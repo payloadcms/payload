@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const csTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Účet',
@@ -104,7 +102,6 @@ export const csTranslations: DefaultTranslationsObject = {
     title: 'Příkazová paleta',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'Přidat +',
     addWidget: 'Přidat widget',
     deleteWidget: 'Odstranit widget {{id}}',
@@ -118,22 +115,37 @@ export const csTranslations: DefaultTranslationsObject = {
       'Na vaší nástěnce nejsou žádné widgety. Můžete je přidat z menu „Nástěnka“, které se nachází v horní liště.',
     resetLayout: 'Obnovit rozložení',
     searchWidgets: 'Hledat widgety...',
+    widgetAddPin: 'Připnout dokument',
     widgetCollectionRequired: 'Collection je povinná.',
     widgetConfigurationError: 'Chyba v konfiguraci widgetu',
+    widgetGridView: 'Zobrazení v mřížce',
     widgetInvalidCollection: 'Collection "{{collection}}" neexistuje.',
     widgetInvalidFilterField: 'Filtrační pole "{{field}}" neexistuje v kolekci "{{collection}}".',
     widgetInvalidSortField: 'Třídicí field "{{field}}" neexistuje v kolekci "{{collection}}".',
     widgetLimitLabel: 'Limit',
+    widgetListView: 'Zobrazení v seznamu',
     widgetNonSortableSortField: 'Pole "{{field}}" nelze řadit v kolekci "{{collection}}".',
+    widgetPinned: 'Připnuté',
+    widgetPinnedEmpty: 'Žádné připnuté dokumenty',
+    widgetPinnedEmptyDescription: 'Zde se zobrazí dokumenty, které připnete',
+    widgetPinnedSaveError: 'Nepodařilo se uložit připnuté dokumenty.',
     widgetQueryError: 'Dokumenty pro tento widget se nepodařilo načíst.',
-    widgetRecentlyViewedEmpty: 'Zatím jste si žádné dokumenty nezobrazili.',
-    widgetRecentlyViewedTitle: 'Nedávno jste si prohlédli',
+    widgetRecentDrafts: 'Nedávné koncepty',
+    widgetRecentDraftsEmpty: 'Žádné nedávné koncepty',
+    widgetRecentDraftsEmptyDescription: 'Zde se zobrazí koncepty dokumentů, které upravujete',
+    widgetRecentlyViewedEmpty: 'Žádné nedávné dokumenty',
+    widgetRecentlyViewedEmptyDescription: 'Zde se zobrazí dokumenty, které upravujete',
+    widgetRecentlyViewedTitle: 'Nedávno zobrazené',
+    widgetRecentsAndPinned: 'Nedávné a připnuté',
+    widgetRemovePin: 'Odepnout dokument',
     widgetSelectCollectionFirst: 'Nejprve vyberte Collection, než zvolíte způsob řazení.',
     widgetSelectSortField: 'Vyberte pole pro řazení',
     widgetSortDirectionLabel: 'Směr řazení',
     widgetSortFieldLabel: 'Řadicí pole',
     widgetTitleFallback: 'Dotaz na Collection',
     widgetTitleLabel: 'Název',
+    widgetUpdated: 'Aktualizováno',
+    widgetUpdatedBy: 'Aktualizoval',
   },
   error: {
     accountAlreadyActivated: 'Tento účet již byl aktivován.',

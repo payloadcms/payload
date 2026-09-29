@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const ltTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Paskyra',
@@ -105,7 +103,6 @@ export const ltTranslations: DefaultTranslationsObject = {
     title: 'Komandų paletė',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'Pridėti +',
     addWidget: 'Pridėti valdiklį',
     deleteWidget: 'Ištrinti valdiklį {{id}}',
@@ -119,25 +116,40 @@ export const ltTranslations: DefaultTranslationsObject = {
       'Jūsų prietaisų skydelyje nėra valdiklių. Juos galite pridėti iš „Skydelio“ meniu, esančio viršutinėje juostoje.',
     resetLayout: 'Atstatyti išdėstymą',
     searchWidgets: 'Ieškokite valdiklių...',
+    widgetAddPin: 'Prisegti dokumentą',
     widgetCollectionRequired: 'Collection yra privaloma.',
     widgetConfigurationError: 'Valdiklio konfigūracijos klaida',
+    widgetGridView: 'Tinklelio vaizdas',
     widgetInvalidCollection: 'Kolekcija "{{collection}}" neegzistuoja.',
     widgetInvalidFilterField:
       'Filtravimo laukas „{{field}}“ neegzistuoja kolekcijoje „{{collection}}“.',
     widgetInvalidSortField:
       'Rikiavimo laukas „{{field}}“ neegzistuoja kolekcijoje „{{collection}}“.',
     widgetLimitLabel: 'Ribojimas',
+    widgetListView: 'Sąrašo vaizdas',
     widgetNonSortableSortField:
       'Rūšiavimo laukas "{{field}}" negali būti rūšiuojamas kolekcijoje "{{collection}}".',
+    widgetPinned: 'Prisegta',
+    widgetPinnedEmpty: 'Nėra prisegtų dokumentų',
+    widgetPinnedEmptyDescription: 'Čia bus rodomi jūsų prisegti dokumentai',
+    widgetPinnedSaveError: 'Nepavyko išsaugoti prisegtų dokumentų.',
     widgetQueryError: 'Nepavyko įkelti dokumentų šiam valdikliui.',
-    widgetRecentlyViewedEmpty: 'Jūs dar neperžiūrėjote jokių dokumentų.',
-    widgetRecentlyViewedTitle: 'Jūs neseniai peržiūrėjote',
+    widgetRecentDrafts: 'Naujausi juodraščiai',
+    widgetRecentDraftsEmpty: 'Nėra naujausių juodraščių',
+    widgetRecentDraftsEmptyDescription: 'Čia bus rodomi jūsų redaguojami juodraščiai',
+    widgetRecentlyViewedEmpty: 'Nėra naujausių dokumentų',
+    widgetRecentlyViewedEmptyDescription: 'Čia bus rodomi jūsų redaguojami dokumentai',
+    widgetRecentlyViewedTitle: 'Neseniai peržiūrėti',
+    widgetRecentsAndPinned: 'Naujausi ir prisegti',
+    widgetRemovePin: 'Atsegti dokumentą',
     widgetSelectCollectionFirst: 'Pasirinkite Collection prieš pasirinkdami rūšiavimą',
     widgetSelectSortField: 'Pasirinkite lauką rūšiavimui',
     widgetSortDirectionLabel: 'Rikiavimo kryptis',
     widgetSortFieldLabel: 'Rikiuoti lauką',
     widgetTitleFallback: 'Kolekcijos užklausa',
     widgetTitleLabel: 'Pavadinimas',
+    widgetUpdated: 'Atnaujinta',
+    widgetUpdatedBy: 'Atnaujino',
   },
   error: {
     accountAlreadyActivated: 'Ši paskyra jau aktyvuota.',

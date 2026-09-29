@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const isTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Aðgangur',
@@ -106,7 +104,6 @@ export const isTranslations: DefaultTranslationsObject = {
     title: 'Skipunarvalmynd',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'Bæta við +',
     addWidget: 'Bæta við smáforriti',
     deleteWidget: 'Eyða græju {{id}}',
@@ -120,23 +117,38 @@ export const isTranslations: DefaultTranslationsObject = {
       'Það eru engar flísar á mælaborðinu þínu. Þú getur bætt þeim við úr "Mælaborði" valmyndinni sem er staðsett í efsta stikanum.',
     resetLayout: 'Endurstilla útlit',
     searchWidgets: 'Leita að græjum...',
+    widgetAddPin: 'Festu skjal',
     widgetCollectionRequired: 'Safn er skylt.',
     widgetConfigurationError: 'Villa við stillingu búnaðar',
+    widgetGridView: 'Rist sýn',
     widgetInvalidCollection: 'Kolekcja „{{collection}}” nie istnieje.',
     widgetInvalidFilterField: 'Sía reitur "{{field}}" er ekki til í safni "{{collection}}".',
     widgetInvalidSortField: 'Röðunarreiturinn "{{field}}" er ekki til í safninu "{{collection}}".',
     widgetLimitLabel: 'Takmörk',
+    widgetListView: 'Listasýn',
     widgetNonSortableSortField:
       'Sortureiturinn "{{field}}" er ekki raðhæfur á Collection "{{collection}}".',
+    widgetPinned: 'Fest',
+    widgetPinnedEmpty: 'Engin fest skjöl',
+    widgetPinnedEmptyDescription: 'Skjöl sem þú festir munu birtast hér',
+    widgetPinnedSaveError: 'Ekki tókst að vista fest skjöl.',
     widgetQueryError: 'Ekki tókst að hlaða skjölum fyrir þessa fjölvísir.',
-    widgetRecentlyViewedEmpty: 'Þú hefur ekki skoðað nein skjöl enn.',
-    widgetRecentlyViewedTitle: 'Þú skoðaðir nýlega',
+    widgetRecentDrafts: 'Nýlegar drög',
+    widgetRecentDraftsEmpty: 'Engin nýleg drög',
+    widgetRecentDraftsEmptyDescription: 'Drög að skjölum sem þú breytir munu birtast hér',
+    widgetRecentlyViewedEmpty: 'Engin nýleg skjöl',
+    widgetRecentlyViewedEmptyDescription: 'Skjöl sem þú breytir munu birtast hér',
+    widgetRecentlyViewedTitle: 'Nýlega skoðuð',
+    widgetRecentsAndPinned: 'Nýlegt og fest',
+    widgetRemovePin: 'Fjarlægja festingu skjals',
     widgetSelectCollectionFirst: 'Veldu safn áður en röðun er valin',
     widgetSelectSortField: 'Veldu reit til að raða eftir',
     widgetSortDirectionLabel: 'Raðstefna',
     widgetSortFieldLabel: 'Raða Field',
     widgetTitleFallback: 'Safnafyrirspurn',
     widgetTitleLabel: 'Titill',
+    widgetUpdated: 'Uppfært',
+    widgetUpdatedBy: 'Uppfært af',
   },
   error: {
     accountAlreadyActivated: 'Þessi aðgangur hefur þegar verið virkjaður.',

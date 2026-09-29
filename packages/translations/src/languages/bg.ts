@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const bgTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Профил',
@@ -104,7 +102,6 @@ export const bgTranslations: DefaultTranslationsObject = {
     title: 'Палитра с команди',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'Добавете +',
     addWidget: 'Добави джаджа',
     deleteWidget: 'Изтрийте джаджа {{id}}',
@@ -118,25 +115,40 @@ export const bgTranslations: DefaultTranslationsObject = {
       'Няма джаджи на таблото ви. Можете да ги добавите от менюто "Табло", което е разположено в горната лента.',
     resetLayout: 'Рестартирай Оформлението',
     searchWidgets: 'Търсене на джаджи...',
+    widgetAddPin: 'Закачи документ',
     widgetCollectionRequired: 'Collection е задължително.',
     widgetConfigurationError: 'Грешка при конфигуриране на уиджета',
+    widgetGridView: 'Изглед на мрежа',
     widgetInvalidCollection: 'Collection "{{collection}}" не съществува.',
     widgetInvalidFilterField:
       'Филтър полето "{{field}}" не съществува в колекцията "{{collection}}".',
     widgetInvalidSortField:
       'Полето за сортиране "{{field}}" не съществува в collection "{{collection}}".',
     widgetLimitLabel: 'Ограничение',
+    widgetListView: 'Списъчен изглед',
     widgetNonSortableSortField:
       'Полето за сортиране "{{field}}" не може да бъде сортирано в Collection "{{collection}}".',
+    widgetPinned: 'Закачени',
+    widgetPinnedEmpty: 'Няма закачени документи',
+    widgetPinnedEmptyDescription: 'Документите, които закачите, ще се появят тук',
+    widgetPinnedSaveError: 'Неуспешно запазване на закачените документи.',
     widgetQueryError: 'Неуспешно зареждане на документи за този уиджет.',
-    widgetRecentlyViewedEmpty: 'Все още не сте разгледали нито един документ.',
+    widgetRecentDrafts: 'Последни чернови',
+    widgetRecentDraftsEmpty: 'Няма последни чернови',
+    widgetRecentDraftsEmptyDescription: 'Черновите документи, които редактирате, ще се появят тук',
+    widgetRecentlyViewedEmpty: 'Няма последни документи',
+    widgetRecentlyViewedEmptyDescription: 'Документите, които редактирате, ще се появят тук',
     widgetRecentlyViewedTitle: 'Последно прегледани',
+    widgetRecentsAndPinned: 'Последни и закачени',
+    widgetRemovePin: 'Откачи документ',
     widgetSelectCollectionFirst: 'Изберете Collection, преди да изберете начин на сортиране.',
     widgetSelectSortField: 'Изберете поле за сортиране',
     widgetSortDirectionLabel: 'Посока на сортиране',
     widgetSortFieldLabel: 'Сортирай Field',
     widgetTitleFallback: 'Заявка към Collection',
     widgetTitleLabel: 'Заглавие',
+    widgetUpdated: 'Актуализиран',
+    widgetUpdatedBy: 'Актуализиран от',
   },
   error: {
     accountAlreadyActivated: 'Този профил вече е активиран.',

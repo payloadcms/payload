@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const roTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Cont',
@@ -107,7 +105,6 @@ export const roTranslations: DefaultTranslationsObject = {
     title: 'Paletă de comenzi',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'Adaugă +',
     addWidget: 'Adaugați widget',
     deleteWidget: 'Ștergeți widget-ul {{id}}',
@@ -121,24 +118,39 @@ export const roTranslations: DefaultTranslationsObject = {
       'Nu există widget-uri pe tabloul dvs. de bord. Le puteți adăuga din meniul "Tablou de bord" situat în bara superioară.',
     resetLayout: 'Resetează Aspectul',
     searchWidgets: 'Caută widgeturi...',
+    widgetAddPin: 'Fixează documentul',
     widgetCollectionRequired: 'Colecția este obligatorie.',
     widgetConfigurationError: 'Eroare de configurare a widgetului',
+    widgetGridView: 'Vizualizare în grid',
     widgetInvalidCollection: 'Colecția "{{collection}}" nu există.',
     widgetInvalidFilterField:
       'Câmpul de filtrare "{{field}}" nu există în colecția "{{collection}}".',
     widgetInvalidSortField: 'Câmpul de sortare "{{field}}" nu există în colecția "{{collection}}".',
     widgetLimitLabel: 'Limită',
+    widgetListView: 'Vizualizare în listă',
     widgetNonSortableSortField:
       'Câmpul de sortare "{{field}}" nu poate fi sortat în colecția "{{collection}}".',
+    widgetPinned: 'Fixate',
+    widgetPinnedEmpty: 'Niciun document fixat',
+    widgetPinnedEmptyDescription: 'Documentele fixate vor apărea aici',
+    widgetPinnedSaveError: 'Nu s-au putut salva documentele fixate.',
     widgetQueryError: 'Nu s-au putut încărca documentele pentru acest widget.',
-    widgetRecentlyViewedEmpty: 'Nu ați vizualizat încă niciun document.',
-    widgetRecentlyViewedTitle: 'Ați vizualizat recent',
+    widgetRecentDrafts: 'Ciorne recente',
+    widgetRecentDraftsEmpty: 'Nicio ciornă recentă',
+    widgetRecentDraftsEmptyDescription: 'Ciornele pe care le editați vor apărea aici',
+    widgetRecentlyViewedEmpty: 'Niciun document recent',
+    widgetRecentlyViewedEmptyDescription: 'Documentele pe care le editați vor apărea aici',
+    widgetRecentlyViewedTitle: 'Vizualizate recent',
+    widgetRecentsAndPinned: 'Recente și fixate',
+    widgetRemovePin: 'Anulează fixarea documentului',
     widgetSelectCollectionFirst: 'Selectați o colecție înainte de a alege ordonarea',
     widgetSelectSortField: 'Selectați un câmp după care să sortați',
     widgetSortDirectionLabel: 'Direcție de sortare',
     widgetSortFieldLabel: 'Sortare Field',
     widgetTitleFallback: 'Interogare de colecție',
     widgetTitleLabel: 'Titlu',
+    widgetUpdated: 'Actualizat',
+    widgetUpdatedBy: 'Actualizat de',
   },
   error: {
     accountAlreadyActivated: 'Acest cont a fost deja activat.',

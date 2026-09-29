@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const lvTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Konts',
@@ -104,7 +102,6 @@ export const lvTranslations: DefaultTranslationsObject = {
     title: 'Komandu palete',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'Pievienot +',
     addWidget: 'Pievienot logrīku',
     deleteWidget: 'Dzēst logrīku {{id}}',
@@ -118,23 +115,38 @@ export const lvTranslations: DefaultTranslationsObject = {
       'Jūsu informācijas panelī nav logrīku. Tos varat pievienot no izvēlnes "Informācijas panelis", kas atrodas augšējā josla.',
     resetLayout: 'Atiestatīt Izkārtojumu',
     searchWidgets: 'Meklēt logrīkus...',
+    widgetAddPin: 'Piespraust dokumentu',
     widgetCollectionRequired: 'Kolekcija ir obligāta.',
     widgetConfigurationError: 'Sīkrīka konfigurācijas kļūda',
+    widgetGridView: 'Režģa skats',
     widgetInvalidCollection: 'Collection "{{collection}}" neeksistē.',
     widgetInvalidFilterField: 'Filtra lauks "{{field}}" neeksistē kolekcijā "{{collection}}".',
     widgetInvalidSortField: 'Kārtošanas lauks "{{field}}" neeksistē kolekcijā "{{collection}}".',
     widgetLimitLabel: 'Ierobežot',
+    widgetListView: 'Saraksta skats',
     widgetNonSortableSortField:
       'Kārtot lauku "{{field}}" kolekcijā "{{collection}}" nav iespējams.',
+    widgetPinned: 'Piespraustie',
+    widgetPinnedEmpty: 'Nav piespraustu dokumentu',
+    widgetPinnedEmptyDescription: 'Šeit parādīsies jūsu piespraustie dokumenti',
+    widgetPinnedSaveError: 'Neizdevās saglabāt piespraustos dokumentus.',
     widgetQueryError: 'Neizdevās ielādēt dokumentus šim logrīkam.',
-    widgetRecentlyViewedEmpty: 'Jūs vēl neesat apskatījis nevienu dokumentu.',
-    widgetRecentlyViewedTitle: 'Jūs nesen skatījāt',
+    widgetRecentDrafts: 'Nesenie melnraksti',
+    widgetRecentDraftsEmpty: 'Nav nesenu melnrakstu',
+    widgetRecentDraftsEmptyDescription: 'Šeit parādīsies jūsu rediģētie melnraksti',
+    widgetRecentlyViewedEmpty: 'Nav nesenu dokumentu',
+    widgetRecentlyViewedEmptyDescription: 'Šeit parādīsies jūsu rediģētie dokumenti',
+    widgetRecentlyViewedTitle: 'Nesen skatītie',
+    widgetRecentsAndPinned: 'Nesenie un piespraustie',
+    widgetRemovePin: 'Atspraust dokumentu',
     widgetSelectCollectionFirst: 'Izvēlieties Collection pirms kārtošanas izvēles',
     widgetSelectSortField: 'Izvēlieties Field, pēc kura kārtot',
     widgetSortDirectionLabel: 'Kārtošanas virziens',
     widgetSortFieldLabel: 'Kārtot lauku',
     widgetTitleFallback: 'Kolekcijas vaicājums',
     widgetTitleLabel: 'Virsraksts',
+    widgetUpdated: 'Atjaunināts',
+    widgetUpdatedBy: 'Atjaunināja',
   },
   error: {
     accountAlreadyActivated: 'Šis konts jau ir aktivizēts.',

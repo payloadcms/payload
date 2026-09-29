@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const ptTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Conta',
@@ -105,7 +103,6 @@ export const ptTranslations: DefaultTranslationsObject = {
     title: 'Paleta de Comandos',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'Adicionar +',
     addWidget: 'Adicionar Widget',
     deleteWidget: 'Excluir widget {{id}}',
@@ -119,25 +116,40 @@ export const ptTranslations: DefaultTranslationsObject = {
       'Não existem widgets no seu painel. Você pode adicioná-los a partir do menu "Painel", localizado na barra superior.',
     resetLayout: 'Redefinir Layout',
     searchWidgets: 'Pesquisar widgets...',
+    widgetAddPin: 'Fixar documento',
     widgetCollectionRequired: 'Coleção é obrigatória.',
     widgetConfigurationError: 'Erro de configuração do widget',
+    widgetGridView: 'Visualização em grade',
     widgetInvalidCollection: 'A Coleção "{{collection}}" não existe.',
     widgetInvalidFilterField:
       'O campo de filtro "{{field}}" não existe na coleção "{{collection}}".',
     widgetInvalidSortField:
       'O campo de ordenação "{{field}}" não existe na coleção "{{collection}}".',
     widgetLimitLabel: 'Limite',
+    widgetListView: 'Visualização em lista',
     widgetNonSortableSortField:
       'O campo de ordenação "{{field}}" não pode ser ordenado na Collection "{{collection}}".',
+    widgetPinned: 'Fixados',
+    widgetPinnedEmpty: 'Nenhum documento fixado',
+    widgetPinnedEmptyDescription: 'Os documentos que você fixar aparecerão aqui',
+    widgetPinnedSaveError: 'Não foi possível salvar os documentos fixados.',
     widgetQueryError: 'Não foi possível carregar os documentos para este widget.',
-    widgetRecentlyViewedEmpty: 'Você ainda não visualizou nenhum documento.',
-    widgetRecentlyViewedTitle: 'Você visualizou recentemente',
+    widgetRecentDrafts: 'Rascunhos recentes',
+    widgetRecentDraftsEmpty: 'Nenhum rascunho recente',
+    widgetRecentDraftsEmptyDescription: 'Os rascunhos que você editar aparecerão aqui',
+    widgetRecentlyViewedEmpty: 'Nenhum documento recente',
+    widgetRecentlyViewedEmptyDescription: 'Os documentos que você editar aparecerão aqui',
+    widgetRecentlyViewedTitle: 'Visualizados recentemente',
+    widgetRecentsAndPinned: 'Recentes e fixados',
+    widgetRemovePin: 'Desafixar documento',
     widgetSelectCollectionFirst: 'Selecione uma Collection antes de escolher a ordenação.',
     widgetSelectSortField: 'Selecione um campo para ordenar por',
     widgetSortDirectionLabel: 'Direção de Ordenação',
     widgetSortFieldLabel: 'Campo de Ordenação',
     widgetTitleFallback: 'Consulta de Collection',
     widgetTitleLabel: 'Título',
+    widgetUpdated: 'Atualizado',
+    widgetUpdatedBy: 'Atualizado por',
   },
   error: {
     accountAlreadyActivated: 'Essa conta já foi ativada.',

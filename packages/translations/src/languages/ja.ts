@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const jaTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'アカウント',
@@ -105,7 +103,6 @@ export const jaTranslations: DefaultTranslationsObject = {
     title: 'コマンドパレット',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: '追加 +',
     addWidget: 'ウィジェットを追加する',
     deleteWidget: 'ウィジェット{{id}}を削除します',
@@ -119,25 +116,40 @@ export const jaTranslations: DefaultTranslationsObject = {
       'あなたのダッシュボードにはウィジェットがありません。 上部バーにある「ダッシュボード」メニューからそれらを追加することができます。',
     resetLayout: 'レイアウトをリセット',
     searchWidgets: 'ウィジェットを検索...',
+    widgetAddPin: 'ドキュメントをピン留め',
     widgetCollectionRequired: 'Collectionは必須です。',
     widgetConfigurationError: 'ウィジェット設定エラー',
+    widgetGridView: 'グリッド表示',
     widgetInvalidCollection: 'Collection「{{collection}}」は存在しません。',
     widgetInvalidFilterField:
       'コレクション「{{collection}}」にフィルターField「{{field}}」は存在しません。',
     widgetInvalidSortField:
       'コレクション「{{collection}}」に並べ替え用のフィールド「{{field}}」が存在しません。',
     widgetLimitLabel: '制限',
+    widgetListView: 'リスト表示',
     widgetNonSortableSortField:
       'コレクション「{{collection}}」でソートフィールド「{{field}}」はソートできません。',
+    widgetPinned: 'ピン留め済み',
+    widgetPinnedEmpty: 'ピン留めされたドキュメントはありません',
+    widgetPinnedEmptyDescription: 'ここにピン留めしたドキュメントが表示されます',
+    widgetPinnedSaveError: 'ピン留めドキュメントを保存できませんでした。',
     widgetQueryError: 'このウィジェットのドキュメントを読み込めませんでした。',
-    widgetRecentlyViewedEmpty: 'まだドキュメントを閲覧していません。',
-    widgetRecentlyViewedTitle: '最近閲覧した',
+    widgetRecentDrafts: '最近の下書き',
+    widgetRecentDraftsEmpty: '最近の下書きはありません',
+    widgetRecentDraftsEmptyDescription: '編集した下書きドキュメントがここに表示されます',
+    widgetRecentlyViewedEmpty: '最近のドキュメントはありません',
+    widgetRecentlyViewedEmptyDescription: '編集したドキュメントがここに表示されます',
+    widgetRecentlyViewedTitle: '最近表示したドキュメント',
+    widgetRecentsAndPinned: '最近とピン留め',
+    widgetRemovePin: 'ドキュメントのピン留めを解除',
     widgetSelectCollectionFirst: '並べ替えを選択する前に、Collectionを選択してください。',
     widgetSelectSortField: '並べ替えに使用するFieldを選択してください',
     widgetSortDirectionLabel: '並び順の方向',
     widgetSortFieldLabel: 'ソートフィールド',
     widgetTitleFallback: 'コレクションクエリ',
     widgetTitleLabel: 'タイトル',
+    widgetUpdated: '更新済み',
+    widgetUpdatedBy: '更新者',
   },
   error: {
     accountAlreadyActivated: 'このアカウントはすでに有効です。',

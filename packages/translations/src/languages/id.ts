@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const idTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Akun',
@@ -105,7 +103,6 @@ export const idTranslations: DefaultTranslationsObject = {
     title: 'Palet Perintah',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'Tambah +',
     addWidget: 'Tambah Widget',
     deleteWidget: 'Hapus widget {{id}}',
@@ -119,24 +116,39 @@ export const idTranslations: DefaultTranslationsObject = {
       'Tidak ada widget di dasbor Anda. Anda dapat menambahkannya dari menu "Dashboard" yang terletak di bar atas.',
     resetLayout: 'Atur Ulang Tata Letak',
     searchWidgets: 'Cari widget...',
+    widgetAddPin: 'Sematkan dokumen',
     widgetCollectionRequired: 'Collection wajib diisi.',
     widgetConfigurationError: 'Kesalahan konfigurasi widget',
+    widgetGridView: 'Tampilan grid',
     widgetInvalidCollection: 'Collection "{{collection}}" tidak ada.',
     widgetInvalidFilterField:
       'Filter field "{{field}}" tidak ada pada Collection "{{collection}}".',
     widgetInvalidSortField: 'Field urut "{{field}}" tidak ada pada Collection "{{collection}}".',
     widgetLimitLabel: 'Batas',
+    widgetListView: 'Tampilan daftar',
     widgetNonSortableSortField:
       'Field pengurutan "{{field}}" tidak dapat diurutkan pada Collection "{{collection}}".',
+    widgetPinned: 'Disematkan',
+    widgetPinnedEmpty: 'Tidak ada dokumen yang disematkan',
+    widgetPinnedEmptyDescription: 'Dokumen yang Anda sematkan akan muncul di sini',
+    widgetPinnedSaveError: 'Tidak dapat menyimpan dokumen yang disematkan.',
     widgetQueryError: 'Tidak dapat memuat dokumen untuk widget ini.',
-    widgetRecentlyViewedEmpty: 'Anda belum melihat dokumen apa pun.',
-    widgetRecentlyViewedTitle: 'Baru-baru ini Anda lihat',
+    widgetRecentDrafts: 'Draf terbaru',
+    widgetRecentDraftsEmpty: 'Tidak ada draf terbaru',
+    widgetRecentDraftsEmptyDescription: 'Draf dokumen yang Anda edit akan muncul di sini',
+    widgetRecentlyViewedEmpty: 'Tidak ada dokumen terbaru',
+    widgetRecentlyViewedEmptyDescription: 'Dokumen yang Anda edit akan muncul di sini',
+    widgetRecentlyViewedTitle: 'Baru saja dilihat',
+    widgetRecentsAndPinned: 'Terbaru dan disematkan',
+    widgetRemovePin: 'Lepaskan sematan dokumen',
     widgetSelectCollectionFirst: 'Pilih sebuah Collection sebelum memilih urutan',
     widgetSelectSortField: 'Pilih Field untuk diurutkan',
     widgetSortDirectionLabel: 'Arah Pengurutan',
     widgetSortFieldLabel: 'Urutkan Field',
     widgetTitleFallback: 'Kueri Collection',
     widgetTitleLabel: 'Judul',
+    widgetUpdated: 'Diperbarui',
+    widgetUpdatedBy: 'Diperbarui oleh',
   },
   error: {
     accountAlreadyActivated: 'Akun ini sudah diaktifkan.',

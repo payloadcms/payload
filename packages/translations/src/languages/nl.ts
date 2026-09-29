@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const nlTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Account',
@@ -106,7 +104,6 @@ export const nlTranslations: DefaultTranslationsObject = {
     title: 'Commandopalet',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'Voeg toe +',
     addWidget: 'Widget toevoegen',
     deleteWidget: 'Verwijder widget {{id}}',
@@ -120,23 +117,38 @@ export const nlTranslations: DefaultTranslationsObject = {
       'Er zijn geen widgets op uw dashboard. U kunt ze toevoegen vanuit het menu "Dashboard" dat zich in de bovenste balk bevindt.',
     resetLayout: 'Herstel Lay-out',
     searchWidgets: 'Zoek widgets...',
+    widgetAddPin: 'Document vastmaken',
     widgetCollectionRequired: 'Collectie is vereist.',
     widgetConfigurationError: 'Fout in de configuratie van de widget',
+    widgetGridView: 'Rasterweergave',
     widgetInvalidCollection: 'Collectie "{{collection}}" bestaat niet.',
     widgetInvalidFilterField: 'Filterveld "{{field}}" bestaat niet in collectie "{{collection}}".',
     widgetInvalidSortField: 'Sorteerveld "{{field}}" bestaat niet in collectie "{{collection}}".',
     widgetLimitLabel: 'Limiet',
+    widgetListView: 'Lijstweergave',
     widgetNonSortableSortField:
       'Sorteerveld "{{field}}" kan niet worden gesorteerd in collectie "{{collection}}".',
+    widgetPinned: 'Vastgemaakt',
+    widgetPinnedEmpty: 'Geen vastgemaakte documenten',
+    widgetPinnedEmptyDescription: 'Documenten die u vastmaakt, verschijnen hier',
+    widgetPinnedSaveError: 'Vastgemaakte documenten konden niet worden opgeslagen.',
     widgetQueryError: 'Kan documenten voor deze widget niet laden.',
-    widgetRecentlyViewedEmpty: 'U heeft nog geen documenten bekeken.',
-    widgetRecentlyViewedTitle: 'U heeft recent bekeken',
+    widgetRecentDrafts: 'Recente concepten',
+    widgetRecentDraftsEmpty: 'Geen recente concepten',
+    widgetRecentDraftsEmptyDescription: 'Conceptdocumenten die u bewerkt, verschijnen hier',
+    widgetRecentlyViewedEmpty: 'Geen recente documenten',
+    widgetRecentlyViewedEmptyDescription: 'Documenten die u bewerkt, verschijnen hier',
+    widgetRecentlyViewedTitle: 'Recent bekeken',
+    widgetRecentsAndPinned: 'Recent en vastgemaakt',
+    widgetRemovePin: 'Document losmaken',
     widgetSelectCollectionFirst: 'Selecteer een collectie voordat u een sorteervolgorde kiest',
     widgetSelectSortField: 'Selecteer een veld om op te sorteren',
     widgetSortDirectionLabel: 'Sorteerrichting',
     widgetSortFieldLabel: 'Sorteerveld',
     widgetTitleFallback: 'Collectiequery',
     widgetTitleLabel: 'Titel',
+    widgetUpdated: 'Bijgewerkt',
+    widgetUpdatedBy: 'Bijgewerkt door',
   },
   error: {
     accountAlreadyActivated: 'Dit account is al geactiveerd.',

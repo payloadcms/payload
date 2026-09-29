@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const frTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Compte',
@@ -106,7 +104,6 @@ export const frTranslations: DefaultTranslationsObject = {
     title: 'Palette de commandes',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'Ajouter +',
     addWidget: 'Ajouter un Widget',
     deleteWidget: 'Supprimer le widget {{id}}',
@@ -120,25 +117,40 @@ export const frTranslations: DefaultTranslationsObject = {
       'Il n\'y a pas de widgets sur votre tableau de bord. Vous pouvez les ajouter depuis le menu "Tableau de bord" situé dans la barre supérieure.',
     resetLayout: 'Réinitialiser la mise en page',
     searchWidgets: 'Rechercher des widgets...',
+    widgetAddPin: 'Épingler le document',
     widgetCollectionRequired: 'La Collection est requise.',
     widgetConfigurationError: 'Erreur de configuration du widget',
+    widgetGridView: 'Vue en grille',
     widgetInvalidCollection: 'La Collection « {{collection}} » n’existe pas.',
     widgetInvalidFilterField:
       'Le champ de filtrage « {{field}} » n’existe pas dans la Collection « {{collection}} ».',
     widgetInvalidSortField:
       'Le champ de tri "{{field}}" n’existe pas dans la Collection "{{collection}}".',
     widgetLimitLabel: 'Limiter',
+    widgetListView: 'Vue en liste',
     widgetNonSortableSortField:
       'Le champ de tri "{{field}}" n\'est pas triable dans la Collection "{{collection}}".',
+    widgetPinned: 'Épinglé',
+    widgetPinnedEmpty: 'Aucun document épinglé',
+    widgetPinnedEmptyDescription: 'Les documents que vous épinglez apparaîtront ici',
+    widgetPinnedSaveError: 'Impossible d’enregistrer les documents épinglés.',
     widgetQueryError: 'Impossible de charger les documents pour ce widget.',
-    widgetRecentlyViewedEmpty: "Vous n'avez encore consulté aucun document.",
-    widgetRecentlyViewedTitle: 'Vous avez récemment consulté',
+    widgetRecentDrafts: 'Brouillons récents',
+    widgetRecentDraftsEmpty: 'Aucun brouillon récent',
+    widgetRecentDraftsEmptyDescription: 'Les brouillons que vous modifiez apparaîtront ici',
+    widgetRecentlyViewedEmpty: 'Aucun document récent',
+    widgetRecentlyViewedEmptyDescription: 'Les documents que vous modifiez apparaîtront ici',
+    widgetRecentlyViewedTitle: 'Récemment consultés',
+    widgetRecentsAndPinned: 'Récents et épinglés',
+    widgetRemovePin: 'Désépingler le document',
     widgetSelectCollectionFirst: 'Sélectionnez une Collection avant de choisir le tri',
     widgetSelectSortField: 'Sélectionnez un champ pour trier',
     widgetSortDirectionLabel: 'Sens de tri',
     widgetSortFieldLabel: 'Champ de tri',
     widgetTitleFallback: 'Requête de Collection',
     widgetTitleLabel: 'Titre',
+    widgetUpdated: 'Mis à jour',
+    widgetUpdatedBy: 'Mis à jour par',
   },
   error: {
     accountAlreadyActivated: 'Ce compte a déjà été activé.',

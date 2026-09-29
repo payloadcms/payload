@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const trTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Hesap',
@@ -106,7 +104,6 @@ export const trTranslations: DefaultTranslationsObject = {
     title: 'Komut Paleti',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'Ekle +',
     addWidget: 'Widget Ekle',
     deleteWidget: "Widget'i sil {{id}}",
@@ -120,25 +117,40 @@ export const trTranslations: DefaultTranslationsObject = {
       'Panoda hiç widgetiniz yok. Bunları, üst çubukta yer alan "Gösterge Tablosu" menüsünden ekleyebilirsiniz.',
     resetLayout: 'Düzeni Sıfırla',
     searchWidgets: "Arama widget'ları...",
+    widgetAddPin: 'Belgeyi sabitle',
     widgetCollectionRequired: 'Collection gereklidir.',
     widgetConfigurationError: 'Widget yapılandırma hatası',
+    widgetGridView: 'Izgara görünümü',
     widgetInvalidCollection: 'Collection "{{collection}}" mevcut değil.',
     widgetInvalidFilterField:
       'Filtre alanı "{{field}}", "{{collection}}" koleksiyonunda mevcut değil.',
     widgetInvalidSortField:
       'Sıralama Field\'i "{{field}}", "{{collection}}" Collection\'ında mevcut değildir.',
     widgetLimitLabel: 'Sınırla',
+    widgetListView: 'Liste görünümü',
     widgetNonSortableSortField:
       '"{{field}}" sıralama alanı, "{{collection}}" koleksiyonu üzerinde sıralanabilir değildir.',
+    widgetPinned: 'Sabitlendi',
+    widgetPinnedEmpty: 'Sabitlenmiş belge yok',
+    widgetPinnedEmptyDescription: 'Sabitlediğiniz belgeler burada görünecek',
+    widgetPinnedSaveError: 'Sabitlenmiş belgeler kaydedilemedi.',
     widgetQueryError: 'Bu widget için belgeler yüklenemedi.',
-    widgetRecentlyViewedEmpty: 'Henüz hiçbir belge görüntülemediniz.',
-    widgetRecentlyViewedTitle: 'Son Görüntüledikleriniz',
+    widgetRecentDrafts: 'Son taslaklar',
+    widgetRecentDraftsEmpty: 'Son taslak yok',
+    widgetRecentDraftsEmptyDescription: 'Düzenlediğiniz taslak belgeler burada görünecek',
+    widgetRecentlyViewedEmpty: 'Son belgeler yok',
+    widgetRecentlyViewedEmptyDescription: 'Düzenlediğiniz belgeler burada görünecek',
+    widgetRecentlyViewedTitle: 'Son görüntülenenler',
+    widgetRecentsAndPinned: 'Son kullanılanlar ve sabitlenenler',
+    widgetRemovePin: 'Belgeyi sabitlemeyi kaldır',
     widgetSelectCollectionFirst: 'Sıralama seçmeden önce bir Collection seçin',
     widgetSelectSortField: 'Sıralama yapmak için bir Field seçin',
     widgetSortDirectionLabel: 'Sıralama Yönü',
     widgetSortFieldLabel: 'Field Sıralama',
     widgetTitleFallback: 'Collection sorgusu',
     widgetTitleLabel: 'Başlık',
+    widgetUpdated: 'Güncellendi',
+    widgetUpdatedBy: '{{updatedBy}} tarafından güncellendi',
   },
   error: {
     accountAlreadyActivated: 'Hesap zaten etkinleştirildi.',

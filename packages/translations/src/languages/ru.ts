@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const ruTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Аккаунт',
@@ -106,7 +104,6 @@ export const ruTranslations: DefaultTranslationsObject = {
     title: 'Палитра команд',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'Добавить +',
     addWidget: 'Добавить виджет',
     deleteWidget: 'Удалить виджет {{id}}',
@@ -120,25 +117,41 @@ export const ruTranslations: DefaultTranslationsObject = {
       'На вашей панели нет виджетов. Вы можете добавить их из меню "Панель управления", расположенного в верхней панели.',
     resetLayout: 'Сбросить Макет',
     searchWidgets: 'Поиск виджетов...',
+    widgetAddPin: 'Закрепить документ',
     widgetCollectionRequired: 'Collection является обязательным.',
     widgetConfigurationError: 'Ошибка конфигурации виджета',
+    widgetGridView: 'Вид сеткой',
     widgetInvalidCollection: 'Коллекция "{{collection}}" не существует.',
     widgetInvalidFilterField:
       'Поле фильтра «{{field}}» не существует в коллекции «{{collection}}».',
     widgetInvalidSortField:
       'Поле сортировки "{{field}}" не существует в коллекции "{{collection}}".',
     widgetLimitLabel: 'Ограничение',
+    widgetListView: 'Вид списком',
     widgetNonSortableSortField:
       'Поле сортировки "{{field}}" не может быть отсортировано в коллекции "{{collection}}".',
+    widgetPinned: 'Закреплено',
+    widgetPinnedEmpty: 'Нет закреплённых документов',
+    widgetPinnedEmptyDescription: 'Закреплённые вами документы будут отображаться здесь',
+    widgetPinnedSaveError: 'Не удалось сохранить закреплённые документы.',
     widgetQueryError: 'Не удалось загрузить документы для этого виджета.',
-    widgetRecentlyViewedEmpty: 'Вы ещё не просматривали ни одного документа.',
-    widgetRecentlyViewedTitle: 'Вы недавно просмотрели',
+    widgetRecentDrafts: 'Недавние черновики',
+    widgetRecentDraftsEmpty: 'Нет недавних черновиков',
+    widgetRecentDraftsEmptyDescription: 'Отредактированные вами черновики будут отображаться здесь',
+    widgetRecentlyViewedEmpty: 'Нет недавних документов',
+    widgetRecentlyViewedEmptyDescription:
+      'Отредактированные вами документы будут отображаться здесь',
+    widgetRecentlyViewedTitle: 'Недавно просмотренные',
+    widgetRecentsAndPinned: 'Недавние и закреплённые',
+    widgetRemovePin: 'Открепить документ',
     widgetSelectCollectionFirst: 'Выберите коллекцию перед выбором сортировки',
     widgetSelectSortField: 'Выберите поле для сортировки',
     widgetSortDirectionLabel: 'Направление сортировки',
     widgetSortFieldLabel: 'Сортировать поле',
     widgetTitleFallback: 'Запрос к Collection',
     widgetTitleLabel: 'Заголовок',
+    widgetUpdated: 'Обновлено',
+    widgetUpdatedBy: 'Обновлено пользователем',
   },
   error: {
     accountAlreadyActivated: 'Этот аккаунт уже был активирован.',

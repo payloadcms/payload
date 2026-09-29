@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const itTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Account',
@@ -105,7 +103,6 @@ export const itTranslations: DefaultTranslationsObject = {
     title: 'Palette dei comandi',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'Aggiungi +',
     addWidget: 'Aggiungi Widget',
     deleteWidget: 'Elimina widget {{id}}',
@@ -119,25 +116,40 @@ export const itTranslations: DefaultTranslationsObject = {
       'Non ci sono widget sulla tua dashboard. Puoi aggiungerli dal menu "Dashboard" situato nella barra superiore.',
     resetLayout: 'Ripristina Layout',
     searchWidgets: 'Cerca widget...',
+    widgetAddPin: 'Fissa documento',
     widgetCollectionRequired: 'Collection è obbligatoria.',
     widgetConfigurationError: 'Errore di configurazione del widget',
+    widgetGridView: 'Vista a griglia',
     widgetInvalidCollection: 'La Collection "{{collection}}" non esiste.',
     widgetInvalidFilterField:
       'Il campo di filtro "{{field}}" non esiste nella Collection "{{collection}}".',
     widgetInvalidSortField:
       'Il campo di ordinamento "{{field}}" non esiste nella Collection "{{collection}}".',
     widgetLimitLabel: 'Limite',
+    widgetListView: 'Vista elenco',
     widgetNonSortableSortField:
       'Il campo di ordinamento "{{field}}" non può essere ordinato nella Collection "{{collection}}".',
+    widgetPinned: 'Fissato',
+    widgetPinnedEmpty: 'Nessun documento fissato',
+    widgetPinnedEmptyDescription: 'I documenti che fissi appariranno qui',
+    widgetPinnedSaveError: 'Impossibile salvare i documenti fissati.',
     widgetQueryError: 'Impossibile caricare i documenti per questo widget.',
-    widgetRecentlyViewedEmpty: 'Non hai ancora visualizzato alcun documento.',
-    widgetRecentlyViewedTitle: 'Visualizzato di recente',
+    widgetRecentDrafts: 'Bozze recenti',
+    widgetRecentDraftsEmpty: 'Nessuna bozza recente',
+    widgetRecentDraftsEmptyDescription: 'Le bozze che modifichi appariranno qui',
+    widgetRecentlyViewedEmpty: 'Nessun documento recente',
+    widgetRecentlyViewedEmptyDescription: 'I documenti che modifichi appariranno qui',
+    widgetRecentlyViewedTitle: 'Visualizzati di recente',
+    widgetRecentsAndPinned: 'Recenti e fissati',
+    widgetRemovePin: 'Rimuovi fissaggio',
     widgetSelectCollectionFirst: 'Seleziona una Collection prima di scegliere l’ordinamento.',
     widgetSelectSortField: 'Selezionare un field per l’ordinamento',
     widgetSortDirectionLabel: 'Direzione di ordinamento',
     widgetSortFieldLabel: 'Campo di ordinamento',
     widgetTitleFallback: 'Query di Collection',
     widgetTitleLabel: 'Titolo',
+    widgetUpdated: 'Aggiornato',
+    widgetUpdatedBy: 'Aggiornato da',
   },
   error: {
     accountAlreadyActivated: 'Questo account è già stato attivato.',

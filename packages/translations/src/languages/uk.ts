@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const ukTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Обліковий запис',
@@ -105,7 +103,6 @@ export const ukTranslations: DefaultTranslationsObject = {
     title: 'Палітра команд',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'Додати +',
     addWidget: 'Додати віджет',
     deleteWidget: 'Видалити віджет {{id}}',
@@ -119,23 +116,38 @@ export const ukTranslations: DefaultTranslationsObject = {
       'На вашій панелі немає віджетів. Ви можете додати їх з меню "Головна", розташованого в верхній панелі.',
     resetLayout: 'Скинути макет',
     searchWidgets: 'Пошук віджетів...',
+    widgetAddPin: 'Закріпити документ',
     widgetCollectionRequired: 'Collection є обов’язковим.',
     widgetConfigurationError: 'Помилка конфігурації віджета',
+    widgetGridView: 'Табличний вигляд',
     widgetInvalidCollection: 'Collection "{{collection}}" не існує.',
     widgetInvalidFilterField: 'Поле фільтрації "{{field}}" не існує у колекції "{{collection}}".',
     widgetInvalidSortField: 'Поле сортування "{{field}}" не існує у Collection "{{collection}}".',
     widgetLimitLabel: 'Обмеження',
+    widgetListView: 'Список',
     widgetNonSortableSortField:
       'Поле сортування «{{field}}» не можна сортувати в колекції «{{collection}}».',
+    widgetPinned: 'Закріплено',
+    widgetPinnedEmpty: 'Немає закріплених документів',
+    widgetPinnedEmptyDescription: 'Документи, які ви закріпите, з’являться тут',
+    widgetPinnedSaveError: 'Не вдалося зберегти закріплені документи.',
     widgetQueryError: 'Не вдалося завантажити документи для цього віджета.',
-    widgetRecentlyViewedEmpty: 'Ви ще не переглядали жодного документа.',
-    widgetRecentlyViewedTitle: 'Ви нещодавно переглядали',
+    widgetRecentDrafts: 'Останні чернетки',
+    widgetRecentDraftsEmpty: 'Немає останніх чернеток',
+    widgetRecentDraftsEmptyDescription: 'Чернетки документів, які ви редагуєте, з’являться тут',
+    widgetRecentlyViewedEmpty: 'Немає останніх документів',
+    widgetRecentlyViewedEmptyDescription: 'Документи, які ви редагуєте, з’являться тут',
+    widgetRecentlyViewedTitle: 'Нещодавно переглянуті',
+    widgetRecentsAndPinned: 'Останні та закріплені',
+    widgetRemovePin: 'Відкріпити документ',
     widgetSelectCollectionFirst: 'Виберіть Collection перед вибором сортування',
     widgetSelectSortField: 'Виберіть поле для сортування',
     widgetSortDirectionLabel: 'Напрямок сортування',
     widgetSortFieldLabel: 'Поле сортування',
     widgetTitleFallback: 'Запит колекції',
     widgetTitleLabel: 'Заголовок',
+    widgetUpdated: 'Оновлено',
+    widgetUpdatedBy: 'Оновлено користувачем',
   },
   error: {
     accountAlreadyActivated: 'Цей обліковий запис вже активований',

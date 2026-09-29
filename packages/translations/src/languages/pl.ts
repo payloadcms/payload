@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const plTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Konto',
@@ -105,7 +103,6 @@ export const plTranslations: DefaultTranslationsObject = {
     title: 'Paleta poleceń',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'Dodaj +',
     addWidget: 'Dodaj Widżet',
     deleteWidget: 'Usuń widget {{id}}',
@@ -119,24 +116,39 @@ export const plTranslations: DefaultTranslationsObject = {
       'Na Twoim pulpicie nie ma żadnych widgetów. Możesz je dodać z menu "Pulpit", które znajduje się na górnej belce.',
     resetLayout: 'Zresetuj Układ',
     searchWidgets: 'Szukaj widgetów...',
+    widgetAddPin: 'Przypnij dokument',
     widgetCollectionRequired: 'Collection jest wymagana.',
     widgetConfigurationError: 'Błąd konfiguracji widgetu',
+    widgetGridView: 'Widok siatki',
     widgetInvalidCollection: 'Kolekcja "{{collection}}" nie istnieje.',
     widgetInvalidFilterField:
       'Pole filtrujące „{{field}}” nie istnieje w kolekcji „{{collection}}”.',
     widgetInvalidSortField: 'Pole sortujące „{{field}}” nie istnieje w kolekcji „{{collection}}”.',
     widgetLimitLabel: 'Limit',
+    widgetListView: 'Widok listy',
     widgetNonSortableSortField:
       'Pole sortujące "{{field}}" nie jest sortowalne w kolekcji "{{collection}}".',
+    widgetPinned: 'Przypięte',
+    widgetPinnedEmpty: 'Brak przypiętych dokumentów',
+    widgetPinnedEmptyDescription: 'Przypięte dokumenty pojawią się tutaj',
+    widgetPinnedSaveError: 'Nie można zapisać przypiętych dokumentów.',
     widgetQueryError: 'Nie można załadować dokumentów dla tego widżetu.',
-    widgetRecentlyViewedEmpty: 'Nie wyświetlono jeszcze żadnych dokumentów.',
-    widgetRecentlyViewedTitle: 'Ostatnio oglądane',
+    widgetRecentDrafts: 'Ostatnie wersje robocze',
+    widgetRecentDraftsEmpty: 'Brak ostatnich wersji roboczych',
+    widgetRecentDraftsEmptyDescription: 'Edytowane wersje robocze pojawią się tutaj',
+    widgetRecentlyViewedEmpty: 'Brak ostatnich dokumentów',
+    widgetRecentlyViewedEmptyDescription: 'Edytowane dokumenty pojawią się tutaj',
+    widgetRecentlyViewedTitle: 'Ostatnio przeglądane',
+    widgetRecentsAndPinned: 'Ostatnie i przypięte',
+    widgetRemovePin: 'Odepnij dokument',
     widgetSelectCollectionFirst: 'Wybierz kolekcję przed wybraniem sortowania',
     widgetSelectSortField: 'Wybierz pole, według którego chcesz sortować',
     widgetSortDirectionLabel: 'Kierunek sortowania',
     widgetSortFieldLabel: 'Sortuj Pole',
     widgetTitleFallback: 'Zapytanie dotyczące Collection',
     widgetTitleLabel: 'Tytuł',
+    widgetUpdated: 'Zaktualizowano',
+    widgetUpdatedBy: 'Zaktualizowano przez',
   },
   error: {
     accountAlreadyActivated: 'To konto zostało już aktywowane.',

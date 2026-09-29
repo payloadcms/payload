@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const etTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Konto',
@@ -103,7 +101,6 @@ export const etTranslations: DefaultTranslationsObject = {
     title: 'Käsukeskus',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'Lisa +',
     addWidget: 'Lisa vidin',
     deleteWidget: 'Kustuta vidin {{id}}',
@@ -117,24 +114,39 @@ export const etTranslations: DefaultTranslationsObject = {
       'Teie armatuurlauale pole vidinaid. Saate neid lisada ülemisel ribal asuvast "Armatuurlaua" menüüst.',
     resetLayout: 'Lähtesta Paigutus',
     searchWidgets: 'Otsi vidinaid...',
+    widgetAddPin: 'Kinnita dokument',
     widgetCollectionRequired: 'Kogu on nõutav.',
     widgetConfigurationError: 'Vidina konfiguratsiooni viga',
+    widgetGridView: 'Ruudustikuvaade',
     widgetInvalidCollection: 'Kogumikku "{{collection}}" ei eksisteeri.',
     widgetInvalidFilterField: 'Filtri väli "{{field}}" ei eksisteeri kogumikus "{{collection}}".',
     widgetInvalidSortField:
       'Sorteerimisväli "{{field}}" ei eksisteeri kollektsioonis "{{collection}}".',
     widgetLimitLabel: 'Piirang',
+    widgetListView: 'Nimekirjavaade',
     widgetNonSortableSortField:
       'Sortimisväli "{{field}}" ei ole kogu "{{collection}}" puhul sorditav.',
+    widgetPinned: 'Kinnitatud',
+    widgetPinnedEmpty: 'Kinnitatud dokumente pole',
+    widgetPinnedEmptyDescription: 'Siia ilmuvad dokumendid, mille kinnitate',
+    widgetPinnedSaveError: 'Kinnitatud dokumente ei õnnestunud salvestada.',
     widgetQueryError: 'Selle vidina jaoks ei õnnestunud dokumente laadida.',
-    widgetRecentlyViewedEmpty: 'Te ei ole veel ühtegi dokumenti vaadanud.',
-    widgetRecentlyViewedTitle: 'Te vaatasite hiljuti',
+    widgetRecentDrafts: 'Viimased mustandid',
+    widgetRecentDraftsEmpty: 'Viimaseid mustandeid pole',
+    widgetRecentDraftsEmptyDescription: 'Siia ilmuvad mustandid, mida redigeerite',
+    widgetRecentlyViewedEmpty: 'Viimaseid dokumente pole',
+    widgetRecentlyViewedEmptyDescription: 'Siia ilmuvad dokumendid, mida redigeerite',
+    widgetRecentlyViewedTitle: 'Hiljuti vaadatud',
+    widgetRecentsAndPinned: 'Viimased ja kinnitatud',
+    widgetRemovePin: 'Eemalda kinnitus',
     widgetSelectCollectionFirst: 'Valige kogu enne sortimise valimist',
     widgetSelectSortField: 'Valige väli, mille alusel sorteerida',
     widgetSortDirectionLabel: 'Sorteerimissuund',
     widgetSortFieldLabel: 'Sorteeri väli',
     widgetTitleFallback: 'Kogumi päring',
     widgetTitleLabel: 'Pealkiri',
+    widgetUpdated: 'Uuendatud',
+    widgetUpdatedBy: 'Uuendatud kasutaja poolt',
   },
   error: {
     accountAlreadyActivated: 'See konto on juba aktiveeritud.',

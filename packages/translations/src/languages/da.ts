@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const daTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Konto',
@@ -103,7 +101,6 @@ export const daTranslations: DefaultTranslationsObject = {
     title: 'Kommandooversigt',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'Tilføj +',
     addWidget: 'Tilføj Widget',
     deleteWidget: 'Slet widget {{id}}',
@@ -117,24 +114,39 @@ export const daTranslations: DefaultTranslationsObject = {
       'Der er ingen widgets på dit kontrolpanel. Du kan tilføje dem fra "Kontrolpanel" menuen placeret i toppen.',
     resetLayout: 'Nulstil Layout',
     searchWidgets: 'Søg widgets...',
+    widgetAddPin: 'Fastgør dokument',
     widgetCollectionRequired: 'Collection er påkrævet.',
     widgetConfigurationError: 'Konfigurationsfejl for widget',
+    widgetGridView: 'Gittervisning',
     widgetInvalidCollection: 'Collection "{{collection}}" eksisterer ikke.',
     widgetInvalidFilterField: 'Filterfeltet "{{field}}" findes ikke i Collection "{{collection}}".',
     widgetInvalidSortField:
       'Sorteringsfeltet "{{field}}" findes ikke i Collection "{{collection}}".',
     widgetLimitLabel: 'Begrænsning',
+    widgetListView: 'Listevisning',
     widgetNonSortableSortField:
       'Sorteringsfeltet "{{field}}" kan ikke sorteres i Collection "{{collection}}".',
+    widgetPinned: 'Fastgjort',
+    widgetPinnedEmpty: 'Ingen fastgjorte dokumenter',
+    widgetPinnedEmptyDescription: 'Dokumenter, du fastgør, vises her',
+    widgetPinnedSaveError: 'Kunne ikke gemme fastgjorte dokumenter.',
     widgetQueryError: 'Kunne ikke indlæse dokumenter til denne widget.',
-    widgetRecentlyViewedEmpty: 'Du har endnu ikke set nogen dokumenter.',
-    widgetRecentlyViewedTitle: 'Du har for nylig set',
+    widgetRecentDrafts: 'Seneste kladder',
+    widgetRecentDraftsEmpty: 'Ingen seneste kladder',
+    widgetRecentDraftsEmptyDescription: 'Kladder, du redigerer, vises her',
+    widgetRecentlyViewedEmpty: 'Ingen seneste dokumenter',
+    widgetRecentlyViewedEmptyDescription: 'Dokumenter, du redigerer, vises her',
+    widgetRecentlyViewedTitle: 'Senest viste',
+    widgetRecentsAndPinned: 'Seneste og fastgjorte',
+    widgetRemovePin: 'Fjern fastgørelse af dokument',
     widgetSelectCollectionFirst: 'Vælg en Collection, før du vælger sortering',
     widgetSelectSortField: 'Vælg et field, der skal sorteres efter',
     widgetSortDirectionLabel: 'Sorteringsretning',
     widgetSortFieldLabel: 'Sortér felt',
     widgetTitleFallback: 'Collectionsforespørgsel',
     widgetTitleLabel: 'Titel',
+    widgetUpdated: 'Opdateret',
+    widgetUpdatedBy: 'Opdateret af',
   },
   error: {
     accountAlreadyActivated: 'Denne konto er allerede blevet aktiveret.',

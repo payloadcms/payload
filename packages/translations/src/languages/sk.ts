@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const skTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Účet',
@@ -105,7 +103,6 @@ export const skTranslations: DefaultTranslationsObject = {
     title: 'Príkazová paleta',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'Pridať +',
     addWidget: 'Pridať Widget',
     deleteWidget: 'Odstrániť widget {{id}}',
@@ -119,23 +116,38 @@ export const skTranslations: DefaultTranslationsObject = {
       'Na vašej nástenke nie sú žiadne miniaplikácie. Môžete ich pridať z menu "Nástenka", ktoré sa nachádza v hornej lište.',
     resetLayout: 'Resetovať rozloženie',
     searchWidgets: 'Hľadať doplnky...',
+    widgetAddPin: 'Pripnúť dokument',
     widgetCollectionRequired: 'Collection je povinná.',
     widgetConfigurationError: 'Chyba v konfigurácii widgetu',
+    widgetGridView: 'Zobrazenie v mriežke',
     widgetInvalidCollection: 'Kolekcia „{{collection}}“ neexistuje.',
     widgetInvalidFilterField: 'Filtrované pole "{{field}}" neexistuje v kolekcii "{{collection}}".',
     widgetInvalidSortField: 'Triediace pole "{{field}}" neexistuje v kolekcii "{{collection}}".',
     widgetLimitLabel: 'Obmedzenie',
+    widgetListView: 'Zobrazenie v zozname',
     widgetNonSortableSortField:
       'Triediace pole "{{field}}" nie je možné triediť v kolekcii "{{collection}}".',
+    widgetPinned: 'Pripnuté',
+    widgetPinnedEmpty: 'Žiadne pripnuté dokumenty',
+    widgetPinnedEmptyDescription: 'Dokumenty, ktoré pripnete, sa zobrazia tu',
+    widgetPinnedSaveError: 'Nepodarilo sa uložiť pripnuté dokumenty.',
     widgetQueryError: 'Nepodarilo sa načítať dokumenty pre tento widget.',
-    widgetRecentlyViewedEmpty: 'Zatiaľ ste si nepozreli žiadne dokumenty.',
-    widgetRecentlyViewedTitle: 'Nedávno ste si prezerali',
+    widgetRecentDrafts: 'Nedávne koncepty',
+    widgetRecentDraftsEmpty: 'Žiadne nedávne koncepty',
+    widgetRecentDraftsEmptyDescription: 'Koncepty dokumentov, ktoré upravujete, sa zobrazia tu',
+    widgetRecentlyViewedEmpty: 'Žiadne nedávne dokumenty',
+    widgetRecentlyViewedEmptyDescription: 'Dokumenty, ktoré upravujete, sa zobrazia tu',
+    widgetRecentlyViewedTitle: 'Nedávno zobrazené',
+    widgetRecentsAndPinned: 'Nedávne a pripnuté',
+    widgetRemovePin: 'Odopnúť dokument',
     widgetSelectCollectionFirst: 'Vyberte najprv Collection pred výberom spôsobu zoradenia.',
     widgetSelectSortField: 'Vyberte pole, podľa ktorého chcete zoradiť',
     widgetSortDirectionLabel: 'Smer triedenia',
     widgetSortFieldLabel: 'Zoradiť Field',
     widgetTitleFallback: 'Dotaz na Collection',
     widgetTitleLabel: 'Názov',
+    widgetUpdated: 'Aktualizované',
+    widgetUpdatedBy: 'Aktualizoval',
   },
   error: {
     accountAlreadyActivated: 'Tento účet už bol aktivovaný.',

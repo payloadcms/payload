@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const caTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Compte',
@@ -105,7 +103,6 @@ export const caTranslations: DefaultTranslationsObject = {
     title: 'Paleta d’ordres',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'Afegeix +',
     addWidget: 'Afegeix Widget',
     deleteWidget: 'Esborra el widget {{id}}',
@@ -119,25 +116,40 @@ export const caTranslations: DefaultTranslationsObject = {
       'No hi ha cap widget al vostre tauler de control. Podeu afegir-los des del menú "Dashboard" situat a la barra superior.',
     resetLayout: 'Restableix la disposició',
     searchWidgets: 'Cerca de ginys...',
+    widgetAddPin: 'Fixa el document',
     widgetCollectionRequired: 'Cal especificar una Collection.',
     widgetConfigurationError: 'Error de configuració del widget',
+    widgetGridView: 'Vista de graella',
     widgetInvalidCollection: 'La Collection "{{collection}}" no existeix.',
     widgetInvalidFilterField:
       'El camp de filtre "{{field}}" no existeix a la Collection "{{collection}}".',
     widgetInvalidSortField:
       'El camp d\'ordenació "{{field}}" no existeix a la col·lecció "{{collection}}".',
     widgetLimitLabel: 'Límit',
+    widgetListView: 'Vista de llista',
     widgetNonSortableSortField:
       'El camp d’ordenació "{{field}}" no es pot ordenar a la col·lecció "{{collection}}".',
+    widgetPinned: 'Fixat',
+    widgetPinnedEmpty: 'No hi ha documents fixats',
+    widgetPinnedEmptyDescription: 'Els documents que fixis apareixeran aquí',
+    widgetPinnedSaveError: "No s'han pogut desar els documents fixats.",
     widgetQueryError: "No s'han pogut carregar els documents per a aquest widget.",
-    widgetRecentlyViewedEmpty: 'Encara no heu visualitzat cap document.',
-    widgetRecentlyViewedTitle: 'Vostè ha vist recentment',
+    widgetRecentDrafts: 'Esborranys recents',
+    widgetRecentDraftsEmpty: 'No hi ha esborranys recents',
+    widgetRecentDraftsEmptyDescription: 'Els esborranys que editis apareixeran aquí',
+    widgetRecentlyViewedEmpty: 'No hi ha documents recents',
+    widgetRecentlyViewedEmptyDescription: 'Els documents que editis apareixeran aquí',
+    widgetRecentlyViewedTitle: 'Vist recentment',
+    widgetRecentsAndPinned: 'Recents i fixats',
+    widgetRemovePin: 'Desfixa el document',
     widgetSelectCollectionFirst: "Seleccioneu una Collection abans de triar l'ordre",
     widgetSelectSortField: 'Seleccioneu un camp per ordenar',
     widgetSortDirectionLabel: "Direcció d'ordenació",
     widgetSortFieldLabel: 'Ordenar camp',
     widgetTitleFallback: 'Consulta de la Collection',
     widgetTitleLabel: 'Títol',
+    widgetUpdated: 'Actualitzat',
+    widgetUpdatedBy: 'Actualitzat per',
   },
   error: {
     accountAlreadyActivated: 'Aquest compte ja ha estat activat.',

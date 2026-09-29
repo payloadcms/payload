@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const viTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Tài khoản',
@@ -105,7 +103,6 @@ export const viTranslations: DefaultTranslationsObject = {
     title: 'Bảng Lệnh',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'Thêm +',
     addWidget: 'Thêm Widget',
     deleteWidget: 'Xóa widget {{id}}',
@@ -119,25 +116,40 @@ export const viTranslations: DefaultTranslationsObject = {
       'Trên bảng điều khiển của bạn không có tiện ích nào. Bạn có thể thêm chúng từ menu "Bảng điều khiển" nằm ở thanh trên cùng.',
     resetLayout: 'Đặt lại Bố cục',
     searchWidgets: 'Tìm kiếm các widget...',
+    widgetAddPin: 'Ghim tài liệu',
     widgetCollectionRequired: 'Collection là bắt buộc.',
     widgetConfigurationError: 'Lỗi cấu hình Widget',
+    widgetGridView: 'Chế độ lưới',
     widgetInvalidCollection: 'Collection "{{collection}}" không tồn tại.',
     widgetInvalidFilterField:
       'Trường lọc "{{field}}" không tồn tại trong Collection "{{collection}}".',
     widgetInvalidSortField:
       'Trường sắp xếp "{{field}}" không tồn tại trong Collection "{{collection}}".',
     widgetLimitLabel: 'Giới hạn',
+    widgetListView: 'Chế độ danh sách',
     widgetNonSortableSortField:
       'Trường sắp xếp "{{field}}" không thể sắp xếp được trên Collection "{{collection}}".',
+    widgetPinned: 'Đã ghim',
+    widgetPinnedEmpty: 'Không có tài liệu đã ghim',
+    widgetPinnedEmptyDescription: 'Các tài liệu bạn ghim sẽ xuất hiện tại đây',
+    widgetPinnedSaveError: 'Không thể lưu các tài liệu đã ghim.',
     widgetQueryError: 'Không thể tải tài liệu cho tiện ích này.',
-    widgetRecentlyViewedEmpty: 'Bạn chưa xem bất kỳ tài liệu nào.',
-    widgetRecentlyViewedTitle: 'Bạn đã xem gần đây',
+    widgetRecentDrafts: 'Bản nháp gần đây',
+    widgetRecentDraftsEmpty: 'Không có bản nháp gần đây',
+    widgetRecentDraftsEmptyDescription: 'Các bản nháp bạn chỉnh sửa sẽ xuất hiện tại đây',
+    widgetRecentlyViewedEmpty: 'Không có tài liệu gần đây',
+    widgetRecentlyViewedEmptyDescription: 'Các tài liệu bạn chỉnh sửa sẽ xuất hiện tại đây',
+    widgetRecentlyViewedTitle: 'Đã xem gần đây',
+    widgetRecentsAndPinned: 'Gần đây và đã ghim',
+    widgetRemovePin: 'Bỏ ghim tài liệu',
     widgetSelectCollectionFirst: 'Chọn một Collection trước khi chọn sắp xếp',
     widgetSelectSortField: 'Chọn một trường để sắp xếp theo',
     widgetSortDirectionLabel: 'Hướng sắp xếp',
     widgetSortFieldLabel: 'Sắp xếp Field',
     widgetTitleFallback: 'Truy vấn Collection',
     widgetTitleLabel: 'Tiêu đề',
+    widgetUpdated: 'Đã cập nhật',
+    widgetUpdatedBy: 'Cập nhật bởi',
   },
   error: {
     accountAlreadyActivated: 'Lỗi - Tài khoản này đã được kích hoạt.',

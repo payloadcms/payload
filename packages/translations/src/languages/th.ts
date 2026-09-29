@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const thTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'บัญชี',
@@ -103,7 +101,6 @@ export const thTranslations: DefaultTranslationsObject = {
     title: 'แถบคำสั่ง',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'เพิ่ม +',
     addWidget: 'เพิ่มวิดเจ็ต',
     deleteWidget: 'ลบวิดเจ็ต {{id}}',
@@ -116,24 +113,39 @@ export const thTranslations: DefaultTranslationsObject = {
     noItems: 'ไม่มีวิดเจ็ตในแดชบอร์ดของคุณ คุณสามารถเพิ่มได้จากเมนู "แดชบอร์ด" ที่ตั้งอยู่บนแถบบน',
     resetLayout: 'รีเซ็ตเลย์เอาท์',
     searchWidgets: 'ค้นหาวิดเจ็ต...',
+    widgetAddPin: 'ปักหมุดเอกสาร',
     widgetCollectionRequired: 'Collection เป็นข้อมูลที่จำเป็น',
     widgetConfigurationError: 'เกิดข้อผิดพลาดในการกำหนดค่าของวิดเจ็ต',
+    widgetGridView: 'มุมมองแบบกริด',
     widgetInvalidCollection: 'Collection "{{collection}}" ไม่มีอยู่ในระบบ',
     widgetInvalidFilterField: 'ฟิลด์ตัวกรอง "{{field}}" ไม่มีอยู่ใน Collection "{{collection}}"',
     widgetInvalidSortField:
       'เขตข้อมูลเรียงลำดับ "{{field}}" ไม่มีอยู่ใน Collection "{{collection}}"',
     widgetLimitLabel: 'จำกัด',
+    widgetListView: 'มุมมองแบบรายการ',
     widgetNonSortableSortField:
       'ไม่สามารถจัดเรียง field "{{field}}" ใน Collection "{{collection}}" ได้',
+    widgetPinned: 'ปักหมุดแล้ว',
+    widgetPinnedEmpty: 'ไม่มีเอกสารที่ปักหมุด',
+    widgetPinnedEmptyDescription: 'เอกสารที่คุณปักหมุดจะแสดงที่นี่',
+    widgetPinnedSaveError: 'ไม่สามารถบันทึกเอกสารที่ปักหมุดได้',
     widgetQueryError: 'ไม่สามารถโหลดเอกสารสำหรับวิดเจ็ตนี้ได้',
-    widgetRecentlyViewedEmpty: 'คุณยังไม่ได้เปิดดูเอกสารใด ๆ',
-    widgetRecentlyViewedTitle: 'คุณได้ดูเมื่อเร็ว ๆ นี้',
+    widgetRecentDrafts: 'ฉบับร่างล่าสุด',
+    widgetRecentDraftsEmpty: 'ไม่มีฉบับร่างล่าสุด',
+    widgetRecentDraftsEmptyDescription: 'เอกสารฉบับร่างที่คุณแก้ไขจะแสดงที่นี่',
+    widgetRecentlyViewedEmpty: 'ไม่มีเอกสารล่าสุด',
+    widgetRecentlyViewedEmptyDescription: 'เอกสารที่คุณแก้ไขจะแสดงที่นี่',
+    widgetRecentlyViewedTitle: 'ดูล่าสุด',
+    widgetRecentsAndPinned: 'ล่าสุดและปักหมุด',
+    widgetRemovePin: 'ยกเลิกปักหมุดเอกสาร',
     widgetSelectCollectionFirst: 'โปรดเลือก Collection ก่อนเลือกการจัดลำดับ',
     widgetSelectSortField: 'เลือก Field เพื่อจัดลำดับ',
     widgetSortDirectionLabel: 'ทิศทางการจัดเรียง',
     widgetSortFieldLabel: 'จัดเรียง Field',
     widgetTitleFallback: 'การค้นหาข้อมูลใน Collection',
     widgetTitleLabel: 'ชื่อเรื่อง',
+    widgetUpdated: 'อัปเดตแล้ว',
+    widgetUpdatedBy: 'อัปเดตโดย',
   },
   error: {
     accountAlreadyActivated: 'บัญชีนี้ถูกเปิดใช้งานไปแล้ว',

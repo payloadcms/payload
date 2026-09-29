@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const hyTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Հաշիվ',
@@ -105,7 +103,6 @@ export const hyTranslations: DefaultTranslationsObject = {
     title: 'Հրամանների վահանակ',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'Ավելացնել +',
     addWidget: 'Ավելացնել վիճակագրություն',
     deleteWidget: 'Ջնջել վիդջեթը {{id}}',
@@ -117,25 +114,40 @@ export const hyTranslations: DefaultTranslationsObject = {
     noItems: 'Ձեր վահագործի վրա վիջեթներ չկան։ Դուք կարող եք ավելացնել դրանք "Վահագործ" մենյուից',
     resetLayout: 'Վերադասավորել Կառուցվածքը',
     searchWidgets: 'Որոնել վիջեթներ...',
+    widgetAddPin: 'Ամրագրել փաստաթուղթը',
     widgetCollectionRequired: 'Collection-ը պարտադիր է։',
     widgetConfigurationError: 'Վիջեթի կազմաձևման սխալ',
+    widgetGridView: 'Ցանցային տեսք',
     widgetInvalidCollection: 'Collection "{{collection}}" չի գոյություն ունի։',
     widgetInvalidFilterField:
       'Զտիչ դաշտը "{{field}}" գոյություն չունի Collection "{{collection}}"-ում։',
     widgetInvalidSortField:
       'Դասաբանման Field-ը "{{field}}" գոյություն չունի Collection "{{collection}}"-ում։',
     widgetLimitLabel: 'Սահմանաչափ',
+    widgetListView: 'Ցանկի տեսք',
     widgetNonSortableSortField:
       'Դասակարգման դաշտը "{{field}}" հնարավոր չէ դասակարգել հավաքածուում "{{collection}}":',
+    widgetPinned: 'Ամրագրված',
+    widgetPinnedEmpty: 'Ամրագրված փաստաթղթեր չկան',
+    widgetPinnedEmptyDescription: 'Այստեղ կհայտնվեն ձեր ամրագրված փաստաթղթերը',
+    widgetPinnedSaveError: 'Չհաջողվեց պահպանել ամրագրված փաստաթղթերը։',
     widgetQueryError: 'Չհաջողվեց բեռնել փաստաթղթերը այս վիդջեթի համար:',
-    widgetRecentlyViewedEmpty: 'Դուք դեռևս չեք դիտել որևէ փաստաթուղթ:',
-    widgetRecentlyViewedTitle: 'Վերջերս դիտած',
+    widgetRecentDrafts: 'Վերջին սևագրերը',
+    widgetRecentDraftsEmpty: 'Վերջին սևագրեր չկան',
+    widgetRecentDraftsEmptyDescription: 'Այստեղ կհայտնվեն ձեր խմբագրած սևագրերը',
+    widgetRecentlyViewedEmpty: 'Վերջին փաստաթղթեր չկան',
+    widgetRecentlyViewedEmptyDescription: 'Այստեղ կհայտնվեն ձեր խմբագրած փաստաթղթերը',
+    widgetRecentlyViewedTitle: 'Վերջերս դիտված',
+    widgetRecentsAndPinned: 'Վերջիններն ու ամրագրվածները',
+    widgetRemovePin: 'Հեռացնել ամրագրվածը',
     widgetSelectCollectionFirst: 'Նախ ընտրեք Collection, ապա ընտրեք դասավորումը',
     widgetSelectSortField: 'Ընտրեք դաշտը՝ դասավորելու համար',
     widgetSortDirectionLabel: 'Տեսակավորման ուղղություն',
     widgetSortFieldLabel: 'Դաշտի դասավորում',
     widgetTitleFallback: 'Collection-ի հարցում',
     widgetTitleLabel: 'Վերնագիր',
+    widgetUpdated: 'Թարմացված է',
+    widgetUpdatedBy: 'Թարմացրել է',
   },
   error: {
     accountAlreadyActivated: 'Այս հաշիվն արդեն ակտիվացված է։',

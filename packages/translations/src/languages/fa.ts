@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const faTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'حساب کاربری',
@@ -103,7 +101,6 @@ export const faTranslations: DefaultTranslationsObject = {
     title: 'پنل فرمان',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'اضافه کنید +',
     addWidget: 'اضافه کردن ویجت',
     deleteWidget: 'حذف ابزارک {{id}}',
@@ -117,23 +114,38 @@ export const faTranslations: DefaultTranslationsObject = {
       'در داشبورد شما هیچ ویجتی وجود ندارد. شما می توانید آنها را از منوی "داشبورد" که در نوار بالا قرار دارد اضافه کنید.',
     resetLayout: 'تنظیم مجدد طرح بندی',
     searchWidgets: 'جستجوی ابزارک‌ها...',
+    widgetAddPin: 'سنجاق کردن سند',
     widgetCollectionRequired: 'Collection الزامی است.',
     widgetConfigurationError: 'خطای پیکربندی ابزارک',
+    widgetGridView: 'نمای شبکه‌ای',
     widgetInvalidCollection: 'Collection "{{collection}}" وجود ندارد.',
     widgetInvalidFilterField: 'فیلد فیلتر "{{field}}" در Collection "{{collection}}" وجود ندارد.',
     widgetInvalidSortField: 'فیلد مرتب‌سازی "{{field}}" در Collection "{{collection}}" وجود ندارد.',
     widgetLimitLabel: 'محدودیت',
+    widgetListView: 'نمای فهرست',
     widgetNonSortableSortField:
       'فیلد مرتب‌سازی "{{field}}" در Collection "{{collection}}" قابل مرتب‌سازی نیست.',
+    widgetPinned: 'سنجاق شده',
+    widgetPinnedEmpty: 'سندی سنجاق نشده است',
+    widgetPinnedEmptyDescription: 'اسنادی که سنجاق کنید اینجا نمایش داده می‌شوند',
+    widgetPinnedSaveError: 'امکان ذخیره اسناد سنجاق شده وجود ندارد.',
     widgetQueryError: 'امکان بارگذاری اسناد برای این ویجت وجود ندارد.',
-    widgetRecentlyViewedEmpty: 'شما هنوز هیچ سندی را مشاهده نکرده‌اید.',
-    widgetRecentlyViewedTitle: 'شما اخیراً مشاهده کرده‌اید',
+    widgetRecentDrafts: 'پیش‌نویس‌های اخیر',
+    widgetRecentDraftsEmpty: 'پیش‌نویسی وجود ندارد',
+    widgetRecentDraftsEmptyDescription: 'پیش‌نویس‌هایی که ویرایش می‌کنید اینجا نمایش داده می‌شوند',
+    widgetRecentlyViewedEmpty: 'سند اخیر وجود ندارد',
+    widgetRecentlyViewedEmptyDescription: 'اسنادی که ویرایش می‌کنید اینجا نمایش داده می‌شوند',
+    widgetRecentlyViewedTitle: 'اخیراً مشاهده شده',
+    widgetRecentsAndPinned: 'اخیرها و سنجاق شده‌ها',
+    widgetRemovePin: 'برداشتن سنجاق سند',
     widgetSelectCollectionFirst: 'ابتدا یک Collection را انتخاب کنید، سپس ترتیب را مشخص نمایید.',
     widgetSelectSortField: 'یک Field را برای مرتب‌سازی انتخاب کنید',
     widgetSortDirectionLabel: 'جهت مرتب‌سازی',
     widgetSortFieldLabel: 'مرتب‌سازی Field',
     widgetTitleFallback: 'کوئری Collection',
     widgetTitleLabel: 'عنوان',
+    widgetUpdated: 'به‌روزرسانی شده',
+    widgetUpdatedBy: 'به‌روزرسانی توسط',
   },
   error: {
     accountAlreadyActivated: 'این حساب کاربری قبلاً فعال شده است.',

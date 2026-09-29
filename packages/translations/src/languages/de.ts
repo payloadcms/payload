@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const deTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Benutzerkonto',
@@ -107,7 +105,6 @@ export const deTranslations: DefaultTranslationsObject = {
     title: 'Befehls-Palette',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'Hinzufügen +',
     addWidget: 'Widget hinzufügen',
     deleteWidget: 'Widget {{id}} löschen',
@@ -121,19 +118,32 @@ export const deTranslations: DefaultTranslationsObject = {
       'Auf deinem Dashboard befinden sich keine Widgets. Du kannst diese über das "Dashboard"-Menü in der oberen Leiste hinzufügen.',
     resetLayout: 'Layout zurücksetzen',
     searchWidgets: 'Suche Widgets...',
+    widgetAddPin: 'Dokument anheften',
     widgetCollectionRequired: 'Collection ist erforderlich.',
     widgetConfigurationError: 'Widget-Konfigurationsfehler',
+    widgetGridView: 'Rasteransicht',
     widgetInvalidCollection: 'Collection „{{collection}}“ existiert nicht.',
     widgetInvalidFilterField:
       'Das Filter-Feld "{{field}}" existiert nicht in der Collection "{{collection}}".',
     widgetInvalidSortField:
       'Sortierfeld „{{field}}“ existiert nicht in der Collection „{{collection}}“.',
     widgetLimitLabel: 'Begrenzung',
+    widgetListView: 'Listenansicht',
     widgetNonSortableSortField:
       'Das Sortierfeld "{{field}}" ist in der Collection "{{collection}}" nicht sortierbar.',
+    widgetPinned: 'Angeheftet',
+    widgetPinnedEmpty: 'Keine angehefteten Dokumente',
+    widgetPinnedEmptyDescription: 'Dokumente, die Sie anheften, erscheinen hier',
+    widgetPinnedSaveError: 'Angeheftete Dokumente konnten nicht gespeichert werden.',
     widgetQueryError: 'Dokumente für dieses Widget konnten nicht geladen werden.',
-    widgetRecentlyViewedEmpty: 'Sie haben noch keine Dokumente angesehen.',
-    widgetRecentlyViewedTitle: 'Sie haben kürzlich angesehen',
+    widgetRecentDrafts: 'Letzte Entwürfe',
+    widgetRecentDraftsEmpty: 'Keine aktuellen Entwürfe',
+    widgetRecentDraftsEmptyDescription: 'Entwurfsdokumente, die Sie bearbeiten, erscheinen hier',
+    widgetRecentlyViewedEmpty: 'Keine aktuellen Dokumente',
+    widgetRecentlyViewedEmptyDescription: 'Dokumente, die Sie bearbeiten, erscheinen hier',
+    widgetRecentlyViewedTitle: 'Kürzlich angesehen',
+    widgetRecentsAndPinned: 'Aktuelle und angeheftete',
+    widgetRemovePin: 'Dokument lösen',
     widgetSelectCollectionFirst:
       'Wählen Sie eine Collection aus, bevor Sie eine Sortierung auswählen',
     widgetSelectSortField: 'Wählen Sie ein Feld zum Sortieren aus',
@@ -141,6 +151,8 @@ export const deTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sortierfeld',
     widgetTitleFallback: 'Sammlungsabfrage',
     widgetTitleLabel: 'Titel',
+    widgetUpdated: 'Aktualisiert',
+    widgetUpdatedBy: 'Aktualisiert von',
   },
   error: {
     accountAlreadyActivated: 'Dieses Benutzerkonto wurde bereits aktiviert',

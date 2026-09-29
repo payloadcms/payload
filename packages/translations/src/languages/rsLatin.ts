@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const rsLatinTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Nalog',
@@ -105,7 +103,6 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     title: 'Komandna paleta',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'Dodaj +',
     addWidget: 'Dodaj widget',
     deleteWidget: 'Obriši widget {{id}}',
@@ -119,24 +116,39 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
       'Na vašoj kontrolnoj tabli nema vidžeta. Možete ih dodati iz menija "Kontrolna tabla" koji se nalazi na vrhu stranice.',
     resetLayout: 'Resetuj raspored',
     searchWidgets: 'Pretraži dodatke...',
+    widgetAddPin: 'Prikvači dokument',
     widgetCollectionRequired: 'Kolekcija je obavezna.',
     widgetConfigurationError: 'Greška u konfiguraciji vidžeta',
+    widgetGridView: 'Prikaz u mreži',
     widgetInvalidCollection: 'Kolekcija "{{collection}}" ne postoji.',
     widgetInvalidFilterField:
       'Polje za filtriranje "{{field}}" ne postoji u kolekciji "{{collection}}".',
     widgetInvalidSortField: 'Sort polje "{{field}}" ne postoji u kolekciji "{{collection}}".',
     widgetLimitLabel: 'Ograničenje',
+    widgetListView: 'Prikaz u listi',
     widgetNonSortableSortField:
       'Polje za sortiranje "{{field}}" nije moguće sortirati u kolekciji "{{collection}}".',
+    widgetPinned: 'Prikvačeno',
+    widgetPinnedEmpty: 'Nema prikvačenih dokumenata',
+    widgetPinnedEmptyDescription: 'Dokumenti koje prikvačite će se pojaviti ovde',
+    widgetPinnedSaveError: 'Nije moguće sačuvati prikvačene dokumente.',
     widgetQueryError: 'Nije moguće učitati dokumente za ovaj vidžet.',
-    widgetRecentlyViewedEmpty: 'Još uvek niste pregledali nijedan dokument.',
-    widgetRecentlyViewedTitle: 'Nedavno ste pregledali',
+    widgetRecentDrafts: 'Nedavni nacrti',
+    widgetRecentDraftsEmpty: 'Nema nedavnih nacrta',
+    widgetRecentDraftsEmptyDescription: 'Nacrti dokumenata koje uređujete će se pojaviti ovde',
+    widgetRecentlyViewedEmpty: 'Nema nedavnih dokumenata',
+    widgetRecentlyViewedEmptyDescription: 'Dokumenti koje uređujete će se pojaviti ovde',
+    widgetRecentlyViewedTitle: 'Nedavno pregledano',
+    widgetRecentsAndPinned: 'Nedavno i prikvačeno',
+    widgetRemovePin: 'Otkači dokument',
     widgetSelectCollectionFirst: 'Izaberite Collection pre nego što izaberete sortiranje',
     widgetSelectSortField: 'Izaberite polje po kojem želite da sortirate',
     widgetSortDirectionLabel: 'Smer sortiranja',
     widgetSortFieldLabel: 'Sortiraj Field',
     widgetTitleFallback: 'Upit kolekcije',
     widgetTitleLabel: 'Naslov',
+    widgetUpdated: 'Ažurirano',
+    widgetUpdatedBy: 'Ažurirao/la',
   },
   error: {
     accountAlreadyActivated: 'Ovaj nalog je već aktiviran.',

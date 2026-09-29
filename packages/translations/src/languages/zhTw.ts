@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const zhTwTranslations: DefaultTranslationsObject = {
   authentication: {
     account: '帳戶',
@@ -100,7 +98,6 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     title: '指令選擇器',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: '添加 +',
     addWidget: '添加小工具',
     deleteWidget: '刪除小工具 {{id}}',
@@ -112,22 +109,37 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     noItems: '您的儀表板上沒有小工具。您可以從頂部工具欄中的"儀表板"選單添加它們。',
     resetLayout: '重設版面配置',
     searchWidgets: '搜索小工具...',
+    widgetAddPin: '釘選文件',
     widgetCollectionRequired: 'Collection 為必填項目。',
     widgetConfigurationError: '元件組態錯誤',
+    widgetGridView: '網格檢視',
     widgetInvalidCollection: 'Collection「{{collection}}」不存在。',
     widgetInvalidFilterField: '篩選欄位「{{field}}」不存在於 Collection「{{collection}}」中。',
     widgetInvalidSortField: '排序欄位「{{field}}」在集合「{{collection}}」中不存在。',
     widgetLimitLabel: '限制',
+    widgetListView: '清單檢視',
     widgetNonSortableSortField: '排序欄位「{{field}}」在 Collection「{{collection}}」上不可排序。',
+    widgetPinned: '已釘選',
+    widgetPinnedEmpty: '沒有已釘選的文件',
+    widgetPinnedEmptyDescription: '您釘選的文件將顯示在此處',
+    widgetPinnedSaveError: '無法儲存已釘選的文件。',
     widgetQueryError: '無法載入此元件的小文件。',
-    widgetRecentlyViewedEmpty: '您尚未瀏覽任何文件。',
-    widgetRecentlyViewedTitle: '您最近檢視',
+    widgetRecentDrafts: '最近的草稿',
+    widgetRecentDraftsEmpty: '沒有最近的草稿',
+    widgetRecentDraftsEmptyDescription: '您編輯的草稿文件將顯示在此處',
+    widgetRecentlyViewedEmpty: '沒有最近的文件',
+    widgetRecentlyViewedEmptyDescription: '您編輯的文件將顯示在此處',
+    widgetRecentlyViewedTitle: '最近檢視',
+    widgetRecentsAndPinned: '最近與已釘選',
+    widgetRemovePin: '取消釘選文件',
     widgetSelectCollectionFirst: '請先選擇一個 Collection 再選擇排序方式',
     widgetSelectSortField: '選擇要排序的欄位',
     widgetSortDirectionLabel: '排序方向',
     widgetSortFieldLabel: '排序欄位',
     widgetTitleFallback: 'Collection 查詢',
     widgetTitleLabel: '標題',
+    widgetUpdated: '已更新',
+    widgetUpdatedBy: '更新者',
   },
   error: {
     accountAlreadyActivated: '此帳戶已啟用。',

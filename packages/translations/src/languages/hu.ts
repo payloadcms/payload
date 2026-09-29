@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const huTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Fiók',
@@ -107,7 +105,6 @@ export const huTranslations: DefaultTranslationsObject = {
     title: 'Parancs paletta',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'Adj hozzá +',
     addWidget: 'Adjon hozzá widgetet',
     deleteWidget: 'Törölje a(z) {{id}} widgetet',
@@ -121,25 +118,40 @@ export const huTranslations: DefaultTranslationsObject = {
       'Nincsenek widgetek az irányítópulton. Hozzáadhatja őket a felső sávban található "Irányítópult" menüből.',
     resetLayout: 'Alaphelyzet visszaállítása',
     searchWidgets: 'Keresés widgetek...',
+    widgetAddPin: 'Dokumentum rögzítése',
     widgetCollectionRequired: 'A Collection megadása kötelező.',
     widgetConfigurationError: 'Widget konfigurációs hiba',
+    widgetGridView: 'Rácsnézet',
     widgetInvalidCollection: 'A(z) "{{collection}}" Collection nem létezik.',
     widgetInvalidFilterField:
       'A(z) „{{field}}” szűrőmező nem létezik a(z) „{{collection}}” Collection-ben.',
     widgetInvalidSortField:
       'A "{{field}}" rendezési mező nem létezik a(z) "{{collection}}" Collection-ben.',
     widgetLimitLabel: 'Korlátozás',
+    widgetListView: 'Listanézet',
     widgetNonSortableSortField:
       'A(z) "{{field}}" mező nem rendezhető a(z) "{{collection}}" Collection-ben.',
+    widgetPinned: 'Rögzítve',
+    widgetPinnedEmpty: 'Nincs rögzített dokumentum',
+    widgetPinnedEmptyDescription: 'A rögzített dokumentumok itt jelennek meg',
+    widgetPinnedSaveError: 'A rögzített dokumentumok mentése nem sikerült.',
     widgetQueryError: 'Nem sikerült betölteni a dokumentumokat ehhez a widgethez.',
-    widgetRecentlyViewedEmpty: 'Még nem tekintett meg egyetlen dokumentumot sem.',
-    widgetRecentlyViewedTitle: 'Ön nemrég megtekintette',
+    widgetRecentDrafts: 'Legutóbbi piszkozatok',
+    widgetRecentDraftsEmpty: 'Nincs legutóbbi piszkozat',
+    widgetRecentDraftsEmptyDescription: 'Az Ön által szerkesztett piszkozatok itt jelennek meg',
+    widgetRecentlyViewedEmpty: 'Nincs legutóbbi dokumentum',
+    widgetRecentlyViewedEmptyDescription: 'Az Ön által szerkesztett dokumentumok itt jelennek meg',
+    widgetRecentlyViewedTitle: 'Legutóbb megtekintett',
+    widgetRecentsAndPinned: 'Legutóbbiak és rögzítettek',
+    widgetRemovePin: 'Dokumentum rögzítésének feloldása',
     widgetSelectCollectionFirst: 'Válasszon ki egy Collection-t a rendezés kiválasztása előtt.',
     widgetSelectSortField: 'Válassza ki a rendezni kívánt mezőt',
     widgetSortDirectionLabel: 'Rendezési irány',
     widgetSortFieldLabel: 'Mező rendezése',
     widgetTitleFallback: 'Gyűjtemény lekérdezés',
     widgetTitleLabel: 'Cím',
+    widgetUpdated: 'Frissítve',
+    widgetUpdatedBy: 'Frissítette',
   },
   error: {
     accountAlreadyActivated: 'Ez a fiók már aktiválva van.',

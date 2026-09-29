@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const koTranslations: DefaultTranslationsObject = {
   authentication: {
     account: '계정',
@@ -104,7 +102,6 @@ export const koTranslations: DefaultTranslationsObject = {
     title: '명령 팔레트',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: '더하다',
     addWidget: '위젯 추가',
     deleteWidget: '위젯 {{id}} 삭제',
@@ -117,24 +114,39 @@ export const koTranslations: DefaultTranslationsObject = {
     noItems: '대시보드에 위젯이 없습니다. 상단 바에 위치한 "대시보드" 메뉴에서 추가할 수 있습니다.',
     resetLayout: '레이아웃 재설정',
     searchWidgets: '위젯 검색...',
+    widgetAddPin: '문서 고정',
     widgetCollectionRequired: 'Collection이 필요합니다.',
     widgetConfigurationError: '위젯 구성 오류',
+    widgetGridView: '그리드 보기',
     widgetInvalidCollection: 'Collection "{{collection}}"이(가) 존재하지 않습니다.',
     widgetInvalidFilterField:
       '컬렉션 "{{collection}}"에 필터 필드 "{{field}}"가 존재하지 않습니다.',
     widgetInvalidSortField: '정렬 필드 "{{field}}"는 컬렉션 "{{collection}}"에 존재하지 않습니다.',
     widgetLimitLabel: '제한',
+    widgetListView: '목록 보기',
     widgetNonSortableSortField:
       '정렬 필드 "{{field}}"는 컬렉션 "{{collection}}"에서 정렬할 수 없습니다.',
+    widgetPinned: '고정됨',
+    widgetPinnedEmpty: '고정된 문서 없음',
+    widgetPinnedEmptyDescription: '여기에 고정한 문서가 표시됩니다',
+    widgetPinnedSaveError: '고정된 문서를 저장할 수 없습니다.',
     widgetQueryError: '이 위젯에 대한 문서를 불러올 수 없습니다.',
-    widgetRecentlyViewedEmpty: '아직 어떠한 Document도 열람하지 않으셨습니다.',
-    widgetRecentlyViewedTitle: '최근에 본 항목',
+    widgetRecentDrafts: '최근 초안',
+    widgetRecentDraftsEmpty: '최근 초안 없음',
+    widgetRecentDraftsEmptyDescription: '편집한 초안 문서가 여기에 표시됩니다',
+    widgetRecentlyViewedEmpty: '최근 문서 없음',
+    widgetRecentlyViewedEmptyDescription: '편집한 문서가 여기에 표시됩니다',
+    widgetRecentlyViewedTitle: '최근 본 문서',
+    widgetRecentsAndPinned: '최근 및 고정',
+    widgetRemovePin: '문서 고정 해제',
     widgetSelectCollectionFirst: '정렬을 선택하기 전에 Collection을 선택하십시오.',
     widgetSelectSortField: '정렬할 Field를 선택하십시오.',
     widgetSortDirectionLabel: '정렬 방향',
     widgetSortFieldLabel: '정렬 필드',
     widgetTitleFallback: '컬렉션 쿼리',
     widgetTitleLabel: '제목',
+    widgetUpdated: '업데이트됨',
+    widgetUpdatedBy: '업데이트한 사람',
   },
   error: {
     accountAlreadyActivated: '이 계정은 이미 활성화되었습니다.',

@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const heTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'חשבון',
@@ -102,7 +100,6 @@ export const heTranslations: DefaultTranslationsObject = {
     title: 'תפריט פקודות',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'הוסף +',
     addWidget: "הוסף וידג'ט",
     deleteWidget: "מחק וידג'ט {{id}}",
@@ -115,23 +112,38 @@ export const heTranslations: DefaultTranslationsObject = {
       'אין יישומונים בלוח הבקרה שלך. אתה יכול להוסיף אותם מתפריט "לוח הבקרה" שממוקם בבר העליון.',
     resetLayout: 'איפוס תצוגה',
     searchWidgets: "חפש ווידג'טים...",
+    widgetAddPin: 'הצמד מסמך',
     widgetCollectionRequired: 'Collection נדרשת.',
     widgetConfigurationError: "שגיאת תצורת ווידג'ט",
+    widgetGridView: 'תצוגת רשת',
     widgetInvalidCollection: 'ה-Collection "{{collection}}" אינו קיים.',
     widgetInvalidFilterField: 'שדה הסינון "{{field}}" אינו קיים ב-Collection "{{collection}}".',
     widgetInvalidSortField: 'שדה המיון "{{field}}" אינו קיים ב-Collection "{{collection}}".',
     widgetLimitLabel: 'הגבלה',
+    widgetListView: 'תצוגת רשימה',
     widgetNonSortableSortField:
       'שדה המיון "{{field}}" אינו ניתן למיון ב-Collection "{{collection}}".',
+    widgetPinned: 'מוצמדים',
+    widgetPinnedEmpty: 'אין מסמכים מוצמדים',
+    widgetPinnedEmptyDescription: 'מסמכים שתצמיד יופיעו כאן',
+    widgetPinnedSaveError: 'לא ניתן לשמור מסמכים מוצמדים.',
     widgetQueryError: "לא ניתן היה לטעון מסמכים עבור ווידג'ט זה.",
-    widgetRecentlyViewedEmpty: 'לא צפית במסמכים כלשהם עדיין.',
-    widgetRecentlyViewedTitle: 'צפית לאחרונה',
+    widgetRecentDrafts: 'טיוטות אחרונות',
+    widgetRecentDraftsEmpty: 'אין טיוטות אחרונות',
+    widgetRecentDraftsEmptyDescription: 'טיוטות שתערוך יופיעו כאן',
+    widgetRecentlyViewedEmpty: 'אין מסמכים אחרונים',
+    widgetRecentlyViewedEmptyDescription: 'מסמכים שתערוך יופיעו כאן',
+    widgetRecentlyViewedTitle: 'נצפו לאחרונה',
+    widgetRecentsAndPinned: 'אחרונים ומוצמדים',
+    widgetRemovePin: 'הסר הצמדה',
     widgetSelectCollectionFirst: 'בחר אוסף לפני בחירת סדר',
     widgetSelectSortField: 'בחר שדה למיון',
     widgetSortDirectionLabel: 'כיוון מיון',
     widgetSortFieldLabel: 'שדה מיון',
     widgetTitleFallback: 'שאילתת Collection',
     widgetTitleLabel: 'כותרת',
+    widgetUpdated: 'עודכן',
+    widgetUpdatedBy: 'עודכן על ידי',
   },
   error: {
     accountAlreadyActivated: 'חשבון זה כבר הופעל.',

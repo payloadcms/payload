@@ -1,7 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import { enTranslations } from './en.js'
-
 export const azTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Hesab',
@@ -104,7 +102,6 @@ export const azTranslations: DefaultTranslationsObject = {
     title: 'Əmr Palitrası',
   },
   dashboard: {
-    ...enTranslations.dashboard,
     addButton: 'Əlavə et +',
     addWidget: 'Vidjet əlavə et',
     deleteWidget: 'Vidgeti silin {{id}}',
@@ -118,25 +115,40 @@ export const azTranslations: DefaultTranslationsObject = {
       'Sizin panelinizdə heç bir vidjet yoxdur. Siz onları yuxarıdaki çubuqda yerləşən "Panel" menyusundan əlavə edə bilərsiniz.',
     resetLayout: 'Düzəni sıfırlama',
     searchWidgets: 'Widgetləri axtarın...',
+    widgetAddPin: 'Sənədi sabitləyin',
     widgetCollectionRequired: 'Collection tələb olunur.',
     widgetConfigurationError: 'Vidjet konfiqurasiyası xətası',
+    widgetGridView: 'Şəbəkə görünüşü',
     widgetInvalidCollection: 'Collection "{{collection}}" mövcud deyil.',
     widgetInvalidFilterField:
       'Filter sahəsi "{{field}}" "{{collection}}" kolleksiyasında mövcud deyil.',
     widgetInvalidSortField:
       'Sıralama field-i "{{field}}" "{{collection}}" collection-unda mövcud deyil.',
     widgetLimitLabel: 'Limit',
+    widgetListView: 'Siyahı görünüşü',
     widgetNonSortableSortField:
       'Sıralama sahəsi "{{field}}" "{{collection}}" kolleksiyasında sıralana bilmir.',
+    widgetPinned: 'Sabitlənmiş',
+    widgetPinnedEmpty: 'Sabitlənmiş sənəd yoxdur',
+    widgetPinnedEmptyDescription: 'Sabitlədiyiniz sənədlər burada görünəcək',
+    widgetPinnedSaveError: 'Sabitlənmiş sənədləri saxlamaq mümkün olmadı.',
     widgetQueryError: 'Bu vidjet üçün sənədləri yükləmək mümkün olmadı.',
-    widgetRecentlyViewedEmpty: 'Siz hələ heç bir sənədə baxmamısınız.',
-    widgetRecentlyViewedTitle: 'Siz son baxdığınız',
+    widgetRecentDrafts: 'Son qaralamalar',
+    widgetRecentDraftsEmpty: 'Son qaralama yoxdur',
+    widgetRecentDraftsEmptyDescription: 'Redaktə etdiyiniz qaralama sənədlər burada görünəcək',
+    widgetRecentlyViewedEmpty: 'Son sənəd yoxdur',
+    widgetRecentlyViewedEmptyDescription: 'Redaktə etdiyiniz sənədlər burada görünəcək',
+    widgetRecentlyViewedTitle: 'Son baxılanlar',
+    widgetRecentsAndPinned: 'Son və sabitlənmişlər',
+    widgetRemovePin: 'Sənədi sabitdən çıxarın',
     widgetSelectCollectionFirst: 'Sıralama seçməzdən əvvəl bir Collection seçin',
     widgetSelectSortField: 'Sıralamaq üçün bir Field seçin',
     widgetSortDirectionLabel: 'Sıralama İstiqaməti',
     widgetSortFieldLabel: 'Field-u sırala',
     widgetTitleFallback: 'Collection sorğusu',
     widgetTitleLabel: 'Başlıq',
+    widgetUpdated: 'Yeniləndi',
+    widgetUpdatedBy: 'Yeniləyən',
   },
   error: {
     accountAlreadyActivated: 'Bu hesab artıq aktivləşdirilib.',
