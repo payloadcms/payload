@@ -7,7 +7,7 @@ import './index.css'
 const baseClass = 'card-grid'
 
 export type CardGridProps<T> = {
-  readonly ariaLabel?: string
+  readonly ariaLabel: string
   readonly className?: string
   readonly getKey: (item: T) => React.Key
   readonly items: readonly T[]
@@ -16,7 +16,7 @@ export type CardGridProps<T> = {
 
 /** A presentation-only responsive grid. Selection, navigation, and drag behavior belong to callers. */
 export const CardGrid = <T,>({
-  ariaLabel = 'Items',
+  ariaLabel,
   className,
   getKey,
   items,

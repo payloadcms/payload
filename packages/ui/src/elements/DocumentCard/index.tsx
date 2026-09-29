@@ -25,7 +25,6 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
   title,
 }) => (
   <article
-    aria-current={isSelected ? 'true' : undefined}
     className={[baseClass, isSelected && `${baseClass}--selected`].filter(Boolean).join(' ')}
   >
     {thumbnail ? (

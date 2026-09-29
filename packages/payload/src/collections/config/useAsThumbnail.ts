@@ -5,7 +5,7 @@ import { fieldAffectsData } from '../../fields/config/types.js'
 import { flattenTopLevelFields } from '../../utilities/flattenTopLevelFields.js'
 
 /** Validate useAsThumbnail for collections. */
-export const validateUseAsThumbnail = (config: CollectionConfig) => {
+export const validateUseAsThumbnail = ({ config }: { config: CollectionConfig }) => {
   if (!config.admin?.useAsThumbnail) {
     return
   }

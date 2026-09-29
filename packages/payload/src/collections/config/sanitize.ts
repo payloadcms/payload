@@ -451,7 +451,7 @@ export const sanitizeCollection = (
   }
 
   validateUseAsTitle(sanitized)
-  validateUseAsThumbnail(sanitized)
+  validateUseAsThumbnail({ config: sanitized })
 
   const sanitizedConfig = sanitized as SanitizedCollectionConfig
 
