@@ -1,0 +1,42 @@
+---
+title: LLM Instructions
+label: LLM Instructions
+order: 80
+desc: Configure shared instructions that guide AI agents working with your collections and globals.
+keywords: llm, ai, instructions, agents
+---
+
+LLM instructions guide AI agents working with your collections and globals. Define Markdown instructions in your collection and global configs. The feature works without the MCP plugin.
+
+Both the [CLI](./cli) and [MCP plugin](../plugins/mcp) return these instructions alongside the writable schema. Only `getCollectionSchema` and `getGlobalSchema` include them, so agents should read the schema before creating or updating content. Instructions are omitted when none are configured.
+
+## Configuration
+
+Set `llmInstructions` on a collection or global to provide read-only Markdown instructions:
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  collections: [
+    {
+      slug: 'pages',
+      llmInstructions:
+        'Use the configured layout blocks and keep page titles concise.',
+      fields: [
+        /* ... */
+      ],
+    },
+  ],
+  globals: [
+    {
+      slug: 'settings',
+      llmInstructions:
+        'Preserve existing navigation links unless asked to change them.',
+      fields: [
+        /* ... */
+      ],
+    },
+  ],
+})
+```
