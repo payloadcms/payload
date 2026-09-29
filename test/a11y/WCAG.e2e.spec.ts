@@ -17,6 +17,7 @@ import {
   expectPaintContrast,
   expectTextContrast,
   getFocusIndicatorStyle,
+  getTopWithinEditor,
   gotoCreatePost,
   gotoFirstPost,
   gotoPostsList,
@@ -1354,18 +1355,18 @@ test.describe('WCAG 2.2 Level AA', () => {
       let handle = callouts.first().getByRole('button', { name: /drag to reorder/i })
 
       await handle.focus()
-      const initialTop = (await callouts.first().boundingBox())!.y
+      const initialTop = await getTopWithinEditor({ target: callouts.first() })
 
       await handle.press('Space')
       await page.keyboard.press('ArrowDown')
       await expect
-        .poll(async () => (await callouts.first().boundingBox())!.y)
+        .poll(() => getTopWithinEditor({ target: callouts.first() }))
         .toBeGreaterThan(initialTop)
       await page.keyboard.press('ArrowUp')
-      await expect.poll(async () => (await callouts.first().boundingBox())!.y).toBe(initialTop)
+      await expect.poll(() => getTopWithinEditor({ target: callouts.first() })).toBe(initialTop)
       await page.keyboard.press('ArrowDown')
       await page.keyboard.press('Escape')
-      await expect.poll(async () => (await callouts.first().boundingBox())!.y).toBe(initialTop)
+      await expect.poll(() => getTopWithinEditor({ target: callouts.first() })).toBe(initialTop)
       await expect(drawer).toBeVisible()
       await expect(callouts.first().locator('input[value$="callout"]')).toHaveValue('First callout')
       await expect(handle).toBeFocused()

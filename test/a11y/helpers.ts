@@ -799,3 +799,14 @@ export async function openDrawerFilters({
   await expect(comboboxes).toHaveCount(2)
   return comboboxes
 }
+
+/** Measures block movement independently of page layout and ancestor scrolling. */
+export async function getTopWithinEditor({ target }: { target: Locator }): Promise<number> {
+  return target.evaluate((element) => {
+    const parent = element.closest('.ContentEditable__root')!
+
+    return (
+      element.getBoundingClientRect().top - parent.getBoundingClientRect().top + parent.scrollTop
+    )
+  })
+}
