@@ -67,7 +67,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ groups, onMobileOpen
         }
       }}
       popupType="menu"
-      renderButton={({ onKeyDown, ...aria }) => (
+      renderButton={({ active: _active, onKeyDown, ...aria }) => (
         <button
           {...aria}
           className="popup-button-list__button popup-button-list__button--submenu-trigger"
