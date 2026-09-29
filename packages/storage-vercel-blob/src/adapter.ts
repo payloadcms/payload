@@ -49,7 +49,7 @@ export function createVercelBlobAdapter({
         token,
       }),
 
-    handleUpload: async ({ data, file: { buffer, mimeType }, storageFilePath }) => {
+    handleUpload: async ({ file: { buffer, mimeType, tempFilePath }, storageFilePath }) => {
       const result = await uploadFile({
         access,
         addRandomSuffix,
@@ -57,14 +57,11 @@ export function createVercelBlobAdapter({
         cacheControlMaxAge,
         mimeType,
         storageFilePath,
+        tempFilePath,
         token,
       })
 
-      if (result.filename) {
-        data.filename = result.filename
-      }
-
-      return data
+      return result
     },
 
     staticHandler: (req, { doc, headers, params: { clientUploadContext, filename } }) =>

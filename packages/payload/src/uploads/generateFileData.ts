@@ -375,7 +375,7 @@ export const generateFileData = async <T>({
       delete file.clientUploadContext
       delete fileForResize.clientUploadContext
       if (file.tempFilePath) {
-        await fs.writeFile(file.tempFilePath, croppedImage) // write fileBuffer to the temp path
+        await fs.writeFile(file.tempFilePath, fileForResize.data)
       } else {
         req.file = fileForResize
       }

@@ -9,6 +9,8 @@ import {
 } from '../utilities/buildStoragePathData.js'
 import { getIncomingFiles } from '../utilities/getIncomingFiles.js'
 
+type StorageFileData = { _objectKey?: string } & FileData & TypeWithID
+
 interface Args {
   adapter: GeneratedAdapter
   collection: CollectionConfig
@@ -28,13 +30,14 @@ export const getAfterChangeHook =
     collection,
     collectionPrefix,
     useCompositePrefixes,
-  }: Args): CollectionAfterChangeHook<FileData & TypeWithID> =>
-  async ({ doc, operation, previousDoc, req }) => {
+  }: Args): CollectionAfterChangeHook<StorageFileData> =>
+  async ({ data, doc, operation, previousDoc, req }) => {
     // Skip if this is an internal update to prevent infinite loop
     if (req.context?.skipCloudStorage) {
       return doc
     }
 
+    const uploadData = { ...doc, _objectKey: data?._objectKey ?? doc._objectKey }
     const isDraftSave = (doc as { _status?: string })._status === 'draft'
     const isDraftOverPublished =
       isDraftSave && (previousDoc as { _status?: string } | undefined)?._status === 'published'
@@ -44,7 +47,7 @@ export const getAfterChangeHook =
 
       if (files.length > 0) {
         // Fold `_objectKey` so generated sizes land in the same folder as the original.
-        const dataForUpload = { ...doc, prefix: getObjectFolder(doc) }
+        const dataForUpload = { ...uploadData, prefix: getObjectFolder(uploadData) }
 
         const uploadResults = await Promise.all(
           files
@@ -162,7 +165,7 @@ export const getAfterChangeHook =
           const newKeys = new Set(
             [...newFilenames].map((filename) =>
               resolveKey({
-                data: docWithMetadata as { _objectKey?: string; prefix?: string },
+                data: { ...uploadData, ...uploadMetadata },
                 filename,
               }),
             ),
