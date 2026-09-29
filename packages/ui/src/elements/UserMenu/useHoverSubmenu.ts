@@ -194,7 +194,8 @@ export const useHoverSubmenu = (id: string) => {
 
     const handlePointerMove = (e: MouseEvent) => {
       const triggerRect = triggerRef.current?.getBoundingClientRect()
-      const contentRect = contentRef.current?.getBoundingClientRect()
+      const contentElement = contentRef.current?.closest<HTMLElement>('.popup__content')
+      const contentRect = contentElement?.getBoundingClientRect()
       if (!triggerRect || !contentRect) {
         return
       }
