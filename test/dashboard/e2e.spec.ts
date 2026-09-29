@@ -320,6 +320,12 @@ describe('Dashboard', () => {
     await page.setViewportSize({ height: 900, width: 1920 })
     await page.goto(url.admin)
 
+    const dashboard = new DashboardHelper(page)
+    await dashboard.setEditing()
+    await dashboard.resizeWidget(15, 'full')
+    await dashboard.stepNavButtons.nth(1).click()
+    await dashboard.assertIsEditing(false)
+
     const widget = page.locator('.recents-widget')
     await widget.getByRole('button', { name: 'Recently viewed' }).click()
     await expect(widget.locator('.recents-widget__name')).toHaveText(ticket.title)
@@ -337,23 +343,27 @@ describe('Dashboard', () => {
       widget.getByRole('button', { name: `Unpin document: ${ticket.title}` }),
     ).toBeEnabled()
 
-    const collectionHeader = await widget
-      .locator('.recents-widget__list-header span:nth-child(2)')
-      .boundingBox()
-    const collectionCell = await widget
-      .locator('.recents-widget__items--list .recents-widget__list-collection')
-      .boundingBox()
-    const nameCell = await widget.locator('.recents-widget__details').boundingBox()
-    const pinButton = await widget
-      .getByRole('button', { name: `Unpin document: ${ticket.title}` })
-      .boundingBox()
+    const collectionHeader = widget.locator('.recents-widget__list-header span:nth-child(2)')
+    const collectionCell = widget.locator(
+      '.recents-widget__items--list .recents-widget__list-collection',
+    )
+    await expect(collectionHeader).toBeVisible()
+    await expect(collectionCell).toBeVisible()
+    await expect(async () => {
+      const nameCell = await widget.locator('.recents-widget__details').boundingBox()
+      const pinButton = await widget
+        .getByRole('button', { name: `Unpin document: ${ticket.title}` })
+        .boundingBox()
+      const headerBox = await collectionHeader.boundingBox()
+      const cellBox = await collectionCell.boundingBox()
 
-    expect(collectionHeader).not.toBeNull()
-    expect(collectionCell).not.toBeNull()
-    expect(nameCell).not.toBeNull()
-    expect(pinButton).not.toBeNull()
-    expect(collectionCell!.x).toBeCloseTo(collectionHeader!.x, 0)
-    expect(pinButton!.x + pinButton!.width).toBeLessThanOrEqual(nameCell!.x + nameCell!.width)
+      expect(nameCell).not.toBeNull()
+      expect(pinButton).not.toBeNull()
+      expect(headerBox).not.toBeNull()
+      expect(cellBox).not.toBeNull()
+      expect(pinButton!.x + pinButton!.width).toBeLessThanOrEqual(nameCell!.x + nameCell!.width)
+      expect(cellBox!.x).toBeCloseTo(headerBox!.x, 0)
+    }).toPass()
 
     await page.reload()
     await page
@@ -480,7 +490,7 @@ describe('Dashboard', () => {
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 12 })
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 13 })
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 14 })
-    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 15 })
+    await d.assertWidthRange({ max: 'full', min: 'small', position: 15 })
   })
 
   test('resize widget', async ({ page }) => {
