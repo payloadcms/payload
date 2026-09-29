@@ -4,7 +4,7 @@ import type { ComponentProps } from 'react'
 import React, { createContext, use, useEffect, useState } from 'react'
 
 import { drawerZBase, useDrawerDepth } from '../../Drawer/index.js'
-import { Modal } from '../../Modal/index.js'
+import { Modal, useModal } from '../../Modal/index.js'
 import { DialogContext } from '../context.js'
 import '../index.css'
 
@@ -34,11 +34,13 @@ export const DialogModal: React.FC<DialogModalProps> = ({
   size = 'small',
 }) => {
   const [isConfirming, setConfirming] = useState(false)
+  const { modalState } = useModal()
+  const isOpen = Boolean(modalState[slug]?.isOpen)
   const drawerDepth = useDrawerDepth()
   const dialogDepth = useDialogDepth()
 
   useEffect(() => {
-    if (closeOnEsc) {
+    if (closeOnEsc || !isOpen) {
       return
     }
 
@@ -52,7 +54,7 @@ export const DialogModal: React.FC<DialogModalProps> = ({
     // Capture phase fires before ModalProvider's bubble-phase listener
     document.addEventListener('keydown', handler, true)
     return () => document.removeEventListener('keydown', handler, true)
-  }, [closeOnEsc])
+  }, [closeOnEsc, isOpen])
 
   return (
     <DialogDepthProvider>

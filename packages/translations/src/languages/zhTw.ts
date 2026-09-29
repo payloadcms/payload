@@ -108,6 +108,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     editingDashboard: '編輯儀表板',
     noItems: '您的儀表板上沒有小工具。您可以從頂部工具欄中的"儀表板"選單添加它們。',
     resetLayout: '重設版面配置',
+    resizeWidget: '調整{{label}}的大小，目前大小：{{size}}',
     searchWidgets: '搜索小工具...',
     widgetCollectionRequired: 'Collection 為必填項目。',
     widgetConfigurationError: '元件組態錯誤',

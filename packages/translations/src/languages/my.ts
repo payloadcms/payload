@@ -115,6 +115,7 @@ export const myTranslations: DefaultTranslationsObject = {
     noItems:
       'သင့်ဒက်ရှ်ဘုတ်တွင် ဝစ်ဂျက်များ မရှိပါ။ အပေါ်ဘားရှိ "Dashboard" မီနူးမှ ထည့်သွင်းနိုင်ပါသည်။',
     resetLayout: 'စီစဉ်မှုကို ပြန်လည်သတ်မှတ်ပါ',
+    resizeWidget: '{{label}} ၏ အရွယ်အစားကို ပြောင်းရန်၊ လက်ရှိအရွယ်အစား: {{size}}',
     searchWidgets: 'ဝစ်ဂျက်များ ရှာဖွေပါ...',
     widgetCollectionRequired: 'Collection သည် မဖြစ်မနေလိုအပ်ပါသည်။',
     widgetConfigurationError: 'Widget အတည်ပြုခြင်းအမှား',

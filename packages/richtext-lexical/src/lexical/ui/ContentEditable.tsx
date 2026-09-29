@@ -14,16 +14,18 @@ import type { SanitizedClientEditorConfig } from '../config/types.js'
 export function LexicalContentEditable({
   className,
   editorConfig,
+  instructionsID,
 }: {
   className?: string
   editorConfig: SanitizedClientEditorConfig
+  instructionsID?: string
 }): JSX.Element {
   const { t } = useTranslation<{}, string>()
   const [_, { getTheme }] = useLexicalComposerContext()
   const theme = getTheme()
-
   return (
     <ContentEditable
+      aria-describedby={instructionsID}
       aria-placeholder={t('lexical:general:placeholder')}
       className={className ?? 'ContentEditable__root'}
       placeholder={

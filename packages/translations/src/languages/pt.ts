@@ -115,6 +115,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     noItems:
       'Não existem widgets no seu painel. Você pode adicioná-los a partir do menu "Painel", localizado na barra superior.',
     resetLayout: 'Redefinir Layout',
+    resizeWidget: 'Redimensionar {{label}}, tamanho atual: {{size}}',
     searchWidgets: 'Pesquisar widgets...',
     widgetCollectionRequired: 'Coleção é obrigatória.',
     widgetConfigurationError: 'Erro de configuração do widget',

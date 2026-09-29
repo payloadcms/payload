@@ -113,6 +113,7 @@ export const faTranslations: DefaultTranslationsObject = {
     noItems:
       'در داشبورد شما هیچ ویجتی وجود ندارد. شما می توانید آنها را از منوی "داشبورد" که در نوار بالا قرار دارد اضافه کنید.',
     resetLayout: 'تنظیم مجدد طرح بندی',
+    resizeWidget: 'تغییر اندازهٔ {{label}}، اندازهٔ فعلی: {{size}}',
     searchWidgets: 'جستجوی ابزارک‌ها...',
     widgetCollectionRequired: 'Collection الزامی است.',
     widgetConfigurationError: 'خطای پیکربندی ابزارک',

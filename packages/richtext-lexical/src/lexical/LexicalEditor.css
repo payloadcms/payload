@@ -1,9 +1,24 @@
 @layer payload-default {
+  .ContentEditable__keyboard-hint {
+    display: none;
+    margin: 0;
+    padding-block-start: var(--spacer-2);
+    padding-inline: calc(var(--content-editable-padding-inline-start) + var(--stroke-width-small));
+    color: var(--color-text);
+    font-size: var(--text-body-small-font-size);
+  }
+
+  .editor-container:has(> .editor-scroller > .editor > .ContentEditable__root:focus)
+    + .ContentEditable__keyboard-hint {
+    display: block;
+  }
+
   .rich-text-lexical {
+    --content-editable-padding-block-start: var(--spacer-3);
+    --content-editable-padding-inline-start: var(--spacer-3);
+
     .editor {
       position: relative;
-      --content-editable-padding-block-start: var(--spacer-3);
-      --content-editable-padding-inline-start: var(--spacer-3);
     }
 
     .editor-container {
@@ -32,17 +47,12 @@
   }
 
   @media (min-width: 768px) {
-    .rich-text-lexical .editor {
+    .rich-text-lexical {
       --content-editable-padding-block-start: var(--spacer-4);
       --content-editable-padding-inline-start: var(--spacer-5);
     }
 
-    .rich-text-lexical:not(.rich-text-lexical--show-gutter)
-      > .rich-text-lexical__wrap
-      > .rich-text-lexical__editor-content
-      > .editor-container
-      > .editor-scroller
-      > .editor {
+    .rich-text-lexical:not(.rich-text-lexical--show-gutter) {
       --content-editable-padding-block-start: var(--spacer-2);
       --content-editable-padding-inline-start: 0px;
     }

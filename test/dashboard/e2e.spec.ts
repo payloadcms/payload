@@ -510,12 +510,15 @@ describe('Dashboard', () => {
     await expect(d.getDeleteWidgetButton(widget)).toBeHidden()
 
     // Widgets should not have draggable attributes when not editing
-    await expect(widget.locator('.draggable')).not.toHaveAttribute('aria-disabled')
+    await expect(widget.locator('.widget-wrapper__drag-btn')).toHaveCount(0)
 
     // verify the opposite:
     await d.setEditing()
     await expect(d.getDeleteWidgetButton(widget)).toBeVisible()
-    await expect(widget.locator('.draggable')).toHaveAttribute('aria-disabled', 'false')
+    await expect(widget.locator('.widget-wrapper__drag-btn')).toHaveAttribute(
+      'aria-disabled',
+      'false',
+    )
   })
 
   test('Responsiveness - all widgets have a 100% width on mobile', async ({ page }) => {

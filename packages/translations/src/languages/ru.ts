@@ -116,6 +116,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     noItems:
       'На вашей панели нет виджетов. Вы можете добавить их из меню "Панель управления", расположенного в верхней панели.',
     resetLayout: 'Сбросить Макет',
+    resizeWidget: 'Изменить размер {{label}}, текущий размер: {{size}}',
     searchWidgets: 'Поиск виджетов...',
     widgetCollectionRequired: 'Collection является обязательным.',
     widgetConfigurationError: 'Ошибка конфигурации виджета',

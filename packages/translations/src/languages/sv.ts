@@ -114,6 +114,7 @@ export const svTranslations: DefaultTranslationsObject = {
     noItems:
       'Det finns inga widgets på din instrumentpanel. Du kan lägga till dem från "Instrumentpanel" -menyn som finns i den översta fältet.',
     resetLayout: 'Återställ layout',
+    resizeWidget: 'Ändra storlek på {{label}}, nuvarande storlek: {{size}}',
     searchWidgets: 'Sök efter widget...',
     widgetCollectionRequired: 'Collection är obligatorisk.',
     widgetConfigurationError: 'Fel i widgetkonfiguration',

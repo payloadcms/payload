@@ -116,6 +116,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     noItems:
       'Er zijn geen widgets op uw dashboard. U kunt ze toevoegen vanuit het menu "Dashboard" dat zich in de bovenste balk bevindt.',
     resetLayout: 'Herstel Lay-out',
+    resizeWidget: 'Formaat van {{label}} wijzigen, huidig formaat: {{size}}',
     searchWidgets: 'Zoek widgets...',
     widgetCollectionRequired: 'Collectie is vereist.',
     widgetConfigurationError: 'Fout in de configuratie van de widget',

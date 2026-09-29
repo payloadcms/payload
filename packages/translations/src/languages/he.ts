@@ -111,6 +111,7 @@ export const heTranslations: DefaultTranslationsObject = {
     noItems:
       'אין יישומונים בלוח הבקרה שלך. אתה יכול להוסיף אותם מתפריט "לוח הבקרה" שממוקם בבר העליון.',
     resetLayout: 'איפוס תצוגה',
+    resizeWidget: 'שינוי הגודל של {{label}}, גודל נוכחי: {{size}}',
     searchWidgets: "חפש ווידג'טים...",
     widgetCollectionRequired: 'Collection נדרשת.',
     widgetConfigurationError: "שגיאת תצורת ווידג'ט",
