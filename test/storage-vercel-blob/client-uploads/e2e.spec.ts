@@ -87,7 +87,7 @@ test.describe('storage-vercel-blob client uploads E2E', () => {
 
       await page.goto(mediaURL.create)
       await page.setInputFiles('input[type="file"]', {
-        name: `client-upload.${format}`,
+        name: `client-upload.${format === 'tiff' ? 'tif' : format}`,
         buffer,
         mimeType: `image/${format}`,
       })
@@ -104,7 +104,20 @@ test.describe('storage-vercel-blob client uploads E2E', () => {
       const { blobs } = await list()
       const stored = blobs.find((blob) => blob.pathname.endsWith(`/${doc.filename}`))
 
+      expect(doc.filename).toBe(`client-upload.${format === 'tiff' ? 'tif' : format}`)
+      expect(doc.sizes.square.filename).toBeDefined()
       expect(blobs.every((blob) => blob.size > 0)).toBe(true)
+
+      const storedSize = blobs.find((blob) =>
+        blob.pathname.endsWith(`/${doc.sizes.square.filename}`),
+      )
+
+      expect(storedSize).toBeDefined()
+      expect(storedSize!.size).toBe(doc.sizes.square.filesize)
+
+      const sizeBytes = Buffer.from(await (await fetch(storedSize!.url)).arrayBuffer())
+
+      expect(await sharp(sizeBytes).metadata()).toMatchObject({ height: 20, width: 30 })
       expect(stored).toBeDefined()
 
       const download = await fetch(stored!.url)
@@ -136,7 +149,7 @@ test.describe('storage-vercel-blob client uploads E2E', () => {
 
     await page.goto(mediaURL.create)
     await page.setInputFiles('input[type="file"]', {
-      name: `client-upload.${format}`,
+      name: `client-upload.${format === 'tiff' ? 'tif' : format}`,
       buffer,
       mimeType: `image/${format}`,
     })
@@ -158,7 +171,18 @@ test.describe('storage-vercel-blob client uploads E2E', () => {
     const { blobs } = await list()
     const stored = blobs.find((blob) => blob.pathname.endsWith(`/${doc.filename}`))
 
+    expect(doc.filename).toBe(`client-upload.${format === 'tiff' ? 'tif' : format}`)
+    expect(doc.sizes.square.filename).toBeDefined()
     expect(blobs.every((blob) => blob.size > 0)).toBe(true)
+
+    const storedSize = blobs.find((blob) => blob.pathname.endsWith(`/${doc.sizes.square.filename}`))
+
+    expect(storedSize).toBeDefined()
+    expect(storedSize!.size).toBe(doc.sizes.square.filesize)
+
+    const sizeBytes = Buffer.from(await (await fetch(storedSize!.url)).arrayBuffer())
+
+    expect(await sharp(sizeBytes).metadata()).toMatchObject({ height: 20, width: 30 })
     expect(stored).toBeDefined()
 
     const download = await fetch(stored!.url)

@@ -32,7 +32,19 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname, '..'),
     },
   },
-  collections: [Media, MediaWithPrefix, MediaContainer, LegacyMedia, Users],
+  collections: [
+    {
+      ...Media,
+      upload: {
+        ...(typeof Media.upload === 'object' ? Media.upload : {}),
+        imageSizes: [{ name: 'square', height: 20, width: 30 }],
+      },
+    },
+    MediaWithPrefix,
+    MediaContainer,
+    LegacyMedia,
+    Users,
+  ],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -44,6 +56,7 @@ export default buildConfigWithDefaults({
   },
   plugins: [
     vercelBlobStorage({
+      addRandomSuffix: true,
       clientUploads: {
         access: ({ req }) => (req.headers.get('x-disallow-access') ? false : true),
       },
