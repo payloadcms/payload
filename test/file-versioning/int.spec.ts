@@ -312,6 +312,11 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       data: { alt: 'source' },
       file: { data: bytes, mimetype: 'image/png', name: 'landscape.png', size: bytes.length },
     })
+    const originalSizePixels = await sharp(
+      path.join(transformedMediaDir, created.sizes!.small!.filename!),
+    )
+      .raw()
+      .toBuffer()
 
     const response = await restClient.PATCH(`/${transformedMediaSlug}/${created.id}`, {
       body: JSON.stringify({ alt: 'cropped' }),
@@ -354,6 +359,9 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     await expect(
       sharp(path.join(transformedMediaDir, stored!.sizes.small.filename)).metadata(),
     ).resolves.toMatchObject({ height: 200, width: 200 })
+    expect(
+      await sharp(path.join(transformedMediaDir, stored!.sizes.small.filename)).raw().toBuffer(),
+    ).toEqual(originalSizePixels)
   })
 
   test('should keep uploaded bytes when the main representation is converted', async ({
