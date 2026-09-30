@@ -169,8 +169,10 @@ export const useHoverSubmenu = (id?: string) => {
   )
 
   const cancelPending = useCallback(() => {
-    group.cancelPending()
-  }, [group])
+    if (id) {
+      group.cancelPending(id)
+    }
+  }, [group, id])
 
   // For the content panel's own onMouseEnter - just cancels a pending close and marks us
   // as "landed", without touching the trigger anchor point `open()` seeds.
