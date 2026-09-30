@@ -494,7 +494,7 @@
       width: 3px;
       height: 3px;
       border-radius: var(--radius-full);
-      background-color: var(--color-bg-brand);
+      background-color: var(--calendar-today-color, var(--color-bg-brand));
     }
 
     &.react-datepicker__day--selected::after {
@@ -933,5 +933,10 @@
       top: 50%;
       transform: translateY(-50%);
     }
+  }
+
+  html[data-enhanced-contrast],
+  html[data-enhanced-contrast] [data-theme] {
+    --calendar-today-color: var(--color-icon-brand);
   }
 }

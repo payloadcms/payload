@@ -1,5 +1,7 @@
 'use client'
 
+import '../enhancedContrast.css'
+
 import type { FormField, UIField } from 'payload'
 
 import {
@@ -105,7 +107,7 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
       <div>{t('plugin-seo:preview')}</div>
       <div
         style={{
-          color: '#9A9A9A',
+          color: 'var(--seo-description-color, #9A9A9A)',
           marginBottom: '5px',
         }}
       >

@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
+import { seoPlugin } from '@payloadcms/plugin-seo'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
@@ -49,6 +50,22 @@ export default buildConfigWithDefaults({
           },
         },
       },
+      dashboard: {
+        defaultLayout: [
+          { widgetSlug: 'collections', width: 'full' },
+          { widgetSlug: 'activity', width: 'small' },
+          {
+            data: {
+              relatedCollection: postsSlug,
+              sortField: 'removedField',
+              title: 'Contrast query error',
+            },
+            widgetSlug: 'collection-query',
+            width: 'medium',
+          },
+        ],
+        widgets: [],
+      },
       importMap: {
         baseDir: path.resolve(dirname),
       },
@@ -73,6 +90,7 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    plugins: [seoPlugin({ collections: [] })],
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
@@ -105,10 +123,20 @@ export default buildConfigWithDefaults({
       overrideAccess: true,
     })
 
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        deletedAt: '2026-01-01T00:00:00.000Z',
+        title: 'Contrast trashed post',
+      },
+      overrideAccess: true,
+    })
+
     const firstPost = await payload.create({
       collection: postsSlug,
       data: {
         accessibilitySelect: 'one',
+        subtitle: 'Original subtitle',
         title: 'Example post one',
       },
       draft: true,
@@ -119,6 +147,7 @@ export default buildConfigWithDefaults({
       id: firstPost.id,
       collection: postsSlug,
       data: {
+        subtitle: 'Replacement subtitle',
         title: 'Example post one, second version',
       },
       draft: true,

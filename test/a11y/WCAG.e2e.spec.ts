@@ -1,24 +1,31 @@
 import type { Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { fileURLToPath } from 'node:url'
 import { formatAdminURL } from 'payload/shared'
 
 import type { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 
+import { openListColumns } from '../__helpers/e2e/columns/openListColumns.js'
 import { addGroupBy, clearGroupBy, openGroupBy } from '../__helpers/e2e/groupBy/index.js'
 import { selectInput } from '../__helpers/e2e/selectInput.js'
+import { openNav } from '../__helpers/e2e/toggleNav.js'
 import {
   addCollectionQueryWidget,
   addTextBlock,
   cleanupModalMedia,
   expectFocusInside,
   expectOptionsToHaveAccessibleNames,
+  expectPaintContrast,
   expectPaintedFocus,
+  expectTextContrast,
   getFocusIndicatorStyle,
+  getTopWithinEditor,
   gotoCreatePost,
   gotoFirstPost,
   gotoPostsList,
   hasRenderedFocusIndicator,
+  inContrastThemes,
   insertTextBlockWithKeyboard,
   openAccessibilityTestPage,
   openAPIKeyDialog,
@@ -40,6 +47,7 @@ import {
   openRichTextUploadDrawer,
   openVersionComparison,
   openWidgetDrawer,
+  waitForDashboardDragReady,
 } from './helpers.js'
 
 test.describe('WCAG 2.2 Level AA', () => {
@@ -236,6 +244,659 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
 
+  test.describe('1.4.3 Contrast (Minimum) (AA)', () => {
+    for (const theme of ['light', 'dark'] as const) {
+      test(`should apply enhanced contrast only while enabled in ${theme} mode`, async () => {
+        await page.context().addCookies([
+          { name: 'payload-theme', url: serverURL, value: theme },
+          { name: 'payload-high-contrast-mode', url: serverURL, value: 'false' },
+        ])
+        await page.goto(postsURL.account)
+        await page.locator('#field-email').fill('contrast-toggle@example.com')
+        const toggle = page.locator('#field-highContrastMode')
+        const save = page.getByRole('button', { name: 'Save', exact: true })
+        await expect(toggle).not.toBeChecked()
+        await expect(page.locator('html')).not.toHaveAttribute('data-enhanced-contrast')
+        await page.mouse.move(0, 0)
+        await expect(save).toHaveCSS('background-color', 'rgb(13, 153, 255)')
+
+        await toggle.check()
+        await expect(page.locator('html')).toHaveAttribute('data-enhanced-contrast', '')
+        await expect(save).toHaveCSS('background-color', 'rgb(7, 104, 207)')
+        await expectTextContrast({ targets: save })
+        await page.reload()
+        await page.locator('#field-email').fill('contrast-toggle@example.com')
+        await expect(toggle).toBeChecked()
+        await expect(page.locator('html')).toHaveAttribute('data-enhanced-contrast', '')
+        await expect(save).toHaveCSS('background-color', 'rgb(7, 104, 207)')
+
+        await toggle.uncheck()
+        await expect(page.locator('html')).not.toHaveAttribute('data-enhanced-contrast')
+        await expect(save).toHaveCSS('background-color', 'rgb(13, 153, 255)')
+        await page.reload()
+        await page.locator('#field-email').fill('contrast-toggle@example.com')
+        await expect(toggle).not.toBeChecked()
+        await expect(page.locator('html')).not.toHaveAttribute('data-enhanced-contrast')
+        await expect(save).toHaveCSS('background-color', 'rgb(13, 153, 255)')
+      })
+    }
+
+    test('should provide contrast for authentication field errors and error toast text', async () => {
+      // PYLD-3608
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await page.goto(postsURL.account)
+          await page.locator('#field-email').fill('')
+          await page.getByRole('button', { name: 'Save', exact: true }).click()
+          await expect(page.locator('.field-error').first()).toBeVisible()
+          const toast = page.locator('[data-sonner-toast][data-type="error"]').first()
+          await expect(toast).toBeVisible()
+          await toast.hover()
+          await expect(toast).toHaveCSS('opacity', '1')
+          await expect(toast).toHaveCSS('filter', /^(none|blur\(0px\))$/)
+          await expectTextContrast({
+            targets: page.locator('.field-error, [data-sonner-toast][data-type="error"]'),
+          })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide enhanced contrast for hovered locale menu text', async () => {
+      await inContrastThemes({
+        page,
+        run: async () => {
+          const options = await openLocaleOptions({ page, postsURL })
+          await options.first().hover()
+          await expectTextContrast({ targets: options.first() })
+          await page.mouse.move(0, 0)
+          await options.first().focus()
+          await expectTextContrast({ targets: options.first() })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide enhanced contrast for selected calendar day text', async () => {
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await openBlockDatePicker({ page, postsURL })
+          await page
+            .locator(
+              '.react-datepicker__day:not(.react-datepicker__day--outside-month):not(.react-datepicker__day--disabled)',
+            )
+            .nth(10)
+            .click()
+          await page.locator('#field-layout__0__date input').click()
+          await page.mouse.move(0, 0)
+          const selected = page.locator('.react-datepicker__day--selected')
+          await expectTextContrast({ targets: selected })
+          await selected.hover()
+          await expectTextContrast({ targets: selected })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for the Forgot password link', async () => {
+      // PYLD-3610
+      await inContrastThemes({
+        page,
+        run: async () => {
+          const loginPage = await page
+            .context()
+            .browser()!
+            .newPage({ extraHTTPHeaders: { DisableAutologin: 'true' } })
+          try {
+            const cookies = await page.context().cookies()
+            await loginPage
+              .context()
+              .addCookies(
+                cookies.filter(({ name }) =>
+                  ['payload-high-contrast-mode', 'payload-theme'].includes(name),
+                ),
+              )
+            await loginPage.goto(postsURL.login)
+            await expectTextContrast({ targets: loginPage.getByRole('link', { name: /forgot/i }) })
+          } finally {
+            await loginPage.context().close()
+          }
+          await gotoPostsList({ page, postsURL })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for the navigation folder search placeholder', async () => {
+      // PYLD-3646
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await gotoPostsList({ page, postsURL })
+          await openNav(page)
+          await page.getByRole('tab', { name: 'Folders', exact: true }).click()
+          await expectTextContrast({
+            placeholder: true,
+            targets: page.getByPlaceholder('Search folders'),
+          })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for the Collection Query error banner text', async () => {
+      // PYLD-3647
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await page.goto(postsURL.admin)
+          await expectTextContrast({
+            targets: page.locator('.collection-query-widget--error'),
+          })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for the enabled Copy to locale button', async () => {
+      // PYLD-3674
+      await inContrastThemes({
+        page,
+        run: async () => {
+          const drawer = await openCopyToLocaleDrawer({ page, postsURL, serverURL })
+          await selectInput({
+            multiSelect: false,
+            option: 'Spanish',
+            page,
+            selectLocator: drawer.locator('#field-toLocale'),
+          })
+          const button = drawer.getByRole('button', { name: 'Copy', exact: true })
+          await expect(button).toBeEnabled()
+          await expectTextContrast({ targets: button })
+          await button.hover()
+          await expectTextContrast({ targets: button })
+          await page.mouse.move(0, 0)
+          await button.focus()
+          await expect(button).toBeFocused()
+          await expectTextContrast({ targets: button })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for the unavailable Copy button', async () => {
+      // PYLD-3681, PYLD-3683
+      await inContrastThemes({
+        page,
+        run: async () => {
+          const drawer = await openCopyToLocaleDrawer({ page, postsURL, serverURL })
+          const button = drawer.getByRole('button', { name: 'Copy', exact: true })
+          await expect(button).toBeDisabled()
+          // Reported readability expectation; inactive controls are exempt from WCAG 1.4.3.
+          await expectTextContrast({ targets: button })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for Copy from and Copy to field content', async () => {
+      // PYLD-3684, PYLD-3685
+      await inContrastThemes({
+        page,
+        run: async () => {
+          const drawer = await openCopyToLocaleDrawer({ page, postsURL, serverURL })
+          await expectTextContrast({
+            targets: drawer.locator(
+              '#field-fromLocale .rs__single-value, #field-toLocale .rs__placeholder',
+            ),
+          })
+          await selectInput({
+            multiSelect: false,
+            option: 'Spanish',
+            page,
+            selectLocator: drawer.locator('#field-toLocale'),
+          })
+          await expectTextContrast({ targets: drawer.locator('#field-toLocale .rs__single-value') })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for an added block name', async () => {
+      // PYLD-3757
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await addTextBlock({ page, postsURL })
+          await expectTextContrast({ targets: page.locator('.blocks-field__block-pill') })
+          const blockName = page.locator('.blocks-field__row .section-title__input')
+          await expectTextContrast({ placeholder: true, targets: blockName })
+          await blockName.fill('Contrast block name')
+          await expectTextContrast({ targets: blockName })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for the selected Filters button text', async () => {
+      // PYLD-3758
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await openPostsFilter({ page, postsURL })
+          await expectTextContrast({
+            targets: page.locator('.list-controls').getByRole('button', { name: /filters/i }),
+          })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for the list Create New button text', async () => {
+      // PYLD-3760
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await gotoPostsList({ page, postsURL })
+          await expectTextContrast({ targets: page.locator('.list-controls__create-new') })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for authentication submit buttons', async () => {
+      // Additional coverage for PYLD-3760.
+      await inContrastThemes({
+        page,
+        run: async () => {
+          const loginPage = await page
+            .context()
+            .browser()!
+            .newPage({ extraHTTPHeaders: { DisableAutologin: 'true' } })
+          try {
+            const cookies = await page.context().cookies()
+            await loginPage
+              .context()
+              .addCookies(
+                cookies.filter(({ name }) =>
+                  ['payload-high-contrast-mode', 'payload-theme'].includes(name),
+                ),
+              )
+            await loginPage.goto(postsURL.login)
+            await expectTextContrast({ targets: loginPage.locator('button[type="submit"]') })
+            await loginPage.getByRole('link', { name: /forgot/i }).click()
+            await expect(loginPage.locator('.forgot-password__form')).toBeVisible()
+            await expectTextContrast({ targets: loginPage.locator('button[type="submit"]') })
+          } finally {
+            await loginPage.context().close()
+          }
+          await gotoPostsList({ page, postsURL })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for trash and restore confirmation buttons', async () => {
+      // Additional coverage for PYLD-3760.
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await gotoFirstPost({ page, postsURL, serverURL })
+          await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+          await page.locator('#action-delete').click()
+          const confirmation = page.locator('[data-dialog-action="confirm"]:visible')
+          await expectTextContrast({ targets: confirmation })
+          await page.locator('#delete-forever').check()
+          await expectTextContrast({ targets: confirmation })
+          await page.locator('[data-dialog-action="cancel"]:visible').click()
+          await page.goto(postsURL.trash)
+          await page.getByRole('link', { name: 'Contrast trashed post', exact: true }).click()
+          await page.locator('#action-restore').click()
+          await expectTextContrast({
+            targets: page.locator('[data-dialog-action="confirm"]:visible'),
+          })
+          await page.locator('[data-dialog-action="cancel"]:visible').click()
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for navigation text while creating a document', async () => {
+      // PYLD-3761
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await gotoCreatePost({ page, postsURL })
+          await openNav(page)
+          await page.getByRole('tab', { name: 'Collections', exact: true }).click()
+          await expectTextContrast({
+            targets: page.locator(
+              '.nav a:visible, .step-nav button:visible, .step-nav a:visible, .step-nav span:visible',
+            ),
+          })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for pagination text', async () => {
+      // PYLD-3762
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await page.goto(`${postsURL.list}?limit=1`)
+          await expect(page.locator('tbody tr').first()).toBeVisible()
+          await expect(page.locator('.paginator__page-input')).toBeEnabled()
+          await expectTextContrast({
+            targets: page.locator('.paginator, .per-page, .list-controls__page-info'),
+          })
+          await page.goto(`${postsURL.list}?limit=10`)
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for the collection search hint', async () => {
+      // PYLD-3766
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await gotoPostsList({ page, postsURL })
+          await expectTextContrast({
+            placeholder: true,
+            targets: page.getByRole('textbox', { name: 'Search', exact: true }),
+          })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for table text', async () => {
+      // PYLD-3767
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await gotoPostsList({ page, postsURL })
+          await expectTextContrast({ targets: page.locator('table') })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for the locale picker text', async () => {
+      // PYLD-3804
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await openLocaleOptions({ page, postsURL })
+          await expectTextContrast({
+            targets: page.locator('.localizer, .popup__content .popup-button-list__button'),
+          })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for the document time ago timestamp', async () => {
+      // PYLD-3805
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await gotoFirstPost({ page, postsURL, serverURL })
+          await expectTextContrast({
+            targets: page.locator('.doc-controls__value-wrap .doc-controls__value'),
+          })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for the currently viewing version metadata', async () => {
+      // PYLD-3806
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await openVersionComparison({ page, postsURL, serverURL })
+          await expectTextContrast({ targets: page.locator('.view-version__version-to-labels') })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide enhanced contrast for hovered version option dates', async () => {
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await openVersionComparison({ page, postsURL, serverURL })
+          await page.locator('.view-version__version-from .rs__control').click()
+          const option = page.locator('.rs__option').first()
+
+          await expect(option).toBeVisible()
+          await option.hover()
+          await expect(option).toHaveClass(/rs__option--is-focused/)
+          await expectTextContrast({ targets: option.locator('.version-pill-label-date') })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should measure filled textarea text contrast', async () => {
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await gotoCreatePost({ page, postsURL })
+          const textarea = page.locator('#field-contrastSEO__description')
+
+          await textarea.fill('Visible textarea text')
+          // The current value can differ from the default text node in an uncontrolled textarea.
+          await expect(async () => {
+            await textarea.evaluate((element: HTMLTextAreaElement) => {
+              element.defaultValue = ''
+            })
+            await expect(textarea).toHaveValue('Visible textarea text')
+            await expect(textarea).toHaveText('')
+          }).toPass()
+          await expectTextContrast({ targets: textarea })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide enhanced contrast for version diff text', async () => {
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await openVersionComparison({ page, postsURL, serverURL })
+          await expect(page.locator('.html-diff [data-match-type="delete"]').first()).toBeVisible()
+          await expectTextContrast({ targets: page.locator('.html-diff') })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for a field description', async () => {
+      // PYLD-3808
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await gotoCreatePost({ page, postsURL })
+          await expectTextContrast({ targets: page.locator('.field-description-subtitle') })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for read-only hasMany select values', async () => {
+      // PYLD-3809
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await gotoCreatePost({ page, postsURL })
+          const field = page.locator('#field-contrastDisabledSelect')
+          await expect(field.locator('input[role="combobox"]')).toBeDisabled()
+          // Preserve the report's readability requirement separately from the inactive-control exception.
+          await expectTextContrast({ targets: field.locator('.multi-value-label__text') })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for the Array add row button', async () => {
+      // PYLD-3815
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await gotoCreatePost({ page, postsURL })
+          await expectTextContrast({ targets: page.locator('#field-items .array-field__add-row') })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for the Blocks add block button', async () => {
+      // PYLD-3816
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await gotoCreatePost({ page, postsURL })
+          await expectTextContrast({
+            targets: page.locator('#field-layout .blocks-field__drawer-toggler'),
+          })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for the date timezone label', async () => {
+      // PYLD-3820
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await gotoCreatePost({ page, postsURL })
+          await expectTextContrast({
+            targets: page.locator('#field-contrastDate .timezone-picker__label'),
+          })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for a group field description', async () => {
+      // PYLD-3821
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await gotoCreatePost({ page, postsURL })
+          await expectTextContrast({
+            targets: page.locator('#field-contrastGroup .field-description'),
+          })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for upload helper and metadata text', async () => {
+      // PYLD-3825
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await gotoCreatePost({ page, postsURL })
+          await expectTextContrast({ targets: page.locator('#field-contrastUpload') })
+          await page.locator('#field-contrastUpload .upload__createNewToggler').click()
+          const drawer = page.locator('[id^="doc-drawer_media_"]').last()
+          await expect(drawer).toBeVisible()
+          await drawer
+            .locator('input[type="file"]')
+            .setInputFiles(fileURLToPath(new URL('../uploads/test-image.png', import.meta.url)))
+          await expect(drawer.getByRole('textbox', { name: 'File Name', exact: true })).toHaveValue(
+            'test-image.png',
+          )
+          await expect(drawer.locator('.drawer__fade-in')).toHaveCSS('opacity', '1')
+          await expectTextContrast({ targets: drawer.locator('.file-manager__selected-meta') })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for unselected tab labels', async () => {
+      // PYLD-3826
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await gotoCreatePost({ page, postsURL })
+          const tab = page.getByRole('tab', { name: 'Contrast second tab', exact: true })
+          await expect(tab).toHaveAttribute('aria-selected', 'false')
+          await expectTextContrast({ targets: tab })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for SEO length warnings and descriptions', async () => {
+      // PYLD-3831
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await gotoCreatePost({ page, postsURL })
+          const field = page.locator('#field-contrastSEO')
+
+          for (const { descriptionLength, label, titleLength } of [
+            { descriptionLength: 0, label: 'Missing', titleLength: 0 },
+            { descriptionLength: 5, label: 'Too short', titleLength: 5 },
+            { descriptionLength: 95, label: 'Almost there', titleLength: 46 },
+            { descriptionLength: 120, label: 'Good', titleLength: 55 },
+            { descriptionLength: 151, label: 'Too long', titleLength: 61 },
+          ]) {
+            await page.locator('#field-contrastSEO__title').fill('a'.repeat(titleLength))
+            await page
+              .locator('#field-contrastSEO__description')
+              .fill('a'.repeat(descriptionLength))
+            await expect(
+              field.locator('small').filter({ hasText: new RegExp(`^${label}$`) }),
+            ).toHaveCount(2)
+            await expectTextContrast({ targets: field })
+          }
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+  })
+
   test.describe('1.4.10 Reflow (AA)', () => {
     test('should ellipsize long selected values without obscuring their remove control', async () => {
       // Additional coverage for PYLD-3811.
@@ -312,6 +973,285 @@ test.describe('WCAG 2.2 Level AA', () => {
       expect(Math.abs(centers.text - centers.chip)).toBeLessThanOrEqual(0.5)
       expect(Math.abs(centers.icon - centers.chip)).toBeLessThanOrEqual(0.5)
       await expect(removeButton).toBeVisible()
+    })
+  })
+
+  test.describe('1.4.11 Non-text Contrast (AA)', () => {
+    test('should preserve contrast for the calendar today indicator when brand colors change', async () => {
+      // Additional coverage for PYLD-3674.
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await openBlockDatePicker({ page, postsURL })
+          const today = page.locator('.react-datepicker__day--today:visible')
+
+          await expect(today).not.toHaveClass(/react-datepicker__day--selected/)
+          await expectPaintContrast({
+            minimum: 3,
+            property: 'backgroundColor',
+            pseudo: '::after',
+            targets: today,
+          })
+          await today.press(Number(await today.textContent()) === 1 ? 'ArrowRight' : 'ArrowLeft')
+          await expect(today).not.toHaveClass(/react-datepicker__day--keyboard-selected/)
+          await expectPaintContrast({
+            minimum: 3,
+            property: 'backgroundColor',
+            pseudo: '::after',
+            targets: today,
+          })
+          await today.hover()
+          await expectPaintContrast({
+            minimum: 3,
+            property: 'backgroundColor',
+            pseudo: '::after',
+            targets: today,
+          })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    for (const { name, selector } of [
+      { name: 'text input', selector: '#field-title' },
+      { name: 'textarea', selector: '#field-contrastSEO__description' },
+      { name: 'select', selector: '#field-accessibilitySelect .rs__control' },
+    ]) {
+      test(`should provide enhanced contrast for ${name} boundaries`, async () => {
+        await inContrastThemes({
+          page,
+          run: async () => {
+            await gotoCreatePost({ page, postsURL })
+            const control = page.locator(selector)
+
+            await control.scrollIntoViewIfNeeded()
+            await expect(control).not.toBeFocused()
+            await expect(control.locator(':focus')).toHaveCount(0)
+            await page.mouse.move(0, 0)
+            await expectPaintContrast({
+              againstParent: true,
+              minimum: 3,
+              property: 'borderTopColor',
+              targets: control,
+            })
+            await control.hover()
+            await expectPaintContrast({
+              againstParent: true,
+              minimum: 3,
+              property: 'borderTopColor',
+              targets: control,
+            })
+          },
+          serverURL,
+          themes: ['light', 'dark'],
+        })
+      })
+    }
+
+    test('should provide enhanced contrast for upload drawer input boundaries', async () => {
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await gotoCreatePost({ page, postsURL })
+          await page.locator('#field-contrastUpload .upload__createNewToggler').click()
+          const drawer = page.locator('[id^="doc-drawer_media_"]').last()
+          await drawer
+            .locator('input[type="file"]')
+            .setInputFiles(fileURLToPath(new URL('../uploads/test-image.png', import.meta.url)))
+          const filename = drawer.getByRole('textbox', { name: 'File Name', exact: true })
+          await expect(filename).toHaveValue('test-image.png')
+          await expect(drawer.locator('.drawer__fade-in')).toHaveCSS('opacity', '1')
+          await page.mouse.move(0, 0)
+          await expectPaintContrast({
+            againstParent: true,
+            minimum: 3,
+            property: 'borderTopColor',
+            targets: filename,
+          })
+          await filename.hover()
+          await expectPaintContrast({
+            againstParent: true,
+            minimum: 3,
+            property: 'borderTopColor',
+            targets: filename,
+          })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide enhanced contrast for the column search boundary', async () => {
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await gotoPostsList({ page, postsURL })
+          const { columnContainer } = await openListColumns(page, {})
+          await expectPaintContrast({
+            againstParent: true,
+            minimum: 3,
+            property: 'backgroundColor',
+            targets: columnContainer.locator('.column-selector__search-bar'),
+          })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide enhanced contrast for editable block title boundaries', async () => {
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await addTextBlock({ page, postsURL })
+          const title = page.locator('.blocks-field__row .section-title__input')
+          await page.mouse.move(0, 0)
+          await expectPaintContrast({
+            againstParent: true,
+            minimum: 3,
+            property: 'borderTopColor',
+            targets: title,
+          })
+          await title.hover()
+          await expectPaintContrast({
+            againstParent: true,
+            minimum: 3,
+            property: 'borderTopColor',
+            targets: title,
+          })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide enhanced contrast for the rich-text editor boundary', async () => {
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await gotoCreatePost({ page, postsURL })
+          await expectPaintContrast({
+            againstParent: true,
+            minimum: 3,
+            property: 'borderTopColor',
+            targets: page.locator('.rich-text-lexical .editor-container'),
+          })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for an off column switch', async () => {
+      // PYLD-3759
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await gotoPostsList({ page, postsURL })
+          const { columnContainer } = await openListColumns(page, {})
+          const row = columnContainer.locator('.column-selector__item--inactive').first()
+          await expect(row.locator('input')).not.toBeChecked()
+          await expectPaintContrast({
+            againstParent: true,
+            minimum: 3,
+            property: 'backgroundColor',
+            targets: row.locator('.switch__track'),
+          })
+          await expectPaintContrast({
+            againstParent: true,
+            minimum: 3,
+            property: 'backgroundColor',
+            targets: row.locator('.switch__knob'),
+          })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for enabled pagination controls', async () => {
+      // PYLD-3763
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await page.goto(`${postsURL.list}?limit=1`)
+          const next = page.locator('.clickable-arrow--right')
+          await expect(next).toBeEnabled()
+          await expectPaintContrast({
+            minimum: 3,
+            property: 'fill',
+            targets: next.locator('svg path'),
+          })
+          const pageInput = page.getByRole('textbox', { name: 'Go to page', exact: true })
+
+          await expect(pageInput).toBeEnabled()
+          await expectPaintContrast({
+            againstParent: true,
+            minimum: 3,
+            property: 'backgroundColor',
+            targets: pageInput,
+          })
+          await pageInput.focus()
+          await expect(pageInput).toBeFocused()
+          await expectPaintContrast({
+            againstParent: true,
+            minimum: 3,
+            property: 'backgroundColor',
+            targets: pageInput,
+          })
+          await next.click()
+          await expect(pageInput).toHaveValue('2')
+          const previous = page.locator('.clickable-arrow--left')
+
+          await expect(previous).toBeEnabled()
+          await expectPaintContrast({
+            minimum: 3,
+            property: 'fill',
+            targets: previous.locator('svg path'),
+          })
+          await page.goto(`${postsURL.list}?limit=10`)
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for unchecked table checkbox boundaries', async () => {
+      // PYLD-3764
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await gotoPostsList({ page, postsURL })
+          await expect(page.locator('tbody tr .cell-_select input').first()).not.toBeChecked()
+          await expectPaintContrast({
+            againstParent: true,
+            minimum: 3,
+            property: 'backgroundColor',
+            targets: page.locator('tbody tr .cell-_select .checkbox-input__input'),
+          })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
+    })
+
+    test('should provide contrast for table sort arrows', async () => {
+      // PYLD-3765
+      await inContrastThemes({
+        page,
+        run: async () => {
+          await gotoPostsList({ page, postsURL })
+          await page.mouse.move(0, 0)
+          await expectPaintContrast({
+            minimum: 3,
+            property: 'fill',
+            targets: page.locator('.sort-column__button svg path'),
+          })
+        },
+        serverURL,
+        themes: ['light', 'dark'],
+      })
     })
   })
 
@@ -440,18 +1380,18 @@ test.describe('WCAG 2.2 Level AA', () => {
       let handle = callouts.first().getByRole('button', { name: /drag to reorder/i })
 
       await handle.focus()
-      const initialTop = (await callouts.first().boundingBox())!.y
+      const initialTop = await getTopWithinEditor({ target: callouts.first() })
 
       await handle.press('Space')
       await page.keyboard.press('ArrowDown')
       await expect
-        .poll(async () => (await callouts.first().boundingBox())!.y)
+        .poll(() => getTopWithinEditor({ target: callouts.first() }))
         .toBeGreaterThan(initialTop)
       await page.keyboard.press('ArrowUp')
-      await expect.poll(async () => (await callouts.first().boundingBox())!.y).toBe(initialTop)
+      await expect.poll(() => getTopWithinEditor({ target: callouts.first() })).toBe(initialTop)
       await page.keyboard.press('ArrowDown')
       await page.keyboard.press('Escape')
-      await expect.poll(async () => (await callouts.first().boundingBox())!.y).toBe(initialTop)
+      await expect.poll(() => getTopWithinEditor({ target: callouts.first() })).toBe(initialTop)
       await expect(drawer).toBeVisible()
       await expect(callouts.first().locator('input[value$="callout"]')).toHaveValue('First callout')
       await expect(handle).toBeFocused()
@@ -858,6 +1798,13 @@ test.describe('WCAG 2.2 Level AA', () => {
         page.getByRole('status').filter({ hasText: 'Picked up draggable item' }),
       ).toHaveCount(1)
       await page.keyboard.press('ArrowLeft')
+      const moveStatus = page.getByRole('status').filter({ hasText: `droppable area ${firstID}-` })
+
+      await expect(moveStatus).toHaveCount(1)
+      // The first leftward target can be the gap after the preceding widget.
+      if ((await moveStatus.innerText()).includes(`${firstID}-after`)) {
+        await page.keyboard.press('ArrowLeft')
+      }
       await expect(page.getByRole('status').filter({ hasText: `${firstID}-before` })).toHaveCount(1)
       await page.keyboard.press('Space')
       await expect(widgets.first()).toHaveAttribute('data-slug', lastID!)
@@ -925,7 +1872,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await page.keyboard.press('Tab')
       await expect(drag).toBeFocused()
       await page.keyboard.press('Space')
-      await expect(page.locator('.drag-overlay')).toBeVisible()
+      await waitForDashboardDragReady({ page })
       await expect(drag).toHaveAttribute('aria-pressed', 'true')
       await expect(
         page.getByRole('status').filter({ hasText: (await widget.getAttribute('data-slug'))! }),
