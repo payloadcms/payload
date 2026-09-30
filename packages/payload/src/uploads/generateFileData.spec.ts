@@ -95,6 +95,62 @@ describe('generateFileData', () => {
     expect(toBufferMock).not.toHaveBeenCalled()
   })
 
+  describe('focal point without a transformer', () => {
+    const createPngReq = ({ query = {} }: { query?: Record<string, unknown> } = {}) =>
+      ({
+        file: {
+          data: PNG_SIGNATURE,
+          mimetype: 'image/png',
+          name: 'photo.png',
+          size: PNG_SIGNATURE.length,
+        },
+        payload: {
+          config: {},
+          logger: { error: vi.fn() },
+        },
+        query,
+      }) as unknown as PayloadRequest
+
+    it('should default the focal point to the center on create', async () => {
+      const result = await generateFileData({
+        collection: createCollection({ focalPoint: true }),
+        config: {} as SanitizedConfig,
+        data: {},
+        operation: 'create',
+        overwriteExistingFiles: true,
+        req: createPngReq(),
+      })
+
+      expect(result.data).toMatchObject({ focalX: 50, focalY: 50 })
+    })
+
+    it('should save a focal point sent through the uploadEdits query param', async () => {
+      const result = await generateFileData({
+        collection: createCollection({ focalPoint: true }),
+        config: {} as SanitizedConfig,
+        data: {},
+        operation: 'create',
+        overwriteExistingFiles: true,
+        req: createPngReq({ query: { uploadEdits: { focalPoint: { x: 20.4, y: 80.6 } } } }),
+      })
+
+      expect(result.data).toMatchObject({ focalX: 20, focalY: 81 })
+    })
+
+    it('should not save a focal point when focalPoint is disabled', async () => {
+      const result = await generateFileData({
+        collection: createCollection({ focalPoint: false }),
+        config: {} as SanitizedConfig,
+        data: {},
+        operation: 'create',
+        overwriteExistingFiles: true,
+        req: createPngReq(),
+      })
+
+      expect(result.data).not.toHaveProperty('focalX')
+    })
+  })
+
   it('uses the inspected non-image type for image processing', async () => {
     const { sharp } = createSharpMock()
     const fileContent = Buffer.from(

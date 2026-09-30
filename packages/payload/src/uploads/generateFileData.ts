@@ -10,6 +10,7 @@ import type { FileData, FileSizes, FileToSave, UploadEdits } from './types.js'
 
 import { FileRetrievalError, FileUploadError, Forbidden, MissingFile } from '../errors/index.js'
 import { isNumber } from '../utilities/isNumber.js'
+import { canResizeImage } from './canResizeImage.js'
 import { checkFileRestrictions } from './checkFileRestrictions.js'
 import { downloadFileToBuffer } from './downloadFileToBuffer.js'
 import { generateImageSizeFilename } from './generateImageSizeFilename.js'
@@ -289,15 +290,6 @@ export const generateFileData = async <T>({
         fileData.height = mainResult?.height
         hasDimensionsFromBridge = true
         sizeResults = results.filter((result) => result.fieldPath !== 'filename')
-
-        if (focalPointEnabled && uploadEdits?.focalPoint) {
-          fileData.focalX = isNumber(uploadEdits.focalPoint.x)
-            ? Math.round(uploadEdits.focalPoint.x)
-            : 50
-          fileData.focalY = isNumber(uploadEdits.focalPoint.y)
-            ? Math.round(uploadEdits.focalPoint.y)
-            : 50
-        }
       } else {
         mainWebFile = await transformUploadFile({
           collectionSlug: collectionConfig.slug,
@@ -307,6 +299,21 @@ export const generateFileData = async <T>({
           req,
         })
       }
+    }
+
+    // Saved for any resizable image, not just one a transformer processed, so it's kept with no
+    // transformer registered and on a header-only client upload.
+    if (
+      focalPointEnabled &&
+      uploadEdits?.focalPoint &&
+      (hasDimensionsFromBridge || canResizeImage(file.mimetype))
+    ) {
+      fileData.focalX = isNumber(uploadEdits.focalPoint.x)
+        ? Math.round(uploadEdits.focalPoint.x)
+        : 50
+      fileData.focalY = isNumber(uploadEdits.focalPoint.y)
+        ? Math.round(uploadEdits.focalPoint.y)
+        : 50
     }
 
     const fileWasTransformed = Boolean(mainWebFile && mainWebFile !== originalWebFile)
