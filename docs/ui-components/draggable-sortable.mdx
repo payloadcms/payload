@@ -1,0 +1,51 @@
+---
+title: Draggable Sortable
+label: Draggable Sortable
+order: 98
+desc: Reorder custom Admin Panel content with Payload's drag-and-drop components.
+keywords: ui, component, drag, drop, sort, reorder, custom view
+---
+
+Use `DraggableSortable` with `DraggableSortableItem` to add pointer, touch, and keyboard reordering to custom Admin Panel interfaces.
+
+## Import
+
+```tsx
+import { DraggableSortable, DraggableSortableItem } from '@payloadcms/ui'
+```
+
+## Basic usage
+
+<ComponentPreview component="DraggableSortable" example="basic" />
+
+`DraggableSortable` coordinates the list and reports the original and destination indexes through `onDragEnd`. Your component remains responsible for updating local state and persisting the new order when necessary.
+
+Each `DraggableSortableItem` exposes the attributes, listeners, ref, transform, and transition needed to render an item. Apply the listeners to a visible drag handle so the rest of the row can retain its own interactions.
+
+## DraggableSortable props
+
+| Prop          | Type                                              | Description                                    |
+| ------------- | ------------------------------------------------- | ---------------------------------------------- |
+| `children*`   | `ReactNode`                                       | Renders the sortable items.                    |
+| `ids*`        | `string[]`                                        | Lists item IDs in their current display order. |
+| `onDragEnd*`  | `({ moveFromIndex, moveToIndex, event }) => void` | Handles a completed reorder.                   |
+| `onDragStart` | `({ id, event }) => void`                         | Handles the beginning of a drag.               |
+| `className`   | `string`                                          | Adds a class to the sortable list container.   |
+
+## DraggableSortableItem props
+
+| Prop        | Type                           | Description                                                 |
+| ----------- | ------------------------------ | ----------------------------------------------------------- |
+| `id*`       | `string`                       | Matches an entry in the parent `ids` array.                 |
+| `children*` | `(sortableState) => ReactNode` | Renders the item with its drag attributes and visual state. |
+| `disabled`  | `boolean`                      | Prevents the item from being reordered.                     |
+
+_\* An asterisk denotes that a prop is required._
+
+## Accessibility
+
+- Put the supplied attributes and listeners on a keyboard-focusable drag handle.
+- Give the handle an accessible name that identifies the item it moves.
+- Persist the resulting order only after `onDragEnd` supplies a valid destination.
+
+These components configure their own drag-and-drop context and require no Payload providers.
