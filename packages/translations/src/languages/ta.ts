@@ -114,6 +114,7 @@ export const taTranslations: DefaultTranslationsObject = {
     noItems:
       'உங்கள் டாஷ்போர்டில் விட்ஜெட்கள் எதுவும் இல்லை. உங்களுக்கு அவைகளை மேல் பட்டையில் அமைந்துள்ள "டாஷ்போர்ட்" பட்டியல',
     resetLayout: 'அமைப்பை மீட்டமைக்க',
+    resizeWidget: '{{label}} அளவை மாற்று, தற்போதைய அளவு: {{size}}',
     searchWidgets: 'தேடல் கருவிகள்...',
     widgetCollectionRequired: 'Collection அவசியமாக 필요.',
     widgetConfigurationError: 'விட்ஜெட் உள்ளமைவு பிழை',

@@ -115,6 +115,7 @@ export const plTranslations: DefaultTranslationsObject = {
     noItems:
       'Na Twoim pulpicie nie ma żadnych widgetów. Możesz je dodać z menu "Pulpit", które znajduje się na górnej belce.',
     resetLayout: 'Zresetuj Układ',
+    resizeWidget: 'Zmień rozmiar {{label}}, obecny rozmiar: {{size}}',
     searchWidgets: 'Szukaj widgetów...',
     widgetCollectionRequired: 'Collection jest wymagana.',
     widgetConfigurationError: 'Błąd konfiguracji widgetu',

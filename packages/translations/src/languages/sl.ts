@@ -114,6 +114,7 @@ export const slTranslations: DefaultTranslationsObject = {
     noItems:
       'Na vaši nadzorni plošči ni pripomočkov. Dodate jih lahko iz menija "Nadzorna plošča", ki se nahaja v zgornji vrstici.',
     resetLayout: 'Ponastavi postavitev',
+    resizeWidget: 'Spremeni velikost {{label}}, trenutna velikost: {{size}}',
     searchWidgets: 'Išči gradnike...',
     widgetCollectionRequired: 'Zbirka je obvezna.',
     widgetConfigurationError: 'Napaka pri konfiguraciji gradnika',

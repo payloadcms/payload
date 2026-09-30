@@ -115,6 +115,7 @@ export const viTranslations: DefaultTranslationsObject = {
     noItems:
       'Trên bảng điều khiển của bạn không có tiện ích nào. Bạn có thể thêm chúng từ menu "Bảng điều khiển" nằm ở thanh trên cùng.',
     resetLayout: 'Đặt lại Bố cục',
+    resizeWidget: 'Đổi kích thước {{label}}, kích thước hiện tại: {{size}}',
     searchWidgets: 'Tìm kiếm các widget...',
     widgetCollectionRequired: 'Collection là bắt buộc.',
     widgetConfigurationError: 'Lỗi cấu hình Widget',

@@ -116,6 +116,7 @@ export const trTranslations: DefaultTranslationsObject = {
     noItems:
       'Panoda hiç widgetiniz yok. Bunları, üst çubukta yer alan "Gösterge Tablosu" menüsünden ekleyebilirsiniz.',
     resetLayout: 'Düzeni Sıfırla',
+    resizeWidget: '{{label}} boyutunu değiştir, mevcut boyut: {{size}}',
     searchWidgets: "Arama widget'ları...",
     widgetCollectionRequired: 'Collection gereklidir.',
     widgetConfigurationError: 'Widget yapılandırma hatası',

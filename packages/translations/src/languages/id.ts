@@ -115,6 +115,7 @@ export const idTranslations: DefaultTranslationsObject = {
     noItems:
       'Tidak ada widget di dasbor Anda. Anda dapat menambahkannya dari menu "Dashboard" yang terletak di bar atas.',
     resetLayout: 'Atur Ulang Tata Letak',
+    resizeWidget: 'Ubah ukuran {{label}}, ukuran saat ini: {{size}}',
     searchWidgets: 'Cari widget...',
     widgetCollectionRequired: 'Collection wajib diisi.',
     widgetConfigurationError: 'Kesalahan konfigurasi widget',

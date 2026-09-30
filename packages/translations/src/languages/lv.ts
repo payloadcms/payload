@@ -114,6 +114,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     noItems:
       'Jūsu informācijas panelī nav logrīku. Tos varat pievienot no izvēlnes "Informācijas panelis", kas atrodas augšējā josla.',
     resetLayout: 'Atiestatīt Izkārtojumu',
+    resizeWidget: 'Mainīt {{label}} izmēru, pašreizējais izmērs: {{size}}',
     searchWidgets: 'Meklēt logrīkus...',
     widgetCollectionRequired: 'Kolekcija ir obligāta.',
     widgetConfigurationError: 'Sīkrīka konfigurācijas kļūda',
