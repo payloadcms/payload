@@ -5062,6 +5062,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
       }) => {
         const exportDoc = await payload.create({
           collection: 'exports',
+          overrideAccess: true,
           user,
           data: {
             collectionSlug: 'pages',
@@ -5073,11 +5074,12 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           },
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         const completedExport = await payload.findByID({
           collection: 'exports',
           id: exportDoc.id,
+          overrideAccess: true,
         })
 
         return path.join(dirname, './uploads', completedExport.filename as string)
@@ -5096,6 +5098,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
       }) => {
         const importDoc = await payload.create({
           collection: 'imports',
+          overrideAccess: true,
           user,
           data: {
             collectionSlug: 'pages',
@@ -5109,11 +5112,12 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           },
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         return payload.findByID({
           collection: 'imports',
           id: importDoc.id,
+          overrideAccess: true,
         })
       }
 
@@ -5125,12 +5129,14 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           data: {
             title: 'hasMany Monomorphic Post 1',
           },
+          overrideAccess: true,
         })
         const post2 = await payload.create({
           collection: 'posts',
           data: {
             title: 'hasMany Monomorphic Post 2',
           },
+          overrideAccess: true,
         })
 
         const testPage = await payload.create({
@@ -5140,6 +5146,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
             hasManyMonomorphic: [post1.id, post2.id],
             _status: 'published',
           },
+          overrideAccess: true,
         })
 
         const csvPath = await exportRelationshipFixture({
@@ -5163,6 +5170,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         await payload.delete({
           collection: 'pages',
           id: testPage.id,
+          overrideAccess: true,
         })
 
         const importDoc = await importRelationshipFixture({
@@ -5174,6 +5182,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
         const importedPages = await payload.find({
           collection: 'pages',
+          overrideAccess: true,
           where: {
             title: { equals: 'hasMany Monomorphic Roundtrip' },
           },
@@ -5199,10 +5208,12 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         const post1 = await payload.create({
           collection: 'posts',
           data: { title: 'hasMany JSON Post 1' },
+          overrideAccess: true,
         })
         const post2 = await payload.create({
           collection: 'posts',
           data: { title: 'hasMany JSON Post 2' },
+          overrideAccess: true,
         })
 
         const testPage = await payload.create({
@@ -5212,6 +5223,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
             hasManyMonomorphic: [post1.id, post2.id],
             _status: 'published',
           },
+          overrideAccess: true,
         })
 
         const jsonPath = await exportRelationshipFixture({
@@ -5234,6 +5246,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         await payload.delete({
           collection: 'pages',
           id: testPage.id,
+          overrideAccess: true,
         })
 
         const importDoc = await importRelationshipFixture({
@@ -5245,6 +5258,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
         const importedPages = await payload.find({
           collection: 'pages',
+          overrideAccess: true,
           where: {
             title: { equals: 'hasMany JSON Roundtrip' },
           },
@@ -5267,6 +5281,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         const post1 = await payload.create({
           collection: 'posts',
           data: { title: 'hasOnePolymorphic JSON Post' },
+          overrideAccess: true,
         })
 
         const testPage = await payload.create({
@@ -5279,6 +5294,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
             },
             _status: 'published',
           },
+          overrideAccess: true,
         })
 
         const jsonPath = await exportRelationshipFixture({
@@ -5301,6 +5317,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         await payload.delete({
           collection: 'pages',
           id: testPage.id,
+          overrideAccess: true,
         })
 
         const importDoc = await importRelationshipFixture({
@@ -5312,6 +5329,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
         const importedPages = await payload.find({
           collection: 'pages',
+          overrideAccess: true,
           where: {
             title: { equals: 'hasOnePolymorphic JSON Roundtrip' },
           },
@@ -5336,10 +5354,12 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         const testUser = await payload.find({
           collection: 'users',
           limit: 1,
+          overrideAccess: true,
         })
         const post1 = await payload.create({
           collection: 'posts',
           data: { title: 'hasManyPolymorphic JSON Post' },
+          overrideAccess: true,
         })
 
         const testPage = await payload.create({
@@ -5352,6 +5372,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
             ],
             _status: 'published',
           },
+          overrideAccess: true,
         })
 
         const jsonPath = await exportRelationshipFixture({
@@ -5377,6 +5398,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         await payload.delete({
           collection: 'pages',
           id: testPage.id,
+          overrideAccess: true,
         })
 
         const importDoc = await importRelationshipFixture({
@@ -5388,6 +5410,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
         const importedPages = await payload.find({
           collection: 'pages',
+          overrideAccess: true,
           where: {
             title: { equals: 'hasManyPolymorphic JSON Roundtrip' },
           },
