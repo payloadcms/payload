@@ -1,0 +1,54 @@
+# Production stack for the app EC2: Payload CMS behind Caddy (reverse proxy + automatic HTTPS).
+# MongoDB is NOT part of this stack - it runs on its own EC2 and is reached through DATABASE_URL.
+#
+#   cp .env.example .env         # then fill in the values
+#   ./deploy/deploy.sh           # builds the image and (re)starts everything
+#
+# The image is built from the repository root so it can compile this branch's packages/.
+name: payload-cms
+
+services:
+  cms:
+    build:
+      context: ../..
+      dockerfile: apps/cms/Dockerfile
+    image: ${CMS_IMAGE:-payload-cms:latest}
+    restart: unless-stopped
+    env_file: .env
+    expose:
+      - '3000'
+    volumes:
+      # Uploaded media lives on the host (in a Docker volume) and survives rebuilds/redeploys
+      - media:/app/media
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '5'
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - cms
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-:80}
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # TLS certificates - keep this volume, or Let's Encrypt rate limits can bite on redeploys
+      - caddy_data:/data
+      - caddy_config:/config
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '5'
+
+volumes:
+  media:
+  caddy_data:
+  caddy_config:

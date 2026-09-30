@@ -1,0 +1,16 @@
+# SITE_ADDRESS comes from .env:
+#   cms.example.com -> HTTPS with an automatic Let's Encrypt certificate (DNS must point at this EC2,
+#                      and ports 80 + 443 must be open in the security group)
+#   :80             -> plain HTTP on the instance IP (default, for a first test without a domain)
+{$SITE_ADDRESS::80} {
+	encode zstd gzip
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options SAMEORIGIN
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+
+	reverse_proxy cms:3000
+}
