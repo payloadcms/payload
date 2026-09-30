@@ -119,6 +119,46 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('1.4.10 Reflow (AA)', () => {
+    test('should truncate a long account label without obscuring the menu icon', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await openNavigationForUserMenu({ page })
+
+      const navHeader = page.locator('.nav__header')
+      const trigger = page.locator('.user-menu__trigger')
+      const label = trigger.locator('.btn__label')
+      const icon = trigger.locator('.btn__icon')
+
+      await label.evaluate((element) => {
+        element.textContent = 'devthisismynameandiloveit@payloadcms.com'
+      })
+
+      const [headerBox, triggerBox, labelBox, iconBox] = await Promise.all([
+        navHeader.boundingBox(),
+        trigger.boundingBox(),
+        label.boundingBox(),
+        icon.boundingBox(),
+      ])
+      const labelMetrics = await label.evaluate((element) => ({
+        clientWidth: element.clientWidth,
+        overflow: getComputedStyle(element).overflow,
+        scrollWidth: element.scrollWidth,
+        textOverflow: getComputedStyle(element).textOverflow,
+      }))
+
+      expect(headerBox).not.toBeNull()
+      expect(triggerBox).not.toBeNull()
+      expect(labelBox).not.toBeNull()
+      expect(iconBox).not.toBeNull()
+      expect(triggerBox!.x + triggerBox!.width).toBeLessThanOrEqual(headerBox!.x + headerBox!.width)
+      expect(labelBox!.x + labelBox!.width).toBeLessThanOrEqual(iconBox!.x)
+      expect(iconBox!.x + iconBox!.width).toBeLessThanOrEqual(triggerBox!.x + triggerBox!.width)
+      expect(labelMetrics).toMatchObject({
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+      })
+      expect(labelMetrics.scrollWidth).toBeGreaterThan(labelMetrics.clientWidth)
+    })
+
     test('should ellipsize long selected values without obscuring their remove control', async () => {
       // Additional coverage for PYLD-3811.
       const fieldSelect = await openBulkEditFieldSelect({ page, postsURL })
