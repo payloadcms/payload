@@ -2,6 +2,7 @@ import type { CollectionConfig, TypeWithID } from '../collections/config/types.j
 import type { PayloadComponent } from '../config/types.js'
 import type { UploadCollectionSlug } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
+import type { StagedObject } from './fileVersioning/fileOperationManager.js'
 import type { ManagedFileManifest } from './fileVersioning/types.js'
 
 export type OriginalFileData = {
@@ -28,6 +29,7 @@ export type FileSizes = {
 
 export type FileData = {
   _managedFiles?: ManagedFileManifest | null
+  _objectKey?: string
   filename: string
   filesize: number
   focalX?: number
@@ -234,6 +236,15 @@ export type UploadConfig = {
    * Field slugs to use for a compound index instead of the default filename index.
    */
   filenameCompoundIndex?: string[]
+  /** @internal Set by cloudStoragePlugin for versioned uploads; adapters do not implement this. */
+  fileOperations?: {
+    stage: (args: {
+      data: Record<string, unknown>
+      files: FileToSave[]
+      req: PayloadRequest
+      trackStagedObject: (object: StagedObject) => void
+    }) => Promise<{ managedFiles: ManagedFileManifest; metadata: Record<string, unknown> }>
+  }
   /**
    * Require files to be uploaded when creating a document.
    * @default true

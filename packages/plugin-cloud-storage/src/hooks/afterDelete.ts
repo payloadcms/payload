@@ -19,6 +19,12 @@ export const getAfterDeleteHook = ({
   useCompositePrefixes,
 }: Args): CollectionAfterDeleteHook<FileData & TypeWithID & TypeWithPrefix> => {
   return async ({ doc, req }) => {
+    // A retained version may still reference these objects; deletion needs
+    // the reference-aware cleanup path.
+    if (collection.versions) {
+      return doc
+    }
+
     try {
       // Fold `_objectKey` so deletes target the real object folder.
       const docPrefix = buildPrefixWithObjectKey({

@@ -22,6 +22,7 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { type CollectionSlug, deepCopyObjectSimple, type FindOptions } from '../../index.js'
 import { runLocalFileUpdate } from '../../uploads/fileVersioning/archive.js'
+import { runCloudFileUpdate } from '../../uploads/fileVersioning/cloudStorage.js'
 import {
   abortFileOperationScope,
   beginFileOperationScope,
@@ -333,15 +334,25 @@ export const updateByIDOperation = async <
       unpublishAllLocales,
     } as const
 
-    let result = await runLocalFileUpdate({
-      id,
-      collection: collectionConfig,
-      current: docWithLocales,
-      files: filesToUpload,
-      nextManifest: (newFileData as Record<string, unknown>)._managedFiles,
-      req,
-      write: () => updateDocument<TSlug, TSelect>(updateArgs),
-    })
+    const write = () => updateDocument<TSlug, TSelect>(updateArgs)
+    let result = collectionConfig.upload.fileOperations
+      ? await runCloudFileUpdate({
+          id,
+          collection: collectionConfig,
+          data: updateArgs.data,
+          files: filesToUpload,
+          req,
+          write,
+        })
+      : await runLocalFileUpdate({
+          id,
+          collection: collectionConfig,
+          current: docWithLocales,
+          files: filesToUpload,
+          nextManifest: (newFileData as Record<string, unknown>)._managedFiles,
+          req,
+          write,
+        })
 
     // /////////////////////////////////////
     // Add collection property for auth collections

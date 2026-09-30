@@ -23,6 +23,7 @@ import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/index.js'
 import { type CollectionSlug, type FindOptions } from '../../index.js'
 import { runLocalFileUpdate } from '../../uploads/fileVersioning/archive.js'
+import { runCloudFileUpdate } from '../../uploads/fileVersioning/cloudStorage.js'
 import {
   abortFileOperationScope,
   beginFileOperationScope,
@@ -424,15 +425,25 @@ export const updateOperation = async <
           showHiddenFields: showHiddenFields!,
           unpublishAllLocales,
         } as const
-        let updatedDoc = await runLocalFileUpdate({
-          id,
-          collection: collectionConfig,
-          current: docWithLocales,
-          files: generatedFileData.files,
-          nextManifest: (generatedFileData.data as Record<string, unknown>)._managedFiles,
-          req,
-          write: () => updateDocument(updateArgs),
-        })
+        const write = () => updateDocument(updateArgs)
+        let updatedDoc = collectionConfig.upload.fileOperations
+          ? await runCloudFileUpdate({
+              id,
+              collection: collectionConfig,
+              data: updateArgs.data,
+              files: generatedFileData.files,
+              req,
+              write,
+            })
+          : await runLocalFileUpdate({
+              id,
+              collection: collectionConfig,
+              current: docWithLocales,
+              files: generatedFileData.files,
+              nextManifest: (generatedFileData.data as Record<string, unknown>)._managedFiles,
+              req,
+              write,
+            })
 
         // /////////////////////////////////////
         // Add collection property for auth collections

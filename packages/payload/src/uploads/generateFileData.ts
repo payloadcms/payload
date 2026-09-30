@@ -1,5 +1,6 @@
 import { fileTypeFromBuffer } from 'file-type'
 import fs from 'fs/promises'
+import { randomUUID } from 'node:crypto'
 
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
@@ -150,6 +151,12 @@ export const generateFileData = async <T>({
     focalPoint: focalPointEnabled = true,
     staticDir,
   } = collectionConfig.upload
+  const hasManagedCloudStorage = Boolean(collectionConfig.upload.fileOperations)
+  const hasProviderDirectReference =
+    file?.uploadReference &&
+    typeof file.uploadReference === 'object' &&
+    !('uploadId' in file.uploadReference)
+  const shouldStageCloudFiles = hasManagedCloudStorage && !hasProviderDirectReference
 
   const staticPath = staticDir
 
@@ -367,7 +374,11 @@ export const generateFileData = async <T>({
 
     fileData.filename = fsSafeName
 
-    if (!disableLocalStorage) {
+    if (shouldStageCloudFiles) {
+      fileData._objectKey = randomUUID()
+    }
+
+    if (!disableLocalStorage || shouldStageCloudFiles) {
       const originalFilename = fileWasTransformed
         ? await getSafeFileName({
             collectionSlug: collectionConfig.slug,
@@ -433,7 +444,7 @@ export const generateFileData = async <T>({
       // file.data is empty when useTempFiles is on, so the real content lives at
       // file.tempFilePath instead (see the function doc for why we avoid buffering it).
       const tempFileHandling = resolveTempFileHandling({
-        disableLocalStorage: Boolean(disableLocalStorage),
+        disableLocalStorage: Boolean(disableLocalStorage) && !shouldStageCloudFiles,
         hasProcessedBuffer: false,
         tempFilePath: file.tempFilePath,
       })
@@ -522,7 +533,7 @@ export const generateFileData = async <T>({
 
         let imageName = imageNameWithDimensions
 
-        if (!disableLocalStorage) {
+        if (!disableLocalStorage || shouldStageCloudFiles) {
           const prefix = (data as Record<string, unknown>)?.prefix as string | undefined
 
           while (true) {
@@ -531,7 +542,7 @@ export const generateFileData = async <T>({
               desiredFilename: imageName,
               prefix,
               req,
-              staticPath: staticPath!,
+              staticPath: disableLocalStorage ? undefined : staticPath!,
             })
             if (plannedSizeBuffers.get(imageName)?.equals(sizeBuffer)) {
               break

@@ -117,6 +117,8 @@ export interface GeneratedAdapter {
   name: string
   onInit?: () => Promise<void> | void
   staticHandler: StaticHandler
+  /** Reads source files by path when staging server-mediated uploads. */
+  supportsTempFiles?: boolean
   /** Generates upload instructions when supported. */
   uploadInstructions?: {
     adminHandler?: {

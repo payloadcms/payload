@@ -34,6 +34,7 @@ export function createAzureAdapter({
 }: CreateAzureAdapterArgs): Adapter {
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'azure',
+    supportsTempFiles: true,
 
     copyFile: ({ from, to }) => copyAzureFile({ client: getStorageClient(), from, to }),
 

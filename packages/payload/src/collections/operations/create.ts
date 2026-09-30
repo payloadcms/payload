@@ -27,6 +27,7 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { saveVersion } from '../../index.js'
+import { runCloudFileCreation } from '../../uploads/fileVersioning/cloudStorage.js'
 import {
   abortFileOperationScope,
   beginFileOperationScope,
@@ -493,7 +494,15 @@ export const createOperation = async <
       Array.isArray(dataWithLocales._managedFiles)
     let doc
 
-    if (hasManagedLocalUpload) {
+    if (collectionConfig.upload.fileOperations && filesToUpload.length > 0) {
+      doc = await runCloudFileCreation({
+        collection: collectionConfig,
+        data: dataWithLocales,
+        files: filesToUpload,
+        req,
+        write: writeDocument,
+      })
+    } else if (hasManagedLocalUpload) {
       doc = await runFileCreationPlan({
         req,
         stage: ({ trackStagedObject }) =>
@@ -671,5 +680,10 @@ export const createOperation = async <
       abortFileOperationScope({ req: args.req })
     }
     throw error
+  } finally {
+    if (hasFileOperationScope && args.req.context) {
+      delete args.req.context._payloadManagedCloudStorage
+      delete args.req.context._payloadManagedCloudMetadata
+    }
   }
 }

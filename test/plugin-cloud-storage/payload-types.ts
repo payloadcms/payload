@@ -78,6 +78,8 @@ export interface Config {
     'restricted-media': RestrictedMedia;
     'test-metadata': TestMetadatum;
     users: User;
+    'versioned-cloud-media': VersionedCloudMedia;
+    'versioned-s3-media': VersionedS3Media;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -96,6 +98,8 @@ export interface Config {
     'restricted-media': RestrictedMediaSelect<false> | RestrictedMediaSelect<true>;
     'test-metadata': TestMetadataSelect<false> | TestMetadataSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'versioned-cloud-media': VersionedCloudMediaSelect<false> | VersionedCloudMediaSelect<true>;
+    'versioned-s3-media': VersionedS3MediaSelect<false> | VersionedS3MediaSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -145,6 +149,7 @@ export interface Media {
   id: string;
   alt?: string | null;
   prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -154,6 +159,29 @@ export interface Media {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+  };
+  _managedFiles?: {
+    key: string;
+    roles: (
+      | {
+          type: 'size';
+          sizeKey: string;
+        }
+      | {
+          type: 'original' | 'default' | 'thumbnail';
+        }
+    )[];
+    storageBackendId: string;
+    [k: string]: unknown;
+  }[];
+  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
   sizes?: {
@@ -182,6 +210,7 @@ export interface Media {
 export interface MediaWithCompositePrefix {
   id: string;
   prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -191,6 +220,29 @@ export interface MediaWithCompositePrefix {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+  };
+  _managedFiles?: {
+    key: string;
+    roles: (
+      | {
+          type: 'size';
+          sizeKey: string;
+        }
+      | {
+          type: 'original' | 'default' | 'thumbnail';
+        }
+    )[];
+    storageBackendId: string;
+    [k: string]: unknown;
+  }[];
+  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -201,6 +253,7 @@ export interface MediaWithCompositePrefix {
 export interface MediaWithCustomUrl {
   id: string;
   prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -210,6 +263,29 @@ export interface MediaWithCustomUrl {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+  };
+  _managedFiles?: {
+    key: string;
+    roles: (
+      | {
+          type: 'size';
+          sizeKey: string;
+        }
+      | {
+          type: 'original' | 'default' | 'thumbnail';
+        }
+    )[];
+    storageBackendId: string;
+    [k: string]: unknown;
+  }[];
+  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -220,6 +296,7 @@ export interface MediaWithCustomUrl {
 export interface MediaWithDisabledPlugin {
   id: string;
   prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -229,6 +306,29 @@ export interface MediaWithDisabledPlugin {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+  };
+  _managedFiles?: {
+    key: string;
+    roles: (
+      | {
+          type: 'size';
+          sizeKey: string;
+        }
+      | {
+          type: 'original' | 'default' | 'thumbnail';
+        }
+    )[];
+    storageBackendId: string;
+    [k: string]: unknown;
+  }[];
+  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -239,6 +339,7 @@ export interface MediaWithDisabledPlugin {
 export interface MediaWithGenerateFileUrl {
   id: string;
   prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -248,6 +349,29 @@ export interface MediaWithGenerateFileUrl {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+  };
+  _managedFiles?: {
+    key: string;
+    roles: (
+      | {
+          type: 'size';
+          sizeKey: string;
+        }
+      | {
+          type: 'original' | 'default' | 'thumbnail';
+        }
+    )[];
+    storageBackendId: string;
+    [k: string]: unknown;
+  }[];
+  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -259,6 +383,7 @@ export interface MediaWithOverwrite {
   id: string;
   alt?: string | null;
   prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -268,6 +393,29 @@ export interface MediaWithOverwrite {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+  };
+  _managedFiles?: {
+    key: string;
+    roles: (
+      | {
+          type: 'size';
+          sizeKey: string;
+        }
+      | {
+          type: 'original' | 'default' | 'thumbnail';
+        }
+    )[];
+    storageBackendId: string;
+    [k: string]: unknown;
+  }[];
+  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
   sizes?: {
@@ -296,6 +444,7 @@ export interface MediaWithOverwrite {
 export interface MediaWithPrefix {
   id: string;
   prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -305,6 +454,29 @@ export interface MediaWithPrefix {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+  };
+  _managedFiles?: {
+    key: string;
+    roles: (
+      | {
+          type: 'size';
+          sizeKey: string;
+        }
+      | {
+          type: 'original' | 'default' | 'thumbnail';
+        }
+    )[];
+    storageBackendId: string;
+    [k: string]: unknown;
+  }[];
+  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -320,6 +492,7 @@ export interface MediaWithThrowingHook {
    */
   shouldThrow?: boolean | null;
   prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -329,6 +502,29 @@ export interface MediaWithThrowingHook {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+  };
+  _managedFiles?: {
+    key: string;
+    roles: (
+      | {
+          type: 'size';
+          sizeKey: string;
+        }
+      | {
+          type: 'original' | 'default' | 'thumbnail';
+        }
+    )[];
+    storageBackendId: string;
+    [k: string]: unknown;
+  }[];
+  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -340,6 +536,7 @@ export interface RestrictedMedia {
   id: string;
   title?: string | null;
   prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -349,6 +546,29 @@ export interface RestrictedMedia {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+  };
+  _managedFiles?: {
+    key: string;
+    roles: (
+      | {
+          type: 'size';
+          sizeKey: string;
+        }
+      | {
+          type: 'original' | 'default' | 'thumbnail';
+        }
+    )[];
+    storageBackendId: string;
+    [k: string]: unknown;
+  }[];
+  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -363,6 +583,7 @@ export interface TestMetadatum {
    */
   testNote?: string | null;
   prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -372,6 +593,29 @@ export interface TestMetadatum {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+  };
+  _managedFiles?: {
+    key: string;
+    roles: (
+      | {
+          type: 'size';
+          sizeKey: string;
+        }
+      | {
+          type: 'original' | 'default' | 'thumbnail';
+        }
+    )[];
+    storageBackendId: string;
+    [k: string]: unknown;
+  }[];
+  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
   sizes?: {
@@ -398,6 +642,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -409,6 +654,104 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versioned-cloud-media".
+ */
+export interface VersionedCloudMedia {
+  id: string;
+  storageMarker?: string | null;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+  };
+  _managedFiles?: {
+    key: string;
+    roles: (
+      | {
+          type: 'size';
+          sizeKey: string;
+        }
+      | {
+          type: 'original' | 'default' | 'thumbnail';
+        }
+    )[];
+    storageBackendId: string;
+    [k: string]: unknown;
+  }[];
+  _fileRevision?: string | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versioned-s3-media".
+ */
+export interface VersionedS3Media {
+  id: string;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+  };
+  _managedFiles?: {
+    key: string;
+    roles: (
+      | {
+          type: 'size';
+          sizeKey: string;
+        }
+      | {
+          type: 'original' | 'default' | 'thumbnail';
+        }
+    )[];
+    storageBackendId: string;
+    [k: string]: unknown;
+  }[];
+  _fileRevision?: string | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    small?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -477,6 +820,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'versioned-cloud-media';
+        value: string | VersionedCloudMedia;
+      } | null)
+    | ({
+        relationTo: 'versioned-s3-media';
+        value: string | VersionedS3Media;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -527,6 +878,7 @@ export interface PayloadMigration {
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -536,6 +888,18 @@ export interface MediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+      };
+  _managedFiles?: T;
+  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
   sizes?:
@@ -569,6 +933,7 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface MediaWithCompositePrefixesSelect<T extends boolean = true> {
   prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -578,6 +943,18 @@ export interface MediaWithCompositePrefixesSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+      };
+  _managedFiles?: T;
+  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
 }
@@ -587,6 +964,7 @@ export interface MediaWithCompositePrefixesSelect<T extends boolean = true> {
  */
 export interface MediaWithCustomUrlSelect<T extends boolean = true> {
   prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -596,6 +974,18 @@ export interface MediaWithCustomUrlSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+      };
+  _managedFiles?: T;
+  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
 }
@@ -605,6 +995,7 @@ export interface MediaWithCustomUrlSelect<T extends boolean = true> {
  */
 export interface MediaWithDisabledPluginSelect<T extends boolean = true> {
   prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -614,6 +1005,18 @@ export interface MediaWithDisabledPluginSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+      };
+  _managedFiles?: T;
+  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
 }
@@ -623,6 +1026,7 @@ export interface MediaWithDisabledPluginSelect<T extends boolean = true> {
  */
 export interface MediaWithGenerateFileUrlSelect<T extends boolean = true> {
   prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -632,6 +1036,18 @@ export interface MediaWithGenerateFileUrlSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+      };
+  _managedFiles?: T;
+  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
 }
@@ -642,6 +1058,7 @@ export interface MediaWithGenerateFileUrlSelect<T extends boolean = true> {
 export interface MediaWithOverwriteSelect<T extends boolean = true> {
   alt?: T;
   prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -651,6 +1068,18 @@ export interface MediaWithOverwriteSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+      };
+  _managedFiles?: T;
+  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
   sizes?:
@@ -684,6 +1113,7 @@ export interface MediaWithOverwriteSelect<T extends boolean = true> {
  */
 export interface MediaWithPrefixSelect<T extends boolean = true> {
   prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -693,6 +1123,18 @@ export interface MediaWithPrefixSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+      };
+  _managedFiles?: T;
+  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
 }
@@ -704,6 +1146,7 @@ export interface MediaWithThrowingHookSelect<T extends boolean = true> {
   alt?: T;
   shouldThrow?: T;
   prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -713,6 +1156,18 @@ export interface MediaWithThrowingHookSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+      };
+  _managedFiles?: T;
+  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
 }
@@ -723,6 +1178,7 @@ export interface MediaWithThrowingHookSelect<T extends boolean = true> {
 export interface RestrictedMediaSelect<T extends boolean = true> {
   title?: T;
   prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -732,6 +1188,18 @@ export interface RestrictedMediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+      };
+  _managedFiles?: T;
+  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
 }
@@ -742,6 +1210,7 @@ export interface RestrictedMediaSelect<T extends boolean = true> {
 export interface TestMetadataSelect<T extends boolean = true> {
   testNote?: T;
   prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -751,6 +1220,18 @@ export interface TestMetadataSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+      };
+  _managedFiles?: T;
+  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
   sizes?:
@@ -780,6 +1261,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -788,6 +1270,84 @@ export interface UsersSelect<T extends boolean = true> {
         id?: T;
         createdAt?: T;
         expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versioned-cloud-media_select".
+ */
+export interface VersionedCloudMediaSelect<T extends boolean = true> {
+  storageMarker?: T;
+  prefix?: T;
+  _objectKey?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+      };
+  _managedFiles?: T;
+  _fileRevision?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versioned-s3-media_select".
+ */
+export interface VersionedS3MediaSelect<T extends boolean = true> {
+  prefix?: T;
+  _objectKey?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+      };
+  _managedFiles?: T;
+  _fileRevision?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        small?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
       };
 }
 /**
@@ -858,7 +1418,9 @@ export interface CollectionQueryWidget {
       | 'media-with-throwing-hook'
       | 'restricted-media'
       | 'test-metadata'
-      | 'users';
+      | 'users'
+      | 'versioned-cloud-media'
+      | 'versioned-s3-media';
     where?:
       | {
           [k: string]: unknown;
@@ -893,6 +1455,8 @@ export interface ActivityWidget {
           | 'restricted-media'
           | 'test-metadata'
           | 'users'
+          | 'versioned-cloud-media'
+          | 'versioned-s3-media'
         )[]
       | null;
   };

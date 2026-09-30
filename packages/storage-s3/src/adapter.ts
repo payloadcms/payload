@@ -31,6 +31,7 @@ export function createS3Adapter({
 }: CreateS3AdapterArgs): Adapter {
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 's3',
+    supportsTempFiles: true,
 
     copyFile: async ({ from, to }) => {
       const { copyS3File } = await import('./copyFile.js')

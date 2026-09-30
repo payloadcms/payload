@@ -43,6 +43,37 @@ export const getAfterChangeHook =
     const isDraftOverPublished =
       isDraftSave && (previousDoc as { _status?: string } | undefined)?._status === 'published'
 
+    if (req.context?._payloadManagedCloudStorage) {
+      const metadata = req.context._payloadManagedCloudMetadata as
+        | Partial<FileData & TypeWithID>
+        | undefined
+
+      if (!metadata || Object.keys(metadata).length === 0) {
+        return doc
+      }
+
+      req.context.skipCloudStorage = true
+      req.file = undefined
+      req.payloadUploadSizes = undefined
+
+      try {
+        const updatedDoc = await req.payload.update({
+          id: doc.id,
+          collection: collection.slug,
+          data: metadata,
+          depth: 0,
+          draft: isDraftSave,
+          overrideAccess: true,
+          req,
+          select,
+        })
+
+        return select ? { ...doc, ...updatedDoc } : { ...doc, ...metadata }
+      } finally {
+        delete req.context.skipCloudStorage
+      }
+    }
+
     try {
       const files = getIncomingFiles({ data: uploadData, req })
 
@@ -118,7 +149,12 @@ export const getAfterChangeHook =
         // persistence have succeeded. Deleting earlier would orphan the
         // record if a later step throws (e.g. a user-defined afterChange
         // hook on the same collection).
-        if (previousDoc && operation === 'update' && !isDraftOverPublished) {
+        if (
+          previousDoc &&
+          operation === 'update' &&
+          !isDraftOverPublished &&
+          !collection.versions
+        ) {
           let filesToDelete: string[] = []
 
           if (typeof previousDoc?.filename === 'string') {

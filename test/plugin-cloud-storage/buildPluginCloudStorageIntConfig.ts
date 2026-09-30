@@ -24,6 +24,8 @@ import { MediaWithThrowingHook } from './collections/MediaWithThrowingHook.js'
 import { RestrictedMedia } from './collections/RestrictedMedia.js'
 import { TestMetadata } from './collections/TestMetadata.js'
 import { Users } from './collections/Users.js'
+import { VersionedCloudMedia } from './collections/VersionedCloudMedia.js'
+import { VersionedS3Media } from './collections/VersionedS3Media.js'
 import { r2UploadEndpoints } from './r2.js'
 import {
   collectionPrefix,
@@ -38,7 +40,10 @@ import {
   prefix,
   restrictedMediaSlug,
   testMetadataSlug,
+  versionedCloudMediaSlug,
+  versionedS3MediaSlug,
 } from './shared.js'
+import { versionedCloudAdapter } from './versionedCloudStorage.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -130,6 +135,7 @@ export function buildPluginCloudStorageIntConfig({
           prefix,
         },
         [mediaWithThrowingHookSlug]: true,
+        [versionedS3MediaSlug]: { prefix: collectionPrefix },
         [restrictedMediaSlug]: true,
       },
       config: {
@@ -216,6 +222,12 @@ export function buildPluginCloudStorageIntConfig({
     },
   })
 
+  const versionedCloudPlugin = cloudStoragePlugin({
+    collections: {
+      [versionedCloudMediaSlug]: { adapter: versionedCloudAdapter },
+    },
+  })
+
   return buildConfigWithDefaults({
     suite: useCompositePrefixes
       ? 'plugin-cloud-storage-composite-prefixes'
@@ -238,9 +250,11 @@ export function buildPluginCloudStorageIntConfig({
         RestrictedMedia,
         TestMetadata,
         Users,
+        VersionedCloudMedia,
+        VersionedS3Media,
       ],
       endpoints: r2UploadEndpoints,
-      plugins: [testMetadataPlugin, disabledStoragePlugin],
+      plugins: [testMetadataPlugin, versionedCloudPlugin, disabledStoragePlugin],
       storage: storagePlugin ? [storagePlugin] : [],
       typescript: {
         outputFile: path.resolve(dirname, 'payload-types.ts'),
@@ -275,6 +289,9 @@ export function buildPluginCloudStorageIntConfig({
               [testMetadataSlug]: {
                 formatOptions: { format: 'webp' },
                 imageSizes: [{ name: 'thumbnail', width: 300 }],
+              },
+              [versionedS3MediaSlug]: {
+                imageSizes: [{ name: 'small', width: 100 }],
               },
             },
           }),

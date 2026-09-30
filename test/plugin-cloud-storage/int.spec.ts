@@ -29,6 +29,7 @@ import {
   prefix,
   restrictedMediaSlug,
   testMetadataSlug,
+  versionedS3MediaSlug,
 } from './shared.js'
 import { clearTestBucket, createTestBucket } from './utils.js'
 
@@ -174,7 +175,7 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
         expect(result).toBe('relative/path')
       })
 
-      test('should normalize backslash separators', async () => {
+      test('should normalize backslash separators in the prefix', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
           filename: 'test.png',
@@ -242,7 +243,7 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
       expect(sanitizeFilename('a/b/../../c/d/../file.txt')).toBe('file.txt')
     })
 
-    test('should normalize backslash separators', () => {
+    test('should normalize backslash separators in the filename', () => {
       expect(sanitizeFilename('..\\..\\windows\\system32\\config')).toBe('config')
     })
 
@@ -318,6 +319,51 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
           })
 
           expect(upload.url).toEqual(`/api/${mediaSlug}/file/${String(upload.filename)}`)
+        })
+
+        test('should retain the first S3 object after a versioned replacement', async ({
+          payload,
+        }) => {
+          const first = await payload.create({
+            collection: versionedS3MediaSlug,
+            data: {},
+            filePath: path.resolve(dirname, '../uploads/image.png'),
+            overrideAccess: true,
+          })
+          const firstRow = await payload.db.findOne({
+            collection: versionedS3MediaSlug,
+            where: { id: { equals: first.id } },
+          })
+          const firstFiles = (
+            firstRow as { _managedFiles: Array<{ key: string; roles: Array<{ type: string }> }> }
+          )._managedFiles
+          const firstKey = firstFiles[0]!.key
+
+          expect(firstFiles.some(({ roles }) => roles.some(({ type }) => type === 'size'))).toBe(
+            true,
+          )
+
+          await payload.update({
+            id: first.id,
+            collection: versionedS3MediaSlug,
+            data: {},
+            filePath: path.resolve(dirname, '../uploads/small.png'),
+            overrideAccess: true,
+          })
+          const secondRow = await payload.db.findOne({
+            collection: versionedS3MediaSlug,
+            where: { id: { equals: first.id } },
+          })
+          const secondFiles = (secondRow as { _managedFiles: Array<{ key: string }> })._managedFiles
+          const secondKey = secondFiles[0]!.key
+
+          expect(secondKey).not.toBe(firstKey)
+          for (const key of [...firstFiles, ...secondFiles].map(({ key }) => key)) {
+            const response = await client.send(
+              new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: key }),
+            )
+            expect(response.$metadata.httpStatusCode).toBe(200)
+          }
         })
 
         test('can upload with prefix', async ({ payload }) => {
@@ -1101,11 +1147,11 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
     })
 
     test.describe('Azure', () => {
-      test.todo('can upload')
+      test.todo('can upload to Azure')
     })
 
     test.describe('GCS', () => {
-      test.todo('can upload')
+      test.todo('can upload to GCS')
     })
 
     test.describe('R2', () => {
