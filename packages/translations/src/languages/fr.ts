@@ -138,7 +138,8 @@ export const frTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Champ de tri',
     widgetTitleFallback: 'Requête de Collection',
     widgetTitleLabel: 'Titre',
-    widgetUploadDropzoneDescription: 'Glisser-déposer un fichier',
+    widgetUploadDropzoneDescription:
+      'Téléversez depuis votre ordinateur par glisser-déposer, ou cliquez sur le bouton ci-dessous',
     widgetUploadFiles: 'Ajouter des fichiers',
   },
   error: {

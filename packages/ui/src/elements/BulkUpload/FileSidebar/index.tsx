@@ -14,6 +14,7 @@ import { Thumbnail } from '../../Thumbnail/index.js'
 import './index.css'
 import { useFormsManager } from '../FormsManager/index.js'
 import { useBulkUpload } from '../index.js'
+import { useCompatibleSelectableCollections } from '../useCompatibleSelectableCollections.js'
 
 const baseClass = 'file-selections'
 
@@ -38,17 +39,14 @@ export function FileSidebar() {
     return formattedSize
   }, [])
 
-  const {
-    collectionSlug: bulkUploadCollectionSlug,
-    selectableCollections,
-    setCollectionSlug,
-  } = useBulkUpload()
+  const { collectionSlug: bulkUploadCollectionSlug, setCollectionSlug } = useBulkUpload()
 
   const { getEntityConfig } = useConfig()
+  const compatibleCollections = useCompatibleSelectableCollections()
 
   return (
     <div className={baseClass}>
-      {selectableCollections?.length > 1 && (
+      {compatibleCollections?.length > 1 && (
         <div className={`${baseClass}__header`}>
           <SelectInput
             className={`${baseClass}__collectionSelect`}
@@ -62,7 +60,7 @@ export function FileSidebar() {
               setCollectionSlug(val)
             }}
             options={
-              selectableCollections?.map((coll) => {
+              compatibleCollections.map((coll) => {
                 const config = getEntityConfig({ collectionSlug: coll })
                 return { label: config.labels.singular, value: config.slug }
               }) || []

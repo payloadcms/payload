@@ -138,7 +138,8 @@ export const roTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sortare Field',
     widgetTitleFallback: 'Interogare de colecție',
     widgetTitleLabel: 'Titlu',
-    widgetUploadDropzoneDescription: 'Trageți și plasați un fișier',
+    widgetUploadDropzoneDescription:
+      'Încărcați de pe computerul dumneavoastră prin tragere și fixare sau faceți clic pe butonul de mai jos',
     widgetUploadFiles: 'Adăugați fișiere',
   },
   error: {

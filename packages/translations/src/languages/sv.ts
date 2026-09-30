@@ -135,7 +135,8 @@ export const svTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sorteringsfält',
     widgetTitleFallback: 'Collectiefråga',
     widgetTitleLabel: 'Titel',
-    widgetUploadDropzoneDescription: 'Dra och släpp en fil',
+    widgetUploadDropzoneDescription:
+      'Ladda upp från din dator genom att dra och släppa, eller klicka på knappen nedan.',
     widgetUploadFiles: 'Lägg till filer',
   },
   error: {

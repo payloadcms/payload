@@ -134,7 +134,8 @@ export const etTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sorteeri väli',
     widgetTitleFallback: 'Kogumi päring',
     widgetTitleLabel: 'Pealkiri',
-    widgetUploadDropzoneDescription: 'Lohista ja aseta fail',
+    widgetUploadDropzoneDescription:
+      'Laad üles oma arvutist, lohistades faili siia või klõpsates allolevat nuppu.',
     widgetUploadFiles: 'Lisa failid',
   },
   error: {

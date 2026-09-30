@@ -134,7 +134,8 @@ export const slTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Razvrsti Field',
     widgetTitleFallback: 'Poizvedba zbirke',
     widgetTitleLabel: 'Naslov',
-    widgetUploadDropzoneDescription: 'Povlecite in spustite datoteko',
+    widgetUploadDropzoneDescription:
+      'Naložite s svojega računalnika z metodo povleci in spusti ali kliknite spodnji gumb.',
     widgetUploadFiles: 'Dodaj datoteke',
   },
   error: {

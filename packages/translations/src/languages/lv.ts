@@ -134,7 +134,8 @@ export const lvTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Kārtot lauku',
     widgetTitleFallback: 'Kolekcijas vaicājums',
     widgetTitleLabel: 'Virsraksts',
-    widgetUploadDropzoneDescription: 'Ievelciet un nometiet failu',
+    widgetUploadDropzoneDescription:
+      'Augšupielādējiet no sava datora, velkot un nometot, vai noklikšķiniet uz pogas zemāk.',
     widgetUploadFiles: 'Pievienot failus',
   },
   error: {

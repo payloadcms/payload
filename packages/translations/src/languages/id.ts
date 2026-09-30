@@ -136,7 +136,8 @@ export const idTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Urutkan Field',
     widgetTitleFallback: 'Kueri Collection',
     widgetTitleLabel: 'Judul',
-    widgetUploadDropzoneDescription: 'Seret dan lepas file',
+    widgetUploadDropzoneDescription:
+      'Unggah dari komputer Anda dengan cara seret dan lepas, atau klik tombol di bawah ini',
     widgetUploadFiles: 'Tambah file',
   },
   error: {

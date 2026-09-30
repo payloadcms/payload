@@ -21,9 +21,9 @@ export function UploadDropzoneWidgetClient({ collections }: Props) {
   const { t } = useTranslation()
 
   const openUpload = React.useCallback(
-    (files?: FileList, destination = collections[0].slug) => {
-      setSelectableCollections(collections.map(({ slug }) => slug))
-      setCollectionSlug(destination)
+    (files?: FileList, availableCollections = collections) => {
+      setSelectableCollections(availableCollections.map(({ slug }) => slug))
+      setCollectionSlug(availableCollections[0].slug)
       setInitialFiles(files)
       openModal(modalSlug)
     },
@@ -39,24 +39,29 @@ export function UploadDropzoneWidgetClient({ collections }: Props) {
 
   const onDrop = React.useCallback(
     (files: FileList) => {
-      const destination = collections.find(({ mimeTypes }) =>
+      const compatibleCollections = collections.filter(({ mimeTypes }) =>
         Array.from(files).every(
           (file) => !mimeTypes?.length || validateMimeType(file.type, mimeTypes),
         ),
       )
 
-      if (!destination) {
+      if (!compatibleCollections.length) {
         toast.error(t('error:invalidFileType'))
         return
       }
 
-      openUpload(files, destination.slug)
+      openUpload(files, compatibleCollections)
     },
     [collections, openUpload, t],
   )
 
   return (
-    <Dropzone className="upload-dropzone-widget__dropzone" multipleFiles onChange={onDrop}>
+    <Dropzone
+      className="upload-dropzone-widget__dropzone"
+      isFocusable={false}
+      multipleFiles
+      onChange={onDrop}
+    >
       <div className="upload-dropzone-widget__content">
         <span aria-hidden="true" className="upload-dropzone-widget__icon" />
         <p className="upload-dropzone-widget__description">

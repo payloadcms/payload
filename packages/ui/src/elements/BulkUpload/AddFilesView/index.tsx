@@ -11,6 +11,7 @@ import { DialogHeader, DialogModal } from '../../Dialog/index.js'
 import { Dropzone } from '../../Dropzone/index.js'
 import { UploadDropzoneContent } from '../../UploadDropzoneContent/index.js'
 import { useBulkUpload } from '../index.js'
+import { useCompatibleSelectableCollections } from '../useCompatibleSelectableCollections.js'
 import './index.css'
 
 const baseClass = 'bulk-upload--add-files'
@@ -23,7 +24,8 @@ type Props = {
 export function AddFilesView({ acceptMimeTypes, modalSlug: modalSlug, onDrop }: Props) {
   const { t } = useTranslation()
   const { getEntityConfig } = useConfig()
-  const { collectionSlug, selectableCollections, setCollectionSlug } = useBulkUpload()
+  const { collectionSlug, setCollectionSlug } = useBulkUpload()
+  const compatibleCollections = useCompatibleSelectableCollections()
 
   const handlePasteFromClipboard = React.useCallback(async () => {
     try {
@@ -41,7 +43,7 @@ export function AddFilesView({ acceptMimeTypes, modalSlug: modalSlug, onDrop }: 
   return (
     <DialogModal className={baseClass} size="large" slug={modalSlug}>
       <DialogHeader showClose title={t('upload:addFiles')} />
-      {selectableCollections?.length > 1 && (
+      {compatibleCollections?.length > 1 && (
         <SelectInput
           className={`${baseClass}__collectionSelect`}
           isClearable={false}
@@ -54,7 +56,7 @@ export function AddFilesView({ acceptMimeTypes, modalSlug: modalSlug, onDrop }: 
               }
             }
           }}
-          options={selectableCollections.map((slug) => ({
+          options={compatibleCollections.map((slug) => ({
             label: getEntityConfig({ collectionSlug: slug }).labels.singular,
             value: slug,
           }))}

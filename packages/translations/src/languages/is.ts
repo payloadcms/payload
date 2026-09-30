@@ -136,7 +136,8 @@ export const isTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Raða Field',
     widgetTitleFallback: 'Safnafyrirspurn',
     widgetTitleLabel: 'Titill',
-    widgetUploadDropzoneDescription: 'Dragðu og slepptu skrá',
+    widgetUploadDropzoneDescription:
+      'Hladdu skjölum inn frá tölvunni þinni með því að draga þau hingað eða smelltu á hnappinn hér að neðan',
     widgetUploadFiles: 'Bæta við skrám',
   },
   error: {

@@ -134,7 +134,8 @@ export const koTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: '정렬 필드',
     widgetTitleFallback: '컬렉션 쿼리',
     widgetTitleLabel: '제목',
-    widgetUploadDropzoneDescription: '파일을 끌어다 놓으세요',
+    widgetUploadDropzoneDescription:
+      '드래그 앤 드롭으로 컴퓨터에서 업로드하거나, 아래 버튼을 클릭하십시오.',
     widgetUploadFiles: '파일 추가',
   },
   error: {

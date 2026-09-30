@@ -137,7 +137,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'ソートフィールド',
     widgetTitleFallback: 'コレクションクエリ',
     widgetTitleLabel: 'タイトル',
-    widgetUploadDropzoneDescription: 'ファイルをドラッグ & ドロップする',
+    widgetUploadDropzoneDescription:
+      'ドラッグアンドドロップでコンピューターからアップロードするか、下のボタンをクリックしてください。',
     widgetUploadFiles: 'ファイルを追加する',
   },
   error: {

@@ -440,6 +440,26 @@ describe('Dashboard', () => {
       .locator('.dropzone input[type="file"]')
       .setInputFiles(path.resolve(dirname, 'test/uploads/image.png'))
     await expect(modal.getByText('image.png')).toBeVisible()
+    const fileDestination = modal.locator('.file-selections__collectionSelect')
+    await expect(fileDestination).toBeVisible()
+
+    await modal.getByRole('button', { name: 'Add Files' }).click()
+    const addMoreFiles = page.locator('#bulk-upload-modal--add-more-files')
+    await expect(addMoreFiles.locator('.bulk-upload--add-files__collectionSelect')).toBeVisible()
+    await addMoreFiles.locator('.dropzone input[type="file"]').setInputFiles({
+      buffer: Buffer.from('pdf'),
+      mimeType: 'application/pdf',
+      name: 'dashboard.pdf',
+    })
+    await expect(modal.getByText('dashboard.pdf')).toBeVisible()
+    await expect(fileDestination).toHaveCount(0)
+
+    await modal.getByRole('button', { name: 'Add Files' }).click()
+    await expect(addMoreFiles.locator('.bulk-upload--add-files__collectionSelect')).toHaveCount(0)
+    await addMoreFiles.getByRole('button', { name: 'Close' }).click()
+    await modal.locator('.file-selections__remove--overlay').first().click()
+    await expect(fileDestination).toBeVisible()
+
     await modal.locator('#field-description').fill('Uploaded from the dashboard')
     try {
       await modal.locator('.bulk-upload--actions-bar__saveButtons button').click()
@@ -467,7 +487,7 @@ describe('Dashboard', () => {
 
       await expect(modal).toBeVisible()
       await expect(modal.getByText('dashboard.pdf')).toBeVisible()
-      await expect(modal.locator('.file-selections__collectionSelect')).toContainText('Media Alt')
+      await expect(modal.locator('.file-selections__collectionSelect')).toHaveCount(0)
     } finally {
       const uploadDirectory = path.resolve(dirname, 'media-alt')
       await rm(path.join(uploadDirectory, 'image.png'), { force: true })

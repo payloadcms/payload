@@ -135,7 +135,8 @@ export const skTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Zoradiť Field',
     widgetTitleFallback: 'Dotaz na Collection',
     widgetTitleLabel: 'Názov',
-    widgetUploadDropzoneDescription: 'Potiahnite a pusťte súbor',
+    widgetUploadDropzoneDescription:
+      'Nahrajte zo svojho počítača pomocou funkcie presunutia myšou, alebo kliknite na tlačidlo nižšie.',
     widgetUploadFiles: 'Pridať súbory',
   },
   error: {

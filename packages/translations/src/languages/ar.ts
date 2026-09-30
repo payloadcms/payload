@@ -135,7 +135,8 @@ export const arTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'ترتيب Field',
     widgetTitleFallback: 'استعلام Collection',
     widgetTitleLabel: 'العنوان',
-    widgetUploadDropzoneDescription: 'قم بسحب وإسقاط ملفّ',
+    widgetUploadDropzoneDescription:
+      'قم بالتحميل من جهازك عن طريق السحب والإفلات، أو انقر على الزر أدناه.',
     widgetUploadFiles: 'أضف ملفات',
   },
   error: {

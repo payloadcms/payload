@@ -137,7 +137,8 @@ export const itTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Campo di ordinamento',
     widgetTitleFallback: 'Query di Collection',
     widgetTitleLabel: 'Titolo',
-    widgetUploadDropzoneDescription: 'Trascina e rilascia un file',
+    widgetUploadDropzoneDescription:
+      'Carica dal tuo computer tramite trascinamento, oppure clicca il pulsante qui sotto',
     widgetUploadFiles: 'Aggiungi File',
   },
   error: {

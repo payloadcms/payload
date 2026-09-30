@@ -128,7 +128,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: '排序字段',
     widgetTitleFallback: 'Collection 查询',
     widgetTitleLabel: '标题',
-    widgetUploadDropzoneDescription: '拖放一个文件',
+    widgetUploadDropzoneDescription: '通过拖放从您的计算机上传，或点击下方按钮',
     widgetUploadFiles: '添加文件',
   },
   error: {

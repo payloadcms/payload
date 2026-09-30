@@ -127,7 +127,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: '排序欄位',
     widgetTitleFallback: 'Collection 查詢',
     widgetTitleLabel: '標題',
-    widgetUploadDropzoneDescription: '拖放檔案',
+    widgetUploadDropzoneDescription: '透過拖放從您的電腦上傳，或點擊下方按鈕。',
     widgetUploadFiles: '新增多個檔案',
   },
   error: {

@@ -137,7 +137,8 @@ export const viTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sắp xếp Field',
     widgetTitleFallback: 'Truy vấn Collection',
     widgetTitleLabel: 'Tiêu đề',
-    widgetUploadDropzoneDescription: 'Kéo và thả một tập tin',
+    widgetUploadDropzoneDescription:
+      'Tải lên từ máy tính của bạn bằng cách kéo và thả, hoặc nhấp vào nút bên dưới',
     widgetUploadFiles: 'Thêm tệp',
   },
   error: {

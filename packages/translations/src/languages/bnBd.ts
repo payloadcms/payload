@@ -137,7 +137,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Field বিন্যাস করুন',
     widgetTitleFallback: 'Collection অনুসন্ধান',
     widgetTitleLabel: 'শিরোনাম',
-    widgetUploadDropzoneDescription: 'একটি ফাইল টেনে এনে ছেড়ে দিন',
+    widgetUploadDropzoneDescription:
+      'আপনার কম্পিউটার থেকে ড্র্যাগ-এন্ড-ড্রপ এর মাধ্যমে আপলোড করুন, অথবা নিচের বাটনে ক্লিক করুন',
     widgetUploadFiles: 'ফাইলগুলি যোগ করুন',
   },
   error: {

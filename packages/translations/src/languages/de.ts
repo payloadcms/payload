@@ -140,7 +140,8 @@ export const deTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sortierfeld',
     widgetTitleFallback: 'Sammlungsabfrage',
     widgetTitleLabel: 'Titel',
-    widgetUploadDropzoneDescription: 'Datei per Drag & Drop verschieben',
+    widgetUploadDropzoneDescription:
+      'Laden Sie von Ihrem Computer hoch, indem Sie per Drag-and-Drop ziehen, oder klicken Sie auf die Schaltfläche unten.',
     widgetUploadFiles: 'Dateien hinzufügen',
   },
   error: {

@@ -137,7 +137,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Rikiuoti lauką',
     widgetTitleFallback: 'Kolekcijos užklausa',
     widgetTitleLabel: 'Pavadinimas',
-    widgetUploadDropzoneDescription: 'Temkite ir numeskite failą',
+    widgetUploadDropzoneDescription:
+      'Įkelkite iš savo kompiuterio vilkdami ir numesdami, arba spustelėkite mygtuką žemiau',
     widgetUploadFiles: 'Pridėti failus',
   },
   error: {

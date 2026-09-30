@@ -135,7 +135,8 @@ export const hyTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Դաշտի դասավորում',
     widgetTitleFallback: 'Collection-ի հարցում',
     widgetTitleLabel: 'Վերնագիր',
-    widgetUploadDropzoneDescription: 'Քաշեք և գցեք ֆայլը',
+    widgetUploadDropzoneDescription:
+      'Վերբեռնեք ձեր համակարգչից քաշել և գցել գործողությամբ կամ սեղմեք ներքևի կոճակը',
     widgetUploadFiles: 'Ավելացնել ֆայլեր',
   },
   error: {

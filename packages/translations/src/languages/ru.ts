@@ -138,7 +138,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Сортировать поле',
     widgetTitleFallback: 'Запрос к Collection',
     widgetTitleLabel: 'Заголовок',
-    widgetUploadDropzoneDescription: 'Перетащите файл',
+    widgetUploadDropzoneDescription:
+      'Загрузите с вашего компьютера путем перетаскивания файла или нажмите кнопку ниже',
     widgetUploadFiles: 'Добавить файлы',
   },
   error: {

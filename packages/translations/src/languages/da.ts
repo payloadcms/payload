@@ -134,7 +134,8 @@ export const daTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sortér felt',
     widgetTitleFallback: 'Collectionsforespørgsel',
     widgetTitleLabel: 'Titel',
-    widgetUploadDropzoneDescription: 'Træk og slip en fil',
+    widgetUploadDropzoneDescription:
+      'Upload fra din computer via træk og slip, eller klik på knappen nedenfor',
     widgetUploadFiles: 'Tilføj Filer',
   },
   error: {

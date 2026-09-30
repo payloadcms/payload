@@ -136,7 +136,8 @@ export const azTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Field-u sırala',
     widgetTitleFallback: 'Collection sorğusu',
     widgetTitleLabel: 'Başlıq',
-    widgetUploadDropzoneDescription: 'Faylı buraya sürükləyin və buraxın',
+    widgetUploadDropzoneDescription:
+      'Kompüterinizdən yükləmək üçün sürükləyib buraxa və ya aşağıdakı düyməni klikləyə bilərsiniz.',
     widgetUploadFiles: 'Faylları Əlavə Edin',
   },
   error: {

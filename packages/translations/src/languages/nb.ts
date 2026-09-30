@@ -136,7 +136,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sorter Field',
     widgetTitleFallback: 'Forespørsel om Collection',
     widgetTitleLabel: 'Tittel',
-    widgetUploadDropzoneDescription: 'Dra og slipp en fil',
+    widgetUploadDropzoneDescription:
+      'Last opp fra datamaskinen din ved å dra og slippe, eller klikk på knappen nedenfor',
     widgetUploadFiles: 'Legg til filer',
   },
   error: {

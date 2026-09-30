@@ -136,7 +136,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Сортирай Field',
     widgetTitleFallback: 'Заявка към Collection',
     widgetTitleLabel: 'Заглавие',
-    widgetUploadDropzoneDescription: 'Дръпни и пусни файл',
+    widgetUploadDropzoneDescription:
+      'Качете от вашия компютър чрез плъзгане и пускане или натиснете бутона по-долу.',
     widgetUploadFiles: 'Добави файлове',
   },
   error: {

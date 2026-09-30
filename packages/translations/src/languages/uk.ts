@@ -135,7 +135,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Поле сортування',
     widgetTitleFallback: 'Запит колекції',
     widgetTitleLabel: 'Заголовок',
-    widgetUploadDropzoneDescription: 'Перемістіть файл',
+    widgetUploadDropzoneDescription:
+      'Завантажте з вашого комп’ютера шляхом перетягування або натисніть кнопку нижче',
     widgetUploadFiles: 'Додати файли',
   },
   error: {

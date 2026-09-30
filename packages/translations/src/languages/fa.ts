@@ -133,7 +133,8 @@ export const faTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'مرتب‌سازی Field',
     widgetTitleFallback: 'کوئری Collection',
     widgetTitleLabel: 'عنوان',
-    widgetUploadDropzoneDescription: 'یک فایل را اینجا بکشید و رها کنید',
+    widgetUploadDropzoneDescription:
+      'بارگذاری از رایانه خود از طریق کشیدن و رها کردن، یا با کلیک بر روی دکمه زیر',
     widgetUploadFiles: 'افزودن فایل‌ها',
   },
   error: {

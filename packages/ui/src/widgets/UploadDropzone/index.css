@@ -18,6 +18,10 @@
     background: var(--color-bg);
     text-align: center;
 
+    &:hover {
+      background: var(--color-bg);
+    }
+
     &.dragging {
       border-color: var(--color-border-selected);
       background: var(--color-bg-selected);
@@ -48,10 +52,18 @@
   .upload-dropzone-widget__drag-message,
   .upload-dropzone-widget__message {
     margin: 0;
-    color: var(--color-text);
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     line-height: var(--text-body-medium-line-height);
+  }
+
+  .upload-dropzone-widget__description,
+  .upload-dropzone-widget__drag-message {
+    color: var(--color-text-secondary);
+  }
+
+  .upload-dropzone-widget__message {
+    color: var(--color-text);
   }
 
   .upload-dropzone-widget__drag-message {

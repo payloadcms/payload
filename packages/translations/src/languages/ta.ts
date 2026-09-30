@@ -137,7 +137,8 @@ export const taTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Field ஐ வரிசைப்படுத்து',
     widgetTitleFallback: 'Collection வினா',
     widgetTitleLabel: 'தலைப்பு',
-    widgetUploadDropzoneDescription: 'கோப்பை இழுத்து விடுக',
+    widgetUploadDropzoneDescription:
+      'உங்கள் கணினியில் இருந்து இழுத்து விடுவதன் மூலம் பதிவேற்றவும், அல்லது கீழேயுள்ள பொத்தானை கிளிக் செய்யவும்',
     widgetUploadFiles: 'கோப்புகளை சேர்க்கவும்',
   },
   error: {

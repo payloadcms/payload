@@ -133,7 +133,7 @@ export const thTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'จัดเรียง Field',
     widgetTitleFallback: 'การค้นหาข้อมูลใน Collection',
     widgetTitleLabel: 'ชื่อเรื่อง',
-    widgetUploadDropzoneDescription: 'ลากและวางไฟล์',
+    widgetUploadDropzoneDescription: 'อัปโหลดจากคอมพิวเตอร์ของคุณโดยลากและวาง หรือคลิกปุ่มด้านล่าง',
     widgetUploadFiles: 'เพิ่มไฟล์',
   },
   error: {

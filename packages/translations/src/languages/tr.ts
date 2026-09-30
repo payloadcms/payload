@@ -138,7 +138,8 @@ export const trTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Field Sıralama',
     widgetTitleFallback: 'Collection sorgusu',
     widgetTitleLabel: 'Başlık',
-    widgetUploadDropzoneDescription: 'Bir dosya sürükleyip bırakabilirsiniz',
+    widgetUploadDropzoneDescription:
+      'Bilgisayarınızdan sürükleyip bırakarak yükleyin veya aşağıdaki butona tıklayın.',
     widgetUploadFiles: 'Dosya Ekle',
   },
   error: {

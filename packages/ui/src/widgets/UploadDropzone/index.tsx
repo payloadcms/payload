@@ -1,5 +1,6 @@
 import type { CollectionSlug, WidgetServerProps } from 'payload'
 
+import { isEntityHidden } from 'payload'
 import React from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
@@ -23,7 +24,7 @@ export function UploadDropzoneWidget({
       (collection) =>
         collection.upload &&
         collection.upload.bulkUpload !== false &&
-        collection.admin?.hidden !== true,
+        !isEntityHidden({ hidden: collection.admin?.hidden, user: req.user }),
     )
   const excludedCollections = new Set(widgetData?.excludedCollections ?? [])
   const selectedCollections = uploadCollections.filter(

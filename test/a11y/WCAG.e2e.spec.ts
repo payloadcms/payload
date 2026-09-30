@@ -515,8 +515,10 @@ test.describe('WCAG 2.2 Level AA', () => {
 
       const widget = page.locator('.upload-dropzone-widget')
       const button = widget.getByRole('button', { name: 'Upload files' })
+      const dropzone = widget.locator('.upload-dropzone-widget__dropzone')
 
       await expect(button).toBeVisible()
+      await expect(dropzone).not.toHaveAttribute('tabindex', '0')
       await button.focus()
       await expect(button).toBeFocused()
       await button.press('Enter')

@@ -136,7 +136,8 @@ export const plTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sortuj Pole',
     widgetTitleFallback: 'Zapytanie dotyczące Collection',
     widgetTitleLabel: 'Tytuł',
-    widgetUploadDropzoneDescription: 'Przeciągnij i upuść plik',
+    widgetUploadDropzoneDescription:
+      'Prześlij z komputera, przeciągając i upuszczając plik lub kliknij przycisk poniżej',
     widgetUploadFiles: 'Dodaj pliki',
   },
   error: {

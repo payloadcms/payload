@@ -131,7 +131,8 @@ export const heTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'שדה מיון',
     widgetTitleFallback: 'שאילתת Collection',
     widgetTitleLabel: 'כותרת',
-    widgetUploadDropzoneDescription: 'גרור ושחרר קובץ',
+    widgetUploadDropzoneDescription:
+      'העלו מהמחשב שלכם באמצעות גרירה ושחרור, או לחצו על הכפתור למטה',
     widgetUploadFiles: 'הוסף קבצים',
   },
   error: {

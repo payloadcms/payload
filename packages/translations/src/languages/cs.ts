@@ -133,7 +133,8 @@ export const csTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Řadicí pole',
     widgetTitleFallback: 'Dotaz na Collection',
     widgetTitleLabel: 'Název',
-    widgetUploadDropzoneDescription: 'Přetáhněte soubor',
+    widgetUploadDropzoneDescription:
+      'Nahrajte ze svého počítače přetažením souboru nebo klikněte na tlačítko níže.',
     widgetUploadFiles: 'Přidat soubory',
   },
   error: {

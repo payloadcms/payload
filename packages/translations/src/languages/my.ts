@@ -137,7 +137,8 @@ export const myTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Field တူညီခြင်း အလိုက် စီစဉ်ရန်',
     widgetTitleFallback: 'Collection query (မေးခွန်း)',
     widgetTitleLabel: 'ခေါင်းစဉ်',
-    widgetUploadDropzoneDescription: 'ဖိုင်တစ်ဖိုင်ကို ဆွဲချလိုက်ပါ။',
+    widgetUploadDropzoneDescription:
+      'သင့်ကွန်ပျူတာမှ ဖိုင်များကို ဤနေရာသို့ ဆွဲယူပြီး ချထား၍ တင်နိုင်ပါသည်၊ သို့မဟုတ် အောက်ပါခလုတ်ကို နှိပ်ပါ။',
     widgetUploadFiles: 'ဖိုင်များ ထည့်ပါ',
   },
   error: {

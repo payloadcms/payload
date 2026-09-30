@@ -137,7 +137,8 @@ export const caTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Ordenar camp',
     widgetTitleFallback: 'Consulta de la Collection',
     widgetTitleLabel: 'Títol',
-    widgetUploadDropzoneDescription: 'Arrossega i deixa anar un fitxer',
+    widgetUploadDropzoneDescription:
+      'Carregueu des del vostre ordinador arrossegant i deixant anar, o feu clic al botó següent',
     widgetUploadFiles: 'Afegir fitxers',
   },
   error: {

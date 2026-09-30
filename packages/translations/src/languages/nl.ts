@@ -136,7 +136,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sorteerveld',
     widgetTitleFallback: 'Collectiequery',
     widgetTitleLabel: 'Titel',
-    widgetUploadDropzoneDescription: 'Sleep een bestand',
+    widgetUploadDropzoneDescription:
+      'Upload vanaf uw computer via slepen en neerzetten, of klik op de knop hieronder.',
     widgetUploadFiles: 'Bestanden toevoegen',
   },
   error: {

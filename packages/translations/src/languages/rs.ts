@@ -136,7 +136,8 @@ export const rsTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sortiraj polje',
     widgetTitleFallback: 'Upit za kolekciju',
     widgetTitleLabel: 'Naslov',
-    widgetUploadDropzoneDescription: 'Превуците и испустите датотеку',
+    widgetUploadDropzoneDescription:
+      'Отпремите са свог рачунара превлачењем и испуштањем или кликните на дугме испод',
     widgetUploadFiles: 'Dodaj datoteke',
   },
   error: {

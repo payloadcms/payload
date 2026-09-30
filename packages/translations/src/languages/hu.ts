@@ -139,7 +139,8 @@ export const huTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Mező rendezése',
     widgetTitleFallback: 'Gyűjtemény lekérdezés',
     widgetTitleLabel: 'Cím',
-    widgetUploadDropzoneDescription: 'Húzzon ide egy fájlt',
+    widgetUploadDropzoneDescription:
+      'Töltsön fel a számítógépéről húzással és ejtéssel, vagy kattintson az alábbi gombra',
     widgetUploadFiles: 'Fájlok hozzáadása',
   },
   error: {
