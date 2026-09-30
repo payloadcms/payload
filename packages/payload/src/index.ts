@@ -48,6 +48,7 @@ import type { DataFromGlobalSlug, Globals, SelectFromGlobalSlug } from './global
 import type {
   ApplyDisableErrors,
   DraftTransformCollectionWithSelect,
+  DraftTransformGlobalWithSelect,
   JsonObject,
   SelectType,
   TransformCollectionWithSelect,
@@ -599,9 +600,7 @@ export class BasePayload {
   ): Promise<
     PaginatedDocs<
       TDraft extends true
-        ? PayloadTypes extends { strictDraftTypes: true }
-          ? DraftTransformCollectionWithSelect<TSlug, TSelect>
-          : TransformCollectionWithSelect<TSlug, TSelect>
+        ? DraftTransformCollectionWithSelect<TSlug, TSelect>
         : TransformCollectionWithSelect<TSlug, TSelect>
     >
   > => {
@@ -617,10 +616,18 @@ export class BasePayload {
     TSlug extends CollectionSlug,
     TDisableErrors extends boolean,
     TSelect extends SelectFromCollectionSlug<TSlug>,
+    TDraft extends boolean = false,
   >(
-    options: FindByIDOptions<TSlug, TDisableErrors, TSelect>,
-  ): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> => {
-    return findByIDLocal<TSlug, TDisableErrors, TSelect>(this, options)
+    options: { draft?: TDraft } & FindByIDOptions<TSlug, TDisableErrors, TSelect>,
+  ): Promise<
+    ApplyDisableErrors<
+      TDraft extends true
+        ? DraftTransformCollectionWithSelect<TSlug, TSelect>
+        : TransformCollectionWithSelect<TSlug, TSelect>,
+      TDisableErrors
+    >
+  > => {
+    return findByIDLocal<TSlug, TDisableErrors, TSelect, TDraft>(this, options)
   }
 
   /**
@@ -637,10 +644,18 @@ export class BasePayload {
     return findDistinctLocal(this, options)
   }
 
-  findGlobal = async <TSlug extends GlobalSlug, TSelect extends SelectFromGlobalSlug<TSlug>>(
-    options: FindGlobalOptions<TSlug, TSelect>,
-  ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
-    return findOneGlobalLocal<TSlug, TSelect>(this, options)
+  findGlobal = async <
+    TSlug extends GlobalSlug,
+    TSelect extends SelectFromGlobalSlug<TSlug>,
+    TDraft extends boolean = false,
+  >(
+    options: { draft?: TDraft } & FindGlobalOptions<TSlug, TSelect>,
+  ): Promise<
+    TDraft extends true
+      ? DraftTransformGlobalWithSelect<TSlug, TSelect>
+      : TransformGlobalWithSelect<TSlug, TSelect>
+  > => {
+    return findOneGlobalLocal<TSlug, TSelect, TDraft>(this, options)
   }
 
   /**

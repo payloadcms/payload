@@ -4,6 +4,7 @@ import type {
   DataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
 } from '../../collections/config/types.js'
+import type { Options as CreateOptions } from '../../collections/operations/local/create.js'
 import type { AuthCollectionSlug } from '../../index.js'
 import type { PayloadRequest, SelectType } from '../../types/index.js'
 
@@ -83,7 +84,7 @@ export const registerFirstUserOperation = async <TSlug extends AuthCollectionSlu
       data,
       overrideAccess: true,
       req,
-    })
+    } as CreateOptions<TSlug, SelectType>)
 
     // auto-verify (if applicable)
     if (verify) {
