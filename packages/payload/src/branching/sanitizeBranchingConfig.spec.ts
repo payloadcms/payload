@@ -8,8 +8,28 @@ import {
   branchesCollectionSlug,
   branchMergesCollectionSlug,
 } from './types.js'
+import { defaultBranchMergeValidation } from './validation.js'
 
 describe('sanitizeBranchingConfig', () => {
+  it('should use the default merge validator when branching is enabled as true', () => {
+    const config = {
+      branching: true,
+      collections: [{ fields: [], slug: 'posts' }],
+    } as Config
+
+    expect(sanitizeBranchingConfig(config).validate).toBe(defaultBranchMergeValidation)
+  })
+
+  it('should preserve a configured replacement merge validator', () => {
+    const validate = async () => ({ errors: [], valid: true })
+    const config = {
+      branching: { validate },
+      collections: [{ fields: [], slug: 'posts' }],
+    } as Config
+
+    expect(sanitizeBranchingConfig(config).validate).toBe(validate)
+  })
+
   it('should reject an auth-enabled collection that opts into branching', () => {
     const config = {
       branching: true,

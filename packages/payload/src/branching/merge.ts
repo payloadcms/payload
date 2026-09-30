@@ -4,6 +4,7 @@ import type { DiscardOptions } from './discard.js'
 import type { ResolvedChange } from './effectiveOperations.js'
 import type { BlockedChange } from './preflight.js'
 import type { BranchOperation } from './types.js'
+import type { BranchMergeValidationError } from './validation.js'
 
 import {
   type BranchMergeUploadDataContext,
@@ -58,6 +59,7 @@ import {
   branchParentField,
   MAIN_BRANCH,
 } from './types.js'
+import { createMainBranchRequest, prepareBranchMergeValidationCandidates } from './validation.js'
 import { deleteBranchGlobalVersionChain, deleteBranchVersionChain } from './versions.js'
 
 export type MergeableChange = {
@@ -86,6 +88,7 @@ export type MergeResult = {
   canMerge: boolean
   mergeable: MergeableChange[]
   merged: MergeableChange[]
+  validationErrors: BranchMergeValidationError[]
   warnings: MergeWarning[]
 }
 
@@ -275,14 +278,17 @@ export const mergeBranch = async (
   const pendingGlobals = selectedChanges.filter((change) => change.entityType === 'global')
 
   const resolved = await resolveEffectiveOperations({ branch, changes: pending, payload, req })
+  const targetReq = createMainBranchRequest({ req })
 
   // This first pass describes which changes the user can select. Each selected
   // change is checked again inside the transaction immediately before its real
   // write, because hooks can change access-relevant state after this point.
-  const blocked = overrideAccess ? [] : await runMergePreflight({ payload, pending: resolved, req })
+  const blocked = overrideAccess
+    ? []
+    : await runMergePreflight({ payload, pending: resolved, req: targetReq })
   const blockedGlobals = overrideAccess
     ? []
-    : await runGlobalMergePreflight({ payload, pending: pendingGlobals, req })
+    : await runGlobalMergePreflight({ payload, pending: pendingGlobals, req: targetReq })
   blocked.push(...blockedGlobals)
 
   blocked.push(
@@ -291,15 +297,25 @@ export const mergeBranch = async (
       payload,
       pending: resolved,
       pendingGlobals,
-      req,
+      req: targetReq,
     })),
   )
 
-  const blockedChangeIDs = new Set(blocked.map((each) => String(each.changeID)))
-  const applicable = pending.filter((change) => !blockedChangeIDs.has(String(change.id)))
-  const applicableGlobals = pendingGlobals.filter(
-    (change) => !blockedChangeIDs.has(String(change.id)),
-  )
+  const validationCandidates = await prepareBranchMergeValidationCandidates({
+    payload,
+    pending: resolved,
+    pendingGlobals,
+    req: targetReq,
+  })
+  const validation = await payload.config.branching.validate({
+    branch,
+    candidates: validationCandidates,
+    req: targetReq,
+    target: MAIN_BRANCH,
+  })
+  const hasPreflightErrors = blocked.length > 0 || !validation.valid
+  const applicable = hasPreflightErrors ? [] : pending
+  const applicableGlobals = hasPreflightErrors ? [] : pendingGlobals
 
   const mergeable: MergeableChange[] = applicable.map((change) => ({
     changeID: change.id,
@@ -353,6 +369,7 @@ export const mergeBranch = async (
     canMerge: mergeable.length > 0,
     mergeable,
     merged: [],
+    validationErrors: validation.errors,
     warnings,
   }
 
@@ -363,6 +380,57 @@ export const mergeBranch = async (
   const branchingHooks = payload.config.branching?.hooks
 
   await branchingHooks?.beforeMerge?.({ branch, changes: mergeable, req, warnings })
+
+  const refreshedResolved = await resolveEffectiveOperations({
+    branch,
+    changes: applicable,
+    payload,
+    req,
+  })
+  const refreshedTargetReq = createMainBranchRequest({ req })
+  const blockedAfterHook = overrideAccess
+    ? []
+    : await runMergePreflight({ payload, pending: refreshedResolved, req: refreshedTargetReq })
+  const blockedGlobalsAfterHook = overrideAccess
+    ? []
+    : await runGlobalMergePreflight({
+        payload,
+        pending: applicableGlobals,
+        req: refreshedTargetReq,
+      })
+
+  blockedAfterHook.push(...blockedGlobalsAfterHook)
+  blockedAfterHook.push(
+    ...(await runMergeDependencyPreflight({
+      initiallyBlocked: blockedAfterHook,
+      payload,
+      pending: refreshedResolved,
+      pendingGlobals: applicableGlobals,
+      req: refreshedTargetReq,
+    })),
+  )
+
+  const refreshedValidationCandidates = await prepareBranchMergeValidationCandidates({
+    payload,
+    pending: refreshedResolved,
+    pendingGlobals: applicableGlobals,
+    req: refreshedTargetReq,
+  })
+  const refreshedValidation = await payload.config.branching.validate({
+    branch,
+    candidates: refreshedValidationCandidates,
+    req: refreshedTargetReq,
+    target: MAIN_BRANCH,
+  })
+
+  if (blockedAfterHook.length || !refreshedValidation.valid) {
+    result.blocked = blockedAfterHook
+    result.canMerge = false
+    result.mergeable = []
+    result.validationErrors = refreshedValidation.errors
+
+    return result
+  }
 
   // Gated on `req.transactionID`, not on whether a `req` was passed in: a merge
   // triggered over HTTP hands in a `req` of its own that has no transaction on
@@ -412,6 +480,7 @@ export const mergeBranch = async (
   }
 
   try {
+    const writeTargetReq = createMainBranchRequest({ req })
     const refreshedApplicable = await resolveEffectiveOperations({
       branch,
       changes: applicable,
@@ -462,7 +531,7 @@ export const mergeBranch = async (
         const blockedAtUse = await runMergePreflight({
           payload,
           pending: [resolvedChange],
-          req,
+          req: writeTargetReq,
         })
 
         if (blockedAtUse.length) {
@@ -494,7 +563,7 @@ export const mergeBranch = async (
         payload,
         pending: [resolvedChange],
         pendingGlobals: [],
-        req,
+        req: writeTargetReq,
       })
 
       if (dependencyBlockedAtUse.length) {
@@ -507,6 +576,7 @@ export const mergeBranch = async (
         payload,
         req,
         resolved: resolvedChange,
+        targetReq: writeTargetReq,
       })
 
       if (uploadSourceDoc) {
@@ -560,7 +630,11 @@ export const mergeBranch = async (
       )
 
       if (!overrideAccess) {
-        const blockedAtUse = await runGlobalMergePreflight({ payload, pending: [change], req })
+        const blockedAtUse = await runGlobalMergePreflight({
+          payload,
+          pending: [change],
+          req: writeTargetReq,
+        })
 
         if (blockedAtUse.length) {
           throw new Forbidden(req.t)
@@ -574,14 +648,21 @@ export const mergeBranch = async (
         payload,
         pending: [],
         pendingGlobals: [change],
-        req,
+        req: writeTargetReq,
       })
 
       if (dependencyBlockedAtUse.length) {
         throw new APIError(dependencyBlockedAtUse[0]!.message, 409)
       }
 
-      await applyGlobalChange({ branch, globalSlug, overrideAccess, payload, req })
+      await applyGlobalChange({
+        branch,
+        globalSlug,
+        overrideAccess,
+        payload,
+        req,
+        targetReq: writeTargetReq,
+      })
 
       snapshots.set(String(change.id), {
         after: await readGlobalMergeSnapshot({ globalSlug, payload, req }),
@@ -742,6 +823,12 @@ const stripInternal = (data: Record<string, unknown>): Record<string, unknown> =
   } = data
 
   return rest
+}
+
+const stripGlobalInternal = (data: Record<string, unknown>): Record<string, unknown> => {
+  const { globalType: _globalType, ...globalData } = data
+
+  return stripInternal(globalData)
 }
 
 /**
@@ -1013,12 +1100,14 @@ const applyChange = async ({
   payload,
   req,
   resolved,
+  targetReq,
 }: {
   hasTransaction: boolean
   overrideAccess: boolean
   payload: Payload
   req: PayloadRequest
   resolved: ResolvedChange
+  targetReq: PayloadRequest
 }): Promise<void> => {
   const { change, collectionSlug, docID, shadow, writes } = resolved
 
@@ -1028,7 +1117,7 @@ const applyChange = async ({
 
   const shadowID = shadow.id as number | string
   const branch = change.branch as string
-  const mainWriteReq = withoutBranch(req)
+  const mainWriteReq = createMainBranchRequest({ req: targetReq })
 
   mainWriteReq.file = undefined
   mainWriteReq.payloadUploadSizes = undefined
@@ -1114,10 +1203,9 @@ const applyChange = async ({
   if (change.operation === 'delete') {
     await payload.delete({
       id: docID,
-      branch: false,
       collection: collectionSlug,
       overrideAccess,
-      req,
+      req: targetReq,
     })
 
     await dropShadowRow()
@@ -1137,7 +1225,6 @@ const applyChange = async ({
   if (change.operation === 'create') {
     const actionableWrites = writes.filter((write) => write.trashState !== 'access')
     const [rowWrite, ...laterWrites] = actionableWrites
-    const createReq = mainWriteReq
     const localization = payload.config.localization
     const hasLocalizedFields = traverseForLocalizedFields(
       payload.collections[collectionSlug]!.config.fields,
@@ -1159,7 +1246,7 @@ const applyChange = async ({
             draft: write.draft,
             locale,
             payload,
-            req: createReq,
+            req,
           })
 
           if (branchDoc) {
@@ -1172,6 +1259,8 @@ const applyChange = async ({
     }
 
     const applyCreateWrites = async () => {
+      const createTargetReq = mainWriteReq
+
       // Updated in place rather than recreated. The row already holds the ID that
       // inbound relationships point at, and deleting it would cascade those
       // relationship rows away — rebuilding the row does not bring them back.
@@ -1188,11 +1277,12 @@ const applyChange = async ({
 
           await updateByIDOperationForBranchMerge({
             id: shadowID,
+            branchMergeStorageReq: req,
             collection: payload.collections[collectionSlug]!,
             data: data as never,
             draft: rowWrite!.draft,
             overrideAccess,
-            req: withLocale({ locale: createLocale, req: createReq }),
+            req: withLocale({ locale: createLocale, req: createTargetReq }),
             trash: includesTrashState(data),
           })
         }
@@ -1201,10 +1291,11 @@ const applyChange = async ({
 
         await updateByIDOperationForBranchMerge({
           id: shadowID,
+          branchMergeStorageReq: req,
           collection: payload.collections[collectionSlug]!,
           data: data as never,
           overrideAccess,
-          req: createReq,
+          req: createTargetReq,
           trash: includesTrashState(data),
         })
       }
@@ -1248,7 +1339,7 @@ const applyChange = async ({
         branch: false,
         collection: collectionSlug,
         data: { [branchField]: MAIN_BRANCH },
-        req: createReq,
+        req,
       })
 
       await applyCreateWrites()
@@ -1261,7 +1352,7 @@ const applyChange = async ({
       branch,
       collectionSlug,
       payload,
-      req: createReq,
+      req,
       shadow,
       shadowID,
     })
@@ -1283,12 +1374,11 @@ const applyChange = async ({
     if (write.trashState === 'apply') {
       await payload.update({
         id: docID,
-        branch: false,
         collection: collectionSlug,
         data: { deletedAt: write.data.deletedAt ?? null } as never,
         draft: false,
         overrideAccess,
-        req,
+        req: targetReq,
         trash: true,
       })
 
@@ -1678,12 +1768,14 @@ const applyGlobalChange = async ({
   overrideAccess,
   payload,
   req,
+  targetReq,
 }: {
   branch: string
   globalSlug: string
   overrideAccess: boolean
   payload: Payload
   req: PayloadRequest
+  targetReq: PayloadRequest
 }): Promise<void> => {
   const writes = await resolveGlobalMergeWrites({ branch, globalSlug, payload, req })
 
@@ -1712,15 +1804,14 @@ const applyGlobalChange = async ({
 
       await payload.updateGlobal({
         slug: globalSlug,
-        branch: false,
-        data: stripInternal({ ...data, globalType: undefined }) as never,
+        data: stripGlobalInternal(data) as never,
         draft: write.draft,
         locale,
         overrideAccess,
         req: withLocale({
           coalesceLatestVersion: localeIndex > 0,
           locale,
-          req,
+          req: targetReq,
         }),
       })
     }

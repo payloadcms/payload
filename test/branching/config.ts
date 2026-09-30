@@ -2,6 +2,7 @@ import type { Block, Payload } from 'payload'
 
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import { defaultBranchMergeValidation } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -91,6 +92,10 @@ export default buildConfigWithDefaults({
       hooks: {
         beforeMerge: (args) => hookSpy.beforeMerge?.(args),
       },
+      validate: (args) =>
+        hookSpy.branchValidation
+          ? hookSpy.branchValidation(args)
+          : defaultBranchMergeValidation(args),
     },
     collections: [
       {

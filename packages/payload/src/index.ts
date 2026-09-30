@@ -1516,7 +1516,6 @@ export type {
   BranchOperation,
   SanitizedBranchingConfig,
 } from './branching/types.js'
-
 export {
   branchChangesCollectionSlug,
   branchDocIDField,
@@ -1525,6 +1524,13 @@ export {
   branchParentField,
   MAIN_BRANCH,
 } from './branching/types.js'
+export { defaultBranchMergeValidation } from './branching/validation.js'
+export type {
+  BranchMergeValidate,
+  BranchMergeValidationCandidate,
+  BranchMergeValidationError,
+  BranchMergeValidationResult,
+} from './branching/validation.js'
 export {
   projectBranchVersionParent,
   projectBranchVersionParents,

@@ -3,6 +3,7 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { Payload, PayloadRequest, SanitizedCollectionConfig } from 'payload'
 
+import { Types } from 'mongoose'
 import path from 'path'
 import {
   assertBranchReadable,
@@ -12,6 +13,7 @@ import {
   isolateBranchState,
   isolateObjectProperty,
   killTransaction,
+  resolveBranch,
   resolveEffectiveOperations,
 } from 'payload'
 import { fileURLToPath } from 'url'
@@ -774,7 +776,20 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         data: { category: category.id, title: 'points at branch category' },
       })
 
-      await payload.branches.merge({ branch })
+      const result = await payload.branches.merge({ branch })
+
+      expect(result.blocked).toEqual([])
+      expect(result.validationErrors).toEqual([])
+      expect(result.merged).toHaveLength(2)
+
+      const rawPost = await payload.db.findOne({
+        branch: false,
+        collection: postsSlug,
+        req: await createPayloadRequest({ branch: false, payload }),
+        where: { id: { equals: post.id } },
+      })
+
+      expect(rawPost).toMatchObject({ _branch: 'main' })
 
       const onMain = await payload.findByID({ id: post.id, collection: postsSlug, depth: 1 })
       const related = onMain.category as { id?: number | string; name?: string } | null
@@ -5832,7 +5847,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(blockedIDs).not.toContain(String(allowedID))
     })
 
-    test('should exclude blocked documents from mergeable rather than failing the whole merge', async () => {
+    test('should reject the selected set when one document is blocked', async () => {
       const result = await payload.branches.merge({
         branch: 'accesswork',
         dryRun: true,
@@ -5840,17 +5855,20 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         user: (await asEditor()) as never,
       })
 
-      const mergeableIDs = result.mergeable.map((each) => String(each.docID))
-
-      expect(mergeableIDs).toContain(String(allowedID))
-      expect(result.mergeable).not.toContainEqual(
+      expect(result.mergeable).toHaveLength(0)
+      expect(result.blocked).toContainEqual(
         expect.objectContaining({ collectionSlug: restrictedSlug, docID: restrictedID }),
       )
-      expect(result.canMerge).toBe(true)
+      expect(result.canMerge).toBe(false)
     })
 
-    test('should apply only the permitted changes and leave blocked ones on the branch', async () => {
-      await payload.branches.merge({
+    test('should leave all selected changes pending when one is blocked', async () => {
+      const before = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: 'accesswork' } },
+      })
+      const result = await payload.branches.merge({
         branch: 'accesswork',
         overrideAccess: false,
         user: (await asEditor()) as never,
@@ -5864,12 +5882,67 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         where: { branch: { equals: 'accesswork' } },
       })
 
+      expect(result.canMerge).toBe(false)
+      expect(result.merged).toHaveLength(0)
+      expect(allowed.title).toBe('allowed on main')
+      expect(restricted.title).toBe('restricted on main')
+      expect(remaining.docs).toHaveLength(before.docs.length)
+    })
+
+    test('should merge a deliberately smaller permitted selection', async () => {
+      const allowedChange = (
+        await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: {
+            and: [
+              { branch: { equals: 'accesswork' } },
+              { collectionSlug: { equals: whereAccessSlug } },
+            ],
+          },
+        })
+      ).docs.find((change) => String(change.doc?.value) === String(allowedID))
+
+      expect(allowedChange).toBeDefined()
+
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        changes: [allowedChange!.id],
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
+      const allowed = await payload.findByID({ id: allowedID, collection: whereAccessSlug })
+      const restricted = await payload.findByID({ id: restrictedID, collection: restrictedSlug })
+      const pendingAllowedChange = await payload.findByID({
+        id: allowedChange!.id,
+        collection: branchChangesSlug,
+        disableErrors: true,
+      })
+
+      expect(result.merged).toContainEqual(
+        expect.objectContaining({ collectionSlug: whereAccessSlug, docID: allowedID }),
+      )
       expect(allowed.title).toBe('edited on branch')
       expect(restricted.title).toBe('restricted on main')
-      expect(remaining.docs.length).toBeGreaterThan(0)
+      expect(pendingAllowedChange).toBeNull()
     })
 
     test('should recheck Where access after beforeMerge changes main', async () => {
+      const allowedChange = (
+        await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: {
+            and: [
+              { branch: { equals: 'accesswork' } },
+              { collectionSlug: { equals: whereAccessSlug } },
+            ],
+          },
+        })
+      ).docs.find((change) => String(change.doc?.value) === String(allowedID))
+
+      expect(allowedChange).toBeDefined()
+
       hookSpy.beforeMerge = async ({ req }) => {
         await req.payload.update({
           id: allowedID,
@@ -5881,13 +5954,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         })
       }
 
-      await expect(
-        payload.branches.merge({
-          branch: 'accesswork',
-          overrideAccess: false,
-          user: (await asEditor()) as never,
-        }),
-      ).rejects.toThrow()
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        changes: [allowedChange!.id],
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
 
       const onMain = await payload.findByID({ id: allowedID, collection: whereAccessSlug })
       const pending = await payload.find({
@@ -5902,6 +5974,10 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
 
       expect(onMain.title).toBe('allowed on main')
+      expect(result.canMerge).toBe(false)
+      expect(result.blocked).toContainEqual(
+        expect.objectContaining({ collectionSlug: whereAccessSlug, docID: allowedID }),
+      )
       expect(pending.docs.some((change) => String(change.doc?.value) === String(allowedID))).toBe(
         true,
       )
@@ -5925,14 +6001,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
       expect(nestedChange).toBeDefined()
 
-      await expect(
-        payload.branches.merge({
-          branch: 'accesswork',
-          changes: [nestedChange!.id],
-          overrideAccess: false,
-          user: (await asEditor()) as never,
-        }),
-      ).rejects.toThrow()
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        changes: [nestedChange!.id],
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
 
       const onMain = await payload.findByID({ id: nestedID, collection: nestedSlug })
       const pending = await payload.findByID({
@@ -5942,6 +6016,10 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
 
       expect(onMain.items?.[0]?.label).toBe('protected on main')
+      expect(result.canMerge).toBe(false)
+      expect(result.blocked).toContainEqual(
+        expect.objectContaining({ collectionSlug: nestedSlug, docID: nestedID }),
+      )
       expect(pending).not.toBeNull()
     })
 
@@ -5971,14 +6049,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         hookSpy.allowRestrictedCreate = false
       }
 
-      await expect(
-        payload.branches.merge({
-          branch: 'accesswork',
-          changes: [createdChange!.id],
-          overrideAccess: false,
-          user: (await asEditor()) as never,
-        }),
-      ).rejects.toThrow()
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        changes: [createdChange!.id],
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
 
       const onMain = await payload.find({
         collection: pagesSlug,
@@ -5992,6 +6068,10 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
 
       expect(onMain.docs).toHaveLength(0)
+      expect(result.canMerge).toBe(false)
+      expect(result.blocked).toContainEqual(
+        expect.objectContaining({ collectionSlug: pagesSlug, docID: created.id }),
+      )
       expect(pending).not.toBeNull()
       expect(hookSpy.restrictedCreateAccessResults).toContain(true)
       expect(hookSpy.restrictedCreateAccessResults?.at(-1)).toBe(false)
@@ -6036,14 +6116,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         hookSpy.allowRestrictedLocalizedCreate = false
       }
 
-      await expect(
-        payload.branches.merge({
-          branch: 'accesswork',
-          changes: [createdChange!.id],
-          overrideAccess: false,
-          user: (await asEditor()) as never,
-        }),
-      ).rejects.toThrow()
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        changes: [createdChange!.id],
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
 
       const pending = await payload.findByID({
         id: createdChange!.id,
@@ -6051,6 +6129,10 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         disableErrors: true,
       })
 
+      expect(result.canMerge).toBe(false)
+      expect(result.blocked).toContainEqual(
+        expect.objectContaining({ collectionSlug: localizedSlug, docID: created.id }),
+      )
       expect(pending).not.toBeNull()
       expect(hookSpy.localizedCreateAccessTitles).toEqual([
         'allowed localized create',
@@ -6459,6 +6541,205 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       const restricted = await payload.findByID({ id: restrictedID, collection: restrictedSlug })
 
       expect(restricted.title).toBe('restricted on main')
+    })
+  })
+
+  test.describe('Merge validation', () => {
+    const branch = 'validation-work'
+    let mainDocumentID: number | string
+
+    const corruptBranchTitle = async () => {
+      const req = await createPayloadRequest({ branch: false, payload })
+      const shadow = await payload.db.findOne({
+        branch: false,
+        collection: pagesSlug,
+        req,
+        where: {
+          and: [{ _branch: { equals: branch } }, { _branchDocID: { equals: mainDocumentID } }],
+        },
+      })
+
+      await (payload.db as MongooseAdapter).collections[pagesSlug]!.collection.updateOne(
+        { _id: new Types.ObjectId(String(shadow!.id)) },
+        { $set: { title: { invalid: true } } },
+      )
+    }
+
+    test.beforeEach(async () => {
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Validation work', slug: branch },
+      })
+
+      const mainDocument = await payload.create({
+        collection: pagesSlug,
+        data: { _status: 'published', title: 'main validation title' },
+      })
+
+      mainDocumentID = mainDocument.id
+
+      await payload.update({
+        id: mainDocumentID,
+        branch,
+        collection: pagesSlug,
+        data: { _status: 'published', title: 'branch validation title' },
+      })
+    })
+
+    test.afterEach(async () => {
+      hookSpy.beforeMerge = undefined
+      hookSpy.branchValidation = undefined
+      hookSpy.pageBeforeOperation = undefined
+
+      const rows = await payload.find({ branch: false, collection: pagesSlug, pagination: false })
+
+      for (const row of rows.docs) {
+        await payload.delete({ id: row.id, branch: false, collection: pagesSlug })
+      }
+
+      for (const collection of [branchChangesSlug, branchesSlug]) {
+        const rows = await payload.find({
+          collection,
+          pagination: false,
+          where: { [collection === branchesSlug ? 'slug' : 'branch']: { equals: branch } },
+        })
+
+        for (const row of rows.docs) {
+          await payload.delete({ id: row.id, collection })
+        }
+      }
+    })
+
+    test('should reject malformed prepared content with the default validator', async () => {
+      await corruptBranchTitle()
+
+      const result = await payload.branches.merge({ branch, dryRun: true })
+      const onMain = await payload.findByID({ id: mainDocumentID, collection: pagesSlug })
+
+      expect(result.canMerge).toBe(false)
+      expect(result.mergeable).toHaveLength(0)
+      expect(result.validationErrors).toContainEqual(
+        expect.objectContaining({
+          collectionSlug: pagesSlug,
+          docID: mainDocumentID,
+          path: 'data.title',
+        }),
+      )
+      expect(onMain.title).toBe('main validation title')
+    })
+
+    test('should pass the latest candidate to replacement validation in main context', async () => {
+      await payload.update({
+        id: mainDocumentID,
+        branch,
+        collection: pagesSlug,
+        data: { title: 'latest validation draft' },
+        draft: true,
+      })
+
+      const calls: Parameters<NonNullable<typeof hookSpy.branchValidation>>[0][] = []
+
+      hookSpy.branchValidation = (args) => {
+        calls.push(args)
+
+        return { errors: [], valid: true }
+      }
+
+      await payload.branches.merge({ branch, dryRun: true })
+
+      expect(calls).toHaveLength(1)
+      expect(calls[0]?.target).toBe('main')
+      expect(resolveBranch(calls[0]!.req)).toBe('main')
+      expect((calls[0]!.req.context as Record<string, unknown>)._branchBypass).toBeUndefined()
+      expect(calls[0]?.candidates).toContainEqual(
+        expect.objectContaining({
+          collectionSlug: pagesSlug,
+          data: expect.objectContaining({ title: 'latest validation draft' }),
+          docID: mainDocumentID,
+          draft: true,
+          operation: 'update',
+        }),
+      )
+    })
+
+    test('should let replacement validation replace only the precheck', async () => {
+      await corruptBranchTitle()
+      hookSpy.branchValidation = () => ({ errors: [], valid: true })
+
+      const preview = await payload.branches.merge({ branch, dryRun: true })
+
+      expect(preview.canMerge).toBe(true)
+      expect(preview.validationErrors).toHaveLength(0)
+
+      await expect(payload.branches.merge({ branch })).rejects.toThrow()
+
+      const onMain = await payload.findByID({ id: mainDocumentID, collection: pagesSlug })
+
+      expect(onMain.title).toBe('main validation title')
+    })
+
+    test('should recheck replacement validation after beforeMerge changes policy', async () => {
+      let validationCalls = 0
+
+      hookSpy.branchValidation = ({ candidates }) => {
+        validationCalls += 1
+
+        return {
+          errors: [],
+          valid: true,
+        }
+      }
+      hookSpy.beforeMerge = () => {
+        hookSpy.branchValidation = ({ candidates }) => ({
+          errors: [
+            {
+              changeID: candidates[0]!.changeID,
+              collectionSlug: candidates[0]!.collectionSlug,
+              docID: candidates[0]!.docID,
+              message: 'Policy changed before execution.',
+            },
+          ],
+          valid: false,
+        })
+      }
+
+      const result = await payload.branches.merge({ branch })
+      const onMain = await payload.findByID({ id: mainDocumentID, collection: pagesSlug })
+
+      expect(validationCalls).toBe(1)
+      expect(result.canMerge).toBe(false)
+      expect(result.validationErrors).toContainEqual(
+        expect.objectContaining({ message: 'Policy changed before execution.' }),
+      )
+      expect(onMain.title).toBe('main validation title')
+    })
+
+    test('should propagate a replacement validation exception', async () => {
+      hookSpy.branchValidation = () => {
+        throw new Error('Replacement validation failed unexpectedly.')
+      }
+
+      await expect(payload.branches.merge({ branch, dryRun: true })).rejects.toThrow(
+        'Replacement validation failed unexpectedly.',
+      )
+    })
+
+    test('should run target content hooks in main context', async () => {
+      const hookRequests: PayloadRequest[] = []
+
+      hookSpy.pageBeforeOperation = ({ req }) => {
+        hookRequests.push(req)
+      }
+
+      await payload.branches.merge({ branch })
+
+      expect(hookRequests.length).toBeGreaterThan(0)
+      expect(hookRequests.every((req) => resolveBranch(req) === 'main')).toBe(true)
+      expect(
+        hookRequests.every(
+          (req) => (req.context as Record<string, unknown>)._branchBypass === undefined,
+        ),
+      ).toBe(true)
     })
   })
 

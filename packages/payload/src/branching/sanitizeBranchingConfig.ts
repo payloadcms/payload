@@ -6,6 +6,7 @@ import {
   branchesCollectionSlug,
   branchMergesCollectionSlug,
 } from './types.js'
+import { defaultBranchMergeValidation } from './validation.js'
 
 /**
  * Built-in Payload collections. Branching is off for these by default because
@@ -60,6 +61,7 @@ export const sanitizeBranchingConfig = (config: Config): SanitizedBranchingConfi
     branchableGlobals: new Set<string>(),
     enabled: false,
     maxShadowedIDs: branching.maxShadowedIDs ?? DEFAULT_MAX_SHADOWED_IDS,
+    validate: branching.validate ?? defaultBranchMergeValidation,
   }
 
   if (!enabled) {
@@ -132,5 +134,6 @@ export const sanitizeBranchingConfig = (config: Config): SanitizedBranchingConfi
     enabled: true,
     hooks: branching.hooks,
     maxShadowedIDs: branching.maxShadowedIDs ?? DEFAULT_MAX_SHADOWED_IDS,
+    validate: branching.validate ?? defaultBranchMergeValidation,
   }
 }

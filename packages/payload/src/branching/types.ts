@@ -1,5 +1,6 @@
 import type { CollectionSlug } from '../index.js'
 import type { Access } from './../config/types.js'
+import type { BranchMergeValidate } from './validation.js'
 
 /**
  * The reserved `_branch` value for production content.
@@ -71,6 +72,11 @@ export type BranchingConfig = {
    * @default 2000
    */
   maxShadowedIDs?: number
+  /**
+   * Replaces the default best-effort pre-merge content validation policy.
+   * Ordinary write validation, hooks, access control, and database constraints still apply.
+   */
+  validate?: BranchMergeValidate
 }
 
 export type SanitizedBranchingConfig = {
@@ -80,7 +86,8 @@ export type SanitizedBranchingConfig = {
   branchableGlobals: Set<string>
   enabled: boolean
   maxShadowedIDs: number
-} & Omit<BranchingConfig, 'exclude'>
+  validate: BranchMergeValidate
+} & Omit<BranchingConfig, 'exclude' | 'validate'>
 
 /**
  * The branching config as it reaches the browser: which entities branch, and

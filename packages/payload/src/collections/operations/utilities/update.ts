@@ -58,6 +58,8 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   collectionConfig: SanitizedCollectionConfig
   config: SanitizedConfig
   data: DeepPartial<DataFromCollectionSlug<TSlug>>
+  /** @internal Request used only for database reads and writes during branch promotion. */
+  databaseReq?: PayloadRequest
   depth: number
   docWithLocales: JsonObject & TypeWithID
   draftArg: boolean
@@ -107,6 +109,7 @@ export const updateDocument = async <
   collectionConfig,
   config,
   data,
+  databaseReq,
   depth,
   docWithLocales,
   draftArg,
@@ -126,6 +129,8 @@ export const updateDocument = async <
   unpublishAllLocales: unpublishAllLocalesArg,
   uploadFileRollbacks,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
+  const databaseRequest = databaseReq ?? req
+
   validateAllLocalesPublicationFlags({
     publishAllLocales: publishAllLocalesArg,
     unpublishAllLocales: unpublishAllLocalesArg,
@@ -460,7 +465,7 @@ export const updateDocument = async <
         const currentDoc = await payload.db.findOne<DataFromCollectionSlug<TSlug>>({
           collection: collectionConfig.slug,
           locale: 'all',
-          req,
+          req: databaseRequest,
           where: { id: { equals: id } },
         })
 
@@ -547,7 +552,7 @@ export const updateDocument = async <
         collection: collectionConfig.slug,
         data: dataToUpdate,
         locale,
-        req,
+        req: databaseRequest,
       })
       markTransactionWrite({ req })
       resultWithLocales = { ...result, updatedAt: dataToUpdate.updatedAt }
@@ -557,7 +562,7 @@ export const updateDocument = async <
         collection: collectionConfig.slug,
         data: dataToUpdate,
         locale,
-        req,
+        req: databaseRequest,
       })
       markTransactionWrite({ req })
     }
@@ -577,7 +582,7 @@ export const updateDocument = async <
       draft: isSavingDraft,
       operation: 'update',
       payload,
-      req,
+      req: databaseRequest,
       unpublish: unpublishAllLocales,
     })
     markTransactionWrite({ req })
