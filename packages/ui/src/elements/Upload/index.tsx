@@ -114,7 +114,7 @@ export type UploadProps = {
   readonly customActions?: React.ReactNode[]
   readonly initialState?: FormState
   readonly onChange?: (file?: File) => void
-  readonly uploadConfig: SanitizedCollectionConfig['upload']
+  readonly uploadConfig: Omit<SanitizedCollectionConfig['upload'], 'uploadInstructions'>
   readonly UploadControls?: React.ReactNode
 }
 
@@ -289,13 +289,13 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
   const canRemoveUpload = docPermissions?.update
 
   const hasImageSizes = uploadConfig?.imageSizes?.length > 0
-  const hasResizeOptions = Boolean(uploadConfig?.resizeOptions)
+  const hasImageAdjustments = Boolean(uploadConfig?.hasImageAdjustments)
   // Explicity check if set to true, default is undefined
   const focalPointEnabled = uploadConfig?.focalPoint === true
 
   const { crop: showCrop = true, focalPoint = true } = uploadConfig
 
-  const showFocalPoint = focalPoint && (hasImageSizes || hasResizeOptions || focalPointEnabled)
+  const showFocalPoint = focalPoint && (hasImageSizes || hasImageAdjustments || focalPointEnabled)
 
   const acceptMimeTypes = uploadConfig.mimeTypes?.join(', ')
 
