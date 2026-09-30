@@ -75,7 +75,7 @@ ENV HOSTNAME=0.0.0.0 \
     MEDIA_DIR=/app/media \
     NEXT_TELEMETRY_DISABLED=1 \
     NODE_ENV=production \
-    PORT=3000
+    PORT=3006
 
 # The base image ships an unprivileged `node` user (uid 1000)
 RUN mkdir -p .next media && chown node:node .next media
@@ -84,7 +84,7 @@ COPY --from=builder --chown=node:node /app/.next/standalone ./
 COPY --from=builder --chown=node:node /app/.next/static ./.next/static
 
 USER node
-EXPOSE 3000
+EXPOSE 3006
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD ["node", "-e", "fetch('http://127.0.0.1:3000/api/health').then((res) => process.exit(res.ok ? 0 : 1), () => process.exit(1))"]

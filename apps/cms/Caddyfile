@@ -12,5 +12,5 @@
 		-Server
 	}
 
-	reverse_proxy cms:3000
+	reverse_proxy cms:3006
 }
