@@ -13,8 +13,8 @@ export const Media: CollectionConfig = {
     },
   ],
   upload: {
-    // Uploaded files are written to local disk. In Docker this is a named volume
-    // (see docker-compose.yml) so files survive container rebuilds.
+    // Used only when S3 storage is off (S3_BUCKET unset, see src/storage/s3.ts): files are then
+    // written to local disk, which in Docker is a named volume that survives rebuilds.
     staticDir: process.env.MEDIA_DIR || 'media',
   },
 }

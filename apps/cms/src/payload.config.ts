@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url'
 import { Media } from './collections/Media'
 import { Users } from './collections/Users'
 import { healthEndpoint } from './endpoints/health'
+import { s3StorageAdapter } from './storage/s3'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -53,6 +54,7 @@ export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || '',
   serverURL,
   sharp,
+  storage: [s3StorageAdapter],
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

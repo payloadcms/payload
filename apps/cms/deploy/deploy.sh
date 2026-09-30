@@ -33,7 +33,9 @@ for _ in $(seq 1 60); do
   status="$(docker inspect -f '{{.State.Health.Status}}' "$container_id")"
   if [[ "$status" == "healthy" ]]; then
     echo "==> CMS is healthy: $(env_value SERVER_URL)/admin"
+    # Every build leaves layers behind; without pruning, the build cache grows by GBs per deploy
     docker image prune -f >/dev/null
+    docker builder prune -f --filter until=72h >/dev/null || true
     exit 0
   fi
   sleep 5

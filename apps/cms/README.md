@@ -23,6 +23,7 @@ installs the app against them. This is the same approach Payload's CI uses to te
 | ------------------------------------- | ---------------------------------------------------------------- |
 | `src/payload.config.ts`               | Payload config: MongoDB via `DATABASE_URL`, `SERVER_URL`, CORS/CSRF |
 | `src/endpoints/health.ts`             | `GET /api/health`: pings MongoDB (used by the Docker healthcheck) |
+| `src/storage/s3.ts`                   | Optional S3 storage for uploads, turned on by `S3_BUCKET`       |
 | `Dockerfile`                          | Multi-stage build from the repo root → small standalone image    |
 | `docker-compose.yml`, `Caddyfile`     | Production stack on the app EC2                                  |
 | `.env.example`                        | Every setting the server needs                                   |
@@ -163,14 +164,121 @@ curl -s localhost/api/health       # {"database":"up","status":"ok"}
 
 - Database, on the MongoDB EC2 (or schedule it with cron):
   `mongodump --uri 'mongodb://admin:<pw>@127.0.0.1:27017/?authSource=admin' --db payload --archive=payload-$(date +%F).gz --gzip`
-- Uploaded media, on the app EC2:
+- Uploaded media, on the app EC2 (only while uploads are stored locally, not in S3):
   `docker run --rm -v payload-cms_media:/media -v "$PWD":/backup busybox tar czf /backup/media-$(date +%F).tgz -C /media .`
-- Or snapshot both EBS volumes with AWS Backup.
+- Or snapshot both EBS volumes with AWS Backup. With S3 storage, turn on bucket versioning instead.
 
-To keep media off the server entirely, use `@payloadcms/storage-s3`. Add it to
-`PACKAGE_DIRS` in `scripts/pack-local-packages.mjs` together with `plugin-cloud-storage`,
-add it to the turbo `--filter` list in the `Dockerfile`, then configure it in
-`payload.config.ts`.
+## Uploads in S3
+
+By default, uploads are saved on the app server. Set `S3_BUCKET` to store them in S3 instead:
+
+1. You upload a file in the admin panel (or `POST /api/media`).
+2. Payload writes it to `s3://<S3_BUCKET>/<S3_PREFIX>/<filename>`.
+3. The media document in MongoDB records `filename`, `prefix` (the S3 folder), `mimeType`,
+   `filesize`, `width`/`height` and `url`.
+4. Every read (REST, GraphQL, Local API) returns `url` as the public S3 or CloudFront address
+   (`<S3_PUBLIC_URL>/<prefix>/<filename>`). Frontends load the file straight from there,
+   not through Payload.
+5. Deleting the document deletes the object in S3. Replacing the file replaces the object.
+
+### a) Create the bucket
+
+Create it in the same region as the EC2. Keep **Object Ownership = Bucket owner enforced**
+(the default; ACLs off).
+
+To make files public, pick **one** option:
+
+- **Simple: public bucket policy.** Under _Block public access_, untick only the two
+  _"...bucket policies"_ options, then add this bucket policy. It makes only the `media/`
+  folder readable:
+
+  ```json
+  {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Sid": "PublicReadMedia",
+        "Effect": "Allow",
+        "Principal": "*",
+        "Action": "s3:GetObject",
+        "Resource": "arn:aws:s3:::YOUR-BUCKET/media/*"
+      }
+    ]
+  }
+  ```
+
+- **Recommended for production: CloudFront.** Keep the bucket fully private, create a
+  CloudFront distribution with an _Origin Access Control_ to the bucket, and set
+  `S3_PUBLIC_URL=https://<distribution>.cloudfront.net` (or your CDN domain). You get HTTPS on
+  your own domain, caching, and no public bucket.
+
+### b) Give the app EC2 access (IAM role, no keys in `.env`)
+
+Create an IAM role for EC2 with this policy and attach it to the **app** instance
+(_Actions → Security → Modify IAM role_):
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject", "s3:DeleteObject", "s3:AbortMultipartUpload"],
+      "Resource": "arn:aws:s3:::YOUR-BUCKET/media/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::YOUR-BUCKET",
+      "Condition": { "StringLike": { "s3:prefix": "media/*" } }
+    }
+  ]
+}
+```
+
+Docker containers can only read the instance role when the metadata hop limit is **2**. Many
+AMIs, including Ubuntu, default to 1. Run this once from any machine with the AWS CLI:
+
+```bash
+aws ec2 modify-instance-metadata-options --instance-id <app-instance-id> \
+  --http-tokens required --http-put-response-hop-limit 2 --http-endpoint enabled
+```
+
+Without a role, you can instead put an IAM user's `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY`
+in `.env`.
+
+### c) Configure and redeploy
+
+```bash
+# apps/cms/.env
+S3_BUCKET=your-bucket
+S3_REGION=ap-southeast-1
+S3_PREFIX=media
+S3_PUBLIC_URL=            # empty = https://your-bucket.s3.ap-southeast-1.amazonaws.com
+```
+
+```bash
+./deploy/deploy.sh
+```
+
+Upload an image in the admin panel. `GET /api/media` should now return `"url": "https://…"`
+pointing at S3, and the file should be in the bucket under `media/`.
+
+### d) Files uploaded before switching
+
+Older uploads are still in the local `media` volume. Copy them to the bucket and record their
+folder, so their URLs keep working:
+
+```bash
+# on the app EC2 (uses the instance role)
+docker run --rm -v payload-cms_media:/media amazon/aws-cli s3 sync /media s3://YOUR-BUCKET/media/
+# on the MongoDB EC2 (use your own container name and admin credentials)
+docker exec -it mongo mongosh -u admin -p --authenticationDatabase admin payload \
+  --eval 'db.media.updateMany({ prefix: { $in: [null, ""] } }, { $set: { prefix: "media" } })'
+```
+
+S3-compatible storage (Cloudflare R2, MinIO, …) works too. Set `S3_ENDPOINT`, and for MinIO
+also `S3_FORCE_PATH_STYLE=true`.
 
 ## Troubleshooting
 
@@ -180,6 +288,8 @@ add it to the turbo `--filter` list in the `Dockerfile`, then configure it in
 | `/api/health` → `503` / logs say `cannot connect to MongoDB` | Run `./deploy/check-db.sh`. Timeout → security group or `bindIp`. `Authentication failed` → user/password/`authSource`, or an un-encoded special character in the password. |
 | Build killed / `exit code: 137`                       | Out of memory. Use an 8 GB instance or check that swap is on (`swapon --show`).                   |
 | Caddy can't get a certificate                         | DNS doesn't point at the instance yet, or port 80/443 is closed. Check `docker compose logs caddy`. |
+| Upload fails: `Could not load credentials` / `AccessDenied` | S3 access. Check that the IAM role is attached with the policy above and that the metadata hop limit is 2, or set the key pair in `.env`. |
+| Upload works but images are broken (403)              | The files aren't public. Add the bucket policy (and untick the bucket-policy public-access blocks), or check the CloudFront origin access settings. |
 
 ## Local development
 

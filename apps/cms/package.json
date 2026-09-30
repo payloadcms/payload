@@ -17,6 +17,7 @@
     "@payloadcms/db-mongodb": "4.0.0-canary.37",
     "@payloadcms/next": "4.0.0-canary.37",
     "@payloadcms/richtext-lexical": "4.0.0-canary.37",
+    "@payloadcms/storage-s3": "4.0.0-canary.37",
     "@payloadcms/ui": "4.0.0-canary.37",
     "cross-env": "10.1.0",
     "graphql": "16.8.1",

@@ -25,7 +25,9 @@ const PACKAGE_DIRS = [
   'graphql',
   'next',
   'payload',
+  'plugin-cloud-storage',
   'richtext-lexical',
+  'storage-s3',
   'translations',
   'ui',
 ]

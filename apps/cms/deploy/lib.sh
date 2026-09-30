@@ -37,6 +37,23 @@ validate_env() {
     has_error=true
   fi
 
+  local s3_bucket s3_region s3_endpoint s3_access_key_id s3_secret_access_key
+  s3_bucket="$(env_value S3_BUCKET)"
+  s3_region="$(env_value S3_REGION)"
+  s3_endpoint="$(env_value S3_ENDPOINT)"
+  s3_access_key_id="$(env_value S3_ACCESS_KEY_ID)"
+  s3_secret_access_key="$(env_value S3_SECRET_ACCESS_KEY)"
+
+  if [[ -n "$s3_bucket" && -z "$s3_region" && -z "$s3_endpoint" ]]; then
+    echo "S3_REGION must be set when S3_BUCKET is set (the bucket's region, e.g. ap-southeast-1)." >&2
+    has_error=true
+  fi
+
+  if [[ -n "$s3_access_key_id" && -z "$s3_secret_access_key" ]] || [[ -z "$s3_access_key_id" && -n "$s3_secret_access_key" ]]; then
+    echo "Set both S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY, or neither (to use the EC2 IAM role)." >&2
+    has_error=true
+  fi
+
   if [[ "$has_error" == true ]]; then
     exit 1
   fi

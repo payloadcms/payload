@@ -160,6 +160,8 @@ export interface User {
 export interface Media {
   id: string;
   alt: string;
+  prefix?: string | null;
+  _objectKey?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -285,6 +287,8 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  prefix?: T;
+  _objectKey?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
