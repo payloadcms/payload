@@ -67,6 +67,7 @@ type MergeDependencyPreflightResult = {
 }
 
 type RunMergeDependencyPreflightArgs = {
+  availableChangeIDs?: Set<string>
   initiallyBlocked: BlockedChange[]
   payload: Payload
   pending: ResolvedChange[]
@@ -512,6 +513,7 @@ export const runGlobalMergePreflight = async ({
  * blocked, every selected change which depends on that create becomes blocked in turn.
  */
 export const runMergeDependencyPreflight = async ({
+  availableChangeIDs,
   initiallyBlocked,
   payload,
   pending,
@@ -520,6 +522,7 @@ export const runMergeDependencyPreflight = async ({
 }: RunMergeDependencyPreflightArgs): Promise<BlockedChange[]> =>
   (
     await resolveMergeDependencies({
+      availableChangeIDs,
       initiallyBlocked,
       payload,
       pending,
@@ -529,12 +532,14 @@ export const runMergeDependencyPreflight = async ({
   ).blocked
 
 export const hasUnavailableBranchCreatedDependency = async ({
+  availableChangeIDs,
   collectionSlug,
   data,
   globalSlug,
   payload,
   req,
 }: {
+  availableChangeIDs?: Set<string>
   collectionSlug?: string
   data: Record<string, unknown>
   globalSlug?: string
@@ -551,19 +556,22 @@ export const hasUnavailableBranchCreatedDependency = async ({
 
   const branchCreates = await findPendingBranchCreates({ payload, req })
 
-  return branchCreates.some((target) =>
-    hasBranchCreatedDocumentReference({
-      data,
-      dataShape: 'withLocales',
-      fields,
-      payloadBlocks: payload.blocks,
-      req,
-      target,
-    }),
+  return branchCreates.some(
+    (target) =>
+      !availableChangeIDs?.has(String(target.changeID)) &&
+      hasBranchCreatedDocumentReference({
+        data,
+        dataShape: 'withLocales',
+        fields,
+        payloadBlocks: payload.blocks,
+        req,
+        target,
+      }),
   )
 }
 
 export const resolveMergeDependencies = async ({
+  availableChangeIDs,
   initiallyBlocked,
   payload,
   pending,
@@ -580,6 +588,7 @@ export const resolveMergeDependencies = async ({
 
   const blockedChangeIDs = new Set(initiallyBlocked.map(({ changeID }) => String(changeID)))
   const selectedChangeIDs = new Set([
+    ...(availableChangeIDs ?? []),
     ...pending.map(({ change }) => String(change.id)),
     ...pendingGlobals.map(({ id }) => String(id)),
   ])

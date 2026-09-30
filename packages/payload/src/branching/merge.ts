@@ -25,6 +25,7 @@ import {
   beginDeferredCleanupScope,
   clearDeferredCleanupScope,
   flushDeferredCleanupScopeAfterOperation,
+  scheduleAfterTransactionCommit,
 } from '../utilities/transactionCallbacks.js'
 import { traverseForLocalizedFields } from '../utilities/traverseForLocalizedFields.js'
 import {
@@ -96,6 +97,38 @@ export type MergeResult = {
   warnings: MergeWarning[]
 }
 
+type MergeApplicationOutcome =
+  | 'applied'
+  | 'attempted'
+  | 'committed'
+  | 'failed'
+  | 'rolledBack'
+  | 'unattempted'
+  | 'unknown'
+
+type MergeEventChange = {
+  after?: unknown
+  applicationOutcome: MergeApplicationOutcome
+  before?: unknown
+  changeID: string
+  cleanupOutcome: 'completed' | 'failed' | 'notNeeded' | 'pending' | 'unknown'
+  collectionSlug?: string
+  docID?: string
+  docTitle: string
+  error?: string
+  globalSlug?: string
+  operation: BranchOperation
+  recoveryOutcome:
+    | 'deleted'
+    | 'failed'
+    | 'notNeeded'
+    | 'pending'
+    | 'restored'
+    | 'unavailable'
+    | 'unknown'
+  targetID?: string
+}
+
 /**
  * Emitted once per change, immediately before it is applied.
  *
@@ -157,6 +190,22 @@ export type MergeOptions = {
 
 const changeDocID = (change: Record<string, any>): number | string =>
   change.doc?.value ?? change.doc
+
+const getMergeErrorMessage = ({ error }: { error: unknown }): string =>
+  error instanceof Error ? error.message : String(error)
+
+const updateMergeEventChange = ({
+  changeID,
+  changes,
+  update,
+}: {
+  changeID: number | string
+  changes: MergeEventChange[]
+  update: Partial<MergeEventChange>
+}): MergeEventChange[] =>
+  changes.map((change) =>
+    change.changeID === String(changeID) ? { ...change, ...update } : change,
+  )
 
 const orderChangesByDependencies = <TChange extends { id: unknown }>({
   changes,
@@ -436,6 +485,59 @@ export const mergeBranch = async (
     return result
   }
 
+  const startedAt = new Date().toISOString()
+  const mergeEventReq = await createPayloadRequest({
+    branch: false,
+    payload,
+    user: req.user ?? undefined,
+  })
+  let mergeEventChanges: MergeEventChange[] = mergeable.map((change) => ({
+    applicationOutcome: 'unattempted',
+    changeID: String(change.changeID),
+    cleanupOutcome: 'pending',
+    collectionSlug: change.collectionSlug,
+    docID: change.docID === undefined ? undefined : String(change.docID),
+    docTitle: String(change.docID ?? change.globalSlug),
+    globalSlug: change.globalSlug,
+    operation: change.operation,
+    recoveryOutcome: 'notNeeded',
+    targetID: change.docID === undefined ? change.globalSlug : String(change.docID),
+  }))
+  const mergeEvent = await payload.create({
+    collection: branchMergesCollectionSlug,
+    data: {
+      branch,
+      changes: mergeEventChanges,
+      mergedByCollection: req.user?.collection,
+      mergedByID: req.user?.id === undefined ? undefined : String(req.user.id),
+      mergedByLabel: (req.user as { email?: string } | null)?.email,
+      startedAt,
+      status: 'inProgress',
+      targetBranch: MAIN_BRANCH,
+    },
+    overrideAccess: true,
+    req: mergeEventReq,
+  })
+  const persistMergeEvent = async ({
+    completedAt,
+    error,
+    mergedAt,
+    status,
+  }: {
+    completedAt?: string
+    error?: string
+    mergedAt?: string
+    status: 'awaitingCommit' | 'cleanupFailed' | 'failed' | 'inProgress' | 'succeeded'
+  }): Promise<void> => {
+    await payload.update({
+      id: mergeEvent.id,
+      collection: branchMergesCollectionSlug,
+      data: { changes: mergeEventChanges, completedAt, error, mergedAt, status },
+      overrideAccess: true,
+      req: mergeEventReq,
+    })
+  }
+
   // Gated on `req.transactionID`, not on whether a `req` was passed in: a merge
   // triggered over HTTP hands in a `req` of its own that has no transaction on
   // it yet, and it must get one just as much as a Local API call would.
@@ -457,6 +559,7 @@ export const mergeBranch = async (
     changeID: number | string
     cleanup: () => Promise<void>
   }[] = []
+  const appliedChangeIDs = new Set<string>()
   const reqContext = req.context as Record<PropertyKey, unknown>
   const previousBranchMergeWriteGuard = reqContext[branchMergeWriteGuardContextKey]
   const previousThrowOnFieldAccessDenied = reqContext[throwOnFieldAccessDeniedContextKey]
@@ -469,6 +572,7 @@ export const mergeBranch = async (
   }) => {
     if (
       await hasUnavailableBranchCreatedDependency({
+        availableChangeIDs: appliedChangeIDs,
         collectionSlug,
         data,
         globalSlug,
@@ -486,6 +590,9 @@ export const mergeBranch = async (
   if (!overrideAccess) {
     reqContext[throwOnFieldAccessDeniedContextKey] = true
   }
+
+  let activeChangeID: number | string | undefined
+  let mergedAt: string | undefined
 
   try {
     const writeTargetReq = createMainBranchRequest({ req })
@@ -513,6 +620,14 @@ export const mergeBranch = async (
     })
 
     for (const [index, change] of applicableInWriteOrder.entries()) {
+      activeChangeID = change.id
+      mergeEventChanges = updateMergeEventChange({
+        changeID: change.id,
+        changes: mergeEventChanges,
+        update: { applicationOutcome: 'attempted' },
+      })
+      await persistMergeEvent({ status: 'inProgress' })
+
       await onProgress?.(
         {
           collectionSlug: change.collectionSlug as string,
@@ -567,6 +682,7 @@ export const mergeBranch = async (
           : null
 
       const dependencyBlockedAtUse = await runMergeDependencyPreflight({
+        availableChangeIDs: appliedChangeIDs,
         initiallyBlocked: [],
         payload,
         pending: [resolvedChange],
@@ -588,6 +704,13 @@ export const mergeBranch = async (
       })
 
       sourceCleanupPlans.push({ changeID: change.id, cleanup })
+      appliedChangeIDs.add(String(change.id))
+      mergeEventChanges = updateMergeEventChange({
+        changeID: change.id,
+        changes: mergeEventChanges,
+        update: { applicationOutcome: 'applied' },
+      })
+      await persistMergeEvent({ status: 'inProgress' })
 
       if (uploadSourceDoc) {
         const retainedDoc = (await payload.db.findOne({
@@ -614,6 +737,7 @@ export const mergeBranch = async (
         entityType: 'collection',
         operation: change.operation as BranchOperation,
       })
+      activeChangeID = undefined
     }
 
     // Globals, after the documents. Ordered that way because a global usually points at
@@ -621,6 +745,14 @@ export const mergeBranch = async (
     // references is already on main.
     for (const [index, change] of applicableGlobals.entries()) {
       const globalSlug = change.globalSlug as string
+
+      activeChangeID = change.id
+      mergeEventChanges = updateMergeEventChange({
+        changeID: change.id,
+        changes: mergeEventChanges,
+        update: { applicationOutcome: 'attempted' },
+      })
+      await persistMergeEvent({ status: 'inProgress' })
 
       await onProgress?.(
         {
@@ -648,6 +780,7 @@ export const mergeBranch = async (
       const before = await readGlobalMergeSnapshot({ globalSlug, payload, req })
 
       const dependencyBlockedAtUse = await runMergeDependencyPreflight({
+        availableChangeIDs: appliedChangeIDs,
         initiallyBlocked: [],
         payload,
         pending: [],
@@ -669,6 +802,13 @@ export const mergeBranch = async (
       })
 
       sourceCleanupPlans.push({ changeID: change.id, cleanup })
+      appliedChangeIDs.add(String(change.id))
+      mergeEventChanges = updateMergeEventChange({
+        changeID: change.id,
+        changes: mergeEventChanges,
+        update: { applicationOutcome: 'applied' },
+      })
+      await persistMergeEvent({ status: 'inProgress' })
 
       snapshots.set(String(change.id), {
         after: await readGlobalMergeSnapshot({ globalSlug, payload, req }),
@@ -681,6 +821,7 @@ export const mergeBranch = async (
         globalSlug,
         operation: 'update',
       })
+      activeChangeID = undefined
     }
 
     for (const { changeID, cleanup } of sourceCleanupPlans) {
@@ -691,60 +832,61 @@ export const mergeBranch = async (
         overrideAccess: true,
         req,
       })
+
+      if (!hasTransaction) {
+        mergeEventChanges = updateMergeEventChange({
+          changeID,
+          changes: mergeEventChanges,
+          update: { cleanupOutcome: 'completed' },
+        })
+        await persistMergeEvent({ status: 'inProgress' })
+      }
     }
 
-    const mergedAt = new Date().toISOString()
+    mergedAt = new Date().toISOString()
 
-    // The ledger, written before the status is settled: the change rows this merge
-    // consumed are gone, and their shadow rows with them, so this is the only
-    // remaining record of what happened. Titles are snapshotted because a document
-    // merged under one name and renamed later was merged under the old one.
-    if (result.merged.length) {
-      await payload.create({
-        collection: branchMergesCollectionSlug,
-        data: {
-          branch,
-          changes: result.merged.map((each) => {
-            const snapshot = snapshots.get(String(each.changeID))
+    const mergedByChangeID = new Map(
+      result.merged.map((mergedChange) => [String(mergedChange.changeID), mergedChange]),
+    )
 
-            if (each.entityType === 'global') {
-              const globalConfig = payload.globals?.config?.find(
-                (config) => config.slug === each.globalSlug,
-              )
+    mergeEventChanges = mergeEventChanges.map((change) => {
+      const mergedChange = mergedByChangeID.get(change.changeID)
+      const snapshot = snapshots.get(change.changeID)
 
-              return {
-                after: snapshot?.after ?? null,
-                before: snapshot?.before ?? null,
-                docTitle:
-                  typeof globalConfig?.label === 'string'
-                    ? globalConfig.label
-                    : (each.globalSlug as string),
-                globalSlug: each.globalSlug,
-                operation: each.operation,
-              }
-            }
+      if (!mergedChange) {
+        return change
+      }
 
-            const useAsTitle = payload.collections[each.collectionSlug!]?.config.admin?.useAsTitle
-            const after = snapshot?.after as null | Record<string, unknown> | undefined
+      if (mergedChange.entityType === 'global') {
+        const globalConfig = payload.globals?.config?.find(
+          (config) => config.slug === mergedChange.globalSlug,
+        )
 
-            return {
-              after: snapshot?.after ?? null,
-              before: snapshot?.before ?? null,
-              collectionSlug: each.collectionSlug,
-              docID: String(each.docID),
-              docTitle: getSnapshotDocumentTitle({ after, docID: each.docID!, useAsTitle }),
-              operation: each.operation,
-            }
-          }),
-          mergedAt,
-          mergedByCollection: req.user?.collection,
-          mergedByID: req.user?.id === undefined ? undefined : String(req.user.id),
-          mergedByLabel: (req.user as { email?: string } | null)?.email,
-        },
-        overrideAccess: true,
-        req,
-      })
-    }
+        return {
+          ...change,
+          after: snapshot?.after ?? null,
+          before: snapshot?.before ?? null,
+          docTitle:
+            typeof globalConfig?.label === 'string'
+              ? globalConfig.label
+              : (mergedChange.globalSlug as string),
+        }
+      }
+
+      const useAsTitle = payload.collections[mergedChange.collectionSlug!]?.config.admin?.useAsTitle
+      const after = snapshot?.after as null | Record<string, unknown> | undefined
+
+      return {
+        ...change,
+        after: snapshot?.after ?? null,
+        before: snapshot?.before ?? null,
+        docTitle: getSnapshotDocumentTitle({
+          after,
+          docID: mergedChange.docID!,
+          useAsTitle,
+        }),
+      }
+    })
 
     const remaining = await payload.count({
       collection: branchChangesCollectionSlug,
@@ -792,7 +934,42 @@ export const mergeBranch = async (
 
     if (shouldCommit) {
       await killTransaction(req)
+      mergeEventChanges = mergeEventChanges.map((change) =>
+        change.applicationOutcome === 'applied'
+          ? { ...change, applicationOutcome: 'rolledBack', cleanupOutcome: 'pending' }
+          : change,
+      )
     }
+
+    const errorMessage = getMergeErrorMessage({ error })
+
+    if (activeChangeID !== undefined) {
+      const activeChange = mergeEventChanges.find(
+        (change) => change.changeID === String(activeChangeID),
+      )
+
+      if (activeChange?.applicationOutcome === 'attempted') {
+        mergeEventChanges = updateMergeEventChange({
+          changeID: activeChangeID,
+          changes: mergeEventChanges,
+          update: { applicationOutcome: 'failed', error: errorMessage },
+        })
+      }
+    }
+
+    try {
+      await persistMergeEvent({
+        completedAt: new Date().toISOString(),
+        error: errorMessage,
+        status: 'failed',
+      })
+    } catch (mergeEventError) {
+      payload.logger.error({
+        err: mergeEventError,
+        msg: 'Failed to record a branch merge failure.',
+      })
+    }
+
     throw error
   } finally {
     if (previousBranchMergeWriteGuard === undefined) {
@@ -814,8 +991,34 @@ export const mergeBranch = async (
     }
   }
 
-  // Fired after commit: a failing deploy webhook must not undo a merge.
-  await branchingHooks?.afterMerge?.({ branch, req, results: result.merged })
+  const completeMergeEvent = async (): Promise<void> => {
+    const completedAt = new Date().toISOString()
+
+    mergeEventChanges = mergeEventChanges.map((change) => ({
+      ...change,
+      applicationOutcome:
+        change.applicationOutcome === 'applied' ? 'committed' : change.applicationOutcome,
+      cleanupOutcome: change.cleanupOutcome === 'pending' ? 'completed' : change.cleanupOutcome,
+    }))
+
+    await persistMergeEvent({ completedAt, mergedAt: mergedAt ?? completedAt, status: 'succeeded' })
+
+    // Fired after commit: a failing deploy webhook must not undo a merge.
+    await branchingHooks?.afterMerge?.({ branch, req, results: result.merged })
+  }
+
+  if (hasTransaction && !shouldCommit) {
+    await persistMergeEvent({ status: 'awaitingCommit' })
+    await scheduleAfterTransactionCommit({
+      callback: async () => {
+        delete req.transactionID
+        await completeMergeEvent()
+      },
+      req,
+    })
+  } else {
+    await completeMergeEvent()
+  }
 
   return result
 }

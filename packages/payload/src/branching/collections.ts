@@ -302,7 +302,29 @@ export const getBranchMergesCollection = (): CollectionConfig => ({
     {
       name: 'mergedAt',
       type: 'date',
-      required: true,
+    },
+    {
+      name: 'startedAt',
+      type: 'date',
+    },
+    {
+      name: 'completedAt',
+      type: 'date',
+    },
+    {
+      name: 'targetBranch',
+      type: 'text',
+      defaultValue: MAIN_BRANCH,
+    },
+    {
+      name: 'status',
+      type: 'select',
+      defaultValue: 'succeeded',
+      options: ['inProgress', 'awaitingCommit', 'succeeded', 'failed', 'cleanupFailed'],
+    },
+    {
+      name: 'error',
+      type: 'text',
     },
     // Stored rather than related: the ledger has to keep reading correctly after
     // the user is deleted, renamed, or moved between auth collections.
@@ -324,12 +346,50 @@ export const getBranchMergesCollection = (): CollectionConfig => ({
       name: 'changes',
       type: 'array',
       fields: [
+        { name: 'changeID', type: 'text' },
         { name: 'collectionSlug', type: 'text' },
         { name: 'docID', type: 'text' },
         { name: 'docTitle', type: 'text' },
         /** Set instead of `collectionSlug`/`docID` when the merged change was a global. */
         { name: 'globalSlug', type: 'text' },
         { name: 'operation', type: 'text' },
+        {
+          name: 'applicationOutcome',
+          type: 'select',
+          options: [
+            'unattempted',
+            'attempted',
+            'applied',
+            'committed',
+            'failed',
+            'rolledBack',
+            'unknown',
+          ],
+        },
+        {
+          name: 'recoveryOutcome',
+          type: 'select',
+          options: [
+            'notNeeded',
+            'pending',
+            'restored',
+            'deleted',
+            'unavailable',
+            'failed',
+            'unknown',
+          ],
+        },
+        {
+          name: 'cleanupOutcome',
+          type: 'select',
+          options: ['pending', 'completed', 'failed', 'notNeeded', 'unknown'],
+        },
+        { name: 'targetID', type: 'text' },
+        { name: 'beforeVersionID', type: 'text' },
+        { name: 'afterVersionID', type: 'text' },
+        { name: 'error', type: 'text' },
+        { name: 'recoveryError', type: 'text' },
+        { name: 'cleanupError', type: 'text' },
         // Both sides of the change, captured either side of the write.
         //
         // Without these the archive can only list what was merged: the branch's copy

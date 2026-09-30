@@ -7,6 +7,7 @@ import { Types } from 'mongoose'
 import path from 'path'
 import {
   assertBranchReadable,
+  commitTransaction,
   createDataloaderCacheKey,
   createPayloadRequest,
   defaultBranchMergeValidation,
@@ -8341,7 +8342,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         await payload.delete({ id: row.id, branch: false, collection: postsSlug })
       }
 
-      for (const collection of [branchChangesSlug, branchesSlug]) {
+      for (const collection of [branchChangesSlug, branchMergesSlug, branchesSlug]) {
         const found = await payload.find({
           collection,
           pagination: false,
@@ -8417,8 +8418,24 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
           pagination: false,
           where: { branch: { equals: 'txnmerge' } },
         })
+        const mergeEvents = await payload.find({
+          collection: branchMergesSlug,
+          pagination: false,
+          where: { branch: { equals: 'txnmerge' } },
+        })
+        const mergeEvent = mergeEvents.docs[0] as unknown as {
+          changes: { applicationOutcome: string }[]
+          status: string
+        }
 
         expect(remainingChanges.docs).toHaveLength(3)
+        expect(mergeEvents.docs).toHaveLength(1)
+        expect(mergeEvent.status).toBe('failed')
+        expect(mergeEvent.changes.map(({ applicationOutcome }) => applicationOutcome)).toEqual([
+          'rolledBack',
+          'failed',
+          'unattempted',
+        ])
       },
     )
 
@@ -8477,9 +8494,27 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
           pagination: false,
           where: { branch: { equals: branchSlug } },
         })
+        const mergeEvents = await payload.find({
+          collection: branchMergesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+        const mergeEvent = mergeEvents.docs[0] as unknown as {
+          changes: { applicationOutcome: string; error?: string }[]
+          error?: string
+          status: string
+        }
 
         expect(sourceRows.docs).toHaveLength(2)
         expect(remainingChanges.docs).toHaveLength(2)
+        expect(mergeEvents.docs).toHaveLength(1)
+        expect(mergeEvent.status).toBe('failed')
+        expect(mergeEvent.error).toContain('Simulated non-transactional merge failure')
+        expect(mergeEvent.changes.map(({ applicationOutcome }) => applicationOutcome)).toEqual([
+          'applied',
+          'failed',
+        ])
+        expect(mergeEvent.changes[1]?.error).toContain('Simulated non-transactional merge failure')
       } finally {
         beginTransactionSpy.mockRestore()
       }
@@ -8606,6 +8641,70 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         hookSpy.beforeChange = undefined
         rollbackTransactionSpy.mockRestore()
         delete req.transactionID
+      }
+    })
+
+    test('should finalise a successful merge only after its caller-owned transaction commits', async () => {
+      branchSlug = 'caller-owned-successful-merge'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Caller-owned successful merge', slug: branchSlug },
+      })
+      const mainDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Caller-owned success original' },
+      })
+
+      await payload.update({
+        id: mainDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Caller-owned success edited' },
+      })
+
+      const req = await createPayloadRequest({ branch: false, payload })
+
+      expect(await initTransaction(req)).toBe(true)
+
+      try {
+        await payload.branches.merge({ branch: branchSlug, overrideAccess: true, req })
+
+        const beforeCommit = (
+          await payload.find({
+            collection: branchMergesSlug,
+            pagination: false,
+            where: { branch: { equals: branchSlug } },
+          })
+        ).docs[0] as unknown as {
+          changes: { applicationOutcome: string; cleanupOutcome: string }[]
+          status: string
+        }
+
+        expect(beforeCommit.status).toBe('awaitingCommit')
+        expect(beforeCommit.changes[0]?.applicationOutcome).toBe('applied')
+        expect(beforeCommit.changes[0]?.cleanupOutcome).toBe('pending')
+
+        await commitTransaction(req)
+
+        const afterCommit = (
+          await payload.find({
+            collection: branchMergesSlug,
+            pagination: false,
+            where: { branch: { equals: branchSlug } },
+          })
+        ).docs[0] as unknown as {
+          changes: { applicationOutcome: string; cleanupOutcome: string }[]
+          status: string
+        }
+
+        expect(afterCommit.status).toBe('succeeded')
+        expect(afterCommit.changes[0]?.applicationOutcome).toBe('committed')
+        expect(afterCommit.changes[0]?.cleanupOutcome).toBe('completed')
+      } finally {
+        if (req.transactionID) {
+          await killTransaction(req)
+        }
       }
     })
 
