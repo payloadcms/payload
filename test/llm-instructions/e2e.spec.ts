@@ -86,6 +86,7 @@ test('should open the correct instructions document from the global menu', async
   await page.getByRole('menuitem', { name: 'Edit LLM instructions' }).click()
 
   await expect(page).toHaveURL(`${instructionsURL}/global%3Asite-settings`)
+  await page.getByRole('tab', { name: 'Additional instructions', exact: true }).click()
   await expect(page.locator('.llm-instructions__description')).toContainText('Site Settings global')
   await page.getByRole('tab', { name: 'System instructions (read-only)' }).click()
 
