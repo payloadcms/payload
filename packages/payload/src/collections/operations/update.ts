@@ -426,25 +426,26 @@ export const updateOperation = async <
           unpublishAllLocales,
         } as const
         const write = () => updateDocument(updateArgs)
-        let updatedDoc = collectionConfig.upload.fileOperations
-          ? await runCloudFileUpdate({
-              id,
-              collection: collectionConfig,
-              current: docWithLocales,
-              data: updateArgs.data,
-              files: generatedFileData.files,
-              req,
-              write,
-            })
-          : await runLocalFileUpdate({
-              id,
-              collection: collectionConfig,
-              current: docWithLocales,
-              files: generatedFileData.files,
-              nextManifest: (generatedFileData.data as Record<string, unknown>)._managedFiles,
-              req,
-              write,
-            })
+        let updatedDoc =
+          collectionConfig.versions && collectionConfig.upload.fileOperations
+            ? await runCloudFileUpdate({
+                id,
+                collection: collectionConfig,
+                current: docWithLocales,
+                data: updateArgs.data,
+                files: generatedFileData.files,
+                req,
+                write,
+              })
+            : await runLocalFileUpdate({
+                id,
+                collection: collectionConfig,
+                current: docWithLocales,
+                files: generatedFileData.files,
+                nextManifest: (generatedFileData.data as Record<string, unknown>)._managedFiles,
+                req,
+                write,
+              })
 
         // /////////////////////////////////////
         // Add collection property for auth collections

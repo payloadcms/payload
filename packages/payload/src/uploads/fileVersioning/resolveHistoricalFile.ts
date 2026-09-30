@@ -7,7 +7,7 @@ import type { ManagedFileManifest } from './types.js'
 import { Forbidden } from '../../errors/Forbidden.js'
 import { NotFound } from '../../errors/NotFound.js'
 import { checkFileAccess } from '../checkFileAccess.js'
-import { synthesizeLegacyUploadState } from './manifest.js'
+import { withLegacyUploadFileData } from './manifest.js'
 
 type StoredVersion = {
   id: number | string
@@ -91,7 +91,7 @@ const resolveVersionFile = async ({
   req: PayloadRequest
   row: StoredVersion
 }): Promise<TypeWithID | undefined> => {
-  const saved = synthesizeLegacyUploadState({
+  const saved = withLegacyUploadFileData({
     collection: collection.config,
     config: req.payload.config,
     doc: row.version,

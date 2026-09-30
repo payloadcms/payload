@@ -48,7 +48,7 @@ export const createManagedFileManifest = ({
   return files
 }
 
-export const synthesizeLegacyUploadState = ({
+export const withLegacyUploadFileData = ({
   collection,
   config,
   doc,

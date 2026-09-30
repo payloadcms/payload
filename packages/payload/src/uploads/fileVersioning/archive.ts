@@ -12,7 +12,7 @@ import { saveVersion } from '../../versions/saveVersion.js'
 import { scheduleUnreferencedFileCleanup } from './cleanup.js'
 import { runFileOperationPlan, stageLocalUploadFiles } from './fileOperationManager.js'
 import { copyLocalFile } from './localStorage.js'
-import { getManagedFileIdentity, synthesizeLegacyUploadState } from './manifest.js'
+import { getManagedFileIdentity, withLegacyUploadFileData } from './manifest.js'
 import { getArchivedFilename } from './naming.js'
 
 type VersionRow = {
@@ -144,7 +144,7 @@ export const archiveOutgoingLocalFiles = async ({
     return
   }
 
-  const currentWithState = synthesizeLegacyUploadState({
+  const currentWithState = withLegacyUploadFileData({
     collection,
     config: req.payload.config,
     doc: current,
@@ -170,7 +170,7 @@ export const archiveOutgoingLocalFiles = async ({
   for (const file of outgoing) {
     const identity = getManagedFileIdentity(file)
     const newestVersion = versions.find(({ version }) => {
-      const stored = synthesizeLegacyUploadState({
+      const stored = withLegacyUploadFileData({
         collection,
         config: req.payload.config,
         doc: version,
@@ -221,12 +221,12 @@ export const archiveOutgoingLocalFiles = async ({
   }
 
   for (const row of versions) {
-    const stored = synthesizeLegacyUploadState({
+    const stored = withLegacyUploadFileData({
       collection,
       config: req.payload.config,
       doc: row.version,
     })
-    const version = archiveVersionReferences({ replacements, version: stored })
+    const version = replaceManagedFileReferences({ replacements, version: stored })
 
     if (!version) {
       continue
@@ -259,7 +259,7 @@ const getOutgoingLocalFiles = ({
   current: JsonObject
   nextManifest: ManagedFileManifest
 }): ManagedFileManifest => {
-  const currentWithState = synthesizeLegacyUploadState({ collection, config, doc: current })
+  const currentWithState = withLegacyUploadFileData({ collection, config, doc: current })
   const currentManifest = Array.isArray(currentWithState._managedFiles)
     ? (currentWithState._managedFiles as ManagedFileManifest)
     : []
@@ -294,7 +294,7 @@ const getVersions = async ({
   return docs as VersionRow[]
 }
 
-export const archiveVersionReferences = ({
+export const replaceManagedFileReferences = ({
   replacements,
   version,
 }: {

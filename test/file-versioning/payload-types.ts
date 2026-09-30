@@ -72,6 +72,7 @@ export interface Config {
     'file-versioned-transformed-media': FileVersionedTransformedMedia;
     'file-versioned-converted-media': FileVersionedConvertedMedia;
     'file-versioned-trash-media': FileVersionedTrashMedia;
+    'file-versioned-plain-media': FileVersionedPlainMedia;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -85,6 +86,7 @@ export interface Config {
     'file-versioned-transformed-media': FileVersionedTransformedMediaSelect<false> | FileVersionedTransformedMediaSelect<true>;
     'file-versioned-converted-media': FileVersionedConvertedMediaSelect<false> | FileVersionedConvertedMediaSelect<true>;
     'file-versioned-trash-media': FileVersionedTrashMediaSelect<false> | FileVersionedTrashMediaSelect<true>;
+    'file-versioned-plain-media': FileVersionedPlainMediaSelect<false> | FileVersionedPlainMediaSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -425,6 +427,56 @@ export interface FileVersionedTrashMedia {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "file-versioned-plain-media".
+ */
+export interface FileVersionedPlainMedia {
+  id: number;
+  alt?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+  };
+  _managedFiles?: {
+    key: string;
+    roles: (
+      | {
+          type: 'size';
+          sizeKey: string;
+        }
+      | {
+          type: 'original' | 'default' | 'thumbnail';
+        }
+    )[];
+    storageBackendId: string;
+    [k: string]: unknown;
+  }[];
+  _fileRevision?: string | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -466,6 +518,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'file-versioned-trash-media';
         value: number | FileVersionedTrashMedia;
+      } | null)
+    | ({
+        relationTo: 'file-versioned-plain-media';
+        value: number | FileVersionedPlainMedia;
       } | null)
     | ({
         relationTo: 'users';
@@ -691,6 +747,38 @@ export interface FileVersionedTrashMediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "file-versioned-plain-media_select".
+ */
+export interface FileVersionedPlainMediaSelect<T extends boolean = true> {
+  alt?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+      };
+  _managedFiles?: T;
+  _fileRevision?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -777,6 +865,7 @@ export interface CollectionQueryWidget {
       | 'file-versioned-transformed-media'
       | 'file-versioned-converted-media'
       | 'file-versioned-trash-media'
+      | 'file-versioned-plain-media'
       | 'users';
     where?:
       | {
@@ -806,6 +895,7 @@ export interface ActivityWidget {
           | 'file-versioned-transformed-media'
           | 'file-versioned-converted-media'
           | 'file-versioned-trash-media'
+          | 'file-versioned-plain-media'
           | 'users'
         )[]
       | null;

@@ -9,7 +9,7 @@ import type { FileData, FileToSave } from './types.js'
 
 import { APIError, ErrorDeletingFile } from '../errors/index.js'
 import { fileExists } from './fileExists.js'
-import { synthesizeLegacyUploadState } from './fileVersioning/manifest.js'
+import { withLegacyUploadFileData } from './fileVersioning/manifest.js'
 
 type Args = {
   collectionConfig: SanitizedCollectionConfig
@@ -31,7 +31,7 @@ export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
   if (!collectionConfig.upload) {
     return
   }
-  const stored = synthesizeLegacyUploadState({ collection: collectionConfig, config, doc })
+  const stored = withLegacyUploadFileData({ collection: collectionConfig, config, doc })
 
   if (collectionConfig.versions || Array.isArray(stored._managedFiles)) {
     return

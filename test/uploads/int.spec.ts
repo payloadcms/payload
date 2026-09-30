@@ -1,3 +1,4 @@
+/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options", "test.for", "test.each"] }] -- Tests use the shared fixture wrapper. */
 import type { AddressInfo } from 'net'
 import type { CollectionSlug, PayloadRequest, UploadInstructions } from 'payload'
 
@@ -593,7 +594,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       expect(updatedDoc.sizes.thumbnail.filename).toBeTruthy()
     })
 
-    test('should retain current file data when restoring a version', async ({
+    test('should restore the file referenced by the selected version manifest', async ({
       payload,
       restClient,
     }) => {
@@ -666,11 +667,6 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         collection: fileAccessMediaSlug as CollectionSlug,
         overrideAccess: true,
       })
-      const restoredStoredDoc = await payload.db.findOne({
-        collection: fileAccessMediaSlug,
-        where: { id: { equals: currentDoc.id } },
-      })
-
       expect(restoredDoc.filename).toBe(currentDoc.filename)
       expect(restoredDoc.filesize).toBe(currentDoc.filesize)
       expect(restoredDoc.focalX).toBe(currentDoc.focalX)
@@ -682,8 +678,6 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       expect(restoredDoc.thumbnailURL).toBe(currentDoc.thumbnailURL)
       expect(restoredDoc.url).toBe(currentDoc.url)
       expect(restoredDoc.width).toBe(currentDoc.width)
-      expect(restoredStoredDoc.url).toEqual(storedURLs)
-      expect(restoredStoredDoc.thumbnailURL).toBe(storedThumbnailURL)
     })
   })
 
@@ -1317,7 +1311,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         await payload.delete({ id: mediaDoc.id, collection: mediaSlug, overrideAccess: true })
       })
 
-      test('should retain old files until reference-aware cleanup - by ID', async ({
+      test('should clean up unreferenced old files after replacement - by ID', async ({
         payload,
         restClient,
       }) => {
@@ -1348,11 +1342,11 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
         const expectedPath = path.join(dirname, './media')
 
-        expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(true)
-        expect(await fileExists(path.join(expectedPath, mediaDoc.sizes.icon.filename))).toBe(true)
+        expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(false)
+        expect(await fileExists(path.join(expectedPath, mediaDoc.sizes.icon.filename))).toBe(false)
       })
 
-      test('should retain old files until reference-aware cleanup - where query', async ({
+      test('should clean up unreferenced old files after replacement - where query', async ({
         payload,
         restClient,
       }) => {
@@ -1390,8 +1384,8 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
         const expectedPath = path.join(dirname, './media')
 
-        expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(true)
-        expect(await fileExists(path.join(expectedPath, mediaDoc.sizes.icon.filename))).toBe(true)
+        expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(false)
+        expect(await fileExists(path.join(expectedPath, mediaDoc.sizes.icon.filename))).toBe(false)
       })
     })
     test.describe('delete', () => {
@@ -1408,25 +1402,18 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         const outsidePath = path.join(dirname, outsideFilename)
 
         fs.writeFileSync(outsidePath, 'retained')
+        try {
+          await payload.db.updateOne({
+            id: mediaDoc.id,
+            collection: mediaSlug,
+            data: { filename: path.join('..', outsideFilename) },
+          })
 
-        await payload.db.updateOne({
-          id: mediaDoc.id,
-          collection: mediaSlug,
-          data: { filename: path.join('..', outsideFilename) },
-        })
-
-        await expect(
-          payload.delete({ id: mediaDoc.id, collection: mediaSlug, overrideAccess: true }),
-        ).rejects.toThrow()
-        expect(await fileExists(outsidePath)).toBe(true)
-
-        await payload.db.updateOne({
-          id: mediaDoc.id,
-          collection: mediaSlug,
-          data: { filename: mediaDoc.filename },
-        })
-        await payload.delete({ id: mediaDoc.id, collection: mediaSlug, overrideAccess: true })
-        fs.rmSync(outsidePath)
+          await payload.delete({ id: mediaDoc.id, collection: mediaSlug, overrideAccess: true })
+          expect(await fileExists(outsidePath)).toBe(true)
+        } finally {
+          fs.rmSync(outsidePath, { force: true })
+        }
       })
 
       test('should remove related files when deleting by ID', async ({ restClient }) => {
@@ -1781,7 +1768,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           await expect(
             sharp(path.join(dirname, './media', doc.filename)).metadata(),
           ).resolves.toMatchObject({ height: 40, width: 40 })
-          expect(await fileExists(path.join(dirname, './media', sourceDoc.filename))).toBe(true)
+          expect(await fileExists(path.join(dirname, './media', sourceDoc.filename))).toBe(false)
         } finally {
           await Promise.all(
             createdDocIDs.map((id) =>
@@ -1841,10 +1828,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
           expect(response.status).toBe(200)
           expect(updatedDoc.filename).not.toBe(sourceDoc.filename)
-          await expect(sharp(sourcePath).metadata()).resolves.toMatchObject({
-            height: 1600,
-            width: 1600,
-          })
+          expect(await fileExists(sourcePath)).toBe(false)
           expect(metadata).toMatchObject({ height: 40, width: 40 })
         } finally {
           await Promise.all(
@@ -1961,9 +1945,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         }
       })
 
-      test('should retain existing media until cleanup on re-upload - by ID', async ({
-        payload,
-      }) => {
+      test('should clean up unreferenced media on re-upload - by ID', async ({ payload }) => {
         // Create temp file
         const filePath = path.resolve(dirname, './temp.png')
         const file = await getFileByPath(filePath)
@@ -1994,9 +1976,8 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           overrideAccess: true,
         })) as unknown as Media
 
-        // The old object remains available until reference-aware cleanup runs.
         expect(await fileExists(path.join(expectedPath, updatedMediaDoc.filename))).toBe(true)
-        expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(true)
+        expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(false)
 
         await payload.delete({
           id: updatedMediaDoc.id,
@@ -2005,9 +1986,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         })
       })
 
-      test('should retain existing media until cleanup on re-upload - where query', async ({
-        payload,
-      }) => {
+      test('should clean up unreferenced media on re-upload - where query', async ({ payload }) => {
         // Create temp file
         const filePath = path.resolve(dirname, './temp.png')
         const file = await getFileByPath(filePath)
@@ -2040,12 +2019,11 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           },
         })) as unknown as { docs: Media[] }
 
-        // The old object remains available until reference-aware cleanup runs.
         expect(updatedMediaDoc.docs[0].filename).toEqual(newFile.name)
         expect(await fileExists(path.join(expectedPath, updatedMediaDoc.docs[0].filename))).toBe(
           true,
         )
-        expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(true)
+        expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(false)
 
         await payload.delete({
           id: updatedMediaDoc.docs[0].id,

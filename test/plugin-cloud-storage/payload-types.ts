@@ -77,6 +77,7 @@ export interface Config {
     'media-with-throwing-hook': MediaWithThrowingHook;
     'restricted-media': RestrictedMedia;
     'test-metadata': TestMetadatum;
+    'unversioned-cloud-media': UnversionedCloudMedia;
     users: User;
     'versioned-cloud-media': VersionedCloudMedia;
     'versioned-public-cloud-media': VersionedPublicCloudMedia;
@@ -98,6 +99,7 @@ export interface Config {
     'media-with-throwing-hook': MediaWithThrowingHookSelect<false> | MediaWithThrowingHookSelect<true>;
     'restricted-media': RestrictedMediaSelect<false> | RestrictedMediaSelect<true>;
     'test-metadata': TestMetadataSelect<false> | TestMetadataSelect<true>;
+    'unversioned-cloud-media': UnversionedCloudMediaSelect<false> | UnversionedCloudMediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'versioned-cloud-media': VersionedCloudMediaSelect<false> | VersionedCloudMediaSelect<true>;
     'versioned-public-cloud-media': VersionedPublicCloudMediaSelect<false> | VersionedPublicCloudMediaSelect<true>;
@@ -747,6 +749,57 @@ export interface TestMetadatum {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unversioned-cloud-media".
+ */
+export interface UnversionedCloudMedia {
+  id: string;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+  };
+  _managedFiles?: {
+    key: string;
+    roles: (
+      | {
+          type: 'size';
+          sizeKey: string;
+        }
+      | {
+          type: 'original' | 'default' | 'thumbnail';
+        }
+    )[];
+    storageBackendId: string;
+    [k: string]: unknown;
+  }[];
+  _fileRevision?: string | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "versioned-cloud-media".
  */
 export interface VersionedCloudMedia {
@@ -973,6 +1026,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'test-metadata';
         value: string | TestMetadatum;
+      } | null)
+    | ({
+        relationTo: 'unversioned-cloud-media';
+        value: string | UnversionedCloudMedia;
       } | null)
     | ({
         relationTo: 'users';
@@ -1432,6 +1489,39 @@ export interface TestMetadataSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unversioned-cloud-media_select".
+ */
+export interface UnversionedCloudMediaSelect<T extends boolean = true> {
+  prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+      };
+  _managedFiles?: T;
+  _fileRevision?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -1638,6 +1728,7 @@ export interface CollectionQueryWidget {
       | 'media-with-throwing-hook'
       | 'restricted-media'
       | 'test-metadata'
+      | 'unversioned-cloud-media'
       | 'users'
       | 'versioned-cloud-media'
       | 'versioned-public-cloud-media'
@@ -1675,6 +1766,7 @@ export interface ActivityWidget {
           | 'media-with-throwing-hook'
           | 'restricted-media'
           | 'test-metadata'
+          | 'unversioned-cloud-media'
           | 'users'
           | 'versioned-cloud-media'
           | 'versioned-public-cloud-media'

@@ -152,7 +152,9 @@ export const generateFileData = async <T>({
     focalPoint: focalPointEnabled = true,
     staticDir,
   } = collectionConfig.upload
-  const hasManagedCloudStorage = Boolean(collectionConfig.upload.fileOperations)
+  const hasManagedCloudStorage = Boolean(
+    collectionConfig.versions && collectionConfig.upload.fileOperations,
+  )
   const uploadReference = file?.uploadReference
   const hasProviderDirectReference =
     uploadReference && typeof uploadReference === 'object' && !('uploadId' in uploadReference)

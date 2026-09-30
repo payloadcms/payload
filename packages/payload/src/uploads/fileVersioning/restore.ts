@@ -6,11 +6,11 @@ import type { SanitizedCollectionConfig } from '../../collections/config/types.j
 import type { JsonObject, PayloadRequest } from '../../types/index.js'
 import type { ManagedFileManifest } from './types.js'
 
-import { archiveOutgoingLocalFiles, archiveVersionReferences } from './archive.js'
+import { archiveOutgoingLocalFiles, replaceManagedFileReferences } from './archive.js'
 import { scheduleUnreferencedFileCleanup } from './cleanup.js'
 import { runFileOperationPlan } from './fileOperationManager.js'
 import { copyLocalFile } from './localStorage.js'
-import { getManagedFileIdentity, synthesizeLegacyUploadState } from './manifest.js'
+import { getManagedFileIdentity, withLegacyUploadFileData } from './manifest.js'
 import { getArchivedFilename } from './naming.js'
 
 /** Copies the selected stored files before making that version current. */
@@ -29,7 +29,7 @@ export const runManagedFileRestore = async <T>({
   selected: JsonObject
   write: (restored: JsonObject) => Promise<T>
 }): Promise<T> => {
-  const stored = synthesizeLegacyUploadState({
+  const stored = withLegacyUploadFileData({
     collection,
     config: req.payload.config,
     doc: selected,
@@ -41,7 +41,7 @@ export const runManagedFileRestore = async <T>({
   const staticDir = collection.upload.staticDir
   const storageBackendId = `local:${collection.slug}`
   const cloudOperations = collection.upload.fileOperations
-  const currentStored = synthesizeLegacyUploadState({
+  const currentStored = withLegacyUploadFileData({
     collection,
     config: req.payload.config,
     doc: current,
@@ -90,7 +90,7 @@ export const runManagedFileRestore = async <T>({
         replacements.set(getManagedFileIdentity(file), key)
       }
 
-      restored = archiveVersionReferences({ replacements, version: stored }) ?? stored
+      restored = replaceManagedFileReferences({ replacements, version: stored }) ?? stored
     },
     write: async ({ trackStagedObject }) => {
       if (staticDir && !collection.upload.disableLocalStorage) {

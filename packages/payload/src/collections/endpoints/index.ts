@@ -12,6 +12,7 @@ import { findByIDHandler } from './findByID.js'
 // import { findDistinctHandler } from './findDistinct.js'
 import { findVersionByIDHandler } from './findVersionByID.js'
 import { findVersionsHandler } from './findVersions.js'
+import { renameFileHandler } from './renameFile.js'
 import { restoreVersionHandler } from './restoreVersion.js'
 import { updateHandler } from './update.js'
 import { updateByIDHandler } from './updateByID.js'
@@ -80,6 +81,11 @@ export const defaultCollectionEndpoints: Endpoint[] = [
       handler: restoreVersionHandler,
       method: 'post',
       path: '/versions/:id',
+    },
+    {
+      handler: renameFileHandler,
+      method: 'post',
+      path: '/:id/rename',
     },
     {
       handler: updateHandler,

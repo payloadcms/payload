@@ -3,21 +3,33 @@ import type { Adapter } from '@payloadcms/plugin-cloud-storage/types'
 export const versionedCloudFiles = new Map<string, Buffer>()
 export const versionedCloudFailure: {
   afterChange: boolean
+  beforeCopy?: () => Promise<void>
   beforeUpload?: () => Promise<void>
   deleteKey?: string
+  moveNumber?: number
   uploadNumber: number
 } = { afterChange: false, uploadNumber: 0 }
-export const versionedCloudCalls = { afterChanges: 0, deletes: [] as string[], uploads: 0 }
+export const versionedCloudCalls = {
+  afterChanges: 0,
+  deletes: [] as string[],
+  moves: 0,
+  uploads: 0,
+}
 
 export const versionedCloudAdapter: Adapter = () => ({
   name: 'test-cloud',
-  copyFile: ({ from, to }) => {
+  copyFile: async ({ from, to }) => {
+    await versionedCloudFailure.beforeCopy?.()
     const bytes = versionedCloudFiles.get(from)
-    if (!bytes || versionedCloudFiles.has(to)) {
-      throw new Error('Cannot copy test cloud object')
+    if (!bytes) {
+      throw new Error('Cloud source does not exist')
+    }
+    if (versionedCloudFiles.has(to)) {
+      throw Object.assign(new Error(`Storage destination already exists: ${to}`), {
+        code: 'EEXIST',
+      })
     }
     versionedCloudFiles.set(to, Buffer.from(bytes))
-    return Promise.resolve()
   },
   handleDelete: ({ storageFilePath }) => {
     versionedCloudCalls.deletes.push(storageFilePath)
@@ -38,6 +50,24 @@ export const versionedCloudAdapter: Adapter = () => ({
       : file.buffer
     versionedCloudFiles.set(storageFilePath, Buffer.from(bytes))
     return { storageMarker: storageFilePath } as never
+  },
+  moveFile: ({ from, to }) => {
+    versionedCloudCalls.moves += 1
+    if (versionedCloudCalls.moves === versionedCloudFailure.moveNumber) {
+      throw new Error('Cloud test move failed')
+    }
+    const bytes = versionedCloudFiles.get(from)
+    if (!bytes) {
+      throw new Error('Cloud source does not exist')
+    }
+    if (versionedCloudFiles.has(to)) {
+      throw Object.assign(new Error(`Storage destination already exists: ${to}`), {
+        code: 'EEXIST',
+      })
+    }
+    versionedCloudFiles.set(to, bytes)
+    versionedCloudFiles.delete(from)
+    return Promise.resolve()
   },
   staticHandler: (_req, { doc, params: { filename } }) => {
     const manifest = (doc as { _managedFiles?: Array<{ key: string }> } | undefined)?._managedFiles

@@ -240,13 +240,13 @@ export const cloudStoragePlugin =
           upload: {
             ...(typeof existingCollection.upload === 'object' ? existingCollection.upload : {}),
             adapter: adapter.name,
-            ...(existingCollection.versions && {
-              fileOperations: createFileOperations({
-                adapter,
-                collection: existingCollection,
-                collectionPrefix: options.prefix,
-                useCompositePrefixes,
-              }),
+            fileOperations: createFileOperations({
+              adapter,
+              collection: existingCollection,
+              collectionPrefix: options.prefix,
+              disablePayloadAccessControl: options.disablePayloadAccessControl,
+              generateFileURL: options.generateFileURL,
+              useCompositePrefixes,
             }),
             ...(uploadInstructions && {
               uploadInstructions,

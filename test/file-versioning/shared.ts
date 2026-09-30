@@ -3,6 +3,11 @@ import { fileURLToPath } from 'node:url'
 
 export const mediaSlug = 'file-versioned-media'
 export const mediaDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'media')
+export const plainMediaSlug = 'file-versioned-plain-media'
+export const plainMediaDir = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  'plain-media',
+)
 export const draftMediaSlug = 'file-versioned-draft-media'
 export const draftMediaDir = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),

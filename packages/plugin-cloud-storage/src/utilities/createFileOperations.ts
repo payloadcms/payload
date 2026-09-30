@@ -1,18 +1,21 @@
-import type { CollectionConfig, FileData, UploadConfig } from 'payload'
+import type { CollectionConfig, FileData, ImageSize, UploadConfig } from 'payload'
 
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { generatePayloadFileURL } from 'payload'
 import { createManagedFileManifest } from 'payload/internal'
 
-import type { GeneratedAdapter } from '../types.js'
+import type { GeneratedAdapter, GenerateFileURL } from '../types.js'
 
 import { buildPrefixWithObjectKey } from './buildPrefixWithObjectKey.js'
-import { buildUploadStoragePathData } from './buildStoragePathData.js'
+import { buildStoragePathData, buildUploadStoragePathData } from './buildStoragePathData.js'
 
 type Args = {
   adapter: GeneratedAdapter
   collection: CollectionConfig
   collectionPrefix?: string
+  disablePayloadAccessControl?: boolean
+  generateFileURL?: GenerateFileURL
   useCompositePrefixes?: boolean
 }
 
@@ -20,6 +23,8 @@ export const createFileOperations = ({
   adapter,
   collection,
   collectionPrefix,
+  disablePayloadAccessControl,
+  generateFileURL,
   useCompositePrefixes,
 }: Args): NonNullable<UploadConfig['fileOperations']> => {
   const storageBackendId = `${adapter.name}:${collection.slug}`
@@ -55,6 +60,102 @@ export const createFileOperations = ({
         storageFilePath: key,
       })
     },
+    getLegacyManifest: async ({ doc, req }) => {
+      if (typeof doc.filename !== 'string' || typeof doc.url !== 'string') {
+        return []
+      }
+
+      const docPrefix = typeof doc.prefix === 'string' ? doc.prefix : undefined
+      const objectFolder = buildPrefixWithObjectKey({
+        objectKey: typeof doc._objectKey === 'string' ? doc._objectKey : undefined,
+        prefix: docPrefix,
+      })
+      const expectedURL = async ({ filename, size }: { filename: string; size?: ImageSize }) => {
+        if (generateFileURL) {
+          return generateFileURL({ collection, filename, prefix: objectFolder, size })
+        }
+        if (disablePayloadAccessControl && adapter.generateURL) {
+          return adapter.generateURL({ collection, data: doc, filename, prefix: objectFolder })
+        }
+        return generatePayloadFileURL({
+          collectionSlug: collection.slug,
+          config: req.payload.config as unknown as Parameters<
+            typeof generatePayloadFileURL
+          >[0]['config'],
+          filename,
+          relative: true,
+        })
+      }
+      if (doc.url !== (await expectedURL({ filename: doc.filename }))) {
+        return []
+      }
+      const references: Parameters<typeof createManagedFileManifest>[0]['references'] = []
+      const add = ({
+        filename,
+        role,
+      }: {
+        filename: string
+        role: (typeof references)[number]['role']
+      }) => {
+        references.push({
+          key: buildStoragePathData({
+            collectionPrefix,
+            docPrefix,
+            filename,
+            useCompositePrefixes,
+          }).storageFilePath,
+          role,
+          storageBackendId,
+        })
+      }
+
+      add({ filename: doc.filename, role: { type: 'default' } })
+      add({ filename: doc.filename, role: { type: 'original' } })
+      if (doc.sizes && typeof doc.sizes === 'object' && !Array.isArray(doc.sizes)) {
+        for (const [sizeKey, size] of Object.entries(doc.sizes)) {
+          if (
+            size &&
+            typeof size === 'object' &&
+            'filename' in size &&
+            typeof size.filename === 'string'
+          ) {
+            const imageSize = req.payload.collections[
+              collection.slug
+            ]?.config.upload.imageSizes?.find(({ name }) => name === sizeKey)
+            if (
+              !('url' in size) ||
+              typeof size.url !== 'string' ||
+              size.url !== (await expectedURL({ filename: size.filename, size: imageSize }))
+            ) {
+              return []
+            }
+            add({ filename: size.filename, role: { type: 'size', sizeKey } })
+          }
+        }
+      }
+      return createManagedFileManifest({ references })
+    },
+    ...(adapter.moveFile && {
+      move: async ({ from, req, to, trackStagedObject }) => {
+        await adapter.moveFile!({
+          collection: req.payload.collections[collection.slug]!.config,
+          from,
+          req,
+          to,
+        })
+        trackStagedObject({
+          key: to,
+          remove: () =>
+            adapter.moveFile!({
+              collection: req.payload.collections[collection.slug]!.config,
+              from: to,
+              req,
+              to: from,
+            }),
+          storageBackendId,
+        })
+      },
+    }),
     stage: async ({ data, files, req, trackStagedObject }) => {
       const docPrefix = buildPrefixWithObjectKey({
         objectKey: typeof data._objectKey === 'string' ? data._objectKey : undefined,

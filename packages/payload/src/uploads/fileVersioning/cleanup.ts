@@ -6,7 +6,7 @@ import type { JsonObject, PayloadRequest, Where } from '../../types/index.js'
 import type { ManagedFile, ManagedFileManifest } from './types.js'
 
 import { deferFileCleanup } from './fileOperationManager.js'
-import { getManagedFileIdentity, synthesizeLegacyUploadState } from './manifest.js'
+import { getManagedFileIdentity, withLegacyUploadFileData } from './manifest.js'
 import { normalizeStorageKey } from './naming.js'
 
 const pageSize = 100
@@ -20,7 +20,7 @@ export const collectManagedFiles = ({
   doc: JsonObject
   req: PayloadRequest
 }): ManagedFileManifest => {
-  const stored = synthesizeLegacyUploadState({
+  const stored = withLegacyUploadFileData({
     collection,
     config: req.payload.config,
     doc,

@@ -238,6 +238,7 @@ export type UploadConfig = {
   filenameCompoundIndex?: string[]
   /** @internal Set by cloudStoragePlugin for versioned uploads; adapters do not implement this. */
   fileOperations?: {
+    /** Copy before the document changes. Must preserve object metadata and reject an occupied key. */
     copy: (args: {
       from: string
       req: PayloadRequest
@@ -245,6 +246,16 @@ export type UploadConfig = {
       trackStagedObject: (object: StagedObject) => void
     }) => Promise<void>
     delete: (args: { key: string; req: PayloadRequest }) => Promise<void>
+    getLegacyManifest?: (args: {
+      doc: Record<string, unknown>
+      req: PayloadRequest
+    }) => Promise<ManagedFileManifest>
+    move?: (args: {
+      from: string
+      req: PayloadRequest
+      to: string
+      trackStagedObject: (object: StagedObject) => void
+    }) => Promise<void>
     stage: (args: {
       data: Record<string, unknown>
       files: FileToSave[]

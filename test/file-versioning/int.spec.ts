@@ -128,6 +128,42 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     expect(await readFile(path.join(mediaDir, created.filename!))).toEqual(bytes)
   })
 
+  test('should expose the original but not the managed manifest in read APIs', async ({
+    payload,
+    restClient,
+  }) => {
+    const bytes = await readFile(imageFixture)
+    const created = await payload.create({
+      collection: mediaSlug,
+      data: { alt: 'read APIs' },
+      file: { name: 'read-api.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+    })
+
+    const local = await payload.findByID({ id: created.id, collection: mediaSlug })
+    const restResponse = await restClient.GET(`/${mediaSlug}/${created.id}`)
+    const rest = (await restResponse.json()) as typeof local
+    const graphqlResponse = await restClient.GRAPHQL_POST({
+      body: JSON.stringify({
+        query: `query { FileVersionedMedia(id: ${JSON.stringify(created.id)}) { original { filename url } } }`,
+      }),
+    })
+    const graphql = (await graphqlResponse.json()) as {
+      data?: { FileVersionedMedia: { original: { filename: string; url: string } } }
+      errors?: { message: string }[]
+    }
+
+    expect(restResponse.status).toBe(200)
+    expect(graphql.errors).toBeUndefined()
+    expect(local.original?.filename).toBe(created.filename)
+    expect(rest.original).toEqual(local.original)
+    expect(graphql.data?.FileVersionedMedia.original).toMatchObject({
+      filename: local.original?.filename,
+      url: local.original?.url,
+    })
+    expect(local._managedFiles).toBeUndefined()
+    expect(rest._managedFiles).toBeUndefined()
+  })
+
   test('should retain PDFs and videos without duplicating their source object', async ({
     payload,
   }) => {
@@ -1606,11 +1642,13 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     }
 
     expect(await readFile(path.join(mediaDir, created.original!.filename!))).toBeTruthy()
-    if (process.env.PAYLOAD_DATABASE !== 'sqlite') {
-      expect(
+    const hasExpectedRollback =
+      process.env.PAYLOAD_DATABASE === 'sqlite' ||
+      Boolean(
         await payload.db.findOne({ collection: mediaSlug, where: { id: { equals: created.id } } }),
-      ).toBeTruthy()
-    }
+      )
+
+    expect(hasExpectedRollback).toBe(true)
   })
 
   test('should archive a separately managed thumbnail with its historical version', async ({

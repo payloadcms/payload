@@ -5,7 +5,11 @@ import path from 'node:path'
 import { expect, vi } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import { versionedCloudMediaSlug, versionedPublicCloudMediaSlug } from './shared.js'
+import {
+  unversionedCloudMediaSlug,
+  versionedCloudMediaSlug,
+  versionedPublicCloudMediaSlug,
+} from './shared.js'
 import {
   versionedCloudCalls,
   versionedCloudFailure,
@@ -37,11 +41,410 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     versionedCloudFiles.clear()
     versionedCloudCalls.afterChanges = 0
     versionedCloudCalls.deletes.length = 0
+    versionedCloudCalls.moves = 0
     versionedCloudCalls.uploads = 0
     versionedCloudFailure.afterChange = false
+    versionedCloudFailure.beforeCopy = undefined
     versionedCloudFailure.beforeUpload = undefined
     versionedCloudFailure.deleteKey = undefined
+    versionedCloudFailure.moveNumber = undefined
     versionedCloudFailure.uploadNumber = 0
+  })
+
+  test('should rename a cloud upload by copying its bytes and retaining its history', async ({
+    payload,
+  }) => {
+    const created = await payload.create({
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      overrideAccess: true,
+    })
+    const before = await getManagedFiles({ id: created.id, payload })
+    const oldKey = before[0]!.key
+    const bytes = Buffer.from(versionedCloudFiles.get(oldKey)!)
+    const renamed = await payload.renameFile({
+      id: created.id,
+      collection: versionedCloudMediaSlug,
+      filename: 'renamed.png',
+      overrideAccess: true,
+    })
+    const after = await getManagedFiles({ id: created.id, payload })
+
+    expect(renamed.filename).toBe('renamed.png')
+    expect(renamed.url).toContain('/renamed.png')
+    expect(renamed.storageMarker).toBe(created.storageMarker)
+    expect(after[0]!.key).not.toBe(oldKey)
+    expect(versionedCloudFiles.get(after[0]!.key)).toEqual(bytes)
+    expect(versionedCloudFiles.get(oldKey)).toEqual(bytes)
+    expect(versionedCloudCalls.moves).toBe(0)
+    const { docs } = await payload.db.findVersions({
+      collection: versionedCloudMediaSlug,
+      where: { parent: { equals: created.id } },
+    })
+    expect(docs.some(({ version }) => version.filename === created.filename)).toBe(true)
+  })
+
+  test('should use native move for an unversioned rename', async ({ payload }) => {
+    const created = await payload.create({
+      collection: unversionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      overrideAccess: true,
+    })
+    const oldKey = [...versionedCloudFiles.keys()][0]!
+    expect(
+      payload.collections[unversionedCloudMediaSlug].config.upload.fileOperations?.move,
+    ).toBeTypeOf('function')
+
+    const renamed = await payload.renameFile({
+      id: created.id,
+      collection: unversionedCloudMediaSlug,
+      filename: 'moved.png',
+      overrideAccess: true,
+    })
+
+    expect(renamed.filename).toBe('moved.png')
+    expect(versionedCloudCalls.moves).toBe(1)
+    expect(versionedCloudFiles.has(oldKey)).toBe(false)
+    const current = await payload.db.findOne<{ _managedFiles: { key: string }[] }>({
+      collection: unversionedCloudMediaSlug,
+      where: { id: { equals: created.id } },
+    })
+    expect(versionedCloudFiles.has(current!._managedFiles[0]!.key)).toBe(true)
+  })
+
+  test('should restore the old key when an unversioned native rename fails after moving', async ({
+    payload,
+  }) => {
+    const created = await payload.create({
+      collection: unversionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      overrideAccess: true,
+    })
+    const oldKey = [...versionedCloudFiles.keys()][0]!
+    versionedCloudFailure.afterChange = true
+
+    await expect(
+      payload.renameFile({
+        id: created.id,
+        collection: unversionedCloudMediaSlug,
+        filename: 'failed.png',
+        overrideAccess: true,
+      }),
+    ).rejects.toThrow('Cloud test afterChange failed')
+
+    expect(versionedCloudFiles.has(oldKey)).toBe(true)
+    expect([...versionedCloudFiles.keys()].some((key) => key.endsWith('/failed.png'))).toBe(false)
+  })
+
+  test('should restore earlier objects when a later native move fails', async ({ payload }) => {
+    const created = await payload.create({
+      collection: unversionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      overrideAccess: true,
+    })
+    const originalKey = [...versionedCloudFiles.keys()][0]!
+    const thumbnailKey = originalKey.replace(/\.png$/, '-thumbnail.png')
+    versionedCloudFiles.set(thumbnailKey, Buffer.from('thumbnail'))
+    await payload.db.updateOne({
+      collection: unversionedCloudMediaSlug,
+      data: {
+        _managedFiles: [
+          {
+            key: originalKey,
+            roles: [{ type: 'default' }, { type: 'original' }],
+            storageBackendId: `test-cloud:${unversionedCloudMediaSlug}`,
+          },
+          {
+            key: thumbnailKey,
+            roles: [{ type: 'thumbnail' }],
+            storageBackendId: `test-cloud:${unversionedCloudMediaSlug}`,
+          },
+        ],
+      },
+      where: { id: { equals: created.id } },
+    })
+    versionedCloudFailure.moveNumber = 2
+
+    await expect(
+      payload.renameFile({
+        id: created.id,
+        collection: unversionedCloudMediaSlug,
+        filename: 'later.png',
+        overrideAccess: true,
+      }),
+    ).rejects.toThrow('Cloud test move failed')
+
+    expect(versionedCloudFiles.has(originalKey)).toBe(true)
+    expect(versionedCloudFiles.has(thumbnailKey)).toBe(true)
+    expect([...versionedCloudFiles.keys()].some((key) => key.endsWith('/later.png'))).toBe(false)
+    const saved = await payload.db.findOne({
+      collection: unversionedCloudMediaSlug,
+      where: { id: { equals: created.id } },
+    })
+    expect(saved?.filename).toBe(created.filename)
+  })
+
+  test('should restore a native move when the database commit fails', async ({ payload }) => {
+    const created = await payload.create({
+      collection: unversionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      overrideAccess: true,
+    })
+    const oldKey = [...versionedCloudFiles.keys()][0]!
+    const commitTransaction = payload.db.commitTransaction
+    payload.db.commitTransaction = () => Promise.reject(new Error('Cloud test commit failed'))
+
+    try {
+      await expect(
+        payload.renameFile({
+          id: created.id,
+          collection: unversionedCloudMediaSlug,
+          filename: 'uncommitted.png',
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('Cloud test commit failed')
+    } finally {
+      payload.db.commitTransaction = commitTransaction
+    }
+
+    expect(versionedCloudFiles.has(oldKey)).toBe(true)
+    expect([...versionedCloudFiles.keys()].some((key) => key.endsWith('/uncommitted.png'))).toBe(
+      false,
+    )
+    const saved = await payload.db.findOne({
+      collection: unversionedCloudMediaSlug,
+      where: { id: { equals: created.id } },
+    })
+    expect(saved?.filename).toBe(created.filename)
+  })
+
+  test('should copy then remove the source when an unversioned adapter has no native move', async ({
+    payload,
+  }) => {
+    const created = await payload.create({
+      collection: unversionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      overrideAccess: true,
+    })
+    const oldKey = [...versionedCloudFiles.keys()][0]!
+    const bytes = Buffer.from(versionedCloudFiles.get(oldKey)!)
+    const operations = payload.collections[unversionedCloudMediaSlug].config.upload.fileOperations!
+    const move = operations.move
+    operations.move = undefined
+
+    try {
+      const renamed = await payload.renameFile({
+        id: created.id,
+        collection: unversionedCloudMediaSlug,
+        filename: 'copied.png',
+        overrideAccess: true,
+      })
+      const after = await payload.db.findOne<{ _managedFiles: { key: string }[] }>({
+        collection: unversionedCloudMediaSlug,
+        where: { id: { equals: created.id } },
+      })
+
+      expect(renamed.filename).toBe('copied.png')
+      expect(versionedCloudCalls.moves).toBe(0)
+      expect(versionedCloudFiles.has(oldKey)).toBe(false)
+      expect(versionedCloudFiles.get(after!._managedFiles[0]!.key)).toEqual(bytes)
+    } finally {
+      operations.move = move
+    }
+  })
+
+  test('should retain the source when fallback copy fails', async ({ payload }) => {
+    const created = await payload.create({
+      collection: unversionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      overrideAccess: true,
+    })
+    const oldKey = [...versionedCloudFiles.keys()][0]!
+    const operations = payload.collections[unversionedCloudMediaSlug].config.upload.fileOperations!
+    const move = operations.move
+    operations.move = undefined
+    versionedCloudFailure.beforeCopy = () => Promise.reject(new Error('Cloud copy failed'))
+
+    try {
+      await expect(
+        payload.renameFile({
+          id: created.id,
+          collection: unversionedCloudMediaSlug,
+          filename: 'failed.png',
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('Cloud copy failed')
+
+      expect(versionedCloudFiles.has(oldKey)).toBe(true)
+      expect(versionedCloudCalls.deletes).not.toContain(oldKey)
+    } finally {
+      operations.move = move
+    }
+  })
+
+  test('should not treat a custom legacy URL as an owned cloud object', async ({ payload }) => {
+    const created = await payload.create({
+      collection: unversionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      overrideAccess: true,
+    })
+    const oldKey = [...versionedCloudFiles.keys()][0]!
+    await payload.db.updateOne({
+      collection: unversionedCloudMediaSlug,
+      data: { url: 'https://external.example.test/image.png' },
+      where: { id: { equals: created.id } },
+    })
+
+    await expect(
+      payload.renameFile({
+        id: created.id,
+        collection: unversionedCloudMediaSlug,
+        filename: 'untrusted.png',
+        overrideAccess: true,
+      }),
+    ).rejects.toThrow('no managed files')
+
+    expect(versionedCloudFiles.has(oldKey)).toBe(true)
+    expect(versionedCloudCalls.moves).toBe(0)
+  })
+
+  test('should reject rename when the configured adapter lacks safe copy', async ({ payload }) => {
+    const created = await payload.create({
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      overrideAccess: true,
+    })
+    const operations = payload.collections[versionedCloudMediaSlug].config.upload.fileOperations!
+    const copy = operations.copy
+    operations.copy = undefined as never
+
+    try {
+      await expect(
+        payload.renameFile({
+          id: created.id,
+          collection: versionedCloudMediaSlug,
+          filename: 'renamed.png',
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('No safe copy operation')
+    } finally {
+      operations.copy = copy
+    }
+  })
+
+  test('should reject a cloud destination collision without changing either object', async ({
+    payload,
+  }) => {
+    const created = await payload.create({
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      overrideAccess: true,
+    })
+    const current = (await getManagedFiles({ id: created.id, payload }))[0]!.key
+    const destination = current.replace(/[^/]+$/, 'occupied.png')
+    const occupiedBytes = Buffer.from('another file')
+    versionedCloudFiles.set(destination, occupiedBytes)
+
+    await expect(
+      payload.renameFile({
+        id: created.id,
+        collection: versionedCloudMediaSlug,
+        filename: 'occupied.png',
+        overrideAccess: true,
+      }),
+    ).rejects.toMatchObject({ status: 409 })
+
+    expect(versionedCloudFiles.get(destination)).toEqual(occupiedBytes)
+    expect((await getManagedFiles({ id: created.id, payload }))[0]?.key).toBe(current)
+  })
+
+  test('should reject a concurrent rename and remove its staged copy', async ({ payload }) => {
+    const created = await payload.create({
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      overrideAccess: true,
+    })
+    let arrivals = 0
+    let release!: () => void
+    const bothStaged = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    versionedCloudFailure.beforeCopy = async () => {
+      arrivals += 1
+      if (arrivals === 2) {
+        release()
+      }
+      await bothStaged
+    }
+
+    const results = await Promise.allSettled([
+      payload.renameFile({
+        id: created.id,
+        collection: versionedCloudMediaSlug,
+        filename: 'first.png',
+        overrideAccess: true,
+      }),
+      payload.renameFile({
+        id: created.id,
+        collection: versionedCloudMediaSlug,
+        filename: 'second.png',
+        overrideAccess: true,
+      }),
+    ])
+    const successes = results.filter((result) => result.status === 'fulfilled')
+    const failures = results.filter((result) => result.status === 'rejected')
+    const current = await getManagedFiles({ id: created.id, payload })
+
+    expect(successes).toHaveLength(1)
+    expect(failures).toHaveLength(1)
+    expect(versionedCloudFiles.has(current[0]!.key)).toBe(true)
+    expect(
+      [...versionedCloudFiles.keys()].filter(
+        (key) => key.endsWith('/first.png') || key.endsWith('/second.png'),
+      ),
+    ).toHaveLength(1)
+  })
+
+  test('should keep direct provider URLs working after rename', async ({ payload }) => {
+    const created = await payload.create({
+      collection: versionedPublicCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      overrideAccess: true,
+    })
+    const renamed = await payload.renameFile({
+      id: created.id,
+      collection: versionedPublicCloudMediaSlug,
+      filename: 'renamed.png',
+      overrideAccess: true,
+    })
+
+    expect(renamed.url).toContain('/renamed.png')
+    expect(renamed.url).toMatch(/^https:\/\/files\.example\.test\//)
+    const { docs } = await payload.db.findVersions({
+      collection: versionedPublicCloudMediaSlug,
+      where: { parent: { equals: created.id } },
+    })
+    const previous = docs.find(({ version }) => version.filename === created.filename)
+    expect(previous).toBeDefined()
+    const historical = await payload.findVersionByID({
+      id: previous!.id,
+      collection: versionedPublicCloudMediaSlug,
+      overrideAccess: false,
+    })
+    expect(historical.version.url).toMatch(/^https:\/\/files\.example\.test\//)
+    expect(historical.version.filename).toBe(created.filename)
   })
 
   test('should retain the original object and earlier bytes across a replacement', async ({

@@ -7,12 +7,14 @@ import { ConvertedMedia } from './collections/ConvertedMedia/index.js'
 import { DraftMedia } from './collections/DraftMedia/index.js'
 import { LegacyMedia } from './collections/LegacyMedia/index.js'
 import { Media } from './collections/Media/index.js'
+import { PlainMedia } from './collections/PlainMedia/index.js'
 import { TransformedMedia } from './collections/TransformedMedia/index.js'
 import { TrashMedia } from './collections/TrashMedia/index.js'
 import { convertedMediaSlug, transformedMediaSlug } from './shared.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 const migrationDir = process.env.FILE_VERSIONING_MIGRATION_DIR
+const hasLegacySchema = process.env.FILE_VERSIONING_LEGACY_SCHEMA === 'true'
 
 const migrationDb = migrationDir
   ? process.env.PAYLOAD_DATABASE === 'postgres'
@@ -34,23 +36,24 @@ const migrationDb = migrationDir
 
 export default buildConfigWithDefaults({
   config: {
-    collections:
-      process.env.FILE_VERSIONING_LEGACY_SCHEMA === 'true'
-        ? [LegacyMedia]
-        : [Media, DraftMedia, TransformedMedia, ConvertedMedia, TrashMedia],
+    collections: hasLegacySchema
+      ? [LegacyMedia]
+      : [Media, DraftMedia, TransformedMedia, ConvertedMedia, TrashMedia, PlainMedia],
     upload: {
-      transformers: [
-        sharpTransformer({
-          collections: {
-            [convertedMediaSlug]: {
-              formatOptions: { format: 'jpeg' },
-            },
-            [transformedMediaSlug]: {
-              variants: [{ name: 'small', height: 200, width: 200 }],
-            },
-          },
-        }),
-      ],
+      transformers: hasLegacySchema
+        ? []
+        : [
+            sharpTransformer({
+              collections: {
+                [convertedMediaSlug]: {
+                  formatOptions: { format: 'jpeg' },
+                },
+                [transformedMediaSlug]: {
+                  variants: [{ name: 'small', height: 200, width: 200 }],
+                },
+              },
+            }),
+          ],
     },
     ...(migrationDb ? { db: migrationDb } : {}),
     typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },

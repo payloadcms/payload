@@ -102,6 +102,7 @@ export type StaticHandler = (
 ) => Promise<Response> | Response
 
 export interface GeneratedAdapter {
+  /** Preserve object metadata and fail if `to` already exists. Rename retains `from` for history. */
   copyFile: CopyFile
   /**
    * Additional fields to be injected into the base collection and image sizes
