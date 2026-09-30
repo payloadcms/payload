@@ -9,13 +9,7 @@ import { assertBranchWritable } from './assertBranchWritable.js'
 import { createShadowRow } from './createShadowRow.js'
 import { peekBranchOperation, resetBranchState, resolveBranch } from './resolveBranch.js'
 import { resolveBranchQuery } from './resolveBranchQuery.js'
-import {
-  branchChangesCollectionSlug,
-  branchDocIDField,
-  branchField,
-  branchOpField,
-  MAIN_BRANCH,
-} from './types.js'
+import { branchChangesCollectionSlug, branchDocIDField, branchField, MAIN_BRANCH } from './types.js'
 
 type Args = {
   branch?: false | string
@@ -274,8 +268,8 @@ export const willBranchAbsorbDelete = ({
  * Turns a delete on a branch into a tombstone against main.
  *
  * A branch cannot delete production content, so deleting a main document from
- * a branch records the intent instead: a shadow row marked `_branchOp: delete`,
- * which the read predicate hides on that branch and nowhere else.
+ * a branch records the intent in its authoritative change record. The read
+ * predicate hides the matching canonical ID on that branch and nowhere else.
  *
  * A document created on the branch has no main row behind it, so it is deleted
  * outright — nothing is left to hide.
@@ -349,12 +343,25 @@ export const resolveBranchDelete = async ({
           { id: { equals: concurrentDelete.winnerID } },
           { [branchField]: { equals: branch } },
           { [branchDocIDField]: { equals: concurrentDelete.docID } },
-          { [branchOpField]: { equals: 'delete' } },
         ],
       },
     })
+    const matchingWinnerChange = matchingWinner
+      ? await req.payload.db.findOne({
+          collection: branchChangesCollectionSlug,
+          req: latestCommittedReq,
+          where: {
+            and: [
+              { branch: { equals: branch } },
+              { collectionSlug: { equals: collectionSlug } },
+              { documentID: { equals: String(concurrentDelete.docID) } },
+              { operation: { equals: 'delete' } },
+            ],
+          },
+        })
+      : null
 
-    if (matchingWinner) {
+    if (matchingWinner && matchingWinnerChange) {
       const outcome = { doc: concurrentDelete.doc, tombstoned: true }
 
       if (matchingBranchDeleteOperation) {
@@ -454,16 +461,6 @@ export const resolveBranchDelete = async ({
   }
 
   if (isOnThisBranch) {
-    // Already forked — turn the existing copy into the tombstone rather than
-    // adding a second row for the same document.
-    await req.payload.db.updateOne({
-      id: targetID,
-      branch: false,
-      collection: collectionSlug,
-      data: { [branchOpField]: 'delete' },
-      req,
-    })
-
     await req.payload.db.deleteMany({
       collection: branchChangesCollectionSlug,
       req,
@@ -493,7 +490,6 @@ export const resolveBranchDelete = async ({
         ...data,
         [branchDocIDField]: canonicalID,
         [branchField]: branch,
-        [branchOpField]: 'delete',
       },
       docID: canonicalID,
       onCreated: async (createReq) => {

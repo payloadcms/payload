@@ -181,9 +181,8 @@ export const loadBranchManifest = async (
 /**
  * Canonical IDs the active branch has tombstoned, keyed by collection slug.
  *
- * Version rows carry no `_branchOp` — a tombstone is a flag on the collection
- * row — so version queries cannot hide deleted documents the way collection
- * queries do, and have to exclude them by identity instead.
+ * Version and collection queries both exclude these documents by canonical
+ * identity from the authoritative change manifest.
  *
  * Loaded from the same manifest query, so asking for this costs nothing beyond
  * the read the request already made.

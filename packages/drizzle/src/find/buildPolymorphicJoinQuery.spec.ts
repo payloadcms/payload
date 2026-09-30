@@ -23,7 +23,6 @@ const parentsTable = sqliteTable('join_parents', {
 const articlesTable = sqliteTable('join_articles', {
   _branch: text('_branch'),
   _branchDocID: integer('_branch_doc_id'),
-  _branchOp: text('_branch_op'),
   id: integer('id').primaryKey(),
   createdAt: text('created_at'),
   details_rank: integer('details_rank'),
@@ -35,7 +34,6 @@ const articlesTable = sqliteTable('join_articles', {
 const notesTable = sqliteTable('join_notes', {
   _branch: text('_branch'),
   _branchDocID: integer('_branch_doc_id'),
-  _branchOp: text('_branch_op'),
   id: integer('id').primaryKey(),
   parent: integer('parent_id'),
   title: text('title'),
@@ -250,7 +248,6 @@ describe('buildPolymorphicJoinQuery', () => {
     const branchFields: Field[] = [
       { name: '_branch', type: 'text' },
       { name: '_branchDocID', relationTo: 'articles', type: 'relationship' },
-      { name: '_branchOp', type: 'text' },
     ]
     const branchAdapter = createAdapter({
       articles: {
@@ -288,7 +285,7 @@ describe('buildPolymorphicJoinQuery', () => {
     const query = renderQuery(buildQuery({ adapter: branchAdapter, req }))
 
     expect(query.sql.match(/"_branch" = \?/g)).toHaveLength(4)
-    expect(query.sql.match(/"_branch_op" <> \?/g)).toHaveLength(2)
+    expect(query.sql).not.toContain('_branch_op')
     expect(query.sql.match(/COALESCE\("_branch_doc_id", "id"\) as "id"/g)).toHaveLength(2)
     expect(query.params.filter((value) => value === 'campaign')).toHaveLength(2)
   })

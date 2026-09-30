@@ -9,7 +9,7 @@ import {
 import { initTransaction } from '../utilities/initTransaction.js'
 import { isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
 import { killTransaction } from '../utilities/killTransaction.js'
-import { branchDocIDField, branchField, branchOpField } from './types.js'
+import { branchDocIDField, branchField } from './types.js'
 
 type Args = {
   branch: string
@@ -246,7 +246,7 @@ export const createShadowRow = async ({
 
     const winner = await findCompetingShadow({ branch, collectionSlug, docID, req })
 
-    if (!winner || winner[branchOpField] !== data[branchOpField]) {
+    if (!winner) {
       markConcurrentShadowOperationError(error)
       throw error
     }
@@ -268,7 +268,7 @@ export const createShadowRow = async ({
     if (shouldCommit && isRecoverableConcurrentShadowError(error)) {
       const winner = await findCompetingShadow({ branch, collectionSlug, docID, req })
 
-      if (winner && winner[branchOpField] === data[branchOpField]) {
+      if (winner) {
         return winner
       }
 

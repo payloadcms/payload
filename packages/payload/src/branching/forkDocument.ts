@@ -7,13 +7,7 @@ import {
   rememberBranchRowID,
   resolveBranch,
 } from './resolveBranch.js'
-import {
-  branchChangesCollectionSlug,
-  branchDocIDField,
-  branchField,
-  branchOpField,
-  MAIN_BRANCH,
-} from './types.js'
+import { branchChangesCollectionSlug, branchDocIDField, branchField, MAIN_BRANCH } from './types.js'
 
 type Args = {
   collectionSlug: string
@@ -97,7 +91,6 @@ export const forkDocument = async ({
     data: {
       [branchDocIDField]: id,
       [branchField]: branch,
-      [branchOpField]: 'update',
     },
     docID: id,
     onCreated: (createReq, createdShadow) =>

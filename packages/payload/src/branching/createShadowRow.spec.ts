@@ -11,7 +11,7 @@ import {
 
 const branch = 'feature'
 const collectionSlug = 'posts'
-const data = { _branch: branch, _branchDocID: 'main-id', _branchOp: 'update', title: 'Shadow' }
+const data = { _branch: branch, _branchDocID: 'main-id', title: 'Shadow' }
 const docID = 'main-id'
 const shadow = { ...data, id: 'shadow-id' }
 
@@ -406,37 +406,6 @@ test('should retry outside a caller transaction until a delayed competing shadow
   expect(rollbackTransaction).toHaveBeenCalledWith('transaction-id')
   expect(findOne).toHaveBeenCalledTimes(6)
   expect(req.transactionID).toBe('outer-transaction')
-})
-
-test('should reject a competing shadow created for a different operation', async () => {
-  const createError = {
-    errorLabels: ['TransientTransactionError'],
-    message: 'Please retry your operation or multi-document transaction.',
-  }
-  const findOne = vi.fn().mockResolvedValue({ ...shadow, _branchOp: 'delete' })
-  const req = {
-    payload: {
-      db: {
-        beginTransaction: vi.fn().mockResolvedValue('transaction-id'),
-        create: vi.fn().mockRejectedValue(createError),
-        findOne,
-        rollbackTransaction: vi.fn().mockResolvedValue(undefined),
-      },
-    },
-  } as unknown as PayloadRequest
-
-  await expect(
-    createShadowRow({
-      branch,
-      collectionSlug,
-      data,
-      docID,
-      onCreated: () => Promise.resolve(),
-      req,
-    }),
-  ).rejects.toBe(createError)
-
-  expect(findOne).toHaveBeenCalledOnce()
 })
 
 test('should retry a whole operation until a transient branch conflict clears', async () => {

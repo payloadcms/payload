@@ -1522,7 +1522,6 @@ export {
   branchDocIDField,
   branchesCollectionSlug,
   branchField,
-  branchOpField,
   branchParentField,
   MAIN_BRANCH,
 } from './branching/types.js'

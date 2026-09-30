@@ -18,13 +18,7 @@ import {
 } from './globalMergeWrites.js'
 import { readLocalizedBranchWrite } from './readLocalizedBranchWrite.js'
 import { isolateBranchState } from './resolveBranch.js'
-import {
-  branchChangesCollectionSlug,
-  branchDocIDField,
-  branchField,
-  branchOpField,
-  MAIN_BRANCH,
-} from './types.js'
+import { branchChangesCollectionSlug, branchDocIDField, branchField, MAIN_BRANCH } from './types.js'
 
 export type { EffectiveOperation }
 
@@ -849,7 +843,7 @@ const whereReferencesBranchMetadata = (value: unknown): boolean => {
 
   return Object.entries(value).some(
     ([key, nestedValue]) =>
-      [branchDocIDField, branchField, branchOpField].includes(key.split('.')[0]!) ||
+      [branchDocIDField, branchField].includes(key.split('.')[0]!) ||
       whereReferencesBranchMetadata(nestedValue),
   )
 }
@@ -860,7 +854,6 @@ const stripInternal = (data: Record<string, unknown>): Record<string, unknown> =
     id: _id,
     [branchDocIDField]: _docID,
     [branchField]: _branch,
-    [branchOpField]: _op,
     createdAt: _createdAt,
     updatedAt: _updatedAt,
     ...rest

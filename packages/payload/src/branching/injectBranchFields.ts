@@ -8,13 +8,7 @@ import {
   recordBranchCreate,
   stampBranchOnCreate,
 } from './hooks.js'
-import {
-  branchDocIDField,
-  branchField,
-  branchOpField,
-  branchParentField,
-  MAIN_BRANCH,
-} from './types.js'
+import { branchDocIDField, branchField, branchParentField, MAIN_BRANCH } from './types.js'
 
 /**
  * These columns are branch bookkeeping, not content. They are `admin.hidden`,
@@ -91,15 +85,6 @@ export const buildBranchDocIDField = (slug: string): Field => ({
   relationTo: slug,
 })
 
-/** `_branchOp` — what this row represents on its branch. Null on main rows. */
-export const buildBranchOpField = (): Field => ({
-  name: branchOpField,
-  type: 'text',
-  ...bookkeepingOnly,
-  index: true,
-  label: 'Branch Operation',
-})
-
 /** `_branchParent` — the canonical parent document, for version rows. */
 export const buildBranchParentField = (slug: string): Field => ({
   name: branchParentField,
@@ -129,10 +114,6 @@ export const injectBranchFields = (collection: CollectionConfig): CollectionConf
 
   if (!hasField(collection.fields, branchDocIDField)) {
     collection.fields.push(buildBranchDocIDField(collection.slug))
-  }
-
-  if (!hasField(collection.fields, branchOpField)) {
-    collection.fields.push(buildBranchOpField())
   }
 
   const indexes = collection.indexes ?? []
@@ -189,8 +170,6 @@ export const injectBranchFields = (collection: CollectionConfig): CollectionConf
  *
  * No `_branchDocID`, because a global's identity is its slug and is stable
  * across branches — the whole canonical-ID translation problem does not arise.
- * No `_branchOp`, because globals cannot be created or deleted through the API,
- * so there are no tombstones.
  */
 export const injectGlobalBranchFields = (global: GlobalConfig): GlobalConfig => {
   if (!hasField(global.fields, branchField)) {

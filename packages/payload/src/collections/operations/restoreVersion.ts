@@ -15,7 +15,7 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { forkDocument } from '../../branching/forkDocument.js'
 import { resetBranchState, resolveBranch } from '../../branching/resolveBranch.js'
-import { branchDocIDField, branchField, branchOpField, MAIN_BRANCH } from '../../branching/types.js'
+import { branchDocIDField, branchField, MAIN_BRANCH } from '../../branching/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
@@ -247,7 +247,6 @@ export const restoreVersionOperation = async <
 
       data[branchField] = branchDocument[branchField]
       data[branchDocIDField] = branchDocument[branchDocIDField]
-      data[branchOpField] = branchDocument[branchOpField]
     }
 
     // /////////////////////////////////////

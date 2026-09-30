@@ -26,7 +26,6 @@ export const branchMergesCollectionSlug = 'payload-branch-merges'
 /** Field injected onto every branch-enabled collection and its version collection. */
 export const branchField = '_branch'
 export const branchDocIDField = '_branchDocID'
-export const branchOpField = '_branchOp'
 export const branchParentField = '_branchParent'
 
 export type BranchOperation = 'create' | 'delete' | 'update'
