@@ -50,11 +50,11 @@ Open **Edit LLM instructions** from a collection's list menu or a global's edit 
 
 ## Editor
 
-Lexical uses a dedicated instructions editor with paragraphs, H2–H4 headings, bold, italic, underline, strikethrough, ordered and unordered lists, and a fixed toolbar. Its feature set is independent of the root editor's features. Set `llmInstructions.editor` to a separate rich-text adapter provider to override it. Custom editors must provide both `converters.fromMarkdown` and `converters.toMarkdown`; projects without a compatible editor use a plain-text field.
+Lexical uses a dedicated instructions editor with paragraphs, H2–H4 headings, bold, italic, underline, strikethrough, ordered and unordered lists, and a fixed toolbar. Its feature set is independent of the root editor's features. Set `llmInstructions.editor` to a separate rich-text adapter to override it.
 
 ## Access control
 
-Authenticated users can read saved instructions for collections and globals they have read access to. Editing also requires update access to the target and permission through `llmInstructions.access`, which defaults to users of the admin auth collection. Target access is evaluated at the entity level, as in the Admin Panel: a document filter counts as conditional access rather than being applied to instruction documents.
+Authenticated users can read saved instructions for collections and globals they have read access to. Editing also requires update access to the target and permission through `llmInstructions.access`, which defaults to users of the admin auth collection. Target access is evaluated at the entity level, as in the Admin Panel.
 
 ## Disabling management
 
