@@ -11,11 +11,7 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
       <Popup
         button={<Button buttonStyle="secondary">Open Popup</Button>}
         buttonType="custom"
-        render={() => (
-          <div style={{ padding: '16px' }}>
-            <p>Popup content goes here</p>
-          </div>
-        )}
+        render={() => <p>Popup content goes here</p>}
       />
     </Variant>
     <Variant label="Horizontal: Right">
@@ -23,11 +19,7 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
         button={<Button buttonStyle="secondary">Right Aligned</Button>}
         buttonType="custom"
         horizontalAlign="right"
-        render={() => (
-          <div style={{ padding: '16px' }}>
-            <p>Right aligned popup</p>
-          </div>
-        )}
+        render={() => <p>Right aligned popup</p>}
       />
     </Variant>
     <Variant label="Nested hover menus">
