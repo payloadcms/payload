@@ -1,5 +1,6 @@
 import type { Payload, PayloadRequest } from '../types/index.js'
 
+import { APIError } from '../errors/index.js'
 import { branchDocIDField, branchField } from './types.js'
 
 /**
@@ -75,6 +76,13 @@ export const resolveEffectiveOperations = async ({
         ],
       },
     })) as null | Record<string, unknown>
+
+    if (!shadow) {
+      throw new APIError(
+        `The ${collectionSlug} branch row for document ${String(docID)} is missing.`,
+        409,
+      )
+    }
 
     resolved.push({
       change,

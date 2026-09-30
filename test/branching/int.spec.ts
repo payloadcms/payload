@@ -3064,6 +3064,95 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(changes.docs[0]).toMatchObject({ operation: 'delete' })
     })
 
+    test('should reject a delete when the branch row has no change record', async () => {
+      await payload.update({
+        id: mainDocID,
+        branch: 'cow',
+        collection: postsSlug,
+        data: { title: 'orphaned branch edit' },
+      })
+
+      const rawReq = await createPayloadRequest({ branch: false, payload })
+      const changes = await payload.db.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        req: rawReq,
+        where: { documentID: { equals: String(mainDocID) } },
+      })
+
+      await payload.db.deleteOne({
+        collection: branchChangesSlug,
+        req: rawReq,
+        where: { id: { equals: changes.docs[0]!.id } },
+      })
+
+      await expect(
+        payload.delete({ id: mainDocID, branch: 'cow', collection: postsSlug }),
+      ).rejects.toMatchObject({ status: 409 })
+
+      const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
+      const shadows = await payload.db.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        req: rawReq,
+        where: {
+          and: [{ _branch: { equals: 'cow' } }, { _branchDocID: { equals: mainDocID } }],
+        },
+      })
+
+      expect(onMain.title).toBe('original on main')
+      expect(shadows.docs).toHaveLength(1)
+      expect(shadows.docs[0]!.title).toBe('orphaned branch edit')
+    })
+
+    test('should reject an update when the branch row has no change record', async () => {
+      await payload.update({
+        id: mainDocID,
+        branch: 'cow',
+        collection: postsSlug,
+        data: { title: 'orphaned branch edit' },
+      })
+
+      const rawReq = await createPayloadRequest({ branch: false, payload })
+      const changes = await payload.db.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        req: rawReq,
+        where: { documentID: { equals: String(mainDocID) } },
+      })
+
+      await payload.db.deleteOne({
+        collection: branchChangesSlug,
+        req: rawReq,
+        where: { id: { equals: changes.docs[0]!.id } },
+      })
+
+      await expect(
+        payload.update({
+          id: mainDocID,
+          branch: 'cow',
+          collection: postsSlug,
+          data: { title: 'second branch edit' },
+        }),
+      ).rejects.toMatchObject({ status: 409 })
+
+      const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
+      const shadows = await payload.db.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        req: rawReq,
+        where: {
+          and: [{ _branch: { equals: 'cow' } }, { _branchDocID: { equals: mainDocID } }],
+        },
+      })
+
+      expect(onMain.title).toBe('original on main')
+      expect(shadows.docs).toHaveLength(1)
+      expect(shadows.docs[0]!.title).toBe('orphaned branch edit')
+    })
+
     test('should allow the same unique value on two different branches', async () => {
       const onMain = await payload.create({
         collection: uniqueSlug,
@@ -5801,6 +5890,50 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
 
       expect(onMain.title).toBe('edited on branch')
+    })
+
+    test('should reject an update change when its branch row is missing', async () => {
+      const changes = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: {
+          and: [
+            { branch: { equals: 'mergeme' } },
+            { collectionSlug: { equals: postsSlug } },
+            { documentID: { equals: String(mainDocID) } },
+          ],
+        },
+      })
+      const change = changes.docs[0]!
+      const shadow = await payload.db.findOne({
+        branch: false,
+        collection: postsSlug,
+        req: await createPayloadRequest({ branch: false, payload }),
+        where: {
+          and: [{ _branch: { equals: 'mergeme' } }, { _branchDocID: { equals: mainDocID } }],
+        },
+      })
+
+      await payload.db.deleteOne({
+        branch: false,
+        collection: postsSlug,
+        req: await createPayloadRequest({ branch: false, payload }),
+        where: { id: { equals: shadow!.id } },
+      })
+
+      await expect(
+        payload.branches.merge({ branch: 'mergeme', changes: [change.id] }),
+      ).rejects.toMatchObject({ status: 409 })
+
+      const remainingChanges = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { id: { equals: change.id } },
+      })
+      const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
+
+      expect(remainingChanges.docs).toHaveLength(1)
+      expect(onMain.title).toBe('original on main')
     })
 
     test('should publish a branch-created document to main keeping its ID', async () => {

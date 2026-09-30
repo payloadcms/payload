@@ -1,8 +1,11 @@
 import type { PayloadRequest } from '../types/index.js'
 
+import { APIError } from '../errors/index.js'
 import { createShadowRow } from './createShadowRow.js'
 import {
   addToBranchManifest,
+  loadBranchManifest,
+  peekBranchOperation,
   peekBranchRowID,
   rememberBranchRowID,
   resolveBranch,
@@ -47,6 +50,15 @@ export const forkDocument = async ({
   const remembered = peekBranchRowID({ collectionSlug, docID: id, req })
 
   if (remembered !== undefined) {
+    await loadBranchManifest(req)
+
+    if (!peekBranchOperation({ collectionSlug, docID: id, req })) {
+      throw new APIError(
+        `The ${collectionSlug} branch row for document ${String(id)} has no change record.`,
+        409,
+      )
+    }
+
     return remembered
   }
 
@@ -72,6 +84,15 @@ export const forkDocument = async ({
   const onBranch = rows.find((row) => row[branchField] === branch)
 
   if (onBranch) {
+    await loadBranchManifest(req)
+
+    if (!peekBranchOperation({ collectionSlug, docID: id, req })) {
+      throw new APIError(
+        `The ${collectionSlug} branch row for document ${String(id)} has no change record.`,
+        409,
+      )
+    }
+
     const rowID = onBranch.id as number | string
 
     rememberBranchRowID({ collectionSlug, docID: id, req, rowID })

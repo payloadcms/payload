@@ -62,12 +62,13 @@ test('should recover a competing database copy after a uniqueness failure', asyn
     errors: [{ message: 'Value must be unique', path: '_branchDocID' }],
   })
   const create = vi.fn()
+  const findOne = vi.fn().mockResolvedValue(shadow)
   const req = {
     payload: {
       db: {
         copy: vi.fn().mockRejectedValue(copyError),
         create,
-        findOne: vi.fn().mockResolvedValue(shadow),
+        findOne,
       },
     },
   } as unknown as PayloadRequest
@@ -85,6 +86,43 @@ test('should recover a competing database copy after a uniqueness failure', asyn
   ).resolves.toBe(shadow)
 
   expect(create).not.toHaveBeenCalled()
+  expect(findOne).toHaveBeenCalledTimes(2)
+  expect(findOne.mock.calls[1]![0]).toMatchObject({ collection: 'payload-branch-changes' })
+})
+
+test('should reject a competing shadow without a change record', async () => {
+  const copyError = new ValidationError({
+    collection: collectionSlug,
+    errors: [{ message: 'Value must be unique', path: '_branchDocID' }],
+  })
+  const findOne = vi
+    .fn()
+    .mockImplementation(({ collection }: { collection: string }) =>
+      Promise.resolve(collection === 'payload-branch-changes' ? null : shadow),
+    )
+  const req = {
+    payload: {
+      db: {
+        copy: vi.fn().mockRejectedValue(copyError),
+        findOne,
+      },
+    },
+  } as unknown as PayloadRequest
+
+  await expect(
+    createShadowRow({
+      branch,
+      collectionSlug,
+      data,
+      docID,
+      onCreated: vi.fn(),
+      req,
+      source: { branch: 'main', id: docID },
+    }),
+  ).rejects.toMatchObject({ status: 409 })
+
+  expect(findOne).toHaveBeenCalledTimes(2)
+  expect(findOne.mock.calls[1]![0]).toMatchObject({ collection: 'payload-branch-changes' })
 })
 
 test('should create the shadow and registry in an ambient transaction without resolving it', async () => {
@@ -404,7 +442,8 @@ test('should retry outside a caller transaction until a delayed competing shadow
   ).resolves.toBe(shadow)
 
   expect(rollbackTransaction).toHaveBeenCalledWith('transaction-id')
-  expect(findOne).toHaveBeenCalledTimes(6)
+  expect(findOne).toHaveBeenCalledTimes(7)
+  expect(findOne.mock.calls[6]![0]).toMatchObject({ collection: 'payload-branch-changes' })
   expect(req.transactionID).toBe('outer-transaction')
 })
 

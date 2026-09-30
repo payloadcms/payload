@@ -427,6 +427,13 @@ export const resolveBranchDelete = async ({
     })
   }
 
+  if (isOnThisBranch && !operation) {
+    throw new APIError(
+      `The ${collectionSlug} branch row for document ${String(canonicalID)} has no change record.`,
+      409,
+    )
+  }
+
   // Created on this branch: no main row stands behind it, so a real delete
   // leaves nothing to hide.
   if (isOnThisBranch && operation === 'create') {
