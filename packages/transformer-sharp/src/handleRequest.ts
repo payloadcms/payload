@@ -68,11 +68,14 @@ export function createHandleRequest({
     ) {
       const metadata = await sharpDependency(sourceBuffer, sharpOptions).metadata()
       const frameCount = isAnimated ? (metadata.pages ?? 1) : 1
+      const frameHeight = metadata.pageHeight ?? metadata.height
+      // EXIF orientations 5-8 rotate the image by 90°, so `.rotate()` below swaps its axes.
+      const isRotatedQuarterTurn = [5, 6, 7, 8].includes(metadata.orientation!)
       const output = getOutputDimensions({
         fit: dynamicDefaults.fit,
         height: parseResult.height,
-        sourceHeight: metadata.pageHeight ?? metadata.height,
-        sourceWidth: metadata.width,
+        sourceHeight: isRotatedQuarterTurn ? metadata.width : frameHeight,
+        sourceWidth: isRotatedQuarterTurn ? frameHeight : metadata.width,
         width: parseResult.width,
         withoutEnlargement,
       })
@@ -101,7 +104,9 @@ export function createHandleRequest({
       }
     }
 
+    // Sharp drops the EXIF orientation tag on output, so apply it to the pixels first.
     const resizedBuffer = await sharpDependency(sourceBuffer, sharpOptions)
+      .rotate()
       .resize({
         fit: dynamicDefaults.fit,
         height: parseResult.height,

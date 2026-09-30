@@ -107,6 +107,39 @@ describe('createHandleRequest', () => {
     expect(metadata.pages).toBe(44)
   })
 
+  it('should apply the EXIF orientation of the source before resizing', async () => {
+    // Stored 400x200 but tagged orientation 6, so it displays as 200x400.
+    const sourceBuffer = await sharp(await makeSourceImage({ format: 'jpeg' }))
+      .withMetadata({ orientation: 6 })
+      .toBuffer()
+
+    const metadata = await getOutputMetadata(
+      await resizeReal({ mimeType: 'image/jpeg', query: 'width=100', sourceBuffer }),
+    )
+
+    expect(metadata.width).toBe(100)
+    expect(metadata.height).toBe(200)
+  })
+
+  it('should budget maxPixels against the EXIF-oriented source dimensions', async () => {
+    // Stored 100x10 but tagged orientation 6, so it displays as 10x100.
+    const sourceBuffer = await sharp(
+      await makeSourceImage({ format: 'jpeg', height: 10, width: 100 }),
+    )
+      .withMetadata({ orientation: 6 })
+      .toBuffer()
+
+    // Displayed 10x100 at width=100 renders 100x1000 = 100,000 pixels, 10x the limit.
+    const result = await resizeReal({
+      dynamicDefaults: resolveSharpDynamicDefaults({ maxPixels: 10_000 }),
+      mimeType: 'image/jpeg',
+      query: 'width=100',
+      sourceBuffer,
+    })
+
+    expect(result.response?.status).toBe(400)
+  })
+
   it('should not upscale when withoutEnlargement is configured as the default', async () => {
     const sourceBuffer = await makeSourceImage({ height: 100, width: 100 })
 
