@@ -1,6 +1,6 @@
-import type { ImageSize, ProbedImageSize } from 'payload'
+import type { ImageSize, ProbedImageSize } from '../types.js'
 
-import { isNumber } from 'payload/shared'
+import { isNumber } from '../../utilities/isNumber.js'
 
 /**
  * Determine whether or not to resize the image.

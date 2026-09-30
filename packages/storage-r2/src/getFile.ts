@@ -1,4 +1,4 @@
-import type { CollectionConfig, FileHandlerOperation, PayloadRequest, TypeWithID } from 'payload'
+import type { CollectionConfig, PayloadRequest, TypeWithID } from 'payload'
 
 import {
   buildStoragePathData,
@@ -14,7 +14,6 @@ interface GetFileArgs {
   doc?: TypeWithID
   filename: string
   incomingHeaders?: Headers
-  operation?: FileHandlerOperation
   prefix: string
   req: PayloadRequest
   uploadReference?: unknown
@@ -29,14 +28,11 @@ export async function getFile({
   doc,
   filename,
   incomingHeaders,
-  operation = 'read',
   prefix = '',
   req,
   uploadReference,
   useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
-  const isTransformSource = operation === 'transform'
-
   try {
     const docPrefix = await getDocPrefix({
       collection,
@@ -63,13 +59,13 @@ export async function getFile({
 
     const fileSize = headObj.size
 
-    // Don't return large file uploads back to the client, or the Worker will run out of memory.
-    // Skipped for `transform`, which needs the real bytes and would otherwise silently corrupt.
-    if (fileSize > 50 * 1024 * 1024 && uploadReference && !isTransformSource) {
+    // Don't return large file uploads back to the client, or the Worker will run out of memory
+    if (fileSize > 50 * 1024 * 1024 && uploadReference) {
       return new Response(null, { status: 200 })
     }
 
-    const rangeHeader = isTransformSource ? null : req.headers.get('range')
+    // Handle range request
+    const rangeHeader = req.headers.get('range')
     const rangeResult = getRangeRequestInfo({ fileSize, rangeHeader })
 
     if (rangeResult.type === 'invalid') {
@@ -79,6 +75,7 @@ export async function getFile({
       })
     }
 
+    // Get object with range if needed
     // Due to https://github.com/cloudflare/workers-sdk/issues/6047
     // We cannot send a Headers instance to Miniflare
     const obj =
@@ -97,11 +94,14 @@ export async function getFile({
 
     let headers = new Headers(incomingHeaders)
 
+    // Add range-related headers from the result
     for (const [headerKey, value] of Object.entries(rangeResult.headers)) {
       headers.append(headerKey, value)
     }
 
+    // Add R2-specific headers
     if (isMiniflare) {
+      // In development with Miniflare, manually set headers from httpMetadata
       const metadata = obj.httpMetadata
       if (metadata?.cacheControl) {
         headers.set('Cache-Control', metadata.cacheControl)
@@ -122,9 +122,8 @@ export async function getFile({
       obj.writeHttpMetadata(headers)
     }
 
-    const contentType = headers.get('Content-Type')
-
     // Apply a restrictive policy to XML-family responses served through Payload.
+    const contentType = headers.get('Content-Type')
     if (isXmlMimeType(contentType)) {
       headers.set('Content-Security-Policy', uploadContentSecurityPolicy)
     }
@@ -132,7 +131,6 @@ export async function getFile({
     const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
 
     if (
-      !isTransformSource &&
       collection.upload &&
       typeof collection.upload === 'object' &&
       typeof collection.upload.modifyResponseHeaders === 'function'
@@ -140,7 +138,7 @@ export async function getFile({
       headers = collection.upload.modifyResponseHeaders({ headers }) || headers
     }
 
-    if (!isTransformSource && etagFromHeaders && etagFromHeaders === obj.etag) {
+    if (etagFromHeaders && etagFromHeaders === obj.etag) {
       return new Response(null, {
         headers,
         status: 304,

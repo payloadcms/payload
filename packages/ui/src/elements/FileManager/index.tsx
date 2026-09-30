@@ -99,10 +99,10 @@ export const FileManager: React.FC<FileManagerProps> = ({
   const imageCacheTag = uploadConfig?.cacheTags && data?.updatedAt
 
   const hasImageSizes = uploadConfig?.imageSizes?.length > 0
-  const hasImageAdjustments = Boolean(uploadConfig?.hasImageAdjustments)
+  const hasResizeOptions = Boolean(uploadConfig?.resizeOptions)
   const focalPointEnabled = uploadConfig?.focalPoint === true
   const { crop: showCrop = true, focalPoint = true } = uploadConfig
-  const showFocalPoint = focalPoint && (hasImageSizes || hasImageAdjustments || focalPointEnabled)
+  const showFocalPoint = focalPoint && (hasImageSizes || hasResizeOptions || focalPointEnabled)
 
   const selectedSizeData = selectedSize
     ? (data?.sizes?.[selectedSize] as Record<string, unknown>)

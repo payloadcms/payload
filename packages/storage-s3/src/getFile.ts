@@ -1,5 +1,5 @@
 import type * as AWS from '@aws-sdk/client-s3'
-import type { CollectionConfig, FileHandlerOperation, PayloadRequest, TypeWithID } from 'payload'
+import type { CollectionConfig, PayloadRequest, TypeWithID } from 'payload'
 import type { Readable } from 'stream'
 
 import { GetObjectCommand } from '@aws-sdk/client-s3'
@@ -30,7 +30,6 @@ interface GetFileArgs {
   doc?: TypeWithID
   filename: string
   incomingHeaders?: Headers
-  operation?: FileHandlerOperation
   req: PayloadRequest
   signedDownloads: SignedDownloadsConfig
   uploadReference?: unknown
@@ -73,13 +72,11 @@ export async function getFile({
   doc,
   filename,
   incomingHeaders,
-  operation = 'read',
   req,
   signedDownloads,
   uploadReference,
   useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
-  const isTransformSource = operation === 'transform'
   let object: AWS.GetObjectOutput | undefined = undefined
   let streamed = false
 
@@ -108,7 +105,7 @@ export async function getFile({
       useCompositePrefixes,
     })
 
-    if (signedDownloads && !uploadReference && !isTransformSource) {
+    if (signedDownloads && !uploadReference) {
       let useSignedURL = true
       if (
         typeof signedDownloads === 'object' &&
@@ -128,6 +125,7 @@ export async function getFile({
       }
     }
 
+    // Get file size first for range validation and to set Content-Length header before streaming
     const headObject = await client.headObject({
       Bucket: bucket,
       Key: storageFilePath,
@@ -138,7 +136,8 @@ export async function getFile({
       return new Response('Internal Server Error', { status: 500 })
     }
 
-    const rangeHeader = isTransformSource ? null : req.headers.get('range')
+    // Handle range request
+    const rangeHeader = req.headers.get('range')
     const rangeResult = getRangeRequestInfo({ fileSize, rangeHeader })
 
     if (rangeResult.type === 'invalid') {
@@ -155,6 +154,7 @@ export async function getFile({
 
     let headers = new Headers(incomingHeaders)
 
+    // Add range-related headers from the result
     for (const [headerKey, value] of Object.entries(rangeResult.headers)) {
       headers.append(headerKey, value)
     }
@@ -173,7 +173,6 @@ export async function getFile({
     const objectEtag = headObject.ETag
 
     if (
-      !isTransformSource &&
       collection.upload &&
       typeof collection.upload === 'object' &&
       typeof collection.upload.modifyResponseHeaders === 'function'
@@ -181,7 +180,7 @@ export async function getFile({
       headers = collection.upload.modifyResponseHeaders({ headers }) || headers
     }
 
-    if (!isTransformSource && etagFromHeaders && etagFromHeaders === objectEtag) {
+    if (etagFromHeaders && etagFromHeaders === objectEtag) {
       return new Response(null, {
         headers,
         status: 304,

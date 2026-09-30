@@ -1,11 +1,11 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
-import { sharpTransformer } from '@payloadcms/transformer-sharp'
+import sharp from 'sharp'
 import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { Categories } from './collections/Categories'
-import { Media, mediaSharpOptions } from './collections/Media'
+import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
@@ -86,11 +86,9 @@ export default buildConfig({
   globals: [Header, Footer],
   plugins,
   secret: process.env.PAYLOAD_SECRET,
+  sharp,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
-  upload: {
-    transformers: [sharpTransformer({ collections: { media: mediaSharpOptions } })],
   },
   jobs: {
     access: {

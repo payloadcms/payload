@@ -3,7 +3,6 @@ import type { PayloadRequest, Where } from '../types/index.js'
 
 import { executeAccess } from '../auth/executeAccess.js'
 import { Forbidden } from '../errors/Forbidden.js'
-import { buildFilenameWhere } from './transformers/resolveUploadDocument.js'
 
 export const checkFileAccess = async ({
   collection,
@@ -37,7 +36,17 @@ export const checkFileAccess = async ({
   }
 
   if (constraints.length > 0) {
-    const filenameCondition = buildFilenameWhere({ filename, imageSizes: config.upload.imageSizes })
+    const filenameCondition: Where = {
+      or: [{ filename: { equals: filename } }],
+    }
+
+    if (config.upload.imageSizes) {
+      config.upload.imageSizes.forEach(({ name }) => {
+        filenameCondition.or!.push({
+          [`sizes.${name}.filename`]: { equals: filename },
+        })
+      })
+    }
 
     const doc = await req.payload.db.findOne({
       collection: config.slug,

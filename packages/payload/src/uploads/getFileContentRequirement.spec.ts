@@ -62,11 +62,11 @@ describe('getFileContentRequirement', () => {
     ).toBe('header')
   })
 
-  it('requires the full file for an image a transformer will adjust', () => {
+  it('requires the full file for an image with resize options configured', () => {
     expect(
       getFileContentRequirement({
         mimeType: 'image/png',
-        uploadConfig: createUploadConfig({ hasImageAdjustments: true }),
+        uploadConfig: createUploadConfig({ resizeOptions: { width: 100 } }),
       }),
     ).toBe('full')
   })

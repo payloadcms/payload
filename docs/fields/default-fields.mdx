@@ -116,11 +116,11 @@ The `salt` and `hash` fields are reserved and cannot be overridden.
 
 The following fields are added to [upload-enabled collections](../upload/overview). Payload deep-merges matching fields from your collection's `fields` array into these defaults.
 
-| Fields                                                                       | Added when                                                                                                                                                            |
-| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `filename`, `mimeType`, `filesize`, `width`, `height`, `url`, `thumbnailURL` | Uploads are enabled.                                                                                                                                                  |
-| `focalX`, `focalY`                                                           | Uploads are enabled, unless `focalPoint` is `false` and no Sharp `variants` or image adjustment options (`resizeOptions`, `formatOptions`, and so on) are configured. |
-| `sizes`                                                                      | Sharp `variants` are configured. Matching fields nested under `sizes` are also merged recursively.                                                                    |
+| Fields                                                                       | Added when                                                                                    |
+| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `filename`, `mimeType`, `filesize`, `width`, `height`, `url`, `thumbnailURL` | Uploads are enabled.                                                                          |
+| `focalX`, `focalY`                                                           | Focal points are enabled, or `imageSizes` or `resizeOptions` is configured.                   |
+| `sizes`                                                                      | `imageSizes` is configured. Matching fields nested under `sizes` are also merged recursively. |
 
 The `file` field is reserved and cannot be overridden.
 

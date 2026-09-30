@@ -309,6 +309,10 @@ describe('getFileFromUploadInstructions', () => {
     })
 
     const req = createReq([handler], {})
+    const sharp = vi.fn(() => {
+      throw new Error('Unexpected image processing')
+    })
+    req.payload.config.sharp = sharp
 
     const file = await getFileFromUploadInstructions({
       collectionSlug: 'media',
@@ -324,6 +328,7 @@ describe('getFileFromUploadInstructions', () => {
     expect(file.tempFilePath).toBeUndefined()
     expect(file.data.equals(MINIMAL_PNG)).toBe(true)
     expect(file.mimetype).toBe('image/png')
+    expect(sharp).not.toHaveBeenCalled()
   })
 
   it('fetches the full file for an image with no configured adjustments when the request includes a crop edit', async () => {

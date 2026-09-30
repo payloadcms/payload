@@ -1,5 +1,5 @@
 import type { BlobDownloadResponseParsed, ContainerClient } from '@azure/storage-blob'
-import type { CollectionConfig, FileHandlerOperation, PayloadRequest, TypeWithID } from 'payload'
+import type { CollectionConfig, PayloadRequest, TypeWithID } from 'payload'
 import type { Readable } from 'stream'
 
 import { RestError } from '@azure/storage-blob'
@@ -16,7 +16,6 @@ interface GetFileArgs {
   doc?: TypeWithID
   filename: string
   incomingHeaders?: Headers
-  operation?: FileHandlerOperation
   req: PayloadRequest
   uploadReference?: unknown
   useCompositePrefixes?: boolean
@@ -59,12 +58,10 @@ export async function getFile({
   doc,
   filename,
   incomingHeaders,
-  operation = 'read',
   req,
   uploadReference,
   useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
-  const isTransformSource = operation === 'transform'
   let blob: BlobDownloadResponseParsed | undefined = undefined
   let streamed = false
 
@@ -95,6 +92,7 @@ export async function getFile({
 
     const blockBlobClient = client.getBlockBlobClient(storageFilePath)
 
+    // Get file size for range validation
     const properties = await blockBlobClient.getProperties()
     const fileSize = properties.contentLength
 
@@ -102,7 +100,8 @@ export async function getFile({
       return new Response('Internal Server Error', { status: 500 })
     }
 
-    const rangeHeader = isTransformSource ? null : req.headers.get('range')
+    // Handle range request
+    const rangeHeader = req.headers.get('range')
     const rangeResult = getRangeRequestInfo({ fileSize, rangeHeader })
 
     if (rangeResult.type === 'invalid') {
@@ -112,6 +111,7 @@ export async function getFile({
       })
     }
 
+    // Download with range if partial
     blob =
       rangeResult.type === 'partial'
         ? await blockBlobClient.download(
@@ -123,10 +123,12 @@ export async function getFile({
 
     let headers = new Headers(incomingHeaders)
 
+    // Add range-related headers from the result
     for (const [key, value] of Object.entries(rangeResult.headers)) {
       headers.append(key, value)
     }
 
+    // Add Azure-specific headers
     headers.append('Content-Type', String(properties.contentType))
     if (properties.etag) {
       headers.append('ETag', String(properties.etag))
@@ -140,7 +142,6 @@ export async function getFile({
     const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
 
     if (
-      !isTransformSource &&
       collection.upload &&
       typeof collection.upload === 'object' &&
       typeof collection.upload.modifyResponseHeaders === 'function'
@@ -148,7 +149,7 @@ export async function getFile({
       headers = collection.upload.modifyResponseHeaders({ headers }) || headers
     }
 
-    if (!isTransformSource && etagFromHeaders && etagFromHeaders === properties.etag) {
+    if (etagFromHeaders && etagFromHeaders === properties.etag) {
       return new Response(null, {
         headers,
         status: 304,

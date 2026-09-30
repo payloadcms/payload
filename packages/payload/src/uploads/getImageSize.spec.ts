@@ -1,6 +1,7 @@
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs'
 import os from 'os'
 import path from 'path'
+import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -31,7 +32,7 @@ const fixturesDir = path.resolve(dirname, '../../../../test/uploads')
 
 // Minimal JPEG XL bare-codestream encoder (bit-packed, little-endian, LSB
 // first). See probeImageSize.spec.ts for the full JXL parsing test suite;
-// this only needs to produce a valid header for the tests below
+// this only needs to produce a valid header for the sharp-fallback tests below
 const encodeJXLCodestream = (width: number, height: number): Buffer => {
   const bits: number[] = []
   const pushBits = (value: number, length: number) => {
@@ -83,13 +84,20 @@ describe('getImageSize', () => {
     { file: 'image.svg', height: 260, width: 260 },
   ]
 
-  it.each(cases)('should read $file dimensions', async ({ file, height, width }) => {
-    expect(await getImageSize({ file: fileFor(file) })).toEqual({ height, width })
+  it.each(cases)('should read $file dimensions via sharp', async ({ file, height, width }) => {
+    expect(await getImageSize({ file: fileFor(file), sharp })).toEqual({ height, width })
   })
 
-  it('should measure a header-only truncated image', async () => {
+  it.each(cases)(
+    'should read $file dimensions via the probe fallback',
+    async ({ file, height, width }) => {
+      expect(await getImageSize({ file: fileFor(file) })).toEqual({ height, width })
+    },
+  )
+
+  it('should fall back to the probe when sharp cannot decode a header-only image', async () => {
     // A 1x1 PNG truncated after IHDR: the header is readable but there is no
-    // pixel data.
+    // pixel data, so sharp throws while the probe still measures it.
     const data = Buffer.from(
       '89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c489',
       'hex',
@@ -102,6 +110,7 @@ describe('getImageSize', () => {
       tempFilePath: '',
     } as PayloadRequest['file']
 
+    expect(await getImageSize({ file, sharp })).toEqual({ height: 1, width: 1 })
     expect(await getImageSize({ file })).toEqual({ height: 1, width: 1 })
   })
 
@@ -113,17 +122,21 @@ describe('getImageSize', () => {
       tempFilePath,
     } as PayloadRequest['file']
 
+    expect(await getImageSize({ file, sharp })).toEqual({ height: 100, width: 200 })
     expect(await getImageSize({ file })).toEqual({ height: 100, width: 200 })
   })
 
-  describe('JPEG XL', () => {
+  describe('sharp cannot decode JPEG XL', () => {
     const tempDir = mkdtempSync(path.join(os.tmpdir(), 'payload-get-image-size-jxl-'))
 
     afterAll(() => {
       rmSync(tempDir, { recursive: true, force: true })
     })
 
-    it('should read an in-memory JPEG XL buffer', async () => {
+    it('should fall back to the probe for an in-memory JPEG XL buffer', async () => {
+      // `isImage('image/jxl')` is true, so `generateFileData` always calls
+      // `getImageSize` with `sharp` for JXL uploads; sharp rejects the format
+      // (libvips has no JXL codec) and the probe must take over
       const data = encodeJXLCodestream(1920, 1080)
       const file = {
         data,
@@ -133,10 +146,10 @@ describe('getImageSize', () => {
         tempFilePath: '',
       } as PayloadRequest['file']
 
-      expect(await getImageSize({ file })).toEqual({ height: 1080, width: 1920 })
+      expect(await getImageSize({ file, sharp })).toEqual({ height: 1080, width: 1920 })
     })
 
-    it('should read a JPEG XL tempFilePath', async () => {
+    it('should fall back to the probe for a JPEG XL tempFilePath', async () => {
       const tempFilePath = path.join(tempDir, 'test.jxl')
       writeFileSync(tempFilePath, encodeJXLCodestream(640, 480))
 
@@ -146,7 +159,7 @@ describe('getImageSize', () => {
         tempFilePath,
       } as PayloadRequest['file']
 
-      expect(await getImageSize({ file })).toEqual({ height: 480, width: 640 })
+      expect(await getImageSize({ file, sharp })).toEqual({ height: 480, width: 640 })
     })
   })
 
