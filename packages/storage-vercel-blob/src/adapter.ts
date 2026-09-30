@@ -78,15 +78,17 @@ export function createVercelBlobAdapter({
           filename,
           useCompositePrefixes,
         })
-        const allowOverwrite = await authorizeClientOverwrite({
-          collectionPrefix: prefix,
-          collectionSources,
-          overrideAccess,
-          req,
-          requestedCollectionSlug: collectionSlug,
-          requestedFilename: requested.sanitizedFilename,
-          requestedStorageFilePath: requested.storageFilePath,
-        })
+        const allowOverwrite = collection.versions
+          ? false
+          : await authorizeClientOverwrite({
+              collectionPrefix: prefix,
+              collectionSources,
+              overrideAccess,
+              req,
+              requestedCollectionSlug: collectionSlug,
+              requestedFilename: requested.sanitizedFilename,
+              requestedStorageFilePath: requested.storageFilePath,
+            })
         const resolved = allowOverwrite
           ? {
               ...requested,

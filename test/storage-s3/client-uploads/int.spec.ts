@@ -247,7 +247,7 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
     } = await response.json()
     expect(url).toBeDefined()
     expect(url).toContain(getTestBucketName())
-    expect(url).toContain('small-file.png')
+    expect(url).toContain('small-file-original.png')
   })
 
   test('should reject file exceeding size limit', async ({ restClient }) => {
@@ -340,7 +340,7 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
 
       expect(url).toBeDefined()
       expect(url).toContain('test-prefix')
-      expect(url).toContain('photo.png')
+      expect(url).toContain('photo-original.png')
       expect(url).not.toContain('..')
     })
 
@@ -362,7 +362,7 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
 
       expect(url).toBeDefined()
       expect(url).toContain('test-prefix')
-      expect(url).toContain('document.png')
+      expect(url).toContain('document-original.png')
       expect(url).not.toContain('..')
       expect(url).not.toContain('other-prefix')
     })
@@ -380,7 +380,7 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
 
       expect(url).toBeDefined()
       expect(url).toContain('test-prefix')
-      expect(url).toContain('photo.png')
+      expect(url).toContain('photo-original.png')
       expect(url).not.toContain('..')
     })
 
@@ -397,7 +397,7 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
 
       expect(url).toBeDefined()
       expect(url).toContain('test-prefix')
-      expect(url).toContain('safe-image.png')
+      expect(url).toContain('safe-image-original.png')
     })
 
     // Regression for #16694: trailing dots are stripped from the storage key the same way they
@@ -417,7 +417,7 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
 
       expect(url).toBeDefined()
       expect(url).toContain('test-prefix')
-      expect(url).toContain('report.png')
+      expect(url).toContain('report-original.png')
       expect(url).not.toContain('report...png')
     })
   })
@@ -441,7 +441,8 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
       createdIds.length = 0
     })
 
-    test('creates a document from a client-uploaded image via the real S3 handler', async ({
+    test('creates a versioned document with a retained provider original', async ({
+      payload,
       restClient,
     }) => {
       const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
@@ -478,6 +479,48 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
       expect(doc.height).toBe(1600)
       expect(doc.filesize).toBe(file.length)
       expect(doc.mimeType).toBe('image/png')
+      expect(doc.original.filename).toBe('header-only-original.png')
+      expect(doc.filename).toBe(doc.original.filename)
+
+      const stored = await payload.findByID({
+        id: doc.id,
+        collection: mediaHeaderOnlySlug,
+        overrideAccess: true,
+        showHiddenFields: true,
+      })
+      expect(stored._managedFiles).toEqual([
+        {
+          key: decodeURIComponent(
+            new URL(instructions.request.url).pathname.split('/').slice(2).join('/'),
+          ),
+          roles: [{ type: 'original' }, { type: 'default' }],
+          storageBackendId: `s3:${mediaHeaderOnlySlug}`,
+        },
+      ])
+      const originalResponse = await restClient.GET(
+        `/${mediaHeaderOnlySlug}/file/${doc.original.filename}`,
+      )
+      expect(originalResponse.status).toBe(200)
+      expect(Buffer.from(await originalResponse.arrayBuffer())).toEqual(file)
+    })
+
+    test('does not create a document when the provider upload never completes', async ({
+      payload,
+      restClient,
+    }) => {
+      const instructions = await restClient
+        .POST(signedURLEndpoint, {
+          body: signedURLBody(mediaHeaderOnlySlug, 'missing.png', 100, 'image/png'),
+        })
+        .then((res) => res.json<UploadInstructions>())
+
+      const formData = new FormData()
+      formData.append('file', JSON.stringify(instructions.file))
+      const response = await restClient.POST(`/${mediaHeaderOnlySlug}`, { body: formData })
+
+      expect(response.status).toBeGreaterThanOrEqual(400)
+      const docs = await payload.find({ collection: mediaHeaderOnlySlug, overrideAccess: true })
+      expect(docs.totalDocs).toBe(0)
     })
   })
 
@@ -498,7 +541,8 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
       createdIds.length = 0
     })
 
-    test('creates a document and generates image sizes from a large client-uploaded image via the real S3 handler', async ({
+    test('retains the direct original while generating a stored image size', async ({
+      payload,
       restClient,
     }) => {
       const file = readFileSync(path.resolve(dirname, '../../uploads/2mb.jpg'))
@@ -542,6 +586,18 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
       expect(doc.sizes.thumbnail.width).toBe(400)
       expect(doc.sizes.thumbnail.height).toBe(300)
       expect(doc.sizes.thumbnail.filename).toBeTruthy()
+      const stored = await payload.findByID({
+        id: doc.id,
+        collection: mediaHeaderOnlyWithSizesSlug,
+        overrideAccess: true,
+        showHiddenFields: true,
+      })
+      expect(stored._managedFiles).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ roles: [{ type: 'original' }, { type: 'default' }] }),
+          expect.objectContaining({ roles: [{ type: 'size', sizeKey: 'thumbnail' }] }),
+        ]),
+      )
     }, 60000)
   })
 

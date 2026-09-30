@@ -494,7 +494,10 @@ export const createOperation = async <
       Array.isArray(dataWithLocales._managedFiles)
     let doc
 
-    if (collectionConfig.upload.fileOperations && filesToUpload.length > 0) {
+    if (
+      collectionConfig.upload.fileOperations &&
+      (filesToUpload.length > 0 || req.context?._payloadVerifiedProviderOriginal)
+    ) {
       doc = await runCloudFileCreation({
         collection: collectionConfig,
         data: dataWithLocales,

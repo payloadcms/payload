@@ -33,6 +33,9 @@ export const createFileOperations = ({
       const dataForUpload = { ...data, prefix: docPrefix }
       const keyByFilename = new Map<string, string>()
       let metadata: Record<string, unknown> = {}
+      const verifiedOriginal = req.context?._payloadVerifiedProviderOriginal as
+        | { filename: string; key: string }
+        | undefined
 
       for (const file of files) {
         const filename = path.basename(file.path)
@@ -104,6 +107,19 @@ export const createFileOperations = ({
           role: { type: 'original' },
           storageBackendId,
         })
+      } else if (verifiedOriginal) {
+        references.push({
+          key: verifiedOriginal.key,
+          role: { type: 'original' },
+          storageBackendId,
+        })
+        if (data.filename === verifiedOriginal.filename) {
+          references.push({
+            key: verifiedOriginal.key,
+            role: { type: 'default' },
+            storageBackendId,
+          })
+        }
       } else {
         const retainedOriginal = (data._managedFiles as FileData['_managedFiles'])?.find(
           (file) =>
@@ -116,6 +132,13 @@ export const createFileOperations = ({
             role: { type: 'original' },
             storageBackendId,
           })
+          if (data.filename === original?.filename) {
+            references.push({
+              key: retainedOriginal.key,
+              role: { type: 'default' },
+              storageBackendId,
+            })
+          }
         }
       }
       if (typeof data.filename === 'string' && keyByFilename.has(data.filename)) {

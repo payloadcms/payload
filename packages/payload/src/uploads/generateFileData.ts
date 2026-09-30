@@ -152,10 +152,23 @@ export const generateFileData = async <T>({
     staticDir,
   } = collectionConfig.upload
   const hasManagedCloudStorage = Boolean(collectionConfig.upload.fileOperations)
+  const uploadReference = file?.uploadReference
   const hasProviderDirectReference =
-    file?.uploadReference &&
-    typeof file.uploadReference === 'object' &&
-    !('uploadId' in file.uploadReference)
+    uploadReference && typeof uploadReference === 'object' && !('uploadId' in uploadReference)
+  const verifiedOriginal = req.context?._payloadVerifiedProviderOriginal as
+    | { filename: string; key: string; signedReceipt: string }
+    | undefined
+  const providerOriginal =
+    hasProviderDirectReference &&
+    'signedReceipt' in uploadReference &&
+    uploadReference.signedReceipt === verifiedOriginal?.signedReceipt &&
+    verifiedOriginal &&
+    typeof collectionConfig.upload.adapter === 'string'
+      ? {
+          filename: verifiedOriginal.filename,
+          key: verifiedOriginal.key,
+        }
+      : undefined
   const shouldStageCloudFiles = hasManagedCloudStorage && !hasProviderDirectReference
 
   const staticPath = staticDir
@@ -414,9 +427,10 @@ export const generateFileData = async <T>({
       fileData._objectKey = randomUUID()
     }
 
-    if (!disableLocalStorage || shouldStageCloudFiles) {
+    if (!disableLocalStorage || shouldStageCloudFiles || providerOriginal) {
       const originalFilename =
         retainedOriginal?.filename ??
+        providerOriginal?.filename ??
         (fileWasTransformed
           ? await getSafeFileName({
               collectionSlug: collectionConfig.slug,
@@ -453,7 +467,33 @@ export const generateFileData = async <T>({
 
       fileData.original = original
 
-      if (fileWasTransformed && !retainedOriginal) {
+      if (providerOriginal) {
+        const storageBackendId = `${collectionConfig.upload.adapter}:${collectionConfig.slug}`
+        fileData._managedFiles = createManagedFileManifest({
+          references: [
+            {
+              key: providerOriginal.key,
+              role: { type: 'original' },
+              storageBackendId,
+            },
+            ...(!fileWasTransformed
+              ? [
+                  {
+                    key: providerOriginal.key,
+                    role: { type: 'default' as const },
+                    storageBackendId,
+                  },
+                ]
+              : []),
+          ],
+        })
+
+        if (!fileWasTransformed) {
+          fileData.filename = originalFilename
+        }
+      }
+
+      if (fileWasTransformed && !retainedOriginal && !providerOriginal) {
         filesToSave.push({
           buffer: Buffer.from(await originalWebFile!.arrayBuffer()),
           path: `${staticPath}/${originalFilename}`,

@@ -20,6 +20,7 @@ export {
 export { downloadFileToBuffer } from '../uploads/downloadFileToBuffer.js'
 export { getUploadInstructions } from '../uploads/endpoints/uploadInstructions.js'
 export { createManagedFileManifest } from '../uploads/fileVersioning/manifest.js'
+export { getOriginalFilename } from '../uploads/fileVersioning/naming.js'
 export { getFileFromUploadInstructions } from '../uploads/getFileFromUploadInstructions.js'
 export { isXmlMimeType } from '../uploads/getFileTypeIdentity.js'
 export { getRangeRequestInfo } from '../uploads/getRangeRequestInfo.js'

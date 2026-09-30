@@ -19,7 +19,11 @@ export const runCloudFileCreation = async <T>({
 }): Promise<T> => {
   const operations = collection.upload.fileOperations
 
-  if (!operations || files.length === 0) {
+  if (
+    !operations ||
+    req.context?.skipCloudStorage ||
+    (files.length === 0 && !req.context?._payloadVerifiedProviderOriginal)
+  ) {
     return write()
   }
 
@@ -65,7 +69,11 @@ export const runCloudFileUpdate = async <T>({
 }): Promise<T> => {
   const operations = collection.upload.fileOperations
 
-  if (!operations || files.length === 0) {
+  if (
+    !operations ||
+    req.context?.skipCloudStorage ||
+    (files.length === 0 && !req.context?._payloadVerifiedProviderOriginal)
+  ) {
     return write()
   }
 

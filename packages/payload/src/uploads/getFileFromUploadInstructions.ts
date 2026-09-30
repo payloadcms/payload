@@ -16,6 +16,7 @@ import { sanitizeFilename } from '../utilities/sanitizeFilename.js'
 import { sanitizeUploadPrefix } from '../utilities/sanitizeUploadPrefix.js'
 import { verifyClientUploadReceipt } from './clientUploadReceipt.js'
 import { docWithFilenameExists } from './docWithFilenameExists.js'
+import { getOriginalFilename, normalizeStorageKey } from './fileVersioning/naming.js'
 import { getFileContentRequirement, HEADER_PROBE_BYTE_LENGTH } from './getFileContentRequirement.js'
 import { getImageSize } from './getImageSize.js'
 import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
@@ -30,6 +31,10 @@ export const getFileFromUploadInstructions = async ({
   file: UploadInstructions['file']
   req: PayloadRequest
 }): Promise<NonNullable<PayloadRequest['file']>> => {
+  if (req.context) {
+    delete req.context._payloadVerifiedProviderOriginal
+  }
+
   if (
     !file ||
     typeof file !== 'object' ||
@@ -54,6 +59,8 @@ export const getFileFromUploadInstructions = async ({
 
   const uploadConfig = req.payload.collections[collectionSlug]!.config.upload
   let allowOverwrite = false
+  let providerFilename = file.filename
+  let verifiedOriginal: { filename: string; key: string; signedReceipt: string } | undefined
 
   if (uploadConfig?.uploadInstructions?.requiresUploadReceipt) {
     const signedReceipt =
@@ -65,6 +72,40 @@ export const getFileFromUploadInstructions = async ({
       signedReceipt,
     })
     allowOverwrite = receipt.allowOverwrite === true
+    let originalFilename: string
+    let storageFilePath: string
+
+    try {
+      originalFilename = getOriginalFilename({ filename: file.filename })
+      storageFilePath = normalizeStorageKey({ key: receipt.storageFilePath })
+    } catch {
+      throw new APIError('Invalid upload reference.', 400)
+    }
+
+    const expectedKeySuffix = [receipt.filePrefix, receipt._objectKey, originalFilename]
+      .filter(Boolean)
+      .join('/')
+
+    if (
+      (!allowOverwrite &&
+        (!receipt._objectKey ||
+          path.posix.basename(storageFilePath) !== originalFilename ||
+          !`/${storageFilePath}`.endsWith(`/${expectedKeySuffix}`))) ||
+      ('prefix' in file.uploadReference && file.uploadReference.prefix !== receipt.filePrefix) ||
+      ('_objectKey' in file.uploadReference &&
+        file.uploadReference._objectKey !== receipt._objectKey)
+    ) {
+      throw new APIError('Invalid upload reference.', 400)
+    }
+
+    providerFilename = allowOverwrite ? file.filename : originalFilename
+    if (!allowOverwrite) {
+      verifiedOriginal = {
+        filename: originalFilename,
+        key: storageFilePath,
+        signedReceipt: signedReceipt as string,
+      }
+    }
     file = {
       ...file,
       uploadReference: {
@@ -121,11 +162,31 @@ export const getFileFromUploadInstructions = async ({
     mimeType: file.mimeType,
     uploadConfig,
   })
+  const providerFile = { ...file, filename: providerFilename }
+  const rememberVerifiedOriginal = () => {
+    if (verifiedOriginal) {
+      req.context ??= {}
+      req.context._payloadVerifiedProviderOriginal = verifiedOriginal
+    }
+  }
 
   // Nothing downstream reads this file's content - use the client-reported metadata directly
   // instead of re-downloading a file that, for a chunked upload, can be far larger than
   // the server's available memory or disk.
   if (contentRequirement === 'none') {
+    const response = await fetchUploadResponse({
+      collectionSlug,
+      file: providerFile,
+      rangeHeader: file.size > 0 ? 'bytes=0-0' : undefined,
+      req,
+      uploadConfig,
+    })
+    const prefix = await readBoundedPrefix(response, 1)
+    if (file.size > 0 && prefix.length === 0) {
+      throw new APIError('Uploaded source is not readable.', 400)
+    }
+    rememberVerifiedOriginal()
+
     return {
       name: file.filename,
       data: Buffer.alloc(0),
@@ -136,18 +197,30 @@ export const getFileFromUploadInstructions = async ({
   }
 
   if (contentRequirement === 'header') {
-    const headerFile = await fetchHeaderOnly({ collectionSlug, file, req, uploadConfig })
+    const headerFile = await fetchHeaderOnly({
+      collectionSlug,
+      file: providerFile,
+      req,
+      uploadConfig,
+    })
     if (headerFile) {
-      return headerFile
+      rememberVerifiedOriginal()
+      return { ...headerFile, name: file.filename }
     }
     // The header wasn't enough to determine the image's dimensions - fall through to a full fetch.
   }
 
-  const response = await fetchUploadResponse({ collectionSlug, file, req, uploadConfig })
+  const response = await fetchUploadResponse({
+    collectionSlug,
+    file: providerFile,
+    req,
+    uploadConfig,
+  })
 
   const tempFilePath = await streamResponseToTempFile({ req, response })
   req.context ??= {}
   req.context._payloadClientUploadTempFile = true
+  rememberVerifiedOriginal()
 
   return {
     name: file.filename,
@@ -282,8 +355,14 @@ const fetchUploadResponse = async ({
   if (response.status >= 300 && response.status < 400) {
     const redirectUrl = response.headers.get('Location')
     if (redirectUrl) {
-      response = await fetch(redirectUrl)
+      response = await fetch(redirectUrl, {
+        ...(rangeHeader && { headers: { Range: rangeHeader } }),
+      })
     }
+  }
+
+  if (!response.ok) {
+    throw new APIError('Uploaded source is not readable.', 400)
   }
 
   return response

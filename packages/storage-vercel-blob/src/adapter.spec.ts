@@ -39,7 +39,13 @@ vi.mock('@vercel/blob/client', () => ({
 
 import { createVercelBlobAdapter } from './adapter.js'
 
-const generateInstructions = async ({ hasOwner }: { hasOwner: boolean }) => {
+const generateInstructions = async ({
+  hasOwner,
+  versions = false,
+}: {
+  hasOwner: boolean
+  versions?: boolean
+}) => {
   const adapter = createVercelBlobAdapter({
     access: 'public',
     baseUrl: 'https://example.com',
@@ -51,7 +57,7 @@ const generateInstructions = async ({ hasOwner }: { hasOwner: boolean }) => {
     token: 'read-write-token',
   })
   const generatedAdapter = adapter({
-    collection: { slug: 'media' },
+    collection: { slug: 'media', versions },
     prefix: '',
   } as never)
   const req = {
@@ -96,6 +102,15 @@ describe('createVercelBlobAdapter', () => {
     expect(instructions).toMatchObject({ data: { pathname: 'reference.png' } })
     expect(mocks.generateClientToken).toHaveBeenCalledWith(
       expect.objectContaining({ allowOverwrite: true, pathname: 'reference.png' }),
+    )
+  })
+
+  it('should allocate a new original instead of overwriting a versioned source', async () => {
+    const instructions = await generateInstructions({ hasOwner: true, versions: true })
+
+    expect(instructions).toMatchObject({ data: { pathname: 'reference-1.png' } })
+    expect(mocks.generateClientToken).toHaveBeenCalledWith(
+      expect.not.objectContaining({ allowOverwrite: true }),
     )
   })
 })

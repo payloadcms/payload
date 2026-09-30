@@ -1,7 +1,7 @@
 import type { PayloadRequest } from 'payload'
 
 import { randomUUID } from 'node:crypto'
-import { createClientUploadReceipt, getSafeFileName } from 'payload/internal'
+import { createClientUploadReceipt, getOriginalFilename, getSafeFileName } from 'payload/internal'
 import { getSanitizedUploadFilename } from 'payload/shared'
 
 import type { UploadReference } from '../types.js'
@@ -69,7 +69,7 @@ export async function resolveSignedURLKey({
   const { storageFilePath } = buildUploadStoragePathData({
     collectionPrefix,
     docPrefix: keyedDocPrefix,
-    filename: sanitizedFilename,
+    filename: getOriginalFilename({ filename: sanitizedFilename }),
     useCompositePrefixes,
   })
 

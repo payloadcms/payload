@@ -298,7 +298,7 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
       new URL(signedURL).pathname.replace(`/devstoreaccount1/${TEST_CONTAINER}/`, ''),
     )
 
-    expect(blobKey).toMatch(/^[0-9a-f-]+\/duplicate-target-1\.png$/)
+    expect(blobKey).toMatch(/^[0-9a-f-]+\/duplicate-target-1-original\.png$/)
 
     await payload.delete({ id: seedDoc.id, collection: mediaSlug, overrideAccess: true })
   })
@@ -344,9 +344,7 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
       createdIds.length = 0
     })
 
-    test('does not read a client-uploaded non-image when metadata is sufficient', async ({
-      restClient,
-    }) => {
+    test('verifies a client-uploaded non-image with a bounded read', async ({ restClient }) => {
       const file = readFileSync(path.resolve(dirname, '../../uploads/audio.mp3'))
       expect(file.length).toBe(23_334)
 
@@ -370,8 +368,8 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
 
         expect(doc.filesize).toBe(23_334)
         expect(doc.mimeType).toBe('audio/mpeg')
-        expect(getPropertiesSpy).not.toHaveBeenCalled()
-        expect(downloadSpy).not.toHaveBeenCalled()
+        expect(getPropertiesSpy).toHaveBeenCalledOnce()
+        expect(downloadSpy).toHaveBeenCalledWith(0, 1, expect.any(Object))
       } finally {
         getPropertiesSpy.mockRestore()
         downloadSpy.mockRestore()

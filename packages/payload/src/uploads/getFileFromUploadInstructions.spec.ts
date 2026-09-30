@@ -8,6 +8,7 @@ import path from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { HEADER_PROBE_BYTE_LENGTH } from './getFileContentRequirement.js'
+import { getOriginalFilename } from './fileVersioning/naming.js'
 import { getFileFromUploadInstructions } from './getFileFromUploadInstructions.js'
 
 vi.mock('./clientUploadReceipt.js', () => ({
@@ -63,7 +64,12 @@ const createUploadReferenceFile = (
   const filename = overrides.filename ?? 'video.mp4'
   const uploadReference = overrides.uploadReference ?? {}
   const prefix = typeof uploadReference.prefix === 'string' ? uploadReference.prefix : ''
-  const storageFilePath = prefix ? `${prefix}/${filename}` : `media/${filename}`
+  const objectKey = 'upload-1'
+  const originalFilename =
+    filename.includes('/') || filename.includes('\\') ? filename : getOriginalFilename({ filename })
+  const storageFilePath = prefix
+    ? `${prefix}/${objectKey}/${originalFilename}`
+    : `media/${objectKey}/${originalFilename}`
   return {
     filename: 'video.mp4',
     mimeType: 'video/mp4',
@@ -72,6 +78,7 @@ const createUploadReferenceFile = (
     uploadReference: {
       ...uploadReference,
       signedReceipt: JSON.stringify({
+        _objectKey: objectKey,
         collectionSlug: 'media',
         filePrefix: prefix,
         filename,
@@ -124,6 +131,7 @@ describe('getFileFromUploadInstructions', () => {
     expect(file.data.length).toBe(0)
     expect(fs.readFileSync(file.tempFilePath!, 'utf8')).toBe('some file contents')
     expect(file.uploadReference).toEqual({
+      _objectKey: 'upload-1',
       prefix: '',
       signedReceipt: expect.any(String),
     })
@@ -283,9 +291,10 @@ describe('getFileFromUploadInstructions', () => {
     expect(handler).not.toHaveBeenCalled()
   })
 
-  it('skips fetching entirely when nothing downstream needs the file content', async () => {
-    const handler = vi.fn(() => {
-      throw new Error('No-content handler was invoked')
+  it('checks that an unchanged direct upload exists without downloading its contents', async () => {
+    const handler = vi.fn(async (handlerReq: PayloadRequest) => {
+      expect(handlerReq.headers.get('range')).toBe('bytes=0-0')
+      return new Response('x', { status: 206 })
     })
     const req = createReq([handler], {})
 
@@ -295,11 +304,39 @@ describe('getFileFromUploadInstructions', () => {
       req,
     })
 
-    expect(handler).not.toHaveBeenCalled()
+    expect(handler).toHaveBeenCalledOnce()
     expect(file.tempFilePath).toBeUndefined()
     expect(file.data.length).toBe(0)
     expect(file.size).toBe(18)
     expect(file.mimetype).toBe('video/mp4')
+  })
+
+  it('rejects a receipt for a key other than the planned original', async () => {
+    const handler = vi.fn(async () => new Response('x', { status: 206 }))
+    const req = createReq([handler], {})
+    const file = createUploadReferenceFile()
+    file.uploadReference.signedReceipt = JSON.stringify({
+      ...JSON.parse(file.uploadReference.signedReceipt as string),
+      storageFilePath: 'media/video.mp4',
+    })
+
+    await expect(
+      getFileFromUploadInstructions({ collectionSlug: 'media', file, req }),
+    ).rejects.toThrow('Invalid upload reference.')
+    expect(handler).not.toHaveBeenCalled()
+  })
+
+  it('rejects a missing direct original before document creation', async () => {
+    const handler = vi.fn(async () => new Response('missing', { status: 404 }))
+    const req = createReq([handler], {})
+
+    await expect(
+      getFileFromUploadInstructions({
+        collectionSlug: 'media',
+        file: createUploadReferenceFile(),
+        req,
+      }),
+    ).rejects.toThrow()
   })
 
   it('fetches only a bounded header for an image with no configured adjustments', async () => {

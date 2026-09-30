@@ -5,6 +5,9 @@ import { resolveSignedURLKey } from './resolveSignedURLKey.js'
 
 vi.mock('payload/internal', () => ({
   createClientUploadReceipt: vi.fn(() => 'receipt'),
+  getOriginalFilename: vi.fn(({ filename }: { filename: string }) =>
+    filename.replace(/(\.[^.]+)?$/, '-original$1'),
+  ),
   getSafeFileName: vi.fn(async ({ desiredFilename }) => desiredFilename),
 }))
 
@@ -34,12 +37,12 @@ describe('resolveSignedURLKey', () => {
       filePrefix: 'media',
       filename: 'photo-1.png',
       req: {},
-      storageFilePath: expect.stringMatching(/^media\/[0-9a-f-]+\/photo-1\.png$/),
+      storageFilePath: expect.stringMatching(/^media\/[0-9a-f-]+\/photo-1-original\.png$/),
     })
     expect(result).toEqual({
       sanitizedDocPrefix: 'media',
       sanitizedFilename: 'photo-1.png',
-      storageFilePath: expect.stringMatching(/^media\/[0-9a-f-]+\/photo-1\.png$/),
+      storageFilePath: expect.stringMatching(/^media\/[0-9a-f-]+\/photo-1-original\.png$/),
       uploadReference: {
         _objectKey: expect.stringMatching(/^[0-9a-f-]+$/),
         prefix: 'media',
@@ -70,7 +73,9 @@ describe('resolveSignedURLKey', () => {
     expect(result).toEqual({
       sanitizedDocPrefix: 'media/media-archive',
       sanitizedFilename: 'photo-1.jpg',
-      storageFilePath: expect.stringMatching(/^media\/media-archive\/[0-9a-f-]+\/photo-1\.jpg$/),
+      storageFilePath: expect.stringMatching(
+        /^media\/media-archive\/[0-9a-f-]+\/photo-1-original\.jpg$/,
+      ),
       uploadReference: {
         _objectKey: expect.stringMatching(/^[0-9a-f-]+$/),
         prefix: 'media/media-archive',
