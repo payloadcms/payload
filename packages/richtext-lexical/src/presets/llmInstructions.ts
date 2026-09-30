@@ -7,6 +7,7 @@ import { OrderedListFeature } from '../features/lists/orderedList/server/index.j
 import { UnorderedListFeature } from '../features/lists/unorderedList/server/index.js'
 import { ParagraphFeature } from '../features/paragraph/server/index.js'
 import { FixedToolbarFeature } from '../features/toolbars/fixed/server/index.js'
+import { InlineToolbarFeature } from '../features/toolbars/inline/server/index.js'
 
 export const getLLMInstructionsFeatures = () => [
   ParagraphFeature(),
@@ -18,4 +19,5 @@ export const getLLMInstructionsFeatures = () => [
   UnorderedListFeature(),
   OrderedListFeature(),
   FixedToolbarFeature(),
+  InlineToolbarFeature(),
 ]
