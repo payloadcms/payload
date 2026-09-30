@@ -318,6 +318,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       try {
         await page.setViewportSize({ height: 180, width: 320 })
         await page.goto(`${serverURL}/admin`)
+        await openNavigationForUserMenu({ page })
         await page.locator('.user-menu__trigger').click()
         const popup = page.locator('.user-menu > .popup__content')
         const popupBox = await popup.boundingBox()
@@ -337,6 +338,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       try {
         await page.setViewportSize({ height: 720, width: 800 })
         await page.goto(`${serverURL}/admin`)
+        await openNavigationForUserMenu({ page })
         await page.locator('.user-menu__trigger').click()
         await page.getByRole('menuitem', { name: /theme/i }).click()
         const submenu = page.locator('.user-menu .popup__content').last()
@@ -946,6 +948,13 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    test('should give the navigation close control an accessible name', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await openNavigationForUserMenu({ page })
+
+      await expect(page.locator('.nav__close')).toHaveAccessibleName(/hide sidebar/i)
+    })
+
     test('should expose the active locale as selected rather than disabled', async () => {
       // Additional coverage for PYLD-3699.
       // Additional coverage for PYLD-3700.
