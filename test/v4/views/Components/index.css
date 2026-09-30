@@ -128,6 +128,9 @@
 }
 
 .components-view__popup-menu-trigger {
+  --color-bg-selected: var(--color-bg-selected-strong);
+  --color-text-selected: var(--color-text-onselected-strong);
+
   width: 100%;
 }
 
