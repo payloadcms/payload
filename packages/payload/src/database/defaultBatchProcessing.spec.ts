@@ -212,4 +212,27 @@ describe('defaultBatchProcessing', () => {
     expect(results[0]).toMatchObject({ index: 0, operation: 'updateOne', status: 'failed' })
     expect(results[1]).toMatchObject({ documentID: 3, index: 1, status: 'succeeded' })
   })
+
+  test('should reject an unsupported operation kind without attempting later work', async () => {
+    const { adapter, executionOrder } = createTestAdapter()
+
+    const results = await defaultBatchProcessing.call(adapter as BaseDatabaseAdapter, {
+      operations: [
+        { args: { collection: 'posts' }, operation: 'replace' } as never,
+        {
+          args: { collection: 'posts', data: { title: 'not attempted' } },
+          operation: 'create',
+        },
+      ],
+    })
+
+    expect(executionOrder).toEqual([])
+    expect(results[0]).toMatchObject({
+      error: expect.any(TypeError),
+      index: 0,
+      operation: 'replace',
+      status: 'failed',
+    })
+    expect(results[1]).toEqual({ index: 1, operation: 'create', status: 'unattempted' })
+  })
 })
