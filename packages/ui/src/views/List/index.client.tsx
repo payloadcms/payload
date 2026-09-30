@@ -3,10 +3,12 @@
 import type { ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL, formatFilesize } from 'payload/shared'
+import { formatAdminURL, formatFilesize, getBestFitFromSizes, isImage } from 'payload/shared'
 import React, { Fragment, useEffect, useRef, useState } from 'react'
 
 import { Button } from '../../elements/Button/index.js'
+import { CardGrid } from '../../elements/CardGrid/index.js'
+import { DocumentCard } from '../../elements/DocumentCard/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { ListWhereBuilder } from '../../elements/ListWhereBuilder/index.js'
@@ -19,10 +21,12 @@ import { useStepNav } from '../../elements/StepNav/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { TableIdentityProvider } from '../../elements/Table/TableIdentity.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
+import { type DocumentViewMode, ViewModeToggle } from '../../elements/ViewModeToggle/index.js'
 import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
+import { usePreferences } from '../../providers/Preferences/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -34,6 +38,107 @@ import { CollectionListHeader } from './ListHeader/index.js'
 import './index.css'
 
 const baseClass = 'collection-list'
+
+const getDocumentID = (doc: Record<string, unknown>): string => {
+  const id = doc.id
+
+  return typeof id === 'string' || typeof id === 'number' ? String(id) : ''
+}
+
+type FlatDocumentGridProps = {
+  readonly adminRoute: string
+  readonly collectionLabel: string
+  readonly collectionSlug: string
+  readonly docs: Record<string, unknown>[]
+  readonly useAsThumbnail?: string
+  readonly useAsTitle?: string
+}
+
+const getDocumentTitle = ({
+  doc,
+  useAsTitle,
+}: {
+  doc: Record<string, unknown>
+  useAsTitle?: string
+}) => {
+  const value = useAsTitle ? doc[useAsTitle] : undefined
+
+  return typeof value === 'string' || typeof value === 'number' ? String(value) : getDocumentID(doc)
+}
+
+const getThumbnailDoc = ({
+  doc,
+  useAsThumbnail,
+}: {
+  doc: Record<string, unknown>
+  useAsThumbnail?: string
+}) => {
+  const thumbnailValue = useAsThumbnail ? doc[useAsThumbnail] : undefined
+
+  if (Array.isArray(thumbnailValue)) {
+    return thumbnailValue[0] && typeof thumbnailValue[0] === 'object'
+      ? (thumbnailValue[0] as Record<string, unknown>)
+      : undefined
+  }
+
+  if (thumbnailValue && typeof thumbnailValue === 'object') {
+    return thumbnailValue as Record<string, unknown>
+  }
+
+  return doc
+}
+
+const getThumbnail = ({
+  doc,
+  useAsThumbnail,
+}: {
+  doc: Record<string, unknown>
+  useAsThumbnail?: string
+}) => {
+  const thumbnailDoc = getThumbnailDoc({ doc, useAsThumbnail })
+  const mimeType = typeof thumbnailDoc.mimeType === 'string' ? thumbnailDoc.mimeType : undefined
+
+  if (mimeType && isImage(mimeType)) {
+    return getBestFitFromSizes({
+      sizes: thumbnailDoc.sizes as Record<string, { url?: string; width?: number }>,
+      thumbnailURL: thumbnailDoc.thumbnailURL as string,
+      url: thumbnailDoc.url as string,
+      width: thumbnailDoc.width as number,
+    })
+  }
+
+  return typeof thumbnailDoc.thumbnailURL === 'string' ? thumbnailDoc.thumbnailURL : undefined
+}
+
+const FlatDocumentGrid: React.FC<FlatDocumentGridProps> = ({
+  adminRoute,
+  collectionLabel,
+  collectionSlug,
+  docs,
+  useAsThumbnail,
+  useAsTitle,
+}) => (
+  <CardGrid
+    ariaLabel={collectionLabel}
+    getKey={getDocumentID}
+    items={docs}
+    renderItem={(doc) => {
+      const thumbnailSrc = getThumbnail({ doc, useAsThumbnail })
+      const title = getDocumentTitle({ doc, useAsTitle })
+
+      return (
+        <DocumentCard
+          href={formatAdminURL({
+            adminRoute,
+            path: `/collections/${collectionSlug}/${encodeURIComponent(getDocumentID(doc))}`,
+          })}
+          thumbnail={thumbnailSrc ? { alt: title, src: thumbnailSrc } : undefined}
+          title={title}
+        />
+      )
+    }}
+  />
+)
 
 export function DefaultListView(props: ListViewClientProps) {
   const {
@@ -54,6 +159,7 @@ export function DefaultListView(props: ListViewClientProps) {
     hasTrashPermission,
     hierarchyData,
     listMenuItems,
+    listPreferences,
     newDocumentURL,
     NoResults,
     queryPreset,
@@ -65,8 +171,12 @@ export function DefaultListView(props: ListViewClientProps) {
   } = props
 
   const [Table] = useControllableState(InitialTable)
+  const [viewMode, setViewMode] = useState<DocumentViewMode>(
+    listPreferences?.documentViewMode ?? 'table',
+  )
 
   const { allowCreate, createNewDrawerSlug, isInDrawer, onBulkSelect } = useListDrawerContext()
+  const { setPreference } = usePreferences()
 
   const hasCreatePermission =
     allowCreate !== undefined
@@ -98,6 +208,11 @@ export function DefaultListView(props: ListViewClientProps) {
   const { openModal } = useModal()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
+
+  const handleViewModeChange = async (nextViewMode: DocumentViewMode) => {
+    setViewMode(nextViewMode)
+    await setPreference(`collection-${collectionSlug}`, { documentViewMode: nextViewMode }, true)
+  }
 
   const { labels, upload } = collectionConfig
 
@@ -241,6 +356,11 @@ export function DefaultListView(props: ListViewClientProps) {
                 queryPresetPermissions={queryPresetPermissions}
                 renderedFilters={renderedFilters}
                 resolvedFilterOptions={resolvedFilterOptions}
+                viewModeToggle={
+                  !collectionConfig.hierarchy && !hierarchyData && !isGroupingBy && !isInDrawer ? (
+                    <ViewModeToggle onChange={handleViewModeChange} viewMode={viewMode} />
+                  ) : undefined
+                }
                 viewType={viewType}
               />
               {isWhereOpen && (
@@ -288,7 +408,18 @@ export function DefaultListView(props: ListViewClientProps) {
                   />
                 </DocumentSelectionProvider>
               ) : docs?.length > 0 ? (
-                <RelationshipProvider>{Table}</RelationshipProvider>
+                !collectionConfig.hierarchy && viewMode === 'grid' ? (
+                  <FlatDocumentGrid
+                    adminRoute={adminRoute}
+                    collectionLabel={collectionLabel}
+                    collectionSlug={collectionSlug}
+                    docs={docs}
+                    useAsThumbnail={collectionConfig.admin.useAsThumbnail}
+                    useAsTitle={collectionConfig.admin.useAsTitle}
+                  />
+                ) : (
+                  <RelationshipProvider>{Table}</RelationshipProvider>
+                )
               ) : null}
               {/* HierarchyTable handles its own empty state, skip for hierarchy views */}
               {docs?.length === 0 &&

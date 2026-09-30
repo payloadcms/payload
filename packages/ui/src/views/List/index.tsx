@@ -9,8 +9,10 @@ import type {
   ListViewServerPropsOnly,
   PaginatedDocs,
   PayloadComponent,
+  PopulateType,
   QueryPreset,
   SanitizedCollectionPermission,
+  SelectType,
 } from 'payload'
 
 import {
@@ -263,6 +265,12 @@ export const renderListView = async (
   /** Automatically force select active columns. */
   const select = transformColumnsToSelect(columns)
 
+  /** Grid cards need their title, timestamp, and thumbnail regardless of visible table columns. */
+  if (collectionConfig.admin.useAsTitle) {
+    select[collectionConfig.admin.useAsTitle] = true
+  }
+  select.updatedAt = true
+
   /** Force select `useAsTitle` for accessible row-selection labels, even if its column is hidden. */
   if (enableRowSelections && collectionConfig.admin.useAsTitle) {
     select[collectionConfig.admin.useAsTitle] = true
@@ -273,6 +281,43 @@ export const renderListView = async (
     collectionConfig,
     select,
   })
+
+  /** Populate only the configured thumbnail relationship for flat collection grids. */
+  const thumbnailFieldName = !collectionConfig.hierarchy
+    ? collectionConfig.admin.useAsThumbnail
+    : undefined
+  let thumbnailPopulate: PopulateType | undefined
+
+  if (thumbnailFieldName) {
+    select[thumbnailFieldName] = true
+
+    const thumbnailField = collectionConfig.flattenedFields.find(
+      (field) => field.name === thumbnailFieldName && field.type === 'upload',
+    )
+
+    if (thumbnailField && 'relationTo' in thumbnailField) {
+      const relatedSlugs = Array.isArray(thumbnailField.relationTo)
+        ? thumbnailField.relationTo
+        : [thumbnailField.relationTo]
+
+      thumbnailPopulate = {}
+
+      for (const relatedSlug of relatedSlugs) {
+        const relatedCollectionConfig = payload.collections[relatedSlug]?.config
+
+        if (relatedCollectionConfig) {
+          const relatedSelect: SelectType = {}
+
+          appendUploadSelectFields({
+            collectionConfig: relatedCollectionConfig,
+            select: relatedSelect,
+          })
+
+          thumbnailPopulate[relatedSlug] = relatedSelect
+        }
+      }
+    }
+  }
 
   /** Force select `_tz` siblings for any timezone-enabled date fields in select */
   appendDateTimezoneSelectFields({
@@ -343,7 +388,7 @@ export const renderListView = async (
     } else {
       data = await req.payload.find({
         collection: collectionSlug,
-        depth: 0,
+        depth: thumbnailFieldName ? 1 : 0,
         draft: true,
         fallbackLocale: false,
         includeLockStatus: true,
@@ -351,6 +396,7 @@ export const renderListView = async (
         locale: req.locale,
         overrideAccess: false,
         page: query?.page ? Number(query.page) : undefined,
+        populate: thumbnailPopulate,
         req,
         select,
         sort: query?.sort,
