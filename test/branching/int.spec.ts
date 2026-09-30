@@ -1043,10 +1043,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
 
       expect(draftOnMain.items?.map((item) => item.label)).toEqual(['second draft', 'first draft'])
-      expect(draftOnMain.items?.map((item) => item.id)).toEqual([
-        publishedOnMain.items?.[1]?.id,
+      expect(publishedOnMain.items?.map((item) => item.label)).toEqual(['main row'])
+      expect(draftOnMain.items?.map((item) => item.id)).toHaveLength(2)
+      expect(draftOnMain.items?.every((item) => Boolean(item.id))).toBe(true)
+      expect(draftOnMain.items?.map((item) => item.id)).not.toContain(
         publishedOnMain.items?.[0]?.id,
-      ])
+      )
     })
 
     test('should preserve nested row identity when a later branch draft removes a row', async () => {
@@ -1106,10 +1108,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
 
       expect(draftOnMain.items?.map((item) => item.label)).toEqual(['second draft', 'third draft'])
-      expect(draftOnMain.items?.map((item) => item.id)).toEqual([
-        publishedOnMain.items?.[1]?.id,
-        publishedOnMain.items?.[2]?.id,
-      ])
+      expect(publishedOnMain.items?.map((item) => item.label)).toEqual(['main row'])
+      expect(draftOnMain.items?.map((item) => item.id)).toHaveLength(2)
+      expect(draftOnMain.items?.every((item) => Boolean(item.id))).toBe(true)
+      expect(draftOnMain.items?.map((item) => item.id)).not.toContain(
+        publishedOnMain.items?.[0]?.id,
+      )
     })
 
     test('should read exact localized merge data without evaluating defaults', async () => {
@@ -2074,7 +2078,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(draftOnMain.heroTitle).toBe('branch draft')
     })
 
-    test('should merge a published global and its newer draft', async () => {
+    test('should merge only the latest global draft after an earlier branch publish', async () => {
+      const mainVersionsBefore = await payload.findGlobalVersions({
+        slug: homepageGlobalSlug,
+        pagination: false,
+      })
+
       await payload.updateGlobal({
         slug: homepageGlobalSlug,
         branch,
@@ -2091,12 +2100,22 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
       const publishedOnMain = await payload.findGlobal({ slug: homepageGlobalSlug })
       const draftOnMain = await payload.findGlobal({ slug: homepageGlobalSlug, draft: true })
+      const mainVersionsAfter = await payload.findGlobalVersions({
+        slug: homepageGlobalSlug,
+        pagination: false,
+      })
 
-      expect(publishedOnMain.heroTitle).toBe('branch published')
+      expect(publishedOnMain.heroTitle).toBe('main published')
       expect(draftOnMain.heroTitle).toBe('branch draft')
+      expect(mainVersionsAfter.docs).toHaveLength(mainVersionsBefore.docs.length + 1)
     })
 
     test('should merge every localized value of a versioned global', async () => {
+      const mainVersionsBefore = await payload.findGlobalVersions({
+        slug: homepageGlobalSlug,
+        pagination: false,
+      })
+
       await payload.updateGlobal({
         slug: homepageGlobalSlug,
         data: { _status: 'published', localizedTitle: 'main English' },
@@ -2124,9 +2143,59 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
       const mainEN = await payload.findGlobal({ slug: homepageGlobalSlug, locale: 'en' })
       const mainES = await payload.findGlobal({ slug: homepageGlobalSlug, locale: 'es' })
+      const mainVersionsAfter = await payload.findGlobalVersions({
+        slug: homepageGlobalSlug,
+        locale: 'all',
+        pagination: false,
+      })
 
       expect(mainEN.localizedTitle).toBe('branch English')
       expect(mainES.localizedTitle).toBe('branch Spanish')
+      expect(mainVersionsAfter.docs).toHaveLength(mainVersionsBefore.docs.length + 3)
+      expect(mainVersionsAfter.docs[0]?.version.localizedTitle).toEqual({
+        en: 'branch English',
+        es: 'branch Spanish',
+      })
+    })
+
+    test('should preserve each locale status from the latest global version', async () => {
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        data: { _status: 'published', localizedTitle: 'main English' },
+        locale: 'en',
+      })
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        data: { _status: 'published', localizedTitle: 'main Spanish' },
+        locale: 'es',
+      })
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch,
+        data: { _status: 'published', localizedTitle: 'branch English' },
+        locale: 'en',
+      })
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch,
+        data: { localizedTitle: 'branch Spanish draft' },
+        draft: true,
+        locale: 'es',
+      })
+
+      await payload.branches.merge({ branch })
+
+      const publishedEN = await payload.findGlobal({ slug: homepageGlobalSlug, locale: 'en' })
+      const publishedES = await payload.findGlobal({ slug: homepageGlobalSlug, locale: 'es' })
+      const draftES = await payload.findGlobal({
+        slug: homepageGlobalSlug,
+        draft: true,
+        locale: 'es',
+      })
+
+      expect(publishedEN.localizedTitle).toBe('branch English')
+      expect(publishedES.localizedTitle).toBe('main Spanish')
+      expect(draftES.localizedTitle).toBe('branch Spanish draft')
     })
 
     test('should check access against every exact global write and locale', async () => {
@@ -2181,16 +2250,6 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
 
       expect(hookSpy.homepageGlobalAccessWrites).toEqual([
-        {
-          heroTitle: 'branch published',
-          locale: 'en',
-          localizedTitle: 'published English',
-        },
-        {
-          heroTitle: 'branch published',
-          locale: 'es',
-          localizedTitle: 'published Spanish',
-        },
         { heroTitle: 'branch draft', locale: 'en', localizedTitle: 'draft English' },
         { heroTitle: 'branch draft', locale: 'es', localizedTitle: 'draft Spanish' },
       ])
@@ -5495,7 +5554,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       )
     })
 
-    test('should evaluate access for sequential writes against the preceding proposed state', async () => {
+    test('should evaluate a latest draft against the current main state', async () => {
       const page = await payload.create({
         collection: pagesSlug,
         data: { _status: 'published', title: 'original sequential state' },
@@ -5523,8 +5582,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         user: (await asEditor()) as never,
       })
 
-      expect(result.blocked).not.toContainEqual(
-        expect.objectContaining({ collectionSlug: pagesSlug, docID: page.id }),
+      expect(result.blocked).toContainEqual(
+        expect.objectContaining({
+          collectionSlug: pagesSlug,
+          docID: page.id,
+          operation: 'update',
+        }),
       )
     })
 
@@ -5662,7 +5725,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
     })
 
-    test('should report a blocked multi-write change once', async () => {
+    test('should not require publish access for a newer draft', async () => {
       await payload.update({
         id: publicID,
         branch: 'accesswork',
@@ -5682,7 +5745,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         result.blocked.filter(
           (each) => each.collectionSlug === publicSlug && String(each.docID) === String(publicID),
         ),
-      ).toHaveLength(1)
+      ).toHaveLength(0)
     })
 
     test('should evaluate global access against the exact proposed data', async () => {
@@ -6736,10 +6799,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
     })
 
     test.afterEach(async () => {
-      const rows = await payload.find({ branch: false, collection: pagesSlug, pagination: false })
+      for (const collection of [autosaveSlug, pagesSlug] as const) {
+        const rows = await payload.find({ branch: false, collection, pagination: false })
 
-      for (const row of rows.docs) {
-        await payload.delete({ id: row.id, branch: false, collection: pagesSlug })
+        for (const row of rows.docs) {
+          await payload.delete({ id: row.id, branch: false, collection })
+        }
       }
 
       for (const collection of [branchChangesSlug, branchesSlug]) {
@@ -6807,23 +6872,51 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         id: pageID,
         branch: 'draftmerge',
         collection: pagesSlug,
-        data: { _status: 'published', title: 'published on branch' },
+        data: { _status: 'published', title: 'first publish on branch' },
+      })
+
+      await payload.update({
+        id: pageID,
+        branch: 'draftmerge',
+        collection: pagesSlug,
+        data: { _status: 'published', title: 'latest publish on branch' },
       })
 
       await payload.branches.merge({ branch: 'draftmerge' })
 
       const published = await payload.findByID({ id: pageID, collection: pagesSlug })
 
-      expect(published.title).toBe('published on branch')
+      expect(published.title).toBe('latest publish on branch')
       expect(published._status).toBe('published')
     })
 
-    test('should apply both states when a branch published and then drafted on top', async () => {
+    test('should apply only the latest draft after an earlier branch publish', async () => {
+      const mainVersionsBefore = await payload.findVersions({
+        collection: pagesSlug,
+        pagination: false,
+        where: { parent: { equals: pageID } },
+      })
+
       await payload.update({
         id: pageID,
         branch: 'draftmerge',
         collection: pagesSlug,
-        data: { _status: 'published', title: 'published on branch' },
+        data: { _status: 'published', title: 'first publish on branch' },
+      })
+
+      await payload.update({
+        id: pageID,
+        branch: 'draftmerge',
+        collection: pagesSlug,
+        data: { _status: 'published', title: 'latest publish on branch' },
+      })
+
+      await payload.update({
+        id: pageID,
+        branch: 'draftmerge',
+        collection: pagesSlug,
+        data: { title: 'first draft after publishing' },
+        draft: true,
       })
 
       await payload.update({
@@ -6838,12 +6931,61 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
       const published = await payload.findByID({ id: pageID, collection: pagesSlug })
       const latest = await payload.findByID({ id: pageID, collection: pagesSlug, draft: true })
+      const mainVersionsAfter = await payload.findVersions({
+        collection: pagesSlug,
+        pagination: false,
+        where: { parent: { equals: pageID } },
+      })
 
-      // Main goes through both transitions the branch went through, rather than
-      // collapsing the publish into the draft above it.
-      expect(published.title).toBe('published on branch')
+      expect(published.title).toBe('published on main')
       expect(latest.title).toBe('drafted after publishing')
       expect(latest._status).toBe('draft')
+      expect(mainVersionsAfter.docs).toHaveLength(mainVersionsBefore.docs.length + 1)
+    })
+
+    test('should merge only the latest autosave', async () => {
+      const autosaveDocument = await payload.create({
+        collection: autosaveSlug,
+        data: { _status: 'published', title: 'autosave published on main' },
+      })
+      const mainVersionsBefore = await payload.findVersions({
+        collection: autosaveSlug,
+        pagination: false,
+        where: { parent: { equals: autosaveDocument.id } },
+      })
+
+      for (const title of ['first autosave', 'second autosave', 'latest autosave']) {
+        await payload.update({
+          id: autosaveDocument.id,
+          autosave: true,
+          branch: 'draftmerge',
+          collection: autosaveSlug,
+          data: { title },
+          draft: true,
+        })
+      }
+
+      await payload.branches.merge({ branch: 'draftmerge' })
+
+      const published = await payload.findByID({
+        id: autosaveDocument.id,
+        collection: autosaveSlug,
+      })
+      const latest = await payload.findByID({
+        id: autosaveDocument.id,
+        collection: autosaveSlug,
+        draft: true,
+      })
+      const mainVersionsAfter = await payload.findVersions({
+        collection: autosaveSlug,
+        pagination: false,
+        where: { parent: { equals: autosaveDocument.id } },
+      })
+
+      expect(published.title).toBe('autosave published on main')
+      expect(latest.title).toBe('latest autosave')
+      expect(latest._status).toBe('draft')
+      expect(mainVersionsAfter.docs).toHaveLength(mainVersionsBefore.docs.length + 1)
     })
 
     test('should merge a draft created on a branch as an unpublished document on main', async () => {
@@ -6879,6 +7021,41 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(publishedOnMain.docs).toHaveLength(1)
       expect(publishedOnMain.docs[0]!._status).toBe('draft')
       expect(mainVersions.docs.map(({ version }) => version._status)).not.toContain('published')
+    })
+
+    test('should create only the latest draft after an earlier branch publication', async () => {
+      const created = await payload.create({
+        branch: 'draftmerge',
+        collection: pagesSlug,
+        data: { _status: 'published', title: 'branch-created publication' },
+      })
+
+      await payload.update({
+        id: created.id,
+        branch: 'draftmerge',
+        collection: pagesSlug,
+        data: { title: 'newer branch-created draft' },
+        draft: true,
+      })
+
+      await payload.branches.merge({ branch: 'draftmerge' })
+
+      const onMain = await payload.findByID({
+        id: created.id,
+        collection: pagesSlug,
+        draft: true,
+      })
+      const mainVersions = await payload.findVersions({
+        collection: pagesSlug,
+        pagination: false,
+        where: { parent: { equals: created.id } },
+      })
+
+      expect(onMain.title).toBe('newer branch-created draft')
+      expect(onMain._status).toBe('draft')
+      expect(mainVersions.docs).toHaveLength(1)
+      expect(mainVersions.docs[0]?.version.title).toBe('newer branch-created draft')
+      expect(mainVersions.docs[0]?.version._status).toBe('draft')
     })
 
     test('should leave main published state untouched by a draft-only merge', async () => {

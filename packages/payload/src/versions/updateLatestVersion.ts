@@ -5,6 +5,8 @@ import type { JsonObject, PayloadRequest } from '../types/index.js'
 
 import { resolveBranchOwnVersions, resolveBranchVersionParent } from '../branching/versions.js'
 
+export const coalesceLatestVersionContextKey = Symbol('coalesceLatestVersion')
+
 type Args<TData extends JsonObject> = {
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig

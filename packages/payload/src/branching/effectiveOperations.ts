@@ -1,6 +1,7 @@
 import type { Payload, PayloadRequest } from '../types/index.js'
 
 import { APIError } from '../errors/index.js'
+import { traverseForLocalizedFields } from '../utilities/traverseForLocalizedFields.js'
 import { branchDocIDField, branchField, MAIN_BRANCH } from './types.js'
 
 /**
@@ -11,7 +12,7 @@ import { branchDocIDField, branchField, MAIN_BRANCH } from './types.js'
  */
 export type EffectiveOperation = 'create' | 'delete' | 'publish' | 'update'
 
-/** One write against main, in the order it must be applied. */
+/** One write against main for the selected source state or its Trash transition. */
 export type EffectiveWrite = {
   /** The document state to write. */
   data: Record<string, unknown>
@@ -32,11 +33,7 @@ export type ResolvedChange = {
   collectionSlug: string
   docID: number | string
   shadow: null | Record<string, unknown>
-  /**
-   * Every operation this change performs against main, in order. A branch
-   * holding a published state *and* a newer draft on top of it yields two:
-   * main genuinely undergoes two transitions.
-   */
+  /** The latest source-state write and any separate Trash transition. */
   writes: EffectiveWrite[]
 }
 
@@ -148,18 +145,17 @@ const resolveWrites = async ({
   const newerDraft = await findNewerDraft({ collectionSlug, payload, req, shadow })
 
   if (change.operation === 'create') {
-    // A document created on the branch is new to main either way; the row's own
-    // status decides whether it arrives published or as a draft.
-    const writes: EffectiveWrite[] = [
+    // Only the latest source state is applied. If a branch published and then
+    // drafted, the draft creates an unpublished target without replaying the
+    // earlier publication first.
+    return [
       ...getTrashAccessWrites({ collectionSlug, payload, shadow }),
-      { data: shadow, draft: !rowIsPublished, operation: 'create' },
+      {
+        data: newerDraft ?? shadow,
+        draft: Boolean(newerDraft) || !rowIsPublished,
+        operation: 'create',
+      },
     ]
-
-    if (newerDraft) {
-      writes.push({ data: newerDraft, draft: true, operation: 'update' })
-    }
-
-    return writes
   }
 
   // Forked. Only a publish rewrites the shadow row, so a row still carrying the
@@ -184,6 +180,15 @@ const resolveWrites = async ({
     shadow,
   })
 
+  if (newerDraft) {
+    return [
+      ...(trashStateWrite
+        ? [{ ...trashStateWrite, trashState: 'apply' as const }]
+        : getTrashAccessWrites({ collectionSlug, payload, shadow })),
+      { data: newerDraft, draft: true, operation: 'update' },
+    ]
+  }
+
   if (!publishedOnBranch) {
     // Nothing to apply when the branch has neither published nor drafted: the
     // fork itself is not a change to main.
@@ -191,7 +196,6 @@ const resolveWrites = async ({
       ...(trashStateWrite
         ? [{ ...trashStateWrite, trashState: 'apply' as const }]
         : getTrashAccessWrites({ collectionSlug, payload, shadow })),
-      ...(newerDraft ? [{ data: newerDraft, draft: true, operation: 'update' as const }] : []),
     ]
   }
 
@@ -201,10 +205,6 @@ const resolveWrites = async ({
       : getTrashAccessWrites({ collectionSlug, payload, shadow })),
     { data: shadow, draft: false, operation: 'publish' },
   ]
-
-  if (newerDraft) {
-    writes.push({ data: newerDraft, draft: true, operation: 'update' })
-  }
 
   return writes
 }
@@ -376,11 +376,21 @@ const findNewerDraft = async ({
   req: PayloadRequest
   shadow: Record<string, unknown>
 }): Promise<null | Record<string, unknown>> => {
+  const collectionConfig = payload.collections[collectionSlug]!.config
+  const localization = payload.config.localization
+  const hasLocalizedFields = traverseForLocalizedFields(collectionConfig.fields)
+  const locale = localization
+    ? hasLocalizedFields
+      ? 'all'
+      : req.locale && req.locale !== 'all'
+        ? req.locale
+        : localization.defaultLocale
+    : undefined
   const { docs } = await payload.db.findVersions({
     branch: false,
     collection: collectionSlug,
     limit: 1,
-    locale: payload.config.localization ? 'all' : undefined,
+    locale,
     pagination: false,
     req,
     sort: '-updatedAt',
@@ -390,15 +400,19 @@ const findNewerDraft = async ({
   const latest = docs?.[0] as { version?: Record<string, unknown> } | undefined
   const version = latest?.version
 
-  if (!version || !isDraft(version._status)) {
+  if (!version || !isDraft({ locale, status: version._status })) {
     return null
   }
 
   return version
 }
 
-const isDraft = (status: unknown): boolean => {
+const isDraft = ({ locale, status }: { locale?: string; status: unknown }): boolean => {
   if (typeof status === 'object' && status !== null) {
+    if (locale && locale !== 'all') {
+      return (status as Record<string, unknown>)[locale] === 'draft'
+    }
+
     return Object.values(status as Record<string, unknown>).includes('draft')
   }
 

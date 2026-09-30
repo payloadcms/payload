@@ -16,7 +16,7 @@ type BaseArgs = {
   req: PayloadRequest
 }
 
-/** Resolves the published row and any newer draft that the branch owns. */
+/** Resolves only the latest source state that should be applied to main. */
 export const resolveGlobalMergeWrites = async ({
   branch,
   globalSlug,
@@ -52,10 +52,11 @@ export const resolveGlobalMergeWrites = async ({
   const latestVersion = docs[0]?.version as Record<string, unknown> | undefined
   const hasNewerDraft = latestVersion ? statusIncludesDraft(latestVersion._status) : false
 
-  return [
-    ...(hasPublishedWrite ? [{ draft: false }] : []),
-    ...(hasNewerDraft ? [{ draft: true }] : []),
-  ]
+  if (hasNewerDraft) {
+    return [{ draft: true }]
+  }
+
+  return hasPublishedWrite ? [{ draft: false }] : []
 }
 
 /** Returns the locales that require distinct writes for one global. */

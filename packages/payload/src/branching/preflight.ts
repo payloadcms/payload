@@ -77,9 +77,8 @@ type RunMergeDependencyPreflightArgs = {
 /**
  * Flattens resolved changes into the operations each one performs.
  *
- * A change can require two permissions — a branch holding a published state and
- * a newer draft publishes *and* updates — and §7 blocks such a change as a whole
- * rather than letting a user who can update but not publish get the draft half.
+ * A content change has one latest source-state operation. A separate Trash
+ * transition can add another permission check for the same change.
  */
 const toPendingOperations = (pending: ResolvedChange[]): PendingOperation[] =>
   pending.flatMap((resolved) =>
