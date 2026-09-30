@@ -56,20 +56,32 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
                         <PopupList.Button onClick={() => {}}>Dark</PopupList.Button>
                       </PopupList.MenuItem>
                     )}
-                    renderButton={({ active: _active, ...props }) => (
-                      <button {...props} type="button">
+                    renderButton={({ active, role, tabIndex, ...props }) => (
+                      <Button
+                        {...props}
+                        buttonStyle="ghost"
+                        extraButtonProps={{ role, tabIndex }}
+                        margin={false}
+                        selected={active}
+                      >
                         Color
-                      </button>
+                      </Button>
                     )}
                     side="right"
                   />
                   <PopupList.Button onClick={() => {}}>Typography</PopupList.Button>
                 </PopupList.MenuItem>
               )}
-              renderButton={({ active: _active, ...props }) => (
-                <button {...props} type="button">
+              renderButton={({ active, role, tabIndex, ...props }) => (
+                <Button
+                  {...props}
+                  buttonStyle="ghost"
+                  extraButtonProps={{ role, tabIndex }}
+                  margin={false}
+                  selected={active}
+                >
                   Theme
-                </button>
+                </Button>
               )}
               side="right"
             />
@@ -84,10 +96,16 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
                   <PopupList.Button onClick={() => {}}>French</PopupList.Button>
                 </PopupList.MenuItem>
               )}
-              renderButton={({ active: _active, ...props }) => (
-                <button {...props} type="button">
+              renderButton={({ active, role, tabIndex, ...props }) => (
+                <Button
+                  {...props}
+                  buttonStyle="ghost"
+                  extraButtonProps={{ role, tabIndex }}
+                  margin={false}
+                  selected={active}
+                >
                   Language
-                </button>
+                </Button>
               )}
               side="right"
             />
