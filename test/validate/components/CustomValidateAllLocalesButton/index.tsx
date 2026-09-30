@@ -20,13 +20,17 @@ export function CustomValidateAllLocalesButton() {
       routes: { api },
     },
   } = useConfig()
-  const { code: activeLocaleCode } = useLocale()
+  const activeLocaleCode = useLocale()?.code
   const { getData } = useForm()
 
   const [isValidating, setIsValidating] = useState(false)
   const [result, setResult] = useState<null | ValidationResult>(null)
 
   const handleClick = async () => {
+    if (!activeLocaleCode) {
+      return
+    }
+
     setIsValidating(true)
 
     const endpoint = getValidateEndpoint({ id, apiRoute: api, collectionSlug, globalSlug })

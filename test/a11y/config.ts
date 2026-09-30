@@ -1,3 +1,5 @@
+import type { CollectionConfig } from 'payload'
+
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
@@ -6,49 +8,163 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { MediaCollection } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
+import { UsersCollection, usersSlug } from './collections/Users/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export default buildConfigWithDefaults({
-  // ...extend config here
-  collections: [PostsCollection, MediaCollection],
+const FolderCollection = {
+  slug: 'payload-folders',
   admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+    useAsTitle: 'name',
+  },
+  fields: [
+    {
+      name: 'name',
+      type: 'text',
+      required: true,
     },
-    components: {
-      views: {
-        FocusIndicatorsView: {
-          path: '/focus-indicators',
-          Component: '/components/FocusIndicatorsView.js#FocusIndicatorsView',
-        },
-      },
+  ],
+  folders: {
+    joinField: {
+      name: 'documentsAndFolders',
     },
   },
-  editor: lexicalEditor({}),
-  globals: [
-    // ...add more globals here
-    MenuGlobal,
-  ],
-  onInit: async (payload) => {
+} satisfies CollectionConfig
+
+export default buildConfigWithDefaults({
+  config: {
+    // ...extend config here
+    admin: {
+      components: {
+        views: {
+          CustomIDModals: {
+            Component: '/components/CustomIDModals/index.js#CustomIDModals',
+            path: '/custom-modal-ids',
+          },
+          FocusIndicatorsView: {
+            Component: '/components/FocusIndicatorsView.js#FocusIndicatorsView',
+            path: '/focus-indicators',
+          },
+        },
+      },
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [UsersCollection, FolderCollection, PostsCollection, MediaCollection],
+    editor: lexicalEditor({}),
+    globals: [
+      // ...add more globals here
+      MenuGlobal,
+    ],
+    indexSortableFields: true,
+    localization: {
+      defaultLocale: 'en',
+      locales: [
+        {
+          code: 'en',
+          label: 'English',
+        },
+        {
+          code: 'es',
+          label: 'Spanish',
+        },
+      ],
+    },
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
+  },
+  seed: async (payload) => {
     await payload.create({
-      collection: 'users',
+      collection: usersSlug,
       data: {
+        apiKey: 'a11y-modal-dialog-fixture-key-1234',
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
+    })
+
+    const parentFolder = await payload.create({
+      collection: 'payload-folders',
+      data: {
+        name: 'Accessibility folder',
+      },
+      overrideAccess: true,
+    })
+
+    await payload.create({
+      collection: 'payload-folders',
+      data: {
+        name: 'Accessibility child folder',
+        '_h_payload-folders': parentFolder.id,
+      },
+      overrideAccess: true,
+    })
+
+    for (const globalText of ['Original menu text', 'Updated menu text', 'Current menu text']) {
+      await payload.updateGlobal({
+        slug: 'menu',
+        data: { globalText },
+        overrideAccess: true,
+      })
+    }
+
+    const firstPost = await payload.create({
+      collection: postsSlug,
+      data: {
+        accessibilitySelect: 'one',
+        title: 'Example post one',
+      },
+      draft: true,
+      overrideAccess: true,
+    })
+
+    await payload.update({
+      id: firstPost.id,
+      collection: postsSlug,
+      data: {
+        title: 'Example post one, second version',
+      },
+      draft: true,
+      overrideAccess: true,
+    })
+
+    await payload.update({
+      id: firstPost.id,
+      collection: postsSlug,
+      data: {
+        _status: 'published',
+        title: 'Example post one, third version',
+      },
+      draft: false,
+      overrideAccess: true,
     })
 
     await payload.create({
       collection: postsSlug,
       data: {
-        title: 'example post',
+        accessibilitySelect: 'two',
+        relatedPost: firstPost.id,
+        title: 'Example post two',
       },
+      draft: false,
+      overrideAccess: true,
+    })
+
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        accessibilitySelect: 'one',
+        relatedPost: firstPost.id,
+        title: 'Example post three',
+      },
+      draft: false,
+      overrideAccess: true,
     })
   },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
+  suite: 'a11y',
 })

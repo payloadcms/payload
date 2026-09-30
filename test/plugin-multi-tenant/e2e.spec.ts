@@ -53,7 +53,6 @@ test.describe('Multi Tenant', () => {
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
 
     const { payload: payloadFromInit, serverURL: serverFromInit } =
       await initPayloadE2ENoConfig<Config>({ dirname })
@@ -74,7 +73,6 @@ test.describe('Multi Tenant', () => {
   test.beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'multiTenant',
     })
     await page.goto(usersURL.admin)
   })
@@ -668,6 +666,7 @@ test.describe('Multi Tenant', () => {
             equals: globalTenant,
           },
         },
+        overrideAccess: true,
       })
       await expect.poll(() => autosaveGlobal?.totalDocs).toBe(1)
       await expect.poll(() => autosaveGlobal?.docs?.[0]?.tenant).toBeDefined()
@@ -1452,6 +1451,7 @@ async function getSelectedTenantFilterName({
           equals: tenantIDFromCookie,
         },
       },
+      overrideAccess: true,
     })
     return tenant?.docs?.[0]?.name || undefined
   }

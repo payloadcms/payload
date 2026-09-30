@@ -1,20 +1,20 @@
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import type { CollectionConfig, PayloadRequest, TypeWithID } from 'payload'
 
 import {
+  buildStoragePathData,
   getFilePrefix as getDocPrefix,
-  getFileKey,
 } from '@payloadcms/plugin-cloud-storage/utilities'
-import { getRangeRequestInfo } from 'payload/internal'
+import { getRangeRequestInfo, isXmlMimeType, uploadContentSecurityPolicy } from 'payload/internal'
 
 import type { R2Bucket } from './types.js'
 
 interface GetFileArgs {
   bucket: R2Bucket
   collection: CollectionConfig
+  doc?: TypeWithID
   filename: string
   incomingHeaders?: Headers
   prefix: string
-  prefixQueryParam?: string
   req: PayloadRequest
   uploadReference?: unknown
   useCompositePrefixes?: boolean
@@ -25,10 +25,10 @@ const isMiniflare = process.env.NODE_ENV === 'development'
 export async function getFile({
   bucket,
   collection,
+  doc,
   filename,
   incomingHeaders,
   prefix = '',
-  prefixQueryParam,
   req,
   uploadReference,
   useCompositePrefixes = false,
@@ -36,13 +36,15 @@ export async function getFile({
   try {
     const docPrefix = await getDocPrefix({
       collection,
+      collectionPrefix: prefix,
+      doc,
       filename,
-      prefixQueryParam,
       req,
       uploadReference,
+      useCompositePrefixes,
     })
 
-    const { fileKey } = getFileKey({
+    const { storageFilePath } = buildStoragePathData({
       collectionPrefix: prefix,
       docPrefix,
       filename,
@@ -50,7 +52,7 @@ export async function getFile({
     })
 
     // Get file size for range validation
-    const headObj = await bucket?.head(fileKey)
+    const headObj = await bucket?.head(storageFilePath)
     if (!headObj) {
       return new Response(null, { status: 404, statusText: 'Not Found' })
     }
@@ -78,13 +80,13 @@ export async function getFile({
     // We cannot send a Headers instance to Miniflare
     const obj =
       rangeResult.type === 'partial' && !isMiniflare
-        ? await bucket?.get(fileKey, {
+        ? await bucket?.get(storageFilePath, {
             range: {
               length: rangeResult.rangeEnd - rangeResult.rangeStart + 1,
               offset: rangeResult.rangeStart,
             },
           })
-        : await bucket?.get(fileKey)
+        : await bucket?.get(storageFilePath)
 
     if (!obj || obj.body == undefined) {
       return new Response(null, { status: 404, statusText: 'Not Found' })
@@ -120,10 +122,10 @@ export async function getFile({
       obj.writeHttpMetadata(headers)
     }
 
-    // Add Content-Security-Policy header for SVG files to prevent executable code
+    // Apply a restrictive policy to XML-family responses served through Payload.
     const contentType = headers.get('Content-Type')
-    if (contentType === 'image/svg+xml') {
-      headers.set('Content-Security-Policy', "script-src 'none'")
+    if (isXmlMimeType(contentType)) {
+      headers.set('Content-Security-Policy', uploadContentSecurityPolicy)
     }
 
     const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')

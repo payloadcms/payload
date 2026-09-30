@@ -94,21 +94,6 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     const hasWhereAccess = hasWhereAccessResult(accessResults)
 
     // /////////////////////////////////////
-    // beforeDelete - Collection
-    // /////////////////////////////////////
-
-    if (collectionConfig.hooks?.beforeDelete?.length) {
-      for (const hook of collectionConfig.hooks.beforeDelete) {
-        await hook({
-          id,
-          collection: collectionConfig,
-          context: req.context,
-          req,
-        })
-      }
-    }
-
-    // /////////////////////////////////////
     // Retrieve document
     // /////////////////////////////////////
 
@@ -133,6 +118,21 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     }
     if (!docToDelete && hasWhereAccess) {
       throw new Forbidden(req.t)
+    }
+
+    // /////////////////////////////////////
+    // beforeDelete - Collection
+    // /////////////////////////////////////
+
+    if (collectionConfig.hooks?.beforeDelete?.length) {
+      for (const hook of collectionConfig.hooks.beforeDelete) {
+        await hook({
+          id,
+          collection: collectionConfig,
+          context: req.context,
+          req,
+        })
+      }
     }
 
     // /////////////////////////////////////

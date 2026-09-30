@@ -24,7 +24,7 @@ import type {
   TypedLocale,
 } from '../index.js'
 import type { File } from '../uploads/types.js'
-import type { Operator } from './constants.js'
+import type { HasManyRelationshipOperator, Operator } from './constants.js'
 export type { TypeWithID } from '../collections/config/types.js'
 export type { Payload } from '../index.js'
 
@@ -134,7 +134,7 @@ export interface PayloadRequest
   operation?: FieldOperation
 }
 
-export type { Operator }
+export type { HasManyRelationshipOperator, Operator }
 
 // Makes it so things like passing new Date() will error
 export type JsonValue = JsonArray | JsonObject | unknown //Date | JsonArray | JsonObject | boolean | null | number | string // TODO: Evaluate proper, strong type for this
@@ -146,7 +146,7 @@ export interface JsonObject {
 }
 
 export type WhereField = {
-  // any json-serializable value
+  // any json-serializable value, including a nested query for supported relationship operators
   [key in Operator]?: JsonValue
 }
 
@@ -339,6 +339,8 @@ export type TransformGlobalWithSelect<
   : DataFromGlobalSlug<TSlug>
 
 export type PopulateType = Partial<TypedCollectionSelect>
+
+export type { SharedLocalAPIOptions } from './operations.js'
 
 export type ResolvedFilterOptions = { [collection: string]: Where }
 

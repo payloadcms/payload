@@ -100,7 +100,9 @@ test.describe('Custom locale validation buttons', () => {
     const id = await createDraft({ spanishTitle: 'Título en español' })
 
     await openDraft(id)
-    await saveDocAndAssert(page, '#action-save', 'error')
+    await saveDocAndAssert(page, '#publish-all-locales', 'error', {
+      disableDismissAllToasts: true,
+    })
     await expect(page.locator('.payload-toast-container')).toContainText('[de]')
 
     await expect
@@ -123,7 +125,7 @@ test.describe('Custom locale validation buttons', () => {
     })
 
     await openDraft(id)
-    await saveDocAndAssert(page, '#action-save', 'success')
+    await saveDocAndAssert(page, '#publish-all-locales', 'success')
   })
 
   async function createDraft({

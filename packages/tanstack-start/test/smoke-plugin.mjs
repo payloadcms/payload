@@ -14,7 +14,7 @@ import {
   payloadRscOptions,
   payloadTanstackStartOptions,
   withPayload,
-} from '../dist/exports/vite.js'
+} from '../dist/withPayload/index.js'
 
 const factory = withPayload(undefined, {
   payloadConfigPath: '/tmp/fake-payload.config.ts',
@@ -76,6 +76,21 @@ if (!config.optimizeDeps.exclude.includes('payload')) {
 }
 if (!config.optimizeDeps.exclude.includes('@payloadcms/ui')) {
   errors.push("optimizeDeps.exclude missing '@payloadcms/ui'")
+}
+
+// `devServerExternalPackages` joins `ssr.external` on dev serve only — the prod
+// build must keep bundling them, since Rollup handles CJS correctly and a bare
+// specifier in the output wouldn't resolve.
+const cjsFactory = withPayload(undefined, {
+  devServerExternalPackages: ['xml2js'],
+  payloadConfigPath: '/tmp/fake-payload.config.ts',
+})
+
+if (!cjsFactory({ command: 'serve', mode: 'development' }).ssr.external.includes('xml2js')) {
+  errors.push('devServerExternalPackages missing from ssr.external on serve')
+}
+if (cjsFactory({ command: 'build', mode: 'production' }).ssr.external.includes('xml2js')) {
+  errors.push('devServerExternalPackages must not apply to ssr.external on build')
 }
 
 // The `vite` override must be merged on top of the defaults: arrays appended,

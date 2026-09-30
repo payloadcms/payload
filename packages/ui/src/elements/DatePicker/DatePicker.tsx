@@ -3,6 +3,7 @@ import type { DatePickerProps } from 'react-datepicker'
 
 import React from 'react'
 import ReactDatePickerDefaultImport, { registerLocale, setDefaultLocale } from 'react-datepicker'
+import { createPortal } from 'react-dom'
 const ReactDatePicker =
   'default' in ReactDatePickerDefaultImport
     ? ReactDatePickerDefaultImport.default
@@ -17,6 +18,46 @@ import { getFormattedLocale } from './getFormattedLocale.js'
 import './index.css'
 
 const baseClass = 'date-time-picker'
+
+type AccessibleCalendarContainerProps = React.PropsWithChildren<{
+  className?: string
+  dialogLabel: string
+  monthLabel: string
+  yearLabel: string
+}>
+
+const AccessibleCalendarContainer: React.FC<AccessibleCalendarContainerProps> = ({
+  children,
+  className,
+  dialogLabel,
+  monthLabel,
+  yearLabel,
+}) => {
+  const containerRef = React.useRef<HTMLDivElement>(null)
+
+  React.useLayoutEffect(() => {
+    containerRef.current
+      ?.querySelector<HTMLSelectElement>('.react-datepicker__month-select')
+      ?.setAttribute('aria-label', monthLabel)
+    containerRef.current
+      ?.querySelector<HTMLSelectElement>('.react-datepicker__year-select')
+      ?.setAttribute('aria-label', yearLabel)
+  })
+
+  return (
+    <div aria-label={dialogLabel} className={className} ref={containerRef} role="dialog">
+      {children}
+    </div>
+  )
+}
+
+const getDateTimeFieldLabel = ({ field, locale }: { field: 'month' | 'year'; locale: string }) => {
+  try {
+    return new Intl.DisplayNames(locale, { type: 'dateTimeField' }).of(field) || field
+  } catch (_error) {
+    return field
+  }
+}
 
 const DatePicker: React.FC<Props> = (props) => {
   const {
@@ -37,8 +78,32 @@ const DatePicker: React.FC<Props> = (props) => {
     value,
   } = props
 
+  const [modalContainer, setModalContainer] = React.useState<Element | null>(null)
+  const setContainerRef = React.useCallback((element: HTMLDivElement | null) => {
+    setModalContainer(element?.closest('dialog, [role="dialog"]') ?? null)
+  }, [])
+  const popperContainer = React.useCallback<React.FC<React.PropsWithChildren>>(
+    ({ children }) => (modalContainer ? createPortal(children, modalContainer) : children),
+    [modalContainer],
+  )
+
   // Use the user's AdminUI language preference for the locale
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
+  const monthLabel = getDateTimeFieldLabel({ field: 'month', locale: i18n.language })
+  const yearLabel = getDateTimeFieldLabel({ field: 'year', locale: i18n.language })
+  const calendarContainer = React.useCallback(
+    ({ children, className }) => (
+      <AccessibleCalendarContainer
+        className={className}
+        dialogLabel={`${t('general:selectValue')}: ${monthLabel}, ${yearLabel}`}
+        monthLabel={monthLabel}
+        yearLabel={yearLabel}
+      >
+        {children}
+      </AccessibleCalendarContainer>
+    ),
+    [monthLabel, t, yearLabel],
+  )
 
   let dateFormat = customDisplayFormat
 
@@ -82,6 +147,7 @@ const DatePicker: React.FC<Props> = (props) => {
     DatePickerProps,
     { selectsMultiple?: never; selectsRange?: never }
   > = {
+    calendarContainer,
     customInputRef: 'ref',
     dateFormat,
     disabled: readOnly,
@@ -94,8 +160,9 @@ const DatePicker: React.FC<Props> = (props) => {
     nextYearButtonLabel: '›',
     onChange,
     placeholderText,
+    popperContainer: modalContainer ? popperContainer : undefined,
     popperPlacement: 'bottom-start',
-    portalId: 'date-time-picker-portal',
+    portalId: modalContainer ? undefined : 'date-time-picker-portal',
     previousMonthButtonLabel: <ChevronIcon direction="left" />,
     previousYearButtonLabel: '‹',
     selected: value && new Date(value),
@@ -130,7 +197,7 @@ const DatePicker: React.FC<Props> = (props) => {
   }, [i18n.language, i18n.dateFNS])
 
   return (
-    <div className={classes} id={id}>
+    <div className={classes} id={id} ref={setContainerRef}>
       <div className={`${baseClass}__input-wrapper`}>
         <ReactDatePicker
           {...dateTimePickerProps}

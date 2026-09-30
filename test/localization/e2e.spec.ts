@@ -156,21 +156,17 @@ describe('Localization', () => {
       await expect(page.locator('.popup__content')).not.toContainText('FILTERED')
     })
 
-    test('should disable control for active locale', async () => {
+    test('should identify the active locale as selected', async () => {
       await page.goto(url.create)
 
       await openLocaleSelector(page)
 
       await expect(page.locator('.popup__content')).toBeVisible()
 
-      const activeOption = page.locator(`.popup__content .popup-button-list__button--selected`)
+      const activeOption = page.getByRole('menuitemradio', { checked: true })
 
       await expect(activeOption).toBeVisible()
-      const tagName = await activeOption.evaluate((node) => node.tagName)
-      expect(tagName).not.toBe('A')
       await expect(activeOption).not.toHaveAttribute('href')
-      expect(tagName).not.toBe('BUTTON')
-      expect(tagName).toBe('DIV')
     })
   })
 
@@ -274,6 +270,7 @@ describe('Localization', () => {
           title: englishTitle,
         },
         locale: defaultLocale,
+        overrideAccess: true,
       })
 
       const id = localizedPost.id.toString()
@@ -286,6 +283,7 @@ describe('Localization', () => {
           title: spanishTitle,
         },
         locale: spanishLocale,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(id))
@@ -773,6 +771,7 @@ describe('Localization', () => {
         collection: 'blocks-fields',
         locale: 'all',
         where: { id: { equals: docID } },
+        overrideAccess: true,
       })
 
       expect(doc.docs).toHaveLength(1)
@@ -791,7 +790,7 @@ describe('Localization', () => {
       await page.goto(urlPostsWithDrafts.create)
       await changeLocale(page, 'es')
       await fillValues({ title: 'Created In Spanish' })
-      await saveDocAndAssert(page, '#publish-locale')
+      await saveDocAndAssert(page)
 
       await expect(page.locator('#field-title')).toHaveValue('Created In Spanish')
       await changeLocale(page, defaultLocale)
@@ -833,7 +832,7 @@ describe('Localization', () => {
       test('should show unpublish in specific locale when localized fields exist', async () => {
         await page.goto(urlAllFieldsLocalized.create)
         await page.locator('#field-text').fill('EN Published')
-        await saveDocAndAssert(page, '#publish-locale')
+        await saveDocAndAssert(page)
         await openDocControls(page)
 
         await expect(page.locator('#action-unpublish')).toBeVisible()
@@ -852,11 +851,11 @@ describe('Localization', () => {
     })
   })
 
-  test('should not show publish specific locale button when no localized fields exist', async () => {
+  test('should not show publish all locales option when no localized fields exist', async () => {
     await page.goto(urlPostsWithDrafts.create)
-    await expect(page.locator('#publish-locale')).toHaveCount(1)
+    await expect(page.locator('#publish-all-locales')).toHaveCount(1)
     await page.goto(noLocalizedFieldsURL.create)
-    await expect(page.locator('#publish-locale')).toHaveCount(0)
+    await expect(page.locator('#publish-all-locales')).toHaveCount(0)
   })
 
   describe('duplicate selected locales', () => {
@@ -901,7 +900,7 @@ describe('Localization', () => {
       await page.waitForURL((url) => !url.toString().includes(id))
 
       // Wait for page to be ready after duplicate redirect
-      await expect(page.locator('.localizer button')).toBeVisible()
+      await expect(page.locator('.localizer .popup__trigger-wrap > button')).toBeVisible()
       await waitForFormReady(page)
       await changeLocale(page, defaultLocale)
       await expect(page.locator('#field-title')).toHaveValue('English Title')
@@ -926,7 +925,7 @@ describe('Localization', () => {
 
         // publish en
         await page.locator('#field-text').fill('EN Published')
-        await saveDocAndAssert(page, '#publish-locale')
+        await saveDocAndAssert(page)
 
         await page.goto(urlAllFieldsLocalized.versions(docID))
 
@@ -940,7 +939,7 @@ describe('Localization', () => {
 
         // publish en
         await page.locator('#field-text').fill('EN Published')
-        await saveDocAndAssert(page, '#publish-locale')
+        await saveDocAndAssert(page)
 
         const docID = (await page.locator('.render-title').getAttribute('data-doc-id')) as string
 
@@ -952,7 +951,7 @@ describe('Localization', () => {
 
         // publish es
         await page.locator('#field-text').fill('ES Published')
-        await saveDocAndAssert(page, '#publish-locale')
+        await saveDocAndAssert(page)
 
         await page.goto(urlAllFieldsLocalized.versions(docID))
         await changeLocale(page, defaultLocale)
@@ -1025,6 +1024,7 @@ describe('Localization', () => {
           title: 'Existing doc title',
         },
         locale: defaultLocale,
+        overrideAccess: true,
       })
 
       // seoTitle is in the SEO tab (active by default) — fill it first

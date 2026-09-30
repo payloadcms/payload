@@ -132,7 +132,8 @@ export function UploadInput(props: UploadInputProps) {
     setSelectableCollections,
   } = useBulkUpload()
   const { permissions } = useAuth()
-  const { code } = useLocale()
+  const locale = useLocale()
+  const code = locale?.code
   const { i18n, t } = useTranslation()
 
   // This will be used by the bulk upload to allow you to select only collections you have create permissions for

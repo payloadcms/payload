@@ -21,6 +21,7 @@ export const formatLivePreviewURL: LivePreviewConfig['url'] = async ({
           },
           limit: 1,
           depth: 0,
+          overrideAccess: true,
         })
         .then((res) => res?.docs?.[0])
 

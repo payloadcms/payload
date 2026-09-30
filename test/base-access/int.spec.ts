@@ -1,49 +1,25 @@
-import type { Payload } from 'payload'
+import { createPayloadRequest, Forbidden, getAccessResults } from 'payload'
+import { expect } from 'vitest'
 
-import path from 'path'
-import { createLocalReq, Forbidden, getAccessResults } from 'payload'
-import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
-
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { denyHeader, postsSlug, settingsSlug, tenantHeader } from './config.js'
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-let payload: Payload
-const createdPostIDs: (number | string)[] = []
-
-const createRequest = async (headers: Record<string, string>) =>
-  createLocalReq(
-    {
-      req: {
-        headers: new Headers(headers),
-      },
-    },
+const createRequest = async ({
+  headers,
+  payload,
+}: {
+  headers: Record<string, string>
+  payload: Parameters<typeof createPayloadRequest>[0]['payload']
+}) =>
+  createPayloadRequest({
     payload,
-  )
-
-describe('baseAccess', () => {
-  beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
+    req: {
+      headers: new Headers(headers),
+    },
   })
 
-  afterEach(async () => {
-    for (const id of createdPostIDs) {
-      await payload.delete({
-        id,
-        collection: postsSlug,
-      })
-    }
-    createdPostIDs.length = 0
-  })
-
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  it('should combine base and collection query constraints', async () => {
+test.suite('baseAccess', { config: './config.ts' }, () => {
+  test('should combine base and collection query constraints', async ({ payload }) => {
     for (const data of [
       {
         status: 'published',
@@ -61,14 +37,17 @@ describe('baseAccess', () => {
         title: 'base-filtered',
       },
     ]) {
-      const doc = await payload.create({
+      await payload.create({
         collection: postsSlug,
         data,
+        overrideAccess: true,
       })
-      createdPostIDs.push(doc.id)
     }
     const req = await createRequest({
-      [tenantHeader]: 'tenant-1',
+      headers: {
+        [tenantHeader]: 'tenant-1',
+      },
+      payload,
     })
 
     const result = await payload.find({
@@ -80,9 +59,12 @@ describe('baseAccess', () => {
     expect(result.docs.map(({ title }) => title)).toEqual(['visible'])
   })
 
-  it('should enforce base access and preserve overrideAccess', async () => {
+  test('should enforce base access and preserve overrideAccess', async ({ payload }) => {
     const req = await createRequest({
-      [denyHeader]: 'true',
+      headers: {
+        [denyHeader]: 'true',
+      },
+      payload,
     })
     const data = {
       status: 'published',
@@ -103,15 +85,18 @@ describe('baseAccess', () => {
       collection: postsSlug,
       data,
       req,
+      overrideAccess: true,
     })
-    createdPostIDs.push(doc.id)
 
     expect(doc.title).toBe(data.title)
   })
 
-  it('should enforce base access for globals', async () => {
+  test('should enforce base access for globals', async ({ payload }) => {
     const req = await createRequest({
-      [denyHeader]: 'true',
+      headers: {
+        [denyHeader]: 'true',
+      },
+      payload,
     })
 
     await expect(
@@ -126,9 +111,12 @@ describe('baseAccess', () => {
     ).rejects.toThrow(Forbidden)
   })
 
-  it('should enforce base access for collection validate operation', async () => {
+  test('should enforce base access for collection validate operation', async ({ payload }) => {
     const req = await createRequest({
-      [denyHeader]: 'true',
+      headers: {
+        [denyHeader]: 'true',
+      },
+      payload,
     })
 
     await expect(
@@ -140,15 +128,17 @@ describe('baseAccess', () => {
           title: 'denied',
         },
         locale: null,
-        overrideAccess: false,
         req,
       }),
     ).rejects.toThrow(Forbidden)
   })
 
-  it('should enforce base access for globals validate operation', async () => {
+  test('should enforce base access for globals validate operation', async ({ payload }) => {
     const req = await createRequest({
-      [denyHeader]: 'true',
+      headers: {
+        [denyHeader]: 'true',
+      },
+      payload,
     })
 
     await expect(
@@ -158,15 +148,17 @@ describe('baseAccess', () => {
           title: 'denied',
         },
         locale: null,
-        overrideAccess: false,
         req,
       }),
     ).rejects.toThrow(Forbidden)
   })
 
-  it('should enforce base access for generated collections', async () => {
+  test('should enforce base access for generated collections', async ({ payload }) => {
     const req = await createRequest({
-      [denyHeader]: 'true',
+      headers: {
+        [denyHeader]: 'true',
+      },
+      payload,
     })
     req.user = {
       id: 'admin-user',
@@ -189,8 +181,8 @@ describe('baseAccess', () => {
     ).rejects.toThrow(Forbidden)
   })
 
-  it('should enforce base admin access in access results', async () => {
-    const allowedReq = await createRequest({})
+  test('should enforce base admin access in access results', async ({ payload }) => {
+    const allowedReq = await createRequest({ headers: {}, payload })
     allowedReq.user = {
       id: 'admin-user',
       collection: 'users',
@@ -204,7 +196,10 @@ describe('baseAccess', () => {
     expect(allowedPermissions.canAccessAdmin).toBe(true)
 
     const deniedReq = await createRequest({
-      [denyHeader]: 'true',
+      headers: {
+        [denyHeader]: 'true',
+      },
+      payload,
     })
     deniedReq.user = allowedReq.user
 

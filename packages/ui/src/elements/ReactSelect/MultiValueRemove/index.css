@@ -1,25 +1,51 @@
 @layer payload-default {
   .multi-value-remove {
+    align-self: center;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    height: var(--spacer-4);
+    margin-block: calc(var(--stroke-width-medium) * -1);
+    min-width: var(--spacer-4);
     position: relative;
     background-color: transparent;
-    border: var(--stroke-width-small) solid transparent;
+    border: 0;
     border-radius: var(--radius-small);
     padding: 0;
     color: var(--color-icon-secondary);
 
+    &::before {
+      border: var(--stroke-width-small) solid transparent;
+      border-radius: var(--radius-small);
+      box-sizing: border-box;
+      content: '';
+      height: var(--spacer-4);
+      left: 50%;
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: var(--spacer-4);
+    }
+
+    &__icon {
+      display: block;
+      position: relative;
+    }
+
     &:hover {
-      color: var(--color-text);
-      background: var(--color-bg-hover);
+      .multi-value-remove__icon {
+        opacity: 0.5;
+      }
     }
 
     &:focus-visible {
       outline: none;
-      border: var(--accessibility-outline);
+
+      &::before {
+        border: var(--accessibility-outline);
+      }
     }
   }
 }

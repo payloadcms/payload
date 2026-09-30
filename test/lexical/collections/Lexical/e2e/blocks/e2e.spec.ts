@@ -34,7 +34,11 @@ import { initPayloadE2ENoConfig } from '../../../../../__helpers/shared/initPayl
 import { RESTClient } from '../../../../../__helpers/shared/rest.js'
 import { initPage } from '../../../../../__setup/e2e/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
-import { lexicalFieldsSlug, lexicalNestedBlocksSlug } from '../../../../slugs.js'
+import {
+  lexicalCopyPasteSlug,
+  lexicalFieldsSlug,
+  lexicalNestedBlocksSlug,
+} from '../../../../slugs.js'
 import { lexicalDocData } from '../../data.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -59,7 +63,6 @@ let serverURL: string
 describe('lexicalBlocks', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     context = await browser.newContext()
@@ -73,8 +76,6 @@ describe('lexicalBlocks', () => {
     // })
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'lexicalTest',
-      uploadsDir: [path.resolve(dirname, './collections/Upload/uploads')],
     })
 
     if (client) {
@@ -102,7 +103,7 @@ describe('lexicalBlocks', () => {
         richTextField,
       })
 
-      await expect(newRSCBlock.locator('.collapsible__content')).toHaveText('Data:')
+      await expect(newRSCBlock.getByTestId('block-rsc-data')).toHaveText('Data:')
 
       // Select paragraph with text "123"
       // Now double-click to select entire line
@@ -147,10 +148,10 @@ describe('lexicalBlocks', () => {
       )
       await expect(editDrawer).toBeHidden()
 
-      await expect(newRSCBlock.locator('.collapsible__content')).toHaveText('Data: value2')
+      await expect(newRSCBlock.getByTestId('block-rsc-data')).toHaveText('Data: value2')
 
-      // press ctrl+B to bold the text previously selected (assuming it is still selected now, which it should be)
-      await page.keyboard.press('Meta+B')
+      // Bold the text selected before opening the drawer.
+      await page.keyboard.press('ControlOrMeta+B')
       // In case this is mac or windows
       await page.keyboard.press('Control+B')
 
@@ -159,7 +160,7 @@ describe('lexicalBlocks', () => {
       // save document and assert
       await saveDocAndAssert(page)
       await wait(300)
-      await expect(newRSCBlock.locator('.collapsible__content')).toHaveText('Data: value2')
+      await expect(newRSCBlock.getByTestId('block-rsc-data')).toHaveText('Data: value2')
 
       // Check if the API result is correct
       await assertLexicalDoc({
@@ -188,6 +189,68 @@ describe('lexicalBlocks', () => {
     await expect(newBlock.locator('#blockName')).toHaveCount(0)
   })
 
+  for (const { blockType, description, sourceField } of [
+    { blockType: 'copyPasteBlock', description: 'directly defined', sourceField: 'sourceBlock' },
+    { blockType: 'nestedBlock', description: 'referenced', sourceField: 'sourceReference' },
+  ]) {
+    test(`should preserve the editor when pasting an unsupported ${description} block`, async ({
+      page,
+      context,
+    }) => {
+      await initPage({ page, serverURL })
+      await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+
+      const url = new AdminUrlUtil(serverURL, lexicalCopyPasteSlug)
+
+      await page.goto(url.create)
+
+      const source = page.locator(`[data-field-path="${sourceField}"] .ContentEditable__root`)
+      const target = page.locator('[data-field-path="target"] .ContentEditable__root')
+      const unsupportedBlock = target.locator('.LexicalEditorTheme__block-not-found')
+
+      await expect(source.locator('input[name="text"]')).toHaveValue('Copied block content')
+      await source.locator('p').first().click()
+      await page.keyboard.press('ControlOrMeta+A')
+      await page.keyboard.press('ControlOrMeta+C')
+      await expect
+        .poll(() => page.evaluate(() => navigator.clipboard.readText()))
+        .toContain('After block')
+
+      await target.click()
+      await assertNetworkRequests(
+        page,
+        currentFramework === 'tanstack-start'
+          ? '/_serverFn/'
+          : `/admin/collections/${lexicalCopyPasteSlug}`,
+        async () => {
+          await page.keyboard.press('ControlOrMeta+V')
+
+          await expect(unsupportedBlock).toContainText(`Block '${blockType}' not found`)
+          await expect(target).toBeEditable()
+          await expect(target.locator('p')).toHaveText(['Before block', 'After block'])
+        },
+        {
+          allowedNumberOfRequests: 0,
+          requestFilter: (request) =>
+            request.method() === 'POST' &&
+            request
+              .postData()
+              ?.includes(
+                `"schemaPath":"${lexicalCopyPasteSlug}.target.lexical_internal_feature.blocks.`,
+              ) === true,
+        },
+      )
+
+      await target.locator('.LexicalEditorTheme__block__actions-button').click()
+      await page.getByRole('menuitem', { name: 'Remove', exact: true }).click()
+      await expect(unsupportedBlock).toHaveCount(0)
+      await target.locator('p').last().click()
+      await page.keyboard.press('End')
+      await page.keyboard.type(' still editable')
+      await expect(target.locator('p').last()).toHaveText('After block still editable')
+    })
+  }
+
   describe('block filterOptions', () => {
     async function setupFilterOptionsTests() {
       const { richTextField } = await navigateToLexicalFields()
@@ -198,6 +261,7 @@ describe('lexicalBlocks', () => {
           text: 'invalid',
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       const { newBlock } = await createBlock({
@@ -394,6 +458,7 @@ describe('lexicalBlocks', () => {
           text: 'invalid',
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       const { newBlock } = await createBlock({
@@ -1434,10 +1499,7 @@ describe('lexicalBlocks', () => {
       await expect(outerToolbarScroll).toBeVisible()
       await expect(nestedToolbarScroll).toBeVisible()
 
-      const outerBox = (await outerToolbarScroll.boundingBox())!
-      const nestedBox = (await nestedToolbarScroll.boundingBox())!
-
-      await page.mouse.move(outerBox.x + outerBox.width / 2, outerBox.y + outerBox.height / 2)
+      await outerToolbarScroll.hover()
       await page.mouse.wheel(0, 200)
 
       await expect(async () => {
@@ -1449,7 +1511,7 @@ describe('lexicalBlocks', () => {
         (el) => el.scrollLeft,
       )
 
-      await page.mouse.move(nestedBox.x + nestedBox.width / 2, nestedBox.y + nestedBox.height / 2)
+      await nestedToolbarScroll.hover()
       await page.mouse.wheel(0, 150)
 
       await expect(async () => {
@@ -1668,7 +1730,7 @@ describe('lexicalBlocks', () => {
       await contentEditable.focus()
 
       // Undo the removal using keyboard shortcut
-      await page.keyboard.press('Control+Z')
+      await page.keyboard.press('ControlOrMeta+Z')
       await wait(500)
 
       // Wait for the block to be restored
@@ -1733,7 +1795,7 @@ async function createInlineBlock({
     openEditDrawer: () => Promise<{ editDrawer: Locator; saveEditDrawer: () => Promise<void> }>
   }>
 }> {
-  const lastParagraph = richTextField.locator('p').last()
+  const lastParagraph = richTextField.locator('.ContentEditable__root > p').last()
   await lastParagraph.scrollIntoViewIfNeeded()
   await expect(lastParagraph).toBeVisible()
 
@@ -1814,7 +1876,7 @@ async function createBlock({
   newBlock: Locator
   slashMenuPopover: Locator
 }> {
-  const lastParagraph = richTextField.locator('p').last()
+  const lastParagraph = richTextField.locator('.ContentEditable__root > p').last()
   await lastParagraph.scrollIntoViewIfNeeded()
   await expect(lastParagraph).toBeVisible()
 

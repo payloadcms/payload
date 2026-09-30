@@ -16,6 +16,7 @@ import { LexicalAccessControl } from './collections/LexicalAccessControl/index.j
 import { LexicalAutosave } from './collections/LexicalAutosave/index.js'
 import { LexicalAutosaveBlock } from './collections/LexicalAutosaveBlock/index.js'
 import { LexicalBenchmark } from './collections/LexicalBenchmark/index.js'
+import { LexicalCopyPaste } from './collections/LexicalCopyPaste/index.js'
 import { LexicalCustomCell } from './collections/LexicalCustomCell/index.js'
 import { LexicalHeadingFeature } from './collections/LexicalHeadingFeature/index.js'
 import { LexicalInBlock } from './collections/LexicalInBlock/index.js'
@@ -77,6 +78,7 @@ export const baseConfig: Partial<Config> = {
     LexicalRelationshipsFields,
     LexicalSlugFieldNameCollision,
     LexicalNestedBlocks,
+    LexicalCopyPaste,
     RichTextFields,
     TextFields,
     Uploads,
@@ -118,13 +120,9 @@ export const baseConfig: Partial<Config> = {
     fallback: true,
     locales: ['en', 'es', 'he'],
   },
-  onInit: async (payload) => {
-    // IMPORTANT: This should only seed, not clear the database.
-    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await seed(payload)
-    }
-  },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 }
+
+export { seed }

@@ -146,7 +146,7 @@ export default buildConfig({
     shouldAutoRun: async (payload) => {
       // Tell Payload if it should run jobs or not. This function is optional and will return true by default.
       // This function will be invoked each time Payload goes to pick up and run jobs.
-      // If this function ever returns false, the cron schedule will be stopped.
+      // If this function returns false, this run is skipped and the cron checks again on its next scheduled run.
       return true
     },
   },
@@ -251,16 +251,17 @@ If you want to process jobs programmatically from your server-side code, you can
 
 ```ts
 // Run all jobs from the `default` queue - default limit is 10
-const results = await payload.jobs.run()
+const results = await payload.jobs.run({ overrideAccess: true })
 
 // You can customize the queue name and limit by passing them as arguments:
-await payload.jobs.run({ queue: 'nightly', limit: 100 })
+await payload.jobs.run({ queue: 'nightly', limit: 100, overrideAccess: true })
 
 // Run all jobs from all queues:
-await payload.jobs.run({ allQueues: true })
+await payload.jobs.run({ allQueues: true, overrideAccess: true })
 
 // You can provide a where clause to filter the jobs that should be run:
 await payload.jobs.run({
+  overrideAccess: true,
   where: { 'input.message': { equals: 'secret' } },
 })
 ```
@@ -270,6 +271,7 @@ await payload.jobs.run({
 ```ts
 const results = await payload.jobs.runByID({
   id: myJobID,
+  overrideAccess: true,
 })
 ```
 
@@ -373,6 +375,7 @@ const createdJob = await payload.jobs.queue({
     title: 'my title',
   },
   processingOrder: '-createdAt', // Process jobs in reverse order of creation = LIFO
+  overrideAccess: true,
 })
 ```
 
@@ -419,6 +422,7 @@ await payload.jobs.queue({
   task: 'sendPasswordReset',
   input: { userId: '123' },
   queue: 'critical',
+  overrideAccess: true,
 })
 
 // Default: Welcome emails, notifications
@@ -426,6 +430,7 @@ await payload.jobs.queue({
   task: 'sendWelcomeEmail',
   input: { userId: '123' },
   queue: 'default',
+  overrideAccess: true,
 })
 
 // Batch: Analytics, reports, cleanups
@@ -433,6 +438,7 @@ await payload.jobs.queue({
   task: 'generateAnalytics',
   input: { date: new Date() },
   queue: 'batch',
+  overrideAccess: true,
 })
 ```
 
@@ -534,7 +540,7 @@ jobs: {
 
 ```ts
 // Option A: Queue manually in your code
-await payload.jobs.queue({ task: 'myTask' })
+await payload.jobs.queue({ task: 'myTask', overrideAccess: true })
 
 // Option B: Add schedule property to auto-queue
 jobs: {
@@ -593,6 +599,7 @@ autoRun: [{ cron: '* * * * *', queue: 'reports' }] // Now they match!
 ```ts
 const jobs = await payload.find({
   collection: 'payload-jobs',
+  overrideAccess: true,
   where: {
     completedAt: { exists: false },
   },
@@ -634,7 +641,11 @@ autoRun: [{ cron: '*/5 * * * *' }]
 
 ```ts
 // Queuing to 'critical' queue
-await payload.jobs.queue({ task: 'myTask', queue: 'critical' })
+await payload.jobs.queue({
+  task: 'myTask',
+  queue: 'critical',
+  overrideAccess: true,
+})
 
 // But autoRun only processes 'default' queue
 autoRun: [{ queue: 'default' }] // won't pick up the job
@@ -642,17 +653,7 @@ autoRun: [{ queue: 'default' }] // won't pick up the job
 
 **Check the jobs collection**
 
-Enable the jobs collection in admin:
-
-```ts
-jobsCollectionOverrides: ({ defaultJobsCollection }) => ({
-  ...defaultJobsCollection,
-  admin: {
-    ...defaultJobsCollection.admin,
-    hidden: false,
-  },
-})
-```
+See [Inspecting Jobs](/docs/jobs-queue/overview#inspecting-jobs) to inspect jobs from trusted server code or enable read-only Admin Panel access.
 
 Look for jobs with:
 
@@ -669,6 +670,7 @@ Check the job logs in the `payload-jobs` collection:
 ```ts
 const job = await payload.findByID({
   collection: 'payload-jobs',
+  overrideAccess: true,
   id: jobId,
 })
 

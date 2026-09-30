@@ -1,21 +1,21 @@
 import type { BlobDownloadResponseParsed, ContainerClient } from '@azure/storage-blob'
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import type { CollectionConfig, PayloadRequest, TypeWithID } from 'payload'
 import type { Readable } from 'stream'
 
 import { RestError } from '@azure/storage-blob'
 import {
+  buildStoragePathData,
   getFilePrefix as getDocPrefix,
-  getFileKey,
 } from '@payloadcms/plugin-cloud-storage/utilities'
-import { getRangeRequestInfo } from 'payload/internal'
+import { getRangeRequestInfo, isXmlMimeType, uploadContentSecurityPolicy } from 'payload/internal'
 
 interface GetFileArgs {
   client: ContainerClient
   collection: CollectionConfig
   collectionPrefix?: string
+  doc?: TypeWithID
   filename: string
   incomingHeaders?: Headers
-  prefixQueryParam?: string
   req: PayloadRequest
   uploadReference?: unknown
   useCompositePrefixes?: boolean
@@ -55,9 +55,9 @@ export async function getFile({
   client,
   collection,
   collectionPrefix = '',
+  doc,
   filename,
   incomingHeaders,
-  prefixQueryParam,
   req,
   uploadReference,
   useCompositePrefixes = false,
@@ -75,20 +75,22 @@ export async function getFile({
   try {
     const docPrefix = await getDocPrefix({
       collection,
+      collectionPrefix,
+      doc,
       filename,
-      prefixQueryParam,
       req,
       uploadReference,
+      useCompositePrefixes,
     })
 
-    const { fileKey } = getFileKey({
+    const { storageFilePath } = buildStoragePathData({
       collectionPrefix,
       docPrefix,
       filename,
       useCompositePrefixes,
     })
 
-    const blockBlobClient = client.getBlockBlobClient(fileKey)
+    const blockBlobClient = client.getBlockBlobClient(storageFilePath)
 
     // Get file size for range validation
     const properties = await blockBlobClient.getProperties()
@@ -132,9 +134,9 @@ export async function getFile({
       headers.append('ETag', String(properties.etag))
     }
 
-    // Add Content-Security-Policy header for SVG files to prevent executable code
-    if (properties.contentType === 'image/svg+xml') {
-      headers.append('Content-Security-Policy', "script-src 'none'")
+    // Apply a restrictive policy to XML-family responses served through Payload.
+    if (isXmlMimeType(properties.contentType)) {
+      headers.append('Content-Security-Policy', uploadContentSecurityPolicy)
     }
 
     const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')

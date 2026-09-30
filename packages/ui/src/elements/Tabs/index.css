@@ -92,6 +92,7 @@
     background: var(--field-color-border-error);
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .tabs__tab-button {
       padding-bottom: var(--spacer-2);

@@ -3,6 +3,7 @@ import type {
   CollectionConfig,
   GlobalConfig,
   PayloadRequest,
+  TextFieldSingleValidation,
 } from 'payload'
 
 import path from 'path'
@@ -41,7 +42,7 @@ export const validationPublishUploadsDir = path.resolve(dirname, 'validation-pub
 type HookEvent = {
   context: Record<string, unknown>
   hook: string
-  operation: string
+  operation: string | undefined
   requestOperation: string | undefined
 }
 
@@ -64,7 +65,7 @@ export const isolationEvents: {
   candidateMarker: unknown
   contextMarker: unknown
   headerMarker: null | string
-  locale: string | undefined
+  locale: null | string | undefined
   queryMarker: unknown
   requestDataMarker: unknown
   responseHeaderMarker: null | string
@@ -79,7 +80,7 @@ export const validationRuntimeIdentityEvents: {
 const localePassRequests = new Set<PayloadRequest>()
 export const localePassEvents: {
   localeAtEnd?: string
-  localeAtStart: string | undefined
+  localeAtStart: null | string | undefined
   operationAtEnd?: string
   operationAtStart: string | undefined
 }[] = []
@@ -200,7 +201,6 @@ const runWriteAttempt: CollectionBeforeChangeHook = async ({ data, operation, re
       await req.payload.create({
         collection: writeTargetsSlug,
         data: { title: 'must not be created' },
-        disableTransaction: true,
         req,
       })
       break
@@ -278,7 +278,6 @@ const runWriteAttempt: CollectionBeforeChangeHook = async ({ data, operation, re
       await req.payload.restoreVersion({
         id: targetID!,
         collection: writeTargetsSlug,
-        disableTransaction: true,
         req,
       })
       break
@@ -361,6 +360,16 @@ const runWriteAttempt: CollectionBeforeChangeHook = async ({ data, operation, re
   return data
 }
 
+const validateTitle: TextFieldSingleValidation = (value, { operation, req }) => {
+  recordHook({
+    context: req.context,
+    hook: 'fieldValidate',
+    operation,
+    requestOperation: req.operation,
+  })
+  return typeof value === 'string' && value.length > 0 ? true : 'Title is required'
+}
+
 const validationCollection: CollectionConfig = {
   slug: validationCollectionSlug,
   access: {
@@ -440,15 +449,7 @@ const validationCollection: CollectionConfig = {
       },
       localized: true,
       required: true,
-      validate: (value, { operation, req }) => {
-        recordHook({
-          context: req.context,
-          hook: 'fieldValidate',
-          operation,
-          requestOperation: req.operation,
-        })
-        return typeof value === 'string' && value.length > 0 ? true : 'Title is required'
-      },
+      validate: validateTitle,
     },
     {
       name: 'summary',
@@ -464,7 +465,7 @@ const validationCollection: CollectionConfig = {
     {
       name: 'location',
       type: 'point',
-      validate: (value) =>
+      validate: (value: unknown) =>
         value === undefined || (Array.isArray(value) && value.length === 2)
           ? true
           : 'Location must use the public point tuple representation',
@@ -698,7 +699,7 @@ const validationGlobal: GlobalConfig = {
     {
       name: 'location',
       type: 'point',
-      validate: (value) =>
+      validate: (value: unknown) =>
         value === undefined || (Array.isArray(value) && value.length === 2)
           ? true
           : 'Location must use the public point tuple representation',
@@ -823,7 +824,7 @@ const validationFallbackCollection: CollectionConfig = {
           return req.context.allowFieldUpdateFallback === true
         },
       },
-      validate: (value) =>
+      validate: (value: unknown) =>
         value === undefined || value === 'valid' ? true : 'Update-protected field is invalid',
     },
     {
@@ -833,7 +834,7 @@ const validationFallbackCollection: CollectionConfig = {
         update: () => false,
         validate: () => true,
       },
-      validate: (value) =>
+      validate: (value: unknown) =>
         value === undefined || value === 'valid' ? true : 'Explicitly validated field is invalid',
     },
   ],
@@ -916,7 +917,7 @@ const validationFallbackGlobal: GlobalConfig = {
           return req.context.allowFieldUpdateFallback === true
         },
       },
-      validate: (value) =>
+      validate: (value: unknown) =>
         value === undefined || value === 'valid'
           ? true
           : 'Global update-protected field is invalid',
@@ -1275,123 +1276,125 @@ const validationNonLocalizedCollection: CollectionConfig = {
 }
 
 export default buildConfigWithDefaults({
-  admin: {
-    autoLogin: {
-      email: devUser.email,
-      password: devUser.password,
-    },
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-  },
-  collections: [
-    validationCollection,
-    validationFallbackCollection,
-    validationWhereCollection,
-    publishCollection,
-    validationCustomButtonsCollection,
-    validationDeniedCollection,
-    validationNonLocalizedCollection,
-    {
-      slug: writeTargetsSlug,
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-          required: true,
-        },
-      ],
-      versions: true,
-    },
-    {
-      slug: validationUploadsSlug,
-      fields: [],
-      upload: {
-        staticDir: validationUploadsDir,
+  config: {
+    admin: {
+      autoLogin: {
+        email: devUser.email,
+        password: devUser.password,
       },
-      versions: false,
-    },
-    {
-      slug: validationPublishUploadsSlug,
-      access: {
-        validate: () => true,
+      importMap: {
+        baseDir: path.resolve(dirname),
       },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-          localized: true,
-          required: true,
-        },
-      ],
-      upload: {
-        imageSizes: [
+    },
+    collections: [
+      validationCollection,
+      validationFallbackCollection,
+      validationWhereCollection,
+      publishCollection,
+      validationCustomButtonsCollection,
+      validationDeniedCollection,
+      validationNonLocalizedCollection,
+      {
+        slug: writeTargetsSlug,
+        fields: [
           {
-            name: 'thumbnail',
-            height: 64,
-            width: 64,
+            name: 'title',
+            type: 'text',
+            required: true,
           },
         ],
-        staticDir: validationPublishUploadsDir,
+        versions: true,
       },
-      versions: {
-        drafts: {
-          validate: false,
+      {
+        slug: validationUploadsSlug,
+        fields: [],
+        upload: {
+          staticDir: validationUploadsDir,
+        },
+        versions: false,
+      },
+      {
+        slug: validationPublishUploadsSlug,
+        access: {
+          validate: () => true,
+        },
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+            localized: true,
+            required: true,
+          },
+        ],
+        upload: {
+          imageSizes: [
+            {
+              name: 'thumbnail',
+              height: 64,
+              width: 64,
+            },
+          ],
+          staticDir: validationPublishUploadsDir,
+        },
+        versions: {
+          drafts: {
+            validate: false,
+          },
         },
       },
-    },
-  ],
-  globals: [
-    validationGlobal,
-    validationFallbackGlobal,
-    validationDeniedGlobal,
-    validationWriteTargetGlobal,
-    validationDraftSourceGlobal,
-    validationAccessSourceGlobal,
-    publishGlobal,
-  ],
-  jobs: {
-    deleteJobOnComplete: false,
-    tasks: [
-      {
-        slug: 'validationWriteGuardProbe',
-        inputSchema: [],
-        outputSchema: [],
-        handler: () => ({ output: {} }),
-      },
     ],
-  },
-  localization: {
-    defaultLocale: 'en',
-    filterAvailableLocales: ({ locales, req }) => {
-      localeFilterOperationEvents.push(req.operation)
-      const availableLocaleCodes = req.context.availableLocaleCodes as string[] | undefined
+    globals: [
+      validationGlobal,
+      validationFallbackGlobal,
+      validationDeniedGlobal,
+      validationWriteTargetGlobal,
+      validationDraftSourceGlobal,
+      validationAccessSourceGlobal,
+      publishGlobal,
+    ],
+    jobs: {
+      deleteJobOnComplete: false,
+      tasks: [
+        {
+          slug: 'validationWriteGuardProbe',
+          inputSchema: [],
+          outputSchema: [],
+          handler: () => ({ output: {} }),
+        },
+      ],
+    },
+    localization: {
+      defaultLocale: 'en',
+      filterAvailableLocales: ({ locales, req }) => {
+        localeFilterOperationEvents.push(req.operation)
+        const availableLocaleCodes = req.context.availableLocaleCodes as string[] | undefined
 
-      return availableLocaleCodes
-        ? locales.filter(({ code }) => availableLocaleCodes.includes(code))
-        : locales
+        return availableLocaleCodes
+          ? locales.filter(({ code }) => availableLocaleCodes.includes(code))
+          : locales
+      },
+      locales: [
+        {
+          code: 'en',
+          label: 'English',
+        },
+        {
+          code: 'es',
+          label: 'Spanish',
+        },
+        {
+          code: 'de',
+          fallbackLocale: 'en',
+          label: 'German',
+        },
+        {
+          code: 'fr',
+          label: 'French',
+        },
+      ],
     },
-    locales: [
-      {
-        code: 'en',
-        label: 'English',
-      },
-      {
-        code: 'es',
-        label: 'Spanish',
-      },
-      {
-        code: 'de',
-        fallbackLocale: 'en',
-        label: 'German',
-      },
-      {
-        code: 'fr',
-        label: 'French',
-      },
-    ],
   },
-  onInit: async (payload) => {
+  seed: async (payload) => {
     if (process.env.NODE_ENV === 'test') {
       return
     }
@@ -1402,6 +1405,8 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
   },
+  suite: 'validate',
 })

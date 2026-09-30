@@ -26,7 +26,6 @@ const url = new AdminUrlUtil(serverURL, 'users')
 describe('Dashboard', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     const page = await browser.newPage()
     await ensureCompilationIsDone({ page, serverURL })
     await page.close()
@@ -34,8 +33,6 @@ describe('Dashboard', () => {
   beforeEach(async ({ page }) => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'lexicalTest',
-      uploadsDir: [path.resolve(dirname, './collections/Upload/uploads')],
     })
     await page.goto(url.admin)
   })
@@ -432,7 +429,7 @@ describe('Dashboard', () => {
     await d.editWidget(2, 'Open Tickets')
     await expect(secondWidgetTitle).toHaveText('Open Tickets')
 
-    await d.stepNavLast.locator('button').nth(1).click()
+    await d.stepNavButtons.nth(1).click()
     await expect(secondWidgetTitle).toHaveText('Open Tickets')
 
     // Re-enter edit mode without page refresh and edit again.
@@ -513,12 +510,15 @@ describe('Dashboard', () => {
     await expect(d.getDeleteWidgetButton(widget)).toBeHidden()
 
     // Widgets should not have draggable attributes when not editing
-    await expect(widget.locator('.draggable')).not.toHaveAttribute('aria-disabled')
+    await expect(widget.locator('.widget-wrapper__drag-btn')).toHaveCount(0)
 
     // verify the opposite:
     await d.setEditing()
     await expect(d.getDeleteWidgetButton(widget)).toBeVisible()
-    await expect(widget.locator('.draggable')).toHaveAttribute('aria-disabled', 'false')
+    await expect(widget.locator('.widget-wrapper__drag-btn')).toHaveAttribute(
+      'aria-disabled',
+      'false',
+    )
   })
 
   test('Responsiveness - all widgets have a 100% width on mobile', async ({ page }) => {

@@ -2,6 +2,7 @@ import type { Access, Config } from '../config/types.js'
 import type { Operation } from '../types/index.js'
 
 import { defaultAccess } from '../auth/defaultAccess.js'
+import { defaultUnlockAccess } from '../auth/defaultUnlockAccess.js'
 
 type QueryPresetOperation = Exclude<Operation, 'validate'>
 
@@ -11,7 +12,7 @@ const defaultCollectionAccess = {
   create: defaultAccess,
   delete: defaultAccess,
   read: defaultAccess,
-  unlock: defaultAccess,
+  unlock: defaultUnlockAccess,
   update: defaultAccess,
 }
 

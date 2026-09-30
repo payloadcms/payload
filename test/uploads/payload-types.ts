@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_104D6ABA".
+ * via the `definition` "LexicalNodes_5A8D4991".
  */
-export type LexicalNodes_104D6ABA =
+export type LexicalNodes_5A8D4991 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_104D6ABA>
+  | SerializedParagraphNode<LexicalNodes_5A8D4991>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_104D6ABA>
+  | SerializedHeadingNode<LexicalNodes_5A8D4991>
   | SerializedUploadNode<'gif-resize'>
   | SerializedUploadNode<'filename-compound-index'>
   | SerializedUploadNode<'no-image-sizes'>
@@ -121,17 +121,20 @@ export type LexicalNodes_104D6ABA =
   | SerializedUploadNode<'constructor-options'>
   | SerializedUploadNode<'bulk-uploads'>
   | SerializedUploadNode<'bulk-uploads-hook-error'>
+  | SerializedUploadNode<'client-upload-temp-file'>
   | SerializedUploadNode<'file-mime-type'>
   | SerializedUploadNode<'svg-only'>
   | SerializedUploadNode<'media-without-delete-access'>
+  | SerializedUploadNode<'media-without-write-access'>
   | SerializedUploadNode<'media-with-image-size-admin-props'>
   | SerializedUploadNode<'prefix-media'>
+  | SerializedUploadNode<'file-access-media'>
   | SerializedUploadNode<'media-with-fields'>
-  | SerializedQuoteNode<LexicalNodes_104D6ABA>
-  | SerializedListNode<LexicalNodes_104D6ABA>
-  | SerializedListItemNode<LexicalNodes_104D6ABA>
-  | SerializedAutoLinkNode<LexicalNodes_104D6ABA, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_104D6ABA, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_5A8D4991>
+  | SerializedListNode<LexicalNodes_5A8D4991>
+  | SerializedListItemNode<LexicalNodes_5A8D4991>
+  | SerializedAutoLinkNode<LexicalNodes_5A8D4991, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_5A8D4991, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'relation'
       | 'audio'
@@ -211,12 +214,15 @@ export interface Config {
     'constructor-options': ConstructorOption;
     'bulk-uploads': BulkUpload;
     'bulk-uploads-hook-error': BulkUploadsHookError;
+    'client-upload-temp-file': ClientUploadTempFile;
     'simple-relationship': SimpleRelationship;
     'file-mime-type': FileMimeType;
     'svg-only': SvgOnly;
     'media-without-delete-access': MediaWithoutDeleteAccess;
+    'media-without-write-access': MediaWithoutWriteAccess;
     'media-with-image-size-admin-props': MediaWithImageSizeAdminProp;
     'prefix-media': PrefixMedia;
+    'file-access-media': FileAccessMedia;
     'media-with-fields': MediaWithField;
     'payload-kv': PayloadKv;
     users: User;
@@ -284,12 +290,15 @@ export interface Config {
     'constructor-options': ConstructorOptionsSelect<false> | ConstructorOptionsSelect<true>;
     'bulk-uploads': BulkUploadsSelect<false> | BulkUploadsSelect<true>;
     'bulk-uploads-hook-error': BulkUploadsHookErrorSelect<false> | BulkUploadsHookErrorSelect<true>;
+    'client-upload-temp-file': ClientUploadTempFileSelect<false> | ClientUploadTempFileSelect<true>;
     'simple-relationship': SimpleRelationshipSelect<false> | SimpleRelationshipSelect<true>;
     'file-mime-type': FileMimeTypeSelect<false> | FileMimeTypeSelect<true>;
     'svg-only': SvgOnlySelect<false> | SvgOnlySelect<true>;
     'media-without-delete-access': MediaWithoutDeleteAccessSelect<false> | MediaWithoutDeleteAccessSelect<true>;
+    'media-without-write-access': MediaWithoutWriteAccessSelect<false> | MediaWithoutWriteAccessSelect<true>;
     'media-with-image-size-admin-props': MediaWithImageSizeAdminPropsSelect<false> | MediaWithImageSizeAdminPropsSelect<true>;
     'prefix-media': PrefixMediaSelect<false> | PrefixMediaSelect<true>;
+    'file-access-media': FileAccessMediaSelect<false> | FileAccessMediaSelect<true>;
     'media-with-fields': MediaWithFieldsSelect<false> | MediaWithFieldsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -356,6 +365,14 @@ export interface Relation {
       )[]
     | null;
   blocks?: LocalizedMediaBlock[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -368,6 +385,14 @@ export interface Media {
   id: string;
   alt?: string | null;
   localized?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -512,11 +537,53 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "versions".
  */
 export interface Version {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -537,6 +604,14 @@ export interface Version {
 export interface HideFileInputOnCreate {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -559,7 +634,15 @@ export interface Uploads1 {
   singleUpload?: (string | null) | Uploads2;
   hasManyThumbnailUpload?: (string | AdminThumbnailSize)[] | null;
   singleThumbnailUpload?: (string | null) | AdminThumbnailSize;
-  richText?: LexicalRichText<LexicalNodes_104D6ABA> | null;
+  richText?: LexicalRichText<LexicalNodes_5A8D4991> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -580,6 +663,14 @@ export interface Uploads2 {
   id: string;
   prefix: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -598,6 +689,14 @@ export interface Uploads2 {
  */
 export interface AdminThumbnailSize {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -646,6 +745,14 @@ export interface LocalizedMediaBlock {
 export interface Audio {
   id: string;
   audio?: (string | null) | Media;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -655,6 +762,14 @@ export interface Audio {
  */
 export interface GifResize {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -695,6 +810,14 @@ export interface FilenameCompoundIndex {
    * Alt text to be used for compound index
    */
   alt?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -731,6 +854,14 @@ export interface FilenameCompoundIndex {
  */
 export interface NoImageSize {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -749,6 +880,14 @@ export interface NoImageSize {
  */
 export interface ObjectFit {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -801,6 +940,14 @@ export interface ObjectFit {
  */
 export interface WithMetaDatum {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -829,6 +976,14 @@ export interface WithMetaDatum {
  */
 export interface WithoutMetaDatum {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -857,6 +1012,14 @@ export interface WithoutMetaDatum {
  */
 export interface WithOnlyJpegMetaDatum {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -885,6 +1048,14 @@ export interface WithOnlyJpegMetaDatum {
  */
 export interface CropOnly {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -929,6 +1100,14 @@ export interface CropOnly {
  */
 export interface FocalOnly {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -973,6 +1152,14 @@ export interface FocalOnly {
  */
 export interface ImageSizesOnly {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1009,6 +1196,14 @@ export interface ImageSizesOnly {
  */
 export interface FocalNoSize {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1027,6 +1222,14 @@ export interface FocalNoSize {
  */
 export interface AllowListMedia {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1045,6 +1248,14 @@ export interface AllowListMedia {
  */
 export interface SkipSafeFetchMedia {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1063,6 +1274,14 @@ export interface SkipSafeFetchMedia {
  */
 export interface SkipSafeFetchHeaderFilter {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1081,6 +1300,14 @@ export interface SkipSafeFetchHeaderFilter {
  */
 export interface SkipAllowListSafeFetchMedia {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1099,6 +1326,14 @@ export interface SkipAllowListSafeFetchMedia {
  */
 export interface RestrictFileType {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1117,6 +1352,14 @@ export interface RestrictFileType {
  */
 export interface NoRestrictFileType {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1135,6 +1378,14 @@ export interface NoRestrictFileType {
  */
 export interface NoRestrictFileMimeType {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1153,6 +1404,14 @@ export interface NoRestrictFileMimeType {
  */
 export interface PdfOnly {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1171,6 +1430,14 @@ export interface PdfOnly {
  */
 export interface RestrictedMimeType {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1189,6 +1456,14 @@ export interface RestrictedMimeType {
  */
 export interface AnimatedTypeMedia {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1241,6 +1516,14 @@ export interface AnimatedTypeMedia {
  */
 export interface Enlarge {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1309,6 +1592,14 @@ export interface Enlarge {
  */
 export interface WithoutEnlarge {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1327,6 +1618,14 @@ export interface WithoutEnlarge {
  */
 export interface Reduce {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1379,6 +1678,14 @@ export interface Reduce {
  */
 export interface MediaTrim {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1423,6 +1730,14 @@ export interface MediaTrim {
  */
 export interface CustomFileNameMedia {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1451,6 +1766,14 @@ export interface CustomFileNameMedia {
  */
 export interface UnstoredMedia {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1469,6 +1792,14 @@ export interface UnstoredMedia {
  */
 export interface ExternallyServedMedia {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1487,6 +1818,14 @@ export interface ExternallyServedMedia {
  */
 export interface AnyImage {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1505,6 +1844,14 @@ export interface AnyImage {
  */
 export interface AdminThumbnailFunction {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1523,6 +1870,14 @@ export interface AdminThumbnailFunction {
  */
 export interface AdminThumbnailWithSearchQuery {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1541,6 +1896,14 @@ export interface AdminThumbnailWithSearchQuery {
  */
 export interface AdminUploadControl {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1559,6 +1922,14 @@ export interface AdminUploadControl {
  */
 export interface AdminUploadFilePreviewSingle {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1577,6 +1948,14 @@ export interface AdminUploadFilePreviewSingle {
  */
 export interface AdminUploadFilePreviewMap {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1595,6 +1974,14 @@ export interface AdminUploadFilePreviewMap {
  */
 export interface FilePreview {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1614,6 +2001,14 @@ export interface FilePreview {
 export interface NoFilesRequired {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1634,6 +2029,14 @@ export interface RelationToNoFilesRequired {
   id: string;
   title?: string | null;
   uploadField?: (string | null) | NoFilesRequired;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1643,6 +2046,14 @@ export interface RelationToNoFilesRequired {
  */
 export interface OptionalFile {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1661,6 +2072,14 @@ export interface OptionalFile {
  */
 export interface RequiredFile {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1680,6 +2099,14 @@ export interface RequiredFile {
 export interface CustomUploadField {
   id: string;
   alt?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1699,6 +2126,14 @@ export interface CustomUploadField {
 export interface MediaWithRelationPreview {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1718,6 +2153,14 @@ export interface MediaWithRelationPreview {
 export interface MediaWithoutCacheTag {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1737,6 +2180,14 @@ export interface MediaWithoutCacheTag {
 export interface MediaWithoutRelationPreview {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1761,6 +2212,14 @@ export interface RelationPreview {
   imageWithoutPreview2?: (string | null) | MediaWithoutRelationPreview;
   imageWithPreview3?: (string | null) | MediaWithoutRelationPreview;
   imageWithoutPreview3?: (string | null) | MediaWithoutRelationPreview;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1774,6 +2233,14 @@ export interface BestFit {
   withinRange?: (string | null) | Enlarge;
   nextSmallestOutOfRange?: (string | null) | FocalOnly;
   original?: (string | null) | FocalOnly;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1786,6 +2253,14 @@ export interface ListViewPreview {
   title?: string | null;
   imageUpload?: (string | null) | MediaWithRelationPreview;
   imageRelationship?: (string | null) | MediaWithRelationPreview;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1795,6 +2270,14 @@ export interface ListViewPreview {
  */
 export interface ThreeDimensional {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1811,6 +2294,14 @@ export interface ThreeDimensional {
  */
 export interface ConstructorOption {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1834,6 +2325,14 @@ export interface BulkUpload {
     relationTo: 'simple-relationship';
     value: string | SimpleRelationship;
   } | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1853,6 +2352,14 @@ export interface BulkUpload {
 export interface SimpleRelationship {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1864,6 +2371,42 @@ export interface BulkUploadsHookError {
   id: string;
   title?: string | null;
   shouldFail?: boolean | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "client-upload-temp-file".
+ */
+export interface ClientUploadTempFile {
+  id: string;
+  title?: string | null;
+  shouldFail?: boolean | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1883,6 +2426,14 @@ export interface BulkUploadsHookError {
 export interface FileMimeType {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1901,6 +2452,14 @@ export interface FileMimeType {
  */
 export interface SvgOnly {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1919,6 +2478,40 @@ export interface SvgOnly {
  */
 export interface MediaWithoutDeleteAccess {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-without-write-access".
+ */
+export interface MediaWithoutWriteAccess {
+  id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1937,6 +2530,14 @@ export interface MediaWithoutDeleteAccess {
  */
 export interface MediaWithImageSizeAdminProp {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1990,6 +2591,14 @@ export interface MediaWithImageSizeAdminProp {
 export interface PrefixMedia {
   id: string;
   prefix?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -2001,6 +2610,45 @@ export interface PrefixMedia {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "file-access-media".
+ */
+export interface FileAccessMedia {
+  id: string;
+  prefix?: string | null;
+  requestMetadata?: string | null;
+  visibility: 'public' | 'restricted';
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2041,6 +2689,14 @@ export interface MediaWithField {
     shutterSpeed?: string | null;
   };
   published?: boolean | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -2255,31 +2911,6 @@ export interface PayloadKv {
     | number
     | boolean
     | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2521,6 +3152,10 @@ export interface PayloadLockedDocument {
         value: string | BulkUploadsHookError;
       } | null)
     | ({
+        relationTo: 'client-upload-temp-file';
+        value: string | ClientUploadTempFile;
+      } | null)
+    | ({
         relationTo: 'simple-relationship';
         value: string | SimpleRelationship;
       } | null)
@@ -2537,12 +3172,20 @@ export interface PayloadLockedDocument {
         value: string | MediaWithoutDeleteAccess;
       } | null)
     | ({
+        relationTo: 'media-without-write-access';
+        value: string | MediaWithoutWriteAccess;
+      } | null)
+    | ({
         relationTo: 'media-with-image-size-admin-props';
         value: string | MediaWithImageSizeAdminProp;
       } | null)
     | ({
         relationTo: 'prefix-media';
         value: string | PrefixMedia;
+      } | null)
+    | ({
+        relationTo: 'file-access-media';
+        value: string | FileAccessMedia;
       } | null)
     | ({
         relationTo: 'media-with-fields';
@@ -2616,6 +3259,8 @@ export interface RelationSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -2626,6 +3271,8 @@ export interface RelationSelect<T extends boolean = true> {
  */
 export interface AudioSelect<T extends boolean = true> {
   audio?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2634,6 +3281,8 @@ export interface AudioSelect<T extends boolean = true> {
  * via the `definition` "gif-resize_select".
  */
 export interface GifResizeSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2676,6 +3325,8 @@ export interface GifResizeSelect<T extends boolean = true> {
  */
 export interface FilenameCompoundIndexSelect<T extends boolean = true> {
   alt?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2717,6 +3368,8 @@ export interface FilenameCompoundIndexSelect<T extends boolean = true> {
  * via the `definition` "no-image-sizes_select".
  */
 export interface NoImageSizesSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2734,6 +3387,8 @@ export interface NoImageSizesSelect<T extends boolean = true> {
  * via the `definition` "object-fit_select".
  */
 export interface ObjectFitSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2795,6 +3450,8 @@ export interface ObjectFitSelect<T extends boolean = true> {
  * via the `definition` "with-meta-data_select".
  */
 export interface WithMetaDataSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2826,6 +3483,8 @@ export interface WithMetaDataSelect<T extends boolean = true> {
  * via the `definition` "without-meta-data_select".
  */
 export interface WithoutMetaDataSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2857,6 +3516,8 @@ export interface WithoutMetaDataSelect<T extends boolean = true> {
  * via the `definition` "with-only-jpeg-meta-data_select".
  */
 export interface WithOnlyJpegMetaDataSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2888,6 +3549,8 @@ export interface WithOnlyJpegMetaDataSelect<T extends boolean = true> {
  * via the `definition` "crop-only_select".
  */
 export interface CropOnlySelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2939,6 +3602,8 @@ export interface CropOnlySelect<T extends boolean = true> {
  * via the `definition` "focal-only_select".
  */
 export interface FocalOnlySelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2990,6 +3655,8 @@ export interface FocalOnlySelect<T extends boolean = true> {
  * via the `definition` "image-sizes-only_select".
  */
 export interface ImageSizesOnlySelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3031,6 +3698,8 @@ export interface ImageSizesOnlySelect<T extends boolean = true> {
  * via the `definition` "focal-no-sizes_select".
  */
 export interface FocalNoSizesSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3050,6 +3719,8 @@ export interface FocalNoSizesSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   localized?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3231,6 +3902,8 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "allow-list-media_select".
  */
 export interface AllowListMediaSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3248,6 +3921,8 @@ export interface AllowListMediaSelect<T extends boolean = true> {
  * via the `definition` "skip-safe-fetch-media_select".
  */
 export interface SkipSafeFetchMediaSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3265,6 +3940,8 @@ export interface SkipSafeFetchMediaSelect<T extends boolean = true> {
  * via the `definition` "skip-safe-fetch-header-filter_select".
  */
 export interface SkipSafeFetchHeaderFilterSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3282,6 +3959,8 @@ export interface SkipSafeFetchHeaderFilterSelect<T extends boolean = true> {
  * via the `definition` "skip-allow-list-safe-fetch-media_select".
  */
 export interface SkipAllowListSafeFetchMediaSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3299,6 +3978,8 @@ export interface SkipAllowListSafeFetchMediaSelect<T extends boolean = true> {
  * via the `definition` "restrict-file-types_select".
  */
 export interface RestrictFileTypesSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3316,6 +3997,8 @@ export interface RestrictFileTypesSelect<T extends boolean = true> {
  * via the `definition` "no-restrict-file-types_select".
  */
 export interface NoRestrictFileTypesSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3333,6 +4016,8 @@ export interface NoRestrictFileTypesSelect<T extends boolean = true> {
  * via the `definition` "no-restrict-file-mime-types_select".
  */
 export interface NoRestrictFileMimeTypesSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3350,6 +4035,8 @@ export interface NoRestrictFileMimeTypesSelect<T extends boolean = true> {
  * via the `definition` "pdf-only_select".
  */
 export interface PdfOnlySelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3367,6 +4054,8 @@ export interface PdfOnlySelect<T extends boolean = true> {
  * via the `definition` "restricted-mime-types_select".
  */
 export interface RestrictedMimeTypesSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3384,6 +4073,8 @@ export interface RestrictedMimeTypesSelect<T extends boolean = true> {
  * via the `definition` "animated-type-media_select".
  */
 export interface AnimatedTypeMediaSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3445,6 +4136,8 @@ export interface AnimatedTypeMediaSelect<T extends boolean = true> {
  * via the `definition` "enlarge_select".
  */
 export interface EnlargeSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3526,6 +4219,8 @@ export interface EnlargeSelect<T extends boolean = true> {
  * via the `definition` "without-enlarge_select".
  */
 export interface WithoutEnlargeSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3543,6 +4238,8 @@ export interface WithoutEnlargeSelect<T extends boolean = true> {
  * via the `definition` "reduce_select".
  */
 export interface ReduceSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3604,6 +4301,8 @@ export interface ReduceSelect<T extends boolean = true> {
  * via the `definition` "media-trim_select".
  */
 export interface MediaTrimSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3655,6 +4354,8 @@ export interface MediaTrimSelect<T extends boolean = true> {
  * via the `definition` "custom-file-name-media_select".
  */
 export interface CustomFileNameMediaSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3686,6 +4387,8 @@ export interface CustomFileNameMediaSelect<T extends boolean = true> {
  * via the `definition` "unstored-media_select".
  */
 export interface UnstoredMediaSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3703,6 +4406,8 @@ export interface UnstoredMediaSelect<T extends boolean = true> {
  * via the `definition` "externally-served-media_select".
  */
 export interface ExternallyServedMediaSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3725,6 +4430,8 @@ export interface Uploads1Select<T extends boolean = true> {
   hasManyThumbnailUpload?: T;
   singleThumbnailUpload?: T;
   richText?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3744,6 +4451,8 @@ export interface Uploads1Select<T extends boolean = true> {
 export interface Uploads2Select<T extends boolean = true> {
   prefix?: T;
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3761,6 +4470,8 @@ export interface Uploads2Select<T extends boolean = true> {
  * via the `definition` "any-images_select".
  */
 export interface AnyImagesSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3778,6 +4489,8 @@ export interface AnyImagesSelect<T extends boolean = true> {
  * via the `definition` "admin-thumbnail-function_select".
  */
 export interface AdminThumbnailFunctionSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3795,6 +4508,8 @@ export interface AdminThumbnailFunctionSelect<T extends boolean = true> {
  * via the `definition` "admin-thumbnail-with-search-queries_select".
  */
 export interface AdminThumbnailWithSearchQueriesSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3812,6 +4527,8 @@ export interface AdminThumbnailWithSearchQueriesSelect<T extends boolean = true>
  * via the `definition` "admin-thumbnail-size_select".
  */
 export interface AdminThumbnailSizeSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3853,6 +4570,8 @@ export interface AdminThumbnailSizeSelect<T extends boolean = true> {
  * via the `definition` "admin-upload-control_select".
  */
 export interface AdminUploadControlSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3870,6 +4589,8 @@ export interface AdminUploadControlSelect<T extends boolean = true> {
  * via the `definition` "admin-upload-file-preview-single_select".
  */
 export interface AdminUploadFilePreviewSingleSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3887,6 +4608,8 @@ export interface AdminUploadFilePreviewSingleSelect<T extends boolean = true> {
  * via the `definition` "admin-upload-file-preview-map_select".
  */
 export interface AdminUploadFilePreviewMapSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3904,6 +4627,8 @@ export interface AdminUploadFilePreviewMapSelect<T extends boolean = true> {
  * via the `definition` "file-preview_select".
  */
 export interface FilePreviewSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3922,6 +4647,8 @@ export interface FilePreviewSelect<T extends boolean = true> {
  */
 export interface NoFilesRequiredSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3941,6 +4668,8 @@ export interface NoFilesRequiredSelect<T extends boolean = true> {
 export interface RelationToNoFilesRequiredSelect<T extends boolean = true> {
   title?: T;
   uploadField?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3949,6 +4678,8 @@ export interface RelationToNoFilesRequiredSelect<T extends boolean = true> {
  * via the `definition` "optional-file_select".
  */
 export interface OptionalFileSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3966,6 +4697,8 @@ export interface OptionalFileSelect<T extends boolean = true> {
  * via the `definition` "required-file_select".
  */
 export interface RequiredFileSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3984,6 +4717,8 @@ export interface RequiredFileSelect<T extends boolean = true> {
  */
 export interface VersionsSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -4003,6 +4738,8 @@ export interface VersionsSelect<T extends boolean = true> {
  */
 export interface CustomUploadFieldSelect<T extends boolean = true> {
   alt?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -4021,6 +4758,8 @@ export interface CustomUploadFieldSelect<T extends boolean = true> {
  */
 export interface MediaWithRelationPreviewSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -4039,6 +4778,8 @@ export interface MediaWithRelationPreviewSelect<T extends boolean = true> {
  */
 export interface MediaWithoutCacheTagsSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -4057,6 +4798,8 @@ export interface MediaWithoutCacheTagsSelect<T extends boolean = true> {
  */
 export interface MediaWithoutRelationPreviewSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -4080,6 +4823,8 @@ export interface RelationPreviewSelect<T extends boolean = true> {
   imageWithoutPreview2?: T;
   imageWithPreview3?: T;
   imageWithoutPreview3?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -4089,6 +4834,8 @@ export interface RelationPreviewSelect<T extends boolean = true> {
  */
 export interface HideFileInputOnCreateSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -4110,6 +4857,8 @@ export interface BestFitSelect<T extends boolean = true> {
   withinRange?: T;
   nextSmallestOutOfRange?: T;
   original?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -4121,6 +4870,8 @@ export interface ListViewPreviewSelect<T extends boolean = true> {
   title?: T;
   imageUpload?: T;
   imageRelationship?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -4129,6 +4880,8 @@ export interface ListViewPreviewSelect<T extends boolean = true> {
  * via the `definition` "three-dimensional_select".
  */
 export interface ThreeDimensionalSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -4144,6 +4897,8 @@ export interface ThreeDimensionalSelect<T extends boolean = true> {
  * via the `definition` "constructor-options_select".
  */
 export interface ConstructorOptionsSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -4163,6 +4918,8 @@ export interface ConstructorOptionsSelect<T extends boolean = true> {
 export interface BulkUploadsSelect<T extends boolean = true> {
   title?: T;
   relationship?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -4182,6 +4939,29 @@ export interface BulkUploadsSelect<T extends boolean = true> {
 export interface BulkUploadsHookErrorSelect<T extends boolean = true> {
   title?: T;
   shouldFail?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "client-upload-temp-file_select".
+ */
+export interface ClientUploadTempFileSelect<T extends boolean = true> {
+  title?: T;
+  shouldFail?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -4200,6 +4980,8 @@ export interface BulkUploadsHookErrorSelect<T extends boolean = true> {
  */
 export interface SimpleRelationshipSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -4209,6 +4991,8 @@ export interface SimpleRelationshipSelect<T extends boolean = true> {
  */
 export interface FileMimeTypeSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -4226,6 +5010,8 @@ export interface FileMimeTypeSelect<T extends boolean = true> {
  * via the `definition` "svg-only_select".
  */
 export interface SvgOnlySelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -4243,6 +5029,27 @@ export interface SvgOnlySelect<T extends boolean = true> {
  * via the `definition` "media-without-delete-access_select".
  */
 export interface MediaWithoutDeleteAccessSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-without-write-access_select".
+ */
+export interface MediaWithoutWriteAccessSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -4260,6 +5067,8 @@ export interface MediaWithoutDeleteAccessSelect<T extends boolean = true> {
  * via the `definition` "media-with-image-size-admin-props_select".
  */
 export interface MediaWithImageSizeAdminPropsSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -4322,6 +5131,8 @@ export interface MediaWithImageSizeAdminPropsSelect<T extends boolean = true> {
  */
 export interface PrefixMediaSelect<T extends boolean = true> {
   prefix?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -4333,6 +5144,42 @@ export interface PrefixMediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "file-access-media_select".
+ */
+export interface FileAccessMediaSelect<T extends boolean = true> {
+  prefix?: T;
+  requestMetadata?: T;
+  visibility?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -4378,6 +5225,8 @@ export interface MediaWithFieldsSelect<T extends boolean = true> {
         shutterSpeed?: T;
       };
   published?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -4637,6 +5486,8 @@ export interface PayloadKvSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -4644,6 +5495,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -4762,12 +5614,15 @@ export interface CollectionQueryWidget {
       | 'constructor-options'
       | 'bulk-uploads'
       | 'bulk-uploads-hook-error'
+      | 'client-upload-temp-file'
       | 'simple-relationship'
       | 'file-mime-type'
       | 'svg-only'
       | 'media-without-delete-access'
+      | 'media-without-write-access'
       | 'media-with-image-size-admin-props'
       | 'prefix-media'
+      | 'file-access-media'
       | 'media-with-fields'
       | 'users';
     where?:
@@ -4851,12 +5706,15 @@ export interface ActivityWidget {
           | 'constructor-options'
           | 'bulk-uploads'
           | 'bulk-uploads-hook-error'
+          | 'client-upload-temp-file'
           | 'simple-relationship'
           | 'file-mime-type'
           | 'svg-only'
           | 'media-without-delete-access'
+          | 'media-without-write-access'
           | 'media-with-image-size-admin-props'
           | 'prefix-media'
+          | 'file-access-media'
           | 'media-with-fields'
           | 'users'
         )[]

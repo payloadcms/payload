@@ -34,7 +34,8 @@ export const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
   const [params, setParams] = useState(initialParams)
   const [isLoading, setIsLoading] = useState(!initialData)
   const [isError, setIsError] = useState(false)
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const hasInitialized = useRef(false)
 
   const search = qs.stringify(

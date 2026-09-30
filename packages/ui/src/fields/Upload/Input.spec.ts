@@ -1,4 +1,6 @@
 // @vitest-environment jsdom
+import type { Locale } from 'payload'
+
 import React, { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -33,7 +35,7 @@ vi.mock('../../providers/Auth/index.js', () => ({
 }))
 
 vi.mock('../../providers/Locale/index.js', () => ({
-  useLocale: () => ({ code: 'en' }),
+  useLocale: (): Locale | null => ({ code: 'en', label: 'English' }),
 }))
 
 vi.mock('../../providers/Translation/index.js', () => ({

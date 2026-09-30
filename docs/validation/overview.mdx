@@ -113,8 +113,9 @@ if (!result.valid) {
 return { ready: true }
 ```
 
-The Local API skips access control by default. Set `overrideAccess: false` and pass `user` or `req`
-when validation should enforce access.
+The Local API enforces access control by default. Set `overrideAccess: true` only for trusted server
+operations that must bypass access control. Pass `user` or `req` when validation must use a specific
+user.
 
 ## REST API
 

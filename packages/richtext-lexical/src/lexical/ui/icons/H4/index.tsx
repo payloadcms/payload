@@ -1,8 +1,9 @@
 'use client'
 import React from 'react'
 
-const path =
-  'M3.639 13.5V7.074H5.196V9.648H8.076V7.074H9.642V13.5H8.076V10.836H5.196V13.5H3.639ZM15.1736 7.074V10.854H16.3706V12.033H15.1736V13.5H13.6796V12.033H10.5116V10.845L13.4996 7.074H15.1736ZM13.6796 8.46L11.8256 10.854H13.6796V8.46Z'
+const headingPath =
+  'M7 6.5a.5.5 0 0 0-1 0v11a.5.5 0 0 0 1 0V12h6v5.5a.5.5 0 0 0 1 0v-11a.5.5 0 0 0-1 0V11H7z'
+const numeralPath = 'M18.85 17.5 V12.5 L16.5 15.85 H19.5'
 
 export const H4Icon: React.FC<{
   readonly className?: string
@@ -17,6 +18,13 @@ export const H4Icon: React.FC<{
     width={24}
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path d={path} fill="currentColor" />
+    <path d={headingPath} fill="currentColor" />
+    <path
+      d={numeralPath}
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={1}
+    />
   </svg>
 )

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/admin-bar",
-  "version": "4.0.0-canary.14",
+  "version": "4.0.0-canary.37",
   "description": "An admin bar for React apps using Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -36,7 +36,7 @@
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
-    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "copyfiles": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },

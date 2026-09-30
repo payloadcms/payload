@@ -43,6 +43,7 @@ import {
   collectionLevelConfigSlug,
   customLivePreviewSlug,
   desktopBreakpoint,
+  forbiddenURLSlug,
   mobileBreakpoint,
   openByDefaultSlug,
   pagesSlug,
@@ -90,6 +91,7 @@ describe('Live Preview', () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
       ?.then((res) => res.user) // TODO: this type is wrong
   })
@@ -103,10 +105,25 @@ describe('Live Preview', () => {
 
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'livePreviewTest',
     })
 
     await ensureCompilationIsDone({ page, serverURL })
+  })
+
+  test('should not load Payload admin assets on the TanStack frontend', async () => {
+    // eslint-disable-next-line playwright/no-skipped-test -- this route belongs to the TanStack-only fixture
+    test.skip(process.env.PAYLOAD_FRAMEWORK !== 'tanstack-start')
+
+    await page.goto(`${serverURL}/live-preview/`)
+
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          getComputedStyle(document.documentElement).getPropertyValue('--font-family-sans').trim(),
+        ),
+      )
+      .toBe('')
+    await expect(page.locator('link[href*="fonts.googleapis.com"]')).toHaveCount(0)
   })
 
   test('collection — renders toggler', async () => {
@@ -295,6 +312,39 @@ describe('Live Preview', () => {
     await expect(iframe).toBeHidden()
   })
 
+  describe('URL validation', () => {
+    const documentIDs: (number | string)[] = []
+
+    test.afterEach(async () => {
+      for (const id of documentIDs) {
+        await payload.delete({ id, collection: forbiddenURLSlug, overrideAccess: true })
+      }
+      documentIDs.length = 0
+    })
+
+    test('should omit preview controls for unsupported URLs', async () => {
+      const urlUtil = new AdminUrlUtil(serverURL, forbiddenURLSlug)
+      const doc = await payload.create({
+        collection: forbiddenURLSlug,
+        data: {},
+        overrideAccess: true,
+      })
+
+      documentIDs.push(doc.id)
+
+      await page.goto(urlUtil.edit(doc.id))
+      await expect(page.locator('.collection-edit')).toBeVisible()
+
+      const { iframe } = await getLivePreviewIframe(page)
+      const toggler = page.locator('#live-preview-toggler')
+      const previewButton = page.locator('#preview-button')
+
+      await expect(toggler).toBeHidden()
+      await expect(iframe).toBeHidden()
+      await expect(previewButton).toBeHidden()
+    })
+  })
+
   test('collection — does not render preview button when url is null', async () => {
     const noURL = new AdminUrlUtil(serverURL, 'conditional-url')
     await page.goto(noURL.create)
@@ -462,6 +512,7 @@ describe('Live Preview', () => {
         },
         title: initialTitle,
       },
+      overrideAccess: true,
     })
 
     await page.goto(pagesURLUtil.edit(testDoc.id))
@@ -604,6 +655,7 @@ describe('Live Preview', () => {
         },
         title: initialTitle,
       },
+      overrideAccess: true,
     })
 
     await page.goto(ssrAutosavePagesURLUtil.edit(testDoc.id))

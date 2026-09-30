@@ -80,9 +80,15 @@ describe('addCollectionAccess', () => {
       scopes: [createScope(collection, accessResultCallback)],
     })
 
-    await collection.access?.validate?.(createArgs())
+    await expect(collection.access?.validate?.(createArgs())).resolves.toEqual({
+      tenant: { in: ['tenant-1'] },
+    })
 
-    expect(documentUpdate).toHaveBeenCalled()
+    expect(documentUpdate).toHaveBeenCalledOnce()
+    expect(accessResultCallback).toHaveBeenCalledOnce()
+    expect(accessResultCallback).toHaveBeenCalledWith(
+      expect.objectContaining({ accessKey: 'validate' }),
+    )
   })
 
   it('keeps callback wrapping when an access result override is configured', async () => {

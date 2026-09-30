@@ -20,7 +20,7 @@ export function CustomValidateOtherLocalesButtons() {
       routes: { api },
     },
   } = useConfig()
-  const { code: activeLocaleCode } = useLocale()
+  const activeLocaleCode = useLocale()?.code
   const { getData } = useForm()
 
   const [results, setResults] = useState<Record<string, ValidationResult>>({})
@@ -52,7 +52,7 @@ export function CustomValidateOtherLocalesButtons() {
 
   return (
     <div className={baseClass} id="custom-validate-other-locales">
-      {otherLocales.map(({ code, required }) => {
+      {otherLocales.map(({ code }) => {
         const isValidating = validatingLocale === code
         const result = results[code]
 
@@ -66,7 +66,7 @@ export function CustomValidateOtherLocalesButtons() {
               onClick={() => void handleClick(code)}
               size="medium"
             >
-              {`Custom validate ${code}${required ? ' (required)' : ''}`}
+              {`Custom validate ${code}`}
             </Button>
             {result && (
               <div className={`${baseClass}__result`} id={`custom-validate-locale-${code}-result`}>
