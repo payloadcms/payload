@@ -1,0 +1,252 @@
+import type { DrizzleAdapter } from '@payloadcms/drizzle'
+import type { PgTableFn } from 'drizzle-orm/pg-core'
+import type { DatabaseAdapterObj, Payload } from 'payload'
+
+import {
+  beginTransaction,
+  buildCreateMigration,
+  commitTransaction,
+  count,
+  countGlobalVersions,
+  countVersions,
+  create,
+  createBlocksToJsonMigrator,
+  createGlobal,
+  createGlobalVersion,
+  createSchemaGenerator,
+  createVersion,
+  deleteMany,
+  deleteOne,
+  deleteVersions,
+  find,
+  findDistinct,
+  findGlobal,
+  findGlobalVersions,
+  findOne,
+  findVersions,
+  migrate,
+  migrateDown,
+  migrateFresh,
+  migrateRefresh,
+  migrateReset,
+  migrateStatus,
+  operatorMap,
+  queryDrafts,
+  rollbackTransaction,
+  updateGlobal,
+  updateGlobalVersion,
+  updateJobs,
+  updateMany,
+  updateOne,
+  updateVersion,
+  upsert,
+  validateOperatorHandlers,
+} from '@payloadcms/drizzle'
+import {
+  columnToCodeConverter,
+  countDistinct,
+  createExtensions,
+  createJSONQuery,
+  defaultDrizzleSnapshot,
+  deleteWhere,
+  execute,
+  init,
+  insert,
+  requireDrizzleKit,
+} from '@payloadcms/drizzle/postgres'
+import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
+import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
+import { fileURLToPath } from 'url'
+
+import type { Args, AuroraServerlessAdapter } from './types.js'
+
+import { connect } from './connect.js'
+import { createDatabase } from './createDatabase.js'
+import { destroy } from './destroy.js'
+import { dropDatabase } from './dropDatabase.js'
+
+const filename = fileURLToPath(import.meta.url)
+
+export function auroraServerlessAdapter(args: Args): DatabaseAdapterObj<AuroraServerlessAdapter> {
+  const postgresIDType = args.idType || 'serial'
+  const payloadIDType = postgresIDType === 'serial' ? 'number' : 'text'
+  const allowIDOnCreate = args.allowIDOnCreate ?? false
+
+  function adapter({ payload }: { payload: Payload }) {
+    const migrationDir = findMigrationDir(args.migrationDir)
+    let resolveInitializing
+    let rejectInitializing
+    let adapterSchema: AuroraServerlessAdapter['pgSchema']
+
+    const initializing = new Promise<void>((res, rej) => {
+      resolveInitializing = res
+      rejectInitializing = rej
+    })
+
+    if (args.schemaName) {
+      adapterSchema = pgSchema(args.schemaName)
+    } else {
+      adapterSchema = { enum: pgEnum, table: pgTable as unknown as PgTableFn<string> }
+    }
+
+    const extensions = (args.extensions ?? []).reduce<Record<string, boolean>>((acc, name) => {
+      acc[name] = true
+      return acc
+    }, {})
+
+    const operatorHandlers = args.query?.operatorHandlers ?? []
+
+    validateOperatorHandlers(operatorHandlers)
+
+    const executeMethod = 'execute'
+    const sanitizeStatements = ({
+      sqlExecute,
+      statements,
+    }: {
+      sqlExecute: string
+      statements: string[]
+    }) => `${sqlExecute}\n ${statements.join('\n')}\`)`
+
+    const adapter = createDatabaseAdapter<AuroraServerlessAdapter>({
+      name: 'postgres',
+      afterSchemaInit: args.afterSchemaInit ?? [],
+      allowIDOnCreate,
+      beforeSchemaInit: args.beforeSchemaInit ?? [],
+      blocksAsJSON: args.blocksAsJSON ?? false,
+      connection: args.connection,
+      createDatabase,
+      createExtensions,
+      createMigration: buildCreateMigration({
+        executeMethod,
+        filename,
+        sanitizeStatements,
+      }),
+      defaultDrizzleSnapshot,
+      disableCreateDatabase: args.disableCreateDatabase ?? true,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+      drizzle: undefined,
+      dropDatabase,
+      enums: {},
+      extensions,
+      features: {
+        json: true,
+      },
+      fieldConstraints: {},
+      foreignKeys: new Set(),
+      generateSchema: createSchemaGenerator({
+        columnToCodeConverter,
+        corePackageSuffix: 'pg-core',
+        defaultOutputFile: args.generateSchemaOutputFile,
+        enumImport: 'pgEnum',
+        schemaImport: 'pgSchema',
+        tableImport: 'pgTable',
+      }),
+      idType: postgresIDType,
+      indexes: new Set<string>(),
+      initializing,
+      localesSuffix: args.localesSuffix || '_locales',
+      logger: args.logger,
+      operatorHandlers,
+      operators: operatorMap,
+      pgSchema: adapterSchema,
+      prodMigrations: args.prodMigrations,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+      push: args.push,
+      rawRelations: {},
+      rawTables: {},
+      readReplicasAfterWriteInterval: 2000,
+      relations: {},
+      relationshipsSuffix: args.relationshipsSuffix || '_rels',
+      schema: {},
+      schemaName: args.schemaName,
+      sessions: {},
+      tableNameMap: new Map<string, string>(),
+      tables: {},
+      tablesFilter: args.tablesFilter,
+      transactionOptions: args.transactionOptions || undefined,
+      versionsSuffix: args.versionsSuffix || '_v',
+
+      // DatabaseAdapter
+      beginTransaction:
+        args.transactionOptions === false ? defaultBeginTransaction() : beginTransaction,
+      commitTransaction,
+      connect,
+      count,
+      countDistinct,
+      countGlobalVersions,
+      countVersions,
+      create,
+      createGlobal,
+      createGlobalVersion,
+      createJSONQuery,
+      createVersion,
+      defaultIDType: payloadIDType,
+      deleteMany,
+      deleteOne,
+      deleteVersions,
+      deleteWhere,
+      destroy,
+      execute,
+      find,
+      findDistinct,
+      findGlobal,
+      findGlobalVersions,
+      findOne,
+      findVersions,
+      init,
+      insert,
+      migrate,
+      migrateDown,
+      migrateFresh,
+      migrateRefresh,
+      migrateReset,
+      migrateStatus,
+      migrationDir,
+      packageName: '@payloadcms/db-aurora-serverless',
+      payload,
+      queryDrafts,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+      rejectInitializing,
+      requireDrizzleKit,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+      resolveInitializing,
+      rollbackTransaction,
+      updateGlobal,
+      updateGlobalVersion,
+      updateJobs,
+      updateMany,
+      updateOne,
+      updateVersion,
+      upsert,
+    })
+
+    adapter.blocksToJsonMigrator = createBlocksToJsonMigrator({
+      adapter: adapter as unknown as DrizzleAdapter,
+      executeMethod,
+      sanitizeStatements,
+    })
+
+    return adapter
+  }
+
+  return {
+    name: 'postgres',
+    allowIDOnCreate,
+    defaultIDType: payloadIDType,
+    init: adapter,
+  }
+}
+
+export type {
+  Args as AuroraServerlessAdapterArgs,
+  AuroraServerlessAdapter,
+  GeneratedDatabaseSchema,
+} from './types.js'
+export type {
+  MigrateDownArgs,
+  MigrateUpArgs,
+  PostgresOperatorHandler,
+  PostgresQueryConfig,
+} from '@payloadcms/drizzle/postgres'
+export { geometryColumn, postgresUnaccent } from '@payloadcms/drizzle/postgres'
+export { sql } from 'drizzle-orm'

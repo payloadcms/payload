@@ -27,7 +27,10 @@
     "recharts": "3.2.1"
   },
   "devDependencies": {
+    "@aws-sdk/client-rds": "^3.614.0",
+    "@aws-sdk/client-rds-data": "^3.614.0",
     "@aws-sdk/client-s3": "^3.614.0",
+    "@aws-sdk/client-secrets-manager": "^3.614.0",
     "@azure/storage-blob": "^12.11.0",
     "@cloudflare/workers-types": "4.20260218.0",
     "@date-fns/tz": "1.2.0",
@@ -39,6 +42,7 @@
     "@next/env": "16.3.3",
     "@opennextjs/cloudflare": "1.16.1",
     "@payloadcms/admin-bar": "workspace:*",
+    "@payloadcms/db-aurora-serverless": "workspace:*",
     "@payloadcms/db-d1-sqlite": "workspace:*",
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/db-postgres": "workspace:*",
