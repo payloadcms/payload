@@ -18,6 +18,7 @@ export const deleteMany: DeleteMany = async function deleteMany(
     adapter: this,
     collectionSlug,
     fields: collectionConfig.flattenedFields,
+    req,
     where,
   })
 

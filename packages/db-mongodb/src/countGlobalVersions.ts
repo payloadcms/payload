@@ -26,6 +26,7 @@ export const countGlobalVersions: CountGlobalVersions = async function countGlob
     adapter: this,
     fields: buildVersionGlobalFields(this.payload.config, globalConfig, true),
     locale,
+    req,
     where,
   })
 

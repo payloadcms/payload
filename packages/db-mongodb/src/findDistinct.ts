@@ -75,9 +75,11 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
 
   const query = await buildQuery({
     adapter: this,
+    branch: args.branch,
     collectionSlug: args.collection,
     fields: collectionConfig.flattenedFields,
     locale: args.locale,
+    req: args.req,
     where,
   })
 
@@ -181,6 +183,7 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
       })
       const relatedAccess = args.relatedAccess?.[fieldPath]
       const relatedWhere = await resolveBranchQuery({
+        branch: args.branch,
         collectionSlug: relationTo,
         req: args.req,
         where: relatedAccess,
@@ -189,9 +192,11 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
         relatedWhere && Object.keys(relatedWhere).length
           ? await buildQuery({
               adapter: this,
+              branch: args.branch,
               collectionSlug: relationTo,
               fields: foreignCollectionConfig.flattenedFields,
               locale: args.locale,
+              req: args.req,
               where: relatedWhere,
             })
           : null

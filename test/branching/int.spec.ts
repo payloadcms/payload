@@ -3067,6 +3067,91 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(onMain.docs).toHaveLength(0)
     })
 
+    test('should hide a matching main document when its branch replacement does not match', async () => {
+      await payload.update({
+        id: mainDocID,
+        branch: 'cow',
+        collection: postsSlug,
+        data: { title: 'does not match main' },
+      })
+
+      const onBranch = await payload.find({
+        branch: 'cow',
+        collection: postsSlug,
+        limit: 1,
+        page: 1,
+        where: { title: { equals: 'original on main' } },
+      })
+      const count = await payload.count({
+        branch: 'cow',
+        collection: postsSlug,
+        where: { title: { equals: 'original on main' } },
+      })
+      const onMain = await payload.find({
+        collection: postsSlug,
+        pagination: false,
+        where: { title: { equals: 'original on main' } },
+      })
+
+      expect(onBranch.docs).toHaveLength(0)
+      expect(onBranch.totalDocs).toBe(0)
+      expect(onBranch.totalPages).toBe(1)
+      expect(count.totalDocs).toBe(0)
+      expect(onMain.docs).toHaveLength(1)
+    })
+
+    test('should hide a relationship-path match replaced by nonmatching branch content', async () => {
+      const category = await payload.create({
+        collection: categoriesSlug,
+        data: { name: 'main relationship match' },
+      })
+
+      await payload.update({
+        id: mainDocID,
+        collection: postsSlug,
+        data: { category: category.id },
+      })
+      await payload.update({
+        id: category.id,
+        branch: 'cow',
+        collection: categoriesSlug,
+        data: { name: 'branch relationship replacement' },
+      })
+
+      const mainValueOnBranch = await payload.find({
+        branch: 'cow',
+        collection: postsSlug,
+        pagination: false,
+        where: { 'category.name': { equals: 'main relationship match' } },
+      })
+      const branchValueOnBranch = await payload.find({
+        branch: 'cow',
+        collection: postsSlug,
+        pagination: false,
+        where: { 'category.name': { equals: 'branch relationship replacement' } },
+      })
+
+      expect(mainValueOnBranch.docs).toHaveLength(0)
+      expect(branchValueOnBranch.docs.map((doc) => String(doc.id))).toContain(String(mainDocID))
+
+      const categoryRows = await payload.find({
+        branch: false,
+        collection: categoriesSlug,
+        pagination: false,
+        where: {
+          or: [{ id: { equals: category.id } }, { _branchDocID: { equals: category.id } }],
+        },
+      })
+
+      for (const categoryRow of categoryRows.docs) {
+        await payload.delete({
+          id: categoryRow.id,
+          branch: false,
+          collection: categoriesSlug,
+        })
+      }
+    })
+
     test('should record the update in the changeset registry', async () => {
       await payload.update({
         id: mainDocID,
@@ -4722,6 +4807,36 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       const ids = (onBranch.posts?.docs ?? []).map((doc: any) => String(doc?.id ?? doc))
 
       expect(ids.filter((id) => id === String(mainPostID))).toHaveLength(1)
+    })
+
+    test('should filter join paths with the active branch content', async () => {
+      await payload.update({
+        id: mainPostID,
+        branch: 'joinwork',
+        collection: postsSlug,
+        data: { title: 'edited join title' },
+      })
+
+      const mainTitleOnBranch = await payload.find({
+        branch: 'joinwork',
+        collection: categoriesSlug,
+        where: { 'posts.title': { equals: 'main post' } },
+      })
+      const branchTitleOnBranch = await payload.find({
+        branch: 'joinwork',
+        collection: categoriesSlug,
+        where: { 'posts.title': { equals: 'edited join title' } },
+      })
+      const mainTitleCount = await payload.count({
+        branch: 'joinwork',
+        collection: categoriesSlug,
+        where: { 'posts.title': { equals: 'main post' } },
+      })
+
+      expect(mainTitleOnBranch.docs).toHaveLength(0)
+      expect(mainTitleOnBranch.totalDocs).toBe(0)
+      expect(mainTitleCount.totalDocs).toBe(0)
+      expect(branchTitleOnBranch.docs.map((doc) => String(doc.id))).toContain(String(categoryID))
     })
 
     test('should use the active branch draft in a join read', async () => {

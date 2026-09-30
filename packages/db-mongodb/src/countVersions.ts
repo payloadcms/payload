@@ -36,8 +36,10 @@ export const countVersions: CountVersions = async function countVersions(
 
   const query = await buildQuery({
     adapter: this,
+    branch,
     fields: buildVersionCollectionFields(this.payload.config, collectionConfig, true),
     locale,
+    req,
     where,
   })
 

@@ -59,8 +59,10 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
 
   const query = await buildQuery({
     adapter: this,
+    branch,
     fields: versionFields,
     locale,
+    req,
     where,
   })
 
