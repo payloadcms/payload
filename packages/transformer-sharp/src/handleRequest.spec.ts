@@ -1,0 +1,193 @@
+import type { PayloadRequest } from 'payload'
+
+import { readFileSync } from 'fs'
+import path from 'path'
+import sharp from 'sharp'
+import { fileURLToPath } from 'url'
+import { describe, expect, it, vi } from 'vitest'
+
+import { createHandleRequest } from './handleRequest.js'
+import { resolveSharpDynamicDefaults } from './sharpTransformer.js'
+
+const dirname = path.dirname(fileURLToPath(import.meta.url))
+// 200x200, 44 frames.
+const animatedWebp = readFileSync(path.resolve(dirname, '../../../test/uploads/animated.webp'))
+
+const makeReq = ({ query = '' }: { query?: string } = {}): PayloadRequest =>
+  ({
+    headers: new Headers(),
+    method: 'GET',
+    payload: { logger: { error: vi.fn() } },
+    searchParams: new URLSearchParams(query),
+  }) as unknown as PayloadRequest
+
+const makeSourceImage = async ({
+  background = { b: 0, g: 128, r: 255 },
+  format = 'png' as Parameters<ReturnType<typeof sharp>['toFormat']>[0],
+  height = 200,
+  width = 400,
+} = {}): Promise<Buffer> =>
+  sharp({ create: { background, channels: 3, height, width } })
+    .toFormat(format)
+    .toBuffer()
+
+const resizeReal = async ({
+  dynamicDefaults = resolveSharpDynamicDefaults(),
+  mimeType = 'image/png',
+  query,
+  sourceBuffer,
+}: {
+  dynamicDefaults?: ReturnType<typeof resolveSharpDynamicDefaults>
+  mimeType?: string
+  query: string
+  sourceBuffer: Buffer
+}) => {
+  const handleRequest = createHandleRequest({ dynamicDefaults, sharpDependency: sharp })
+  const getSourceFile = vi.fn().mockResolvedValue(new Response(sourceBuffer))
+
+  const result = await handleRequest({
+    collectionSlug: 'media',
+    documentID: '1',
+    filename: 'logo.png',
+    getSourceFile,
+    mimeType,
+    req: makeReq({ query }),
+  })
+
+  return result
+}
+
+const getOutputMetadata = async (result: Awaited<ReturnType<typeof resizeReal>>) =>
+  sharp(Buffer.from(await result.response!.arrayBuffer())).metadata()
+
+describe('createHandleRequest', () => {
+  it('should reject a width-only request whose aspect-ratio-derived output exceeds maxPixels', async () => {
+    const sourceBuffer = await makeSourceImage({ height: 100, width: 10 })
+
+    // 10x100 source at width=100 renders 100x1000 = 100,000 pixels, 10x the limit.
+    const result = await resizeReal({
+      dynamicDefaults: resolveSharpDynamicDefaults({ maxPixels: 10_000 }),
+      query: 'width=100',
+      sourceBuffer,
+    })
+
+    expect(result.response?.status).toBe(400)
+  })
+
+  it.each(['width=1000&height=1000', 'width=1000'])(
+    'should count every frame of an animated source against maxPixels (%s)',
+    async (query) => {
+      // 1000x1000 per frame is within the 16,777,216 default, but across 44 frames
+      // Sharp would render 44,000,000 pixels.
+      const result = await resizeReal({
+        mimeType: 'image/webp',
+        query,
+        sourceBuffer: animatedWebp,
+      })
+
+      expect(result.response?.status).toBe(400)
+    },
+  )
+
+  it('should resize every frame of an animated source within maxPixels', async () => {
+    const metadata = await sharp(
+      Buffer.from(
+        await (
+          await resizeReal({
+            mimeType: 'image/webp',
+            query: 'width=100',
+            sourceBuffer: animatedWebp,
+          })
+        ).response!.arrayBuffer(),
+      ),
+      { animated: true },
+    ).metadata()
+
+    expect(metadata.width).toBe(100)
+    expect(metadata.pages).toBe(44)
+  })
+
+  it('should apply the EXIF orientation of the source before resizing', async () => {
+    // Stored 400x200 but tagged orientation 6, so it displays as 200x400.
+    const sourceBuffer = await sharp(await makeSourceImage({ format: 'jpeg' }))
+      .withMetadata({ orientation: 6 })
+      .toBuffer()
+
+    const metadata = await getOutputMetadata(
+      await resizeReal({ mimeType: 'image/jpeg', query: 'width=100', sourceBuffer }),
+    )
+
+    expect(metadata.width).toBe(100)
+    expect(metadata.height).toBe(200)
+  })
+
+  it('should budget maxPixels against the EXIF-oriented source dimensions', async () => {
+    // Stored 100x10 but tagged orientation 6, so it displays as 10x100.
+    const sourceBuffer = await sharp(
+      await makeSourceImage({ format: 'jpeg', height: 10, width: 100 }),
+    )
+      .withMetadata({ orientation: 6 })
+      .toBuffer()
+
+    // Displayed 10x100 at width=100 renders 100x1000 = 100,000 pixels, 10x the limit.
+    const result = await resizeReal({
+      dynamicDefaults: resolveSharpDynamicDefaults({ maxPixels: 10_000 }),
+      mimeType: 'image/jpeg',
+      query: 'width=100',
+      sourceBuffer,
+    })
+
+    expect(result.response?.status).toBe(400)
+  })
+
+  it('should not upscale when withoutEnlargement is configured as the default', async () => {
+    const sourceBuffer = await makeSourceImage({ height: 100, width: 100 })
+
+    const metadata = await getOutputMetadata(
+      await resizeReal({
+        dynamicDefaults: resolveSharpDynamicDefaults({ withoutEnlargement: true }),
+        query: 'width=300',
+        sourceBuffer,
+      }),
+    )
+
+    expect(metadata.width).toBe(100)
+    expect(metadata.height).toBe(100)
+  })
+
+  it('should allow a per-request withoutEnlargement=false to override a configured withoutEnlargement=true default', async () => {
+    const sourceBuffer = await makeSourceImage({ height: 100, width: 100 })
+
+    const metadata = await getOutputMetadata(
+      await resizeReal({
+        dynamicDefaults: resolveSharpDynamicDefaults({ withoutEnlargement: true }),
+        query: 'width=300&withoutEnlargement=false',
+        sourceBuffer,
+      }),
+    )
+
+    expect(metadata.width).toBe(300)
+  })
+
+  it.each([
+    ['jpeg', 'jpeg'],
+    ['png', 'png'],
+    ['webp', 'webp'],
+    ['tiff', 'tiff'],
+    ['gif', 'gif'],
+    // AVIF is stored in a HEIF container — Sharp reports its metadata format as
+    // "heif", not "avif", even though the MIME type and file extension are AVIF.
+    ['avif', 'heif'],
+  ] as const)(
+    'should retain the source format (%s) in the resized output',
+    async (format, expectedMetadataFormat) => {
+      const sourceBuffer = await makeSourceImage({ format })
+
+      const metadata = await getOutputMetadata(
+        await resizeReal({ mimeType: `image/${format}`, query: 'width=100', sourceBuffer }),
+      )
+
+      expect(metadata.format).toBe(expectedMetadataFormat)
+    },
+  )
+})
