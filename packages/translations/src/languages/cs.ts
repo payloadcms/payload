@@ -114,6 +114,7 @@ export const csTranslations: DefaultTranslationsObject = {
     noItems:
       'Na vaší nástěnce nejsou žádné widgety. Můžete je přidat z menu „Nástěnka“, které se nachází v horní liště.',
     resetLayout: 'Obnovit rozložení',
+    resizeWidget: 'Změnit velikost {{label}}, aktuální velikost: {{size}}',
     searchWidgets: 'Hledat widgety...',
     widgetCollectionRequired: 'Collection je povinná.',
     widgetConfigurationError: 'Chyba v konfiguraci widgetu',
@@ -312,6 +313,7 @@ export const csTranslations: DefaultTranslationsObject = {
     create: 'Vytvořit',
     created: 'Vytvořeno',
     createdAt: 'Vytvořeno v',
+    createdBy: 'Vytvořeno kým',
     createNew: 'Vytvořit nové',
     createNewLabel: 'Vytvořit nový {{label}}',
     creating: 'Vytváření',
@@ -514,6 +516,7 @@ export const csTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Nadcházející události',
     updatedAgo: 'Aktualizováno před {{distance}}',
     updatedAt: 'Aktualizováno v',
+    updatedBy: 'Aktualizováno uživatelem',
     updatedCountSuccessfully: 'Úspěšně aktualizováno {{count}} {{label}}.',
     updatedLabelSuccessfully: 'Úspěšně aktualizovaný {{label}}.',
     updatedSuccessfully: 'Úspěšně aktualizováno.',

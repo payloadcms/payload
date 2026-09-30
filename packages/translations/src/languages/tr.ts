@@ -116,6 +116,7 @@ export const trTranslations: DefaultTranslationsObject = {
     noItems:
       'Panoda hiç widgetiniz yok. Bunları, üst çubukta yer alan "Gösterge Tablosu" menüsünden ekleyebilirsiniz.',
     resetLayout: 'Düzeni Sıfırla',
+    resizeWidget: '{{label}} boyutunu değiştir, mevcut boyut: {{size}}',
     searchWidgets: "Arama widget'ları...",
     widgetCollectionRequired: 'Collection gereklidir.',
     widgetConfigurationError: 'Widget yapılandırma hatası',
@@ -321,6 +322,7 @@ export const trTranslations: DefaultTranslationsObject = {
     create: 'Oluştur',
     created: 'Oluşturma tarihi',
     createdAt: 'Oluşturma tarihi',
+    createdBy: 'Oluşturan',
     createNew: 'Yeni oluştur',
     createNewLabel: 'Yeni bir {{label}} oluştur',
     creating: 'Oluşturuluyor',
@@ -525,6 +527,7 @@ export const trTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Yaklaşan Etkinlikler',
     updatedAgo: '{{distance}} önce güncellendi',
     updatedAt: 'Güncellenme tarihi',
+    updatedBy: 'Güncelleyen',
     updatedCountSuccessfully: '{{count}} {{label}} başarıyla güncellendi.',
     updatedLabelSuccessfully: '{{label}} başarıyla güncellendi.',
     updatedSuccessfully: 'Başarıyla güncellendi.',

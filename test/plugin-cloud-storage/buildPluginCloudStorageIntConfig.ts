@@ -135,8 +135,8 @@ export function buildPluginCloudStorageIntConfig({
           prefix,
         },
         [mediaWithThrowingHookSlug]: true,
-        [versionedS3MediaSlug]: { prefix: collectionPrefix },
         [restrictedMediaSlug]: true,
+        [versionedS3MediaSlug]: { prefix: collectionPrefix },
       },
       config: {
         credentials: {
@@ -185,6 +185,7 @@ export function buildPluginCloudStorageIntConfig({
     collections: {
       [testMetadataSlug]: {
         adapter: () => ({
+          name: 'test-metadata-adapter',
           copyFile: ({ from, to }) => {
             const source = uploadedTestFiles.get(from)
 
@@ -195,7 +196,6 @@ export function buildPluginCloudStorageIntConfig({
             uploadedTestFiles.set(to, { ...source, filename: to })
             return Promise.resolve()
           },
-          name: 'test-metadata-adapter',
           handleDelete: ({ doc, filename }) => {
             recordedCleanupTargets.push({ filename, prefix: doc.prefix })
             uploadedTestFiles.delete(filename)
@@ -229,9 +229,6 @@ export function buildPluginCloudStorageIntConfig({
   })
 
   return buildConfigWithDefaults({
-    suite: useCompositePrefixes
-      ? 'plugin-cloud-storage-composite-prefixes'
-      : 'plugin-cloud-storage',
     config: {
       admin: {
         importMap: {
@@ -265,33 +262,33 @@ export function buildPluginCloudStorageIntConfig({
           sharpTransformer({
             collections: {
               [mediaSlug]: {
-                imageSizes: [
-                  { height: 400, width: 400, crop: 'center', name: 'square' },
-                  { width: 900, height: 450, crop: 'center', name: 'sixteenByNineMedium' },
-                ],
                 resizeOptions: {
+                  height: 200,
                   position: 'center',
                   width: 200,
-                  height: 200,
                 },
+                variants: [
+                  { name: 'square', crop: 'center', height: 400, width: 400 },
+                  { name: 'sixteenByNineMedium', crop: 'center', height: 450, width: 900 },
+                ],
               },
               [mediaWithOverwriteSlug]: {
-                imageSizes: [
-                  { height: 400, width: 400, crop: 'center', name: 'square' },
-                  { width: 900, height: 450, crop: 'center', name: 'sixteenByNineMedium' },
-                ],
                 resizeOptions: {
+                  height: 200,
                   position: 'center',
                   width: 200,
-                  height: 200,
                 },
+                variants: [
+                  { name: 'square', crop: 'center', height: 400, width: 400 },
+                  { name: 'sixteenByNineMedium', crop: 'center', height: 450, width: 900 },
+                ],
               },
               [testMetadataSlug]: {
                 formatOptions: { format: 'webp' },
-                imageSizes: [{ name: 'thumbnail', width: 300 }],
+                variants: [{ name: 'thumbnail', width: 300 }],
               },
               [versionedS3MediaSlug]: {
-                imageSizes: [{ name: 'small', width: 100 }],
+                variants: [{ name: 'small', width: 100 }],
               },
             },
           }),
@@ -312,5 +309,8 @@ export function buildPluginCloudStorageIntConfig({
         `Using plugin-cloud-storage adapter: ${process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER}`,
       )
     },
+    suite: useCompositePrefixes
+      ? 'plugin-cloud-storage-composite-prefixes'
+      : 'plugin-cloud-storage',
   })
 }

@@ -788,7 +788,7 @@ test.describe('Bulk Edit', () => {
       selectLocator: bulkEditForm.locator('.react-select'),
     })
 
-    await bulkEditForm.getByLabel('Tab Text').fill('updated value')
+    await bulkEditForm.getByRole('textbox', { name: 'Tab Text', exact: true }).fill('updated value')
     await bulkEditForm.locator('button[type="submit"]').click()
 
     await expect(bulkEditForm).toBeHidden()

@@ -350,6 +350,39 @@ export const Posts: CollectionConfig = {
 }
 ```
 
+### Authorship (`createdBy` / `updatedBy`) is now enabled by default
+
+Collections and globals now track authorship by default: Payload injects `createdBy` and `updatedBy` polymorphic relationship fields (related to every auth-enabled collection) and stamps them from `req.user` on each write. Previously there was no authorship tracking; you now opt out with `authorship: false`.
+
+**What changes:**
+
+- Every non-internal collection and global gains `createdBy` and `updatedBy` when your config has at least one auth collection. On SQL adapters this adds relationship rows (stored in each entity's `_rels` table), so existing projects need a database migration. In development the schema is pushed automatically; in production, generate a migration with `payload migrate:create` and run `payload migrate`. Existing documents are backfilled with `null`.
+- `createdBy` is only derived on a document's first write, so editing a document whose `createdBy` is `null` (for example a migrated or anonymously created document) does not backfill the editor as the creator.
+- Payload's internal system collections and globals are excluded automatically: `payload-jobs`, `payload-jobs-stats`, `payload-preferences`, `payload-locked-documents`, `payload-migrations`, `payload-query-presets`, and the KV collection.
+
+**Plugins:** plugin-injected collections also receive authorship unless the plugin opts out. In this release:
+
+- **Opted out** (no authorship): `@payloadcms/plugin-search`, `@payloadcms/payload-cloud`, and all `@payloadcms/plugin-ecommerce` collections.
+- **Kept on** (they gain `createdBy` / `updatedBy`): `@payloadcms/plugin-redirects`, `@payloadcms/plugin-form-builder` (forms and form submissions), and `@payloadcms/plugin-import-export` (imports and exports). Existing projects using these plugins on a SQL adapter need a migration for those collections too. To opt one out, set `authorship: false` through that plugin's collection-override option.
+
+**To opt out for an existing collection or global:**
+
+```diff
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  fields: [],
++ authorship: false,
+}
+```
+
+**A codemod is available** to preserve the previous behaviour:
+
+```bash
+npx @payloadcms/codemod --transform migrate-authorship-default
+```
+
+`migrate-authorship-default` adds `authorship: false` to every `CollectionConfig` and `GlobalConfig` in your source that does not already set `authorship`, so your own collections have zero schema changes. It only rewrites your config files — it cannot reach plugin-injected collections, so any plugin that keeps authorship on (above) still gains the fields and requires a migration (or an explicit `authorship: false` override).
+
 ### List View Select API is now the default
 
 The `admin.enableListViewSelectAPI` Collection Config property has been removed. The List View now always uses the [Select API](../queries/select) to query only the active columns, which was previously opt-in.
@@ -478,6 +511,52 @@ Several types and utilities that were re-exported from `@payloadcms/ui` and `@pa
 ```
 
 Running `npx @payloadcms/codemod --transform migrate-aliased-exports` preserves old local bindings by importing renamed symbols with an `as` alias (e.g. `import type { CollectionPreferences as ListPreferences } from 'payload'` or `import { createPayloadRequestFromWebRequest as createPayloadRequest } from 'payload'`). Run `migrate-payload-request-creation` to complete the request helper's identifier and call-site migration, or drop the other aliases and rename their usages manually if you want to fully commit to the new names.
+
+### Field component types replaced by props types
+
+Field component aliases that wrapped props in `React.ComponentType<Props>` have been removed. Import the props type directly so each component can use `React.FC<Props>` or a function declaration.
+
+```diff
+- import type { TextFieldClientComponent } from 'payload'
++ import type { TextFieldClientProps } from 'payload'
++ import type React from 'react'
+
+- export const CustomTextField: TextFieldClientComponent = (props) => {
++ export const CustomTextField: React.FC<TextFieldClientProps> = (props) => {
+    // ...
+  }
+```
+
+Generic type arguments move to the props type:
+
+```diff
+- import type { FieldErrorClientComponent, TextFieldClient } from 'payload'
++ import type { FieldErrorClientProps, TextFieldClient } from 'payload'
++ import type React from 'react'
+
+- const Error: FieldErrorClientComponent<TextFieldClient> = (props) => null
++ const Error: React.FC<FieldErrorClientProps<TextFieldClient>> = (props) => null
+```
+
+Function declarations can annotate their parameter without a component wrapper:
+
+```tsx
+import type { TextFieldServerProps } from 'payload'
+
+export default async function CustomTextField(props: TextFieldServerProps) {
+  // ...
+}
+```
+
+This covers main field components, labels, descriptions, errors, diffs, and block row labels. Admin-view types such as `AdminViewComponent` and `DocumentTabComponent` are separate.
+
+#### Codemod
+
+To migrate automatically, there's a codemod for this change available by running:
+
+```bash
+npx @payloadcms/codemod --transform migrate-field-component-types
+```
 
 ### `DefaultValue` function variant is now typed to allow returning a `Promise` ([#17522](https://github.com/payloadcms/payload/pull/17522))
 
@@ -1732,11 +1811,13 @@ Run `npx @payloadcms/codemod --transform migrate-azure-chunk-large-files` to rem
 
 Image resizing is no longer built into `payload` itself. It now ships as an official [file transformer](../upload/transformers), `@payloadcms/transformer-sharp`, that you register under `upload.transformers`.
 
-This affects three things:
+This affects four things:
 
 1. The top-level `sharp` config property has been removed. Passing a Sharp instance now happens through `sharpTransformer({ sharp })` instead.
 2. Per-collection Sharp options — `constructorOptions`, `formatOptions`, `resizeOptions`, `trimOptions`, and `withMetadata` — have been removed from `CollectionConfig['upload']`. They're now authored through `sharpTransformer({ collections })`.
+   - `imageSizes` has also been removed from `CollectionConfig['upload']`. Image sizes are now declared as `variants` on `sharpTransformer({ collections: { <slug>: { variants } } })`. The entries themselves (`name`, `width`, `height`, `generateImageName`, and so on) are unchanged. A collection that still sets `upload.imageSizes` fails the build.
 3. `sharp` is no longer a dependency of `payload` at all (previously a `devDependency`, not a runtime `dependency`). Install `@payloadcms/transformer-sharp` explicitly.
+4. The Sharp-specific types `SharpDependency`, `ImageUploadFormatOptions`, `ImageUploadTrimOptions`, and `SharpImageSizeOptions` are no longer exported from `payload`. Import `SharpDependency` from `@payloadcms/transformer-sharp`. For the option types, use `SharpCollectionConfig['formatOptions']`, `SharpCollectionConfig['trimOptions']`, and `NonNullable<SharpCollectionConfig['variants']>[number]` from the same package.
 
 ```sh
 pnpm add @payloadcms/transformer-sharp
@@ -1764,7 +1845,7 @@ pnpm add @payloadcms/transformer-sharp
 +         collections: {
 +           media: {
 +             resizeOptions: { width: 2048, height: 2048 },
-+             imageSizes: [{ name: 'thumbnail', width: 400, height: 300 }],
++             variants: [{ name: 'thumbnail', width: 400, height: 300 }],
 +           },
 +         },
 +       }),
@@ -1773,9 +1854,9 @@ pnpm add @payloadcms/transformer-sharp
   })
 ```
 
-Run `npx @payloadcms/codemod --transform migrate-sharp-to-transformer` to migrate automatically. The codemod moves a top-level `sharp` dependency and inline collection Sharp options into `sharpTransformer({ collections })`, appends to an existing `upload.transformers` array if you already have one, and leaves anything it can't safely rewrite in place with a note — for example, a `collections` array built by a function call, or a collection defined outside the `buildConfig` call. Review those manually.
+Run `npx @payloadcms/codemod --transform migrate-sharp-to-transformer` to migrate automatically. The codemod moves a top-level `sharp` dependency and inline collection Sharp options — including `crop` and `focalPoint` — into `sharpTransformer({ collections })` (writing `imageSizes` as `variants`), appends to an existing `upload.transformers` array if you already have one, and leaves anything it can't safely rewrite in place with a note — for example, a `collections` array built by a function call, or a collection defined outside the `buildConfig` call. Review those manually. For a config that already registers `sharpTransformer`, it only renames `imageSizes` to `variants` inside the existing `sharpTransformer` call and flags a leftover top-level `sharp` property; it doesn't move any remaining collection options.
 
-`imageSizes`, `crop`, and `focalPoint` are still readable at `collection.upload.imageSizes`/`.crop`/`.focalPoint` — `sharpTransformer` writes a projection of what you configure back onto the sanitized collection at startup, so the Admin Panel, generated types, and the stored `sizes` shape on your documents are unchanged. This write-back is why `crop`/`focalPoint`/`imageSizes` are not in the list of removed options above — only the Sharp-specific processing options moved.
+Your `variants`, `crop`, and `focalPoint` are still readable at `collection.upload.imageSizes`/`.crop`/`.focalPoint` on the **sanitized** config (for example `req.payload.collections.media.config.upload.imageSizes`). `sharpTransformer` writes a projection of what you configure back onto the sanitized collection at startup, so the Admin Panel, generated types, and the stored `sizes` shape on your documents are unchanged. For a collection configured on `sharpTransformer`, a `crop` or `focalPoint` set on the transformer replaces the collection's own value; one left unset there keeps the collection's. `imageSizes` can't be set on the collection at all.
 
 If you inject a custom Sharp build or version, pass it the same way:
 
@@ -1784,7 +1865,17 @@ If you inject a custom Sharp build or version, pass it the same way:
 + sharpTransformer({ sharp: myCustomSharp })
 ```
 
-`sharpTransformer` can also resize images at request time (`/api/media/file/photo.png?width=400`). This is new in Payload 4 and **disabled by default**, so a migrated config keeps serving only the original file and your pre-generated `imageSizes`, as in Payload 3.x. The codemod doesn't enable it. To opt in, pass `dynamic: true` or `dynamic: { collections: ['media'] }` — see [Dynamic (request-time) resizing](../upload/transformers#dynamic-request-time-resizing), and [Securing dynamic resizing](../upload/transformers#securing-dynamic-resizing) before enabling it on a publicly readable collection.
+`sharpTransformer` can also resize images at request time (`/api/media/file/photo.png?width=400`). This is new in Payload 4 and **disabled by default**, so a migrated config keeps serving only the original file and your pre-generated `variants`. The codemod doesn't enable it. To opt in, pass `dynamic: true` or `dynamic: { collections: ['media'] }` — see [Dynamic (request-time) resizing](../upload/transformers#dynamic-request-time-resizing), and [Securing dynamic resizing](../upload/transformers#securing-dynamic-resizing) before enabling it on a publicly readable collection.
+
+#### The file endpoint changes once any transformer is registered
+
+Registering any transformer under `upload.transformers` — including `sharpTransformer()` with dynamic resizing off — routes every file request through the transformer-aware handler:
+
+- A file must belong to an upload document to be served. A file that exists in storage without a matching document now returns `404`.
+- For files whose MIME type a transformer declares (every image, with `sharpTransformer()`), `access.read` can run twice per request: once with `req.fileTransform` set to `true` to decide a possible transform, and once without it for an ordinary read. Keep `access.read` cheap, and use `req.fileTransform` to restrict transformed reads — see [Access control](../upload/transformers#access-control).
+- Responses produced by a transformer always carry Payload's CORS headers, which `modifyResponseHeaders` can't override.
+
+To link to a file from your own code, including with transformer query parameters, use the new `generatePayloadFileURL` helper (exported from `payload` and `payload/shared`). It always builds the access-controlled Payload file endpoint, so links never bypass `access.read` by pointing straight at storage.
 
 ### Storage adapters always insert the `prefix` field now — `alwaysInsertFields` removed
 

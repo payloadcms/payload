@@ -115,6 +115,7 @@ export const plTranslations: DefaultTranslationsObject = {
     noItems:
       'Na Twoim pulpicie nie ma żadnych widgetów. Możesz je dodać z menu "Pulpit", które znajduje się na górnej belce.',
     resetLayout: 'Zresetuj Układ',
+    resizeWidget: 'Zmień rozmiar {{label}}, obecny rozmiar: {{size}}',
     searchWidgets: 'Szukaj widgetów...',
     widgetCollectionRequired: 'Collection jest wymagana.',
     widgetConfigurationError: 'Błąd konfiguracji widgetu',
@@ -316,6 +317,7 @@ export const plTranslations: DefaultTranslationsObject = {
     create: 'Stwórz',
     created: 'Utworzono',
     createdAt: 'Data utworzenia',
+    createdBy: 'Utworzone przez',
     createNew: 'Stwórz nowy',
     createNewLabel: 'Stwórz nowy {{label}}',
     creating: 'Tworzenie',
@@ -517,6 +519,7 @@ export const plTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Nadchodzące Wydarzenia',
     updatedAgo: 'Zaktualizowano {{distance}} temu',
     updatedAt: 'Data edycji',
+    updatedBy: 'Zaktualizowano przez',
     updatedCountSuccessfully: 'Pomyślnie zaktualizowano {{count}} {{label}}.',
     updatedLabelSuccessfully: 'Pomyślnie zaktualizowano {{label}}.',
     updatedSuccessfully: 'Aktualizacja zakończona sukcesem.',

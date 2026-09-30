@@ -114,6 +114,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     noItems:
       'Det er ingen widgets på dashbordet ditt. Du kan legge dem til fra "Dashboard" -menyen som ligger i toppfeltet.',
     resetLayout: 'Tilbakestill layout',
+    resizeWidget: 'Endre størrelsen på {{label}}, gjeldende størrelse: {{size}}',
     searchWidgets: 'Søk widgets...',
     widgetCollectionRequired: 'Collectie er påkrevd.',
     widgetConfigurationError: 'Feil i widget-konfigurasjon',
@@ -318,6 +319,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     create: 'Opprett',
     created: 'Opprettet',
     createdAt: 'Opprettet',
+    createdBy: 'Opprettet av',
     createNew: 'Opprett ny',
     createNewLabel: 'Opprett ny {{label}}',
     creating: 'Oppretter',
@@ -521,6 +523,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Kommende hendelser',
     updatedAgo: 'Oppdatert for {{distance}} siden',
     updatedAt: 'Oppdatert',
+    updatedBy: 'Oppdatert av',
     updatedCountSuccessfully: 'Oppdaterte {{count}} {{label}} vellykket.',
     updatedLabelSuccessfully: 'Oppdatert {{label}} vellykket.',
     updatedSuccessfully: 'Oppdatert.',

@@ -51,20 +51,31 @@ export function createHandleRequest({
 
     const sourceBuffer = Buffer.from(await source.arrayBuffer())
 
-    const sharpOptions: SharpOptions = ANIMATED_MIME_TYPES.includes(mimeType)
-      ? { animated: true }
-      : {}
+    const isAnimated = ANIMATED_MIME_TYPES.includes(mimeType)
+    const sharpOptions: SharpOptions = isAnimated ? { animated: true } : {}
 
     const withoutEnlargement = parseResult.withoutEnlargement ?? dynamicDefaults.withoutEnlargement
 
-    // With a single dimension Sharp derives the other from the aspect ratio, so the
-    // output size is only known once the source is probed.
-    if (parseResult.width === undefined || parseResult.height === undefined) {
+    // The output size is only known once the source is probed: with a single dimension
+    // Sharp derives the other from the aspect ratio, `fit: 'outside'` can overflow the
+    // requested box along one axis, and an animated source is resized frame by frame,
+    // so its real cost is the per-frame output times the frame count.
+    if (
+      isAnimated ||
+      parseResult.width === undefined ||
+      parseResult.height === undefined ||
+      dynamicDefaults.fit === 'outside'
+    ) {
       const metadata = await sharpDependency(sourceBuffer, sharpOptions).metadata()
-      const output = getAspectRatioOutputDimensions({
+      const frameCount = isAnimated ? (metadata.pages ?? 1) : 1
+      const frameHeight = metadata.pageHeight ?? metadata.height
+      // EXIF orientations 5-8 rotate the image by 90°, so `.rotate()` below swaps its axes.
+      const isRotatedQuarterTurn = [5, 6, 7, 8].includes(metadata.orientation!)
+      const output = getOutputDimensions({
+        fit: dynamicDefaults.fit,
         height: parseResult.height,
-        sourceHeight: metadata.pageHeight ?? metadata.height,
-        sourceWidth: metadata.width,
+        sourceHeight: isRotatedQuarterTurn ? metadata.width : frameHeight,
+        sourceWidth: isRotatedQuarterTurn ? frameHeight : metadata.width,
         width: parseResult.width,
         withoutEnlargement,
       })
@@ -73,14 +84,16 @@ export function createHandleRequest({
         output &&
         (output.width > dynamicDefaults.maxWidth ||
           output.height > dynamicDefaults.maxHeight ||
-          output.width * output.height > dynamicDefaults.maxPixels)
+          output.width * output.height * frameCount > dynamicDefaults.maxPixels)
       ) {
+        const frameDescription = frameCount > 1 ? ` across ${frameCount} frames` : ''
+
         return {
           response: Response.json(
             {
               errors: [
                 {
-                  message: `Requested dimensions (${output.width}x${output.height}) exceed the configured maximum.`,
+                  message: `Requested dimensions (${output.width}x${output.height}${frameDescription}) exceed the configured maximum.`,
                 },
               ],
             },
@@ -91,7 +104,9 @@ export function createHandleRequest({
       }
     }
 
+    // Sharp drops the EXIF orientation tag on output, so apply it to the pixels first.
     const resizedBuffer = await sharpDependency(sourceBuffer, sharpOptions)
+      .rotate()
       .resize({
         fit: dynamicDefaults.fit,
         height: parseResult.height,
@@ -115,24 +130,42 @@ export function createHandleRequest({
   }
 }
 
-function getAspectRatioOutputDimensions({
+/**
+ * The per-frame output size. When both dimensions are requested with any `fit` other
+ * than `'outside'` this is the requested box, an upper bound (`fit: 'contain'`/`'inside'`
+ * or `withoutEnlargement` can render smaller), which is what a resource budget needs.
+ * `'outside'` scales to cover the box, so one axis can exceed it.
+ */
+function getOutputDimensions({
+  fit,
   height,
   sourceHeight,
   sourceWidth,
   width,
   withoutEnlargement,
 }: {
+  fit: SharpDynamicDefaults['fit']
   height: number | undefined
   sourceHeight: number | undefined
   sourceWidth: number | undefined
   width: number | undefined
   withoutEnlargement: boolean
 }): { height: number; width: number } | undefined {
+  const hasBothDimensions = width !== undefined && height !== undefined
+
+  if (hasBothDimensions && fit !== 'outside') {
+    return { height, width }
+  }
+
   if (!sourceWidth || !sourceHeight) {
     return undefined
   }
 
-  const scale = width !== undefined ? width / sourceWidth : height! / sourceHeight
+  const scale = hasBothDimensions
+    ? Math.max(width / sourceWidth, height / sourceHeight)
+    : width !== undefined
+      ? width / sourceWidth
+      : height! / sourceHeight
   const effectiveScale = withoutEnlargement ? Math.min(scale, 1) : scale
 
   return {

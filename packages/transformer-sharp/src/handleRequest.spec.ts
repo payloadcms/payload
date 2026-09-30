@@ -1,10 +1,17 @@
 import type { PayloadRequest } from 'payload'
 
+import { readFileSync } from 'fs'
+import path from 'path'
 import sharp from 'sharp'
+import { fileURLToPath } from 'url'
 import { describe, expect, it, vi } from 'vitest'
 
 import { createHandleRequest } from './handleRequest.js'
 import { resolveSharpDynamicDefaults } from './sharpTransformer.js'
+
+const dirname = path.dirname(fileURLToPath(import.meta.url))
+// 200x200, 44 frames.
+const animatedWebp = readFileSync(path.resolve(dirname, '../../../test/uploads/animated.webp'))
 
 const makeReq = ({ query = '' }: { query?: string } = {}): PayloadRequest =>
   ({
@@ -60,6 +67,72 @@ describe('createHandleRequest', () => {
     // 10x100 source at width=100 renders 100x1000 = 100,000 pixels, 10x the limit.
     const result = await resizeReal({
       dynamicDefaults: resolveSharpDynamicDefaults({ maxPixels: 10_000 }),
+      query: 'width=100',
+      sourceBuffer,
+    })
+
+    expect(result.response?.status).toBe(400)
+  })
+
+  it.each(['width=1000&height=1000', 'width=1000'])(
+    'should count every frame of an animated source against maxPixels (%s)',
+    async (query) => {
+      // 1000x1000 per frame is within the 16,777,216 default, but across 44 frames
+      // Sharp would render 44,000,000 pixels.
+      const result = await resizeReal({
+        mimeType: 'image/webp',
+        query,
+        sourceBuffer: animatedWebp,
+      })
+
+      expect(result.response?.status).toBe(400)
+    },
+  )
+
+  it('should resize every frame of an animated source within maxPixels', async () => {
+    const metadata = await sharp(
+      Buffer.from(
+        await (
+          await resizeReal({
+            mimeType: 'image/webp',
+            query: 'width=100',
+            sourceBuffer: animatedWebp,
+          })
+        ).response!.arrayBuffer(),
+      ),
+      { animated: true },
+    ).metadata()
+
+    expect(metadata.width).toBe(100)
+    expect(metadata.pages).toBe(44)
+  })
+
+  it('should apply the EXIF orientation of the source before resizing', async () => {
+    // Stored 400x200 but tagged orientation 6, so it displays as 200x400.
+    const sourceBuffer = await sharp(await makeSourceImage({ format: 'jpeg' }))
+      .withMetadata({ orientation: 6 })
+      .toBuffer()
+
+    const metadata = await getOutputMetadata(
+      await resizeReal({ mimeType: 'image/jpeg', query: 'width=100', sourceBuffer }),
+    )
+
+    expect(metadata.width).toBe(100)
+    expect(metadata.height).toBe(200)
+  })
+
+  it('should budget maxPixels against the EXIF-oriented source dimensions', async () => {
+    // Stored 100x10 but tagged orientation 6, so it displays as 10x100.
+    const sourceBuffer = await sharp(
+      await makeSourceImage({ format: 'jpeg', height: 10, width: 100 }),
+    )
+      .withMetadata({ orientation: 6 })
+      .toBuffer()
+
+    // Displayed 10x100 at width=100 renders 100x1000 = 100,000 pixels, 10x the limit.
+    const result = await resizeReal({
+      dynamicDefaults: resolveSharpDynamicDefaults({ maxPixels: 10_000 }),
+      mimeType: 'image/jpeg',
       query: 'width=100',
       sourceBuffer,
     })

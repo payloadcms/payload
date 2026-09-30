@@ -67,7 +67,7 @@ test.describe('Tags', () => {
       if (parentId !== undefined) {
         data[`_h_${tagsSlug}`] = parentId
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- hierarchy `_h_*` field is not in the generated type
+
       const doc = await payload.create({
         collection: tagsSlug,
         data: data as any,
@@ -87,7 +87,7 @@ test.describe('Tags', () => {
       .getByRole('button', { name: 'Create New' })
       .first()
       .click()
-    await page.getByRole('button', { name: 'Tag', exact: true }).click()
+    await page.getByRole('menuitem', { name: 'Tag', exact: true }).click()
 
     const drawer = page.locator('.drawer__content')
     await expect(drawer).toBeVisible()

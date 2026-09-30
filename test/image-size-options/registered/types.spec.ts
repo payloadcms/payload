@@ -1,4 +1,5 @@
-import type { CollectionConfig, ImageSize } from 'payload'
+import type { SharpCollectionConfig } from '@payloadcms/transformer-sharp'
+import type { ImageSize } from 'payload'
 
 import '@payloadcms/transformer-sharp'
 import { describe, expect, test } from 'tstyche'
@@ -15,8 +16,7 @@ declare module 'payload' {
   }
 }
 
-type CollectionUploadConfig = Exclude<NonNullable<CollectionConfig['upload']>, boolean>
-type CollectionImageSize = NonNullable<CollectionUploadConfig['imageSizes']>[number]
+type SharpVariant = NonNullable<SharpCollectionConfig['variants']>[number]
 
 describe('registered image size options', () => {
   test('should accept the options registered by @payloadcms/transformer-sharp', () => {
@@ -35,7 +35,7 @@ describe('registered image size options', () => {
     }>().type.toBeAssignableTo<ImageSize>()
   })
 
-  test('should apply registered options to collection upload configuration', () => {
-    expect<CollectionImageSize>().type.toBe<ImageSize>()
+  test('should apply registered options to sharp transformer variants', () => {
+    expect<SharpVariant>().type.toBe<ImageSize>()
   })
 })

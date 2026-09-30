@@ -15,5 +15,5 @@ export default buildConfig({
   upload: { transformers: [sharpTransformer({ sharp, collections: { media: { resizeOptions: {
         width: 200,
         height: 200,
-    }, imageSizes: [{ name: 'square', height: 400, width: 400 }], crop: false } } })] },
+    }, variants: [{ name: 'square', height: 400, width: 400 }], crop: false } } })] },
 })

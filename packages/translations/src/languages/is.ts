@@ -116,6 +116,7 @@ export const isTranslations: DefaultTranslationsObject = {
     noItems:
       'Það eru engar flísar á mælaborðinu þínu. Þú getur bætt þeim við úr "Mælaborði" valmyndinni sem er staðsett í efsta stikanum.',
     resetLayout: 'Endurstilla útlit',
+    resizeWidget: 'Breyta stærð {{label}}, núverandi stærð: {{size}}',
     searchWidgets: 'Leita að græjum...',
     widgetCollectionRequired: 'Safn er skylt.',
     widgetConfigurationError: 'Villa við stillingu búnaðar',
@@ -315,6 +316,7 @@ export const isTranslations: DefaultTranslationsObject = {
     create: 'Nýskrá',
     created: 'Nýskráð',
     createdAt: 'Nýskráð',
+    createdBy: 'Búið til af',
     createNew: 'Nýskrá',
     createNewLabel: 'Nýskrá: {{label}}',
     creating: 'Nýskrái',
@@ -516,6 +518,7 @@ export const isTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Komandi viðburðir',
     updatedAgo: 'Uppfært fyrir {{distance}} síðan',
     updatedAt: 'Uppfært',
+    updatedBy: 'Uppfært af',
     updatedCountSuccessfully: 'Uppfærsla {{count}} {{label}} tókst.',
     updatedLabelSuccessfully: 'Uppfærði {{label}} með góðum árangri.',
     updatedSuccessfully: 'Uppfærsla tókst.',

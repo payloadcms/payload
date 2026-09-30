@@ -117,6 +117,7 @@ export const roTranslations: DefaultTranslationsObject = {
     noItems:
       'Nu există widget-uri pe tabloul dvs. de bord. Le puteți adăuga din meniul "Tablou de bord" situat în bara superioară.',
     resetLayout: 'Resetează Aspectul',
+    resizeWidget: 'Redimensionează {{label}}, dimensiunea actuală: {{size}}',
     searchWidgets: 'Caută widgeturi...',
     widgetCollectionRequired: 'Colecția este obligatorie.',
     widgetConfigurationError: 'Eroare de configurare a widgetului',
@@ -322,6 +323,7 @@ export const roTranslations: DefaultTranslationsObject = {
     create: 'Creează',
     created: 'Creat',
     createdAt: 'Creat la',
+    createdBy: 'Creat de',
     createNew: 'Creați unul nou',
     createNewLabel: 'Creați un nou {{label}}',
     creating: 'Creare',
@@ -524,6 +526,7 @@ export const roTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Evenimente viitoare',
     updatedAgo: 'Actualizat acum {{distance}}',
     updatedAt: 'Actualizat la',
+    updatedBy: 'Actualizat de',
     updatedCountSuccessfully: 'Actualizate {{count}} {{label}} cu succes.',
     updatedLabelSuccessfully: '{{label}} actualizată cu succes.',
     updatedSuccessfully: 'Actualizat cu succes.',

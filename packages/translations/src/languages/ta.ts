@@ -114,6 +114,7 @@ export const taTranslations: DefaultTranslationsObject = {
     noItems:
       'உங்கள் டாஷ்போர்டில் விட்ஜெட்கள் எதுவும் இல்லை. உங்களுக்கு அவைகளை மேல் பட்டையில் அமைந்துள்ள "டாஷ்போர்ட்" பட்டியல',
     resetLayout: 'அமைப்பை மீட்டமைக்க',
+    resizeWidget: '{{label}} அளவை மாற்று, தற்போதைய அளவு: {{size}}',
     searchWidgets: 'தேடல் கருவிகள்...',
     widgetCollectionRequired: 'Collection அவசியமாக 필요.',
     widgetConfigurationError: 'விட்ஜெட் உள்ளமைவு பிழை',
@@ -317,6 +318,7 @@ export const taTranslations: DefaultTranslationsObject = {
     create: 'உருவாக்கு',
     created: 'உருவாக்கப்பட்டது',
     createdAt: 'உருவாக்கப்பட்ட நாள்',
+    createdBy: 'உருவாக்கியவர்',
     createNew: 'புதியது உருவாக்கு',
     createNewLabel: 'புதிய {{label}} உருவாக்கு',
     creating: 'உருவாக்குகிறது...',
@@ -520,6 +522,7 @@ export const taTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'வரவிருக்கும் நிகழ்ச்சிகள்',
     updatedAgo: 'புதுப்பிக்கப்பட்டது {{distance}} முன்னர்',
     updatedAt: 'புதுப்பிக்கப்பட்ட நேரம்',
+    updatedBy: 'புதுப்பித்தவர்',
     updatedCountSuccessfully: '{{count}} {{label}} வெற்றிகரமாக புதுப்பிக்கப்பட்டது.',
     updatedLabelSuccessfully: '{{label}} வெற்றிகரமாக புதுப்பிக்கப்பட்டது.',
     updatedSuccessfully: 'வெற்றிகரமாக புதுப்பிக்கப்பட்டது.',

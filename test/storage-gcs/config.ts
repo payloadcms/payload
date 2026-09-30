@@ -26,15 +26,15 @@ const uploadOptions = {
     sharpTransformer({
       collections: {
         [mediaSlug]: {
-          imageSizes: [
-            { height: 400, width: 400, crop: 'center', name: 'square' },
-            { width: 900, height: 450, crop: 'center', name: 'sixteenByNineMedium' },
-          ],
           resizeOptions: {
             position: 'center',
             width: 200,
             height: 200,
           },
+          variants: [
+            { height: 400, width: 400, crop: 'center', name: 'square' },
+            { width: 900, height: 450, crop: 'center', name: 'sixteenByNineMedium' },
+          ],
         },
       },
     }),

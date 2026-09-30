@@ -115,6 +115,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     noItems:
       'Na vašoj nadzornoj ploči nema widgeta. Možete ih dodati iz izbornika "Nadzorna ploča" smještenog na vrhu.',
     resetLayout: 'Resetiraj raspored',
+    resizeWidget: 'Promijeni veličinu {{label}}, trenutna veličina: {{size}}',
     searchWidgets: 'Pretraži widgete...',
     widgetCollectionRequired: 'Collection je obvezan.',
     widgetConfigurationError: 'Pogreška u konfiguraciji widgeta',
@@ -316,6 +317,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     create: 'Izradi',
     created: 'Kreirano',
     createdAt: 'Izrađeno u',
+    createdBy: 'Kreirano od strane',
     createNew: 'Izradi novo',
     createNewLabel: 'Izradi novo {{label}}',
     creating: 'U izradi',
@@ -517,6 +519,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Nadolazeći događaji',
     updatedAgo: 'Ažurirano prije {{distance}}',
     updatedAt: 'Ažurirano u',
+    updatedBy: 'Ažurirao/la',
     updatedCountSuccessfully: 'Uspješno ažurirano {{count}} {{label}}.',
     updatedLabelSuccessfully: 'Uspješno ažurirano {{label}}.',
     updatedSuccessfully: 'Uspješno ažurirano.',

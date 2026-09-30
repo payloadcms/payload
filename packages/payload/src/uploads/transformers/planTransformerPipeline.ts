@@ -15,24 +15,16 @@ export async function planTransformerPipeline({
   transformers,
 }: {
   args: CanTransformArgs
-  capability: 'handleRequest' | 'transformFile'
+  capability: TransformerCapability
   transformers: UploadTransformer[]
 }): Promise<UploadTransformer[]> {
   const pipeline: UploadTransformer[] = []
 
-  for (const transformer of transformers) {
-    if (typeof transformer[capability] !== 'function') {
-      continue
-    }
-
-    const matchesAnyMimeType = transformer.mimeTypes.some((pattern) =>
-      matchesMimeType({ mimeType: args.mimeType, pattern }),
-    )
-
-    if (!matchesAnyMimeType) {
-      continue
-    }
-
+  for (const transformer of getCandidateTransformers({
+    capability,
+    mimeType: args.mimeType,
+    transformers,
+  })) {
     if (typeof transformer.canTransform === 'function') {
       const isEligible = await transformer.canTransform(args)
 
@@ -46,3 +38,26 @@ export async function planTransformerPipeline({
 
   return pipeline
 }
+
+/**
+ * The transformers that implement `capability` and declare a MIME pattern matching
+ * `mimeType`, before `canTransform` narrows them. Runs no application-defined code,
+ * so it is safe to call before access control has been checked.
+ */
+export function getCandidateTransformers({
+  capability,
+  mimeType,
+  transformers,
+}: {
+  capability: TransformerCapability
+  mimeType: string
+  transformers: UploadTransformer[]
+}): UploadTransformer[] {
+  return transformers.filter(
+    (transformer) =>
+      typeof transformer[capability] === 'function' &&
+      transformer.mimeTypes.some((pattern) => matchesMimeType({ mimeType, pattern })),
+  )
+}
+
+type TransformerCapability = 'handleRequest' | 'transformFile'

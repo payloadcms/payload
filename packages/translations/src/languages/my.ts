@@ -115,6 +115,7 @@ export const myTranslations: DefaultTranslationsObject = {
     noItems:
       'သင့်ဒက်ရှ်ဘုတ်တွင် ဝစ်ဂျက်များ မရှိပါ။ အပေါ်ဘားရှိ "Dashboard" မီနူးမှ ထည့်သွင်းနိုင်ပါသည်။',
     resetLayout: 'စီစဉ်မှုကို ပြန်လည်သတ်မှတ်ပါ',
+    resizeWidget: '{{label}} ၏ အရွယ်အစားကို ပြောင်းရန်၊ လက်ရှိအရွယ်အစား: {{size}}',
     searchWidgets: 'ဝစ်ဂျက်များ ရှာဖွေပါ...',
     widgetCollectionRequired: 'Collection သည် မဖြစ်မနေလိုအပ်ပါသည်။',
     widgetConfigurationError: 'Widget အတည်ပြုခြင်းအမှား',
@@ -321,6 +322,7 @@ export const myTranslations: DefaultTranslationsObject = {
     create: 'ဖန်တီးမည်။',
     created: 'ဖန်တီးခဲ့သည်။',
     createdAt: 'ဖန်တီးခဲ့သည့်အချိန်',
+    createdBy: 'ဖန်တီးသူ',
     createNew: 'အသစ် ဖန်တီးမည်။',
     createNewLabel: '{{label}} အသစ် ဖန်တီးမည်။',
     creating: 'ဖန်တီးနေသည်။',
@@ -526,6 +528,7 @@ export const myTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'လာမည့် အစီအစဉ်များ',
     updatedAgo: 'နောက်ဆုံး အပ်ဒိတ်လုပ်ခဲ့သည် {{distance}} ကလောက် ဖြစ်ပါသည်။',
     updatedAt: 'ပြင်ဆင်ခဲ့သည့်အချိန်',
+    updatedBy: 'အပ်ဒိတ်လုပ်သူ',
     updatedCountSuccessfully: '{{count}} {{label}} ကို အောင်မြင်စွာ အပ်ဒိတ်လုပ်ခဲ့သည်။',
     updatedLabelSuccessfully: '{{label}} ကို အောင်မြင်စွာ အပ်ဒိတ်လုပ်ခဲ့သည်။',
     updatedSuccessfully: 'အပ်ဒိတ်လုပ်ပြီးပါပြီ။',

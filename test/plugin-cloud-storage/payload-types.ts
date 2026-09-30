@@ -150,6 +150,14 @@ export interface Media {
   alt?: string | null;
   prefix?: string | null;
   _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -205,12 +213,54 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media-with-composite-prefixes".
  */
 export interface MediaWithCompositePrefix {
   id: string;
   prefix?: string | null;
   _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -254,6 +304,14 @@ export interface MediaWithCustomUrl {
   id: string;
   prefix?: string | null;
   _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -297,6 +355,14 @@ export interface MediaWithDisabledPlugin {
   id: string;
   prefix?: string | null;
   _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -340,6 +406,14 @@ export interface MediaWithGenerateFileUrl {
   id: string;
   prefix?: string | null;
   _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -384,6 +458,14 @@ export interface MediaWithOverwrite {
   alt?: string | null;
   prefix?: string | null;
   _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -445,6 +527,14 @@ export interface MediaWithPrefix {
   id: string;
   prefix?: string | null;
   _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -493,6 +583,14 @@ export interface MediaWithThrowingHook {
   shouldThrow?: boolean | null;
   prefix?: string | null;
   _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -537,6 +635,14 @@ export interface RestrictedMedia {
   title?: string | null;
   prefix?: string | null;
   _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -584,6 +690,14 @@ export interface TestMetadatum {
   testNote?: string | null;
   prefix?: string | null;
   _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -631,32 +745,6 @@ export interface TestMetadatum {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  resetPasswordRequestedAt?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "versioned-cloud-media".
  */
 export interface VersionedCloudMedia {
@@ -664,6 +752,14 @@ export interface VersionedCloudMedia {
   storageMarker?: string | null;
   prefix?: string | null;
   _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -708,6 +804,14 @@ export interface VersionedS3Media {
   id: string;
   prefix?: string | null;
   _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -742,16 +846,6 @@ export interface VersionedS3Media {
   _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
-    small?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -879,6 +973,8 @@ export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   prefix?: T;
   _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -934,6 +1030,8 @@ export interface MediaSelect<T extends boolean = true> {
 export interface MediaWithCompositePrefixesSelect<T extends boolean = true> {
   prefix?: T;
   _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -965,6 +1063,8 @@ export interface MediaWithCompositePrefixesSelect<T extends boolean = true> {
 export interface MediaWithCustomUrlSelect<T extends boolean = true> {
   prefix?: T;
   _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -996,6 +1096,8 @@ export interface MediaWithCustomUrlSelect<T extends boolean = true> {
 export interface MediaWithDisabledPluginSelect<T extends boolean = true> {
   prefix?: T;
   _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1027,6 +1129,8 @@ export interface MediaWithDisabledPluginSelect<T extends boolean = true> {
 export interface MediaWithGenerateFileUrlSelect<T extends boolean = true> {
   prefix?: T;
   _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1059,6 +1163,8 @@ export interface MediaWithOverwriteSelect<T extends boolean = true> {
   alt?: T;
   prefix?: T;
   _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1114,6 +1220,8 @@ export interface MediaWithOverwriteSelect<T extends boolean = true> {
 export interface MediaWithPrefixSelect<T extends boolean = true> {
   prefix?: T;
   _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1147,6 +1255,8 @@ export interface MediaWithThrowingHookSelect<T extends boolean = true> {
   shouldThrow?: T;
   prefix?: T;
   _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1179,6 +1289,8 @@ export interface RestrictedMediaSelect<T extends boolean = true> {
   title?: T;
   prefix?: T;
   _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1211,6 +1323,8 @@ export interface TestMetadataSelect<T extends boolean = true> {
   testNote?: T;
   prefix?: T;
   _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1254,6 +1368,8 @@ export interface TestMetadataSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1280,6 +1396,8 @@ export interface VersionedCloudMediaSelect<T extends boolean = true> {
   storageMarker?: T;
   prefix?: T;
   _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1312,6 +1430,8 @@ export interface VersionedCloudMediaSelect<T extends boolean = true> {
 export interface VersionedS3MediaSelect<T extends boolean = true> {
   prefix?: T;
   _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1335,20 +1455,6 @@ export interface VersionedS3MediaSelect<T extends boolean = true> {
   _fileRevision?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
-    | T
-    | {
-        small?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -116,6 +116,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     noItems:
       'На вашей панели нет виджетов. Вы можете добавить их из меню "Панель управления", расположенного в верхней панели.',
     resetLayout: 'Сбросить Макет',
+    resizeWidget: 'Изменить размер {{label}}, текущий размер: {{size}}',
     searchWidgets: 'Поиск виджетов...',
     widgetCollectionRequired: 'Collection является обязательным.',
     widgetConfigurationError: 'Ошибка конфигурации виджета',
@@ -320,6 +321,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     create: 'Создать',
     created: 'Создано',
     createdAt: 'Дата создания',
+    createdBy: 'Создано',
     createNew: 'Создать',
     createNewLabel: 'Создать новый {{label}}',
     creating: 'Создание',
@@ -523,6 +525,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Предстоящие события',
     updatedAgo: 'Обновлено {{distance}} назад',
     updatedAt: 'Дата правки',
+    updatedBy: 'Обновлено пользователем',
     updatedCountSuccessfully: 'Обновлено {{count}} {{label}} успешно.',
     updatedLabelSuccessfully: 'Успешно обновлено {{label}}.',
     updatedSuccessfully: 'Успешно Обновлено.',

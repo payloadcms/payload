@@ -1,7 +1,7 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Config } from '../config/types.js'
 import type { Field } from '../fields/config/types.js'
-import type { UploadConfig } from './types.js'
+import type { SanitizedUploadConfig } from './types.js'
 
 import { managedFileManifestJSONSchema } from './fileVersioning/manifestJSONSchema.js'
 import { generateFilePathOrURL } from './generateFilePathOrURL.js'
@@ -26,7 +26,9 @@ type Options = {
 }
 
 export const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
-  const uploadOptions: UploadConfig = typeof collection.upload === 'object' ? collection.upload : {}
+  // `imageSizes` only exists once a transformer (e.g. Sharp) has written it back during init.
+  const uploadOptions: Partial<SanitizedUploadConfig> =
+    typeof collection.upload === 'object' ? collection.upload : {}
 
   const mimeType: Field = {
     name: 'mimeType',

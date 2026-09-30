@@ -113,6 +113,7 @@ export const etTranslations: DefaultTranslationsObject = {
     noItems:
       'Teie armatuurlauale pole vidinaid. Saate neid lisada ülemisel ribal asuvast "Armatuurlaua" menüüst.',
     resetLayout: 'Lähtesta Paigutus',
+    resizeWidget: 'Muuda {{label}} suurust, praegune suurus: {{size}}',
     searchWidgets: 'Otsi vidinaid...',
     widgetCollectionRequired: 'Kogu on nõutav.',
     widgetConfigurationError: 'Vidina konfiguratsiooni viga',
@@ -314,6 +315,7 @@ export const etTranslations: DefaultTranslationsObject = {
     create: 'Loo',
     created: 'Loodud',
     createdAt: 'Loomisaeg',
+    createdBy: 'Loodud poolt',
     createNew: 'Loo uus',
     createNewLabel: 'Loo uus {{label}}',
     creating: 'Loomine',
@@ -514,6 +516,7 @@ export const etTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Eelseisvad sündmused',
     updatedAgo: 'Uuendatud {{distance}} tagasi',
     updatedAt: 'Uuendatud',
+    updatedBy: 'Uuendatud poolt',
     updatedCountSuccessfully: 'Uuendatud {{count}} {{label}} edukalt.',
     updatedLabelSuccessfully: 'Uuendas {{label}} edukalt.',
     updatedSuccessfully: 'Edukalt uuendatud.',

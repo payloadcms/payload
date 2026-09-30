@@ -1,4 +1,10 @@
-import type { CollectionConfig, FileData, PayloadRequest, TypeWithID, UploadConfig } from 'payload'
+import type {
+  CollectionConfig,
+  FileData,
+  PayloadRequest,
+  SanitizedUploadConfig,
+  TypeWithID,
+} from 'payload'
 
 import path from 'node:path'
 
@@ -69,7 +75,7 @@ export async function getFilePrefix({
   }
 
   // Reads without a query prefix or read-access constraints skip the endpoint's document lookup.
-  const imageSizes = (collection?.upload as UploadConfig)?.imageSizes || []
+  const imageSizes = (collection?.upload as SanitizedUploadConfig)?.imageSizes || []
 
   const filenameClause = {
     or: [

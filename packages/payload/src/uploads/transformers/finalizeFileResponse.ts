@@ -2,6 +2,8 @@ import type { Collection } from '../../collections/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 
 import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { isXmlMimeType } from '../getFileTypeIdentity.js'
+import { uploadContentSecurityPolicy } from '../uploadContentSecurityPolicy.js'
 
 const MANDATORY_CORS_HEADER_NAMES = [
   'Access-Control-Allow-Methods',
@@ -26,7 +28,7 @@ export function finalizeFileResponse({
   response: Response
 }): Response {
   const headers = new Headers(response.headers)
-  const isSvg = headers.get('Content-Type') === 'image/svg+xml'
+  const sourceContentType = headers.get('Content-Type')
 
   const modifyResponseHeaders = collection.config.upload
     ? collection.config.upload.modifyResponseHeaders
@@ -37,8 +39,13 @@ export function finalizeFileResponse({
       ? modifyResponseHeaders({ headers }) || headers
       : headers
 
-  if (isSvg) {
-    modifiedHeaders.set('Content-Security-Policy', "script-src 'none'")
+  // Check the content type both before and after `modifyResponseHeaders`, so the hook
+  // can neither introduce an XML type nor relabel one to escape the policy.
+  const isXml =
+    isXmlMimeType(sourceContentType) || isXmlMimeType(modifiedHeaders.get('Content-Type'))
+
+  if (isXml) {
+    modifiedHeaders.set('Content-Security-Policy', uploadContentSecurityPolicy)
   }
 
   for (const corsHeaderName of MANDATORY_CORS_HEADER_NAMES) {

@@ -296,7 +296,6 @@ export type UploadConfig = {
    * Set to `true` to prevent the admin UI having a way to remove an existing file while editing.
    */
   hideRemoveFile?: boolean
-  imageSizes?: ImageSize[]
   /**
    * Restrict mimeTypes in the file picker. Array of valid mime types or mimetype wildcards
    * @example ['image/*', 'application/pdf']
@@ -397,6 +396,12 @@ export type checkFileRestrictionsParams = {
 }
 
 export type SanitizedUploadConfig = {
+  /**
+   * The collection's image sizes, as written at startup by a registered transformer such as
+   * `sharpTransformer({ collections: { <slug>: { variants } } })`. Names and admin options
+   * only — not authored on the collection.
+   */
+  imageSizes?: ImageSize[]
   staticDir: UploadConfig['staticDir']
 } & UploadConfig
 

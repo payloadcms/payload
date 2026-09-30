@@ -35,13 +35,20 @@ describe('assertNoLegacySharpConfig', () => {
     },
   )
 
-  it('should throw when a collection declares imageSizes but no transformer is registered', () => {
-    const config = {
+  it.each([
+    { collections: [{ slug: 'media', upload: { imageSizes: [{ name: 'thumbnail' }] } }] },
+    {
       collections: [{ slug: 'media', upload: { imageSizes: [{ name: 'thumbnail' }] } }],
-    } as unknown as Config
+      upload: { transformers: [{ mimeTypes: ['image/*'], slug: 'sharp' }] },
+    },
+  ])(
+    'should throw when a collection declares imageSizes, even with a transformer (%#)',
+    (rawConfig) => {
+      const config = rawConfig as unknown as Config
 
-    expect(() => assertNoLegacySharpConfig({ config })).toThrow(/imageSizes/)
-  })
+      expect(() => assertNoLegacySharpConfig({ config })).toThrow(/upload\.imageSizes/)
+    },
+  )
 
   it('should report every violation across multiple collections in a single error', () => {
     const config = {
@@ -66,9 +73,8 @@ describe('assertNoLegacySharpConfig', () => {
   })
 
   it.each([
-    { collections: [{ slug: 'media', upload: { imageSizes: [] } }] },
     {
-      collections: [{ slug: 'media', upload: { imageSizes: [{ name: 'thumbnail' }] } }],
+      collections: [{ slug: 'media', upload: { staticDir: 'media' } }],
       upload: { transformers: [{ mimeTypes: ['image/*'], slug: 'sharp' }] },
     },
     { collections: [{ slug: 'pages' }] },

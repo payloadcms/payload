@@ -115,6 +115,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     noItems:
       'あなたのダッシュボードにはウィジェットがありません。 上部バーにある「ダッシュボード」メニューからそれらを追加することができます。',
     resetLayout: 'レイアウトをリセット',
+    resizeWidget: '{{label}}のサイズを変更、現在のサイズ：{{size}}',
     searchWidgets: 'ウィジェットを検索...',
     widgetCollectionRequired: 'Collectionは必須です。',
     widgetConfigurationError: 'ウィジェット設定エラー',
@@ -319,6 +320,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     create: '作成',
     created: '作成',
     createdAt: '作成日',
+    createdBy: '作成者',
     createNew: '新規作成',
     createNewLabel: '{{label}} を新規作成',
     creating: '作成中',
@@ -518,6 +520,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     upcomingEvents: '今後のイベント',
     updatedAgo: '{{distance}}前に更新されました',
     updatedAt: '更新日',
+    updatedBy: '更新者',
     updatedCountSuccessfully: '{{count}}つの{{label}}を正常に更新しました。',
     updatedLabelSuccessfully: '{{label}}の更新に成功しました。',
     updatedSuccessfully: '更新成功。',

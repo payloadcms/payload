@@ -209,13 +209,13 @@ async function transformSize({
       resizeHeight = Math.round(resizeWidth / originalAspectRatio)
     }
     if (!resizeHeight) {
-      resizeHeight = originalImageMeta.height
+      resizeHeight = adjustedDimensions.height
     }
     if (!resizeWidth) {
-      resizeWidth = originalImageMeta.width
+      resizeWidth = adjustedDimensions.width
     }
 
-    const resizeAspectRatio = resizeWidth! / resizeHeight!
+    const resizeAspectRatio = resizeWidth / resizeHeight
     const prioritizeHeight = resizeAspectRatio < originalAspectRatio
 
     resized = resized.resize({
@@ -236,31 +236,31 @@ async function transformSize({
       : info.height
     const resizedWidth = info.width
 
-    const halfResizeX = resizeWidth! / 2
+    const halfResizeX = resizeWidth / 2
     const xFocalCenter = resizedWidth * (focalPoint.x / 100)
     let leftBound = xFocalCenter - halfResizeX
     if (xFocalCenter + halfResizeX > resizedWidth) {
-      leftBound = resizedWidth - resizeWidth!
+      leftBound = resizedWidth - resizeWidth
     }
     if (leftBound < 0) {
       leftBound = 0
     }
 
-    const halfResizeY = resizeHeight! / 2
+    const halfResizeY = resizeHeight / 2
     const yFocalCenter = resizedHeight * (focalPoint.y / 100)
     let topBound = yFocalCenter - halfResizeY
     if (yFocalCenter + halfResizeY > resizedHeight) {
-      topBound = resizedHeight - resizeHeight!
+      topBound = resizedHeight - resizeHeight
     }
     if (topBound < 0) {
       topBound = 0
     }
 
     resized = resized.extract({
-      height: resizeHeight!,
+      height: resizeHeight,
       left: Math.floor(leftBound),
       top: Math.floor(topBound),
-      width: resizeWidth!,
+      width: resizeWidth,
     })
   } else {
     resized = resized.resize(imageResizeConfig)

@@ -1,4 +1,10 @@
-import type { ArrayLiteralExpression, ObjectLiteralExpression, SourceFile } from 'ts-morph'
+import type {
+  ArrayLiteralExpression,
+  ObjectLiteralExpression,
+  PropertyAssignment,
+  ShorthandPropertyAssignment,
+  SourceFile,
+} from 'ts-morph'
 
 import { Node, SyntaxKind } from 'ts-morph'
 
@@ -6,6 +12,7 @@ import type { Transform } from '../../types.js'
 
 const TRANSFORMER_MODULE = '@payloadcms/transformer-sharp'
 const TRANSFORMER_NAME = 'sharpTransformer'
+const VARIANTS_KEY = 'variants'
 
 const IDENTIFIER_PATTERN = /^[A-Z_$][\w$]*$/i
 const RESERVED_WORDS = new Set([
@@ -173,10 +180,21 @@ function extractCollectionSharpEntry({
   const movedTexts: string[] = []
   for (const name of MOVED_UPLOAD_FIELDS) {
     const prop = uploadObj.getProperty(name)
-    if (prop && Node.isPropertyAssignment(prop)) {
-      movedTexts.push(prop.print())
-      prop.remove()
+    if (!prop) {
+      continue
     }
+
+    // A shorthand `imageSizes` reads the same binding from `buildConfig`'s argument,
+    // where the `sharpTransformer` call is inserted, so it moves verbatim.
+    if (Node.isPropertyAssignment(prop) || Node.isShorthandPropertyAssignment(prop)) {
+      movedTexts.push(name === 'imageSizes' ? printAsVariants(prop) : prop.print())
+      prop.remove()
+      continue
+    }
+
+    notes.push(
+      `${filePath}: collection ${slugInitializer.getText()}'s \`upload.${name}\` isn't a plain property — move it into \`sharpTransformer({ collections })\` manually.`,
+    )
   }
 
   if (movedTexts.length === 0) {
@@ -245,6 +263,69 @@ function extractSharpCollectionEntries({
   return entries
 }
 
+/** `sharpTransformer` authors image sizes as `variants`; the collection's `imageSizes` is renamed on the way in. */
+function printAsVariants(prop: PropertyAssignment | ShorthandPropertyAssignment): string {
+  return Node.isShorthandPropertyAssignment(prop)
+    ? `${VARIANTS_KEY}: ${prop.getName()}`
+    : `${VARIANTS_KEY}: ${prop.getInitializerOrThrow().print()}`
+}
+
+/**
+ * Renames `imageSizes` to `variants` inside every inline `sharpTransformer({ collections })`
+ * entry in the file — configs migrated before `variants` existed. Returns whether it changed
+ * anything.
+ */
+function renameImageSizesInSharpTransformerCalls({
+  notes,
+  sourceFile,
+}: {
+  notes: string[]
+  sourceFile: SourceFile
+}): boolean {
+  let hasChanged = false
+
+  const sharpTransformerCalls = sourceFile
+    .getDescendantsOfKind(SyntaxKind.CallExpression)
+    .filter((call) => {
+      const callee = call.getExpression()
+      return Node.isIdentifier(callee) && callee.getText() === TRANSFORMER_NAME
+    })
+
+  for (const call of sharpTransformerCalls) {
+    const collectionsObj = call
+      .getArguments()[0]
+      ?.asKind(SyntaxKind.ObjectLiteralExpression)
+      ?.getProperty('collections')
+      ?.asKind(SyntaxKind.PropertyAssignment)
+      ?.getInitializerIfKind(SyntaxKind.ObjectLiteralExpression)
+
+    for (const entry of collectionsObj?.getProperties() ?? []) {
+      const entryObj = Node.isPropertyAssignment(entry)
+        ? entry.getInitializerIfKind(SyntaxKind.ObjectLiteralExpression)
+        : undefined
+
+      if (!entryObj) {
+        notes.push(
+          `${sourceFile.getFilePath()}: a \`${TRANSFORMER_NAME}({ collections })\` entry isn't an inline object — rename any \`imageSizes\` in it to \`${VARIANTS_KEY}\` manually.`,
+        )
+        continue
+      }
+
+      const imageSizesProp = entryObj.getProperty('imageSizes')
+
+      if (imageSizesProp && Node.isPropertyAssignment(imageSizesProp)) {
+        imageSizesProp.getNameNode().replaceWithText(VARIANTS_KEY)
+        hasChanged = true
+      } else if (imageSizesProp && Node.isShorthandPropertyAssignment(imageSizesProp)) {
+        imageSizesProp.replaceWithText(printAsVariants(imageSizesProp))
+        hasChanged = true
+      }
+    }
+  }
+
+  return hasChanged
+}
+
 function findSharpTransformerCall(transformersArray: ArrayLiteralExpression) {
   return transformersArray.getElements().find((el) => {
     if (!Node.isCallExpression(el)) {
@@ -262,6 +343,10 @@ export const migrateSharpToTransformer: Transform = {
     const notes: string[] = []
 
     for (const sourceFile of project.getSourceFiles()) {
+      if (renameImageSizesInSharpTransformerCalls({ notes, sourceFile })) {
+        filesChanged.add(sourceFile.getFilePath())
+      }
+
       const buildConfigLocalNames = findBuildConfigLocalNames(sourceFile)
       if (buildConfigLocalNames.size === 0) {
         continue
@@ -337,8 +422,23 @@ export const migrateSharpToTransformer: Transform = {
 
         const transformerCallText = `${TRANSFORMER_NAME}({ ${transformerArgs.join(', ')} })`
 
+        // Adding a `transformers` property next to a non-array one, or after a spread
+        // that may already set it, would create a duplicate key whose last value wins
+        // at runtime — silently dropping the existing transformers.
+        const uploadHasSpread = uploadObj
+          ?.getProperties()
+          .some((prop) => Node.isSpreadAssignment(prop))
+
         if (existingTransformersArray) {
           existingTransformersArray.addElement(transformerCallText)
+        } else if (existingTransformersProp) {
+          notes.push(
+            `${sourceFile.getFilePath()}: \`upload.transformers\` isn't an inline array — add \`${transformerCallText}\` to it manually.`,
+          )
+        } else if (uploadHasSpread) {
+          notes.push(
+            `${sourceFile.getFilePath()}: \`upload\` contains a spread that may already set \`transformers\` — add \`${transformerCallText}\` to its transformers manually.`,
+          )
         } else if (uploadObj) {
           uploadObj.addPropertyAssignment({
             name: 'transformers',
@@ -369,5 +469,5 @@ export const migrateSharpToTransformer: Transform = {
     return { filesChanged: Array.from(filesChanged), notes: notes.length ? notes : undefined }
   },
   description:
-    'Move a top-level `sharp` dependency and per-collection Sharp-specific `upload` options (resizeOptions, imageSizes, formatOptions, trimOptions, constructorOptions, withMetadata, crop, focalPoint) into `sharpTransformer({ collections })`, registered under `upload.transformers`.',
+    'Move a top-level `sharp` dependency and per-collection Sharp-specific `upload` options (resizeOptions, imageSizes, formatOptions, trimOptions, constructorOptions, withMetadata, crop, focalPoint) into `sharpTransformer({ collections })`, registered under `upload.transformers`, with `imageSizes` renamed to `variants`. Also renames `imageSizes` to `variants` in existing `sharpTransformer({ collections })` entries.',
 }

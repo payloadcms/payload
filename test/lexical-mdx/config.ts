@@ -1,11 +1,13 @@
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import * as fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import sharp from 'sharp'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { MediaCollection } from './collections/Media/index.js'
+import { MediaCollection, mediaSharpOptions, mediaSlug } from './collections/Media/index.js'
 import { PostsCollection } from './collections/Posts/index.js'
 import { docsBasePath } from './collections/Posts/shared.js'
 const filename = fileURLToPath(import.meta.url)
@@ -14,6 +16,9 @@ const dirname = path.dirname(filename)
 export default buildConfigWithDefaults({
   suite: 'lexical-mdx',
   config: {
+    upload: {
+      transformers: [sharpTransformer({ collections: { [mediaSlug]: mediaSharpOptions }, sharp })],
+    },
     // ...extend config here
     admin: {
       importMap: {
@@ -53,8 +58,8 @@ export default buildConfigWithDefaults({
 
     await payload.delete({
       collection: 'posts',
-      where: {},
       overrideAccess: true,
+      where: {},
     })
 
     // Recursively collect all paths to .mdx files RELATIVE to basePath

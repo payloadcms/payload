@@ -115,6 +115,7 @@ export const itTranslations: DefaultTranslationsObject = {
     noItems:
       'Non ci sono widget sulla tua dashboard. Puoi aggiungerli dal menu "Dashboard" situato nella barra superiore.',
     resetLayout: 'Ripristina Layout',
+    resizeWidget: 'Ridimensiona {{label}}, dimensione attuale: {{size}}',
     searchWidgets: 'Cerca widget...',
     widgetCollectionRequired: 'Collection è obbligatoria.',
     widgetConfigurationError: 'Errore di configurazione del widget',
@@ -321,6 +322,7 @@ export const itTranslations: DefaultTranslationsObject = {
     create: 'Crea',
     created: 'Data di creazione',
     createdAt: 'Creato il',
+    createdBy: 'Creato da',
     createNew: 'Crea Nuovo',
     createNewLabel: 'Crea nuovo {{label}}',
     creating: 'Crea nuovo',
@@ -524,6 +526,7 @@ export const itTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Eventi Imminenti',
     updatedAgo: 'Aggiornato {{distance}} fa',
     updatedAt: 'Aggiornato il',
+    updatedBy: 'Aggiornato da',
     updatedCountSuccessfully: '{{count}} {{label}} aggiornato con successo.',
     updatedLabelSuccessfully: '{{label}} aggiornata con successo.',
     updatedSuccessfully: 'Aggiornato con successo.',

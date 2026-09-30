@@ -11,7 +11,7 @@ import { retrieveFileResponse } from '../endpoints/getFile.js'
 import { createLazySourceGetter } from './createLazySourceGetter.js'
 import { finalizeFileResponse } from './finalizeFileResponse.js'
 import { getSourceFileResponse } from './getSourceFileResponse.js'
-import { planTransformerPipeline } from './planTransformerPipeline.js'
+import { getCandidateTransformers, planTransformerPipeline } from './planTransformerPipeline.js'
 import { getRequestedFile, resolveUploadDocument } from './resolveUploadDocument.js'
 import { withFileTransformAccessContext } from './withFileTransformAccessContext.js'
 
@@ -38,14 +38,16 @@ export async function handleDynamicFileRequest({
   const resolvedDocument = await resolveUploadDocument({ collection, filename, prefix, req })
 
   if (!resolvedDocument) {
-    // Force isTransform: true — there's no mimeType to plan a pipeline from, so this
-    // must assume the stricter transform-aware access check, or the status code would
-    // leak file existence to an access function keyed on req.fileTransform.
-    await withFileTransformAccessContext({
-      callback: () => checkFileAccess({ collection, filename, prefix, req }),
-      isTransform: true,
-      req,
-    })
+    // There's no mimeType to plan a pipeline from, so both access modes must pass
+    // before admitting the file doesn't exist — otherwise the status code would leak
+    // file existence to an access function keyed on req.fileTransform.
+    for (const isTransform of [true, false]) {
+      await withFileTransformAccessContext({
+        callback: () => checkFileAccess({ collection, filename, prefix, req }),
+        isTransform,
+        req,
+      })
+    }
     throw new NotFound(req.t)
   }
 
@@ -130,13 +132,25 @@ function planRequestPipeline({
   })
 }
 
+type AccessResult = { document?: ResolvedUploadDocument; isAllowed: true } | { isAllowed: false }
+
 /**
+ * Decides which document is served and which pipeline runs, checking read access
+ * before any application-defined transformer code (`canTransform`) executes.
+ *
+ * 1. The first access mode comes from MIME matching alone: a transform-aware check
+ *    when any transformer could handle the file, otherwise an ordinary read.
+ * 2. If the transform-aware check is denied, an ordinary read may still be allowed
+ *    (e.g. public originals, signed-in-only variants), so that mode is tried next.
+ * 3. Only once a check has passed does `canTransform` plan the real pipeline.
+ * 4. The access mode the final pipeline requires must itself have passed — a
+ *    "variants only" policy must not leak the original when no transformer applies.
+ *
  * `resolveUploadDocument` is unfiltered, so without a `prefix` it can match a
  * document the user can't read that shares the filename (filenames are only
  * unique per prefix). Whenever `checkFileAccess` returns a document, that
  * authorized document is the one served — storage adapters trust `doc` to
- * resolve the object key. If it differs, the pipeline is re-planned from its
- * `mimeType`, and access is re-checked when that turns a plain read into a transform.
+ * resolve the object key.
  */
 async function authorizeDocument({
   collection,
@@ -151,40 +165,72 @@ async function authorizeDocument({
   req: PayloadRequest
   resolvedDocument: ResolvedUploadDocument
 }): Promise<{ document: ResolvedUploadDocument; pipeline: UploadTransformer[] }> {
-  const checkAccess = ({ isTransform }: { isTransform: boolean }) =>
-    withFileTransformAccessContext({
-      callback: () => checkFileAccess({ collection, filename, prefix, req }),
-      isTransform,
-      req,
-    }) as Promise<ResolvedUploadDocument | undefined>
+  const accessResults = new Map<boolean, Promise<AccessResult>>()
 
-  const pipeline = await planRequestPipeline({
-    collection,
-    document: resolvedDocument,
-    filename,
-    req,
-  })
+  const checkAccess = ({ isTransform }: { isTransform: boolean }): Promise<AccessResult> => {
+    if (!accessResults.has(isTransform)) {
+      accessResults.set(
+        isTransform,
+        withFileTransformAccessContext({
+          callback: () => checkFileAccess({ collection, filename, prefix, req }),
+          isTransform,
+          req,
+        }).then(
+          (document) => ({
+            document: document as ResolvedUploadDocument | undefined,
+            isAllowed: true as const,
+          }),
+          (err: unknown) => {
+            if (err instanceof Forbidden) {
+              return { isAllowed: false as const }
+            }
 
-  const accessDocument = await checkAccess({ isTransform: pipeline.length > 0 })
+            throw err
+          },
+        ),
+      )
+    }
 
-  if (!accessDocument || accessDocument.id === resolvedDocument.id) {
-    return { document: resolvedDocument, pipeline }
+    return accessResults.get(isTransform)!
   }
 
-  const accessPipeline = await planRequestPipeline({
-    collection,
-    document: accessDocument,
-    filename,
-    req,
-  })
+  const hasCandidateTransformers =
+    getCandidateTransformers({
+      capability: 'handleRequest',
+      mimeType: getRequestedFile({ document: resolvedDocument, filename }).mimeType,
+      transformers: req.payload.config.upload.transformers,
+    }).length > 0
 
-  if (accessPipeline.length > 0 && pipeline.length === 0) {
-    const transformAccessDocument = await checkAccess({ isTransform: true })
+  let isTransformAccess = hasCandidateTransformers
+  let access = await checkAccess({ isTransform: isTransformAccess })
 
-    if (transformAccessDocument && transformAccessDocument.id !== accessDocument.id) {
+  if (!access.isAllowed && isTransformAccess) {
+    isTransformAccess = false
+    access = await checkAccess({ isTransform: isTransformAccess })
+  }
+
+  if (!access.isAllowed) {
+    throw new Forbidden(req.t)
+  }
+
+  const document =
+    access.document && access.document.id !== resolvedDocument.id
+      ? access.document
+      : resolvedDocument
+
+  const pipeline = await planRequestPipeline({ collection, document, filename, req })
+  const isTransform = pipeline.length > 0
+
+  if (isTransform !== isTransformAccess) {
+    const requiredAccess = await checkAccess({ isTransform })
+
+    if (
+      !requiredAccess.isAllowed ||
+      (requiredAccess.document && requiredAccess.document.id !== document.id)
+    ) {
       throw new Forbidden(req.t)
     }
   }
 
-  return { document: accessDocument, pipeline: accessPipeline }
+  return { document, pipeline }
 }

@@ -1,3 +1,4 @@
+import type { SharpCollectionConfig } from '@payloadcms/transformer-sharp'
 import type { CollectionConfig } from 'payload'
 
 export const mediaSlug = 'media'
@@ -9,26 +10,28 @@ export const MediaCollection: CollectionConfig = {
     read: () => true,
   },
   fields: [],
-  upload: {
-    crop: true,
-    focalPoint: true,
-    imageSizes: [
-      {
-        name: 'thumbnail',
-        height: 200,
-        width: 200,
-      },
-      {
-        name: 'medium',
-        height: 800,
-        width: 800,
-      },
-      {
-        name: 'large',
-        height: 1200,
-        width: 1200,
-      },
-    ],
-  },
+  upload: true,
   versions: false,
+}
+
+export const mediaSharpOptions: SharpCollectionConfig = {
+  crop: true,
+  focalPoint: true,
+  variants: [
+    {
+      name: 'thumbnail',
+      height: 200,
+      width: 200,
+    },
+    {
+      name: 'medium',
+      height: 800,
+      width: 800,
+    },
+    {
+      name: 'large',
+      height: 1200,
+      width: 1200,
+    },
+  ],
 }

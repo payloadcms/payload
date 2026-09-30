@@ -500,9 +500,11 @@ test.describe('Hierarchy Sidebar', () => {
         const listControls = page.locator('.hierarchy-list__controls')
         await listControls.getByRole('button', { name: 'Create New' }).first().click()
 
-        await expect(page.getByRole('button', { name: 'Organization', exact: true })).toBeVisible()
-        await expect(page.getByRole('button', { name: 'Product', exact: true })).toBeVisible()
-        await page.getByRole('button', { name: 'Organization', exact: true }).click()
+        await expect(
+          page.getByRole('menuitem', { name: 'Organization', exact: true }),
+        ).toBeVisible()
+        await expect(page.getByRole('menuitem', { name: 'Product', exact: true })).toBeVisible()
+        await page.getByRole('menuitem', { name: 'Organization', exact: true }).click()
 
         const drawer = page.locator('#hierarchy-create-folders')
         const titleInput = drawer.locator('#field-title')
@@ -640,7 +642,7 @@ test.describe('Hierarchy Sidebar', () => {
       await listControls.getByRole('button', { name: 'Create New' }).first().click()
 
       // Select "Folder" from the popup menu
-      await page.getByRole('button', { name: 'Folder', exact: true }).click()
+      await page.getByRole('menuitem', { name: 'Folder', exact: true }).click()
 
       // Wait for drawer to open
       const drawer = page.locator('.drawer__content')
@@ -706,7 +708,7 @@ test.describe('Hierarchy Sidebar', () => {
 
       const listControls = page.locator('.hierarchy-list__controls')
       await listControls.getByRole('button', { name: 'Create New' }).first().click()
-      await page.getByRole('button', { name: 'Folder', exact: true }).click()
+      await page.getByRole('menuitem', { name: 'Folder', exact: true }).click()
 
       const drawer = page.locator('.drawer__content')
       await expect(drawer).toBeVisible()
@@ -820,8 +822,8 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(modal).toBeVisible()
 
       // Both folders should be visible in their respective columns
-      await expect(modal.getByRole('button', { name: parentFolderName })).toBeVisible()
-      await expect(modal.getByRole('button', { name: childFolderName })).toBeVisible()
+      await expect(modal.getByRole('button', { name: parentFolderName, exact: true })).toBeVisible()
+      await expect(modal.getByRole('button', { name: childFolderName, exact: true })).toBeVisible()
     })
 
     test('should reset transient selections after canceling and reopening the modal', async () => {

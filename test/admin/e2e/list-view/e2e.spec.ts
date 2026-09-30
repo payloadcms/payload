@@ -779,7 +779,7 @@ describe('List View', () => {
 
       await expect(tableItems).toHaveCount(5)
       await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6')
-      await expect(page.locator('.per-page button')).toContainText('5')
+      await expect(page.locator('.per-page .popup__trigger-wrap > button')).toContainText('5')
       await page.goto(`${postsUrl.list}?limit=5&page=2`)
 
       await addListFilter({
@@ -1517,7 +1517,9 @@ describe('List View', () => {
 
       await page.goto(postsUrl.list)
       await expect
-        .poll(async () => await page.locator('.per-page button').textContent())
+        .poll(
+          async () => await page.locator('.per-page .popup__trigger-wrap > button').textContent(),
+        )
         .toContain('5')
       await expect(page.locator(tableRowLocator)).toHaveCount(5)
     })
@@ -1533,7 +1535,9 @@ describe('List View', () => {
 
       await wait(1000)
 
-      await expect.poll(async () => await page.locator('.per-page button').isVisible()).toBe(true)
+      await expect
+        .poll(async () => await page.locator('.per-page .popup__trigger-wrap > button').isVisible())
+        .toBe(true)
 
       await expectPerPageLimits({ expectedLimits: [5, 10, 15], page })
     })
@@ -1660,7 +1664,9 @@ describe('List View', () => {
       await listDrawer.waitFor({ state: 'visible' })
       await expect(listDrawer).toBeVisible()
 
-      await expect(page.locator('.list-drawer .per-page button')).toContainText('10')
+      await expect(
+        page.locator('.list-drawer .per-page .popup__trigger-wrap > button'),
+      ).toContainText('10')
       await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(10)
 
       // Change per-page to 5
@@ -1677,7 +1683,9 @@ describe('List View', () => {
       await listDrawer.waitFor({ state: 'visible' })
       await expect(listDrawer).toBeVisible()
 
-      await expect(page.locator('.list-drawer .per-page button')).toContainText('5')
+      await expect(
+        page.locator('.list-drawer .per-page .popup__trigger-wrap > button'),
+      ).toContainText('5')
       await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(5)
     })
   })

@@ -41,11 +41,11 @@ export default buildConfigWithDefaults({
       transformers: [
         sharpTransformer({
           collections: {
-            [transformedMediaSlug]: {
-              imageSizes: [{ height: 200, name: 'small', width: 200 }],
-            },
             [convertedMediaSlug]: {
               formatOptions: { format: 'jpeg' },
+            },
+            [transformedMediaSlug]: {
+              variants: [{ name: 'small', height: 200, width: 200 }],
             },
           },
         }),

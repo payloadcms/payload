@@ -36,7 +36,7 @@ export default buildConfigWithDefaults({
         sharpTransformer({
           collections: {
             media: {
-              imageSizes: [
+              variants: [
                 { height: 400, width: 400, crop: 'center', name: 'square' },
                 { width: 900, height: 450, crop: 'center', name: 'sixteenByNineMedium' },
               ],

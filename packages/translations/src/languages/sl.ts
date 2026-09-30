@@ -114,6 +114,7 @@ export const slTranslations: DefaultTranslationsObject = {
     noItems:
       'Na vaši nadzorni plošči ni pripomočkov. Dodate jih lahko iz menija "Nadzorna plošča", ki se nahaja v zgornji vrstici.',
     resetLayout: 'Ponastavi postavitev',
+    resizeWidget: 'Spremeni velikost {{label}}, trenutna velikost: {{size}}',
     searchWidgets: 'Išči gradnike...',
     widgetCollectionRequired: 'Zbirka je obvezna.',
     widgetConfigurationError: 'Napaka pri konfiguraciji gradnika',
@@ -314,6 +315,7 @@ export const slTranslations: DefaultTranslationsObject = {
     create: 'Ustvari',
     created: 'Ustvarjeno',
     createdAt: 'Ustvarjeno',
+    createdBy: 'Ustvaril',
     createNew: 'Ustvari novo',
     createNewLabel: 'Ustvari nov {{label}}',
     creating: 'Ustvarjanje',
@@ -516,6 +518,7 @@ export const slTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Prihajajoči dogodki',
     updatedAgo: 'Posodobljeno pred {{distance}}',
     updatedAt: 'Posodobljeno',
+    updatedBy: 'Posodobljeno od',
     updatedCountSuccessfully: 'Uspešno posodobljeno {{count}} {{label}}.',
     updatedLabelSuccessfully: '{{label}} uspešno posodobljen.',
     updatedSuccessfully: 'Uspešno posodobljeno.',

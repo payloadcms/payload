@@ -8,107 +8,113 @@ import type { DeepUndefinable, MarkOptional, MarkRequired } from 'ts-essentials'
 
 import type {
   JoinFieldClientProps,
-  JoinFieldErrorClientComponent,
-  JoinFieldErrorServerComponent,
-  JoinFieldLabelClientComponent,
-  JoinFieldLabelServerComponent,
+  JoinFieldErrorClientProps,
+  JoinFieldErrorServerProps,
+  JoinFieldLabelClientProps,
+  JoinFieldLabelServerProps,
 } from '../../admin/fields/Join.js'
-import type { FieldClientComponent, FieldServerComponent } from '../../admin/forms/Field.js'
+import type { FieldClientProps, FieldServerProps } from '../../admin/forms/Field.js'
 import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichText.js'
 import type {
   ArrayFieldClientProps,
-  ArrayFieldErrorClientComponent,
-  ArrayFieldErrorServerComponent,
-  ArrayFieldLabelClientComponent,
-  ArrayFieldLabelServerComponent,
+  ArrayFieldErrorClientProps,
+  ArrayFieldErrorServerProps,
+  ArrayFieldLabelClientProps,
+  ArrayFieldLabelServerProps,
+  BlockRowLabelClientProps,
+  BlockRowLabelServerProps,
   BlocksFieldClientProps,
-  BlocksFieldErrorClientComponent,
-  BlocksFieldErrorServerComponent,
-  BlocksFieldLabelClientComponent,
-  BlocksFieldLabelServerComponent,
+  BlocksFieldErrorClientProps,
+  BlocksFieldErrorServerProps,
+  BlocksFieldLabelClientProps,
+  BlocksFieldLabelServerProps,
   CheckboxFieldClientProps,
-  CheckboxFieldErrorClientComponent,
-  CheckboxFieldErrorServerComponent,
-  CheckboxFieldLabelClientComponent,
-  CheckboxFieldLabelServerComponent,
+  CheckboxFieldErrorClientProps,
+  CheckboxFieldErrorServerProps,
+  CheckboxFieldLabelClientProps,
+  CheckboxFieldLabelServerProps,
   ClientTab,
   CodeFieldClientProps,
-  CodeFieldErrorClientComponent,
-  CodeFieldErrorServerComponent,
-  CodeFieldLabelClientComponent,
-  CodeFieldLabelServerComponent,
+  CodeFieldErrorClientProps,
+  CodeFieldErrorServerProps,
+  CodeFieldLabelClientProps,
+  CodeFieldLabelServerProps,
   CollapsibleFieldClientProps,
-  CollapsibleFieldLabelClientComponent,
-  CollapsibleFieldLabelServerComponent,
+  CollapsibleFieldLabelClientProps,
+  CollapsibleFieldLabelServerProps,
   ConditionalDateProps,
   Data,
   DateFieldClientProps,
-  DateFieldErrorClientComponent,
-  DateFieldErrorServerComponent,
-  DateFieldLabelClientComponent,
-  DateFieldLabelServerComponent,
+  DateFieldErrorClientProps,
+  DateFieldErrorServerProps,
+  DateFieldLabelClientProps,
+  DateFieldLabelServerProps,
   DefaultCellComponentProps,
   DefaultServerCellComponentProps,
   Description,
   EmailFieldClientProps,
-  EmailFieldErrorClientComponent,
-  EmailFieldErrorServerComponent,
-  EmailFieldLabelClientComponent,
-  EmailFieldLabelServerComponent,
+  EmailFieldErrorClientProps,
+  EmailFieldErrorServerProps,
+  EmailFieldLabelClientProps,
+  EmailFieldLabelServerProps,
   FieldDescriptionClientProps,
   FieldDescriptionServerProps,
   FieldDiffClientProps,
   FieldDiffServerProps,
   GroupFieldClientProps,
-  GroupFieldLabelClientComponent,
-  GroupFieldLabelServerComponent,
+  GroupFieldLabelClientProps,
+  GroupFieldLabelServerProps,
   HiddenFieldProps,
   JSONFieldClientProps,
-  JSONFieldErrorClientComponent,
-  JSONFieldErrorServerComponent,
-  JSONFieldLabelClientComponent,
-  JSONFieldLabelServerComponent,
+  JSONFieldErrorClientProps,
+  JSONFieldErrorServerProps,
+  JSONFieldLabelClientProps,
+  JSONFieldLabelServerProps,
   NumberFieldClientProps,
-  NumberFieldErrorClientComponent,
-  NumberFieldErrorServerComponent,
-  NumberFieldLabelClientComponent,
-  NumberFieldLabelServerComponent,
+  NumberFieldErrorClientProps,
+  NumberFieldErrorServerProps,
+  NumberFieldLabelClientProps,
+  NumberFieldLabelServerProps,
   PointFieldClientProps,
-  PointFieldErrorClientComponent,
-  PointFieldErrorServerComponent,
-  PointFieldLabelClientComponent,
-  PointFieldLabelServerComponent,
+  PointFieldErrorClientProps,
+  PointFieldErrorServerProps,
+  PointFieldLabelClientProps,
+  PointFieldLabelServerProps,
   RadioFieldClientProps,
-  RadioFieldErrorClientComponent,
-  RadioFieldErrorServerComponent,
-  RadioFieldLabelClientComponent,
-  RadioFieldLabelServerComponent,
+  RadioFieldErrorClientProps,
+  RadioFieldErrorServerProps,
+  RadioFieldLabelClientProps,
+  RadioFieldLabelServerProps,
   RelationshipFieldClientProps,
-  RelationshipFieldErrorClientComponent,
-  RelationshipFieldErrorServerComponent,
-  RelationshipFieldLabelClientComponent,
-  RelationshipFieldLabelServerComponent,
+  RelationshipFieldErrorClientProps,
+  RelationshipFieldErrorServerProps,
+  RelationshipFieldLabelClientProps,
+  RelationshipFieldLabelServerProps,
   RichTextFieldClientProps,
   RowFieldClientProps,
   RowLabelComponent,
   SelectFieldClientProps,
-  SelectFieldErrorClientComponent,
-  SelectFieldErrorServerComponent,
-  SelectFieldLabelClientComponent,
-  SelectFieldLabelServerComponent,
+  SelectFieldErrorClientProps,
+  SelectFieldErrorServerProps,
+  SelectFieldLabelClientProps,
+  SelectFieldLabelServerProps,
   StaticDescription,
   TabsFieldClientProps,
   TextareaFieldClientProps,
-  TextareaFieldErrorClientComponent,
-  TextareaFieldErrorServerComponent,
-  TextareaFieldLabelClientComponent,
-  TextareaFieldLabelServerComponent,
+  TextareaFieldErrorClientProps,
+  TextareaFieldErrorServerProps,
+  TextareaFieldLabelClientProps,
+  TextareaFieldLabelServerProps,
   TextFieldClientProps,
-  TextFieldErrorClientComponent,
-  TextFieldErrorServerComponent,
-  TextFieldLabelClientComponent,
-  TextFieldLabelServerComponent,
+  TextFieldErrorClientProps,
+  TextFieldErrorServerProps,
+  TextFieldLabelClientProps,
+  TextFieldLabelServerProps,
   UploadFieldClientProps,
+  UploadFieldErrorClientProps,
+  UploadFieldErrorServerProps,
+  UploadFieldLabelClientProps,
+  UploadFieldLabelServerProps,
 } from '../../admin/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
 import type {
@@ -369,7 +375,7 @@ export type FieldAdmin = {
     Cell?: PayloadComponent<DefaultServerCellComponentProps, DefaultCellComponentProps>
     Description?: PayloadComponent<FieldDescriptionServerProps, FieldDescriptionClientProps>
     Diff?: PayloadComponent<FieldDiffServerProps, FieldDiffClientProps>
-    Field?: PayloadComponent<FieldClientComponent | FieldServerComponent>
+    Field?: PayloadComponent<FieldServerProps, FieldClientProps>
     /**
      * The Filter component has to be a client component
      */
@@ -569,8 +575,8 @@ export type NumberField = {
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
-      Error?: CustomComponent<NumberFieldErrorClientComponent | NumberFieldErrorServerComponent>
-      Label?: CustomComponent<NumberFieldLabelClientComponent | NumberFieldLabelServerComponent>
+      Error?: PayloadComponent<NumberFieldErrorServerProps, NumberFieldErrorClientProps>
+      Label?: PayloadComponent<NumberFieldLabelServerProps, NumberFieldLabelClientProps>
     } & FieldAdmin['components']
     /** Set this property to define a placeholder string for the field. */
     placeholder?: Record<string, string> | string
@@ -616,8 +622,8 @@ export type TextField = {
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
-      Error?: CustomComponent<TextFieldErrorClientComponent | TextFieldErrorServerComponent>
-      Label?: CustomComponent<TextFieldLabelClientComponent | TextFieldLabelServerComponent>
+      Error?: PayloadComponent<TextFieldErrorServerProps, TextFieldErrorClientProps>
+      Label?: PayloadComponent<TextFieldLabelServerProps, TextFieldLabelClientProps>
     } & FieldAdmin['components']
     placeholder?: Record<string, string> | string
     rtl?: boolean
@@ -659,8 +665,8 @@ export type EmailField = {
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
-      Error?: CustomComponent<EmailFieldErrorClientComponent | EmailFieldErrorServerComponent>
-      Label?: CustomComponent<EmailFieldLabelClientComponent | EmailFieldLabelServerComponent>
+      Error?: PayloadComponent<EmailFieldErrorServerProps, EmailFieldErrorClientProps>
+      Label?: PayloadComponent<EmailFieldLabelServerProps, EmailFieldLabelClientProps>
     } & FieldAdmin['components']
     placeholder?: Record<string, string> | string
   } & FieldAdmin
@@ -679,8 +685,8 @@ export type SlugField = {
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
-      Error?: CustomComponent<TextFieldErrorClientComponent | TextFieldErrorServerComponent>
-      Label?: CustomComponent<TextFieldLabelClientComponent | TextFieldLabelServerComponent>
+      Error?: PayloadComponent<TextFieldErrorServerProps, TextFieldErrorClientProps>
+      Label?: PayloadComponent<TextFieldLabelServerProps, TextFieldLabelClientProps>
     } & FieldAdmin['components']
     placeholder?: Record<string, string> | string
   } & FieldAdmin
@@ -706,8 +712,8 @@ export type TextareaField = {
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
-      Error?: CustomComponent<TextareaFieldErrorClientComponent | TextareaFieldErrorServerComponent>
-      Label?: CustomComponent<TextareaFieldLabelClientComponent | TextareaFieldLabelServerComponent>
+      Error?: PayloadComponent<TextareaFieldErrorServerProps, TextareaFieldErrorClientProps>
+      Label?: PayloadComponent<TextareaFieldLabelServerProps, TextareaFieldLabelClientProps>
     } & FieldAdmin['components']
     placeholder?: Record<string, string> | string
     rows?: number
@@ -730,8 +736,8 @@ export type CheckboxField = {
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
-      Error?: CustomComponent<CheckboxFieldErrorClientComponent | CheckboxFieldErrorServerComponent>
-      Label?: CustomComponent<CheckboxFieldLabelClientComponent | CheckboxFieldLabelServerComponent>
+      Error?: PayloadComponent<CheckboxFieldErrorServerProps, CheckboxFieldErrorClientProps>
+      Label?: PayloadComponent<CheckboxFieldLabelServerProps, CheckboxFieldLabelClientProps>
     } & FieldAdmin['components']
   } & FieldAdmin
   type: 'checkbox'
@@ -782,8 +788,8 @@ export type DateField = {
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
-      Error?: CustomComponent<DateFieldErrorClientComponent | DateFieldErrorServerComponent>
-      Label?: CustomComponent<DateFieldLabelClientComponent | DateFieldLabelServerComponent>
+      Error?: PayloadComponent<DateFieldErrorServerProps, DateFieldErrorClientProps>
+      Label?: PayloadComponent<DateFieldLabelServerProps, DateFieldLabelClientProps>
     } & FieldAdmin['components']
     date?: ConditionalDateProps
     placeholder?: Record<string, string> | string
@@ -812,7 +818,7 @@ export type GroupBase = {
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
-      Label?: CustomComponent<GroupFieldLabelClientComponent | GroupFieldLabelServerComponent>
+      Label?: PayloadComponent<GroupFieldLabelServerProps, GroupFieldLabelClientProps>
     } & FieldAdmin['components']
     hideGutter?: boolean
   } & FieldAdmin
@@ -873,8 +879,9 @@ export type CollapsibleField = {
         components: {
           afterInput?: CustomComponent[]
           beforeInput?: CustomComponent[]
-          Label: CustomComponent<
-            CollapsibleFieldLabelClientComponent | CollapsibleFieldLabelServerComponent
+          Label: PayloadComponent<
+            CollapsibleFieldLabelServerProps,
+            CollapsibleFieldLabelClientProps
           >
         } & FieldAdmin['components']
         initCollapsed?: boolean
@@ -886,8 +893,9 @@ export type CollapsibleField = {
         components?: {
           afterInput?: CustomComponent[]
           beforeInput?: CustomComponent[]
-          Label?: CustomComponent<
-            CollapsibleFieldLabelClientComponent | CollapsibleFieldLabelServerComponent
+          Label?: PayloadComponent<
+            CollapsibleFieldLabelServerProps,
+            CollapsibleFieldLabelClientProps
           >
         } & FieldAdmin['components']
         initCollapsed?: boolean
@@ -1051,12 +1059,8 @@ type UploadAdmin = {
   components?: {
     afterInput?: CustomComponent[]
     beforeInput?: CustomComponent[]
-    Error?: CustomComponent<
-      RelationshipFieldErrorClientComponent | RelationshipFieldErrorServerComponent
-    >
-    Label?: CustomComponent<
-      RelationshipFieldLabelClientComponent | RelationshipFieldLabelServerComponent
-    >
+    Error?: PayloadComponent<UploadFieldErrorServerProps, UploadFieldErrorClientProps>
+    Label?: PayloadComponent<UploadFieldLabelServerProps, UploadFieldLabelClientProps>
   } & FieldAdmin['components']
   isSortable?: boolean
 } & FieldAdmin
@@ -1103,8 +1107,8 @@ export type CodeField = {
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
-      Error?: CustomComponent<CodeFieldErrorClientComponent | CodeFieldErrorServerComponent>
-      Label?: CustomComponent<CodeFieldLabelClientComponent | CodeFieldLabelServerComponent>
+      Error?: PayloadComponent<CodeFieldErrorServerProps, CodeFieldErrorClientProps>
+      Label?: PayloadComponent<CodeFieldLabelServerProps, CodeFieldLabelClientProps>
     } & FieldAdmin['components']
     editorOptions?: EditorProps['options']
     editorProps?: Partial<EditorProps>
@@ -1128,8 +1132,8 @@ export type JSONField = {
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
-      Error?: CustomComponent<JSONFieldErrorClientComponent | JSONFieldErrorServerComponent>
-      Label?: CustomComponent<JSONFieldLabelClientComponent | JSONFieldLabelServerComponent>
+      Error?: PayloadComponent<JSONFieldErrorServerProps, JSONFieldErrorClientProps>
+      Label?: PayloadComponent<JSONFieldLabelServerProps, JSONFieldLabelClientProps>
     } & FieldAdmin['components']
     editorOptions?: EditorProps['options']
     maxHeight?: number
@@ -1155,8 +1159,8 @@ export type SelectField = {
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
-      Error?: CustomComponent<SelectFieldErrorClientComponent | SelectFieldErrorServerComponent>
-      Label?: CustomComponent<SelectFieldLabelClientComponent | SelectFieldLabelServerComponent>
+      Error?: PayloadComponent<SelectFieldErrorServerProps, SelectFieldErrorClientProps>
+      Label?: PayloadComponent<SelectFieldLabelServerProps, SelectFieldLabelClientProps>
     } & FieldAdmin['components']
     isClearable?: boolean
     isSortable?: boolean
@@ -1245,12 +1249,8 @@ type RelationshipAdmin = {
   components?: {
     afterInput?: CustomComponent[]
     beforeInput?: CustomComponent[]
-    Error?: CustomComponent<
-      RelationshipFieldErrorClientComponent | RelationshipFieldErrorServerComponent
-    >
-    Label?: CustomComponent<
-      RelationshipFieldLabelClientComponent | RelationshipFieldLabelServerComponent
-    >
+    Error?: PayloadComponent<RelationshipFieldErrorServerProps, RelationshipFieldErrorClientProps>
+    Label?: PayloadComponent<RelationshipFieldLabelServerProps, RelationshipFieldLabelClientProps>
   } & FieldAdmin['components']
   isSortable?: boolean
   placeholder?: LabelFunction | string
@@ -1351,8 +1351,8 @@ export type ArrayField = {
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
-      Error?: CustomComponent<ArrayFieldErrorClientComponent | ArrayFieldErrorServerComponent>
-      Label?: CustomComponent<ArrayFieldLabelClientComponent | ArrayFieldLabelServerComponent>
+      Error?: PayloadComponent<ArrayFieldErrorServerProps, ArrayFieldErrorClientProps>
+      Label?: PayloadComponent<ArrayFieldLabelServerProps, ArrayFieldLabelClientProps>
       RowLabel?: RowLabelComponent
     } & FieldAdmin['components']
     initCollapsed?: boolean
@@ -1393,8 +1393,8 @@ export type RadioField = {
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
-      Error?: CustomComponent<RadioFieldErrorClientComponent | RadioFieldErrorServerComponent>
-      Label?: CustomComponent<RadioFieldLabelClientComponent | RadioFieldLabelServerComponent>
+      Error?: PayloadComponent<RadioFieldErrorServerProps, RadioFieldErrorClientProps>
+      Label?: PayloadComponent<RadioFieldLabelServerProps, RadioFieldLabelClientProps>
     } & FieldAdmin['components']
     layout?: 'horizontal' | 'vertical'
   } & FieldAdmin
@@ -1500,7 +1500,7 @@ export type Block = {
        * This will replace the entire block component, including the block header / collapsible.
        */
       Block?: PayloadComponent<any, any>
-      Label?: PayloadComponent<any, any>
+      Label?: PayloadComponent<BlockRowLabelServerProps, BlockRowLabelClientProps>
     }
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
@@ -1588,8 +1588,8 @@ export type BlocksField = {
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
-      Error?: CustomComponent<BlocksFieldErrorClientComponent | BlocksFieldErrorServerComponent>
-      Label?: CustomComponent<BlocksFieldLabelClientComponent | BlocksFieldLabelServerComponent>
+      Error?: PayloadComponent<BlocksFieldErrorServerProps, BlocksFieldErrorClientProps>
+      Label?: PayloadComponent<BlocksFieldLabelServerProps, BlocksFieldLabelClientProps>
     } & FieldAdmin['components']
     initCollapsed?: boolean
     /**
@@ -1652,8 +1652,8 @@ export type PointField = {
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
-      Error?: CustomComponent<PointFieldErrorClientComponent | PointFieldErrorServerComponent>
-      Label?: CustomComponent<PointFieldLabelClientComponent | PointFieldLabelServerComponent>
+      Error?: PayloadComponent<PointFieldErrorServerProps, PointFieldErrorClientProps>
+      Label?: PayloadComponent<PointFieldLabelServerProps, PointFieldLabelClientProps>
     } & FieldAdmin['components']
     placeholder?: Record<string, string> | string
     step?: number
@@ -1682,8 +1682,8 @@ export type JoinField = {
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
-      Error?: CustomComponent<JoinFieldErrorClientComponent | JoinFieldErrorServerComponent>
-      Label?: CustomComponent<JoinFieldLabelClientComponent | JoinFieldLabelServerComponent>
+      Error?: PayloadComponent<JoinFieldErrorServerProps, JoinFieldErrorClientProps>
+      Label?: PayloadComponent<JoinFieldLabelServerProps, JoinFieldLabelClientProps>
     } & FieldAdmin['components']
     defaultColumns?: string[]
     disableBulkEdit?: never

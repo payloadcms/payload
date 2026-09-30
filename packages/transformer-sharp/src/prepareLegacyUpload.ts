@@ -14,11 +14,16 @@ import { sanitizeResizeConfig } from './sanitizeResizeConfig.js'
  * Sharp throws on truncated/header-only files. Returns `undefined` instead —
  * matching core's dependency-free probe — since unreadable dimensions shouldn't fail the upload.
  */
-async function tryProbe(file: File, sharpDependency: SharpDependency) {
+async function tryProbe(
+  file: File,
+  sharpDependency: SharpDependency,
+): Promise<ProbedImageSize | undefined> {
   try {
     const buffer = Buffer.from(await file.arrayBuffer())
     const metadata = await sharpDependency(buffer).metadata()
-    return metadata.width && metadata.height ? metadata : undefined
+    return metadata.width && metadata.height
+      ? { height: metadata.height, width: metadata.width }
+      : undefined
   } catch {
     return undefined
   }
@@ -53,7 +58,7 @@ export function createPrepareLegacyUpload({
     if (fileSupportsResize) {
       const originalMeta = await tryProbe(file, sharpDependency)
       if (originalMeta) {
-        originalDimensions = { height: originalMeta.height!, width: originalMeta.width! }
+        originalDimensions = { height: originalMeta.height, width: originalMeta.width }
       }
     }
 
@@ -85,9 +90,9 @@ export function createPrepareLegacyUpload({
     const results: PreparedUploadTransformation[] = [mainResult]
 
     const focalPointEnabled = collectionUpload.focalPoint !== false
-    const imageSizes = collectionUpload.imageSizes
+    const variants = collectionUpload.variants
 
-    if (canProcessAsImage && Array.isArray(imageSizes) && originalDimensions) {
+    if (canProcessAsImage && Array.isArray(variants) && originalDimensions) {
       const focalPoint: FocalPoint | undefined =
         focalPointEnabled && uploadEdits?.focalPoint
           ? {
@@ -96,7 +101,7 @@ export function createPrepareLegacyUpload({
             }
           : undefined
 
-      const sizeResults = await mapWithBoundedConcurrency(imageSizes, async (rawConfig) => {
+      const sizeResults = await mapWithBoundedConcurrency(variants, async (rawConfig) => {
         const imageResizeConfig = sanitizeResizeConfig(rawConfig)
         const fieldPath = `sizes.${imageResizeConfig.name}` as const
 

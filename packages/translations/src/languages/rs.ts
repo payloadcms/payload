@@ -115,6 +115,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     noItems:
       'Na vašoj kontrolnoj tabli nema vidžeta. Možete ih dodati iz menija "Kontrolna tabla" koji se nalazi na vrhu.',
     resetLayout: 'Ресетуј распоред',
+    resizeWidget: 'Промени величину {{label}}, тренутна величина: {{size}}',
     searchWidgets: 'Pretraži widgete...',
     widgetCollectionRequired: 'Kolekcija je obavezna.',
     widgetConfigurationError: 'Greška u konfiguraciji vidžeta',
@@ -317,6 +318,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     create: 'Креирај',
     created: 'Креирано',
     createdAt: 'Креирано у',
+    createdBy: 'Kreirano od strane',
     createNew: 'Креирај ново',
     createNewLabel: 'Креирај ново {{label}}',
     creating: 'Креира се',
@@ -517,6 +519,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Predstojeći događaji',
     updatedAgo: 'Ažurirano pre {{distance}}',
     updatedAt: 'Ажурирано у',
+    updatedBy: 'Ažurirao/la',
     updatedCountSuccessfully: 'Успешно ажурирано {{count}} {{label}}.',
     updatedLabelSuccessfully: 'Uspešno ažurirano {{label}}.',
     updatedSuccessfully: 'Успешно ажурирано.',
