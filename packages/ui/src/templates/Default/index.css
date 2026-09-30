@@ -14,7 +14,7 @@
     flex-direction: column;
     background-color: var(--color-bg);
     min-height: 0;
-    overflow: scroll;
+    overflow: auto;
   }
 
   /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
