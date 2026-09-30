@@ -69,6 +69,7 @@ export const discardBranchHandler: PayloadHandler = async (req) => {
   const result = await discardBranchChanges(payload, {
     branch: branchDoc.slug as string,
     changes: body.changes,
+    overrideAccess: true,
     req,
   })
 

@@ -36,7 +36,6 @@ let emptyGroupPoint
 describe('Point', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       // prebuild,
@@ -49,8 +48,6 @@ describe('Point', () => {
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsTest',
-      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
 
     if (client) {
@@ -68,6 +65,7 @@ describe('Point', () => {
         localized: [4, 2],
         point: [5, 5],
       },
+      overrideAccess: true,
     })
     emptyGroupPoint = await payload.create({
       collection: pointFieldsSlug,
@@ -76,6 +74,7 @@ describe('Point', () => {
         localized: [3, -2],
         point: [5, 5],
       },
+      overrideAccess: true,
     })
   })
 

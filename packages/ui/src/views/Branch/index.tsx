@@ -59,7 +59,7 @@ export async function BranchChangesView(props: DocumentViewServerProps) {
     ? await payload.find({
         collection: branchChangesCollectionSlug,
         depth: 0,
-        overrideAccess: false,
+        overrideAccess: true,
         pagination: false,
         req,
         sort: 'collectionSlug',
@@ -114,11 +114,10 @@ export async function BranchChangesView(props: DocumentViewServerProps) {
         collection: 'payload-jobs',
         depth: 0,
         limit: 25,
-        overrideAccess: false,
+        overrideAccess: true,
         pagination: false,
         req,
         sort: 'waitUntil',
-        user: req.user,
         where: buildUpcomingMergeWhere({ branchSlug: slug }),
       })
     : null

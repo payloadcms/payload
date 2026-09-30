@@ -192,6 +192,7 @@ export const find: Find = async function find(
       docs: result.docs as Record<string, unknown>[],
       joins,
       locale,
+      req,
     })
   }
 

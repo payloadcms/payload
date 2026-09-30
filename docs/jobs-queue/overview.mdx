@@ -87,8 +87,12 @@ handler: async () => {
 <Pill text="Queue Jobs" />
 
 ```ts
-// Option A: Manual Queuing—Used for user-triggered actions
-payload.jobs.queue({ task: 'sendEmail', input: { to: 'user@example.com' } })
+// Option A: Manual Queuing—Used from trusted server code
+payload.jobs.queue({
+  task: 'sendEmail',
+  input: { to: 'user@example.com' },
+  overrideAccess: true,
+})
 
 // Option B: Scheduled Queuing
 // Step 1 - Define schedules in task/workflow config:
@@ -141,7 +145,7 @@ autoRun: [{
 GET /api/payload-jobs/run?queue=emails
 
 // Option D: Manual
-payload.jobs.run({ queue: 'emails' })
+payload.jobs.run({ queue: 'emails', overrideAccess: true })
 ```
 
 <Arrow direction="down" />

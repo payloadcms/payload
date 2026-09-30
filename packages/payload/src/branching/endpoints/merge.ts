@@ -25,8 +25,8 @@ export type MergeStreamEvent =
  *
  * Runs with `overrideAccess: false` and the authenticated user, so the
  * per-document preflight applies. This is the boundary at which branching's
- * access model is actually enforced — the Local API, like every other Payload
- * operation, trusts server-side callers by default.
+ * access model is actually enforced. The Local API uses the same secure default;
+ * trusted server-side callers must opt in to bypassing it.
  *
  * `stream: true` switches the response to NDJSON progress events. A merge walks
  * an arbitrary number of documents one at a time, so the admin panel needs to

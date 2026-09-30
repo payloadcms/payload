@@ -117,7 +117,17 @@ export const useHierarchySearch = ({
         setIsLoading(false)
       }
     },
-    [api, collectionSlug, limit, locale, parentFieldName, serverURL, titleField, titlePathField],
+    [
+      api,
+      branch,
+      collectionSlug,
+      limit,
+      locale,
+      parentFieldName,
+      serverURL,
+      titleField,
+      titlePathField,
+    ],
   )
 
   const search = useCallback(

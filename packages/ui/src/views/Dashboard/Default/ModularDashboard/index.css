@@ -26,8 +26,10 @@
     }
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .modular-dashboard .widget {
+      /* stylelint-disable-next-line plugin/no-important -- TODO: pre-existing; revisit whether specificity can win instead */
       width: 100% !important;
     }
 

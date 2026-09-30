@@ -1,13 +1,17 @@
 import type { Config } from '../config/types.js'
 import type { SanitizedBranchingConfig } from './types.js'
 
-import { branchChangesCollectionSlug, branchesCollectionSlug } from './types.js'
+import {
+  branchChangesCollectionSlug,
+  branchesCollectionSlug,
+  branchMergesCollectionSlug,
+} from './types.js'
 
 /**
  * Built-in Payload collections. Branching is off for these by default because
- * none of them hold authored content, but each can opt in with
- * `branching: true` — except the two that store branch state itself, which
- * cannot be branched at all (see `hardExcludedSlugs`).
+ * none of them hold authored content, but each can opt in with `branching: true`
+ * — except collections that store branch state itself, which cannot be branched
+ * at all (see `hardExcludedSlugs`).
  */
 export const corePayloadCollectionSlugs = [
   'payload-jobs',
@@ -23,7 +27,11 @@ export const corePayloadCollectionSlugs = [
  * branch would require already knowing the active branch in order to read the
  * registry that answers exactly that question.
  */
-export const hardExcludedSlugs = [branchChangesCollectionSlug, branchesCollectionSlug] as const
+export const hardExcludedSlugs = [
+  branchChangesCollectionSlug,
+  branchesCollectionSlug,
+  branchMergesCollectionSlug,
+] as const
 
 const DEFAULT_MAX_SHADOWED_IDS = 2000
 
@@ -73,16 +81,6 @@ export const sanitizeBranchingConfig = (config: Config): SanitizedBranchingConfi
     offByDefault.add(kvCollectionSlug)
   }
 
-  for (const collection of config.collections ?? []) {
-    // Detection is by the `auth` flag, never by slug: the auth collection can
-    // be named anything, a project can have several, and plugins add their own.
-    // `auth` may be `true` or an options object, and `disableLocalStrategy`
-    // collections still count.
-    if (collection.auth) {
-      offByDefault.add(collection.slug)
-    }
-  }
-
   const branchableCollections = new Set<string>()
 
   for (const collection of config.collections ?? []) {
@@ -92,6 +90,15 @@ export const sanitizeBranchingConfig = (config: Config): SanitizedBranchingConfi
       if (collection.branching === true) {
         throw new Error(
           `Collection "${slug}" stores branch state and cannot itself be branched. Remove \`branching: true\` from it.`,
+        )
+      }
+      continue
+    }
+
+    if (collection.auth) {
+      if (collection.branching === true) {
+        throw new Error(
+          `Collection "${slug}" has authentication enabled and cannot be branched. Remove \`branching: true\` from it.`,
         )
       }
       continue

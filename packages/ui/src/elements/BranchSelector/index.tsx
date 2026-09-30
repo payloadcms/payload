@@ -209,7 +209,7 @@ export const BranchSelector: React.FC<{ className?: string }> = ({ className }) 
         portalClassName={`${baseClass}__popup`}
         renderButton={({ active, onClick, onKeyDown, ...ariaProps }) => (
           <Button
-            aria-label={t('branching:selectBranch')}
+            aria-label={`${t('branching:selectBranch')}: ${activeLabel}`}
             buttonStyle="secondary"
             className={`${baseClass}__trigger`}
             extraButtonProps={{ onKeyDown }}

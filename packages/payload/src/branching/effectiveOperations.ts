@@ -214,22 +214,33 @@ const hasBranchPublishedVersion = async ({
     return false
   }
 
-  const { docs } = await payload.db.findVersions({
-    branch: false,
-    collection: collectionSlug,
-    limit: 1,
-    pagination: false,
-    req,
-    where: {
-      and: [
-        { parent: { equals: shadow.id } },
-        { [branchField]: { equals: branch } },
-        { 'version._status': { equals: 'published' } },
-      ],
-    },
-  })
+  const locales = payload.config.localization
+    ? payload.config.localization.localeCodes
+    : [undefined]
 
-  return docs.length > 0
+  for (const locale of locales) {
+    const { docs } = await payload.db.findVersions({
+      branch: false,
+      collection: collectionSlug,
+      limit: 1,
+      locale,
+      pagination: false,
+      req,
+      where: {
+        and: [
+          { parent: { equals: shadow.id } },
+          { [branchField]: { equals: branch } },
+          { 'version._status': { equals: 'published' } },
+        ],
+      },
+    })
+
+    if (docs.length > 0) {
+      return true
+    }
+  }
+
+  return false
 }
 
 /**
@@ -253,6 +264,7 @@ const findNewerDraft = async ({
     branch: false,
     collection: collectionSlug,
     limit: 1,
+    locale: payload.config.localization ? 'all' : undefined,
     pagination: false,
     req,
     sort: '-updatedAt',
@@ -262,11 +274,19 @@ const findNewerDraft = async ({
   const latest = docs?.[0] as { version?: Record<string, unknown> } | undefined
   const version = latest?.version
 
-  if (!version || version._status !== 'draft') {
+  if (!version || !isDraft(version._status)) {
     return null
   }
 
   return version
+}
+
+const isDraft = (status: unknown): boolean => {
+  if (typeof status === 'object' && status !== null) {
+    return Object.values(status as Record<string, unknown>).includes('draft')
+  }
+
+  return status === 'draft'
 }
 
 /**

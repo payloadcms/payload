@@ -14,6 +14,7 @@ import {
   createGlobalVersion,
   createSchemaGenerator,
   createVersion,
+  deleteBranchGlobal,
   deleteMany,
   deleteOne,
   deleteVersions,
@@ -38,6 +39,7 @@ import {
   updateMany,
   updateOne,
   updateVersion,
+  upsertBranchGlobalChange,
 } from '@payloadcms/drizzle'
 import {
   columnToCodeConverter,
@@ -170,6 +172,7 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
       }),
       createVersion,
       defaultIDType: payloadIDType,
+      deleteBranchGlobal,
       deleteMany,
       deleteOne,
       deleteVersions,
@@ -203,6 +206,7 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
       updateOne,
       updateVersion,
       upsert: updateOne,
+      upsertBranchGlobalChange,
     })
 
     adapter.blocksToJsonMigrator = createBlocksToJsonMigrator({

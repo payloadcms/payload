@@ -1,18 +1,25 @@
+import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { Payload, SanitizedCollectionConfig } from 'payload'
 
 import path from 'path'
 import {
-  createLocalReq,
+  assertBranchReadable,
+  createPayloadRequest,
   isolateBranchState,
   isolateObjectProperty,
   resolveEffectiveOperations,
 } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { expect, vi } from 'vitest'
 
+// eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercises this internal boundary directly.
+import { readLocalizedBranchWrite } from '../../packages/payload/src/branching/readLocalizedBranchWrite.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercises this internal boundary directly.
+import { readCollectionMergeSnapshot } from '../../packages/payload/src/branching/readMergeSnapshot.js'
+import { scheduleMergeHandler } from '../../packages/ui/src/utilities/scheduleMergeHandler.js'
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { hookSpy } from './hookSpy.js'
 import {
@@ -33,9 +40,11 @@ import {
   postsSlug,
   publicSlug,
   restrictedSlug,
+  uninitializedGlobalSlug,
   uniqueSlug,
   whereAccessSlug,
 } from './shared.js'
+import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -50,9 +59,10 @@ const fieldNames = (collection: SanitizedCollectionConfig): string[] =>
 const collectionConfig = (slug: string): SanitizedCollectionConfig =>
   payload.collections[slug]!.config
 
-describe('Branching', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () => {
+  test.beforeAll(async ({ payloadInstance, restClientInstance }) => {
+    payload = createTrustedPayload(payloadInstance)
+    restClient = restClientInstance
 
     const login = await restClient
       .POST('/users/login', {
@@ -63,12 +73,8 @@ describe('Branching', () => {
     token = login.token
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  describe('Schema', () => {
-    it('should inject branch fields into a branch-enabled collection', () => {
+  test.describe('Schema', () => {
+    test('should inject branch fields into a branch-enabled collection', () => {
       const names = fieldNames(collectionConfig(postsSlug))
 
       expect(names).toContain('_branch')
@@ -76,7 +82,7 @@ describe('Branching', () => {
       expect(names).toContain('_branchOp')
     })
 
-    it('should not inject branch fields into a collection opted out with branching: false', () => {
+    test('should not inject branch fields into a collection opted out with branching: false', () => {
       const names = fieldNames(collectionConfig(excludedSlug))
 
       expect(names).not.toContain('_branch')
@@ -84,19 +90,19 @@ describe('Branching', () => {
       expect(names).not.toContain('_branchOp')
     })
 
-    it('should not inject branch fields into auth collections by default', () => {
+    test('should not inject branch fields into auth collections by default', () => {
       const names = fieldNames(collectionConfig('users'))
 
       expect(names).not.toContain('_branch')
     })
 
-    it('should not inject branch fields into built-in Payload collections by default', () => {
+    test('should not inject branch fields into built-in Payload collections by default', () => {
       const names = fieldNames(collectionConfig('payload-preferences'))
 
       expect(names).not.toContain('_branch')
     })
 
-    it('should default _branch to the main sentinel rather than null', () => {
+    test('should default _branch to the main sentinel rather than null', () => {
       const branchField = collectionConfig(postsSlug).flattenedFields.find(
         (field) => field.name === '_branch',
       )
@@ -104,7 +110,7 @@ describe('Branching', () => {
       expect(branchField).toMatchObject({ type: 'text', defaultValue: 'main' })
     })
 
-    it('should type _branchDocID as a self-referential relationship so it inherits the ID type', () => {
+    test('should type _branchDocID as a self-referential relationship so it inherits the ID type', () => {
       const docIDField = collectionConfig(numericIDSlug).flattenedFields.find(
         (field) => field.name === '_branchDocID',
       )
@@ -112,7 +118,7 @@ describe('Branching', () => {
       expect(docIDField).toMatchObject({ type: 'relationship', relationTo: numericIDSlug })
     })
 
-    it('should rewrite a unique field into a branch-scoped compound index', () => {
+    test('should rewrite a unique field into a branch-scoped compound index', () => {
       const config = collectionConfig(uniqueSlug)
       const slugField = config.flattenedFields.find((field) => field.name === 'slug')
 
@@ -129,17 +135,17 @@ describe('Branching', () => {
     })
   })
 
-  describe('Writes on main', () => {
+  test.describe('Writes on main', () => {
     const createdIDs: (number | string)[] = []
 
-    afterAll(async () => {
+    test.afterAll(async () => {
       for (const id of createdIDs) {
         await payload.delete({ id, collection: postsSlug })
       }
       createdIDs.length = 0
     })
 
-    it('should stamp documents created without a branch as main', async () => {
+    test('should stamp documents created without a branch as main', async () => {
       const doc = await payload.create({
         collection: postsSlug,
         data: { title: 'on main' },
@@ -154,7 +160,7 @@ describe('Branching', () => {
       expect(raw?._branch).toBe('main')
     })
 
-    it('should still enforce uniqueness within a branch after the index rewrite', async () => {
+    test('should still enforce uniqueness within a branch after the index rewrite', async () => {
       const first = await payload.create({
         collection: uniqueSlug,
         data: { slug: 'about' },
@@ -168,11 +174,11 @@ describe('Branching', () => {
     })
   })
 
-  describe('Read path — documents created on a branch', () => {
+  test.describe('Read path — documents created on a branch', () => {
     const mainIDs: (number | string)[] = []
     const branchIDs: (number | string)[] = []
 
-    beforeAll(async () => {
+    test.beforeAll(async () => {
       await payload.create({
         collection: branchesSlug,
         data: { name: 'Halloween', slug: 'halloween' },
@@ -200,7 +206,7 @@ describe('Branching', () => {
       }
     })
 
-    afterAll(async () => {
+    test.afterAll(async () => {
       for (const id of [...mainIDs, ...branchIDs]) {
         await payload.delete({ id, branch: false, collection: postsSlug })
       }
@@ -208,7 +214,7 @@ describe('Branching', () => {
       branchIDs.length = 0
     })
 
-    it('should hide a document created on a branch from main', async () => {
+    test('should hide a document created on a branch from main', async () => {
       const result = await payload.find({ collection: postsSlug, pagination: false })
       const ids = result.docs.map((doc) => doc.id)
 
@@ -218,7 +224,7 @@ describe('Branching', () => {
       }
     })
 
-    it('should return a document created on a branch when reading that branch', async () => {
+    test('should return a document created on a branch when reading that branch', async () => {
       const result = await payload.find({
         branch: 'halloween',
         collection: postsSlug,
@@ -232,7 +238,7 @@ describe('Branching', () => {
       }
     })
 
-    it('should isolate two concurrent branches from each other', async () => {
+    test('should isolate two concurrent branches from each other', async () => {
       const result = await payload.find({
         branch: 'q4',
         collection: postsSlug,
@@ -251,7 +257,7 @@ describe('Branching', () => {
      * applied after the query rather than inside it, totalDocs and page
      * boundaries would both be wrong and no post-processing could fix them.
      */
-    it('should keep pagination and totalDocs correct on main', async () => {
+    test('should keep pagination and totalDocs correct on main', async () => {
       const page1 = await payload.find({ collection: postsSlug, limit: 10, page: 1 })
 
       expect(page1.totalDocs).toBe(25)
@@ -259,7 +265,7 @@ describe('Branching', () => {
       expect(page1.docs).toHaveLength(10)
     })
 
-    it('should keep pagination and totalDocs correct on a branch', async () => {
+    test('should keep pagination and totalDocs correct on a branch', async () => {
       const page1 = await payload.find({
         branch: 'halloween',
         collection: postsSlug,
@@ -272,7 +278,7 @@ describe('Branching', () => {
       expect(page1.docs).toHaveLength(10)
     })
 
-    it('should not return the same document on two pages of a branch read', async () => {
+    test('should not return the same document on two pages of a branch read', async () => {
       const seen = new Set<number | string>()
 
       for (const page of [1, 2, 3]) {
@@ -293,7 +299,7 @@ describe('Branching', () => {
       expect(seen.size).toBe(30)
     })
 
-    it('should agree between count and find on a branch', async () => {
+    test('should agree between count and find on a branch', async () => {
       const counted = await payload.count({ branch: 'halloween', collection: postsSlug })
       const found = await payload.find({
         branch: 'halloween',
@@ -305,7 +311,7 @@ describe('Branching', () => {
       expect(counted.totalDocs).toBe(30)
     })
 
-    it('should record branch-created documents in the changeset registry', async () => {
+    test('should record branch-created documents in the changeset registry', async () => {
       const changes = await payload.find({
         collection: branchChangesSlug,
         pagination: false,
@@ -320,7 +326,7 @@ describe('Branching', () => {
       })
     })
 
-    it('should leave a branching-disabled collection unaffected by branch context', async () => {
+    test('should leave a branching-disabled collection unaffected by branch context', async () => {
       const doc = await payload.create({
         branch: 'halloween',
         collection: excludedSlug,
@@ -334,24 +340,24 @@ describe('Branching', () => {
       await payload.delete({ id: doc.id, collection: excludedSlug })
     })
 
-    it.todo('should leave query shapes unchanged when branching is disabled')
+    test.todo('should leave query shapes unchanged when branching is disabled')
   })
 
-  describe('Branch resolution', () => {
-    it.todo(
+  test.describe('Branch resolution', () => {
+    test.todo(
       'should resolve the branch identically via Local API arg, query param and stored preference',
     )
-    it.todo('should always resolve req.user from main, even on a branch')
+    test.todo('should always resolve req.user from main, even on a branch')
   })
 
   /**
    * The gaps a coverage audit turned up: behaviours that are implemented and load-bearing
    * but were never asserted, so a regression in any of them would have been silent.
    */
-  describe('Audit gaps', () => {
+  test.describe('Audit gaps', () => {
     const branch = 'auditwork'
 
-    beforeAll(async () => {
+    test.beforeAll(async () => {
       const existing = await payload.find({
         collection: branchesSlug,
         pagination: false,
@@ -366,7 +372,7 @@ describe('Branching', () => {
       }
     })
 
-    afterEach(async () => {
+    test.afterEach(async () => {
       for (const collection of [postsSlug, pagesSlug, categoriesSlug] as const) {
         const rows = await payload.find({ branch: false, collection, pagination: false })
 
@@ -392,7 +398,7 @@ describe('Branching', () => {
     // on. The three existing select tests all run against a collection with versions
     // off, so this guard was never exercised — and its failure mode is shadow-row
     // primary keys surfacing as document IDs in the admin drafts list.
-    it('should keep canonical IDs when selecting fields on a branch drafts read', async () => {
+    test('should keep canonical IDs when selecting fields on a branch drafts read', async () => {
       const doc = await payload.create({
         collection: pagesSlug,
         data: { _status: 'published', title: 'main title' },
@@ -420,7 +426,7 @@ describe('Branching', () => {
       expect(drafts.docs[0]!.title).toBe('branch title')
     })
 
-    it('should keep canonical IDs when selecting fields on a branch version read', async () => {
+    test('should keep canonical IDs when selecting fields on a branch version read', async () => {
       const doc = await payload.create({
         collection: pagesSlug,
         data: { _status: 'published', title: 'main title' },
@@ -450,7 +456,7 @@ describe('Branching', () => {
     })
 
     // The bulk paths are what the admin list view's "edit many" and "delete many" use.
-    it('should fork every matching document on a bulk update', async () => {
+    test('should fork every matching document on a bulk update', async () => {
       const first = await payload.create({ collection: postsSlug, data: { title: 'first' } })
       const second = await payload.create({ collection: postsSlug, data: { title: 'second' } })
 
@@ -468,7 +474,7 @@ describe('Branching', () => {
       expect(onMain.docs.map((doc) => doc.title).sort()).toEqual(['first', 'second'])
     })
 
-    it('should tombstone every matching document on a bulk delete', async () => {
+    test('should tombstone every matching document on a bulk delete', async () => {
       const first = await payload.create({ collection: postsSlug, data: { title: 'first' } })
       const second = await payload.create({ collection: postsSlug, data: { title: 'second' } })
 
@@ -489,7 +495,7 @@ describe('Branching', () => {
     // rather than recreating it *specifically* so inbound relationship rows survive —
     // deleting the row would cascade them away, and rebuilding it does not bring them
     // back. A regression here silently nulls relationships after a merge.
-    it('should preserve inbound relationships when merging a branch-created document', async () => {
+    test('should preserve inbound relationships when merging a branch-created document', async () => {
       const category = await payload.create({
         branch,
         collection: categoriesSlug,
@@ -516,7 +522,7 @@ describe('Branching', () => {
     // Plan §15's precedence contract. The general form of the bug this audit started
     // from: the Local API argument and the query param must resolve to the same branch,
     // or one entry point quietly reads production while the other reads the branch.
-    it('should resolve the same branch from a Local API argument and a query param', async () => {
+    test('should resolve the same branch from a Local API argument and a query param', async () => {
       const doc = await payload.create({
         collection: postsSlug,
         data: { title: 'on main' },
@@ -548,10 +554,10 @@ describe('Branching', () => {
    * locale, and array/block fields, which live in their own tables under Drizzle so a
    * fork has to copy child rows and re-parent them.
    */
-  describe('Localized and nested fields', () => {
+  test.describe('Localized and nested fields', () => {
     const branch = 'shapework'
 
-    beforeAll(async () => {
+    test.beforeAll(async () => {
       const existing = await payload.find({
         collection: branchesSlug,
         pagination: false,
@@ -566,7 +572,10 @@ describe('Branching', () => {
       }
     })
 
-    afterEach(async () => {
+    test.afterEach(async () => {
+      hookSpy.localizedChangeRows = undefined
+      hookSpy.postDefaultValueCount = undefined
+
       for (const collection of [localizedSlug, nestedSlug] as const) {
         const rows = await payload.find({ branch: false, collection, pagination: false })
 
@@ -586,7 +595,7 @@ describe('Branching', () => {
       }
     })
 
-    it('should fork one locale and leave the others reading main', async () => {
+    test('should fork one locale and leave the others reading main', async () => {
       const doc = await payload.create({
         collection: localizedSlug,
         data: { _status: 'published', title: 'main english' },
@@ -628,7 +637,7 @@ describe('Branching', () => {
       expect(mainES.title).toBe('main spanish')
     })
 
-    it('should merge a localized edit into the right locale only', async () => {
+    test('should merge a localized edit into the right locale only', async () => {
       const doc = await payload.create({
         collection: localizedSlug,
         data: { _status: 'published', title: 'main english' },
@@ -659,7 +668,216 @@ describe('Branching', () => {
       expect(mainEN.title).toBe('main english')
     })
 
-    it('should fork array and block rows onto the branch', async () => {
+    test('should preserve one localized nested row across every merged locale', async () => {
+      const doc = await payload.create({
+        collection: localizedSlug,
+        data: {
+          _status: 'published',
+          items: [{ label: 'main English' }],
+          title: 'main english',
+        },
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: doc.id,
+        collection: localizedSlug,
+        data: {
+          _status: 'published',
+          items: [{ id: doc.items?.[0]?.id, label: 'main Spanish' }],
+          title: 'main spanish',
+        },
+        locale: 'es',
+      })
+
+      await payload.update({
+        id: doc.id,
+        branch,
+        collection: localizedSlug,
+        data: {
+          _status: 'published',
+          items: [{ label: 'branch English' }],
+          title: 'branch english',
+        },
+        locale: 'en',
+      })
+
+      hookSpy.localizedChangeRows = []
+
+      await payload.branches.merge({ branch })
+
+      const mainEN = await payload.findByID({
+        id: doc.id,
+        collection: localizedSlug,
+        locale: 'en',
+      })
+      const mainES = await payload.findByID({
+        id: doc.id,
+        collection: localizedSlug,
+        locale: 'es',
+      })
+
+      expect(mainEN.items?.map((item) => item.label)).toEqual(['branch English'])
+      expect(mainES.items?.map((item) => item.label)).toEqual(['main Spanish'])
+      expect(mainEN.items?.map((item) => item.id)).toEqual(mainES.items?.map((item) => item.id))
+      expect(hookSpy.localizedChangeRows).toHaveLength(2)
+      expect(hookSpy.localizedChangeRows?.[0]?.ids).toEqual(hookSpy.localizedChangeRows?.[1]?.ids)
+    })
+
+    test('should preserve nested row identity when a later branch draft reorders rows', async () => {
+      const doc = await payload.create({
+        collection: localizedSlug,
+        data: {
+          _status: 'published',
+          items: [{ label: 'main row' }],
+          title: 'main',
+        },
+        locale: 'en',
+      })
+
+      const publishedOnBranch = await payload.update({
+        id: doc.id,
+        branch,
+        collection: localizedSlug,
+        data: {
+          _status: 'published',
+          items: [{ label: 'first published' }, { label: 'second published' }],
+          title: 'published on branch',
+        },
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: doc.id,
+        branch,
+        collection: localizedSlug,
+        data: {
+          items: [
+            { id: publishedOnBranch.items?.[1]?.id, label: 'second draft' },
+            { id: publishedOnBranch.items?.[0]?.id, label: 'first draft' },
+          ],
+          title: 'draft on branch',
+        },
+        draft: true,
+        locale: 'en',
+      })
+
+      await payload.branches.merge({ branch })
+
+      const publishedOnMain = await payload.findByID({
+        id: doc.id,
+        collection: localizedSlug,
+        locale: 'en',
+      })
+      const draftOnMain = await payload.findByID({
+        id: doc.id,
+        collection: localizedSlug,
+        draft: true,
+        locale: 'en',
+      })
+
+      expect(draftOnMain.items?.map((item) => item.label)).toEqual(['second draft', 'first draft'])
+      expect(draftOnMain.items?.map((item) => item.id)).toEqual([
+        publishedOnMain.items?.[1]?.id,
+        publishedOnMain.items?.[0]?.id,
+      ])
+    })
+
+    test('should preserve nested row identity when a later branch draft removes a row', async () => {
+      const doc = await payload.create({
+        collection: localizedSlug,
+        data: {
+          _status: 'published',
+          items: [{ label: 'main row' }],
+          title: 'main',
+        },
+        locale: 'en',
+      })
+
+      const publishedOnBranch = await payload.update({
+        id: doc.id,
+        branch,
+        collection: localizedSlug,
+        data: {
+          _status: 'published',
+          items: [
+            { label: 'first published' },
+            { label: 'second published' },
+            { label: 'third published' },
+          ],
+          title: 'published on branch',
+        },
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: doc.id,
+        branch,
+        collection: localizedSlug,
+        data: {
+          items: [
+            { id: publishedOnBranch.items?.[1]?.id, label: 'second draft' },
+            { id: publishedOnBranch.items?.[2]?.id, label: 'third draft' },
+          ],
+          title: 'draft on branch',
+        },
+        draft: true,
+        locale: 'en',
+      })
+
+      await payload.branches.merge({ branch })
+
+      const publishedOnMain = await payload.findByID({
+        id: doc.id,
+        collection: localizedSlug,
+        locale: 'en',
+      })
+      const draftOnMain = await payload.findByID({
+        id: doc.id,
+        collection: localizedSlug,
+        draft: true,
+        locale: 'en',
+      })
+
+      expect(draftOnMain.items?.map((item) => item.label)).toEqual(['second draft', 'third draft'])
+      expect(draftOnMain.items?.map((item) => item.id)).toEqual([
+        publishedOnMain.items?.[1]?.id,
+        publishedOnMain.items?.[2]?.id,
+      ])
+    })
+
+    test('should read exact localized merge data without evaluating defaults', async () => {
+      const doc = await payload.create({
+        collection: localizedSlug,
+        data: { _status: 'published', title: 'main english' },
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: doc.id,
+        branch,
+        collection: localizedSlug,
+        data: { _status: 'published', title: 'branch english' },
+        locale: 'en',
+      })
+
+      hookSpy.postDefaultValueCount = 0
+
+      const branchWrite = await readLocalizedBranchWrite({
+        branch,
+        collectionSlug: localizedSlug,
+        docID: doc.id,
+        draft: false,
+        locale: 'en',
+        payload,
+        req: await createPayloadRequest({ branch: false, payload }),
+      })
+
+      expect(hookSpy.postDefaultValueCount).toBe(0)
+      expect(branchWrite?.computedDefault).toBeUndefined()
+    })
+
+    test('should fork array and block rows onto the branch', async () => {
       const doc = await payload.create({
         collection: nestedSlug,
         data: {
@@ -694,7 +912,7 @@ describe('Branching', () => {
       expect((onMain.layout?.[0] as { heading?: string })?.heading).toBe('main hero')
     })
 
-    it('should merge array and block rows into main', async () => {
+    test('should merge array and block rows into main', async () => {
       const doc = await payload.create({
         collection: nestedSlug,
         data: {
@@ -731,12 +949,12 @@ describe('Branching', () => {
    * both a request and a branch. The branch is an argument, so the argument wins — the same
    * contract `locale` has.
    */
-  describe('An explicit branch on a shared request', () => {
+  test.describe('An explicit branch on a shared request', () => {
     const first = 'explicitfirst'
     const second = 'explicitsecond'
     let docID: number | string
 
-    beforeAll(async () => {
+    test.beforeAll(async () => {
       for (const slug of [first, second]) {
         const existing = await payload.find({
           collection: branchesSlug,
@@ -750,7 +968,7 @@ describe('Branching', () => {
       }
     })
 
-    beforeEach(async () => {
+    test.beforeEach(async () => {
       const doc = await payload.create({ collection: postsSlug, data: { title: 'on main' } })
 
       docID = doc.id
@@ -763,7 +981,7 @@ describe('Branching', () => {
       }
     })
 
-    afterEach(async () => {
+    test.afterEach(async () => {
       const rows = await payload.find({ branch: false, collection: postsSlug, pagination: false })
 
       for (const row of rows.docs) {
@@ -781,8 +999,8 @@ describe('Branching', () => {
       }
     })
 
-    it('should read each branch a request is pointed at, in turn', async () => {
-      const req = await createLocalReq({}, payload)
+    test('should read each branch a request is pointed at, in turn', async () => {
+      const req = await createPayloadRequest({ payload })
 
       // The first read resolves and memoizes a branch on this request; the second and third
       // name different ones, and used to be handed the first one's answer.
@@ -806,8 +1024,8 @@ describe('Branching', () => {
       expect(onMain.title).toBe('on first branch')
     })
 
-    it('should leave the caller request on its own branch', async () => {
-      const req = await createLocalReq({ branch: first }, payload)
+    test('should leave the caller request on its own branch', async () => {
+      const req = await createPayloadRequest({ branch: first, payload })
 
       await payload.findByID({ id: docID, branch: second, collection: postsSlug, req })
 
@@ -817,8 +1035,8 @@ describe('Branching', () => {
       expect(after.title).toBe('on first branch')
     })
 
-    it('should write to the branch it is told to, not the one the request resolved', async () => {
-      const req = await createLocalReq({ branch: first }, payload)
+    test('should write to the branch it is told to, not the one the request resolved', async () => {
+      const req = await createPayloadRequest({ branch: first, payload })
 
       await payload.findByID({ id: docID, collection: postsSlug, req })
 
@@ -839,8 +1057,8 @@ describe('Branching', () => {
       expect(onMain.title).toBe('on main')
     })
 
-    it('should bypass branching when told to, on a branch-scoped request', async () => {
-      const req = await createLocalReq({ branch: first }, payload)
+    test('should bypass branching when told to, on a branch-scoped request', async () => {
+      const req = await createPayloadRequest({ branch: first, payload })
 
       await payload.findByID({ id: docID, collection: postsSlug, req })
 
@@ -862,11 +1080,11 @@ describe('Branching', () => {
    * copy — and the population read itself has to carry the branch to find a related
    * document that only exists on it.
    */
-  describe('Populated relationships on a branch', () => {
+  test.describe('Populated relationships on a branch', () => {
     const branch = 'populatework'
     const other = 'populateother'
 
-    beforeAll(async () => {
+    test.beforeAll(async () => {
       for (const slug of [branch, other]) {
         const existing = await payload.find({
           collection: branchesSlug,
@@ -883,7 +1101,7 @@ describe('Branching', () => {
       }
     })
 
-    afterEach(async () => {
+    test.afterEach(async () => {
       for (const collection of [postsSlug, categoriesSlug] as const) {
         const rows = await payload.find({ branch: false, collection, pagination: false })
 
@@ -903,7 +1121,7 @@ describe('Branching', () => {
       }
     })
 
-    it('should populate a related document that exists only on the branch', async () => {
+    test('should populate a related document that exists only on the branch', async () => {
       const category = await payload.create({
         branch,
         collection: categoriesSlug,
@@ -929,7 +1147,7 @@ describe('Branching', () => {
       expect((onBranch.category as { name?: string })?.name).toBe('branch only category')
     })
 
-    it('should populate the branch copy of a document that also exists on main', async () => {
+    test('should populate the branch copy of a document that also exists on main', async () => {
       const category = await payload.create({
         collection: categoriesSlug,
         data: { name: 'main category' },
@@ -959,7 +1177,7 @@ describe('Branching', () => {
       expect((onMain.category as { name?: string })?.name).toBe('main category')
     })
 
-    it('should not serve one branch a populated document cached for another', async () => {
+    test('should not serve one branch a populated document cached for another', async () => {
       const category = await payload.create({
         collection: categoriesSlug,
         data: { name: 'main category' },
@@ -987,7 +1205,7 @@ describe('Branching', () => {
       // A shared `req` on its own resolves a single branch by design (§15); this is the
       // shape that legitimately reads two, and the dataloader's cache key has to tell them
       // apart or the second field is served the first field's populated document.
-      const base = await createLocalReq({}, payload)
+      const base = await createPayloadRequest({ payload })
 
       const readOn = async (slug: string) => {
         const scoped = isolateObjectProperty(base, ['branch', 'context'])
@@ -1017,11 +1235,11 @@ describe('Branching', () => {
    * and nothing tested. `branch` is now an argument, resolved onto the request the same way
    * `locale` is.
    */
-  describe('GraphQL', () => {
+  test.describe('GraphQL', () => {
     const branch = 'graphqlwork'
     let docID: number | string
 
-    beforeAll(async () => {
+    test.beforeAll(async () => {
       const existing = await payload.find({
         collection: branchesSlug,
         pagination: false,
@@ -1036,7 +1254,7 @@ describe('Branching', () => {
       }
     })
 
-    beforeEach(async () => {
+    test.beforeEach(async () => {
       const doc = await payload.create({ collection: postsSlug, data: { title: 'on main' } })
 
       docID = doc.id
@@ -1049,7 +1267,7 @@ describe('Branching', () => {
       })
     })
 
-    afterEach(async () => {
+    test.afterEach(async () => {
       const rows = await payload.find({ branch: false, collection: postsSlug, pagination: false })
 
       for (const row of rows.docs) {
@@ -1080,7 +1298,7 @@ describe('Branching', () => {
         })
         .then((res) => res.json())
 
-    it('should read a document on a branch', async () => {
+    test('should read a document on a branch', async () => {
       const onBranch = await gql(`query {
         Post(id: ${gqlID(docID)}, branch: "${branch}") { title }
       }`)
@@ -1093,7 +1311,7 @@ describe('Branching', () => {
       expect(onMain.data.Post.title).toBe('on main')
     })
 
-    it('should list documents on a branch', async () => {
+    test('should list documents on a branch', async () => {
       const result = await gql(`query {
         Posts(branch: "${branch}") { docs { id title } }
       }`)
@@ -1106,7 +1324,7 @@ describe('Branching', () => {
       expect(matching[0]!.title).toBe('on branch')
     })
 
-    it('should fork onto the branch when updating through GraphQL', async () => {
+    test('should fork onto the branch when updating through GraphQL', async () => {
       await gql(`mutation {
         updatePost(id: ${gqlID(docID)}, branch: "${branch}", data: { title: "written through graphql" }) {
           title
@@ -1126,11 +1344,11 @@ describe('Branching', () => {
    * both merge and discard, which filtered the registry to collections — so the edit was
    * permanently stuck on the branch, visible in the changeset and impossible to act on.
    */
-  describe('Globals through merge and discard', () => {
+  test.describe('Globals through merge and discard', () => {
     const branch = 'globalwork'
     let branchID: number | string
 
-    beforeEach(async () => {
+    test.beforeEach(async () => {
       const branchDoc = await payload.create({
         collection: branchesSlug,
         data: { name: 'Global work', slug: branch },
@@ -1150,7 +1368,10 @@ describe('Branching', () => {
       })
     })
 
-    afterEach(async () => {
+    test.afterEach(async () => {
+      hookSpy.postBeforeRead = undefined
+      hookSpy.restrictLedgerSnapshotGlobalRead = undefined
+
       for (const collection of [branchChangesSlug, branchMergesSlug]) {
         const rows = await payload.find({
           collection,
@@ -1164,9 +1385,19 @@ describe('Branching', () => {
       }
 
       await payload.delete({ id: branchID, collection: branchesSlug }).catch(() => {})
+
+      const ledgerReaders = await payload.find({
+        collection: 'users',
+        pagination: false,
+        where: { email: { equals: 'ledger-reader@example.com' } },
+      })
+
+      for (const ledgerReader of ledgerReaders.docs) {
+        await payload.delete({ id: ledgerReader.id, collection: 'users' })
+      }
     })
 
-    it('should record the global edit as a pending change', async () => {
+    test('should record the global edit as a pending change', async () => {
       const changes = await payload.find({
         collection: branchChangesSlug,
         pagination: false,
@@ -1178,7 +1409,7 @@ describe('Branching', () => {
       expect(changes.docs[0]!.globalSlug).toBe(headerGlobalSlug)
     })
 
-    it('should apply a global edit to main on merge', async () => {
+    test('should apply a global edit to main on merge', async () => {
       const result = await payload.branches.merge({ branch })
 
       expect(result.merged).toHaveLength(1)
@@ -1189,7 +1420,7 @@ describe('Branching', () => {
       expect(onMain.navLabel).toBe('branch label')
     })
 
-    it('should read through to main again after merging a global', async () => {
+    test('should read through to main again after merging a global', async () => {
       await payload.branches.merge({ branch })
 
       // The branch's copy is gone, so a later edit on main is visible on the branch —
@@ -1204,7 +1435,7 @@ describe('Branching', () => {
       expect(onBranch.navLabel).toBe('edited on main afterwards')
     })
 
-    it('should close the branch when the only change was a global', async () => {
+    test('should close the branch when the only change was a global', async () => {
       await payload.branches.merge({ branch, closeBranch: true })
 
       const branchDoc = await payload.findByID({ id: branchID, collection: branchesSlug })
@@ -1212,7 +1443,7 @@ describe('Branching', () => {
       expect(branchDoc.status).toBe('closed')
     })
 
-    it('should record the merged global in the ledger', async () => {
+    test('should record the merged global in the ledger', async () => {
       await payload.branches.merge({ branch })
 
       const merges = await payload.find({
@@ -1229,7 +1460,39 @@ describe('Branching', () => {
       expect(changes[0]!.globalSlug).toBe(headerGlobalSlug)
     })
 
-    it('should return the global to main state on discard', async () => {
+    test('should apply global read constraints without running global read hooks for ledger snapshots', async () => {
+      const mergingUser = await payload.create({
+        collection: 'users',
+        data: { email: 'ledger-reader@example.com', password: 'test' },
+      })
+
+      hookSpy.postBeforeRead = () => {
+        throw new Error('snapshot global read hook must not run')
+      }
+      hookSpy.restrictLedgerSnapshotGlobalRead = true
+
+      const result = await payload.branches.merge({
+        branch,
+        overrideAccess: true,
+        user: { ...mergingUser, collection: 'users' } as never,
+      })
+
+      const event = (
+        await payload.find({
+          collection: branchMergesSlug,
+          pagination: false,
+          where: { branch: { equals: branch } },
+        })
+      ).docs[0]! as unknown as {
+        changes: { after?: null | Record<string, unknown>; before?: Record<string, unknown> }[]
+      }
+
+      expect(result.merged).toHaveLength(1)
+      expect(event.changes[0]?.before?.navLabel).toBe('main label')
+      expect(event.changes[0]?.after).toBeNull()
+    })
+
+    test('should return the global to main state on discard', async () => {
       const result = await payload.branches.discard({ branch })
 
       expect(result.discarded).toHaveLength(1)
@@ -1250,13 +1513,378 @@ describe('Branching', () => {
     })
   })
 
+  test.describe('Versioned globals through merge and discard', () => {
+    const branch = 'versioned-global-work'
+
+    const cleanBranchState = async () => {
+      const req = await createPayloadRequest({ branch: false, payload })
+
+      await payload.db.deleteVersions({
+        globalSlug: homepageGlobalSlug,
+        req,
+        where: { _branch: { equals: branch } },
+      })
+      await payload.db.deleteBranchGlobal?.({ branch, globalSlug: homepageGlobalSlug, req })
+
+      for (const collection of [branchChangesSlug, branchMergesSlug]) {
+        const rows = await payload.find({
+          collection,
+          overrideAccess: true,
+          pagination: false,
+          where: { branch: { equals: branch } },
+        })
+
+        for (const row of rows.docs) {
+          await payload.delete({ id: row.id, collection, overrideAccess: true })
+        }
+      }
+
+      const branches = await payload.find({
+        collection: branchesSlug,
+        overrideAccess: true,
+        pagination: false,
+        where: { slug: { equals: branch } },
+      })
+
+      for (const branchDoc of branches.docs) {
+        await payload.delete({
+          id: branchDoc.id,
+          collection: branchesSlug,
+          overrideAccess: true,
+        })
+      }
+    }
+
+    test.beforeEach(async () => {
+      await cleanBranchState()
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Versioned global work', slug: branch },
+      })
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        data: { _status: 'published', heroTitle: 'main published' },
+      })
+    })
+
+    test.afterEach(async () => {
+      hookSpy.homepageGlobalAccessWrites = undefined
+      await cleanBranchState()
+    })
+
+    test('should record and discard a draft-only global change', async () => {
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch,
+        data: { heroTitle: 'branch draft' },
+        draft: true,
+      })
+
+      const changes = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: branch } },
+      })
+
+      expect(changes.docs).toHaveLength(1)
+      expect(changes.docs[0]!.globalSlug).toBe(homepageGlobalSlug)
+
+      await payload.branches.discard({ branch })
+
+      const branchVersions = await payload.findGlobalVersions({
+        slug: homepageGlobalSlug,
+        branch: false,
+        overrideAccess: true,
+        pagination: false,
+        where: { _branch: { equals: branch } },
+      })
+
+      expect(branchVersions.docs).toHaveLength(0)
+    })
+
+    test('should record a restored global version as a branch change', async () => {
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch,
+        data: { _status: 'published', heroTitle: 'branch historical' },
+      })
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch,
+        data: { _status: 'published', heroTitle: 'branch current' },
+      })
+
+      const versions = await payload.findGlobalVersions({
+        slug: homepageGlobalSlug,
+        branch,
+        pagination: false,
+      })
+      const historicalVersion = versions.docs.find(
+        ({ version }) => version.heroTitle === 'branch historical',
+      )
+      const existingChanges = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: branch } },
+      })
+
+      expect(historicalVersion).toBeDefined()
+
+      for (const change of existingChanges.docs) {
+        await payload.delete({
+          id: change.id,
+          collection: branchChangesSlug,
+          overrideAccess: true,
+        })
+      }
+
+      await payload.restoreGlobalVersion({
+        id: historicalVersion!.id,
+        slug: homepageGlobalSlug,
+        branch,
+        overrideAccess: true,
+      })
+
+      const restoredChanges = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: branch } },
+      })
+      const restoredOnBranch = await payload.findGlobal({
+        slug: homepageGlobalSlug,
+        branch,
+        draft: true,
+      })
+
+      expect(restoredChanges.docs).toHaveLength(1)
+      expect(restoredChanges.docs[0]!.globalSlug).toBe(homepageGlobalSlug)
+      expect(restoredOnBranch.heroTitle).toBe('branch historical')
+    })
+
+    test('should merge a draft-only global without changing its published value', async () => {
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch,
+        data: { heroTitle: 'branch draft' },
+        draft: true,
+      })
+
+      const result = await payload.branches.merge({ branch })
+      const publishedOnMain = await payload.findGlobal({ slug: homepageGlobalSlug })
+      const draftOnMain = await payload.findGlobal({ slug: homepageGlobalSlug, draft: true })
+
+      expect(result.merged).toHaveLength(1)
+      expect(publishedOnMain.heroTitle).toBe('main published')
+      expect(draftOnMain.heroTitle).toBe('branch draft')
+    })
+
+    test('should merge a published global and its newer draft', async () => {
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch,
+        data: { _status: 'published', heroTitle: 'branch published' },
+      })
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch,
+        data: { heroTitle: 'branch draft' },
+        draft: true,
+      })
+
+      await payload.branches.merge({ branch })
+
+      const publishedOnMain = await payload.findGlobal({ slug: homepageGlobalSlug })
+      const draftOnMain = await payload.findGlobal({ slug: homepageGlobalSlug, draft: true })
+
+      expect(publishedOnMain.heroTitle).toBe('branch published')
+      expect(draftOnMain.heroTitle).toBe('branch draft')
+    })
+
+    test('should merge every localized value of a versioned global', async () => {
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        data: { _status: 'published', localizedTitle: 'main English' },
+        locale: 'en',
+      })
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        data: { _status: 'published', localizedTitle: 'main Spanish' },
+        locale: 'es',
+      })
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch,
+        data: { _status: 'published', localizedTitle: 'branch English' },
+        locale: 'en',
+      })
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch,
+        data: { _status: 'published', localizedTitle: 'branch Spanish' },
+        locale: 'es',
+      })
+
+      await payload.branches.merge({ branch })
+
+      const mainEN = await payload.findGlobal({ slug: homepageGlobalSlug, locale: 'en' })
+      const mainES = await payload.findGlobal({ slug: homepageGlobalSlug, locale: 'es' })
+
+      expect(mainEN.localizedTitle).toBe('branch English')
+      expect(mainES.localizedTitle).toBe('branch Spanish')
+    })
+
+    test('should check access against every exact global write and locale', async () => {
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch,
+        data: {
+          _status: 'published',
+          heroTitle: 'branch published',
+          localizedTitle: 'published English',
+        },
+        locale: 'en',
+      })
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch,
+        data: {
+          _status: 'published',
+          heroTitle: 'branch published',
+          localizedTitle: 'published Spanish',
+        },
+        locale: 'es',
+      })
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch,
+        data: { heroTitle: 'branch draft', localizedTitle: 'draft English' },
+        draft: true,
+        locale: 'en',
+      })
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch,
+        data: { heroTitle: 'branch draft', localizedTitle: 'draft Spanish' },
+        draft: true,
+        locale: 'es',
+      })
+
+      hookSpy.homepageGlobalAccessWrites = []
+
+      await payload.branches.merge({
+        branch,
+        dryRun: true,
+        overrideAccess: false,
+        user: (
+          await payload.find({
+            collection: 'users',
+            pagination: false,
+            where: { email: { equals: devUser.email } },
+          })
+        ).docs[0] as never,
+      })
+
+      expect(hookSpy.homepageGlobalAccessWrites).toEqual([
+        {
+          heroTitle: 'branch published',
+          locale: 'en',
+          localizedTitle: 'published English',
+        },
+        {
+          heroTitle: 'branch published',
+          locale: 'es',
+          localizedTitle: 'published Spanish',
+        },
+        { heroTitle: 'branch draft', locale: 'en', localizedTitle: 'draft English' },
+        { heroTitle: 'branch draft', locale: 'es', localizedTitle: 'draft Spanish' },
+      ])
+    })
+
+    test('should block a global draft allowed only by branch metadata', async () => {
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch,
+        data: { _status: 'published', heroTitle: 'published before draft' },
+      })
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch,
+        data: { heroTitle: 'draft allowed only off main' },
+        draft: true,
+      })
+
+      const result = await payload.branches.merge({
+        branch,
+        dryRun: true,
+        overrideAccess: false,
+        user: (
+          await payload.find({
+            collection: 'users',
+            pagination: false,
+            where: { email: { equals: devUser.email } },
+          })
+        ).docs[0] as never,
+      })
+
+      expect(result.blocked).toContainEqual(
+        expect.objectContaining({ globalSlug: homepageGlobalSlug, operation: 'update' }),
+      )
+    })
+
+    test('should block a global when one exact draft locale is denied', async () => {
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch,
+        data: { _status: 'published', localizedTitle: 'published English' },
+        locale: 'en',
+      })
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch,
+        data: { _status: 'published', localizedTitle: 'published Spanish' },
+        locale: 'es',
+      })
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch,
+        data: { localizedTitle: 'draft English' },
+        draft: true,
+        locale: 'en',
+      })
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch,
+        data: { localizedTitle: 'blocked Spanish draft' },
+        draft: true,
+        locale: 'es',
+      })
+
+      const result = await payload.branches.merge({
+        branch,
+        dryRun: true,
+        overrideAccess: false,
+        user: (
+          await payload.find({
+            collection: 'users',
+            pagination: false,
+            where: { email: { equals: devUser.email } },
+          })
+        ).docs[0] as never,
+      })
+
+      expect(result.blocked).toContainEqual(
+        expect.objectContaining({ globalSlug: homepageGlobalSlug, operation: 'update' }),
+      )
+    })
+  })
+
   // `findDistinct` had no branch predicate in either adapter, so a branch's shadow rows
   // fed main's distinct values and the branch's own edits were missing from its own.
-  describe('Distinct values on a branch', () => {
+  test.describe('Distinct values on a branch', () => {
     const branch = 'distinctwork'
     const created: (number | string)[] = []
 
-    beforeAll(async () => {
+    test.beforeAll(async () => {
       const existing = await payload.find({
         collection: branchesSlug,
         pagination: false,
@@ -1271,7 +1899,7 @@ describe('Branching', () => {
       }
     })
 
-    afterEach(async () => {
+    test.afterEach(async () => {
       const rows = await payload.find({ branch: false, collection: postsSlug, pagination: false })
 
       for (const row of rows.docs) {
@@ -1291,7 +1919,7 @@ describe('Branching', () => {
       created.length = 0
     })
 
-    it('should reflect a branch edit and hide it from main', async () => {
+    test('should reflect a branch edit and hide it from main', async () => {
       const doc = await payload.create({
         collection: postsSlug,
         data: { title: 'on main' },
@@ -1329,25 +1957,31 @@ describe('Branching', () => {
    * uses a collection whose read access is the canonical public-site rule, because a
    * branch's copy of a published document satisfies that rule too.
    */
-  describe('Branch visibility', () => {
+  test.describe('Branch visibility', () => {
     let publicDocID: number | string
+    const privateBranch = 'private-visibility'
 
-    beforeAll(async () => {
-      const existing = await payload.find({
-        collection: branchesSlug,
-        pagination: false,
-        where: { slug: { equals: 'visibility' } },
-      })
-
-      if (!existing.docs.length) {
-        await payload.create({
+    test.beforeAll(async () => {
+      for (const branch of ['visibility', privateBranch]) {
+        const existing = await payload.find({
           collection: branchesSlug,
-          data: { name: 'Visibility', slug: 'visibility' },
+          pagination: false,
+          where: { slug: { equals: branch } },
         })
+
+        if (!existing.docs.length) {
+          await payload.create({
+            collection: branchesSlug,
+            data: {
+              name: branch === privateBranch ? 'Private visibility' : 'Visibility',
+              slug: branch,
+            },
+          })
+        }
       }
     })
 
-    beforeEach(async () => {
+    test.beforeEach(async () => {
       const doc = await payload.create({
         collection: publicSlug,
         data: { _status: 'published', title: 'live on main' },
@@ -1361,9 +1995,21 @@ describe('Branching', () => {
         collection: publicSlug,
         data: { _status: 'published', title: 'unreleased on branch' },
       })
+
+      await payload.update({
+        id: doc.id,
+        branch: privateBranch,
+        collection: publicSlug,
+        data: { _status: 'published', title: 'private unreleased content' },
+      })
+
+      await payload.updateGlobal({
+        slug: headerGlobalSlug,
+        data: { navLabel: 'main navigation' },
+      })
     })
 
-    afterEach(async () => {
+    test.afterEach(async () => {
       const rows = await payload.find({ branch: false, collection: publicSlug, pagination: false })
 
       for (const row of rows.docs) {
@@ -1373,7 +2019,7 @@ describe('Branching', () => {
       const changes = await payload.find({
         collection: branchChangesSlug,
         pagination: false,
-        where: { branch: { equals: 'visibility' } },
+        where: { branch: { in: ['visibility', privateBranch] } },
       })
 
       for (const change of changes.docs) {
@@ -1381,7 +2027,7 @@ describe('Branching', () => {
       }
     })
 
-    it('should refuse an anonymous read that names a branch', async () => {
+    test('should refuse an anonymous read that names a branch', async () => {
       const res = await restClient.GET(`/${publicSlug}/${publicDocID}?branch=visibility`, {
         auth: false,
       })
@@ -1389,7 +2035,7 @@ describe('Branching', () => {
       expect(res.status).toBe(403)
     })
 
-    it('should still serve main to an anonymous reader', async () => {
+    test('should still serve main to an anonymous reader', async () => {
       // The gate must not cost anything to a request that never mentions a branch —
       // the public site is this request.
       const res = await restClient.GET(`/${publicSlug}/${publicDocID}`, { auth: false })
@@ -1398,13 +2044,34 @@ describe('Branching', () => {
       expect((await res.json()).title).toBe('live on main')
     })
 
-    it('should refuse an anonymous list read that names a branch', async () => {
+    test('should refuse an anonymous list read that names a branch', async () => {
       const res = await restClient.GET(`/${publicSlug}?branch=visibility`, { auth: false })
 
       expect(res.status).toBe(403)
     })
 
-    it('should serve the branch copy to a reader who can see the branch', async () => {
+    test('should refuse collection document access checks on an unreadable branch', async () => {
+      const res = await restClient.POST(
+        `/${publicSlug}/access/${publicDocID}?branch=${privateBranch}`,
+        { auth: false, body: JSON.stringify({}) },
+      )
+
+      expect(res.status).toBe(403)
+    })
+
+    test('should refuse global document access checks on an unreadable branch', async () => {
+      const res = await restClient.POST(
+        `/globals/${headerGlobalSlug}/access?branch=${privateBranch}`,
+        {
+          auth: false,
+          body: JSON.stringify({}),
+        },
+      )
+
+      expect(res.status).toBe(403)
+    })
+
+    test('should serve the branch copy to a reader who can see the branch', async () => {
       const res = await restClient.GET(`/${publicSlug}/${publicDocID}?branch=visibility`, {
         headers: { Authorization: `JWT ${token}` },
       })
@@ -1413,7 +2080,7 @@ describe('Branching', () => {
       expect((await res.json()).title).toBe('unreleased on branch')
     })
 
-    it('should refuse a branch that does not exist', async () => {
+    test('should refuse a branch that does not exist', async () => {
       // Same answer as an unreadable branch, deliberately: distinguishing them would
       // tell an anonymous caller which branch names exist.
       const res = await restClient.GET(`/${publicSlug}/${publicDocID}?branch=no-such-branch`, {
@@ -1423,16 +2090,61 @@ describe('Branching', () => {
       expect(res.status).toBe(403)
     })
 
-    it('should leave the Local API free to address any branch', async () => {
-      // Server-side callers are trusted by default, as everywhere else in Payload. The
-      // gate is about requests arriving from outside.
+    test('should let a trusted Local API caller override branch access', async () => {
       const onBranch = await payload.findByID({
         id: publicDocID,
-        branch: 'visibility',
+        branch: privateBranch,
         collection: publicSlug,
+        overrideAccess: true,
       })
 
-      expect(onBranch.title).toBe('unreleased on branch')
+      expect(onBranch.title).toBe('private unreleased content')
+    })
+
+    test('should enforce branch access for the Local API by default', async () => {
+      await expect(
+        payload.findByID({
+          id: publicDocID,
+          branch: privateBranch,
+          collection: publicSlug,
+          overrideAccess: false,
+          user: {
+            collection: 'users',
+            email: 'restricted@example.com',
+            id: 'restricted-user',
+          } as never,
+        }),
+      ).rejects.toThrow()
+    })
+
+    test('should enforce branch access for Local API global reads', async () => {
+      await expect(
+        payload.findGlobal({
+          branch: privateBranch,
+          overrideAccess: false,
+          slug: headerGlobalSlug,
+          user: {
+            collection: 'users',
+            email: 'restricted@example.com',
+            id: 'restricted-user',
+          } as never,
+        }),
+      ).rejects.toThrow()
+    })
+
+    test('should enforce branch access for Local API merges by default', async () => {
+      await expect(
+        payload.branches.merge({
+          branch: privateBranch,
+          dryRun: true,
+          overrideAccess: false,
+          user: {
+            collection: 'users',
+            email: 'restricted@example.com',
+            id: 'restricted-user',
+          } as never,
+        }),
+      ).rejects.toThrow()
     })
   })
 
@@ -1440,10 +2152,10 @@ describe('Branching', () => {
    * The two version writes that are not branch-aware. Both destroy production history
    * rather than branch history, which is the worst direction for this to fail in.
    */
-  describe('Version writes that must stay off main', () => {
+  test.describe('Version writes that must stay off main', () => {
     const branch = 'versionwrites'
 
-    beforeAll(async () => {
+    test.beforeAll(async () => {
       const existing = await payload.find({
         collection: branchesSlug,
         pagination: false,
@@ -1458,7 +2170,7 @@ describe('Branching', () => {
       }
     })
 
-    afterEach(async () => {
+    test.afterEach(async () => {
       for (const collection of [maxVersionsSlug, autosaveSlug, pagesSlug] as const) {
         const rows = await payload.find({ branch: false, collection, pagination: false })
 
@@ -1482,7 +2194,7 @@ describe('Branching', () => {
     // main's ancestry too — and then deletes by canonical `parent` with no `_branch`
     // scoping. Pruning on a branch therefore deleted main's version rows and left the
     // branch's own chain (which hangs off the shadow row) untouched.
-    it('should prune only the branch chain when max versions is reached on a branch', async () => {
+    test('should prune only the branch chain when max versions is reached on a branch', async () => {
       const doc = await payload.create({
         collection: maxVersionsSlug,
         data: { _status: 'published', title: 'main v1' },
@@ -1527,7 +2239,7 @@ describe('Branching', () => {
     // latest is not an autosave row, so it is left alone), but unpublish updates
     // whatever the latest row happens to be — and on a branch with no versions of its
     // own yet, that is main's.
-    it('should not rewrite main latest version row when unpublishing on a branch', async () => {
+    test('should not rewrite main latest version row when unpublishing on a branch', async () => {
       const doc = await payload.create({
         collection: pagesSlug,
         data: { _status: 'published', title: 'published on main' },
@@ -1569,7 +2281,7 @@ describe('Branching', () => {
     // `updateLatestVersion` finds by canonical `parent` — a branch-aware read, so it
     // returns main's latest row as part of the branch's ancestry — and then rewrites
     // that row through the branch-blind `db.updateVersion`.
-    it('should not rewrite main latest version row when autosaving on a branch', async () => {
+    test('should not rewrite main latest version row when autosaving on a branch', async () => {
       const doc = await payload.create({
         collection: autosaveSlug,
         data: { _status: 'published', title: 'main published' },
@@ -1603,10 +2315,10 @@ describe('Branching', () => {
 
   // What a diff does: the same document, read on two branches, to show what
   // merging one into the other would change.
-  describe('Reading two branches in one request', () => {
+  test.describe('Reading two branches in one request', () => {
     let docID: number | string
 
-    beforeAll(async () => {
+    test.beforeAll(async () => {
       const existing = await payload.find({
         collection: branchesSlug,
         pagination: false,
@@ -1621,7 +2333,7 @@ describe('Branching', () => {
       }
     })
 
-    beforeEach(async () => {
+    test.beforeEach(async () => {
       const doc = await payload.create({
         collection: postsSlug,
         data: { title: 'on main' },
@@ -1637,7 +2349,7 @@ describe('Branching', () => {
       })
     })
 
-    afterEach(async () => {
+    test.afterEach(async () => {
       const shadows = await payload.find({
         branch: false,
         collection: postsSlug,
@@ -1662,8 +2374,8 @@ describe('Branching', () => {
       }
     })
 
-    it('should return each branch when every read isolates its branch state', async () => {
-      const req = await createLocalReq({ user: null }, payload)
+    test('should return each branch when every read isolates its branch state', async () => {
+      const req = await createPayloadRequest({ payload, user: null })
 
       const [fromMain, fromBranch] = await Promise.all([
         payload.findByID({
@@ -1684,8 +2396,8 @@ describe('Branching', () => {
       expect(fromBranch.title).toBe('on branch')
     })
 
-    it('should leave the original request on its own branch after an isolated read', async () => {
-      const req = await createLocalReq({ branch: 'two-branch-read' }, payload)
+    test('should leave the original request on its own branch after an isolated read', async () => {
+      const req = await createPayloadRequest({ branch: 'two-branch-read', payload })
 
       // Resolve the branch on `req` itself before reading elsewhere, as any
       // operation would.
@@ -1704,8 +2416,8 @@ describe('Branching', () => {
       expect(stillOnBranch.title).toBe('on branch')
     })
 
-    it('should follow an explicit branch even when the request already resolved another', async () => {
-      const req = await createLocalReq({ branch: 'two-branch-read' }, payload)
+    test('should follow an explicit branch even when the request already resolved another', async () => {
+      const req = await createPayloadRequest({ branch: 'two-branch-read', payload })
 
       await payload.findByID({ id: docID, collection: postsSlug, req })
 
@@ -1728,13 +2440,36 @@ describe('Branching', () => {
 
       expect(again.title).toBe('on branch')
     })
+
+    test('should recheck branch access when an isolated request changes branch and user', async () => {
+      const admin = (
+        await payload.find({
+          collection: 'users',
+          pagination: false,
+          where: { email: { equals: devUser.email } },
+        })
+      ).docs[0]
+      const req = await createPayloadRequest({
+        branch: 'two-branch-read',
+        payload,
+        user: admin as never,
+      })
+
+      await assertBranchReadable({ req })
+
+      const isolatedReq = isolateBranchState(req)
+      isolatedReq.branch = 'unreadable-branch'
+      isolatedReq.user = null
+
+      await expect(assertBranchReadable({ req: isolatedReq })).rejects.toThrow()
+    })
   })
 
-  describe('Write path — copy-on-write updates', () => {
+  test.describe('Write path — copy-on-write updates', () => {
     let mainDocID: number | string
     const cleanup: (number | string)[] = []
 
-    beforeAll(async () => {
+    test.beforeAll(async () => {
       const existing = await payload.find({
         collection: branchesSlug,
         pagination: false,
@@ -1746,7 +2481,7 @@ describe('Branching', () => {
       }
     })
 
-    beforeEach(async () => {
+    test.beforeEach(async () => {
       const doc = await payload.create({
         collection: postsSlug,
         data: { order: 1, title: 'original on main' },
@@ -1755,7 +2490,7 @@ describe('Branching', () => {
       cleanup.push(doc.id)
     })
 
-    afterEach(async () => {
+    test.afterEach(async () => {
       const shadows = await payload.find({
         branch: false,
         collection: postsSlug,
@@ -1783,7 +2518,7 @@ describe('Branching', () => {
       }
     })
 
-    it('should leave the main document untouched when updating on a branch', async () => {
+    test('should leave the main document untouched when updating on a branch', async () => {
       await payload.update({
         id: mainDocID,
         branch: 'cow',
@@ -1796,7 +2531,7 @@ describe('Branching', () => {
       expect(onMain.title).toBe('original on main')
     })
 
-    it('should create exactly one shadow row on first branch edit', async () => {
+    test('should create exactly one shadow row on first branch edit', async () => {
       await payload.update({
         id: mainDocID,
         branch: 'cow',
@@ -1819,7 +2554,7 @@ describe('Branching', () => {
       expect(String(shadows.docs[0]!._branchDocID)).toBe(String(mainDocID))
     })
 
-    it('should reuse the existing shadow row on subsequent branch edits', async () => {
+    test('should reuse the existing shadow row on subsequent branch edits', async () => {
       await payload.update({
         id: mainDocID,
         branch: 'cow',
@@ -1844,7 +2579,7 @@ describe('Branching', () => {
       expect(shadows.docs[0]!.title).toBe('second branch edit')
     })
 
-    it('should return branch content when reading the branch by canonical ID', async () => {
+    test('should return branch content when reading the branch by canonical ID', async () => {
       await payload.update({
         id: mainDocID,
         branch: 'cow',
@@ -1867,7 +2602,7 @@ describe('Branching', () => {
     // from — so a branch read surfaced shadow-row primary keys. The admin list
     // view selects only its visible columns, so every row it rendered on a
     // branch linked to an ID that findByID could not resolve.
-    it('should keep the canonical ID when a branch find narrows fields with select', async () => {
+    test('should keep the canonical ID when a branch find narrows fields with select', async () => {
       await payload.update({
         id: mainDocID,
         branch: 'cow',
@@ -1887,7 +2622,7 @@ describe('Branching', () => {
       expect(String(result.docs[0]!.id)).toBe(String(mainDocID))
     })
 
-    it('should keep the canonical ID when a branch findByID narrows fields with select', async () => {
+    test('should keep the canonical ID when a branch findByID narrows fields with select', async () => {
       await payload.update({
         id: mainDocID,
         branch: 'cow',
@@ -1905,7 +2640,7 @@ describe('Branching', () => {
       expect(String(onBranch.id)).toBe(String(mainDocID))
     })
 
-    it('should keep the canonical ID when a branch find excludes fields with select', async () => {
+    test('should keep the canonical ID when a branch find excludes fields with select', async () => {
       await payload.update({
         id: mainDocID,
         branch: 'cow',
@@ -1925,7 +2660,7 @@ describe('Branching', () => {
       expect(String(result.docs[0]!.id)).toBe(String(mainDocID))
     })
 
-    it('should return the canonical ID on the document an update returns', async () => {
+    test('should return the canonical ID on the document an update returns', async () => {
       const updated = await payload.update({
         id: mainDocID,
         branch: 'cow',
@@ -1936,7 +2671,35 @@ describe('Branching', () => {
       expect(String(updated.id)).toBe(String(mainDocID))
     })
 
-    it('should sort on a branch-modified field using the branch value', async () => {
+    test('should return the canonical ID from an atomic branch-row update', async () => {
+      await payload.update({
+        id: mainDocID,
+        branch: 'cow',
+        collection: postsSlug,
+        data: { title: 'forked on branch' },
+      })
+
+      const shadow = await payload.db.findOne({
+        branch: false,
+        collection: postsSlug,
+        req: await createPayloadRequest({ branch: false, payload }),
+        where: { _branch: { equals: 'cow' } },
+      })
+      const req = await createPayloadRequest({ branch: 'cow', payload })
+      const updated = await payload.db.updateOne({
+        branch: 'cow',
+        collection: postsSlug,
+        data: { title: 'atomic branch edit' },
+        options: { atomic: true },
+        req,
+        where: { id: { equals: shadow!.id } },
+      })
+
+      expect(String(updated.id)).toBe(String(mainDocID))
+      expect(updated.title).toBe('atomic branch edit')
+    })
+
+    test('should sort on a branch-modified field using the branch value', async () => {
       const second = await payload.create({
         collection: postsSlug,
         data: { order: 2, title: 'b second on main' },
@@ -1973,7 +2736,7 @@ describe('Branching', () => {
       expect(mainIDs.indexOf(String(mainDocID))).toBeLessThan(mainIDs.indexOf(String(second.id)))
     })
 
-    it('should populate a relationship with the branch version of the related document', async () => {
+    test('should populate a relationship with the branch version of the related document', async () => {
       const category = await payload.create({
         collection: categoriesSlug,
         data: { name: 'main category' },
@@ -2021,7 +2784,7 @@ describe('Branching', () => {
       await payload.delete({ id: category.id, branch: false, collection: categoriesSlug })
     })
 
-    it('should not double-count a document edited on a branch', async () => {
+    test('should not double-count a document edited on a branch', async () => {
       await payload.update({
         id: mainDocID,
         branch: 'cow',
@@ -2040,7 +2803,7 @@ describe('Branching', () => {
       expect(onBranch.docs.filter((doc) => String(doc.id) === String(mainDocID))).toHaveLength(1)
     })
 
-    it('should filter on a branch-modified field using the branch value', async () => {
+    test('should filter on a branch-modified field using the branch value', async () => {
       await payload.update({
         id: mainDocID,
         branch: 'cow',
@@ -2064,7 +2827,7 @@ describe('Branching', () => {
       expect(onMain.docs).toHaveLength(0)
     })
 
-    it('should record the update in the changeset registry', async () => {
+    test('should record the update in the changeset registry', async () => {
       await payload.update({
         id: mainDocID,
         branch: 'cow',
@@ -2082,7 +2845,7 @@ describe('Branching', () => {
       expect(changes.docs[0]).toMatchObject({ collectionSlug: postsSlug, operation: 'update' })
     })
 
-    it('should tombstone rather than delete when deleting a main document on a branch', async () => {
+    test('should tombstone rather than delete when deleting a main document on a branch', async () => {
       await payload.delete({ id: mainDocID, branch: 'cow', collection: postsSlug })
 
       const stillOnMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
@@ -2090,7 +2853,7 @@ describe('Branching', () => {
       expect(stillOnMain.title).toBe('original on main')
     })
 
-    it('should hide a document deleted on a branch from that branch only', async () => {
+    test('should hide a document deleted on a branch from that branch only', async () => {
       await payload.delete({ id: mainDocID, branch: 'cow', collection: postsSlug })
 
       const onBranch = await payload.find({
@@ -2104,7 +2867,7 @@ describe('Branching', () => {
       expect(onMain.docs.map((doc) => String(doc.id))).toContain(String(mainDocID))
     })
 
-    it('should record the delete in the changeset registry', async () => {
+    test('should record the delete in the changeset registry', async () => {
       await payload.delete({ id: mainDocID, branch: 'cow', collection: postsSlug })
 
       const changes = await payload.find({
@@ -2117,7 +2880,7 @@ describe('Branching', () => {
       expect(changes.docs[0]).toMatchObject({ operation: 'delete' })
     })
 
-    it('should hard-delete a document created on the same branch', async () => {
+    test('should hard-delete a document created on the same branch', async () => {
       const created = await payload.create({
         branch: 'cow',
         collection: postsSlug,
@@ -2135,7 +2898,7 @@ describe('Branching', () => {
 
       expect(rows.docs).toHaveLength(0)
     })
-    it('should allow the same unique value on two different branches', async () => {
+    test('should allow the same unique value on two different branches', async () => {
       const onMain = await payload.create({
         collection: uniqueSlug,
         data: { slug: 'shared' },
@@ -2178,11 +2941,11 @@ describe('Branching', () => {
     })
   })
 
-  describe('Drafts and publishing on a branch', () => {
+  test.describe('Drafts and publishing on a branch', () => {
     let pageID: number | string
     const cleanup: (number | string)[] = []
 
-    beforeAll(async () => {
+    test.beforeAll(async () => {
       const existing = await payload.find({
         collection: branchesSlug,
         pagination: false,
@@ -2197,7 +2960,7 @@ describe('Branching', () => {
       }
     })
 
-    beforeEach(async () => {
+    test.beforeEach(async () => {
       const page = await payload.create({
         collection: pagesSlug,
         data: { _status: 'published', title: 'published on main' },
@@ -2206,7 +2969,7 @@ describe('Branching', () => {
       cleanup.push(page.id)
     })
 
-    afterEach(async () => {
+    test.afterEach(async () => {
       const shadows = await payload.find({
         branch: false,
         collection: pagesSlug,
@@ -2234,7 +2997,7 @@ describe('Branching', () => {
       }
     })
 
-    it('should hide a draft saved on a branch from main', async () => {
+    test('should hide a draft saved on a branch from main', async () => {
       await payload.update({
         id: pageID,
         branch: 'draftwork',
@@ -2252,7 +3015,7 @@ describe('Branching', () => {
       expect(mainDraft.title).toBe('published on main')
     })
 
-    it('should return the branch draft when reading drafts on the branch', async () => {
+    test('should return the branch draft when reading drafts on the branch', async () => {
       await payload.update({
         id: pageID,
         branch: 'draftwork',
@@ -2271,7 +3034,7 @@ describe('Branching', () => {
       expect(branchDraft.title).toBe('draft on branch')
     })
 
-    it('should not publish on main when publishing on a branch', async () => {
+    test('should not publish on main when publishing on a branch', async () => {
       await payload.update({
         id: pageID,
         branch: 'draftwork',
@@ -2290,7 +3053,7 @@ describe('Branching', () => {
       expect(onBranch.title).toBe('published on branch')
     })
 
-    it('should keep version history isolated per branch', async () => {
+    test('should keep version history isolated per branch', async () => {
       await payload.update({
         id: pageID,
         branch: 'draftwork',
@@ -2310,7 +3073,7 @@ describe('Branching', () => {
       }
     })
 
-    it('should list drafts on a branch without duplicating the main document', async () => {
+    test('should list drafts on a branch without duplicating the main document', async () => {
       await payload.update({
         id: pageID,
         branch: 'draftwork',
@@ -2336,7 +3099,7 @@ describe('Branching', () => {
     // the row — but left the branch's *version* chain behind. The drafts list reads
     // through versions, so the branch went on listing the merged document a second
     // time alongside main's, as two identical published rows.
-    it('should not duplicate a merged document in the branch drafts list', async () => {
+    test('should not duplicate a merged document in the branch drafts list', async () => {
       await payload.update({
         id: pageID,
         branch: 'draftwork',
@@ -2376,7 +3139,7 @@ describe('Branching', () => {
     // keeps its row through the merge — the row is promoted to main rather than
     // recreated — so its branch-scoped version rows had to stop being branch-scoped
     // with it, or the branch listed the promoted document twice.
-    it('should not duplicate a document created on the branch after it merges', async () => {
+    test('should not duplicate a document created on the branch after it merges', async () => {
       const created = await payload.create({
         branch: 'draftwork',
         collection: pagesSlug,
@@ -2416,7 +3179,7 @@ describe('Branching', () => {
     // chain, and a drafts-enabled collection went on listing it. The list view
     // reads drafts, so the row stayed put while every other read treated the
     // document as gone, including the edit view behind it.
-    it('should hide a document deleted on a branch from that branch drafts list', async () => {
+    test('should hide a document deleted on a branch from that branch drafts list', async () => {
       await payload.update({
         id: pageID,
         branch: 'draftwork',
@@ -2437,7 +3200,7 @@ describe('Branching', () => {
       expect(onBranch.docs.map((doc) => String(doc.id))).not.toContain(String(pageID))
     })
 
-    it('should still list a document deleted on a branch when reading drafts on main', async () => {
+    test('should still list a document deleted on a branch when reading drafts on main', async () => {
       await payload.update({
         id: pageID,
         branch: 'draftwork',
@@ -2460,7 +3223,7 @@ describe('Branching', () => {
     // The delete cascaded to versions by canonical ID before the tombstone was
     // decided, so main lost its version chain while keeping its row — production
     // history destroyed by a branch that is supposed to be isolated from it.
-    it('should leave main version history intact when deleting on a branch', async () => {
+    test('should leave main version history intact when deleting on a branch', async () => {
       await payload.update({
         id: pageID,
         branch: 'draftwork',
@@ -2488,7 +3251,7 @@ describe('Branching', () => {
       expect(mainDraft.title).toBe('published on main')
     })
 
-    it('should hide a document deleted on a branch without a prior branch edit', async () => {
+    test('should hide a document deleted on a branch without a prior branch edit', async () => {
       await payload.delete({ id: pageID, branch: 'draftwork', collection: pagesSlug })
 
       const onBranch = await payload.find({
@@ -2505,7 +3268,7 @@ describe('Branching', () => {
     // branch. It does not, and it should not: a branch's history reads as a
     // continuation of main's, so main's own rows are the ancestry and copying them
     // would duplicate every one.
-    it('should show main history up to the fork point as the branch ancestry', async () => {
+    test('should show main history up to the fork point as the branch ancestry', async () => {
       await payload.update({
         id: pageID,
         collection: pagesSlug,
@@ -2552,11 +3315,11 @@ describe('Branching', () => {
      * `baseUpdatedAt` cannot be repurposed because §16's "main moved" warning depends
      * on its current meaning.
      */
-    it.todo('should exclude main versions recorded after the branch forked')
+    test.todo('should exclude main versions recorded after the branch forked')
 
     // The Versions tab count and the Versions list came from different queries, and
     // only the list was branch-aware — so the tab said 3 while 4 rows rendered.
-    it('should count versions the same way it lists them on a branch', async () => {
+    test('should count versions the same way it lists them on a branch', async () => {
       await payload.update({
         id: pageID,
         branch: 'draftwork',
@@ -2593,7 +3356,7 @@ describe('Branching', () => {
       expect(counted.totalDocs).toBeGreaterThan(countedOnMain.totalDocs)
     })
 
-    it('should keep one branch out of another branch history', async () => {
+    test('should keep one branch out of another branch history', async () => {
       const existing = await payload.find({
         collection: branchesSlug,
         pagination: false,
@@ -2651,7 +3414,7 @@ describe('Branching', () => {
       }
     })
 
-    it('should record a draft-only document created on a branch in the changeset registry', async () => {
+    test('should record a draft-only document created on a branch in the changeset registry', async () => {
       const created = await payload.create({
         branch: 'draftwork',
         collection: pagesSlug,
@@ -2671,7 +3434,7 @@ describe('Branching', () => {
       expect((changes.docs[0]?.doc as { value?: unknown })?.value).toBe(created.id)
     })
 
-    it('should record a draft edit to a main document as an update in the changeset registry', async () => {
+    test('should record a draft edit to a main document as an update in the changeset registry', async () => {
       await payload.update({
         id: pageID,
         branch: 'draftwork',
@@ -2691,7 +3454,7 @@ describe('Branching', () => {
       expect((changes.docs[0]?.doc as { value?: unknown })?.value).toBe(pageID)
     })
 
-    it('should record a draft created through the REST API with a branch param', async () => {
+    test('should record a draft created through the REST API with a branch param', async () => {
       const res = await restClient.POST(`/${pagesSlug}?branch=draftwork&draft=true`, {
         body: JSON.stringify({ _status: 'draft', title: 'rest draft on branch' }),
         headers: { Authorization: `JWT ${token}` },
@@ -2712,7 +3475,7 @@ describe('Branching', () => {
 
     // What the admin panel's API tab does: read one document by ID over REST with a
     // `branch` param. The tab showed main's copy while sitting on a branch.
-    it('should return the branch copy when reading one document by ID over REST', async () => {
+    test('should return the branch copy when reading one document by ID over REST', async () => {
       await payload.update({
         id: pageID,
         branch: 'draftwork',
@@ -2738,7 +3501,7 @@ describe('Branching', () => {
 
     // Writes over REST had no branch coverage at all, and a write that silently lands
     // on main is strictly worse than a read that silently returns it.
-    it('should fork onto the branch when updating through REST with a branch param', async () => {
+    test('should fork onto the branch when updating through REST with a branch param', async () => {
       const res = await restClient.PATCH(`/${pagesSlug}/${pageID}?branch=draftwork&depth=0`, {
         body: JSON.stringify({ title: 'patched on branch' }),
         headers: { Authorization: `JWT ${token}` },
@@ -2757,7 +3520,7 @@ describe('Branching', () => {
       expect(onMain.title).toBe('published on main')
     })
 
-    it('should tombstone rather than delete when deleting through REST with a branch param', async () => {
+    test('should tombstone rather than delete when deleting through REST with a branch param', async () => {
       const res = await restClient.DELETE(`/${pagesSlug}/${pageID}?branch=draftwork&depth=0`, {
         headers: { Authorization: `JWT ${token}` },
       })
@@ -2781,7 +3544,7 @@ describe('Branching', () => {
     // query param was visible to it. Pinned anyway: the bug was the *divergence*
     // between the two reads, and a list that silently stopped agreeing with a
     // by-ID read would be the same defect wearing different clothes.
-    it('should return the branch copy when listing documents over REST', async () => {
+    test('should return the branch copy when listing documents over REST', async () => {
       await payload.update({
         id: pageID,
         branch: 'draftwork',
@@ -2802,7 +3565,7 @@ describe('Branching', () => {
       expect(matching[0].title).toBe('updated on branch')
     })
 
-    it('should keep a draft created on a branch off main', async () => {
+    test('should keep a draft created on a branch off main', async () => {
       const created = await payload.create({
         branch: 'draftwork',
         collection: pagesSlug,
@@ -2829,10 +3592,10 @@ describe('Branching', () => {
     })
   })
 
-  describe('Uploads on a branch', () => {
+  test.describe('Uploads on a branch', () => {
     const cleanup: (number | string)[] = []
 
-    beforeAll(async () => {
+    test.beforeAll(async () => {
       const existing = await payload.find({
         collection: branchesSlug,
         pagination: false,
@@ -2847,7 +3610,7 @@ describe('Branching', () => {
       }
     })
 
-    afterEach(async () => {
+    test.afterEach(async () => {
       const shadows = await payload.find({
         branch: false,
         collection: mediaSlug,
@@ -2876,14 +3639,15 @@ describe('Branching', () => {
     })
 
     const createOnMain = async (name: string) => {
+      const data = Buffer.from(`bytes for ${name}`)
       const doc = await payload.create({
         collection: mediaSlug,
         data: { alt: 'on main' },
         file: {
           name,
-          data: Buffer.from(`bytes for ${name}`),
+          data,
           mimetype: 'text/plain',
-          size: 32,
+          size: data.length,
         },
       })
       cleanup.push(doc.id)
@@ -2894,7 +3658,7 @@ describe('Branching', () => {
     // `filename` is unique on upload collections, and it is added after branch
     // field injection runs — so it kept a global unique index and a branch's copy
     // of the row collided with main's, failing validation outright.
-    it('should allow forking an upload onto a branch despite the unique filename', async () => {
+    test('should allow forking an upload onto a branch despite the unique filename', async () => {
       const media = await createOnMain('fork-me.txt')
 
       await payload.update({
@@ -2917,10 +3681,10 @@ describe('Branching', () => {
 
     // `deleteAssociatedFiles` ran before `db.deleteOne` decided the delete was a
     // tombstone, so main lost the file its surviving row still points at.
-    it('should keep the file on main when deleting an upload on a branch', async () => {
+    test('should keep the file on main when deleting an upload on a branch', async () => {
       const fs = await import('fs')
       const media = await createOnMain('keep-me.txt')
-      const filePath = path.resolve(dirname, 'media', media.filename!)
+      const filePath = path.resolve(dirname, 'media', media.filename)
 
       expect(fs.existsSync(filePath)).toBe(true)
 
@@ -2933,7 +3697,96 @@ describe('Branching', () => {
       expect(onMain.alt).toBe('on main')
     })
 
-    it('should hide an upload deleted on a branch from that branch only', async () => {
+    test('should keep the main file when replacing an upload on a branch', async () => {
+      const fs = await import('fs')
+      const media = await createOnMain('keep-original-on-replace.txt')
+      const mainFilePath = path.resolve(dirname, 'media', media.filename)
+      const replacementData = Buffer.from('branch replacement bytes')
+
+      const replaced = await payload.update({
+        id: media.id,
+        branch: 'uploadwork',
+        collection: mediaSlug,
+        data: { alt: 'branch replacement' },
+        file: {
+          name: 'branch-replacement.txt',
+          data: replacementData,
+          mimetype: 'text/plain',
+          size: replacementData.length,
+        },
+      })
+      const replacementFilePath = path.resolve(dirname, 'media', replaced.filename)
+      const onMain = await payload.findByID({ id: media.id, collection: mediaSlug })
+
+      expect(replaced.filename).toBe('branch-replacement.txt')
+      expect(fs.existsSync(mainFilePath)).toBe(true)
+      expect(fs.existsSync(replacementFilePath)).toBe(true)
+      expect(fs.readFileSync(mainFilePath, 'utf8')).toBe('bytes for keep-original-on-replace.txt')
+      expect(fs.readFileSync(replacementFilePath, 'utf8')).toBe('branch replacement bytes')
+      expect(onMain.filename).toBe(media.filename)
+    })
+
+    test('should remove a replacement file when discarding a branch upload edit', async () => {
+      const fs = await import('fs')
+      const media = await createOnMain('keep-original-on-discard.txt')
+      const mainFilePath = path.resolve(dirname, 'media', media.filename)
+      const replacementData = Buffer.from('discarded branch replacement bytes')
+      const replaced = await payload.update({
+        id: media.id,
+        branch: 'uploadwork',
+        collection: mediaSlug,
+        data: { alt: 'discarded replacement' },
+        file: {
+          name: 'discarded-branch-replacement.txt',
+          data: replacementData,
+          mimetype: 'text/plain',
+          size: replacementData.length,
+        },
+      })
+      const replacementFilePath = path.resolve(dirname, 'media', replaced.filename)
+
+      expect(replaced.filename).toBe('discarded-branch-replacement.txt')
+
+      await payload.branches.discard({ branch: 'uploadwork' })
+
+      const onMain = await payload.findByID({ id: media.id, collection: mediaSlug })
+
+      expect(fs.existsSync(mainFilePath)).toBe(true)
+      expect(fs.existsSync(replacementFilePath)).toBe(false)
+      expect(onMain.filename).toBe(media.filename)
+    })
+
+    test('should remove the superseded main file when merging a branch upload replacement', async () => {
+      const fs = await import('fs')
+      const media = await createOnMain('remove-original-on-merge.txt')
+      const mainFilePath = path.resolve(dirname, 'media', media.filename)
+      const replacementData = Buffer.from('merged branch replacement bytes')
+      const replaced = await payload.update({
+        id: media.id,
+        branch: 'uploadwork',
+        collection: mediaSlug,
+        data: { alt: 'merged replacement' },
+        file: {
+          name: 'merged-branch-replacement.txt',
+          data: replacementData,
+          mimetype: 'text/plain',
+          size: replacementData.length,
+        },
+      })
+      const replacementFilePath = path.resolve(dirname, 'media', replaced.filename)
+
+      expect(replaced.filename).toBe('merged-branch-replacement.txt')
+
+      await payload.branches.merge({ branch: 'uploadwork' })
+
+      const onMain = await payload.findByID({ id: media.id, collection: mediaSlug })
+
+      expect(fs.existsSync(mainFilePath)).toBe(false)
+      expect(fs.existsSync(replacementFilePath)).toBe(true)
+      expect(onMain.filename).toBe(replaced.filename)
+    })
+
+    test('should hide an upload deleted on a branch from that branch only', async () => {
       const media = await createOnMain('hide-me.txt')
 
       await payload.delete({ id: media.id, branch: 'uploadwork', collection: mediaSlug })
@@ -2949,7 +3802,7 @@ describe('Branching', () => {
       expect(onMain.docs.map((doc) => String(doc.id))).toContain(String(media.id))
     })
 
-    it('should delete the file when removing an upload created on that branch', async () => {
+    test('should delete the file when removing an upload created on that branch', async () => {
       const fs = await import('fs')
 
       const created = await payload.create({
@@ -2964,7 +3817,7 @@ describe('Branching', () => {
         },
       })
 
-      const filePath = path.resolve(dirname, 'media', created.filename!)
+      const filePath = path.resolve(dirname, 'media', created.filename)
 
       expect(fs.existsSync(filePath)).toBe(true)
 
@@ -2974,8 +3827,8 @@ describe('Branching', () => {
     })
   })
 
-  describe('Globals', () => {
-    beforeAll(async () => {
+  test.describe('Globals', () => {
+    test.beforeAll(async () => {
       const existing = await payload.find({
         collection: branchesSlug,
         pagination: false,
@@ -2995,7 +3848,90 @@ describe('Branching', () => {
       })
     })
 
-    it('should leave main untouched when editing a global on a branch', async () => {
+    test.options(
+      'should uniquely store two globals on main and the same branch in MongoDB',
+      { db: 'mongo' },
+      async () => {
+        const branch = 'mongo-global-index'
+        const adapter = payload.db as MongooseAdapter
+        const branchDoc = await payload.create({
+          collection: branchesSlug,
+          data: { name: 'Mongo global index', slug: branch },
+        })
+
+        try {
+          await payload.updateGlobal({
+            slug: headerGlobalSlug,
+            data: { navLabel: 'main nav' },
+          })
+          await payload.updateGlobal({
+            slug: uninitializedGlobalSlug,
+            data: { branchValue: 'secondary on main' },
+          })
+          await payload.updateGlobal({
+            slug: headerGlobalSlug,
+            branch,
+            data: { navLabel: 'header on branch' },
+          })
+          await payload.updateGlobal({
+            slug: uninitializedGlobalSlug,
+            branch,
+            data: { branchValue: 'secondary on branch' },
+          })
+
+          const rows = await adapter.globals
+            .find({
+              _branch: { $in: [branch, 'main'] },
+              globalType: { $in: [headerGlobalSlug, uninitializedGlobalSlug] },
+            })
+            .lean()
+          const indexes = await adapter.globals.collection.indexes()
+          const configuredBranchField = payload.globals.config
+            .find(({ slug }) => slug === headerGlobalSlug)
+            ?.flattenedFields.find(({ name }) => name === '_branch')
+          const globalBranchIndex = indexes.find(
+            ({ key }: { key: Record<string, number> }) =>
+              key.globalType === 1 && key._branch === 1 && Object.keys(key).length === 2,
+          )
+          const branchOnlyIndex = indexes.find(
+            ({ key }: { key: Record<string, number> }) =>
+              key._branch === 1 && Object.keys(key).length === 1,
+          )
+
+          expect(rows).toHaveLength(4)
+          expect(configuredBranchField).toMatchObject({ index: true, unique: true })
+          expect(globalBranchIndex).toMatchObject({ unique: true })
+          expect(branchOnlyIndex).toBeUndefined()
+          await expect(
+            adapter.globals.collection.insertOne({
+              _branch: branch,
+              globalType: headerGlobalSlug,
+              navLabel: 'duplicate branch row',
+            }),
+          ).rejects.toMatchObject({ code: 11000 })
+        } finally {
+          await adapter.globals.deleteMany({ globalType: uninitializedGlobalSlug })
+          await adapter.globals.deleteOne({
+            _branch: branch,
+            globalType: headerGlobalSlug,
+          })
+
+          const changes = await payload.find({
+            collection: branchChangesSlug,
+            pagination: false,
+            where: { branch: { equals: branch } },
+          })
+
+          for (const change of changes.docs) {
+            await payload.delete({ id: change.id, collection: branchChangesSlug })
+          }
+
+          await payload.delete({ id: branchDoc.id, collection: branchesSlug })
+        }
+      },
+    )
+
+    test('should leave main untouched when editing a global on a branch', async () => {
       await payload.updateGlobal({
         slug: headerGlobalSlug,
         branch: 'globalwork',
@@ -3007,7 +3943,7 @@ describe('Branching', () => {
       expect(onMain.navLabel).toBe('main nav')
     })
 
-    it('should return the branch version when reading the global on that branch', async () => {
+    test('should return the branch version when reading the global on that branch', async () => {
       await payload.updateGlobal({
         slug: headerGlobalSlug,
         branch: 'globalwork',
@@ -3022,7 +3958,7 @@ describe('Branching', () => {
       expect(onBranch.navLabel).toBe('branch nav')
     })
 
-    it('should read through to main for a global never edited on the branch', async () => {
+    test('should read through to main for a global never edited on the branch', async () => {
       const onOtherBranch = await payload.findGlobal({
         slug: headerGlobalSlug,
         branch: 'halloween',
@@ -3031,7 +3967,7 @@ describe('Branching', () => {
       expect(onOtherBranch.navLabel).toBe('main nav')
     })
 
-    it('should keep two branches independent for the same global', async () => {
+    test('should keep two branches independent for the same global', async () => {
       await payload.updateGlobal({
         slug: headerGlobalSlug,
         branch: 'globalwork',
@@ -3058,7 +3994,7 @@ describe('Branching', () => {
      * without a branch-scoped fix, saving a draft of a global on a branch
      * silently clears main's latest flag and main loses its draft.
      */
-    it('should not clear main latest version flag when saving a global draft on a branch', async () => {
+    test('should not clear main latest version flag when saving a global draft on a branch', async () => {
       await payload.updateGlobal({
         slug: homepageGlobalSlug,
         data: { _status: 'published', heroTitle: 'published on main' },
@@ -3086,7 +4022,7 @@ describe('Branching', () => {
       expect(mainLatest.docs[0]!.version.heroTitle).toBe('main draft')
     })
 
-    it('should hide a global draft saved on a branch from main', async () => {
+    test('should hide a global draft saved on a branch from main', async () => {
       await payload.updateGlobal({
         slug: homepageGlobalSlug,
         branch: 'globalwork',
@@ -3103,12 +4039,12 @@ describe('Branching', () => {
     })
   })
 
-  describe('Joins', () => {
+  test.describe('Joins', () => {
     let categoryID: number | string
     let mainPostID: number | string
     let branchPostID: number | string
 
-    beforeEach(async () => {
+    test.beforeEach(async () => {
       await payload.create({
         collection: branchesSlug,
         data: { name: 'Join work', slug: 'joinwork' },
@@ -3134,12 +4070,20 @@ describe('Branching', () => {
       branchPostID = branchPost.id
     })
 
-    afterEach(async () => {
-      for (const slug of [postsSlug, categoriesSlug]) {
-        const rows = await payload.find({ branch: false, collection: slug, pagination: false })
+    test.afterEach(async () => {
+      for (const slug of [postsSlug, pagesSlug, categoriesSlug]) {
+        const rows = await payload.find({
+          branch: false,
+          collection: slug,
+          pagination: false,
+        })
 
         for (const row of rows.docs) {
-          await payload.delete({ id: row.id, branch: false, collection: slug })
+          await payload.delete({
+            id: row.id,
+            branch: false,
+            collection: slug,
+          })
         }
       }
 
@@ -3156,7 +4100,7 @@ describe('Branching', () => {
       }
     })
 
-    it('should exclude branch-created documents from a join read on main', async () => {
+    test('should exclude branch-created documents from a join read on main', async () => {
       const onMain = await payload.findByID({ id: categoryID, collection: categoriesSlug })
       const ids = (onMain.posts?.docs ?? []).map((doc: any) => String(doc?.id ?? doc))
 
@@ -3164,7 +4108,7 @@ describe('Branching', () => {
       expect(ids).not.toContain(String(branchPostID))
     })
 
-    it('should include branch-created documents in a join read on that branch', async () => {
+    test('should include branch-created documents in a join read on that branch', async () => {
       const onBranch = await payload.findByID({
         id: categoryID,
         branch: 'joinwork',
@@ -3176,7 +4120,7 @@ describe('Branching', () => {
       expect(ids).toContain(String(branchPostID))
     })
 
-    it('should exclude branch-deleted documents from a join read on that branch', async () => {
+    test('should exclude branch-deleted documents from a join read on that branch', async () => {
       await payload.delete({ id: mainPostID, branch: 'joinwork', collection: postsSlug })
 
       const onBranch = await payload.findByID({
@@ -3193,7 +4137,7 @@ describe('Branching', () => {
       expect(mainIDs).toContain(String(mainPostID))
     })
 
-    it('should not surface a shadow row as a separate join entry', async () => {
+    test('should not surface a shadow row as a separate join entry', async () => {
       await payload.update({
         id: mainPostID,
         branch: 'joinwork',
@@ -3210,15 +4154,122 @@ describe('Branching', () => {
 
       expect(ids.filter((id) => id === String(mainPostID))).toHaveLength(1)
     })
+
+    test('should use the active branch draft in a join read', async () => {
+      const page = await payload.create({
+        collection: pagesSlug,
+        data: { _status: 'draft', category: categoryID, title: 'main draft' },
+        draft: true,
+      })
+
+      await payload.update({
+        id: page.id,
+        branch: 'joinwork',
+        collection: pagesSlug,
+        data: { title: 'branch draft' },
+        draft: true,
+      })
+
+      const onBranch = await payload.findByID({
+        id: categoryID,
+        branch: 'joinwork',
+        collection: categoriesSlug,
+        draft: true,
+      })
+      const onMain = await payload.findByID({
+        id: categoryID,
+        collection: categoriesSlug,
+        draft: true,
+      })
+      const branchDraft = (onBranch as any).pages?.docs[0]
+      const mainDraft = (onMain as any).pages?.docs[0]
+
+      expect(branchDraft?.title).toBe('branch draft')
+      expect(mainDraft?.title).toBe('main draft')
+    })
+
+    test('should return a canonical document ID from a branch draft join', async () => {
+      const page = await payload.create({
+        collection: pagesSlug,
+        data: { _status: 'draft', category: categoryID, title: 'main draft' },
+        draft: true,
+      })
+
+      await payload.update({
+        id: page.id,
+        branch: 'joinwork',
+        collection: pagesSlug,
+        data: { title: 'branch draft' },
+        draft: true,
+      })
+
+      const onBranch = await payload.findByID({
+        id: categoryID,
+        branch: 'joinwork',
+        collection: categoriesSlug,
+        draft: true,
+      })
+      const branchDraft = (onBranch as any).pages?.docs[0]
+
+      expect(String(branchDraft?.id ?? branchDraft)).toBe(String(page.id))
+    })
+
+    test('should scope every polymorphic join target to the active branch', async () => {
+      const mainPage = await payload.create({
+        collection: pagesSlug,
+        data: { category: categoryID, title: 'main page' },
+      })
+      const branchPage = await payload.create({
+        branch: 'joinwork',
+        collection: pagesSlug,
+        data: { category: categoryID, title: 'branch page' },
+      })
+
+      await payload.update({
+        id: mainPostID,
+        branch: 'joinwork',
+        collection: postsSlug,
+        data: { title: 'edited on branch' },
+      })
+      await payload.delete({ id: mainPage.id, branch: 'joinwork', collection: pagesSlug })
+
+      const onBranch = await payload.findByID({
+        id: categoryID,
+        branch: 'joinwork',
+        collection: categoriesSlug,
+      })
+      const onMain = await payload.findByID({ id: categoryID, collection: categoriesSlug })
+      const getReferences = (
+        docs: Array<{ relationTo: string; value: { id: number | string } | number | string }>,
+      ) =>
+        docs.map(
+          ({ relationTo, value }) =>
+            `${relationTo}:${String(typeof value === 'object' ? value.id : value)}`,
+        )
+      const branchReferences = getReferences(onBranch.content?.docs ?? [])
+      const mainReferences = getReferences(onMain.content?.docs ?? [])
+
+      expect(
+        branchReferences.filter((reference) => reference === `${postsSlug}:${mainPostID}`),
+      ).toHaveLength(1)
+      expect(branchReferences).toContain(`${pagesSlug}:${branchPage.id}`)
+      expect(branchReferences).not.toContain(`${pagesSlug}:${mainPage.id}`)
+      expect(mainReferences).toContain(`${postsSlug}:${mainPostID}`)
+      expect(mainReferences).toContain(`${pagesSlug}:${mainPage.id}`)
+      expect(mainReferences).not.toContain(`${pagesSlug}:${branchPage.id}`)
+    })
   })
 
-  describe('Merge access preflight', () => {
+  test.describe('Merge access preflight', () => {
     let editorID: number | string
     let restrictedID: number | string
     let allowedID: number | string
     let deniedID: number | string
+    let localizedID: number | string
+    let nestedID: number | string
+    let publicID: number | string
 
-    beforeEach(async () => {
+    test.beforeEach(async () => {
       await payload.create({
         collection: branchesSlug,
         data: { name: 'Access work', slug: 'accesswork' },
@@ -3248,6 +4299,33 @@ describe('Branching', () => {
       })
       deniedID = denied.id
 
+      const nested = await payload.create({
+        collection: nestedSlug,
+        data: { items: [{ label: 'protected on main' }], title: 'nested on main' },
+      })
+      nestedID = nested.id
+
+      const localized = await payload.create({
+        collection: localizedSlug,
+        data: { _status: 'published', title: 'localized on main' },
+        locale: 'en',
+      })
+      localizedID = localized.id
+
+      await payload.update({
+        id: localizedID,
+        collection: localizedSlug,
+        data: { _status: 'published', title: 'localized Spanish on main' },
+        locale: 'es',
+      })
+
+      const publicDoc = await payload.create({
+        collection: publicSlug,
+        data: { _status: 'draft', title: 'draft on main' },
+        draft: true,
+      })
+      publicID = publicDoc.id
+
       for (const [collection, id] of [
         [restrictedSlug, restrictedID],
         [whereAccessSlug, allowedID],
@@ -3260,10 +4338,60 @@ describe('Branching', () => {
           data: { title: 'edited on branch' },
         })
       }
+
+      await payload.update({
+        id: nestedID,
+        branch: 'accesswork',
+        collection: nestedSlug,
+        data: { items: [{ label: 'protected on branch' }] },
+      })
+
+      await payload.update({
+        id: localizedID,
+        branch: 'accesswork',
+        collection: localizedSlug,
+        data: { _status: 'published', title: 'blocked localized proposed data' },
+        locale: 'es',
+      })
+
+      await payload.update({
+        id: publicID,
+        branch: 'accesswork',
+        collection: publicSlug,
+        data: { _status: 'published', title: 'published on branch' },
+      })
+
+      await payload.updateGlobal({
+        slug: headerGlobalSlug,
+        branch: false,
+        data: { navLabel: 'global main allowed' },
+      })
+
+      await payload.updateGlobal({
+        slug: headerGlobalSlug,
+        branch: 'accesswork',
+        data: { navLabel: 'blocked by proposed data' },
+      })
     })
 
-    afterEach(async () => {
-      for (const slug of [restrictedSlug, whereAccessSlug]) {
+    test.afterEach(async () => {
+      hookSpy.allowRestrictedCreate = undefined
+      hookSpy.allowRestrictedLocalizedCreate = undefined
+      hookSpy.allowRestrictedNestedFieldWrite = undefined
+      hookSpy.beforeMerge = undefined
+      hookSpy.localizedChangeOperations = undefined
+      hookSpy.localizedCreateAccessTitles = undefined
+      hookSpy.restrictLocalizedReadSelect = undefined
+      hookSpy.restrictedCreateAccessResults = undefined
+
+      for (const slug of [
+        localizedSlug,
+        nestedSlug,
+        pagesSlug,
+        publicSlug,
+        restrictedSlug,
+        whereAccessSlug,
+      ]) {
         const rows = await payload.find({ branch: false, collection: slug, pagination: false })
 
         for (const row of rows.docs) {
@@ -3272,6 +4400,14 @@ describe('Branching', () => {
       }
 
       await payload.delete({ id: editorID, collection: 'users' })
+
+      if (payload.db.deleteBranchGlobal) {
+        await payload.db.deleteBranchGlobal({
+          branch: 'accesswork',
+          globalSlug: headerGlobalSlug,
+          req: await createPayloadRequest({ branch: false, payload }),
+        })
+      }
 
       for (const collection of [branchChangesSlug, branchesSlug]) {
         const rows = await payload.find({
@@ -3295,7 +4431,7 @@ describe('Branching', () => {
         })
       ).docs[0]
 
-    it('should block a document the merging user cannot update', async () => {
+    test('should evaluate collection access against the exact proposed data', async () => {
       const result = await payload.branches.merge({
         branch: 'accesswork',
         dryRun: true,
@@ -3312,7 +4448,299 @@ describe('Branching', () => {
       expect(blocked!.message).toContain(restrictedSlug)
     })
 
-    it('should allow the same document for a user who does have access', async () => {
+    test('should evaluate collection access against each localized proposed write', async () => {
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        dryRun: true,
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
+
+      expect(result.blocked).toContainEqual(
+        expect.objectContaining({
+          collectionSlug: localizedSlug,
+          docID: localizedID,
+          operation: 'publish',
+        }),
+      )
+    })
+
+    test('should evaluate create access against each localized proposed value', async () => {
+      const created = await payload.create({
+        branch: 'accesswork',
+        collection: localizedSlug,
+        data: { _status: 'published', title: 'allowed localized create' },
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: created.id,
+        branch: 'accesswork',
+        collection: localizedSlug,
+        data: { _status: 'published', title: 'blocked localized create' },
+        locale: 'es',
+      })
+
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        dryRun: true,
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
+
+      expect(result.blocked).toContainEqual(
+        expect.objectContaining({
+          collectionSlug: localizedSlug,
+          docID: created.id,
+          operation: 'create',
+        }),
+      )
+    })
+
+    test('should evaluate access for sequential writes against the preceding proposed state', async () => {
+      const page = await payload.create({
+        collection: pagesSlug,
+        data: { _status: 'published', title: 'original sequential state' },
+      })
+
+      await payload.update({
+        id: page.id,
+        branch: 'accesswork',
+        collection: pagesSlug,
+        data: { _status: 'published', title: 'published before draft' },
+      })
+
+      await payload.update({
+        id: page.id,
+        branch: 'accesswork',
+        collection: pagesSlug,
+        data: { title: 'draft after allowed publish' },
+        draft: true,
+      })
+
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        dryRun: true,
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
+
+      expect(result.blocked).not.toContainEqual(
+        expect.objectContaining({ collectionSlug: pagesSlug, docID: page.id }),
+      )
+    })
+
+    test('should not evaluate sequential access against branch bookkeeping', async () => {
+      const page = await payload.create({
+        collection: pagesSlug,
+        data: { _status: 'published', title: 'original branch bookkeeping state' },
+      })
+
+      await payload.update({
+        id: page.id,
+        branch: 'accesswork',
+        collection: pagesSlug,
+        data: { _status: 'published', title: 'published before restricted draft' },
+      })
+
+      await payload.update({
+        id: page.id,
+        branch: 'accesswork',
+        collection: pagesSlug,
+        data: { title: 'draft allowed only off main' },
+        draft: true,
+      })
+
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        dryRun: true,
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
+
+      expect(result.blocked).toContainEqual(
+        expect.objectContaining({ collectionSlug: pagesSlug, docID: page.id, operation: 'update' }),
+      )
+    })
+
+    test('should block a change to a protected nested field', async () => {
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        dryRun: true,
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
+
+      const blocked = result.blocked.find(
+        (each) => each.collectionSlug === nestedSlug && String(each.docID) === String(nestedID),
+      )
+
+      expect(blocked).toMatchObject({
+        collectionSlug: nestedSlug,
+        operation: 'update',
+        reason: 'access',
+      })
+    })
+
+    test('should block a create containing a protected nested field', async () => {
+      const created = await payload.create({
+        branch: 'accesswork',
+        collection: nestedSlug,
+        data: { items: [{ label: 'protected branch create' }], title: 'created on branch' },
+      })
+
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        dryRun: true,
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
+
+      expect(result.blocked).toContainEqual(
+        expect.objectContaining({
+          collectionSlug: nestedSlug,
+          docID: created.id,
+          operation: 'create',
+        }),
+      )
+    })
+
+    test('should treat unmatched nested rows as new when checking protected fields', async () => {
+      const nested = await payload.create({
+        collection: nestedSlug,
+        data: {
+          items: [
+            { label: 'protected first', note: 'first note' },
+            { label: 'protected second', note: 'second note' },
+          ],
+          title: 'nested row identity',
+        },
+      })
+
+      await payload.update({
+        id: nested.id,
+        branch: 'accesswork',
+        collection: nestedSlug,
+        data: {
+          items: [
+            { label: 'protected first', note: 'second note' },
+            { label: 'protected second', note: 'first note' },
+          ],
+        },
+      })
+
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        dryRun: true,
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
+
+      expect(result.blocked).toContainEqual(
+        expect.objectContaining({
+          collectionSlug: nestedSlug,
+          docID: nested.id,
+          operation: 'update',
+        }),
+      )
+    })
+
+    test('should block a publication denied by _status field access', async () => {
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        dryRun: true,
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
+
+      const blocked = result.blocked.find(
+        (each) => each.collectionSlug === publicSlug && String(each.docID) === String(publicID),
+      )
+
+      expect(blocked).toMatchObject({
+        collectionSlug: publicSlug,
+        operation: 'publish',
+        reason: 'access',
+      })
+    })
+
+    test('should report a blocked multi-write change once', async () => {
+      await payload.update({
+        id: publicID,
+        branch: 'accesswork',
+        collection: publicSlug,
+        data: { title: 'drafted after denied publication' },
+        draft: true,
+      })
+
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        dryRun: true,
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
+
+      expect(
+        result.blocked.filter(
+          (each) => each.collectionSlug === publicSlug && String(each.docID) === String(publicID),
+        ),
+      ).toHaveLength(1)
+    })
+
+    test('should evaluate global access against the exact proposed data', async () => {
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        dryRun: true,
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
+
+      expect(result.blocked).toContainEqual(
+        expect.objectContaining({ globalSlug: headerGlobalSlug, operation: 'update' }),
+      )
+    })
+
+    test('should apply a global Where access result to the current main global', async () => {
+      await payload.updateGlobal({
+        slug: headerGlobalSlug,
+        branch: false,
+        data: { navLabel: 'global main denied' },
+      })
+
+      await payload.updateGlobal({
+        slug: headerGlobalSlug,
+        branch: 'accesswork',
+        data: { navLabel: 'allowed proposed data' },
+      })
+
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        dryRun: true,
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
+
+      expect(result.blocked).toContainEqual(
+        expect.objectContaining({ globalSlug: headerGlobalSlug, operation: 'update' }),
+      )
+    })
+
+    test('should enforce merge access when overrideAccess is false', async () => {
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        dryRun: true,
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
+
+      const blockedIDs = result.blocked.map((each) => String(each.docID))
+
+      expect(blockedIDs).toContain(String(restrictedID))
+      expect(blockedIDs).toContain(String(deniedID))
+      expect(blockedIDs).not.toContain(String(allowedID))
+    })
+
+    test('should allow the same document for a user who does have access', async () => {
       const result = await payload.branches.merge({
         branch: 'accesswork',
         dryRun: true,
@@ -3329,7 +4757,7 @@ describe('Branching', () => {
       expect(result.blocked.map((each) => String(each.docID))).not.toContain(String(restrictedID))
     })
 
-    it('should resolve Where-returning access per document', async () => {
+    test('should resolve Where-returning access per document', async () => {
       const result = await payload.branches.merge({
         branch: 'accesswork',
         dryRun: true,
@@ -3343,7 +4771,7 @@ describe('Branching', () => {
       expect(blockedIDs).not.toContain(String(allowedID))
     })
 
-    it('should exclude blocked documents from mergeable rather than failing the whole merge', async () => {
+    test('should exclude blocked documents from mergeable rather than failing the whole merge', async () => {
       const result = await payload.branches.merge({
         branch: 'accesswork',
         dryRun: true,
@@ -3354,11 +4782,13 @@ describe('Branching', () => {
       const mergeableIDs = result.mergeable.map((each) => String(each.docID))
 
       expect(mergeableIDs).toContain(String(allowedID))
-      expect(mergeableIDs).not.toContain(String(restrictedID))
+      expect(result.mergeable).not.toContainEqual(
+        expect.objectContaining({ collectionSlug: restrictedSlug, docID: restrictedID }),
+      )
       expect(result.canMerge).toBe(true)
     })
 
-    it('should apply only the permitted changes and leave blocked ones on the branch', async () => {
+    test('should apply only the permitted changes and leave blocked ones on the branch', async () => {
       await payload.branches.merge({
         branch: 'accesswork',
         overrideAccess: false,
@@ -3378,7 +4808,591 @@ describe('Branching', () => {
       expect(remaining.docs.length).toBeGreaterThan(0)
     })
 
-    it('should not mutate anything on a dryRun even when everything is permitted', async () => {
+    test('should recheck Where access after beforeMerge changes main', async () => {
+      hookSpy.beforeMerge = async ({ req }) => {
+        await req.payload.update({
+          id: allowedID,
+          branch: false,
+          collection: whereAccessSlug,
+          data: { mergeable: false },
+          overrideAccess: true,
+          req,
+        })
+      }
+
+      await expect(
+        payload.branches.merge({
+          branch: 'accesswork',
+          overrideAccess: false,
+          user: (await asEditor()) as never,
+        }),
+      ).rejects.toThrow()
+
+      const onMain = await payload.findByID({ id: allowedID, collection: whereAccessSlug })
+      const pending = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: {
+          and: [
+            { branch: { equals: 'accesswork' } },
+            { collectionSlug: { equals: whereAccessSlug } },
+          ],
+        },
+      })
+
+      expect(onMain.title).toBe('allowed on main')
+      expect(pending.docs.some((change) => String(change.doc?.value) === String(allowedID))).toBe(
+        true,
+      )
+    })
+
+    test('should abort rather than consume a change when field access changes before write', async () => {
+      hookSpy.allowRestrictedNestedFieldWrite = true
+      hookSpy.beforeMerge = () => {
+        hookSpy.allowRestrictedNestedFieldWrite = false
+      }
+
+      const nestedChange = (
+        await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: {
+            and: [{ branch: { equals: 'accesswork' } }, { collectionSlug: { equals: nestedSlug } }],
+          },
+        })
+      ).docs.find((change) => String(change.doc?.value) === String(nestedID))
+
+      expect(nestedChange).toBeDefined()
+
+      await expect(
+        payload.branches.merge({
+          branch: 'accesswork',
+          changes: [nestedChange!.id],
+          overrideAccess: false,
+          user: (await asEditor()) as never,
+        }),
+      ).rejects.toThrow()
+
+      const onMain = await payload.findByID({ id: nestedID, collection: nestedSlug })
+      const pending = await payload.findByID({
+        id: nestedChange!.id,
+        collection: branchChangesSlug,
+        disableErrors: true,
+      })
+
+      expect(onMain.items?.[0]?.label).toBe('protected on main')
+      expect(pending).not.toBeNull()
+    })
+
+    test('should enforce create access when promoting a branch-created document', async () => {
+      hookSpy.allowRestrictedCreate = true
+
+      const created = await payload.create({
+        branch: 'accesswork',
+        collection: pagesSlug,
+        data: { _status: 'published', title: 'created on branch' },
+      })
+      const createdChange = (
+        await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: {
+            and: [{ branch: { equals: 'accesswork' } }, { collectionSlug: { equals: pagesSlug } }],
+          },
+        })
+      ).docs.find((change) => String(change.doc?.value) === String(created.id))
+
+      expect(createdChange).toBeDefined()
+
+      hookSpy.restrictedCreateAccessResults = []
+
+      hookSpy.beforeMerge = () => {
+        hookSpy.allowRestrictedCreate = false
+      }
+
+      await expect(
+        payload.branches.merge({
+          branch: 'accesswork',
+          changes: [createdChange!.id],
+          overrideAccess: false,
+          user: (await asEditor()) as never,
+        }),
+      ).rejects.toThrow()
+
+      const onMain = await payload.find({
+        collection: pagesSlug,
+        pagination: false,
+        where: { id: { equals: created.id } },
+      })
+      const pending = await payload.findByID({
+        id: createdChange!.id,
+        collection: branchChangesSlug,
+        disableErrors: true,
+      })
+
+      expect(onMain.docs).toHaveLength(0)
+      expect(pending).not.toBeNull()
+      expect(hookSpy.restrictedCreateAccessResults).toContain(true)
+      expect(hookSpy.restrictedCreateAccessResults?.at(-1)).toBe(false)
+    })
+
+    test('should recheck localized create access after beforeMerge', async () => {
+      hookSpy.allowRestrictedLocalizedCreate = true
+
+      const created = await payload.create({
+        branch: 'accesswork',
+        collection: localizedSlug,
+        data: { _status: 'published', title: 'allowed localized create' },
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: created.id,
+        branch: 'accesswork',
+        collection: localizedSlug,
+        data: { _status: 'published', title: 'blocked localized create' },
+        locale: 'es',
+      })
+
+      const createdChange = (
+        await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: {
+            and: [
+              { branch: { equals: 'accesswork' } },
+              { collectionSlug: { equals: localizedSlug } },
+            ],
+          },
+        })
+      ).docs.find((change) => String(change.doc?.value) === String(created.id))
+
+      expect(createdChange).toBeDefined()
+
+      hookSpy.localizedCreateAccessTitles = []
+
+      hookSpy.beforeMerge = () => {
+        hookSpy.allowRestrictedLocalizedCreate = false
+      }
+
+      await expect(
+        payload.branches.merge({
+          branch: 'accesswork',
+          changes: [createdChange!.id],
+          overrideAccess: false,
+          user: (await asEditor()) as never,
+        }),
+      ).rejects.toThrow()
+
+      const pending = await payload.findByID({
+        id: createdChange!.id,
+        collection: branchChangesSlug,
+        disableErrors: true,
+      })
+
+      expect(pending).not.toBeNull()
+      expect(hookSpy.localizedCreateAccessTitles).toEqual([
+        'allowed localized create',
+        'blocked localized create',
+        'allowed localized create',
+        'blocked localized create',
+      ])
+    })
+
+    test('should recheck localized create access after onProgress', async () => {
+      hookSpy.allowRestrictedLocalizedCreate = true
+
+      const created = await payload.create({
+        branch: 'accesswork',
+        collection: localizedSlug,
+        data: { _status: 'published', title: 'allowed localized create' },
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: created.id,
+        branch: 'accesswork',
+        collection: localizedSlug,
+        data: { _status: 'published', title: 'blocked localized create' },
+        locale: 'es',
+      })
+
+      const createdChange = (
+        await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: {
+            and: [
+              { branch: { equals: 'accesswork' } },
+              { collectionSlug: { equals: localizedSlug } },
+            ],
+          },
+        })
+      ).docs.find((change) => String(change.doc?.value) === String(created.id))
+
+      expect(createdChange).toBeDefined()
+
+      await expect(
+        payload.branches.merge({
+          branch: 'accesswork',
+          changes: [createdChange!.id],
+          onProgress: () => {
+            hookSpy.allowRestrictedLocalizedCreate = false
+          },
+          overrideAccess: false,
+          user: (await asEditor()) as never,
+        }),
+      ).rejects.toThrow()
+
+      const onMain = await payload.find({
+        collection: localizedSlug,
+        pagination: false,
+        where: { id: { equals: created.id } },
+      })
+      const pending = await payload.findByID({
+        id: createdChange!.id,
+        collection: branchChangesSlug,
+        disableErrors: true,
+      })
+
+      expect(onMain.docs).toHaveLength(0)
+      expect(pending).not.toBeNull()
+    })
+
+    test('should block a localized create containing a protected hidden field', async () => {
+      hookSpy.allowRestrictedLocalizedCreate = true
+
+      const created = await payload.create({
+        branch: 'accesswork',
+        collection: localizedSlug,
+        data: {
+          _status: 'published',
+          restrictedHidden: 'protected branch value',
+          title: 'allowed localized create',
+        },
+        locale: 'en',
+      })
+      const createdChange = (
+        await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: {
+            and: [
+              { branch: { equals: 'accesswork' } },
+              { collectionSlug: { equals: localizedSlug } },
+            ],
+          },
+        })
+      ).docs.find((change) => String(change.doc?.value) === String(created.id))
+
+      expect(createdChange).toBeDefined()
+
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        changes: [createdChange!.id],
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
+
+      const onMain = await payload.find({
+        collection: localizedSlug,
+        pagination: false,
+        where: { id: { equals: created.id } },
+      })
+      const pending = await payload.findByID({
+        id: createdChange!.id,
+        collection: branchChangesSlug,
+        disableErrors: true,
+      })
+
+      expect(result.blocked).toContainEqual(
+        expect.objectContaining({
+          collectionSlug: localizedSlug,
+          docID: created.id,
+          operation: 'create',
+        }),
+      )
+      expect(onMain.docs).toHaveLength(0)
+      expect(pending).not.toBeNull()
+    })
+
+    test('should block a localized create containing a protected field excluded by select', async () => {
+      hookSpy.allowRestrictedLocalizedCreate = true
+      hookSpy.restrictLocalizedReadSelect = true
+
+      const created = await payload.create({
+        branch: 'accesswork',
+        collection: localizedSlug,
+        data: {
+          _status: 'published',
+          restrictedSelectedOut: 'protected branch value',
+          title: 'allowed localized create',
+        },
+        locale: 'en',
+      })
+      const createdChange = (
+        await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: {
+            and: [
+              { branch: { equals: 'accesswork' } },
+              { collectionSlug: { equals: localizedSlug } },
+            ],
+          },
+        })
+      ).docs.find((change) => String(change.doc?.value) === String(created.id))
+
+      expect(createdChange).toBeDefined()
+
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        changes: [createdChange!.id],
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
+
+      expect(result.blocked).toContainEqual(
+        expect.objectContaining({
+          collectionSlug: localizedSlug,
+          docID: created.id,
+          operation: 'create',
+        }),
+      )
+    })
+
+    test('should preserve localized nested rows when promoting a branch-created document', async () => {
+      hookSpy.allowRestrictedLocalizedCreate = true
+
+      const created = await payload.create({
+        branch: 'accesswork',
+        collection: localizedSlug,
+        data: {
+          _status: 'published',
+          items: [{ label: 'first English' }, { label: 'second English' }],
+          title: 'allowed localized create',
+        },
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: created.id,
+        branch: 'accesswork',
+        collection: localizedSlug,
+        data: {
+          _status: 'published',
+          items: [
+            { id: created.items?.[0]?.id, label: 'first Spanish' },
+            { id: created.items?.[1]?.id, label: 'second Spanish' },
+          ],
+          title: 'allowed Spanish localized create',
+        },
+        locale: 'es',
+      })
+
+      const createdChange = (
+        await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: {
+            and: [
+              { branch: { equals: 'accesswork' } },
+              { collectionSlug: { equals: localizedSlug } },
+            ],
+          },
+        })
+      ).docs.find((change) => String(change.doc?.value) === String(created.id))
+
+      expect(createdChange).toBeDefined()
+
+      await payload.branches.merge({
+        branch: 'accesswork',
+        changes: [createdChange!.id],
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
+
+      const mainEN = await payload.findByID({
+        id: created.id,
+        collection: localizedSlug,
+        locale: 'en',
+      })
+      const mainES = await payload.findByID({
+        id: created.id,
+        collection: localizedSlug,
+        locale: 'es',
+      })
+
+      expect(mainEN.items?.map((item) => item.label)).toEqual(['first English', 'second English'])
+      expect(mainES.items?.map((item) => item.label)).toEqual(['first Spanish', 'second Spanish'])
+      expect(mainEN.items?.map((item) => item.id)).toEqual(mainES.items?.map((item) => item.id))
+    })
+
+    test('should run the create lifecycle once when promoting multiple locales', async () => {
+      hookSpy.allowRestrictedLocalizedCreate = true
+
+      const created = await payload.create({
+        branch: 'accesswork',
+        collection: localizedSlug,
+        data: { _status: 'published', title: 'allowed localized create' },
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: created.id,
+        branch: 'accesswork',
+        collection: localizedSlug,
+        data: { _status: 'published', title: 'allowed Spanish localized create' },
+        locale: 'es',
+      })
+
+      const createdChange = (
+        await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: {
+            and: [
+              { branch: { equals: 'accesswork' } },
+              { collectionSlug: { equals: localizedSlug } },
+            ],
+          },
+        })
+      ).docs.find((change) => String(change.doc?.value) === String(created.id))
+
+      expect(createdChange).toBeDefined()
+
+      hookSpy.localizedChangeOperations = []
+
+      await payload.branches.merge({
+        branch: 'accesswork',
+        changes: [createdChange!.id],
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
+
+      expect(
+        hookSpy.localizedChangeOperations?.filter((operation) => operation === 'create'),
+      ).toEqual(['create'])
+    })
+
+    test('should promote every locale of a permitted branch-created document', async () => {
+      hookSpy.allowRestrictedLocalizedCreate = true
+
+      const created = await payload.create({
+        branch: 'accesswork',
+        collection: localizedSlug,
+        data: { _status: 'published', title: 'allowed localized create' },
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: created.id,
+        branch: 'accesswork',
+        collection: localizedSlug,
+        data: { _status: 'published', title: 'allowed Spanish localized create' },
+        locale: 'es',
+      })
+
+      const createdChange = (
+        await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: {
+            and: [
+              { branch: { equals: 'accesswork' } },
+              { collectionSlug: { equals: localizedSlug } },
+            ],
+          },
+        })
+      ).docs.find((change) => String(change.doc?.value) === String(created.id))
+
+      expect(createdChange).toBeDefined()
+
+      await payload.branches.merge({
+        branch: 'accesswork',
+        changes: [createdChange!.id],
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
+
+      const mainEN = await payload.findByID({
+        id: created.id,
+        collection: localizedSlug,
+        locale: 'en',
+      })
+      const mainES = await payload.findByID({
+        id: created.id,
+        collection: localizedSlug,
+        locale: 'es',
+      })
+
+      expect(mainEN.title).toBe('allowed localized create')
+      expect(mainES.title).toBe('allowed Spanish localized create')
+    })
+
+    test('should promote a permitted branch-created document with access checks', async () => {
+      hookSpy.allowRestrictedCreate = true
+
+      const created = await payload.create({
+        branch: 'accesswork',
+        collection: pagesSlug,
+        data: { _status: 'published', title: 'permitted branch create' },
+      })
+      const createdChange = (
+        await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: {
+            and: [{ branch: { equals: 'accesswork' } }, { collectionSlug: { equals: pagesSlug } }],
+          },
+        })
+      ).docs.find((change) => String(change.doc?.value) === String(created.id))
+
+      expect(createdChange).toBeDefined()
+
+      await payload.branches.merge({
+        branch: 'accesswork',
+        changes: [createdChange!.id],
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
+
+      const onMain = await payload.findByID({ id: created.id, collection: pagesSlug })
+
+      expect(onMain.title).toBe('permitted branch create')
+    })
+
+    test('should not apply a create access Where result to the promoted row', async () => {
+      const created = await payload.create({
+        branch: 'accesswork',
+        collection: pagesSlug,
+        data: { _status: 'published', title: 'create access where result' },
+      })
+      const createdChange = (
+        await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: {
+            and: [{ branch: { equals: 'accesswork' } }, { collectionSlug: { equals: pagesSlug } }],
+          },
+        })
+      ).docs.find((change) => String(change.doc?.value) === String(created.id))
+
+      expect(createdChange).toBeDefined()
+
+      await payload.branches.merge({
+        branch: 'accesswork',
+        changes: [createdChange!.id],
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
+
+      const onMain = await payload.findByID({ id: created.id, collection: pagesSlug })
+
+      expect(onMain.title).toBe('create access where result')
+    })
+
+    test('should not mutate anything on a dryRun even when everything is permitted', async () => {
       await payload.branches.merge({ branch: 'accesswork', dryRun: true })
 
       const restricted = await payload.findByID({ id: restrictedID, collection: restrictedSlug })
@@ -3387,12 +5401,12 @@ describe('Branching', () => {
     })
   })
 
-  describe('Merge', () => {
+  test.describe('Merge', () => {
     let mainDocID: number | string
     let branchOnlyID: number | string
     const cleanup: (number | string)[] = []
 
-    beforeEach(async () => {
+    test.beforeEach(async () => {
       await payload.create({
         collection: branchesSlug,
         data: { name: 'Merge me', slug: 'mergeme' },
@@ -3420,7 +5434,7 @@ describe('Branching', () => {
       })
     })
 
-    afterEach(async () => {
+    test.afterEach(async () => {
       const rows = await payload.find({
         branch: false,
         collection: postsSlug,
@@ -3455,7 +5469,7 @@ describe('Branching', () => {
       }
     })
 
-    it('should report pending changes without mutating anything on dryRun', async () => {
+    test('should report pending changes without mutating anything on dryRun', async () => {
       const result = await payload.branches.merge({ branch: 'mergeme', dryRun: true })
 
       expect(result.mergeable).toHaveLength(2)
@@ -3465,7 +5479,7 @@ describe('Branching', () => {
       expect(onMain.title).toBe('original on main')
     })
 
-    it('should apply a branch edit to main', async () => {
+    test('should apply a branch edit to main', async () => {
       await payload.branches.merge({ branch: 'mergeme' })
 
       const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
@@ -3473,7 +5487,7 @@ describe('Branching', () => {
       expect(onMain.title).toBe('edited on branch')
     })
 
-    it('should publish a branch-created document to main keeping its ID', async () => {
+    test('should publish a branch-created document to main keeping its ID', async () => {
       await payload.branches.merge({ branch: 'mergeme' })
 
       const onMain = await payload.findByID({ id: branchOnlyID, collection: postsSlug })
@@ -3482,7 +5496,7 @@ describe('Branching', () => {
       expect(String(onMain.id)).toBe(String(branchOnlyID))
     })
 
-    it('should leave no shadow rows behind after merging', async () => {
+    test('should leave no shadow rows behind after merging', async () => {
       await payload.branches.merge({ branch: 'mergeme' })
 
       const shadows = await payload.find({
@@ -3495,7 +5509,7 @@ describe('Branching', () => {
       expect(shadows.docs).toHaveLength(0)
     })
 
-    it('should mark the branch merged and clear its changeset', async () => {
+    test('should mark the branch merged and clear its changeset', async () => {
       await payload.branches.merge({ branch: 'mergeme' })
 
       const changes = await payload.find({
@@ -3513,7 +5527,7 @@ describe('Branching', () => {
       expect(branchDoc.docs[0]!.status).toBe('merged')
     })
 
-    it('should apply only the selected changes and leave the rest on an open branch', async () => {
+    test('should apply only the selected changes and leave the rest on an open branch', async () => {
       const preflight = await payload.branches.merge({ branch: 'mergeme', dryRun: true })
       const editChange = preflight.mergeable.find(
         (change) => String(change.docID) === String(mainDocID),
@@ -3538,7 +5552,7 @@ describe('Branching', () => {
       expect(branchDoc.docs[0]!.status).toBe('open')
     })
 
-    it('should apply a branch delete to main', async () => {
+    test('should apply a branch delete to main', async () => {
       await payload.delete({ id: mainDocID, branch: 'mergeme', collection: postsSlug })
       await payload.branches.merge({ branch: 'mergeme' })
 
@@ -3551,7 +5565,7 @@ describe('Branching', () => {
       expect(onMain.docs).toHaveLength(0)
     })
 
-    it('should warn when main moved after the document was branched', async () => {
+    test('should warn when main moved after the document was branched', async () => {
       await payload.update({
         id: mainDocID,
         collection: postsSlug,
@@ -3565,7 +5579,7 @@ describe('Branching', () => {
       expect(String(warning!.docID)).toBe(String(mainDocID))
     })
 
-    it('should overwrite main even when main moved after the fork', async () => {
+    test('should overwrite main even when main moved after the fork', async () => {
       await payload.update({
         id: mainDocID,
         collection: postsSlug,
@@ -3579,7 +5593,7 @@ describe('Branching', () => {
       expect(onMain.title).toBe('edited on branch')
     })
 
-    it('should fire afterChange hooks on merge with the right operation', async () => {
+    test('should fire afterChange hooks on merge with the right operation', async () => {
       const calls: { operation: string; title: unknown }[] = []
 
       hookSpy.afterChange = (args) => {
@@ -3598,7 +5612,7 @@ describe('Branching', () => {
       )
     })
 
-    it('should re-run beforeChange hooks on merge', async () => {
+    test('should re-run beforeChange hooks on merge', async () => {
       let ran = 0
 
       hookSpy.beforeChange = () => {
@@ -3612,7 +5626,7 @@ describe('Branching', () => {
       expect(ran).toBeGreaterThan(0)
     })
 
-    it('should not leave a shadow row behind from the merge writes themselves', async () => {
+    test('should not leave a shadow row behind from the merge writes themselves', async () => {
       await payload.branches.merge({ branch: 'mergeme' })
 
       // `_branch` is `hidden`, so asserting on it needs `showHiddenFields`.
@@ -3634,10 +5648,10 @@ describe('Branching', () => {
    * draft never touches the document row, so merge cannot read the row alone and
    * has to consult the branch's version chain to know what it is applying.
    */
-  describe('Merging drafts and publishes', () => {
+  test.describe('Merging drafts and publishes', () => {
     let pageID: number | string
 
-    beforeEach(async () => {
+    test.beforeEach(async () => {
       await payload.create({
         collection: branchesSlug,
         data: { name: 'Draft merge', slug: 'draftmerge' },
@@ -3651,7 +5665,7 @@ describe('Branching', () => {
       pageID = page.id
     })
 
-    afterEach(async () => {
+    test.afterEach(async () => {
       const rows = await payload.find({ branch: false, collection: pagesSlug, pagination: false })
 
       for (const row of rows.docs) {
@@ -3673,7 +5687,7 @@ describe('Branching', () => {
       }
     })
 
-    it('should merge a draft-only branch edit as a draft, leaving main published state alone', async () => {
+    test('should merge a draft-only branch edit as a draft, leaving main published state alone', async () => {
       await payload.update({
         id: pageID,
         branch: 'draftmerge',
@@ -3692,7 +5706,7 @@ describe('Branching', () => {
       expect(latest._status).toBe('draft')
     })
 
-    it('should report a draft-only branch edit as an update rather than a publish', async () => {
+    test('should report a draft-only branch edit as an update rather than a publish', async () => {
       await payload.update({
         id: pageID,
         branch: 'draftmerge',
@@ -3711,14 +5725,14 @@ describe('Branching', () => {
           })
         ).docs,
         payload,
-        req: await createLocalReq({ branch: false }, payload),
+        req: await createPayloadRequest({ branch: false, payload }),
       })
 
       expect(resolved).toHaveLength(1)
       expect(resolved[0]!.writes.map((write) => write.operation)).toEqual(['update'])
     })
 
-    it('should merge a publish on a branch as a publish to main', async () => {
+    test('should merge a publish on a branch as a publish to main', async () => {
       await payload.update({
         id: pageID,
         branch: 'draftmerge',
@@ -3734,7 +5748,7 @@ describe('Branching', () => {
       expect(published._status).toBe('published')
     })
 
-    it('should apply both states when a branch published and then drafted on top', async () => {
+    test('should apply both states when a branch published and then drafted on top', async () => {
       await payload.update({
         id: pageID,
         branch: 'draftmerge',
@@ -3762,7 +5776,7 @@ describe('Branching', () => {
       expect(latest._status).toBe('draft')
     })
 
-    it('should merge a draft created on a branch as an unpublished document on main', async () => {
+    test('should merge a draft created on a branch as an unpublished document on main', async () => {
       const created = await payload.create({
         branch: 'draftmerge',
         collection: pagesSlug,
@@ -3778,13 +5792,26 @@ describe('Branching', () => {
         pagination: false,
         where: { id: { equals: created.id } },
       })
+      const publishedOnMain = await payload.find({
+        collection: pagesSlug,
+        pagination: false,
+        where: { id: { equals: created.id } },
+      })
+      const mainVersions = await payload.findVersions({
+        collection: pagesSlug,
+        pagination: false,
+        where: { parent: { equals: created.id } },
+      })
 
       expect(onMain.docs).toHaveLength(1)
       expect(onMain.docs[0]!._status).toBe('draft')
       expect(onMain.docs[0]!.title).toBe('draft created on branch')
+      expect(publishedOnMain.docs).toHaveLength(1)
+      expect(publishedOnMain.docs[0]!._status).toBe('draft')
+      expect(mainVersions.docs.map(({ version }) => version._status)).not.toContain('published')
     })
 
-    it('should leave main published state untouched by a draft-only merge', async () => {
+    test('should leave main published state untouched by a draft-only merge', async () => {
       const before = await payload.findByID({ id: pageID, collection: pagesSlug })
 
       await payload.update({
@@ -3804,7 +5831,7 @@ describe('Branching', () => {
       expect(after.title).toBe('published on main')
     })
 
-    it('should not leave a shadow row behind after merging a draft-only edit', async () => {
+    test('should not leave a shadow row behind after merging a draft-only edit', async () => {
       await payload.update({
         id: pageID,
         branch: 'draftmerge',
@@ -3832,7 +5859,7 @@ describe('Branching', () => {
    * §16's branch lifecycle. A branch is the workspace and a merge is an event, so
    * merging does not end a branch — closing it does, and only when asked.
    */
-  describe('Branch lifecycle after merging', () => {
+  test.describe('Branch lifecycle after merging', () => {
     let mainDocID: number | string
 
     const branchStatus = async (slug: string) =>
@@ -3844,7 +5871,7 @@ describe('Branching', () => {
         })
       ).docs[0]
 
-    beforeEach(async () => {
+    test.beforeEach(async () => {
       await payload.create({
         collection: branchesSlug,
         data: { name: 'Life cycle', slug: 'lifecycle' },
@@ -3852,7 +5879,12 @@ describe('Branching', () => {
 
       const doc = await payload.create({
         collection: postsSlug,
-        data: { title: 'original on main' },
+        data: {
+          confidential: 'main secret',
+          internalNote: 'hidden main value',
+          order: 1,
+          title: 'original on main',
+        },
       })
 
       mainDocID = doc.id
@@ -3865,7 +5897,13 @@ describe('Branching', () => {
       })
     })
 
-    afterEach(async () => {
+    test.afterEach(async () => {
+      hookSpy.postBeforeRead = undefined
+      hookSpy.postDefaultValueCount = undefined
+      hookSpy.postTitleAfterReadCount = undefined
+      hookSpy.restrictLedgerSnapshotEntityRead = undefined
+      hookSpy.restrictLedgerSnapshotGlobalRead = undefined
+
       const rows = await payload.find({ branch: false, collection: postsSlug, pagination: false })
 
       for (const row of rows.docs) {
@@ -3883,9 +5921,19 @@ describe('Branching', () => {
           await payload.delete({ id: row.id, collection })
         }
       }
+
+      const ledgerReaders = await payload.find({
+        collection: 'users',
+        pagination: false,
+        where: { email: { equals: 'ledger-reader@example.com' } },
+      })
+
+      for (const ledgerReader of ledgerReaders.docs) {
+        await payload.delete({ id: ledgerReader.id, collection: 'users' })
+      }
     })
 
-    it('should record a ledger entry naming what the merge applied', async () => {
+    test('should record a ledger entry naming what the merge applied', async () => {
       await payload.branches.merge({ branch: 'lifecycle' })
 
       const events = await payload.find({
@@ -3913,7 +5961,7 @@ describe('Branching', () => {
       })
     })
 
-    it('should snapshot both sides of each merged change so the diff survives', async () => {
+    test('should snapshot both sides of each merged change so the diff survives', async () => {
       await payload.branches.merge({ branch: 'lifecycle' })
 
       const event = (
@@ -3930,9 +5978,229 @@ describe('Branching', () => {
       // dropped and main then holds the merged values on the one remaining row.
       expect(event.changes[0]?.before?.title).toBe('original on main')
       expect(event.changes[0]?.after?.title).toBe('edited on branch')
+      expect(event.changes[0]?.before).not.toHaveProperty('_branch')
+      expect(event.changes[0]?.after).not.toHaveProperty('_branch')
     })
 
-    it('should snapshot an empty before for a branch-created document', async () => {
+    test('should expose a merge ledger entry only to the user who created it', async () => {
+      const mergingUser = (
+        await payload.find({
+          collection: 'users',
+          pagination: false,
+          where: { email: { equals: devUser.email } },
+        })
+      ).docs[0]!
+      const otherUser = await payload.create({
+        collection: 'users',
+        data: { email: 'ledger-reader@example.com', password: 'test' },
+      })
+
+      await payload.branches.merge({
+        branch: 'lifecycle',
+        overrideAccess: false,
+        user: { ...mergingUser, collection: 'users' } as never,
+      })
+
+      await payload.create({
+        collection: branchMergesSlug,
+        data: {
+          branch: 'lifecycle',
+          changes: [],
+          mergedAt: new Date().toISOString(),
+          mergedByID: String(mergingUser.id),
+        },
+      })
+
+      const ownEvents = await payload.find({
+        collection: branchMergesSlug,
+        overrideAccess: false,
+        pagination: false,
+        user: { ...mergingUser, collection: 'users' } as never,
+        where: { branch: { equals: 'lifecycle' } },
+      })
+      const otherEvents = await payload.find({
+        collection: branchMergesSlug,
+        overrideAccess: false,
+        pagination: false,
+        user: { ...otherUser, collection: 'users' } as never,
+        where: { branch: { equals: 'lifecycle' } },
+      })
+      const collidingAuthCollectionEvents = await payload.find({
+        collection: branchMergesSlug,
+        overrideAccess: false,
+        pagination: false,
+        user: { ...mergingUser, collection: 'secondary-users' } as never,
+        where: { branch: { equals: 'lifecycle' } },
+      })
+
+      expect(ownEvents.docs).toHaveLength(2)
+      expect(otherEvents.docs).toHaveLength(0)
+      expect(collidingAuthCollectionEvents.docs).toHaveLength(0)
+    })
+
+    test('should enforce field and hidden-field read rules for ledger snapshots when merge writes override access', async () => {
+      const mergingUser = await payload.create({
+        collection: 'users',
+        data: { email: 'ledger-reader@example.com', password: 'test' },
+      })
+
+      await payload.branches.merge({
+        branch: 'lifecycle',
+        overrideAccess: true,
+        user: { ...mergingUser, collection: 'users' } as never,
+      })
+
+      const event = (
+        await payload.find({
+          collection: branchMergesSlug,
+          pagination: false,
+          where: { branch: { equals: 'lifecycle' } },
+        })
+      ).docs[0]! as unknown as {
+        changes: {
+          after?: Record<string, unknown>
+          before?: Record<string, unknown>
+          docTitle?: string
+        }[]
+      }
+
+      expect(event.changes[0]?.before).not.toHaveProperty('confidential')
+      expect(event.changes[0]?.after).not.toHaveProperty('confidential')
+      expect(event.changes[0]?.before).not.toHaveProperty('internalNote')
+      expect(event.changes[0]?.after).not.toHaveProperty('internalNote')
+      expect(event.changes[0]?.before).not.toHaveProperty('title')
+      expect(event.changes[0]?.after).not.toHaveProperty('title')
+      expect(event.changes[0]?.docTitle).toBe(String(mainDocID))
+    })
+
+    test('should apply collection read constraints to each ledger snapshot', async () => {
+      const mergingUser = await payload.create({
+        collection: 'users',
+        data: { email: 'ledger-reader@example.com', password: 'test' },
+      })
+
+      hookSpy.restrictLedgerSnapshotEntityRead = true
+
+      await payload.update({
+        id: mainDocID,
+        branch: 'lifecycle',
+        collection: postsSlug,
+        data: { order: 2 },
+      })
+
+      await payload.branches.merge({
+        branch: 'lifecycle',
+        overrideAccess: true,
+        user: { ...mergingUser, collection: 'users' } as never,
+      })
+
+      const event = (
+        await payload.find({
+          collection: branchMergesSlug,
+          pagination: false,
+          where: { branch: { equals: 'lifecycle' } },
+        })
+      ).docs[0]! as unknown as {
+        changes: { after?: null | Record<string, unknown>; before?: Record<string, unknown> }[]
+      }
+
+      expect(event.changes[0]?.before?.order).toBe(1)
+      expect(event.changes[0]?.after).toBeNull()
+    })
+
+    test('should not evaluate field defaults while capturing a collection ledger snapshot', async () => {
+      const req = await createPayloadRequest({ branch: false, payload })
+
+      hookSpy.postDefaultValueCount = 0
+
+      const snapshot = await readCollectionMergeSnapshot({
+        collectionSlug: postsSlug,
+        docID: mainDocID,
+        payload,
+        req,
+      })
+
+      expect(hookSpy.postDefaultValueCount).toBe(0)
+      expect(snapshot).not.toHaveProperty('computedDefault')
+    })
+
+    test('should not run field read hooks while capturing a collection ledger snapshot', async () => {
+      const req = await createPayloadRequest({ branch: false, payload })
+
+      hookSpy.postTitleAfterReadCount = 0
+
+      const snapshot = await readCollectionMergeSnapshot({
+        collectionSlug: postsSlug,
+        docID: mainDocID,
+        payload,
+        req,
+      })
+
+      expect(snapshot?.title).toBe('original on main')
+      expect(hookSpy.postTitleAfterReadCount).toBe(0)
+    })
+
+    test('should not let a collection read hook failure abort a merge', async () => {
+      hookSpy.postBeforeRead = () => {
+        throw new Error('snapshot read hook must not run')
+      }
+
+      const result = await payload.branches.merge({
+        branch: 'lifecycle',
+        overrideAccess: true,
+      })
+
+      expect(result.merged).toHaveLength(1)
+    })
+
+    test('should keep merge ledger writes server-owned', async () => {
+      const user = (
+        await payload.find({
+          collection: 'users',
+          pagination: false,
+          where: { email: { equals: devUser.email } },
+        })
+      ).docs[0]!
+
+      await payload.branches.merge({ branch: 'lifecycle' })
+
+      const event = (
+        await payload.find({
+          collection: branchMergesSlug,
+          pagination: false,
+          where: { branch: { equals: 'lifecycle' } },
+        })
+      ).docs[0]!
+      const createResult = await payload
+        .create({
+          collection: branchMergesSlug,
+          data: { branch: 'lifecycle', changes: [], mergedAt: new Date().toISOString() },
+          overrideAccess: false,
+          user: { ...user, collection: 'users' } as never,
+        })
+        .then(
+          () => 'fulfilled',
+          () => 'rejected',
+        )
+      const deleteResult = await payload
+        .delete({
+          id: event.id,
+          collection: branchMergesSlug,
+          overrideAccess: false,
+          user: { ...user, collection: 'users' } as never,
+        })
+        .then(
+          () => 'fulfilled',
+          () => 'rejected',
+        )
+
+      expect({ createResult, deleteResult }).toEqual({
+        createResult: 'rejected',
+        deleteResult: 'rejected',
+      })
+    })
+
+    test('should snapshot an empty before for a branch-created document', async () => {
       const created = await payload.create({
         branch: 'lifecycle',
         collection: postsSlug,
@@ -3968,7 +6236,7 @@ describe('Branching', () => {
       expect(event.changes[0]?.after?.title).toBe('created on branch')
     })
 
-    it('should keep the branch open when only some changes are merged', async () => {
+    test('should keep the branch open when only some changes are merged', async () => {
       const second = await payload.create({
         branch: 'lifecycle',
         collection: postsSlug,
@@ -3997,7 +6265,7 @@ describe('Branching', () => {
       expect(onBranch.title).toBe('created on branch')
     })
 
-    it('should mark the branch merged but not closed when everything is applied', async () => {
+    test('should mark the branch merged but not closed when everything is applied', async () => {
       await payload.branches.merge({ branch: 'lifecycle' })
 
       const branch = await branchStatus('lifecycle')
@@ -4006,7 +6274,7 @@ describe('Branching', () => {
       expect(branch?.mergedAt).toBeTruthy()
     })
 
-    it('should reopen a merged branch as soon as it has a change again', async () => {
+    test('should reopen a merged branch as soon as it has a change again', async () => {
       await payload.branches.merge({ branch: 'lifecycle' })
 
       expect((await branchStatus('lifecycle'))?.status).toBe('merged')
@@ -4024,7 +6292,7 @@ describe('Branching', () => {
       expect(branch?.mergedAt).toBeFalsy()
     })
 
-    it('should close the branch when the merge asks for it', async () => {
+    test('should close the branch when the merge asks for it', async () => {
       await payload.branches.merge({ branch: 'lifecycle', closeBranch: true })
 
       const branch = await branchStatus('lifecycle')
@@ -4033,7 +6301,7 @@ describe('Branching', () => {
       expect(branch?.mergedAt).toBeTruthy()
     })
 
-    it('should leave the branch open when a partial merge asks to close it', async () => {
+    test('should leave the branch open when a partial merge asks to close it', async () => {
       await payload.create({
         branch: 'lifecycle',
         collection: postsSlug,
@@ -4058,7 +6326,7 @@ describe('Branching', () => {
       expect((await branchStatus('lifecycle'))?.status).toBe('open')
     })
 
-    it('should refuse writes to a closed branch', async () => {
+    test('should refuse writes to a closed branch', async () => {
       await payload.branches.merge({ branch: 'lifecycle', closeBranch: true })
 
       await expect(
@@ -4088,7 +6356,7 @@ describe('Branching', () => {
       expect(onMain.title).toBe('edited on branch')
     })
 
-    it('should still allow reading a closed branch', async () => {
+    test('should still allow reading a closed branch', async () => {
       await payload.branches.merge({ branch: 'lifecycle', closeBranch: true })
 
       // The archive has to remain readable, or the ledger would be unreachable.
@@ -4101,7 +6369,7 @@ describe('Branching', () => {
       expect(onBranch.docs.map((doc) => doc.title)).toContain('edited on branch')
     })
 
-    it('should accumulate one ledger entry per merge across a reused branch', async () => {
+    test('should accumulate one ledger entry per merge across a reused branch', async () => {
       await payload.branches.merge({ branch: 'lifecycle' })
 
       await payload.update({
@@ -4128,7 +6396,7 @@ describe('Branching', () => {
    * Discard is merge's mirror: every operation reduces to dropping the branch's own
    * row, because that row *is* the change.
    */
-  describe('Discarding changes', () => {
+  test.describe('Discarding changes', () => {
     let mainDocID: number | string
     let createdOnBranchID: number | string
 
@@ -4139,7 +6407,7 @@ describe('Branching', () => {
         where: { branch: { equals: 'discardwork' } },
       })
 
-    beforeEach(async () => {
+    test.beforeEach(async () => {
       await payload.create({
         collection: branchesSlug,
         data: { name: 'Discard work', slug: 'discardwork' },
@@ -4168,7 +6436,7 @@ describe('Branching', () => {
       createdOnBranchID = created.id
     })
 
-    afterEach(async () => {
+    test.afterEach(async () => {
       const rows = await payload.find({ branch: false, collection: postsSlug, pagination: false })
 
       for (const row of rows.docs) {
@@ -4188,7 +6456,7 @@ describe('Branching', () => {
       }
     })
 
-    it('should revert a branch edit to main state', async () => {
+    test('should revert a branch edit to main state', async () => {
       await payload.branches.discard({ branch: 'discardwork' })
 
       const onBranch = await payload.findByID({
@@ -4201,7 +6469,7 @@ describe('Branching', () => {
       expect(onBranch.order).toBe(1)
     })
 
-    it('should remove a document created on the branch', async () => {
+    test('should remove a document created on the branch', async () => {
       await payload.branches.discard({ branch: 'discardwork' })
 
       const rows = await payload.find({
@@ -4214,7 +6482,7 @@ describe('Branching', () => {
       expect(rows.docs).toHaveLength(0)
     })
 
-    it('should restore a document the branch had deleted', async () => {
+    test('should restore a document the branch had deleted', async () => {
       const doomed = await payload.create({
         collection: postsSlug,
         data: { title: 'doomed on main' },
@@ -4248,7 +6516,7 @@ describe('Branching', () => {
       expect(restored.docs[0]!.title).toBe('doomed on main')
     })
 
-    it('should leave main untouched', async () => {
+    test('should leave main untouched', async () => {
       await payload.branches.discard({ branch: 'discardwork' })
 
       const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
@@ -4257,13 +6525,13 @@ describe('Branching', () => {
       expect(onMain.order).toBe(1)
     })
 
-    it('should clear the changeset it discarded', async () => {
+    test('should clear the changeset it discarded', async () => {
       await payload.branches.discard({ branch: 'discardwork' })
 
       expect((await pendingChanges()).docs).toHaveLength(0)
     })
 
-    it('should discard only the selected changes', async () => {
+    test('should discard only the selected changes', async () => {
       const changes = await pendingChanges()
       const updateChange = changes.docs.find((change) => change.operation === 'update')
 
@@ -4291,7 +6559,7 @@ describe('Branching', () => {
       expect((await pendingChanges()).docs).toHaveLength(1)
     })
 
-    it('should leave no shadow rows behind', async () => {
+    test('should leave no shadow rows behind', async () => {
       await payload.branches.discard({ branch: 'discardwork' })
 
       const shadows = await payload.find({
@@ -4305,7 +6573,7 @@ describe('Branching', () => {
       expect(shadows.docs).toHaveLength(0)
     })
 
-    it('should not mark the branch merged when everything is discarded', async () => {
+    test('should not mark the branch merged when everything is discarded', async () => {
       await payload.branches.discard({ branch: 'discardwork' })
 
       const branch = (
@@ -4320,13 +6588,13 @@ describe('Branching', () => {
       expect(branch?.status).toBe('open')
     })
 
-    it('should refuse to discard on a closed branch', async () => {
+    test('should refuse to discard on a closed branch', async () => {
       await payload.branches.merge({ branch: 'discardwork', closeBranch: true })
 
       await expect(payload.branches.discard({ branch: 'discardwork' })).rejects.toThrow()
     })
 
-    it('should discard through the REST endpoint', async () => {
+    test('should discard through the REST endpoint', async () => {
       const branchDoc = (
         await payload.find({
           collection: branchesSlug,
@@ -4346,7 +6614,7 @@ describe('Branching', () => {
       expect((await pendingChanges()).docs).toHaveLength(0)
     })
 
-    it('should reject an unauthenticated discard', async () => {
+    test('should reject an unauthenticated discard', async () => {
       const branchDoc = (
         await payload.find({
           collection: branchesSlug,
@@ -4363,6 +6631,22 @@ describe('Branching', () => {
       expect([401, 403]).toContain(res.status)
       expect((await pendingChanges()).docs).toHaveLength(2)
     })
+
+    test('should enforce branch delete access in the Local API by default', async () => {
+      await expect(
+        payload.branches.discard({
+          branch: 'discardwork',
+          overrideAccess: false,
+          user: {
+            collection: 'users',
+            email: 'restricted@example.com',
+            id: 'restricted-user',
+          } as never,
+        }),
+      ).rejects.toThrow()
+
+      expect((await pendingChanges()).docs).toHaveLength(2)
+    })
   })
 
   /**
@@ -4371,11 +6655,11 @@ describe('Branching', () => {
    * change that: the transaction is owned by the operation, not by whoever
    * happens to have created the request object.
    */
-  describe('Transactional integrity', () => {
+  test.describe('Transactional integrity', () => {
     let branchSlug: string
     let deleteOneSpy: ReturnType<typeof vi.spyOn> | undefined
 
-    afterEach(async () => {
+    test.afterEach(async () => {
       hookSpy.beforeChange = undefined
       deleteOneSpy?.mockRestore()
       deleteOneSpy = undefined
@@ -4399,7 +6683,7 @@ describe('Branching', () => {
       }
     })
 
-    it('should roll back every change in a non-streaming merge when a later change fails', async () => {
+    test('should roll back every change in a non-streaming merge when a later change fails', async () => {
       branchSlug = 'txnmerge'
 
       const branchDoc = await payload.create({
@@ -4463,7 +6747,7 @@ describe('Branching', () => {
       expect(remainingChanges.docs).toHaveLength(3)
     })
 
-    it('should roll back every change in a discard when a later change fails', async () => {
+    test('should roll back every change in a discard when a later change fails', async () => {
       branchSlug = 'txndiscard'
 
       const branchDoc = await payload.create({
@@ -4539,6 +6823,194 @@ describe('Branching', () => {
 
       expect(remainingChanges.docs).toHaveLength(3)
     })
+
+    test('should leave a caller-owned transaction open when merge fails', async () => {
+      branchSlug = 'caller-owned-merge'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Caller-owned merge', slug: branchSlug },
+      })
+      const mainDoc = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Caller-owned original' },
+      })
+
+      await payload.update({
+        id: mainDoc.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Caller-owned edited' },
+      })
+
+      const req = await createPayloadRequest({ branch: false, payload })
+      req.transactionID = 'caller-owned-merge-transaction'
+      const rollbackTransactionSpy = vi.spyOn(payload.db, 'rollbackTransaction')
+
+      hookSpy.beforeChange = ({ data }: { data: Record<string, unknown> }) => {
+        if (data.title === 'Caller-owned edited') {
+          throw new Error('Simulated caller-owned merge failure')
+        }
+      }
+
+      try {
+        await expect(
+          payload.branches.merge({ branch: branchSlug, overrideAccess: true, req }),
+        ).rejects.toThrow('Simulated caller-owned merge failure')
+
+        expect(rollbackTransactionSpy).not.toHaveBeenCalled()
+        expect(req.transactionID).toBe('caller-owned-merge-transaction')
+      } finally {
+        hookSpy.beforeChange = undefined
+        rollbackTransactionSpy.mockRestore()
+        delete req.transactionID
+      }
+    })
+
+    test('should leave a caller-owned transaction open when discard fails', async () => {
+      branchSlug = 'caller-owned-discard'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Caller-owned discard', slug: branchSlug },
+      })
+      const mainDoc = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Caller-owned original' },
+      })
+
+      await payload.update({
+        id: mainDoc.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Caller-owned edited' },
+      })
+
+      const shadow = (
+        await payload.find({
+          branch: false,
+          collection: postsSlug,
+          pagination: false,
+          showHiddenFields: true,
+          where: { _branch: { equals: branchSlug } },
+        })
+      ).docs[0]!
+      const req = await createPayloadRequest({ branch: false, payload })
+      req.transactionID = 'caller-owned-discard-transaction'
+      const originalDeleteOne = payload.db.deleteOne.bind(payload.db)
+
+      deleteOneSpy = vi.spyOn(payload.db, 'deleteOne').mockImplementation(async (args: any) => {
+        if (args?.where?.id?.equals === shadow.id) {
+          throw new Error('Simulated caller-owned discard failure')
+        }
+
+        return originalDeleteOne(args)
+      })
+
+      const rollbackTransactionSpy = vi.spyOn(payload.db, 'rollbackTransaction')
+
+      try {
+        await expect(
+          payload.branches.discard({ branch: branchSlug, overrideAccess: true, req }),
+        ).rejects.toThrow('Simulated caller-owned discard failure')
+
+        expect(rollbackTransactionSpy).not.toHaveBeenCalled()
+        expect(req.transactionID).toBe('caller-owned-discard-transaction')
+      } finally {
+        rollbackTransactionSpy.mockRestore()
+        delete req.transactionID
+      }
+    })
+
+    test('should leave a caller-owned transaction open when a global merge fails', async () => {
+      branchSlug = 'caller-owned-global-merge'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Caller-owned global merge', slug: branchSlug },
+      })
+      await payload.updateGlobal({
+        slug: headerGlobalSlug,
+        data: { navLabel: 'Caller-owned global original' },
+      })
+      await payload.updateGlobal({
+        slug: headerGlobalSlug,
+        branch: branchSlug,
+        data: { navLabel: 'Caller-owned global edited' },
+      })
+
+      const req = await createPayloadRequest({ branch: false, payload })
+      req.transactionID = 'caller-owned-global-merge-transaction'
+      const rollbackTransactionSpy = vi.spyOn(payload.db, 'rollbackTransaction')
+
+      hookSpy.headerBeforeOperation = () => {
+        throw new Error('Simulated caller-owned global merge failure')
+      }
+
+      try {
+        await expect(
+          payload.branches.merge({ branch: branchSlug, overrideAccess: true, req }),
+        ).rejects.toThrow('Simulated caller-owned global merge failure')
+
+        expect(rollbackTransactionSpy).not.toHaveBeenCalled()
+        expect(req.transactionID).toBe('caller-owned-global-merge-transaction')
+      } finally {
+        hookSpy.headerBeforeOperation = undefined
+        rollbackTransactionSpy.mockRestore()
+        delete req.transactionID
+
+        await payload.db.deleteBranchGlobal?.({
+          branch: branchSlug,
+          globalSlug: headerGlobalSlug,
+          req: await createPayloadRequest({ branch: false, payload }),
+        })
+        await payload.updateGlobal({
+          slug: headerGlobalSlug,
+          data: { navLabel: 'main label' },
+        })
+      }
+    })
+
+    test('should leave a caller-owned transaction open when a delete merge fails', async () => {
+      branchSlug = 'caller-owned-delete-merge'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Caller-owned delete merge', slug: branchSlug },
+      })
+      const mainDoc = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Caller-owned delete original' },
+      })
+
+      await payload.delete({ id: mainDoc.id, branch: branchSlug, collection: postsSlug })
+
+      const req = await createPayloadRequest({ branch: false, payload })
+      req.transactionID = 'caller-owned-delete-merge-transaction'
+      const originalDeleteOne = payload.db.deleteOne.bind(payload.db)
+
+      deleteOneSpy = vi.spyOn(payload.db, 'deleteOne').mockImplementation(async (args: any) => {
+        if (args?.collection === postsSlug && args?.where?.id?.equals === mainDoc.id) {
+          throw new Error('Simulated caller-owned delete merge failure')
+        }
+
+        return originalDeleteOne(args)
+      })
+
+      const rollbackTransactionSpy = vi.spyOn(payload.db, 'rollbackTransaction')
+
+      try {
+        await expect(
+          payload.branches.merge({ branch: branchSlug, overrideAccess: true, req }),
+        ).rejects.toThrow('Simulated caller-owned delete merge failure')
+
+        expect(rollbackTransactionSpy).not.toHaveBeenCalled()
+        expect(req.transactionID).toBe('caller-owned-delete-merge-transaction')
+      } finally {
+        rollbackTransactionSpy.mockRestore()
+        delete req.transactionID
+      }
+    })
   })
 
   /**
@@ -4547,8 +7019,14 @@ describe('Branching', () => {
    * concurrent first-edits of the same document on the same branch can both
    * pass that check before either write lands, each creating its own row.
    */
-  describe('Fork race safety', () => {
-    afterEach(async () => {
+  test.describe('Fork race safety', () => {
+    test.afterEach(async () => {
+      await payload.db.deleteBranchGlobal?.({
+        branch: 'racebranch',
+        globalSlug: headerGlobalSlug,
+        req: await createPayloadRequest({ branch: false, payload }),
+      })
+
       const rows = await payload.find({ branch: false, collection: postsSlug, pagination: false })
 
       for (const row of rows.docs) {
@@ -4568,7 +7046,7 @@ describe('Branching', () => {
       }
     })
 
-    it('should create exactly one shadow row when two edits race to fork the same document', async () => {
+    test('should create exactly one shadow row when two edits race to fork the same document', async () => {
       await payload.create({
         collection: branchesSlug,
         data: { name: 'Race', slug: 'racebranch' },
@@ -4612,7 +7090,114 @@ describe('Branching', () => {
       expect(changes.docs).toHaveLength(1)
     })
 
-    it('should create exactly one tombstone when two deletes race to remove the same never-forked document', async () => {
+    test('should create exactly one global row when first writes race', async () => {
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Race', slug: 'racebranch' },
+      })
+      await payload.updateGlobal({
+        slug: headerGlobalSlug,
+        data: { navLabel: 'main before race' },
+      })
+
+      await Promise.all(
+        Array.from({ length: 10 }, (_, index) =>
+          payload.updateGlobal({
+            slug: headerGlobalSlug,
+            branch: 'racebranch',
+            data: { navLabel: `race edit ${index}` },
+          }),
+        ),
+      )
+
+      const adapter = payload.db as any
+      const branchRows =
+        adapter.name === 'mongoose'
+          ? await adapter.globals
+              .find({ _branch: 'racebranch', globalType: headerGlobalSlug })
+              .lean()
+          : (
+              await adapter.drizzle.query[adapter.tableNameMap.get(headerGlobalSlug)].findMany()
+            ).filter((row: Record<string, unknown>) => row._branch === 'racebranch')
+
+      expect(branchRows).toHaveLength(1)
+
+      const changes = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: 'racebranch' } },
+      })
+
+      expect(changes.docs).toHaveLength(1)
+    })
+
+    test.options(
+      'should preserve disjoint scalar global changes when first writes race',
+      { db: 'drizzle' },
+      async () => {
+        await payload.create({
+          collection: branchesSlug,
+          data: { name: 'Race', slug: 'racebranch' },
+        })
+        await payload.updateGlobal({
+          slug: headerGlobalSlug,
+          data: {
+            navItems: [{ label: 'main item' }],
+            navLabel: 'main label',
+            secondaryLabel: 'main secondary',
+          },
+        })
+
+        const updateGlobal = payload.db.updateGlobal.bind(payload.db)
+        let releaseWrites!: () => void
+        const writesReady = new Promise<void>((resolve) => {
+          releaseWrites = resolve
+        })
+        let waitingWrites = 0
+        const updateGlobalSpy = vi
+          .spyOn(payload.db, 'updateGlobal')
+          .mockImplementation(async (args) => {
+            waitingWrites += 1
+            if (waitingWrites === 2) {
+              releaseWrites()
+            }
+
+            await writesReady
+
+            return updateGlobal(args)
+          })
+
+        try {
+          await Promise.all([
+            payload.updateGlobal({
+              slug: headerGlobalSlug,
+              branch: 'racebranch',
+              data: { navLabel: 'branch label' },
+            }),
+            payload.updateGlobal({
+              slug: headerGlobalSlug,
+              branch: 'racebranch',
+              data: { secondaryLabel: 'branch secondary' },
+            }),
+          ])
+        } finally {
+          updateGlobalSpy.mockRestore()
+        }
+
+        const onBranch = await payload.findGlobal({
+          slug: headerGlobalSlug,
+          branch: 'racebranch',
+        })
+
+        expect(onBranch).toMatchObject({
+          navItems: [{ label: 'main item' }],
+          navLabel: 'branch label',
+          secondaryLabel: 'branch secondary',
+        })
+      },
+    )
+
+    test('should create exactly one tombstone when two deletes race to remove the same never-forked document', async () => {
       await payload.create({
         collection: branchesSlug,
         data: { name: 'Race', slug: 'racebranch' },
@@ -4666,7 +7251,7 @@ describe('Branching', () => {
    * `waitUntil` and the queueing user — so these cover what merging adds to that: the
    * permission re-check at fire time, and a branch that moved in between.
    */
-  describe('Scheduled merge', () => {
+  test.describe('Scheduled merge', () => {
     let mainDocID: number | string
     // Captured rather than looked up by slug: `slug` de-duplicates against existing
     // branches, so a leftover row would silently rename this one and every assertion
@@ -4687,10 +7272,12 @@ describe('Branching', () => {
         id: (
           await payload.jobs.queue({
             input: { branch: branchSlug, ...input },
+            overrideAccess: true,
             task: 'scheduleMerge',
             waitUntil: new Date(Date.now() - 60_000),
           })
         ).id,
+        overrideAccess: true,
       })
 
     const readBranch = async () => payload.findByID({ id: branchID, collection: branchesSlug })
@@ -4742,7 +7329,7 @@ describe('Branching', () => {
         })
       ).docs[0]!
 
-    beforeEach(async () => {
+    test.beforeEach(async () => {
       const branchDoc = await payload.create({
         collection: branchesSlug,
         data: { name: 'Scheduled', slug: 'scheduled' },
@@ -4766,7 +7353,7 @@ describe('Branching', () => {
       })
     })
 
-    afterEach(async () => {
+    test.afterEach(async () => {
       const rows = await payload.find({ branch: false, collection: postsSlug, pagination: false })
 
       for (const row of rows.docs) {
@@ -4792,13 +7379,33 @@ describe('Branching', () => {
       for (const job of jobs.docs) {
         await payload.delete({ id: job.id, collection: 'payload-jobs' })
       }
+
+      const privateBranches = await payload.find({
+        collection: branchesSlug,
+        pagination: false,
+        where: { slug: { equals: 'private-visibility' } },
+      })
+
+      for (const privateBranch of privateBranches.docs) {
+        await payload.delete({ id: privateBranch.id, collection: branchesSlug })
+      }
+
+      const restrictedUsers = await payload.find({
+        collection: 'users',
+        pagination: false,
+        where: { email: { equals: 'restricted-canceller@example.com' } },
+      })
+
+      for (const restrictedUser of restrictedUsers.docs) {
+        await payload.delete({ id: restrictedUser.id, collection: 'users' })
+      }
     })
 
-    it('should register the scheduleMerge task when branching is enabled', () => {
+    test('should register the scheduleMerge task when branching is enabled', () => {
       expect(payload.config.jobs.tasks.map((task) => task.slug)).toContain('scheduleMerge')
     })
 
-    it('should apply the branch when the job runs', async () => {
+    test('should apply the branch when the job runs', async () => {
       const user = await asDevUser()
 
       await runScheduledMerge({ user: user.id })
@@ -4808,7 +7415,7 @@ describe('Branching', () => {
       expect(onMain.title).toBe('edited on branch')
     })
 
-    it('should close the branch when the schedule asked for it', async () => {
+    test('should close the branch when the schedule asked for it', async () => {
       const user = await asDevUser()
 
       await runScheduledMerge({ closeBranch: true, user: user.id })
@@ -4818,17 +7425,18 @@ describe('Branching', () => {
       expect(await mergeOutcome()).toMatchObject({ pendingChanges: [], status: 'closed' })
     })
 
-    it('should refuse to merge when the queueing user no longer resolves', async () => {
+    test('should refuse to merge when the queueing user no longer resolves', async () => {
       // Scheduled publish falls back to `overrideAccess` here. A merge writes across
       // production, so the same fallback would turn a deleted account into an
       // unchecked one — this fails instead.
       const job = await payload.jobs.queue({
         input: { branch: branchSlug, user: 999999 },
+        overrideAccess: true,
         task: 'scheduleMerge',
         waitUntil: new Date(Date.now() - 60_000),
       })
 
-      await payload.jobs.runByID({ id: job.id })
+      await payload.jobs.runByID({ id: job.id, overrideAccess: true })
 
       const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
 
@@ -4842,7 +7450,57 @@ describe('Branching', () => {
       expect(ran.totalTried).toBeGreaterThan(0)
     })
 
-    it('should skip queued changes that no longer exist', async () => {
+    test('should not cancel a scheduled merge for an inaccessible branch', async () => {
+      const privateBranch = await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Private visibility', slug: 'private-visibility' },
+      })
+      const restrictedUser = await payload.create({
+        collection: 'users',
+        data: { email: 'restricted-canceller@example.com', password: 'test' },
+      })
+      const job = await payload.jobs.queue({
+        input: { branch: privateBranch.slug, user: restrictedUser.id },
+        overrideAccess: true,
+        task: 'scheduleMerge',
+        waitUntil: new Date(Date.now() + 60_000),
+      })
+      const req = await createPayloadRequest({
+        payload,
+        user: { ...restrictedUser, collection: 'users' },
+      })
+
+      await scheduleMergeHandler({ deleteID: job.id, req })
+
+      const retainedJob = await payload.findByID({
+        id: job.id,
+        collection: 'payload-jobs',
+        disableErrors: true,
+      })
+
+      expect(retainedJob).not.toBeNull()
+    })
+
+    test('should not cancel a job that is not a scheduled merge', async () => {
+      const user = await asDevUser()
+      const unrelatedJob = await payload.db.create({
+        collection: 'payload-jobs',
+        data: { input: {}, taskSlug: 'inline' },
+      })
+      const req = await createPayloadRequest({ payload, user })
+
+      await scheduleMergeHandler({ deleteID: unrelatedJob.id, req })
+
+      const retainedJob = await payload.findByID({
+        id: unrelatedJob.id,
+        collection: 'payload-jobs',
+        disableErrors: true,
+      })
+
+      expect(retainedJob).not.toBeNull()
+    })
+
+    test('should skip queued changes that no longer exist', async () => {
       const user = await asDevUser()
 
       const changes = await payload.find({
@@ -4861,7 +7519,7 @@ describe('Branching', () => {
       expect(onMain.title).toBe('edited on branch')
     })
 
-    it('should clear the branch progress marker when the job finishes', async () => {
+    test('should clear the branch progress marker when the job finishes', async () => {
       const user = await asDevUser()
 
       await runScheduledMerge({ user: user.id })
@@ -4871,11 +7529,11 @@ describe('Branching', () => {
     })
   })
 
-  describe('Merge REST endpoint', () => {
+  test.describe('Merge REST endpoint', () => {
     let branchID: number | string
     let docID: number | string
 
-    beforeEach(async () => {
+    test.beforeEach(async () => {
       const branchDoc = await payload.create({
         collection: branchesSlug,
         data: { name: 'REST merge', slug: 'restmerge' },
@@ -4896,7 +7554,7 @@ describe('Branching', () => {
       })
     })
 
-    afterEach(async () => {
+    test.afterEach(async () => {
       const rows = await payload.find({ branch: false, collection: postsSlug, pagination: false })
 
       for (const row of rows.docs) {
@@ -4921,7 +7579,7 @@ describe('Branching', () => {
     // The create-promotion write went through `updateByIDOperation`, which takes no
     // `branch` argument and reads the request, so with `?branch=` the promotion resolved
     // against the branch it was merging and silently did nothing.
-    it('should merge even when the triggering request names the branch', async () => {
+    test('should merge even when the triggering request names the branch', async () => {
       const created = await payload.create({
         branch: 'restmerge',
         collection: postsSlug,
@@ -4944,7 +7602,7 @@ describe('Branching', () => {
       expect(updated.title).toBe('edited on branch')
     })
 
-    it('should reject an unauthenticated merge', async () => {
+    test('should reject an unauthenticated merge', async () => {
       const res = await restClient.POST(`/${branchesSlug}/${branchID}/merge`, {
         // NextRESTClient attaches its stored token unless auth is disabled.
         auth: false,
@@ -4958,7 +7616,7 @@ describe('Branching', () => {
       expect(onMain.title).toBe('original on main')
     })
 
-    it('should report the pending changes on a dryRun without mutating', async () => {
+    test('should report the pending changes on a dryRun without mutating', async () => {
       const res = await restClient.POST(`/${branchesSlug}/${branchID}/merge`, {
         body: JSON.stringify({ dryRun: true }),
         headers: { Authorization: `JWT ${token}` },
@@ -4974,7 +7632,7 @@ describe('Branching', () => {
       expect(onMain.title).toBe('original on main')
     })
 
-    it('should apply the merge when authenticated', async () => {
+    test('should apply the merge when authenticated', async () => {
       const res = await restClient.POST(`/${branchesSlug}/${branchID}/merge`, {
         body: JSON.stringify({}),
         headers: { Authorization: `JWT ${token}` },
@@ -4989,7 +7647,7 @@ describe('Branching', () => {
       expect(onMain.title).toBe('edited on branch')
     })
 
-    it('should enforce access as the requesting user rather than overriding it', async () => {
+    test('should enforce access as the requesting user rather than overriding it', async () => {
       const editor = await payload.create({
         collection: 'users',
         data: { email: 'resteditor@example.com', password: 'test' },
@@ -5034,7 +7692,7 @@ describe('Branching', () => {
       await payload.delete({ id: editor.id, collection: 'users' })
     })
 
-    it('should return 404 for an unknown branch', async () => {
+    test('should return 404 for an unknown branch', async () => {
       const res = await restClient.POST(`/${branchesSlug}/999999/merge`, {
         body: JSON.stringify({}),
         headers: { Authorization: `JWT ${token}` },
@@ -5048,7 +7706,7 @@ describe('Branching', () => {
      * needs to report where it is. Streaming the loop it already runs avoids
      * inventing a job and a polling endpoint to carry that state.
      */
-    describe('streamed progress', () => {
+    test.describe('streamed progress', () => {
       /** Parses the NDJSON body into the events the client would see. */
       const readEvents = (body: string) =>
         body
@@ -5056,7 +7714,7 @@ describe('Branching', () => {
           .filter(Boolean)
           .map((line) => JSON.parse(line) as Record<string, any>)
 
-      it('should stream one progress event per change and finish with the result', async () => {
+      test('should stream one progress event per change and finish with the result', async () => {
         const second = await payload.create({
           branch: 'restmerge',
           collection: postsSlug,
@@ -5090,7 +7748,7 @@ describe('Branching', () => {
         expect(created.title).toBe('created on branch')
       })
 
-      it('should stream only the selected changes', async () => {
+      test('should stream only the selected changes', async () => {
         await payload.create({
           branch: 'restmerge',
           collection: postsSlug,
@@ -5127,7 +7785,7 @@ describe('Branching', () => {
         expect(remaining.docs[0]!.operation).toBe('create')
       })
 
-      it('should enforce access on the streamed path too', async () => {
+      test('should enforce access on the streamed path too', async () => {
         const res = await restClient.POST(`/${branchesSlug}/${branchID}/merge`, {
           auth: false,
           body: JSON.stringify({ stream: true }),
@@ -5140,7 +7798,7 @@ describe('Branching', () => {
         expect(onMain.title).toBe('original on main')
       })
 
-      it('should fall back to a plain JSON response for a dryRun', async () => {
+      test('should fall back to a plain JSON response for a dryRun', async () => {
         const res = await restClient.POST(`/${branchesSlug}/${branchID}/merge`, {
           body: JSON.stringify({ dryRun: true, stream: true }),
           headers: { Authorization: `JWT ${token}` },

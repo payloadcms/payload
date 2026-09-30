@@ -3,6 +3,7 @@ import type { Insert } from './types.js'
 
 export const insert: Insert = async function insert({
   db,
+  onConflictDoNothing,
   onConflictDoUpdate,
   tableName,
   values,
@@ -10,7 +11,13 @@ export const insert: Insert = async function insert({
   const table = this.tables[tableName]
   let result
 
-  if (onConflictDoUpdate) {
+  if (onConflictDoNothing) {
+    result = await (db as TransactionPg)
+      .insert(table)
+      .values(values)
+      .onConflictDoNothing(onConflictDoNothing)
+      .returning()
+  } else if (onConflictDoUpdate) {
     result = await (db as TransactionPg)
       .insert(table)
       .values(values)

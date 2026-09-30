@@ -2,6 +2,7 @@ import type {
   CollectionConfig,
   CollectionSlug,
   DataFromCollectionSlug,
+  JsonObject,
   PayloadRequest,
 } from 'payload'
 
@@ -39,6 +40,12 @@ export type ImportResult = {
   updated: number
 }
 
+/** Export document or unsaved form values. `id` indicates a saved document. Treat as read-only. */
+export type ExportDoc = { id?: number | string } & JsonObject
+
+/** Import document or unsaved preview form values. `id` indicates a saved document. Treat as read-only. */
+export type ImportDoc = { id?: number | string } & JsonObject
+
 /**
  * Hook called before each export batch is written to file.
  * Receives the transformed batch data and the original DB documents.
@@ -49,6 +56,8 @@ export type ExportBeforeHook<TSlug extends CollectionSlug = CollectionSlug> = (a
   batchNumber: number
   /** Transformed batch — flat rows for CSV, nested docs for JSON. Modify and return this. */
   data: Record<string, unknown>[]
+  /** See {@link ExportDoc}. */
+  exportDoc: ExportDoc
   /** Export format. Open-ended to support custom formats in the future. */
   format: 'csv' | 'json' | ({} & string)
   /**
@@ -74,6 +83,8 @@ export type ExportAfterHook = (args: {
   batchNumber: number
   /** The batch data that was written */
   data: Record<string, unknown>[]
+  /** See {@link ExportDoc}. */
+  exportDoc: ExportDoc
   /** Export format */
   format: 'csv' | 'json' | ({} & string)
   /** Raw DB documents before transformation */
@@ -100,6 +111,8 @@ export type ImportBeforeHook<TSlug extends CollectionSlug = CollectionSlug> = (a
   data: Partial<DataFromCollectionSlug<TSlug>>[]
   /** Import format. Open-ended to support custom formats in the future. */
   format: 'csv' | 'json' | ({} & string)
+  /** See {@link ImportDoc}. */
+  importDoc: ImportDoc
   /** Raw parsed file rows before unflattening. Read-only reference. */
   originalData: Record<string, unknown>[]
   req: PayloadRequest
@@ -116,6 +129,8 @@ export type ImportAfterHook = (args: {
   batchNumber: number
   /** Import format */
   format: 'csv' | 'json' | ({} & string)
+  /** See {@link ImportDoc}. */
+  importDoc: ImportDoc
   /**
    * Raw parsed file rows for this batch before unflattening and before-hook
    * transformation. For CSV this is the flat key/value row; for JSON this is

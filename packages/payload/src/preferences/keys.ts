@@ -11,7 +11,7 @@ export const PREFERENCE_KEYS = {
    *
    * Deliberately one key rather than one per concern. An admin render needs all
    * of it, so a single key resolves the lot in a single query — see
-   * `getAdminPreferences` in `@payloadcms/ui`. New globally-scoped admin state
+   * `getAdminPreferences` in `payload`. New globally-scoped admin state
    * belongs here rather than in a key of its own.
    */
   ADMIN: 'admin',

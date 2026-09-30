@@ -1,11 +1,19 @@
 import fs from 'fs/promises'
+import { status as httpStatus } from 'http-status'
+import path from 'path'
 
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { FileData, FileToSave } from './types.js'
 
-import { ErrorDeletingFile } from '../errors/index.js'
+import { APIError, ErrorDeletingFile } from '../errors/index.js'
+import {
+  beginDeferredCleanupScopeIfNeeded,
+  clearDeferredCleanupScope,
+  flushDeferredCleanupScope,
+  scheduleAfterTransactionCommit,
+} from '../utilities/transactionCallbacks.js'
 import { fileExists } from './fileExists.js'
 
 type Args = {
@@ -27,35 +35,131 @@ export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
   if (!collectionConfig.upload) {
     return
   }
-  if (overrideDelete || files.length > 0) {
-    const { staticDir: staticPath } = collectionConfig.upload
+  const cleanupScope = await beginDeferredCleanupScopeIfNeeded({ req })
 
-    const fileToDelete = `${staticPath}/${doc.filename as string}`
+  try {
+    if (overrideDelete || files.length > 0) {
+      const { staticDir: staticPath } = collectionConfig.upload
 
-    try {
-      if (await fileExists(fileToDelete)) {
-        await fs.unlink(fileToDelete)
-      }
-    } catch (ignore) {
-      throw new ErrorDeletingFile(req.t)
-    }
+      const fileToDelete = resolveFilePath({
+        filename: doc.filename as string,
+        staticPath,
+      })
 
-    if (doc.sizes) {
-      const sizes: FileData[] = Object.values(doc.sizes)
-      // Since forEach will not wait until unlink is finished it could
-      // happen that two operations will try to delete the same file.
-      // To avoid this it is recommended to use "sync" instead
+      await scheduleFileDeletion({ filePath: fileToDelete, req, staticPath })
 
-      for (const size of sizes) {
-        const sizeToDelete = `${staticPath}/${size.filename}`
-        try {
-          if (await fileExists(sizeToDelete)) {
-            await fs.unlink(sizeToDelete)
-          }
-        } catch (ignore) {
-          throw new ErrorDeletingFile(req.t)
+      if (doc.sizes) {
+        const sizes: FileData[] = Object.values(doc.sizes)
+        // Since forEach will not wait until unlink is finished it could
+        // happen that two operations will try to delete the same file.
+        // To avoid this it is recommended to use "sync" instead
+
+        for (const size of sizes) {
+          const sizeToDelete = resolveFilePath({ filename: size.filename, staticPath })
+          await scheduleFileDeletion({ filePath: sizeToDelete, req, staticPath })
         }
       }
     }
+
+    if (cleanupScope) {
+      await flushDeferredCleanupScope({ req, scope: cleanupScope })
+    }
+  } catch (error) {
+    if (cleanupScope) {
+      clearDeferredCleanupScope({ req, scope: cleanupScope })
+    }
+
+    throw error
   }
+}
+
+const scheduleFileDeletion = async ({
+  filePath,
+  req,
+  staticPath,
+}: {
+  filePath?: string
+  req: PayloadRequest
+  staticPath?: string
+}): Promise<void> => {
+  try {
+    await assertFileDeletionIsSafe({ filePath, staticPath })
+  } catch (ignore) {
+    throw new ErrorDeletingFile(req.t)
+  }
+
+  await scheduleAfterTransactionCommit({
+    callback: async () => {
+      try {
+        await deleteFile({ filePath, staticPath })
+      } catch (ignore) {
+        throw new ErrorDeletingFile(req.t)
+      }
+    },
+    req,
+  })
+}
+
+const resolveFilePath = ({
+  filename,
+  staticPath,
+}: {
+  filename?: null | string
+  staticPath?: string
+}) => {
+  if (!filename || !staticPath) {
+    return
+  }
+
+  const resolvedDir = path.resolve(staticPath)
+  const filePath = path.resolve(resolvedDir, filename)
+
+  if (!isWithinDirectory({ directory: resolvedDir, target: filePath })) {
+    throw new APIError('Invalid filename.', httpStatus.BAD_REQUEST)
+  }
+
+  return filePath
+}
+
+const deleteFile = async ({ filePath, staticPath }: { filePath?: string; staticPath?: string }) => {
+  if (!(await assertFileDeletionIsSafe({ filePath, staticPath }))) {
+    return
+  }
+
+  await fs.unlink(filePath!)
+}
+
+const assertFileDeletionIsSafe = async ({
+  filePath,
+  staticPath,
+}: {
+  filePath?: string
+  staticPath?: string
+}): Promise<boolean> => {
+  if (!filePath || !staticPath || !(await fileExists(filePath))) {
+    return false
+  }
+
+  const [resolvedDir, resolvedParent] = await Promise.all([
+    fs.realpath(staticPath),
+    fs.realpath(path.dirname(filePath)),
+  ])
+  const resolvedTarget = path.join(resolvedParent, path.basename(filePath))
+
+  if (!isWithinDirectory({ directory: resolvedDir, target: resolvedTarget })) {
+    throw new APIError('Invalid filename.', httpStatus.BAD_REQUEST)
+  }
+
+  return true
+}
+
+const isWithinDirectory = ({ directory, target }: { directory: string; target: string }) => {
+  const relativePath = path.relative(directory, target)
+
+  return (
+    relativePath === '' ||
+    (relativePath !== '..' &&
+      !relativePath.startsWith(`..${path.sep}`) &&
+      !path.isAbsolute(relativePath))
+  )
 }

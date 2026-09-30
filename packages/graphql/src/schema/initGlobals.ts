@@ -90,6 +90,9 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
           scope: 'docAccess',
           typeSuffix: 'DocAccess',
         }),
+        args: {
+          branch: { type: GraphQLString },
+        },
         resolve: docAccessResolver(global),
       }
     }
@@ -166,6 +169,7 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
             graphqlResult.globals.graphQL[slug].versionType,
           ),
           args: {
+            branch: { type: GraphQLString },
             where: {
               type: buildWhereInputType({
                 name: `versions${formattedName}`,

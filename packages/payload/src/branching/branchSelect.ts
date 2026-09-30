@@ -1,8 +1,9 @@
 import type { PayloadRequest, SelectType } from '../types/index.js'
 
 import { getSelectMode } from '../utilities/getSelectMode.js'
+import { branchGlobalNeedsBothRows } from './globals.js'
 import { resolveBranch } from './resolveBranch.js'
-import { branchDocIDField, branchParentField, MAIN_BRANCH } from './types.js'
+import { branchDocIDField, branchField, branchParentField, MAIN_BRANCH } from './types.js'
 
 type ActiveArgs = {
   branch?: false | string
@@ -39,14 +40,14 @@ type SelectArgs = {
   select?: SelectType
 } & ActiveArgs
 
-const withBranchField = ({
-  branch,
-  collectionSlug,
+const withRequiredSelectField = ({
   field,
-  req,
   select,
-}: { field: string } & SelectArgs): SelectType | undefined => {
-  if (!select || !isBranchProjectionActive({ branch, collectionSlug, req })) {
+}: {
+  field: string
+  select?: SelectType
+}): SelectType | undefined => {
+  if (!select) {
     return select
   }
 
@@ -72,6 +73,20 @@ const withBranchField = ({
   return { ...select, [field]: true } as SelectType
 }
 
+const withBranchField = ({
+  branch,
+  collectionSlug,
+  field,
+  req,
+  select,
+}: { field: string } & SelectArgs): SelectType | undefined => {
+  if (!isBranchProjectionActive({ branch, collectionSlug, req })) {
+    return select
+  }
+
+  return withRequiredSelectField({ field, select })
+}
+
 /**
  * Keeps `_branchDocID` in a collection read's `select`.
  *
@@ -91,3 +106,22 @@ export const withBranchIDSelect = (args: SelectArgs): SelectType | undefined =>
  */
 export const withBranchVersionSelect = (args: SelectArgs): SelectType | undefined =>
   withBranchField({ ...args, field: branchParentField })
+
+/** Keeps `_branch` available while choosing between a branch global and main. */
+export const withBranchGlobalSelect = ({
+  branch,
+  globalSlug,
+  req,
+  select,
+}: {
+  branch?: false | string
+  globalSlug: string
+  req?: Partial<PayloadRequest>
+  select?: SelectType
+}): SelectType | undefined => {
+  if (!branchGlobalNeedsBothRows({ branch, globalSlug, req })) {
+    return select
+  }
+
+  return withRequiredSelectField({ field: branchField, select })
+}

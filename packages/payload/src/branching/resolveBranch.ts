@@ -35,7 +35,7 @@ const getBranchingConfig = (req: PayloadRequest): SanitizedBranchingConfig | und
  * costs nothing beyond this function.
  *
  * Where the admin UI's persisted selection turns into that argument is the
- * admin UI's business (`initReq`), the same division `locale` already uses.
+ * admin UI's business (`initAdminContext`), the same division `locale` already uses.
  *
  * Precedence, highest first:
  *   1. explicit Local API argument (`req.branch`, set by the caller)
@@ -56,7 +56,7 @@ export const resolveBranch = (req: PayloadRequest): string => {
     return existing.branch
   }
 
-  // The bypass sentinel `createLocalReq` sets for `branch: false`. Honoured here and not
+  // The bypass sentinel `createPayloadRequest` sets for `branch: false`. Honoured here and not
   // only at the database layer, because a request told to ignore branching must not
   // report a branch to anything that asks — a `branch: false` request built from an HTTP
   // request still carries `?branch=` in its query, and falling through to it made the
@@ -361,7 +361,7 @@ export const rememberBranchRowID = ({
 export const withoutBranch = (req: PayloadRequest): PayloadRequest => {
   const isolated = isolateBranchState(req)
 
-  // The same sentinel `createLocalReq({ branch: false })` sets, rather than a `branch`
+  // The same sentinel `createPayloadRequest({ branch: false })` sets, rather than a `branch`
   // of our own: `req.branch` alone is not enough, because resolution falls back to the
   // query string behind it.
   isolated.branch = undefined
@@ -402,4 +402,17 @@ export const peekBranchManifest = (req: PayloadRequest): Map<string, (number | s
   const state = context?.[stateKey] as BranchState | undefined
 
   return state?.manifest ?? new Map()
+}
+
+/**
+ * The branch deletions already loaded for this request, without loading them.
+ *
+ * Version join builders are synchronous. They run after the top-level branch query has loaded the
+ * manifest, which also records deletions, so they can reuse that state without another query.
+ */
+export const peekBranchDeletions = (req: PayloadRequest): Map<string, (number | string)[]> => {
+  const context = req?.context as Record<string, unknown> | undefined
+  const state = context?.[stateKey] as BranchState | undefined
+
+  return state?.deleted ?? new Map()
 }

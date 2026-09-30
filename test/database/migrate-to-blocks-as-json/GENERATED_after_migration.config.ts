@@ -1,7 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { buildConfig } from 'payload'
-
 import './payload-types.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)

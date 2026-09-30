@@ -101,7 +101,6 @@ export const updateMany: UpdateMany = async function updateMany(
   const findOptions: QueryOptions = {
     ...baseOptions,
     lean: true,
-    // Mongoose 9 deprecated `new`, and the warning it logs fails any e2e test that saves.
     projection: buildProjectionFromSelect({
       adapter: this,
       fields: collectionConfig.flattenedFields,

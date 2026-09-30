@@ -93,7 +93,9 @@ export interface Config {
   };
   collectionsJoins: {
     categories: {
+      pages: 'pages';
       posts: 'posts';
+      content: 'posts' | 'pages';
     };
   };
   collectionsSelect: {
@@ -128,11 +130,13 @@ export interface Config {
   globals: {
     header: Header;
     homepage: Homepage;
+    'uninitialized-global': UninitializedGlobal;
     'payload-jobs-stats': PayloadJobsStat;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     homepage: HomepageSelect<false> | HomepageSelect<true>;
+    'uninitialized-global': UninitializedGlobalSelect<false> | UninitializedGlobalSelect<true>;
     'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
   };
   locale: 'en' | 'es';
@@ -179,10 +183,21 @@ export interface Post {
   id: string;
   title?: string | null;
   order?: number | null;
+  confidential?: string | null;
+  computedDefault?: string | null;
+  internalNote?: string | null;
   category?: (string | null) | Category;
   _branch: string;
   _branchDocID?: (string | null) | Post;
   _branchOp?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -193,14 +208,41 @@ export interface Post {
 export interface Category {
   id: string;
   name?: string | null;
+  pages?: {
+    docs?: (string | Page)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   posts?: {
     docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  content?: {
+    docs?: (
+      | {
+          relationTo?: 'posts';
+          value: string | Post;
+        }
+      | {
+          relationTo?: 'pages';
+          value: string | Page;
+        }
+    )[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
   _branch: string;
   _branchDocID?: (string | null) | Category;
   _branchOp?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -211,12 +253,55 @@ export interface Category {
 export interface Page {
   id: string;
   title?: string | null;
+  category?: (string | null) | Category;
   _branch: string;
   _branchDocID?: (string | null) | Page;
   _branchOp?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -228,6 +313,14 @@ export interface Media {
   _branch: string;
   _branchDocID?: (string | null) | Media;
   _branchOp?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -250,6 +343,14 @@ export interface UniqueDoc {
   _branch: string;
   _branchDocID?: (string | null) | UniqueDoc;
   _branchOp?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -263,6 +364,14 @@ export interface NumericIdDoc {
   _branch: string;
   _branchDocID?: (number | null) | NumericIdDoc;
   _branchOp?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -276,6 +385,14 @@ export interface RestrictedDoc {
   _branch: string;
   _branchDocID?: (string | null) | RestrictedDoc;
   _branchOp?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -290,6 +407,14 @@ export interface WhereAccessDoc {
   _branch: string;
   _branchDocID?: (string | null) | WhereAccessDoc;
   _branchOp?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -303,6 +428,14 @@ export interface PublicDoc {
   _branch: string;
   _branchDocID?: (string | null) | PublicDoc;
   _branchOp?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -317,6 +450,14 @@ export interface MaxVersionsDoc {
   _branch: string;
   _branchDocID?: (string | null) | MaxVersionsDoc;
   _branchOp?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -331,6 +472,14 @@ export interface AutosaveDoc {
   _branch: string;
   _branchDocID?: (string | null) | AutosaveDoc;
   _branchOp?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -342,10 +491,27 @@ export interface AutosaveDoc {
 export interface LocalizedDoc {
   id: string;
   title?: string | null;
+  restrictedHidden?: string | null;
+  restrictedSelectedOut?: string | null;
+  items?:
+    | {
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  computedDefault?: string | null;
   shared?: string | null;
   _branch: string;
   _branchDocID?: (string | null) | LocalizedDoc;
   _branchOp?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -360,6 +526,7 @@ export interface NestedDoc {
   items?:
     | {
         label?: string | null;
+        note?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -367,6 +534,14 @@ export interface NestedDoc {
   _branch: string;
   _branchDocID?: (string | null) | NestedDoc;
   _branchOp?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -387,6 +562,14 @@ export interface Hero {
 export interface ExcludedDoc {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -406,31 +589,6 @@ export interface PayloadKv {
     | number
     | boolean
     | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -554,6 +712,14 @@ export interface PayloadBranch {
   status?: ('open' | 'merging' | 'merged' | 'closed') | null;
   mergedAt?: string | null;
   mergeProgress?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -623,6 +789,14 @@ export interface PayloadBranchChange {
   operation: 'create' | 'update' | 'delete';
   baseUpdatedAt?: string | null;
   baseVersionID?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -634,6 +808,7 @@ export interface PayloadBranchMerge {
   id: string;
   branch: string;
   mergedAt: string;
+  mergedByCollection?: string | null;
   mergedByID?: string | null;
   mergedByLabel?: string | null;
   changes?:
@@ -664,6 +839,14 @@ export interface PayloadBranchMerge {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -783,10 +966,15 @@ export interface PayloadMigration {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   order?: T;
+  confidential?: T;
+  computedDefault?: T;
+  internalNote?: T;
   category?: T;
   _branch?: T;
   _branchDocID?: T;
   _branchOp?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -796,9 +984,12 @@ export interface PostsSelect<T extends boolean = true> {
  */
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
+  category?: T;
   _branch?: T;
   _branchDocID?: T;
   _branchOp?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -809,10 +1000,14 @@ export interface PagesSelect<T extends boolean = true> {
  */
 export interface CategoriesSelect<T extends boolean = true> {
   name?: T;
+  pages?: T;
   posts?: T;
+  content?: T;
   _branch?: T;
   _branchDocID?: T;
   _branchOp?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -825,6 +1020,8 @@ export interface MediaSelect<T extends boolean = true> {
   _branch?: T;
   _branchDocID?: T;
   _branchOp?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -846,6 +1043,8 @@ export interface UniqueDocsSelect<T extends boolean = true> {
   _branch?: T;
   _branchDocID?: T;
   _branchOp?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -859,6 +1058,8 @@ export interface NumericIdDocsSelect<T extends boolean = true> {
   _branch?: T;
   _branchDocID?: T;
   _branchOp?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -871,6 +1072,8 @@ export interface RestrictedDocsSelect<T extends boolean = true> {
   _branch?: T;
   _branchDocID?: T;
   _branchOp?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -884,6 +1087,8 @@ export interface WhereAccessDocsSelect<T extends boolean = true> {
   _branch?: T;
   _branchDocID?: T;
   _branchOp?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -896,6 +1101,8 @@ export interface PublicDocsSelect<T extends boolean = true> {
   _branch?: T;
   _branchDocID?: T;
   _branchOp?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -909,6 +1116,8 @@ export interface MaxVersionsDocsSelect<T extends boolean = true> {
   _branch?: T;
   _branchDocID?: T;
   _branchOp?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -922,6 +1131,8 @@ export interface AutosaveDocsSelect<T extends boolean = true> {
   _branch?: T;
   _branchDocID?: T;
   _branchOp?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -932,10 +1143,21 @@ export interface AutosaveDocsSelect<T extends boolean = true> {
  */
 export interface LocalizedDocsSelect<T extends boolean = true> {
   title?: T;
+  restrictedHidden?: T;
+  restrictedSelectedOut?: T;
+  items?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
+  computedDefault?: T;
   shared?: T;
   _branch?: T;
   _branchDocID?: T;
   _branchOp?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -950,6 +1172,7 @@ export interface NestedDocsSelect<T extends boolean = true> {
     | T
     | {
         label?: T;
+        note?: T;
         id?: T;
       };
   layout?:
@@ -966,6 +1189,8 @@ export interface NestedDocsSelect<T extends boolean = true> {
   _branch?: T;
   _branchDocID?: T;
   _branchOp?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -975,6 +1200,8 @@ export interface NestedDocsSelect<T extends boolean = true> {
  */
 export interface ExcludedDocsSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -991,6 +1218,8 @@ export interface PayloadKvSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -998,6 +1227,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -1059,6 +1289,8 @@ export interface PayloadBranchesSelect<T extends boolean = true> {
   status?: T;
   mergedAt?: T;
   mergeProgress?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1075,6 +1307,8 @@ export interface PayloadBranchChangesSelect<T extends boolean = true> {
   operation?: T;
   baseUpdatedAt?: T;
   baseVersionID?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1085,6 +1319,7 @@ export interface PayloadBranchChangesSelect<T extends boolean = true> {
 export interface PayloadBranchMergesSelect<T extends boolean = true> {
   branch?: T;
   mergedAt?: T;
+  mergedByCollection?: T;
   mergedByID?: T;
   mergedByLabel?: T;
   changes?:
@@ -1099,6 +1334,8 @@ export interface PayloadBranchMergesSelect<T extends boolean = true> {
         after?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1142,6 +1379,14 @@ export interface Header {
   id: string;
   navLabel?: string | null;
   _branch: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1152,8 +1397,36 @@ export interface Header {
 export interface Homepage {
   id: string;
   heroTitle?: string | null;
+  localizedTitle?: string | null;
   _branch: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uninitialized-global".
+ */
+export interface UninitializedGlobal {
+  id: string;
+  branchValue?: string | null;
+  _branch: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1182,6 +1455,8 @@ export interface PayloadJobsStat {
 export interface HeaderSelect<T extends boolean = true> {
   navLabel?: T;
   _branch?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1192,8 +1467,24 @@ export interface HeaderSelect<T extends boolean = true> {
  */
 export interface HomepageSelect<T extends boolean = true> {
   heroTitle?: T;
+  localizedTitle?: T;
   _branch?: T;
+  createdBy?: T;
+  updatedBy?: T;
   _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uninitialized-global_select".
+ */
+export interface UninitializedGlobalSelect<T extends boolean = true> {
+  branchValue?: T;
+  _branch?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

@@ -21,6 +21,7 @@ import {
   BulkUploadProvider,
   CommandPalette,
   EntityVisibilityProvider,
+  HierarchyProvider,
   MergeBranchProvider,
   DefaultTemplateWrapper as Wrapper,
 } from '../../exports/client/index.js'
@@ -187,53 +188,55 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
 
   return (
     <RenderBranchProvider req={req}>
-      {/* Above both the app header and the page, because the merge modal is mounted
-          exactly once and either can raise it. */}
-      <MergeBranchProvider>
-        <EntityVisibilityProvider visibleEntities={visibleEntities}>
-          <CommandPalette />
-          <BulkUploadProvider modalSlugPrefix={collectionSlug}>
-            <ActionsProvider Actions={Actions} viewKey={viewKey}>
-              {RenderServerComponent({
-                clientProps,
-                Component: CustomHeader,
-                importMap: payload.importMap,
-                serverProps,
-              })}
-              <div style={{ position: 'relative' }}>
-                <Wrapper baseClass={baseClass} className={className}>
-                  {NavComponent}
-                  <div className={`${baseClass}__wrap`}>
-                    <AppHeader
-                      CustomAvatar={
-                        avatar !== 'gravatar' && avatar !== 'default'
-                          ? RenderServerComponent({
-                              Component: avatar.Component,
-                              importMap: payload.importMap,
-                              serverProps,
-                            })
-                          : undefined
-                      }
-                      CustomLogoutButton={
-                        components?.logout?.Button
-                          ? RenderServerComponent({
-                              clientProps,
-                              Component: components.logout.Button,
-                              importMap: payload.importMap,
-                              serverProps,
-                            })
-                          : undefined
-                      }
-                      settingsItemGroups={settingsItemGroups}
-                    />
-                    {children}
-                  </div>
-                </Wrapper>
-              </div>
-            </ActionsProvider>
-          </BulkUploadProvider>
-        </EntityVisibilityProvider>
-      </MergeBranchProvider>
+      <HierarchyProvider>
+        {/* Above both the app header and the page, because the merge modal is mounted
+            exactly once and either can raise it. */}
+        <MergeBranchProvider>
+          <EntityVisibilityProvider visibleEntities={visibleEntities}>
+            <CommandPalette />
+            <BulkUploadProvider modalSlugPrefix={collectionSlug}>
+              <ActionsProvider Actions={Actions} viewKey={viewKey}>
+                {RenderServerComponent({
+                  clientProps,
+                  Component: CustomHeader,
+                  importMap: payload.importMap,
+                  serverProps,
+                })}
+                <div style={{ position: 'relative' }}>
+                  <Wrapper baseClass={baseClass} className={className}>
+                    {NavComponent}
+                    <div className={`${baseClass}__wrap`}>
+                      <AppHeader
+                        CustomAvatar={
+                          avatar !== 'gravatar' && avatar !== 'default'
+                            ? RenderServerComponent({
+                                Component: avatar.Component,
+                                importMap: payload.importMap,
+                                serverProps,
+                              })
+                            : undefined
+                        }
+                        CustomLogoutButton={
+                          components?.logout?.Button
+                            ? RenderServerComponent({
+                                clientProps,
+                                Component: components.logout.Button,
+                                importMap: payload.importMap,
+                                serverProps,
+                              })
+                            : undefined
+                        }
+                        settingsItemGroups={settingsItemGroups}
+                      />
+                      {children}
+                    </div>
+                  </Wrapper>
+                </div>
+              </ActionsProvider>
+            </BulkUploadProvider>
+          </EntityVisibilityProvider>
+        </MergeBranchProvider>
+      </HierarchyProvider>
     </RenderBranchProvider>
   )
 }

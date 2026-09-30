@@ -61,6 +61,8 @@ export const getScheduleMergeTask = ({
         collection: adminUserSlug,
         depth: 0,
         disableErrors: true,
+        overrideAccess: true,
+        req,
       })) as null | User
 
       if (user) {

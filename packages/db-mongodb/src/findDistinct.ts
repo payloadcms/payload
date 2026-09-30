@@ -166,7 +166,8 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
         sortProperty = sortWithoutRelationPrefix
       }
     }
-    relationLookup = rels.reduce<PipelineStage[]>((acc, { fieldPath, relationTo }) => {
+    relationLookup = []
+    for (const { fieldPath, relationTo } of rels) {
       sortAggregation = sortAggregation.filter((each) => {
         if ('$lookup' in each && each.$lookup.as.replace(/^_+/, '') === fieldPath) {
           return false
@@ -174,18 +175,65 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
 
         return true
       })
-      const { Model: foreignModel } = getCollection({ adapter: this, collectionSlug: relationTo })
-      acc.push({
+      const { collectionConfig: foreignCollectionConfig, Model: foreignModel } = getCollection({
+        adapter: this,
+        collectionSlug: relationTo,
+      })
+      const relatedAccess = args.relatedAccess?.[fieldPath]
+      const relatedWhere = await resolveBranchQuery({
+        collectionSlug: relationTo,
+        req: args.req,
+        where: relatedAccess,
+      })
+      const relatedQuery =
+        relatedWhere && Object.keys(relatedWhere).length
+          ? await buildQuery({
+              adapter: this,
+              collectionSlug: relationTo,
+              fields: foreignCollectionConfig.flattenedFields,
+              locale: args.locale,
+              where: relatedWhere,
+            })
+          : null
+
+      relationLookup.push({
         $lookup: {
           as: fieldPath,
-          foreignField: '_id',
           from: foreignModel.collection.name,
-          localField: fieldPath,
+          ...(relatedQuery
+            ? {
+                let: { relatedIDs: `$${fieldPath}` },
+                pipeline: [
+                  {
+                    $match: {
+                      $and: [
+                        {
+                          $expr: {
+                            $cond: {
+                              else: {
+                                $eq: [{ $ifNull: ['$_branchDocID', '$_id'] }, '$$relatedIDs'],
+                              },
+                              if: { $isArray: '$$relatedIDs' },
+                              then: {
+                                $in: [{ $ifNull: ['$_branchDocID', '$_id'] }, '$$relatedIDs'],
+                              },
+                            },
+                          },
+                        },
+                        relatedQuery,
+                      ],
+                    },
+                  },
+                ],
+              }
+            : {
+                foreignField: '_id',
+                localField: fieldPath,
+              }),
         },
       })
-      acc.push({ $unwind: `$${fieldPath}` })
-      return acc
-    }, [])
+      relationLookup.push({ $unwind: `$${fieldPath}` })
+    }
   }
 
   let $unwind: any = ''

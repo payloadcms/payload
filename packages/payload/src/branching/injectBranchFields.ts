@@ -1,8 +1,13 @@
 import type { CollectionConfig } from '../collections/config/types.js'
-import type { Field } from '../fields/config/types.js'
+import type { Field, TextField } from '../fields/config/types.js'
 import type { GlobalConfig } from '../globals/config/types.js'
 
-import { forkOnBranchUpdate, recordBranchCreate, stampBranchOnCreate } from './hooks.js'
+import {
+  assertBranchWritableBeforeCollectionWrite,
+  assertBranchWritableBeforeGlobalWrite,
+  recordBranchCreate,
+  stampBranchOnCreate,
+} from './hooks.js'
 import {
   branchDocIDField,
   branchField,
@@ -56,7 +61,7 @@ const bookkeepingOnly = {
  * enforcing uniqueness among main rows on Postgres, which treats NULLs as
  * distinct.
  */
-export const buildBranchField = (): Field => ({
+export const buildBranchField = (): TextField => ({
   name: branchField,
   type: 'text',
   ...bookkeepingOnly,
@@ -172,8 +177,8 @@ export const injectBranchFields = (collection: CollectionConfig): CollectionConf
   collection.hooks.beforeChange = [...(collection.hooks.beforeChange ?? []), stampBranchOnCreate]
   collection.hooks.afterChange = [...(collection.hooks.afterChange ?? []), recordBranchCreate]
   collection.hooks.beforeOperation = [
+    assertBranchWritableBeforeCollectionWrite,
     ...(collection.hooks.beforeOperation ?? []),
-    forkOnBranchUpdate,
   ]
 
   return collection
@@ -189,8 +194,17 @@ export const injectBranchFields = (collection: CollectionConfig): CollectionConf
  */
 export const injectGlobalBranchFields = (global: GlobalConfig): GlobalConfig => {
   if (!hasField(global.fields, branchField)) {
-    global.fields.push(buildBranchField())
+    // Each global has at most one row on a branch. Besides expressing that
+    // invariant, the unique key is the conflict target used by adapter upserts
+    // when concurrent requests make the first branch write.
+    global.fields.push({ ...buildBranchField(), unique: true })
   }
+
+  global.hooks = global.hooks ?? {}
+  global.hooks.beforeOperation = [
+    assertBranchWritableBeforeGlobalWrite,
+    ...(global.hooks.beforeOperation ?? []),
+  ]
 
   return global
 }

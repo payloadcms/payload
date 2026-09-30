@@ -36,6 +36,19 @@ const Context = createContext({} as ListRelationshipContext)
 export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNode }> = ({
   children,
 }) => {
+  const branch = useBranchParam()
+
+  return (
+    <RelationshipProviderForBranch branch={branch} key={branch ?? 'main'}>
+      {children}
+    </RelationshipProviderForBranch>
+  )
+}
+
+const RelationshipProviderForBranch: React.FC<{
+  readonly branch?: string
+  readonly children?: React.ReactNode
+}> = ({ branch, children }) => {
   const [documents, dispatchDocuments] = useReducer(reducer, {})
   const debouncedDocuments = useDebounce(documents, 100)
 
@@ -49,7 +62,6 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
   const { i18n } = useTranslation()
   const currentLocale = useLocale()
   const locale = currentLocale?.code
-  const branch = useBranchParam()
   const prevLocale = useRef(locale)
 
   const loadRelationshipDocs = useCallback(

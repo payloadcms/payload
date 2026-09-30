@@ -1,7 +1,7 @@
 import type { I18nClient, TFunction } from '@payloadcms/translations'
 
 import type { StaticDescription } from '../../admin/types.js'
-import type { ImportMap } from '../../bin/generateImportMap/index.js'
+import type { ImportMap } from '../../cli/commands/generateImportMap/generateImportMap.js'
 import type {
   LivePreviewConfig,
   ServerOnlyLivePreviewProperties,
@@ -38,6 +38,7 @@ export type ServerOnlyUploadProperties = keyof Pick<
   SanitizedCollectionConfig['upload'],
   | 'admin'
   | 'adminThumbnail'
+  | 'deleteFiles'
   | 'externalFileHeaderFilter'
   | 'handlers'
   | 'modifyResponseHeaders'
@@ -64,10 +65,10 @@ export type ClientCollectionConfig = {
     | 'preview'
     | ServerOnlyCollectionAdminProperties
   >
-  auth?: { verify?: true } & Omit<
-    SanitizedCollectionConfig['auth'],
-    'forgotPassword' | 'strategies' | 'verify'
-  >
+  auth?: {
+    forgotPassword: Pick<SanitizedCollectionConfig['auth']['forgotPassword'], 'minRequestInterval'>
+    verify?: true
+  } & Omit<SanitizedCollectionConfig['auth'], 'forgotPassword' | 'strategies' | 'verify'>
   fields: ClientField[]
   hierarchy?: ClientHierarchyConfig | false
   labels: {
@@ -99,6 +100,7 @@ const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] 
 const serverOnlyUploadProperties: Partial<ServerOnlyUploadProperties>[] = [
   'admin',
   'adminThumbnail',
+  'deleteFiles',
   'externalFileHeaderFilter',
   'handlers',
   'modifyResponseHeaders',
@@ -195,6 +197,10 @@ export const createClientCollectionConfig = ({
         }
 
         clientCollection.auth = {} as { verify?: true } & SanitizedCollectionConfig['auth']
+
+        clientCollection.auth.forgotPassword = {
+          minRequestInterval: collection.auth.forgotPassword.minRequestInterval,
+        }
 
         if (collection.auth.cookies) {
           clientCollection.auth.cookies = collection.auth.cookies

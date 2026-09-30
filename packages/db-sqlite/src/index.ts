@@ -41,6 +41,7 @@ import {
   updateOne,
   updateVersion,
   upsert,
+  upsertBranchGlobalChange,
 } from '@payloadcms/drizzle'
 import {
   columnToCodeConverter,
@@ -228,6 +229,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       updateOne,
       updateVersion,
       upsert,
+      upsertBranchGlobalChange,
     })
 
     adapter.blocksToJsonMigrator = createBlocksToJsonMigrator({

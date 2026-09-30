@@ -5,11 +5,15 @@ import type {
   SelectType,
   TransformCollectionWithSelect,
 } from '../../types/index.js'
+import type { DeferredCleanupScope } from '../../utilities/transactionCallbacks.js'
 import type { Collection, DataFromCollectionSlug } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
-import { willBranchAbsorbDelete } from '../../branching/tombstone.js'
+import {
+  assertBranchCreatedDeleteUnreferenced,
+  willBranchAbsorbDelete,
+} from '../../branching/tombstone.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
@@ -23,6 +27,11 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import {
+  beginDeferredCleanupScope,
+  clearDeferredCleanupScope,
+  flushDeferredCleanupScopeAfterOperation,
+} from '../../utilities/transactionCallbacks.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
 import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
@@ -45,9 +54,12 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
   incomingArgs: Arguments<TSlug, TSelect>,
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
+  let cleanupScope: DeferredCleanupScope | null = null
+  let shouldCommit = false
 
   try {
-    const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+    shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+    cleanupScope = await beginDeferredCleanupScope({ req: args.req })
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -92,21 +104,6 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     const hasWhereAccess = hasWhereAccessResult(accessResults)
 
     // /////////////////////////////////////
-    // beforeDelete - Collection
-    // /////////////////////////////////////
-
-    if (collectionConfig.hooks?.beforeDelete?.length) {
-      for (const hook of collectionConfig.hooks.beforeDelete) {
-        await hook({
-          id,
-          collection: collectionConfig,
-          context: req.context,
-          req,
-        })
-      }
-    }
-
-    // /////////////////////////////////////
     // Retrieve document
     // /////////////////////////////////////
 
@@ -132,6 +129,33 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     if (!docToDelete && hasWhereAccess) {
       throw new Forbidden(req.t)
     }
+
+    await assertBranchCreatedDeleteUnreferenced({
+      collectionSlug: collectionConfig.slug,
+      doc: docToDelete,
+      req,
+    })
+
+    // /////////////////////////////////////
+    // beforeDelete - Collection
+    // /////////////////////////////////////
+
+    if (collectionConfig.hooks?.beforeDelete?.length) {
+      for (const hook of collectionConfig.hooks.beforeDelete) {
+        await hook({
+          id,
+          collection: collectionConfig,
+          context: req.context,
+          req,
+        })
+      }
+    }
+
+    await assertBranchCreatedDeleteUnreferenced({
+      collectionSlug: collectionConfig.slug,
+      doc: docToDelete,
+      req,
+    })
 
     // /////////////////////////////////////
     // Handle potentially locked documents
@@ -300,13 +324,22 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     // 8. Return results
     // /////////////////////////////////////
 
+    if (cleanupScope) {
+      await flushDeferredCleanupScopeAfterOperation({ req, scope: cleanupScope })
+    }
     if (shouldCommit) {
       await commitTransaction(req)
     }
 
     return result as TransformCollectionWithSelect<TSlug, TSelect>
   } catch (error: unknown) {
-    await killTransaction(args.req)
+    if (cleanupScope) {
+      clearDeferredCleanupScope({ req: args.req, scope: cleanupScope })
+    }
+
+    if (shouldCommit) {
+      await killTransaction(args.req)
+    }
     throw error
   }
 }

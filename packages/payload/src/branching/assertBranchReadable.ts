@@ -6,6 +6,12 @@ import { branchesCollectionSlug, MAIN_BRANCH } from './types.js'
 
 const checkedKey = '_branchReadableChecked'
 
+type BranchReadableCheck = {
+  branch: string
+  userCollection?: string
+  userID?: number | string
+}
+
 /**
  * Refuses a request that names a branch the caller cannot see.
  *
@@ -35,10 +41,26 @@ const checkedKey = '_branchReadableChecked'
  * the operations hand to the adapter is narrowed to `branch`, `context`, `payload` and
  * `transactionID` — it has no `user`, so an access check there has nobody to check.
  */
-export const assertBranchReadable = async ({ req }: { req: PayloadRequest }): Promise<void> => {
+export const assertBranchReadable = async ({
+  collectionSlug,
+  globalSlug,
+  req,
+}: {
+  collectionSlug?: string
+  globalSlug?: string
+  req: PayloadRequest
+}): Promise<void> => {
   const branching = req.payload?.config?.branching
 
   if (!branching?.enabled) {
+    return
+  }
+
+  if (collectionSlug && !branching.branchableCollections.has(collectionSlug)) {
+    return
+  }
+
+  if (globalSlug && !branching.branchableGlobals.has(globalSlug)) {
     return
   }
 
@@ -50,7 +72,13 @@ export const assertBranchReadable = async ({ req }: { req: PayloadRequest }): Pr
 
   const context = req.context as Record<string, unknown> | undefined
 
-  if (context?.[checkedKey]) {
+  const checked = context?.[checkedKey] as BranchReadableCheck | undefined
+
+  if (
+    checked?.branch === branch &&
+    checked.userCollection === req.user?.collection &&
+    checked.userID === req.user?.id
+  ) {
     return
   }
 
@@ -74,6 +102,10 @@ export const assertBranchReadable = async ({ req }: { req: PayloadRequest }): Pr
   }
 
   if (context) {
-    context[checkedKey] = true
+    context[checkedKey] = {
+      branch,
+      userCollection: req.user?.collection,
+      userID: req.user?.id,
+    } satisfies BranchReadableCheck
   }
 }

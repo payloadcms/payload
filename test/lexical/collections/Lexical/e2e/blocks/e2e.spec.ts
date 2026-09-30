@@ -59,7 +59,6 @@ let serverURL: string
 describe('lexicalBlocks', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     context = await browser.newContext()
@@ -73,8 +72,6 @@ describe('lexicalBlocks', () => {
     // })
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'lexicalTest',
-      uploadsDir: [path.resolve(dirname, './collections/Upload/uploads')],
     })
 
     if (client) {
@@ -102,7 +99,7 @@ describe('lexicalBlocks', () => {
         richTextField,
       })
 
-      await expect(newRSCBlock.locator('.collapsible__content')).toHaveText('Data:')
+      await expect(newRSCBlock.getByTestId('block-rsc-data')).toHaveText('Data:')
 
       // Select paragraph with text "123"
       // Now double-click to select entire line
@@ -147,10 +144,10 @@ describe('lexicalBlocks', () => {
       )
       await expect(editDrawer).toBeHidden()
 
-      await expect(newRSCBlock.locator('.collapsible__content')).toHaveText('Data: value2')
+      await expect(newRSCBlock.getByTestId('block-rsc-data')).toHaveText('Data: value2')
 
-      // press ctrl+B to bold the text previously selected (assuming it is still selected now, which it should be)
-      await page.keyboard.press('Meta+B')
+      // Bold the text selected before opening the drawer.
+      await page.keyboard.press('ControlOrMeta+B')
       // In case this is mac or windows
       await page.keyboard.press('Control+B')
 
@@ -159,7 +156,7 @@ describe('lexicalBlocks', () => {
       // save document and assert
       await saveDocAndAssert(page)
       await wait(300)
-      await expect(newRSCBlock.locator('.collapsible__content')).toHaveText('Data: value2')
+      await expect(newRSCBlock.getByTestId('block-rsc-data')).toHaveText('Data: value2')
 
       // Check if the API result is correct
       await assertLexicalDoc({
@@ -198,6 +195,7 @@ describe('lexicalBlocks', () => {
           text: 'invalid',
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       const { newBlock } = await createBlock({
@@ -394,6 +392,7 @@ describe('lexicalBlocks', () => {
           text: 'invalid',
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       const { newBlock } = await createBlock({
@@ -1434,10 +1433,7 @@ describe('lexicalBlocks', () => {
       await expect(outerToolbarScroll).toBeVisible()
       await expect(nestedToolbarScroll).toBeVisible()
 
-      const outerBox = (await outerToolbarScroll.boundingBox())!
-      const nestedBox = (await nestedToolbarScroll.boundingBox())!
-
-      await page.mouse.move(outerBox.x + outerBox.width / 2, outerBox.y + outerBox.height / 2)
+      await outerToolbarScroll.hover()
       await page.mouse.wheel(0, 200)
 
       await expect(async () => {
@@ -1449,7 +1445,7 @@ describe('lexicalBlocks', () => {
         (el) => el.scrollLeft,
       )
 
-      await page.mouse.move(nestedBox.x + nestedBox.width / 2, nestedBox.y + nestedBox.height / 2)
+      await nestedToolbarScroll.hover()
       await page.mouse.wheel(0, 150)
 
       await expect(async () => {
@@ -1668,7 +1664,7 @@ describe('lexicalBlocks', () => {
       await contentEditable.focus()
 
       // Undo the removal using keyboard shortcut
-      await page.keyboard.press('Control+Z')
+      await page.keyboard.press('ControlOrMeta+Z')
       await wait(500)
 
       // Wait for the block to be restored

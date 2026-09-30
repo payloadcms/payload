@@ -16,8 +16,9 @@ import type {
   TransformCollectionWithSelect,
   Where,
 } from '../../../types/index.js'
+import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { File } from '../../../uploads/types.js'
-import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
+import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
 import type {
   BulkOperationResult,
   DraftFlagFromCollectionSlug,
@@ -27,7 +28,7 @@ import type {
 
 import { APIError } from '../../../errors/index.js'
 import { getFileByPath } from '../../../uploads/getFileByPath.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { updateOperation } from '../update.js'
 import { updateByIDOperation } from '../updateByID.js'
 
@@ -83,12 +84,6 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    */
   locale?: TypedLocale
   /**
-   * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
-   * @default true
-   */
-  overrideAccess?: boolean
-  /**
    * By default, document locks are ignored (`true`). Set to `false` to enforce locks and prevent operations when a document is locked by another user. [More details](https://payloadcms.com/docs/admin/locked-documents).
    * @default true
    */
@@ -137,7 +132,8 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: null | User
-} & Pick<FindOptions<TSlug, TSelect>, 'select'>
+} & Pick<FindOptions<TSlug, TSelect>, 'select'> &
+  Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 export type ByIDOptions<
   TSlug extends CollectionSlug,
@@ -233,7 +229,7 @@ async function updateLocal<
     file,
     filePath,
     limit,
-    overrideAccess = true,
+    overrideAccess = false,
     overrideLock,
     overwriteExistingFiles = false,
     populate,
@@ -254,7 +250,10 @@ async function updateLocal<
     )
   }
 
-  const req = await createLocalReq(options as CreateLocalReqOptions, payload)
+  const req = await createPayloadRequest({
+    ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
+    payload,
+  })
   req.file = file ?? (await getFileByPath(filePath!))
 
   const args = {

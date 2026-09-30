@@ -160,6 +160,7 @@ export const AddNewRelation: React.FC<Props> = ({
             horizontalAlign="right"
             onToggleClose={() => setPopupOpen(false)}
             onToggleOpen={() => setPopupOpen(true)}
+            popupType="menu"
             render={({ close: closePopup }) => (
               <PopupList.ButtonGroup>
                 {relatedCollections.map((relatedCollection) => {

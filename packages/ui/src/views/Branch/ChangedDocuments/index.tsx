@@ -255,6 +255,7 @@ const ChangedDocumentRow: React.FC<{
           {selectable && (
             <span className={`${baseClass}__select`}>
               <CheckboxInput
+                aria-label={t('general:selectLabel', { label: title })}
                 checked={isSelected}
                 id={`${baseClass}-${change.id}`}
                 label=""

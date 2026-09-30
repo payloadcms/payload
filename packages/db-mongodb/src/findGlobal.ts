@@ -7,6 +7,7 @@ import {
   pickBranchGlobal,
   resolveBranch,
   resolveBranchGlobalQuery,
+  withBranchGlobalSelect,
 } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -40,7 +41,7 @@ export const findGlobal: FindGlobal = async function findGlobal(
     select: buildProjectionFromSelect({
       adapter: this,
       fields,
-      select,
+      select: withBranchGlobalSelect({ branch, globalSlug, req, select }),
     }),
     session: await getSession(this, req),
   }

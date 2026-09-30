@@ -2,10 +2,13 @@ import type { JoinQuery, PayloadRequest, SanitizedJoins, Where } from 'payload'
 
 import {
   appendVersionToQueryKey,
+  applyBranchIDProjection,
   buildVersionCollectionFields,
   combineQueries,
   getBranchPredicateSync,
   getQueryDraftsSort,
+  projectBranchVersionParent,
+  resolveBranchVersionQuery,
 } from 'payload'
 import { fieldShouldBeLocalized } from 'payload/shared'
 
@@ -143,7 +146,9 @@ export async function resolveJoins({
       }
 
       // Extract all parent document IDs to use in the join query
-      const parentIDs = docs.map((d) => (versions ? (d.parent ?? d._id ?? d.id) : (d._id ?? d.id)))
+      const parentIDs = docs.map((doc) =>
+        versions ? projectBranchVersionParent(doc) : (doc._id ?? doc.id),
+      )
 
       // Build the base query
       let whereQuery: null | Record<string, unknown> = null
@@ -166,27 +171,35 @@ export async function resolveJoins({
         req,
       })
 
-      if (joinBranchPredicate) {
-        whereQuery = { and: [whereQuery as Where, joinBranchPredicate] }
-      }
+      if (useDrafts) {
+        const branchVersionWhere = await resolveBranchVersionQuery({
+          collectionSlug: joinCollectionSlug,
+          req,
+          where: appendVersionToQueryKey(whereQuery as Where),
+        })
 
-      whereQuery = useDrafts
-        ? await JoinModel.buildQuery({
-            locale,
-            payload: adapter.payload,
-            where: combineQueries(appendVersionToQueryKey(whereQuery as Where), {
-              latest: {
-                equals: true,
-              },
-            }),
-          })
-        : await buildQuery({
-            adapter,
-            collectionSlug: joinCollectionSlug,
-            fields: targetConfig.flattenedFields,
-            locale,
-            where: whereQuery as Where,
-          })
+        whereQuery = await JoinModel.buildQuery({
+          locale,
+          payload: adapter.payload,
+          where: combineQueries(branchVersionWhere ?? {}, {
+            latest: {
+              equals: true,
+            },
+          }),
+        })
+      } else {
+        if (joinBranchPredicate) {
+          whereQuery = { and: [whereQuery as Where, joinBranchPredicate] }
+        }
+
+        whereQuery = await buildQuery({
+          adapter,
+          collectionSlug: joinCollectionSlug,
+          fields: targetConfig.flattenedFields,
+          locale,
+          where: whereQuery as Where,
+        })
+      }
 
       // Handle localized paths and version prefixes
       let dbFieldName = joinDef.field.on
@@ -250,7 +263,12 @@ export async function resolveJoins({
         timestamps: true,
       })
 
-      const projection = buildJoinProjection(dbFieldName, useDrafts, sort)
+      const projection = buildJoinProjection(
+        dbFieldName,
+        useDrafts,
+        sort,
+        Boolean(joinBranchPredicate),
+      )
 
       const [results, dbCount] = await Promise.all([
         JoinModel.find(whereQuery, projection, {
@@ -271,6 +289,18 @@ export async function resolveJoins({
         operation: 'read',
       })
 
+      if (useDrafts) {
+        for (const result of results) {
+          result.id = projectBranchVersionParent(result)
+        }
+      } else {
+        applyBranchIDProjection({
+          collectionSlug: joinCollectionSlug,
+          docs: results,
+          req,
+        })
+      }
+
       // Return results with collection info for grouping
       return {
         collectionSlug: joinCollectionSlug,
@@ -278,7 +308,6 @@ export async function resolveJoins({
         dbFieldName,
         results,
         sort,
-        useDrafts,
       }
     })
 
@@ -299,15 +328,11 @@ export async function resolveJoins({
         continue
       }
 
-      const { collectionSlug, count, dbFieldName, results, sort, useDrafts } = collectionResult
+      const { collectionSlug, count, dbFieldName, results, sort } = collectionResult
 
       totalCount += count
 
       for (const result of results) {
-        if (useDrafts) {
-          result.id = result.parent
-        }
-
         const parentValues = getByPathWithArrays(result, dbFieldName) as (
           | { relationTo: string; value: number | string }
           | number
@@ -409,7 +434,7 @@ export async function resolveJoins({
 
     // Attach the joined data to each parent document
     for (const doc of docs) {
-      const id = (versions ? (doc.parent ?? doc._id ?? doc.id) : (doc._id ?? doc.id)) as string
+      const id = (versions ? projectBranchVersionParent(doc) : (doc._id ?? doc.id)) as string
       const all = grouped[id]?.docs || []
 
       // Calculate the slice for pagination
@@ -613,6 +638,7 @@ function buildJoinProjection(
   baseFieldName: string,
   useDrafts: boolean,
   sort: Record<string, string>,
+  shouldProjectBranchID: boolean,
 ): Record<string, 1> {
   const projection: Record<string, 1> = {
     _id: 1,
@@ -621,6 +647,10 @@ function buildJoinProjection(
 
   if (useDrafts) {
     projection.parent = 1
+  }
+
+  if (shouldProjectBranchID) {
+    projection[useDrafts ? '_branchParent' : '_branchDocID'] = 1
   }
 
   for (const fieldName of Object.keys(sort)) {

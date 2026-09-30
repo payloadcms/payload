@@ -1,9 +1,13 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import { status as httpStatus } from 'http-status'
+import { randomUUID } from 'node:crypto'
+import fs from 'node:fs/promises'
+import path from 'node:path'
 
 import type { AccessResult } from '../../config/types.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
+import type { DeferredCleanupScope } from '../../utilities/transactionCallbacks.js'
 import type {
   BulkOperationResult,
   Collection,
@@ -14,8 +18,8 @@ import type {
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { forkDocument } from '../../branching/forkDocument.js'
-import { resolveBranch } from '../../branching/resolveBranch.js'
-import { MAIN_BRANCH } from '../../branching/types.js'
+import { resetBranchState, resolveBranch } from '../../branching/resolveBranch.js'
+import { branchField, MAIN_BRANCH } from '../../branching/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { validateSortQuery } from '../../database/queryValidation/validateSortQuery.js'
@@ -23,15 +27,34 @@ import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/index.js'
 import { type CollectionSlug, type FindOptions } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
+import {
+  getLocalizedUploadProperties,
+  getUploadDestination,
+  mergeUploadDataWithDocument,
+  sanitizeUploadData,
+} from '../../uploads/sanitizeUploadData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
-import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
+import { hasDraftsEnabled, hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { isErrorPublic } from '../../utilities/isErrorPublic.js'
+import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import {
+  beginDeferredCleanupScope,
+  clearDeferredCleanupScope,
+  flushDeferredCleanupScope,
+  flushDeferredCleanupScopeAfterOperation,
+} from '../../utilities/transactionCallbacks.js'
+import {
+  getAllLocalesPublicationStatus,
+  normalizeAllLocalesPublicationStatus,
+  reconcileAllLocalesPublicationStatus,
+  validateAllLocalesPublicationFlags,
+} from '../../versions/allLocalesPublicationStatus.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
@@ -75,14 +98,69 @@ export const updateOperation = async <
   incomingArgs: Arguments<TSlug>,
 ): Promise<BulkOperationResult<TSlug, TSelect>> => {
   let args = incomingArgs
+  let cleanupScope: DeferredCleanupScope | null = null
+  let shouldUsePerDocumentBranchTransactions = false
+  let shouldCommit = false
 
   if (args.collection.config.disableBulkEdit && !args.overrideAccess) {
     throw new APIError(`Collection ${args.collection.config.slug} has disabled bulk edit`, 403)
   }
 
   try {
-    const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+    const branch = resolveBranch(args.req)
+    const isBranchUpdate =
+      branch !== MAIN_BRANCH &&
+      Boolean(
+        args.req.payload.config.branching?.branchableCollections.has(args.collection.config.slug),
+      )
+    const hasCallerTransaction = Boolean(await args.req.transactionID)
 
+    shouldUsePerDocumentBranchTransactions = isBranchUpdate && !hasCallerTransaction
+    shouldCommit =
+      !args.disableTransaction &&
+      !args.req.payload.db.bulkOperationsSingleTransaction &&
+      !shouldUsePerDocumentBranchTransactions &&
+      (await initTransaction(args.req))
+    cleanupScope = await beginDeferredCleanupScope({ req: args.req })
+
+    if (args.collection.config.upload && !args.overrideAccess) {
+      const { objectKey, prefix } = getUploadDestination({ data: args.data, file: args.req.file })
+      const data = sanitizeUploadData(args.data, 'update')
+
+      args = {
+        ...args,
+        data:
+          typeof data === 'object' && data !== null
+            ? {
+                ...data,
+                ...(prefix !== undefined ? { prefix } : {}),
+                ...(objectKey !== undefined ? { _objectKey: objectKey } : {}),
+              }
+            : data,
+      }
+    }
+
+    validateAllLocalesPublicationFlags({
+      publishAllLocales: args.publishAllLocales,
+      unpublishAllLocales: args.unpublishAllLocales,
+    })
+
+    const initialCollectionConfig = args.collection.config
+    const initialAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
+      hasLocalizedStatus: Boolean(
+        args.req.payload.config.localization && hasLocalizeStatusEnabled(initialCollectionConfig),
+      ),
+      publishAllLocales:
+        !args.draft &&
+        (args.publishAllLocales ??
+          !(hasLocalizeStatusEnabled(initialCollectionConfig) && args.req.locale !== 'all')),
+      unpublishAllLocales: Boolean(args.unpublishAllLocales),
+    })
+
+    const initialAllLocalesPublicationIntent = normalizeAllLocalesPublicationStatus({
+      data: args.data,
+      status: initialAllLocalesPublicationStatus,
+    })
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
@@ -105,7 +183,7 @@ export const updateOperation = async <
       overrideLock,
       overwriteExistingFiles = false,
       populate,
-      publishAllLocales,
+      publishAllLocales: publishAllLocalesArg,
       req: {
         fallbackLocale,
         locale,
@@ -117,7 +195,7 @@ export const updateOperation = async <
       showHiddenFields,
       sort: incomingSort,
       trash = false,
-      unpublishAllLocales,
+      unpublishAllLocales: unpublishAllLocalesArg,
       where,
     } = args
 
@@ -126,6 +204,35 @@ export const updateOperation = async <
     }
 
     const { data: bulkUpdateData } = args
+
+    validateAllLocalesPublicationFlags({
+      publishAllLocales: publishAllLocalesArg,
+      unpublishAllLocales: unpublishAllLocalesArg,
+    })
+
+    const requestedAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
+      hasLocalizedStatus: Boolean(
+        config.localization && hasLocalizeStatusEnabled(collectionConfig),
+      ),
+      publishAllLocales:
+        !draftArg &&
+        (publishAllLocalesArg ?? !(hasLocalizeStatusEnabled(collectionConfig) && locale !== 'all')),
+      unpublishAllLocales: Boolean(unpublishAllLocalesArg),
+    })
+    const allLocalesPublicationStatus = reconcileAllLocalesPublicationStatus({
+      data: bulkUpdateData,
+      intent: initialAllLocalesPublicationIntent,
+      status: requestedAllLocalesPublicationStatus,
+    })
+    const publicationIntentSurvivedBeforeOperation =
+      !requestedAllLocalesPublicationStatus || Boolean(allLocalesPublicationStatus)
+    const publishAllLocales = publicationIntentSurvivedBeforeOperation
+      ? publishAllLocalesArg
+      : false
+    const unpublishAllLocales = publicationIntentSurvivedBeforeOperation
+      ? unpublishAllLocalesArg
+      : false
+
     const shouldSaveDraft = Boolean(draftArg && hasDraftsEnabled(collectionConfig))
 
     // /////////////////////////////////////
@@ -135,7 +242,7 @@ export const updateOperation = async <
     let accessResult: AccessResult
     if (!overrideAccess) {
       accessResult = await executeAccess(
-        { slug: collectionConfig.slug, req },
+        { slug: collectionConfig.slug, data: bulkUpdateData, req },
         collectionConfig.access.update,
       )
     }
@@ -191,24 +298,34 @@ export const updateOperation = async <
       sort,
     })
 
-    const runQuery = async () => {
-      if (hasDraftsEnabled(collectionConfig) && (shouldSaveDraft || isTrashAttempt)) {
-        const versionsWhere = appendVersionToQueryKey(fullWhere)
+    if (hasDraftsEnabled(collectionConfig) && (shouldSaveDraft || isTrashAttempt)) {
+      await validateQueryPaths({
+        collectionConfig: collection.config,
+        overrideAccess: overrideAccess!,
+        req,
+        versionFields: buildVersionCollectionFields(payload.config, collection.config, true),
+        where: appendVersionToQueryKey(where),
+      })
+    }
 
-        await validateQueryPaths({
-          collectionConfig: collection.config,
-          overrideAccess: overrideAccess!,
-          req,
-          versionFields: buildVersionCollectionFields(payload.config, collection.config, true),
-          where: appendVersionToQueryKey(where),
-        })
+    const runQuery = async ({
+      queryLimit = limit,
+      queryReq = req,
+      queryWhere = fullWhere,
+    }: {
+      queryLimit?: number
+      queryReq?: PayloadRequest
+      queryWhere?: Where
+    } = {}) => {
+      if (hasDraftsEnabled(collectionConfig) && (shouldSaveDraft || isTrashAttempt)) {
+        const versionsWhere = appendVersionToQueryKey(queryWhere)
 
         const query = await payload.db.queryDrafts<DataFromCollectionSlug<TSlug>>({
           collection: collectionConfig.slug,
-          limit,
+          limit: queryLimit,
           locale: locale!,
           pagination: false,
-          req,
+          req: queryReq,
           sort: getQueryDraftsSort({ collectionConfig, sort }),
           where: versionsWhere,
         })
@@ -218,65 +335,134 @@ export const updateOperation = async <
 
       const query = await payload.db.find({
         collection: collectionConfig.slug,
-        limit,
+        limit: queryLimit,
         locale: locale!,
         pagination: false,
-        req,
+        req: queryReq,
         sort,
-        where: fullWhere,
+        where: queryWhere,
       })
 
       return query.docs
     }
 
-    let docs = await runQuery()
+    const docs = await runQuery()
 
-    // /////////////////////////////////////
-    // Copy-on-write onto the branch
-    // /////////////////////////////////////
-
-    // The single-document path forks in a `beforeOperation` hook, which needs an `id` and
-    // so returns early for a bulk update — leaving every matched document to be written
-    // straight to main. The IDs only exist after the query above, so the fork belongs
-    // here.
-    //
-    // Re-queried afterwards, and that is the load-bearing half: the write builds on the
-    // document it read, so carrying main's row onto the branch's new copy stamps
-    // `_branch: 'main'` onto that copy and it then surfaces on main as a duplicate. The
-    // second read returns the branch's own rows, which is what the write must extend.
-    if (resolveBranch(req) !== MAIN_BRANCH) {
-      for (const doc of docs) {
-        await forkDocument({ id: doc.id, collectionSlug: collection.config.slug, req })
-      }
-
-      docs = await runQuery()
-    }
-
-    // /////////////////////////////////////
-    // Generate data for all files and sizes
-    // /////////////////////////////////////
-
-    const { data, files: filesToUpload } = await generateFileData({
-      collection,
-      config,
-      data: bulkUpdateData,
-      operation: 'update',
-      overwriteExistingFiles,
-      req,
-      throwOnMissingFile: false,
-    })
+    const sharedGeneratedFileData =
+      !collectionConfig.upload || (overrideAccess && Boolean(req.file))
+        ? await generateFileData({
+            collection,
+            config,
+            data: bulkUpdateData,
+            operation: 'update',
+            overwriteExistingFiles,
+            req,
+            throwOnMissingFile: false,
+          })
+        : null
 
     const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
+    // File replacement cleanup needs a per-document checkpoint. Process file uploads in order so
+    // each checkpoint remains the active nested scope until that document finishes.
+    const shouldProcessDocumentsSequentially =
+      isBranchUpdate ||
+      req.payload.db.bulkOperationsSingleTransaction ||
+      Boolean(collectionConfig.upload && req.file)
 
-    const promises = docs.map(async (docWithLocales) => {
-      const { id } = docWithLocales
+    const processDocument = async (initialDocWithLocales: (typeof docs)[number]) => {
+      const { id } = initialDocWithLocales
+      let documentCleanupScope: DeferredCleanupScope | null = null
+      let documentReq = req
+      let documentTempFilePath: string | undefined
+      let docShouldCommit = false
 
       try {
-        // Each document gets its own transaction when singleTransaction is enabled
-        let docShouldCommit = false
-        if (req.payload.db.bulkOperationsSingleTransaction) {
-          docShouldCommit = await initTransaction(req)
+        // Branch updates need a transaction per result so a caught document failure can roll back
+        // its fork without removing successful documents from the same bulk operation.
+        if (
+          !args.disableTransaction &&
+          (req.payload.db.bulkOperationsSingleTransaction || shouldUsePerDocumentBranchTransactions)
+        ) {
+          docShouldCommit = await initTransaction(documentReq)
         }
+        if (shouldProcessDocumentsSequentially) {
+          documentCleanupScope = await beginDeferredCleanupScope({ req: documentReq })
+        }
+
+        let docWithLocales = initialDocWithLocales
+
+        if (isBranchUpdate) {
+          const isExistingBranchDocument =
+            (docWithLocales as Record<string, unknown>)[branchField] === branch
+
+          if (hasCallerTransaction && !isExistingBranchDocument) {
+            throw new APIError(
+              'Cannot update an untouched branch document within an existing transaction.',
+              httpStatus.CONFLICT,
+            )
+          }
+
+          await forkDocument({
+            id,
+            collectionSlug: collection.config.slug,
+            req: documentReq,
+            // Without an operation-owned transaction, keep the isolated race-recovery path. An
+            // adapter with transactions disabled or unavailable cannot roll back a later hook
+            // failure after its write has completed.
+            useAmbientTransaction: docShouldCommit,
+          })
+
+          const branchDocuments = await runQuery({
+            queryLimit: 1,
+            queryReq: documentReq,
+            queryWhere: combineQueries(fullWhere, { id: { equals: id } }),
+          })
+          const branchDocument = branchDocuments[0]
+
+          if (!branchDocument) {
+            throw new Error('Unable to read the branch document after creating its shadow.')
+          }
+
+          docWithLocales = branchDocument
+        }
+
+        const documentFile = req.file ? { ...req.file } : undefined
+        if (collectionConfig.upload && !overrideAccess && documentFile?.tempFilePath) {
+          const extension = path.extname(documentFile.tempFilePath)
+          documentTempFilePath = path.join(
+            path.dirname(documentFile.tempFilePath),
+            `${path.basename(documentFile.tempFilePath, extension)}-${randomUUID()}${extension}`,
+          )
+          await fs.copyFile(documentFile.tempFilePath, documentTempFilePath)
+          documentFile.tempFilePath = documentTempFilePath
+        }
+
+        if (collectionConfig.upload && req.file) {
+          documentReq = isolateObjectProperty(documentReq, ['file', 'payloadUploadSizes'])
+          documentReq.file = documentFile
+          documentReq.payloadUploadSizes =
+            sharedGeneratedFileData === null ? {} : { ...req.payloadUploadSizes }
+        }
+        const generatedFileData =
+          sharedGeneratedFileData ??
+          (await generateFileData({
+            collection,
+            config,
+            data: mergeUploadDataWithDocument(bulkUpdateData, docWithLocales, {
+              locale:
+                locale === 'all' || !locale
+                  ? config.localization
+                    ? config.localization.defaultLocale
+                    : undefined
+                  : locale,
+              localizedProperties: getLocalizedUploadProperties(collectionConfig.flattenedFields),
+            }),
+            operation: 'update',
+            originalDoc: docWithLocales,
+            overwriteExistingFiles,
+            req: documentReq,
+            throwOnMissingFile: false,
+          }))
 
         const select = sanitizeSelect({
           fields: collectionConfig.flattenedFields,
@@ -298,7 +484,7 @@ export const updateOperation = async <
           config,
           data: copyDataWithFreshRowIDs({
             config,
-            data,
+            data: generatedFileData.data,
             existingDoc: docWithLocales,
             fields: collectionConfig.fields,
           }),
@@ -306,14 +492,14 @@ export const updateOperation = async <
           docWithLocales,
           draftArg,
           fallbackLocale: fallbackLocale!,
-          filesToUpload,
+          filesToUpload: generatedFileData.files,
           locale: locale!,
           overrideAccess: overrideAccess!,
           overrideLock: overrideLock!,
           payload,
           populate,
           publishAllLocales,
-          req,
+          req: documentReq,
           select: select!,
           showHiddenFields: showHiddenFields!,
           unpublishAllLocales,
@@ -327,43 +513,61 @@ export const updateOperation = async <
           updatedDoc = { ...updatedDoc, collection: collectionConfig.slug }
         }
 
+        if (documentCleanupScope) {
+          await flushDeferredCleanupScope({ req: documentReq, scope: documentCleanupScope })
+        }
         if (docShouldCommit) {
-          await commitTransaction(req)
+          await commitTransaction(documentReq)
         }
 
         return updatedDoc
       } catch (error) {
         const isPublic = error instanceof Error ? isErrorPublic(error, config) : false
 
-        if (req.payload.db.bulkOperationsSingleTransaction) {
-          await killTransaction(req)
+        if (documentCleanupScope) {
+          clearDeferredCleanupScope({ req: documentReq, scope: documentCleanupScope })
+        }
+        if (docShouldCommit) {
+          await killTransaction(documentReq)
+        }
+        if (isBranchUpdate) {
+          resetBranchState(documentReq)
         }
         errors.push({
           id,
           isPublic,
           message: error instanceof Error ? error.message : 'Unknown error',
         })
+      } finally {
+        if (documentTempFilePath) {
+          await fs.rm(documentTempFilePath, { force: true }).catch((error) => {
+            req.payload.logger.error({ err: error, msg: 'Failed to remove temp file copy' })
+          })
+        }
       }
       return null
-    })
+    }
+
+    // Upload processing may mutate its temp file while cropping, so each upload document must
+    // finish before the next starts. Branch updates also run in order because each result owns its
+    // fork transaction. Other metadata-only bulk updates retain their parallel behavior.
+    let awaitedDocs: (DataFromCollectionSlug<TSlug> | null)[]
+    if (shouldProcessDocumentsSequentially) {
+      awaitedDocs = []
+      for (const doc of docs) {
+        awaitedDocs.push(await processDocument(doc))
+      }
+    } else {
+      awaitedDocs = await Promise.all(docs.map(processDocument))
+    }
 
     await unlinkTempFiles({
       collectionConfig,
       config,
       req,
+    }).catch((unlinkError) => {
+      req.payload.logger.error({ err: unlinkError, msg: 'Failed to remove temp file' })
     })
-
-    // Process sequentially when using single transaction mode to avoid shared state issues
-    // Process in parallel when using one transaction for better performance
-    let awaitedDocs: (DataFromCollectionSlug<TSlug> | null)[]
-    if (req.payload.db.bulkOperationsSingleTransaction) {
-      awaitedDocs = []
-      for (const promise of promises) {
-        awaitedDocs.push(await promise)
-      }
-    } else {
-      awaitedDocs = await Promise.all(promises)
-    }
 
     let result = {
       docs: awaitedDocs.filter(Boolean),
@@ -383,6 +587,13 @@ export const updateOperation = async <
       result,
     })
 
+    if (cleanupScope) {
+      if (errors.length === 0 || shouldProcessDocumentsSequentially) {
+        await flushDeferredCleanupScopeAfterOperation({ req, scope: cleanupScope })
+      } else {
+        clearDeferredCleanupScope({ req: args.req, scope: cleanupScope })
+      }
+    }
     if (shouldCommit) {
       await commitTransaction(req)
     }
@@ -390,7 +601,24 @@ export const updateOperation = async <
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     return result
   } catch (error: unknown) {
-    await killTransaction(args.req)
+    if (shouldUsePerDocumentBranchTransactions) {
+      resetBranchState(args.req)
+    }
+
+    if (cleanupScope) {
+      clearDeferredCleanupScope({ req: args.req, scope: cleanupScope })
+    }
+
+    await unlinkTempFiles({
+      collectionConfig: args.collection.config,
+      config: args.req.payload.config,
+      req: args.req,
+    }).catch((unlinkError) => {
+      args.req.payload.logger.error({ err: unlinkError, msg: 'Failed to remove temp file' })
+    })
+    if (shouldCommit) {
+      await killTransaction(args.req)
+    }
     throw error
   }
 }

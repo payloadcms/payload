@@ -268,6 +268,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
         }),
         args: {
           id: { type: new GraphQLNonNull(idType) },
+          branch: { type: GraphQLString },
         },
         resolve: docAccessResolver(collection),
       }
@@ -326,6 +327,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           type: collection.graphQL.type,
           args: {
             id: { type: new GraphQLNonNull(idType) },
+            branch: { type: GraphQLString },
             ...(createMutationInputType
               ? { data: { type: collection.graphQL.mutationInputType } }
               : {}),
@@ -370,6 +372,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           type: collection.graphQL.versionType,
           args: {
             id: { type: versionIDType },
+            branch: { type: GraphQLString },
             ...(config.localization
               ? {
                   fallbackLocale: { type: graphqlResult.types.fallbackLocaleInputType },
@@ -386,6 +389,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
             collection.graphQL.versionType,
           ),
           args: {
+            branch: { type: GraphQLString },
             where: {
               type: buildWhereInputType({
                 name: `versions${singularName}`,

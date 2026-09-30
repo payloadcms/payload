@@ -85,6 +85,7 @@ export { updateMany } from './updateMany.js'
 export { updateOne } from './updateOne.js'
 export { updateVersion } from './updateVersion.js'
 export { upsert } from './upsert.js'
+export { upsertBranchGlobalChange } from './upsertBranchGlobalChange.js'
 export { upsertRow } from './upsertRow/index.js'
 export {
   buildDynamicPredefinedBlocksToJsonMigration,

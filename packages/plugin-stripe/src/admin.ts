@@ -3,6 +3,7 @@ import type { Config } from 'payload'
 import type { SanitizedStripePluginConfig, StripePluginConfig } from './types.js'
 
 import { getFields } from './fields/getFields.js'
+import { sanitizeStripeRESTConfig } from './utilities/sanitizeStripeRESTConfig.js'
 
 export const stripePlugin =
   (incomingPluginConfig: StripePluginConfig) =>
@@ -12,8 +13,7 @@ export const stripePlugin =
     // set config defaults here
     const pluginConfig: SanitizedStripePluginConfig = {
       ...incomingPluginConfig,
-      // TODO: in the next major version, default this to `false`
-      rest: incomingPluginConfig?.rest ?? true,
+      rest: sanitizeStripeRESTConfig({ rest: incomingPluginConfig?.rest }),
       sync: incomingPluginConfig?.sync || [],
     }
 

@@ -1,147 +1,196 @@
-import { initI18n } from '@payloadcms/translations'
-import * as qs from 'qs-esm'
+import type { Payload, RequestContext, TypedLocale, User } from '../index.js'
+import type { PayloadRequest } from '../types/index.js'
 
-import type { SanitizedConfig } from '../config/types.js'
-import type { TypedFallbackLocale } from '../index.js'
-import type { CustomPayloadRequestProperties, PayloadRequest } from '../types/index.js'
-
-import { executeAuthStrategies } from '../auth/executeAuthStrategies.js'
+import { peekResolvedBranch, resetBranchState } from '../branching/resolveBranch.js'
+import { MAIN_BRANCH } from '../branching/types.js'
 import { getDataLoader } from '../collections/dataloader.js'
-import { getPayload } from '../index.js'
-import { sanitizeLocales } from './addLocalesToRequest.js'
-import { formatAdminURL } from './formatAdminURL.js'
-import { getRequestLanguage } from './getRequestLanguage.js'
-import { parseCookies } from './parseCookies.js'
+import { getLocalI18n } from '../translations/getLocalI18n.js'
+import { sanitizeFallbackLocale } from '../utilities/sanitizeFallbackLocale.js'
+import { isolateObjectProperty } from './isolateObjectProperty.js'
 
-type Args = {
-  canSetHeaders?: boolean
-  config: Promise<SanitizedConfig> | SanitizedConfig
-  params?: {
-    collection: string
+function getRequestContext(
+  req: Partial<PayloadRequest> = { context: null } as unknown as PayloadRequest,
+  context: RequestContext = {},
+): RequestContext {
+  if (req.context) {
+    if (Object.keys(req.context).length === 0 && req.context.constructor === Object) {
+      // if req.context is `{}` avoid unnecessary spread
+      return context
+    } else {
+      return { ...req.context, ...context }
+    }
+  } else {
+    return context
   }
-  payloadInstanceCacheKey?: string
-  request: Request
 }
 
-export const createPayloadRequest = async ({
-  canSetHeaders,
-  config: configPromise,
-  params,
-  payloadInstanceCacheKey,
-  request,
-}: Args): Promise<PayloadRequest> => {
-  const cookies = parseCookies(request.headers)
-  const payload = await getPayload({
-    config: configPromise,
-    cron: true,
-    key: payloadInstanceCacheKey,
-  })
+const attachFakeURLProperties = (req: Partial<PayloadRequest>, urlSuffix?: string) => {
+  /**
+   * *NOTE*
+   * If no URL is provided, the local API was called outside
+   * the context of a request. Therefore we create a fake URL object.
+   * `ts-expect-error` is used below for properties that are 'read-only'.
+   * Since they do not exist yet we can safely ignore the error.
+   */
+  let urlObject: undefined | URL
 
-  const { config } = payload
-  const localization = config.localization
+  function getURLObject() {
+    if (urlObject) {
+      return urlObject
+    }
 
-  const urlProperties = new URL(request.url)
-  const { pathname, searchParams } = urlProperties
+    const fallbackURL = `http://${req.host || 'localhost'}${urlSuffix || ''}`
 
-  const isGraphQL =
-    !config.graphQL.disable &&
-    pathname ===
-      formatAdminURL({
-        apiRoute: config.routes.api,
-        path: config.routes.graphQL as `/${string}`,
-      })
+    const urlToUse =
+      req?.url ||
+      (req.payload?.config?.serverURL
+        ? `${req.payload?.config.serverURL}${urlSuffix || ''}`
+        : fallbackURL)
 
-  const language = getRequestLanguage({
-    config,
-    cookies,
-    headers: request.headers,
-  })
+    try {
+      urlObject = new URL(urlToUse)
+    } catch (_err) {
+      req.payload?.logger.error(
+        `Failed to create URL object from URL: ${urlToUse}, falling back to ${fallbackURL}`,
+      )
 
-  const i18n = await initI18n({
-    config: config.i18n,
-    context: 'api',
-    language,
-  })
+      urlObject = new URL(fallbackURL)
+    }
 
-  let locale = searchParams.get('locale')
+    return urlObject
+  }
 
-  const { search: queryToParse } = urlProperties
+  if (!req.host) {
+    req.host = getURLObject().host
+  }
 
-  const query = queryToParse
-    ? qs.parse(queryToParse, {
-        allowEmptyArrays: true,
-        arrayLimit: 1000,
-        depth: 10,
-        ignoreQueryPrefix: true,
-      })
-    : {}
+  if (!req.protocol) {
+    req.protocol = getURLObject().protocol
+  }
 
-  const fallbackFromRequest = (query.fallbackLocale ||
-    searchParams.get('fallback-locale') ||
-    searchParams.get('fallbackLocale')) as TypedFallbackLocale
+  if (!req.pathname) {
+    req.pathname = getURLObject().pathname
+  }
 
-  let fallbackLocale = fallbackFromRequest
+  if (!req.searchParams) {
+    // @ts-expect-error eslint-disable-next-line no-param-reassign
+    req.searchParams = getURLObject().searchParams
+  }
+
+  if (!req.origin) {
+    // @ts-expect-error eslint-disable-next-line no-param-reassign
+    req.origin = getURLObject().origin
+  }
+
+  if (!req?.url) {
+    // @ts-expect-error eslint-disable-next-line no-param-reassign
+    req.url = getURLObject().href
+  }
+}
+
+export type CreatePayloadRequestArgs = {
+  /**
+   * Read and write against this branch instead of the request's own.
+   * `false` bypasses branching entirely.
+   */
+  branch?: false | string
+  context?: RequestContext
+  depth?: number
+  fallbackLocale?: false | TypedLocale
+  locale?: string
+  payload: Payload
+  req?: Partial<PayloadRequest>
+  urlSuffix?: string
+  user?: User
+}
+
+type CreatePayloadRequest = (args: CreatePayloadRequestArgs) => Promise<PayloadRequest>
+
+export const createPayloadRequest: CreatePayloadRequest = async ({
+  branch,
+  context,
+  depth,
+  fallbackLocale,
+  locale: localeArg,
+  payload,
+  req = {} as PayloadRequest,
+  urlSuffix,
+  user,
+}): Promise<PayloadRequest> => {
+  const localization = payload.config?.localization
+  let shouldCreateIsolatedDataLoader = false
 
   if (localization) {
-    const locales = sanitizeLocales({
+    const locale = localeArg === '*' ? 'all' : localeArg
+    const defaultLocale = localization.defaultLocale
+    const localeCandidate = locale || req?.locale || req?.query?.locale
+
+    req.locale =
+      localeCandidate && typeof localeCandidate === 'string' ? localeCandidate : defaultLocale
+
+    const sanitizedFallback = sanitizeFallbackLocale({
       fallbackLocale: fallbackLocale!,
-      locale: locale!,
+      locale: req.locale,
       localization,
     })
 
-    fallbackLocale = locales.fallbackLocale!
-    locale = locales.locale!
+    req.fallbackLocale = sanitizedFallback!
   }
 
-  // Materialized here for the same reason `locale` is, and it has to be: operations
-  // hand the database adapter a narrowed request that carries `branch` explicitly
-  // rather than the whole request, so a branch still sitting unread in the query
-  // string is invisible to the read and it resolves against main. Set only when
-  // asked for, so an unbranched request is untouched.
-  const branch = searchParams.get('branch')
+  const i18n =
+    req?.i18n ||
+    (await getLocalI18n({ config: payload.config, language: payload.config.i18n.fallbackLanguage }))
 
-  const customRequest: CustomPayloadRequestProperties = {
-    ...(branch ? { branch } : {}),
-    context: {},
-    fallbackLocale: fallbackLocale!,
-    hash: urlProperties.hash,
-    host: urlProperties.host,
-    href: urlProperties.href,
-    i18n,
-    locale,
-    origin: urlProperties.origin,
-    pathname: urlProperties.pathname,
-    payload,
-    payloadAPI: isGraphQL ? 'GraphQL' : 'REST',
-    payloadDataLoader: undefined!,
-    payloadUploadSizes: {},
-    port: urlProperties.port,
-    protocol: urlProperties.protocol,
-    query,
-    routeParams: params || {},
-    search: urlProperties.search,
-    searchParams: urlProperties.searchParams,
-    t: i18n.t,
-    transactionID: undefined,
-    user: null,
+  if (!req.headers) {
+    req.headers = new Headers()
   }
 
-  const req: PayloadRequest = Object.assign(request, customRequest)
+  req.context = getRequestContext(req, context)
 
-  req.payloadDataLoader = getDataLoader(req)
+  if (branch !== undefined) {
+    const targetBranch = branch === false ? MAIN_BRANCH : branch
+    const currentBranch =
+      peekResolvedBranch(req) ??
+      (typeof req.branch === 'string'
+        ? req.branch
+        : typeof req.query?.branch === 'string'
+          ? req.query.branch
+          : undefined)
 
-  const { responseHeaders, user } = await executeAuthStrategies({
-    canSetHeaders,
-    headers: req.headers,
-    isGraphQL,
-    payload,
-  })
+    if (currentBranch !== undefined && currentBranch !== targetBranch) {
+      req = isolateObjectProperty(req, ['branch', 'context', 'payloadDataLoader'])
+      req.context = { ...req.context }
+      resetBranchState(req as PayloadRequest)
+      shouldCreateIsolatedDataLoader = true
+    }
 
-  req.user = user
-
-  if (responseHeaders) {
-    req.responseHeaders = responseHeaders
+    req.branch = branch === false ? undefined : branch
+    ;(req.context as Record<string, unknown>)._branchBypass = branch === false
   }
 
-  return req
+  req.payloadAPI = req?.payloadAPI || 'local'
+  req.payload = payload
+  req.i18n = i18n
+  req.t = i18n.t
+  req.user = user || req?.user || null
+
+  // Ensure user.collection is set for auth-related access control
+  // TODO (4.0): Instead of silently falling back, throw an error if user.collection is missing
+  if (req.user && !req.user.collection) {
+    req.user = { ...req.user, collection: payload.config.admin.user }
+  }
+
+  req.payloadDataLoader = shouldCreateIsolatedDataLoader
+    ? getDataLoader(req as PayloadRequest)
+    : req?.payloadDataLoader || getDataLoader(req as PayloadRequest)
+  req.routeParams = req?.routeParams || {}
+  req.query = req?.query || {}
+
+  if (typeof depth !== 'undefined') {
+    req.query.depth = depth
+  }
+
+  attachFakeURLProperties(req, urlSuffix)
+
+  return req as PayloadRequest
 }

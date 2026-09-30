@@ -2,6 +2,8 @@ import type { MarkRequired } from 'ts-essentials'
 
 import type { PayloadRequest } from '../types/index.js'
 
+import { clearTransactionCommitCallbacks } from './transactionCallbacks.js'
+
 /**
  * Rollback the transaction from the req using the db adapter and removes it from the req
  *
@@ -23,5 +25,6 @@ export async function killTransaction(
       // swallow any errors while attempting to rollback
     }
     delete req.transactionID
+    clearTransactionCommitCallbacks({ req, transactionID })
   }
 }

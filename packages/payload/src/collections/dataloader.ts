@@ -187,6 +187,7 @@ export const getDataLoader = (req: PayloadRequest) => {
 }
 
 const createFindDataloaderCacheKey = ({
+  branch,
   collection,
   currentDepth,
   depth,
@@ -206,6 +207,7 @@ const createFindDataloaderCacheKey = ({
   where,
 }: FindOptions<string, SelectType>): string =>
   JSON.stringify([
+    branch ?? req?.branch,
     collection,
     currentDepth,
     depth,

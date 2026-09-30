@@ -3,6 +3,7 @@ import { status as httpStatus } from 'http-status'
 import type { AccessResult } from '../../config/types.js'
 import type { CollectionSlug, FindOptions } from '../../index.js'
 import type { PayloadRequest, PopulateType, SelectType, Where } from '../../types/index.js'
+import type { DeferredCleanupScope } from '../../utilities/transactionCallbacks.js'
 import type {
   BulkOperationResult,
   Collection,
@@ -11,16 +12,24 @@ import type {
 } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
-import { willBranchAbsorbDelete } from '../../branching/tombstone.js'
+import { resolveBranch } from '../../branching/resolveBranch.js'
+import {
+  assertBranchCreatedDeleteUnreferenced,
+  willBranchAbsorbDelete,
+} from '../../branching/tombstone.js'
+import { MAIN_BRANCH } from '../../branching/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
-import { APIError } from '../../errors/index.js'
+import { APIError, Locked } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
-import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
+import {
+  deleteDocumentLocks,
+  getDocumentLockState,
+} from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasScheduledPublishEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
@@ -28,6 +37,12 @@ import { isErrorPublic } from '../../utilities/isErrorPublic.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import {
+  beginDeferredCleanupScope,
+  clearDeferredCleanupScope,
+  flushDeferredCleanupScope,
+  flushDeferredCleanupScopeAfterOperation,
+} from '../../utilities/transactionCallbacks.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
 import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
@@ -53,13 +68,18 @@ export const deleteOperation = async <
   incomingArgs: Arguments,
 ): Promise<BulkOperationResult<TSlug, TSelect>> => {
   let args = incomingArgs
-
+  let cleanupScope: DeferredCleanupScope | null = null
+  let shouldCommit = false
   if (args.collection.config.disableBulkDelete && !args.overrideAccess) {
     throw new APIError(`Collection ${args.collection.config.slug} has disabled bulk delete`, 403)
   }
 
   try {
-    const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+    shouldCommit =
+      !args.disableTransaction &&
+      !args.req.payload.db.bulkOperationsSingleTransaction &&
+      (await initTransaction(args.req))
+    cleanupScope = await beginDeferredCleanupScope({ req: args.req })
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
@@ -148,72 +168,386 @@ export const deleteOperation = async <
     })
 
     const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
+    let didBatchDeleteFail = false
 
-    const promises = docs.map(async (doc) => {
-      let result
+    type Doc = DataFromCollectionSlug<TSlug>
+    type ResultDoc = BulkOperationResult<TSlug, TSelect>['docs'][number]
+    type CheckedDeleteEntry = {
+      doc: Doc
+      fullDocument: Doc
+      index: number
+      lockDocumentIDs: (number | string)[]
+    }
+    type DeleteEntry = {
+      absorbedByBranch: boolean
+    } & CheckedDeleteEntry
 
-      const { id } = doc
+    const deletedDocumentIDs = new Map<string, number | string>()
+    const isDeletingFromBranch =
+      Boolean(
+        config.branching?.enabled &&
+          config.branching.branchableCollections.has(collectionConfig.slug),
+      ) && resolveBranch(req) !== MAIN_BRANCH
 
-      try {
-        // Each document gets its own transaction when singleTransaction is enabled
-        let docShouldCommit = false
-        if (req.payload.db.bulkOperationsSingleTransaction) {
-          docShouldCommit = await initTransaction(req)
+    const pushError = (id: number | string, error: unknown, message?: string) => {
+      errors.push({
+        id,
+        isPublic: error instanceof Error ? isErrorPublic(error, config) : false,
+        message: message ?? (error instanceof Error ? error.message : 'Unknown error'),
+      })
+    }
+
+    // /////////////////////////////////////
+    // beforeDelete - Collection, and associated files
+    // /////////////////////////////////////
+
+    const assertDeleteUnreferenced = async ({ doc }: { doc: Doc }): Promise<Doc> =>
+      (await assertBranchCreatedDeleteUnreferenced({
+        collectionSlug: collectionConfig.slug,
+        doc,
+        req,
+      })) as Doc
+
+    const runBeforeDeleteHooks = async ({ doc }: { doc: Doc }): Promise<void> => {
+      if (collectionConfig.hooks?.beforeDelete?.length) {
+        for (const hook of collectionConfig.hooks.beforeDelete) {
+          await hook({
+            id: doc.id,
+            collection: collectionConfig,
+            context: req.context,
+            req,
+          })
+        }
+      }
+    }
+
+    const runDeleteCleanup = async ({ fullDocument }: { fullDocument: Doc }): Promise<boolean> => {
+      const absorbedByBranch = willBranchAbsorbDelete({
+        collectionSlug: collectionConfig.slug,
+        doc: fullDocument,
+        req,
+      })
+
+      if (!absorbedByBranch) {
+        await deleteAssociatedFiles({
+          collectionConfig,
+          config,
+          doc: fullDocument,
+          overrideDelete: true,
+          req,
+        })
+      }
+
+      return absorbedByBranch
+    }
+
+    const prepareDocumentsForDelete = async (): Promise<CheckedDeleteEntry[]> => {
+      const { lockDocumentIDsByDocumentID, lockedDocumentIDs } = await getDocumentLockState({
+        collectionSlug: collectionConfig.slug,
+        ids: docs.map(({ id }) => id),
+        overrideLock,
+        req,
+      })
+
+      const unlocked: { doc: Doc; index: number }[] = []
+
+      docs.forEach((doc, index) => {
+        if (lockedDocumentIDs.has(String(doc.id))) {
+          pushError(
+            doc.id,
+            new Locked(`Document with ID ${doc.id} is currently locked and cannot be deleted.`),
+          )
+
+          return
         }
 
-        // /////////////////////////////////////
-        // Handle potentially locked documents
-        // /////////////////////////////////////
+        unlocked.push({ doc, index })
+      })
 
-        await checkDocumentLockStatus({
-          id,
+      const initialCheckResults = await Promise.all(
+        unlocked.map(async (entry): Promise<CheckedDeleteEntry | null> => {
+          try {
+            const fullDocument = await assertDeleteUnreferenced({ doc: entry.doc })
+
+            return {
+              ...entry,
+              fullDocument,
+              lockDocumentIDs: lockDocumentIDsByDocumentID.get(String(entry.doc.id)) ?? [],
+            }
+          } catch (error) {
+            pushError(entry.doc.id, error)
+
+            return null
+          }
+        }),
+      )
+      const initiallyChecked = initialCheckResults.filter(
+        (entry): entry is CheckedDeleteEntry => entry !== null,
+      )
+
+      const hookResults = await Promise.all(
+        initiallyChecked.map(async (entry): Promise<CheckedDeleteEntry | null> => {
+          try {
+            await runBeforeDeleteHooks({ doc: entry.doc })
+
+            return entry
+          } catch (error) {
+            pushError(entry.doc.id, error)
+
+            return null
+          }
+        }),
+      )
+      const hookCompleted = hookResults.filter(
+        (entry): entry is CheckedDeleteEntry => entry !== null,
+      )
+
+      const postHookCheckResults = await Promise.all(
+        hookCompleted.map(async (entry): Promise<CheckedDeleteEntry | null> => {
+          try {
+            const fullDocument = await assertDeleteUnreferenced({ doc: entry.fullDocument })
+
+            return { ...entry, fullDocument }
+          } catch (error) {
+            pushError(entry.doc.id, error)
+
+            return null
+          }
+        }),
+      )
+
+      return postHookCheckResults.filter((entry): entry is CheckedDeleteEntry => entry !== null)
+    }
+
+    // /////////////////////////////////////
+    // afterRead - Fields, afterRead - Collection, afterDelete - Collection
+    // /////////////////////////////////////
+
+    const runAfterDeleteWork = async (doc: Doc): Promise<ResultDoc> => {
+      let result = await afterRead({
+        collection: collectionConfig,
+        context: req.context,
+        depth: depth!,
+        doc,
+        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+        draft: undefined,
+        fallbackLocale: fallbackLocale!,
+        global: null,
+        locale: locale!,
+        overrideAccess: overrideAccess!,
+        populate,
+        req,
+        select,
+        showHiddenFields: showHiddenFields!,
+      })
+
+      // Add collection property for auth collections
+      if (collectionConfig.auth) {
+        result = { ...result, collection: collectionConfig.slug }
+      }
+
+      if (collectionConfig.hooks?.afterRead?.length) {
+        for (const hook of collectionConfig.hooks.afterRead) {
+          result =
+            (await hook({
+              collection: collectionConfig,
+              context: req.context,
+              doc: result || doc,
+              overrideAccess,
+              req,
+            })) || result
+        }
+      }
+
+      if (collectionConfig.hooks?.afterDelete?.length) {
+        for (const hook of collectionConfig.hooks.afterDelete) {
+          result =
+            (await hook({
+              id: doc.id,
+              collection: collectionConfig,
+              context: req.context,
+              doc: result,
+              req,
+            })) || result
+        }
+      }
+
+      return result as ResultDoc
+    }
+
+    /**
+     * One transaction and one set of database calls per document. Only used when
+     * `bulkOperationsSingleTransaction` is enabled, which requires each document to be committed
+     * on its own and therefore cannot share a batched write with the rest of the operation.
+     */
+    const deleteDocumentIndividually = async ({
+      doc,
+      fullDocument: initiallyCheckedDocument,
+      lockDocumentIDs,
+    }: CheckedDeleteEntry): Promise<null | ResultDoc> => {
+      let docCleanupScope: DeferredCleanupScope | null = null
+      let docShouldCommit = false
+
+      try {
+        docShouldCommit = await initTransaction(req)
+        docCleanupScope = await beginDeferredCleanupScope({ req })
+
+        const fullDocument = await assertDeleteUnreferenced({ doc: initiallyCheckedDocument })
+        const absorbedByBranch = willBranchAbsorbDelete({
           collectionSlug: collectionConfig.slug,
-          lockErrorMessage: `Document with ID ${id} is currently locked and cannot be deleted.`,
-          overrideLock,
+          doc: fullDocument,
           req,
         })
 
-        // /////////////////////////////////////
-        // beforeDelete - Collection
-        // /////////////////////////////////////
+        if (!isDeletingFromBranch) {
+          await runDeleteCleanup({ fullDocument })
 
-        if (collectionConfig.hooks?.beforeDelete?.length) {
-          for (const hook of collectionConfig.hooks.beforeDelete) {
-            await hook({
-              id,
-              collection: collectionConfig,
-              context: req.context,
+          if (collectionConfig.versions) {
+            await deleteCollectionVersions({
+              id: doc.id,
+              slug: collectionConfig.slug,
+              payload,
+              req,
+            })
+          }
+
+          if (hasScheduledPublishEnabled(collectionConfig) && !absorbedByBranch) {
+            await deleteScheduledPublishJobs({
+              id: doc.id,
+              slug: collectionConfig.slug,
+              payload,
               req,
             })
           }
         }
 
-        // See `deleteByID`: on a branch these cascades would reach main's data,
-        // because the delete becomes a tombstone and main keeps its row.
-        const absorbedByBranch = willBranchAbsorbDelete({
+        await payload.db.deleteOne({
+          collection: collectionConfig.slug,
+          req,
+          returning: false,
+          where: {
+            id: {
+              equals: doc.id,
+            },
+          },
+        })
+
+        deletedDocumentIDs.set(String(doc.id), doc.id)
+
+        if (isDeletingFromBranch) {
+          await runDeleteCleanup({ fullDocument })
+
+          if (collectionConfig.versions) {
+            await deleteCollectionVersions({
+              id: doc.id,
+              slug: collectionConfig.slug,
+              payload,
+              req,
+            })
+          }
+
+          if (hasScheduledPublishEnabled(collectionConfig) && !absorbedByBranch) {
+            await deleteScheduledPublishJobs({
+              id: doc.id,
+              slug: collectionConfig.slug,
+              payload,
+              req,
+            })
+          }
+        }
+
+        await deleteDocumentLocks({
           collectionSlug: collectionConfig.slug,
-          doc,
+          ids: [doc.id],
+          lockDocumentIDs,
           req,
         })
 
-        if (!absorbedByBranch) {
-          await deleteAssociatedFiles({
-            collectionConfig,
-            config,
-            doc,
-            overrideDelete: true,
-            req,
-          })
+        const result = await runAfterDeleteWork(doc)
+
+        if (docCleanupScope) {
+          await flushDeferredCleanupScope({ req, scope: docCleanupScope })
+        }
+        if (docShouldCommit) {
+          await commitTransaction(req)
         }
 
+        return result
+      } catch (error) {
+        if (docCleanupScope) {
+          clearDeferredCleanupScope({ req, scope: docCleanupScope })
+        }
+
+        if (docShouldCommit) {
+          await killTransaction(req)
+          deletedDocumentIDs.delete(String(doc.id))
+        }
+
+        pushError(doc.id, error)
+
+        return null
+      }
+    }
+
+    /**
+     * Deletes unbranched rows as one batch. Branch deletes use the per-document adapter path so it
+     * can create tombstones and remove branch-created rows from the change registry. Hooks still
+     * run for each document.
+     */
+    const deleteDocumentsInBulk = async (
+      preparedDocuments: CheckedDeleteEntry[],
+    ): Promise<(null | ResultDoc)[]> => {
+      const results: (null | ResultDoc)[] = new Array(docs.length).fill(null)
+      let deletable: DeleteEntry[]
+
+      if (isDeletingFromBranch) {
+        deletable = preparedDocuments.map((entry) => ({
+          ...entry,
+          absorbedByBranch: willBranchAbsorbDelete({
+            collectionSlug: collectionConfig.slug,
+            doc: entry.fullDocument,
+            req,
+          }),
+        }))
+      } else {
+        const cleanupResults = await Promise.all(
+          preparedDocuments.map(async (entry): Promise<DeleteEntry | null> => {
+            try {
+              const absorbedByBranch = await runDeleteCleanup({
+                fullDocument: entry.fullDocument,
+              })
+
+              return { ...entry, absorbedByBranch }
+            } catch (error) {
+              pushError(entry.doc.id, error)
+
+              return null
+            }
+          }),
+        )
+
+        deletable = cleanupResults.filter((entry): entry is DeleteEntry => entry !== null)
+      }
+
+      if (!deletable.length) {
+        return results
+      }
+
+      const ids = deletable.map(({ doc }) => doc.id)
+      const lockDocumentIDs = deletable.flatMap((entry) => entry.lockDocumentIDs)
+      const hardDeleteIDs = deletable
+        .filter(({ absorbedByBranch }) => !absorbedByBranch)
+        .map(({ doc }) => doc.id)
+
+      if (!isDeletingFromBranch) {
         // /////////////////////////////////////
         // Delete versions
         // /////////////////////////////////////
 
         if (collectionConfig.versions) {
           await deleteCollectionVersions({
-            id,
             slug: collectionConfig.slug,
+            ids,
             payload,
             req,
           })
@@ -222,141 +556,154 @@ export const deleteOperation = async <
         // /////////////////////////////////////
         // Delete scheduled posts
         // /////////////////////////////////////
-        if (hasScheduledPublishEnabled(collectionConfig) && !absorbedByBranch) {
+
+        if (hasScheduledPublishEnabled(collectionConfig) && hardDeleteIDs.length) {
           await deleteScheduledPublishJobs({
-            id,
             slug: collectionConfig.slug,
+            ids: hardDeleteIDs,
             payload,
             req,
           })
         }
-
-        // /////////////////////////////////////
-        // Delete document
-        // /////////////////////////////////////
-
-        await payload.db.deleteOne({
-          collection: collectionConfig.slug,
-          req,
-          returning: false,
-          where: {
-            id: {
-              equals: id,
-            },
-          },
-        })
-
-        // /////////////////////////////////////
-        // afterRead - Fields
-        // /////////////////////////////////////
-
-        result = await afterRead({
-          collection: collectionConfig,
-          context: req.context,
-          depth: depth!,
-          doc: result || doc,
-          // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-          draft: undefined,
-          fallbackLocale: fallbackLocale!,
-          global: null,
-          locale: locale!,
-          overrideAccess: overrideAccess!,
-          populate,
-          req,
-          select,
-          showHiddenFields: showHiddenFields!,
-        })
-
-        // /////////////////////////////////////
-        // Add collection property for auth collections
-        // /////////////////////////////////////
-
-        if (collectionConfig.auth) {
-          result = { ...result, collection: collectionConfig.slug }
-        }
-
-        // /////////////////////////////////////
-        // afterRead - Collection
-        // /////////////////////////////////////
-
-        if (collectionConfig.hooks?.afterRead?.length) {
-          for (const hook of collectionConfig.hooks.afterRead) {
-            result =
-              (await hook({
-                collection: collectionConfig,
-                context: req.context,
-                doc: result || doc,
-                overrideAccess,
-                req,
-              })) || result
-          }
-        }
-
-        // /////////////////////////////////////
-        // afterDelete - Collection
-        // /////////////////////////////////////
-
-        if (collectionConfig.hooks?.afterDelete?.length) {
-          for (const hook of collectionConfig.hooks.afterDelete) {
-            result =
-              (await hook({
-                id,
-                collection: collectionConfig,
-                context: req.context,
-                doc: result,
-                req,
-              })) || result
-          }
-        }
-
-        // /////////////////////////////////////
-        // 8. Return results
-        // /////////////////////////////////////
-        if (docShouldCommit) {
-          await commitTransaction(req)
-        }
-
-        return result
-      } catch (error) {
-        const isPublic = error instanceof Error ? isErrorPublic(error, config) : false
-
-        if (req.payload.db.bulkOperationsSingleTransaction) {
-          await killTransaction(req)
-        }
-        errors.push({
-          id: doc.id,
-          isPublic,
-          message: error instanceof Error ? error.message : 'Unknown error',
-        })
       }
-      return null
-    })
 
-    // Process sequentially when using single transaction mode to avoid shared state issues
-    // Process in parallel when using one transaction for better performance
-    let awaitedDocs
+      // /////////////////////////////////////
+      // Delete documents
+      // /////////////////////////////////////
+
+      const deletedInBatch: (number | string)[] = []
+
+      try {
+        if (isDeletingFromBranch) {
+          for (const { doc } of deletable) {
+            await payload.db.deleteOne({
+              collection: collectionConfig.slug,
+              req,
+              returning: false,
+              where: {
+                id: {
+                  equals: doc.id,
+                },
+              },
+            })
+
+            deletedDocumentIDs.set(String(doc.id), doc.id)
+            deletedInBatch.push(doc.id)
+          }
+        } else {
+          await payload.db.deleteMany({
+            collection: collectionConfig.slug,
+            req,
+            where: {
+              id: {
+                in: ids,
+              },
+            },
+          })
+
+          for (const id of ids) {
+            deletedDocumentIDs.set(String(id), id)
+            deletedInBatch.push(id)
+          }
+        }
+
+        if (isDeletingFromBranch) {
+          await Promise.all(deletable.map(({ fullDocument }) => runDeleteCleanup({ fullDocument })))
+
+          if (collectionConfig.versions) {
+            await deleteCollectionVersions({
+              slug: collectionConfig.slug,
+              ids,
+              payload,
+              req,
+            })
+          }
+
+          if (hasScheduledPublishEnabled(collectionConfig) && hardDeleteIDs.length) {
+            await deleteScheduledPublishJobs({
+              slug: collectionConfig.slug,
+              ids: hardDeleteIDs,
+              payload,
+              req,
+            })
+          }
+        }
+
+        await deleteDocumentLocks({
+          collectionSlug: collectionConfig.slug,
+          ids,
+          lockDocumentIDs,
+          req,
+        })
+      } catch (error) {
+        didBatchDeleteFail = true
+
+        if (shouldCommit) {
+          await killTransaction(req)
+
+          for (const id of deletedInBatch) {
+            deletedDocumentIDs.delete(String(id))
+          }
+        }
+
+        // The delete covers the whole batch, so a failure here belongs to the batch rather than to
+        // any single document. Say so explicitly, otherwise one batch failure reads as N unrelated
+        // per-document failures.
+        const message = `Bulk delete failed for this batch of ${deletable.length} documents: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`
+
+        for (const { doc } of deletable) {
+          pushError(doc.id, error, message)
+        }
+
+        return results
+      }
+
+      await Promise.all(
+        deletable.map(async (entry) => {
+          try {
+            results[entry.index] = await runAfterDeleteWork(entry.doc)
+          } catch (error) {
+            pushError(entry.doc.id, error)
+          }
+        }),
+      )
+
+      return results
+    }
+
+    let awaitedDocs: (null | ResultDoc)[]
+    const preparedDocuments = await prepareDocumentsForDelete()
+
     if (req.payload.db.bulkOperationsSingleTransaction) {
+      // Process sequentially so that each document's transaction is isolated from the next
       awaitedDocs = []
-      for (const promise of promises) {
-        awaitedDocs.push(await promise)
+
+      for (const preparedDocument of preparedDocuments) {
+        awaitedDocs.push(await deleteDocumentIndividually(preparedDocument))
       }
     } else {
-      awaitedDocs = await Promise.all(promises)
+      awaitedDocs = await deleteDocumentsInBulk(preparedDocuments)
     }
 
     // /////////////////////////////////////
     // Delete Preferences
     // /////////////////////////////////////
 
-    await deleteUserPreferences({
-      collectionConfig,
-      ids: docs.map(({ id }) => id),
-      payload,
-      req,
-    })
+    const deletedPreferenceIDs = [...deletedDocumentIDs.values()]
+
+    if (deletedPreferenceIDs.length) {
+      await deleteUserPreferences({
+        collectionConfig,
+        ids: deletedPreferenceIDs,
+        payload,
+        req,
+      })
+    }
 
     let result = {
-      docs: awaitedDocs.filter(Boolean),
+      docs: awaitedDocs.filter((doc): doc is ResultDoc => Boolean(doc)),
       errors,
     }
 
@@ -372,13 +719,26 @@ export const deleteOperation = async <
       result,
     })
 
-    if (shouldCommit) {
+    if (cleanupScope) {
+      if (didBatchDeleteFail) {
+        clearDeferredCleanupScope({ req: args.req, scope: cleanupScope })
+      } else {
+        await flushDeferredCleanupScopeAfterOperation({ req, scope: cleanupScope })
+      }
+    }
+    if (shouldCommit && !didBatchDeleteFail) {
       await commitTransaction(req)
     }
 
     return result
   } catch (error: unknown) {
-    await killTransaction(args.req)
+    if (cleanupScope) {
+      clearDeferredCleanupScope({ req: args.req, scope: cleanupScope })
+    }
+
+    if (shouldCommit) {
+      await killTransaction(args.req)
+    }
     throw error
   }
 }

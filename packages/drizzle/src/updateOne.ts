@@ -1,3 +1,4 @@
+import type { SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { UpdateOne } from 'payload'
 
@@ -8,9 +9,13 @@ import type { DrizzleAdapter } from './types.js'
 
 import { buildQuery } from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
+import { transform } from './transform/read/index.js'
+import { transformForWrite } from './transform/write/index.js'
 import { upsertRow } from './upsertRow/index.js'
+import { shouldUseOptimizedUpsertRow } from './upsertRow/shouldUseOptimizedUpsertRow.js'
 import { getPrimaryDb } from './utilities/getPrimaryDb.js'
 import { getTransaction } from './utilities/getTransaction.js'
+import { markWrite } from './utilities/readAfterWrite.js'
 
 export const updateOne: UpdateOne = async function updateOne(
   this: DrizzleAdapter,
@@ -34,6 +39,7 @@ export const updateOne: UpdateOne = async function updateOne(
     id === undefined || id === null
       ? id
       : await resolveBranchRowID({ id, branch, collectionSlug, req })
+  let whereToUpdate: SQL<unknown> | undefined
 
   const db = getPrimaryDb(this, await getTransaction(this, req))
 
@@ -45,6 +51,57 @@ export const updateOne: UpdateOne = async function updateOne(
       tableName,
       where: whereArg,
     })
+    // A `where` that needs joins cannot be applied to the UPDATE statement itself, so those
+    // queries keep resolving a matching id first and then update that row unconditionally
+    whereToUpdate = joins.length === 0 ? where : undefined
+
+    if (options.atomic === true) {
+      if (!shouldUseOptimizedUpsertRow({ data, fields: collection.flattenedFields })) {
+        throw new Error('Atomic where updates only support fields stored on the main table')
+      }
+
+      const { arraysToPush, row } = transformForWrite({
+        adapter: this,
+        data,
+        enableAtomicWrites: true,
+        fields: collection.flattenedFields,
+        tableName,
+      })
+
+      if (arraysToPush && Object.keys(arraysToPush).length) {
+        throw new Error('Atomic where updates do not support array operations')
+      }
+
+      markWrite(this)
+
+      const docs = await (db as LibSQLDatabase)
+        .update(this.tables[tableName])
+        .set(row)
+        .where(where)
+        .returning()
+
+      if (!docs[0]) {
+        return null
+      }
+
+      const result = transform({
+        adapter: this,
+        config: this.payload.config,
+        data: docs[0],
+        fields: collection.flattenedFields,
+        joinQuery: false,
+        tableName,
+      })
+
+      applyBranchIDProjection({
+        branch,
+        collectionSlug,
+        docs: [result as Record<string, unknown>],
+        req,
+      })
+
+      return result
+    }
 
     // selectDistinct will only return if there are joins
     const selectDistinctResult = await selectDistinct({
@@ -94,6 +151,7 @@ export const updateOne: UpdateOne = async function updateOne(
     req,
     select: withBranchIDSelect({ branch, collectionSlug, req, select }),
     tableName,
+    where: whereToUpdate,
   })
 
   if (returning === false) {

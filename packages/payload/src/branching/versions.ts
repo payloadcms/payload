@@ -2,7 +2,13 @@ import type { Payload } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 
 import { rewriteBranchVersionParents } from './branchIDs.js'
-import { loadBranchDeletions, loadBranchManifest, resolveBranch } from './resolveBranch.js'
+import {
+  loadBranchDeletions,
+  loadBranchManifest,
+  peekBranchDeletions,
+  peekBranchManifest,
+  resolveBranch,
+} from './resolveBranch.js'
 import { resolveBranchRowID } from './resolveBranchRowID.js'
 import { branchField, branchParentField, MAIN_BRANCH } from './types.js'
 
@@ -17,6 +23,57 @@ const bypassed = (branch: false | string | undefined, req?: Partial<PayloadReque
   branch === false ||
   !req?.payload ||
   Boolean((req.context as Record<string, unknown> | undefined)?._branchBypass)
+
+const buildBranchVersionQuery = ({
+  branch,
+  deletedIDs,
+  shadowedIDs,
+  where,
+}: {
+  branch: string
+  deletedIDs: (number | string)[]
+  shadowedIDs: (number | string)[]
+  where: undefined | Where
+}): Where => {
+  if (branch === MAIN_BRANCH) {
+    const mainBase = where && Object.keys(where).length ? [where] : []
+
+    return { and: [...mainBase, { [branchField]: { equals: MAIN_BRANCH } }] }
+  }
+
+  // `id` arrives here as `parent` (`appendVersionToQueryKey`), and on a branch a version
+  // row's `parent` is the shadow row while the caller means the canonical document. Same
+  // rewrite the history query does — without it, filtering a drafts read by document ID
+  // matched nothing on a branch while working on main, which is the admin panel's own
+  // read of a single draft.
+  const base = (() => {
+    const rewritten = rewriteBranchVersionParents(where)
+
+    return rewritten && Object.keys(rewritten).length ? [rewritten] : []
+  })()
+
+  const mainVersions: Where = shadowedIDs.length
+    ? { and: [{ [branchField]: { equals: MAIN_BRANCH } }, { parent: { not_in: shadowedIDs } }] }
+    : { [branchField]: { equals: MAIN_BRANCH } }
+
+  // A tombstone is a flag on the collection row, which version rows know nothing
+  // about — so a document deleted on this branch would keep its branch version
+  // chain and go on appearing in drafts reads, while every other read on the
+  // branch treats it as gone. `_branchParent` is a relationship field, so
+  // `not_in` is null-safe on relational adapters as well as Mongo.
+  const branchVersions: Where = deletedIDs.length
+    ? {
+        and: [
+          { [branchField]: { equals: branch } },
+          { [branchParentField]: { not_in: deletedIDs } },
+        ],
+      }
+    : { [branchField]: { equals: branch } }
+
+  return {
+    and: [...base, { or: [branchVersions, mainVersions] }],
+  }
+}
 
 /**
  * Branch predicate for version queries.
@@ -42,50 +99,54 @@ export const resolveBranchVersionQuery = async ({
     return where
   }
 
-  const branch = branchOverride ?? resolveBranch(req as PayloadRequest)
+  const branch =
+    typeof branchOverride === 'string' ? branchOverride : resolveBranch(req as PayloadRequest)
 
   if (branch === MAIN_BRANCH) {
-    const mainBase = where && Object.keys(where).length ? [where] : []
-
-    return { and: [...mainBase, { [branchField]: { equals: MAIN_BRANCH } }] }
+    return buildBranchVersionQuery({ branch, deletedIDs: [], shadowedIDs: [], where })
   }
-
-  // `id` arrives here as `parent` (`appendVersionToQueryKey`), and on a branch a version
-  // row's `parent` is the shadow row while the caller means the canonical document. Same
-  // rewrite the history query does — without it, filtering a drafts read by document ID
-  // matched nothing on a branch while working on main, which is the admin panel's own
-  // read of a single draft.
-  const base = (() => {
-    const rewritten = rewriteBranchVersionParents(where)
-
-    return rewritten && Object.keys(rewritten).length ? [rewritten] : []
-  })()
 
   const manifest = await loadBranchManifest(req as PayloadRequest)
   const shadowedIDs = manifest.get(collectionSlug) ?? []
   const deletedIDs = (await loadBranchDeletions(req as PayloadRequest)).get(collectionSlug) ?? []
 
-  const mainVersions: Where = shadowedIDs.length
-    ? { and: [{ [branchField]: { equals: MAIN_BRANCH } }, { parent: { not_in: shadowedIDs } }] }
-    : { [branchField]: { equals: MAIN_BRANCH } }
+  return buildBranchVersionQuery({ branch, deletedIDs, shadowedIDs, where })
+}
 
-  // A tombstone is a flag on the collection row, which version rows know nothing
-  // about — so a document deleted on this branch would keep its branch version
-  // chain and go on appearing in drafts reads, while every other read on the
-  // branch treats it as gone. `_branchParent` is a relationship field, so
-  // `not_in` is null-safe on relational adapters as well as Mongo.
-  const branchVersions: Where = deletedIDs.length
-    ? {
-        and: [
-          { [branchField]: { equals: branch } },
-          { [branchParentField]: { not_in: deletedIDs } },
-        ],
-      }
-    : { [branchField]: { equals: branch } }
-
-  return {
-    and: [...base, { or: [branchVersions, mainVersions] }],
+/**
+ * Synchronous branch predicate for version joins.
+ *
+ * Join query builders run after the top-level read has loaded and memoized the branch manifest.
+ * This uses that state while sharing the exact query construction with
+ * {@link resolveBranchVersionQuery}.
+ */
+export const resolveBranchVersionQuerySync = ({
+  branch: branchOverride,
+  collectionSlug,
+  req,
+  where,
+}: QueryArgs): undefined | Where => {
+  if (bypassed(branchOverride, req)) {
+    return where
   }
+
+  const branching = req!.payload!.config?.branching
+
+  if (!branching?.enabled || !branching.branchableCollections.has(collectionSlug)) {
+    return where
+  }
+
+  const branch =
+    typeof branchOverride === 'string' ? branchOverride : resolveBranch(req as PayloadRequest)
+
+  if (branch === MAIN_BRANCH) {
+    return buildBranchVersionQuery({ branch, deletedIDs: [], shadowedIDs: [], where })
+  }
+
+  const shadowedIDs = peekBranchManifest(req as PayloadRequest).get(collectionSlug) ?? []
+  const deletedIDs = peekBranchDeletions(req as PayloadRequest).get(collectionSlug) ?? []
+
+  return buildBranchVersionQuery({ branch, deletedIDs, shadowedIDs, where })
 }
 
 /**
@@ -315,5 +376,30 @@ export const deleteBranchVersionChain = async ({
         { [branchParentField]: { exists: true } },
       ],
     },
+  })
+}
+
+/** Drops every version of one global owned by a branch that is being discarded or merged. */
+export const deleteBranchGlobalVersionChain = async ({
+  branch,
+  globalSlug,
+  payload,
+  req,
+}: {
+  branch: string
+  globalSlug: string
+  payload: Payload
+  req: PayloadRequest
+}): Promise<void> => {
+  const globalConfig = payload.globals.config.find(({ slug }) => slug === globalSlug)
+
+  if (!globalConfig?.versions) {
+    return
+  }
+
+  await payload.db.deleteVersions({
+    globalSlug,
+    req,
+    where: { [branchField]: { equals: branch } },
   })
 }

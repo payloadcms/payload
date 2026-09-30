@@ -68,7 +68,9 @@ type Args = {
   siblingDoc: JsonObject
   siblingFields?: (Field | TabAsField)[]
   triggerAccessControl?: boolean
+  triggerDefaultValue?: boolean
   triggerHooks?: boolean
+  triggerPopulation?: boolean
 } & Required<Pick<AfterReadArgs<JsonObject>, 'flattenLocales'>>
 
 // This function is responsible for the following actions, in order:
@@ -110,7 +112,9 @@ export const promise = async ({
   siblingDoc,
   siblingFields,
   triggerAccessControl = true,
+  triggerDefaultValue = true,
   triggerHooks = true,
+  triggerPopulation = true,
 }: Args): Promise<void> => {
   const { indexPath, path, schemaPath } = getFieldPaths({
     field,
@@ -349,6 +353,7 @@ export const promise = async ({
     }
 
     if (
+      triggerPopulation &&
       'virtual' in field &&
       typeof field.virtual === 'string' &&
       (!field.hidden || showHiddenFields)
@@ -406,6 +411,7 @@ export const promise = async ({
     // Set defaultValue on the field for globals being returned without being first created
     // or collection documents created prior to having a default.
     if (
+      triggerDefaultValue &&
       !removedFieldValue &&
       allowDefaultValue &&
       typeof siblingDoc[field.name!] === 'undefined' &&
@@ -420,7 +426,10 @@ export const promise = async ({
       })
     }
 
-    if (field.type === 'relationship' || field.type === 'upload' || field.type === 'join') {
+    if (
+      triggerPopulation &&
+      (field.type === 'relationship' || field.type === 'upload' || field.type === 'join')
+    ) {
       populationPromises.push(
         relationshipPopulationPromise({
           currentDepth,
@@ -484,7 +493,9 @@ export const promise = async ({
             showHiddenFields,
             siblingDoc: row || {},
             triggerAccessControl,
+            triggerDefaultValue,
             triggerHooks,
+            triggerPopulation,
           })
         })
       } else if (!shouldHoistLocalizedValue && typeof rows === 'object' && rows !== null) {
@@ -518,7 +529,9 @@ export const promise = async ({
                 showHiddenFields,
                 siblingDoc: (row as JsonObject) || {},
                 triggerAccessControl,
+                triggerDefaultValue,
                 triggerHooks,
+                triggerPopulation,
               })
             })
           }
@@ -582,7 +595,9 @@ export const promise = async ({
               showHiddenFields,
               siblingDoc: (row as JsonObject) || {},
               triggerAccessControl,
+              triggerDefaultValue,
               triggerHooks,
+              triggerPopulation,
             })
           }
         })
@@ -626,7 +641,9 @@ export const promise = async ({
                   showHiddenFields,
                   siblingDoc: (row as JsonObject) || {},
                   triggerAccessControl,
+                  triggerDefaultValue,
                   triggerHooks,
+                  triggerPopulation,
                 })
               }
             })
@@ -672,7 +689,9 @@ export const promise = async ({
         showHiddenFields,
         siblingDoc,
         triggerAccessControl,
+        triggerDefaultValue,
         triggerHooks,
+        triggerPopulation,
       })
 
       break
@@ -716,7 +735,9 @@ export const promise = async ({
               showHiddenFields,
               siblingDoc: localizedData || {},
               triggerAccessControl,
+              triggerDefaultValue,
               triggerHooks,
+              triggerPopulation,
             })
           })
         } else {
@@ -749,7 +770,9 @@ export const promise = async ({
             showHiddenFields,
             siblingDoc: typeof siblingDoc[field.name] !== 'object' ? {} : siblingDoc[field.name],
             triggerAccessControl,
+            triggerDefaultValue,
             triggerHooks,
+            triggerPopulation,
           })
         }
       } else {
@@ -782,7 +805,9 @@ export const promise = async ({
           showHiddenFields,
           siblingDoc,
           triggerAccessControl,
+          triggerDefaultValue,
           triggerHooks,
+          triggerPopulation,
         })
       }
 
@@ -800,7 +825,7 @@ export const promise = async ({
 
       const editor: RichTextAdapter = field?.editor
 
-      if (editor?.hooks?.afterRead?.length) {
+      if (triggerHooks && editor?.hooks?.afterRead?.length) {
         for (const hook of editor.hooks.afterRead) {
           if (shouldRunHookOnAllLocales) {
             const localesAndValues = Object.entries(siblingDoc[field.name])
@@ -925,7 +950,9 @@ export const promise = async ({
               showHiddenFields,
               siblingDoc: localizedData || {},
               triggerAccessControl,
+              triggerDefaultValue,
               triggerHooks,
+              triggerPopulation,
             })
           })
         } else {
@@ -958,7 +985,9 @@ export const promise = async ({
             showHiddenFields,
             siblingDoc: typeof siblingDoc[field.name] !== 'object' ? {} : siblingDoc[field.name],
             triggerAccessControl,
+            triggerDefaultValue,
             triggerHooks,
+            triggerPopulation,
           })
         }
       } else {
@@ -991,7 +1020,9 @@ export const promise = async ({
           showHiddenFields,
           siblingDoc: tabDoc,
           triggerAccessControl,
+          triggerDefaultValue,
           triggerHooks,
+          triggerPopulation,
         })
       }
 
@@ -1028,7 +1059,9 @@ export const promise = async ({
         showHiddenFields,
         siblingDoc,
         triggerAccessControl,
+        triggerDefaultValue,
         triggerHooks,
+        triggerPopulation,
       })
 
       break

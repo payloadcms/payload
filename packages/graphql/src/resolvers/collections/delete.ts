@@ -1,8 +1,11 @@
+import type { GraphQLResolveInfo } from 'graphql'
 import type { Collection, CollectionSlug, DataFromCollectionSlug, PayloadRequest } from 'payload'
 
-import { deleteByIDOperation, isolateObjectProperty, resetBranchState } from 'payload'
+import { deleteByIDOperation } from 'payload'
 
 import type { Context } from '../types.js'
+
+import { getGraphQLRequest } from '../getGraphQLRequest.js'
 
 export type Resolver<TSlug extends CollectionSlug> = (
   _: unknown,
@@ -17,31 +20,21 @@ export type Resolver<TSlug extends CollectionSlug> = (
   context: {
     req: PayloadRequest
   },
+  info: GraphQLResolveInfo,
 ) => Promise<DataFromCollectionSlug<TSlug>>
 
 export function getDeleteResolver<TSlug extends CollectionSlug>(
   collection: Collection,
 ): Resolver<TSlug> {
-  return async function resolver(_, args, context: Context) {
-    let { req } = context
-    const locale = req.locale
-    const fallbackLocale = req.fallbackLocale
-    req = isolateObjectProperty(req, 'locale')
-    req = isolateObjectProperty(req, 'fallbackLocale')
-    req.locale = args.locale || locale
-    req.fallbackLocale = args.fallbackLocale || fallbackLocale
-
-    // Same shape as `locale`: an argument on the field, resolved onto the request the
-    // operation reads. Branch state is memoized per request, so a field that names its own
-    // branch gets its own copy of that state rather than the previous field's.
-    if (args.branch && args.branch !== req.branch) {
-      req.branch = args.branch
-      req.context = { ...req.context }
-      resetBranchState(req)
-    }
-    if (!req.query) {
-      req.query = {}
-    }
+  return async function resolver(_, args, context: Context, info) {
+    const req = await getGraphQLRequest({
+      branch: args.branch,
+      collectionSlug: collection.config.slug,
+      context,
+      fallbackLocale: args.fallbackLocale,
+      info,
+      locale: args.locale,
+    })
 
     const draft: boolean =
       (args.draft ?? req.query?.draft === 'false')
@@ -53,13 +46,11 @@ export function getDeleteResolver<TSlug extends CollectionSlug>(
       req.query.draft = String(draft)
     }
 
-    context.req = req
-
     const options = {
       id: args.id,
       collection,
       depth: 0,
-      req: isolateObjectProperty(req, 'transactionID'),
+      req,
       trash: args.trash,
     }
 

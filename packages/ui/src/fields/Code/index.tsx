@@ -1,5 +1,5 @@
 'use client'
-import type { CodeFieldClientComponent } from 'payload'
+import type { CodeFieldClientProps } from 'payload'
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -22,7 +22,7 @@ const prismToMonacoLanguageMap = {
 
 const baseClass = 'code-field'
 
-const CodeFieldComponent: CodeFieldClientComponent = (props) => {
+const CodeFieldComponent: React.FC<CodeFieldClientProps> = (props) => {
   const {
     field,
     field: {

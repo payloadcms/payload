@@ -11,7 +11,9 @@ import {
   getQueryDraftsSort,
   type JoinQuery,
   type PayloadRequest,
+  resolveBranchVersionQuery,
   type SanitizedCollectionConfig,
+  type Where,
 } from 'payload'
 import { fieldShouldBeLocalized, hasDraftsEnabled } from 'payload/shared'
 
@@ -129,7 +131,19 @@ export const buildJoinAggregation = async ({
       const alias = `${as}.docs.${collectionSlug}`
       aliases.push(alias)
 
-      const basePipeline = [
+      const joinBranchPredicate = getBranchPredicateSync({
+        collectionSlug,
+        req,
+      })
+      const branchMatch = joinBranchPredicate
+        ? await buildQuery({
+            adapter,
+            fields: adapter.payload.collections[collectionSlug]!.config.flattenedFields,
+            locale,
+            where: joinBranchPredicate,
+          })
+        : undefined
+      const basePipeline: Exclude<PipelineStage, PipelineStage.Merge | PipelineStage.Out>[] = [
         {
           $addFields: {
             relationTo: {
@@ -146,9 +160,16 @@ export const buildJoinAggregation = async ({
                 },
               },
               $match,
+              ...(branchMatch ? [branchMatch] : []),
             ],
           },
         },
+        ...(joinBranchPredicate
+          ? ([{ $set: { _id: { $ifNull: ['$_branchDocID', '$_id'] } } }] as Exclude<
+              PipelineStage,
+              PipelineStage.Merge | PipelineStage.Out
+            >[])
+          : []),
       ]
 
       const { Model: JoinModel } = getCollection({ adapter, collectionSlug })
@@ -333,20 +354,26 @@ export const buildJoinAggregation = async ({
         req,
       })
 
-      const branchedWhereJoin = joinBranchPredicate
-        ? ({ and: [whereJoin, joinBranchPredicate] } as typeof whereJoin)
-        : whereJoin
+      const resolvedWhereJoin = useDrafts
+        ? ((await resolveBranchVersionQuery({
+            collectionSlug: collectionConfig.slug,
+            req,
+            where: appendVersionToQueryKey(whereJoin),
+          })) ?? {})
+        : joinBranchPredicate
+          ? ({ and: [whereJoin, joinBranchPredicate] } as Where)
+          : whereJoin
 
       const $match = await JoinModel.buildQuery({
         locale,
         payload: adapter.payload,
         where: useDrafts
-          ? combineQueries(appendVersionToQueryKey(branchedWhereJoin), {
+          ? combineQueries(resolvedWhereJoin, {
               latest: {
                 equals: true,
               },
             })
-          : branchedWhereJoin,
+          : resolvedWhereJoin,
       })
 
       const pipeline: Exclude<PipelineStage, PipelineStage.Merge | PipelineStage.Out>[] = [
@@ -355,10 +382,11 @@ export const buildJoinAggregation = async ({
         // primary key, so join results address documents the same way every
         // other read does.
         ...(joinBranchPredicate
-          ? ([{ $set: { _id: { $ifNull: ['$_branchDocID', '$_id'] } } }] as Exclude<
-              PipelineStage,
-              PipelineStage.Merge | PipelineStage.Out
-            >[])
+          ? ([
+              useDrafts
+                ? { $set: { parent: { $ifNull: ['$_branchParent', '$parent'] } } }
+                : { $set: { _id: { $ifNull: ['$_branchDocID', '$_id'] } } },
+            ] as Exclude<PipelineStage, PipelineStage.Merge | PipelineStage.Out>[])
           : []),
         {
           $sort: { [sortProperty]: sortDirection },

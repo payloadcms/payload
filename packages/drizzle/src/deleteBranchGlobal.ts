@@ -12,7 +12,7 @@ import { markWrite } from './utilities/readAfterWrite.js'
  * Drops a branch's copy of a global.
  *
  * Each global has its own table holding one row per branch, so this deletes by the branch
- * column. Main's row is the one where that column is null, and `branch` is always a real
+ * column. Main's row uses the `main` sentinel, and `branch` is always a real non-main
  * branch by the time this is called, so main's row can never match.
  */
 export const deleteBranchGlobal: DeleteBranchGlobal = async function deleteBranchGlobal(

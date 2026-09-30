@@ -40,7 +40,6 @@ describe('Lexical Fully Featured - database', () => {
   let url: AdminUrlUtil
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     const page = await browser.newPage()
@@ -50,8 +49,6 @@ describe('Lexical Fully Featured - database', () => {
   beforeEach(async ({ page }) => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'lexicalTest',
-      uploadsDir: [path.resolve(dirname, './collections/Upload/uploads')],
     })
     url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
     lexical = new LexicalHelpers(page)
@@ -85,6 +82,7 @@ describe('Lexical Fully Featured - database', () => {
       const uploadedImage = await payload.find({
         collection: 'uploads',
         where: { filename: { equals: expectedFileName || 'payload-1.jpg' } },
+        overrideAccess: true,
       })
       expect(uploadedImage.totalDocs).toBe(1)
     }
@@ -129,6 +127,7 @@ describe('Lexical Fully Featured - database', () => {
       const lexicalFullyFeatured = await payload.find({
         collection: lexicalFullyFeaturedSlug,
         limit: 1,
+        overrideAccess: true,
       })
       const richText = lexicalFullyFeatured?.docs?.[0]?.richText
 
@@ -234,6 +233,7 @@ describe('Lexical Fully Featured - database', () => {
           ],
         }),
       },
+      overrideAccess: true,
     })
 
     /**

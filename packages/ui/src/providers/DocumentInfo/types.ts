@@ -73,11 +73,6 @@ export type DocumentInfoContext = {
   incrementVersionCount: () => void
   isInitializing: boolean
   preferencesKey?: string
-  /**
-   * @deprecated This property is deprecated and will be removed in v4.
-   * Use `data` instead.
-   */
-  savedDocumentData?: Data
   setCurrentEditor?: React.Dispatch<React.SetStateAction<User>>
   setData: (data: Data) => void
   setDocFieldPreferences: (
@@ -94,11 +89,6 @@ export type DocumentInfoContext = {
   unlockDocument: (docID: number | string, slug: string) => Promise<void>
   unpublishedVersionCount: number
   updateDocumentEditor: (docID: number | string, slug: string, user: User) => Promise<void>
-  /**
-   * @deprecated This property is deprecated and will be removed in v4.
-   * Use `setData` instead.
-   */
-  updateSavedDocumentData: (data: Data) => void
   uploadStatus?: 'failed' | 'idle' | 'uploading'
   versionCount: number
 } & DocumentInfoProps

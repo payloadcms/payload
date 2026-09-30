@@ -20,7 +20,7 @@ const baseClass = 'pill-branch-changes'
  * from it instead of issuing its own request.
  */
 export const BranchChangesPill: React.FC = () => {
-  const { savedDocumentData } = useDocumentInfo()
+  const { data } = useDocumentInfo()
 
   const {
     config: {
@@ -31,7 +31,7 @@ export const BranchChangesPill: React.FC = () => {
 
   const [count, setCount] = useState<null | number>(null)
 
-  const slug = (savedDocumentData as { slug?: string } | undefined)?.slug
+  const slug = (data as { slug?: string } | undefined)?.slug
 
   useEffect(() => {
     if (!slug) {

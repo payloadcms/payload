@@ -1,6 +1,6 @@
 import type { ServerFunction, Where } from 'payload'
 
-import { canAccessAdmin } from 'payload'
+import { canAccessAdmin, Forbidden } from 'payload'
 import { branchesCollectionSlug } from 'payload/shared'
 
 export type ScheduleMergeHandlerArgs = {
@@ -39,10 +39,49 @@ export const scheduleMergeHandler: ServerFunction<ScheduleMergeHandlerArgs> = as
 
   try {
     if (deleteID) {
+      const scheduledMergeJob = await payload.findByID({
+        id: deleteID,
+        collection: 'payload-jobs',
+        depth: 0,
+        disableErrors: true,
+        overrideAccess: true,
+        req,
+      })
+      const scheduledBranchSlug =
+        scheduledMergeJob?.taskSlug === 'scheduleMerge' &&
+        typeof scheduledMergeJob.input?.branch === 'string'
+          ? scheduledMergeJob.input.branch
+          : undefined
+
+      if (!scheduledBranchSlug) {
+        throw new Forbidden(req.t)
+      }
+
+      const readableBranch = (
+        await payload.find({
+          collection: branchesCollectionSlug,
+          depth: 0,
+          limit: 1,
+          overrideAccess: false,
+          pagination: false,
+          req,
+          user,
+          where: { slug: { equals: scheduledBranchSlug } },
+        })
+      ).docs[0]
+
+      if (!readableBranch) {
+        throw new Forbidden(req.t)
+      }
+
       await payload.delete({
         collection: 'payload-jobs',
+        overrideAccess: true,
         req,
-        where: { id: { equals: deleteID } },
+        where: buildScheduledMergeCancellationWhere({
+          branchSlug: scheduledBranchSlug,
+          jobID: deleteID,
+        }),
       })
 
       return { message: i18n.t('general:success') }
@@ -90,11 +129,27 @@ export const scheduleMergeHandler: ServerFunction<ScheduleMergeHandlerArgs> = as
       ? `Error cancelling scheduled merge ${deleteID}`
       : `Error scheduling merge of branch ${branchID}`
 
-    payload.logger.error({ err }, error)
+    payload.logger.error({ err, msg: error })
 
     return { error }
   }
 }
+
+export const buildScheduledMergeCancellationWhere = ({
+  branchSlug,
+  jobID,
+}: {
+  branchSlug: string
+  jobID: number | string
+}): Where => ({
+  and: [
+    { id: { equals: jobID } },
+    { taskSlug: { equals: 'scheduleMerge' } },
+    { completedAt: { exists: false } },
+    { processingUntil: { exists: false } },
+    { 'input.branch': { equals: branchSlug } },
+  ],
+})
 
 /**
  * The `where` for a branch's upcoming scheduled merges.
@@ -105,6 +160,8 @@ export const scheduleMergeHandler: ServerFunction<ScheduleMergeHandlerArgs> = as
 export const buildUpcomingMergeWhere = ({ branchSlug }: { branchSlug: string }): Where => ({
   and: [
     { taskSlug: { equals: 'scheduleMerge' } },
+    { completedAt: { exists: false } },
+    { processingUntil: { exists: false } },
     { waitUntil: { greater_than: new Date() } },
     { 'input.branch': { equals: branchSlug } },
   ],

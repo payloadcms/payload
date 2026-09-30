@@ -41,6 +41,7 @@ import {
   updateOne,
   updateVersion,
   upsert,
+  upsertBranchGlobalChange,
   validateOperatorHandlers,
 } from '@payloadcms/drizzle'
 import {
@@ -231,6 +232,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       updateOne,
       updateVersion,
       upsert,
+      upsertBranchGlobalChange,
     })
 
     adapter.blocksToJsonMigrator = createBlocksToJsonMigrator({

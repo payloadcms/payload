@@ -1,10 +1,14 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Config } from '../config/types.js'
-import type { CollectionAfterChangeHook, PayloadRequest } from '../index.js'
+import type { CollectionAfterChangeHook, CollectionBeforeDeleteHook, Where } from '../index.js'
 import type { SanitizedBranchingConfig } from './types.js'
 
 import { defaultAccess } from '../auth/defaultAccess.js'
+import { APIError } from '../errors/index.js'
 import { wrapInternalEndpoints } from '../utilities/wrapInternalEndpoints.js'
+import { assertBranchCreatedDocumentsUnreferenced } from './assertBranchCreatedDocumentsUnreferenced.js'
+import { combineBranchAccess } from './combineBranchAccess.js'
+import { discardBranchChangesBeforeBranchDeletion } from './discard.js'
 import { discardBranchHandler } from './endpoints/discard.js'
 import { mergeBranchHandler } from './endpoints/merge.js'
 import { loadBranchRow, setBranchRow } from './resolveBranch.js'
@@ -19,9 +23,15 @@ export const getBranchesCollection = (branching: SanitizedBranchingConfig): Coll
   slug: branchesCollectionSlug,
   access: {
     create: branching.access?.createBranch ?? defaultAccess,
-    delete: branching.access?.deleteBranch ?? defaultAccess,
+    delete: combineBranchAccess({
+      readAccess: branching.access?.readBranch ?? defaultAccess,
+      writeAccess: branching.access?.deleteBranch ?? defaultAccess,
+    }),
     read: branching.access?.readBranch ?? defaultAccess,
-    update: defaultAccess,
+    update: combineBranchAccess({
+      readAccess: branching.access?.readBranch ?? defaultAccess,
+      writeAccess: branching.access?.updateBranch ?? defaultAccess,
+    }),
   },
   admin: {
     defaultColumns: ['name', 'slug', 'status', 'updatedAt'],
@@ -75,6 +85,7 @@ export const getBranchesCollection = (branching: SanitizedBranchingConfig): Coll
     {
       name: 'status',
       type: 'select',
+      access: { create: () => false, update: () => false },
       admin: {
         // Rendered as a status pill rather than a raw lowercase value: a branch's
         // status answers the same question a document's draft/published status
@@ -94,6 +105,7 @@ export const getBranchesCollection = (branching: SanitizedBranchingConfig): Coll
     {
       name: 'mergedAt',
       type: 'date',
+      access: { create: () => false, update: () => false },
       admin: { readOnly: true },
     },
     {
@@ -106,9 +118,13 @@ export const getBranchesCollection = (branching: SanitizedBranchingConfig): Coll
       // scheduled case, where nobody is holding a connection.
       name: 'mergeProgress',
       type: 'text',
+      access: { create: () => false, update: () => false },
       admin: { hidden: true, readOnly: true },
     },
   ],
+  hooks: {
+    beforeDelete: [deleteBranchStateBeforeDelete],
+  },
   // Wrapped so the POST body is parsed onto `req.data`, as with every other
   // built-in endpoint.
   endpoints: wrapInternalEndpoints([
@@ -141,10 +157,10 @@ export const getBranchChangesCollection = (config: Config): CollectionConfig => 
   return {
     slug: branchChangesCollectionSlug,
     access: {
-      create: defaultAccess,
-      delete: defaultAccess,
-      read: defaultAccess,
-      update: defaultAccess,
+      create: () => false,
+      delete: () => false,
+      read: () => false,
+      update: () => false,
     },
     admin: {
       hidden: true,
@@ -209,7 +225,14 @@ export const getBranchChangesCollection = (config: Config): CollectionConfig => 
       // nobody could navigate to.
       afterChange: [reopenBranchOnChange],
     },
-    indexes: [{ fields: ['branch', 'collectionSlug'], unique: false }],
+    indexes: [
+      { fields: ['branch', 'collectionSlug'], unique: false },
+      {
+        fields: ['branch', 'globalSlug'],
+        requireExists: ['globalSlug'],
+        unique: true,
+      },
+    ],
     lockDocuments: false,
     // Registry rows are derived state; versioning them is meaningless.
     versions: false,
@@ -226,11 +249,33 @@ export const getBranchChangesCollection = (config: Config): CollectionConfig => 
 export const getBranchMergesCollection = (): CollectionConfig => ({
   slug: branchMergesCollectionSlug,
   access: {
-    create: defaultAccess,
-    // Append-only: a ledger that can be edited is not a ledger. Deletion is
-    // permitted so that deleting a branch can take its history with it.
-    delete: defaultAccess,
-    read: defaultAccess,
+    create: () => false,
+    delete: () => false,
+    read: ({ req }) => {
+      if (req.user?.id === undefined || !req.user.collection) {
+        return false
+      }
+
+      const identity: Where = {
+        and: [
+          { mergedByCollection: { equals: req.user.collection } },
+          { mergedByID: { equals: String(req.user.id) } },
+        ],
+      }
+
+      if (req.user.collection !== req.payload.config.admin.user) {
+        return identity
+      }
+
+      const legacyIdentity: Where = {
+        and: [
+          { mergedByCollection: { exists: false } },
+          { mergedByID: { equals: String(req.user.id) } },
+        ],
+      }
+
+      return { or: [identity, legacyIdentity] }
+    },
     update: () => false,
   },
   admin: {
@@ -249,7 +294,11 @@ export const getBranchMergesCollection = (): CollectionConfig => ({
       required: true,
     },
     // Stored rather than related: the ledger has to keep reading correctly after
-    // the user is deleted, and after they are renamed.
+    // the user is deleted, renamed, or moved between auth collections.
+    {
+      name: 'mergedByCollection',
+      type: 'text',
+    },
     {
       name: 'mergedByID',
       type: 'text',
@@ -276,14 +325,17 @@ export const getBranchMergesCollection = (): CollectionConfig => ({
         // is dropped by the merge and main then holds the merged values on the only
         // row that exists, so there is no second state left to diff against. Storing
         // them is the price of a history that can still answer "what changed?" —
-        // taken *after* the write for `after`, so hook-derived fields are included
-        // and the diff shows what main really received.
+        // taken *after* the write for `after`, so the diff shows persisted main
+        // state without adding values from read hooks.
         { name: 'before', type: 'json' },
         { name: 'after', type: 'json' },
       ],
     },
   ],
-  indexes: [{ fields: ['branch', 'mergedAt'], unique: false }],
+  indexes: [
+    { fields: ['branch', 'mergedAt'], unique: false },
+    { fields: ['mergedByCollection', 'mergedByID'], unique: false },
+  ],
   lockDocuments: false,
   versions: false,
 })
@@ -318,4 +370,104 @@ const reopenBranchOnChange: CollectionAfterChangeHook = async ({ doc, operation,
   }
 
   return doc
+}
+
+const deleteBranchStateBeforeDelete: CollectionBeforeDeleteHook = async ({ id, req }) => {
+  const branch = await req.payload.findByID({
+    id,
+    collection: branchesCollectionSlug,
+    depth: 0,
+    overrideAccess: true,
+    req,
+  })
+
+  if (typeof branch.slug !== 'string') {
+    return
+  }
+
+  const branchCreatedChanges = await req.payload.find({
+    collection: branchChangesCollectionSlug,
+    depth: 0,
+    overrideAccess: true,
+    pagination: false,
+    req,
+    where: {
+      and: [{ branch: { equals: branch.slug } }, { operation: { equals: 'create' } }],
+    },
+  })
+  const branchCreatedTargets = branchCreatedChanges.docs.flatMap((change) => {
+    if (change.entityType !== 'collection' || typeof change.collectionSlug !== 'string') {
+      return []
+    }
+
+    const docID = (change.doc as { value?: number | string } | undefined)?.value ?? change.doc
+
+    return typeof docID === 'number' || typeof docID === 'string'
+      ? [{ collectionSlug: change.collectionSlug, docID }]
+      : []
+  })
+
+  await assertBranchCreatedDocumentsUnreferenced({
+    ignoredOwnerBranch: branch.slug,
+    req,
+    targets: branchCreatedTargets,
+  })
+
+  const scheduledMergeConditions: Where[] = [
+    { taskSlug: { equals: 'scheduleMerge' } },
+    { 'input.branch': { equals: branch.slug } },
+  ]
+  const now = new Date().toISOString()
+  const activeScheduledMergeWhere: Where = {
+    and: [
+      ...scheduledMergeConditions,
+      { completedAt: { exists: false } },
+      { processingUntil: { greater_than: now } },
+    ],
+  }
+  const assertNoActiveScheduledMerges = async (): Promise<void> => {
+    const activeScheduledMerges = await req.payload.count({
+      collection: 'payload-jobs',
+      overrideAccess: true,
+      req,
+      where: activeScheduledMergeWhere,
+    })
+
+    if (activeScheduledMerges.totalDocs > 0) {
+      throw new APIError('This branch cannot be deleted while a scheduled merge is running.', 409)
+    }
+  }
+
+  // Check first so a rejected deletion leaves every queued job unchanged.
+  await assertNoActiveScheduledMerges()
+
+  await req.payload.delete({
+    collection: 'payload-jobs',
+    overrideAccess: true,
+    req,
+    where: {
+      and: [
+        ...scheduledMergeConditions,
+        {
+          or: [
+            { completedAt: { exists: true } },
+            { processingUntil: { exists: false } },
+            { processingUntil: { less_than_equal: now } },
+          ],
+        },
+      ],
+    },
+  })
+
+  // A worker can acquire or queue work while inactive jobs are being removed.
+  await assertNoActiveScheduledMerges()
+
+  await discardBranchChangesBeforeBranchDeletion(req.payload, { branch: branch.slug, req })
+
+  await req.payload.delete({
+    collection: branchMergesCollectionSlug,
+    overrideAccess: true,
+    req,
+    where: { branch: { equals: branch.slug } },
+  })
 }

@@ -1,18 +1,48 @@
+import type { ArrayField, BlocksField, Field } from '../fields/config/types.js'
 import type { Payload, PayloadRequest } from '../types/index.js'
 import type { DiscardOptions } from './discard.js'
 import type { ResolvedChange } from './effectiveOperations.js'
 import type { BlockedChange } from './preflight.js'
 import type { BranchOperation } from './types.js'
 
-import { updateByIDOperation } from '../collections/operations/updateByID.js'
+import { updateByIDOperationForBranchMerge } from '../collections/operations/updateByID.js'
 import { copyDataWithFreshRowIDs } from '../collections/operations/utilities/copyDataWithFreshRowIDs.js'
+import { APIError, Forbidden } from '../errors/index.js'
+import { tabHasName } from '../fields/config/types.js'
+import { throwOnFieldAccessDeniedContextKey } from '../fields/hooks/beforeValidate/throwOnAccessDenied.js'
+import { deleteUploadFilesExclusiveToDocument } from '../uploads/deleteUploadFilesExclusiveToDocument.js'
 import { commitTransaction } from '../utilities/commitTransaction.js'
-import { createLocalReq } from '../utilities/createLocalReq.js'
+import { createPayloadRequest } from '../utilities/createPayloadRequest.js'
+import { getVersionsMax } from '../utilities/getVersionsConfig.js'
 import { initTransaction } from '../utilities/initTransaction.js'
 import { killTransaction } from '../utilities/killTransaction.js'
+import {
+  beginDeferredCleanupScope,
+  clearDeferredCleanupScope,
+  flushDeferredCleanupScopeAfterOperation,
+} from '../utilities/transactionCallbacks.js'
+import { traverseForLocalizedFields } from '../utilities/traverseForLocalizedFields.js'
+import {
+  enforceMaxVersions,
+  skipEnforceMaxVersionsContextKey,
+} from '../versions/enforceMaxVersions.js'
 import { discardBranchChanges } from './discard.js'
 import { resolveEffectiveOperations } from './effectiveOperations.js'
-import { runGlobalMergePreflight, runMergePreflight } from './preflight.js'
+import {
+  getGlobalMergeLocales,
+  readBranchGlobalWrite,
+  resolveGlobalMergeWrites,
+} from './globalMergeWrites.js'
+import { type BranchMergeWriteGuard, branchMergeWriteGuardContextKey } from './mergeWriteGuard.js'
+import {
+  hasUnavailableBranchCreatedDependency,
+  resolveMergeDependencies,
+  runGlobalMergePreflight,
+  runMergeDependencyPreflight,
+  runMergePreflight,
+} from './preflight.js'
+import { readLocalizedBranchWrite } from './readLocalizedBranchWrite.js'
+import { readCollectionMergeSnapshot, readGlobalMergeSnapshot } from './readMergeSnapshot.js'
 import { isolateBranchState, withoutBranch } from './resolveBranch.js'
 import {
   branchChangesCollectionSlug,
@@ -21,9 +51,10 @@ import {
   branchField,
   branchMergesCollectionSlug,
   branchOpField,
+  branchParentField,
   MAIN_BRANCH,
 } from './types.js'
-import { deleteBranchVersionChain } from './versions.js'
+import { deleteBranchGlobalVersionChain, deleteBranchVersionChain } from './versions.js'
 
 export type MergeableChange = {
   changeID: number | string
@@ -45,7 +76,7 @@ export type MergeWarning = {
 }
 
 export type MergeResult = {
-  /** Changes the merging user is not permitted to apply. */
+  /** Changes that cannot be applied because of access or an unavailable dependency. */
   blocked: BlockedChange[]
   /** True when at least one selected change can be applied. */
   canMerge: boolean
@@ -96,14 +127,13 @@ export type MergeOptions = {
    */
   onProgress?: (progress: MergeProgress) => Promise<void> | void
   /**
-   * Skip the per-document permission preflight, matching how every other Local
-   * API operation defaults to trusting server-side callers.
+   * Skip the per-document permission checks.
    *
-   * HTTP callers must pass `false` together with `user`: the preflight is the
-   * enforcement boundary for branching, since branch writes are deliberately
-   * permissive on the assumption that nothing is real until merge.
+   * HTTP callers must pass `false` together with `user`: branch writes are
+   * deliberately permissive on the assumption that nothing is real until
+   * merge.
    *
-   * @default true
+   * @default false
    */
   overrideAccess?: boolean
   req?: PayloadRequest
@@ -116,6 +146,61 @@ export type MergeOptions = {
 
 const changeDocID = (change: Record<string, any>): number | string =>
   change.doc?.value ?? change.doc
+
+const orderChangesByDependencies = <TChange extends { id: unknown }>({
+  changes,
+  dependencyChangeIDsByChangeID,
+}: {
+  changes: TChange[]
+  dependencyChangeIDsByChangeID: Map<string, Set<string>>
+}): TChange[] => {
+  const changesByID = new Map(changes.map((change) => [String(change.id), change]))
+  const orderedChanges: TChange[] = []
+  const orderedChangeIDs = new Set<string>()
+  const visitingChangeIDs = new Set<string>()
+
+  const visitChange = (change: TChange): void => {
+    const changeID = String(change.id)
+
+    if (orderedChangeIDs.has(changeID) || visitingChangeIDs.has(changeID)) {
+      return
+    }
+
+    visitingChangeIDs.add(changeID)
+
+    for (const dependencyChangeID of dependencyChangeIDsByChangeID.get(changeID) ?? []) {
+      const dependencyChange = changesByID.get(dependencyChangeID)
+
+      if (dependencyChange) {
+        visitChange(dependencyChange)
+      }
+    }
+
+    visitingChangeIDs.delete(changeID)
+    orderedChangeIDs.add(changeID)
+    orderedChanges.push(change)
+  }
+
+  for (const change of changes) {
+    visitChange(change)
+  }
+
+  return orderedChanges
+}
+
+const getSnapshotDocumentTitle = ({
+  after,
+  docID,
+  useAsTitle,
+}: {
+  after: null | Record<string, unknown> | undefined
+  docID: number | string
+  useAsTitle: string | undefined
+}): string => {
+  const title = useAsTitle ? after?.[useAsTitle] : undefined
+
+  return typeof title === 'number' || typeof title === 'string' ? String(title) : String(docID)
+}
 
 /**
  * Applies a branch's changes to `main`.
@@ -136,7 +221,7 @@ export const mergeBranch = async (
     closeBranch = false,
     dryRun = false,
     onProgress,
-    overrideAccess = true,
+    overrideAccess = false,
     req: incomingReq,
     user,
   }: MergeOptions,
@@ -145,7 +230,7 @@ export const mergeBranch = async (
   // primary key and writes to main, so it must not be branch-filtered itself.
   const req = incomingReq
     ? withoutBranch(incomingReq)
-    : await createLocalReq({ branch: false, user }, payload)
+    : await createPayloadRequest({ branch: false, payload, user })
 
   if (user && !req.user) {
     req.user = user
@@ -154,7 +239,7 @@ export const mergeBranch = async (
   const branchDocs = await payload.find({
     collection: branchesCollectionSlug,
     limit: 1,
-    overrideAccess: true,
+    overrideAccess,
     pagination: false,
     req,
     where: { slug: { equals: branch } },
@@ -187,14 +272,30 @@ export const mergeBranch = async (
 
   const resolved = await resolveEffectiveOperations({ branch, changes: pending, payload, req })
 
-  const resolvedByChangeID = new Map(resolved.map((each) => [String(each.change.id), each]))
-
-  // The enforcement boundary: a branch is a proposal, and this is where the
-  // merging user's production permissions are actually applied.
+  // This first pass describes which changes the user can select. Each selected
+  // change is checked again inside the transaction immediately before its real
+  // write, because hooks can change access-relevant state after this point.
   const blocked = overrideAccess ? [] : await runMergePreflight({ payload, pending: resolved, req })
-  const blockedChangeIDs = new Set(blocked.map((each) => String(each.changeID)))
+  const blockedGlobals = overrideAccess
+    ? []
+    : await runGlobalMergePreflight({ payload, pending: pendingGlobals, req })
+  blocked.push(...blockedGlobals)
 
+  blocked.push(
+    ...(await runMergeDependencyPreflight({
+      initiallyBlocked: blocked,
+      payload,
+      pending: resolved,
+      pendingGlobals,
+      req,
+    })),
+  )
+
+  const blockedChangeIDs = new Set(blocked.map((each) => String(each.changeID)))
   const applicable = pending.filter((change) => !blockedChangeIDs.has(String(change.id)))
+  const applicableGlobals = pendingGlobals.filter(
+    (change) => !blockedChangeIDs.has(String(change.id)),
+  )
 
   const mergeable: MergeableChange[] = applicable.map((change) => ({
     changeID: change.id,
@@ -204,14 +305,6 @@ export const mergeBranch = async (
     operation: change.operation as BranchOperation,
   }))
 
-  const blockedGlobals = overrideAccess
-    ? []
-    : await runGlobalMergePreflight({ payload, pending: pendingGlobals, req })
-  const blockedGlobalIDs = new Set(blockedGlobals.map((each) => String(each.changeID)))
-  const applicableGlobals = pendingGlobals.filter(
-    (change) => !blockedGlobalIDs.has(String(change.id)),
-  )
-
   mergeable.push(
     ...applicableGlobals.map((change) => ({
       changeID: change.id,
@@ -220,8 +313,6 @@ export const mergeBranch = async (
       operation: 'update' as const,
     })),
   )
-
-  blocked.push(...blockedGlobals)
 
   const warnings: MergeWarning[] = []
 
@@ -273,47 +364,159 @@ export const mergeBranch = async (
   // triggered over HTTP hands in a `req` of its own that has no transaction on
   // it yet, and it must get one just as much as a Local API call would.
   const shouldCommit = await initTransaction(req)
+  const transactionID = req.transactionID ? await req.transactionID : undefined
+  const hasTransaction = transactionID !== null && transactionID !== undefined
+  const cleanupScope = await beginDeferredCleanupScope({ req })
 
   // Both sides of every change, for the ledger. Read either side of the write
   // because that is the only moment both exist: afterwards the branch's copy is
   // gone and main holds the merged values on the one remaining row.
   const snapshots = new Map<string, { after: unknown; before: unknown }>()
+  const uploadCleanupPlans: {
+    collectionSlug: string
+    retainedDoc: null | Record<string, unknown>
+    sourceDoc: Record<string, unknown>
+  }[] = []
+  const reqContext = req.context as Record<PropertyKey, unknown>
+  const previousBranchMergeWriteGuard = reqContext[branchMergeWriteGuardContextKey]
+  const previousThrowOnFieldAccessDenied = reqContext[throwOnFieldAccessDeniedContextKey]
 
-  const readFromMain = async (collectionSlug: string, docID: number | string) =>
-    (await payload.db.findOne({
-      branch: false,
-      collection: collectionSlug,
-      req,
-      where: { and: [{ [branchField]: { equals: MAIN_BRANCH } }, { id: { equals: docID } }] },
-    })) as null | Record<string, unknown>
+  reqContext[branchMergeWriteGuardContextKey] = (async ({
+    collectionSlug,
+    data,
+    globalSlug,
+    req: writeReq,
+  }) => {
+    if (
+      await hasUnavailableBranchCreatedDependency({
+        collectionSlug,
+        data,
+        globalSlug,
+        payload,
+        req: writeReq,
+      })
+    ) {
+      throw new APIError(
+        'This change refers to branch-created content that will not be available on main.',
+        409,
+      )
+    }
+  }) satisfies BranchMergeWriteGuard
 
-  const readGlobalFromMain = async (globalSlug: string) =>
-    (await payload.findGlobal({
-      slug: globalSlug,
-      branch: false,
-      depth: 0,
-      overrideAccess: true,
-      req,
-    })) as null | Record<string, unknown>
+  if (!overrideAccess) {
+    reqContext[throwOnFieldAccessDeniedContextKey] = true
+  }
 
   try {
-    for (const [index, change] of applicable.entries()) {
+    const refreshedApplicable = await resolveEffectiveOperations({
+      branch,
+      changes: applicable,
+      payload,
+      req,
+    })
+    const dependencyPlan = await resolveMergeDependencies({
+      initiallyBlocked: [],
+      payload,
+      pending: refreshedApplicable,
+      pendingGlobals: applicableGlobals,
+      req,
+    })
+
+    if (dependencyPlan.blocked.length) {
+      throw new APIError(dependencyPlan.blocked[0]!.message, 409)
+    }
+
+    const applicableInWriteOrder = orderChangesByDependencies({
+      changes: applicable,
+      dependencyChangeIDsByChangeID: dependencyPlan.dependencyChangeIDsByChangeID,
+    })
+
+    for (const [index, change] of applicableInWriteOrder.entries()) {
       await onProgress?.({
         collectionSlug: change.collectionSlug as string,
         current: index + 1,
         docID: changeDocID(change),
         operation: change.operation as BranchOperation,
-        total: applicable.length,
+        total: applicableInWriteOrder.length,
       })
+
+      const [resolvedChange] = await resolveEffectiveOperations({
+        branch,
+        changes: [change],
+        payload,
+        req,
+      })
+
+      if (!resolvedChange) {
+        throw new Error(`Branch change ${String(change.id)} could not be resolved.`)
+      }
+
+      if (!overrideAccess) {
+        const blockedAtUse = await runMergePreflight({
+          payload,
+          pending: [resolvedChange],
+          req,
+        })
+
+        if (blockedAtUse.length) {
+          throw new Forbidden(req.t)
+        }
+      }
 
       const collectionSlug = change.collectionSlug as string
       const docID = changeDocID(change)
-      const before = await readFromMain(collectionSlug, docID)
+      const collectionConfig = payload.collections[collectionSlug]!.config
+      const before =
+        change.operation === 'create'
+          ? null
+          : await readCollectionMergeSnapshot({ collectionSlug, docID, payload, req })
+      const uploadSourceDoc =
+        change.operation === 'update' && collectionConfig.upload
+          ? ((await payload.db.findOne({
+              branch: false,
+              collection: collectionSlug,
+              req,
+              where: {
+                and: [{ [branchField]: { equals: MAIN_BRANCH } }, { id: { equals: docID } }],
+              },
+            })) as null | Record<string, unknown>)
+          : null
 
-      await applyChange({ payload, req, resolved: resolvedByChangeID.get(String(change.id))! })
+      const dependencyBlockedAtUse = await runMergeDependencyPreflight({
+        initiallyBlocked: [],
+        payload,
+        pending: [resolvedChange],
+        pendingGlobals: [],
+        req,
+      })
+
+      if (dependencyBlockedAtUse.length) {
+        throw new APIError(dependencyBlockedAtUse[0]!.message, 409)
+      }
+
+      await applyChange({
+        hasTransaction,
+        overrideAccess,
+        payload,
+        req,
+        resolved: resolvedChange,
+      })
+
+      if (uploadSourceDoc) {
+        const retainedDoc = (await payload.db.findOne({
+          branch: false,
+          collection: collectionSlug,
+          req,
+          where: {
+            and: [{ [branchField]: { equals: MAIN_BRANCH } }, { id: { equals: docID } }],
+          },
+        })) as null | Record<string, unknown>
+
+        uploadCleanupPlans.push({ collectionSlug, retainedDoc, sourceDoc: uploadSourceDoc })
+      }
 
       snapshots.set(String(change.id), {
-        after: await readFromMain(collectionSlug, docID),
+        after: await readCollectionMergeSnapshot({ collectionSlug, docID, payload, req }),
         before,
       })
 
@@ -340,18 +543,38 @@ export const mergeBranch = async (
 
       await onProgress?.({
         collectionSlug: globalSlug,
-        current: applicable.length + index + 1,
+        current: applicableInWriteOrder.length + index + 1,
         docID: globalSlug,
         operation: 'update',
-        total: applicable.length + applicableGlobals.length,
+        total: applicableInWriteOrder.length + applicableGlobals.length,
       })
 
-      const before = await readGlobalFromMain(globalSlug)
+      if (!overrideAccess) {
+        const blockedAtUse = await runGlobalMergePreflight({ payload, pending: [change], req })
 
-      await applyGlobalChange({ branch, globalSlug, payload, req })
+        if (blockedAtUse.length) {
+          throw new Forbidden(req.t)
+        }
+      }
+
+      const before = await readGlobalMergeSnapshot({ globalSlug, payload, req })
+
+      const dependencyBlockedAtUse = await runMergeDependencyPreflight({
+        initiallyBlocked: [],
+        payload,
+        pending: [],
+        pendingGlobals: [change],
+        req,
+      })
+
+      if (dependencyBlockedAtUse.length) {
+        throw new APIError(dependencyBlockedAtUse[0]!.message, 409)
+      }
+
+      await applyGlobalChange({ branch, globalSlug, overrideAccess, payload, req })
 
       snapshots.set(String(change.id), {
-        after: await readGlobalFromMain(globalSlug),
+        after: await readGlobalMergeSnapshot({ globalSlug, payload, req }),
         before,
       })
 
@@ -401,21 +624,20 @@ export const mergeBranch = async (
               }
             }
 
-            const shadow = resolvedByChangeID.get(String(each.changeID))?.shadow
             const useAsTitle = payload.collections[each.collectionSlug!]?.config.admin?.useAsTitle
+            const after = snapshot?.after as null | Record<string, unknown> | undefined
 
             return {
               after: snapshot?.after ?? null,
               before: snapshot?.before ?? null,
               collectionSlug: each.collectionSlug,
               docID: String(each.docID),
-              docTitle: String(
-                (useAsTitle ? shadow?.[useAsTitle] : undefined) ?? shadow?.id ?? each.docID,
-              ),
+              docTitle: getSnapshotDocumentTitle({ after, docID: each.docID!, useAsTitle }),
               operation: each.operation,
             }
           }),
           mergedAt,
+          mergedByCollection: req.user?.collection,
           mergedByID: req.user?.id === undefined ? undefined : String(req.user.id),
           mergedByLabel: (req.user as { email?: string } | null)?.email,
         },
@@ -446,12 +668,46 @@ export const mergeBranch = async (
       })
     }
 
+    for (const { collectionSlug, retainedDoc, sourceDoc } of uploadCleanupPlans) {
+      await deleteUploadFilesExclusiveToDocument({
+        collectionConfig: payload.collections[collectionSlug]!.config,
+        config: payload.config,
+        req,
+        retainedDoc,
+        sourceDoc,
+      })
+    }
+
+    if (cleanupScope) {
+      await flushDeferredCleanupScopeAfterOperation({ req, scope: cleanupScope })
+    }
+
     if (shouldCommit) {
       await commitTransaction(req)
     }
   } catch (error) {
-    await killTransaction(req)
+    if (cleanupScope) {
+      clearDeferredCleanupScope({ req, scope: cleanupScope })
+    }
+
+    if (shouldCommit) {
+      await killTransaction(req)
+    }
     throw error
+  } finally {
+    if (previousBranchMergeWriteGuard === undefined) {
+      delete reqContext[branchMergeWriteGuardContextKey]
+    } else {
+      reqContext[branchMergeWriteGuardContextKey] = previousBranchMergeWriteGuard
+    }
+
+    if (!overrideAccess) {
+      if (previousThrowOnFieldAccessDenied === undefined) {
+        delete reqContext[throwOnFieldAccessDeniedContextKey]
+      } else {
+        reqContext[throwOnFieldAccessDeniedContextKey] = previousThrowOnFieldAccessDenied
+      }
+    }
   }
 
   // Fired after commit: a failing deploy webhook must not undo a merge.
@@ -499,11 +755,254 @@ const forMain = ({
     fields: payload.collections[collectionSlug]!.config.fields,
   })
 
+type NestedRowIDMap = Map<ArrayField | BlocksField, Map<string, number | string>>
+
+/**
+ * Reuses IDs that main minted for the same source branch rows during an earlier write.
+ * The field key scopes row IDs to the nested table that owns them.
+ */
+const applyMappedNestedRowIDs = ({
+  data,
+  fields,
+  mainRowIDsBySource,
+  payload,
+  sourceData,
+}: {
+  data: Record<string, unknown>
+  fields: Field[]
+  mainRowIDsBySource: NestedRowIDMap
+  payload: Payload
+  sourceData: Record<string, unknown>
+}): Record<string, unknown> => {
+  visitNestedRows({
+    data,
+    fields,
+    payload,
+    sourceData,
+    visitRow: ({ field, row, sourceRow }) => {
+      const sourceRowID = sourceRow.id
+
+      if (typeof sourceRowID !== 'string' && typeof sourceRowID !== 'number') {
+        return
+      }
+
+      const mappedRowID = mainRowIDsBySource.get(field)?.get(String(sourceRowID))
+
+      if (mappedRowID !== undefined) {
+        row.id = mappedRowID
+      }
+    },
+  })
+
+  return data
+}
+
+/** Records the main ID for each source branch row after a write succeeds. */
+const recordNestedRowIDs = ({
+  fields,
+  mainRowIDsBySource,
+  mergedData,
+  payload,
+  sourceData,
+}: {
+  fields: Field[]
+  mainRowIDsBySource: NestedRowIDMap
+  mergedData: Record<string, unknown>
+  payload: Payload
+  sourceData: Record<string, unknown>
+}): void => {
+  visitNestedRows({
+    data: mergedData,
+    fields,
+    payload,
+    sourceData,
+    visitRow: ({ field, row, sourceRow }) => {
+      const mergedRowID = row.id
+      const sourceRowID = sourceRow.id
+
+      if (
+        (typeof mergedRowID !== 'string' && typeof mergedRowID !== 'number') ||
+        (typeof sourceRowID !== 'string' && typeof sourceRowID !== 'number')
+      ) {
+        return
+      }
+
+      let fieldRowIDs = mainRowIDsBySource.get(field)
+
+      if (!fieldRowIDs) {
+        fieldRowIDs = new Map()
+        mainRowIDsBySource.set(field, fieldRowIDs)
+      }
+
+      fieldRowIDs.set(String(sourceRowID), mergedRowID)
+    },
+  })
+}
+
+const visitNestedRows = ({
+  data,
+  fields,
+  payload,
+  sourceData,
+  visitRow,
+}: {
+  data: Record<string, unknown>
+  fields: Field[]
+  payload: Payload
+  sourceData: Record<string, unknown>
+  visitRow: (args: {
+    field: ArrayField | BlocksField
+    row: Record<string, unknown>
+    sourceRow: Record<string, unknown>
+  }) => void
+}): void => {
+  for (const field of fields) {
+    if (field.type === 'row' || field.type === 'collapsible') {
+      visitNestedRows({ data, fields: field.fields, payload, sourceData, visitRow })
+      continue
+    }
+
+    if (field.type === 'tabs') {
+      for (const tab of field.tabs) {
+        if (!tabHasName(tab)) {
+          visitNestedRows({ data, fields: tab.fields, payload, sourceData, visitRow })
+          continue
+        }
+
+        const nestedData = data[tab.name]
+        const nestedSourceData = sourceData[tab.name]
+
+        if (
+          nestedData &&
+          typeof nestedData === 'object' &&
+          !Array.isArray(nestedData) &&
+          nestedSourceData &&
+          typeof nestedSourceData === 'object' &&
+          !Array.isArray(nestedSourceData)
+        ) {
+          visitNestedRows({
+            data: nestedData as Record<string, unknown>,
+            fields: tab.fields,
+            payload,
+            sourceData: nestedSourceData as Record<string, unknown>,
+            visitRow,
+          })
+        }
+      }
+
+      continue
+    }
+
+    if (field.type === 'group') {
+      if (!('name' in field) || !field.name) {
+        visitNestedRows({ data, fields: field.fields, payload, sourceData, visitRow })
+        continue
+      }
+
+      const nestedData = data[field.name]
+      const nestedSourceData = sourceData[field.name]
+
+      if (
+        nestedData &&
+        typeof nestedData === 'object' &&
+        !Array.isArray(nestedData) &&
+        nestedSourceData &&
+        typeof nestedSourceData === 'object' &&
+        !Array.isArray(nestedSourceData)
+      ) {
+        visitNestedRows({
+          data: nestedData as Record<string, unknown>,
+          fields: field.fields,
+          payload,
+          sourceData: nestedSourceData as Record<string, unknown>,
+          visitRow,
+        })
+      }
+
+      continue
+    }
+
+    if ((field.type !== 'array' && field.type !== 'blocks') || !field.name) {
+      continue
+    }
+
+    const rows = data[field.name]
+    const sourceRows = sourceData[field.name]
+
+    if (!Array.isArray(rows) || !Array.isArray(sourceRows)) {
+      continue
+    }
+
+    for (const [index, row] of rows.entries()) {
+      const sourceRow = sourceRows[index]
+
+      if (
+        !row ||
+        typeof row !== 'object' ||
+        Array.isArray(row) ||
+        !sourceRow ||
+        typeof sourceRow !== 'object' ||
+        Array.isArray(sourceRow)
+      ) {
+        continue
+      }
+
+      const rowData = row as Record<string, unknown>
+      const sourceRowData = sourceRow as Record<string, unknown>
+
+      visitRow({ field, row: rowData, sourceRow: sourceRowData })
+
+      const nestedFields =
+        field.type === 'array'
+          ? field.fields
+          : resolveBlockFields({
+              field,
+              payload,
+              row: rowData,
+            })
+
+      visitNestedRows({
+        data: rowData,
+        fields: nestedFields,
+        payload,
+        sourceData: sourceRowData,
+        visitRow,
+      })
+    }
+  }
+}
+
+const resolveBlockFields = ({
+  field,
+  payload,
+  row,
+}: {
+  field: BlocksField
+  payload: Payload
+  row: Record<string, unknown>
+}): Field[] => {
+  const blockType = row.blockType
+
+  if (typeof blockType !== 'string') {
+    return []
+  }
+
+  const block =
+    payload.config.blocks?.find(({ slug }) => slug === blockType) ??
+    field.blocks.find((candidate) => typeof candidate !== 'string' && candidate.slug === blockType)
+
+  return typeof block === 'string' || !block ? [] : block.fields
+}
+
 const applyChange = async ({
+  hasTransaction,
+  overrideAccess,
   payload,
   req,
   resolved,
 }: {
+  hasTransaction: boolean
+  overrideAccess: boolean
   payload: Payload
   req: PayloadRequest
   resolved: ResolvedChange
@@ -540,7 +1039,7 @@ const applyChange = async ({
       id: docID,
       branch: false,
       collection: collectionSlug,
-      overrideAccess: true,
+      overrideAccess,
       req,
     })
 
@@ -560,64 +1059,175 @@ const applyChange = async ({
 
   if (change.operation === 'create') {
     const [rowWrite, ...laterWrites] = writes
+    const createReq = withoutBranch(req)
+    const localization = payload.config.localization
+    const hasLocalizedFields = traverseForLocalizedFields(
+      payload.collections[collectionSlug]!.config.fields,
+    )
+    const localeCodes = localization && hasLocalizedFields ? localization.localeCodes : undefined
+    let localizedWrites: Map<string, Record<string, unknown>>[] | undefined
 
-    // Before the promotion, not after: the write below records main's first version
-    // for this row, and clearing the chain afterwards could take it with it — which
-    // would drop a published document out of main's own drafts list.
-    await dropVersionChain()
+    if (localeCodes?.length) {
+      localizedWrites = []
 
-    // Updated in place rather than recreated. The row already holds the ID that
-    // inbound relationships point at, and deleting it would cascade those
-    // relationship rows away — rebuilding the row does not bring them back.
-    // `operation: 'create'` still reports it as a create, because from main's
-    // point of view the document is new.
-    await updateByIDOperation({
-      id: shadowID,
-      collection: payload.collections[collectionSlug]!,
-      data: {
-        ...stripInternal(rowWrite!.data),
-        [branchField]: MAIN_BRANCH,
-        [branchOpField]: null,
-      } as never,
-      operation: 'create',
-      overrideAccess: true,
-      req,
-    })
+      for (const write of writes) {
+        const documentsByLocale = new Map<string, Record<string, unknown>>()
 
-    // The branch left a draft above what it published. Applied as its own write so
-    // main passes through both states it genuinely went through.
-    for (const write of laterWrites) {
-      await payload.update({
+        for (const locale of localeCodes) {
+          const branchDoc = await readLocalizedBranchWrite({
+            branch,
+            collectionSlug,
+            docID,
+            draft: write.draft,
+            locale,
+            payload,
+            req: createReq,
+          })
+
+          if (branchDoc) {
+            documentsByLocale.set(locale, branchDoc)
+          }
+        }
+
+        localizedWrites.push(documentsByLocale)
+      }
+    }
+
+    const applyCreateWrites = async () => {
+      // Updated in place rather than recreated. The row already holds the ID that
+      // inbound relationships point at, and deleting it would cascade those
+      // relationship rows away — rebuilding the row does not bring them back.
+      // The branch-merge operation still reports it as a create, because from
+      // main's point of view the document is new.
+      if (localeCodes?.length) {
+        const defaultLocale = localization && localization.defaultLocale
+        const createLocale =
+          defaultLocale && localeCodes.includes(defaultLocale) ? defaultLocale : localeCodes[0]!
+        const branchDoc = localizedWrites?.[0]?.get(createLocale)
+
+        if (branchDoc) {
+          await updateByIDOperationForBranchMerge({
+            id: shadowID,
+            collection: payload.collections[collectionSlug]!,
+            data: stripInternal(branchDoc) as never,
+            draft: rowWrite!.draft,
+            overrideAccess,
+            req: withLocale({ locale: createLocale, req: createReq }),
+          })
+        }
+      } else {
+        await updateByIDOperationForBranchMerge({
+          id: shadowID,
+          collection: payload.collections[collectionSlug]!,
+          data: stripInternal(rowWrite!.data) as never,
+          overrideAccess,
+          req: createReq,
+        })
+      }
+
+      // The branch left a draft above what it published. Applied as its own write so
+      // main passes through both states it genuinely went through.
+      for (const [writeIndex, write] of laterWrites.entries()) {
+        if (localeCodes?.length) {
+          for (const locale of localeCodes) {
+            const branchDoc = localizedWrites?.[writeIndex + 1]?.get(locale)
+
+            if (!branchDoc) {
+              continue
+            }
+
+            await payload.update({
+              id: shadowID,
+              branch: false,
+              collection: collectionSlug,
+              data: stripInternal(branchDoc) as never,
+              draft: true,
+              locale,
+              overrideAccess,
+              req: createReq,
+            })
+          }
+        } else {
+          await payload.update({
+            id: shadowID,
+            branch: false,
+            collection: collectionSlug,
+            data: stripInternal(write.data) as never,
+            draft: true,
+            overrideAccess,
+            req: createReq,
+          })
+        }
+      }
+    }
+
+    if (hasTransaction) {
+      // Before the promotion, not after: the write below records main's first version
+      // for this row, and clearing the chain afterwards could take it with it — which
+      // would drop a published document out of main's own drafts list.
+      await dropVersionChain()
+
+      await payload.db.updateOne({
         id: shadowID,
         branch: false,
         collection: collectionSlug,
-        data: stripInternal(write.data) as never,
-        draft: true,
-        overrideAccess: true,
-        req,
+        data: { [branchField]: MAIN_BRANCH, [branchOpField]: null },
+        req: createReq,
       })
+
+      await applyCreateWrites()
+
+      return
     }
+
+    await applyBranchCreateWithoutTransaction({
+      applyCreateWrites,
+      branch,
+      collectionSlug,
+      payload,
+      req: createReq,
+      shadow,
+      shadowID,
+    })
 
     return
   }
 
   const localization = payload.config.localization
   const localeCodes = localization ? localization.localeCodes : undefined
+  const fields = payload.collections[collectionSlug]!.config.fields
+  const mainRowIDsBySource: NestedRowIDMap = new Map()
 
   for (const write of writes) {
     // With localization off there is one value per field, so the shadow row is the write.
     if (!localeCodes?.length) {
-      await payload.update({
+      const data = applyMappedNestedRowIDs({
+        data: forMain({ collectionSlug, data: write.data, payload }),
+        fields,
+        mainRowIDsBySource,
+        payload,
+        sourceData: write.data,
+      })
+
+      const mergedData = (await payload.update({
         id: docID,
         branch: false,
         collection: collectionSlug,
-        data: forMain({ collectionSlug, data: write.data, payload }) as never,
+        data: data as never,
         // A draft-only branch edit must stay a draft on main: main's published row
         // is not what the branch changed, and publishing it would push work the
         // author never published live.
         draft: write.draft,
-        overrideAccess: true,
+        overrideAccess,
         req,
+      })) as Record<string, unknown>
+
+      recordNestedRowIDs({
+        fields,
+        mainRowIDsBySource,
+        mergedData,
+        payload,
+        sourceData: write.data,
       })
 
       continue
@@ -631,35 +1241,49 @@ const applyChange = async ({
     // dropped the branch's edits to every other one. Reading per locale through the Local
     // API is the same thing a person editing main by hand would do.
     for (const locale of localeCodes) {
-      const branchDoc = await payload.findByID({
-        id: docID,
+      const branchDoc = await readLocalizedBranchWrite({
         branch,
-        collection: collectionSlug,
-        depth: 0,
-        disableErrors: true,
+        collectionSlug,
+        docID,
         draft: write.draft,
         locale,
-        overrideAccess: true,
-        req: onBranch(req, branch),
+        payload,
+        req,
       })
 
       if (!branchDoc) {
         continue
       }
 
-      await payload.update({
+      const data = applyMappedNestedRowIDs({
+        data: forMain({
+          collectionSlug,
+          data: branchDoc,
+          payload,
+        }),
+        fields,
+        mainRowIDsBySource,
+        payload,
+        sourceData: branchDoc,
+      })
+
+      const mergedData = (await payload.update({
         id: docID,
         branch: false,
         collection: collectionSlug,
-        data: forMain({
-          collectionSlug,
-          data: branchDoc as Record<string, unknown>,
-          payload,
-        }) as never,
+        data: data as never,
         draft: write.draft,
         locale,
-        overrideAccess: true,
+        overrideAccess,
         req,
+      })) as Record<string, unknown>
+
+      recordNestedRowIDs({
+        fields,
+        mainRowIDsBySource,
+        mergedData,
+        payload,
+        sourceData: branchDoc,
       })
     }
   }
@@ -667,56 +1291,334 @@ const applyChange = async ({
   await dropShadowRow()
 }
 
-/**
- * A copy of the merge's request that can read the branch it is merging.
- *
- * The merge engine's own request has branch resolution switched off, which is what makes
- * its writes land on main. Reading the branch's side of a change needs the opposite, and
- * needs it without disturbing the request doing the writing.
- */
-const onBranch = (req: PayloadRequest, branch: string): PayloadRequest => {
+const withLocale = ({ locale, req }: { locale: string; req: PayloadRequest }): PayloadRequest => {
   const isolated = isolateBranchState(req)
 
-  isolated.branch = branch
-  ;(isolated.context as Record<string, unknown>)._branchBypass = false
+  isolated.locale = locale
 
   return isolated
 }
 
-/**
- * Applies a branch's copy of a global to main, then drops the copy.
- *
- * The copy is the change — there is no operation to resolve and nothing to tombstone — so
- * this is a read of the branch's row, a write of main's, and a delete. Dropping the copy
- * is what makes the branch read through to main again; leaving it would shadow main for
- * good, so a later edit on main would be invisible on a branch that had already merged.
- */
+type RawCollectionVersion = {
+  id: number | string
+  latest?: boolean
+  version?: Record<string, unknown>
+} & Record<string, unknown>
+
+const applyBranchCreateWithoutTransaction = async ({
+  applyCreateWrites,
+  branch,
+  collectionSlug,
+  payload,
+  req,
+  shadow,
+  shadowID,
+}: {
+  applyCreateWrites: () => Promise<void>
+  branch: string
+  collectionSlug: string
+  payload: Payload
+  req: PayloadRequest
+  shadow: Record<string, unknown>
+  shadowID: number | string
+}): Promise<void> => {
+  const existingVersions = await readRawDocumentVersions({
+    collectionSlug,
+    docID: shadowID,
+    payload,
+    req,
+  })
+  const existingVersionIDs = new Set(existingVersions.map(({ id }) => String(id)))
+  const existingLatestVersions = existingVersions.filter(({ latest }) => latest === true)
+  let preparedVersions: RawCollectionVersion[] = []
+  const reqContext = req.context as Record<PropertyKey, unknown>
+  const previousSkipEnforceMaxVersions = reqContext[skipEnforceMaxVersionsContextKey]
+
+  try {
+    for (const version of existingLatestVersions) {
+      await setVersionLatest({ collectionSlug, isLatest: false, payload, req, version })
+    }
+
+    // The row keeps its branch identity while project access, hooks and validation
+    // run. A rejected write therefore cannot become visible on main when the
+    // adapter has no transaction support.
+    reqContext[skipEnforceMaxVersionsContextKey] = { id: shadowID, collectionSlug }
+
+    try {
+      await applyCreateWrites()
+    } finally {
+      if (previousSkipEnforceMaxVersions === undefined) {
+        delete reqContext[skipEnforceMaxVersionsContextKey]
+      } else {
+        reqContext[skipEnforceMaxVersionsContextKey] = previousSkipEnforceMaxVersions
+      }
+    }
+
+    const versionsAfterWrite = await readRawDocumentVersions({
+      collectionSlug,
+      docID: shadowID,
+      payload,
+      req,
+    })
+
+    preparedVersions = versionsAfterWrite.filter(({ id }) => !existingVersionIDs.has(String(id)))
+
+    for (const version of preparedVersions) {
+      await promotePreparedVersion({ collectionSlug, payload, req, version })
+    }
+
+    // The document promotion is the final visibility change. Every operation that
+    // can reject user data has completed before this trusted adapter write.
+    await payload.db.updateOne({
+      id: shadowID,
+      branch: false,
+      collection: collectionSlug,
+      data: { [branchField]: MAIN_BRANCH, [branchOpField]: null },
+      req,
+    })
+
+    await deleteVersionsByID({
+      collectionSlug,
+      ids: [...existingVersionIDs],
+      payload,
+      req,
+    })
+
+    const collection = payload.collections[collectionSlug]!.config
+    const maxVersions = getVersionsMax(collection)
+
+    if (maxVersions > 0) {
+      await enforceMaxVersions({
+        id: shadowID,
+        collection,
+        max: maxVersions,
+        payload,
+        req,
+      })
+    }
+  } catch (error) {
+    await restoreBranchCreatedShadow({
+      branch,
+      collectionSlug,
+      payload,
+      req,
+      shadow,
+      shadowID,
+    })
+
+    const versionsAfterFailure = await readRawDocumentVersions({
+      collectionSlug,
+      docID: shadowID,
+      payload,
+      req,
+    })
+
+    preparedVersions = versionsAfterFailure.filter(({ id }) => !existingVersionIDs.has(String(id)))
+
+    await deleteVersionsByID({
+      collectionSlug,
+      ids: preparedVersions.map(({ id }) => id),
+      payload,
+      req,
+    })
+
+    for (const originalVersion of existingVersions) {
+      await setVersionLatest({
+        collectionSlug,
+        isLatest: originalVersion.latest === true,
+        payload,
+        req,
+        version: originalVersion,
+      })
+    }
+
+    throw error
+  }
+}
+
+const readRawDocumentVersions = async ({
+  collectionSlug,
+  docID,
+  payload,
+  req,
+}: {
+  collectionSlug: string
+  docID: number | string
+  payload: Payload
+  req: PayloadRequest
+}): Promise<RawCollectionVersion[]> => {
+  if (!payload.collections[collectionSlug]?.config.versions) {
+    return []
+  }
+
+  const { docs } = await payload.db.findVersions({
+    branch: false,
+    collection: collectionSlug,
+    limit: 0,
+    pagination: false,
+    req,
+    where: { parent: { equals: docID } },
+  })
+
+  return docs as RawCollectionVersion[]
+}
+
+const setVersionLatest = async ({
+  collectionSlug,
+  isLatest,
+  payload,
+  req,
+  version,
+}: {
+  collectionSlug: string
+  isLatest: boolean
+  payload: Payload
+  req: PayloadRequest
+  version: RawCollectionVersion
+}): Promise<void> => {
+  await payload.db.updateVersion({
+    id: version.id,
+    collection: collectionSlug,
+    req,
+    versionData: {
+      latest: isLatest,
+      version: version.version ?? {},
+    },
+  })
+}
+
+const promotePreparedVersion = async ({
+  collectionSlug,
+  payload,
+  req,
+  version,
+}: {
+  collectionSlug: string
+  payload: Payload
+  req: PayloadRequest
+  version: RawCollectionVersion
+}): Promise<void> => {
+  const documentVersion =
+    version.version && typeof version.version === 'object' ? version.version : {}
+
+  await payload.db.updateVersion({
+    id: version.id,
+    collection: collectionSlug,
+    req,
+    versionData: {
+      [branchField]: MAIN_BRANCH,
+      [branchParentField]: null,
+      version: {
+        ...documentVersion,
+        [branchField]: MAIN_BRANCH,
+        [branchOpField]: null,
+      },
+    } as never,
+  })
+}
+
+const deleteVersionsByID = async ({
+  collectionSlug,
+  ids,
+  payload,
+  req,
+}: {
+  collectionSlug: string
+  ids: (number | string)[]
+  payload: Payload
+  req: PayloadRequest
+}): Promise<void> => {
+  if (!ids.length) {
+    return
+  }
+
+  await payload.db.deleteVersions({
+    collection: collectionSlug,
+    req,
+    where: { id: { in: ids } },
+  })
+}
+
+const restoreBranchCreatedShadow = async ({
+  branch,
+  collectionSlug,
+  payload,
+  req,
+  shadow,
+  shadowID,
+}: {
+  branch: string
+  collectionSlug: string
+  payload: Payload
+  req: PayloadRequest
+  shadow: Record<string, unknown>
+  shadowID: number | string
+}): Promise<void> => {
+  const { id: _id, ...originalData } = shadow
+
+  await payload.db.updateOne({
+    id: shadowID,
+    branch: false,
+    collection: collectionSlug,
+    data: {
+      ...originalData,
+      [branchField]: branch,
+      [branchOpField]: 'create',
+    },
+    req,
+  })
+}
+
+/** Applies every stored state of a branch global to main in published-then-draft order. */
 const applyGlobalChange = async ({
   branch,
   globalSlug,
+  overrideAccess,
   payload,
   req,
 }: {
   branch: string
   globalSlug: string
+  overrideAccess: boolean
   payload: Payload
   req: PayloadRequest
 }): Promise<void> => {
-  const branchGlobal = (await payload.findGlobal({
-    slug: globalSlug,
-    branch,
-    depth: 0,
-    overrideAccess: true,
-    req,
-  })) as Record<string, unknown>
+  const writes = await resolveGlobalMergeWrites({ branch, globalSlug, payload, req })
 
-  await payload.updateGlobal({
-    slug: globalSlug,
-    branch: false,
-    data: stripInternal({ ...branchGlobal, globalType: undefined }) as never,
-    overrideAccess: true,
-    req,
-  })
+  if (!writes.length) {
+    throw new Error(`Branch "${branch}" has no stored copy of global "${globalSlug}" to merge.`)
+  }
+
+  const locales = getGlobalMergeLocales({ globalSlug, payload, req })
+
+  for (const write of writes) {
+    for (const locale of locales) {
+      const data = await readBranchGlobalWrite({
+        branch,
+        draft: write.draft,
+        globalSlug,
+        locale,
+        payload,
+        req,
+      })
+
+      if (!data) {
+        throw new Error(
+          `Branch "${branch}" has no stored ${write.draft ? 'draft' : 'published'} state of global "${globalSlug}" to merge.`,
+        )
+      }
+
+      await payload.updateGlobal({
+        slug: globalSlug,
+        branch: false,
+        data: stripInternal({ ...data, globalType: undefined }) as never,
+        draft: write.draft,
+        locale,
+        overrideAccess,
+        req: withLocale({ locale, req }),
+      })
+    }
+  }
 
   if (!payload.db.deleteBranchGlobal) {
     throw new Error(
@@ -724,6 +1626,7 @@ const applyGlobalChange = async ({
     )
   }
 
+  await deleteBranchGlobalVersionChain({ branch, globalSlug, payload, req })
   await payload.db.deleteBranchGlobal({ branch, globalSlug, req })
 }
 

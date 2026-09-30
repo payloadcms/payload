@@ -186,6 +186,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
       docs: result.docs as Record<string, unknown>[],
       joins,
       locale,
+      req,
       versions: true,
     })
   }

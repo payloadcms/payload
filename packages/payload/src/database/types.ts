@@ -101,28 +101,35 @@ export interface BaseDatabaseAdapter {
   /**
    * Run any migration up functions that have not yet been performed and update the status
    */
-  migrate: (args?: { migrations?: Migration[] }) => Promise<void>
+  migrate: (args?: {
+    forceAcceptWarning?: boolean
+    migrations?: Migration[]
+    shouldPrompt?: boolean
+  }) => Promise<MigrationResult | void>
   /**
    * Run any migration down functions that have been performed
    */
-  migrateDown: () => Promise<void>
+  migrateDown: () => Promise<MigrationResult | void>
 
   /**
    * Drop the current database and run all migrate up functions
    */
-  migrateFresh: (args: { forceAcceptWarning?: boolean }) => Promise<void>
+  migrateFresh: (args: {
+    forceAcceptWarning?: boolean
+    shouldPrompt?: boolean
+  }) => Promise<MigrationResult | void>
   /**
    * Run all migration down functions before running up
    */
-  migrateRefresh: () => Promise<void>
+  migrateRefresh: () => Promise<MigrationResult | void>
   /**
    * Run all migrate down functions
    */
-  migrateReset: () => Promise<void>
+  migrateReset: () => Promise<MigrationResult | void>
   /**
    * Read the current state of migrations and output the result to show which have been run
    */
-  migrateStatus: () => Promise<void>
+  migrateStatus: () => Promise<MigrationStatus[] | void>
 
   /**
    * Path to read and write migration files from
@@ -172,6 +179,8 @@ export interface BaseDatabaseAdapter {
   updateOne: UpdateOne
   updateVersion: UpdateVersion
   upsert: Upsert
+  /** Atomically registers the first write to a global on a branch. */
+  upsertBranchGlobalChange?: UpsertBranchGlobalChange
 }
 
 export type Init = () => Promise<void> | void
@@ -189,11 +198,31 @@ export type CreateMigration = (args: {
   forceAcceptWarning?: boolean
   migrationName?: string
   payload: Payload
+  /** Set to false when the caller cannot answer interactive prompts. */
+  shouldPrompt?: boolean
   /**
    * Skips the prompt asking to create empty migrations
    */
   skipEmpty?: boolean
-}) => Promise<void> | void
+}) => CreateMigrationResult | Promise<CreateMigrationResult | void> | void
+
+export type CreateMigrationResult = {
+  created: boolean
+  path?: string
+}
+
+export type MigrationResult = {
+  batch?: number
+  cancelled?: true
+  migrated: string[]
+  rolledBack: string[]
+}
+
+export type MigrationStatus = {
+  batch?: number
+  name: string
+  ran: boolean
+}
 
 export type Transaction = (
   callback: () => Promise<void>,
@@ -407,6 +436,10 @@ export type UpdateGlobalArgs<T extends Record<string, unknown> = any> = {
    * Branch to scope this operation to. `false` bypasses branching entirely.
    */
   branch?: false | string
+  /**
+   * Fields to apply if a concurrent first branch write already inserted the branch row.
+   */
+  branchConflictData?: T
   data: T
   /**
    * Additional database adapter specific options to pass to the query
@@ -570,6 +603,14 @@ export type DeleteBranchGlobalArgs = {
 
 export type DeleteBranchGlobal = (args: DeleteBranchGlobalArgs) => Promise<void>
 
+export type UpsertBranchGlobalChangeArgs = {
+  branch: string
+  globalSlug: string
+  req?: Partial<PayloadRequest>
+}
+
+export type UpsertBranchGlobalChange = (args: UpsertBranchGlobalChangeArgs) => Promise<void>
+
 export type FindDistinctArgs = {
   /**
    * Branch to scope this operation to. `false` bypasses branching entirely.
@@ -580,6 +621,11 @@ export type FindDistinctArgs = {
   limit?: number
   locale?: string
   page?: number
+  /**
+   * Access constraints for relationship values traversed by the distinct field path.
+   * Keys are relationship paths relative to the queried collection.
+   */
+  relatedAccess?: Record<string, Where>
   req?: Partial<PayloadRequest>
   sort?: Sort
   where?: Where
@@ -812,4 +858,4 @@ export type GenerateSchemaArgs = {
   prettify?: boolean
 }
 
-export type GenerateSchema = (args?: GenerateSchemaArgs) => Promise<void>
+export type GenerateSchema = (args?: GenerateSchemaArgs) => Promise<{ outputFile: string }>

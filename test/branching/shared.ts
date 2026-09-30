@@ -20,6 +20,7 @@ export const nestedSlug = 'nested-docs'
 
 export const headerGlobalSlug = 'header'
 export const homepageGlobalSlug = 'homepage'
+export const uninitializedGlobalSlug = 'uninitialized-global'
 
 /** Core-owned branching collections */
 export const branchesSlug = 'payload-branches'

@@ -2,10 +2,10 @@ import type {
   CollectionAfterChangeHook,
   CollectionBeforeChangeHook,
   CollectionBeforeOperationHook,
+  GlobalBeforeOperationHook,
 } from '../index.js'
 
 import { assertBranchWritable } from './assertBranchWritable.js'
-import { forkDocument } from './forkDocument.js'
 import { resolveBranch } from './resolveBranch.js'
 import { branchChangesCollectionSlug, branchField, branchOpField, MAIN_BRANCH } from './types.js'
 
@@ -69,27 +69,13 @@ export const recordBranchCreate: CollectionAfterChangeHook = async ({
   return doc
 }
 
-/**
- * Redirects a branch update onto the branch's own copy of the document,
- * copy-on-writing that copy into existence the first time.
- *
- * Rewriting `args.id` rather than intercepting the write means the rest of the
- * operation — field hooks, validation, version creation — runs unmodified
- * against a real row.
- */
-export const forkOnBranchUpdate: CollectionBeforeOperationHook = async ({
+/** Refuses collection writes before they can make changes on a closed branch. */
+export const assertBranchWritableBeforeCollectionWrite: CollectionBeforeOperationHook = async ({
   args,
-  collection,
   operation,
   req,
 }) => {
-  if (operation !== 'updateByID' && operation !== 'update') {
-    return args
-  }
-
-  const id = (args as { id?: number | string }).id
-
-  if (id === undefined || id === null) {
+  if (operation !== 'create' && operation !== 'restoreVersion' && operation !== 'update') {
     return args
   }
 
@@ -101,11 +87,32 @@ export const forkOnBranchUpdate: CollectionBeforeOperationHook = async ({
 
   await assertBranchWritable({ branch, req })
 
-  // Ensures the branch has its own copy, but leaves `args.id` as the canonical
-  // ID. Canonical IDs are the only identity the API exposes; the read path
-  // resolves them through the where-tree rewrite and the write path through
-  // `resolveBranchRowID`.
-  await forkDocument({ id, collectionSlug: collection.slug, req })
+  return args
+}
+
+/** Refuses global writes before they can make changes on a closed branch. */
+export const assertBranchWritableBeforeGlobalWrite: GlobalBeforeOperationHook = async ({
+  args,
+  global,
+  operation,
+  req,
+}) => {
+  if (operation !== 'restoreVersion' && operation !== 'update') {
+    return args
+  }
+
+  const branch = resolveBranch(req)
+  const branching = req.payload.config.branching
+
+  if (
+    branch === MAIN_BRANCH ||
+    !branching?.enabled ||
+    !branching.branchableGlobals.has(global.slug)
+  ) {
+    return args
+  }
+
+  await assertBranchWritable({ branch, req })
 
   return args
 }

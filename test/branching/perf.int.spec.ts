@@ -1,15 +1,11 @@
 import type { Payload } from 'payload'
 
 import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
-import { beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { branchesSlug, excludedSlug, headerGlobalSlug, pagesSlug, postsSlug } from './shared.js'
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
 
@@ -45,6 +41,7 @@ const METHODS = [
   'updateOne',
   'updateVersion',
   'upsert',
+  'upsertBranchGlobalChange',
 ]
 
 let recording = false
@@ -105,17 +102,17 @@ const record = ({
   )
 }
 
-describe('Branching query cost', () => {
+test.suite('Branching query cost', { config: './config.ts', resetBetweenTests: false }, () => {
   const branch = 'perfwork'
 
-  beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
+  test.beforeAll(async ({ payloadInstance }) => {
+    payload = createTrustedPayload(payloadInstance)
     install()
 
     await payload.create({ collection: branchesSlug, data: { name: 'Perf', slug: branch } })
   })
 
-  it('should add one query per request to reads, and none on main', async () => {
+  test('should add one query per request to reads, and none on main', async () => {
     const post = await payload.create({ collection: postsSlug, data: { title: 'main' } })
     const page = await payload.create({
       collection: pagesSlug,
@@ -192,7 +189,7 @@ describe('Branching query cost', () => {
    * than reading one? It must not — the predicate resolves the whole result set in the
    * database, so an N+1 would mean the union was being assembled in application code.
    */
-  it('should cost the same for one document as for a page of them', async () => {
+  test('should cost the same for one document as for a page of them', async () => {
     const branchDocs: (number | string)[] = []
     const mainDocs: (number | string)[] = []
 
@@ -266,7 +263,7 @@ describe('Branching query cost', () => {
     }
   })
 
-  it('should pay the manifest once per request rather than once per read', async () => {
+  test('should pay the manifest once per request rather than once per read', async () => {
     const req = { branch } as never
 
     const shared = await measure(async () => {
@@ -282,7 +279,7 @@ describe('Branching query cost', () => {
     expect(shared.total).toBe(4)
   })
 
-  it('should cost nothing on a branchable collection read from main', async () => {
+  test('should cost nothing on a branchable collection read from main', async () => {
     const excluded = await measure(() =>
       payload.find({ collection: excludedSlug, pagination: false }),
     )
@@ -297,7 +294,7 @@ describe('Branching query cost', () => {
     expect(branchable.total).toBe(excluded.total)
   })
 
-  it('should fork once per document and charge later writes less', async () => {
+  test('should fork once per document and charge later writes less', async () => {
     const doc = await payload.create({ collection: postsSlug, data: { title: 'to fork' } })
     const onMainDoc = await payload.create({ collection: postsSlug, data: { title: 'main only' } })
 
@@ -319,10 +316,13 @@ describe('Branching query cost', () => {
       firstQueries: firstWrite.calls,
       later: laterWrite.total - mainWrite.total,
       laterQueries: laterWrite.calls,
-    }).toMatchObject({ first: 5, later: 3 })
+      // The write first reads an access-filtered document. A first write then creates the
+      // shadow and reads it back; later writes still verify the resolved branch row before
+      // mutation. These reads keep denied writes from creating branch state.
+    }).toMatchObject({ first: 7, later: 4 })
   })
 
-  it('should charge a known amount for create, delete and global writes', async () => {
+  test('should charge a known amount for create, delete and global writes', async () => {
     const mainCreate = await measure(() =>
       payload.create({ collection: postsSlug, data: { title: 'm' } }),
     )
@@ -364,7 +364,10 @@ describe('Branching query cost', () => {
       deleteQueries: branchDelete.calls,
       global: branchGlobal.total - mainGlobal.total,
       globalQueries: branchGlobal.calls,
-    }).toMatchObject({ create: 2, delete: 6, global: 1 })
+      // Branch-created delete safety reads branch reference state before hooks and again after
+      // hooks, because hooks can add references before the delete reaches the adapter.
+      // A branch global update also checks that the caller can read the target branch.
+    }).toMatchObject({ create: 2, delete: 8, global: 2 })
 
     // A human-readable table of the numbers above; the assertions are what actually guards them.
     fs.writeFileSync(

@@ -1,5 +1,7 @@
 import type { PayloadRequest, Where } from '../types/index.js'
 
+import { isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
+import { assertBranchCreatedDocumentsUnreferenced } from './assertBranchCreatedDocumentsUnreferenced.js'
 import { assertBranchWritable } from './assertBranchWritable.js'
 import { createShadowRow } from './createShadowRow.js'
 import { resetBranchState, resolveBranch } from './resolveBranch.js'
@@ -26,6 +28,69 @@ type Result = {
   doc?: Record<string, unknown>
   /** True when the delete became a tombstone and must not proceed. */
   tombstoned: boolean
+}
+
+/**
+ * Checks a branch-created document before delete hooks and cascades can cause
+ * effects that a database rollback cannot restore.
+ */
+export const assertBranchCreatedDeleteUnreferenced = async ({
+  branch: branchOverride,
+  collectionSlug,
+  doc,
+  req,
+}: {
+  branch?: false | string
+  collectionSlug: string
+  doc: null | Record<string, unknown> | undefined
+  req?: Partial<PayloadRequest>
+}): Promise<null | Record<string, unknown>> => {
+  if (!doc) {
+    return null
+  }
+
+  if (branchOverride === false || !req?.payload) {
+    return doc
+  }
+
+  if ((req.context as Record<string, unknown> | undefined)?._branchBypass) {
+    return doc
+  }
+
+  const branching = req.payload.config?.branching
+
+  if (!branching?.enabled || !branching.branchableCollections.has(collectionSlug)) {
+    return doc
+  }
+
+  const branch = branchOverride ?? resolveBranch(req as PayloadRequest)
+
+  if (branch === MAIN_BRANCH) {
+    return doc
+  }
+
+  const branchDocument = (await req.payload.db.findOne({
+    branch: false,
+    collection: collectionSlug,
+    req,
+    where: {
+      and: [{ id: { equals: doc.id as number | string } }, { [branchField]: { equals: branch } }],
+    },
+  })) as null | Record<string, unknown>
+
+  if (!branchDocument || branchDocument[branchOpField] !== 'create') {
+    return doc
+  }
+
+  const targetID = branchDocument.id as number | string
+
+  await assertBranchCreatedDocumentsUnreferenced({
+    ignoredOwnerRowIDs: new Map([[collectionSlug, new Set([targetID])]]),
+    req: req as PayloadRequest,
+    targets: [{ collectionSlug, docID: targetID }],
+  })
+
+  return branchDocument
 }
 
 /**
@@ -133,6 +198,25 @@ export const resolveBranchDelete = async ({
   // Created on this branch: no main row stands behind it, so a real delete
   // leaves nothing to hide.
   if (isOnThisBranch && target[branchOpField] === 'create') {
+    await assertBranchCreatedDeleteUnreferenced({
+      branch,
+      collectionSlug,
+      doc: target,
+      req: req as PayloadRequest,
+    })
+
+    if (req.transactionID) {
+      const latestCommittedReq = isolateObjectProperty(req as PayloadRequest, ['transactionID'])
+
+      delete latestCommittedReq.transactionID
+
+      await assertBranchCreatedDocumentsUnreferenced({
+        ignoredOwnerRowIDs: new Map([[collectionSlug, new Set([targetID])]]),
+        req: latestCommittedReq,
+        targets: [{ collectionSlug, docID: targetID }],
+      })
+    }
+
     await req.payload.db.deleteMany({
       collection: branchChangesCollectionSlug,
       req,

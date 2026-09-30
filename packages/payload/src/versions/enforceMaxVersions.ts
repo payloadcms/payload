@@ -14,6 +14,13 @@ type Args = {
   req?: PayloadRequest
 }
 
+export const skipEnforceMaxVersionsContextKey = Symbol('skipEnforceMaxVersions')
+
+type SkipEnforceMaxVersions = {
+  collectionSlug: string
+  id: number | string
+}
+
 export const enforceMaxVersions = async ({
   id,
   collection,
@@ -22,6 +29,18 @@ export const enforceMaxVersions = async ({
   payload,
   req,
 }: Args): Promise<void> => {
+  const skipEnforceMaxVersions = (req?.context as Record<PropertyKey, unknown> | undefined)?.[
+    skipEnforceMaxVersionsContextKey
+  ] as SkipEnforceMaxVersions | undefined
+
+  if (
+    collection &&
+    skipEnforceMaxVersions?.collectionSlug === collection.slug &&
+    String(skipEnforceMaxVersions.id) === String(id)
+  ) {
+    return
+  }
+
   const entityType = collection ? 'collection' : 'global'
   const slug = collection ? collection.slug : globalConfig?.slug
 

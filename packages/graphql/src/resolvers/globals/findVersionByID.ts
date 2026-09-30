@@ -1,11 +1,12 @@
 import type { GraphQLResolveInfo } from 'graphql'
 import type { Document, SanitizedGlobalConfig } from 'payload'
 
-import { findVersionByIDOperationGlobal, isolateObjectProperty, resetBranchState } from 'payload'
+import { findVersionByIDOperationGlobal } from 'payload'
 
 import type { Context } from '../types.js'
 
 import { buildSelectForCollection } from '../../utilities/select.js'
+import { getGraphQLRequest } from '../getGraphQLRequest.js'
 
 export type Resolver = (
   _: unknown,
@@ -23,27 +24,15 @@ export type Resolver = (
 
 export function findVersionByID(globalConfig: SanitizedGlobalConfig): Resolver {
   return async function resolver(_, args, context, info) {
-    const req = (context.req = isolateObjectProperty(context.req, [
-      'branch',
-      'context',
-      'locale',
-      'fallbackLocale',
-      'transactionID',
-    ]))
-    const select = (context.select = args.select ? buildSelectForCollection(info) : undefined)
-
-    req.locale = args.locale || req.locale
-    req.fallbackLocale = args.fallbackLocale || req.fallbackLocale
-
-    // Same shape as `locale`: an argument on the field, resolved onto the request the
-    // operation reads. Branch state is memoized per request, so a field that names its own
-    // branch gets its own copy of that state rather than the previous field's.
-    if (args.branch && args.branch !== req.branch) {
-      req.branch = args.branch
-      req.context = { ...req.context }
-      resetBranchState(req)
-    }
-    req.query = req.query || {}
+    const req = await getGraphQLRequest({
+      branch: args.branch,
+      context,
+      fallbackLocale: args.fallbackLocale,
+      globalSlug: globalConfig.slug,
+      info,
+      locale: args.locale,
+    })
+    const select = args.select ? buildSelectForCollection(info, context) : undefined
 
     const options = {
       id: args.id,

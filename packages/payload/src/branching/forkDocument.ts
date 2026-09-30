@@ -21,6 +21,8 @@ type Args = {
   collectionSlug: string
   id: number | string
   req: PayloadRequest
+  /** Creates a new shadow in the request's existing transaction. */
+  useAmbientTransaction?: boolean
 }
 
 /**
@@ -32,7 +34,12 @@ type Args = {
  * diff, so the branch's version can be filtered and sorted on by the database
  * like any other row.
  */
-export const forkDocument = async ({ id, collectionSlug, req }: Args): Promise<number | string> => {
+export const forkDocument = async ({
+  id,
+  collectionSlug,
+  req,
+  useAmbientTransaction = false,
+}: Args): Promise<number | string> => {
   const branch = resolveBranch(req)
 
   if (branch === MAIN_BRANCH) {
@@ -121,6 +128,7 @@ export const forkDocument = async ({ id, collectionSlug, req }: Args): Promise<n
         req: createReq,
       }),
     req,
+    useAmbientTransaction,
   })
 
   // The manifest now has one more entry. Added rather than reloaded: dropping the memoized

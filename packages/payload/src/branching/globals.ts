@@ -1,7 +1,12 @@
 import type { PayloadRequest, Where } from '../types/index.js'
 
-import { resolveBranch } from './resolveBranch.js'
-import { branchChangesCollectionSlug, branchField, MAIN_BRANCH } from './types.js'
+import { loadBranchRow, resolveBranch, setBranchRow } from './resolveBranch.js'
+import {
+  branchChangesCollectionSlug,
+  branchesCollectionSlug,
+  branchField,
+  MAIN_BRANCH,
+} from './types.js'
 
 type BaseArgs = {
   branch?: false | string
@@ -77,9 +82,9 @@ export const pickBranchGlobal = <T extends Record<string, any>>(
  * The branch a global write should be scoped to, or `null` on main.
  *
  * Storage differs too much between adapters to upsert the branch's copy here —
- * Mongo keeps every global in one discriminated collection, Drizzle gives each
- * its own table — so each adapter performs the upsert and calls
- * `recordBranchGlobalChange` once it has.
+ * Mongo keeps every global in one discriminated collection and Drizzle gives each
+ * its own table, so each adapter performs the upsert. The global operation records
+ * the change after that adapter write succeeds.
  */
 export const resolveBranchGlobalWrite = (args: BaseArgs): null | string => {
   const active = activeBranch(args)
@@ -105,6 +110,14 @@ export const recordBranchGlobalChange = async ({
   }
 
   if (recorded.has(key)) {
+    return
+  }
+
+  if (req!.payload!.db.upsertBranchGlobalChange) {
+    await req!.payload!.db.upsertBranchGlobalChange({ branch, globalSlug, req })
+    await reopenBranchForGlobalChange({ branch, req: req as PayloadRequest })
+    recorded.add(key)
+
     return
   }
 
@@ -138,6 +151,30 @@ export const recordBranchGlobalChange = async ({
   })
 
   recorded.add(key)
+}
+
+const reopenBranchForGlobalChange = async ({
+  branch,
+  req,
+}: {
+  branch: string
+  req: PayloadRequest
+}): Promise<void> => {
+  const row = await loadBranchRow({ branch, req })
+
+  if (row?.status !== 'merged') {
+    return
+  }
+
+  const reopened = await req.payload.update({
+    id: row.id as number | string,
+    collection: branchesCollectionSlug,
+    data: { mergedAt: null, status: 'open' },
+    overrideAccess: true,
+    req,
+  })
+
+  setBranchRow({ branch, req, row: reopened as Record<string, unknown> })
 }
 
 /**

@@ -1,8 +1,11 @@
+import type { GraphQLResolveInfo } from 'graphql'
 import type { Collection, PayloadRequest, Where } from 'payload'
 
-import { countOperation, isolateObjectProperty } from 'payload'
+import { countOperation } from 'payload'
 
 import type { Context } from '../types.js'
+
+import { getGraphQLRequest } from '../getGraphQLRequest.js'
 
 export type Resolver = (
   _: unknown,
@@ -16,22 +19,22 @@ export type Resolver = (
   context: {
     req: PayloadRequest
   },
+  info: GraphQLResolveInfo,
 ) => Promise<{ totalDocs: number }>
 
 export function countResolver(collection: Collection): Resolver {
-  return async function resolver(_, args, context: Context) {
-    let { req } = context
-    const locale = req.locale
-    const fallbackLocale = req.fallbackLocale
-    req = isolateObjectProperty(req, 'locale')
-    req = isolateObjectProperty(req, 'fallbackLocale')
-    req.locale = args.locale || locale
-    req.fallbackLocale = fallbackLocale
-    context.req = req
+  return async function resolver(_, args, context: Context, info) {
+    const req = await getGraphQLRequest({
+      branch: args.branch,
+      collectionSlug: collection.config.slug,
+      context,
+      info,
+      locale: args.locale,
+    })
 
     const options = {
       collection,
-      req: isolateObjectProperty(req, 'transactionID'),
+      req,
       trash: args.trash,
       where: args.where,
     }

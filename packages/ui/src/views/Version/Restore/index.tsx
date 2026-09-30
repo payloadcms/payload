@@ -4,6 +4,7 @@ import type { ClientCollectionConfig, ClientGlobalConfig, SanitizedCollectionCon
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { Fragment, useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -67,16 +68,18 @@ export const Restore: React.FC<Props> = ({
   const canRestoreAsDraft = status !== 'draft' && collectionConfig?.versions?.drafts
 
   const handleRestore = useCallback(async () => {
-    const branchParam = branch ? `&branch=${encodeURIComponent(branch)}` : ''
-
-    let fetchURL = formatAdminURL({
-      apiRoute,
-      path: '',
-    })
+    const queryString = qs.stringify(
+      { branch: branch || undefined, draft },
+      { addQueryPrefix: true },
+    )
+    let fetchURL: string
     let redirectURL: string
 
     if (collectionConfig) {
-      fetchURL = `${fetchURL}/${collectionConfig.slug}/versions/${versionID}?draft=${draft}${branchParam}`
+      fetchURL = formatAdminURL({
+        apiRoute,
+        path: `/${collectionConfig.slug}/versions/${versionID}${queryString}`,
+      })
       redirectURL = formatAdminURL({
         adminRoute,
         path: `/collections/${collectionConfig.slug}/${originalDocID}`,
@@ -84,7 +87,10 @@ export const Restore: React.FC<Props> = ({
     }
 
     if (globalConfig) {
-      fetchURL = `${fetchURL}/globals/${globalConfig.slug}/versions/${versionID}?draft=${draft}${branchParam}`
+      fetchURL = formatAdminURL({
+        apiRoute,
+        path: `/globals/${globalConfig.slug}/versions/${versionID}${queryString}`,
+      })
       redirectURL = formatAdminURL({
         adminRoute,
         path: `/globals/${globalConfig.slug}`,

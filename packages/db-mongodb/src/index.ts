@@ -64,6 +64,7 @@ import { updateMany } from './updateMany.js'
 import { updateOne } from './updateOne.js'
 import { updateVersion } from './updateVersion.js'
 import { upsert } from './upsert.js'
+import { upsertBranchGlobalChange } from './upsertBranchGlobalChange.js'
 
 export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
@@ -337,6 +338,7 @@ export function mongooseAdapter({
       updateOne,
       updateVersion,
       upsert,
+      upsertBranchGlobalChange,
       useAlternativeDropDatabase,
       useBigIntForNumberIDs,
       useJoinAggregations,

@@ -83,6 +83,7 @@ export const findOne: FindOne = async function findOne(
       docs: [doc] as Record<string, unknown>[],
       joins,
       locale,
+      req,
     })
   }
 

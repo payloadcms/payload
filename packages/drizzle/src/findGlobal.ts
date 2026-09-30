@@ -5,6 +5,7 @@ import {
   pickBranchGlobal,
   resolveBranch,
   resolveBranchGlobalQuery,
+  withBranchGlobalSelect,
 } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
@@ -29,7 +30,7 @@ export const findGlobal: FindGlobal = async function findGlobal(
     locale,
     pagination: false,
     req,
-    select,
+    select: withBranchGlobalSelect({ branch, globalSlug: slug, req, select }),
     tableName,
     where: resolveBranchGlobalQuery({ branch, globalSlug: slug, req, where }),
   })

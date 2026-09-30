@@ -40,6 +40,7 @@ export type BranchingConfig = {
     createBranch?: Access
     deleteBranch?: Access
     readBranch?: Access
+    updateBranch?: Access
   }
   /**
    * Collections to exclude from branching, in addition to the defaults.

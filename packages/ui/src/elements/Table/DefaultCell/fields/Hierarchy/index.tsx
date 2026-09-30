@@ -8,6 +8,7 @@ import type { SelectionWithPath } from '../../../../Hierarchy/Modal/types.js'
 import { useIntersect } from '../../../../../hooks/useIntersect.js'
 import { FolderIcon } from '../../../../../icons/Folder/index.js'
 import { TagIcon } from '../../../../../icons/Tag/index.js'
+import { useBranchParam } from '../../../../../providers/Branch/index.js'
 import { useConfig } from '../../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../../providers/Translation/index.js'
 import { canUseDOM } from '../../../../../utilities/canUseDOM.js'
@@ -15,6 +16,7 @@ import { formatDocTitle } from '../../../../../utilities/formatDocTitle/index.js
 import { Button } from '../../../../Button/index.js'
 import { useHierarchyModal } from '../../../../Hierarchy/Modal/useHierarchyModal.js'
 import { useListRelationships } from '../../../RelationshipProvider/index.js'
+import { buildHierarchyCellUpdateURL } from './buildHierarchyCellUpdateURL.js'
 import './index.css'
 
 type Value = { relationTo: string; value: number | string }
@@ -33,6 +35,7 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
   const hasMany = field.hasMany ?? false
 
   const { config, getEntityConfig } = useConfig()
+  const branch = useBranchParam()
   const [intersectionRef, entry] = useIntersect()
   const [values, setValues] = useState<Value[]>([])
   const { documents, getRelationships } = useListRelationships()
@@ -168,7 +171,13 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
       // Update the document via API
       try {
         const response = await fetch(
-          `${config.serverURL}${config.routes.api}/${collectionSlug}/${rowData.id}`,
+          buildHierarchyCellUpdateURL({
+            id: rowData.id,
+            apiRoute: config.routes.api,
+            branch,
+            collectionSlug,
+            serverURL: config.serverURL,
+          }),
           {
             body: JSON.stringify({
               [field.name]: newValue,
@@ -200,7 +209,7 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
 
       closeModal()
     },
-    [collectionSlug, config, field.name, hasMany, rowData, relationTo, getRelationships],
+    [branch, collectionSlug, config, field.name, hasMany, rowData, relationTo, getRelationships],
   )
 
   // Build display labels

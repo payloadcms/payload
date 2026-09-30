@@ -271,8 +271,9 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
   const addOptionByID = useCallback(
     async (id, relation) => {
       if (!errorLoading && id !== 'null' && id && relation) {
+        const queryString = qs.stringify({ branch, depth: 0 }, { addQueryPrefix: true })
         const response = await fetch(
-          formatAdminURL({ apiRoute: api, path: `/${relation}/${id}?depth=0` }),
+          formatAdminURL({ apiRoute: api, path: `/${relation}/${id}${queryString}` }),
           {
             credentials: 'include',
             headers: {
@@ -290,7 +291,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         }
       }
     },
-    [i18n, addOptions, api, errorLoading, t],
+    [addOptions, api, branch, errorLoading, i18n, t],
   )
 
   /**

@@ -4,8 +4,10 @@ import { max, sql } from 'drizzle-orm'
 import {
   type FindDistinct,
   getFieldByPath,
+  getLocalizedPaths,
   resolveBranchQuery,
   type SanitizedCollectionConfig,
+  type Where,
 } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
@@ -15,6 +17,22 @@ import { buildQuery } from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
 import { getTransaction } from './utilities/getTransaction.js'
 import { DistinctSymbol } from './utilities/rawConstraint.js'
+
+const prefixWherePaths = ({ prefix, where }: { prefix: string; where: Where }): Where => {
+  const prefixedWhere: Where = {}
+
+  for (const [key, value] of Object.entries(where)) {
+    if (['and', 'or'].includes(key.toLowerCase()) && Array.isArray(value)) {
+      prefixedWhere[key] = value.map((nestedWhere) =>
+        prefixWherePaths({ prefix, where: nestedWhere }),
+      )
+    } else {
+      prefixedWhere[`${prefix}.${key}`] = value
+    }
+  }
+
+  return prefixedWhere
+}
 
 const getOrderColumn = (
   orderBy: { column: GenericColumn; order: typeof asc | typeof desc }[],
@@ -51,6 +69,41 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
     where: args.where,
   })
 
+  const relatedBranchConstraints: Where[] = []
+  const fieldPaths = getLocalizedPaths({
+    collectionSlug: args.collection,
+    fields: collectionConfig.flattenedFields,
+    incomingPath: args.field,
+    locale: args.locale,
+    overrideAccess: true,
+    payload: this.payload,
+  })
+
+  for (let pathIndex = 1; pathIndex < fieldPaths.length; pathIndex++) {
+    const relatedCollectionSlug = fieldPaths[pathIndex]?.collectionSlug
+
+    if (!relatedCollectionSlug) {
+      continue
+    }
+
+    const relationshipPath = fieldPaths
+      .slice(0, pathIndex)
+      .map(({ path }) => path)
+      .join('.')
+    const relatedWhere = await resolveBranchQuery({
+      branch: args.branch,
+      collectionSlug: relatedCollectionSlug,
+      req: args.req,
+      where: args.relatedAccess?.[relationshipPath],
+    })
+
+    if (relatedWhere && Object.keys(relatedWhere).length) {
+      relatedBranchConstraints.push(
+        prefixWherePaths({ prefix: relationshipPath, where: relatedWhere }),
+      )
+    }
+  }
+
   const { joins, orderBy, selectFields, where } = buildQuery({
     adapter: this,
     fields: collectionConfig.flattenedFields,
@@ -59,12 +112,13 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
     tableName,
     where: {
       and: [
-        branchScopedWhere ?? {},
         {
           [args.field]: {
             equals: DistinctSymbol,
           },
         },
+        branchScopedWhere ?? {},
+        ...relatedBranchConstraints,
       ],
     },
   })

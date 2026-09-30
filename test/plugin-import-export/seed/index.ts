@@ -26,6 +26,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         password: devUser.password,
         name: 'name value',
       },
+      overrideAccess: true,
     })
     const restricted = await payload.create({
       collection: 'users',
@@ -34,6 +35,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         password: regularUser.password,
         name: 'restricted user',
       },
+      overrideAccess: true,
     })
     // Seed posts
     const posts = []
@@ -46,6 +48,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           content: richTextData,
           _status: i % 2 === 0 ? 'published' : 'draft', // Evens published, odds draft
         },
+        overrideAccess: true,
       })
 
       if (i < 3) {
@@ -59,6 +62,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         data: {
           title: `Doc ${i}`,
         },
+        overrideAccess: true,
       })
     }
 
@@ -71,6 +75,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
             array: [{ field1: 'test' }],
           },
         },
+        overrideAccess: true,
       })
     }
     for (let i = 0; i < 5; i++) {
@@ -81,6 +86,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           localized: 'en test',
         },
         locale: 'en',
+        overrideAccess: true,
       })
       await payload.update({
         collection: 'pages',
@@ -89,6 +95,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           localized: 'es test',
         },
         locale: 'es',
+        overrideAccess: true,
       })
       await payload.update({
         collection: 'pages',
@@ -97,6 +104,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           localized: `בדיקה ${i}`,
         },
         locale: 'he',
+        overrideAccess: true,
       })
     }
 
@@ -109,6 +117,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           localized: `בדיקה ${i}`,
         },
         locale: 'he',
+        overrideAccess: true,
       })
     }
     for (let i = 0; i < 5; i++) {
@@ -127,6 +136,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
             },
           ],
         },
+        overrideAccess: true,
       })
     }
     for (let i = 0; i < 5; i++) {
@@ -145,6 +155,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
             },
           ],
         },
+        overrideAccess: true,
       })
     }
 
@@ -155,6 +166,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           author: user.id,
           title: `Virtual ${i}`,
         },
+        overrideAccess: true,
       })
     }
 
@@ -165,6 +177,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           customRelationship: user.id,
           title: `Custom ${i}`,
         },
+        overrideAccess: true,
       })
     }
 
@@ -175,6 +188,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           title: `hasMany Number ${i}`,
           hasManyNumber: [0, 1, 1, 2, 3, 5, 8, 13, 21],
         },
+        overrideAccess: true,
       })
     }
 
@@ -195,6 +209,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
             },
           ],
         },
+        overrideAccess: true,
       })
     }
 
@@ -204,6 +219,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         data: {
           title: `JSON ${i}`,
         },
+        overrideAccess: true,
       })
     }
 
@@ -213,6 +229,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         data: {
           title: `Jobs ${i}`,
         },
+        overrideAccess: true,
       })
     }
 
@@ -224,6 +241,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           title: `Checkbox ${i}`,
           checkbox: i % 2 === 0,
         },
+        overrideAccess: true,
       })
     }
 
@@ -236,6 +254,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           title: `Select ${i}`,
           select: options[i % 3],
         },
+        overrideAccess: true,
       })
     }
 
@@ -252,6 +271,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           title: `SelectMany ${i}`,
           selectHasMany: tagSets[i],
         },
+        overrideAccess: true,
       })
     }
 
@@ -264,6 +284,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           title: `Radio ${i}`,
           radio: radios[i % 3],
         },
+        overrideAccess: true,
       })
     }
 
@@ -275,6 +296,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           title: `Email ${i}`,
           email: `test${i}@example.com`,
         },
+        overrideAccess: true,
       })
     }
 
@@ -286,6 +308,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           title: `Textarea ${i}`,
           textarea: `Line 1 for textarea ${i}\nLine 2\nLine 3`,
         },
+        overrideAccess: true,
       })
     }
 
@@ -297,6 +320,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           title: `Code ${i}`,
           code: `function test${i}() {\n  return ${i};\n}`,
         },
+        overrideAccess: true,
       })
     }
 
@@ -308,6 +332,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           title: `Point ${i}`,
           point: [-122.4194 + i * 0.01, 37.7749 + i * 0.01],
         },
+        overrideAccess: true,
       })
     }
 
@@ -319,6 +344,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           title: `TextMany ${i}`,
           textHasMany: [`tag${i}a`, `tag${i}b`, `tag${i}c`],
         },
+        overrideAccess: true,
       })
     }
 
@@ -337,6 +363,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           ...imageFile,
           name: `test-media-${i}.png`,
         } as File,
+        overrideAccess: true,
       })
       mediaIds.push(media.id)
     }
@@ -349,6 +376,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           title: `Upload ${i}`,
           upload: mediaIds[i % mediaIds.length],
         },
+        overrideAccess: true,
       })
     }
 
@@ -361,6 +389,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
             title: `Monomorphic ${i}`,
             hasManyMonomorphic: [posts[1].id],
           },
+          overrideAccess: true,
         })
       }
     }
@@ -387,6 +416,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
               },
             ],
           },
+          overrideAccess: true,
         })
       }
     }
@@ -398,6 +428,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         data: {
           title: `Export Only Post ${i}`,
         },
+        overrideAccess: true,
       })
     }
 
@@ -408,6 +439,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         data: {
           title: `Import Only Post ${i}`,
         },
+        overrideAccess: true,
       })
     }
 
@@ -417,6 +449,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         data: {
           title: `Post with no jobs queue active ${i}`,
         },
+        overrideAccess: true,
       })
     }
 
@@ -426,6 +459,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         data: {
           title: `Post with limit ${i}`,
         },
+        overrideAccess: true,
       })
     }
 

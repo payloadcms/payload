@@ -416,6 +416,17 @@ export const MergeBranchModal: React.FC = () => {
     : progress?.total
       ? Math.round((progress.current / progress.total) * 100)
       : 0
+  const progressLabel = isDone
+    ? t('branching:mergedOfTotal', { current: mergedCount, total: mergedCount })
+    : progress
+      ? t('branching:mergingProgress', {
+          current: progress.current,
+          total: progress.total,
+        })
+      : t('branching:mergeStarting')
+  const completedProgressValue = Math.max(mergedCount, 1)
+  const progressCurrent = isDone ? completedProgressValue : (progress?.current ?? 0)
+  const progressTotal = isDone ? completedProgressValue : (progress?.total ?? 1)
 
   return (
     <DialogModal className={baseClass} closeOnBlur={!isMerging} slug={mergeBranchModalSlug}>
@@ -539,7 +550,15 @@ export const MergeBranchModal: React.FC = () => {
 
         {(isMerging || isDone) && (
           <div className={`${baseClass}__progress`}>
-            <div className={`${baseClass}__progress-bar`}>
+            <div
+              aria-labelledby="merge-branch-progress-label"
+              aria-valuemax={progressTotal}
+              aria-valuemin={0}
+              aria-valuenow={progressCurrent}
+              aria-valuetext={progressLabel}
+              className={`${baseClass}__progress-bar`}
+              role="progressbar"
+            >
               <div
                 className={[
                   `${baseClass}__progress-fill`,
@@ -550,15 +569,13 @@ export const MergeBranchModal: React.FC = () => {
                 style={{ width: `${percentComplete}%` }}
               />
             </div>
-            <span className={`${baseClass}__progress-label`}>
-              {isDone
-                ? t('branching:mergedOfTotal', { current: mergedCount, total: mergedCount })
-                : progress
-                  ? t('branching:mergingProgress', {
-                      current: progress.current,
-                      total: progress.total,
-                    })
-                  : t('branching:mergeStarting')}
+            <span
+              aria-live="polite"
+              className={`${baseClass}__progress-label`}
+              id="merge-branch-progress-label"
+              role="status"
+            >
+              {progressLabel}
             </span>
           </div>
         )}
