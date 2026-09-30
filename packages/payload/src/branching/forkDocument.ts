@@ -1,5 +1,3 @@
-import { v4 as uuid } from 'uuid'
-
 import type { PayloadRequest } from '../types/index.js'
 
 import { createShadowRow } from './createShadowRow.js'
@@ -93,20 +91,10 @@ export const forkDocument = async ({
     return id
   }
 
-  const { id: _discardedID, ...data } = mainDoc
-
-  // Array and block rows are rows of their own under a relational adapter, with primary
-  // keys of their own, so copying them verbatim makes the insert collide with the
-  // originals — `UNIQUE constraint failed`, and the fork fails outright rather than
-  // degrading. Mongo stores them as subdocuments and does not care, which is why no
-  // flat-field test ever saw this.
-  const copied = stripRowIDs(data)
-
   const shadow = await createShadowRow({
     branch,
     collectionSlug,
     data: {
-      ...copied,
       [branchDocIDField]: id,
       [branchField]: branch,
       [branchOpField]: 'update',
@@ -128,6 +116,7 @@ export const forkDocument = async ({
         req: createReq,
       }),
     req,
+    source: { id, branch: MAIN_BRANCH },
     useAmbientTransaction,
   })
 
@@ -138,48 +127,4 @@ export const forkDocument = async ({
   rememberBranchRowID({ collectionSlug, docID: id, req, rowID: shadow.id as number | string })
 
   return shadow.id as number | string
-}
-
-/**
- * Re-keys the nested rows of a copied document.
- *
- * Array and block rows own primary keys of their own under a relational adapter, so a
- * verbatim copy collides with the originals. New keys rather than none: this writes through
- * `db.create` to keep the copy byte-identical, which skips the field hooks that would
- * otherwise mint them, and the columns are `NOT NULL`.
- *
- * Applied to a raw database row rather than an API document, which is what makes the
- * blanket walk safe: at this level the only arrays of objects are array and block rows,
- * the ones that own an `id`. Relationships are IDs or `{ relationTo, value }` pairs, and a
- * localized array arrives as `{ en: [...], es: [...] }` — hence recursing through plain
- * objects too.
- */
-const stripRowIDs = (value: unknown): any => {
-  if (Array.isArray(value)) {
-    return value.map((entry) => {
-      if (entry && typeof entry === 'object' && 'id' in (entry as Record<string, unknown>)) {
-        const row = entry as Record<string, unknown>
-
-        return stripRowIDs({
-          ...row,
-          // Numeric keys come from a sequence the database owns, so they are left for it
-          // to assign.
-          id: typeof row.id === 'string' ? uuid() : undefined,
-        })
-      }
-
-      return stripRowIDs(entry)
-    })
-  }
-
-  if (value && typeof value === 'object' && !(value instanceof Date)) {
-    return Object.fromEntries(
-      Object.entries(value as Record<string, unknown>).map(([key, each]) => [
-        key,
-        stripRowIDs(each),
-      ]),
-    )
-  }
-
-  return value
 }

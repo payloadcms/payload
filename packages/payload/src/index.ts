@@ -1678,6 +1678,8 @@ export type {
   BeginTransaction,
   CommitTransaction,
   Connect,
+  Copy,
+  CopyArgs,
   Count,
   CountArgs,
   CountGlobalVersionArgs,

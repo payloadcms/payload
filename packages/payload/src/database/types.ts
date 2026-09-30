@@ -40,6 +40,7 @@ export interface BaseDatabaseAdapter {
    * Open the connection to the database
    */
   connect?: Connect
+  copy: Copy
   count: Count
   countGlobalVersions: CountGlobalVersions
   countVersions: CountVersions
@@ -193,6 +194,23 @@ type ConnectArgs = {
 export type Connect = (args?: ConnectArgs) => Promise<void>
 
 export type Destroy = () => Promise<void>
+
+export type CopyArgs = {
+  collection: CollectionSlug
+  /** Top-level field values that replace values from the source document. */
+  data?: Record<string, unknown>
+  destination: {
+    branch: string
+  }
+  req?: Partial<PayloadRequest>
+  source: {
+    branch: string
+    /** Logical document ID on the source branch. */
+    id: number | string
+  }
+}
+
+export type Copy = (this: BaseDatabaseAdapter, args: CopyArgs) => Promise<Document>
 
 export type BatchProcessingOperation =
   | {

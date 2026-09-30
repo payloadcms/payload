@@ -1,3 +1,4 @@
+import type { CopyArgs } from '../database/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
 import { ValidationError } from '../errors/ValidationError.js'
@@ -24,6 +25,8 @@ type Args = {
    */
   onCreated: (req: PayloadRequest, shadow: Record<string, unknown>) => Promise<unknown>
   req: PayloadRequest
+  /** Copies an exact logical source document instead of creating from data alone. */
+  source?: CopyArgs['source']
   /** Uses the request's existing transaction and leaves commit or rollback to its owner. */
   useAmbientTransaction?: boolean
 }
@@ -183,6 +186,7 @@ export const createShadowRow = async ({
   docID,
   onCreated,
   req,
+  source,
   useAmbientTransaction = false,
 }: Args): Promise<Record<string, unknown>> => {
   if (useAmbientTransaction) {
@@ -194,11 +198,13 @@ export const createShadowRow = async ({
     }
 
     try {
-      const shadow = (await ambient.payload.db.create({
-        collection: collectionSlug,
+      const shadow = await createShadowContent({
+        branch,
+        collectionSlug,
         data,
         req: ambient,
-      })) as Record<string, unknown>
+        source,
+      })
 
       await onCreated(ambient, shadow)
 
@@ -223,11 +229,13 @@ export const createShadowRow = async ({
   let shadow: Record<string, unknown>
 
   try {
-    shadow = (await isolated.payload.db.create({
-      collection: collectionSlug,
+    shadow = await createShadowContent({
+      branch,
+      collectionSlug,
       data,
       req: isolated,
-    })) as Record<string, unknown>
+      source,
+    })
   } catch (error) {
     await killTransaction(isolated)
 
@@ -283,4 +291,34 @@ export const createShadowRow = async ({
 
     throw error
   }
+}
+
+const createShadowContent = async ({
+  branch,
+  collectionSlug,
+  data,
+  req,
+  source,
+}: {
+  branch: string
+  collectionSlug: string
+  data: Record<string, unknown>
+  req: PayloadRequest
+  source?: CopyArgs['source']
+}): Promise<Record<string, unknown>> => {
+  if (source) {
+    return req.payload.db.copy({
+      collection: collectionSlug,
+      data,
+      destination: { branch },
+      req,
+      source,
+    }) as Promise<Record<string, unknown>>
+  }
+
+  return req.payload.db.create({
+    collection: collectionSlug,
+    data,
+    req,
+  }) as Promise<Record<string, unknown>>
 }

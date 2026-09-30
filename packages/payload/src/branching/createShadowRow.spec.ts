@@ -15,6 +15,78 @@ const data = { _branch: branch, _branchDocID: 'main-id', _branchOp: 'update', ti
 const docID = 'main-id'
 const shadow = { ...data, id: 'shadow-id' }
 
+test('should use database copy for a shadow with an explicit source', async () => {
+  const copy = vi.fn().mockResolvedValue(shadow)
+  const create = vi.fn()
+  const onCreated = vi.fn().mockResolvedValue(undefined)
+  const req = {
+    payload: {
+      db: {
+        beginTransaction: vi.fn().mockResolvedValue('copy-transaction'),
+        commitTransaction: vi.fn().mockResolvedValue(undefined),
+        copy,
+        create,
+        rollbackTransaction: vi.fn().mockResolvedValue(undefined),
+      },
+    },
+  } as unknown as PayloadRequest
+
+  await expect(
+    createShadowRow({
+      branch,
+      collectionSlug,
+      data,
+      docID,
+      onCreated,
+      req,
+      source: { branch: 'main', id: docID },
+    }),
+  ).resolves.toBe(shadow)
+
+  const copyReq = copy.mock.calls[0]![0].req as PayloadRequest
+
+  expect(copy).toHaveBeenCalledWith({
+    collection: collectionSlug,
+    data,
+    destination: { branch },
+    req: copyReq,
+    source: { branch: 'main', id: docID },
+  })
+  expect(create).not.toHaveBeenCalled()
+  expect(onCreated).toHaveBeenCalledWith(copyReq, shadow)
+})
+
+test('should recover a competing database copy after a uniqueness failure', async () => {
+  const copyError = new ValidationError({
+    collection: collectionSlug,
+    errors: [{ message: 'Value must be unique', path: '_branchDocID' }],
+  })
+  const create = vi.fn()
+  const req = {
+    payload: {
+      db: {
+        copy: vi.fn().mockRejectedValue(copyError),
+        create,
+        findOne: vi.fn().mockResolvedValue(shadow),
+      },
+    },
+  } as unknown as PayloadRequest
+
+  await expect(
+    createShadowRow({
+      branch,
+      collectionSlug,
+      data,
+      docID,
+      onCreated: vi.fn(),
+      req,
+      source: { branch: 'main', id: docID },
+    }),
+  ).resolves.toBe(shadow)
+
+  expect(create).not.toHaveBeenCalled()
+})
+
 test('should create the shadow and registry in an ambient transaction without resolving it', async () => {
   const callerFile = { name: 'upload.txt' }
   const commitTransaction = vi.fn()
