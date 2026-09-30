@@ -76,7 +76,7 @@ export type CloudinaryTransformation = {
 
 /**
  * Image size options implemented by this transformer, registered onto core's
- * `ImageSize` so `imageSizes` entries can carry Cloudinary-specific settings.
+ * `ImageSize` so `variants` entries can carry Cloudinary-specific settings.
  */
 export type CloudinaryImageSizeOptions = {
   crop?: CloudinaryCropMode
@@ -103,7 +103,7 @@ declare module 'payload' {
 /**
  * A collection's Cloudinary-owned upload-time settings, authored via
  * `cloudinaryTransformer({ collections: { <slug>: {...} } })`. `init()` writes a
- * narrowed, Cloudinary-agnostic projection of `imageSizes`/`crop`/`focalPoint`
+ * narrowed, Cloudinary-agnostic projection of `variants` (as `imageSizes`)/`crop`/`focalPoint`
  * back onto the sanitized collection's `upload` config for core's own use
  * (Admin UI, field generation); this richer shape is what the transformer reads.
  */
@@ -114,9 +114,10 @@ export type CloudinaryCollectionConfig = {
   focalPoint?: boolean
   /** Format and quality applied to the main uploaded file. */
   formatOptions?: { format: CloudinaryFormat; quality?: CloudinaryQuality }
-  imageSizes?: ImageSize[]
   /** Transformation applied to the main uploaded file. */
   resizeOptions?: Omit<CloudinaryTransformation, 'x' | 'y'>
+  /** Image sizes generated for each upload, stored under the document's `sizes`. */
+  variants?: ImageSize[]
 }
 
 /** Configurable defaults for dynamic (request-time) transformation. */

@@ -38,19 +38,19 @@ export default buildConfigWithDefaults({
         cloudinaryTransformer({
           collections: {
             [mediaSlug]: {
-              imageSizes: [
+              resizeOptions: { width: 1200 },
+              variants: [
                 { name: 'square', height: 400, width: 400 },
                 // Exercises Cloudinary's content-aware crop, which Sharp has no equivalent for.
                 { name: 'sixteenByNineMedium', gravity: 'auto', height: 450, width: 900 },
                 // Larger than the fixture in both dimensions: recorded with null metadata.
                 { name: 'tooLarge', height: 5000, width: 5000 },
               ],
-              resizeOptions: { width: 1200 },
             },
             [mediaWithFocalPointSlug]: {
               crop: true,
               focalPoint: true,
-              imageSizes: [{ name: 'portrait', height: 600, width: 300 }],
+              variants: [{ name: 'portrait', height: 600, width: 300 }],
             },
           },
           dynamic: true,

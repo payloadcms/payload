@@ -67,7 +67,7 @@ export function buildDynamicTransformation({
 }
 
 /**
- * Builds the transformation for one configured `imageSizes` entry.
+ * Builds the transformation for one configured `variants` entry.
  *
  * A focal point is expressed as Cloudinary's `g_xy_center` with the focus translated
  * from percentages into source pixels, which is how Cloudinary anchors a crop to a point.

@@ -483,7 +483,7 @@ cloudinaryTransformer({
     media: {
       crop: true,
       focalPoint: true,
-      imageSizes: [
+      variants: [
         { name: 'thumbnail', width: 400, height: 300 },
         // Cloudinary's content-aware crop — no local equivalent in Sharp
         { name: 'card', width: 768, height: 1024, gravity: 'auto' },
@@ -495,7 +495,7 @@ cloudinaryTransformer({
 })
 ```
 
-As with `sharpTransformer`, this writes a provider-agnostic projection of `imageSizes`, `crop`, and `focalPoint` back onto the collection's sanitized `upload` config at startup, so the Admin Panel, generated types, and the rest of core keep seeing `collection.upload.imageSizes` exactly as before. The `sizes` shape on your documents is unchanged, including the behavior where a size larger than the source in both dimensions is recorded with null metadata.
+As with `sharpTransformer`, this writes a provider-agnostic projection of `variants`, `crop`, and `focalPoint` back onto the collection's sanitized `upload` config at startup (as `upload.imageSizes`/`.crop`/`.focalPoint`), so the Admin Panel, generated types, and the rest of core see the same sizes as before. The `sizes` shape on your documents is unchanged, including the behavior where a size larger than the source in both dimensions is recorded with null metadata.
 
 An Admin-selected crop becomes a `c_crop` step; a focal point becomes `g_xy_center` with the focus translated into source pixels.
 

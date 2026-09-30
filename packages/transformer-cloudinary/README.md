@@ -111,7 +111,7 @@ cloudinaryTransformer({
     media: {
       crop: true,
       focalPoint: true,
-      imageSizes: [
+      variants: [
         { name: 'thumbnail', height: 300, width: 400 },
         // Cloudinary's content-aware crop — no local equivalent in Sharp
         { name: 'card', gravity: 'auto', height: 1024, width: 768 },
@@ -123,7 +123,7 @@ cloudinaryTransformer({
 })
 ```
 
-At startup this writes a Cloudinary-agnostic projection of `imageSizes`, `crop`, and `focalPoint` back onto the collection's sanitized `upload` config, so the Admin Panel, generated types, and the rest of core keep seeing `collection.upload.imageSizes` exactly as before. The `sizes` shape on your documents is unchanged, including the long-standing behavior where a size larger than the source in both dimensions is recorded with null metadata.
+At startup this writes a Cloudinary-agnostic projection of `variants`, `crop`, and `focalPoint` back onto the collection's sanitized `upload` config (as `upload.imageSizes`/`.crop`/`.focalPoint`), so the Admin Panel, generated types, and the rest of core see the same sizes as before. The `sizes` shape on your documents is unchanged, including the long-standing behavior where a size larger than the source in both dimensions is recorded with null metadata.
 
 <!-- prettier-ignore -->
 > **Note on cost and latency.** Cloudinary has no stateless "transform these bytes" API — every transformation is addressed against a stored asset. Upload-time processing therefore stages the original as a short-lived Cloudinary asset, generates all derived sizes in one call, pulls them back, and deletes the staged original before returning. That is one upload, one derivation call, and one delete per uploaded file, on top of fetching each derived size. If you only need local resizing, `@payloadcms/transformer-sharp` does it without the round trip.

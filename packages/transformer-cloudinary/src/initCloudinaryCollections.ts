@@ -1,4 +1,4 @@
-import type { Config } from 'payload'
+import type { Config, SanitizedUploadConfig } from 'payload'
 
 import type { CloudinaryCollectionConfig } from './types.js'
 
@@ -18,7 +18,7 @@ const RESERVED_IMAGE_SIZE_NAMES = [
 /**
  * Validates `cloudinaryTransformer({ collections })` against the config's real
  * collections, then writes a narrowed, Cloudinary-agnostic projection of
- * `imageSizes`/`crop`/`focalPoint`/`hasImageAdjustments` back onto each targeted
+ * `variants` (as `imageSizes`)/`crop`/`focalPoint`/`hasImageAdjustments` back onto each targeted
  * collection's sanitized `upload` config, so core's own field generation and
  * Admin UI keep working without knowing about Cloudinary.
  */
@@ -54,24 +54,24 @@ export function initCloudinaryCollections({
 
     const seenSizeNames = new Set<string>()
 
-    for (const size of cloudinaryConfig.imageSizes ?? []) {
+    for (const size of cloudinaryConfig.variants ?? []) {
       if (typeof size.name !== 'string' || size.name.trim().length === 0) {
         errors.push(
-          `cloudinaryTransformer collections."${slug}".imageSizes has an entry missing a valid \`name\`.`,
+          `cloudinaryTransformer collections."${slug}".variants has an entry missing a valid \`name\`.`,
         )
         continue
       }
 
       if (seenSizeNames.has(size.name)) {
         errors.push(
-          `cloudinaryTransformer collections."${slug}".imageSizes has a duplicate size name: "${size.name}".`,
+          `cloudinaryTransformer collections."${slug}".variants has a duplicate size name: "${size.name}".`,
         )
       }
       seenSizeNames.add(size.name)
 
       if (RESERVED_IMAGE_SIZE_NAMES.includes(size.name)) {
         errors.push(
-          `cloudinaryTransformer collections."${slug}".imageSizes uses reserved name "${size.name}", which collides with a built-in upload field. Choose a different name.`,
+          `cloudinaryTransformer collections."${slug}".variants uses reserved name "${size.name}", which collides with a built-in upload field. Choose a different name.`,
         )
       }
     }
@@ -83,30 +83,31 @@ export function initCloudinaryCollections({
     )
   }
 
-  for (const [slug, cloudinaryConfig] of Object.entries(collections)) {
-    if (!cloudinaryConfig) {
-      continue
+  // Write onto copies, never the authored collection objects: a rebuilt config (e.g. on a dev
+  // reload) would otherwise see `upload.imageSizes` on the collection and reject it as legacy.
+  config.collections = config.collections!.map((collection) => {
+    const cloudinaryConfig = collections[collection.slug]
+
+    if (!cloudinaryConfig || !collection.upload) {
+      return collection
     }
 
-    const collection = config.collections!.find((candidate) => candidate.slug === slug)!
-
-    if (collection.upload === true) {
-      collection.upload = {}
+    const upload: Partial<SanitizedUploadConfig> = {
+      ...(typeof collection.upload === 'object' ? collection.upload : {}),
+      crop: cloudinaryConfig.crop,
+      focalPoint: cloudinaryConfig.focalPoint,
+      hasImageAdjustments: Boolean(
+        cloudinaryConfig.resizeOptions || cloudinaryConfig.formatOptions,
+      ),
+      imageSizes: cloudinaryConfig.variants?.map(({ name, admin, generateImageName }) => ({
+        name,
+        admin,
+        generateImageName,
+      })),
     }
 
-    if (typeof collection.upload !== 'object') {
-      continue
-    }
-
-    collection.upload.imageSizes = cloudinaryConfig.imageSizes?.map(
-      ({ name, admin, generateImageName }) => ({ name, admin, generateImageName }),
-    )
-    collection.upload.crop = cloudinaryConfig.crop
-    collection.upload.focalPoint = cloudinaryConfig.focalPoint
-    collection.upload.hasImageAdjustments = Boolean(
-      cloudinaryConfig.resizeOptions || cloudinaryConfig.formatOptions,
-    )
-  }
+    return { ...collection, upload }
+  })
 
   return config
 }

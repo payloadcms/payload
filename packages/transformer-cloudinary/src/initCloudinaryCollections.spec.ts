@@ -21,7 +21,7 @@ describe('initCloudinaryCollections', () => {
         media: {
           crop: true,
           focalPoint: true,
-          imageSizes: [{ name: 'square', height: 400, width: 400 }],
+          variants: [{ name: 'square', height: 400, width: 400 }],
         },
       },
       config,
@@ -34,6 +34,21 @@ describe('initCloudinaryCollections', () => {
       focalPoint: true,
       imageSizes: [{ name: 'square', admin: undefined, generateImageName: undefined }],
     })
+  })
+
+  it('should write onto a copy, leaving the authored collection untouched', () => {
+    const config = createConfig()
+    const authoredMedia = config.collections![0]!
+    const authoredUpload = authoredMedia.upload
+
+    initCloudinaryCollections({
+      collections: { media: { variants: [{ name: 'square', width: 400 }] } },
+      config,
+    })
+
+    expect(config.collections![0]).not.toBe(authoredMedia)
+    expect(authoredMedia.upload).toBe(authoredUpload)
+    expect(authoredUpload).not.toHaveProperty('imageSizes')
   })
 
   it('should flag configured adjustments for the Admin Panel', () => {
@@ -64,11 +79,7 @@ describe('initCloudinaryCollections', () => {
       initCloudinaryCollections({
         collections: {
           media: {
-            imageSizes: [
-              { name: 'square', width: 1 },
-              { name: 'square', width: 2 },
-              { name: 'url' },
-            ],
+            variants: [{ name: 'square', width: 1 }, { name: 'square', width: 2 }, { name: 'url' }],
           },
         },
         config: createConfig(),

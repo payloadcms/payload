@@ -98,7 +98,7 @@ export function createPrepareUpload({
         tasks.push({ chain: mainChain, fieldPath: 'filename' })
       }
 
-      for (const size of collectionUpload.imageSizes ?? []) {
+      for (const size of collectionUpload.variants ?? []) {
         const sizeOptions = size as { name: string } & CloudinaryImageSizeOptions
         const fieldPath = `sizes.${sizeOptions.name}` as const
 
