@@ -1152,45 +1152,19 @@ export const mergeBranch = async (
 
   const finalizeMergeAfterCommit = async (): Promise<void> => {
     const cleanupErrors: string[] = []
-
-    mergeEventChanges = mergeEventChanges.map((change) => ({
-      ...change,
-      applicationOutcome:
-        change.applicationOutcome === 'applied' ? 'committed' : change.applicationOutcome,
-    }))
-    await persistMergeEvent({ mergedAt, status: 'inProgress' })
-
-    for (const { changeID, cleanup } of sourceCleanupPlans) {
-      let cleanupError: string | undefined
-      let cleanupOutcome: SourceCleanupOutcome = 'completed'
-
-      try {
-        cleanupOutcome = await cleanup()
-
-        if (cleanupOutcome === 'completed') {
-          await payload.delete({
-            id: changeID,
-            collection: branchChangesCollectionSlug,
-            overrideAccess: true,
-            req,
-          })
-        }
-
-        const uploadCleanupPlan = uploadCleanupPlans.find(
-          (plan) => String(plan.changeID) === String(changeID),
-        )
-
-        if (cleanupOutcome === 'completed' && uploadCleanupPlan) {
-          await deleteUploadFilesExclusiveToDocument({
-            collectionConfig: payload.collections[uploadCleanupPlan.collectionSlug]!.config,
-            config: payload.config,
-            req,
-            retainedDoc: uploadCleanupPlan.retainedDoc,
-            sourceDoc: uploadCleanupPlan.sourceDoc,
-          })
-        }
-      } catch (error) {
-        cleanupError = getMergeErrorMessage({ error })
+    const uploadCleanupPlanByChangeID = new Map(
+      uploadCleanupPlans.map((plan) => [String(plan.changeID), plan]),
+    )
+    const persistCleanupOutcome = async ({
+      changeID,
+      cleanupError,
+      cleanupOutcome,
+    }: {
+      changeID: number | string
+      cleanupError?: string
+      cleanupOutcome: MergeEventChange['cleanupOutcome']
+    }): Promise<void> => {
+      if (cleanupError) {
         cleanupErrors.push(cleanupError)
       }
 
@@ -1206,6 +1180,106 @@ export const mergeBranch = async (
         mergedAt,
         status: cleanupErrors.length ? 'cleanupFailed' : 'inProgress',
       })
+    }
+
+    mergeEventChanges = mergeEventChanges.map((change) => ({
+      ...change,
+      applicationOutcome:
+        change.applicationOutcome === 'applied' ? 'committed' : change.applicationOutcome,
+    }))
+    await persistMergeEvent({ mergedAt, status: 'inProgress' })
+
+    const completedSourceCleanups: (typeof sourceCleanupPlans)[number][] = []
+
+    for (const sourceCleanupPlan of sourceCleanupPlans) {
+      const { changeID, cleanup } = sourceCleanupPlan
+
+      try {
+        const cleanupOutcome = await cleanup()
+
+        if (cleanupOutcome === 'superseded') {
+          await persistCleanupOutcome({ changeID, cleanupOutcome })
+          continue
+        }
+
+        completedSourceCleanups.push(sourceCleanupPlan)
+      } catch (error) {
+        await persistCleanupOutcome({
+          changeID,
+          cleanupError: getMergeErrorMessage({ error }),
+          cleanupOutcome: 'failed',
+        })
+      }
+    }
+
+    if (completedSourceCleanups.length) {
+      // Branch changes are server-owned bookkeeping with no public delete lifecycle.
+      // Target content still uses the ordered Local API path above.
+      let registryCleanupResults: Awaited<ReturnType<typeof payload.db.batchProcessing>> | undefined
+
+      try {
+        registryCleanupResults = await payload.db.batchProcessing({
+          operations: completedSourceCleanups.map(({ changeID }) => ({
+            args: {
+              branch: false,
+              collection: branchChangesCollectionSlug,
+              returning: false,
+              where: { id: { equals: changeID } },
+            },
+            operation: 'deleteOne',
+          })),
+          req,
+        })
+      } catch (error) {
+        const cleanupError = getMergeErrorMessage({ error })
+
+        for (const { changeID } of completedSourceCleanups) {
+          await persistCleanupOutcome({ changeID, cleanupError, cleanupOutcome: 'failed' })
+        }
+      }
+
+      const registryCleanupResultByIndex = new Map(
+        registryCleanupResults?.map((result) => [result.index, result]),
+      )
+
+      for (const [index, { changeID }] of completedSourceCleanups.entries()) {
+        if (!registryCleanupResults) {
+          continue
+        }
+
+        const registryCleanupResult = registryCleanupResultByIndex.get(index)
+        let cleanupError: string | undefined
+
+        if (!registryCleanupResult || registryCleanupResult.status === 'unattempted') {
+          cleanupError = 'Branch change registry cleanup was not attempted.'
+        } else if (registryCleanupResult.status === 'failed') {
+          cleanupError = getMergeErrorMessage({ error: registryCleanupResult.error })
+        }
+
+        if (!cleanupError) {
+          const uploadCleanupPlan = uploadCleanupPlanByChangeID.get(String(changeID))
+
+          if (uploadCleanupPlan) {
+            try {
+              await deleteUploadFilesExclusiveToDocument({
+                collectionConfig: payload.collections[uploadCleanupPlan.collectionSlug]!.config,
+                config: payload.config,
+                req,
+                retainedDoc: uploadCleanupPlan.retainedDoc,
+                sourceDoc: uploadCleanupPlan.sourceDoc,
+              })
+            } catch (error) {
+              cleanupError = getMergeErrorMessage({ error })
+            }
+          }
+        }
+
+        await persistCleanupOutcome({
+          changeID,
+          cleanupError,
+          cleanupOutcome: cleanupError ? 'failed' : 'completed',
+        })
+      }
     }
 
     try {

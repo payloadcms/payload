@@ -10092,6 +10092,292 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       }
     })
 
+    test('should batch registry cleanup after ordered target lifecycle writes', async () => {
+      branchSlug = 'batched-registry-cleanup'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Batched registry cleanup', slug: branchSlug },
+      })
+      const firstDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Batch cleanup first original' },
+      })
+      const secondDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Batch cleanup second original' },
+      })
+
+      await payload.update({
+        id: firstDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Batch cleanup first edited' },
+      })
+      await payload.update({
+        id: secondDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Batch cleanup second edited' },
+      })
+
+      const pendingChanges = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        sort: 'createdAt',
+        where: { branch: { equals: branchSlug } },
+      })
+      const batchProcessing = payload.db.batchProcessing.bind(payload.db)
+      const batchProcessingSpy = vi
+        .spyOn(payload.db, 'batchProcessing')
+        .mockImplementation((args) => batchProcessing(args))
+      const targetHookTitles: string[] = []
+      let earlierTitleObservedBySecondHook: string | undefined
+
+      hookSpy.beforeChange = async ({
+        data,
+        req,
+      }: {
+        data: Record<string, unknown>
+        req: PayloadRequest
+      }) => {
+        if (typeof data.title === 'string') {
+          targetHookTitles.push(data.title)
+        }
+
+        if (data.title === 'Batch cleanup second edited') {
+          const earlierTarget = await payload.findByID({
+            id: firstDocument.id,
+            collection: postsSlug,
+            req,
+          })
+
+          earlierTitleObservedBySecondHook = earlierTarget.title
+        }
+      }
+
+      try {
+        await payload.branches.merge({ branch: branchSlug, overrideAccess: true })
+
+        expect(batchProcessingSpy).toHaveBeenCalledWith({
+          operations: pendingChanges.docs.map(({ id }) => ({
+            args: {
+              branch: false,
+              collection: branchChangesSlug,
+              returning: false,
+              where: { id: { equals: id } },
+            },
+            operation: 'deleteOne',
+          })),
+          req: expect.any(Object),
+        })
+        expect(targetHookTitles.indexOf('Batch cleanup first edited')).toBeLessThan(
+          targetHookTitles.indexOf('Batch cleanup second edited'),
+        )
+        expect(earlierTitleObservedBySecondHook).toBe('Batch cleanup first edited')
+
+        const onMain = await payload.find({
+          collection: postsSlug,
+          pagination: false,
+          sort: 'createdAt',
+          where: { id: { in: [firstDocument.id, secondDocument.id] } },
+        })
+
+        expect(onMain.docs.map(({ title }) => title)).toEqual([
+          'Batch cleanup first edited',
+          'Batch cleanup second edited',
+        ])
+      } finally {
+        batchProcessingSpy.mockRestore()
+      }
+    })
+
+    test('should preserve failed and unattempted outcomes from registry cleanup batches', async () => {
+      branchSlug = 'partial-registry-cleanup-batch'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Partial registry cleanup batch', slug: branchSlug },
+      })
+      const firstDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Partial batch first original' },
+      })
+      const secondDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Partial batch second original' },
+      })
+
+      await payload.update({
+        id: firstDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Partial batch first edited' },
+      })
+      await payload.update({
+        id: secondDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Partial batch second edited' },
+      })
+
+      const deleteOne = payload.db.deleteOne.bind(payload.db)
+      let hasFailedRegistryDelete = false
+      const registryDeleteSpy = vi
+        .spyOn(payload.db, 'deleteOne')
+        .mockImplementation(async (args) => {
+          if (args.collection === branchChangesSlug && !hasFailedRegistryDelete) {
+            hasFailedRegistryDelete = true
+            throw new Error('Simulated registry cleanup operation failure')
+          }
+
+          return deleteOne(args)
+        })
+
+      try {
+        const result = await payload.branches.merge({
+          branch: branchSlug,
+          overrideAccess: true,
+        })
+        const remainingChanges = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          sort: 'createdAt',
+          where: { branch: { equals: branchSlug } },
+        })
+        const failedEvent = (
+          await payload.find({
+            collection: branchMergesSlug,
+            pagination: false,
+            where: { branch: { equals: branchSlug } },
+          })
+        ).docs[0] as unknown as {
+          changes: { cleanupError?: string; cleanupOutcome: string }[]
+          status: string
+        }
+
+        expect(result.merged).toHaveLength(2)
+        expect(remainingChanges.docs).toHaveLength(2)
+        expect(failedEvent.status).toBe('cleanupFailed')
+        expect(failedEvent.changes).toMatchObject([
+          {
+            cleanupError: 'Simulated registry cleanup operation failure',
+            cleanupOutcome: 'failed',
+          },
+          {
+            cleanupError: 'Branch change registry cleanup was not attempted.',
+            cleanupOutcome: 'failed',
+          },
+        ])
+
+        const retryResult = await payload.branches.merge({
+          branch: branchSlug,
+          overrideAccess: true,
+        })
+        const changesAfterRetry = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+
+        expect(retryResult.merged).toHaveLength(2)
+        expect(changesAfterRetry.docs).toHaveLength(0)
+      } finally {
+        registryDeleteSpy.mockRestore()
+      }
+    })
+
+    test('should retry a rejected registry cleanup batch without repeating target writes', async () => {
+      branchSlug = 'rejected-registry-cleanup-batch'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Rejected registry cleanup batch', slug: branchSlug },
+      })
+      const mainDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Rejected batch original' },
+      })
+
+      await payload.update({
+        id: mainDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Rejected batch edited' },
+      })
+
+      const batchProcessing = payload.db.batchProcessing.bind(payload.db)
+      const batchProcessingSpy = vi
+        .spyOn(payload.db, 'batchProcessing')
+        .mockRejectedValueOnce(new Error('Simulated registry cleanup batch rejection'))
+        .mockImplementation((args) => batchProcessing(args))
+      let targetWriteCount = 0
+
+      hookSpy.beforeChange = ({ data }: { data: Record<string, unknown> }) => {
+        if (data.title === 'Rejected batch edited') {
+          targetWriteCount += 1
+        }
+      }
+
+      try {
+        const firstResult = await payload.branches.merge({
+          branch: branchSlug,
+          overrideAccess: true,
+        })
+        const targetWriteCountAfterFirstMerge = targetWriteCount
+        const failedEvent = (
+          await payload.find({
+            collection: branchMergesSlug,
+            pagination: false,
+            where: { branch: { equals: branchSlug } },
+          })
+        ).docs[0] as unknown as {
+          changes: { cleanupError?: string; cleanupOutcome: string }[]
+          error?: string
+          status: string
+        }
+
+        expect(firstResult.merged).toHaveLength(1)
+        expect(failedEvent.status).toBe('cleanupFailed')
+        expect(failedEvent.error).toContain('Simulated registry cleanup batch rejection')
+        expect(failedEvent.changes[0]).toMatchObject({
+          cleanupError: 'Simulated registry cleanup batch rejection',
+          cleanupOutcome: 'failed',
+        })
+
+        const retryResult = await payload.branches.merge({
+          branch: branchSlug,
+          overrideAccess: true,
+        })
+        const remainingChanges = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+        const mergeEvents = await payload.find({
+          collection: branchMergesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+        const eventAfterRetry = mergeEvents.docs[0] as unknown as {
+          changes: { cleanupOutcome: string }[]
+          error?: null | string
+          status: string
+        }
+
+        expect(retryResult.merged).toHaveLength(1)
+        expect(targetWriteCount).toBe(targetWriteCountAfterFirstMerge)
+        expect(remainingChanges.docs).toHaveLength(0)
+        expect(mergeEvents.docs).toHaveLength(1)
+        expect(eventAfterRetry.status).toBe('succeeded')
+        expect(eventAfterRetry.error).toBeNull()
+        expect(eventAfterRetry.changes[0]).toMatchObject({ cleanupOutcome: 'completed' })
+      } finally {
+        hookSpy.beforeChange = undefined
+        batchProcessingSpy.mockRestore()
+      }
+    })
+
     test.options(
       'should roll back every change in a discard when a later change fails',
       { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
