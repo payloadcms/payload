@@ -58,6 +58,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
         href={href}
         onClick={onSelect ? handleClick : undefined}
         onDoubleClick={onSelect ? handleDoubleClick : undefined}
+        tabIndex={0}
       >
         {thumbnail ? (
           <img

@@ -30,9 +30,12 @@
   .document-card__link:focus:not(:focus-visible) {
     opacity: 1;
   }
+  .document-card:has(.document-card__link:focus-visible) {
+    outline: var(--accessibility-outline);
+    outline-offset: var(--accessibility-outline-offset);
+  }
   .document-card__link:focus-visible {
-    outline: var(--stroke-width-small) solid var(--color-border-selected);
-    outline-offset: var(--spacer-1);
+    outline: none;
   }
   .document-card__title {
     display: block;
