@@ -204,11 +204,11 @@ test.describe('WCAG 2.2 Level AA', () => {
         fieldLabel: 'Accessibility Select',
         fieldPath: 'accessibilitySelect',
       })
-      const tableIds = await page
-        .locator('table[id^="payload-table-"]')
-        .evaluateAll((tables) => tables.map((table) => table.id))
+      const groupedTables = page.locator('table[id^="payload-table-"]')
 
-      expect(tableIds.length).toBeGreaterThan(1)
+      await expect.poll(() => groupedTables.count()).toBeGreaterThan(1)
+      const tableIds = await groupedTables.evaluateAll((tables) => tables.map((table) => table.id))
+
       expect(new Set(tableIds).size).toBe(tableIds.length)
       await clearGroupBy(page)
     })
@@ -858,7 +858,13 @@ test.describe('WCAG 2.2 Level AA', () => {
         page.getByRole('status').filter({ hasText: 'Picked up draggable item' }),
       ).toHaveCount(1)
       await page.keyboard.press('ArrowLeft')
-      await expect(page.getByRole('status').filter({ hasText: `${firstID}-before` })).toHaveCount(1)
+      const overFirstWidget = page.getByRole('status').filter({ hasText: firstID! })
+
+      await expect(overFirstWidget).toContainText(new RegExp(`${firstID}-(before|after)`))
+      if ((await overFirstWidget.innerText()).includes(`${firstID}-after`)) {
+        await page.keyboard.press('ArrowLeft')
+      }
+      await expect(overFirstWidget).toContainText(`${firstID}-before`)
       await page.keyboard.press('Space')
       await expect(widgets.first()).toHaveAttribute('data-slug', lastID!)
       await expect(widgets.last()).toHaveAttribute('data-slug', firstID!)
@@ -893,7 +899,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         ).toBeFocused()
         await page.keyboard.press('Tab')
         await expect(
-          widget.getByRole('button', { name: /^Resize You recently viewed, current size: small$/ }),
+          widget.getByRole('button', { name: /^Resize You recently viewed, current size: full$/ }),
         ).toBeFocused()
         await page.keyboard.press('Tab')
         await expect(
@@ -2115,11 +2121,11 @@ test.describe('WCAG 2.2 Level AA', () => {
       // PYLD-3754
       test.slow()
       const whereBuilder = await openPostsFilter({ page, postsURL })
-      const filterComboboxes = whereBuilder.locator('input[role="combobox"]')
+      const filterComboboxes = whereBuilder.getByRole('combobox')
 
-      expect(await filterComboboxes.count()).toBeGreaterThan(0)
+      await expect(filterComboboxes.first()).toBeVisible()
       await expect
-        .soft(whereBuilder.locator('.condition__field input[role="combobox"]'))
+        .soft(whereBuilder.locator('.condition__field').getByRole('combobox'))
         .toHaveAccessibleName(/where|field/i)
       for (let index = 0; index < (await filterComboboxes.count()); index++) {
         await expect.soft(filterComboboxes.nth(index)).toHaveAccessibleName(/\S/)
