@@ -8,12 +8,15 @@ import React, { createContext, use, useCallback, useEffect, useId, useRef, useSt
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { ThemeProvider } from '../../providers/Theme/index.js'
 import './index.css'
+import { createMenuScope, type MenuScope } from './MenuScope.js'
 import { type PopupButtonRenderProps, PopupTrigger } from './PopupTrigger/index.js'
+import { useSubmenuPointerIntent } from './useSubmenuPointerIntent.js'
 
 const baseClass = 'popup'
 
 type PopupContextValue = {
   closePopupChain: (options?: { restoreFocus?: boolean }) => void
+  menuScope: MenuScope
   popupRef: React.RefObject<HTMLDivElement | null>
   popupRole?: AriaRole
 }
@@ -65,6 +68,7 @@ export type PopupProps = {
    * @default 'left'
    */
   horizontalAlign?: 'center' | 'left' | 'right'
+  hoverSubmenu?: boolean
   id?: string
   initActive?: boolean
   noBackground?: boolean
@@ -134,6 +138,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     disabled,
     forceOpen,
     horizontalAlign = 'left',
+    hoverSubmenu = false,
     initActive = false,
     noBackground,
     onToggleClose,
@@ -165,21 +170,32 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
   const parentPopup = use(PopupContext)
   const popupRole = (popupType === true ? 'menu' : popupType || undefined) as AriaRole | undefined
+  const menuScope = useState(() => createMenuScope())[0]
+  const isSubmenu = parentPopup?.popupRole === 'menu' && popupRole === 'menu'
 
   const [active, setActiveInternal] = useState(initActive)
   const [isOnTop, setIsOnTop] = useState(verticalAlign === 'top')
 
   const setActive = useCallback(
-    (isActive: boolean, viaKeyboard = false) => {
+    (isActive: boolean, viaKeyboard = false, coordinateParent = true) => {
       if (isActive) {
         openedViaKeyboardRef.current = viaKeyboard
+        if (coordinateParent && isSubmenu) {
+          parentPopup.menuScope.requestOpen({
+            id: contentId,
+            delay: false,
+            viaKeyboard,
+          })
+          return
+        }
         onToggleOpen?.(true)
       } else {
         onToggleClose?.()
+        menuScope.closeActiveBranch()
       }
       setActiveInternal(isActive)
     },
-    [onToggleClose, onToggleOpen],
+    [contentId, isSubmenu, menuScope, onToggleClose, onToggleOpen, parentPopup],
   )
 
   const closePopup = useCallback(
@@ -206,6 +222,34 @@ export const Popup: React.FC<PopupProps> = (props) => {
     },
     [closePopup, parentPopup],
   )
+
+  const openFromParent = useCallback(
+    (viaKeyboard: boolean) => setActive(true, viaKeyboard, false),
+    [setActive],
+  )
+
+  useEffect(() => {
+    if (!isSubmenu) {
+      return
+    }
+
+    return parentPopup.menuScope.register({
+      id: contentId,
+      closeBranch: () => closePopup({ restoreFocus: false }),
+      open: openFromParent,
+    })
+  }, [closePopup, contentId, isSubmenu, openFromParent, parentPopup])
+
+  const pointerIntent = useSubmenuPointerIntent({
+    contentRef: popupRef,
+    enabled: isSubmenu && hoverSubmenu,
+    onClose: () => setActive(false),
+    onOpen: () =>
+      parentPopup?.menuScope.requestOpen({
+        id: contentId,
+        delay: Boolean(parentPopup.menuScope.activeChildId),
+      }),
+  })
 
   // /////////////////////////////////////
   // Position Calculation
@@ -418,6 +462,24 @@ export const Popup: React.FC<PopupProps> = (props) => {
     if (e.key === 'Escape') {
       e.preventDefault()
       e.stopPropagation()
+      closePopup()
+      return
+    }
+
+    if (e.key === 'ArrowRight' && popupRole === 'menu') {
+      const trigger = (document.activeElement as HTMLElement | null)?.closest<HTMLElement>(
+        `.${baseClass}__trigger-wrap`,
+      )
+      const nestedTrigger = trigger?.querySelector<HTMLElement>('button, [role="menuitem"]')
+      if (nestedTrigger) {
+        e.preventDefault()
+        nestedTrigger.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter' }))
+        return
+      }
+    }
+
+    if (e.key === 'ArrowLeft' && parentPopup) {
+      e.preventDefault()
       closePopup()
       return
     }
@@ -639,12 +701,16 @@ export const Popup: React.FC<PopupProps> = (props) => {
           >
             {Trigger}
           </div>
+        ) : hoverSubmenu && isSubmenu ? (
+          <div {...pointerIntent}>{Trigger}</div>
         ) : (
           Trigger
         )}
       </div>
 
-      <PopupContext value={{ closePopupChain, popupRef, popupRole }}>
+      <PopupContext value={{ closePopupChain, menuScope, popupRef, popupRole }}>
+        {/* The menu surface tracks pointer intent while preserving its menu semantics. */}
+        {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
         <div
           aria-label={popupAriaLabel}
           className={
@@ -668,6 +734,8 @@ export const Popup: React.FC<PopupProps> = (props) => {
           data-popup-id={id || undefined}
           data-theme={theme === 'auto' ? undefined : theme}
           id={contentId}
+          onMouseEnter={pointerIntent.onMouseEnter}
+          onMouseLeave={pointerIntent.onMouseLeave}
           popover="manual"
           ref={popupRef}
           role={popupRole}

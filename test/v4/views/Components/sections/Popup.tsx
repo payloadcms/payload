@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Popup } from '@payloadcms/ui'
+import { Button, Popup, PopupList } from '@payloadcms/ui'
 import React from 'react'
 
 import { Section, Variant } from '../shared.js'
@@ -27,6 +27,71 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
           <div style={{ padding: '16px' }}>
             <p>Right aligned popup</p>
           </div>
+        )}
+      />
+    </Variant>
+    <Variant label="Nested hover menus">
+      <Popup
+        button={<Button buttonStyle="secondary">Open nested menu</Button>}
+        buttonType="custom"
+        popupAriaLabel="Nested menu level one"
+        popupType="menu"
+        render={() => (
+          <PopupList.MenuItem>
+            <Popup
+              buttonType="custom"
+              hoverSubmenu
+              popupAriaLabel="Theme menu"
+              popupType="menu"
+              render={() => (
+                <PopupList.MenuItem>
+                  <Popup
+                    buttonType="custom"
+                    hoverSubmenu
+                    popupAriaLabel="Color menu"
+                    popupType="menu"
+                    render={() => (
+                      <PopupList.MenuItem>
+                        <PopupList.Button onClick={() => {}}>Light</PopupList.Button>
+                        <PopupList.Button onClick={() => {}}>Dark</PopupList.Button>
+                      </PopupList.MenuItem>
+                    )}
+                    renderButton={({ active: _active, ...props }) => (
+                      <button {...props} type="button">
+                        Color
+                      </button>
+                    )}
+                    side="right"
+                  />
+                  <PopupList.Button onClick={() => {}}>Typography</PopupList.Button>
+                </PopupList.MenuItem>
+              )}
+              renderButton={({ active: _active, ...props }) => (
+                <button {...props} type="button">
+                  Theme
+                </button>
+              )}
+              side="right"
+            />
+            <Popup
+              buttonType="custom"
+              hoverSubmenu
+              popupAriaLabel="Language menu"
+              popupType="menu"
+              render={() => (
+                <PopupList.MenuItem>
+                  <PopupList.Button onClick={() => {}}>English</PopupList.Button>
+                  <PopupList.Button onClick={() => {}}>French</PopupList.Button>
+                </PopupList.MenuItem>
+              )}
+              renderButton={({ active: _active, ...props }) => (
+                <button {...props} type="button">
+                  Language
+                </button>
+              )}
+              side="right"
+            />
+          </PopupList.MenuItem>
         )}
       />
     </Variant>
