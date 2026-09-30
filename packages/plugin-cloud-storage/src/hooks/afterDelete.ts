@@ -19,9 +19,8 @@ export const getAfterDeleteHook = ({
   useCompositePrefixes,
 }: Args): CollectionAfterDeleteHook<FileData & TypeWithID & TypeWithPrefix> => {
   return async ({ doc, req }) => {
-    // A retained version may still reference these objects; deletion needs
-    // the reference-aware cleanup path.
-    if (collection.versions) {
+    // Managed objects are deleted after the operation commits and all references are checked.
+    if (collection.versions || Array.isArray(doc._managedFiles)) {
       return doc
     }
 

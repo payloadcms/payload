@@ -15,6 +15,11 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
 import {
+  collectManagedFiles,
+  collectVersionFiles,
+  scheduleUnreferencedFileCleanup,
+} from '../../uploads/fileVersioning/cleanup.js'
+import {
   abortFileOperationScope,
   beginFileOperationScope,
   completeFileOperationScope,
@@ -154,6 +159,15 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       req,
     })
 
+    const deletedFiles = collectionConfig.upload
+      ? [
+          ...collectManagedFiles({ collection: collectionConfig, doc: docToDelete!, req }),
+          ...(collectionConfig.versions
+            ? await collectVersionFiles({ collection: collectionConfig, parentID: id, req })
+            : []),
+        ]
+      : []
+
     await deleteAssociatedFiles({
       collectionConfig,
       config,
@@ -292,6 +306,14 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       overrideAccess,
       result,
     })
+
+    if (collectionConfig.upload) {
+      await scheduleUnreferencedFileCleanup({
+        candidates: deletedFiles,
+        collection: collectionConfig,
+        req,
+      })
+    }
 
     // /////////////////////////////////////
     // 8. Return results

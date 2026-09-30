@@ -40,6 +40,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     versionedCloudCalls.uploads = 0
     versionedCloudFailure.afterChange = false
     versionedCloudFailure.beforeUpload = undefined
+    versionedCloudFailure.deleteKey = undefined
     versionedCloudFailure.uploadNumber = 0
   })
 
@@ -155,6 +156,42 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     expect(currentManifest[0]!.key).not.toBe(firstManifest[0]!.key)
     expect(versionedCloudFiles.get(currentManifest[0]!.key)).toEqual(firstBytes)
     expect(after.find(({ id }) => id === selected.id)?.version).toEqual(selected.version)
+  })
+
+  test('should retain a failed cloud deletion and log its exact storage identity', async ({
+    payload,
+  }) => {
+    const first = await payload.create({
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+    })
+    const firstKey = (await getManagedFiles({ id: first.id, payload }))[0]!.key
+
+    await payload.update({
+      id: first.id,
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: secondFile,
+    })
+    const currentKey = (await getManagedFiles({ id: first.id, payload }))[0]!.key
+    const logged = vi.spyOn(payload.logger, 'error')
+    versionedCloudFailure.deleteKey = firstKey
+
+    try {
+      await payload.delete({ id: first.id, collection: versionedCloudMediaSlug })
+
+      expect(versionedCloudFiles.has(firstKey)).toBe(true)
+      expect(versionedCloudFiles.has(currentKey)).toBe(false)
+      expect(versionedCloudCalls.deletes).toContain(firstKey)
+      expect(logged).toHaveBeenCalledWith(
+        expect.objectContaining({
+          msg: expect.stringContaining(`test-cloud:${versionedCloudMediaSlug}:${firstKey}`),
+        }),
+      )
+    } finally {
+      logged.mockRestore()
+    }
   })
 
   test('should keep authorized public provider URLs direct across history and restore', async ({

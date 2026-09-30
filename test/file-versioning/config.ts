@@ -8,6 +8,7 @@ import { DraftMedia } from './collections/DraftMedia/index.js'
 import { LegacyMedia } from './collections/LegacyMedia/index.js'
 import { Media } from './collections/Media/index.js'
 import { TransformedMedia } from './collections/TransformedMedia/index.js'
+import { TrashMedia } from './collections/TrashMedia/index.js'
 import { convertedMediaSlug, transformedMediaSlug } from './shared.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -36,7 +37,7 @@ export default buildConfigWithDefaults({
     collections:
       process.env.FILE_VERSIONING_LEGACY_SCHEMA === 'true'
         ? [LegacyMedia]
-        : [Media, DraftMedia, TransformedMedia, ConvertedMedia],
+        : [Media, DraftMedia, TransformedMedia, ConvertedMedia, TrashMedia],
     upload: {
       transformers: [
         sharpTransformer({

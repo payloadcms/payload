@@ -339,6 +339,7 @@ export const updateByIDOperation = async <
       ? await runCloudFileUpdate({
           id,
           collection: collectionConfig,
+          current: docWithLocales,
           data: updateArgs.data,
           files: filesToUpload,
           req,

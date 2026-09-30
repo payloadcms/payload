@@ -2,6 +2,7 @@ import type { SanitizedCollectionConfig } from '../../collections/config/types.j
 import type { JsonObject, PayloadRequest } from '../../types/index.js'
 import type { FileToSave } from '../types.js'
 
+import { collectManagedFiles, scheduleUnreferencedFileCleanup } from './cleanup.js'
 import { runFileCreationPlan, runFileOperationPlan } from './fileOperationManager.js'
 
 export const runCloudFileCreation = async <T>({
@@ -55,12 +56,14 @@ export const runCloudFileCreation = async <T>({
 export const runCloudFileUpdate = async <T>({
   id,
   collection,
+  current,
   data,
   files,
   req,
   write,
 }: {
   collection: SanitizedCollectionConfig
+  current: JsonObject
   data: JsonObject
   files: FileToSave[]
   id: number | string
@@ -93,7 +96,17 @@ export const runCloudFileUpdate = async <T>({
       metadata = staged.metadata
       Object.assign(data, metadata, { _managedFiles: staged.managedFiles })
     },
-    write: () => withCloudHookGuard({ metadata, req, write }),
+    write: async () => {
+      const result = await withCloudHookGuard({ metadata, req, write })
+
+      await scheduleUnreferencedFileCleanup({
+        candidates: collectManagedFiles({ collection, doc: current, req }),
+        collection,
+        req,
+      })
+
+      return result
+    },
   })
 }
 

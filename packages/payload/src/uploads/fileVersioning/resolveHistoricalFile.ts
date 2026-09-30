@@ -69,7 +69,7 @@ export const resolveHistoricalFile = async ({
       }
     }
 
-    if (!versions.hasNextPage) {
+    if (versions.docs.length < 100) {
       break
     }
     page += 1

@@ -9,6 +9,7 @@ import type { StagedObject } from './fileOperationManager.js'
 import type { ManagedFileManifest } from './types.js'
 
 import { saveVersion } from '../../versions/saveVersion.js'
+import { scheduleUnreferencedFileCleanup } from './cleanup.js'
 import { runFileOperationPlan, stageLocalUploadFiles } from './fileOperationManager.js'
 import { copyLocalFile } from './localStorage.js'
 import { getManagedFileIdentity, synthesizeLegacyUploadState } from './manifest.js'
@@ -74,7 +75,20 @@ export const runLocalFileUpdate = async <T>({
         trackStagedObject,
       })
 
-      return write()
+      const result = await write()
+
+      await scheduleUnreferencedFileCleanup({
+        candidates: getOutgoingLocalFiles({
+          collection,
+          config: req.payload.config,
+          current,
+          nextManifest: nextManifest as ManagedFileManifest,
+        }),
+        collection,
+        req,
+      })
+
+      return result
     },
   })
 }

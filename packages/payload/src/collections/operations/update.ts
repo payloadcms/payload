@@ -430,6 +430,7 @@ export const updateOperation = async <
           ? await runCloudFileUpdate({
               id,
               collection: collectionConfig,
+              current: docWithLocales,
               data: updateArgs.data,
               files: generatedFileData.files,
               req,

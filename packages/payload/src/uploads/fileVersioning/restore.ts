@@ -7,6 +7,7 @@ import type { JsonObject, PayloadRequest } from '../../types/index.js'
 import type { ManagedFileManifest } from './types.js'
 
 import { archiveOutgoingLocalFiles, archiveVersionReferences } from './archive.js'
+import { scheduleUnreferencedFileCleanup } from './cleanup.js'
 import { runFileOperationPlan } from './fileOperationManager.js'
 import { copyLocalFile } from './localStorage.js'
 import { getManagedFileIdentity, synthesizeLegacyUploadState } from './manifest.js'
@@ -103,7 +104,15 @@ export const runManagedFileRestore = async <T>({
         })
       }
 
-      return write(restored)
+      const result = await write(restored)
+
+      await scheduleUnreferencedFileCleanup({
+        candidates: currentManifest,
+        collection,
+        req,
+      })
+
+      return result
     },
   })
 }

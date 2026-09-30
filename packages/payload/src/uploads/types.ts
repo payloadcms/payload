@@ -244,12 +244,14 @@ export type UploadConfig = {
       to: string
       trackStagedObject: (object: StagedObject) => void
     }) => Promise<void>
+    delete: (args: { key: string; req: PayloadRequest }) => Promise<void>
     stage: (args: {
       data: Record<string, unknown>
       files: FileToSave[]
       req: PayloadRequest
       trackStagedObject: (object: StagedObject) => void
     }) => Promise<{ managedFiles: ManagedFileManifest; metadata: Record<string, unknown> }>
+    storageBackendId: string
   }
   /**
    * Require files to be uploaded when creating a document.

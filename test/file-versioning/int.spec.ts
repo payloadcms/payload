@@ -2,9 +2,18 @@
 import { copyFile, mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { createPayloadRequest } from 'payload'
 import sharp from 'sharp'
 import { expect } from 'vitest'
 
+/* eslint-disable payload/no-relative-monorepo-imports -- These lifecycle helpers are internal. */
+import {
+  collectVersionFiles,
+  scheduleUnreferencedFileCleanup,
+} from '../../packages/payload/src/uploads/fileVersioning/cleanup.js'
+import { initTransaction } from '../../packages/payload/src/utilities/initTransaction.js'
+import { killTransaction } from '../../packages/payload/src/utilities/killTransaction.js'
+/* eslint-enable payload/no-relative-monorepo-imports */
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import {
@@ -16,6 +25,8 @@ import {
   mediaSlug,
   transformedMediaDir,
   transformedMediaSlug,
+  trashMediaDir,
+  trashMediaSlug,
 } from './shared.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -46,6 +57,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     await rm(draftMediaDir, { force: true, recursive: true })
     await rm(transformedMediaDir, { force: true, recursive: true })
     await rm(convertedMediaDir, { force: true, recursive: true })
+    await rm(trashMediaDir, { force: true, recursive: true })
   })
 
   test('should ignore a client supplied original and manifest', async ({ payload }) => {
@@ -1285,6 +1297,322 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     expect(await readFile(path.join(mediaDir, previous!.original!.filename))).toEqual(bytes)
   })
 
+  test('should delete a stored file only after its last version is pruned', async ({ payload }) => {
+    const collection = payload.collections[mediaSlug].config
+    const previousVersions = collection.versions
+    collection.versions = { ...previousVersions, maxPerDoc: 5 }
+
+    try {
+      const first = await payload.create({
+        collection: mediaSlug,
+        data: { alt: 'first' },
+        filePath: imageFixture,
+      })
+
+      await payload.update({
+        id: first.id,
+        collection: mediaSlug,
+        data: { alt: 'second' },
+        filePath: path.resolve(dirname, '../uploads/small.png'),
+      })
+
+      const { docs: initialVersions } = await payload.db.findVersions({
+        collection: mediaSlug,
+        pagination: false,
+        where: { parent: { equals: first.id } },
+      })
+      const firstVersion = initialVersions.find(({ version }) => version.alt === 'first')!
+      const archivedOriginal = firstVersion.version._managedFiles!.find(({ roles }) =>
+        roles.some(({ type }) => type === 'original'),
+      )!.key
+
+      expect(await readFile(path.join(mediaDir, archivedOriginal))).toBeTruthy()
+
+      for (let revision = 3; revision <= 6; revision++) {
+        await payload.update({
+          id: first.id,
+          collection: mediaSlug,
+          data: { alt: `revision ${revision}` },
+        })
+      }
+
+      const { docs: retained } = await payload.db.findVersions({
+        collection: mediaSlug,
+        pagination: false,
+        where: { parent: { equals: first.id } },
+      })
+
+      expect(retained).toHaveLength(5)
+      expect(retained.some(({ id }) => id === firstVersion.id)).toBe(false)
+      await expect(stat(path.join(mediaDir, archivedOriginal))).rejects.toMatchObject({
+        code: 'ENOENT',
+      })
+      expect(
+        await readFile(path.join(mediaDir, retained[0]!.version.original!.filename)),
+      ).toBeTruthy()
+    } finally {
+      collection.versions = previousVersions
+    }
+  })
+
+  test('should retain unlimited versions until a permanent delete removes their files', async ({
+    payload,
+    restClient,
+  }) => {
+    const collection = payload.collections[mediaSlug].config
+    const previousVersions = collection.versions
+    collection.versions = { ...previousVersions, maxPerDoc: 0 }
+
+    try {
+      const first = await payload.create({
+        collection: mediaSlug,
+        data: { alt: 'first' },
+        filePath: imageFixture,
+      })
+
+      for (let revision = 2; revision <= 4; revision++) {
+        await payload.update({
+          id: first.id,
+          collection: mediaSlug,
+          data: { alt: `revision ${revision}` },
+          filePath: path.resolve(dirname, '../uploads/small.png'),
+        })
+      }
+
+      const { docs: latest } = await payload.db.findVersions({
+        collection: mediaSlug,
+        limit: 1,
+        where: { parent: { equals: first.id } },
+      })
+      const now = new Date().toISOString()
+
+      for (let revision = 5; revision <= 105; revision++) {
+        await payload.db.createVersion({
+          autosave: false,
+          collectionSlug: mediaSlug,
+          createdAt: now,
+          parent: first.id,
+          updatedAt: now,
+          versionData: { ...latest[0]!.version, alt: `revision ${revision}` },
+        })
+      }
+
+      const { docs: versions } = await payload.db.findVersions({
+        collection: mediaSlug,
+        limit: 0,
+        pagination: false,
+        where: { parent: { equals: first.id } },
+      })
+      const current = await payload.db.findOne({
+        collection: mediaSlug,
+        where: { id: { equals: first.id } },
+      })
+      const storedKeys = new Set([
+        ...current!._managedFiles!.map(({ key }) => key),
+        ...versions.flatMap(({ version }) => version._managedFiles?.map(({ key }) => key) ?? []),
+      ])
+
+      expect(versions).toHaveLength(105)
+      const oldestKey = versions.find(({ version }) => version.alt === 'first')!.version
+        ._managedFiles![0]!.key
+      const historicalResponse = await restClient.GET(`/${mediaSlug}/file/${oldestKey}`)
+
+      expect(historicalResponse.status).toBe(200)
+      const req = await createPayloadRequest({ payload })
+      const collected = await collectVersionFiles({
+        collection,
+        parentID: first.id,
+        req,
+      })
+
+      expect(new Set(collected.map(({ key }) => key))).toEqual(storedKeys)
+      await payload.delete({ id: first.id, collection: mediaSlug, overrideAccess: true })
+
+      expect((await readdir(mediaDir)).filter((key) => storedKeys.has(key))).toEqual([])
+    } finally {
+      collection.versions = previousVersions
+    }
+  })
+
+  test('should delete an unversioned file after it is removed from the document', async ({
+    payload,
+  }) => {
+    const collection = payload.collections[mediaSlug].config
+    const previousVersions = collection.versions
+    Object.assign(collection, { versions: false })
+
+    try {
+      const created = await payload.create({
+        collection: mediaSlug,
+        data: { alt: 'with file' },
+        filePath: imageFixture,
+      })
+      const filename = created.original!.filename!
+
+      await payload.update({
+        id: created.id,
+        collection: mediaSlug,
+        data: {
+          _managedFiles: [],
+          alt: 'without file',
+          filename: null,
+          original: { filename: null, filesize: null, mimeType: null, url: null },
+        },
+        overrideAccess: true,
+      })
+
+      await expect(stat(path.join(mediaDir, filename))).rejects.toMatchObject({ code: 'ENOENT' })
+    } finally {
+      collection.versions = previousVersions
+    }
+  })
+
+  test('should remove managed files after a bulk permanent delete', async ({ payload }) => {
+    const first = await payload.create({
+      collection: mediaSlug,
+      data: { alt: 'first' },
+      filePath: imageFixture,
+    })
+    const second = await payload.create({
+      collection: mediaSlug,
+      data: { alt: 'second' },
+      filePath: imageFixture,
+    })
+    const filenames = [first.original!.filename!, second.original!.filename!]
+
+    const deleted = await payload.delete({
+      collection: mediaSlug,
+      overrideAccess: true,
+      select: { id: true },
+      where: { id: { in: [first.id, second.id] } },
+    })
+
+    expect(deleted.docs).toHaveLength(2)
+    for (const filename of filenames) {
+      await expect(stat(path.join(mediaDir, filename))).rejects.toMatchObject({ code: 'ENOENT' })
+    }
+  })
+
+  test('should distinguish the same storage key in different backends', async ({ payload }) => {
+    const key = 'shared-key.png'
+    await mkdir(mediaDir, { recursive: true })
+    await writeFile(path.join(mediaDir, key), await readFile(imageFixture))
+    await payload.db.create({
+      collection: mediaSlug,
+      data: {
+        _managedFiles: [
+          {
+            key,
+            roles: [{ type: 'original' }],
+            storageBackendId: `other:${mediaSlug}`,
+          },
+        ],
+        alt: 'other backend reference',
+      },
+    })
+    const req = await createPayloadRequest({ payload })
+
+    await scheduleUnreferencedFileCleanup({
+      candidates: [{ key, roles: [{ type: 'original' }], storageBackendId: `local:${mediaSlug}` }],
+      collection: payload.collections[mediaSlug].config,
+      req,
+    })
+
+    await expect(stat(path.join(mediaDir, key))).rejects.toMatchObject({ code: 'ENOENT' })
+  })
+
+  test('should keep a trashed upload through restore and remove it on permanent delete', async ({
+    payload,
+  }) => {
+    const created = await payload.create({
+      collection: trashMediaSlug,
+      data: { alt: 'before trash' },
+      filePath: imageFixture,
+    })
+    const filename = created.original!.filename!
+
+    await payload.update({
+      id: created.id,
+      collection: trashMediaSlug,
+      data: { deletedAt: new Date().toISOString() },
+    })
+
+    expect(await readFile(path.join(trashMediaDir, filename))).toBeTruthy()
+
+    await payload.update({
+      id: created.id,
+      collection: trashMediaSlug,
+      data: { deletedAt: null },
+      trash: true,
+    })
+
+    expect(await readFile(path.join(trashMediaDir, filename))).toBeTruthy()
+
+    await payload.delete({ id: created.id, collection: trashMediaSlug })
+
+    await expect(stat(path.join(trashMediaDir, filename))).rejects.toMatchObject({ code: 'ENOENT' })
+  })
+
+  test.skipIf(process.env.PAYLOAD_DATABASE === 'sqlite')(
+    'should keep files when an outer transaction rolls back a nested delete',
+    async ({ payload }) => {
+      const created = await payload.create({
+        collection: mediaSlug,
+        data: { alt: 'before delete' },
+        filePath: imageFixture,
+      })
+      const filename = created.original!.filename!
+      const req = await createPayloadRequest({ payload })
+
+      expect(await initTransaction(req)).toBe(true)
+      await payload.delete({
+        id: created.id,
+        collection: mediaSlug,
+        disableTransaction: true,
+        overrideAccess: true,
+        req,
+      })
+
+      expect(await readFile(path.join(mediaDir, filename))).toBeTruthy()
+      await killTransaction(req)
+      expect(await readFile(path.join(mediaDir, filename))).toBeTruthy()
+      expect(
+        await payload.db.findOne({ collection: mediaSlug, where: { id: { equals: created.id } } }),
+      ).toBeTruthy()
+    },
+  )
+
+  test('should keep files when an afterDelete hook rejects the operation', async ({ payload }) => {
+    const created = await payload.create({
+      collection: mediaSlug,
+      data: { alt: 'before delete' },
+      filePath: imageFixture,
+    })
+    const hooks = payload.collections[mediaSlug].config.hooks
+    const originalHooks = hooks.afterDelete
+    hooks.afterDelete = [
+      ...(originalHooks ?? []),
+      () => {
+        throw new Error('Rejected delete after the database write')
+      },
+    ]
+
+    try {
+      await expect(
+        payload.delete({ id: created.id, collection: mediaSlug, overrideAccess: true }),
+      ).rejects.toThrow('Rejected delete after the database write')
+    } finally {
+      hooks.afterDelete = originalHooks
+    }
+
+    expect(await readFile(path.join(mediaDir, created.original!.filename!))).toBeTruthy()
+    if (process.env.PAYLOAD_DATABASE !== 'sqlite') {
+      expect(
+        await payload.db.findOne({ collection: mediaSlug, where: { id: { equals: created.id } } }),
+      ).toBeTruthy()
+    }
+  })
+
   test('should archive a separately managed thumbnail with its historical version', async ({
     payload,
   }) => {
@@ -1348,6 +1676,25 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     expect(archivedThumbnail?.key).not.toBe('photo-thumb.png')
     expect(previous?.thumbnailURL).toContain(path.basename(archivedThumbnail!.key))
     expect(await readFile(path.join(mediaDir, archivedThumbnail!.key))).toEqual(thumbnailBytes)
+
+    const selected = versions.find(({ version }) => version.alt === 'with thumbnail')!
+    await payload.restoreVersion({ id: selected.id, collection: mediaSlug })
+    const restored = await payload.db.findOne({
+      collection: mediaSlug,
+      where: { id: { equals: created.id } },
+    })
+    const restoredThumbnail = restored!._managedFiles!.find(({ roles }) =>
+      roles.some(({ type }) => type === 'thumbnail'),
+    )!
+
+    expect(await readFile(path.join(mediaDir, restoredThumbnail.key))).toEqual(thumbnailBytes)
+    expect(await readFile(path.join(mediaDir, archivedThumbnail!.key))).toEqual(thumbnailBytes)
+
+    await payload.delete({ id: created.id, collection: mediaSlug, overrideAccess: true })
+
+    for (const key of [restoredThumbnail.key, archivedThumbnail!.key]) {
+      await expect(stat(path.join(mediaDir, key))).rejects.toMatchObject({ code: 'ENOENT' })
+    }
   })
 
   test('should read an untouched legacy local file without changing stored data or files', async ({

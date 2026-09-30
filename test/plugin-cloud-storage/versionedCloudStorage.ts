@@ -4,6 +4,7 @@ export const versionedCloudFiles = new Map<string, Buffer>()
 export const versionedCloudFailure: {
   afterChange: boolean
   beforeUpload?: () => Promise<void>
+  deleteKey?: string
   uploadNumber: number
 } = { afterChange: false, uploadNumber: 0 }
 export const versionedCloudCalls = { afterChanges: 0, deletes: [] as string[], uploads: 0 }
@@ -20,6 +21,9 @@ export const versionedCloudAdapter: Adapter = () => ({
   },
   handleDelete: ({ storageFilePath }) => {
     versionedCloudCalls.deletes.push(storageFilePath)
+    if (versionedCloudFailure.deleteKey === storageFilePath) {
+      throw new Error('Cloud test delete failed')
+    }
     versionedCloudFiles.delete(storageFilePath)
     return Promise.resolve()
   },

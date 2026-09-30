@@ -18,3 +18,8 @@ export const convertedMediaDir = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   'converted-media',
 )
+export const trashMediaSlug = 'file-versioned-trash-media'
+export const trashMediaDir = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  'trash-media',
+)

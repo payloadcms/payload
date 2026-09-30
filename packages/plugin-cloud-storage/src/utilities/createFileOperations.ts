@@ -46,6 +46,15 @@ export const createFileOperations = ({
         storageBackendId,
       })
     },
+    delete: async ({ key, req }) => {
+      await adapter.handleDelete({
+        collection,
+        doc: {} as never,
+        filename: path.posix.basename(key),
+        req,
+        storageFilePath: key,
+      })
+    },
     stage: async ({ data, files, req, trackStagedObject }) => {
       const docPrefix = buildPrefixWithObjectKey({
         objectKey: typeof data._objectKey === 'string' ? data._objectKey : undefined,
@@ -184,6 +193,7 @@ export const createFileOperations = ({
 
       return { managedFiles: createManagedFileManifest({ references }), metadata }
     },
+    storageBackendId,
   }
 }
 

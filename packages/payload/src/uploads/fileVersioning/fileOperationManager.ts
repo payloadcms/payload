@@ -82,6 +82,22 @@ export const abortFileOperationScope = ({ req }: { req: PayloadRequest }): void 
   }
 }
 
+/** Runs cleanup after the outer operation and its database transaction succeed. */
+export const deferFileCleanup = async ({
+  cleanup,
+  req,
+}: {
+  cleanup: () => Promise<void>
+  req: PayloadRequest
+}): Promise<void> => {
+  const state = getRequestState({ req })
+  state.pending.push({ cleanup, staged: new Map() })
+
+  if (state.depth === 0 && (!req.transactionID || state.isCommitted)) {
+    await flushCleanup({ req, state })
+  }
+}
+
 /**
  * Stages owned objects, then claims the parent upload row before writing document or version data.
  * Every file-changing writer must use this claim, including drafts that leave the published row alone.
