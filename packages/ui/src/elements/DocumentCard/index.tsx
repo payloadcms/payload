@@ -27,16 +27,16 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
   <article
     className={[baseClass, isSelected && `${baseClass}--selected`].filter(Boolean).join(' ')}
   >
-    {thumbnail ? (
-      <img alt={thumbnail.alt || ''} className={`${baseClass}__thumbnail`} src={thumbnail.src} />
-    ) : (
-      <div className={`${baseClass}__thumbnail ${baseClass}__thumbnail--empty`} />
-    )}
-    <div className={`${baseClass}__content`}>
-      <Link className={`${baseClass}__link`} href={href}>
+    <Link className={`${baseClass}__link`} href={href}>
+      {thumbnail ? (
+        <img alt={thumbnail.alt || ''} className={`${baseClass}__thumbnail`} src={thumbnail.src} />
+      ) : (
+        <div className={`${baseClass}__thumbnail ${baseClass}__thumbnail--empty`} />
+      )}
+      <div className={`${baseClass}__content`}>
         <span className={`${baseClass}__title`}>{title}</span>
-      </Link>
-      {children ? <div className={`${baseClass}__metadata`}>{children}</div> : null}
-    </div>
+        {children ? <div className={`${baseClass}__metadata`}>{children}</div> : null}
+      </div>
+    </Link>
   </article>
 )
