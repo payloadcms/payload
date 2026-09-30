@@ -1,12 +1,11 @@
 import type { Metadata } from 'next'
-import type { DraftFieldData } from 'payload'
 
 import type { Media, Page, Post, Config } from '../payload-types'
 
 import { mergeOpenGraph } from './mergeOpenGraph'
 import { getServerSideURL } from './getURL'
 
-const getImageURL = (image?: DraftFieldData<Media> | Config['db']['defaultIDType'] | null) => {
+const getImageURL = (image?: Media | Config['db']['defaultIDType'] | null) => {
   const serverUrl = getServerSideURL()
 
   let url = serverUrl + '/website-template-OG.webp'
@@ -21,7 +20,7 @@ const getImageURL = (image?: DraftFieldData<Media> | Config['db']['defaultIDType
 }
 
 export const generateMeta = async (args: {
-  doc: DraftFieldData<Page> | DraftFieldData<Post> | null
+  doc: Partial<Page> | Partial<Post> | null
 }): Promise<Metadata> => {
   const { doc } = args
 

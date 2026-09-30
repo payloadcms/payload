@@ -26,7 +26,7 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 The `typescript.strictDraftTypes` option has been removed. Remove it from your config and regenerate your types with `payload generate:types`.
 
-Local API draft reads (`find`, `findByID`, and `findGlobal` with `draft: true`) now type required fields as optional because drafts can skip validation. This includes fields inside groups, named tabs, array rows, and blocks. Check that each field is present before using it, even after checking its parent:
+Local API draft reads (`find`, `findByID`, and `findGlobal` with `draft: true`) now type required fields as optional because drafts can skip validation. Check that a field is present before using it:
 
 ```ts
 const post = await payload.findByID({ collection: 'posts', id, draft: true })

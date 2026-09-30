@@ -1,7 +1,5 @@
 import React from 'react'
 
-import type { DraftFieldData } from 'payload'
-
 import type { Page } from '@/payload-types'
 
 import RichText from '@/components/RichText'
@@ -11,7 +9,7 @@ type LowImpactHeroType =
       children?: React.ReactNode
       richText?: never
     }
-  | (Omit<DraftFieldData<Page['hero']>, 'richText'> & {
+  | (Omit<Page['hero'], 'richText'> & {
       children?: never
       richText?: Page['hero']['richText']
     })

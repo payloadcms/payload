@@ -51,7 +51,6 @@ import type {
   TypedCollectionSelect,
   TypedLocale,
 } from '../../index.js'
-import type { DraftFieldData } from '../../types/draft.js'
 import type {
   PayloadRequest,
   SelectIncludeType,
@@ -142,9 +141,10 @@ export type DraftDataFromCollectionSlug<TSlug extends CollectionSlug> = DraftDat
  * Helper type for draft data OUTPUT (e.g., query results) - makes user fields optional but keeps id required
  * When querying drafts, required fields may be null/undefined as validation is skipped, but system fields like id are always present
  */
-export type QueryDraftDataFromCollection<TData extends JsonObject> = DraftFieldData<
-  Omit<TData, 'id'>
+export type QueryDraftDataFromCollection<TData extends JsonObject> = Partial<
+  Omit<TData, 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>
 > &
+  Partial<Pick<TData, 'createdAt' | 'deletedAt' | 'sizes' | 'updatedAt'>> &
   Pick<TData, 'id'>
 
 export type QueryDraftDataFromCollectionSlug<TSlug extends CollectionSlug> =

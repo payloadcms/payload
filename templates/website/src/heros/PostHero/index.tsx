@@ -1,15 +1,13 @@
 import { formatDateTime } from '@/utilities/formatDateTime'
 import React from 'react'
 
-import type { DraftFieldData } from 'payload'
-
 import type { Post } from '@/payload-types'
 
 import { Media } from '@/components/Media'
 import { formatAuthors } from '@/utilities/formatAuthors'
 
 export const PostHero: React.FC<{
-  post: DraftFieldData<Post>
+  post: Partial<Post>
 }> = ({ post }) => {
   const { categories, heroImage, populatedAuthors, publishedAt, title } = post
 

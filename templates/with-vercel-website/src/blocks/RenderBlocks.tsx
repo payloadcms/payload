@@ -1,7 +1,5 @@
 import React, { Fragment } from 'react'
 
-import type { DraftFieldData } from 'payload'
-
 import type { Page } from '@/payload-types'
 
 import { ArchiveBlock } from '@/blocks/ArchiveBlock/Component'
@@ -19,7 +17,7 @@ const blockComponents = {
 }
 
 export const RenderBlocks: React.FC<{
-  blocks: DraftFieldData<Page['layout']>
+  blocks: Page['layout'][0][]
 }> = (props) => {
   const { blocks } = props
 

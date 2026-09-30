@@ -1,7 +1,5 @@
 import React from 'react'
 
-import type { DraftFieldData } from 'payload'
-
 import type { Page } from '@/payload-types'
 
 import { HighImpactHero } from '@/heros/HighImpact'
@@ -14,7 +12,7 @@ const heroes = {
   mediumImpact: MediumImpactHero,
 }
 
-export const RenderHero: React.FC<DraftFieldData<Page['hero']>> = (props) => {
+export const RenderHero: React.FC<Page['hero']> = (props) => {
   const { type } = props || {}
 
   if (!type || type === 'none') return null
