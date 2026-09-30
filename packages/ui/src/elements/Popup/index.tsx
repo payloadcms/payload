@@ -64,6 +64,8 @@ export type PopupProps = {
   forceOpen?: boolean
   /**
    * Preferred horizontal alignment of the popup, if there is enough space available.
+   * Nested menu popups use 'left' and 'right' as their preferred side instead.
+   * When omitted, nested menu popups prefer the right side.
    *
    * @default 'left'
    */
@@ -137,7 +139,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     className,
     disabled,
     forceOpen,
-    horizontalAlign = 'left',
+    horizontalAlign: horizontalAlignProp,
     hoverSubmenu = false,
     initActive = false,
     noBackground,
@@ -172,6 +174,9 @@ export const Popup: React.FC<PopupProps> = (props) => {
   const popupRole = (popupType === true ? 'menu' : popupType || undefined) as AriaRole | undefined
   const submenuScope = useState(() => createSubmenuScope())[0]
   const isSubmenu = parentPopup?.popupRole === 'menu' && popupRole === 'menu'
+  const horizontalAlign = horizontalAlignProp ?? 'left'
+  const resolvedSide =
+    side ?? (isSubmenu ? (horizontalAlignProp === 'left' ? 'left' : 'right') : undefined)
 
   const [active, setActiveInternal] = useState(initActive)
   const [isOnTop, setIsOnTop] = useState(verticalAlign === 'top')
@@ -279,7 +284,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     let left: number
     let caretLeft: number
 
-    if (side) {
+    if (resolvedSide) {
       // /////////////////////////////////////
       // Side Positioning
       // Places the popup to the left or right of the parent popup (not just the trigger),
@@ -298,7 +303,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
         ? parentPopup.popupRef.current.getBoundingClientRect()
         : triggerRect
 
-      if (side === 'left') {
+      if (resolvedSide === 'left') {
         left = anchorRect.left - popupRect.width - sideOffset
         if (left < offset) {
           // flip to right side
@@ -719,8 +724,8 @@ export const Popup: React.FC<PopupProps> = (props) => {
               ? [
                   `${baseClass}__content`,
                   `${baseClass}--size-${size}`,
-                  side
-                    ? `${baseClass}--side-${side}`
+                  resolvedSide
+                    ? `${baseClass}--side-${resolvedSide}`
                     : isOnTop
                       ? `${baseClass}--v-top`
                       : `${baseClass}--v-bottom`,
@@ -756,7 +761,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
               </ThemeProvider>
             )}
           </div>
-          {caret && !side && <div className={`${baseClass}__caret`} />}
+          {caret && !resolvedSide && <div className={`${baseClass}__caret`} />}
         </div>
       </PopupContext>
     </div>

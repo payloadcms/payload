@@ -50,6 +50,7 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
                   <Popup
                     buttonType="custom"
                     className="components-view__popup-menu"
+                    horizontalAlign="right"
                     hoverSubmenu
                     popupAriaLabel="Color menu"
                     popupType="menu"

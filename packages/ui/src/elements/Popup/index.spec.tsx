@@ -77,3 +77,57 @@ test('should open and close nested menus with keyboard focus restoration', async
   await expect.element(screen.getByRole('menuitem', { name: 'Light' })).toBeVisible()
   await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
 })
+
+test('should position a nested menu beside its parent when horizontally aligned right', async () => {
+  const screen = await render(
+    <Popup button="Root" popupAriaLabel="Root menu" popupType="menu" theme="auto">
+      <PopupList.MenuItem>
+        <Popup
+          renderButton={({ active: _active, ...props }) => (
+            <button {...props} type="button">
+              Theme
+            </button>
+          )}
+          buttonType="custom"
+          hoverSubmenu
+          popupAriaLabel="Theme menu"
+          popupType="menu"
+          theme="auto"
+          render={() => (
+            <PopupList.MenuItem>
+              <Popup
+                renderButton={({ active: _active, ...props }) => (
+                  <button {...props} type="button">
+                    Color
+                  </button>
+                )}
+                buttonType="custom"
+                horizontalAlign="right"
+                hoverSubmenu
+                popupAriaLabel="Color menu"
+                popupType="menu"
+                theme="auto"
+                render={() => <PopupList.Button onClick={() => {}}>Light</PopupList.Button>}
+              />
+            </PopupList.MenuItem>
+          )}
+          side="right"
+        />
+      </PopupList.MenuItem>
+    </Popup>,
+  )
+
+  await screen.getByRole('button', { name: 'Root' }).click()
+  await screen.getByRole('menuitem', { name: 'Theme' }).hover()
+  await screen.getByRole('menuitem', { name: 'Color' }).hover()
+  await expect.element(screen.getByRole('menuitem', { name: 'Light' })).toBeVisible()
+
+  const childMenu = document.querySelector<HTMLElement>('[aria-label="Theme menu"]')
+  const subchildMenu = document.querySelector<HTMLElement>('[aria-label="Color menu"]')
+
+  expect(childMenu).not.toBeNull()
+  expect(subchildMenu).not.toBeNull()
+  expect(subchildMenu!.getBoundingClientRect().left).toBeGreaterThanOrEqual(
+    childMenu!.getBoundingClientRect().right,
+  )
+})
