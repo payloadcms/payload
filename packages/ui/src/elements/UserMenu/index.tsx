@@ -18,8 +18,8 @@ import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
 import { LanguageMenu, LanguageMenuContent } from './LanguageMenu/index.js'
 import { SettingsMenu, SettingsMenuContent } from './SettingsMenu/index.js'
 import { SubMenuHeader } from './SubMenuHeader/index.js'
-import './index.css'
 import { ThemeMenu, ThemeMenuContent } from './ThemeMenu/index.js'
+import './index.css'
 
 const baseClass = 'user-menu'
 
@@ -59,10 +59,6 @@ export const UserMenu: React.FC<UserMenuProps> = ({
     'language' | 'settings' | 'theme' | null
   >(null)
 
-  // Bumped whenever the account menu closes, so submenu triggers (Theme/Language/Settings)
-  // remount and reset their own open/hover state - otherwise a submenu left open via hover
-  // stays mounted and open even after the parent menu itself has closed.
-  const [menuInstanceKey, setMenuInstanceKey] = useState(0)
   const setMobileSubmenuRef = useCallback((element: HTMLDivElement | null) => {
     if (!element) {
       return
@@ -105,10 +101,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
       caret={false}
       className={baseClass}
       horizontalAlign="right"
-      onToggleClose={() => {
-        setActiveMobileSubmenu(null)
-        setMenuInstanceKey((key) => key + 1)
-      }}
+      onToggleClose={() => setActiveMobileSubmenu(null)}
       popupType="menu"
       renderButton={({ active, ...ariaProps }) => (
         <Button
@@ -124,7 +117,6 @@ export const UserMenu: React.FC<UserMenuProps> = ({
           {showTitle && (titleString || identifier) ? titleString || identifier : undefined}
         </Button>
       )}
-      showScrim
       size="large"
       theme="dark"
       verticalAlign="bottom"
@@ -180,7 +172,6 @@ export const UserMenu: React.FC<UserMenuProps> = ({
               {showThemeMenu && (
                 <PopupList.MenuItem>
                   <ThemeMenu
-                    key={menuInstanceKey}
                     onMobileOpen={isMobile ? () => setActiveMobileSubmenu('theme') : undefined}
                   />
                 </PopupList.MenuItem>
@@ -188,7 +179,6 @@ export const UserMenu: React.FC<UserMenuProps> = ({
               {hasMultipleLanguages && (
                 <PopupList.MenuItem>
                   <LanguageMenu
-                    key={menuInstanceKey}
                     onMobileOpen={isMobile ? () => setActiveMobileSubmenu('language') : undefined}
                   />
                 </PopupList.MenuItem>
@@ -204,7 +194,6 @@ export const UserMenu: React.FC<UserMenuProps> = ({
               <PopupList.MenuItem>
                 <SettingsMenu
                   groups={settingsItemGroups}
-                  key={menuInstanceKey}
                   onMobileOpen={isMobile ? () => setActiveMobileSubmenu('settings') : undefined}
                 />
               </PopupList.MenuItem>

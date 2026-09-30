@@ -9,7 +9,6 @@ import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { ThemeProvider } from '../../providers/Theme/index.js'
 import './index.css'
 import { type PopupButtonRenderProps, PopupTrigger } from './PopupTrigger/index.js'
-import { useHoverSubmenu } from './useHoverSubmenu.js'
 
 const baseClass = 'popup'
 
@@ -66,8 +65,6 @@ export type PopupProps = {
    * @default 'left'
    */
   horizontalAlign?: 'center' | 'left' | 'right'
-  /** Opens this popup as a safe-zone hover submenu on pointer input. */
-  hoverSubmenu?: boolean | string
   id?: string
   initActive?: boolean
   noBackground?: boolean
@@ -83,11 +80,6 @@ export type PopupProps = {
    */
   renderButton?: (props: PopupButtonRenderProps) => React.ReactNode
   showOnHover?: boolean
-  /**
-   * Renders a full-viewport layer beneath the popup while it is open, preventing a dismissal
-   * click from also activating content underneath the popup.
-   */
-  showScrim?: boolean
   /**
    * By default, the scrollbar is hidden. If you want to show it, set this to true.
    * In both cases, the container is still scrollable.
@@ -142,7 +134,6 @@ export const Popup: React.FC<PopupProps> = (props) => {
     disabled,
     forceOpen,
     horizontalAlign = 'left',
-    hoverSubmenu,
     initActive = false,
     noBackground,
     onToggleClose,
@@ -153,7 +144,6 @@ export const Popup: React.FC<PopupProps> = (props) => {
     render,
     renderButton,
     showOnHover = false,
-    showScrim = false,
     showScrollbar = false,
     side,
     size = 'fit-content',
@@ -165,13 +155,6 @@ export const Popup: React.FC<PopupProps> = (props) => {
   const triggerRef = useRef<HTMLDivElement>(null)
   const generatedContentId = useId()
   const contentId = `${id || generatedContentId}-content`
-  const hoverId =
-    hoverSubmenu === true
-      ? `hover-${generatedContentId}`
-      : hoverSubmenu
-        ? `${hoverSubmenu}-${generatedContentId}`
-        : undefined
-  const hover = useHoverSubmenu(hoverId)
 
   /**
    * Keeps track of whether the popup was opened via keyboard.
@@ -188,13 +171,6 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
   const setActive = useCallback(
     (isActive: boolean, viaKeyboard = false) => {
-      if (hoverSubmenu) {
-        if (isActive) {
-          hover.open()
-        } else {
-          hover.close()
-        }
-      }
       if (isActive) {
         openedViaKeyboardRef.current = viaKeyboard
         onToggleOpen?.(true)
@@ -203,7 +179,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
       }
       setActiveInternal(isActive)
     },
-    [hover, hoverSubmenu, onToggleClose, onToggleOpen],
+    [onToggleClose, onToggleOpen],
   )
 
   const closePopup = useCallback(
@@ -627,12 +603,10 @@ export const Popup: React.FC<PopupProps> = (props) => {
   }, [active])
 
   useEffect(() => {
-    if (hoverSubmenu) {
-      setActive(hover.isOpen)
-    } else if (forceOpen !== undefined) {
+    if (forceOpen !== undefined) {
       setActive(forceOpen)
     }
-  }, [forceOpen, hover.isOpen, hoverSubmenu, setActive])
+  }, [forceOpen, setActive])
 
   const Trigger = (
     <PopupTrigger
@@ -643,8 +617,6 @@ export const Popup: React.FC<PopupProps> = (props) => {
       className={buttonClassName}
       contentId={contentId}
       disabled={disabled}
-      hoverOnly={Boolean(hoverSubmenu)}
-      hoverOnMouseEnter={hoverSubmenu ? hover.open : undefined}
       isMenuItem={parentPopup?.popupRole === 'menu'}
       noBackground={noBackground}
       popupType={popupType}
@@ -656,16 +628,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')} id={id}>
-      <div
-        className={`${baseClass}__trigger-wrap`}
-        onMouseLeave={hoverSubmenu ? hover.cancelPending : undefined}
-        ref={(element) => {
-          // The same wrapper is used by Popup focus management and the hover safe-zone.
-          triggerRef.current = element
-          // eslint-disable-next-line react-compiler/react-compiler
-          hover.triggerRef.current = element
-        }}
-      >
+      <div className={`${baseClass}__trigger-wrap`} ref={triggerRef}>
         {showOnHover ? (
           <div
             className={`${baseClass}__on-hover-watch`}
@@ -682,7 +645,6 @@ export const Popup: React.FC<PopupProps> = (props) => {
       </div>
 
       <PopupContext value={{ closePopupChain, popupRef, popupRole }}>
-        {active && showScrim && !parentPopup && <div className={`${baseClass}__scrim`} />}
         <div
           aria-label={popupAriaLabel}
           className={
@@ -712,8 +674,6 @@ export const Popup: React.FC<PopupProps> = (props) => {
         >
           <div
             className={`${baseClass}__scroll-container${showScrollbar ? ` ${baseClass}__scroll-container--show-scrollbar` : ''}`}
-            onMouseEnter={hoverSubmenu ? hover.keepOpen : undefined}
-            ref={hover.contentRef as React.Ref<HTMLDivElement>}
           >
             {theme === 'auto' ? (
               <>

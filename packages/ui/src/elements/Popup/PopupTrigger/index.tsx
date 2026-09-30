@@ -14,7 +14,6 @@ export type PopupButtonRenderProps = {
   'aria-haspopup'?: AriaAttributes['aria-haspopup']
   onClick: React.MouseEventHandler
   onKeyDown: React.KeyboardEventHandler
-  onMouseEnter?: React.MouseEventHandler
   role?: 'menuitem'
   tabIndex?: -1
 }
@@ -27,8 +26,6 @@ export type PopupTriggerProps = {
   className?: string
   contentId: string
   disabled?: boolean
-  hoverOnly?: boolean
-  hoverOnMouseEnter?: React.MouseEventHandler
   isMenuItem?: boolean
   noBackground?: boolean
   popupType?: AriaAttributes['aria-haspopup']
@@ -46,8 +43,6 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
     className,
     contentId,
     disabled,
-    hoverOnly = false,
-    hoverOnMouseEnter,
     isMenuItem,
     noBackground,
     popupType,
@@ -69,10 +64,6 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
     .join(' ')
 
   const handleClick: React.MouseEventHandler = (event) => {
-    if (hoverOnly) {
-      event.preventDefault()
-      return
-    }
     if (disabled) {
       event.preventDefault()
       return
@@ -110,7 +101,6 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
           'aria-haspopup': popupType,
           onClick: handleClick,
           onKeyDown: handleKeyDown,
-          onMouseEnter: hoverOnMouseEnter,
           role: isMenuItem ? 'menuitem' : undefined,
           tabIndex: isMenuItem ? -1 : undefined,
         })}

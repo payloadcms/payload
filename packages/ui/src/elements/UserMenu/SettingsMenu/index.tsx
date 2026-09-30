@@ -33,6 +33,7 @@ export const SettingsMenuContent: React.FC<{ groups: UserMenuSettingsGroup[] }> 
 
 export const SettingsMenu: React.FC<SettingsMenuProps> = ({ groups, onMobileOpen }) => {
   const { t } = useTranslation()
+
   if (onMobileOpen) {
     return (
       <button
@@ -43,7 +44,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ groups, onMobileOpen
         tabIndex={-1}
         type="button"
       >
-        <span className="popup-button-list__icon">
+        <span className="popup-button-list__submenu-icon">
           <GearIcon size={24} />
         </span>
         <span className="popup-button-list__label">{t('general:settings')}</span>
@@ -56,16 +57,22 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ groups, onMobileOpen
 
   return (
     <Popup
-      className="popup-button-list__submenu"
-      hoverSubmenu
       popupType="menu"
-      renderButton={({ active: _active, ...aria }) => (
+      renderButton={({ active, onClick, onKeyDown, ...aria }) => (
         <button
           {...aria}
-          className="popup-button-list__button popup-button-list__button--submenu-trigger"
+          className={[
+            'popup-button-list__button',
+            'popup-button-list__button--submenu-trigger',
+            active && 'popup-button-list__button--selected',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          onClick={onClick}
+          onKeyDown={onKeyDown}
           type="button"
         >
-          <span className="popup-button-list__icon">
+          <span className="popup-button-list__submenu-icon">
             <GearIcon size={24} />
           </span>
           <span className="popup-button-list__label">{t('general:settings')}</span>
@@ -78,9 +85,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ groups, onMobileOpen
       size="large"
       theme="dark"
     >
-      <div className="popup-button-list__submenu-content">
-        <SettingsMenuContent groups={groups} />
-      </div>
+      <SettingsMenuContent groups={groups} />
     </Popup>
   )
 }

@@ -29,60 +29,19 @@
     text-decoration: none;
     color: inherit;
 
-    &:hover:not(.sidebar-row--selected) {
+    &:hover {
       background: var(--color-bg-secondary);
       text-decoration: none;
-    }
-  }
-
-  /* SidebarRow is also a public extension point for custom navigation items. Keep its
-     default spacing aligned with built-in nav links without changing tree rows that only
-     reuse the shared sidebar-row class. */
-  .sidebar-row-wrapper > .sidebar-row {
-    position: relative;
-    isolation: isolate;
-    background: transparent;
-    padding-block: var(--spacer-2);
-    padding-inline: var(--spacer-3);
-
-    &::before {
-      content: '';
-      position: absolute;
-      inset-block: var(--spacer-1);
-      inset-inline: var(--spacer-2);
-      z-index: -1;
-      border-radius: var(--button-radius);
-    }
-
-    &:hover:not(.sidebar-row--selected) {
-      background: transparent;
-
-      &::before {
-        background: var(--color-bg-secondary);
-      }
-    }
-
-    &:focus-visible {
-      outline: none;
-
-      &::before {
-        outline: var(--accessibility-outline);
-        outline-offset: var(--accessibility-outline-offset);
-      }
-    }
-
-    &.sidebar-row--selected {
-      background: transparent;
-
-      &::before {
-        background: var(--color-bg-selected);
-      }
     }
   }
 
   .sidebar-row--selected {
     font-weight: var(--text-body-medium-strong-font-weight);
     background: var(--color-bg-selected);
+
+    &:hover {
+      background: var(--color-bg-selected);
+    }
   }
 
   .sidebar-row__icon {

@@ -34,6 +34,7 @@ export const LanguageMenu: React.FC<{
   readonly onMobileOpen?: () => void
 }> = ({ onMobileOpen }) => {
   const { t } = useTranslation()
+
   if (onMobileOpen) {
     return (
       <button
@@ -44,7 +45,7 @@ export const LanguageMenu: React.FC<{
         tabIndex={-1}
         type="button"
       >
-        <span className="popup-button-list__icon">
+        <span className="popup-button-list__submenu-icon">
           <LanguageIcon size={24} />
         </span>
         <span className="popup-button-list__label">{t('general:language')}</span>
@@ -57,16 +58,22 @@ export const LanguageMenu: React.FC<{
 
   return (
     <Popup
-      className="popup-button-list__submenu"
-      hoverSubmenu
       popupType="menu"
-      renderButton={({ active: _active, ...aria }) => (
+      renderButton={({ active, onClick, onKeyDown, ...aria }) => (
         <button
           {...aria}
-          className="popup-button-list__button popup-button-list__button--submenu-trigger"
+          className={[
+            'popup-button-list__button',
+            'popup-button-list__button--submenu-trigger',
+            active && 'popup-button-list__button--selected',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          onClick={onClick}
+          onKeyDown={onKeyDown}
           type="button"
         >
-          <span className="popup-button-list__icon">
+          <span className="popup-button-list__submenu-icon">
             <LanguageIcon size={24} />
           </span>
           <span className="popup-button-list__label">{t('general:language')}</span>
@@ -79,9 +86,7 @@ export const LanguageMenu: React.FC<{
       size="large"
       theme="dark"
     >
-      <div className="popup-button-list__submenu-content">
-        <LanguageMenuContent />
-      </div>
+      <LanguageMenuContent />
     </Popup>
   )
 }

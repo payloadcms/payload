@@ -40,6 +40,7 @@ export const ThemeMenu: React.FC<{
   readonly onMobileOpen?: () => void
 }> = ({ onMobileOpen }) => {
   const { t } = useTranslation()
+
   if (onMobileOpen) {
     return (
       <button
@@ -50,7 +51,7 @@ export const ThemeMenu: React.FC<{
         tabIndex={-1}
         type="button"
       >
-        <span className="popup-button-list__icon">
+        <span className="popup-button-list__submenu-icon">
           <VariableColorIcon size={24} />
         </span>
         <span className="popup-button-list__label">{t('general:theme')}</span>
@@ -63,16 +64,22 @@ export const ThemeMenu: React.FC<{
 
   return (
     <Popup
-      className="popup-button-list__submenu"
-      hoverSubmenu
       popupType="menu"
-      renderButton={({ active: _active, ...aria }) => (
+      renderButton={({ active, onClick, onKeyDown, ...aria }) => (
         <button
           {...aria}
-          className="popup-button-list__button popup-button-list__button--submenu-trigger"
+          className={[
+            'popup-button-list__button',
+            'popup-button-list__button--submenu-trigger',
+            active && 'popup-button-list__button--selected',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          onClick={onClick}
+          onKeyDown={onKeyDown}
           type="button"
         >
-          <span className="popup-button-list__icon">
+          <span className="popup-button-list__submenu-icon">
             <VariableColorIcon size={24} />
           </span>
           <span className="popup-button-list__label">{t('general:theme')}</span>
@@ -85,9 +92,7 @@ export const ThemeMenu: React.FC<{
       size="large"
       theme="dark"
     >
-      <div className="popup-button-list__submenu-content">
-        <ThemeMenuContent />
-      </div>
+      <ThemeMenuContent />
     </Popup>
   )
 }

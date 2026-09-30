@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 
@@ -28,7 +28,6 @@ import {
 } from './helpers.js'
 
 const openNavigationForUserMenu = async ({ page }: { page: Page }): Promise<void> => {
-  const userMenuTrigger = page.locator('.user-menu__trigger')
   const openNavigation = page.locator('.app-header--nav-open')
 
   if ((await openNavigation.count()) === 0) {
@@ -36,14 +35,7 @@ const openNavigationForUserMenu = async ({ page }: { page: Page }): Promise<void
     await expect(openNavigation).toHaveCount(1)
   }
 
-  await expect(userMenuTrigger).toBeVisible()
-  await expect(userMenuTrigger).toHaveCount(1)
-}
-
-const openUserMenu = async ({ page, trigger }: { page: Page; trigger: Locator }): Promise<void> => {
-  await trigger.evaluate((element) => element.click())
-  await expect(trigger).toHaveAttribute('aria-expanded', 'true')
-  await expect(page.locator('.user-menu__profile')).toBeVisible()
+  await expect(page.locator('.user-menu__trigger')).toBeVisible()
 }
 
 test.describe('WCAG 2.2 Level AA', () => {
@@ -262,7 +254,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       })
       const trigger = drawer.locator('.per-page .popup__trigger-wrap button')
 
-      await openUserMenu({ page, trigger })
+      await trigger.click()
       const popup = drawer.locator('.per-page .popup__content')
       const [triggerBox, popupBox] = await Promise.all([trigger.boundingBox(), popup.boundingBox()])
 
@@ -324,7 +316,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       const trigger = page.locator('.rich-text-lexical .toolbar-popup__dropdown-add')
 
       await trigger.scrollIntoViewIfNeeded()
-      await openUserMenu({ page, trigger })
+      await trigger.click()
       const menu = page.locator('.toolbar-popup__dropdown-items[data-dropdown-key="add"]')
       const beforeTriggerBox = await trigger.boundingBox()
       const beforeMenuBox = await menu.boundingBox()
@@ -365,8 +357,7 @@ test.describe('WCAG 2.2 Level AA', () => {
           richText.style.transform = `translateY(${window.innerHeight - triggerBottom - 4}px)`
         }
       })
-      await trigger.focus()
-      await openUserMenu({ page, trigger })
+      await trigger.click()
       const menu = page.locator('.toolbar-popup__dropdown-items[data-dropdown-key="add"]')
       const menuBox = await menu.boundingBox()
 
@@ -429,14 +420,14 @@ test.describe('WCAG 2.2 Level AA', () => {
       await openNavigationForUserMenu({ page })
       const trigger = page.locator('.user-menu__trigger')
 
-      await openUserMenu({ page, trigger })
+      await trigger.focus()
+      await trigger.press('Enter')
 
-      const account = page.locator('.user-menu__profile')
+      const account = page.getByRole('menuitem', { name: /dev@payloadcms\.com/i })
       const theme = page.getByRole('menuitem', { name: /theme/i })
       const language = page.getByRole('menuitem', { name: /language/i })
       const logout = page.getByRole('menuitem', { name: /log out/i })
 
-      await account.focus()
       await expect(account).toBeFocused()
       await page.keyboard.press('ArrowDown')
       await expect(theme).toBeFocused()
@@ -459,7 +450,8 @@ test.describe('WCAG 2.2 Level AA', () => {
       await openNavigationForUserMenu({ page })
       const trigger = page.locator('.user-menu__trigger')
 
-      await openUserMenu({ page, trigger })
+      await trigger.focus()
+      await trigger.press('Enter')
       const language = page.getByRole('menuitem', { name: /language/i })
       await language.focus()
       await language.press('Enter')
@@ -479,7 +471,8 @@ test.describe('WCAG 2.2 Level AA', () => {
       await openNavigationForUserMenu({ page })
       const trigger = page.locator('.user-menu__trigger')
 
-      await openUserMenu({ page, trigger })
+      await trigger.focus()
+      await trigger.press('Enter')
       const language = page.getByRole('menuitem', { name: /language/i })
       await language.focus()
       await language.press('Enter')
@@ -501,7 +494,8 @@ test.describe('WCAG 2.2 Level AA', () => {
       await openNavigationForUserMenu({ page })
       const trigger = page.locator('.user-menu__trigger')
 
-      await openUserMenu({ page, trigger })
+      await trigger.focus()
+      await trigger.press('Enter')
       const language = page.getByRole('menuitem', { name: /language/i })
       await expect(language).not.toHaveAttribute('aria-haspopup')
       await language.focus()
@@ -520,7 +514,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       const trigger = page.locator('#toggle-group-by')
 
       await trigger.focus()
-      await trigger.click()
+      await trigger.press('Enter')
 
       const dialog = page.getByRole('dialog', { name: /group by/i })
       const close = dialog.getByRole('button', { name: /close/i })
@@ -538,7 +532,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       const trigger = page.locator('.columns-button__button')
 
       await trigger.focus()
-      await trigger.evaluate((element) => element.click())
+      await trigger.press('Enter')
 
       const dialog = page.getByRole('dialog', { name: /columns/i })
       const close = dialog.getByRole('button', { name: /close/i })
@@ -956,7 +950,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await openNavigationForUserMenu({ page })
       const trigger = page.locator('.user-menu__trigger')
 
-      await openUserMenu({ page, trigger })
+      await trigger.press('Enter')
       const controlledPopupId = await trigger.getAttribute('aria-controls')
       const menu = page.locator(`#${controlledPopupId}`)
 
