@@ -162,15 +162,9 @@ export const getAfterChangeHook =
             if (updatedDoc.url !== undefined) {
               docWithMetadata.url = updatedDoc.url
             }
-            if (docWithMetadata.sizes && updatedDoc.sizes) {
-              docWithMetadata.sizes = Object.fromEntries(
-                Object.entries(docWithMetadata.sizes).map(([name, size]) => [
-                  name,
-                  updatedDoc.sizes[name]?.url !== undefined
-                    ? { ...size, url: updatedDoc.sizes[name]!.url }
-                    : size,
-                ]),
-              )
+            if (updatedDoc.sizes) {
+              // Only return size fields that the collection actually persisted.
+              docWithMetadata.sizes = updatedDoc.sizes
             }
           } finally {
             if (req.query && uploadEdits !== undefined) {
