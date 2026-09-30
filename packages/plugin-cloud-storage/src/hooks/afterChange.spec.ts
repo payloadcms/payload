@@ -52,6 +52,150 @@ describe('upload replacement cleanup', () => {
     expect(update).not.toHaveBeenCalled()
   })
 
+  it('should persist a field changed by an adapter that mutates and returns data', async () => {
+    const doc = { id: 1, filename: 'original.png', mimeType: 'image/png' }
+    const update = vi.fn(async () => doc)
+    const hook = getAfterChangeHook({
+      adapter: {
+        handleUpload: vi.fn(({ data }) => {
+          data.filename = 'original-suffixed.png'
+          return data
+        }),
+      } as never,
+      collection: { slug: 'media' } as never,
+    })
+
+    await hook({
+      data: doc,
+      doc,
+      operation: 'create',
+      req: {
+        context: {},
+        file: { data: Buffer.from('image'), size: 5 },
+        payload: { logger: { error: vi.fn() }, update },
+      },
+    } as never)
+
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { filename: 'original-suffixed.png' } }),
+    )
+  })
+
+  it('should keep unchanged document fields out of copied image-size metadata', async () => {
+    const doc = {
+      id: 1,
+      filename: 'original.png',
+      mimeType: 'image/png',
+      sizes: { square: { filename: 'original-30x20.png', mimeType: 'image/png' } },
+    }
+    const update = vi.fn(
+      async (_args: { data: { sizes: { square: Record<string, unknown> } } }) => doc,
+    )
+    const hook = getAfterChangeHook({
+      adapter: {
+        handleUpload: vi.fn(({ data, file }) =>
+          file.filename === doc.filename
+            ? undefined
+            : { ...data, sizes: { ...data.sizes }, url: '/square.png' },
+        ),
+      } as never,
+      collection: { slug: 'media' } as never,
+    })
+
+    await hook({
+      data: doc,
+      doc,
+      operation: 'create',
+      req: {
+        context: {},
+        file: { data: Buffer.from('main'), size: 4 },
+        payload: { logger: { error: vi.fn() }, update },
+        payloadUploadSizes: { square: Buffer.from('size') },
+      },
+    } as never)
+
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          sizes: expect.objectContaining({
+            square: expect.objectContaining({ filename: 'original-30x20.png', url: '/square.png' }),
+          }),
+        }),
+      }),
+    )
+    expect(update.mock.calls[0]?.[0]?.data.sizes.square.sizes).toBeUndefined()
+  })
+
+  it('should associate image-size results by size name when filenames match', async () => {
+    const doc = {
+      id: 1,
+      filename: 'original.png',
+      mimeType: 'image/png',
+      sizes: {
+        square: { filename: 'original-30x20.png', mimeType: 'image/png' },
+        thumbnail: { filename: 'original-30x20.png', mimeType: 'image/png' },
+      },
+    }
+    const update = vi.fn(async () => doc)
+    const hook = getAfterChangeHook({
+      adapter: {
+        handleUpload: vi.fn(({ file }) =>
+          file.buffer.toString() === 'main'
+            ? undefined
+            : { filename: `${file.buffer.toString()}-suffixed.png` },
+        ),
+      } as never,
+      collection: { slug: 'media' } as never,
+    })
+
+    await hook({
+      data: doc,
+      doc,
+      operation: 'create',
+      req: {
+        context: {},
+        file: { data: Buffer.from('main'), size: 4 },
+        payload: { logger: { error: vi.fn() }, update },
+        payloadUploadSizes: {
+          square: Buffer.from('square'),
+          thumbnail: Buffer.from('thumbnail'),
+        },
+      },
+    } as never)
+
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          sizes: expect.objectContaining({
+            square: expect.objectContaining({ filename: 'square-suffixed.png' }),
+            thumbnail: expect.objectContaining({ filename: 'thumbnail-suffixed.png' }),
+          }),
+        }),
+      }),
+    )
+  })
+
+  it('should not reuse a completed upload from the same request', async () => {
+    const doc = { id: 1, filename: 'original.png', mimeType: 'image/png' }
+    const file = { data: Buffer.from('image'), size: 5 }
+    const handleUpload = vi.fn(({ data }) => data)
+    const hook = getAfterChangeHook({
+      adapter: { handleUpload } as never,
+      collection: { slug: 'media' } as never,
+    })
+    const req = {
+      context: { _payloadCloudStorage: { file, uploadSizes: undefined } },
+      file,
+      payload: { logger: { error: vi.fn() }, update: vi.fn() },
+    }
+
+    await hook({ data: doc, doc, operation: 'create', req } as never)
+    await hook({ data: doc, doc, operation: 'update', req } as never)
+
+    expect(handleUpload).toHaveBeenCalledOnce()
+    expect(req.file).toBeUndefined()
+  })
+
   it.each([
     ['invoices', 'media/invoices', true, false],
     ['invoices', 'media/invoices', true, true],

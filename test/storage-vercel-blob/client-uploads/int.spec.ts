@@ -112,6 +112,8 @@ test.suite('@payloadcms/storage-vercel-blob clientUploads', { config: './config.
 
     expect(doc.filename).toMatch(/^image-[a-z0-9]+\.png$/)
     expect(doc.sizes?.square?.filename).toMatch(/^image-30x20-[a-z0-9]+\.png$/)
+    expect(doc.url).toContain(doc.filename)
+    expect(doc.sizes?.square?.url).toContain(doc.sizes?.square?.filename)
     expect(blobs.map((blob) => blob.pathname)).toContain(doc.filename)
     expect(blobs.map((blob) => blob.pathname)).toContain(doc.sizes!.square!.filename)
   })
