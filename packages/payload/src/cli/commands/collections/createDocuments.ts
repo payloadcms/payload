@@ -1,9 +1,7 @@
-import path from 'node:path'
-
 import type { EntityInputSchema } from '../../../utilities/entityInputSchema/types.js'
 
 import { createDocumentsLocalInputSchema } from '../../../collections/operations/inputSchemas.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { hasDraftValidationEnabled } from '../../../utilities/getVersionsConfig.js'
 import { defineCLICommand } from '../../defineCLICommand.js'
 import {
@@ -12,6 +10,7 @@ import {
   parseDocuments,
   parseFallbackLocale,
   parseJSON,
+  resolveCLIFile,
 } from '../data/input.js'
 import {
   getCollectionValidationResult,
@@ -41,7 +40,7 @@ export const createCreateDocumentsCommand = defineCLICommand({
     const docs: Array<{ doc: unknown; index: number } | { id: number | string; index: number }> = []
     const errors: Array<{ index: number; issues?: unknown[]; message: string }> = []
     let schema: EntityInputSchema | undefined
-    const req = await createLocalReq({}, payload)
+    const req = await createPayloadRequest({ payload })
     const shouldUsePartialSchema =
       args.draft === true &&
       collectionConfig !== undefined &&
@@ -58,13 +57,15 @@ export const createCreateDocumentsCommand = defineCLICommand({
           req,
         })
 
+        const resolvedFile = await resolveCLIFile({ slug: collection, input: file, req })
+
         const doc = await payload.create({
           collection,
           data: prepareCollectionData({ collection, data: inputData, payload }),
           depth: args.depth,
           draft: args.draft,
           fallbackLocale: args.fallbackLocale,
-          filePath: file ? path.resolve(process.cwd(), file) : undefined,
+          ...resolvedFile,
           locale: args.locale,
           overrideAccess: args.overrideAccess,
           overwriteExistingFiles: args.overwriteExistingFiles,

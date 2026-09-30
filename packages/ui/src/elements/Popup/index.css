@@ -33,8 +33,10 @@
     color: var(--popup-text, var(--color-text));
     border-radius: var(--popup-radius);
     min-width: 80px;
-    max-width: 400px;
+    max-width: min(calc(var(--spacer-6) * 10), calc(100vw - var(--spacer-3)));
     box-shadow: var(--elevation-400-menu-panel);
+    border: 0;
+    margin: 0;
   }
 
   .popup__content[data-theme='dark'] {
@@ -57,7 +59,7 @@
   .popup__scroll-container {
     overflow-x: hidden;
     overflow-y: auto;
-    max-height: calc(var(--spacer-5) * 10);
+    max-height: min(calc(var(--spacer-5) * 10), calc(100vh - var(--spacer-3)));
     padding: var(--spacer-2) 0;
   }
 

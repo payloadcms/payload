@@ -200,35 +200,6 @@ describe('Uploads', () => {
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'uploadsTest',
-      uploadsDir: [
-        path.resolve(dirname, './uploads'),
-        path.resolve(dirname, './media'),
-        path.resolve(dirname, './media-gif'),
-        path.resolve(dirname, './no-image-sizes'),
-        path.resolve(dirname, './object-fit'),
-        path.resolve(dirname, './custom-file-name-media'),
-        path.resolve(dirname, './focal-only'),
-        path.resolve(dirname, './crop-only'),
-        path.resolve(dirname, './optional'),
-        path.resolve(dirname, './required'),
-        path.resolve(dirname, './focal-no-sizes'),
-        path.resolve(dirname, './svg-only'),
-        path.resolve(dirname, './media-trim'),
-        path.resolve(dirname, './image-sizes-only'),
-        path.resolve(dirname, './versions'),
-        path.resolve(dirname, './media-with-relation-preview'),
-        path.resolve(dirname, './with-meta-data'),
-        path.resolve(dirname, './with-any-image-type'),
-        path.resolve(dirname, './with-only-jpeg-meta-data'),
-        path.resolve(dirname, './without-meta-data'),
-        path.resolve(dirname, './collections/Upload1/uploads'),
-        path.resolve(dirname, './collections/Upload2/uploads'),
-        path.resolve(dirname, './collections/AdminThumbnailFunction/test/uploads'),
-        path.resolve(dirname, './collections/AdminThumbnailSize/test/uploads'),
-        path.resolve(dirname, './collections/AdminThumbnailWithSearchQueries/test/uploads'),
-        path.resolve(dirname, './collections/AdminUploadControl/test/uploads'),
-      ],
     })
 
     if (client) {
@@ -270,6 +241,7 @@ describe('Uploads', () => {
         depth: 0,
         limit: 1,
         pagination: false,
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -306,6 +278,7 @@ describe('Uploads', () => {
     const relationDoc = await payload.create({
       collection: relationSlug,
       data: {},
+      overrideAccess: true,
     })
 
     await page.goto(relationURL.edit(relationDoc.id))
@@ -337,6 +310,7 @@ describe('Uploads', () => {
             equals: relationDoc.id,
           },
         },
+        overrideAccess: true,
       })
     ).docs[0] as any
 
@@ -361,6 +335,7 @@ describe('Uploads', () => {
         depth: 0,
         limit: 1,
         pagination: false,
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -377,6 +352,7 @@ describe('Uploads', () => {
         depth: 0,
         limit: 1,
         pagination: false,
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -402,6 +378,7 @@ describe('Uploads', () => {
             equals: 'image/png',
           },
         },
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -421,6 +398,7 @@ describe('Uploads', () => {
         depth: 0,
         limit: 1,
         pagination: false,
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -454,6 +432,7 @@ describe('Uploads', () => {
         where: {
           mimeType: { contains: 'image/' },
         },
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -485,6 +464,7 @@ describe('Uploads', () => {
         where: {
           mimeType: { contains: 'image/' },
         },
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -517,6 +497,7 @@ describe('Uploads', () => {
         where: {
           mimeType: { contains: 'image/' },
         },
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -847,6 +828,7 @@ describe('Uploads', () => {
             equals: 'image/png',
           },
         },
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -970,6 +952,7 @@ describe('Uploads', () => {
           collection: audioSlug,
           depth: 0,
           pagination: false,
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -1015,6 +998,7 @@ describe('Uploads', () => {
           collection: audioSlug,
           depth: 0,
           pagination: false,
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -1140,6 +1124,7 @@ describe('Uploads', () => {
             equals: 'image/png',
           },
         },
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -1167,6 +1152,7 @@ describe('Uploads', () => {
             equals: 'image/png',
           },
         },
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -1197,6 +1183,7 @@ describe('Uploads', () => {
         depth: 0,
         limit: 1,
         pagination: false,
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -2541,6 +2528,7 @@ describe('Uploads', () => {
       data: {
         title: 'test',
       },
+      overrideAccess: true,
     })
     await page.goto(hideFileInputOnCreateURL.edit(doc.id))
 
@@ -2676,8 +2664,13 @@ describe('Uploads', () => {
   })
 
   test('should be able to replace the file even if the user doesnt have delete access', async () => {
-    const docID = (await payload.find({ collection: mediaWithoutDeleteAccessSlug, limit: 1 }))
-      .docs[0]?.id as string
+    const docID = (
+      await payload.find({
+        collection: mediaWithoutDeleteAccessSlug,
+        limit: 1,
+        overrideAccess: true,
+      })
+    ).docs[0]?.id as string
     await gotoAndWaitForForm(page, mediaWithoutDeleteAccessURL.edit(docID))
     // Replacing the file is available even without delete access
     await page.locator('.file-toolbar__filename-btn').click()
@@ -2693,7 +2686,11 @@ describe('Uploads', () => {
     await expect(filename).toHaveValue('test-image.jpg')
     await saveDocAndAssert(page)
     const filenameFromAPI = (
-      await payload.find({ collection: mediaWithoutDeleteAccessSlug, limit: 1 })
+      await payload.find({
+        collection: mediaWithoutDeleteAccessSlug,
+        limit: 1,
+        overrideAccess: true,
+      })
     ).docs[0]?.filename
     expect(filenameFromAPI).toBe('test-image.jpg')
   })
@@ -2983,6 +2980,7 @@ describe('Uploads', () => {
       data: {
         title: 'Upload without file',
       },
+      overrideAccess: true,
     })
 
     const relationDoc = await payload.create({
@@ -2991,6 +2989,7 @@ describe('Uploads', () => {
         title: 'Relation document',
         uploadField: uploadDoc.id,
       },
+      overrideAccess: true,
     })
 
     await page.goto(relationToNoFilesRequiredURL.edit(relationDoc.id))
@@ -3045,6 +3044,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'image/png' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -3062,6 +3062,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'audio/mpeg' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -3081,6 +3082,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'application/pdf' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -3100,6 +3102,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'audio/mpeg' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -3119,6 +3122,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'video/mp4' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -3138,6 +3142,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'image/png' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -3158,6 +3163,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'image/png' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -3175,6 +3181,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'audio/mpeg' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -3194,6 +3201,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'audio/mpeg' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -3211,6 +3219,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'application/pdf' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -3227,6 +3236,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'image/png' } },
+          overrideAccess: true,
         })
       ).docs[0]
 
@@ -3245,6 +3255,7 @@ describe('Uploads', () => {
           depth: 0,
           limit: 1,
           where: { mimeType: { equals: 'video/mp4' } },
+          overrideAccess: true,
         })
       ).docs[0]
 

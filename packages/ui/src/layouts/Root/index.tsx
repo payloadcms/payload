@@ -1,15 +1,12 @@
-import type {
-  ImportMap,
-  LanguageOptions,
-  SanitizedConfig,
-  ServerAdapter,
-  ServerFunctionClient,
-} from 'payload'
+import type { ImportMap, LanguageOptions, SanitizedConfig, ServerFunctionClient } from 'payload'
 
 import { applyLocaleFiltering } from 'payload/shared'
 import React, { Suspense } from 'react'
 
+import type { InitAdminContextFn } from '../../views/Root/index.js'
+
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
+
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
 import { ProgressBar, RootProvider } from '../../exports/client/index.js'
 import { checkDependencies, type CheckDependenciesArgs } from '../../utilities/checkDependencies.js'
@@ -18,7 +15,6 @@ import { getLanguageDir } from '../../utilities/getLanguageDir.js'
 import { getRequestEmbed } from '../../utilities/getRequestEmbed.js'
 import { getRequestHighContrast } from '../../utilities/getRequestHighContrast.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
-import { initReq } from '../../utilities/initReq.js'
 import { NestProviders } from './NestProviders.js'
 import { getViewportMeta } from './viewport.js'
 // eslint-disable-next-line payload/no-imports-from-self -- Self-import via package path ensures consumer's bundler resolves the full CSS chain (design tokens, preflight, etc.) in prod builds
@@ -68,16 +64,12 @@ type RootLayoutProps = {
   readonly head?: React.ReactNode
   readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
   readonly importMap: ImportMap
+  readonly initAdminContext: InitAdminContextFn
   /**
    * Client router adapter. Caller supplies a framework-specific provider
    * (for Next.js use the `NextRouterAdapter` exported from `@payloadcms/next`).
    */
   readonly RouterAdapter: React.FC<{ children: React.ReactNode }>
-  /**
-   * Server adapter providing framework-specific access to headers, cookies, redirects,
-   * and other server APIs (for Next.js use `nextServerAdapter` from `@payloadcms/next`).
-   */
-  readonly serverAdapter: ServerAdapter
   readonly serverFunction: ServerFunctionClient
 }
 
@@ -100,8 +92,8 @@ const RootLayoutContent = async ({
   head: headFromProps,
   htmlProps = {},
   importMap,
+  initAdminContext,
   RouterAdapter,
-  serverAdapter,
   serverFunction,
 }: RootLayoutProps) => {
   const {
@@ -113,7 +105,8 @@ const RootLayoutContent = async ({
     req: {
       payload: { config },
     },
-  } = await initReq({ configPromise, importMap, key: 'RootLayout', serverAdapter })
+    user,
+  } = await initAdminContext({ configPromise, importMap, key: 'RootLayout' })
 
   const theme = getRequestTheme({
     config,
@@ -149,7 +142,7 @@ const RootLayoutContent = async ({
     config,
     i18n: req.i18n,
     importMap,
-    user: req.user,
+    user,
   })
 
   await applyLocaleFiltering({ clientConfig, config, req })
@@ -183,12 +176,12 @@ const RootLayoutContent = async ({
           languageCode={languageCode}
           languageOptions={languageOptions}
           locale={req.locale}
-          permissions={req.user ? permissions : null}
+          permissions={user ? permissions : null}
           RouterAdapter={RouterAdapter}
           serverFunction={serverFunction}
           theme={theme}
           translations={req.i18n.translations}
-          user={req.user}
+          user={user}
         >
           <ProgressBar />
           {Array.isArray(config.admin?.components?.providers) &&
@@ -201,7 +194,7 @@ const RootLayoutContent = async ({
                 payload: req.payload,
                 permissions,
                 server: req.server,
-                user: req.user,
+                user,
               }}
             >
               {children}

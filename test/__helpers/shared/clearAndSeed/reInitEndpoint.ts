@@ -7,7 +7,6 @@ import type { TestDataConfig } from './testDataConfig.js'
 
 import { path } from './reInitializeDB.js'
 import { resetAndSeed } from './resetAndSeed.js'
-import { seedDB } from './seed.js'
 
 export const createReInitEndpoint = ({ seed, suite }: TestDataConfig): Endpoint => {
   let resetQueue = Promise.resolve()
@@ -60,52 +59,6 @@ export const createReInitEndpoint = ({ seed, suite }: TestDataConfig): Endpoint 
   }
 }
 
-const legacyHandler: PayloadHandler = async (req) => {
-  process.env.SEED_IN_CONFIG_ONINIT = 'true'
-  const { payload } = req
-
-  if (!req.url) {
-    throw new Error('Request URL is required')
-  }
-
-  const query: {
-    deleteOnly?: string
-    snapshotKey?: string
-    uploadsDir?: string | string[]
-  } = qs.parse(req.url.split('?')[1] ?? '', {
-    depth: 10,
-    ignoreQueryPrefix: true,
-  })
-
-  let uploadsDir = query.uploadsDir
-  if (typeof uploadsDir === 'object') {
-    uploadsDir = Object.values(uploadsDir)
-  }
-
-  try {
-    await seedDB({
-      _payload: payload,
-      collectionSlugs: payload.config.collections.map(({ slug }) => slug),
-      deleteOnly: query.deleteOnly === 'true',
-      seedFunction: payload.config.onInit,
-      snapshotKey: String(query.snapshotKey),
-      uploadsDir,
-    })
-
-    return Response.json(
-      {
-        message: 'Database reset and onInit run successfully.',
-      },
-      {
-        status: httpStatus.OK,
-      },
-    )
-  } catch (err) {
-    payload.logger.error(err)
-    return createErrorResponse(err)
-  }
-}
-
 const createErrorResponse = (error: unknown): Response =>
   Response.json(
     {
@@ -115,10 +68,3 @@ const createErrorResponse = (error: unknown): Response =>
       status: httpStatus.INTERNAL_SERVER_ERROR,
     },
   )
-
-/** @deprecated Migrate the config to `buildConfigWithDefaults({ config, seed, suite })`. */
-export const reInitEndpoint: Endpoint = {
-  handler: legacyHandler,
-  method: 'get',
-  path,
-}

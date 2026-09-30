@@ -67,8 +67,12 @@ test.describe('Tags', () => {
       if (parentId !== undefined) {
         data[`_h_${tagsSlug}`] = parentId
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- hierarchy `_h_*` field is not in the generated type
-      const doc = await payload.create({ collection: tagsSlug, data: data as any })
+
+      const doc = await payload.create({
+        collection: tagsSlug,
+        data: data as any,
+        overrideAccess: true,
+      })
       created.push(doc)
       createdTagIds.push(doc.id)
       parentId = doc.id
@@ -83,7 +87,7 @@ test.describe('Tags', () => {
       .getByRole('button', { name: 'Create New' })
       .first()
       .click()
-    await page.getByRole('button', { name: 'Tag', exact: true }).click()
+    await page.getByRole('menuitem', { name: 'Tag', exact: true }).click()
 
     const drawer = page.locator('.drawer__content')
     await expect(drawer).toBeVisible()
@@ -94,6 +98,7 @@ test.describe('Tags', () => {
     const { docs } = await payload.find({
       collection: tagsSlug,
       where: { name: { equals: name } },
+      overrideAccess: true,
     })
     const createdTag = docs[0] as Tag
     createdTagIds.push(createdTag.id)
@@ -116,7 +121,7 @@ test.describe('Tags', () => {
 
   test.afterAll(async () => {
     for (const id of createdTagIds) {
-      await payload.delete({ id, collection: tagsSlug })
+      await payload.delete({ id, collection: tagsSlug, overrideAccess: true })
     }
   })
 

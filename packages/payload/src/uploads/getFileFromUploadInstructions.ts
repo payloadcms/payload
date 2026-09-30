@@ -12,8 +12,13 @@ import type { PayloadRequest } from '../types/index.js'
 import type { SanitizedUploadConfig, UploadEdits, UploadInstructions } from './types.js'
 
 import { APIError } from '../errors/APIError.js'
+import { sanitizeFilename } from '../utilities/sanitizeFilename.js'
+import { sanitizeUploadPrefix } from '../utilities/sanitizeUploadPrefix.js'
+import { verifyClientUploadReceipt } from './clientUploadReceipt.js'
+import { docWithFilenameExists } from './docWithFilenameExists.js'
 import { getFileContentRequirement, HEADER_PROBE_BYTE_LENGTH } from './getFileContentRequirement.js'
 import { getImageSize } from './getImageSize.js'
+import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
 import { getStagedFile } from './stagedUpload.js'
 
 export const getFileFromUploadInstructions = async ({
@@ -28,8 +33,13 @@ export const getFileFromUploadInstructions = async ({
   if (
     !file ||
     typeof file !== 'object' ||
+    typeof file.filename !== 'string' ||
+    typeof file.mimeType !== 'string' ||
+    !Number.isSafeInteger(file.size) ||
+    file.size < 0 ||
     !file.uploadReference ||
-    typeof file.uploadReference !== 'object'
+    typeof file.uploadReference !== 'object' ||
+    Array.isArray(file.uploadReference)
   ) {
     throw new APIError('Invalid upload reference.', 400)
   }
@@ -43,6 +53,64 @@ export const getFileFromUploadInstructions = async ({
   }
 
   const uploadConfig = req.payload.collections[collectionSlug]!.config.upload
+  let allowOverwrite = false
+
+  if (uploadConfig?.uploadInstructions?.requiresUploadReceipt) {
+    const signedReceipt =
+      'signedReceipt' in file.uploadReference ? file.uploadReference.signedReceipt : undefined
+    const receipt = verifyClientUploadReceipt({
+      collectionSlug,
+      filename: file.filename,
+      req,
+      signedReceipt,
+    })
+    allowOverwrite = receipt.allowOverwrite === true
+    file = {
+      ...file,
+      uploadReference: {
+        _objectKey: receipt._objectKey,
+        prefix: receipt.filePrefix,
+        signedReceipt,
+      },
+    }
+  }
+
+  const prefix =
+    'prefix' in file.uploadReference && typeof file.uploadReference.prefix === 'string'
+      ? file.uploadReference.prefix
+      : undefined
+
+  let sanitizedFilename: string
+
+  try {
+    sanitizedFilename = sanitizeFilename(file.filename)
+  } catch {
+    throw new APIError('Invalid upload reference.', 400)
+  }
+
+  if (
+    sanitizedFilename !== file.filename ||
+    (typeof prefix === 'string' && sanitizeUploadPrefix(prefix) !== prefix)
+  ) {
+    throw new APIError('Invalid upload reference.', 400)
+  }
+
+  // Provider-backed references are submitted with the document request. They may only claim a
+  // new object identity; existing top-level and generated filenames already belong to another
+  // document and must continue through that document's read access checks.
+  if (
+    !allowOverwrite &&
+    (await docWithFilenameExists({
+      collectionSlug,
+      filename: file.filename,
+      matchAnyPrefix: true,
+      path: '',
+      prefix,
+      req,
+    }))
+  ) {
+    throw new APIError('Invalid upload reference.', 400)
+  }
 
   if (!uploadConfig || !uploadConfig.handlers) {
     throw new APIError('uploadConfig.handlers is not present for ' + collectionSlug)
@@ -78,6 +146,8 @@ export const getFileFromUploadInstructions = async ({
   const response = await fetchUploadResponse({ collectionSlug, file, req, uploadConfig })
 
   const tempFilePath = await streamResponseToTempFile({ req, response })
+  req.context ??= {}
+  req.context._payloadClientUploadTempFile = true
 
   return {
     name: file.filename,
@@ -90,10 +160,10 @@ export const getFileFromUploadInstructions = async ({
 }
 
 /**
- * Whether the request's `uploadEdits` query param carries a crop or resize edit - mirrors the
- * raw `req.query.uploadEdits` read in generateFileData.ts's `shouldReupload`/`cropData` checks,
- * since a full parse (with its `data`/`originalDoc` focal-point fallback) isn't available yet
- * at this point in the request lifecycle.
+ * Whether the request's `uploadEdits` query param carries a crop or resize edit - reads the raw
+ * `req.query.uploadEdits`, since a full parse (with its `data`/`originalDoc` focal-point
+ * fallback, done in generateFileData.ts) isn't available yet at this point in the request
+ * lifecycle.
  */
 const requestHasSizeEdits = (req: PayloadRequest): boolean => {
   const uploadEdits = req.query?.uploadEdits
@@ -101,8 +171,7 @@ const requestHasSizeEdits = (req: PayloadRequest): boolean => {
     return false
   }
 
-  const { crop, heightInPixels, widthInPixels } = uploadEdits as UploadEdits
-  return Boolean(crop || heightInPixels || widthInPixels)
+  return hasCropOrResizeEdit(uploadEdits as UploadEdits)
 }
 
 /**
@@ -140,7 +209,6 @@ const fetchHeaderOnly = async ({
         mimetype: file.mimeType,
         size: file.size,
       },
-      sharp: req.payload.config.sharp,
     })
   } catch {
     return null

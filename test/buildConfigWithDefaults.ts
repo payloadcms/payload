@@ -31,10 +31,7 @@ import { en } from 'payload/i18n/en'
 import { es } from 'payload/i18n/es'
 import sharp from 'sharp'
 
-import {
-  createReInitEndpoint,
-  reInitEndpoint,
-} from './__helpers/shared/clearAndSeed/reInitEndpoint.js'
+import { createReInitEndpoint } from './__helpers/shared/clearAndSeed/reInitEndpoint.js'
 import { createSeedCommand } from './__helpers/shared/clearAndSeed/seedCommand.js'
 import {
   type SeedFunction,
@@ -55,28 +52,13 @@ type BuildConfigWithDefaultsArgs = {
   suite: string
 }
 
-type LegacyBuildConfigWithDefaultsOptions = {
-  disableAutoLogin?: boolean
-}
-
-export function buildConfigWithDefaults(args: BuildConfigWithDefaultsArgs): Promise<SanitizedConfig>
-/** @deprecated Use `buildConfigWithDefaults({ config, disableAutoLogin, seed, suite })`. */
-export function buildConfigWithDefaults(
-  testConfig?: Partial<Config>,
-  options?: LegacyBuildConfigWithDefaultsOptions,
-): Promise<SanitizedConfig>
-export async function buildConfigWithDefaults(
-  argsOrConfig: BuildConfigWithDefaultsArgs | Partial<Config> = {},
-  legacyOptions: LegacyBuildConfigWithDefaultsOptions = {},
-): Promise<SanitizedConfig> {
-  const usesTestDataConfig = 'config' in argsOrConfig && 'suite' in argsOrConfig
-  const testConfig = usesTestDataConfig ? argsOrConfig.config : argsOrConfig
-  const disableAutoLogin = usesTestDataConfig
-    ? argsOrConfig.disableAutoLogin
-    : legacyOptions.disableAutoLogin
-  const testDataConfig = usesTestDataConfig
-    ? { seed: argsOrConfig.seed, suite: argsOrConfig.suite }
-    : undefined
+export async function buildConfigWithDefaults({
+  config: testConfig,
+  disableAutoLogin,
+  seed,
+  suite,
+}: BuildConfigWithDefaultsArgs): Promise<SanitizedConfig> {
+  const testDataConfig = { seed, suite }
   const config: Config = {
     db: databaseAdapter,
     editor: lexicalEditor({
@@ -168,7 +150,7 @@ export async function buildConfigWithDefaults(
     ...testConfig,
     endpoints: [
       localAPIEndpoint,
-      testDataConfig ? createReInitEndpoint(testDataConfig) : reInitEndpoint,
+      createReInitEndpoint(testDataConfig),
       ...(testConfig?.endpoints || []),
     ],
     i18n: {
@@ -216,7 +198,7 @@ export async function buildConfigWithDefaults(
     config.plugins = [...(config.plugins ?? []), mcpPlugin({})]
   }
 
-  if (config.cli !== false && testDataConfig) {
+  if (config.cli !== false) {
     config.cli = {
       ...config.cli,
       commands: {
@@ -228,12 +210,10 @@ export async function buildConfigWithDefaults(
 
   const sanitizedConfig = await buildConfig(config)
 
-  if (testDataConfig) {
-    Object.defineProperty(sanitizedConfig, testDataConfigSymbol, {
-      enumerable: false,
-      value: testDataConfig,
-    })
-  }
+  Object.defineProperty(sanitizedConfig, testDataConfigSymbol, {
+    enumerable: false,
+    value: testDataConfig,
+  })
 
   return sanitizedConfig
 }

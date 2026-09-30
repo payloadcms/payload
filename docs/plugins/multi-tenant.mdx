@@ -32,6 +32,7 @@ This plugin sets up multi-tenancy for your application from within your [Admin P
 - Filters relationship fields by selected tenant
 - Ability to create "global" like collections, 1 doc per tenant
 - Automatically assign a tenant to new documents
+- Rejects writes that assign a tenant the user is not a member of
 
 <Banner type="error">
   **Warning**
@@ -90,6 +91,8 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
       /**
        * Opt out of adding the tenant field and place
        * it manually using the `tenantField` export from the plugin
+       *
+       * Tenant membership is still enforced on write. See Tenant write enforcement.
        */
       customTenantField?: boolean
       /**
@@ -329,6 +332,50 @@ const config = buildConfig({
 
 export default config
 ```
+
+## Tenant write enforcement
+
+Every create and update to a tenant-enabled collection is checked. If the request assigns a tenant that the user is not a member of, the write is rejected with a validation error on the tenant field.
+
+This applies to the tenant a document starts in and the tenant it moves to. A user cannot create a new document in another tenant or move an existing document to another tenant.
+
+The check runs on drafts and autosave saves as well as ordinary saves. Payload skips field validation for those operations, so the plugin also enforces membership in a collection `beforeValidate` hook.
+
+### What is checked
+
+The tenant is compared with the tenants assigned to the user on the admin users collection. The check is skipped when:
+
+- The user passes your `userHasAccessToAllTenants` function
+- The user belongs to a different auth collection. These users do not have a tenants array, which matches how the plugin's access control treats them
+- The tenant is unchanged. An update that does not change the tenant field is not blocked by this check
+- The call comes from the Local API with no user, such as a seed script or a migration
+
+All other writes are checked, including requests with no user. An unauthenticated request belongs to no tenant, so it cannot assign one. If a collection allows public creates and must set a tenant, do this in server-side code through the Local API instead of the request body.
+
+<Banner type="warning">
+  **Note**
+
+Local API calls that pass a `user` are checked, even with `overrideAccess: true`. If server-side code needs to write across tenants, omit the `user` or use a user that passes `userHasAccessToAllTenants`.
+
+</Banner>
+
+### Other auth collections
+
+Users from an auth collection other than the tenant-managed collection cannot write the tenant field. Attempts to set or change the tenant are ignored. These users can still update other fields if the collection access rules allow it. This applies when the plugin adds the field, or when a `customTenantField` configuration passes `adminUsersSlug` to `tenantField`.
+
+### filterOptions and write permission
+
+`filterOptions` on the tenant field controls which tenants the admin panel shows. It does not control which tenants the server accepts on write.
+
+If you override `filterOptions` to show more tenants, the additional tenants are still rejected on save. Use `userHasAccessToAllTenants` to let a user write outside their assigned tenants.
+
+The write check reads the user's tenant assignments instead of running the `filterOptions` query. This avoids a database read in the same transaction as the write.
+
+### Collections that place the tenant field themselves
+
+Collections that use `customTenantField` receive the same collection-hook check. The field checks the user's explicit tenant assignments. If users depend on `userHasAccessToAllTenants`, pass that function to `tenantField` when you place it. The collection hook applies the check in all cases.
+
+Access control also applies. A user who cannot update a document is rejected before the tenant is checked.
 
 ## Front end usage
 

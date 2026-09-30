@@ -13,8 +13,9 @@ const { email, password } = devUser
 _internal_jobSystemGlobals.shouldAutoRun = false
 _internal_jobSystemGlobals.shouldAutoSchedule = false
 
-test.suite({ config: './config.schedules-autocron.ts' })(
+test.suite(
   'Queues - scheduling, with automatic scheduling handling',
+  { config: './config.schedules-autocron.ts' },
   () => {
     test.afterAll(async () => {
       // Ensure no new crons are scheduled
@@ -78,6 +79,7 @@ test.suite({ config: './config.schedules-autocron.ts' })(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBeGreaterThanOrEqual(minJobsCompleted)

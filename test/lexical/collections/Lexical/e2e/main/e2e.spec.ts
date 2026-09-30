@@ -312,7 +312,7 @@ describe('lexicalMain', () => {
     await expect(richTextField).toBeVisible()
     await richTextField.click() // Use click, because focus does not work
     await page.keyboard.type('some text')
-    const spanInEditor = richTextField.locator('span').first()
+    const spanInEditor = richTextField.locator('[data-lexical-text="true"]').first()
     await expect(spanInEditor).toHaveText('some text')
     await saveDocAndAssert(page)
     await page.locator('#clear-lexical-lexicalSimple').click()
@@ -327,7 +327,7 @@ describe('lexicalMain', () => {
     await expect(richTextField).toBeVisible()
     await richTextField.click() // Use click, because focus does not work
     await page.keyboard.type('some text')
-    const spanInEditor = richTextField.locator('span').first()
+    const spanInEditor = richTextField.locator('[data-lexical-text="true"]').first()
     await expect(spanInEditor).toHaveText('some text')
     await saveDocAndAssert(page)
     await page.locator('#clear-lexical-lexicalSimple').click()
@@ -523,7 +523,7 @@ describe('lexicalMain', () => {
     await expect(richTextField.locator('.LexicalEditorTheme__block')).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
-    const lastParagraph = richTextField.locator('p').last()
+    const lastParagraph = richTextField.locator('.ContentEditable__root > p').last()
     await lastParagraph.scrollIntoViewIfNeeded()
     await expect(lastParagraph).toBeVisible()
 
@@ -602,7 +602,7 @@ describe('lexicalMain', () => {
     await expect(richTextField.locator('.LexicalEditorTheme__block')).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
-    const lastParagraph = richTextField.locator('p').last()
+    const lastParagraph = richTextField.locator('.ContentEditable__root > p').last()
     await lastParagraph.scrollIntoViewIfNeeded()
     await expect(lastParagraph).toBeVisible()
 
@@ -709,7 +709,7 @@ describe('lexicalMain', () => {
       await navigateToLexicalFields(true, 'lexical-relationship-fields')
       const richTextField = page.locator('.rich-text-lexical').nth(0)
 
-      const lastParagraph = richTextField.locator('p').last()
+      const lastParagraph = richTextField.locator('.ContentEditable__root > p').last()
       await lastParagraph.scrollIntoViewIfNeeded()
       await expect(lastParagraph).toBeVisible()
 
@@ -735,7 +735,7 @@ describe('lexicalMain', () => {
       await navigateToLexicalFields(true, 'lexical-relationship-fields')
       const richTextField = page.locator('.rich-text-lexical').nth(0)
 
-      const lastParagraph = richTextField.locator('p').last()
+      const lastParagraph = richTextField.locator('.ContentEditable__root > p').last()
       await lastParagraph.scrollIntoViewIfNeeded()
       await expect(lastParagraph).toBeVisible()
 
@@ -1752,9 +1752,9 @@ describe('lexicalMain', () => {
     await textNode.click()
     await expect(decoratorLocator).toBeHidden()
 
-    const closeTagInMultiSelect = page
-      .getByRole('button', { name: 'payload.jpg Edit payload.jpg' })
-      .getByLabel('Remove')
+    const closeTagInMultiSelect = page.getByRole('button', {
+      name: /^Remove payload\.jpg/,
+    })
     await closeTagInMultiSelect.click()
     await expect(decoratorLocator).toBeHidden()
 
@@ -1859,6 +1859,11 @@ describe('lexicalMain', () => {
     await page.keyboard.press('ArrowUp')
     await selectedNthDecorator(0)
     await page.keyboard.press('ArrowUp')
+    await expect(selectedDecorator).toBeHidden()
+    await expect
+      .poll(() => page.evaluate(() => window.getSelection()?.anchorNode?.textContent))
+      .toBe('Upload Node:')
+    await page.keyboard.press('ArrowDown')
     await selectedNthDecorator(0)
 
     // TODO: It would be nice to add tests with lists and nested lists
@@ -1891,6 +1896,7 @@ describe('lexicalMain', () => {
         },
         title: 'Test Custom Cell',
       },
+      overrideAccess: true,
     })
 
     const url = new AdminUrlUtil(serverURL, lexicalCustomCellSlug)

@@ -162,6 +162,7 @@ export const seedCommand = defineCLICommand({
 
     await payload.create({
       collection: 'pages',
+      overrideAccess: true,
       data: { title: 'My page' },
     })
 
@@ -305,7 +306,14 @@ export default buildConfig({
 
 ## Working with data from the CLI
 
-Payload includes local commands for inspecting the config and working with collections and globals. They use the Local API, load the current Payload config on every invocation, and bypass access control by default. Run them only from a trusted environment with access to the project.
+Payload includes local commands for inspecting the config and working with collections and globals. They use the Local API and load the current Payload config on every invocation.
+
+<Banner type="warning">
+  Data commands bypass access control by default. Run them only from a trusted
+  environment with access to the project. Pass `--override-access false` to
+  enforce access control as an anonymous request because the CLI does not have a
+  logged-in user.
+</Banner>
 
 Start by discovering the available slugs and inspecting the input schema for a collection:
 
@@ -327,7 +335,7 @@ pnpm payload updateDocument \
   --data '{"title":"Updated title"}'
 ```
 
-Pass `--override-access false` to run a data command through Payload's access control. Local CLI commands do not have a logged-in user, so access is checked as an anonymous request:
+To explicitly enforce access control:
 
 ```sh
 pnpm payload findDocuments --slug posts --override-access false
@@ -345,6 +353,26 @@ pnpm payload findDocuments --input '{"slug":"posts","overrideAccess":false}'
 pnpm payload createDocuments \
   --slug media \
   --documents '[{"data":{"alt":"Company logo"},"file":"./images/logo.png"}]'
+```
+
+Upload input can also use an external URL. Payload applies the upload collection's `pasteURL`, allow-list, safe-fetch, header, and file-size settings before creating or updating the document:
+
+The trusted local CLI does not require an explicit allow-list. If one is configured, both the initial URL and redirects must match it. `pasteURL: false` disables URL uploads.
+
+```sh
+pnpm payload createDocuments \
+  --slug media \
+  --documents '[{"data":{"alt":"Company logo"},"file":{"source":"externalURL","url":"https://example.com/logo.png"}}]'
+```
+
+For `updateDocument`, pass the same object through `--file`:
+
+```sh
+pnpm payload updateDocument \
+  --slug media \
+  --id 1 \
+  --data '{"alt":"Updated logo"}' \
+  --file '{"source":"externalURL","url":"https://example.com/logo.png"}'
 ```
 
 For longer input, put the array in a file:

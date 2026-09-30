@@ -47,6 +47,7 @@
         border: none;
         padding: 0;
         padding-left: var(--spacer-1);
+        /* stylelint-disable-next-line plugin/no-important -- TODO: pre-existing; revisit whether specificity can win instead */
         min-height: auto !important;
         position: relative;
         box-shadow: unset;

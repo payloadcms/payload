@@ -11,6 +11,7 @@ import {
   useDebouncedEffect,
   useDocumentInfo,
   useField,
+  useForm,
   useFormFields,
   useTranslation,
 } from '@payloadcms/ui'
@@ -25,10 +26,17 @@ import type {
 import type { ImportPreviewResponse } from '../../types.js'
 
 import { DEFAULT_PREVIEW_LIMIT, PREVIEW_LIMIT_OPTIONS } from '../../constants.js'
+import {
+  getFormStateSignature,
+  getSubmittedFormValues,
+} from '../../utilities/getSubmittedFormValues.js'
 import { RelationshipCell } from '../RelationshipCell/index.js'
 import './index.css'
 
 const baseClass = 'import-preview'
+
+// The file contents are sent separately as `fileData`.
+const nonSerializableFormKeys = ['file']
 
 /**
  * Browser-native ArrayBuffer → base64. Avoids Node's `Buffer`, which is not
@@ -69,6 +77,11 @@ export const ImportPreview: React.FC = () => {
 
   // Access the file field directly from form fields
   const fileField = useFormFields(([fields]) => fields?.file || null)
+
+  const { getData } = useForm()
+  const formStateSignature = useFormFields(([fields]) =>
+    getFormStateSignature({ fields, omit: nonSerializableFormKeys }),
+  )
 
   const [dataToRender, setDataToRender] = useState<Record<string, unknown>[]>([])
   const [columns, setColumns] = useState<Column[]>([])
@@ -158,6 +171,10 @@ export const ImportPreview: React.FC = () => {
               collectionSlug: targetCollectionSlug,
               fileData,
               format,
+              formData: getSubmittedFormValues({
+                formData: getData(),
+                omit: nonSerializableFormKeys,
+              }),
               previewLimit,
               previewPage,
             }),
@@ -496,6 +513,8 @@ export const ImportPreview: React.FC = () => {
       filename,
       mimeType,
       fileField?.value,
+      formStateSignature,
+      getData,
       collectionConfig,
       config,
       i18n,

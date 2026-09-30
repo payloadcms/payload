@@ -381,6 +381,21 @@ export const getTableColumnFromPath = ({
 
         const newCollectionPath = pathSegments.slice(1).join('.')
 
+        // Filtering through a polymorphic `on` relationship is not supported: it is stored in the
+        // `_rels` table with no direct column to correlate on, which would otherwise build invalid SQL.
+        const onRelationshipField = getFieldByPath({
+          fields: adapter.payload.collections[field.collection].config.flattenedFields,
+          path: field.on,
+        })?.field
+
+        if (
+          onRelationshipField &&
+          (onRelationshipField.type === 'relationship' || onRelationshipField.type === 'upload') &&
+          Array.isArray(onRelationshipField.relationTo)
+        ) {
+          throw new APIError('Not supported')
+        }
+
         if (field.hasMany) {
           const relationTableName = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${adapter.relationshipsSuffix}`
 

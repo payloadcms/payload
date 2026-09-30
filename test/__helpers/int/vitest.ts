@@ -10,7 +10,6 @@ import { getCurrentDatabaseAdapter } from '../../dbAdapters.js'
 import { resetAndSeed } from '../shared/clearAndSeed/resetAndSeed.js'
 import { getTestDataConfig } from '../shared/clearAndSeed/testDataConfig.js'
 import { getSDK } from '../shared/getSDK.js'
-import { initPayloadInt } from '../shared/initPayloadInt.js'
 import { mongooseList } from '../shared/isMongoose.js'
 import { NextRESTClient } from '../shared/NextRESTClient.js'
 import { runCLICommand } from '../shared/runCLICommand.js'
@@ -23,6 +22,11 @@ type TestOptions = {
 type TestSuiteOptions = {
   config?: string
   cron?: boolean
+  /**
+   * Set to false for suites that manage their own test isolation. The fixture resets and seeds once
+   * before the file's tests, then shares the database state and REST client between those tests.
+   */
+  resetBetweenTests?: boolean
 } & TestOptions
 
 type IntegrationFixtures = {
@@ -31,11 +35,15 @@ type IntegrationFixtures = {
     configPath: null | string
     /** Raw file-scoped instance for suite hooks. Tests should use `payload`. */
     payloadInstance: Payload
+    resetBetweenTests: boolean
     /** Config supplied to `test.suite`, imported automatically before file hooks run. */
     resolvedConfig: null | SanitizedConfig
+    /** Raw file-scoped REST client for suites that intentionally share state across tests. */
+    restClientInstance: NextRESTClient
+    /** Prepares shared test data once for suites that disable resets between tests. */
+    seedAtStart: void
     testCron: boolean
     testDir: string
-    testSuiteConfigured: boolean
   }
   $test: {
     cli: (input: Parameters<typeof runCLICommand>[0]) => ReturnType<typeof runCLICommand>
@@ -52,13 +60,24 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
     void payload
 
     const previousDropDatabase = process.env.PAYLOAD_DROP_DATABASE
+
+    if (previousDropDatabase !== 'true') {
+      throw new Error('The CLI fixture expected PAYLOAD_DROP_DATABASE to be true before setup.')
+    }
+
     // The parent Payload instance already prepared the database. The child CLI process must reuse it.
     process.env.PAYLOAD_DROP_DATABASE = 'false'
 
     try {
+      if (configPath === null) {
+        throw new Error(
+          "This integration test requires Payload. Pass its config path to test.suite('Name', { config: './config.ts' }, ...).",
+        )
+      }
+
       await use((input) =>
         runCLICommand(input, {
-          configPath: configPath ?? path.resolve(testDir, 'config.ts'),
+          configPath,
           cwd: testDir,
         }),
       )
@@ -67,17 +86,10 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
     }
   },
   config: [
-    async ({ resolvedConfig, testDir, testSuiteConfigured }, use) => {
-      if (!testSuiteConfigured) {
-        const { config } = await initPayloadInt(testDir, undefined, false)
-
-        await use(config)
-        return
-      }
-
+    async ({ resolvedConfig }, use) => {
       if (resolvedConfig === null) {
         throw new Error(
-          "This integration test requires Payload. Pass its config path to test.suite({ config: './config.ts' })(...).",
+          "This integration test requires Payload. Pass its config path to test.suite('Name', { config: './config.ts' }, ...).",
         )
       }
 
@@ -92,8 +104,8 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
     },
     { scope: 'file' },
   ],
-  payload: async ({ payloadInstance, testSuiteConfigured }, use) => {
-    if (testSuiteConfigured) {
+  payload: async ({ payloadInstance, resetBetweenTests }, use) => {
+    if (resetBetweenTests) {
       const testDataConfig = getTestDataConfig(payloadInstance.config)
 
       if (!testDataConfig) {
@@ -102,7 +114,6 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
 
       await resetAndSeed({ payload: payloadInstance, ...testDataConfig })
     }
-
     await use(payloadInstance)
   },
   payloadInstance: [
@@ -117,9 +128,13 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
     },
     { scope: 'file' },
   ],
-  restClient: async ({ payload }, use) => {
-    await use(new NextRESTClient(payload.config))
-  },
+  resetBetweenTests: [
+    // eslint-disable-next-line no-empty-pattern
+    async ({}, use) => {
+      await use(true)
+    },
+    { scope: 'file' },
+  ],
   resolvedConfig: [
     async ({ configPath }, use) => {
       if (configPath === null) {
@@ -135,9 +150,26 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
     },
     { auto: true, scope: 'file' },
   ],
+  restClient: async ({ payload, resetBetweenTests, restClientInstance }, use) => {
+    await use(resetBetweenTests ? new NextRESTClient(payload.config) : restClientInstance)
+  },
+  restClientInstance: [
+    async ({ payloadInstance }, use) => {
+      await use(new NextRESTClient(payloadInstance.config))
+    },
+    { scope: 'file' },
+  ],
   sdk: async ({ payload }, use) => {
     await use(getSDK(payload.config))
   },
+  seedAtStart: [
+    // Overridden by test.suite only when a suite disables resets between tests.
+    // eslint-disable-next-line no-empty-pattern
+    async ({}, use) => {
+      await use(undefined)
+    },
+    { auto: true, scope: 'file' },
+  ],
   testCron: [
     // eslint-disable-next-line no-empty-pattern
     async ({}, use) => {
@@ -152,13 +184,6 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
     },
     { scope: 'file' },
   ],
-  testSuiteConfigured: [
-    // eslint-disable-next-line no-empty-pattern
-    async ({}, use) => {
-      await use(false)
-    },
-    { scope: 'file' },
-  ],
 })
 
 /**
@@ -168,30 +193,60 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
  * imported once before file hooks run. Payload is initialized lazily, once per file, and destroyed
  * afterward. Before every test that uses Payload, REST, or the SDK, the database and upload
  * directories are reset and the suite's optional seed function is run. REST and SDK clients are
- * recreated per test. Standalone integration tests use `test.suite({})` and do not initialize
- * Payload.
+ * recreated per test. Suites that already manage their own isolation can set `resetBetweenTests` to
+ * false to reset and seed once, then share their database state and REST client. Standalone
+ * integration tests use `test.suite('Name', {}, ...)` and do not initialize Payload.
  *
  * @example
- * test.suite({ config: './config.ts' })('Posts', () => {
+ * test.suite('Posts', { config: './config.ts' }, () => {
  *   test('reads posts', async ({ payload }) => {
  *     await payload.find({ collection: 'posts' })
  *   })
  * })
  */
 export const test = Object.assign(testWithFixtures, {
-  options: (options: TestOptions) => {
-    const shouldRun = matchesDatabase(options)
-
-    return Object.assign(testWithFixtures.runIf(shouldRun), {
-      describe: testWithFixtures.describe.runIf(shouldRun),
-    })
-  },
-  suite(this: typeof testWithFixtures, { config, cron = true, db }: TestSuiteOptions) {
+  // A single name-first call prevents static discovery from treating the options as another test.
+  options: Object.assign(
+    (
+      name: string,
+      options: TestOptions,
+      testFunction: NonNullable<Parameters<typeof testWithFixtures>[2]>,
+      timeout?: number,
+    ) => testWithFixtures.runIf(matchesDatabase(options))(name, testFunction, timeout),
+    {
+      describe: (
+        name: string,
+        options: TestOptions,
+        factory: NonNullable<Parameters<typeof testWithFixtures.describe>[2]>,
+      ) => testWithFixtures.describe.runIf(matchesDatabase(options))(name, factory),
+    },
+  ),
+  // The name must come first so Vitest's static discovery builds the correct test hierarchy.
+  suite(
+    this: typeof testWithFixtures,
+    name: string,
+    { config, cron = true, db, resetBetweenTests = true }: TestSuiteOptions,
+    factory: NonNullable<Parameters<typeof testWithFixtures.describe>[2]>,
+  ) {
     this.override('configPath', config ? path.resolve(getTestDirectory(), config) : null)
+    this.override('resetBetweenTests', resetBetweenTests)
     this.override('testCron', cron)
-    this.override('testSuiteConfigured', true)
 
-    return this.describe.runIf(matchesDatabase({ db }))
+    if (!resetBetweenTests) {
+      this.override('seedAtStart', async ({ payloadInstance: payload }) => {
+        const testDataConfig = getTestDataConfig(payload.config)
+
+        if (!testDataConfig) {
+          throw new Error('Test suite metadata was not registered by buildConfigWithDefaults.')
+        }
+
+        // This state is used for the whole file, so there is no later reset to restore it into.
+        // Skip creating a snapshot that would never be read.
+        await resetAndSeed({ alwaysSeed: true, payload, ...testDataConfig })
+      })
+    }
+
+    return this.describe.runIf(matchesDatabase({ db }))(name, factory)
   },
 })
 

@@ -32,7 +32,7 @@ export function findVersionsResolver(collection: Collection): Resolver {
       'fallbackLocale',
       'transactionID',
     ]))
-    const select = (context.select = args.select ? buildSelectForCollectionMany(info) : undefined)
+    const select = (context.select = args.select ? buildSelectForCollectionMany(info, context) : undefined)
 
     req.locale = args.locale || req.locale
     req.fallbackLocale = args.fallbackLocale || req.fallbackLocale

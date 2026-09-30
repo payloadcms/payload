@@ -1,38 +1,23 @@
-import type { Payload } from 'payload'
+import { expect, vi } from 'vitest'
 
-import path from 'path'
-import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
-
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { postsSlug } from './config.js'
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-let payload: Payload
-
-describe('Collections REST - bulk delete rollback', () => {
-  beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
-  })
-
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  it.skipIf(
+test.suite('Collections REST - bulk delete rollback', { config: './config.ts' }, () => {
+  test.skipIf(
     process.env.PAYLOAD_DATABASE === 'cosmosdb' || process.env.PAYLOAD_DATABASE === 'documentdb',
-  )('should roll back when the batched deleteMany fails', async () => {
+  )('should roll back when the batched deleteMany fails', async ({ payload }) => {
     const title = 'bulk-delete-failure'
 
     await payload.create({
       collection: postsSlug,
       data: { title },
+      overrideAccess: true,
     })
     await payload.create({
       collection: postsSlug,
       data: { title },
+      overrideAccess: true,
     })
 
     const originalDeleteMany = payload.db.deleteMany.bind(payload.db)
@@ -50,6 +35,7 @@ describe('Collections REST - bulk delete rollback', () => {
     const result = await payload.delete({
       collection: postsSlug,
       where: { title: { equals: title } },
+      overrideAccess: true,
     })
 
     const deletedCollections = deleteManySpy.mock.calls.map(([args]) => args.collection)
@@ -74,6 +60,7 @@ describe('Collections REST - bulk delete rollback', () => {
     const remainingDocs = await payload.find({
       collection: postsSlug,
       where: { title: { equals: title } },
+      overrideAccess: true,
     })
 
     expect(remainingDocs.docs).toHaveLength(2)

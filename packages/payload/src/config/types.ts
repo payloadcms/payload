@@ -589,6 +589,10 @@ export type ServerProps = {
    * Optional because non-framework contexts (jobs, scripts, tests) may not have an adapter attached.
    */
   readonly server: ServerAdapter
+  /**
+   * Authenticated user with field read access applied. Use for values sent to the client.
+   * For access-control checks use the full principal at `req.user`.
+   */
   readonly user?: User
   readonly viewType?: ViewTypes
   readonly visibleEntities?: VisibleEntities
@@ -676,14 +680,6 @@ export type BaseLocalizationConfig = {
    * @example `"en"`
    */
   defaultLocale: string
-  /**
-   * Change the locale used by the default Publish button.
-   * If set to `all`, all locales will be published.
-   * If set to `active`, only the locale currently being edited will be published.
-   * The non-default option will be available via the secondary button.
-   * @default 'all'
-   */
-  defaultLocalePublishOption?: 'active' | 'all'
   /** Set to `true` to let missing values in localised fields fall back to the values in `defaultLocale`
    *
    * If false, then no requests will fallback unless a fallbackLocale is specified in the request.
@@ -792,7 +788,7 @@ export type FetchAPIFileUploadOptions = {
   /**
    * Returns a HTTP 413 when the file is bigger than the size limit if `true`.
    * Otherwise, it will add a `truncated = true` to the resulting file structure.
-   * @default false
+   * @default true
    */
   abortOnLimit?: boolean | undefined
   /**
@@ -838,6 +834,12 @@ export type FetchAPIFileUploadOptions = {
    * // myFileName.ext --> myFileNamee.xt
    */
   preserveExtension?: boolean | number | undefined
+  /**
+   * Maximum size in bytes for the complete raw multipart request, including files, fields, headers, and boundaries.
+   * Must be a non-negative safe integer. Set to `Infinity` to disable the request-wide limit.
+   * @default 50 * 1024 * 1024
+   */
+  requestSizeLimit?: number | undefined
   /**
    * Response which will be send to client if file size limit exceeded when `abortOnLimit` set to `true`.
    * @default 'File size limit has been reached'

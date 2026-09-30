@@ -15,24 +15,24 @@ import { createMcpClient } from './mcpClient.js'
 type McpSetup = {
   getApiKey: (rbac?: TestRBAC) => Promise<string>
   getLimitedApiKey: () => Promise<string>
-  limitedUserId: string
-  userId: string
+  limitedUserId: number | string
+  userId: number | string
 }
 
-type McpTestContext = McpSetup & {
+type McpTestContext = {
   mcp: McpClient
   payload: Payload
   protocolEra: ProtocolEra
   restClient: NextRESTClient
-}
+} & McpSetup
 
 type McpTestFunction = (context: McpTestContext) => Promise<void> | void
 
 const payloadTest = base.extend<'mcpSetup', McpSetup>(
   'mcpSetup',
-  { auto: true },
-  async ({ payload, restClient }) => {
-    const loginResponse: { user: { id: string } } = await restClient
+  { auto: true, scope: 'file' },
+  async ({ payloadInstance: payload, restClientInstance: restClient }, { onCleanup }) => {
+    const loginResponse: { user: { id: number | string } } = await restClient
       .POST('/users/login', {
         body: JSON.stringify({ email: devUser.email, password: devUser.password }),
       })
@@ -89,11 +89,19 @@ const payloadTest = base.extend<'mcpSetup', McpSetup>(
       return apiKey
     }
 
+    onCleanup(() =>
+      payload.delete({
+        id: limitedUserId,
+        collection: 'users',
+        overrideAccess: true,
+      }),
+    )
+
     return { getApiKey, getLimitedApiKey, limitedUserId, userId }
   },
 )
 
-const protocolEras: Array<{ label: string; protocolEra: ProtocolEra }> = [
+export const protocolEras: Array<{ label: string; protocolEra: ProtocolEra }> = [
   { label: '2025 legacy', protocolEra: 'legacy' },
   { label: '2026 modern', protocolEra: 'modern' },
 ]
@@ -102,46 +110,38 @@ export const test = Object.assign(payloadTest, {
   suite: base.suite,
 })
 
-/** Registers every MCP integration test independently against both protocol eras. */
-export function it(name: string, testFunction: McpTestFunction, timeout?: number): void {
-  for (const { label, protocolEra } of protocolEras) {
-    registerMcpTest({ label, name, protocolEra, testFunction, timeout })
-  }
-}
-
-/** Registers an integration test for behavior that exists only in the modern era. */
-export function itModern(name: string, testFunction: McpTestFunction, timeout?: number): void {
-  registerMcpTest({
-    label: '2026 modern',
+/** Keeps test names unchanged; describe.for supplies the protocol-era groups. */
+export const createMcpTests = ({ protocolEra }: { protocolEra: ProtocolEra }) => {
+  const registerMcpTest = ({
     name,
-    protocolEra: 'modern',
+    shouldRun = true,
     testFunction,
     timeout,
-  })
-}
+  }: {
+    name: string
+    shouldRun?: boolean
+    testFunction: McpTestFunction
+    timeout?: number
+  }): void => {
+    payloadTest.runIf(shouldRun)(
+      name,
+      async ({ mcpSetup, payload, restClient }) => {
+        const mcp = createMcpClient({ protocolEra, restClient })
 
-const registerMcpTest = ({
-  label,
-  name,
-  protocolEra,
-  testFunction,
-  timeout,
-}: {
-  label: string
-  name: string
-  protocolEra: ProtocolEra
-  testFunction: McpTestFunction
-  timeout?: number
-}): void => {
-  payloadTest(
-    `${name} [${label}]`,
-    async ({ mcpSetup, payload, restClient }) => {
-      const mcp = createMcpClient({ protocolEra, restClient })
+        onTestFinished(() => mcp.close())
 
-      onTestFinished(() => mcp.close())
+        await testFunction({ mcp, payload, protocolEra, restClient, ...mcpSetup })
+      },
+      timeout,
+    )
+  }
 
-      await testFunction({ mcp, payload, protocolEra, restClient, ...mcpSetup })
+  return {
+    it: (name: string, testFunction: McpTestFunction, timeout?: number): void => {
+      registerMcpTest({ name, testFunction, timeout })
     },
-    timeout,
-  )
+    testModern: (name: string, testFunction: McpTestFunction, timeout?: number): void => {
+      registerMcpTest({ name, shouldRun: protocolEra === 'modern', testFunction, timeout })
+    },
+  }
 }
