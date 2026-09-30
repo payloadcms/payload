@@ -8,17 +8,17 @@ import React, { createContext, use, useCallback, useEffect, useId, useRef, useSt
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { ThemeProvider } from '../../providers/Theme/index.js'
 import './index.css'
-import { createMenuScope, type MenuScope } from './MenuScope.js'
 import { type PopupButtonRenderProps, PopupTrigger } from './PopupTrigger/index.js'
+import { createSubmenuScope, type SubmenuScope } from './SubmenuScope.js'
 import { useSubmenuPointerIntent } from './useSubmenuPointerIntent.js'
 
 const baseClass = 'popup'
 
 type PopupContextValue = {
   closePopupChain: (options?: { restoreFocus?: boolean }) => void
-  menuScope: MenuScope
   popupRef: React.RefObject<HTMLDivElement | null>
   popupRole?: AriaRole
+  submenuScope: SubmenuScope
 }
 
 const PopupContext = createContext<null | PopupContextValue>(null)
@@ -170,7 +170,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
   const parentPopup = use(PopupContext)
   const popupRole = (popupType === true ? 'menu' : popupType || undefined) as AriaRole | undefined
-  const menuScope = useState(() => createMenuScope())[0]
+  const submenuScope = useState(() => createSubmenuScope())[0]
   const isSubmenu = parentPopup?.popupRole === 'menu' && popupRole === 'menu'
 
   const [active, setActiveInternal] = useState(initActive)
@@ -181,7 +181,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
       if (isActive) {
         openedViaKeyboardRef.current = viaKeyboard
         if (coordinateParent && isSubmenu) {
-          parentPopup.menuScope.requestOpen({
+          parentPopup.submenuScope.requestOpen({
             id: contentId,
             delay: false,
             viaKeyboard,
@@ -191,12 +191,12 @@ export const Popup: React.FC<PopupProps> = (props) => {
         onToggleOpen?.(true)
       } else {
         onToggleClose?.()
-        menuScope.closeActiveBranch()
-        parentPopup?.menuScope.release(contentId)
+        submenuScope.closeActiveBranch()
+        parentPopup?.submenuScope.release(contentId)
       }
       setActiveInternal(isActive)
     },
-    [contentId, isSubmenu, menuScope, onToggleClose, onToggleOpen, parentPopup],
+    [contentId, isSubmenu, onToggleClose, onToggleOpen, parentPopup, submenuScope],
   )
 
   const closePopup = useCallback(
@@ -234,7 +234,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
       return
     }
 
-    return parentPopup.menuScope.register({
+    return parentPopup.submenuScope.register({
       id: contentId,
       closeBranch: () => closePopup({ restoreFocus: false }),
       open: openFromParent,
@@ -246,9 +246,9 @@ export const Popup: React.FC<PopupProps> = (props) => {
     enabled: isSubmenu && hoverSubmenu,
     onClose: () => setActive(false),
     onOpen: () =>
-      parentPopup?.menuScope.requestOpen({
+      parentPopup?.submenuScope.requestOpen({
         id: contentId,
-        delay: Boolean(parentPopup.menuScope.activeChildId),
+        delay: Boolean(parentPopup.submenuScope.activeChildId),
       }),
   })
 
@@ -709,7 +709,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
         )}
       </div>
 
-      <PopupContext value={{ closePopupChain, menuScope, popupRef, popupRole }}>
+      <PopupContext value={{ closePopupChain, popupRef, popupRole, submenuScope }}>
         {/* The menu surface tracks pointer intent while preserving its menu semantics. */}
         {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
         <div

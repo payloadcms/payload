@@ -1,13 +1,13 @@
 import { afterEach, expect, test, vi } from 'vitest'
 
-import { createMenuScope } from './MenuScope.js'
+import { createSubmenuScope } from './SubmenuScope.js'
 
 afterEach(() => {
   vi.useRealTimers()
 })
 
 test('should close the active sibling branch when another child opens', () => {
-  const scope = createMenuScope()
+  const scope = createSubmenuScope()
   const closed: string[] = []
   const first = { id: 'first', closeBranch: () => closed.push('first'), open: () => {} }
   const second = { id: 'second', closeBranch: () => closed.push('second'), open: () => {} }
@@ -21,7 +21,7 @@ test('should close the active sibling branch when another child opens', () => {
 })
 
 test('should cancel a pending sibling activation', () => {
-  const scope = createMenuScope()
+  const scope = createSubmenuScope()
   const opened: string[] = []
   scope.register({ id: 'first', closeBranch: () => {}, open: () => opened.push('first') })
 
@@ -32,7 +32,7 @@ test('should cancel a pending sibling activation', () => {
 })
 
 test('should reopen a child after its branch releases the active slot', () => {
-  const scope = createMenuScope()
+  const scope = createSubmenuScope()
   let openCount = 0
   scope.register({ id: 'first', closeBranch: () => {}, open: () => openCount++ })
 
@@ -45,7 +45,7 @@ test('should reopen a child after its branch releases the active slot', () => {
 
 test('should use a custom hover delay when opening a child', () => {
   vi.useFakeTimers()
-  const scope = createMenuScope({ hoverDelay: 300 })
+  const scope = createSubmenuScope({ hoverDelay: 300 })
   let openCount = 0
 
   scope.register({ id: 'first', closeBranch: () => {}, open: () => openCount++ })

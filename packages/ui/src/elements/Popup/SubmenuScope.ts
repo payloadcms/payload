@@ -4,7 +4,7 @@ export type SubmenuNode = {
   open: (viaKeyboard: boolean) => void
 }
 
-export type MenuScope = {
+export type SubmenuScope = {
   activeChildId: null | string
   cancelPending: (id?: string) => void
   closeActiveBranch: () => void
@@ -15,9 +15,9 @@ export type MenuScope = {
 
 const DEFAULT_HOVER_DELAY = 150
 
-export const createMenuScope = ({
+export const createSubmenuScope = ({
   hoverDelay = DEFAULT_HOVER_DELAY,
-}: { hoverDelay?: number } = {}): MenuScope => {
+}: { hoverDelay?: number } = {}): SubmenuScope => {
   const nodes = new Map<string, SubmenuNode>()
   let activeChildId: null | string = null
   let pendingChildId: null | string = null
