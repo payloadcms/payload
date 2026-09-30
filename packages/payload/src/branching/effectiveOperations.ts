@@ -1,7 +1,7 @@
 import type { Payload, PayloadRequest } from '../types/index.js'
 
 import { APIError } from '../errors/index.js'
-import { branchDocIDField, branchField } from './types.js'
+import { branchDocIDField, branchField, MAIN_BRANCH } from './types.js'
 
 /**
  * What a change will actually do to `main` when merged, which is not always what
@@ -18,6 +18,13 @@ export type EffectiveWrite = {
   /** Whether the write is a draft save rather than a publish. */
   draft: boolean
   operation: EffectiveOperation
+  /**
+   * A row-level Trash transition that accompanies versioned content.
+   *
+   * `apply` updates main. `access` only adds the required permission check
+   * because a later published write already carries the same `deletedAt` state.
+   */
+  trashState?: 'access' | 'apply'
 }
 
 export type ResolvedChange = {
@@ -89,7 +96,7 @@ export const resolveEffectiveOperations = async ({
       collectionSlug,
       docID,
       shadow,
-      writes: await resolveWrites({ branch, change, collectionSlug, payload, req, shadow }),
+      writes: await resolveWrites({ branch, change, collectionSlug, docID, payload, req, shadow }),
     })
   }
 
@@ -100,6 +107,7 @@ const resolveWrites = async ({
   branch,
   change,
   collectionSlug,
+  docID,
   payload,
   req,
   shadow,
@@ -107,6 +115,7 @@ const resolveWrites = async ({
   branch: string
   change: Record<string, any>
   collectionSlug: string
+  docID: number | string
   payload: Payload
   req: PayloadRequest
   shadow: null | Record<string, unknown>
@@ -126,6 +135,7 @@ const resolveWrites = async ({
   // row itself is the whole change and ordinary update permission covers it.
   if (!hasDrafts) {
     return [
+      ...getTrashAccessWrites({ collectionSlug, payload, shadow }),
       {
         data: shadow,
         draft: false,
@@ -140,7 +150,10 @@ const resolveWrites = async ({
   if (change.operation === 'create') {
     // A document created on the branch is new to main either way; the row's own
     // status decides whether it arrives published or as a draft.
-    const writes: EffectiveWrite[] = [{ data: shadow, draft: !rowIsPublished, operation: 'create' }]
+    const writes: EffectiveWrite[] = [
+      ...getTrashAccessWrites({ collectionSlug, payload, shadow }),
+      { data: shadow, draft: !rowIsPublished, operation: 'create' },
+    ]
 
     if (newerDraft) {
       writes.push({ data: newerDraft, draft: true, operation: 'update' })
@@ -163,20 +176,115 @@ const resolveWrites = async ({
     rowIsPublished &&
     (!matchesForkPoint({ baseUpdatedAt: change.baseUpdatedAt, shadow }) ||
       (await hasBranchPublishedVersion({ branch, collectionSlug, payload, req, shadow })))
+  const trashStateWrite = await resolveTrashStateWrite({
+    collectionSlug,
+    docID,
+    payload,
+    req,
+    shadow,
+  })
 
   if (!publishedOnBranch) {
     // Nothing to apply when the branch has neither published nor drafted: the
     // fork itself is not a change to main.
-    return newerDraft ? [{ data: newerDraft, draft: true, operation: 'update' }] : []
+    return [
+      ...(trashStateWrite
+        ? [{ ...trashStateWrite, trashState: 'apply' as const }]
+        : getTrashAccessWrites({ collectionSlug, payload, shadow })),
+      ...(newerDraft ? [{ data: newerDraft, draft: true, operation: 'update' as const }] : []),
+    ]
   }
 
-  const writes: EffectiveWrite[] = [{ data: shadow, draft: false, operation: 'publish' }]
+  const writes: EffectiveWrite[] = [
+    ...(trashStateWrite
+      ? [{ ...trashStateWrite, trashState: 'access' as const }]
+      : getTrashAccessWrites({ collectionSlug, payload, shadow })),
+    { data: shadow, draft: false, operation: 'publish' },
+  ]
 
   if (newerDraft) {
     writes.push({ data: newerDraft, draft: true, operation: 'update' })
   }
 
   return writes
+}
+
+const getTrashAccessWrites = ({
+  collectionSlug,
+  payload,
+  shadow,
+}: {
+  collectionSlug: string
+  payload: Payload
+  shadow: Record<string, unknown>
+}): EffectiveWrite[] => {
+  if (!payload.collections[collectionSlug]?.config.trash || shadow.deletedAt == null) {
+    return []
+  }
+
+  return [
+    {
+      data: shadow,
+      draft: false,
+      operation: 'delete',
+      trashState: 'access',
+    },
+  ]
+}
+
+const resolveTrashStateWrite = async ({
+  collectionSlug,
+  docID,
+  payload,
+  req,
+  shadow,
+}: {
+  collectionSlug: string
+  docID: number | string
+  payload: Payload
+  req: PayloadRequest
+  shadow: Record<string, unknown>
+}): Promise<EffectiveWrite | null> => {
+  if (!payload.collections[collectionSlug]?.config.trash) {
+    return null
+  }
+
+  const main = (await payload.db.findOne({
+    branch: false,
+    collection: collectionSlug,
+    req,
+    where: {
+      and: [{ [branchField]: { equals: MAIN_BRANCH } }, { id: { equals: docID } }],
+    },
+  })) as null | Record<string, unknown>
+
+  if (!main || toTrashState(main.deletedAt) === toTrashState(shadow.deletedAt)) {
+    return null
+  }
+
+  return {
+    data: shadow,
+    draft: false,
+    operation: shadow.deletedAt == null ? 'update' : 'delete',
+  }
+}
+
+const toTrashState = (value: unknown): null | number | string => {
+  if (value == null) {
+    return null
+  }
+
+  if (value instanceof Date) {
+    return value.getTime()
+  }
+
+  if (typeof value !== 'number' && typeof value !== 'string') {
+    return null
+  }
+
+  const time = new Date(value).getTime()
+
+  return Number.isNaN(time) ? value : time
 }
 
 /**

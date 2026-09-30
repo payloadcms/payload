@@ -637,7 +637,10 @@ export const resolveMergeDependencies = async ({
           docTitle: String(resolved.docID),
           message:
             'This change refers to branch-created content that will not be available on main.',
-          operation: resolved.writes[0]?.operation ?? 'update',
+          operation:
+            resolved.writes.find((write) => !write.trashState)?.operation ??
+            resolved.writes[0]?.operation ??
+            'update',
           reason: 'dependency',
         },
         dependencyChangeIDs,

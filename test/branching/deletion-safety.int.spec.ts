@@ -52,6 +52,34 @@ const createBranchTarget = async ({ branch, payload }: { branch: string; payload
     overrideAccess: true,
   })
 
+const createTrashedBranchOwner = async ({
+  branchName,
+  payload,
+}: {
+  branchName: string
+  payload: Payload
+}) => {
+  const mainOwner = await payload.create({
+    collection: deletionSafetyOwnersSlug,
+    data: { title: 'main owner' },
+    overrideAccess: true,
+  })
+  const branch = await createBranch({ name: branchName, payload })
+
+  await payload.update({
+    id: mainOwner.id,
+    branch: branch.slug,
+    collection: deletionSafetyOwnersSlug,
+    data: {
+      deletedAt: new Date().toISOString(),
+      title: 'trashed branch owner',
+    },
+    overrideAccess: true,
+  })
+
+  return { branch, mainOwner }
+}
+
 const findCreateChange = async ({
   branch,
   docID,
@@ -225,6 +253,276 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     ).rejects.toMatchObject({ status: 409 })
 
     await expectTargetToRemain({ id: target.id, branch: branch.slug, payload })
+  })
+
+  test('should keep a trashed branch copy from revealing its inherited main document', async ({
+    payload,
+  }) => {
+    const { branch, mainOwner } = await createTrashedBranchOwner({
+      branchName: 'Trashed branch copy',
+      payload,
+    })
+
+    const defaultBranchDocument = await payload.findByID({
+      id: mainOwner.id,
+      branch: branch.slug,
+      collection: deletionSafetyOwnersSlug,
+      disableErrors: true,
+      overrideAccess: true,
+    })
+    const defaultBranchDocuments = await payload.find({
+      branch: branch.slug,
+      collection: deletionSafetyOwnersSlug,
+      overrideAccess: true,
+      where: { id: { equals: mainOwner.id } },
+    })
+    const defaultBranchCount = await payload.count({
+      branch: branch.slug,
+      collection: deletionSafetyOwnersSlug,
+      overrideAccess: true,
+      where: { id: { equals: mainOwner.id } },
+    })
+    const trashedBranchDocument = await payload.findByID({
+      id: mainOwner.id,
+      branch: branch.slug,
+      collection: deletionSafetyOwnersSlug,
+      overrideAccess: true,
+      trash: true,
+    })
+    const trashedBranchDocuments = await payload.find({
+      branch: branch.slug,
+      collection: deletionSafetyOwnersSlug,
+      overrideAccess: true,
+      trash: true,
+      where: { id: { equals: mainOwner.id } },
+    })
+    const trashedBranchCount = await payload.count({
+      branch: branch.slug,
+      collection: deletionSafetyOwnersSlug,
+      overrideAccess: true,
+      trash: true,
+      where: { id: { equals: mainOwner.id } },
+    })
+    const mainDocument = await payload.findByID({
+      id: mainOwner.id,
+      collection: deletionSafetyOwnersSlug,
+      overrideAccess: true,
+    })
+
+    expect(defaultBranchDocument).toBeNull()
+    expect(defaultBranchDocuments.totalDocs).toBe(0)
+    expect(defaultBranchCount.totalDocs).toBe(0)
+    expect(trashedBranchDocument.title).toBe('trashed branch owner')
+    expect(trashedBranchDocuments.docs).toHaveLength(1)
+    expect(trashedBranchDocuments.docs[0]?.title).toBe('trashed branch owner')
+    expect(trashedBranchCount.totalDocs).toBe(1)
+    expect(mainDocument.title).toBe('main owner')
+  })
+
+  test('should restore a trashed branch copy without changing main', async ({ payload }) => {
+    const { branch, mainOwner } = await createTrashedBranchOwner({
+      branchName: 'Restore trashed branch copy',
+      payload,
+    })
+
+    await payload.update({
+      id: mainOwner.id,
+      branch: branch.slug,
+      collection: deletionSafetyOwnersSlug,
+      data: { deletedAt: null },
+      overrideAccess: true,
+      trash: true,
+    })
+
+    const restoredBranchDocument = await payload.findByID({
+      id: mainOwner.id,
+      branch: branch.slug,
+      collection: deletionSafetyOwnersSlug,
+      overrideAccess: true,
+    })
+    const mainDocument = await payload.findByID({
+      id: mainOwner.id,
+      collection: deletionSafetyOwnersSlug,
+      overrideAccess: true,
+    })
+
+    expect(restoredBranchDocument.title).toBe('trashed branch owner')
+    expect(mainDocument.title).toBe('main owner')
+  })
+
+  test('should reveal main after discarding a trashed branch copy', async ({ payload }) => {
+    const { branch, mainOwner } = await createTrashedBranchOwner({
+      branchName: 'Discard trashed branch copy',
+      payload,
+    })
+
+    await payload.branches.discard({ branch: branch.slug, overrideAccess: true })
+
+    const inheritedBranchDocument = await payload.findByID({
+      id: mainOwner.id,
+      branch: branch.slug,
+      collection: deletionSafetyOwnersSlug,
+      overrideAccess: true,
+    })
+    const branchRows = await payload.db.find({
+      branch: false,
+      collection: deletionSafetyOwnersSlug,
+      pagination: false,
+      where: { _branch: { equals: branch.slug } },
+    })
+
+    expect(inheritedBranchDocument.title).toBe('main owner')
+    expect(branchRows.docs).toHaveLength(0)
+  })
+
+  test('should keep main after permanently deleting a trashed branch copy', async ({ payload }) => {
+    const { branch, mainOwner } = await createTrashedBranchOwner({
+      branchName: 'Permanently delete trashed branch copy',
+      payload,
+    })
+
+    await payload.delete({
+      id: mainOwner.id,
+      branch: branch.slug,
+      collection: deletionSafetyOwnersSlug,
+      overrideAccess: true,
+      trash: true,
+    })
+
+    const deletedBranchDocument = await payload.findByID({
+      id: mainOwner.id,
+      branch: branch.slug,
+      collection: deletionSafetyOwnersSlug,
+      disableErrors: true,
+      overrideAccess: true,
+      trash: true,
+    })
+    const mainDocument = await payload.findByID({
+      id: mainOwner.id,
+      collection: deletionSafetyOwnersSlug,
+      overrideAccess: true,
+    })
+
+    expect(deletedBranchDocument).toBeNull()
+    expect(mainDocument.title).toBe('main owner')
+
+    await payload.branches.discard({ branch: branch.slug, overrideAccess: true })
+
+    const inheritedBranchDocument = await payload.findByID({
+      id: mainOwner.id,
+      branch: branch.slug,
+      collection: deletionSafetyOwnersSlug,
+      overrideAccess: true,
+    })
+
+    expect(inheritedBranchDocument.title).toBe('main owner')
+  })
+
+  test('should apply a trashed branch copy to main on merge', async ({ payload }) => {
+    const { branch, mainOwner } = await createTrashedBranchOwner({
+      branchName: 'Merge trashed branch copy',
+      payload,
+    })
+
+    await payload.branches.merge({ branch: branch.slug, overrideAccess: true })
+
+    const defaultMainDocument = await payload.findByID({
+      id: mainOwner.id,
+      collection: deletionSafetyOwnersSlug,
+      disableErrors: true,
+      overrideAccess: true,
+    })
+    const trashedMainDocument = await payload.findByID({
+      id: mainOwner.id,
+      collection: deletionSafetyOwnersSlug,
+      overrideAccess: true,
+      trash: true,
+    })
+    const trashedMainDraft = await payload.findByID({
+      id: mainOwner.id,
+      collection: deletionSafetyOwnersSlug,
+      draft: true,
+      overrideAccess: true,
+      trash: true,
+    })
+
+    expect(defaultMainDocument).toBeNull()
+    expect(trashedMainDocument.title).toBe('main owner')
+    expect(trashedMainDraft.title).toBe('trashed branch owner')
+  })
+
+  test('should restore a trashed main document through a branch merge', async ({ payload }) => {
+    const mainOwner = await payload.create({
+      collection: deletionSafetyOwnersSlug,
+      data: {
+        deletedAt: new Date().toISOString(),
+        title: 'trashed main owner',
+      },
+      overrideAccess: true,
+    })
+    const branch = await createBranch({ name: 'Restore main through branch', payload })
+
+    await payload.update({
+      id: mainOwner.id,
+      branch: branch.slug,
+      collection: deletionSafetyOwnersSlug,
+      data: {
+        deletedAt: null,
+        title: 'restored branch owner',
+      },
+      overrideAccess: true,
+      trash: true,
+    })
+
+    await payload.branches.merge({ branch: branch.slug, overrideAccess: true })
+
+    const restoredMainDocument = await payload.findByID({
+      id: mainOwner.id,
+      collection: deletionSafetyOwnersSlug,
+      overrideAccess: true,
+    })
+    const restoredMainDraft = await payload.findByID({
+      id: mainOwner.id,
+      collection: deletionSafetyOwnersSlug,
+      draft: true,
+      overrideAccess: true,
+    })
+
+    expect(restoredMainDocument.title).toBe('trashed main owner')
+    expect(restoredMainDraft.title).toBe('restored branch owner')
+  })
+
+  test('should merge a branch-created trashed document without exposing it', async ({
+    payload,
+  }) => {
+    const branch = await createBranch({ name: 'Create trashed document', payload })
+    const branchOwner = await payload.create({
+      branch: branch.slug,
+      collection: deletionSafetyOwnersSlug,
+      data: {
+        deletedAt: new Date().toISOString(),
+        title: 'branch-created trashed owner',
+      },
+      overrideAccess: true,
+    })
+
+    await payload.branches.merge({ branch: branch.slug, overrideAccess: true })
+
+    const defaultMainDocument = await payload.findByID({
+      id: branchOwner.id,
+      collection: deletionSafetyOwnersSlug,
+      disableErrors: true,
+      overrideAccess: true,
+    })
+    const trashedMainDocument = await payload.findByID({
+      id: branchOwner.id,
+      collection: deletionSafetyOwnersSlug,
+      overrideAccess: true,
+      trash: true,
+    })
+
+    expect(defaultMainDocument).toBeNull()
+    expect(trashedMainDocument.title).toBe('branch-created trashed owner')
   })
 
   test('should block direct deletion when the raw main global references branch-created content', async ({
