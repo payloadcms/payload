@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { RootLayout } from './index.js'
 import { ResolveThemeOnClient } from './ResolveThemeOnClient.js'
 import { getViewportMeta, isIPhoneUserAgent } from './viewport.js'
-import { getRequestTheme, getRequestThemeWithSource } from '../../utilities/getRequestTheme.js'
+import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 
 vi.mock('payload/shared', () => ({ applyLocaleFiltering: vi.fn() }))
 vi.mock('../../elements/Nav/getNavPrefs.js', () => ({
@@ -148,7 +148,7 @@ describe('RootLayout', () => {
   })
 })
 
-describe('getRequestThemeWithSource', () => {
+describe('getRequestTheme', () => {
   it.each([
     {
       configuredTheme: 'dark',
@@ -200,11 +200,11 @@ describe('getRequestThemeWithSource', () => {
         headers.set('Sec-CH-Prefers-Color-Scheme', headerTheme)
       }
 
-      const result = getRequestThemeWithSource({
+      const result = getRequestTheme({
         config: {
           admin: { theme: configuredTheme },
           cookiePrefix: 'custom',
-        } as Parameters<typeof getRequestThemeWithSource>[0]['config'],
+        } as Parameters<typeof getRequestTheme>[0]['config'],
         cookies,
         headers,
       })
@@ -212,17 +212,4 @@ describe('getRequestThemeWithSource', () => {
       expect(result).toEqual(expected)
     },
   )
-
-  it('should preserve the getRequestTheme return value', () => {
-    const theme = getRequestTheme({
-      config: {
-        admin: { theme: 'all' },
-        cookiePrefix: 'custom',
-      } as Parameters<typeof getRequestTheme>[0]['config'],
-      cookies: new Map([['custom-theme', 'dark']]),
-      headers: new Headers(),
-    })
-
-    expect(theme).toBe('dark')
-  })
 })

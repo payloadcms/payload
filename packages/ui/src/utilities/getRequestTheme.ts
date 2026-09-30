@@ -19,11 +19,7 @@ export type RequestThemeResult = {
 
 const acceptedThemes: Theme[] = ['dark', 'light']
 
-export const getRequestTheme = ({ config, cookies, headers }: GetRequestThemeArgs): Theme => {
-  return getRequestThemeWithSource({ config, cookies, headers }).theme
-}
-
-export const getRequestThemeWithSource = ({
+export const getRequestTheme = ({
   config,
   cookies,
   headers,

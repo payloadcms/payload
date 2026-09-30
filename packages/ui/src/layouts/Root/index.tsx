@@ -13,7 +13,7 @@ import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { getLanguageDir } from '../../utilities/getLanguageDir.js'
 import { getRequestEmbed } from '../../utilities/getRequestEmbed.js'
 import { getRequestHighContrast } from '../../utilities/getRequestHighContrast.js'
-import { getRequestThemeWithSource } from '../../utilities/getRequestTheme.js'
+import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { NestProviders } from './NestProviders.js'
 import { ResolveThemeOnClient } from './ResolveThemeOnClient.js'
 import { getViewportMeta } from './viewport.js'
@@ -108,7 +108,7 @@ const RootLayoutContent = async ({
     user,
   } = await initAdminContext({ configPromise, importMap, key: 'RootLayout' })
 
-  const { source: themeSource, theme } = getRequestThemeWithSource({
+  const { source: themeSource, theme } = getRequestTheme({
     config,
     cookies,
     headers,

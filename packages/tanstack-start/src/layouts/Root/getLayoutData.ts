@@ -15,7 +15,7 @@ import { getNavPrefs } from '@payloadcms/ui/elements/Nav/getNavPrefs'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { getRequestEmbed } from '@payloadcms/ui/utilities/getRequestEmbed'
-import { getRequestThemeWithSource } from '@payloadcms/ui/utilities/getRequestTheme'
+import { getRequestTheme } from '@payloadcms/ui/utilities/getRequestTheme'
 import { Outlet } from '@tanstack/react-router'
 import { applyLocaleFiltering } from 'payload/shared'
 import { createElement } from 'react'
@@ -71,7 +71,11 @@ export async function getLayoutData({
     user,
   } = await initAdminContext({ configPromise, importMap })
 
-  const { source: themeSource, theme } = getRequestThemeWithSource({ config, cookies, headers })
+  const { source: themeSource, theme } = getRequestTheme({
+    config,
+    cookies,
+    headers,
+  })
   const isEmbedded = getRequestEmbed({ config, cookies })
 
   const languageOptions: LanguageOptions = Object.entries(
