@@ -214,7 +214,7 @@
     "swc-plugin-transform-remove-imports": "8.3.0",
     "tempy": "1.0.1",
     "tstyche": "7.2.1",
-    "tsx": "4.22.4",
+    "tsx": "4.23.15",
     "turbo": "^2.5.4",
     "typescript": "catalog:",
     "vite": "8.3.0",

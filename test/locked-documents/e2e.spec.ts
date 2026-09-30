@@ -211,7 +211,19 @@ describe('Locked Documents', () => {
 
     test('should only allow bulk delete on unlocked documents on current page', async () => {
       await page.goto(postsUrl.list)
+      const grid = page.getByRole('grid')
+      const lockedRow = grid.getByRole('row').filter({ has: page.locator('.locked') })
+      const selectableRows = grid.getByRole('row').filter({
+        has: page.locator('.select-row__checkbox'),
+      })
+
+      await expect(lockedRow).toHaveCount(1)
+      await expect(lockedRow).not.toHaveAttribute('aria-selected')
+      await expect(selectableRows).toHaveCount(2)
+      await expect(selectableRows.nth(0)).toHaveAttribute('aria-selected', 'false')
       await page.locator('input#select-all').click()
+      await expect(lockedRow).not.toHaveAttribute('aria-selected')
+      await expect(selectableRows.nth(0)).toHaveAttribute('aria-selected', 'true')
       // Should be partial since one doc is locked and cannot be selected
       await expect(page.locator('.select-all .checkbox-input__icon.partial')).toBeVisible()
       await page.locator('.delete-documents__toggle').click()
@@ -512,7 +524,7 @@ describe('Locked Documents', () => {
 
       expect(lockedDocs.docs.length).toBe(1)
 
-      await page.locator('a[aria-label="API"]').click()
+      await page.getByRole('link', { name: 'API', exact: true }).click()
 
       // Locate the modal container
       const modalContainer = page.locator('.payload__modal-container')
