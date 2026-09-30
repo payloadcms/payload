@@ -263,6 +263,7 @@ export const renderTable = ({
         <SelectRow
           key={i}
           rowData={row}
+          rowIndex={i}
           selectRowLabel={getSelectRowLabel({ i18n, rowData: row, useAsTitle })}
         />
       )),
@@ -294,6 +295,13 @@ export const renderTable = ({
             <TableSectionContent>
               <Table
                 appearance={tableAppearance}
+                ariaLabel={
+                  heading
+                    ? [getTranslation(clientCollectionConfig?.labels?.plural, i18n), heading]
+                        .filter(Boolean)
+                        .join(': ')
+                    : undefined
+                }
                 columns={columnsToUse}
                 data={data?.docs || []}
                 id={tableId}

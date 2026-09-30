@@ -124,6 +124,14 @@ export default buildConfigWithDefaults({
       overrideAccess: true,
     })
 
+    for (const globalText of ['Original menu text', 'Updated menu text', 'Current menu text']) {
+      await payload.updateGlobal({
+        slug: 'menu',
+        data: { globalText },
+        overrideAccess: true,
+      })
+    }
+
     const firstPost = await payload.create({
       collection: postsSlug,
       data: {
