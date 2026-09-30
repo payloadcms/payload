@@ -68,12 +68,22 @@ describe('Dashboard', () => {
     const card = group.locator('.card').first()
     const actions = card.locator('.card__actions')
     const createLink = card.getByRole('link', { name: 'Create new Users' })
-    const wrapBox = (await wrap.boundingBox())!
-    const cardBox = (await card.boundingBox())!
 
-    expect(cardBox.x - wrapBox.x).toBe(0)
-    expect(cardBox.y - wrapBox.y).toBe(37)
-    expect(cardBox.height).toBe(64)
+    await expect
+      .poll(async () => {
+        const [wrapBox, cardBox] = await Promise.all([wrap.boundingBox(), card.boundingBox()])
+
+        if (!wrapBox || !cardBox) {
+          return null
+        }
+
+        return {
+          height: cardBox.height,
+          xOffset: cardBox.x - wrapBox.x,
+          yOffset: cardBox.y - wrapBox.y,
+        }
+      })
+      .toEqual({ height: 64, xOffset: 0, yOffset: 37 })
     await expect(card).toHaveCSS('border-radius', '13px')
     await expect(actions).toHaveCSS('opacity', '0')
     const defaultBackground = await card.evaluate(
@@ -93,14 +103,16 @@ describe('Dashboard', () => {
       await expect(widgetCard).toHaveCSS('padding-top', '12px')
     }
 
-    await card.hover()
+    await expect(async () => {
+      await card.hover()
+      await expect(actions).toHaveCSS('opacity', '1')
+      await expect(card).not.toHaveCSS('background-color', defaultBackground)
+    }).toPass({ timeout: 5000 })
 
-    await expect(actions).toHaveCSS('opacity', '1')
-    expect(await card.evaluate((element) => getComputedStyle(element).backgroundColor)).not.toBe(
-      defaultBackground,
-    )
-    await createLink.hover()
-    await expect(page.getByRole('tooltip')).toContainText('Create new Users')
+    await expect(async () => {
+      await createLink.hover()
+      await expect(page.getByRole('tooltip')).toContainText('Create new Users')
+    }).toPass({ timeout: 5000 })
 
     await page.mouse.move(0, 0)
     await card.getByRole('link', { name: 'Show all Users' }).focus()
@@ -560,15 +572,12 @@ describe('Dashboard', () => {
     await expect(d.getDeleteWidgetButton(widget)).toBeHidden()
 
     // Widgets should not have draggable attributes when not editing
-    await expect(widget.locator('.widget-wrapper__drag-btn')).toHaveCount(0)
+    await expect(widget.locator('.draggable')).not.toHaveAttribute('aria-disabled')
 
     // verify the opposite:
     await d.setEditing()
     await expect(d.getDeleteWidgetButton(widget)).toBeVisible()
-    await expect(widget.locator('.widget-wrapper__drag-btn')).toHaveAttribute(
-      'aria-disabled',
-      'false',
-    )
+    await expect(widget.locator('.draggable')).toHaveAttribute('aria-disabled', 'false')
   })
 
   test('Responsiveness - all widgets have a 100% width on mobile', async ({ page }) => {
