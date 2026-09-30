@@ -1,7 +1,8 @@
-import type { CollectionConfig } from '../collections/config/types.js'
+import type { CollectionConfig, CompoundIndex } from '../collections/config/types.js'
 import type { Field, TextField } from '../fields/config/types.js'
 import type { GlobalConfig } from '../globals/config/types.js'
 
+import { fieldAffectsData, tabHasName } from '../fields/config/types.js'
 import {
   assertBranchWritableBeforeCollectionWrite,
   assertBranchWritableBeforeGlobalWrite,
@@ -99,6 +100,51 @@ export const buildBranchParentField = (slug: string): Field => ({
 const hasField = (fields: Field[], name: string): boolean =>
   fields.some((field) => 'name' in field && field.name === name)
 
+const joinFieldPath = ({ name, parentPath }: { name: string; parentPath: string }): string =>
+  parentPath ? `${parentPath}.${name}` : name
+
+const rewriteUniqueFields = ({
+  fields,
+  indexes,
+  parentPath = '',
+}: {
+  fields: Field[]
+  indexes: CompoundIndex[]
+  parentPath?: string
+}): void => {
+  for (const field of fields) {
+    if (fieldAffectsData(field) && 'unique' in field && field.unique) {
+      const fieldPath = joinFieldPath({ name: field.name, parentPath })
+
+      field.unique = false
+      indexes.push({
+        fields: [fieldPath, branchField],
+        ...(field.required === true ? {} : { requireExists: [fieldPath] }),
+        unique: true,
+      })
+    }
+
+    if (field.type === 'collapsible' || field.type === 'group' || field.type === 'row') {
+      rewriteUniqueFields({
+        fields: field.fields,
+        indexes,
+        parentPath:
+          field.type === 'group' && fieldAffectsData(field)
+            ? joinFieldPath({ name: field.name, parentPath })
+            : parentPath,
+      })
+    } else if (field.type === 'tabs') {
+      for (const tab of field.tabs) {
+        rewriteUniqueFields({
+          fields: tab.fields,
+          indexes,
+          parentPath: tabHasName(tab) ? joinFieldPath({ name: tab.name, parentPath }) : parentPath,
+        })
+      }
+    }
+  }
+}
+
 /**
  * Injects the branch discriminator fields and rewrites `unique: true` fields
  * into branch-scoped compound indexes.
@@ -116,7 +162,11 @@ export const injectBranchFields = (collection: CollectionConfig): CollectionConf
     collection.fields.push(buildBranchDocIDField(collection.slug))
   }
 
-  const indexes = collection.indexes ?? []
+  const indexes = (collection.indexes ?? []).map((index) =>
+    index.unique && !index.fields.includes(branchField)
+      ? { ...index, fields: [...index.fields, branchField] }
+      : index,
+  )
 
   // Catches two concurrent first-edits of the same document on the same branch:
   // whichever write loses the race gets a constraint violation from the
@@ -129,12 +179,7 @@ export const injectBranchFields = (collection: CollectionConfig): CollectionConf
     unique: true,
   })
 
-  for (const field of collection.fields) {
-    if ('name' in field && 'unique' in field && field.unique) {
-      field.unique = false
-      indexes.push({ fields: [field.name, branchField], unique: true })
-    }
-  }
+  rewriteUniqueFields({ fields: collection.fields, indexes })
 
   collection.indexes = indexes
 
@@ -147,8 +192,10 @@ export const injectBranchFields = (collection: CollectionConfig): CollectionConf
   if (collection.upload) {
     const upload = collection.upload === true ? {} : collection.upload
 
-    if (!upload.filenameCompoundIndex) {
-      upload.filenameCompoundIndex = ['filename', branchField]
+    upload.filenameCompoundIndex ??= ['filename']
+
+    if (!upload.filenameCompoundIndex.includes(branchField)) {
+      upload.filenameCompoundIndex.push(branchField)
     }
 
     collection.upload = upload

@@ -207,6 +207,29 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
           unique: true,
         }),
       )
+      expect(config.indexes).toContainEqual({
+        fields: ['site', 'customSlug', '_branch'],
+        requireExists: ['site', 'customSlug'],
+        unique: true,
+      })
+      expect(config.sanitizedIndexes).toContainEqual(
+        expect.objectContaining({
+          fields: expect.arrayContaining([
+            expect.objectContaining({ path: 'metadata.code' }),
+            expect.objectContaining({ path: '_branch' }),
+          ]),
+          requireExists: ['metadata.code'],
+          unique: true,
+        }),
+      )
+    })
+
+    test('should add branch scope to a custom upload filename index', () => {
+      expect(collectionConfig(mediaSlug).upload.filenameCompoundIndex).toEqual([
+        'filename',
+        'alt',
+        '_branch',
+      ])
     })
   })
 
@@ -246,6 +269,16 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       ).rejects.toThrow()
 
       await payload.delete({ id: first.id, collection: uniqueSlug })
+    })
+
+    test('should allow several documents without an optional unique value', async () => {
+      const first = await payload.create({ collection: uniqueSlug, data: {} })
+      const second = await payload.create({ collection: uniqueSlug, data: {} })
+
+      expect(first.id).not.toBe(second.id)
+
+      await payload.delete({ id: first.id, collection: uniqueSlug })
+      await payload.delete({ id: second.id, collection: uniqueSlug })
     })
   })
 
@@ -3442,6 +3475,78 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       for (const change of changes.docs) {
         await payload.delete({ id: change.id, collection: branchChangesSlug })
       }
+    })
+
+    test('should allow a nested unique value on main and a branch', async () => {
+      const onMain = await payload.create({
+        collection: uniqueSlug,
+        data: { metadata: { code: 'nested-shared' } },
+      })
+      const onBranch = await payload.create({
+        branch: 'cow',
+        collection: uniqueSlug,
+        data: { metadata: { code: 'nested-shared' } },
+      })
+
+      expect(String(onBranch.id)).not.toBe(String(onMain.id))
+
+      for (const id of [onMain.id, onBranch.id]) {
+        await payload.delete({ id, branch: false, collection: uniqueSlug })
+      }
+    })
+
+    test('should reject a duplicate nested unique value within one branch', async () => {
+      const first = await payload.create({
+        branch: 'cow',
+        collection: uniqueSlug,
+        data: { metadata: { code: 'nested-duplicate' } },
+      })
+
+      await expect(
+        payload.create({
+          branch: 'cow',
+          collection: uniqueSlug,
+          data: { metadata: { code: 'nested-duplicate' } },
+        }),
+      ).rejects.toThrow()
+
+      await payload.delete({ id: first.id, branch: false, collection: uniqueSlug })
+    })
+
+    test('should allow a custom compound value on main and a branch', async () => {
+      const onMain = await payload.create({
+        collection: uniqueSlug,
+        data: { customSlug: 'shared', site: 'example' },
+      })
+      const onBranch = await payload.create({
+        branch: 'cow',
+        collection: uniqueSlug,
+        data: { customSlug: 'shared', site: 'example' },
+      })
+
+      expect(String(onBranch.id)).not.toBe(String(onMain.id))
+
+      for (const id of [onMain.id, onBranch.id]) {
+        await payload.delete({ id, branch: false, collection: uniqueSlug })
+      }
+    })
+
+    test('should reject a duplicate custom compound value within one branch', async () => {
+      const first = await payload.create({
+        branch: 'cow',
+        collection: uniqueSlug,
+        data: { customSlug: 'duplicate', site: 'example' },
+      })
+
+      await expect(
+        payload.create({
+          branch: 'cow',
+          collection: uniqueSlug,
+          data: { customSlug: 'duplicate', site: 'example' },
+        }),
+      ).rejects.toThrow()
+
+      await payload.delete({ id: first.id, branch: false, collection: uniqueSlug })
     })
   })
 
