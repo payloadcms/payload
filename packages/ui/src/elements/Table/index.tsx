@@ -1,9 +1,10 @@
 'use client'
 
-import type { Column } from 'payload'
+import type { Column, User } from 'payload'
 
 import React, { useRef } from 'react'
 
+import { useAuth } from '../../providers/Auth/index.js'
 import { useSelection } from '../../providers/Selection/index.js'
 import { useGridNavigation } from './GridNavigation/useGridNavigation.js'
 import { TableGridContext, useTableID, useTableNavigationLabel } from './TableIdentity.js'
@@ -36,6 +37,7 @@ export const Table: React.FC<Props> = ({
   const tableRef = useRef<HTMLTableElement>(null)
   const isGrid = Boolean(navigationLabel)
   const { selected } = useSelection()
+  const { user } = useAuth()
 
   const activeColumns = columns?.filter((col) => col?.active)
   const hasRowSelection = isGrid && activeColumns?.some((column) => column.accessor === '_select')
@@ -81,11 +83,15 @@ export const Table: React.FC<Props> = ({
           <tbody>
             {data &&
               data?.map((row, rowIndex) => {
+                const userEditing = row._userEditing as undefined | User
+                const isLockedByAnotherUser =
+                  row._isLocked && userEditing && userEditing.id !== user?.id
+
                 return (
                   <tr
                     aria-label={isGrid ? String(rowIndex + 1) : undefined}
                     aria-selected={
-                      hasRowSelection
+                      hasRowSelection && !isLockedByAnotherUser
                         ? Boolean(
                             (typeof row.id === 'string' || typeof row.id === 'number') &&
                               selected.get(row.id),

@@ -376,7 +376,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(page.locator(`#${tableId}`)).toHaveCount(1)
     })
 
-    test('should give every grouped table a unique ID', async () => {
+    test('should give every grouped table a unique ID and group-specific name', async () => {
       // Additional coverage for PYLD-3692.
       await gotoPostsList({ page, postsURL })
       await addGroupBy(page, {
@@ -393,6 +393,12 @@ test.describe('WCAG 2.2 Level AA', () => {
 
         expect(tableIds.length).toBeGreaterThan(1)
         expect(new Set(tableIds).size).toBe(tableIds.length)
+        await expect(
+          page.getByRole('grid', { name: 'Posts: Value One', exact: true }),
+        ).toBeVisible()
+        await expect(
+          page.getByRole('grid', { name: 'Posts: Value Two', exact: true }),
+        ).toBeVisible()
       } finally {
         await clearGroupBy(page)
         await expect(page.locator('table')).toHaveCount(1)
@@ -520,7 +526,9 @@ test.describe('WCAG 2.2 Level AA', () => {
       const checkbox = rows.nth(0).getByRole('checkbox')
 
       await expect(checkbox).toBeFocused()
-      await expect(checkbox).toHaveAccessibleName('Select Row 1')
+      const title = await rows.nth(0).locator('.cell-title').innerText()
+
+      await expect(checkbox).toHaveAccessibleName(`Select ${title}, Row 1`)
       await expect(checkbox).not.toBeChecked()
       await page.keyboard.press('Space')
       await expect(rows.nth(0)).toHaveAttribute('aria-selected', 'true')
@@ -633,7 +641,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       }
     })
 
-    test('should preserve collection grid focus through record navigation and column changes', async () => {
+    test('should reset grid entry after record navigation and retain it through column changes', async () => {
       await gotoPostsList({ page, postsURL })
       const grid = page.getByRole('grid', { name: 'Posts', exact: true })
       const title = grid.getByRole('link', { name: 'Example post two', exact: true })
@@ -647,7 +655,12 @@ test.describe('WCAG 2.2 Level AA', () => {
         await expect(page).toHaveURL(/\/posts\/[^/?]+$/)
         await expect(page.locator('#field-title')).toHaveValue('Example post two')
         await page.locator('.step-nav').getByRole('link', { name: 'Posts', exact: true }).click()
-        await expect(title.locator('..')).toHaveAttribute('tabindex', '0')
+        const firstCell = grid.locator('tbody .cell--linked').first()
+
+        await expect(firstCell).toHaveAttribute('tabindex', '0')
+        await page.getByRole('link', { name: 'Create New', exact: true }).focus()
+        await page.keyboard.press('Tab')
+        await expect(firstCell).toBeFocused()
         const target = grid.locator('tbody tr').first().locator('.cell-updatedAt')
 
         await target.focus()

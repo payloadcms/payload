@@ -182,11 +182,11 @@ describe('List View', () => {
       const rowCheckboxes = page.locator(`${tableRowLocator} .select-row__checkbox input`)
 
       await expect(rowCheckboxes).toHaveCount(2)
-      await expect(page.getByRole('checkbox', { name: 'Select Row 1', exact: true })).toBeVisible()
-      await expect(page.getByRole('checkbox', { name: 'Select Row 2', exact: true })).toBeVisible()
+      await expect(page.getByRole('checkbox', { name: /^Select post[12], Row 1$/ })).toBeVisible()
+      await expect(page.getByRole('checkbox', { name: /^Select post[12], Row 2$/ })).toBeVisible()
     })
 
-    test('should number grid row checkboxes when useAsTitle is not configured', async () => {
+    test('should label grid row checkboxes with the document ID and row number when useAsTitle is not configured', async () => {
       const doc = await payload.create({
         collection: listViewSelectAPISlug,
         data: {
@@ -198,10 +198,12 @@ describe('List View', () => {
       const selectAPIUrl = new AdminUrlUtil(serverURL, listViewSelectAPISlug)
 
       await page.goto(selectAPIUrl.list)
-      await expect(page.getByRole('checkbox', { name: 'Select Row 1', exact: true })).toBeVisible()
+      await expect(
+        page.getByRole('checkbox', { name: `Select ${doc.id}, Row 1`, exact: true }),
+      ).toBeVisible()
     })
 
-    test('should retain grid row checkbox numbers when the title column is hidden', async () => {
+    test('should retain grid row checkbox titles and numbers when the title column is hidden', async () => {
       await toggleColumn(page, {
         columnLabel: 'Title',
         columnName: 'title',
@@ -210,8 +212,8 @@ describe('List View', () => {
       await page.reload()
 
       await expect(page.locator('#heading-title')).toBeHidden()
-      await expect(page.getByRole('checkbox', { name: 'Select Row 1', exact: true })).toBeVisible()
-      await expect(page.getByRole('checkbox', { name: 'Select Row 2', exact: true })).toBeVisible()
+      await expect(page.getByRole('checkbox', { name: /^Select post[12], Row 1$/ })).toBeVisible()
+      await expect(page.getByRole('checkbox', { name: /^Select post[12], Row 2$/ })).toBeVisible()
     })
 
     test('should link second cell', async () => {

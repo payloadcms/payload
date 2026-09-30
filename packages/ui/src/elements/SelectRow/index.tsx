@@ -38,7 +38,7 @@ export const SelectRow: React.FC<{
     <CheckboxInput
       aria-label={
         isGrid && rowIndex !== undefined
-          ? t('general:selectLabel', { label: `${t('general:row')} ${rowIndex + 1}` })
+          ? `${selectRowLabel}, ${t('general:row')} ${rowIndex + 1}`
           : selectRowLabel
       }
       checked={Boolean(selected.get(rowData.id))}

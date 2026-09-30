@@ -13,8 +13,6 @@ const interactionSelector =
 
 type Position = { column: string; columnIndex: number; row: string; rowIndex: number }
 
-const savedPositions = new Map<string, Position>()
-
 /** Rove over rendered cells, including opaque server-rendered/custom cell contents. */
 export function useGridNavigation({
   id,
@@ -34,8 +32,6 @@ export function useGridNavigation({
       return
     }
 
-    const cacheKey = `${window.location.pathname}:${id ?? 'table'}`
-    position.current = savedPositions.get(cacheKey) ?? position.current
     const originals = new Map<HTMLElement, null | string>()
     const assignedTabIndexes = new Map<HTMLElement, null | string>()
     let activeCell: HTMLTableCellElement | undefined
@@ -125,7 +121,6 @@ export function useGridNavigation({
         row: row.dataset.id ?? 'header',
         rowIndex: row.rowIndex,
       }
-      savedPositions.set(cacheKey, position.current)
     }
     const synchronize = () => {
       refreshOriginals()
