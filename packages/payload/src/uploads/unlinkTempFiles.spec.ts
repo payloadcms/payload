@@ -43,6 +43,36 @@ describe('unlinkTempFiles', () => {
     expect(unlinkMock).toHaveBeenCalledWith('/tmp/payload-client-upload-abc')
   })
 
+  it('should delete a processed client-upload temp file after a storage hook clears req.file', async () => {
+    const req = {
+      context: { _payloadClientUploadTempFile: '/tmp/payload-client-upload-cleared' },
+      file: undefined,
+    } as unknown as PayloadRequest
+
+    await unlinkTempFiles({
+      collectionConfig,
+      config: { upload: { useTempFiles: false } } as unknown as SanitizedConfig,
+      req,
+    })
+
+    expect(unlinkMock).toHaveBeenCalledWith('/tmp/payload-client-upload-cleared')
+  })
+
+  it('should delete a multipart temp file after a storage hook clears req.file', async () => {
+    const req = {
+      context: { _payloadCloudStorageTempFilePath: '/tmp/payload-multipart-cleared' },
+      file: undefined,
+    } as unknown as PayloadRequest
+
+    await unlinkTempFiles({
+      collectionConfig,
+      config: { upload: { useTempFiles: true } } as unknown as SanitizedConfig,
+      req,
+    })
+
+    expect(unlinkMock).toHaveBeenCalledWith('/tmp/payload-multipart-cleared')
+  })
+
   it('does not delete an unrelated temp file when useTempFiles is off and there is no upload reference', async () => {
     const req = createReq('/tmp/some-other-temp-file')
 

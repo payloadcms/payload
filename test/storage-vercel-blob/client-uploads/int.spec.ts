@@ -4,6 +4,8 @@ import { del, head, list } from '@vercel/blob'
 import { put } from '@vercel/blob/client'
 import dotenv from 'dotenv'
 import { readFileSync } from 'fs'
+import { mkdtemp, readdir, rm } from 'node:fs/promises'
+import os from 'node:os'
 import path from 'path'
 import * as qs from 'qs-esm'
 import sharp from 'sharp'
@@ -82,6 +84,55 @@ test.suite('@payloadcms/storage-vercel-blob clientUploads', { config: './config.
     const { blobs } = await list()
     const uploaded = blobs.find((b) => b.pathname === instructions.data.pathname)
     expect(uploaded).toBeDefined()
+  })
+
+  test('should remove a processed client-upload temp file after saving', async ({
+    payload,
+    restClient,
+  }) => {
+    const tempFileDir = await mkdtemp(path.join(os.tmpdir(), 'payload-client-cleanup-'))
+    const originalTempFileDir = payload.config.upload.tempFileDir
+    payload.config.upload.tempFileDir = tempFileDir
+
+    try {
+      const file = await sharp({
+        create: { background: '#336699', channels: 3, height: 80, width: 120 },
+      })
+        .png()
+        .toBuffer()
+      const instructionsResponse = await restClient.POST(uploadInstructionsPath, {
+        body: JSON.stringify(uploadMetadata('media', file.length)),
+      })
+      const instructions = (await instructionsResponse.json()) as VercelBlobUploadInstructions
+
+      await put(instructions.data.pathname, new Blob([file], { type: 'image/png' }), {
+        access: 'public',
+        contentType: 'image/png',
+        token: instructions.data.token,
+      })
+
+      const formData = new FormData()
+      formData.append('_payload', JSON.stringify({}))
+      formData.append('file', JSON.stringify(instructions.file))
+
+      const query = qs.stringify(
+        {
+          uploadEdits: {
+            crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
+            heightInPixels: 40,
+            widthInPixels: 60,
+          },
+        },
+        { addQueryPrefix: true },
+      )
+      const response = await restClient.POST(`/media${query}`, { body: formData })
+
+      expect(response.status).toBe(201)
+      expect(await readdir(tempFileDir)).toEqual([])
+    } finally {
+      payload.config.upload.tempFileDir = originalTempFileDir
+      await rm(tempFileDir, { force: true, recursive: true })
+    }
   })
 
   test('should retain random suffixes for Local API uploads when client uploads are enabled', async ({

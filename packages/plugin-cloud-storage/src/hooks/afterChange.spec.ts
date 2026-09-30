@@ -29,6 +29,34 @@ describe('upload replacement cleanup', () => {
     expect(req.query.uploadEdits).toBe(uploadEdits)
   })
 
+  it('should restore crop instructions when an internal metadata update fails', async () => {
+    const doc = { id: 1, filename: 'processed.png', mimeType: 'image/png' }
+    const uploadEdits = { crop: { height: 50, width: 50, x: 0, y: 0 } }
+    const req = {
+      context: {},
+      file: { data: Buffer.from('processed'), size: 9 },
+      payload: {
+        logger: { error: vi.fn() },
+        update: vi.fn(async () => {
+          expect(req.query.uploadEdits).toBeUndefined()
+          throw new Error('update failed')
+        }),
+      },
+      query: { uploadEdits },
+    }
+    const hook = getAfterChangeHook({
+      adapter: { handleUpload: vi.fn(async () => ({ filename: 'processed-1.png' })) } as never,
+      collection: { slug: 'media' } as never,
+    })
+
+    await expect(hook({ data: doc, doc, operation: 'create', req } as never)).rejects.toThrow(
+      'update failed',
+    )
+
+    expect(req.query.uploadEdits).toBe(uploadEdits)
+    expect(req.context).not.toHaveProperty('skipCloudStorage')
+  })
+
   it('should not update an unchanged document after an adapter echoes upload data', async () => {
     const doc = { id: 1, filename: 'processed.png', mimeType: 'image/png' }
     const update = vi.fn()
@@ -78,6 +106,156 @@ describe('upload replacement cleanup', () => {
 
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ data: { filename: 'original-suffixed.png' } }),
+    )
+  })
+
+  it('should persist a nested field changed by an adapter that mutates and returns data', async () => {
+    const doc = { id: 1, filename: 'original.png', mimeType: 'image/png', meta: { cdnId: 'old' } }
+    const update = vi.fn(async () => doc)
+    const hook = getAfterChangeHook({
+      adapter: {
+        handleUpload: vi.fn(({ data }) => {
+          data.meta.cdnId = 'new'
+          return data
+        }),
+      } as never,
+      collection: { slug: 'media' } as never,
+    })
+
+    await hook({
+      data: doc,
+      doc,
+      operation: 'create',
+      req: {
+        context: {},
+        file: { data: Buffer.from('image'), size: 5 },
+        payload: { logger: { error: vi.fn() }, update },
+      },
+    } as never)
+
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { meta: { cdnId: 'new' } } }),
+    )
+    expect(doc.meta.cdnId).toBe('old')
+  })
+
+  it('should not persist an unchanged nested value from copied adapter data', async () => {
+    class Metadata {
+      constructor(readonly cdnId: string) {}
+    }
+
+    const doc = {
+      id: 1,
+      filename: 'original.png',
+      meta: new Metadata('same'),
+      mimeType: 'image/png',
+    }
+    const update = vi.fn(async () => doc)
+    const hook = getAfterChangeHook({
+      adapter: { handleUpload: vi.fn(({ data }) => ({ ...data, url: '/original.png' })) } as never,
+      collection: { slug: 'media' } as never,
+    })
+
+    await hook({
+      data: doc,
+      doc,
+      operation: 'create',
+      req: {
+        context: {},
+        file: { data: Buffer.from('image'), size: 5 },
+        payload: { logger: { error: vi.fn() }, update },
+      },
+    } as never)
+
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({ data: { url: '/original.png' } }))
+  })
+
+  it('should save a size field changed within data.sizes at the correct level', async () => {
+    const doc = {
+      id: 1,
+      filename: 'original.png',
+      mimeType: 'image/png',
+      sizes: { square: { filename: 'square.png', mimeType: 'image/png' } },
+    }
+    const update = vi.fn(async () => doc)
+    const hook = getAfterChangeHook({
+      adapter: {
+        handleUpload: vi.fn(({ data, file }) => {
+          if (file.sizeName === 'square') {
+            data.sizes.square.filename = 'square-suffixed.png'
+            return data
+          }
+        }),
+      } as never,
+      collection: { slug: 'media' } as never,
+    })
+
+    await hook({
+      data: doc,
+      doc,
+      operation: 'create',
+      req: {
+        context: {},
+        file: { data: Buffer.from('main'), size: 4 },
+        payload: { logger: { error: vi.fn() }, update },
+        payloadUploadSizes: { square: Buffer.from('size') },
+      },
+    } as never)
+
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: {
+          sizes: { square: { filename: 'square-suffixed.png', mimeType: 'image/png' } },
+        },
+      }),
+    )
+  })
+
+  it('should retain a main-file size change when the size upload adds metadata', async () => {
+    const doc = {
+      id: 1,
+      filename: 'original.png',
+      mimeType: 'image/png',
+      sizes: { square: { filename: 'square.png', mimeType: 'image/png' } },
+    }
+    const update = vi.fn(async () => doc)
+    const hook = getAfterChangeHook({
+      adapter: {
+        handleUpload: vi.fn(({ data, file }) => {
+          if (file.sizeName) {
+            data.sizes.square.url = '/square-url'
+            return data
+          }
+          return { sizes: { square: { ...data.sizes.square, filename: 'square-renamed.png' } } }
+        }),
+      } as never,
+      collection: { slug: 'media' } as never,
+    })
+
+    await hook({
+      data: doc,
+      doc,
+      operation: 'create',
+      req: {
+        context: {},
+        file: { data: Buffer.from('main'), size: 4 },
+        payload: { logger: { error: vi.fn() }, update },
+        payloadUploadSizes: { square: Buffer.from('size') },
+      },
+    } as never)
+
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: {
+          sizes: {
+            square: {
+              filename: 'square-renamed.png',
+              mimeType: 'image/png',
+              url: '/square-url',
+            },
+          },
+        },
+      }),
     )
   })
 
@@ -194,6 +372,25 @@ describe('upload replacement cleanup', () => {
 
     expect(handleUpload).toHaveBeenCalledOnce()
     expect(req.file).toBeUndefined()
+  })
+
+  it('should preserve a temp-file path for cleanup after clearing upload request state', async () => {
+    const doc = { id: 1, filename: 'original.png', mimeType: 'image/png' }
+    const file = { data: Buffer.from('image'), size: 5, tempFilePath: '/tmp/upload-image' }
+    const hook = getAfterChangeHook({
+      adapter: { handleUpload: vi.fn(() => undefined) } as never,
+      collection: { slug: 'media' } as never,
+    })
+    const req = {
+      context: { _payloadCloudStorage: { file, uploadSizes: undefined } },
+      file,
+      payload: { logger: { error: vi.fn() }, update: vi.fn() },
+    }
+
+    await hook({ data: doc, doc, operation: 'create', req } as never)
+
+    expect(req.file).toBeUndefined()
+    expect(req.context).toHaveProperty('_payloadCloudStorageTempFilePath', '/tmp/upload-image')
   })
 
   it.each([
