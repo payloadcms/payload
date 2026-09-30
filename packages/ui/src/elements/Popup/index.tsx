@@ -192,6 +192,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
       } else {
         onToggleClose?.()
         menuScope.closeActiveBranch()
+        parentPopup?.menuScope.release(contentId)
       }
       setActiveInternal(isActive)
     },

@@ -9,6 +9,7 @@ export type MenuScope = {
   cancelPending: (id?: string) => void
   closeActiveBranch: () => void
   register: (node: SubmenuNode) => () => void
+  release: (id: string) => void
   requestOpen: (args: { delay: boolean; id: string; viaKeyboard?: boolean }) => void
 }
 
@@ -64,6 +65,12 @@ export const createMenuScope = (): MenuScope => {
           activeChildId = null
         }
         nodes.delete(node.id)
+      }
+    },
+    release: (id) => {
+      cancelPending(id)
+      if (activeChildId === id) {
+        activeChildId = null
       }
     },
     requestOpen: ({ id, delay, viaKeyboard = false }) => {

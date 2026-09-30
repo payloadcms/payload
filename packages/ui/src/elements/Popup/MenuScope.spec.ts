@@ -26,3 +26,15 @@ test('should cancel a pending sibling activation', () => {
 
   expect(opened).toEqual([])
 })
+
+test('should reopen a child after its branch releases the active slot', () => {
+  const scope = createMenuScope()
+  let openCount = 0
+  scope.register({ id: 'first', closeBranch: () => {}, open: () => openCount++ })
+
+  scope.requestOpen({ delay: false, id: 'first' })
+  scope.release('first')
+  scope.requestOpen({ delay: false, id: 'first' })
+
+  expect(openCount).toBe(2)
+})
