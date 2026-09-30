@@ -4,6 +4,7 @@ import type { PayloadRequest } from '../types/index.js'
 
 import {
   clearTransactionCommitCallbacks,
+  clearTransactionRollbackCallbacks,
   runTransactionCommitCallbacks,
 } from './transactionCallbacks.js'
 
@@ -41,12 +42,14 @@ export async function commitTransaction(
     if (isUnknownTransactionCommitResult(error)) {
       delete req.transactionID
       clearTransactionCommitCallbacks({ req, transactionID: resolvedTransactionID })
+      clearTransactionRollbackCallbacks({ req, transactionID: resolvedTransactionID })
     }
 
     throw error
   }
 
   delete req.transactionID
+  clearTransactionRollbackCallbacks({ req, transactionID: resolvedTransactionID })
 
   try {
     await runTransactionCommitCallbacks({ req, transactionID: resolvedTransactionID })

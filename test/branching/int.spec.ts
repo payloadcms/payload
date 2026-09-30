@@ -8520,6 +8520,243 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       }
     })
 
+    test('should retain committed target content when post-commit source cleanup fails', async () => {
+      branchSlug = 'post-commit-cleanup-failure'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Post-commit cleanup failure', slug: branchSlug },
+      })
+      const mainDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Cleanup original' },
+      })
+
+      await payload.update({
+        id: mainDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Cleanup edited' },
+      })
+
+      const shadow = (
+        await payload.find({
+          branch: false,
+          collection: postsSlug,
+          pagination: false,
+          showHiddenFields: true,
+          where: { _branch: { equals: branchSlug } },
+        })
+      ).docs[0]!
+      const originalDeleteOne = payload.db.deleteOne.bind(payload.db)
+
+      deleteOneSpy = vi.spyOn(payload.db, 'deleteOne').mockImplementation(async (args: any) => {
+        if (args?.where?.id?.equals === shadow.id) {
+          throw new Error('Simulated post-commit source cleanup failure')
+        }
+
+        return originalDeleteOne(args)
+      })
+
+      const result = await payload.branches.merge({
+        branch: branchSlug,
+        overrideAccess: true,
+      })
+
+      expect(result.merged).toHaveLength(1)
+
+      const onMain = await payload.findByID({ id: mainDocument.id, collection: postsSlug })
+      const sourceRows = await payload.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        showHiddenFields: true,
+        where: { _branch: { equals: branchSlug } },
+      })
+      const remainingChanges = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: branchSlug } },
+      })
+      const mergeEvent = (
+        await payload.find({
+          collection: branchMergesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+      ).docs[0] as unknown as {
+        changes: {
+          applicationOutcome: string
+          cleanupError?: string
+          cleanupOutcome: string
+        }[]
+        error?: string
+        status: string
+      }
+
+      expect(onMain.title).toBe('Cleanup edited')
+      expect(sourceRows.docs).toHaveLength(1)
+      expect(remainingChanges.docs).toHaveLength(1)
+      expect(mergeEvent.status).toBe('cleanupFailed')
+      expect(mergeEvent.error).toContain('Simulated post-commit source cleanup failure')
+      expect(mergeEvent.changes[0]).toMatchObject({
+        applicationOutcome: 'committed',
+        cleanupOutcome: 'failed',
+      })
+      expect(mergeEvent.changes[0]?.cleanupError).toContain(
+        'Simulated post-commit source cleanup failure',
+      )
+    })
+
+    test('should retain a committed deletion when deletion-marker cleanup fails', async () => {
+      branchSlug = 'post-commit-deletion-cleanup-failure'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Post-commit deletion cleanup failure', slug: branchSlug },
+      })
+      const mainDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Delete after commit' },
+      })
+
+      await payload.delete({
+        id: mainDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+      })
+
+      const deletionMarker = (
+        await payload.find({
+          branch: false,
+          collection: postsSlug,
+          pagination: false,
+          showHiddenFields: true,
+          where: { _branch: { equals: branchSlug } },
+        })
+      ).docs[0]!
+      const originalDeleteOne = payload.db.deleteOne.bind(payload.db)
+
+      deleteOneSpy = vi.spyOn(payload.db, 'deleteOne').mockImplementation(async (args: any) => {
+        if (args?.where?.id?.equals === deletionMarker.id) {
+          throw new Error('Simulated deletion-marker cleanup failure')
+        }
+
+        return originalDeleteOne(args)
+      })
+
+      const result = await payload.branches.merge({
+        branch: branchSlug,
+        overrideAccess: true,
+      })
+
+      const onMain = await payload.find({
+        collection: postsSlug,
+        pagination: false,
+        where: { id: { equals: mainDocument.id } },
+      })
+      const sourceRows = await payload.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        showHiddenFields: true,
+        where: { _branch: { equals: branchSlug } },
+      })
+      const remainingChanges = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: branchSlug } },
+      })
+      const mergeEvent = (
+        await payload.find({
+          collection: branchMergesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+      ).docs[0] as unknown as {
+        changes: { applicationOutcome: string; cleanupOutcome: string }[]
+        status: string
+      }
+
+      expect(result.merged).toHaveLength(1)
+      expect(onMain.docs).toHaveLength(0)
+      expect(sourceRows.docs).toHaveLength(1)
+      expect(remainingChanges.docs).toHaveLength(1)
+      expect(mergeEvent.status).toBe('cleanupFailed')
+      expect(mergeEvent.changes[0]).toMatchObject({
+        applicationOutcome: 'committed',
+        cleanupOutcome: 'failed',
+      })
+    })
+
+    test('should retain a committed global update when source cleanup fails', async () => {
+      branchSlug = 'post-commit-global-cleanup-failure'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Post-commit global cleanup failure', slug: branchSlug },
+      })
+      await payload.updateGlobal({
+        slug: headerGlobalSlug,
+        data: { navLabel: 'Global cleanup original' },
+      })
+      await payload.updateGlobal({
+        slug: headerGlobalSlug,
+        branch: branchSlug,
+        data: { navLabel: 'Global cleanup edited' },
+      })
+
+      const deleteBranchGlobalSpy = vi
+        .spyOn(payload.db, 'deleteBranchGlobal')
+        .mockRejectedValueOnce(new Error('Simulated global source cleanup failure'))
+
+      try {
+        const result = await payload.branches.merge({
+          branch: branchSlug,
+          overrideAccess: true,
+        })
+        const onMain = await payload.findGlobal({ slug: headerGlobalSlug })
+        const onBranch = await payload.findGlobal({ branch: branchSlug, slug: headerGlobalSlug })
+        const remainingChanges = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+        const mergeEvent = (
+          await payload.find({
+            collection: branchMergesSlug,
+            pagination: false,
+            where: { branch: { equals: branchSlug } },
+          })
+        ).docs[0] as unknown as {
+          changes: { applicationOutcome: string; cleanupOutcome: string }[]
+          status: string
+        }
+
+        expect(result.merged).toHaveLength(1)
+        expect(onMain.navLabel).toBe('Global cleanup edited')
+        expect(onBranch.navLabel).toBe('Global cleanup edited')
+        expect(remainingChanges.docs).toHaveLength(1)
+        expect(mergeEvent.status).toBe('cleanupFailed')
+        expect(mergeEvent.changes[0]).toMatchObject({
+          applicationOutcome: 'committed',
+          cleanupOutcome: 'failed',
+        })
+      } finally {
+        deleteBranchGlobalSpy.mockRestore()
+
+        await payload.db.deleteBranchGlobal?.({
+          branch: branchSlug,
+          globalSlug: headerGlobalSlug,
+          req: await createPayloadRequest({ branch: false, payload }),
+        })
+        await payload.updateGlobal({
+          slug: headerGlobalSlug,
+          data: { navLabel: 'main label' },
+        })
+      }
+    })
+
     test.options(
       'should roll back every change in a discard when a later change fails',
       { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
@@ -8701,6 +8938,219 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         expect(afterCommit.status).toBe('succeeded')
         expect(afterCommit.changes[0]?.applicationOutcome).toBe('committed')
         expect(afterCommit.changes[0]?.cleanupOutcome).toBe('completed')
+      } finally {
+        if (req.transactionID) {
+          await killTransaction(req)
+        }
+      }
+    })
+
+    test('should preserve newer source work created before caller-owned cleanup', async () => {
+      branchSlug = 'caller-owned-newer-source-work'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Caller-owned newer source work', slug: branchSlug },
+      })
+      const mainDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Newer source original' },
+      })
+
+      await payload.update({
+        id: mainDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Merge candidate' },
+      })
+
+      const req = await createPayloadRequest({ branch: false, payload })
+
+      expect(await initTransaction(req)).toBe(true)
+
+      try {
+        await payload.branches.merge({ branch: branchSlug, overrideAccess: true, req })
+
+        await payload.update({
+          id: mainDocument.id,
+          branch: branchSlug,
+          collection: postsSlug,
+          data: { title: 'Newer branch work' },
+        })
+
+        await commitTransaction(req)
+
+        const onMain = await payload.findByID({ id: mainDocument.id, collection: postsSlug })
+        const onBranch = await payload.findByID({
+          id: mainDocument.id,
+          branch: branchSlug,
+          collection: postsSlug,
+        })
+        const remainingChanges = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+        const mergeEvent = (
+          await payload.find({
+            collection: branchMergesSlug,
+            pagination: false,
+            where: { branch: { equals: branchSlug } },
+          })
+        ).docs[0] as unknown as {
+          changes: { applicationOutcome: string; cleanupOutcome: string }[]
+          status: string
+        }
+
+        expect(onMain.title).toBe('Merge candidate')
+        expect(onBranch.title).toBe('Newer branch work')
+        expect(remainingChanges.docs).toHaveLength(1)
+        expect(mergeEvent.status).toBe('succeeded')
+        expect(mergeEvent.changes[0]).toMatchObject({
+          applicationOutcome: 'committed',
+          cleanupOutcome: 'superseded',
+        })
+      } finally {
+        if (req.transactionID) {
+          await killTransaction(req)
+        }
+      }
+    })
+
+    test('should preserve newer global work created before caller-owned cleanup', async () => {
+      branchSlug = 'caller-owned-newer-global-work'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Caller-owned newer global work', slug: branchSlug },
+      })
+      await payload.updateGlobal({
+        slug: headerGlobalSlug,
+        data: { navLabel: 'Global source original' },
+      })
+      await payload.updateGlobal({
+        slug: headerGlobalSlug,
+        branch: branchSlug,
+        data: { navLabel: 'Global merge candidate' },
+      })
+
+      const req = await createPayloadRequest({ branch: false, payload })
+
+      expect(await initTransaction(req)).toBe(true)
+
+      try {
+        await payload.branches.merge({ branch: branchSlug, overrideAccess: true, req })
+
+        await payload.updateGlobal({
+          slug: headerGlobalSlug,
+          branch: branchSlug,
+          data: { navLabel: 'Newer global branch work' },
+        })
+
+        await commitTransaction(req)
+
+        const onMain = await payload.findGlobal({ slug: headerGlobalSlug })
+        const onBranch = await payload.findGlobal({ branch: branchSlug, slug: headerGlobalSlug })
+        const remainingChanges = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+        const mergeEvent = (
+          await payload.find({
+            collection: branchMergesSlug,
+            pagination: false,
+            where: { branch: { equals: branchSlug } },
+          })
+        ).docs[0] as unknown as {
+          changes: { applicationOutcome: string; cleanupOutcome: string }[]
+          status: string
+        }
+
+        expect(onMain.navLabel).toBe('Global merge candidate')
+        expect(onBranch.navLabel).toBe('Newer global branch work')
+        expect(remainingChanges.docs).toHaveLength(1)
+        expect(mergeEvent.status).toBe('succeeded')
+        expect(mergeEvent.changes[0]).toMatchObject({
+          applicationOutcome: 'committed',
+          cleanupOutcome: 'superseded',
+        })
+      } finally {
+        if (req.transactionID) {
+          await killTransaction(req)
+        }
+
+        await payload.db.deleteBranchGlobal?.({
+          branch: branchSlug,
+          globalSlug: headerGlobalSlug,
+          req: await createPayloadRequest({ branch: false, payload }),
+        })
+        await payload.updateGlobal({
+          slug: headerGlobalSlug,
+          data: { navLabel: 'main label' },
+        })
+      }
+    })
+
+    test('should record a successful merge as rolled back when its caller-owned transaction rolls back', async () => {
+      branchSlug = 'caller-owned-rolled-back-merge'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Caller-owned rolled-back merge', slug: branchSlug },
+      })
+      const mainDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Caller-owned rollback original' },
+      })
+
+      await payload.update({
+        id: mainDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Caller-owned rollback edited' },
+      })
+
+      const req = await createPayloadRequest({ branch: false, payload })
+
+      expect(await initTransaction(req)).toBe(true)
+
+      try {
+        await payload.branches.merge({ branch: branchSlug, overrideAccess: true, req })
+        await killTransaction(req)
+
+        const onMain = await payload.findByID({ id: mainDocument.id, collection: postsSlug })
+        const onBranch = await payload.findByID({
+          id: mainDocument.id,
+          branch: branchSlug,
+          collection: postsSlug,
+        })
+        const remainingChanges = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+        const mergeEvent = (
+          await payload.find({
+            collection: branchMergesSlug,
+            pagination: false,
+            where: { branch: { equals: branchSlug } },
+          })
+        ).docs[0] as unknown as {
+          changes: { applicationOutcome: string; cleanupOutcome: string }[]
+          error?: string
+          status: string
+        }
+
+        expect(onMain.title).toBe('Caller-owned rollback original')
+        expect(onBranch.title).toBe('Caller-owned rollback edited')
+        expect(remainingChanges.docs).toHaveLength(1)
+        expect(mergeEvent.status).toBe('failed')
+        expect(mergeEvent.error).toContain('Caller-owned transaction rolled back')
+        expect(mergeEvent.changes[0]).toMatchObject({
+          applicationOutcome: 'rolledBack',
+          cleanupOutcome: 'pending',
+        })
       } finally {
         if (req.transactionID) {
           await killTransaction(req)

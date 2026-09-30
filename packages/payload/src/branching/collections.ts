@@ -382,7 +382,7 @@ export const getBranchMergesCollection = (): CollectionConfig => ({
         {
           name: 'cleanupOutcome',
           type: 'select',
-          options: ['pending', 'completed', 'failed', 'notNeeded', 'unknown'],
+          options: ['pending', 'completed', 'failed', 'notNeeded', 'superseded', 'unknown'],
         },
         { name: 'targetID', type: 'text' },
         { name: 'beforeVersionID', type: 'text' },

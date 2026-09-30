@@ -26,6 +26,7 @@ import {
   clearDeferredCleanupScope,
   flushDeferredCleanupScopeAfterOperation,
   scheduleAfterTransactionCommit,
+  scheduleAfterTransactionRollback,
 } from '../utilities/transactionCallbacks.js'
 import { traverseForLocalizedFields } from '../utilities/traverseForLocalizedFields.js'
 import {
@@ -111,7 +112,8 @@ type MergeEventChange = {
   applicationOutcome: MergeApplicationOutcome
   before?: unknown
   changeID: string
-  cleanupOutcome: 'completed' | 'failed' | 'notNeeded' | 'pending' | 'unknown'
+  cleanupError?: string
+  cleanupOutcome: 'completed' | 'failed' | 'notNeeded' | 'pending' | 'superseded' | 'unknown'
   collectionSlug?: string
   docID?: string
   docTitle: string
@@ -128,6 +130,8 @@ type MergeEventChange = {
     | 'unknown'
   targetID?: string
 }
+
+type SourceCleanupOutcome = 'completed' | 'superseded'
 
 /**
  * Emitted once per change, immediately before it is applied.
@@ -193,6 +197,20 @@ const changeDocID = (change: Record<string, any>): number | string =>
 
 const getMergeErrorMessage = ({ error }: { error: unknown }): string =>
   error instanceof Error ? error.message : String(error)
+
+const getTimestamp = ({ value }: { value: unknown }): number | undefined => {
+  if (value instanceof Date) {
+    return value.getTime()
+  }
+
+  if (typeof value !== 'number' && typeof value !== 'string') {
+    return undefined
+  }
+
+  const timestamp = new Date(value).getTime()
+
+  return Number.isNaN(timestamp) ? undefined : timestamp
+}
 
 const updateMergeEventChange = ({
   changeID,
@@ -551,13 +569,14 @@ export const mergeBranch = async (
   // gone and main holds the merged values on the one remaining row.
   const snapshots = new Map<string, { after: unknown; before: unknown }>()
   const uploadCleanupPlans: {
+    changeID: number | string
     collectionSlug: string
     retainedDoc: null | Record<string, unknown>
     sourceDoc: Record<string, unknown>
   }[] = []
   const sourceCleanupPlans: {
     changeID: number | string
-    cleanup: () => Promise<void>
+    cleanup: () => Promise<SourceCleanupOutcome>
   }[] = []
   const appliedChangeIDs = new Set<string>()
   const reqContext = req.context as Record<PropertyKey, unknown>
@@ -593,6 +612,121 @@ export const mergeBranch = async (
 
   let activeChangeID: number | string | undefined
   let mergedAt: string | undefined
+
+  const finalizeMergeAfterCommit = async (): Promise<void> => {
+    const cleanupErrors: string[] = []
+
+    mergeEventChanges = mergeEventChanges.map((change) => ({
+      ...change,
+      applicationOutcome:
+        change.applicationOutcome === 'applied' ? 'committed' : change.applicationOutcome,
+    }))
+    await persistMergeEvent({ mergedAt, status: 'inProgress' })
+
+    for (const { changeID, cleanup } of sourceCleanupPlans) {
+      let cleanupError: string | undefined
+      let cleanupOutcome: SourceCleanupOutcome = 'completed'
+
+      try {
+        cleanupOutcome = await cleanup()
+
+        if (cleanupOutcome === 'completed') {
+          await payload.delete({
+            id: changeID,
+            collection: branchChangesCollectionSlug,
+            overrideAccess: true,
+            req,
+          })
+        }
+
+        const uploadCleanupPlan = uploadCleanupPlans.find(
+          (plan) => String(plan.changeID) === String(changeID),
+        )
+
+        if (cleanupOutcome === 'completed' && uploadCleanupPlan) {
+          await deleteUploadFilesExclusiveToDocument({
+            collectionConfig: payload.collections[uploadCleanupPlan.collectionSlug]!.config,
+            config: payload.config,
+            req,
+            retainedDoc: uploadCleanupPlan.retainedDoc,
+            sourceDoc: uploadCleanupPlan.sourceDoc,
+          })
+        }
+      } catch (error) {
+        cleanupError = getMergeErrorMessage({ error })
+        cleanupErrors.push(cleanupError)
+      }
+
+      mergeEventChanges = updateMergeEventChange({
+        changeID,
+        changes: mergeEventChanges,
+        update: cleanupError
+          ? { cleanupError, cleanupOutcome: 'failed' }
+          : { cleanupError: undefined, cleanupOutcome },
+      })
+      await persistMergeEvent({
+        error: cleanupErrors.length ? cleanupErrors.join('\n') : undefined,
+        mergedAt,
+        status: cleanupErrors.length ? 'cleanupFailed' : 'inProgress',
+      })
+    }
+
+    try {
+      const remaining = await payload.count({
+        collection: branchChangesCollectionSlug,
+        overrideAccess: true,
+        req,
+        where: { branch: { equals: branch } },
+      })
+
+      if (remaining.totalDocs === 0) {
+        await payload.update({
+          id: branchDoc.id,
+          collection: branchesCollectionSlug,
+          data: { mergedAt, status: closeBranch ? 'closed' : 'merged' },
+          overrideAccess: true,
+          req,
+        })
+      }
+    } catch (error) {
+      cleanupErrors.push(getMergeErrorMessage({ error }))
+    }
+
+    const completedAt = new Date().toISOString()
+
+    await persistMergeEvent({
+      completedAt,
+      error: cleanupErrors.length ? cleanupErrors.join('\n') : undefined,
+      mergedAt: mergedAt ?? completedAt,
+      status: cleanupErrors.length ? 'cleanupFailed' : 'succeeded',
+    })
+
+    // Fired after commit: a failing deploy webhook must not undo a merge.
+    await branchingHooks?.afterMerge?.({ branch, req, results: result.merged })
+
+    if (incomingReq) {
+      refreshBranchState(incomingReq)
+    }
+  }
+
+  const recordMergeRollback = async (): Promise<void> => {
+    const error = 'Caller-owned transaction rolled back.'
+
+    mergeEventChanges = mergeEventChanges.map((change) =>
+      change.applicationOutcome === 'applied'
+        ? { ...change, applicationOutcome: 'rolledBack' }
+        : change,
+    )
+    await persistMergeEvent({
+      completedAt: new Date().toISOString(),
+      error,
+      status: 'failed',
+    })
+
+    if (incomingReq) {
+      refreshBranchState(incomingReq)
+    }
+  }
 
   try {
     const writeTargetReq = createMainBranchRequest({ req })
@@ -722,7 +856,12 @@ export const mergeBranch = async (
           },
         })) as null | Record<string, unknown>
 
-        uploadCleanupPlans.push({ collectionSlug, retainedDoc, sourceDoc: uploadSourceDoc })
+        uploadCleanupPlans.push({
+          changeID: change.id,
+          collectionSlug,
+          retainedDoc,
+          sourceDoc: uploadSourceDoc,
+        })
       }
 
       snapshots.set(String(change.id), {
@@ -824,25 +963,6 @@ export const mergeBranch = async (
       activeChangeID = undefined
     }
 
-    for (const { changeID, cleanup } of sourceCleanupPlans) {
-      await cleanup()
-      await payload.delete({
-        id: changeID,
-        collection: branchChangesCollectionSlug,
-        overrideAccess: true,
-        req,
-      })
-
-      if (!hasTransaction) {
-        mergeEventChanges = updateMergeEventChange({
-          changeID,
-          changes: mergeEventChanges,
-          update: { cleanupOutcome: 'completed' },
-        })
-        await persistMergeEvent({ status: 'inProgress' })
-      }
-    }
-
     mergedAt = new Date().toISOString()
 
     const mergedByChangeID = new Map(
@@ -888,40 +1008,14 @@ export const mergeBranch = async (
       }
     })
 
-    const remaining = await payload.count({
-      collection: branchChangesCollectionSlug,
-      overrideAccess: true,
-      req,
-      where: { branch: { equals: branch } },
-    })
-
-    // `merged` means "nothing left pending", not "finished forever". A partial
-    // merge leaves the branch open and workable, and recording a new change on a
-    // merged branch flips it back (see `reopenBranchOnChange`) — the branch is the
-    // workspace, the merge is the event. `closed` is the terminal state, and only a
-    // caller who asked for it gets it.
-    if (remaining.totalDocs === 0) {
-      await payload.update({
-        id: branchDoc.id,
-        collection: branchesCollectionSlug,
-        data: { mergedAt, status: closeBranch ? 'closed' : 'merged' },
-        overrideAccess: true,
-        req,
-      })
-    }
-
-    for (const { collectionSlug, retainedDoc, sourceDoc } of uploadCleanupPlans) {
-      await deleteUploadFilesExclusiveToDocument({
-        collectionConfig: payload.collections[collectionSlug]!.config,
-        config: payload.config,
-        req,
-        retainedDoc,
-        sourceDoc,
-      })
-    }
-
     if (cleanupScope) {
       await flushDeferredCleanupScopeAfterOperation({ req, scope: cleanupScope })
+    }
+
+    if (hasTransaction) {
+      await persistMergeEvent({ mergedAt, status: 'awaitingCommit' })
+      await scheduleAfterTransactionCommit({ callback: finalizeMergeAfterCommit, req })
+      await scheduleAfterTransactionRollback({ callback: recordMergeRollback, req })
     }
 
     if (shouldCommit) {
@@ -991,33 +1085,8 @@ export const mergeBranch = async (
     }
   }
 
-  const completeMergeEvent = async (): Promise<void> => {
-    const completedAt = new Date().toISOString()
-
-    mergeEventChanges = mergeEventChanges.map((change) => ({
-      ...change,
-      applicationOutcome:
-        change.applicationOutcome === 'applied' ? 'committed' : change.applicationOutcome,
-      cleanupOutcome: change.cleanupOutcome === 'pending' ? 'completed' : change.cleanupOutcome,
-    }))
-
-    await persistMergeEvent({ completedAt, mergedAt: mergedAt ?? completedAt, status: 'succeeded' })
-
-    // Fired after commit: a failing deploy webhook must not undo a merge.
-    await branchingHooks?.afterMerge?.({ branch, req, results: result.merged })
-  }
-
-  if (hasTransaction && !shouldCommit) {
-    await persistMergeEvent({ status: 'awaitingCommit' })
-    await scheduleAfterTransactionCommit({
-      callback: async () => {
-        delete req.transactionID
-        await completeMergeEvent()
-      },
-      req,
-    })
-  } else {
-    await completeMergeEvent()
+  if (!hasTransaction) {
+    await finalizeMergeAfterCommit()
   }
 
   return result
@@ -1320,11 +1389,11 @@ const applyChange = async ({
   req: PayloadRequest
   resolved: ResolvedChange
   targetReq: PayloadRequest
-}): Promise<() => Promise<void>> => {
+}): Promise<() => Promise<SourceCleanupOutcome>> => {
   const { change, collectionSlug, docID, shadow, writes } = resolved
 
   if (!shadow) {
-    return () => Promise.resolve()
+    return () => Promise.resolve('completed')
   }
 
   const shadowID = shadow.id as number | string
@@ -1345,6 +1414,24 @@ const applyChange = async ({
     deleteBranchVersionChain({ branch, collectionSlug, payload, req, rowID: shadowID })
 
   const dropShadowRow = async () => {
+    const currentShadow = (await payload.db.findOne({
+      branch: false,
+      collection: collectionSlug,
+      req,
+      where: { id: { equals: shadowID } },
+    })) as null | Record<string, unknown>
+
+    const currentUpdatedAt = getTimestamp({ value: currentShadow?.updatedAt })
+    const mergedSourceUpdatedAt = getTimestamp({ value: shadow.updatedAt })
+
+    if (
+      currentUpdatedAt !== undefined &&
+      mergedSourceUpdatedAt !== undefined &&
+      currentUpdatedAt !== mergedSourceUpdatedAt
+    ) {
+      return 'superseded' as const
+    }
+
     await dropVersionChain()
 
     await payload.db.deleteOne({
@@ -1353,6 +1440,8 @@ const applyChange = async ({
       req,
       where: { id: { equals: shadowID } },
     })
+
+    return 'completed' as const
   }
 
   const updateMainDocument = async ({
@@ -1552,7 +1641,7 @@ const applyChange = async ({
 
       await applyCreateWrites()
 
-      return () => Promise.resolve()
+      return () => Promise.resolve('completed')
     }
 
     await applyBranchCreateWithoutTransaction({
@@ -1565,7 +1654,7 @@ const applyChange = async ({
       shadowID,
     })
 
-    return () => Promise.resolve()
+    return () => Promise.resolve('completed')
   }
 
   const fields = payload.collections[collectionSlug]!.config.fields
@@ -1984,7 +2073,7 @@ const applyGlobalChange = async ({
   payload: Payload
   req: PayloadRequest
   targetReq: PayloadRequest
-}): Promise<() => Promise<void>> => {
+}): Promise<() => Promise<SourceCleanupOutcome>> => {
   const writes = await resolveGlobalMergeWrites({ branch, globalSlug, payload, req })
 
   if (!writes.length) {
@@ -1998,6 +2087,11 @@ const applyGlobalChange = async ({
   }
 
   const locales = getGlobalMergeLocales({ globalSlug, payload, req })
+  const appliedSourceStates: {
+    data: string
+    draft: boolean
+    locale: string
+  }[] = []
 
   for (const write of writes) {
     for (const [localeIndex, locale] of locales.entries()) {
@@ -2016,6 +2110,8 @@ const applyGlobalChange = async ({
         )
       }
 
+      appliedSourceStates.push({ data: JSON.stringify(data), draft: write.draft, locale })
+
       await payload.updateGlobal({
         slug: globalSlug,
         data: stripGlobalInternal(data) as never,
@@ -2032,8 +2128,25 @@ const applyGlobalChange = async ({
   }
 
   return async () => {
+    for (const sourceState of appliedSourceStates) {
+      const currentData = await readBranchGlobalWrite({
+        branch,
+        draft: sourceState.draft,
+        globalSlug,
+        locale: sourceState.locale,
+        payload,
+        req,
+      })
+
+      if (currentData && JSON.stringify(currentData) !== sourceState.data) {
+        return 'superseded'
+      }
+    }
+
     await deleteBranchGlobalVersionChain({ branch, globalSlug, payload, req })
     await payload.db.deleteBranchGlobal!({ branch, globalSlug, req })
+
+    return 'completed'
   }
 }
 
