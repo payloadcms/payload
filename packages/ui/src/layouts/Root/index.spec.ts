@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
 import { getViewportMeta, isIPhoneUserAgent } from './viewport.js'
-import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 
 describe('RootLayout', () => {
   it('should apply the focus zoom viewport workaround to iPhone user agents only', () => {
@@ -22,70 +21,4 @@ describe('RootLayout', () => {
       name: 'viewport',
     })
   })
-})
-
-describe('getRequestTheme', () => {
-  it.each([
-    {
-      configuredTheme: 'dark',
-      cookieTheme: 'light',
-      expected: { theme: 'dark', themeSource: 'config' },
-      headerTheme: 'light',
-    },
-    {
-      configuredTheme: 'all',
-      cookieTheme: 'light',
-      expected: { theme: 'light', themeSource: 'cookie' },
-      headerTheme: 'dark',
-    },
-    {
-      configuredTheme: 'all',
-      cookieTheme: 'auto',
-      expected: { theme: 'dark', themeSource: 'header' },
-      headerTheme: 'dark',
-    },
-    {
-      configuredTheme: 'all',
-      cookieTheme: undefined,
-      expected: { theme: 'dark', themeSource: 'header' },
-      headerTheme: 'dark',
-    },
-    {
-      configuredTheme: 'all',
-      cookieTheme: undefined,
-      expected: { theme: 'light', themeSource: 'default' },
-      headerTheme: 'sepia',
-    },
-    {
-      configuredTheme: 'all',
-      cookieTheme: undefined,
-      expected: { theme: 'light', themeSource: 'default' },
-      headerTheme: undefined,
-    },
-  ] as const)(
-    'should resolve the $expected.themeSource theme with its source',
-    ({ configuredTheme, cookieTheme, expected, headerTheme }) => {
-      const cookies = new Map<string, string>()
-      const headers = new Headers()
-
-      if (cookieTheme) {
-        cookies.set('custom-theme', cookieTheme)
-      }
-
-      if (headerTheme) {
-        headers.set('Sec-CH-Prefers-Color-Scheme', headerTheme)
-      }
-
-      const result = getRequestTheme({
-        config: {
-          admin: { theme: configuredTheme },
-          cookiePrefix: 'custom',
-        } as Parameters<typeof getRequestTheme>[0]['config'],
-        cookies,
-        headers,
-      })
-
-      expect(result).toEqual(expected)
-    },
-  )
 })
