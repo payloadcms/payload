@@ -72,6 +72,18 @@ export function useGridNavigation({
       })
     const refreshOriginals = () => {
       for (const [element, assigned] of assignedTabIndexes) {
+        if (!table.contains(element)) {
+          const original = originals.get(element)
+
+          if (original == null) {
+            element.removeAttribute('tabindex')
+          } else {
+            element.setAttribute('tabindex', original)
+          }
+          originals.delete(element)
+          assignedTabIndexes.delete(element)
+          continue
+        }
         const current = element.getAttribute('tabindex')
 
         // Preserve changes made by a custom widget instead of treating them as grid writes.
@@ -125,6 +137,17 @@ export function useGridNavigation({
     const synchronize = () => {
       refreshOriginals()
       const available = cells().filter(isVisible)
+      const shouldRecoverFocus =
+        hadFocus &&
+        focusedElement &&
+        (!table.contains(focusedElement) ||
+          !isVisible(focusedElement) ||
+          focusedElement.matches(':disabled')) &&
+        (document.activeElement === document.body || document.activeElement === focusedElement)
+
+      if (shouldRecoverFocus) {
+        isInteracting = false
+      }
 
       if (!activeCell?.isConnected || !available.includes(activeCell)) {
         const saved = position.current
@@ -135,8 +158,12 @@ export function useGridNavigation({
 
         activeCell =
           (row &&
-            (Array.from(row.cells).find((cell) => cell.dataset.column === saved?.column) ??
-              row.cells[Math.min(saved.columnIndex, row.cells.length - 1)])) ||
+            (Array.from(row.cells).find(
+              (cell) => available.includes(cell) && cell.dataset.column === saved?.column,
+            ) ??
+              Array.from(row.cells).filter(isVisible)[
+                Math.min(saved.columnIndex, Array.from(row.cells).filter(isVisible).length - 1)
+              ])) ||
           available.find((cell) => cell.matches('tbody .cell--linked')) ||
           available[0]
         isInteracting = false
@@ -161,12 +188,7 @@ export function useGridNavigation({
       }
       if (activeCell) {
         remember(activeCell)
-        if (
-          hadFocus &&
-          focusedElement &&
-          !focusedElement.isConnected &&
-          document.activeElement === document.body
-        ) {
+        if (shouldRecoverFocus) {
           getCellNavigation({ cell: activeCell }).target.focus()
         }
       }

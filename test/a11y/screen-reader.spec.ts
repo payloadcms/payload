@@ -149,9 +149,12 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       const removedText = (await removed.innerText()).trim()
 
       expect(removedText).not.toBe('')
-      const oldGroup = await navigateScreenReaderTo({ matches: /Previous Version/i, screenReader })
+      const oldGroup = await navigateScreenReaderTo({
+        matches: /Comparing against.*group|group.*Comparing against/i,
+        screenReader,
+      })
 
-      expect(oldGroup).toMatch(/Previous Version/i)
+      expect(oldGroup).toMatch(/Comparing against/i)
       const capture = await captureScreenReader({
         action: async () => {
           for (let index = 0; index < 30; index++) {
@@ -174,7 +177,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
         screenReader,
       })
 
-      expect(newGroup).not.toMatch(/Previous Version/i)
+      expect(newGroup).not.toMatch(/Comparing against/i)
     })
 
     test('should announce the Copy to combobox label once on focus', async ({

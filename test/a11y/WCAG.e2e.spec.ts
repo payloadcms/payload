@@ -591,6 +591,24 @@ test.describe('WCAG 2.2 Level AA', () => {
         await cell.focus()
         await page.keyboard.press('F2')
         await expect(input).toBeFocused()
+        await input.evaluate((element: HTMLInputElement) => {
+          element.disabled = true
+        })
+        await expect(cell).toBeFocused()
+        await expect(cell).toHaveAttribute('tabindex', '0')
+        await input.evaluate((element: HTMLInputElement) => {
+          element.disabled = false
+        })
+        await cell.evaluate((element: HTMLElement) => {
+          element.hidden = true
+        })
+        await expect(row.locator('.cell-title')).toBeFocused()
+        await cell.evaluate((element: HTMLElement) => {
+          element.hidden = false
+        })
+        await cell.focus()
+        await page.keyboard.press('F2')
+        await expect(input).toBeFocused()
         await page.keyboard.press('ArrowLeft')
         await expect(input).toBeFocused()
         await input.fill('Unsaved edit')
