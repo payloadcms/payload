@@ -1,5 +1,6 @@
 'use client'
 import type { LinkAdapterProps } from 'payload'
+import type { AriaAttributes } from 'react'
 
 import * as React from 'react'
 
@@ -79,6 +80,9 @@ export const CheckboxGroup = RadioGroup
 
 type MenuButtonProps = {
   active?: boolean
+  'aria-controls'?: AriaAttributes['aria-controls']
+  'aria-expanded'?: AriaAttributes['aria-expanded']
+  'aria-haspopup'?: AriaAttributes['aria-haspopup']
   ariaChecked?: boolean
   children: React.ReactNode
   className?: string
@@ -87,12 +91,17 @@ type MenuButtonProps = {
   icon?: React.ReactNode
   id?: string
   onClick?: (e?: React.MouseEvent) => void
+  onKeyDown?: React.KeyboardEventHandler
   role?: 'menuitem' | 'menuitemcheckbox' | 'menuitemradio'
+  tabIndex?: number
 }
 
 export const Button: React.FC<MenuButtonProps> = ({
   id,
   active,
+  'aria-controls': ariaControls,
+  'aria-expanded': ariaExpanded,
+  'aria-haspopup': ariaHaspopup,
   ariaChecked,
   children,
   className,
@@ -100,7 +109,9 @@ export const Button: React.FC<MenuButtonProps> = ({
   href,
   icon,
   onClick,
+  onKeyDown,
   role,
+  tabIndex,
 }) => {
   const classes = [
     `${baseClass}__button`,
@@ -119,6 +130,9 @@ export const Button: React.FC<MenuButtonProps> = ({
       return (
         <Link
           aria-checked={ariaChecked}
+          aria-controls={ariaControls}
+          aria-expanded={ariaExpanded}
+          aria-haspopup={ariaHaspopup}
           className={classes}
           href={href}
           id={id}
@@ -127,9 +141,10 @@ export const Button: React.FC<MenuButtonProps> = ({
               onClick(e)
             }
           }}
+          onKeyDown={onKeyDown}
           prefetch={false}
           role={role ?? 'menuitem'}
-          tabIndex={-1}
+          tabIndex={tabIndex ?? -1}
         >
           {iconElement}
           <span className={`${baseClass}__label`}>{children}</span>
@@ -141,6 +156,9 @@ export const Button: React.FC<MenuButtonProps> = ({
       return (
         <button
           aria-checked={ariaChecked}
+          aria-controls={ariaControls}
+          aria-expanded={ariaExpanded}
+          aria-haspopup={ariaHaspopup}
           className={classes}
           id={id}
           onClick={(e) => {
@@ -148,8 +166,9 @@ export const Button: React.FC<MenuButtonProps> = ({
               onClick(e)
             }
           }}
+          onKeyDown={onKeyDown}
           role={role ?? 'menuitem'}
-          tabIndex={-1}
+          tabIndex={tabIndex ?? -1}
           type="button"
         >
           {iconElement}
@@ -161,18 +180,20 @@ export const Button: React.FC<MenuButtonProps> = ({
 
   return (
     <button
+      aria-controls={ariaControls}
       aria-disabled="true"
       className={classes}
       data-popup-prevent-close
       id={id}
       onClick={(event) => event.preventDefault()}
       onKeyDown={(event) => {
+        onKeyDown?.(event)
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault()
         }
       }}
       role={role ?? 'menuitem'}
-      tabIndex={-1}
+      tabIndex={tabIndex ?? -1}
       type="button"
     >
       {iconElement}
