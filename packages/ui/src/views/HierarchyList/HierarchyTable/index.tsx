@@ -480,6 +480,7 @@ export function HierarchyTable({
         Cell: NameCell,
         className: `${baseClass}__col-name`,
         heading: t('general:name'),
+        isLinked: true,
       },
       {
         accessor: 'collection',

@@ -73,7 +73,7 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
 
   // Full icon for modal subheader
   const drawerIcon = preRenderedIcon || fallbackIcon
-  // Small icon for compact display (pill button)
+  // Small icon for compact display
   const displayIcon = preRenderedSmallIcon ?? drawerIcon
 
   // Set up the hierarchy modal
@@ -236,8 +236,8 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
   return (
     <div className={baseClass} ref={intersectionRef}>
       <Button
-        buttonStyle="pill"
-        className={`${baseClass}__pill`}
+        buttonStyle="secondary"
+        className={`${baseClass}__button`}
         icon={displayIcon}
         iconPosition="left"
         margin={false}
