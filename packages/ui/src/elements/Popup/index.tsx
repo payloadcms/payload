@@ -292,8 +292,15 @@ export const Popup: React.FC<PopupProps> = (props) => {
       // viewport space.
       // /////////////////////////////////////
 
-      // Top: align with trigger top, clamped to viewport
-      top = triggerRect.top
+      const scrollContainer = popup.querySelector<HTMLElement>(
+        `:scope > .${baseClass}__scroll-container`,
+      )
+      const popupPaddingTop = scrollContainer
+        ? Number.parseFloat(window.getComputedStyle(scrollContainer).paddingTop) || 0
+        : 0
+
+      // Align the first menu item with the trigger by accounting for the popup's top padding.
+      top = triggerRect.top - popupPaddingTop
       const maxTop = window.innerHeight - popupRect.height - offset
       top = Math.max(offset, Math.min(top, maxTop))
 

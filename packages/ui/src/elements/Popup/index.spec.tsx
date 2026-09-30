@@ -140,49 +140,53 @@ test('should open and close nested menus with keyboard focus restoration', async
   await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
 })
 
-test('should position a nested menu beside its parent when horizontally aligned right', async () => {
+test('should position a nested menu beside its parent and offset its top by its padding', async () => {
   const screen = await render(
-    <Popup button="Root" popupAriaLabel="Root menu" popupType="menu" theme="auto">
-      <PopupList.MenuItem>
-        <Popup
-          renderButton={({ active: _active, ...props }) => (
-            <button {...props} type="button">
-              Theme
-            </button>
-          )}
-          buttonType="custom"
-          hoverSubmenu
-          popupAriaLabel="Theme menu"
-          popupType="menu"
-          theme="auto"
-          render={() => (
-            <PopupList.MenuItem>
-              <Popup
-                renderButton={({ active: _active, ...props }) => (
-                  <button {...props} type="button">
-                    Color
-                  </button>
-                )}
-                buttonType="custom"
-                horizontalAlign="right"
-                hoverSubmenu
-                popupAriaLabel="Color menu"
-                popupType="menu"
-                theme="auto"
-                render={() => <PopupList.Button onClick={() => {}}>Light</PopupList.Button>}
-              />
-            </PopupList.MenuItem>
-          )}
-          side="right"
-        />
-      </PopupList.MenuItem>
-    </Popup>,
+    <div style={{ '--spacer-2': '8px' } as CSSProperties}>
+      <Popup button="Root" popupAriaLabel="Root menu" popupType="menu" theme="auto">
+        <PopupList.MenuItem>
+          <Popup
+            renderButton={({ active: _active, ...props }) => (
+              <button {...props} type="button">
+                Theme
+              </button>
+            )}
+            buttonType="custom"
+            hoverSubmenu
+            popupAriaLabel="Theme menu"
+            popupType="menu"
+            theme="auto"
+            render={() => (
+              <PopupList.MenuItem>
+                <Popup
+                  renderButton={({ active: _active, ...props }) => (
+                    <button {...props} type="button">
+                      Color
+                    </button>
+                  )}
+                  buttonType="custom"
+                  horizontalAlign="right"
+                  hoverSubmenu
+                  popupAriaLabel="Color menu"
+                  popupType="menu"
+                  theme="auto"
+                  render={() => <PopupList.Button onClick={() => {}}>Light</PopupList.Button>}
+                />
+              </PopupList.MenuItem>
+            )}
+            side="right"
+          />
+        </PopupList.MenuItem>
+      </Popup>
+    </div>,
   )
 
   await screen.getByRole('button', { name: 'Root' }).click()
   await screen.getByRole('menuitem', { name: 'Theme' }).hover()
-  await screen.getByRole('menuitem', { name: 'Color' }).hover()
-  await expect.element(screen.getByRole('menuitem', { name: 'Light' })).toBeVisible()
+  const color = screen.getByRole('menuitem', { name: 'Color' })
+  await color.hover()
+  const light = screen.getByRole('menuitem', { name: 'Light' })
+  await expect.element(light).toBeVisible()
 
   const childMenu = document.querySelector<HTMLElement>('[aria-label="Theme menu"]')
   const subchildMenu = document.querySelector<HTMLElement>('[aria-label="Color menu"]')
@@ -191,5 +195,13 @@ test('should position a nested menu beside its parent when horizontally aligned 
   expect(subchildMenu).not.toBeNull()
   expect(subchildMenu!.getBoundingClientRect().left).toBeGreaterThanOrEqual(
     childMenu!.getBoundingClientRect().right,
+  )
+
+  const colorElement = subchildMenu!.parentElement!.querySelector<HTMLElement>(
+    ':scope > .popup__trigger-wrap [role="menuitem"]',
+  )
+
+  expect(Math.round(subchildMenu!.getBoundingClientRect().top)).toBe(
+    Math.round(colorElement!.getBoundingClientRect().top - 8),
   )
 })
