@@ -514,10 +514,15 @@ export const idTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Tambah file',
     addFiles: 'Tambah file',
+    aspectRatio: 'Rasio Aspek',
+    aspectRatioCustom: 'Kustom',
+    aspectRatioFreeform: 'Bebas',
+    aspectRatioOriginal: 'Gambar asli',
     bulkUpload: 'Unggah Massal',
     crop: 'Pangkas',
     cropToolDescription:
       'Seret sudut area yang dipilih, gambar area baru atau sesuaikan nilai di bawah ini.',
+    customAspectRatio: 'Rasio kustom',
     download: 'Unduh',
     dragAndDrop: 'Seret dan lepas file',
     dragAndDropHere: 'atau seret dan lepas file di sini',
@@ -530,6 +535,7 @@ export const idTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Seret titik fokus langsung pada pratinjau atau sesuaikan nilai di bawah ini.',
     height: 'Tinggi',
+    invalidAspectRatio: 'Masukkan rasio sebagai lebar:tinggi, misalnya 16:9.',
     lessInfo: 'Info lebih sedikit',
     moreInfo: 'Info lebih lanjut',
     noFile: 'Tidak ada file',
