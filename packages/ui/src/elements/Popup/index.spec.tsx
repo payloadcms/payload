@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react'
+
 import { expect, test } from 'vitest'
 import { render } from 'vitest-browser-react'
 
@@ -51,40 +53,42 @@ test('should preserve ancestor menus while nested hover menus are active', async
   await expect.element(color).toHaveAttribute('aria-expanded', 'true')
 })
 
-test('should close an active submenu when a sibling leaf item receives pointer or focus', async () => {
+test('should defer a sibling leaf hover state while a submenu is active', async () => {
   const screen = await render(
-    <Popup button="Root" popupType="menu" theme="auto">
-      <PopupList.MenuItem>
-        <Popup
-          renderButton={({ active: _active, ...props }) => (
-            <button {...props} type="button">
-              Theme
-            </button>
-          )}
-          buttonType="custom"
-          hoverSubmenu
-          popupType="menu"
-          theme="auto"
-          render={() => (
-            <PopupList.MenuItem>
-              <Popup
-                renderButton={({ active: _active, ...props }) => (
-                  <button {...props} type="button">
-                    Color
-                  </button>
-                )}
-                buttonType="custom"
-                hoverSubmenu
-                popupType="menu"
-                theme="auto"
-                render={() => <PopupList.Button onClick={() => {}}>Light</PopupList.Button>}
-              />
-              <PopupList.Button onClick={() => {}}>Typography</PopupList.Button>
-            </PopupList.MenuItem>
-          )}
-        />
-      </PopupList.MenuItem>
-    </Popup>,
+    <div style={{ '--popup-item-bg-hover': 'rgb(1, 2, 3)' } as CSSProperties}>
+      <Popup button="Root" popupType="menu" theme="auto">
+        <PopupList.MenuItem>
+          <Popup
+            renderButton={({ active: _active, ...props }) => (
+              <button {...props} type="button">
+                Theme
+              </button>
+            )}
+            buttonType="custom"
+            hoverSubmenu
+            popupType="menu"
+            theme="auto"
+            render={() => (
+              <PopupList.MenuItem>
+                <Popup
+                  renderButton={({ active: _active, ...props }) => (
+                    <button {...props} type="button">
+                      Color
+                    </button>
+                  )}
+                  buttonType="custom"
+                  hoverSubmenu
+                  popupType="menu"
+                  theme="auto"
+                  render={() => <PopupList.Button onClick={() => {}}>Light</PopupList.Button>}
+                />
+                <PopupList.Button onClick={() => {}}>Typography</PopupList.Button>
+              </PopupList.MenuItem>
+            )}
+          />
+        </PopupList.MenuItem>
+      </Popup>
+    </div>,
   )
 
   await screen.getByRole('button', { name: 'Root' }).click()
@@ -98,19 +102,15 @@ test('should close an active submenu when a sibling leaf item receives pointer o
   const colorElement = Array.from(document.querySelectorAll<HTMLElement>('[role="menuitem"]')).find(
     (element) => element.textContent === 'Color',
   )
-
-  expect(colorElement?.getAttribute('aria-expanded')).toBe('false')
-
-  await color.hover()
-  await expect.element(screen.getByRole('menuitem', { name: 'Light' })).toBeVisible()
-
   const typographyElement = Array.from(
     document.querySelectorAll<HTMLElement>('[role="menuitem"]'),
   ).find((element) => element.textContent === 'Typography')
 
-  typographyElement?.focus()
+  expect(colorElement?.getAttribute('aria-expanded')).toBe('true')
+  expect(getComputedStyle(typographyElement!).backgroundColor).toBe('rgba(0, 0, 0, 0)')
 
   await expect.element(color).toHaveAttribute('aria-expanded', 'false')
+  expect(getComputedStyle(typographyElement!).backgroundColor).toBe('rgb(1, 2, 3)')
 })
 
 test('should open and close nested menus with keyboard focus restoration', async () => {
