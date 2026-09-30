@@ -71,7 +71,6 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
                         Color
                       </Button>
                     )}
-                    side="right"
                     size="large"
                   />
                   <PopupList.Button onClick={() => {}}>Typography</PopupList.Button>
