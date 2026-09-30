@@ -54,34 +54,44 @@ export const getAfterChangeHook =
         // Fold `_objectKey` so generated sizes land in the same folder as the original.
         const dataForUpload = { ...uploadData, prefix: getObjectFolder(uploadData) }
 
+        const filesToUpload = files.filter((file) => !file.uploadReference)
         const uploadResults = await Promise.all(
-          files
-            .filter((file) => !file.uploadReference)
-            .map((file) =>
-              adapter.handleUpload({
-                collection,
-                data: dataForUpload,
-                file,
-                req,
-                storageFilePath: buildUploadStoragePathData({
-                  collectionPrefix,
-                  docPrefix: dataForUpload.prefix,
-                  filename: file.filename,
-                  useCompositePrefixes,
-                }).storageFilePath,
-              }),
-            ),
+          filesToUpload.map((file) =>
+            adapter.handleUpload({
+              collection,
+              data: dataForUpload,
+              file,
+              req,
+              storageFilePath: buildUploadStoragePathData({
+                collectionPrefix,
+                docPrefix: dataForUpload.prefix,
+                filename: file.filename,
+                useCompositePrefixes,
+              }).storageFilePath,
+            }),
+          ),
         )
 
-        const uploadMetadata = uploadResults
-          .filter(
-            (result): result is Partial<FileData & TypeWithID> =>
-              result != null && typeof result === 'object',
+        const uploadMetadata = {} as Partial<FileData & TypeWithID>
+        uploadResults.forEach((metadata, index) => {
+          if (!metadata || typeof metadata !== 'object' || metadata === dataForUpload) {
+            return
+          }
+
+          const size = Object.entries(uploadData.sizes ?? {}).find(
+            ([, value]) => value?.filename === filesToUpload[index]?.filename,
           )
-          .reduce(
-            (acc, metadata) => ({ ...acc, ...metadata }),
-            {} as Partial<FileData & TypeWithID>,
-          )
+
+          if (size) {
+            uploadMetadata.sizes = {
+              ...uploadData.sizes,
+              ...uploadMetadata.sizes,
+              [size[0]]: { ...size[1], ...metadata },
+            }
+          } else {
+            Object.assign(uploadMetadata, metadata)
+          }
+        })
 
         // Adapters may echo `data` back as metadata; keep the document's own `prefix`/`_objectKey`.
         delete (uploadMetadata as Record<string, unknown>).prefix
@@ -98,6 +108,10 @@ export const getAfterChangeHook =
           // Clear to prevent re-processing
           req.file = undefined
           req.payloadUploadSizes = undefined
+          const uploadEdits = req.query?.uploadEdits
+          if (req.query) {
+            delete req.query.uploadEdits
+          }
 
           try {
             const updatedDoc = await req.payload.update({
@@ -114,6 +128,9 @@ export const getAfterChangeHook =
             // Persist all adapter metadata, but do not add unselected fields to the response.
             docWithMetadata = select ? { ...doc, ...updatedDoc } : { ...doc, ...uploadMetadata }
           } finally {
+            if (req.query && uploadEdits !== undefined) {
+              req.query.uploadEdits = uploadEdits
+            }
             delete req.context.skipCloudStorage
           }
         }

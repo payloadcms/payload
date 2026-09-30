@@ -70,6 +70,7 @@ export function createR2Adapter({
         buffer: file.buffer,
         mimeType: file.mimeType,
         storageFilePath,
+        tempFilePath: file.tempFilePath,
       }),
 
     staticHandler: (req, { doc, headers, params: { filename, uploadReference } }) =>

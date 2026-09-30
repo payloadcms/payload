@@ -147,7 +147,7 @@ export const getFileFromUploadInstructions = async ({
 
   const tempFilePath = await streamResponseToTempFile({ req, response })
   req.context ??= {}
-  req.context._payloadClientUploadTempFile = true
+  req.context._payloadClientUploadTempFile = tempFilePath
 
   return {
     name: file.filename,
