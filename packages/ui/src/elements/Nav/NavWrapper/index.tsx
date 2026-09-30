@@ -14,7 +14,7 @@ export const NavWrapper: React.FC<{
 }> = (props) => {
   const { baseClass, children, header } = props
 
-  const { hydrated, navOpen } = useNav()
+  const { hydrated, navOpen, navRef } = useNav()
 
   return (
     <aside
@@ -28,7 +28,9 @@ export const NavWrapper: React.FC<{
       inert={!navOpen ? true : undefined}
     >
       {header}
-      {children}
+      <div className={`${baseClass}__scroll`} ref={navRef}>
+        {children}
+      </div>
     </aside>
   )
 }

@@ -72,4 +72,36 @@ test.describe('v4 custom navigation', () => {
     expect(focusOutline.style).not.toBe('none')
     expect(Number.parseFloat(focusOutline.width)).toBeGreaterThan(0)
   })
+
+  test('should allow document scrolling after reaching the end of the desktop sidebar', async () => {
+    await page.setViewportSize({ height: 400, width: 1280 })
+    await page.goto(`${serverURL}/admin`)
+    await openNav(page)
+
+    const scrollRegionPoint = await page.locator('.nav').evaluate((sidebar) => {
+      const scrollRegion = Array.from(sidebar.querySelectorAll<HTMLElement>('*')).find(
+        (element) => {
+          const { overflowY } = getComputedStyle(element)
+
+          return (
+            ['auto', 'scroll'].includes(overflowY) && element.scrollHeight > element.clientHeight
+          )
+        },
+      )
+
+      if (!scrollRegion) {
+        throw new Error('Expected the sidebar to contain a scrollable region')
+      }
+
+      scrollRegion.scrollTop = scrollRegion.scrollHeight
+      const bounds = scrollRegion.getBoundingClientRect()
+
+      return { x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 }
+    })
+
+    await page.mouse.move(scrollRegionPoint.x, scrollRegionPoint.y)
+    await page.mouse.wheel(0, 600)
+
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
+  })
 })

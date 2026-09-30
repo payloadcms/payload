@@ -29,19 +29,27 @@
     outline: 0;
   }
 
-  .nav__wrap {
-    flex: 1 1 auto;
-    height: 100%;
+  .nav__scroll {
+    flex: 1 1 0;
+    min-height: 0;
     width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    padding: var(--nav-padding-block-start) var(--nav-padding-inline-end)
+      var(--nav-padding-block-end) var(--nav-padding-inline-start);
     overflow-y: auto;
-    overscroll-behavior: none;
 
     &::-webkit-scrollbar {
       display: none;
     }
+  }
+
+  .nav__wrap {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex-grow: 1;
   }
 
   .nav__label {
