@@ -43,14 +43,10 @@ export const ChildNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
   const isFolder = Boolean(hierarchyConfig && hierarchyConfig.allowHasMany === false)
   const parentFieldName = hierarchyConfig?.parentFieldName || 'parent'
 
-  // `_browseHref` keeps the click inside the collection being browsed; the fallback covers rows
-  // built outside the hierarchy view.
-  const hierarchyURL =
-    row._browseHref ??
-    formatAdminURL({
-      adminRoute,
-      path: `/collections/${row._collectionSlug}?${parentFieldName}=${row.id}`,
-    })
+  const hierarchyURL = formatAdminURL({
+    adminRoute,
+    path: `/collections/${row._collectionSlug}?${parentFieldName}=${row.id}`,
+  })
 
   const DefaultIcon = isFolder ? <FolderIcon /> : <TagIcon />
 
