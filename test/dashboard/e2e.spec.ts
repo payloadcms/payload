@@ -335,13 +335,7 @@ describe('Dashboard', () => {
     await listButton.click()
     await expect(listButton).toHaveAttribute('aria-pressed', 'true')
     await expect(widget.locator('.recents-widget__items--list')).toBeVisible()
-
-    await widget.getByRole('button', { name: `Pin document: ${ticket.title}` }).click()
-    await pinnedButton.click()
-    await expect(widget.locator('.recents-widget__name')).toHaveText(ticket.title)
-    await expect(
-      widget.getByRole('button', { name: `Unpin document: ${ticket.title}` }),
-    ).toBeEnabled()
+    await expect(widget.locator('.recents-widget__pin')).toHaveCount(0)
 
     const collectionHeader = widget.locator('.recents-widget__list-header span:nth-child(2)')
     const collectionCell = widget.locator(
@@ -350,20 +344,24 @@ describe('Dashboard', () => {
     await expect(collectionHeader).toBeVisible()
     await expect(collectionCell).toBeVisible()
     await expect(async () => {
-      const nameCell = await widget.locator('.recents-widget__details').boundingBox()
-      const pinButton = await widget
-        .getByRole('button', { name: `Unpin document: ${ticket.title}` })
-        .boundingBox()
       const headerBox = await collectionHeader.boundingBox()
       const cellBox = await collectionCell.boundingBox()
 
-      expect(nameCell).not.toBeNull()
-      expect(pinButton).not.toBeNull()
       expect(headerBox).not.toBeNull()
       expect(cellBox).not.toBeNull()
-      expect(pinButton!.x + pinButton!.width).toBeLessThanOrEqual(nameCell!.x + nameCell!.width)
       expect(cellBox!.x).toBeCloseTo(headerBox!.x, 0)
     }).toPass()
+
+    await widget.getByRole('button', { name: 'Grid view' }).click()
+    await widget.getByRole('button', { name: `Pin document: ${ticket.title}` }).click()
+    await pinnedButton.click()
+    await expect(widget.locator('.recents-widget__name')).toHaveText(ticket.title)
+    await expect(
+      widget.getByRole('button', { name: `Unpin document: ${ticket.title}` }),
+    ).toBeEnabled()
+
+    await listButton.click()
+    await expect(widget.locator('.recents-widget__pin')).toHaveCount(0)
 
     await page.reload()
     await page
@@ -372,6 +370,7 @@ describe('Dashboard', () => {
       .click()
     await expect(page.locator('.recents-widget__name')).toHaveText(ticket.title)
 
+    await page.locator('.recents-widget').getByRole('button', { name: 'Grid view' }).click()
     await page
       .locator('.recents-widget')
       .getByRole('button', { name: `Unpin document: ${ticket.title}` })

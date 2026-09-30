@@ -235,16 +235,18 @@ export function RecentsAndPinnedClient({
                     </span>
                     <span className="recents-widget__list-updated-by">—</span>
                   </a>
-                  <button
-                    aria-label={`${isPinned ? labels.removePin : labels.addPin}: ${item.title}`}
-                    aria-pressed={isPinned}
-                    className="recents-widget__pin"
-                    disabled={isSaving}
-                    onClick={() => void togglePin(item)}
-                    type="button"
-                  >
-                    <span aria-hidden="true" className="recents-widget__pin-icon" />
-                  </button>
+                  {view === 'grid' ? (
+                    <button
+                      aria-label={`${isPinned ? labels.removePin : labels.addPin}: ${item.title}`}
+                      aria-pressed={isPinned}
+                      className="recents-widget__pin"
+                      disabled={isSaving}
+                      onClick={() => void togglePin(item)}
+                      type="button"
+                    >
+                      <span aria-hidden="true" className="recents-widget__pin-icon" />
+                    </button>
+                  ) : null}
                 </li>
               )
             })}
