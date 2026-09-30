@@ -49,7 +49,7 @@ export default async function Page({ params: paramsPromise }: Args) {
   // Decode to support slugs with special characters
   const decodedSlug = decodeURIComponent(slug)
   const url = '/' + decodedSlug
-  let page: RequiredDataFromCollectionSlug<'pages'> | null
+  let page: Partial<RequiredDataFromCollectionSlug<'pages'>> | null
 
   page = await queryPageBySlug({
     slug: decodedSlug,
@@ -74,8 +74,8 @@ export default async function Page({ params: paramsPromise }: Args) {
 
       {draft && <LivePreviewListener />}
 
-      <RenderHero {...hero} />
-      <RenderBlocks blocks={layout} />
+      {hero && <RenderHero {...hero} />}
+      {layout && <RenderBlocks blocks={layout} />}
     </article>
   )
 }
