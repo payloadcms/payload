@@ -15,6 +15,7 @@ export interface File {
   filename: string
   filesize: number
   mimeType: string
+  sizeName?: string
   tempFilePath?: string
 }
 

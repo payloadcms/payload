@@ -97,4 +97,33 @@ describe('createVercelBlobAdapter', () => {
       true,
     ])
   })
+
+  it('should keep the client-upload key when the file is preserved in request context', async () => {
+    const adapter = createVercelBlobAdapter({
+      access: 'public',
+      addRandomSuffix: true,
+      baseUrl: 'https://example.com',
+      cacheControlMaxAge: 60,
+      clientUploads: true,
+      collectionSources: [],
+      token: 'read-write-token',
+    })({ collection: { slug: 'media' } } as never)
+
+    await adapter.handleUpload({
+      data: { _objectKey: 'issued-key' },
+      file: { buffer: Buffer.alloc(0), filename: 'processed.png', mimeType: 'image/png' },
+      req: {
+        context: {
+          payloadClientUploadTempFilePath: '/tmp/client-upload',
+          _payloadCloudStorage: { file: { tempFilePath: '/tmp/client-upload' } },
+        },
+        file: undefined,
+      },
+      storageFilePath: 'issued-key/processed.png',
+    } as never)
+
+    expect(mocks.uploadFile).toHaveBeenCalledWith(
+      expect.objectContaining({ addRandomSuffix: false }),
+    )
+  })
 })

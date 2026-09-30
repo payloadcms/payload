@@ -1,5 +1,7 @@
 import type { CollectionAfterChangeHook, CollectionConfig, FileData, TypeWithID } from 'payload'
 
+import { isDeepStrictEqual } from 'node:util'
+
 import type { GeneratedAdapter } from '../types.js'
 
 import { buildPrefixWithObjectKey } from '../utilities/buildPrefixWithObjectKey.js'
@@ -52,11 +54,16 @@ export const getAfterChangeHook =
         // Files with a clientUploadContext are already in storage.
         const filesToUpload = files.filter((file) => !file.clientUploadContext)
         const uploadResults = await Promise.all(
-          filesToUpload.map((file) =>
-            adapter.handleUpload({
+          filesToUpload.map(async (file) => {
+            const dataForFile = { ...dataForUpload, sizes: structuredClone(dataForUpload.sizes) }
+            const originalDataForFile = {
+              ...dataForFile,
+              sizes: structuredClone(dataForFile.sizes),
+            }
+            const metadata = await adapter.handleUpload({
               clientUploadContext: file.clientUploadContext,
               collection,
-              data: dataForUpload,
+              data: dataForFile,
               file,
               req,
               storageFilePath: buildUploadStoragePathData({
@@ -65,30 +72,44 @@ export const getAfterChangeHook =
                 filename: file.filename,
                 useCompositePrefixes,
               }).storageFilePath,
-            }),
-          ),
+            })
+
+            return { file, metadata, originalDataForFile }
+          }),
         )
 
         const uploadMetadata = {} as Partial<FileData & TypeWithID>
-        uploadResults.forEach((metadata, index) => {
-          if (!metadata || typeof metadata !== 'object' || metadata === dataForUpload) {
+        uploadResults.forEach(({ file, metadata, originalDataForFile }) => {
+          if (!metadata || typeof metadata !== 'object') {
             return
           }
 
-          const size = Object.entries(uploadData.sizes ?? {}).find(
-            ([, value]) => value?.filename === filesToUpload[index]?.filename,
+          const changedMetadata = Object.fromEntries(
+            Object.entries(metadata).filter(([key, value]) => {
+              const originalValue = originalDataForFile[key as keyof StorageFileData]
+              return !Object.is(value, originalValue) && !isDeepStrictEqual(value, originalValue)
+            }),
           )
 
-          if (size) {
+          if (file.sizeName && Object.keys(changedMetadata).length > 0) {
             uploadMetadata.sizes = {
               ...uploadData.sizes,
               ...uploadMetadata.sizes,
-              [size[0]]: { ...size[1], ...metadata },
+              [file.sizeName]: {
+                ...uploadData.sizes[file.sizeName]!,
+                ...changedMetadata,
+              } as FileData['sizes'][string],
             }
-          } else {
-            Object.assign(uploadMetadata, metadata)
+          } else if (!file.sizeName) {
+            Object.assign(uploadMetadata, changedMetadata)
           }
         })
+
+        req.file = undefined
+        req.payloadUploadSizes = undefined
+        if (req.context) {
+          delete req.context._payloadCloudStorage
+        }
 
         // Adapters may echo `data` back as metadata; keep the document's own `prefix`/`_objectKey`.
         delete (uploadMetadata as Record<string, unknown>).prefix
@@ -102,16 +123,13 @@ export const getAfterChangeHook =
           }
           req.context.skipCloudStorage = true
 
-          // Clear to prevent re-processing
-          req.file = undefined
-          req.payloadUploadSizes = undefined
           const uploadEdits = req.query?.uploadEdits
           if (req.query) {
             delete req.query.uploadEdits
           }
 
           try {
-            await req.payload.update({
+            const updatedDoc = await req.payload.update({
               id: doc.id,
               collection: collection.slug,
               data: uploadMetadata,
@@ -119,14 +137,26 @@ export const getAfterChangeHook =
               draft: isDraftSave,
               req,
             })
+            docWithMetadata = { ...doc, ...uploadMetadata }
+            if (updatedDoc.url !== undefined) {
+              docWithMetadata.url = updatedDoc.url
+            }
+            if (docWithMetadata.sizes && updatedDoc.sizes) {
+              docWithMetadata.sizes = Object.fromEntries(
+                Object.entries(docWithMetadata.sizes).map(([name, size]) => [
+                  name,
+                  updatedDoc.sizes[name]?.url !== undefined
+                    ? { ...size, url: updatedDoc.sizes[name]!.url }
+                    : size,
+                ]),
+              )
+            }
           } finally {
             if (req.query && uploadEdits !== undefined) {
               req.query.uploadEdits = uploadEdits
             }
             delete req.context.skipCloudStorage
           }
-
-          docWithMetadata = { ...doc, ...uploadMetadata }
         }
 
         // Delete previous files only after the new upload and metadata

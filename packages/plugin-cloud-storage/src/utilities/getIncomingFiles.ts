@@ -42,6 +42,7 @@ export function getIncomingFiles({
               filename: `${resizedFileData.filename}`,
               filesize: payloadUploadSizes[key].length,
               mimeType: resizedFileData.mimeType,
+              sizeName: key,
             },
           ])
         }
