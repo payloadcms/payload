@@ -390,14 +390,8 @@ export const getBranchMergesCollection = (): CollectionConfig => ({
         { name: 'error', type: 'text' },
         { name: 'recoveryError', type: 'text' },
         { name: 'cleanupError', type: 'text' },
-        // Both sides of the change, captured either side of the write.
-        //
-        // Without these the archive can only list what was merged: the branch's copy
-        // is dropped by the merge and main then holds the merged values on the only
-        // row that exists, so there is no second state left to diff against. Storing
-        // them is the price of a history that can still answer "what changed?" —
-        // taken *after* the write for `after`, so the diff shows persisted main
-        // state without adding values from read hooks.
+        // Kept only so merge events written before version-reference history can
+        // still render. New events leave these fields empty.
         { name: 'before', type: 'json' },
         { name: 'after', type: 'json' },
       ],

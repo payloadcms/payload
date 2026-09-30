@@ -26,6 +26,14 @@ type Args<T extends JsonObject = JsonObject> = {
   unpublish?: boolean
 }
 
+export const captureSavedVersionIDContextKey = Symbol('captureSavedVersionID')
+
+export type CaptureSavedVersionID = (args: {
+  collectionSlug?: string
+  globalSlug?: string
+  versionID: number | string
+}) => void
+
 export async function saveVersion<TData extends JsonObject = JsonObject>(
   args: { returning: false } & Args<TData>,
 ): Promise<null>
@@ -157,6 +165,20 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
       req,
     })
   }
+
+  const versionID = result?.id
+  const captureSavedVersionID = (req?.context as Record<PropertyKey, unknown> | undefined)?.[
+    captureSavedVersionIDContextKey
+  ] as CaptureSavedVersionID | undefined
+
+  if (captureSavedVersionID && (typeof versionID === 'number' || typeof versionID === 'string')) {
+    captureSavedVersionID({
+      collectionSlug: collection?.slug,
+      globalSlug: global?.slug,
+      versionID,
+    })
+  }
+
   if (returning === false) {
     return null
   }

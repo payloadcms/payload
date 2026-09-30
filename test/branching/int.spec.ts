@@ -1877,7 +1877,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(changes[0]!.globalSlug).toBe(headerGlobalSlug)
     })
 
-    test('should apply global read constraints without running global read hooks for ledger snapshots', async () => {
+    test('should not run global read hooks or store snapshots for a merge event', async () => {
       const mergingUser = await payload.create({
         collection: 'users',
         data: { email: 'ledger-reader@example.com', password: 'test' },
@@ -1886,8 +1886,6 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       hookSpy.postBeforeRead = () => {
         throw new Error('snapshot global read hook must not run')
       }
-      hookSpy.restrictLedgerSnapshotGlobalRead = true
-
       const result = await payload.branches.merge({
         branch,
         overrideAccess: true,
@@ -1905,8 +1903,8 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       }
 
       expect(result.merged).toHaveLength(1)
-      expect(event.changes[0]?.before?.navLabel).toBe('main label')
-      expect(event.changes[0]?.after).toBeNull()
+      expect(event.changes[0]?.before).toBeUndefined()
+      expect(event.changes[0]?.after).toBeUndefined()
     })
 
     test('should return the global to main state on discard', async () => {
@@ -2093,6 +2091,50 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(result.merged).toHaveLength(1)
       expect(publishedOnMain.heroTitle).toBe('main published')
       expect(draftOnMain.heroTitle).toBe('branch draft')
+    })
+
+    test('should record the exact target versions for a versioned global merge', async () => {
+      const req = await createPayloadRequest({ branch: false, payload })
+      const beforeVersions = await payload.db.findGlobalVersions({
+        branch: false,
+        global: homepageGlobalSlug,
+        limit: 1,
+        pagination: false,
+        req,
+        sort: '-updatedAt',
+        where: { _branch: { equals: 'main' } },
+      })
+
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch,
+        data: { heroTitle: 'global version reference after' },
+        draft: true,
+      })
+      await payload.branches.merge({ branch })
+
+      const afterVersions = await payload.db.findGlobalVersions({
+        branch: false,
+        global: homepageGlobalSlug,
+        limit: 1,
+        pagination: false,
+        req,
+        sort: '-updatedAt',
+        where: { _branch: { equals: 'main' } },
+      })
+      const mergeEvent = (
+        await payload.find({
+          collection: branchMergesSlug,
+          pagination: false,
+          where: { branch: { equals: branch } },
+        })
+      ).docs[0] as unknown as {
+        changes: { afterVersionID?: string; beforeVersionID?: string }[]
+      }
+
+      expect(mergeEvent.changes[0]?.beforeVersionID).toBe(String(beforeVersions.docs[0]?.id))
+      expect(mergeEvent.changes[0]?.afterVersionID).toBe(String(afterVersions.docs[0]?.id))
+      expect(mergeEvent.changes[0]?.afterVersionID).not.toBe(mergeEvent.changes[0]?.beforeVersionID)
     })
 
     test('should merge only the latest global draft after an earlier branch publish', async () => {
@@ -7557,10 +7599,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       hookSpy.restrictLedgerSnapshotEntityRead = undefined
       hookSpy.restrictLedgerSnapshotGlobalRead = undefined
 
-      const rows = await payload.find({ branch: false, collection: postsSlug, pagination: false })
+      for (const collection of [pagesSlug, postsSlug]) {
+        const rows = await payload.find({ branch: false, collection, pagination: false })
 
-      for (const row of rows.docs) {
-        await payload.delete({ id: row.id, branch: false, collection: postsSlug })
+        for (const row of rows.docs) {
+          await payload.delete({ id: row.id, branch: false, collection })
+        }
       }
 
       for (const collection of [branchChangesSlug, branchMergesSlug, branchesSlug]) {
@@ -7614,7 +7658,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
     })
 
-    test('should snapshot both sides of each merged change so the diff survives', async () => {
+    test('should not store full document snapshots in a merge event', async () => {
       await payload.branches.merge({ branch: 'lifecycle' })
 
       const event = (
@@ -7627,12 +7671,67 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         changes: { after?: Record<string, unknown>; before?: Record<string, unknown> }[]
       }
 
-      // Both sides exist only in the moment of the merge: the branch's copy is
-      // dropped and main then holds the merged values on the one remaining row.
-      expect(event.changes[0]?.before?.title).toBe('original on main')
-      expect(event.changes[0]?.after?.title).toBe('edited on branch')
-      expect(event.changes[0]?.before).not.toHaveProperty('_branch')
-      expect(event.changes[0]?.after).not.toHaveProperty('_branch')
+      expect(event.changes[0]?.before).toBeUndefined()
+      expect(event.changes[0]?.after).toBeUndefined()
+    })
+
+    test('should record the exact target version before and after a versioned merge', async () => {
+      const page = await payload.create({
+        collection: pagesSlug,
+        data: { title: 'version reference before' },
+      })
+
+      try {
+        const beforeVersions = await payload.db.findVersions({
+          branch: false,
+          collection: pagesSlug,
+          limit: 1,
+          pagination: false,
+          req: await createPayloadRequest({ branch: false, payload }),
+          sort: '-updatedAt',
+          where: { parent: { equals: page.id } },
+        })
+
+        await payload.update({
+          id: page.id,
+          branch: 'lifecycle',
+          collection: pagesSlug,
+          data: { title: 'version reference after' },
+        })
+        await payload.branches.merge({ branch: 'lifecycle' })
+
+        const afterVersions = await payload.db.findVersions({
+          branch: false,
+          collection: pagesSlug,
+          limit: 1,
+          pagination: false,
+          req: await createPayloadRequest({ branch: false, payload }),
+          sort: '-updatedAt',
+          where: { parent: { equals: page.id } },
+        })
+        const mergeEvent = (
+          await payload.find({
+            collection: branchMergesSlug,
+            pagination: false,
+            where: { branch: { equals: 'lifecycle' } },
+          })
+        ).docs[0] as unknown as {
+          changes: {
+            afterVersionID?: string
+            beforeVersionID?: string
+            collectionSlug?: string
+          }[]
+        }
+        const pageChange = mergeEvent.changes.find(
+          ({ collectionSlug }) => collectionSlug === pagesSlug,
+        )
+
+        expect(pageChange?.beforeVersionID).toBe(String(beforeVersions.docs[0]?.id))
+        expect(pageChange?.afterVersionID).toBe(String(afterVersions.docs[0]?.id))
+        expect(pageChange?.afterVersionID).not.toBe(pageChange?.beforeVersionID)
+      } finally {
+        await payload.delete({ id: page.id, branch: false, collection: pagesSlug })
+      }
     })
 
     test('should expose a merge ledger entry only to the user who created it', async () => {
@@ -7691,7 +7790,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(collidingAuthCollectionEvents.docs).toHaveLength(0)
     })
 
-    test('should enforce field and hidden-field read rules for ledger snapshots when merge writes override access', async () => {
+    test('should enforce field read rules when recording a merge-event title', async () => {
       const mergingUser = await payload.create({
         collection: 'users',
         data: { email: 'ledger-reader@example.com', password: 'test' },
@@ -7717,16 +7816,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         }[]
       }
 
-      expect(event.changes[0]?.before).not.toHaveProperty('confidential')
-      expect(event.changes[0]?.after).not.toHaveProperty('confidential')
-      expect(event.changes[0]?.before).not.toHaveProperty('internalNote')
-      expect(event.changes[0]?.after).not.toHaveProperty('internalNote')
-      expect(event.changes[0]?.before).not.toHaveProperty('title')
-      expect(event.changes[0]?.after).not.toHaveProperty('title')
+      expect(event.changes[0]?.before).toBeUndefined()
+      expect(event.changes[0]?.after).toBeUndefined()
       expect(event.changes[0]?.docTitle).toBe(String(mainDocID))
     })
 
-    test('should apply collection read constraints to each ledger snapshot', async () => {
+    test('should apply collection read constraints to a merge-event title', async () => {
       const mergingUser = await payload.create({
         collection: 'users',
         data: { email: 'ledger-reader@example.com', password: 'test' },
@@ -7754,14 +7849,19 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
           where: { branch: { equals: 'lifecycle' } },
         })
       ).docs[0]! as unknown as {
-        changes: { after?: null | Record<string, unknown>; before?: Record<string, unknown> }[]
+        changes: {
+          after?: null | Record<string, unknown>
+          before?: Record<string, unknown>
+          docTitle?: string
+        }[]
       }
 
-      expect(event.changes[0]?.before?.order).toBe(1)
-      expect(event.changes[0]?.after).toBeNull()
+      expect(event.changes[0]?.before).toBeUndefined()
+      expect(event.changes[0]?.after).toBeUndefined()
+      expect(event.changes[0]?.docTitle).toBe(String(mainDocID))
     })
 
-    test('should not evaluate field defaults while capturing a collection ledger snapshot', async () => {
+    test('should not evaluate field defaults while resolving a merge-event title', async () => {
       const req = await createPayloadRequest({ branch: false, payload })
 
       hookSpy.postDefaultValueCount = 0
@@ -7777,7 +7877,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(snapshot).not.toHaveProperty('computedDefault')
     })
 
-    test('should not run field read hooks while capturing a collection ledger snapshot', async () => {
+    test('should not run field read hooks while resolving a merge-event title', async () => {
       const req = await createPayloadRequest({ branch: false, payload })
 
       hookSpy.postTitleAfterReadCount = 0
@@ -7853,7 +7953,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
     })
 
-    test('should snapshot an empty before for a branch-created document', async () => {
+    test('should record a branch-created title without full document snapshots', async () => {
       const created = await payload.create({
         branch: 'lifecycle',
         collection: postsSlug,
@@ -7884,9 +7984,9 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         changes: { after?: Record<string, unknown>; before?: null | Record<string, unknown> }[]
       }
 
-      // Nothing stood on main before it, so there is no "before" to diff against.
-      expect(event.changes[0]?.before).toBeFalsy()
-      expect(event.changes[0]?.after?.title).toBe('created on branch')
+      expect(event.changes[0]?.before).toBeUndefined()
+      expect(event.changes[0]?.after).toBeUndefined()
+      expect((event.changes[0] as { docTitle?: string })?.docTitle).toBe('created on branch')
     })
 
     test('should keep the branch open when only some changes are merged', async () => {
@@ -8333,13 +8433,16 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
     test.afterEach(async () => {
       hookSpy.beforeChange = undefined
+      hookSpy.headerBeforeOperation = undefined
       deleteOneSpy?.mockRestore()
       deleteOneSpy = undefined
 
-      const rows = await payload.find({ branch: false, collection: postsSlug, pagination: false })
+      for (const collection of [pagesSlug, postsSlug]) {
+        const rows = await payload.find({ branch: false, collection, pagination: false })
 
-      for (const row of rows.docs) {
-        await payload.delete({ id: row.id, branch: false, collection: postsSlug })
+        for (const row of rows.docs) {
+          await payload.delete({ id: row.id, branch: false, collection })
+        }
       }
 
       for (const collection of [branchChangesSlug, branchMergesSlug, branchesSlug]) {
@@ -8515,6 +8618,594 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
           'failed',
         ])
         expect(mergeEvent.changes[1]?.error).toContain('Simulated non-transactional merge failure')
+      } finally {
+        beginTransactionSpy.mockRestore()
+      }
+    })
+
+    test('should restore an earlier versioned target after a later non-transactional failure', async () => {
+      branchSlug = 'non-transactional-version-recovery'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Non-transactional version recovery', slug: branchSlug },
+      })
+      const versionedDocument = await payload.create({
+        collection: pagesSlug,
+        data: { title: 'Versioned original' },
+      })
+      const failingDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Failure original' },
+      })
+
+      await payload.update({
+        id: versionedDocument.id,
+        branch: branchSlug,
+        collection: pagesSlug,
+        data: { title: 'Versioned edited' },
+      })
+      await payload.update({
+        id: failingDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Failure edited' },
+      })
+
+      const beginTransactionSpy = vi.spyOn(payload.db, 'beginTransaction').mockResolvedValue(null)
+
+      hookSpy.beforeChange = ({ data }: { data: Record<string, unknown> }) => {
+        if (data.title === 'Failure edited') {
+          throw new Error('Simulated failure after versioned write')
+        }
+      }
+
+      try {
+        await expect(
+          payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+        ).rejects.toThrow('Simulated failure after versioned write')
+
+        const onMain = await payload.findByID({
+          id: versionedDocument.id,
+          collection: pagesSlug,
+          draft: true,
+        })
+        const onBranch = await payload.findByID({
+          id: versionedDocument.id,
+          branch: branchSlug,
+          collection: pagesSlug,
+          draft: true,
+        })
+        const remainingChanges = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+        const mergeEvent = (
+          await payload.find({
+            collection: branchMergesSlug,
+            pagination: false,
+            where: { branch: { equals: branchSlug } },
+          })
+        ).docs[0] as unknown as {
+          changes: {
+            afterVersionID?: string
+            applicationOutcome: string
+            beforeVersionID?: string
+            collectionSlug?: string
+            recoveryOutcome: string
+          }[]
+          status: string
+        }
+        const recoveredChange = mergeEvent.changes.find(
+          ({ collectionSlug }) => collectionSlug === pagesSlug,
+        )
+
+        expect(onMain.title).toBe('Versioned original')
+        expect(onBranch.title).toBe('Versioned edited')
+        expect(remainingChanges.docs).toHaveLength(2)
+        expect(mergeEvent.status).toBe('failed')
+        expect(recoveredChange).toMatchObject({
+          applicationOutcome: 'applied',
+          recoveryOutcome: 'restored',
+        })
+        expect(recoveredChange?.beforeVersionID).toBeTruthy()
+        expect(recoveredChange?.afterVersionID).toBeTruthy()
+      } finally {
+        beginTransactionSpy.mockRestore()
+      }
+    })
+
+    test('should restore an earlier versioned global after a later non-transactional failure', async () => {
+      branchSlug = 'non-transactional-global-version-recovery'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Non-transactional global recovery', slug: branchSlug },
+      })
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        data: { _status: 'published', heroTitle: 'Global versioned original' },
+      })
+      await payload.updateGlobal({
+        slug: headerGlobalSlug,
+        data: { navLabel: 'Global failure original' },
+      })
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch: branchSlug,
+        data: { heroTitle: 'Global versioned edited' },
+        draft: true,
+      })
+      await payload.updateGlobal({
+        slug: headerGlobalSlug,
+        branch: branchSlug,
+        data: { navLabel: 'Global failure edited' },
+      })
+
+      const beginTransactionSpy = vi.spyOn(payload.db, 'beginTransaction').mockResolvedValue(null)
+
+      hookSpy.headerBeforeOperation = () => {
+        throw new Error('Simulated failure after versioned global write')
+      }
+
+      try {
+        await expect(
+          payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+        ).rejects.toThrow('Simulated failure after versioned global write')
+
+        const onMain = await payload.findGlobal({
+          slug: homepageGlobalSlug,
+          draft: true,
+        })
+        const onBranch = await payload.findGlobal({
+          slug: homepageGlobalSlug,
+          branch: branchSlug,
+          draft: true,
+        })
+        const remainingChanges = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+        const mergeEvent = (
+          await payload.find({
+            collection: branchMergesSlug,
+            pagination: false,
+            where: { branch: { equals: branchSlug } },
+          })
+        ).docs[0] as unknown as {
+          changes: {
+            afterVersionID?: string
+            applicationOutcome: string
+            beforeVersionID?: string
+            globalSlug?: string
+            recoveryOutcome: string
+          }[]
+          status: string
+        }
+        const recoveredChange = mergeEvent.changes.find(
+          ({ globalSlug }) => globalSlug === homepageGlobalSlug,
+        )
+
+        expect(onMain.heroTitle).toBe('Global versioned original')
+        expect(onBranch.heroTitle).toBe('Global versioned edited')
+        expect(remainingChanges.docs).toHaveLength(2)
+        expect(mergeEvent.status).toBe('failed')
+        expect(recoveredChange).toMatchObject({
+          applicationOutcome: 'applied',
+          recoveryOutcome: 'restored',
+        })
+        expect(recoveredChange?.beforeVersionID).toBeTruthy()
+        expect(recoveredChange?.afterVersionID).toBeTruthy()
+      } finally {
+        hookSpy.headerBeforeOperation = undefined
+        beginTransactionSpy.mockRestore()
+
+        const req = await createPayloadRequest({ branch: false, payload })
+
+        await payload.db.deleteBranchGlobal?.({
+          branch: branchSlug,
+          globalSlug: homepageGlobalSlug,
+          req,
+        })
+        await payload.db.deleteBranchGlobal?.({
+          branch: branchSlug,
+          globalSlug: headerGlobalSlug,
+          req,
+        })
+        await payload.updateGlobal({
+          slug: homepageGlobalSlug,
+          data: { _status: 'published', heroTitle: 'main published' },
+        })
+        await payload.updateGlobal({
+          slug: headerGlobalSlug,
+          data: { navLabel: 'main label' },
+        })
+      }
+    })
+
+    test('should remove a branch-created target after a later non-transactional failure', async () => {
+      branchSlug = 'non-transactional-create-recovery'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Non-transactional create recovery', slug: branchSlug },
+      })
+      const createdOnBranch = await payload.create({
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Created on branch' },
+      })
+      const failingDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Failure original' },
+      })
+
+      await payload.update({
+        id: failingDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Failure edited' },
+      })
+
+      const beginTransactionSpy = vi.spyOn(payload.db, 'beginTransaction').mockResolvedValue(null)
+
+      hookSpy.beforeChange = ({ data }: { data: Record<string, unknown> }) => {
+        if (data.title === 'Failure edited') {
+          throw new Error('Simulated failure after branch create')
+        }
+      }
+
+      try {
+        await expect(
+          payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+        ).rejects.toThrow('Simulated failure after branch create')
+
+        const onMain = await payload.find({
+          branch: false,
+          collection: postsSlug,
+          pagination: false,
+          where: {
+            and: [{ id: { equals: createdOnBranch.id } }, { _branch: { equals: 'main' } }],
+          },
+        })
+        const onBranch = await payload.findByID({
+          id: createdOnBranch.id,
+          branch: branchSlug,
+          collection: postsSlug,
+        })
+        const remainingChanges = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+        const mergeEvent = (
+          await payload.find({
+            collection: branchMergesSlug,
+            pagination: false,
+            where: { branch: { equals: branchSlug } },
+          })
+        ).docs[0] as unknown as {
+          changes: {
+            applicationOutcome: string
+            collectionSlug?: string
+            operation: string
+            recoveryOutcome: string
+          }[]
+          status: string
+        }
+        const recoveredChange = mergeEvent.changes.find(
+          ({ collectionSlug, operation }) => collectionSlug === postsSlug && operation === 'create',
+        )
+
+        expect(onMain.docs).toHaveLength(0)
+        expect(onBranch.title).toBe('Created on branch')
+        expect(remainingChanges.docs).toHaveLength(2)
+        expect(mergeEvent.status).toBe('failed')
+        expect(recoveredChange).toMatchObject({
+          applicationOutcome: 'applied',
+          recoveryOutcome: 'deleted',
+        })
+      } finally {
+        beginTransactionSpy.mockRestore()
+      }
+    })
+
+    test('should record an unknown outcome when application progress cannot be persisted', async () => {
+      branchSlug = 'non-transactional-unknown-application'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Non-transactional unknown application', slug: branchSlug },
+      })
+      const versionedDocument = await payload.create({
+        collection: pagesSlug,
+        data: { title: 'Unknown application original' },
+      })
+
+      await payload.update({
+        id: versionedDocument.id,
+        branch: branchSlug,
+        collection: pagesSlug,
+        data: { title: 'Unknown application edited' },
+      })
+
+      const beginTransactionSpy = vi.spyOn(payload.db, 'beginTransaction').mockResolvedValue(null)
+      const updateOne = payload.db.updateOne.bind(payload.db)
+      const updateOneSpy = vi.spyOn(payload.db, 'updateOne').mockImplementation(async (args) => {
+        const changes = (args.data as { changes?: { applicationOutcome?: string }[] }).changes
+
+        if (
+          args.collection === branchMergesSlug &&
+          changes?.some(({ applicationOutcome }) => applicationOutcome === 'applied')
+        ) {
+          updateOneSpy.mockImplementation(updateOne)
+          throw new Error('Simulated application progress failure')
+        }
+
+        return updateOne(args)
+      })
+
+      try {
+        await expect(
+          payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+        ).rejects.toThrow('Simulated application progress failure')
+
+        const onMain = await payload.findByID({
+          id: versionedDocument.id,
+          collection: pagesSlug,
+          draft: true,
+        })
+        const onBranch = await payload.findByID({
+          id: versionedDocument.id,
+          branch: branchSlug,
+          collection: pagesSlug,
+          draft: true,
+        })
+        const remainingChanges = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+        const mergeEvent = (
+          await payload.find({
+            collection: branchMergesSlug,
+            pagination: false,
+            where: { branch: { equals: branchSlug } },
+          })
+        ).docs[0] as unknown as {
+          changes: {
+            applicationOutcome: string
+            error?: string
+            recoveryOutcome: string
+          }[]
+          error?: string
+          status: string
+        }
+
+        expect(onMain.title).toBe('Unknown application edited')
+        expect(onBranch.title).toBe('Unknown application edited')
+        expect(remainingChanges.docs).toHaveLength(1)
+        expect(mergeEvent.status).toBe('failed')
+        expect(mergeEvent.error).toContain('Simulated application progress failure')
+        expect(mergeEvent.changes[0]).toMatchObject({
+          applicationOutcome: 'unknown',
+          recoveryOutcome: 'unknown',
+        })
+        expect(mergeEvent.changes[0]?.error).toContain('Simulated application progress failure')
+      } finally {
+        updateOneSpy.mockRestore()
+        beginTransactionSpy.mockRestore()
+      }
+    })
+
+    test('should preserve the merge error when recovery progress cannot be persisted', async () => {
+      branchSlug = 'non-transactional-unknown-recovery'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Non-transactional unknown recovery', slug: branchSlug },
+      })
+      const versionedDocument = await payload.create({
+        collection: pagesSlug,
+        data: { title: 'Unknown recovery original' },
+      })
+      const failingDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Unknown recovery failure original' },
+      })
+
+      await payload.update({
+        id: versionedDocument.id,
+        branch: branchSlug,
+        collection: pagesSlug,
+        data: { title: 'Unknown recovery edited' },
+      })
+      await payload.update({
+        id: failingDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Unknown recovery failure edited' },
+      })
+
+      const beginTransactionSpy = vi.spyOn(payload.db, 'beginTransaction').mockResolvedValue(null)
+      const updateOne = payload.db.updateOne.bind(payload.db)
+      const updateOneSpy = vi.spyOn(payload.db, 'updateOne').mockImplementation(async (args) => {
+        const changes = (args.data as { changes?: { recoveryOutcome?: string }[] }).changes
+
+        if (
+          args.collection === branchMergesSlug &&
+          changes?.some(({ recoveryOutcome }) => recoveryOutcome === 'pending')
+        ) {
+          updateOneSpy.mockImplementation(updateOne)
+          throw new Error('Simulated recovery progress failure')
+        }
+
+        return updateOne(args)
+      })
+
+      hookSpy.beforeChange = ({ data }: { data: Record<string, unknown> }) => {
+        if (data.title === 'Unknown recovery failure edited') {
+          throw new Error('Simulated original merge failure')
+        }
+      }
+
+      try {
+        await expect(
+          payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+        ).rejects.toThrow('Simulated original merge failure')
+
+        const onMain = await payload.findByID({
+          id: versionedDocument.id,
+          collection: pagesSlug,
+          draft: true,
+        })
+        const onBranch = await payload.findByID({
+          id: versionedDocument.id,
+          branch: branchSlug,
+          collection: pagesSlug,
+          draft: true,
+        })
+        const remainingChanges = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+        const mergeEvent = (
+          await payload.find({
+            collection: branchMergesSlug,
+            pagination: false,
+            where: { branch: { equals: branchSlug } },
+          })
+        ).docs[0] as unknown as {
+          changes: {
+            applicationOutcome: string
+            collectionSlug?: string
+            recoveryError?: string
+            recoveryOutcome: string
+          }[]
+          error?: string
+          status: string
+        }
+        const unresolvedChange = mergeEvent.changes.find(
+          ({ collectionSlug }) => collectionSlug === pagesSlug,
+        )
+
+        expect(onMain.title).toBe('Unknown recovery edited')
+        expect(onBranch.title).toBe('Unknown recovery edited')
+        expect(remainingChanges.docs).toHaveLength(2)
+        expect(mergeEvent.status).toBe('failed')
+        expect(mergeEvent.error).toContain('Simulated original merge failure')
+        expect(unresolvedChange).toMatchObject({
+          applicationOutcome: 'applied',
+          recoveryOutcome: 'unknown',
+        })
+        expect(unresolvedChange?.recoveryError).toContain('Simulated recovery progress failure')
+      } finally {
+        updateOneSpy.mockRestore()
+        beginTransactionSpy.mockRestore()
+      }
+    })
+
+    test('should report recovery as unavailable when the target version was pruned', async () => {
+      branchSlug = 'non-transactional-pruned-recovery'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Non-transactional pruned recovery', slug: branchSlug },
+      })
+      const versionedDocument = await payload.create({
+        collection: pagesSlug,
+        data: { title: 'Pruned recovery original' },
+      })
+      const failingDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Pruned recovery failure original' },
+      })
+      const req = await createPayloadRequest({ branch: false, payload })
+      const beforeVersions = await payload.db.findVersions({
+        branch: false,
+        collection: pagesSlug,
+        limit: 1,
+        pagination: false,
+        req,
+        sort: '-updatedAt',
+        where: { parent: { equals: versionedDocument.id } },
+      })
+      const beforeVersionID = beforeVersions.docs[0]!.id
+
+      await payload.update({
+        id: versionedDocument.id,
+        branch: branchSlug,
+        collection: pagesSlug,
+        data: { title: 'Pruned recovery edited' },
+      })
+      await payload.update({
+        id: failingDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Pruned recovery failure edited' },
+      })
+
+      const beginTransactionSpy = vi.spyOn(payload.db, 'beginTransaction').mockResolvedValue(null)
+
+      hookSpy.beforeChange = async ({ data }: { data: Record<string, unknown> }) => {
+        if (data.title === 'Pruned recovery failure edited') {
+          await payload.db.deleteVersions({
+            collection: pagesSlug,
+            req,
+            where: { id: { equals: beforeVersionID } },
+          })
+          throw new Error('Simulated failure after pruning the recovery version')
+        }
+      }
+
+      try {
+        await expect(
+          payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+        ).rejects.toThrow('Simulated failure after pruning the recovery version')
+
+        const onMain = await payload.findByID({
+          id: versionedDocument.id,
+          collection: pagesSlug,
+          draft: true,
+        })
+        const onBranch = await payload.findByID({
+          id: versionedDocument.id,
+          branch: branchSlug,
+          collection: pagesSlug,
+          draft: true,
+        })
+        const mergeEvent = (
+          await payload.find({
+            collection: branchMergesSlug,
+            pagination: false,
+            where: { branch: { equals: branchSlug } },
+          })
+        ).docs[0] as unknown as {
+          changes: {
+            applicationOutcome: string
+            collectionSlug?: string
+            recoveryError?: string
+            recoveryOutcome: string
+          }[]
+          error?: string
+          status: string
+        }
+        const unresolvedChange = mergeEvent.changes.find(
+          ({ collectionSlug }) => collectionSlug === pagesSlug,
+        )
+
+        expect(onMain.title).toBe('Pruned recovery edited')
+        expect(onBranch.title).toBe('Pruned recovery edited')
+        expect(mergeEvent.status).toBe('failed')
+        expect(mergeEvent.error).toContain('Simulated failure after pruning the recovery version')
+        expect(unresolvedChange).toMatchObject({
+          applicationOutcome: 'applied',
+          recoveryOutcome: 'unavailable',
+        })
+        expect(unresolvedChange?.recoveryError).toBeUndefined()
       } finally {
         beginTransactionSpy.mockRestore()
       }

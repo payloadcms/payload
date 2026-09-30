@@ -33,6 +33,10 @@ import {
   enforceMaxVersions,
   skipEnforceMaxVersionsContextKey,
 } from '../versions/enforceMaxVersions.js'
+import {
+  type CaptureSavedVersionID,
+  captureSavedVersionIDContextKey,
+} from '../versions/saveVersion.js'
 import { coalesceLatestVersionContextKey } from '../versions/updateLatestVersion.js'
 import { discardBranchChanges } from './discard.js'
 import { resolveEffectiveOperations } from './effectiveOperations.js'
@@ -50,7 +54,7 @@ import {
   runMergePreflight,
 } from './preflight.js'
 import { readLocalizedBranchWrite } from './readLocalizedBranchWrite.js'
-import { readCollectionMergeSnapshot, readGlobalMergeSnapshot } from './readMergeSnapshot.js'
+import { readCollectionMergeSnapshot } from './readMergeSnapshot.js'
 import { isolateBranchState, refreshBranchState, withoutBranch } from './resolveBranch.js'
 import {
   branchChangesCollectionSlug,
@@ -109,8 +113,10 @@ type MergeApplicationOutcome =
 
 type MergeEventChange = {
   after?: unknown
+  afterVersionID?: string
   applicationOutcome: MergeApplicationOutcome
   before?: unknown
+  beforeVersionID?: string
   changeID: string
   cleanupError?: string
   cleanupOutcome: 'completed' | 'failed' | 'notNeeded' | 'pending' | 'superseded' | 'unknown'
@@ -120,6 +126,7 @@ type MergeEventChange = {
   error?: string
   globalSlug?: string
   operation: BranchOperation
+  recoveryError?: string
   recoveryOutcome:
     | 'deleted'
     | 'failed'
@@ -132,6 +139,12 @@ type MergeEventChange = {
 }
 
 type SourceCleanupOutcome = 'completed' | 'superseded'
+type SourceRecoveryOutcome = 'deleted' | 'restored'
+
+type AppliedChangeResult = {
+  cleanup: () => Promise<SourceCleanupOutcome>
+  recover?: () => Promise<SourceRecoveryOutcome>
+}
 
 /**
  * Emitted once per change, immediately before it is applied.
@@ -210,6 +223,108 @@ const getTimestamp = ({ value }: { value: unknown }): number | undefined => {
   const timestamp = new Date(value).getTime()
 
   return Number.isNaN(timestamp) ? undefined : timestamp
+}
+
+const findLatestTargetCollectionVersionID = async ({
+  collectionSlug,
+  docID,
+  payload,
+  req,
+}: {
+  collectionSlug: string
+  docID: number | string
+  payload: Payload
+  req: PayloadRequest
+}): Promise<string | undefined> => {
+  if (!payload.collections[collectionSlug]?.config.versions) {
+    return undefined
+  }
+
+  const { docs } = await payload.db.findVersions({
+    branch: false,
+    collection: collectionSlug,
+    limit: 1,
+    pagination: false,
+    req,
+    sort: '-updatedAt',
+    where: { parent: { equals: docID } },
+  })
+  const versionID = docs[0]?.id
+
+  return versionID === undefined ? undefined : String(versionID)
+}
+
+const findLatestTargetGlobalVersionID = async ({
+  globalSlug,
+  payload,
+  req,
+}: {
+  globalSlug: string
+  payload: Payload
+  req: PayloadRequest
+}): Promise<string | undefined> => {
+  const globalConfig = payload.globals.config.find(({ slug }) => slug === globalSlug)
+
+  if (!globalConfig?.versions) {
+    return undefined
+  }
+
+  const { docs } = await payload.db.findGlobalVersions({
+    branch: false,
+    global: globalSlug,
+    limit: 1,
+    pagination: false,
+    req,
+    sort: '-updatedAt',
+    where: { [branchField]: { equals: MAIN_BRANCH } },
+  })
+  const versionID = docs[0]?.id
+
+  return versionID === undefined ? undefined : String(versionID)
+}
+
+const hasTargetVersion = async ({
+  change,
+  payload,
+  req,
+}: {
+  change: MergeEventChange
+  payload: Payload
+  req: PayloadRequest
+}): Promise<boolean> => {
+  if (!change.beforeVersionID) {
+    return false
+  }
+
+  if (change.globalSlug) {
+    const { docs } = await payload.db.findGlobalVersions({
+      branch: false,
+      global: change.globalSlug,
+      limit: 1,
+      pagination: false,
+      req,
+      where: { id: { equals: change.beforeVersionID } },
+    })
+
+    return docs.length > 0
+  }
+
+  if (!change.collectionSlug) {
+    return false
+  }
+
+  const { docs } = await payload.db.findVersions({
+    branch: false,
+    collection: change.collectionSlug,
+    limit: 1,
+    pagination: false,
+    req,
+    where: {
+      and: [{ id: { equals: change.beforeVersionID } }, { parent: { equals: change.targetID } }],
+    },
+  })
+
+  return docs.length > 0
 }
 
 const updateMergeEventChange = ({
@@ -555,6 +670,58 @@ export const mergeBranch = async (
       req: mergeEventReq,
     })
   }
+  const persistAppliedMergeEvent = async ({
+    changeID,
+  }: {
+    changeID: number | string
+  }): Promise<void> => {
+    try {
+      await persistMergeEvent({ status: 'inProgress' })
+    } catch (error) {
+      const errorMessage = getMergeErrorMessage({ error })
+
+      mergeEventChanges = updateMergeEventChange({
+        changeID,
+        changes: mergeEventChanges,
+        update: {
+          applicationOutcome: 'unknown',
+          error: errorMessage,
+          recoveryOutcome: 'unknown',
+        },
+      })
+
+      throw error
+    }
+  }
+  const persistRecoveryMergeEvent = async ({
+    changeID,
+  }: {
+    changeID: number | string
+  }): Promise<boolean> => {
+    try {
+      await persistMergeEvent({ status: 'inProgress' })
+
+      return true
+    } catch (error) {
+      const recoveryError = getMergeErrorMessage({ error })
+      const change = mergeEventChanges.find(
+        ({ changeID: candidateChangeID }) => candidateChangeID === String(changeID),
+      )
+
+      mergeEventChanges = updateMergeEventChange({
+        changeID,
+        changes: mergeEventChanges,
+        update: {
+          recoveryError: change?.recoveryError
+            ? `${change.recoveryError}\n${recoveryError}`
+            : recoveryError,
+          recoveryOutcome: 'unknown',
+        },
+      })
+
+      return false
+    }
+  }
 
   // Gated on `req.transactionID`, not on whether a `req` was passed in: a merge
   // triggered over HTTP hands in a `req` of its own that has no transaction on
@@ -564,10 +731,6 @@ export const mergeBranch = async (
   const hasTransaction = transactionID !== null && transactionID !== undefined
   const cleanupScope = await beginDeferredCleanupScope({ req })
 
-  // Both sides of every change, for the ledger. Read either side of the write
-  // because that is the only moment both exist: afterwards the branch's copy is
-  // gone and main holds the merged values on the one remaining row.
-  const snapshots = new Map<string, { after: unknown; before: unknown }>()
   const uploadCleanupPlans: {
     changeID: number | string
     collectionSlug: string
@@ -577,6 +740,7 @@ export const mergeBranch = async (
   const sourceCleanupPlans: {
     changeID: number | string
     cleanup: () => Promise<SourceCleanupOutcome>
+    recover?: () => Promise<SourceRecoveryOutcome>
   }[] = []
   const appliedChangeIDs = new Set<string>()
   const reqContext = req.context as Record<PropertyKey, unknown>
@@ -799,10 +963,24 @@ export const mergeBranch = async (
       const collectionSlug = change.collectionSlug as string
       const docID = changeDocID(change)
       const collectionConfig = payload.collections[collectionSlug]!.config
-      const before =
+      const beforeVersionID =
         change.operation === 'create'
-          ? null
-          : await readCollectionMergeSnapshot({ collectionSlug, docID, payload, req })
+          ? undefined
+          : await findLatestTargetCollectionVersionID({
+              collectionSlug,
+              docID,
+              payload,
+              req: writeTargetReq,
+            })
+      let afterVersionID: string | undefined
+      const writeTargetContext = writeTargetReq.context as Record<PropertyKey, unknown>
+      const previousCaptureSavedVersionID = writeTargetContext[captureSavedVersionIDContextKey]
+
+      writeTargetContext[captureSavedVersionIDContextKey] = ((capturedVersion) => {
+        if (capturedVersion.collectionSlug === collectionSlug) {
+          afterVersionID = String(capturedVersion.versionID)
+        }
+      }) satisfies CaptureSavedVersionID
       const uploadSourceDoc =
         change.operation === 'update' && collectionConfig.upload
           ? ((await payload.db.findOne({
@@ -828,23 +1006,33 @@ export const mergeBranch = async (
         throw new APIError(dependencyBlockedAtUse[0]!.message, 409)
       }
 
-      const cleanup = await applyChange({
-        hasTransaction,
-        overrideAccess,
-        payload,
-        req,
-        resolved: resolvedChange,
-        targetReq: writeTargetReq,
-      })
+      let appliedChange: AppliedChangeResult
 
-      sourceCleanupPlans.push({ changeID: change.id, cleanup })
+      try {
+        appliedChange = await applyChange({
+          hasTransaction,
+          overrideAccess,
+          payload,
+          req,
+          resolved: resolvedChange,
+          targetReq: writeTargetReq,
+        })
+      } finally {
+        if (previousCaptureSavedVersionID === undefined) {
+          delete writeTargetContext[captureSavedVersionIDContextKey]
+        } else {
+          writeTargetContext[captureSavedVersionIDContextKey] = previousCaptureSavedVersionID
+        }
+      }
+
+      sourceCleanupPlans.push({ changeID: change.id, ...appliedChange })
       appliedChangeIDs.add(String(change.id))
       mergeEventChanges = updateMergeEventChange({
         changeID: change.id,
         changes: mergeEventChanges,
-        update: { applicationOutcome: 'applied' },
+        update: { afterVersionID, applicationOutcome: 'applied', beforeVersionID },
       })
-      await persistMergeEvent({ status: 'inProgress' })
+      await persistAppliedMergeEvent({ changeID: change.id })
 
       if (uploadSourceDoc) {
         const retainedDoc = (await payload.db.findOne({
@@ -864,9 +1052,23 @@ export const mergeBranch = async (
         })
       }
 
-      snapshots.set(String(change.id), {
-        after: await readCollectionMergeSnapshot({ collectionSlug, docID, payload, req }),
-        before,
+      const persistedTarget = await readCollectionMergeSnapshot({
+        collectionSlug,
+        docID,
+        payload,
+        req,
+      })
+
+      mergeEventChanges = updateMergeEventChange({
+        changeID: change.id,
+        changes: mergeEventChanges,
+        update: {
+          docTitle: getSnapshotDocumentTitle({
+            after: persistedTarget,
+            docID,
+            useAsTitle: collectionConfig.admin?.useAsTitle,
+          }),
+        },
       })
 
       result.merged.push({
@@ -916,7 +1118,20 @@ export const mergeBranch = async (
         }
       }
 
-      const before = await readGlobalMergeSnapshot({ globalSlug, payload, req })
+      const beforeVersionID = await findLatestTargetGlobalVersionID({
+        globalSlug,
+        payload,
+        req: writeTargetReq,
+      })
+      let afterVersionID: string | undefined
+      const writeTargetContext = writeTargetReq.context as Record<PropertyKey, unknown>
+      const previousCaptureSavedVersionID = writeTargetContext[captureSavedVersionIDContextKey]
+
+      writeTargetContext[captureSavedVersionIDContextKey] = ((capturedVersion) => {
+        if (capturedVersion.globalSlug === globalSlug) {
+          afterVersionID = String(capturedVersion.versionID)
+        }
+      }) satisfies CaptureSavedVersionID
 
       const dependencyBlockedAtUse = await runMergeDependencyPreflight({
         availableChangeIDs: appliedChangeIDs,
@@ -931,27 +1146,42 @@ export const mergeBranch = async (
         throw new APIError(dependencyBlockedAtUse[0]!.message, 409)
       }
 
-      const cleanup = await applyGlobalChange({
-        branch,
-        globalSlug,
-        overrideAccess,
-        payload,
-        req,
-        targetReq: writeTargetReq,
-      })
+      let cleanup: () => Promise<SourceCleanupOutcome>
+
+      try {
+        cleanup = await applyGlobalChange({
+          branch,
+          globalSlug,
+          overrideAccess,
+          payload,
+          req,
+          targetReq: writeTargetReq,
+        })
+      } finally {
+        if (previousCaptureSavedVersionID === undefined) {
+          delete writeTargetContext[captureSavedVersionIDContextKey]
+        } else {
+          writeTargetContext[captureSavedVersionIDContextKey] = previousCaptureSavedVersionID
+        }
+      }
 
       sourceCleanupPlans.push({ changeID: change.id, cleanup })
       appliedChangeIDs.add(String(change.id))
       mergeEventChanges = updateMergeEventChange({
         changeID: change.id,
         changes: mergeEventChanges,
-        update: { applicationOutcome: 'applied' },
+        update: { afterVersionID, applicationOutcome: 'applied', beforeVersionID },
       })
-      await persistMergeEvent({ status: 'inProgress' })
+      await persistAppliedMergeEvent({ changeID: change.id })
 
-      snapshots.set(String(change.id), {
-        after: await readGlobalMergeSnapshot({ globalSlug, payload, req }),
-        before,
+      const globalConfig = payload.globals?.config?.find((config) => config.slug === globalSlug)
+
+      mergeEventChanges = updateMergeEventChange({
+        changeID: change.id,
+        changes: mergeEventChanges,
+        update: {
+          docTitle: typeof globalConfig?.label === 'string' ? globalConfig.label : globalSlug,
+        },
       })
 
       result.merged.push({
@@ -964,49 +1194,6 @@ export const mergeBranch = async (
     }
 
     mergedAt = new Date().toISOString()
-
-    const mergedByChangeID = new Map(
-      result.merged.map((mergedChange) => [String(mergedChange.changeID), mergedChange]),
-    )
-
-    mergeEventChanges = mergeEventChanges.map((change) => {
-      const mergedChange = mergedByChangeID.get(change.changeID)
-      const snapshot = snapshots.get(change.changeID)
-
-      if (!mergedChange) {
-        return change
-      }
-
-      if (mergedChange.entityType === 'global') {
-        const globalConfig = payload.globals?.config?.find(
-          (config) => config.slug === mergedChange.globalSlug,
-        )
-
-        return {
-          ...change,
-          after: snapshot?.after ?? null,
-          before: snapshot?.before ?? null,
-          docTitle:
-            typeof globalConfig?.label === 'string'
-              ? globalConfig.label
-              : (mergedChange.globalSlug as string),
-        }
-      }
-
-      const useAsTitle = payload.collections[mergedChange.collectionSlug!]?.config.admin?.useAsTitle
-      const after = snapshot?.after as null | Record<string, unknown> | undefined
-
-      return {
-        ...change,
-        after: snapshot?.after ?? null,
-        before: snapshot?.before ?? null,
-        docTitle: getSnapshotDocumentTitle({
-          after,
-          docID: mergedChange.docID!,
-          useAsTitle,
-        }),
-      }
-    })
 
     if (cleanupScope) {
       await flushDeferredCleanupScopeAfterOperation({ req, scope: cleanupScope })
@@ -1033,6 +1220,95 @@ export const mergeBranch = async (
           ? { ...change, applicationOutcome: 'rolledBack', cleanupOutcome: 'pending' }
           : change,
       )
+    }
+
+    if (!hasTransaction) {
+      for (const recoveryPlan of [...sourceCleanupPlans].reverse()) {
+        const change = mergeEventChanges.find(
+          ({ changeID }) => changeID === String(recoveryPlan.changeID),
+        )
+
+        if (!change || change.applicationOutcome !== 'applied') {
+          continue
+        }
+
+        mergeEventChanges = updateMergeEventChange({
+          changeID: change.changeID,
+          changes: mergeEventChanges,
+          update: { recoveryOutcome: 'pending' },
+        })
+
+        if (!(await persistRecoveryMergeEvent({ changeID: change.changeID }))) {
+          continue
+        }
+
+        if (
+          !recoveryPlan.recover &&
+          (!change.beforeVersionID || (!change.collectionSlug && !change.globalSlug))
+        ) {
+          mergeEventChanges = updateMergeEventChange({
+            changeID: change.changeID,
+            changes: mergeEventChanges,
+            update: { recoveryOutcome: 'unavailable' },
+          })
+          await persistRecoveryMergeEvent({ changeID: change.changeID })
+          continue
+        }
+
+        try {
+          let recoveryOutcome: SourceRecoveryOutcome
+
+          if (recoveryPlan.recover) {
+            recoveryOutcome = await recoveryPlan.recover()
+          } else {
+            const recoveryReq = createMainBranchRequest({ req })
+
+            if (!(await hasTargetVersion({ change, payload, req: recoveryReq }))) {
+              mergeEventChanges = updateMergeEventChange({
+                changeID: change.changeID,
+                changes: mergeEventChanges,
+                update: { recoveryOutcome: 'unavailable' },
+              })
+              await persistRecoveryMergeEvent({ changeID: change.changeID })
+              continue
+            }
+
+            if (change.globalSlug) {
+              await payload.restoreGlobalVersion({
+                id: change.beforeVersionID!,
+                slug: change.globalSlug,
+                overrideAccess,
+                req: recoveryReq,
+              })
+            } else {
+              await payload.restoreVersion({
+                id: change.beforeVersionID!,
+                collection: change.collectionSlug!,
+                overrideAccess,
+                req: recoveryReq,
+              })
+            }
+
+            recoveryOutcome = 'restored'
+          }
+          mergeEventChanges = updateMergeEventChange({
+            changeID: change.changeID,
+            changes: mergeEventChanges,
+            update: { recoveryOutcome },
+          })
+        } catch (recoveryError) {
+          mergeEventChanges = updateMergeEventChange({
+            changeID: change.changeID,
+            changes: mergeEventChanges,
+            update: {
+              recoveryError: getMergeErrorMessage({ error: recoveryError }),
+              recoveryOutcome: 'failed',
+            },
+          })
+        }
+
+        await persistRecoveryMergeEvent({ changeID: change.changeID })
+      }
     }
 
     const errorMessage = getMergeErrorMessage({ error })
@@ -1389,11 +1665,11 @@ const applyChange = async ({
   req: PayloadRequest
   resolved: ResolvedChange
   targetReq: PayloadRequest
-}): Promise<() => Promise<SourceCleanupOutcome>> => {
+}): Promise<AppliedChangeResult> => {
   const { change, collectionSlug, docID, shadow, writes } = resolved
 
   if (!shadow) {
-    return () => Promise.resolve('completed')
+    return { cleanup: () => Promise.resolve('completed') }
   }
 
   const shadowID = shadow.id as number | string
@@ -1509,14 +1785,14 @@ const applyChange = async ({
       req: targetReq,
     })
 
-    return dropShadowRow
+    return { cleanup: dropShadowRow }
   }
 
   // A fork that was never edited afterwards. Nothing happened to the document on
   // this branch, so writing main would only bump `updatedAt` and re-run hooks for
   // a no-op — the shadow row is simply discarded.
   if (!writes.length) {
-    return dropShadowRow
+    return { cleanup: dropShadowRow }
   }
 
   if (change.operation === 'create') {
@@ -1641,10 +1917,10 @@ const applyChange = async ({
 
       await applyCreateWrites()
 
-      return () => Promise.resolve('completed')
+      return { cleanup: () => Promise.resolve('completed') }
     }
 
-    await applyBranchCreateWithoutTransaction({
+    return applyBranchCreateWithoutTransaction({
       applyCreateWrites,
       branch,
       collectionSlug,
@@ -1653,8 +1929,6 @@ const applyChange = async ({
       shadow,
       shadowID,
     })
-
-    return () => Promise.resolve('completed')
   }
 
   const fields = payload.collections[collectionSlug]!.config.fields
@@ -1764,7 +2038,7 @@ const applyChange = async ({
     }
   }
 
-  return dropShadowRow
+  return { cleanup: dropShadowRow }
 }
 
 const includesTrashState = (data: Record<string, unknown>): boolean =>
@@ -1812,7 +2086,7 @@ const applyBranchCreateWithoutTransaction = async ({
   req: PayloadRequest
   shadow: Record<string, unknown>
   shadowID: number | string
-}): Promise<void> => {
+}): Promise<AppliedChangeResult> => {
   const existingVersions = await readRawDocumentVersions({
     collectionSlug,
     docID: shadowID,
@@ -1824,6 +2098,36 @@ const applyBranchCreateWithoutTransaction = async ({
   let preparedVersions: RawCollectionVersion[] = []
   const reqContext = req.context as Record<PropertyKey, unknown>
   const previousSkipEnforceMaxVersions = reqContext[skipEnforceMaxVersionsContextKey]
+
+  const recover = async (): Promise<SourceRecoveryOutcome> => {
+    await restoreBranchCreatedShadow({
+      branch,
+      collectionSlug,
+      payload,
+      req,
+      shadow,
+      shadowID,
+    })
+
+    await deleteVersionsByID({
+      collectionSlug,
+      ids: preparedVersions.map(({ id }) => id),
+      payload,
+      req,
+    })
+
+    for (const originalVersion of existingVersions) {
+      await setVersionLatest({
+        collectionSlug,
+        isLatest: originalVersion.latest === true,
+        payload,
+        req,
+        version: originalVersion,
+      })
+    }
+
+    return 'deleted'
+  }
 
   try {
     for (const version of existingLatestVersions) {
@@ -1867,36 +2171,7 @@ const applyBranchCreateWithoutTransaction = async ({
       data: { [branchField]: MAIN_BRANCH },
       req,
     })
-
-    await deleteVersionsByID({
-      collectionSlug,
-      ids: [...existingVersionIDs],
-      payload,
-      req,
-    })
-
-    const collection = payload.collections[collectionSlug]!.config
-    const maxVersions = getVersionsMax(collection)
-
-    if (maxVersions > 0) {
-      await enforceMaxVersions({
-        id: shadowID,
-        collection,
-        max: maxVersions,
-        payload,
-        req,
-      })
-    }
   } catch (error) {
-    await restoreBranchCreatedShadow({
-      branch,
-      collectionSlug,
-      payload,
-      req,
-      shadow,
-      shadowID,
-    })
-
     const versionsAfterFailure = await readRawDocumentVersions({
       collectionSlug,
       docID: shadowID,
@@ -1906,24 +2181,36 @@ const applyBranchCreateWithoutTransaction = async ({
 
     preparedVersions = versionsAfterFailure.filter(({ id }) => !existingVersionIDs.has(String(id)))
 
-    await deleteVersionsByID({
-      collectionSlug,
-      ids: preparedVersions.map(({ id }) => id),
-      payload,
-      req,
-    })
-
-    for (const originalVersion of existingVersions) {
-      await setVersionLatest({
-        collectionSlug,
-        isLatest: originalVersion.latest === true,
-        payload,
-        req,
-        version: originalVersion,
-      })
-    }
+    await recover()
 
     throw error
+  }
+
+  return {
+    cleanup: async () => {
+      await deleteVersionsByID({
+        collectionSlug,
+        ids: [...existingVersionIDs],
+        payload,
+        req,
+      })
+
+      const collection = payload.collections[collectionSlug]!.config
+      const maxVersions = getVersionsMax(collection)
+
+      if (maxVersions > 0) {
+        await enforceMaxVersions({
+          id: shadowID,
+          collection,
+          max: maxVersions,
+          payload,
+          req,
+        })
+      }
+
+      return 'completed'
+    },
+    recover,
   }
 }
 

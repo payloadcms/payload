@@ -155,8 +155,7 @@ export async function BranchChangesView(props: DocumentViewServerProps) {
   )
 
   // The merge history, newest first and paginated: a long-lived branch accumulates
-  // one event per merge indefinitely, and each event carries a snapshot per document
-  // it merged, so this is the one read on this page that grows without bound.
+  // one event per merge indefinitely, so this read is paginated independently.
   const historyPage = Number(
     (props.searchParams as Record<string, string | undefined> | undefined)?.historyPage ?? 1,
   )
@@ -170,8 +169,7 @@ export async function BranchChangesView(props: DocumentViewServerProps) {
         overrideAccess: false,
         page: historyPageNumber,
         req,
-        // `changes.before` / `changes.after` are whole-document snapshots, so they
-        // are left out of the list read — a row's diff is fetched when it is opened.
+        // A row's referenced versions and diff are fetched only when it is opened.
         select: {
           branch: true,
           changes: {
