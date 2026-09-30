@@ -1671,6 +1671,10 @@ export { validateSearchParam } from './database/queryValidation/validateSearchPa
 
 export type {
   BaseDatabaseAdapter,
+  BatchProcessing,
+  BatchProcessingArgs,
+  BatchProcessingOperation,
+  BatchProcessingResult,
   BeginTransaction,
   CommitTransaction,
   Connect,
