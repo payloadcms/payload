@@ -23,23 +23,25 @@
     padding: var(--spacer-2-5);
   }
   .document-card__title {
-    display: block;
+    display: inline-block;
     overflow: hidden;
     color: var(--color-text);
+    max-width: 100%;
     text-overflow: ellipsis;
     text-decoration: none;
+    vertical-align: top;
     white-space: nowrap;
   }
   .document-card__title:focus:not(:focus-visible) {
     opacity: 1;
   }
-  .document-card:focus-visible,
-  .document-card:has(.document-card__title:focus-visible) {
-    outline: var(--accessibility-outline);
-    outline-offset: var(--accessibility-outline-offset);
+  .document-card:focus-visible {
+    border-radius: var(--radius-large);
+    box-shadow: 0 0 0 var(--stroke-width-small) var(--accessibility-focus-color);
   }
   .document-card__title:focus-visible {
-    outline: none;
+    outline: var(--accessibility-outline);
+    outline-offset: var(--spacer-1);
   }
   .document-card__metadata {
     margin-block-start: var(--spacer-1);
