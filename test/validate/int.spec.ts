@@ -22,9 +22,12 @@ import {
   localeFilterOperationEvents,
   localePassEvents,
   permissionOperationEvents,
+  scheduledValidationEvents,
+  validationRuntimeIdentityEvents,
+} from './events.js'
+import {
   publishCollectionSlug,
   publishGlobalSlug,
-  scheduledValidationEvents,
   validationAccessSourceGlobalSlug,
   validationAuthCollectionSlug,
   validationCollectionSlug,
@@ -35,13 +38,12 @@ import {
   validationFallbackCollectionSlug,
   validationFallbackGlobalSlug,
   validationGlobalSlug,
-  validationRuntimeIdentityEvents,
   validationUploadsDir,
   validationUploadsSlug,
   validationWhereCollectionSlug,
   validationWriteTargetGlobalSlug,
   writeTargetsSlug,
-} from './config.js'
+} from './shared.js'
 
 const formatGraphQLID = ({ id, payload }: { id: number | string; payload: Payload }) =>
   payload.db.defaultIDType === 'number' ? id : `"${id}"`
@@ -3576,7 +3578,7 @@ async function createWriteTarget({ payload }: { payload: Payload }) {
   })
 }
 
-async function runWriteAttempt({
+function runWriteAttempt({
   payload,
   targetID,
   writeAttempt,
