@@ -37,6 +37,8 @@ type ReleaseCiDeps = {
   }) => Promise<{ releaseNotes: string; releaseUrl: string }>
   hasGithubToken: boolean
   log: (message: string) => void
+  /** Tag that triggered the workflow (`GITHUB_REF_NAME`). Required unless dry-run. */
+  triggerTag: string | undefined
   workspace: Pick<Workspace, 'build' | 'publish' | 'version'>
 }
 
@@ -53,6 +55,7 @@ export const runReleaseCi = async ({
     generateReleaseNotes,
     hasGithubToken,
     log,
+    triggerTag,
     workspace,
   } = deps
 
@@ -83,6 +86,16 @@ export const runReleaseCi = async ({
   }
   const tag = preid // narrowed to 'beta' | 'canary'
 
+  // npm publishes the package.json version, so a tag pushed on a commit with a
+  // different version would silently skip as "already published".
+  const releaseTag = `v${version}`
+  const shouldCheckTriggerTag = !dryRun || triggerTag !== undefined
+  if (shouldCheckTriggerTag && triggerTag !== releaseTag) {
+    throw new Error(
+      `Trigger tag ${triggerTag ?? '(missing)'} does not match package.json version ${releaseTag}.`,
+    )
+  }
+
   log(`\n  Publishing ${version} to dist-tag '${tag}'${dryRun ? ' (dry-run)' : ''}\n`)
 
   const fromVersion = await findChangelogBaseTag({ version })
@@ -90,7 +103,6 @@ export const runReleaseCi = async ({
     throw new Error(`Could not determine changelog base tag for v${version}`)
   }
 
-  const releaseTag = `v${version}`
   const { releaseNotes, releaseUrl } = await generateReleaseNotes({
     fromVersion,
     toVersion: releaseTag,
@@ -133,6 +145,7 @@ async function main(): Promise<void> {
       generateReleaseNotes,
       hasGithubToken: Boolean(process.env.GITHUB_TOKEN),
       log: console.log,
+      triggerTag: process.env.GITHUB_REF_NAME,
       workspace: getWorkspace(),
     },
     dryRun,
