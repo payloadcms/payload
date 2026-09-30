@@ -53,13 +53,12 @@ export const getAfterChangeHook =
 
         // Files with a clientUploadContext are already in storage.
         const filesToUpload = files.filter((file) => !file.clientUploadContext)
+        const originalDataForUpload = filesToUpload.length
+          ? structuredClone(dataForUpload)
+          : dataForUpload
         const uploadResults = await Promise.all(
           filesToUpload.map(async (file) => {
-            const dataForFile = { ...dataForUpload, sizes: structuredClone(dataForUpload.sizes) }
-            const originalDataForFile = {
-              ...dataForFile,
-              sizes: structuredClone(dataForFile.sizes),
-            }
+            const dataForFile = structuredClone(originalDataForUpload)
             const metadata = await adapter.handleUpload({
               clientUploadContext: file.clientUploadContext,
               collection,
@@ -74,37 +73,59 @@ export const getAfterChangeHook =
               }).storageFilePath,
             })
 
-            return { file, metadata, originalDataForFile }
+            return { file, metadata }
           }),
         )
 
         const uploadMetadata = {} as Partial<FileData & TypeWithID>
-        uploadResults.forEach(({ file, metadata, originalDataForFile }) => {
+        uploadResults.forEach(({ file, metadata }) => {
           if (!metadata || typeof metadata !== 'object') {
             return
           }
 
           const changedMetadata = Object.fromEntries(
             Object.entries(metadata).filter(([key, value]) => {
-              const originalValue = originalDataForFile[key as keyof StorageFileData]
+              const originalValue = originalDataForUpload[key as keyof StorageFileData]
               return !Object.is(value, originalValue) && !isDeepStrictEqual(value, originalValue)
             }),
-          )
+          ) as Partial<StorageFileData>
 
-          if (file.sizeName && Object.keys(changedMetadata).length > 0) {
-            uploadMetadata.sizes = {
-              ...uploadData.sizes,
-              ...uploadMetadata.sizes,
-              [file.sizeName]: {
-                ...uploadData.sizes[file.sizeName]!,
-                ...changedMetadata,
-              } as FileData['sizes'][string],
+          if (file.sizeName) {
+            const { sizes, ...fileMetadata } = changedMetadata
+            const originalSize = originalDataForUpload.sizes?.[file.sizeName] as
+              | Record<string, unknown>
+              | undefined
+            const changedSizeMetadata = Object.fromEntries(
+              Object.entries(sizes?.[file.sizeName] ?? {}).filter(([key, value]) => {
+                const originalValue = originalSize?.[key]
+                return !Object.is(value, originalValue) && !isDeepStrictEqual(value, originalValue)
+              }),
+            )
+            const sizeMetadata = { ...fileMetadata, ...changedSizeMetadata }
+            if (Object.keys(sizeMetadata).length > 0) {
+              uploadMetadata.sizes = {
+                ...uploadData.sizes,
+                ...uploadMetadata.sizes,
+                [file.sizeName]: {
+                  ...uploadData.sizes[file.sizeName],
+                  ...uploadMetadata.sizes?.[file.sizeName],
+                  ...sizeMetadata,
+                } as FileData['sizes'][string],
+              }
             }
-          } else if (!file.sizeName) {
+          } else {
             Object.assign(uploadMetadata, changedMetadata)
           }
         })
 
+        const tempFilePath =
+          req.file?.tempFilePath ??
+          (req.context?._payloadCloudStorage as { file?: typeof req.file } | undefined)?.file
+            ?.tempFilePath
+        if (tempFilePath) {
+          req.context ??= {}
+          req.context._payloadCloudStorageTempFilePath = tempFilePath
+        }
         req.file = undefined
         req.payloadUploadSizes = undefined
         if (req.context) {
