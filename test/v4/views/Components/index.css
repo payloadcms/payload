@@ -131,6 +131,19 @@
   width: 100%;
 }
 
+.components-view__popup-menu {
+  flex: 1;
+  width: 100%;
+}
+
+.components-view__popup-menu .popup__trigger-wrap {
+  width: 100%;
+}
+
+.components-view__popup-menu .popup__trigger-wrap > div {
+  width: 100%;
+}
+
 /* Tooltip trigger */
 .components-view__tooltip-trigger {
   position: relative;

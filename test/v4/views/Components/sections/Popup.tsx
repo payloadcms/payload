@@ -34,12 +34,14 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
       <Popup
         button={<Button buttonStyle="secondary">Open nested menu</Button>}
         buttonType="custom"
+        className="components-view__popup-menu"
         popupAriaLabel="Nested menu level one"
         popupType="menu"
         render={() => (
           <PopupList.MenuItem>
             <Popup
               buttonType="custom"
+              className="components-view__popup-menu"
               hoverSubmenu
               popupAriaLabel="Theme menu"
               popupType="menu"
@@ -47,6 +49,7 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
                 <PopupList.MenuItem>
                   <Popup
                     buttonType="custom"
+                    className="components-view__popup-menu"
                     hoverSubmenu
                     popupAriaLabel="Color menu"
                     popupType="menu"
@@ -91,6 +94,7 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
             />
             <Popup
               buttonType="custom"
+              className="components-view__popup-menu"
               hoverSubmenu
               popupAriaLabel="Language menu"
               popupType="menu"
@@ -117,6 +121,7 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
             />
           </PopupList.MenuItem>
         )}
+        size="large"
       />
     </Variant>
   </Section>
