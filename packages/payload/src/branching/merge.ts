@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto'
+
 import type { ArrayField, BlocksField, Field } from '../fields/config/types.js'
 import type { Payload, PayloadRequest } from '../types/index.js'
 import type { DiscardOptions } from './discard.js'
@@ -135,6 +137,10 @@ type MergeEventChange = {
     | 'restored'
     | 'unavailable'
     | 'unknown'
+  sourceID?: string
+  sourceRevision?: string
+  sourceUpdatedAt?: string
+  sourceVersionIDs?: (number | string)[]
   targetID?: string
 }
 
@@ -144,6 +150,19 @@ type SourceRecoveryOutcome = 'deleted' | 'restored'
 type AppliedChangeResult = {
   cleanup: () => Promise<SourceCleanupOutcome>
   recover?: () => Promise<SourceRecoveryOutcome>
+  sourceID?: string
+  sourceRevision?: string
+  sourceUpdatedAt?: string
+  sourceVersionIDs?: (number | string)[]
+}
+
+type PersistedMergeEvent = {
+  changes?: MergeEventChange[]
+  completedAt?: string
+  error?: string
+  id: number | string
+  mergedAt?: string
+  status?: string
 }
 
 /**
@@ -395,6 +414,332 @@ const getSnapshotDocumentTitle = ({
   return typeof title === 'number' || typeof title === 'string' ? String(title) : String(docID)
 }
 
+const toMergeableChange = ({ change }: { change: MergeEventChange }): MergeableChange | null => {
+  if (change.globalSlug) {
+    return {
+      changeID: change.changeID,
+      entityType: 'global',
+      globalSlug: change.globalSlug,
+      operation: change.operation,
+    }
+  }
+
+  if (!change.collectionSlug || change.docID === undefined) {
+    return null
+  }
+
+  return {
+    changeID: change.changeID,
+    collectionSlug: change.collectionSlug,
+    docID: change.docID,
+    entityType: 'collection',
+    operation: change.operation,
+  }
+}
+
+const persistRetriedMergeEvent = async ({
+  event,
+  payload,
+  req,
+}: {
+  event: PersistedMergeEvent
+  payload: Payload
+  req: PayloadRequest
+}): Promise<void> => {
+  const changes = event.changes ?? []
+  const hasUnresolvedCleanup = changes.some(({ cleanupOutcome }) =>
+    ['failed', 'pending', 'unknown'].includes(cleanupOutcome),
+  )
+
+  await payload.update({
+    id: event.id,
+    collection: branchMergesCollectionSlug,
+    data: {
+      changes,
+      completedAt: hasUnresolvedCleanup ? event.completedAt : new Date().toISOString(),
+      error: hasUnresolvedCleanup ? event.error : null,
+      status: hasUnresolvedCleanup ? 'cleanupFailed' : 'succeeded',
+    },
+    overrideAccess: true,
+    req,
+  })
+}
+
+type SerializedGlobalSourceState = {
+  data: string
+  draft: boolean
+  locale: string
+}
+
+const getGlobalSourceRevision = ({
+  sourceStates,
+}: {
+  sourceStates: SerializedGlobalSourceState[]
+}): string => createHash('sha256').update(JSON.stringify(sourceStates)).digest('hex')
+
+const readSerializedGlobalSourceStates = async ({
+  branch,
+  globalSlug,
+  payload,
+  req,
+}: {
+  branch: string
+  globalSlug: string
+  payload: Payload
+  req: PayloadRequest
+}): Promise<SerializedGlobalSourceState[]> => {
+  const writes = await resolveGlobalMergeWrites({ branch, globalSlug, payload, req })
+  const locales = getGlobalMergeLocales({ globalSlug, payload, req })
+  const sourceStates: SerializedGlobalSourceState[] = []
+
+  for (const write of writes) {
+    for (const locale of locales) {
+      const data = await readBranchGlobalWrite({
+        branch,
+        draft: write.draft,
+        globalSlug,
+        locale,
+        payload,
+        req,
+      })
+
+      if (data) {
+        sourceStates.push({ data: JSON.stringify(data), draft: write.draft, locale })
+      }
+    }
+  }
+
+  return sourceStates
+}
+
+/**
+ * Retries only the source cleanup recorded by a committed merge event.
+ *
+ * The target write is already durable. Replaying it would run hooks and create
+ * versions again, so cleanup uses the stored source row identity and revision.
+ * A changed source row belongs to newer branch work and is left for the normal
+ * merge path.
+ */
+const retryFailedCleanups = async ({
+  branch,
+  payload,
+  req,
+  selected,
+}: {
+  branch: string
+  payload: Payload
+  req: PayloadRequest
+  selected?: (number | string)[]
+}): Promise<{ handledChangeIDs: Set<string>; retried: MergeableChange[] }> => {
+  const failedEvents = await payload.find({
+    collection: branchMergesCollectionSlug,
+    depth: 0,
+    overrideAccess: true,
+    pagination: false,
+    req,
+    sort: '-startedAt',
+    where: {
+      and: [{ branch: { equals: branch } }, { status: { equals: 'cleanupFailed' } }],
+    },
+  })
+  const selectedChangeIDs = selected ? new Set(selected.map(String)) : null
+  const handledChangeIDs = new Set<string>()
+  const retried: MergeableChange[] = []
+  const retriedChangeIDs = new Set<string>()
+
+  for (const eventDocument of failedEvents.docs) {
+    const event = eventDocument as unknown as PersistedMergeEvent
+
+    for (const change of event.changes ?? []) {
+      const canRetryCollection = Boolean(
+        change.collectionSlug &&
+          change.sourceID &&
+          change.sourceUpdatedAt &&
+          change.operation !== 'create',
+      )
+      const canRetryGlobal = Boolean(change.globalSlug && change.sourceRevision)
+      const canRetryCreatedCollection = Boolean(
+        change.collectionSlug &&
+          change.operation === 'create' &&
+          change.sourceID &&
+          change.sourceVersionIDs,
+      )
+
+      if (
+        retriedChangeIDs.has(change.changeID) ||
+        (selectedChangeIDs && !selectedChangeIDs.has(change.changeID)) ||
+        change.applicationOutcome !== 'committed' ||
+        change.cleanupOutcome !== 'failed' ||
+        (!canRetryCollection && !canRetryCreatedCollection && !canRetryGlobal)
+      ) {
+        continue
+      }
+
+      event.changes = updateMergeEventChange({
+        changeID: change.changeID,
+        changes: event.changes ?? [],
+        update: { cleanupError: undefined, cleanupOutcome: 'pending' },
+      })
+      await persistRetriedMergeEvent({ event, payload, req })
+
+      try {
+        let isSuperseded = false
+
+        if (canRetryGlobal) {
+          const currentSourceStates = await readSerializedGlobalSourceStates({
+            branch,
+            globalSlug: change.globalSlug!,
+            payload,
+            req,
+          })
+
+          isSuperseded =
+            currentSourceStates.length > 0 &&
+            getGlobalSourceRevision({ sourceStates: currentSourceStates }) !== change.sourceRevision
+
+          if (!isSuperseded) {
+            await deleteBranchGlobalVersionChain({
+              branch,
+              globalSlug: change.globalSlug!,
+              payload,
+              req,
+            })
+            await payload.db.deleteBranchGlobal?.({
+              branch,
+              globalSlug: change.globalSlug!,
+              req,
+            })
+          }
+        } else if (canRetryCreatedCollection) {
+          const newerSource = await payload.db.findOne({
+            branch: false,
+            collection: change.collectionSlug!,
+            req,
+            where: {
+              and: [
+                { [branchField]: { equals: branch } },
+                { [branchDocIDField]: { equals: change.targetID } },
+              ],
+            },
+          })
+
+          isSuperseded = Boolean(newerSource)
+
+          if (!isSuperseded) {
+            await deleteVersionsByID({
+              collectionSlug: change.collectionSlug!,
+              ids: change.sourceVersionIDs!,
+              payload,
+              req,
+            })
+
+            const collection = payload.collections[change.collectionSlug!]!.config
+            const maxVersions = getVersionsMax(collection)
+
+            if (maxVersions > 0) {
+              await enforceMaxVersions({
+                id: change.sourceID!,
+                collection,
+                max: maxVersions,
+                payload,
+                req,
+              })
+            }
+          }
+        } else {
+          const source = (await payload.db.findOne({
+            branch: false,
+            collection: change.collectionSlug!,
+            req,
+            where: { id: { equals: change.sourceID! } },
+          })) as null | Record<string, unknown>
+          const currentSourceUpdatedAt = getTimestamp({ value: source?.updatedAt })
+          const mergedSourceUpdatedAt = getTimestamp({ value: change.sourceUpdatedAt })
+
+          isSuperseded = Boolean(
+            source &&
+              currentSourceUpdatedAt !== undefined &&
+              mergedSourceUpdatedAt !== undefined &&
+              currentSourceUpdatedAt !== mergedSourceUpdatedAt,
+          )
+
+          if (!isSuperseded && source) {
+            await deleteBranchVersionChain({
+              branch,
+              collectionSlug: change.collectionSlug!,
+              payload,
+              req,
+              rowID: change.sourceID!,
+            })
+            await payload.db.deleteOne({
+              branch: false,
+              collection: change.collectionSlug!,
+              req,
+              where: { id: { equals: change.sourceID! } },
+            })
+          }
+        }
+
+        if (isSuperseded) {
+          event.changes = updateMergeEventChange({
+            changeID: change.changeID,
+            changes: event.changes,
+            update: { cleanupOutcome: 'superseded' },
+          })
+          await persistRetriedMergeEvent({ event, payload, req })
+          handledChangeIDs.add(change.changeID)
+          retriedChangeIDs.add(change.changeID)
+          continue
+        }
+
+        const changeRecord = await payload.db.findOne({
+          collection: branchChangesCollectionSlug,
+          req,
+          where: { id: { equals: change.changeID } },
+        })
+
+        if (changeRecord) {
+          await payload.delete({
+            id: change.changeID,
+            collection: branchChangesCollectionSlug,
+            overrideAccess: true,
+            req,
+          })
+        }
+
+        event.changes = updateMergeEventChange({
+          changeID: change.changeID,
+          changes: event.changes,
+          update: { cleanupOutcome: 'completed' },
+        })
+        await persistRetriedMergeEvent({ event, payload, req })
+
+        const mergeableChange = toMergeableChange({ change })
+
+        if (mergeableChange) {
+          retried.push(mergeableChange)
+        }
+        handledChangeIDs.add(change.changeID)
+        retriedChangeIDs.add(change.changeID)
+      } catch (error) {
+        const cleanupError = getMergeErrorMessage({ error })
+
+        event.changes = updateMergeEventChange({
+          changeID: change.changeID,
+          changes: event.changes,
+          update: { cleanupError, cleanupOutcome: 'failed' },
+        })
+        event.error = cleanupError
+        await persistRetriedMergeEvent({ event, payload, req })
+
+        throw error
+      }
+    }
+  }
+
+  return { handledChangeIDs, retried }
+}
+
 /**
  * Applies a branch's changes to `main`.
  *
@@ -444,6 +789,11 @@ export const mergeBranch = async (
     throw new Error(`Branch "${branch}" was not found.`)
   }
 
+  const cleanupRetry = dryRun
+    ? { handledChangeIDs: new Set<string>(), retried: [] }
+    : await retryFailedCleanups({ branch, payload, req, selected })
+  const retriedCleanups = cleanupRetry.retried
+
   const allChanges = await payload.find({
     collection: branchChangesCollectionSlug,
     overrideAccess: true,
@@ -454,7 +804,9 @@ export const mergeBranch = async (
   })
 
   const selectedChanges = allChanges.docs.filter(
-    (change) => !selected || selected.map(String).includes(String(change.id)),
+    (change) =>
+      !cleanupRetry.handledChangeIDs.has(String(change.id)) &&
+      (!selected || selected.map(String).includes(String(change.id))),
   )
 
   // Globals travel the same registry but not the same pipeline: there is one of each, so
@@ -503,13 +855,16 @@ export const mergeBranch = async (
   const applicable = hasPreflightErrors ? [] : pending
   const applicableGlobals = hasPreflightErrors ? [] : pendingGlobals
 
-  const mergeable: MergeableChange[] = applicable.map((change) => ({
-    changeID: change.id,
-    collectionSlug: change.collectionSlug as string,
-    docID: changeDocID(change),
-    entityType: 'collection' as const,
-    operation: change.operation as BranchOperation,
-  }))
+  const mergeable: MergeableChange[] = [
+    ...retriedCleanups,
+    ...applicable.map((change) => ({
+      changeID: change.id,
+      collectionSlug: change.collectionSlug as string,
+      docID: changeDocID(change),
+      entityType: 'collection' as const,
+      operation: change.operation as BranchOperation,
+    })),
+  ]
 
   mergeable.push(
     ...applicableGlobals.map((change) => ({
@@ -554,12 +909,30 @@ export const mergeBranch = async (
     blocked,
     canMerge: mergeable.length > 0,
     mergeable,
-    merged: [],
+    merged: [...retriedCleanups],
     validationErrors: validation.errors,
     warnings,
   }
 
-  if (dryRun || !mergeable.length) {
+  const hasChangesToApply = applicable.length > 0 || applicableGlobals.length > 0
+
+  if (dryRun || !hasChangesToApply) {
+    if (!dryRun && retriedCleanups.length && allChanges.docs.length === 0) {
+      const mergedAt = new Date().toISOString()
+
+      await payload.update({
+        id: branchDoc.id,
+        collection: branchesCollectionSlug,
+        data: { mergedAt, status: closeBranch ? 'closed' : 'merged' },
+        overrideAccess: true,
+        req,
+      })
+
+      if (incomingReq) {
+        refreshBranchState(incomingReq)
+      }
+    }
+
     return result
   }
 
@@ -1030,7 +1403,14 @@ export const mergeBranch = async (
       mergeEventChanges = updateMergeEventChange({
         changeID: change.id,
         changes: mergeEventChanges,
-        update: { afterVersionID, applicationOutcome: 'applied', beforeVersionID },
+        update: {
+          afterVersionID,
+          applicationOutcome: 'applied',
+          beforeVersionID,
+          sourceID: appliedChange.sourceID,
+          sourceUpdatedAt: appliedChange.sourceUpdatedAt,
+          sourceVersionIDs: appliedChange.sourceVersionIDs,
+        },
       })
       await persistAppliedMergeEvent({ changeID: change.id })
 
@@ -1146,10 +1526,10 @@ export const mergeBranch = async (
         throw new APIError(dependencyBlockedAtUse[0]!.message, 409)
       }
 
-      let cleanup: () => Promise<SourceCleanupOutcome>
+      let appliedGlobal: AppliedChangeResult
 
       try {
-        cleanup = await applyGlobalChange({
+        appliedGlobal = await applyGlobalChange({
           branch,
           globalSlug,
           overrideAccess,
@@ -1165,12 +1545,17 @@ export const mergeBranch = async (
         }
       }
 
-      sourceCleanupPlans.push({ changeID: change.id, cleanup })
+      sourceCleanupPlans.push({ changeID: change.id, ...appliedGlobal })
       appliedChangeIDs.add(String(change.id))
       mergeEventChanges = updateMergeEventChange({
         changeID: change.id,
         changes: mergeEventChanges,
-        update: { afterVersionID, applicationOutcome: 'applied', beforeVersionID },
+        update: {
+          afterVersionID,
+          applicationOutcome: 'applied',
+          beforeVersionID,
+          sourceRevision: appliedGlobal.sourceRevision,
+        },
       })
       await persistAppliedMergeEvent({ changeID: change.id })
 
@@ -1681,6 +2066,12 @@ const applyChange = async ({
   mainWriteReq.query = { ...mainWriteReq.query }
   delete mainWriteReq.query.uploadEdits
   delete (mainWriteReq.context as Record<string, unknown>)._payloadCloudStorage
+  const sourceTimestamp = getTimestamp({ value: shadow.updatedAt })
+  const sourceIdentity = {
+    sourceID: String(shadowID),
+    sourceUpdatedAt:
+      sourceTimestamp === undefined ? undefined : new Date(sourceTimestamp).toISOString(),
+  }
 
   // The chain goes with the row. It hangs off the shadow row's primary key rather
   // than the canonical ID, so nothing addressing the document cascades to it, and a
@@ -1785,14 +2176,14 @@ const applyChange = async ({
       req: targetReq,
     })
 
-    return { cleanup: dropShadowRow }
+    return { cleanup: dropShadowRow, ...sourceIdentity }
   }
 
   // A fork that was never edited afterwards. Nothing happened to the document on
   // this branch, so writing main would only bump `updatedAt` and re-run hooks for
   // a no-op — the shadow row is simply discarded.
   if (!writes.length) {
-    return { cleanup: dropShadowRow }
+    return { cleanup: dropShadowRow, ...sourceIdentity }
   }
 
   if (change.operation === 'create') {
@@ -1917,10 +2308,10 @@ const applyChange = async ({
 
       await applyCreateWrites()
 
-      return { cleanup: () => Promise.resolve('completed') }
+      return { cleanup: () => Promise.resolve('completed'), ...sourceIdentity }
     }
 
-    return applyBranchCreateWithoutTransaction({
+    const appliedCreate = await applyBranchCreateWithoutTransaction({
       applyCreateWrites,
       branch,
       collectionSlug,
@@ -1929,6 +2320,8 @@ const applyChange = async ({
       shadow,
       shadowID,
     })
+
+    return { ...appliedCreate, ...sourceIdentity }
   }
 
   const fields = payload.collections[collectionSlug]!.config.fields
@@ -2038,7 +2431,7 @@ const applyChange = async ({
     }
   }
 
-  return { cleanup: dropShadowRow }
+  return { cleanup: dropShadowRow, ...sourceIdentity }
 }
 
 const includesTrashState = (data: Record<string, unknown>): boolean =>
@@ -2211,6 +2604,7 @@ const applyBranchCreateWithoutTransaction = async ({
       return 'completed'
     },
     recover,
+    sourceVersionIDs: [...existingVersionIDs],
   }
 }
 
@@ -2360,7 +2754,7 @@ const applyGlobalChange = async ({
   payload: Payload
   req: PayloadRequest
   targetReq: PayloadRequest
-}): Promise<() => Promise<SourceCleanupOutcome>> => {
+}): Promise<AppliedChangeResult> => {
   const writes = await resolveGlobalMergeWrites({ branch, globalSlug, payload, req })
 
   if (!writes.length) {
@@ -2414,26 +2808,29 @@ const applyGlobalChange = async ({
     }
   }
 
-  return async () => {
-    for (const sourceState of appliedSourceStates) {
-      const currentData = await readBranchGlobalWrite({
-        branch,
-        draft: sourceState.draft,
-        globalSlug,
-        locale: sourceState.locale,
-        payload,
-        req,
-      })
+  return {
+    cleanup: async () => {
+      for (const sourceState of appliedSourceStates) {
+        const currentData = await readBranchGlobalWrite({
+          branch,
+          draft: sourceState.draft,
+          globalSlug,
+          locale: sourceState.locale,
+          payload,
+          req,
+        })
 
-      if (currentData && JSON.stringify(currentData) !== sourceState.data) {
-        return 'superseded'
+        if (currentData && JSON.stringify(currentData) !== sourceState.data) {
+          return 'superseded'
+        }
       }
-    }
 
-    await deleteBranchGlobalVersionChain({ branch, globalSlug, payload, req })
-    await payload.db.deleteBranchGlobal!({ branch, globalSlug, req })
+      await deleteBranchGlobalVersionChain({ branch, globalSlug, payload, req })
+      await payload.db.deleteBranchGlobal!({ branch, globalSlug, req })
 
-    return 'completed'
+      return 'completed'
+    },
+    sourceRevision: getGlobalSourceRevision({ sourceStates: appliedSourceStates }),
   }
 }
 

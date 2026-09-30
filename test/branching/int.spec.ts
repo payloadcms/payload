@@ -9211,6 +9211,182 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       }
     })
 
+    test('should report that recovery restored over an intervening target edit', async () => {
+      branchSlug = 'non-transactional-intervening-target-recovery'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Intervening target recovery', slug: branchSlug },
+      })
+      const versionedDocument = await payload.create({
+        collection: pagesSlug,
+        data: { title: 'Intervening recovery original' },
+      })
+      const failingDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Intervening recovery failure original' },
+      })
+
+      await payload.update({
+        id: versionedDocument.id,
+        branch: branchSlug,
+        collection: pagesSlug,
+        data: { title: 'Intervening recovery branch edit' },
+      })
+      await payload.update({
+        id: failingDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Intervening recovery failure edit' },
+      })
+
+      const beginTransactionSpy = vi.spyOn(payload.db, 'beginTransaction').mockResolvedValue(null)
+
+      hookSpy.beforeChange = async ({ data }: { data: Record<string, unknown> }) => {
+        if (data.title === 'Intervening recovery failure edit') {
+          await payload.update({
+            id: versionedDocument.id,
+            collection: pagesSlug,
+            data: { title: 'Intervening main edit' },
+            draft: true,
+          })
+          throw new Error('Simulated failure after intervening target edit')
+        }
+      }
+
+      try {
+        await expect(
+          payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+        ).rejects.toThrow('Simulated failure after intervening target edit')
+
+        const onMain = await payload.findByID({
+          id: versionedDocument.id,
+          collection: pagesSlug,
+          draft: true,
+        })
+        const mergeEvent = (
+          await payload.find({
+            collection: branchMergesSlug,
+            pagination: false,
+            where: { branch: { equals: branchSlug } },
+          })
+        ).docs[0] as unknown as {
+          changes: {
+            applicationOutcome: string
+            collectionSlug?: string
+            recoveryOutcome: string
+          }[]
+          error?: string
+          status: string
+        }
+        const recoveredChange = mergeEvent.changes.find(
+          ({ collectionSlug }) => collectionSlug === pagesSlug,
+        )
+
+        expect(onMain.title).toBe('Intervening recovery original')
+        expect(mergeEvent.status).toBe('failed')
+        expect(mergeEvent.error).toContain('Simulated failure after intervening target edit')
+        expect(recoveredChange).toMatchObject({
+          applicationOutcome: 'applied',
+          recoveryOutcome: 'restored',
+        })
+      } finally {
+        hookSpy.beforeChange = undefined
+        beginTransactionSpy.mockRestore()
+      }
+    })
+
+    test('should retain the original merge error when target recovery fails', async () => {
+      branchSlug = 'non-transactional-target-recovery-failure'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Target recovery failure', slug: branchSlug },
+      })
+      const versionedDocument = await payload.create({
+        collection: pagesSlug,
+        data: { title: 'Recovery failure original' },
+      })
+      const failingDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Later failure original' },
+      })
+
+      await payload.update({
+        id: versionedDocument.id,
+        branch: branchSlug,
+        collection: pagesSlug,
+        data: { title: 'Recovery failure branch edit' },
+      })
+      await payload.update({
+        id: failingDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Later failure branch edit' },
+      })
+
+      const beginTransactionSpy = vi.spyOn(payload.db, 'beginTransaction').mockResolvedValue(null)
+      const restoreVersionSpy = vi
+        .spyOn(payload, 'restoreVersion')
+        .mockRejectedValueOnce(new Error('Simulated target recovery failure'))
+
+      hookSpy.beforeChange = ({ data }: { data: Record<string, unknown> }) => {
+        if (data.title === 'Later failure branch edit') {
+          throw new Error('Simulated original merge failure before recovery')
+        }
+      }
+
+      try {
+        await expect(
+          payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+        ).rejects.toThrow('Simulated original merge failure before recovery')
+
+        const onMain = await payload.findByID({
+          id: versionedDocument.id,
+          collection: pagesSlug,
+          draft: true,
+        })
+        const remainingChanges = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+        const mergeEvent = (
+          await payload.find({
+            collection: branchMergesSlug,
+            pagination: false,
+            where: { branch: { equals: branchSlug } },
+          })
+        ).docs[0] as unknown as {
+          changes: {
+            applicationOutcome: string
+            collectionSlug?: string
+            recoveryError?: string
+            recoveryOutcome: string
+          }[]
+          error?: string
+          status: string
+        }
+        const failedRecovery = mergeEvent.changes.find(
+          ({ collectionSlug }) => collectionSlug === pagesSlug,
+        )
+
+        expect(onMain.title).toBe('Recovery failure branch edit')
+        expect(remainingChanges.docs).toHaveLength(2)
+        expect(mergeEvent.status).toBe('failed')
+        expect(mergeEvent.error).toContain('Simulated original merge failure before recovery')
+        expect(failedRecovery).toMatchObject({
+          applicationOutcome: 'applied',
+          recoveryOutcome: 'failed',
+        })
+        expect(failedRecovery?.recoveryError).toContain('Simulated target recovery failure')
+      } finally {
+        hookSpy.beforeChange = undefined
+        restoreVersionSpy.mockRestore()
+        beginTransactionSpy.mockRestore()
+      }
+    })
+
     test('should retain committed target content when post-commit source cleanup fails', async () => {
       branchSlug = 'post-commit-cleanup-failure'
 
@@ -9299,7 +9475,314 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       )
     })
 
-    test('should retain a committed deletion when deletion-marker cleanup fails', async () => {
+    test('should retry failed source cleanup without repeating the committed target write', async () => {
+      branchSlug = 'post-commit-cleanup-retry'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Post-commit cleanup retry', slug: branchSlug },
+      })
+      const mainDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Cleanup retry original' },
+      })
+
+      await payload.update({
+        id: mainDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Cleanup retry edited' },
+      })
+
+      const shadow = (
+        await payload.find({
+          branch: false,
+          collection: postsSlug,
+          pagination: false,
+          showHiddenFields: true,
+          where: { _branch: { equals: branchSlug } },
+        })
+      ).docs[0]!
+      const originalDeleteOne = payload.db.deleteOne.bind(payload.db)
+      let cleanupAttempts = 0
+      let targetWriteCount = 0
+
+      deleteOneSpy = vi.spyOn(payload.db, 'deleteOne').mockImplementation(async (args: any) => {
+        if (args?.where?.id?.equals === shadow.id && cleanupAttempts++ === 0) {
+          throw new Error('Simulated retryable source cleanup failure')
+        }
+
+        return originalDeleteOne(args)
+      })
+      hookSpy.beforeChange = ({ data }: { data: Record<string, unknown> }) => {
+        if (data.title === 'Cleanup retry edited') {
+          targetWriteCount += 1
+        }
+      }
+
+      await payload.branches.merge({ branch: branchSlug, overrideAccess: true })
+
+      expect(targetWriteCount).toBeGreaterThan(0)
+
+      const targetWriteCountAfterFirstMerge = targetWriteCount
+
+      const failedEvent = (
+        await payload.find({
+          collection: branchMergesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+      ).docs[0] as unknown as {
+        changes: {
+          applicationOutcome: string
+          cleanupOutcome: string
+          sourceID?: string
+          sourceUpdatedAt?: string
+        }[]
+        status: string
+      }
+
+      expect(failedEvent).toMatchObject({
+        changes: [
+          {
+            applicationOutcome: 'committed',
+            cleanupOutcome: 'failed',
+            sourceID: String(shadow.id),
+            sourceUpdatedAt: shadow.updatedAt,
+          },
+        ],
+        status: 'cleanupFailed',
+      })
+
+      await payload.branches.merge({ branch: branchSlug, overrideAccess: true })
+
+      const onMain = await payload.findByID({ id: mainDocument.id, collection: postsSlug })
+      const sourceRows = await payload.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        showHiddenFields: true,
+        where: { _branch: { equals: branchSlug } },
+      })
+      const remainingChanges = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: branchSlug } },
+      })
+      const mergeEvents = await payload.find({
+        collection: branchMergesSlug,
+        pagination: false,
+        where: { branch: { equals: branchSlug } },
+      })
+      const mergeEvent = mergeEvents.docs[0] as unknown as {
+        changes: { applicationOutcome: string; cleanupOutcome: string }[]
+        error?: string
+        status: string
+      }
+
+      expect(onMain.title).toBe('Cleanup retry edited')
+      expect(targetWriteCount).toBe(targetWriteCountAfterFirstMerge)
+      expect(sourceRows.docs).toHaveLength(0)
+      expect(remainingChanges.docs).toHaveLength(0)
+      expect(mergeEvents.docs).toHaveLength(1)
+      expect(mergeEvent.status).toBe('succeeded')
+      expect(mergeEvent.error).toBeNull()
+      expect(mergeEvent.changes[0]).toMatchObject({
+        applicationOutcome: 'committed',
+        cleanupOutcome: 'completed',
+      })
+    })
+
+    test('should preserve newer source work during a failed cleanup retry', async () => {
+      branchSlug = 'post-commit-cleanup-retry-newer-source'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Cleanup retry with newer source', slug: branchSlug },
+      })
+      const mainDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Cleanup retry original' },
+      })
+
+      await payload.update({
+        id: mainDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'First merged source' },
+      })
+
+      const shadow = (
+        await payload.find({
+          branch: false,
+          collection: postsSlug,
+          pagination: false,
+          showHiddenFields: true,
+          where: { _branch: { equals: branchSlug } },
+        })
+      ).docs[0]!
+      const originalDeleteOne = payload.db.deleteOne.bind(payload.db)
+      let cleanupAttempts = 0
+
+      deleteOneSpy = vi.spyOn(payload.db, 'deleteOne').mockImplementation(async (args: any) => {
+        if (args?.where?.id?.equals === shadow.id && cleanupAttempts++ === 0) {
+          throw new Error('Simulated source cleanup failure before newer work')
+        }
+
+        return originalDeleteOne(args)
+      })
+
+      await payload.branches.merge({ branch: branchSlug, overrideAccess: true })
+      await payload.update({
+        id: mainDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Newer source work' },
+      })
+
+      const retryResult = await payload.branches.merge({
+        branch: branchSlug,
+        overrideAccess: true,
+      })
+      const onMain = await payload.findByID({ id: mainDocument.id, collection: postsSlug })
+      const onBranch = await payload.findByID({
+        id: mainDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+      })
+      const sourceRows = await payload.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        showHiddenFields: true,
+        where: { _branch: { equals: branchSlug } },
+      })
+      const remainingChanges = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: branchSlug } },
+      })
+      const mergeEvents = await payload.find({
+        collection: branchMergesSlug,
+        pagination: false,
+        where: { branch: { equals: branchSlug } },
+      })
+      const mergeEvent = mergeEvents.docs[0] as unknown as {
+        changes: { applicationOutcome: string; cleanupOutcome: string }[]
+        error?: null | string
+        status: string
+      }
+
+      expect(retryResult.merged).toHaveLength(0)
+      expect(onMain.title).toBe('First merged source')
+      expect(onBranch.title).toBe('Newer source work')
+      expect(sourceRows.docs).toHaveLength(1)
+      expect(remainingChanges.docs).toHaveLength(1)
+      expect(mergeEvents.docs).toHaveLength(1)
+      expect(mergeEvent.status).toBe('succeeded')
+      expect(mergeEvent.error).toBeNull()
+      expect(mergeEvent.changes[0]).toMatchObject({
+        applicationOutcome: 'committed',
+        cleanupOutcome: 'superseded',
+      })
+    })
+
+    test('should retry branch-created version cleanup without repeating the target write', async () => {
+      branchSlug = 'post-commit-created-version-cleanup-retry'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Branch-created version cleanup retry', slug: branchSlug },
+      })
+      const createdOnBranch = await payload.create({
+        branch: branchSlug,
+        collection: pagesSlug,
+        data: { title: 'Created version cleanup retry' },
+      })
+      const beginTransactionSpy = vi.spyOn(payload.db, 'beginTransaction').mockResolvedValue(null)
+      const originalDeleteVersions = payload.db.deleteVersions.bind(payload.db)
+      let sourceVersionCleanupAttempts = 0
+      let targetWriteCount = 0
+      const deleteVersionsSpy = vi
+        .spyOn(payload.db, 'deleteVersions')
+        .mockImplementation(async (args) => {
+          if (args.collection === pagesSlug && sourceVersionCleanupAttempts++ === 0) {
+            throw new Error('Simulated branch-created source version cleanup failure')
+          }
+
+          return originalDeleteVersions(args)
+        })
+
+      hookSpy.pageBeforeChange = () => {
+        targetWriteCount += 1
+      }
+
+      try {
+        await payload.branches.merge({ branch: branchSlug, overrideAccess: true })
+
+        const targetWriteCountAfterFirstMerge = targetWriteCount
+        const failedEvent = (
+          await payload.find({
+            collection: branchMergesSlug,
+            pagination: false,
+            where: { branch: { equals: branchSlug } },
+          })
+        ).docs[0] as unknown as {
+          changes: {
+            applicationOutcome: string
+            cleanupOutcome: string
+            sourceVersionIDs?: string[]
+          }[]
+          status: string
+        }
+
+        expect(failedEvent.status).toBe('cleanupFailed')
+        expect(failedEvent.changes[0]?.sourceVersionIDs?.length).toBeGreaterThan(0)
+
+        const retryResult = await payload.branches.merge({
+          branch: branchSlug,
+          overrideAccess: true,
+        })
+        const onMain = await payload.findByID({
+          id: createdOnBranch.id,
+          collection: pagesSlug,
+          draft: true,
+        })
+        const remainingChanges = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+        const mergeEvents = await payload.find({
+          collection: branchMergesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+        const eventAfterRetry = mergeEvents.docs[0] as unknown as {
+          changes: { applicationOutcome: string; cleanupOutcome: string }[]
+          error?: null | string
+          status: string
+        }
+
+        expect(retryResult.merged).toHaveLength(1)
+        expect(onMain.title).toBe('Created version cleanup retry')
+        expect(targetWriteCount).toBe(targetWriteCountAfterFirstMerge)
+        expect(remainingChanges.docs).toHaveLength(0)
+        expect(mergeEvents.docs).toHaveLength(1)
+        expect(eventAfterRetry.status).toBe('succeeded')
+        expect(eventAfterRetry.error).toBeNull()
+        expect(eventAfterRetry.changes[0]).toMatchObject({
+          applicationOutcome: 'committed',
+          cleanupOutcome: 'completed',
+        })
+      } finally {
+        hookSpy.pageBeforeChange = undefined
+        deleteVersionsSpy.mockRestore()
+        beginTransactionSpy.mockRestore()
+      }
+    })
+
+    test('should retry failed deletion-marker cleanup without repeating the deletion', async () => {
       branchSlug = 'post-commit-deletion-cleanup-failure'
 
       await payload.create({
@@ -9327,9 +9810,10 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         })
       ).docs[0]!
       const originalDeleteOne = payload.db.deleteOne.bind(payload.db)
+      let cleanupAttempts = 0
 
       deleteOneSpy = vi.spyOn(payload.db, 'deleteOne').mockImplementation(async (args: any) => {
-        if (args?.where?.id?.equals === deletionMarker.id) {
+        if (args?.where?.id?.equals === deletionMarker.id && cleanupAttempts++ === 0) {
           throw new Error('Simulated deletion-marker cleanup failure')
         }
 
@@ -9378,9 +9862,47 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         applicationOutcome: 'committed',
         cleanupOutcome: 'failed',
       })
+
+      const retryResult = await payload.branches.merge({
+        branch: branchSlug,
+        overrideAccess: true,
+      })
+      const sourceRowsAfterRetry = await payload.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        showHiddenFields: true,
+        where: { _branch: { equals: branchSlug } },
+      })
+      const changesAfterRetry = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: branchSlug } },
+      })
+      const eventsAfterRetry = await payload.find({
+        collection: branchMergesSlug,
+        pagination: false,
+        where: { branch: { equals: branchSlug } },
+      })
+      const eventAfterRetry = eventsAfterRetry.docs[0] as unknown as {
+        changes: { applicationOutcome: string; cleanupOutcome: string }[]
+        error?: null | string
+        status: string
+      }
+
+      expect(retryResult.merged).toHaveLength(1)
+      expect(sourceRowsAfterRetry.docs).toHaveLength(0)
+      expect(changesAfterRetry.docs).toHaveLength(0)
+      expect(eventsAfterRetry.docs).toHaveLength(1)
+      expect(eventAfterRetry.status).toBe('succeeded')
+      expect(eventAfterRetry.error).toBeNull()
+      expect(eventAfterRetry.changes[0]).toMatchObject({
+        applicationOutcome: 'committed',
+        cleanupOutcome: 'completed',
+      })
     })
 
-    test('should retain a committed global update when source cleanup fails', async () => {
+    test('should retry failed global cleanup without repeating the committed target write', async () => {
       branchSlug = 'post-commit-global-cleanup-failure'
 
       await payload.create({
@@ -9400,6 +9922,11 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       const deleteBranchGlobalSpy = vi
         .spyOn(payload.db, 'deleteBranchGlobal')
         .mockRejectedValueOnce(new Error('Simulated global source cleanup failure'))
+      let targetWriteCount = 0
+
+      hookSpy.headerBeforeOperation = () => {
+        targetWriteCount += 1
+      }
 
       try {
         const result = await payload.branches.merge({
@@ -9413,14 +9940,18 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
           pagination: false,
           where: { branch: { equals: branchSlug } },
         })
-        const mergeEvent = (
+        const failedEvent = (
           await payload.find({
             collection: branchMergesSlug,
             pagination: false,
             where: { branch: { equals: branchSlug } },
           })
         ).docs[0] as unknown as {
-          changes: { applicationOutcome: string; cleanupOutcome: string }[]
+          changes: {
+            applicationOutcome: string
+            cleanupOutcome: string
+            sourceRevision?: string
+          }[]
           status: string
         }
 
@@ -9428,10 +9959,123 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         expect(onMain.navLabel).toBe('Global cleanup edited')
         expect(onBranch.navLabel).toBe('Global cleanup edited')
         expect(remainingChanges.docs).toHaveLength(1)
-        expect(mergeEvent.status).toBe('cleanupFailed')
-        expect(mergeEvent.changes[0]).toMatchObject({
+        expect(failedEvent.status).toBe('cleanupFailed')
+        expect(failedEvent.changes[0]).toMatchObject({
           applicationOutcome: 'committed',
           cleanupOutcome: 'failed',
+        })
+        expect(failedEvent.changes[0]?.sourceRevision).toBeTruthy()
+
+        const targetWriteCountAfterFirstMerge = targetWriteCount
+        const retryResult = await payload.branches.merge({
+          branch: branchSlug,
+          overrideAccess: true,
+        })
+        const changesAfterRetry = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+        const eventsAfterRetry = await payload.find({
+          collection: branchMergesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+        const eventAfterRetry = eventsAfterRetry.docs[0] as unknown as {
+          changes: { applicationOutcome: string; cleanupOutcome: string }[]
+          error?: null | string
+          status: string
+        }
+
+        expect(retryResult.merged).toHaveLength(1)
+        expect(targetWriteCount).toBe(targetWriteCountAfterFirstMerge)
+        expect(changesAfterRetry.docs).toHaveLength(0)
+        expect(eventsAfterRetry.docs).toHaveLength(1)
+        expect(eventAfterRetry.status).toBe('succeeded')
+        expect(eventAfterRetry.error).toBeNull()
+        expect(eventAfterRetry.changes[0]).toMatchObject({
+          applicationOutcome: 'committed',
+          cleanupOutcome: 'completed',
+        })
+      } finally {
+        deleteBranchGlobalSpy.mockRestore()
+
+        await payload.db.deleteBranchGlobal?.({
+          branch: branchSlug,
+          globalSlug: headerGlobalSlug,
+          req: await createPayloadRequest({ branch: false, payload }),
+        })
+        await payload.updateGlobal({
+          slug: headerGlobalSlug,
+          data: { navLabel: 'main label' },
+        })
+      }
+    })
+
+    test('should preserve newer global source work during a failed cleanup retry', async () => {
+      branchSlug = 'post-commit-global-cleanup-newer-source'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Global cleanup retry with newer source', slug: branchSlug },
+      })
+      await payload.updateGlobal({
+        slug: headerGlobalSlug,
+        data: { navLabel: 'Global cleanup retry original' },
+      })
+      await payload.updateGlobal({
+        slug: headerGlobalSlug,
+        branch: branchSlug,
+        data: { navLabel: 'First global merged source' },
+      })
+
+      const deleteBranchGlobalSpy = vi
+        .spyOn(payload.db, 'deleteBranchGlobal')
+        .mockRejectedValueOnce(new Error('Simulated global cleanup failure before newer work'))
+
+      try {
+        await payload.branches.merge({ branch: branchSlug, overrideAccess: true })
+        await payload.updateGlobal({
+          slug: headerGlobalSlug,
+          branch: branchSlug,
+          data: { navLabel: 'Newer global source work' },
+        })
+
+        const retryResult = await payload.branches.merge({
+          branch: branchSlug,
+          overrideAccess: true,
+        })
+        const onMain = await payload.findGlobal({ slug: headerGlobalSlug })
+        const onBranch = await payload.findGlobal({
+          slug: headerGlobalSlug,
+          branch: branchSlug,
+        })
+        const remainingChanges = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+        const mergeEvents = await payload.find({
+          collection: branchMergesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+        const mergeEvent = mergeEvents.docs[0] as unknown as {
+          changes: { applicationOutcome: string; cleanupOutcome: string }[]
+          error?: null | string
+          status: string
+        }
+
+        expect(retryResult.merged).toHaveLength(0)
+        expect(onMain.navLabel).toBe('First global merged source')
+        expect(onBranch.navLabel).toBe('Newer global source work')
+        expect(remainingChanges.docs).toHaveLength(1)
+        expect(mergeEvents.docs).toHaveLength(1)
+        expect(mergeEvent.status).toBe('succeeded')
+        expect(mergeEvent.error).toBeNull()
+        expect(mergeEvent.changes[0]).toMatchObject({
+          applicationOutcome: 'committed',
+          cleanupOutcome: 'superseded',
         })
       } finally {
         deleteBranchGlobalSpy.mockRestore()
