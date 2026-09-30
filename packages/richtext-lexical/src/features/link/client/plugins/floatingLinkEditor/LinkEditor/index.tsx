@@ -332,8 +332,10 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
       ),
       editor.registerCommand(
         KEY_ESCAPE_COMMAND,
-        () => {
+        (event) => {
           if (isLink) {
+            event.preventDefault()
+            event.stopImmediatePropagation()
             setNotLink()
 
             return true

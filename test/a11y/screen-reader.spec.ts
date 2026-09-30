@@ -5,12 +5,15 @@ import { screenReaderTest as test } from '@guidepup/playwright'
 import { expect } from '@playwright/test'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { formatAdminURL } from 'payload/shared'
 
 import { openGroupBy } from '../__helpers/e2e/groupBy/index.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/e2e/initPage.js'
+import { devUser } from '../credentials.js'
 import {
+  addCollectionQueryWidget,
   addTextBlock,
   captureScreenReader,
   captureScreenReaderOutput,
@@ -19,10 +22,12 @@ import {
   gotoCreatePost,
   gotoFirstPost,
   gotoPostsList,
+  insertTextBlockWithKeyboard,
   navigateScreenReaderTo,
   openBulkEditFieldSelect,
   openBulkUploadDialog,
   openCopyToLocaleDrawer,
+  openDashboardEditor,
   openDrawerFilters,
   openEditImageDialog,
   openFirstBlockActions,
@@ -50,6 +55,12 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
   })
 
   test.beforeEach(async ({ page }) => {
+    const loginResponse = await page.request.post(
+      formatAdminURL({ apiRoute: '/api', path: '/users/login', serverURL }),
+      { data: devUser },
+    )
+
+    expect(loginResponse.ok()).toBe(true)
     await initPage({ page, serverURL })
     page.removeAllListeners('console')
   })
@@ -57,8 +68,52 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
   test.afterEach(async ({ page }) => {
     await cleanupModalMedia({ page })
   })
+  test.describe('1.1.1 Non-text Content (A)', () => {
+    test('should expose the login logo to the screen-reader cursor as Payload', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3609
+      await page.context().clearCookies()
+      await page.setExtraHTTPHeaders({ DisableAutologin: 'true' })
+      await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/login', serverURL }))
+      await expect(page.locator('.login__brand .graphic-logo')).toBeVisible()
+      const output = await navigateScreenReaderTo({
+        matches: /Payload.*(?:image|graphic)|(?:image|graphic).*Payload/i,
+        screenReader,
+      })
+
+      expect(output).toMatch(/Payload/i)
+    })
+  })
 
   test.describe('1.3.1 Info and Relationships (A)', () => {
+    test.describe('Safari and VoiceOver report', () => {
+      test.skip(process.platform !== 'darwin', 'Safari and VoiceOver report')
+
+      test('should announce the visible Collection Query bullet text when its card receives focus', async ({
+        page,
+        screenReader,
+      }) => {
+        // PYLD-3572
+        await openDashboardEditor({ page, serverURL })
+        const widget = await addCollectionQueryWidget({ page })
+        const bullets = await widget
+          .locator('.collection-query-widget__error-list li')
+          .allTextContents()
+
+        expect(bullets.length).toBeGreaterThan(0)
+        await expect(widget.locator('.draggable')).toBeFocused()
+        await widget.getByRole('button', { name: 'Drag to reorder', exact: true }).focus()
+        const capture = await captureScreenReader({
+          action: () => page.keyboard.press('Shift+Tab'),
+          screenReader,
+        })
+        for (const bullet of bullets) {
+          expect.soft(capture.spokenPhrase).toContain(bullet.trim())
+        }
+      })
+    })
     test('should announce the Copy to combobox label once on focus', async ({
       page,
       screenReader,
@@ -176,8 +231,201 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       expect(capture.spokenPhrase.match(/English/gi)).toHaveLength(1)
     })
   })
+  test.describe('2.1.1 Keyboard (A)', () => {
+    test.describe('Requires Windows and NVDA', () => {
+      test.skip(process.platform !== 'win32', 'Requires Windows and NVDA')
+
+      test('should lift a dashboard widget with Space while NVDA is active', async ({
+        page,
+        screenReader,
+      }) => {
+        // PYLD-3642
+        await openDashboardEditor({ page, serverURL })
+        const widget = await addCollectionQueryWidget({ page })
+
+        await widget.getByRole('button', { name: 'Drag to reorder', exact: true }).focus()
+        const output = await captureScreenReaderOutput({
+          action: () => screenReader.press('Space'),
+          screenReader,
+        })
+        await expect(page.locator('.drag-overlay')).toBeVisible()
+        await expect(page.locator('[id^="widget-editor-"]:visible')).toHaveCount(0)
+        expect(output).toMatch(/picked up|lifted|dragging/i)
+        await screenReader.press('Escape')
+        await expect(page.locator('.drag-overlay')).toHaveCount(0)
+      })
+    })
+  })
 
   test.describe('2.4.3 Focus Order (A)', () => {
+    test.describe('Safari and VoiceOver report', () => {
+      test.skip(process.platform !== 'darwin', 'Safari and VoiceOver report')
+
+      test('should reach widget edit size and remove controls with the VoiceOver cursor', async ({
+        page,
+        screenReader,
+      }) => {
+        // PYLD-3573
+        await openDashboardEditor({ page, serverURL })
+        const widget = await addCollectionQueryWidget({ page })
+        await widget.locator('.draggable').focus()
+        await navigateScreenReaderTo({
+          matches: /edit.*collection query/i,
+          screenReader,
+        })
+        await screenReader.act()
+        await expect(page.locator('[id^="widget-editor-"]:visible')).toHaveCount(1)
+        await page.keyboard.press('Escape')
+        const sizeText = (await widget.locator('.widget-wrapper__size-btn').innerText()).trim()
+        await navigateScreenReaderTo({
+          matches: /edit.*collection query/i,
+          screenReader,
+        })
+        let hasReachedSize = false
+        for (let index = 0; index < 8; index++) {
+          await screenReader.next()
+          const output = await screenReader.itemText()
+          if (
+            output.toLowerCase().includes(sizeText.toLowerCase()) &&
+            /resize.*collection query/i.test(output) &&
+            /button/i.test(output)
+          ) {
+            hasReachedSize = true
+            break
+          }
+          if (/delete.*collection query/i.test(output)) {
+            break
+          }
+        }
+        expect(hasReachedSize).toBe(true)
+        await screenReader.act()
+        await expect(widget.locator('.widget-wrapper__size-btn')).toHaveAttribute(
+          'aria-expanded',
+          'true',
+        )
+        await page.keyboard.press('Escape')
+        await navigateScreenReaderTo({
+          matches: /delete.*collection query/i,
+          screenReader,
+        })
+        await screenReader.act()
+        await expect(widget).toHaveCount(0)
+      })
+    })
+
+    test.describe('Requires NVDA browse mode', () => {
+      test.skip(process.platform !== 'win32', 'Requires NVDA browse mode')
+
+      test('should not expose an invisible loading object after relationship drawer content', async ({
+        page,
+        screenReader,
+      }) => {
+        // PYLD-3650
+        await gotoCreatePost({ page, postsURL })
+        await page.locator('#relatedPost-add-new button').press('Enter')
+        const drawer = page.locator('.doc-drawer:visible')
+
+        await expect(drawer.locator('[data-form-ready="true"]').first()).toBeVisible()
+        // Place a browse-cursor boundary after the overlay without relying on wrapping to the header.
+        await drawer.evaluate((element) => {
+          const boundary = document.createElement('p')
+
+          boundary.textContent = 'End of relationship drawer'
+          element.append(boundary)
+        })
+        await navigateScreenReaderTo({ matches: /featured image/i, screenReader })
+        const outputs: string[] = []
+        let hasReachedEnd = false
+        for (let index = 0; index < 50; index++) {
+          await screenReader.next()
+          const output = await screenReader.itemText()
+          outputs.push(output)
+          if (/end of relationship drawer/i.test(output)) {
+            hasReachedEnd = true
+            break
+          }
+        }
+        expect(hasReachedEnd, outputs.join('\n')).toBe(true)
+        expect(outputs.join(' ')).not.toMatch(/loading|unknown|unlabeled/i)
+      })
+    })
+
+    test.describe('Requires NVDA browse mode', () => {
+      test.skip(process.platform !== 'win32', 'Requires NVDA browse mode')
+
+      test('should allow the NVDA browse cursor to exit Lexical editors in both directions', async ({
+        page,
+        screenReader,
+      }) => {
+        // PYLD-3741
+        await gotoCreatePost({ page, postsURL })
+        await insertTextBlockWithKeyboard({ page })
+        for (const field of ['content', 'layout.0.body']) {
+          const editor = page.locator(`[data-field-path="${field}"] [contenteditable="true"]`)
+          const text = `Screen reader exit ${field}`
+
+          await editor.fill(text)
+          await screenReader.perform(NVDAKeyCodeCommands.exitFocusMode)
+          for (const direction of ['next', 'previous'] as const) {
+            await navigateScreenReaderTo({ matches: new RegExp(text), screenReader })
+            const boundary =
+              field === 'content'
+                ? direction === 'next'
+                  ? /add item/i
+                  : /published on/i
+                : direction === 'next'
+                  ? /^text(?:$| .*?(?:edit|text field))/i
+                  : /block name/i
+            const outputs: string[] = []
+            let hasReachedOutsideContent = false
+            for (let index = 0; index < 40; index++) {
+              await screenReader[direction]()
+              const output = await screenReader.itemText()
+              outputs.push(output)
+              if (boundary.test(output)) {
+                hasReachedOutsideContent = true
+                break
+              }
+            }
+            expect(hasReachedOutsideContent, outputs.join('\n')).toBe(true)
+          }
+        }
+      })
+    })
+
+    test('should omit hidden Lexical controls from screen-reader navigation', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3789
+      await gotoCreatePost({ page, postsURL })
+      await insertTextBlockWithKeyboard({ page })
+      for (const field of ['content', 'layout.0.body']) {
+        const editor = page.locator(`[data-field-path="${field}"] [contenteditable="true"]`)
+        const text = `Screen reader hidden controls ${field}`
+
+        await editor.fill(text)
+        await page.mouse.move(0, 0)
+        await navigateScreenReaderTo({ matches: new RegExp(text), screenReader })
+        let hasExitedEditor = false
+        const outputs: string[] = []
+        for (let index = 0; index < 40; index++) {
+          await screenReader.next()
+          const output = await screenReader.itemText()
+          outputs.push(output)
+          if (
+            field === 'content'
+              ? /add item/i.test(output)
+              : /text.*(?:edit|text field)/i.test(output)
+          ) {
+            hasExitedEditor = true
+            break
+          }
+        }
+        expect(hasExitedEditor, outputs.join('\n')).toBe(true)
+        expect(outputs.join(' ')).not.toMatch(/drag to move|add block|edit link|remove link/i)
+      }
+    })
     test('should contain screen-reader traversal in bulk-upload and image-edit dialogs', async ({
       page,
       screenReader,

@@ -115,6 +115,7 @@ export const skTranslations: DefaultTranslationsObject = {
     noItems:
       'Na vašej nástenke nie sú žiadne miniaplikácie. Môžete ich pridať z menu "Nástenka", ktoré sa nachádza v hornej lište.',
     resetLayout: 'Resetovať rozloženie',
+    resizeWidget: 'Zmeniť veľkosť {{label}}, aktuálna veľkosť: {{size}}',
     searchWidgets: 'Hľadať doplnky...',
     widgetCollectionRequired: 'Collection je povinná.',
     widgetConfigurationError: 'Chyba v konfigurácii widgetu',

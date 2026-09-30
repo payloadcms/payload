@@ -8,6 +8,8 @@ import {
 } from '@payloadcms/richtext-lexical'
 import { createFolderField } from 'payload'
 
+import { mediaSlug } from '../Media/index.js'
+
 export const postsSlug = 'posts'
 
 export const PostsCollection: CollectionConfig = {
@@ -148,6 +150,10 @@ export const PostsCollection: CollectionConfig = {
           slug: 'textBlock',
           fields: [
             {
+              name: 'body',
+              type: 'richText',
+            },
+            {
               name: 'text',
               type: 'text',
             },
@@ -177,6 +183,11 @@ export const PostsCollection: CollectionConfig = {
       ],
     },
     createFolderField({ relationTo: 'payload-folders' }),
+    {
+      name: 'featuredImage',
+      type: 'upload',
+      relationTo: mediaSlug,
+    },
   ],
   trash: true,
   versions: {

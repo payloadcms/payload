@@ -115,6 +115,7 @@ export const arTranslations: DefaultTranslationsObject = {
     noItems:
       'لا توجد أدوات على لوحة التحكم الخاصة بك. يمكنك إضافتها من القائمة "لوحة التحكم" الموجودة في الشريط العلوي.',
     resetLayout: 'إعادة تعيين التخطيط',
+    resizeWidget: 'تغيير حجم {{label}}، الحجم الحالي: {{size}}',
     searchWidgets: 'ابحث عن الأدوات...',
     widgetCollectionRequired: 'المجموعة مطلوبة.',
     widgetConfigurationError: 'خطأ في تكوين الودجة',

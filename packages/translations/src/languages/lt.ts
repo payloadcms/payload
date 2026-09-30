@@ -115,6 +115,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     noItems:
       'Jūsų prietaisų skydelyje nėra valdiklių. Juos galite pridėti iš „Skydelio“ meniu, esančio viršutinėje juostoje.',
     resetLayout: 'Atstatyti išdėstymą',
+    resizeWidget: 'Keisti {{label}} dydį, dabartinis dydis: {{size}}',
     searchWidgets: 'Ieškokite valdiklių...',
     widgetCollectionRequired: 'Collection yra privaloma.',
     widgetConfigurationError: 'Valdiklio konfigūracijos klaida',
