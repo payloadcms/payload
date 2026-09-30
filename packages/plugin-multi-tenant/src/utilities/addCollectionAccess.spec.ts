@@ -65,6 +65,45 @@ describe('addCollectionAccess', () => {
     await expect(config.baseAccess?.collections?.create?.(createArgs())).resolves.toBe(true)
   })
 
+  it('falls back to base update access for validate when validate access is not configured', async () => {
+    const baseUpdate = vi.fn(() => false)
+    const collection: CollectionConfig = { slug: 'posts', fields: [] }
+    const config = {
+      baseAccess: {
+        collections: {
+          update: baseUpdate,
+        },
+      },
+    } as Config
+
+    addCollectionAccess({ config, scopes: [createScope(collection)] })
+
+    await expect(config.baseAccess?.collections?.validate?.(createArgs())).resolves.toBe(false)
+    expect(baseUpdate).toHaveBeenCalledOnce()
+  })
+
+  it('prefers explicit base validate access over base update access', async () => {
+    const baseUpdate = vi.fn(() => false)
+    const baseValidate = vi.fn(() => true)
+    const collection: CollectionConfig = { slug: 'posts', fields: [] }
+    const config = {
+      baseAccess: {
+        collections: {
+          update: baseUpdate,
+          validate: baseValidate,
+        },
+      },
+    } as Config
+
+    addCollectionAccess({ config, scopes: [createScope(collection)] })
+
+    await expect(config.baseAccess?.collections?.validate?.(createArgs())).resolves.toEqual({
+      tenant: { in: ['tenant-1'] },
+    })
+    expect(baseValidate).toHaveBeenCalledOnce()
+    expect(baseUpdate).not.toHaveBeenCalled()
+  })
+
   it('keeps callback wrapping when an access result override is configured', async () => {
     const documentResult = { published: { equals: true } }
     const documentRead = vi.fn(() => documentResult)
