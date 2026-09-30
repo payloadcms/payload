@@ -1,12 +1,24 @@
 'use client'
 
-import { FullscreenModal, Modal, useModal } from '@payloadcms/ui'
+import { DialogModal, FullscreenModal, Modal, useModal } from '@payloadcms/ui'
 
 export function CustomIDModals() {
   const { closeModal, openModal } = useModal()
 
   return (
     <>
+      <button onClick={() => openModal('locked-slug')} type="button">
+        Open locked dialog
+      </button>
+      <DialogModal closeOnEsc={false} slug="locked-slug">
+        <h2>Locked title</h2>
+        <button onClick={() => openModal('child-slug')} type="button">
+          Open child
+        </button>
+        <button onClick={() => closeModal('locked-slug')} type="button">
+          Close locked dialog
+        </button>
+      </DialogModal>
       <button onClick={() => openModal('parent-slug')} type="button">
         Open parent
       </button>

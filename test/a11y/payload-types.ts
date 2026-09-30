@@ -90,6 +90,32 @@ export type LexicalNodes_B836F062 =
   | SerializedListNode<LexicalNodes_B836F062>
   | SerializedListItemNode<LexicalNodes_B836F062>
   | SerializedHeadingNode<LexicalNodes_B836F062>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_404F6FF7".
+ */
+export type LexicalNodes_404F6FF7 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_404F6FF7>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'media'>
+  | SerializedQuoteNode<LexicalNodes_404F6FF7>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'payload-folders'
+      | 'posts'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_404F6FF7, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_404F6FF7, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_404F6FF7>
+  | SerializedListItemNode<LexicalNodes_404F6FF7>
+  | SerializedHeadingNode<LexicalNodes_404F6FF7>;
 
 export interface Config {
   auth: {
@@ -259,6 +285,7 @@ export interface Post {
     | null;
   layout?: (TextBlock | ImageBlock)[] | null;
   '_h_payload-folders'?: (string | null) | PayloadFolder;
+  featuredImage?: (string | null) | Media;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -277,6 +304,7 @@ export interface Post {
  * via the `definition` "TextBlock".
  */
 export interface TextBlock {
+  body?: LexicalRichText<LexicalNodes_404F6FF7> | null;
   text?: string | null;
   date?: string | null;
   id?: string | null;
@@ -496,6 +524,7 @@ export interface PostsSelect<T extends boolean = true> {
         textBlock?:
           | T
           | {
+              body?: T;
               text?: T;
               date?: T;
               id?: T;
@@ -510,6 +539,7 @@ export interface PostsSelect<T extends boolean = true> {
             };
       };
   '_h_payload-folders'?: T;
+  featuredImage?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
