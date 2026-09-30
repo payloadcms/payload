@@ -1,5 +1,5 @@
 import type { PayloadRequest } from '../types/index.js'
-import type { SanitizedBranchingConfig } from './types.js'
+import type { BranchOperation, SanitizedBranchingConfig } from './types.js'
 
 import { getDataLoader } from '../collections/dataloader.js'
 import { branchesCollectionSlug, MAIN_BRANCH } from './types.js'
@@ -17,6 +17,8 @@ type BranchState = {
   /** Canonical shadowed document IDs, keyed by collection slug. */
   manifest: Map<string, (number | string)[]>
   manifestLoaded: boolean
+  /** Change-record operation keyed by collection and canonical document ID. */
+  operations: Map<string, BranchOperation>
   /** Canonical ID → shadow row primary key, for the writes that resolved it. */
   rowIDs: Map<string, number | string>
 }
@@ -75,6 +77,7 @@ export const resolveBranch = (req: PayloadRequest): string => {
       deleted: new Map(),
       manifest: new Map(),
       manifestLoaded: false,
+      operations: new Map(),
       rowIDs: new Map(),
     } satisfies BranchState
   }
@@ -161,6 +164,14 @@ export const loadBranchManifest = async (
       } else {
         state.deleted.set(slug, [docID])
       }
+    }
+
+    if (
+      change.operation === 'create' ||
+      change.operation === 'delete' ||
+      change.operation === 'update'
+    ) {
+      state.operations.set(`${slug}:${String(docID)}`, change.operation)
     }
   }
 
@@ -284,10 +295,12 @@ export const setBranchRow = ({
 export const addToBranchManifest = ({
   collectionSlug,
   docID,
+  operation,
   req,
 }: {
   collectionSlug: string
   docID: number | string
+  operation: BranchOperation
   req: PayloadRequest
 }): void => {
   const context = req.context as Record<string, unknown> | undefined
@@ -308,6 +321,8 @@ export const addToBranchManifest = ({
   } else {
     state.manifest.set(collectionSlug, [docID])
   }
+
+  state.operations.set(`${collectionSlug}:${String(docID)}`, operation)
 }
 
 /** The shadow row ID this request has already resolved for a canonical ID, if any. */
@@ -415,4 +430,20 @@ export const peekBranchDeletions = (req: PayloadRequest): Map<string, (number | 
   const state = context?.[stateKey] as BranchState | undefined
 
   return state?.deleted ?? new Map()
+}
+
+/** The authoritative operation for one collection document in the loaded change manifest. */
+export const peekBranchOperation = ({
+  collectionSlug,
+  docID,
+  req,
+}: {
+  collectionSlug: string
+  docID: number | string
+  req?: Partial<PayloadRequest>
+}): BranchOperation | undefined => {
+  const context = req?.context as Record<string, unknown> | undefined
+  const state = context?.[stateKey] as BranchState | undefined
+
+  return state?.operations.get(`${collectionSlug}:${String(docID)}`)
 }

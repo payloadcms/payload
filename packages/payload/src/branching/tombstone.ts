@@ -7,7 +7,7 @@ import { isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
 import { assertBranchCreatedDocumentsUnreferenced } from './assertBranchCreatedDocumentsUnreferenced.js'
 import { assertBranchWritable } from './assertBranchWritable.js'
 import { createShadowRow } from './createShadowRow.js'
-import { resetBranchState, resolveBranch } from './resolveBranch.js'
+import { peekBranchOperation, resetBranchState, resolveBranch } from './resolveBranch.js'
 import { resolveBranchQuery } from './resolveBranchQuery.js'
 import {
   branchChangesCollectionSlug,
@@ -196,7 +196,14 @@ export const assertBranchCreatedDeleteUnreferenced = async ({
     },
   })) as null | Record<string, unknown>
 
-  if (!branchDocument || branchDocument[branchOpField] !== 'create') {
+  if (
+    !branchDocument ||
+    peekBranchOperation({
+      collectionSlug,
+      docID: branchDocument.id as number | string,
+      req,
+    }) !== 'create'
+  ) {
     return doc
   }
 
@@ -253,7 +260,14 @@ export const willBranchAbsorbDelete = ({
     return false
   }
 
-  return !(doc[branchField] === branch && doc[branchOpField] === 'create')
+  return !(
+    doc[branchField] === branch &&
+    peekBranchOperation({
+      collectionSlug,
+      docID: doc.id as number | string,
+      req,
+    }) === 'create'
+  )
 }
 
 /**
@@ -378,9 +392,10 @@ export const resolveBranchDelete = async ({
 
   const targetID = target.id as number | string
   const isOnThisBranch = target[branchField] === branch
-  const isTombstoneExpectedForTarget = !(isOnThisBranch && target[branchOpField] === 'create')
   const canonicalID =
     (target[branchDocIDField] as any)?.value ?? target[branchDocIDField] ?? targetID
+  const operation = peekBranchOperation({ collectionSlug, docID: canonicalID, req })
+  const isTombstoneExpectedForTarget = !(isOnThisBranch && operation === 'create')
 
   if (
     matchingBranchDeleteOperation &&
@@ -407,7 +422,7 @@ export const resolveBranchDelete = async ({
 
   // Created on this branch: no main row stands behind it, so a real delete
   // leaves nothing to hide.
-  if (isOnThisBranch && target[branchOpField] === 'create') {
+  if (isOnThisBranch && operation === 'create') {
     await assertBranchCreatedDeleteUnreferenced({
       branch,
       collectionSlug,

@@ -6,7 +6,7 @@ import type {
 } from '../index.js'
 
 import { assertBranchWritable } from './assertBranchWritable.js'
-import { resolveBranch } from './resolveBranch.js'
+import { addToBranchManifest, resolveBranch } from './resolveBranch.js'
 import { branchChangesCollectionSlug, branchField, branchOpField, MAIN_BRANCH } from './types.js'
 
 /**
@@ -64,6 +64,13 @@ export const recordBranchCreate: CollectionAfterChangeHook = async ({
       operation: 'create',
     },
     overrideAccess: true,
+    req,
+  })
+
+  addToBranchManifest({
+    collectionSlug: collection.slug,
+    docID: doc.id,
+    operation: 'create',
     req,
   })
 

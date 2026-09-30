@@ -3010,6 +3010,89 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
       expect(rows.docs).toHaveLength(0)
     })
+
+    test('should use the create change to hard-delete a branch-created document', async () => {
+      const created = await payload.create({
+        branch: 'cow',
+        collection: postsSlug,
+        data: { title: 'created then deleted by change operation' },
+      })
+      const rawReq = await createPayloadRequest({ branch: false, payload })
+
+      await payload.db.updateOne({
+        branch: false,
+        collection: postsSlug,
+        data: { _branchOp: 'update' },
+        req: rawReq,
+        where: { id: { equals: created.id } },
+      })
+
+      await payload.delete({ id: created.id, branch: 'cow', collection: postsSlug })
+
+      const rows = await payload.db.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        req: rawReq,
+        where: { id: { equals: created.id } },
+      })
+      const changes = await payload.db.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        req: rawReq,
+        where: { documentID: { equals: String(created.id) } },
+      })
+
+      expect(rows.docs).toHaveLength(0)
+      expect(changes.docs).toHaveLength(0)
+    })
+
+    test('should use the update change to tombstone an edited main document', async () => {
+      await payload.update({
+        id: mainDocID,
+        branch: 'cow',
+        collection: postsSlug,
+        data: { title: 'edited before delete' },
+      })
+
+      const rawReq = await createPayloadRequest({ branch: false, payload })
+      const shadow = await payload.db.findOne({
+        branch: false,
+        collection: postsSlug,
+        req: rawReq,
+        where: { _branchDocID: { equals: mainDocID } },
+      })
+
+      await payload.db.updateOne({
+        branch: false,
+        collection: postsSlug,
+        data: { _branchOp: 'create' },
+        req: rawReq,
+        where: { id: { equals: shadow!.id } },
+      })
+
+      await payload.delete({ id: mainDocID, branch: 'cow', collection: postsSlug })
+
+      const onBranch = await payload.findByID({
+        id: mainDocID,
+        branch: 'cow',
+        collection: postsSlug,
+        disableErrors: true,
+      })
+      const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
+      const changes = await payload.db.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        req: rawReq,
+        where: { documentID: { equals: String(mainDocID) } },
+      })
+
+      expect(onBranch).toBeNull()
+      expect(onMain.title).toBe('original on main')
+      expect(changes.docs).toHaveLength(1)
+      expect(changes.docs[0]).toMatchObject({ operation: 'delete' })
+    })
+
     test('should allow the same unique value on two different branches', async () => {
       const onMain = await payload.create({
         collection: uniqueSlug,

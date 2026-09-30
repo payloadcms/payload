@@ -124,7 +124,7 @@ export const forkDocument = async ({
   // The manifest now has one more entry. Added rather than reloaded: dropping the memoized
   // copy made the next read in this request re-query every change row on the branch to
   // learn one ID, and every save the admin panel makes is a write followed by a read.
-  addToBranchManifest({ collectionSlug, docID: id, req })
+  addToBranchManifest({ collectionSlug, docID: id, operation: 'update', req })
   rememberBranchRowID({ collectionSlug, docID: id, req, rowID: shadow.id as number | string })
 
   return shadow.id as number | string
