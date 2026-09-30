@@ -85,7 +85,7 @@ export function initSharpCollections({
 
   // Write onto copies, never the authored collection objects: a rebuilt config (e.g. on a dev
   // reload) would otherwise see `upload.imageSizes` on the collection and reject it as legacy.
-  config.collections = config.collections!.map((collection) => {
+  config.collections = config.collections?.map((collection) => {
     const sharpConfig = collections[collection.slug]
 
     if (!sharpConfig || !collection.upload) {

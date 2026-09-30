@@ -20,6 +20,12 @@ const uploadCollection = ({
 }) => ({ slug, upload }) as unknown as NonNullable<Config['collections']>[number]
 
 describe('initSharpCollections', () => {
+  it('should not throw when the config has no collections', () => {
+    const config = makeConfig(undefined)
+
+    expect(() => initSharpCollections({ collections: {}, config })).not.toThrow()
+  })
+
   it("should keep the collection's crop and focalPoint when Sharp doesn't set them", () => {
     const config = makeConfig([
       uploadCollection({ slug: 'media', upload: { crop: false, focalPoint: false } }),
