@@ -116,6 +116,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     noItems:
       'Er zijn geen widgets op uw dashboard. U kunt ze toevoegen vanuit het menu "Dashboard" dat zich in de bovenste balk bevindt.',
     resetLayout: 'Herstel Lay-out',
+    resizeWidget: 'Formaat van {{label}} wijzigen, huidig formaat: {{size}}',
     searchWidgets: 'Zoek widgets...',
     widgetCollectionRequired: 'Collectie is vereist.',
     widgetConfigurationError: 'Fout in de configuratie van de widget',
@@ -326,6 +327,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     create: 'Aanmaken',
     created: 'Aangemaakt',
     createdAt: 'Aangemaakt op',
+    createdBy: 'Aangemaakt door',
     createNew: 'Nieuw aanmaken',
     createNewLabel: 'Nieuw(e) {{label}} aanmaken',
     creating: 'Aanmaken',
@@ -529,6 +531,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Aankomende Evenementen',
     updatedAgo: 'Bijgewerkt {{distance}} geleden',
     updatedAt: 'Aangepast op',
+    updatedBy: 'Bijgewerkt door',
     updatedCountSuccessfully: '{{count}} {{label}} succesvol bijgewerkt.',
     updatedLabelSuccessfully: 'Met succes {{label}} bijgewerkt.',
     updatedSuccessfully: 'Succesvol aangepast.',

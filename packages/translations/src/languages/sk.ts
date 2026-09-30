@@ -115,6 +115,7 @@ export const skTranslations: DefaultTranslationsObject = {
     noItems:
       'Na vašej nástenke nie sú žiadne miniaplikácie. Môžete ich pridať z menu "Nástenka", ktoré sa nachádza v hornej lište.',
     resetLayout: 'Resetovať rozloženie',
+    resizeWidget: 'Zmeniť veľkosť {{label}}, aktuálna veľkosť: {{size}}',
     searchWidgets: 'Hľadať doplnky...',
     widgetCollectionRequired: 'Collection je povinná.',
     widgetConfigurationError: 'Chyba v konfigurácii widgetu',
@@ -319,6 +320,7 @@ export const skTranslations: DefaultTranslationsObject = {
     create: 'Vytvoriť',
     created: 'Vytvořeno',
     createdAt: 'Vytvorené v',
+    createdBy: 'Vytvoril',
     createNew: 'Vytvoriť nové',
     createNewLabel: 'Vytvoriť nový {{label}}',
     creating: 'Vytváranie',
@@ -518,6 +520,7 @@ export const skTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Nadchádzajúce udalosti',
     updatedAgo: 'Aktualizované pred {{distance}}',
     updatedAt: 'Aktualizované v',
+    updatedBy: 'Aktualizoval/a',
     updatedCountSuccessfully: 'Úspešne aktualizované {{count}} {{label}}.',
     updatedLabelSuccessfully: 'Úspešne aktualizované {{label}}.',
     updatedSuccessfully: 'Úspešne aktualizované.',

@@ -115,6 +115,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     noItems:
       'На вашій панелі немає віджетів. Ви можете додати їх з меню "Головна", розташованого в верхній панелі.',
     resetLayout: 'Скинути макет',
+    resizeWidget: 'Змінити розмір {{label}}, поточний розмір: {{size}}',
     searchWidgets: 'Пошук віджетів...',
     widgetCollectionRequired: 'Collection є обов’язковим.',
     widgetConfigurationError: 'Помилка конфігурації віджета',
@@ -317,6 +318,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     create: 'Створити',
     created: 'Створено',
     createdAt: 'Дата створення',
+    createdBy: 'Створено Автором',
     createNew: 'Створити',
     createNewLabel: 'Створити новий {{label}}',
     creating: 'Створення',
@@ -517,6 +519,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Майбутні події',
     updatedAgo: 'Оновлено {{distance}} тому',
     updatedAt: 'Змінено',
+    updatedBy: 'Оновлено ким',
     updatedCountSuccessfully: 'Успішно оновлено {{count}} {{label}}.',
     updatedLabelSuccessfully: 'Успішно оновлено {{label}}.',
     updatedSuccessfully: 'Успішно відредаговано.',

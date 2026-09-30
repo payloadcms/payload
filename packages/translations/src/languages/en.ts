@@ -115,6 +115,7 @@ export const enTranslations = {
     noItems:
       'There are no widgets on your dashboard. You can add them from the "Dashboard" menu located in the top bar.',
     resetLayout: 'Reset Layout',
+    resizeWidget: 'Resize {{label}}, current size: {{size}}',
     searchWidgets: 'Search widgets...',
     widgetCollectionRequired: 'Collection is required.',
     widgetConfigurationError: 'Widget configuration error',
@@ -321,6 +322,7 @@ export const enTranslations = {
     create: 'Create',
     created: 'Created',
     createdAt: 'Created At',
+    createdBy: 'Created By',
     createNew: 'Create New',
     createNewLabel: 'Create new {{label}}',
     creating: 'Creating',
@@ -521,6 +523,7 @@ export const enTranslations = {
     upcomingEvents: 'Upcoming Events',
     updatedAgo: 'Updated {{distance}} ago',
     updatedAt: 'Updated At',
+    updatedBy: 'Updated By',
     updatedCountSuccessfully: 'Updated {{count}} {{label}} successfully.',
     updatedLabelSuccessfully: 'Updated {{label}} successfully.',
     updatedSuccessfully: 'Updated successfully.',

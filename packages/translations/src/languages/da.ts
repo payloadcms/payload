@@ -113,6 +113,7 @@ export const daTranslations: DefaultTranslationsObject = {
     noItems:
       'Der er ingen widgets på dit kontrolpanel. Du kan tilføje dem fra "Kontrolpanel" menuen placeret i toppen.',
     resetLayout: 'Nulstil Layout',
+    resizeWidget: 'Tilpas størrelsen på {{label}}, nuværende størrelse: {{size}}',
     searchWidgets: 'Søg widgets...',
     widgetCollectionRequired: 'Collection er påkrævet.',
     widgetConfigurationError: 'Konfigurationsfejl for widget',
@@ -319,6 +320,7 @@ export const daTranslations: DefaultTranslationsObject = {
     create: 'Opret',
     created: 'Oprettet',
     createdAt: 'Oprettet til',
+    createdBy: 'Oprettet af',
     createNew: 'Opret ny',
     createNewLabel: 'Opret ny {{label}}',
     creating: 'Opretter',
@@ -521,6 +523,7 @@ export const daTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Kommende Begivenheder',
     updatedAgo: 'Opdateret for {{distance}} siden',
     updatedAt: 'Opdateret ved',
+    updatedBy: 'Opdateret af',
     updatedCountSuccessfully: 'Opdateret {{count}} {{label}} successfully.',
     updatedLabelSuccessfully: 'Opdaterede {{label}} med succes.',
     updatedSuccessfully: 'Opdateret.',

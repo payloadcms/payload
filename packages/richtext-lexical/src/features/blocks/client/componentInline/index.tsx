@@ -291,7 +291,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
       }
     }
 
-    if (formData && !initialState) {
+    if (clientBlock && formData && !initialState) {
       void awaitInitialState()
     }
 
@@ -313,6 +313,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
     globalSlug,
     getDocPreferences,
     parentDocumentFields,
+    clientBlock,
   ])
 
   /**

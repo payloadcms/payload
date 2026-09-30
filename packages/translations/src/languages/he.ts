@@ -111,6 +111,7 @@ export const heTranslations: DefaultTranslationsObject = {
     noItems:
       'אין יישומונים בלוח הבקרה שלך. אתה יכול להוסיף אותם מתפריט "לוח הבקרה" שממוקם בבר העליון.',
     resetLayout: 'איפוס תצוגה',
+    resizeWidget: 'שינוי הגודל של {{label}}, גודל נוכחי: {{size}}',
     searchWidgets: "חפש ווידג'טים...",
     widgetCollectionRequired: 'Collection נדרשת.',
     widgetConfigurationError: "שגיאת תצורת ווידג'ט",
@@ -308,6 +309,7 @@ export const heTranslations: DefaultTranslationsObject = {
     create: 'יצירה',
     created: 'נוצר',
     createdAt: 'נוצר בתאריך',
+    createdBy: 'נוצר על ידי',
     createNew: 'יצירת חדש',
     createNewLabel: 'יצירת {{label}} חדש',
     creating: 'יצירה',
@@ -505,6 +507,7 @@ export const heTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'אירועים קרובים',
     updatedAgo: 'עודכן לפני {{distance}}',
     updatedAt: 'עודכן בתאריך',
+    updatedBy: 'עודכן על ידי',
     updatedCountSuccessfully: 'עודכן {{count}} {{label}} בהצלחה.',
     updatedLabelSuccessfully: 'עודכן {{label}} בהצלחה.',
     updatedSuccessfully: 'עודכן בהצלחה.',

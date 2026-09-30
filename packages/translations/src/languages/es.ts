@@ -115,6 +115,7 @@ export const esTranslations: DefaultTranslationsObject = {
     noItems:
       'No hay widgets en su tablero. Puede agregarlos desde el menú "Tablero" ubicado en la barra superior.',
     resetLayout: 'Restablecer Diseño',
+    resizeWidget: 'Cambiar el tamaño de {{label}}, tamaño actual: {{size}}',
     searchWidgets: 'Buscar widgets...',
     widgetCollectionRequired: 'La Colección es requerida.',
     widgetConfigurationError: 'Error de configuración del widget',
@@ -326,6 +327,7 @@ export const esTranslations: DefaultTranslationsObject = {
     create: 'Crear',
     created: 'Creado',
     createdAt: 'Fecha de creación',
+    createdBy: 'Creado por',
     createNew: 'Crear',
     createNewLabel: 'Crear {{label}}',
     creating: 'Creando',
@@ -529,6 +531,7 @@ export const esTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Próximos eventos',
     updatedAgo: 'Actualizado hace {{distance}}',
     updatedAt: 'Última modificación',
+    updatedBy: 'Actualizado por',
     updatedCountSuccessfully: '{{count}} {{label}} actualizados con éxito.',
     updatedLabelSuccessfully: '{{label}} se actualizó con éxito.',
     updatedSuccessfully: 'Se actualizó con éxito.',

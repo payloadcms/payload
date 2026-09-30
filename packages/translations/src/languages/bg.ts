@@ -114,6 +114,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     noItems:
       'Няма джаджи на таблото ви. Можете да ги добавите от менюто "Табло", което е разположено в горната лента.',
     resetLayout: 'Рестартирай Оформлението',
+    resizeWidget: 'Преоразмеряване на {{label}}, текущ размер: {{size}}',
     searchWidgets: 'Търсене на джаджи...',
     widgetCollectionRequired: 'Collection е задължително.',
     widgetConfigurationError: 'Грешка при конфигуриране на уиджета',
@@ -319,6 +320,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     create: 'Създай',
     created: 'Създаден',
     createdAt: 'Създаден на',
+    createdBy: 'Създадено от',
     createNew: 'Създай нов',
     createNewLabel: 'Създай нов {{label}}',
     creating: 'Създава се',
@@ -521,6 +523,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Предстоящи събития',
     updatedAgo: 'Актуализирано преди {{distance}}',
     updatedAt: 'Обновен на',
+    updatedBy: 'Актуализирано от',
     updatedCountSuccessfully: 'Обновени {{count}} {{label}} успешно.',
     updatedLabelSuccessfully: 'Успешно обновихме {{label}}.',
     updatedSuccessfully: 'Обновен успешно.',

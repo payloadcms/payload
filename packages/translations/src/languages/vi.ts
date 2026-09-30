@@ -115,6 +115,7 @@ export const viTranslations: DefaultTranslationsObject = {
     noItems:
       'Trên bảng điều khiển của bạn không có tiện ích nào. Bạn có thể thêm chúng từ menu "Bảng điều khiển" nằm ở thanh trên cùng.',
     resetLayout: 'Đặt lại Bố cục',
+    resizeWidget: 'Đổi kích thước {{label}}, kích thước hiện tại: {{size}}',
     searchWidgets: 'Tìm kiếm các widget...',
     widgetCollectionRequired: 'Collection là bắt buộc.',
     widgetConfigurationError: 'Lỗi cấu hình Widget',
@@ -321,6 +322,7 @@ export const viTranslations: DefaultTranslationsObject = {
     create: 'Tạo',
     created: 'Đã tạo',
     createdAt: 'Ngày tạo',
+    createdBy: 'Được tạo bởi',
     createNew: 'Tạo mới',
     createNewLabel: 'Tạo mới {{label}}',
     creating: 'Đang tạo',
@@ -522,6 +524,7 @@ export const viTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Sự kiện sắp tới',
     updatedAgo: 'Cập nhật {{distance}} trước',
     updatedAt: 'Ngày cập nhật',
+    updatedBy: 'Cập nhật bởi',
     updatedCountSuccessfully: 'Đã cập nhật thành công {{count}} {{label}}.',
     updatedLabelSuccessfully: 'Đã cập nhật {{label}} thành công.',
     updatedSuccessfully: 'Cập nhật thành công.',

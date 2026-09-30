@@ -117,6 +117,7 @@ export const deTranslations: DefaultTranslationsObject = {
     noItems:
       'Auf deinem Dashboard befinden sich keine Widgets. Du kannst diese über das "Dashboard"-Menü in der oberen Leiste hinzufügen.',
     resetLayout: 'Layout zurücksetzen',
+    resizeWidget: 'Größe von {{label}} ändern, aktuelle Größe: {{size}}',
     searchWidgets: 'Suche Widgets...',
     widgetCollectionRequired: 'Collection ist erforderlich.',
     widgetConfigurationError: 'Widget-Konfigurationsfehler',
@@ -330,6 +331,7 @@ export const deTranslations: DefaultTranslationsObject = {
     create: 'Erstellen',
     created: 'Erstellt',
     createdAt: 'Erstellt am',
+    createdBy: 'Erstellt von',
     createNew: 'Neu erstellen',
     createNewLabel: '{{label}} neu erstellen',
     creating: 'Erstelle',
@@ -534,6 +536,7 @@ export const deTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Bevorstehende Ereignisse',
     updatedAgo: 'Aktualisiert vor {{distance}}',
     updatedAt: 'Aktualisiert am',
+    updatedBy: 'Aktualisiert von',
     updatedCountSuccessfully: '{{count}} {{label}} erfolgreich aktualisiert.',
     updatedLabelSuccessfully: '{{label}} erfolgreich aktualisiert.',
     updatedSuccessfully: 'Erfolgreich aktualisiert.',

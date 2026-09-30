@@ -117,6 +117,7 @@ export const huTranslations: DefaultTranslationsObject = {
     noItems:
       'Nincsenek widgetek az irányítópulton. Hozzáadhatja őket a felső sávban található "Irányítópult" menüből.',
     resetLayout: 'Alaphelyzet visszaállítása',
+    resizeWidget: '{{label}} átméretezése, jelenlegi méret: {{size}}',
     searchWidgets: 'Keresés widgetek...',
     widgetCollectionRequired: 'A Collection megadása kötelező.',
     widgetConfigurationError: 'Widget konfigurációs hiba',
@@ -325,6 +326,7 @@ export const huTranslations: DefaultTranslationsObject = {
     create: 'Létrehozás',
     created: 'Létrehozva',
     createdAt: 'Létrehozva:',
+    createdBy: 'Létrehozta',
     createNew: 'Új létrehozása',
     createNewLabel: 'Új {{label}} létrehozása',
     creating: 'Létrehozás',
@@ -527,6 +529,7 @@ export const huTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Közelgő események',
     updatedAgo: 'Frissítve {{distance}} ezelőtt',
     updatedAt: 'Frissítve:',
+    updatedBy: 'Frissítette',
     updatedCountSuccessfully: '{{count}} {{label}} sikeresen frissítve.',
     updatedLabelSuccessfully: 'A(z) {{label}} sikeresen frissült.',
     updatedSuccessfully: 'Sikeresen frissítve.',

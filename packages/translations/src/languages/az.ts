@@ -114,6 +114,7 @@ export const azTranslations: DefaultTranslationsObject = {
     noItems:
       'Sizin panelinizdə heç bir vidjet yoxdur. Siz onları yuxarıdaki çubuqda yerləşən "Panel" menyusundan əlavə edə bilərsiniz.',
     resetLayout: 'Düzəni sıfırlama',
+    resizeWidget: '{{label}} ölçüsünü dəyişin, cari ölçü: {{size}}',
     searchWidgets: 'Widgetləri axtarın...',
     widgetCollectionRequired: 'Collection tələb olunur.',
     widgetConfigurationError: 'Vidjet konfiqurasiyası xətası',
@@ -323,6 +324,7 @@ export const azTranslations: DefaultTranslationsObject = {
     create: 'Yarat',
     created: 'Yaradıldı',
     createdAt: 'Yaradıldığı tarix',
+    createdBy: 'Yaradan',
     createNew: 'Yeni yarat',
     createNewLabel: 'Yeni {{label}} yarat',
     creating: 'Yaradılır',
@@ -527,6 +529,7 @@ export const azTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Gələcək Tədbirlər',
     updatedAgo: '{{distance}} əvvəl yeniləndi',
     updatedAt: 'Yeniləndiyi tarix',
+    updatedBy: 'Yenilənib tərəfindən',
     updatedCountSuccessfully: '{{count}} {{label}} uğurla yeniləndi.',
     updatedLabelSuccessfully: '{{label}} uğurla yeniləndi.',
     updatedSuccessfully: 'Uğurla yeniləndi.',

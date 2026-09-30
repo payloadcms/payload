@@ -115,6 +115,7 @@ export const idTranslations: DefaultTranslationsObject = {
     noItems:
       'Tidak ada widget di dasbor Anda. Anda dapat menambahkannya dari menu "Dashboard" yang terletak di bar atas.',
     resetLayout: 'Atur Ulang Tata Letak',
+    resizeWidget: 'Ubah ukuran {{label}}, ukuran saat ini: {{size}}',
     searchWidgets: 'Cari widget...',
     widgetCollectionRequired: 'Collection wajib diisi.',
     widgetConfigurationError: 'Kesalahan konfigurasi widget',
@@ -321,6 +322,7 @@ export const idTranslations: DefaultTranslationsObject = {
     create: 'Buat',
     created: 'Dibuat',
     createdAt: 'Dibuat Pada',
+    createdBy: 'Dibuat Oleh',
     createNew: 'Buat Baru',
     createNewLabel: 'Buat {{label}} baru',
     creating: 'Membuat',
@@ -525,6 +527,7 @@ export const idTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Acara Mendatang',
     updatedAgo: 'Diperbarui {{distance}} yang lalu',
     updatedAt: 'Diperbarui Pada',
+    updatedBy: 'Diperbarui Oleh',
     updatedCountSuccessfully: 'Berhasil memperbarui {{count}} {{label}}.',
     updatedLabelSuccessfully: 'Berhasil memperbarui {{label}}.',
     updatedSuccessfully: 'Berhasil diperbarui.',

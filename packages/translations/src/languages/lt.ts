@@ -115,6 +115,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     noItems:
       'Jūsų prietaisų skydelyje nėra valdiklių. Juos galite pridėti iš „Skydelio“ meniu, esančio viršutinėje juostoje.',
     resetLayout: 'Atstatyti išdėstymą',
+    resizeWidget: 'Keisti {{label}} dydį, dabartinis dydis: {{size}}',
     searchWidgets: 'Ieškokite valdiklių...',
     widgetCollectionRequired: 'Collection yra privaloma.',
     widgetConfigurationError: 'Valdiklio konfigūracijos klaida',
@@ -323,6 +324,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     create: 'Sukurti',
     created: 'Sukurta',
     createdAt: 'Sukurta',
+    createdBy: 'Sukurta',
     createNew: 'Sukurti naują',
     createNewLabel: 'Sukurti naują {{label}}',
     creating: 'Kuriant',
@@ -523,6 +525,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Artimieji renginiai',
     updatedAgo: 'Atnaujinta prieš {{distance}}',
     updatedAt: 'Atnaujinta',
+    updatedBy: 'Atnaujino',
     updatedCountSuccessfully: '{{count}} {{label}} sėkmingai atnaujinta.',
     updatedLabelSuccessfully: 'Sėkmingai atnaujinta {{label}}.',
     updatedSuccessfully: 'Sėkmingai atnaujinta.',

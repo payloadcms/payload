@@ -115,6 +115,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     noItems:
       'আপনার ড্যাশবোর্ডে কোনো উইজেট নেই। আপনি তা শীর্ষ বারে অবস্থিত "ড্যাশবোর্ড" মেনু থেকে যোগ করতে পারেন।',
     resetLayout: 'লেআউট রিসেট করুন',
+    resizeWidget: '{{label}}-এর আকার পরিবর্তন করুন, বর্তমান আকার: {{size}}',
     searchWidgets: 'উইজেটগুলি অনুসন্ধান করুন...',
     widgetCollectionRequired: 'Collection প্রয়োজনীয়।',
     widgetConfigurationError: 'উইজেট কনফিগারেশন ত্রুটি',
@@ -325,6 +326,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     create: 'তৈরি করুন',
     created: 'তৈরি করা হয়েছে',
     createdAt: 'তৈরি করার তারিখ',
+    createdBy: 'নির্মাতা',
     createNew: 'নতুন তৈরি করুন',
     createNewLabel: 'নতুন {{label}} তৈরি করুন',
     creating: 'তৈরি করা হচ্ছে',
@@ -530,6 +532,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'আসন্ন ইভেন্টগুলি',
     updatedAgo: 'হালনাগাদ হয়েছে {{distance}} পূর্বে',
     updatedAt: 'আপডেট করা হয়েছে',
+    updatedBy: 'আপডেট করেছেন',
     updatedCountSuccessfully: '{{count}} {{label}} সফলভাবে আপডেট করা হয়েছে।',
     updatedLabelSuccessfully: '{{label}} সফলভাবে আপডেট করা হয়েছে।',
     updatedSuccessfully: 'সফলভাবে আপডেট করা হয়েছে।',

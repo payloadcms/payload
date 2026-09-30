@@ -32,7 +32,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
   let token: string
   let user: User
 
-  test.beforeEach(async ({ payload }) => {
+  test.beforeEach(({ payload }) => {
     processingLeaseDefaults = { ...payload.config.jobs.processingLease }
   })
 
@@ -83,6 +83,24 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
 
       expect(jobsStatsGlobal).toBeDefined()
       expect(metaField).toBeDefined()
+    })
+
+    test('should not inject authorship fields into the internal jobs global or collection', ({
+      payload,
+    }) => {
+      const jobsCollection = payload.config.collections.find(({ slug }) => slug === 'payload-jobs')
+      const jobsStatsGlobal = payload.config.globals.find(
+        ({ slug }) => slug === 'payload-jobs-stats',
+      )
+
+      expect(jobsCollection).toBeDefined()
+      expect(jobsStatsGlobal).toBeDefined()
+
+      for (const fields of [jobsCollection!.fields, jobsStatsGlobal!.fields]) {
+        const names = fields.filter((f) => 'name' in f).map((f) => (f as { name: string }).name)
+        expect(names).not.toContain('createdBy')
+        expect(names).not.toContain('updatedBy')
+      }
     })
   })
 

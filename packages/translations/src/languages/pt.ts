@@ -115,6 +115,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     noItems:
       'Não existem widgets no seu painel. Você pode adicioná-los a partir do menu "Painel", localizado na barra superior.',
     resetLayout: 'Redefinir Layout',
+    resizeWidget: 'Redimensionar {{label}}, tamanho atual: {{size}}',
     searchWidgets: 'Pesquisar widgets...',
     widgetCollectionRequired: 'Coleção é obrigatória.',
     widgetConfigurationError: 'Erro de configuração do widget',
@@ -321,6 +322,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     create: 'Criar',
     created: 'Criado',
     createdAt: 'Criado Em',
+    createdBy: 'Criado por',
     createNew: 'Criar Novo',
     createNewLabel: 'Criar novo(a) {{label}}',
     creating: 'Criando',
@@ -524,6 +526,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Próximos Eventos',
     updatedAgo: 'Atualizado há {{distance}}',
     updatedAt: 'Atualizado Em',
+    updatedBy: 'Atualizado por',
     updatedCountSuccessfully: 'Atualizado {{count}} {{label}} com sucesso.',
     updatedLabelSuccessfully: '{{label}} atualizado com sucesso.',
     updatedSuccessfully: 'Atualizado com sucesso.',

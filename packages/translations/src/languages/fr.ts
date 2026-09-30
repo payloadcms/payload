@@ -116,6 +116,7 @@ export const frTranslations: DefaultTranslationsObject = {
     noItems:
       'Il n\'y a pas de widgets sur votre tableau de bord. Vous pouvez les ajouter depuis le menu "Tableau de bord" situé dans la barre supérieure.',
     resetLayout: 'Réinitialiser la mise en page',
+    resizeWidget: 'Redimensionner {{label}}, taille actuelle : {{size}}',
     searchWidgets: 'Rechercher des widgets...',
     widgetCollectionRequired: 'La Collection est requise.',
     widgetConfigurationError: 'Erreur de configuration du widget',
@@ -330,6 +331,7 @@ export const frTranslations: DefaultTranslationsObject = {
     create: 'Créer',
     created: 'Créé(e)',
     createdAt: 'Créé(e) à',
+    createdBy: 'Créé par',
     createNew: 'Créer un(e) nouveau ou nouvelle',
     createNewLabel: 'Créer un(e) nouveau ou nouvelle {{label}}',
     creating: 'création en cours',
@@ -534,6 +536,7 @@ export const frTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Événements à venir',
     updatedAgo: 'Mis à jour il y a {{distance}}',
     updatedAt: 'Modifié le',
+    updatedBy: 'Mis à jour par',
     updatedCountSuccessfully: '{{count}} {{label}} mis à jour avec succès.',
     updatedLabelSuccessfully: '{{label}} mis à jour avec succès.',
     updatedSuccessfully: 'Mis à jour avec succès.',

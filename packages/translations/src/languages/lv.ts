@@ -114,6 +114,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     noItems:
       'Jūsu informācijas panelī nav logrīku. Tos varat pievienot no izvēlnes "Informācijas panelis", kas atrodas augšējā josla.',
     resetLayout: 'Atiestatīt Izkārtojumu',
+    resizeWidget: 'Mainīt {{label}} izmēru, pašreizējais izmērs: {{size}}',
     searchWidgets: 'Meklēt logrīkus...',
     widgetCollectionRequired: 'Kolekcija ir obligāta.',
     widgetConfigurationError: 'Sīkrīka konfigurācijas kļūda',
@@ -319,6 +320,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     create: 'Izveidot',
     created: 'Izveidots',
     createdAt: 'Izveidots',
+    createdBy: 'Izveidoja',
     createNew: 'Izveidot jaunu',
     createNewLabel: 'Izveidot jaunu {{label}}',
     creating: 'Izveido...',
@@ -519,6 +521,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Gaidāmie notikumi',
     updatedAgo: 'Atjaunināts pirms {{distance}}',
     updatedAt: 'Atjaunināts',
+    updatedBy: 'Atjaunināja',
     updatedCountSuccessfully: 'Veiksmīgi atjaunināti {{count}} {{label}}.',
     updatedLabelSuccessfully: '{{label}} veiksmīgi atjaunināts.',
     updatedSuccessfully: 'Veiksmīgi atjaunināts.',

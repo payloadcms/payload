@@ -115,6 +115,7 @@ export const caTranslations: DefaultTranslationsObject = {
     noItems:
       'No hi ha cap widget al vostre tauler de control. Podeu afegir-los des del menú "Dashboard" situat a la barra superior.',
     resetLayout: 'Restableix la disposició',
+    resizeWidget: 'Canvia la mida de {{label}}, mida actual: {{size}}',
     searchWidgets: 'Cerca de ginys...',
     widgetCollectionRequired: 'Cal especificar una Collection.',
     widgetConfigurationError: 'Error de configuració del widget',
@@ -322,6 +323,7 @@ export const caTranslations: DefaultTranslationsObject = {
     create: 'Crear',
     created: 'Creat',
     createdAt: 'Creat el',
+    createdBy: 'Creat per',
     createNew: 'Crear nou',
     createNewLabel: 'Crea nou {{label}}',
     creating: 'Creant',
@@ -525,6 +527,7 @@ export const caTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Esdeveniments programats',
     updatedAgo: 'Actualitzat fa {{distance}}',
     updatedAt: 'Actualitzat el',
+    updatedBy: 'Actualitzat per',
     updatedCountSuccessfully: 'Actualitzat {{count}} {{label}} correctament.',
     updatedLabelSuccessfully: 'Actualitzat {{label}} amb èxit.',
     updatedSuccessfully: 'Actualitzat amb exit.',

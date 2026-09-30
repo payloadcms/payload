@@ -113,6 +113,7 @@ export const faTranslations: DefaultTranslationsObject = {
     noItems:
       'در داشبورد شما هیچ ویجتی وجود ندارد. شما می توانید آنها را از منوی "داشبورد" که در نوار بالا قرار دارد اضافه کنید.',
     resetLayout: 'تنظیم مجدد طرح بندی',
+    resizeWidget: 'تغییر اندازهٔ {{label}}، اندازهٔ فعلی: {{size}}',
     searchWidgets: 'جستجوی ابزارک‌ها...',
     widgetCollectionRequired: 'Collection الزامی است.',
     widgetConfigurationError: 'خطای پیکربندی ابزارک',
@@ -313,6 +314,7 @@ export const faTranslations: DefaultTranslationsObject = {
     create: 'ایجاد',
     created: 'ایجاد شد',
     createdAt: 'تاریخ ایجاد',
+    createdBy: 'ایجاد شده توسط',
     createNew: 'ایجاد مورد جدید',
     createNewLabel: 'ایجاد {{label}} جدید',
     creating: 'در حال ایجاد...',
@@ -513,6 +515,7 @@ export const faTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'رویدادهای آینده',
     updatedAgo: 'آخرین به‌روزرسانی {{distance}} قبل',
     updatedAt: 'تاریخ به‌روزرسانی',
+    updatedBy: 'به‌روزرسانی شده توسط',
     updatedCountSuccessfully: '{{count}} {{label}} با موفقیت به‌روزرسانی شد.',
     updatedLabelSuccessfully: '{{label}} با موفقیت به‌روزرسانی شد.',
     updatedSuccessfully: 'با موفقیت به‌روزرسانی شد.',
