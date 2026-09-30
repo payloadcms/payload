@@ -453,6 +453,10 @@ export const mergeBranch = async (
     retainedDoc: null | Record<string, unknown>
     sourceDoc: Record<string, unknown>
   }[] = []
+  const sourceCleanupPlans: {
+    changeID: number | string
+    cleanup: () => Promise<void>
+  }[] = []
   const reqContext = req.context as Record<PropertyKey, unknown>
   const previousBranchMergeWriteGuard = reqContext[branchMergeWriteGuardContextKey]
   const previousThrowOnFieldAccessDenied = reqContext[throwOnFieldAccessDeniedContextKey]
@@ -574,7 +578,7 @@ export const mergeBranch = async (
         throw new APIError(dependencyBlockedAtUse[0]!.message, 409)
       }
 
-      await applyChange({
+      const cleanup = await applyChange({
         hasTransaction,
         overrideAccess,
         payload,
@@ -582,6 +586,8 @@ export const mergeBranch = async (
         resolved: resolvedChange,
         targetReq: writeTargetReq,
       })
+
+      sourceCleanupPlans.push({ changeID: change.id, cleanup })
 
       if (uploadSourceDoc) {
         const retainedDoc = (await payload.db.findOne({
@@ -601,12 +607,6 @@ export const mergeBranch = async (
         before,
       })
 
-      await payload.delete({
-        id: change.id,
-        collection: branchChangesCollectionSlug,
-        overrideAccess: true,
-        req,
-      })
       result.merged.push({
         changeID: change.id,
         collectionSlug: change.collectionSlug as string,
@@ -659,7 +659,7 @@ export const mergeBranch = async (
         throw new APIError(dependencyBlockedAtUse[0]!.message, 409)
       }
 
-      await applyGlobalChange({
+      const cleanup = await applyGlobalChange({
         branch,
         globalSlug,
         overrideAccess,
@@ -668,16 +668,11 @@ export const mergeBranch = async (
         targetReq: writeTargetReq,
       })
 
+      sourceCleanupPlans.push({ changeID: change.id, cleanup })
+
       snapshots.set(String(change.id), {
         after: await readGlobalMergeSnapshot({ globalSlug, payload, req }),
         before,
-      })
-
-      await payload.delete({
-        id: change.id,
-        collection: branchChangesCollectionSlug,
-        overrideAccess: true,
-        req,
       })
 
       result.merged.push({
@@ -685,6 +680,16 @@ export const mergeBranch = async (
         entityType: 'global',
         globalSlug,
         operation: 'update',
+      })
+    }
+
+    for (const { changeID, cleanup } of sourceCleanupPlans) {
+      await cleanup()
+      await payload.delete({
+        id: changeID,
+        collection: branchChangesCollectionSlug,
+        overrideAccess: true,
+        req,
       })
     }
 
@@ -1112,11 +1117,11 @@ const applyChange = async ({
   req: PayloadRequest
   resolved: ResolvedChange
   targetReq: PayloadRequest
-}): Promise<void> => {
+}): Promise<() => Promise<void>> => {
   const { change, collectionSlug, docID, shadow, writes } = resolved
 
   if (!shadow) {
-    return
+    return () => Promise.resolve()
   }
 
   const shadowID = shadow.id as number | string
@@ -1212,18 +1217,14 @@ const applyChange = async ({
       req: targetReq,
     })
 
-    await dropShadowRow()
-
-    return
+    return dropShadowRow
   }
 
   // A fork that was never edited afterwards. Nothing happened to the document on
   // this branch, so writing main would only bump `updatedAt` and re-run hooks for
   // a no-op — the shadow row is simply discarded.
   if (!writes.length) {
-    await dropShadowRow()
-
-    return
+    return dropShadowRow
   }
 
   if (change.operation === 'create') {
@@ -1348,7 +1349,7 @@ const applyChange = async ({
 
       await applyCreateWrites()
 
-      return
+      return () => Promise.resolve()
     }
 
     await applyBranchCreateWithoutTransaction({
@@ -1361,7 +1362,7 @@ const applyChange = async ({
       shadowID,
     })
 
-    return
+    return () => Promise.resolve()
   }
 
   const fields = payload.collections[collectionSlug]!.config.fields
@@ -1471,7 +1472,7 @@ const applyChange = async ({
     }
   }
 
-  await dropShadowRow()
+  return dropShadowRow
 }
 
 const includesTrashState = (data: Record<string, unknown>): boolean =>
@@ -1780,11 +1781,17 @@ const applyGlobalChange = async ({
   payload: Payload
   req: PayloadRequest
   targetReq: PayloadRequest
-}): Promise<void> => {
+}): Promise<() => Promise<void>> => {
   const writes = await resolveGlobalMergeWrites({ branch, globalSlug, payload, req })
 
   if (!writes.length) {
     throw new Error(`Branch "${branch}" has no stored copy of global "${globalSlug}" to merge.`)
+  }
+
+  if (!payload.db.deleteBranchGlobal) {
+    throw new Error(
+      `The database adapter cannot remove a branch's copy of a global, so "${globalSlug}" cannot be merged.`,
+    )
   }
 
   const locales = getGlobalMergeLocales({ globalSlug, payload, req })
@@ -1821,14 +1828,10 @@ const applyGlobalChange = async ({
     }
   }
 
-  if (!payload.db.deleteBranchGlobal) {
-    throw new Error(
-      `The database adapter cannot remove a branch's copy of a global, so "${globalSlug}" cannot be merged.`,
-    )
+  return async () => {
+    await deleteBranchGlobalVersionChain({ branch, globalSlug, payload, req })
+    await payload.db.deleteBranchGlobal!({ branch, globalSlug, req })
   }
-
-  await deleteBranchGlobalVersionChain({ branch, globalSlug, payload, req })
-  await payload.db.deleteBranchGlobal({ branch, globalSlug, req })
 }
 
 export const getBranchesLocalAPI = (payload: Payload) => ({

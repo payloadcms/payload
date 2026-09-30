@@ -8422,6 +8422,69 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       },
     )
 
+    test('should retain source state when a later non-transactional merge write fails', async () => {
+      branchSlug = 'non-transactional-merge'
+
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Non-transactional merge', slug: branchSlug },
+      })
+
+      const first = await payload.create({
+        collection: postsSlug,
+        data: { title: 'First original' },
+      })
+      const second = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Second original' },
+      })
+
+      await payload.update({
+        id: first.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'First edited' },
+      })
+      await payload.update({
+        id: second.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Second edited' },
+      })
+
+      const beginTransactionSpy = vi.spyOn(payload.db, 'beginTransaction').mockResolvedValue(null)
+
+      hookSpy.beforeChange = ({ data }: { data: Record<string, unknown> }) => {
+        if (data.title === 'Second edited') {
+          throw new Error('Simulated non-transactional merge failure')
+        }
+      }
+
+      try {
+        await expect(
+          payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+        ).rejects.toThrow('Simulated non-transactional merge failure')
+
+        const sourceRows = await payload.find({
+          branch: false,
+          collection: postsSlug,
+          pagination: false,
+          showHiddenFields: true,
+          where: { _branch: { equals: branchSlug } },
+        })
+        const remainingChanges = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+
+        expect(sourceRows.docs).toHaveLength(2)
+        expect(remainingChanges.docs).toHaveLength(2)
+      } finally {
+        beginTransactionSpy.mockRestore()
+      }
+    })
+
     test.options(
       'should roll back every change in a discard when a later change fails',
       { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
