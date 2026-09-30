@@ -21,7 +21,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
-import { $getNodeByKey, SKIP_DOM_SELECTION_TAG } from 'lexical'
+import { $getNodeByKey, HISTORY_MERGE_TAG, SKIP_DOM_SELECTION_TAG } from 'lexical'
 
 import './index.css'
 import '../../../../utilities/fieldsDrawer/index.css'
@@ -278,7 +278,10 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
           },
           // Without this, the outer editor's reconciler resets DOM selection
           // back into its own root, kicking focus out of any nested richText.
-          { tag: SKIP_DOM_SELECTION_TAG },
+          // HISTORY_MERGE_TAG prevents this internal default-value write from
+          // creating its own undo entry, which would require two Undo presses
+          // to remove a newly inserted inline block.
+          { tag: [SKIP_DOM_SELECTION_TAG, HISTORY_MERGE_TAG] },
         )
 
         setInitialState(state)

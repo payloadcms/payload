@@ -27,7 +27,7 @@ import {
   XIcon,
 } from '@payloadcms/ui'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
-import { $getNodeByKey, $getRoot, SKIP_DOM_SELECTION_TAG } from 'lexical'
+import { $getNodeByKey, $getRoot, HISTORY_MERGE_TAG, SKIP_DOM_SELECTION_TAG } from 'lexical'
 import {
   type BlocksFieldClient,
   type ClientBlock,
@@ -289,7 +289,10 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
           },
           // Without this, the outer editor's reconciler resets DOM selection
           // back into its own root, kicking focus out of any nested richText.
-          { tag: SKIP_DOM_SELECTION_TAG },
+          // HISTORY_MERGE_TAG prevents this internal default-value write from
+          // creating its own undo entry, which would require two Undo presses
+          // to remove a newly inserted block.
+          { tag: [SKIP_DOM_SELECTION_TAG, HISTORY_MERGE_TAG] },
         )
 
         setInitialState(state)
