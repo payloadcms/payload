@@ -1,10 +1,9 @@
 @layer payload-default {
   .template-default {
-    height: 100vh;
+    min-height: 100vh;
     display: grid;
     position: relative;
     isolation: isolate;
-    overflow: hidden;
   }
 
   /* stylelint-disable-next-line plugin/no-non-standard-breakpoints -- TODO: pre-existing; align with a canonical breakpoint */
