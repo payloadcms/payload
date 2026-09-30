@@ -116,6 +116,7 @@ export const frTranslations: DefaultTranslationsObject = {
     noItems:
       'Il n\'y a pas de widgets sur votre tableau de bord. Vous pouvez les ajouter depuis le menu "Tableau de bord" situé dans la barre supérieure.',
     resetLayout: 'Réinitialiser la mise en page',
+    resizeWidget: 'Redimensionner {{label}}, taille actuelle : {{size}}',
     searchWidgets: 'Rechercher des widgets...',
     widgetCollectionRequired: 'La Collection est requise.',
     widgetConfigurationError: 'Erreur de configuration du widget',

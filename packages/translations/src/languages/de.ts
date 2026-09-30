@@ -117,6 +117,7 @@ export const deTranslations: DefaultTranslationsObject = {
     noItems:
       'Auf deinem Dashboard befinden sich keine Widgets. Du kannst diese über das "Dashboard"-Menü in der oberen Leiste hinzufügen.',
     resetLayout: 'Layout zurücksetzen',
+    resizeWidget: 'Größe von {{label}} ändern, aktuelle Größe: {{size}}',
     searchWidgets: 'Suche Widgets...',
     widgetCollectionRequired: 'Collection ist erforderlich.',
     widgetConfigurationError: 'Widget-Konfigurationsfehler',

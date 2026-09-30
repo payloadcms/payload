@@ -115,6 +115,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     noItems:
       'Na vašoj kontrolnoj tabli nema vidžeta. Možete ih dodati iz menija "Kontrolna tabla" koji se nalazi na vrhu stranice.',
     resetLayout: 'Resetuj raspored',
+    resizeWidget: 'Promeni veličinu {{label}}, trenutna veličina: {{size}}',
     searchWidgets: 'Pretraži dodatke...',
     widgetCollectionRequired: 'Kolekcija je obavezna.',
     widgetConfigurationError: 'Greška u konfiguraciji vidžeta',

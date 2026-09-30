@@ -15,6 +15,7 @@ import { selectInput } from '../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/e2e/initPage.js'
+import { devUser } from '../credentials.js'
 import { DashboardHelper } from '../dashboard/utils.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
@@ -36,6 +37,12 @@ export async function openAccessibilityTestPage({
   const { serverURL } = await initPayloadE2ENoConfig({ dirname })
   const postsURL = new AdminUrlUtil(serverURL, 'posts')
   const context = await browser.newContext()
+  const loginResponse = await context.request.post(
+    formatAdminURL({ apiRoute: '/api', path: '/users/login', serverURL }),
+    { data: devUser },
+  )
+
+  expect(loginResponse.ok()).toBe(true)
   const { page } = await initPage({ context, serverURL })
   page.removeAllListeners('console')
 
@@ -566,4 +573,74 @@ export async function openDrawerFilters({
   }
   await expect(comboboxes).toHaveCount(2)
   return comboboxes
+}
+
+export async function openDashboardEditor({ page, serverURL }: { page: Page; serverURL: string }) {
+  await page.goto(formatAdminURL({ adminRoute: '/admin', serverURL }))
+  const trigger = page.locator('.dashboard-breadcrumb-dropdown .popup__trigger-wrap button')
+
+  await trigger.focus()
+  await trigger.press('Enter')
+  await page.getByRole('menuitem', { name: 'Edit Dashboard', exact: true }).press('Enter')
+  await expect(page.locator('.modular-dashboard.editing')).toBeVisible()
+  return page.locator('.dashboard-breadcrumb-dropdown__editing')
+}
+
+export async function addCollectionQueryWidget({ page }: { page: Page }) {
+  const widgets = page.locator('.widget[data-slug^="collection-query-"]')
+  const previousCount = await widgets.count()
+  const add = page
+    .locator('.dashboard-breadcrumb-dropdown__actions')
+    .getByRole('button', { name: 'Add +', exact: true })
+
+  await add.press('Enter')
+  const drawer = page.locator('dialog[id^="widgets-drawer-"]')
+  await expect(drawer).toBeVisible()
+  await drawer.getByRole('button', { name: /collection query/i }).press('Enter')
+  await expect(drawer).toBeHidden()
+  await expect(widgets).toHaveCount(previousCount + 1)
+  await expect(widgets.last().locator('.collection-query-widget')).toBeVisible()
+  await expect(widgets.last().locator('.draggable')).toBeFocused()
+  return widgets.last()
+}
+
+export async function insertTextBlockWithKeyboard({ page }: { page: Page }) {
+  const trigger = page.locator('#field-layout > .blocks-field__drawer-toggler')
+
+  await trigger.press('Enter')
+  const drawer = page.locator('[id^="drawer_1_blocks-drawer-"]')
+  await expect(drawer).toBeVisible()
+  await drawer.getByRole('button', { name: 'Text block', exact: true }).press('Enter')
+  await drawer.getByRole('button', { name: 'Insert', exact: true }).press('Enter')
+  await expect(drawer).toBeHidden()
+  const row = page.locator('#field-layout .blocks-field__row').last()
+  await expect(row).toBeVisible()
+  return row
+}
+
+export async function expectPaintedFocus({ page }: { page: Page }) {
+  const focused = page.locator(':focus')
+
+  await expect(focused).toBeVisible()
+  await expect
+    .poll(() =>
+      focused.evaluate((element) => {
+        for (let node: Element | null = element; node; node = node.parentElement) {
+          const style = getComputedStyle(node)
+          if (Number(style.opacity) === 0 || style.visibility === 'hidden') {
+            return false
+          }
+        }
+        const rect = element.getBoundingClientRect()
+        return (
+          rect.width > 0 &&
+          rect.height > 0 &&
+          rect.bottom > 0 &&
+          rect.right > 0 &&
+          rect.top < innerHeight &&
+          rect.left < innerWidth
+        )
+      }),
+    )
+    .toBe(true)
 }

@@ -115,6 +115,7 @@ export const enTranslations = {
     noItems:
       'There are no widgets on your dashboard. You can add them from the "Dashboard" menu located in the top bar.',
     resetLayout: 'Reset Layout',
+    resizeWidget: 'Resize {{label}}, current size: {{size}}',
     searchWidgets: 'Search widgets...',
     widgetCollectionRequired: 'Collection is required.',
     widgetConfigurationError: 'Widget configuration error',

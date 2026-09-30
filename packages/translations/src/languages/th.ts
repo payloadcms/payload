@@ -112,6 +112,7 @@ export const thTranslations: DefaultTranslationsObject = {
     editingDashboard: 'แก้ไขแดชบอร์ด',
     noItems: 'ไม่มีวิดเจ็ตในแดชบอร์ดของคุณ คุณสามารถเพิ่มได้จากเมนู "แดชบอร์ด" ที่ตั้งอยู่บนแถบบน',
     resetLayout: 'รีเซ็ตเลย์เอาท์',
+    resizeWidget: 'ปรับขนาด {{label}} ขนาดปัจจุบัน: {{size}}',
     searchWidgets: 'ค้นหาวิดเจ็ต...',
     widgetCollectionRequired: 'Collection เป็นข้อมูลที่จำเป็น',
     widgetConfigurationError: 'เกิดข้อผิดพลาดในการกำหนดค่าของวิดเจ็ต',

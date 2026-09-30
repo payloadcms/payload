@@ -115,6 +115,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     noItems:
       'На вашій панелі немає віджетів. Ви можете додати їх з меню "Головна", розташованого в верхній панелі.',
     resetLayout: 'Скинути макет',
+    resizeWidget: 'Змінити розмір {{label}}, поточний розмір: {{size}}',
     searchWidgets: 'Пошук віджетів...',
     widgetCollectionRequired: 'Collection є обов’язковим.',
     widgetConfigurationError: 'Помилка конфігурації віджета',

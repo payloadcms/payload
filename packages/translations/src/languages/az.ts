@@ -114,6 +114,7 @@ export const azTranslations: DefaultTranslationsObject = {
     noItems:
       'Sizin panelinizdə heç bir vidjet yoxdur. Siz onları yuxarıdaki çubuqda yerləşən "Panel" menyusundan əlavə edə bilərsiniz.',
     resetLayout: 'Düzəni sıfırlama',
+    resizeWidget: '{{label}} ölçüsünü dəyişin, cari ölçü: {{size}}',
     searchWidgets: 'Widgetləri axtarın...',
     widgetCollectionRequired: 'Collection tələb olunur.',
     widgetConfigurationError: 'Vidjet konfiqurasiyası xətası',

@@ -117,6 +117,7 @@ export const roTranslations: DefaultTranslationsObject = {
     noItems:
       'Nu există widget-uri pe tabloul dvs. de bord. Le puteți adăuga din meniul "Tablou de bord" situat în bara superioară.',
     resetLayout: 'Resetează Aspectul',
+    resizeWidget: 'Redimensionează {{label}}, dimensiunea actuală: {{size}}',
     searchWidgets: 'Caută widgeturi...',
     widgetCollectionRequired: 'Colecția este obligatorie.',
     widgetConfigurationError: 'Eroare de configurare a widgetului',
