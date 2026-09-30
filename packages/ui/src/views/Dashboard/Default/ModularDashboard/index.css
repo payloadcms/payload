@@ -41,10 +41,9 @@
   .modular-dashboard.editing .widget-content {
     user-select: none;
     -webkit-user-select: none;
-    pointer-events: none;
   }
 
-  .modular-dashboard.editing .draggable {
+  .modular-dashboard.editing .widget-wrapper__drag-btn {
     cursor: grab;
   }
 
@@ -109,7 +108,10 @@
     position: absolute;
     inset: 0;
     z-index: 5;
-    pointer-events: none;
+    border: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
     background: rgba(0, 0, 0, 0.35);
     outline: var(--accessibility-outline);
     outline-offset: var(--accessibility-outline-offset);

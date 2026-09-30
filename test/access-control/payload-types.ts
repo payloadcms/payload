@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_8CC232E1".
+ * via the `definition` "LexicalNodes_94ECF813".
  */
-export type LexicalNodes_8CC232E1 =
+export type LexicalNodes_94ECF813 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_8CC232E1>
+  | SerializedParagraphNode<LexicalNodes_94ECF813>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_8CC232E1>
+  | SerializedHeadingNode<LexicalNodes_94ECF813>
   | {
       type: 'upload';
       /**
@@ -79,11 +79,11 @@ export type LexicalNodes_8CC232E1 =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_8CC232E1>
-  | SerializedListNode<LexicalNodes_8CC232E1>
-  | SerializedListItemNode<LexicalNodes_8CC232E1>
-  | SerializedAutoLinkNode<LexicalNodes_8CC232E1, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_8CC232E1, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_94ECF813>
+  | SerializedListNode<LexicalNodes_94ECF813>
+  | SerializedListItemNode<LexicalNodes_94ECF813>
+  | SerializedAutoLinkNode<LexicalNodes_94ECF813, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_94ECF813, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'public-users'
@@ -105,6 +105,9 @@ export type LexicalNodes_8CC232E1 =
       | 'hidden-access'
       | 'hidden-access-count'
       | 'fields-and-top-access'
+      | 'inherited-read-versions'
+      | 'inherited-read-versions-virtual-related'
+      | 'inherited-read-versions-virtual'
       | 'blocks-field-access'
       | 'disabled'
       | 'rich-text'
@@ -129,13 +132,13 @@ export type LexicalNodes_8CC232E1 =
     >;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_600B08CC".
+ * via the `definition` "LexicalNodes_94426BDB".
  */
-export type LexicalNodes_600B08CC =
+export type LexicalNodes_94426BDB =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_600B08CC>
+  | SerializedParagraphNode<LexicalNodes_94426BDB>
   | SerializedHorizontalRuleNode
   | {
       type: 'upload';
@@ -145,7 +148,7 @@ export type LexicalNodes_600B08CC =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_600B08CC>
+  | SerializedQuoteNode<LexicalNodes_94426BDB>
   | SerializedRelationshipNode<
       | 'users'
       | 'public-users'
@@ -167,6 +170,9 @@ export type LexicalNodes_600B08CC =
       | 'hidden-access'
       | 'hidden-access-count'
       | 'fields-and-top-access'
+      | 'inherited-read-versions'
+      | 'inherited-read-versions-virtual-related'
+      | 'inherited-read-versions-virtual'
       | 'blocks-field-access'
       | 'disabled'
       | 'rich-text'
@@ -189,11 +195,11 @@ export type LexicalNodes_600B08CC =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_600B08CC, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_600B08CC, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_600B08CC>
-  | SerializedListItemNode<LexicalNodes_600B08CC>
-  | SerializedHeadingNode<LexicalNodes_600B08CC>;
+  | SerializedAutoLinkNode<LexicalNodes_94426BDB, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_94426BDB, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_94426BDB>
+  | SerializedListItemNode<LexicalNodes_94426BDB>
+  | SerializedHeadingNode<LexicalNodes_94426BDB>;
 
 export interface Config {
   auth: {
@@ -225,6 +231,9 @@ export interface Config {
     'hidden-access': HiddenAccess;
     'hidden-access-count': HiddenAccessCount;
     'fields-and-top-access': FieldsAndTopAccess;
+    'inherited-read-versions': InheritedReadVersion;
+    'inherited-read-versions-virtual-related': InheritedReadVersionsVirtualRelated;
+    'inherited-read-versions-virtual': InheritedReadVersionsVirtual;
     'blocks-field-access': BlocksFieldAccess;
     disabled: Disabled;
     'rich-text': RichText;
@@ -282,6 +291,9 @@ export interface Config {
     'hidden-access': HiddenAccessSelect<false> | HiddenAccessSelect<true>;
     'hidden-access-count': HiddenAccessCountSelect<false> | HiddenAccessCountSelect<true>;
     'fields-and-top-access': FieldsAndTopAccessSelect<false> | FieldsAndTopAccessSelect<true>;
+    'inherited-read-versions': InheritedReadVersionsSelect<false> | InheritedReadVersionsSelect<true>;
+    'inherited-read-versions-virtual-related': InheritedReadVersionsVirtualRelatedSelect<false> | InheritedReadVersionsVirtualRelatedSelect<true>;
+    'inherited-read-versions-virtual': InheritedReadVersionsVirtualSelect<false> | InheritedReadVersionsVirtualSelect<true>;
     'blocks-field-access': BlocksFieldAccessSelect<false> | BlocksFieldAccessSelect<true>;
     disabled: DisabledSelect<false> | DisabledSelect<true>;
     'rich-text': RichTextSelect<false> | RichTextSelect<true>;
@@ -309,6 +321,8 @@ export interface Config {
   };
   fallbackLocale: null;
   globals: {
+    'inherited-read-versions-global': InheritedReadVersionsGlobal;
+    'inherited-read-versions-virtual-global': InheritedReadVersionsVirtualGlobal;
     settings: Setting;
     test: Test;
     'read-only-global': ReadOnlyGlobal;
@@ -316,6 +330,8 @@ export interface Config {
     'read-not-update-global': ReadNotUpdateGlobal;
   };
   globalsSelect: {
+    'inherited-read-versions-global': InheritedReadVersionsGlobalSelect<false> | InheritedReadVersionsGlobalSelect<true>;
+    'inherited-read-versions-virtual-global': InheritedReadVersionsVirtualGlobalSelect<false> | InheritedReadVersionsVirtualGlobalSelect<true>;
     settings: SettingsSelect<false> | SettingsSelect<true>;
     test: TestSelect<false> | TestSelect<true>;
     'read-only-global': ReadOnlyGlobalSelect<false> | ReadOnlyGlobalSelect<true>;
@@ -1311,6 +1327,115 @@ export interface FieldsAndTopAccess {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inherited-read-versions".
+ */
+export interface InheritedReadVersion {
+  id: string;
+  secret?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'auth-collection';
+        value: string | AuthCollection;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'auth-collection';
+        value: string | AuthCollection;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inherited-read-versions-virtual-related".
+ */
+export interface InheritedReadVersionsVirtualRelated {
+  id: string;
+  label?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'auth-collection';
+        value: string | AuthCollection;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'auth-collection';
+        value: string | AuthCollection;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inherited-read-versions-virtual".
+ */
+export interface InheritedReadVersionsVirtual {
+  id: string;
+  related?: (string | null) | InheritedReadVersionsVirtualRelated;
+  relatedLabel?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'auth-collection';
+        value: string | AuthCollection;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'auth-collection';
+        value: string | AuthCollection;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "blocks-field-access".
  */
 export interface BlocksFieldAccess {
@@ -1475,7 +1600,7 @@ export interface RichText {
  * via the `definition` "RichText".
  */
 export interface RichText1 {
-  richText?: LexicalRichText<LexicalNodes_8CC232E1> | null;
+  richText?: LexicalRichText<LexicalNodes_94ECF813> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'richText';
@@ -1487,24 +1612,24 @@ export interface RichText1 {
 export interface Regression1 {
   id: string;
   group1?: {
-    richText1?: LexicalRichText<LexicalNodes_600B08CC> | null;
+    richText1?: LexicalRichText<LexicalNodes_94426BDB> | null;
     text?: string | null;
   };
   tab1?: {
-    richText2?: LexicalRichText<LexicalNodes_600B08CC> | null;
-    blocks2?: MyBlock_D096D653[] | null;
+    richText2?: LexicalRichText<LexicalNodes_94426BDB> | null;
+    blocks2?: MyBlock_493DD542[] | null;
   };
-  richText4?: LexicalRichText<LexicalNodes_600B08CC> | null;
+  richText4?: LexicalRichText<LexicalNodes_94426BDB> | null;
   blocks3?: MyBlock2[] | null;
   array?:
     | {
-        art?: LexicalRichText<LexicalNodes_600B08CC> | null;
+        art?: LexicalRichText<LexicalNodes_94426BDB> | null;
         id?: string | null;
       }[]
     | null;
   arrayWithAccessFalse?:
     | {
-        richText6?: LexicalRichText<LexicalNodes_600B08CC> | null;
+        richText6?: LexicalRichText<LexicalNodes_94426BDB> | null;
         id?: string | null;
       }[]
     | null;
@@ -1542,10 +1667,10 @@ export interface Regression1 {
  * Multiple blocks resolve to the `MyBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
  *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "MyBlock_D096D653".
+ * via the `definition` "MyBlock_493DD542".
  */
-export interface MyBlock_D096D653 {
-  richText3?: LexicalRichText<LexicalNodes_600B08CC> | null;
+export interface MyBlock_493DD542 {
+  richText3?: LexicalRichText<LexicalNodes_94426BDB> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'myBlock';
@@ -1555,7 +1680,7 @@ export interface MyBlock_D096D653 {
  * via the `definition` "MyBlock2".
  */
 export interface MyBlock2 {
-  richText5?: LexicalRichText<LexicalNodes_600B08CC> | null;
+  richText5?: LexicalRichText<LexicalNodes_94426BDB> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'myBlock2';
@@ -1565,7 +1690,7 @@ export interface MyBlock2 {
  * via the `definition` "MyBlock3".
  */
 export interface MyBlock3 {
-  richText7?: LexicalRichText<LexicalNodes_600B08CC> | null;
+  richText7?: LexicalRichText<LexicalNodes_94426BDB> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'myBlock3';
@@ -1577,12 +1702,12 @@ export interface MyBlock3 {
 export interface Regression2 {
   id: string;
   group?: {
-    richText1?: LexicalRichText<LexicalNodes_600B08CC> | null;
+    richText1?: LexicalRichText<LexicalNodes_94426BDB> | null;
     text?: string | null;
   };
   array?:
     | {
-        richText2?: LexicalRichText<LexicalNodes_600B08CC> | null;
+        richText2?: LexicalRichText<LexicalNodes_94426BDB> | null;
         id?: string | null;
       }[]
     | null;
@@ -2102,32 +2227,6 @@ export interface PayloadKv {
     | number
     | boolean
     | null;
-  createdBy?:
-    | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null)
-    | ({
-        relationTo: 'public-users';
-        value: string | PublicUser;
-      } | null)
-    | ({
-        relationTo: 'auth-collection';
-        value: string | AuthCollection;
-      } | null);
-  updatedBy?:
-    | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null)
-    | ({
-        relationTo: 'public-users';
-        value: string | PublicUser;
-      } | null)
-    | ({
-        relationTo: 'auth-collection';
-        value: string | AuthCollection;
-      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2215,6 +2314,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'fields-and-top-access';
         value: string | FieldsAndTopAccess;
+      } | null)
+    | ({
+        relationTo: 'inherited-read-versions';
+        value: string | InheritedReadVersion;
+      } | null)
+    | ({
+        relationTo: 'inherited-read-versions-virtual-related';
+        value: string | InheritedReadVersionsVirtualRelated;
+      } | null)
+    | ({
+        relationTo: 'inherited-read-versions-virtual';
+        value: string | InheritedReadVersionsVirtual;
       } | null)
     | ({
         relationTo: 'blocks-field-access';
@@ -2663,6 +2774,40 @@ export interface FieldsAndTopAccessSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inherited-read-versions_select".
+ */
+export interface InheritedReadVersionsSelect<T extends boolean = true> {
+  secret?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inherited-read-versions-virtual-related_select".
+ */
+export interface InheritedReadVersionsVirtualRelatedSelect<T extends boolean = true> {
+  label?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inherited-read-versions-virtual_select".
+ */
+export interface InheritedReadVersionsVirtualSelect<T extends boolean = true> {
+  related?: T;
+  relatedLabel?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "blocks-field-access_select".
  */
 export interface BlocksFieldAccessSelect<T extends boolean = true> {
@@ -3104,8 +3249,6 @@ export interface SelfReferentialSelect<T extends boolean = true> {
 export interface PayloadKvSelect<T extends boolean = true> {
   key?: T;
   data?: T;
-  createdBy?: T;
-  updatedBy?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3138,6 +3281,79 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inherited-read-versions-global".
+ */
+export interface InheritedReadVersionsGlobal {
+  id: string;
+  visible?: boolean | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'auth-collection';
+        value: string | AuthCollection;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'auth-collection';
+        value: string | AuthCollection;
+      } | null);
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inherited-read-versions-virtual-global".
+ */
+export interface InheritedReadVersionsVirtualGlobal {
+  id: string;
+  related?: (string | null) | InheritedReadVersionsVirtualRelated;
+  relatedLabel?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'auth-collection';
+        value: string | AuthCollection;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'auth-collection';
+        value: string | AuthCollection;
+      } | null);
+  updatedAt?: string | null;
+  createdAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3321,6 +3537,31 @@ export interface ReadNotUpdateGlobal {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inherited-read-versions-global_select".
+ */
+export interface InheritedReadVersionsGlobalSelect<T extends boolean = true> {
+  visible?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inherited-read-versions-virtual-global_select".
+ */
+export interface InheritedReadVersionsVirtualGlobalSelect<T extends boolean = true> {
+  related?: T;
+  relatedLabel?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "settings_select".
  */
 export interface SettingsSelect<T extends boolean = true> {
@@ -3417,6 +3658,9 @@ export interface CollectionQueryWidget {
       | 'hidden-access'
       | 'hidden-access-count'
       | 'fields-and-top-access'
+      | 'inherited-read-versions'
+      | 'inherited-read-versions-virtual-related'
+      | 'inherited-read-versions-virtual'
       | 'blocks-field-access'
       | 'disabled'
       | 'rich-text'
@@ -3477,6 +3721,9 @@ export interface ActivityWidget {
           | 'hidden-access'
           | 'hidden-access-count'
           | 'fields-and-top-access'
+          | 'inherited-read-versions'
+          | 'inherited-read-versions-virtual-related'
+          | 'inherited-read-versions-virtual'
           | 'blocks-field-access'
           | 'disabled'
           | 'rich-text'

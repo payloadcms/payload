@@ -1,9 +1,9 @@
-import type { PointFieldLabelServerComponent } from 'payload'
+import type { PointFieldLabelServerProps } from 'payload'
 
 import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomPointFieldLabelServer: PointFieldLabelServerComponent = ({
+export const CustomPointFieldLabelServer: React.FC<PointFieldLabelServerProps> = ({
   clientField,
   path,
 }) => {

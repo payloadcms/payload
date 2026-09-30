@@ -11,6 +11,8 @@ export {
 export { applyUserReadAccess } from '../auth/applyUserReadAccess.js'
 export { createCLI } from '../cli/index.js'
 export { getCommandInput } from '../cli/runtime/getCommandInput.js'
+export { createSchemaBuildContext } from '../database/createSchemaBuildContext.js'
+export type { SchemaBuildContext } from '../database/createSchemaBuildContext.js'
 export { assertClientUploadAccess } from '../uploads/assertClientUploadAccess.js'
 export { assertClientUploadAllowed } from '../uploads/assertClientUploadAllowed.js'
 export {

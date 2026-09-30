@@ -1,6 +1,6 @@
 'use client'
 
-import type { SelectFieldClientComponent } from 'payload'
+import type { SelectFieldClientProps } from 'payload'
 import type { ReactNode } from 'react'
 
 import {
@@ -18,7 +18,7 @@ import { reduceFields } from './reduceFields.js'
 
 const baseClass = 'field-type fields-to-export'
 
-export const FieldsToExport: SelectFieldClientComponent = (props) => {
+export const FieldsToExport: React.FC<SelectFieldClientProps> = (props) => {
   const { id } = useDocumentInfo()
   const { setValue, value } = useField<string[]>()
   const { value: collectionSlug } = useField<string>({ path: 'collectionSlug' })

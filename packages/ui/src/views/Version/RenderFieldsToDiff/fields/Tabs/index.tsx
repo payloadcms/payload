@@ -3,7 +3,7 @@ import type {
   ClientTab,
   FieldDiffClientProps,
   TabsFieldClient,
-  TabsFieldDiffClientComponent,
+  TabsFieldDiffClientProps,
   VersionTab,
 } from 'payload'
 
@@ -18,7 +18,7 @@ import { RenderVersionFieldsToDiff } from '../../RenderVersionFieldsToDiff.js'
 
 const baseClass = 'tabs-diff'
 
-export const Tabs: TabsFieldDiffClientComponent = (props) => {
+export const Tabs: React.FC<TabsFieldDiffClientProps> = (props) => {
   const { baseVersionField, comparisonValue: valueFrom, field, versionValue: valueTo } = props
   const { selectedLocales } = useSelectedLocales()
 

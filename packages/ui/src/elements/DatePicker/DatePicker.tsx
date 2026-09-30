@@ -3,6 +3,7 @@ import type { DatePickerProps } from 'react-datepicker'
 
 import React from 'react'
 import ReactDatePickerDefaultImport, { registerLocale, setDefaultLocale } from 'react-datepicker'
+import { createPortal } from 'react-dom'
 const ReactDatePicker =
   'default' in ReactDatePickerDefaultImport
     ? ReactDatePickerDefaultImport.default
@@ -77,6 +78,15 @@ const DatePicker: React.FC<Props> = (props) => {
     value,
   } = props
 
+  const [modalContainer, setModalContainer] = React.useState<Element | null>(null)
+  const setContainerRef = React.useCallback((element: HTMLDivElement | null) => {
+    setModalContainer(element?.closest('dialog, [role="dialog"]') ?? null)
+  }, [])
+  const popperContainer = React.useCallback<React.FC<React.PropsWithChildren>>(
+    ({ children }) => (modalContainer ? createPortal(children, modalContainer) : children),
+    [modalContainer],
+  )
+
   // Use the user's AdminUI language preference for the locale
   const { i18n, t } = useTranslation()
   const monthLabel = getDateTimeFieldLabel({ field: 'month', locale: i18n.language })
@@ -150,8 +160,9 @@ const DatePicker: React.FC<Props> = (props) => {
     nextYearButtonLabel: '›',
     onChange,
     placeholderText,
+    popperContainer: modalContainer ? popperContainer : undefined,
     popperPlacement: 'bottom-start',
-    portalId: 'date-time-picker-portal',
+    portalId: modalContainer ? undefined : 'date-time-picker-portal',
     previousMonthButtonLabel: <ChevronIcon direction="left" />,
     previousYearButtonLabel: '‹',
     selected: value && new Date(value),
@@ -186,7 +197,7 @@ const DatePicker: React.FC<Props> = (props) => {
   }, [i18n.language, i18n.dateFNS])
 
   return (
-    <div className={classes} id={id}>
+    <div className={classes} id={id} ref={setContainerRef}>
       <div className={`${baseClass}__input-wrapper`}>
         <ReactDatePicker
           {...dateTimePickerProps}
