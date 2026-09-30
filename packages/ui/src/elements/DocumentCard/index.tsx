@@ -66,7 +66,11 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
   }
 
   const handleCardKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
-    if (!onSelect || (event.key !== 'Enter' && event.key !== ' ')) {
+    if (
+      !onSelect ||
+      (event.target as HTMLElement).closest('a') ||
+      (event.key !== 'Enter' && event.key !== ' ')
+    ) {
       return
     }
 
