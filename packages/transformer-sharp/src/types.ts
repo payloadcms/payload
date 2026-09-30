@@ -37,6 +37,8 @@ export type SharpImageSizeOptions = {
   crop?: string // comes from sharp package
   formatOptions?: ImageUploadFormatOptions
   trimOptions?: ImageUploadTrimOptions
+  /** Image sizes generated for each upload, stored under the document's `sizes`. */
+  variants?: ImageSize[]
   /**
    * When an uploaded image is smaller than the defined image size, we have 3 options:
    *
@@ -58,8 +60,8 @@ declare module 'payload' {
 /**
  * A collection's Sharp-owned upload-time settings, authored via
  * `sharpTransformer({ collections: { <slug>: {...} } })`. `init()` writes a
- * narrowed, Sharp-agnostic projection of `imageSizes`/`crop`/`focalPoint` back
- * onto the sanitized collection's `upload` config for core's own use (Admin UI,
+ * narrowed, Sharp-agnostic projection of `variants` (as `imageSizes`)/`crop`/`focalPoint`
+ * back onto the sanitized collection's `upload` config for core's own use (Admin UI,
  * field generation); this richer shape is what the transformer itself reads.
  */
 export type SharpCollectionConfig = {
@@ -67,9 +69,10 @@ export type SharpCollectionConfig = {
   crop?: boolean
   focalPoint?: boolean
   formatOptions?: ImageUploadFormatOptions
-  imageSizes?: ImageSize[]
   resizeOptions?: ResizeOptions
   trimOptions?: ImageUploadTrimOptions
+  /** Image sizes generated for each upload, stored under the document's `sizes`. */
+  variants?: ImageSize[]
   withMetadata?: WithMetadata
 }
 

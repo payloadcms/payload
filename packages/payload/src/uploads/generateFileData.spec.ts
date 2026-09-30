@@ -187,6 +187,68 @@ describe('generateFileData', () => {
     expect(transformFile).toHaveBeenCalledTimes(1)
   })
 
+  describe('transformed file metadata', () => {
+    const runTransformerReturning = async (outputFile: File) => {
+      const req = createReq(undefined)
+      req.file = {
+        data: Buffer.from('{"a":1}'),
+        mimetype: 'application/json',
+        name: 'data.json',
+        size: 7,
+      } as PayloadRequest['file']
+      req.payload.config.upload = {
+        transformers: [
+          {
+            slug: 'test',
+            mimeTypes: ['application/json'],
+            transformFile: vi.fn().mockResolvedValue({ file: outputFile, status: 'complete' }),
+          },
+        ],
+      } as unknown as PayloadRequest['payload']['config']['upload']
+
+      const result = await generateFileData({
+        collection: createCollection(),
+        config: {} as SanitizedConfig,
+        data: {},
+        operation: 'create',
+        overwriteExistingFiles: true,
+        req,
+      })
+
+      return result.data as { filename: string; filesize: number; mimeType: string }
+    }
+
+    it('should use the returned file type and name when the output bytes have no detectable type', async () => {
+      const data = await runTransformerReturning(
+        new File(['a\n1\n'], 'data.csv', { type: 'text/csv' }),
+      )
+
+      expect(data).toMatchObject({ filename: 'data.csv', filesize: 4, mimeType: 'text/csv' })
+    })
+
+    it('should use a renamed output file name', async () => {
+      const data = await runTransformerReturning(
+        new File(['a\n1\n'], 'report.csv', { type: 'text/csv' }),
+      )
+
+      expect(data.filename).toBe('report.csv')
+    })
+
+    it('should prefer the detected type over a stale type and extension on the returned file', async () => {
+      const data = await runTransformerReturning(
+        new File([PNG_SIGNATURE], 'data.json', { type: 'application/json' }),
+      )
+
+      expect(data).toMatchObject({ filename: 'data.png', mimeType: 'image/png' })
+    })
+
+    it('should fall back to the upload type and name when the returned file declares neither', async () => {
+      const data = await runTransformerReturning(new File(['{"a":2}'], ''))
+
+      expect(data).toMatchObject({ filename: 'data.json', mimeType: 'application/json' })
+    })
+  })
+
   it('does not overwrite req.file with a truncated header-only buffer', async () => {
     // Mirrors what `getFileFromUploadInstructions` returns for the `'header'` content
     // requirement: only the first bytes of the file, alongside the real, full declared size.

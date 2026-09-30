@@ -1198,7 +1198,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
           const movie_1 = await payload.create({
             collection: 'movies',
             depth: 0,
-            data: { director: director_1.id, name: 'Some Movie 1' },
+            data: { director: director_1.id, name: 'Some Movie 1', select: [] },
             overrideAccess: true,
           })
 
@@ -1208,6 +1208,10 @@ test.suite('Relationships', { config: './config.ts' }, () => {
             data: { director: director_2.id, name: 'Some Movie 2' },
             overrideAccess: true,
           })
+
+          expect(movie_1.select).toStrictEqual([])
+          // An omitted hasMany select should be returned as [] by every adapter.
+          expect(movie_2.select).toStrictEqual([])
 
           const res_1 = await payload.find({
             collection: 'movies',

@@ -41,6 +41,8 @@ export const LanguageMenu: React.FC<{
         className="popup-button-list__button popup-button-list__button--submenu-trigger"
         data-popup-prevent-close
         onClick={onMobileOpen}
+        role="menuitem"
+        tabIndex={-1}
         type="button"
       >
         <span className="popup-button-list__submenu-icon">
@@ -56,6 +58,7 @@ export const LanguageMenu: React.FC<{
 
   return (
     <Popup
+      popupType="menu"
       renderButton={({ active, onClick, onKeyDown, ...aria }) => (
         <button
           {...aria}

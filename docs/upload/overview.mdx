@@ -27,7 +27,7 @@ keywords: uploads, images, media, overview, documentation, Content Management Sy
 
 **By simply enabling Upload functionality on a Collection, Payload will automatically transform your Collection into a robust file management / storage solution. The following modifications will be made:**
 
-1. `filename`, `mimeType`, and `filesize` fields will be automatically added to your Collection. Optionally, if you pass `imageSizes` to your Collection's Upload config, a [`sizes`](#image-sizes) array will also be added containing auto-resized image sizes and filenames.
+1. `filename`, `mimeType`, and `filesize` fields will be automatically added to your Collection. Optionally, if you declare image sizes as `variants` on [`sharpTransformer`](#image-sizes), a [`sizes`](#image-sizes) group will also be added containing auto-resized image sizes and filenames.
 1. The Admin Panel will modify its built-in `List` component to show a thumbnail for each upload within the List View
 1. The Admin Panel will modify its `Edit` view(s) to add a new set of corresponding Upload UI which will allow for file upload
 1. The `create`, `update`, and `delete` Collection operations will be modified to support file upload, re-upload, and deletion
@@ -63,7 +63,7 @@ export const Media: CollectionConfig = {
 ```
 
 <Banner type="info">
-  **Note:** Image resizing (`imageSizes`, `resizeOptions`, and related Sharp
+  **Note:** Image resizing (image sizes, `resizeOptions`, and related Sharp
   options) is configured through
   [`@payloadcms/transformer-sharp`](./transformers#payloadcmstransformer-sharp),
   not on the collection's own `upload` config. See [Image Sizes](#image-sizes)
@@ -85,9 +85,8 @@ _An asterisk denotes that an option is required._
 | **`externalFileHeaderFilter`** | Accepts existing headers and returns the headers after filtering or modifying. If using this option, you should handle the removal of any sensitive cookies (like payload-prefixed cookies) to prevent leaking session information to external services. By default, Payload automatically filters out payload-prefixed cookies when this option is not defined. |
 | **`filesRequiredOnCreate`**    | Mandate file data on creation, default is true.                                                                                                                                                                                                                                                                                                                  |
 | **`filenameCompoundIndex`**    | Field slugs to use for a compound index instead of the default filename index.                                                                                                                                                                                                                                                                                   |
-| **`focalPoint`**               | Set to `false` to disable the focal point selection tool in the [Admin Panel](../admin/overview). The focal point selector is only available when a registered transformer configures `imageSizes` or a main-image resize for this collection. [More](#crop-and-focal-point-selector)                                                                            |
+| **`focalPoint`**               | Set to `false` to disable the focal point selection tool in the [Admin Panel](../admin/overview). The focal point selector is only available when a registered transformer configures image sizes or a main-image resize for this collection. [More](#crop-and-focal-point-selector)                                                                             |
 | **`handlers`**                 | Array of Request handlers to execute when fetching a file, if a handler returns a Response it will be sent to the client. Otherwise Payload will retrieve and send back the file.                                                                                                                                                                                |
-| **`imageSizes`**               | Set automatically by a registered transformer (such as `sharpTransformer`) — see [File Transformers](./transformers). If specified directly, image uploads will be automatically resized in accordance to these image sizes. [More](#image-sizes)                                                                                                                |
 | **`mimeTypes`**                | Restrict mimeTypes in the file picker. Array of valid mimetypes or mimetype wildcards [More](#mimetypes)                                                                                                                                                                                                                                                         |
 | **`pasteURL`**                 | Controls whether files can be uploaded from remote URLs by pasting them into the Upload field. **Enabled by default.** Accepts `false` to disable or an object with an `allowList` of valid remote URLs. [More](#uploading-files-from-remote-urls)                                                                                                               |
 | **`skipSafeFetch`**            | Set to an `allowList` to skip the safe fetch check when fetching external files. Set to `true` to skip the safe fetch for all documents in this collection. Defaults to `false`.                                                                                                                                                                                 |
@@ -176,11 +175,11 @@ The filename from here will also be threaded to image sizes if they're enabled.
 
 ## Image Sizes
 
-If you specify an array of `imageSizes`, Payload will automatically crop and resize your uploads to fit each of the sizes specified by your config.
+If you declare image sizes, Payload will automatically crop and resize your uploads to fit each of the sizes specified by your config.
 
 The [Admin Panel](../admin/overview) will also automatically display all available files, including width, height, and file size, for each of your uploaded files.
 
-`imageSizes` — along with the rest of Sharp's image-resizing options — is configured through [`@payloadcms/transformer-sharp`](./transformers#payloadcmstransformer-sharp), Payload's official image-resizing transformer:
+Image sizes — declared as `variants`, along with the rest of Sharp's image-resizing options — are configured through [`@payloadcms/transformer-sharp`](./transformers#payloadcmstransformer-sharp), Payload's official image-resizing transformer:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -195,7 +194,7 @@ export default buildConfig({
       sharpTransformer({
         collections: {
           media: {
-            imageSizes: [
+            variants: [
               {
                 name: 'thumbnail',
                 width: 400,
@@ -227,7 +226,7 @@ export default buildConfig({
 })
 ```
 
-`sharpTransformer` writes a Sharp-agnostic projection of each configured `imageSizes` entry (`name`, `admin`, and `generateImageName` only) back onto the collection's own `upload.imageSizes`, so the rest of this section — and the generated `sizes` shape on your documents — is unaffected by where the configuration is authored.
+`sharpTransformer` writes a Sharp-agnostic projection of each configured `variants` entry (`name`, `admin`, and `generateImageName` only) back onto the collection's sanitized `upload.imageSizes`, so the rest of this section — and the generated `sizes` shape on your documents — is unaffected by where the configuration is authored. `imageSizes` can't be set on the collection itself.
 
 #### Admin List View Options
 
@@ -304,7 +303,7 @@ Setting `crop: false` and `focalPoint: false` on `sharpTransformer({ collections
 
 Image cropping occurs before any resizing, the resized images will therefore be generated from the cropped image (**not** the original image).
 
-If no resizing options are specified (`imageSizes` or `resizeOptions`), the focal point selector will not be displayed.
+If no resizing options are specified (`variants` or `resizeOptions`), the focal point selector will not be displayed.
 
 ## Disabling Local Upload Storage
 
@@ -324,33 +323,49 @@ provide your own admin thumbnail using **upload.adminThumbnail**.
 
 You can specify how Payload retrieves admin thumbnails for your upload-enabled Collections with one of the following:
 
-1. `adminThumbnail` as a **string**, equal to one of your provided image size names.
+1. `adminThumbnail` as a **string**, equal to one of your image size names (declared as `variants` on `sharpTransformer`).
 
 ```ts
-import type { CollectionConfig } from 'payload'
+import { buildConfig } from 'payload'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 
-export const Media: CollectionConfig = {
-  slug: 'media',
+export default buildConfig({
+  collections: [
+    {
+      slug: 'media',
+      fields: [],
+      upload: {
+        // highlight-start
+        adminThumbnail: 'small',
+        // highlight-end
+      },
+    },
+  ],
   upload: {
-    // highlight-start
-    adminThumbnail: 'small',
-    // highlight-end
-    imageSizes: [
-      {
-        name: 'small',
-        fit: 'cover',
-        height: 300,
-        width: 900,
-      },
-      {
-        name: 'large',
-        fit: 'cover',
-        height: 600,
-        width: 1800,
-      },
+    transformers: [
+      sharpTransformer({
+        collections: {
+          media: {
+            variants: [
+              {
+                name: 'small',
+                fit: 'cover',
+                height: 300,
+                width: 900,
+              },
+              {
+                name: 'large',
+                fit: 'cover',
+                height: 600,
+                width: 1800,
+              },
+            ],
+          },
+        },
+      }),
     ],
   },
-}
+})
 ```
 
 2. `adminThumbnail` as a **function** that takes the document's data and sends back a full URL to load the thumbnail.

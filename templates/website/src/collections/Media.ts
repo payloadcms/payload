@@ -49,7 +49,7 @@ export const Media: CollectionConfig = {
 
 export const mediaSharpOptions = {
   focalPoint: true,
-  imageSizes: [
+  variants: [
     {
       name: 'thumbnail',
       width: 300,

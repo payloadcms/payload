@@ -11,7 +11,12 @@ import { expect } from 'vitest'
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
-import { resizePreviewMediaSlug, transformerMediaSlug, usersSlug } from './shared.js'
+import {
+  outsideFitMediaSlug,
+  resizePreviewMediaSlug,
+  transformerMediaSlug,
+  usersSlug,
+} from './shared.js'
 import {
   resetTransformerCallCounts,
   resetTransformerMediaHookCallCounts,
@@ -282,14 +287,14 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
   })
 
   test.describe('Sharp dynamic resizing', () => {
-    const docIDs: (number | string)[] = []
+    const docIDs: { collection: CollectionSlug; id: number | string }[] = []
 
     test.afterEach(async () => {
-      for (const id of docIDs) {
+      for (const { id, collection } of docIDs) {
         try {
           await payload.delete({
             id,
-            collection: resizePreviewMediaSlug as CollectionSlug,
+            collection,
             overrideAccess: true,
           })
         } catch {
@@ -299,16 +304,19 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
       docIDs.length = 0
     })
 
-    const uploadFixture = async (fixtureFilename: string) => {
+    const uploadFixture = async (
+      fixtureFilename: string,
+      collection: CollectionSlug = resizePreviewMediaSlug as CollectionSlug,
+    ) => {
       const filePath = path.resolve(dirname, `../uploads/${fixtureFilename}`)
       const file = await getFileByPath(filePath)
       const doc = await payload.create({
-        collection: resizePreviewMediaSlug as CollectionSlug,
+        collection,
         data: {},
         file,
         overrideAccess: true,
       })
-      docIDs.push(doc.id)
+      docIDs.push({ id: doc.id, collection })
       return doc as unknown as { filename: string; id: number | string }
     }
 
@@ -403,6 +411,32 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
       expect(response.status).toBe(200)
       const metadata = await sharp(Buffer.from(await response.arrayBuffer())).metadata()
       expect(metadata.width).toBe(320)
+    })
+
+    test('should resize to cover the requested box when fit is outside', async () => {
+      const doc = await uploadFixture('small.png', outsideFitMediaSlug as CollectionSlug) // 320x80
+
+      // Scale is max(100 / 320, 100 / 80) = 1.25, so the output is 400x100.
+      const response = await restClient.GET(
+        `/${outsideFitMediaSlug}/file/${doc.filename}?width=100&height=100`,
+      )
+
+      expect(response.status).toBe(200)
+      const metadata = await sharp(Buffer.from(await response.arrayBuffer())).metadata()
+      expect(metadata.width).toBe(400)
+      expect(metadata.height).toBe(100)
+    })
+
+    test('should return 400 when fit outside would overflow the configured maximum along one axis', async () => {
+      const doc = await uploadFixture('small.png', outsideFitMediaSlug as CollectionSlug) // 320x80
+
+      // The requested box is within every limit, but scale max(100 / 320, 4096 / 80) = 51.2
+      // renders 16384x4096 — 4x the default maxWidth and maxPixels.
+      const response = await restClient.GET(
+        `/${outsideFitMediaSlug}/file/${doc.filename}?width=100&height=4096`,
+      )
+
+      expect(response.status).toBe(400)
     })
 
     test('should return 416 for a Range header on a recognized dynamic resize request', async () => {

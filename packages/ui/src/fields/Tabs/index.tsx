@@ -5,7 +5,7 @@ import type {
   DocumentPreferences,
   SanitizedFieldPermissions,
   StaticDescription,
-  TabsFieldClientComponent,
+  TabsFieldClientProps,
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -32,7 +32,7 @@ const baseClass = 'tabs-field'
 
 export { TabsProvider }
 
-const TabsFieldComponent: TabsFieldClientComponent = (props) => {
+const TabsFieldComponent: React.FC<TabsFieldClientProps> = (props) => {
   const {
     field: { admin: { className } = {}, tabs = [] },
     forceRender = false,

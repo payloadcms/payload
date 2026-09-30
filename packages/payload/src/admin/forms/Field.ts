@@ -127,13 +127,13 @@ export type ServerFieldBase<
 } & Omit<ClientComponentProps, 'field'> &
   Omit<ServerComponentProps, 'clientField' | 'field'>
 
-export type FieldClientComponent<
+export type FieldClientProps<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
   AdditionalProps extends Record<string, unknown> = Record<string, unknown>,
-> = React.ComponentType<AdditionalProps & ClientFieldBase<TFieldClient>>
+> = AdditionalProps & ClientFieldBase<TFieldClient>
 
-export type FieldServerComponent<
+export type FieldServerProps<
   TFieldServer extends Field = Field,
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
   AdditionalProps extends Record<string, unknown> = Record<string, unknown>,
-> = React.ComponentType<AdditionalProps & ServerFieldBase<TFieldServer, TFieldClient>>
+> = AdditionalProps & ServerFieldBase<TFieldServer, TFieldClient>

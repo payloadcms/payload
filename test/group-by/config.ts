@@ -1,10 +1,12 @@
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import sharp from 'sharp'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { CategoriesCollection } from './collections/Categories/index.js'
-import { MediaCollection } from './collections/Media/index.js'
+import { MediaCollection, mediaSharpOptions, mediaSlug } from './collections/Media/index.js'
 import { NoGroupableCollection } from './collections/NoGroupable/index.js'
 import { PagesCollection } from './collections/Pages/index.js'
 import { PostsCollection } from './collections/Posts/index.js'
@@ -33,6 +35,9 @@ export default buildConfigWithDefaults({
     editor: lexicalEditor({}),
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
+    upload: {
+      transformers: [sharpTransformer({ collections: { [mediaSlug]: mediaSharpOptions }, sharp })],
     },
   },
   seed,

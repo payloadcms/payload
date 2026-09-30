@@ -97,6 +97,8 @@ transformFile: (args: {
 
 `transformFile` is a one-file-in, one-file-out primitive — it never writes to storage itself. Payload's upload pipeline calls every eligible transformer's `transformFile` in declaration order, threading the result of one into the next, then persists whatever the pipeline produces.
 
+The stored `filename` is based on the returned `File`'s `name`. Its `mimeType` and extension come from the output bytes when their format can be detected, such as an image converted to WebP. Otherwise, as for text-like output like CSV or JSON, they come from the returned `File`'s `type` and `name`. Set both on the `File` you return when your transformer changes the format.
+
 ## The `handleRequest` capability (dynamic requests)
 
 ```ts
@@ -167,7 +169,7 @@ const externalResizeTransformer: UploadTransformer = {
 
 Ordinary file reads are unaffected by transformers: they use the same collection `read` access control that governs every other file request.
 
-A **dynamic-transform request** (one that at least one configured transformer is eligible for) additionally sets `req.fileTransform: true` for the duration of the single `access.read` call that decides whether the request may proceed. This lets a collection distinguish "someone is asking for a transformed variant of this file" from an ordinary read:
+A **dynamic-transform request** (one that at least one configured transformer is eligible for) additionally sets `req.fileTransform: true` for the duration of the `access.read` call that decides whether the request may proceed. This lets a collection distinguish "someone is asking for a transformed variant of this file" from an ordinary read:
 
 ```ts
 export const Media: CollectionConfig = {
@@ -180,7 +182,9 @@ export const Media: CollectionConfig = {
 }
 ```
 
-`req.fileTransform` is `true` only during that one access-control call. It is not set during `canTransform`, `transformFile`, or `handleRequest`. If access is denied, the pipeline never runs — `getSourceFile`, every transformer's `handleRequest`, and any external service a transformer would have called are all skipped entirely.
+`req.fileTransform` is `true` only during that one access-control call. It is not set during `canTransform`, `transformFile`, or `handleRequest`. If access is denied, the pipeline never runs — `canTransform`, `getSourceFile`, every transformer's `handleRequest`, and any external service a transformer would have called are all skipped entirely.
+
+Because `canTransform` can only run after access is granted, Payload first decides whether a request _could_ be a transform from each transformer's `mimeTypes` alone. `access.read` may therefore run a second time with `req.fileTransform` unset: when the transform-aware call is denied (the request is still served if it turns out to be an ordinary read), or when no transformer ends up applying to the request. Whichever way the request is finally served — transformed or original — the matching access mode must allow it.
 
 This access check runs before any transformer executes, and before Payload resolves which storage adapter or external provider would serve the source bytes. A denied request never reaches storage.
 
@@ -214,7 +218,7 @@ export default buildConfig({
 
 ### Upload-time image processing
 
-Per-collection Sharp settings — `imageSizes`, `resizeOptions`, `formatOptions`, `trimOptions`, `constructorOptions`, `withMetadata`, `crop`, and `focalPoint` — are authored through `sharpTransformer({ collections })`, not on the collection's own `upload` config:
+Per-collection Sharp settings — `variants` (image sizes), `resizeOptions`, `formatOptions`, `trimOptions`, `constructorOptions`, `withMetadata`, `crop`, and `focalPoint` — are authored through `sharpTransformer({ collections })`, not on the collection's own `upload` config:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -233,7 +237,7 @@ export default buildConfig({
       sharpTransformer({
         collections: {
           media: {
-            imageSizes: [
+            variants: [
               { name: 'thumbnail', width: 400, height: 300 },
               { name: 'card', width: 768, height: 1024 },
             ],
@@ -250,7 +254,7 @@ export default buildConfig({
 })
 ```
 
-At startup, `sharpTransformer` writes a Sharp-agnostic projection of `imageSizes` (name, `admin`, and `generateImageName` only), `crop`, and `focalPoint` back onto the collection's sanitized `upload` config — so the Admin Panel, generated types, and the rest of core continue to see `collection.upload.imageSizes`/`.crop`/`.focalPoint` exactly as before. The `sizes` shape on your documents is unchanged.
+At startup, `sharpTransformer` writes a Sharp-agnostic projection of `variants` (name, `admin`, and `generateImageName` only), `crop`, and `focalPoint` back onto the collection's sanitized `upload` config, as `upload.imageSizes`/`.crop`/`.focalPoint`. So the Admin Panel, generated types, and the rest of core see the same sizes as before. The `sizes` shape on your documents is unchanged. `imageSizes` exists only on the sanitized config: setting it on the collection itself fails the build.
 
 See [Image Sizes](./overview#image-sizes) for what each Sharp-specific image size option does, and [Crop and Focal Point Selector](./overview#crop-and-focal-point-selector) for the Admin Panel behavior these settings control.
 
