@@ -53,6 +53,7 @@ export default buildConfigWithDefaults({
       dashboard: {
         defaultLayout: [
           { widgetSlug: 'collections', width: 'full' },
+          { widgetSlug: 'activity', width: 'small' },
           {
             data: {
               relatedCollection: postsSlug,

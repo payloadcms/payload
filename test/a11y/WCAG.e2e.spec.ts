@@ -47,6 +47,7 @@ import {
   openRichTextUploadDrawer,
   openVersionComparison,
   openWidgetDrawer,
+  waitForDashboardDragReady,
 } from './helpers.js'
 
 test.describe('WCAG 2.2 Level AA', () => {
@@ -1797,6 +1798,13 @@ test.describe('WCAG 2.2 Level AA', () => {
         page.getByRole('status').filter({ hasText: 'Picked up draggable item' }),
       ).toHaveCount(1)
       await page.keyboard.press('ArrowLeft')
+      const moveStatus = page.getByRole('status').filter({ hasText: `droppable area ${firstID}-` })
+
+      await expect(moveStatus).toHaveCount(1)
+      // The first leftward target can be the gap after the preceding widget.
+      if ((await moveStatus.innerText()).includes(`${firstID}-after`)) {
+        await page.keyboard.press('ArrowLeft')
+      }
       await expect(page.getByRole('status').filter({ hasText: `${firstID}-before` })).toHaveCount(1)
       await page.keyboard.press('Space')
       await expect(widgets.first()).toHaveAttribute('data-slug', lastID!)
@@ -1864,7 +1872,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await page.keyboard.press('Tab')
       await expect(drag).toBeFocused()
       await page.keyboard.press('Space')
-      await expect(page.locator('.drag-overlay')).toBeVisible()
+      await waitForDashboardDragReady({ page })
       await expect(drag).toHaveAttribute('aria-pressed', 'true')
       await expect(
         page.getByRole('status').filter({ hasText: (await widget.getAttribute('data-slug'))! }),

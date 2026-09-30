@@ -887,3 +887,14 @@ export async function expectPaintedFocus({ page }: { page: Page }) {
     )
     .toBe(true)
 }
+
+/** Let dnd-kit's deferred keyboard listener attach after drag activation is painted. */
+export async function waitForDashboardDragReady({ page }: { page: Page }) {
+  await expect(page.locator('.drag-overlay')).toBeVisible()
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+      ),
+  )
+}
