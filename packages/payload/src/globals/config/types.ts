@@ -24,6 +24,7 @@ import type {
   TypedGlobal,
   TypedGlobalSelect,
 } from '../../index.js'
+import type { DraftFieldData } from '../../types/draft.js'
 import type { PayloadRequest, SelectIncludeType, Where, WithSelectFn } from '../../types/index.js'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
 
@@ -32,7 +33,7 @@ export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
 export type SelectFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobalSelect[TSlug]
 
 /** Draft reads may omit any field except the global ID because validation is skipped. */
-export type QueryDraftDataFromGlobalSlug<TSlug extends GlobalSlug> = Partial<
+export type QueryDraftDataFromGlobalSlug<TSlug extends GlobalSlug> = DraftFieldData<
   Omit<DataFromGlobalSlug<TSlug>, 'id'>
 > &
   Pick<DataFromGlobalSlug<TSlug>, 'id'>

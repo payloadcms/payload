@@ -1519,6 +1519,8 @@ export type {
 
 export type { CompoundIndex, FoldersConfig, TagsConfig } from './collections/config/types.js'
 
+export type { DraftFieldData } from './types/draft.js'
+
 export type { SanitizedCompoundIndex } from './collections/config/types.js'
 
 export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
