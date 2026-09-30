@@ -24,6 +24,8 @@ installs the app against them. This is the same approach Payload's CI uses to te
 | `src/payload.config.ts`               | Payload config: MongoDB via `DATABASE_URL`, `SERVER_URL`, CORS/CSRF |
 | `src/endpoints/health.ts`             | `GET /api/health`: pings MongoDB (used by the Docker healthcheck) |
 | `src/storage/s3.ts`                   | Optional S3 storage for uploads, turned on by `S3_BUCKET`       |
+| `src/collections/Posts.ts`            | Blog posts for the personal website (see "Blog posts")           |
+| `src/hooks/revalidateWebsite.ts`      | Tells the website to refresh its pages when a post changes      |
 | `Dockerfile`                          | Multi-stage build from the repo root → small standalone image    |
 | `docker-compose.yml`, `Caddyfile`     | Production stack on the app EC2                                  |
 | `.env.example`                        | Every setting the server needs                                   |
@@ -118,6 +120,7 @@ nano .env
 | `SERVER_URL`     | exactly what you type in the browser, no trailing slash: `http://<ec2-public-ip>` or `https://cms.example.com` |
 | `SITE_ADDRESS`   | `:80` for plain HTTP on the IP, or `cms.example.com` for automatic HTTPS               |
 | `CORS_ORIGINS`   | optional, comma-separated frontend origins that call the API with cookies               |
+| `WEBSITE_URL`, `WEBSITE_REVALIDATE_SECRET` | optional, refresh the website as soon as a post is published (see "Blog posts") |
 
 URL-encode special characters in the MongoDB password: `@` → `%40`, `:` → `%3A`, `/` → `%2F`,
 `#` → `%23`, `?` → `%3F`.
@@ -280,6 +283,39 @@ docker exec -it mongo mongosh -u admin -p --authenticationDatabase admin payload
 S3-compatible storage (Cloudflare R2, MinIO, …) works too. Set `S3_ENDPOINT`, and for MinIO
 also `S3_FORCE_PATH_STYLE=true`.
 
+## Blog posts
+
+The `posts` collection holds the blog posts of the personal website
+([atorpos/personalwebsite](https://github.com/atorpos/personalwebsite), setup in its `docs/payload-cms.md`).
+The website reads published posts from `GET /api/posts` without logging in. Drafts are only visible to
+logged-in users.
+
+| Field        | On the website                                                                                  |
+| ------------ | ----------------------------------------------------------------------------------------------- |
+| Title        | Post title                                                                                      |
+| Description  | Text on post cards, in search results and in the RSS feed                                       |
+| Images       | The first one is the cover on post cards; all of them form the gallery at the top of the post  |
+| Content      | The post: headings, lists, quotes, links (to URLs or other posts), images, code, YouTube videos |
+| Slug         | The URL, `/blog/<slug>`. Generated from the title once and kept when the title changes         |
+| Published At | The post date. Filled in when the post is first published                                       |
+| Featured     | Lists the post under "Featured" on the home page                                                |
+| Tags         | Tag chips. A tag links to `/tags/<tag>` when the website has `content/tags/<tag>.md`            |
+| SEO          | Optional title and description for search engines and link previews                             |
+
+The website refreshes its pages from the CMS about once a minute. To update it the moment you publish,
+edit, unpublish or delete a post, give both sides the same secret (`openssl rand -hex 32`):
+
+1. Website: set `REVALIDATE_SECRET=<secret>` and redeploy it.
+2. CMS `.env`: set `WEBSITE_URL=https://<your-website>` and `WEBSITE_REVALIDATE_SECRET=<secret>`, then run
+   `./deploy/deploy.sh`.
+
+After a publish, `docker compose logs cms` shows `Revalidated website` with the refreshed pages, or
+`Could not revalidate` with the reason.
+
+The website reads the API from its own server, so it doesn't need to be in `CORS_ORIGINS`. With uploads in
+S3, set `PAYLOAD_MEDIA_URL` on the website to `S3_PUBLIC_URL` (or `https://<bucket>.s3.<region>.amazonaws.com`
+when that is empty) so it is allowed to load the images.
+
 ## Troubleshooting
 
 | Symptom                                               | Cause / fix                                                                                   |
@@ -290,6 +326,7 @@ also `S3_FORCE_PATH_STYLE=true`.
 | Caddy can't get a certificate                         | DNS doesn't point at the instance yet, or port 80/443 is closed. Check `docker compose logs caddy`. |
 | Upload fails: `Could not load credentials` / `AccessDenied` | S3 access. Check that the IAM role is attached with the policy above and that the metadata hop limit is 2, or set the key pair in `.env`. |
 | Upload works but images are broken (403)              | The files aren't public. Add the bucket policy (and untick the bucket-policy public-access blocks), or check the CloudFront origin access settings. |
+| Website only shows a published post after a minute   | `docker compose logs cms` shows `Could not revalidate`: `401` means the two secrets differ; `ECONNREFUSED` or a timeout means `WEBSITE_URL` is wrong. |
 
 ## Local development
 
