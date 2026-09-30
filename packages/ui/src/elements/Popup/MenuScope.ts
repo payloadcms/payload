@@ -13,9 +13,11 @@ export type MenuScope = {
   requestOpen: (args: { delay: boolean; id: string; viaKeyboard?: boolean }) => void
 }
 
-const HOVER_OPEN_DELAY = 150
+const DEFAULT_HOVER_DELAY = 150
 
-export const createMenuScope = (): MenuScope => {
+export const createMenuScope = ({
+  hoverDelay = DEFAULT_HOVER_DELAY,
+}: { hoverDelay?: number } = {}): MenuScope => {
   const nodes = new Map<string, SubmenuNode>()
   let activeChildId: null | string = null
   let pendingChildId: null | string = null
@@ -90,7 +92,7 @@ export const createMenuScope = (): MenuScope => {
         pendingTimer = undefined
         pendingChildId = null
         activate({ id, viaKeyboard })
-      }, HOVER_OPEN_DELAY)
+      }, hoverDelay)
     },
   }
 }
