@@ -24,6 +24,7 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple } from '../../index.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
@@ -35,6 +36,7 @@ import {
 } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolvePublishAllLocales } from '../../utilities/resolvePublishAllLocales.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import {
@@ -71,6 +73,8 @@ export const updateOperation = async <
 >(
   args: Args<TSlug>,
 ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
+  assertNoValidationWrite(args.req)
+
   const req = args.req
   const initialGlobalConfig = args.globalConfig
 
@@ -79,14 +83,17 @@ export const updateOperation = async <
     unpublishAllLocales: args.unpublishAllLocales,
   })
 
+  const initialPublishAllLocales = resolvePublishAllLocales({
+    draft: args.draft,
+    hasLocalizeStatusEnabled: hasLocalizeStatusEnabled(initialGlobalConfig),
+    locale: req.locale,
+    publishAllLocalesArg: args.publishAllLocales,
+  })
   const initialAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
     hasLocalizedStatus: Boolean(
       req.payload.config.localization && hasLocalizeStatusEnabled(initialGlobalConfig),
     ),
-    publishAllLocales:
-      !args.draft &&
-      (args.publishAllLocales ??
-        !(hasLocalizeStatusEnabled(initialGlobalConfig) && req.locale !== 'all')),
+    publishAllLocales: initialPublishAllLocales,
     unpublishAllLocales: Boolean(args.unpublishAllLocales),
   })
 
@@ -139,9 +146,12 @@ export const updateOperation = async <
       unpublishAllLocales: unpublishAllLocalesArg,
     })
 
-    let publishAllLocales =
-      !draftArg &&
-      (publishAllLocalesArg ?? !(hasLocalizeStatusEnabled(globalConfig) && locale !== 'all'))
+    let publishAllLocales = resolvePublishAllLocales({
+      draft: draftArg,
+      hasLocalizeStatusEnabled: hasLocalizeStatusEnabled(globalConfig),
+      locale,
+      publishAllLocalesArg,
+    })
     let unpublishAllLocales =
       typeof unpublishAllLocalesArg === 'string'
         ? unpublishAllLocalesArg === 'true'
@@ -301,6 +311,7 @@ export const updateOperation = async <
             context: req.context,
             data,
             global: globalConfig,
+            operation: 'update',
             originalDoc: publicationHookDoc,
             overrideAccess,
             req,
@@ -319,6 +330,7 @@ export const updateOperation = async <
             context: req.context,
             data,
             global: globalConfig,
+            operation: 'update',
             originalDoc: publicationHookDoc,
             overrideAccess,
             req,
@@ -603,6 +615,7 @@ export const updateOperation = async <
             data,
             doc: result,
             global: globalConfig,
+            operation: 'update',
             overrideAccess,
             previousDoc: originalDoc,
             req,

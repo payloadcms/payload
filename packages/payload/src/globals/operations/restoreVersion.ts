@@ -9,6 +9,7 @@ import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -29,6 +30,8 @@ export type Arguments = {
 export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any>(
   args: Arguments,
 ): Promise<T> => {
+  assertNoValidationWrite(args.req)
+
   const { id, depth, draft, globalConfig, overrideAccess, populate, showHiddenFields } = args
   const req = args.req!
   const { fallbackLocale, locale, payload } = req
@@ -247,6 +250,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
             data: result,
             doc: result,
             global: globalConfig,
+            operation: 'update',
             overrideAccess,
             previousDoc,
             req,
