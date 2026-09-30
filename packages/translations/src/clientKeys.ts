@@ -81,6 +81,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'dashboard:editDashboard',
   'dashboard:editingDashboard',
   'dashboard:resetLayout',
+  'dashboard:resizeWidget',
   'dashboard:addButton',
   'dashboard:discardConfirmLabel',
   'dashboard:discardMessage',

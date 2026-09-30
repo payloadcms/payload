@@ -16,7 +16,6 @@ const dirname = path.dirname(filename)
 const USE_BLOCK_REFERENCES = true
 
 export default buildConfigWithDefaults({
-  suite: 'benchmark-blocks',
   config: {
     admin: {
       importMap: {
@@ -40,7 +39,7 @@ export default buildConfigWithDefaults({
     upload: {
       transformers: [sharpTransformer({ collections: { [mediaSlug]: mediaSharpOptions }, sharp })],
     },
-    // @ts-expect-error
+    // @ts-expect-error -- The benchmark intentionally produces more block types than generated types include.
     blocks: USE_BLOCK_REFERENCES ? generateBlocks(30 * 20, false) : undefined,
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
@@ -64,4 +63,5 @@ export default buildConfigWithDefaults({
       overrideAccess: true,
     })
   },
+  suite: 'benchmark-blocks',
 })

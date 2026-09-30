@@ -113,6 +113,7 @@ export const koTranslations: DefaultTranslationsObject = {
     editingDashboard: '대시보드 편집',
     noItems: '대시보드에 위젯이 없습니다. 상단 바에 위치한 "대시보드" 메뉴에서 추가할 수 있습니다.',
     resetLayout: '레이아웃 재설정',
+    resizeWidget: '{{label}} 크기 조정, 현재 크기: {{size}}',
     searchWidgets: '위젯 검색...',
     widgetCollectionRequired: 'Collection이 필요합니다.',
     widgetConfigurationError: '위젯 구성 오류',

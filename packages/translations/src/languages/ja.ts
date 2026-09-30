@@ -115,6 +115,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     noItems:
       'あなたのダッシュボードにはウィジェットがありません。 上部バーにある「ダッシュボード」メニューからそれらを追加することができます。',
     resetLayout: 'レイアウトをリセット',
+    resizeWidget: '{{label}}のサイズを変更、現在のサイズ：{{size}}',
     searchWidgets: 'ウィジェットを検索...',
     widgetCollectionRequired: 'Collectionは必須です。',
     widgetConfigurationError: 'ウィジェット設定エラー',

@@ -20,6 +20,29 @@ const uploadCollection = ({
 }) => ({ slug, upload }) as unknown as NonNullable<Config['collections']>[number]
 
 describe('initSharpCollections', () => {
+  it("should keep the collection's crop and focalPoint when Sharp doesn't set them", () => {
+    const config = makeConfig([
+      uploadCollection({ slug: 'media', upload: { crop: false, focalPoint: false } }),
+    ])
+
+    const result = initSharpCollections({ collections: { media: {} }, config })
+
+    expect(result.collections?.[0]?.upload).toMatchObject({ crop: false, focalPoint: false })
+  })
+
+  it("should let Sharp's crop and focalPoint override the collection's", () => {
+    const config = makeConfig([
+      uploadCollection({ slug: 'media', upload: { crop: false, focalPoint: false } }),
+    ])
+
+    const result = initSharpCollections({
+      collections: { media: { crop: true, focalPoint: true } },
+      config,
+    })
+
+    expect(result.collections?.[0]?.upload).toMatchObject({ crop: true, focalPoint: true })
+  })
+
   it('should write variants as imageSizes onto a copy, leaving the authored collection untouched', () => {
     const authoredUpload = { staticDir: 'media' }
     const authoredCollection = uploadCollection({ slug: 'media', upload: authoredUpload })

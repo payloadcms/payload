@@ -115,6 +115,7 @@ export const caTranslations: DefaultTranslationsObject = {
     noItems:
       'No hi ha cap widget al vostre tauler de control. Podeu afegir-los des del menú "Dashboard" situat a la barra superior.',
     resetLayout: 'Restableix la disposició',
+    resizeWidget: 'Canvia la mida de {{label}}, mida actual: {{size}}',
     searchWidgets: 'Cerca de ginys...',
     widgetCollectionRequired: 'Cal especificar una Collection.',
     widgetConfigurationError: 'Error de configuració del widget',

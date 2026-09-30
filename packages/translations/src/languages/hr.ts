@@ -115,6 +115,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     noItems:
       'Na vašoj nadzornoj ploči nema widgeta. Možete ih dodati iz izbornika "Nadzorna ploča" smještenog na vrhu.',
     resetLayout: 'Resetiraj raspored',
+    resizeWidget: 'Promijeni veličinu {{label}}, trenutna veličina: {{size}}',
     searchWidgets: 'Pretraži widgete...',
     widgetCollectionRequired: 'Collection je obvezan.',
     widgetConfigurationError: 'Pogreška u konfiguraciji widgeta',

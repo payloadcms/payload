@@ -4,7 +4,7 @@ import type { KeyboardEvent } from 'react'
 import {
   $getNodeByKey,
   COMMAND_PRIORITY_HIGH,
-  KEY_ENTER_COMMAND,
+  KEY_DOWN_COMMAND,
   SKIP_DOM_SELECTION_TAG,
 } from 'lexical'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
@@ -25,11 +25,11 @@ export function useBlockReordering({
   useEffect(
     () =>
       editor.registerCommand(
-        KEY_ENTER_COMMAND,
+        KEY_DOWN_COMMAND,
         (event) => {
           const target = event?.target
 
-          // Leave Enter to the menu controls instead of editing the retained text selection.
+          // Leave action-menu keys to the controls instead of editing the retained selection.
           return (
             target instanceof HTMLElement &&
             Boolean(editor.getElementByKey(nodeKey)?.contains(target)) &&

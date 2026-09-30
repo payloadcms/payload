@@ -523,7 +523,7 @@ describe('lexicalMain', () => {
     await expect(richTextField.locator('.LexicalEditorTheme__block')).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
-    const lastParagraph = richTextField.locator('p').last()
+    const lastParagraph = richTextField.locator('.ContentEditable__root > p').last()
     await lastParagraph.scrollIntoViewIfNeeded()
     await expect(lastParagraph).toBeVisible()
 
@@ -602,7 +602,7 @@ describe('lexicalMain', () => {
     await expect(richTextField.locator('.LexicalEditorTheme__block')).toHaveCount(10)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
-    const lastParagraph = richTextField.locator('p').last()
+    const lastParagraph = richTextField.locator('.ContentEditable__root > p').last()
     await lastParagraph.scrollIntoViewIfNeeded()
     await expect(lastParagraph).toBeVisible()
 
@@ -709,7 +709,7 @@ describe('lexicalMain', () => {
       await navigateToLexicalFields(true, 'lexical-relationship-fields')
       const richTextField = page.locator('.rich-text-lexical').nth(0)
 
-      const lastParagraph = richTextField.locator('p').last()
+      const lastParagraph = richTextField.locator('.ContentEditable__root > p').last()
       await lastParagraph.scrollIntoViewIfNeeded()
       await expect(lastParagraph).toBeVisible()
 
@@ -735,7 +735,7 @@ describe('lexicalMain', () => {
       await navigateToLexicalFields(true, 'lexical-relationship-fields')
       const richTextField = page.locator('.rich-text-lexical').nth(0)
 
-      const lastParagraph = richTextField.locator('p').last()
+      const lastParagraph = richTextField.locator('.ContentEditable__root > p').last()
       await lastParagraph.scrollIntoViewIfNeeded()
       await expect(lastParagraph).toBeVisible()
 

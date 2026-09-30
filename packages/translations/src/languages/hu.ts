@@ -117,6 +117,7 @@ export const huTranslations: DefaultTranslationsObject = {
     noItems:
       'Nincsenek widgetek az irányítópulton. Hozzáadhatja őket a felső sávban található "Irányítópult" menüből.',
     resetLayout: 'Alaphelyzet visszaállítása',
+    resizeWidget: '{{label}} átméretezése, jelenlegi méret: {{size}}',
     searchWidgets: 'Keresés widgetek...',
     widgetCollectionRequired: 'A Collection megadása kötelező.',
     widgetConfigurationError: 'Widget konfigurációs hiba',

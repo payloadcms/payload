@@ -109,6 +109,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     editingDashboard: '编辑仪表板',
     noItems: '您的仪表板上没有小部件。您可以从位于顶部栏的“仪表板”菜单中添加它们。',
     resetLayout: '重置布局',
+    resizeWidget: '调整{{label}}的大小，当前大小：{{size}}',
     searchWidgets: '搜索小工具...',
     widgetCollectionRequired: 'Collection为必填项。',
     widgetConfigurationError: '小部件配置错误',

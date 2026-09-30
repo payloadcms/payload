@@ -92,10 +92,14 @@ export function initSharpCollections({
       return collection
     }
 
+    const authoredUpload = typeof collection.upload === 'object' ? collection.upload : {}
+
     const upload: Partial<SanitizedUploadConfig> = {
-      ...(typeof collection.upload === 'object' ? collection.upload : {}),
-      crop: sharpConfig.crop,
-      focalPoint: sharpConfig.focalPoint,
+      ...authoredUpload,
+      // Sharp's setting wins when given; otherwise keep the collection's own, so an
+      // unset Sharp option can't silently re-enable a collection's `crop: false`.
+      crop: sharpConfig.crop ?? authoredUpload.crop,
+      focalPoint: sharpConfig.focalPoint ?? authoredUpload.focalPoint,
       hasImageAdjustments: Boolean(
         sharpConfig.resizeOptions ||
           sharpConfig.formatOptions ||
