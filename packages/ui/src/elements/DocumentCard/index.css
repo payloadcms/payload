@@ -27,6 +27,9 @@
     color: var(--color-text);
     text-decoration: none;
   }
+  .document-card__link:focus:not(:focus-visible) {
+    opacity: 1;
+  }
   .document-card__link:focus-visible {
     outline: var(--stroke-width-small) solid var(--color-border-selected);
     outline-offset: var(--spacer-1);
