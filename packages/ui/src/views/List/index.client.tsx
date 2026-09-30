@@ -27,7 +27,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
-import { SelectionProvider } from '../../providers/Selection/index.js'
+import { SelectionProvider, useSelection } from '../../providers/Selection/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
@@ -117,28 +117,40 @@ const FlatDocumentGrid: React.FC<FlatDocumentGridProps> = ({
   docs,
   useAsThumbnail,
   useAsTitle,
-}) => (
-  <CardGrid
-    ariaLabel={collectionLabel}
-    getKey={getDocumentID}
-    items={docs}
-    renderItem={(doc) => {
-      const thumbnailSrc = getThumbnail({ doc, useAsThumbnail })
-      const title = getDocumentTitle({ doc, useAsTitle })
+}) => {
+  const { selected, setSelection } = useSelection()
 
-      return (
-        <DocumentCard
-          href={formatAdminURL({
-            adminRoute,
-            path: `/collections/${collectionSlug}/${encodeURIComponent(getDocumentID(doc))}`,
-          })}
-          thumbnail={thumbnailSrc ? { alt: title, src: thumbnailSrc } : undefined}
-          title={title}
-        />
-      )
-    }}
-  />
-)
+  return (
+    <CardGrid
+      ariaLabel={collectionLabel}
+      getKey={getDocumentID}
+      items={docs}
+      renderItem={(doc) => {
+        const id = doc.id
+        const documentID = getDocumentID(doc)
+        const thumbnailSrc = getThumbnail({ doc, useAsThumbnail })
+        const title = getDocumentTitle({ doc, useAsTitle })
+
+        return (
+          <DocumentCard
+            href={formatAdminURL({
+              adminRoute,
+              path: `/collections/${collectionSlug}/${encodeURIComponent(documentID)}`,
+            })}
+            isSelected={
+              (typeof id === 'string' || typeof id === 'number') && Boolean(selected.get(id))
+            }
+            onSelect={
+              typeof id === 'string' || typeof id === 'number' ? () => setSelection(id) : undefined
+            }
+            thumbnail={thumbnailSrc ? { alt: title, src: thumbnailSrc } : undefined}
+            title={title}
+          />
+        )
+      }}
+    />
+  )
+}
 
 export function DefaultListView(props: ListViewClientProps) {
   const {
