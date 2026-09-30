@@ -55,7 +55,6 @@ export const ChildNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
     collectionSlug: row._collectionSlug,
   })
 
-  // Editing happens in place, so the table and tree are refreshed rather than navigated away from.
   const handleSave = useCallback(() => {
     clearRouteCache()
     refreshTree(row._collectionSlug)

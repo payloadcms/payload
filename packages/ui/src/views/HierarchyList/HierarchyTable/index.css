@@ -1,9 +1,4 @@
 @layer payload-default {
-  /*
-   * The sections stack in a column that claims the view's leftover height, and the last section
-   * absorbs it, so a full-height card grid inside it has empty space to be clicked or dragged over.
-   * Scoped to this view rather than TableSection itself, which other views lay out differently.
-   */
   .hierarchy-tables {
     display: flex;
     flex-direction: column;
@@ -20,7 +15,6 @@
     flex-grow: 1;
   }
 
-  /* The title link and its edit affordance sit inline; the cell keeps the shared td padding. */
   .hierarchy-tables__name-cell {
     display: flex;
     align-items: center;
@@ -49,7 +43,6 @@
     }
   }
 
-  /* The underline comes from the shared `cell-link` class - see elements/Table/index.css. */
   .hierarchy-tables__name-link {
     display: flex;
     align-items: center;
@@ -62,10 +55,6 @@
     flex-shrink: 0;
   }
 
-  /*
-   * `overflow: hidden` is required for the ellipsis, so the line box must be tall enough to
-   * contain the link underline. A line-height shorter than the glyph box crops it away.
-   */
   .hierarchy-tables__name-text {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -120,11 +109,6 @@
     line-height: var(--text-body-large-strong-line-height);
   }
 
-  /*
-   * Grid mode's per-collection pagination. Aligned to the same gutter as the cards above, and
-   * wrapping rather than compressing, since a hierarchy can surface one control per related
-   * collection.
-   */
   .hierarchy-tables__plane-pagination {
     display: flex;
     flex-wrap: wrap;

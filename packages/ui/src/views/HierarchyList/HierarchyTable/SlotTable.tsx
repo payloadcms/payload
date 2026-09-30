@@ -7,15 +7,12 @@ import React from 'react'
 import { Locked } from '../../../elements/Locked/index.js'
 import { CheckboxInput } from '../../../fields/Checkbox/Input.js'
 import { AlignJustifiedIcon } from '../../../icons/AlignJustified/index.js'
-// Rows adopt the shared table's class contract (`cell--linked`, `cell-_select`, ...) so the
-// styling lives in one place; this file only adds what the slot API needs on top.
 import '../../../elements/Table/index.css'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import './SlotTable.css'
 
 const baseClass = 'slot-table'
 
-/** Matches what SelectRow renders, so the shared row-selected background rule applies here too. */
 const selectRowClass = 'select-row select-row__checkbox'
 
 export type SlotColumn<TRow = Record<string, unknown>> = {
@@ -35,10 +32,6 @@ export type SlotColumn<TRow = Record<string, unknown>> = {
    * Column header content
    */
   heading: React.ReactNode
-  /**
-   * Marks the column as the row's link to its document, so the cell adopts the shared
-   * `cell--linked` treatment: padding moves onto the anchor for a full-cell click target.
-   */
   isLinked?: boolean
 }
 

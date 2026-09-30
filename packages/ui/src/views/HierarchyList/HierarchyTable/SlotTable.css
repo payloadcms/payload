@@ -1,8 +1,4 @@
 @layer payload-default {
-  /*
-   * Rows use the shared table's classes (see elements/Table/index.css), so only what the slot
-   * API adds on top lives here: a whole-row click target, and the drag column's own affordance.
-   */
   .slot-table__tr--clickable {
     cursor: pointer;
 
@@ -36,7 +32,6 @@
     height: var(--spacer-3);
   }
 
-  /* Header cell that spans the checkbox column via colspan */
   .slot-table__th-merged {
     display: flex;
     align-items: center;

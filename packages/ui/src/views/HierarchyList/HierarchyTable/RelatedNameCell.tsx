@@ -35,8 +35,6 @@ export const RelatedNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
     path: `/collections/${row._collectionSlug}/${row.id}`,
   })
 
-  // Upload collections delegate to the list view's file cell, so thumbnail resolution and styling
-  // stay in one place. Everything else gets a generic document icon.
   const filenameField = collectionConfig?.upload
     ? collectionConfig.fields.find((field) => 'name' in field && field.name === 'filename')
     : undefined

@@ -26,7 +26,6 @@
     height: var(--spacer-3);
     margin-block: var(--spacer-1);
 
-    /* On iPad, inline elements are selectable by default */
     user-select: none;
   }
 
@@ -124,8 +123,6 @@
     --checkbox-mark-color: var(--color-icon-ondisabled);
   }
 
-  /* The muted variant keeps the neutral surface when marked, so only the default
-     variant gets the brand fill, the on-brand mark and the mark halo. */
   .checkbox-input__control:not(.checkbox-input__control--muted, :disabled)
     + .checkbox-input__visuals {
     --checkbox-mark-color: var(--color-icon-onbrand);
@@ -185,7 +182,6 @@
     margin-block-start: var(--spacer-1);
   }
 
-  /* Align the description with the label rather than the control */
   .checkbox > .field-description {
     padding-inline-start: var(--spacer-4);
   }
