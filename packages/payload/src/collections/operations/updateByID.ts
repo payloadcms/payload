@@ -23,6 +23,7 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { retryConcurrentShadowOperation } from '../../branching/createShadowRow.js'
 import { forkDocument } from '../../branching/forkDocument.js'
+import { assertBranchMergeValidationWriteAllowed } from '../../branching/mergeWriteGuard.js'
 import {
   refreshRequestDataLoader,
   resetBranchState,
@@ -270,6 +271,8 @@ const updateByIDOperationWithLifecycleAttempt = async <
   let didResolveBranchFork = false
   let shouldCommit = false
   const uploadFileRollbacks: UploadFileRollbacks = new Map()
+
+  assertBranchMergeValidationWriteAllowed({ req: args.req })
 
   try {
     shouldCommit = !args.disableTransaction && (await initTransaction(args.req))

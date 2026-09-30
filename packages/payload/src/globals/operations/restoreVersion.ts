@@ -6,6 +6,7 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { assertBranchReadable } from '../../branching/assertBranchReadable.js'
 import { recordBranchGlobalChange, resolveBranchGlobalWrite } from '../../branching/globals.js'
+import { assertBranchMergeValidationWriteAllowed } from '../../branching/mergeWriteGuard.js'
 import { branchField, MAIN_BRANCH } from '../../branching/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
@@ -37,6 +38,8 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
   const { id, depth, draft, globalConfig, overrideAccess, populate, showHiddenFields } = args
   const req = args.req!
   const { fallbackLocale, locale, payload } = req
+
+  assertBranchMergeValidationWriteAllowed({ req })
 
   if (!overrideAccess) {
     await assertBranchReadable({ globalSlug: globalConfig.slug, req })

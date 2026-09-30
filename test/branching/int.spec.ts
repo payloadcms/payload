@@ -9,6 +9,7 @@ import {
   assertBranchReadable,
   createDataloaderCacheKey,
   createPayloadRequest,
+  defaultBranchMergeValidation,
   initTransaction,
   isolateBranchState,
   isolateObjectProperty,
@@ -6591,10 +6592,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       hookSpy.branchValidation = undefined
       hookSpy.pageBeforeOperation = undefined
 
-      const rows = await payload.find({ branch: false, collection: pagesSlug, pagination: false })
+      for (const collection of [pagesSlug, uniqueSlug]) {
+        const rows = await payload.find({ branch: false, collection, pagination: false })
 
-      for (const row of rows.docs) {
-        await payload.delete({ id: row.id, branch: false, collection: pagesSlug })
+        for (const row of rows.docs) {
+          await payload.delete({ id: row.id, branch: false, collection })
+        }
       }
 
       for (const collection of [branchChangesSlug, branchesSlug]) {
@@ -6650,6 +6653,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(calls).toHaveLength(1)
       expect(calls[0]?.target).toBe('main')
       expect(resolveBranch(calls[0]!.req)).toBe('main')
+      expect(calls[0]!.req.operation).toBe('validate')
       expect((calls[0]!.req.context as Record<string, unknown>)._branchBypass).toBeUndefined()
       expect(calls[0]?.candidates).toContainEqual(
         expect.objectContaining({
@@ -6681,7 +6685,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
     test('should recheck replacement validation after beforeMerge changes policy', async () => {
       let validationCalls = 0
 
-      hookSpy.branchValidation = ({ candidates }) => {
+      hookSpy.branchValidation = () => {
         validationCalls += 1
 
         return {
@@ -6724,14 +6728,133 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       )
     })
 
+    test('should validate known JSON, array, and block structures', async () => {
+      const req = await createPayloadRequest({ branch: false, payload })
+      const result = await defaultBranchMergeValidation({
+        branch,
+        candidates: [
+          {
+            changeID: 'structured-candidate',
+            collectionSlug: nestedSlug,
+            data: {
+              items: { invalid: true },
+              layout: [{ blockType: 'hero', heading: 42 }],
+              metadata: { score: 'high' },
+              unstructuredMetadata: { arbitrary: ['content', 42] },
+            },
+            docID: mainDocumentID,
+            draft: false,
+            entityType: 'collection',
+            operation: 'update',
+          },
+        ],
+        req,
+        target: 'main',
+      })
+
+      expect(result.valid).toBe(false)
+      expect(result.errors.map(({ path }) => path)).toEqual(
+        expect.arrayContaining(['data.items', 'data.layout[0].heading', 'data.metadata.score']),
+      )
+      expect(result.errors.some(({ path }) => path?.startsWith('data.unstructuredMetadata'))).toBe(
+        false,
+      )
+    })
+
+    test('should preserve the caller request and skip merge hooks during preview', async () => {
+      const req = await createPayloadRequest({ branch, payload })
+      const initialContext = req.context
+      const initialTransactionID = req.transactionID
+      const beforeMerge = vi.fn()
+
+      hookSpy.beforeMerge = beforeMerge
+
+      await payload.branches.merge({ branch, dryRun: true, req })
+
+      expect(beforeMerge).not.toHaveBeenCalled()
+      expect(req.context).toBe(initialContext)
+      expect(req.transactionID).toBe(initialTransactionID)
+      expect(resolveBranch(req)).toBe(branch)
+    })
+
+    test('should reject writes made with the validation request', async () => {
+      hookSpy.branchValidation = async ({ req }) => {
+        await payload.update({
+          id: mainDocumentID,
+          collection: pagesSlug,
+          data: { title: 'validation side effect' },
+          req,
+        })
+
+        return { errors: [], valid: true }
+      }
+
+      await expect(payload.branches.merge({ branch, dryRun: true })).rejects.toThrow(
+        'Content cannot be changed during branch merge validation.',
+      )
+
+      const onMain = await payload.findByID({ id: mainDocumentID, collection: pagesSlug })
+
+      expect(onMain.title).toBe('main validation title')
+    })
+
+    test('should let the database reject a conflict after preview succeeds', async () => {
+      const mainUnique = await payload.create({
+        collection: uniqueSlug,
+        data: { slug: 'merge-conflict' },
+      })
+      const branchUnique = await payload.create({
+        branch,
+        collection: uniqueSlug,
+        data: { slug: 'merge-conflict' },
+      })
+      const branchUniqueChange = (
+        await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: {
+            and: [{ branch: { equals: branch } }, { collectionSlug: { equals: uniqueSlug } }],
+          },
+        })
+      ).docs.find((change) => String(change.doc?.value) === String(branchUnique.id))
+
+      expect(branchUniqueChange).toBeDefined()
+
+      const preview = await payload.branches.merge({
+        branch,
+        changes: [branchUniqueChange!.id],
+        dryRun: true,
+      })
+
+      expect(preview.canMerge).toBe(true)
+      await expect(
+        payload.branches.merge({ branch, changes: [branchUniqueChange!.id] }),
+      ).rejects.toThrow()
+
+      const mainRows = await payload.find({
+        collection: uniqueSlug,
+        pagination: false,
+        where: { slug: { equals: 'merge-conflict' } },
+      })
+      const pendingChange = await payload.findByID({
+        id: branchUniqueChange!.id,
+        collection: branchChangesSlug,
+        disableErrors: true,
+      })
+
+      expect(mainRows.docs.map(({ id }) => String(id))).toEqual([String(mainUnique.id)])
+      expect(pendingChange).not.toBeNull()
+    })
+
     test('should run target content hooks in main context', async () => {
       const hookRequests: PayloadRequest[] = []
+      const branchReq = await createPayloadRequest({ branch, payload })
 
       hookSpy.pageBeforeOperation = ({ req }) => {
         hookRequests.push(req)
       }
 
-      await payload.branches.merge({ branch })
+      await payload.branches.merge({ branch, req: branchReq })
 
       expect(hookRequests.length).toBeGreaterThan(0)
       expect(hookRequests.every((req) => resolveBranch(req) === 'main')).toBe(true)
@@ -6740,6 +6863,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
           (req) => (req.context as Record<string, unknown>)._branchBypass === undefined,
         ),
       ).toBe(true)
+      expect(resolveBranch(branchReq)).toBe(branch)
     })
   })
 

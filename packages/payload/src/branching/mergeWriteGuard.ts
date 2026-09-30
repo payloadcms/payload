@@ -1,5 +1,6 @@
 import type { PayloadRequest } from '../types/index.js'
 
+import { APIError } from '../errors/index.js'
 import { resolveBranch } from './resolveBranch.js'
 import { MAIN_BRANCH } from './types.js'
 
@@ -13,6 +14,13 @@ export type BranchMergeWrite = {
 export type BranchMergeWriteGuard = (write: BranchMergeWrite) => Promise<void>
 
 export const branchMergeWriteGuardContextKey = Symbol('branchMergeWriteGuard')
+
+/** Prevents content writes made through a branch merge validation request. */
+export const assertBranchMergeValidationWriteAllowed = ({ req }: { req: PayloadRequest }): void => {
+  if (req.operation === 'validate') {
+    throw new APIError('Content cannot be changed during branch merge validation.', 409)
+  }
+}
 
 /** Runs the active merge's final-data guard after hooks and field processing. */
 export const runBranchMergeWriteGuard = async ({

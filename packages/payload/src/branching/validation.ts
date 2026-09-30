@@ -63,6 +63,18 @@ export const createMainBranchRequest = ({ req }: { req: PayloadRequest }): Paylo
   return targetReq
 }
 
+export const createBranchMergeValidationRequest = ({
+  req,
+}: {
+  req: PayloadRequest
+}): PayloadRequest => {
+  const validationReq = createMainBranchRequest({ req })
+
+  validationReq.operation = 'validate'
+
+  return validationReq
+}
+
 export const prepareBranchMergeValidationCandidates = async ({
   payload,
   pending,

@@ -59,7 +59,11 @@ import {
   branchParentField,
   MAIN_BRANCH,
 } from './types.js'
-import { createMainBranchRequest, prepareBranchMergeValidationCandidates } from './validation.js'
+import {
+  createBranchMergeValidationRequest,
+  createMainBranchRequest,
+  prepareBranchMergeValidationCandidates,
+} from './validation.js'
 import { deleteBranchGlobalVersionChain, deleteBranchVersionChain } from './versions.js'
 
 export type MergeableChange = {
@@ -310,7 +314,7 @@ export const mergeBranch = async (
   const validation = await payload.config.branching.validate({
     branch,
     candidates: validationCandidates,
-    req: targetReq,
+    req: createBranchMergeValidationRequest({ req: targetReq }),
     target: MAIN_BRANCH,
   })
   const hasPreflightErrors = blocked.length > 0 || !validation.valid
@@ -419,7 +423,7 @@ export const mergeBranch = async (
   const refreshedValidation = await payload.config.branching.validate({
     branch,
     candidates: refreshedValidationCandidates,
-    req: refreshedTargetReq,
+    req: createBranchMergeValidationRequest({ req: refreshedTargetReq }),
     target: MAIN_BRANCH,
   })
 

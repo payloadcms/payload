@@ -14,6 +14,7 @@ import type { FindOptions } from './local/find.js'
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { forkDocument } from '../../branching/forkDocument.js'
+import { assertBranchMergeValidationWriteAllowed } from '../../branching/mergeWriteGuard.js'
 import {
   refreshRequestDataLoader,
   resetBranchState,
@@ -64,6 +65,8 @@ export const restoreVersionOperation = async <
 >(
   args: Arguments,
 ): Promise<TData> => {
+  assertBranchMergeValidationWriteAllowed({ req: args.req })
+
   const {
     id,
     collection: { config: collectionConfig },

@@ -58,6 +58,8 @@ export type CustomPayloadRequestProperties = {
    */
   // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   locale?: 'all' | TypedLocale
+  /** The internal operation scope for this request. */
+  operation?: 'validate' | Operation
   /**
    * The payload object
    */

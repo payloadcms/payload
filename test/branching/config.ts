@@ -452,6 +452,21 @@ export default buildConfigWithDefaults({
         fields: [
           { name: 'title', type: 'text' },
           {
+            name: 'metadata',
+            type: 'json',
+            jsonSchema: {
+              fileMatch: ['branch-metadata.json'],
+              schema: {
+                type: 'object',
+                additionalProperties: false,
+                properties: { score: { type: 'number' } },
+                required: ['score'],
+              },
+              uri: 'payload://branch-metadata.json',
+            },
+          },
+          { name: 'unstructuredMetadata', type: 'json' },
+          {
             name: 'items',
             type: 'array',
             fields: [

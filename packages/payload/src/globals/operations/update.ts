@@ -22,7 +22,10 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { assertBranchReadable } from '../../branching/assertBranchReadable.js'
 import { recordBranchGlobalChange, resolveBranchGlobalWrite } from '../../branching/globals.js'
-import { runBranchMergeWriteGuard } from '../../branching/mergeWriteGuard.js'
+import {
+  assertBranchMergeValidationWriteAllowed,
+  runBranchMergeWriteGuard,
+} from '../../branching/mergeWriteGuard.js'
 import { branchField, MAIN_BRANCH } from '../../branching/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { Forbidden } from '../../errors/index.js'
@@ -81,6 +84,8 @@ export const updateOperation = async <
 ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
   const req = args.req
   const initialGlobalConfig = args.globalConfig
+
+  assertBranchMergeValidationWriteAllowed({ req })
 
   if (!args.overrideAccess) {
     await assertBranchReadable({ globalSlug: initialGlobalConfig.slug, req })

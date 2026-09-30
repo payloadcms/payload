@@ -16,6 +16,7 @@ import {
   isConcurrentShadowOperationError,
   retryConcurrentShadowOperation,
 } from '../../branching/createShadowRow.js'
+import { assertBranchMergeValidationWriteAllowed } from '../../branching/mergeWriteGuard.js'
 import {
   refreshBranchState,
   resetBranchState,
@@ -177,6 +178,8 @@ const deleteByIDOperationAttempt = async <
   let args = incomingArgs
   let cleanupScope: DeferredCleanupScope | null = null
   let shouldCommit = false
+
+  assertBranchMergeValidationWriteAllowed({ req: args.req })
 
   try {
     shouldCommit = !args.disableTransaction && (await initTransaction(args.req))

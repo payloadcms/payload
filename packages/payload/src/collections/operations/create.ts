@@ -19,7 +19,10 @@ import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
 import { executeAccess } from '../../auth/executeAccess.js'
 import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
 import { registerLocalStrategy } from '../../auth/strategies/local/register.js'
-import { runBranchMergeWriteGuard } from '../../branching/mergeWriteGuard.js'
+import {
+  assertBranchMergeValidationWriteAllowed,
+  runBranchMergeWriteGuard,
+} from '../../branching/mergeWriteGuard.js'
 import { getDuplicateDocumentData } from '../../duplicateDocument/index.js'
 import { APIError } from '../../errors/index.js'
 import { fillEmptyLocalizedSlugs } from '../../fields/baseFields/slug/fillEmptyLocalizedSlugs.js'
@@ -84,6 +87,8 @@ export const createOperation = async <
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
   let externalUploadSource: ReturnType<typeof getExternalUploadSource>
+
+  assertBranchMergeValidationWriteAllowed({ req: args.req })
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))

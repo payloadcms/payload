@@ -13,6 +13,7 @@ import type {
 } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { assertBranchMergeValidationWriteAllowed } from '../../branching/mergeWriteGuard.js'
 import {
   refreshBranchState,
   resetBranchState,
@@ -80,6 +81,9 @@ export const deleteOperation = async <
   let cleanupScope: DeferredCleanupScope | null = null
   let hasCallerTransaction = false
   let shouldCommit = false
+
+  assertBranchMergeValidationWriteAllowed({ req: args.req })
+
   if (args.collection.config.disableBulkDelete && !args.overrideAccess) {
     throw new APIError(`Collection ${args.collection.config.slug} has disabled bulk delete`, 403)
   }
