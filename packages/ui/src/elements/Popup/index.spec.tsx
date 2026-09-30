@@ -51,6 +51,68 @@ test('should preserve ancestor menus while nested hover menus are active', async
   await expect.element(color).toHaveAttribute('aria-expanded', 'true')
 })
 
+test('should close an active submenu when a sibling leaf item receives pointer or focus', async () => {
+  const screen = await render(
+    <Popup button="Root" popupType="menu" theme="auto">
+      <PopupList.MenuItem>
+        <Popup
+          renderButton={({ active: _active, ...props }) => (
+            <button {...props} type="button">
+              Theme
+            </button>
+          )}
+          buttonType="custom"
+          hoverSubmenu
+          popupType="menu"
+          theme="auto"
+          render={() => (
+            <PopupList.MenuItem>
+              <Popup
+                renderButton={({ active: _active, ...props }) => (
+                  <button {...props} type="button">
+                    Color
+                  </button>
+                )}
+                buttonType="custom"
+                hoverSubmenu
+                popupType="menu"
+                theme="auto"
+                render={() => <PopupList.Button onClick={() => {}}>Light</PopupList.Button>}
+              />
+              <PopupList.Button onClick={() => {}}>Typography</PopupList.Button>
+            </PopupList.MenuItem>
+          )}
+        />
+      </PopupList.MenuItem>
+    </Popup>,
+  )
+
+  await screen.getByRole('button', { name: 'Root' }).click()
+  await screen.getByRole('menuitem', { name: 'Theme' }).hover()
+  const color = screen.getByRole('menuitem', { name: 'Color' })
+  await color.hover()
+  await expect.element(screen.getByRole('menuitem', { name: 'Light' })).toBeVisible()
+
+  await screen.getByRole('menuitem', { name: 'Typography' }).hover()
+
+  const colorElement = Array.from(document.querySelectorAll<HTMLElement>('[role="menuitem"]')).find(
+    (element) => element.textContent === 'Color',
+  )
+
+  expect(colorElement?.getAttribute('aria-expanded')).toBe('false')
+
+  await color.hover()
+  await expect.element(screen.getByRole('menuitem', { name: 'Light' })).toBeVisible()
+
+  const typographyElement = Array.from(
+    document.querySelectorAll<HTMLElement>('[role="menuitem"]'),
+  ).find((element) => element.textContent === 'Typography')
+
+  typographyElement?.focus()
+
+  await expect.element(color).toHaveAttribute('aria-expanded', 'false')
+})
+
 test('should open and close nested menus with keyboard focus restoration', async () => {
   const screen = await render(
     <Popup button="Root" popupType="menu" theme="auto">

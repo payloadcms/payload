@@ -579,6 +579,26 @@ export const Popup: React.FC<PopupProps> = (props) => {
     }
   })
 
+  const handleMenuItemInteraction = useCallback(
+    (event: React.FocusEvent<HTMLDivElement> | React.MouseEvent<HTMLDivElement>) => {
+      if (popupRole !== 'menu') {
+        return
+      }
+
+      const menuItem = (event.target as Element).closest<HTMLElement>(MENU_ITEM_SELECTOR)
+      if (
+        !menuItem ||
+        menuItem.closest(POPUP_CONTENT_SELECTOR) !== popupRef.current ||
+        menuItem.closest(`.${baseClass}__trigger-wrap`)
+      ) {
+        return
+      }
+
+      submenuScope.closeActiveBranch()
+    },
+    [popupRole, submenuScope],
+  )
+
   // /////////////////////////////////////
   // Effect: Setup/Teardown position and focus management
   // /////////////////////////////////////
@@ -740,8 +760,10 @@ export const Popup: React.FC<PopupProps> = (props) => {
           data-popup-id={id || undefined}
           data-theme={theme === 'auto' ? undefined : theme}
           id={contentId}
+          onFocus={handleMenuItemInteraction}
           onMouseEnter={pointerIntent.onMouseEnter}
           onMouseLeave={pointerIntent.onMouseLeave}
+          onMouseOver={handleMenuItemInteraction}
           popover="manual"
           ref={popupRef}
           role={popupRole}
