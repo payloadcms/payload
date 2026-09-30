@@ -22,26 +22,24 @@
   .document-card__content {
     padding: var(--spacer-2-5);
   }
-  .document-card__link {
-    display: block;
-    color: var(--color-text);
-    text-decoration: none;
-  }
-  .document-card__link:focus:not(:focus-visible) {
-    opacity: 1;
-  }
-  .document-card:has(.document-card__link:focus-visible) {
-    outline: var(--accessibility-outline);
-    outline-offset: var(--accessibility-outline-offset);
-  }
-  .document-card__link:focus-visible {
-    outline: none;
-  }
   .document-card__title {
     display: block;
     overflow: hidden;
+    color: var(--color-text);
     text-overflow: ellipsis;
+    text-decoration: none;
     white-space: nowrap;
+  }
+  .document-card__title:focus:not(:focus-visible) {
+    opacity: 1;
+  }
+  .document-card:focus-visible,
+  .document-card:has(.document-card__title:focus-visible) {
+    outline: var(--accessibility-outline);
+    outline-offset: var(--accessibility-outline-offset);
+  }
+  .document-card__title:focus-visible {
+    outline: none;
   }
   .document-card__metadata {
     margin-block-start: var(--spacer-1);

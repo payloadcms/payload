@@ -48,37 +48,65 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
     void router.push(href)
   }
 
+  const handleCardClick = (event: React.MouseEvent<HTMLElement>) => {
+    if ((event.target as HTMLElement).closest('a')) {
+      return
+    }
+
+    onSelect?.()
+  }
+
+  const handleCardDoubleClick = (event: React.MouseEvent<HTMLElement>) => {
+    if (!onSelect || (event.target as HTMLElement).closest('a')) {
+      return
+    }
+
+    event.preventDefault()
+    void router.push(href)
+  }
+
+  const handleCardKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+    if (!onSelect || (event.key !== 'Enter' && event.key !== ' ')) {
+      return
+    }
+
+    event.preventDefault()
+    onSelect()
+  }
+
   return (
-    <article
+    <div
+      aria-describedby={onSelect ? selectionStatusID : undefined}
+      aria-label={onSelect ? title : undefined}
+      aria-pressed={onSelect ? isSelected : undefined}
       className={[baseClass, isSelected && `${baseClass}--selected`].filter(Boolean).join(' ')}
+      onClick={onSelect ? handleCardClick : undefined}
+      onDoubleClick={onSelect ? handleCardDoubleClick : undefined}
+      onKeyDown={onSelect ? handleCardKeyDown : undefined}
+      role="button"
+      tabIndex={onSelect ? 0 : undefined}
     >
-      <Link
-        aria-describedby={isSelected ? selectionStatusID : undefined}
-        className={`${baseClass}__link`}
-        href={href}
-        onClick={onSelect ? handleClick : undefined}
-        onDoubleClick={onSelect ? handleDoubleClick : undefined}
-        tabIndex={0}
-      >
-        {thumbnail ? (
-          <img
-            alt={thumbnail.alt || ''}
-            className={`${baseClass}__thumbnail`}
-            src={thumbnail.src}
-          />
-        ) : (
-          <div className={`${baseClass}__thumbnail ${baseClass}__thumbnail--empty`} />
-        )}
-        <div className={`${baseClass}__content`}>
-          <span className={`${baseClass}__title`}>{title}</span>
-          {children ? <div className={`${baseClass}__metadata`}>{children}</div> : null}
-        </div>
-      </Link>
+      {thumbnail ? (
+        <img alt={thumbnail.alt || ''} className={`${baseClass}__thumbnail`} src={thumbnail.src} />
+      ) : (
+        <div className={`${baseClass}__thumbnail ${baseClass}__thumbnail--empty`} />
+      )}
+      <div className={`${baseClass}__content`}>
+        <Link
+          className={`${baseClass}__title`}
+          href={href}
+          onClick={onSelect ? handleClick : undefined}
+          onDoubleClick={onSelect ? handleDoubleClick : undefined}
+        >
+          {title}
+        </Link>
+        {children ? <div className={`${baseClass}__metadata`}>{children}</div> : null}
+      </div>
       {onSelect ? (
         <span className="document-card__selection-status sr-only" id={selectionStatusID}>
-          {isSelected ? 'Selected' : 'Not selected'}
+          {isSelected ? 'Selected.' : 'Not selected.'} Press Enter or Space to change selection.
         </span>
       ) : null}
-    </article>
+    </div>
   )
 }
