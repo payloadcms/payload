@@ -11,10 +11,10 @@ import { LogOutIcon } from '../../icons/LogOut/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { Button } from '../Button/index.js'
 import { MenuSeparator } from '../MenuSeparator/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
-import { HoverSubmenuGroupProvider } from './HoverSubmenuGroup.js'
 import { LanguageMenu, LanguageMenuContent } from './LanguageMenu/index.js'
 import { SettingsMenu, SettingsMenuContent } from './SettingsMenu/index.js'
 import { SubMenuHeader } from './SubMenuHeader/index.js'
@@ -111,25 +111,18 @@ export const UserMenu: React.FC<UserMenuProps> = ({
       }}
       popupType="menu"
       renderButton={({ active, ...ariaProps }) => (
-        <button
+        <Button
           {...ariaProps}
           aria-label={t('authentication:account')}
-          className={[
-            `${baseClass}__trigger`,
-            active && 'popup-button--active',
-            showTitle && `${baseClass}__trigger--with-title`,
-          ]
-            .filter(Boolean)
-            .join(' ')}
+          buttonStyle="ghost"
+          className={`${baseClass}__trigger${showTitle ? ` ${baseClass}__trigger--with-title` : ''}`}
+          icon={<ChevronIcon direction="down" size={16} />}
+          margin={false}
+          selected={active}
           type="button"
         >
-          <div className={`${baseClass}__trigger-content`}>
-            {showTitle && (titleString || identifier) && (
-              <p className={`${baseClass}__trigger-label`}>{titleString || identifier}</p>
-            )}
-            <ChevronIcon direction="down" size={16} />
-          </div>
-        </button>
+          {showTitle && (titleString || identifier) ? titleString || identifier : undefined}
+        </Button>
       )}
       showScrim
       size="large"
@@ -181,46 +174,43 @@ export const UserMenu: React.FC<UserMenuProps> = ({
             </div>
           </a>
 
-          <HoverSubmenuGroupProvider>
-            {/* Preferences group: Theme + Language */}
-            {showPreferencesGroup && (
-              <>
-                {showThemeMenu && (
-                  <PopupList.MenuItem>
-                    <ThemeMenu
-                      key={menuInstanceKey}
-                      onMobileOpen={isMobile ? () => setActiveMobileSubmenu('theme') : undefined}
-                    />
-                  </PopupList.MenuItem>
-                )}
-                {hasMultipleLanguages && (
-                  <PopupList.MenuItem>
-                    <LanguageMenu
-                      key={menuInstanceKey}
-                      onMobileOpen={isMobile ? () => setActiveMobileSubmenu('language') : undefined}
-                    />
-                  </PopupList.MenuItem>
-                )}
-              </>
-            )}
-
-            <MenuSeparator />
-
-            {/* Settings group */}
-            {hasSettingsItems && (
-              <>
+          {/* Preferences group: Theme + Language */}
+          {showPreferencesGroup && (
+            <>
+              {showThemeMenu && (
                 <PopupList.MenuItem>
-                  <SettingsMenu
-                    groups={settingsItemGroups}
+                  <ThemeMenu
                     key={menuInstanceKey}
-                    onMobileOpen={isMobile ? () => setActiveMobileSubmenu('settings') : undefined}
+                    onMobileOpen={isMobile ? () => setActiveMobileSubmenu('theme') : undefined}
                   />
                 </PopupList.MenuItem>
-                <MenuSeparator />
-              </>
-            )}
-          </HoverSubmenuGroupProvider>
+              )}
+              {hasMultipleLanguages && (
+                <PopupList.MenuItem>
+                  <LanguageMenu
+                    key={menuInstanceKey}
+                    onMobileOpen={isMobile ? () => setActiveMobileSubmenu('language') : undefined}
+                  />
+                </PopupList.MenuItem>
+              )}
+            </>
+          )}
 
+          <MenuSeparator />
+
+          {/* Settings group */}
+          {hasSettingsItems && (
+            <>
+              <PopupList.MenuItem>
+                <SettingsMenu
+                  groups={settingsItemGroups}
+                  key={menuInstanceKey}
+                  onMobileOpen={isMobile ? () => setActiveMobileSubmenu('settings') : undefined}
+                />
+              </PopupList.MenuItem>
+              <MenuSeparator />
+            </>
+          )}
           {/* Account actions */}
           <PopupList.MenuItem>
             {CustomLogoutButton ?? (

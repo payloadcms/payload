@@ -1,6 +1,7 @@
 'use client'
 import type { AriaAttributes, AriaRole, CSSProperties } from 'react'
 
+export { HoverSubmenuGroupProvider } from './HoverSubmenuGroup.js'
 export * as PopupList from './PopupButtonList/index.js'
 
 import React, { createContext, use, useCallback, useEffect, useId, useRef, useState } from 'react'
@@ -9,6 +10,7 @@ import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { ThemeProvider } from '../../providers/Theme/index.js'
 import './index.css'
 import { type PopupButtonRenderProps, PopupTrigger } from './PopupTrigger/index.js'
+import { useHoverSubmenu } from './useHoverSubmenu.js'
 
 const baseClass = 'popup'
 
@@ -65,6 +67,8 @@ export type PopupProps = {
    * @default 'left'
    */
   horizontalAlign?: 'center' | 'left' | 'right'
+  /** Opens this popup as a safe-zone hover submenu on pointer input. */
+  hoverSubmenu?: string
   id?: string
   initActive?: boolean
   noBackground?: boolean
@@ -139,6 +143,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     disabled,
     forceOpen,
     horizontalAlign = 'left',
+    hoverSubmenu,
     initActive = false,
     noBackground,
     onToggleClose,
@@ -161,6 +166,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
   const triggerRef = useRef<HTMLDivElement>(null)
   const generatedContentId = useId()
   const contentId = `${id || generatedContentId}-content`
+  const hover = useHoverSubmenu(hoverSubmenu ? `${hoverSubmenu}-${generatedContentId}` : undefined)
 
   /**
    * Keeps track of whether the popup was opened via keyboard.
@@ -177,6 +183,13 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
   const setActive = useCallback(
     (isActive: boolean, viaKeyboard = false) => {
+      if (hoverSubmenu) {
+        if (isActive) {
+          hover.open()
+        } else {
+          hover.close()
+        }
+      }
       if (isActive) {
         openedViaKeyboardRef.current = viaKeyboard
         onToggleOpen?.(true)
@@ -185,7 +198,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
       }
       setActiveInternal(isActive)
     },
-    [onToggleClose, onToggleOpen],
+    [hover, hoverSubmenu, onToggleClose, onToggleOpen],
   )
 
   const closePopup = useCallback(
@@ -609,10 +622,12 @@ export const Popup: React.FC<PopupProps> = (props) => {
   }, [active])
 
   useEffect(() => {
-    if (forceOpen !== undefined) {
+    if (hoverSubmenu) {
+      setActive(hover.isOpen)
+    } else if (forceOpen !== undefined) {
       setActive(forceOpen)
     }
-  }, [forceOpen, setActive])
+  }, [forceOpen, hover.isOpen, hoverSubmenu, setActive])
 
   const Trigger = (
     <PopupTrigger
@@ -623,6 +638,8 @@ export const Popup: React.FC<PopupProps> = (props) => {
       className={buttonClassName}
       contentId={contentId}
       disabled={disabled}
+      hoverOnly={Boolean(hoverSubmenu)}
+      hoverOnMouseEnter={hoverSubmenu ? hover.open : undefined}
       isMenuItem={parentPopup?.popupRole === 'menu'}
       noBackground={noBackground}
       popupType={popupType}
@@ -634,7 +651,15 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')} id={id}>
-      <div className={`${baseClass}__trigger-wrap`} ref={triggerRef}>
+      <div
+        className={`${baseClass}__trigger-wrap`}
+        ref={(element) => {
+          // The same wrapper is used by Popup focus management and the hover safe-zone.
+          triggerRef.current = element
+          // eslint-disable-next-line react-compiler/react-compiler
+          hover.triggerRef.current = element
+        }}
+      >
         {showOnHover ? (
           <div
             className={`${baseClass}__on-hover-watch`}
@@ -681,6 +706,8 @@ export const Popup: React.FC<PopupProps> = (props) => {
         >
           <div
             className={`${baseClass}__scroll-container${showScrollbar ? ` ${baseClass}__scroll-container--show-scrollbar` : ''}`}
+            onMouseEnter={hoverSubmenu ? hover.keepOpen : undefined}
+            ref={hover.contentRef as React.Ref<HTMLDivElement>}
           >
             {theme === 'auto' ? (
               <>

@@ -126,7 +126,7 @@ const getFunnelPolygon = (
  * a sibling submenu becomes active, this one closes immediately rather than waiting on
  * its own hover-out timer.
  */
-export const useHoverSubmenu = (id: string) => {
+export const useHoverSubmenu = (id?: string) => {
   const [isOpen, setIsOpen] = useState(false)
   const closeTimeoutRef = useRef<null | ReturnType<typeof setTimeout>>(null)
   const triggerRef = useRef<HTMLElement | null>(null)
@@ -159,7 +159,9 @@ export const useHoverSubmenu = (id: string) => {
       if (e) {
         anchorRef.current = { x: e.clientX, y: e.clientY }
       }
-      group?.setActiveId(id)
+      if (id) {
+        group?.setActiveId(id)
+      }
       setIsOpen(true)
     },
     [cancelClose, group, id],
@@ -175,7 +177,9 @@ export const useHoverSubmenu = (id: string) => {
   const close = useCallback(() => {
     cancelClose()
     setIsOpen(false)
-    group?.setActiveId((current) => (current === id ? null : current))
+    if (id) {
+      group?.setActiveId((current) => (current === id ? null : current))
+    }
   }, [cancelClose, group, id])
 
   // A sibling became active (its trigger was hovered) - force-close this one now,
