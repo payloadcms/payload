@@ -196,8 +196,10 @@ export function DefaultListView(props: ListViewClientProps) {
   )
 
   const { allowCreate, createNewDrawerSlug, isInDrawer, onBulkSelect } = useListDrawerContext()
-  const { setPreference } = usePreferences()
+  const { getPreference, setPreference } = usePreferences()
   const router = useRouter()
+  const viewModeChangeID = useRef(0)
+  const viewModeUpdate = useRef(Promise.resolve())
 
   const hasCreatePermission =
     allowCreate !== undefined
@@ -231,9 +233,27 @@ export function DefaultListView(props: ListViewClientProps) {
   const collectionConfig = getEntityConfig({ collectionSlug })
 
   const handleViewModeChange = async (nextViewMode: DocumentViewMode) => {
+    const changeID = ++viewModeChangeID.current
+    const preferencesKey = `collection-${collectionSlug}`
+
     setViewMode(nextViewMode)
-    await setPreference(`collection-${collectionSlug}`, { documentViewMode: nextViewMode }, true)
-    router.refresh()
+
+    const update = viewModeUpdate.current.then(async () => {
+      const preferences = await getPreference<Record<string, unknown>>(preferencesKey)
+
+      await setPreference(
+        preferencesKey,
+        { ...(preferences || {}), documentViewMode: nextViewMode },
+        false,
+      )
+
+      if (changeID === viewModeChangeID.current) {
+        router.refresh()
+      }
+    })
+
+    viewModeUpdate.current = update.catch(() => undefined)
+    await update
   }
 
   const { labels, upload } = collectionConfig
