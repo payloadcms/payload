@@ -11,6 +11,13 @@ import { deepMergeSimple } from '../../utilities/deepMerge.js'
 import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
 
+type PreferenceUpdater<T> = (current: null | T) => T
+
+type SetPreference = {
+  <T = Preferences>(key: string, updater: PreferenceUpdater<T>): Promise<void>
+  <T = Preferences>(key: string, value: T, merge?: boolean): Promise<void>
+}
+
 type PreferencesContext = {
   getPreference: <T = Preferences>(key: string) => Promise<T>
   /**
@@ -18,11 +25,7 @@ type PreferencesContext = {
    * @param value - preference data to store
    * @param merge - when true will combine the existing preference object batch the change into one request for objects, default = false
    */
-  setPreference: <T = Preferences>(key: string, value: T, merge?: boolean) => Promise<void>
-  updatePreference: <T = Preferences>(
-    key: string,
-    updater: (current: null | T) => T,
-  ) => Promise<void>
+  setPreference: SetPreference
 }
 
 const Context = createContext({} as PreferencesContext)
@@ -100,7 +103,34 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
   )
 
   const setPreference = useCallback(
-    async (key: string, value: unknown, merge = false): Promise<void> => {
+    async <T = Preferences,>(
+      key: string,
+      value: PreferenceUpdater<T> | T,
+      merge = false,
+    ): Promise<void> => {
+      if (typeof value === 'function') {
+        const updater = value as PreferenceUpdater<T>
+        const previousUpdate = updateQueues.current[key] ?? Promise.resolve()
+        const update = previousUpdate.then(async () => {
+          const current = await getPreference<T>(key)
+          const nextValue = updater(current ?? null)
+
+          preferencesRef.current[key] = nextValue
+
+          await requests.post(
+            formatAdminURL({
+              apiRoute: api,
+              path: `/payload-preferences/${key}`,
+            }),
+            requestOptions(nextValue, i18n.language),
+          )
+        })
+
+        updateQueues.current[key] = update.catch(() => undefined)
+        await update
+        return
+      }
+
       if (merge === false) {
         preferencesRef.current[key] = value
 
@@ -172,36 +202,11 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         void updatePreference()
       })
     },
-    [api, getPreference, i18n.language, pendingUpdate],
-  )
-
-  const updatePreference = useCallback(
-    async <T = Preferences,>(key: string, updater: (current: null | T) => T): Promise<void> => {
-      const previousUpdate = updateQueues.current[key] ?? Promise.resolve()
-      const update = previousUpdate.then(async () => {
-        const current = await getPreference<T>(key)
-        const value = updater(current ?? null)
-
-        preferencesRef.current[key] = value
-
-        await requests.post(
-          formatAdminURL({
-            apiRoute: api,
-            path: `/payload-preferences/${key}`,
-          }),
-          requestOptions(value, i18n.language),
-        )
-      })
-
-      updateQueues.current[key] = update.catch(() => undefined)
-      await update
-    },
-    [api, getPreference, i18n.language, updateQueues],
+    [api, getPreference, i18n.language, pendingUpdate, updateQueues],
   )
 
   contextRef.current.getPreference = getPreference
   contextRef.current.setPreference = setPreference
-  contextRef.current.updatePreference = updatePreference
   return <Context value={contextRef.current}>{children}</Context>
 }
 

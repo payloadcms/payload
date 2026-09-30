@@ -196,7 +196,7 @@ export function DefaultListView(props: ListViewClientProps) {
   )
 
   const { allowCreate, createNewDrawerSlug, isInDrawer, onBulkSelect } = useListDrawerContext()
-  const { updatePreference } = usePreferences()
+  const { setPreference } = usePreferences()
   const router = useRouter()
 
   const hasCreatePermission =
@@ -234,7 +234,7 @@ export function DefaultListView(props: ListViewClientProps) {
     const preferencesKey = `collection-${collectionSlug}`
 
     setViewMode(nextViewMode)
-    await updatePreference<CollectionPreferences>(preferencesKey, (preferences) => ({
+    await setPreference<CollectionPreferences>(preferencesKey, (preferences) => ({
       ...(preferences ?? {}),
       documentViewMode: nextViewMode,
     }))
