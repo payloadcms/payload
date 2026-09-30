@@ -37,6 +37,7 @@ import {
   openPostsFilter,
   openRichTextRelationshipDrawer,
   openRichTextUploadDrawer,
+  openVersionComparison,
   openVersionsList,
   openWidgetDrawer,
 } from './helpers.js'
@@ -114,6 +115,68 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
         }
       })
     })
+
+    test('should announce table cell text once without conflicting sort commands', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3750
+      // PYLD-3596
+      await gotoPostsList({ page, postsURL })
+      const title = 'Example post two'
+      const output = await navigateScreenReaderTo({
+        matches: /^(?!.*select).*Example post two/i,
+        screenReader,
+      })
+      const spoken = await screenReader.lastSpokenPhrase()
+
+      expect(output).toContain(title)
+      expect(spoken.match(/Example post two/gi) || []).toHaveLength(1)
+      expect(spoken).not.toMatch(/ascending.*descending|descending.*ascending/i)
+      expect(spoken).not.toMatch(/sort by|\{\{label\}\}/i)
+    })
+
+    test('should communicate removed version text while browsing the comparison', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3722
+      await openVersionComparison({ page, postsURL, serverURL, versionIndex: 0 })
+      const removed = page.locator('.text-diff [data-match-type="delete"]').first()
+
+      await expect(removed).toBeVisible()
+      await expect(removed).toHaveCSS('text-decoration-line', 'line-through')
+      const removedText = (await removed.innerText()).trim()
+
+      expect(removedText).not.toBe('')
+      const oldGroup = await navigateScreenReaderTo({ matches: /Previous Version/i, screenReader })
+
+      expect(oldGroup).toMatch(/Previous Version/i)
+      const capture = await captureScreenReader({
+        action: async () => {
+          for (let index = 0; index < 30; index++) {
+            await screenReader.next()
+            const item = await screenReader.itemText()
+
+            if (item.includes(removedText)) {
+              return
+            }
+          }
+          throw new Error(`Did not reach removed text: ${removedText}`)
+        },
+        screenReader,
+      })
+
+      expect(capture.spokenPhrase).toContain(removedText)
+      expect(capture.spokenPhrase).toMatch(/deleted|deletion|removed|strikethrough|strike through/i)
+      const newGroup = await navigateScreenReaderTo({
+        matches: /^(?!.*Previous Version)(?:Version.*group|group.*Version)/i,
+        screenReader,
+      })
+
+      expect(newGroup).not.toMatch(/Previous Version/i)
+    })
+
     test('should announce the Copy to combobox label once on focus', async ({
       page,
       screenReader,
@@ -825,6 +888,50 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
 
       expect(output).toMatch(/Text block/i)
       expect(output).toMatch(/checked|selected/i)
+    })
+  })
+  test.describe('4.1.3 Status Messages (AA)', () => {
+    test('should announce table search result changes without moving focus', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3696
+      test.setTimeout(60000)
+      await gotoPostsList({ page, postsURL })
+      const search = page.getByRole('textbox', { name: /search/i }).first()
+
+      await search.focus()
+      for (const { count, query, speech } of [
+        {
+          count: 1,
+          query: 'Example post two',
+          speech: /(?:1|one)\s+(?:post|result|document|item)/i,
+        },
+        {
+          count: 1,
+          query: 'Example post three',
+          speech: /(?:1|one)\s+(?:post|result|document|item)/i,
+        },
+        {
+          count: 0,
+          query: 'no-such-accessibility-post',
+          speech: /(?:0|zero)\s+(?:post|result|document|item)/i,
+        },
+      ]) {
+        const capture = await captureScreenReader({
+          action: async () => {
+            await search.fill(query)
+            await expect(page.locator('tbody tr')).toHaveCount(count)
+            await expect(page.getByRole('status').filter({ hasText: query })).toContainText(
+              String(count),
+            )
+          },
+          screenReader,
+        })
+
+        await expect(search).toBeFocused()
+        expect(capture.spokenPhrase).toMatch(speech)
+      }
     })
   })
 })

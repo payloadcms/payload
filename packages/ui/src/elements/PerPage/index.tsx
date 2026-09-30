@@ -59,7 +59,7 @@ export const PerPage: React.FC<PerPageProps> = ({
         renderButton={({ active, onClick, onKeyDown, ...ariaProps }) => (
           <Button
             {...ariaProps}
-            aria-label={`${t('general:perPageLabel')}: ${limitToUse}`}
+            aria-label={t('general:perPage', { limit: limitToUse })}
             buttonStyle="secondary"
             className={[active && `${baseClass}--active`].filter(Boolean).join(' ')}
             extraButtonProps={{

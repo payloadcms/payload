@@ -263,6 +263,7 @@ export const renderTable = ({
         <SelectRow
           key={i}
           rowData={row}
+          rowIndex={i}
           selectRowLabel={getSelectRowLabel({ i18n, rowData: row, useAsTitle })}
         />
       )),
