@@ -283,9 +283,10 @@ export const renderListView = async (
   })
 
   /** Populate only the configured thumbnail relationship for flat collection grids. */
-  const thumbnailFieldName = !collectionConfig.hierarchy
-    ? collectionConfig.admin.useAsThumbnail
-    : undefined
+  const thumbnailFieldName =
+    collectionPreferences?.documentViewMode === 'grid' && !collectionConfig.hierarchy
+      ? collectionConfig.admin.useAsThumbnail
+      : undefined
   let thumbnailPopulate: PopulateType | undefined
 
   if (thumbnailFieldName) {

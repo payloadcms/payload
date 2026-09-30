@@ -27,6 +27,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
+import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { SelectionProvider, useSelection } from '../../providers/Selection/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -196,6 +197,7 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const { allowCreate, createNewDrawerSlug, isInDrawer, onBulkSelect } = useListDrawerContext()
   const { setPreference } = usePreferences()
+  const router = useRouter()
 
   const hasCreatePermission =
     allowCreate !== undefined
@@ -231,6 +233,7 @@ export function DefaultListView(props: ListViewClientProps) {
   const handleViewModeChange = async (nextViewMode: DocumentViewMode) => {
     setViewMode(nextViewMode)
     await setPreference(`collection-${collectionSlug}`, { documentViewMode: nextViewMode }, true)
+    router.refresh()
   }
 
   const { labels, upload } = collectionConfig
