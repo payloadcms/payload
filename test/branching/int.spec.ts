@@ -101,6 +101,61 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(names).toContain('_branchOp')
     })
 
+    test('should enforce one collection change per branch and logical document', () => {
+      const changesCollection = collectionConfig(branchChangesSlug)
+
+      expect(fieldNames(changesCollection)).toContain('documentID')
+      expect(changesCollection.indexes).toContainEqual({
+        fields: ['branch', 'collectionSlug', 'documentID'],
+        requireExists: ['collectionSlug', 'documentID'],
+        unique: true,
+      })
+    })
+
+    test('should reject a duplicate collection change identity', async () => {
+      const branch = await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Unique collection change identity' },
+        overrideAccess: true,
+      })
+      const document = await payload.create({
+        collection: postsSlug,
+        data: { title: 'unique change target' },
+        overrideAccess: true,
+      })
+      const changeData = {
+        branch: branch.slug,
+        collectionSlug: postsSlug,
+        doc: { relationTo: postsSlug, value: document.id },
+        documentID: String(document.id),
+        entityType: 'collection' as const,
+        operation: 'update' as const,
+      }
+      const change = await payload.create({
+        collection: branchChangesSlug,
+        data: changeData,
+        overrideAccess: true,
+      })
+
+      try {
+        await expect(
+          payload.create({
+            collection: branchChangesSlug,
+            data: changeData,
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow()
+      } finally {
+        await payload.delete({
+          id: change.id,
+          collection: branchChangesSlug,
+          overrideAccess: true,
+        })
+        await payload.delete({ id: document.id, collection: postsSlug, overrideAccess: true })
+        await payload.delete({ id: branch.id, collection: branchesSlug, overrideAccess: true })
+      }
+    })
+
     test('should not inject branch fields into a collection opted out with branching: false', () => {
       const names = fieldNames(collectionConfig(excludedSlug))
 
@@ -340,6 +395,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(changes.docs).toHaveLength(5)
       expect(changes.docs[0]).toMatchObject({
         collectionSlug: postsSlug,
+        documentID: String(changes.docs[0]!.doc?.value),
         entityType: 'collection',
         operation: 'create',
       })
@@ -2861,7 +2917,11 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
 
       expect(changes.docs).toHaveLength(1)
-      expect(changes.docs[0]).toMatchObject({ collectionSlug: postsSlug, operation: 'update' })
+      expect(changes.docs[0]).toMatchObject({
+        collectionSlug: postsSlug,
+        documentID: String(mainDocID),
+        operation: 'update',
+      })
     })
 
     test('should tombstone rather than delete when deleting a main document on a branch', async () => {

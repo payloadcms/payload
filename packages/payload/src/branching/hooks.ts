@@ -59,6 +59,7 @@ export const recordBranchCreate: CollectionAfterChangeHook = async ({
       branch,
       collectionSlug: collection.slug,
       doc: { relationTo: collection.slug, value: doc.id },
+      documentID: String(doc.id),
       entityType: 'collection',
       operation: 'create',
     },

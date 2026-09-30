@@ -747,6 +747,7 @@ export interface PayloadBranchChange {
   branch: string;
   entityType?: ('collection' | 'global') | null;
   collectionSlug?: string | null;
+  documentID?: string | null;
   globalSlug?: string | null;
   doc?:
     | ({
@@ -1320,6 +1321,7 @@ export interface PayloadBranchChangesSelect<T extends boolean = true> {
   branch?: T;
   entityType?: T;
   collectionSlug?: T;
+  documentID?: T;
   globalSlug?: T;
   doc?: T;
   operation?: T;

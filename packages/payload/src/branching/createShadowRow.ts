@@ -42,6 +42,7 @@ const isShadowUniquenessError = (error: unknown): error is ValidationError =>
           fieldPath === branchDocIDField ||
           fieldPath === '_branch_doc_id' ||
           fieldPath === '_branchdocid_id' ||
+          fieldPath === 'documentID' ||
           fieldPath === branchField,
       ),
   )

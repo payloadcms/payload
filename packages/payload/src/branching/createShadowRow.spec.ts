@@ -336,6 +336,7 @@ test.each([
   '_branch_doc_id',
   '_branchdocid_id',
   '_branchdocid_id, _branch',
+  'documentID',
   '_branch',
 ])('should return a competing shadow row after a %s uniqueness failure', async (path) => {
   const createError = new ValidationError({

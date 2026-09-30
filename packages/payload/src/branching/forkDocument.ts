@@ -108,6 +108,7 @@ export const forkDocument = async ({
           branch,
           collectionSlug,
           doc: { relationTo: collectionSlug, value: id },
+          documentID: String(id),
           entityType: 'collection',
           operation: 'update',
           rowID: String(createdShadow.id),
