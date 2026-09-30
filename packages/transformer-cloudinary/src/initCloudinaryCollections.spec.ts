@@ -13,6 +13,26 @@ const createConfig = (): Config =>
   }) as Config
 
 describe('initCloudinaryCollections', () => {
+  it("should keep the collection's crop and focalPoint when Cloudinary doesn't set them", () => {
+    const config = {
+      collections: [{ slug: 'media', fields: [], upload: { crop: false, focalPoint: false } }],
+    } as Config
+
+    initCloudinaryCollections({ collections: { media: {} }, config })
+
+    expect(config.collections![0]!.upload).toMatchObject({ crop: false, focalPoint: false })
+  })
+
+  it("should let Cloudinary's crop and focalPoint override the collection's", () => {
+    const config = {
+      collections: [{ slug: 'media', fields: [], upload: { crop: false, focalPoint: false } }],
+    } as Config
+
+    initCloudinaryCollections({ collections: { media: { crop: true, focalPoint: true } }, config })
+
+    expect(config.collections![0]!.upload).toMatchObject({ crop: true, focalPoint: true })
+  })
+
   it('should project image sizes onto the collection upload config', () => {
     const config = createConfig()
 

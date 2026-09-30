@@ -92,10 +92,14 @@ export function initCloudinaryCollections({
       return collection
     }
 
+    const authoredUpload = typeof collection.upload === 'object' ? collection.upload : {}
+
     const upload: Partial<SanitizedUploadConfig> = {
-      ...(typeof collection.upload === 'object' ? collection.upload : {}),
-      crop: cloudinaryConfig.crop,
-      focalPoint: cloudinaryConfig.focalPoint,
+      ...authoredUpload,
+      // Cloudinary's setting wins when given; otherwise keep the collection's own, so an
+      // unset Cloudinary option can't silently re-enable a collection's `crop: false`.
+      crop: cloudinaryConfig.crop ?? authoredUpload.crop,
+      focalPoint: cloudinaryConfig.focalPoint ?? authoredUpload.focalPoint,
       hasImageAdjustments: Boolean(
         cloudinaryConfig.resizeOptions || cloudinaryConfig.formatOptions,
       ),
