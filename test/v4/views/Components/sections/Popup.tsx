@@ -11,7 +11,11 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
       <Popup
         button={<Button buttonStyle="secondary">Open Popup</Button>}
         buttonType="custom"
-        render={() => <p>Popup content goes here</p>}
+        render={() => (
+          <PopupList.MenuItem>
+            <PopupList.Button onClick={() => {}}>Popup content goes here</PopupList.Button>
+          </PopupList.MenuItem>
+        )}
       />
     </Variant>
     <Variant label="Horizontal: Right">
@@ -19,7 +23,11 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
         button={<Button buttonStyle="secondary">Right Aligned</Button>}
         buttonType="custom"
         horizontalAlign="right"
-        render={() => <p>Right aligned popup</p>}
+        render={() => (
+          <PopupList.MenuItem>
+            <PopupList.Button onClick={() => {}}>Right aligned popup</PopupList.Button>
+          </PopupList.MenuItem>
+        )}
       />
     </Variant>
     <Variant label="Nested hover menus">
@@ -32,7 +40,6 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
         render={() => (
           <PopupList.MenuItem>
             <Popup
-              button={<PopupList.Button>Theme</PopupList.Button>}
               buttonType="custom"
               className="components-view__popup-menu"
               hoverSubmenu
@@ -41,7 +48,6 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
               render={() => (
                 <PopupList.MenuItem>
                   <Popup
-                    button={<PopupList.Button>Color</PopupList.Button>}
                     buttonType="custom"
                     className="components-view__popup-menu"
                     hoverSubmenu
@@ -53,17 +59,40 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
                         <PopupList.Button onClick={() => {}}>Dark</PopupList.Button>
                       </PopupList.MenuItem>
                     )}
+                    renderButton={({ active, role, tabIndex, ...props }) => (
+                      <Button
+                        {...props}
+                        buttonStyle="ghost"
+                        className="components-view__popup-menu-trigger"
+                        extraButtonProps={{ role, tabIndex }}
+                        margin={false}
+                        selected={active}
+                      >
+                        Color
+                      </Button>
+                    )}
                     side="right"
                     size="large"
                   />
                   <PopupList.Button onClick={() => {}}>Typography</PopupList.Button>
                 </PopupList.MenuItem>
               )}
+              renderButton={({ active, role, tabIndex, ...props }) => (
+                <Button
+                  {...props}
+                  buttonStyle="ghost"
+                  className="components-view__popup-menu-trigger"
+                  extraButtonProps={{ role, tabIndex }}
+                  margin={false}
+                  selected={active}
+                >
+                  Theme
+                </Button>
+              )}
               side="right"
               size="large"
             />
             <Popup
-              button={<PopupList.Button>Language</PopupList.Button>}
               buttonType="custom"
               className="components-view__popup-menu"
               hoverSubmenu
@@ -74,6 +103,18 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
                   <PopupList.Button onClick={() => {}}>English</PopupList.Button>
                   <PopupList.Button onClick={() => {}}>French</PopupList.Button>
                 </PopupList.MenuItem>
+              )}
+              renderButton={({ active, role, tabIndex, ...props }) => (
+                <Button
+                  {...props}
+                  buttonStyle="ghost"
+                  className="components-view__popup-menu-trigger"
+                  extraButtonProps={{ role, tabIndex }}
+                  margin={false}
+                  selected={active}
+                >
+                  Language
+                </Button>
               )}
               side="right"
               size="large"
