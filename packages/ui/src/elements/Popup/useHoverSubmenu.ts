@@ -182,6 +182,14 @@ export const useHoverSubmenu = (id?: string) => {
     }
   }, [cancelClose, group, id])
 
+  useEffect(() => {
+    if (!id) {
+      return
+    }
+
+    return group.register(id, close)
+  }, [close, group, id])
+
   // A sibling became active (its trigger was hovered) - force-close this one now,
   // instead of relying on this submenu's own hover-zone timeout to eventually catch up.
   useEffect(() => {

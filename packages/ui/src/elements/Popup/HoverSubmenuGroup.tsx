@@ -1,15 +1,17 @@
 'use client'
 import type React from 'react'
 
-import { useSyncExternalStore } from 'react'
+import { useMemo, useSyncExternalStore } from 'react'
 
 type HoverSubmenuGroupContextValue = {
   activeId: null | string
+  register: (id: string, close: () => void) => () => void
   setActiveId: React.Dispatch<React.SetStateAction<null | string>>
 }
 
 let activeId: null | string = null
 const listeners = new Set<() => void>()
+const closeHandlers = new Map<string, () => void>()
 
 const subscribe = (listener: () => void) => {
   listeners.add(listener)
@@ -19,8 +21,17 @@ const subscribe = (listener: () => void) => {
 const getActiveId = () => activeId
 
 const setActiveId: HoverSubmenuGroupContextValue['setActiveId'] = (nextActiveId) => {
-  activeId = typeof nextActiveId === 'function' ? nextActiveId(activeId) : nextActiveId
+  const nextId = typeof nextActiveId === 'function' ? nextActiveId(activeId) : nextActiveId
+  if (nextId && activeId && activeId !== nextId) {
+    closeHandlers.get(activeId)?.()
+  }
+  activeId = nextId
   listeners.forEach((listener) => listener())
+}
+
+const register: HoverSubmenuGroupContextValue['register'] = (id, close) => {
+  closeHandlers.set(id, close)
+  return () => closeHandlers.delete(id)
 }
 
 /**
@@ -39,5 +50,5 @@ export const HoverSubmenuGroupProvider: React.FC<{ children: React.ReactNode }> 
 export const useHoverSubmenuGroup = () => {
   const currentActiveId = useSyncExternalStore(subscribe, getActiveId, getActiveId)
 
-  return { activeId: currentActiveId, setActiveId }
+  return useMemo(() => ({ activeId: currentActiveId, register, setActiveId }), [currentActiveId])
 }
