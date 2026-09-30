@@ -6,7 +6,6 @@ import React, { Suspense } from 'react'
 import type { InitAdminContextFn } from '../../views/Root/index.js'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
-
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
 import { ProgressBar, RootProvider } from '../../exports/client/index.js'
 import { checkDependencies, type CheckDependenciesArgs } from '../../utilities/checkDependencies.js'
@@ -14,8 +13,9 @@ import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { getLanguageDir } from '../../utilities/getLanguageDir.js'
 import { getRequestEmbed } from '../../utilities/getRequestEmbed.js'
 import { getRequestHighContrast } from '../../utilities/getRequestHighContrast.js'
-import { getRequestTheme } from '../../utilities/getRequestTheme.js'
+import { getRequestThemeWithSource } from '../../utilities/getRequestTheme.js'
 import { NestProviders } from './NestProviders.js'
+import { ResolveThemeOnClient } from './ResolveThemeOnClient.js'
 import { getViewportMeta } from './viewport.js'
 // eslint-disable-next-line payload/no-imports-from-self -- Self-import via package path ensures consumer's bundler resolves the full CSS chain (design tokens, preflight, etc.) in prod builds
 import '@payloadcms/ui/css/app.css'
@@ -108,7 +108,7 @@ const RootLayoutContent = async ({
     user,
   } = await initAdminContext({ configPromise, importMap, key: 'RootLayout' })
 
-  const theme = getRequestTheme({
+  const { source: themeSource, theme } = getRequestThemeWithSource({
     config,
     cookies,
     headers,
@@ -158,9 +158,12 @@ const RootLayoutContent = async ({
       data-theme={theme}
       dir={dir}
       lang={languageCode}
-      suppressHydrationWarning={config?.admin?.suppressHydrationWarning ?? false}
+      suppressHydrationWarning={
+        config.admin.theme === 'all' || config.admin.suppressHydrationWarning
+      }
     >
       <head>
+        {themeSource === 'default' && <ResolveThemeOnClient serverTheme={theme} />}
         {viewportMeta}
         <style>{`@layer payload-default, payload;`}</style>
         {headFromProps}

@@ -36,6 +36,11 @@
       "types": "./src/exports/layouts.ts",
       "default": "./src/exports/layouts.ts"
     },
+    "./layouts/Root/ResolveThemeOnClient": {
+      "import": "./src/layouts/Root/ResolveThemeOnClient.tsx",
+      "types": "./src/layouts/Root/ResolveThemeOnClient.tsx",
+      "default": "./src/layouts/Root/ResolveThemeOnClient.tsx"
+    },
     "./icons/*": {
       "import": "./src/icons/*/index.tsx",
       "types": "./src/icons/*/index.tsx",
@@ -439,6 +444,11 @@
         "import": "./dist/exports/layouts.js",
         "types": "./dist/exports/layouts.d.ts",
         "default": "./dist/exports/layouts.js"
+      },
+      "./layouts/Root/ResolveThemeOnClient": {
+        "import": "./dist/layouts/Root/ResolveThemeOnClient.js",
+        "types": "./dist/layouts/Root/ResolveThemeOnClient.d.ts",
+        "default": "./dist/layouts/Root/ResolveThemeOnClient.js"
       },
       "./css": {
         "import": "./dist/styles.css",
