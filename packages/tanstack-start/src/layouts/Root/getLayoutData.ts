@@ -71,11 +71,12 @@ export async function getLayoutData({
     user,
   } = await initAdminContext({ configPromise, importMap })
 
-  const { source: themeSource, theme } = getRequestTheme({
+  const { theme, themeSource } = getRequestTheme({
     config,
     cookies,
     headers,
   })
+
   const isEmbedded = getRequestEmbed({ config, cookies })
 
   const languageOptions: LanguageOptions = Object.entries(

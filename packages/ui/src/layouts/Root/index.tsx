@@ -108,7 +108,7 @@ const RootLayoutContent = async ({
     user,
   } = await initAdminContext({ configPromise, importMap, key: 'RootLayout' })
 
-  const { source: themeSource, theme } = getRequestTheme({
+  const { theme, themeSource } = getRequestTheme({
     config,
     cookies,
     headers,

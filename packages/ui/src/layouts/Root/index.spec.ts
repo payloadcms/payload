@@ -153,41 +153,41 @@ describe('getRequestTheme', () => {
     {
       configuredTheme: 'dark',
       cookieTheme: 'light',
-      expected: { source: 'config', theme: 'dark' },
+      expected: { theme: 'dark', themeSource: 'config' },
       headerTheme: 'light',
     },
     {
       configuredTheme: 'all',
       cookieTheme: 'light',
-      expected: { source: 'cookie', theme: 'light' },
+      expected: { theme: 'light', themeSource: 'cookie' },
       headerTheme: 'dark',
     },
     {
       configuredTheme: 'all',
       cookieTheme: 'auto',
-      expected: { source: 'header', theme: 'dark' },
+      expected: { theme: 'dark', themeSource: 'header' },
       headerTheme: 'dark',
     },
     {
       configuredTheme: 'all',
       cookieTheme: undefined,
-      expected: { source: 'header', theme: 'dark' },
+      expected: { theme: 'dark', themeSource: 'header' },
       headerTheme: 'dark',
     },
     {
       configuredTheme: 'all',
       cookieTheme: undefined,
-      expected: { source: 'default', theme: 'light' },
+      expected: { theme: 'light', themeSource: 'default' },
       headerTheme: 'sepia',
     },
     {
       configuredTheme: 'all',
       cookieTheme: undefined,
-      expected: { source: 'default', theme: 'light' },
+      expected: { theme: 'light', themeSource: 'default' },
       headerTheme: undefined,
     },
   ] as const)(
-    'should resolve the $expected.source theme with its source',
+    'should resolve the $expected.themeSource theme with its source',
     ({ configuredTheme, cookieTheme, expected, headerTheme }) => {
       const cookies = new Map<string, string>()
       const headers = new Headers()
