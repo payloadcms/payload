@@ -597,6 +597,20 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
     })
   })
 
+  test.describe('2.4.6 Headings and Labels (AA)', () => {
+    test('should announce Welcome and the signed-in account as a heading', async ({
+      page,
+      screenReader,
+    }) => {
+      await page.goto(`${serverURL}/admin`)
+      await expect(page.getByRole('heading', { name: /^Welcome, /, level: 1 })).toBeVisible()
+
+      const output = await navigateScreenReaderTo({ matches: /Welcome, /i, screenReader })
+
+      expect(output).toMatch(/heading/i)
+    })
+  })
+
   test.describe('4.1.2 Name, Role, Value (A)', () => {
     test('should announce rich-text upload and relationship filter options in NVDA browse mode', async ({
       page,
