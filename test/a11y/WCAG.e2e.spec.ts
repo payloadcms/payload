@@ -316,6 +316,25 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.1.1 Keyboard (A)', () => {
+    test('should switch dashboard document views with keyboard and expose pressed states', async () => {
+      await page.goto(`${serverURL}/admin`)
+      const widget = page.locator('.recents-widget')
+      const drafts = widget.getByRole('button', { name: 'Recent drafts' })
+      const list = widget.getByRole('button', { name: 'List view' })
+
+      await drafts.focus()
+      await drafts.press('Enter')
+      await expect(drafts).toHaveAttribute('aria-pressed', 'true')
+      await expect(widget.getByRole('button', { name: 'Recently viewed' })).toHaveAttribute(
+        'aria-pressed',
+        'false',
+      )
+
+      await list.focus()
+      await list.press('Space')
+      await expect(list).toHaveAttribute('aria-pressed', 'true')
+    })
+
     test('should move the focal-point handle with arrow keys and clamp it to the image', async () => {
       const dialog = await openEditImageDialog({ page, serverURL })
       const handle = dialog.getByRole('button', { name: 'Set focal point', exact: true })

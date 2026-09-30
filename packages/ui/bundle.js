@@ -75,6 +75,7 @@ async function build() {
   await esbuild.build({
     entryPoints: ['src/exports/client/index.ts'],
     bundle: true,
+    loader: { '.svg': 'dataurl' },
     minify: true,
     outdir: 'dist-styles',
     packages: 'external',

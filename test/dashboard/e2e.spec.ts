@@ -285,13 +285,128 @@ describe('Dashboard', () => {
     const d = new DashboardHelper(page)
     const activityCard = d.widgetByPos(15).locator('.recently-viewed-widget')
 
-    await expect(activityCard.locator('.widget-card__title')).toHaveText('You recently viewed')
+    await expect(activityCard.locator('.widget-card__title')).toHaveText('Recents and pinned')
+    await activityCard.getByRole('button', { name: 'Recently viewed' }).click()
 
-    const rowTitles = activityCard.locator('.widget-card__row-title')
+    const rowTitles = activityCard.locator('.recents-widget__name')
     await expect(rowTitles).toHaveCount(2)
     // The most recently viewed document is listed first.
     await expect(rowTitles.nth(0)).toHaveText(secondDoc.title)
     await expect(rowTitles.nth(1)).toHaveText(firstDoc.title)
+    await expect(activityCard.locator('.recents-widget__meta').first()).toContainText('Tickets')
+    await expect(activityCard.locator('.recents-widget__meta time').first()).toHaveAttribute(
+      'datetime',
+      secondDoc.updatedAt,
+    )
+  })
+
+  test('activity widget switches views and persists pin and unpin actions', async ({ page }) => {
+    const ticket = (await (await page.request.get(`${serverURL}/api/tickets?limit=1`)).json())
+      .docs[0]
+    const preferenceResponse = await page.request.post(
+      `${serverURL}/api/payload-preferences/recently-viewed`,
+      {
+        data: {
+          value: {
+            items: [
+              { collectionSlug: 'tickets', id: ticket.id, viewedAt: new Date().toISOString() },
+            ],
+          },
+        },
+      },
+    )
+
+    expect(preferenceResponse.ok()).toBe(true)
+    await page.setViewportSize({ height: 900, width: 1920 })
+    await page.goto(url.admin)
+
+    const dashboard = new DashboardHelper(page)
+    await dashboard.setEditing()
+    await dashboard.resizeWidget(15, 'full')
+    await dashboard.stepNavButtons.nth(1).click()
+    await dashboard.assertIsEditing(false)
+
+    const widget = page.locator('.recents-widget')
+    await widget.getByRole('button', { name: 'Recently viewed' }).click()
+    await expect(widget.locator('.recents-widget__name')).toHaveText(ticket.title)
+    const listButton = widget.getByRole('button', { name: 'List view' })
+    const pinnedButton = widget.getByRole('button', { name: 'Pinned', exact: true })
+
+    await listButton.click()
+    await expect(listButton).toHaveAttribute('aria-pressed', 'true')
+    await expect(widget.locator('.recents-widget__items--list')).toBeVisible()
+    await expect(widget.locator('.recents-widget__pin')).toHaveCount(0)
+
+    const collectionHeader = widget.locator('.recents-widget__list-header span:nth-child(2)')
+    const collectionCell = widget.locator(
+      '.recents-widget__items--list .recents-widget__list-collection',
+    )
+    await expect(collectionHeader).toBeVisible()
+    await expect(collectionCell).toBeVisible()
+    await expect(async () => {
+      const headerBox = await collectionHeader.boundingBox()
+      const cellBox = await collectionCell.boundingBox()
+
+      expect(headerBox).not.toBeNull()
+      expect(cellBox).not.toBeNull()
+      expect(cellBox!.x).toBeCloseTo(headerBox!.x, 0)
+    }).toPass()
+
+    await widget.getByRole('button', { name: 'Grid view' }).click()
+    await widget.getByRole('button', { name: `Pin document: ${ticket.title}` }).click()
+    await pinnedButton.click()
+    await expect(widget.locator('.recents-widget__name')).toHaveText(ticket.title)
+    await expect(
+      widget.getByRole('button', { name: `Unpin document: ${ticket.title}` }),
+    ).toBeEnabled()
+
+    await listButton.click()
+    await expect(widget.locator('.recents-widget__pin')).toHaveCount(0)
+
+    await page.reload()
+    await page
+      .locator('.recents-widget')
+      .getByRole('button', { name: 'Pinned', exact: true })
+      .click()
+    await expect(page.locator('.recents-widget__name')).toHaveText(ticket.title)
+
+    await page.locator('.recents-widget').getByRole('button', { name: 'Grid view' }).click()
+    await page
+      .locator('.recents-widget')
+      .getByRole('button', { name: `Unpin document: ${ticket.title}` })
+      .click()
+    await expect(page.locator('.recents-widget__empty-title')).toHaveText('No pinned documents')
+    await expect(page.locator('.recents-widget__empty-description')).toHaveText(
+      'Documents you pin will appear here',
+    )
+  })
+
+  test('activity widget lists recent drafts and its empty state', async ({ page }) => {
+    const widget = page.locator('.recents-widget')
+    await widget.getByRole('button', { name: 'Recent drafts' }).click()
+    await expect(widget.locator('.recents-widget__empty-title')).toHaveText('No recent drafts')
+    await expect(widget.locator('.recents-widget__empty-description')).toHaveText(
+      'Draft documents you edit will appear here',
+    )
+
+    const response = await page.request.post(`${serverURL}/api/draft-posts?draft=true`, {
+      data: { title: 'Widget draft' },
+    })
+    expect(response.ok()).toBe(true)
+
+    await page.reload()
+    const refreshedWidget = page.locator('.recents-widget')
+    await refreshedWidget.getByRole('button', { name: 'Recent drafts' }).click()
+    await expect(refreshedWidget.locator('.recents-widget__name')).toHaveText('Widget draft')
+    await refreshedWidget.getByRole('button', { name: 'Pin document: Widget draft' }).click()
+    await expect(
+      refreshedWidget.getByRole('button', { name: 'Unpin document: Widget draft' }),
+    ).toBeEnabled()
+
+    await page.reload()
+    const persistedWidget = page.locator('.recents-widget')
+    await persistedWidget.getByRole('button', { name: 'Pinned', exact: true }).click()
+    await expect(persistedWidget.locator('.recents-widget__name')).toHaveText('Widget draft')
   })
 
   test('activity widget collections filter shows inclusion checkboxes and excludes unchecked', async ({
@@ -314,7 +429,8 @@ describe('Dashboard', () => {
 
     const d = new DashboardHelper(page)
     const activityCard = d.widgetByPos(15).locator('.recently-viewed-widget')
-    await expect(activityCard.locator('.widget-card__row-title')).toHaveCount(2)
+    await activityCard.getByRole('button', { name: 'Recently viewed' }).click()
+    await expect(activityCard.locator('.recents-widget__name')).toHaveCount(2)
 
     // Open the activity widget configuration.
     await d.setEditing()
@@ -350,7 +466,8 @@ describe('Dashboard', () => {
     await d.saveChangesAndValidate()
 
     // The excluded collection's document drops out; the remaining document still renders.
-    const rowTitles = activityCard.locator('.widget-card__row-title')
+    await activityCard.getByRole('button', { name: 'Recently viewed' }).click()
+    const rowTitles = activityCard.locator('.recents-widget__name')
     await expect(rowTitles).toHaveCount(1)
     await expect(rowTitles.nth(0)).toHaveText(event.title)
   })
@@ -372,7 +489,7 @@ describe('Dashboard', () => {
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 12 })
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 13 })
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 14 })
-    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 15 })
+    await d.assertWidthRange({ max: 'full', min: 'small', position: 15 })
   })
 
   test('resize widget', async ({ page }) => {

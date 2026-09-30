@@ -32,4 +32,19 @@ test.describe('Community', () => {
     const textCell = page.locator('.row-1 .cell-title')
     await expect(textCell).toHaveText('example post')
   })
+
+  test('should place Recents before Collections in the default dashboard', async () => {
+    await page.goto(url.admin)
+
+    const recents = page.locator('.widget[data-slug^="activity-"]')
+    const collections = page.locator('.widget[data-slug^="collections-"]')
+
+    await expect(recents).toBeVisible()
+    await expect(collections).toBeVisible()
+
+    const recentsBox = await recents.boundingBox()
+    const collectionsBox = await collections.boundingBox()
+
+    expect(recentsBox?.y).toBeLessThan(collectionsBox?.y)
+  })
 })

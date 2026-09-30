@@ -27,8 +27,8 @@ describe('sanitizeConfig', () => {
       custom: {},
       dashboard: {
         defaultLayout: [
+          { widgetSlug: 'activity', width: 'full' },
           { widgetSlug: 'collections', width: 'full' },
-          { widgetSlug: 'activity', width: 'small' },
         ],
         widgets: expect.any(Array),
       },
