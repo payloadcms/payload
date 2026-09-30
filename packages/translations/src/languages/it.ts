@@ -115,6 +115,7 @@ export const itTranslations: DefaultTranslationsObject = {
     noItems:
       'Non ci sono widget sulla tua dashboard. Puoi aggiungerli dal menu "Dashboard" situato nella barra superiore.',
     resetLayout: 'Ripristina Layout',
+    resizeWidget: 'Ridimensiona {{label}}, dimensione attuale: {{size}}',
     searchWidgets: 'Cerca widget...',
     widgetCollectionRequired: 'Collection è obbligatoria.',
     widgetConfigurationError: 'Errore di configurazione del widget',

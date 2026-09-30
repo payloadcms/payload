@@ -114,6 +114,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     noItems:
       'Няма джаджи на таблото ви. Можете да ги добавите от менюто "Табло", което е разположено в горната лента.',
     resetLayout: 'Рестартирай Оформлението',
+    resizeWidget: 'Преоразмеряване на {{label}}, текущ размер: {{size}}',
     searchWidgets: 'Търсене на джаджи...',
     widgetCollectionRequired: 'Collection е задължително.',
     widgetConfigurationError: 'Грешка при конфигуриране на уиджета',

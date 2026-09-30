@@ -113,6 +113,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     editingDashboard: 'Խմբագրման Վահանակ',
     noItems: 'Ձեր վահագործի վրա վիջեթներ չկան։ Դուք կարող եք ավելացնել դրանք "Վահագործ" մենյուից',
     resetLayout: 'Վերադասավորել Կառուցվածքը',
+    resizeWidget: 'Փոխել {{label}}-ի չափը, ընթացիկ չափը՝ {{size}}',
     searchWidgets: 'Որոնել վիջեթներ...',
     widgetCollectionRequired: 'Collection-ը պարտադիր է։',
     widgetConfigurationError: 'Վիջեթի կազմաձևման սխալ',

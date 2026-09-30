@@ -115,6 +115,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     noItems:
       'আপনার ড্যাশবোর্ডে কোন উইজেট নেই। আপনি তাদেরকে শীর্ষ বারে অবস্থিত "ড্যাশবোর্ড" মেনু থেকে যোগ করতে পারেন।',
     resetLayout: 'লেআউট পুনরায় সেট করুন',
+    resizeWidget: '{{label}}-এর আকার পরিবর্তন করুন, বর্তমান আকার: {{size}}',
     searchWidgets: 'উইজেট অনুসন্ধান করুন...',
     widgetCollectionRequired: 'Collection প্রয়োজনীয়।',
     widgetConfigurationError: 'উইজেট কনফিগারেশন ত্রুটি',
