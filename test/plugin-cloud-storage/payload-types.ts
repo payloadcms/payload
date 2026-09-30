@@ -79,6 +79,7 @@ export interface Config {
     'test-metadata': TestMetadatum;
     users: User;
     'versioned-cloud-media': VersionedCloudMedia;
+    'versioned-public-cloud-media': VersionedPublicCloudMedia;
     'versioned-s3-media': VersionedS3Media;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -99,6 +100,7 @@ export interface Config {
     'test-metadata': TestMetadataSelect<false> | TestMetadataSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'versioned-cloud-media': VersionedCloudMediaSelect<false> | VersionedCloudMediaSelect<true>;
+    'versioned-public-cloud-media': VersionedPublicCloudMediaSelect<false> | VersionedPublicCloudMediaSelect<true>;
     'versioned-s3-media': VersionedS3MediaSelect<false> | VersionedS3MediaSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -798,6 +800,57 @@ export interface VersionedCloudMedia {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versioned-public-cloud-media".
+ */
+export interface VersionedPublicCloudMedia {
+  id: string;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+  };
+  _managedFiles?: {
+    key: string;
+    roles: (
+      | {
+          type: 'size';
+          sizeKey: string;
+        }
+      | {
+          type: 'original' | 'default' | 'thumbnail';
+        }
+    )[];
+    storageBackendId: string;
+    [k: string]: unknown;
+  }[];
+  _fileRevision?: string | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "versioned-s3-media".
  */
 export interface VersionedS3Media {
@@ -928,6 +981,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'versioned-cloud-media';
         value: string | VersionedCloudMedia;
+      } | null)
+    | ({
+        relationTo: 'versioned-public-cloud-media';
+        value: string | VersionedPublicCloudMedia;
       } | null)
     | ({
         relationTo: 'versioned-s3-media';
@@ -1435,6 +1492,39 @@ export interface VersionedCloudMediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versioned-public-cloud-media_select".
+ */
+export interface VersionedPublicCloudMediaSelect<T extends boolean = true> {
+  prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+      };
+  _managedFiles?: T;
+  _fileRevision?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "versioned-s3-media_select".
  */
 export interface VersionedS3MediaSelect<T extends boolean = true> {
@@ -1550,6 +1640,7 @@ export interface CollectionQueryWidget {
       | 'test-metadata'
       | 'users'
       | 'versioned-cloud-media'
+      | 'versioned-public-cloud-media'
       | 'versioned-s3-media';
     where?:
       | {
@@ -1586,6 +1677,7 @@ export interface ActivityWidget {
           | 'test-metadata'
           | 'users'
           | 'versioned-cloud-media'
+          | 'versioned-public-cloud-media'
           | 'versioned-s3-media'
         )[]
       | null;

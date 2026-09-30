@@ -280,7 +280,7 @@ const getVersions = async ({
   return docs as VersionRow[]
 }
 
-const archiveVersionReferences = ({
+export const archiveVersionReferences = ({
   replacements,
   version,
 }: {

@@ -6,7 +6,9 @@ export const Media: CollectionConfig = {
   slug: mediaSlug,
   access: {
     create: () => true,
-    read: () => true,
+    read: ({ req }) => (req.user ? true : { alt: { not_equals: 'restricted' } }),
+    readVersions: ({ req }) =>
+      req.user ? true : { 'version.alt': { not_equals: 'version restricted' } },
     update: () => true,
   },
   fields: [{ name: 'alt', type: 'text' }],

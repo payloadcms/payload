@@ -25,6 +25,27 @@ export const createFileOperations = ({
   const storageBackendId = `${adapter.name}:${collection.slug}`
 
   return {
+    copy: async ({ from, req, to, trackStagedObject }) => {
+      await adapter.copyFile({
+        collection: req.payload.collections[collection.slug]!.config,
+        from,
+        req,
+        to,
+      })
+      trackStagedObject({
+        key: to,
+        remove: async () => {
+          await adapter.handleDelete({
+            collection,
+            doc: {} as never,
+            filename: path.posix.basename(to),
+            req,
+            storageFilePath: to,
+          })
+        },
+        storageBackendId,
+      })
+    },
     stage: async ({ data, files, req, trackStagedObject }) => {
       const docPrefix = buildPrefixWithObjectKey({
         objectKey: typeof data._objectKey === 'string' ? data._objectKey : undefined,

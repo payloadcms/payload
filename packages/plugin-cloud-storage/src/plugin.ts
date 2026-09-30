@@ -7,6 +7,7 @@ import { getAfterChangeHook } from './hooks/afterChange.js'
 import { getAfterDeleteHook } from './hooks/afterDelete.js'
 import { getNormalizeUploadPrefixHook } from './hooks/normalizeUploadPrefix.js'
 import { getPreserveFileDataHook } from './hooks/preserveFileData.js'
+import { getPublicOriginalURLHook } from './hooks/publicOriginalURL.js'
 import { createFileOperations } from './utilities/createFileOperations.js'
 
 // This plugin extends all targeted collections by offloading uploaded files
@@ -213,6 +214,19 @@ export const cloudStoragePlugin =
                 collectionPrefix: options.prefix,
                 useCompositePrefixes,
               }),
+            ],
+            afterRead: [
+              ...(existingCollection.hooks?.afterRead || []),
+              ...(options.disablePayloadAccessControl &&
+              (options.generateFileURL || adapter.generateURL)
+                ? [
+                    getPublicOriginalURLHook({
+                      adapter,
+                      collection: existingCollection,
+                      generateFileURL: options.generateFileURL,
+                    }),
+                  ]
+                : []),
             ],
             beforeChange: [
               ...(existingCollection.hooks?.beforeChange || []),

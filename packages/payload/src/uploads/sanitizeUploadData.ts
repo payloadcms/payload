@@ -12,6 +12,7 @@ export type ExternalUploadSource = {
 }
 
 type UploadDataOptions = {
+  clearMissing?: boolean
   locale?: string
   localizedProperties?: Set<string>
 }
@@ -212,6 +213,8 @@ export const restoreUploadDataFromDocument = <T>(
   for (const property of uploadDerivedProperties) {
     if (hasOwnProperty(document, property)) {
       restoredData[property] = getDocumentProperty(document, property, options)
+    } else if (options.clearMissing) {
+      restoredData[property] = null
     } else {
       delete restoredData[property]
     }

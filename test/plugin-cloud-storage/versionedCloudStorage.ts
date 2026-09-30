@@ -35,5 +35,18 @@ export const versionedCloudAdapter: Adapter = () => ({
     versionedCloudFiles.set(storageFilePath, Buffer.from(bytes))
     return { storageMarker: storageFilePath } as never
   },
-  staticHandler: () => new Response('Not found', { status: 404 }),
+  staticHandler: (_req, { doc, params: { filename } }) => {
+    const manifest = (doc as { _managedFiles?: Array<{ key: string }> } | undefined)?._managedFiles
+    const key = manifest?.find((file) => file.key.split('/').at(-1) === filename)?.key
+    const bytes = key ? versionedCloudFiles.get(key) : undefined
+
+    return bytes ? new Response(new Uint8Array(bytes)) : new Response('Not found', { status: 404 })
+  },
+})
+
+export const publicVersionedCloudAdapter: Adapter = (args) => ({
+  ...versionedCloudAdapter(args),
+  name: 'test-public-cloud',
+  generateURL: ({ filename, prefix }) =>
+    `https://files.example.test/${prefix ? `${prefix}/` : ''}${encodeURIComponent(filename)}`,
 })

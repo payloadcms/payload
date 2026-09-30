@@ -25,6 +25,7 @@ import { RestrictedMedia } from './collections/RestrictedMedia.js'
 import { TestMetadata } from './collections/TestMetadata.js'
 import { Users } from './collections/Users.js'
 import { VersionedCloudMedia } from './collections/VersionedCloudMedia.js'
+import { VersionedPublicCloudMedia } from './collections/VersionedPublicCloudMedia.js'
 import { VersionedS3Media } from './collections/VersionedS3Media.js'
 import { r2UploadEndpoints } from './r2.js'
 import {
@@ -41,9 +42,10 @@ import {
   restrictedMediaSlug,
   testMetadataSlug,
   versionedCloudMediaSlug,
+  versionedPublicCloudMediaSlug,
   versionedS3MediaSlug,
 } from './shared.js'
-import { versionedCloudAdapter } from './versionedCloudStorage.js'
+import { publicVersionedCloudAdapter, versionedCloudAdapter } from './versionedCloudStorage.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -225,6 +227,10 @@ export function buildPluginCloudStorageIntConfig({
   const versionedCloudPlugin = cloudStoragePlugin({
     collections: {
       [versionedCloudMediaSlug]: { adapter: versionedCloudAdapter },
+      [versionedPublicCloudMediaSlug]: {
+        adapter: publicVersionedCloudAdapter,
+        disablePayloadAccessControl: true,
+      },
     },
   })
 
@@ -248,6 +254,7 @@ export function buildPluginCloudStorageIntConfig({
         TestMetadata,
         Users,
         VersionedCloudMedia,
+        VersionedPublicCloudMedia,
         VersionedS3Media,
       ],
       endpoints: r2UploadEndpoints,

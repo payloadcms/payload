@@ -238,6 +238,12 @@ export type UploadConfig = {
   filenameCompoundIndex?: string[]
   /** @internal Set by cloudStoragePlugin for versioned uploads; adapters do not implement this. */
   fileOperations?: {
+    copy: (args: {
+      from: string
+      req: PayloadRequest
+      to: string
+      trackStagedObject: (object: StagedObject) => void
+    }) => Promise<void>
     stage: (args: {
       data: Record<string, unknown>
       files: FileToSave[]

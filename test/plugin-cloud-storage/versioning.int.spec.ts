@@ -1,10 +1,11 @@
+/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options"] }] -- Tests use the shared fixture wrapper. */
 import type { Payload } from 'payload'
 
 import path from 'node:path'
 import { expect, vi } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import { versionedCloudMediaSlug } from './shared.js'
+import { versionedCloudMediaSlug, versionedPublicCloudMediaSlug } from './shared.js'
 import {
   versionedCloudCalls,
   versionedCloudFailure,
@@ -96,6 +97,114 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
         ),
       ),
     ).toBe(true)
+  })
+
+  test('should restore a prior cloud object into a new current key', async ({
+    payload,
+    restClient,
+  }) => {
+    const first = await payload.create({
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+    })
+    const firstManifest = await getManagedFiles({ id: first.id, payload })
+    const firstBytes = Buffer.from(versionedCloudFiles.get(firstManifest[0]!.key)!)
+
+    await payload.update({
+      id: first.id,
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: secondFile,
+    })
+    const { docs: before } = await payload.db.findVersions({
+      collection: versionedCloudMediaSlug,
+      pagination: false,
+      where: { parent: { equals: first.id } },
+    })
+    const selected = before.find(({ version }) =>
+      (version._managedFiles ?? []).some(({ key }) => key === firstManifest[0]!.key),
+    )!
+    const selectedRead = await payload.findVersionByID({
+      id: selected.id,
+      collection: versionedCloudMediaSlug,
+      overrideAccess: false,
+    })
+    const historicalURL = new URL(selectedRead.version.original!.url!, 'http://localhost')
+    const historicalResponse = await restClient.GET(
+      `${historicalURL.pathname.replace(/^\/api/, '')}${historicalURL.search}`,
+    )
+
+    expect(historicalURL.searchParams.get('version')).toBe(String(selected.id))
+    expect(historicalResponse.status).toBe(200)
+    expect(Buffer.from(await historicalResponse.arrayBuffer()).equals(firstBytes)).toBe(true)
+
+    await payload.restoreVersion({
+      id: selected.id,
+      collection: versionedCloudMediaSlug,
+      overrideAccess: false,
+    })
+
+    const currentManifest = await getManagedFiles({ id: first.id, payload })
+    const { docs: after } = await payload.db.findVersions({
+      collection: versionedCloudMediaSlug,
+      pagination: false,
+      where: { parent: { equals: first.id } },
+    })
+
+    expect(currentManifest[0]!.key).not.toBe(firstManifest[0]!.key)
+    expect(versionedCloudFiles.get(currentManifest[0]!.key)).toEqual(firstBytes)
+    expect(after.find(({ id }) => id === selected.id)?.version).toEqual(selected.version)
+  })
+
+  test('should keep authorized public provider URLs direct across history and restore', async ({
+    payload,
+  }) => {
+    const first = await payload.create({
+      collection: versionedPublicCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+    })
+    const firstStored = await payload.db.findOne({
+      collection: versionedPublicCloudMediaSlug,
+      where: { id: { equals: first.id } },
+    })
+    const firstKey = firstStored?._managedFiles?.[0]?.key
+
+    await payload.update({
+      id: first.id,
+      collection: versionedPublicCloudMediaSlug,
+      data: {},
+      filePath: secondFile,
+    })
+    const { docs } = await payload.db.findVersions({
+      collection: versionedPublicCloudMediaSlug,
+      pagination: false,
+      where: { parent: { equals: first.id } },
+    })
+    const selected = docs.find(({ version }) =>
+      version._managedFiles?.some(({ key }) => key === firstKey),
+    )!
+    const historical = await payload.findVersionByID({
+      id: selected.id,
+      collection: versionedPublicCloudMediaSlug,
+      overrideAccess: false,
+    })
+
+    expect(historical.version.original?.url).toMatch(/^https:\/\/files\.example\.test\//)
+
+    await payload.restoreVersion({
+      id: selected.id,
+      collection: versionedPublicCloudMediaSlug,
+      overrideAccess: false,
+    })
+    const current = await payload.findByID({
+      id: first.id,
+      collection: versionedPublicCloudMediaSlug,
+    })
+
+    expect(current.original?.url).toMatch(/^https:\/\/files\.example\.test\//)
+    expect(current.url).toMatch(/^https:\/\/files\.example\.test\//)
   })
 
   test('should remove a staged cloud object when upload or a later hook fails', async ({

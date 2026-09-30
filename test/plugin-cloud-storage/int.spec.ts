@@ -410,7 +410,14 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
             overrideAccess: true,
             showHiddenFields: true,
           })
-          expect(current.original).toMatchObject(initialOriginal!)
+          expect(current.original).toMatchObject({
+            filename: initialOriginal?.filename,
+            filesize: initialOriginal?.filesize,
+            height: initialOriginal?.height,
+            mimeType: initialOriginal?.mimeType,
+            url: initialOriginal?.url,
+            width: initialOriginal?.width,
+          })
           expect(
             current._managedFiles?.find(({ roles }) =>
               roles.some(({ type }) => type === 'original'),
@@ -422,6 +429,76 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
           )
           expect(originalResponse.status).toBe(200)
           expect(Buffer.from(await originalResponse.arrayBuffer())).toEqual(bytes)
+        })
+
+        test('should serve and restore historical S3 bytes', async ({ payload, restClient }) => {
+          const firstBytes = await fs.promises.readFile(
+            path.resolve(dirname, '../uploads/image.png'),
+          )
+          const first = await payload.create({
+            collection: versionedS3MediaSlug,
+            data: {},
+            filePath: path.resolve(dirname, '../uploads/image.png'),
+          })
+          const firstStored = await payload.db.findOne({
+            collection: versionedS3MediaSlug,
+            where: { id: { equals: first.id } },
+          })
+          const firstKey = firstStored!._managedFiles!.find(({ roles }) =>
+            roles.some(({ type }) => type === 'original'),
+          )!.key
+
+          await payload.update({
+            id: first.id,
+            collection: versionedS3MediaSlug,
+            data: {},
+            filePath: path.resolve(dirname, '../uploads/small.png'),
+          })
+
+          const { docs } = await payload.db.findVersions({
+            collection: versionedS3MediaSlug,
+            pagination: false,
+            where: { parent: { equals: first.id } },
+          })
+          const selected = docs.find(({ version }) =>
+            version._managedFiles?.some(({ key }) => key === firstKey),
+          )!
+          const historical = await payload.findVersionByID({
+            id: selected.id,
+            collection: versionedS3MediaSlug,
+            overrideAccess: false,
+          })
+          const historicalURL = new URL(historical.version.original!.url!, 'http://localhost')
+          const historicalResponse = await restClient.GET(
+            `${historicalURL.pathname.replace(/^\/api/, '')}${historicalURL.search}`,
+          )
+
+          expect(historicalResponse.status).toBe(200)
+          expect(Buffer.from(await historicalResponse.arrayBuffer())).toEqual(firstBytes)
+
+          await payload.restoreVersion({
+            id: selected.id,
+            collection: versionedS3MediaSlug,
+            overrideAccess: false,
+          })
+
+          const restored = await payload.findByID({
+            id: first.id,
+            collection: versionedS3MediaSlug,
+            overrideAccess: false,
+            showHiddenFields: true,
+          })
+          const restoredOriginalKey = restored._managedFiles!.find(({ roles }) =>
+            roles.some(({ type }) => type === 'original'),
+          )!.key
+          const restoredURL = new URL(restored.original!.url!, 'http://localhost')
+          const restoredResponse = await restClient.GET(
+            `${restoredURL.pathname.replace(/^\/api/, '')}${restoredURL.search}`,
+          )
+
+          expect(restoredOriginalKey).not.toBe(firstKey)
+          expect(restoredResponse.status).toBe(200)
+          expect(Buffer.from(await restoredResponse.arrayBuffer())).toEqual(firstBytes)
         })
 
         test('can upload with prefix', async ({ payload }) => {

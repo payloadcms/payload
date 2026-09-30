@@ -2524,6 +2524,29 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
       uploadedFilenames.length = 0
     })
 
+    test('should serve the current original without File Transformers', async ({
+      payload,
+      restClient,
+    }) => {
+      const imageFile = await getFileByPath(path.resolve(dirname, './image.jpg'))
+
+      imageFile.name = 'raw-without-transformer.jpg'
+      const created = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: { _status: 'published', alt: 'raw original' },
+        file: imageFile,
+        overrideAccess: true,
+      })
+
+      uploadedFilenames.push(created.filename)
+      const response = await restClient.GET(
+        `/${draftWithUploadCollectionSlug}/file/${created.original!.filename}`,
+      )
+
+      expect(response.status).toBe(200)
+      expect(Buffer.from(await response.arrayBuffer()).equals(imageFile.data)).toBe(true)
+    })
+
     test('should not modify the published document when saving a draft with a new file', async ({
       payload,
     }) => {

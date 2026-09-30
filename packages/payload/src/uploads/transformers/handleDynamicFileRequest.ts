@@ -8,6 +8,7 @@ import { NotFound } from '../../errors/NotFound.js'
 import { TransformerContractError } from '../../errors/TransformerContractError.js'
 import { checkFileAccess } from '../checkFileAccess.js'
 import { retrieveFileResponse } from '../endpoints/getFile.js'
+import { resolveHistoricalFile } from '../fileVersioning/resolveHistoricalFile.js'
 import { createLazySourceGetter } from './createLazySourceGetter.js'
 import { finalizeFileResponse } from './finalizeFileResponse.js'
 import { getSourceFileResponse } from './getSourceFileResponse.js'
@@ -38,6 +39,11 @@ export async function handleDynamicFileRequest({
   const resolvedDocument = await resolveUploadDocument({ collection, filename, prefix, req })
 
   if (!resolvedDocument) {
+    if (collection.config.versions) {
+      const historical = await resolveHistoricalFile({ collection, filename, prefix, req })
+      return retrieveFileResponse({ collection, doc: historical, filename, prefix, req })
+    }
+
     // There's no mimeType to plan a pipeline from, so both access modes must pass
     // before admitting the file doesn't exist — otherwise the status code would leak
     // file existence to an access function keyed on req.fileTransform.
@@ -49,6 +55,25 @@ export async function handleDynamicFileRequest({
       })
     }
     throw new NotFound(req.t)
+  }
+
+  if (
+    resolvedDocument.original?.filename === filename &&
+    (resolvedDocument.filename !== filename || req.searchParams.get('original') === 'true')
+  ) {
+    const permittedDocument = await withFileTransformAccessContext({
+      callback: () => checkFileAccess({ collection, filename, prefix, req }),
+      isTransform: false,
+      req,
+    })
+
+    return retrieveFileResponse({
+      collection,
+      doc: (permittedDocument ?? resolvedDocument) as ResolvedUploadDocument,
+      filename,
+      prefix,
+      req,
+    })
   }
 
   const { document, pipeline } = await authorizeDocument({

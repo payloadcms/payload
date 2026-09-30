@@ -7,11 +7,13 @@ import { buildFilenameWhere } from './transformers/resolveUploadDocument.js'
 
 export const checkFileAccess = async ({
   collection,
+  documentID,
   filename,
   prefix,
   req,
 }: {
   collection: Collection
+  documentID?: number | string
   filename: string
   prefix?: string
   req: PayloadRequest
@@ -22,7 +24,7 @@ export const checkFileAccess = async ({
   const { config } = collection
 
   const accessResult = await executeAccess(
-    { slug: config.slug, data: { filename }, isReadingStaticFile: true, req },
+    { id: documentID, slug: config.slug, data: { filename }, isReadingStaticFile: true, req },
     config.access.read,
   )
 
@@ -36,8 +38,11 @@ export const checkFileAccess = async ({
     constraints.push({ prefix: { equals: prefix } })
   }
 
-  if (constraints.length > 0) {
-    const filenameCondition = buildFilenameWhere({ filename, imageSizes: config.upload.imageSizes })
+  if (constraints.length > 0 || documentID !== undefined) {
+    const filenameCondition =
+      documentID === undefined
+        ? buildFilenameWhere({ filename, imageSizes: config.upload.imageSizes })
+        : { id: { equals: documentID } }
 
     const doc = await req.payload.db.findOne({
       collection: config.slug,
