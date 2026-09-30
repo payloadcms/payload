@@ -1,6 +1,6 @@
 'use client'
 
-import type { ListViewClientProps } from 'payload'
+import type { CollectionPreferences, ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL, formatFilesize, getBestFitFromSizes, isImage } from 'payload/shared'
@@ -196,10 +196,8 @@ export function DefaultListView(props: ListViewClientProps) {
   )
 
   const { allowCreate, createNewDrawerSlug, isInDrawer, onBulkSelect } = useListDrawerContext()
-  const { getPreference, setPreference } = usePreferences()
+  const { updatePreference } = usePreferences()
   const router = useRouter()
-  const viewModeChangeID = useRef(0)
-  const viewModeUpdate = useRef(Promise.resolve())
 
   const hasCreatePermission =
     allowCreate !== undefined
@@ -233,27 +231,14 @@ export function DefaultListView(props: ListViewClientProps) {
   const collectionConfig = getEntityConfig({ collectionSlug })
 
   const handleViewModeChange = async (nextViewMode: DocumentViewMode) => {
-    const changeID = ++viewModeChangeID.current
     const preferencesKey = `collection-${collectionSlug}`
 
     setViewMode(nextViewMode)
-
-    const update = viewModeUpdate.current.then(async () => {
-      const preferences = await getPreference<Record<string, unknown>>(preferencesKey)
-
-      await setPreference(
-        preferencesKey,
-        { ...(preferences || {}), documentViewMode: nextViewMode },
-        false,
-      )
-
-      if (changeID === viewModeChangeID.current) {
-        router.refresh()
-      }
-    })
-
-    viewModeUpdate.current = update.catch(() => undefined)
-    await update
+    await updatePreference<CollectionPreferences>(preferencesKey, (preferences) => ({
+      ...(preferences ?? {}),
+      documentViewMode: nextViewMode,
+    }))
+    router.refresh()
   }
 
   const { labels, upload } = collectionConfig

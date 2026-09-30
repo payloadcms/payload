@@ -19,6 +19,10 @@ type PreferencesContext = {
    * @param merge - when true will combine the existing preference object batch the change into one request for objects, default = false
    */
   setPreference: <T = Preferences>(key: string, value: T, merge?: boolean) => Promise<void>
+  updatePreference: <T = Preferences>(
+    key: string,
+    updater: (current: null | T) => T,
+  ) => Promise<void>
 }
 
 const Context = createContext({} as PreferencesContext)
@@ -35,6 +39,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
   const contextRef = useRef({} as PreferencesContext)
   const preferencesRef = useRef({})
   const pendingUpdate = useRef({})
+  const updateQueues = useRef<Record<string, Promise<void>>>({})
   const { config } = useConfig()
   const { user } = useAuth()
   const { i18n } = useTranslation()
@@ -47,6 +52,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
     if (!user) {
       // clear preferences between users
       preferencesRef.current = {}
+      updateQueues.current = {}
     }
   }, [user])
 
@@ -169,8 +175,33 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
     [api, getPreference, i18n.language, pendingUpdate],
   )
 
+  const updatePreference = useCallback(
+    async <T = Preferences,>(key: string, updater: (current: null | T) => T): Promise<void> => {
+      const previousUpdate = updateQueues.current[key] ?? Promise.resolve()
+      const update = previousUpdate.then(async () => {
+        const current = await getPreference<T>(key)
+        const value = updater(current ?? null)
+
+        preferencesRef.current[key] = value
+
+        await requests.post(
+          formatAdminURL({
+            apiRoute: api,
+            path: `/payload-preferences/${key}`,
+          }),
+          requestOptions(value, i18n.language),
+        )
+      })
+
+      updateQueues.current[key] = update.catch(() => undefined)
+      await update
+    },
+    [api, getPreference, i18n.language, updateQueues],
+  )
+
   contextRef.current.getPreference = getPreference
   contextRef.current.setPreference = setPreference
+  contextRef.current.updatePreference = updatePreference
   return <Context value={contextRef.current}>{children}</Context>
 }
 
