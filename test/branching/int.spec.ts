@@ -2946,6 +2946,39 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(onMain.docs.map((doc) => String(doc.id))).toContain(String(mainDocID))
     })
 
+    test('should use the delete change rather than row metadata to hide a tombstone', async () => {
+      await payload.delete({ id: mainDocID, branch: 'cow', collection: postsSlug })
+
+      const rawReq = await createPayloadRequest({ branch: false, payload })
+      const tombstone = await payload.db.findOne({
+        branch: false,
+        collection: postsSlug,
+        req: rawReq,
+        where: {
+          and: [{ _branch: { equals: 'cow' } }, { _branchDocID: { equals: mainDocID } }],
+        },
+      })
+
+      await payload.db.updateOne({
+        branch: false,
+        collection: postsSlug,
+        data: { _branchOp: null },
+        req: rawReq,
+        where: { id: { equals: tombstone!.id } },
+      })
+
+      const onBranch = await payload.findByID({
+        id: mainDocID,
+        branch: 'cow',
+        collection: postsSlug,
+        disableErrors: true,
+      })
+      const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
+
+      expect(onBranch).toBeNull()
+      expect(onMain.title).toBe('original on main')
+    })
+
     test('should record the delete in the changeset registry', async () => {
       await payload.delete({ id: mainDocID, branch: 'cow', collection: postsSlug })
 

@@ -2,7 +2,13 @@ import type { PayloadRequest, Where } from '../types/index.js'
 
 import { appendBranchFilter } from './appendBranchFilter.js'
 import { rewriteBranchIDs } from './branchIDs.js'
-import { loadBranchManifest, peekBranchManifest, resolveBranch } from './resolveBranch.js'
+import {
+  loadBranchDeletions,
+  loadBranchManifest,
+  peekBranchDeletions,
+  peekBranchManifest,
+  resolveBranch,
+} from './resolveBranch.js'
 import { MAIN_BRANCH } from './types.js'
 
 type Args = {
@@ -67,14 +73,19 @@ export const resolveBranchQuery = async ({
   if (branch === MAIN_BRANCH) {
     return appendBranchFilter({
       branch,
+      deletedIDs: [],
       enabled: true,
       shadowedIDs: [],
       where: where ?? {},
     })
   }
 
-  const manifest = await loadBranchManifest(req as PayloadRequest)
+  const [manifest, deletions] = await Promise.all([
+    loadBranchManifest(req as PayloadRequest),
+    loadBranchDeletions(req as PayloadRequest),
+  ])
   const shadowedIDs = collectionSlug ? (manifest.get(collectionSlug) ?? []) : []
+  const deletedIDs = collectionSlug ? (deletions.get(collectionSlug) ?? []) : []
 
   // A shadow row's primary key is not the document's canonical ID, so any `id`
   // constraint has to be redirected before the branch predicate is applied.
@@ -88,6 +99,7 @@ export const resolveBranchQuery = async ({
 
   return appendBranchFilter({
     branch,
+    deletedIDs,
     enabled: true,
     shadowedIDs,
     where: rewritten ?? {},
@@ -134,6 +146,10 @@ export const getBranchPredicateSync = ({
     branch === MAIN_BRANCH
       ? []
       : (peekBranchManifest(req as PayloadRequest).get(collectionSlug) ?? [])
+  const deletedIDs =
+    branch === MAIN_BRANCH
+      ? []
+      : (peekBranchDeletions(req as PayloadRequest).get(collectionSlug) ?? [])
 
-  return appendBranchFilter({ branch, enabled: true, shadowedIDs, where: {} })
+  return appendBranchFilter({ branch, deletedIDs, enabled: true, shadowedIDs, where: {} })
 }
