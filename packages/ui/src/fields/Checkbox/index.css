@@ -153,6 +153,27 @@
     --checkbox-bg: var(--color-bg-brand-hover);
   }
 
+  .checkbox-input__control.checkbox-input__control--muted:checked + .checkbox-input__visuals,
+  .checkbox-input__control.checkbox-input__control--muted:indeterminate + .checkbox-input__visuals {
+    --checkbox-bg: var(--field-color-toggle-bg-checked);
+    --checkbox-border-color: var(--field-color-toggle-border-checked);
+    --checkbox-mark-color: var(--field-color-toggle-icon);
+
+    transition: background var(--checkbox-duration) var(--checkbox-easing);
+  }
+
+  .checkbox-input__control.checkbox-input__control--muted:checked:hover + .checkbox-input__visuals,
+  .checkbox-input__control.checkbox-input__control--muted:indeterminate:hover
+    + .checkbox-input__visuals {
+    --checkbox-border-color: var(--special-border-translucent-strong);
+  }
+
+  .checkbox-input__control.checkbox-input__control--muted:checked:active + .checkbox-input__visuals,
+  .checkbox-input__control.checkbox-input__control--muted:indeterminate:active
+    + .checkbox-input__visuals {
+    --checkbox-bg: var(--color-bg-brand-hover);
+  }
+
   .checkbox-input__control:indeterminate + .checkbox-input__visuals .checkbox-input__mixed {
     display: block;
   }
