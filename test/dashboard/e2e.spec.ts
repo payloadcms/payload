@@ -356,9 +356,12 @@ describe('Dashboard', () => {
     await widget.getByRole('button', { name: `Pin document: ${ticket.title}` }).click()
     await pinnedButton.click()
     await expect(widget.locator('.recents-widget__name')).toHaveText(ticket.title)
-    await expect(
-      widget.getByRole('button', { name: `Unpin document: ${ticket.title}` }),
-    ).toBeEnabled()
+    const unpinButton = widget.getByRole('button', { name: `Unpin document: ${ticket.title}` })
+    await expect(unpinButton).toBeEnabled()
+    await page.mouse.move(0, 0)
+    await expect(unpinButton).toHaveCSS('opacity', '0')
+    await widget.locator('.recents-widget__item').hover()
+    await expect(unpinButton).toHaveCSS('opacity', '1')
 
     await listButton.click()
     await expect(widget.locator('.recents-widget__pin')).toHaveCount(0)

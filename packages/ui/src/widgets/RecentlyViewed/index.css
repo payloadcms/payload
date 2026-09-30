@@ -252,7 +252,6 @@
     opacity: 0;
   }
 
-  .recents-widget__pin[aria-pressed='true'],
   .recents-widget__item:hover .recents-widget__pin,
   .recents-widget__item:focus-within .recents-widget__pin {
     opacity: 1;
