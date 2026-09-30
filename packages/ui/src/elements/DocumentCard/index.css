@@ -8,7 +8,6 @@
   }
   .document-card--selected {
     border-color: var(--color-border-selected);
-    box-shadow: inset 0 0 0 var(--stroke-width-medium) var(--color-border-selected);
   }
   .document-card__thumbnail {
     display: block;

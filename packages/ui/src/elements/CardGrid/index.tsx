@@ -9,6 +9,7 @@ const baseClass = 'card-grid'
 export type CardGridProps<T> = {
   readonly ariaLabel: string
   readonly className?: string
+  readonly getItemClassName?: (item: T) => string | undefined
   readonly getKey: (item: T) => React.Key
   readonly items: readonly T[]
   readonly renderItem: (item: T) => React.ReactNode
@@ -18,13 +19,17 @@ export type CardGridProps<T> = {
 export const CardGrid = <T,>({
   ariaLabel,
   className,
+  getItemClassName,
   getKey,
   items,
   renderItem,
 }: CardGridProps<T>) => (
   <ul aria-label={ariaLabel} className={[baseClass, className].filter(Boolean).join(' ')}>
     {items.map((item) => (
-      <li className={`${baseClass}__item`} key={getKey(item)}>
+      <li
+        className={[`${baseClass}__item`, getItemClassName?.(item)].filter(Boolean).join(' ')}
+        key={getKey(item)}
+      >
         {renderItem(item)}
       </li>
     ))}

@@ -123,6 +123,13 @@ const FlatDocumentGrid: React.FC<FlatDocumentGridProps> = ({
   return (
     <CardGrid
       ariaLabel={collectionLabel}
+      getItemClassName={(doc) => {
+        const id = doc.id
+
+        return (typeof id === 'string' || typeof id === 'number') && selected.get(id)
+          ? 'card-grid__item--selected'
+          : undefined
+      }}
       getKey={getDocumentID}
       items={docs}
       renderItem={(doc) => {
