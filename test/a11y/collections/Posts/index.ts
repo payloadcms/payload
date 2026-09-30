@@ -31,6 +31,7 @@ export const PostsCollection: CollectionConfig = {
       name: 'subtitle',
       type: 'text',
       admin: {
+        components: { Cell: '/components/GridCell/index.js#GridCell' },
         description:
           'A subtitle field to test focus indicators in the admin UI, helps us detect exiting out of rich text editor properly.',
       },

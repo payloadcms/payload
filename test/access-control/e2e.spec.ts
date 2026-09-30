@@ -686,7 +686,10 @@ describe('Access Control', () => {
 
     test('versions tab should not show', async () => {
       await page.goto(restrictedVersionsAdminPanelUrl.edit(existingDoc.id))
-      await page.locator('.doc-tabs__tabs').getByLabel('Versions').click()
+      await page
+        .locator('.doc-tabs__tabs')
+        .getByRole('link', { name: /^Versions\b/ })
+        .click()
       const rows = page.locator('.versions table tbody tr')
       await expect(rows).toHaveCount(1)
     })
