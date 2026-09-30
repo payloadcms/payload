@@ -1,5 +1,5 @@
 import { put } from '@vercel/blob'
-import { createReadStream } from 'fs'
+import { openAsBlob } from 'node:fs'
 import path from 'path'
 
 interface UploadFileArgs {
@@ -27,7 +27,7 @@ export async function uploadFile({
   tempFilePath,
   token,
 }: UploadFileArgs): Promise<UploadFileResult> {
-  const body = tempFilePath ? createReadStream(tempFilePath) : buffer
+  const body = tempFilePath ? await openAsBlob(tempFilePath) : buffer
   const result = await put(storageFilePath, body, {
     access,
     addRandomSuffix,

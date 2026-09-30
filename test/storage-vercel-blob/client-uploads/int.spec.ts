@@ -137,6 +137,21 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
     expect(blobs.map((blob) => blob.pathname)).toContain(`${prefix}/${doc.filename}`)
   })
 
+  it('should keep main and image-size filenames separate with random suffixes', async () => {
+    const doc = await payload.create({
+      collection: 'media',
+      data: {},
+      filePath: path.resolve(dirname, '../../uploads/image.png'),
+      overrideAccess: true,
+    })
+    const { blobs } = await list()
+
+    expect(doc.filename).toMatch(/^image-[a-z0-9]+\.png$/)
+    expect(doc.sizes?.square?.filename).toMatch(/^image-30x20-[a-z0-9]+\.png$/)
+    expect(blobs.map((blob) => blob.pathname)).toContain(doc.filename)
+    expect(blobs.map((blob) => blob.pathname)).toContain(doc.sizes!.square!.filename)
+  })
+
   it('should retain random suffixes for REST multipart uploads when client uploads are enabled', async () => {
     const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
     const formData = new FormData()
