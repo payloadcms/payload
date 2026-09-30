@@ -67,22 +67,20 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    'transformer-media': TransformerMedia;
-    'resize-preview-media': ResizePreviewMedia;
-    'outside-fit-media': OutsideFitMedia;
-    'payload-kv': PayloadKv;
+    media: Media;
+    'media-with-focal-point': MediaWithFocalPoint;
     users: User;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
   collectionsSelect: {
-    'transformer-media': TransformerMediaSelect<false> | TransformerMediaSelect<true>;
-    'resize-preview-media': ResizePreviewMediaSelect<false> | ResizePreviewMediaSelect<true>;
-    'outside-fit-media': OutsideFitMediaSelect<false> | OutsideFitMediaSelect<true>;
-    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
+    'media-with-focal-point': MediaWithFocalPointSelect<false> | MediaWithFocalPointSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -125,11 +123,11 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "transformer-media".
+ * via the `definition` "media".
  */
-export interface TransformerMedia {
+export interface Media {
   id: string;
-  prefix?: string | null;
+  alt?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -149,6 +147,32 @@ export interface TransformerMedia {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+  sizes?: {
+    square?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    sixteenByNineMedium?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    tooLarge?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -186,9 +210,9 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "resize-preview-media".
+ * via the `definition` "media-with-focal-point".
  */
-export interface ResizePreviewMedia {
+export interface MediaWithFocalPoint {
   id: string;
   createdBy?: {
     relationTo: 'users';
@@ -209,32 +233,16 @@ export interface ResizePreviewMedia {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "outside-fit-media".
- */
-export interface OutsideFitMedia {
-  id: string;
-  createdBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
+  sizes?: {
+    portrait?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -261,16 +269,12 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
-        relationTo: 'transformer-media';
-        value: string | TransformerMedia;
+        relationTo: 'media';
+        value: string | Media;
       } | null)
     | ({
-        relationTo: 'resize-preview-media';
-        value: string | ResizePreviewMedia;
-      } | null)
-    | ({
-        relationTo: 'outside-fit-media';
-        value: string | OutsideFitMedia;
+        relationTo: 'media-with-focal-point';
+        value: string | MediaWithFocalPoint;
       } | null)
     | ({
         relationTo: 'users';
@@ -320,10 +324,10 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "transformer-media_select".
+ * via the `definition` "media_select".
  */
-export interface TransformerMediaSelect<T extends boolean = true> {
-  prefix?: T;
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -337,12 +341,46 @@ export interface TransformerMediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+  sizes?:
+    | T
+    | {
+        square?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        sixteenByNineMedium?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        tooLarge?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "resize-preview-media_select".
+ * via the `definition` "media-with-focal-point_select".
  */
-export interface ResizePreviewMediaSelect<T extends boolean = true> {
+export interface MediaWithFocalPointSelect<T extends boolean = true> {
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -356,33 +394,20 @@ export interface ResizePreviewMediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "outside-fit-media_select".
- */
-export interface OutsideFitMediaSelect<T extends boolean = true> {
-  createdBy?: T;
-  updatedBy?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_select".
- */
-export interface PayloadKvSelect<T extends boolean = true> {
-  key?: T;
-  data?: T;
+  sizes?:
+    | T
+    | {
+        portrait?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -408,6 +433,14 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -458,7 +491,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'transformer-media' | 'resize-preview-media' | 'outside-fit-media' | 'users';
+    relatedCollection: 'media' | 'media-with-focal-point' | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -480,7 +513,7 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('transformer-media' | 'resize-preview-media' | 'outside-fit-media' | 'users')[] | null;
+    excludedCollections?: ('media' | 'media-with-focal-point' | 'users')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
