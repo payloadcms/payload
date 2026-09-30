@@ -4,9 +4,9 @@ export function renderHelp({ command }: { command: string }): string {
   ${command} upgrade [run | prompt] [options]
 
 Commands:
-  (none)              Run transforms against [path] (default: cwd)
+  (none)              Run transforms only against [path] (default: cwd)
   upgrade             Pick how to run the full v3 -> v4 upgrade
-  upgrade run         Run the mechanical upgrade slice in cwd
+  upgrade run         Bump Payload deps, install, then run transforms in cwd
   upgrade prompt      Print the upgrade orchestration prompt
 
 Transform options:
