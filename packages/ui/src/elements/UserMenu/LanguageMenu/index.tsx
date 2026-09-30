@@ -58,7 +58,7 @@ export const LanguageMenu: React.FC<{
   return (
     <Popup
       className="popup-button-list__submenu"
-      hoverSubmenu="language"
+      hoverSubmenu
       popupType="menu"
       renderButton={({ active: _active, ...aria }) => (
         <button

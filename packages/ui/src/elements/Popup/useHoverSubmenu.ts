@@ -160,12 +160,19 @@ export const useHoverSubmenu = (id?: string) => {
         anchorRef.current = { x: e.clientX, y: e.clientY }
       }
       if (id) {
-        group?.setActiveId(id)
+        group.requestActive(id, () => setIsOpen(true))
+      } else {
+        setIsOpen(true)
       }
-      setIsOpen(true)
     },
     [cancelClose, group, id],
   )
+
+  const cancelPending = useCallback(() => {
+    if (id) {
+      group.cancelPending(id)
+    }
+  }, [group, id])
 
   // For the content panel's own onMouseEnter - just cancels a pending close and marks us
   // as "landed", without touching the trigger anchor point `open()` seeds.
@@ -176,11 +183,12 @@ export const useHoverSubmenu = (id?: string) => {
 
   const close = useCallback(() => {
     cancelClose()
+    cancelPending()
     setIsOpen(false)
     if (id) {
       group?.setActiveId((current) => (current === id ? null : current))
     }
-  }, [cancelClose, group, id])
+  }, [cancelClose, cancelPending, group, id])
 
   useEffect(() => {
     if (!id) {
@@ -285,5 +293,5 @@ export const useHoverSubmenu = (id?: string) => {
     return () => document.removeEventListener('mousemove', handlePointerMove)
   }, [isOpen, cancelClose, scheduleClose])
 
-  return { close, contentRef, isOpen, keepOpen, open, triggerRef }
+  return { cancelPending, close, contentRef, isOpen, keepOpen, open, triggerRef }
 }

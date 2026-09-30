@@ -5,13 +5,17 @@ import { useMemo, useSyncExternalStore } from 'react'
 
 type HoverSubmenuGroupContextValue = {
   activeId: null | string
+  cancelPending: (id: string) => void
   register: (id: string, close: () => void) => () => void
+  requestActive: (id: string, open: () => void) => void
   setActiveId: React.Dispatch<React.SetStateAction<null | string>>
 }
 
+const HOVER_OPEN_DELAY = 150
 let activeId: null | string = null
 const listeners = new Set<() => void>()
 const closeHandlers = new Map<string, () => void>()
+let pendingOpen: { id: string; timeout: ReturnType<typeof setTimeout> } | null = null
 
 const subscribe = (listener: () => void) => {
   listeners.add(listener)
@@ -34,6 +38,31 @@ const register: HoverSubmenuGroupContextValue['register'] = (id, close) => {
   return () => closeHandlers.delete(id)
 }
 
+const cancelPending: HoverSubmenuGroupContextValue['cancelPending'] = (id) => {
+  if (pendingOpen?.id === id) {
+    clearTimeout(pendingOpen.timeout)
+    pendingOpen = null
+  }
+}
+
+const requestActive: HoverSubmenuGroupContextValue['requestActive'] = (id, open) => {
+  cancelPending(id)
+
+  if (!activeId || activeId === id) {
+    setActiveId(id)
+    open()
+    return
+  }
+
+  const timeout = setTimeout(() => {
+    pendingOpen = null
+    setActiveId(id)
+    open()
+  }, HOVER_OPEN_DELAY)
+
+  pendingOpen = { id, timeout }
+}
+
 /**
  * Coordinates a set of sibling hover-opened submenus (e.g. Theme / Language / Settings)
  * so that only one can be open at a time. Without this, each submenu only knows about
@@ -41,14 +70,11 @@ const register: HoverSubmenuGroupContextValue['register'] = (id, close) => {
  * while a previously-hovered sibling's submenu is still considered "inside its own zone"
  * and never closes.
  */
-export const HoverSubmenuGroupProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  return children
-}
-
 export const useHoverSubmenuGroup = () => {
   const currentActiveId = useSyncExternalStore(subscribe, getActiveId, getActiveId)
 
-  return useMemo(() => ({ activeId: currentActiveId, register, setActiveId }), [currentActiveId])
+  return useMemo(
+    () => ({ activeId: currentActiveId, cancelPending, register, requestActive, setActiveId }),
+    [currentActiveId],
+  )
 }

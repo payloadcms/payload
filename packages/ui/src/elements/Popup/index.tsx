@@ -1,7 +1,6 @@
 'use client'
 import type { AriaAttributes, AriaRole, CSSProperties } from 'react'
 
-export { HoverSubmenuGroupProvider } from './HoverSubmenuGroup.js'
 export * as PopupList from './PopupButtonList/index.js'
 
 import React, { createContext, use, useCallback, useEffect, useId, useRef, useState } from 'react'
@@ -68,7 +67,7 @@ export type PopupProps = {
    */
   horizontalAlign?: 'center' | 'left' | 'right'
   /** Opens this popup as a safe-zone hover submenu on pointer input. */
-  hoverSubmenu?: string
+  hoverSubmenu?: boolean | string
   id?: string
   initActive?: boolean
   noBackground?: boolean
@@ -166,7 +165,13 @@ export const Popup: React.FC<PopupProps> = (props) => {
   const triggerRef = useRef<HTMLDivElement>(null)
   const generatedContentId = useId()
   const contentId = `${id || generatedContentId}-content`
-  const hover = useHoverSubmenu(hoverSubmenu ? `${hoverSubmenu}-${generatedContentId}` : undefined)
+  const hoverId =
+    hoverSubmenu === true
+      ? `hover-${generatedContentId}`
+      : hoverSubmenu
+        ? `${hoverSubmenu}-${generatedContentId}`
+        : undefined
+  const hover = useHoverSubmenu(hoverId)
 
   /**
    * Keeps track of whether the popup was opened via keyboard.
@@ -653,6 +658,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     <div className={[baseClass, className].filter(Boolean).join(' ')} id={id}>
       <div
         className={`${baseClass}__trigger-wrap`}
+        onMouseLeave={hoverSubmenu ? hover.cancelPending : undefined}
         ref={(element) => {
           // The same wrapper is used by Popup focus management and the hover safe-zone.
           triggerRef.current = element
