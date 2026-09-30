@@ -3,16 +3,24 @@ type GetWelcomeDisplayArgs = {
   user?: null | object
 }
 
-const getNonEmptyString = (value: unknown): string | undefined =>
-  typeof value === 'string' ? value.trim() || undefined : undefined
+const getDisplayString = (value: unknown): string | undefined => {
+  if (typeof value === 'string') {
+    return value.trim() || undefined
+  }
+
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return String(value)
+  }
+
+  return undefined
+}
 
 export function getWelcomeDisplay({ useAsTitle, user }: GetWelcomeDisplayArgs): string | undefined {
   const userData = user as null | Record<string, unknown> | undefined
-  const email = getNonEmptyString(userData?.email)
-  const username = getNonEmptyString(userData?.username)
-  const userID =
-    typeof userData?.id === 'number' ? String(userData.id) : getNonEmptyString(userData?.id)
-  const title = useAsTitle ? getNonEmptyString(userData?.[useAsTitle]) : undefined
+  const email = getDisplayString(userData?.email)
+  const username = getDisplayString(userData?.username)
+  const userID = getDisplayString(userData?.id)
+  const title = useAsTitle ? getDisplayString(userData?.[useAsTitle]) : undefined
 
   return title ?? username ?? email ?? userID
 }
