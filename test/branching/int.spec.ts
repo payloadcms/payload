@@ -6,6 +6,7 @@ import type { Payload, PayloadRequest, SanitizedCollectionConfig } from 'payload
 import path from 'path'
 import {
   assertBranchReadable,
+  createDataloaderCacheKey,
   createPayloadRequest,
   initTransaction,
   isolateBranchState,
@@ -1177,7 +1178,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
     })
 
     test.afterEach(async () => {
-      for (const collection of [postsSlug, categoriesSlug] as const) {
+      for (const collection of [postsSlug, categoriesSlug, numericIDSlug] as const) {
         const rows = await payload.find({ branch: false, collection, pagination: false })
 
         for (const row of rows.docs) {
@@ -1250,6 +1251,136 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
       expect((onBranch.category as { name?: string })?.name).toBe('branch category')
       expect((onMain.category as { name?: string })?.name).toBe('main category')
+    })
+
+    test('should refresh populated relationships after a branch update on the same request', async () => {
+      const category = await payload.create({
+        collection: categoriesSlug,
+        data: { name: 'main category' },
+      })
+      const post = await payload.create({
+        collection: postsSlug,
+        data: { category: category.id, title: 'points at updated category' },
+      })
+      const req = await createPayloadRequest({ branch, payload })
+      const beforeUpdate = await payload.findByID({
+        id: post.id,
+        collection: postsSlug,
+        depth: 1,
+        req,
+      })
+
+      await payload.update({
+        id: category.id,
+        collection: categoriesSlug,
+        data: { name: 'branch category' },
+        req,
+      })
+
+      const afterUpdate = await payload.findByID({
+        id: post.id,
+        collection: postsSlug,
+        depth: 1,
+        req,
+      })
+
+      expect((beforeUpdate.category as { name?: string })?.name).toBe('main category')
+      expect((afterUpdate.category as { name?: string })?.name).toBe('branch category')
+    })
+
+    test('should refresh populated relationships after a bulk branch update on the same request', async () => {
+      const category = await payload.create({
+        collection: categoriesSlug,
+        data: { name: 'main category' },
+      })
+      const post = await payload.create({
+        collection: postsSlug,
+        data: { category: category.id, title: 'points at bulk-updated category' },
+      })
+      const req = await createPayloadRequest({ branch, payload })
+      const beforeUpdate = await payload.findByID({
+        id: post.id,
+        collection: postsSlug,
+        depth: 1,
+        req,
+      })
+
+      await payload.update({
+        collection: categoriesSlug,
+        data: { name: 'bulk branch category' },
+        req,
+        where: { id: { equals: category.id } },
+      })
+
+      const afterUpdate = await payload.findByID({
+        id: post.id,
+        collection: postsSlug,
+        depth: 1,
+        req,
+      })
+
+      expect((beforeUpdate.category as { name?: string })?.name).toBe('main category')
+      expect((afterUpdate.category as { name?: string })?.name).toBe('bulk branch category')
+    })
+
+    test('should refresh populated relationships after a branch delete on the same request', async () => {
+      const category = await payload.create({
+        collection: categoriesSlug,
+        data: { name: 'main category' },
+      })
+      const post = await payload.create({
+        collection: postsSlug,
+        data: { category: category.id, title: 'points at deleted category' },
+      })
+      const req = await createPayloadRequest({ branch, payload })
+      const beforeDelete = await payload.findByID({
+        id: post.id,
+        collection: postsSlug,
+        depth: 1,
+        req,
+      })
+
+      await payload.delete({ id: category.id, collection: categoriesSlug, req })
+
+      const afterDelete = await payload.findByID({
+        id: post.id,
+        collection: postsSlug,
+        depth: 1,
+        req,
+      })
+
+      expect((beforeDelete.category as { name?: string })?.name).toBe('main category')
+      expect(String(afterDelete.category)).toBe(String(category.id))
+    })
+
+    test('should refresh populated relationships after a branch create on the same request', async () => {
+      const req = await createPayloadRequest({ branch, payload })
+      const documentID = 9_812_345
+      const cacheKey = createDataloaderCacheKey({
+        branch,
+        collectionSlug: numericIDSlug,
+        currentDepth: 0,
+        depth: 1,
+        docID: documentID,
+        draft: false,
+        fallbackLocale: req.fallbackLocale!,
+        locale: req.locale!,
+        overrideAccess: true,
+        showHiddenFields: false,
+        transactionID: req.transactionID!,
+      })
+      const beforeCreate = await req.payloadDataLoader.load(cacheKey)
+
+      await payload.create({
+        collection: numericIDSlug,
+        data: { id: documentID, title: 'created on branch' },
+        req,
+      })
+
+      const afterCreate = await req.payloadDataLoader.load(cacheKey)
+
+      expect(beforeCreate).toBeNull()
+      expect(afterCreate).toMatchObject({ id: documentID, title: 'created on branch' })
     })
 
     test('should not serve one branch a populated document cached for another', async () => {
@@ -2604,6 +2735,39 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
 
       expect(onMain.title).toBe('original on main')
+    })
+
+    test('should refresh branch state across several writes on one request', async () => {
+      const req = await createPayloadRequest({ branch: 'cow', payload })
+      const beforeWrites = await payload.findByID({ id: mainDocID, collection: postsSlug, req })
+
+      const created = await payload.create({
+        collection: postsSlug,
+        data: { title: 'created on branch' },
+        req,
+      })
+      const afterCreate = await payload.findByID({ id: created.id, collection: postsSlug, req })
+
+      await payload.update({
+        id: mainDocID,
+        collection: postsSlug,
+        data: { title: 'edited on branch' },
+        req,
+      })
+      const afterUpdate = await payload.findByID({ id: mainDocID, collection: postsSlug, req })
+
+      await payload.delete({ id: mainDocID, collection: postsSlug, req })
+      const afterDelete = await payload.findByID({
+        id: mainDocID,
+        collection: postsSlug,
+        disableErrors: true,
+        req,
+      })
+
+      expect(beforeWrites.title).toBe('original on main')
+      expect(afterCreate.title).toBe('created on branch')
+      expect(afterUpdate.title).toBe('edited on branch')
+      expect(afterDelete).toBeNull()
     })
 
     test('should create exactly one shadow row on first branch edit', async () => {
@@ -6001,6 +6165,34 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(branchDoc.docs[0]!.status).toBe('open')
     })
 
+    test('should refresh the caller request after merging a change', async () => {
+      const req = await createPayloadRequest({ branch: 'mergeme', payload })
+      const beforeMerge = await payload.findByID({ id: mainDocID, collection: postsSlug, req })
+      const changes = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: {
+          and: [
+            { branch: { equals: 'mergeme' } },
+            { collectionSlug: { equals: postsSlug } },
+            { documentID: { equals: String(mainDocID) } },
+          ],
+        },
+      })
+
+      await payload.branches.merge({
+        branch: 'mergeme',
+        changes: [changes.docs[0]!.id],
+        overrideAccess: true,
+        req,
+      })
+
+      const afterMerge = await payload.findByID({ id: mainDocID, collection: postsSlug, req })
+
+      expect(beforeMerge.title).toBe('edited on branch')
+      expect(afterMerge.title).toBe('edited on branch')
+    })
+
     test('should apply a branch delete to main', async () => {
       await payload.delete({ id: mainDocID, branch: 'mergeme', collection: postsSlug })
       await payload.branches.merge({ branch: 'mergeme' })
@@ -6916,6 +7108,25 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
       expect(onBranch.title).toBe('original on main')
       expect(onBranch.order).toBe(1)
+    })
+
+    test('should refresh the caller request after discarding a change', async () => {
+      const req = await createPayloadRequest({ branch: 'discardwork', payload })
+      const beforeDiscard = await payload.findByID({ id: mainDocID, collection: postsSlug, req })
+      const changes = await pendingChanges()
+      const updateChange = changes.docs.find((change) => change.operation === 'update')
+
+      await payload.branches.discard({
+        branch: 'discardwork',
+        changes: [updateChange!.id],
+        overrideAccess: true,
+        req,
+      })
+
+      const afterDiscard = await payload.findByID({ id: mainDocID, collection: postsSlug, req })
+
+      expect(beforeDiscard.title).toBe('edited on branch')
+      expect(afterDiscard.title).toBe('original on main')
     })
 
     test('should remove a document created on the branch', async () => {

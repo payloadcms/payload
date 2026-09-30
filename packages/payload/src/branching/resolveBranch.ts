@@ -405,6 +405,17 @@ export const resetBranchState = (req: PayloadRequest): void => {
   }
 }
 
+/** Clears memoized branch and document state after a write changes what this request can read. */
+export const refreshBranchState = (req: PayloadRequest): void => {
+  resetBranchState(req)
+  refreshRequestDataLoader(req)
+}
+
+/** Clears documents cached while populating relationships on this request. */
+export const refreshRequestDataLoader = (req: PayloadRequest): void => {
+  req.payloadDataLoader = getDataLoader(req)
+}
+
 /**
  * The manifest already loaded for this request, without loading it.
  *

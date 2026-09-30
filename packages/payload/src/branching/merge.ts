@@ -47,7 +47,7 @@ import {
 } from './preflight.js'
 import { readLocalizedBranchWrite } from './readLocalizedBranchWrite.js'
 import { readCollectionMergeSnapshot, readGlobalMergeSnapshot } from './readMergeSnapshot.js'
-import { isolateBranchState, withoutBranch } from './resolveBranch.js'
+import { isolateBranchState, refreshBranchState, withoutBranch } from './resolveBranch.js'
 import {
   branchChangesCollectionSlug,
   branchDocIDField,
@@ -716,6 +716,10 @@ export const mergeBranch = async (
       } else {
         reqContext[throwOnFieldAccessDeniedContextKey] = previousThrowOnFieldAccessDenied
       }
+    }
+
+    if (incomingReq) {
+      refreshBranchState(incomingReq)
     }
   }
 

@@ -23,7 +23,11 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { retryConcurrentShadowOperation } from '../../branching/createShadowRow.js'
 import { forkDocument } from '../../branching/forkDocument.js'
-import { resetBranchState, resolveBranch } from '../../branching/resolveBranch.js'
+import {
+  refreshRequestDataLoader,
+  resetBranchState,
+  resolveBranch,
+} from '../../branching/resolveBranch.js'
 import { branchField, MAIN_BRANCH } from '../../branching/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
@@ -548,6 +552,10 @@ const updateByIDOperationWithLifecycleAttempt = async <
           msg: 'Failed to remove an upload rollback backup after committing its database write.',
         })
       })
+    }
+
+    if (isBranchingDocument) {
+      refreshRequestDataLoader(req)
     }
 
     return result

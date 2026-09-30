@@ -13,7 +13,11 @@ import type {
 } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
-import { resetBranchState, resolveBranch } from '../../branching/resolveBranch.js'
+import {
+  refreshBranchState,
+  resetBranchState,
+  resolveBranch,
+} from '../../branching/resolveBranch.js'
 import {
   assertBranchCreatedDeleteUnreferenced,
   assertBranchDeleteCanUseCallerTransaction,
@@ -1031,6 +1035,10 @@ export const deleteOperation = async <
     }
     if (shouldCommit && !didBatchDeleteFail) {
       await commitTransaction(req)
+    }
+
+    if (isDeletingFromBranch) {
+      refreshBranchState(req)
     }
 
     return result
