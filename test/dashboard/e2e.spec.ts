@@ -568,16 +568,18 @@ describe('Dashboard', () => {
 
     // Delete buttons should not be visible when not editing
     const widget = d.widgetByPos(1)
+    const dragHandle = widget.getByRole('button', { name: 'Drag to reorder' })
+
     await widget.hover()
     await expect(d.getDeleteWidgetButton(widget)).toBeHidden()
 
-    // Widgets should not have draggable attributes when not editing
-    await expect(widget.locator('.draggable')).not.toHaveAttribute('aria-disabled')
+    await expect(dragHandle).toHaveCount(0)
 
     // verify the opposite:
     await d.setEditing()
     await expect(d.getDeleteWidgetButton(widget)).toBeVisible()
-    await expect(widget.locator('.draggable')).toHaveAttribute('aria-disabled', 'false')
+    await expect(dragHandle).toBeVisible()
+    await expect(dragHandle).toBeEnabled()
   })
 
   test('Responsiveness - all widgets have a 100% width on mobile', async ({ page }) => {
