@@ -127,6 +127,10 @@
   min-height: var(--spacer-6);
 }
 
+.components-view__popup-menu-trigger {
+  width: 100%;
+}
+
 /* Tooltip trigger */
 .components-view__tooltip-trigger {
   position: relative;

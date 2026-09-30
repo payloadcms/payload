@@ -60,6 +60,7 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
                       <Button
                         {...props}
                         buttonStyle="ghost"
+                        className="components-view__popup-menu-trigger"
                         extraButtonProps={{ role, tabIndex }}
                         margin={false}
                         selected={active}
@@ -68,6 +69,7 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
                       </Button>
                     )}
                     side="right"
+                    size="large"
                   />
                   <PopupList.Button onClick={() => {}}>Typography</PopupList.Button>
                 </PopupList.MenuItem>
@@ -76,6 +78,7 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
                 <Button
                   {...props}
                   buttonStyle="ghost"
+                  className="components-view__popup-menu-trigger"
                   extraButtonProps={{ role, tabIndex }}
                   margin={false}
                   selected={active}
@@ -84,6 +87,7 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
                 </Button>
               )}
               side="right"
+              size="large"
             />
             <Popup
               buttonType="custom"
@@ -100,6 +104,7 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
                 <Button
                   {...props}
                   buttonStyle="ghost"
+                  className="components-view__popup-menu-trigger"
                   extraButtonProps={{ role, tabIndex }}
                   margin={false}
                   selected={active}
@@ -108,6 +113,7 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
                 </Button>
               )}
               side="right"
+              size="large"
             />
           </PopupList.MenuItem>
         )}
