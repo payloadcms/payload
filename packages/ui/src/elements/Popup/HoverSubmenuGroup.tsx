@@ -5,7 +5,7 @@ import { useMemo, useSyncExternalStore } from 'react'
 
 type HoverSubmenuGroupContextValue = {
   activeId: null | string
-  cancelPending: (id: string) => void
+  cancelPending: () => void
   register: (id: string, close: () => void) => () => void
   requestActive: (id: string, open: () => void) => void
   setActiveId: React.Dispatch<React.SetStateAction<null | string>>
@@ -38,15 +38,15 @@ const register: HoverSubmenuGroupContextValue['register'] = (id, close) => {
   return () => closeHandlers.delete(id)
 }
 
-const cancelPending: HoverSubmenuGroupContextValue['cancelPending'] = (id) => {
-  if (pendingOpen?.id === id) {
+const cancelPending: HoverSubmenuGroupContextValue['cancelPending'] = () => {
+  if (pendingOpen) {
     clearTimeout(pendingOpen.timeout)
     pendingOpen = null
   }
 }
 
 const requestActive: HoverSubmenuGroupContextValue['requestActive'] = (id, open) => {
-  cancelPending(id)
+  cancelPending()
 
   if (!activeId || activeId === id) {
     setActiveId(id)
