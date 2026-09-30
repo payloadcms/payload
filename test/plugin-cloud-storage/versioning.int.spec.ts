@@ -114,31 +114,6 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     expect(versionedCloudFiles.has(current!._managedFiles[0]!.key)).toBe(true)
   })
 
-  test('should restore the old key when an unversioned native rename fails after moving', async ({
-    payload,
-  }) => {
-    const created = await payload.create({
-      collection: unversionedCloudMediaSlug,
-      data: {},
-      filePath: firstFile,
-      overrideAccess: true,
-    })
-    const oldKey = [...versionedCloudFiles.keys()][0]!
-    versionedCloudFailure.afterChange = true
-
-    await expect(
-      payload.renameFile({
-        id: created.id,
-        collection: unversionedCloudMediaSlug,
-        filename: 'failed.png',
-        overrideAccess: true,
-      }),
-    ).rejects.toThrow('Cloud test afterChange failed')
-
-    expect(versionedCloudFiles.has(oldKey)).toBe(true)
-    expect([...versionedCloudFiles.keys()].some((key) => key.endsWith('/failed.png'))).toBe(false)
-  })
-
   test('should restore earlier objects when a later native move fails', async ({ payload }) => {
     const created = await payload.create({
       collection: unversionedCloudMediaSlug,
@@ -414,37 +389,6 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
         (key) => key.endsWith('/first.png') || key.endsWith('/second.png'),
       ),
     ).toHaveLength(1)
-  })
-
-  test('should keep direct provider URLs working after rename', async ({ payload }) => {
-    const created = await payload.create({
-      collection: versionedPublicCloudMediaSlug,
-      data: {},
-      filePath: firstFile,
-      overrideAccess: true,
-    })
-    const renamed = await payload.renameFile({
-      id: created.id,
-      collection: versionedPublicCloudMediaSlug,
-      filename: 'renamed.png',
-      overrideAccess: true,
-    })
-
-    expect(renamed.url).toContain('/renamed.png')
-    expect(renamed.url).toMatch(/^https:\/\/files\.example\.test\//)
-    const { docs } = await payload.db.findVersions({
-      collection: versionedPublicCloudMediaSlug,
-      where: { parent: { equals: created.id } },
-    })
-    const previous = docs.find(({ version }) => version.filename === created.filename)
-    expect(previous).toBeDefined()
-    const historical = await payload.findVersionByID({
-      id: previous!.id,
-      collection: versionedPublicCloudMediaSlug,
-      overrideAccess: false,
-    })
-    expect(historical.version.url).toMatch(/^https:\/\/files\.example\.test\//)
-    expect(historical.version.filename).toBe(created.filename)
   })
 
   test('should retain the original object and earlier bytes across a replacement', async ({

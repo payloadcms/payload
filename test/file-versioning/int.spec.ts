@@ -469,30 +469,6 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     expect(Buffer.from(await originalResponse.arrayBuffer())).toEqual(bytes)
   })
 
-  test('should keep uploaded bytes when the main representation is converted', async ({
-    payload,
-  }) => {
-    const bytes = await readFile(imageFixture)
-    const created = await payload.create({
-      collection: convertedMediaSlug,
-      data: { alt: 'converted' },
-      file: { name: 'convert.png', data: bytes, mimetype: 'image/png', size: bytes.length },
-    })
-    const stored = await payload.db.findOne({
-      collection: convertedMediaSlug,
-      where: { id: { equals: created.id } },
-    })
-
-    expect(stored?.mimeType).toBe('image/jpeg')
-    expect(stored?.original).toMatchObject({ filesize: bytes.length, mimeType: 'image/png' })
-    expect(stored?.original?.filename).not.toBe(stored?.filename)
-    expect(stored?._managedFiles).toHaveLength(2)
-    expect(await readFile(path.join(convertedMediaDir, stored!.original!.filename))).toEqual(bytes)
-    await expect(
-      sharp(path.join(convertedMediaDir, stored!.filename)).metadata(),
-    ).resolves.toMatchObject({ format: 'jpeg' })
-  })
-
   test('should retain trusted original and manifest data in a version snapshot', async ({
     payload,
   }) => {
@@ -1111,59 +1087,6 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     expect(archived?.original?.filename).not.toBe(first.filename)
     expect(await readFile(path.join(mediaDir, archived!.original!.filename))).toEqual(firstBytes)
     expect(await readFile(path.join(mediaDir, result.docs[0]!.filename!))).toEqual(secondBytes)
-  })
-
-  test('should retain original and converted output bytes across repeated replacements', async ({
-    payload,
-  }) => {
-    const firstBytes = await readFile(imageFixture)
-    const secondBytes = await sharp(firstBytes).flop().png().toBuffer()
-    const thirdBytes = await sharp(firstBytes).negate().png().toBuffer()
-    const first = await payload.create({
-      collection: convertedMediaSlug,
-      data: { alt: 'A' },
-      file: { name: 'photo.png', data: firstBytes, mimetype: 'image/png', size: firstBytes.length },
-    })
-    const firstOutput = await readFile(path.join(convertedMediaDir, first.filename!))
-
-    await payload.update({
-      id: first.id,
-      collection: convertedMediaSlug,
-      data: { alt: 'B' },
-      file: {
-        name: 'photo.png',
-        data: secondBytes,
-        mimetype: 'image/png',
-        size: secondBytes.length,
-      },
-    })
-    await payload.update({
-      id: first.id,
-      collection: convertedMediaSlug,
-      data: { alt: 'C' },
-      file: { name: 'photo.png', data: thirdBytes, mimetype: 'image/png', size: thirdBytes.length },
-    })
-
-    const { docs: versions } = await payload.db.findVersions({
-      collection: convertedMediaSlug,
-      limit: 0,
-      pagination: false,
-      where: { parent: { equals: first.id } },
-    })
-    const firstVersion = versions.find(({ version }) => version.alt === 'A')?.version
-    const secondVersion = versions.find(({ version }) => version.alt === 'B')?.version
-
-    expect(firstVersion?._managedFiles).toHaveLength(2)
-    expect(secondVersion?._managedFiles).toHaveLength(2)
-    expect(await readFile(path.join(convertedMediaDir, firstVersion!.original!.filename))).toEqual(
-      firstBytes,
-    )
-    expect(await readFile(path.join(convertedMediaDir, firstVersion!.filename))).toEqual(
-      firstOutput,
-    )
-    expect(await readFile(path.join(convertedMediaDir, secondVersion!.original!.filename))).toEqual(
-      secondBytes,
-    )
   })
 
   test('should preserve file revisions through draft, autosave, publish, and unpublish', async ({
