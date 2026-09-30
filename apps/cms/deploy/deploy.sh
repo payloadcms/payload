@@ -11,6 +11,7 @@ cd "$APP_DIR"
 # shellcheck source=SCRIPTDIR/lib.sh
 source "$APP_DIR/deploy/lib.sh"
 
+echo "==> Checking $APP_DIR/.env"
 require_env_file
 validate_env
 

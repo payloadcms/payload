@@ -2,9 +2,11 @@
 # Shared helpers for the deploy scripts. Expects the current directory to be apps/cms.
 
 # Reads KEY from .env without executing it (values such as connection strings may contain `&`).
+# A missing key yields an empty string; `|| true` keeps grep's "no match" from aborting callers
+# that run with `set -e -o pipefail`.
 env_value() {
   local key="$1"
-  grep -E "^${key}=" .env | tail -n 1 | cut -d= -f2- | sed -e 's/^["'\'']//' -e 's/["'\'']$//'
+  { grep -E "^${key}=" .env || true; } | tail -n 1 | cut -d= -f2- | sed -e 's/^["'\'']//' -e 's/["'\'']$//'
 }
 
 require_env_file() {
