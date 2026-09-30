@@ -1467,6 +1467,7 @@ test.describe('WCAG 2.2 Level AA', () => {
     test('should visit every theme option with arrow keys including the middle option', async () => {
       // PYLD-3636
       await page.goto(formatAdminURL({ adminRoute: '/admin', serverURL }))
+      await openNavigationForUserMenu({ page })
       await page.locator('.user-menu__trigger').press('Enter')
       await page.getByRole('menuitem', { name: /theme/i }).press('Enter')
       const options = page.getByRole('menuitemradio')
