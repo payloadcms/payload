@@ -1859,6 +1859,11 @@ describe('lexicalMain', () => {
     await page.keyboard.press('ArrowUp')
     await selectedNthDecorator(0)
     await page.keyboard.press('ArrowUp')
+    await expect(selectedDecorator).toBeHidden()
+    await expect
+      .poll(() => page.evaluate(() => window.getSelection()?.anchorNode?.textContent))
+      .toBe('Upload Node:')
+    await page.keyboard.press('ArrowDown')
     await selectedNthDecorator(0)
 
     // TODO: It would be nice to add tests with lists and nested lists
