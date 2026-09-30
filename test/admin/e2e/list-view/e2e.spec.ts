@@ -182,11 +182,11 @@ describe('List View', () => {
       const rowCheckboxes = page.locator(`${tableRowLocator} .select-row__checkbox input`)
 
       await expect(rowCheckboxes).toHaveCount(2)
-      await expect(page.getByRole('checkbox', { name: 'Select post1' })).toBeVisible()
-      await expect(page.getByRole('checkbox', { name: 'Select post2' })).toBeVisible()
+      await expect(page.getByRole('checkbox', { name: 'Select Row 1', exact: true })).toBeVisible()
+      await expect(page.getByRole('checkbox', { name: 'Select Row 2', exact: true })).toBeVisible()
     })
 
-    test('should use the document ID in the accessible name when useAsTitle is not configured', async () => {
+    test('should number grid row checkboxes when useAsTitle is not configured', async () => {
       const doc = await payload.create({
         collection: listViewSelectAPISlug,
         data: {
@@ -198,10 +198,10 @@ describe('List View', () => {
       const selectAPIUrl = new AdminUrlUtil(serverURL, listViewSelectAPISlug)
 
       await page.goto(selectAPIUrl.list)
-      await expect(page.getByRole('checkbox', { name: `Select ${doc.id}` })).toBeVisible()
+      await expect(page.getByRole('checkbox', { name: 'Select Row 1', exact: true })).toBeVisible()
     })
 
-    test('should use useAsTitle in the accessible name when its column is hidden', async () => {
+    test('should retain grid row checkbox numbers when the title column is hidden', async () => {
       await toggleColumn(page, {
         columnLabel: 'Title',
         columnName: 'title',
@@ -210,8 +210,8 @@ describe('List View', () => {
       await page.reload()
 
       await expect(page.locator('#heading-title')).toBeHidden()
-      await expect(page.getByRole('checkbox', { name: 'Select post1' })).toBeVisible()
-      await expect(page.getByRole('checkbox', { name: 'Select post2' })).toBeVisible()
+      await expect(page.getByRole('checkbox', { name: 'Select Row 1', exact: true })).toBeVisible()
+      await expect(page.getByRole('checkbox', { name: 'Select Row 2', exact: true })).toBeVisible()
     })
 
     test('should link second cell', async () => {
@@ -778,7 +778,7 @@ describe('List View', () => {
       const tableItems = page.locator(tableRowLocator)
 
       await expect(tableItems).toHaveCount(5)
-      await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6')
+      await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6 items')
       await expect(page.locator('.per-page .popup__trigger-wrap > button')).toContainText('5')
       await page.goto(`${postsUrl.list}?limit=5&page=2`)
 
@@ -790,7 +790,7 @@ describe('List View', () => {
       })
 
       await page.waitForURL(new RegExp(`${postsUrl.list}\\?limit=5&page=1`))
-      await expect(page.locator('.page-controls__page-info')).toHaveText('1-3 of 3')
+      await expect(page.locator('.page-controls__page-info')).toHaveText('1-3 of 3 items')
     })
 
     test('should reset filter values for every additional filter', async () => {
@@ -1557,7 +1557,7 @@ describe('List View', () => {
       await setPerPageLimit({ limit: 5, page })
 
       await expect.poll(async () => await page.locator(tableRowLocator).count()).toBe(5)
-      await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6')
+      await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6 items')
 
       await wait(500)
 
@@ -1586,7 +1586,7 @@ describe('List View', () => {
 
       const tableItems = page.locator(tableRowLocator)
       await expect.poll(async () => await tableItems.count()).toBe(5)
-      await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 16')
+      await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 16 items')
 
       await wait(500)
 
@@ -1599,7 +1599,7 @@ describe('List View', () => {
       await wait(500)
       await expect(tableItems).toHaveCount(1)
       await expectPerPageLimits({ expectedLimits: [5, 10, 15], page })
-      await expect(page.locator('.page-controls__page-info')).toHaveText('16-16 of 16')
+      await expect(page.locator('.page-controls__page-info')).toHaveText('16-16 of 16 items')
     })
 
     test('should paginate when timestamps are disabled', async () => {
