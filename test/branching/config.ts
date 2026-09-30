@@ -246,6 +246,7 @@ export default buildConfigWithDefaults({
         slug: uniqueSlug,
         fields: [
           { name: 'slug', type: 'text', unique: true },
+          { name: 'localizedSlug', type: 'text', localized: true, unique: true },
           {
             name: 'metadata',
             type: 'group',

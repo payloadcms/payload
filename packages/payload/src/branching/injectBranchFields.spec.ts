@@ -75,6 +75,25 @@ describe('injectBranchFields', () => {
     })
   })
 
+  it('should add branch scope to localized unique fields', () => {
+    const collection = buildCollection({
+      fields: [{ name: 'slug', type: 'text', localized: true, unique: true }],
+    })
+
+    injectBranchFields(collection)
+
+    expect(collection.fields[0]).toMatchObject({
+      localized: true,
+      name: 'slug',
+      unique: false,
+    })
+    expect(collection.indexes).toContainEqual({
+      fields: ['slug', '_branch'],
+      requireExists: ['slug'],
+      unique: true,
+    })
+  })
+
   it('should add branch scope to developer unique indexes without changing their constraints', () => {
     const collection = buildCollection({
       fields: [

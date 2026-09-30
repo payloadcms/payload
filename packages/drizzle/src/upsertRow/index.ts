@@ -3,6 +3,7 @@ import type { SelectedFields } from 'drizzle-orm/sqlite-core'
 import type { TypeWithID } from 'payload'
 
 import { and, desc, eq, isNull, or } from 'drizzle-orm'
+import { branchField, MAIN_BRANCH } from 'payload'
 
 import type { BlockRowToInsert } from '../transform/write/types.js'
 import type { Args } from './types.js'
@@ -341,12 +342,19 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     const numbersToInsert: Record<string, unknown>[] = []
     const blocksToInsert: { [blockType: string]: BlockRowToInsert[] } = {}
     const selectsToInsert: { [selectTableName: string]: Record<string, unknown>[] } = {}
+    const localeTableName = `${tableName}${adapter.localesSuffix}`
+    const shouldStampLocaleBranch = Boolean(
+      adapter.rawTables[localeTableName]?.columns[branchField],
+    )
 
     // If there are locale rows with data, add the parent and locale to each
     if (Object.keys(nestedWrite.locales).length > 0) {
       Object.entries(nestedWrite.locales).forEach(([locale, localeRow]) => {
         localeRow._parentID = insertedRow.id
         localeRow._locale = locale
+        if (shouldStampLocaleBranch) {
+          localeRow[branchField] = insertedRow[branchField] ?? data[branchField] ?? MAIN_BRANCH
+        }
         localesToInsert.push(localeRow)
       })
     }
@@ -411,7 +419,6 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // //////////////////////////////////
 
     if (localesToInsert.length > 0) {
-      const localeTableName = `${tableName}${adapter.localesSuffix}`
       const localeTable = adapter.tables[`${tableName}${adapter.localesSuffix}`]
 
       if (operation === 'update' && isUpdatingAfterInsertConflict) {

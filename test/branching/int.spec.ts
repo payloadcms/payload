@@ -231,6 +231,36 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         '_branch',
       ])
     })
+
+    test.options(
+      'should build one branch-scoped unique index for each localized value',
+      { db: 'mongo' },
+      () => {
+        const indexes = (payload.db as MongooseAdapter).collections[
+          uniqueSlug
+        ].schema.indexes() as [Record<string, 1>, Record<string, unknown>][]
+
+        expect(indexes).toContainEqual([
+          { _branch: 1, 'localizedSlug.en': 1 },
+          {
+            partialFilterExpression: { 'localizedSlug.en': { $exists: true } },
+            unique: true,
+          },
+        ])
+        expect(indexes).toContainEqual([
+          { _branch: 1, 'localizedSlug.es': 1 },
+          {
+            partialFilterExpression: { 'localizedSlug.es': { $exists: true } },
+            unique: true,
+          },
+        ])
+        expect(
+          indexes.some(
+            ([definition]) => 'localizedSlug.en' in definition && 'localizedSlug.es' in definition,
+          ),
+        ).toBe(false)
+      },
+    )
   })
 
   test.describe('Writes on main', () => {
@@ -3463,6 +3493,58 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       ).rejects.toThrow()
 
       for (const id of [onMain.id, onCow.id, onQ4.id]) {
+        await payload.delete({ id, branch: false, collection: uniqueSlug })
+      }
+
+      const changes = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { collectionSlug: { equals: uniqueSlug } },
+      })
+
+      for (const change of changes.docs) {
+        await payload.delete({ id: change.id, collection: branchChangesSlug })
+      }
+    })
+
+    test('should enforce localized uniqueness per locale and branch', async () => {
+      const onMain = await payload.create({
+        collection: uniqueSlug,
+        data: { localizedSlug: 'localized-shared' },
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: onMain.id,
+        collection: uniqueSlug,
+        data: { localizedSlug: 'main-spanish' },
+        locale: 'es',
+      })
+
+      const onCow = await payload.create({
+        branch: 'cow',
+        collection: uniqueSlug,
+        data: { localizedSlug: 'localized-shared' },
+        locale: 'en',
+      })
+
+      await expect(
+        payload.create({
+          collection: uniqueSlug,
+          data: { localizedSlug: 'localized-shared' },
+          locale: 'en',
+        }),
+      ).rejects.toThrow()
+      await expect(
+        payload.create({
+          branch: 'cow',
+          collection: uniqueSlug,
+          data: { localizedSlug: 'localized-shared' },
+          locale: 'en',
+        }),
+      ).rejects.toThrow()
+
+      for (const id of [onMain.id, onCow.id]) {
         await payload.delete({ id, branch: false, collection: uniqueSlug })
       }
 

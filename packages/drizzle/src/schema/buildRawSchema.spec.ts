@@ -58,6 +58,63 @@ const createAdapter = (
   }) as unknown as DrizzleAdapter
 
 describe('buildRawSchema', () => {
+  it('should build branch-scoped localized unique indexes in the locales table', () => {
+    const config = sanitizeConfig({
+      branching: true,
+      collections: [
+        {
+          slug: 'articles',
+          fields: [
+            {
+              name: 'slug',
+              type: 'text',
+              localized: true,
+              unique: true,
+            },
+          ],
+          versions: { drafts: true },
+        },
+      ],
+      localization: {
+        defaultLocale: 'en',
+        locales: ['en', 'de'],
+      },
+    } as Config)
+    const adapter = createAdapter(config)
+
+    expect(() => buildRawSchema({ adapter, setColumnID })).not.toThrow()
+
+    const localesTable = adapter.rawTables.articles_locales
+
+    expect(localesTable.columns._branch).toMatchObject({
+      default: 'main',
+      name: '_branch',
+      notNull: true,
+      type: 'varchar',
+    })
+    expect(Object.values(localesTable.indexes ?? {})).toContainEqual(
+      expect.objectContaining({
+        on: ['slug', '_branch', '_locale'],
+        unique: true,
+      }),
+    )
+
+    const versionLocalesTable = adapter.rawTables._articles_versions_locales
+
+    expect(versionLocalesTable.columns._branch).toMatchObject({
+      default: 'main',
+      name: '_branch',
+      notNull: true,
+      type: 'varchar',
+    })
+    expect(Object.values(versionLocalesTable.indexes ?? {})).toContainEqual(
+      expect.objectContaining({
+        on: ['version_slug', '_branch', '_locale'],
+        unique: false,
+      }),
+    )
+  })
+
   it('should create suffixed block tables for different schemas with the same slug', async () => {
     const config = sanitizeConfig({
       collections: [
