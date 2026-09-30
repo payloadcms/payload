@@ -23,6 +23,7 @@ import { EditUpload } from '../EditUpload/index.js'
 import { FileDetails } from '../FileDetails/index.js'
 import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
+import { getEditorFileSrc } from './getEditorFileSrc.js'
 import { pasteURLDrawerSlug, UploadFromURLModal } from './UploadFromURLModal/index.js'
 import { usePasteFromClipboard } from './usePasteFromClipboard.js'
 import { useUploadFromUrl } from './useUploadFromUrl.js'
@@ -328,7 +329,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
         <EditDepthProvider>
           <EditUpload
             fileName={value?.name || data?.filename}
-            fileSrc={data?.url || fileSrc}
+            fileSrc={getEditorFileSrc({ data, fileSrc, hasSelectedFile: Boolean(value) })}
             imageCacheTag={imageCacheTag}
             initialCrop={uploadEdits?.crop ?? undefined}
             initialFocalPoint={{
