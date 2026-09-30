@@ -10,7 +10,7 @@ installs the app against them. This is the same approach Payload's CI uses to te
                     │  80 / 443
         ┌───────────▼─────────────── EC2 #2: app server ─┐
         │  caddy (reverse proxy, automatic HTTPS)        │
-        │    └─► cms (Next.js + Payload, port 3000)      │
+        │    └─► cms (Next.js + Payload, port 3006)      │
         │          └─ /app/media  → docker volume "media"│
         └───────────┬────────────────────────────────────┘
                     │ 27017 (private VPC network only)

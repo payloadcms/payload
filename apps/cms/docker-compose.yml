@@ -16,7 +16,7 @@ services:
     restart: unless-stopped
     env_file: .env
     expose:
-      - '3000'
+      - '3006'
     volumes:
       # Uploaded media lives on the host (in a Docker volume) and survives rebuilds/redeploys
       - media:/app/media
