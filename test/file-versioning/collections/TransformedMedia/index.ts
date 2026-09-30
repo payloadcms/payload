@@ -11,5 +11,5 @@ export const TransformedMedia: CollectionConfig = {
   },
   fields: [{ name: 'alt', type: 'text' }],
   upload: { staticDir: transformedMediaDir },
-  versions: true,
+  versions: { maxPerDoc: 2 },
 }

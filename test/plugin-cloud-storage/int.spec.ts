@@ -366,6 +366,64 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
           }
         })
 
+        test('should reuse the original S3 object across edits without a new upload', async ({
+          payload,
+          restClient,
+        }) => {
+          const bytes = await fs.promises.readFile(path.resolve(dirname, '../uploads/image.png'))
+          const created = await payload.create({
+            collection: versionedS3MediaSlug,
+            data: {},
+            file: { name: 'landscape.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+            overrideAccess: true,
+          })
+          const initialOriginal = created.original
+          const initialRow = await payload.db.findOne({
+            collection: versionedS3MediaSlug,
+            where: { id: { equals: created.id } },
+          })
+          const initialOriginalKey = (
+            initialRow as { _managedFiles: Array<{ key: string; roles: Array<{ type: string }> }> }
+          )._managedFiles.find(({ roles }) => roles.some(({ type }) => type === 'original'))!.key
+
+          for (const [x, alt] of [
+            [0, 'first crop'],
+            [25, 'second crop'],
+          ] as const) {
+            const response = await restClient.PATCH(`/${versionedS3MediaSlug}/${created.id}`, {
+              body: JSON.stringify({ alt }),
+              query: {
+                uploadEdits: {
+                  crop: { height: 50, unit: '%', width: 50, x, y: 0 },
+                  heightInPixels: 800,
+                  widthInPixels: 800,
+                },
+              },
+            })
+
+            expect(response.status).toBe(200)
+          }
+
+          const current = await payload.findByID({
+            id: created.id,
+            collection: versionedS3MediaSlug,
+            overrideAccess: true,
+            showHiddenFields: true,
+          })
+          expect(current.original).toMatchObject(initialOriginal!)
+          expect(
+            current._managedFiles?.find(({ roles }) =>
+              roles.some(({ type }) => type === 'original'),
+            )?.key,
+          ).toBe(initialOriginalKey)
+
+          const originalResponse = await restClient.GET(
+            `/${versionedS3MediaSlug}/file/${current.original!.filename}`,
+          )
+          expect(originalResponse.status).toBe(200)
+          expect(Buffer.from(await originalResponse.arrayBuffer())).toEqual(bytes)
+        })
+
         test('can upload with prefix', async ({ payload }) => {
           const upload = await payload.create({
             collection: mediaWithPrefixSlug,

@@ -2,7 +2,7 @@ import { fileTypeFromBuffer } from 'file-type'
 import fs from 'fs/promises'
 import { randomUUID } from 'node:crypto'
 
-import type { Collection } from '../collections/config/types.js'
+import type { Collection, TypeWithID } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { Document, PayloadRequest } from '../types/index.js'
 import type { ManagedFileReference } from './fileVersioning/types.js'
@@ -161,10 +161,18 @@ export const generateFileData = async <T>({
   const staticPath = staticDir
 
   const incomingFileData: Document = isDuplicating ? originalDoc : data
-  const fileDataToReupload: Document | undefined =
-    operation === 'update' ? originalDoc : incomingFileData
-  const fileSourceData =
-    externalUploadSource ?? (fileDataToReupload as unknown as FileData | undefined)
+  const currentFileData = (operation === 'update' ? originalDoc : incomingFileData) as
+    | FileData
+    | undefined
+  const retainedOriginal =
+    operation === 'update' &&
+    !file &&
+    !externalUploadSource &&
+    typeof currentFileData?.original?.filename === 'string' &&
+    typeof currentFileData.original.url === 'string'
+      ? currentFileData.original
+      : undefined
+  const fileSourceData = externalUploadSource ?? retainedOriginal ?? currentFileData
   let isLocalFile = false
 
   if (
@@ -190,6 +198,26 @@ export const generateFileData = async <T>({
         const response = await getFileByPath(filePath)
         file = response
         overwriteExistingFiles = true
+      } else if (filename && retainedOriginal && hasManagedCloudStorage) {
+        const { retrieveFileResponse } = await import('./endpoints/getFile.js')
+        const response = await retrieveFileResponse({
+          collection: { config: collectionConfig },
+          doc: originalDoc as TypeWithID,
+          filename,
+          operation: 'transform',
+          req,
+        })
+        if (!response.ok) {
+          throw new Error(`Unable to read retained original ${filename}`)
+        }
+        const buffer = Buffer.from(await response.arrayBuffer())
+        file = {
+          name: filename,
+          data: buffer,
+          mimetype: retainedOriginal.mimeType,
+          size: buffer.length,
+        }
+        overwriteExistingFiles = true
       } else if (filename && url) {
         // File is remote
         file = await downloadFileToBuffer({
@@ -201,6 +229,10 @@ export const generateFileData = async <T>({
       }
     } catch (err: unknown) {
       throw new FileRetrievalError(req.t, err instanceof Error ? err.message : undefined)
+    }
+
+    if (file && retainedOriginal && currentFileData?.filename) {
+      file = { ...file, name: currentFileData.filename }
     }
   }
 
@@ -360,7 +392,11 @@ export const generateFileData = async <T>({
 
     let fsSafeName = getSanitizedUploadFilename(file.name, ext)
 
-    if (!overwriteExistingFiles || !disableLocalStorage) {
+    if (
+      !overwriteExistingFiles ||
+      !disableLocalStorage ||
+      (shouldStageCloudFiles && retainedOriginal)
+    ) {
       // Extract prefix if present (added by plugin-cloud-storage)
       const prefix = (data as Record<string, unknown>)?.prefix as string | undefined
       fsSafeName = await getSafeFileName({
@@ -379,29 +415,33 @@ export const generateFileData = async <T>({
     }
 
     if (!disableLocalStorage || shouldStageCloudFiles) {
-      const originalFilename = fileWasTransformed
-        ? await getSafeFileName({
-            collectionSlug: collectionConfig.slug,
-            desiredFilename: getOriginalFilename({
-              filename: getSanitizedUploadFilename(file.name),
-            }),
-            req,
-            staticPath: staticPath!,
-          })
-        : fsSafeName
-      const original = {
-        filename: originalFilename,
-        filesize: file.size,
-        mimeType: file.mimetype,
-        url: formatAdminURL({
-          apiRoute: req.payload.config.routes.api,
-          path: `/${collectionConfig.slug}/file/${encodeURIComponent(originalFilename)}`,
-          relative: true,
-          serverURL: req.payload.config.serverURL,
-        }),
-      } as NonNullable<FileData['original']>
+      const originalFilename =
+        retainedOriginal?.filename ??
+        (fileWasTransformed
+          ? await getSafeFileName({
+              collectionSlug: collectionConfig.slug,
+              desiredFilename: getOriginalFilename({
+                filename: getSanitizedUploadFilename(file.name),
+              }),
+              req,
+              staticPath: staticPath!,
+            })
+          : fsSafeName)
+      const original =
+        retainedOriginal ??
+        ({
+          filename: originalFilename,
+          filesize: file.size,
+          mimeType: file.mimetype,
+          url: formatAdminURL({
+            apiRoute: req.payload.config.routes.api,
+            path: `/${collectionConfig.slug}/file/${encodeURIComponent(originalFilename)}`,
+            relative: true,
+            serverURL: req.payload.config.serverURL,
+          }),
+        } as NonNullable<FileData['original']>)
 
-      if (isProcessableImage(file.mimetype)) {
+      if (!retainedOriginal && isProcessableImage(file.mimetype)) {
         try {
           const dimensions = await getImageSize({ file })
           original.width = dimensions.width
@@ -413,11 +453,20 @@ export const generateFileData = async <T>({
 
       fileData.original = original
 
-      if (fileWasTransformed) {
+      if (fileWasTransformed && !retainedOriginal) {
         filesToSave.push({
           buffer: Buffer.from(await originalWebFile!.arrayBuffer()),
           path: `${staticPath}/${originalFilename}`,
         })
+      }
+
+      if (retainedOriginal && shouldStageCloudFiles) {
+        const originalFile = currentFileData?._managedFiles?.find((managedFile) =>
+          managedFile.roles.some((role) => role.type === 'original'),
+        )
+        if (originalFile) {
+          fileData._managedFiles = [{ ...originalFile, roles: [{ type: 'original' }] }]
+        }
       }
     }
 

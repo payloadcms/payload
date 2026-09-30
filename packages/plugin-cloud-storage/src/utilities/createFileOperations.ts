@@ -1,4 +1,4 @@
-import type { CollectionConfig, UploadConfig } from 'payload'
+import type { CollectionConfig, FileData, UploadConfig } from 'payload'
 
 import fs from 'node:fs/promises'
 import path from 'node:path'
@@ -104,6 +104,19 @@ export const createFileOperations = ({
           role: { type: 'original' },
           storageBackendId,
         })
+      } else {
+        const retainedOriginal = (data._managedFiles as FileData['_managedFiles'])?.find(
+          (file) =>
+            file.storageBackendId === storageBackendId &&
+            file.roles.some((role) => role.type === 'original'),
+        )
+        if (retainedOriginal) {
+          references.push({
+            key: retainedOriginal.key,
+            role: { type: 'original' },
+            storageBackendId,
+          })
+        }
       }
       if (typeof data.filename === 'string' && keyByFilename.has(data.filename)) {
         references.push({

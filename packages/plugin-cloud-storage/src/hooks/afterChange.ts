@@ -55,6 +55,9 @@ export const getAfterChangeHook =
       req.context.skipCloudStorage = true
       req.file = undefined
       req.payloadUploadSizes = undefined
+      const originalQuery = req.query
+      req.query = { ...req.query }
+      delete req.query.uploadEdits
 
       try {
         const updatedDoc = await req.payload.update({
@@ -70,6 +73,7 @@ export const getAfterChangeHook =
 
         return select ? { ...doc, ...updatedDoc } : { ...doc, ...metadata }
       } finally {
+        req.query = originalQuery
         delete req.context.skipCloudStorage
       }
     }

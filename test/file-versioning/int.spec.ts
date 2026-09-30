@@ -367,6 +367,60 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     ).toEqual(originalSizePixels)
   })
 
+  test('should keep the uploaded original after repeated edits and version pruning', async ({
+    payload,
+    restClient,
+  }) => {
+    const bytes = await readFile(imageFixture)
+    const created = await payload.create({
+      collection: transformedMediaSlug,
+      data: { alt: 'source' },
+      file: { name: 'landscape.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+    })
+    const initialOriginal = created.original
+
+    for (const [alt, x] of [
+      ['first crop', 0],
+      ['second crop', 25],
+    ] as const) {
+      const response = await restClient.PATCH(`/${transformedMediaSlug}/${created.id}`, {
+        body: JSON.stringify({ alt }),
+        query: {
+          uploadEdits: {
+            crop: { height: 50, unit: '%', width: 50, x, y: 0 },
+            heightInPixels: 800,
+            widthInPixels: 800,
+          },
+        },
+      })
+
+      expect(response.status).toBe(200)
+    }
+
+    const { docs: versions } = await payload.db.findVersions({
+      collection: transformedMediaSlug,
+      limit: 10,
+      where: { parent: { equals: created.id } },
+    })
+    expect(versions).toHaveLength(2)
+
+    const current = await payload.findByID({
+      id: created.id,
+      collection: transformedMediaSlug,
+      showHiddenFields: true,
+    })
+    expect(current.original).toMatchObject(initialOriginal!)
+    expect(await readFile(path.join(transformedMediaDir, current.original!.filename))).toEqual(
+      bytes,
+    )
+
+    const originalResponse = await restClient.GET(
+      `/${transformedMediaSlug}/file/${current.original!.filename}`,
+    )
+    expect(originalResponse.status).toBe(200)
+    expect(Buffer.from(await originalResponse.arrayBuffer())).toEqual(bytes)
+  })
+
   test('should keep uploaded bytes when the main representation is converted', async ({
     payload,
   }) => {

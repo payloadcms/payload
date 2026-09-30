@@ -1,4 +1,6 @@
-import type { CollectionConfig, PayloadRequest, TypeWithID, UploadConfig } from 'payload'
+import type { CollectionConfig, FileData, PayloadRequest, TypeWithID, UploadConfig } from 'payload'
+
+import path from 'node:path'
 
 import { buildPrefixWithObjectKey } from './buildPrefixWithObjectKey.js'
 import { buildUploadStoragePathData } from './buildStoragePathData.js'
@@ -39,7 +41,10 @@ export async function getFilePrefix({
   // The serve path already loaded and authorized this document — trust it over any
   // client-supplied upload reference or query prefix.
   if (doc) {
-    return buildPrefixWithObjectKey({ objectKey: doc._objectKey, prefix: doc.prefix })
+    return (
+      getOriginalFilePrefix({ collectionPrefix, doc, filename, useCompositePrefixes }) ??
+      buildPrefixWithObjectKey({ objectKey: doc._objectKey, prefix: doc.prefix })
+    )
   }
 
   // Upload instructions call handlers without a document yet. Re-contain the claimed
@@ -71,6 +76,7 @@ export async function getFilePrefix({
       {
         filename: { equals: filename },
       },
+      { 'original.filename': { equals: filename } },
       ...imageSizes.map((imageSize) => ({
         [`sizes.${imageSize.name}.filename`]: { equals: filename },
       })),
@@ -95,13 +101,59 @@ export async function getFilePrefix({
     pagination: false,
     req,
     select: {
+      _managedFiles: true,
       _objectKey: true,
+      original: true,
       prefix: true,
     },
     showHiddenFields: true,
     where,
   })
 
-  const found = files?.docs?.[0] as { _objectKey?: string; prefix?: string } | undefined
-  return buildPrefixWithObjectKey({ objectKey: found?._objectKey, prefix: found?.prefix })
+  const found = files?.docs?.[0] as
+    | ({ _objectKey?: string; prefix?: string } & Partial<FileData>)
+    | undefined
+  return (
+    (found &&
+      getOriginalFilePrefix({ collectionPrefix, doc: found, filename, useCompositePrefixes })) ??
+    buildPrefixWithObjectKey({ objectKey: found?._objectKey, prefix: found?.prefix })
+  )
+}
+
+const getOriginalFilePrefix = ({
+  collectionPrefix,
+  doc,
+  filename,
+  useCompositePrefixes,
+}: {
+  collectionPrefix?: string
+  doc: Partial<FileData>
+  filename: string
+  useCompositePrefixes: boolean
+}): string | undefined => {
+  if (doc.original?.filename !== filename) {
+    return
+  }
+
+  const original = doc._managedFiles?.find(
+    (file) =>
+      file.roles.some((role) => role.type === 'original') &&
+      path.posix.basename(file.key) === filename,
+  )
+  if (!original) {
+    return
+  }
+
+  const directory = path.posix.dirname(original.key)
+  if (!useCompositePrefixes) {
+    return directory === '.' ? '' : directory
+  }
+
+  const base = collectionPrefix ? `${collectionPrefix}/` : ''
+  if (directory === collectionPrefix) {
+    return ''
+  }
+  if (!base || directory.startsWith(base)) {
+    return directory.slice(base.length)
+  }
 }
