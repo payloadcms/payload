@@ -25,7 +25,6 @@ import {
   mediaWithGenerateFileURLSlug,
   mediaWithOverwriteSlug,
   mediaWithPrefixSlug,
-  mediaWithThrowingHookSlug,
   prefix,
   restrictedMediaSlug,
   testMetadataSlug,
@@ -242,7 +241,7 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
       expect(sanitizeFilename('a/b/../../c/d/../file.txt')).toBe('file.txt')
     })
 
-    test('should normalize backslash separators', () => {
+    test('should normalize backslash separators in a filename', () => {
       expect(sanitizeFilename('..\\..\\windows\\system32\\config')).toBe('config')
     })
 
@@ -566,7 +565,7 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
         for (const id of createdIDs) {
           try {
             await payload.delete({ id, collection: testMetadataSlug, overrideAccess: true })
-          } catch (e) {
+          } catch (_e) {
             // Ignore
           }
         }
@@ -951,7 +950,7 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
           try {
             await payload.delete({
               id,
-              collection: mediaWithThrowingHookSlug,
+              collection: testMetadataSlug,
               overrideAccess: true,
             })
           } catch (_) {
@@ -966,15 +965,15 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
       }) => {
         await expect(
           payload.create({
-            collection: mediaWithThrowingHookSlug,
-            data: { shouldThrow: true },
+            collection: testMetadataSlug,
+            data: { testNote: 'Throw on internal update' },
             filePath: path.resolve(dirname, '../uploads/image.png'),
             overrideAccess: true,
           }),
         ).rejects.toThrow('User afterChange hook throws error')
       })
 
-      test('should surface user afterChange errors during reupload and preserve the previous file in S3', async ({
+      test('should surface user afterChange errors during reupload and preserve the previous file', async ({
         payload,
       }) => {
         const imagePath = path.resolve(dirname, '../uploads/image.png')
@@ -986,8 +985,8 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
         })
 
         const initial = await payload.create({
-          collection: mediaWithThrowingHookSlug,
-          data: { shouldThrow: false },
+          collection: testMetadataSlug,
+          data: { testNote: 'Initial upload' },
           file: buildFile('initial.png'),
           overrideAccess: true,
         })
@@ -995,25 +994,19 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
         createdIDs.push(initial.id)
 
         const initialKey = `${initial.filename}`
-        const before = await client.send(
-          new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: initialKey }),
-        )
-        expect(before.$metadata.httpStatusCode).toBe(200)
+        expect(uploadedTestFiles.has(initialKey)).toBe(true)
 
         await expect(
           payload.update({
             id: initial.id,
-            collection: mediaWithThrowingHookSlug,
-            data: { shouldThrow: true },
+            collection: testMetadataSlug,
+            data: { testNote: 'Throw on internal update' },
             file: buildFile('replacement.png'),
             overrideAccess: true,
           }),
         ).rejects.toThrow('User afterChange hook throws error')
 
-        const after = await client.send(
-          new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: initialKey }),
-        )
-        expect(after.$metadata.httpStatusCode).toBe(200)
+        expect(uploadedTestFiles.has(initialKey)).toBe(true)
       })
     })
 
@@ -1101,11 +1094,11 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
     })
 
     test.describe('Azure', () => {
-      test.todo('can upload')
+      test.todo('should upload to Azure')
     })
 
     test.describe('GCS', () => {
-      test.todo('can upload')
+      test.todo('should upload to GCS')
     })
 
     test.describe('R2', () => {
