@@ -443,6 +443,7 @@ export interface Post {
   id: string;
   title: string;
   content?: LexicalRichText<LexicalNodes_A6419FB0> | null;
+  disabledForImportExport?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -1873,6 +1874,7 @@ export interface PagesSelect<T extends boolean = true> {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   content?: T;
+  disabledForImportExport?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
