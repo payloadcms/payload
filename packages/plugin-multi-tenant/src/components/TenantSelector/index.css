@@ -2,7 +2,7 @@
   .tenant-selector {
     border-bottom: var(--stroke-width-small) solid var(--color-border);
     width: 100%;
-    margin-block-end: var(--spacer-2-5);
+    margin-block-end: var(--spacer-2);
     padding-block-start: var(--nav-padding-block-start);
     padding-block-end: var(--spacer-3);
 
