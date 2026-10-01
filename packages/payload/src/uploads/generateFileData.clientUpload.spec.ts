@@ -17,6 +17,8 @@ it.each([
   { hasTempFile: false, mode: 'format' },
   { hasTempFile: true, mode: 'format-crop' },
   { hasTempFile: false, mode: 'format-crop' },
+  { hasTempFile: true, mode: 'unchanged-crop' },
+  { hasTempFile: false, mode: 'unchanged-crop' },
   { hasTempFile: true, mode: 'crop' },
   { hasTempFile: false, mode: 'crop' },
 ])(
@@ -50,9 +52,15 @@ it.each([
         query: mode.includes('crop')
           ? {
               uploadEdits: {
-                crop: { height: 50, width: 50, unit: '%', x: 0, y: 0 },
-                heightInPixels: 40,
-                widthInPixels: 60,
+                crop: {
+                  height: mode === 'unchanged-crop' ? 100 : 50,
+                  width: mode === 'unchanged-crop' ? 100 : 50,
+                  unit: '%',
+                  x: 0,
+                  y: 0,
+                },
+                heightInPixels: mode === 'unchanged-crop' ? 80 : 40,
+                widthInPixels: mode === 'unchanged-crop' ? 120 : 60,
               },
             }
           : {},
@@ -69,7 +77,9 @@ it.each([
                   formatOptions: { format: 'webp' },
                   ...(mode.includes('crop') ? { resizeOptions: { height: 20, width: 30 } } : {}),
                 }
-              : { resizeOptions: { height: 20, width: 30 } }),
+              : mode === 'unchanged-crop'
+                ? {}
+                : { resizeOptions: { height: 20, width: 30 } }),
           },
         },
       } as unknown as Collection
@@ -100,8 +110,8 @@ it.each([
       expect(bytes.length).toBe(metadata.filesize)
       expect(await sharp(bytes).metadata()).toMatchObject({
         format: mode.startsWith('format') ? 'webp' : 'png',
-        height: mode === 'format' ? 80 : 20,
-        width: mode === 'format' ? 120 : 30,
+        height: mode === 'format' || mode === 'unchanged-crop' ? 80 : 20,
+        width: mode === 'format' || mode === 'unchanged-crop' ? 120 : 30,
       })
       if (hasTempFile) {
         expect(req.file!.data.length).toBe(0)
@@ -109,5 +119,66 @@ it.each([
     } finally {
       await rm(directory, { force: true, recursive: true })
     }
+  },
+)
+
+it.each([false, true])(
+  'should preserve animation when cropping and converting (resize: %s)',
+  async (hasResizeOptions) => {
+    const source = await readFile(
+      new URL('../../../../test/uploads/animated.webp', import.meta.url),
+    )
+    const sourceMetadata = await sharp(source, { animated: true }).metadata()
+    const req = {
+      file: {
+        clientUpload: { isProcessed: false, originalStorageFilePath: 'issued-key/animated.webp' },
+        data: source,
+        mimetype: 'image/webp',
+        name: 'animated.webp',
+        size: source.length,
+        uploadReference: { signedReceipt: 'verified-receipt' },
+      },
+      payload: { config: { sharp }, logger: { error: vi.fn() } },
+      query: {
+        uploadEdits: {
+          crop: { height: 50, width: 50, unit: '%', x: 0, y: 0 },
+          heightInPixels: 100,
+          widthInPixels: 100,
+        },
+      },
+    } as unknown as PayloadRequest
+    const collection = {
+      config: {
+        slug: 'media',
+        upload: {
+          disableLocalStorage: true,
+          focalPoint: false,
+          formatOptions: { format: 'webp' },
+          ...(hasResizeOptions ? { resizeOptions: { height: 50, width: 50 } } : {}),
+        },
+      },
+    } as unknown as Collection
+    const { data } = await generateFileData({
+      collection,
+      config: {} as SanitizedConfig,
+      data: {},
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req,
+    })
+    const metadata = data as { filesize: number; height: number; width: number }
+    const resultMetadata = await sharp(req.file!.data, { animated: true }).metadata()
+
+    expect(resultMetadata.pages).toBe(sourceMetadata.pages)
+    const frameDimension = hasResizeOptions ? 50 : 100
+
+    expect(resultMetadata.pageHeight).toBe(frameDimension)
+    expect(resultMetadata.width).toBe(frameDimension)
+    expect(metadata).toMatchObject({
+      height: frameDimension,
+      width: frameDimension,
+      filesize: req.file!.data.length,
+    })
+    expect(req.file!.size).toBe(metadata.filesize)
   },
 )

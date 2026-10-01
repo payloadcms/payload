@@ -356,14 +356,14 @@ export const generateFileData = async <T>({
       })
 
       if (formatOptions) {
-        ;({ data: croppedImage, info } = await sharp(croppedImage)
+        ;({ data: croppedImage, info } = await sharp(croppedImage, sharpOptions)
           .toFormat(formatOptions.format, formatOptions.options)
           .toBuffer({ resolveWithObject: true }))
       }
 
       // Apply resize after cropping to ensure it conforms to resizeOptions
       if (resizeOptions && !resizeOptions.withoutEnlargement) {
-        const resizedAfterCrop = await sharp(croppedImage)
+        const resizedAfterCrop = await sharp(croppedImage, sharpOptions)
           .resize({
             fit: resizeOptions?.fit || 'cover',
             height: resizeOptions?.height,

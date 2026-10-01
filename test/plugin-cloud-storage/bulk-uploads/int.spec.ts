@@ -25,25 +25,28 @@ test.suite('cloud storage bulk request isolation', { config: './config.ts' }, ()
   for (const mode of ['reprocess', 'buffer', 'temp'] as const) {
     const hasSharedFile = mode !== 'reprocess'
     test(`should preserve isolated crop state for bulk uploads (${mode})`, async ({ payload }) => {
-      const docs = await Promise.all(
-        ['#336699', '#996633'].map(async (background, index) => {
-          const bytes = await sharp({
-            create: { background, channels: 3, height: 80 + index * 20, width: 120 + index * 20 },
-          })
-            .png()
-            .toBuffer()
-          return payload.create({
+      const docs: Array<{ id: number | string }> = []
+
+      for (const [index, background] of ['#336699', '#996633'].entries()) {
+        const bytes = await sharp({
+          create: { background, channels: 3, height: 80 + index * 20, width: 120 + index * 20 },
+        })
+          .png()
+          .toBuffer()
+
+        docs.push(
+          await payload.create({
             collection: mediaSlug,
-            data: {},
+            data: hasSharedFile ? { prefix: `document-${index}` } : {},
             file: {
               data: bytes,
               mimetype: 'image/png',
               name: `original-${index}.png`,
               size: bytes.length,
             },
-          })
-        }),
-      )
+          }),
+        )
+      }
       outerRequests.length = 0
 
       const req = await createPayloadRequest({ payload })
@@ -103,6 +106,7 @@ test.suite('cloud storage bulk request isolation', { config: './config.ts' }, ()
         collection: mediaSlug,
         data: {},
         file: req.file,
+        overrideAccess: hasSharedFile,
         where: { id: { in: docs.map(({ id }) => id) } },
         req,
       })
@@ -129,6 +133,10 @@ test.suite('cloud storage bulk request isolation', { config: './config.ts' }, ()
       }
       const result = await update
 
+      expect(outerRequests.every(({ file }) => file?.data === req.file?.data)).toBe(hasSharedFile)
+      expect(outerRequests.map(({ file }) => file?.tempFilePath).filter(Boolean)).toEqual(
+        mode === 'temp' ? [tempFilePath, tempFilePath] : [],
+      )
       expect(outerRequests).toHaveLength(2)
       expect(outerRequests[0]!.context).not.toBe(outerRequests[1]!.context)
       expect(outerRequests[0]!.query).not.toBe(outerRequests[1]!.query)
@@ -142,13 +150,13 @@ test.suite('cloud storage bulk request isolation', { config: './config.ts' }, ()
           )
         : false
       expect(hasTempFile).toBe(false)
-      expect(
-        storedFiles
-          .get(result.docs[0]!.filename)!
-          .equals(storedFiles.get(result.docs[1]!.filename)!),
-      ).toBe(hasSharedFile)
+      const resultBuffers = result.docs.map(
+        (doc) => storedFiles.get([doc.prefix, doc.filename].filter(Boolean).join('/'))!,
+      )
+
+      expect(resultBuffers[0]!.equals(resultBuffers[1]!)).toBe(hasSharedFile)
       for (const doc of result.docs) {
-        const bytes = storedFiles.get(doc.filename)!
+        const bytes = storedFiles.get([doc.prefix, doc.filename].filter(Boolean).join('/'))!
         expect(await sharp(bytes).metadata()).toMatchObject({ height: 40, width: 60 })
         expect(doc.filesize).toBe(bytes.length)
         expect(doc.storageVersion).toBe(2)
