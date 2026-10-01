@@ -22,11 +22,17 @@ export const toolSchemas = {
         .describe(
           'Optional: locale code to retrieve data in (e.g., "en", "es"). Use "all" to retrieve all locales for localized fields',
         ),
-      select: z
-        .string()
+      populate: z
+        .record(z.string(), z.unknown())
         .optional()
         .describe(
-          "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+          'Optional: control which fields to include from populated relationship or upload documents.',
+        ),
+      select: z
+        .record(z.string(), z.unknown())
+        .optional()
+        .describe(
+          "Optional: define exactly which fields you'd like to return in the response, e.g., {\"title\": true}",
         ),
     }),
   },
@@ -58,6 +64,12 @@ export const toolSchemas = {
         .string()
         .optional()
         .describe('Optional: fallback locale code to use when requested locale is not available'),
+      joins: z
+        .union([z.record(z.string(), z.unknown()), z.literal(false)])
+        .optional()
+        .describe(
+          'Optional: configure join field queries, or pass false to disable all join fields.',
+        ),
       limit: z
         .number()
         .int()
@@ -79,16 +91,30 @@ export const toolSchemas = {
         .optional()
         .default(1)
         .describe('Page number for pagination (default: 1)'),
-      select: z
-        .string()
+      pagination: z
+        .boolean()
+        .optional()
+        .describe('Optional: set to false to skip the count query overhead'),
+      populate: z
+        .record(z.string(), z.unknown())
         .optional()
         .describe(
-          "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+          'Optional: control which fields to include from populated relationship or upload documents.',
+        ),
+      select: z
+        .record(z.string(), z.unknown())
+        .optional()
+        .describe(
+          "Optional: define exactly which fields you'd like to return in the response, e.g., {\"title\": true}",
         ),
       sort: z
         .string()
         .optional()
         .describe('Field to sort by (e.g., "createdAt", "-updatedAt" for descending)'),
+      trash: z
+        .boolean()
+        .optional()
+        .describe('Optional: include soft-deleted documents when trash is enabled on the collection'),
       where: z
         .string()
         .optional()
@@ -126,10 +152,10 @@ export const toolSchemas = {
           'Optional: locale code to create the document in (e.g., "en", "es"). Defaults to the default locale',
         ),
       select: z
-        .string()
+        .record(z.string(), z.unknown())
         .optional()
         .describe(
-          "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+          "Optional: define exactly which fields you'd like to return in the response, e.g., {\"title\": true}",
         ),
     }),
   },
@@ -167,10 +193,10 @@ export const toolSchemas = {
         .default(true)
         .describe('Whether to override document locks'),
       select: z
-        .string()
+        .record(z.string(), z.unknown())
         .optional()
         .describe(
-          "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+          "Optional: define exactly which fields you'd like to return in the response, e.g., {\"title\": true}",
         ),
       where: z
         .string()
@@ -235,10 +261,10 @@ export const toolSchemas = {
           'Optional: locale code to update data in (e.g., "en", "es"). Use "all" to update all locales for localized fields',
         ),
       select: z
-        .string()
+        .record(z.string(), z.unknown())
         .optional()
         .describe(
-          "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"siteName\": true}'",
+          "Optional: define exactly which fields you'd like to return in the response, e.g., {\"siteName\": true}",
         ),
     }),
   },
@@ -369,11 +395,9 @@ export const toolSchemas = {
     description: 'Checks authentication status for the current user.',
     parameters: z.object({
       headers: z
-        .string()
+        .record(z.string(), z.string())
         .optional()
-        .describe(
-          'Optional JSON string containing custom headers to send with the authentication request',
-        ),
+        .describe('Optional custom headers to send with the authentication request'),
     }),
   },
 
