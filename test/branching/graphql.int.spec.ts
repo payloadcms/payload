@@ -357,6 +357,25 @@ test.suite('Branching GraphQL', { config: './config.ts' }, () => {
     })
 
     expect(result.errors).toBeUndefined()
+    expect(result.data?.restoreVersionHomepage).toMatchObject({ heroTitle: 'branch hero one' })
+
+    const versionsAfterRestore = await payload.findGlobalVersions({
+      slug: homepageGlobalSlug,
+      branch,
+      overrideAccess: true,
+      pagination: false,
+    })
+    const latestVersionAfterRestore = versionsAfterRestore.docs.find(({ latest }) => latest)
+    const mainVersionsAfterRestore = await payload.findGlobalVersions({
+      slug: homepageGlobalSlug,
+      overrideAccess: true,
+      pagination: false,
+    })
+
+    expect(latestVersionAfterRestore?.version.heroTitle).toBe('branch hero one')
+    expect(mainVersionsAfterRestore.docs.map(({ version }) => version.heroTitle)).not.toContain(
+      'branch hero one',
+    )
 
     const onBranch = await payload.findGlobal({
       slug: homepageGlobalSlug,

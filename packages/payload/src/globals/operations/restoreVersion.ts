@@ -20,6 +20,7 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { markTransactionWrite } from '../../utilities/transactionMutationTracker.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
 import { getRestoredStatusesToAuthorize } from '../../versions/getRestoredStatusesToAuthorize.js'
+import { saveVersion } from '../../versions/saveVersion.js'
 
 export type Arguments = {
   depth?: number
@@ -173,21 +174,31 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
       slug: globalConfig.slug,
       req,
     })
+    const writeBranch = resolveBranchGlobalWrite({ globalSlug: globalConfig.slug, req })
 
     let result = rawVersion.version
-    const writeBranch = resolveBranchGlobalWrite({ globalSlug: globalConfig.slug, req })
 
     if (payload.config.branching?.branchableGlobals.has(globalConfig.slug)) {
       result[branchField] = writeBranch ?? MAIN_BRANCH
     }
 
-    // Ensure updatedAt date is always updated
-    result.updatedAt = new Date().toISOString()
-
-    if (global) {
+    if (global || writeBranch) {
+      // Ensure updatedAt date is always updated
+      result.updatedAt = new Date().toISOString()
       result = await payload.db.updateGlobal({
         slug: globalConfig.slug,
         data: result,
+        req,
+      })
+      markTransactionWrite({ req })
+
+      result = await saveVersion({
+        autosave: false,
+        docWithLocales: result,
+        draft,
+        global: globalConfig,
+        operation: 'restoreVersion',
+        payload,
         req,
       })
     } else {
@@ -196,21 +207,8 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
         data: result,
         req,
       })
+      markTransactionWrite({ req })
     }
-    markTransactionWrite({ req })
-
-    const now = new Date().toISOString()
-
-    result = await payload.db.createGlobalVersion({
-      autosave: false,
-      createdAt: result.createdAt ? new Date(result.createdAt).toISOString() : now,
-      globalSlug: globalConfig.slug,
-      req,
-      updatedAt: draft ? now : new Date(result.updatedAt).toISOString(),
-      versionData: result,
-    })
-    markTransactionWrite({ req })
-
     if (writeBranch) {
       await recordBranchGlobalChange({
         branch: writeBranch,
