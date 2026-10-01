@@ -164,12 +164,8 @@
     align-items: center;
   }
 
-  .popup-button-list__button--submenu-trigger.popup-button-list__button--selected {
-    background-color: transparent;
-    color: var(--popup-item-color, var(--color-text));
-  }
-
   .popup-button-list__button--submenu-trigger:hover,
+  .popup-button-list__button--submenu-trigger.popup-button-list__button--selected,
   .popup-button-list__button--submenu-trigger.popup-button-list__button--selected:hover {
     background-color: var(--popup-item-bg-hover, var(--color-bg-brand));
     color: var(--popup-item-color-hover, var(--color-text-onbrand));
