@@ -10,7 +10,7 @@ const RESERVED_IMAGE_SIZE_NAMES = [
   'height',
   'url',
   'thumbnailURL',
-  'sizes',
+  'variants',
   'focalX',
   'focalY',
 ]

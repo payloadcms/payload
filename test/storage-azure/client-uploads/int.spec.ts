@@ -134,7 +134,7 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
         filename: 'legacy-original.png',
         mimeType: 'image/png',
         prefix,
-        sizes: { thumbnail: { filename: sizeFilename, mimeType: 'image/png' } },
+        variants: { thumbnail: { filename: sizeFilename, mimeType: 'image/png' } },
       },
     })
     const collection = payload.collections[mediaHeaderOnlyWithSizesSlug].config
@@ -464,9 +464,9 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
 
         expect(doc.filesize).toBe(file.length)
         expect(doc.mimeType).toBe('image/jpeg')
-        expect(doc.sizes.thumbnail.width).toBe(400)
-        expect(doc.sizes.thumbnail.height).toBe(300)
-        expect(doc.sizes.thumbnail.filename).toBeTruthy()
+        expect(doc.variants.thumbnail.width).toBe(400)
+        expect(doc.variants.thumbnail.height).toBe(300)
+        expect(doc.variants.thumbnail.filename).toBeTruthy()
 
         expect(downloadSpy).toHaveBeenCalledTimes(1)
 

@@ -37,7 +37,7 @@ const RelatedDocIcon = ({ collectionSlug, row }: RelatedDocIconProps) => {
 
   if (isFileImage) {
     thumbnailSrc = getBestFitFromSizes({
-      sizes: row.sizes as Record<string, { url?: string; width?: number }>,
+      sizes: row.variants as Record<string, { url?: string; width?: number }>,
       thumbnailURL: row.thumbnailURL as string,
       url: row.url as string,
       width: row.width as number,

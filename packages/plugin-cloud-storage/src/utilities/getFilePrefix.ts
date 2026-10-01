@@ -72,7 +72,7 @@ export async function getFilePrefix({
         filename: { equals: filename },
       },
       ...variants.map((imageSize) => ({
-        [`sizes.${imageSize.name}.filename`]: { equals: filename },
+        [`variants.${imageSize.name}.filename`]: { equals: filename },
       })),
     ],
   }

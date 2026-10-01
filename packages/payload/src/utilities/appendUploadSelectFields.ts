@@ -29,14 +29,14 @@ export const appendUploadSelectFields = ({
       typeof collectionConfig.upload.adminThumbnail === 'string'
     ) {
       /** Only return image size properties that are required to generate the adminThumbnailURL */
-      select.sizes = {
+      select.variants = {
         [collectionConfig.upload.adminThumbnail]: {
           filename: true,
         },
       }
     } else {
       /** Only return image size properties that are required for thumbnails */
-      select.sizes = collectionConfig.upload.variants.reduce((acc, imageSizeConfig) => {
+      select.variants = collectionConfig.upload.variants.reduce((acc, imageSizeConfig) => {
         return {
           ...acc,
           [imageSizeConfig.name]: {

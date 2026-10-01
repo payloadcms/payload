@@ -6,7 +6,7 @@ import { Forbidden } from '../../errors/Forbidden.js'
 export type ResolvedUploadDocument = {
   filename: string
   mimeType: string
-  sizes?: Record<string, { filename?: null | string; mimeType?: null | string } | null>
+  variants?: Record<string, { filename?: null | string; mimeType?: null | string } | null>
 } & TypeWithID
 
 /**
@@ -26,7 +26,7 @@ export function buildFilenameWhere({
 
   variants?.forEach(({ name }) => {
     filenameCondition.or!.push({
-      [`sizes.${name}.filename`]: { equals: filename },
+      [`variants.${name}.filename`]: { equals: filename },
     })
   })
 
@@ -46,7 +46,7 @@ export function getRequestedFile({
   filename: string
 }): { filename: string; mimeType: string } {
   if (document.filename !== filename) {
-    const size = Object.values(document.sizes ?? {}).find((size) => size?.filename === filename)
+    const size = Object.values(document.variants ?? {}).find((size) => size?.filename === filename)
 
     if (size?.filename && size.mimeType) {
       return { filename: size.filename, mimeType: size.mimeType }

@@ -232,7 +232,7 @@ describe('getFileFromUploadInstructions', () => {
         where: {
           or: [
             { filename: { equals: 'preview.png' } },
-            { 'sizes.preview.filename': { equals: 'preview.png' } },
+            { 'variants.preview.filename': { equals: 'preview.png' } },
           ],
         },
       }),

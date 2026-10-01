@@ -61,13 +61,13 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
             config,
             filename:
               typeof adminThumbnail === 'string'
-                ? (originalDoc.sizes?.[adminThumbnail]?.filename as string)
+                ? (originalDoc.variants?.[adminThumbnail]?.filename as string)
                 : undefined,
             relative: false,
             serverURL: req.payload.config.serverURL,
             urlOrPath:
               typeof adminThumbnail === 'string'
-                ? (originalDoc.sizes?.[adminThumbnail]?.url as string)
+                ? (originalDoc.variants?.[adminThumbnail]?.url as string)
                 : undefined,
           })
         },
@@ -200,7 +200,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
   if (uploadOptions.variants) {
     uploadFields = uploadFields.concat([
       {
-        name: 'sizes',
+        name: 'variants',
         type: 'group',
         admin: {
           hidden: true,
@@ -226,8 +226,8 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
                       collectionSlug: collection?.slug as string,
                       config,
                       filename:
-                        data?.sizes?.[size.name]?.filename ||
-                        originalDoc?.sizes?.[size.name]?.filename,
+                        data?.variants?.[size.name]?.filename ||
+                        originalDoc?.variants?.[size.name]?.filename,
                       relative: false,
                       serverURL: req.payload.config.serverURL,
                       urlOrPath: value,
@@ -239,8 +239,8 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
                       collectionSlug: collection?.slug as string,
                       config,
                       filename:
-                        data?.sizes?.[size.name]?.filename ||
-                        originalDoc?.sizes?.[size.name]?.filename,
+                        data?.variants?.[size.name]?.filename ||
+                        originalDoc?.variants?.[size.name]?.filename,
                       relative: true,
                       serverURL: req.payload.config.serverURL,
                       urlOrPath: value,

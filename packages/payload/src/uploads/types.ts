@@ -23,9 +23,9 @@ export type FileData = {
   focalY?: number
   height: number
   mimeType: string
-  sizes: FileSizes
   tempFilePath?: string
   url?: string
+  variants: FileSizes
   width: number
 }
 
