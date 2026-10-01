@@ -3,7 +3,7 @@ import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 
-test.suite({ config: './config.ts' })('Custom GraphQL', () => {
+test.suite('Custom GraphQL', { config: './config.ts' }, () => {
   if (
     !['cosmosdb', 'firestore', 'sqlite', 'sqlite-uuid', 'sqlite-uuidv7'].includes(
       process.env.PAYLOAD_DATABASE || '',

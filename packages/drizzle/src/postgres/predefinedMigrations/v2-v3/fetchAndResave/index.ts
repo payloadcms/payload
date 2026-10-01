@@ -47,6 +47,7 @@ export const fetchAndResave = async ({
             locale: 'all',
             req,
             showHiddenFields: true,
+            overrideAccess: true,
           })
 
           if (debug) {
@@ -97,6 +98,7 @@ export const fetchAndResave = async ({
             locale: 'all',
             req,
             showHiddenFields: true,
+            overrideAccess: true,
           })
 
           if (debug) {
@@ -155,6 +157,7 @@ export const fetchAndResave = async ({
             locale: 'all',
             req,
             showHiddenFields: true,
+            overrideAccess: true,
           })
 
           if (debug) {
@@ -202,6 +205,7 @@ export const fetchAndResave = async ({
             locale: 'all',
             req,
             showHiddenFields: true,
+            overrideAccess: true,
           })
 
           traverseFields({

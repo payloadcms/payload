@@ -45,9 +45,7 @@ export function getFileContentRequirement({
   }
 
   const hasMimeTypeAllowList =
-    !uploadConfig.allowRestrictedFileTypes &&
-    Array.isArray(uploadConfig.mimeTypes) &&
-    uploadConfig.mimeTypes.length > 0
+    Array.isArray(uploadConfig.mimeTypes) && uploadConfig.mimeTypes.length > 0
 
   if (hasMimeTypeAllowList) {
     return 'full'

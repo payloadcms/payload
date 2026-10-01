@@ -12,6 +12,7 @@
     padding: var(--spacer-1) 0;
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .doc-tabs {
       width: 100%;

@@ -15,6 +15,7 @@ import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
 import { MediaWithCompositePrefixes } from './collections/MediaWithCompositePrefixes.js'
 import { MediaWithCustomURL } from './collections/MediaWithCustomURL.js'
+import { MediaWithDisabledPlugin } from './collections/MediaWithDisabledPlugin.js'
 import { MediaWithGenerateFileURL } from './collections/MediaWithGenerateFileURL.js'
 import { MediaWithOverwrite } from './collections/MediaWithOverwrite.js'
 import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
@@ -22,11 +23,13 @@ import { MediaWithThrowingHook } from './collections/MediaWithThrowingHook.js'
 import { RestrictedMedia } from './collections/RestrictedMedia.js'
 import { TestMetadata } from './collections/TestMetadata.js'
 import { Users } from './collections/Users.js'
+import { r2UploadEndpoints } from './r2.js'
 import {
   collectionPrefix,
   mediaSlug,
   mediaWithCompositePrefixesSlug,
   mediaWithCustomURLSlug,
+  mediaWithDisabledPluginSlug,
   mediaWithGenerateFileURLSlug,
   mediaWithOverwriteSlug,
   mediaWithPrefixSlug,
@@ -45,6 +48,8 @@ export type BuildPluginCloudStorageIntConfigArgs = {
   /** When false, S3 uses non-composite prefix resolution (single stored prefix segment; pre-composite behavior). */
   useCompositePrefixes: boolean
 }
+
+export const recordedCleanupTargets: Array<{ filename: string; prefix?: string }> = []
 
 export function buildPluginCloudStorageIntConfig({
   useCompositePrefixes,
@@ -160,12 +165,22 @@ export function buildPluginCloudStorageIntConfig({
     })
   }
 
+  const disabledStoragePlugin = cloudStoragePlugin({
+    collections: {
+      [mediaWithDisabledPluginSlug]: {
+        adapter: null,
+      },
+    },
+    enabled: false,
+  })
+
   const testMetadataPlugin = cloudStoragePlugin({
     collections: {
       [testMetadataSlug]: {
         adapter: () => ({
           name: 'test-metadata-adapter',
-          handleDelete: ({ filename }) => {
+          handleDelete: ({ doc, filename }) => {
+            recordedCleanupTargets.push({ filename, prefix: doc.prefix })
             uploadedTestFiles.delete(filename)
           },
           handleUpload: ({ data, file }) => {
@@ -185,7 +200,7 @@ export function buildPluginCloudStorageIntConfig({
           },
           staticHandler: () => new Response('Not found', { status: 404 }),
         }),
-        prefix: 'test-prefix',
+        prefix: 'test-metadata',
       },
     },
   })
@@ -204,6 +219,7 @@ export function buildPluginCloudStorageIntConfig({
         Media,
         MediaWithCompositePrefixes,
         MediaWithCustomURL,
+        MediaWithDisabledPlugin,
         MediaWithGenerateFileURL,
         MediaWithOverwrite,
         MediaWithPrefix,
@@ -212,7 +228,8 @@ export function buildPluginCloudStorageIntConfig({
         TestMetadata,
         Users,
       ],
-      plugins: [testMetadataPlugin],
+      endpoints: r2UploadEndpoints,
+      plugins: [testMetadataPlugin, disabledStoragePlugin],
       storage: storagePlugin ? [storagePlugin] : [],
       typescript: {
         outputFile: path.resolve(dirname, 'payload-types.ts'),
@@ -226,6 +243,7 @@ export function buildPluginCloudStorageIntConfig({
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       payload.logger.info(

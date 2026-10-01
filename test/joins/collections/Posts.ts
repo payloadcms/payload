@@ -41,6 +41,11 @@ export const Posts: CollectionConfig = {
       },
     },
     {
+      name: 'hiddenSecret',
+      type: 'text',
+      hidden: true,
+    },
+    {
       name: 'upload',
       type: 'upload',
       relationTo: uploadsSlug,

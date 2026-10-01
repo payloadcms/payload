@@ -17,6 +17,7 @@ async function getDocument(collection: Collection, slug: string, depth = 0) {
         equals: slug,
       },
     },
+    overrideAccess: true,
   })
 
   return page.docs[0]

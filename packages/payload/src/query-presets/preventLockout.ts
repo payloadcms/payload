@@ -1,7 +1,7 @@
 import type { Validate } from '../fields/config/types.js'
 
 import { APIError } from '../errors/APIError.js'
-import { createLocalReq } from '../utilities/createLocalReq.js'
+import { createPayloadRequest } from '../utilities/createPayloadRequest.js'
 import { initTransaction } from '../utilities/initTransaction.js'
 import { killTransaction } from '../utilities/killTransaction.js'
 import { queryPresetsCollectionSlug } from './config.js'
@@ -21,17 +21,15 @@ export const preventLockout: Validate = async (
 ) => {
   // Use context to ensure an infinite loop doesn't occur
   if (!incomingReq.context._preventLockout && !overrideAccess) {
-    const req = await createLocalReq(
-      {
-        context: {
-          _preventLockout: true,
-        },
-        req: {
-          user: incomingReq.user,
-        },
+    const req = await createPayloadRequest({
+      context: {
+        _preventLockout: true,
       },
-      incomingReq.payload,
-    )
+      payload: incomingReq.payload,
+      req: {
+        user: incomingReq.user,
+      },
+    })
 
     // Might be `null` if no transactions are enabled
     const transaction = await initTransaction(req)
@@ -43,6 +41,7 @@ export const preventLockout: Validate = async (
         ...data,
         isTemp: true,
       },
+      overrideAccess: true,
       req,
     })
 
@@ -82,6 +81,7 @@ export const preventLockout: Validate = async (
         await req.payload.delete({
           id: tempPreset.id,
           collection: queryPresetsCollectionSlug,
+          overrideAccess: true,
           req,
         })
       }

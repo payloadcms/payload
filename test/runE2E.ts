@@ -1,4 +1,3 @@
-import { spawn } from 'child_process'
 import globby from 'globby'
 import minimist from 'minimist'
 import { createServer } from 'net'
@@ -6,6 +5,10 @@ import path from 'path'
 import shelljs from 'shelljs'
 import slash from 'slash'
 import { fileURLToPath } from 'url'
+
+import type { TestServerProcess } from './__helpers/shared/devServer.js'
+
+import { spawnTestServer } from './__helpers/shared/devServer.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(__filename)
@@ -35,6 +38,7 @@ const {
   'grep-invert': grepInvert,
   headed,
   part,
+  'screen-reader': screenReader,
   shard,
   'update-snapshots': updateSnapshots,
   workers,
@@ -50,7 +54,8 @@ const effectiveGrepInvert = grepInvert ?? (grep === '@visual' ? undefined : '@vi
 
 // Run all
 if (!suiteName) {
-  let files = await globby(`${path.resolve(dirname).replace(/\\/g, '/')}/**/*e2e.spec.ts`)
+  const testFilePattern = screenReader ? '*screen-reader.spec.ts' : '*e2e.spec.ts'
+  let files = await globby(`${path.resolve(dirname).replace(/\\/g, '/')}/**/${testFilePattern}`)
 
   const totalFiles = files.length
 
@@ -90,6 +95,7 @@ if (!suiteName) {
       baseTestFolder,
       grepInvertArg: effectiveGrepInvert,
       headedArg: headed,
+      screenReaderArg: screenReader,
       suitePaths: file,
       updateSnapshotsArg: updateSnapshots,
     })
@@ -111,7 +117,10 @@ if (!suiteName) {
     .resolve(dirname, inputSuitePath)
     .replaceAll('__', '/')
 
-  const allSuitesInFolder = await globby(`${suiteFolderPath.replace(/\\/g, '/')}/*e2e.spec.ts`)
+  const testFilePattern = screenReader ? '*screen-reader.spec.ts' : '*e2e.spec.ts'
+  const allSuitesInFolder = await globby(
+    `${suiteFolderPath.replace(/\\/g, '/')}/${testFilePattern}`,
+  )
 
   const baseTestFolder = inputSuitePath.split('__')[0]
 
@@ -131,6 +140,7 @@ if (!suiteName) {
     grepArg: grep,
     grepInvertArg: effectiveGrepInvert,
     headedArg: headed,
+    screenReaderArg: screenReader,
     shardArg: shard,
     suiteConfigPath,
     suitePaths: allSuitesInFolder,
@@ -155,6 +165,7 @@ async function executePlaywright({
   grepArg,
   grepInvertArg,
   headedArg,
+  screenReaderArg,
   shardArg,
   suiteConfigPath,
   suitePaths,
@@ -167,6 +178,7 @@ async function executePlaywright({
   grepArg?: string
   grepInvertArg?: string
   headedArg?: boolean
+  screenReaderArg?: boolean
   shardArg?: string
   suiteConfigPath?: string
   suitePaths: string | string[]
@@ -177,7 +189,9 @@ async function executePlaywright({
   console.log(`Executing ${paths.join(', ')}...`)
   const playwrightCfg = path.resolve(
     dirname,
-    `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
+    screenReaderArg
+      ? 'playwright.screen-reader.config.ts'
+      : `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
   )
 
   const spawnDevArgs: string[] = [
@@ -204,23 +218,12 @@ async function executePlaywright({
     server.listen(e2ePort)
   })
 
-  let child: ReturnType<typeof spawn> | undefined
+  let server: TestServerProcess | undefined
 
   if (portInUse) {
     console.log(`Port ${e2ePort} is already in use — reusing existing dev server.`)
   } else {
-    child = spawn('pnpm', spawnDevArgs, {
-      cwd: path.resolve(dirname, '..'),
-      // Makes this process the leader of its own process group, so `stopServer` can signal every
-      // descendant it spawns (pnpm -> a shell -> cross-env -> tsx -> the actual Next.js server)
-      // by targeting the group instead of just this one PID, which by itself never reaches the
-      // real server process running several layers down.
-      detached: true,
-      env: {
-        ...process.env,
-      },
-      stdio: 'inherit',
-    })
+    server = spawnTestServer({ args: spawnDevArgs })
   }
 
   // A prod server only starts listening after the build/init completes, which outlasts Playwright's navigation timeout.
@@ -253,10 +256,10 @@ async function executePlaywright({
     if (bail) {
       console.error(`TEST FAILURE DURING ${suite} suite.`)
     }
-    await stopServer(child)
+    await server?.stop()
     process.exit(1)
   } else {
-    await stopServer(child)
+    await server?.stop()
   }
   testRunCodes.push(results)
 
@@ -266,41 +269,6 @@ async function executePlaywright({
 function clearWebpackCache() {
   const webpackCachePath = path.resolve(dirname, '../node_modules/.cache/webpack')
   shelljs.rm('-rf', webpackCachePath)
-}
-
-/**
- * Waits for the spawned server to fully exit before resolving, instead of firing the kill signal
- * and moving on. Without this, a caller that runs several suites back-to-back (each against its
- * own config, bound to the same port) can start the next suite's port-in-use check before this
- * server has actually released the port — that next suite then silently reuses the still-dying
- * server from the wrong suite instead of starting its own.
- */
-async function stopServer(serverChild: ReturnType<typeof spawn> | undefined): Promise<void> {
-  if (!serverChild || serverChild.exitCode !== null || !serverChild.pid) {
-    return
-  }
-
-  // Negative PID targets the whole process group `spawn`'s `detached: true` made this process the
-  // leader of, not just this one PID — see the comment where it's spawned. Already exited by the
-  // time this fires is the expected, common case (ESRCH), not an error.
-  const killGroup = (signal: NodeJS.Signals) => {
-    try {
-      process.kill(-serverChild.pid!, signal)
-    } catch {
-      // Already exited — nothing left to signal.
-    }
-  }
-
-  await new Promise<void>((resolve) => {
-    const killTimer = setTimeout(() => killGroup('SIGKILL'), 15000)
-
-    serverChild.once('exit', () => {
-      clearTimeout(killTimer)
-      resolve()
-    })
-
-    killGroup('SIGTERM')
-  })
 }
 
 /**

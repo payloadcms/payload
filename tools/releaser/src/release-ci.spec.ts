@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { runReleaseCi } from './release-ci.js'
 
+const defaultTriggerTag: string | undefined = 'v4.0.0-canary.10'
+
 const baseDeps = () => ({
   createDraftGitHubRelease: vi.fn(async () => ({ releaseUrl: 'https://gh/release' })),
   findChangelogBaseTag: vi.fn(async () => 'v4.0.0-canary.9'),
@@ -11,6 +13,7 @@ const baseDeps = () => ({
   })),
   hasGithubToken: true,
   log: vi.fn(),
+  triggerTag: defaultTriggerTag,
   workspace: {
     build: vi.fn(async () => {}),
     publish: vi.fn(async () => {}),
@@ -33,7 +36,7 @@ describe('runReleaseCi', () => {
     expect(deps.findChangelogBaseTag).toHaveBeenCalledWith({ version: '4.0.0-canary.10' })
     expect(deps.generateReleaseNotes).toHaveBeenCalledWith({
       fromVersion: 'v4.0.0-canary.9',
-      toVersion: 'HEAD',
+      toVersion: 'v4.0.0-canary.10',
     })
     expect(deps.createDraftGitHubRelease).toHaveBeenCalledWith({
       branch: 'main',
@@ -50,6 +53,7 @@ describe('runReleaseCi', () => {
 
   it('should derive the beta dist-tag from a beta version', async () => {
     const deps = makeDeps({
+      triggerTag: 'v4.0.0-beta.3',
       workspace: {
         build: vi.fn(async () => {}),
         publish: vi.fn(async () => {}),
@@ -96,6 +100,15 @@ describe('runReleaseCi', () => {
     expect(deps.workspace.build).not.toHaveBeenCalled()
   })
 
+  it('should refuse when no changelog base tag is available', async () => {
+    const deps = makeDeps({ findChangelogBaseTag: vi.fn(async () => undefined) })
+
+    await expect(runReleaseCi({ deps, dryRun: false })).rejects.toThrow(/changelog base tag/)
+    expect(deps.generateReleaseNotes).not.toHaveBeenCalled()
+    expect(deps.workspace.build).not.toHaveBeenCalled()
+    expect(deps.workspace.publish).not.toHaveBeenCalled()
+  })
+
   it('should refuse an unsupported prerelease line', async () => {
     const deps = makeDeps({
       workspace: {
@@ -108,6 +121,37 @@ describe('runReleaseCi', () => {
     await expect(runReleaseCi({ deps, dryRun: false })).rejects.toThrow(/prerelease line must be/)
     expect(deps.workspace.build).not.toHaveBeenCalled()
     expect(deps.workspace.publish).not.toHaveBeenCalled()
+  })
+
+  it('should refuse before building when the trigger tag does not match the version', async () => {
+    const deps = makeDeps({ triggerTag: 'v4.0.0-canary.11' })
+
+    await expect(runReleaseCi({ deps, dryRun: false })).rejects.toThrow(/does not match/)
+    expect(deps.generateReleaseNotes).not.toHaveBeenCalled()
+    expect(deps.workspace.build).not.toHaveBeenCalled()
+    expect(deps.workspace.publish).not.toHaveBeenCalled()
+  })
+
+  it('should refuse before building when the trigger tag is missing', async () => {
+    const deps = makeDeps({ triggerTag: undefined })
+
+    await expect(runReleaseCi({ deps, dryRun: false })).rejects.toThrow(/does not match/)
+    expect(deps.workspace.build).not.toHaveBeenCalled()
+    expect(deps.workspace.publish).not.toHaveBeenCalled()
+  })
+
+  it('should allow a missing trigger tag in dry-run', async () => {
+    const deps = makeDeps({ triggerTag: undefined })
+
+    await runReleaseCi({ deps, dryRun: true })
+
+    expect(deps.generateReleaseNotes).toHaveBeenCalledOnce()
+  })
+
+  it('should refuse a mismatched trigger tag in dry-run', async () => {
+    const deps = makeDeps({ triggerTag: 'v4.0.0-canary.11' })
+
+    await expect(runReleaseCi({ deps, dryRun: true })).rejects.toThrow(/does not match/)
   })
 
   it('should skip build, publish, and draft in dry-run but still generate notes', async () => {

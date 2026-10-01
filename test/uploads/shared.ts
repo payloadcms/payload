@@ -55,3 +55,4 @@ export const adminUploadFilePreviewSingleSlug = 'admin-upload-file-preview-singl
 export const adminUploadFilePreviewMapSlug = 'admin-upload-file-preview-map'
 export const filePreviewSlug = 'file-preview'
 export const clientUploadTempFileSlug = 'client-upload-temp-file'
+export const fileAccessMediaSlug = 'file-access-media'

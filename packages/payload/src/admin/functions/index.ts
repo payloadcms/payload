@@ -16,7 +16,7 @@ import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 import type { ColumnsFromURL } from '../../utilities/transformColumnPreferences.js'
 import type { ComponentRenderer } from '../adapters/render.js'
 
-export type InitReqResult = {
+export type AdminContext = {
   cookies: Map<string, string>
   // TODO: Remove in 4.0. Duplicative, already available in req.headers
   headers: Headers
@@ -25,12 +25,14 @@ export type InitReqResult = {
   locale?: Locale
   permissions: SanitizedPermissions
   req: PayloadRequest
+  /** The authenticated user after read access for client-facing consumers. */
+  user?: PayloadRequest['user']
 }
 
 export type DefaultServerFunctionArgs = {
   importMap: ImportMap
   renderComponent?: ComponentRenderer
-} & Pick<InitReqResult, 'cookies' | 'locale' | 'permissions' | 'req'>
+} & Pick<AdminContext, 'cookies' | 'locale' | 'permissions' | 'req' | 'user'>
 
 export type ServerFunctionArgs = {
   args: Record<string, unknown>

@@ -71,7 +71,7 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
     try {
       if (configPath === null) {
         throw new Error(
-          "This integration test requires Payload. Pass its config path to test.suite({ config: './config.ts' })(...).",
+          "This integration test requires Payload. Pass its config path to test.suite('Name', { config: './config.ts' }, ...).",
         )
       }
 
@@ -89,7 +89,7 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
     async ({ resolvedConfig }, use) => {
       if (resolvedConfig === null) {
         throw new Error(
-          "This integration test requires Payload. Pass its config path to test.suite({ config: './config.ts' })(...).",
+          "This integration test requires Payload. Pass its config path to test.suite('Name', { config: './config.ts' }, ...).",
         )
       }
 
@@ -195,26 +195,38 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
  * directories are reset and the suite's optional seed function is run. REST and SDK clients are
  * recreated per test. Suites that already manage their own isolation can set `resetBetweenTests` to
  * false to reset and seed once, then share their database state and REST client. Standalone
- * integration tests use `test.suite({})` and do not initialize Payload.
+ * integration tests use `test.suite('Name', {}, ...)` and do not initialize Payload.
  *
  * @example
- * test.suite({ config: './config.ts' })('Posts', () => {
+ * test.suite('Posts', { config: './config.ts' }, () => {
  *   test('reads posts', async ({ payload }) => {
  *     await payload.find({ collection: 'posts' })
  *   })
  * })
  */
 export const test = Object.assign(testWithFixtures, {
-  options: (options: TestOptions) => {
-    const shouldRun = matchesDatabase(options)
-
-    return Object.assign(testWithFixtures.runIf(shouldRun), {
-      describe: testWithFixtures.describe.runIf(shouldRun),
-    })
-  },
+  // A single name-first call prevents static discovery from treating the options as another test.
+  options: Object.assign(
+    (
+      name: string,
+      options: TestOptions,
+      testFunction: NonNullable<Parameters<typeof testWithFixtures>[2]>,
+      timeout?: number,
+    ) => testWithFixtures.runIf(matchesDatabase(options))(name, testFunction, timeout),
+    {
+      describe: (
+        name: string,
+        options: TestOptions,
+        factory: NonNullable<Parameters<typeof testWithFixtures.describe>[2]>,
+      ) => testWithFixtures.describe.runIf(matchesDatabase(options))(name, factory),
+    },
+  ),
+  // The name must come first so Vitest's static discovery builds the correct test hierarchy.
   suite(
     this: typeof testWithFixtures,
+    name: string,
     { config, cron = true, db, resetBetweenTests = true }: TestSuiteOptions,
+    factory: NonNullable<Parameters<typeof testWithFixtures.describe>[2]>,
   ) {
     this.override('configPath', config ? path.resolve(getTestDirectory(), config) : null)
     this.override('resetBetweenTests', resetBetweenTests)
@@ -234,7 +246,7 @@ export const test = Object.assign(testWithFixtures, {
       })
     }
 
-    return this.describe.runIf(matchesDatabase({ db }))
+    return this.describe.runIf(matchesDatabase({ db }))(name, factory)
   },
 })
 

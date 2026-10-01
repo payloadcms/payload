@@ -1,5 +1,6 @@
 import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
 import type { Theme } from '@payloadcms/ui'
+import type { RequestThemeSource } from '@payloadcms/ui/utilities/getRequestTheme'
 import type {
   ClientConfig,
   ImportMap,
@@ -19,7 +20,7 @@ import { Outlet } from '@tanstack/react-router'
 import { applyLocaleFiltering } from 'payload/shared'
 import { createElement } from 'react'
 
-import { initReq } from '../../utilities/initReq.server.js'
+import { initAdminContext } from '../../utilities/initAdminContext.server.js'
 
 export type RootLayoutData = {
   clientConfig: ClientConfig
@@ -39,6 +40,8 @@ export type RootLayoutData = {
    */
   providers?: React.ReactNode
   theme: Theme
+  /** The request input used to resolve `theme`. */
+  themeSource: RequestThemeSource
   translations: I18nClient['translations']
   user: null | User
 }
@@ -65,9 +68,15 @@ export async function getLayoutData({
     req: {
       payload: { config },
     },
-  } = await initReq({ configPromise, importMap })
+    user,
+  } = await initAdminContext({ configPromise, importMap })
 
-  const theme = getRequestTheme({ config, cookies, headers })
+  const { theme, themeSource } = getRequestTheme({
+    config,
+    cookies,
+    headers,
+  })
+
   const isEmbedded = getRequestEmbed({ config, cookies })
 
   const languageOptions: LanguageOptions = Object.entries(
@@ -88,7 +97,7 @@ export async function getLayoutData({
     config,
     i18n: req.i18n,
     importMap,
-    user: req.user ?? true,
+    user: user ?? true,
   })
 
   await applyLocaleFiltering({ clientConfig, config, req })
@@ -109,7 +118,7 @@ export async function getLayoutData({
       permissions,
       searchParams: {},
       server: req.server!,
-      user: req.user ?? undefined,
+      user: user ?? undefined,
     }
     // Mirror the Next adapter's `NestProviders`: render each configured provider
     // via `RenderServerComponent` so the entry's own `clientProps`/`serverProps`
@@ -140,7 +149,8 @@ export async function getLayoutData({
     permissions,
     providers,
     theme,
+    themeSource,
     translations: req.i18n.translations,
-    user: req.user,
+    user: user ?? null,
   }
 }
