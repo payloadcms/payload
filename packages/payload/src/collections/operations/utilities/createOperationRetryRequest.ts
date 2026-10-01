@@ -751,7 +751,10 @@ const setSynchronizedProperty = ({
     return
   }
 
-  if (!descriptor || ('value' in descriptor ? descriptor.writable !== false : descriptor.set)) {
+  if (
+    !descriptor ||
+    ('value' in descriptor ? descriptor.writable !== false : descriptor.set !== undefined)
+  ) {
     Reflect.set(target, key, value)
   }
 }
