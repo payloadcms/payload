@@ -641,6 +641,8 @@ export const getTableColumnFromPath = ({
       case 'relationship':
       case 'upload': {
         const newCollectionPath = pathSegments.slice(1).join('.')
+        const relationshipQueryPath = `${getTableName(tableContainingField)}.${fieldStoragePath}._rels`
+        const targetQueryPath = `${getTableName(tableContainingField)}.${fieldStoragePath}._target`
 
         if (Array.isArray(field.relationTo) || field.hasMany) {
           const relationshipPath = resolveRelationshipPath({
@@ -659,7 +661,7 @@ export const getTableColumnFromPath = ({
           let relationshipFields: FlattenedField[]
           const relationTableName = `${rootTableName}${adapter.relationshipsSuffix}`
 
-          const existingJoin = joins.find((e) => e.queryPath === `${constraintPath}.${field.name}`)
+          const existingJoin = joins.find((e) => e.queryPath === relationshipQueryPath)
 
           let aliasRelationshipTable: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
           let aliasRelationshipTableName: string
@@ -696,7 +698,7 @@ export const getTableColumnFromPath = ({
             addJoinTable({
               condition: and(...conditions),
               joins,
-              queryPath: `${constraintPath}.${field.name}`,
+              queryPath: relationshipQueryPath,
               table: aliasRelationshipTable,
             })
           } else {
@@ -707,7 +709,7 @@ export const getTableColumnFromPath = ({
                 like(aliasRelationshipTable.path, relationshipPath.path),
               ),
               joins,
-              queryPath: `${constraintPath}.${field.name}`,
+              queryPath: relationshipQueryPath,
               table: aliasRelationshipTable,
             })
           }
@@ -723,7 +725,6 @@ export const getTableColumnFromPath = ({
 
             // parent to relationship join table
             relationshipFields = relationshipConfig.flattenedFields
-            const targetQueryPath = `${constraintPath}.${field.name}._target`
             const existingTargetJoin = joins.find((join) => join.queryPath === targetQueryPath)
 
             if (existingTargetJoin) {
@@ -904,14 +905,13 @@ export const getTableColumnFromPath = ({
         } else if (
           pathSegments.length > 1 &&
           (!(pathSegments.length === 2 && pathSegments[1] === 'id') ||
-            joins.some((join) => join.queryPath === `${fieldStoragePath}._target`))
+            joins.some((join) => join.queryPath === targetQueryPath))
         ) {
           // simple relationships
           const columnName = `${columnPrefix}${field.name}`
           const newTableName = adapter.tableNameMap.get(
             toSnakeCase(adapter.payload.collections[field.relationTo].config.slug),
           )
-          const targetQueryPath = `${fieldStoragePath}._target`
           const existingTargetJoin = joins.find((join) => join.queryPath === targetQueryPath)
           const newAliasTable = (existingTargetJoin?.table ??
             getTableAlias({ adapter, tableName: newTableName }).newAliasTable) as ReturnType<

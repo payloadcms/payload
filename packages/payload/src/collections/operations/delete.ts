@@ -47,6 +47,7 @@ import {
   flushDeferredCleanupScope,
   flushDeferredCleanupScopeAfterOperation,
 } from '../../utilities/transactionCallbacks.js'
+import { markTransactionWrite } from '../../utilities/transactionMutationTracker.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
 import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
@@ -386,10 +387,41 @@ export const deleteOperation = async <
       const hookCompleted = hookResults.filter(
         (entry): entry is CheckedDeleteEntry => entry !== null,
       )
+      const {
+        lockDocumentIDsByDocumentID: refreshedLockDocumentIDsByDocumentID,
+        lockedDocumentIDs: refreshedLockedDocumentIDs,
+      } = await getDocumentLockState({
+        collectionSlug: collectionConfig.slug,
+        ids: hookCompleted.map(({ doc }) => doc.id),
+        overrideLock,
+        req,
+      })
+      const lockCheckedAfterHooks: CheckedDeleteEntry[] = []
+
+      for (const entry of hookCompleted) {
+        const documentID = String(entry.doc.id)
+
+        if (refreshedLockedDocumentIDs.has(documentID)) {
+          pushError(
+            entry.doc.id,
+            new Locked(
+              `Document with ID ${entry.doc.id} is currently locked and cannot be deleted.`,
+            ),
+          )
+
+          continue
+        }
+
+        lockCheckedAfterHooks.push({
+          ...entry,
+          lockDocumentIDs: refreshedLockDocumentIDsByDocumentID.get(documentID) ?? [],
+        })
+      }
+
       const postHookCheckResults: (CheckedDeleteEntry | null)[] = []
 
       if (hasSharedTransaction) {
-        for (const entry of hookCompleted) {
+        for (const entry of lockCheckedAfterHooks) {
           const fullDocument = await assertDeleteUnreferenced({ doc: entry.fullDocument })
 
           postHookCheckResults.push({ ...entry, fullDocument })
@@ -397,7 +429,7 @@ export const deleteOperation = async <
       } else {
         postHookCheckResults.push(
           ...(await Promise.all(
-            hookCompleted.map(async (entry): Promise<CheckedDeleteEntry | null> => {
+            lockCheckedAfterHooks.map(async (entry): Promise<CheckedDeleteEntry | null> => {
               try {
                 const fullDocument = await assertDeleteUnreferenced({ doc: entry.fullDocument })
 
@@ -545,6 +577,7 @@ export const deleteOperation = async <
             },
           },
         })
+        markTransactionWrite({ req })
 
         const finalBranchDeleteOutcome = isDeletingFromBranch
           ? requireBranchDeleteOutcome({ outcome: branchDeleteOutcome })
@@ -744,6 +777,7 @@ export const deleteOperation = async <
                 },
               },
             })
+            markTransactionWrite({ req })
 
             const finalBranchDeleteOutcome = requireBranchDeleteOutcome({
               outcome: branchDeleteOutcomes.get(String(doc.id)),
@@ -764,6 +798,7 @@ export const deleteOperation = async <
               },
             },
           })
+          markTransactionWrite({ req })
 
           for (const id of ids) {
             deletedDocumentIDs.set(String(id), id)

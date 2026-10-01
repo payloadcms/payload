@@ -6,6 +6,7 @@ import type { JsonObject, PayloadRequest, SelectType } from '../types/index.js'
 import { deepCopyObjectSimple } from '../index.js'
 import { getVersionsMax, hasLocalizeStatusEnabled } from '../utilities/getVersionsConfig.js'
 import { sanitizeInternalFields } from '../utilities/sanitizeInternalFields.js'
+import { markTransactionWrite } from '../utilities/transactionMutationTracker.js'
 import { getQueryDraftsSelect } from './drafts/getQueryDraftsSelect.js'
 import { enforceMaxVersions } from './enforceMaxVersions.js'
 import { updateLatestVersion } from './updateLatestVersion.js'
@@ -91,6 +92,9 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
         shouldUpdate: autosave ? (v) => 'autosave' in v && v.autosave === true : undefined,
         versionData,
       })
+      if (result) {
+        markTransactionWrite({ req })
+      }
     }
 
     if (!result) {
@@ -118,6 +122,7 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
         createVersionArgs.globalSlug = global.slug
         result = await payload.db.createGlobalVersion(createVersionArgs as CreateGlobalVersionArgs)
       }
+      markTransactionWrite({ req })
     }
   } catch (err) {
     let errorMessage: string | undefined

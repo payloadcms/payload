@@ -228,6 +228,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       })
     : rowToInsert
   let nestedWrite = rowToInsert
+  let isUpdatingAfterInsertConflict = false
 
   if (customID) {
     rowToInsert.row.id = customID
@@ -295,6 +296,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
             if (updatedRows[0]) {
               insertedRow = updatedRows[0]
               nestedWrite = conflictWrite
+              isUpdatingAfterInsertConflict = true
               break
             }
 
@@ -412,7 +414,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       const localeTableName = `${tableName}${adapter.localesSuffix}`
       const localeTable = adapter.tables[`${tableName}${adapter.localesSuffix}`]
 
-      if (operation === 'update') {
+      if (operation === 'update' && isUpdatingAfterInsertConflict) {
         for (const localeRow of localesToInsert) {
           await adapter.insert({
             db,
@@ -425,6 +427,14 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
           })
         }
       } else {
+        if (operation === 'update') {
+          await adapter.deleteWhere({
+            db,
+            tableName: localeTableName,
+            where: eq(localeTable._parentID, insertedRow.id),
+          })
+        }
+
         await adapter.insert({
           db,
           tableName: localeTableName,

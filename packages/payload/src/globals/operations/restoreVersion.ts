@@ -16,6 +16,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { markTransactionWrite } from '../../utilities/transactionMutationTracker.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
 import { getRestoredStatusesToAuthorize } from '../../versions/getRestoredStatusesToAuthorize.js'
 
@@ -193,6 +194,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
         req,
       })
     }
+    markTransactionWrite({ req })
 
     const now = new Date().toISOString()
 
@@ -204,6 +206,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
       updatedAt: draft ? now : new Date(result.updatedAt).toISOString(),
       versionData: result,
     })
+    markTransactionWrite({ req })
 
     if (writeBranch) {
       await recordBranchGlobalChange({

@@ -7,6 +7,10 @@ import { getDataLoader } from '../collections/dataloader.js'
 import { getLocalI18n } from '../translations/getLocalI18n.js'
 import { sanitizeFallbackLocale } from '../utilities/sanitizeFallbackLocale.js'
 import { isolateObjectProperty } from './isolateObjectProperty.js'
+import {
+  createIsolatedDeferredCleanupContext,
+  hasActiveDeferredCleanupScope,
+} from './transactionCallbacks.js'
 
 function getRequestContext(
   req: Partial<PayloadRequest> = { context: null } as unknown as PayloadRequest,
@@ -119,6 +123,11 @@ export const createPayloadRequest: CreatePayloadRequest = async ({
 }): Promise<PayloadRequest> => {
   const localization = payload.config?.localization
   let shouldCreateIsolatedDataLoader = false
+
+  if (hasActiveDeferredCleanupScope({ req })) {
+    req = isolateObjectProperty(req, 'context')
+    req.context = createIsolatedDeferredCleanupContext({ req })
+  }
 
   if (localization) {
     const locale = localeArg === '*' ? 'all' : localeArg

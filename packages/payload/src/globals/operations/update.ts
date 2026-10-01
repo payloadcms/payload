@@ -44,6 +44,7 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { markTransactionWrite } from '../../utilities/transactionMutationTracker.js'
 import {
   buildAllLocalesPublicationHookDoc,
   getAllLocalesPublicationStatus,
@@ -270,6 +271,7 @@ export const updateOperation = async <
       lockErrorMessage: `Global with slug "${slug}" is currently locked by another user and cannot be updated.`,
       overrideLock,
       req,
+      shouldDeleteLock: false,
     })
 
     // /////////////////////////////////////
@@ -498,6 +500,13 @@ export const updateOperation = async <
       }),
     })
 
+    await checkDocumentLockStatus({
+      globalSlug: slug,
+      lockErrorMessage: `Global with slug "${slug}" is currently locked by another user and cannot be updated.`,
+      overrideLock,
+      req,
+    })
+
     let resultWithLocales: JsonObject = result
     if (!isSavingDraft) {
       const now = new Date().toISOString()
@@ -533,6 +542,7 @@ export const updateOperation = async <
           req,
         })
       }
+      markTransactionWrite({ req })
 
       resultWithLocales.updatedAt = now
 
@@ -566,6 +576,7 @@ export const updateOperation = async <
         select,
         unpublish: unpublishAllLocales,
       })
+      markTransactionWrite({ req })
 
       resultWithLocales = {
         ...resultWithLocales,

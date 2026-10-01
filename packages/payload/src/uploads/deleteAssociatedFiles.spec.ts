@@ -432,6 +432,46 @@ describe('deleteAssociatedFiles', () => {
     expect(await fileExists(outerFilePath)).toBe(false)
   })
 
+  it('should keep successful cleanup when a sibling scope in the same transaction fails', async () => {
+    const failedFilename = 'failed-same-transaction-document.txt'
+    const successfulFilename = 'successful-same-transaction-document.txt'
+    const failedFilePath = path.join(staticDir, failedFilename)
+    const successfulFilePath = path.join(staticDir, successfulFilename)
+    const databaseCommit = vi.fn().mockResolvedValue(undefined)
+    const database = { commitTransaction: databaseCommit }
+    const failedReq = {
+      context: {},
+      payload: { db: database },
+      t: vi.fn(),
+      transactionID: 'shared-transaction',
+    } as unknown as PayloadRequest
+    const successfulReq = {
+      context: {},
+      payload: { db: database },
+      t: vi.fn(),
+      transactionID: 'shared-transaction',
+    } as unknown as PayloadRequest
+    const failedScope = await beginDeferredCleanupScope({ req: failedReq })
+    const successfulScope = await beginDeferredCleanupScope({ req: successfulReq })
+
+    await Promise.all([
+      fs.writeFile(failedFilePath, 'failed document'),
+      fs.writeFile(successfulFilePath, 'successful document'),
+    ])
+    await deleteAssociatedFiles({ ...getArgs({ filename: failedFilename }), req: failedReq })
+    await deleteAssociatedFiles({
+      ...getArgs({ filename: successfulFilename }),
+      req: successfulReq,
+    })
+
+    clearDeferredCleanupScope({ req: failedReq, scope: failedScope })
+    await flushDeferredCleanupScope({ req: successfulReq, scope: successfulScope })
+    await commitTransaction(successfulReq)
+
+    expect(await fileExists(failedFilePath)).toBe(true)
+    expect(await fileExists(successfulFilePath)).toBe(false)
+  })
+
   it('should defer file deletion until a non-transactional operation succeeds', async () => {
     const filename = 'non-transactional-document.txt'
     const filePath = path.join(staticDir, filename)

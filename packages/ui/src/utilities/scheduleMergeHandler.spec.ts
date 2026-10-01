@@ -1,8 +1,8 @@
 import { expect, test, vi } from 'vitest'
 
+import { buildUpcomingMergeWhere } from './buildUpcomingMergeWhere.js'
 import {
   buildScheduledMergeCancellationWhere,
-  buildUpcomingMergeWhere,
   scheduleMergeHandler,
 } from './scheduleMergeHandler.js'
 

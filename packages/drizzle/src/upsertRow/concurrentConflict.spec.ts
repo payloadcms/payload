@@ -253,6 +253,99 @@ describe('upsertRow concurrent inserts', () => {
     ])
   })
 
+  it('should replace omitted locale rows during an ordinary update', async () => {
+    const transformedWrite = createTransformedWrite({
+      locales: {
+        en: { title: 'Published English title' },
+      },
+      row: { title: 'Published title' },
+    })
+    const localizedRows = [
+      {
+        _locale: 'en',
+        _parentID: 2,
+        title: 'Previous English title',
+      },
+      {
+        _locale: 'es',
+        _parentID: 2,
+        title: 'Spanish draft',
+      },
+    ]
+    const localeColumn = sql`locale`
+    const localeParentColumn = sql`parent_id`
+    const fields = [
+      {
+        localized: true,
+        name: 'title',
+        type: 'text',
+      },
+    ] as FlattenedField[]
+    const adapter = {
+      deleteWhere: vi.fn(({ tableName }) => {
+        if (tableName === 'settings_locales') {
+          localizedRows.length = 0
+        }
+      }),
+      insert: vi.fn(({ onConflictDoUpdate, tableName, values }) => {
+        if (tableName === 'settings') {
+          return [{ id: 2 }]
+        }
+
+        const rows = Array.isArray(values) ? values : [values]
+
+        for (const row of rows) {
+          const existingRow = localizedRows.find(
+            (localizedRow) =>
+              localizedRow._locale === row._locale && localizedRow._parentID === row._parentID,
+          )
+
+          if (existingRow && onConflictDoUpdate) {
+            Object.assign(existingRow, onConflictDoUpdate.set)
+          } else {
+            localizedRows.push(row)
+          }
+        }
+
+        return rows
+      }),
+      localesSuffix: '_locales',
+      payload: { config: {} },
+      rawTables: {},
+      readReplicasAfterWriteInterval: 2000,
+      relationshipsSuffix: '_rels',
+      tables: {
+        settings: { id: sql`id` },
+        settings_locales: {
+          _locale: localeColumn,
+          _parentID: localeParentColumn,
+        },
+      },
+      tableNameMap: new Map(),
+    } as unknown as DrizzleAdapter
+
+    mocks.transformForWrite.mockReturnValueOnce(transformedWrite)
+
+    await upsertRow({
+      id: 2,
+      adapter,
+      data: { title: { en: 'Published English title' } },
+      db: {} as DrizzleAdapter['drizzle'],
+      fields,
+      ignoreResult: true,
+      operation: 'update',
+      tableName: 'settings',
+    })
+
+    expect(localizedRows).toEqual([
+      {
+        _locale: 'en',
+        _parentID: 2,
+        title: 'Published English title',
+      },
+    ])
+  })
+
   it('should preserve omitted select locales after another write inserts the parent', async () => {
     const fullInsert = createTransformedWrite({
       row: { _branch: 'feature' },

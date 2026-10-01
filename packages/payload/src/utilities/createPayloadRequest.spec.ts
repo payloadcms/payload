@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import type { Payload } from '../index.js'
 
 import { createPayloadRequest } from './createPayloadRequest.js'
+import { beginDeferredCleanupScope, clearDeferredCleanupScope } from './transactionCallbacks.js'
 
 describe('createPayloadRequest - URL construction', () => {
   const mockPayload = {
@@ -18,6 +19,7 @@ describe('createPayloadRequest - URL construction', () => {
     logger: {
       error: vi.fn(),
     },
+    db: {},
   } as unknown as Payload
 
   it('should use req.url when provided and serverURL is undefined', async () => {
@@ -166,5 +168,34 @@ describe('createPayloadRequest - URL construction', () => {
     expect(queryBranchRequest.query.branch).toBe('from-query')
     expect(queryBranchRequest.context).not.toHaveProperty('_branchBypass')
     expect(mainRequest.context).toMatchObject({ _branchBypass: true })
+  })
+
+  it('should isolate nested local operations from an active cleanup scope', async () => {
+    const parentRequest = await createPayloadRequest({ payload: mockPayload })
+    const parentScope = await beginDeferredCleanupScope({ req: parentRequest })
+
+    const firstNestedRequest = await createPayloadRequest({
+      payload: mockPayload,
+      req: parentRequest,
+    })
+    const secondNestedRequest = await createPayloadRequest({
+      payload: mockPayload,
+      req: parentRequest,
+    })
+
+    expect(firstNestedRequest).not.toBe(parentRequest)
+    expect(secondNestedRequest).not.toBe(parentRequest)
+    expect(secondNestedRequest).not.toBe(firstNestedRequest)
+
+    const firstNestedScope = await beginDeferredCleanupScope({ req: firstNestedRequest })
+    const secondNestedScope = await beginDeferredCleanupScope({ req: secondNestedRequest })
+
+    expect(() =>
+      clearDeferredCleanupScope({ req: firstNestedRequest, scope: firstNestedScope }),
+    ).not.toThrow()
+    expect(() =>
+      clearDeferredCleanupScope({ req: secondNestedRequest, scope: secondNestedScope }),
+    ).not.toThrow()
+    clearDeferredCleanupScope({ req: parentRequest, scope: parentScope })
   })
 })

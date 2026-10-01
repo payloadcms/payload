@@ -21,10 +21,7 @@ import type {
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
-import {
-  isConcurrentShadowOperationError,
-  retryConcurrentShadowOperation,
-} from '../../branching/createShadowRow.js'
+import { retryConcurrentShadowOperation } from '../../branching/createShadowRow.js'
 import { forkDocument } from '../../branching/forkDocument.js'
 import { resetBranchState, resolveBranch } from '../../branching/resolveBranch.js'
 import { branchField, MAIN_BRANCH } from '../../branching/types.js'
@@ -67,7 +64,11 @@ import {
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
-import { createOperationRetryRequest } from './utilities/createOperationRetryRequest.js'
+import {
+  commitOperationRetryRequestContext,
+  createOperationRetryRequest,
+  shouldRetryOperationRequest,
+} from './utilities/createOperationRetryRequest.js'
 import { updateDocument } from './utilities/update.js'
 
 export const branchMergeUploadDataContextKey = Symbol('branchMergeUploadData')
@@ -171,25 +172,32 @@ const updateByIDOperationWithLifecycle = async <
   )
   let didOwnAttemptTransaction = false
   let didReachFinalCommit = false
+  let isRetrySafe = false
 
   try {
     return await retryConcurrentShadowOperation({
       operation: async () => {
         didOwnAttemptTransaction = false
         didReachFinalCommit = false
+        isRetrySafe = false
 
-        const attemptArgs = hasCallerTransaction
-          ? incomingArgs
-          : {
+        const retryRequest = hasCallerTransaction
+          ? undefined
+          : await createOperationRetryRequest({
+              copyFileTempPath: shouldIsolateTempFile,
+              req: incomingArgs.req,
+            })
+
+        isRetrySafe = retryRequest?.isRetrySafe ?? false
+        const attemptArgs = retryRequest
+          ? {
               ...incomingArgs,
               data: deepCopyObjectSimple(pristineData),
-              req: await createOperationRetryRequest({
-                copyFileTempPath: shouldIsolateTempFile,
-                req: incomingArgs.req,
-              }),
+              req: retryRequest.req,
             }
+          : incomingArgs
 
-        return updateByIDOperationWithLifecycleAttempt<TSlug, TSelect>({
+        const result = await updateByIDOperationWithLifecycleAttempt<TSlug, TSelect>({
           branchMergeUploadDataToTrust,
           hasCallerTransaction,
           incomingArgs: attemptArgs,
@@ -201,11 +209,21 @@ const updateByIDOperationWithLifecycle = async <
             didOwnAttemptTransaction = isOperationTransaction
           },
         })
+
+        if (retryRequest?.isRetrySafe) {
+          commitOperationRetryRequestContext({ req: attemptArgs.req })
+        }
+
+        return result
       },
       shouldRetry: ({ error }) =>
-        !hasCallerTransaction &&
-        didOwnAttemptTransaction &&
-        (didReachFinalCommit || isConcurrentShadowOperationError(error)),
+        shouldRetryOperationRequest({
+          didOwnAttemptTransaction,
+          didReachFinalCommit,
+          error,
+          hasCallerTransaction,
+          isRetrySafe,
+        }),
     })
   } finally {
     if (shouldIsolateTempFile) {

@@ -47,6 +47,7 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { markTransactionWrite } from '../../utilities/transactionMutationTracker.js'
 import {
   buildAllLocalesPublicationHookDoc,
   getAllLocalesPublicationStatus,
@@ -491,6 +492,7 @@ export const createOperation = async <
         req,
       })
     }
+    markTransactionWrite({ req })
 
     const verificationToken = doc._verificationToken
     let resultWithLocales: Document = sanitizeInternalFields(doc)

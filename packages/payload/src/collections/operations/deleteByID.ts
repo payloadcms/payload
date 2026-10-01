@@ -44,11 +44,16 @@ import {
   clearDeferredCleanupScope,
   flushDeferredCleanupScopeAfterOperation,
 } from '../../utilities/transactionCallbacks.js'
+import { markTransactionWrite } from '../../utilities/transactionMutationTracker.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
 import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
-import { createOperationRetryRequest } from './utilities/createOperationRetryRequest.js'
+import {
+  commitOperationRetryRequestContext,
+  createOperationRetryRequest,
+  shouldRetryOperationRequest,
+} from './utilities/createOperationRetryRequest.js'
 
 export type Arguments<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   collection: Collection
@@ -70,6 +75,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
   const branch = resolveBranch(incomingArgs.req)
   let didOwnAttemptTransaction = false
   let didReachFinalCommit = false
+  let isRetrySafe = false
   let concurrentDeleteRetryError: unknown
   let concurrentDeleteWinnerID: number | string | undefined
 
@@ -102,15 +108,21 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     operation: async () => {
       didOwnAttemptTransaction = false
       didReachFinalCommit = false
+      isRetrySafe = false
 
-      const attemptArgs = hasCallerTransaction
-        ? incomingArgs
-        : {
+      const retryRequest = hasCallerTransaction
+        ? undefined
+        : await createOperationRetryRequest({ req: incomingArgs.req })
+
+      isRetrySafe = retryRequest?.isRetrySafe ?? false
+      const attemptArgs = retryRequest
+        ? {
             ...incomingArgs,
-            req: await createOperationRetryRequest({ req: incomingArgs.req }),
+            req: retryRequest.req,
           }
+        : incomingArgs
 
-      return deleteByIDOperationAttempt({
+      const result = await deleteByIDOperationAttempt({
         concurrentDeleteRetryError,
         concurrentDeleteWinnerID,
         hasCallerTransaction,
@@ -122,11 +134,21 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
           didOwnAttemptTransaction = isOperationTransaction
         },
       })
+
+      if (retryRequest?.isRetrySafe) {
+        commitOperationRetryRequestContext({ req: attemptArgs.req })
+      }
+
+      return result
     },
     shouldRetry: ({ error }) =>
-      !hasCallerTransaction &&
-      didOwnAttemptTransaction &&
-      (didReachFinalCommit || isConcurrentShadowOperationError(error)),
+      shouldRetryOperationRequest({
+        didOwnAttemptTransaction,
+        didReachFinalCommit,
+        error,
+        hasCallerTransaction,
+        isRetrySafe,
+      }),
   })
 }
 
@@ -382,6 +404,7 @@ const deleteByIDOperationAttempt = async <
       select,
       where: { id: { equals: id } },
     })
+    markTransactionWrite({ req })
 
     const finalBranchDeleteOutcome = isBranchingDocument
       ? requireBranchDeleteOutcome({ outcome: branchDeleteOutcome })

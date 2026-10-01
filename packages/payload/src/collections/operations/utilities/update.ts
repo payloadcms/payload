@@ -45,6 +45,7 @@ import {
   hasDraftValidationEnabled,
   hasLocalizeStatusEnabled,
 } from '../../../utilities/getVersionsConfig.js'
+import { markTransactionWrite } from '../../../utilities/transactionMutationTracker.js'
 import {
   buildAllLocalesPublicationHookDoc,
   getAllLocalesPublicationStatus,
@@ -64,6 +65,7 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   filesToUpload: FileToSave[]
   id: number | string
   locale: string
+  onBeforeDocumentWrite?: () => void
   /**
    * Hook `operation` label. Merge reports a branch-created document as a
    * `create` on main even though the row is updated in place, since deleting
@@ -111,6 +113,7 @@ export const updateDocument = async <
   fallbackLocale,
   filesToUpload,
   locale,
+  onBeforeDocumentWrite,
   operation = 'update',
   overrideAccess,
   overrideLock,
@@ -158,6 +161,7 @@ export const updateDocument = async <
     lockErrorMessage: `Document with ID ${id} is currently locked by another user and cannot be updated.`,
     overrideLock,
     req,
+    shouldDeleteLock: false,
   })
 
   const originalDoc = await afterRead({
@@ -517,6 +521,14 @@ export const updateDocument = async <
     })
   }
 
+  await checkDocumentLockStatus({
+    id,
+    collectionSlug: collectionConfig.slug,
+    lockErrorMessage: `Document with ID ${id} is currently locked by another user and cannot be updated.`,
+    overrideLock,
+    req,
+  })
+
   // /////////////////////////////////////
   // Update
   // /////////////////////////////////////
@@ -526,6 +538,7 @@ export const updateDocument = async <
   if (!isSavingDraft) {
     // Ensure updatedAt date is always updated
     dataToUpdate.updatedAt = new Date().toISOString()
+    onBeforeDocumentWrite?.()
     if (localizedPublishData) {
       // Single-locale publish: save filtered data to main doc but keep full locale data for
       // the version so draft fetches (replaceWithDraftIfAvailable) return complete data.
@@ -536,6 +549,7 @@ export const updateDocument = async <
         locale,
         req,
       })
+      markTransactionWrite({ req })
       resultWithLocales = { ...result, updatedAt: dataToUpdate.updatedAt }
     } else {
       resultWithLocales = await req.payload.db.updateOne({
@@ -545,6 +559,7 @@ export const updateDocument = async <
         locale,
         req,
       })
+      markTransactionWrite({ req })
     }
   }
 
@@ -553,6 +568,7 @@ export const updateDocument = async <
   // /////////////////////////////////////
 
   if (collectionConfig.versions) {
+    onBeforeDocumentWrite?.()
     resultWithLocales = await saveVersion({
       id,
       autosave,
@@ -564,6 +580,7 @@ export const updateDocument = async <
       req,
       unpublish: unpublishAllLocales,
     })
+    markTransactionWrite({ req })
   }
 
   // /////////////////////////////////////

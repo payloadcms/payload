@@ -3,18 +3,22 @@ import type { MarkRequired } from 'ts-essentials'
 import type { PayloadRequest } from '../types/index.js'
 
 type TransactionCallback = () => Promise<void>
+type TransactionCallbackEntry = {
+  callback: TransactionCallback
+  sequence: number
+}
 type TransactionID = number | string
 export type DeferredCleanupScope = {
-  callbacks: TransactionCallback[]
+  callbacks: TransactionCallbackEntry[]
   database: object
   parent: DeferredCleanupScope | null
-  startIndex: number
   state: 'closed' | 'collecting' | 'flushing'
   transactionID?: TransactionID
 }
 
-const callbacksByDatabase = new WeakMap<object, Map<TransactionID, TransactionCallback[]>>()
-const deferredCleanupScopeContextKey = '_payloadDeferredCleanupScope'
+const callbacksByDatabase = new WeakMap<object, Map<TransactionID, TransactionCallbackEntry[]>>()
+export const deferredCleanupScopeContextKey = '_payloadDeferredCleanupScope'
+let nextTransactionCallbackSequence = 0
 
 /** Creates a request context whose cleanup callbacks can be managed independently. */
 export const createIsolatedDeferredCleanupContext = ({
@@ -22,17 +26,31 @@ export const createIsolatedDeferredCleanupContext = ({
 }: {
   req: Partial<PayloadRequest>
 }): PayloadRequest['context'] => {
-  const context = { ...req.context }
+  const sourceContext = req.context ?? {}
+  const context: PayloadRequest['context'] = {}
 
-  delete context[deferredCleanupScopeContextKey]
+  for (const key of Reflect.ownKeys(sourceContext)) {
+    if (key === deferredCleanupScopeContextKey) {
+      continue
+    }
+
+    const descriptor = Object.getOwnPropertyDescriptor(sourceContext, key)
+
+    if (descriptor?.enumerable) {
+      Object.defineProperty(context, key, descriptor)
+    }
+  }
 
   return context
 }
 
+export const hasActiveDeferredCleanupScope = ({ req }: { req: Partial<PayloadRequest> }): boolean =>
+  Boolean(req.context?.[deferredCleanupScopeContextKey])
+
 /**
- * Marks the current callback position so an operation can remove only the cleanup it registered.
- * Transaction callbacks remain queued until commit. A root scope without a transaction runs its
- * callbacks when the operation flushes it.
+ * Creates an operation-owned cleanup queue. Successful nested scopes transfer their cleanup to a
+ * parent for the same database and transaction. Root transaction scopes transfer their cleanup to
+ * the transaction queue. Failed scopes can therefore discard only the cleanup they still own.
  */
 export const beginDeferredCleanupScope = async ({
   req,
@@ -74,18 +92,12 @@ const createDeferredCleanupScope = ({
 }): DeferredCleanupScope => {
   req.context ??= {}
   const parent = (req.context[deferredCleanupScopeContextKey] as DeferredCleanupScope) ?? null
-  const callbacks = transactionID
-    ? getTransactionCallbacks({ database: req.payload.db, transactionID })
-    : parent && parent.transactionID === undefined
-      ? parent.callbacks
-      : []
   const scope: DeferredCleanupScope = {
-    callbacks,
+    callbacks: [],
     database: req.payload.db,
     parent,
-    startIndex: callbacks.length,
     state: 'collecting',
-    transactionID: transactionID || undefined,
+    transactionID: transactionID ?? undefined,
   }
 
   req.context[deferredCleanupScopeContextKey] = scope
@@ -110,28 +122,31 @@ export const scheduleAfterTransactionCommit = async ({
   const pendingTransactionID = req.transactionID
   const transactionID =
     pendingTransactionID instanceof Promise ? await pendingTransactionID : pendingTransactionID
+  const scope = req.context?.[deferredCleanupScopeContextKey] as DeferredCleanupScope | undefined
+  const callbackEntry = {
+    callback,
+    sequence: nextTransactionCallbackSequence++,
+  }
+
+  if (scope?.database === req.payload.db && scope.transactionID === (transactionID ?? undefined)) {
+    if (scope.state === 'flushing') {
+      await callback()
+    } else {
+      scope.callbacks.push(callbackEntry)
+    }
+
+    return
+  }
 
   if (!transactionID) {
     if (req.transactionID === pendingTransactionID) {
       delete req.transactionID
     }
 
-    const scope = req.context?.[deferredCleanupScopeContextKey] as DeferredCleanupScope | undefined
-
-    if (!scope || scope.transactionID !== undefined) {
-      throw new Error('File cleanup requires an active transaction or deferred cleanup scope.')
-    }
-
-    if (scope.state === 'flushing') {
-      await callback()
-    } else {
-      scope.callbacks.push(callback)
-    }
-
-    return
+    throw new Error('File cleanup requires an active transaction or deferred cleanup scope.')
   }
 
-  getTransactionCallbacks({ database: req.payload.db, transactionID }).push(callback)
+  getTransactionCallbacks({ database: req.payload.db, transactionID }).push(callbackEntry)
 }
 
 export const runTransactionCommitCallbacks = async ({
@@ -142,20 +157,20 @@ export const runTransactionCommitCallbacks = async ({
   transactionID: TransactionID
 }): Promise<void> => {
   const callbacksByTransaction = callbacksByDatabase.get(req.payload.db)
-  const callbacks = callbacksByTransaction?.get(transactionID)
+  const callbacks = callbacksByTransaction?.get(transactionID) ?? []
+  const scopedCallbacks = closeTransactionScopes({ req, transactionID })
 
-  if (!callbacks) {
-    return
-  }
+  callbacksByTransaction?.delete(transactionID)
 
-  closeTransactionScopes({ req, transactionID })
-  callbacksByTransaction!.delete(transactionID)
-
-  if (callbacksByTransaction!.size === 0) {
+  if (callbacksByTransaction?.size === 0) {
     callbacksByDatabase.delete(req.payload.db)
   }
 
-  await runCallbacks({ callbacks })
+  if (callbacks.length === 0 && scopedCallbacks.length === 0) {
+    return
+  }
+
+  await runCallbacks({ callbacks: [...callbacks, ...scopedCallbacks] })
 }
 
 export const clearTransactionCommitCallbacks = ({
@@ -188,14 +203,30 @@ export const flushDeferredCleanupScope = async ({
 
   assertDeferredCleanupScopeIsActive({ req, scope })
 
-  if (scope.transactionID !== undefined || scope.parent?.callbacks === scope.callbacks) {
+  if (
+    scope.parent?.database === scope.database &&
+    scope.parent.transactionID === scope.transactionID
+  ) {
+    scope.parent.callbacks.push(...scope.callbacks)
+    scope.callbacks.length = 0
     popScope({ req, scope })
-    removeEmptyTransactionQueue({ scope })
+    return
+  }
+
+  if (scope.transactionID !== undefined) {
+    if (scope.callbacks.length > 0) {
+      getTransactionCallbacks({
+        database: scope.database,
+        transactionID: scope.transactionID,
+      }).push(...scope.callbacks)
+    }
+    scope.callbacks.length = 0
+    popScope({ req, scope })
     return
   }
 
   scope.state = 'flushing'
-  const callbacks = scope.callbacks.splice(scope.startIndex)
+  const callbacks = scope.callbacks.splice(0)
 
   try {
     await runCallbacks({ callbacks })
@@ -238,9 +269,8 @@ export const clearDeferredCleanupScope = ({
   }
 
   assertDeferredCleanupScopeIsActive({ req, scope })
-  scope.callbacks.splice(scope.startIndex)
+  scope.callbacks.length = 0
   popScope({ req, scope })
-  removeEmptyTransactionQueue({ scope })
 }
 
 const assertDeferredCleanupScopeIsActive = ({
@@ -261,7 +291,7 @@ const getTransactionCallbacks = ({
 }: {
   database: object
   transactionID: TransactionID
-}): TransactionCallback[] => {
+}): TransactionCallbackEntry[] => {
   const callbacksByTransaction = callbacksByDatabase.get(database) ?? new Map()
   const callbacks = callbacksByTransaction.get(transactionID) ?? []
 
@@ -269,24 +299,6 @@ const getTransactionCallbacks = ({
   callbacksByDatabase.set(database, callbacksByTransaction)
 
   return callbacks
-}
-
-const removeEmptyTransactionQueue = ({ scope }: { scope: DeferredCleanupScope }): void => {
-  if (
-    scope.transactionID === undefined ||
-    scope.callbacks.length > 0 ||
-    scope.parent?.callbacks === scope.callbacks
-  ) {
-    return
-  }
-
-  const callbacksByTransaction = callbacksByDatabase.get(scope.database)
-
-  callbacksByTransaction?.delete(scope.transactionID)
-
-  if (callbacksByTransaction?.size === 0) {
-    callbacksByDatabase.delete(scope.database)
-  }
 }
 
 const popScope = ({
@@ -315,19 +327,28 @@ const closeTransactionScopes = ({
 }: {
   req: MarkRequired<Partial<PayloadRequest>, 'payload'>
   transactionID: TransactionID
-}): void => {
+}): TransactionCallbackEntry[] => {
   const scope = req.context?.[deferredCleanupScopeContextKey] as DeferredCleanupScope | undefined
 
-  if (scope?.transactionID === transactionID) {
-    popScope({ req, scope })
-    closeTransactionScopes({ req, transactionID })
+  if (scope?.transactionID !== transactionID) {
+    return []
   }
+
+  const callbacks = scope.callbacks.splice(0)
+
+  popScope({ req, scope })
+
+  return [...closeTransactionScopes({ req, transactionID }), ...callbacks]
 }
 
-const runCallbacks = async ({ callbacks }: { callbacks: TransactionCallback[] }): Promise<void> => {
+const runCallbacks = async ({
+  callbacks,
+}: {
+  callbacks: TransactionCallbackEntry[]
+}): Promise<void> => {
   const errors: unknown[] = []
 
-  for (const callback of callbacks) {
+  for (const { callback } of callbacks.sort((a, b) => a.sequence - b.sequence)) {
     try {
       await callback()
     } catch (error) {

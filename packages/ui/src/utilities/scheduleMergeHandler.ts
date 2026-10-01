@@ -156,19 +156,3 @@ export const buildScheduledMergeCancellationWhere = ({
     { 'input.branch': { equals: branchSlug } },
   ],
 })
-
-/**
- * The `where` for a branch's upcoming scheduled merges.
- *
- * Mirrors `buildUpcomingScheduleWhere`: same collection, same shape, filtered on the
- * branch slug carried in the job's input.
- */
-export const buildUpcomingMergeWhere = ({ branchSlug }: { branchSlug: string }): Where => ({
-  and: [
-    { taskSlug: { equals: 'scheduleMerge' } },
-    { completedAt: { exists: false } },
-    { processingUntil: { exists: false } },
-    { waitUntil: { greater_than: new Date() } },
-    { 'input.branch': { equals: branchSlug } },
-  ],
-})

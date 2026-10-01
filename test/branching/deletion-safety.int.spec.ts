@@ -9,6 +9,10 @@ import { expect, vi } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import {
+  databaseAdapterSupportsTransactions,
+  isPostgresDatabaseAdapter,
+} from '../__helpers/shared/databaseAdapterCapabilities.js'
+import {
   deletionSafetyBranchGlobalSlug,
   deletionSafetyGlobalSlug,
   deletionSafetyMediaDirectory,
@@ -1295,162 +1299,170 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     expect(afterDeleteDocument).toEqual({ id: target.id, title: titleAfterHook })
   })
 
-  test('should roll back a shared-transaction branch tombstone when an after-delete hook fails', async ({
-    payload,
-  }) => {
-    const branch = await createBranch({ name: 'Shared delete rollback', payload })
-    const target = await payload.create({
-      collection: deletionSafetyTargetsSlug,
-      data: { title: 'shared rollback target' },
-      overrideAccess: true,
-    })
-    const originalBulkOperationsSingleTransaction = payload.db.bulkOperationsSingleTransaction
+  test.options(
+    'should roll back a shared-transaction branch tombstone when an after-delete hook fails',
+    { db: (adapter) => databaseAdapterSupportsTransactions({ adapter }) },
+    async ({ payload }) => {
+      const branch = await createBranch({ name: 'Shared delete rollback', payload })
+      const target = await payload.create({
+        collection: deletionSafetyTargetsSlug,
+        data: { title: 'shared rollback target' },
+        overrideAccess: true,
+      })
+      const originalBulkOperationsSingleTransaction = payload.db.bulkOperationsSingleTransaction
 
-    deletionSafetySpy.rejectTargetAfterDeleteID = target.id
-    payload.db.bulkOperationsSingleTransaction = false
+      deletionSafetySpy.rejectTargetAfterDeleteID = target.id
+      payload.db.bulkOperationsSingleTransaction = false
 
-    try {
-      await expect(
-        payload.delete({
+      try {
+        await expect(
+          payload.delete({
+            branch: branch.slug,
+            collection: deletionSafetyTargetsSlug,
+            overrideAccess: true,
+            where: { id: { equals: target.id } },
+          }),
+        ).rejects.toThrow('Rejected target after delete')
+
+        await expectBranchDeleteToHaveRolledBack({
+          id: target.id,
+          branch: branch.slug,
+          payload,
+        })
+      } finally {
+        payload.db.bulkOperationsSingleTransaction = originalBulkOperationsSingleTransaction
+      }
+    },
+  )
+
+  test.options(
+    'should roll back a per-document branch tombstone when an after-delete hook fails',
+    { db: (adapter) => databaseAdapterSupportsTransactions({ adapter }) },
+    async ({ payload }) => {
+      const branch = await createBranch({ name: 'Per-document delete rollback', payload })
+      const target = await payload.create({
+        collection: deletionSafetyTargetsSlug,
+        data: { title: 'per-document rollback target' },
+        overrideAccess: true,
+      })
+      const originalBulkOperationsSingleTransaction = payload.db.bulkOperationsSingleTransaction
+
+      deletionSafetySpy.rejectTargetAfterDeleteID = target.id
+      payload.db.bulkOperationsSingleTransaction = true
+
+      try {
+        const result = await payload.delete({
           branch: branch.slug,
           collection: deletionSafetyTargetsSlug,
           overrideAccess: true,
           where: { id: { equals: target.id } },
-        }),
-      ).rejects.toThrow('Rejected target after delete')
+        })
 
-      await expectBranchDeleteToHaveRolledBack({
-        id: target.id,
-        branch: branch.slug,
-        payload,
-      })
-    } finally {
-      payload.db.bulkOperationsSingleTransaction = originalBulkOperationsSingleTransaction
-    }
-  })
-
-  test('should roll back a per-document branch tombstone when an after-delete hook fails', async ({
-    payload,
-  }) => {
-    const branch = await createBranch({ name: 'Per-document delete rollback', payload })
-    const target = await payload.create({
-      collection: deletionSafetyTargetsSlug,
-      data: { title: 'per-document rollback target' },
-      overrideAccess: true,
-    })
-    const originalBulkOperationsSingleTransaction = payload.db.bulkOperationsSingleTransaction
-
-    deletionSafetySpy.rejectTargetAfterDeleteID = target.id
-    payload.db.bulkOperationsSingleTransaction = true
-
-    try {
-      const result = await payload.delete({
-        branch: branch.slug,
-        collection: deletionSafetyTargetsSlug,
-        overrideAccess: true,
-        where: { id: { equals: target.id } },
-      })
-
-      expect(result.docs).toHaveLength(0)
-      expect(result.errors).toHaveLength(1)
-      expect(result.errors[0]?.message).toBe('Rejected target after delete')
-      await expectBranchDeleteToHaveRolledBack({
-        id: target.id,
-        branch: branch.slug,
-        payload,
-      })
-    } finally {
-      payload.db.bulkOperationsSingleTransaction = originalBulkOperationsSingleTransaction
-    }
-  })
-
-  test('should reject an untouched bulk branch delete inside a caller transaction', async ({
-    payload,
-  }) => {
-    const branch = await createBranch({ name: 'Caller transaction bulk delete', payload })
-    const target = await payload.create({
-      collection: deletionSafetyTargetsSlug,
-      data: { title: 'caller transaction delete target' },
-      overrideAccess: true,
-    })
-    const req = await createPayloadRequest({ branch: branch.slug, payload })
-    const didStartTransaction = await initTransaction(req)
-
-    expect(didStartTransaction).toBe(true)
-
-    try {
-      const result = await payload.delete({
-        branch: branch.slug,
-        collection: deletionSafetyTargetsSlug,
-        overrideAccess: true,
-        req,
-        where: { id: { equals: target.id } },
-      })
-
-      expect(result.docs).toHaveLength(0)
-      expect(result.errors).toHaveLength(1)
-      expect(result.errors[0]?.message).toBe(
-        'Cannot delete an untouched branch document within an existing transaction.',
-      )
-      expect(req.transactionID).toBeTruthy()
-      await expectBranchDeleteToHaveRolledBack({
-        id: target.id,
-        branch: branch.slug,
-        payload,
-      })
-    } finally {
-      if (req.transactionID) {
-        await killTransaction(req)
+        expect(result.docs).toHaveLength(0)
+        expect(result.errors).toHaveLength(1)
+        expect(result.errors[0]?.message).toBe('Rejected target after delete')
+        await expectBranchDeleteToHaveRolledBack({
+          id: target.id,
+          branch: branch.slug,
+          payload,
+        })
+      } finally {
+        payload.db.bulkOperationsSingleTransaction = originalBulkOperationsSingleTransaction
       }
-    }
-  })
+    },
+  )
 
-  test('should allow a selected existing branch shadow delete inside a caller transaction', async ({
-    payload,
-  }) => {
-    const branch = await createBranch({ name: 'Selected caller transaction delete', payload })
-    const target = await payload.create({
-      collection: deletionSafetyTargetsSlug,
-      data: { title: 'selected caller transaction main target' },
-      overrideAccess: true,
-    })
-
-    await payload.update({
-      id: target.id,
-      branch: branch.slug,
-      collection: deletionSafetyTargetsSlug,
-      data: { title: 'selected caller transaction branch target' },
-      overrideAccess: true,
-    })
-
-    const req = await createPayloadRequest({ branch: branch.slug, payload })
-    const didStartTransaction = await initTransaction(req)
-
-    expect(didStartTransaction).toBe(true)
-
-    try {
-      const result = await payload.delete({
-        branch: branch.slug,
+  test.options(
+    'should reject an untouched bulk branch delete inside a caller transaction',
+    { db: (adapter) => databaseAdapterSupportsTransactions({ adapter }) },
+    async ({ payload }) => {
+      const branch = await createBranch({ name: 'Caller transaction bulk delete', payload })
+      const target = await payload.create({
         collection: deletionSafetyTargetsSlug,
+        data: { title: 'caller transaction delete target' },
         overrideAccess: true,
-        req,
-        select: { title: true },
-        where: { id: { equals: target.id } },
+      })
+      const req = await createPayloadRequest({ branch: branch.slug, payload })
+      const didStartTransaction = await initTransaction(req)
+
+      expect(didStartTransaction).toBe(true)
+
+      try {
+        const result = await payload.delete({
+          branch: branch.slug,
+          collection: deletionSafetyTargetsSlug,
+          overrideAccess: true,
+          req,
+          where: { id: { equals: target.id } },
+        })
+
+        expect(result.docs).toHaveLength(0)
+        expect(result.errors).toHaveLength(1)
+        expect(result.errors[0]?.message).toBe(
+          'Cannot delete an untouched branch document within an existing transaction.',
+        )
+        expect(req.transactionID).toBeTruthy()
+        await expectBranchDeleteToHaveRolledBack({
+          id: target.id,
+          branch: branch.slug,
+          payload,
+        })
+      } finally {
+        if (req.transactionID) {
+          await killTransaction(req)
+        }
+      }
+    },
+  )
+
+  test.options(
+    'should allow a selected existing branch shadow delete inside a caller transaction',
+    { db: (adapter) => databaseAdapterSupportsTransactions({ adapter }) },
+    async ({ payload }) => {
+      const branch = await createBranch({ name: 'Selected caller transaction delete', payload })
+      const target = await payload.create({
+        collection: deletionSafetyTargetsSlug,
+        data: { title: 'selected caller transaction main target' },
+        overrideAccess: true,
       })
 
-      expect(result.docs).toHaveLength(1)
-      expect(result.errors).toEqual([])
-      expect(req.transactionID).toBeTruthy()
-    } finally {
-      if (req.transactionID) {
-        await killTransaction(req)
+      await payload.update({
+        id: target.id,
+        branch: branch.slug,
+        collection: deletionSafetyTargetsSlug,
+        data: { title: 'selected caller transaction branch target' },
+        overrideAccess: true,
+      })
+
+      const req = await createPayloadRequest({ branch: branch.slug, payload })
+      const didStartTransaction = await initTransaction(req)
+
+      expect(didStartTransaction).toBe(true)
+
+      try {
+        const result = await payload.delete({
+          branch: branch.slug,
+          collection: deletionSafetyTargetsSlug,
+          overrideAccess: true,
+          req,
+          select: { title: true },
+          where: { id: { equals: target.id } },
+        })
+
+        expect(result.docs).toHaveLength(1)
+        expect(result.errors).toEqual([])
+        expect(req.transactionID).toBeTruthy()
+      } finally {
+        if (req.transactionID) {
+          await killTransaction(req)
+        }
       }
-    }
-  })
+    },
+  )
 
   test.options(
     'should not hard-delete main when a branch shadow disappears during delete',
-    { db: 'drizzle' },
+    { db: (adapter) => isPostgresDatabaseAdapter({ adapter }) },
     async ({ payload }) => {
       const branch = await createBranch({ name: 'Disappearing delete shadow', payload })
       const target = await payload.create({
@@ -1527,7 +1539,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
   test.options(
     'should clear rolled-back branch delete state before reusing the request',
-    { db: 'drizzle' },
+    { db: (adapter) => isPostgresDatabaseAdapter({ adapter }) },
     async ({ payload }) => {
       const branch = await createBranch({ name: 'Rolled-back delete request state', payload })
       const target = await payload.create({
@@ -1720,87 +1732,32 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     expect(fs.existsSync(originalFilePath)).toBe(true)
   })
 
-  test('should restore an overwritten branch bulk upload when its document transaction rolls back', async ({
-    payload,
-  }) => {
-    const branch = await createBranch({ name: 'Branch upload file rollback', payload })
-    const originalFileData = Buffer.from('branch bulk rollback original bytes')
-    const upload = await payload.create({
-      collection: deletionSafetyMediaSlug,
-      data: { alt: 'branch bulk rollback original' },
-      file: {
-        name: 'branch-bulk-rollback.txt',
-        data: originalFileData,
-        mimetype: 'text/plain',
-        size: originalFileData.length,
-      },
-      overrideAccess: true,
-    })
-    const filePath = path.resolve(deletionSafetyMediaDirectory, upload.filename)
-    const replacementFileData = Buffer.from('branch bulk rollback replacement bytes')
-
-    deletionSafetySpy.rejectUploadAfterChange = true
-
-    const result = await payload.update({
-      branch: branch.slug,
-      collection: deletionSafetyMediaSlug,
-      data: { alt: 'branch bulk rollback replacement' },
-      file: {
-        name: upload.filename,
-        data: replacementFileData,
-        mimetype: 'text/plain',
-        size: replacementFileData.length,
-      },
-      overrideAccess: true,
-      overwriteExistingFiles: true,
-      where: { id: { equals: upload.id } },
-    })
-    const uploadAfterRollback = await payload.findByID({
-      id: upload.id,
-      collection: deletionSafetyMediaSlug,
-      overrideAccess: true,
-    })
-    const branchUploadAfterRollback = await payload.findByID({
-      id: upload.id,
-      branch: branch.slug,
-      collection: deletionSafetyMediaSlug,
-      overrideAccess: true,
-    })
-
-    expect(result.docs).toHaveLength(0)
-    expect(result.errors).toHaveLength(1)
-    expect(result.errors[0]?.message).toBe('Rejected upload after change')
-    expect(uploadAfterRollback.alt).toBe('branch bulk rollback original')
-    expect(branchUploadAfterRollback.alt).toBe('branch bulk rollback original')
-    expect(fs.readFileSync(filePath)).toEqual(originalFileData)
-  })
-
-  test('should restore an overwritten bulk upload after a per-document transaction rollback', async ({
-    payload,
-  }) => {
-    const originalFileData = Buffer.from('per-document rollback original bytes')
-    const upload = await payload.create({
-      collection: deletionSafetyMediaSlug,
-      data: { alt: 'per-document rollback original' },
-      file: {
-        name: 'per-document-bulk-rollback.txt',
-        data: originalFileData,
-        mimetype: 'text/plain',
-        size: originalFileData.length,
-      },
-      overrideAccess: true,
-    })
-    const filePath = path.resolve(deletionSafetyMediaDirectory, upload.filename)
-    const replacementFileData = Buffer.from('per-document rollback replacement bytes')
-    const originalBulkOperationsSingleTransaction = payload.db.bulkOperationsSingleTransaction
-
-    deletionSafetySpy.rejectUploadAfterChangeID = upload.id
-    payload.db.bulkOperationsSingleTransaction = true
-
-    try {
-      const result = await payload.update({
+  test.options(
+    'should restore an overwritten branch bulk upload when its document transaction rolls back',
+    { db: (adapter) => databaseAdapterSupportsTransactions({ adapter }) },
+    async ({ payload }) => {
+      const branch = await createBranch({ name: 'Branch upload file rollback', payload })
+      const originalFileData = Buffer.from('branch bulk rollback original bytes')
+      const upload = await payload.create({
         collection: deletionSafetyMediaSlug,
-        data: { alt: 'per-document rollback replacement' },
+        data: { alt: 'branch bulk rollback original' },
+        file: {
+          name: 'branch-bulk-rollback.txt',
+          data: originalFileData,
+          mimetype: 'text/plain',
+          size: originalFileData.length,
+        },
+        overrideAccess: true,
+      })
+      const filePath = path.resolve(deletionSafetyMediaDirectory, upload.filename)
+      const replacementFileData = Buffer.from('branch bulk rollback replacement bytes')
+
+      deletionSafetySpy.rejectUploadAfterChange = true
+
+      const result = await payload.update({
+        branch: branch.slug,
+        collection: deletionSafetyMediaSlug,
+        data: { alt: 'branch bulk rollback replacement' },
         file: {
           name: upload.filename,
           data: replacementFileData,
@@ -1816,16 +1773,75 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
         collection: deletionSafetyMediaSlug,
         overrideAccess: true,
       })
+      const branchUploadAfterRollback = await payload.findByID({
+        id: upload.id,
+        branch: branch.slug,
+        collection: deletionSafetyMediaSlug,
+        overrideAccess: true,
+      })
 
       expect(result.docs).toHaveLength(0)
       expect(result.errors).toHaveLength(1)
       expect(result.errors[0]?.message).toBe('Rejected upload after change')
-      expect(uploadAfterRollback.alt).toBe('per-document rollback original')
+      expect(uploadAfterRollback.alt).toBe('branch bulk rollback original')
+      expect(branchUploadAfterRollback.alt).toBe('branch bulk rollback original')
       expect(fs.readFileSync(filePath)).toEqual(originalFileData)
-    } finally {
-      payload.db.bulkOperationsSingleTransaction = originalBulkOperationsSingleTransaction
-    }
-  })
+    },
+  )
+
+  test.options(
+    'should restore an overwritten bulk upload after a per-document transaction rollback',
+    { db: (adapter) => databaseAdapterSupportsTransactions({ adapter }) },
+    async ({ payload }) => {
+      const originalFileData = Buffer.from('per-document rollback original bytes')
+      const upload = await payload.create({
+        collection: deletionSafetyMediaSlug,
+        data: { alt: 'per-document rollback original' },
+        file: {
+          name: 'per-document-bulk-rollback.txt',
+          data: originalFileData,
+          mimetype: 'text/plain',
+          size: originalFileData.length,
+        },
+        overrideAccess: true,
+      })
+      const filePath = path.resolve(deletionSafetyMediaDirectory, upload.filename)
+      const replacementFileData = Buffer.from('per-document rollback replacement bytes')
+      const originalBulkOperationsSingleTransaction = payload.db.bulkOperationsSingleTransaction
+
+      deletionSafetySpy.rejectUploadAfterChangeID = upload.id
+      payload.db.bulkOperationsSingleTransaction = true
+
+      try {
+        const result = await payload.update({
+          collection: deletionSafetyMediaSlug,
+          data: { alt: 'per-document rollback replacement' },
+          file: {
+            name: upload.filename,
+            data: replacementFileData,
+            mimetype: 'text/plain',
+            size: replacementFileData.length,
+          },
+          overrideAccess: true,
+          overwriteExistingFiles: true,
+          where: { id: { equals: upload.id } },
+        })
+        const uploadAfterRollback = await payload.findByID({
+          id: upload.id,
+          collection: deletionSafetyMediaSlug,
+          overrideAccess: true,
+        })
+
+        expect(result.docs).toHaveLength(0)
+        expect(result.errors).toHaveLength(1)
+        expect(result.errors[0]?.message).toBe('Rejected upload after change')
+        expect(uploadAfterRollback.alt).toBe('per-document rollback original')
+        expect(fs.readFileSync(filePath)).toEqual(originalFileData)
+      } finally {
+        payload.db.bulkOperationsSingleTransaction = originalBulkOperationsSingleTransaction
+      }
+    },
+  )
 
   test.options(
     'should report a bulk upload cleanup failure after a non-transactional write',
@@ -2699,6 +2715,671 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
         if (req.transactionID) {
           await killTransaction(req)
         }
+      }
+    },
+  )
+
+  test.options(
+    'should roll back an operation-owned bulk update when a pre-write hook writes and then fails',
+    { db: (adapter) => isPostgresDatabaseAdapter({ adapter }) },
+    async ({ payload }) => {
+      const hookWriteTarget = await payload.create({
+        collection: deletionSafetyTargetsSlug,
+        data: { title: 'operation hook write target original' },
+        overrideAccess: true,
+      })
+      const failedUpload = await payload.create({
+        collection: deletionSafetyMediaSlug,
+        data: { alt: 'operation hook write failure upload' },
+        file: {
+          name: 'operation-hook-failed.txt',
+          data: Buffer.from('operation hook failed bytes'),
+          mimetype: 'text/plain',
+          size: 27,
+        },
+        overrideAccess: true,
+      })
+      const originalBulkOperationsSingleTransaction = payload.db.bulkOperationsSingleTransaction
+
+      deletionSafetySpy.rejectUploadAfterHookWriteID = failedUpload.id
+      deletionSafetySpy.uploadHookWriteTargetID = hookWriteTarget.id
+      payload.db.bulkOperationsSingleTransaction = false
+
+      try {
+        await expect(
+          payload.update({
+            collection: deletionSafetyMediaSlug,
+            data: { alt: 'rejected operation hook replacement' },
+            overrideAccess: true,
+            where: { id: { equals: failedUpload.id } },
+          }),
+        ).rejects.toThrow('Rejected upload after hook write')
+
+        const targetAfterRollback = await payload.findByID({
+          id: hookWriteTarget.id,
+          collection: deletionSafetyTargetsSlug,
+          overrideAccess: true,
+        })
+
+        expect(targetAfterRollback.title).toBe('operation hook write target original')
+      } finally {
+        deletionSafetySpy.rejectUploadAfterHookWriteID = undefined
+        deletionSafetySpy.uploadHookWriteTargetID = undefined
+        payload.db.bulkOperationsSingleTransaction = originalBulkOperationsSingleTransaction
+      }
+    },
+  )
+
+  test.options(
+    'should keep an earlier successful document when a later pre-write validation fails',
+    { db: (adapter) => isPostgresDatabaseAdapter({ adapter }) },
+    async ({ payload }) => {
+      const hookWriteTarget = await payload.create({
+        collection: deletionSafetyTargetsSlug,
+        data: { title: 'per-document hook target original' },
+        overrideAccess: true,
+      })
+      const successfulUpload = await payload.create({
+        collection: deletionSafetyMediaSlug,
+        data: { alt: 'a successful upload' },
+        file: {
+          name: 'per-document-success.txt',
+          data: Buffer.from('per-document success'),
+          mimetype: 'text/plain',
+          size: 20,
+        },
+        overrideAccess: true,
+      })
+      const failedUpload = await payload.create({
+        collection: deletionSafetyMediaSlug,
+        data: { alt: 'b failed upload' },
+        file: {
+          name: 'per-document-failure.txt',
+          data: Buffer.from('per-document failure'),
+          mimetype: 'text/plain',
+          size: 20,
+        },
+        overrideAccess: true,
+      })
+      const originalBulkOperationsSingleTransaction = payload.db.bulkOperationsSingleTransaction
+
+      deletionSafetySpy.uploadHookWriteID = successfulUpload.id
+      deletionSafetySpy.uploadHookWriteTargetID = hookWriteTarget.id
+      deletionSafetySpy.rejectUploadBeforeValidateID = failedUpload.id
+      payload.db.bulkOperationsSingleTransaction = false
+
+      try {
+        const result = await payload.update({
+          collection: deletionSafetyMediaSlug,
+          data: { alt: 'bulk replacement' },
+          overrideAccess: true,
+          sort: 'alt',
+          where: { id: { in: [successfulUpload.id, failedUpload.id] } },
+        })
+
+        expect(result.docs).toHaveLength(1)
+        expect(result.docs[0]?.id).toBe(successfulUpload.id)
+        expect(result.errors).toHaveLength(1)
+        expect(result.errors[0]?.id).toBe(failedUpload.id)
+
+        const successfulAfterUpdate = await payload.findByID({
+          id: successfulUpload.id,
+          collection: deletionSafetyMediaSlug,
+          overrideAccess: true,
+        })
+        const failedAfterUpdate = await payload.findByID({
+          id: failedUpload.id,
+          collection: deletionSafetyMediaSlug,
+          overrideAccess: true,
+        })
+        const targetAfterUpdate = await payload.findByID({
+          id: hookWriteTarget.id,
+          collection: deletionSafetyTargetsSlug,
+          overrideAccess: true,
+        })
+
+        expect(successfulAfterUpdate.alt).toBe('bulk replacement')
+        expect(failedAfterUpdate.alt).toBe('b failed upload')
+        expect(targetAfterUpdate.title).toBe('written by rejected upload hook')
+      } finally {
+        deletionSafetySpy.uploadHookWriteID = undefined
+        deletionSafetySpy.uploadHookWriteTargetID = undefined
+        deletionSafetySpy.rejectUploadBeforeValidateID = undefined
+        payload.db.bulkOperationsSingleTransaction = originalBulkOperationsSingleTransaction
+      }
+    },
+  )
+
+  test.options(
+    'should roll back a disabled-transaction hook write when its parent document fails',
+    { db: (adapter) => isPostgresDatabaseAdapter({ adapter }) },
+    async ({ payload }) => {
+      const hookWriteTarget = await payload.create({
+        collection: deletionSafetyTargetsSlug,
+        data: { title: 'disabled transaction hook target original' },
+        overrideAccess: true,
+      })
+      const failedUpload = await payload.create({
+        collection: deletionSafetyMediaSlug,
+        data: { alt: 'disabled transaction hook failure upload' },
+        file: {
+          name: 'disabled-transaction-hook-failure.txt',
+          data: Buffer.from('disabled transaction hook failure'),
+          mimetype: 'text/plain',
+          size: 33,
+        },
+        overrideAccess: true,
+      })
+      const originalBulkOperationsSingleTransaction = payload.db.bulkOperationsSingleTransaction
+
+      deletionSafetySpy.disableUploadHookWriteTransaction = true
+      deletionSafetySpy.rejectUploadAfterHookWriteID = failedUpload.id
+      deletionSafetySpy.uploadHookWriteTargetID = hookWriteTarget.id
+      payload.db.bulkOperationsSingleTransaction = false
+
+      try {
+        await expect(
+          payload.update({
+            collection: deletionSafetyMediaSlug,
+            data: { alt: 'rejected disabled transaction hook replacement' },
+            overrideAccess: true,
+            where: { id: { equals: failedUpload.id } },
+          }),
+        ).rejects.toThrow('Rejected upload after hook write')
+
+        const targetAfterRollback = await payload.findByID({
+          id: hookWriteTarget.id,
+          collection: deletionSafetyTargetsSlug,
+          overrideAccess: true,
+        })
+
+        expect(targetAfterRollback.title).toBe('disabled transaction hook target original')
+      } finally {
+        deletionSafetySpy.disableUploadHookWriteTransaction = false
+        deletionSafetySpy.rejectUploadAfterHookWriteID = undefined
+        deletionSafetySpy.uploadHookWriteTargetID = undefined
+        payload.db.bulkOperationsSingleTransaction = originalBulkOperationsSingleTransaction
+      }
+    },
+  )
+
+  test.options(
+    'should roll back a direct database hook write when its parent document fails',
+    { db: (adapter) => isPostgresDatabaseAdapter({ adapter }) },
+    async ({ payload }) => {
+      const hookWriteTarget = await payload.create({
+        collection: deletionSafetyTargetsSlug,
+        data: { title: 'direct database hook target original' },
+        overrideAccess: true,
+      })
+      const failedUpload = await payload.create({
+        collection: deletionSafetyMediaSlug,
+        data: { alt: 'direct database hook failure upload' },
+        file: {
+          name: 'direct-database-hook-failure.txt',
+          data: Buffer.from('direct database hook failure'),
+          mimetype: 'text/plain',
+          size: 28,
+        },
+        overrideAccess: true,
+      })
+      const originalBulkOperationsSingleTransaction = payload.db.bulkOperationsSingleTransaction
+
+      deletionSafetySpy.directDatabaseUploadHookWrite = true
+      deletionSafetySpy.rejectUploadAfterHookWriteID = failedUpload.id
+      deletionSafetySpy.uploadHookWriteTargetID = hookWriteTarget.id
+      payload.db.bulkOperationsSingleTransaction = false
+
+      try {
+        await expect(
+          payload.update({
+            collection: deletionSafetyMediaSlug,
+            data: { alt: 'rejected direct database hook replacement' },
+            overrideAccess: true,
+            where: { id: { equals: failedUpload.id } },
+          }),
+        ).rejects.toThrow('Rejected upload after hook write')
+
+        const targetAfterRollback = await payload.findByID({
+          id: hookWriteTarget.id,
+          collection: deletionSafetyTargetsSlug,
+          overrideAccess: true,
+        })
+
+        expect(targetAfterRollback.title).toBe('direct database hook target original')
+      } finally {
+        deletionSafetySpy.directDatabaseUploadHookWrite = false
+        deletionSafetySpy.rejectUploadAfterHookWriteID = undefined
+        deletionSafetySpy.uploadHookWriteTargetID = undefined
+        payload.db.bulkOperationsSingleTransaction = originalBulkOperationsSingleTransaction
+      }
+    },
+  )
+
+  test.options(
+    'should detect a direct database write before a non-upload validation failure',
+    { db: (adapter) => isPostgresDatabaseAdapter({ adapter }) },
+    async ({ payload }) => {
+      const hookWriteTarget = await payload.create({
+        collection: deletionSafetyTargetsSlug,
+        data: { title: 'direct target hook write original' },
+        overrideAccess: true,
+      })
+      const failedTarget = await payload.create({
+        collection: deletionSafetyTargetsSlug,
+        data: { title: 'direct target hook failure' },
+        overrideAccess: true,
+      })
+      const originalBulkOperationsSingleTransaction = payload.db.bulkOperationsSingleTransaction
+
+      deletionSafetySpy.directDatabaseWriteFailureID = failedTarget.id
+      deletionSafetySpy.directDatabaseWriteTargetID = hookWriteTarget.id
+      payload.db.bulkOperationsSingleTransaction = false
+
+      try {
+        await expect(
+          payload.update({
+            collection: deletionSafetyTargetsSlug,
+            data: { title: 'rejected direct target replacement' },
+            overrideAccess: true,
+            where: { id: { equals: failedTarget.id } },
+          }),
+        ).rejects.toThrow('Rejected target after direct database write')
+
+        const targetAfterRollback = await payload.findByID({
+          id: hookWriteTarget.id,
+          collection: deletionSafetyTargetsSlug,
+          overrideAccess: true,
+        })
+
+        expect(targetAfterRollback.title).toBe('direct target hook write original')
+      } finally {
+        deletionSafetySpy.directDatabaseWriteFailureID = undefined
+        deletionSafetySpy.directDatabaseWriteTargetID = undefined
+        payload.db.bulkOperationsSingleTransaction = originalBulkOperationsSingleTransaction
+      }
+    },
+  )
+
+  test.options(
+    'should roll back a queued job when its parent document fails validation',
+    { db: (adapter) => isPostgresDatabaseAdapter({ adapter }) },
+    async ({ payload }) => {
+      const failedTarget = await payload.create({
+        collection: deletionSafetyTargetsSlug,
+        data: { title: 'queued job target failure' },
+        overrideAccess: true,
+      })
+      const originalBulkOperationsSingleTransaction = payload.db.bulkOperationsSingleTransaction
+
+      deletionSafetySpy.queueJobBeforeTargetValidationFailureID = failedTarget.id
+      payload.db.bulkOperationsSingleTransaction = false
+
+      try {
+        await expect(
+          payload.update({
+            collection: deletionSafetyTargetsSlug,
+            data: { title: 'rejected queued job target replacement' },
+            overrideAccess: true,
+            where: { id: { equals: failedTarget.id } },
+          }),
+        ).rejects.toThrow('Rejected target after queueing a job')
+
+        const queuedJobs = await payload.find({
+          collection: 'payload-jobs',
+          overrideAccess: true,
+          pagination: false,
+          where: { 'input.doc.value': { equals: failedTarget.id } },
+        })
+
+        expect(queuedJobs.docs).toHaveLength(0)
+      } finally {
+        deletionSafetySpy.queueJobBeforeTargetValidationFailureID = undefined
+        payload.db.bulkOperationsSingleTransaction = originalBulkOperationsSingleTransaction
+      }
+    },
+  )
+
+  test.options(
+    'should reject an update when its existing lock is reassigned during validation',
+    { db: (adapter) => isPostgresDatabaseAdapter({ adapter }) },
+    async ({ payload }) => {
+      const originalLockUser = await payload.create({
+        collection: 'users',
+        data: { email: 'original-lock-user@example.com', password: 'test' },
+        overrideAccess: true,
+      })
+      const newLockUser = await payload.create({
+        collection: 'users',
+        data: { email: 'new-lock-user@example.com', password: 'test' },
+        overrideAccess: true,
+      })
+      const upload = await payload.create({
+        collection: deletionSafetyMediaSlug,
+        data: { alt: 'lock race original' },
+        file: {
+          name: 'lock-race.txt',
+          data: Buffer.from('lock race'),
+          mimetype: 'text/plain',
+          size: 9,
+        },
+        overrideAccess: true,
+      })
+      const lock = await payload.create({
+        collection: 'payload-locked-documents',
+        data: {
+          document: { relationTo: deletionSafetyMediaSlug, value: upload.id },
+          user: { relationTo: 'users', value: originalLockUser.id },
+        },
+        overrideAccess: true,
+      })
+      const req = await createPayloadRequest({ payload })
+
+      req.user = { ...originalLockUser, collection: 'users' }
+      deletionSafetySpy.reassignUploadLockDuringValidation = {
+        lockID: lock.id,
+        userID: newLockUser.id,
+      }
+
+      try {
+        await expect(
+          payload.update({
+            id: upload.id,
+            collection: deletionSafetyMediaSlug,
+            data: { alt: 'lock race updated' },
+            overrideAccess: true,
+            overrideLock: false,
+            req,
+          }),
+        ).rejects.toThrow('currently locked by another user')
+
+        const locks = await payload.find({
+          collection: 'payload-locked-documents',
+          overrideAccess: true,
+          pagination: false,
+          where: {
+            and: [
+              { 'document.relationTo': { equals: deletionSafetyMediaSlug } },
+              { 'document.value': { equals: upload.id } },
+            ],
+          },
+        })
+
+        expect(locks.docs).toHaveLength(1)
+        expect(getRelationshipID(locks.docs[0]?.user?.value)).toBe(newLockUser.id)
+      } finally {
+        deletionSafetySpy.reassignUploadLockDuringValidation = undefined
+      }
+    },
+  )
+
+  test.options(
+    'should reject an update when its existing lock is reassigned within its transaction',
+    { db: (adapter) => isPostgresDatabaseAdapter({ adapter }) },
+    async ({ payload }) => {
+      const originalLockUser = await payload.create({
+        collection: 'users',
+        data: { email: 'transaction-lock-user@example.com', password: 'test' },
+        overrideAccess: true,
+      })
+      const newLockUser = await payload.create({
+        collection: 'users',
+        data: { email: 'transaction-new-lock-user@example.com', password: 'test' },
+        overrideAccess: true,
+      })
+      const upload = await payload.create({
+        collection: deletionSafetyMediaSlug,
+        data: { alt: 'transaction lock race original' },
+        file: {
+          name: 'transaction-lock-race.txt',
+          data: Buffer.from('transaction lock race'),
+          mimetype: 'text/plain',
+          size: 21,
+        },
+        overrideAccess: true,
+      })
+      const lock = await payload.create({
+        collection: 'payload-locked-documents',
+        data: {
+          document: { relationTo: deletionSafetyMediaSlug, value: upload.id },
+          user: { relationTo: 'users', value: originalLockUser.id },
+        },
+        overrideAccess: true,
+      })
+      const req = await createPayloadRequest({ payload })
+
+      req.user = { ...originalLockUser, collection: 'users' }
+      deletionSafetySpy.reassignUploadLockDuringValidation = {
+        lockID: lock.id,
+        useCurrentRequest: true,
+        userID: newLockUser.id,
+      }
+
+      try {
+        await expect(
+          payload.update({
+            id: upload.id,
+            collection: deletionSafetyMediaSlug,
+            data: { alt: 'transaction lock race updated' },
+            overrideAccess: true,
+            overrideLock: false,
+            req,
+          }),
+        ).rejects.toThrow('currently locked by another user')
+
+        const uploadAfterRejection = await payload.findByID({
+          id: upload.id,
+          collection: deletionSafetyMediaSlug,
+          overrideAccess: true,
+        })
+        const locks = await payload.find({
+          collection: 'payload-locked-documents',
+          overrideAccess: true,
+          pagination: false,
+          where: {
+            and: [
+              { 'document.relationTo': { equals: deletionSafetyMediaSlug } },
+              { 'document.value': { equals: upload.id } },
+            ],
+          },
+        })
+
+        expect(uploadAfterRejection.alt).toBe('transaction lock race original')
+        expect(locks.docs).toHaveLength(1)
+        expect(getRelationshipID(locks.docs[0]?.user?.value)).toBe(originalLockUser.id)
+      } finally {
+        deletionSafetySpy.reassignUploadLockDuringValidation = undefined
+      }
+    },
+  )
+
+  test.options(
+    'should reject a global update when its lock is reassigned during validation',
+    { db: (adapter) => isPostgresDatabaseAdapter({ adapter }) },
+    async ({ payload }) => {
+      const originalLockUser = await payload.create({
+        collection: 'users',
+        data: { email: 'global-lock-user@example.com', password: 'test' },
+        overrideAccess: true,
+      })
+      const newLockUser = await payload.create({
+        collection: 'users',
+        data: { email: 'global-new-lock-user@example.com', password: 'test' },
+        overrideAccess: true,
+      })
+      const originalTarget = await payload.create({
+        collection: deletionSafetyTargetsSlug,
+        data: { title: 'global lock original target' },
+        overrideAccess: true,
+      })
+      const replacementTarget = await payload.create({
+        collection: deletionSafetyTargetsSlug,
+        data: { title: 'global lock replacement target' },
+        overrideAccess: true,
+      })
+
+      await payload.updateGlobal({
+        slug: deletionSafetyGlobalSlug,
+        data: { target: originalTarget.id },
+        overrideAccess: true,
+      })
+
+      const lock = await payload.create({
+        collection: 'payload-locked-documents',
+        data: {
+          globalSlug: deletionSafetyGlobalSlug,
+          user: { relationTo: 'users', value: originalLockUser.id },
+        },
+        overrideAccess: true,
+      })
+      const req = await createPayloadRequest({ payload })
+
+      req.user = { ...originalLockUser, collection: 'users' }
+      deletionSafetySpy.reassignGlobalLockDuringValidation = {
+        lockID: lock.id,
+        useCurrentRequest: true,
+        userID: newLockUser.id,
+      }
+
+      try {
+        await expect(
+          payload.updateGlobal({
+            slug: deletionSafetyGlobalSlug,
+            data: { target: replacementTarget.id },
+            overrideAccess: true,
+            overrideLock: false,
+            req,
+          }),
+        ).rejects.toThrow('currently locked by another user')
+
+        const globalAfterRejection = await payload.db.findGlobal<{ target?: unknown }>({
+          slug: deletionSafetyGlobalSlug,
+        })
+        const locks = await payload.find({
+          collection: 'payload-locked-documents',
+          overrideAccess: true,
+          pagination: false,
+          where: { globalSlug: { equals: deletionSafetyGlobalSlug } },
+        })
+
+        expect(getRelationshipID(globalAfterRejection.target)).toBe(originalTarget.id)
+        expect(locks.docs).toHaveLength(1)
+        expect(getRelationshipID(locks.docs[0]?.user?.value)).toBe(originalLockUser.id)
+      } finally {
+        deletionSafetySpy.reassignGlobalLockDuringValidation = undefined
+      }
+    },
+  )
+
+  test.options(
+    'should refresh locks created or reassigned during bulk delete hooks',
+    { db: (adapter) => isPostgresDatabaseAdapter({ adapter }) },
+    async ({ payload }) => {
+      const deletingUser = await payload.create({
+        collection: 'users',
+        data: { email: 'bulk-lock-user@example.com', password: 'test' },
+        overrideAccess: true,
+      })
+      const newLockUser = await payload.create({
+        collection: 'users',
+        data: { email: 'bulk-new-lock-user@example.com', password: 'test' },
+        overrideAccess: true,
+      })
+      const protectedUpload = await payload.create({
+        collection: deletionSafetyMediaSlug,
+        data: { alt: 'bulk lock protected upload' },
+        file: {
+          name: 'bulk-lock-protected.txt',
+          data: Buffer.from('bulk lock protected'),
+          mimetype: 'text/plain',
+          size: 19,
+        },
+        overrideAccess: true,
+      })
+      const deletableUpload = await payload.create({
+        collection: deletionSafetyMediaSlug,
+        data: { alt: 'bulk lock deletable upload' },
+        file: {
+          name: 'bulk-lock-deletable.txt',
+          data: Buffer.from('bulk lock deletable'),
+          mimetype: 'text/plain',
+          size: 19,
+        },
+        overrideAccess: true,
+      })
+      const originalLock = await payload.create({
+        collection: 'payload-locked-documents',
+        data: {
+          document: { relationTo: deletionSafetyMediaSlug, value: protectedUpload.id },
+          user: { relationTo: 'users', value: deletingUser.id },
+        },
+        overrideAccess: true,
+      })
+      const originalBulkOperationsSingleTransaction = payload.db.bulkOperationsSingleTransaction
+
+      deletionSafetySpy.beforeUploadDelete = async ({ id, req }) => {
+        if (String(id) === String(protectedUpload.id)) {
+          await req.payload.update({
+            id: originalLock.id,
+            collection: 'payload-locked-documents',
+            data: { user: { relationTo: 'users', value: newLockUser.id } },
+            overrideAccess: true,
+            req,
+          })
+        }
+
+        if (String(id) === String(deletableUpload.id)) {
+          await req.payload.create({
+            collection: 'payload-locked-documents',
+            data: {
+              document: { relationTo: deletionSafetyMediaSlug, value: deletableUpload.id },
+              user: { relationTo: 'users', value: deletingUser.id },
+            },
+            overrideAccess: true,
+            req,
+          })
+        }
+      }
+      payload.db.bulkOperationsSingleTransaction = false
+
+      try {
+        const result = await payload.delete({
+          collection: deletionSafetyMediaSlug,
+          overrideAccess: true,
+          overrideLock: false,
+          user: { ...deletingUser, collection: 'users' },
+          where: { id: { in: [protectedUpload.id, deletableUpload.id] } },
+        })
+        const remainingUploads = await payload.find({
+          collection: deletionSafetyMediaSlug,
+          overrideAccess: true,
+          pagination: false,
+          where: { id: { in: [protectedUpload.id, deletableUpload.id] } },
+        })
+        const remainingLocks = await payload.find({
+          collection: 'payload-locked-documents',
+          depth: 0,
+          overrideAccess: true,
+          pagination: false,
+          where: {
+            and: [
+              { 'document.relationTo': { equals: deletionSafetyMediaSlug } },
+              { 'document.value': { in: [protectedUpload.id, deletableUpload.id] } },
+            ],
+          },
+        })
+
+        expect(result.docs.map(({ id }) => id)).toEqual([deletableUpload.id])
+        expect(result.errors).toHaveLength(1)
+        expect(result.errors[0]?.id).toBe(protectedUpload.id)
+        expect(result.errors[0]?.message).toContain('currently locked and cannot be deleted')
+        expect(remainingUploads.docs.map(({ id }) => id)).toEqual([protectedUpload.id])
+        expect(remainingLocks.docs).toHaveLength(1)
+        expect(remainingLocks.docs[0]?.id).toBe(originalLock.id)
+        expect(getRelationshipID(remainingLocks.docs[0]?.user?.value)).toBe(newLockUser.id)
+      } finally {
+        deletionSafetySpy.beforeUploadDelete = undefined
+        payload.db.bulkOperationsSingleTransaction = originalBulkOperationsSingleTransaction
       }
     },
   )

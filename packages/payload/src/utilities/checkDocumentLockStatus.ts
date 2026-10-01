@@ -4,6 +4,7 @@ import type { JsonObject, PayloadRequest, Where } from '../types/index.js'
 
 import { Locked } from '../errors/index.js'
 import { lockedDocumentsCollectionSlug } from '../locked-documents/config.js'
+import { markTransactionWrite } from './transactionMutationTracker.js'
 
 type CheckDocumentLockStatusArgs = {
   collectionSlug?: string
@@ -13,6 +14,7 @@ type CheckDocumentLockStatusArgs = {
   lockErrorMessage?: string
   overrideLock?: boolean
   req: PayloadRequest
+  shouldDeleteLock?: boolean
 }
 
 export const checkDocumentLockStatus = async ({
@@ -23,6 +25,7 @@ export const checkDocumentLockStatus = async ({
   lockErrorMessage,
   overrideLock = true,
   req,
+  shouldDeleteLock = true,
 }: CheckDocumentLockStatusArgs): Promise<void> => {
   const { payload } = req
 
@@ -70,6 +73,7 @@ export const checkDocumentLockStatus = async ({
       collection: lockedDocumentsCollectionSlug,
       limit: 1,
       pagination: false,
+      req: payload.db.name === 'mongoose' ? undefined : req,
       sort: '-updatedAt',
       where: lockedDocumentQuery,
     })
@@ -96,6 +100,10 @@ export const checkDocumentLockStatus = async ({
     }
   }
 
+  if (!shouldDeleteLock) {
+    return
+  }
+
   // Perform the delete operation regardless of overrideLock status
   await payload.db.deleteMany({
     collection: lockedDocumentsCollectionSlug,
@@ -103,6 +111,7 @@ export const checkDocumentLockStatus = async ({
     req: payload.db.name === 'mongoose' ? undefined : req,
     where: lockedDocumentQuery,
   })
+  markTransactionWrite({ req: payload.db.name === 'mongoose' ? undefined : req })
 }
 
 type BulkLockArgs = {
@@ -163,6 +172,7 @@ export const getDocumentLockState = async ({
     collection: lockedDocumentsCollectionSlug,
     limit: 0,
     pagination: false,
+    req: payload.db.name === 'mongoose' ? undefined : req,
     sort: '-updatedAt',
     where: buildBulkLockedDocumentQuery(collectionSlug, ids),
   })
@@ -244,4 +254,5 @@ export const deleteDocumentLocks = async ({
       ? { id: { in: lockDocumentIDs } }
       : buildBulkLockedDocumentQuery(collectionSlug, ids),
   })
+  markTransactionWrite({ req: payload.db.name === 'mongoose' ? undefined : req })
 }

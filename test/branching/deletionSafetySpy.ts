@@ -9,9 +9,16 @@ export const deletionSafetySpy = {
   beforeTargetDelete: undefined as
     | ((args: { id: number | string; req: PayloadRequest }) => Promise<void>)
     | undefined,
+  beforeUploadDelete: undefined as
+    | ((args: { id: number | string; req: PayloadRequest }) => Promise<void>)
+    | undefined,
   bulkDeleteHookIDs: [] as (number | string)[],
   createUploadOwnerOnBeforeDelete: false,
   createUploadOwnerOnSecondBeforeDelete: false,
+  directDatabaseUploadHookWrite: false,
+  directDatabaseWriteFailureID: undefined as number | string | undefined,
+  directDatabaseWriteTargetID: undefined as number | string | undefined,
+  disableUploadHookWriteTransaction: false,
   globalBeforeReadCount: 0,
   hasCreatedRaceJob: false,
   hasCreatedUploadOwner: false,
@@ -19,6 +26,13 @@ export const deletionSafetySpy = {
   mainMergeCollectionDependencyTargetID: undefined as number | string | undefined,
   mainMergeGlobalDependencyTargetID: undefined as number | string | undefined,
   ownerBeforeReadCount: 0,
+  queueJobBeforeTargetValidationFailureID: undefined as number | string | undefined,
+  reassignGlobalLockDuringValidation: undefined as
+    | { lockID: number | string; useCurrentRequest?: boolean; userID: number | string }
+    | undefined,
+  reassignUploadLockDuringValidation: undefined as
+    | { lockID: number | string; useCurrentRequest?: boolean; userID: number | string }
+    | undefined,
   rejectTargetAfterChangeID: undefined as number | string | undefined,
   rejectTargetAfterDeleteID: undefined as number | string | undefined,
   rejectUploadAfterChange: false,
@@ -31,6 +45,7 @@ export const deletionSafetySpy = {
   rejectVersionedTargetCreate: false,
   uploadAfterDeleteCount: 0,
   uploadBeforeDeleteCount: 0,
+  uploadHookWriteID: undefined as number | string | undefined,
   uploadHookWriteTargetID: undefined as number | string | undefined,
   uploadUpdateRequestFiles: [] as Array<{ id: number | string; name: string | undefined }>,
 }
@@ -40,9 +55,14 @@ export const resetDeletionSafetySpy = (): void => {
   deletionSafetySpy.afterTargetDelete = undefined
   deletionSafetySpy.beforeRejectedUploadAfterChange = undefined
   deletionSafetySpy.beforeTargetDelete = undefined
+  deletionSafetySpy.beforeUploadDelete = undefined
   deletionSafetySpy.bulkDeleteHookIDs = []
   deletionSafetySpy.createUploadOwnerOnBeforeDelete = false
   deletionSafetySpy.createUploadOwnerOnSecondBeforeDelete = false
+  deletionSafetySpy.directDatabaseUploadHookWrite = false
+  deletionSafetySpy.directDatabaseWriteFailureID = undefined
+  deletionSafetySpy.directDatabaseWriteTargetID = undefined
+  deletionSafetySpy.disableUploadHookWriteTransaction = false
   deletionSafetySpy.globalBeforeReadCount = 0
   deletionSafetySpy.hasCreatedRaceJob = false
   deletionSafetySpy.hasCreatedUploadOwner = false
@@ -50,6 +70,9 @@ export const resetDeletionSafetySpy = (): void => {
   deletionSafetySpy.mainMergeCollectionDependencyTargetID = undefined
   deletionSafetySpy.mainMergeGlobalDependencyTargetID = undefined
   deletionSafetySpy.ownerBeforeReadCount = 0
+  deletionSafetySpy.queueJobBeforeTargetValidationFailureID = undefined
+  deletionSafetySpy.reassignGlobalLockDuringValidation = undefined
+  deletionSafetySpy.reassignUploadLockDuringValidation = undefined
   deletionSafetySpy.rejectTargetAfterChangeID = undefined
   deletionSafetySpy.rejectTargetAfterDeleteID = undefined
   deletionSafetySpy.rejectUploadAfterChange = false
@@ -62,6 +85,7 @@ export const resetDeletionSafetySpy = (): void => {
   deletionSafetySpy.rejectVersionedTargetAfterDeleteID = undefined
   deletionSafetySpy.uploadAfterDeleteCount = 0
   deletionSafetySpy.uploadBeforeDeleteCount = 0
+  deletionSafetySpy.uploadHookWriteID = undefined
   deletionSafetySpy.uploadHookWriteTargetID = undefined
   deletionSafetySpy.uploadUpdateRequestFiles = []
 }

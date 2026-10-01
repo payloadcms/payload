@@ -13,8 +13,6 @@ export { extractJWT } from '../auth/extractJWT.js'
 export { getLoginOptions } from '../auth/getLoginOptions.js'
 export { addSessionToUser, removeExpiredSessions } from '../auth/sessions.js'
 
-export { getFromImportMap } from '../cli/commands/generateImportMap/utilities/getFromImportMap.js'
-export { parsePayloadComponent } from '../cli/commands/generateImportMap/utilities/parsePayloadComponent.js'
 export {
   branchChangesCollectionSlug,
   branchesCollectionSlug,
@@ -22,6 +20,8 @@ export {
   type ClientBranchingConfig,
   MAIN_BRANCH,
 } from '../branching/types.js'
+export { getFromImportMap } from '../cli/commands/generateImportMap/utilities/getFromImportMap.js'
+export { parsePayloadComponent } from '../cli/commands/generateImportMap/utilities/parsePayloadComponent.js'
 export {
   type ClientCollectionConfig,
   createClientCollectionConfig,

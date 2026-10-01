@@ -35,6 +35,7 @@ import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { markTransactionWrite } from '../../utilities/transactionMutationTracker.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { getRestoredStatusesToAuthorize } from '../../versions/getRestoredStatusesToAuthorize.js'
 import { saveVersion } from '../../versions/saveVersion.js'
@@ -293,6 +294,7 @@ export const restoreVersionOperation = async <
         req: reqWithValidationLocale,
         select,
       })
+      markTransactionWrite({ req: reqWithValidationLocale })
     }
 
     // /////////////////////////////////////
@@ -310,6 +312,7 @@ export const restoreVersionOperation = async <
       req: reqWithValidationLocale,
       select,
     })
+    markTransactionWrite({ req: reqWithValidationLocale })
 
     // /////////////////////////////////////
     // afterRead - Fields

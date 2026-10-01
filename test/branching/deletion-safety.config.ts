@@ -63,7 +63,51 @@ export default buildConfigWithDefaults({
               await deletionSafetySpy.beforeTargetDelete?.({ id, req })
             },
           ],
+          beforeValidate: [
+            async ({ data, operation, originalDoc, req }) => {
+              if (
+                operation === 'update' &&
+                deletionSafetySpy.queueJobBeforeTargetValidationFailureID !== undefined &&
+                String(originalDoc?.id) ===
+                  String(deletionSafetySpy.queueJobBeforeTargetValidationFailureID)
+              ) {
+                await req.payload.jobs.queue({
+                  input: {
+                    doc: {
+                      relationTo: deletionSafetyTargetsSlug,
+                      value: originalDoc.id,
+                    },
+                  },
+                  overrideAccess: true,
+                  req,
+                  task: 'schedulePublish',
+                  waitUntil: new Date(Date.now() + 60_000),
+                })
+
+                throw new Error('Rejected target after queueing a job')
+              }
+
+              if (
+                operation === 'update' &&
+                deletionSafetySpy.directDatabaseWriteFailureID !== undefined &&
+                deletionSafetySpy.directDatabaseWriteTargetID !== undefined &&
+                String(originalDoc?.id) === String(deletionSafetySpy.directDatabaseWriteFailureID)
+              ) {
+                await req.payload.db.updateOne({
+                  id: deletionSafetySpy.directDatabaseWriteTargetID,
+                  collection: deletionSafetyTargetsSlug,
+                  data: { title: 'written directly by rejected target hook' },
+                  req,
+                })
+
+                throw new Error('Rejected target after direct database write')
+              }
+
+              return data
+            },
+          ],
         },
+        lockDocuments: false,
         versions: false,
       },
       {
@@ -205,6 +249,8 @@ export default buildConfigWithDefaults({
                   req,
                 })
               }
+
+              await deletionSafetySpy.beforeUploadDelete?.({ id, req })
             },
           ],
           beforeValidate: [
@@ -214,23 +260,60 @@ export default buildConfigWithDefaults({
                   id: originalDoc.id,
                   name: req.file?.name,
                 })
+
+                if (deletionSafetySpy.reassignUploadLockDuringValidation) {
+                  const reassignLock = deletionSafetySpy.reassignUploadLockDuringValidation
+
+                  await req.payload.update({
+                    id: reassignLock.lockID,
+                    collection: 'payload-locked-documents',
+                    data: {
+                      user: {
+                        relationTo: 'users',
+                        value: reassignLock.userID,
+                      },
+                    },
+                    overrideAccess: true,
+                    req: reassignLock.useCurrentRequest ? req : undefined,
+                  })
+                }
+              }
+
+              const shouldWriteFromHook =
+                operation === 'update' &&
+                deletionSafetySpy.uploadHookWriteTargetID !== undefined &&
+                ((deletionSafetySpy.uploadHookWriteID !== undefined &&
+                  String(originalDoc?.id) === String(deletionSafetySpy.uploadHookWriteID)) ||
+                  (deletionSafetySpy.uploadHookWriteID === undefined &&
+                    deletionSafetySpy.rejectUploadAfterHookWriteID !== undefined &&
+                    String(originalDoc?.id) ===
+                      String(deletionSafetySpy.rejectUploadAfterHookWriteID)))
+
+              if (shouldWriteFromHook) {
+                if (deletionSafetySpy.directDatabaseUploadHookWrite) {
+                  await req.payload.db.updateOne({
+                    id: deletionSafetySpy.uploadHookWriteTargetID,
+                    collection: deletionSafetyTargetsSlug,
+                    data: { title: 'written by rejected upload hook' },
+                    req,
+                  })
+                } else {
+                  await req.payload.update({
+                    id: deletionSafetySpy.uploadHookWriteTargetID,
+                    collection: deletionSafetyTargetsSlug,
+                    data: { title: 'written by rejected upload hook' },
+                    disableTransaction: deletionSafetySpy.disableUploadHookWriteTransaction,
+                    overrideAccess: true,
+                    req,
+                  })
+                }
               }
 
               if (
                 operation === 'update' &&
                 deletionSafetySpy.rejectUploadAfterHookWriteID !== undefined &&
-                String(originalDoc?.id) ===
-                  String(deletionSafetySpy.rejectUploadAfterHookWriteID) &&
-                deletionSafetySpy.uploadHookWriteTargetID !== undefined
+                String(originalDoc?.id) === String(deletionSafetySpy.rejectUploadAfterHookWriteID)
               ) {
-                await req.payload.update({
-                  id: deletionSafetySpy.uploadHookWriteTargetID,
-                  collection: deletionSafetyTargetsSlug,
-                  data: { title: 'written by rejected upload hook' },
-                  overrideAccess: true,
-                  req,
-                })
-
                 throw new Error('Rejected upload after hook write')
               }
 
@@ -292,6 +375,28 @@ export default buildConfigWithDefaults({
               deletionSafetySpy.globalBeforeReadCount += 1
 
               return doc
+            },
+          ],
+          beforeValidate: [
+            async ({ data, req }) => {
+              if (deletionSafetySpy.reassignGlobalLockDuringValidation) {
+                const reassignLock = deletionSafetySpy.reassignGlobalLockDuringValidation
+
+                await req.payload.update({
+                  id: reassignLock.lockID,
+                  collection: 'payload-locked-documents',
+                  data: {
+                    user: {
+                      relationTo: 'users',
+                      value: reassignLock.userID,
+                    },
+                  },
+                  overrideAccess: true,
+                  req: reassignLock.useCurrentRequest ? req : undefined,
+                })
+              }
+
+              return data
             },
           ],
         },

@@ -13,7 +13,7 @@ import type { ScheduledMerge } from './ScheduledMerges/index.js'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
 import { BranchChanges } from '../../exports/client/index.js'
-import { buildUpcomingMergeWhere } from '../../utilities/scheduleMergeHandler.js'
+import { buildUpcomingMergeWhere } from '../../utilities/buildUpcomingMergeWhere.js'
 import { SetDocumentStepNav } from '../Edit/SetDocumentStepNav/index.js'
 import './index.css'
 

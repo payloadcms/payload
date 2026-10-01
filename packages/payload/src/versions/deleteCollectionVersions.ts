@@ -2,6 +2,7 @@ import type { PayloadRequest } from '../types/index.js'
 
 import { resolveBranchOwnVersions } from '../branching/versions.js'
 import { type Payload } from '../index.js'
+import { markTransactionWrite } from '../utilities/transactionMutationTracker.js'
 
 type Args = {
   id?: number | string
@@ -51,6 +52,7 @@ export const deleteCollectionVersions = async ({
           ? branchScopedVersionQueries[0]!
           : { or: branchScopedVersionQueries },
     })
+    markTransactionWrite({ req })
   } catch (err) {
     payload.logger.error({
       err,

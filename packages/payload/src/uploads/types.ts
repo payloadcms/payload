@@ -223,6 +223,11 @@ export type UploadConfig = {
    */
   constructorOptions?: SharpOptions
   /**
+   * Enables cropping of images.
+   * @default true
+   */
+  crop?: boolean
+  /**
    * Deletes files from adapter-managed storage when an internal operation removes file references
    * without deleting the owning document.
    *
@@ -233,11 +238,6 @@ export type UploadConfig = {
     retainedDoc?: null | object
     sourceDoc: object
   }) => Promise<void>
-  /**
-   * Enables cropping of images.
-   * @default true
-   */
-  crop?: boolean
   /**
    * Disable the ability to save files to disk.
    * @default false

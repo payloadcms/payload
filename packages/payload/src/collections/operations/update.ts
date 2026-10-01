@@ -59,6 +59,10 @@ import {
   flushDeferredCleanupScopeAfterOperation,
 } from '../../utilities/transactionCallbacks.js'
 import {
+  hasTransactionWrite,
+  runInTransactionMutationScope,
+} from '../../utilities/transactionMutationTracker.js'
+import {
   getAllLocalesPublicationStatus,
   normalizeAllLocalesPublicationStatus,
   reconcileAllLocalesPublicationStatus,
@@ -380,235 +384,257 @@ export const updateOperation = async <
       hasCallerTransaction ||
       Boolean(collectionConfig.upload && (req.file || shouldCommit))
 
-    const processDocument = async (initialDocWithLocales: (typeof docs)[number]) => {
-      const { id } = initialDocWithLocales
-      let documentCleanupScope: DeferredCleanupScope | null = null
-      let documentReq = req
-      let documentTempFilePath: string | undefined
-      let docShouldCommit = false
-      let hasEnteredUpdateDocument = false
-      const documentUploadFileRollbacks: UploadFileRollbacks = new Map()
+    const processDocument = (initialDocWithLocales: (typeof docs)[number]) =>
+      runInTransactionMutationScope({
+        adapter: req.payload.db,
+        callback: async (transactionMutationScope) => {
+          const { id } = initialDocWithLocales
+          let documentCleanupScope: DeferredCleanupScope | null = null
+          let documentReq = req
+          let documentTempFilePath: string | undefined
+          let docShouldCommit = false
+          let hasEnteredUpdateDocument = false
+          let hasWrittenTransactionArtifact = false
+          const documentUploadFileRollbacks: UploadFileRollbacks = new Map()
 
-      if (collectionConfig.upload) {
-        documentReq = isolateObjectProperty(documentReq, ['context', 'file', 'payloadUploadSizes'])
-        documentReq.context = createIsolatedDeferredCleanupContext({ req })
-        delete documentReq.context._payloadCloudStorage
-        documentReq.file = req.file ? { ...req.file } : undefined
-        documentReq.payloadUploadSizes =
-          sharedGeneratedFileData === null ? {} : { ...req.payloadUploadSizes }
-      }
-
-      try {
-        // Branch updates need a transaction per result so a caught document failure can roll back
-        // its fork without removing successful documents from the same bulk operation.
-        if (
-          !args.disableTransaction &&
-          (req.payload.db.bulkOperationsSingleTransaction || shouldUsePerDocumentBranchTransactions)
-        ) {
-          docShouldCommit = await initTransaction(documentReq)
-        }
-        if (collectionConfig.upload || shouldProcessDocumentsSequentially) {
-          documentCleanupScope = await beginDeferredCleanupScope({ req: documentReq })
-        }
-
-        let docWithLocales = initialDocWithLocales
-
-        if (isBranchUpdate) {
-          const isExistingBranchDocument =
-            (docWithLocales as Record<string, unknown>)[branchField] === branch
-
-          if (hasCallerTransaction && !isExistingBranchDocument) {
-            throw new APIError(
-              'Cannot update an untouched branch document within an existing transaction.',
-              httpStatus.CONFLICT,
-            )
+          if (collectionConfig.upload) {
+            documentReq = isolateObjectProperty(documentReq, [
+              'context',
+              'file',
+              'payloadUploadSizes',
+            ])
+            documentReq.context = createIsolatedDeferredCleanupContext({ req })
+            delete documentReq.context._payloadCloudStorage
+            documentReq.file = req.file ? { ...req.file } : undefined
+            documentReq.payloadUploadSizes =
+              sharedGeneratedFileData === null ? {} : { ...req.payloadUploadSizes }
           }
 
-          await forkDocument({
-            id,
-            collectionSlug: collection.config.slug,
-            req: documentReq,
-            // Without an operation-owned transaction, keep the isolated race-recovery path. An
-            // adapter with transactions disabled or unavailable cannot roll back a later hook
-            // failure after its write has completed.
-            useAmbientTransaction: docShouldCommit,
-          })
+          try {
+            // Branch updates need a transaction per result so a caught document failure can roll back
+            // its fork without removing successful documents from the same bulk operation.
+            if (
+              !args.disableTransaction &&
+              (req.payload.db.bulkOperationsSingleTransaction ||
+                shouldUsePerDocumentBranchTransactions)
+            ) {
+              docShouldCommit = await initTransaction(documentReq)
+            }
+            if (collectionConfig.upload || shouldProcessDocumentsSequentially) {
+              documentCleanupScope = await beginDeferredCleanupScope({ req: documentReq })
+            }
 
-          const branchDocuments = await runQuery({
-            queryLimit: 1,
-            queryReq: documentReq,
-            queryWhere: combineQueries(fullWhere, { id: { equals: id } }),
-          })
-          const branchDocument = branchDocuments[0]
+            let docWithLocales = initialDocWithLocales
 
-          if (!branchDocument) {
-            throw new Error('Unable to read the branch document after creating its shadow.')
-          }
+            if (isBranchUpdate) {
+              const isExistingBranchDocument =
+                (docWithLocales as Record<string, unknown>)[branchField] === branch
 
-          docWithLocales = branchDocument
-        }
+              if (hasCallerTransaction && !isExistingBranchDocument) {
+                throw new APIError(
+                  'Cannot update an untouched branch document within an existing transaction.',
+                  httpStatus.CONFLICT,
+                )
+              }
 
-        const documentFile = documentReq.file ? { ...documentReq.file } : undefined
-        if (collectionConfig.upload && !overrideAccess && documentFile?.tempFilePath) {
-          const extension = path.extname(documentFile.tempFilePath)
-          documentTempFilePath = path.join(
-            path.dirname(documentFile.tempFilePath),
-            `${path.basename(documentFile.tempFilePath, extension)}-${randomUUID()}${extension}`,
-          )
-          await fs.copyFile(documentFile.tempFilePath, documentTempFilePath)
-          documentFile.tempFilePath = documentTempFilePath
-        }
-
-        if (collectionConfig.upload && documentFile) {
-          documentReq.file = documentFile
-        }
-        const generatedFileData =
-          sharedGeneratedFileData ??
-          (await generateFileData({
-            collection,
-            config,
-            data: mergeUploadDataWithDocument(bulkUpdateData, docWithLocales, {
-              locale:
-                locale === 'all' || !locale
-                  ? config.localization
-                    ? config.localization.defaultLocale
-                    : undefined
-                  : locale,
-              localizedProperties: getLocalizedUploadProperties(collectionConfig.flattenedFields),
-            }),
-            operation: 'update',
-            originalDoc: docWithLocales,
-            overwriteExistingFiles,
-            req: documentReq,
-            throwOnMissingFile: false,
-          }))
-
-        const shouldTrackUploadFileRollback = Boolean(
-          (shouldCommit || docShouldCommit) &&
-            collectionConfig.upload &&
-            !collectionConfig.upload.disableLocalStorage,
-        )
-
-        const select = sanitizeSelect({
-          fields: collectionConfig.flattenedFields,
-          select: resolveSelect({
-            config: collectionConfig.select,
-            operation: 'update',
-            req,
-            select: incomingSelect,
-          }),
-        })
-
-        // ///////////////////////////////////////////////
-        // Update document, runs all document level hooks
-        // ///////////////////////////////////////////////
-        hasEnteredUpdateDocument = true
-        let updatedDoc = await updateDocument({
-          id,
-          autosave,
-          collectionConfig,
-          config,
-          data: copyDataWithFreshRowIDs({
-            config,
-            data: generatedFileData.data,
-            existingDoc: docWithLocales,
-            fields: collectionConfig.fields,
-          }),
-          depth: depth!,
-          docWithLocales,
-          draftArg,
-          fallbackLocale: fallbackLocale!,
-          filesToUpload: generatedFileData.files,
-          locale: locale!,
-          overrideAccess: overrideAccess!,
-          overrideLock: overrideLock!,
-          payload,
-          populate,
-          publishAllLocales,
-          req: documentReq,
-          select: select!,
-          showHiddenFields: showHiddenFields!,
-          unpublishAllLocales,
-          uploadFileRollbacks: shouldTrackUploadFileRollback
-            ? docShouldCommit
-              ? documentUploadFileRollbacks
-              : uploadFileRollbacks
-            : undefined,
-        })
-
-        // /////////////////////////////////////
-        // Add collection property for auth collections
-        // /////////////////////////////////////
-
-        if (collectionConfig.auth) {
-          updatedDoc = { ...updatedDoc, collection: collectionConfig.slug }
-        }
-
-        if (documentCleanupScope) {
-          if (documentCleanupScope.transactionID === undefined) {
-            await flushDeferredCleanupScopeAfterOperation({
-              req: documentReq,
-              scope: documentCleanupScope,
-            })
-          } else {
-            await flushDeferredCleanupScope({ req: documentReq, scope: documentCleanupScope })
-          }
-        }
-        if (docShouldCommit) {
-          await commitTransaction(documentReq)
-
-          await cleanupUploadFileRollbacks({ rollbacks: documentUploadFileRollbacks }).catch(
-            (error) => {
-              args.req.payload.logger.error({
-                err: error,
-                msg: 'Failed to remove an upload rollback backup after committing its document database write.',
+              await forkDocument({
+                id,
+                collectionSlug: collection.config.slug,
+                req: documentReq,
+                // Without an operation-owned transaction, keep the isolated race-recovery path. An
+                // adapter with transactions disabled or unavailable cannot roll back a later hook
+                // failure after its write has completed.
+                useAmbientTransaction: docShouldCommit,
               })
-            },
-          )
-        }
 
-        return updatedDoc
-      } catch (error) {
-        const isPublic = error instanceof Error ? isErrorPublic(error, config) : false
-        const shouldRollbackArtifacts = shouldRollbackTransactionArtifacts({ error })
+              const branchDocuments = await runQuery({
+                queryLimit: 1,
+                queryReq: documentReq,
+                queryWhere: combineQueries(fullWhere, { id: { equals: id } }),
+              })
+              const branchDocument = branchDocuments[0]
 
-        if (documentCleanupScope) {
-          clearDeferredCleanupScope({ req: documentReq, scope: documentCleanupScope })
-        }
-        if (docShouldCommit) {
-          await killTransaction(documentReq)
+              if (!branchDocument) {
+                throw new Error('Unable to read the branch document after creating its shadow.')
+              }
 
-          if (shouldRollbackArtifacts) {
-            await rollbackUploadFiles({ rollbacks: documentUploadFileRollbacks }).catch(
-              (rollbackError) => {
-                args.req.payload.logger.error({
-                  err: rollbackError,
-                  msg: 'Failed to restore upload files after rolling back their document database write.',
-                })
-              },
+              docWithLocales = branchDocument
+            }
+
+            const documentFile = documentReq.file ? { ...documentReq.file } : undefined
+            if (collectionConfig.upload && !overrideAccess && documentFile?.tempFilePath) {
+              const extension = path.extname(documentFile.tempFilePath)
+              documentTempFilePath = path.join(
+                path.dirname(documentFile.tempFilePath),
+                `${path.basename(documentFile.tempFilePath, extension)}-${randomUUID()}${extension}`,
+              )
+              await fs.copyFile(documentFile.tempFilePath, documentTempFilePath)
+              documentFile.tempFilePath = documentTempFilePath
+            }
+
+            if (collectionConfig.upload && documentFile) {
+              documentReq.file = documentFile
+            }
+            const generatedFileData =
+              sharedGeneratedFileData ??
+              (await generateFileData({
+                collection,
+                config,
+                data: mergeUploadDataWithDocument(bulkUpdateData, docWithLocales, {
+                  locale:
+                    locale === 'all' || !locale
+                      ? config.localization
+                        ? config.localization.defaultLocale
+                        : undefined
+                      : locale,
+                  localizedProperties: getLocalizedUploadProperties(
+                    collectionConfig.flattenedFields,
+                  ),
+                }),
+                operation: 'update',
+                originalDoc: docWithLocales,
+                overwriteExistingFiles,
+                req: documentReq,
+                throwOnMissingFile: false,
+              }))
+
+            const shouldTrackUploadFileRollback = Boolean(
+              (shouldCommit || docShouldCommit) &&
+                collectionConfig.upload &&
+                !collectionConfig.upload.disableLocalStorage,
             )
+
+            const select = sanitizeSelect({
+              fields: collectionConfig.flattenedFields,
+              select: resolveSelect({
+                config: collectionConfig.select,
+                operation: 'update',
+                req,
+                select: incomingSelect,
+              }),
+            })
+
+            // ///////////////////////////////////////////////
+            // Update document, runs all document level hooks
+            // ///////////////////////////////////////////////
+            hasEnteredUpdateDocument = true
+            hasWrittenTransactionArtifact =
+              shouldTrackUploadFileRollback && generatedFileData.files.length > 0
+            let updatedDoc = await updateDocument({
+              id,
+              autosave,
+              collectionConfig,
+              config,
+              data: copyDataWithFreshRowIDs({
+                config,
+                data: generatedFileData.data,
+                existingDoc: docWithLocales,
+                fields: collectionConfig.fields,
+              }),
+              depth: depth!,
+              docWithLocales,
+              draftArg,
+              fallbackLocale: fallbackLocale!,
+              filesToUpload: generatedFileData.files,
+              locale: locale!,
+              onBeforeDocumentWrite: () => {
+                hasWrittenTransactionArtifact = true
+              },
+              overrideAccess: overrideAccess!,
+              overrideLock: overrideLock!,
+              payload,
+              populate,
+              publishAllLocales,
+              req: documentReq,
+              select: select!,
+              showHiddenFields: showHiddenFields!,
+              unpublishAllLocales,
+              uploadFileRollbacks: shouldTrackUploadFileRollback
+                ? docShouldCommit
+                  ? documentUploadFileRollbacks
+                  : uploadFileRollbacks
+                : undefined,
+            })
+
+            // /////////////////////////////////////
+            // Add collection property for auth collections
+            // /////////////////////////////////////
+
+            if (collectionConfig.auth) {
+              updatedDoc = { ...updatedDoc, collection: collectionConfig.slug }
+            }
+
+            if (documentCleanupScope) {
+              if (documentCleanupScope.transactionID === undefined) {
+                await flushDeferredCleanupScopeAfterOperation({
+                  req: documentReq,
+                  scope: documentCleanupScope,
+                })
+              } else {
+                await flushDeferredCleanupScope({ req: documentReq, scope: documentCleanupScope })
+              }
+            }
+            if (docShouldCommit) {
+              await commitTransaction(documentReq)
+
+              await cleanupUploadFileRollbacks({ rollbacks: documentUploadFileRollbacks }).catch(
+                (error) => {
+                  args.req.payload.logger.error({
+                    err: error,
+                    msg: 'Failed to remove an upload rollback backup after committing its document database write.',
+                  })
+                },
+              )
+            }
+
+            return updatedDoc
+          } catch (error) {
+            const isPublic = error instanceof Error ? isErrorPublic(error, config) : false
+            const shouldRollbackArtifacts = shouldRollbackTransactionArtifacts({ error })
+
+            if (documentCleanupScope) {
+              clearDeferredCleanupScope({ req: documentReq, scope: documentCleanupScope })
+            }
+            if (docShouldCommit) {
+              await killTransaction(documentReq)
+
+              if (shouldRollbackArtifacts) {
+                await rollbackUploadFiles({ rollbacks: documentUploadFileRollbacks }).catch(
+                  (rollbackError) => {
+                    args.req.payload.logger.error({
+                      err: rollbackError,
+                      msg: 'Failed to restore upload files after rolling back their document database write.',
+                    })
+                  },
+                )
+              }
+            }
+            if (isBranchUpdate) {
+              resetBranchState(documentReq)
+            }
+            if (
+              (hasCallerTransaction && hasEnteredUpdateDocument) ||
+              (shouldCommit &&
+                (hasTransactionWrite({ scope: transactionMutationScope }) ||
+                  hasWrittenTransactionArtifact))
+            ) {
+              throw error
+            }
+            errors.push({
+              id,
+              isPublic,
+              message: error instanceof Error ? error.message : 'Unknown error',
+            })
+          } finally {
+            if (documentTempFilePath) {
+              await fs.rm(documentTempFilePath, { force: true }).catch((error) => {
+                req.payload.logger.error({ err: error, msg: 'Failed to remove temp file copy' })
+              })
+            }
           }
-        }
-        if (isBranchUpdate) {
-          resetBranchState(documentReq)
-        }
-        if ((hasCallerTransaction || shouldCommit) && hasEnteredUpdateDocument) {
-          throw error
-        }
-        errors.push({
-          id,
-          isPublic,
-          message: error instanceof Error ? error.message : 'Unknown error',
-        })
-      } finally {
-        if (documentTempFilePath) {
-          await fs.rm(documentTempFilePath, { force: true }).catch((error) => {
-            req.payload.logger.error({ err: error, msg: 'Failed to remove temp file copy' })
-          })
-        }
-      }
-      return null
-    }
+          return null
+        },
+      })
 
     // Upload processing may mutate its temp file while cropping, so each upload document must
     // finish before the next starts. Branch updates also run in order because each result owns its

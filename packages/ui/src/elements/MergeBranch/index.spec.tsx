@@ -63,7 +63,7 @@ vi.mock('../../providers/Translation/index.js', () => ({
   }),
 }))
 vi.mock('../../utilities/api.js', () => ({ requests: { get: vi.fn() } }))
-vi.mock('../../utilities/scheduleMergeHandler.js', () => ({
+vi.mock('../../utilities/buildUpcomingMergeWhere.js', () => ({
   buildUpcomingMergeWhere: () => ({}),
 }))
 vi.mock('../Button/index.js', () => ({

@@ -26,6 +26,7 @@ import { readCollectionMergeSnapshot } from '../../packages/payload/src/branchin
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercises this internal boundary directly.
 import { scheduleMergeHandler } from '../../packages/ui/src/utilities/scheduleMergeHandler.js'
 import { test } from '../__helpers/int/vitest.js'
+import { databaseAdapterSupportsTransactions } from '../__helpers/shared/databaseAdapterCapabilities.js'
 import { devUser } from '../credentials.js'
 import { hookSpy } from './hookSpy.js'
 import {
@@ -58,6 +59,14 @@ let token: string
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const expectedConcurrentOperationAttemptCounts = databaseAdapterSupportsTransactions({
+  adapter: process.env.PAYLOAD_DATABASE ?? 'mongodb',
+})
+  ? [[1, 2]]
+  : [
+      [1, 1],
+      [1, 2],
+    ]
 
 const fieldNames = (collection: SanitizedCollectionConfig): string[] =>
   collection.flattenedFields.map((field) => field.name)
@@ -7323,7 +7332,9 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
       expect(shadows.docs).toHaveLength(1)
       expect(['edit A!', 'edit B!']).toContain(shadows.docs[0]!.title)
-      expect([...hookAttempts.values()].sort()).toEqual([1, 2])
+      expect(expectedConcurrentOperationAttemptCounts).toContainEqual(
+        [...hookAttempts.values()].sort(),
+      )
 
       for (const requestState of requestStateAtAttemptStart) {
         expect(requestState).toEqual({
@@ -7532,79 +7543,29 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       },
     )
 
-    test('should roll back a first branch tombstone when an afterDelete hook fails', async () => {
-      await payload.create({
-        collection: branchesSlug,
-        data: { name: 'Race', slug: 'racebranch' },
-      })
-
-      const doc = await payload.create({ collection: postsSlug, data: { title: 'hook failure' } })
-      const hookError = new Error('Simulated afterDelete failure')
-
-      hookSpy.postAfterDelete = () => {
-        throw hookError
-      }
-
-      try {
-        await expect(
-          payload.delete({ id: doc.id, branch: 'racebranch', collection: postsSlug }),
-        ).rejects.toBe(hookError)
-      } finally {
-        hookSpy.postAfterDelete = undefined
-      }
-
-      const shadows = await payload.find({
-        branch: false,
-        collection: postsSlug,
-        pagination: false,
-        showHiddenFields: true,
-        where: {
-          and: [{ _branch: { equals: 'racebranch' } }, { _branchDocID: { equals: doc.id } }],
-        },
-      })
-      const changes = await payload.find({
-        collection: branchChangesSlug,
-        pagination: false,
-        where: { branch: { equals: 'racebranch' } },
-      })
-      const onBranch = await payload.findByID({
-        id: doc.id,
-        branch: 'racebranch',
-        collection: postsSlug,
-      })
-
-      expect(shadows.docs).toHaveLength(0)
-      expect(changes.docs).toHaveLength(0)
-      expect(onBranch.title).toBe('hook failure')
-    })
-
-    test('should reject a first branch delete inside a caller-owned transaction', async () => {
-      await payload.create({
-        collection: branchesSlug,
-        data: { name: 'Race', slug: 'racebranch' },
-      })
-
-      const doc = await payload.create({ collection: postsSlug, data: { title: 'caller delete' } })
-      const req = await createPayloadRequest({ branch: 'racebranch', payload })
-      const didStartTransaction = await initTransaction(req)
-      const callerTransactionID = await req.transactionID
-
-      expect(didStartTransaction).toBe(true)
-
-      try {
-        await expect(
-          payload.delete({
-            id: doc.id,
-            branch: 'racebranch',
-            collection: postsSlug,
-            req,
-          }),
-        ).rejects.toMatchObject({
-          message: 'Cannot delete an untouched branch document within an existing transaction.',
-          status: 409,
+    test.options(
+      'should roll back a first branch tombstone when an afterDelete hook fails',
+      { db: (adapter) => databaseAdapterSupportsTransactions({ adapter }) },
+      async () => {
+        await payload.create({
+          collection: branchesSlug,
+          data: { name: 'Race', slug: 'racebranch' },
         })
 
-        expect(req.transactionID).toBe(callerTransactionID)
+        const doc = await payload.create({ collection: postsSlug, data: { title: 'hook failure' } })
+        const hookError = new Error('Simulated afterDelete failure')
+
+        hookSpy.postAfterDelete = () => {
+          throw hookError
+        }
+
+        try {
+          await expect(
+            payload.delete({ id: doc.id, branch: 'racebranch', collection: postsSlug }),
+          ).rejects.toBe(hookError)
+        } finally {
+          hookSpy.postAfterDelete = undefined
+        }
 
         const shadows = await payload.find({
           branch: false,
@@ -7620,15 +7581,76 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
           pagination: false,
           where: { branch: { equals: 'racebranch' } },
         })
+        const onBranch = await payload.findByID({
+          id: doc.id,
+          branch: 'racebranch',
+          collection: postsSlug,
+        })
 
         expect(shadows.docs).toHaveLength(0)
         expect(changes.docs).toHaveLength(0)
-      } finally {
-        if (req.transactionID) {
-          await killTransaction(req)
+        expect(onBranch.title).toBe('hook failure')
+      },
+    )
+
+    test.options(
+      'should reject a first branch delete inside a caller-owned transaction',
+      { db: (adapter) => databaseAdapterSupportsTransactions({ adapter }) },
+      async () => {
+        await payload.create({
+          collection: branchesSlug,
+          data: { name: 'Race', slug: 'racebranch' },
+        })
+
+        const doc = await payload.create({
+          collection: postsSlug,
+          data: { title: 'caller delete' },
+        })
+        const req = await createPayloadRequest({ branch: 'racebranch', payload })
+        const didStartTransaction = await initTransaction(req)
+        const callerTransactionID = await req.transactionID
+
+        expect(didStartTransaction).toBe(true)
+
+        try {
+          await expect(
+            payload.delete({
+              id: doc.id,
+              branch: 'racebranch',
+              collection: postsSlug,
+              req,
+            }),
+          ).rejects.toMatchObject({
+            message: 'Cannot delete an untouched branch document within an existing transaction.',
+            status: 409,
+          })
+
+          expect(req.transactionID).toBe(callerTransactionID)
+
+          const shadows = await payload.find({
+            branch: false,
+            collection: postsSlug,
+            pagination: false,
+            showHiddenFields: true,
+            where: {
+              and: [{ _branch: { equals: 'racebranch' } }, { _branchDocID: { equals: doc.id } }],
+            },
+          })
+          const changes = await payload.find({
+            collection: branchChangesSlug,
+            pagination: false,
+            where: { branch: { equals: 'racebranch' } },
+          })
+
+          expect(shadows.docs).toHaveLength(0)
+          expect(changes.docs).toHaveLength(0)
+        } finally {
+          if (req.transactionID) {
+            await killTransaction(req)
+          }
         }
-      }
-    })
+      },
+    )
 
     test('should create exactly one tombstone when two deletes race to remove the same never-forked document', async () => {
       await payload.create({
@@ -7710,7 +7732,9 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       }
 
       expect(waitingShadowCreates).toBe(2)
-      expect([...deleteHookAttempts.values()].sort()).toEqual([1, 2])
+      expect(expectedConcurrentOperationAttemptCounts).toContainEqual(
+        [...deleteHookAttempts.values()].sort(),
+      )
 
       const shadows = await payload.find({
         branch: false,
