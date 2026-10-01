@@ -1998,11 +1998,6 @@ export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { generatePayloadFileURL } from './uploads/generatePayloadFileURL.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
-export {
-  getStoredUploadVariants,
-  getUploadVariantsFieldName,
-  type UploadVariantsFieldName,
-} from './uploads/getUploadVariantsFieldName.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
 export type * from './uploads/transformers/types.js'
 export type * from './uploads/types.js'

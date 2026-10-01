@@ -1,7 +1,5 @@
 import type { CollectionConfig, FieldHook, ImageSize } from 'payload'
 
-import { getStoredUploadVariants } from 'payload'
-
 import type { GeneratedAdapter, GenerateFileURL } from '../types.js'
 
 import { sanitizePrefix } from '../utilities/sanitizePrefix.js'
@@ -31,10 +29,8 @@ const getObjectFolder = (data: unknown): string => {
 
 export const getAfterReadHook =
   ({ adapter, collection, disablePayloadAccessControl, generateFileURL, size }: Args): FieldHook =>
-  async ({ data, req, value }) => {
-    const filename = size
-      ? getStoredUploadVariants({ config: req.payload.config, doc: data })?.[size.name]?.filename
-      : data?.filename
+  async ({ data, value }) => {
+    const filename = size ? data?.variants?.[size.name]?.filename : data?.filename
     const prefix = data?.prefix
     // Direct-serve URLs encode the full location; the proxy resolves `_objectKey` server-side.
     const objectFolder = getObjectFolder(data)

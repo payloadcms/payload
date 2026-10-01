@@ -4,8 +4,6 @@ import { writeFileSync } from 'fs'
 
 import type { DrizzleAdapter } from '../types.js'
 
-import { assertLegacySizesDisabled } from './getSizesToVariantsRenames.js'
-
 /**
  * Builds the `sizes-to-variants` predefined migration for a SQL adapter. The migration renames
  * columns rather than letting drizzle-kit diff the schema (which would drop and re-add them,
@@ -19,9 +17,6 @@ export const buildDynamicPredefinedSizesToVariantsMigration = ({
 }): DynamicMigrationTemplate => {
   return async ({ filePath, payload }) => {
     const adapter = payload.db as unknown as DrizzleAdapter
-
-    assertLegacySizesDisabled({ adapter })
-
     const { generateDrizzleJson } = adapter.requireDrizzleKit()
     const drizzleJsonAfter = await generateDrizzleJson(adapter.schema)
 

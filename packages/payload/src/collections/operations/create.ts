@@ -28,7 +28,6 @@ import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { saveVersion } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
-import { getUploadVariantsFieldName } from '../../uploads/getUploadVariantsFieldName.js'
 import {
   getExternalUploadSource,
   getUploadDestination,
@@ -93,9 +92,7 @@ export const createOperation = async <
     if (args.collection.config.upload && !args.overrideAccess) {
       externalUploadSource = getExternalUploadSource(args.data)
       const { objectKey, prefix } = getUploadDestination({ data: args.data, file: args.req.file })
-      const sanitizedData = sanitizeUploadData(args.data, 'create', {
-        variantsFieldName: getUploadVariantsFieldName({ config: args.req.payload.config }),
-      })
+      const sanitizedData = sanitizeUploadData(args.data, 'create')
 
       args = {
         ...args,

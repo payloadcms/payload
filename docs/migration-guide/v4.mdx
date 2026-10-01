@@ -1882,21 +1882,7 @@ The group field that holds each generated image size on an upload document is no
 
 GraphQL queries select `variants { thumbnail { url } }` instead of `sizes { thumbnail { url } }`, and regenerated types expose `variants?: { ... }` (and `variants?: T | { ... }` on the `*Select` types) in place of `sizes`. Update any frontend code that reads `media.sizes`, including values you pass to helpers such as `getBestFitFromSizes({ sizes: doc.variants })`.
 
-To upgrade without migrating yet, set `upload.legacySizes: true` in your Payload config. Every upload collection then keeps storing generated files under the 3.x `sizes` field, so your existing database works as-is, and `variants` becomes a read-only virtual alias of it. Documents return both `sizes` and `variants`, `where`, `select`, and `sort` work on either path, and both appear in the generated types and GraphQL schema. Writes to `variants` are ignored. The option is deprecated and will be removed in the next major version:
-
-```ts
-buildConfig({
-  upload: {
-    legacySizes: true,
-  },
-})
-```
-
-Plugins and custom code that read stored upload data directly, or query the database without the Local API, should use `getStoredUploadVariants({ config, doc })` and `getUploadVariantsFieldName({ config })` from `payload` so they work in both modes.
-
-Once your frontends read `variants`, remove `upload.legacySizes` and run the migration below. The migration refuses to run while `upload.legacySizes` is on.
-
-Without `upload.legacySizes`, existing documents must be migrated. Create the predefined migration for your database adapter and run it:
+Existing documents must be migrated. Create the predefined migration for your database adapter and run it:
 
 ```sh
 # MongoDB

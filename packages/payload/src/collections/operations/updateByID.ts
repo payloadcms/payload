@@ -22,7 +22,6 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { type CollectionSlug, deepCopyObjectSimple, type FindOptions } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
-import { getUploadVariantsFieldName } from '../../uploads/getUploadVariantsFieldName.js'
 import {
   getLocalizedUploadProperties,
   getUploadDestination,
@@ -81,9 +80,7 @@ export const updateByIDOperation = async <
 
     if (args.collection.config.upload && !args.overrideAccess) {
       const { objectKey, prefix } = getUploadDestination({ data: args.data, file: args.req.file })
-      const data = sanitizeUploadData(args.data, 'update', {
-        variantsFieldName: getUploadVariantsFieldName({ config: args.req.payload.config }),
-      })
+      const data = sanitizeUploadData(args.data, 'update')
 
       args = {
         ...args,
@@ -270,7 +267,6 @@ export const updateByIDOperation = async <
               : undefined
             : locale,
         localizedProperties: getLocalizedUploadProperties(collectionConfig.flattenedFields),
-        variantsFieldName: getUploadVariantsFieldName({ config }),
       })
     }
 

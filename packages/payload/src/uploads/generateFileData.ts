@@ -18,7 +18,6 @@ import { getFileByPath } from './getFileByPath.js'
 import { getFileExtension, getSanitizedUploadFilename } from './getFileTypeIdentity.js'
 import { getImageSize } from './getImageSize.js'
 import { getSafeFileName } from './getSafeFilename.js'
-import { getUploadVariantsFieldName } from './getUploadVariantsFieldName.js'
 import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
 import { hasFullFileContents } from './hasFullFileContents.js'
 import { isProcessableImage } from './isProcessableImage.js'
@@ -503,9 +502,7 @@ export const generateFileData = async <T>({
         })
       }
 
-      ;(fileData as Record<string, unknown>)[
-        getUploadVariantsFieldName({ config: req.payload.config })
-      ] = sizes
+      fileData.variants = sizes
     }
   } catch (err) {
     req.payload.logger.error(err)

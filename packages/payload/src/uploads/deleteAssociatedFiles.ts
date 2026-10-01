@@ -9,7 +9,6 @@ import type { FileData, FileToSave } from './types.js'
 
 import { APIError, ErrorDeletingFile } from '../errors/index.js'
 import { fileExists } from './fileExists.js'
-import { getUploadVariantsFieldName } from './getUploadVariantsFieldName.js'
 
 type Args = {
   collectionConfig: SanitizedCollectionConfig
@@ -22,7 +21,6 @@ type Args = {
 
 export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
   collectionConfig,
-  config,
   doc,
   files = [],
   overrideDelete,
@@ -45,10 +43,8 @@ export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
       throw new ErrorDeletingFile(req.t)
     }
 
-    const variants = doc[getUploadVariantsFieldName({ config })]
-
-    if (variants && typeof variants === 'object') {
-      const sizes = Object.values(variants) as FileData[]
+    if (doc.variants) {
+      const sizes: FileData[] = Object.values(doc.variants)
       // Since forEach will not wait until unlink is finished it could
       // happen that two operations will try to delete the same file.
       // To avoid this it is recommended to use "sync" instead

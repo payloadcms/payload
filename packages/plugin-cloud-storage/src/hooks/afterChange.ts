@@ -1,6 +1,6 @@
 import type { CollectionAfterChangeHook, CollectionConfig, FileData, TypeWithID } from 'payload'
 
-import { deepMergeWithSourceArrays, getStoredUploadVariants } from 'payload'
+import { deepMergeWithSourceArrays } from 'payload'
 
 import type { GeneratedAdapter } from '../types.js'
 
@@ -125,14 +125,9 @@ export const getAfterChangeHook =
             filesToDelete.push(previousDoc.filename)
           }
 
-          const previousVariants = getStoredUploadVariants({
-            config: req.payload.config,
-            doc: previousDoc,
-          })
-
-          if (previousVariants) {
+          if (typeof previousDoc.variants === 'object') {
             filesToDelete = filesToDelete.concat(
-              Object.values(previousVariants).map(
+              Object.values(previousDoc?.variants || []).map(
                 (resizedFileData) => resizedFileData?.filename as string,
               ),
             )
@@ -145,13 +140,8 @@ export const getAfterChangeHook =
           if (typeof newFileData.filename === 'string') {
             newFilenames.add(newFileData.filename)
           }
-          const newVariants = getStoredUploadVariants({
-            config: req.payload.config,
-            doc: newFileData,
-          })
-
-          if (newVariants) {
-            for (const size of Object.values(newVariants)) {
+          if (typeof newFileData.variants === 'object') {
+            for (const size of Object.values(newFileData.variants || {})) {
               if (size?.filename && typeof size.filename === 'string') {
                 newFilenames.add(size.filename)
               }

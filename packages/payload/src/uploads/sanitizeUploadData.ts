@@ -1,7 +1,6 @@
 import path from 'path'
 
 import type { FlattenedField } from '../fields/config/types.js'
-import type { UploadVariantsFieldName } from './getUploadVariantsFieldName.js'
 
 import { APIError } from '../errors/APIError.js'
 
@@ -15,8 +14,6 @@ export type ExternalUploadSource = {
 type UploadDataOptions = {
   locale?: string
   localizedProperties?: Set<string>
-  /** Where generated variants are stored; see `getUploadVariantsFieldName`. */
-  variantsFieldName?: UploadVariantsFieldName
 }
 
 const hasOwnProperty = (value: Record<string, unknown>, key: string): boolean =>
@@ -110,21 +107,15 @@ const validateFilename = (filename: unknown): void => {
   }
 }
 
-export const sanitizeUploadData = <T>(
-  data: T,
-  operation: Operation,
-  { variantsFieldName = 'variants' }: Pick<UploadDataOptions, 'variantsFieldName'> = {},
-): T => {
+export const sanitizeUploadData = <T>(data: T, operation: Operation): T => {
   if (!isRecord(data)) {
     return data
   }
 
   validateFilename(data.filename)
 
-  const submittedVariants = data[variantsFieldName]
-
-  if (isRecord(submittedVariants)) {
-    for (const sizeData of Object.values(submittedVariants)) {
+  if (isRecord(data.variants)) {
+    for (const sizeData of Object.values(data.variants)) {
       if (isRecord(sizeData)) {
         validateFilename(sizeData.filename)
       }
@@ -133,7 +124,7 @@ export const sanitizeUploadData = <T>(
 
   const sanitizedData: Record<string, unknown> = { ...data }
   delete sanitizedData.filename
-  delete sanitizedData[variantsFieldName]
+  delete sanitizedData.variants
   delete sanitizedData.url
   // Server-owned; never accepted from the caller.
   delete sanitizedData._objectKey
@@ -169,22 +160,20 @@ export const mergeUploadDataWithDocument = <T>(
     }
   }
 
-  const variantsFieldName = options.variantsFieldName ?? 'variants'
-  const submittedVariants = data[variantsFieldName]
-  const documentSizes = getDocumentProperty(document, variantsFieldName, options)
-  if (!hasOwnProperty(data, variantsFieldName) && hasOwnProperty(document, variantsFieldName)) {
-    mergedData[variantsFieldName] = documentSizes
-  } else if (isRecord(submittedVariants) && isRecord(documentSizes)) {
+  const documentSizes = getDocumentProperty(document, 'variants', options)
+  if (!hasOwnProperty(data, 'variants') && hasOwnProperty(document, 'variants')) {
+    mergedData.variants = documentSizes
+  } else if (isRecord(data.variants) && isRecord(documentSizes)) {
     const mergedSizes: Record<string, unknown> = { ...documentSizes }
 
-    for (const [sizeName, sizeData] of Object.entries(submittedVariants)) {
+    for (const [sizeName, sizeData] of Object.entries(data.variants)) {
       const documentSize = documentSizes[sizeName]
 
       mergedSizes[sizeName] =
         isRecord(sizeData) && isRecord(documentSize) ? { ...documentSize, ...sizeData } : sizeData
     }
 
-    mergedData[variantsFieldName] = mergedSizes
+    mergedData.variants = mergedSizes
   }
 
   return mergedData as T
@@ -199,6 +188,7 @@ const uploadDerivedProperties = [
   'height',
   'mimeType',
   'prefix',
+  'variants',
   'thumbnailURL',
   'url',
   'width',
@@ -214,7 +204,7 @@ export const restoreUploadDataFromDocument = <T>(
   }
 
   const restoredData: Record<string, unknown> = { ...data }
-  for (const property of [...uploadDerivedProperties, options.variantsFieldName ?? 'variants']) {
+  for (const property of uploadDerivedProperties) {
     if (hasOwnProperty(document, property)) {
       restoredData[property] = getDocumentProperty(document, property, options)
     } else {

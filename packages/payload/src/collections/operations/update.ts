@@ -23,7 +23,6 @@ import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/index.js'
 import { type CollectionSlug, type FindOptions } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
-import { getUploadVariantsFieldName } from '../../uploads/getUploadVariantsFieldName.js'
 import {
   getLocalizedUploadProperties,
   getUploadDestination,
@@ -99,9 +98,7 @@ export const updateOperation = async <
 
     if (args.collection.config.upload && !args.overrideAccess) {
       const { objectKey, prefix } = getUploadDestination({ data: args.data, file: args.req.file })
-      const data = sanitizeUploadData(args.data, 'update', {
-        variantsFieldName: getUploadVariantsFieldName({ config: args.req.payload.config }),
-      })
+      const data = sanitizeUploadData(args.data, 'update')
 
       args = {
         ...args,
@@ -368,7 +365,6 @@ export const updateOperation = async <
                     : undefined
                   : locale,
               localizedProperties: getLocalizedUploadProperties(collectionConfig.flattenedFields),
-              variantsFieldName: getUploadVariantsFieldName({ config }),
             }),
             operation: 'update',
             originalDoc: docWithLocales,

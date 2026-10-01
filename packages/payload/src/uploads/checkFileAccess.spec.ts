@@ -27,7 +27,6 @@ const makeReq = (findOne: ReturnType<typeof vi.fn>): PayloadRequest =>
   ({
     t: vi.fn(),
     payload: {
-      config: {},
       db: { findOne },
     },
   }) as unknown as PayloadRequest

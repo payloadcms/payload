@@ -18,7 +18,6 @@ describe('getHandleMultiPartUpload', () => {
     } as unknown as R2Bucket
     const req = {
       payload: {
-        config: {},
         collections: {
           media: { config: { access: {}, upload: true } },
         },

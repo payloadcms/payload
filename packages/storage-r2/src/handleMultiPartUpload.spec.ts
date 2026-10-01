@@ -10,7 +10,6 @@ import { getHandleMultiPartUpload } from './handleMultiPartUpload.js'
 const createRequest = (filename: string, mimeType: string) =>
   ({
     payload: {
-      config: {},
       collections: {
         media: {
           config: {
@@ -34,7 +33,6 @@ const createContinuationRequest = ({ multipartKey }: { multipartKey: string }) =
     arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(0)),
     user: { id: 'user' },
     payload: {
-      config: {},
       collections: {
         media: { config: { slug: 'media', access: {}, upload: { staticDir: '/tmp' } } },
       },
@@ -132,7 +130,6 @@ describe('getHandleMultiPartUpload', () => {
     } as unknown as R2Bucket
     const req = {
       payload: {
-        config: {},
         collections: {
           media: { config: { access: {}, upload: true } },
         },

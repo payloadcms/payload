@@ -1,7 +1,5 @@
 import type { FileData, PayloadRequest } from 'payload'
 
-import { getStoredUploadVariants } from 'payload'
-
 import type { File } from '../types.js'
 
 interface CloudStorageContext {
@@ -35,10 +33,8 @@ export function getIncomingFiles({
 
     files = [mainFile]
 
-    const variants = getStoredUploadVariants({ config: req.payload.config, doc: data })
-
-    if (variants) {
-      Object.entries(variants).forEach(([key, resizedFileData]) => {
+    if (data?.variants) {
+      Object.entries(data.variants).forEach(([key, resizedFileData]) => {
         if (payloadUploadSizes?.[key] && resizedFileData.mimeType) {
           files = files.concat([
             {
