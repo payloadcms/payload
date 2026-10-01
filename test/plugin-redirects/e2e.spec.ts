@@ -55,8 +55,9 @@ test.describe('Redirects Plugin', () => {
       await expect(customUrlOption).toContainText('Custom URL')
 
       // Check the override field still works
-      const redirectTypeLabel = page.locator('label[for="field-type"]')
-      await expect(redirectTypeLabel).toContainText('Redirect Type (Overridden)')
+      await expect(
+        page.getByRole('combobox', { name: 'Redirect Type (Overridden)', exact: true }),
+      ).toBeVisible()
     })
 
     test('should display translated field labels in Spanish', async () => {

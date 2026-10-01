@@ -293,10 +293,14 @@ export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
           />
         )}
       </div>
+      <span className="sr-only" id={`${uuid}-search-description`}>
+        {t('general:searchAutomatically')}
+      </span>
       <div className={`${baseClass}__search`}>
         <div className={`${baseClass}__search-bar`}>
           <SearchIcon size={24} />
           <input
+            aria-describedby={`${uuid}-search-description`}
             aria-label={t('general:searchColumns')}
             className={`${baseClass}__search-input`}
             onChange={(e) => setSearchQuery(e.target.value)}
