@@ -6,6 +6,7 @@ import { formatAdminURL } from 'payload/shared'
 import type { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 
 import { addGroupBy, clearGroupBy, openGroupBy } from '../__helpers/e2e/groupBy/index.js'
+import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { selectInput } from '../__helpers/e2e/selectInput.js'
 import {
   addCollectionQueryWidget,
@@ -429,6 +430,30 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('1.4.10 Reflow (AA)', () => {
+    test('should keep collection cards within a 320px viewport', async () => {
+      const previousViewport = page.viewportSize()
+
+      try {
+        await page.setViewportSize({ height: 720, width: 320 })
+        await page.goto(`${serverURL}/admin`)
+
+        const cards = page.locator('.collections__card-list .card')
+
+        expect(await cards.count()).toBeGreaterThan(0)
+        for (const card of await cards.all()) {
+          const box = await card.boundingBox()
+
+          expect(box).not.toBeNull()
+          expect(box!.x).toBeGreaterThanOrEqual(0)
+          expect(box!.x + box!.width).toBeLessThanOrEqual(320)
+        }
+      } finally {
+        if (previousViewport) {
+          await page.setViewportSize(previousViewport)
+        }
+      }
+    })
+
     test('should ellipsize long selected values without obscuring their remove control', async () => {
       // Additional coverage for PYLD-3811.
       const fieldSelect = await openBulkEditFieldSelect({ page, postsURL })
@@ -2231,6 +2256,33 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.7 Focus Visible (AA)', () => {
+    test('should reveal the collection card create action and its focus indicator by keyboard', async ({
+      browser: _browser,
+    }, testInfo) => {
+      await page.goto(`${serverURL}/admin`)
+      await page.mouse.move(0, 0)
+
+      const scan = await runAxeScan({ include: ['.collections'], page, testInfo })
+      const card = page.locator('.collections__card-list .card').first()
+      const createLink = card.locator('.card__actions a')
+      const actions = card.locator('.card__actions')
+      const unfocusedStyle = await getFocusIndicatorStyle(createLink)
+
+      expect(scan.violations).toHaveLength(0)
+      await expect(actions).toHaveCSS('opacity', '0')
+      await card.locator('.card__click').focus()
+      await page.keyboard.press('Tab')
+
+      await expect(createLink).toBeFocused()
+      await expect(actions).toHaveCSS('opacity', '1')
+      expect(
+        hasRenderedFocusIndicator({
+          focusedStyle: await getFocusIndicatorStyle(createLink),
+          unfocusedStyle,
+        }),
+      ).toBe(true)
+    })
+
     test('should paint a keyboard focus indicator on the dashboard Add button', async () => {
       // PYLD-3631
       const header = await openDashboardEditor({ page, serverURL })
