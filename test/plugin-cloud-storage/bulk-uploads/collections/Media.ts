@@ -4,6 +4,7 @@ import { controls, mediaSlug, outerRequests } from '../shared.js'
 
 export const Media: CollectionConfig = {
   slug: mediaSlug,
+  versions: false,
   access: { create: () => true, read: () => true, update: () => true, delete: () => true },
   fields: [{ name: 'storageVersion', type: 'number', defaultValue: 0 }],
   hooks: {
@@ -21,5 +22,5 @@ export const Media: CollectionConfig = {
       },
     ],
   },
-  upload: { focalPoint: false, skipSafeFetch: true },
+  upload: { filenameCompoundIndex: ['filename', 'prefix'], focalPoint: false, skipSafeFetch: true },
 }
