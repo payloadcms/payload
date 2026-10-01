@@ -186,11 +186,6 @@
     display: flex;
     align-items: center;
     margin-left: auto;
-    opacity: 0.5;
   }
 
-  .popup-button-list__button--submenu-trigger:hover .popup-button-list__chevron,
-  .popup-button-list__button--selected .popup-button-list__chevron {
-    opacity: 1;
-  }
 }
