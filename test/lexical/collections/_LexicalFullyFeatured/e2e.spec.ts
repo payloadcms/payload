@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
+import { closeNav } from '../../../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
@@ -67,6 +68,8 @@ describe('Lexical Fully Featured', () => {
   })
 
   test('ensure upload node can be aligned', async ({ page }) => {
+    await closeNav(page)
+
     await lexical.slashCommand('upload')
     await lexical.drawer.locator('.list-drawer__header').getByText('Create New').click()
     await lexical.page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
@@ -421,6 +424,7 @@ describe('Lexical Fully Featured, admin panel in RTL', () => {
     await expect(page.getByText('משתמשים').first()).toBeVisible()
     await page.goto(url.create)
     await expect(lexical.editor.first()).toBeVisible()
+    await closeNav(page)
     await lexical.editor.first().focus()
   })
   test('slash menu should be positioned correctly in RTL', async ({ page }) => {
