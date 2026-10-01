@@ -1,3 +1,5 @@
+import type { PayloadRequest } from 'payload'
+
 import path from 'path'
 import { ValidationError } from 'payload'
 import { fileURLToPath } from 'url'
@@ -21,8 +23,13 @@ const testImagePath = path.resolve(dirname, '../uploads/image.png')
 const testPdfPath = path.resolve(dirname, '../uploads/test-pdf.pdf')
 let form: Form
 
-test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
-  test.beforeEach(async ({ payload }) => {
+const suiteOptions = {
+  config: './config.ts',
+  resetBetweenTests: false,
+}
+
+test.suite('@payloadcms/plugin-form-builder', suiteOptions, () => {
+  test.beforeAll(async ({ payloadInstance: payload }) => {
     const formConfig: Omit<Form, 'createdAt' | 'id' | 'updatedAt'> = {
       confirmationType: 'message',
       confirmationMessage: {
@@ -68,19 +75,45 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
     form = (await payload.create({
       collection: formsSlug,
       data: formConfig,
+      overrideAccess: true,
     })) as unknown as Form
   })
 
   test.describe('plugin collections', () => {
     test('adds forms collection', async ({ payload }) => {
-      const { docs: forms } = await payload.find({ collection: formsSlug })
+      const { docs: forms } = await payload.find({ collection: formsSlug, overrideAccess: true })
       expect(forms.length).toBeGreaterThan(0)
     })
 
     test('adds form submissions collection', async ({ payload }) => {
-      const { docs: formSubmissions } = await payload.find({ collection: formSubmissionsSlug })
+      const { docs: formSubmissions } = await payload.find({ collection: formSubmissionsSlug, overrideAccess: true })
       expect(formSubmissions).toHaveLength(1)
     })
+
+    /* eslint-disable vitest/no-standalone-expect -- test is a custom Vitest test registrar. */
+    test('should restrict form data reads to admin collection users', async ({ payload }) => {
+      const formsCollection = payload.config.collections.find(({ slug }) => slug === formsSlug)!
+      const submissionsCollection = payload.config.collections.find(
+        ({ slug }) => slug === formSubmissionsSlug,
+      )!
+      const emailsField = formsCollection.fields.find(
+        (field) => 'name' in field && field.name === 'emails',
+      )!
+      const adminRequest = {
+        payload,
+        user: { collection: payload.config.admin.user },
+      } as PayloadRequest
+      const unrelatedRequest = {
+        payload,
+        user: { collection: 'customers' },
+      } as PayloadRequest
+
+      expect(await submissionsCollection.access.read({ req: adminRequest })).toBe(true)
+      expect(await submissionsCollection.access.read({ req: unrelatedRequest })).toBe(false)
+      expect(await emailsField.access?.read?.({ req: adminRequest })).toBe(true)
+      expect(await emailsField.access?.read?.({ req: unrelatedRequest })).toBe(false)
+    })
+    /* eslint-enable vitest/no-standalone-expect */
   })
 
   test.describe('form building', () => {
@@ -130,6 +163,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
       const testForm = await payload.create({
         collection: formsSlug,
         data: formConfig,
+        overrideAccess: true,
       })
 
       expect(testForm).toHaveProperty('fields')
@@ -178,6 +212,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
       const testForm = await payload.create({
         collection: formsSlug,
         data: formConfig,
+        overrideAccess: true,
       })
 
       expect(testForm).toHaveProperty('custom', 'custom')
@@ -198,6 +233,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
           ],
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(formSubmission).toHaveProperty('form', form.id)
@@ -221,6 +257,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
             ],
           },
           depth: 0,
+          overrideAccess: true,
         })
 
       await expect(req).rejects.toThrow(ValidationError)
@@ -672,7 +709,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
     test.afterEach(async ({ payload }) => {
       for (const id of createdSubmissionIds) {
         try {
-          await payload.delete({ collection: formSubmissionsSlug, id })
+          await payload.delete({ collection: formSubmissionsSlug, id, overrideAccess: true })
         } catch {
           // ignore if already deleted
         }
@@ -681,7 +718,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
 
       for (const id of createdFormIds) {
         try {
-          await payload.delete({ collection: formsSlug, id })
+          await payload.delete({ collection: formsSlug, id, overrideAccess: true })
         } catch {
           // ignore if already deleted
         }
@@ -690,7 +727,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
 
       for (const id of createdMediaIds) {
         try {
-          await payload.delete({ collection: mediaSlug, id })
+          await payload.delete({ collection: mediaSlug, id, overrideAccess: true })
         } catch {
           // ignore if already deleted
         }
@@ -699,7 +736,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
 
       for (const id of createdDocumentIds) {
         try {
-          await payload.delete({ collection: documentsSlug, id })
+          await payload.delete({ collection: documentsSlug, id, overrideAccess: true })
         } catch {
           // ignore if already deleted
         }
@@ -757,6 +794,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         createdFormIds.push(testForm.id)
@@ -787,6 +825,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         createdFormIds.push(testForm.id)
@@ -807,6 +846,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               { blockType: 'upload', name: 'avatar', uploadCollection: mediaSlug },
             ],
           },
+          overrideAccess: true,
         })
 
         createdFormIds.push(testForm.id)
@@ -836,6 +876,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         createdFormIds.push(testForm.id)
@@ -847,6 +888,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               form: testForm.id,
               submissionData: [],
             },
+            overrideAccess: true,
           }),
         ).rejects.toThrow(ValidationError)
       })
@@ -870,6 +912,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         createdFormIds.push(testForm.id)
@@ -881,6 +924,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               form: testForm.id,
               submissionData: [{ field: 'requiredFile', value: '' }],
             },
+            overrideAccess: true,
           }),
         ).rejects.toThrow(ValidationError)
       })
@@ -893,6 +937,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
           collection: mediaSlug,
           data: { alt: 'test' },
           filePath: testImagePath,
+          overrideAccess: true,
         })
 
         createdMediaIds.push(mediaDoc.id)
@@ -912,6 +957,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         createdFormIds.push(testForm.id)
@@ -922,6 +968,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
             form: testForm.id,
             submissionData: [{ field: 'requiredFile', value: mediaDoc.id }],
           },
+          overrideAccess: true,
         })
 
         createdSubmissionIds.push(submission.id)
@@ -954,6 +1001,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         createdFormIds.push(testForm.id)
@@ -964,6 +1012,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
             form: testForm.id,
             submissionData: [{ field: 'name', value: 'John Doe' }],
           },
+          overrideAccess: true,
         })
 
         createdSubmissionIds.push(submission.id)
@@ -976,6 +1025,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
           collection: mediaSlug,
           data: { alt: 'test' },
           filePath: testImagePath,
+          overrideAccess: true,
         })
 
         createdMediaIds.push(mediaDoc.id)
@@ -1007,6 +1057,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         createdFormIds.push(testForm.id)
@@ -1017,6 +1068,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
             form: testForm.id,
             submissionData: [{ field: 'required', value: mediaDoc.id }],
           },
+          overrideAccess: true,
         })
 
         createdSubmissionIds.push(submission.id)
@@ -1032,6 +1084,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
           collection: documentsSlug,
           data: {},
           filePath: testPdfPath,
+          overrideAccess: true,
         })
 
         createdDocumentIds.push(pdfDoc.id)
@@ -1052,6 +1105,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         createdFormIds.push(testForm.id)
@@ -1065,6 +1119,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               form: testForm.id,
               submissionData: [{ field: 'image', value: pdfDoc.id }],
             },
+            overrideAccess: true,
           }),
         ).rejects.toThrow(ValidationError)
       })
@@ -1074,6 +1129,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
           collection: mediaSlug,
           data: { alt: 'test' },
           filePath: testImagePath,
+          overrideAccess: true,
         })
 
         createdMediaIds.push(mediaDoc.id)
@@ -1094,6 +1150,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         createdFormIds.push(testForm.id)
@@ -1104,6 +1161,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
             form: testForm.id,
             submissionData: [{ field: 'image', value: mediaDoc.id }],
           },
+          overrideAccess: true,
         })
 
         createdSubmissionIds.push(submission.id)
@@ -1129,6 +1187,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         createdFormIds.push(testForm.id)
@@ -1140,6 +1199,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               form: testForm.id,
               submissionData: [{ field: 'file', value: '507f1f77bcf86cd799439011' }],
             },
+            overrideAccess: true,
           }),
         ).rejects.toThrow(ValidationError)
       })
@@ -1151,6 +1211,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
           collection: mediaSlug,
           data: { alt: 'test' },
           filePath: testImagePath,
+          overrideAccess: true,
         })
 
         createdMediaIds.push(mediaDoc.id)
@@ -1167,6 +1228,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               { blockType: 'upload', name: 'avatar', uploadCollection: mediaSlug },
             ],
           },
+          overrideAccess: true,
         })
 
         createdFormIds.push(testForm.id)
@@ -1181,6 +1243,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               { field: 'avatar', value: mediaDoc.id },
             ],
           },
+          overrideAccess: true,
         })
 
         createdSubmissionIds.push(submission.id)
@@ -1208,6 +1271,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
             title: 'No Upload Form',
             fields: [{ blockType: 'text', name: 'message' }],
           },
+          overrideAccess: true,
         })
 
         createdFormIds.push(testForm.id)
@@ -1218,6 +1282,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
             form: testForm.id,
             submissionData: [{ field: 'message', value: 'Hello World' }],
           },
+          overrideAccess: true,
         })
 
         createdSubmissionIds.push(submission.id)
@@ -1240,6 +1305,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               { blockType: 'upload', name: 'avatar', uploadCollection: mediaSlug, required: true },
             ],
           },
+          overrideAccess: true,
         })
 
         createdFormIds.push(testForm.id)
@@ -1287,6 +1353,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
         const mediaDoc = await payload.findByID({
           collection: mediaSlug,
           id: avatarMediaId,
+          overrideAccess: true,
         })
 
         expect(mediaDoc).toBeDefined()
@@ -1314,6 +1381,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         createdFormIds.push(testForm.id)
@@ -1357,6 +1425,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               { blockType: 'upload', name: 'photo', uploadCollection: mediaSlug },
             ],
           },
+          overrideAccess: true,
         })
 
         createdFormIds.push(testForm.id)
@@ -1423,6 +1492,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
           collection: mediaSlug,
           data: { alt: 'test' },
           filePath: testImagePath,
+          overrideAccess: true,
         })
 
         createdMediaIds.push(mediaDoc.id)
@@ -1442,6 +1512,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         createdFormIds.push(testForm.id)
@@ -1495,6 +1566,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
         createdFormIds.push(testForm.id)
 
@@ -1547,6 +1619,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
           collection: mediaSlug,
           data: { alt: 'pre-upload' },
           filePath: testImagePath,
+          overrideAccess: true,
         })
         createdMediaIds.push(mediaDoc.id)
 
@@ -1565,6 +1638,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
         createdFormIds.push(testForm.id)
 
@@ -1603,6 +1677,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
             title: 'submissionUploads empty test',
             fields: [{ blockType: 'text', name: 'fullName', required: true }],
           },
+          overrideAccess: true,
         })
         createdFormIds.push(testForm.id)
 
@@ -1652,6 +1727,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
         createdFormIds.push(testForm.id)
 
@@ -1706,6 +1782,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
           collection: mediaSlug,
           data: { alt: 'photo-1' },
           filePath: testImagePath,
+          overrideAccess: true,
         })
         createdMediaIds.push(media1.id)
 
@@ -1713,6 +1790,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
           collection: mediaSlug,
           data: { alt: 'photo-2' },
           filePath: testImagePath,
+          overrideAccess: true,
         })
         createdMediaIds.push(media2.id)
 
@@ -1720,6 +1798,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
           collection: documentsSlug,
           data: {},
           filePath: testPdfPath,
+          overrideAccess: true,
         })
         createdDocumentIds.push(docFile.id)
 
@@ -1745,6 +1824,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
         createdFormIds.push(testForm.id)
 
@@ -1821,6 +1901,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         createdFormIds.push(testForm.id)
@@ -1867,11 +1948,13 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
           collection: mediaSlug,
           data: { alt: 'first' },
           filePath: testImagePath,
+          overrideAccess: true,
         })
         const mediaDoc2 = await payload.create({
           collection: mediaSlug,
           data: { alt: 'second' },
           filePath: testImagePath,
+          overrideAccess: true,
         })
 
         createdMediaIds.push(mediaDoc1.id, mediaDoc2.id)
@@ -1891,6 +1974,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         createdFormIds.push(testForm.id)
@@ -1902,6 +1986,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               form: testForm.id,
               submissionData: [{ field: 'photo', value: `${mediaDoc1.id},${mediaDoc2.id}` }],
             },
+            overrideAccess: true,
           }),
         ).rejects.toThrow(ValidationError)
       })
@@ -1928,6 +2013,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         createdFormIds.push(testForm.id)
@@ -1983,12 +2069,13 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
               },
             ],
           },
+          overrideAccess: true,
         })
 
         createdFormIds.push(testForm.id)
 
         // Capture media count before the submission attempt
-        const mediaBefore = await payload.find({ collection: mediaSlug, limit: 0 })
+        const mediaBefore = await payload.find({ collection: mediaSlug, limit: 0, overrideAccess: true })
         const countBefore = mediaBefore.totalDocs
 
         const formData = new FormData()
@@ -2019,7 +2106,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
         expect(response.status).toBe(400)
 
         // The image doc created before the PDF validation failure should have been cleaned up
-        const mediaAfter = await payload.find({ collection: mediaSlug, limit: 0 })
+        const mediaAfter = await payload.find({ collection: mediaSlug, limit: 0, overrideAccess: true })
 
         expect(mediaAfter.totalDocs).toBe(countBefore)
       })

@@ -38,7 +38,7 @@ export function helpMessage(): void {
 
         {dim Available templates: ${formatTemplates(validTemplates)}}
 
-      --no-agent                    Skip writing AGENTS.md and CLAUDE.md
+      --no-agent                    Skip writing AGENTS.md
       --use-npm                     Use npm to install dependencies
       --use-yarn                    Use yarn to install dependencies
       --use-pnpm                    Use pnpm to install dependencies

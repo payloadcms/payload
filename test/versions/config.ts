@@ -28,7 +28,11 @@ import { Media } from './collections/Media.js'
 import { Media2 } from './collections/Media2.js'
 import NestedArraySelect from './collections/NestedArraySelect.js'
 import Posts from './collections/Posts.js'
+import RestoreAccess from './collections/RestoreAccess.js'
+import RestoreAccessLocalized from './collections/RestoreAccessLocalized.js'
+import { SecondaryAdminUsers } from './collections/SecondaryAdminUsers.js'
 import { TextCollection } from './collections/Text.js'
+import { Users } from './collections/Users.js'
 import VersionPosts from './collections/Versions.js'
 import AutosaveGlobal from './globals/Autosave.js'
 import AutosaveWithDraftButtonGlobal from './globals/AutosaveWithDraftButton.js'
@@ -38,6 +42,7 @@ import DraftUnlimitedGlobal from './globals/DraftUnlimited.js'
 import DraftWithMaxGlobal from './globals/DraftWithMax.js'
 import LocalizedGlobal from './globals/LocalizedGlobal.js'
 import { MaxVersions } from './globals/MaxVersions.js'
+import RestoreAccessGlobal, { RestoreAccessNoVersionsGlobal } from './globals/RestoreAccess.js'
 import SimpleDraftGlobal from './globals/SimpleDraft.js'
 import { seed } from './seed.js'
 import { BASE_PATH } from './shared.js'
@@ -77,6 +82,10 @@ export default buildConfigWithDefaults({
       DraftsWithUploadCloudStorage,
       Media,
       Media2,
+      RestoreAccess,
+      RestoreAccessLocalized,
+      Users,
+      SecondaryAdminUsers,
     ],
     globals: [
       AutosaveGlobal,
@@ -88,6 +97,8 @@ export default buildConfigWithDefaults({
       MaxVersions,
       DraftUnlimitedGlobal,
       SimpleDraftGlobal,
+      RestoreAccessGlobal,
+      RestoreAccessNoVersionsGlobal,
     ],
     indexSortableFields: true,
     localization: {

@@ -66,6 +66,7 @@ async function upgradeGlobal({
       data: document,
       depth: 0,
       locale: locale || undefined,
+      overrideAccess: true,
     })
   }
 }
@@ -93,6 +94,7 @@ async function upgradeCollection({
     await payload.count({
       collection: collection.slug,
       locale: locale || undefined,
+      overrideAccess: true,
     })
   ).totalDocs
 
@@ -139,6 +141,7 @@ async function upgradeCollection({
           data: document,
           depth: 0,
           locale: locale || undefined,
+          overrideAccess: true,
         })
       }
     }

@@ -36,6 +36,13 @@ test.describe('Visual', () => {
     const textCell = page.locator('.row-1 .cell-title')
     await expect(textCell).toBeVisible()
 
+    await page.addStyleTag({
+      content: '.collection-list .table table { table-layout: fixed; }',
+    })
+
+    const listTable = page.locator('.collection-list .table table')
+    await expect(listTable).toHaveCSS('table-layout', 'fixed')
+
     await expectScreenshot({ name: 'posts-list-view.png', mask: [page.locator('.cell-id')], page })
   })
 

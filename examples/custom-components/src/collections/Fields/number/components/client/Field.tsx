@@ -1,9 +1,9 @@
 'use client'
-import type { NumberFieldClientComponent } from 'payload'
+import type { NumberFieldClientProps } from 'payload'
 
 import { NumberField } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomNumberFieldClient: NumberFieldClientComponent = (props) => {
+export const CustomNumberFieldClient: React.FC<NumberFieldClientProps> = (props) => {
   return <NumberField {...props} />
 }

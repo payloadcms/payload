@@ -104,8 +104,10 @@ export type ServerComponentProps = {
    * framework-specific renderer directly.
    */
   renderComponent?: ComponentRenderer
+  /** Request object. Use `req.user` (full principal) for access-control checks. */
   req: PayloadRequest
   siblingData: Data
+  /** Authenticated user with field read access applied. Use for values sent to the client; use `req.user` for access checks. */
   user: User
   value?: unknown
 }
@@ -125,13 +127,13 @@ export type ServerFieldBase<
 } & Omit<ClientComponentProps, 'field'> &
   Omit<ServerComponentProps, 'clientField' | 'field'>
 
-export type FieldClientComponent<
+export type FieldClientProps<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
   AdditionalProps extends Record<string, unknown> = Record<string, unknown>,
-> = React.ComponentType<AdditionalProps & ClientFieldBase<TFieldClient>>
+> = AdditionalProps & ClientFieldBase<TFieldClient>
 
-export type FieldServerComponent<
+export type FieldServerProps<
   TFieldServer extends Field = Field,
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
   AdditionalProps extends Record<string, unknown> = Record<string, unknown>,
-> = React.ComponentType<AdditionalProps & ServerFieldBase<TFieldServer, TFieldClient>>
+> = AdditionalProps & ServerFieldBase<TFieldServer, TFieldClient>

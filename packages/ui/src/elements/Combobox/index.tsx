@@ -88,6 +88,8 @@ export const Combobox: React.FC<ComboboxProps> = (props) => {
       className={`${baseClass} ${popupProps.className || ''}`}
       onToggleClose={handleToggleClose}
       onToggleOpen={handleToggleOpen}
+      popupAriaLabel={ariaLabel || searchPlaceholder}
+      popupType="dialog"
       render={({ close }) => (
         <div className={`${baseClass}__content`}>
           {showSearch && (

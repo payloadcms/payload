@@ -37,6 +37,7 @@ export const generateSubmissionCollection = (
             _existingForm = await payload.findByID({
               id: value,
               collection: formSlug,
+              overrideAccess: true,
               req,
             })
 
@@ -110,7 +111,7 @@ export const generateSubmissionCollection = (
     slug: formConfig?.formSubmissionOverrides?.slug || 'form-submissions',
     access: {
       create: () => true,
-      read: ({ req: { user } }) => !!user, // logged-in users,
+      read: ({ req }) => req.user?.collection === req.payload.config.admin.user,
       update: () => false,
       ...(formConfig?.formSubmissionOverrides?.access || {}),
     },

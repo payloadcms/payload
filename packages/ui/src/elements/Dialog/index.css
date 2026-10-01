@@ -97,6 +97,7 @@
     padding-block: var(--spacer-2);
     padding-inline-start: var(--spacer-3);
     padding-inline-end: var(--spacer-2);
+    border-block-start: var(--stroke-width-small) solid var(--color-border);
     flex-shrink: 0;
   }
 }

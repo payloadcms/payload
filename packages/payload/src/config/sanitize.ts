@@ -69,9 +69,9 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     }
   }
 
-  const userCollection = sanitizedConfig.collections!.find(
-    ({ slug }) => slug === sanitizedConfig.admin!.user,
-  )
+  const authCollections = sanitizedConfig.collections!.filter(({ auth }) => Boolean(auth))
+
+  const userCollection = authCollections.find(({ slug }) => slug === sanitizedConfig.admin!.user)
 
   if (!userCollection || !userCollection.auth) {
     throw new InvalidConfiguration(
@@ -205,6 +205,13 @@ const addDefaultDashboardWidgets = ({
   const dashboard: DashboardConfig = (adminConfig.dashboard ??= { widgets: [] })
 
   dashboard.widgets.push({
+    slug: 'welcome',
+    Component: '@payloadcms/ui/rsc#WelcomeWidget',
+    label: ({ t }) => t('general:welcome'),
+    maxWidth: 'full',
+    minWidth: 'full',
+  })
+  dashboard.widgets.push({
     slug: 'collections',
     Component: '@payloadcms/ui/rsc#CollectionCards',
     minWidth: 'full',
@@ -238,12 +245,16 @@ const addDefaultDashboardWidgets = ({
   })
   dashboard.defaultLayout ??= [
     {
-      widgetSlug: 'collections',
+      widgetSlug: 'welcome',
       width: 'full',
     } satisfies WidgetInstance,
     {
       widgetSlug: 'activity',
-      width: 'small',
+      width: 'full',
+    } satisfies WidgetInstance,
+    {
+      widgetSlug: 'collections',
+      width: 'full',
     } satisfies WidgetInstance,
   ]
 }
@@ -497,7 +508,9 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   if (schedulePublishCollections.length || schedulePublishGlobals.length) {
     ;((config.jobs ??= {} as SanitizedJobsConfig).tasks ??= []).push(
       getSchedulePublishTask({
-        adminUserSlug: config.admin!.user,
+        authCollectionSlugs: config
+          .collections!.filter(({ auth }) => Boolean(auth))
+          .map(({ slug }) => slug),
         collections: schedulePublishCollections,
         globals: schedulePublishGlobals,
       }),

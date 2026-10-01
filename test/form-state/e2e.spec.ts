@@ -438,6 +438,7 @@ test.describe('Form State', () => {
       data: {
         title: 'Initial Title',
       },
+      overrideAccess: true,
     })
 
     await page.goto(autosavePostsUrl.edit(doc.id))
@@ -584,6 +585,7 @@ test.describe('Form State', () => {
       data: {
         title: 'Initial Title',
       },
+      overrideAccess: true,
     })
 
     await page.goto(autosavePostsUrl.edit(autosavePost.id))
@@ -848,5 +850,6 @@ async function createPost(overrides?: Partial<Post>): Promise<Post> {
       title: 'Post Title',
       ...overrides,
     },
+    overrideAccess: true,
   }) as unknown as Promise<Post>
 }
