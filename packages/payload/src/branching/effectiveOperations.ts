@@ -1,8 +1,11 @@
-import type { Payload, PayloadRequest } from '../types/index.js'
+import type { Payload, PayloadRequest, Where } from '../types/index.js'
 
 import { APIError } from '../errors/index.js'
+import { processInBatches } from '../utilities/processInBatches.js'
 import { traverseForLocalizedFields } from '../utilities/traverseForLocalizedFields.js'
 import { branchDocIDField, branchField, MAIN_BRANCH } from './types.js'
+
+const effectiveOperationReadBatchSize = 400
 
 /**
  * What a change will actually do to `main` when merged, which is not always what
@@ -63,23 +66,13 @@ export const resolveEffectiveOperations = async ({
   payload: Payload
   req: PayloadRequest
 }): Promise<ResolvedChange[]> => {
+  const shadowsByChange = await readChangeShadows({ branch, changes, payload, req })
   const resolved: ResolvedChange[] = []
 
   for (const change of changes) {
     const collectionSlug = change.collectionSlug as string
-    const docID = change.doc?.value ?? change.doc
-
-    const shadow = (await payload.db.findOne({
-      branch: false,
-      collection: collectionSlug,
-      req,
-      where: {
-        and: [
-          { [branchField]: { equals: branch } },
-          { or: [{ id: { equals: docID } }, { [branchDocIDField]: { equals: docID } }] },
-        ],
-      },
-    })) as null | Record<string, unknown>
+    const docID = relationshipValue(change.doc)
+    const shadow = shadowsByChange.get(changeKey({ collectionSlug, docID })) ?? null
 
     if (!shadow) {
       throw new APIError(
@@ -98,6 +91,90 @@ export const resolveEffectiveOperations = async ({
   }
 
   return resolved
+}
+
+const changeKey = ({
+  collectionSlug,
+  docID,
+}: {
+  collectionSlug: string
+  docID: number | string
+}): string => `${collectionSlug}:${String(docID)}`
+
+const readChangeShadows = async ({
+  branch,
+  changes,
+  payload,
+  req,
+}: {
+  branch: string
+  changes: Record<string, any>[]
+  payload: Payload
+  req: PayloadRequest
+}): Promise<Map<string, Record<string, unknown>>> => {
+  const changesByCollection = new Map<string, Record<string, any>[]>()
+  const shadowsByChange = new Map<string, Record<string, unknown>>()
+
+  for (const change of changes) {
+    const collectionSlug = change.collectionSlug as string
+    const collectionChanges = changesByCollection.get(collectionSlug) ?? []
+
+    collectionChanges.push(change)
+    changesByCollection.set(collectionSlug, collectionChanges)
+  }
+
+  for (const [collectionSlug, collectionChanges] of changesByCollection) {
+    await processInBatches({
+      batchSize: effectiveOperationReadBatchSize,
+      input: collectionChanges,
+      processBatch: async ({ batch }) => {
+        const createdDocumentIDs = batch
+          .filter(({ operation }) => operation === 'create')
+          .map((change) => relationshipValue(change.doc))
+        const existingDocumentIDs = batch
+          .filter(({ operation }) => operation !== 'create')
+          .map((change) => relationshipValue(change.doc))
+        const identityQueries: Where[] = []
+
+        if (createdDocumentIDs.length) {
+          identityQueries.push({ id: { in: createdDocumentIDs } })
+        }
+
+        if (existingDocumentIDs.length) {
+          identityQueries.push({ [branchDocIDField]: { in: existingDocumentIDs } })
+        }
+
+        const identityQuery: Where =
+          identityQueries.length === 1 ? identityQueries[0]! : { or: identityQueries }
+        const { docs } = await payload.db.find({
+          branch: false,
+          collection: collectionSlug,
+          limit: batch.length,
+          pagination: false,
+          req,
+          where: {
+            and: [{ [branchField]: { equals: branch } }, identityQuery],
+          },
+        })
+
+        for (const shadow of docs as Record<string, unknown>[]) {
+          const docID = relationshipValue(shadow[branchDocIDField] ?? shadow.id)
+
+          shadowsByChange.set(changeKey({ collectionSlug, docID }), shadow)
+        }
+      },
+    })
+  }
+
+  return shadowsByChange
+}
+
+const relationshipValue = (value: unknown): number | string => {
+  if (typeof value === 'object' && value !== null && 'value' in value) {
+    return (value as { value: number | string }).value
+  }
+
+  return value as number | string
 }
 
 const resolveWrites = async ({

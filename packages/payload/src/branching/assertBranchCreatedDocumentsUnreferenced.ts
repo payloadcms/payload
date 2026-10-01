@@ -357,6 +357,249 @@ export const hasBranchCreatedDocumentReference = ({
 }: BranchCreatedReferenceArgs): boolean =>
   hasReferenceInFields({ data, dataShape, fields, payloadBlocks, req, target })
 
+/**
+ * Returns the collection types that a configured field tree can reference.
+ *
+ * `undefined` means the field tree can contain references that are not described by static field
+ * configuration. Rich text is intentionally unbounded because serialized nodes and editor-provided
+ * subfields can reference collections at runtime.
+ */
+export const getPossibleRelationshipCollectionSlugs = ({
+  fields,
+  payloadBlocks,
+}: {
+  fields: FlattenedField[]
+  payloadBlocks: PayloadRequest['payload']['blocks']
+}): Set<string> | undefined =>
+  collectPossibleRelationshipCollectionSlugs({
+    fields,
+    payloadBlocks,
+    visitedBlockSlugs: new Set(),
+  })
+
+const collectPossibleRelationshipCollectionSlugs = ({
+  fields,
+  payloadBlocks,
+  visitedBlockSlugs,
+}: {
+  fields: FlattenedField[]
+  payloadBlocks: PayloadRequest['payload']['blocks']
+  visitedBlockSlugs: Set<string>
+}): Set<string> | undefined => {
+  const collectionSlugs = new Set<string>()
+
+  for (const field of fields) {
+    if (fieldIsVirtual(field)) {
+      continue
+    }
+
+    if (field.type === 'relationship' || field.type === 'upload') {
+      for (const relationTo of Array.isArray(field.relationTo)
+        ? field.relationTo
+        : [field.relationTo]) {
+        collectionSlugs.add(relationTo)
+      }
+
+      continue
+    }
+
+    if (field.type === 'richText') {
+      return undefined
+    }
+
+    if (field.type === 'array' || field.type === 'group' || field.type === 'tab') {
+      const nestedCollectionSlugs = collectPossibleRelationshipCollectionSlugs({
+        fields: field.flattenedFields,
+        payloadBlocks,
+        visitedBlockSlugs,
+      })
+
+      if (!nestedCollectionSlugs) {
+        return undefined
+      }
+
+      for (const collectionSlug of nestedCollectionSlugs) {
+        collectionSlugs.add(collectionSlug)
+      }
+
+      continue
+    }
+
+    if (field.type !== 'blocks') {
+      continue
+    }
+
+    for (const blockReference of field.blocks) {
+      const block =
+        typeof blockReference === 'string' ? payloadBlocks[blockReference] : blockReference
+
+      if (!block) {
+        return undefined
+      }
+
+      if (visitedBlockSlugs.has(block.slug)) {
+        continue
+      }
+
+      visitedBlockSlugs.add(block.slug)
+
+      const nestedCollectionSlugs = collectPossibleRelationshipCollectionSlugs({
+        fields: block.flattenedFields,
+        payloadBlocks,
+        visitedBlockSlugs,
+      })
+
+      if (!nestedCollectionSlugs) {
+        return undefined
+      }
+
+      for (const collectionSlug of nestedCollectionSlugs) {
+        collectionSlugs.add(collectionSlug)
+      }
+    }
+  }
+
+  return collectionSlugs
+}
+
+/** Returns whether configured relationship or upload fields contain any stored value. */
+export const hasConfiguredRelationshipValue = ({
+  data,
+  dataShape,
+  fields,
+  payloadBlocks,
+}: {
+  data: unknown
+  dataShape: BranchCreatedReferenceArgs['dataShape']
+  fields: FlattenedField[]
+  payloadBlocks: PayloadRequest['payload']['blocks']
+}): boolean =>
+  hasConfiguredRelationshipValueInFields({
+    data,
+    dataShape,
+    fields,
+    parentIsLocalized: false,
+    payloadBlocks,
+  })
+
+const hasConfiguredRelationshipValueInFields = ({
+  data,
+  dataShape,
+  fields,
+  parentIsLocalized,
+  payloadBlocks,
+}: {
+  data: unknown
+  dataShape: BranchCreatedReferenceArgs['dataShape']
+  fields: FlattenedField[]
+  parentIsLocalized: boolean
+  payloadBlocks: PayloadRequest['payload']['blocks']
+}): boolean => {
+  if (Array.isArray(data)) {
+    return data.some((entry) =>
+      hasConfiguredRelationshipValueInFields({
+        data: entry,
+        dataShape,
+        fields,
+        parentIsLocalized,
+        payloadBlocks,
+      }),
+    )
+  }
+
+  if (!data || typeof data !== 'object') {
+    return false
+  }
+
+  const record = data as Record<string, unknown>
+
+  for (const field of fields) {
+    if (fieldIsVirtual(field)) {
+      continue
+    }
+
+    const fieldValues = getFieldValues({ dataShape, field, parentIsLocalized, record })
+    const nestedParentIsLocalized =
+      parentIsLocalized || ('localized' in field && Boolean(field.localized))
+
+    if (field.type === 'relationship' || field.type === 'upload') {
+      if (
+        fieldValues.some((value) =>
+          nestedValueMatches({
+            matches: (nestedValue) =>
+              nestedValue !== undefined && nestedValue !== null && nestedValue !== '',
+            value,
+          }),
+        )
+      ) {
+        return true
+      }
+
+      continue
+    }
+
+    if (field.type === 'richText') {
+      if (fieldValues.some((value) => value !== undefined && value !== null)) {
+        return true
+      }
+
+      continue
+    }
+
+    if (field.type === 'array' || field.type === 'group' || field.type === 'tab') {
+      if (
+        fieldValues.some((value) =>
+          hasConfiguredRelationshipValueInFields({
+            data: value,
+            dataShape,
+            fields: field.flattenedFields,
+            parentIsLocalized: nestedParentIsLocalized,
+            payloadBlocks,
+          }),
+        )
+      ) {
+        return true
+      }
+
+      continue
+    }
+
+    if (field.type !== 'blocks') {
+      continue
+    }
+
+    if (
+      fieldValues.some((value) =>
+        nestedValueMatches({
+          matches: (row) => {
+            if (!row || typeof row !== 'object') {
+              return false
+            }
+
+            const rowRecord = row as Record<string, unknown>
+            const block = resolveBlock({ blockType: rowRecord.blockType, field, payloadBlocks })
+
+            return block
+              ? hasConfiguredRelationshipValueInFields({
+                  data: rowRecord,
+                  dataShape,
+                  fields: block.flattenedFields,
+                  parentIsLocalized: nestedParentIsLocalized,
+                  payloadBlocks,
+                })
+              : true
+          },
+          value,
+        }),
+      )
+    ) {
+      return true
+    }
+  }
+
+  return false
+}
+
 type ReferenceFieldScanArgs = {
   parentIsLocalized?: boolean
 } & BranchCreatedReferenceArgs

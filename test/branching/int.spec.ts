@@ -7658,6 +7658,51 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
     })
 
+    test('should checkpoint large merge events with bounded database writes', async () => {
+      for (let index = 0; index < 100; index += 1) {
+        await payload.create({
+          branch: 'lifecycle',
+          collection: postsSlug,
+          data: { title: `checkpoint document ${index}` },
+        })
+      }
+
+      const updateOne = payload.db.updateOne.bind(payload.db)
+      let mergeEventUpdateCount = 0
+      const updateOneSpy = vi.spyOn(payload.db, 'updateOne').mockImplementation(async (args) => {
+        if (args.collection === branchMergesSlug) {
+          mergeEventUpdateCount += 1
+        }
+
+        return updateOne(args)
+      })
+
+      try {
+        await payload.branches.merge({ branch: 'lifecycle' })
+      } finally {
+        updateOneSpy.mockRestore()
+      }
+
+      const mergeEvent = (
+        await payload.find({
+          collection: branchMergesSlug,
+          pagination: false,
+          where: { branch: { equals: 'lifecycle' } },
+        })
+      ).docs[0] as unknown as {
+        changes: { applicationOutcome: string; cleanupOutcome: string }[]
+      }
+
+      expect(mergeEvent.changes).toHaveLength(101)
+      expect(
+        mergeEvent.changes.every(
+          ({ applicationOutcome, cleanupOutcome }) =>
+            applicationOutcome === 'committed' && cleanupOutcome === 'completed',
+        ),
+      ).toBe(true)
+      expect(mergeEventUpdateCount).toBeLessThan(20)
+    })
+
     test('should not store full document snapshots in a merge event', async () => {
       await payload.branches.merge({ branch: 'lifecycle' })
 

@@ -8,7 +8,9 @@ import { getLatestCollectionVersion } from '../versions/getLatestCollectionVersi
 import { getLatestGlobalVersion } from '../versions/getLatestGlobalVersion.js'
 import {
   type BranchCreatedTarget,
+  getPossibleRelationshipCollectionSlugs,
   hasBranchCreatedDocumentReference,
+  hasConfiguredRelationshipValue,
 } from './assertBranchCreatedDocumentsUnreferenced.js'
 import { checkFieldAccess } from './checkFieldAccess.js'
 import {
@@ -558,7 +560,22 @@ export const hasUnavailableBranchCreatedDependency = async ({
     return false
   }
 
-  const branchCreates = await findPendingBranchCreates({ payload, req })
+  if (
+    !hasConfiguredRelationshipValue({
+      data,
+      dataShape: 'withLocales',
+      fields,
+      payloadBlocks: payload.blocks,
+    })
+  ) {
+    return false
+  }
+
+  const collectionSlugs = getPossibleRelationshipCollectionSlugs({
+    fields,
+    payloadBlocks: payload.blocks,
+  })
+  const branchCreates = await findPendingBranchCreates({ collectionSlugs, payload, req })
 
   return branchCreates.some(
     (target) =>
@@ -582,9 +599,14 @@ export const resolveMergeDependencies = async ({
   pendingGlobals,
   req,
 }: RunMergeDependencyPreflightArgs): Promise<MergeDependencyPreflightResult> => {
+  if (!hasPendingRelationshipValues({ payload, pending, pendingGlobals })) {
+    return { blocked: [], dependencyChangeIDsByChangeID: new Map() }
+  }
+
   // Deliberately spans every branch. A stored relationship can name a document
   // created on another branch, and that target is unavailable on main too.
-  const branchCreates = await findPendingBranchCreates({ payload, req })
+  const collectionSlugs = getDependencyCollectionSlugs({ payload, pending, pendingGlobals })
+  const branchCreates = await findPendingBranchCreates({ collectionSlugs, payload, req })
 
   if (!branchCreates.length) {
     return { blocked: [], dependencyChangeIDsByChangeID: new Map() }
@@ -756,13 +778,52 @@ export const resolveMergeDependencies = async ({
   return { blocked: dependencyBlocked, dependencyChangeIDsByChangeID }
 }
 
+const hasPendingRelationshipValues = ({
+  payload,
+  pending,
+  pendingGlobals,
+}: {
+  payload: Payload
+  pending: ResolvedChange[]
+  pendingGlobals: Record<string, unknown>[]
+}): boolean => {
+  if (pendingGlobals.length) {
+    return true
+  }
+
+  return pending.some((resolved) => {
+    const fields = payload.collections[resolved.collectionSlug]?.config.flattenedFields
+
+    if (!fields) {
+      return false
+    }
+
+    return resolved.writes.some(
+      (write) =>
+        write.operation !== 'delete' &&
+        hasConfiguredRelationshipValue({
+          data: write.data,
+          dataShape: 'withLocales',
+          fields,
+          payloadBlocks: payload.blocks,
+        }),
+    )
+  })
+}
+
 const findPendingBranchCreates = async ({
+  collectionSlugs,
   payload,
   req,
 }: {
+  collectionSlugs?: Set<string>
   payload: Payload
   req: PayloadRequest
 }): Promise<BranchCreateChange[]> => {
+  if (collectionSlugs?.size === 0) {
+    return []
+  }
+
   const pendingBranchCreates = await payload.find({
     collection: branchChangesCollectionSlug,
     depth: 0,
@@ -771,13 +832,59 @@ const findPendingBranchCreates = async ({
     pagination: false,
     req,
     where: {
-      and: [{ entityType: { equals: 'collection' } }, { operation: { equals: 'create' } }],
+      and: [
+        { entityType: { equals: 'collection' } },
+        { operation: { equals: 'create' } },
+        ...(collectionSlugs ? [{ collectionSlug: { in: [...collectionSlugs] } }] : []),
+      ],
     },
   })
 
   return getBranchCreateChanges({
     changes: pendingBranchCreates.docs as Record<string, unknown>[],
   })
+}
+
+const getDependencyCollectionSlugs = ({
+  payload,
+  pending,
+  pendingGlobals,
+}: {
+  payload: Payload
+  pending: ResolvedChange[]
+  pendingGlobals: Record<string, unknown>[]
+}): Set<string> | undefined => {
+  const collectionSlugs = new Set<string>()
+  const fieldTrees = [
+    ...pending.map(
+      ({ collectionSlug }) => payload.collections[collectionSlug]?.config.flattenedFields,
+    ),
+    ...pendingGlobals.map(
+      (change) =>
+        payload.globals.config.find(({ slug }) => slug === change.globalSlug)?.flattenedFields,
+    ),
+  ]
+
+  for (const fields of fieldTrees) {
+    if (!fields) {
+      continue
+    }
+
+    const possibleCollectionSlugs = getPossibleRelationshipCollectionSlugs({
+      fields,
+      payloadBlocks: payload.blocks,
+    })
+
+    if (!possibleCollectionSlugs) {
+      return undefined
+    }
+
+    for (const collectionSlug of possibleCollectionSlugs) {
+      collectionSlugs.add(collectionSlug)
+    }
+  }
+
+  return collectionSlugs
 }
 
 const getBranchCreateChanges = ({
