@@ -7,7 +7,7 @@
   }
 
   .popup-button-list > .popup {
-    width: 100%;
+    align-self: stretch;
   }
 
   [dir='rtl'] .popup-button-list__text-align--left {
