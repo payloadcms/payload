@@ -20,6 +20,8 @@ import { getFileContentRequirement, HEADER_PROBE_BYTE_LENGTH } from './getFileCo
 import { getImageSize } from './getImageSize.js'
 import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
 import { getStagedFile } from './stagedUpload.js'
+import { planTransformerPipeline } from './transformers/planTransformerPipeline.js'
+import { getUploadTransformerInternal } from './transformers/uploadTransformerBridge.js'
 
 export const getFileFromUploadInstructions = async ({
   collectionSlug,
@@ -118,6 +120,11 @@ export const getFileFromUploadInstructions = async ({
 
   const contentRequirement = getFileContentRequirement({
     hasSizeEdits: requestHasSizeEdits(req),
+    hasTransformFileStages: await hasTransformFileStages({
+      collectionSlug,
+      mimeType: file.mimeType,
+      req,
+    }),
     mimeType: file.mimeType,
     uploadConfig,
   })
@@ -172,6 +179,35 @@ const requestHasSizeEdits = (req: PayloadRequest): boolean => {
   }
 
   return hasCropOrResizeEdit(uploadEdits as UploadEdits)
+}
+
+/**
+ * Whether a transformer that reads the whole file will run `transformFile` on this upload. A
+ * bridge transformer (e.g. `sharpTransformer`) is excluded: it projects what it needs onto the
+ * sanitized upload config (`hasImageAdjustments`, `imageSizes`) at startup instead.
+ */
+const hasTransformFileStages = async ({
+  collectionSlug,
+  mimeType,
+  req,
+}: {
+  collectionSlug: string
+  mimeType: string
+  req: PayloadRequest
+}): Promise<boolean> => {
+  const transformers = req.payload.config.upload?.transformers ?? []
+
+  if (transformers.length === 0) {
+    return false
+  }
+
+  const pipeline = await planTransformerPipeline({
+    args: { collectionSlug, mimeType, operation: 'upload', req },
+    capability: 'transformFile',
+    transformers,
+  })
+
+  return pipeline.some((transformer) => !getUploadTransformerInternal(transformer)?.prepareUpload)
 }
 
 /**

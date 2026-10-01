@@ -66,11 +66,18 @@ export async function handleDynamicFileRequest({
   })
 
   let currentResponse: Response | undefined
+  // Aborted on failure to close every response body handed to a transformer, even one the
+  // transformer locked with its own reader before throwing.
+  const handedOutBodies = new AbortController()
 
   try {
     for (const transformer of pipeline) {
       const stageSource = createLazySourceGetter({
-        retrieve: async () => currentResponse ?? source.get(),
+        retrieve: async () =>
+          withAbortableBody({
+            response: currentResponse ?? (await source.get()),
+            signal: handedOutBodies.signal,
+          }),
       })
 
       const result = await transformer.handleRequest!({
@@ -96,6 +103,8 @@ export async function handleDynamicFileRequest({
     }
   } catch (err) {
     req.payload.logger.error({ err, msg: 'Error running the file transformer pipeline' })
+    handedOutBodies.abort(err)
+    await cancelUnusedBody(currentResponse)
     throw err
   }
 
@@ -106,6 +115,44 @@ export async function handleDynamicFileRequest({
   // No transformer produced a response — serve the original file through the
   // normal path (Range/ETag/redirect support, existing `modifyResponseHeaders` order).
   return retrieveFileResponse({ collection, doc: document, filename, prefix, req })
+}
+
+/**
+ * Re-wraps `response` so its body can be cancelled through `signal`, closing the underlying
+ * source stream (file handle, storage connection) regardless of who holds a reader on it.
+ */
+function withAbortableBody({
+  response,
+  signal,
+}: {
+  response: Response
+  signal: AbortSignal
+}): Response {
+  if (!response.body) {
+    return response
+  }
+
+  return new Response(response.body.pipeThrough(new TransformStream(), { signal }), {
+    headers: response.headers,
+    status: response.status,
+    statusText: response.statusText,
+  })
+}
+
+/**
+ * Cancels a response body nothing has started reading. A locked body was handed to a transformer
+ * through `withAbortableBody`, and is closed by aborting its signal instead.
+ */
+async function cancelUnusedBody(response: Response | undefined): Promise<void> {
+  if (!response?.body || response.body.locked) {
+    return
+  }
+
+  try {
+    await response.body.cancel()
+  } catch {
+    // The pipeline error is what gets reported — a failure to cancel must not mask it.
+  }
 }
 
 function planRequestPipeline({

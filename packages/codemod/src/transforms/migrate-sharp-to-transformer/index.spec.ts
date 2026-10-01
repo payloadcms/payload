@@ -106,6 +106,62 @@ export default buildConfig({
     )
   })
 
+  it.each([
+    ['a non-array transformers property', 'upload: {\n    transformers: sharedTransformers,\n  },'],
+    ['a spread in upload', 'upload: {\n    ...sharedUpload,\n  },'],
+    ['a non-inline upload object', 'upload: sharedUpload,'],
+  ])(
+    'keeps the Sharp settings in place when sharpTransformer cannot be registered due to %s',
+    async (_, uploadPropertyText) => {
+      const input = `import sharp from 'sharp'
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  collections: [
+    {
+      slug: 'media',
+      fields: [],
+      upload: {
+        imageSizes: [{ name: 'thumbnail', width: 400 }],
+        staticDir: 'media',
+      },
+    },
+  ],
+  sharp,
+  ${uploadPropertyText}
+})
+`
+      const { notes, source } = await runTransformWithNotes({ input })
+
+      expect(source).toBe(input)
+      expect(notes).toContainEqual(
+        expect.stringContaining('then remove the migrated Sharp settings'),
+      )
+    },
+  )
+
+  it('uses the local alias of an existing sharpTransformer import', async () => {
+    const input = `import { sharpTransformer as st } from '@payloadcms/transformer-sharp'
+import sharp from 'sharp'
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  collections: [],
+  sharp,
+})
+`
+    const result = await runTransform({ source: input, transform: migrateSharpToTransformer })
+
+    expect(result).toContain('transformers: [st({ sharp })]')
+    expect(result).toContain(
+      "import { sharpTransformer as st } from '@payloadcms/transformer-sharp'\n",
+    )
+    expect(result).not.toMatch(/\bsharpTransformer\(/)
+    expect(await runTransform({ source: result, transform: migrateSharpToTransformer })).toBe(
+      result,
+    )
+  })
+
   it('renames imageSizes to variants in an already-migrated sharpTransformer config', async () => {
     const input = `import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import { buildConfig } from 'payload'

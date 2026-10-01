@@ -302,6 +302,58 @@ describe('getFileFromUploadInstructions', () => {
     expect(file.mimetype).toBe('video/mp4')
   })
 
+  it('fetches the full file when a custom transformFile transformer matches its mime type', async () => {
+    const handler = vi.fn(async (handlerReq: PayloadRequest) => {
+      expect(handlerReq.headers.get('range')).toBeNull()
+      return new Response(MINIMAL_PNG, { headers: { 'Content-Type': 'image/png' } })
+    })
+
+    const req = createReq([handler], {})
+    req.payload.config.upload.transformers = [
+      { slug: 'custom', mimeTypes: ['image/*'], transformFile: vi.fn() },
+    ]
+
+    const file = await getFileFromUploadInstructions({
+      collectionSlug: 'media',
+      file: createUploadReferenceFile({
+        filename: 'photo.png',
+        mimeType: 'image/png',
+        size: MINIMAL_PNG.length,
+      }),
+      req,
+    })
+
+    tempFilesToClean.push(file.tempFilePath!)
+
+    expect(handler).toHaveBeenCalledTimes(1)
+    expect(file.tempFilePath).toBeDefined()
+    expect(fs.readFileSync(file.tempFilePath!).equals(MINIMAL_PNG)).toBe(true)
+  })
+
+  it('skips fetching when a transformFile transformer declines the upload in canTransform', async () => {
+    const handler = vi.fn(() => {
+      throw new Error('No-content handler was invoked')
+    })
+
+    const req = createReq([handler], {})
+    req.payload.config.upload.transformers = [
+      {
+        slug: 'custom',
+        canTransform: () => false,
+        mimeTypes: ['*/*'],
+        transformFile: vi.fn(),
+      },
+    ]
+
+    await getFileFromUploadInstructions({
+      collectionSlug: 'media',
+      file: createUploadReferenceFile(),
+      req,
+    })
+
+    expect(handler).not.toHaveBeenCalled()
+  })
+
   it('fetches only a bounded header for an image with no configured adjustments', async () => {
     const handler = vi.fn(async (handlerReq: PayloadRequest) => {
       expect(handlerReq.headers.get('range')).toBe(`bytes=0-${HEADER_PROBE_BYTE_LENGTH - 1}`)

@@ -144,4 +144,17 @@ describe('getFileContentRequirement', () => {
       }),
     ).toBe('full')
   })
+
+  it.each(['video/mp4', 'image/png'])(
+    'requires the full file for %s when a transformFile transformer will process it',
+    (mimeType) => {
+      expect(
+        getFileContentRequirement({
+          hasTransformFileStages: true,
+          mimeType,
+          uploadConfig: createUploadConfig(),
+        }),
+      ).toBe('full')
+    },
+  )
 })
