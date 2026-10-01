@@ -1,21 +1,16 @@
 import type { ListQuery, Where } from 'payload'
 
-/**
- * Repeatedly `JSON.parse` a value while it remains a string, unwrapping any number
- * of accumulated `JSON.stringify` layers back to its canonical form. A malformed
- * value (parse failure) is returned as-is. Each parse strictly removes one layer, so
- * this always terminates.
- */
-const parseJSONLayers = (value: unknown): unknown => {
-  while (typeof value === 'string') {
-    try {
-      value = JSON.parse(value)
-    } catch {
-      return value
-    }
+/** `JSON.parse` a string value once; returns `undefined` on failure. Non-strings pass through. */
+const parseJSON = (value: unknown): unknown => {
+  if (typeof value !== 'string') {
+    return value
   }
 
-  return value
+  try {
+    return JSON.parse(value)
+  } catch {
+    return undefined
+  }
 }
 
 /**
@@ -27,14 +22,32 @@ export const sanitizeQuery = (toSanitize: ListQuery): ListQuery => {
   const sanitized = { ...toSanitize }
 
   // `columns` and `queryByGroup` are written to the URL as JSON strings (see
-  // ListQueryProvider's `JSON.stringify(...)`). Parse them back into their canonical
-  // array/object form on read so the next write does not re-stringify an
-  // already-stringified value. Without this, each refresh added another escape layer
-  // until the URL overflowed the request size limit (414 URI Too Long). Unwrapping
-  // every accumulated layer also heals URLs already corrupted by the prior behavior.
+  // ListQueryProvider's `JSON.stringify(...)`). Parse each once on read, then validate
+  // the shape (`string[]` / plain object) and drop anything else so defaults apply.
+  // Without parsing, each refresh re-stringified the value and added another escape
+  // layer until the URL overflowed the request size limit (414 URI Too Long). Values
+  // from URLs already corrupted by that bug are still strings after one parse, so
+  // they are dropped rather than recursively unwrapped.
   // See https://github.com/payloadcms/payload/issues/16659
-  sanitized.columns = parseJSONLayers(sanitized.columns) as ListQuery['columns']
-  sanitized.queryByGroup = parseJSONLayers(sanitized.queryByGroup) as ListQuery['queryByGroup']
+  if (sanitized.columns !== undefined) {
+    const columns = parseJSON(sanitized.columns)
+
+    if (Array.isArray(columns) && columns.every((c) => typeof c === 'string')) {
+      sanitized.columns = columns
+    } else {
+      delete sanitized.columns
+    }
+  }
+
+  if (sanitized.queryByGroup !== undefined) {
+    const queryByGroup = parseJSON(sanitized.queryByGroup)
+
+    if (queryByGroup !== null && typeof queryByGroup === 'object' && !Array.isArray(queryByGroup)) {
+      sanitized.queryByGroup = queryByGroup as ListQuery['queryByGroup']
+    } else {
+      delete sanitized.queryByGroup
+    }
+  }
 
   Object.entries(sanitized).forEach(([key, value]) => {
     if (key === 'columns' && Array.isArray(sanitized[key]) && sanitized[key].length === 0) {

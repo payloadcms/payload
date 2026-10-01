@@ -46,12 +46,22 @@ describe('sanitizeQuery', () => {
       expect(urlValue).toBe(JSON.stringify(original))
     })
 
-    it('recovers a multiply-encoded (already-corrupted) columns value back to an array', () => {
+    it('drops a multiply-encoded (already-corrupted) columns value so defaults apply', () => {
       // A URL corrupted by the pre-fix bug carries several JSON.stringify layers.
+      // We parse once, still get a string, and fall back to defaults.
       let urlValue = JSON.stringify(['id', 'title'])
       urlValue = JSON.stringify(urlValue) // 2 layers
       urlValue = JSON.stringify(urlValue) // 3 layers
-      expect(run({ columns: urlValue }).columns).toEqual(['id', 'title'])
+      expect(run({ columns: urlValue }).columns).toBeUndefined()
+    })
+
+    it('drops malformed JSON columns', () => {
+      expect(run({ columns: '[id' }).columns).toBeUndefined()
+    })
+
+    it('drops columns that are not a string array', () => {
+      expect(run({ columns: JSON.stringify([1, 2]) }).columns).toBeUndefined()
+      expect(run({ columns: JSON.stringify({ a: 1 }) }).columns).toBeUndefined()
     })
 
     it('still drops an empty columns array (stringified or not)', () => {
@@ -79,6 +89,17 @@ describe('sanitizeQuery', () => {
       }
 
       expect(urlValue).toBe(JSON.stringify(original))
+    })
+  })
+
+  describe('queryByGroup shape validation', () => {
+    it.each([
+      ['an array', JSON.stringify([1])],
+      ['null', 'null'],
+      ['a double-encoded string', JSON.stringify(JSON.stringify({ a: 1 }))],
+      ['malformed JSON', '{a'],
+    ])('drops queryByGroup that is %s', (_label, value) => {
+      expect(run({ queryByGroup: value }).queryByGroup).toBeUndefined()
     })
   })
 
