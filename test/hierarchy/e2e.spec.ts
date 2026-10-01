@@ -150,7 +150,7 @@ test.describe('Hierarchy Sidebar', () => {
       await acmeCard.click()
       await expect(acmeCard).toHaveAttribute('aria-pressed', 'true')
 
-      await acmeCard.getByRole('link', { name: 'Acme Corp' }).press('Enter')
+      await acmeCard.getByRole('link', { name: 'Acme Corp', exact: true }).press('Enter')
       await expect(page.getByRole('heading', { name: 'Acme Corp' })).toBeVisible()
       await expect(page.getByRole('list', { name: 'Organizations' })).toBeVisible()
     })
