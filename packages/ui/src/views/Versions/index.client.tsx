@@ -37,8 +37,9 @@ export const VersionsViewClient: React.FC<{
       )}
       {versionCount > 0 && (
         <React.Fragment>
-          <Table columns={columns} data={data?.docs} />
+          <Table columns={columns} data={data?.docs} navigationLabel={i18n.t('version:versions')} />
           <PageControlsComponent
+            countLabel={i18n.t('version:versions')}
             data={data}
             handlePageChange={handlePageChange}
             handlePerPageChange={handlePerPageChange}

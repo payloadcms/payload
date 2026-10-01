@@ -32,6 +32,11 @@ import {
   hiddenAccessCountSlug,
   hiddenAccessSlug,
   hiddenFieldsSlug,
+  inheritedReadVersionsGlobalSlug,
+  inheritedReadVersionsSlug,
+  inheritedReadVersionsVirtualGlobalSlug,
+  inheritedReadVersionsVirtualRelatedSlug,
+  inheritedReadVersionsVirtualSlug,
   nonAdminEmail,
   postReferencesSlug,
   publicUserEmail,
@@ -72,6 +77,17 @@ const PublicReadabilityAccess: FieldAccess = ({ req: { user }, siblingData }) =>
 }
 
 export const requestHeaders = new Headers({ authorization: 'Bearer testBearerToken' })
+let inheritedReadVersionsAllowedID: number | string | undefined
+let inheritedReadVersionsAllowedVersionID: number | string | undefined
+
+export const setInheritedReadVersionsAllowedID = (id: number | string | undefined): void => {
+  inheritedReadVersionsAllowedID = id
+}
+
+export const setInheritedReadVersionsAllowedVersionID = (id: number | string | undefined): void => {
+  inheritedReadVersionsAllowedVersionID = id
+}
+
 const UseRequestHeadersAccess: FieldAccess = ({ req: { headers } }) => {
   return !!headers && headers.get('authorization') === requestHeaders.get('authorization')
 }
@@ -101,6 +117,14 @@ export const getConfig: () => Partial<Config> = () => ({
     },
     user: 'users',
   },
+  baseAccess: {
+    collections: {
+      readVersions: ({ id, slug }) =>
+        slug !== inheritedReadVersionsSlug || inheritedReadVersionsAllowedVersionID === undefined
+          ? true
+          : id === inheritedReadVersionsAllowedVersionID,
+    },
+  },
   blocks: [
     {
       slug: 'titleblock',
@@ -115,6 +139,9 @@ export const getConfig: () => Partial<Config> = () => ({
   collections: [
     {
       slug: 'users',
+      admin: {
+        defaultColumns: ['id', 'email'],
+      },
       access: {
         // admin:  () => true,
         admin: async ({ req }) => {
@@ -839,6 +866,55 @@ export const getConfig: () => Partial<Config> = () => ({
       ],
       versions: { drafts: true },
     },
+    {
+      slug: inheritedReadVersionsSlug,
+      access: {
+        read: ({ id }) =>
+          id
+            ? id === inheritedReadVersionsAllowedID
+            : {
+                secret: {
+                  equals: 'allowed',
+                },
+              },
+      },
+      fields: [
+        {
+          name: 'secret',
+          type: 'text',
+        },
+      ],
+      versions: true,
+    },
+    {
+      slug: inheritedReadVersionsVirtualRelatedSlug,
+      access: { read: () => true },
+      fields: [
+        {
+          name: 'label',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: inheritedReadVersionsVirtualSlug,
+      access: {
+        read: () => ({ relatedLabel: { equals: 'allowed' } }),
+      },
+      fields: [
+        {
+          name: 'related',
+          type: 'relationship',
+          relationTo: inheritedReadVersionsVirtualRelatedSlug,
+        },
+        {
+          name: 'relatedLabel',
+          type: 'text',
+          virtual: 'related.label',
+        },
+      ],
+      versions: true,
+    },
     BlocksFieldAccess,
     Disabled,
     RichText,
@@ -1096,6 +1172,46 @@ export const getConfig: () => Partial<Config> = () => ({
   ],
   globals: [
     {
+      slug: inheritedReadVersionsGlobalSlug,
+      access: {
+        read: ({ id }) =>
+          id
+            ? false
+            : {
+                visible: {
+                  equals: true,
+                },
+              },
+      },
+      fields: [
+        {
+          name: 'visible',
+          type: 'checkbox',
+        },
+      ],
+      versions: true,
+    },
+    {
+      slug: inheritedReadVersionsVirtualGlobalSlug,
+      access: {
+        read: () => ({ relatedLabel: { equals: 'allowed' } }),
+        update: () => true,
+      },
+      fields: [
+        {
+          name: 'related',
+          type: 'relationship',
+          relationTo: inheritedReadVersionsVirtualRelatedSlug,
+        },
+        {
+          name: 'relatedLabel',
+          type: 'text',
+          virtual: 'related.label',
+        },
+      ],
+      versions: true,
+    },
+    {
       slug: 'settings',
       access: {
         readVersions: () => true,
@@ -1127,7 +1243,7 @@ export const getConfig: () => Partial<Config> = () => ({
       slug: 'test',
       access: {
         read: async ({ req: { payload } }) => {
-          const access = await payload.findGlobal({ slug: 'settings' })
+          const access = await payload.findGlobal({ slug: 'settings', overrideAccess: true })
           return Boolean(access.test)
         },
       },
@@ -1189,6 +1305,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       email: devUser.email,
       password: devUser.password,
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1197,6 +1314,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       email: nonAdminEmail,
       password: 'test',
     },
+    overrideAccess: true,
   })
 
   // Regular user - can access admin panel but has limited delete permissions
@@ -1207,6 +1325,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       password: 'test',
       roles: ['user'],
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1215,6 +1334,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       email: publicUserEmail,
       password: 'test',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1222,6 +1342,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
     data: {
       restrictedField: 'restricted',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1229,6 +1350,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
     data: {
       name: 'read-only',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1277,6 +1399,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       },
       title: 'Blocks Field Access Test Document',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1284,6 +1407,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
     data: {
       name: 'versioned',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1300,6 +1424,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
         },
       ],
     },
+    overrideAccess: true,
   })
 
   await payload.updateGlobal({
@@ -1307,6 +1432,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
     data: {
       name: 'dev@payloadcms.com',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1344,6 +1470,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
         richText2: buildEditorState<DefaultNodeTypes>({ text: 'Text8' }),
       },
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1359,6 +1486,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
         text: 'Text2',
       },
     },
+    overrideAccess: true,
   })
 
   // Seed read-restricted collection
@@ -1371,6 +1499,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       _status: 'published',
       title: 'Differentiated Doc 1',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1379,5 +1508,6 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       _status: 'published',
       title: 'Restricted Doc 1',
     },
+    overrideAccess: true,
   })
 }

@@ -17,7 +17,8 @@
     opacity: 0;
     background-color: var(--color-bg-tooltip);
     max-width: var(--tooltip-max-width);
-    padding: var(--spacer-1);
+    padding-block: var(--spacer-1);
+    padding-inline: var(--spacer-2);
     color: var(--color-text-ontooltip);
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);

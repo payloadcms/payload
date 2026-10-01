@@ -1,11 +1,11 @@
 'use client'
 
-import type { Option, SelectFieldClientComponent } from 'payload'
+import type { Option, SelectFieldClientProps } from 'payload'
 
 import { SelectField, useField } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomMultiSelect: SelectFieldClientComponent = (props) => {
+export const CustomMultiSelect: React.FC<SelectFieldClientProps> = (props) => {
   const { path } = props
   const { setValue, value } = useField<string[]>({ path })
   const [options, setOptions] = React.useState<Option[]>([])

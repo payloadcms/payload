@@ -1,3 +1,4 @@
+import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import {
   type AllOperations,
   combineQueries,
@@ -5,6 +6,8 @@ import {
   type PayloadRequest,
   type Where,
 } from '../../index.js'
+import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
+import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
 
 /**
  * Returns whether or not the entity doc exists based on the where query.
@@ -27,6 +30,29 @@ export async function entityDocExists({
   where: Where
 }): Promise<boolean> {
   if (entityType === 'global') {
+    if (operation === 'readVersions') {
+      const global = req.payload.globals.config.find(({ slug: globalSlug }) => globalSlug === slug)
+
+      if (!global) {
+        return false
+      }
+
+      sanitizeWhereQuery({
+        fields: buildVersionGlobalFields(req.payload.config, global, true),
+        payload: req.payload,
+        where,
+      })
+
+      const count = await req.payload.db.countGlobalVersions({
+        global: slug,
+        locale,
+        req,
+        where,
+      })
+
+      return count.totalDocs > 0
+    }
+
     const global = await req.payload.db.findGlobal({
       slug,
       locale,
@@ -42,11 +68,25 @@ export async function entityDocExists({
 
   if (entityType === 'collection' && id) {
     if (operation === 'readVersions') {
+      const collection = req.payload.collections[slug]?.config
+
+      if (!collection) {
+        return false
+      }
+
+      const fullWhere = combineQueries(where, { parent: { equals: id } })
+
+      sanitizeWhereQuery({
+        fields: buildVersionCollectionFields(req.payload.config, collection, true),
+        payload: req.payload,
+        where: fullWhere,
+      })
+
       const count = await req.payload.db.countVersions({
         collection: slug,
         locale,
         req,
-        where: combineQueries(where, { parent: { equals: id } }),
+        where: fullWhere,
       })
       return count.totalDocs > 0
     }

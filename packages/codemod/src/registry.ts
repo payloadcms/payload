@@ -1,24 +1,29 @@
 import type { Transform } from './types.js'
 
+import { addOverrideAccessTrue } from './transforms/add-override-access-true/index.js'
 import { exampleNoop } from './transforms/example-noop/index.js'
 import { globalsComponentsEdit } from './transforms/globals-components-edit/index.js'
 import { migrateAfterOperationRead } from './transforms/migrate-after-operation-read/index.js'
 import { migrateAliasedExports } from './transforms/migrate-aliased-exports/index.js'
+import { migrateAuthorshipDefault } from './transforms/migrate-authorship-default/index.js'
 import { migrateAzureChunkLargeFiles } from './transforms/migrate-azure-chunk-large-files/index.js'
 import { migrateBlockReferencesToBlocks } from './transforms/migrate-block-references-to-blocks/index.js'
 import { migrateBuildScript } from './transforms/migrate-build-script/index.js'
 import { migrateDbTypesSubpath } from './transforms/migrate-db-types-subpath/index.js'
 import { migrateDisabledFields } from './transforms/migrate-disabled-fields/index.js'
 import { migrateDocumentTitleContext } from './transforms/migrate-document-title-context/index.js'
+import { migrateFieldComponentTypes } from './transforms/migrate-field-component-types/index.js'
 import { migrateForceSelect } from './transforms/migrate-force-select/index.js'
 import { migrateHideAPIURL } from './transforms/migrate-hide-api-url/index.js'
 import { migrateImportExportHooks } from './transforms/migrate-import-export-hooks/index.js'
 import { migrateListViewSelectAPI } from './transforms/migrate-list-view-select-api/index.js'
 import { migrateNextGenerateViewportExport } from './transforms/migrate-next-generate-viewport-export/index.js'
 import { migrateNextSubpathExports } from './transforms/migrate-next-subpath-exports/index.js'
+import { migratePayloadRequestCreation } from './transforms/migrate-payload-request-creation/index.js'
 import { migrateSlugField } from './transforms/migrate-slug-field/index.js'
 import { migrateStorageAdaptersToConfig } from './transforms/migrate-storage-adapters-to-config/index.js'
 import { migrateVersionsDefault } from './transforms/migrate-versions-default/index.js'
+import { removeDefaultLocalePublishOption } from './transforms/remove-default-locale-publish-option/index.js'
 import { removeGroupByTrue } from './transforms/remove-group-by-true/index.js'
 import { removeLocalizeStatusConfig } from './transforms/remove-localize-status-config/index.js'
 import { removePublishSpecificLocale } from './transforms/remove-publish-specific-locale/index.js'
@@ -30,13 +35,16 @@ import { renameTypescriptSchemaToJsonSchema } from './transforms/rename-typescri
 
 export const transforms: Transform[] = [
   exampleNoop,
+  addOverrideAccessTrue,
   migrateAfterOperationRead,
   migrateHideAPIURL,
   globalsComponentsEdit,
   migrateListViewSelectAPI,
   migrateDisabledFields,
   migrateForceSelect,
+  migrateFieldComponentTypes,
   migrateAliasedExports,
+  migratePayloadRequestCreation,
   migrateBlockReferencesToBlocks,
   migrateBuildScript,
   migrateDocumentTitleContext,
@@ -49,6 +57,8 @@ export const transforms: Transform[] = [
   migrateNextSubpathExports,
   migrateSlugField,
   migrateVersionsDefault,
+  migrateAuthorshipDefault,
+  removeDefaultLocalePublishOption,
   removeGroupByTrue,
   removeLocalizeStatusConfig,
   removeVersionsTrue,

@@ -9,6 +9,8 @@
     "paths": {
       "@payloadcms/translations": ["../../translations/dist/index.d.ts"],
       "@payloadcms/ui": ["../../ui/dist/exports/client/index.d.ts"],
+      "@payloadcms/ui/providers/*": ["../../ui/dist/providers/*/index.d.ts"],
+      "@payloadcms/ui/views/NotFound/client": ["../../ui/dist/views/NotFound/client.d.ts"],
       "@payloadcms/ui/*": ["../../ui/dist/exports/*"],
       "payload": ["../../payload/dist/index.bundled.d.ts"],
       "payload/*": ["../../payload/dist/exports/*.d.ts"]

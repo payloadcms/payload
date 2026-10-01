@@ -30,6 +30,7 @@ const seed = async () => {
 
   const user = await payload.create({
     collection: 'users',
+    overrideAccess: true,
     data: {
       email: 'dev@payloadcms.com',
       password: 'some-password',
@@ -38,6 +39,7 @@ const seed = async () => {
 
   const page = await payload.create({
     collection: 'pages',
+    overrideAccess: true,
     data: {
       title: 'My Homepage',
       // other data to seed here

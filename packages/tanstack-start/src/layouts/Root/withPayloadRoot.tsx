@@ -1,6 +1,8 @@
 'use client'
 import type { Theme } from '@payloadcms/ui'
+import type { RequestThemeSource } from '@payloadcms/ui/utilities/getRequestTheme'
 
+import { ResolveThemeOnClient } from '@payloadcms/ui/layouts/Root/ResolveThemeOnClient'
 import { getLanguageDir } from '@payloadcms/ui/utilities/getLanguageDir'
 import { HeadContent, Scripts, useRouterState } from '@tanstack/react-router'
 import React from 'react'
@@ -11,6 +13,12 @@ type AdminHTMLProps = {
   lang?: string
 }
 
+type AdminShellState = {
+  htmlProps: AdminHTMLProps
+  serverTheme: Theme
+  themeSource: RequestThemeSource
+}
+
 export type PayloadAdminShellProps = {
   readonly children: React.ReactNode
 }
@@ -19,22 +27,31 @@ export type PayloadAdminShellProps = {
  * The `<html>` document shell for Payload admin routes — the TanStack Start
  * equivalent of `@payloadcms/next`'s root layout `<html>`. Sets
  * `data-theme`/`lang`/`dir` on `<html>` from the server-computed layout data
- * (`getLayoutData`, exposed on the `/_payload` route loader), so the admin
- * panel renders themed with the correct text direction on the first paint with no
- * client bootstrap script — the same server-side path Next's `RootLayout`
- * uses, sharing `getRequestTheme`/`getLanguageDir` from `@payloadcms/ui`.
+ * (`getLayoutData`, exposed on the `/_payload` route loader). A blocking script
+ * resolves the server's default theme from the browser preference before first paint,
+ * while the server-provided language and text direction remain authoritative.
  */
 export function PayloadAdminShell({ children }: PayloadAdminShellProps) {
-  const htmlProps = useRouterState({
-    select: (state): AdminHTMLProps => {
+  const { htmlProps, serverTheme, themeSource } = useRouterState({
+    select: (state): AdminShellState => {
       for (const match of state.matches) {
-        const data = match.loaderData as { languageCode?: string; theme?: Theme } | undefined
+        const data = match.loaderData as
+          | {
+              languageCode?: string
+              theme?: Theme
+              themeSource?: RequestThemeSource
+            }
+          | undefined
 
         if (data?.theme && data?.languageCode) {
           return {
-            'data-theme': data.theme,
-            dir: getLanguageDir({ languageCode: data.languageCode }),
-            lang: data.languageCode,
+            htmlProps: {
+              'data-theme': data.theme,
+              dir: getLanguageDir({ languageCode: data.languageCode }),
+              lang: data.languageCode,
+            },
+            serverTheme: data.theme,
+            themeSource: data.themeSource ?? 'default',
           }
         }
       }
@@ -42,7 +59,11 @@ export function PayloadAdminShell({ children }: PayloadAdminShellProps) {
       // No layout data yet (fresh session before the loader resolves): default
       // to `ltr` so the `[dir='ltr']`-scoped admin layout rules (e.g. the
       // document sidebar divider) still match, matching Next's `ltr` default.
-      return { dir: 'ltr' }
+      return {
+        htmlProps: { dir: 'ltr' },
+        serverTheme: 'light',
+        themeSource: 'default',
+      }
     },
   })
 
@@ -50,6 +71,7 @@ export function PayloadAdminShell({ children }: PayloadAdminShellProps) {
     // eslint-disable-next-line jsx-a11y/html-has-lang -- `lang` is set from server-computed layout data when available
     <html {...htmlProps} suppressHydrationWarning>
       <head>
+        {themeSource === 'default' && <ResolveThemeOnClient serverTheme={serverTheme} />}
         <style>{`@layer payload-default, payload;`}</style>
         <HeadContent />
       </head>
