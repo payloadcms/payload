@@ -4,4 +4,5 @@ export const MediaWithPrefix: CollectionConfig = {
   slug: 'media-with-prefix',
   upload: true,
   fields: [],
+  versions: false,
 }

@@ -1,5 +1,6 @@
 import type { FlattenedField } from 'payload'
 
+import { getBlockFlattenedFields, getNestedFlattenedFields } from './flattenedFields.js'
 import { isPlainObject } from './isPlainObject.js'
 import { processRichTextField } from './processRichTextField.js'
 
@@ -140,29 +141,60 @@ const normalizePolymorphicRelationships = (
   }
 }
 
-const normalizeRichText = (doc: Record<string, unknown>, fields: FlattenedField[]): void => {
-  for (const field of fields.filter((f) => f.type === 'richText')) {
-    if (field.name in doc && doc[field.name]) {
-      doc[field.name] = processRichTextField(doc[field.name])
-    }
-  }
-
-  for (const field of fields.filter((f) => f.type === 'blocks')) {
-    const blocks = doc[field.name]
-    if (!Array.isArray(blocks)) {
+const normalizeRichTextInFields = (
+  doc: Record<string, unknown>,
+  fields: FlattenedField[],
+): void => {
+  for (const field of fields) {
+    if (!('name' in field) || !field.name || !(field.name in doc)) {
       continue
     }
-    for (const block of blocks) {
-      if (!isPlainObject(block)) {
+    const value = doc[field.name]
+    if (value === null || value === undefined) {
+      continue
+    }
+
+    if (field.type === 'richText') {
+      doc[field.name] = processRichTextField(value)
+    } else if (field.type === 'blocks') {
+      if (!Array.isArray(value)) {
         continue
       }
-      for (const [key, value] of Object.entries(block)) {
-        if (key === 'richText' || (typeof key === 'string' && key.includes('richText'))) {
-          block[key] = processRichTextField(value)
+      const blockDefs =
+        (field as { blocks?: Array<{ flattenedFields?: FlattenedField[]; slug: string }> })
+          .blocks ?? []
+      for (const blockItem of value) {
+        if (!isPlainObject(blockItem)) {
+          continue
+        }
+        const blockDef = blockDefs.find((b) => b.slug === blockItem.blockType)
+        if (blockDef) {
+          normalizeRichTextInFields(blockItem, getBlockFlattenedFields(blockDef))
         }
       }
+    } else if (field.type === 'array') {
+      if (!Array.isArray(value)) {
+        continue
+      }
+      const nestedFields = getNestedFlattenedFields(field) ?? []
+      for (const item of value) {
+        if (!isPlainObject(item)) {
+          continue
+        }
+        normalizeRichTextInFields(item, nestedFields)
+      }
+    } else if (field.type === 'group' || field.type === 'tab') {
+      if (!isPlainObject(value)) {
+        continue
+      }
+      const nestedFields = getNestedFlattenedFields(field) ?? []
+      normalizeRichTextInFields(value, nestedFields)
     }
   }
+}
+
+const normalizeRichText = (doc: Record<string, unknown>, fields: FlattenedField[]): void => {
+  normalizeRichTextInFields(doc, fields)
 }
 
 /**

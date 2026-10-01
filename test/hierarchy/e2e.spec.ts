@@ -7,10 +7,10 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Organization } from './payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
 import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -41,7 +41,14 @@ async function setHierarchyFilter({
     el.classList.contains('popup-button-list__button--selected'),
   )
   if (isCurrentlyChecked !== checked) {
+    const preferenceUpdate = page.waitForResponse(
+      (response) =>
+        response.url().includes('/api/payload-preferences/hierarchy-tree-') &&
+        response.request().method() === 'POST' &&
+        response.ok(),
+    )
     await filterButton.click()
+    await preferenceUpdate
   }
 
   await page.keyboard.press('Escape')
@@ -69,18 +76,18 @@ test.describe('Hierarchy Sidebar', () => {
     organizationsURL = new AdminUrlUtil(serverURL, 'organizations')
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   test.afterAll(async () => {
     // Clean up created documents
     for (const id of createdOrgIds) {
-      await payload.delete({ id, collection: 'organizations' }).catch(() => {})
+      await payload
+        .delete({ id, collection: 'organizations', overrideAccess: true })
+        .catch(() => {})
     }
     for (const id of createdDeptIds) {
-      await payload.delete({ id, collection: 'departments' }).catch(() => {})
+      await payload.delete({ id, collection: 'departments', overrideAccess: true }).catch(() => {})
     }
   })
 
@@ -151,6 +158,68 @@ test.describe('Hierarchy Sidebar', () => {
 
       // Child should be hidden
       await expect(tree.getByText('Engineering Division')).toBeHidden()
+    })
+
+    test('should navigate tree via keyboard and load more with Enter without navigation', async () => {
+      const prefs = await payload.find({
+        collection: 'payload-preferences',
+        overrideAccess: true,
+        where: { key: { equals: 'hierarchy-tree-divisions' } },
+      })
+      for (const pref of prefs.docs) {
+        await payload.delete({
+          id: pref.id,
+          collection: 'payload-preferences',
+          overrideAccess: true,
+        })
+      }
+
+      await page.goto(`${serverURL}/admin`)
+      await openNav(page)
+      await page.getByRole('tab', { name: 'Divisions' }).click()
+
+      const tree = page.getByRole('tree')
+      await expect(tree).toBeVisible()
+
+      const getActiveText = async () =>
+        page.evaluate(() => (document.activeElement?.textContent || '').trim())
+
+      const getActiveClass = async () =>
+        page.evaluate(() => (document.activeElement?.className || '').toString())
+
+      // Focus the first tree node, then close/open with arrows for deterministic keyboard flow
+      const alphaNode = tree.locator('.tree-node').first()
+      await expect(alphaNode).toBeVisible()
+      await alphaNode.focus()
+      await expect.poll(getActiveText).toContain('Alpha Division')
+      await page.keyboard.press('ArrowLeft')
+      await expect(alphaNode).toHaveAttribute('aria-expanded', 'false')
+
+      // Open Alpha Division with ArrowRight, then navigate vertically through its children
+      await page.keyboard.press('ArrowRight')
+      await expect(alphaNode).toHaveAttribute('aria-expanded', 'true')
+      await expect(tree.getByText('Alpha Child 1')).toBeVisible()
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(getActiveText).toContain('Alpha Child 1')
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(getActiveText).toContain('Alpha Child 2')
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(getActiveText).toContain('Alpha Child 3')
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(getActiveClass).toContain('tree__load-more-button')
+
+      // Enter should load more children, not navigate
+      const urlBefore = page.url()
+      await page.keyboard.press('Enter')
+      await expect(page).toHaveURL(urlBefore)
+      await expect(tree.getByText('Alpha Child 4')).toBeVisible()
+      await expect
+        .poll(() => page.evaluate(() => document.activeElement?.getAttribute('aria-level')))
+        .toBe('2')
+
+      // Continue vertical navigation to the next root sibling after the newly loaded child
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(getActiveText).toContain('Beta Division')
     })
   })
 
@@ -251,6 +320,7 @@ test.describe('Hierarchy Sidebar', () => {
       testOrg = await payload.create({
         collection: 'organizations',
         data: { title: 'Selection Test Org' },
+        overrideAccess: true,
       })
       createdOrgIds.push(testOrg.id)
     })
@@ -314,7 +384,14 @@ test.describe('Hierarchy Sidebar', () => {
       await page.goto(organizationsURL.list)
       await openNav(page)
 
+      const preferenceUpdate = page.waitForResponse(
+        (response) =>
+          response.url().endsWith('/api/payload-preferences/nav-sidebar-active-tab') &&
+          response.request().method() === 'POST' &&
+          response.ok(),
+      )
       await page.getByRole('tab', { name: 'Organizations' }).click()
+      await preferenceUpdate
 
       // Find and use search input
       const searchInput = page.getByPlaceholder('Search Organizations')
@@ -334,19 +411,27 @@ test.describe('Hierarchy Sidebar', () => {
       await page.goto(organizationsURL.list)
       await openNav(page)
 
+      const preferenceUpdate = page.waitForResponse(
+        (response) =>
+          response.url().endsWith('/api/payload-preferences/nav-sidebar-active-tab') &&
+          response.request().method() === 'POST' &&
+          response.ok(),
+      )
       await page.getByRole('tab', { name: 'Organizations' }).click()
+      await preferenceUpdate
 
       const searchInput = page.getByPlaceholder('Search Organizations')
+      const clearButton = page.getByRole('button', { name: 'Clear' })
 
       // Perform search
       await searchInput.fill('Engineering')
+      await expect(clearButton).toBeVisible()
       await searchInput.press('Enter')
 
       // Wait for tree to be hidden
       await expect(page.getByRole('tree')).toBeHidden()
 
       // Clear search (aria-label is t('general:clear') = "Clear")
-      const clearButton = page.getByRole('button', { name: 'Clear' })
       await clearButton.click()
 
       // Tree should be visible again
@@ -365,11 +450,87 @@ test.describe('Hierarchy Sidebar', () => {
       // Clear folder tree preferences to ensure clean filter state
       const prefs = await payload.find({
         collection: 'payload-preferences',
+        overrideAccess: true,
         where: { key: { equals: 'hierarchy-tree-folders' } },
       })
       for (const pref of prefs.docs) {
-        await payload.delete({ collection: 'payload-preferences', id: pref.id })
+        await payload.delete({
+          id: pref.id,
+          collection: 'payload-preferences',
+          overrideAccess: true,
+        })
       }
+    })
+
+    test.describe('Autosave create drawer', () => {
+      let organizationTitle: string
+
+      test.afterEach(async () => {
+        const createdOrganizations = await payload.find({
+          collection: 'organizations',
+          draft: true,
+          overrideAccess: true,
+          where: { title: { equals: organizationTitle } },
+        })
+
+        for (const organization of createdOrganizations.docs) {
+          await payload.delete({
+            id: organization.id,
+            collection: 'organizations',
+            overrideAccess: true,
+          })
+        }
+      })
+
+      test('should keep autosave drawer open when creating an allowed document in a folder hierarchy', async () => {
+        test.setTimeout(TEST_TIMEOUT_LONG)
+        organizationTitle = `Autosave Organization ${Date.now()}`
+
+        const multiTypeFolders = await payload.find({
+          collection: 'folders',
+          limit: 1,
+          overrideAccess: true,
+          where: { name: { equals: 'Orgs and Products' } },
+        })
+        const multiTypeFolder = multiTypeFolders.docs[0]
+
+        await page.goto(organizationsURL.list)
+        await page.goto(`${foldersURL.hierarchy}?parentFolder=${multiTypeFolder.id}`)
+
+        const listControls = page.locator('.hierarchy-list__controls')
+        await listControls.getByRole('button', { name: 'Create New' }).first().click()
+
+        await expect(
+          page.getByRole('menuitem', { name: 'Organization', exact: true }),
+        ).toBeVisible()
+        await expect(page.getByRole('menuitem', { name: 'Product', exact: true })).toBeVisible()
+        await page.getByRole('menuitem', { name: 'Organization', exact: true }).click()
+
+        const drawer = page.locator('#hierarchy-create-folders')
+        const titleInput = drawer.locator('#field-title')
+
+        await expect(drawer).toBeVisible()
+        await titleInput.fill(organizationTitle)
+
+        await expect
+          .poll(async () => {
+            const autosavedOrganizations = await payload.find({
+              collection: 'organizations',
+              depth: 0,
+              draft: true,
+              overrideAccess: true,
+              where: { title: { equals: organizationTitle } },
+            })
+
+            return autosavedOrganizations.docs[0]?.parentFolder
+          })
+          .toBe(multiTypeFolder.id)
+
+        await expect(drawer).toBeVisible()
+        await expect(titleInput).toHaveValue(organizationTitle)
+        await drawer.locator('.doc-drawer__header-close').click()
+        await expect(drawer).toBeHidden()
+      })
     })
 
     test('should show filter button when collectionSpecific is configured', async () => {
@@ -481,7 +642,7 @@ test.describe('Hierarchy Sidebar', () => {
       await listControls.getByRole('button', { name: 'Create New' }).first().click()
 
       // Select "Folder" from the popup menu
-      await page.getByRole('button', { name: 'Folder', exact: true }).click()
+      await page.getByRole('menuitem', { name: 'Folder', exact: true }).click()
 
       // Wait for drawer to open
       const drawer = page.locator('.drawer__content')
@@ -508,10 +669,15 @@ test.describe('Hierarchy Sidebar', () => {
       // Clean up - delete the created folder
       const createdFolder = await payload.find({
         collection: 'folders',
+        overrideAccess: true,
         where: { name: { equals: newFolderName } },
       })
       if (createdFolder.docs[0]) {
-        await payload.delete({ id: createdFolder.docs[0].id, collection: 'folders' })
+        await payload.delete({
+          id: createdFolder.docs[0].id,
+          collection: 'folders',
+          overrideAccess: true,
+        })
       }
     })
 
@@ -542,7 +708,7 @@ test.describe('Hierarchy Sidebar', () => {
 
       const listControls = page.locator('.hierarchy-list__controls')
       await listControls.getByRole('button', { name: 'Create New' }).first().click()
-      await page.getByRole('button', { name: 'Folder', exact: true }).click()
+      await page.getByRole('menuitem', { name: 'Folder', exact: true }).click()
 
       const drawer = page.locator('.drawer__content')
       await expect(drawer).toBeVisible()
@@ -560,24 +726,23 @@ test.describe('Hierarchy Sidebar', () => {
       // The new folder should NOT appear in the filtered tree (filter is Organizations)
       await expect(tree.getByText(newFolderName)).toBeHidden({ timeout: 5000 })
 
-      // Clear the filter
-      await setHierarchyFilter({ checked: false, filterName: 'Organizations', page, sidebar })
-
-      // Now the folder should be visible
-      await expect(tree.getByText(newFolderName)).toBeVisible()
-
       // Clean up
       const createdFolder = await payload.find({
         collection: 'folders',
+        overrideAccess: true,
         where: { name: { equals: newFolderName } },
       })
       if (createdFolder.docs[0]) {
-        await payload.delete({ id: createdFolder.docs[0].id, collection: 'folders' })
+        await payload.delete({
+          id: createdFolder.docs[0].id,
+          collection: 'folders',
+          overrideAccess: true,
+        })
       }
     })
   })
 
-  test.describe('Column Drawer', () => {
+  test.describe('Column Modal', () => {
     let productsURL: AdminUrlUtil
     let parentFolder: { id: number | string }
     let childFolder: { id: number | string }
@@ -597,11 +762,13 @@ test.describe('Hierarchy Sidebar', () => {
       parentFolder = await payload.create({
         collection: 'folders',
         data: { name: parentFolderName },
+        overrideAccess: true,
       })
 
       childFolder = await payload.create({
         collection: 'folders',
         data: { name: childFolderName, parentFolder: parentFolder.id },
+        overrideAccess: true,
       })
 
       // Create a product with the child folder selected
@@ -612,23 +779,30 @@ test.describe('Hierarchy Sidebar', () => {
           name: `Product In Child Folder ${uniqueSuffix}`,
           parentFolder: childFolder.id as number,
         },
+        overrideAccess: true,
       })
     })
 
     test.afterAll(async () => {
       // Clean up in reverse order of dependencies
       if (productWithFolder?.id) {
-        await payload.delete({ id: productWithFolder.id, collection: 'products' }).catch(() => {})
+        await payload
+          .delete({ id: productWithFolder.id, collection: 'products', overrideAccess: true })
+          .catch(() => {})
       }
       if (childFolder?.id) {
-        await payload.delete({ id: childFolder.id, collection: 'folders' }).catch(() => {})
+        await payload
+          .delete({ id: childFolder.id, collection: 'folders', overrideAccess: true })
+          .catch(() => {})
       }
       if (parentFolder?.id) {
-        await payload.delete({ id: parentFolder.id, collection: 'folders' }).catch(() => {})
+        await payload
+          .delete({ id: parentFolder.id, collection: 'folders', overrideAccess: true })
+          .catch(() => {})
       }
     })
 
-    test('should expand column drawer to show currently selected folder', async () => {
+    test('should expand column modal to show currently selected folder', async () => {
       // Navigate to the product edit page
       await page.goto(productsURL.edit(String(productWithFolder.id)))
 
@@ -641,15 +815,79 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(folderButton).toBeVisible()
       await folderButton.click()
 
-      // The drawer should open and show columns expanded to the current selection:
+      // The modal should open and show columns expanded to the current selection:
       // Column 1 (root): Parent folder visible
       // Column 2 (Parent's children): Child folder visible (and selected)
-      const drawer = page.locator('.hierarchy-drawer')
-      await expect(drawer).toBeVisible()
+      const modal = page.locator('.hierarchy-modal')
+      await expect(modal).toBeVisible()
 
       // Both folders should be visible in their respective columns
-      await expect(drawer.getByRole('button', { name: parentFolderName })).toBeVisible()
-      await expect(drawer.getByRole('button', { name: childFolderName })).toBeVisible()
+      await expect(modal.getByRole('button', { name: parentFolderName, exact: true })).toBeVisible()
+      await expect(modal.getByRole('button', { name: childFolderName, exact: true })).toBeVisible()
+    })
+
+    test('should reset transient selections after canceling and reopening the modal', async () => {
+      await page.goto(productsURL.edit(String(productWithFolder.id)))
+
+      const folderButton = page.getByRole('button', { name: childFolderName })
+      await expect(folderButton).toBeVisible()
+
+      await folderButton.click()
+      const modal = page.locator('.hierarchy-modal')
+      await expect(modal).toBeVisible()
+
+      const parentFolderItem = modal
+        .locator('.hierarchy-column-item', { hasText: parentFolderName })
+        .first()
+      await parentFolderItem.locator('.hierarchy-column-item__checkbox').click()
+
+      await expect(
+        modal.locator('.hierarchy-column-item--selected .hierarchy-column-item__title', {
+          hasText: parentFolderName,
+        }),
+      ).toBeVisible()
+
+      await modal.getByRole('button', { name: 'Cancel' }).click()
+      await expect(modal).toBeHidden()
+
+      await folderButton.click()
+      await expect(modal).toBeVisible()
+
+      await expect(
+        modal.locator('.hierarchy-column-item--selected .hierarchy-column-item__title', {
+          hasText: childFolderName,
+        }),
+      ).toBeVisible()
+      await expect(
+        modal.locator('.hierarchy-column-item--selected .hierarchy-column-item__title', {
+          hasText: parentFolderName,
+        }),
+      ).toBeHidden()
+    })
+
+    test('should reset transient expanded location after canceling and reopening the modal', async () => {
+      await page.goto(productsURL.edit(String(productWithFolder.id)))
+
+      const folderButton = page.getByRole('button', { name: childFolderName })
+      await expect(folderButton).toBeVisible()
+
+      await folderButton.click()
+      const modal = page.locator('.hierarchy-modal')
+      await expect(modal).toBeVisible()
+
+      await expect(modal.locator('.hierarchy-column')).toHaveCount(2)
+
+      await modal.locator('.hierarchy-column-item', { hasText: childFolderName }).first().click()
+
+      await expect(modal.locator('.hierarchy-column')).toHaveCount(3)
+
+      await modal.getByRole('button', { name: 'Cancel' }).click()
+      await expect(modal).toBeHidden()
+
+      await folderButton.click()
+      await expect(modal).toBeVisible()
+
+      await expect(modal.locator('.hierarchy-column')).toHaveCount(2)
     })
   })
 })

@@ -14,7 +14,6 @@ import { CopyIcon } from '@payloadcms/ui/icons/Copy'
 import { DocumentIcon } from '@payloadcms/ui/icons/Document'
 import { DuplicateIcon } from '@payloadcms/ui/icons/Duplicate'
 import { EditIcon } from '@payloadcms/ui/icons/Edit'
-import { ExternalLinkIcon } from '@payloadcms/ui/icons/ExternalLink'
 import { EyeIcon } from '@payloadcms/ui/icons/Eye'
 import { FilterIcon } from '@payloadcms/ui/icons/Filter'
 import { FolderIcon } from '@payloadcms/ui/icons/Folder'
@@ -28,6 +27,7 @@ import { LogOutIcon } from '@payloadcms/ui/icons/LogOut'
 import { MinimizeMaximizeIcon } from '@payloadcms/ui/icons/MinimizeMaximize'
 import { MoreIcon } from '@payloadcms/ui/icons/More'
 import { MoveFolderIcon } from '@payloadcms/ui/icons/MoveFolder'
+import { NewTabIcon } from '@payloadcms/ui/icons/NewTab'
 import { PeopleIcon } from '@payloadcms/ui/icons/People'
 import { PlusIcon } from '@payloadcms/ui/icons/Plus'
 import { RefreshIcon } from '@payloadcms/ui/icons/Refresh'
@@ -365,20 +365,20 @@ export const IconsSection: React.FC<{ selectedComponent: string }> = ({ selected
         </div>
       </div>
 
-      {/* ExternalLink - size */}
+      {/* NewTab - size */}
       <div className="components-view__icon-item components-view__icon-item--variants">
-        <span>ExternalLink</span>
+        <span>NewTab</span>
         <div className="components-view__icon-content">
           <div className="components-view__icon-size-row">
             <span>size: 24 (default)</span>
             <div className="components-view__icon-variants">
-              <ExternalLinkIcon size={24} />
+              <NewTabIcon size={24} />
             </div>
           </div>
           <div className="components-view__icon-size-row">
             <span>size: 16</span>
             <div className="components-view__icon-variants">
-              <ExternalLinkIcon size={16} />
+              <NewTabIcon size={16} />
             </div>
           </div>
         </div>

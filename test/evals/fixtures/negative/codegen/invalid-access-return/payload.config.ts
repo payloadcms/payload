@@ -12,6 +12,7 @@ export default buildConfig({
         read: ({ req }) => (req.user ? 'yes' : 'no'),
       },
       fields: [{ name: 'title', type: 'text' }],
+      versions: false,
     },
   ],
 })

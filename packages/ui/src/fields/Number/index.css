@@ -35,5 +35,24 @@
     &.read-only .input-stepper {
       display: none;
     }
+
+    .number__prefix,
+    .number__suffix {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--text-body-medium-font-size);
+      color: var(--color-text-secondary);
+      user-select: none;
+    }
+
+    .number__prefix {
+      padding-inline-start: var(--field-padding-inline);
+    }
+
+    .number__suffix {
+      padding-inline-end: var(--field-padding-inline);
+    }
   }
 }

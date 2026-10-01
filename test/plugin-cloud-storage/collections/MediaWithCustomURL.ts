@@ -6,4 +6,5 @@ export const MediaWithCustomURL: CollectionConfig = {
     disableLocalStorage: true,
   },
   fields: [],
+  versions: false,
 }

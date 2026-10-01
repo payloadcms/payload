@@ -107,4 +107,5 @@ export const Customers: CollectionConfig = {
     },
   ],
   timestamps: true,
+  versions: false,
 }

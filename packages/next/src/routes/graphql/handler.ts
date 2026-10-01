@@ -7,7 +7,7 @@ import { status as httpStatus } from 'http-status'
 import {
   addDataAndFileToRequest,
   addLocalesToRequestFromData,
-  createPayloadRequest,
+  createPayloadRequestFromWebRequest,
   headersWithCors,
   logError,
   mergeHeaders,
@@ -98,18 +98,24 @@ export const getGraphql = async (config: Promise<SanitizedConfig> | SanitizedCon
 export const POST =
   (config: Promise<SanitizedConfig> | SanitizedConfig) => async (request: Request) => {
     const originalRequest = request.clone()
-    const req = await createPayloadRequest({
+    const req = await createPayloadRequestFromWebRequest({
       canSetHeaders: true,
       config,
       request,
     })
 
+    const { payload } = req
+
+    if (payload.config.graphQL?.disable) {
+      return new Response(null, {
+        status: 404,
+      })
+    }
+
     await addDataAndFileToRequest(req)
     addLocalesToRequestFromData(req)
 
     const { schema, validationRules } = await getGraphql(config)
-
-    const { payload } = req
 
     const headers = {}
     const apiResponse = await createHandler({

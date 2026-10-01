@@ -21,6 +21,9 @@ const config = withBundleAnalyzer(
       },
       experimental: {
         fullySpecified: true,
+        // The `typescript` dependency is aliased to `@typescript/typescript6`, which only ships a
+        // `tsc6` bin. Next's CLI mode looks for `typescript/bin/tsc`, so use the compiler API instead.
+        useTypeScriptCli: false,
         serverActions: {
           bodySizeLimit: '5mb',
         },

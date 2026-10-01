@@ -1,5 +1,6 @@
 'use client'
 import { type ListQuery, type Where } from 'payload'
+import { transformWhereQuery, validateWhereQuery } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
@@ -9,7 +10,6 @@ import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
-import { useConfig } from '../Config/index.js'
 import { useRouter, useSearchParams } from '../RouterAdapter/index.js'
 import { ListQueryContext, ListQueryModifiedContext } from './context.js'
 import { mergeQuery } from './mergeQuery.js'
@@ -33,9 +33,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const rawSearchParams = useSearchParams()
   const { startRouteTransition } = useRouteTransition()
   const [modified, setModified] = useState(false)
-  const { getEntityConfig } = useConfig()
-  const collectionConfig = getEntityConfig({ collectionSlug })
-
   const contextRef = useRef({} as IListQueryContext)
   contextRef.current.modified = modified
 
@@ -154,7 +151,14 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     if (window.location.search !== search) {
       setQuery(newQuery)
       // Important: do not use router.replace here to avoid re-rendering.
-      window.history.replaceState(null, '', search)
+      // Go through the adapter's replaceState so routers that observe history
+      // mutations (e.g. TanStack) don't re-run their loader and double-load the
+      // view. Falls back to the native call for adapters that don't implement it.
+      if (router.replaceState) {
+        router.replaceState(search)
+      } else {
+        window.history.replaceState(null, '', search)
+      }
     }
   })
 
@@ -165,6 +169,33 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       syncPropsToURL()
     }
   }, [modifySearchParams, queryFromProps])
+
+  const hasActiveFilters = useMemo(() => {
+    if (!query?.where) {
+      return false
+    }
+
+    // Normalize flat/invalid where queries (e.g. `{ title: { equals } }`) into the
+    // `or/and` structure so they are detected the same way the WhereBuilder reads them.
+    const normalizedWhere = validateWhereQuery(query.where)
+      ? query.where
+      : transformWhereQuery(query.where)
+
+    return (normalizedWhere.or ?? []).some((orGroup) =>
+      (orGroup.and ?? []).some((andGroup) => {
+        const field = Object.keys(andGroup)[0]
+        if (!field) {
+          return false
+        }
+        const operatorObj = andGroup[field]
+        if (!operatorObj || typeof operatorObj !== 'object') {
+          return false
+        }
+        const operator = Object.keys(operatorObj)[0]
+        return Boolean(operator) && (operatorObj as Record<string, unknown>)[operator] !== undefined
+      }),
+    )
+  }, [query?.where])
 
   return (
     <ListQueryContext
@@ -177,7 +208,8 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         handleSearchChange,
         handleSortChange,
         handleWhereChange,
-        isGroupingBy: Boolean(collectionConfig?.admin?.groupBy && query?.groupBy),
+        hasActiveFilters,
+        isGroupingBy: Boolean(query?.groupBy),
         orderableFieldName,
         query,
         refineListData,

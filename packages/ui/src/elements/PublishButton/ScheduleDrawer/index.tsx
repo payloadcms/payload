@@ -1,14 +1,12 @@
 /* eslint-disable no-console */
 'use client'
 
-import type { Column, SchedulePublish, Where } from 'payload'
+import type { Column, SchedulePublish } from 'payload'
 
 import { TZDateMini as TZDate } from '@date-fns/tz/date/mini'
 import { getTranslation } from '@payloadcms/translations'
 import { endOfToday, isToday, startOfDay } from 'date-fns'
 import { transpose } from 'date-fns/transpose'
-import { formatAdminURL } from 'payload/shared'
-import * as qs from 'qs-esm'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
@@ -21,7 +19,6 @@ import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useDocumentTitle } from '../../../providers/DocumentTitle/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { requests } from '../../../utilities/api.js'
 import { Banner } from '../../Banner/index.js'
 import { Button } from '../../Button/index.js'
 import { DatePickerField } from '../../DatePicker/index.js'
@@ -38,6 +35,7 @@ const baseClass = 'schedule-publish'
 
 type Props = {
   defaultType?: PublishType
+  onUpcomingChange?: (hasUpcoming: boolean) => void
   schedulePublishConfig?: SchedulePublish
   slug: string
 }
@@ -47,7 +45,12 @@ const defaultLocaleOption = {
   value: 'all',
 }
 
-export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePublishConfig }) => {
+export const ScheduleDrawer: React.FC<Props> = ({
+  slug,
+  defaultType,
+  onUpcomingChange,
+  schedulePublishConfig,
+}) => {
   const {
     config: {
       admin: {
@@ -55,13 +58,12 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
         timezones: { defaultTimezone, supportedTimezones },
       },
       localization,
-      routes: { api },
     },
   } = useConfig()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
   const { title } = useDocumentTitle()
   const { i18n, t } = useTranslation()
-  const { schedulePublish } = useServerFunctions()
+  const { getUpcomingScheduledPublish, schedulePublish } = useServerFunctions()
   const [type, setType] = React.useState<PublishType>(defaultType || 'publish')
   const [date, setDate] = React.useState<Date>()
   const [timezone, setTimezone] = React.useState<string>(defaultTimezone)
@@ -91,55 +93,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
   }, [localization, i18n])
 
   const fetchUpcoming = React.useCallback(async () => {
-    const query: { sort: string; where: Where } = {
-      sort: 'waitUntil',
-      where: {
-        and: [
-          {
-            taskSlug: {
-              equals: 'schedulePublish',
-            },
-          },
-          {
-            waitUntil: {
-              greater_than: new Date(),
-            },
-          },
-        ],
-      },
-    }
-
-    if (collectionSlug) {
-      query.where.and.push({
-        'input.doc.value': {
-          equals: String(id),
-        },
-      })
-      query.where.and.push({
-        'input.doc.relationTo': {
-          equals: collectionSlug,
-        },
-      })
-    }
-
-    if (globalSlug) {
-      query.where.and.push({
-        'input.global': {
-          equals: globalSlug,
-        },
-      })
-    }
-
-    const { docs } = await requests
-      .post(formatAdminURL({ apiRoute: api, path: `/payload-jobs` }), {
-        body: qs.stringify(query),
-        headers: {
-          'Accept-Language': i18n.language,
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'X-Payload-HTTP-Method-Override': 'GET',
-        },
-      })
-      .then((res) => res.json())
+    const docs = await getUpcomingScheduledPublish({ id, collectionSlug, globalSlug })
 
     setUpcomingColumns(
       buildUpcomingColumns({
@@ -154,7 +108,19 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
       }),
     )
     setUpcoming(docs)
-  }, [collectionSlug, globalSlug, api, i18n, dateFormat, localization, supportedTimezones, t, id])
+    onUpcomingChange?.(docs.length > 0)
+  }, [
+    collectionSlug,
+    globalSlug,
+    getUpcomingScheduledPublish,
+    i18n,
+    dateFormat,
+    localization,
+    supportedTimezones,
+    t,
+    id,
+    onUpcomingChange,
+  ])
 
   const deleteHandler = React.useCallback(
     async (id: number | string) => {
@@ -278,7 +244,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
   }, [upcoming, fetchUpcoming])
 
   const minTime = useMemo(() => {
-    if (date && isToday(date)) {
+    if (!date || isToday(date)) {
       return new Date()
     }
 

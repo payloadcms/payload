@@ -64,12 +64,12 @@ export const RichTextFieldImpl: React.FC<LexicalRichTextFieldProps> = (props) =>
 
     const featureProvidersLocal: FeatureProviderClient<any, any>[] = []
     for (const clientFeature of Object.values(filteredClientFeatures)) {
-      if (!clientFeature.clientFeatureProvider) {
+      if (!clientFeature.clientFeatureProvider || !clientFeature.clientFeatureProps) {
         continue
       }
       featureProvidersLocal.push(
         clientFeature.clientFeatureProvider(clientFeature.clientFeatureProps),
-      ) // Execute the clientFeatureProvider function here, as the server cannot execute functions imported from use client files
+      )
     }
 
     const resolvedClientFeatures = loadClientFeatures({

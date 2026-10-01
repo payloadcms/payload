@@ -4,6 +4,17 @@ import type {
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 
+import {
+  buildUploadStoragePathData,
+  resolveSignedURLKey,
+} from '@payloadcms/plugin-cloud-storage/utilities'
+import { generateClientTokenFromReadWriteToken } from '@vercel/blob/client'
+import { Forbidden } from 'payload'
+import { assertClientUploadAllowed, createClientUploadReceipt } from 'payload/internal'
+
+import type { VercelBlobCollectionSource } from './authorizeFileOverwrite.js'
+
+import { authorizeClientOverwrite } from './authorizeFileOverwrite.js'
 import { deleteFile } from './deleteFile.js'
 import { generateURL } from './generateURL.js'
 import { getFile } from './getFile.js'
@@ -15,6 +26,7 @@ interface CreateVercelBlobAdapterArgs {
   baseUrl: string
   cacheControlMaxAge: number
   clientUploads?: ClientUploadsConfig
+  collectionSources: VercelBlobCollectionSource[]
   token: string
   useCompositePrefixes?: boolean
 }
@@ -25,12 +37,103 @@ export function createVercelBlobAdapter({
   baseUrl,
   cacheControlMaxAge,
   clientUploads,
+  collectionSources,
   token,
   useCompositePrefixes = false,
 }: CreateVercelBlobAdapterArgs): Adapter {
+  const clientUploadsAccess = typeof clientUploads === 'object' ? clientUploads.access : undefined
+
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'vercel-blob',
-    clientUploads,
+
+    uploadInstructions: {
+      adminHandler: {
+        path: '@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler',
+      },
+      enabled: Boolean(clientUploads),
+      generate: async ({
+        collectionSlug,
+        docPrefix,
+        filename,
+        filesize,
+        mimeType,
+        overrideAccess,
+        req,
+      }) => {
+        if (
+          !overrideAccess &&
+          (clientUploadsAccess ? !(await clientUploadsAccess({ collectionSlug, req })) : !req.user)
+        ) {
+          throw new Forbidden(req.t)
+        }
+
+        assertClientUploadAllowed({ collection, filename, mimeType })
+
+        const requested = buildUploadStoragePathData({
+          collectionPrefix: prefix,
+          docPrefix,
+          filename,
+          useCompositePrefixes,
+        })
+        const allowOverwrite = await authorizeClientOverwrite({
+          collectionPrefix: prefix,
+          collectionSources,
+          overrideAccess,
+          req,
+          requestedCollectionSlug: collectionSlug,
+          requestedFilename: requested.sanitizedFilename,
+          requestedStorageFilePath: requested.storageFilePath,
+        })
+        const resolved = allowOverwrite
+          ? {
+              ...requested,
+              uploadReference: {
+                prefix: requested.sanitizedDocPrefix,
+                signedReceipt: createClientUploadReceipt({
+                  allowOverwrite: true,
+                  collectionSlug,
+                  filename: requested.sanitizedFilename,
+                  filePrefix: requested.sanitizedDocPrefix,
+                  req,
+                  storageFilePath: requested.storageFilePath,
+                }),
+              },
+            }
+          : await resolveSignedURLKey({
+              collectionPrefix: prefix,
+              collectionSlug,
+              docPrefix,
+              filename,
+              req,
+              useCompositePrefixes,
+            })
+
+        return {
+          name: 'uploadToVercelBlob',
+          type: 'dispatch',
+          data: {
+            pathname: resolved.storageFilePath,
+            token: await generateClientTokenFromReadWriteToken({
+              addRandomSuffix: false,
+              allowedContentTypes: mimeType ? [mimeType] : undefined,
+              ...(allowOverwrite && { allowOverwrite: true }),
+              cacheControlMaxAge,
+              maximumSizeInBytes: filesize,
+              pathname: resolved.storageFilePath,
+              token,
+            }),
+          },
+          file: {
+            filename: resolved.sanitizedFilename,
+            mimeType,
+            size: filesize,
+            uploadReference: resolved.uploadReference,
+          },
+        }
+      },
+      requiresUploadReceipt: true,
+      useInAdmin: true,
+    },
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({
@@ -41,28 +144,22 @@ export function createVercelBlobAdapter({
         useCompositePrefixes,
       }),
 
-    handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
+    handleDelete: ({ storageFilePath }) =>
       deleteFile({
         baseUrl,
-        collectionPrefix: prefix,
-        docPrefix,
-        filename,
+        storageFilePath,
         token,
-        useCompositePrefixes,
       }),
 
-    handleUpload: async ({ data, file: { buffer, filename, mimeType } }) => {
+    handleUpload: async ({ data, file: { buffer, mimeType }, storageFilePath }) => {
       const result = await uploadFile({
         access,
         addRandomSuffix,
         buffer,
         cacheControlMaxAge,
-        collectionPrefix: prefix,
-        docPrefix: data.prefix,
-        filename,
         mimeType,
+        storageFilePath,
         token,
-        useCompositePrefixes,
       })
 
       if (result.filename) {
@@ -72,21 +169,18 @@ export function createVercelBlobAdapter({
       return data
     },
 
-    staticHandler: (
-      req,
-      { headers, params: { clientUploadContext, filename, prefix: prefixQueryParam } },
-    ) =>
+    staticHandler: (req, { doc, headers, params: { filename, uploadReference } }) =>
       getFile({
         baseUrl,
         cacheControlMaxAge,
-        clientUploadContext,
         collection,
         collectionPrefix: prefix,
+        doc,
         filename,
         incomingHeaders: headers,
-        prefixQueryParam,
         req,
         token,
+        uploadReference,
         useCompositePrefixes,
       }),
   })

@@ -1,4 +1,4 @@
-import type { ClientUser, PayloadRequest, TypedUser } from 'payload'
+import type { PayloadRequest, User } from 'payload'
 
 const globalLockDurationDefault = 300
 
@@ -12,7 +12,7 @@ export async function getGlobalData(req: PayloadRequest) {
   // I thought about moving it to a payload to share it, but we're already
   // exporting all the views props from the next package.
   let globalData: Array<{
-    data: { _isLocked: boolean; _lastEditedAt: string; _userEditing: ClientUser | number | string }
+    data: { _isLocked: boolean; _lastEditedAt: string; _userEditing: number | string | User }
     lockDuration?: number
     slug: string
   }> = []
@@ -51,7 +51,7 @@ export async function getGlobalData(req: PayloadRequest) {
           data: {
             _isLocked: !!lockedDoc,
             _lastEditedAt: (lockedDoc?.updatedAt as string) ?? null,
-            _userEditing: (lockedDoc?.user as { value?: TypedUser })?.value ?? null,
+            _userEditing: (lockedDoc?.user as { value?: User })?.value ?? null,
           },
           lockDuration,
         }

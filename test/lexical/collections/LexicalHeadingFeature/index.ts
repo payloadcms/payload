@@ -23,4 +23,5 @@ export const LexicalHeadingFeature: CollectionConfig = {
       }),
     },
   ],
+  versions: false,
 }

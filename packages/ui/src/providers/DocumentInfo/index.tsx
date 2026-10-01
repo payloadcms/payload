@@ -1,5 +1,5 @@
 'use client'
-import type { ClientUser, DocumentPreferences } from 'payload'
+import type { DocumentPreferences, User } from 'payload'
 
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
@@ -38,6 +38,7 @@ const DocumentInfo: React.FC<
     hasPublishedDoc: hasPublishedDocFromProps,
     hasPublishPermission: hasPublishPermissionFromProps,
     hasSavePermission: hasSavePermissionFromProps,
+    hasScheduledPublish: hasScheduledPublishFromProps,
     initialData,
     initialState,
     isLocked: isLockedFromProps,
@@ -93,11 +94,15 @@ const DocumentInfo: React.FC<
     unpublishedVersionCountFromProps,
   )
 
+  const [hasScheduledPublish, setHasScheduledPublish] = useState(
+    Boolean(hasScheduledPublishFromProps),
+  )
+
   const [documentIsLocked, setDocumentIsLocked] = useControllableState<boolean | undefined>(
     isLockedFromProps,
   )
 
-  const [currentEditor, setCurrentEditor] = useControllableState<ClientUser | null>(
+  const [currentEditor, setCurrentEditor] = useControllableState<null | User>(
     currentEditorFromProps,
   )
   const [lastUpdateTime, setLastUpdateTime] = useControllableState<number>(lastUpdateTimeFromProps)
@@ -111,7 +116,7 @@ const DocumentInfo: React.FC<
   const documentLockState = useRef<{
     hasShownLockedModal: boolean
     isLocked: boolean
-    user: ClientUser | number | string
+    user: number | string | User
   } | null>({
     hasShownLockedModal: false,
     isLocked: false,
@@ -126,18 +131,14 @@ const DocumentInfo: React.FC<
   )
 
   const { getPreference, setPreference } = usePreferences()
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const { localeIsLoading } = useLocaleLoading()
 
   const isInitializing = useMemo(
     () => initialState === undefined || initialData === undefined || localeIsLoading,
     [initialData, initialState, localeIsLoading],
   )
-
-  const baseAPIPath = formatAdminURL({
-    apiRoute: api,
-    path: '',
-  })
 
   let slug: string
   let pluralType: 'collections' | 'globals'
@@ -168,28 +169,37 @@ const DocumentInfo: React.FC<
       try {
         const isGlobal = slug === globalSlug
 
-        const request = await requests.get(`${baseAPIPath}/payload-locked-documents`, {
-          credentials: 'include',
-          params: isGlobal
-            ? {
-                'where[globalSlug][equals]': slug,
-              }
-            : {
-                'where[document.relationTo][equals]': slug,
-                'where[document.value][equals]': docID,
-              },
-        })
+        const request = await requests.get(
+          formatAdminURL({ apiRoute: api, path: '/payload-locked-documents' }),
+          {
+            credentials: 'include',
+            params: isGlobal
+              ? {
+                  'where[globalSlug][equals]': slug,
+                }
+              : {
+                  'where[document.relationTo][equals]': slug,
+                  'where[document.value][equals]': docID,
+                },
+          },
+        )
 
         const { docs } = await request.json()
 
         if (docs?.length > 0) {
           const lockID = docs[0].id
-          await requests.delete(`${baseAPIPath}/payload-locked-documents/${lockID}`, {
-            credentials: 'include',
-            headers: {
-              'Content-Type': 'application/json',
+          await requests.delete(
+            formatAdminURL({
+              apiRoute: api,
+              path: `/payload-locked-documents/${lockID}`,
+            }),
+            {
+              credentials: 'include',
+              headers: {
+                'Content-Type': 'application/json',
+              },
             },
-          })
+          )
           setDocumentIsLocked(false)
         }
       } catch (error) {
@@ -197,11 +207,11 @@ const DocumentInfo: React.FC<
         console.error('Failed to unlock the document', error)
       }
     },
-    [baseAPIPath, globalSlug, setDocumentIsLocked, hasLockedDocumentsCollection],
+    [api, globalSlug, setDocumentIsLocked, hasLockedDocumentsCollection],
   )
 
   const updateDocumentEditor = useCallback(
-    async (docID: number | string, slug: string, user: ClientUser | number | string) => {
+    async (docID: number | string, slug: string, user: number | string | User) => {
       // Check if the locked-documents collection exists before making API calls
       if (!hasLockedDocumentsCollection) {
         return
@@ -211,17 +221,20 @@ const DocumentInfo: React.FC<
         const isGlobal = slug === globalSlug
 
         // Check if the document is already locked
-        const request = await requests.get(`${baseAPIPath}/payload-locked-documents`, {
-          credentials: 'include',
-          params: isGlobal
-            ? {
-                'where[globalSlug][equals]': slug,
-              }
-            : {
-                'where[document.relationTo][equals]': slug,
-                'where[document.value][equals]': docID,
-              },
-        })
+        const request = await requests.get(
+          formatAdminURL({ apiRoute: api, path: '/payload-locked-documents' }),
+          {
+            credentials: 'include',
+            params: isGlobal
+              ? {
+                  'where[globalSlug][equals]': slug,
+                }
+              : {
+                  'where[document.relationTo][equals]': slug,
+                  'where[document.value][equals]': docID,
+                },
+          },
+        )
 
         const { docs } = await request.json()
 
@@ -234,22 +247,28 @@ const DocumentInfo: React.FC<
               : { relationTo: 'users', value: user }
 
           // Send a patch request to update the _lastEdited info
-          await requests.patch(`${baseAPIPath}/payload-locked-documents/${lockID}`, {
-            body: JSON.stringify({
-              user: userData,
+          await requests.patch(
+            formatAdminURL({
+              apiRoute: api,
+              path: `/payload-locked-documents/${lockID}`,
             }),
-            credentials: 'include',
-            headers: {
-              'Content-Type': 'application/json',
+            {
+              body: JSON.stringify({
+                user: userData,
+              }),
+              credentials: 'include',
+              headers: {
+                'Content-Type': 'application/json',
+              },
             },
-          })
+          )
         }
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Failed to update the document editor', error)
       }
     },
-    [baseAPIPath, globalSlug, hasLockedDocumentsCollection],
+    [api, globalSlug, hasLockedDocumentsCollection],
   )
 
   const getDocPermissions = useGetDocPermissions({
@@ -328,18 +347,21 @@ const DocumentInfo: React.FC<
   const action: string = React.useMemo(() => {
     const docPath = `${pluralType === 'globals' ? `/globals` : ''}/${slug}${id ? `/${id}` : ''}`
 
-    return `${baseAPIPath}${docPath}${qs.stringify(
-      {
-        depth: 0,
-        'fallback-locale': 'null',
-        locale,
-        uploadEdits: uploadEdits || undefined,
-      },
-      {
-        addQueryPrefix: true,
-      },
-    )}`
-  }, [baseAPIPath, locale, pluralType, id, slug, uploadEdits])
+    return formatAdminURL({
+      apiRoute: api,
+      path: `${docPath}${qs.stringify(
+        {
+          depth: 0,
+          'fallback-locale': 'null',
+          locale,
+          uploadEdits: uploadEdits || undefined,
+        },
+        {
+          addQueryPrefix: true,
+        },
+      )}` as `/${string}`,
+    })
+  }, [api, locale, pluralType, id, slug, uploadEdits])
 
   const value: DocumentInfoContext = {
     ...props,
@@ -355,6 +377,7 @@ const DocumentInfo: React.FC<
     hasPublishedDoc,
     hasPublishPermission,
     hasSavePermission,
+    hasScheduledPublish,
     incrementVersionCount,
     initialData,
     initialState,
@@ -362,12 +385,12 @@ const DocumentInfo: React.FC<
     lastUpdateTime,
     mostRecentVersionIsAutosaved,
     preferencesKey,
-    savedDocumentData: data,
     setCurrentEditor,
     setData,
     setDocFieldPreferences,
     setDocumentIsLocked,
     setHasPublishedDoc,
+    setHasScheduledPublish,
     setLastUpdateTime,
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
@@ -375,7 +398,6 @@ const DocumentInfo: React.FC<
     unlockDocument,
     unpublishedVersionCount,
     updateDocumentEditor,
-    updateSavedDocumentData: setData,
     uploadStatus,
     versionCount,
   }

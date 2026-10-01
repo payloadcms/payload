@@ -49,6 +49,7 @@ export const baseConfig: Partial<Config> = {
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: foldersSlug,
@@ -65,6 +66,7 @@ export const baseConfig: Partial<Config> = {
           required: true,
         },
       ],
+      versions: false,
     },
   ],
   admin: {
@@ -76,19 +78,11 @@ export const baseConfig: Partial<Config> = {
       beforeLogin: ['/components/BeforeLogin/index.js#BeforeLogin'],
       graphics: {
         Logo: '/components/Logo/index.js#Logo',
-        Icon: '/components/Icon/index.js#Icon',
       },
     },
   },
-  onInit: async (payload) => {
-    // IMPORTANT: This should only seed, not clear the database.
-    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await seed(payload)
-    }
-  },
   plugins: [
     multiTenantPlugin<ConfigType>({
-      // debug: true,
       userHasAccessToAllTenants: (user) => Boolean(user.roles?.includes('admin')),
       useTenantsCollectionAccess: false,
       tenantField: {
@@ -153,6 +147,7 @@ export const baseConfig: Partial<Config> = {
         const fullTenant = await req.payload.findByID({
           collection: 'tenants',
           id: tenant,
+          overrideAccess: true,
         })
         if (
           fullTenant &&
@@ -174,3 +169,5 @@ export const baseConfig: Partial<Config> = {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 }
+
+export { seed }

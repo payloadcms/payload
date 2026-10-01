@@ -18,12 +18,13 @@ import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 
 type PublishManyDrawerContentProps = {
+  collection: PublishManyProps['collection']
   drawerSlug: string
   ids: (number | string)[]
   onSuccess?: () => void
   selectAll: boolean
   where?: Where
-} & PublishManyProps
+}
 
 export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
   const {
@@ -44,7 +45,8 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
     },
   } = useConfig()
 
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
 
   const router = useRouter()
   const searchParams = useSearchParams()

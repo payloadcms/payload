@@ -73,11 +73,137 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_D5E7E2D8".
+ */
+export type LexicalNodes_D5E7E2D8 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_D5E7E2D8>
+  | SerializedUploadNode<'media', LexicalUploadFields_7C90EEAC>
+  | SerializedUploadNode<'gallery', LexicalUploadFields_9521FA4A>
+  | SerializedHorizontalRuleNode
+  | SerializedQuoteNode<LexicalNodes_D5E7E2D8>
+  | SerializedRelationshipNode<
+      | 'posts'
+      | 'pages'
+      | 'pages-categories'
+      | 'draft-posts'
+      | 'fallback-users'
+      | 'input-types'
+      | 'users'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_D5E7E2D8, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_D5E7E2D8, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_D5E7E2D8>
+  | SerializedListItemNode<LexicalNodes_D5E7E2D8>
+  | SerializedHeadingNode<LexicalNodes_D5E7E2D8>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_FB3BECC7_Input".
+ */
+export type LexicalNodes_FB3BECC7_Input =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_FB3BECC7_Input>
+  | SerializedUploadNodeInput<'media', LexicalUploadFields_7C90EEAC>
+  | SerializedUploadNodeInput<'gallery', LexicalUploadFields_9521FA4A>
+  | SerializedHorizontalRuleNode
+  | SerializedQuoteNode<LexicalNodes_FB3BECC7_Input>
+  | SerializedRelationshipNodeInput<
+      | 'posts'
+      | 'pages'
+      | 'pages-categories'
+      | 'draft-posts'
+      | 'fallback-users'
+      | 'input-types'
+      | 'users'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_FB3BECC7_Input, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_FB3BECC7_Input, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_FB3BECC7_Input>
+  | SerializedListItemNode<LexicalNodes_FB3BECC7_Input>
+  | SerializedHeadingNode<LexicalNodes_FB3BECC7_Input>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_040C7D3E".
+ */
+export type LexicalNodes_040C7D3E =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_040C7D3E>
+  | SerializedBlockNode<Cta>
+  | SerializedRelationshipNode<
+      | 'posts'
+      | 'pages'
+      | 'pages-categories'
+      | 'draft-posts'
+      | 'fallback-users'
+      | 'input-types'
+      | 'users'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'media'>
+  | SerializedUploadNode<'gallery'>
+  | SerializedQuoteNode<LexicalNodes_040C7D3E>
+  | SerializedAutoLinkNode<LexicalNodes_040C7D3E, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_040C7D3E, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_040C7D3E>
+  | SerializedListItemNode<LexicalNodes_040C7D3E>
+  | SerializedHeadingNode<LexicalNodes_040C7D3E>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_BE82CF4C_Input".
+ */
+export type LexicalNodes_BE82CF4C_Input =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_BE82CF4C_Input>
+  | SerializedBlockNode<CtaInput>
+  | SerializedRelationshipNodeInput<
+      | 'posts'
+      | 'pages'
+      | 'pages-categories'
+      | 'draft-posts'
+      | 'fallback-users'
+      | 'input-types'
+      | 'users'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNodeInput<'media'>
+  | SerializedUploadNodeInput<'gallery'>
+  | SerializedQuoteNode<LexicalNodes_BE82CF4C_Input>
+  | SerializedAutoLinkNode<LexicalNodes_BE82CF4C_Input, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_BE82CF4C_Input, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_BE82CF4C_Input>
+  | SerializedListItemNode<LexicalNodes_BE82CF4C_Input>
+  | SerializedHeadingNode<LexicalNodes_BE82CF4C_Input>;
 
 export interface Config {
   auth: {
+    'fallback-users': FallbackUserAuthOperations;
     users: UserAuthOperations;
-    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
   };
   blocks: {};
   collections: {
@@ -85,8 +211,11 @@ export interface Config {
     pages: Page;
     'pages-categories': PagesCategory;
     'draft-posts': DraftPost;
+    media: Media;
+    gallery: Gallery;
+    'fallback-users': FallbackUser;
+    'input-types': InputType;
     users: User;
-    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -102,8 +231,11 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     'pages-categories': PagesCategoriesSelect<false> | PagesCategoriesSelect<true>;
     'draft-posts': DraftPostsSelect<false> | DraftPostsSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
+    gallery: GallerySelect<false> | GallerySelect<true>;
+    'fallback-users': FallbackUsersSelect<false> | FallbackUsersSelect<true>;
+    'input-types': InputTypesSelect<false> | InputTypesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
-    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -124,33 +256,66 @@ export interface Config {
   locale: null;
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
+  };
+  collectionsInput: {
+    posts: PostInput;
+    pages: PageInput;
+    'pages-categories': PagesCategoryInput;
+    'draft-posts': DraftPostInput;
+    media: MediaInput;
+    gallery: GalleryInput;
+    'fallback-users': FallbackUserInput;
+    'input-types': InputTypeInput;
+    users: UserInput;
+    'payload-kv': PayloadKvInput;
+    'payload-locked-documents': PayloadLockedDocumentInput;
+    'payload-preferences': PayloadPreferenceInput;
+    'payload-migrations': PayloadMigrationInput;
+  };
+  globalsInput: {
+    menu: MenuInput;
+    settings: SettingInput;
   };
   strictDraftTypes: true;
-  user: User | PayloadMcpApiKey;
+  user: FallbackUser | User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
   };
 }
-export interface UserAuthOperations {
-  forgotPassword: {
-    email: string;
-    password: string;
-  };
-  login: {
-    email: string;
-    password: string;
-  };
+export interface FallbackUserAuthOperations {
+  forgotPassword:
+    | {
+        email: string;
+      }
+    | {
+        username: string;
+      };
+  login:
+    | {
+        email: string;
+        password: string;
+      }
+    | {
+        password: string;
+        username: string;
+      };
   registerFirstUser: {
-    email: string;
     password: string;
+    username?: string;
+    email?: string;
   };
-  unlock: {
-    email: string;
-    password: string;
-  };
+  unlock:
+    | {
+        email: string;
+      }
+    | {
+        username: string;
+      };
 }
-export interface PayloadMcpApiKeyAuthOperations {
+export interface UserAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -175,21 +340,7 @@ export interface PayloadMcpApiKeyAuthOperations {
 export interface Post {
   id: string;
   text?: string | null;
-  richText: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
+  richText: LexicalRichText<LexicalNodes_D5E7E2D8>;
   title?: string | null;
   selectField: MySelectOptions;
   insideUnnamedGroup?: string | null;
@@ -198,6 +349,24 @@ export interface Post {
   };
   radioField: MyRadioOptions;
   externalType?: CustomType;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
   updatedAt: string;
   createdAt: string;
 }
@@ -207,12 +376,122 @@ export interface CustomType {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fallback-users".
+ */
+export interface FallbackUser {
+  id: number;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  apiKey?: string | null;
+  apiKeyLast4?: string | null;
+  apiKeyIndex?: string | null;
+  email?: string | null;
+  username?: string | null;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  _verified?: boolean | null;
+  _verificationToken?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'fallback-users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
 export interface Page {
   id: string;
   title?: string | null;
   category?: (string | null) | PagesCategory;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
   updatedAt: string;
   createdAt: string;
 }
@@ -228,6 +507,24 @@ export interface PagesCategory {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
   updatedAt: string;
   createdAt: string;
 }
@@ -239,77 +536,144 @@ export interface DraftPost {
   id: string;
   title: string;
   description: string;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
+ * via the `definition` "media".
  */
-export interface User {
+export interface Media {
   id: string;
+  alt?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
   updatedAt: string;
   createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
- * API keys control which collections, resources, tools, and prompts MCP clients can access
- *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys".
+ * via the `definition` "gallery".
  */
-export interface PayloadMcpApiKey {
+export interface Gallery {
   id: string;
-  /**
-   * The user that the API key is associated with.
-   */
-  user: string | User;
-  /**
-   * A useful label for the API key.
-   */
-  label?: string | null;
-  /**
-   * The purpose of the API key.
-   */
-  description?: string | null;
-  /**
-   * When checked, this key bypasses Payload access control on every operation it performs. Leave unchecked unless you have a specific reason.
-   */
-  overrideAccess?: boolean | null;
-  /**
-   * Access for this API key — uncheck to revoke individual tools.
-   */
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
+  title?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
   updatedAt: string;
   createdAt: string;
-  enableAPIKey?: boolean | null;
-  apiKey?: string | null;
-  apiKeyIndex?: string | null;
-  collection: 'payload-mcp-api-keys';
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "input-types".
+ */
+export interface InputType {
+  id: string;
+  title: string;
+  status: 'draft' | 'published';
+  category?: (string | null) | PagesCategory;
+  categories?: (string | PagesCategory)[] | null;
+  related?:
+    | ({
+        relationTo: 'pages';
+        value: string | Page;
+      } | null)
+    | ({
+        relationTo: 'pages-categories';
+        value: string | PagesCategory;
+      } | null);
+  image?: (string | null) | Media;
+  richText?: LexicalRichText<LexicalNodes_040C7D3E> | null;
+  computedTitle?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -352,22 +716,34 @@ export interface PayloadLockedDocument {
         value: string | DraftPost;
       } | null)
     | ({
-        relationTo: 'users';
-        value: string | User;
+        relationTo: 'media';
+        value: string | Media;
       } | null)
     | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
+        relationTo: 'gallery';
+        value: string | Gallery;
+      } | null)
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'input-types';
+        value: string | InputType;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user:
     | {
-        relationTo: 'users';
-        value: string | User;
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
       }
     | {
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
+        relationTo: 'users';
+        value: string | User;
       };
   updatedAt: string;
   createdAt: string;
@@ -380,12 +756,12 @@ export interface PayloadPreference {
   id: string;
   user:
     | {
-        relationTo: 'users';
-        value: string | User;
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
       }
     | {
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
+        relationTo: 'users';
+        value: string | User;
       };
   key?: string | null;
   value?:
@@ -428,6 +804,8 @@ export interface PostsSelect<T extends boolean = true> {
       };
   radioField?: T;
   externalType?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -438,6 +816,8 @@ export interface PostsSelect<T extends boolean = true> {
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
   category?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -448,6 +828,8 @@ export interface PagesSelect<T extends boolean = true> {
 export interface PagesCategoriesSelect<T extends boolean = true> {
   title?: T;
   relatedPages?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -458,22 +840,72 @@ export interface PagesCategoriesSelect<T extends boolean = true> {
 export interface DraftPostsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_select".
+ * via the `definition` "media_select".
  */
-export interface UsersSelect<T extends boolean = true> {
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gallery_select".
+ */
+export interface GallerySelect<T extends boolean = true> {
+  title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fallback-users_select".
+ */
+export interface FallbackUsersSelect<T extends boolean = true> {
+  id?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  apiKey?: T;
+  apiKeyLast4?: T;
+  apiKeyIndex?: T;
   email?: T;
+  username?: T;
   resetPasswordToken?: T;
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
+  _verified?: T;
+  _verificationToken?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -486,19 +918,46 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_select".
+ * via the `definition` "input-types_select".
  */
-export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  user?: T;
-  label?: T;
-  description?: T;
-  overrideAccess?: T;
-  access?: T;
+export interface InputTypesSelect<T extends boolean = true> {
+  title?: T;
+  status?: T;
+  category?: T;
+  categories?: T;
+  related?: T;
+  image?: T;
+  richText?: T;
+  computedTitle?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
-  enableAPIKey?: T;
-  apiKey?: T;
-  apiKeyIndex?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  resetPasswordRequestedAt?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -547,6 +1006,25 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface Menu {
   id: string;
   text?: string | null;
+  richText?: LexicalRichText<LexicalNodes_D5E7E2D8> | null;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -557,6 +1035,24 @@ export interface Menu {
 export interface Setting {
   id: string;
   siteName?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -567,6 +1063,9 @@ export interface Setting {
  */
 export interface MenuSelect<T extends boolean = true> {
   text?: T;
+  richText?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -577,6 +1076,8 @@ export interface MenuSelect<T extends boolean = true> {
  */
 export interface SettingsSelect<T extends boolean = true> {
   siteName?: T;
+  createdBy?: T;
+  updatedBy?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -594,11 +1095,743 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'posts'
+      | 'pages'
+      | 'pages-categories'
+      | 'draft-posts'
+      | 'media'
+      | 'gallery'
+      | 'fallback-users'
+      | 'input-types'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'posts'
+          | 'pages'
+          | 'pages-categories'
+          | 'draft-posts'
+          | 'media'
+          | 'gallery'
+          | 'fallback-users'
+          | 'input-types'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_input".
+ */
+export interface PostInput {
+  id?: string;
+  text?: string | null;
+  richText: LexicalRichText<LexicalNodes_FB3BECC7_Input>;
+  title?: string | null;
+  selectField: MySelectOptions;
+  insideUnnamedGroup?: string | null;
+  namedGroup?: {
+    insideNamedGroup?: string | null;
+  };
+  radioField: MyRadioOptions;
+  externalType?: CustomType;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_input".
+ */
+export interface PageInput {
+  id?: string;
+  title?: string | null;
+  category?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages-categories_input".
+ */
+export interface PagesCategoryInput {
+  id?: string;
+  title?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-posts_input".
+ */
+export interface DraftPostInput {
+  id?: string;
+  title: string;
+  description: string;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_input".
+ */
+export interface MediaInput {
+  id?: string;
+  alt?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gallery_input".
+ */
+export interface GalleryInput {
+  id?: string;
+  title?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fallback-users_input".
+ */
+export interface FallbackUserInput {
+  id?: number;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  apiKey?: string | null;
+  apiKeyLast4?: string | null;
+  apiKeyIndex?: string | null;
+  email?: string | null;
+  username?: string | null;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  _verified?: boolean | null;
+  _verificationToken?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "input-types_input".
+ */
+export interface InputTypeInput {
+  id?: string;
+  title: string;
+  status?: 'draft' | 'published';
+  category?: string | null;
+  categories?: string[] | null;
+  related?:
+    | ({
+        relationTo: 'pages';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'pages-categories';
+        value: string;
+      } | null);
+  image?: string | null;
+  richText?: LexicalRichText<LexicalNodes_BE82CF4C_Input> | null;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_input".
+ */
+export interface UserInput {
+  id?: string;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_input".
+ */
+export interface PayloadKvInput {
+  id?: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_input".
+ */
+export interface PayloadLockedDocumentInput {
+  id?: string;
+  document?:
+    | ({
+        relationTo: 'posts';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'pages-categories';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'draft-posts';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'gallery';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'input-types';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  globalSlug?: string | null;
+  user:
+    | {
+        relationTo: 'fallback-users';
+        value: number;
+      }
+    | {
+        relationTo: 'users';
+        value: string;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_input".
+ */
+export interface PayloadPreferenceInput {
+  id?: string;
+  user:
+    | {
+        relationTo: 'fallback-users';
+        value: number;
+      }
+    | {
+        relationTo: 'users';
+        value: string;
+      };
+  key?: string | null;
+  value?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_input".
+ */
+export interface PayloadMigrationInput {
+  id?: string;
+  name?: string | null;
+  batch?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "menu_input".
+ */
+export interface MenuInput {
+  id?: string;
+  text?: string | null;
+  richText?: LexicalRichText<LexicalNodes_FB3BECC7_Input> | null;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "settings_input".
+ */
+export interface SettingInput {
+  id?: string;
+  siteName?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalUploadFields_7C90EEAC".
+ */
+export interface LexicalUploadFields_7C90EEAC {
+  caption?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalUploadFields_9521FA4A".
+ */
+export interface LexicalUploadFields_9521FA4A {
+  altText: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Cta".
+ */
+export interface Cta {
+  id: string;
+  blockType: 'cta';
+  link?: (string | null) | Page;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CtaInput".
+ */
+export interface CtaInput {
+  id: string;
+  blockType: 'cta';
+  link?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
   [k: string]: unknown;
 }
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedHorizontalRuleNode {
+  type: 'horizontalrule';
+  version: number;
+}
+
+export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'quote';
+}
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface LexicalLinkFields {
+  [k: string]: unknown;
+  doc?: {
+    relationTo: string;
+    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
+  } | null;
+  linkType: 'custom' | 'internal';
+  newTab: boolean;
+  url?: string;
+}
+export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'link';
+  fields: TFields;
+  id?: string;
+}
+export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'autolink';
+  fields: TFields;
+}
+
+export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'list';
+  checked?: boolean;
+  listType: 'number' | 'bullet' | 'check';
+  start: number;
+  tag: 'ul' | 'ol';
+}
+
+export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'listitem';
+  checked?: boolean;
+  value: number;
+}
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
+}
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
+}
+
+export type SerializedUploadNodeInput<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'];
+  };
+}[TSlugs];
+
+export type SerializedRelationshipNodeInput<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'];
+  };
+}[TSlugs];
+
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'block';
+  format: LexicalElementFormat;
+  version: number;
+  fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'inlineBlock';
+  version: number;
+  fields: { id: string } & Omit<TFields, 'id'>;
+} : never;
 
 
 declare module 'payload' {

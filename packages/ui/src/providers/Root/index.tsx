@@ -7,7 +7,7 @@ import type {
   RouterAdapterComponent,
   SanitizedPermissions,
   ServerFunctionClient,
-  TypedUser,
+  User,
 } from 'payload'
 
 import { DndContext, pointerWithin } from '@dnd-kit/core'
@@ -18,6 +18,7 @@ import React from 'react'
 import type { Theme } from '../Theme/index.js'
 
 import { CloseModalOnRouteChange } from '../../elements/CloseModalOnRouteChange/index.js'
+import { DrawerStackProvider } from '../../elements/Drawer/index.js'
 import { LoadingOverlayProvider } from '../../elements/LoadingOverlay/index.js'
 import { NavProvider } from '../../elements/Nav/context.js'
 import { StayLoggedInModal } from '../../elements/StayLoggedIn/index.js'
@@ -28,13 +29,13 @@ import { AuthProvider } from '../Auth/index.js'
 import { ClientFunctionProvider } from '../ClientFunction/index.js'
 import { ConfigProvider } from '../Config/index.js'
 import { DocumentEventsProvider } from '../DocumentEvents/index.js'
+import { EmbedProvider } from '../Embed/index.js'
 import { HierarchyProvider } from '../Hierarchy/index.js'
 import { LocaleProvider } from '../Locale/index.js'
-import { ParamsProvider } from '../Params/index.js'
+import { ModalAccessibility } from '../ModalAccessibility/index.js'
 import { PreferencesProvider } from '../Preferences/index.js'
 import { RouteCache } from '../RouteCache/index.js'
 import { RouteTransitionProvider } from '../RouteTransition/index.js'
-import { SearchParamsProvider } from '../SearchParams/index.js'
 import { ServerFunctionsProvider } from '../ServerFunctions/index.js'
 import { ThemeProvider } from '../Theme/index.js'
 import { ToastContainer } from '../ToastContainer/index.js'
@@ -45,6 +46,7 @@ type Props = {
   readonly children: React.ReactNode
   readonly config: ClientConfig
   readonly dateFNSKey: Language['dateFNSKey']
+  readonly embed?: boolean
   readonly fallbackLang: I18nOptions['fallbackLanguage']
   readonly highContrastMode: boolean
   readonly isNavOpen?: boolean
@@ -56,13 +58,14 @@ type Props = {
   readonly serverFunction: ServerFunctionClient
   readonly theme: Theme
   readonly translations: I18nClient['translations']
-  readonly user: null | TypedUser
+  readonly user: null | User
 }
 
 export const RootProvider: React.FC<Props> = ({
   children,
   config,
   dateFNSKey,
+  embed,
   fallbackLang,
   highContrastMode,
   isNavOpen,
@@ -80,9 +83,9 @@ export const RootProvider: React.FC<Props> = ({
 
   return (
     <ClickOutsideProvider>
-      <RouterAdapter>
-        <ServerFunctionsProvider serverFunction={serverFunction}>
-          <RouteTransitionProvider>
+      <RouteTransitionProvider>
+        <RouterAdapter>
+          <ServerFunctionsProvider serverFunction={serverFunction}>
             <RouteCache
               cachingEnabled={process.env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH === 'true'}
             >
@@ -104,18 +107,15 @@ export const RootProvider: React.FC<Props> = ({
                       }}
                     >
                       <ScrollInfoProvider>
-                        <SearchParamsProvider>
-                          <ModalProvider
-                            classPrefix="payload"
-                            transTime={0}
-                            zIndex="var(--z-modal)"
-                          >
+                        <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
+                          <DrawerStackProvider>
+                            <ModalAccessibility />
                             <CloseModalOnRouteChange />
                             <AuthProvider permissions={permissions} user={user}>
                               <PreferencesProvider>
                                 <HierarchyProvider>
                                   <ThemeProvider highContrastMode={highContrastMode} theme={theme}>
-                                    <ParamsProvider>
+                                    <EmbedProvider embed={embed}>
                                       <LocaleProvider locale={locale}>
                                         <StepNavProvider>
                                           <LoadingOverlayProvider>
@@ -135,25 +135,26 @@ export const RootProvider: React.FC<Props> = ({
                                           </LoadingOverlayProvider>
                                         </StepNavProvider>
                                       </LocaleProvider>
-                                    </ParamsProvider>
+                                    </EmbedProvider>
                                   </ThemeProvider>
                                 </HierarchyProvider>
                               </PreferencesProvider>
                               <ModalContainer />
                               <StayLoggedInModal />
                             </AuthProvider>
-                          </ModalProvider>
-                        </SearchParamsProvider>
+                            {/* AuthProvider can unmount its children during logout; keep pending toasts alive. */}
+                            <ToastContainer config={config} />
+                          </DrawerStackProvider>
+                        </ModalProvider>
                       </ScrollInfoProvider>
                     </WindowInfoProvider>
                   </TranslationProvider>
                 </ClientFunctionProvider>
               </ConfigProvider>
             </RouteCache>
-          </RouteTransitionProvider>
-        </ServerFunctionsProvider>
-      </RouterAdapter>
-      <ToastContainer config={config} />
+          </ServerFunctionsProvider>
+        </RouterAdapter>
+      </RouteTransitionProvider>
     </ClickOutsideProvider>
   )
 }

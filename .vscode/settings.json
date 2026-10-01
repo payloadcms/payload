@@ -27,13 +27,19 @@
   "stylelint.validate": ["css", "scss"],
   "css.validate": false,
   "scss.validate": false,
-  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  // Prefer TS7's native language server for editor performance. Legacy TypeScript language
+  // service plugins, including @payloadcms/typescript-plugin, are not loaded in this mode.
+  "js/ts.experimental.useTsgo": true,
+  // `node_modules/typescript` is intentionally the TS6 compatibility API for ESLint.
+  // Point the native extension at the workspace-installed TS7 package instead.
+  "js/ts.tsdk.path": "node_modules/.pnpm/typescript@7.0.2/node_modules/typescript",
   "js/ts.tsdk.promptToUseWorkspaceVersion": true,
   // Load .git-blame-ignore-revs file
   "gitlens.advanced.blame.customArguments": ["--ignore-revs-file", ".git-blame-ignore-revs"],
   // Essentially disables bun test buttons
   "bun.test.filePattern": "bun.test.ts",
   "playwright.env": {
+    "PATH": "${env:HOME}/.local/share/mise/shims:${env:PATH}",
     "NODE_OPTIONS": "--no-deprecation --no-experimental-strip-types"
   },
   "vitest.nodeEnv": {

@@ -43,6 +43,7 @@ const UploadFields: CollectionConfig = {
       },
     },
   ],
+  versions: false,
 }
 
 export default UploadFields

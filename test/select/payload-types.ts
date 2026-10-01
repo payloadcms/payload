@@ -60,6 +60,41 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_2BD2444B".
+ */
+export type LexicalNodes_2BD2444B =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_2BD2444B>
+  | SerializedAutoLinkNode<LexicalNodes_2BD2444B, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_2BD2444B, LexicalLinkFields>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'upload'>
+  | SerializedQuoteNode<LexicalNodes_2BD2444B>
+  | SerializedRelationshipNode<
+      | 'posts'
+      | 'localized-posts'
+      | 'versioned-posts'
+      | 'deep-posts'
+      | 'pages'
+      | 'points'
+      | 'force-select'
+      | 'rels'
+      | 'relationships-blocks'
+      | 'select-documents'
+      | 'custom-ids'
+      | 'users'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedListNode<LexicalNodes_2BD2444B>
+  | SerializedListItemNode<LexicalNodes_2BD2444B>
+  | SerializedHeadingNode<LexicalNodes_2BD2444B>;
 
 export interface Config {
   auth: {
@@ -77,6 +112,7 @@ export interface Config {
     upload: Upload;
     rels: Rel;
     'relationships-blocks': RelationshipsBlock;
+    'select-documents': SelectDocument;
     'custom-ids': CustomId;
     users: User;
     'payload-kv': PayloadKv;
@@ -96,6 +132,7 @@ export interface Config {
     upload: UploadSelect<false> | UploadSelect<true>;
     rels: RelsSelect<false> | RelsSelect<true>;
     'relationships-blocks': RelationshipsBlocksSelect<false> | RelationshipsBlocksSelect<true>;
+    'select-documents': SelectDocumentsSelect<false> | SelectDocumentsSelect<true>;
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -118,6 +155,8 @@ export interface Config {
   locale: 'en' | 'de';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -164,24 +203,7 @@ export interface Post {
         id?: string | null;
       }[]
     | null;
-  blocks?:
-    | (
-        | {
-            text?: string | null;
-            introText?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'intro';
-          }
-        | {
-            text?: string | null;
-            ctaText?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'cta';
-          }
-      )[]
-    | null;
+  blocks?: (Intro | Cta)[] | null;
   tab?: {
     text?: string | null;
     number?: number | null;
@@ -201,8 +223,38 @@ export interface Post {
         value: string | Rel;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Intro".
+ */
+export interface Intro {
+  text?: string | null;
+  introText?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'intro';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Cta".
+ */
+export interface Cta {
+  text?: string | null;
+  ctaText?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'cta';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -211,8 +263,52 @@ export interface Post {
 export interface Rel {
   id: string;
   text?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  name?: string | null;
+  number?: number | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -220,6 +316,15 @@ export interface Rel {
  */
 export interface Upload {
   id: string;
+  link?: (string | null) | Rel;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -264,44 +369,40 @@ export interface LocalizedPost {
         id?: string | null;
       }[]
     | null;
-  blocks?:
-    | (
-        | {
-            text?: string | null;
-            introText?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'intro';
-          }
-        | {
-            text?: string | null;
-            ctaText?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'cta';
-          }
-      )[]
-    | null;
-  blocksSecond?:
-    | (
-        | {
-            text?: string | null;
-            firstText?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'first';
-          }
-        | {
-            text?: string | null;
-            secondText?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'second';
-          }
-      )[]
-    | null;
+  blocks?: (Intro | Cta)[] | null;
+  blocksSecond?: (First | Second)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "First".
+ */
+export interface First {
+  text?: string | null;
+  firstText?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'first';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Second".
+ */
+export interface Second {
+  text?: string | null;
+  secondText?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'second';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -317,17 +418,28 @@ export interface VersionedPost {
         id?: string | null;
       }[]
     | null;
-  blocks?:
-    | {
-        text?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'test';
-      }[]
-    | null;
+  blocks?: Test[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Test".
+ */
+export interface Test {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'test';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -345,15 +457,7 @@ export interface DeepPost {
           id?: string | null;
         }[]
       | null;
-    blocks?:
-      | {
-          text?: string | null;
-          number?: number | null;
-          id?: string | null;
-          blockName?: string | null;
-          blockType: 'block';
-        }[]
-      | null;
+    blocks?: Block[] | null;
   };
   arrayTop?:
     | {
@@ -368,8 +472,27 @@ export interface DeepPost {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block".
+ */
+export interface Block {
+  text?: string | null;
+  number?: number | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -378,44 +501,7 @@ export interface DeepPost {
 export interface Page {
   id: string;
   relatedPage?: (string | null) | Page;
-  content?:
-    | {
-        title: string;
-        link: {
-          docPoly?: {
-            relationTo: 'pages';
-            value: string | Page;
-          } | null;
-          doc?: (string | null) | Page;
-          docMany?: (string | Page)[] | null;
-          docHasManyPoly?:
-            | {
-                relationTo: 'pages';
-                value: string | Page;
-              }[]
-            | null;
-          label: string;
-        };
-        richTextLexical?: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'introduction';
-      }[]
-    | null;
+  content?: Introduction[] | null;
   slug: string;
   additional?: string | null;
   array?:
@@ -425,17 +511,54 @@ export interface Page {
         id?: string | null;
       }[]
     | null;
-  blocks?:
-    | {
-        title?: string | null;
-        other?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'some';
-      }[]
-    | null;
+  blocks?: Some[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Introduction".
+ */
+export interface Introduction {
+  title: string;
+  link: {
+    docPoly?: {
+      relationTo: 'pages';
+      value: string | Page;
+    } | null;
+    doc?: (string | null) | Page;
+    docMany?: (string | Page)[] | null;
+    docHasManyPoly?:
+      | {
+          relationTo: 'pages';
+          value: string | Page;
+        }[]
+      | null;
+    label: string;
+  };
+  richTextLexical?: LexicalRichText<LexicalNodes_2BD2444B> | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'introduction';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Some".
+ */
+export interface Some {
+  title?: string | null;
+  other?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'some';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -449,6 +572,14 @@ export interface Point {
    * @maxItems 2
    */
   point?: [number, number] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -461,6 +592,14 @@ export interface ForceSelect {
   text?: string | null;
   field1?: string | null;
   field2?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -470,17 +609,59 @@ export interface ForceSelect {
  */
 export interface RelationshipsBlock {
   id: string;
-  blocks?:
-    | {
-        hasMany?: (string | Rel)[] | null;
-        hasOne?: (string | null) | Rel;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'block';
-      }[]
-    | null;
+  blocks?: Block_421D958C[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * Multiple blocks resolve to the `Block` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block_421D958C".
+ */
+export interface Block_421D958C {
+  hasMany?: (string | Rel)[] | null;
+  hasOne?: (string | null) | Rel;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "select-documents".
+ */
+export interface SelectDocument {
+  id: string;
+  blocks?: SelectRelationshipBlock[] | null;
+  upload?: (string | null) | Upload;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SelectRelationshipBlock".
+ */
+export interface SelectRelationshipBlock {
+  link?: (string | null) | Rel;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'select-relationship-block';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -489,35 +670,16 @@ export interface RelationshipsBlock {
 export interface CustomId {
   id: number;
   text?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: string;
-  name?: string | null;
-  number?: number | null;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -582,6 +744,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'relationships-blocks';
         value: string | RelationshipsBlock;
+      } | null)
+    | ({
+        relationTo: 'select-documents';
+        value: string | SelectDocument;
       } | null)
     | ({
         relationTo: 'custom-ids';
@@ -688,6 +854,8 @@ export interface PostsSelect<T extends boolean = true> {
   hasManyUpload?: T;
   hasOnePoly?: T;
   hasManyPoly?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -766,6 +934,8 @@ export interface LocalizedPostsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -793,6 +963,8 @@ export interface VersionedPostsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -842,6 +1014,8 @@ export interface DeepPostsSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -893,6 +1067,8 @@ export interface PagesSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -903,6 +1079,8 @@ export interface PagesSelect<T extends boolean = true> {
 export interface PointsSelect<T extends boolean = true> {
   text?: T;
   point?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -914,6 +1092,8 @@ export interface ForceSelectSelect<T extends boolean = true> {
   text?: T;
   field1?: T;
   field2?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -922,6 +1102,9 @@ export interface ForceSelectSelect<T extends boolean = true> {
  * via the `definition` "upload_select".
  */
 export interface UploadSelect<T extends boolean = true> {
+  link?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -940,6 +1123,8 @@ export interface UploadSelect<T extends boolean = true> {
  */
 export interface RelsSelect<T extends boolean = true> {
   text?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -960,8 +1145,35 @@ export interface RelationshipsBlocksSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "select-documents_select".
+ */
+export interface SelectDocumentsSelect<T extends boolean = true> {
+  blocks?:
+    | T
+    | {
+        'select-relationship-block'?: T | SelectRelationshipBlockSelect<T>;
+      };
+  upload?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SelectRelationshipBlock_select".
+ */
+export interface SelectRelationshipBlockSelect<T extends boolean = true> {
+  link?: T;
+  id?: T;
+  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -970,6 +1182,8 @@ export interface RelationshipsBlocksSelect<T extends boolean = true> {
 export interface CustomIdsSelect<T extends boolean = true> {
   id?: T;
   text?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -980,6 +1194,8 @@ export interface CustomIdsSelect<T extends boolean = true> {
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
   number?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -987,6 +1203,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -1045,6 +1262,14 @@ export interface GlobalPost {
   id: string;
   text?: string | null;
   number?: number | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1057,6 +1282,14 @@ export interface ForceSelectGlobal {
   text?: string | null;
   field1?: string | null;
   field2?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1067,6 +1300,8 @@ export interface ForceSelectGlobal {
 export interface GlobalPostSelect<T extends boolean = true> {
   text?: T;
   number?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1079,6 +1314,8 @@ export interface ForceSelectGlobalSelect<T extends boolean = true> {
   text?: T;
   field1?: T;
   field2?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1095,10 +1332,206 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'posts'
+      | 'localized-posts'
+      | 'versioned-posts'
+      | 'deep-posts'
+      | 'pages'
+      | 'points'
+      | 'force-select'
+      | 'upload'
+      | 'rels'
+      | 'relationships-blocks'
+      | 'select-documents'
+      | 'custom-ids'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'posts'
+          | 'localized-posts'
+          | 'versioned-posts'
+          | 'deep-posts'
+          | 'pages'
+          | 'points'
+          | 'force-select'
+          | 'upload'
+          | 'rels'
+          | 'relationships-blocks'
+          | 'select-documents'
+          | 'custom-ids'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
   [k: string]: unknown;
+}
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export interface LexicalLinkFields {
+  [k: string]: unknown;
+  doc?: {
+    relationTo: string;
+    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
+  } | null;
+  linkType: 'custom' | 'internal';
+  newTab: boolean;
+  url?: string;
+}
+export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'link';
+  fields: TFields;
+  id?: string;
+}
+export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'autolink';
+  fields: TFields;
+}
+
+export interface SerializedHorizontalRuleNode {
+  type: 'horizontalrule';
+  version: number;
+}
+
+export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'quote';
+}
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'list';
+  checked?: boolean;
+  listType: 'number' | 'bullet' | 'check';
+  start: number;
+  tag: 'ul' | 'ol';
+}
+
+export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'listitem';
+  checked?: boolean;
+  value: number;
+}
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
+}
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
 }
 
 

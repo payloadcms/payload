@@ -33,7 +33,14 @@ export type DocumentDrawerProps = {
   Pick<DrawerProps, 'Header'>
 
 export type DocumentTogglerProps = {
-  readonly buttonStyle?: 'dashed' | 'destructive' | 'ghost' | 'pill' | 'primary' | 'secondary'
+  readonly buttonStyle?:
+    | 'dashed'
+    | 'destructive'
+    | 'ghost'
+    | 'link'
+    | 'pill'
+    | 'primary'
+    | 'secondary'
   readonly children?: React.ReactNode
   readonly className?: string
   readonly collectionSlug: string
@@ -42,6 +49,7 @@ export type DocumentTogglerProps = {
   readonly extraButtonProps?: Record<string, any>
   readonly onClick?: () => void
   readonly operation: Operation
+  readonly tooltip?: string
 } & Readonly<HTMLAttributes<HTMLButtonElement>>
 
 export type UseDocumentDrawerContext = {

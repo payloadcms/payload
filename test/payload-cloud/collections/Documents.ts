@@ -22,4 +22,5 @@ export const Documents: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

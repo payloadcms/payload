@@ -1,0 +1,7 @@
+@layer payload-default {
+  .query-preset-columns-cell {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacer-1);
+  }
+}

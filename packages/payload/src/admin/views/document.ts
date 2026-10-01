@@ -15,11 +15,14 @@ export type EditViewProps = {
  */
 export type RenderDocumentVersionsProperties = {
   /**
-   * @default false
+   * Override the CreatedAt cell component rendered in the versions table.
+   * Useful when embedding the versions list inside a drawer that should update URL params
+   * rather than perform a full navigation.
    */
-  disableGutter?: boolean
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  CreatedAtCellOverride?: (props: any) => any
   /**
-   * Use createdAt cell that appends params to the url on version selection instead of redirecting user
+   * @deprecated Pass `CreatedAtCellOverride` directly instead.
    * @default false
    */
   useVersionDrawerCreatedAtCell?: boolean

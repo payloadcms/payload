@@ -1,0 +1,32 @@
+@layer payload-default {
+  .file-details-draggable {
+    display: flex;
+    gap: var(--spacer-2);
+    align-items: center;
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-small);
+    padding: var(--spacer-2-5);
+  }
+
+  .file-details-draggable--drag-wrapper {
+    display: flex;
+    gap: var(--spacer-2);
+    align-items: center;
+  }
+
+  .file-details-draggable__thumbnail {
+    max-width: var(--spacer-4);
+  }
+
+  .file-details-draggable__actions {
+    flex-grow: 2;
+    display: flex;
+    gap: var(--spacer-2);
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .file-details-draggable__remove.btn--style-icon-label {
+    margin: 0;
+  }
+}

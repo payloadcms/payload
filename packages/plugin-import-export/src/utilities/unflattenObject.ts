@@ -2,7 +2,7 @@ import type { FlattenedField, PayloadRequest } from 'payload'
 
 import type { ImportFieldHookEntry } from '../types.js'
 
-import { getNestedFlattenedFields } from './flattenedFields.js'
+import { getBlockFlattenedFields, getNestedFlattenedFields } from './flattenedFields.js'
 import { postProcessDocument } from './unflattenPostProcess.js'
 
 type UnflattenArgs = {
@@ -22,6 +22,12 @@ const collectArrayLikeNames = (fields: FlattenedField[], into: Set<string>): voi
     }
     if (field.type === 'array' || field.type === 'blocks') {
       into.add(field.name)
+    }
+    if (field.type === 'blocks') {
+      for (const block of (field as { blocks?: Array<{ flattenedFields?: FlattenedField[] }> })
+        .blocks ?? []) {
+        collectArrayLikeNames(getBlockFlattenedFields(block), into)
+      }
     }
     const nested = getNestedFlattenedFields(field)
     if (nested) {
@@ -312,7 +318,10 @@ export const unflattenObject = ({
               blockObject[blockFieldName] = value
             } else {
               if (!blockObject[blockFieldName] || typeof blockObject[blockFieldName] !== 'object') {
-                blockObject[blockFieldName] = {}
+                const segmentAfterBlockField = pathSegments[i + 4]
+                const blockFieldIsArray =
+                  segmentAfterBlockField !== undefined && indexSegment.test(segmentAfterBlockField)
+                blockObject[blockFieldName] = blockFieldIsArray ? [] : {}
               }
               currentObject = blockObject[blockFieldName] as Record<string, unknown>
               i = i + 3
@@ -336,6 +345,18 @@ export const unflattenObject = ({
           currentObject = arr[arrayIndex] as Record<string, unknown>
           i++
         }
+      } else if (Array.isArray(currentObject) && indexSegment.test(segment)) {
+        // currentObject is an array we arrived at via block field traversal — treat the
+        // segment as a numeric index rather than a plain property name.
+        const idx = parseInt(segment, 10)
+        const arr = currentObject as unknown[]
+        while (arr.length <= idx) {
+          arr.push(null)
+        }
+        if (arr[idx] === null || arr[idx] === undefined) {
+          arr[idx] = {}
+        }
+        currentObject = arr[idx] as Record<string, unknown>
       } else {
         // Skip if already set to null (polymorphic relationship already processed)
         if (currentObject[segment] === null && isLast && segment === 'relationTo') {

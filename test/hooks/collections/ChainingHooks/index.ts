@@ -18,6 +18,7 @@ const ChainingHooks: CollectionConfig = {
       name: 'text',
     },
   ],
+  versions: false,
 }
 
 export default ChainingHooks

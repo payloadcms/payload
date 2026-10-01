@@ -11,4 +11,5 @@ export const Singular: CollectionConfig = {
       name: 'category',
     },
   ],
+  versions: false,
 }

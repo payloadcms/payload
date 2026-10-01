@@ -3,7 +3,7 @@ import React from 'react'
 export const PayloadIcon: React.FC<{
   fill?: string
 }> = ({ fill: fillFromProps }) => {
-  const fill = fillFromProps || 'var(--theme-elevation-1000)'
+  const fill = fillFromProps || 'var(--color-icon)'
 
   return (
     <svg

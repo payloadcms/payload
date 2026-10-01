@@ -67,7 +67,7 @@ export const transformBlocks = ({
 
     const matchedBlock =
       adapter.payload.blocks[blockRow.blockType] ??
-      ((field.blockReferences ?? field.blocks).find(
+      (field.blocks.find(
         (block) => typeof block !== 'string' && block.slug === blockRow.blockType,
       ) as FlattenedBlock | undefined)
 

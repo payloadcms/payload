@@ -1,6 +1,7 @@
 import type { SerializedLexicalNode } from 'lexical'
 import type {
   ClientFieldSchemaMap,
+  ComponentRenderer,
   DocumentPreferences,
   FieldSchemaMap,
   FormState,
@@ -34,6 +35,7 @@ type Props = {
     operation: Operation
     permissions?: SanitizedFieldPermissions
     preferences: DocumentPreferences
+    renderComponent: ComponentRenderer
     renderFieldFn: any
     req: PayloadRequest
   }

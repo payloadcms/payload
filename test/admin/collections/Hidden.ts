@@ -13,4 +13,5 @@ export const CollectionHidden: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

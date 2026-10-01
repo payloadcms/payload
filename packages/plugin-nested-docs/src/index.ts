@@ -1,4 +1,6 @@
-import type { Plugin, SingleRelationshipField } from 'payload'
+import type { SingleRelationshipField } from 'payload'
+
+import { definePlugin } from 'payload'
 
 import type { NestedDocsPluginConfig } from './types.js'
 
@@ -12,9 +14,9 @@ import { getParents } from './utilities/getParents.js'
 
 export { createBreadcrumbsField, createParentField, getParents }
 
-export const nestedDocsPlugin =
-  (pluginConfig: NestedDocsPluginConfig): Plugin =>
-  (config) => ({
+export const nestedDocsPlugin = definePlugin<NestedDocsPluginConfig>({
+  slug: '@payloadcms/plugin-nested-docs',
+  plugin: ({ config, options: pluginConfig }) => ({
     ...config,
     collections: (config.collections || []).map((collection) => {
       if (pluginConfig.collections.indexOf(collection.slug) > -1) {
@@ -67,4 +69,5 @@ export const nestedDocsPlugin =
 
       return collection
     }),
-  })
+  }),
+})

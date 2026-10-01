@@ -96,4 +96,5 @@ export const RelationshipUpdatedExternally: CollectionConfig = {
     },
   ],
   slug: relationUpdatedExternallySlug,
+  versions: false,
 }

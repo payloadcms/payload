@@ -15,6 +15,10 @@ export const Folders: CollectionConfig = {
     },
   ],
   folders: {
+    admin: {
+      treeLimit: 4,
+    },
     parentFieldName: 'parent',
   },
+  versions: false,
 }

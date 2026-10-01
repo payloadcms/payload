@@ -65,8 +65,6 @@
       <excludeFolder url="file://$MODULE_DIR$/packages/storage-gcs/dist" />
       <excludeFolder url="file://$MODULE_DIR$/packages/storage-s3/.turbo" />
       <excludeFolder url="file://$MODULE_DIR$/packages/storage-s3/dist" />
-      <excludeFolder url="file://$MODULE_DIR$/packages/storage-uploadthing/.turbo" />
-      <excludeFolder url="file://$MODULE_DIR$/packages/storage-uploadthing/dist" />
       <excludeFolder url="file://$MODULE_DIR$/packages/storage-vercel-blob/.turbo" />
       <excludeFolder url="file://$MODULE_DIR$/packages/storage-vercel-blob/dist" />
       <excludeFolder url="file://$MODULE_DIR$/packages/translations/.turbo" />

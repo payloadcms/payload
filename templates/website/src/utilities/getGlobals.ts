@@ -1,4 +1,4 @@
-import type { Config } from 'src/payload-types'
+import type { Config } from '@/payload-types'
 
 import configPromise from '@payload-config'
 import { type DataFromGlobalSlug, getPayload } from 'payload'
@@ -12,6 +12,7 @@ async function getGlobal<T extends Global>(slug: T, depth = 0): Promise<DataFrom
   const global = await payload.findGlobal({
     slug,
     depth,
+    overrideAccess: true,
   })
 
   return global

@@ -6,6 +6,7 @@
   "references": [
     { "path": "../../packages/translations" },
     { "path": "../../packages/richtext-lexical" },
+    { "path": "../../packages/plugin-form-builder" },
     { "path": "../../packages/plugin-multi-tenant" }
   ],
   "exclude": ["./src/generateTranslations"]

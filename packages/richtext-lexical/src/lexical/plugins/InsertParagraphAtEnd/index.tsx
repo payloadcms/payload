@@ -1,17 +1,19 @@
-/* eslint-disable jsx-a11y/click-events-have-key-events */
 'use client'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useTranslation } from '@payloadcms/ui'
 import { $createParagraphNode, $getRoot } from 'lexical'
 import React from 'react'
 
 import './index.css'
 import { useEditorConfigContext } from '../../config/client/EditorConfigProvider.js'
+import { AddIcon } from '../../ui/icons/Add/index.js'
 const baseClass = 'insert-paragraph-at-end'
 
 export const InsertParagraphAtEndPlugin: React.FC = () => {
   const [editor] = useLexicalComposerContext()
   const { editorConfig } = useEditorConfigContext()
+  const { t } = useTranslation<{}, string>()
 
   if (editorConfig?.admin?.hideInsertParagraphAtEnd) {
     return null
@@ -26,17 +28,15 @@ export const InsertParagraphAtEndPlugin: React.FC = () => {
   }
 
   return (
-    // TODO: convert to button
-    <div
-      aria-label="Insert Paragraph"
+    <button
+      aria-label={t('lexical:general:insertParagraph')}
       className={baseClass}
       onClick={onClick}
-      role="button"
-      tabIndex={0}
+      type="button"
     >
-      <div className={`${baseClass}-inside`}>
-        <span>+</span>
-      </div>
-    </div>
+      <span className={`${baseClass}-inside`}>
+        <AddIcon size={16} />
+      </span>
+    </button>
   )
 }

@@ -17,4 +17,5 @@ export const AnyImageTypeCollection: CollectionConfig = {
     enableRichTextRelationship: false,
   },
   fields: [],
+  versions: false,
 }

@@ -69,4 +69,5 @@ export const AfterOperationCollection: CollectionConfig = {
       required: true,
     },
   ],
+  versions: false,
 }

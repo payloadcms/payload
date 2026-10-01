@@ -184,6 +184,63 @@ export interface Post {
 }
 ```
 
+## Input and output types
+
+Payload can optionally generate a second, write-shaped **input** type alongside the **output** (read) type for each collection and global. It's **opt-in** — enable it with `typescript.generateInputTypes: true`:
+
+```ts
+// payload.config.ts
+{
+  // ...
+  typescript: {
+    generateInputTypes: true, // defaults to false
+  },
+}
+```
+
+When enabled, you get two interfaces per entity:
+
+- `Post` — the **output** shape, returned by `find`, `findByID`, and similar read operations.
+- `PostInput` — the **input** shape, describing the `data` you write in `create` and `update`.
+
+They diverge because reading and writing are not symmetric:
+
+- **Relationship and upload fields** are written as an ID, but on read they can be the fully populated document (depending on [`depth`](../queries/depth)). The input type narrows them to the ID only.
+- **`id`** is optional on input — you may supply a custom ID or let Payload generate one.
+- **`createdAt` / `updatedAt`**, and the drafts **`_status`** field, are managed by Payload and omitted from the input type.
+- **Fields with a `defaultValue`** are optional on input, since Payload fills them in when omitted.
+- **Virtual fields** and **join fields** are read-only and omitted from the input type.
+
+For the `posts` collection above, the input type narrows the relationship to an ID and drops the auto-managed fields:
+
+```ts
+export interface PostInput {
+  id?: string // optional — custom ID or Payload-generated
+  title?: string | null
+  author?: string | null // ID only, never the populated document
+  // no createdAt / updatedAt
+}
+```
+
+[Rich text](../rich-text/overview) fields follow the same rule: on input, relationship and upload nodes carry the ID only.
+
+The input types are also exposed on the generated `Config` interface, alongside the existing maps:
+
+```ts
+import type { Config } from './payload-types'
+
+type PostInput = Config['collectionsInput']['posts']
+type MenuInput = Config['globalsInput']['menu']
+```
+
+Enabling input types is purely additive — the **output** types are byte-for-byte identical whether or not it's on, so turning it on only adds the new `*Input` defs and `collectionsInput` / `globalsInput` maps.
+
+### Using input types with the Local API
+
+The Local API's `create` and `update` type their `data` against the **output (read) shape**, not the input shape. This is intentional: it keeps read-modify-write ergonomic — you can read a document at `depth > 0` and write part of it back without the populated relationships failing to type-check.
+
+The input types remain a valid **subset** of what those operations accept, so a value typed as `PostInput` is always assignable to `create` / `update` `data`. Reach for `PostInput` (or `Config['collectionsInput'][...]`) when you want to strictly type a write helper, a form payload, or a seed script.
+
 ## Custom Field Interfaces
 
 `array`, `group` and named `tab` fields generate a top-level interface only when you set `interfaceName` on them. `block` fields always generate a top-level interface — `interfaceName` on a block is an **override** of the auto-derived name (which is a PascalCase form of the slug: `'content-block'` → `ContentBlock`).

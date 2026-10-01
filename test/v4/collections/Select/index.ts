@@ -135,6 +135,7 @@ const SelectFields: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }
 
 export default SelectFields

@@ -5,6 +5,7 @@ export const migrationsCollection: CollectionConfig = {
   admin: {
     hidden: true,
   },
+  authorship: false,
   endpoints: false,
   fields: [
     {
@@ -19,4 +20,5 @@ export const migrationsCollection: CollectionConfig = {
   ],
   graphQL: false,
   lockDocuments: false,
+  versions: false,
 }

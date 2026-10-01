@@ -1,4 +1,4 @@
-import type { Config, Field, FieldSchemaMap, UploadCollectionSlug } from 'payload'
+import type { CollectionSlug, Config, Field, FieldSchemaMap, UploadCollectionSlug } from 'payload'
 
 import { sanitizeFields } from 'payload'
 
@@ -6,12 +6,21 @@ import type { UploadFeaturePropsClient } from '../client/index.js'
 
 import { populate } from '../../../populateGraphQL/populate.js'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
+import { filterEnabledRelationshipCollections } from '../../relationship/shared/filterEnabledRelationshipCollections.js'
 import { createNode } from '../../typeUtilities.js'
 import { uploadPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
-import { UploadMarkdownTransformer } from './markdownTransformer.js'
+import { PAYLOAD_UPLOAD } from './markdownTransformer.js'
 import { UploadServerNode } from './nodes/UploadNode.js'
+import { createUploadNodeJSONSchema } from './schema.js'
 import { uploadValidation } from './validate.js'
+
+export type {
+  Internal_UploadData,
+  SerializedUploadNode,
+  UploadData,
+  UploadDataImproved,
+} from './schema.js'
 
 export type ExclusiveUploadFeatureProps =
   | {
@@ -50,24 +59,29 @@ export type UploadFeatureProps = {
   maxDepth?: number
 } & ExclusiveUploadFeatureProps
 
+export type UploadFeatureServerProps = {
+  /** Collection policy resolved during feature initialization. */
+  enabledCollectionSlugs: CollectionSlug[]
+} & UploadFeatureProps
+
 export const UploadFeature = createServerFeature<
   UploadFeatureProps,
-  UploadFeatureProps,
+  UploadFeatureServerProps,
   UploadFeaturePropsClient
 >({
-  feature: async ({ config: _config, isRoot, parentIsLocalized, props }) => {
-    if (!props) {
-      props = { collections: {} }
+  feature: ({ config: _config, isRoot, parentIsLocalized, props: unsanitizedProps }) => {
+    const props: UploadFeatureServerProps = {
+      ...unsanitizedProps,
+      collections: unsanitizedProps?.collections ?? {},
+      enabledCollectionSlugs: filterEnabledRelationshipCollections(_config.collections, {
+        ...unsanitizedProps,
+        uploads: true,
+      }).map(({ slug }) => slug),
     }
 
     const clientProps: UploadFeaturePropsClient = {
       collections: {},
-    }
-    if (props.disabledCollections) {
-      clientProps.disabledCollections = props.disabledCollections
-    }
-    if (props.enabledCollections) {
-      clientProps.enabledCollections = props.enabledCollections
+      enabledCollectionSlugs: props.enabledCollectionSlugs,
     }
 
     if (props.collections) {
@@ -83,7 +97,7 @@ export const UploadFeature = createServerFeature<
     for (const collectionKey in props.collections) {
       const collection = props.collections[collectionKey]!
       if (collection.fields?.length) {
-        collection.fields = await sanitizeFields({
+        collection.fields = sanitizeFields({
           config: _config as unknown as Config,
           fields: collection.fields,
           parentIsLocalized,
@@ -115,7 +129,7 @@ export const UploadFeature = createServerFeature<
         return schemaMap
       },
       i18n,
-      markdownTransformers: [UploadMarkdownTransformer],
+      markdownTransformers: [PAYLOAD_UPLOAD],
       nodes: [
         createNode({
           getSubFields: ({ node, req }) => {
@@ -126,6 +140,9 @@ export const UploadFeature = createServerFeature<
                 allSubFields = allSubFields.concat(collectionFields)
               }
               return allSubFields
+            }
+            if (!props.enabledCollectionSlugs.includes(node.relationTo)) {
+              return null
             }
             const collection = req ? req.payload.collections[node?.relationTo] : null
 
@@ -158,7 +175,7 @@ export const UploadFeature = createServerFeature<
                 req,
                 showHiddenFields,
               }) => {
-                if (!node?.value) {
+                if (!node?.value || !props.enabledCollectionSlugs.includes(node.relationTo)) {
                   return node
                 }
                 const collection = req.payload.collections[node?.relationTo]
@@ -166,8 +183,10 @@ export const UploadFeature = createServerFeature<
                 if (!collection) {
                   return node
                 }
-                // @ts-expect-error - Fix in Payload v4
-                const id = node?.value?.id || node?.value // for backwards-compatibility
+                const id =
+                  typeof node?.value === 'object' && node.value !== null && 'id' in node.value
+                    ? node.value.id
+                    : node?.value // for backwards-compatibility
 
                 const populateDepth =
                   props?.maxDepth !== undefined && props?.maxDepth < depth ? props?.maxDepth : depth
@@ -193,6 +212,7 @@ export const UploadFeature = createServerFeature<
               },
             ],
           },
+          jsonSchema: createUploadNodeJSONSchema(props),
           node: UploadServerNode,
           validations: [uploadValidation(props)],
         }),

@@ -1,7 +1,6 @@
 import type {
   ClientCollectionConfig,
   ClientGlobalConfig,
-  ClientUser,
   Data,
   DocumentPreferences,
   FormState,
@@ -9,7 +8,7 @@ import type {
   SanitizedCollectionConfig,
   SanitizedDocumentPermissions,
   SanitizedGlobalConfig,
-  TypedUser,
+  User,
 } from 'payload'
 
 import React from 'react'
@@ -23,7 +22,7 @@ export type DocumentInfoProps = {
   readonly apiURL?: string
   readonly BeforeFields?: React.ReactNode
   readonly collectionSlug?: SanitizedCollectionConfig['slug']
-  readonly currentEditor: TypedUser
+  readonly currentEditor: User
   readonly disableActions?: boolean
   readonly disableCreate?: boolean
   readonly disableLeaveWithoutSaving?: boolean
@@ -37,6 +36,8 @@ export type DocumentInfoProps = {
   readonly hasPublishedDoc: boolean
   readonly hasPublishPermission?: boolean
   readonly hasSavePermission?: boolean
+  /** Whether the document or global has an upcoming scheduled publish/unpublish job. */
+  readonly hasScheduledPublish?: boolean
   /** Whether the user can trash (soft delete) documents. Only applicable when `trash` is enabled. */
   readonly hasTrashPermission?: boolean
   readonly id?: number | string
@@ -57,26 +58,22 @@ export type DocumentInfoProps = {
 }
 
 export type DocumentInfoContext = {
-  currentEditor?: ClientUser | null | number | string
+  currentEditor?: null | number | string | User
   data?: Data
   docConfig?: ClientCollectionConfig | ClientGlobalConfig
   documentIsLocked?: boolean
   documentLockState: React.RefObject<{
     hasShownLockedModal: boolean
     isLocked: boolean
-    user: ClientUser | number | string
+    user: number | string | User
   } | null>
   getDocPermissions: GetDocPermissions
   getDocPreferences: () => Promise<DocumentPreferences>
+  hasScheduledPublish: boolean
   incrementVersionCount: () => void
   isInitializing: boolean
   preferencesKey?: string
-  /**
-   * @deprecated This property is deprecated and will be removed in v4.
-   * Use `data` instead.
-   */
-  savedDocumentData?: Data
-  setCurrentEditor?: React.Dispatch<React.SetStateAction<ClientUser>>
+  setCurrentEditor?: React.Dispatch<React.SetStateAction<User>>
   setData: (data: Data) => void
   setDocFieldPreferences: (
     field: string,
@@ -84,18 +81,14 @@ export type DocumentInfoContext = {
   ) => void
   setDocumentIsLocked?: React.Dispatch<React.SetStateAction<boolean>>
   setHasPublishedDoc: React.Dispatch<React.SetStateAction<boolean>>
+  setHasScheduledPublish: React.Dispatch<React.SetStateAction<boolean>>
   setLastUpdateTime: React.Dispatch<React.SetStateAction<number>>
   setMostRecentVersionIsAutosaved: React.Dispatch<React.SetStateAction<boolean>>
   setUnpublishedVersionCount: React.Dispatch<React.SetStateAction<number>>
   setUploadStatus?: (status: 'failed' | 'idle' | 'uploading') => void
   unlockDocument: (docID: number | string, slug: string) => Promise<void>
   unpublishedVersionCount: number
-  updateDocumentEditor: (docID: number | string, slug: string, user: ClientUser) => Promise<void>
-  /**
-   * @deprecated This property is deprecated and will be removed in v4.
-   * Use `setData` instead.
-   */
-  updateSavedDocumentData: (data: Data) => void
+  updateDocumentEditor: (docID: number | string, slug: string, user: User) => Promise<void>
   uploadStatus?: 'failed' | 'idle' | 'uploading'
   versionCount: number
 } & DocumentInfoProps

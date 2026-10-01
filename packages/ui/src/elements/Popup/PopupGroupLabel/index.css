@@ -1,9 +1,24 @@
 @layer payload-default {
   .popup-list-group-label {
     color: var(--color-text-secondary);
-    font-weight: 500;
-    line-height: 1;
-    margin-top: var(--spacer-1);
-    margin-bottom: var(--spacer-2);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    letter-spacing: var(--text-body-medium-letter-spacing);
+    line-height: var(--text-body-medium-line-height);
+    padding-block: var(--spacer-1);
+    padding-inline: var(--spacer-3);
+  }
+
+  /* Align the label's text with its sibling button labels, which carry a
+     var(--spacer-1) inset. The icon variants reserve an extra icon-slot
+     inset, so their labels sit one more var(--spacer-1) in. */
+  .popup-button-list .popup-list-group-label {
+    padding-inline-start: var(--spacer-1);
+  }
+
+  .popup-button-list--with-actions .popup-list-group-label,
+  .popup-button-list--with-icons .popup-list-group-label {
+    padding-inline-start: var(--spacer-2);
   }
 }

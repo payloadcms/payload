@@ -3,6 +3,8 @@ import type { Page, TestInfo } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { expect } from '@playwright/test'
 
+import { waitForFormReady } from './helpers.js'
+
 type AxeResults = Awaited<ReturnType<AxeBuilder['analyze']>>
 
 export interface CheckFocusIndicatorsOptions {
@@ -128,6 +130,9 @@ export async function checkFocusIndicators(
     document.body.focus()
   })
   await page.waitForTimeout(200)
+
+  // Wait for form hydration before interacting with elements
+  await waitForFormReady(page)
 
   if (verbose) {
     const hasFocus = await page.evaluate(() => document.hasFocus())

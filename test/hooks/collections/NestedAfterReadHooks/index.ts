@@ -68,6 +68,7 @@ const NestedAfterReadHooks: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }
 
 export default NestedAfterReadHooks

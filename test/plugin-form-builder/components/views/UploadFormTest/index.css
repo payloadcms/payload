@@ -1,0 +1,104 @@
+@layer payload-default {
+  .upload-form-test__view {
+    margin-top: var(--spacer-5);
+    width: 100%;
+  }
+
+  .upload-form-test__title {
+    margin-bottom: var(--spacer-2);
+  }
+
+  .upload-form-test__back-button {
+    margin-bottom: var(--spacer-3);
+    display: inline-flex;
+  }
+
+  .upload-form-test__back-icon {
+    transform: rotate(-90deg);
+  }
+
+  .upload-form-test__description {
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacer-4);
+  }
+
+  .upload-form-test__section {
+    background: var(--color-bg-secondary);
+    border: var(--stroke-width-small) solid var(--color-border);
+    border-radius: var(--radius-medium);
+    margin-bottom: var(--spacer-4);
+    padding: var(--spacer-4);
+  }
+
+  .upload-form-test__section-title {
+    margin-bottom: var(--spacer-3);
+  }
+
+  .upload-form-test__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-field);
+  }
+
+  .upload-form-test__form .btn {
+    align-self: flex-start;
+  }
+
+  .upload-form-test__field {
+    margin-bottom: 0;
+  }
+
+  .upload-form-test__label {
+    color: var(--color-text);
+    display: block;
+    margin-bottom: var(--spacer-1);
+  }
+
+  .upload-form-test__help {
+    color: var(--color-text-secondary);
+    margin: var(--spacer-2) 0;
+  }
+
+  .upload-form-test__error {
+    color: var(--color-text-danger);
+    margin-top: var(--spacer-2);
+  }
+
+  .upload-form-test__success {
+    margin-top: var(--spacer-2);
+  }
+
+  .upload-form-test__success-title {
+    color: var(--color-text-success);
+  }
+
+  .upload-form-test__file-input {
+    color: var(--color-text-secondary);
+  }
+
+  .upload-form-test__file-input::file-selector-button,
+  .upload-form-test__file-input::-webkit-file-upload-button {
+    all: unset;
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--color-bg-secondary);
+    border: var(--stroke-width-small) solid var(--color-border);
+    border-radius: var(--radius-large);
+    color: var(--color-text);
+    cursor: pointer;
+    display: inline-block;
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-style: normal;
+    font-weight: var(--text-body-medium-font-weight);
+    letter-spacing: var(--text-body-medium-letter-spacing);
+    line-height: var(--text-body-medium-line-height);
+    margin-inline-end: var(--spacer-2);
+    padding: var(--spacer-1) var(--spacer-2-5);
+  }
+
+  .upload-form-test__file-input:hover::file-selector-button,
+  .upload-form-test__file-input:hover::-webkit-file-upload-button {
+    background: var(--color-bg-hover);
+  }
+}

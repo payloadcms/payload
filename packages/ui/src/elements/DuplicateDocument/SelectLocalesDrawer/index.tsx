@@ -10,9 +10,9 @@ import React, { useCallback, useMemo, useState } from 'react'
 
 import { CheckboxInput } from '../../../fields/Checkbox/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { DrawerHeader } from '../../BulkUpload/Header/index.js'
 import { Button } from '../../Button/index.js'
 import { Drawer } from '../../Drawer/index.js'
+import { DrawerHeader } from '../../DrawerHeader/index.js'
 import './index.css'
 
 export type LocaleOption = {
@@ -47,7 +47,7 @@ export const SelectLocalesDrawer: React.FC<SelectLocalesDrawerProps> = ({
   onConfirm,
 }) => {
   const { i18n, t } = useTranslation()
-  const { toggleModal } = useModal()
+  const { closeModal, toggleModal } = useModal()
   const [selectedLocales, setSelectedLocales] = useState<string[]>([])
 
   const localeOptions = useMemo(
@@ -72,8 +72,8 @@ export const SelectLocalesDrawer: React.FC<SelectLocalesDrawerProps> = ({
 
   const handleConfirm = useCallback(async () => {
     await onConfirm({ selectedLocales })
-    toggleModal(slug)
-  }, [onConfirm, selectedLocales, slug, toggleModal])
+    closeModal(slug)
+  }, [closeModal, onConfirm, selectedLocales, slug])
 
   return (
     <Drawer

@@ -41,4 +41,5 @@ export const MediaWithThrowingHook: CollectionConfig = {
   upload: {
     disableLocalStorage: true,
   },
+  versions: false,
 }

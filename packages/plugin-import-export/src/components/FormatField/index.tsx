@@ -1,7 +1,7 @@
 'use client'
 
 import type { ReactSelectOption } from '@payloadcms/ui'
-import type { SelectFieldClientComponent } from 'payload'
+import type { SelectFieldClientProps } from 'payload'
 
 import { FieldLabel, ReactSelect, useConfig, useField } from '@payloadcms/ui'
 import React, { useCallback, useEffect, useMemo } from 'react'
@@ -15,9 +15,14 @@ const allOptions: ReactSelectOption[] = [
   { label: 'JSON', value: 'json' },
 ]
 
-export const FormatField: SelectFieldClientComponent = (props) => {
+export const FormatField: React.FC<SelectFieldClientProps> = (props) => {
   const { getEntityConfig } = useConfig()
   const width = props.field.admin?.width
+
+  const styles = useMemo<React.CSSProperties>(
+    () => ({ '--field-width': width }) as React.CSSProperties,
+    [width],
+  )
 
   const { setValue, value: formatValue } = useField<Format>()
   const { value: targetCollectionSlug } = useField<string>({ path: 'collectionSlug' })
@@ -61,7 +66,7 @@ export const FormatField: SelectFieldClientComponent = (props) => {
   const isReadOnly = Boolean(forcedFormat) || props.readOnly
 
   return (
-    <div className={baseClass} style={{ width }}>
+    <div className={baseClass} style={styles}>
       <FieldLabel label={props.field.label} path={props.path} />
       <ReactSelect
         className={'format-field'}

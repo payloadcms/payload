@@ -41,4 +41,5 @@ export const LexicalLinkFeature: CollectionConfig = {
       }),
     },
   ],
+  versions: false,
 }

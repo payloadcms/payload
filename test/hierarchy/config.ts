@@ -37,6 +37,7 @@ export const Categories: CollectionConfig = {
     },
     parentFieldName: 'parent',
   },
+  versions: false,
 }
 
 // Pages collection with dedicated slug field (tests slugField config option)
@@ -68,6 +69,7 @@ export const Pages: CollectionConfig = {
     parentFieldName: 'parent',
     slugField: 'slug', // Use dedicated slug field for _h_slugPath
   },
+  versions: false,
 }
 
 // Regions collection with explicit group (should appear in BOTH nav and as sidebar tab)
@@ -95,6 +97,7 @@ export const Regions: CollectionConfig = {
     },
     parentFieldName: 'parent',
   },
+  versions: false,
 }
 
 // Departments collection with custom field names
@@ -123,6 +126,29 @@ export const Departments: CollectionConfig = {
     slugPathFieldName: '_breadcrumbSlug',
     titlePathFieldName: '_breadcrumbTitle',
   },
+  versions: false,
+}
+
+// Divisions collection - dedicated to tree-limit / load-more keyboard regression tests
+export const Divisions: CollectionConfig = {
+  slug: 'divisions',
+  admin: {
+    useAsTitle: 'title',
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+  ],
+  hierarchy: {
+    admin: {
+      treeLimit: 3,
+    },
+    parentFieldName: 'parent',
+  },
+  versions: false,
 }
 
 // Organizations collection with hierarchy (main test collection)
@@ -155,13 +181,27 @@ export const Organizations: CollectionConfig = {
     parentFieldName: 'parent',
   },
   versions: {
-    drafts: true,
+    drafts: {
+      autosave: {
+        interval: 1000,
+      },
+    },
   },
 }
 
 // Folders collection with collectionSpecific (enables filter in tree search)
 export const Folders: CollectionConfig = {
   slug: 'folders',
+  admin: {
+    useAsTitle: 'name',
+  },
+  fields: [
+    {
+      name: 'name',
+      type: 'text',
+      required: true,
+    },
+  ],
   folders: {
     admin: {
       components: {
@@ -174,16 +214,7 @@ export const Folders: CollectionConfig = {
     collectionSpecific: { fieldName: 'allowedTypes' },
     parentFieldName: 'parentFolder',
   },
-  admin: {
-    useAsTitle: 'name',
-  },
-  fields: [
-    {
-      name: 'name',
-      type: 'text',
-      required: true,
-    },
-  ],
+  versions: false,
 }
 
 // Products collection with localized title field
@@ -223,29 +254,42 @@ export const Products: CollectionConfig = {
 }
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'hierarchy',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [
+      Categories,
+      Departments,
+      Divisions,
+      Folders,
+      Organizations,
+      Pages,
+      Products,
+      Regions,
+    ],
+    debug: true,
+    localization: {
+      defaultLocale: 'en',
+      fallback: true,
+      locales: ['en', 'es', 'de'],
+    },
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [Categories, Departments, Folders, Organizations, Pages, Products, Regions],
-  debug: true,
-  localization: {
-    defaultLocale: 'en',
-    fallback: true,
-    locales: ['en', 'es', 'de'],
-  },
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
     await seed(payload)
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

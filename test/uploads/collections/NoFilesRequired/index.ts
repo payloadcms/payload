@@ -20,4 +20,5 @@ export const NoFilesRequired: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

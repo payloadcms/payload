@@ -19,4 +19,5 @@ export const BeforeChangeHooks: CollectionConfig = {
       required: true,
     },
   ],
+  versions: false,
 }

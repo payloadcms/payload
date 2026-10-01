@@ -1,4 +1,4 @@
-import type { Payload, ServerAdapter, TypedUser, ViewTypes } from 'payload'
+import type { Payload, ServerAdapter, User, ViewTypes } from 'payload'
 
 import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
 
@@ -25,8 +25,8 @@ type Args = {
   tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
   useAsTitle: string
-  user?: TypedUser
-  userHasAccessToAllTenants: Required<MultiTenantPluginConfig<any>>['userHasAccessToAllTenants']
+  user?: User
+  userHasAccessToAllTenants: Required<MultiTenantPluginConfig>['userHasAccessToAllTenants']
   view: ViewTypes
 }
 export async function getGlobalViewRedirect({
@@ -75,6 +75,7 @@ export async function getGlobalViewRedirect({
         collection: collectionSlug,
         depth: 0,
         limit: 1,
+        overrideAccess: true,
         pagination: false,
         select: {
           id: true,
@@ -171,6 +172,7 @@ async function generateCreateRedirect({
         },
         depth: 0,
         draft: true,
+        overrideAccess: true,
         select: {
           id: true,
         },

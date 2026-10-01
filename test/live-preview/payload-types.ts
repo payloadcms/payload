@@ -60,6 +60,115 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_265E6A5E".
+ */
+export type LexicalNodes_265E6A5E =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_265E6A5E>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'media'>
+  | SerializedQuoteNode<LexicalNodes_265E6A5E>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'pages'
+      | 'posts'
+      | 'ssr'
+      | 'ssr-autosave'
+      | 'tenants'
+      | 'categories'
+      | 'collection-level-config'
+      | 'open-by-default'
+      | 'static-url'
+      | 'custom-live-preview'
+      | 'conditional-url'
+      | 'forbidden-url'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_265E6A5E, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_265E6A5E, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_265E6A5E>
+  | SerializedListItemNode<LexicalNodes_265E6A5E>
+  | SerializedHeadingNode<LexicalNodes_265E6A5E>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_50E80D16".
+ */
+export type LexicalNodes_50E80D16 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_50E80D16>
+  | SerializedBlockNode<MediaBlock_1EDC4A89>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'media'>
+  | SerializedQuoteNode<LexicalNodes_50E80D16>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'pages'
+      | 'posts'
+      | 'ssr'
+      | 'ssr-autosave'
+      | 'tenants'
+      | 'categories'
+      | 'collection-level-config'
+      | 'open-by-default'
+      | 'static-url'
+      | 'custom-live-preview'
+      | 'conditional-url'
+      | 'forbidden-url'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_50E80D16, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_50E80D16, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_50E80D16>
+  | SerializedListItemNode<LexicalNodes_50E80D16>
+  | SerializedHeadingNode<LexicalNodes_50E80D16>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_638B30E7".
+ */
+export type LexicalNodes_638B30E7 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_638B30E7>
+  | SerializedBlockNode<MyBlock>
+  | SerializedHeadingNode<LexicalNodes_638B30E7>
+  | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
+  | SerializedQuoteNode<LexicalNodes_638B30E7>
+  | SerializedListNode<LexicalNodes_638B30E7>
+  | SerializedListItemNode<LexicalNodes_638B30E7>
+  | SerializedAutoLinkNode<LexicalNodes_638B30E7, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_638B30E7, LexicalLinkFields_0A7E9EC0>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'pages'
+      | 'posts'
+      | 'ssr'
+      | 'ssr-autosave'
+      | 'tenants'
+      | 'categories'
+      | 'collection-level-config'
+      | 'open-by-default'
+      | 'static-url'
+      | 'custom-live-preview'
+      | 'conditional-url'
+      | 'forbidden-url'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >;
 
 export interface Config {
   auth: {
@@ -78,9 +187,11 @@ export interface Config {
     categories: Category;
     media: Media;
     'collection-level-config': CollectionLevelConfig;
+    'open-by-default': OpenByDefault;
     'static-url': StaticUrl;
     'custom-live-preview': CustomLivePreview;
     'conditional-url': ConditionalUrl;
+    'forbidden-url': ForbiddenUrl;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -97,9 +208,11 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     'collection-level-config': CollectionLevelConfigSelect<false> | CollectionLevelConfigSelect<true>;
+    'open-by-default': OpenByDefaultSelect<false> | OpenByDefaultSelect<true>;
     'static-url': StaticUrlSelect<false> | StaticUrlSelect<true>;
     'custom-live-preview': CustomLivePreviewSelect<false> | CustomLivePreviewSelect<true>;
     'conditional-url': ConditionalUrlSelect<false> | ConditionalUrlSelect<true>;
+    'forbidden-url': ForbiddenUrlSelect<false> | ForbiddenUrlSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -120,6 +233,8 @@ export interface Config {
   locale: 'en' | 'es';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -147,7 +262,7 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "mediaBlock".
+ * via the `definition` "MediaBlock".
  */
 export interface MediaBlock {
   invertBackground?: boolean | null;
@@ -164,6 +279,14 @@ export interface MediaBlock {
 export interface Media {
   id: string;
   alt: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -182,6 +305,14 @@ export interface Media {
  */
 export interface User {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -189,6 +320,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -214,206 +346,18 @@ export interface Page {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
+    richText?: LexicalRichText<LexicalNodes_265E6A5E> | null;
     media?: (string | null) | Media;
   };
-  layout?:
-    | (
-        | {
-            invertBackground?: boolean | null;
-            richText?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            links?:
-              | {
-                  link: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
-                    reference?:
-                      | ({
-                          relationTo: 'posts';
-                          value: string | Post;
-                        } | null)
-                      | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
-                    appearance?: ('primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'cta';
-          }
-        | {
-            invertBackground?: boolean | null;
-            columns?:
-              | {
-                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-                  richText?: {
-                    root: {
-                      type: string;
-                      children: {
-                        type: any;
-                        version: number;
-                        [k: string]: unknown;
-                      }[];
-                      direction: ('ltr' | 'rtl') | null;
-                      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                      indent: number;
-                      version: number;
-                    };
-                    [k: string]: unknown;
-                  } | null;
-                  enableLink?: boolean | null;
-                  link?: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
-                    reference?:
-                      | ({
-                          relationTo: 'posts';
-                          value: string | Post;
-                        } | null)
-                      | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
-                    appearance?: ('default' | 'primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'content';
-          }
-        | {
-            invertBackground?: boolean | null;
-            position?: ('default' | 'fullscreen') | null;
-            media: string | Media;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'mediaBlock';
-          }
-        | {
-            introContent?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            populateBy?: ('collection' | 'selection') | null;
-            relationTo?: 'posts' | null;
-            categories?: (string | Category)[] | null;
-            limit?: number | null;
-            selectedDocs?:
-              | {
-                  relationTo: 'posts';
-                  value: string | Post;
-                }[]
-              | null;
-            /**
-             * This field is auto-populated after-read
-             */
-            populatedDocs?:
-              | {
-                  relationTo: 'posts';
-                  value: string | Post;
-                }[]
-              | null;
-            /**
-             * This field is auto-populated after-read
-             */
-            populatedDocsTotal?: number | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'archive';
-          }
-      )[]
-    | null;
+  layout?: (Cta | Content | MediaBlock | Archive)[] | null;
   /**
    * A number field for visual comparison with toolbar size inputs
    */
   testNumber?: number | null;
   localizedTitle?: string | null;
   relationToLocalized?: (string | null) | Post;
-  richTextLexical?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  richTextLexicalLocalized?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  richTextLexical?: LexicalRichText<LexicalNodes_50E80D16> | null;
+  richTextLexicalLocalized?: LexicalRichText<LexicalNodes_50E80D16> | null;
   relationshipAsUpload?: (string | null) | Media;
   relationshipMonoHasOne?: (string | null) | Post;
   relationshipMonoHasMany?: (string | Post)[] | null;
@@ -430,21 +374,7 @@ export interface Page {
   arrayOfRelationships?:
     | {
         uploadInArray?: (string | null) | Media;
-        richTextInArray?: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
+        richTextInArray?: LexicalRichText<LexicalNodes_638B30E7> | null;
         relationshipInArrayMonoHasOne?: (string | null) | Post;
         relationshipInArrayMonoHasMany?: (string | Post)[] | null;
         relationshipInArrayPolyHasOne?: {
@@ -468,6 +398,14 @@ export interface Page {
     description?: string | null;
     image?: (string | null) | Media;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -479,8 +417,51 @@ export interface Tenant {
   id: string;
   title: string;
   clientURL: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Cta".
+ */
+export interface Cta {
+  invertBackground?: boolean | null;
+  richText?: LexicalRichText<LexicalNodes_265E6A5E> | null;
+  links?:
+    | {
+        link: {
+          type?: ('reference' | 'custom') | null;
+          newTab?: boolean | null;
+          reference?:
+            | ({
+                relationTo: 'posts';
+                value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null);
+          url?: string | null;
+          label: string;
+          /**
+           * Choose how the link should be rendered.
+           */
+          appearance?: ('primary' | 'secondary') | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'cta';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -493,170 +474,10 @@ export interface Post {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
+    richText?: LexicalRichText<LexicalNodes_265E6A5E> | null;
     media?: (string | null) | Media;
   };
-  layout?:
-    | (
-        | {
-            invertBackground?: boolean | null;
-            richText?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            links?:
-              | {
-                  link: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
-                    reference?:
-                      | ({
-                          relationTo: 'posts';
-                          value: string | Post;
-                        } | null)
-                      | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
-                    appearance?: ('primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'cta';
-          }
-        | {
-            invertBackground?: boolean | null;
-            columns?:
-              | {
-                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-                  richText?: {
-                    root: {
-                      type: string;
-                      children: {
-                        type: any;
-                        version: number;
-                        [k: string]: unknown;
-                      }[];
-                      direction: ('ltr' | 'rtl') | null;
-                      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                      indent: number;
-                      version: number;
-                    };
-                    [k: string]: unknown;
-                  } | null;
-                  enableLink?: boolean | null;
-                  link?: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
-                    reference?:
-                      | ({
-                          relationTo: 'posts';
-                          value: string | Post;
-                        } | null)
-                      | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
-                    appearance?: ('default' | 'primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'content';
-          }
-        | {
-            invertBackground?: boolean | null;
-            position?: ('default' | 'fullscreen') | null;
-            media: string | Media;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'mediaBlock';
-          }
-        | {
-            introContent?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            populateBy?: ('collection' | 'selection') | null;
-            relationTo?: 'posts' | null;
-            categories?: (string | Category)[] | null;
-            limit?: number | null;
-            selectedDocs?:
-              | {
-                  relationTo: 'posts';
-                  value: string | Post;
-                }[]
-              | null;
-            /**
-             * This field is auto-populated after-read
-             */
-            populatedDocs?:
-              | {
-                  relationTo: 'posts';
-                  value: string | Post;
-                }[]
-              | null;
-            /**
-             * This field is auto-populated after-read
-             */
-            populatedDocsTotal?: number | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'archive';
-          }
-      )[]
-    | null;
+  layout?: (Cta | Content | MediaBlock | Archive)[] | null;
   relatedPosts?: (string | Post)[] | null;
   localizedTitle?: string | null;
   meta?: {
@@ -664,9 +485,87 @@ export interface Post {
     description?: string | null;
     image?: (string | null) | Media;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Content".
+ */
+export interface Content {
+  invertBackground?: boolean | null;
+  columns?:
+    | {
+        size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
+        richText?: LexicalRichText<LexicalNodes_265E6A5E> | null;
+        enableLink?: boolean | null;
+        link?: {
+          type?: ('reference' | 'custom') | null;
+          newTab?: boolean | null;
+          reference?:
+            | ({
+                relationTo: 'posts';
+                value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null);
+          url?: string | null;
+          label: string;
+          /**
+           * Choose how the link should be rendered.
+           */
+          appearance?: ('default' | 'primary' | 'secondary') | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'content';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Archive".
+ */
+export interface Archive {
+  introContent?: LexicalRichText<LexicalNodes_265E6A5E> | null;
+  populateBy?: ('collection' | 'selection') | null;
+  relationTo?: 'posts' | null;
+  categories?: (string | Category)[] | null;
+  limit?: number | null;
+  selectedDocs?:
+    | {
+        relationTo: 'posts';
+        value: string | Post;
+      }[]
+    | null;
+  /**
+   * This field is auto-populated after-read
+   */
+  populatedDocs?:
+    | {
+        relationTo: 'posts';
+        value: string | Post;
+      }[]
+    | null;
+  /**
+   * This field is auto-populated after-read
+   */
+  populatedDocsTotal?: number | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'archive';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -675,6 +574,14 @@ export interface Post {
 export interface Category {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -691,175 +598,23 @@ export interface Ssr {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
+    richText?: LexicalRichText<LexicalNodes_265E6A5E> | null;
     media?: (string | null) | Media;
   };
-  layout?:
-    | (
-        | {
-            invertBackground?: boolean | null;
-            richText?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            links?:
-              | {
-                  link: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
-                    reference?:
-                      | ({
-                          relationTo: 'posts';
-                          value: string | Post;
-                        } | null)
-                      | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
-                    appearance?: ('primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'cta';
-          }
-        | {
-            invertBackground?: boolean | null;
-            columns?:
-              | {
-                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-                  richText?: {
-                    root: {
-                      type: string;
-                      children: {
-                        type: any;
-                        version: number;
-                        [k: string]: unknown;
-                      }[];
-                      direction: ('ltr' | 'rtl') | null;
-                      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                      indent: number;
-                      version: number;
-                    };
-                    [k: string]: unknown;
-                  } | null;
-                  enableLink?: boolean | null;
-                  link?: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
-                    reference?:
-                      | ({
-                          relationTo: 'posts';
-                          value: string | Post;
-                        } | null)
-                      | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
-                    appearance?: ('default' | 'primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'content';
-          }
-        | {
-            invertBackground?: boolean | null;
-            position?: ('default' | 'fullscreen') | null;
-            media: string | Media;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'mediaBlock';
-          }
-        | {
-            introContent?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            populateBy?: ('collection' | 'selection') | null;
-            relationTo?: 'posts' | null;
-            categories?: (string | Category)[] | null;
-            limit?: number | null;
-            selectedDocs?:
-              | {
-                  relationTo: 'posts';
-                  value: string | Post;
-                }[]
-              | null;
-            /**
-             * This field is auto-populated after-read
-             */
-            populatedDocs?:
-              | {
-                  relationTo: 'posts';
-                  value: string | Post;
-                }[]
-              | null;
-            /**
-             * This field is auto-populated after-read
-             */
-            populatedDocsTotal?: number | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'archive';
-          }
-      )[]
-    | null;
+  layout?: (Cta | Content | MediaBlock | Archive)[] | null;
   meta?: {
     title?: string | null;
     description?: string | null;
     image?: (string | null) | Media;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -876,175 +631,23 @@ export interface SsrAutosave {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
+    richText?: LexicalRichText<LexicalNodes_265E6A5E> | null;
     media?: (string | null) | Media;
   };
-  layout?:
-    | (
-        | {
-            invertBackground?: boolean | null;
-            richText?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            links?:
-              | {
-                  link: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
-                    reference?:
-                      | ({
-                          relationTo: 'posts';
-                          value: string | Post;
-                        } | null)
-                      | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
-                    appearance?: ('primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'cta';
-          }
-        | {
-            invertBackground?: boolean | null;
-            columns?:
-              | {
-                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-                  richText?: {
-                    root: {
-                      type: string;
-                      children: {
-                        type: any;
-                        version: number;
-                        [k: string]: unknown;
-                      }[];
-                      direction: ('ltr' | 'rtl') | null;
-                      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                      indent: number;
-                      version: number;
-                    };
-                    [k: string]: unknown;
-                  } | null;
-                  enableLink?: boolean | null;
-                  link?: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
-                    reference?:
-                      | ({
-                          relationTo: 'posts';
-                          value: string | Post;
-                        } | null)
-                      | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
-                    appearance?: ('default' | 'primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'content';
-          }
-        | {
-            invertBackground?: boolean | null;
-            position?: ('default' | 'fullscreen') | null;
-            media: string | Media;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'mediaBlock';
-          }
-        | {
-            introContent?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            populateBy?: ('collection' | 'selection') | null;
-            relationTo?: 'posts' | null;
-            categories?: (string | Category)[] | null;
-            limit?: number | null;
-            selectedDocs?:
-              | {
-                  relationTo: 'posts';
-                  value: string | Post;
-                }[]
-              | null;
-            /**
-             * This field is auto-populated after-read
-             */
-            populatedDocs?:
-              | {
-                  relationTo: 'posts';
-                  value: string | Post;
-                }[]
-              | null;
-            /**
-             * This field is auto-populated after-read
-             */
-            populatedDocsTotal?: number | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'archive';
-          }
-      )[]
-    | null;
+  layout?: (Cta | Content | MediaBlock | Archive)[] | null;
   meta?: {
     title?: string | null;
     description?: string | null;
     image?: (string | null) | Media;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1058,6 +661,34 @@ export interface SsrAutosave {
 export interface CollectionLevelConfig {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Live Preview opens automatically on first visit via `openByDefault`.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "open-by-default".
+ */
+export interface OpenByDefault {
+  id: string;
+  title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1068,6 +699,14 @@ export interface CollectionLevelConfig {
 export interface StaticUrl {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1082,175 +721,23 @@ export interface CustomLivePreview {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
+    richText?: LexicalRichText<LexicalNodes_265E6A5E> | null;
     media?: (string | null) | Media;
   };
-  layout?:
-    | (
-        | {
-            invertBackground?: boolean | null;
-            richText?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            links?:
-              | {
-                  link: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
-                    reference?:
-                      | ({
-                          relationTo: 'posts';
-                          value: string | Post;
-                        } | null)
-                      | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
-                    appearance?: ('primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'cta';
-          }
-        | {
-            invertBackground?: boolean | null;
-            columns?:
-              | {
-                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-                  richText?: {
-                    root: {
-                      type: string;
-                      children: {
-                        type: any;
-                        version: number;
-                        [k: string]: unknown;
-                      }[];
-                      direction: ('ltr' | 'rtl') | null;
-                      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                      indent: number;
-                      version: number;
-                    };
-                    [k: string]: unknown;
-                  } | null;
-                  enableLink?: boolean | null;
-                  link?: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
-                    reference?:
-                      | ({
-                          relationTo: 'posts';
-                          value: string | Post;
-                        } | null)
-                      | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
-                    appearance?: ('default' | 'primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'content';
-          }
-        | {
-            invertBackground?: boolean | null;
-            position?: ('default' | 'fullscreen') | null;
-            media: string | Media;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'mediaBlock';
-          }
-        | {
-            introContent?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            populateBy?: ('collection' | 'selection') | null;
-            relationTo?: 'posts' | null;
-            categories?: (string | Category)[] | null;
-            limit?: number | null;
-            selectedDocs?:
-              | {
-                  relationTo: 'posts';
-                  value: string | Post;
-                }[]
-              | null;
-            /**
-             * This field is auto-populated after-read
-             */
-            populatedDocs?:
-              | {
-                  relationTo: 'posts';
-                  value: string | Post;
-                }[]
-              | null;
-            /**
-             * This field is auto-populated after-read
-             */
-            populatedDocsTotal?: number | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'archive';
-          }
-      )[]
-    | null;
+  layout?: (Cta | Content | MediaBlock | Archive)[] | null;
   meta?: {
     title?: string | null;
     description?: string | null;
     image?: (string | null) | Media;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1262,6 +749,31 @@ export interface ConditionalUrl {
   id: string;
   title?: string | null;
   enabled?: boolean | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forbidden-url".
+ */
+export interface ForbiddenUrl {
+  id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1326,6 +838,10 @@ export interface PayloadLockedDocument {
         value: string | CollectionLevelConfig;
       } | null)
     | ({
+        relationTo: 'open-by-default';
+        value: string | OpenByDefault;
+      } | null)
+    | ({
         relationTo: 'static-url';
         value: string | StaticUrl;
       } | null)
@@ -1336,6 +852,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'conditional-url';
         value: string | ConditionalUrl;
+      } | null)
+    | ({
+        relationTo: 'forbidden-url';
+        value: string | ForbiddenUrl;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1384,6 +904,8 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1391,6 +913,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -1524,6 +1047,8 @@ export interface PagesSelect<T extends boolean = true> {
         description?: T;
         image?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1626,6 +1151,8 @@ export interface PostsSelect<T extends boolean = true> {
         description?: T;
         image?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -1727,6 +1254,8 @@ export interface SsrSelect<T extends boolean = true> {
         description?: T;
         image?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1827,6 +1356,8 @@ export interface SsrAutosaveSelect<T extends boolean = true> {
         description?: T;
         image?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1838,6 +1369,8 @@ export interface SsrAutosaveSelect<T extends boolean = true> {
 export interface TenantsSelect<T extends boolean = true> {
   title?: T;
   clientURL?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1847,6 +1380,8 @@ export interface TenantsSelect<T extends boolean = true> {
  */
 export interface CategoriesSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1856,6 +1391,8 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1874,6 +1411,19 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface CollectionLevelConfigSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "open-by-default_select".
+ */
+export interface OpenByDefaultSelect<T extends boolean = true> {
+  title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1883,6 +1433,8 @@ export interface CollectionLevelConfigSelect<T extends boolean = true> {
  */
 export interface StaticUrlSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1983,6 +1535,8 @@ export interface CustomLivePreviewSelect<T extends boolean = true> {
         description?: T;
         image?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1993,6 +1547,18 @@ export interface CustomLivePreviewSelect<T extends boolean = true> {
 export interface ConditionalUrlSelect<T extends boolean = true> {
   title?: T;
   enabled?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forbidden-url_select".
+ */
+export interface ForbiddenUrlSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2066,6 +1632,14 @@ export interface Header {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2099,6 +1673,14 @@ export interface Footer {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2122,6 +1704,8 @@ export interface HeaderSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -2146,6 +1730,8 @@ export interface FooterSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -2162,11 +1748,274 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'users'
+      | 'pages'
+      | 'posts'
+      | 'ssr'
+      | 'ssr-autosave'
+      | 'tenants'
+      | 'categories'
+      | 'media'
+      | 'collection-level-config'
+      | 'open-by-default'
+      | 'static-url'
+      | 'custom-live-preview'
+      | 'conditional-url'
+      | 'forbidden-url';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'users'
+          | 'pages'
+          | 'posts'
+          | 'ssr'
+          | 'ssr-autosave'
+          | 'tenants'
+          | 'categories'
+          | 'media'
+          | 'collection-level-config'
+          | 'open-by-default'
+          | 'static-url'
+          | 'custom-live-preview'
+          | 'conditional-url'
+          | 'forbidden-url'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * Multiple blocks resolve to the `MediaBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MediaBlock_1EDC4A89".
+ */
+export interface MediaBlock_1EDC4A89 {
+  id: string;
+  blockType: 'mediaBlock';
+  invertBackground?: boolean | null;
+  position?: ('default' | 'fullscreen') | null;
+  media: string | Media;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlock".
+ */
+export interface MyBlock {
+  id: string;
+  blockType: 'myBlock';
+  someText?: string | null;
+  someTextRequired: string;
+  radios?: ('option1' | 'option2' | 'option3') | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalUploadFields_1AB4670B".
+ */
+export interface LexicalUploadFields_1AB4670B {
+  alt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
+ */
+export interface LexicalLinkFields_0A7E9EC0 {
+  linkType: 'custom' | 'internal';
+  url?: string;
+  doc?: {
+    relationTo: string;
+    value:
+      | string
+      | number
+      | {
+          id: string | number;
+          [k: string]: unknown;
+        };
+  } | null;
+  newTab: boolean;
+  description?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
   [k: string]: unknown;
 }
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export interface SerializedHorizontalRuleNode {
+  type: 'horizontalrule';
+  version: number;
+}
+
+export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'quote';
+}
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface LexicalLinkFields {
+  [k: string]: unknown;
+  doc?: {
+    relationTo: string;
+    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
+  } | null;
+  linkType: 'custom' | 'internal';
+  newTab: boolean;
+  url?: string;
+}
+export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'link';
+  fields: TFields;
+  id?: string;
+}
+export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'autolink';
+  fields: TFields;
+}
+
+export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'list';
+  checked?: boolean;
+  listType: 'number' | 'bullet' | 'check';
+  start: number;
+  tag: 'ul' | 'ol';
+}
+
+export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'listitem';
+  checked?: boolean;
+  value: number;
+}
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
+}
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
+}
+
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'block';
+  format: LexicalElementFormat;
+  version: number;
+  fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'inlineBlock';
+  version: number;
+  fields: { id: string } & Omit<TFields, 'id'>;
+} : never;
 
 
 declare module 'payload' {

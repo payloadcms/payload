@@ -18,4 +18,5 @@ export const Video: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

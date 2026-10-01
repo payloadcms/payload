@@ -5,8 +5,7 @@ import type { PayloadHandler } from '../../config/types.js'
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { isNumber } from '../../utilities/isNumber.js'
-import { generatePayloadCookie } from '../cookies.js'
-import { loginOperation } from '../operations/login.js'
+import { loginWithCookie } from '../loginWithCookie.js'
 
 export const loginHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
@@ -24,22 +23,12 @@ export const loginHandler: PayloadHandler = async (req) => {
           password: typeof req.data?.password === 'string' ? req.data.password : '',
         }
 
-  const result = await loginOperation({
+  const { cookie, result } = await loginWithCookie({
     collection,
     data: authData,
     depth: isNumber(depth) ? Number(depth) : undefined,
     req,
   })
-
-  const cookie = generatePayloadCookie({
-    collectionAuthConfig: collection.config.auth,
-    cookiePrefix: req.payload.config.cookiePrefix,
-    token: result.token!,
-  })
-
-  if (collection.config.auth.removeTokenFromResponses) {
-    delete result.token
-  }
 
   return Response.json(
     {

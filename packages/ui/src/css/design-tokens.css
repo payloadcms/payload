@@ -88,6 +88,11 @@
     --ramp-red-900: #771208;
     --ramp-red-1000: #660e0b;
 
+    /* Dark Red */
+    --ramp-dark-red-500: #e03e1a;
+    --ramp-dark-red-600: #c4381c;
+    --ramp-dark-red-700: #963323;
+
     /* Pale Red */
     --ramp-pale-red-600: #a55440;
     --ramp-pale-red-700: #864537;

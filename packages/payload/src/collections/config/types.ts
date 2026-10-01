@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
-import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
+import type { IsAny, MarkOptional } from 'ts-essentials'
 
 import type { CustomUpload, ViewTypes } from '../../admin/types.js'
 import type { Arguments as MeArguments } from '../../auth/operations/me.js'
@@ -8,7 +8,7 @@ import type {
   Arguments as RefreshArguments,
   Result as RefreshResult,
 } from '../../auth/operations/refresh.js'
-import type { Auth, ClientUser, IncomingAuthType } from '../../auth/types.js'
+import type { Auth, IncomingAuthType } from '../../auth/types.js'
 import type {
   Access,
   AfterErrorHookArgs,
@@ -27,6 +27,7 @@ import type {
   StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
+import type { Authorship, SanitizedAuthorship } from '../../fields/baseFields/authorship/types.js'
 import type {
   Field,
   FlattenedField,
@@ -71,7 +72,16 @@ import type {
   OperationMap,
 } from '../operations/utilities/types.js'
 
-export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollection[TSlug]
+export type DataFromCollectionSlug<TSlug extends CollectionSlug> =
+  TypedCollection[string extends CollectionSlug ? CollectionSlug : TSlug]
+
+/**
+ * The ID type of a given collection (e.g. `string` or `number`), taken from its generated type.
+ * Use this instead of the project-wide {@link DefaultDocumentIDType} when the collection slug is
+ * known, since each collection can have its own ID type.
+ */
+export type IDTypeForCollectionSlug<TSlug extends CollectionSlug> =
+  DataFromCollectionSlug<TSlug>['id']
 
 export type SelectFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollectionSelect[TSlug]
 
@@ -225,6 +235,8 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
   overrideAccess?: boolean
   previousDoc: T
   req: PayloadRequest
+  /** Resolved field selection for the operation's response. */
+  select?: SelectType
 }) => any
 
 export type BeforeReadHook<T extends TypeWithID = any> = (args: {
@@ -444,6 +456,7 @@ export type CollectionAdminOptions = {
       list?: {
         actions?: CustomComponent[]
         Component?: PayloadComponent
+        NoResults?: CustomComponent
       }
     } & SharedEntityViews
   } & Omit<SharedAdminComponents, 'edit' | 'views'>
@@ -493,16 +506,9 @@ export type CollectionAdminOptions = {
    */
   group?: false | Record<string, string> | string
   /**
-   * @description Enable grouping by a field in the list view.
-   * Uses `payload.findDistinct` under the hood to populate the group-by options.
-   *
-   * @experimental This option is currently in beta and may change in future releases. Use at your own risk.
-   */
-  groupBy?: boolean
-  /**
    * Exclude the collection from the admin nav and routes
    */
-  hidden?: ((args: { user: ClientUser }) => boolean) | boolean
+  hidden?: ((args: { user: PayloadRequest['user'] }) => boolean) | boolean
   /**
    * Additional fields to be searched via the full text search
    */
@@ -528,6 +534,48 @@ export type CollectionAdminOptions = {
   useAsTitle?: string
 }
 
+export type CollectionAccess<TData = any> = {
+  admin?: ({ slug, req }: { req: PayloadRequest; slug: string }) => boolean | Promise<boolean>
+  create?: Access<TData>
+  delete?: Access<TData>
+  read?: Access<TData>
+  readVersions?: Access<TData>
+  unlock?: Access<TData>
+  update?: Access<TData>
+}
+
+type CollectionHooks<TSlug extends CollectionSlug = any> = {
+  afterChange?: AfterChangeHook[]
+  afterDelete?: AfterDeleteHook[]
+  afterError?: AfterErrorHook[]
+  afterForgotPassword?: AfterForgotPasswordHook[]
+  afterLogin?: AfterLoginHook[]
+  afterLogout?: AfterLogoutHook[]
+  afterMe?: AfterMeHook[]
+  afterOperation?: AfterOperationHook<TSlug>[]
+  afterRead?: AfterReadHook[]
+  afterRefresh?: AfterRefreshHook[]
+  beforeChange?: BeforeChangeHook[]
+  beforeDelete?: BeforeDeleteHook[]
+  beforeLogin?: BeforeLoginHook[]
+  beforeOperation?: BeforeOperationHook<TSlug>[]
+  beforeRead?: BeforeReadHook[]
+  beforeValidate?: BeforeValidateHook[]
+  /**
+    /**
+     * Use the `me` hook to control the `me` operation.
+     * Here, you can optionally instruct the me operation to return early,
+     * and skip its default logic.
+     */
+  me?: MeHook[]
+  /**
+   * Use the `refresh` hook to control the refresh operation.
+   * Here, you can optionally instruct the refresh operation to return early,
+   * and skip its default logic.
+   */
+  refresh?: RefreshHook[]
+}
+
 /** Manage all aspects of a data collection */
 export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   /**
@@ -538,15 +586,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   /**
    * Access control
    */
-  access?: {
-    admin?: ({ req }: { req: PayloadRequest }) => boolean | Promise<boolean>
-    create?: Access
-    delete?: Access
-    read?: Access
-    readVersions?: Access
-    unlock?: Access
-    update?: Access
-  }
+  access?: CollectionAccess
   /**
    * Collection admin options
    */
@@ -557,6 +597,16 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * Use `true` to enable with default options
    */
   auth?: boolean | IncomingAuthType
+  /**
+   * Automatically track the user that created and last updated each document via
+   * polymorphic `createdBy` / `updatedBy` relationship fields to your auth collections.
+   *
+   * Use `true` (default) to enable both, `false` to disable both, or an object to
+   * toggle each field independently, e.g. `{ updatedBy: false }`.
+   *
+   * @default true
+   */
+  authorship?: Authorship | boolean
   /**
    * Configuration for bulk operations
    */
@@ -574,6 +624,10 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * Default field to sort by in collection list view
    */
   defaultSort?: Sort
+  /**
+   * Disable the bulk delete operation for the collection in the admin panel and the API
+   */
+  disableBulkDelete?: boolean
   /**
    * Disable the bulk edit operation for the collection in the admin panel and the API
    */
@@ -633,37 +687,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   /**
    * Hooks to modify Payload functionality
    */
-  hooks?: {
-    afterChange?: AfterChangeHook[]
-    afterDelete?: AfterDeleteHook[]
-    afterError?: AfterErrorHook[]
-    afterForgotPassword?: AfterForgotPasswordHook[]
-    afterLogin?: AfterLoginHook[]
-    afterLogout?: AfterLogoutHook[]
-    afterMe?: AfterMeHook[]
-    afterOperation?: AfterOperationHook<TSlug>[]
-    afterRead?: AfterReadHook[]
-    afterRefresh?: AfterRefreshHook[]
-    beforeChange?: BeforeChangeHook[]
-    beforeDelete?: BeforeDeleteHook[]
-    beforeLogin?: BeforeLoginHook[]
-    beforeOperation?: BeforeOperationHook<TSlug>[]
-    beforeRead?: BeforeReadHook[]
-    beforeValidate?: BeforeValidateHook[]
-    /**
-    /**
-     * Use the `me` hook to control the `me` operation.
-     * Here, you can optionally instruct the me operation to return early,
-     * and skip its default logic.
-     */
-    me?: MeHook[]
-    /**
-     * Use the `refresh` hook to control the refresh operation.
-     * Here, you can optionally instruct the refresh operation to return early,
-     * and skip its default logic.
-     */
-    refresh?: RefreshHook[]
-  }
+  hooks?: CollectionHooks<TSlug>
   /**
    * Define compound indexes for this collection.
    * This can be used to either speed up querying/sorting by 2 or more fields at the same time or
@@ -781,28 +805,40 @@ export type SanitizedJoins = {
 }
 
 /**
- * @todo remove the `DeepRequired` in v4.
- * We don't actually guarantee that all properties are set when sanitizing configs.
+ * Properties populated during sanitization are redefined below. All other collection properties
+ * preserve their incoming optionality.
  */
 export interface SanitizedCollectionConfig
   extends Omit<
-    DeepRequired<CollectionConfig>,
-    | 'admin'
-    | 'auth'
-    | 'endpoints'
-    | 'fields'
-    | 'folder'
-    | 'folders'
-    | 'hierarchy'
-    | 'slug'
-    | 'tags'
-    | 'upload'
-    | 'versions'
-  > {
-  admin: CollectionAdminOptions
+      CollectionConfig,
+      | '_sanitized'
+      | 'access'
+      | 'admin'
+      | 'auth'
+      | 'authorship'
+      | 'custom'
+      | 'endpoints'
+      | 'folder'
+      | 'folders'
+      | 'hierarchy'
+      | 'hooks'
+      | 'indexes'
+      | 'labels'
+      | 'slug'
+      | 'tags'
+      | 'timestamps'
+      | 'upload'
+      | 'versions'
+    >,
+    Required<Pick<CollectionConfig, 'admin' | 'custom' | 'indexes' | 'timestamps'>> {
+  _sanitized: true
+  access: Pick<CollectionAccess, 'admin'> &
+    Required<
+      Pick<CollectionAccess, 'create' | 'delete' | 'read' | 'readVersions' | 'unlock' | 'update'>
+    >
   auth: Auth
+  authorship: SanitizedAuthorship
   endpoints: Endpoint[] | false
-  fields: Field[]
   /**
    * Fields in the database schema structure
    * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
@@ -812,10 +848,12 @@ export interface SanitizedCollectionConfig
    * Hierarchy configuration (when collection is a hierarchy type like folders or tags)
    */
   hierarchy: false | SanitizedHierarchyConfig
+  hooks: Required<CollectionHooks>
   /**
    * Object of collections to join 'Join Fields object keyed by collection
    */
   joins: SanitizedJoins
+  labels: Required<NonNullable<CollectionConfig['labels']>>
   /**
    * List of all polymorphic join fields
    */

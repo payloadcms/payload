@@ -20,8 +20,7 @@ export const BlockWithBlockRef: Block = {
     {
       name: 'nestedBlocks',
       type: 'blocks',
-      blockReferences: ['nestedBlock'],
-      blocks: [],
+      blocks: ['nestedBlock'],
     },
   ],
 }
@@ -53,4 +52,5 @@ export const LexicalNestedBlocks: CollectionConfig = {
       }),
     },
   ],
+  versions: false,
 }

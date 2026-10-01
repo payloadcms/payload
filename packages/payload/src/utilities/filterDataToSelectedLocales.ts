@@ -108,18 +108,14 @@ export function filterDataToSelectedLocales({
             }
 
             return rows.map((blockData: JsonObject) => {
-              let block: Block | FlattenedBlock | undefined
-              if (configBlockReferences && field.blockReferences) {
-                for (const blockOrReference of field.blockReferences) {
-                  if (typeof blockOrReference === 'string') {
-                    block = configBlockReferences.find((b) => b.slug === blockData.blockType)
-                  } else {
-                    block = blockOrReference
-                  }
-                }
-              } else if (field.blocks) {
-                block = field.blocks.find((b) => b.slug === blockData.blockType)
-              }
+              const blockOrSlug = field.blocks.find((b) => {
+                const slug = typeof b === 'string' ? b : b.slug
+                return slug === blockData.blockType
+              })
+              const block: Block | FlattenedBlock | undefined =
+                typeof blockOrSlug === 'string'
+                  ? configBlockReferences?.find((b) => b.slug === blockOrSlug)
+                  : blockOrSlug
 
               if (block) {
                 const filtered = filterDataToSelectedLocales({

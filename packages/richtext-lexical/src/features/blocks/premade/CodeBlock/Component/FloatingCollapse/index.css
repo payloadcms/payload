@@ -7,7 +7,7 @@
   justify-content: center;
   box-sizing: border-box;
   position: absolute;
-  left: 50%;
+  inset-inline-start: 50%;
   transform: translateX(-50%);
   height: var(--spacer-4);
   bottom: calc(var(--spacer-2-5) * -1);
@@ -20,9 +20,7 @@
   line-height: var(--text-body-medium-line-height);
   white-space: nowrap;
 
-  box-shadow:
-    0px 0px 0.5px 0px rgba(0, 0, 0, 0.18),
-    0px 1px 3px 0px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--elevation-100-canvas);
 
   &:hover {
     background: var(--color-bg-secondary-hover);

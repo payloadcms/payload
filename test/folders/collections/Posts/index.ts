@@ -22,4 +22,5 @@ export const Posts: CollectionConfig = {
     createFolderField({ relationTo: folderSlug }),
   ],
   trash: true,
+  versions: false,
 }

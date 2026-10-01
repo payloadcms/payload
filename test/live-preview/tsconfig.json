@@ -13,8 +13,7 @@
       "@payloadcms/ui/providers/*": ["../../packages/ui/src/providers/*/index.tsx"],
       "@payloadcms/ui/templates/*": ["../../packages/ui/src/templates/*/index.tsx"],
       "@payloadcms/ui/utilities/*": ["../../packages/ui/src/utilities/*.ts"],
-      "@payloadcms/ui/scss": ["../../packages/ui/src/scss.scss"],
-      "@payloadcms/ui/scss/app.scss": ["../../packages/ui/src/scss/app.scss"],
+      "@payloadcms/ui/css/app.css": ["../../packages/ui/src/css/app.css"],
       "payload/types": ["../../packages/payload/src/exports/types.ts"],
       "@payloadcms/next/*": ["../../packages/next/src/*"],
       "@payloadcms/next": ["../../packages/next/src/exports/*"]

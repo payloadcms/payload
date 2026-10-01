@@ -13,6 +13,7 @@ const Uploads: CollectionConfig = {
       label: 'Alt Text',
     },
   ],
+  versions: false,
 }
 
 export default Uploads

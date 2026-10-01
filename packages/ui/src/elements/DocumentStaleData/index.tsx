@@ -3,8 +3,14 @@ import React, { useEffect } from 'react'
 
 import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { Button } from '../Button/index.js'
-import { AlertModal, useModal } from '../Modal/index.js'
+import {
+  DialogBody,
+  DialogConfirm,
+  DialogFooter,
+  DialogHeader,
+  DialogModal,
+} from '../Dialog/index.js'
+import { useModal } from '../Modal/index.js'
 
 const modalSlug = 'document-stale-data'
 
@@ -25,25 +31,20 @@ export const DocumentStaleData: React.FC<{
   }, [isActive, openModal, closeModal])
 
   return (
-    <AlertModal
-      actions={
-        <Button
-          buttonStyle="primary"
-          id={`${modalSlug}-reload`}
+    <DialogModal closeOnEsc={false} size="small" slug={modalSlug}>
+      <DialogHeader title={t('general:documentModified')} />
+      <DialogBody>
+        <p>{t('general:documentOutOfDate')}</p>
+      </DialogBody>
+      <DialogFooter>
+        <DialogConfirm
+          label={t('general:reloadDocument')}
           onClick={async () => {
-            closeModal(modalSlug)
             clearRouteCache()
             await onReload()
           }}
-        >
-          {t('general:reloadDocument')}
-        </Button>
-      }
-      compact
-      slug={modalSlug}
-      title={t('general:documentModified')}
-    >
-      <p>{t('general:documentOutOfDate')}</p>
-    </AlertModal>
+        />
+      </DialogFooter>
+    </DialogModal>
   )
 }

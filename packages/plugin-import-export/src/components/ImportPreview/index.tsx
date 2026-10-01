@@ -11,6 +11,7 @@ import {
   useDebouncedEffect,
   useDocumentInfo,
   useField,
+  useForm,
   useFormFields,
   useTranslation,
 } from '@payloadcms/ui'
@@ -25,9 +26,32 @@ import type {
 import type { ImportPreviewResponse } from '../../types.js'
 
 import { DEFAULT_PREVIEW_LIMIT, PREVIEW_LIMIT_OPTIONS } from '../../constants.js'
-import './index.scss'
+import {
+  getFormStateSignature,
+  getSubmittedFormValues,
+} from '../../utilities/getSubmittedFormValues.js'
+import './index.css'
 
 const baseClass = 'import-preview'
+
+// The file contents are sent separately as `fileData`.
+const nonSerializableFormKeys = ['file']
+
+/**
+ * Browser-native ArrayBuffer → base64. Avoids Node's `Buffer`, which is not
+ * available in the browser under bundlers that don't polyfill it (e.g. Vite),
+ * unlike Next's webpack build. Chunked to stay under `String.fromCharCode`'s
+ * argument-count limit for large files.
+ */
+const arrayBufferToBase64 = (arrayBuffer: ArrayBuffer): string => {
+  const bytes = new Uint8Array(arrayBuffer)
+  const chunkSize = 0x8000
+  let binary = ''
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize))
+  }
+  return btoa(binary)
+}
 
 export const ImportPreview: React.FC = () => {
   const [isPending, startTransition] = useTransition()
@@ -52,6 +76,11 @@ export const ImportPreview: React.FC = () => {
 
   // Access the file field directly from form fields
   const fileField = useFormFields(([fields]) => fields?.file || null)
+
+  const { getData } = useForm()
+  const formStateSignature = useFormFields(([fields]) =>
+    getFormStateSignature({ fields, omit: nonSerializableFormKeys }),
+  )
 
   const [dataToRender, setDataToRender] = useState<Record<string, unknown>[]>([])
   const [columns, setColumns] = useState<Column[]>([])
@@ -114,7 +143,7 @@ export const ImportPreview: React.FC = () => {
           if (fileField?.value && fileField.value instanceof File) {
             // File is being uploaded, read its contents
             const arrayBuffer = await fileField.value.arrayBuffer()
-            const base64 = Buffer.from(arrayBuffer).toString('base64')
+            const base64 = arrayBufferToBase64(arrayBuffer)
             fileData = base64
           } else if (url) {
             // File has been saved, fetch from URL
@@ -123,7 +152,7 @@ export const ImportPreview: React.FC = () => {
               throw new Error('Failed to fetch file')
             }
             const arrayBuffer = await response.arrayBuffer()
-            const base64 = Buffer.from(arrayBuffer).toString('base64')
+            const base64 = arrayBufferToBase64(arrayBuffer)
             fileData = base64
           }
 
@@ -141,6 +170,10 @@ export const ImportPreview: React.FC = () => {
               collectionSlug: targetCollectionSlug,
               fileData,
               format,
+              formData: getSubmittedFormValues({
+                formData: getData(),
+                omit: nonSerializableFormKeys,
+              }),
               previewLimit,
               previewPage,
             }),
@@ -470,6 +503,8 @@ export const ImportPreview: React.FC = () => {
       filename,
       mimeType,
       fileField?.value,
+      formStateSignature,
+      getData,
       collectionConfig,
       config,
       i18n,

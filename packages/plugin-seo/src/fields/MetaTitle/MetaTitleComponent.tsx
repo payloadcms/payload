@@ -23,7 +23,7 @@ import type { GenerateTitle } from '../../types.js'
 
 import { defaults } from '../../defaults.js'
 import { LengthIndicator } from '../../ui/LengthIndicator.js'
-import '../index.scss'
+import '../index.css'
 
 const { maxLength: maxLengthDefault, minLength: minLengthDefault } = defaults.title
 
@@ -90,7 +90,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         hasSavePermission: docInfo.hasSavePermission,
         initialData: docInfo.initialData,
         initialState: reduceToSerializableFields(docInfo.initialState ?? {}),
-        locale: typeof locale === 'object' ? locale?.code : locale,
+        locale: locale?.code,
         title,
       } satisfies Omit<
         Parameters<GenerateTitle>[0],

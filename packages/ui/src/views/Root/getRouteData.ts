@@ -1,0 +1,456 @@
+import type {
+  AdminViewAdapter,
+  AdminViewServerProps,
+  CollectionPreferences,
+  CustomComponent,
+  DocumentSubViewTypes,
+  Payload,
+  PayloadComponent,
+  SanitizedCollectionConfig,
+  SanitizedConfig,
+  SanitizedGlobalConfig,
+  ViewTypes,
+} from 'payload'
+import type React from 'react'
+
+import { parseDocumentID } from 'payload'
+import { formatAdminURL, isNumber } from 'payload/shared'
+
+import type { ViewFromConfig } from './getCustomViewByRoute.js'
+
+import { isPathMatchingRoute } from '../../utilities/isPathMatchingRoute.js'
+import { TrashView } from '../CollectionTrash/index.js'
+import { DocumentView } from '../Document/index.js'
+import { forgotPasswordBaseClass } from '../ForgotPassword/index.js'
+import { HierarchyView } from '../Hierarchy/index.js'
+import { ListView } from '../List/index.js'
+import { loginBaseClass } from '../Login/index.js'
+import { resetPasswordBaseClass } from '../ResetPassword/index.js'
+import { verifyBaseClass } from '../Verify/index.js'
+import { getSubViewActions, getViewActions } from './attachViewActions.js'
+import { getCustomCollectionViewByRoute } from './getCustomCollectionViewByRoute.js'
+import { getCustomGlobalViewByRoute } from './getCustomGlobalViewByRoute.js'
+import { getCustomViewByKey } from './getCustomViewByKey.js'
+import { getCustomViewByRoute } from './getCustomViewByRoute.js'
+import { getDocumentViewInfo } from './getDocumentViewInfo.js'
+
+const baseClasses = {
+  account: 'account',
+  forgot: forgotPasswordBaseClass,
+  login: loginBaseClass,
+  reset: resetPasswordBaseClass,
+  verify: verifyBaseClass,
+}
+
+type OneSegmentViews = {
+  [K in Exclude<keyof SanitizedConfig['admin']['routes'], 'reset'>]: React.FC<AdminViewServerProps>
+}
+
+export type GetRouteDataResult = {
+  collectionConfig?: SanitizedCollectionConfig
+  DefaultView: ViewFromConfig
+  documentSubViewType?: DocumentSubViewTypes
+  globalConfig?: SanitizedGlobalConfig
+  routeParams: {
+    collection?: string
+    global?: string
+    id?: number | string
+    token?: string
+    versionID?: number | string
+  }
+  templateClassName: string
+  templateType: 'default' | 'minimal'
+  viewActions?: CustomComponent[]
+  viewType?: ViewTypes
+}
+
+export type GetRouteDataArgs = {
+  adminRoute: string
+  adminViews: AdminViewAdapter
+  collectionConfig?: SanitizedCollectionConfig
+  /**
+   * User preferences for a collection.
+   *
+   * These preferences are normally undefined
+   * unless the user is on the list view and the
+   * collection is folder enabled.
+   */
+  collectionPreferences?: CollectionPreferences
+  currentRoute: string
+  globalConfig?: SanitizedGlobalConfig
+  payload: Payload
+  searchParams: {
+    [key: string]: string | string[]
+  }
+  segments: string[]
+}
+
+export const getRouteData = ({
+  adminRoute,
+  adminViews,
+  collectionConfig,
+  collectionPreferences = undefined,
+  currentRoute,
+  globalConfig,
+  payload,
+  segments,
+}: GetRouteDataArgs): GetRouteDataResult => {
+  const { config } = payload
+  let ViewToRender: ViewFromConfig = null
+  let templateClassName: string
+  let templateType: 'default' | 'minimal' | undefined
+  let documentSubViewType: DocumentSubViewTypes
+  let viewType: ViewTypes
+  const routeParams: GetRouteDataResult['routeParams'] = {}
+
+  const [segmentOne, segmentTwo, segmentThree, segmentFour, segmentFive, segmentSix] = segments
+
+  const viewActions: CustomComponent[] = [...(config?.admin?.components?.actions || [])]
+
+  const oneSegmentViews: OneSegmentViews = {
+    account: adminViews.account?.Component as React.FC<AdminViewServerProps>,
+    createFirstUser: adminViews.createFirstUser?.Component as React.FC<AdminViewServerProps>,
+    forgot: adminViews.forgot?.Component as React.FC<AdminViewServerProps>,
+    inactivity: adminViews.logoutInactivity?.Component as React.FC<AdminViewServerProps>,
+    login: adminViews.login?.Component as React.FC<AdminViewServerProps>,
+    logout: adminViews.logout?.Component as React.FC<AdminViewServerProps>,
+    unauthorized: adminViews.unauthorized?.Component as React.FC<AdminViewServerProps>,
+  }
+
+  switch (segments.length) {
+    case 0: {
+      if (currentRoute === adminRoute) {
+        ViewToRender = {
+          Component: adminViews.dashboard?.Component as React.FC<AdminViewServerProps>,
+        }
+        templateClassName = 'dashboard'
+        templateType = 'default'
+        viewType = 'dashboard'
+      }
+      break
+    }
+    case 1: {
+      // users can override the default routes via `admin.routes` config
+      // i.e.{ admin: { routes: { logout: '/sign-out', inactivity: '/idle' }}}
+      let viewKey: keyof typeof oneSegmentViews
+
+      if (config.admin.routes) {
+        const matchedRoute = Object.entries(config.admin.routes).find(([, route]) => {
+          return isPathMatchingRoute({
+            currentRoute,
+            exact: true,
+            path: formatAdminURL({
+              adminRoute,
+              path: route,
+            }),
+          })
+        })
+
+        if (matchedRoute) {
+          viewKey = matchedRoute[0] as keyof typeof oneSegmentViews
+        }
+      }
+
+      // Check if a custom view is configured for this viewKey
+      // First try to get custom view by the known viewKey, then fallback to route matching
+      const customView =
+        (viewKey && getCustomViewByKey({ config, viewKey })) ||
+        getCustomViewByRoute({ config, currentRoute })
+
+      if (customView?.view?.payloadComponent || customView?.view?.Component) {
+        // User has configured a custom view (either overriding a built-in or a new custom view)
+        ViewToRender = customView.view
+
+        // If this custom view is overriding a built-in view (viewKey matches a built-in),
+        // use the built-in's template settings and viewType
+        if (viewKey && oneSegmentViews[viewKey]) {
+          viewType = viewKey as ViewTypes
+          templateClassName = baseClasses[viewKey] || viewKey
+          templateType = 'minimal'
+
+          if (viewKey === 'account') {
+            templateType = 'default'
+          }
+        }
+      } else if (oneSegmentViews[viewKey]) {
+        // --> /account
+        // --> /create-first-user
+        // --> /forgot
+        // --> /login
+        // --> /logout
+        // --> /logout-inactivity
+        // --> /unauthorized
+
+        ViewToRender = {
+          Component: oneSegmentViews[viewKey],
+        }
+
+        viewType = viewKey as ViewTypes
+
+        templateClassName = baseClasses[viewKey]
+        templateType = 'minimal'
+
+        if (viewKey === 'account') {
+          templateType = 'default'
+        }
+      }
+      break
+    }
+    case 2: {
+      if (`/${segmentOne}` === config.admin.routes.reset) {
+        // --> /reset/:token
+        ViewToRender = {
+          Component: adminViews.reset?.Component as React.FC<AdminViewServerProps>,
+        }
+        templateClassName = baseClasses[segmentTwo]
+        templateType = 'minimal'
+        viewType = 'reset'
+      } else if (collectionConfig) {
+        // --> /collections/:collectionSlug'
+        routeParams.collection = collectionConfig.slug
+
+        if (collectionPreferences?.listViewType === 'hierarchy' && collectionConfig.hierarchy) {
+          // Render hierarchy view by default if set in preferences
+          ViewToRender = {
+            Component: HierarchyView,
+          }
+
+          templateClassName = `${segmentTwo}-hierarchy`
+          templateType = 'default'
+          viewType = 'hierarchy'
+        } else {
+          // Regular list view
+          ViewToRender = {
+            Component: ListView,
+          }
+
+          templateClassName = `${segmentTwo}-list`
+          templateType = 'default'
+          viewType = 'list'
+        }
+
+        viewActions.push(...(collectionConfig.admin.components?.views?.list?.actions || []))
+      } else if (globalConfig) {
+        // --> /globals/:globalSlug
+        routeParams.global = globalConfig.slug
+
+        ViewToRender = {
+          Component: DocumentView,
+        }
+
+        templateClassName = 'global-edit'
+        templateType = 'default'
+        viewType = 'document'
+
+        // add default view actions
+        viewActions.push(
+          ...getViewActions({
+            editConfig: globalConfig.admin?.components?.views?.edit,
+            viewKey: 'default',
+          }),
+        )
+      }
+      break
+    }
+    default:
+      if (segmentTwo === 'verify') {
+        // --> /:collectionSlug/verify/:token
+        routeParams.collection = segmentOne
+        routeParams.token = segmentThree
+
+        ViewToRender = {
+          Component: adminViews.verify?.Component as React.FC<AdminViewServerProps>,
+        }
+
+        templateClassName = 'verify'
+        templateType = 'minimal'
+        viewType = 'verify'
+      } else if (collectionConfig) {
+        routeParams.collection = collectionConfig.slug
+
+        if (segmentThree === 'trash' && typeof segmentFour === 'string') {
+          // --> /collections/:collectionSlug/trash/:id (read-only)
+          // --> /collections/:collectionSlug/trash/:id/api
+          // --> /collections/:collectionSlug/trash/:id/preview
+          // --> /collections/:collectionSlug/trash/:id/versions
+          // --> /collections/:collectionSlug/trash/:id/versions/:versionID
+          routeParams.id = segmentFour
+          routeParams.versionID = segmentSix
+
+          ViewToRender = {
+            Component: DocumentView,
+          }
+
+          templateClassName = `collection-default-edit`
+          templateType = 'default'
+
+          const viewInfo = getDocumentViewInfo([segmentFive, segmentSix])
+          viewType = viewInfo.viewType
+          documentSubViewType = viewInfo.documentSubViewType
+
+          viewActions.push(
+            ...getSubViewActions({
+              collectionOrGlobal: collectionConfig,
+              viewKeyArg: documentSubViewType,
+            }),
+          )
+        } else if (segmentThree === 'trash') {
+          // --> /collections/:collectionSlug/trash
+          ViewToRender = {
+            Component: TrashView,
+          }
+
+          templateClassName = `${segmentTwo}-trash`
+          templateType = 'default'
+          viewType = 'trash'
+
+          viewActions.push(...(collectionConfig.admin.components?.views?.list?.actions || []))
+        } else if (segmentThree === 'hierarchy' && collectionConfig.hierarchy) {
+          // --> /collections/:collectionSlug/hierarchy
+          ViewToRender = {
+            Component: HierarchyView,
+          }
+
+          templateClassName = `${segmentTwo}-hierarchy`
+          templateType = 'default'
+          viewType = 'hierarchy'
+
+          viewActions.push(...(collectionConfig.admin.components?.views?.list?.actions || []))
+        } else {
+          // Check for custom collection views before assuming it's an edit view
+          const baseRoute = `/${segmentOne}/${segmentTwo}`
+          const customCollectionView = getCustomCollectionViewByRoute({
+            adminRoute,
+            baseRoute,
+            currentRoute,
+            views: collectionConfig.admin.components?.views,
+          })
+
+          if (customCollectionView.viewKey && customCollectionView.view.payloadComponent) {
+            // --> /collections/:collectionSlug/:customViewPath
+            ViewToRender = customCollectionView.view
+
+            templateClassName = `collection-${customCollectionView.viewKey}`
+            templateType = 'default'
+            viewType = customCollectionView.viewKey
+          } else {
+            // Collection Edit Views
+            // --> /collections/:collectionSlug/create
+            // --> /collections/:collectionSlug/:id
+            // --> /collections/:collectionSlug/:id/api
+            // --> /collections/:collectionSlug/:id/versions
+            // --> /collections/:collectionSlug/:id/versions/:versionID
+            routeParams.id = segmentThree === 'create' ? undefined : segmentThree
+            routeParams.versionID = segmentFive
+
+            ViewToRender = {
+              Component: DocumentView,
+            }
+
+            templateClassName = `collection-default-edit`
+            templateType = 'default'
+
+            const viewInfo = getDocumentViewInfo([segmentFour, segmentFive])
+            viewType = viewInfo.viewType
+            documentSubViewType = viewInfo.documentSubViewType
+
+            viewActions.push(
+              ...getSubViewActions({
+                collectionOrGlobal: collectionConfig,
+                viewKeyArg: documentSubViewType,
+              }),
+            )
+          }
+        }
+      } else if (globalConfig) {
+        // Check for custom global views before assuming it's an edit view
+        const baseRoute = `/${segmentOne}/${segmentTwo}`
+        const customGlobalView = getCustomGlobalViewByRoute({
+          adminRoute,
+          baseRoute,
+          currentRoute,
+          views: globalConfig.admin.components?.views,
+        })
+
+        if (customGlobalView.viewKey && customGlobalView.view.payloadComponent) {
+          // --> /globals/:globalSlug/:customViewPath
+          ViewToRender = customGlobalView.view
+
+          templateClassName = `global-${customGlobalView.viewKey}`
+          templateType = 'default'
+          viewType = customGlobalView.viewKey
+        } else {
+          // Global Edit Views
+          // --> /globals/:globalSlug/versions
+          // --> /globals/:globalSlug/versions/:versionID
+          // --> /globals/:globalSlug/api
+          routeParams.global = globalConfig.slug
+          routeParams.versionID = segmentFour
+
+          ViewToRender = {
+            Component: DocumentView,
+          }
+
+          templateClassName = `global-edit`
+          templateType = 'default'
+
+          const viewInfo = getDocumentViewInfo([segmentThree, segmentFour])
+          viewType = viewInfo.viewType
+          documentSubViewType = viewInfo.documentSubViewType
+
+          viewActions.push(
+            ...getSubViewActions({
+              collectionOrGlobal: globalConfig,
+              viewKeyArg: documentSubViewType,
+            }),
+          )
+        }
+      }
+      break
+  }
+
+  if (!ViewToRender) {
+    ViewToRender = getCustomViewByRoute({ config, currentRoute })?.view
+  }
+
+  if (collectionConfig) {
+    if (routeParams.id) {
+      routeParams.id = parseDocumentID({
+        id: routeParams.id,
+        collectionSlug: collectionConfig.slug,
+        payload,
+      })
+    }
+
+    if (routeParams.versionID) {
+      routeParams.versionID = parseDocumentID({
+        id: routeParams.versionID,
+        collectionSlug: collectionConfig.slug,
+        payload,
+      })
+    }
+  }
+
+  if (globalConfig && routeParams.versionID) {
+    routeParams.versionID =
+      payload.db.defaultIDType === 'number' && isNumber(routeParams.versionID)
+        ? Number(routeParams.versionID)
+        : routeParams.versionID
+  }
+
+  if (viewActions.length) {
+    viewActions.reverse()
+  }
+
+  return {
+    collectionConfig,
+    DefaultView: ViewToRender,
+    documentSubViewType,
+    globalConfig,
+    routeParams,
+    templateClassName,
+    templateType,
+    viewActions: viewActions.length ? viewActions : undefined,
+    viewType,
+  }
+}

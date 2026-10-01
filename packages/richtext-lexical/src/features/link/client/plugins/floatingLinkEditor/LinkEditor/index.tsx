@@ -7,8 +7,8 @@ import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
 import {
-  ExternalLinkIcon,
   formatDrawerSlug,
+  NewTabIcon,
   useConfig,
   useEditDepth,
   useLocale,
@@ -20,6 +20,7 @@ import {
   $getSelection,
   $isLineBreakNode,
   $isRangeSelection,
+  $onUpdate,
   COMMAND_PRIORITY_HIGH,
   COMMAND_PRIORITY_LOW,
   getDOMSelection,
@@ -30,7 +31,7 @@ import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import type { LinkNode } from '../../../../nodes/LinkNode.js'
-import type { LinkFields } from '../../../../nodes/types.js'
+import type { LinkFields } from '../../../../server/schema.js'
 import type { LinkPayload } from '../types.js'
 
 import { useEditorConfigContext } from '../../../../../../lexical/config/client/EditorConfigProvider.js'
@@ -325,15 +326,17 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
       editor.registerCommand(
         SELECTION_CHANGE_COMMAND,
         () => {
-          void $updateLinkEditor()
+          $onUpdate(() => editor.read('latest', $updateLinkEditor))
           return true
         },
         COMMAND_PRIORITY_LOW,
       ),
       editor.registerCommand(
         KEY_ESCAPE_COMMAND,
-        () => {
+        (event) => {
           if (isLink) {
+            event.preventDefault()
+            event.stopImmediatePropagation()
             setNotLink()
 
             return true
@@ -364,7 +367,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
   return (
     <React.Fragment>
-      <div className="link-editor" data-theme="dark" ref={editorRef}>
+      <div className="link-editor" data-theme="dark" hidden={!isLink} ref={editorRef}>
         <div className="link-input">
           {linkNode?.__fields?.linkType === 'custom' ? <LinkIcon /> : <PageIcon />}
           {linkUrl && linkUrl.length > 0 ? (
@@ -372,7 +375,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
               {linkLabel != null && linkLabel.length > 0 ? linkLabel : linkUrl}
               {linkNode?.__fields.newTab ? (
                 <>
-                  <ExternalLinkIcon size={16} /> <div className="link-input__divider" />{' '}
+                  <NewTabIcon size={16} /> <div className="link-input__divider" />{' '}
                 </>
               ) : null}
             </a>
@@ -381,7 +384,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
               <span className="link-input__label-pure">{linkLabel}</span>
               {linkNode?.__fields.newTab ? (
                 <>
-                  <ExternalLinkIcon size={16} /> <div className="link-input__divider" />{' '}
+                  <NewTabIcon size={16} /> <div className="link-input__divider" />{' '}
                 </>
               ) : null}
             </>

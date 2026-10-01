@@ -8,7 +8,6 @@ import { Content } from '../../blocks/Content/config'
 import { FormBlock } from '../../blocks/Form/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
 import { hero } from '@/heros/config'
-import { slugField } from 'payload'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
@@ -21,7 +20,7 @@ import {
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
 
-export const Pages: CollectionConfig<'pages'> = {
+export const Pages: CollectionConfig = {
   slug: 'pages',
   access: {
     create: authenticated,
@@ -31,7 +30,10 @@ export const Pages: CollectionConfig<'pages'> = {
   },
   // This config controls what's populated by default when a page is referenced
   // https://payloadcms.com/docs/queries/select#defaultpopulate-collection-config-property
-  // Type safe if the collection slug generic is passed to `CollectionConfig` - `CollectionConfig<'pages'>
+  // NOTE: the slug generic (CollectionConfig<'pages'>) is dropped to work around a TypeScript 6
+  // regression where a slug-typed config's defaultPopulate is not assignable to buildConfig's
+  // collections array. defaultPopulate falls back to SelectType (keys no longer field-checked);
+  // restore the generic once the core types are fixed.
   defaultPopulate: {
     title: true,
     slug: true,
@@ -117,7 +119,11 @@ export const Pages: CollectionConfig<'pages'> = {
         position: 'sidebar',
       },
     },
-    slugField(),
+    {
+      name: 'slug',
+      type: 'slug',
+      useAsSlug: 'title',
+    },
   ],
   hooks: {
     afterChange: [revalidatePage],

@@ -8,8 +8,8 @@ async function main() {
 
   const { bump = 'minor', 'dry-run': dryRun, tag, debug } = args
 
-  if (!tag || !['canary', 'internal', 'internal-debug'].includes(tag)) {
-    abort('Tag is required. Use --tag <canary|internal|internal-debug>')
+  if (!tag || !['internal', 'internal-debug'].includes(tag)) {
+    abort('Tag is required. Use --tag <internal|internal-debug>')
   }
 
   console.log(`\n  Bump: ${bump}`)
@@ -17,11 +17,11 @@ async function main() {
   console.log(`  Debug: ${debug ? 'Enabled' : 'Disabled'}`)
   console.log(`  Dry Run: ${dryRun ? 'Enabled' : 'Disabled'}`)
 
-  const workspace = await getWorkspace()
+  const workspace = getWorkspace()
   await workspace.bumpVersion(tag)
   await workspace.build({ debug: debug ?? false })
   console.log('Build successful. Publishing packages...')
-  await workspace.publishSync({ dryRun: dryRun ?? false, tag })
+  await workspace.publish({ dryRun: dryRun ?? false, tag })
 
   header('🎉 Done!')
 }

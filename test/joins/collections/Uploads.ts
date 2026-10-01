@@ -23,4 +23,5 @@ export const Uploads: CollectionConfig = {
   upload: {
     staticDir: path.resolve(dirname, '../uploads'),
   },
+  versions: false,
 }

@@ -1,4 +1,4 @@
-import type { ElementTransformer } from '../../../packages/@lexical/markdown/MarkdownTransformers.js'
+import type { ElementTransformer } from '@lexical/markdown'
 
 import {
   $createHorizontalRuleNode,
@@ -6,7 +6,7 @@ import {
   HorizontalRuleNode,
 } from './nodes/HorizontalRuleNode.js'
 
-export const MarkdownTransformer: ElementTransformer = {
+export const PAYLOAD_HORIZONTAL_RULE: ElementTransformer = {
   type: 'element',
   dependencies: [HorizontalRuleNode],
   export: (node, exportChildren) => {

@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
+
 import { POLL_TOPASS_TIMEOUT } from '../../../playwright.config.js'
 
 export const selectLivePreviewBreakpoint = async (page: Page, breakpointLabel: string) => {
@@ -21,7 +22,9 @@ export const selectLivePreviewBreakpoint = async (page: Page, breakpointLabel: s
 
   await expect(breakpointSelector).toContainText(breakpointLabel)
 
-  const option = page.locator('.live-preview-toolbar-controls__breakpoint .popup__trigger-wrap button')
+  const option = page.locator(
+    '.live-preview-toolbar-controls__breakpoint .popup__trigger-wrap button',
+  )
 
   await expect(option).toHaveText(breakpointLabel)
 }

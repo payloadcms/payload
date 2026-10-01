@@ -4,6 +4,7 @@ import React, { Fragment } from 'react'
 import type { Props } from './types.js'
 
 import { ChevronIcon } from '../../icons/Chevron/index.js'
+import { ClipboardIcon } from '../../icons/Clipboard/index.js'
 import { EditIcon } from '../../icons/Edit/index.js'
 import { LinkIcon } from '../../icons/Link/index.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
@@ -11,6 +12,7 @@ import { SpinnerIcon } from '../../icons/Spinner/index.js'
 import { SwapIcon } from '../../icons/Swap/index.js'
 import { WriteIcon } from '../../icons/Write/index.js'
 import { XIcon } from '../../icons/X/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { Link } from '../Link/index.js'
 import { Popup } from '../Popup/index.js'
 import './index.css'
@@ -18,6 +20,7 @@ import { Tooltip } from '../Tooltip/index.js'
 
 const icons = {
   chevron: ChevronIcon,
+  clipboard: ClipboardIcon,
   edit: EditIcon,
   link: LinkIcon,
   plus: PlusIcon,
@@ -62,7 +65,11 @@ export const Button: React.FC<Props> = (props) => {
   const {
     id,
     type = 'button',
+    'aria-controls': ariaControls,
+    'aria-expanded': ariaExpanded,
+    'aria-haspopup': ariaHasPopup,
     'aria-label': ariaLabel,
+    'aria-pressed': ariaPressed,
     buttonStyle = 'primary',
     children,
     className,
@@ -76,6 +83,7 @@ export const Button: React.FC<Props> = (props) => {
     margin = true,
     newTab,
     onClick,
+    onKeyDown,
     onMouseDown,
     popupIconSize,
     ref,
@@ -89,6 +97,7 @@ export const Button: React.FC<Props> = (props) => {
   } = props
 
   const [showTooltip, setShowTooltip] = React.useState(false)
+  const { t } = useTranslation()
 
   // Explicit `=== true` check preserves `false` for aria-disabled attribute.
   // Using `disabled || loading` would treat `false` as falsy, omitting the attribute entirely.
@@ -133,11 +142,16 @@ export const Button: React.FC<Props> = (props) => {
   const buttonProps = {
     id,
     type,
+    'aria-controls': ariaControls,
     'aria-disabled': isDisabled,
+    'aria-expanded': ariaExpanded,
+    'aria-haspopup': ariaHasPopup,
     'aria-label': ariaLabel,
+    'aria-pressed': ariaPressed,
     className: !SubMenuPopupContent ? [classes, styleClasses].join(' ') : classes,
     disabled: isDisabled,
     onClick: !isDisabled ? handleClick : undefined,
+    onKeyDown: !isDisabled ? onKeyDown : undefined,
     onMouseDown: !isDisabled ? onMouseDown : undefined,
     onPointerEnter: tooltip ? () => setShowTooltip(true) : undefined,
     onPointerLeave: tooltip ? () => setShowTooltip(false) : undefined,
@@ -208,12 +222,14 @@ export const Button: React.FC<Props> = (props) => {
         {buttonElement}
         <Popup
           button={<ChevronIcon size={popupIconSize} />}
+          buttonAriaLabel={t('general:moreOptions')}
           buttonSize={size}
           className={disabled && !enableSubMenu ? `${baseClass}--popup-disabled` : ''}
           disabled={disabled && !enableSubMenu}
           horizontalAlign="right"
           id={`${id}-popup`}
           noBackground
+          popupType="menu"
           render={({ close }) => SubMenuPopupContent({ close: () => close() })}
           size="small"
           verticalAlign="bottom"

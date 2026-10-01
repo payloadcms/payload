@@ -16,4 +16,5 @@ export const Users: CollectionConfig = {
     },
     roles,
   ],
+  versions: false,
 }

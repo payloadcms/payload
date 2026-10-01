@@ -98,6 +98,8 @@ export interface Config {
   locale: null;
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -131,6 +133,14 @@ export interface Page {
   id: string;
   text?: string | null;
   postsRelationship?: (string | Post)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -141,6 +151,14 @@ export interface Page {
 export interface Post {
   id: string;
   text?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -152,6 +170,14 @@ export interface User {
   id: string;
   name?: string | null;
   roles?: ('admin' | 'editor' | 'user')[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -159,6 +185,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -185,6 +212,14 @@ export interface DefaultColumn {
   field6?: string | null;
   field7?: string | null;
   defaultColumnField?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -269,6 +304,25 @@ export interface PayloadMigration {
 export interface PayloadQueryPreset {
   id: string;
   title: string;
+  groupBy?: string | null;
+  columns?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  where?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   isShared?: boolean | null;
   access?: {
     read?: {
@@ -286,25 +340,6 @@ export interface PayloadQueryPreset {
       users?: (string | User)[] | null;
     };
   };
-  where?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  columns?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  groupBy?: string | null;
   relatedCollection: 'pages' | 'posts' | 'default-columns';
   /**
    * This is a temporary field used to determine if updating the preset would remove the user's access to it. When `true`, this record will be deleted after running the preset's `validate` function.
@@ -320,6 +355,8 @@ export interface PayloadQueryPreset {
 export interface PagesSelect<T extends boolean = true> {
   text?: T;
   postsRelationship?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -329,6 +366,8 @@ export interface PagesSelect<T extends boolean = true> {
  */
 export interface PostsSelect<T extends boolean = true> {
   text?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -339,6 +378,8 @@ export interface PostsSelect<T extends boolean = true> {
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
   roles?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -346,6 +387,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -369,6 +411,8 @@ export interface DefaultColumnsSelect<T extends boolean = true> {
   field6?: T;
   field7?: T;
   defaultColumnField?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -418,6 +462,9 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface PayloadQueryPresetsSelect<T extends boolean = true> {
   title?: T;
+  groupBy?: T;
+  columns?: T;
+  where?: T;
   isShared?: T;
   access?:
     | T
@@ -443,9 +490,6 @@ export interface PayloadQueryPresetsSelect<T extends boolean = true> {
               users?: T;
             };
       };
-  where?: T;
-  columns?: T;
-  groupBy?: T;
   relatedCollection?: T;
   isTemp?: T;
   updatedAt?: T;
@@ -460,6 +504,39 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection: 'pages' | 'posts' | 'users' | 'default-columns';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?: ('pages' | 'posts' | 'users' | 'default-columns')[] | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

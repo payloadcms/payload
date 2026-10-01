@@ -10,10 +10,10 @@ export type TypedPayloadSDK = PayloadSDK<GeneratedTypes>
  */
 export const getSDK = (config: SanitizedConfig) => {
   const api = {
-    GET: REST_GET(config),
-    POST: REST_POST(config),
-    PATCH: REST_PATCH(config),
     DELETE: REST_DELETE(config),
+    GET: REST_GET(config),
+    PATCH: REST_PATCH(config),
+    POST: REST_POST(config),
     PUT: REST_PUT(config),
   }
 

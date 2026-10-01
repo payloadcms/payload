@@ -5,7 +5,7 @@ import type { PublishButtonClientProps } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL, hasAutosaveEnabled, hasLocalizeStatusEnabled } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback } from 'react'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
@@ -40,7 +40,8 @@ export function PublishButton({
   const { submit } = useForm()
   const modified = useFormModified()
   const editDepth = useEditDepth()
-  const { code: localeCode } = useLocale()
+  const locale = useLocale()
+  const localeCode = locale?.code
   const {
     localization,
     routes: { api },
@@ -67,12 +68,10 @@ export function PublishButton({
     (modified || hasNewerVersions || !hasPublishedDoc) &&
     uploadStatus !== 'uploading'
 
-  const [hasLocalizedFields, setHasLocalizedFields] = useState(false)
-
-  useEffect(() => {
-    const hasLocalizedField = traverseForLocalizedFields(entityConfig?.fields)
-    setHasLocalizedFields(hasLocalizedField)
-  }, [entityConfig?.fields])
+  const hasLocalizedFields = React.useMemo(
+    () => Boolean(entityConfig?.fields && traverseForLocalizedFields(entityConfig.fields)),
+    [entityConfig?.fields],
+  )
 
   const isSpecificLocalePublishEnabled = localization && hasLocalizedFields && hasPublishPermission
 
@@ -186,7 +185,7 @@ export function PublishButton({
     setMostRecentVersionIsAutosaved,
   ])
 
-  const publishSpecificLocale = useCallback(
+  const publishLocale = useCallback(
     async (locale) => {
       if (uploadStatus === 'uploading') {
         return
@@ -196,7 +195,6 @@ export function PublishButton({
         {
           depth: 0,
           locale,
-          publishSpecificLocale: locale,
         },
         { addQueryPrefix: true },
       )
@@ -235,11 +233,6 @@ export function PublishButton({
     ],
   )
 
-  // Publish to all locales unless there are localized fields AND defaultLocalePublishOption is 'active'
-  const isDefaultPublishAll =
-    !isSpecificLocalePublishEnabled ||
-    (localization && localization?.defaultLocalePublishOption !== 'active')
-
   const activeLocale =
     localization &&
     localization?.locales.find((locale) =>
@@ -257,37 +250,22 @@ export function PublishButton({
       <FormSubmit
         buttonId="action-save"
         disabled={!canPublish}
-        onClick={isDefaultPublishAll ? publish : () => publishSpecificLocale(activeLocale.code)}
+        onClick={isSpecificLocalePublishEnabled ? () => publishLocale(activeLocale.code) : publish}
         size="medium"
         SubMenuPopupContent={
           isSpecificLocalePublishEnabled
-            ? ({ close }) => {
-                return (
-                  <React.Fragment>
-                    {isSpecificLocalePublishEnabled && (
-                      <PopupList.ButtonGroup>
-                        <PopupList.Button
-                          id="publish-locale"
-                          onClick={
-                            isDefaultPublishAll
-                              ? () => publishSpecificLocale(activeLocale.code)
-                              : publish
-                          }
-                        >
-                          {isDefaultPublishAll
-                            ? t('version:publishIn', { locale: activeLocaleLabel })
-                            : t('version:publishAllLocales')}
-                        </PopupList.Button>
-                      </PopupList.ButtonGroup>
-                    )}
-                  </React.Fragment>
-                )
-              }
+            ? () => (
+                <PopupList.ButtonGroup>
+                  <PopupList.Button id="publish-all-locales" onClick={publish}>
+                    {t('version:publishAllLocales')}
+                  </PopupList.Button>
+                </PopupList.ButtonGroup>
+              )
             : undefined
         }
         type="button"
       >
-        {!isDefaultPublishAll ? (
+        {isSpecificLocalePublishEnabled ? (
           t('version:publishIn', { locale: activeLocaleLabel })
         ) : (
           <React.Fragment>

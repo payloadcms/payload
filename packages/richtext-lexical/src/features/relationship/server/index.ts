@@ -3,9 +3,13 @@ import type { CollectionSlug } from 'payload'
 import { populate } from '../../../populateGraphQL/populate.js'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
+import { filterEnabledRelationshipCollections } from '../shared/filterEnabledRelationshipCollections.js'
 import { relationshipPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
 import { RelationshipServerNode } from './nodes/RelationshipNode.js'
+import { createRelationshipNodeJSONSchema } from './schema.js'
+
+export type { RelationshipData, SerializedRelationshipNode } from './schema.js'
 
 export type ExclusiveRelationshipFeatureProps =
   | {
@@ -39,17 +43,34 @@ export type RelationshipFeatureProps = {
   maxDepth?: number
 } & ExclusiveRelationshipFeatureProps
 
+export type RelationshipFeatureServerProps = {
+  /** Collection policy resolved during feature initialization. */
+  enabledCollectionSlugs: CollectionSlug[]
+} & RelationshipFeatureProps
+
+export type RelationshipFeatureClientProps = {
+  enabledCollectionSlugs: CollectionSlug[]
+}
+
 export const RelationshipFeature = createServerFeature<
   RelationshipFeatureProps,
-  RelationshipFeatureProps,
-  ExclusiveRelationshipFeatureProps
+  RelationshipFeatureServerProps,
+  RelationshipFeatureClientProps
 >({
-  feature: ({ props }) => {
-    // we don't need to pass maxDepth to the client, it's only used on the server
-    const { maxDepth, ...clientFeatureProps } = props ?? {}
+  feature: ({ config, props: unsanitizedProps }) => {
+    const props: RelationshipFeatureServerProps = {
+      ...unsanitizedProps,
+      enabledCollectionSlugs: filterEnabledRelationshipCollections(config.collections, {
+        ...unsanitizedProps,
+        uploads: false,
+      }).map(({ slug }) => slug),
+    }
+
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#RelationshipFeatureClient',
-      clientFeatureProps,
+      clientFeatureProps: {
+        enabledCollectionSlugs: props.enabledCollectionSlugs,
+      },
       i18n,
       nodes: [
         createNode({
@@ -67,7 +88,7 @@ export const RelationshipFeature = createServerFeature<
                 req,
                 showHiddenFields,
               }) => {
-                if (!node?.value) {
+                if (!node?.value || !props.enabledCollectionSlugs.includes(node.relationTo)) {
                   return node
                 }
                 const collection = req.payload.collections[node?.relationTo]
@@ -78,7 +99,8 @@ export const RelationshipFeature = createServerFeature<
                 // @ts-expect-error
                 const id = node?.value?.id || node?.value // for backwards-compatibility
 
-                const populateDepth = maxDepth !== undefined && maxDepth < depth ? maxDepth : depth
+                const populateDepth =
+                  props.maxDepth !== undefined && props.maxDepth < depth ? props.maxDepth : depth
 
                 populationPromises.push(
                   populate({
@@ -101,9 +123,22 @@ export const RelationshipFeature = createServerFeature<
               },
             ],
           },
+          jsonSchema: createRelationshipNodeJSONSchema(props),
           node: RelationshipServerNode,
+          validations: [
+            ({
+              node,
+              validation: {
+                options: { req },
+              },
+            }) =>
+              props.enabledCollectionSlugs.includes(node.relationTo)
+                ? true
+                : req.t('validation:invalidSelection'),
+          ],
         }),
       ],
+      sanitizedServerFeatureProps: props,
     }
   },
   key: 'relationship',

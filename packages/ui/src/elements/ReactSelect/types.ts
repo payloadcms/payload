@@ -1,5 +1,7 @@
 import type { LabelFunction } from 'payload'
+import type { AriaAttributes } from 'react'
 import type {
+  ClassNamesConfig,
   CommonProps,
   GroupBase,
   Props as ReactSelectStateManagerProps,
@@ -8,7 +10,8 @@ import type {
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
 
-type CustomSelectProps = {
+export type CustomSelectProps = {
+  clearValueLabel?: string
   disableKeyDown?: boolean
   disableMouseDown?: boolean
   draggableProps?: any
@@ -18,6 +21,8 @@ type CustomSelectProps = {
     className: string,
     selectProps: ReactSelectStateManagerProps,
   ) => any
+  /** Force the portaled menu to render with a specific theme, independent of the control's ambient theme. */
+  menuPortalTheme?: 'dark' | 'light'
   onDelete?: DocumentDrawerProps['onDelete']
   onDocumentOpen?: (args: {
     collectionSlug: string
@@ -27,6 +32,7 @@ type CustomSelectProps = {
   }) => void
   onDuplicate?: DocumentDrawerProps['onSave']
   onSave?: DocumentDrawerProps['onSave']
+  removeValueLabel?: string
   valueContainerLabel?: string
 }
 
@@ -65,9 +71,13 @@ export type OptionGroup = {
 }
 
 export type ReactSelectAdapterProps = {
+  'aria-label'?: AriaAttributes['aria-label']
+  'aria-labelledby'?: AriaAttributes['aria-labelledby']
   backspaceRemovesValue?: boolean
   blurInputOnSelect?: boolean
+  captureMenuScroll?: boolean
   className?: string
+  classNames?: ClassNamesConfig<Option, boolean, GroupBase<Option>>
   components?: {
     [key: string]: React.FC<any>
   }
@@ -84,6 +94,16 @@ export type ReactSelectAdapterProps = {
         search: string,
       ) => boolean)
     | undefined
+  formatOptionLabel?: ReactSelectStateManagerProps<
+    Option,
+    boolean,
+    GroupBase<Option>
+  >['formatOptionLabel']
+  getOptionLabel?: ReactSelectStateManagerProps<
+    Option,
+    boolean,
+    GroupBase<Option>
+  >['getOptionLabel']
   getOptionValue?: ReactSelectStateManagerProps<
     Option,
     boolean,
@@ -101,6 +121,8 @@ export type ReactSelectAdapterProps = {
   isSearchable?: boolean
   isSortable?: boolean
   menuIsOpen?: boolean
+  menuPortalTarget?: HTMLElement | null
+  menuPosition?: 'absolute' | 'fixed'
   noOptionsMessage?: (obj: { inputValue: string }) => string
   numberOnly?: boolean
   onChange?: (value: Option | Option[]) => void

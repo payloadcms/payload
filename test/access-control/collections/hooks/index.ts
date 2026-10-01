@@ -41,4 +41,5 @@ export const Hooks: CollectionConfig = {
       },
     },
   ],
+  versions: false,
 }

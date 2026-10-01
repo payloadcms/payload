@@ -1,8 +1,6 @@
-import type { Access, CollectionConfig, Where } from 'payload'
-
 import { getUserTenantIDs } from '@payloadcms/plugin-multi-tenant/utilities'
 import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
-import { createFolderField } from 'payload'
+import { type Access, type CollectionConfig, createFolderField, type Where } from 'payload'
 
 import { foldersSlug, menuItemsSlug, notTenantedSlug, relationshipsSlug } from '../shared.js'
 
@@ -130,4 +128,5 @@ export const MenuItems: CollectionConfig = {
       relationTo: foldersSlug,
     }),
   ],
+  versions: false,
 }

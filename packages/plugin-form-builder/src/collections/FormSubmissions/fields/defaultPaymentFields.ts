@@ -7,18 +7,24 @@ export const defaultPaymentFields: Field = {
     {
       name: 'field',
       type: 'text',
-      label: 'Field',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:field'),
     },
     {
       name: 'status',
       type: 'text',
-      label: 'Status',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:paymentStatus'),
     },
     {
       name: 'amount',
       type: 'number',
       admin: {
-        description: 'Amount in cents',
+        description: ({ t }) =>
+          // @ts-expect-error - translations are not typed in plugins yet
+          t('plugin-form-builder:amountInCents'),
       },
     },
     {
@@ -32,20 +38,28 @@ export const defaultPaymentFields: Field = {
         {
           name: 'token',
           type: 'text',
-          label: 'token',
+          label: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:token'),
         },
         {
           name: 'brand',
           type: 'text',
-          label: 'Brand',
+          label: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:brand'),
         },
         {
           name: 'number',
           type: 'text',
-          label: 'Number',
+          label: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:numberSingular'),
         },
       ],
-      label: 'Credit Card',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:creditCard'),
     },
   ],
 }

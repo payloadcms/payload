@@ -1,13 +1,12 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
-import type { SQLiteSelect, SQLiteSelectBase } from 'drizzle-orm/sqlite-core'
+import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
 
-import { and, asc, count, desc, eq, getTableName, or, sql } from 'drizzle-orm'
+import { count, sql } from 'drizzle-orm'
 import {
   appendVersionToQueryKey,
   buildVersionCollectionFields,
   combineQueries,
   type FlattenedField,
-  getFieldByPath,
   getQueryDraftsSort,
   type JoinQuery,
   type SelectMode,
@@ -22,78 +21,15 @@ import type { Result } from './buildFindManyArgs.js'
 
 import { buildQuery } from '../queries/buildQuery.js'
 import { getTableAlias } from '../queries/getTableAlias.js'
-import { operatorMap } from '../queries/operatorMap.js'
 import { getArrayRelationName } from '../utilities/getArrayRelationName.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { jsonAggBuildObject } from '../utilities/json.js'
 import { rawConstraint } from '../utilities/rawConstraint.js'
-import { sanitizePathSegment } from '../utilities/sanitizePathSegment.js'
 import {
   InternalBlockTableNameIndex,
   resolveBlockTableName,
 } from '../utilities/validateExistingBlockIsIdentical.js'
-
-const flattenAllWherePaths = (where: Where, paths: { path: string; ref: any }[]) => {
-  for (const k in where) {
-    if (['AND', 'OR'].includes(k.toUpperCase())) {
-      if (Array.isArray(where[k])) {
-        for (const whereField of where[k]) {
-          flattenAllWherePaths(whereField, paths)
-        }
-      }
-    } else {
-      // TODO: explore how to support arrays/relationship querying.
-      paths.push({ path: k.split('.').join('_'), ref: where })
-    }
-  }
-}
-
-const buildSQLWhere = (where: Where, alias: string) => {
-  for (const k in where) {
-    if (['AND', 'OR'].includes(k.toUpperCase())) {
-      if (Array.isArray(where[k])) {
-        const op = 'AND' === k.toUpperCase() ? and : or
-        const accumulated = []
-        for (const whereField of where[k]) {
-          accumulated.push(buildSQLWhere(whereField, alias))
-        }
-        return op(...accumulated)
-      }
-    } else {
-      let payloadOperator = Object.keys(where[k])[0]
-
-      const value = where[k][payloadOperator]
-      if (payloadOperator === '$raw') {
-        if (typeof value !== 'string') {
-          return undefined
-        }
-        return sql.raw(value)
-      }
-
-      // Handle exists: false -> use isNull instead of isNotNull
-
-      // This logic is duplicated from sanitizeQueryValue.ts because buildSQLWhere
-      // is a simplified WHERE builder for polymorphic joins that doesn't have access
-      // to field definitions needed by sanitizeQueryValue
-      if (payloadOperator === 'exists' && value === false) {
-        payloadOperator = 'isNull'
-      }
-
-      if (!(payloadOperator in operatorMap)) {
-        return undefined
-      }
-
-      const sanitizedColumnName = k
-        .split('.')
-        .map((s) => sanitizePathSegment(s))
-        .join('_')
-
-      return operatorMap[payloadOperator](sql.raw(`"${alias}"."${sanitizedColumnName}"`), value)
-    }
-  }
-}
-
-type SQLSelect = SQLiteSelectBase<any, any, any, any>
+import { buildPolymorphicJoinQuery } from './buildPolymorphicJoinQuery.js'
 
 type TraverseFieldArgs = {
   _locales: Result
@@ -296,7 +232,7 @@ export const traverseFields = ({
           break
         }
 
-        ;(field.blockReferences ?? field.blocks).forEach((_block) => {
+        field.blocks.forEach((_block) => {
           const block = typeof _block === 'string' ? adapter.payload.blocks[_block] : _block
           const blockKey = `_blocks_${block.slug}${!block[InternalBlockTableNameIndex] ? '' : `_${block[InternalBlockTableNameIndex]}`}`
 
@@ -471,180 +407,28 @@ export const traverseFields = ({
           limit += 1
         }
 
-        const columnName = `${path.replaceAll('.', '_')}${field.name}`
-
-        const db = adapter.drizzle as LibSQLDatabase
-
         if (Array.isArray(field.collection)) {
-          let currentQuery: null | SQLSelect = null
-          const onPath = field.on.split('.').join('_')
+          const polymorphicJoinQuery = buildPolymorphicJoinQuery({
+            adapter,
+            currentTableName,
+            field,
+            limit,
+            locale,
+            page,
+            path,
+            shouldCount,
+            sort,
+            where,
+          })
 
-          if (Array.isArray(sort)) {
-            throw new Error('Not implemented')
+          currentArgs.extras[polymorphicJoinQuery.columnName] = polymorphicJoinQuery.documents
+
+          if (polymorphicJoinQuery.count) {
+            currentArgs.extras[`${polymorphicJoinQuery.columnName}_count`] =
+              polymorphicJoinQuery.count
           }
-
-          let sanitizedSort = sort
-
-          if (!sanitizedSort) {
-            if (
-              field.collection.some((collection) =>
-                adapter.payload.collections[collection].config.fields.some(
-                  (f) => f.type === 'date' && f.name === 'createdAt',
-                ),
-              )
-            ) {
-              sanitizedSort = '-createdAt'
-            } else {
-              sanitizedSort = 'id'
-            }
-          }
-
-          const sortOrder = sanitizedSort.startsWith('-') ? desc : asc
-          sanitizedSort = sanitizedSort.replace('-', '')
-
-          const sortPath = sanitizedSort.split('.').join('_')
-
-          const wherePaths: { path: string; ref: any }[] = []
-
-          if (where) {
-            flattenAllWherePaths(where, wherePaths)
-          }
-
-          for (const collection of field.collection) {
-            const joinCollectionTableName = adapter.tableNameMap.get(toSnakeCase(collection))
-
-            const table = adapter.tables[joinCollectionTableName]
-
-            const sortColumn = table[sortPath]
-
-            const selectFields = {
-              id: adapter.tables[joinCollectionTableName].id,
-              parent: sql`${adapter.tables[joinCollectionTableName][onPath]}`.as(onPath),
-              relationTo: sql`${collection}`.as('relationTo'),
-              sortPath: sql`${sortColumn ? sortColumn : null}`.as('sortPath'),
-            }
-
-            const collectionQueryWhere: any[] = []
-            // Select for WHERE and Fallback NULL
-            for (const { path, ref } of wherePaths) {
-              const collectioConfig = adapter.payload.collections[collection].config
-              const field = getFieldByPath({ fields: collectioConfig.flattenedFields, path })
-
-              if (field && field.field.type === 'select' && field.field.hasMany) {
-                let tableName = adapter.tableNameMap.get(
-                  `${toSnakeCase(collection)}_${toSnakeCase(path)}`,
-                )
-                let parentTable = getTableName(table)
-
-                if (adapter.schemaName) {
-                  tableName = `"${adapter.schemaName}"."${tableName}"`
-                  parentTable = `"${adapter.schemaName}"."${parentTable}"`
-                }
-
-                if (adapter.name === 'postgres') {
-                  selectFields[path] = sql
-                    .raw(
-                      `(select jsonb_agg(${tableName}.value) from ${tableName} where ${tableName}.parent_id = ${parentTable}.id)`,
-                    )
-                    .as(path)
-                } else {
-                  selectFields[path] = sql
-                    .raw(
-                      `(select json_group_array(${tableName}.value) from ${tableName} where ${tableName}.parent_id = ${parentTable}.id)`,
-                    )
-                    .as(path)
-                }
-
-                const constraint = ref[path]
-                const operator = Object.keys(constraint)[0]
-                const value: any = Object.values(constraint)[0]
-
-                const query = adapter.createJSONQuery({
-                  column: `"${path}"`,
-                  operator,
-                  pathSegments: [field.field.name],
-                  table: parentTable,
-                  value,
-                })
-                ref[path] = { $raw: query }
-              } else if (adapter.tables[joinCollectionTableName][path]) {
-                selectFields[path] = sql`${adapter.tables[joinCollectionTableName][path]}`.as(path)
-                // Allow to filter by collectionSlug
-              } else if (path !== 'relationTo') {
-                // For timestamp fields like deletedAt, we need to cast to timestamp in Postgres
-                // SQLite doesn't require explicit type casting for UNION queries
-                if (path === 'deletedAt' && adapter.name === 'postgres') {
-                  selectFields[path] = sql`null::timestamp with time zone`.as(path)
-                } else {
-                  selectFields[path] = sql`null`.as(path)
-                }
-              }
-            }
-
-            let query: any = db.select(selectFields).from(adapter.tables[joinCollectionTableName])
-            if (collectionQueryWhere.length) {
-              query = query.where(and(...collectionQueryWhere))
-            }
-            if (currentQuery === null) {
-              currentQuery = query as unknown as SQLSelect
-            } else {
-              currentQuery = currentQuery.unionAll(query) as SQLSelect
-            }
-          }
-
-          const subQueryAlias = `${columnName}_subquery`
-
-          let sqlWhere = eq(
-            sql.raw(`"${currentTableName}"."id"`),
-            sql.raw(`"${subQueryAlias}"."${onPath}"`),
-          )
-
-          if (where && Object.keys(where).length > 0) {
-            sqlWhere = and(sqlWhere, buildSQLWhere(where, subQueryAlias))
-          }
-
-          if (shouldCount) {
-            currentArgs.extras[`${columnName}_count`] = sql`${db
-              .select({ count: count() })
-              .from(sql`${currentQuery.as(subQueryAlias)}`)
-              .where(sqlWhere)}`.as(`${columnName}_count`)
-          }
-
-          currentQuery = currentQuery.orderBy(sortOrder(sql`"sortPath"`)) as SQLSelect
-
-          const sortedUnionAlias = `${columnName}_sorted`
-
-          let limitOffsetSQL = sql.empty()
-          if (limit) {
-            limitOffsetSQL = sql` LIMIT ${limit}`
-          }
-          if (page && limit !== 0) {
-            const offset = (page - 1) * limit
-            if (offset > 0) {
-              limitOffsetSQL = sql`${limitOffsetSQL} OFFSET ${offset}`
-            }
-          }
-
-          // Correlate to parent row + apply any join where filters
-          let innerWhere = sql.raw(`"${sortedUnionAlias}"."${onPath}" = "${currentTableName}"."id"`)
-          if (where && Object.keys(where).length > 0) {
-            const additionalWhere = buildSQLWhere(where, sortedUnionAlias)
-            innerWhere = sql`${innerWhere} AND ${additionalWhere}`
-          }
-
-          // IMPORTANT: For polymorphic joins, LIMIT must be applied AFTER correlating to the parent row.
-          // Otherwise, the limit applies globally across ALL parents, not per-parent.
-          currentArgs.extras[columnName] = sql`(
-            SELECT ${jsonAggBuildObject(adapter, {
-              id: sql.raw(`"${subQueryAlias}"."id"`),
-              relationTo: sql.raw(`"${subQueryAlias}"."relationTo"`),
-            })}
-            FROM (
-              SELECT * FROM ${sql`${currentQuery.as(sortedUnionAlias)}`}
-              WHERE ${innerWhere}${limitOffsetSQL}
-            ) AS ${sql.raw(`"${subQueryAlias}"`)}
-          )`.as(columnName)
         } else {
+          const db = adapter.drizzle as LibSQLDatabase
           const useDrafts =
             (versions || draftsEnabled) &&
             hasDraftsEnabled(adapter.payload.collections[field.collection].config)

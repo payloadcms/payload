@@ -1,5 +1,5 @@
 import { spawn, spawnSync } from 'node:child_process'
-import { rmSync } from 'node:fs'
+import { existsSync, mkdirSync, rmSync } from 'node:fs'
 import { copyFile, mkdtemp } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
@@ -8,9 +8,36 @@ import pLimit from 'p-limit'
 import type { CodegenRunnerResult, TokenUsage, TranscriptEvent } from '../types.js'
 import type { CodegenRunner, CodegenRunnerOptions } from './types.js'
 
-import { cleanup, gitInit, installSkill, materialize, readEntry } from './workdir.js'
+import { finalizeAudit, readAudit } from '../../__helpers/plugins/audit/index.js'
+import { cleanup, getAuditPath, gitInit, installSkill, materialize, readEntry } from './workdir.js'
+
+/**
+ * Fallback login dir for the agent, used when the API key is rejected (e.g. an
+ * org login policy). Lives in your user config (not the repo) so it can't be
+ * committed or wiped with eval output; log into it once with `claude auth login`.
+ * Separate from your real ~/.claude.
+ */
+const AGENT_CONFIG_DIR = path.join(
+  process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config'),
+  'payload-evals',
+  'claude-code',
+)
+
+/**
+ * Env for the spawned `claude`. With `stripApiKey`, drop the API-key vars so it
+ * logs in via the config dir instead (some orgs reject API keys).
+ */
+function agentEnv(configDir: string, stripApiKey: boolean): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = { ...process.env, CLAUDE_CONFIG_DIR: configDir }
+  if (stripApiKey) {
+    delete env.ANTHROPIC_API_KEY
+    delete env.ANTHROPIC_AUTH_TOKEN
+  }
+  return env
+}
 
 const DEFAULT_AGENT_MODEL = 'claude-opus-4-6'
+const DEFAULT_AGENT_IDLE_TIMEOUT_MS = 90_000
 const DEFAULT_TIMEOUT_MS = 600_000
 const PROMPT_SUFFIX =
   'IMPORTANT: Do not run package managers (npm, pnpm, yarn) or build/test/dev commands. Modify only payload.config.ts. Just write the file.'
@@ -20,7 +47,8 @@ export const SKILL_SYSTEM_PROMPT =
 
 const limit = pLimit(Number(process.env.EVAL_AGENT_CONCURRENCY ?? '2'))
 
-let initPromise: null | Promise<{ sandboxDir: string; version: string }> = null
+let initPromise: null | Promise<{ sandboxDir: string; stripApiKey: boolean; version: string }> =
+  null
 
 export const claudeCodeRunner: CodegenRunner = {
   async run(instruction, starterConfig, options) {
@@ -33,43 +61,78 @@ export async function getAgentVersion(): Promise<string> {
   return init.version
 }
 
+/**
+ * Checks the agent can authenticate, once, before any test runs. Throws the
+ * actionable login message if not — so the run aborts up front instead of
+ * failing every case. Call from globalSetup when the runner is `claude-code`.
+ */
+export async function preflightAgentAuth(): Promise<void> {
+  await ensureInit()
+}
+
 async function runOne(
   instruction: string,
   starterConfig: string,
   options: CodegenRunnerOptions,
 ): Promise<CodegenRunnerResult> {
   const {
+    additionalAllowedTools = [],
     agentModel = DEFAULT_AGENT_MODEL,
+    configPath,
+    exposeMcpTools,
+    mcpConfigPath,
+    mcpDatabaseURL,
     skillInstall = 'embedded',
     timeoutMs = DEFAULT_TIMEOUT_MS,
+    workspaceFiles,
   } = options
   const init = await ensureInit()
 
-  const workdir = await materialize({ starterConfig })
+  const workdir = await materialize({
+    configPath,
+    exposeMcpTools,
+    mcpConfigPath,
+    mcpDatabaseURL,
+    starterConfig,
+    workspaceFiles,
+  })
+  const auditPath = exposeMcpTools ? getAuditPath(workdir) : undefined
   assertSafeWorkdir(workdir)
   try {
     gitInit(workdir)
     await installSkill({ mode: skillInstall, workdir })
 
-    const prompt = `${instruction}\n\n${PROMPT_SUFFIX}`
+    const prompt = exposeMcpTools ? instruction : `${instruction}\n\n${PROMPT_SUFFIX}`
     const appendSystemPrompt = skillInstall === 'embedded' ? SKILL_SYSTEM_PROMPT : undefined
     const { exitCode, stderr, transcript, usage } = await spawnAgent({
       agentModel,
+      allowedBuiltinTools: [
+        'ToolSearch',
+        ...(exposeMcpTools && skillInstall === 'embedded' ? ['Skill'] : []),
+        ...additionalAllowedTools,
+      ].join(','),
       appendSystemPrompt,
       prompt,
       sandboxDir: init.sandboxDir,
+      stripApiKey: init.stripApiKey,
       timeoutMs,
       workdir,
     })
 
     const modifiedConfig = exitCode === 0 ? await readEntry(workdir) : starterConfig
+    const audit = auditPath ? readAudit({ path: auditPath }) : undefined
+
+    if (auditPath && process.env.EVAL_KEEP_WORKDIR === '1') {
+      finalizeAudit({ path: auditPath })
+    }
 
     const result: CodegenRunnerResult = {
       agentExitCode: exitCode,
       agentLog: stderr.length > 0 ? truncate(stderr, 10_000) : undefined,
+      audit,
       confidence: 0,
       modifiedConfig,
-      transcript: capTranscript(transcript),
+      transcript,
       usage: usage ?? zeroUsage(),
     }
     return result
@@ -80,16 +143,20 @@ async function runOne(
 
 async function spawnAgent({
   agentModel,
+  allowedBuiltinTools,
   appendSystemPrompt,
   prompt,
   sandboxDir,
+  stripApiKey,
   timeoutMs,
   workdir,
 }: {
   agentModel: string
+  allowedBuiltinTools?: string
   appendSystemPrompt?: string
   prompt: string
   sandboxDir: string
+  stripApiKey: boolean
   timeoutMs: number
   workdir: string
 }): Promise<{
@@ -110,6 +177,17 @@ async function spawnAgent({
   if (appendSystemPrompt) {
     args.push('--append-system-prompt', appendSystemPrompt)
   }
+  const mcpFile = path.join(workdir, '.mcp.json')
+  if (existsSync(mcpFile)) {
+    args.push(
+      '--tools',
+      allowedBuiltinTools ?? 'ToolSearch',
+      '--mcp-config',
+      mcpFile,
+      '--strict-mcp-config',
+      '--allowedTools=mcp__payload__*',
+    )
+  }
   args.push(prompt)
   return new Promise((resolve) => {
     const child = spawn('claude', args, {
@@ -117,7 +195,7 @@ async function spawnAgent({
       // detached so timeout can kill the whole process group via -pid;
       // otherwise grandchild processes (agent's tool subprocesses) leak.
       detached: true,
-      env: { ...process.env, CLAUDE_CONFIG_DIR: sandboxDir },
+      env: agentEnv(sandboxDir, stripApiKey),
       stdio: ['ignore', 'pipe', 'pipe'],
     })
     const transcript: TranscriptEvent[] = []
@@ -129,6 +207,9 @@ async function spawnAgent({
         return
       }
       const { events, usage: lineUsage } = parseStreamJsonLine(line)
+      if (events.length > 0 || lineUsage) {
+        resetIdleTimer()
+      }
       for (const event of events) {
         transcript.push(event)
       }
@@ -152,6 +233,7 @@ async function spawnAgent({
       stderr += b.toString()
     })
     let resolved = false
+    let idleTimer: NodeJS.Timeout
     const finish = (result: {
       exitCode: number
       stderr: string
@@ -162,9 +244,12 @@ async function spawnAgent({
         return
       }
       resolved = true
+      clearTimeout(idleTimer)
+      clearTimeout(hardTimer)
       resolve(result)
     }
-    const timer = setTimeout(() => {
+
+    const killAgent = (message: string) => {
       try {
         if (child.pid !== undefined) {
           process.kill(-child.pid, 'SIGKILL')
@@ -179,16 +264,31 @@ async function spawnAgent({
           stderr += `\n[runner] child.kill fallback also failed: ${(childKillErr as Error).message}`
         }
       }
-      stderr += `\n[runner] killed after ${timeoutMs}ms timeout`
+      stderr += `\n${message}`
       finish({ exitCode: -1, stderr, transcript, usage })
-    }, timeoutMs)
+    }
+
+    const resetIdleTimer = () => {
+      clearTimeout(idleTimer)
+      idleTimer = setTimeout(
+        () =>
+          killAgent(
+            `[runner] killed after ${DEFAULT_AGENT_IDLE_TIMEOUT_MS}ms without an agent event`,
+          ),
+        DEFAULT_AGENT_IDLE_TIMEOUT_MS,
+      )
+    }
+
+    resetIdleTimer()
+    const hardTimer = setTimeout(
+      () => killAgent(`[runner] killed after ${timeoutMs}ms hard timeout`),
+      timeoutMs,
+    )
     child.on('error', (err) => {
-      clearTimeout(timer)
       stderr += `\n[runner] spawn error: ${err.message}`
       finish({ exitCode: -1, stderr, transcript, usage })
     })
     child.on('exit', (code) => {
-      clearTimeout(timer)
       if (stdoutBuffer.length > 0) {
         ingestLine(stdoutBuffer)
         stdoutBuffer = ''
@@ -198,7 +298,11 @@ async function spawnAgent({
   })
 }
 
-async function ensureInit(): Promise<{ sandboxDir: string; version: string }> {
+async function ensureInit(): Promise<{
+  sandboxDir: string
+  stripApiKey: boolean
+  version: string
+}> {
   if (initPromise === null) {
     initPromise = initOnce().catch((err: unknown) => {
       // Reset so the next caller retries instead of seeing a cached rejection.
@@ -209,32 +313,45 @@ async function ensureInit(): Promise<{ sandboxDir: string; version: string }> {
   return initPromise
 }
 
-async function initOnce(): Promise<{ sandboxDir: string; version: string }> {
+async function initOnce(): Promise<{ sandboxDir: string; stripApiKey: boolean; version: string }> {
   const version = captureVersion()
-  const sandboxDir = await mkdtemp(path.join(os.tmpdir(), 'payload-eval-claude-config-'))
+
+  // Try the API key first (fresh temp dir), copying ~/.claude/.credentials.json if needed.
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), 'payload-eval-claude-config-'))
   process.on('exit', () => {
     try {
-      rmSync(sandboxDir, { force: true, recursive: true })
+      rmSync(tempDir, { force: true, recursive: true })
     } catch {
       // best-effort
     }
   })
-
-  const probe = await authProbe(sandboxDir)
+  let probe = await authProbe(tempDir, false)
   if (!probe.ok) {
-    await copyCredentialsInto(sandboxDir)
-    const retry = await authProbe(sandboxDir)
-    if (!retry.ok) {
-      throw new Error(
-        `Claude Code authentication failed in sandbox ${sandboxDir}.\n` +
-          `Probe stderr: ${retry.stderr.trim() || '(empty)'}\n` +
-          `Probe stdout: ${retry.stdout.trim() || '(empty)'}\n` +
-          `Fix: run \`claude login\` or set ANTHROPIC_API_KEY in the test shell.`,
-      )
-    }
+    await copyCredentialsInto(tempDir)
+    probe = await authProbe(tempDir, false)
+  }
+  if (probe.ok) {
+    return { sandboxDir: tempDir, stripApiKey: false, version }
   }
 
-  return { sandboxDir, version }
+  // API key rejected (e.g. an org login policy) — retry against the dedicated isolated
+  // login dir. Still a clean sandbox (no personal CLAUDE.md/skills); only auth changes.
+  mkdirSync(AGENT_CONFIG_DIR, { recursive: true })
+  const oauth = await authProbe(AGENT_CONFIG_DIR, true)
+  if (oauth.ok) {
+    return { sandboxDir: AGENT_CONFIG_DIR, stripApiKey: true, version }
+  }
+
+  throw new Error(
+    `Claude Code authentication failed for the agent runner.\n` +
+      `API-key probe stderr: ${probe.stderr.trim() || '(empty)'}\n` +
+      `OAuth-sandbox probe stderr: ${oauth.stderr.trim() || '(empty)'}\n` +
+      `Fix (either works):\n` +
+      `  • set ANTHROPIC_API_KEY in the test shell, or\n` +
+      `  • log in once to the isolated sandbox (works under org OAuth pins):\n` +
+      `      CLAUDE_CONFIG_DIR="${AGENT_CONFIG_DIR}" claude auth login --console\n` +
+      `      (use --sso or --claudeai to match your org login)`,
+  )
 }
 
 function captureVersion(): string {
@@ -249,10 +366,11 @@ function captureVersion(): string {
 
 async function authProbe(
   sandboxDir: string,
+  stripApiKey: boolean,
 ): Promise<{ ok: boolean; stderr: string; stdout: string }> {
   return new Promise((resolve) => {
     const child = spawn('claude', ['--print', '--model', 'haiku', 'reply with the word ok'], {
-      env: { ...process.env, CLAUDE_CONFIG_DIR: sandboxDir },
+      env: agentEnv(sandboxDir, stripApiKey),
       stdio: ['ignore', 'pipe', 'pipe'],
     })
     let stdout = ''
@@ -296,7 +414,7 @@ async function copyCredentialsInto(sandboxDir: string): Promise<void> {
   try {
     await copyFile(src, dest)
   } catch {
-    // probe will throw the actionable error
+    // No creds file to copy — the auth probe handles it.
   }
 }
 
@@ -386,11 +504,11 @@ function extractAssistantBlocks(message: unknown): TranscriptEvent[] {
       type?: unknown
     }
     if (block.type === 'text' && typeof block.text === 'string') {
-      events.push({ text: truncateText(block.text), type: 'text' })
+      events.push({ type: 'text', text: truncateText(block.text) })
       continue
     }
     if (block.type === 'thinking' && typeof block.thinking === 'string') {
-      events.push({ text: truncateText(block.thinking), type: 'thinking' })
+      events.push({ type: 'thinking', text: truncateText(block.thinking) })
       continue
     }
     if (
@@ -400,9 +518,9 @@ function extractAssistantBlocks(message: unknown): TranscriptEvent[] {
     ) {
       events.push({
         id: block.id,
-        input: normalizeToolInput(block.input),
         name: block.name,
         type: 'tool_use',
+        input: normalizeToolInput(block.input),
       })
     }
   }
@@ -426,10 +544,10 @@ function extractUserBlocks(message: unknown): TranscriptEvent[] {
       continue
     }
     events.push({
+      type: 'tool_result',
       content: normalizeToolResultContent(block.content),
       isError: block.is_error === true ? true : undefined,
       toolUseId: block.tool_use_id,
-      type: 'tool_result',
     })
   }
   return events
@@ -479,7 +597,7 @@ function truncateText(s: string): string {
   return s.length <= TEXT_TRUNCATE_LIMIT ? s : `${s.slice(0, TEXT_TRUNCATE_LIMIT)}… [truncated]`
 }
 
-function capTranscript(events: TranscriptEvent[]): TranscriptEvent[] {
+export function capTranscript(events: TranscriptEvent[]): TranscriptEvent[] {
   if (events.length <= TRANSCRIPT_EVENT_CAP) {
     return events
   }
@@ -487,8 +605,8 @@ function capTranscript(events: TranscriptEvent[]): TranscriptEvent[] {
   const tail = events.slice(events.length - 100)
   const omitted = events.length - 200
   const marker: TranscriptEvent = {
-    text: `… [transcript truncated: ${omitted} events omitted]`,
     type: 'text',
+    text: `… [transcript truncated: ${omitted} events omitted]`,
   }
   return [...head, marker, ...tail]
 }

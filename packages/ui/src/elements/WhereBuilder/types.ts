@@ -9,11 +9,14 @@ import type {
 export type WhereBuilderProps = {
   readonly collectionPluralLabel?: SanitizedCollectionConfig['labels']['plural']
   readonly collectionSlug: SanitizedCollectionConfig['slug']
-  readonly fields?: ClientField[]
-  /** When set, WhereBuilder is controlled by the form (value + onChange) instead of list query. */
-  readonly onChange?: (where: Where) => void
+  readonly fields: ClientField[]
+  /** Called with the next `where` value whenever a condition is added, edited, or removed. */
+  readonly onChange: (where: Where) => Promise<void> | void
+  /** Called when the last condition is removed, so the parent has empty state control. */
+  readonly onEmptyRemove?: () => void
   readonly renderedFilters?: Map<string, React.ReactNode>
   readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
+  /** The current `where` value to render conditions from. */
   readonly value?: Where
 }
 
@@ -95,5 +98,15 @@ export type RemoveCondition = ({
   orIndex,
 }: {
   andIndex: number
+  orIndex: number
+}) => Promise<void> | void
+
+export type UpdateJoin = ({
+  andIndex,
+  join,
+  orIndex,
+}: {
+  andIndex: number
+  join: Relation
   orIndex: number
 }) => Promise<void> | void

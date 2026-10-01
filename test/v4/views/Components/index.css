@@ -21,7 +21,6 @@
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
-  transition: all 0.15s ease;
 }
 
 .components-view__back:hover {
@@ -202,7 +201,6 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-medium);
   background: var(--color-bg);
-  transition: border-color 0.15s ease;
   min-width: 100px;
   overflow: hidden;
 }

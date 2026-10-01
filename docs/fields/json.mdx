@@ -69,9 +69,9 @@ export const MyJSONField: Field = {
 
 The JSON Field inherits all of the default admin options from the base [Field Admin Config](./overview#admin-options), plus the following additional options:
 
-| Option              | Description                                                                                                                                                   |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`editorOptions`** | Options that can be passed to the monaco editor, [view the full list](https://microsoft.github.io/monaco-editor/typedoc/variables/editor.EditorOptions.html). |
+| Option              | Description                                                                                                                                                                       |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`editorOptions`** | Options that can be passed to the monaco editor, [view the full list](https://microsoft.github.io/monaco-editor/docs.html#variables/editor_editor_api.editor.EditorOptions.html). |
 
 ## Example
 
@@ -162,9 +162,9 @@ export const ExampleCollection: CollectionConfig = {
 ```tsx
 import type React from 'react'
 import { JSONField } from '@payloadcms/ui'
-import type { JSONFieldServerComponent } from 'payload'
+import type { JSONFieldServerProps } from 'payload'
 
-export const CustomJSONFieldServer: JSONFieldServerComponent = ({
+export const CustomJSONFieldServer: React.FC<JSONFieldServerProps> = ({
   clientField,
   path,
   schemaPath,
@@ -187,9 +187,11 @@ export const CustomJSONFieldServer: JSONFieldServerComponent = ({
 'use client'
 import React from 'react'
 import { JSONField } from '@payloadcms/ui'
-import type { JSONFieldClientComponent } from 'payload'
+import type { JSONFieldClientProps } from 'payload'
 
-export const CustomJSONFieldClient: JSONFieldClientComponent = (props) => {
+export const CustomJSONFieldClient: React.FC<JSONFieldClientProps> = (
+  props,
+) => {
   return <JSONField {...props} />
 }
 ```
@@ -201,12 +203,11 @@ export const CustomJSONFieldClient: JSONFieldClientComponent = (props) => {
 ```tsx
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { JSONFieldLabelServerComponent } from 'payload'
+import type { JSONFieldLabelServerProps } from 'payload'
 
-export const CustomJSONFieldLabelServer: JSONFieldLabelServerComponent = ({
-  clientField,
-  path,
-}) => {
+export const CustomJSONFieldLabelServer: React.FC<
+  JSONFieldLabelServerProps
+> = ({ clientField, path }) => {
   return (
     <FieldLabel
       label={clientField?.label || clientField?.name}
@@ -223,12 +224,11 @@ export const CustomJSONFieldLabelServer: JSONFieldLabelServerComponent = ({
 'use client'
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { JSONFieldLabelClientComponent } from 'payload'
+import type { JSONFieldLabelClientProps } from 'payload'
 
-export const CustomJSONFieldLabelClient: JSONFieldLabelClientComponent = ({
-  field,
-  path,
-}) => {
+export const CustomJSONFieldLabelClient: React.FC<
+  JSONFieldLabelClientProps
+> = ({ field, path }) => {
   return (
     <FieldLabel
       label={field?.label || field?.name}

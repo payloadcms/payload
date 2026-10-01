@@ -26,6 +26,7 @@ const CheckboxFields: CollectionConfig = {
       },
     },
   ],
+  versions: false,
 }
 
 export default CheckboxFields

@@ -13,8 +13,6 @@ export const createHandler: PayloadHandler = async (req) => {
 
   const { autosave, depth, draft, populate, publishAllLocales, select } = parseParams(req.query)
 
-  const publishSpecificLocale = req.query.publishSpecificLocale as string | undefined
-
   const doc = await createOperation({
     autosave,
     collection,
@@ -23,7 +21,6 @@ export const createHandler: PayloadHandler = async (req) => {
     draft,
     populate,
     publishAllLocales,
-    publishSpecificLocale,
     req,
     select,
   })

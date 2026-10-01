@@ -3,6 +3,14 @@
  * Lexical expects certain properties to be numbers, not strings.
  */
 export const processRichTextField = (value: unknown): unknown => {
+  if (typeof value === 'string') {
+    try {
+      value = JSON.parse(value)
+    } catch {
+      return value
+    }
+  }
+
   if (!value || typeof value !== 'object') {
     return value
   }

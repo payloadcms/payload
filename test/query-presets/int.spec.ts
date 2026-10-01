@@ -1,27 +1,17 @@
-import type { Payload, User } from 'payload'
-import { describe, beforeAll, afterAll, it, expect } from 'vitest'
+import type { User } from 'payload'
 
-import path from 'path'
-import { fileURLToPath } from 'url'
+import { expect } from 'vitest'
 
+import { test } from '../__helpers/int/vitest.js'
 import { devUser, regularUser } from '../credentials.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
 const queryPresetsCollectionSlug = 'payload-query-presets'
-
-let payload: Payload
 let adminUser: User
 let editorUser: User
 let publicUser: User
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('Query Presets', () => {
-  beforeAll(async () => {
-    // @ts-expect-error: initPayloadInt does not have a proper type definition
-    ;({ payload } = await initPayloadInt(dirname))
-
+test.suite('Query Presets', { config: './config.ts', resetBetweenTests: false }, () => {
+  test.beforeAll(async ({ payloadInstance: payload }) => {
     adminUser = await payload
       .login({
         collection: 'users',
@@ -29,6 +19,7 @@ describe('Query Presets', () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
       ?.then((result) => result.user)
 
@@ -39,6 +30,7 @@ describe('Query Presets', () => {
           email: regularUser.email,
           password: regularUser.password,
         },
+        overrideAccess: true,
       })
       ?.then((result) => result.user)
 
@@ -49,19 +41,26 @@ describe('Query Presets', () => {
           email: 'public@email.com',
           password: regularUser.password,
         },
+        overrideAccess: true,
       })
       ?.then((result) => result.user)
   })
 
-  afterAll(async () => {
-    await payload.destroy()
+  test('should not inject authorship fields into the internal query-presets collection', ({
+    payload,
+  }) => {
+    const fields = payload.collections[queryPresetsCollectionSlug].config.fields
+    const names = fields.filter((f) => 'name' in f).map((f) => (f as { name: string }).name)
+
+    expect(names).not.toContain('createdBy')
+    expect(names).not.toContain('updatedBy')
   })
 
-  describe('default access control', () => {
-    it('should only allow logged in users to perform actions', async () => {
+  test.describe('default access control', () => {
+    test('should only allow logged in users to perform actions', async ({ payload }) => {
       // create
-      try {
-        const result = await payload.create({
+      await expect(
+        payload.create({
           collection: queryPresetsCollectionSlug,
           user: undefined,
           overrideAccess: false,
@@ -69,12 +68,8 @@ describe('Query Presets', () => {
             title: 'Only Logged In Users',
             relatedCollection: 'pages',
           },
-        })
-
-        expect(result).toBeFalsy()
-      } catch (error: unknown) {
-        expect((error as Error).message).toBe('You are not allowed to perform this action.')
-      }
+        }),
+      ).rejects.toThrow('You are not allowed to perform this action.')
 
       const { id } = await payload.create({
         collection: queryPresetsCollectionSlug,
@@ -82,26 +77,23 @@ describe('Query Presets', () => {
           title: 'Only Logged In Users',
           relatedCollection: 'pages',
         },
+        overrideAccess: true,
       })
 
       // read
-      try {
-        const result = await payload.findByID({
+      await expect(
+        payload.findByID({
           collection: queryPresetsCollectionSlug,
           depth: 0,
           user: undefined,
           overrideAccess: false,
           id,
-        })
-
-        expect(result).toBeFalsy()
-      } catch (error: unknown) {
-        expect((error as Error).message).toBe('You are not allowed to perform this action.')
-      }
+        }),
+      ).rejects.toThrow('You are not allowed to perform this action.')
 
       // update
-      try {
-        const result = await payload.update({
+      await expect(
+        payload.update({
           collection: queryPresetsCollectionSlug,
           id,
           user: undefined,
@@ -109,47 +101,41 @@ describe('Query Presets', () => {
           data: {
             title: 'Only Logged In Users (Updated)',
           },
-        })
+        }),
+      ).rejects.toThrow('You are not allowed to perform this action.')
 
-        expect(result).toBeFalsy()
-      } catch (error: unknown) {
-        expect((error as Error).message).toBe('You are not allowed to perform this action.')
+      // make sure the update didn't go through
+      const preset = await payload.findByID({
+        collection: queryPresetsCollectionSlug,
+        depth: 0,
+        id,
+        overrideAccess: true,
+      })
 
-        // make sure the update didn't go through
-        const preset = await payload.findByID({
-          collection: queryPresetsCollectionSlug,
-          depth: 0,
-          id,
-        })
-
-        expect(preset.title).toBe('Only Logged In Users')
-      }
+      expect(preset.title).toBe('Only Logged In Users')
 
       // delete
-      try {
-        const result = await payload.delete({
+      await expect(
+        payload.delete({
           collection: queryPresetsCollectionSlug,
           id: 'some-id',
           user: undefined,
           overrideAccess: false,
-        })
+        }),
+      ).rejects.toThrow('You are not allowed to perform this action.')
 
-        expect(result).toBeFalsy()
-      } catch (error: unknown) {
-        expect((error as Error).message).toBe('You are not allowed to perform this action.')
+      // make sure the delete didn't go through
+      const presetAfterDelete = await payload.findByID({
+        collection: queryPresetsCollectionSlug,
+        depth: 0,
+        id,
+        overrideAccess: true,
+      })
 
-        // make sure the delete didn't go through
-        const preset = await payload.findByID({
-          collection: queryPresetsCollectionSlug,
-          depth: 0,
-          id,
-        })
-
-        expect(preset.title).toBe('Only Logged In Users')
-      }
+      expect(presetAfterDelete.title).toBe('Only Logged In Users')
     })
 
-    it('should respect access when set to "specificUsers"', async () => {
+    test('should respect access when set to "specificUsers"', async ({ payload }) => {
       const presetForSpecificUsers = await payload.create({
         collection: queryPresetsCollectionSlug,
         user: adminUser,
@@ -185,19 +171,15 @@ describe('Query Presets', () => {
 
       expect(foundPresetWithUser1.id).toBe(presetForSpecificUsers.id)
 
-      try {
-        const foundPresetWithEditorUser = await payload.findByID({
+      await expect(
+        payload.findByID({
           collection: queryPresetsCollectionSlug,
           depth: 0,
           user: editorUser,
           overrideAccess: false,
           id: presetForSpecificUsers.id,
-        })
-
-        expect(foundPresetWithEditorUser).toBeFalsy()
-      } catch (error: unknown) {
-        expect((error as Error).message).toBe('Not Found')
-      }
+        }),
+      ).rejects.toThrow('Not Found')
 
       const presetUpdatedByAdminUser = await payload.update({
         collection: queryPresetsCollectionSlug,
@@ -211,8 +193,8 @@ describe('Query Presets', () => {
 
       expect(presetUpdatedByAdminUser.title).toBe('Specific Users (Updated)')
 
-      try {
-        const presetUpdatedByEditorUser = await payload.update({
+      await expect(
+        payload.update({
           collection: queryPresetsCollectionSlug,
           id: presetForSpecificUsers.id,
           user: editorUser,
@@ -220,15 +202,11 @@ describe('Query Presets', () => {
           data: {
             title: 'Specific Users (Updated)',
           },
-        })
-
-        expect(presetUpdatedByEditorUser).toBeFalsy()
-      } catch (error: unknown) {
-        expect((error as Error).message).toBe('You are not allowed to perform this action.')
-      }
+        }),
+      ).rejects.toThrow('You are not allowed to perform this action.')
     })
 
-    it('should respect access when set to "onlyMe"', async () => {
+    test('should respect access when set to "onlyMe"', async ({ payload }) => {
       const presetForOnlyMe = await payload.create({
         collection: queryPresetsCollectionSlug,
         overrideAccess: false,
@@ -262,19 +240,15 @@ describe('Query Presets', () => {
 
       expect(foundPresetWithUser1.id).toBe(presetForOnlyMe.id)
 
-      try {
-        const foundPresetWithEditorUser = await payload.findByID({
+      await expect(
+        payload.findByID({
           collection: queryPresetsCollectionSlug,
           depth: 0,
           user: editorUser,
           overrideAccess: false,
           id: presetForOnlyMe.id,
-        })
-
-        expect(foundPresetWithEditorUser).toBeFalsy()
-      } catch (error: unknown) {
-        expect((error as Error).message).toBe('Not Found')
-      }
+        }),
+      ).rejects.toThrow('Not Found')
 
       const presetUpdatedByUser1 = await payload.update({
         collection: queryPresetsCollectionSlug,
@@ -288,8 +262,8 @@ describe('Query Presets', () => {
 
       expect(presetUpdatedByUser1.title).toBe('Only Me (Updated)')
 
-      try {
-        const presetUpdatedByEditorUser = await payload.update({
+      await expect(
+        payload.update({
           collection: queryPresetsCollectionSlug,
           id: presetForOnlyMe.id,
           user: editorUser,
@@ -297,15 +271,11 @@ describe('Query Presets', () => {
           data: {
             title: 'Only Me (Updated)',
           },
-        })
-
-        expect(presetUpdatedByEditorUser).toBeFalsy()
-      } catch (error: unknown) {
-        expect((error as Error).message).toBe('You are not allowed to perform this action.')
-      }
+        }),
+      ).rejects.toThrow('You are not allowed to perform this action.')
     })
 
-    it('should respect access when set to "everyone"', async () => {
+    test('should respect access when set to "everyone"', async ({ payload }) => {
       const presetForEveryone = await payload.create({
         collection: queryPresetsCollectionSlug,
         overrideAccess: false,
@@ -377,12 +347,12 @@ describe('Query Presets', () => {
       expect(presetUpdatedByEditorUser.title).toBe('Everyone (Update 2)')
     })
 
-    it('should prevent accidental lockout', async () => {
-      try {
-        // create a preset using "specificRoles"
-        // this will ensure the user on the request is _NOT_ automatically added to the `users` list
-        // and will throw a validation error instead
-        const presetWithoutAccess = await payload.create({
+    test('should prevent accidental lockout', async ({ payload }) => {
+      // create a preset using "specificRoles"
+      // this will ensure the user on the request is _NOT_ automatically added to the `users` list
+      // and will throw a validation error instead
+      await expect(
+        payload.create({
           collection: queryPresetsCollectionSlug,
           user: editorUser,
           overrideAccess: false,
@@ -400,12 +370,8 @@ describe('Query Presets', () => {
               },
             },
           },
-        })
-
-        expect(presetWithoutAccess).toBeFalsy()
-      } catch (error: unknown) {
-        expect((error as Error).message).toBe('This action will lock you out of this preset.')
-      }
+        }),
+      ).rejects.toThrow('This action will lock you out of this preset.')
 
       // create a preset using "specificUsers"
       // this will ensure the user on the request _IS_ automatically added to the `users` list
@@ -468,8 +434,8 @@ describe('Query Presets', () => {
       })
 
       // attempt to update the preset to lock the user out of access
-      try {
-        const presetUpdatedByUser1 = await payload.update({
+      await expect(
+        payload.update({
           collection: queryPresetsCollectionSlug,
           id: presetWithUser1.id,
           user: adminUser,
@@ -487,17 +453,13 @@ describe('Query Presets', () => {
               },
             },
           },
-        })
-
-        expect(presetUpdatedByUser1).toBeFalsy()
-      } catch (error: unknown) {
-        expect((error as Error).message).toBe('This action will lock you out of this preset.')
-      }
+        }),
+      ).rejects.toThrow('This action will lock you out of this preset.')
     })
   })
 
-  describe('user-defined access control', () => {
-    it('should respect top-level access control overrides', async () => {
+  test.describe('user-defined access control', () => {
+    test('should respect top-level access control overrides', async ({ payload }) => {
       const preset = await payload.create({
         collection: queryPresetsCollectionSlug,
         user: adminUser,
@@ -529,24 +491,22 @@ describe('Query Presets', () => {
 
       expect(foundPresetWithUser1.id).toBe(preset.id)
 
-      try {
-        const foundPresetWithPublicUser = await payload.findByID({
+      await expect(
+        payload.findByID({
           collection: queryPresetsCollectionSlug,
           depth: 0,
           user: publicUser,
           overrideAccess: false,
           id: preset.id,
-        })
-
-        expect(foundPresetWithPublicUser).toBeFalsy()
-      } catch (error: unknown) {
-        expect((error as Error).message).toBe('You are not allowed to perform this action.')
-      }
+        }),
+      ).rejects.toThrow('You are not allowed to perform this action.')
     })
 
-    it('should only allow admins to select the "onlyAdmins" preset (via `filterOptions`)', async () => {
-      try {
-        const presetForAdminsCreatedByEditor = await payload.create({
+    test('should only allow admins to select the "onlyAdmins" preset (via `filterOptions`)', async ({
+      payload,
+    }) => {
+      await expect(
+        payload.create({
           collection: queryPresetsCollectionSlug,
           user: editorUser,
           overrideAccess: false,
@@ -567,14 +527,10 @@ describe('Query Presets', () => {
             },
             relatedCollection: 'pages',
           },
-        })
-
-        expect(presetForAdminsCreatedByEditor).toBeFalsy()
-      } catch (error: unknown) {
-        expect((error as Error).message).toBe(
-          'The following fields are invalid: Sharing settings > Read > Specify who can read this Preset, Sharing settings > Update > Specify who can update this Preset',
-        )
-      }
+        }),
+      ).rejects.toThrow(
+        'The following fields are invalid: Read > Specify who can read this Preset, Update > Specify who can update this Preset',
+      )
 
       const presetForAdminsCreatedByAdmin = await payload.create({
         collection: queryPresetsCollectionSlug,
@@ -602,8 +558,8 @@ describe('Query Presets', () => {
       expect(presetForAdminsCreatedByAdmin).toBeDefined()
 
       // attempt to update the preset using an editor user
-      try {
-        const presetUpdatedByEditorUser = await payload.update({
+      await expect(
+        payload.update({
           collection: queryPresetsCollectionSlug,
           id: presetForAdminsCreatedByAdmin.id,
           user: editorUser,
@@ -619,15 +575,11 @@ describe('Query Presets', () => {
               },
             },
           },
-        })
-
-        expect(presetUpdatedByEditorUser).toBeFalsy()
-      } catch (error: unknown) {
-        expect((error as Error).message).toBe('You are not allowed to perform this action.')
-      }
+        }),
+      ).rejects.toThrow('You are not allowed to perform this action.')
     })
 
-    it('should respect access when set to "specificRoles"', async () => {
+    test('should respect access when set to "specificRoles"', async ({ payload }) => {
       const presetForSpecificRoles = await payload.create({
         collection: queryPresetsCollectionSlug,
         user: adminUser,
@@ -663,19 +615,15 @@ describe('Query Presets', () => {
 
       expect(foundPresetWithUser1.id).toBe(presetForSpecificRoles.id)
 
-      try {
-        const foundPresetWithEditorUser = await payload.findByID({
+      await expect(
+        payload.findByID({
           collection: queryPresetsCollectionSlug,
           depth: 0,
           user: editorUser,
           overrideAccess: false,
           id: presetForSpecificRoles.id,
-        })
-
-        expect(foundPresetWithEditorUser).toBeFalsy()
-      } catch (error: unknown) {
-        expect((error as Error).message).toBe('Not Found')
-      }
+        }),
+      ).rejects.toThrow('Not Found')
 
       const presetUpdatedByUser1 = await payload.update({
         collection: queryPresetsCollectionSlug,
@@ -689,8 +637,8 @@ describe('Query Presets', () => {
 
       expect(presetUpdatedByUser1.title).toBe('Specific Roles (Updated)')
 
-      try {
-        const presetUpdatedByEditorUser = await payload.update({
+      await expect(
+        payload.update({
           collection: queryPresetsCollectionSlug,
           id: presetForSpecificRoles.id,
           user: editorUser,
@@ -698,15 +646,11 @@ describe('Query Presets', () => {
           data: {
             title: 'Specific Roles (Updated)',
           },
-        })
-
-        expect(presetUpdatedByEditorUser).toBeFalsy()
-      } catch (error: unknown) {
-        expect((error as Error).message).toBe('You are not allowed to perform this action.')
-      }
+        }),
+      ).rejects.toThrow('You are not allowed to perform this action.')
     })
 
-    it('should respect boolean access control results', async () => {
+    test('should respect boolean access control results', async ({ payload }) => {
       // create a preset with the read constraint set to "noone"
       const presetForNoone = await payload.create({
         collection: queryPresetsCollectionSlug,
@@ -725,27 +669,26 @@ describe('Query Presets', () => {
             },
           },
         },
+        overrideAccess: true,
       })
 
-      try {
-        const foundPresetWithUser1 = await payload.findByID({
+      await expect(
+        payload.findByID({
           collection: queryPresetsCollectionSlug,
           depth: 0,
           user: adminUser,
           overrideAccess: false,
           id: presetForNoone.id,
-        })
-
-        expect(foundPresetWithUser1).toBeFalsy()
-      } catch (error: unknown) {
-        expect((error as Error).message).toBe('Not Found')
-      }
+        }),
+      ).rejects.toThrow('Not Found')
     })
   })
 
-  it.skip('should disable query presets when "enabledQueryPresets" is not true on the collection', async () => {
-    try {
-      const result = await payload.create({
+  test.skip('should disable query presets when "enabledQueryPresets" is not true on the collection', async ({
+    payload,
+  }) => {
+    await expect(
+      payload.create({
         collection: 'payload-query-presets',
         user: adminUser,
         overrideAccess: false,
@@ -753,17 +696,12 @@ describe('Query Presets', () => {
           title: 'Disabled Query Presets',
           relatedCollection: 'pages',
         },
-      })
-
-      // TODO: this test always passes because this expect throws an error which is caught and passes the 'catch' block
-      expect(result).toBeFalsy()
-    } catch (error) {
-      expect(error).toBeDefined()
-    }
+      }),
+    ).rejects.toThrow()
   })
 
-  describe('Where object formatting', () => {
-    it('transforms "where" query objects into the "and" / "or" format', async () => {
+  test.describe('Where object formatting', () => {
+    test('transforms "where" query objects into the "and" / "or" format', async ({ payload }) => {
       const result = await payload.create({
         collection: queryPresetsCollectionSlug,
         user: adminUser,
@@ -805,7 +743,7 @@ describe('Query Presets', () => {
       })
     })
 
-    it('should handle empty where and columns fields', async () => {
+    test('should handle empty where and columns fields', async ({ payload }) => {
       const result = await payload.create({
         collection: queryPresetsCollectionSlug,
         user: adminUser,

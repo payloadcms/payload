@@ -3,7 +3,6 @@ import type { SanitizedConfig } from '../config/types.js'
 import type { Field, FlattenedField } from '../fields/config/types.js'
 
 import { hasAutosaveEnabled, hasDraftsEnabled } from '../utilities/getVersionsConfig.js'
-import { versionSnapshotField } from './baseFields.js'
 
 export const buildVersionCollectionFields = <T extends boolean = false>(
   config: SanitizedConfig,
@@ -45,8 +44,6 @@ export const buildVersionCollectionFields = <T extends boolean = false>(
 
   if (hasDraftsEnabled(collection)) {
     if (config.localization) {
-      fields.push(versionSnapshotField)
-
       fields.push({
         name: 'publishedLocale',
         type: 'select',

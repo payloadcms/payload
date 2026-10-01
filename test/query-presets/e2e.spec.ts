@@ -6,20 +6,17 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, PayloadQueryPreset } from './payload-types.js'
 
-import { clickPillSelectorItem, toggleColumn } from '../__helpers/e2e/columns/index.js'
+import { clickColumnSelectorItem, toggleColumn } from '../__helpers/e2e/columns/index.js'
 import { addListFilter, openListFilters } from '../__helpers/e2e/filters/index.js'
 import { addGroupBy, clearGroupBy } from '../__helpers/e2e/groupBy/index.js'
-import {
-  ensureCompilationIsDone,
-  exactText,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-} from '../__helpers/e2e/helpers.js'
+import { exactText, saveDocAndAssert } from '../__helpers/e2e/helpers.js'
 import { navigateToListView } from '../__helpers/e2e/navigateToListView.js'
 import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { assertURLParams } from './helpers/assertURLParams.js'
 import { openQueryPresetDrawer } from './helpers/openQueryPresetDrawer.js'
@@ -57,19 +54,14 @@ describe('Query Presets', () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     pagesUrl = new AdminUrlUtil(serverURL, pagesSlug)
-
-    await ensureCompilationIsDone({ browser, serverURL })
   })
 
   beforeEach(async ({ page }) => {
-    initPageConsoleErrorCatch(page)
+    await initPage({ page, serverURL })
 
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'querypresets',
     })
-
-    await ensureCompilationIsDone({ page, serverURL })
 
     const allDocs = (
       await payload.find({
@@ -82,6 +74,7 @@ describe('Query Presets', () => {
             in: ['Everyone', 'Only Me', 'Specific Users'],
           },
         },
+        overrideAccess: true,
       })
     ).docs
 
@@ -120,16 +113,21 @@ describe('Query Presets', () => {
     const editModal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(editModal).toBeVisible()
 
-    // Verify the Where field is visible (empty state: "Add Filter" or "No filters set")
+    // Verify the Where field is visible (empty state renders an empty where-builder)
     const whereField = editModal.locator('.query-preset-where-field')
     await expect(whereField).toBeVisible()
     await expect(whereField.locator('.where-builder')).toBeVisible()
-    await expect(whereField.locator('.where-builder__no-filters')).toBeVisible()
 
-    // Verify the Columns field is visible and has 4 selected pills (same as default columns in list view)
+    // Verify the Columns field opens a selector with 4 active columns (same as default columns in list view)
     const columnsField = editModal.locator('.query-preset-columns-field')
     await expect(columnsField).toBeVisible()
-    await expect(columnsField.locator('.chip--selected')).toHaveCount(4)
+    await columnsField.locator('.columns-button__button').click()
+    const columnSelector = page.locator('.popup__content .column-selector')
+    await expect(columnSelector).toBeVisible()
+    await expect(
+      columnSelector.locator('.column-selector__item:not(.column-selector__item--inactive)'),
+    ).toHaveCount(4)
+    await columnsField.locator('.columns-button__button').click()
 
     await editModal.locator('button.doc-drawer__header-close').click()
     await expect(editModal).toBeHidden()
@@ -194,7 +192,7 @@ describe('Query Presets', () => {
 
     await openDeletePreset({ page })
 
-    await page.locator('[id="delete-preset-confirmation"] #confirm-action').click()
+    await page.locator('[id="delete-preset-confirmation"] [data-dialog-action="confirm"]').click()
 
     // columns can either be omitted or an empty string after being cleared
     const regex = /columns=(?:\[\]|$)/
@@ -254,9 +252,9 @@ describe('Query Presets', () => {
     page,
   }) => {
     await navigateToListView({ page, url: pagesUrl.list })
-    await checkPresetMenuOptions({ page, expectEdit: false, expectDelete: false })
+    await checkPresetMenuOptions({ expectDelete: false, expectEdit: false, page })
     await selectPreset({ page, presetTitle: seededData.everyone.title })
-    await checkPresetMenuOptions({ page, expectEdit: true, expectDelete: true })
+    await checkPresetMenuOptions({ expectDelete: true, expectEdit: true, page })
   })
 
   // eslint-disable-next-line playwright/expect-expect -- assertions are in checkPresetModifiedOptions helper
@@ -266,17 +264,17 @@ describe('Query Presets', () => {
     await navigateToListView({ page, url: pagesUrl.list })
 
     // Before selecting a preset, reset/save should not be visible in popup
-    await checkPresetModifiedOptions({ page, expectReset: false, expectSave: false })
+    await checkPresetModifiedOptions({ expectReset: false, expectSave: false, page })
 
     await selectPreset({ page, presetTitle: seededData.onlyMe.title })
 
     // After selecting preset but before changes, should still not show reset/save
-    await checkPresetModifiedOptions({ page, expectReset: false, expectSave: false })
+    await checkPresetModifiedOptions({ expectReset: false, expectSave: false, page })
 
     await toggleColumn(page, { columnLabel: 'ID' })
 
     // After making changes, reset/save should be visible
-    await checkPresetModifiedOptions({ page, expectReset: true, expectSave: true })
+    await checkPresetModifiedOptions({ expectReset: true, expectSave: true, page })
   })
 
   test('should conditionally render "update for everyone" label based on if preset is shared', async ({
@@ -338,7 +336,7 @@ describe('Query Presets', () => {
     await expect(page.locator('.icon--filter__badge')).toBeHidden()
 
     // Verify the reset/save options are hidden (no longer modified)
-    await checkPresetModifiedOptions({ page, expectReset: false, expectSave: false })
+    await checkPresetModifiedOptions({ expectReset: false, expectSave: false, page })
   })
 
   test('should only enter modified state when changes are made to an active preset', async ({
@@ -446,6 +444,7 @@ describe('Query Presets', () => {
     const posts = await payload.find({
       collection: 'posts',
       limit: 1,
+      overrideAccess: true,
     })
     const testPost = posts.docs[0]
 
@@ -492,17 +491,15 @@ describe('Query Presets', () => {
     const posts = await payload.find({
       collection: 'posts',
       limit: 2,
+      overrideAccess: true,
     })
     const [testPost1, testPost2] = posts.docs
 
     await openListFilters(page, {})
 
     const whereBuilder = page.locator('.where-builder')
-    const addFirst = whereBuilder.locator('.where-builder__add-first-filter')
 
-    await addFirst.click()
-
-    const condition = whereBuilder.locator('.where-builder__or-filters > li').first()
+    const condition = whereBuilder.locator('.condition').first()
 
     // Select field
     await condition.locator('.condition__field .rs__control').click()
@@ -575,9 +572,19 @@ describe('Query Presets', () => {
     // Verify groupBy field displays the current groupBy value (from initialData)
     const groupByField = modal.locator('.query-preset-group-by-field')
     await expect(groupByField).toBeVisible()
-    await expect(groupByField.locator('.group-by-builder')).toBeVisible()
-    await expect(groupByField).toContainText('Text')
-    await expect(groupByField).toContainText(/ascending/i)
+    const groupByTrigger = groupByField.locator('#toggle-group-by')
+    await expect(groupByTrigger).toContainText('Text')
+
+    // Open the control to verify the saved field and ascending sort direction
+    await groupByTrigger.click()
+    const groupByPopup = page.locator('.group-by-control__popup')
+    await expect(groupByPopup).toBeVisible()
+    await expect(groupByPopup).toContainText('Text')
+    await expect(groupByPopup).toContainText(/ascending/i)
+
+    // Close the control before saving
+    await groupByTrigger.click()
+    await expect(groupByPopup).toBeHidden()
 
     await saveDocAndAssert(page)
     await expect(modal).toBeHidden()
@@ -681,6 +688,9 @@ describe('Query Presets', () => {
     const postsUrl = new AdminUrlUtil(serverURL, 'posts')
     await navigateToListView({ page, url: postsUrl.list })
 
+    // Apply groupBy on the list view so it flows into the new preset
+    await addGroupBy(page, { fieldLabel: 'Text', fieldPath: 'text' })
+
     await openCreatePreset({ page })
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()
@@ -690,21 +700,27 @@ describe('Query Presets', () => {
 
     const columnsField = modal.locator('.query-preset-columns-field')
     await expect(columnsField).toBeVisible()
-    let selectedCount = await columnsField.locator('.chip--selected').count()
-    while (selectedCount > 0) {
-      await columnsField.locator('.chip--selected').first().locator('.chip__action').click()
-      selectedCount = await columnsField.locator('.chip--selected').count()
-    }
-    await clickPillSelectorItem({ container: columnsField, label: 'Text' })
-    await clickPillSelectorItem({ container: columnsField, label: 'ID' })
+    await columnsField.locator('.columns-button__button').click()
+    const columnSelector = page.locator('.popup__content .column-selector')
+    await expect(columnSelector).toBeVisible()
 
+    // Turn off every active column, then enable only Text and ID
+    const activeColumns = columnSelector.locator(
+      '.column-selector__item:not(.column-selector__item--inactive)',
+    )
+    let activeCount = await activeColumns.count()
+    while (activeCount > 0) {
+      await activeColumns.first().locator('.switch').click()
+      activeCount = await activeColumns.count()
+    }
+    await clickColumnSelectorItem({ container: columnSelector, label: 'Text' })
+    await clickColumnSelectorItem({ container: columnSelector, label: 'ID' })
+    await columnsField.locator('.columns-button__button').click()
+
+    // The groupBy applied on the list view should carry into the drawer
     const groupByField = modal.locator('.query-preset-group-by-field')
     await expect(groupByField).toBeVisible()
-    await groupByField.locator('#group-by--field-select').click()
-    await page
-      .locator('.rs__option', { hasText: exactText('Text') })
-      .first()
-      .click()
+    await expect(groupByField.locator('#toggle-group-by')).toContainText('Text')
 
     await saveDocAndAssert(page)
     // Close modal if it did not close automatically after save
@@ -739,13 +755,13 @@ describe('Query Presets', () => {
     await expect(page.locator('#select-preset')).toContainText(seededData.onlyMe.title)
 
     // 3. Save button should NOT show in popup (no modifications yet)
-    await checkPresetModifiedOptions({ page, expectReset: false, expectSave: false })
+    await checkPresetModifiedOptions({ expectReset: false, expectSave: false, page })
 
     // 4. Make a change
     await toggleColumn(page, { columnLabel: 'ID' })
 
     // 5. Save button should show in popup
-    await checkPresetModifiedOptions({ page, expectReset: true, expectSave: true })
+    await checkPresetModifiedOptions({ expectReset: true, expectSave: true, page })
   })
 
   test('should reset groupBy when clicking reset button on modified preset', async ({ page }) => {
@@ -769,7 +785,7 @@ describe('Query Presets', () => {
     await expect(page.locator('.table-section__header').first()).toBeVisible()
 
     // Verify reset/save buttons are not visible initially (no modifications)
-    await checkPresetModifiedOptions({ page, expectReset: false, expectSave: false })
+    await checkPresetModifiedOptions({ expectReset: false, expectSave: false, page })
 
     // Clear the groupBy (modify the preset)
     await clearGroupBy(page)
@@ -777,7 +793,7 @@ describe('Query Presets', () => {
     await expect(page.locator('.table-section__header')).toHaveCount(0)
 
     // Verify reset button becomes visible after modification
-    await checkPresetModifiedOptions({ page, expectReset: true, expectSave: true })
+    await checkPresetModifiedOptions({ expectReset: true, expectSave: true, page })
 
     // Reset the preset changes
     await resetPresetChanges({ page })
@@ -787,7 +803,7 @@ describe('Query Presets', () => {
     await expect(page.locator('.table-section__header').first()).toBeVisible()
 
     // Verify reset button is hidden again after reset
-    await checkPresetModifiedOptions({ page, expectReset: false, expectSave: false })
+    await checkPresetModifiedOptions({ expectReset: false, expectSave: false, page })
   })
 
   test('should apply preset from URL query param', async ({ page }) => {
@@ -796,10 +812,10 @@ describe('Query Presets', () => {
 
     // Verify the where query is in the URL
     await assertURLParams({
-      page,
       columns: seededData.everyone.columns,
-      where: seededData.everyone.where,
+      page,
       preset: seededData.everyone.id,
+      where: seededData.everyone.where,
     })
 
     // Verify the preset is selected in the preset selector

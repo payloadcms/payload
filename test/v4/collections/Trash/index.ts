@@ -20,6 +20,7 @@ const Rubbish: CollectionConfig = {
       required: true,
     },
   ],
+  versions: false,
 }
 
 export default Rubbish

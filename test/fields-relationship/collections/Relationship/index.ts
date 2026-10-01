@@ -56,6 +56,12 @@ export const Relationship: CollectionConfig = {
       type: 'relationship',
     },
     {
+      name: 'relationshipRestrictedFiltered',
+      filterOptions: () => true,
+      relationTo: relationRestrictedSlug,
+      type: 'relationship',
+    },
+    {
       name: 'relationshipWithTitle',
       relationTo: relationWithTitleSlug,
       type: 'relationship',
@@ -194,4 +200,5 @@ export const Relationship: CollectionConfig = {
     },
   ],
   slug,
+  versions: false,
 }

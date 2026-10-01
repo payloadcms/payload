@@ -69,7 +69,9 @@ export const getLockedDocumentsCollection = (config: Config): CollectionConfig |
     admin: {
       hidden: true,
     },
+    authorship: false,
     fields,
     lockDocuments: false,
+    versions: false,
   }
 }

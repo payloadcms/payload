@@ -1,9 +1,9 @@
-import type { EmailFieldLabelServerComponent } from 'payload'
+import type { EmailFieldLabelServerProps } from 'payload'
 
 import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomEmailFieldLabelServer: EmailFieldLabelServerComponent = ({
+export const CustomEmailFieldLabelServer: React.FC<EmailFieldLabelServerProps> = ({
   clientField,
   path,
 }) => {

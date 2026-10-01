@@ -19,4 +19,5 @@ export const UseAsTitleGroupField: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

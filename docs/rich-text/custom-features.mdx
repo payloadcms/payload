@@ -189,7 +189,7 @@ import { createServerFeature } from '@payloadcms/richtext-lexical'
 
 createServerFeature({
   //...
-  feature: async ({
+  feature: ({
     config,
     isRoot,
     props,
@@ -846,7 +846,7 @@ To sanitize those in the server feature, you can pass a function to `feature` in
 ```ts
 createServerFeature<UnSanitizedProps, SanitizedProps, UnSanitizedClientProps>({
   //...
-  feature: async ({
+  feature: ({
     config,
     isRoot,
     props,

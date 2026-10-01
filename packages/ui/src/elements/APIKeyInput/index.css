@@ -1,0 +1,92 @@
+@layer payload-default {
+  .api-key-input {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+    width: 100%;
+  }
+
+  .api-key-input__control {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    gap: var(--spacer-2);
+    min-width: 0;
+    min-height: var(--spacer-5);
+    padding: 0 var(--spacer-2);
+    background: var(--color-bg-secondary);
+    border: var(--stroke-width-small) solid transparent;
+    border-radius: var(--radius-medium);
+  }
+
+  .api-key-input__icon {
+    flex-shrink: 0;
+    width: var(--spacer-4);
+    height: var(--spacer-4);
+    color: var(--color-icon-secondary);
+  }
+
+  .api-key-input__field {
+    flex-grow: 1;
+    min-width: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    outline: none;
+    color: var(--color-text);
+    font-family: var(--font-family-mono);
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
+  }
+
+  .api-key-input__field:focus,
+  .api-key-input__field:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+
+  .api-key-input__field[type='password'] {
+    font-family: var(--font-family-sans);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
+    letter-spacing: 0.025rem;
+  }
+
+  .api-key-input__toggle {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    appearance: none;
+    width: var(--spacer-4);
+    height: var(--spacer-4);
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-icon-secondary);
+  }
+
+  .api-key-input__toggle:hover {
+    color: var(--color-icon);
+  }
+
+  .api-key-input .copy-to-clipboard {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--spacer-5);
+    min-height: var(--spacer-5);
+    padding: 0;
+    color: var(--color-icon-secondary);
+    background: var(--color-bg-secondary);
+    border: var(--stroke-width-small) solid transparent;
+    border-radius: var(--radius-medium);
+  }
+
+  .api-key-input .copy-to-clipboard:hover {
+    color: var(--color-icon);
+    background: var(--color-bg-hover);
+  }
+}

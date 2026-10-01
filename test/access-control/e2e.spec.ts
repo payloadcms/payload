@@ -14,17 +14,14 @@ import { login } from '../__helpers/e2e/auth/login.js'
 import { getColumnSelectorItem, openListColumns } from '../__helpers/e2e/columns/index.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
 import { openGroupBy } from '../__helpers/e2e/groupBy/index.js'
-import {
-  ensureCompilationIsDone,
-  exactText,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-} from '../__helpers/e2e/helpers.js'
+import { exactText, saveDocAndAssert } from '../__helpers/e2e/helpers.js'
 import { openDocControls } from '../__helpers/e2e/openDocControls.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { closeNav, openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { devUser } from '../credentials.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { readRestrictedSlug } from './collections/ReadRestricted/index.js'
@@ -63,7 +60,7 @@ const dirname = path.dirname(filename)
  * Repeat all above for globals
  */
 
-const { beforeAll, beforeEach, describe, afterEach, afterAll } = test
+const { afterAll, afterEach, beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
 describe('Access Control', () => {
@@ -109,10 +106,7 @@ describe('Access Control', () => {
     restrictedTrashUrl = new AdminUrlUtil(serverURL, restrictedTrashSlug)
 
     context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ noAutoLogin: true, page, serverURL })
+    ;({ page } = await initPage({ context, noAutoLogin: true, serverURL }))
 
     await login({ page, serverURL })
   })
@@ -158,28 +152,41 @@ describe('Access Control', () => {
     test('ensure field with update access control is readOnly during both initial load and after saving', async () => {
       test.setTimeout(TEST_TIMEOUT_LONG)
 
+      const isTanStack = process.env.PAYLOAD_FRAMEWORK === 'tanstack-start'
+
       async function waitForFormState(action: 'reload' | 'save') {
-        await assertNetworkRequests(
-          page,
-          '/admin/collections/field-restricted-update-based-on-data',
-          async () => {
-            if (action === 'save') {
-              await saveDocAndAssert(page)
-            } else {
-              await page.reload()
-            }
-          },
-          {
-            allowedNumberOfRequests: action === 'save' ? 2 : 1,
-            minimumNumberOfRequests: action === 'save' ? 2 : 1,
-          },
-        )
+        if (isTanStack) {
+          if (action === 'save') {
+            await saveDocAndAssert(page)
+          } else {
+            await page.reload()
+          }
+          // eslint-disable-next-line playwright/no-networkidle
+          await page.waitForLoadState('networkidle')
+        } else {
+          await assertNetworkRequests(
+            page,
+            '/admin/collections/field-restricted-update-based-on-data',
+            async () => {
+              if (action === 'save') {
+                await saveDocAndAssert(page)
+              } else {
+                await page.reload()
+              }
+            },
+            {
+              allowedNumberOfRequests: action === 'save' ? 2 : 1,
+              minimumNumberOfRequests: action === 'save' ? 2 : 1,
+            },
+          )
+        }
       }
       // Reproduces a bug where the shape of the `data` object passed to the field update access control function is incorrect
       // after saving the document, and correct on initial load.
 
       await payload.delete({
         collection: 'field-restricted-update-based-on-data',
+        overrideAccess: true,
         where: {
           id: {
             exists: true,
@@ -230,6 +237,7 @@ describe('Access Control', () => {
 
       await payload.delete({
         collection: 'field-restricted-update-based-on-data',
+        overrideAccess: true,
         where: {
           id: {
             exists: true,
@@ -394,6 +402,7 @@ describe('Access Control', () => {
         data: {
           name: 'name',
         },
+        overrideAccess: true,
       })
     })
 
@@ -445,6 +454,7 @@ describe('Access Control', () => {
         data: {
           name: 'name',
         },
+        overrideAccess: true,
       })
     })
 
@@ -511,6 +521,7 @@ describe('Access Control', () => {
         data: {
           name: 'unrestricted-123',
         },
+        overrideAccess: true,
       })
 
       await page.goto(unrestrictedURL.edit(unrestrictedDoc.id.toString()))
@@ -572,6 +583,7 @@ describe('Access Control', () => {
           data: {
             name: 'unrestricted-123',
           },
+          overrideAccess: true,
         })
         await page.goto(unrestrictedURL.edit(unrestrictedDoc.id.toString()))
         const field = page.locator('#field-userRestrictedDocs')
@@ -606,6 +618,7 @@ describe('Access Control', () => {
           data: {
             name: 'dev@payloadcms.com',
           },
+          overrideAccess: true,
         })
 
         await page.goto(userRestrictedGlobalURL.global(userRestrictedGlobalSlug))
@@ -623,6 +636,7 @@ describe('Access Control', () => {
           data: {
             name: 'anonymous@payloadcms.com',
           },
+          overrideAccess: true,
         })
 
         await page.goto(userRestrictedGlobalURL.global(userRestrictedGlobalSlug))
@@ -657,6 +671,7 @@ describe('Access Control', () => {
         data: {
           name: 'name',
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -665,12 +680,16 @@ describe('Access Control', () => {
         data: {
           hidden: true,
         },
+        overrideAccess: true,
       })
     })
 
     test('versions tab should not show', async () => {
       await page.goto(restrictedVersionsAdminPanelUrl.edit(existingDoc.id))
-      await page.locator('.doc-tabs__tabs').getByLabel('Versions').click()
+      await page
+        .locator('.doc-tabs__tabs')
+        .getByRole('link', { name: /^Versions\b/ })
+        .click()
       const rows = page.locator('.versions table tbody tr')
       await expect(rows).toHaveCount(1)
     })
@@ -690,6 +709,7 @@ describe('Access Control', () => {
           approvedTitle: 'Title',
           lockTitle: true,
         },
+        overrideAccess: true,
       })
     })
 
@@ -712,8 +732,14 @@ describe('Access Control', () => {
     test('can only unlock self when admin', async () => {
       await page.goto(usersUrl.list)
 
-      const adminUserRow = page.locator('.table tr').filter({ hasText: devUser.email })
-      const nonAdminUserRow = page.locator('.table tr').filter({ hasText: nonAdminEmail })
+      // Scope the match to the email cell so authorship's createdBy/updatedBy
+      // columns can't interfere with locating the correct user row.
+      const adminUserRow = page
+        .locator('.table tr')
+        .filter({ has: page.locator('.cell-email', { hasText: devUser.email }) })
+      const nonAdminUserRow = page
+        .locator('.table tr')
+        .filter({ has: page.locator('.cell-email', { hasText: nonAdminEmail }) })
 
       // Wait for hydration
       await wait(1000)
@@ -814,6 +840,7 @@ describe('Access Control', () => {
           email: publicUserEmail,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       await context.addCookies([
@@ -886,13 +913,30 @@ describe('Access Control', () => {
   describe('restricting update access to auth fields', () => {
     let existingDoc: ReadOnlyCollection
     beforeAll(async () => {
+      const existing = await payload.find({
+        collection: authSlug,
+        limit: 1,
+        overrideAccess: true,
+        where: { email: { equals: 'test@payloadcms.com' } },
+      })
+      for (const doc of existing.docs) {
+        await payload.delete({ id: doc.id, collection: authSlug, overrideAccess: true })
+      }
+
       existingDoc = await payload.create({
         collection: authSlug,
         data: {
           email: 'test@payloadcms.com',
           password: 'test',
         },
+        overrideAccess: true,
       })
+    })
+
+    afterAll(async () => {
+      if (existingDoc?.id) {
+        await payload.delete({ id: existingDoc.id, collection: authSlug, overrideAccess: true })
+      }
     })
     test('should show email as readonly when user does not have update permission', async () => {
       await page.goto(authFields.edit(existingDoc.id))
@@ -1085,178 +1129,170 @@ describe('Access Control', () => {
       test('should hide top-level field with read: false in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide restrictedTopLevel field
-        await expect(
-          initialField.locator('.rs__option', { hasText: 'Restricted Top Level' }),
-        ).toBeHidden()
+        await expect(menu.locator('.rs__option', { hasText: 'Restricted Top Level' })).toBeHidden()
       })
 
       test('should hide nested field with read: false inside group in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Public Phone',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide secretPhone field
-        await expect(initialField.locator('.rs__option', { hasText: 'Secret Phone' })).toBeHidden()
+        await expect(menu.locator('.rs__option', { hasText: 'Secret Phone' })).toBeHidden()
       })
 
       test('should hide field with read: false inside row in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible In Row',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide restrictedInRow field
-        await expect(
-          initialField.locator('.rs__option', { hasText: 'Restricted In Row' }),
-        ).toBeHidden()
+        await expect(menu.locator('.rs__option', { hasText: 'Restricted In Row' })).toBeHidden()
       })
 
       test('should hide field with read: false inside collapsible in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible In Collapsible',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide restrictedInCollapsible field
         await expect(
-          initialField.locator('.rs__option', { hasText: 'Restricted In Collapsible' }),
+          menu.locator('.rs__option', { hasText: 'Restricted In Collapsible' }),
         ).toBeHidden()
       })
 
       test('should hide deeply nested field with read: false in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible Metric',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide metadata.analytics.restrictedMetric field
-        await expect(
-          initialField.locator('.rs__option', { hasText: 'Restricted Metric' }),
-        ).toBeHidden()
+        await expect(menu.locator('.rs__option', { hasText: 'Restricted Metric' })).toBeHidden()
       })
 
       test('should hide field with read: false inside unnamed tab in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Public Data',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide secretInPublicTab field
-        await expect(
-          initialField.locator('.rs__option', { hasText: 'Secret In Public Tab' }),
-        ).toBeHidden()
+        await expect(menu.locator('.rs__option', { hasText: 'Secret In Public Tab' })).toBeHidden()
       })
 
       test('should hide field with read: false inside named tab in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Settings > Visible Setting',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide restrictedSetting field
         await expect(
-          initialField.locator('.rs__option', { hasText: 'Settings > Restricted Setting' }),
+          menu.locator('.rs__option', { hasText: 'Settings > Restricted Setting' }),
         ).toBeHidden()
       })
 
       test('should hide field with read: false inside row within group in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Address > City',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide secretPostalCode field
         await expect(
-          initialField.locator('.rs__option', { hasText: 'Address > Secret Postal Code' }),
+          menu.locator('.rs__option', { hasText: 'Address > Secret Postal Code' }),
         ).toBeHidden()
       })
 
       test('should hide field with read: false inside group within collapsible in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Advanced Settings > Advanced > Visible Advanced',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide restrictedAdvanced field
         await expect(
-          initialField.locator('.rs__option', {
+          menu.locator('.rs__option', {
             hasText: 'Advanced Settings > Advanced > Restricted Advanced',
           }),
         ).toBeHidden()
@@ -1442,19 +1478,19 @@ describe('Access Control', () => {
       test('should show virtual field in filter dropdown when collection has field with access control', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Virtual field should be visible in the filter dropdown
-        const virtualFieldOption = initialField.locator('.rs__option', {
+        const virtualFieldOption = menu.locator('.rs__option', {
           hasText: 'Unrestricted Virtual Field Name',
         })
         await expect(virtualFieldOption).toBeVisible()
@@ -1483,24 +1519,24 @@ describe('Access Control', () => {
       test('should show nested fields within virtual group field in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Nested fields within the virtual group should be visible
-        const virtualGroupTitleOption = initialField.locator('.rs__option', {
+        const virtualGroupTitleOption = menu.locator('.rs__option', {
           hasText: 'Unrestricted Virtual Group Info > Title',
         })
         await expect(virtualGroupTitleOption).toBeVisible()
 
-        const virtualGroupDescriptionOption = initialField.locator('.rs__option', {
+        const virtualGroupDescriptionOption = menu.locator('.rs__option', {
           hasText: 'Unrestricted Virtual Group Info > Description',
         })
         await expect(virtualGroupDescriptionOption).toBeVisible()
@@ -1534,19 +1570,19 @@ describe('Access Control', () => {
       test('should show virtual field nested inside group in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Virtual field nested inside contactInfo group should be visible
-        const nestedVirtualFieldOption = initialField.locator('.rs__option', {
+        const nestedVirtualFieldOption = menu.locator('.rs__option', {
           hasText: 'Contact Info > Virtual Contact Name',
         })
         await expect(nestedVirtualFieldOption).toBeVisible()
@@ -1575,20 +1611,20 @@ describe('Access Control', () => {
       test('should hide top-level virtual field with read: false in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Restricted virtual field should be hidden (use exactText to avoid matching "Unrestricted...")
         await expect(
-          initialField.locator('.rs__option', { hasText: exactText('Restricted Virtual Field') }),
+          menu.locator('.rs__option', { hasText: exactText('Restricted Virtual Field') }),
         ).toBeHidden()
       })
 
@@ -1616,20 +1652,20 @@ describe('Access Control', () => {
       test('should hide nested virtual field with read: false in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Restricted virtual field nested in contactInfo should be hidden
         await expect(
-          initialField.locator('.rs__option', {
+          menu.locator('.rs__option', {
             hasText: 'Contact Info > Restricted Virtual Contact Info',
           }),
         ).toBeHidden()
@@ -1705,7 +1741,7 @@ describe('Access Control', () => {
   describe('blocks field access control', () => {
     test('should respect field-level access control for blocks fields', async () => {
       await page.goto(blocksFieldAccessUrl.create)
-      await expect(page.locator('.doc-header__title')).toContainText('[Untitled]')
+      await expect(page.locator('.doc-header__title')).toContainText('Untitled')
 
       // Editable blocks field should allow adding blocks
       const editableBlocksField = page.locator('#field-editableBlocks')
@@ -1713,7 +1749,7 @@ describe('Access Control', () => {
 
       // Read-only blocks field should not allow adding blocks
       const readOnlyBlocksField = page.locator('#field-readOnlyBlocks')
-      await expect(readOnlyBlocksField.locator('.blocks-field__drawer-toggler')).toBeDisabled()
+      await expect(readOnlyBlocksField.locator('.blocks-field__drawer-toggler')).toBeHidden()
 
       // Editable block references field should allow adding blocks
       const editableBlockRefsField = page.locator('#field-editableBlockRefs')
@@ -1721,21 +1757,19 @@ describe('Access Control', () => {
 
       // Read-only block references field should not allow adding blocks
       const readOnlyBlockRefsField = page.locator('#field-readOnlyBlockRefs')
-      await expect(readOnlyBlockRefsField.locator('.blocks-field__drawer-toggler')).toBeDisabled()
+      await expect(readOnlyBlockRefsField.locator('.blocks-field__drawer-toggler')).toBeHidden()
 
       // Tab read-only blocks field should not allow adding blocks
       const tabReadOnlyBlocksField = page.locator(
         '.field-type.tabs-field #field-tabReadOnlyTest__tabReadOnlyBlocks',
       )
-      await expect(tabReadOnlyBlocksField.locator('.blocks-field__drawer-toggler')).toBeDisabled()
+      await expect(tabReadOnlyBlocksField.locator('.blocks-field__drawer-toggler')).toBeHidden()
 
       // Tab read-only block references field should not allow adding blocks
       const tabReadOnlyBlockRefsField = page.locator(
         '.field-type.tabs-field #field-tabReadOnlyTest__tabReadOnlyBlockRefs',
       )
-      await expect(
-        tabReadOnlyBlockRefsField.locator('.blocks-field__drawer-toggler'),
-      ).toBeDisabled()
+      await expect(tabReadOnlyBlockRefsField.locator('.blocks-field__drawer-toggler')).toBeHidden()
     })
 
     test('should respect field-level access control for individual fields within blocks', async () => {
@@ -1786,6 +1820,7 @@ describe('Access Control', () => {
           },
           title: 'Test Document',
         },
+        overrideAccess: true,
       })
 
       await page.goto(blocksFieldAccessUrl.edit(doc.id))
@@ -1827,8 +1862,9 @@ describe('Access Control', () => {
       afterEach(async () => {
         for (const id of createdDocIds) {
           await payload.delete({
-            collection: differentiatedTrashSlug,
             id,
+            collection: differentiatedTrashSlug,
+            overrideAccess: true,
             trash: true,
           })
         }
@@ -1850,7 +1886,8 @@ describe('Access Control', () => {
         test('should show delete button in doc controls dropdown', async () => {
           const doc = await payload.create({
             collection: differentiatedTrashSlug,
-            data: { title: 'Test Doc', _status: 'published' },
+            data: { _status: 'published', title: 'Test Doc' },
+            overrideAccess: true,
           })
           createdDocIds.push(doc.id)
 
@@ -1866,7 +1903,8 @@ describe('Access Control', () => {
         test('should show delete forever checkbox in delete modal', async () => {
           const doc = await payload.create({
             collection: differentiatedTrashSlug,
-            data: { title: 'Test Doc', _status: 'published' },
+            data: { _status: 'published', title: 'Test Doc' },
+            overrideAccess: true,
           })
           createdDocIds.push(doc.id)
 
@@ -1883,7 +1921,8 @@ describe('Access Control', () => {
         test('should allow permanently deleting a doc', async () => {
           const doc = await payload.create({
             collection: differentiatedTrashSlug,
-            data: { title: 'Test Doc For Perma Delete', _status: 'published' },
+            data: { _status: 'published', title: 'Test Doc For Perma Delete' },
+            overrideAccess: true,
           })
           // Don't add to createdDocIds since we're permanently deleting it
 
@@ -1895,7 +1934,7 @@ describe('Access Control', () => {
 
           await page.locator('.popup__content #action-delete').click()
           await page.locator('#delete-forever').check()
-          await page.locator('.delete-document #confirm-action').click()
+          await page.locator('.delete-document [data-dialog-action="confirm"]').click()
 
           await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
             `Differentiated Trash "Test Doc For Perma Delete" successfully deleted.`,
@@ -1907,10 +1946,11 @@ describe('Access Control', () => {
           const doc = await payload.create({
             collection: differentiatedTrashSlug,
             data: {
-              title: 'Admin Trashed Doc View Test',
               _status: 'published',
               deletedAt: new Date().toISOString(),
+              title: 'Admin Trashed Doc View Test',
             },
+            overrideAccess: true,
           })
           // Don't add to createdDocIds since we're permanently deleting it
 
@@ -1928,7 +1968,7 @@ describe('Access Control', () => {
           // Click permanently delete and confirm
           await permanentlyDeleteButton.click()
           await expect(page.locator(`#perma-delete-${doc.id}`)).toBeVisible()
-          await page.locator(`#perma-delete-${doc.id} #confirm-action`).click()
+          await page.locator(`#perma-delete-${doc.id} [data-dialog-action="confirm"]`).click()
 
           // Verify success toast
           await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
@@ -1943,12 +1983,12 @@ describe('Access Control', () => {
       describe('as regular user', () => {
         beforeAll(async () => {
           await login({
-            page,
-            serverURL,
             data: {
               email: regularUserEmail,
               password: 'test',
             },
+            page,
+            serverURL,
           })
         })
 
@@ -1960,7 +2000,8 @@ describe('Access Control', () => {
         test('should show delete button in doc controls dropdown', async () => {
           const doc = await payload.create({
             collection: differentiatedTrashSlug,
-            data: { title: 'Test Doc', _status: 'published' },
+            data: { _status: 'published', title: 'Test Doc' },
+            overrideAccess: true,
           })
           createdDocIds.push(doc.id)
 
@@ -1976,7 +2017,8 @@ describe('Access Control', () => {
         test('should hide delete forever checkbox in delete modal since user cannot permanently delete', async () => {
           const doc = await payload.create({
             collection: differentiatedTrashSlug,
-            data: { title: 'Test Doc', _status: 'published' },
+            data: { _status: 'published', title: 'Test Doc' },
+            overrideAccess: true,
           })
           createdDocIds.push(doc.id)
 
@@ -1995,7 +2037,8 @@ describe('Access Control', () => {
         test('should allow trashing a doc', async () => {
           const doc = await payload.create({
             collection: differentiatedTrashSlug,
-            data: { title: 'Test Doc For Trash', _status: 'published' },
+            data: { _status: 'published', title: 'Test Doc For Trash' },
+            overrideAccess: true,
           })
           createdDocIds.push(doc.id)
 
@@ -2006,7 +2049,7 @@ describe('Access Control', () => {
           await threeDotMenu.click()
 
           await page.locator('.popup__content #action-delete').click()
-          await page.locator('.delete-document #confirm-action').click()
+          await page.locator('.delete-document [data-dialog-action="confirm"]').click()
 
           await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
             `Differentiated Trash "Test Doc For Trash" moved to trash.`,
@@ -2018,10 +2061,11 @@ describe('Access Control', () => {
           const doc = await payload.create({
             collection: differentiatedTrashSlug,
             data: {
-              title: 'Trashed Doc View Test',
               _status: 'published',
               deletedAt: new Date().toISOString(),
+              title: 'Trashed Doc View Test',
             },
+            overrideAccess: true,
           })
           createdDocIds.push(doc.id)
 
@@ -2039,7 +2083,7 @@ describe('Access Control', () => {
           // Click restore and confirm
           await restoreButton.click()
           await expect(page.locator(`#restore-${doc.id}`)).toBeVisible()
-          await page.locator(`#restore-${doc.id} #confirm-action`).click()
+          await page.locator(`#restore-${doc.id} [data-dialog-action="confirm"]`).click()
 
           // Verify success toast
           await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
@@ -2058,8 +2102,9 @@ describe('Access Control', () => {
       afterEach(async () => {
         for (const id of createdDocIds) {
           await payload.delete({
-            collection: restrictedTrashSlug,
             id,
+            collection: restrictedTrashSlug,
+            overrideAccess: true,
             trash: true,
           })
         }
@@ -2074,7 +2119,8 @@ describe('Access Control', () => {
         test('should show delete button in doc controls dropdown', async () => {
           const doc = await payload.create({
             collection: restrictedTrashSlug,
-            data: { title: 'Test Doc', _status: 'published' },
+            data: { _status: 'published', title: 'Test Doc' },
+            overrideAccess: true,
           })
           createdDocIds.push(doc.id)
 
@@ -2090,7 +2136,8 @@ describe('Access Control', () => {
         test('should show delete forever checkbox in delete modal', async () => {
           const doc = await payload.create({
             collection: restrictedTrashSlug,
-            data: { title: 'Test Doc', _status: 'published' },
+            data: { _status: 'published', title: 'Test Doc' },
+            overrideAccess: true,
           })
           createdDocIds.push(doc.id)
 
@@ -2107,7 +2154,8 @@ describe('Access Control', () => {
         test('should allow trashing a doc', async () => {
           const doc = await payload.create({
             collection: restrictedTrashSlug,
-            data: { title: 'Test Doc For Trash', _status: 'published' },
+            data: { _status: 'published', title: 'Test Doc For Trash' },
+            overrideAccess: true,
           })
           createdDocIds.push(doc.id)
 
@@ -2118,7 +2166,7 @@ describe('Access Control', () => {
           await threeDotMenu.click()
 
           await page.locator('.popup__content #action-delete').click()
-          await page.locator('.delete-document #confirm-action').click()
+          await page.locator('.delete-document [data-dialog-action="confirm"]').click()
 
           await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
             `Restricted Trash "Test Doc For Trash" moved to trash.`,
@@ -2128,7 +2176,8 @@ describe('Access Control', () => {
         test('should allow permanently deleting a doc', async () => {
           const doc = await payload.create({
             collection: restrictedTrashSlug,
-            data: { title: 'Test Doc For Perma Delete', _status: 'published' },
+            data: { _status: 'published', title: 'Test Doc For Perma Delete' },
+            overrideAccess: true,
           })
           // Don't add to createdDocIds since we're permanently deleting it
 
@@ -2140,7 +2189,7 @@ describe('Access Control', () => {
 
           await page.locator('.popup__content #action-delete').click()
           await page.locator('#delete-forever').check()
-          await page.locator('.delete-document #confirm-action').click()
+          await page.locator('.delete-document [data-dialog-action="confirm"]').click()
 
           await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
             `Restricted Trash "Test Doc For Perma Delete" successfully deleted.`,
@@ -2151,12 +2200,12 @@ describe('Access Control', () => {
       describe('as regular user', () => {
         beforeAll(async () => {
           await login({
-            page,
-            serverURL,
             data: {
               email: regularUserEmail,
               password: 'test',
             },
+            page,
+            serverURL,
           })
         })
 
@@ -2168,7 +2217,8 @@ describe('Access Control', () => {
         test('should not show doc controls popup when user has no delete access', async () => {
           const doc = await payload.create({
             collection: restrictedTrashSlug,
-            data: { title: 'Test Doc', _status: 'published' },
+            data: { _status: 'published', title: 'Test Doc' },
+            overrideAccess: true,
           })
           createdDocIds.push(doc.id)
 
@@ -2191,8 +2241,9 @@ describe('Access Control', () => {
         afterEach(async () => {
           for (const id of createdDocIds) {
             await payload.delete({
-              collection: differentiatedTrashSlug,
               id,
+              collection: differentiatedTrashSlug,
+              overrideAccess: true,
               trash: true,
             })
           }
@@ -2207,7 +2258,8 @@ describe('Access Control', () => {
           test('should show delete button when selecting docs in list view', async () => {
             const doc = await payload.create({
               collection: differentiatedTrashSlug,
-              data: { title: 'Bulk Test Doc 1', _status: 'published' },
+              data: { _status: 'published', title: 'Bulk Test Doc 1' },
+              overrideAccess: true,
             })
             createdDocIds.push(doc.id)
 
@@ -2234,12 +2286,12 @@ describe('Access Control', () => {
         describe('as regular user', () => {
           beforeAll(async () => {
             await login({
-              page,
-              serverURL,
               data: {
                 email: regularUserEmail,
                 password: 'test',
               },
+              page,
+              serverURL,
             })
           })
 
@@ -2250,7 +2302,8 @@ describe('Access Control', () => {
           test('should show delete button when selecting docs in list view (user can trash)', async () => {
             const doc = await payload.create({
               collection: differentiatedTrashSlug,
-              data: { title: 'Bulk Test Doc Regular User', _status: 'published' },
+              data: { _status: 'published', title: 'Bulk Test Doc Regular User' },
+              overrideAccess: true,
             })
             createdDocIds.push(doc.id)
 
@@ -2276,7 +2329,8 @@ describe('Access Control', () => {
           test('should hide delete permanently checkbox in bulk delete modal', async () => {
             const doc = await payload.create({
               collection: differentiatedTrashSlug,
-              data: { title: 'Bulk Test Doc Regular User 2', _status: 'published' },
+              data: { _status: 'published', title: 'Bulk Test Doc Regular User 2' },
+              overrideAccess: true,
             })
             createdDocIds.push(doc.id)
 
@@ -2310,8 +2364,9 @@ describe('Access Control', () => {
         afterEach(async () => {
           for (const id of createdDocIds) {
             await payload.delete({
-              collection: restrictedTrashSlug,
               id,
+              collection: restrictedTrashSlug,
+              overrideAccess: true,
               trash: true,
             })
           }
@@ -2326,7 +2381,8 @@ describe('Access Control', () => {
           test('should show delete button when selecting docs in list view', async () => {
             const doc = await payload.create({
               collection: restrictedTrashSlug,
-              data: { title: 'Restricted Bulk Test Doc', _status: 'published' },
+              data: { _status: 'published', title: 'Restricted Bulk Test Doc' },
+              overrideAccess: true,
             })
             createdDocIds.push(doc.id)
 
@@ -2353,12 +2409,12 @@ describe('Access Control', () => {
         describe('as regular user', () => {
           beforeAll(async () => {
             await login({
-              page,
-              serverURL,
               data: {
                 email: regularUserEmail,
                 password: 'test',
               },
+              page,
+              serverURL,
             })
           })
 
@@ -2369,7 +2425,8 @@ describe('Access Control', () => {
           test('should not show delete button when selecting docs in list view (user cannot trash or delete)', async () => {
             const doc = await payload.create({
               collection: restrictedTrashSlug,
-              data: { title: 'Restricted Bulk Test Doc Regular User', _status: 'published' },
+              data: { _status: 'published', title: 'Restricted Bulk Test Doc Regular User' },
+              overrideAccess: true,
             })
             createdDocIds.push(doc.id)
 
@@ -2403,8 +2460,9 @@ describe('Access Control', () => {
           for (const id of createdDocIds) {
             try {
               await payload.delete({
-                collection: differentiatedTrashSlug,
                 id,
+                collection: differentiatedTrashSlug,
+                overrideAccess: true,
                 trash: true,
               })
             } catch (_e) {
@@ -2424,10 +2482,11 @@ describe('Access Control', () => {
             const doc = await payload.create({
               collection: differentiatedTrashSlug,
               data: {
-                title: 'Trash View Bulk Test Admin',
                 _status: 'published',
                 deletedAt: new Date().toISOString(),
+                title: 'Trash View Bulk Test Admin',
               },
+              overrideAccess: true,
             })
             createdDocIds.push(doc.id)
 
@@ -2454,12 +2513,12 @@ describe('Access Control', () => {
         describe('as regular user', () => {
           beforeAll(async () => {
             await login({
-              page,
-              serverURL,
               data: {
                 email: regularUserEmail,
                 password: 'test',
               },
+              page,
+              serverURL,
             })
           })
 
@@ -2472,10 +2531,11 @@ describe('Access Control', () => {
             const doc = await payload.create({
               collection: differentiatedTrashSlug,
               data: {
-                title: 'Trash View Bulk Test Regular',
                 _status: 'published',
                 deletedAt: new Date().toISOString(),
+                title: 'Trash View Bulk Test Regular',
               },
+              overrideAccess: true,
             })
             createdDocIds.push(doc.id)
 
@@ -2508,5 +2568,6 @@ async function createDoc(data: any): Promise<Record<string, unknown> & TypeWithI
   return payload.create({
     collection: slug,
     data,
+    overrideAccess: true,
   }) as any as Promise<Record<string, unknown> & TypeWithID>
 }

@@ -20,4 +20,5 @@ export const CollectionLevelConfig: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

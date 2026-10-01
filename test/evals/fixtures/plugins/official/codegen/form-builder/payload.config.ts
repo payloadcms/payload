@@ -8,6 +8,7 @@ export default buildConfig({
     {
       slug: 'pages',
       fields: [{ name: 'title', type: 'text', required: true }],
+      versions: false,
     },
   ],
   plugins: [],

@@ -15,6 +15,7 @@ export type {
   PaymentAdapterClientArgs,
   ProductsValidation,
   SanitizedEcommercePluginConfig,
+  UserWithCart,
 } from '../types/index.js'
 
 export type { TypedEcommerce } from '../types/utilities.js'

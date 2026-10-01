@@ -28,6 +28,13 @@ const DocControls: CollectionConfig = {
       name: 'content',
       type: 'textarea',
     },
+    {
+      type: 'text',
+      name: 'test',
+      admin: {
+        position: 'sidebar',
+      },
+    },
     createFolderField({ relationTo: foldersSlug }),
   ],
 }

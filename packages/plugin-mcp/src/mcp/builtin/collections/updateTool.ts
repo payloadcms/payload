@@ -1,79 +1,37 @@
-import type { SelectType } from 'payload'
+import type { Where } from 'payload'
 
-import { z } from 'zod'
+import {
+  getCollectionInputSchema,
+  getCollectionVirtualFieldNames,
+  parseDocumentID,
+  stripVirtualFields,
+  transformPointDataToPayload,
+  updateDocumentInputSchema,
+  validateCollectionData,
+} from 'payload'
 
+import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import {
-  getCollectionVirtualFieldNames,
-  stripVirtualFields,
-} from '../../../utils/getVirtualFieldNames.js'
-import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
-import { prepareCollectionSchema } from '../../../utils/schemaConversion/prepareCollectionSchema.js'
-import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
+import { formatEntityError } from '../formatEntityError.js'
+import { fileInputSchema, resolveFile } from './fileInput.js'
 
-const DEFAULT_DESCRIPTION = 'Update documents in a collection by ID or where clause.'
+const DEFAULT_DESCRIPTION =
+  'Update documents. Prefer uploadReference after upload, externalURL for URLs, or base64 for small local files.'
 
-export const updateCollectionTool = defineCollectionTool({
-  description: DEFAULT_DESCRIPTION,
-  input: ({ collectionSchema }) => {
-    const partialSchema = prepareCollectionSchema(collectionSchema)
-
-    // Collection updates do not require all required fields to be passed => delete .required.
-    //
-    // Local API equivalent: packages/payload/src/collections/operations/local/update.ts#BaseOptions#data:
-    // data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
-    delete partialSchema.required
-
-    return z.object({
-      id: z.union([z.string(), z.number()]).describe('The ID of the document to update').optional(),
-      data: z
-        .fromJSONSchema(partialSchema as unknown as z.core.JSONSchema.JSONSchema)
-        .describe('The fields to update'),
-      depth: z
-        .number()
-        .describe('How many levels deep to populate relationships')
-        .optional()
-        .default(0),
-      draft: z
-        .boolean()
-        .describe('Whether to update the document as a draft')
-        .optional()
-        .default(false),
-      fallbackLocale: z
-        .string()
-        .describe('Optional: fallback locale code to use when requested locale is not available')
-        .optional(),
-      filePath: z.string().describe('File path for file uploads').optional(),
-      locale: z
-        .string()
-        .describe(
-          'Optional: locale code to update the document in (e.g., "en", "es"). Defaults to the default locale',
-        )
-        .optional(),
-      overrideLock: z
-        .boolean()
-        .describe('Whether to override document locks')
-        .optional()
-        .default(true),
-      overwriteExistingFiles: z
-        .boolean()
-        .describe('Whether to overwrite existing files')
-        .optional()
-        .default(false),
-      select: z
-        .string()
-        .describe(
-          'Optional: define exactly which fields you\'d like to return in the response (JSON), e.g., \'{"title": "My Post"}\'',
-        )
-        .optional(),
-      where: z
-        .string()
-        .describe('JSON string for where clause to update multiple documents')
-        .optional(),
-    })
+export const updateDocumentTool = defineCollectionTool({
+  access: (args) =>
+    defaultAccess(args) && Boolean(args.permissions?.collections?.[args.slug]?.update),
+  annotations: {
+    destructiveHint: true,
+    idempotentHint: false,
+    openWorldHint: false,
+    readOnlyHint: false,
+    title: 'Update Document',
   },
-}).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
+  description: DEFAULT_DESCRIPTION,
+  input: updateDocumentInputSchema({ file: fileInputSchema }),
+}).handler(async ({ slug, authorizedMCP, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
 
@@ -83,107 +41,124 @@ export const updateCollectionTool = defineCollectionTool({
     depth,
     draft,
     fallbackLocale,
-    filePath,
+    file: fileInput,
+    limit,
     locale,
     overrideLock,
-    overwriteExistingFiles,
+    populate,
+    publishAllLocales,
+    returning,
     select,
+    sort,
+    trash,
+    unpublishAllLocales,
     where,
   } = input
 
   logger.info(
-    `Updating document in collection: ${collectionSlug}${id ? ` with ID: ${id}` : ' with where clause'}, draft: ${draft}${locale ? `, locale: ${locale}` : ''}`,
+    `Updating document in collection: ${slug}${id ? ` with ID: ${id}` : ' with where clause'}, draft: ${draft}${locale ? `, locale: ${locale}` : ''}`,
   )
 
   try {
-    if (!id && !where) {
-      return {
-        content: [{ type: 'text', text: 'Error: Either id or where clause must be provided' }],
-      }
-    }
+    const virtualFieldNames = getCollectionVirtualFieldNames(payload.config, slug)
+    const inputData = stripVirtualFields(data, virtualFieldNames)
+    validateCollectionData({
+      slug,
+      data: inputData,
+      partial: true,
+      req,
+    })
 
-    let parsedData = transformPointDataToPayload(data as Record<string, unknown>)
-    const virtualFieldNames = getCollectionVirtualFieldNames(payload.config, collectionSlug)
-    parsedData = stripVirtualFields(parsedData, virtualFieldNames)
+    const parsedData = transformPointDataToPayload(inputData)
+    const file = await resolveFile({ slug, input: fileInput, req })
 
-    let whereClause: Record<string, unknown> = {}
-    if (where) {
-      try {
-        whereClause = JSON.parse(where) as Record<string, unknown>
-      } catch {
-        logger.error(`Invalid where clause JSON: ${where}`)
-        return { content: [{ type: 'text', text: 'Error: Invalid JSON in where clause' }] }
-      }
-    }
+    const whereClause: Where = where ?? {}
 
-    let selectClause: SelectType | undefined
-    if (select) {
-      try {
-        selectClause = JSON.parse(select) as SelectType
-      } catch {
-        logger.warn(`Invalid select clause JSON: ${select}`)
-        return { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] }
-      }
-    }
-
-    if (id) {
-      const updateOptions = {
-        id,
-        collection: collectionSlug,
+    if (id !== undefined) {
+      const result = await payload.update({
+        id: parseDocumentID({ id, collectionSlug: slug, payload }),
+        collection: slug,
         data: parsedData,
         depth,
         draft,
+        fallbackLocale,
+        locale,
+        overrideAccess: authorizedMCP.overrideAccess,
         overrideLock,
+        populate,
+        publishAllLocales,
         req,
-        ...localAPIDefaults(authorizedMCP),
-        ...(filePath ? { filePath } : {}),
-        ...(overwriteExistingFiles ? { overwriteExistingFiles } : {}),
-        ...(locale ? { locale } : {}),
-        ...(fallbackLocale ? { fallbackLocale } : {}),
-        ...(selectClause ? { select: selectClause } : {}),
-      }
+        select: returning ? select : { id: true },
+        trash,
+        unpublishAllLocales,
+        ...(file ? { file } : {}),
+      })
 
-      const result = await payload.update(updateOptions as any)
+      const responseResult = returning ? result : { id: result.id }
 
       return {
         content: [
           {
             type: 'text',
-            text: `Document updated successfully in collection "${collectionSlug}"!\nUpdated document:\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
+            text: `Document updated successfully in collection "${slug}"!\nResult:\n\`\`\`json\n${JSON.stringify(responseResult)}\n\`\`\``,
           },
         ],
-        doc: result as Record<string, unknown>,
+        doc: responseResult as Record<string, unknown>,
       }
     }
 
-    const updateOptions = {
-      collection: collectionSlug,
+    const result = await payload.update({
+      collection: slug,
       data: parsedData,
       depth,
       draft,
+      fallbackLocale,
+      limit,
+      locale,
+      overrideAccess: authorizedMCP.overrideAccess,
       overrideLock,
+      populate,
+      publishAllLocales,
       req,
-      ...localAPIDefaults(authorizedMCP),
+      select: returning ? select : { id: true },
+      sort,
+      trash,
+      unpublishAllLocales,
       where: whereClause,
-      ...(filePath ? { filePath } : {}),
-      ...(overwriteExistingFiles ? { overwriteExistingFiles } : {}),
-      ...(locale ? { locale } : {}),
-      ...(fallbackLocale ? { fallbackLocale } : {}),
-      ...(selectClause ? { select: selectClause } : {}),
-    }
+      ...(file ? { file } : {}),
+    })
 
-    const result = await payload.update(updateOptions as any)
+    const docs = returning ? result.docs : result.docs.map(({ id }) => ({ id }))
+    const errors = result.errors || []
 
-    const bulkResult = result as { docs?: unknown[]; errors?: unknown[] }
-    const docs = bulkResult.docs || []
-    const errors = bulkResult.errors || []
-
-    let responseText = `Multiple documents updated in collection "${collectionSlug}"!\nUpdated: ${docs.length} documents\nErrors: ${errors.length}\n---`
+    let responseText = `Multiple documents updated in collection "${slug}"!\nUpdated: ${docs.length} documents\nErrors: ${errors.length}\n---`
     if (docs.length > 0) {
       responseText += `\n\nUpdated documents:\n\`\`\`json\n${JSON.stringify(docs)}\n\`\`\``
     }
     if (errors.length > 0) {
       responseText += `\n\nErrors:\n\`\`\`json\n${JSON.stringify(errors)}\n\`\`\``
+
+      const errorSchema = getCollectionInputSchema({ collectionSlug: slug, req })
+
+      if (errorSchema) {
+        responseText += `\n\nUse this schema for data:\n\`\`\`json\n${JSON.stringify(errorSchema)}\n\`\`\``
+      }
+
+      return {
+        content: [{ type: 'text', text: responseText }],
+        doc: { docs, errors } as unknown as Record<string, unknown>,
+        isError: true,
+        ...(errorSchema
+          ? {
+              structuredContent: {
+                slug,
+                docs,
+                errors,
+                schema: errorSchema,
+              },
+            }
+          : {}),
+      }
     }
 
     return {
@@ -192,14 +167,7 @@ export const updateCollectionTool = defineCollectionTool({
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    logger.error(`Error updating document in ${collectionSlug}: ${errorMessage}`)
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `Error updating document in collection "${collectionSlug}": ${errorMessage}`,
-        },
-      ],
-    }
+    logger.error(`Error updating document in ${slug}: ${errorMessage}`)
+    return formatEntityError({ slug, action: 'updating', entity: 'collection', error, req })
   }
 })

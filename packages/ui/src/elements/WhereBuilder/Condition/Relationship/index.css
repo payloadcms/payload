@@ -1,8 +1,8 @@
 @layer payload-default {
   .condition-value-relationship__error-loading {
     border: var(--stroke-width-small) solid var(--color-border-danger);
-    min-height: base(2);
-    padding: base(0.5) base(0.75);
+    min-height: var(--spacer-6);
+    padding: var(--spacer-2) var(--spacer-3);
     background-color: var(--color-bg-danger);
     color: var(--color-text);
   }

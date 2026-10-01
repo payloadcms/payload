@@ -1,3 +1,3 @@
 'use client'
 
-export { LinkToDoc } from '../ui/LinkToDoc.js'
+export { LinkToDoc } from '../ui/LinkToDoc/index.js'

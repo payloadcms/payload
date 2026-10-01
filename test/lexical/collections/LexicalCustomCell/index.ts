@@ -32,4 +32,5 @@ export const LexicalCustomCell: CollectionConfig = {
       },
     },
   ],
+  versions: false,
 }

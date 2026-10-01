@@ -1,4 +1,8 @@
 @layer payload-default {
+  [data-test='payload-ui-barrel-sentinel'] {
+    --payload-ui-barrel-loaded: 1;
+  }
+
   .banner {
     display: flex;
     align-items: center;

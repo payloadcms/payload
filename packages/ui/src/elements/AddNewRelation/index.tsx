@@ -17,7 +17,6 @@ import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { Popup } from '../Popup/index.js'
 import * as PopupList from '../Popup/PopupButtonList/index.js'
 import './index.css'
-import { Tooltip } from '../Tooltip/index.js'
 
 const baseClass = 'relationship-add-new'
 
@@ -43,7 +42,6 @@ export const AddNewRelation: React.FC<Props> = ({
 
   const [popupOpen, setPopupOpen] = useState(false)
   const { i18n, t } = useTranslation()
-  const [showTooltip, setShowTooltip] = useState(false)
 
   const [DocumentDrawer, DocumentDrawerToggler, { isDrawerOpen, toggleDrawer }] = useDocumentDrawer(
     {
@@ -90,10 +88,6 @@ export const AddNewRelation: React.FC<Props> = ({
     },
     [collectionConfig, hasMany, onChange, value],
   )
-
-  const onPopupToggle = useCallback((state) => {
-    setPopupOpen(state)
-  }, [])
 
   useEffect(() => {
     if (permissions) {
@@ -145,26 +139,16 @@ export const AddNewRelation: React.FC<Props> = ({
       {relatedCollections.length === 1 && (
         <Fragment>
           <DocumentDrawerToggler
-            buttonStyle="pill"
+            buttonStyle="secondary"
             className={[
               `${baseClass}__add-button`,
               unstyled && `${baseClass}__add-button--unstyled`,
             ]
               .filter(Boolean)
               .join(' ')}
-            onMouseEnter={() => setShowTooltip(true)}
-            onMouseLeave={() => setShowTooltip(false)}
+            tooltip={ButtonFromProps ? undefined : label}
           >
-            {ButtonFromProps ? (
-              ButtonFromProps
-            ) : (
-              <Fragment>
-                <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
-                  {label}
-                </Tooltip>
-                <PlusIcon />
-              </Fragment>
-            )}
+            {ButtonFromProps ? ButtonFromProps : <PlusIcon />}
           </DocumentDrawerToggler>
           <DocumentDrawer onSave={onSave} />
         </Fragment>
@@ -174,7 +158,9 @@ export const AddNewRelation: React.FC<Props> = ({
           <Popup
             buttonType="custom"
             horizontalAlign="right"
-            onToggleOpen={onPopupToggle}
+            onToggleClose={() => setPopupOpen(false)}
+            onToggleOpen={() => setPopupOpen(true)}
+            popupType="menu"
             render={({ close: closePopup }) => (
               <PopupList.ButtonGroup>
                 {relatedCollections.map((relatedCollection) => {
@@ -201,8 +187,9 @@ export const AddNewRelation: React.FC<Props> = ({
               <Button
                 className={`${baseClass}__add-button`}
                 {...buttonProps}
-                buttonStyle="pill"
+                buttonStyle="secondary"
                 selected={active}
+                tooltip={popupOpen ? '' : t('fields:addNew')}
               >
                 <PlusIcon />
               </Button>

@@ -18,6 +18,7 @@ import './index.css'
 
 export const TextInput: React.FC<TextInputProps> = (props) => {
   const {
+    id: idFromProps,
     AfterInput,
     BeforeInput,
     className,
@@ -39,6 +40,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
     required,
     rtl,
     showError,
+    size = 'large',
     style,
     value,
     valueToRender,
@@ -108,12 +110,19 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
+      data-size={size}
       style={style}
     >
       <RenderCustomComponent
         CustomComponent={Label}
         Fallback={
-          <FieldLabel label={label} localized={localized} path={path} required={required} />
+          <FieldLabel
+            htmlFor={idFromProps}
+            label={label}
+            localized={localized}
+            path={path}
+            required={required}
+          />
         }
       />
       <div className={`${fieldBaseClass}__wrap`}>
@@ -157,7 +166,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
             className="form-input"
             data-rtl={rtl}
             disabled={readOnly}
-            id={`field-${path?.replace(/\./g, '__')}`}
+            id={idFromProps ?? `field-${path?.replace(/\./g, '__')}`}
             name={path}
             onChange={onChange as (e: ChangeEvent<HTMLInputElement>) => void}
             onKeyDown={onKeyDown}

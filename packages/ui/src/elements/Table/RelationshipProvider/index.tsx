@@ -46,7 +46,8 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
   } = useConfig()
 
   const { i18n } = useTranslation()
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const prevLocale = useRef(locale)
 
   const loadRelationshipDocs = useCallback(
@@ -67,6 +68,7 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
           const select: SelectType = {}
 
           params.append('depth', '0')
+          params.append('draft', 'true')
           params.append('limit', '250')
 
           const collection = collections.find((c) => c.slug === slug)

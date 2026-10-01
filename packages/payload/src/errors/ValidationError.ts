@@ -16,6 +16,7 @@ export type ValidationFieldError = {
   // The error message to display for this field
   message: string
   path: string
+  tableName?: string
 }
 
 export class ValidationError extends APIError<{

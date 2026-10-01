@@ -18,4 +18,5 @@ export const UsersCollection: CollectionConfig = {
       defaultValue: 42,
     },
   ],
+  versions: false,
 }

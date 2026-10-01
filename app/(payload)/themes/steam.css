@@ -140,7 +140,7 @@
   --field-color-upload-border: #2a475e;
 
   /* Field sizing */
-  --field-min-height: 2.25rem;
+  --field-min-height-large: 2.25rem;
   --field-padding-inline: 0.75rem;
   --field-border-radius: 2px;
 

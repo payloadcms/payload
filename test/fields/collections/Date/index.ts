@@ -266,6 +266,7 @@ const DateFields: CollectionConfig = {
       },
     },
   ],
+  versions: false,
 }
 
 export default DateFields

@@ -10,4 +10,5 @@ export const MenuGlobal: GlobalConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

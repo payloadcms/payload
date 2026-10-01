@@ -9,10 +9,12 @@ export default buildConfig({
       slug: 'users',
       auth: true,
       fields: [],
+      versions: false,
     },
     {
       slug: 'pages',
       fields: [{ name: 'title', type: 'text' }],
+      versions: false,
     },
   ],
   plugins: [],

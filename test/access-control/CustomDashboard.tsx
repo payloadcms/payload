@@ -1,1 +1,1 @@
-export { DefaultDashboard as default } from '@payloadcms/next/views'
+export { DefaultDashboard as default } from '@payloadcms/ui/views/Dashboard'

@@ -35,4 +35,5 @@ export const Virtuals: CollectionConfig = {
       relationTo: 'posts',
     },
   ],
+  versions: false,
 }

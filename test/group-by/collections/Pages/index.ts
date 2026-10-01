@@ -6,7 +6,6 @@ export const PagesCollection: CollectionConfig = {
   slug: pagesSlug,
   admin: {
     useAsTitle: 'title',
-    groupBy: true,
   },
   trash: true,
   fields: [
@@ -15,4 +14,5 @@ export const PagesCollection: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

@@ -7,9 +7,11 @@ export const Global: GlobalConfig = {
   admin: {
     components: {
       edit: {
-        beforeDocumentControls: [
-          '/components/BeforeDocumentControls/CustomDraftButton/index.js#CustomDraftButton',
-        ],
+        ...{
+          beforeDocumentControls: [
+            '/components/BeforeDocumentControls/CustomDraftButton/index.js#CustomDraftButton',
+          ],
+        },
       },
       views: {
         edit: {

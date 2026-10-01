@@ -102,8 +102,7 @@ describe('filterDataToSelectedLocales', () => {
         {
           name: 'layout',
           type: 'blocks',
-          blocks: [],
-          blockReferences: ['content'],
+          blocks: ['content'],
         },
       ]
 

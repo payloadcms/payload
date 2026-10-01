@@ -175,7 +175,6 @@ async function main() {
     bump,
     dryRun,
     fromVersion,
-    openReleaseUrl: true,
     toVersion: 'HEAD',
   })
 
@@ -253,7 +252,7 @@ async function main() {
 
   // Publish only payload to get 5 min auth token
   packageDetails = packageDetails.filter((p) => p.name !== 'payload')
-  runCmd(`pnpm publish -C packages/payload --no-git-checks --json --tag ${tag}`, execOpts)
+  runCmd(`pnpm publish -C packages/payload --no-git-checks --tag ${tag}`, execOpts)
 
   const results: PublishResult[] = []
   for (const pkg of packageDetails) {
@@ -320,7 +319,7 @@ async function publishSinglePackage(pkg: PackageDetails, opts?: { dryRun?: boole
   console.log(chalk.bold(`🚀 ${pkg.name} publishing...`))
 
   try {
-    const cmdArgs = ['publish', '-C', pkg.packagePath, '--no-git-checks', '--json', '--tag', tag]
+    const cmdArgs = ['publish', '-C', pkg.packagePath, '--no-git-checks', '--tag', tag]
     if (dryRun) {
       cmdArgs.push('--dry-run')
       console.log(chalk.gray(`\n${logPrefix} pnpm ${cmdArgs.join(' ')}\n`))

@@ -15,7 +15,7 @@
     textarea {
       overflow-y: auto;
       resize: vertical;
-      min-height: calc(var(--field-min-height) * 2);
+      min-height: calc(var(--field-min-height-large) * 2);
       height: auto;
       display: flex;
       field-sizing: content;

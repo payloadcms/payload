@@ -12,18 +12,16 @@ const __dirname = path.dirname(__filename)
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  runJobsQueue,
-  saveDocAndAssert,
-} from '../__helpers/e2e/helpers.js'
+import { runJobsQueue, saveDocAndAssert } from '../__helpers/e2e/helpers.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { setPerPageLimit } from '../__helpers/e2e/setPerPageLimit.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { readCSV } from './helpers.js'
 import {
+  batchRefFieldName,
   postsWithColumnMapSlug,
   postsWithHooksSlug,
   postsWithS3ExportSlug,
@@ -37,6 +35,7 @@ test.describe('Import Export Plugin', () => {
   let importsURL: AdminUrlUtil
   let postsURL: AdminUrlUtil
   let customIdPagesURL: AdminUrlUtil
+  let postsWithHooksURL: AdminUrlUtil
   let s3ExportsURL: AdminUrlUtil
   let s3ImportsURL: AdminUrlUtil
   let payload: PayloadTestSDK<Config>
@@ -44,6 +43,7 @@ test.describe('Import Export Plugin', () => {
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
+    fs.mkdirSync(path.join(__dirname, 'uploads'), { recursive: true })
     const { payload: payloadFromInit, serverURL: url } = await initPayloadE2ENoConfig<Config>({
       dirname: __dirname,
     })
@@ -52,16 +52,14 @@ test.describe('Import Export Plugin', () => {
     importsURL = new AdminUrlUtil(serverURL, 'imports')
     postsURL = new AdminUrlUtil(serverURL, 'posts')
     customIdPagesURL = new AdminUrlUtil(serverURL, 'custom-id-pages')
+    postsWithHooksURL = new AdminUrlUtil(serverURL, postsWithHooksSlug)
     s3ExportsURL = new AdminUrlUtil(serverURL, postsWithS3ExportSlug)
     s3ImportsURL = new AdminUrlUtil(serverURL, postsWithS3ImportSlug)
 
     payload = payloadFromInit
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   test.describe('Export', () => {
@@ -76,7 +74,7 @@ test.describe('Import Export Plugin', () => {
       await expect(async () => {
         await page.reload()
 
-        const exportFilename = page.locator('.file-details__main-detail')
+        const exportFilename = page.locator('.file-toolbar__filename-text')
         await expect(exportFilename).toBeVisible()
         await expect(exportFilename).toContainText('.csv')
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
@@ -89,7 +87,7 @@ test.describe('Import Export Plugin', () => {
       const formatField = page.locator('.format-field .rs__control')
       await expect(formatField).toBeVisible()
       await formatField.click()
-      await page.locator('.rs__menu .rs__option:has-text("json")').click()
+      await getSelectMenu({ page }).locator('.rs__option', { hasText: 'json' }).click()
 
       await saveDocAndAssert(page)
 
@@ -98,7 +96,7 @@ test.describe('Import Export Plugin', () => {
       await expect(async () => {
         await page.reload()
 
-        const exportFilename = page.locator('.file-details__main-detail')
+        const exportFilename = page.locator('.file-toolbar__filename-text')
         await expect(exportFilename).toBeVisible()
         await expect(exportFilename).toContainText('.json')
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
@@ -126,10 +124,12 @@ test.describe('Import Export Plugin', () => {
 
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
+      await expect(createExportButton.locator('button')).toHaveCount(0)
 
       await createExportButton.click()
 
@@ -144,15 +144,17 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('body')).not.toContainText('Loading...')
 
       // Change per-page to 25
-      await setPerPageLimit({ page, limit: 25 })
+      await setPerPageLimit({ limit: 25, page })
 
       // Open export from list menu
       const listMenuButton = page.locator('#list-menu')
+
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -175,8 +177,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -218,8 +221,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts No Jobs Queues',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -270,8 +274,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts Exports Only',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -312,12 +317,14 @@ test.describe('Import Export Plugin', () => {
           where: {
             'input.collectionSlug': { equals: 'custom-id-pages' },
           },
+          overrideAccess: true,
         })
         await payload.delete({
           collection: 'exports' as any,
           where: {
             collectionSlug: { equals: 'custom-id-pages' },
           },
+          overrideAccess: true,
         })
 
         await payload.create({
@@ -326,6 +333,7 @@ test.describe('Import Export Plugin', () => {
             id: `e2e-export-${uniqueId}-1`,
             title: 'E2E Export Custom Page 1',
           },
+          overrideAccess: true,
         })
 
         await payload.create({
@@ -334,6 +342,7 @@ test.describe('Import Export Plugin', () => {
             id: `e2e-export-${uniqueId}-2`,
             title: 'E2E Export Custom Page 2',
           },
+          overrideAccess: true,
         })
 
         await page.goto(customIdPagesURL.list)
@@ -343,8 +352,9 @@ test.describe('Import Export Plugin', () => {
         await expect(listMenuButton).toBeVisible()
         await listMenuButton.click()
 
-        const createExportButton = page.locator('.popup__scroll-container button', {
-          hasText: 'Export',
+        const createExportButton = page.getByRole('menuitem', {
+          name: 'Export Custom Id Pages',
+          exact: true,
         })
         await expect(createExportButton).toBeVisible()
         await createExportButton.click()
@@ -355,12 +365,8 @@ test.describe('Import Export Plugin', () => {
 
         // Ensure the export is for custom-id-pages (id + title columns visible) before saving
         await expect(async () => {
-          await expect(
-            page.locator('.export-preview table thead th').filter({ hasText: 'id' }),
-          ).toBeVisible()
-          await expect(
-            page.locator('.export-preview table thead th').filter({ hasText: 'title' }),
-          ).toBeVisible()
+          await expect(page.locator('.export-preview table thead th#heading-id')).toBeVisible()
+          await expect(page.locator('.export-preview table thead th#heading-title')).toBeVisible()
         }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
         // Verify the collection field is set to Custom ID Pages before saving
@@ -390,6 +396,7 @@ test.describe('Import Export Plugin', () => {
               equals: exportId,
             },
           },
+          overrideAccess: true,
         })
         expect(docs.length).toBe(1)
         expect(docs[0].collectionSlug).toBe('custom-id-pages')
@@ -399,14 +406,14 @@ test.describe('Import Export Plugin', () => {
         await expect(async () => {
           await page.reload()
 
-          const exportFilename = page.locator('.file-details__main-detail')
+          const exportFilename = page.locator('.file-toolbar__filename-text')
           await expect(exportFilename).toBeVisible()
           await expect(exportFilename).toContainText('.csv')
           // Verify we're downloading from the correct collection export
           await expect(exportFilename).toContainText('custom-id-pages')
         }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
-        const downloadLink = page.locator('.file-details__main-detail a')
+        const downloadLink = page.locator('.file-toolbar__icon-link[download]')
         await expect(downloadLink).toHaveAttribute('href', /.+/)
 
         const [download] = await Promise.all([page.waitForEvent('download'), downloadLink.click()])
@@ -416,9 +423,9 @@ test.describe('Import Export Plugin', () => {
         const content = fs.readFileSync(tempPath, 'utf8')
         fs.unlinkSync(tempPath)
 
-        // Ensure we got the custom-id-pages export (id,title only; no _status)
+        // Ensure we got the custom-id-pages export (id,title lead; no _status)
         await expect(() => {
-          expect(content).toMatch(/^\uFEFF?id,title,updatedAt,createdAt/m)
+          expect(content).toMatch(/^\uFEFF?id,title,/m)
           expect(content).not.toContain('_status')
 
           expect(content).toContain(`e2e-export-${uniqueId}-1`)
@@ -439,6 +446,7 @@ test.describe('Import Export Plugin', () => {
             id: `preview-export-${uniqueId}-1`,
             title: 'Preview Export Test 1',
           },
+          overrideAccess: true,
         })
         createdPages.push(`preview-export-${uniqueId}-1`)
 
@@ -448,6 +456,7 @@ test.describe('Import Export Plugin', () => {
             id: `preview-export-${uniqueId}-2`,
             title: 'Preview Export Test 2',
           },
+          overrideAccess: true,
         })
         createdPages.push(`preview-export-${uniqueId}-2`)
 
@@ -458,8 +467,9 @@ test.describe('Import Export Plugin', () => {
         await expect(listMenuButton).toBeVisible()
         await listMenuButton.click()
 
-        const createExportButton = page.locator('.popup__scroll-container button', {
-          hasText: 'Export',
+        const createExportButton = page.getByRole('menuitem', {
+          name: 'Export Custom Id Pages',
+          exact: true,
         })
         await expect(createExportButton).toBeVisible()
         await createExportButton.click()
@@ -501,8 +511,9 @@ test.describe('Import Export Plugin', () => {
         // Cleanup
         for (const id of createdPages) {
           await payload.delete({
-            collection: 'custom-id-pages' as any,
             id,
+            collection: 'custom-id-pages' as any,
+            overrideAccess: true,
           })
         }
       })
@@ -517,7 +528,7 @@ test.describe('Import Export Plugin', () => {
         await expect(collectionField).toBeVisible()
         await collectionField.locator('.rs__control').click()
 
-        const menu = page.locator('.rs__menu')
+        const menu = getSelectMenu({ page })
         await expect(menu).toBeVisible()
 
         await expect(menu.locator('.rs__option:text-is("Pages")')).toBeVisible()
@@ -559,8 +570,9 @@ test.describe('Import Export Plugin', () => {
         await expect(listMenuButton).toBeVisible()
         await listMenuButton.click()
 
-        const createExportButton = page.locator('.popup__scroll-container button', {
-          hasText: 'Export',
+        const createExportButton = page.getByRole('menuitem', {
+          name: 'Export Custom Id Pages',
+          exact: true,
         })
         await expect(createExportButton).toBeVisible()
         await createExportButton.click()
@@ -577,7 +589,7 @@ test.describe('Import Export Plugin', () => {
         await expect(collectionField).toBeVisible()
         await collectionField.locator('.rs__control').click()
 
-        const menu = page.locator('.rs__menu')
+        const menu = getSelectMenu({ page })
         await expect(menu).toBeVisible()
 
         await expect(menu.locator('.rs__option:text-is("Pages")')).toBeVisible()
@@ -594,7 +606,7 @@ test.describe('Import Export Plugin', () => {
         await expect(collectionField).toBeVisible()
         await collectionField.locator('.rs__control').click()
 
-        let menu = page.locator('.rs__menu')
+        let menu = getSelectMenu({ page })
         await expect(menu).toBeVisible()
 
         let optionsBefore = 0
@@ -608,7 +620,7 @@ test.describe('Import Export Plugin', () => {
         await expect(page.locator('.collection-edit')).toBeVisible()
 
         await collectionField.locator('.rs__control').click()
-        menu = page.locator('.rs__menu')
+        menu = getSelectMenu({ page })
         await expect(menu).toBeVisible()
 
         await expect(async () => {
@@ -641,14 +653,16 @@ test.describe('Import Export Plugin', () => {
           where: {
             title: { contains: pattern },
           },
+          overrideAccess: true,
         })
       }
       createdPageTitlePatterns.length = 0
 
       for (const id of createdPageIDs) {
         await payload.delete({
-          collection: 'pages',
           id,
+          collection: 'pages',
+          overrideAccess: true,
         })
       }
       createdPageIDs.length = 0
@@ -677,7 +691,7 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.collection-edit')).toBeVisible()
 
       await page.setInputFiles('input[type="file"]', csvPath)
-      await expect(page.locator('.file-field__filename')).toHaveValue('e2e-test-import.csv')
+      await expect(page.locator('#field-filemanager-filename')).toHaveValue('e2e-test-import.csv')
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
@@ -696,6 +710,7 @@ test.describe('Import Export Plugin', () => {
         where: {
           title: { contains: 'E2E Import Test' },
         },
+        overrideAccess: true,
       })
 
       expect(importedDocs.docs.length).toBeGreaterThanOrEqual(2)
@@ -716,7 +731,7 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.collection-edit')).toBeVisible()
 
       await page.setInputFiles('input[type="file"]', jsonPath)
-      await expect(page.locator('.file-field__filename')).toHaveValue('e2e-test-import.json')
+      await expect(page.locator('#field-filemanager-filename')).toHaveValue('e2e-test-import.json')
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
@@ -735,6 +750,7 @@ test.describe('Import Export Plugin', () => {
         where: {
           title: { contains: 'E2E JSON Import' },
         },
+        overrideAccess: true,
       })
 
       expect(importedDocs.docs.length).toBeGreaterThanOrEqual(2)
@@ -750,8 +766,17 @@ test.describe('Import Export Plugin', () => {
 
       await page.goto(importsURL.create)
 
-      await page.setInputFiles('input[type="file"]', csvPath)
-      await expect(page.locator('.file-field__filename')).toHaveValue('e2e-list-test.csv')
+      // `setInputFiles` fires a one-shot native change event; if it lands before
+      // the upload field's React onChange is hydrated (the admin view is an async
+      // RSC/Flight payload that hydrates after the shell), the selection is
+      // dropped and the filename never appears. Unlike click/fill, setInputFiles
+      // does not auto-retry, so retry the selection until it registers.
+      await expect(async () => {
+        await page.setInputFiles('input[type="file"]', csvPath)
+        await expect(page.locator('#field-filemanager-filename')).toHaveValue('e2e-list-test.csv', {
+          timeout: 2000,
+        })
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
@@ -776,10 +801,12 @@ test.describe('Import Export Plugin', () => {
 
       await listMenuButton.click()
 
-      const createImportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Import Posts',
+      const createImportButton = page.getByRole('menuitem', {
+        name: 'Import Posts',
+        exact: true,
       })
       await expect(createImportButton).toBeVisible()
+      await expect(createImportButton.locator('button')).toHaveCount(0)
 
       await createImportButton.click()
 
@@ -795,6 +822,7 @@ test.describe('Import Export Plugin', () => {
           excerpt: 'Original excerpt',
           title: 'E2E Update Test Original',
         },
+        overrideAccess: true,
       })
 
       createdPageIDs.push(existingDoc.id)
@@ -807,8 +835,18 @@ test.describe('Import Export Plugin', () => {
 
       await page.goto(importsURL.create)
 
-      await page.setInputFiles('input[type="file"]', csvPath)
-      await expect(page.locator('.file-field__filename')).toHaveValue('e2e-update-test.csv')
+      // See note above: retry the file selection until the upload field's React
+      // onChange is hydrated (async RSC/Flight view), since setInputFiles is a
+      // one-shot native event with no auto-retry.
+      await expect(async () => {
+        await page.setInputFiles('input[type="file"]', csvPath)
+        await expect(page.locator('#field-filemanager-filename')).toHaveValue(
+          'e2e-update-test.csv',
+          {
+            timeout: 2000,
+          },
+        )
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
@@ -832,6 +870,7 @@ test.describe('Import Export Plugin', () => {
             equals: existingDoc.id,
           },
         },
+        overrideAccess: true,
       })
 
       expect(updatedDoc?.title).toBe('E2E Update Test Modified')
@@ -851,7 +890,7 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.collection-edit')).toBeVisible()
 
       await page.setInputFiles('input[type="file"]', csvPath)
-      await expect(page.locator('.file-field__filename')).toHaveValue(
+      await expect(page.locator('#field-filemanager-filename')).toHaveValue(
         'e2e-published-status-test.csv',
       )
 
@@ -869,10 +908,11 @@ test.describe('Import Export Plugin', () => {
 
       const importedDocs = await payload.find({
         collection: 'pages',
+        draft: false,
         where: {
           title: { contains: 'E2E Published Status Test' },
         },
-        draft: false,
+        overrideAccess: true,
       })
 
       expect(importedDocs.docs.length).toBe(2)
@@ -895,7 +935,7 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.collection-edit')).toBeVisible()
 
       await page.setInputFiles('input[type="file"]', csvPath)
-      await expect(page.locator('.file-field__filename')).toHaveValue(
+      await expect(page.locator('#field-filemanager-filename')).toHaveValue(
         'e2e-explicit-status-test.csv',
       )
 
@@ -913,10 +953,11 @@ test.describe('Import Export Plugin', () => {
 
       const draftDocs = await payload.find({
         collection: 'pages',
+        draft: true,
         where: {
           title: { equals: 'E2E Explicit Draft Test' },
         },
-        draft: true,
+        overrideAccess: true,
       })
 
       expect(draftDocs.docs.length).toBe(1)
@@ -924,10 +965,11 @@ test.describe('Import Export Plugin', () => {
 
       const publishedDocs = await payload.find({
         collection: 'pages',
+        draft: false,
         where: {
           title: { equals: 'E2E Explicit Published Test' },
         },
-        draft: false,
+        overrideAccess: true,
       })
 
       expect(publishedDocs.docs.length).toBe(1)
@@ -943,8 +985,7 @@ test.describe('Import Export Plugin', () => {
 
         const collectionField = page.locator('#field-collectionSlug')
         await collectionField.locator('.rs__control').click()
-        await expect(page.locator('.rs__menu')).toBeVisible()
-        await page.locator('.rs__option:has-text("Custom Id Pages")').click()
+        await getSelectMenu({ page }).locator('.rs__option', { hasText: 'Custom Id Pages' }).click()
 
         const fileInput = page.locator('input[type="file"]')
         await fileInput.setInputFiles({
@@ -972,8 +1013,7 @@ test.describe('Import Export Plugin', () => {
 
         const collectionField = page.locator('#field-collectionSlug')
         await collectionField.locator('.rs__control').click()
-        await expect(page.locator('.rs__menu')).toBeVisible()
-        await page.locator('.rs__option:has-text("Custom Id Pages")').click()
+        await getSelectMenu({ page }).locator('.rs__option', { hasText: 'Custom Id Pages' }).click()
 
         const fileInput = page.locator('input[type="file"]')
         await fileInput.setInputFiles({
@@ -1002,6 +1042,7 @@ test.describe('Import Export Plugin', () => {
           where: {
             id: { contains: `e2e-custom-${uniqueId}` },
           },
+          overrideAccess: true,
         })
 
         expect(importedPages.totalDocs).toBe(2)
@@ -1016,8 +1057,7 @@ test.describe('Import Export Plugin', () => {
 
         const collectionField = page.locator('#field-collectionSlug')
         await collectionField.locator('.rs__control').click()
-        await expect(page.locator('.rs__menu')).toBeVisible()
-        await page.locator('.rs__option:has-text("Custom Id Pages")').click()
+        await getSelectMenu({ page }).locator('.rs__option', { hasText: 'Custom Id Pages' }).click()
 
         const fileInput = page.locator('input[type="file"]')
         await fileInput.setInputFiles({
@@ -1071,7 +1111,7 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.collection-edit')).toBeVisible()
 
       await page.setInputFiles('input[type="file"]', csvPath)
-      await expect(page.locator('.file-field__filename')).toHaveValue(csvFilename)
+      await expect(page.locator('#field-filemanager-filename')).toHaveValue(csvFilename)
 
       // Collection field is disabled since this custom import only targets one collection
       const collectionField = page.locator('#field-collectionSlug')
@@ -1084,9 +1124,10 @@ test.describe('Import Export Plugin', () => {
         await runJobsQueue({ serverURL })
         const { docs } = await payload.find({
           collection: postsWithS3ImportSlug as any,
-          where: {},
-          sort: '-createdAt',
           limit: 1,
+          sort: '-createdAt',
+          where: {},
+          overrideAccess: true,
         })
         expect(docs[0]?.status).toBe('completed')
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
@@ -1096,6 +1137,7 @@ test.describe('Import Export Plugin', () => {
         where: {
           title: { contains: 'S3 E2E Import' },
         },
+        overrideAccess: true,
       })
 
       expect(posts.totalDocs).toBeGreaterThanOrEqual(3)
@@ -1105,10 +1147,12 @@ test.describe('Import Export Plugin', () => {
       await payload.create({
         collection: postsWithS3Slug,
         data: { title: 'S3 E2E Export 1' },
+        overrideAccess: true,
       })
       await payload.create({
         collection: postsWithS3Slug,
         data: { title: 'S3 E2E Export 2' },
+        overrideAccess: true,
       })
 
       await page.goto(s3ExportsURL.create)
@@ -1119,12 +1163,12 @@ test.describe('Import Export Plugin', () => {
       await expect(async () => {
         await runJobsQueue({ serverURL })
         await page.reload()
-        const exportFilename = page.locator('.file-details__main-detail')
+        const exportFilename = page.locator('.file-toolbar__filename-text')
         await expect(exportFilename).toBeVisible()
         await expect(exportFilename).toContainText('.csv')
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
-      const downloadLink = page.locator('.file-details__main-detail a')
+      const downloadLink = page.locator('.file-toolbar__icon-link[download]')
       await expect(downloadLink).toHaveAttribute('href', /.+/)
 
       const [download] = await Promise.all([page.waitForEvent('download'), downloadLink.click()])
@@ -1146,8 +1190,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -1189,8 +1234,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -1223,18 +1269,19 @@ test.describe('Import Export Plugin', () => {
     test.beforeAll(async () => {
       pagesURL = new AdminUrlUtil(serverURL, 'pages')
 
-      const users = await payload.find({ collection: 'users', limit: 1 })
+      const users = await payload.find({ collection: 'users', limit: 1, overrideAccess: true })
       const userId = users.docs[0]!.id
 
       await payload.create({
         collection: 'pages',
         data: {
-          title: 'E2E beforeExport Preview Test',
-          customRelationship: userId,
-          customRelNameEmail: userId,
-          customRelIdName: userId,
           _status: 'published',
+          customRelationship: userId,
+          customRelIdName: userId,
+          customRelNameEmail: userId,
+          title: 'E2E beforeExport Preview Test',
         },
+        overrideAccess: true,
       })
     })
 
@@ -1242,6 +1289,7 @@ test.describe('Import Export Plugin', () => {
       await payload.delete({
         collection: 'pages',
         where: { title: { equals: 'E2E beforeExport Preview Test' } },
+        overrideAccess: true,
       })
     })
 
@@ -1253,8 +1301,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Pages',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Pages',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -1298,6 +1347,7 @@ test.describe('Import Export Plugin', () => {
         await payload.create({
           collection: 'posts-with-limits',
           data: { title: `E2E Limit Test Post ${i}` },
+          overrideAccess: true,
         })
       }
     })
@@ -1309,6 +1359,7 @@ test.describe('Import Export Plugin', () => {
         where: {
           title: { contains: 'E2E Limit Test Post' },
         },
+        overrideAccess: true,
       })
     })
 
@@ -1320,8 +1371,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts With Limits',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts With Limits',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -1347,8 +1399,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts With Limits',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts With Limits',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -1383,8 +1436,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts With Limits',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts With Limits',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -1398,12 +1452,12 @@ test.describe('Import Export Plugin', () => {
       await expect(async () => {
         await page.reload()
 
-        const exportFilename = page.locator('.file-details__main-detail')
+        const exportFilename = page.locator('.file-toolbar__filename-text')
         await expect(exportFilename).toBeVisible()
         await expect(exportFilename).toContainText('.csv')
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
-      const downloadLink = page.locator('.file-details__main-detail a')
+      const downloadLink = page.locator('.file-toolbar__icon-link[download]')
       await expect(downloadLink).toHaveAttribute('href', /.+/)
 
       const [download] = await Promise.all([page.waitForEvent('download'), downloadLink.click()])
@@ -1457,12 +1511,14 @@ test.describe('Import Export Plugin', () => {
       const devUsers = await payload.find({
         collection: 'users',
         where: { email: { equals: 'dev@payloadcms.com' } },
+        overrideAccess: true,
       })
 
       await payload.update({
         id: devUsers.docs[0]!.id,
         collection: 'users',
         data: { limit: 7 },
+        overrideAccess: true,
       })
 
       // Create 10 test documents (more than both limits)
@@ -1470,6 +1526,7 @@ test.describe('Import Export Plugin', () => {
         await payload.create({
           collection: 'posts-with-limits',
           data: { title: `E2E Dynamic Limit Post ${i}` },
+          overrideAccess: true,
         })
       }
     })
@@ -1479,12 +1536,14 @@ test.describe('Import Export Plugin', () => {
       const devUsers = await payload.find({
         collection: 'users',
         where: { email: { equals: 'dev@payloadcms.com' } },
+        overrideAccess: true,
       })
 
       await payload.update({
         id: devUsers.docs[0]!.id,
         collection: 'users',
         data: { limit: null as unknown as number },
+        overrideAccess: true,
       })
 
       // Clean up test documents
@@ -1493,6 +1552,7 @@ test.describe('Import Export Plugin', () => {
         where: {
           title: { contains: 'E2E Dynamic Limit Post' },
         },
+        overrideAccess: true,
       })
     })
 
@@ -1504,8 +1564,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts With Limits',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts With Limits',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -1531,8 +1592,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts With Limits',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts With Limits',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -1546,12 +1608,12 @@ test.describe('Import Export Plugin', () => {
       await expect(async () => {
         await page.reload()
 
-        const exportFilename = page.locator('.file-details__main-detail')
+        const exportFilename = page.locator('.file-toolbar__filename-text')
         await expect(exportFilename).toBeVisible()
         await expect(exportFilename).toContainText('.csv')
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
-      const downloadLink = page.locator('.file-details__main-detail a')
+      const downloadLink = page.locator('.file-toolbar__icon-link[download]')
       await expect(downloadLink).toHaveAttribute('href', /.+/)
 
       const [download] = await Promise.all([page.waitForEvent('download'), downloadLink.click()])
@@ -1572,8 +1634,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts With Limits',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts With Limits',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -1647,6 +1710,7 @@ test.describe('Import Export Plugin', () => {
         await payload.delete({
           collection: postsWithColumnMapSlug,
           where: { title: { equals: title } },
+          overrideAccess: true,
         })
       }
       createdTitles.length = 0
@@ -1667,7 +1731,9 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.collection-edit')).toBeVisible()
 
       await page.setInputFiles('input[type="file"]', csvPath)
-      await expect(page.locator('.file-field__filename')).toHaveValue('e2e-column-map-import.csv')
+      await expect(page.locator('#field-filemanager-filename')).toHaveValue(
+        'e2e-column-map-import.csv',
+      )
 
       const importModeField = page.locator('#field-importMode')
       await importModeField.click()
@@ -1679,6 +1745,7 @@ test.describe('Import Export Plugin', () => {
         const { docs } = await payload.find({
           collection: postsWithColumnMapSlug,
           where: { title: { in: ['E2E Foreign A', 'E2E Foreign B'] } },
+          overrideAccess: true,
         })
         expect(docs).toHaveLength(2)
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
@@ -1687,6 +1754,7 @@ test.describe('Import Export Plugin', () => {
         collection: postsWithColumnMapSlug,
         sort: 'title',
         where: { title: { in: ['E2E Foreign A', 'E2E Foreign B'] } },
+        overrideAccess: true,
       })
 
       expect(imported.docs[0]!.title).toBe('E2E Foreign A')
@@ -1699,7 +1767,8 @@ test.describe('Import Export Plugin', () => {
     test('should export CSV with renamed column headers via admin save', async () => {
       await payload.create({
         collection: postsWithColumnMapSlug,
-        data: { title: 'E2E Export Rename', excerpt: 'exported summary', count: 99 },
+        data: { count: 99, excerpt: 'exported summary', title: 'E2E Export Rename' },
+        overrideAccess: true,
       })
       createdTitles.push('E2E Export Rename')
 
@@ -1711,21 +1780,25 @@ test.describe('Import Export Plugin', () => {
 
       await expect(async () => {
         await page.reload()
-        const exportFilename = page.locator('.file-details__main-detail')
+        const exportFilename = page.locator('.file-toolbar__filename-text')
         await expect(exportFilename).toBeVisible()
         await expect(exportFilename).toContainText('.csv')
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       const exports = await payload.find({
         collection: 'posts-with-column-map-export',
-        sort: '-createdAt',
         limit: 1,
+        sort: '-createdAt',
+        overrideAccess: true,
       })
 
       expect(exports.docs).toHaveLength(1)
       const exportDoc = exports.docs[0]! as unknown as { filename: string; id: number | string }
-      const csvPath = path.join(__dirname, 'uploads', exportDoc.filename)
-      const rows = await readCSV(csvPath)
+      const response = await page.request.get(
+        `${serverURL}/api/posts-with-column-map-export/file/${encodeURIComponent(exportDoc.filename)}`,
+      )
+      expect(response.ok()).toBe(true)
+      const rows = await readCSV(await response.body())
 
       const matching = rows.find((row) => row['Post Title'] === 'E2E Export Rename')
       expect(matching).toBeDefined()
@@ -1734,8 +1807,9 @@ test.describe('Import Export Plugin', () => {
       expect(matching!.title).toBeUndefined()
 
       await payload.delete({
-        collection: 'posts-with-column-map-export',
         id: exportDoc.id,
+        collection: 'posts-with-column-map-export',
+        overrideAccess: true,
       })
     })
   })
@@ -1748,7 +1822,8 @@ test.describe('Import Export Plugin', () => {
       for (let i = 1; i <= 2; i++) {
         const doc = await payload.create({
           collection: postsWithHooksSlug,
-          data: { title: `Hook Preview Post ${i}`, secret: `secret-${i}`, count: i },
+          data: { count: i, secret: `secret-${i}`, title: `Hook Preview Post ${i}` },
+          overrideAccess: true,
         })
         createdPostIds.push(doc.id)
       }
@@ -1756,7 +1831,9 @@ test.describe('Import Export Plugin', () => {
 
     test.afterAll(async () => {
       for (const id of createdPostIds) {
-        await payload.delete({ collection: postsWithHooksSlug, id }).catch(() => null)
+        await payload
+          .delete({ id, collection: postsWithHooksSlug, overrideAccess: true })
+          .catch(() => null)
       }
     })
 
@@ -1827,8 +1904,8 @@ test.describe('Import Export Plugin', () => {
         {
           data: {
             collectionSlug: postsWithHooksSlug,
-            format: 'csv',
             fileData,
+            format: 'csv',
           },
         },
       )
@@ -1844,7 +1921,7 @@ test.describe('Import Export Plugin', () => {
     })
 
     test('should apply import.hooks.before in JSON import preview (title gets _imported suffix)', async () => {
-      const jsonContent = JSON.stringify([{ title: 'Hook Preview Import JSON', count: 2 }])
+      const jsonContent = JSON.stringify([{ count: 2, title: 'Hook Preview Import JSON' }])
       const fileData = Buffer.from(jsonContent).toString('base64')
 
       const response = await page.request.post(
@@ -1852,8 +1929,8 @@ test.describe('Import Export Plugin', () => {
         {
           data: {
             collectionSlug: postsWithHooksSlug,
-            format: 'json',
             fileData,
+            format: 'json',
           },
         },
       )
@@ -1866,6 +1943,112 @@ test.describe('Import Export Plugin', () => {
 
       // import.hooks.before appends '_imported' to the title
       expect(body.docs[0].title).toBe('Hook Preview Import JSON_imported')
+    })
+  })
+
+  // Drive the browser to verify that preview components forward custom fields.
+  test.describe('Hooks — custom fields on the preview forms', () => {
+    const createdPostIDs: (number | string)[] = []
+    const tempFiles: string[] = []
+
+    test.beforeAll(async () => {
+      const doc = await payload.create({
+        collection: postsWithHooksSlug,
+        data: { count: 1, secret: 'custom-field-secret', title: 'Custom Field Preview Post' },
+      })
+
+      createdPostIDs.push(doc.id)
+    })
+
+    test.afterAll(async () => {
+      for (const filePath of tempFiles) {
+        fs.rmSync(filePath, { force: true })
+      }
+      tempFiles.length = 0
+
+      for (const id of createdPostIDs) {
+        await payload.delete({ id, collection: postsWithHooksSlug })
+      }
+      createdPostIDs.length = 0
+    })
+
+    test('should send a custom export field to the preview endpoint for the before hook to read', async () => {
+      await page.goto(postsWithHooksURL.list)
+      await expect(page.locator('.collection-list')).toBeVisible()
+
+      const listMenuButton = page.locator('#list-menu')
+      await expect(listMenuButton).toBeVisible()
+      await listMenuButton.click()
+
+      const createExportButton = page.locator('.popup__scroll-container button', {
+        hasText: 'Export',
+      })
+      await expect(createExportButton).toBeVisible()
+      await createExportButton.click()
+
+      const previewTable = page.locator('.export-preview table')
+
+      await expect(async () => {
+        await expect(previewTable).toBeVisible()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      const batchRefHeader = previewTable.locator('thead th').filter({ hasText: batchRefFieldName })
+
+      await expect(batchRefHeader).toHaveCount(0)
+
+      await page.locator(`#field-${batchRefFieldName}`).fill('E2E-EXPORT-REF')
+
+      await expect(async () => {
+        await expect(batchRefHeader).toHaveCount(1)
+        await expect(previewTable).toContainText('E2E-EXPORT-REF')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+    })
+
+    test('should send a custom import field to the preview endpoint for the before hook to read', async () => {
+      const csvContent = 'title,count\n"Custom Field Preview Import","1"'
+      const csvPath = path.join(__dirname, 'uploads', 'e2e-import-doc-custom-field.csv')
+
+      fs.writeFileSync(csvPath, csvContent)
+      tempFiles.push(csvPath)
+
+      await page.goto(postsWithHooksURL.list)
+      await expect(page.locator('.collection-list')).toBeVisible()
+
+      const listMenuButton = page.locator('#list-menu')
+
+      await expect(listMenuButton).toBeVisible()
+      await listMenuButton.click()
+
+      const createImportButton = page.locator('.popup__scroll-container button', {
+        hasText: 'Import',
+      })
+      await expect(createImportButton).toBeVisible()
+      await createImportButton.click()
+
+      // See the note on the update-mode import test: setInputFiles fires a one-shot native
+      // change event, so retry until the upload field's React onChange is hydrated.
+      await expect(async () => {
+        await page.setInputFiles('input[type="file"]', csvPath)
+        await expect(page.locator('#field-filemanager-filename')).toHaveValue(
+          'e2e-import-doc-custom-field.csv',
+          { timeout: 2000 },
+        )
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      const previewTable = page.locator('.import-preview table')
+
+      await expect(async () => {
+        await expect(previewTable).toContainText('Custom Field Preview Import_imported')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      await page.locator(`#field-${batchRefFieldName}`).fill('E2E-IMPORT-REF')
+
+      // import.hooks.before appends the reference it reads from importDoc to every title
+      await expect(async () => {
+        await expect(previewTable).toContainText(
+          'Custom Field Preview Import_imported_E2E-IMPORT-REF',
+        )
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
   })
 })

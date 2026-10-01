@@ -33,4 +33,5 @@ export const Media: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

@@ -20,4 +20,5 @@ export const RichTextCollection: CollectionConfig = {
       }),
     },
   ],
+  versions: false,
 }

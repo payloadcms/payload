@@ -1,4 +1,4 @@
-import type { TypedUser, User } from 'payload'
+import type { User } from 'payload'
 
 import type { PayloadTestSDK } from '../shared/sdk/index.js'
 import type { GeneratedTypes } from '../shared/sdk/types.js'
@@ -14,7 +14,7 @@ export const upsertPreferences = async <
 }: {
   key: string
   payload: PayloadTestSDK<TConfig>
-  user: TypedUser
+  user: User
   value: any
 }): Promise<TGeneratedTypes['collections']['payload-preferences']> => {
   try {
@@ -30,6 +30,7 @@ export const upsertPreferences = async <
             { 'user.relationTo': { equals: user.collection } },
           ],
         },
+        overrideAccess: true,
       })
       ?.then((res) => res.docs?.[0])
 
@@ -45,6 +46,7 @@ export const upsertPreferences = async <
           },
           value,
         },
+        overrideAccess: true,
       })
     } else {
       const newValue = typeof value === 'object' ? { ...(prefs?.value || {}), ...value } : value
@@ -60,6 +62,7 @@ export const upsertPreferences = async <
           },
           value: newValue,
         },
+        overrideAccess: true,
       })
 
       if (prefs?.status >= 400) {
@@ -92,6 +95,7 @@ export const deletePreferences = async <TConfig extends GeneratedTypes<any>>({
           { 'user.relationTo': { equals: user.collection } },
         ],
       },
+      overrideAccess: true,
     })
   } catch (e) {
     console.error('Error deleting prefs', e)

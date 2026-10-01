@@ -1,9 +1,11 @@
 /* eslint-disable perfectionist/sort-objects */
-import type { PayloadRequest, Sort, TypedUser, Where } from 'payload'
+import type { PayloadRequest, Sort, User, Where } from 'payload'
 
 import { stringify } from 'csv-stringify/sync'
 import { APIError } from 'payload'
 import { Readable } from 'stream'
+
+import type { ExportDoc } from '../types.js'
 
 import { applyFieldHooks } from '../utilities/applyFieldHooks.js'
 import { buildDisabledFieldRegex } from '../utilities/buildDisabledFieldRegex.js'
@@ -42,8 +44,8 @@ export type Export = {
   name: string
   page?: number
   sort?: Sort
-  userCollection: string
-  userID: number | string
+  userCollection?: string
+  userID?: number | string
   where?: Where
 }
 
@@ -52,6 +54,7 @@ export type CreateExportArgs = {
    * If true, stream the file instead of saving it
    */
   download?: boolean
+  exportDoc: ExportDoc
   req: PayloadRequest
 } & Export
 
@@ -65,6 +68,7 @@ export const createExport = async (args: CreateExportArgs) => {
     download,
     drafts: draftsFromInput,
     exportCollection,
+    exportDoc,
     fields,
     format,
     limit: incomingLimit,
@@ -99,18 +103,18 @@ export const createExport = async (args: CreateExportArgs) => {
     throw new APIError(`Collection with slug ${collectionSlug} not found.`)
   }
 
-  let user: TypedUser | undefined
+  let user: undefined | User
 
   if (userCollection && userID) {
     user = (await req.payload.findByID({
       id: userID,
       collection: userCollection,
       overrideAccess: true,
-    })) as TypedUser
+    })) as User
   }
 
   if (!user && req.user) {
-    user = req?.user?.id ? req.user : req?.user?.user
+    user = req.user
   }
 
   if (!user) {
@@ -351,6 +355,7 @@ export const createExport = async (args: CreateExportArgs) => {
             batchRowsToWrite = await exportHooks.before({
               batchNumber: streamBatchNumber,
               data: batchRows,
+              exportDoc,
               format,
               originalData: originalDocs,
               req,
@@ -409,6 +414,7 @@ export const createExport = async (args: CreateExportArgs) => {
             await exportHooks.after({
               batchNumber: streamBatchNumber,
               data: batchRowsToWrite,
+              exportDoc,
               format,
               originalData: originalDocs,
               req,
@@ -438,6 +444,7 @@ export const createExport = async (args: CreateExportArgs) => {
             batchRowsToWrite = await exportHooks.before({
               batchNumber: streamBatchNumber,
               data: batchRows,
+              exportDoc,
               format,
               originalData: originalDocs,
               req,
@@ -458,6 +465,7 @@ export const createExport = async (args: CreateExportArgs) => {
             await exportHooks.after({
               batchNumber: streamBatchNumber,
               data: batchRowsToWrite,
+              exportDoc,
               format,
               originalData: originalDocs,
               req,
@@ -532,6 +540,7 @@ export const createExport = async (args: CreateExportArgs) => {
   if (!accessDenied) {
     exportResult = await processor.processExport({
       collectionSlug,
+      exportDoc,
       findArgs: findArgs as ExportFindArgs,
       format,
       hooks: exportHooks,

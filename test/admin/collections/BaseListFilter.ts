@@ -16,4 +16,5 @@ export const BaseListFilter: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

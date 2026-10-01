@@ -32,6 +32,7 @@ export const queueSpecificConcurrencyWorkflow: WorkflowConfig<'queueSpecificConc
           data: {
             title: `started:${job.queue}:${job.input.resourceId}:${job.id}`,
           },
+          overrideAccess: true,
         })
 
         await wait(delayMs)
@@ -47,6 +48,7 @@ export const queueSpecificConcurrencyWorkflow: WorkflowConfig<'queueSpecificConc
           data: {
             title: `completed:${job.queue}:${job.input.resourceId}:${job.id}`,
           },
+          overrideAccess: true,
         })
 
         return { output: {} }

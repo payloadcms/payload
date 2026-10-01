@@ -1,8 +1,8 @@
-import { PreviewSearchParams } from '@/app/(frontend)/next/preview/route'
+import { PreviewSearchParams } from '@/app/(app)/next/preview/route'
 import { PayloadRequest, CollectionSlug } from 'payload'
 
 const collectionPrefixMap: Partial<Record<CollectionSlug, string>> = {
-  posts: '/posts',
+  products: '/products',
   pages: '',
 }
 

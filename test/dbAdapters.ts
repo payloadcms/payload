@@ -299,7 +299,6 @@ export function generateDatabaseAdapter(dbAdapter: DatabaseAdapterType) {
   `,
   )
 
-  console.log('Wrote', dbAdapter, 'db adapter')
   return adapter.source
 }
 

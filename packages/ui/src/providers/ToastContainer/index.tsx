@@ -1,36 +1,89 @@
 'use client'
 import type { ClientConfig } from 'payload'
 
-import React from 'react'
+import { useModal } from '@faceless-ui/modal'
+import React, { useLayoutEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Toaster } from 'sonner'
 
-import { ErrorIcon } from '../../icons/Error/index.js'
+import { CheckIcon } from '../../icons/Check/index.js'
 import { InfoIcon } from '../../icons/Info/index.js'
-import { SuccessIcon } from '../../icons/Success/index.js'
 import { WarningIcon } from '../../icons/Warning/index.js'
+import { XIcon } from '../../icons/X/index.js'
+import { getActiveModal } from '../../utilities/getActiveModal.js'
+import './index.css'
 
 export const ToastContainer: React.FC<{
   config: ClientConfig
 }> = ({ config }) => {
   const { admin: { toast: { duration, expand, limit, position } = {} } = {} } = config
 
-  return (
+  const { modalState } = useModal()
+  const [portalContainer, setPortalContainer] = useState<HTMLDivElement | null>(null)
+
+  useLayoutEffect(() => {
+    const container = document.createElement('div')
+
+    document.body.appendChild(container)
+    setPortalContainer(container)
+    return () => container.remove()
+  }, [])
+
+  useLayoutEffect(() => {
+    if (!portalContainer) {
+      return
+    }
+    const updateContainer = () => {
+      const activeModal = getActiveModal({ modalState })
+      const destination = activeModal ?? document.body
+
+      // Move the portal host, preserving Sonner's mounted state and pending notifications.
+      if (portalContainer.parentElement !== destination) {
+        destination.appendChild(portalContainer)
+      }
+    }
+
+    updateContainer()
+    const observer = new MutationObserver(updateContainer)
+
+    observer.observe(document.body, {
+      attributeFilter: ['open'],
+      attributes: true,
+      childList: true,
+      subtree: true,
+    })
+    return () => observer.disconnect()
+  }, [modalState, portalContainer])
+
+  if (!portalContainer) {
+    return null
+  }
+
+  return createPortal(
     <Toaster
       className="payload-toast-container"
       closeButton
-      // @ts-expect-error
+      // @ts-expect-error - Sonner's `dir` prop is typed as `Direction`, but passing "undefined" opts out of RTL/LTR handling
       dir="undefined"
       duration={duration ?? 4000}
       expand={expand ?? false}
       gap={8}
       icons={{
-        error: <ErrorIcon />,
+        close: <XIcon size={24} />,
+        error: <WarningIcon />,
         info: <InfoIcon />,
-        success: <SuccessIcon />,
+        success: <CheckIcon size={24} />,
         warning: <WarningIcon />,
       }}
-      offset="calc(var(--gutter-h) / 2)"
+      offset={{
+        bottom: 'var(--spacer-6)',
+        right: 'var(--spacer-6)',
+      }}
       position={position ?? 'bottom-right'}
+      style={{
+        width: '280px',
+      }}
+      theme="dark"
       toastOptions={{
         classNames: {
           closeButton: 'payload-toast-close-button',
@@ -46,6 +99,7 @@ export const ToastContainer: React.FC<{
         unstyled: true,
       }}
       visibleToasts={limit ?? 5}
-    />
+    />,
+    portalContainer,
   )
 }

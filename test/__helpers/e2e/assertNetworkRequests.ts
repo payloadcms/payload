@@ -2,6 +2,8 @@ import type { Page, Request } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
+const isTanStack = process.env.PAYLOAD_FRAMEWORK === 'tanstack-start'
+
 /**
  * Counts the number of network requests every `interval` milliseconds until `timeout` is reached.
  * Useful to ensure unexpected network requests are not triggered by an action.
@@ -50,7 +52,23 @@ export const assertNetworkRequests = async (
 
   // begin tracking network requests
   page.on('request', async (request) => {
-    if (request.url().includes(url) && (requestFilter ? await requestFilter(request) : true)) {
+    const requestUrl = request.url()
+    // TanStack Start dispatches Payload server functions (form state, etc.)
+    // through its `createServerFn` RPC at `/_serverFn/<base64-fn-id>` instead of
+    // the document/admin URL that Next.js posts RSC form-state requests to. So
+    // when a test asserts an *admin* URL (where Next routes form state), accept
+    // the `/_serverFn` URL on tanstack too. REST `/api/...` endpoints (e.g.
+    // `/api/<collection>/access/<id>`) are framework-agnostic and must NOT be
+    // conflated with server-function calls, otherwise unrelated form-state RPCs
+    // would be counted against them.
+    const isFrameworkAgnosticApiUrl = url.includes('/api/')
+    const matches =
+      requestUrl.includes(url) ||
+      (isTanStack &&
+        !isFrameworkAgnosticApiUrl &&
+        (requestUrl.includes('/_serverFn/') || requestUrl.includes('/api/server-function')))
+
+    if (matches && (requestFilter ? await requestFilter(request) : true)) {
       matchedRequests.push(request)
     }
   })

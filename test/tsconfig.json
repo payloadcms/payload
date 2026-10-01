@@ -28,7 +28,8 @@
       }
     ],
     "paths": {
-      "@payload-config": ["./tags/config.ts"]
+      "@payload-config": ["./tags/config.ts"],
+      "__helpers/*": ["./__helpers/*"]
     }
   },
   "exclude": [
@@ -48,6 +49,8 @@
     "./*.tsx",
     "./__helpers/**/*.ts",
     "./__helpers/**/*.tsx",
+    "./__setup/**/*.ts",
+    "./__setup/**/*.tsx",
     "./app/**/*.ts",
     "./app/**/*.tsx",
     "./evals/**/*.ts",

@@ -9,4 +9,5 @@ export const MediaWithPrefix: CollectionConfig = {
     filenameCompoundIndex: ['filename', 'prefix'],
   },
   fields: [],
+  versions: false,
 }

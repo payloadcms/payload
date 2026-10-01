@@ -1,14 +1,13 @@
 import type { DocumentViewServerProps } from 'payload'
 
 import { SetStepNav } from '@payloadcms/ui'
-import { notFound } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
 import { customTabViewComponentTitle } from '../../../shared.js'
 
 export function CustomTabComponentView({ initPageResult }: DocumentViewServerProps) {
   if (!initPageResult) {
-    notFound()
+    return null
   }
 
   return (

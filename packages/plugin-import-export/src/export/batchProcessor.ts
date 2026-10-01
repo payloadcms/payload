@@ -2,9 +2,9 @@
  * Export-specific batch processor for processing documents in batches during export.
  * Uses the generic batch processing utilities from useBatchProcessor.
  */
-import type { PayloadRequest, SelectType, Sort, TypedUser, Where } from 'payload'
+import type { PayloadRequest, SelectType, Sort, User, Where } from 'payload'
 
-import type { ExportAfterHook, ExportBeforeHook } from '../types.js'
+import type { ExportAfterHook, ExportBeforeHook, ExportDoc } from '../types.js'
 
 import { type BatchProcessorOptions } from '../utilities/useBatchProcessor.js'
 
@@ -28,7 +28,7 @@ export interface ExportFindArgs {
   page?: number
   select?: SelectType
   sort?: Sort
-  user?: TypedUser
+  user?: User
   where?: Where
 }
 
@@ -40,6 +40,7 @@ export interface ExportProcessOptions<TDoc = unknown> {
    * The slug of the collection to export
    */
   collectionSlug: string
+  exportDoc: ExportDoc
   /**
    * Arguments to pass to payload.find()
    */
@@ -133,6 +134,7 @@ export function createExportBatchProcessor(options: ExportBatchProcessorOptions 
     processOptions: ExportProcessOptions<TDoc>,
   ): Promise<ExportResult> => {
     const {
+      exportDoc,
       findArgs,
       format,
       hooks,
@@ -181,6 +183,7 @@ export function createExportBatchProcessor(options: ExportBatchProcessorOptions 
           ? await hooks.before({
               batchNumber,
               data: batchData,
+              exportDoc,
               format,
               originalData: originalDocs,
               req,
@@ -205,6 +208,7 @@ export function createExportBatchProcessor(options: ExportBatchProcessorOptions 
         await hooks.after({
           batchNumber,
           data: dataToWrite,
+          exportDoc,
           format,
           originalData: originalDocs,
           req,
@@ -241,6 +245,7 @@ export function createExportBatchProcessor(options: ExportBatchProcessorOptions 
     processOptions: ExportProcessOptions<TDoc>,
   ): AsyncGenerator<{ columns: string[]; docs: Record<string, unknown>[] }> {
     const {
+      exportDoc,
       findArgs,
       format,
       hooks,
@@ -288,6 +293,7 @@ export function createExportBatchProcessor(options: ExportBatchProcessorOptions 
           ? await hooks.before({
               batchNumber,
               data: batchData,
+              exportDoc,
               format,
               originalData: originalDocs,
               req,
@@ -312,6 +318,7 @@ export function createExportBatchProcessor(options: ExportBatchProcessorOptions 
         await hooks.after({
           batchNumber,
           data: dataToWrite,
+          exportDoc,
           format,
           originalData: originalDocs,
           req,

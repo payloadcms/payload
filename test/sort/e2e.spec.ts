@@ -7,16 +7,13 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  // throttleTest
-} from '../__helpers/e2e/helpers.js'
+import { goToListDoc } from '../__helpers/e2e/goToListDoc.js'
 import { scrollEntirePage } from '../__helpers/e2e/scrollEntirePage.js'
-import { moveRow } from '../__helpers/e2e/sort/moveRow.js'
+import { attemptKeyboardReorder, moveRow } from '../__helpers/e2e/sort/moveRow.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { orderableSlug } from './collections/Orderable/index.js'
 import { orderableJoinSlug } from './collections/OrderableJoin/index.js'
@@ -38,40 +35,43 @@ describe('Sort functionality', () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     context = await browser.newContext()
-    page = await context.newPage()
+    ;({ page } = await initPage({ context, serverURL }))
 
-    initPageConsoleErrorCatch(page)
+    // Wait for the server to be ready before the node-side REST login: on the
+    // slower TanStack prod cold-start, `client.login()` (a direct fetch, no retry)
+    // can hit the server before it accepts connections → `TypeError: fetch failed`.
 
     client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
-
-    await ensureCompilationIsDone({ page, serverURL })
   })
 
   test.beforeEach(async () => {
-    // await throttleTest({ page, context, delay: 'Fast 4G' })
-
-    const seedResponsePromise = page.waitForResponse(
-      (response) => response.url().includes('/api/seed') && response.status() === 200,
-    )
-
-    await page.evaluate(async () => {
-      const response = await fetch('/api/seed', { method: 'POST' })
-      return response.json()
-    })
-
-    await seedResponsePromise
+    // The prod server may still be cold-starting in CI, so the first requests can
+    // be refused (`fetch failed`). Poll the seed endpoint until it responds 200.
+    await expect
+      .poll(
+        async () =>
+          page.evaluate(async () => {
+            try {
+              const response = await fetch('/api/seed', { method: 'POST' })
+              return response.status
+            } catch {
+              return 0
+            }
+          }),
+        { timeout: TEST_TIMEOUT_LONG },
+      )
+      .toBe(200)
   })
 
   // eslint-disable-next-line playwright/expect-expect
   test('Orderable collection', async () => {
     const url = new AdminUrlUtil(serverURL, orderableSlug)
-    await page.goto(url.list)
-
     const joinFieldResolvePromise = page.waitForResponse(
       (response) => response.url().includes('/api/orderable-join') && response.status() === 200,
     )
 
+    await page.goto(url.list)
     await joinFieldResolvePromise
     await page.goto(`${url.list}?sort=-_order`)
 
@@ -102,30 +102,73 @@ describe('Sort functionality', () => {
 
     await assertRows(['A', 'C', 'D', 'B'])
 
-    // Note: Clicking the sort button again should not change the order
-    // In previous versions we allowed ascending and descending order.
+    // Clicking the sort button again should toggle to descending order
     await page.locator('button.sort-header').nth(0).click()
-    await page.waitForURL(/sort=_order/, { timeout: 2000 })
-    await assertRows(['A', 'C', 'D', 'B'])
+    await page.waitForURL(/sort=-_order/, { timeout: 2000 })
+    await assertRows(['B', 'D', 'C', 'A'])
 
-    await page.getByLabel('Sort by Title Ascending').click()
-    await page.waitForURL(/sort=title/, { timeout: 2000 })
-
-    // Expect a warning because not sorted by order first
     await moveRow(page, {
       fromIndex: 0,
       toIndex: 2,
-      expected: 'warning',
     })
+
+    await assertRows(['D', 'C', 'B', 'A'])
+
+    // Move to top
+    await moveRow(page, {
+      fromIndex: 2,
+      toIndex: 0,
+    })
+
+    await assertRows(['B', 'D', 'C', 'A'])
+
+    // Move to bottom
+    await moveRow(page, {
+      fromIndex: 0,
+      toIndex: 3,
+    })
+
+    await assertRows(['D', 'C', 'A', 'B'])
+
+    // Clicking the sort button again should toggle back to ascending order
+    await page.locator('button.sort-header').nth(0).click()
+    await page.waitForURL(/sort=_order/, { timeout: 2000 })
+    await assertRows(['B', 'A', 'C', 'D'])
+
+    await page.getByLabel('Sort by Title Ascending').click()
+    await page.waitForURL(/sort=title/, { timeout: 2000 })
+    await assertRows(['A', 'B', 'C', 'D'])
+
+    // Dragging the handle with the mouse should not start a drag when not sorted by order
+    await moveRow(page, {
+      fromIndex: 0,
+      toIndex: 2,
+      expected: 'disabled',
+    })
+
+    await assertRows(['A', 'B', 'C', 'D'])
+
+    // Pressing Space on the handle should warn instead of letting the user reorder with arrow keys
+    // Pressing it repeatedly should not stack multiple toasts
+    await attemptKeyboardReorder(page, { index: 0, presses: 3 })
+
+    await assertRows(['A', 'B', 'C', 'D'])
   })
 
   test('Orderable join fields', async () => {
     const url = new AdminUrlUtil(serverURL, orderableJoinSlug)
-    await page.goto(url.list)
 
-    await page.getByText('Join A').click()
+    // Navigate via the row's href + hard `page.goto` instead of a soft Next.js
+    // navigation. Under `--prod`, the edit route compiles lazily on first hit and
+    // the soft navigation's URL only updates after the RSC payload arrives, which
+    // can stall past the test timeout on a cold CI server.
+    await goToListDoc({
+      cellClass: '.cell-title',
+      page,
+      textToMatch: 'Join A',
+      urlUtil: url,
+    })
 
-    await page.waitForURL(new RegExp(`${orderableJoinSlug}/`))
     await scrollEntirePage(page)
 
     await expect(page.locator('button.sort-header')).toHaveCount(3)
@@ -137,8 +180,8 @@ describe('Sort functionality', () => {
     // Move to middle
     await moveRow(page, {
       fromIndex: 1,
-      toIndex: 2,
       scope: page.locator('#field-orderableJoinField1'),
+      toIndex: 2,
     })
 
     await assertRows(['A', 'C', 'B', 'D'], {
@@ -152,8 +195,8 @@ describe('Sort functionality', () => {
     // Move to end
     await moveRow(page, {
       fromIndex: 0,
-      toIndex: 3,
       scope: page.locator('#field-orderableJoinField2'),
+      toIndex: 3,
     })
 
     await assertRows(['B', 'C', 'D', 'A'], {

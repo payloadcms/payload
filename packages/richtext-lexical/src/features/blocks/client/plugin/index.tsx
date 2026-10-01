@@ -17,7 +17,7 @@ import {
 import { useEffect, useState } from 'react'
 
 import type { PluginComponent } from '../../../typesClient.js'
-import type { BlockFields, BlockFieldsOptionalID } from '../../server/nodes/BlocksNode.js'
+import type { BlockFields, BlockFieldsOptionalID } from '../../server/schema.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'

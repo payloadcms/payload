@@ -1,6 +1,6 @@
 import type { LexicalNode } from 'lexical'
 
-import type { LinkFields } from '../../../nodes/types.js'
+import type { LinkFields } from '../../../server/schema.js'
 
 /**
  * The payload of a link node

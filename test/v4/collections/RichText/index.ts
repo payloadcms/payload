@@ -3,9 +3,9 @@ import type { CollectionConfig } from 'payload'
 import {
   BlocksFeature,
   CodeBlock,
-  EXPERIMENTAL_TableFeature,
   FixedToolbarFeature,
   lexicalEditor,
+  TableFeature,
   UploadFeature,
 } from '@payloadcms/richtext-lexical'
 
@@ -20,6 +20,9 @@ const RichTextFields: CollectionConfig = {
     {
       name: 'content',
       type: 'richText',
+      admin: {
+        description: 'The main content of the document.',
+      },
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
@@ -80,17 +83,23 @@ const RichTextFields: CollectionConfig = {
     {
       name: 'table',
       type: 'richText',
+      admin: {
+        description: 'Rich text table field used to validate description spacing.',
+      },
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           FixedToolbarFeature(),
-          EXPERIMENTAL_TableFeature(),
+          TableFeature(),
         ],
       }),
     },
     {
       name: 'code',
       type: 'richText',
+      admin: {
+        description: 'Rich text code block field used to validate description spacing.',
+      },
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
@@ -104,6 +113,9 @@ const RichTextFields: CollectionConfig = {
     {
       name: 'typography',
       type: 'richText',
+      admin: {
+        description: 'Rich text typography field used to validate description spacing.',
+      },
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
       }),
@@ -111,6 +123,9 @@ const RichTextFields: CollectionConfig = {
     {
       name: 'lists',
       type: 'richText',
+      admin: {
+        description: 'Rich text list field used to validate description spacing.',
+      },
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
       }),

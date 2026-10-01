@@ -1,62 +1,105 @@
-import crypto from 'crypto'
+import type { Field, TextField } from '../../fields/config/types.js'
 
-import type { Field, FieldHook } from '../../fields/config/types.js'
+import { fieldAffectsData } from '../../fields/config/types.js'
+import { canCreateOrUpdateAPIKey } from './apiKey/canCreateOrUpdateAPIKey.js'
+import { encryptAPIKey } from './apiKey/encryptAPIKey.js'
+import { omitAPIKeyIndex } from './apiKey/omitAPIKeyIndex.js'
+import { omitEncryptedAPIKey } from './apiKey/omitEncryptedAPIKey.js'
+import { setAPIKeyIndex } from './apiKey/setAPIKeyIndex.js'
+import { setKeyLast4 } from './apiKey/setKeyLast4.js'
 
-const encryptKey: FieldHook = ({ req, value }) =>
-  value ? req.payload.encrypt(value as string) : null
-const decryptKey: FieldHook = ({ req, value }) =>
-  value ? req.payload.decrypt(value as string) : undefined
+export { omitAPIKey } from './apiKey/omitAPIKey.js'
 
-export const apiKeyFields = [
-  {
-    name: 'enableAPIKey',
-    type: 'checkbox',
-    admin: {
-      components: {
-        Field: false,
+type APIKeyTextFieldOverride = Omit<
+  Partial<TextField>,
+  'hasMany' | 'maxRows' | 'minRows' | 'name' | 'type' | 'validate'
+>
+
+export const createAPIKeyFields = ({
+  apiKeyField,
+  apiKeyIndexField,
+  apiKeyLast4Field,
+}: {
+  apiKeyField?: APIKeyTextFieldOverride
+  apiKeyIndexField?: APIKeyTextFieldOverride
+  apiKeyLast4Field?: APIKeyTextFieldOverride
+} = {}): Field[] => {
+  const customAccess = apiKeyField?.access
+
+  return [
+    {
+      name: 'apiKey',
+      type: 'text',
+      ...apiKeyField,
+      access: {
+        create: canCreateOrUpdateAPIKey,
+        ...apiKeyField?.access,
+        read: () => false,
+        update: apiKeyField?.access?.update ?? canCreateOrUpdateAPIKey,
       },
-    },
-    label: ({ t }) => t('authentication:enableAPIKey'),
-  },
-  {
-    name: 'apiKey',
-    type: 'text',
-    admin: {
-      components: {
-        Field: false,
-      },
-    },
-    hooks: {
-      afterRead: [decryptKey],
-      beforeChange: [encryptKey],
-    },
-    label: ({ t }) => t('authentication:apiKey'),
-  },
-  {
-    name: 'apiKeyIndex',
-    type: 'text',
-    admin: {
-      disabled: true,
-    },
-    hidden: true,
-    hooks: {
-      beforeValidate: [
-        ({ data, req, value }) => {
-          if (data?.apiKey === false || data?.apiKey === null) {
-            return null
-          }
-          if (data?.enableAPIKey === false || data?.enableAPIKey === null) {
-            return null
-          }
-          if (data?.apiKey) {
-            return crypto
-              .createHmac('sha256', req.payload.secret)
-              .update(data.apiKey as string)
-              .digest('hex')
-          }
-          return value
+      admin: {
+        components: {
+          Field: false,
         },
-      ],
+        ...apiKeyField?.admin,
+      },
+      hooks: {
+        ...apiKeyField?.hooks,
+        afterRead: [omitEncryptedAPIKey, ...(apiKeyField?.hooks?.afterRead ?? [])],
+        beforeChange: [encryptAPIKey, ...(apiKeyField?.hooks?.beforeChange ?? [])],
+      },
+      label: apiKeyField?.label ?? (({ t }) => t('authentication:apiKey')),
     },
-  },
-] as Field[]
+    {
+      name: 'apiKeyLast4',
+      type: 'text',
+      ...apiKeyLast4Field,
+      access: {
+        ...apiKeyLast4Field?.access,
+        create: customAccess?.create ?? canCreateOrUpdateAPIKey,
+        read: customAccess?.update ?? canCreateOrUpdateAPIKey,
+        update: customAccess?.update ?? canCreateOrUpdateAPIKey,
+      },
+      admin: {
+        components: {
+          Field: false,
+        },
+        ...apiKeyLast4Field?.admin,
+      },
+      hooks: {
+        ...apiKeyLast4Field?.hooks,
+        beforeValidate: [setKeyLast4, ...(apiKeyLast4Field?.hooks?.beforeValidate ?? [])],
+      },
+    },
+    {
+      name: 'apiKeyIndex',
+      type: 'text',
+      ...apiKeyIndexField,
+      access: {
+        ...apiKeyIndexField?.access,
+        create: customAccess?.create ?? canCreateOrUpdateAPIKey,
+        read: () => false,
+        update: customAccess?.update ?? canCreateOrUpdateAPIKey,
+      },
+      admin: {
+        disabled: true,
+        ...apiKeyIndexField?.admin,
+      },
+      hidden: apiKeyIndexField?.hidden ?? true,
+      hooks: {
+        ...apiKeyIndexField?.hooks,
+        afterRead: [omitAPIKeyIndex, ...(apiKeyIndexField?.hooks?.afterRead ?? [])],
+        beforeValidate: [setAPIKeyIndex, ...(apiKeyIndexField?.hooks?.beforeValidate ?? [])],
+      },
+    },
+  ]
+}
+
+/** Builds API key fields and safely merges custom overrides. */
+export const getAPIKeyFields = (fields: Field[]): Field[] => {
+  const customAPIKeyField = fields.find(
+    (field) => fieldAffectsData(field) && field.name === 'apiKey' && field.type === 'text',
+  )
+
+  return createAPIKeyFields({ apiKeyField: customAPIKeyField as TextField | undefined })
+}

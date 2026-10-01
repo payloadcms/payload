@@ -4,7 +4,7 @@ import type { DOMConversionOutput, LexicalNode, SerializedLexicalNode } from 'le
 import { $applyNodeReplacement } from 'lexical'
 import * as React from 'react'
 
-import type { SerializedHorizontalRuleNode } from '../../server/nodes/HorizontalRuleNode.js'
+import type { SerializedHorizontalRuleNode } from '../../server/schema.js'
 
 import { HorizontalRuleServerNode } from '../../server/nodes/HorizontalRuleNode.js'
 
@@ -20,7 +20,9 @@ export class HorizontalRuleNode extends HorizontalRuleServerNode {
   /**
    * The data for this node is stored serialized as JSON. This is the "load function" of that node: it takes the saved data and converts it into a node.
    */
-  static override importJSON(serializedNode: SerializedHorizontalRuleNode): HorizontalRuleNode {
+  static override importJSON(
+    _serializedNode: Record<string, unknown> & SerializedHorizontalRuleNode,
+  ): HorizontalRuleNode {
     return $createHorizontalRuleNode()
   }
 

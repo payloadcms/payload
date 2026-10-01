@@ -1,7 +1,16 @@
-import type { Config, SanitizedConfig } from '../../config/types.js'
+import type { Config } from '../../config/types.js'
+import type { RichTextSanitizer } from '../../fields/config/sanitize.js'
+import type { SanitizedDrafts } from '../../versions/types.js'
 import type { GlobalConfig, SanitizedGlobalConfig } from './types.js'
 
 import { defaultAccess } from '../../auth/defaultAccess.js'
+import { hasWhereAccessResult } from '../../auth/types.js'
+import { withBaseAccess } from '../../auth/withBaseAccess.js'
+import {
+  createCreatedByField,
+  createUpdatedByField,
+  sanitizeAuthorship,
+} from '../../fields/baseFields/authorship/index.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
@@ -10,17 +19,14 @@ import { toWords } from '../../utilities/formatLabels.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
+import { appendGlobalVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { defaultGlobalEndpoints } from '../endpoints/index.js'
-export const sanitizeGlobal = async (
+export const sanitizeGlobal = (
   config: Config,
   global: GlobalConfig,
-  /**
-   * If this property is set, RichText fields won't be sanitized immediately. Instead, they will be added to this array as promises
-   * so that you can sanitize them together, after the config has been sanitized.
-   */
-  richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
+  richTextSanitizers?: RichTextSanitizer[],
   _validRelationships?: string[],
-): Promise<SanitizedGlobalConfig> => {
+): SanitizedGlobalConfig => {
   if (global._sanitized) {
     return global as SanitizedGlobalConfig
   }
@@ -47,9 +53,10 @@ export const sanitizeGlobal = async (
     global.admin = {}
   }
 
-  if (!global.access.read) {
-    global.access.read = defaultAccess
-  }
+  const read = global.access.read ?? defaultAccess
+  const configuredReadVersions = global.access.readVersions
+
+  global.access.read = read
 
   if (!global.access.update) {
     global.access.update = defaultAccess
@@ -75,15 +82,66 @@ export const sanitizeGlobal = async (
     global.hooks.afterRead = []
   }
 
+  if (!global.hooks.beforeOperation) {
+    global.hooks.beforeOperation = []
+  }
+
   // Sanitize fields
   const validRelationships = _validRelationships ?? config.collections?.map((c) => c.slug) ?? []
 
-  global.fields = await sanitizeFields({
+  // Inject createdBy / updatedBy (unless already defined) before sanitizing fields.
+  const authorship = sanitizeAuthorship(global.authorship)
+  global.authorship = authorship
+
+  if (authorship.createdBy || authorship.updatedBy) {
+    const authCollections = (config.collections ?? [])
+      .filter((collectionConfig) => collectionConfig.auth)
+      .map((collectionConfig) => collectionConfig.slug)
+
+    let hasCreatedBy = false
+    let hasUpdatedBy = false
+
+    global.fields.some((field) => {
+      if (fieldAffectsData(field)) {
+        if (field.name === 'createdBy') {
+          hasCreatedBy = true
+        }
+
+        if (field.name === 'updatedBy') {
+          hasUpdatedBy = true
+        }
+
+        // A user may spread `getAuthorshipFields` into their `fields` to customize these
+        // without knowing the auth collections; backfill the polymorphic relationTo here.
+        if (
+          (field.name === 'createdBy' || field.name === 'updatedBy') &&
+          field.type === 'relationship' &&
+          (!field.relationTo || (Array.isArray(field.relationTo) && field.relationTo.length === 0))
+        ) {
+          field.relationTo = authCollections
+        }
+      }
+
+      return hasCreatedBy && hasUpdatedBy
+    })
+
+    if (authCollections.length > 0) {
+      if (authorship.createdBy && !hasCreatedBy) {
+        global.fields.push(createCreatedByField({ authCollections }))
+      }
+
+      if (authorship.updatedBy && !hasUpdatedBy) {
+        global.fields.push(createUpdatedByField({ authCollections }))
+      }
+    }
+  }
+
+  global.fields = sanitizeFields({
     config,
     fields: global.fields,
     globalConfig: global,
     parentIsLocalized: false,
-    richTextSanitizationPromises,
+    richTextSanitizers,
     validRelationships,
   })
 
@@ -96,6 +154,8 @@ export const sanitizeGlobal = async (
       global.endpoints.push(endpoint)
     }
   }
+
+  global.versions = global.versions ?? true
 
   if (global.versions) {
     if (global.versions === true) {
@@ -117,15 +177,10 @@ export const sanitizeGlobal = async (
 
       const hasLocalizedFields = traverseForLocalizedFields(global.fields)
 
-      if (config.localization && hasLocalizedFields) {
-        if (global.versions.drafts.localizeStatus === undefined) {
-          global.versions.drafts.localizeStatus = false
-        }
-      }
-
-      global.versions.drafts.localizeStatus = config.experimental?.localizeStatus
-        ? global.versions.drafts.localizeStatus
-        : false
+      // Auto-enable per-locale status when localization is configured and the global has localized fields.
+      ;(global.versions.drafts as SanitizedDrafts).localizeStatus = !!(
+        config.localization && hasLocalizedFields
+      )
 
       if (global.versions.drafts.autosave === true) {
         global.versions.drafts.autosave = {
@@ -140,7 +195,7 @@ export const sanitizeGlobal = async (
       global.fields = mergeBaseFields(
         global.fields,
         baseVersionFields({
-          localized: global.versions.drafts.localizeStatus ?? false,
+          localized: (global.versions.drafts as SanitizedDrafts).localizeStatus ?? false,
         }),
       )
     }
@@ -187,6 +242,35 @@ export const sanitizeGlobal = async (
       },
       label: ({ t }) => t('general:createdAt'),
     })
+  }
+
+  for (const operation of ['read', 'update'] as const) {
+    global.access[operation] = withBaseAccess({
+      slug: global.slug,
+      access: global.access[operation],
+      entityType: 'global',
+      operation,
+    })
+  }
+
+  const effectiveRead = global.access.read
+  const readVersions =
+    configuredReadVersions ??
+    (async (args) => {
+      const result = await effectiveRead({ ...args, id: undefined })
+
+      return hasWhereAccessResult(result) ? appendGlobalVersionToQueryKey(result) : result
+    })
+
+  if (global.versions) {
+    global.access.readVersions = withBaseAccess({
+      slug: global.slug,
+      access: readVersions,
+      entityType: 'global',
+      operation: 'readVersions',
+    })
+  } else {
+    global.access.readVersions = readVersions
   }
 
   ;(global as SanitizedGlobalConfig).flattenedFields = flattenAllFields({ fields: global.fields })

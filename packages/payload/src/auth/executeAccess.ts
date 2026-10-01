@@ -9,14 +9,16 @@ type OperationArgs = {
   id?: number | string
   isReadingStaticFile?: boolean
   req: PayloadRequest
+  slug: string
 }
 export const executeAccess = async (
-  { id, data, disableErrors, isReadingStaticFile = false, req }: OperationArgs,
-  access: Access,
+  { id, slug, data, disableErrors, isReadingStaticFile = false, req }: OperationArgs,
+  access?: Access,
 ): Promise<AccessResult> => {
   if (access) {
     const resolvedConstraint = await access({
       id,
+      slug,
       data,
       isReadingStaticFile,
       req,

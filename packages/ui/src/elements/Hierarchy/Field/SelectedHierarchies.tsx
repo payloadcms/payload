@@ -7,7 +7,7 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Chip } from '../../Chip/index.js'
 import { Spinner } from '../../Spinner/index.js'
-import './SelectedHierarchies.scss'
+import './SelectedHierarchies.css'
 
 const baseClass = 'selected-hierarchies'
 

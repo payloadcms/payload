@@ -4,7 +4,7 @@ import type {
   PayloadRequest,
   SelectMode,
   SelectType,
-  TypedUser,
+  User,
 } from 'payload'
 
 import { iterateFields } from './iterateFields.js'
@@ -18,7 +18,7 @@ type Args = {
   select?: SelectType
   selectMode?: SelectMode
   siblingData: Data
-  user: TypedUser
+  user: User
 }
 
 export const calculateDefaultValues = async ({

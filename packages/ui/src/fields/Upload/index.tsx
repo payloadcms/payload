@@ -92,7 +92,7 @@ export function UploadComponent(props: UploadFieldClientProps) {
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
-    <BulkUploadProvider drawerSlugPrefix={pathFromProps}>
+    <BulkUploadProvider modalSlugPrefix={pathFromProps}>
       <UploadInput
         AfterInput={AfterInput}
         allowCreate={allowCreate !== false}

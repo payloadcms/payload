@@ -1,8 +1,8 @@
-import type { PayloadRequest, TypedUser } from 'payload'
+import type { PayloadRequest, User } from 'payload'
 
 import { APIError } from 'payload'
 
-import type { ImportResult } from '../types.js'
+import type { ImportDoc, ImportResult } from '../types.js'
 
 import { applyFieldHooks } from '../utilities/applyFieldHooks.js'
 import { getImportFieldFunctions } from '../utilities/getImportFieldFunctions.js'
@@ -49,6 +49,7 @@ export type Import = {
 
 export type CreateImportArgs = {
   defaultVersionStatus?: 'draft' | 'published'
+  importDoc: ImportDoc
   req: PayloadRequest
 } & Import
 
@@ -59,6 +60,7 @@ export const createImport = async ({
   defaultVersionStatus = 'published',
   file,
   format,
+  importDoc,
   importMode = 'create',
   matchField = 'id',
   maxLimit,
@@ -66,14 +68,21 @@ export const createImport = async ({
   userCollection,
   userID,
 }: CreateImportArgs): Promise<ImportResult> => {
-  let user: TypedUser | undefined
+  let user: undefined | User
 
   if (userCollection && userID) {
     user = (await req.payload.findByID({
       id: userID,
       collection: userCollection,
+      overrideAccess: true,
       req,
-    })) as TypedUser
+    })) as User
+
+    if (user) {
+      // `findByID` omits the runtime `collection` property; restore it so downstream
+      // writes (e.g. authorship tracking) know which auth collection the user belongs to.
+      user.collection = userCollection
+    }
   }
 
   if (!user) {
@@ -229,6 +238,7 @@ export const createImport = async ({
     docs: documents,
     format,
     hooks: importHooks,
+    importDoc,
     importMode,
     matchField,
     originalDocs,

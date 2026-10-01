@@ -22,4 +22,5 @@ export const CollectionNoApiView: CollectionConfig = {
     },
   },
   fields: [],
+  versions: false,
 }

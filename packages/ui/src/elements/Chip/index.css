@@ -10,7 +10,7 @@
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
-    color: var(--text-default);
+    color: var(--color-text);
     background-color: var(--color-bg);
     user-select: none;
 

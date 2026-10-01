@@ -11,6 +11,7 @@ export default buildConfig({
         { name: 'title', type: 'text', required: true },
         { name: 'slug', type: 'text', required: true },
       ],
+      versions: false,
     },
   ],
   plugins: [],

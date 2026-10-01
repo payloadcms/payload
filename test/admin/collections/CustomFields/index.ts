@@ -23,6 +23,13 @@ export const CustomFields: CollectionConfig = {
       minLength: 3,
     },
     {
+      name: 'fieldWithUndefinedComponents',
+      type: 'text',
+      admin: {
+        components: undefined,
+      },
+    },
+    {
       name: 'customTextClientField',
       type: 'text',
       maxLength: 100,
@@ -216,4 +223,5 @@ export const CustomFields: CollectionConfig = {
       type: 'ui',
     },
   ],
+  versions: false,
 }

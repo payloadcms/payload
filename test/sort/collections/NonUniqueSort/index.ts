@@ -14,4 +14,5 @@ export const NonUniqueSortCollection: CollectionConfig = {
       type: 'number',
     },
   ],
+  versions: false,
 }

@@ -1,0 +1,18 @@
+@layer payload-default {
+  .logout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .logout__wrap {
+    z-index: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacer-3);
+    width: 100%;
+  }
+}

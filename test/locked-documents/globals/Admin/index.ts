@@ -13,4 +13,5 @@ export const AdminGlobal: GlobalConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

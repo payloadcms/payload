@@ -26,6 +26,6 @@ export async function login({
 
   await page.waitForURL(`${serverURL}/admin`)
 
-  const dashboardArtifact = page.locator('span[title="Dashboard"]')
+  const dashboardArtifact = page.locator('.step-nav__first')
   await expect(dashboardArtifact).toBeVisible()
 }

@@ -14,11 +14,13 @@ export default buildConfig({
           required: true,
         },
       ],
+      versions: false,
     },
     {
       slug: 'users',
       auth: true,
       fields: [],
+      versions: false,
     },
   ],
 })

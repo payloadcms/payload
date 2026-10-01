@@ -1,8 +1,11 @@
 'use client'
 
+import { Button, TextInput } from '@payloadcms/ui'
 import React, { useRef, useState } from 'react'
 
 import type { Form } from '../../../payload-types.js'
+
+import './index.css'
 
 type UploadFieldBlock = Extract<NonNullable<Form['fields']>[number], { blockType: 'upload' }>
 type NonUploadFieldBlock = Exclude<NonNullable<Form['fields']>[number], { blockType: 'upload' }>
@@ -23,6 +26,7 @@ function SingleFormSection({ form, serverURL }: { form: Form; serverURL: string 
   const [result, setResult] = useState<null | SubmitResult>(null)
   const [error, setError] = useState<null | string>(null)
   const [loading, setLoading] = useState(false)
+  const [textValues, setTextValues] = useState<Record<string, string>>({})
   const formRef = useRef<HTMLFormElement>(null)
 
   const fields = form.fields ?? []
@@ -43,7 +47,7 @@ function SingleFormSection({ form, serverURL }: { form: Form; serverURL: string 
         .filter((f): f is NamedNonUploadField => 'name' in f)
         .map((f) => ({
           field: f.name,
-          value: (htmlForm.elements.namedItem(f.name) as HTMLInputElement)?.value ?? '',
+          value: textValues[f.name] ?? '',
         }))
 
       formData.append(
@@ -69,8 +73,7 @@ function SingleFormSection({ form, serverURL }: { form: Form; serverURL: string 
         method: 'POST',
       })
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const json = (await response.json()) as any
+      const json = await response.json()
 
       if (!response.ok) {
         const apiErrors = json?.errors?.[0]?.data?.errors
@@ -112,6 +115,7 @@ function SingleFormSection({ form, serverURL }: { form: Form; serverURL: string 
 
       setResult({ submissionId: json.doc.id, uploads: uploadResults })
       formRef.current?.reset()
+      setTextValues({})
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
@@ -120,58 +124,44 @@ function SingleFormSection({ form, serverURL }: { form: Form; serverURL: string 
   }
 
   return (
-    <section
-      data-testid={`form-section-${form.id}`}
-      style={{
-        border: '1px solid var(--theme-elevation-200)',
-        borderRadius: '4px',
-        marginBottom: 'calc(var(--base) * 2)',
-        padding: 'var(--base)',
-      }}
-    >
-      <h2>{form.title}</h2>
+    <section className="upload-form-test__section" data-testid={`form-section-${form.id}`}>
+      <h2 className="upload-form-test__section-title">{form.title}</h2>
 
-      <form onSubmit={handleSubmit} ref={formRef}>
+      <form className="upload-form-test__form" onSubmit={handleSubmit} ref={formRef}>
         {textFields
           .filter((f): f is NamedNonUploadField => 'name' in f)
           .map((field) => (
-            <div key={field.name} style={{ marginBottom: 'var(--base)' }}>
-              <label htmlFor={`${form.id}-${field.name}`} style={{ display: 'block' }}>
-                {field.label ?? field.name}
-                {field.required ? ' *' : ''}
-              </label>
-              <input
-                id={`${form.id}-${field.name}`}
-                name={field.name}
-                required={field.required ?? false}
-                style={{
-                  border: '1px solid var(--theme-elevation-200)',
-                  padding: '4px 8px',
-                  width: '300px',
-                }}
-                type="text"
-              />
-            </div>
+            <TextInput
+              key={field.name}
+              label={field.label ?? field.name}
+              onChange={(e) => {
+                setTextValues((previousValues) => ({
+                  ...previousValues,
+                  [field.name]: e.target.value,
+                }))
+              }}
+              path={field.name}
+              required={Boolean(field.required)}
+              value={textValues[field.name] ?? ''}
+            />
           ))}
 
         {uploadFields.map((field) => {
           const allowedTypes = field.mimeTypes?.map((m) => m.mimeType).join(', ')
           return (
-            <div key={field.name} style={{ marginBottom: 'var(--base)' }}>
-              <label htmlFor={`${form.id}-${field.name}`} style={{ display: 'block' }}>
+            <div className="upload-form-test__field" key={field.name}>
+              <label className="upload-form-test__label" htmlFor={`${form.id}-${field.name}`}>
                 {field.label ?? field.name}
                 {field.required ? ' *' : ''}
               </label>
               {allowedTypes && (
-                <p
-                  data-testid={`allowed-types-${field.name}`}
-                  style={{ fontSize: '0.8em', margin: '2px 0' }}
-                >
+                <p className="upload-form-test__help" data-testid={`allowed-types-${field.name}`}>
                   Allowed: {allowedTypes}
                 </p>
               )}
               <input
                 accept={allowedTypes}
+                className="upload-form-test__file-input"
                 id={`${form.id}-${field.name}`}
                 multiple={field.multiple ?? false}
                 name={field.name}
@@ -182,20 +172,20 @@ function SingleFormSection({ form, serverURL }: { form: Form; serverURL: string 
           )
         })}
 
-        <button disabled={loading} type="submit">
-          {loading ? 'Submitting…' : 'Submit'}
-        </button>
+        <Button buttonStyle="primary" loading={loading} margin={false} type="submit">
+          Submit
+        </Button>
       </form>
 
       {error && (
-        <p data-testid="upload-error" style={{ color: 'var(--theme-error-500)', marginTop: '8px' }}>
+        <p className="upload-form-test__error" data-testid="upload-error">
           {error}
         </p>
       )}
 
       {result && (
-        <div data-testid="upload-success" style={{ marginTop: '8px' }}>
-          <p style={{ color: 'var(--theme-success-500)' }}>
+        <div className="upload-form-test__success" data-testid="upload-success">
+          <p className="upload-form-test__success-title">
             Submission created (id: {result.submissionId})
           </p>
           {result.uploads.map((u, i) => (

@@ -10,7 +10,6 @@
     --tree-indent: var(--spacer-3);
     --tree-chevron-width: var(--spacer-3);
     --tree-chevron-spacing: var(--spacer-2);
-    --tree-node-padding-y: var(--spacer-1);
     --tree-node-content-height: var(--text-body-medium-line-height);
     --tree-row-gap: var(--spacer-1);
     --tree-font-size: var(--text-body-medium-font-size);
@@ -38,6 +37,7 @@
   .tree__all-option {
     gap: var(--spacer-1);
     padding-left: var(--spacer-2);
+    padding-block: var(--spacer-1);
 
     .sidebar-row__title {
       font-weight: var(--text-body-medium-strong-font-weight);

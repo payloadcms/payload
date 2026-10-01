@@ -1,5 +1,6 @@
 'use client'
 
+import { INLINE_CODE } from '@lexical/markdown'
 import { $isTableSelection } from '@lexical/table'
 import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
@@ -8,7 +9,6 @@ import type { ToolbarGroup } from '../../toolbars/types.js'
 import { CodeIcon } from '../../../lexical/ui/icons/Code/index.js'
 import { createClientFeature } from '../../../utilities/createClientFeature.js'
 import { toolbarFormatGroupWithItems } from '../shared/toolbarFormatGroup.js'
-import { INLINE_CODE } from './markdownTransformers.js'
 
 const toolbarGroups: ToolbarGroup[] = [
   toolbarFormatGroupWithItems([

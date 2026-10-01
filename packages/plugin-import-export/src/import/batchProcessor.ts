@@ -1,8 +1,8 @@
-import type { PayloadRequest, TypedUser } from 'payload'
+import type { PayloadRequest, User } from 'payload'
 
-import { isolateObjectProperty } from 'payload'
+import { getDataLoader, isolateObjectProperty } from 'payload'
 
-import type { ImportAfterHook, ImportBeforeHook, ImportResult } from '../types.js'
+import type { ImportAfterHook, ImportBeforeHook, ImportDoc, ImportResult } from '../types.js'
 import type { ImportMode } from './createImport.js'
 
 import {
@@ -56,6 +56,7 @@ export interface ImportProcessOptions {
     after?: ImportAfterHook
     before?: ImportBeforeHook
   }
+  importDoc: ImportDoc
   importMode: ImportMode
   matchField?: string
   /** Raw parsed rows before unflattening — used as originalData in hooks */
@@ -63,7 +64,7 @@ export interface ImportProcessOptions {
   req: PayloadRequest
   /** Total number of batches (pre-computed for hook args) */
   totalBatches?: number
-  user?: TypedUser
+  user?: User
 }
 
 /**
@@ -136,7 +137,7 @@ type ProcessImportBatchOptions = {
   matchField: string | undefined
   options: { batchSize: number; defaultVersionStatus: 'draft' | 'published' }
   req: PayloadRequest
-  user?: TypedUser
+  user?: User
 }
 
 /**
@@ -164,13 +165,15 @@ async function processImportBatch({
     failed: [],
     successful: [],
   }
-  // Create a request proxy that isolates the transactionID property, then clear it.
-  // This is critical because if a nested operation fails (e.g., Forbidden due to access control),
-  // Payload's error handling calls killTransaction(req), which would kill the parent's transaction
-  // if we shared the same transaction. By isolating and clearing transactionID, each nested
-  // operation either uses no transaction or starts its own, independent of the parent.
-  const req = isolateObjectProperty(reqFromArgs, 'transactionID')
+  // Isolate + clear `transactionID` so a failing nested op (e.g. Forbidden) kills its own
+  // transaction, not the parent's, on `killTransaction`.
+  // Also isolate `payloadDataLoader`: the shared loader mutates the parent's `req.transactionID`
+  // while batching relationship population (`batchAndLoadDocs`), so populating a nested doc's
+  // relationship (e.g. authorship `createdBy`/`updatedBy`) would leak the nested transaction onto
+  // the parent. A fresh loader keeps each request's transaction isolated.
+  const req = isolateObjectProperty(reqFromArgs, ['payloadDataLoader', 'transactionID'])
   req.transactionID = undefined
+  req.payloadDataLoader = getDataLoader(req)
 
   const collectionEntry = req.payload.collections[collectionSlug]
 
@@ -616,6 +619,7 @@ export function createImportBatchProcessor(options: ImportBatchProcessorOptions 
       docs: documents,
       format = 'csv',
       hooks,
+      importDoc,
       importMode,
       matchField,
       originalDocs: originalDocs,
@@ -651,6 +655,7 @@ export function createImportBatchProcessor(options: ImportBatchProcessorOptions 
               batchNumber,
               data: currentBatch as Parameters<ImportBeforeHook>[0]['data'],
               format,
+              importDoc,
               originalData: originalBatch,
               req,
               totalBatches,
@@ -708,6 +713,7 @@ export function createImportBatchProcessor(options: ImportBatchProcessorOptions 
         await hooks.after({
           batchNumber,
           format,
+          importDoc,
           originalData: originalBatch,
           req,
           result: batchHookResult,

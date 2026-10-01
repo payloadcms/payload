@@ -1,5 +1,5 @@
 'use client'
-import type { ClientUser, SanitizedPermissions, TypedUser } from 'payload'
+import type { AuthenticatedUser, SanitizedPermissions } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { formatAdminURL } from 'payload/shared'
@@ -7,79 +7,49 @@ import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+import type { TabSessionReconciliationOptions } from './tabSessionSync/index.js'
+import type { AuthContext, AuthSession, UserWithToken } from './types.js'
+
 import { stayLoggedInModalSlug } from '../../elements/StayLoggedIn/index.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { useConfig } from '../Config/index.js'
-import { usePathname, useRouter } from '../RouterAdapter/index.js'
+import { usePathname, useRouter, useSearchParams } from '../RouterAdapter/index.js'
 import { useRouteTransition } from '../RouteTransition/index.js'
+import { createAuthSessionRequests } from './authSessionRequests.js'
+import { TAB_SESSION_EVENT_TYPES } from './tabSessionSync/index.js'
+import { useTabSessionSync } from './tabSessionSync/useTabSessionSync.js'
+import { useAuthSessionTimers } from './useAuthSessionTimers.js'
 
-export type UserWithToken<T = ClientUser> = {
-  /** seconds until expiration */
-  exp: number
-  refreshedToken?: string
-  token?: string
-  user: T
-}
-
-export type AuthContext<T = ClientUser> = {
-  fetchFullUser: () => Promise<null | TypedUser>
-  logOut: () => Promise<boolean>
-  /**
-   * These are the permissions for the current user from a global scope.
-   *
-   * When checking for permissions on document specific level, use the `useDocumentInfo` hook instead.
-   *
-   * @example
-   *
-   * ```tsx
-   * import { useAuth } from 'payload/ui'
-   *
-   * const MyComponent: React.FC = () => {
-   *   const { permissions } = useAuth()
-   *
-   *   if (permissions?.collections?.myCollection?.create) {
-   *     // user can create documents in 'myCollection'
-   *   }
-   *
-   *   return null
-   * }
-   * ```
-   *
-   * with useDocumentInfo:
-   *
-   * ```tsx
-   * import { useDocumentInfo } from 'payload/ui'
-   *
-   * const MyComponent: React.FC = () => {
-   *  const { docPermissions } = useDocumentInfo()
-   *  if (docPermissions?.create) {
-   *   // user can create this document
-   *  }
-   *  return null
-   * } ```
-   */
-  permissions?: SanitizedPermissions
-  refreshCookie: (forceRefresh?: boolean) => void
-  refreshCookieAsync: () => Promise<ClientUser>
-  refreshPermissions: () => Promise<void>
-  setPermissions: (permissions: SanitizedPermissions) => void
-  setUser: (user: null | UserWithToken<T>) => void
-  strategy?: string
-  token?: string
-  tokenExpirationMs?: number
-  user?: null | T
-}
+export type { AuthContext, AuthSession, UserWithToken } from './types.js'
 
 const Context = createContext({} as AuthContext)
-
-const maxTimeoutMs = 2147483647
 
 type Props = {
   children: React.ReactNode
   permissions?: SanitizedPermissions
-  user?: ClientUser | null
+  user?: AuthenticatedUser | null
+}
+
+type FetchFullUserResult =
+  | {
+      expirationMs?: number
+      status: 'authenticated'
+      user: AuthenticatedUser
+    }
+  | {
+      status: 'indeterminate'
+    }
+  | {
+      status: 'unauthenticated'
+    }
+
+type UserResponse = {
+  exp?: number
+  refreshedToken?: string
+  token?: string
+  user?: AuthenticatedUser | null
 }
 
 export function AuthProvider({
@@ -89,6 +59,8 @@ export function AuthProvider({
 }: Props) {
   const pathname = usePathname()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const route = `${pathname}?${searchParams.toString()}`
 
   const { config } = useConfig()
 
@@ -96,7 +68,7 @@ export function AuthProvider({
     admin: {
       autoLogin,
       autoRefresh,
-      routes: { inactivity: logoutInactivityRoute },
+      routes: { inactivity: logoutInactivityRoute, login: loginRoute },
       user: userSlug,
     },
     routes: { admin: adminRoute, api: apiRoute },
@@ -106,18 +78,16 @@ export function AuthProvider({
   const { closeAllModals, openModal } = useModal()
   const { startRouteTransition } = useRouteTransition()
 
-  const [user, setUserInMemory] = useState<ClientUser | null>(initialUser)
+  const [user, setUserInMemory] = useState<AuthenticatedUser | null>(initialUser)
   const [tokenInMemory, setTokenInMemory] = useState<string>()
-  const [tokenExpirationMs, setTokenExpirationMs] = useState<number>()
+  const [authSession, setAuthSession] = useState<AuthSession>()
   const [permissions, setPermissions] = useState<SanitizedPermissions>(initialPermissions)
-  const [forceLogoutBufferMs, setForceLogoutBufferMs] = useState<number>(120_000)
   const [fetchedUserOnMount, setFetchedUserOnMount] = useState(false)
 
-  const refreshTokenTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
-  const reminderTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
-  const forceLogOutTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
+  const [authRequests] = useState(createAuthSessionRequests)
+  const userRef = React.useRef<AuthenticatedUser | null>(initialUser)
 
-  const id = user?.id
+  const isAuthenticated = Boolean(user)
 
   const redirectToInactivityRoute = useCallback(() => {
     const baseAdminRoute = formatAdminURL({ adminRoute, path: '' })
@@ -133,159 +103,271 @@ export function AuthProvider({
     closeAllModals()
   }, [router, adminRoute, logoutInactivityRoute, closeAllModals, startRouteTransition])
 
-  const revokeTokenAndExpire = useCallback(() => {
-    setUserInMemory(null)
-    setTokenInMemory(undefined)
-    setTokenExpirationMs(undefined)
-    clearTimeout(refreshTokenTimeoutRef.current)
-  }, [])
+  const redirectToLoginRoute = useCallback(() => {
+    startRouteTransition(() =>
+      router.replace(
+        formatAdminURL({
+          adminRoute,
+          path: loginRoute,
+        }),
+      ),
+    )
 
-  // Handler for reminder timeout - uses useEffectEvent to capture latest autoRefresh value
-  const handleReminderTimeout = useEffectEvent(() => {
+    closeAllModals()
+  }, [adminRoute, closeAllModals, loginRoute, router, startRouteTransition])
+
+  function onSessionActivity() {
+    setAuthSession((currentAuthSession) => {
+      if (!currentAuthSession || currentAuthSession.activityRecorded) {
+        return currentAuthSession
+      }
+
+      return {
+        ...currentAuthSession,
+        activityRecorded: true,
+      }
+    })
+  }
+
+  function onSessionActivityRefresh() {
+    void refreshSession({ isActivityRefresh: true })
+  }
+
+  function onSessionExpiration(expirationMs: number) {
+    const collection = userRef.current?.collection
+
+    tabSessionSync.broadcast({
+      type: TAB_SESSION_EVENT_TYPES.EXPIRED,
+      expiredTokenAt: expirationMs,
+    })
+    void logOutSession({ collection }).then(redirectToInactivityRoute)
+  }
+
+  function onSessionReminder() {
     if (autoRefresh) {
-      refreshCookieEvent()
+      sessionTimers.scheduleRefresh()
     } else {
       openModal(stayLoggedInModalSlug)
     }
+  }
+
+  const sessionTimers = useAuthSessionTimers({
+    isAuthenticated,
+    onActivity: onSessionActivity,
+    onActivityRefresh: onSessionActivityRefresh,
+    onExpire: onSessionExpiration,
+    onReminder: onSessionReminder,
   })
 
-  const setNewUser = useCallback(
-    (userResponse: null | UserWithToken) => {
-      clearTimeout(reminderTimeoutRef.current)
-      clearTimeout(forceLogOutTimeoutRef.current)
+  useEffect(() => {
+    sessionTimers.recordActivity('route')
+  }, [route, sessionTimers])
 
-      if (userResponse?.user) {
-        setUserInMemory(userResponse.user)
-        setTokenInMemory(userResponse.token ?? userResponse.refreshedToken)
-        setTokenExpirationMs(userResponse.exp * 1000)
+  const clearUserInMemory = useCallback(() => {
+    userRef.current = null
+    setUserInMemory(null)
+    setTokenInMemory(undefined)
+    setAuthSession(undefined)
+    sessionTimers.clear()
+  }, [sessionTimers])
 
-        const expiresInMs = Math.max(
-          0,
-          Math.min((userResponse.exp ?? 0) * 1000 - Date.now(), maxTimeoutMs),
-        )
+  const setLocalSession = useCallback(
+    (session: null | UserResponse) => {
+      if (session?.user) {
+        const expirationMs =
+          typeof session.exp === 'number' && Number.isFinite(session.exp)
+            ? session.exp * 1000
+            : undefined
+        const nextSessionTiming =
+          expirationMs !== undefined ? sessionTimers.setExpiration(expirationMs) : undefined
 
-        if (expiresInMs) {
-          const nextForceLogoutBufferMs = Math.min(60_000, expiresInMs / 2)
-          setForceLogoutBufferMs(nextForceLogoutBufferMs)
+        userRef.current = session.user
+        setUserInMemory(session.user)
+        setTokenInMemory(session.token ?? session.refreshedToken)
 
-          reminderTimeoutRef.current = setTimeout(
-            handleReminderTimeout,
-            Math.max(expiresInMs - nextForceLogoutBufferMs, 0),
-          )
-
-          forceLogOutTimeoutRef.current = setTimeout(() => {
-            revokeTokenAndExpire()
-            redirectToInactivityRoute()
-          }, expiresInMs)
+        if (nextSessionTiming) {
+          setAuthSession({
+            ...nextSessionTiming,
+            activityRecorded: false,
+          })
         }
       } else {
-        revokeTokenAndExpire()
+        clearUserInMemory()
       }
     },
-    [redirectToInactivityRoute, revokeTokenAndExpire],
+    [clearUserInMemory, sessionTimers],
   )
 
-  const refreshCookie = useCallback(
-    (forceRefresh?: boolean) => {
-      if (!id) {
-        return
+  const setUser = useCallback(
+    (session: null | UserWithToken) => {
+      authRequests.discardPendingResults()
+      setLocalSession(session)
+    },
+    [authRequests, setLocalSession],
+  )
+
+  const tabSessionSync = useTabSessionSync({
+    getTokenExpirationMs: sessionTimers.getCurrentExpirationMs,
+    onSessionExpired: () => {
+      const collection = userRef.current?.collection
+
+      void logOutSession({ collection }).then(redirectToInactivityRoute)
+    },
+    onSessionLoggedOut: () => {
+      const collection = userRef.current?.collection
+
+      void logOutSession({ collection }).then(redirectToLoginRoute)
+    },
+    onSessionRefreshed: (session) => {
+      if (!authRequests.isLoggingOut()) {
+        authRequests.discardPendingResults()
+        setLocalSession(session)
+      }
+    },
+    onTabSessionUnauthenticated: () => {
+      redirectToInactivityRoute()
+    },
+    reconcileSession: async (options) => {
+      const result = await fetchFullUserResult(options)
+
+      if (result.status === 'authenticated' && result.expirationMs !== undefined) {
+        return {
+          expirationMs: result.expirationMs,
+          status: result.status,
+          user: result.user,
+        }
       }
 
-      const expiresInMs = Math.max(0, (tokenExpirationMs ?? 0) - Date.now())
+      if (result.status === 'unauthenticated') {
+        return result
+      }
 
-      if (forceRefresh || (tokenExpirationMs && expiresInMs < forceLogoutBufferMs * 2)) {
-        clearTimeout(refreshTokenTimeoutRef.current)
-        refreshTokenTimeoutRef.current = setTimeout(async () => {
-          try {
-            const request = await requests.post(
-              formatAdminURL({
-                apiRoute,
-                path: `/${userSlug}/refresh-token?refresh`,
-              }),
-              {
-                headers: {
-                  'Accept-Language': i18n.language,
-                },
+      return { status: 'indeterminate' }
+    },
+  })
+
+  const refreshSession = useCallback(
+    ({ isActivityRefresh }: { isActivityRefresh: boolean }): Promise<AuthenticatedUser | null> => {
+      return authRequests.refresh(async ({ acceptResult, invalidateWhenIdle, isResultStale }) => {
+        if (isResultStale()) {
+          return null
+        }
+
+        const handledExpiration = sessionTimers.getCurrentExpirationMs()
+        const handledUser = userRef.current
+
+        try {
+          const refreshStartedAt = Date.now()
+          const request = await requests.post(
+            formatAdminURL({
+              apiRoute,
+              path: `/${userSlug}/refresh-token${isActivityRefresh ? '?refresh' : ''}`,
+            }),
+            {
+              headers: {
+                'Accept-Language': i18n.language,
               },
-            )
+            },
+          )
 
-            if (request.status === 200) {
-              const json: UserWithToken = await request.json()
-              setNewUser(json)
-            } else {
-              setNewUser(null)
+          if (isResultStale()) {
+            return null
+          }
+
+          if (request.status === 200) {
+            const json: UserWithToken = await request.json()
+
+            if (!acceptResult()) {
+              return null
+            }
+
+            setLocalSession(json)
+            tabSessionSync.broadcast({
+              type: TAB_SESSION_EVENT_TYPES.REFRESHED,
+              refreshStartedAt,
+              session: json,
+            })
+            return json.user
+          }
+
+          if (handledUser) {
+            const invalidateSession = () => {
+              if (handledExpiration !== undefined) {
+                tabSessionSync.broadcast({
+                  type: TAB_SESSION_EVENT_TYPES.EXPIRED,
+                  expiredTokenAt: handledExpiration,
+                })
+              }
+
+              setLocalSession(null)
               redirectToInactivityRoute()
             }
-          } catch (e) {
-            toast.error(e.message)
+
+            invalidateWhenIdle(invalidateSession)
           }
-        }, 1000)
-      }
+        } catch (e) {
+          toast.error(`Refreshing token failed: ${e.message}`)
+        }
+
+        return null
+      })
     },
     [
       apiRoute,
+      authRequests,
+      tabSessionSync,
       i18n.language,
       redirectToInactivityRoute,
-      setNewUser,
-      tokenExpirationMs,
+      sessionTimers,
+      setLocalSession,
       userSlug,
-      forceLogoutBufferMs,
-      id,
     ],
   )
 
   const refreshCookieAsync = useCallback(
-    async (skipSetUser?: boolean): Promise<ClientUser> => {
-      try {
-        const request = await requests.post(
-          formatAdminURL({
-            apiRoute,
-            path: `/${userSlug}/refresh-token`,
-          }),
-          {
-            headers: {
-              'Accept-Language': i18n.language,
-            },
-          },
-        )
+    (): Promise<AuthenticatedUser | null> => refreshSession({ isActivityRefresh: false }),
+    [refreshSession],
+  )
 
-        if (request.status === 200) {
-          const json: UserWithToken = await request.json()
-          if (!skipSetUser) {
-            setNewUser(json)
+  const logOutSession = useCallback(
+    ({ collection }: { collection?: string }): Promise<void> => {
+      return authRequests.logOut({
+        clearSession: () => {
+          authRequests.discardPendingResults()
+          setLocalSession(null)
+        },
+        request: async () => {
+          try {
+            if (collection) {
+              await requests.post(
+                formatAdminURL({
+                  apiRoute,
+                  path: `/${collection}/logout`,
+                }),
+              )
+            }
+          } catch (_) {
+            // Explicit logout always clears local state, even if server revocation fails.
           }
-          return json.user
-        }
-
-        if (user) {
-          setNewUser(null)
-          redirectToInactivityRoute()
-        }
-      } catch (e) {
-        toast.error(`Refreshing token failed: ${e.message}`)
-      }
-      return null
+        },
+      })
     },
-    [apiRoute, i18n.language, redirectToInactivityRoute, setNewUser, userSlug, user],
+    [apiRoute, authRequests, setLocalSession],
   )
 
   const logOut = useCallback(async () => {
-    try {
-      if (user && user.collection) {
-        setNewUser(null)
-        await requests.post(
-          formatAdminURL({
-            apiRoute,
-            path: `/${user.collection}/logout`,
-          }),
-        )
-      }
-    } catch (_) {
-      // fail silently and log the user out in state
+    const logoutEvent = { type: TAB_SESSION_EVENT_TYPES.LOGGED_OUT } as const
+    const logoutPublication = tabSessionSync.broadcast(logoutEvent)
+    const collection = userRef.current?.collection
+
+    await logOutSession({ collection })
+
+    if (logoutPublication?.type === TAB_SESSION_EVENT_TYPES.LOGGED_OUT) {
+      tabSessionSync.broadcastLogoutSettlement(logoutPublication)
     }
 
     return true
-  }, [apiRoute, setNewUser, user])
+  }, [tabSessionSync, logOutSession])
 
   const refreshPermissions = useCallback(
     async ({ locale }: { locale?: string } = {}) => {
@@ -324,40 +406,79 @@ export function AuthProvider({
     [apiRoute, i18n],
   )
 
-  const fetchFullUser = React.useCallback(async () => {
-    try {
-      const request = await requests.get(
-        formatAdminURL({
-          apiRoute,
-          path: `/${userSlug}/me`,
-        }),
-        {
-          credentials: 'include',
-          headers: {
-            'Accept-Language': i18n.language,
-          },
-        },
-      )
+  const fetchFullUserResult = React.useCallback(
+    ({
+      isTabSessionEventStale,
+    }: Partial<TabSessionReconciliationOptions> = {}): Promise<FetchFullUserResult> => {
+      return authRequests.queue(async ({ acceptResult, isResultStale }) => {
+        const isResponseStale = () => isResultStale() || Boolean(isTabSessionEventStale?.())
 
-      if (request.status === 200) {
-        const json: UserWithToken = await request.json()
-        setNewUser(json)
-        return json?.user || null
-      }
-    } catch (e) {
-      toast.error(`Fetching user failed: ${e.message}`)
-    }
+        if (isResponseStale()) {
+          return { status: 'indeterminate' }
+        }
 
-    return null
-  }, [apiRoute, userSlug, i18n.language, setNewUser])
+        try {
+          const request = await requests.get(
+            formatAdminURL({
+              apiRoute,
+              path: `/${userSlug}/me`,
+            }),
+            {
+              credentials: 'include',
+              headers: {
+                'Accept-Language': i18n.language,
+              },
+            },
+          )
 
-  const refreshCookieEvent = useEffectEvent(refreshCookie)
-  useEffect(() => {
-    // when location changes, refresh cookie
-    refreshCookieEvent()
-  }, [pathname])
+          if (request.status !== 200) {
+            return { status: 'indeterminate' }
+          }
+
+          const json: null | UserResponse = await request.json()
+
+          if (isResponseStale()) {
+            return { status: 'indeterminate' }
+          }
+
+          if (json?.user) {
+            if (!acceptResult()) {
+              return { status: 'indeterminate' }
+            }
+
+            setLocalSession(json)
+
+            return {
+              expirationMs:
+                typeof json.exp === 'number' && Number.isFinite(json.exp)
+                  ? json.exp * 1000
+                  : sessionTimers.getCurrentExpirationMs(),
+              status: 'authenticated',
+              user: json.user,
+            }
+          }
+
+          setLocalSession(null)
+
+          return { status: 'unauthenticated' }
+        } catch (e) {
+          toast.error(`Fetching user failed: ${e.message}`)
+        }
+
+        return { status: 'indeterminate' }
+      })
+    },
+    [apiRoute, authRequests, i18n.language, sessionTimers, setLocalSession, userSlug],
+  )
+
+  const fetchFullUser = React.useCallback(async (): Promise<AuthenticatedUser | null> => {
+    const result = await fetchFullUserResult()
+
+    return result.status === 'authenticated' ? result.user : null
+  }, [fetchFullUserResult])
 
   const fetchFullUserEvent = useEffectEvent(fetchFullUser)
+
   useEffect(() => {
     async function fetchUserOnMount() {
       await fetchFullUserEvent()
@@ -375,12 +496,9 @@ export function AuthProvider({
 
   useEffect(
     () => () => {
-      // remove all timeouts on unmount
-      clearTimeout(refreshTokenTimeoutRef.current)
-      clearTimeout(reminderTimeoutRef.current)
-      clearTimeout(forceLogOutTimeoutRef.current)
+      authRequests.discardPendingResults()
     },
-    [],
+    [authRequests],
   )
 
   if (!user && !fetchedUserOnMount) {
@@ -390,16 +508,16 @@ export function AuthProvider({
   return (
     <Context
       value={{
+        authSession,
         fetchFullUser,
         logOut,
         permissions,
-        refreshCookie,
+        refreshCookie: sessionTimers.scheduleRefresh,
         refreshCookieAsync,
         refreshPermissions,
         setPermissions,
-        setUser: setNewUser,
+        setUser,
         token: tokenInMemory,
-        tokenExpirationMs,
         user,
       }}
     >
@@ -408,4 +526,4 @@ export function AuthProvider({
   )
 }
 
-export const useAuth = <T = ClientUser,>(): AuthContext<T> => use(Context) as AuthContext<T>
+export const useAuth = <T = AuthenticatedUser,>(): AuthContext<T> => use(Context) as AuthContext<T>

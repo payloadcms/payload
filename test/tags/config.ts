@@ -21,17 +21,6 @@ export const mediaSlug = 'media'
 // Tags hierarchy collection (multi-select)
 export const Tags: CollectionConfig = {
   slug: tagsSlug,
-  tags: {
-    admin: {
-      components: {
-        Icon: {
-          clientProps: { color: '#FF10F0' }, // Tags - neon pink
-          path: '/components/ColoredTagIcon.tsx#ColoredTagIcon',
-        },
-      },
-    },
-  },
-  labels: { singular: 'Tag', plural: 'Tags' },
   admin: {
     useAsTitle: 'name',
   },
@@ -46,22 +35,23 @@ export const Tags: CollectionConfig = {
       type: 'textarea',
     },
   ],
-}
-
-// Categories hierarchy collection (single-select)
-export const Categories: CollectionConfig = {
-  slug: categoriesSlug,
+  labels: { plural: 'Tags', singular: 'Tag' },
   tags: {
     admin: {
       components: {
         Icon: {
-          clientProps: { color: '#DFFF00' }, // Categories - neon yellow
+          clientProps: { color: '#FF10F0' }, // Tags - neon pink
           path: '/components/ColoredTagIcon.tsx#ColoredTagIcon',
         },
       },
     },
   },
-  labels: { singular: 'Category', plural: 'Categories' },
+  versions: false,
+}
+
+// Categories hierarchy collection (single-select)
+export const Categories: CollectionConfig = {
+  slug: categoriesSlug,
   admin: {
     useAsTitle: 'name',
   },
@@ -72,6 +62,18 @@ export const Categories: CollectionConfig = {
       required: true,
     },
   ],
+  labels: { plural: 'Categories', singular: 'Category' },
+  tags: {
+    admin: {
+      components: {
+        Icon: {
+          clientProps: { color: '#DFFF00' }, // Categories - neon yellow
+          path: '/components/ColoredTagIcon.tsx#ColoredTagIcon',
+        },
+      },
+    },
+  },
+  versions: false,
 }
 
 // Posts collection that references both tags (multi) and categories (single)
@@ -95,6 +97,7 @@ export const Posts: CollectionConfig = {
     // Multi-select tags (hasMany: true, the default)
     createTagField({ hasMany: true, label: 'Tags', relationTo: tagsSlug }),
   ],
+  versions: false,
 }
 
 // Pages collection that references tags
@@ -115,6 +118,7 @@ export const Pages: CollectionConfig = {
     },
     createTagField({ hasMany: true, relationTo: tagsSlug }),
   ],
+  versions: false,
 }
 
 // Media collection that references tags
@@ -132,35 +136,39 @@ export const Media: CollectionConfig = {
     createTagField({ hasMany: true, relationTo: tagsSlug }),
   ],
   upload: true,
+  versions: false,
 }
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'tags',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [Categories, Posts, Pages, Media, Tags],
+    debug: true,
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [Categories, Posts, Pages, Media, Tags],
-  debug: true,
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
-    // Seed taxonomy data
     try {
       await seed(payload)
     } catch (error) {
       payload.logger.error('Failed to seed taxonomy data:')
       payload.logger.error(error)
     }
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })
 

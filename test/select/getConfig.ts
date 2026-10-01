@@ -20,6 +20,11 @@ const dirname = path.dirname(filename)
 
 export const getConfig: () => Partial<Config> = () => ({
   // ...extend config here
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     PostsCollection,
     LocalizedPostsCollection,
@@ -30,34 +35,42 @@ export const getConfig: () => Partial<Config> = () => ({
     ForceSelect,
     {
       slug: 'upload',
-      fields: [],
+      fields: [
+        {
+          name: 'link',
+          type: 'relationship',
+          relationTo: 'rels',
+        },
+      ],
       upload: {
         staticDir: path.resolve(dirname, 'media'),
       },
+      versions: false,
     },
     {
       slug: 'rels',
-      fields: [{ type: 'text', name: 'text' }],
+      fields: [{ name: 'text', type: 'text' }],
+      versions: false,
     },
     {
       slug: 'relationships-blocks',
       fields: [
         {
-          type: 'blocks',
           name: 'blocks',
+          type: 'blocks',
           blocks: [
             {
               slug: 'block',
               fields: [
                 {
-                  type: 'relationship',
                   name: 'hasMany',
-                  relationTo: 'rels',
+                  type: 'relationship',
                   hasMany: true,
+                  relationTo: 'rels',
                 },
                 {
-                  type: 'relationship',
                   name: 'hasOne',
+                  type: 'relationship',
                   relationTo: 'rels',
                 },
               ],
@@ -65,10 +78,43 @@ export const getConfig: () => Partial<Config> = () => ({
           ],
         },
       ],
+      versions: false,
+    },
+    {
+      slug: 'select-documents',
+      fields: [
+        {
+          name: 'blocks',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'select-relationship-block',
+              fields: [
+                {
+                  name: 'link',
+                  type: 'relationship',
+                  relationTo: 'rels',
+                },
+              ],
+              interfaceName: 'SelectRelationshipBlock',
+            },
+          ],
+        },
+        {
+          name: 'upload',
+          type: 'upload',
+          relationTo: 'upload',
+        },
+      ],
+      versions: false,
     },
     CustomID,
     UsersCollection,
   ],
+  cors: [`http://localhost:${process.env.PORT || 3000}`, 'http://localhost:3001'],
+  editor: lexicalEditor({
+    features: ({ defaultFeatures }) => [...defaultFeatures],
+  }),
   globals: [
     {
       slug: 'global-post',
@@ -82,6 +128,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'number',
         },
       ],
+      versions: false,
     },
     {
       slug: 'force-select-global',
@@ -110,41 +157,25 @@ export const getConfig: () => Partial<Config> = () => ({
 
         return select
       },
+      versions: false,
     } satisfies GlobalConfig<'force-select-global'>,
   ],
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-  },
   localization: {
-    locales: ['en', 'de'],
     defaultLocale: 'en',
-  },
-  editor: lexicalEditor({
-    features: ({ defaultFeatures }) => [...defaultFeatures],
-  }),
-  cors: [`http://localhost:${process.env.PORT || 3000}`, 'http://localhost:3001'],
-  onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
-
-    // // Create image
-    // const imageFilePath = path.resolve(dirname, '../uploads/image.png')
-    // const imageFile = await getFileByPath(imageFilePath)
-
-    // await payload.create({
-    //   collection: 'media',
-    //   data: {},
-    //   file: imageFile,
-    // })
+    locales: ['en', 'de'],
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })
+
+export const seed: NonNullable<Config['onInit']> = async (payload) => {
+  await payload.create({
+    collection: 'users',
+    data: {
+      email: devUser.email,
+      password: devUser.password,
+    },
+    overrideAccess: true,
+  })
+}

@@ -1,0 +1,91 @@
+@layer payload-default {
+  .file-toolbar {
+    --file-toolbar-filename-max-width: 200px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* When the toolbar gets too narrow for the filename dropdown and the actions side by side,
+       wrap the actions below the dropdown instead of letting them overlap. */
+    flex-wrap: wrap;
+    row-gap: var(--spacer-2);
+    padding: var(--spacer-2) var(--gutter-h);
+    padding-inline-start: var(--spacer-2-5);
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+    background: var(--color-bg);
+    flex-shrink: 0;
+  }
+
+  .file-toolbar__left {
+    display: flex;
+    align-items: flex-start;
+    min-width: 0;
+    /* Grow to fill on wide toolbars, but don't shrink — so when space runs out the actions
+       wrap below the dropdown instead of the dropdown collapsing. */
+    flex: 1 0 auto;
+  }
+
+  .file-toolbar__right {
+    display: flex;
+    gap: var(--spacer-1);
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .file-toolbar__filename-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+    padding: var(--spacer-1) var(--spacer-2);
+    border-radius: var(--radius-medium);
+    background: var(--color-bg);
+    border: var(--stroke-width-small) solid var(--special-border-translucent);
+    cursor: pointer;
+    color: var(--color-text);
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
+    line-height: var(--text-body-medium-strong-line-height);
+    letter-spacing: var(--text-body-medium-letter-spacing);
+    max-width: var(--file-toolbar-filename-max-width);
+
+    &:hover {
+      background: var(--color-bg-transparent-hover);
+    }
+
+    &:active {
+      background: var(--color-bg-transparent-pressed);
+    }
+  }
+
+  /* When the file cannot be replaced (hideRemoveFile), the filename is static, not a dropdown. */
+  .file-toolbar__filename-btn--static {
+    cursor: default;
+    border-color: transparent;
+
+    &:hover,
+    &:active {
+      background: var(--color-bg);
+    }
+  }
+
+  .file-toolbar__filename-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .file-toolbar__icon-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-medium);
+    color: var(--color-icon);
+    text-decoration: none;
+
+    &:hover {
+      background: var(--color-bg-transparent-hover);
+      color: var(--color-icon);
+    }
+  }
+}

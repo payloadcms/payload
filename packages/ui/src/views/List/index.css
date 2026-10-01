@@ -12,12 +12,31 @@
 
   .collection-list__sub-header {
     flex-basis: 100%;
-    padding-top: var(--spacer-3);
+    padding-top: var(--spacer-2-5);
   }
 
   .collection-list .table table {
     width: 100%;
     overflow: auto;
+  }
+
+  .collection-list .table table td.cell--linked > :is(a, button) {
+    font-weight: var(--text-body-medium-strong-font-weight);
+    text-decoration-line: underline;
+    text-decoration-style: solid;
+    text-decoration-skip-ink: none;
+    text-decoration-color: var(--color-border);
+    text-decoration-thickness: auto;
+    text-underline-offset: 2px;
+    text-underline-position: from-font;
+
+    &:hover {
+      text-decoration-color: var(--color-text);
+    }
+  }
+
+  .collection-list .table table td.cell--linked > :is(a, button):has(.id-label) {
+    text-decoration-line: none;
   }
 
   .collection-list .table table [class^='cell']:not(.cell--linked) > p,
@@ -68,6 +87,7 @@
     margin-top: var(--spacer-2);
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1024px) {
     .collection-list {
       margin-top: var(--spacer-2);
@@ -102,6 +122,7 @@
     }
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .collection-list {
       margin-bottom: var(--spacing-view-bottom);
@@ -115,5 +136,9 @@
       box-shadow: none;
       border-radius: 0;
     }
+  }
+
+  .list-view__not-found-banner {
+    margin: var(--spacer-2-5) var(--gutter-h);
   }
 }

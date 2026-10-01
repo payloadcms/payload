@@ -45,4 +45,5 @@ export const LexicalViewsProviderFallback: CollectionConfig = {
     plural: 'Lexical Views Provider Fallback',
     singular: 'Lexical Views Provider Fallback',
   },
+  versions: false,
 }

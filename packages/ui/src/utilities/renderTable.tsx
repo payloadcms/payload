@@ -130,7 +130,14 @@ export const renderTable = ({
   let serverFields: Field[] = collectionConfig?.fields || []
   const isPolymorphic = collections
 
-  const isGroupingBy = Boolean(collectionConfig?.admin?.groupBy && query?.groupBy)
+  const isGroupingBy = Boolean(query?.groupBy)
+  const tableId = [
+    'payload-table',
+    clientCollectionConfig?.slug || 'results',
+    isGroupingBy ? encodeURIComponent(String(groupByValue ?? key)) : undefined,
+  ]
+    .filter(Boolean)
+    .join('-')
 
   if (isPolymorphic) {
     clientFields = []
@@ -252,8 +259,13 @@ export const renderTable = ({
         hidden: true,
       },
       Heading: <SelectAll />,
-      renderedCells: (data?.docs || []).map((_, i) => (
-        <SelectRow key={i} rowData={data?.docs[i]} />
+      renderedCells: (data?.docs || []).map((row, i) => (
+        <SelectRow
+          key={i}
+          rowData={row}
+          rowIndex={i}
+          selectRowLabel={getSelectRowLabel({ i18n, rowData: row, useAsTitle })}
+        />
       )),
     } as Column)
   }
@@ -278,10 +290,22 @@ export const renderTable = ({
                 groupByValue={groupByValue}
                 heading={heading}
               />
-              <GroupByPageControls data={data} groupByValue={groupByValue} />
+              <GroupByPageControls data={data} groupByValue={groupByValue} tableId={tableId} />
             </TableSectionHeader>
             <TableSectionContent>
-              <Table appearance={tableAppearance} columns={columnsToUse} data={data?.docs || []} />
+              <Table
+                appearance={tableAppearance}
+                ariaLabel={
+                  heading
+                    ? [getTranslation(clientCollectionConfig?.labels?.plural, i18n), heading]
+                        .filter(Boolean)
+                        .join(': ')
+                    : undefined
+                }
+                columns={columnsToUse}
+                data={data?.docs || []}
+                id={tableId}
+              />
             </TableSectionContent>
           </SelectionProvider>
         </TableSectionRoot>
@@ -301,7 +325,12 @@ export const renderTable = ({
             </TableSectionHeader>
           )}
           <TableSectionContent>
-            <Table appearance={tableAppearance} columns={columnsToUse} data={data?.docs || []} />
+            <Table
+              appearance={tableAppearance}
+              columns={columnsToUse}
+              data={data?.docs || []}
+              id={tableId}
+            />
           </TableSectionContent>
         </TableSectionRoot>
       ),
@@ -333,9 +362,28 @@ export const renderTable = ({
             collection={clientCollectionConfig}
             columns={columnsToUse}
             data={data?.docs || []}
+            id={tableId}
           />
         </TableSectionContent>
       </TableSectionRoot>
     ),
   }
+}
+
+const getSelectRowLabel = ({
+  i18n,
+  rowData,
+  useAsTitle,
+}: {
+  i18n: I18nClient
+  rowData: { id: number | string } & Record<string, unknown>
+  useAsTitle: CollectionConfig['admin']['useAsTitle']
+}) => {
+  const title = useAsTitle ? rowData[useAsTitle] : undefined
+  const label =
+    typeof title === 'number' || (typeof title === 'string' && title)
+      ? String(title)
+      : String(rowData.id)
+
+  return i18n.t('general:selectLabel', { label })
 }

@@ -13,7 +13,7 @@ type Args = {
   tenantFieldName: string
   tenantsCollectionSlug: string
   useAsTitle: string
-  userHasAccessToAllTenants: Required<MultiTenantPluginConfig<any>>['userHasAccessToAllTenants']
+  userHasAccessToAllTenants: Required<MultiTenantPluginConfig>['userHasAccessToAllTenants']
   viewType: ViewTypes
 } & ServerProps
 

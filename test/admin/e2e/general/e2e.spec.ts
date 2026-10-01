@@ -1,21 +1,22 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { formatAdminURL, wait } from 'payload/shared'
 
 import type { Config, Geo, Post } from '../../payload-types.js'
 
 import {
-  ensureCompilationIsDone,
   getRoutes,
-  initPageConsoleErrorCatch,
   openLocaleSelector,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
   // throttleTest,
 } from '../../../__helpers/e2e/helpers.js'
+import { test } from '../../../__helpers/e2e/playwright.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../../../__setup/e2e/initPage.js'
 import {
   BASE_PATH,
   customAdminRoutes,
@@ -87,8 +88,6 @@ describe('General', () => {
     const prebuild = false // Boolean(process.env.CI)
 
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       prebuild,
@@ -103,10 +102,7 @@ describe('General', () => {
     uploadsTwo = new AdminUrlUtil(serverURL, uploadTwoCollectionSlug)
 
     context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
+    ;({ page } = await initPage({ context, customAdminRoutes, serverURL }))
 
     adminRoutes = getRoutes({ customAdminRoutes })
     adminRoute = adminRoutes.routes.admin
@@ -121,10 +117,32 @@ describe('General', () => {
 
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'adminTests',
     })
 
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
+  })
+
+  describe('inactivity route', () => {
+    test('should redirect to admin when reaching the inactivity route while still authenticated', async () => {
+      // With auto-login enabled, the AuthProvider re-authenticates the user, so a request
+      // to the inactivity route arrives already logged in. Previously this rendered the
+      // logout loading overlay indefinitely — the user should instead be sent back to the
+      // route they were headed to (via the `redirect` param) rather than getting stuck.
+      const redirectTo = formatAdminURL({ adminRoute, path: '/collections/posts' })
+
+      await page.goto(
+        formatAdminURL({
+          adminRoute,
+          path: `${customAdminRoutes.inactivity!}?redirect=${encodeURIComponent(redirectTo)}`,
+          serverURL,
+        }),
+      )
+
+      await expect(page).toHaveURL(new RegExp(`${redirectTo}(?:\\?.*)?$`))
+      await expect(page.locator('.collection-list')).toBeVisible()
+      await expect(page.locator('.loading-overlay')).toBeHidden()
+      await expect(page).not.toHaveURL(/custom-inactivity/)
+    })
   })
 
   describe('metadata', () => {
@@ -152,7 +170,7 @@ describe('General', () => {
         )
       })
 
-      test('should fallback to root meta for custom root views', async () => {
+      test('should fallback to root meta for custom root views', { framework: 'rsc' }, async () => {
         await page.goto(
           formatAdminURL({
             adminRoute,
@@ -163,17 +181,21 @@ describe('General', () => {
         await expect(page.title()).resolves.toMatch(/- Custom Title Suffix$/)
       })
 
-      test('should render custom meta title from custom root views', async () => {
-        await page.goto(
-          formatAdminURL({
-            adminRoute,
-            path: '/custom-minimal-view',
-            serverURL,
-          }),
-        )
-        const pattern = new RegExp(`^${customRootViewMetaTitle}`)
-        await expect(page.title()).resolves.toMatch(pattern)
-      })
+      test(
+        'should render custom meta title from custom root views',
+        { framework: 'rsc' },
+        async () => {
+          await page.goto(
+            formatAdminURL({
+              adminRoute,
+              path: '/custom-minimal-view',
+              serverURL,
+            }),
+          )
+          const pattern = new RegExp(`^${customRootViewMetaTitle}`)
+          await expect(page.title()).resolves.toMatch(pattern)
+        },
+      )
     })
 
     describe('robots', () => {
@@ -305,20 +327,65 @@ describe('General', () => {
   })
 
   describe('theme', () => {
+    test('should resolve the automatic dark theme before hydration without a usable client hint', async ({
+      browser,
+    }) => {
+      const themeContext = await browser.newContext({ colorScheme: 'dark' })
+      const themePage = await themeContext.newPage()
+
+      try {
+        const themeCookies = (await themeContext.cookies(postsUrl.admin)).filter(({ name }) =>
+          name.endsWith('-theme'),
+        )
+
+        expect(themeCookies).toHaveLength(0)
+
+        await themePage.route('**/*', async (route) => {
+          const request = route.request()
+
+          if (request.resourceType() === 'script') {
+            await route.abort()
+            return
+          }
+
+          if (request.isNavigationRequest()) {
+            const headers = { ...request.headers() }
+
+            // Chromium can re-inject secured client hints after interception.
+            // Fetching outside its network stack forces the server fallback path.
+            headers['sec-ch-prefers-color-scheme'] = 'unsupported'
+            const response = await route.fetch({ headers })
+
+            await route.fulfill({ response })
+            return
+          }
+
+          await route.continue()
+        })
+
+        const response = await themePage.goto(postsUrl.admin, { waitUntil: 'domcontentloaded' })
+        const serverHTML = await response?.text()
+
+        expect(serverHTML).toMatch(/<html[^>]*data-theme="light"/)
+        await expect(themePage.locator('html')).toHaveAttribute('data-theme', 'dark')
+      } finally {
+        await themeContext.close()
+      }
+    })
+
     test('should default to automatic theme mode', async () => {
       await page.goto(postsUrl.admin)
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
       await page.goto(`${postsUrl.admin}/account`)
-      await expect(page.locator('#field-theme-auto')).toBeChecked()
-      await expect(page.locator('#field-theme-light')).not.toBeChecked()
-      await expect(page.locator('#field-theme-dark')).not.toBeChecked()
+      const themeSelect = page.locator('.payload-settings__theme .react-select')
+      await expect(themeSelect).toContainText('Auto')
     })
 
     test('should explicitly change to light theme', async () => {
       await page.goto(`${postsUrl.admin}/account`)
-      await page.locator('label[for="field-theme-light"]').click()
-      await expect(page.locator('#field-theme-light')).toBeChecked()
-      await expect(page.locator('#field-theme-dark')).not.toBeChecked()
+      const themeSelect = page.locator('.payload-settings__theme .react-select')
+      await themeSelect.click()
+      await page.locator('.rs__option', { hasText: 'Light' }).click()
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
 
       // reload the page and ensure theme is retained
@@ -328,9 +395,9 @@ describe('General', () => {
 
     test('should explicitly change to dark theme', async () => {
       await page.goto(`${postsUrl.admin}/account`)
-      await page.locator('label[for="field-theme-dark"]').click()
-      await expect(page.locator('#field-theme-light')).not.toBeChecked()
-      await expect(page.locator('#field-theme-dark')).toBeChecked()
+      const themeSelect = page.locator('.payload-settings__theme .react-select')
+      await themeSelect.click()
+      await page.locator('.rs__option', { hasText: 'Dark' }).click()
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
 
       // reload the page and ensure theme is retained
@@ -338,11 +405,95 @@ describe('General', () => {
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
 
       // reset to light
-      await page.goto(`${postsUrl.admin}/account`)
-      await page.locator('label[for="field-theme-light"]').click()
-      await expect(page.locator('#field-theme-light')).toBeChecked()
-      await expect(page.locator('#field-theme-dark')).not.toBeChecked()
+      await page.locator('.payload-settings__theme .react-select').click()
+      await page.locator('.rs__option', { hasText: 'Light' }).click()
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+    })
+
+    describe('user menu', () => {
+      const openThemeSubMenu = async () => {
+        await page.locator('button[aria-label="Account"]').click()
+        await page
+          .locator('.popup-button-list__button--submenu-trigger')
+          .filter({ hasText: 'Theme' })
+          .click()
+      }
+
+      const closePopups = async () => {
+        await page.keyboard.press('Escape')
+        await page.keyboard.press('Escape')
+      }
+
+      test('should switch to dark theme via user menu and reflect correct active state', async () => {
+        await page.goto(postsUrl.admin)
+
+        await openThemeSubMenu()
+        await page
+          .locator('.popup-button-list__button--radio-group-item', { hasText: 'Dark' })
+          .click()
+        await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+
+        // sub-popup stays open (data-popup-prevent-close) — verify active state directly
+        const darkItem = page.locator('.popup-button-list__button--radio-group-item', {
+          hasText: 'Dark',
+        })
+        await expect(darkItem).toHaveClass(/popup-button-list__button--selected/)
+
+        // navigate to account page and verify theme select shows Dark
+        await page.goto(`${postsUrl.admin}/account`)
+        await expect(page.locator('.payload-settings__theme .react-select')).toContainText('Dark')
+
+        // reload and verify persisted
+        await page.reload()
+        await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+        await expect(page.locator('.payload-settings__theme .react-select')).toContainText('Dark')
+
+        // reset to auto
+        await page.locator('.payload-settings__theme .react-select').click()
+        await page.locator('.rs__option', { hasText: 'Automatic' }).click()
+        await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+      })
+
+      test('should switch to light theme via user menu and reflect active state', async () => {
+        // start with dark so we have something to switch from
+        await page.goto(postsUrl.admin)
+        await openThemeSubMenu()
+        await page
+          .locator('.popup-button-list__button--radio-group-item', { hasText: 'Dark' })
+          .click()
+        await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+
+        // now switch to light via user menu — sub-popup is still open, click directly
+        await page
+          .locator('.popup-button-list__button--radio-group-item', { hasText: 'Light' })
+          .click()
+        await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+
+        // verify 'Light' shown as active in submenu (still open)
+        const lightItem = page.locator('.popup-button-list__button--radio-group-item', {
+          hasText: 'Light',
+        })
+        await expect(lightItem).toHaveClass(/popup-button-list__button--selected/)
+
+        // reset to auto — close popups first, then reopen fresh
+        await closePopups()
+        await openThemeSubMenu()
+        await page
+          .locator('.popup-button-list__button--radio-group-item', { hasText: 'Auto' })
+          .click()
+        await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+      })
+
+      test('should render custom logout button from admin.components.logout.Button', async () => {
+        await page.goto(postsUrl.admin)
+
+        // Logout lives inside the user menu popup
+        await page.locator('button[aria-label="Account"]').click()
+
+        // The custom Logout component (admin.components.logout.Button) renders an
+        // anchor ending in `#custom`, replacing the default logout button.
+        await expect(page.locator('a[href$="/custom-logout#custom"]')).toBeVisible()
+      })
     })
   })
 
@@ -719,22 +870,26 @@ describe('General', () => {
       await expect(page.locator('.custom-provider')).toContainText('This is a custom provider.')
     })
 
-    test('should render custom provider server components with props', async () => {
-      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
-      await expect(page.locator('.custom-provider-server')).toHaveCount(1)
-      await expect(page.locator('.custom-provider-server')).toContainText(
-        'This is a custom provider with payload: true',
-      )
-    })
+    test(
+      'should render custom provider server components with props',
+      { framework: 'rsc' },
+      async () => {
+        await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
+        await expect(page.locator('.custom-provider-server')).toHaveCount(1)
+        await expect(page.locator('.custom-provider-server')).toContainText(
+          'This is a custom provider with payload: true',
+        )
+      },
+    )
   })
 
   describe('custom root views', () => {
-    test('should render custom view', async () => {
+    test('should render custom view', { framework: 'rsc' }, async () => {
       await page.goto(formatAdminURL({ adminRoute, path: customViewPath, serverURL }))
       await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
     })
 
-    test('should render custom nested view', async () => {
+    test('should render custom nested view', { framework: 'rsc' }, async () => {
       await page.goto(
         formatAdminURL({
           adminRoute,
@@ -748,7 +903,7 @@ describe('General', () => {
       await expect(page.locator('h1#custom-view-title')).toContainText(customNestedViewTitle)
     })
 
-    test('should render public custom view', async () => {
+    test('should render public custom view', { framework: 'rsc' }, async () => {
       await page.goto(
         formatAdminURL({
           adminRoute,
@@ -760,6 +915,8 @@ describe('General', () => {
     })
 
     test('should render protected nested custom view', async () => {
+      test.slow()
+
       await page.goto(
         formatAdminURL({
           adminRoute,
@@ -1045,7 +1202,7 @@ describe('General', () => {
       await page.goto(postsUrl.edit(id))
       await openDocControls(page)
       await page.locator('#action-delete').click()
-      await page.locator(`[id=delete-${id}] #confirm-action`).click()
+      await page.locator(`[id=delete-${id}] [data-dialog-action="confirm"]`).click()
       await expect(page.locator(`text=Post "${title}" successfully deleted.`)).toBeVisible()
       expect(page.url()).toContain(postsUrl.list)
     })
@@ -1085,7 +1242,7 @@ describe('General', () => {
       await expect(modalContainer).toBeVisible()
 
       // Click the "Leave anyway" button
-      await page.locator('#leave-without-saving .alert-modal__controls .btn--style-primary').click()
+      await page.locator('#leave-without-saving .dialog__footer .btn--style-primary').click()
 
       // Assert that the class on the modal container changes to 'payload__modal-container--exitDone'
       await expect(modalContainer).toHaveClass(/payload__modal-container--exitDone/)
@@ -1137,37 +1294,6 @@ describe('General', () => {
       await expect(toast).toBeVisible()
     })
   })
-
-  describe('progress bar', () => {
-    test.fixme('should show progress bar on page navigation', async () => {
-      // TODO: This test is extremely flaky in CI. Not a surprise, the progress bar only shows if the timing is right. Need to fix this and make extra sure it passes in CI without retries.
-      // eslint-disable-next-line playwright/no-networkidle
-      await page.goto(postsUrl.admin, { waitUntil: 'networkidle' })
-      // Wait for hydration - otherwise playwright clicks the card early and nothing happens
-      await wait(1000)
-
-      // Throttle network to ensure navigation takes > 500ms so progress bar is visible
-      // Progress bar has 150ms initial delay before showing, so fast navigations won't show it
-      const client = await page.context().newCDPSession(page)
-      await client.send('Network.emulateNetworkConditions', {
-        downloadThroughput: (500 * 1024) / 8, // 500 kbps
-        latency: 400, // 400ms latency
-        offline: false,
-        uploadThroughput: (500 * 1024) / 8,
-      })
-
-      await page.locator('.collections__card-list .card').first().click()
-      await expect(page.locator('.progress-bar')).toBeVisible()
-
-      // Reset network conditions
-      await client.send('Network.emulateNetworkConditions', {
-        downloadThroughput: -1,
-        latency: 0,
-        offline: false,
-        uploadThroughput: -1,
-      })
-    })
-  })
 })
 
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
@@ -1178,6 +1304,7 @@ async function createPost(overrides?: Partial<Post>): Promise<Post> {
       title,
       ...overrides,
     },
+    overrideAccess: true,
   }) as unknown as Promise<Post>
 }
 
@@ -1188,5 +1315,6 @@ async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
       point: [4, -4],
       ...overrides,
     },
+    overrideAccess: true,
   }) as unknown as Promise<Geo>
 }

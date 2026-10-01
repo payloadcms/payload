@@ -131,7 +131,6 @@ export const ALL_STORAGE_ADAPTERS = [
   'localDisk',
   'r2Storage',
   's3Storage',
-  'uploadthingStorage',
   'vercelBlobStorage',
 ] as const
 

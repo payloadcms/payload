@@ -1,0 +1,15 @@
+@layer payload-default {
+  .nav {
+    position: sticky;
+    top: 0;
+    left: 0;
+    flex-shrink: 0;
+    height: 100vh;
+    width: var(--nav-width);
+    border-right: var(--stroke-width-small) solid var(--color-border);
+    [dir='rtl'] & {
+      border-right: none;
+      border-left: var(--stroke-width-small) solid var(--color-border);
+    }
+  }
+}

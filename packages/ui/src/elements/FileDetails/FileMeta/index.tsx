@@ -13,7 +13,7 @@ export type FileMetaProps = {
 }
 
 import { CopyToClipboard } from '../../CopyToClipboard/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'file-meta'
 

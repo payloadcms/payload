@@ -1,0 +1,48 @@
+@layer payload-default {
+  .import-preview__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: var(--spacer-2);
+  }
+
+  .import-preview__info {
+    color: var(--color-text-secondary);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+  }
+
+  .import-preview__import-count {
+    color: var(--color-text-secondary);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+  }
+
+  .import-preview__pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacer-4);
+    margin-top: var(--spacer-4);
+    padding-top: var(--spacer-4);
+    border-top: var(--stroke-width-small) solid var(--color-border);
+
+    /* When only PerPage is present (no Pagination), keep it on the right */
+    .per-page:only-child {
+      margin-left: auto;
+    }
+  }
+
+  .import-preview__page-info {
+    color: var(--color-text-secondary);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    white-space: nowrap;
+  }
+}

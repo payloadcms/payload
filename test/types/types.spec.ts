@@ -1,133 +1,790 @@
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+import type { useAuth } from '@payloadcms/ui'
 import type {
+  Access,
+  ArrayField,
+  AuthenticatedUser,
+  Block,
+  BlockRowLabelClientProps,
+  BlockRowLabelServerProps,
+  BlocksField,
+  BlocksFieldLabelClientProps,
+  BlocksFieldLabelServerProps,
   BulkOperationResult,
+  CollapsibleField,
   CollectionSlug,
   CustomDocumentViewConfig,
   DefaultDocumentViewConfig,
+  FieldClientProps,
+  FieldErrorServerProps,
+  FieldServerProps,
   GeneratedTypes,
+  Job,
+  JobTaskStatus,
+  JoinFieldLabelServerProps,
+  JoinFieldServerProps,
   JoinQuery,
-  JsonObject,
+  MeOperationResult,
+  NamedGroupField,
+  NamedTab,
   PaginatedDocs,
+  PayloadClientComponentProps,
+  PayloadRequest,
+  PayloadServerComponentProps,
   PayloadTypesShape,
+  RowField,
+  SanitizedCollectionConfig,
+  SanitizedGlobalConfig,
   SelectType,
+  TabsField,
+  TextField,
+  TextFieldClientProps,
+  TextFieldDiffClientProps,
+  TextFieldServerProps,
   TypedCollectionSelect,
-  TypeWithID,
   TypeWithVersion,
+  UnnamedGroupField,
+  UnnamedTab,
+  UntypedPayloadTypes,
+  UploadFieldErrorServerProps,
   Where,
 } from 'payload'
+import type { FC } from 'react'
 
 import {
   buildEditorState,
   type DefaultNodeTypes,
   type DefaultTypedEditorState,
-  type RecursiveNodes,
+  type SerializedAutoLinkNode,
   type SerializedBlockNode,
   type SerializedHeadingNode,
+  type SerializedHorizontalRuleNode,
+  type SerializedLineBreakNode,
+  type SerializedLinkNode,
+  type SerializedListItemNode,
+  type SerializedListNode,
+  type SerializedParagraphNode,
+  type SerializedQuoteNode,
+  type SerializedRelationshipNode,
+  type SerializedTabNode,
   type SerializedTextNode,
   type TypedEditorState,
+  type WithDefaultNodes,
 } from '@payloadcms/richtext-lexical'
+import { convertLexicalToPlaintext } from '@payloadcms/richtext-lexical/plaintext'
 import { PayloadSDK } from '@payloadcms/sdk'
 import payload from 'payload'
 import { describe, expect, test } from 'tstyche'
 
 import type {
+  DraftPost,
+  DraftPostInput,
+  FallbackUser,
+  LexicalUploadFields_9521FA4A as GalleryUploadFields,
+  SerializedAutoLinkNode as GenAutoLink,
+  SerializedHeadingNode as GenHeading,
+  SerializedHorizontalRuleNode as GenHR,
+  SerializedLineBreakNode as GenLB,
+  SerializedListItemNode as GenLI,
+  SerializedLinkNode as GenLink,
+  SerializedListNode as GenList,
+  LexicalNodes_D5E7E2D8 as GenNodeUnion,
+  SerializedParagraphNode as GenParagraph,
+  SerializedQuoteNode as GenQuote,
+  SerializedTabNode as GenTab,
+  SerializedTextNode as GenText,
+  InputType,
+  InputTypeInput,
   Config as LocalConfig,
+  Media,
+  LexicalUploadFields_7C90EEAC as MediaUploadFields,
   Menu,
   MyRadioOptions,
   MySelectOptions,
+  Page,
+  PagesCategory,
+  PagesCategoryInput,
   Post,
+  PostInput,
   SupportedTimezones,
   User,
+  UserInput,
 } from './payload-types.js'
 
 describe('Types testing', () => {
+  test('sanitized collection readVersions access is required', () => {
+    expect<SanitizedCollectionConfig['access']['readVersions']>().type.toBe<Access>()
+  })
+
+  test('sanitized global readVersions access is required', () => {
+    expect<SanitizedGlobalConfig['access']['readVersions']>().type.toBe<Access>()
+  })
+
+  describe('field duplication configuration', () => {
+    test('should only expose disableDuplicate on fields that own data', () => {
+      expect<ArrayField>().type.toHaveProperty('disableDuplicate')
+      expect<BlocksField>().type.toHaveProperty('disableDuplicate')
+      expect<NamedGroupField>().type.toHaveProperty('disableDuplicate')
+      expect<NamedTab>().type.toHaveProperty('disableDuplicate')
+      expect<TextField>().type.toHaveProperty('disableDuplicate')
+
+      expect<CollapsibleField>().type.not.toHaveProperty('disableDuplicate')
+      expect<RowField>().type.not.toHaveProperty('disableDuplicate')
+      expect<TabsField>().type.not.toHaveProperty('disableDuplicate')
+      expect<UnnamedGroupField>().type.not.toHaveProperty('disableDuplicate')
+      expect<UnnamedTab>().type.not.toHaveProperty('disableDuplicate')
+    })
+  })
+
+  describe('field component props', () => {
+    test('should expose standalone props for canonical and specialized field components', () => {
+      const GenericClientField: FC<FieldClientProps> = () => null
+      const GenericServerError: FC<FieldErrorServerProps<TextField>> = () => null
+      const BlocksServerLabel: FC<BlocksFieldLabelServerProps> = () => null
+      const TextClientDiff: FC<TextFieldDiffClientProps> = () => null
+      const BlockServerRowLabel: FC<BlockRowLabelServerProps> = () => null
+
+      expect(GenericClientField).type.toBe<FC<FieldClientProps>>()
+      expect(GenericServerError).type.toBe<FC<FieldErrorServerProps<TextField>>>()
+      expect(BlocksServerLabel).type.toBe<FC<BlocksFieldLabelServerProps>>()
+      expect(TextClientDiff).type.toBe<FC<TextFieldDiffClientProps>>()
+      expect(BlockServerRowLabel).type.toBe<FC<BlockRowLabelServerProps>>()
+      expect<JoinFieldLabelServerProps['clientField']['collection']>().type.toBeAssignableTo<
+        CollectionSlug | CollectionSlug[]
+      >()
+      expect<UploadFieldErrorServerProps['clientField']['relationTo']>().type.toBeAssignableTo<
+        CollectionSlug | CollectionSlug[]
+      >()
+    })
+
+    test('should preserve separate server and client props in field component configuration', () => {
+      type BlocksLabel = NonNullable<
+        NonNullable<NonNullable<BlocksField['admin']>['components']>['Label']
+      >
+      type GenericField = NonNullable<
+        NonNullable<NonNullable<TextField['admin']>['components']>['Field']
+      >
+      type BlockLabel = NonNullable<NonNullable<NonNullable<Block['admin']>['components']>['Label']>
+
+      expect<
+        PayloadServerComponentProps<BlocksLabel>
+      >().type.toBeAssignableTo<BlocksFieldLabelServerProps>()
+      expect<
+        PayloadClientComponentProps<BlocksLabel>
+      >().type.toBeAssignableTo<BlocksFieldLabelClientProps>()
+      expect<PayloadServerComponentProps<GenericField>>().type.toBeAssignableTo<FieldServerProps>()
+      expect<PayloadClientComponentProps<GenericField>>().type.toBeAssignableTo<FieldClientProps>()
+      expect<
+        PayloadServerComponentProps<BlockLabel>
+      >().type.toBeAssignableTo<BlockRowLabelServerProps>()
+      expect<
+        PayloadClientComponentProps<BlockLabel>
+      >().type.toBeAssignableTo<BlockRowLabelClientProps>()
+    })
+
+    test('should use props types for field client and server components', () => {
+      const ClientField: FC<TextFieldClientProps> = () => null
+      const JoinServerField = ({ clientField }: JoinFieldServerProps) => clientField.collection
+      const ServerField: FC<TextFieldServerProps> = () => null
+
+      expect(ClientField).type.toBe<FC<TextFieldClientProps>>()
+      expect(JoinServerField).type.toBe<
+        (props: JoinFieldServerProps) => JoinFieldServerProps['clientField']['collection']
+      >()
+      expect(ServerField).type.toBe<FC<TextFieldServerProps>>()
+    })
+
+    test('should not export concrete field component aliases', () => {
+      type RemovedFieldComponentAliases = [
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').ArrayFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').ArrayFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').BlocksFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').BlocksFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').CheckboxFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').CheckboxFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').CodeFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').CodeFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').CollapsibleFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').CollapsibleFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').DateFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').DateFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').EmailFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').EmailFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').GroupFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').GroupFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').JoinFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').JoinFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').JSONFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').JSONFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').NumberFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').NumberFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').PointFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').PointFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').RadioFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').RadioFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').RelationshipFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').RelationshipFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').RichTextFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').RichTextFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').RowFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').RowFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').SelectFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').SelectFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').TabsFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').TabsFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').TextFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').TextFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').TextareaFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').TextareaFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').UIFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').UIFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').UploadFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').UploadFieldServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').FieldClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').FieldServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').FieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').FieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').FieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').FieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').FieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').FieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').FieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').FieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').BlockRowLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').BlockRowLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').ArrayFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').ArrayFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').ArrayFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').ArrayFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').ArrayFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').ArrayFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').ArrayFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').ArrayFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').BlocksFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').BlocksFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').BlocksFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').BlocksFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').BlocksFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').BlocksFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').BlocksFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').BlocksFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CheckboxFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CheckboxFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CheckboxFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CheckboxFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CheckboxFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CheckboxFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CheckboxFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CheckboxFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CodeFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CodeFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CodeFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CodeFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CodeFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CodeFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CodeFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CodeFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CollapsibleFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CollapsibleFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CollapsibleFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CollapsibleFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CollapsibleFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CollapsibleFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CollapsibleFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').CollapsibleFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').DateFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').DateFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').DateFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').DateFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').DateFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').DateFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').DateFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').DateFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').EmailFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').EmailFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').EmailFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').EmailFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').EmailFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').EmailFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').EmailFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').EmailFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').GroupFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').GroupFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').GroupFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').GroupFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').GroupFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').GroupFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').GroupFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').GroupFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JSONFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JSONFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JSONFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JSONFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JSONFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JSONFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JSONFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JSONFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JoinFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JoinFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JoinFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JoinFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JoinFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JoinFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JoinFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').JoinFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').NumberFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').NumberFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').NumberFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').NumberFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').NumberFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').NumberFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').NumberFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').NumberFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').PointFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').PointFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').PointFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').PointFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').PointFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').PointFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').PointFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').PointFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RadioFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RadioFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RadioFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RadioFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RadioFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RadioFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RadioFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RadioFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RelationshipFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RelationshipFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RelationshipFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RelationshipFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RelationshipFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RelationshipFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RelationshipFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RelationshipFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RichTextFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RichTextFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RichTextFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RichTextFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RichTextFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RichTextFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RichTextFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RichTextFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RowFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RowFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RowFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RowFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RowFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RowFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RowFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').RowFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').SelectFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').SelectFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').SelectFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').SelectFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').SelectFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').SelectFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').SelectFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').SelectFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TabsFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TabsFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TabsFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TabsFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TabsFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TabsFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TabsFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TabsFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextareaFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextareaFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextareaFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextareaFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextareaFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextareaFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextareaFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').TextareaFieldLabelServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').UIFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').UIFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').UploadFieldDescriptionClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').UploadFieldDescriptionServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').UploadFieldDiffClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').UploadFieldDiffServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').UploadFieldErrorClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').UploadFieldErrorServerComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').UploadFieldLabelClientComponent,
+        // @ts-expect-error! -- Field component aliases were removed in Payload 4.
+        import('payload').UploadFieldLabelServerComponent,
+      ]
+
+      expect<RemovedFieldComponentAliases>().type.toBeAssignableTo<unknown[]>()
+    })
+  })
+
+  test('should fall back when generated types do not include jobs', () => {
+    expect<Job['id']>().type.toBe<number | string>()
+    expect<Job['processingToken']>().type.toBe<null | string | undefined>()
+    expect<Job['taskStatus']>().type.toBe<JobTaskStatus>()
+    expect<'payload-jobs'>().type.not.toBeAssignableTo<CollectionSlug>()
+  })
+
+  describe('authenticated user', () => {
+    test('should use AuthenticatedUser for request and me operation users', () => {
+      expect<PayloadRequest['user']>().type.toBe<AuthenticatedUser | null>()
+      expect<MeOperationResult['user']>().type.toBe<AuthenticatedUser | null | undefined>()
+    })
+
+    test('should not expose strategy on core or UI auth result types', () => {
+      expect<MeOperationResult>().type.not.toHaveProperty('strategy')
+      expect<ReturnType<typeof useAuth>>().type.not.toHaveProperty('strategy')
+    })
+  })
+
   test('payload.find', () => {
-    expect(payload.find({ collection: 'users' })).type.toBe<Promise<PaginatedDocs<User>>>()
-  })
-
-  test('payload.findByID', () => {
-    expect(payload.findByID({ id: 1, collection: 'users' })).type.toBe<Promise<User>>()
-  })
-
-  test('payload.findByID with disableErrors: true', () => {
-    expect(payload.findByID({ id: 1, collection: 'users', disableErrors: true })).type.toBe<
-      Promise<null | User>
+    expect(payload.find({ collection: 'users', overrideAccess: true })).type.toBe<
+      Promise<PaginatedDocs<User>>
     >()
   })
 
-  test('payload.create', () => {
-    expect(payload.create({ collection: 'users', data: { email: 'user@email.com' } })).type.toBe<
+  test('payload.findByID', () => {
+    expect(payload.findByID({ id: 1, collection: 'users', overrideAccess: true })).type.toBe<
       Promise<User>
     >()
   })
 
+  test('payload.findByID with disableErrors: true', () => {
+    expect(
+      payload.findByID({ id: 1, collection: 'users', disableErrors: true, overrideAccess: true }),
+    ).type.toBe<Promise<null | User>>()
+  })
+
+  test('payload.create', () => {
+    expect(
+      payload.create({
+        collection: 'users',
+        data: { email: 'user@email.com' },
+        overrideAccess: true,
+      }),
+    ).type.toBe<Promise<User>>()
+  })
+
   test('payload.update by ID', () => {
-    expect(payload.update({ id: 1, collection: 'users', data: {} })).type.toBe<Promise<User>>()
+    expect(
+      payload.update({ id: 1, collection: 'users', data: {}, overrideAccess: true }),
+    ).type.toBe<Promise<User>>()
   })
 
   test('payload.update many', () => {
-    expect(payload.update({ collection: 'users', data: {}, where: {} })).type.toBe<
-      Promise<BulkOperationResult<'users', SelectType>>
-    >()
+    expect(
+      payload.update({ collection: 'users', data: {}, where: {}, overrideAccess: true }),
+    ).type.toBe<Promise<BulkOperationResult<'users', SelectType>>>()
   })
 
   test('payload.delete by ID', () => {
-    expect(payload.delete({ id: 1, collection: 'users' })).type.toBe<Promise<User>>()
+    expect(payload.delete({ id: 1, collection: 'users', overrideAccess: true })).type.toBe<
+      Promise<User>
+    >()
   })
 
   test('payload.delete many', () => {
-    expect(payload.delete({ collection: 'users', where: {} })).type.toBe<
+    expect(payload.delete({ collection: 'users', where: {}, overrideAccess: true })).type.toBe<
       Promise<BulkOperationResult<'users', SelectType>>
     >()
   })
 
   test('payload.findGlobal', () => {
-    expect(payload.findGlobal({ slug: 'menu' })).type.toBe<Promise<Menu>>()
+    expect(payload.findGlobal({ slug: 'menu', overrideAccess: true })).type.toBe<Promise<Menu>>()
   })
 
   test('payload.updateGlobal', () => {
-    expect(payload.updateGlobal({ slug: 'menu', data: {} })).type.toBe<Promise<Menu>>()
+    expect(payload.updateGlobal({ slug: 'menu', data: {}, overrideAccess: true })).type.toBe<
+      Promise<Menu>
+    >()
   })
 
   test('payload.findVersions', () => {
-    expect(payload.findVersions({ collection: 'posts' })).type.toBe<
+    expect(payload.findVersions({ collection: 'posts', overrideAccess: true })).type.toBe<
       Promise<PaginatedDocs<TypeWithVersion<Post>>>
     >()
   })
 
   test('payload.findVersionByID', () => {
-    expect(payload.findVersionByID({ id: 'id', collection: 'posts' })).type.toBe<
-      Promise<TypeWithVersion<Post>>
-    >()
+    expect(
+      payload.findVersionByID({ id: 'id', collection: 'posts', overrideAccess: true }),
+    ).type.toBe<Promise<TypeWithVersion<Post>>>()
   })
 
   test('payload.findGlobalVersions', () => {
-    expect(payload.findGlobalVersions({ slug: 'menu' })).type.toBe<
+    expect(payload.findGlobalVersions({ slug: 'menu', overrideAccess: true })).type.toBe<
       Promise<PaginatedDocs<TypeWithVersion<Menu>>>
     >()
   })
 
   test('payload.findGlobalVersionByID', () => {
-    expect(payload.findGlobalVersionByID({ id: 'id', slug: 'menu' })).type.toBe<
-      Promise<TypeWithVersion<Menu>>
-    >()
+    expect(
+      payload.findGlobalVersionByID({ id: 'id', slug: 'menu', overrideAccess: true }),
+    ).type.toBe<Promise<TypeWithVersion<Menu>>>()
   })
 
   describe('select', () => {
     test('should include only ID if select is an empty object', () => {
-      expect(payload.findByID({ id: 'id', collection: 'posts', select: {} })).type.toBe<
-        Promise<{ id: Post['id'] }>
-      >()
+      expect(
+        payload.findByID({ id: 'id', collection: 'posts', select: {}, overrideAccess: true }),
+      ).type.toBe<Promise<{ id: Post['id'] }>>()
     })
 
     test('should include only title and ID', () => {
       expect(
-        payload.findByID({ id: 'id', collection: 'posts', select: { title: true } }),
+        payload.findByID({
+          id: 'id',
+          collection: 'posts',
+          select: { title: true },
+          overrideAccess: true,
+        }),
       ).type.toBe<Promise<{ id: Post['id']; title?: Post['title'] }>>()
     })
 
     test('should exclude title', () => {
       expect(
-        payload.findByID({ id: 'id', collection: 'posts', select: { title: false } }),
+        payload.findByID({
+          id: 'id',
+          collection: 'posts',
+          select: { title: false },
+          overrideAccess: true,
+        }),
       ).type.toBe<Promise<Omit<Post, 'title'>>>()
     })
   })
@@ -159,23 +816,30 @@ describe('Types testing', () => {
       expect<User['collection']>().type.toBe<'users'>()
     })
 
+    test('generated User is assignable to the untyped fallback user type', () => {
+      // Payload uses this auth contract when generated types are unavailable, so every generated
+      // user must be readable through it.
+      type UntypedFallbackUser = UntypedPayloadTypes['user']
+
+      expect<User>().type.toBeAssignableTo<UntypedFallbackUser>()
+      expect<FallbackUser>().type.toBeAssignableTo<UntypedFallbackUser>()
+    })
+
     test('payload operations return users with collection property', async () => {
-      const user = await payload.findByID({ id: 'id', collection: 'users' })
+      const user = await payload.findByID({ id: 'id', collection: 'users', overrideAccess: true })
       expect(user.collection).type.toBe<'users'>()
     })
 
     test('collection property is not required in update data for auth collections', () => {
       // The collection property should not be required when updating users
       // It is auto-populated by the system
-      expect(
-        payload.update({
-          id: 'id',
-          collection: 'users',
-          data: {
-            email: 'test@example.com',
-          },
-        }),
-      ).type.not.toRaiseError()
+      expect(payload.update).type.toBeCallableWith({
+        id: 'id',
+        collection: 'users',
+        data: {
+          email: 'test@example.com',
+        },
+      })
     })
 
     test('has global generated options interface based on select field', () => {
@@ -331,26 +995,33 @@ describe('Types testing', () => {
       }
     })
 
-    test('ensure generated richText types can be assigned to DefaultTypedEditorState type', () => {
-      // If there is a function that expects DefaultTypedEditorState, you should be able to assign the generated type to it
-      // This ensures that data can be passed directly form the payload local API to a function that expects DefaultTypedEditorState
+    test('ensure generated richText types can be assigned to DefaultTypedEditorState when no custom upload fields exist', () => {
+      // When no UploadFeature extra fields are configured, the generated type and DefaultTypedEditorState
+      // are bidirectionally assignable. With per-collection upload fields (as in this config), the generated
+      // type has narrower upload field types, so they diverge. In that case, use `buildEditorState<Post['richText']>()`
+      // instead of `buildEditorState<DefaultNodeTypes>()`.
+      //
+      // This test intentionally documents the divergence when custom upload fields are configured.
       type GeneratedRichTextType = Post['richText']
 
-      expect<DefaultTypedEditorState>().type.toBeAssignableFrom<GeneratedRichTextType>()
+      // The generated type and DefaultTypedEditorState are NOT bidirectionally assignable when custom
+      // upload fields narrow the node union. buildEditorState<Post['richText']> is the correct path.
+      expect<Post['richText']>().type.toBeAssignableFrom<
+        ReturnType<typeof buildEditorState<GeneratedRichTextType>>
+      >()
     })
 
-    test('ensure DefaultTypedEditorState type can be assigned to GeneratedRichTextType type', () => {
-      /**
-       * Example:
-       *
-       * const mySeedData: RequiredDataFromCollectionSlug<'posts'> = {
-       *   title: 'hello',
-       *   richText: buildEditorState<DefaultNodeTypes>({text: 'hello'}) // <= DefaultTypedEditorState
-       * }
-       */
+    test('ensure generated richText types can be assigned to SerializedEditorState (what converters consume)', () => {
+      // Every lexical converter (convertLexicalToHTML, convertLexicalToPlaintext, ...) accepts
+      // `data: SerializedEditorState`, so data straight from the local API must be assignable to it.
       type GeneratedRichTextType = Post['richText']
 
-      expect<GeneratedRichTextType>().type.toBeAssignableFrom<DefaultTypedEditorState>()
+      expect<SerializedEditorState>().type.toBeAssignableFrom<GeneratedRichTextType>()
+
+      // ...and the converter must accept the generated type directly, with no cast.
+      expect(convertLexicalToPlaintext).type.toBeCallableWith({
+        data: null as unknown as GeneratedRichTextType,
+      })
     })
 
     test('ensure type property in editorState.root.children.push() is correctly typed as union of all node types', () => {
@@ -452,7 +1123,7 @@ describe('Types testing', () => {
     })
 
     test('ensure linebreak nodes cannot have children even when nested', () => {
-      // This test verifies that RecursiveNodes doesn't add children to leaf nodes
+      // This test verifies that the self-recursive `DefaultNodeTypes` union doesn't add children to leaf nodes
       type RootChildren = DefaultTypedEditorState['root']['children'][number]
 
       // At top level
@@ -502,7 +1173,7 @@ describe('Types testing', () => {
     })
 
     test('accepts complete heading node as part of DefaultNodeTypes if heading node is explicitly typed', () => {
-      const headingNode: SerializedHeadingNode<RecursiveNodes<DefaultNodeTypes>> = {
+      const headingNode: SerializedHeadingNode<DefaultNodeTypes> = {
         type: 'heading',
         children: [
           {
@@ -513,7 +1184,7 @@ describe('Types testing', () => {
             style: '',
             text: 'Title',
             version: 1,
-          } as SerializedTextNode,
+          },
         ],
         direction: 'ltr',
         format: '',
@@ -537,7 +1208,7 @@ describe('Types testing', () => {
     })
 
     test('accepts complete heading node as part of nested children within DefaultNodeTypes if heading node is explicitly typed', () => {
-      const headingNode: SerializedHeadingNode<RecursiveNodes<DefaultNodeTypes>> = {
+      const headingNode: SerializedHeadingNode<DefaultNodeTypes> = {
         type: 'heading',
         children: [
           {
@@ -548,7 +1219,7 @@ describe('Types testing', () => {
             style: '',
             text: 'Title',
             version: 1,
-          } as SerializedTextNode,
+          },
         ],
         direction: 'ltr',
         format: '',
@@ -568,6 +1239,7 @@ describe('Types testing', () => {
               format: 'left',
               indent: 0,
               textFormat: 0,
+              textStyle: '',
               version: 0,
             },
           ],
@@ -596,7 +1268,7 @@ describe('Types testing', () => {
             style: '',
             text: 'Title',
             version: 1,
-          } as SerializedTextNode,
+          },
         ],
         direction: 'ltr',
         format: '',
@@ -616,6 +1288,7 @@ describe('Types testing', () => {
               format: 'left',
               indent: 0,
               textFormat: 0,
+              textStyle: '',
               version: 0,
             },
             {
@@ -640,6 +1313,7 @@ describe('Types testing', () => {
               format: 'left',
               indent: 0,
               textFormat: 0,
+              textStyle: '',
               version: 0,
             },
           ],
@@ -726,10 +1400,36 @@ describe('Types testing', () => {
         expect(result.root.children[0]!.type).type.toBe<'block' | _Hardcoded_DefaultNodeTypes>()
       })
 
-      test('buildEditorState result can be assigned to Post richText field', () => {
-        const result = buildEditorState<DefaultNodeTypes>({ text: 'hello' })
-        type GeneratedRichTextType = Post['richText']
-        expect(result).type.toBeAssignableTo<GeneratedRichTextType>()
+      test('buildEditorState with generated field type can be assigned to Post richText field', () => {
+        const result = buildEditorState<Post['richText']>({ text: 'hello' })
+        expect(result).type.toBeAssignableTo<Post['richText']>()
+      })
+
+      test('buildEditorState accepts a generated field type directly and returns exactly it', () => {
+        // The ergonomic path for users with generated types: pass the field type, no node extraction.
+        const result = buildEditorState<Post['richText']>({ text: 'hello' })
+        expect(result).type.toBe<Post['richText']>()
+      })
+
+      test('buildEditorState with a generated field type directly narrows `nodes` to the field — a registered node type is accepted', () => {
+        // `horizontalrule` is part of this editor, so calling with it is valid.
+        expect(buildEditorState<Post['richText']>).type.toBeCallableWith({
+          nodes: [{ type: 'horizontalrule', version: 1 }],
+        })
+      })
+
+      test('buildEditorState with a generated field type directly narrows `nodes` to the field — an unregistered node type errors', () => {
+        // `block` is not enabled on this editor, so calling with it is rejected.
+        expect(buildEditorState<Post['richText']>).type.not.toBeCallableWith({
+          nodes: [
+            {
+              type: 'block',
+              fields: { id: 'x', blockName: '', blockType: 'whatever' },
+              format: '',
+              version: 1,
+            },
+          ],
+        })
       })
 
       test('buildEditorState allows pushing typed nodes to children', () => {
@@ -757,21 +1457,19 @@ describe('Types testing', () => {
       })
 
       test('buildEditorState correctly validates incomplete text node (missing text property)', () => {
-        expect(
-          buildEditorState<DefaultNodeTypes>({
-            nodes: [
-              {
-                type: 'text',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-                version: 1,
-                // Missing 'text' property - this should be a type error
-              },
-            ],
-          }),
-        ).type.toRaiseError()
+        expect(buildEditorState<DefaultNodeTypes>).type.not.toBeCallableWith({
+          nodes: [
+            {
+              type: 'text',
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              version: 1,
+              // Missing 'text' property - this should be a type error
+            },
+          ],
+        })
       })
 
       test('buildEditorState validates complete text node correctly', () => {
@@ -793,21 +1491,19 @@ describe('Types testing', () => {
       })
 
       test('buildEditorState correctly validates incomplete heading node (missing tag property)', () => {
-        expect(
-          buildEditorState<DefaultNodeTypes>({
-            nodes: [
-              {
-                type: 'heading',
-                children: [],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                version: 1,
-                // Missing 'tag' property - this should be a type error
-              },
-            ],
-          }),
-        ).type.toRaiseError()
+        expect(buildEditorState<DefaultNodeTypes>).type.not.toBeCallableWith({
+          nodes: [
+            {
+              type: 'heading',
+              children: [],
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              version: 1,
+              // Missing 'tag' property - this should be a type error
+            },
+          ],
+        })
       })
 
       test('buildEditorState with explicit generic allows custom nodes', () => {
@@ -869,35 +1565,33 @@ describe('Types testing', () => {
       })
 
       test('throws error for invalid children of non-explicit typed heading node', () => {
-        expect(
-          buildEditorState<DefaultNodeTypes>({
-            nodes: [
-              {
-                type: 'heading',
-                children: [
-                  {
-                    type: 'text',
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: 'Title',
-                    version: 1,
-                  },
-                  {
-                    type: 'invalid',
-                    test: 'test',
-                  },
-                ],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                tag: 'h1',
-                version: 1,
-              },
-            ],
-          }),
-        ).type.toRaiseError()
+        expect(buildEditorState<DefaultNodeTypes>).type.not.toBeCallableWith({
+          nodes: [
+            {
+              type: 'heading',
+              children: [
+                {
+                  type: 'text',
+                  detail: 0,
+                  format: 0,
+                  mode: 'normal',
+                  style: '',
+                  text: 'Title',
+                  version: 1,
+                },
+                {
+                  type: 'invalid',
+                  test: 'test',
+                },
+              ],
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              tag: 'h1',
+              version: 1,
+            },
+          ],
+        })
       })
 
       test('accepts complete heading node with DefaultNodeTypes if heading node is explicitly typed', () => {
@@ -915,7 +1609,7 @@ describe('Types testing', () => {
               style: '',
               text: 'Title',
               version: 1,
-            } as SerializedTextNode,
+            },
           ],
           direction: 'ltr',
           format: '',
@@ -929,22 +1623,167 @@ describe('Types testing', () => {
         expect(result).type.toBe<TypedEditorState<DefaultNodeTypes>>()
       })
     })
+
+    describe('generated <-> runtime per-node compatibility', () => {
+      // Per-node assertions pinpoint which node differs when the whole-tree
+      // assertions above fail.
+
+      test('SerializedTextNode: generated <-> runtime', () => {
+        expect<GenText>().type.toBeAssignableFrom<SerializedTextNode>()
+        expect<SerializedTextNode>().type.toBeAssignableFrom<GenText>()
+      })
+
+      test('SerializedTabNode: generated <-> runtime', () => {
+        expect<GenTab>().type.toBeAssignableFrom<SerializedTabNode>()
+        expect<SerializedTabNode>().type.toBeAssignableFrom<GenTab>()
+      })
+
+      test('SerializedLineBreakNode: generated <-> runtime', () => {
+        expect<GenLB>().type.toBeAssignableFrom<SerializedLineBreakNode>()
+        expect<SerializedLineBreakNode>().type.toBeAssignableFrom<GenLB>()
+      })
+
+      test('SerializedHorizontalRuleNode: generated <-> runtime', () => {
+        expect<GenHR>().type.toBeAssignableFrom<SerializedHorizontalRuleNode>()
+        expect<SerializedHorizontalRuleNode>().type.toBeAssignableFrom<GenHR>()
+      })
+
+      test('SerializedParagraphNode<T>: generated <-> runtime', () => {
+        expect<GenParagraph<GenNodeUnion>>().type.toBeAssignableFrom<
+          SerializedParagraphNode<GenNodeUnion>
+        >()
+        expect<SerializedParagraphNode<GenNodeUnion>>().type.toBeAssignableFrom<
+          GenParagraph<GenNodeUnion>
+        >()
+      })
+
+      test('SerializedHeadingNode<T>: generated <-> runtime', () => {
+        expect<GenHeading<GenNodeUnion>>().type.toBeAssignableFrom<
+          SerializedHeadingNode<GenNodeUnion>
+        >()
+        expect<SerializedHeadingNode<GenNodeUnion>>().type.toBeAssignableFrom<
+          GenHeading<GenNodeUnion>
+        >()
+      })
+
+      test('SerializedQuoteNode<T>: generated <-> runtime', () => {
+        expect<GenQuote<GenNodeUnion>>().type.toBeAssignableFrom<
+          SerializedQuoteNode<GenNodeUnion>
+        >()
+        expect<SerializedQuoteNode<GenNodeUnion>>().type.toBeAssignableFrom<
+          GenQuote<GenNodeUnion>
+        >()
+      })
+
+      test('SerializedListNode<T>: generated <-> runtime', () => {
+        expect<GenList<GenNodeUnion>>().type.toBeAssignableFrom<SerializedListNode<GenNodeUnion>>()
+        expect<SerializedListNode<GenNodeUnion>>().type.toBeAssignableFrom<GenList<GenNodeUnion>>()
+      })
+
+      test('SerializedListItemNode<T>: generated <-> runtime', () => {
+        expect<GenLI<GenNodeUnion>>().type.toBeAssignableFrom<
+          SerializedListItemNode<GenNodeUnion>
+        >()
+        expect<SerializedListItemNode<GenNodeUnion>>().type.toBeAssignableFrom<
+          GenLI<GenNodeUnion>
+        >()
+      })
+
+      test('SerializedLinkNode<T>: generated <-> runtime', () => {
+        expect<GenLink<GenNodeUnion>>().type.toBeAssignableFrom<SerializedLinkNode<GenNodeUnion>>()
+        expect<SerializedLinkNode<GenNodeUnion>>().type.toBeAssignableFrom<GenLink<GenNodeUnion>>()
+      })
+
+      test('SerializedAutoLinkNode<T>: generated <-> runtime', () => {
+        expect<GenAutoLink<GenNodeUnion>>().type.toBeAssignableFrom<
+          SerializedAutoLinkNode<GenNodeUnion>
+        >()
+        expect<SerializedAutoLinkNode<GenNodeUnion>>().type.toBeAssignableFrom<
+          GenAutoLink<GenNodeUnion>
+        >()
+      })
+
+      test('SerializedRelationshipNode: generated <-> runtime', () => {
+        // The relationship node excludes upload collections, so compare against the
+        // relationship member as it actually appears in the generated union.
+        type GenRelationshipInUnion = Extract<GenNodeUnion, { type: 'relationship' }>
+        expect<GenRelationshipInUnion>().type.toBeAssignableFrom<SerializedRelationshipNode>()
+        expect<SerializedRelationshipNode>().type.toBeAssignableFrom<GenRelationshipInUnion>()
+      })
+
+      test('SerializedUploadNode: generated narrows correctly per collection', () => {
+        // With per-collection upload fields, the generated type is a discriminated union of
+        // per-collection variants rather than one SerializedUploadNode with unioned generics.
+        type GenUploadInUnion = Extract<GenNodeUnion, { type: 'upload' }>
+        type MediaVariant = Extract<GenUploadInUnion, { relationTo: 'media' }>
+        type GalleryVariant = Extract<GenUploadInUnion, { relationTo: 'gallery' }>
+
+        expect<MediaVariant>().type.toHaveProperty('fields')
+        expect<GalleryVariant>().type.toHaveProperty('fields')
+
+        expect<MediaVariant['relationTo']>().type.toBe<'media'>()
+        expect<GalleryVariant['relationTo']>().type.toBe<'gallery'>()
+      })
+
+      test('SerializedUploadNode: discriminated fields per collection', () => {
+        type GenUpload = Extract<GenNodeUnion, { type: 'upload' }>
+
+        type MediaUpload = Extract<GenUpload, { relationTo: 'media' }>
+        type GalleryUpload = Extract<GenUpload, { relationTo: 'gallery' }>
+
+        expect<MediaUpload['fields']>().type.toBe<MediaUploadFields>()
+        expect<GalleryUpload['fields']>().type.toBe<GalleryUploadFields>()
+
+        expect<MediaUpload['fields']>().type.toHaveProperty('caption')
+        expect<GalleryUpload['fields']>().type.toHaveProperty('altText')
+
+        expect<MediaUpload['fields']>().type.not.toHaveProperty('altText')
+        expect<GalleryUpload['fields']>().type.not.toHaveProperty('caption')
+      })
+
+      test('LexicalRichText<T>.root: generated root children are typed as the generated node union', () => {
+        type GenChild = Post['richText']['root']['children'][number]
+        expect<GenChild>().type.toBe<GenNodeUnion>()
+      })
+    })
+
+    describe('node union composition (WithDefaultNodes)', () => {
+      type MyBlock = SerializedBlockNode<{ blockType: 'myBlock'; foo: string }>
+
+      // Previously impossible: `DefaultNodeTypesOf<Self>` was a circular reference (TS2456), and
+      // `DefaultNodeTypes | Block` only adds the block at the top level. WithDefaultNodes threads it.
+      test('WithDefaultNodes<Block> threads the block into container children', () => {
+        type Nodes = WithDefaultNodes<MyBlock>
+        type ParagraphChild = Extract<Nodes, { type: 'paragraph' }>['children'][number]
+        expect<Extract<ParagraphChild, { type: 'block' }>>().type.toBe<MyBlock>()
+      })
+
+      // Same assertion for DefaultTypedEditorState - does its `TAdditional` thread into children too?
+      test('DefaultTypedEditorState<Block> threads the block into container children', () => {
+        type Nodes = DefaultTypedEditorState<MyBlock>['root']['children'][number]
+        type ParagraphChild = Extract<Nodes, { type: 'paragraph' }>['children'][number]
+        expect<Extract<ParagraphChild, { type: 'block' }>>().type.toBe<MyBlock>()
+      })
+    })
   })
 
   describe('sdk', () => {
     test('ensure generated types can be manually assigned to PayloadSDK generic', () => {
-      expect(new PayloadSDK<LocalConfig>({ baseURL: '' })).type.not.toRaiseError()
+      expect(PayloadSDK<LocalConfig>).type.toBeConstructableWith({ baseURL: '' })
     })
 
     test('ensure SDK without generic automatically uses GeneratedTypes', () => {
       const _sdk = new PayloadSDK({ baseURL: '' })
       expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
         | 'draft-posts'
+        | 'fallback-users'
+        | 'gallery'
+        | 'input-types'
+        | 'media'
         | 'pages'
         | 'pages-categories'
         | 'payload-kv'
         | 'payload-locked-documents'
-        | 'payload-mcp-api-keys'
         | 'payload-migrations'
         | 'payload-preferences'
         | 'posts'
@@ -952,16 +1791,30 @@ describe('Types testing', () => {
       >()
     })
 
+    test('should expose strategy only on SDK auth result users', async () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+      const meResult = await _sdk.me({ collection: 'users' })
+      const refreshResult = await _sdk.refreshToken({ collection: 'users' })
+
+      expect(meResult).type.not.toHaveProperty('strategy')
+      expect(meResult.user).type.toHaveProperty('_strategy')
+      expect(refreshResult).type.not.toHaveProperty('strategy')
+      expect(refreshResult.user).type.toHaveProperty('_strategy')
+    })
+
     test('ensure SDK with explicit generic uses has correct collection types', () => {
       const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
       // ensure collection property of sdk.create has posts in the union type
       expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
         | 'draft-posts'
+        | 'fallback-users'
+        | 'gallery'
+        | 'input-types'
+        | 'media'
         | 'pages'
         | 'pages-categories'
         | 'payload-kv'
         | 'payload-locked-documents'
-        | 'payload-mcp-api-keys'
         | 'payload-migrations'
         | 'payload-preferences'
         | 'posts'
@@ -976,7 +1829,14 @@ describe('Types testing', () => {
         data: {
           radioField: 'option-1',
           richText: {
-            root: { type: '', children: [], direction: null, format: '', indent: 0, version: 0 },
+            root: {
+              type: 'root',
+              children: [],
+              direction: null,
+              format: '',
+              indent: 0,
+              version: 0,
+            },
           },
           selectField: 'option-1',
           title: 'Test Post',
@@ -987,20 +1847,25 @@ describe('Types testing', () => {
 
     test('SDK create data should be typed and reject invalid properties', () => {
       const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
-      expect(
-        _sdk.create({
-          collection: 'posts',
-          data: {
-            invalidProperty: 'should error',
-            radioField: 'option-1',
-            richText: {
-              root: { type: '', children: [], direction: null, format: '', indent: 0, version: 0 },
+      expect(_sdk.create).type.not.toBeCallableWith({
+        collection: 'posts',
+        data: {
+          invalidProperty: 'should error',
+          radioField: 'option-1',
+          richText: {
+            root: {
+              type: 'root',
+              children: [],
+              direction: null,
+              format: '',
+              indent: 0,
+              version: 0,
             },
-            selectField: 'option-1',
-            title: 'Test Post',
           },
-        }),
-      ).type.toRaiseError()
+          selectField: 'option-1',
+          title: 'Test Post',
+        },
+      })
     })
 
     test('SDK with select in findByID returns correct types', async () => {
@@ -1035,12 +1900,204 @@ describe('Types testing', () => {
     })
   })
 
+  describe('richText enforcement in local API and SDK', () => {
+    test('payload.create accepts buildEditorState output as richText', () => {
+      expect(payload.create).type.toBeCallableWith({
+        collection: 'posts',
+        data: {
+          radioField: 'option-1',
+          richText: buildEditorState<Post['richText']>({ text: 'hello' }),
+          selectField: 'option-1',
+        },
+      })
+    })
+
+    test('payload.create accepts inline richText with correct node structure', () => {
+      expect(payload.create).type.toBeCallableWith({
+        collection: 'posts',
+        data: {
+          radioField: 'option-1',
+          richText: {
+            root: {
+              type: 'root',
+              children: [
+                {
+                  type: 'paragraph',
+                  children: [
+                    {
+                      type: 'text',
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: 'hello',
+                      version: 1,
+                    },
+                  ],
+                  direction: null,
+                  format: '',
+                  indent: 0,
+                  textFormat: 0,
+                  textStyle: '',
+                  version: 1,
+                },
+              ],
+              direction: null,
+              format: '',
+              indent: 0,
+              version: 1,
+            },
+          },
+          selectField: 'option-1',
+        },
+      })
+    })
+
+    test('payload.update accepts richText via buildEditorState', () => {
+      expect(payload.update).type.toBeCallableWith({
+        id: 1,
+        collection: 'posts',
+        data: {
+          richText: buildEditorState<Post['richText']>({ text: 'updated' }),
+        },
+      })
+    })
+
+    test('payload.updateGlobal accepts richText via buildEditorState', () => {
+      expect(payload.updateGlobal).type.toBeCallableWith({
+        slug: 'menu',
+        data: {
+          richText: buildEditorState<Menu['richText']>({ text: 'nav content' }),
+        },
+      })
+    })
+
+    test('SDK create accepts buildEditorState output as richText', () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+
+      expect(_sdk.create).type.toBeCallableWith({
+        collection: 'posts',
+        data: {
+          radioField: 'option-1',
+          richText: buildEditorState<Post['richText']>({ text: 'hello' }),
+          selectField: 'option-1',
+        },
+      })
+    })
+
+    test('convertLexicalToPlaintext accepts generated richText directly', () => {
+      const _post = null as unknown as Post
+
+      expect(convertLexicalToPlaintext).type.toBeCallableWith({ data: _post.richText })
+    })
+  })
+
+  describe('input types narrow the write shape', () => {
+    test('relationship and upload values are ID-only in write data', () => {
+      // The read type also accepts a populated document — a value you never actually write.
+      expect<PagesCategory>().type.toBeAssignableTo<InputType['category']>()
+      expect<PagesCategory[]>().type.toBeAssignableTo<NonNullable<InputType['categories']>>()
+      expect<Page>().type.toBeAssignableTo<NonNullable<InputType['related']>['value']>()
+      expect<Media>().type.toBeAssignableTo<InputType['image']>()
+
+      expect<PagesCategory>().type.not.toBeAssignableTo<InputTypeInput['category']>()
+      expect<PagesCategory[]>().type.not.toBeAssignableTo<
+        NonNullable<InputTypeInput['categories']>
+      >()
+      expect<Page>().type.not.toBeAssignableTo<NonNullable<InputTypeInput['related']>['value']>()
+      expect<Media>().type.not.toBeAssignableTo<InputTypeInput['image']>()
+    })
+
+    test('rich text relationship and upload nodes are ID-only in write data', () => {
+      expect<PostInput['richText']>().type.toBeAssignableTo<Post['richText']>()
+      expect<Post['richText']>().type.not.toBeAssignableTo<PostInput['richText']>()
+    })
+
+    test('id is optional in write data', () => {
+      expect<InputType['id']>().type.toBe<string>()
+      expect<InputTypeInput['id']>().type.toBe<string | undefined>()
+    })
+
+    test('createdAt and updatedAt are not part of write data', () => {
+      expect<InputType>().type.toHaveProperty('createdAt')
+      expect<InputType>().type.toHaveProperty('updatedAt')
+      expect<InputTypeInput>().type.not.toHaveProperty('createdAt')
+      expect<InputTypeInput>().type.not.toHaveProperty('updatedAt')
+    })
+
+    test('_status is part of write data for draft-enabled entities', () => {
+      expect<DraftPost>().type.toHaveProperty('_status')
+      expect<DraftPostInput>().type.toHaveProperty('_status')
+      expect<DraftPostInput['_status']>().type.toBe<DraftPost['_status']>()
+    })
+
+    test('fields with a defaultValue are optional in write data', () => {
+      expect<InputType['status']>().type.toBe<'draft' | 'published'>()
+      expect<InputTypeInput['status']>().type.toBe<'draft' | 'published' | undefined>()
+    })
+
+    test('virtual fields are not part of write data', () => {
+      expect<InputType>().type.toHaveProperty('computedTitle')
+      expect<InputTypeInput>().type.not.toHaveProperty('computedTitle')
+    })
+
+    test('join fields are not part of write data', () => {
+      expect<PagesCategory>().type.toHaveProperty('relatedPages')
+      expect<PagesCategoryInput>().type.not.toHaveProperty('relatedPages')
+    })
+
+    test('the auth collection discriminator is not part of write data', () => {
+      expect<User>().type.toHaveProperty('collection')
+      expect<UserInput>().type.not.toHaveProperty('collection')
+    })
+  })
+
+  // The Local API's `create`/`update` type `data` against the read shape, not the input shape.
+  // The input types are a valid subset, so a value typed as `*Input` is always accepted there.
+  describe('input types are assignable to create / update data (which expect the read shape)', () => {
+    test('a full PostInput is valid payload.create and payload.update data', () => {
+      const data = {} as PostInput
+      expect(payload.create).type.toBeCallableWith({ collection: 'posts', data })
+      expect(payload.update).type.toBeCallableWith({ id: 1, collection: 'posts', data })
+    })
+
+    test('a full InputTypeInput is valid payload.update data', () => {
+      const data = {} as InputTypeInput
+      expect(payload.update).type.toBeCallableWith({ id: 1, collection: 'input-types', data })
+    })
+
+    test('input field values (relationship, hasMany, polymorphic, upload, defaulted) are valid update data', () => {
+      const input = {} as InputTypeInput
+      expect(payload.update).type.toBeCallableWith({
+        id: 1,
+        collection: 'input-types',
+        data: {
+          categories: input.categories,
+          category: input.category,
+          image: input.image,
+          related: input.related,
+          status: input.status,
+        },
+      })
+    })
+
+    test('input rich text (ID-only relationship + block nodes) is valid update data', () => {
+      const richText = {} as InputTypeInput['richText']
+      expect(payload.update).type.toBeCallableWith({
+        id: 1,
+        collection: 'input-types',
+        data: { richText },
+      })
+    })
+  })
+
   describe('strictDraftTypes flag', () => {
     describe('query operations', () => {
       test('draft find query returns optional required fields when flag is enabled', async () => {
         const result = await payload.find({
           collection: 'draft-posts',
           draft: true,
+          overrideAccess: true,
         })
 
         const doc = result.docs[0]!
@@ -1058,6 +2115,7 @@ describe('Types testing', () => {
       test('non-draft find query returns required fields as required', async () => {
         const result = await payload.find({
           collection: 'draft-posts',
+          overrideAccess: true,
         })
 
         const doc = result.docs[0]!
@@ -1075,237 +2133,247 @@ describe('Types testing', () => {
 
     describe('create operations', () => {
       test('create with draft:true on draft-enabled collection allows partial data', () => {
-        expect(
-          payload.create({
-            collection: 'draft-posts',
-            data: {
-              title: 'Test', // Only one required field
-            },
-            draft: true,
-          }),
-        ).type.not.toRaiseError()
+        expect(payload.create).type.toBeCallableWith({
+          collection: 'draft-posts',
+          data: {
+            title: 'Test', // Only one required field
+          },
+          draft: true,
+        })
       })
 
       test('create with draft:false on draft-enabled collection requires all required fields', () => {
         // Missing description - should error
-        expect(
-          payload.create({
-            collection: 'draft-posts',
-            data: {
-              title: 'Test',
-            },
-            draft: false,
-          }),
-        ).type.toRaiseError()
+        expect(payload.create).type.not.toBeCallableWith({
+          collection: 'draft-posts',
+          data: {
+            title: 'Test',
+          },
+          draft: false,
+        })
 
         // All required fields present - should not error
-        expect(
-          payload.create({
-            collection: 'draft-posts',
-            data: {
-              title: 'Test',
-              description: 'Description',
-            },
-            draft: false,
-          }),
-        ).type.not.toRaiseError()
+        expect(payload.create).type.toBeCallableWith({
+          collection: 'draft-posts',
+          data: {
+            title: 'Test',
+            description: 'Description',
+          },
+          draft: false,
+        })
       })
 
       test('create without draft property on draft-enabled collection requires all required fields', () => {
         // Missing description - should error
-        expect(
-          payload.create({
-            collection: 'draft-posts',
-            data: {
-              title: 'Test',
-            },
-          }),
-        ).type.toRaiseError()
+        expect(payload.create).type.not.toBeCallableWith({
+          collection: 'draft-posts',
+          data: {
+            title: 'Test',
+          },
+        })
 
         // All required fields present - should not error
-        expect(
-          payload.create({
-            collection: 'draft-posts',
-            data: {
-              title: 'Test',
-              description: 'Description',
-            },
-          }),
-        ).type.not.toRaiseError()
+        expect(payload.create).type.toBeCallableWith({
+          collection: 'draft-posts',
+          data: {
+            title: 'Test',
+            description: 'Description',
+          },
+        })
       })
 
       test('create on non-draft collection forbids draft property', () => {
-        expect(
-          payload.create({
-            collection: 'pages',
-            data: {
-              title: 'Test',
-            },
-            draft: true,
-          }),
-        ).type.toRaiseError()
+        expect(payload.create).type.not.toBeCallableWith({
+          collection: 'pages',
+          data: {
+            title: 'Test',
+          },
+          draft: true,
+        })
 
-        expect(
-          payload.create({
-            collection: 'pages',
-            data: {
-              title: 'Test',
-            },
-            draft: false,
-          }),
-        ).type.toRaiseError()
+        expect(payload.create).type.not.toBeCallableWith({
+          collection: 'pages',
+          data: {
+            title: 'Test',
+          },
+          draft: false,
+        })
 
         // Without draft property - should not error
-        expect(
-          payload.create({
-            collection: 'pages',
-            data: {
-              title: 'Test',
-            },
-          }),
-        ).type.not.toRaiseError()
+        expect(payload.create).type.toBeCallableWith({
+          collection: 'pages',
+          data: {
+            title: 'Test',
+          },
+        })
       })
 
       test('create with invalid property should error regardless of draft mode', () => {
-        expect(
-          payload.create({
-            collection: 'draft-posts',
-            data: {
-              title: 'Test',
-              description: 'Description',
-              invalidProperty: 'should error',
-            },
-            draft: false,
-          }),
-        ).type.toRaiseError()
+        expect(payload.create).type.not.toBeCallableWith({
+          collection: 'draft-posts',
+          data: {
+            title: 'Test',
+            description: 'Description',
+            invalidProperty: 'should error',
+          },
+          draft: false,
+        })
 
-        expect(
-          payload.create({
-            collection: 'draft-posts',
-            data: {
-              title: 'Test',
-              invalidProperty: 'should error',
-            },
-            draft: true,
-          }),
-        ).type.toRaiseError()
+        expect(payload.create).type.not.toBeCallableWith({
+          collection: 'draft-posts',
+          data: {
+            title: 'Test',
+            invalidProperty: 'should error',
+          },
+          draft: true,
+        })
       })
 
       test('create on pages (non-draft) collection with all fields should work', () => {
-        expect(
-          payload.create({
-            collection: 'pages',
-            data: {
-              title: 'Page Title',
-            },
-          }),
-        ).type.not.toRaiseError()
+        expect(payload.create).type.toBeCallableWith({
+          collection: 'pages',
+          data: {
+            title: 'Page Title',
+          },
+        })
       })
 
       test('create on pages (non-draft) with missing optional fields should work', () => {
-        expect(
-          payload.create({
-            collection: 'pages',
-            data: {
-              title: 'Page Title',
-              // category is optional relationship, can be omitted
-            },
-          }),
-        ).type.not.toRaiseError()
+        expect(payload.create).type.toBeCallableWith({
+          collection: 'pages',
+          data: {
+            title: 'Page Title',
+            // category is optional relationship, can be omitted
+          },
+        })
       })
 
       // Additional operations tests
       test('find with draft:true on non-draft collection should error', () => {
-        expect(payload.find({ collection: 'pages', draft: true })).type.toRaiseError()
+        expect(payload.find).type.not.toBeCallableWith({ collection: 'pages', draft: true })
       })
 
       test('find with draft:false on non-draft collection should error', () => {
-        expect(payload.find({ collection: 'pages', draft: false })).type.toRaiseError()
+        expect(payload.find).type.not.toBeCallableWith({ collection: 'pages', draft: false })
       })
 
       test('find with draft:true on draft-enabled collection should work', () => {
-        expect(payload.find({ collection: 'draft-posts', draft: true })).type.not.toRaiseError()
+        expect(payload.find).type.toBeCallableWith({ collection: 'draft-posts', draft: true })
       })
 
       test('find with draft:false on draft-enabled collection should work', () => {
-        expect(payload.find({ collection: 'draft-posts', draft: false })).type.not.toRaiseError()
+        expect(payload.find).type.toBeCallableWith({ collection: 'draft-posts', draft: false })
       })
 
       test('findByID with draft:true on non-draft collection should error', () => {
-        expect(payload.findByID({ collection: 'pages', id: 1, draft: true })).type.toRaiseError()
+        expect(payload.findByID).type.not.toBeCallableWith({
+          collection: 'pages',
+          id: 1,
+          draft: true,
+        })
       })
 
       test('findByID with draft:false on non-draft collection should error', () => {
-        expect(payload.findByID({ collection: 'pages', id: 1, draft: false })).type.toRaiseError()
+        expect(payload.findByID).type.not.toBeCallableWith({
+          collection: 'pages',
+          id: 1,
+          draft: false,
+        })
       })
 
       test('findByID with draft:true on draft-enabled collection should work', () => {
-        expect(
-          payload.findByID({ collection: 'draft-posts', id: 1, draft: true }),
-        ).type.not.toRaiseError()
+        expect(payload.findByID).type.toBeCallableWith({
+          collection: 'draft-posts',
+          id: 1,
+          draft: true,
+        })
       })
 
       test('update with draft:true on non-draft collection should error', () => {
-        expect(
-          payload.update({ collection: 'pages', id: 1, data: { title: 'Test' }, draft: true }),
-        ).type.toRaiseError()
+        expect(payload.update).type.not.toBeCallableWith({
+          collection: 'pages',
+          id: 1,
+          data: { title: 'Test' },
+          draft: true,
+        })
       })
 
       test('update with draft:false on non-draft collection should error', () => {
-        expect(
-          payload.update({ collection: 'pages', id: 1, data: { title: 'Test' }, draft: false }),
-        ).type.toRaiseError()
+        expect(payload.update).type.not.toBeCallableWith({
+          collection: 'pages',
+          id: 1,
+          data: { title: 'Test' },
+          draft: false,
+        })
       })
 
       test('update with draft:true on draft-enabled collection should work', () => {
-        expect(
-          payload.update({
-            collection: 'draft-posts',
-            id: 1,
-            data: { title: 'Test' },
-            draft: true,
-          }),
-        ).type.not.toRaiseError()
+        expect(payload.update).type.toBeCallableWith({
+          collection: 'draft-posts',
+          id: 1,
+          data: { title: 'Test' },
+          draft: true,
+        })
       })
 
       test('duplicate with draft:true on non-draft collection should error', () => {
-        expect(payload.duplicate({ collection: 'pages', id: 1, draft: true })).type.toRaiseError()
+        expect(payload.duplicate).type.not.toBeCallableWith({
+          collection: 'pages',
+          id: 1,
+          draft: true,
+        })
       })
 
       test('duplicate with draft:false on non-draft collection should error', () => {
-        expect(payload.duplicate({ collection: 'pages', id: 1, draft: false })).type.toRaiseError()
+        expect(payload.duplicate).type.not.toBeCallableWith({
+          collection: 'pages',
+          id: 1,
+          draft: false,
+        })
       })
 
       test('duplicate with draft:true on draft-enabled collection should work', () => {
-        expect(
-          payload.duplicate({ collection: 'draft-posts', id: 1, draft: true }),
-        ).type.not.toRaiseError()
+        expect(payload.duplicate).type.toBeCallableWith({
+          collection: 'draft-posts',
+          id: 1,
+          draft: true,
+        })
       })
 
       test('global findOne with draft:true on non-draft global should error', () => {
-        expect(payload.findGlobal({ slug: 'menu', draft: true })).type.toRaiseError()
+        expect(payload.findGlobal).type.not.toBeCallableWith({ slug: 'menu', draft: true })
       })
 
       test('global findOne with draft:false on non-draft global should error', () => {
-        expect(payload.findGlobal({ slug: 'menu', draft: false })).type.toRaiseError()
+        expect(payload.findGlobal).type.not.toBeCallableWith({ slug: 'menu', draft: false })
       })
 
       test('global findOne with draft:true on draft-enabled global should work', () => {
-        expect(payload.findGlobal({ slug: 'settings', draft: true })).type.not.toRaiseError()
+        expect(payload.findGlobal).type.toBeCallableWith({ slug: 'settings', draft: true })
       })
 
       test('global update with draft:true on non-draft global should error', () => {
-        expect(payload.updateGlobal({ slug: 'menu', data: {}, draft: true })).type.toRaiseError()
+        expect(payload.updateGlobal).type.not.toBeCallableWith({
+          slug: 'menu',
+          data: {},
+          draft: true,
+        })
       })
 
       test('global update with draft:false on non-draft global should error', () => {
-        expect(payload.updateGlobal({ slug: 'menu', data: {}, draft: false })).type.toRaiseError()
+        expect(payload.updateGlobal).type.not.toBeCallableWith({
+          slug: 'menu',
+          data: {},
+          draft: false,
+        })
       })
 
       test('global update with draft:true on draft-enabled global should work', () => {
-        expect(
-          payload.updateGlobal({ slug: 'settings', data: {}, draft: true }),
-        ).type.not.toRaiseError()
+        expect(payload.updateGlobal).type.toBeCallableWith({
+          slug: 'settings',
+          data: {},
+          draft: true,
+        })
       })
     })
   })

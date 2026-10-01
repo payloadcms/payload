@@ -1,4 +1,3 @@
-import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import type {
   DOMConversionMap,
   DOMExportOutput,
@@ -7,13 +6,6 @@ import type {
   LexicalNode,
   NodeKey,
 } from 'lexical'
-import type {
-  CollectionSlug,
-  DataFromCollectionSlug,
-  JsonObject,
-  TypedUploadCollection,
-  UploadCollectionSlug,
-} from 'payload'
 import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
@@ -21,66 +13,9 @@ import { addClassNamesToElement } from '@lexical/utils'
 import ObjectID from 'bson-objectid'
 import { $applyNodeReplacement } from 'lexical'
 
-import type { StronglyTypedLeafNode } from '../../../../types/nodeTypes.js'
+import type { Internal_UploadData, SerializedUploadNode, UploadData } from '../schema.js'
 
 import { $convertUploadElement } from './conversions.js'
-
-export type UploadData<TUploadExtraFieldsData extends JsonObject = JsonObject> = {
-  [TCollectionSlug in CollectionSlug]: {
-    fields: TUploadExtraFieldsData
-    /**
-     * Every lexical node that has sub-fields needs to have a unique ID. This is the ID of this upload node, not the ID of the linked upload document
-     */
-    id: string
-    relationTo: TCollectionSlug
-    /**
-     * Value can be just the document ID, or the full, populated document
-     */
-    value: DataFromCollectionSlug<TCollectionSlug> | number | string
-  }
-}[CollectionSlug]
-
-/**
- * Internal use only - UploadData type that can contain a pending state
- * @internal
- */
-export type Internal_UploadData<TUploadExtraFieldsData extends JsonObject = JsonObject> = {
-  pending?: {
-    /**
-     * ID that corresponds to the bulk upload form ID
-     */
-    formID: string
-    /**
-     * src value of the image dom element
-     */
-    src: string
-  }
-} & UploadData<TUploadExtraFieldsData>
-
-/**
- * UploadDataImproved is a more precise type, and will replace UploadData in Payload v4.
- * This type is for internal use only as it will be deprecated in the future.
- * @internal
- *
- * @todo Replace UploadData with UploadDataImproved in 4.0
- */
-export type UploadDataImproved<TUploadExtraFieldsData extends JsonObject = JsonObject> = {
-  [TCollectionSlug in UploadCollectionSlug]: {
-    fields: TUploadExtraFieldsData
-    /**
-     * Every lexical node that has sub-fields needs to have a unique ID. This is the ID of this upload node, not the ID of the linked upload document
-     */
-    id: string
-    relationTo: TCollectionSlug
-    /**
-     * Value can be just the document ID, or the full, populated document
-     */
-    value: number | string | TypedUploadCollection[TCollectionSlug]
-  }
-}[UploadCollectionSlug]
-
-export type SerializedUploadNode = StronglyTypedLeafNode<SerializedDecoratorBlockNode, 'upload'> &
-  UploadData
 
 export class UploadServerNode extends DecoratorBlockNode {
   __data: UploadData

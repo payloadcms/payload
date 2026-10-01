@@ -3,7 +3,7 @@ import type { FileData, FileSize, TypeWithID } from 'payload'
 import escapeHTML from 'escape-html'
 
 import type { SerializedUploadNode } from '../../../../../types/nodeTypes.js'
-import type { UploadDataImproved } from '../../../../upload/server/nodes/UploadNode.js'
+import type { UploadDataImproved } from '../../../../upload/server/schema.js'
 import type { HTMLConverters } from '../types.js'
 
 export const UploadHTMLConverter: HTMLConverters<SerializedUploadNode> = {

@@ -25,15 +25,18 @@ export default buildConfig({
     {
       slug: 'tenants',
       fields: [{ name: 'name', type: 'text', required: true }],
+      versions: false,
     },
     {
       slug: 'users',
       auth: true,
       fields: [{ name: 'email', type: 'email', required: true }],
+      versions: false,
     },
     {
       slug: 'posts',
       fields: [{ name: 'title', type: 'text', required: true }],
+      versions: false,
     },
   ],
   plugins: [withTenancy],

@@ -1,14 +1,17 @@
 'use client'
 import React from 'react'
 
+import type { ClipboardPasteEligibilityArgs } from '../ClipboardAction/types.js'
+
 import { ArrowIcon } from '../../icons/Arrow/index.js'
-import { ClipboardIcon } from '../../icons/Clipboard/index.js'
 import { CopyIcon } from '../../icons/Copy/index.js'
 import { DuplicateIcon } from '../../icons/Duplicate/index.js'
 import { MoreIcon } from '../../icons/More/index.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
+import { SwapIcon } from '../../icons/Swap/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useCanPasteClipboard } from '../ClipboardAction/useCanPasteClipboard.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import './index.css'
 
@@ -21,8 +24,11 @@ export type Props = {
   hasMaxRows: boolean
   index: number
   isSortable?: boolean
+  label: string
   moveRow: (from: number, to: number) => void
+  pasteData: ClipboardPasteEligibilityArgs
   pasteRow: (index: number) => void
+  pasteRowBelow: (index: number) => void
   removeRow: (index: number) => void
   rowCount: number
 }
@@ -34,20 +40,32 @@ export const ArrayAction: React.FC<Props> = ({
   hasMaxRows,
   index,
   isSortable,
+  label,
   moveRow,
+  pasteData,
   pasteRow,
+  pasteRowBelow,
   removeRow,
   rowCount,
 }) => {
   const { t } = useTranslation()
 
+  const { canPaste, refresh } = useCanPasteClipboard(pasteData)
+
   return (
     <Popup
       button={<MoreIcon />}
+      buttonAriaLabel={`${t('general:moreOptions')}: ${label}`}
       buttonClassName={`${baseClass}__button`}
       caret={false}
       className={baseClass}
       horizontalAlign="right"
+      onToggleOpen={(active) => {
+        if (active) {
+          refresh()
+        }
+      }}
+      popupType="menu"
       render={({ close }) => {
         return (
           <PopupList.MenuItem>
@@ -109,15 +127,29 @@ export const ArrayAction: React.FC<Props> = ({
             >
               {t('general:copyRow')}
             </PopupList.Button>
+            {!hasMaxRows && (
+              <PopupList.Button
+                className={`${baseClass}__action ${baseClass}__paste-below`}
+                disabled={!canPaste}
+                icon={<ArrowIcon direction="down" size={24} />}
+                onClick={() => {
+                  pasteRowBelow(index)
+                  close()
+                }}
+              >
+                {t('general:pasteBelow')}
+              </PopupList.Button>
+            )}
             <PopupList.Button
               className={`${baseClass}__action ${baseClass}__paste`}
-              icon={<ClipboardIcon size={24} />}
+              disabled={!canPaste}
+              icon={<SwapIcon />}
               onClick={() => {
                 pasteRow(index)
                 close()
               }}
             >
-              {t('general:pasteRow')}
+              {t('general:replaceRow')}
             </PopupList.Button>
             <PopupList.Button
               className={`${baseClass}__action ${baseClass}__remove`}
@@ -132,7 +164,6 @@ export const ArrayAction: React.FC<Props> = ({
           </PopupList.MenuItem>
         )
       }}
-      size="medium"
     />
   )
 }

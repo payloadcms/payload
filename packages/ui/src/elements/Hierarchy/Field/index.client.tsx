@@ -4,7 +4,7 @@ import type { RelationshipFieldClientProps } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useMemo } from 'react'
 
-import type { SelectionWithPath } from '../Drawer/types.js'
+import type { SelectionWithPath } from '../Modal/types.js'
 
 import { FieldDescription } from '../../../fields/FieldDescription/index.js'
 import { FieldError } from '../../../fields/FieldError/index.js'
@@ -12,14 +12,15 @@ import { FieldLabel } from '../../../fields/FieldLabel/index.js'
 import { mergeFieldStyles } from '../../../fields/mergeFieldStyles.js'
 import { fieldBaseClass } from '../../../fields/shared/index.js'
 import { useField } from '../../../forms/useField/index.js'
+import { CirclePlusIcon } from '../../../icons/CirclePlus/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { RenderCustomComponent } from '../../RenderCustomComponent/index.js'
-import { useHierarchyDrawer } from '../Drawer/useHierarchyDrawer.js'
+import { useHierarchyModal } from '../Modal/useHierarchyModal.js'
 import { SelectedHierarchies } from './SelectedHierarchies.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'hierarchy-field'
 
@@ -90,7 +91,7 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
     return [value]
   }, [value])
 
-  // Initialize selections for the drawer - use current value so drawer expands to current selection
+  // Initialize selections for the modal - use current value so modal expands to current selection
   const initialSelections = useMemo(() => {
     if (!value) {
       return []
@@ -109,24 +110,24 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
     [documentCollectionSlug],
   )
 
-  const [HierarchyDrawer, , { openDrawer }] = useHierarchyDrawer({
+  const [HierarchyModal, , { openModal }] = useHierarchyModal({
     filterByCollection,
     hierarchyCollectionSlug: hierarchySlug,
     Icon,
   })
 
-  const handleDrawerSave = useCallback(
+  const handleModalSave = useCallback(
     ({
-      closeDrawer,
+      closeModal,
       selections,
     }: {
-      closeDrawer: () => void
+      closeModal: () => void
       selections: Map<number | string, SelectionWithPath>
     }) => {
       const ids = Array.from(selections.keys())
       const newValue = hasMany ? ids : (ids[0] ?? null)
       setValue(newValue)
-      closeDrawer()
+      closeModal()
     },
     [hasMany, setValue],
   )
@@ -143,9 +144,9 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
     [hasMany, selectedIds, setValue],
   )
 
-  const handleOpenDrawer = useCallback(() => {
-    openDrawer()
-  }, [openDrawer])
+  const handleOpenModal = useCallback(() => {
+    openModal()
+  }, [openModal])
 
   const hierarchyLabel =
     getTranslation(
@@ -193,10 +194,10 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
               buttonStyle="dashed"
               className={`${baseClass}__manage-button`}
               disabled={disabled}
-              icon="plus"
+              icon={<CirclePlusIcon size={24} />}
               iconPosition="left"
               margin={false}
-              onClick={handleOpenDrawer}
+              onClick={handleOpenModal}
               size="medium"
             >
               {t('general:selectLabel', { label: hierarchyLabel })}
@@ -209,10 +210,10 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
           Fallback={<FieldDescription description={description} path={path} />}
         />
       </div>
-      <HierarchyDrawer
+      <HierarchyModal
         hasMany={hasMany}
         initialSelections={initialSelections}
-        onSave={handleDrawerSave}
+        onSave={handleModalSave}
       />
     </div>
   )

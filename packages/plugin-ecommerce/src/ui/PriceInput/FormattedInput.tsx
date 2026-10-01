@@ -140,14 +140,14 @@ export const FormattedInput: React.FC<Props> = ({
     <div className={`field-type number ${baseClass}`}>
       {label && <FieldLabel as="label" htmlFor={id} label={label} required={required} />}
 
-      <div className={`${baseClass}Container`}>
+      <div className={`${baseClass}Container form-input-group`}>
         <div className={`${baseClass}CurrencySymbol`}>
           <span>{currency.symbol}</span>
         </div>
 
         {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
         <input
-          className={`${baseClass}Input`}
+          className={`${baseClass}Input form-input`}
           disabled={disabled || readOnly}
           id={id}
           onBlur={handleInputBlur}

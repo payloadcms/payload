@@ -1,7 +1,10 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const skillDir = path.resolve(process.cwd(), 'tools/claude-plugin/skills/payload')
+// Resolve the skill source relative to this file so behavior is independent of cwd.
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const skillDir = path.resolve(__dirname, '../../packages/payload/skills/payload')
 const referenceDir = path.join(skillDir, 'reference')
 
 let cached: null | string = null
@@ -12,8 +15,7 @@ let cached: null | string = null
  * the markdown links inside SKILL.md (e.g. `[FIELDS.md](reference/FIELDS.md)`)
  * are inert text — without inlining, references are effectively invisible.
  *
- * Cached for the process lifetime; cache.getSkillHash hashes the same string
- * so cache keys invalidate when any skill file changes.
+ * Memoized for the process lifetime.
  */
 export function loadSkillContext(): string {
   if (cached !== null) {

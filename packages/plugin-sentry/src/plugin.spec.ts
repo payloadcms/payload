@@ -1,8 +1,12 @@
-import type { AfterErrorHook, AfterErrorHookArgs, Config, PayloadRequest } from 'payload'
+import {
+  addDefaultsToConfig,
+  type AfterErrorHook,
+  type AfterErrorHookArgs,
+  type Config,
+  type PayloadRequest,
+} from 'payload'
 import { randomUUID } from 'crypto'
 import { describe, it, expect, vitest } from 'vitest'
-
-import { defaults } from 'payload'
 
 import { sentryPlugin } from './index'
 
@@ -115,8 +119,9 @@ function assertPluginDidNotRun(config: Config) {
 }
 
 function createConfig(overrides?: Partial<Config>): Config {
-  return {
-    ...defaults,
+  return addDefaultsToConfig({
+    db: { defaultIDType: 'text', init: () => ({}) as any },
+    secret: '',
     ...overrides,
-  } as Config
+  })
 }

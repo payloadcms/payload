@@ -6,20 +6,19 @@ import type { NumberFilterProps as Props } from './types.js'
 
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { ReactSelect } from '../../../ReactSelect/index.js'
-import './index.scss'
-
-const baseClass = 'condition-value-number'
 
 export const NumberFilter: React.FC<Props> = (props) => {
   const {
     disabled,
-    field: { admin, hasMany },
+    field: { admin, hasMany, label },
     onChange,
     operator,
     value,
   } = props
 
   const { i18n, t } = useTranslation()
+
+  const ariaLabel = label ? getTranslation(label, i18n) : t('general:enterAValue')
 
   const isMulti = ['in', 'not_in'].includes(operator) || hasMany
 
@@ -68,6 +67,7 @@ export const NumberFilter: React.FC<Props> = (props) => {
 
   return isMulti ? (
     <ReactSelect
+      aria-label={ariaLabel}
       disabled={disabled}
       isClearable
       isCreatable
@@ -81,7 +81,8 @@ export const NumberFilter: React.FC<Props> = (props) => {
     />
   ) : (
     <input
-      className={baseClass}
+      aria-label={ariaLabel}
+      className="form-input"
       disabled={disabled}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}

@@ -4,11 +4,10 @@
     flex-direction: column;
     gap: var(--spacer-2);
 
-    .tooltip:not([aria-hidden='true']) {
-      right: auto;
-      position: static;
-      margin-bottom: 0.2em;
-      max-width: fit-content;
+    .field-type__wrap {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacer-2);
     }
 
     ul {

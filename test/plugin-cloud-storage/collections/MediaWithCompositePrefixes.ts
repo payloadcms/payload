@@ -6,4 +6,5 @@ export const MediaWithCompositePrefixes: CollectionConfig = {
     disableLocalStorage: true,
   },
   fields: [],
+  versions: false,
 }

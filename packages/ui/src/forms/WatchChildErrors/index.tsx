@@ -29,8 +29,12 @@ export const WatchChildErrors: React.FC<TrackSubSchemaErrorCountProps> = ({
 
   useThrottledEffect(
     () => {
+      // Errors are only surfaced after a submit attempt. Once the form is no longer
+      // submitted (e.g. after a successful save resets the submitted flag), reset the
+      // count to 0 so stale error indicators don't linger on the tab.
+      let errorCount = 0
+
       if (hasSubmitted) {
-        let errorCount = 0
         Object.entries(formState).forEach(([key]) => {
           const matchingSegment = segmentsToMatch?.some((segment) => {
             const segmentToMatch = [...parentPath, segment].join('.')
@@ -52,8 +56,9 @@ export const WatchChildErrors: React.FC<TrackSubSchemaErrorCountProps> = ({
             }
           }
         })
-        setErrorCount(errorCount)
       }
+
+      setErrorCount(errorCount)
     },
     250,
     [formState, hasSubmitted, fields],

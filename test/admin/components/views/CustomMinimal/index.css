@@ -1,0 +1,22 @@
+.custom-minimal-view__login-btn {
+  margin-right: var(--spacer-2);
+}
+
+.custom-minimal-view__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-3);
+
+  & > * {
+    margin: 0;
+  }
+}
+
+.custom-minimal-view__controls {
+  display: flex;
+  gap: var(--spacer-2);
+
+  & > * {
+    margin: 0;
+  }
+}

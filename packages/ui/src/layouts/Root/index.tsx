@@ -1,27 +1,24 @@
-import type { AcceptedLanguages } from '@payloadcms/translations'
-import type {
-  ImportMap,
-  LanguageOptions,
-  SanitizedConfig,
-  ServerAdapter,
-  ServerFunctionClient,
-} from 'payload'
+import type { ImportMap, LanguageOptions, SanitizedConfig, ServerFunctionClient } from 'payload'
 
-import { rtlLanguages } from '@payloadcms/translations'
 import { applyLocaleFiltering } from 'payload/shared'
 import React, { Suspense } from 'react'
+
+import type { InitAdminContextFn } from '../../views/Root/index.js'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
 import { ProgressBar, RootProvider } from '../../exports/client/index.js'
 import { checkDependencies, type CheckDependenciesArgs } from '../../utilities/checkDependencies.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'
+import { getLanguageDir } from '../../utilities/getLanguageDir.js'
+import { getRequestEmbed } from '../../utilities/getRequestEmbed.js'
 import { getRequestHighContrast } from '../../utilities/getRequestHighContrast.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
-import { initReq } from '../../utilities/initReq.js'
 import { NestProviders } from './NestProviders.js'
-// eslint-disable-next-line payload/no-imports-from-self -- Self-import via package path ensures consumer's bundler resolves the full SCSS chain (design tokens, preflight, etc.) in prod builds
-import '@payloadcms/ui/scss/app.scss'
+import { ResolveThemeOnClient } from './ResolveThemeOnClient.js'
+import { getViewportMeta } from './viewport.js'
+// eslint-disable-next-line payload/no-imports-from-self -- Self-import via package path ensures consumer's bundler resolves the full CSS chain (design tokens, preflight, etc.) in prod builds
+import '@payloadcms/ui/css/app.css'
 
 type Font = {
   className?: string
@@ -67,16 +64,12 @@ type RootLayoutProps = {
   readonly head?: React.ReactNode
   readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
   readonly importMap: ImportMap
+  readonly initAdminContext: InitAdminContextFn
   /**
    * Client router adapter. Caller supplies a framework-specific provider
    * (for Next.js use the `NextRouterAdapter` exported from `@payloadcms/next`).
    */
   readonly RouterAdapter: React.FC<{ children: React.ReactNode }>
-  /**
-   * Server adapter providing framework-specific access to headers, cookies, redirects,
-   * and other server APIs (for Next.js use `nextServerAdapter` from `@payloadcms/next`).
-   */
-  readonly serverAdapter: ServerAdapter
   readonly serverFunction: ServerFunctionClient
 }
 
@@ -99,8 +92,8 @@ const RootLayoutContent = async ({
   head: headFromProps,
   htmlProps = {},
   importMap,
+  initAdminContext,
   RouterAdapter,
-  serverAdapter,
   serverFunction,
 }: RootLayoutProps) => {
   const {
@@ -112,9 +105,10 @@ const RootLayoutContent = async ({
     req: {
       payload: { config },
     },
-  } = await initReq({ configPromise, importMap, key: 'RootLayout', serverAdapter })
+    user,
+  } = await initAdminContext({ configPromise, importMap, key: 'RootLayout' })
 
-  const theme = getRequestTheme({
+  const { theme, themeSource } = getRequestTheme({
     config,
     cookies,
     headers,
@@ -126,9 +120,8 @@ const RootLayoutContent = async ({
     headers,
   })
 
-  const dir = (rtlLanguages as unknown as AcceptedLanguages[]).includes(languageCode)
-    ? 'RTL'
-    : 'LTR'
+  const dir = getLanguageDir({ languageCode })
+  const embed = getRequestEmbed({ config, cookies })
 
   const languageOptions: LanguageOptions = Object.entries(
     config.i18n.supportedLanguages || {},
@@ -149,12 +142,13 @@ const RootLayoutContent = async ({
     config,
     i18n: req.i18n,
     importMap,
-    user: req.user,
+    user,
   })
 
   await applyLocaleFiltering({ clientConfig, config, req })
 
   const fontClassNames = fonts.map((f) => f.variable ?? f.className).filter(Boolean)
+  const viewportMeta = getViewportMeta(headers.get('user-agent') ?? undefined)
 
   return (
     <html
@@ -164,9 +158,13 @@ const RootLayoutContent = async ({
       data-theme={theme}
       dir={dir}
       lang={languageCode}
-      suppressHydrationWarning={config?.admin?.suppressHydrationWarning ?? false}
+      suppressHydrationWarning={
+        config.admin.theme === 'all' || config.admin.suppressHydrationWarning
+      }
     >
       <head>
+        {themeSource === 'default' && <ResolveThemeOnClient serverTheme={theme} />}
+        {viewportMeta}
         <style>{`@layer payload-default, payload;`}</style>
         {headFromProps}
       </head>
@@ -174,18 +172,19 @@ const RootLayoutContent = async ({
         <RootProvider
           config={clientConfig}
           dateFNSKey={req.i18n.dateFNSKey}
+          embed={embed}
           fallbackLang={config.i18n.fallbackLanguage}
           highContrastMode={highContrastMode}
           isNavOpen={navPrefs?.open ?? true}
           languageCode={languageCode}
           languageOptions={languageOptions}
           locale={req.locale}
-          permissions={req.user ? permissions : null}
+          permissions={user ? permissions : null}
           RouterAdapter={RouterAdapter}
           serverFunction={serverFunction}
           theme={theme}
           translations={req.i18n.translations}
-          user={req.user}
+          user={user}
         >
           <ProgressBar />
           {Array.isArray(config.admin?.components?.providers) &&
@@ -198,7 +197,7 @@ const RootLayoutContent = async ({
                 payload: req.payload,
                 permissions,
                 server: req.server,
-                user: req.user,
+                user,
               }}
             >
               {children}

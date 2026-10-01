@@ -1,11 +1,4 @@
-import type {
-  FlattenedBlock,
-  FlattenedBlocksField,
-  FlattenedField,
-  Operator,
-  Payload,
-  RelationshipField,
-} from 'payload'
+import type { FlattenedBlock, FlattenedField, Operator, Payload, RelationshipField } from 'payload'
 
 import { Types } from 'mongoose'
 import { createArrayFromCommaDelineated, escapeRegExp } from 'payload'
@@ -56,9 +49,8 @@ const getFieldFromSegments = ({
   payload: Payload
   segments: string[]
 }): FlattenedField | undefined => {
-  if ('blocks' in field || 'blockReferences' in field) {
-    const _field: FlattenedBlocksField = field as FlattenedBlocksField
-    for (const _block of _field.blockReferences ?? _field.blocks) {
+  if ('blocks' in field) {
+    for (const _block of field.blocks) {
       const block: FlattenedBlock | undefined =
         typeof _block === 'string' ? payload.blocks[_block] : _block
       if (block) {

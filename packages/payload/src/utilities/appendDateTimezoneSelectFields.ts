@@ -43,7 +43,7 @@ export const appendDateTimezoneSelectFields = ({
     }
 
     if (field.type === 'blocks') {
-      const blockReferences = (field.blockReferences ?? field.blocks) as Array<
+      const blocks = field.blocks as Array<
         | {
             flattenedFields: FlattenedField[]
             slug: string
@@ -51,7 +51,7 @@ export const appendDateTimezoneSelectFields = ({
         | string
       >
 
-      for (const block of blockReferences) {
+      for (const block of blocks) {
         if (typeof block === 'string') {
           continue
         }

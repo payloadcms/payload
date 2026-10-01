@@ -1,4 +1,3 @@
-import { spawn } from 'child_process'
 import globby from 'globby'
 import minimist from 'minimist'
 import { createServer } from 'net'
@@ -7,20 +6,26 @@ import shelljs from 'shelljs'
 import slash from 'slash'
 import { fileURLToPath } from 'url'
 
+import type { TestServerProcess } from './__helpers/shared/devServer.js'
+
+import { spawnTestServer } from './__helpers/shared/devServer.js'
+
 const __filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(__filename)
 
 shelljs.env.DISABLE_LOGGING = 'true'
 
-const prod = process.argv.includes('--prod')
-if (prod) {
+// --prod-server boots a real production server (next build / vite build) per suite
+// against the packed dist packages. Without it, the dev server runs against source.
+const prodServer = process.argv.includes('--prod-server')
+if (prodServer) {
   process.env.PAYLOAD_TEST_PROD = 'true'
   shelljs.env.PAYLOAD_TEST_PROD = 'true'
 }
 
 const turbo = process.argv.includes('--no-turbo') ? false : true
 
-process.argv = process.argv.filter((arg) => arg !== '--prod' && arg !== '--no-turbo')
+process.argv = process.argv.filter((arg) => arg !== '--prod-server' && arg !== '--no-turbo')
 
 const playwrightBin = path.resolve(dirname, '../node_modules/.bin/playwright')
 
@@ -30,16 +35,27 @@ const {
   bail,
   'fully-parallel': fullyParallel,
   grep,
+  'grep-invert': grepInvert,
   headed,
   part,
+  'screen-reader': screenReader,
   shard,
+  'update-snapshots': updateSnapshots,
   workers,
 } = minimist(process.argv.slice(2), { alias: { g: 'grep' } })
 const suiteName = args[0]
 
+// `@visual` screenshot comparisons only run against a real production build (see
+// `expectScreenshot`) and are opted into explicitly, via `--grep @visual`, by the dedicated
+// visual-regression CI job and `pnpm test:visual`. Exclude them by default so the
+// plain dev-server run (`pnpm test:e2e` / `pnpm test`) doesn't hit `expectScreenshot`'s
+// production-build check.
+const effectiveGrepInvert = grepInvert ?? (grep === '@visual' ? undefined : '@visual')
+
 // Run all
 if (!suiteName) {
-  let files = await globby(`${path.resolve(dirname).replace(/\\/g, '/')}/**/*e2e.spec.ts`)
+  const testFilePattern = screenReader ? '*screen-reader.spec.ts' : '*e2e.spec.ts'
+  let files = await globby(`${path.resolve(dirname).replace(/\\/g, '/')}/**/${testFilePattern}`)
 
   const totalFiles = files.length
 
@@ -74,17 +90,15 @@ if (!suiteName) {
     if (!baseTestFolder) {
       throw new Error(`No base test folder found for ${file}`)
     }
-    await executePlaywright(
-      file,
-      baseTestFolder,
+    await executePlaywright({
       bail,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      headed,
-    )
+      baseTestFolder,
+      grepInvertArg: effectiveGrepInvert,
+      headedArg: headed,
+      screenReaderArg: screenReader,
+      suitePaths: file,
+      updateSnapshotsArg: updateSnapshots,
+    })
   }
 } else {
   let inputSuitePath: string | undefined = suiteName
@@ -103,7 +117,10 @@ if (!suiteName) {
     .resolve(dirname, inputSuitePath)
     .replaceAll('__', '/')
 
-  const allSuitesInFolder = await globby(`${suiteFolderPath.replace(/\\/g, '/')}/*e2e.spec.ts`)
+  const testFilePattern = screenReader ? '*screen-reader.spec.ts' : '*e2e.spec.ts'
+  const allSuitesInFolder = await globby(
+    `${suiteFolderPath.replace(/\\/g, '/')}/${testFilePattern}`,
+  )
 
   const baseTestFolder = inputSuitePath.split('__')[0]
 
@@ -117,17 +134,19 @@ if (!suiteName) {
 
   // Run all spec files in the folder with a single dev server and playwright invocation
   // This avoids port conflicts when multiple spec files exist in the same folder
-  await executePlaywright(
-    allSuitesInFolder,
+  await executePlaywright({
     baseTestFolder,
-    false,
+    fullyParallelArg: fullyParallel,
+    grepArg: grep,
+    grepInvertArg: effectiveGrepInvert,
+    headedArg: headed,
+    screenReaderArg: screenReader,
+    shardArg: shard,
     suiteConfigPath,
-    shard,
-    fullyParallel,
-    workers,
-    grep,
-    headed,
-  )
+    suitePaths: allSuitesInFolder,
+    updateSnapshotsArg: updateSnapshots,
+    workersArg: workers,
+  })
 }
 
 console.log('\nRESULTS:')
@@ -139,35 +158,54 @@ console.log('\n')
 // baseTestFolder is the most top level folder of the test suite, that contains the payload config.
 // We need this because pnpm dev for a given test suite will always be run from the top level test folder,
 // not from a nested suite folder.
-async function executePlaywright(
-  suitePaths: string | string[],
-  baseTestFolder: string,
+async function executePlaywright({
   bail = false,
-  suiteConfigPath?: string,
-  shardArg?: string,
-  fullyParallelArg?: boolean,
-  workersArg?: number,
-  grepArg?: string,
-  headedArg?: boolean,
-) {
+  baseTestFolder,
+  fullyParallelArg,
+  grepArg,
+  grepInvertArg,
+  headedArg,
+  screenReaderArg,
+  shardArg,
+  suiteConfigPath,
+  suitePaths,
+  updateSnapshotsArg,
+  workersArg,
+}: {
+  bail?: boolean
+  baseTestFolder: string
+  fullyParallelArg?: boolean
+  grepArg?: string
+  grepInvertArg?: string
+  headedArg?: boolean
+  screenReaderArg?: boolean
+  shardArg?: string
+  suiteConfigPath?: string
+  suitePaths: string | string[]
+  updateSnapshotsArg?: boolean
+  workersArg?: number
+}) {
   const paths = Array.isArray(suitePaths) ? suitePaths : [suitePaths]
   console.log(`Executing ${paths.join(', ')}...`)
   const playwrightCfg = path.resolve(
     dirname,
-    `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
+    screenReaderArg
+      ? 'playwright.screen-reader.config.ts'
+      : `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
   )
 
   const spawnDevArgs: string[] = [
     'dev',
     suiteConfigPath ? `${baseTestFolder}#${suiteConfigPath}` : baseTestFolder,
   ]
-  if (prod) {
-    spawnDevArgs.push('--prod')
+  if (prodServer) {
+    spawnDevArgs.push('--prod-server')
   }
 
   if (!turbo) {
     spawnDevArgs.push('--no-turbo')
   }
+  spawnDevArgs.push('--no-seed')
 
   process.env.START_MEMORY_DB = 'true'
 
@@ -180,27 +218,32 @@ async function executePlaywright(
     server.listen(e2ePort)
   })
 
-  let child: ReturnType<typeof spawn> | undefined
+  let server: TestServerProcess | undefined
 
   if (portInUse) {
     console.log(`Port ${e2ePort} is already in use — reusing existing dev server.`)
   } else {
-    child = spawn('pnpm', spawnDevArgs, {
-      cwd: path.resolve(dirname, '..'),
-      env: {
-        ...process.env,
-      },
-      stdio: 'inherit',
-    })
+    server = spawnTestServer({ args: spawnDevArgs })
   }
+
+  // A prod server only starts listening after the build/init completes, which outlasts Playwright's navigation timeout.
+  // Wait for it before running tests.
+  // (The dev server compiles routes lazily, so it needs no upfront wait.)
+  if (prodServer && !portInUse) {
+    await waitForServer(e2ePort)
+  }
+
+  await resetServer(e2ePort)
 
   const shardFlag = shardArg ? ` --shard=${shardArg}` : ''
   const fullyParallelFlag = fullyParallelArg ? ' --fully-parallel' : ''
   const workersFlag = workersArg !== undefined ? ` --workers=${workersArg}` : ''
   const grepFlag = grepArg ? ` --grep="${grepArg}"` : ''
+  const grepInvertFlag = grepInvertArg ? ` --grep-invert="${grepInvertArg}"` : ''
   const headedFlag = headedArg ? ' --headed' : ''
+  const updateSnapshotsFlag = updateSnapshotsArg ? ' --update-snapshots' : ''
   const cmd = slash(
-    `${playwrightBin} test ${paths.join(' ')} -c ${playwrightCfg}${shardFlag}${fullyParallelFlag}${workersFlag}${grepFlag}${headedFlag}`,
+    `${playwrightBin} test ${paths.join(' ')} -c ${playwrightCfg}${shardFlag}${fullyParallelFlag}${workersFlag}${grepFlag}${grepInvertFlag}${headedFlag}${updateSnapshotsFlag}`,
   )
   console.log('\n', cmd)
   const { code, stdout } = shelljs.exec(cmd, {
@@ -213,10 +256,10 @@ async function executePlaywright(
     if (bail) {
       console.error(`TEST FAILURE DURING ${suite} suite.`)
     }
-    child?.kill(1)
+    await server?.stop()
     process.exit(1)
   } else {
-    child?.kill()
+    await server?.stop()
   }
   testRunCodes.push(results)
 
@@ -226,4 +269,57 @@ async function executePlaywright(
 function clearWebpackCache() {
   const webpackCachePath = path.resolve(dirname, '../node_modules/.cache/webpack')
   shelljs.rm('-rf', webpackCachePath)
+}
+
+/**
+ * Poll a port until the server responds, so Playwright doesn't start against a prod server that is still building.
+ * Resolves on any HTTP response (the server only binds after the build/init finishes);
+ * rejects if it never comes up.
+ */
+async function waitForServer(port: number, timeoutMs = 8 * 60 * 1000): Promise<void> {
+  const url = `http://localhost:${port}/`
+  const start = Date.now()
+  console.log(`Waiting for prod server on ${url} …`)
+
+  while (Date.now() - start < timeoutMs) {
+    try {
+      await fetch(url)
+      console.log(`Prod server ready after ${Math.round((Date.now() - start) / 1000)}s`)
+      return
+    } catch {
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+    }
+  }
+
+  throw new Error(`Prod server did not start within ${timeoutMs / 1000}s`)
+}
+
+async function resetServer(port: number, timeoutMs = 8 * 60 * 1000): Promise<void> {
+  const url = `http://localhost:${port}/api/re-initialize`
+  const start = Date.now()
+  let lastConnectionError: unknown
+  console.log(`Waiting to reset test data at ${url} …`)
+
+  while (Date.now() - start < timeoutMs) {
+    let response: Response
+
+    try {
+      response = await fetch(url, { method: 'POST' })
+    } catch (error) {
+      lastConnectionError = error
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      continue
+    }
+
+    if (response.ok || response.status === 404) {
+      return
+    }
+
+    throw new Error(`Failed to reset test data: ${response.status} ${await response.text()}`)
+  }
+
+  const connectionError =
+    lastConnectionError instanceof Error ? `: ${lastConnectionError.message}` : ''
+
+  throw new Error(`Timed out waiting to reset test data at ${url}${connectionError}`)
 }

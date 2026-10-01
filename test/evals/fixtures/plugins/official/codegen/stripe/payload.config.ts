@@ -11,6 +11,7 @@ export default buildConfig({
         { name: 'name', type: 'text' },
         { name: 'email', type: 'email' },
       ],
+      versions: false,
     },
     {
       slug: 'products',
@@ -18,6 +19,7 @@ export default buildConfig({
         { name: 'name', type: 'text', required: true },
         { name: 'price', type: 'number', required: true },
       ],
+      versions: false,
     },
   ],
   plugins: [],

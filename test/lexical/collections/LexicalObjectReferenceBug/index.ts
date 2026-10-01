@@ -35,4 +35,5 @@ export const LexicalObjectReferenceBugCollection: CollectionConfig = {
       }),
     },
   ],
+  versions: false,
 }

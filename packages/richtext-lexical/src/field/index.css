@@ -7,7 +7,7 @@
     }
 
     & > .field-error.tooltip {
-      right: auto;
+      inset-inline-end: auto;
       position: static;
       margin-bottom: 0.2em;
       max-width: fit-content;
@@ -27,7 +27,7 @@
     gap: var(--spacer-2);
 
     label.field-label:not(.unstyled) {
-      margin-right: unset;
+      margin-inline-end: unset;
       padding-bottom: unset;
     }
   }
@@ -35,24 +35,24 @@
   .rich-text-lexical__wrap {
     width: 100%;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+  }
+
+  @keyframes rich-text-lexical-fade-in-background {
+    from {
+      background-color: transparent;
+    }
+    to {
+      background-color: var(--color-bg-hover);
+    }
   }
 
   .rich-text-lexical--read-only {
     .editor-container {
       .editor {
-        @keyframes fadeInBackground {
-          from {
-            background-color: transparent;
-          }
-          to {
-            background-color: var(--color-bg-hover);
-          }
-          to {
-            background-color: var(--color-bg-hover);
-          }
-        }
-
-        animation: fadeInBackground 0.5s ease forwards;
+        animation: rich-text-lexical-fade-in-background 0.5s ease forwards;
         color: var(--color-text-tertiary);
       }
     }

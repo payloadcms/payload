@@ -1,11 +1,5 @@
 @layer payload-default {
   .icon--warning {
-    .icon__circle {
-      fill: var(--color-bg-warning);
-    }
-
-    .icon__symbol {
-      stroke: var(--color-text-onwarning);
-    }
+    color: var(--color-bg-warning);
   }
 }

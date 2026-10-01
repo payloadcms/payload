@@ -15,7 +15,6 @@ import { DocumentIcon } from '@payloadcms/ui/icons/Document'
 import { Dots } from '@payloadcms/ui/icons/Dots'
 import { DuplicateIcon } from '@payloadcms/ui/icons/Duplicate'
 import { EditIcon } from '@payloadcms/ui/icons/Edit'
-import { ExternalLinkIcon } from '@payloadcms/ui/icons/ExternalLink'
 import { EyeIcon } from '@payloadcms/ui/icons/Eye'
 import { FolderIcon } from '@payloadcms/ui/icons/Folder'
 import { GearIcon } from '@payloadcms/ui/icons/Gear'
@@ -27,6 +26,7 @@ import { LogOutIcon } from '@payloadcms/ui/icons/LogOut'
 import { MinimizeMaximizeIcon } from '@payloadcms/ui/icons/MinimizeMaximize'
 import { MoreIcon } from '@payloadcms/ui/icons/More'
 import { MoveFolderIcon } from '@payloadcms/ui/icons/MoveFolder'
+import { NewTabIcon } from '@payloadcms/ui/icons/NewTab'
 import { PeopleIcon } from '@payloadcms/ui/icons/People'
 import { PlusIcon } from '@payloadcms/ui/icons/Plus'
 import { SearchIcon } from '@payloadcms/ui/icons/Search'
@@ -102,8 +102,8 @@ const icons: IconEntry[] = [
     sizes: [16, 24],
   },
   {
-    name: 'ExternalLinkIcon',
-    render: (size) => <ExternalLinkIcon size={size} />,
+    name: 'NewTabIcon',
+    render: (size) => <NewTabIcon size={size} />,
     sizes: [16, 24],
   },
   {

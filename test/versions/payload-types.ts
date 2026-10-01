@@ -60,11 +60,100 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_29DD3EB9".
+ */
+export type LexicalNodes_29DD3EB9 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_29DD3EB9>
+  | SerializedBlockNode<MyBlock>
+  | SerializedHeadingNode<LexicalNodes_29DD3EB9>
+  | SerializedUploadNode<'draft-with-upload'>
+  | SerializedUploadNode<'draft-with-upload-cloud-storage'>
+  | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
+  | SerializedUploadNode<'media2'>
+  | SerializedQuoteNode<LexicalNodes_29DD3EB9>
+  | SerializedListNode<LexicalNodes_29DD3EB9>
+  | SerializedListItemNode<LexicalNodes_29DD3EB9>
+  | SerializedAutoLinkNode<LexicalNodes_29DD3EB9, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_29DD3EB9, LexicalLinkFields_0A7E9EC0>
+  | SerializedRelationshipNode<
+      | 'disable-publish'
+      | 'posts'
+      | 'autosave-posts'
+      | 'autosave-with-draft-button-posts'
+      | 'autosave-multi-select-posts'
+      | 'nested-array-select'
+      | 'autosave-with-validate-posts'
+      | 'draft-posts'
+      | 'drafts-no-read-versions'
+      | 'draft-with-max-posts'
+      | 'draft-posts-with-change-hook'
+      | 'drafts-with-custom-unpublish'
+      | 'draft-with-validate-posts'
+      | 'error-on-unpublish'
+      | 'localized-posts'
+      | 'version-posts'
+      | 'custom-ids'
+      | 'diff'
+      | 'text'
+      | 'restore-access'
+      | 'restore-access-localized'
+      | 'users'
+      | 'secondary-admin-users'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_AB595D72".
+ */
+export type LexicalNodes_AB595D72 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_AB595D72>
+  | SerializedRelationshipNode<
+      | 'disable-publish'
+      | 'posts'
+      | 'autosave-posts'
+      | 'autosave-with-draft-button-posts'
+      | 'autosave-multi-select-posts'
+      | 'nested-array-select'
+      | 'autosave-with-validate-posts'
+      | 'draft-posts'
+      | 'drafts-no-read-versions'
+      | 'draft-with-max-posts'
+      | 'draft-posts-with-change-hook'
+      | 'drafts-with-custom-unpublish'
+      | 'draft-with-validate-posts'
+      | 'error-on-unpublish'
+      | 'localized-posts'
+      | 'version-posts'
+      | 'custom-ids'
+      | 'diff'
+      | 'text'
+      | 'restore-access'
+      | 'restore-access-localized'
+      | 'users'
+      | 'secondary-admin-users'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >;
 
 export interface Config {
   auth: {
     users: UserAuthOperations;
-    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
+    'secondary-admin-users': SecondaryAdminUserAuthOperations;
   };
   blocks: {};
   collections: {
@@ -73,6 +162,7 @@ export interface Config {
     'autosave-posts': AutosavePost;
     'autosave-with-draft-button-posts': AutosaveWithDraftButtonPost;
     'autosave-multi-select-posts': AutosaveMultiSelectPost;
+    'nested-array-select': NestedArraySelect;
     'autosave-with-validate-posts': AutosaveWithValidatePost;
     'draft-posts': DraftPost;
     'drafts-no-read-versions': DraftsNoReadVersion;
@@ -87,10 +177,13 @@ export interface Config {
     diff: Diff;
     text: Text;
     'draft-with-upload': DraftWithUpload;
+    'draft-with-upload-cloud-storage': DraftWithUploadCloudStorage;
     media: Media;
     media2: Media2;
+    'restore-access': RestoreAccess;
+    'restore-access-localized': RestoreAccessLocalized;
     users: User;
-    'payload-mcp-api-keys': PayloadMcpApiKey;
+    'secondary-admin-users': SecondaryAdminUser;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -104,6 +197,7 @@ export interface Config {
     'autosave-posts': AutosavePostsSelect<false> | AutosavePostsSelect<true>;
     'autosave-with-draft-button-posts': AutosaveWithDraftButtonPostsSelect<false> | AutosaveWithDraftButtonPostsSelect<true>;
     'autosave-multi-select-posts': AutosaveMultiSelectPostsSelect<false> | AutosaveMultiSelectPostsSelect<true>;
+    'nested-array-select': NestedArraySelectSelect<false> | NestedArraySelectSelect<true>;
     'autosave-with-validate-posts': AutosaveWithValidatePostsSelect<false> | AutosaveWithValidatePostsSelect<true>;
     'draft-posts': DraftPostsSelect<false> | DraftPostsSelect<true>;
     'drafts-no-read-versions': DraftsNoReadVersionsSelect<false> | DraftsNoReadVersionsSelect<true>;
@@ -118,10 +212,13 @@ export interface Config {
     diff: DiffSelect<false> | DiffSelect<true>;
     text: TextSelect<false> | TextSelect<true>;
     'draft-with-upload': DraftWithUploadSelect<false> | DraftWithUploadSelect<true>;
+    'draft-with-upload-cloud-storage': DraftWithUploadCloudStorageSelect<false> | DraftWithUploadCloudStorageSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     media2: Media2Select<false> | Media2Select<true>;
+    'restore-access': RestoreAccessSelect<false> | RestoreAccessSelect<true>;
+    'restore-access-localized': RestoreAccessLocalizedSelect<false> | RestoreAccessLocalizedSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
-    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
+    'secondary-admin-users': SecondaryAdminUsersSelect<false> | SecondaryAdminUsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -142,6 +239,9 @@ export interface Config {
     'max-versions': MaxVersion;
     'draft-unlimited-global': DraftUnlimitedGlobal;
     'simple-draft-global': SimpleDraftGlobal;
+    'restore-access-global': RestoreAccessGlobal;
+    'restore-access-no-versions-global': RestoreAccessNoVersionsGlobal;
+    'payload-jobs-stats': PayloadJobsStat;
   };
   globalsSelect: {
     'autosave-global': AutosaveGlobalSelect<false> | AutosaveGlobalSelect<true>;
@@ -153,12 +253,17 @@ export interface Config {
     'max-versions': MaxVersionsSelect<false> | MaxVersionsSelect<true>;
     'draft-unlimited-global': DraftUnlimitedGlobalSelect<false> | DraftUnlimitedGlobalSelect<true>;
     'simple-draft-global': SimpleDraftGlobalSelect<false> | SimpleDraftGlobalSelect<true>;
+    'restore-access-global': RestoreAccessGlobalSelect<false> | RestoreAccessGlobalSelect<true>;
+    'restore-access-no-versions-global': RestoreAccessNoVersionsGlobalSelect<false> | RestoreAccessNoVersionsGlobalSelect<true>;
+    'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
   };
   locale: 'en' | 'es' | 'de';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
-  user: User | PayloadMcpApiKey;
+  user: User | SecondaryAdminUser;
   jobs: {
     tasks: {
       schedulePublish: TaskSchedulePublish;
@@ -188,7 +293,7 @@ export interface UserAuthOperations {
     password: string;
   };
 }
-export interface PayloadMcpApiKeyAuthOperations {
+export interface SecondaryAdminUserAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -213,9 +318,115 @@ export interface PayloadMcpApiKeyAuthOperations {
 export interface DisablePublish {
   id: string;
   title: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "secondary-admin-users".
+ */
+export interface SecondaryAdminUser {
+  id: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'secondary-admin-users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -226,6 +437,24 @@ export interface Post {
   relationToAutosaves?: (string | null) | AutosavePost;
   relationToVersions?: (string | null) | VersionPost;
   relationToDrafts?: (string | null) | DraftPost;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
 }
@@ -238,11 +467,7 @@ export interface AutosavePost {
   title: string;
   relationship?: (string | null) | Post;
   computedTitle?: string | null;
-  richText?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
+  richText?: LexicalRichText<LexicalNodes_29DD3EB9> | null;
   json?:
     | {
         [k: string]: unknown;
@@ -259,6 +484,24 @@ export interface AutosavePost {
         id?: string | null;
       }[]
     | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -271,6 +514,24 @@ export interface VersionPost {
   id: string;
   title: string;
   description: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
 }
@@ -284,20 +545,43 @@ export interface DraftPost {
   description: string;
   radio?: 'test' | null;
   select?: ('test1' | 'test2')[] | null;
-  blocksField?:
-    | {
-        text?: string | null;
-        localized?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'block';
-      }[]
-    | null;
+  blocksField?: Block[] | null;
   relation?: (string | null) | DraftPost;
+  relationWithFilterOptions?: (string | DraftPost)[] | null;
   restrictedToUpdate?: boolean | null;
+  restrictedToSecondaryCollection?: boolean | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block".
+ */
+export interface Block {
+  text?: string | null;
+  localized?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -306,6 +590,24 @@ export interface DraftPost {
 export interface AutosaveWithDraftButtonPost {
   id: string;
   title: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -318,6 +620,63 @@ export interface AutosaveMultiSelectPost {
   id: string;
   title: string;
   tag?: ('blog' | 'essay' | 'portfolio')[] | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nested-array-select".
+ */
+export interface NestedArraySelect {
+  id: string;
+  outer?:
+    | {
+        inner?:
+          | {
+              days?: ('monday' | 'tuesday' | 'wednesday')[] | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -329,6 +688,24 @@ export interface AutosaveMultiSelectPost {
 export interface AutosaveWithValidatePost {
   id: string;
   title: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -341,6 +718,24 @@ export interface DraftsNoReadVersion {
   id: string;
   title: string;
   description?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -355,16 +750,26 @@ export interface DraftWithMaxPost {
   description: string;
   radio?: 'test' | null;
   select?: ('test1' | 'test2')[] | null;
-  blocksField?:
-    | {
-        text?: string | null;
-        localized?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'block';
-      }[]
-    | null;
+  blocksField?: Block[] | null;
   relation?: (string | null) | DraftWithMaxPost;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -377,6 +782,24 @@ export interface DraftPostsWithChangeHook {
   id: string;
   title: string;
   description: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -388,6 +811,24 @@ export interface DraftPostsWithChangeHook {
 export interface DraftsWithCustomUnpublish {
   id: string;
   title: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -399,6 +840,24 @@ export interface DraftsWithCustomUnpublish {
 export interface DraftWithValidatePost {
   id: string;
   title: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -410,6 +869,27 @@ export interface DraftWithValidatePost {
 export interface ErrorOnUnpublish {
   id: string;
   title: string;
+  group?: {
+    textInGroup?: string | null;
+  };
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -422,30 +902,55 @@ export interface LocalizedPost {
   id: string;
   text?: string | null;
   description?: string | null;
-  blocks?:
-    | (
-        | {
-            array?:
-              | {
-                  relationship?: (string | null) | Post;
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'block';
-          }
-        | {
-            blockText?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'localizedTextBlock';
-          }
-      )[]
-    | null;
+  blocks?: (Block_DBD0B346 | LocalizedTextBlock)[] | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * Multiple blocks resolve to the `Block` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block_DBD0B346".
+ */
+export interface Block_DBD0B346 {
+  array?:
+    | {
+        relationship?: (string | null) | Post;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LocalizedTextBlock".
+ */
+export interface LocalizedTextBlock {
+  blockText?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedTextBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -454,6 +959,24 @@ export interface LocalizedPost {
 export interface CustomId {
   id: string;
   title?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
 }
@@ -475,56 +998,7 @@ export interface Diff {
         id?: string | null;
       }[]
     | null;
-  blocks?:
-    | (
-        | {
-            title?: string | null;
-            relatedItem?: {
-              relationTo: 'text';
-              value: string | Text;
-            } | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'SingleRelationshipBlock';
-          }
-        | {
-            title?: string | null;
-            relatedItem?:
-              | {
-                  relationTo: 'text';
-                  value: string | Text;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'ManyRelationshipBlock';
-          }
-        | {
-            textInBlock?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'TextBlock';
-          }
-        | {
-            textInCollapsibleInCollapsibleBlock?: string | null;
-            textInRowInCollapsibleBlock?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'CollapsibleBlock';
-          }
-        | {
-            namedTab1InBlock?: {
-              textInNamedTab1InBlock?: string | null;
-            };
-            textInUnnamedTab2InBlock?: string | null;
-            textInUnnamedTab2InBlockAccessFalse?: string | null;
-            textInRowInUnnamedTab2InBlock?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'TabsBlock';
-          }
-      )[]
-    | null;
+  blocks?: (SingleRelationshipBlock | ManyRelationshipBlock | TextBlock | CollapsibleBlock | TabsBlock)[] | null;
   checkbox?: boolean | null;
   code?: string | null;
   textInCollapsible?: string | null;
@@ -587,16 +1061,9 @@ export interface Diff {
       )[]
     | null;
   zeroDepthRelationship?: (string | null) | User;
-  richtext?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
-  richtextWithCustomDiff?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
+  richtext?: LexicalRichText<LexicalNodes_29DD3EB9> | null;
+  richtextWithConstrainedRelationship?: LexicalRichText<LexicalNodes_AB595D72> | null;
+  richtextWithCustomDiff?: LexicalRichText<LexicalNodes_29DD3EB9> | null;
   textInRow?: string | null;
   textCannotRead?: string | null;
   select?: ('option1' | 'option2') | null;
@@ -612,9 +1079,41 @@ export interface Diff {
   textArea?: string | null;
   upload?: (string | null) | Media;
   uploadHasMany?: (string | Media)[] | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SingleRelationshipBlock".
+ */
+export interface SingleRelationshipBlock {
+  title?: string | null;
+  relatedItem?: {
+    relationTo: 'text';
+    value: string | Text;
+  } | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'SingleRelationshipBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -623,33 +1122,79 @@ export interface Diff {
 export interface Text {
   id: string;
   text: string;
+  owner?: (string | null) | User;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
+ * via the `definition` "ManyRelationshipBlock".
  */
-export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
+export interface ManyRelationshipBlock {
+  title?: string | null;
+  relatedItem?:
     | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
+        relationTo: 'text';
+        value: string | Text;
       }[]
     | null;
-  password?: string | null;
-  collection: 'users';
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'ManyRelationshipBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TextBlock".
+ */
+export interface TextBlock {
+  textInBlock?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'TextBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CollapsibleBlock".
+ */
+export interface CollapsibleBlock {
+  textInCollapsibleInCollapsibleBlock?: string | null;
+  textInRowInCollapsibleBlock?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'CollapsibleBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TabsBlock".
+ */
+export interface TabsBlock {
+  namedTab1InBlock?: {
+    textInNamedTab1InBlock?: string | null;
+  };
+  textInUnnamedTab2InBlock?: string | null;
+  textInUnnamedTab2InBlockAccessFalse?: string | null;
+  textInRowInUnnamedTab2InBlock?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'TabsBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -657,6 +1202,24 @@ export interface User {
  */
 export interface Media {
   id: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -676,6 +1239,64 @@ export interface Media {
 export interface DraftWithUpload {
   id: string;
   alt?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-with-upload-cloud-storage".
+ */
+export interface DraftWithUploadCloudStorage {
+  id: string;
+  alt?: string | null;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -695,6 +1316,24 @@ export interface DraftWithUpload {
  */
 export interface Media2 {
   id: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -708,47 +1347,62 @@ export interface Media2 {
   focalY?: number | null;
 }
 /**
- * API keys control which collections, resources, tools, and prompts MCP clients can access
- *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys".
+ * via the `definition` "restore-access".
  */
-export interface PayloadMcpApiKey {
+export interface RestoreAccess {
   id: string;
-  /**
-   * The user that the API key is associated with.
-   */
-  user: string | User;
-  /**
-   * A useful label for the API key.
-   */
-  label?: string | null;
-  /**
-   * The purpose of the API key.
-   */
-  description?: string | null;
-  /**
-   * When checked, this key bypasses Payload access control on every operation it performs. Leave unchecked unless you have a specific reason.
-   */
-  overrideAccess?: boolean | null;
-  /**
-   * Access for this API key — uncheck to revoke individual tools.
-   */
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
+  title: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   updatedAt: string;
   createdAt: string;
-  enableAPIKey?: boolean | null;
-  apiKey?: string | null;
-  apiKeyIndex?: string | null;
-  collection: 'payload-mcp-api-keys';
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-access-localized".
+ */
+export interface RestoreAccessLocalized {
+  id: string;
+  title: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -794,6 +1448,15 @@ export interface PayloadJob {
     | number
     | boolean
     | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   completedAt?: string | null;
   totalTried?: number | null;
   /**
@@ -821,7 +1484,7 @@ export interface PayloadJob {
         completedAt: string;
         taskSlug: 'inline' | 'schedulePublish';
         taskID: string;
-        input?:
+        input:
           | {
               [k: string]: unknown;
             }
@@ -849,13 +1512,22 @@ export interface PayloadJob {
           | number
           | boolean
           | null;
+        parent?: {
+          taskSlug?: ('inline' | 'schedulePublish') | null;
+          taskID?: string | null;
+        };
         id?: string | null;
       }[]
     | null;
   taskSlug?: ('inline' | 'schedulePublish') | null;
   queue?: string | null;
   waitUntil?: string | null;
-  processing?: boolean | null;
+  processingUntil?: string | null;
+  processingToken?: string | null;
+  /**
+   * Used for concurrency control. Jobs with the same key are subject to exclusive/supersedes rules.
+   */
+  concurrencyKey?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -885,6 +1557,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'autosave-multi-select-posts';
         value: string | AutosaveMultiSelectPost;
+      } | null)
+    | ({
+        relationTo: 'nested-array-select';
+        value: string | NestedArraySelect;
       } | null)
     | ({
         relationTo: 'autosave-with-validate-posts';
@@ -943,6 +1619,10 @@ export interface PayloadLockedDocument {
         value: string | DraftWithUpload;
       } | null)
     | ({
+        relationTo: 'draft-with-upload-cloud-storage';
+        value: string | DraftWithUploadCloudStorage;
+      } | null)
+    | ({
         relationTo: 'media';
         value: string | Media;
       } | null)
@@ -951,12 +1631,20 @@ export interface PayloadLockedDocument {
         value: string | Media2;
       } | null)
     | ({
+        relationTo: 'restore-access';
+        value: string | RestoreAccess;
+      } | null)
+    | ({
+        relationTo: 'restore-access-localized';
+        value: string | RestoreAccessLocalized;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
       } | null)
     | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
       } | null);
   globalSlug?: string | null;
   user:
@@ -965,8 +1653,8 @@ export interface PayloadLockedDocument {
         value: string | User;
       }
     | {
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
       };
   updatedAt: string;
   createdAt: string;
@@ -983,8 +1671,8 @@ export interface PayloadPreference {
         value: string | User;
       }
     | {
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
       };
   key?: string | null;
   value?:
@@ -1016,6 +1704,8 @@ export interface PayloadMigration {
  */
 export interface DisablePublishSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1028,6 +1718,8 @@ export interface PostsSelect<T extends boolean = true> {
   relationToAutosaves?: T;
   relationToVersions?: T;
   relationToDrafts?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1048,6 +1740,8 @@ export interface AutosavePostsSelect<T extends boolean = true> {
         text?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1058,6 +1752,8 @@ export interface AutosavePostsSelect<T extends boolean = true> {
  */
 export interface AutosaveWithDraftButtonPostsSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1069,6 +1765,30 @@ export interface AutosaveWithDraftButtonPostsSelect<T extends boolean = true> {
 export interface AutosaveMultiSelectPostsSelect<T extends boolean = true> {
   title?: T;
   tag?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nested-array-select_select".
+ */
+export interface NestedArraySelectSelect<T extends boolean = true> {
+  outer?:
+    | T
+    | {
+        inner?:
+          | T
+          | {
+              days?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1079,6 +1799,8 @@ export interface AutosaveMultiSelectPostsSelect<T extends boolean = true> {
  */
 export interface AutosaveWithValidatePostsSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1105,7 +1827,11 @@ export interface DraftPostsSelect<T extends boolean = true> {
             };
       };
   relation?: T;
+  relationWithFilterOptions?: T;
   restrictedToUpdate?: T;
+  restrictedToSecondaryCollection?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1117,6 +1843,8 @@ export interface DraftPostsSelect<T extends boolean = true> {
 export interface DraftsNoReadVersionsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1143,6 +1871,8 @@ export interface DraftWithMaxPostsSelect<T extends boolean = true> {
             };
       };
   relation?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1154,6 +1884,8 @@ export interface DraftWithMaxPostsSelect<T extends boolean = true> {
 export interface DraftPostsWithChangeHookSelect<T extends boolean = true> {
   title?: T;
   description?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1164,6 +1896,8 @@ export interface DraftPostsWithChangeHookSelect<T extends boolean = true> {
  */
 export interface DraftsWithCustomUnpublishSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1174,6 +1908,8 @@ export interface DraftsWithCustomUnpublishSelect<T extends boolean = true> {
  */
 export interface DraftWithValidatePostsSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1184,6 +1920,13 @@ export interface DraftWithValidatePostsSelect<T extends boolean = true> {
  */
 export interface ErrorOnUnpublishSelect<T extends boolean = true> {
   title?: T;
+  group?:
+    | T
+    | {
+        textInGroup?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1218,6 +1961,8 @@ export interface LocalizedPostsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1229,6 +1974,8 @@ export interface LocalizedPostsSelect<T extends boolean = true> {
 export interface VersionPostsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1239,6 +1986,8 @@ export interface VersionPostsSelect<T extends boolean = true> {
 export interface CustomIdsSelect<T extends boolean = true> {
   id?: T;
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1331,6 +2080,7 @@ export interface DiffSelect<T extends boolean = true> {
   relationshipHasManyPolymorphic2?: T;
   zeroDepthRelationship?: T;
   richtext?: T;
+  richtextWithConstrainedRelationship?: T;
   richtextWithCustomDiff?: T;
   textInRow?: T;
   textCannotRead?: T;
@@ -1349,6 +2099,8 @@ export interface DiffSelect<T extends boolean = true> {
   textArea?: T;
   upload?: T;
   uploadHasMany?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1359,6 +2111,9 @@ export interface DiffSelect<T extends boolean = true> {
  */
 export interface TextSelect<T extends boolean = true> {
   text?: T;
+  owner?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1368,6 +2123,31 @@ export interface TextSelect<T extends boolean = true> {
  */
 export interface DraftWithUploadSelect<T extends boolean = true> {
   alt?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-with-upload-cloud-storage_select".
+ */
+export interface DraftWithUploadCloudStorageSelect<T extends boolean = true> {
+  alt?: T;
+  prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1386,6 +2166,8 @@ export interface DraftWithUploadSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1403,6 +2185,8 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "media2_select".
  */
 export interface Media2Select<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1417,9 +2201,35 @@ export interface Media2Select<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-access_select".
+ */
+export interface RestoreAccessSelect<T extends boolean = true> {
+  title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-access-localized_select".
+ */
+export interface RestoreAccessLocalizedSelect<T extends boolean = true> {
+  title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1427,6 +2237,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -1439,19 +2250,28 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_select".
+ * via the `definition` "secondary-admin-users_select".
  */
-export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  user?: T;
-  label?: T;
-  description?: T;
-  overrideAccess?: T;
-  access?: T;
+export interface SecondaryAdminUsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
-  enableAPIKey?: T;
-  apiKey?: T;
-  apiKeyIndex?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  resetPasswordRequestedAt?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1468,6 +2288,7 @@ export interface PayloadKvSelect<T extends boolean = true> {
 export interface PayloadJobsSelect<T extends boolean = true> {
   input?: T;
   taskStatus?: T;
+  meta?: T;
   completedAt?: T;
   totalTried?: T;
   hasError?: T;
@@ -1483,12 +2304,20 @@ export interface PayloadJobsSelect<T extends boolean = true> {
         output?: T;
         state?: T;
         error?: T;
+        parent?:
+          | T
+          | {
+              taskSlug?: T;
+              taskID?: T;
+            };
         id?: T;
       };
   taskSlug?: T;
   queue?: T;
   waitUntil?: T;
-  processing?: T;
+  processingUntil?: T;
+  processingToken?: T;
+  concurrencyKey?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1531,6 +2360,24 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface AutosaveGlobal {
   id: string;
   title: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1542,6 +2389,24 @@ export interface AutosaveGlobal {
 export interface AutosaveWithDraftButtonGlobal {
   id: string;
   title: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1553,6 +2418,24 @@ export interface AutosaveWithDraftButtonGlobal {
 export interface DraftGlobal {
   id: string;
   title: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1564,6 +2447,24 @@ export interface DraftGlobal {
 export interface DraftWithMaxGlobal {
   id: string;
   title: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1575,6 +2476,24 @@ export interface DraftWithMaxGlobal {
 export interface DisablePublishGlobal {
   id: string;
   title?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1587,6 +2506,24 @@ export interface LocalizedGlobal {
   id: string;
   title?: string | null;
   content?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1598,6 +2535,24 @@ export interface LocalizedGlobal {
 export interface MaxVersion {
   id: string;
   title?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1609,6 +2564,24 @@ export interface MaxVersion {
 export interface DraftUnlimitedGlobal {
   id: string;
   title: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1620,7 +2593,100 @@ export interface DraftUnlimitedGlobal {
 export interface SimpleDraftGlobal {
   id: string;
   title: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
   _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-access-global".
+ */
+export interface RestoreAccessGlobal {
+  id: string;
+  title: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-access-no-versions-global".
+ */
+export interface RestoreAccessNoVersionsGlobal {
+  id: string;
+  title: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats".
+ */
+export interface PayloadJobsStat {
+  id: string;
+  stats?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1630,6 +2696,8 @@ export interface SimpleDraftGlobal {
  */
 export interface AutosaveGlobalSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1641,6 +2709,8 @@ export interface AutosaveGlobalSelect<T extends boolean = true> {
  */
 export interface AutosaveWithDraftButtonGlobalSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1652,6 +2722,8 @@ export interface AutosaveWithDraftButtonGlobalSelect<T extends boolean = true> {
  */
 export interface DraftGlobalSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1663,6 +2735,8 @@ export interface DraftGlobalSelect<T extends boolean = true> {
  */
 export interface DraftWithMaxGlobalSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1674,6 +2748,8 @@ export interface DraftWithMaxGlobalSelect<T extends boolean = true> {
  */
 export interface DisablePublishGlobalSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1686,6 +2762,8 @@ export interface DisablePublishGlobalSelect<T extends boolean = true> {
 export interface LocalizedGlobalSelect<T extends boolean = true> {
   title?: T;
   content?: T;
+  createdBy?: T;
+  updatedBy?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1697,6 +2775,8 @@ export interface LocalizedGlobalSelect<T extends boolean = true> {
  */
 export interface MaxVersionsSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1708,6 +2788,8 @@ export interface MaxVersionsSelect<T extends boolean = true> {
  */
 export interface DraftUnlimitedGlobalSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1719,7 +2801,44 @@ export interface DraftUnlimitedGlobalSelect<T extends boolean = true> {
  */
 export interface SimpleDraftGlobalSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-access-global_select".
+ */
+export interface RestoreAccessGlobalSelect<T extends boolean = true> {
+  title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-access-no-versions-global_select".
+ */
+export interface RestoreAccessNoVersionsGlobalSelect<T extends boolean = true> {
+  title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats_select".
+ */
+export interface PayloadJobsStatsSelect<T extends boolean = true> {
+  stats?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1733,6 +2852,96 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'disable-publish'
+      | 'posts'
+      | 'autosave-posts'
+      | 'autosave-with-draft-button-posts'
+      | 'autosave-multi-select-posts'
+      | 'nested-array-select'
+      | 'autosave-with-validate-posts'
+      | 'draft-posts'
+      | 'drafts-no-read-versions'
+      | 'draft-with-max-posts'
+      | 'draft-posts-with-change-hook'
+      | 'drafts-with-custom-unpublish'
+      | 'draft-with-validate-posts'
+      | 'error-on-unpublish'
+      | 'localized-posts'
+      | 'version-posts'
+      | 'custom-ids'
+      | 'diff'
+      | 'text'
+      | 'draft-with-upload'
+      | 'draft-with-upload-cloud-storage'
+      | 'media'
+      | 'media2'
+      | 'restore-access'
+      | 'restore-access-localized'
+      | 'users'
+      | 'secondary-admin-users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'disable-publish'
+          | 'posts'
+          | 'autosave-posts'
+          | 'autosave-with-draft-button-posts'
+          | 'autosave-multi-select-posts'
+          | 'nested-array-select'
+          | 'autosave-with-validate-posts'
+          | 'draft-posts'
+          | 'drafts-no-read-versions'
+          | 'draft-with-max-posts'
+          | 'draft-posts-with-change-hook'
+          | 'drafts-with-custom-unpublish'
+          | 'draft-with-validate-posts'
+          | 'error-on-unpublish'
+          | 'localized-posts'
+          | 'version-posts'
+          | 'custom-ids'
+          | 'diff'
+          | 'text'
+          | 'draft-with-upload'
+          | 'draft-with-upload-cloud-storage'
+          | 'media'
+          | 'media2'
+          | 'restore-access'
+          | 'restore-access-localized'
+          | 'users'
+          | 'secondary-admin-users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1756,9 +2965,56 @@ export interface TaskSchedulePublish {
           value: string | DraftPostsWithChangeHook;
         } | null);
     global?: ('draft-global' | 'draft-unlimited-global') | null;
-    user?: (string | null) | User;
+    user?:
+      | ({
+          relationTo: 'users';
+          value: string | User;
+        } | null)
+      | ({
+          relationTo: 'secondary-admin-users';
+          value: string | SecondaryAdminUser;
+        } | null);
   };
   output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlock".
+ */
+export interface MyBlock {
+  id: string;
+  blockType: 'myBlock';
+  someText?: string | null;
+  someTextRequired: string;
+  radios?: ('option1' | 'option2' | 'option3') | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalUploadFields_1AB4670B".
+ */
+export interface LexicalUploadFields_1AB4670B {
+  alt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
+ */
+export interface LexicalLinkFields_0A7E9EC0 {
+  linkType: 'custom' | 'internal';
+  url?: string;
+  doc?: {
+    relationTo: string;
+    value:
+      | string
+      | number
+      | {
+          id: string | number;
+          [k: string]: unknown;
+        };
+  } | null;
+  newTab: boolean;
+  description?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1766,6 +3022,147 @@ export interface TaskSchedulePublish {
  */
 export interface Auth {
   [k: string]: unknown;
+}
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'block';
+  format: LexicalElementFormat;
+  version: number;
+  fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'inlineBlock';
+  version: number;
+  fields: { id: string } & Omit<TFields, 'id'>;
+} : never;
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
+}
+
+export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'quote';
+}
+
+export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'list';
+  checked?: boolean;
+  listType: 'number' | 'bullet' | 'check';
+  start: number;
+  tag: 'ul' | 'ol';
+}
+
+export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'listitem';
+  checked?: boolean;
+  value: number;
+}
+
+export interface LexicalLinkFields {
+  [k: string]: unknown;
+  doc?: {
+    relationTo: string;
+    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
+  } | null;
+  linkType: 'custom' | 'internal';
+  newTab: boolean;
+  url?: string;
+}
+export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'link';
+  fields: TFields;
+  id?: string;
+}
+export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'autolink';
+  fields: TFields;
+}
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
 }
 
 

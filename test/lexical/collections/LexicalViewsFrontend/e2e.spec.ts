@@ -7,9 +7,9 @@ import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 import type { LexicalViewsFrontendNodes } from './index.js'
 
-import { ensureCompilationIsDone } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { lexicalViewsFrontendSlug, lexicalViewsSlug } from '../../slugs.js'
 
@@ -31,7 +31,6 @@ const { beforeAll, beforeEach, describe } = test
 describe('Lexical Views', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload: _payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     const page = await browser.newPage()
@@ -130,6 +129,7 @@ describe('Lexical Views', () => {
           }),
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       try {
@@ -165,8 +165,9 @@ describe('Lexical Views', () => {
         ).toHaveAttribute('data-lexical-view', 'frontend')
       } finally {
         await _payload.delete({
-          collection: lexicalViewsFrontendSlug,
           id: doc.id,
+          collection: lexicalViewsFrontendSlug,
+          overrideAccess: true,
         })
       }
     })
@@ -198,6 +199,7 @@ describe('Lexical Views', () => {
           }),
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       try {
@@ -242,8 +244,9 @@ describe('Lexical Views', () => {
         await expect(blockDecorator.locator('.custom-banner-block-component')).toBeVisible()
       } finally {
         await _payload.delete({
-          collection: lexicalViewsFrontendSlug,
           id: doc.id,
+          collection: lexicalViewsFrontendSlug,
+          overrideAccess: true,
         })
       }
     })
@@ -273,6 +276,7 @@ describe('Lexical Views', () => {
           }),
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       try {
@@ -316,8 +320,9 @@ describe('Lexical Views', () => {
         await expect(bannerBlock).toHaveAttribute('data-banner-type', 'important')
       } finally {
         await _payload.delete({
-          collection: lexicalViewsFrontendSlug,
           id: doc.id,
+          collection: lexicalViewsFrontendSlug,
+          overrideAccess: true,
         })
       }
     })

@@ -41,7 +41,7 @@ export type ColumnProps = {
   hasNextPage: boolean
   isLoading: boolean
   items: ColumnItemData[]
-  /** Called when user clicks "New" button - parent should open drawer with parentId */
+  /** Called when user clicks "New" button - parent should open modal with parentId */
   onCreateNew: (params: { parentId: null | number | string }) => void
   onExpand: (params: { id: number | string }) => void
   onLoadMore: () => void

@@ -11,4 +11,5 @@ export const SimpleRelationshipCollection: CollectionConfig = {
       name: 'title',
     },
   ],
+  versions: false,
 }

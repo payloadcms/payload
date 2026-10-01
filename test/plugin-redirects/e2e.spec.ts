@@ -7,13 +7,10 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-} from '../__helpers/e2e/helpers.js'
+import { saveDocAndAssert } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -36,10 +33,7 @@ test.describe('Redirects Plugin', () => {
     payload = payloadFromInit
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   test.describe('Redirects collection', () => {
@@ -92,8 +86,9 @@ test.describe('Redirects Plugin', () => {
     test('should display translated field labels in German (custom translation)', async () => {
       // Change user language to German
       await page.goto(serverURL + '/admin/account')
-      await page.waitForSelector('.payload-settings__language .react-select')
-      await page.locator('.payload-settings__language .react-select').click()
+      const languageField = page.locator('.payload-settings__language .react-select')
+      await expect(languageField).toBeVisible()
+      await languageField.click()
       await page.locator('.rs__option', { hasText: 'Deutsch' }).click()
 
       // Wait for settings to save

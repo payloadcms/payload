@@ -10,7 +10,7 @@ let config: SanitizedConfig
 
 describe('builds sort params', () => {
   beforeAll(async () => {
-    config = await sanitizeConfig({
+    config = sanitizeConfig({
       localization: {
         defaultLocale: 'en',
         fallback: true,

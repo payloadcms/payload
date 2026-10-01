@@ -1,3 +1,8 @@
+import type {
+  MultilineElementTransformer,
+  TextMatchTransformer,
+  Transformer,
+} from '@lexical/markdown'
 import type { ClientBlock } from 'payload'
 
 import {
@@ -8,12 +13,6 @@ import {
   type LexicalNodeReplacement,
   type SerializedLexicalNode,
 } from 'lexical'
-
-import type { Transformer } from '../../../../packages/@lexical/markdown/index.js'
-import type {
-  MultilineElementTransformer,
-  TextMatchTransformer,
-} from '../../../../packages/@lexical/markdown/MarkdownTransformers.js'
 
 import { extractPropsFromJSXPropsString } from '../../../../utilities/jsx/extractPropsFromJSXPropsString.js'
 import { propsToJSXString } from '../../../../utilities/jsx/jsx.js'
@@ -337,9 +336,9 @@ function getMarkdownTransformerForBlock(
           }
 
           const node = $createBlockNode({
-            blockType: block.slug,
             ...blockFields,
-          } as any)
+            blockType: block.slug,
+          })
 
           if (node) {
             // Now handle beforeStartLine and afterEndLine. If those are not empty, we need to add them as text nodes before and after the block node.
@@ -421,9 +420,9 @@ function getMarkdownTransformerForBlock(
         }
 
         const node = $createBlockNode({
-          blockType: block.slug,
           ...blockFields,
-        } as any)
+          blockType: block.slug,
+        })
 
         if (node) {
           rootNode.append(node)

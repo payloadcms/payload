@@ -19,6 +19,12 @@ export const duplicateBlock = async (
     `#field-${fieldName} > .blocks-field__rows > div > .blocks-field__row`,
   )
 
+  // Ensure the form has finished its initial render before counting/duplicating
+  // rows. TanStack Start renders the document form client-side after navigation
+  // (unlike Next's SSR), so measuring immediately would under-count the field's
+  // default rows.
+  await expect(page.locator('[data-form-ready="true"]').first()).toBeVisible()
+
   const numberOfPrevRows = await rowLocator.count()
 
   const { popupContentLocator, rowActionsButtonLocator } = await openArrayRowActions(page, {

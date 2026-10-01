@@ -20,4 +20,5 @@ export const TranslatedLabels: CollectionConfig = {
     plural: ({ t }) => t('general:documents'),
     singular: ({ t }) => t('general:document'),
   },
+  versions: false,
 }

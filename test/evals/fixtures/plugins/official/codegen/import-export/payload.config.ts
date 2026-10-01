@@ -11,10 +11,12 @@ export default buildConfig({
         { name: 'title', type: 'text', required: true },
         { name: 'content', type: 'richText' },
       ],
+      versions: false,
     },
     {
       slug: 'pages',
       fields: [{ name: 'title', type: 'text', required: true }],
+      versions: false,
     },
   ],
   plugins: [],

@@ -1,102 +1,76 @@
-import { z } from 'zod'
+import { deleteDocumentsInputSchema, parseDocumentID } from 'payload'
 
+import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 
-const DEFAULT_DESCRIPTION = 'Delete documents in a collection by ID or where clause.'
+const DEFAULT_DESCRIPTION =
+  'Delete documents in any collection by passing the collection slug and ID or where clause.'
 
-export const deleteCollectionTool = defineCollectionTool({
+export const deleteDocumentsTool = defineCollectionTool({
+  access: (args) =>
+    defaultAccess(args) && Boolean(args.permissions?.collections?.[args.slug]?.delete),
+  annotations: {
+    destructiveHint: true,
+    idempotentHint: false,
+    openWorldHint: false,
+    readOnlyHint: false,
+    title: 'Delete Documents',
+  },
   description: DEFAULT_DESCRIPTION,
-  input: z.object({
-    id: z
-      .union([z.string(), z.number()])
-      .describe('Optional: specific document ID to delete')
-      .optional(),
-    depth: z
-      .number()
-      .int()
-      .min(0)
-      .max(10)
-      .describe('Depth of population for relationships in response')
-      .optional()
-      .default(0),
-    fallbackLocale: z
-      .string()
-      .describe('Optional: fallback locale code to use when requested locale is not available')
-      .optional(),
-    locale: z
-      .string()
-      .describe(
-        'Optional: locale code for the operation (e.g., "en", "es"). Defaults to the default locale',
-      )
-      .optional(),
-    where: z
-      .string()
-      .describe('Optional: JSON string for where clause to delete multiple documents')
-      .optional(),
-  }),
-}).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
+  input: deleteDocumentsInputSchema,
+}).handler(async ({ slug, authorizedMCP, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
 
   const { id, depth, fallbackLocale, locale, where } = input
 
   logger.info(
-    `Deleting document from collection: ${collectionSlug}${id ? ` with ID: ${id}` : ' with where clause'}${locale ? `, locale: ${locale}` : ''}`,
+    `Deleting document from collection: ${slug}${id ? ` with ID: ${id}` : ' with where clause'}${locale ? `, locale: ${locale}` : ''}`,
   )
 
   try {
-    if (!id && !where) {
-      return {
-        content: [{ type: 'text', text: 'Error: Either id or where clause must be provided' }],
-      }
-    }
+    if (id !== undefined) {
+      const result = await payload.delete({
+        id: parseDocumentID({ id, collectionSlug: slug, payload }),
+        collection: slug,
+        depth,
+        overrideAccess: authorizedMCP.overrideAccess,
+        req,
+        ...(locale && { locale }),
+        ...(fallbackLocale !== undefined && { fallbackLocale }),
+      })
 
-    let whereClause: Record<string, unknown> = {}
-    if (where) {
-      try {
-        whereClause = JSON.parse(where) as Record<string, unknown>
-      } catch {
-        logger.warn(`Invalid where clause JSON: ${where}`)
-        return { content: [{ type: 'text', text: 'Error: Invalid JSON in where clause' }] }
-      }
-    }
-
-    const deleteOptions: Record<string, unknown> = {
-      collection: collectionSlug,
-      depth,
-      req,
-      ...localAPIDefaults(authorizedMCP),
-      ...(locale && { locale }),
-      ...(fallbackLocale && { fallbackLocale }),
-    }
-
-    if (id) {
-      deleteOptions.id = id
-    } else {
-      deleteOptions.where = whereClause
-    }
-
-    const result = await payload.delete(deleteOptions as Parameters<typeof payload.delete>[0])
-
-    if (id) {
       return {
         content: [
           {
             type: 'text',
-            text: `Document deleted successfully from collection "${collectionSlug}"!\nDeleted document:\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
+            text: `Document deleted successfully from collection "${slug}"!\nDeleted document:\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
           },
         ],
         doc: result as Record<string, unknown>,
       }
     }
 
-    const bulkResult = result as { docs?: unknown[]; errors?: unknown[] }
-    const docs = bulkResult.docs || []
-    const errors = bulkResult.errors || []
+    if (where === undefined) {
+      return {
+        content: [{ type: 'text', text: 'Error: Either id or where clause must be provided' }],
+      }
+    }
 
-    let responseText = `Document deleted successfully from collection "${collectionSlug}"!\nDeleted: ${docs.length} documents\nErrors: ${errors.length}\n---`
+    const result = await payload.delete({
+      collection: slug,
+      depth,
+      overrideAccess: authorizedMCP.overrideAccess,
+      req,
+      where,
+      ...(locale && { locale }),
+      ...(fallbackLocale !== undefined && { fallbackLocale }),
+    })
+    const docs = result.docs || []
+    const errors = result.errors || []
+
+    let responseText = `Document deleted successfully from collection "${slug}"!\nDeleted: ${docs.length} documents\nErrors: ${errors.length}\n---`
     if (docs.length > 0) {
       responseText += `\n\nDeleted documents:\n\`\`\`json\n${JSON.stringify(docs)}\n\`\`\``
     }
@@ -110,12 +84,12 @@ export const deleteCollectionTool = defineCollectionTool({
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    logger.error(`Error deleting document from ${collectionSlug}: ${errorMessage}`)
+    logger.error(`Error deleting document from ${slug}: ${errorMessage}`)
     return {
       content: [
         {
           type: 'text',
-          text: `Error deleting document from collection "${collectionSlug}": ${errorMessage}`,
+          text: `Error deleting document from collection "${slug}": ${errorMessage}`,
         },
       ],
     }

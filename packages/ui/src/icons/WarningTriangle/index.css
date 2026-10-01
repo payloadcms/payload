@@ -1,0 +1,5 @@
+@layer payload-default {
+  .icon--warning-triangle {
+    /* Icon uses currentColor, no additional styles needed */
+  }
+}
