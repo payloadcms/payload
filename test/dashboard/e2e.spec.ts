@@ -440,6 +440,7 @@ describe('Dashboard', () => {
       .locator('.dropzone input[type="file"]')
       .setInputFiles(path.resolve(dirname, 'test/uploads/image.png'))
     await expect(modal.getByText('image.png')).toBeVisible()
+    await expect(modal.locator('#field-description')).toBeVisible()
     const fileDestination = modal.locator('.file-selections__collectionSelect')
     await expect(fileDestination).toBeVisible()
 
@@ -447,9 +448,9 @@ describe('Dashboard', () => {
     const addMoreFiles = page.locator('#bulk-upload-modal--add-more-files')
     await expect(addMoreFiles.locator('.bulk-upload--add-files__collectionSelect')).toBeVisible()
     await addMoreFiles.locator('.dropzone input[type="file"]').setInputFiles({
+      name: 'dashboard.pdf',
       buffer: Buffer.from('pdf'),
       mimeType: 'application/pdf',
-      name: 'dashboard.pdf',
     })
     await expect(modal.getByText('dashboard.pdf')).toBeVisible()
     await expect(fileDestination).toHaveCount(0)

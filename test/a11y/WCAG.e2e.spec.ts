@@ -1337,31 +1337,34 @@ test.describe('WCAG 2.2 Level AA', () => {
 
       await expectFocusInside({ container: header, page })
       await test.step('Read widget content before its named actions', async () => {
-        const widget = page.locator('.widget[data-slug^="activity-"]')
+        const widget = page.locator('.widget[data-slug^="upload-dropzone-"]')
         const card = widget.locator('.draggable')
         const drag = widget.getByRole('button', { name: 'Drag to reorder', exact: true })
-        const text = (await widget.locator('.widget-content').innerText())
-          .replace(/\s+/g, ' ')
-          .trim()
 
+        await expect(
+          widget
+            .getByRole('region', { name: 'Upload files' })
+            .getByText('Upload from your computer via drag-and-drop, or click the button below'),
+        ).toBeVisible()
         await card.focus()
         await page.keyboard.press('Shift+Tab')
         await page.keyboard.press('Tab')
         await expect(card).toBeFocused()
-        await expect(card).toHaveAccessibleName(text)
+        await expect(card).toHaveAccessibleName('Upload files')
+        await expect(drag).toHaveAccessibleDescription(/Upload files/)
         await page.keyboard.press('Tab')
         await expect(drag).toBeFocused()
         await page.keyboard.press('Tab')
         await expect(
-          widget.getByRole('button', { name: 'Edit You recently viewed', exact: true }),
+          widget.getByRole('button', { name: 'Edit Upload files', exact: true }),
         ).toBeFocused()
         await page.keyboard.press('Tab')
         await expect(
-          widget.getByRole('button', { name: /^Resize You recently viewed, current size: small$/ }),
+          widget.getByRole('button', { name: /^Resize Upload files, current size: small$/ }),
         ).toBeFocused()
         await page.keyboard.press('Tab')
         await expect(
-          widget.getByRole('button', { name: 'Delete You recently viewed', exact: true }),
+          widget.getByRole('button', { name: 'Delete Upload files', exact: true }),
         ).toBeFocused()
       })
       const widget = await addCollectionQueryWidget({ page })

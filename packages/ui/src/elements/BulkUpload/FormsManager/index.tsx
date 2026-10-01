@@ -151,6 +151,10 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
   const hasInitializedWithFiles = React.useRef(false)
   const initialStateRef = React.useRef<FormState>(null)
+  const initializedStateCollectionSlugRef = React.useRef<string | undefined>(undefined)
+  const initializedPermissionsCollectionSlugRef = React.useRef<string | undefined>(undefined)
+  const currentCollectionSlugRef = React.useRef(collectionSlug)
+  currentCollectionSlugRef.current = collectionSlug
   const getFormDataRef = React.useRef<() => Data>(() => ({}))
 
   const actionURL = formatAdminURL({
@@ -189,6 +193,10 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       },
     ).then((res) => res.json())
 
+    if (currentCollectionSlugRef.current !== collectionSlug) {
+      return
+    }
+
     setDocPermissions(json)
 
     setHasSavePermission(
@@ -200,6 +208,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     )
 
     setHasPublishPermission(publishedAccessJSON?.update)
+    initializedPermissionsCollectionSlugRef.current = collectionSlug
     setHasInitializedDocPermissions(true)
   }, [api, code, collectionSlug, i18n.language])
 
@@ -211,12 +220,14 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
       // FETCH AND SET THE DOCUMENT SLOTS HERE!
       const documentSlots = await getDocumentSlots({ collectionSlug })
-      setDocumentSlots(documentSlots)
 
       try {
         const { state: formStateWithoutFiles } = await getFormState({
           collectionSlug,
-          docPermissions,
+          docPermissions:
+            initializedPermissionsCollectionSlugRef.current === collectionSlug
+              ? docPermissions
+              : undefined,
           docPreferences: { fields: {} },
           locale: code,
           operation: 'create',
@@ -235,10 +246,18 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
           }
         }
 
+        if (currentCollectionSlugRef.current !== collectionSlug) {
+          return null
+        }
+
+        setDocumentSlots(documentSlots)
         initialStateRef.current = formStateWithoutFiles
+        initializedStateCollectionSlugRef.current = collectionSlug
         setHasInitializedState(true)
+        return formStateWithoutFiles
       } catch (_err) {
         // swallow error
+        return null
       }
     },
     [getDocumentSlots, collectionSlug, getFormState, docPermissions, code, folderFieldName],
@@ -299,21 +318,26 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       }
 
       toggleLoadingOverlay({ isLoading: true, key: 'addingDocs' })
-      if (!hasInitializedState) {
-        await initializeSharedFormState()
+      let initialFormState = initialStateRef.current
+      if (initializedStateCollectionSlugRef.current !== collectionSlug) {
+        initialFormState = await initializeSharedFormState()
+      }
+      if (currentCollectionSlugRef.current !== collectionSlug || !initialFormState) {
+        toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })
+        return
       }
       dispatch({
         type: 'ADD_FORMS',
         forms: Array.from(files).map((file) => ({
           file,
-          initialState: applyFolderToState(initialStateRef.current),
+          initialState: applyFolderToState(initialFormState),
         })),
       })
       toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })
     },
     [
       initializeSharedFormState,
-      hasInitializedState,
+      collectionSlug,
       toggleLoadingOverlay,
       activeIndex,
       forms,
@@ -326,15 +350,20 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const addInitialForms = useEffectEvent(async (initialForms: InitialForms) => {
     toggleLoadingOverlay({ isLoading: true, key: 'addingDocs' })
 
-    if (!hasInitializedState) {
-      await initializeSharedFormState()
+    let initialFormState = initialStateRef.current
+    if (initializedStateCollectionSlugRef.current !== collectionSlug) {
+      initialFormState = await initializeSharedFormState()
+    }
+    if (currentCollectionSlugRef.current !== collectionSlug || !initialFormState) {
+      toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })
+      return
     }
 
     dispatch({
       type: 'ADD_FORMS',
       forms: initialForms.map((form) => ({
         ...form,
-        initialState: applyFolderToState(form?.initialState || initialStateRef.current),
+        initialState: applyFolderToState(form?.initialState || initialFormState),
       })),
     })
 
@@ -683,16 +712,19 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     if (!collectionSlug) {
       return
     }
-    if (!hasInitializedState) {
+    if (initializedStateCollectionSlugRef.current !== collectionSlug) {
       void initializeSharedFormState()
     }
 
-    if (!hasInitializedDocPermissions) {
+    if (initializedPermissionsCollectionSlugRef.current !== collectionSlug) {
       void initializeSharedDocPermissions()
     }
 
     if (initialFiles || initialForms) {
-      if (!hasInitializedState || !hasInitializedDocPermissions) {
+      if (
+        initializedStateCollectionSlugRef.current !== collectionSlug ||
+        initializedPermissionsCollectionSlugRef.current !== collectionSlug
+      ) {
         setIsInitializing(true)
       } else {
         setIsInitializing(false)
@@ -701,6 +733,9 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
     if (
       hasInitializedState &&
+      hasInitializedDocPermissions &&
+      initializedStateCollectionSlugRef.current === collectionSlug &&
+      initializedPermissionsCollectionSlugRef.current === collectionSlug &&
       (initialForms?.length || initialFiles?.length) &&
       !hasInitializedWithFiles.current
     ) {

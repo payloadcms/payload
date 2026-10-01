@@ -59,7 +59,7 @@
 
   .upload-dropzone-widget__description,
   .upload-dropzone-widget__drag-message {
-    color: var(--color-text-secondary);
+    color: color-mix(in srgb, var(--color-text-secondary) 91%, var(--color-text) 9%);
   }
 
   .upload-dropzone-widget__message {
