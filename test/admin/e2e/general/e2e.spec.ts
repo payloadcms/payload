@@ -425,6 +425,28 @@ describe('General', () => {
         await page.keyboard.press('Escape')
       }
 
+      test('should keep the open submenu parent highlighted while hovering a child item', async () => {
+        await page.goto(postsUrl.admin)
+        await openNav(page)
+        await page.locator('button[aria-label="Account"]').click()
+
+        const language = page
+          .locator('.popup-button-list__button--submenu-trigger')
+          .filter({ hasText: 'Language' })
+
+        await language.hover()
+        await expect(language).toHaveAttribute('aria-expanded', 'true')
+
+        const highlightedBackground = await language.evaluate(
+          (element) => getComputedStyle(element).backgroundColor,
+        )
+
+        expect(highlightedBackground).not.toBe('rgba(0, 0, 0, 0)')
+
+        await page.getByRole('menuitemradio').first().hover()
+        await expect(language).toHaveCSS('background-color', highlightedBackground)
+      })
+
       test('should switch to dark theme via user menu and reflect correct active state', async () => {
         await page.goto(postsUrl.admin)
 
