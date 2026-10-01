@@ -1,5 +1,6 @@
 import type { CollectionAfterChangeHook, CollectionConfig, FileData, TypeWithID } from 'payload'
 
+import path from 'node:path'
 import { isDeepStrictEqual } from 'node:util'
 import { deepMergeWithSourceArrays, isolateObjectProperty } from 'payload'
 
@@ -50,6 +51,7 @@ export const getAfterChangeHook =
 
     try {
       const files = getIncomingFiles({ data: uploadData, req })
+      const mainClientUpload = files.find((file) => !file.sizeName)?.clientUpload
 
       if (files.length > 0) {
         // Fold `_objectKey` so generated sizes land in the same folder as the original.
@@ -186,79 +188,51 @@ export const getAfterChangeHook =
         // persistence have succeeded. Deleting earlier would orphan the
         // record if a later step throws (e.g. a user-defined afterChange
         // hook on the same collection).
+        const locationArgs = { collectionPrefix, useCompositePrefixes }
+        const newLocations = getFileLocations({
+          ...locationArgs,
+          data: {
+            ...uploadData,
+            ...uploadMetadata,
+            ...(!select ? docWithMetadata : {}),
+          },
+        })
+        const previousLocations = previousDoc
+          ? getFileLocations({ ...locationArgs, data: previousDoc })
+          : new Map<string, string>()
+        const filesToDelete = new Map<string, { doc: StorageFileData; filename: string }>()
+
         if (previousDoc && operation === 'update' && !isDraftOverPublished) {
-          let filesToDelete: string[] = []
-
-          if (typeof previousDoc?.filename === 'string') {
-            filesToDelete.push(previousDoc.filename)
-          }
-
-          if (typeof previousDoc.sizes === 'object') {
-            filesToDelete = filesToDelete.concat(
-              Object.values(previousDoc?.sizes || []).map(
-                (resizedFileData) => resizedFileData?.filename as string,
-              ),
-            )
-          }
-
-          // Compare full locations: a replacement can reuse a filename while moving
-          // a legacy object beneath the collection prefix.
-          const newFileData = { ...uploadData, ...uploadMetadata }
-          const newFilenames = new Set<string>()
-          if (typeof newFileData.filename === 'string') {
-            newFilenames.add(newFileData.filename)
-          }
-          if (typeof newFileData.sizes === 'object') {
-            for (const size of Object.values(newFileData.sizes || {})) {
-              if (size?.filename && typeof size.filename === 'string') {
-                newFilenames.add(size.filename)
-              }
+          for (const [storageFilePath, filename] of previousLocations) {
+            if (!newLocations.has(storageFilePath)) {
+              filesToDelete.set(storageFilePath, { doc: previousDoc, filename })
             }
           }
-
-          const resolveKey = ({
-            data,
-            filename,
-          }: {
-            data: { _objectKey?: string; prefix?: string }
-            filename: string
-          }) =>
-            buildStoragePathData({
-              collectionPrefix,
-              docPrefix: getObjectFolder(data),
-              filename,
-              useCompositePrefixes,
-            }).storageFilePath
-          const newKeys = new Set(
-            [...newFilenames].map((filename) =>
-              resolveKey({
-                data: newFileData as { _objectKey?: string; prefix?: string },
-                filename,
-              }),
-            ),
-          )
-
-          const deletionPromises = filesToDelete.map(async (filename) => {
-            if (!filename) {
-              return
-            }
-            const storageFilePath = resolveKey({
-              data: previousDoc as { _objectKey?: string; prefix?: string },
-              filename,
-            })
-            if (!newKeys.has(storageFilePath)) {
-              await adapter.handleDelete({
-                collection,
-                doc: previousDoc,
-                filename,
-                req,
-                storageFilePath,
-              })
-            }
-          })
-
-          await Promise.all(deletionPromises)
         }
+
+        if (mainClientUpload?.isProcessed) {
+          const { originalStorageFilePath } = mainClientUpload
+          const isRetainedPublishedFile =
+            isDraftOverPublished && previousLocations.has(originalStorageFilePath)
+          if (!newLocations.has(originalStorageFilePath) && !isRetainedPublishedFile) {
+            filesToDelete.set(originalStorageFilePath, {
+              doc: previousDoc ?? uploadData,
+              filename: path.posix.basename(originalStorageFilePath),
+            })
+          }
+        }
+
+        await Promise.all(
+          [...filesToDelete].map(([storageFilePath, { doc: deletedFileDoc, filename }]) =>
+            adapter.handleDelete({
+              collection,
+              doc: deletedFileDoc,
+              filename,
+              req,
+              storageFilePath,
+            }),
+          ),
+        )
 
         if (docWithMetadata !== doc) {
           return docWithMetadata
@@ -273,3 +247,33 @@ export const getAfterChangeHook =
     }
     return doc
   }
+
+const getFileLocations = ({
+  collectionPrefix,
+  data,
+  useCompositePrefixes,
+}: {
+  collectionPrefix?: string
+  data: StorageFileData
+  useCompositePrefixes?: boolean
+}): Map<string, string> => {
+  const filenames = [
+    data.filename,
+    ...Object.values(data.sizes ?? {}).map((size) => size?.filename),
+  ]
+  const locations = new Map<string, string>()
+
+  for (const filename of filenames) {
+    if (typeof filename === 'string' && filename) {
+      const { storageFilePath } = buildStoragePathData({
+        collectionPrefix,
+        docPrefix: getObjectFolder(data),
+        filename,
+        useCompositePrefixes,
+      })
+      locations.set(storageFilePath, filename)
+    }
+  }
+
+  return locations
+}
