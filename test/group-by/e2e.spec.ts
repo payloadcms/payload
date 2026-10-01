@@ -339,6 +339,18 @@ test.describe('Group By', () => {
     await expect(sortTrigger).toBeDisabled()
   })
 
+  test('should preserve unrelated URL parameters when changing group-by', async () => {
+    await page.goto(`${url.list}?custom=keep`)
+
+    await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+    await expect(page).toHaveURL(/groupBy=category/)
+    await expect.poll(() => new URL(page.url()).searchParams.get('custom')).toBe('keep')
+
+    await clearGroupBy(page)
+    await expect(page).not.toHaveURL(/groupBy=category/)
+    await expect.poll(() => new URL(page.url()).searchParams.get('custom')).toBe('keep')
+  })
+
   test('should group by relationships even when their values are null', async () => {
     await payload.create({
       collection: postsSlug,
