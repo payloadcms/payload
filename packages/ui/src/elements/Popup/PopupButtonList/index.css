@@ -6,6 +6,10 @@
     text-align: left;
   }
 
+  .popup-button-list > .popup {
+    width: 100%;
+  }
+
   [dir='rtl'] .popup-button-list__text-align--left {
     text-align: right;
   }
@@ -35,6 +39,7 @@
     display: flex;
     align-items: stretch;
     flex: 1;
+    width: 100%;
     color: var(--popup-item-color, var(--color-text));
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
@@ -157,6 +162,17 @@
   /* Submenu trigger buttons: icon on left, label in middle, chevron pushed right */
   .popup-button-list__button--submenu-trigger {
     align-items: center;
+  }
+
+  .popup-button-list__button--submenu-trigger.popup-button-list__button--selected {
+    background-color: transparent;
+    color: var(--popup-item-color, var(--color-text));
+  }
+
+  .popup-button-list__button--submenu-trigger:hover,
+  .popup-button-list__button--submenu-trigger.popup-button-list__button--selected:hover {
+    background-color: var(--popup-item-bg-hover, var(--color-bg-brand));
+    color: var(--popup-item-color-hover, var(--color-text-onbrand));
   }
 
   .popup-button-list__submenu-icon {
