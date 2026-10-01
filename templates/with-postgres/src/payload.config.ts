@@ -1,4 +1,5 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
+import { mcpPlugin } from '@payloadcms/plugin-mcp'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
@@ -30,5 +31,5 @@ export default buildConfig({
     },
   }),
   sharp,
-  plugins: [],
+  plugins: [mcpPlugin({})],
 })

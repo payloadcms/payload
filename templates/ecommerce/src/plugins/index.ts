@@ -1,4 +1,5 @@
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
+import { mcpPlugin } from '@payloadcms/plugin-mcp'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { Plugin } from 'payload'
 import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
@@ -128,4 +129,5 @@ export const plugins: Plugin[] = [
       productsCollectionOverride: ProductsCollection,
     },
   }),
+  mcpPlugin({}),
 ]
