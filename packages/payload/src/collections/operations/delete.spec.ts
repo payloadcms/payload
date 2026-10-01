@@ -31,7 +31,7 @@ describe('deleteOperation', () => {
     documents = [{ id: 1 }],
   }: {
     afterDelete?: (args: { doc: { id: number }; req: PayloadRequest }) => Promise<void> | void
-    beforeDelete?: (args: { req: PayloadRequest }) => Promise<void> | void
+    beforeDelete?: (args: { id: number; req: PayloadRequest }) => Promise<void> | void
     bulkOperationsSingleTransaction?: boolean
     callerTransaction?: boolean
     documents?: { id: number }[]
@@ -189,24 +189,42 @@ describe('deleteOperation', () => {
     expect(req).not.toHaveProperty('transactionID')
   })
 
-  it('should roll back an operation-owned shared transaction when a write-capable beforeDelete hook fails', async () => {
+  it('should return batch errors after rolling back an operation-owned shared transaction', async () => {
     const beforeDeleteError = new Error('beforeDelete failed in operation transaction')
-    const { commitDatabaseTransaction, req, rollbackDatabaseTransaction, runDelete, updateOne } =
-      createDeleteTestContext({
-        beforeDelete: async ({ req }) => {
-          await req.payload.db.updateOne({
-            id: 1,
-            collection: 'documents',
-            data: { title: 'hook write' },
-            req,
-          })
-          throw beforeDeleteError
-        },
-        callerTransaction: false,
-      })
+    const {
+      commitDatabaseTransaction,
+      deleteMany,
+      req,
+      rollbackDatabaseTransaction,
+      runDelete,
+      updateOne,
+    } = createDeleteTestContext({
+      beforeDelete: async ({ id, req }) => {
+        if (id !== 1) {
+          return
+        }
 
-    await expect(runDelete()).rejects.toBe(beforeDeleteError)
+        await req.payload.db.updateOne({
+          id: 1,
+          collection: 'documents',
+          data: { title: 'hook write' },
+          req,
+        })
+        throw beforeDeleteError
+      },
+      callerTransaction: false,
+      documents: [{ id: 1 }, { id: 2 }],
+    })
+
+    await expect(runDelete()).resolves.toEqual({
+      docs: [],
+      errors: [
+        expect.objectContaining({ id: 1, message: beforeDeleteError.message }),
+        expect.objectContaining({ id: 2, message: expect.stringContaining('rolled back') }),
+      ],
+    })
     expect(updateOne).toHaveBeenCalledOnce()
+    expect(deleteMany).not.toHaveBeenCalled()
     expect(commitDatabaseTransaction).not.toHaveBeenCalled()
     expect(rollbackDatabaseTransaction).toHaveBeenCalledWith('operation-transaction')
     expect(req).not.toHaveProperty('transactionID')

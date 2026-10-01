@@ -363,8 +363,29 @@ export const deleteOperation = async <
         }
       } else if (hasSharedTransaction) {
         for (const entry of initiallyChecked) {
-          await runBeforeDeleteHooks({ doc: entry.doc })
-          hookResults.push(entry)
+          try {
+            await runBeforeDeleteHooks({ doc: entry.doc })
+            hookResults.push(entry)
+          } catch (error) {
+            if (hasCallerTransaction) {
+              throw error
+            }
+
+            didBatchDeleteFail = true
+            await killTransaction(req)
+
+            for (const rolledBackEntry of initiallyChecked) {
+              pushError(
+                rolledBackEntry.doc.id,
+                error,
+                rolledBackEntry === entry
+                  ? undefined
+                  : `Bulk delete was rolled back because the beforeDelete hook failed for document ${entry.doc.id}.`,
+              )
+            }
+
+            return []
+          }
         }
       } else {
         hookResults.push(
