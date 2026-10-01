@@ -1,4 +1,5 @@
 import type { ScreenReaderPlaywright } from '@guidepup/playwright'
+import type { Locator } from '@playwright/test'
 
 import { NVDAKeyCodeCommands } from '@guidepup/guidepup'
 import { screenReaderTest as test } from '@guidepup/playwright'
@@ -21,6 +22,7 @@ import {
   expectPopupCursorToMove,
   gotoCreatePost,
   gotoFirstPost,
+  gotoLabelTestLogin,
   gotoPostsList,
   insertTextBlockWithKeyboard,
   navigateScreenReaderTo,
@@ -85,6 +87,26 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       })
 
       expect(output).toMatch(/Payload/i)
+    })
+  })
+
+  test.describe('1.1.1 Non-text Content (A)', () => {
+    test('should announce required state instead of the asterisk', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3579
+      await page.goto(
+        formatAdminURL({ adminRoute: '/admin', path: '/collections/media/create', serverURL }),
+      )
+      const alt = page.locator('#field-alt')
+
+      await expect(alt).toBeVisible()
+      const capture = await captureScreenReader({ action: () => alt.focus(), screenReader })
+
+      expect(capture.spokenPhrase).toMatch(/alt/i)
+      expect(capture.spokenPhrase).toMatch(/required/i)
+      expect(capture.spokenPhrase).not.toMatch(/star|asterisk/i)
     })
   })
 
@@ -492,6 +514,55 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
         expect(outputs.join(' ')).not.toMatch(/drag to move|add block|edit link|remove link/i)
       }
     })
+    for (const form of ['document', 'login'] as const) {
+      test.describe(`${form} form`, () => {
+        test('should expose validation errors next to their fields', async ({
+          page,
+          screenReader,
+        }) => {
+          // PYLD-3581; login also covers the reading-order behavior of PYLD-3613.
+          if (form === 'login') {
+            await gotoLabelTestLogin({ page, serverURL })
+            await page.locator('input[name="email"]').fill('dev@payloadcms.com')
+            await page.getByRole('button', { name: 'Login', exact: true }).click()
+          } else {
+            await gotoCreatePost({ page, postsURL })
+            await page.getByRole('button', { name: /^Publish(?: in English)?$/ }).click()
+          }
+
+          const field = page.locator(form === 'login' ? 'input[name="password"]' : '#field-title')
+          const error = page
+            .locator('.field-error')
+            .filter({ hasText: /required/i })
+            .first()
+
+          await expect(error).toBeVisible()
+          await expectAdjacentValidationError({ error, field, screenReader })
+        })
+      })
+    }
+
+    test('should announce password errors after submission', async ({ page, screenReader }) => {
+      // PYLD-3613
+      await gotoLabelTestLogin({ page, serverURL })
+      await page.locator('input[name="email"]').fill('dev@payloadcms.com')
+      const password = page.locator('input[name="password"]')
+
+      await password.fill('temporary')
+      await password.fill('')
+      await password.press('Tab')
+      const error = page.locator('.field-error').filter({ hasText: /required/i })
+      const capture = await captureScreenReader({
+        action: async () => {
+          await page.getByRole('button', { name: 'Login', exact: true }).click()
+          await expect(error).toBeVisible()
+        },
+        screenReader,
+      })
+
+      expect.soft(capture.spokenPhrase).toContain((await error.innerText()).trim())
+    })
+
     test('should contain screen-reader traversal in bulk-upload and image-edit dialogs', async ({
       page,
       screenReader,
@@ -660,6 +731,74 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       const output = await navigateScreenReaderTo({ matches: /sort/i, screenReader })
 
       expect(output).toMatch(/dimmed|disabled|unavailable/i)
+    })
+  })
+
+  test.describe('2.4.6 Headings and Labels (AA)', () => {
+    test('should announce Welcome and the signed-in account as a heading', async ({
+      page,
+      screenReader,
+    }) => {
+      await page.goto(`${serverURL}/admin`)
+      await expect(page.getByRole('heading', { name: /^Welcome, /, level: 1 })).toBeVisible()
+
+      const output = await navigateScreenReaderTo({ matches: /Welcome, /i, screenReader })
+
+      expect(output).toMatch(/heading/i)
+    })
+  })
+
+  test.describe('3.2.2 On Input (A)', () => {
+    test('should announce automatic search and collection results', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3773
+      for (const isColumnSearch of [false, true]) {
+        await gotoPostsList({ page, postsURL })
+        if (isColumnSearch) {
+          await page.locator('.columns-button__button').click()
+        }
+        const search = isColumnSearch
+          ? page
+              .getByRole('dialog', { name: /columns/i })
+              .getByRole('textbox', { name: /search columns/i })
+          : page.locator('#search-filter-input')
+        const focusCapture = await captureScreenReader({
+          action: () => search.focus(),
+          screenReader,
+        })
+        const resultsCapture = await captureScreenReader({
+          action: async () => {
+            await search.fill('no-matching-accessibility-result')
+            if (isColumnSearch) {
+              await expect(
+                page.getByText('No matches found for this search', { exact: true }),
+              ).toBeVisible()
+            } else {
+              await expect(page.locator('tbody tr')).toHaveCount(0)
+              await expect(page.locator('.no-results__title')).toHaveText('No Results.')
+            }
+          },
+          screenReader,
+        })
+
+        await expect(search).toBeFocused()
+        expect
+          .soft(
+            (isColumnSearch &&
+              /automatic|as you type|while you type/i.test(focusCapture.spokenPhrase)) ||
+              /results found for.*(?:0|zero)|no (?:matches|results|posts)/i.test(
+                resultsCapture.spokenPhrase,
+              ),
+            JSON.stringify({
+              focus: focusCapture.spokenPhrase,
+              isColumnSearch,
+              results: resultsCapture.spokenPhrase,
+            }),
+          )
+          .toBe(true)
+      }
     })
   })
 
@@ -908,17 +1047,17 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
         {
           count: 1,
           query: 'Example post two',
-          speech: /(?:1|one)\s+(?:post|result|document|item)/i,
+          speech: /results found for.*(?:1|one)/i,
         },
         {
           count: 1,
           query: 'Example post three',
-          speech: /(?:1|one)\s+(?:post|result|document|item)/i,
+          speech: /results found for.*(?:1|one)/i,
         },
         {
           count: 0,
           query: 'no-such-accessibility-post',
-          speech: /(?:0|zero)\s+(?:post|result|document|item)/i,
+          speech: /results found for.*(?:0|zero)/i,
         },
       ]) {
         const capture = await captureScreenReader({
@@ -949,4 +1088,41 @@ async function collectModalCursorStops({ screenReader }: { screenReader: ScreenR
     }
   }
   return stops
+}
+
+async function expectAdjacentValidationError({
+  error,
+  field,
+  screenReader,
+}: {
+  error: Locator
+  field: Locator
+  screenReader: ScreenReaderPlaywright
+}) {
+  const message = (await error.innerText()).replace(/\s+/g, ' ').trim()
+  const stops: string[] = []
+  let hasAdjacentError = false
+
+  // Permit the label and field wrapper between the input and its error, in either direction.
+  for (const direction of ['previous', 'next'] as const) {
+    await field.blur()
+    await field.focus()
+    for (let index = 0; index < 3; index++) {
+      await screenReader[direction]()
+      const text = (await screenReader.itemText()).replace(/\s+/g, ' ').trim()
+
+      stops.push(text)
+      if (text.includes(message)) {
+        hasAdjacentError = true
+        break
+      }
+      if (/dashboard|navigation|publish|save draft/i.test(text)) {
+        break
+      }
+    }
+    if (hasAdjacentError) {
+      break
+    }
+  }
+  expect(hasAdjacentError, JSON.stringify({ message, stops })).toBe(true)
 }

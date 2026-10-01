@@ -270,14 +270,15 @@ export interface PayloadFolder {
  */
 export interface Post {
   id: string;
-  title?: string | null;
+  title: string;
   /**
    * A subtitle field to test focus indicators in the admin UI, helps us detect exiting out of rich text editor properly.
    */
   subtitle?: string | null;
-  accessibilitySelect?: ('one' | 'two') | null;
+  accessibilitySelect: 'one' | 'two';
   accessibilitySortableSelect?: ('one' | 'two')[] | null;
   accessibilityDisabledSelect?: ('one' | 'two') | null;
+  requiredTags: string[];
   relatedPost?: (string | null) | Post;
   publishedOn?: string | null;
   content?: LexicalRichText<LexicalNodes_D6CBC3A3> | null;
@@ -299,6 +300,31 @@ export interface Post {
     relationTo: 'users';
     value: string | User;
   } | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  location?: [number, number] | null;
+  settings?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  source?: string | null;
+  unlabelledSettings?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  unlabelledSource?: string | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -340,6 +366,7 @@ export interface Media {
     relationTo: 'users';
     value: string | User;
   } | null;
+  alt: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -543,6 +570,7 @@ export interface PostsSelect<T extends boolean = true> {
   accessibilitySelect?: T;
   accessibilitySortableSelect?: T;
   accessibilityDisabledSelect?: T;
+  requiredTags?: T;
   relatedPost?: T;
   publishedOn?: T;
   content?: T;
@@ -577,6 +605,11 @@ export interface PostsSelect<T extends boolean = true> {
   featuredImage?: T;
   createdBy?: T;
   updatedBy?: T;
+  location?: T;
+  settings?: T;
+  source?: T;
+  unlabelledSettings?: T;
+  unlabelledSource?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -589,6 +622,7 @@ export interface PostsSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   createdBy?: T;
   updatedBy?: T;
+  alt?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

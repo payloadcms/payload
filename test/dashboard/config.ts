@@ -15,7 +15,6 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  suite: 'dashboard',
   config: {
     admin: {
       components: {
@@ -32,6 +31,15 @@ export default buildConfigWithDefaults({
       dashboard: {
         defaultLayout: ({ req: { user } }) => {
           const baseWidgets: WidgetInstance[] = [
+            {
+              widgetSlug: 'welcome',
+              width: 'full',
+            },
+            {
+              data: {},
+              widgetSlug: 'activity',
+              width: 'full',
+            },
             {
               widgetSlug: 'collections',
               width: 'full',
@@ -169,12 +177,6 @@ export default buildConfigWithDefaults({
 
           baseWidgets.push(...collectionQueryWidgets)
 
-          baseWidgets.push({
-            data: {},
-            widgetSlug: 'activity',
-            width: 'medium',
-          })
-
           return baseWidgets
         },
         widgets: [
@@ -287,4 +289,5 @@ export default buildConfigWithDefaults({
     },
   },
   seed,
+  suite: 'dashboard',
 })
