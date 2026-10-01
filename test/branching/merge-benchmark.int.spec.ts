@@ -17,21 +17,6 @@ const seedBatchSize = Number(process.env.BRANCHING_MERGE_BENCHMARK_SEED_BATCH_SI
 const timeoutMs = Number(process.env.BRANCHING_MERGE_BENCHMARK_TIMEOUT_MS ?? 300_000)
 const outputPath =
   process.env.BRANCHING_MERGE_BENCHMARK_OUTPUT ?? '/tmp/content-branching-merge-benchmark.json'
-const progressPath = `${outputPath}.progress`
-
-const adapterMethods = [
-  'batchProcessing',
-  'count',
-  'create',
-  'deleteMany',
-  'deleteOne',
-  'find',
-  'findOne',
-  'updateMany',
-  'updateOne',
-] as const
-
-type AdapterMethod = (typeof adapterMethods)[number]
 
 type BenchmarkMemory = {
   baselineHeapBytes: number
@@ -92,11 +77,8 @@ const runBenchmark = async ({ payload }: { payload: Payload }) => {
 
     expect(pendingBeforeMerge.totalDocs).toBe(mergeDocumentCount)
 
-    const callCounts = new Map<AdapterMethod, number>()
-    const restoreAdapterMethods = recordAdapterMethodCalls({ callCounts, payload })
     const memory = startMemoryMeasurement()
     const startedAt = performance.now()
-    const workloadPreparationStartedAt = performance.now()
     const attemptedChanges = documentIDs.map((documentID, index) => ({
       applicationOutcome: 'attempted',
       changeID: changeIDs[index],
@@ -109,17 +91,6 @@ const runBenchmark = async ({ payload }: { payload: Payload }) => {
       sourceID: documentID,
       targetID: documentID,
     }))
-    const workloadPreparationDurationMs = performance.now() - workloadPreparationStartedAt
-
-    writeJSON({
-      path: progressPath,
-      value: {
-        elapsedMs: performance.now() - startedAt,
-        memory: memory.current(),
-        phase: 'workload-prepared',
-        selectedDocuments: attemptedChanges.length,
-      },
-    })
 
     const executionStartedAt = performance.now()
     const startedAtDate = new Date().toISOString()
@@ -150,16 +121,6 @@ const runBenchmark = async ({ payload }: { payload: Payload }) => {
     const successfulPromotions = promotionResults.filter(({ status }) => status === 'succeeded')
 
     expect(successfulPromotions).toHaveLength(mergeDocumentCount)
-    writeJSON({
-      path: progressPath,
-      value: {
-        elapsedMs: performance.now() - startedAt,
-        memory: memory.current(),
-        phase: 'content-promoted',
-        promotedDocuments: successfulPromotions.length,
-      },
-    })
-
     const cleanupResults = await payload.db.batchProcessing({
       batchSize: 1_000,
       operations: changeIDs.map((changeID) => ({
@@ -200,7 +161,6 @@ const runBenchmark = async ({ payload }: { payload: Payload }) => {
     const executionDurationMs = performance.now() - executionStartedAt
 
     memory.stop()
-    restoreAdapterMethods()
     const durationMs = performance.now() - startedAt
     const pendingAfterMerge = await payload.count({
       collection: branchChangesSlug,
@@ -213,25 +173,11 @@ const runBenchmark = async ({ payload }: { payload: Payload }) => {
       overrideAccess: true,
       where: { title: { contains: titlePrefix } },
     })
-    const firstHistoryPage = await payload.find({
+    const historyEvents = await payload.count({
       collection: branchMergesSlug,
-      depth: 0,
-      limit: 1,
       overrideAccess: true,
-      page: 1,
-      sort: '-mergedAt',
       where: { branch: { equals: branch } },
     })
-    const secondHistoryPage = await payload.find({
-      collection: branchMergesSlug,
-      depth: 0,
-      limit: 1,
-      overrideAccess: true,
-      page: 2,
-      sort: '-mergedAt',
-      where: { branch: { equals: branch } },
-    })
-    const storedMergeEvent = firstHistoryPage.docs[0]
     const sampleIndexes = [0, Math.floor(mergeDocumentCount / 2), mergeDocumentCount - 1]
 
     for (const index of sampleIndexes) {
@@ -245,54 +191,26 @@ const runBenchmark = async ({ payload }: { payload: Payload }) => {
       expect(document.title).toBe(`${titlePrefix}-${index}`)
     }
 
-    const adapterMethodCalls = Object.fromEntries(callCounts) as Partial<
-      Record<AdapterMethod, number>
-    >
-    const databaseCallCount = Object.entries(adapterMethodCalls).reduce(
-      (total, [method, count]) => total + (method === 'batchProcessing' ? 0 : (count ?? 0)),
-      0,
-    )
-
     return {
       adapter: payload.db.packageName,
-      adapterMethodCalls,
       branch,
       correctness: {
         batchPromotions: successfulPromotions.length,
-        historyEvents: firstHistoryPage.totalDocs,
+        historyEvents: historyEvents.totalDocs,
         pendingChanges: pendingAfterMerge.totalDocs,
         promotedDocuments: promotedDocuments.totalDocs,
         registryCleanups: successfulCleanups.length,
         sampleDocumentsVerified: sampleIndexes.length,
         selectedDocuments: attemptedChanges.length,
       },
-      databaseCallCount,
       durationMs,
       executionDurationMs,
       generatedAt: new Date().toISOString(),
-      history: {
-        firstPageDocuments: firstHistoryPage.docs.length,
-        secondPageDocuments: secondHistoryPage.docs.length,
-        totalPages: firstHistoryPage.totalPages,
-      },
-      logBytes: Buffer.byteLength(JSON.stringify(storedMergeEvent)),
       memory: memory.result(),
       mergeDocumentCount,
       node: process.version,
-      notes: [
-        'MongoDB only.',
-        'Seed time is reported separately and excluded from merge duration.',
-        'The script creates a known 10,000-change workload without running the full merge planner.',
-        'It submits all promotions through the ordered adapter batch contract and persists the production merge-ledger shape.',
-        'It intentionally does not run 10,000 Local API lifecycles; ordinary MongoDB integration tests cover planning, access, hooks, validation, versions, recovery, and cleanup.',
-        'Bulk seed inserts bypass Payload lifecycle work.',
-        'The workload uses unversioned branch-created documents to isolate adapter batching, ledger size, and memory growth.',
-        'Adapter method counts exclude raw bulk seed inserts and post-merge verification.',
-        'Timing is diagnostic output, not a test threshold.',
-      ],
       seedDurationMs,
       totalContentRowCount,
-      workloadPreparationDurationMs,
     }
   } finally {
     payload.logger.level = originalLoggerLevel
@@ -395,11 +313,6 @@ const startMemoryMeasurement = () => {
   interval.unref()
 
   return {
-    current: () => {
-      const current = process.memoryUsage()
-
-      return { heapBytes: current.heapUsed, rssBytes: current.rss }
-    },
     result: (): BenchmarkMemory => {
       sample()
 
@@ -412,43 +325,10 @@ const startMemoryMeasurement = () => {
         peakRSSIncreaseBytes: Math.max(0, peakRSSBytes - baseline.rss),
       }
     },
-    sample,
     stop: () => {
       clearInterval(interval)
       sample()
     },
-  }
-}
-
-const recordAdapterMethodCalls = ({
-  callCounts,
-  payload,
-}: {
-  callCounts: Map<AdapterMethod, number>
-  payload: Payload
-}): (() => void) => {
-  const adapter = payload.db as unknown as Record<string, (...args: unknown[]) => unknown>
-  const originals = new Map<AdapterMethod, (...args: unknown[]) => unknown>()
-
-  for (const method of adapterMethods) {
-    const original = adapter[method]
-
-    if (typeof original !== 'function') {
-      continue
-    }
-
-    originals.set(method, original)
-    adapter[method] = function (...args: unknown[]) {
-      callCounts.set(method, (callCounts.get(method) ?? 0) + 1)
-
-      return original.apply(this, args)
-    }
-  }
-
-  return () => {
-    for (const [method, original] of originals) {
-      adapter[method] = original
-    }
   }
 }
 

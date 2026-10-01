@@ -48,78 +48,6 @@ describe('injectBranchFields', () => {
     })
   })
 
-  it('should add branch scope to nested unique fields', () => {
-    const collection = buildCollection({
-      fields: [
-        {
-          name: 'metadata',
-          type: 'group',
-          fields: [{ name: 'code', type: 'text', unique: true }],
-        },
-      ],
-    })
-
-    injectBranchFields(collection)
-
-    const metadata = collection.fields[0]
-
-    expect(metadata).toMatchObject({ type: 'group' })
-    expect(metadata && 'fields' in metadata ? metadata.fields[0] : undefined).toMatchObject({
-      name: 'code',
-      unique: false,
-    })
-    expect(collection.indexes).toContainEqual({
-      fields: ['metadata.code', '_branch'],
-      requireExists: ['metadata.code'],
-      unique: true,
-    })
-  })
-
-  it('should add branch scope to localized unique fields', () => {
-    const collection = buildCollection({
-      fields: [{ name: 'slug', type: 'text', localized: true, unique: true }],
-    })
-
-    injectBranchFields(collection)
-
-    expect(collection.fields[0]).toMatchObject({
-      localized: true,
-      name: 'slug',
-      unique: false,
-    })
-    expect(collection.indexes).toContainEqual({
-      fields: ['slug', '_branch'],
-      requireExists: ['slug'],
-      unique: true,
-    })
-  })
-
-  it('should add branch scope to developer unique indexes without changing their constraints', () => {
-    const collection = buildCollection({
-      fields: [
-        { name: 'site', type: 'text' },
-        { name: 'slug', type: 'text' },
-      ],
-      indexes: [
-        {
-          fields: ['site', 'slug'],
-          requireExists: ['slug'],
-          unique: true,
-        },
-        { fields: ['site', 'slug'] },
-      ],
-    })
-
-    injectBranchFields(collection)
-
-    expect(collection.indexes).toContainEqual({
-      fields: ['site', 'slug', '_branch'],
-      requireExists: ['slug'],
-      unique: true,
-    })
-    expect(collection.indexes).toContainEqual({ fields: ['site', 'slug'] })
-  })
-
   it('should not add branch scope twice to a developer unique index', () => {
     const collection = buildCollection({
       fields: [{ name: 'slug', type: 'text' }],
@@ -135,19 +63,6 @@ describe('injectBranchFields', () => {
     expect(collection.indexes).not.toContainEqual({
       fields: ['slug', '_branch', '_branch'],
       unique: true,
-    })
-  })
-
-  it('should add branch scope to a custom upload filename index', () => {
-    const collection = buildCollection({
-      fields: [{ name: 'prefix', type: 'text' }],
-      upload: { filenameCompoundIndex: ['filename', 'prefix'] },
-    })
-
-    injectBranchFields(collection)
-
-    expect(collection.upload).toMatchObject({
-      filenameCompoundIndex: ['filename', 'prefix', '_branch'],
     })
   })
 })

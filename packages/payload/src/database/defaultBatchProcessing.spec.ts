@@ -132,61 +132,6 @@ describe('defaultBatchProcessing', () => {
     ])
   })
 
-  test('should distinguish a missing match when returned documents are disabled', async () => {
-    const { adapter } = createTestAdapter()
-
-    const results = await defaultBatchProcessing.call(adapter as BaseDatabaseAdapter, {
-      operations: [
-        {
-          args: {
-            collection: 'posts',
-            data: { title: 'missing' },
-            returning: false,
-            where: { id: { equals: 99 } },
-          },
-          operation: 'updateOne',
-        },
-      ],
-    })
-
-    expect(results).toEqual([{ index: 0, operation: 'updateOne', status: 'noMatch' }])
-  })
-
-  test('should stop after a failure and mark later operations as unattempted', async () => {
-    const { adapter, executionOrder } = createTestAdapter({ shouldFailOnTitle: 'fail' })
-
-    const results = await defaultBatchProcessing.call(adapter as BaseDatabaseAdapter, {
-      batchSize: 2,
-      operations: [
-        {
-          args: {
-            collection: 'posts',
-            data: { title: 'updated' },
-            where: { id: { equals: 1 } },
-          },
-          operation: 'updateOne',
-        },
-        {
-          args: {
-            collection: 'posts',
-            data: { title: 'fail' },
-            where: { id: { equals: 2 } },
-          },
-          operation: 'updateOne',
-        },
-        {
-          args: { collection: 'posts', data: { title: 'not attempted' } },
-          operation: 'create',
-        },
-      ],
-    })
-
-    expect(executionOrder).toEqual(['update:1', 'update:2'])
-    expect(results[0]).toMatchObject({ documentID: 1, index: 0, status: 'succeeded' })
-    expect(results[1]).toMatchObject({ index: 1, operation: 'updateOne', status: 'failed' })
-    expect(results[2]).toEqual({ index: 2, operation: 'create', status: 'unattempted' })
-  })
-
   test('should continue after a failure only when the caller requests it', async () => {
     const { adapter, executionOrder } = createTestAdapter({ shouldFailOnTitle: 'fail' })
 

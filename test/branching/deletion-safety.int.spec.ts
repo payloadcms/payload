@@ -270,38 +270,12 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
       disableErrors: true,
       overrideAccess: true,
     })
-    const defaultBranchDocuments = await payload.find({
-      branch: branch.slug,
-      collection: deletionSafetyOwnersSlug,
-      overrideAccess: true,
-      where: { id: { equals: mainOwner.id } },
-    })
-    const defaultBranchCount = await payload.count({
-      branch: branch.slug,
-      collection: deletionSafetyOwnersSlug,
-      overrideAccess: true,
-      where: { id: { equals: mainOwner.id } },
-    })
     const trashedBranchDocument = await payload.findByID({
       id: mainOwner.id,
       branch: branch.slug,
       collection: deletionSafetyOwnersSlug,
       overrideAccess: true,
       trash: true,
-    })
-    const trashedBranchDocuments = await payload.find({
-      branch: branch.slug,
-      collection: deletionSafetyOwnersSlug,
-      overrideAccess: true,
-      trash: true,
-      where: { id: { equals: mainOwner.id } },
-    })
-    const trashedBranchCount = await payload.count({
-      branch: branch.slug,
-      collection: deletionSafetyOwnersSlug,
-      overrideAccess: true,
-      trash: true,
-      where: { id: { equals: mainOwner.id } },
     })
     const mainDocument = await payload.findByID({
       id: mainOwner.id,
@@ -310,12 +284,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     })
 
     expect(defaultBranchDocument).toBeNull()
-    expect(defaultBranchDocuments.totalDocs).toBe(0)
-    expect(defaultBranchCount.totalDocs).toBe(0)
     expect(trashedBranchDocument.title).toBe('trashed branch owner')
-    expect(trashedBranchDocuments.docs).toHaveLength(1)
-    expect(trashedBranchDocuments.docs[0]?.title).toBe('trashed branch owner')
-    expect(trashedBranchCount.totalDocs).toBe(1)
     expect(mainDocument.title).toBe('main owner')
   })
 

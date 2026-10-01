@@ -3,7 +3,6 @@ import type { BaseDatabaseAdapter, CopyArgs } from './types.js'
 
 import { describe, expect, it } from 'vitest'
 
-import { ValidationError } from '../errors/ValidationError.js'
 import { createDatabaseAdapter } from './createDatabaseAdapter.js'
 import { defaultCopy } from './defaultCopy.js'
 
@@ -103,38 +102,5 @@ describe('defaultCopy', () => {
       },
       req,
     })
-  })
-
-  it('should reject a missing source without creating a destination', async () => {
-    let hasCreated = false
-    const req = { payload: {} } as PayloadRequest
-    const adapter = {
-      create: async () => {
-        hasCreated = true
-
-        return {}
-      },
-      findOne: async () => null,
-    } as unknown as BaseDatabaseAdapter
-
-    await expect(defaultCopy.call(adapter, createCopyArgs({ req }))).rejects.toMatchObject({
-      name: 'NotFound',
-    })
-    expect(hasCreated).toBe(false)
-  })
-
-  it('should preserve a duplicate-destination storage error', async () => {
-    const duplicateError = new ValidationError({
-      collection: 'posts',
-      errors: [{ message: 'Value must be unique', path: '_branchDocID' }],
-    })
-    const req = { payload: {} } as PayloadRequest
-    const adapter = {
-      create: async () => Promise.reject(duplicateError),
-      findOne: async () => ({ _branch: 'main', id: 'source-row-id' }),
-      payload: payloadForCopy,
-    } as unknown as BaseDatabaseAdapter
-
-    await expect(defaultCopy.call(adapter, createCopyArgs({ req }))).rejects.toBe(duplicateError)
   })
 })

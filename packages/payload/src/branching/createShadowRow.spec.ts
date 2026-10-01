@@ -15,6 +15,44 @@ const data = { _branch: branch, _branchDocID: 'main-id', title: 'Shadow' }
 const docID = 'main-id'
 const shadow = { ...data, id: 'shadow-id' }
 
+const createCopyConflictRequest = ({
+  hasChangeRecord,
+}: {
+  hasChangeRecord: boolean
+}): {
+  create: ReturnType<typeof vi.fn>
+  findOne: ReturnType<typeof vi.fn>
+  req: PayloadRequest
+} => {
+  const copyError = new ValidationError({
+    collection: collectionSlug,
+    errors: [{ message: 'Value must be unique', path: '_branchDocID' }],
+  })
+  const create = vi.fn()
+  const findOne = vi
+    .fn()
+    .mockImplementation(({ collection }: { collection: string }) =>
+      Promise.resolve(
+        collection === 'payload-branch-changes'
+          ? hasChangeRecord
+            ? { id: 'change-id', operation: 'update' }
+            : null
+          : shadow,
+      ),
+    )
+  const req = {
+    payload: {
+      db: {
+        copy: vi.fn().mockRejectedValue(copyError),
+        create,
+        findOne,
+      },
+    },
+  } as unknown as PayloadRequest
+
+  return { create, findOne, req }
+}
+
 test('should use database copy for a shadow with an explicit source', async () => {
   const copy = vi.fn().mockResolvedValue(shadow)
   const create = vi.fn()
@@ -57,21 +95,7 @@ test('should use database copy for a shadow with an explicit source', async () =
 })
 
 test('should recover a competing database copy after a uniqueness failure', async () => {
-  const copyError = new ValidationError({
-    collection: collectionSlug,
-    errors: [{ message: 'Value must be unique', path: '_branchDocID' }],
-  })
-  const create = vi.fn()
-  const findOne = vi.fn().mockResolvedValue(shadow)
-  const req = {
-    payload: {
-      db: {
-        copy: vi.fn().mockRejectedValue(copyError),
-        create,
-        findOne,
-      },
-    },
-  } as unknown as PayloadRequest
+  const { create, findOne, req } = createCopyConflictRequest({ hasChangeRecord: true })
 
   await expect(
     createShadowRow({
@@ -91,23 +115,7 @@ test('should recover a competing database copy after a uniqueness failure', asyn
 })
 
 test('should reject a competing shadow without a change record', async () => {
-  const copyError = new ValidationError({
-    collection: collectionSlug,
-    errors: [{ message: 'Value must be unique', path: '_branchDocID' }],
-  })
-  const findOne = vi
-    .fn()
-    .mockImplementation(({ collection }: { collection: string }) =>
-      Promise.resolve(collection === 'payload-branch-changes' ? null : shadow),
-    )
-  const req = {
-    payload: {
-      db: {
-        copy: vi.fn().mockRejectedValue(copyError),
-        findOne,
-      },
-    },
-  } as unknown as PayloadRequest
+  const { findOne, req } = createCopyConflictRequest({ hasChangeRecord: false })
 
   await expect(
     createShadowRow({

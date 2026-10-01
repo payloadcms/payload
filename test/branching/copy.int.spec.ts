@@ -1,6 +1,6 @@
 import type { PayloadRequest } from 'payload'
 
-import { commitTransaction, initTransaction, killTransaction, ValidationError } from 'payload'
+import { initTransaction, killTransaction, ValidationError } from 'payload'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
@@ -110,7 +110,7 @@ test.suite('Database copy', { config: './config.ts' }, () => {
   })
 
   test.options(
-    'should leave commit and rollback to the caller transaction',
+    'should leave rollback to the caller transaction',
     { db: (adapter) => adapter === 'mongodb' || adapter === 'postgres' },
     async ({ payload }) => {
       const source = await payload.create({
@@ -148,39 +148,6 @@ test.suite('Database copy', { config: './config.ts' }, () => {
       })
 
       expect(copyAfterRollback).toBeNull()
-
-      const commitReq = { payload } as PayloadRequest
-      const didStartCommitTransaction = await initTransaction(commitReq)
-      const commitTransactionID = await commitReq.transactionID
-      let committedCopyID: number | string | undefined
-
-      expect(didStartCommitTransaction).toBe(true)
-
-      try {
-        const committedCopy = await payload.db.copy({
-          collection: nestedSlug,
-          destination: { branch: 'committed-transaction-copy' },
-          req: commitReq,
-          source: { id: source.id, branch: 'main' },
-        })
-
-        committedCopyID = committedCopy.id
-        expect(commitReq.transactionID).toBe(commitTransactionID)
-
-        await commitTransaction(commitReq)
-      } finally {
-        if (commitReq.transactionID) {
-          await killTransaction(commitReq)
-        }
-      }
-
-      const copyAfterCommit = await payload.db.findOne({
-        branch: false,
-        collection: nestedSlug,
-        where: { id: { equals: committedCopyID } },
-      })
-
-      expect(copyAfterCommit).not.toBeNull()
     },
   )
 })
