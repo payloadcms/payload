@@ -6,7 +6,9 @@ import { formatAdminURL } from 'payload/shared'
 import type { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 
 import { addGroupBy, clearGroupBy, openGroupBy } from '../__helpers/e2e/groupBy/index.js'
+import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { selectInput } from '../__helpers/e2e/selectInput.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import {
   addCollectionQueryWidget,
   addTextBlock,
@@ -183,6 +185,94 @@ test.describe('WCAG 2.2 Level AA', () => {
           const label = (await header.locator('.sort-column__label').innerText()).trim()
 
           await expect.soft(header).toHaveAccessibleName(label)
+        }
+      }
+    })
+
+    test('should associate coordinate labels with their inputs', async () => {
+      // PYLD-3824, PYLD-3607
+      await gotoCreatePost({ page, postsURL })
+      for (const coordinate of ['Longitude', 'Latitude']) {
+        const label = page.locator('.point label').filter({ hasText: `Location - ${coordinate}` })
+        const input = page.locator(`input[name="location.${coordinate.toLowerCase()}"]`)
+
+        await expect(label).toBeVisible()
+        await expect(input).toBeVisible()
+        await expect.soft(input).toHaveAccessibleName(new RegExp(`Location.*${coordinate}`, 'i'))
+        await label.click()
+        await expect.soft(input).toBeFocused()
+        expect
+          .soft(await label.evaluate((element: HTMLLabelElement) => element.control?.id))
+          .toBe(await input.getAttribute('id'))
+      }
+    })
+
+    test('should associate JSON and Code labels with their editors', async () => {
+      // PYLD-3822
+      test.setTimeout(60000)
+      await gotoCreatePost({ page, postsURL })
+      for (const [field, labelText] of [
+        ['settings', 'Settings'],
+        ['source', 'Source'],
+      ] as const) {
+        const wrapper = page.locator(`#field-${field}`)
+        const input = wrapper.getByRole('textbox')
+        const label = page.locator('.field-label').filter({ hasText: new RegExp(`^${labelText}$`) })
+
+        await wrapper.scrollIntoViewIfNeeded()
+        await expect(input).toBeAttached()
+        await label.click()
+        await expect.soft(input).toBeFocused()
+        await expect.soft(input).toHaveAccessibleName(new RegExp(labelText, 'i'))
+      }
+      for (const field of ['unlabelledSettings', 'unlabelledSource']) {
+        const wrapper = page.locator(`#field-${field}`)
+
+        await wrapper.scrollIntoViewIfNeeded()
+        await expect.soft(wrapper.getByRole('textbox')).toHaveAccessibleName('Editor content')
+      }
+    })
+
+    test('should focus select inputs when their labels are clicked', async () => {
+      // PYLD-3814
+      await gotoCreatePost({ page, postsURL })
+      for (const name of ['Accessibility Select', 'Required Tags']) {
+        const label = page.locator('label').filter({ hasText: name })
+        const field = page.locator('.field-type').filter({ has: label })
+        const input = field.getByRole('combobox')
+
+        await expect(input).toHaveAccessibleName(name)
+        await label.click()
+        await expect(input).toBeFocused()
+        expect(await label.evaluate((element: HTMLLabelElement) => element.control?.id)).toBe(
+          await input.getAttribute('id'),
+        )
+      }
+    })
+
+    test('should associate rich-text toolbars with their fields', async () => {
+      // PYLD-3788, PYLD-3780, PYLD-3742
+      await addTextBlock({ page, postsURL })
+      for (const [selector, name] of [
+        ['[data-field-path="content"]', 'Content'],
+        ['[data-field-path="layout.0.body"]', 'Body'],
+      ] as const) {
+        const field = page.locator(selector)
+        const toolbar = field.locator('.fixed-toolbar')
+        const editor = field.locator('[contenteditable="true"]').first()
+
+        await expect(editor).toBeVisible()
+        await expect(editor).toHaveAccessibleName(name)
+
+        await expect(toolbar).toBeVisible()
+        await expect(toolbar.getByRole('button').first()).toBeVisible()
+        const namedContainer = page
+          .getByRole('group', { name: new RegExp(name, 'i') })
+          .or(page.getByRole('toolbar', { name: new RegExp(name, 'i') }))
+          .or(page.getByRole('region', { name: new RegExp(name, 'i') }))
+
+        for (const button of await toolbar.getByRole('button').all()) {
+          await expect.soft(namedContainer.getByRole('button').and(button)).toHaveCount(1)
         }
       }
     })
@@ -478,6 +568,30 @@ test.describe('WCAG 2.2 Level AA', () => {
         textOverflow: 'ellipsis',
       })
       expect(labelMetrics.scrollWidth).toBeGreaterThan(labelMetrics.clientWidth)
+    })
+
+    test('should keep collection cards within a 320px viewport', async () => {
+      const previousViewport = page.viewportSize()
+
+      try {
+        await page.setViewportSize({ height: 720, width: 320 })
+        await page.goto(`${serverURL}/admin`)
+
+        const cards = page.locator('.collections__card-list .card')
+
+        expect(await cards.count()).toBeGreaterThan(0)
+        for (const card of await cards.all()) {
+          const box = await card.boundingBox()
+
+          expect(box).not.toBeNull()
+          expect(box!.x).toBeGreaterThanOrEqual(0)
+          expect(box!.x + box!.width).toBeLessThanOrEqual(320)
+        }
+      } finally {
+        if (previousViewport) {
+          await page.setViewportSize(previousViewport)
+        }
+      }
     })
 
     test('should ellipsize long selected values without obscuring their remove control', async () => {
@@ -1334,7 +1448,13 @@ test.describe('WCAG 2.2 Level AA', () => {
         page.getByRole('status').filter({ hasText: 'Picked up draggable item' }),
       ).toHaveCount(1)
       await page.keyboard.press('ArrowLeft')
-      await expect(page.getByRole('status').filter({ hasText: `${firstID}-before` })).toHaveCount(1)
+      const overFirstWidget = page.getByRole('status').filter({ hasText: firstID! })
+
+      await expect(overFirstWidget).toContainText(new RegExp(`${firstID}-(before|after)`))
+      if ((await overFirstWidget.innerText()).includes(`${firstID}-after`)) {
+        await page.keyboard.press('ArrowLeft')
+      }
+      await expect(overFirstWidget).toContainText(`${firstID}-before`)
       await page.keyboard.press('Space')
       await expect(widgets.first()).toHaveAttribute('data-slug', lastID!)
       await expect(widgets.last()).toHaveAttribute('data-slug', firstID!)
@@ -1369,7 +1489,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         ).toBeFocused()
         await page.keyboard.press('Tab')
         await expect(
-          widget.getByRole('button', { name: /^Resize You recently viewed, current size: small$/ }),
+          widget.getByRole('button', { name: /^Resize You recently viewed, current size: full$/ }),
         ).toBeFocused()
         await page.keyboard.press('Tab')
         await expect(
@@ -1588,6 +1708,81 @@ test.describe('WCAG 2.2 Level AA', () => {
       await page.keyboard.press('Escape')
       await expect(trigger).toBeFocused()
     })
+    for (const form of ['document', 'login'] as const) {
+      test(`should associate ${form} errors with their fields and focus order`, async () => {
+        // PYLD-3581, PYLD-3613, PYLD-3611
+        const context = await page.context().browser()!.newContext()
+        const { page: formPage } = await initPage({ context, serverURL })
+
+        try {
+          if (form === 'login') {
+            await context.clearCookies()
+            await context.route(
+              (url) => url.origin === new URL(serverURL).origin,
+              async (route) => {
+                await route.continue({
+                  headers: { ...route.request().headers(), DisableAutologin: 'true' },
+                })
+              },
+            )
+            await formPage.goto(formatAdminURL({ adminRoute: '/admin', path: '/login', serverURL }))
+            await formPage.locator('input[name="email"]').fill('dev@payloadcms.com')
+            const password = formPage.locator('input[name="password"]')
+
+            await expectRequiredState({ input: password })
+            await password.fill('temporary')
+            await password.fill('')
+            await password.press('Tab')
+            await formPage.getByRole('button', { name: 'Login', exact: true }).click()
+          } else {
+            await gotoCreatePost({ page: formPage, postsURL })
+            await formPage.getByRole('button', { name: /^Publish(?: in English)?$/ }).click()
+          }
+
+          const input = formPage.locator(
+            form === 'login' ? 'input[name="password"]' : '#field-title',
+          )
+          const error = formPage.locator('.field-type').filter({ has: input }).getByRole('alert')
+
+          await expect(error).toHaveCount(1)
+          await expect(error).toBeVisible()
+          await expect(error).not.toHaveAttribute('aria-hidden', 'true')
+          await expect(input).toHaveAccessibleDescription((await error.innerText()).trim())
+          await expectErrorTabOrder({ error, input })
+          const originalMessage = await error.locator('.tooltip-content').textContent()
+
+          try {
+            await error.locator('.tooltip-content').evaluate((element) => {
+              element.textContent =
+                'Please enter a valid value for this required field before saving your changes. ' +
+                'A'.repeat(100)
+            })
+            for (const width of [390, 1280]) {
+              await formPage.setViewportSize({ height: 900, width })
+              await input.scrollIntoViewIfNeeded()
+              await expect(error).toBeVisible()
+              await expect
+                .poll(async () => {
+                  const box = await error.boundingBox()
+
+                  return box && box.x >= 0 && box.x + box.width <= width
+                })
+                .toBe(true)
+              expect(
+                await error.evaluate((element) => element.scrollWidth <= element.clientWidth),
+              ).toBe(true)
+              await expectErrorTabOrder({ error, input })
+            }
+          } finally {
+            await error.locator('.tooltip-content').evaluate((element, message) => {
+              element.textContent = message
+            }, originalMessage)
+          }
+        } finally {
+          await context.close()
+        }
+      })
+    }
 
     for (const key of ['Enter', 'Space']) {
       test(`should retain focus after moving a rich-text block without a drag handle using ${key}`, async () => {
@@ -2283,6 +2478,33 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.7 Focus Visible (AA)', () => {
+    test('should reveal the collection card create action and its focus indicator by keyboard', async ({
+      browser: _browser,
+    }, testInfo) => {
+      await page.goto(`${serverURL}/admin`)
+      await page.mouse.move(0, 0)
+
+      const scan = await runAxeScan({ include: ['.collections'], page, testInfo })
+      const card = page.locator('.collections__card-list .card').first()
+      const createLink = card.locator('.card__actions a')
+      const actions = card.locator('.card__actions')
+      const unfocusedStyle = await getFocusIndicatorStyle(createLink)
+
+      expect(scan.violations).toHaveLength(0)
+      await expect(actions).toHaveCSS('opacity', '0')
+      await card.locator('.card__click').focus()
+      await page.keyboard.press('Tab')
+
+      await expect(createLink).toBeFocused()
+      await expect(actions).toHaveCSS('opacity', '1')
+      expect(
+        hasRenderedFocusIndicator({
+          focusedStyle: await getFocusIndicatorStyle(createLink),
+          unfocusedStyle,
+        }),
+      ).toBe(true)
+    })
+
     test('should paint a keyboard focus indicator on the dashboard Add button', async () => {
       // PYLD-3631
       const header = await openDashboardEditor({ page, serverURL })
@@ -2436,6 +2658,170 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
 
+  test.describe('3.2.2 On Input (A)', () => {
+    test('should retain focus during automatic search', async () => {
+      // Additional coverage for PYLD-3773.
+      for (const isColumnSearch of [false, true]) {
+        await page.goto(`${postsURL.list}?search=`)
+        if (isColumnSearch) {
+          await page.locator('.columns-button__button').click()
+        }
+        const search = isColumnSearch
+          ? page
+              .getByRole('dialog', { name: /columns/i })
+              .getByRole('textbox', { name: /search columns/i })
+          : page.locator('#search-filter-input')
+
+        await expect(search).toHaveAccessibleDescription(/automatically as you type/i)
+        await search.fill('no-matching-accessibility-result')
+        if (isColumnSearch) {
+          await expect(
+            page.getByText('No matches found for this search', { exact: true }),
+          ).toBeVisible()
+        } else {
+          await expect(page.locator('tbody tr')).toHaveCount(0)
+          await expect(page.locator('.no-results__title')).toHaveText('No Results.')
+        }
+        await expect(search).toBeFocused()
+      }
+    })
+  })
+
+  test.describe('3.3.2 Labels or Instructions (A)', () => {
+    test('should expose required state without naming the asterisk', async () => {
+      // PYLD-3579, PYLD-3779, PYLD-3715
+      for (const { name, collection, field, localized } of [
+        { name: 'Alt', collection: 'media', field: 'alt', localized: false },
+        { name: 'Title', collection: 'posts', field: 'title', localized: true },
+      ]) {
+        await page.goto(
+          formatAdminURL({
+            adminRoute: '/admin',
+            path: `/collections/${collection}/create`,
+            serverURL,
+          }),
+        )
+        const input = page.locator(`#field-${field}`)
+
+        await expect(input).toBeVisible()
+        await expect(input).toHaveAccessibleName(new RegExp(name))
+        await expect(input).not.toHaveAccessibleName(/\*/)
+        await expectRequiredState({ input })
+        if (localized) {
+          await expect(page.locator('label').filter({ hasText: /^Title/ })).toContainText('English')
+        }
+      }
+    })
+
+    test('should expose select requirements and validation errors', async () => {
+      await gotoCreatePost({ page, postsURL })
+      const select = page.locator('#field-accessibilitySelect')
+      const tags = page
+        .locator('.field-type.text')
+        .filter({ has: page.locator('.field-requiredTags') })
+
+      const selectInput = select.getByRole('combobox')
+
+      await selectInput.focus()
+      await expect(selectInput).toHaveAttribute('aria-describedby', /live-region/)
+      await expect(selectInput).toHaveAttribute('aria-required', 'true')
+      await select.locator('.clear-indicator').click()
+      await tags.locator('.multi-value-remove').click()
+      await page.getByRole('button', { name: /^Publish(?: in English)?$/ }).click()
+
+      for (const field of [select, tags]) {
+        const input = field.getByRole('combobox')
+        const error = field.locator('.field-error[role="alert"]')
+
+        await expect(error).toContainText(/require/i)
+        await expect(input).toHaveAttribute('aria-required', 'true')
+        await expect(input).toHaveAttribute('aria-invalid', 'true')
+        await expect(input).toHaveAccessibleDescription(
+          new RegExp((await error.textContent())!.trim()),
+        )
+        await expect(field.locator('input[required]')).toHaveCount(0)
+        await expect(input).toHaveAttribute('aria-describedby', /placeholder/)
+        await input.focus()
+        await expect(input).toHaveAccessibleDescription(/require/i)
+      }
+    })
+
+    test('should update accessibility states on non-searchable selects', async () => {
+      await gotoCreatePost({ page, postsURL })
+      const input = page.getByRole('combobox', { name: 'Non-searchable required select' })
+
+      await expect(input).toHaveAttribute('aria-required', 'true')
+      await expect(input).toHaveAttribute('aria-invalid', 'true')
+      await expect(input).toHaveAccessibleDescription('Choose an option An option is required.')
+      await input.focus()
+      await expect(input).toHaveAccessibleDescription('Choose an option An option is required.')
+      await expect(input.locator('..').locator('input[required]')).toHaveCount(0)
+      await page.getByRole('button', { name: 'Clear select requirements' }).click()
+      await expect(input).not.toHaveAttribute('aria-required', 'true')
+      await expect(input).not.toHaveAttribute('aria-invalid', 'true')
+      await expect(input).toHaveAccessibleDescription('Choose an option')
+    })
+
+    test('should open and dismiss required-field help', async () => {
+      // PYLD-3778
+      await gotoCreatePost({ page, postsURL })
+      const message = 'Fields marked with * are required.'
+      const trigger = page.getByRole('button', { name: message, exact: true })
+      const explanation = page.getByText(message, { exact: true })
+
+      await expect(trigger).toBeVisible()
+      await expect(trigger).toHaveText('')
+      const spacing = await trigger.evaluate((button) => {
+        const icon = button.closest('.required-fields-info')!
+        const parent = icon.parentElement!
+        const next = icon.nextSibling
+        const fields = parent.querySelector('.document-fields__fields')!
+        const before = fields.getBoundingClientRect().top
+
+        icon.remove()
+        const after = fields.getBoundingClientRect().top
+
+        parent.insertBefore(icon, next)
+        return { after, before }
+      })
+
+      expect(spacing.after).toBe(spacing.before)
+      await expect(explanation).toBeHidden()
+      await trigger.hover()
+      await expect(explanation).toBeVisible()
+      await explanation.hover()
+      await expect(explanation).toBeVisible()
+      await page.keyboard.press('Escape')
+      await expect(explanation).toBeHidden()
+      await page.locator('#field-title').focus()
+      await trigger.focus()
+      await expect(explanation).toBeVisible()
+      await trigger.press('Escape')
+      await expect(explanation).toBeHidden()
+      await trigger.press('Enter')
+      await expect(explanation).toBeVisible()
+      await page.locator('#field-title').click()
+      await expect(explanation).toBeHidden()
+      await trigger.click()
+      await expect(explanation).toBeVisible()
+      const box = await trigger.boundingBox()
+
+      expect(box?.width).toBeGreaterThanOrEqual(24)
+      expect(box?.height).toBeGreaterThanOrEqual(24)
+      await trigger.press('Escape')
+      await page.locator('#relatedPost-add-new button').click()
+      const drawer = page.locator('dialog[id^="doc-drawer_posts_"]')
+      const drawerTrigger = drawer.getByRole('button', { name: message, exact: true })
+      const drawerExplanation = drawer.getByText(message, { exact: true })
+
+      await drawerTrigger.focus()
+      await expect(drawerExplanation).toBeVisible()
+      await drawerTrigger.press('Escape')
+      await expect(drawerExplanation).toBeHidden()
+      await expect(drawer).toBeVisible()
+    })
+  })
+
   test.describe('4.1.2 Name, Role, Value (A)', () => {
     test('should give the navigation close control an accessible name', async () => {
       await page.goto(`${serverURL}/admin`)
@@ -2559,6 +2945,39 @@ test.describe('WCAG 2.2 Level AA', () => {
             .toHaveAccessibleName('Next table page')
         }
       })
+    })
+
+    test('should expose required authentication fields and their errors', async () => {
+      await page.goto(
+        formatAdminURL({ adminRoute: '/admin', path: '/collections/users/create', serverURL }),
+      )
+      const fields = [
+        { name: 'Email', selector: 'input[name="email"]' },
+        { name: 'New Password', selector: 'input[name="password"]' },
+        { name: 'Confirm Password', selector: 'input[name="confirm-password"]' },
+      ]
+
+      for (const { name, selector } of fields) {
+        const input = page.locator(selector)
+
+        await expect(input).toHaveAccessibleName(name)
+        await expectRequiredState({ input })
+        await expect(input).not.toHaveAttribute('aria-invalid', 'true')
+        await expect(input).toHaveAccessibleDescription('')
+      }
+
+      await page.getByRole('button', { name: 'Save', exact: true }).click()
+
+      for (const { name, selector } of fields) {
+        const input = page.locator(selector)
+        const error = page.locator('.field-type').filter({ has: input }).getByRole('alert')
+
+        await expect(error).toBeVisible()
+        await expect(input).toHaveAccessibleName(name)
+        await expect(input).toHaveAttribute('aria-invalid', 'true')
+        await expect(input).toHaveAccessibleDescription((await error.innerText()).trim())
+        await expectErrorTabOrder({ error, input })
+      }
     })
 
     for (const { label, open } of [
@@ -2751,11 +3170,11 @@ test.describe('WCAG 2.2 Level AA', () => {
       // PYLD-3754
       test.slow()
       const whereBuilder = await openPostsFilter({ page, postsURL })
-      const filterComboboxes = whereBuilder.locator('input[role="combobox"]')
+      const filterComboboxes = whereBuilder.getByRole('combobox')
 
-      expect(await filterComboboxes.count()).toBeGreaterThan(0)
+      await expect(filterComboboxes.first()).toBeVisible()
       await expect
-        .soft(whereBuilder.locator('.condition__field input[role="combobox"]'))
+        .soft(whereBuilder.locator('.condition__field').getByRole('combobox'))
         .toHaveAccessibleName(/where|field/i)
       for (let index = 0; index < (await filterComboboxes.count()); index++) {
         await expect.soft(filterComboboxes.nth(index)).toHaveAccessibleName(/\S/)
@@ -2816,6 +3235,108 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
   test.describe('4.1.3 Status Messages (AA)', () => {
+    test('should announce completed collection searches', async () => {
+      await page.clock.install()
+      await page.goto(`${postsURL.list}?groupBy=&search=`)
+      const search = page.locator('#search-filter-input')
+      const status = page.locator('.collection-list__search-status')
+
+      await expect(status).toHaveAttribute('role', 'status')
+      await expect(status).toBeEmpty()
+      await search.fill('no-matching-accessibility-result')
+      await expect(status).toHaveText('Results found for “no-matching-accessibility-result”: 0.')
+      await expect(search).toBeFocused()
+      const previousMessage = await status.locator('span').elementHandle()
+
+      let releaseResponse!: () => void
+      const responseGate = new Promise<void>((resolve) => {
+        releaseResponse = resolve
+      })
+      let hasPendingRequest = false
+      const routePattern = (url: URL) =>
+        url.pathname === new URL(postsURL.list).pathname ||
+        (url.pathname.startsWith('/_serverFn/') &&
+          Boolean(url.searchParams.get('payload')?.includes('"collections/posts"')))
+
+      await page.route(routePattern, async (route) => {
+        hasPendingRequest = true
+        await responseGate
+        await route.continue()
+      })
+      try {
+        await page.clock.pauseAt(new Date())
+        await search.fill('another-no-matching-accessibility-result')
+        await expect(status).toBeEmpty()
+        await page.clock.resume()
+        await expect.poll(() => hasPendingRequest).toBe(true)
+        await expect(status).toBeEmpty()
+        releaseResponse()
+        await expect(status).toHaveText(
+          'Results found for “another-no-matching-accessibility-result”: 0.',
+        )
+        expect(await previousMessage.evaluate((element) => element.isConnected)).toBe(false)
+      } finally {
+        await page.clock.resume()
+        releaseResponse()
+        await page.unrouteAll({ behavior: 'wait' })
+      }
+      await search.fill('')
+      await expect(status).toHaveText('Search cleared.')
+      await expect(search).toBeFocused()
+      await addGroupBy(page, {
+        fieldLabel: 'Accessibility Select',
+        fieldPath: 'accessibilitySelect',
+      })
+      await expect(status).toHaveText(/^\d+ Posts?$/)
+      await page.keyboard.press('Escape')
+      await clearGroupBy(page)
+      await expect(status).toHaveText(/^\d+ Posts?$/)
+      await page.keyboard.press('Escape')
+      try {
+        await search.fill('third version')
+        await expect(status).toHaveText('Results found for “third version”: 1.')
+        await expect(page.getByRole('status').filter({ hasText: /\S/ })).toHaveCount(1)
+        await expect(search).toBeFocused()
+        await search.fill('Example')
+        await expect(status).toHaveText(/Results found for “Example”: \d+\./)
+        for (const groupBy of ['accessibilitySelect', '']) {
+          let releaseGrouping!: () => void
+          let isGroupingPending = false
+          const groupingGate = new Promise<void>((resolve) => {
+            releaseGrouping = resolve
+          })
+          await page.route(routePattern, async (route) => {
+            isGroupingPending = true
+            await groupingGate
+            await route.continue()
+          })
+          try {
+            const { groupByContent } = await openGroupBy(page)
+            if (groupBy) {
+              await groupByContent.locator('.group-by-control__select-trigger').first().click()
+              await page
+                .locator('.popup-button-list .popup-button-list__button')
+                .filter({ hasText: /^Accessibility Select$/ })
+                .click()
+            } else {
+              await groupByContent.getByRole('button', { name: 'Clear', exact: true }).click()
+            }
+            await expect.poll(() => isGroupingPending).toBe(true)
+            await expect(status).toBeEmpty()
+            releaseGrouping()
+            await expect(status).toHaveText(/^\d+ Posts?$/)
+          } finally {
+            releaseGrouping()
+            await page.unrouteAll({ behavior: 'wait' })
+          }
+          await page.keyboard.press('Escape')
+        }
+      } finally {
+        await page.goto(`${postsURL.list}?groupBy=&search=`)
+        await expect(search).toHaveValue('')
+      }
+    })
+
     test('should expose and dismiss a failed drawer submission notification', async () => {
       const drawer = await openRelationshipCreationDrawer({ page, postsURL })
 
@@ -2922,4 +3443,22 @@ async function openRichTextContext({
   }
   await gotoCreatePost({ page, postsURL })
   return page.locator('main')
+}
+
+async function expectErrorTabOrder({ error, input }: { error: Locator; input: Locator }) {
+  await input.focus()
+  await input.press('Shift+Tab')
+  await expect(error).toBeFocused()
+  await expect(error).toHaveCSS('outline-style', 'solid')
+  await error.press('Tab')
+  await expect(input).toBeFocused()
+}
+
+async function expectRequiredState({ input }: { input: Locator }) {
+  expect(
+    await input.evaluate(
+      (element: HTMLInputElement) =>
+        element.required || element.getAttribute('aria-required') === 'true',
+    ),
+  ).toBe(true)
 }
