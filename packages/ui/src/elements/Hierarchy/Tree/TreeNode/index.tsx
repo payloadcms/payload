@@ -175,7 +175,8 @@ export const TreeNode = ({
         >
           {hasChildren && (
             <button
-              aria-label={expanded ? t('general:collapse') : t('general:open')}
+              aria-expanded={expanded}
+              aria-label={`${expanded ? t('general:collapse') : t('general:open')} ${node.title}`}
               className={`${baseClass}__toggle`}
               onClick={handleToggle}
               onMouseDown={(e) => e.preventDefault()}

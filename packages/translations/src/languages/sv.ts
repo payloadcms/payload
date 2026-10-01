@@ -496,6 +496,7 @@ export const svTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Visa alla {{label}}',
     shownInTable: 'Visas i tabell',
     showSidebar: 'Visa sidofält',
+    skipToContent: 'Hoppa till innehåll',
     sorryNotFound: 'Tyvärr, det finns inget som motsvarar din begäran.',
     sort: 'Sortera',
     sortByLabelDirection: 'Sortera efter {{label}} {{direction}}',
@@ -558,6 +559,7 @@ export const svTranslations: DefaultTranslationsObject = {
     noParent: 'Ingen förälder',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Sök {{label}}',
+    searchResults: 'Hittade {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Kan inte kopiera till samma språk',

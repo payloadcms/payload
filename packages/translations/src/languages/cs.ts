@@ -490,6 +490,7 @@ export const csTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Zobrazit všechny {{label}}',
     shownInTable: 'Zobrazeno v tabulce',
     showSidebar: 'Zobrazit postranní panel',
+    skipToContent: 'Přejít na obsah',
     sorryNotFound: 'Je nám líto, ale neexistuje nic, co by odpovídalo vašemu požadavku.',
     sort: 'Třídit',
     sortByLabelDirection: 'Seřadit podle {{label}} {{direction}}',
@@ -552,6 +553,7 @@ export const csTranslations: DefaultTranslationsObject = {
     noParent: 'Bez nadřazeného',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Hledat {{label}}',
+    searchResults: 'Nalezeno: {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Nelze kopírovat do stejného umístění',

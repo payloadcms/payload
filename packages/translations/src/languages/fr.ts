@@ -505,6 +505,7 @@ export const frTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Afficher tous les {{label}}',
     shownInTable: 'Affiché dans un tableau',
     showSidebar: 'Afficher la barre latérale',
+    skipToContent: 'Aller au contenu',
     sorryNotFound: 'Désolé, rien ne correspond à votre demande.',
     sort: 'Trier',
     sortByLabelDirection: 'Trier par {{label}} {{direction}}',
@@ -569,6 +570,7 @@ export const frTranslations: DefaultTranslationsObject = {
     noParent: 'Aucun parent',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Recherche {{label}}',
+    searchResults: '{{count}} trouvés',
   },
   localization: {
     cannotCopySameLocale: 'Impossible de copier dans le même endroit',

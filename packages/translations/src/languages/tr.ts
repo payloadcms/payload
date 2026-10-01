@@ -500,6 +500,7 @@ export const trTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Tüm {{label}} göster',
     shownInTable: 'Tablo olarak gösterildi',
     showSidebar: 'Kenar çubuğunu göster',
+    skipToContent: 'İçeriğe geç',
     sorryNotFound: 'Üzgünüz, isteğinizle eşleşen bir sonuç bulunamadı.',
     sort: 'Sırala',
     sortByLabelDirection: '{{label}} göre sırala {{direction}}',
@@ -563,6 +564,7 @@ export const trTranslations: DefaultTranslationsObject = {
     noParent: 'Üst Yok',
     noResults: 'No results for "{{query}}"',
     searchLabel: '{{label}} Ara',
+    searchResults: '{{count}} bulundu',
   },
   localization: {
     cannotCopySameLocale: 'Aynı yerel ayara kopyalanamaz.',

@@ -51,7 +51,7 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
   selectedNodeId,
   useAsTitle: useAsTitleProp,
 }) => {
-  const { focusedId, moveFocus, setFocusedId } = useTreeFocus()
+  const { moveFocus } = useTreeFocus()
   const router = useRouter()
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
@@ -231,47 +231,14 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
     [onNodeClick],
   )
 
-  const rootFocusableIds = useMemo(
-    () => (rootNodes ? rootNodes.map((node) => `node-${String(node.id)}`) : []),
-    [rootNodes],
-  )
-
-  const firstRootFocusableId = rootFocusableIds[0]
-  const lastRootFocusableId = rootFocusableIds[rootFocusableIds.length - 1]
-
   const handleTreeKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === 'ArrowDown') {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault()
-
-        if (
-          focusedId &&
-          firstRootFocusableId &&
-          lastRootFocusableId &&
-          focusedId === lastRootFocusableId
-        ) {
-          setFocusedId(firstRootFocusableId)
-          return
-        }
-
-        moveFocus('down')
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault()
-
-        if (
-          focusedId &&
-          firstRootFocusableId &&
-          lastRootFocusableId &&
-          focusedId === firstRootFocusableId
-        ) {
-          setFocusedId(lastRootFocusableId)
-          return
-        }
-
-        moveFocus('up')
+        moveFocus(e.key === 'ArrowDown' ? 'down' : 'up')
       }
     },
-    [firstRootFocusableId, focusedId, lastRootFocusableId, moveFocus, setFocusedId],
+    [moveFocus],
   )
 
   if (isLoading && !rootNodes) {
@@ -342,7 +309,9 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
         {canCreate && (
           <>
             <Button
-              aria-label={t('general:createNew')}
+              aria-label={t('general:createNewLabel', {
+                label: getTranslation(collectionConfig.labels.singular, i18n),
+              })}
               buttonStyle="ghost"
               className={`${baseClass}__create-button`}
               margin={false}

@@ -504,6 +504,7 @@ export const deTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Alle {{label}} anzeigen',
     shownInTable: 'In Tabelle angezeigt',
     showSidebar: 'Seitenleiste anzeigen',
+    skipToContent: 'Zum Inhalt springen',
     sorryNotFound:
       'Es tut uns leid, aber wir haben nichts gefunden, was deiner Anfrage entspricht.',
     sort: 'Sortieren',
@@ -569,6 +570,7 @@ export const deTranslations: DefaultTranslationsObject = {
     noParent: 'Kein Elternteil',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Suche {{label}}',
+    searchResults: '{{count}} gefunden',
   },
   localization: {
     cannotCopySameLocale: 'Kann nicht in dieselbe Sprache kopiert werden',

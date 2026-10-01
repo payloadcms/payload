@@ -490,6 +490,7 @@ export const etTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Näita kõiki {{label}}',
     shownInTable: 'Kuvatud tabelis',
     showSidebar: 'Kuva külgriba',
+    skipToContent: 'Liigu sisu juurde',
     sorryNotFound: 'Vabandust - teie päringule vastavat sisu ei leitud.',
     sort: 'Sorteeri',
     sortByLabelDirection: 'Sorteeri {{label}} {{direction}}',
@@ -552,6 +553,7 @@ export const etTranslations: DefaultTranslationsObject = {
     noParent: 'Ei Vanem',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Otsi {{label}}',
+    searchResults: 'Leitud: {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Ei saa kopeerida samasse keelde',

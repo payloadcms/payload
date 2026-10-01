@@ -493,6 +493,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Prikaži sve {{label}}',
     shownInTable: 'Prikazano u tablici',
     showSidebar: 'Prikaži bočnu traku',
+    skipToContent: 'Prijeđi na sadržaj',
     sorryNotFound: 'Nažalost, ne postoji ništa što odgovara vašem zahtjevu.',
     sort: 'Sortiraj',
     sortByLabelDirection: 'Sortiraj prema {{label}} {{direction}}',
@@ -555,6 +556,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     noParent: 'Bez nadređenog',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Pretraži {{label}}',
+    searchResults: 'Pronađeno: {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Ne može se kopirati na istu lokaciju',

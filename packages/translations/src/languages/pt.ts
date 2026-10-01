@@ -497,6 +497,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Mostre todos {{label}}',
     shownInTable: 'Exibido em tabela',
     showSidebar: 'Mostrar barra lateral',
+    skipToContent: 'Saltar para o conteúdo',
     sorryNotFound: 'Desculpe—não há nada que corresponda à sua requisição.',
     sort: 'Ordenar',
     sortByLabelDirection: 'Ordenar por {{label}} {{direction}}',
@@ -559,6 +560,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     noParent: 'Sem Parentesco',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Pesquisar {{label}}',
+    searchResults: 'Encontrados: {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Não é possível copiar para o mesmo local',

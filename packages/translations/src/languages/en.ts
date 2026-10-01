@@ -494,6 +494,7 @@ export const enTranslations = {
     showAllLabel: 'Show all {{label}}',
     shownInTable: 'Shown in table',
     showSidebar: 'Show sidebar',
+    skipToContent: 'Skip to content',
     sorryNotFound: 'Sorry—there is nothing to correspond with your request.',
     sort: 'Sort',
     sortByLabelDirection: 'Sort by {{label}} {{direction}}',
@@ -555,6 +556,7 @@ export const enTranslations = {
     noParent: 'No Parent',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Search {{label}}',
+    searchResults: 'Found {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Cannot copy to the same locale',

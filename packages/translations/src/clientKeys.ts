@@ -192,6 +192,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'hierarchy:noParent',
   'hierarchy:noResults',
   'hierarchy:searchLabel',
+  'hierarchy:searchResults',
 
   'general:all',
   'general:aboutToDeleteCount',
@@ -417,6 +418,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:showAllLabel',
   'general:showSidebar',
   'general:shownInTable',
+  'general:skipToContent',
   'general:sorryNotFound',
   'general:sort',
   'general:sortByLabelDirection',

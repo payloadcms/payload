@@ -494,6 +494,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Покажи всички {{label}}',
     shownInTable: 'Показано в таблица',
     showSidebar: 'Показване на страничната лента',
+    skipToContent: 'Към съдържанието',
     sorryNotFound: 'Съжаляваме-няма нищо, което да отговаря на търсенето ти.',
     sort: 'Сортирай',
     sortByLabelDirection: 'Сортирай по {{label}} {{direction}}',
@@ -556,6 +557,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     noParent: 'Без родител',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Търсене {{label}}',
+    searchResults: 'Намерени: {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Не може да се копира в същата локация',

@@ -244,6 +244,8 @@ export function DefaultListView(props: ListViewClientProps) {
     collectionLabel,
   ])
 
+  const Container = isInDrawer ? 'div' : 'main'
+
   return (
     <TableIdentityProvider
       collectionSlug={collectionSlug}
@@ -253,7 +255,7 @@ export function DefaultListView(props: ListViewClientProps) {
     >
       <Fragment>
         <TableColumnsProvider collectionSlug={collectionSlug} columnState={columnState}>
-          <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
+          <Container className={`${baseClass} ${baseClass}--${collectionSlug}`}>
             <SelectionProvider docs={docs} totalDocs={data?.totalDocs}>
               {BeforeList}
               <CollectionListHeader
@@ -435,7 +437,7 @@ export function DefaultListView(props: ListViewClientProps) {
                 />
               )}
             </SelectionProvider>
-          </div>
+          </Container>
         </TableColumnsProvider>
         {docs?.length > 0 && isGroupingBy && data.totalPages > 1 && (
           <PageControls collectionConfig={collectionConfig} />

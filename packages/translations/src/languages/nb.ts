@@ -497,6 +497,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Vis alle {{label}}',
     shownInTable: 'Vist i tabell',
     showSidebar: 'Vis sidepanel',
+    skipToContent: 'Hopp til innhold',
     sorryNotFound: 'Beklager, det er ingenting som samsvarer med forespørselen din.',
     sort: 'Sortér',
     sortByLabelDirection: 'Sorter etter {{label}} {{direction}}',
@@ -559,6 +560,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     noParent: 'Ingen forelder',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Søk {{label}}',
+    searchResults: 'Fant {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Kan ikke kopiere til samme språk',

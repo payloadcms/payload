@@ -493,6 +493,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Rādīt visus {{label}}',
     shownInTable: 'Parādīts tabulā',
     showSidebar: 'Rādīt sānu joslu',
+    skipToContent: 'Pāriet uz saturu',
     sorryNotFound: 'Atvainojiet — jūsu pieprasījumam neatbilst nekas.',
     sort: 'Kārtot',
     sortByLabelDirection: 'Kārtot pēc {{label}} {{direction}}',
@@ -554,6 +555,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     noParent: 'Nav vecāku',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Meklēt {{label}}',
+    searchResults: 'Atrasts: {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Nevar kopēt uz to pašu lokalizāciju',

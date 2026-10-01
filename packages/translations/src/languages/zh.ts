@@ -471,6 +471,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     showAllLabel: '显示所有 {{label}}',
     shownInTable: '在表格中显示',
     showSidebar: '显示侧边栏',
+    skipToContent: '跳转到内容',
     sorryNotFound: '对不起，没有与您的请求相对应的东西。',
     sort: '排序',
     sortByLabelDirection: '按 {{label}} {{direction}} 排序',
@@ -531,6 +532,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     noParent: '无父项',
     noResults: 'No results for "{{query}}"',
     searchLabel: '搜索 {{label}}',
+    searchResults: '找到 {{count}} 项',
   },
   localization: {
     cannotCopySameLocale: '无法复制到相同的语言环境',

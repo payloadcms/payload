@@ -501,6 +501,7 @@ export const esTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Mostrar todos los elementos de {{label}}',
     shownInTable: 'Mostrado en tabla',
     showSidebar: 'Mostrar barra lateral',
+    skipToContent: 'Saltar al contenido',
     sorryNotFound: 'Lo sentimos, no hay nada que coincida con tu solicitud.',
     sort: 'Ordenar',
     sortByLabelDirection: 'Ordenar por {{label}} {{direction}}',
@@ -563,6 +564,7 @@ export const esTranslations: DefaultTranslationsObject = {
     noParent: 'Sin Padre',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Buscar {{label}}',
+    searchResults: 'Se encontraron {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'No se puede copiar al mismo idioma',

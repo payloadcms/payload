@@ -494,6 +494,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Prikaži sve {{label}}',
     shownInTable: 'Prikazano u tabeli',
     showSidebar: 'Prikaži bočnu traku',
+    skipToContent: 'Pređi na sadržaj',
     sorryNotFound: 'Nažalost, ne postoji ništa što odgovara vašem zahtevu.',
     sort: 'Sortiraj',
     sortByLabelDirection: 'Sortiraj prema {{label}} {{direction}}',
@@ -556,6 +557,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     noParent: 'Bez roditelja',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Pretraga {{label}}',
+    searchResults: 'Pronađeno: {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Ne može se kopirati na istu lokaciju',

@@ -485,6 +485,7 @@ export const faTranslations: DefaultTranslationsObject = {
     showAllLabel: 'نمایش همه {{label}}',
     shownInTable: 'نمایش داده شده در جدول',
     showSidebar: 'نمایش نوار کناری',
+    skipToContent: 'رفتن به محتوا',
     sorryNotFound: 'متأسفانه، موردی مطابق با درخواست شما پیدا نشد.',
     sort: 'مرتب‌سازی',
     sortByLabelDirection: 'مرتب‌سازی بر اساس {{label}} {{direction}}',
@@ -548,6 +549,7 @@ export const faTranslations: DefaultTranslationsObject = {
     noParent: 'بدون والد',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'جستجو {{label}}',
+    searchResults: '{{count}} مورد یافت شد',
   },
   localization: {
     cannotCopySameLocale: 'امکان کپی کردن اطلاعات به همان زبان وجود ندارد.',
