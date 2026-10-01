@@ -40,6 +40,8 @@ The `authenticate` function is passed the following arguments:
 
 At its core a strategy simply takes information from the incoming request and returns a user. This is exactly how Payload's built-in strategies function.
 
+The example below sets `disableLocalStrategy` to `true` because the custom strategy replaces local authentication. Set it to `false` or omit it to keep email and password authentication enabled alongside your custom strategy.
+
 Your `authenticate` method should return an object containing a Payload user document and any optional headers that you'd like Payload to set for you when we return a response.
 
 ```ts

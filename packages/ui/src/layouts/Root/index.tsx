@@ -104,6 +104,7 @@ const RootLayoutContent = async ({
       languageCode={data.languageCode}
       suppressHydrationWarning={data.suppressHydrationWarning}
       theme={data.theme}
+      themeSource={data.themeSource}
       viewport={getViewportMeta(context.headers.get('user-agent') ?? undefined)}
     >
       <RootProviders data={data} RouterAdapter={RouterAdapter} serverFunction={serverFunction}>

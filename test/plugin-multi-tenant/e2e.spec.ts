@@ -759,6 +759,27 @@ test.describe('Multi Tenant', () => {
   })
 
   test.describe('Tenant Selector', () => {
+    test('should let nav sections own their inline spacing', async () => {
+      await page.setViewportSize({ height: 900, width: 600 })
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+
+      await page.goto(tenantsURL.list)
+      await openNav(page)
+
+      const [navBox, navGroupBox] = await Promise.all([
+        page.locator('.nav').boundingBox(),
+        page.locator('.nav-group').first().boundingBox(),
+      ])
+
+      expect(navBox).not.toBeNull()
+      expect(navGroupBox).not.toBeNull()
+      expect(Math.abs(navGroupBox!.x - navBox!.x)).toBeLessThanOrEqual(1)
+    })
+
     test('should populate tenant selector on login', async () => {
       await loginClientSide({
         data: credentials.admin,

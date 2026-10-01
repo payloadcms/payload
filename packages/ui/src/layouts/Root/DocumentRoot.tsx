@@ -5,6 +5,10 @@ import type { HtmlHTMLAttributes, ReactNode } from 'react'
 import React from 'react'
 
 import type { Theme } from '../../providers/Theme/shared.js'
+import type { RequestThemeSource } from '../../utilities/getRequestTheme.js'
+
+import { defaultTheme } from '../../providers/Theme/shared.js'
+import { ResolveThemeOnClient } from './ResolveThemeOnClient.js'
 
 export type RootLayoutFont = {
   className?: string
@@ -21,6 +25,7 @@ export type DocumentRootProps = {
   languageCode?: string
   suppressHydrationWarning?: boolean
   theme?: Theme
+  themeSource?: RequestThemeSource
   /** Optional viewport tag; adapters with router-managed metadata supply it through `head`. */
   viewport?: ReactNode
 }
@@ -35,6 +40,7 @@ export function DocumentRoot({
   languageCode,
   suppressHydrationWarning = false,
   theme,
+  themeSource,
   viewport,
 }: DocumentRootProps) {
   const fontClassNames = fonts.map((font) => font.variable ?? font.className).filter(Boolean)
@@ -50,6 +56,7 @@ export function DocumentRoot({
       suppressHydrationWarning={suppressHydrationWarning}
     >
       <head>
+        {themeSource === 'default' && <ResolveThemeOnClient serverTheme={theme ?? defaultTheme} />}
         {viewport}
         <style>{`@layer payload-default, payload;`}</style>
         {head}

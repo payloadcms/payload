@@ -12,6 +12,7 @@ import type {
 import { applyLocaleFiltering } from 'payload/shared'
 
 import type { Theme } from '../providers/Theme/shared.js'
+import type { RequestThemeSource } from './getRequestTheme.js'
 
 import { getNavPrefs } from '../elements/Nav/getNavPrefs.js'
 import { getClientConfig } from './getClientConfig.js'
@@ -34,6 +35,8 @@ export type RootLayoutData = {
   permissions: SanitizedPermissions
   suppressHydrationWarning: boolean
   theme: Theme
+  /** The request input used to resolve the theme. */
+  themeSource: RequestThemeSource
   translations: I18nClient['translations']
   user: null | User
 }
@@ -51,6 +54,7 @@ export async function getRootLayoutData({
   importMap,
 }: Args): Promise<RootLayoutData> {
   const { config } = req.payload
+  const { theme, themeSource } = getRequestTheme({ config, cookies, headers })
 
   const languageOptions: LanguageOptions = Object.entries(config.i18n.supportedLanguages || {}).map(
     ([language, languageConfig]) => ({
@@ -82,8 +86,10 @@ export async function getRootLayoutData({
     languageOptions,
     locale: req.locale ?? undefined,
     permissions,
-    suppressHydrationWarning: config.admin?.suppressHydrationWarning ?? false,
-    theme: getRequestTheme({ config, cookies, headers }),
+    suppressHydrationWarning:
+      config.admin.theme === 'all' || Boolean(config.admin.suppressHydrationWarning),
+    theme,
+    themeSource,
     translations: req.i18n.translations,
     user: user ?? null,
   }

@@ -51,6 +51,11 @@
       "types": "./src/layouts/Root/DocumentRoot.tsx",
       "default": "./src/layouts/Root/DocumentRoot.tsx"
     },
+    "./layouts/Root/ResolveThemeOnClient": {
+      "import": "./src/layouts/Root/ResolveThemeOnClient.tsx",
+      "types": "./src/layouts/Root/ResolveThemeOnClient.tsx",
+      "default": "./src/layouts/Root/ResolveThemeOnClient.tsx"
+    },
     "./icons/*": {
       "import": "./src/icons/*/index.tsx",
       "types": "./src/icons/*/index.tsx",
@@ -428,8 +433,8 @@
     "@babel/preset-typescript": "7.27.1",
     "@hyrious/esbuild-plugin-commonjs": "0.2.6",
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/react": "19.2.14",
-    "@types/react-dom": "19.2.3",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
     "babel-plugin-react-compiler": "19.1.0-rc.3",
     "esbuild": "0.27.1",
     "esbuild-sass-plugin": "3.3.1",
@@ -474,6 +479,11 @@
         "import": "./dist/layouts/Root/DocumentRoot.js",
         "types": "./dist/layouts/Root/DocumentRoot.d.ts",
         "default": "./dist/layouts/Root/DocumentRoot.js"
+      },
+      "./layouts/Root/ResolveThemeOnClient": {
+        "import": "./dist/layouts/Root/ResolveThemeOnClient.js",
+        "types": "./dist/layouts/Root/ResolveThemeOnClient.d.ts",
+        "default": "./dist/layouts/Root/ResolveThemeOnClient.js"
       },
       "./css": {
         "import": "./dist/styles.css",

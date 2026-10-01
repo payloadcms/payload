@@ -1777,7 +1777,7 @@ describe('lexicalMain', () => {
     await page.keyboard.press('Backspace')
     await expect(labelInsideCollapsableBody2).toBeHidden()
 
-    const monacoLabel = page.locator('label').getByText('Code')
+    const monacoLabel = page.locator('.field-label').getByText('Code', { exact: true })
     await monacoLabel.click()
     await expectInsideSelectedDecorator(monacoLabel)
 
