@@ -1,6 +1,6 @@
-import type { Config } from '../config/types.js'
+import type { Config, Plugin } from '../config/types.js'
 
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { sanitizeBranchingConfig } from './sanitizeBranchingConfig.js'
 import {
@@ -11,6 +11,10 @@ import {
 import { defaultBranchMergeValidation } from './validation.js'
 
 describe('sanitizeBranchingConfig', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   it('should use the default merge validator when branching is enabled as true', () => {
     const config = {
       branching: true,
@@ -61,4 +65,67 @@ describe('sanitizeBranchingConfig', () => {
       )
     },
   )
+
+  it('should warn when branching and the multi-tenant plugin are enabled', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const multiTenantPlugin = (() => {}) as Plugin
+
+    multiTenantPlugin.slug = '@payloadcms/plugin-multi-tenant'
+
+    sanitizeBranchingConfig({
+      branching: true,
+      collections: [{ fields: [], slug: 'posts' }],
+      plugins: [multiTenantPlugin],
+    } as Config)
+
+    expect(warn).toHaveBeenCalledExactlyOnceWith(
+      '[Payload] Content branching and @payloadcms/plugin-multi-tenant are enabled together. This combination is not supported and does not provide tenant isolation.',
+    )
+  })
+
+  it('should not warn when the multi-tenant plugin is disabled', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const multiTenantPlugin = (() => {}) as Plugin
+
+    multiTenantPlugin.slug = '@payloadcms/plugin-multi-tenant'
+    multiTenantPlugin.options = { enabled: false }
+
+    sanitizeBranchingConfig({
+      branching: true,
+      collections: [{ fields: [], slug: 'posts' }],
+      plugins: [multiTenantPlugin],
+    } as Config)
+
+    expect(warn).not.toHaveBeenCalled()
+  })
+
+  it('should not warn when branching is disabled', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const multiTenantPlugin = (() => {}) as Plugin
+
+    multiTenantPlugin.slug = '@payloadcms/plugin-multi-tenant'
+
+    sanitizeBranchingConfig({
+      collections: [{ fields: [], slug: 'posts' }],
+      plugins: [multiTenantPlugin],
+    } as Config)
+
+    expect(warn).not.toHaveBeenCalled()
+  })
+
+  it('should not mistake a custom tenant field for the multi-tenant plugin', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    sanitizeBranchingConfig({
+      branching: true,
+      collections: [
+        {
+          fields: [{ name: 'tenant', type: 'text' }],
+          slug: 'posts',
+        },
+      ],
+    } as Config)
+
+    expect(warn).not.toHaveBeenCalled()
+  })
 })

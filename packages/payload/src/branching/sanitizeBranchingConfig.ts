@@ -68,6 +68,17 @@ export const sanitizeBranchingConfig = (config: Config): SanitizedBranchingConfi
     return disabled
   }
 
+  const isMultiTenantPluginEnabled = config.plugins?.some(
+    (plugin) =>
+      plugin.slug === '@payloadcms/plugin-multi-tenant' && plugin.options?.enabled !== false,
+  )
+
+  if (isMultiTenantPluginEnabled) {
+    console.warn(
+      '[Payload] Content branching and @payloadcms/plugin-multi-tenant are enabled together. This combination is not supported and does not provide tenant isolation.',
+    )
+  }
+
   const explicitlyExcluded = new Set<string>(branching.exclude ?? [])
   const offByDefault = new Set<string>(corePayloadCollectionSlugs)
 
