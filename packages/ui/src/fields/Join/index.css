@@ -24,10 +24,10 @@
 
   .field-type.join .relationship-table__header h4 {
     margin: 0;
-    font-family: var(--text-body-large-strong-font-family);
-    font-size: var(--text-body-large-strong-font-size);
-    font-weight: var(--text-body-large-strong-font-weight);
-    line-height: var(--text-body-large-strong-line-height);
+    font-family: var(--text-body-large-bold-font-family);
+    font-size: var(--text-body-large-bold-font-size);
+    font-weight: var(--text-body-large-bold-font-weight);
+    line-height: var(--text-body-large-bold-line-height);
     letter-spacing: var(--join-header-letter-spacing);
     color: var(--color-text);
   }

@@ -12,10 +12,10 @@
 .user-menu__trigger {
   max-width: 100%;
   min-width: 0;
-  font-family: var(--text-body-medium-strong-font-family);
-  font-size: var(--text-body-medium-strong-font-size);
-  font-weight: var(--text-body-medium-strong-font-weight);
-  line-height: var(--text-body-medium-strong-line-height);
+  font-family: var(--text-body-medium-bold-font-family);
+  font-size: var(--text-body-medium-bold-font-size);
+  font-weight: var(--text-body-medium-bold-font-weight);
+  line-height: var(--text-body-medium-bold-line-height);
   white-space: nowrap;
 
   .btn__content,
@@ -63,11 +63,11 @@
 
 .user-menu__name,
 .user-menu__identifier {
-  font-family: var(--text-body-medium-strong-font-family);
-  font-size: var(--text-body-medium-strong-font-size);
-  font-weight: var(--text-body-medium-strong-font-weight);
-  line-height: var(--text-body-medium-strong-line-height);
-  letter-spacing: var(--text-body-medium-strong-letter-spacing);
+  font-family: var(--text-body-medium-bold-font-family);
+  font-size: var(--text-body-medium-bold-font-size);
+  font-weight: var(--text-body-medium-bold-font-weight);
+  line-height: var(--text-body-medium-bold-line-height);
+  letter-spacing: var(--text-body-medium-bold-letter-spacing);
   margin: 0;
   text-align: center;
 }

@@ -87,7 +87,7 @@
   .blocks-field__title {
     margin-bottom: 0;
     color: var(--color-text);
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-bold-font-weight);
   }
 
   .blocks-field__block-header {

@@ -81,8 +81,8 @@
 
   .doc-controls__creating-new {
     color: var(--color-text);
-    font-family: var(--text-body-medium-strong-font-family);
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-family: var(--text-body-medium-bold-font-family);
+    font-weight: var(--text-body-medium-bold-font-weight);
   }
 
   .doc-controls__controls-wrapper {

@@ -65,7 +65,7 @@
     flex: 1 0 0;
     min-width: 0;
     margin: 0;
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-bold-font-weight);
     letter-spacing: var(--text-body-medium-letter-spacing);
   }
 

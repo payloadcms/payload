@@ -82,7 +82,7 @@
     padding: var(--spacer-2);
     border-top-left-radius: 0;
     border-top-right-radius: var(--radius-large);
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-bold-font-weight);
     min-height: calc(var(--spacer-4) + var(--spacer-2) * 2);
     width: 100%;
   }
@@ -94,10 +94,10 @@
   .react-datepicker-time__header {
     margin-top: 0;
     color: var(--color-text);
-    font-family: var(--text-body-medium-strong-font-family);
-    font-size: var(--text-body-medium-strong-font-size);
-    font-weight: var(--text-body-medium-strong-font-weight);
-    line-height: var(--text-body-medium-strong-line-height);
+    font-family: var(--text-body-medium-bold-font-family);
+    font-size: var(--text-body-medium-bold-font-size);
+    font-weight: var(--text-body-medium-bold-font-weight);
+    line-height: var(--text-body-medium-bold-line-height);
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
@@ -116,7 +116,7 @@
 
   .react-datepicker-year-header {
     padding: var(--spacer-2-5) 0;
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-bold-font-weight);
     color: var(--color-text);
     width: 100%;
     display: flex;
@@ -731,7 +731,7 @@
     border-top: var(--stroke-width-small) solid var(--color-border);
     cursor: pointer;
     text-align: center;
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-bold-font-weight);
     padding: var(--spacer-1) 0;
     clear: left;
     border-bottom-left-radius: var(--radius-large);

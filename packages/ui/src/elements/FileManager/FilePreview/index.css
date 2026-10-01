@@ -56,10 +56,10 @@
     padding: 0 var(--spacer-2);
     border-radius: var(--radius-medium);
     background: var(--color-bg-secondary-hover);
-    font-family: var(--text-body-medium-strong-font-family);
+    font-family: var(--text-body-medium-bold-font-family);
     font-size: var(--text-body-medium-font-size);
-    font-weight: var(--text-body-medium-strong-font-weight);
-    line-height: var(--text-body-medium-strong-line-height);
+    font-weight: var(--text-body-medium-bold-font-weight);
+    line-height: var(--text-body-medium-bold-line-height);
     color: var(--color-text);
     white-space: nowrap;
     flex-shrink: 0;

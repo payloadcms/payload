@@ -13,11 +13,11 @@
 
   .import-preview-relationship__collection {
     color: var(--color-text-secondary);
-    font-family: var(--text-body-small-strong-font-family);
-    font-size: var(--text-body-medium-strong-font-size);
+    font-family: var(--text-body-small-bold-font-family);
+    font-size: var(--text-body-medium-bold-font-size);
     font-weight: var(--text-body-large-font-weight);
-    letter-spacing: var(--text-body-small-strong-letter-spacing);
-    line-height: var(--text-body-small-strong-line-height);
+    letter-spacing: var(--text-body-small-bold-letter-spacing);
+    line-height: var(--text-body-small-bold-line-height);
     white-space: nowrap;
   }
 

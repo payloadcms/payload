@@ -59,9 +59,9 @@
 
   .cmd-palette__group-label {
     padding: var(--spacer-1) var(--spacer-4);
-    font-family: var(--text-body-medium-strong-font-family);
+    font-family: var(--text-body-medium-bold-font-family);
     font-size: var(--text-body-medium-font-size);
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-bold-font-weight);
     text-transform: uppercase;
     letter-spacing: 0.06em;
     /* Tertiary + bold reads as a non-interactive section header, distinct from
@@ -101,7 +101,7 @@
   }
 
   .cmd-palette__option-match {
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-bold-font-weight);
     color: var(--color-text);
   }
 
@@ -152,7 +152,7 @@
   /* The primary action (Enter): emphasized so it reads as the default. Selector is
      element-qualified to outrank button.cmd-palette__hint's `font`/`color: inherit`. */
   button.cmd-palette__hint--primary {
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-bold-font-weight);
     color: var(--color-text);
 
     & .cmd-palette__key {

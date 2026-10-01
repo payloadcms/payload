@@ -48,7 +48,7 @@
   .api-key-input__field[type='password'] {
     font-family: var(--font-family-sans);
     font-size: var(--text-body-medium-font-size);
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-bold-font-weight);
     letter-spacing: 0.025rem;
   }
 

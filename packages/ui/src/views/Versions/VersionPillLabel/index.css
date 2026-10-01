@@ -6,7 +6,7 @@
   }
 
   .version-pill-label-text {
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-bold-font-weight);
   }
 
   .version-pill-label-date {

@@ -75,7 +75,7 @@
   }
 
   .query-inspector__label {
-    font-weight: var(--text-body-large-strong-font-weight);
+    font-weight: var(--text-body-large-bold-font-weight);
   }
 
   .query-inspector__form-fields {

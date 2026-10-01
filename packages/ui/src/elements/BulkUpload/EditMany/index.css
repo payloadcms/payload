@@ -32,11 +32,11 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     color: var(--color-text);
-    font-family: var(--text-body-large-strong-font-family);
-    font-size: var(--text-body-large-strong-font-size);
-    font-weight: var(--text-body-large-strong-font-weight);
-    line-height: var(--text-body-large-strong-line-height);
-    letter-spacing: var(--text-body-large-strong-letter-spacing);
+    font-family: var(--text-body-large-bold-font-family);
+    font-size: var(--text-body-large-bold-font-size);
+    font-weight: var(--text-body-large-bold-font-weight);
+    line-height: var(--text-body-large-bold-line-height);
+    letter-spacing: var(--text-body-large-bold-letter-spacing);
   }
 
   .edit-many-bulk-uploads__header__actions {

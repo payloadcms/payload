@@ -32,7 +32,7 @@
   /* Sorted column label styling */
   .sort-column--sorted .sort-column__label {
     color: var(--color-text);
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-bold-font-weight);
   }
 
   .sort-column__buttons {

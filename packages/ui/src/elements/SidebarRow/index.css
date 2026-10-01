@@ -78,7 +78,7 @@
   }
 
   .sidebar-row--selected {
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-bold-font-weight);
     background: var(--color-bg-selected);
 
     &:hover {
