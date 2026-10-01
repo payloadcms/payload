@@ -25,7 +25,7 @@ import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
 import { buildFoldersHierarchy, buildTagsHierarchy } from '../../hierarchy/presets.js'
 import { sanitizeHierarchyCollection } from '../../hierarchy/sanitizeHierarchyCollection.js'
 import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
-import { withLegacyUploadFileData } from '../../uploads/fileVersioning/manifest.js'
+import { withLegacyCloudUploadFileData } from '../../uploads/fileVersioning/manifest.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
@@ -397,7 +397,7 @@ export const sanitizeCollection = (
     sanitized.hooks = {
       ...sanitized.hooks,
       beforeRead: [
-        ({ doc }) => withLegacyUploadFileData({ collection: sanitized, config, doc }),
+        ({ doc, req }) => withLegacyCloudUploadFileData({ collection: sanitized, doc, req }),
         ...(sanitized.hooks?.beforeRead || []),
       ],
     }

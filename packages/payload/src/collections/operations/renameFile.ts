@@ -21,7 +21,7 @@ import {
 import { copyLocalFile, moveLocalFile } from '../../uploads/fileVersioning/localStorage.js'
 import {
   getManagedFileIdentity,
-  withLegacyUploadFileData,
+  withLegacyCloudUploadFileData,
 } from '../../uploads/fileVersioning/manifest.js'
 import { normalizeStorageKey } from '../../uploads/fileVersioning/naming.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -88,29 +88,12 @@ export const renameFileOperation = async (
     if (!current) {
       throw hasWhereAccessResult(access) ? new Forbidden(req.t) : new NotFound(req.t)
     }
-    let stored = withLegacyUploadFileData({
+    const stored = await withLegacyCloudUploadFileData({
       collection: collection.config,
-      config: req.payload.config,
       doc: current as JsonObject,
-    }) as JsonObject
+      req,
+    })
     const operations = collection.config.upload.fileOperations
-    if (!Array.isArray(stored._managedFiles) && operations?.getLegacyManifest) {
-      const legacyManifest = await operations.getLegacyManifest({ doc: stored, req })
-      if (legacyManifest.length) {
-        stored = {
-          ...stored,
-          _managedFiles: legacyManifest,
-          original: {
-            filename: stored.filename,
-            filesize: stored.filesize,
-            height: stored.height,
-            mimeType: stored.mimeType,
-            url: stored.url,
-            width: stored.width,
-          },
-        }
-      }
-    }
     const manifest = (stored._managedFiles as ManagedFileManifest | undefined) ?? []
     const oldOriginal = (stored.original as { filename?: string } | undefined)?.filename
     const oldFilename = oldOriginal ?? (stored.filename as string | undefined)

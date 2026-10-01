@@ -29,6 +29,7 @@ import {
   beginFileOperationScope,
   completeFileOperationScope,
 } from '../../uploads/fileVersioning/fileOperationManager.js'
+import { withLegacyCloudUploadFileData } from '../../uploads/fileVersioning/manifest.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import {
   getLocalizedUploadProperties,
@@ -335,7 +336,8 @@ export const updateOperation = async <
 
     const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
 
-    const processDocument = async (docWithLocales: (typeof docs)[number]) => {
+    const processDocument = async (incomingDoc: (typeof docs)[number]) => {
+      let docWithLocales = incomingDoc
       const { id } = docWithLocales
       let documentTempFilePath: string | undefined
 
@@ -362,6 +364,13 @@ export const updateOperation = async <
           documentReq = isolateObjectProperty(req, ['file', 'payloadUploadSizes'])
           documentReq.file = documentFile
           documentReq.payloadUploadSizes = {}
+        }
+        if (collectionConfig.upload?.fileOperations) {
+          docWithLocales = await withLegacyCloudUploadFileData({
+            collection: collectionConfig,
+            doc: docWithLocales,
+            req: documentReq,
+          })
         }
         const generatedFileData =
           sharedGeneratedFileData ??
@@ -430,7 +439,7 @@ export const updateOperation = async <
           ? await runCloudFileUpdate({
               id,
               collection: collectionConfig,
-              current: docWithLocales,
+              current: incomingDoc,
               data: updateArgs.data,
               files: generatedFileData.files,
               req,

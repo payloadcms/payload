@@ -6,6 +6,7 @@ import type { SanitizedCollectionConfig } from '../../collections/config/types.j
 import type { JsonObject, PayloadRequest } from '../../types/index.js'
 import type { ManagedFileManifest } from './types.js'
 
+import { APIError } from '../../errors/APIError.js'
 import { archiveOutgoingLocalFiles, replaceManagedFileReferences } from './archive.js'
 import { scheduleUnreferencedFileCleanup } from './cleanup.js'
 import { runFileOperationPlan } from './fileOperationManager.js'
@@ -41,6 +42,19 @@ export const runManagedFileRestore = async <T>({
   const staticDir = collection.upload.staticDir
   const storageBackendId = `local:${collection.slug}`
   const cloudOperations = collection.upload.fileOperations
+  for (const file of manifest) {
+    const hasLocalBackend =
+      !collection.upload.disableLocalStorage &&
+      Boolean(staticDir) &&
+      file.storageBackendId === storageBackendId
+    const hasCloudBackend =
+      Boolean(cloudOperations) && file.storageBackendId === cloudOperations?.storageBackendId
+
+    if (!hasLocalBackend && !hasCloudBackend) {
+      throw new APIError(`No configured storage backend can restore ${file.storageBackendId}.`, 400)
+    }
+  }
+
   const currentStored = withLegacyUploadFileData({
     collection,
     config: req.payload.config,

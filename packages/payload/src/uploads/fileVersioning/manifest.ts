@@ -1,5 +1,6 @@
 import type { CollectionConfig } from '../../collections/config/types.js'
 import type { Config } from '../../config/types.js'
+import type { PayloadRequest } from '../../types/index.js'
 import type { OriginalFileData } from '../types.js'
 import type {
   ManagedFileIdentity,
@@ -161,6 +162,48 @@ export const withLegacyUploadFileData = ({
     _managedFiles: createManagedFileManifest({ references }),
     original,
   }
+}
+
+export const withLegacyCloudUploadFileData = async <T extends Record<string, unknown>>({
+  collection,
+  doc,
+  req,
+}: {
+  collection: CollectionConfig
+  doc: T
+  req: PayloadRequest
+}): Promise<T> => {
+  const stored = withLegacyUploadFileData({ collection, config: req.payload.config, doc })
+  const operations =
+    typeof collection.upload === 'object' ? collection.upload.fileOperations : undefined
+
+  if (
+    Array.isArray(stored._managedFiles) ||
+    !operations?.getLegacyManifest ||
+    typeof stored.filename !== 'string' ||
+    typeof stored.url !== 'string' ||
+    typeof stored.filesize !== 'number' ||
+    typeof stored.mimeType !== 'string'
+  ) {
+    return stored as T
+  }
+
+  const manifest = await operations.getLegacyManifest({ doc: stored, req })
+  if (!manifest.length) {
+    return stored as T
+  }
+
+  return Object.assign({}, doc, stored, {
+    _managedFiles: manifest,
+    original: {
+      filename: stored.filename,
+      filesize: stored.filesize,
+      height: stored.height,
+      mimeType: stored.mimeType,
+      url: stored.url,
+      width: stored.width,
+    },
+  })
 }
 
 const isSameRole = ({ first, second }: { first: ManagedFileRole; second: ManagedFileRole }) =>

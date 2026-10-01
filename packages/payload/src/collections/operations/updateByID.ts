@@ -28,6 +28,7 @@ import {
   beginFileOperationScope,
   completeFileOperationScope,
 } from '../../uploads/fileVersioning/fileOperationManager.js'
+import { withLegacyCloudUploadFileData } from '../../uploads/fileVersioning/manifest.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import {
   getLocalizedUploadProperties,
@@ -250,7 +251,7 @@ export const updateByIDOperation = async <
       where: fullWhere,
     }
 
-    const docWithLocales = await getLatestCollectionVersion<
+    let docWithLocales = await getLatestCollectionVersion<
       RequiredDataFromCollectionSlug<TSlug> & TypeWithID
     >({
       id,
@@ -268,6 +269,15 @@ export const updateByIDOperation = async <
     }
     if (!docWithLocales) {
       throw new NotFound(req.t)
+    }
+
+    const storedDocWithLocales = docWithLocales
+    if (collectionConfig.upload.fileOperations) {
+      docWithLocales = await withLegacyCloudUploadFileData({
+        collection: collectionConfig,
+        doc: docWithLocales,
+        req,
+      })
     }
 
     if (collectionConfig.upload && !overrideAccess) {
@@ -339,7 +349,7 @@ export const updateByIDOperation = async <
       ? await runCloudFileUpdate({
           id,
           collection: collectionConfig,
-          current: docWithLocales,
+          current: storedDocWithLocales,
           data: updateArgs.data,
           files: filesToUpload,
           req,

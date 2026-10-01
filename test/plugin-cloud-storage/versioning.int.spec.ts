@@ -116,6 +116,147 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     expect(versionedCloudCalls.uploads).toBe(1)
   })
 
+  test('should read and replace a legacy cloud file through verified storage state', async ({
+    payload,
+  }) => {
+    const created = await payload.create({
+      collection: unversionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      overrideAccess: true,
+    })
+    const currentKey = [...versionedCloudFiles.keys()][0]!
+    const legacyKey = 'legacy.png'
+    const bytes = versionedCloudFiles.get(currentKey)!
+    versionedCloudFiles.delete(currentKey)
+    versionedCloudFiles.set(legacyKey, bytes)
+    await payload.db.updateOne({
+      collection: unversionedCloudMediaSlug,
+      data: {
+        _managedFiles: null,
+        _objectKey: null,
+        filename: legacyKey,
+        original: { filename: null, filesize: null, mimeType: null, url: null },
+        url: `/api/${unversionedCloudMediaSlug}/file/${legacyKey}`,
+      },
+      where: { id: { equals: created.id } },
+    })
+
+    const read = await payload.findByID({
+      id: created.id,
+      collection: unversionedCloudMediaSlug,
+      overrideAccess: true,
+      showHiddenFields: true,
+    })
+    const stored = await payload.db.findOne({
+      collection: unversionedCloudMediaSlug,
+      where: { id: { equals: created.id } },
+    })
+
+    expect(read.original?.filename).toBe(legacyKey)
+    expect(read.original?.url).toBe(read.url)
+    expect(read._managedFiles).toEqual([
+      {
+        key: legacyKey,
+        roles: [{ type: 'default' }, { type: 'original' }],
+        storageBackendId: `test-cloud:${unversionedCloudMediaSlug}`,
+      },
+    ])
+    expect(stored?._managedFiles).toBeNull()
+    expect(stored?.original?.filename).toBeNull()
+    expect(versionedCloudFiles.get(legacyKey)).toEqual(await readFile(firstFile))
+    expect(versionedCloudCalls.uploads).toBe(1)
+    expect(versionedCloudCalls.deletes).toEqual([])
+
+    const replaced = await payload.update({
+      id: created.id,
+      collection: unversionedCloudMediaSlug,
+      data: {},
+      filePath: secondFile,
+      overrideAccess: true,
+    })
+    const persisted = await payload.db.findOne({
+      collection: unversionedCloudMediaSlug,
+      where: { id: { equals: created.id } },
+    })
+
+    expect(replaced.original?.filename).toBe(replaced.filename)
+    expect(persisted?._managedFiles).toHaveLength(1)
+    expect(versionedCloudFiles.has(legacyKey)).toBe(false)
+    expect(
+      versionedCloudFiles.get((persisted?._managedFiles as Array<{ key: string }>)[0]!.key),
+    ).toEqual(await readFile(secondFile))
+    expect(versionedCloudCalls.deletes).toContain(legacyKey)
+  })
+
+  test('should preserve a verified legacy cloud file in version history on replacement', async ({
+    payload,
+  }) => {
+    const created = await payload.create({
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      overrideAccess: true,
+    })
+    const newKey = [...versionedCloudFiles.keys()][0]!
+    const legacyKey = 'legacy-cropped.png'
+    const bytes = await readFile(secondFile)
+    versionedCloudFiles.delete(newKey)
+    versionedCloudFiles.set(legacyKey, bytes)
+    const legacyData = {
+      _managedFiles: null,
+      _objectKey: null,
+      filename: legacyKey,
+      original: { filename: null, filesize: null, mimeType: null, url: null },
+      url: `/api/${versionedCloudMediaSlug}/file/${legacyKey}`,
+    }
+    await payload.db.updateOne({
+      collection: versionedCloudMediaSlug,
+      data: legacyData,
+      where: { id: { equals: created.id } },
+    })
+    const { docs: versions } = await payload.db.findVersions({
+      collection: versionedCloudMediaSlug,
+      where: { parent: { equals: created.id } },
+    })
+    for (const row of versions) {
+      await payload.db.updateVersion({
+        id: row.id,
+        collection: versionedCloudMediaSlug,
+        versionData: {
+          createdAt: row.createdAt,
+          latest: row.latest,
+          parent: row.parent,
+          updatedAt: row.updatedAt,
+          version: { ...row.version, ...legacyData },
+        },
+      })
+    }
+
+    await payload.update({
+      id: created.id,
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      overrideAccess: true,
+    })
+    const { docs: retained } = await payload.db.findVersions({
+      collection: versionedCloudMediaSlug,
+      where: { parent: { equals: created.id } },
+    })
+    const legacyVersion = retained.find(({ version }) => version.filename === legacyKey)?.version
+
+    expect(versionedCloudFiles.get(legacyKey)?.equals(bytes)).toBe(true)
+    expect(legacyVersion?.original?.filename).toBe(legacyKey)
+    expect(legacyVersion?._managedFiles).toEqual([
+      {
+        key: legacyKey,
+        roles: [{ type: 'default' }, { type: 'original' }],
+        storageBackendId: `test-cloud:${versionedCloudMediaSlug}`,
+      },
+    ])
+  })
+
   test('should clean up the outgoing unversioned file after replacement', async ({ payload }) => {
     const created = await payload.create({
       collection: unversionedCloudMediaSlug,
@@ -421,11 +562,21 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       collection: unversionedCloudMediaSlug,
       data: {
         _managedFiles: null,
-        original: null,
+        original: { filename: null, filesize: null, mimeType: null, url: null },
         url: 'https://external.example.test/image.png',
       },
       where: { id: { equals: created.id } },
     })
+
+    const read = await payload.findByID({
+      id: created.id,
+      collection: unversionedCloudMediaSlug,
+      overrideAccess: true,
+      showHiddenFields: true,
+    })
+
+    expect(read.original?.filename).toBeNull()
+    expect(read._managedFiles).toBeFalsy()
 
     await expect(
       payload.renameFile({
@@ -652,6 +803,84 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     expect(currentManifest[0]!.key).not.toBe(firstManifest[0]!.key)
     expect(versionedCloudFiles.get(currentManifest[0]!.key)).toEqual(firstBytes)
     expect(after.find(({ id }) => id === selected.id)?.version).toEqual(selected.version)
+  })
+
+  test('should reject restore from a different cloud backend before changing files or documents', async ({
+    payload,
+  }) => {
+    const first = await payload.create({
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      overrideAccess: true,
+    })
+    const firstKey = (await getManagedFiles({ id: first.id, payload }))[0]!.key
+
+    await payload.update({
+      id: first.id,
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: secondFile,
+      overrideAccess: true,
+    })
+    const currentBefore = await payload.db.findOne({
+      collection: versionedCloudMediaSlug,
+      where: { id: { equals: first.id } },
+    })
+    const { docs: versions } = await payload.db.findVersions({
+      collection: versionedCloudMediaSlug,
+      where: { parent: { equals: first.id } },
+    })
+    const selected = versions.find(({ version }) =>
+      version._managedFiles?.some(({ key }) => key === firstKey),
+    )!
+    const selectedVersion = {
+      ...selected.version,
+      _managedFiles: [
+        ...selected.version._managedFiles!,
+        { ...selected.version._managedFiles![0]!, storageBackendId: 'other-cloud:media' },
+      ],
+    }
+    await payload.db.updateVersion({
+      id: selected.id,
+      collection: versionedCloudMediaSlug,
+      versionData: {
+        createdAt: selected.createdAt,
+        latest: selected.latest,
+        parent: selected.parent,
+        updatedAt: selected.updatedAt,
+        version: selectedVersion,
+      },
+    })
+    const keysBefore = [...versionedCloudFiles.keys()]
+    const operations = payload.collections[versionedCloudMediaSlug].config.upload.fileOperations!
+    const copy = vi.spyOn(operations, 'copy')
+
+    try {
+      await expect(
+        payload.restoreVersion({
+          id: selected.id,
+          collection: versionedCloudMediaSlug,
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow(/backend/i)
+      expect(copy).not.toHaveBeenCalled()
+    } finally {
+      copy.mockRestore()
+    }
+
+    expect(
+      await payload.db.findOne({
+        collection: versionedCloudMediaSlug,
+        where: { id: { equals: first.id } },
+      }),
+    ).toEqual(currentBefore)
+    expect([...versionedCloudFiles.keys()]).toEqual(keysBefore)
+    const { docs: after } = await payload.db.findVersions({
+      collection: versionedCloudMediaSlug,
+      where: { id: { equals: selected.id } },
+    })
+    expect(after[0]?.version).toEqual(selectedVersion)
   })
 
   test('should retain a failed cloud deletion and log its exact storage identity', async ({
