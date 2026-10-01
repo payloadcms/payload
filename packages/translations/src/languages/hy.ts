@@ -513,10 +513,15 @@ export const hyTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Ավելացնել ֆայլ',
     addFiles: 'Ավելացնել ֆայլեր',
+    aspectRatio: 'Կողմերի հարաբերակցություն',
+    aspectRatioCustom: 'Անհատական',
+    aspectRatioFreeform: 'Ազատ',
+    aspectRatioOriginal: 'Բնօրինակ պատկեր',
     bulkUpload: 'Զանգվածային վերբեռնում',
     crop: 'Կտրել',
     cropToolDescription:
       'Քաշեք ընտրված տարածքի անկյունները, նշեք նոր տարածք կամ կարգավորեք ստորև նշված արժեքները։',
+    customAspectRatio: 'Անհատական հարաբերակցություն',
     download: 'Ներբեռնել',
     dragAndDrop: 'Քաշեք և գցեք ֆայլը',
     dragAndDropHere: 'կամ քաշեք և գցեք ֆայլն այստեղ',
@@ -529,6 +534,8 @@ export const hyTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Քաշեք կիզակետը անմիջապես նախադիտման վրա կամ կարգավորեք ստորև նշված արժեքները։',
     height: 'Բարձրություն',
+    invalidAspectRatio:
+      'Մուտքագրեք հարաբերակցությունը լայնություն:բարձրություն ձևաչափով, օրինակ՝ 16:9։',
     lessInfo: 'Ավելի քիչ տեղեկություն',
     moreInfo: 'Ավելի շատ տեղեկություն',
     noFile: 'Ֆայլ չկա',

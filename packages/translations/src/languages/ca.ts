@@ -513,10 +513,15 @@ export const caTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Afegir fitxer',
     addFiles: 'Afegir fitxers',
+    aspectRatio: "Relació d'aspecte",
+    aspectRatioCustom: 'Personalitzada',
+    aspectRatioFreeform: 'Lliure',
+    aspectRatioOriginal: 'Imatge original',
     bulkUpload: 'Carregar arxius massius',
     crop: 'Retallar',
     cropToolDescription:
       'Arrossega les cantonades de l’àrea seleccionada, dibuixa una nova àrea o ajusta els valors a continuació.',
+    customAspectRatio: 'Relació personalitzada',
     download: 'Descarrega',
     dragAndDrop: 'Arrossega i deixa anar un fitxer',
     dragAndDropHere: 'o arrossega i deixa anar un fitxer aquí',
@@ -529,6 +534,7 @@ export const caTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Arrossega el punt focal directament sobre la vista prèvia o ajusta els valors a continuació.',
     height: 'Alçada',
+    invalidAspectRatio: 'Introdueix una relació com a amplada:alçada, per exemple 16:9.',
     lessInfo: 'Menys informació',
     moreInfo: 'Més informació',
     noFile: 'No hi ha cap fitxer',

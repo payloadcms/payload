@@ -516,10 +516,15 @@ export const trTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Dosya ekle',
     addFiles: 'Dosya Ekle',
+    aspectRatio: 'En-boy oranı',
+    aspectRatioCustom: 'Özel',
+    aspectRatioFreeform: 'Serbest',
+    aspectRatioOriginal: 'Orijinal görsel',
     bulkUpload: 'Toplu Yükleme',
     crop: 'Mahsulat',
     cropToolDescription:
       'Seçilen alanın köşelerini sürükleyin, yeni bir alan çizin ya da aşağıdaki değerleri ayarlayın.',
+    customAspectRatio: 'Özel oran',
     download: 'İndir',
     dragAndDrop: 'Bir dosya sürükleyip bırakabilirsiniz',
     dragAndDropHere: 'veya buraya bir dosya sürükleyip bırakabilirsiniz',
@@ -532,6 +537,7 @@ export const trTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Önizlemeye odak noktasını doğrudan sürükleyin veya aşağıdaki değerleri ayarlayın.',
     height: 'Yükseklik',
+    invalidAspectRatio: 'Oranı genişlik:yükseklik biçiminde girin, örneğin 16:9.',
     lessInfo: 'Daha az bilgi',
     moreInfo: 'Daha fazla bilgi',
     noFile: 'Dosya yok',
