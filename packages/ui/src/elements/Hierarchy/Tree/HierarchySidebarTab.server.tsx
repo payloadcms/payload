@@ -131,6 +131,7 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
             collection: hierarchyCollectionSlug,
             depth: 0,
             overrideAccess: false,
+            req,
             user,
           })
 
@@ -177,6 +178,7 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
       ...(initialSelectedFilters.length > 0 && { filterByCollections: initialSelectedFilters }),
       ...(treeLimit !== undefined && { limit: treeLimit }),
       payload,
+      req,
       selectedNodeId,
       selectedNodeParentId,
       user: req.user,

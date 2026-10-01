@@ -12,6 +12,7 @@ import {
   databaseAdapterSupportsTransactions,
   isPostgresDatabaseAdapter,
 } from '../__helpers/shared/databaseAdapterCapabilities.js'
+import { mongooseList } from '../__helpers/shared/isMongoose.js'
 import {
   deletionSafetyBranchGlobalSlug,
   deletionSafetyGlobalSlug,
@@ -27,6 +28,9 @@ import { branchChangesSlug, branchesSlug } from './shared.js'
 
 const branchReferenceErrorMessage =
   'Branch-created content cannot be deleted while a surviving document or version references it.'
+const transactionCapableMongooseAdapters = new Set(
+  mongooseList.filter((adapter) => databaseAdapterSupportsTransactions({ adapter })),
+)
 
 const getRelationshipID = (value: unknown): unknown =>
   typeof value === 'object' && value !== null && 'id' in value
@@ -709,7 +713,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
   test.options(
     'should clear a rolled-back first branch update before reusing the request',
-    { db: 'mongo' },
+    { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
     async ({ payload }) => {
       const mainTarget = await payload.create({
         collection: deletionSafetyTargetsSlug,
@@ -807,7 +811,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
   test.options(
     'should reject an untouched branch update inside a caller transaction without side effects',
-    { db: 'mongo' },
+    { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
     async ({ payload }) => {
       const mainTarget = await payload.create({
         collection: deletionSafetyTargetsSlug,
@@ -870,7 +874,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
   test.options(
     'should update an existing branch shadow inside a caller transaction',
-    { db: 'mongo' },
+    { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
     async ({ payload }) => {
       const mainTarget = await payload.create({
         collection: deletionSafetyTargetsSlug,
@@ -933,7 +937,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
   test.options(
     'should reject only untouched branch documents during a caller-owned bulk update',
-    { db: 'mongo' },
+    { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
     async ({ payload }) => {
       const branch = await createBranch({ name: 'Caller transaction bulk update', payload })
       const existingShadowTarget = await payload.create({
@@ -1964,7 +1968,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
   test.options(
     'should roll back an operation-owned bulk upload when one document fails validation',
-    { db: 'mongo' },
+    { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
     async ({ payload }) => {
       const successfulFileData = Buffer.from('operation transaction successful original bytes')
       const successfulUpload = await payload.create({
@@ -2046,7 +2050,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
   test.options(
     'should restore an overwritten upload when an operation-owned transaction rolls back',
-    { db: 'mongo' },
+    { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
     async ({ payload }) => {
       const originalFileData = Buffer.from('same path original bytes')
       const upload = await payload.create({
@@ -2100,7 +2104,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
   test.options(
     'should keep a concurrent upload replacement when an operation-owned transaction rolls back',
-    { db: 'mongo' },
+    { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
     async ({ payload }) => {
       const originalFileData = Buffer.from('concurrent rollback original bytes')
       const upload = await payload.create({
@@ -2228,7 +2232,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
   test.options(
     'should roll back only the document that fails after a single-transaction adapter write',
-    { db: 'mongo' },
+    { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
     async ({ payload }) => {
       const successfulFileData = Buffer.from('late failure successful original bytes')
       const successfulUpload = await payload.create({
@@ -2291,7 +2295,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
   test.options(
     'should keep successful first branch bulk updates and roll back the failed document fork',
-    { db: 'mongo' },
+    { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
     async ({ payload }) => {
       const branch = await createBranch({ name: 'Mixed first branch bulk update', payload })
       const successfulTarget = await payload.create({
@@ -2411,7 +2415,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
   test.options(
     'should clear bulk upload cleanup when a caller-owned transaction is rolled back',
-    { db: 'mongo' },
+    { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
     async ({ payload }) => {
       const successfulFileData = Buffer.from('caller transaction successful original bytes')
       const successfulUpload = await payload.create({
@@ -2502,7 +2506,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
   test.options(
     'should reject a caller-owned bulk update when a document fails after writing',
-    { db: 'mongo' },
+    { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
     async ({ payload }) => {
       const successfulFileData = Buffer.from('caller late successful bytes')
       const successfulUpload = await payload.create({
@@ -2578,7 +2582,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
   test.options(
     'should roll back an operation-owned bulk transaction when a document fails after writing',
-    { db: 'mongo' },
+    { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
     async ({ payload }) => {
       const successfulTarget = await payload.create({
         collection: deletionSafetyTargetsSlug,
@@ -2628,7 +2632,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
   test.options(
     'should reject a caller-owned bulk update when a hook writes and then fails',
-    { db: 'mongo' },
+    { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
     async ({ payload }) => {
       const hookWriteTarget = await payload.create({
         collection: deletionSafetyTargetsSlug,

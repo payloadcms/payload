@@ -34,11 +34,13 @@ vi.mock('../RouteTransition/index.js', () => ({
 }))
 
 const mainTreeData: HierarchyInitialData = {
+  branch: null,
   docs: [{ id: 'folder-1', title: 'main' }],
   loadedParents: {},
 }
 
 const featureTreeData: HierarchyInitialData = {
+  branch: 'feature',
   docs: [{ id: 'folder-1', title: 'feature' }],
   loadedParents: {},
 }
@@ -62,6 +64,21 @@ test('should keep hierarchy data separate when the nested provider receives anot
   await screen.rerender(<BranchHierarchyFixture activeBranch="main" treeData={featureTreeData} />)
   await expect.element(screen.getByTestId('active-branch')).toHaveTextContent('main')
   await expect.element(screen.getByTestId('tree-data')).toHaveTextContent('main')
+})
+
+test('should not attach fresh main data to a feature branch cache', async () => {
+  const screen = await render(
+    <BranchHierarchyFixture
+      activeBranch="feature"
+      treeData={{
+        ...mainTreeData,
+        docs: mainTreeData.docs.map((doc) => ({ ...doc })),
+      }}
+    />,
+  )
+
+  await expect.element(screen.getByTestId('active-branch')).toHaveTextContent('feature')
+  await expect.element(screen.getByTestId('tree-data')).toHaveTextContent('empty')
 })
 
 function BranchHierarchyFixture({

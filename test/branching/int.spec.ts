@@ -27,6 +27,7 @@ import { readCollectionMergeSnapshot } from '../../packages/payload/src/branchin
 import { scheduleMergeHandler } from '../../packages/ui/src/utilities/scheduleMergeHandler.js'
 import { test } from '../__helpers/int/vitest.js'
 import { databaseAdapterSupportsTransactions } from '../__helpers/shared/databaseAdapterCapabilities.js'
+import { mongooseList } from '../__helpers/shared/isMongoose.js'
 import { devUser } from '../credentials.js'
 import { hookSpy } from './hookSpy.js'
 import {
@@ -67,6 +68,9 @@ const expectedConcurrentOperationAttemptCounts = databaseAdapterSupportsTransact
       [1, 1],
       [1, 2],
     ]
+const transactionCapableMongooseAdapters = new Set(
+  mongooseList.filter((adapter) => databaseAdapterSupportsTransactions({ adapter })),
+)
 
 const fieldNames = (collection: SanitizedCollectionConfig): string[] =>
   collection.flattenedFields.map((field) => field.name)
@@ -3743,7 +3747,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
     test.options(
       'should preserve a temp-file upload across a transient final commit retry',
-      { db: 'mongo' },
+      { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
       async () => {
         const fs = await import('fs/promises')
         const os = await import('os')
@@ -3802,7 +3806,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
     test.options(
       'should remove a branch upload when its final database commit fails',
-      { db: 'mongo' },
+      { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
       async () => {
         const fs = await import('fs/promises')
         const media = await createOnMain('upload-rollback-main.txt')
@@ -6850,7 +6854,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
     test.options(
       'should roll back every change in a non-streaming merge when a later change fails',
-      { db: 'mongo' },
+      { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
       async () => {
         branchSlug = 'txnmerge'
 
@@ -6918,7 +6922,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
     test.options(
       'should roll back every change in a discard when a later change fails',
-      { db: 'mongo' },
+      { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
       async () => {
         branchSlug = 'txndiscard'
 
@@ -7366,7 +7370,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
     test.options(
       'should retry a first branch edit when its final transaction commit is transient',
-      { db: 'mongo' },
+      { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
       async () => {
         await payload.create({
           collection: branchesSlug,
@@ -7771,7 +7775,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
     test.options(
       'should replace a concurrent delete winner that is removed before the retry consumes it',
-      { db: 'mongo' },
+      { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
       async () => {
         await payload.create({
           collection: branchesSlug,
@@ -7931,7 +7935,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
     test.options(
       'should complete a delete that starts before a competing first edit commits',
-      { db: 'mongo' },
+      { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
       async () => {
         await payload.create({
           collection: branchesSlug,

@@ -88,10 +88,18 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
   )
 
   const contextData = getTreeDataForCollection(collectionSlug)
+  const activeBranch = branch ?? null
+  const matchingContextData = (contextData?.branch ?? null) === activeBranch ? contextData : null
+  const matchingInitialDataProp =
+    (initialDataProp?.branch ?? null) === activeBranch ? initialDataProp : null
   const baseFilterKey = baseFilter ? JSON.stringify(baseFilter) : ''
-  const contextBaseFilterKey = contextData?.baseFilter ? JSON.stringify(contextData.baseFilter) : ''
+  const contextBaseFilterKey = matchingContextData?.baseFilter
+    ? JSON.stringify(matchingContextData.baseFilter)
+    : ''
   const initialData =
-    baseFilterKey === contextBaseFilterKey ? (contextData ?? initialDataProp) : initialDataProp
+    baseFilterKey === contextBaseFilterKey
+      ? (matchingContextData ?? matchingInitialDataProp)
+      : matchingInitialDataProp
   // Tracks whether context has been seeded at least once since the last navigation.
   // Resets when initialExpandedNodesProp changes (new array reference = navigation).
   // Allows the memo to distinguish "not yet seeded" (fall back to prop) from
@@ -150,7 +158,6 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
 
   // Pre-populate cache with initialData synchronously before first render
   const childrenCache = useRef<Map<string, CachedChildren>>(new Map())
-  const initialDataBranchesRef = useRef<WeakMap<object, null | string>>(new WeakMap())
 
   const previousBranchRef = useRef(branch)
   if (previousBranchRef.current !== branch) {
@@ -168,15 +175,6 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
     if (!initialData || initialData.docs.length === 0) {
       return
     }
-
-    const initialDataBranch = initialDataBranchesRef.current.get(initialData)
-    const activeBranch = branch ?? null
-
-    if (initialDataBranch !== undefined && initialDataBranch !== activeBranch) {
-      return
-    }
-
-    initialDataBranchesRef.current.set(initialData, activeBranch)
 
     const docsByParent = new Map<string, TreeDocument[]>()
     for (const doc of initialData.docs) {

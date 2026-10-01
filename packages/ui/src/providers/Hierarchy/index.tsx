@@ -4,7 +4,7 @@ import type { TypeWithID, Where } from 'payload'
 
 import { DEFAULT_HIERARCHY_TREE_LIMIT, formatAdminURL, PREFERENCE_KEYS } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { createContext, use, useCallback, useRef, useState } from 'react'
+import React, { createContext, use, useCallback, useState } from 'react'
 
 import type {
   AllowedCollection,
@@ -42,8 +42,6 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
   } = useConfig()
 
   const branch = useBranchParam()
-  const branchRef = useRef(branch)
-  branchRef.current = branch
 
   const [baseFilter, setBaseFilter] = useState<null | Where>(null)
   const [collectionSlug, setCollectionSlug] = useState<null | string>(null)
@@ -136,7 +134,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
       setTreeCache((prev) => {
         const newCache = new Map(prev)
         const cacheKey = getHierarchyCacheKey({
-          branch: branchRef.current,
+          branch: treeData.branch ?? undefined,
           collectionSlug: slug,
         })
         const existingEntry = newCache.get(cacheKey)
@@ -151,6 +149,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
 
           newCache.set(cacheKey, {
             baseFilter: existingEntry.baseFilter,
+            branch: treeData.branch ?? existingEntry.branch ?? null,
             docs: [...existingEntry.docs, ...newDocs],
             loadedParents: {
               ...existingEntry.loadedParents,
