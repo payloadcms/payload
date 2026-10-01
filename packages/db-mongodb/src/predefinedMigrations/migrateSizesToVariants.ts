@@ -29,36 +29,45 @@ export async function migrateSizesToVariants({
   const session = await getSession(adapter, req)
   const [from, to] = direction === 'up' ? ['sizes', 'variants'] : ['variants', 'sizes']
 
+  const targets: { collection: Collection; fromPath: string; toPath: string }[] = []
+
   for (const collection of payload.config.collections) {
     if (!collection.upload) {
       continue
     }
 
-    const targets: { collection: Collection; path: string }[] = [
-      { collection: adapter.collections[collection.slug]!.collection, path: '' },
-    ]
+    targets.push({
+      collection: adapter.collections[collection.slug]!.collection,
+      fromPath: from,
+      toPath: to,
+    })
 
     if (collection.versions && adapter.versions[collection.slug]) {
-      targets.push({ collection: adapter.versions[collection.slug]!.collection, path: 'version.' })
-    }
-
-    for (const target of targets) {
-      const fromPath = `${target.path}${from}`
-      const toPath = `${target.path}${to}`
-
-      const result = await target.collection.updateMany(
-        { [fromPath]: { $exists: true }, [toPath]: { $exists: false } },
-        { $rename: { [fromPath]: toPath } },
-        { session },
-      )
-
-      // Index builds can't run inside a multi-document transaction, so they skip the session.
-      await rekeyIndexes({ collection: target.collection, fromPath, toPath })
-
-      payload.logger.info({
-        msg: `sizes-to-variants (${direction}): renamed ${fromPath} on ${result.modifiedCount} document(s) in "${target.collection.collectionName}"`,
+      targets.push({
+        collection: adapter.versions[collection.slug]!.collection,
+        fromPath: `version.${from}`,
+        toPath: `version.${to}`,
       })
     }
+  }
+
+  // Index changes can't be part of a multi-document transaction, and one made after the
+  // migration's transaction has written to a collection aborts it. A transaction's snapshot starts
+  // at its first operation, so re-keying every index before any transactional write is safe.
+  for (const target of targets) {
+    await rekeyIndexes(target)
+  }
+
+  for (const { collection, fromPath, toPath } of targets) {
+    const result = await collection.updateMany(
+      { [fromPath]: { $exists: true }, [toPath]: { $exists: false } },
+      { $rename: { [fromPath]: toPath } },
+      { session },
+    )
+
+    payload.logger.info({
+      msg: `sizes-to-variants (${direction}): renamed ${fromPath} on ${result.modifiedCount} document(s) in "${collection.collectionName}"`,
+    })
   }
 }
 

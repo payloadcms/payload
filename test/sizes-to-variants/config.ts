@@ -4,7 +4,7 @@ import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { mediaSlug, variantName } from './shared.js'
+import { camelCaseVariantName, mediaSlug, variantName } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -30,7 +30,12 @@ export default buildConfigWithDefaults({
       transformers: [
         sharpTransformer({
           collections: {
-            [mediaSlug]: { variants: [{ name: variantName, height: 40, width: 40 }] },
+            [mediaSlug]: {
+              variants: [
+                { name: variantName, height: 40, width: 40 },
+                { name: camelCaseVariantName, width: 60 },
+              ],
+            },
           },
           sharp,
         }),

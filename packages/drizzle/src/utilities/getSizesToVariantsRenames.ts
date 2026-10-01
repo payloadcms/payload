@@ -1,6 +1,6 @@
 import toSnakeCase from 'to-snake-case'
 
-import type { DrizzleAdapter, RawIndex } from '../types.js'
+import type { DrizzleAdapter, RawIndex, RawTable } from '../types.js'
 
 import { maxGeneratedIdentifierLength } from './validateIdentifierLength.js'
 
@@ -91,7 +91,9 @@ export function getSizesToVariantsRenames({
       }
 
       const indexes = Object.values(rawTable.indexes ?? {})
-        .map((index) => planIndexRename({ columns, direction, index, tableName }))
+        .map((index) =>
+          planIndexRename({ columns, direction, index, rawColumns: rawTable.columns, tableName }),
+        )
         .filter((index): index is SizesToVariantsIndexRename => Boolean(index))
 
       plan.push({ columns, indexes, tableName })
@@ -105,14 +107,17 @@ function planIndexRename({
   columns,
   direction,
   index,
+  rawColumns,
   tableName,
 }: {
   columns: SizesToVariantsColumnRename[]
   direction: SizesToVariantsDirection
   index: RawIndex
+  rawColumns: RawTable['columns']
   tableName: string
 }): SizesToVariantsIndexRename | undefined {
-  const currentColumns = [index.on].flat()
+  // `on` holds the column's schema key (e.g. `variants_heroLarge_filename`), not its database name.
+  const currentColumns = [index.on].flat().map((key) => rawColumns[key]?.name ?? key)
   const renamedColumns = currentColumns.map((column) =>
     columns.find((rename) => (direction === 'up' ? rename.to : rename.from) === column),
   )

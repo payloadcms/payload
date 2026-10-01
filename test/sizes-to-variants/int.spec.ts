@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { Payload, PayloadRequest } from 'payload'
 
 import { migrateSizesToVariants as migrateMongoSizesToVariants } from '@payloadcms/db-mongodb/migration-utils'
 import { migrateSizesToVariants as migratePostgresSizesToVariants } from '@payloadcms/db-postgres/migration-utils'
@@ -6,12 +6,13 @@ import { migrateSizesToVariants as migrateSqliteSizesToVariants } from '@payload
 import { sql } from 'drizzle-orm'
 import fs from 'fs'
 import path from 'path'
+import { commitTransaction, initTransaction } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import { mediaSlug, variantName } from './shared.js'
+import { camelCaseVariantName, mediaSlug, variantName } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -36,19 +37,29 @@ const createMedia = async ({ payload }: { payload: Payload }) => {
   return { id: doc.id, filename: doc.filename!, variantFilename }
 }
 
-/** The index the current schema expects on a table's variant filename column. */
-const getExpectedIndexName = ({
+/** The index names the current schema expects on a table's variant filename columns. */
+const getExpectedIndexNames = ({
   payload,
   tableName,
 }: {
   payload: Payload
   tableName: string
-}): string | undefined => {
+}): string[] => {
   const rawTable = (payload.db as any).rawTables[tableName]
 
-  return Object.values<{ name: string; on: string | string[] }>(rawTable.indexes ?? {}).find(
-    (index) => [index.on].flat().some((column) => column.endsWith(variantFilenameColumn)),
-  )?.name
+  return [variantName, camelCaseVariantName].map((name) => {
+    // Raw index `on` holds the column's schema key, which keeps the camelCase variant name.
+    const columnKey = `variants_${name}_filename`
+    const index = Object.values<{ name: string; on: string | string[] }>(
+      rawTable.indexes ?? {},
+    ).find((rawIndex) => [rawIndex.on].flat().includes(columnKey))
+
+    if (!index) {
+      throw new Error(`Expected an index on ${columnKey}`)
+    }
+
+    return index.name
+  })
 }
 
 test.suite('sizes-to-variants migration', { config: './config.ts' }, () => {
@@ -102,7 +113,7 @@ test.suite('sizes-to-variants migration', { config: './config.ts' }, () => {
       const migrate = ({ direction, payload }: { direction: 'down' | 'up'; payload: Payload }) =>
         migratePostgresSizesToVariants({ db: (payload.db as any).drizzle, direction, payload })
 
-      test('should move legacy sizes columns to variants without losing data', async ({
+      test('should move legacy sizes columns to variants in Postgres without losing data', async ({
         payload,
       }) => {
         const { id, variantFilename } = await createMedia({ payload })
@@ -134,19 +145,19 @@ test.suite('sizes-to-variants migration', { config: './config.ts' }, () => {
       }) => {
         await createMedia({ payload })
 
-        const expectedIndexName = getExpectedIndexName({ payload, tableName: mediaSlug })
-
-        expect(expectedIndexName).toBeTruthy()
+        const expectedIndexNames = getExpectedIndexNames({ payload, tableName: mediaSlug })
 
         await migrate({ direction: 'down', payload })
 
-        expect(await getIndexNames({ payload, tableName: mediaSlug })).not.toContain(
-          expectedIndexName,
+        expect(await getIndexNames({ payload, tableName: mediaSlug })).not.toEqual(
+          expect.arrayContaining(expectedIndexNames),
         )
 
         await migrate({ direction: 'up', payload })
 
-        expect(await getIndexNames({ payload, tableName: mediaSlug })).toContain(expectedIndexName)
+        expect(await getIndexNames({ payload, tableName: mediaSlug })).toEqual(
+          expect.arrayContaining(expectedIndexNames),
+        )
       })
 
       test('should be safe to re-run once the columns are renamed', async ({ payload }) => {
@@ -187,7 +198,7 @@ test.suite('sizes-to-variants migration', { config: './config.ts' }, () => {
     const migrate = ({ direction, payload }: { direction: 'down' | 'up'; payload: Payload }) =>
       migrateSqliteSizesToVariants({ db: (payload.db as any).drizzle, direction, payload })
 
-    test('should move legacy sizes columns to variants without losing data', async ({
+    test('should move legacy sizes columns to variants in SQLite without losing data', async ({
       payload,
     }) => {
       const { id, variantFilename } = await createMedia({ payload })
@@ -216,19 +227,19 @@ test.suite('sizes-to-variants migration', { config: './config.ts' }, () => {
     }) => {
       await createMedia({ payload })
 
-      const expectedIndexName = getExpectedIndexName({ payload, tableName: mediaSlug })
-
-      expect(expectedIndexName).toBeTruthy()
+      const expectedIndexNames = getExpectedIndexNames({ payload, tableName: mediaSlug })
 
       await migrate({ direction: 'down', payload })
 
-      expect(await getIndexNames({ payload, tableName: mediaSlug })).not.toContain(
-        expectedIndexName,
+      expect(await getIndexNames({ payload, tableName: mediaSlug })).not.toEqual(
+        expect.arrayContaining(expectedIndexNames),
       )
 
       await migrate({ direction: 'up', payload })
 
-      expect(await getIndexNames({ payload, tableName: mediaSlug })).toContain(expectedIndexName)
+      expect(await getIndexNames({ payload, tableName: mediaSlug })).toEqual(
+        expect.arrayContaining(expectedIndexNames),
+      )
     })
   })
 
@@ -267,6 +278,24 @@ test.suite('sizes-to-variants migration', { config: './config.ts' }, () => {
 
       expect(migratedDocument.sizes).toBeUndefined()
       expect(migratedDocument.variants?.[variantName]?.filename).toBe(variantFilename)
+
+      const doc = await payload.findByID({ id, collection: mediaSlug, overrideAccess: true })
+
+      expect(doc.variants?.[variantName]?.filename).toBe(variantFilename)
+    })
+
+    test('should migrate inside the transaction payload migrate runs it in', async ({
+      payload,
+    }) => {
+      const { id, variantFilename } = await createMedia({ payload })
+
+      await migrateMongoSizesToVariants({ direction: 'down', payload })
+
+      const req = { payload } as unknown as PayloadRequest
+
+      await initTransaction(req)
+      await migrateMongoSizesToVariants({ payload, req })
+      await commitTransaction(req)
 
       const doc = await payload.findByID({ id, collection: mediaSlug, overrideAccess: true })
 
