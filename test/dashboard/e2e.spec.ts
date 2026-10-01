@@ -576,13 +576,40 @@ describe('Dashboard', () => {
       mimeType: 'application/pdf',
     })
     await expect(modal.getByText('dashboard.pdf')).toBeVisible()
-    await expect(fileDestination).toHaveCount(0)
+    await expect(fileDestination).toBeVisible()
+    await openSelectMenu({ page, selectLocator: fileDestination })
+    const incompatibleDestination = getSelectMenu({ page }).getByRole('option', {
+      name: 'Media (Accepts: image/*)',
+      exact: true,
+    })
+    await expect(incompatibleDestination).toHaveAttribute('aria-disabled', 'true')
+    await incompatibleDestination.click({ force: true })
+    await expect(fileDestination.locator('.react-select--single-value')).toHaveText('Media Alt')
+    await modal.locator('.dialog-title').click()
 
     await modal.getByRole('button', { name: 'Add Files' }).click()
-    await expect(addMoreFiles.locator('.bulk-upload--add-files__collectionSelect')).toHaveCount(0)
+    const addMoreDestination = addMoreFiles.locator('.bulk-upload--add-files__collectionSelect')
+    await expect(addMoreDestination).toBeVisible()
+    await openSelectMenu({ page, selectLocator: addMoreDestination })
+    await expect(
+      getSelectMenu({ page }).getByRole('option', {
+        name: 'Media (Accepts: image/*)',
+        exact: true,
+      }),
+    ).toHaveAttribute('aria-disabled', 'true')
+    await addMoreFiles.locator('.dialog-title').click()
     await addMoreFiles.getByRole('button', { name: 'Close', exact: true }).click()
-    await modal.locator('.file-selections__remove--overlay').first().click()
+    await modal
+      .locator('.file-selections__fileRowContainer')
+      .filter({ hasText: 'dashboard.pdf' })
+      .locator('.file-selections__remove--overlay')
+      .click()
     await expect(fileDestination).toBeVisible()
+    await openSelectMenu({ page, selectLocator: fileDestination })
+    await expect(
+      getSelectMenu({ page }).getByRole('option', { name: 'Media', exact: true }),
+    ).not.toHaveAttribute('aria-disabled', 'true')
+    await modal.locator('.dialog-title').click()
 
     await modal.locator('#field-description').fill('Uploaded from the dashboard')
     try {
@@ -611,7 +638,14 @@ describe('Dashboard', () => {
 
       await expect(modal).toBeVisible()
       await expect(modal.getByText('dashboard.pdf')).toBeVisible()
-      await expect(modal.locator('.file-selections__collectionSelect')).toHaveCount(0)
+      await expect(fileDestination).toBeVisible()
+      await openSelectMenu({ page, selectLocator: fileDestination })
+      await expect(
+        getSelectMenu({ page }).getByRole('option', {
+          name: 'Media (Accepts: image/*)',
+          exact: true,
+        }),
+      ).toHaveAttribute('aria-disabled', 'true')
     } finally {
       const uploadDirectory = path.resolve(dirname, 'media-alt')
       await rm(path.join(uploadDirectory, 'image.png'), { force: true })

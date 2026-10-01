@@ -22,9 +22,12 @@ export function UploadDropzoneWidgetClient({ collections }: Props) {
   const { t } = useTranslation()
 
   const openUpload = React.useCallback(
-    (files?: FileList, availableCollections = collections) => {
-      setSelectableCollections(availableCollections.map(({ slug }) => slug))
-      setCollectionSlug(availableCollections[0].slug)
+    ({
+      collectionSlug = collections[0].slug,
+      files,
+    }: { collectionSlug?: string; files?: FileList } = {}) => {
+      setSelectableCollections(collections.map(({ slug }) => slug))
+      setCollectionSlug(collectionSlug)
       setInitialFiles(files)
       openModal(modalSlug)
     },
@@ -51,7 +54,7 @@ export function UploadDropzoneWidgetClient({ collections }: Props) {
         return
       }
 
-      openUpload(files, compatibleCollections)
+      openUpload({ collectionSlug: compatibleCollections[0].slug, files })
     },
     [collections, openUpload, t],
   )

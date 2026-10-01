@@ -7,7 +7,7 @@ import type { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 
 import { addGroupBy, clearGroupBy, openGroupBy } from '../__helpers/e2e/groupBy/index.js'
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
-import { selectInput } from '../__helpers/e2e/selectInput.js'
+import { getSelectMenu, selectInput } from '../__helpers/e2e/selectInput.js'
 import { initPage } from '../__setup/e2e/initPage.js'
 import {
   addCollectionQueryWidget,
@@ -660,6 +660,62 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(modal.locator('.bulk-upload--add-files__collectionSelect')).toContainText(
         'Media Alt',
       )
+    })
+
+    test('should keep incompatible upload destinations visible and skip them with the keyboard', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await page
+        .locator('.upload-dropzone-widget')
+        .getByRole('button', { name: 'Upload files' })
+        .click()
+
+      const modal = page.locator('#bulk-upload-modal-slug-1')
+
+      await selectInput({
+        multiSelect: false,
+        option: 'Media Alt',
+        page,
+        selectLocator: modal.locator('.bulk-upload--add-files__collectionSelect'),
+      })
+      await modal.locator('.dropzone input[type="file"]').setInputFiles({
+        name: 'keyboard.pdf',
+        buffer: Buffer.from('pdf'),
+        mimeType: 'application/pdf',
+      })
+
+      const destination = modal.locator('.file-selections__collectionSelect')
+      const input = destination.getByRole('combobox', { name: 'Collection', exact: true })
+
+      await expect(input).toBeVisible()
+      await input.focus()
+      await input.press('ArrowDown')
+      await expect(
+        getSelectMenu({ page }).getByRole('option', {
+          name: 'Media (Accepts: image/*)',
+          exact: true,
+        }),
+      ).toHaveAttribute('aria-disabled', 'true')
+      await input.press('Home')
+      await input.press('Enter')
+      await expect(destination.locator('.react-select--single-value')).toHaveText('Media Alt')
+      await expect(input).toBeFocused()
+
+      await modal.locator('.file-selections__remove--overlay').click()
+
+      const addFilesDestination = modal.locator('.bulk-upload--add-files__collectionSelect')
+      const addFilesInput = addFilesDestination.getByRole('combobox', {
+        name: 'Collection',
+        exact: true,
+      })
+
+      await addFilesInput.focus()
+      await addFilesInput.press('ArrowDown')
+      await expect(
+        getSelectMenu({ page }).getByRole('option', { name: 'Media', exact: true }),
+      ).not.toHaveAttribute('aria-disabled', 'true')
+      await addFilesInput.press('Home')
+      await addFilesInput.press('Enter')
+      await expect(addFilesDestination.locator('.react-select--single-value')).toHaveText('Media')
     })
 
     test('should navigate and select collection grid rows without trapping keyboard focus', async () => {
@@ -2771,22 +2827,22 @@ test.describe('WCAG 2.2 Level AA', () => {
       })
 
       expect(spacing.after).toBe(spacing.before)
-      await expect(explanation).not.toBeVisible()
+      await expect(explanation).toBeHidden()
       await trigger.hover()
       await expect(explanation).toBeVisible()
       await explanation.hover()
       await expect(explanation).toBeVisible()
       await page.keyboard.press('Escape')
-      await expect(explanation).not.toBeVisible()
+      await expect(explanation).toBeHidden()
       await page.locator('#field-title').focus()
       await trigger.focus()
       await expect(explanation).toBeVisible()
       await trigger.press('Escape')
-      await expect(explanation).not.toBeVisible()
+      await expect(explanation).toBeHidden()
       await trigger.press('Enter')
       await expect(explanation).toBeVisible()
       await page.locator('#field-title').click()
-      await expect(explanation).not.toBeVisible()
+      await expect(explanation).toBeHidden()
       await trigger.click()
       await expect(explanation).toBeVisible()
       const box = await trigger.boundingBox()
@@ -2802,7 +2858,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await drawerTrigger.focus()
       await expect(drawerExplanation).toBeVisible()
       await drawerTrigger.press('Escape')
-      await expect(drawerExplanation).not.toBeVisible()
+      await expect(drawerExplanation).toBeHidden()
       await expect(drawer).toBeVisible()
     })
   })

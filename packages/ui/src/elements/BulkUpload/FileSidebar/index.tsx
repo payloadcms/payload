@@ -5,7 +5,6 @@ import React from 'react'
 
 import { SelectInput } from '../../../fields/Select/Input.js'
 import { XIcon } from '../../../icons/X/index.js'
-import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { ErrorPill } from '../../ErrorPill/index.js'
 import { ShimmerEffect } from '../../ShimmerEffect/index.js'
@@ -14,7 +13,7 @@ import { Thumbnail } from '../../Thumbnail/index.js'
 import './index.css'
 import { useFormsManager } from '../FormsManager/index.js'
 import { useBulkUpload } from '../index.js'
-import { useCompatibleSelectableCollections } from '../useCompatibleSelectableCollections.js'
+import { useUploadCollectionOptions } from '../useUploadCollectionOptions.js'
 
 const baseClass = 'file-selections'
 
@@ -42,16 +41,17 @@ export function FileSidebar() {
 
   const { collectionSlug: bulkUploadCollectionSlug } = useBulkUpload()
 
-  const { getEntityConfig } = useConfig()
-  const compatibleCollections = useCompatibleSelectableCollections()
+  const collectionOptions = useUploadCollectionOptions()
 
   return (
     <div className={baseClass}>
-      {compatibleCollections?.length > 1 && (
+      {collectionOptions.length > 1 && (
         <div className={`${baseClass}__header`}>
           <SelectInput
             className={`${baseClass}__collectionSelect`}
             isClearable={false}
+            Label={null}
+            label={t('general:collection')}
             name="groupBy"
             onChange={(e) => {
               const val: string =
@@ -60,12 +60,7 @@ export function FileSidebar() {
                   : (e as unknown as string)
               changeCollectionSlug(val)
             }}
-            options={
-              compatibleCollections.map((coll) => {
-                const config = getEntityConfig({ collectionSlug: coll })
-                return { label: config.labels.singular, value: config.slug }
-              }) || []
-            }
+            options={collectionOptions}
             path="groupBy"
             readOnly={isInitializing}
             required
