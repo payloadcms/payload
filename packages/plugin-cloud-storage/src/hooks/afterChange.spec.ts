@@ -3,6 +3,72 @@ import { describe, expect, it, vi } from 'vitest'
 import { getAfterChangeHook } from './afterChange.js'
 
 describe('upload replacement cleanup', () => {
+  it.each([false, true])(
+    'should upload a verified client original only when processed: %s',
+    async (isProcessed) => {
+      const doc = { id: 1, filename: 'image.png', mimeType: 'image/png' }
+      const handleUpload = vi.fn()
+      const req = {
+        context: {},
+        file: {
+          clientUpload: { isProcessed, originalStorageFilePath: 'image.png' },
+          data: Buffer.from('image'),
+          size: 5,
+          uploadReference: { signedReceipt: 'verified' },
+        },
+        payload: { logger: { error: vi.fn() } },
+      }
+      const hook = getAfterChangeHook({
+        collection: { slug: 'media' },
+        adapter: { handleUpload },
+      } as never)
+
+      await hook({ data: doc, doc, operation: 'create', req } as never)
+
+      expect(handleUpload).toHaveBeenCalledTimes(isProcessed ? 1 : 0)
+    },
+  )
+
+  it('should upload generated sizes while skipping an unchanged verified client original', async () => {
+    const doc = {
+      id: 1,
+      filename: 'image.png',
+      mimeType: 'image/png',
+      sizes: { square: { filename: 'size.png', mimeType: 'image/png' } },
+    }
+    const handleUpload = vi.fn()
+    const hook = getAfterChangeHook({
+      collection: { slug: 'media' },
+      adapter: { handleUpload },
+    } as never)
+
+    await hook({
+      data: doc,
+      doc,
+      operation: 'create',
+      req: {
+        context: {},
+        file: {
+          clientUpload: { isProcessed: false, originalStorageFilePath: 'image.png' },
+          data: Buffer.alloc(0),
+          size: 100,
+        },
+        payloadUploadSizes: { square: Buffer.from('size') },
+        payload: { logger: { error: vi.fn() } },
+      },
+    } as never)
+
+    expect(handleUpload).toHaveBeenCalledOnce()
+    expect(handleUpload).toHaveBeenCalledWith(
+      expect.objectContaining({
+        file: expect.objectContaining({
+          sizeName: 'square',
+          clientUpload: { isProcessed: true, originalStorageFilePath: 'image.png' },
+        }),
+      }),
+    )
+  })
+
   it('should clear crop instructions during an internal metadata update', async () => {
     const doc = { id: 1, filename: 'processed.png', mimeType: 'image/png' }
     const uploadEdits = { crop: { height: 50, width: 50, x: 0, y: 0 } }

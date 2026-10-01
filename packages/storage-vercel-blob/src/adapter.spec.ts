@@ -106,7 +106,14 @@ describe('createVercelBlobAdapter', () => {
       for (const filename of ['image.png', 'image-30x20.png']) {
         await adapter.handleUpload({
           data: isClientUpload ? { _objectKey: 'upload-key' } : {},
-          file: { buffer: Buffer.from('image'), filename, mimeType: 'image/png' },
+          file: {
+            buffer: Buffer.from('image'),
+            filename,
+            mimeType: 'image/png',
+            clientUpload: isClientUpload
+              ? { isProcessed: true, originalStorageFilePath: 'upload-key/image.png' }
+              : undefined,
+          },
           req: {
             context: {
               _payloadClientUploadTempFile: isClientUpload ? '/tmp/client-upload' : undefined,
@@ -144,6 +151,7 @@ describe('createVercelBlobAdapter', () => {
     await adapter.handleUpload({
       data: { _objectKey: 'issued-key' },
       file: {
+        clientUpload: { isProcessed: true, originalStorageFilePath: 'issued-key/processed.png' },
         buffer: Buffer.alloc(0),
         filename: 'processed.png',
         mimeType: 'image/png',
@@ -154,7 +162,12 @@ describe('createVercelBlobAdapter', () => {
     } as never)
     await adapter.handleUpload({
       data: { _objectKey: 'issued-key' },
-      file: { buffer: Buffer.from('size'), filename: 'processed-30x20.png', mimeType: 'image/png' },
+      file: {
+        clientUpload: { isProcessed: true, originalStorageFilePath: 'issued-key/processed.png' },
+        buffer: Buffer.from('size'),
+        filename: 'processed-30x20.png',
+        mimeType: 'image/png',
+      },
       req,
       storageFilePath: 'issued-key/processed-30x20.png',
     } as never)
@@ -172,7 +185,7 @@ describe('createVercelBlobAdapter', () => {
     ])
   })
 
-  it('should keep the client-upload key when the file is preserved in request context', async () => {
+  it('should keep a legacy client-upload key without object-key or request-context inference', async () => {
     const adapter = createVercelBlobAdapter({
       access: 'public',
       addRandomSuffix: true,
@@ -184,15 +197,14 @@ describe('createVercelBlobAdapter', () => {
     })({ collection: { slug: 'media' } } as never)
 
     await adapter.handleUpload({
-      data: { _objectKey: 'issued-key' },
-      file: { buffer: Buffer.alloc(0), filename: 'processed.png', mimeType: 'image/png' },
-      req: {
-        context: {
-          _payloadClientUploadTempFile: '/tmp/client-upload',
-          _payloadCloudStorage: { file: { tempFilePath: '/tmp/client-upload' } },
-        },
-        file: undefined,
+      data: {},
+      file: {
+        clientUpload: { isProcessed: true, originalStorageFilePath: 'processed.png' },
+        buffer: Buffer.alloc(0),
+        filename: 'processed.png',
+        mimeType: 'image/png',
       },
+      req: {},
       storageFilePath: 'issued-key/processed.png',
     } as never)
 

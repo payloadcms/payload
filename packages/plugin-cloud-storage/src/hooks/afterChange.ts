@@ -55,7 +55,9 @@ export const getAfterChangeHook =
         // Fold `_objectKey` so generated sizes land in the same folder as the original.
         const dataForUpload = { ...uploadData, prefix: getObjectFolder(uploadData) }
 
-        const filesToUpload = files.filter((file) => !file.uploadReference)
+        const filesToUpload = files.filter((file) =>
+          file.clientUpload ? file.clientUpload.isProcessed : !file.uploadReference,
+        )
         const originalDataForUpload = filesToUpload.length
           ? structuredClone(dataForUpload)
           : dataForUpload
