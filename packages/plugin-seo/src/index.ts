@@ -1,6 +1,12 @@
 import type { Config, Field, GroupField, PayloadRequest, TabsField } from 'payload'
 
-import { canAccessAdmin, executeAccess, Forbidden, UnauthorizedError } from 'payload'
+import {
+  canAccessAdmin,
+  executeAccess,
+  Forbidden,
+  traverseFields,
+  UnauthorizedError,
+} from 'payload'
 import { deepMergeSimple } from 'payload/shared'
 
 import type {
@@ -56,6 +62,12 @@ export const seoPlugin =
       },
     ]
 
+    const collectionGenerationTargetSlugs = new Set(pluginConfig.collections ?? [])
+    for (const c of config.collections ?? []) {
+      if (hasSEOGenerationField({ config, fields: c.fields })) {
+        collectionGenerationTargetSlugs.add(c.slug)
+      }
+    }
     const authorizeGenerateTarget = async ({
       data,
       req,
@@ -71,7 +83,7 @@ export const seoPlugin =
       }
 
       const collectionConfig =
-        data.collectionSlug && pluginConfig.collections?.includes(data.collectionSlug)
+        data.collectionSlug && collectionGenerationTargetSlugs.has(data.collectionSlug)
           ? config.collections?.find(({ slug }) => slug === data.collectionSlug)
           : undefined
       const globalConfig =
@@ -401,6 +413,54 @@ export const seoPlugin =
       },
     }
   }
+
+const hasSEOGenerationField = ({
+  config,
+  fields,
+}: {
+  config: Config
+  fields: Field[]
+}): boolean => {
+  let hasGenerationField = false
+
+  traverseFields({
+    callback: ({ field }) => {
+      if (!('admin' in field)) {
+        return
+      }
+
+      const fieldComponent = field.admin?.components?.Field
+      const generationProp =
+        fieldComponent && typeof fieldComponent === 'object'
+          ? seoGenerationComponentProps[
+              fieldComponent.path as keyof typeof seoGenerationComponentProps
+            ]
+          : undefined
+
+      if (
+        generationProp &&
+        (fieldComponent as { clientProps?: Record<string, unknown> }).clientProps?.[
+          generationProp
+        ] === true
+      ) {
+        hasGenerationField = true
+
+        return true
+      }
+    },
+    config,
+    fields,
+  })
+
+  return hasGenerationField
+}
+
+const seoGenerationComponentProps = {
+  '@payloadcms/plugin-seo/client#MetaDescriptionComponent': 'hasGenerateDescriptionFn',
+  '@payloadcms/plugin-seo/client#MetaImageComponent': 'hasGenerateImageFn',
+  '@payloadcms/plugin-seo/client#MetaTitleComponent': 'hasGenerateTitleFn',
+  '@payloadcms/plugin-seo/client#PreviewComponent': 'hasGenerateURLFn',
+} as const
 
 const authorizeGenerate = async ({ req }: { req: PayloadRequest }): Promise<void> => {
   if (!req.user) {
