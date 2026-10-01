@@ -26,6 +26,10 @@
       width: var(--spacer-6);
       height: var(--spacer-6);
     }
+
+    .icon--document {
+      color: var(--color-text-tertiary);
+    }
   }
   .document-card__content {
     padding: var(--spacer-2-5);

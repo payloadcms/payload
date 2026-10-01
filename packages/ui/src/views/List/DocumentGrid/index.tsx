@@ -5,6 +5,7 @@ import React from 'react'
 
 import { CardGrid } from '../../../elements/CardGrid/index.js'
 import { DocumentCard } from '../../../elements/DocumentCard/index.js'
+import { DocumentIcon } from '../../../icons/Document/index.js'
 import { useSelection } from '../../../providers/Selection/index.js'
 
 type DocumentGridProps = {
@@ -118,6 +119,7 @@ export const DocumentGrid: React.FC<DocumentGridProps> = ({
             onSelect={
               typeof id === 'string' || typeof id === 'number' ? () => setSelection(id) : undefined
             }
+            placeholder={<DocumentIcon />}
             thumbnail={thumbnailSrc ? { alt: title, src: thumbnailSrc } : undefined}
             title={title}
           />
