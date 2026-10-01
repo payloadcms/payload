@@ -28,7 +28,9 @@ export const unlinkTempFiles: (args: Args) => Promise<void> = async ({
   // A file fetched from a client-upload reference always gets its own temp file for
   // post-processing (see getFileFromUploadInstructions.ts), regardless of the global
   // useTempFiles setting, so it must always be cleaned up here too.
-  const isClientUploadTempFile = Boolean(file?.uploadReference || clientUploadTempFilePath)
+  const isClientUploadTempFile = Boolean(
+    file?.clientUpload || file?.uploadReference || clientUploadTempFilePath,
+  )
 
   if (collectionConfig.upload && (config.upload?.useTempFiles || isClientUploadTempFile)) {
     if (tempFilePath) {

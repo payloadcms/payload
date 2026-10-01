@@ -1,3 +1,5 @@
+import { isolateObjectProperty } from 'payload'
+
 import { describe, expect, it, vi } from 'vitest'
 
 import { getAfterChangeHook } from './afterChange.js'
@@ -77,8 +79,10 @@ describe('upload replacement cleanup', () => {
       file: { data: Buffer.from('processed'), size: 9 },
       payload: {
         logger: { error: vi.fn() },
-        update: vi.fn(async () => {
-          expect(req.query.uploadEdits).toBeUndefined()
+        update: vi.fn(async ({ req: metadataReq }) => {
+          expect(metadataReq.query.uploadEdits).toBeUndefined()
+          expect(req.query.uploadEdits).toBe(uploadEdits)
+          expect(metadataReq.context.skipCloudStorage).toBe(true)
           return doc
         }),
       },
@@ -103,8 +107,10 @@ describe('upload replacement cleanup', () => {
       file: { data: Buffer.from('processed'), size: 9 },
       payload: {
         logger: { error: vi.fn() },
-        update: vi.fn(async () => {
-          expect(req.query.uploadEdits).toBeUndefined()
+        update: vi.fn(async ({ req: metadataReq }) => {
+          expect(metadataReq.query.uploadEdits).toBeUndefined()
+          expect(req.query.uploadEdits).toBe(uploadEdits)
+          expect(metadataReq.context.skipCloudStorage).toBe(true)
           throw new Error('update failed')
         }),
       },
@@ -121,6 +127,86 @@ describe('upload replacement cleanup', () => {
 
     expect(req.query.uploadEdits).toBe(uploadEdits)
     expect(req.context).not.toHaveProperty('skipCloudStorage')
+  })
+
+  it('should isolate an awaited metadata update from a parallel document', async () => {
+    let enterMetadataUpdate!: () => void
+    let finishMetadataUpdate!: () => void
+    const entered = new Promise<void>((resolve) => {
+      enterMetadataUpdate = resolve
+    })
+    const pending = new Promise<void>((resolve) => {
+      finishMetadataUpdate = resolve
+    })
+    const uploadEdits = { crop: { width: 50, height: 50 } }
+    const sharedReq = {
+      context: {},
+      query: { uploadEdits },
+      payload: {
+        logger: { error: vi.fn() },
+        update: vi.fn(async ({ req: metadataReq }) => {
+          expect(metadataReq.context.skipCloudStorage).toBe(true)
+          expect(metadataReq.query.uploadEdits).toBeUndefined()
+          enterMetadataUpdate()
+          await pending
+          return { filename: 'uploaded.png' }
+        }),
+      },
+    }
+    const firstReq = isolateObjectProperty(sharedReq as any, ['file', 'payloadUploadSizes'])
+    const secondReq = isolateObjectProperty(sharedReq as any, ['file', 'payloadUploadSizes'])
+    firstReq.file = { data: Buffer.from('a'), size: 1 }
+    secondReq.file = { data: Buffer.from('b'), size: 1 }
+    const handleUpload = vi.fn(async ({ file }) =>
+      file.buffer.toString() === 'a' ? { filename: 'uploaded.png' } : undefined,
+    )
+    const hook = getAfterChangeHook({
+      collection: { slug: 'media' },
+      adapter: { handleUpload },
+    } as never)
+    const doc = { id: 1, filename: 'a.png', mimeType: 'image/png' }
+    const first = hook({ data: doc, doc, operation: 'update', req: firstReq } as never)
+
+    await entered
+    try {
+      const secondDoc = { ...doc, id: 2, filename: 'b.png' }
+      await hook({ data: secondDoc, doc: secondDoc, operation: 'update', req: secondReq } as never)
+
+      expect(handleUpload).toHaveBeenCalledTimes(2)
+      expect(sharedReq.query.uploadEdits).toBe(uploadEdits)
+      expect(sharedReq.context).not.toHaveProperty('skipCloudStorage')
+    } finally {
+      finishMetadataUpdate()
+      await first
+    }
+  })
+
+  it('should not give nested metadata updates ownership of the outer temp file', async () => {
+    const doc = { id: 1, filename: 'file.png', mimeType: 'image/png' }
+    const update = vi.fn(async ({ req }) => {
+      expect(req.file).toBeUndefined()
+      expect(req.context).not.toHaveProperty('_payloadClientUploadTempFile')
+      expect(req.context).not.toHaveProperty('_payloadCloudStorageTempFilePath')
+      expect(req.context).not.toHaveProperty('_payloadCloudStorage')
+      return doc
+    })
+    const hook = getAfterChangeHook({
+      collection: { slug: 'media' },
+      adapter: { handleUpload: async () => ({ filename: 'updated.png' }) },
+    } as never)
+
+    await hook({
+      data: doc,
+      doc,
+      operation: 'create',
+      req: {
+        context: { _payloadClientUploadTempFile: '/tmp/outer-file' },
+        file: { data: Buffer.alloc(0), size: 10, tempFilePath: '/tmp/outer-file' },
+        payload: { logger: { error: vi.fn() }, update },
+      },
+    } as never)
+
+    expect(update).toHaveBeenCalledOnce()
   })
 
   it('should not update an unchanged document after an adapter echoes upload data', async () => {
