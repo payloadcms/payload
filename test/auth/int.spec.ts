@@ -1505,7 +1505,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         const userEmail = 'lock@me.com'
 
         const tryLogin = async (
-          success?: boolean,
+          success: boolean | undefined,
           { restClient }: { restClient: NextRESTClient },
         ) => {
           const res = await restClient.POST(`/${slug}/login`, {

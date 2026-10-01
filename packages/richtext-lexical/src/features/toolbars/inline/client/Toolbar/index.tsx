@@ -8,6 +8,7 @@ import {
   $getSelection,
   $isRangeSelection,
   $isTextNode,
+  $onUpdate,
   COMMAND_PRIORITY_LOW,
   getDOMSelection,
   SELECTION_CHANGE_COMMAND,
@@ -278,7 +279,7 @@ function InlineToolbar({
       editor.registerCommand(
         SELECTION_CHANGE_COMMAND,
         () => {
-          $updateTextFormatFloatingToolbar()
+          $onUpdate(() => editor.read('latest', $updateTextFormatFloatingToolbar))
           return false
         },
         COMMAND_PRIORITY_LOW,

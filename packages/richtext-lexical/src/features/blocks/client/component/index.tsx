@@ -588,6 +588,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
                   // Handle controls before Lexical consumes keys using its retained text selection.
                   if (
                     target.matches('.collapsible__drag') &&
+                    (event.key !== 'Escape' || isReordering) &&
                     [' ', 'ArrowDown', 'ArrowUp', 'Enter', 'Escape', 'Tab'].includes(event.key)
                   ) {
                     onKeyDown(event)

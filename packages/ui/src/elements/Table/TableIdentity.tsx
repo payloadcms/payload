@@ -5,14 +5,18 @@ import React, { createContext, use, useId } from 'react'
 type TableIdentity = {
   baseID: string
   legacyBaseID: string
+  navigationLabel?: string
 }
+
+export const TableGridContext = createContext(false)
 
 const TableIdentityContext = createContext<null | TableIdentity>(null)
 
 export const TableIdentityProvider: React.FC<{
   children: React.ReactNode
   collectionSlug: string
-}> = ({ children, collectionSlug }) => {
+  navigationLabel?: string
+}> = ({ children, collectionSlug, navigationLabel }) => {
   const instanceID = useId().replace(/:/g, '')
 
   return (
@@ -20,6 +24,7 @@ export const TableIdentityProvider: React.FC<{
       value={{
         baseID: `payload-table-${collectionSlug}-${instanceID}`,
         legacyBaseID: `payload-table-${collectionSlug}`,
+        navigationLabel,
       }}
     >
       {children}
@@ -44,3 +49,6 @@ export const useTableID = (id?: string): string | undefined => {
 
   return id
 }
+
+export const useTableNavigationLabel = (): string | undefined =>
+  use(TableIdentityContext)?.navigationLabel
