@@ -1,5 +1,5 @@
 import path from 'path'
-import { type Payload } from 'payload'
+import { type Payload, type PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -1443,6 +1443,209 @@ describe('ecommerce', () => {
       })
 
       expect(productAfter.inventory).toBe(startingInventory - 1)
+    })
+  })
+
+  describe('variant transaction scoping (issue 18338)', () => {
+    it('should create a product and its variant in a single shared transaction', async () => {
+      const sizeTypes = await payload.find({
+        collection: 'variantTypes',
+        limit: 1,
+        overrideAccess: true,
+        where: {
+          name: {
+            equals: 'size',
+          },
+        },
+      })
+
+      const sizeType = sizeTypes.docs[0]
+
+      expect(sizeType).toBeTruthy()
+
+      const smallOptions = await payload.find({
+        collection: 'variantOptions',
+        limit: 1,
+        overrideAccess: true,
+        where: {
+          value: {
+            equals: 'small',
+          },
+        },
+      })
+
+      const smallOption = smallOptions.docs[0]
+
+      expect(smallOption).toBeTruthy()
+
+      const req = { payload } as PayloadRequest
+      req.transactionID = await payload.db.beginTransaction?.()
+
+      const productName = `Txn Product ${Date.now()}`
+
+      let productId: string | undefined
+      let variantId: string | undefined
+
+      try {
+        const product = await payload.create({
+          collection: 'products',
+          data: {
+            name: productName,
+            enableVariants: true,
+            variantTypes: [sizeType.id],
+          },
+          overrideAccess: true,
+          req,
+        })
+
+        productId = product.id
+
+        const variant = await payload.create({
+          collection: 'variants',
+          data: {
+            inventory: 5,
+            options: [smallOption.id],
+            priceInUSD: 1999,
+            priceInUSDEnabled: true,
+            product: product.id,
+          },
+          overrideAccess: true,
+          req,
+        })
+
+        variantId = variant.id
+
+        if (req.transactionID) {
+          await payload.db.commitTransaction?.(req.transactionID)
+          req.transactionID = undefined
+        }
+
+        expect(variant.title).toContain('Small')
+
+        const persisted = await payload.findByID({
+          id: variant.id,
+          collection: 'variants',
+          depth: 0,
+          overrideAccess: true,
+        })
+
+        expect(persisted.title).toContain('Small')
+      } catch (err) {
+        if (req.transactionID) {
+          await payload.db.rollbackTransaction?.(req.transactionID).catch(() => {})
+        }
+
+        throw err
+      } finally {
+        if (variantId) {
+          await payload
+            .delete({
+              id: variantId,
+              collection: 'variants',
+              overrideAccess: true,
+            })
+            .catch(() => {})
+        }
+
+        if (productId) {
+          await payload
+            .delete({
+              id: productId,
+              collection: 'products',
+              overrideAccess: true,
+            })
+            .catch(() => {})
+        }
+      }
+    })
+
+    it('should reject a duplicate variant option combination in a single shared transaction', async () => {
+      const sizeTypes = await payload.find({
+        collection: 'variantTypes',
+        limit: 1,
+        overrideAccess: true,
+        where: {
+          name: {
+            equals: 'size',
+          },
+        },
+      })
+
+      const sizeType = sizeTypes.docs[0]
+
+      expect(sizeType).toBeTruthy()
+
+      const smallOptions = await payload.find({
+        collection: 'variantOptions',
+        limit: 1,
+        overrideAccess: true,
+        where: {
+          value: {
+            equals: 'small',
+          },
+        },
+      })
+
+      const smallOption = smallOptions.docs[0]
+
+      expect(smallOption).toBeTruthy()
+
+      const req = { payload } as PayloadRequest
+      req.transactionID = await payload.db.beginTransaction?.()
+
+      const productName = `Txn Dup Product ${Date.now()}`
+
+      try {
+        const product = await payload.create({
+          collection: 'products',
+          data: {
+            name: productName,
+            enableVariants: true,
+            variantTypes: [sizeType.id],
+          },
+          overrideAccess: true,
+          req,
+        })
+
+        await payload.create({
+          collection: 'variants',
+          data: {
+            inventory: 5,
+            options: [smallOption.id],
+            priceInUSD: 1999,
+            priceInUSDEnabled: true,
+            product: product.id,
+          },
+          overrideAccess: true,
+          req,
+        })
+
+        let duplicateError: unknown
+
+        try {
+          await payload.create({
+            collection: 'variants',
+            data: {
+              inventory: 5,
+              options: [smallOption.id],
+              priceInUSD: 1999,
+              priceInUSDEnabled: true,
+              product: product.id,
+            },
+            overrideAccess: true,
+            req,
+          })
+        } catch (err) {
+          duplicateError = err
+        }
+
+        expect(duplicateError).toBeTruthy()
+        expect(JSON.stringify(duplicateError)).toContain('variantOptionsAlreadyExists')
+      } finally {
+        if (req.transactionID) {
+          await payload.db.rollbackTransaction?.(req.transactionID).catch(() => {})
+        }
+      }
     })
   })
 })
