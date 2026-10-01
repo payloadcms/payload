@@ -1,15 +1,10 @@
 'use client'
-import type { Theme } from '@payloadcms/ui'
+import type { DocumentRootProps } from '@payloadcms/ui/layouts/DocumentRoot'
+import type { RootLayoutData } from '@payloadcms/ui/utilities/getRootLayoutData'
 
-import { getLanguageDir } from '@payloadcms/ui/utilities/getLanguageDir'
+import { DocumentRoot } from '@payloadcms/ui/layouts/DocumentRoot'
 import { HeadContent, Scripts, useRouterState } from '@tanstack/react-router'
 import React from 'react'
-
-type AdminHTMLProps = {
-  'data-theme'?: Theme
-  dir: 'ltr' | 'rtl'
-  lang?: string
-}
 
 export type PayloadAdminShellProps = {
   readonly children: React.ReactNode
@@ -22,19 +17,21 @@ export type PayloadAdminShellProps = {
  * (`getLayoutData`, exposed on the `/_payload` route loader), so the admin
  * panel renders themed with the correct text direction on the first paint with no
  * client bootstrap script — the same server-side path Next's `RootLayout`
- * uses, sharing `getRequestTheme`/`getLanguageDir` from `@payloadcms/ui`.
+ * uses, sharing document rendering and request preferences from `@payloadcms/ui`.
  */
 export function PayloadAdminShell({ children }: PayloadAdminShellProps) {
-  const htmlProps = useRouterState({
-    select: (state): AdminHTMLProps => {
+  const documentProps = useRouterState({
+    select: (state): Partial<DocumentRootProps> => {
       for (const match of state.matches) {
-        const data = match.loaderData as { languageCode?: string; theme?: Theme } | undefined
+        const data = match.loaderData as Partial<RootLayoutData> | undefined
 
         if (data?.theme && data?.languageCode) {
           return {
-            'data-theme': data.theme,
-            dir: getLanguageDir({ languageCode: data.languageCode }),
-            lang: data.languageCode,
+            dir: data.dir,
+            highContrastMode: data.highContrastMode,
+            languageCode: data.languageCode,
+            suppressHydrationWarning: data.suppressHydrationWarning,
+            theme: data.theme,
           }
         }
       }
@@ -47,17 +44,10 @@ export function PayloadAdminShell({ children }: PayloadAdminShellProps) {
   })
 
   return (
-    // eslint-disable-next-line jsx-a11y/html-has-lang -- `lang` is set from server-computed layout data when available
-    <html {...htmlProps} suppressHydrationWarning>
-      <head>
-        <style>{`@layer payload-default, payload;`}</style>
-        <HeadContent />
-      </head>
-      <body>
-        {children}
-        <Scripts />
-      </body>
-    </html>
+    <DocumentRoot {...documentProps} head={<HeadContent />}>
+      {children}
+      <Scripts />
+    </DocumentRoot>
   )
 }
 

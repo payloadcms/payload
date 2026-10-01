@@ -1,0 +1,60 @@
+'use client'
+
+import type { HtmlHTMLAttributes, ReactNode } from 'react'
+
+import React from 'react'
+
+import type { Theme } from '../../providers/Theme/shared.js'
+
+export type RootLayoutFont = {
+  className?: string
+  variable?: string
+}
+
+export type DocumentRootProps = {
+  children: ReactNode
+  dir?: 'ltr' | 'rtl'
+  fonts?: RootLayoutFont[]
+  head?: ReactNode
+  highContrastMode?: boolean
+  htmlProps?: HtmlHTMLAttributes<HTMLHtmlElement>
+  languageCode?: string
+  suppressHydrationWarning?: boolean
+  theme?: Theme
+  /** Optional viewport tag; adapters with router-managed metadata supply it through `head`. */
+  viewport?: ReactNode
+}
+
+export function DocumentRoot({
+  children,
+  dir = 'ltr',
+  fonts = [],
+  head,
+  highContrastMode = false,
+  htmlProps = {},
+  languageCode,
+  suppressHydrationWarning = false,
+  theme,
+  viewport,
+}: DocumentRootProps) {
+  const fontClassNames = fonts.map((font) => font.variable ?? font.className).filter(Boolean)
+
+  return (
+    <html
+      {...htmlProps}
+      className={[...fontClassNames, htmlProps.className].filter(Boolean).join(' ')}
+      data-enhanced-contrast={highContrastMode ? '' : undefined}
+      data-theme={theme}
+      dir={dir}
+      lang={languageCode}
+      suppressHydrationWarning={suppressHydrationWarning}
+    >
+      <head>
+        {viewport}
+        <style>{`@layer payload-default, payload;`}</style>
+        {head}
+      </head>
+      <body>{children}</body>
+    </html>
+  )
+}

@@ -2378,6 +2378,26 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
 
+  test.describe('3.1.1 Language of Page (A)', () => {
+    test('should render the document language from the request preference', async () => {
+      const context = page.context()
+      const originalCookie = (await context.cookies(serverURL)).find(
+        (cookie) => cookie.name === 'payload-lng',
+      )
+
+      try {
+        await context.addCookies([{ name: 'payload-lng', url: serverURL, value: 'de' }])
+        await page.goto(postsURL.list)
+        await expect(page.locator('html')).toHaveAttribute('lang', 'de')
+      } finally {
+        await context.clearCookies({ name: 'payload-lng' })
+        if (originalCookie) {
+          await context.addCookies([originalCookie])
+        }
+      }
+    })
+  })
+
   test.describe('4.1.2 Name, Role, Value (A)', () => {
     test('should expose table Columns and Group By expansion states', async () => {
       // PYLD-3781
