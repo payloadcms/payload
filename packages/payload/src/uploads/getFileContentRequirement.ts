@@ -19,7 +19,8 @@ export type FileContentRequirement = 'full' | 'header' | 'none'
  * actually reads instead of always being re-downloaded in full.
  *
  * - `full`: local storage needs the real bytes, or a registered file transformer will adjust
- *   the image (`upload.hasImageAdjustments`), or the file is animated, or additional image
+ *   the image (`upload.hasImageAdjustments`), or a custom `transformFile` transformer will
+ *   process the file (`hasTransformFileStages`), or the file is animated, or additional image
  *   sizes will be generated from it, or the collection restricts mime types (which also runs
  *   SVG/PDF content-safety checks that must see the whole file), or the request itself carries
  *   a crop/resize edit (`uploadEdits`) that will be applied to the fetched bytes.
@@ -28,6 +29,7 @@ export type FileContentRequirement = 'full' | 'header' | 'none'
  */
 export function getFileContentRequirement({
   hasSizeEdits,
+  hasTransformFileStages,
   mimeType,
   uploadConfig,
 }: {
@@ -37,6 +39,12 @@ export function getFileContentRequirement({
    * only require a header probe.
    */
   hasSizeEdits?: boolean
+  /**
+   * Whether a registered transformer without its own content projection (anything other than a
+   * built-in bridge transformer like `sharpTransformer`) will run `transformFile` on this file.
+   * Such a transformer reads the whole file, so neither a header probe nor no content is enough.
+   */
+  hasTransformFileStages?: boolean
   mimeType: string
   uploadConfig: SanitizedUploadConfig
 }): FileContentRequirement {
@@ -47,18 +55,18 @@ export function getFileContentRequirement({
   const hasMimeTypeAllowList =
     Array.isArray(uploadConfig.mimeTypes) && uploadConfig.mimeTypes.length > 0
 
-  if (hasMimeTypeAllowList) {
+  if (hasMimeTypeAllowList || hasTransformFileStages) {
     return 'full'
   }
 
   const isResizableImage = canResizeImage(mimeType)
-  // `hasImageAdjustments` and `imageSizes` are the transformer-agnostic projection a file
+  // `hasImageAdjustments` and `variants` are the transformer-agnostic projection a file
   // transformer writes back onto the sanitized upload config at startup (see
   // `@payloadcms/transformer-sharp`'s `initSharpCollections`), so core can make this decision
   // without knowing which transformer is registered or how it is configured.
   const hasConfiguredAdjustments = Boolean(
     uploadConfig.hasImageAdjustments ||
-      (Array.isArray(uploadConfig.imageSizes) && uploadConfig.imageSizes.length > 0),
+      (Array.isArray(uploadConfig.variants) && uploadConfig.variants.length > 0),
   )
 
   if (hasSizeEdits || (isResizableImage && hasConfiguredAdjustments) || isAnimatedImage(mimeType)) {

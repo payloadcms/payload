@@ -77,4 +77,24 @@ describe('buildConfig', () => {
       /sharp/i,
     )
   })
+
+  it('should reject removed Sharp settings a plugin adds, before any transformer init runs', async () => {
+    const transformer: UploadTransformer = {
+      init: vi.fn((config: Config) => config),
+      mimeTypes: ['image/*'],
+      slug: 'test-transformer',
+    }
+
+    const plugin = (config: Config): Config => ({
+      ...config,
+      collections: [
+        { slug: 'media', fields: [], upload: { resizeOptions: { width: 100 } } },
+      ] as unknown as Config['collections'],
+    })
+
+    await expect(
+      buildConfig(makeConfig({ plugins: [plugin], upload: { transformers: [transformer] } })),
+    ).rejects.toThrow(/resizeOptions/)
+    expect(transformer.init).not.toHaveBeenCalled()
+  })
 })

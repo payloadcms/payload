@@ -98,6 +98,25 @@ const findBuildConfigLocalNames = (file: SourceFile): Set<string> => {
   return localNames
 }
 
+/**
+ * The local binding `sharpTransformer` is imported under in this file, honoring an alias such as
+ * `import { sharpTransformer as st }`. Falls back to `sharpTransformer` when it isn't imported yet.
+ */
+function getSharpTransformerLocalName(sourceFile: SourceFile): string {
+  const namedImports = sourceFile
+    .getImportDeclarations()
+    .filter((decl) => decl.getModuleSpecifierValue() === TRANSFORMER_MODULE)
+    .flatMap((decl) => decl.getNamedImports())
+    .filter((named) => named.getName() === TRANSFORMER_NAME)
+
+  const unaliasedImport = namedImports.find((named) => !named.getAliasNode())
+  const aliasedImport = namedImports.find((named) => named.getAliasNode())
+
+  return unaliasedImport
+    ? TRANSFORMER_NAME
+    : (aliasedImport?.getAliasNode()?.getText() ?? TRANSFORMER_NAME)
+}
+
 function ensureSharpTransformerImport(sourceFile: SourceFile): void {
   const existing = sourceFile
     .getImportDeclarations()
@@ -133,10 +152,18 @@ function ensureSharpTransformerImport(sourceFile: SourceFile): void {
   }
 }
 
+type CollectionSharpEntry = {
+  /** `<slug>: { ... }` text for the `sharpTransformer({ collections })` map. */
+  entryText: string
+  /** Moved properties, removed from the collection only once `sharpTransformer` is registered. */
+  movedProps: (PropertyAssignment | ShorthandPropertyAssignment)[]
+  uploadObj: ObjectLiteralExpression
+}
+
 /**
- * Extracts Sharp-owned fields off one collection's `upload` object literal into
- * a `<slug>: { ... }` entry text for the `sharpTransformer({ collections })` map.
- * Returns `undefined` when the collection has nothing to migrate.
+ * Reads Sharp-owned fields off one collection's `upload` object literal into
+ * a `<slug>: { ... }` entry text for the `sharpTransformer({ collections })` map,
+ * without modifying the collection. Returns `undefined` when the collection has nothing to migrate.
  */
 function extractCollectionSharpEntry({
   collectionObj,
@@ -146,7 +173,7 @@ function extractCollectionSharpEntry({
   collectionObj: ObjectLiteralExpression
   filePath: string
   notes: string[]
-}): string | undefined {
+}): CollectionSharpEntry | undefined {
   const slugProp = collectionObj.getProperty('slug')
   const slugAssignment = slugProp?.asKind(SyntaxKind.PropertyAssignment)
   const slugInitializer = slugAssignment?.getInitializer()
@@ -178,6 +205,7 @@ function extractCollectionSharpEntry({
   }
 
   const movedTexts: string[] = []
+  const movedProps: CollectionSharpEntry['movedProps'] = []
   for (const name of MOVED_UPLOAD_FIELDS) {
     const prop = uploadObj.getProperty(name)
     if (!prop) {
@@ -188,7 +216,7 @@ function extractCollectionSharpEntry({
     // where the `sharpTransformer` call is inserted, so it moves verbatim.
     if (Node.isPropertyAssignment(prop) || Node.isShorthandPropertyAssignment(prop)) {
       movedTexts.push(name === 'imageSizes' ? printAsVariants(prop) : prop.print())
-      prop.remove()
+      movedProps.push(prop)
       continue
     }
 
@@ -201,11 +229,6 @@ function extractCollectionSharpEntry({
     return undefined
   }
 
-  // Avoid leaving `upload: {\n}` spread across two lines once every property moves out.
-  if (uploadObj.getProperties().length === 0) {
-    uploadObj.replaceWithText('{}')
-  }
-
   const slugLiteralValue = Node.isStringLiteral(slugInitializer)
     ? slugInitializer.getLiteralValue()
     : undefined
@@ -214,7 +237,18 @@ function extractCollectionSharpEntry({
       ? slugLiteralValue
       : `[${slugInitializer.getText()}]`
 
-  return `${keyText}: { ${movedTexts.join(', ')} }`
+  return { entryText: `${keyText}: { ${movedTexts.join(', ')} }`, movedProps, uploadObj }
+}
+
+function removeMovedCollectionProps({ movedProps, uploadObj }: CollectionSharpEntry): void {
+  for (const prop of movedProps) {
+    prop.remove()
+  }
+
+  // Avoid leaving `upload: {\n}` spread across two lines once every property moves out.
+  if (uploadObj.getProperties().length === 0) {
+    uploadObj.replaceWithText('{}')
+  }
 }
 
 /**
@@ -230,7 +264,7 @@ function extractSharpCollectionEntries({
   configObj: ObjectLiteralExpression
   filePath: string
   notes: string[]
-}): string[] {
+}): CollectionSharpEntry[] {
   const collectionsProp = configObj.getProperty('collections')
   if (!collectionsProp || !Node.isPropertyAssignment(collectionsProp)) {
     return []
@@ -244,7 +278,7 @@ function extractSharpCollectionEntries({
     return []
   }
 
-  const entries: string[] = []
+  const entries: CollectionSharpEntry[] = []
 
   for (const el of arrayLiteral.getElements()) {
     if (!Node.isObjectLiteralExpression(el)) {
@@ -278,9 +312,11 @@ function printAsVariants(prop: PropertyAssignment | ShorthandPropertyAssignment)
 function renameImageSizesInSharpTransformerCalls({
   notes,
   sourceFile,
+  transformerLocalName,
 }: {
   notes: string[]
   sourceFile: SourceFile
+  transformerLocalName: string
 }): boolean {
   let hasChanged = false
 
@@ -288,7 +324,7 @@ function renameImageSizesInSharpTransformerCalls({
     .getDescendantsOfKind(SyntaxKind.CallExpression)
     .filter((call) => {
       const callee = call.getExpression()
-      return Node.isIdentifier(callee) && callee.getText() === TRANSFORMER_NAME
+      return Node.isIdentifier(callee) && callee.getText() === transformerLocalName
     })
 
   for (const call of sharpTransformerCalls) {
@@ -326,13 +362,19 @@ function renameImageSizesInSharpTransformerCalls({
   return hasChanged
 }
 
-function findSharpTransformerCall(transformersArray: ArrayLiteralExpression) {
+function findSharpTransformerCall({
+  transformerLocalName,
+  transformersArray,
+}: {
+  transformerLocalName: string
+  transformersArray: ArrayLiteralExpression
+}) {
   return transformersArray.getElements().find((el) => {
     if (!Node.isCallExpression(el)) {
       return false
     }
     const callee = el.getExpression()
-    return Node.isIdentifier(callee) && callee.getText() === TRANSFORMER_NAME
+    return Node.isIdentifier(callee) && callee.getText() === transformerLocalName
   })
 }
 
@@ -343,7 +385,9 @@ export const migrateSharpToTransformer: Transform = {
     const notes: string[] = []
 
     for (const sourceFile of project.getSourceFiles()) {
-      if (renameImageSizesInSharpTransformerCalls({ notes, sourceFile })) {
+      const transformerLocalName = getSharpTransformerLocalName(sourceFile)
+
+      if (renameImageSizesInSharpTransformerCalls({ notes, sourceFile, transformerLocalName })) {
         filesChanged.add(sourceFile.getFilePath())
       }
 
@@ -376,7 +420,13 @@ export const migrateSharpToTransformer: Transform = {
           ?.asKind(SyntaxKind.PropertyAssignment)
           ?.getInitializerIfKind(SyntaxKind.ArrayLiteralExpression)
 
-        if (existingTransformersArray && findSharpTransformerCall(existingTransformersArray)) {
+        if (
+          existingTransformersArray &&
+          findSharpTransformerCall({
+            transformerLocalName,
+            transformersArray: existingTransformersArray,
+          })
+        ) {
           // Already migrated, but a leftover `sharp` property would fail a later
           // type-check with no signal from this codemod — flag it here.
           if (configObj.getProperty('sharp')) {
@@ -395,11 +445,6 @@ export const migrateSharpToTransformer: Transform = {
           sharpExpressionText = sharpProp.getName()
         }
 
-        // Remove `sharp` before extracting collection entries — later removals
-        // shift node positions, and ts-morph node references taken before a
-        // sibling removal can go stale.
-        sharpProp?.remove()
-
         const collectionEntries = extractSharpCollectionEntries({
           configObj,
           filePath: sourceFile.getFilePath(),
@@ -417,10 +462,12 @@ export const migrateSharpToTransformer: Transform = {
           )
         }
         if (collectionEntries.length > 0) {
-          transformerArgs.push(`collections: { ${collectionEntries.join(', ')} }`)
+          transformerArgs.push(
+            `collections: { ${collectionEntries.map((entry) => entry.entryText).join(', ')} }`,
+          )
         }
 
-        const transformerCallText = `${TRANSFORMER_NAME}({ ${transformerArgs.join(', ')} })`
+        const transformerCallText = `${transformerLocalName}({ ${transformerArgs.join(', ')} })`
 
         // Adding a `transformers` property next to a non-array one, or after a spread
         // that may already set it, would create a duplicate key whose last value wins
@@ -429,15 +476,21 @@ export const migrateSharpToTransformer: Transform = {
           ?.getProperties()
           .some((prop) => Node.isSpreadAssignment(prop))
 
+        // The old settings are only removed once the replacement call is registered —
+        // otherwise the migrated config would silently lose its image processing.
+        let isRegistered = true
+
         if (existingTransformersArray) {
           existingTransformersArray.addElement(transformerCallText)
         } else if (existingTransformersProp) {
+          isRegistered = false
           notes.push(
-            `${sourceFile.getFilePath()}: \`upload.transformers\` isn't an inline array — add \`${transformerCallText}\` to it manually.`,
+            `${sourceFile.getFilePath()}: \`upload.transformers\` isn't an inline array — add \`${transformerCallText}\` to it manually, then remove the migrated Sharp settings.`,
           )
         } else if (uploadHasSpread) {
+          isRegistered = false
           notes.push(
-            `${sourceFile.getFilePath()}: \`upload\` contains a spread that may already set \`transformers\` — add \`${transformerCallText}\` to its transformers manually.`,
+            `${sourceFile.getFilePath()}: \`upload\` contains a spread that may already set \`transformers\` — add \`${transformerCallText}\` to its transformers manually, then remove the migrated Sharp settings.`,
           )
         } else if (uploadObj) {
           uploadObj.addPropertyAssignment({
@@ -445,14 +498,24 @@ export const migrateSharpToTransformer: Transform = {
             initializer: `[${transformerCallText}]`,
           })
         } else if (uploadProp) {
+          isRegistered = false
           notes.push(
-            `${sourceFile.getFilePath()}: \`upload\` isn't an inline object — add \`transformers: [${transformerCallText}]\` to it manually.`,
+            `${sourceFile.getFilePath()}: \`upload\` isn't an inline object — add \`transformers: [${transformerCallText}]\` to it manually, then remove the migrated Sharp settings.`,
           )
         } else {
           configObj.addPropertyAssignment({
             name: 'upload',
             initializer: `{ transformers: [${transformerCallText}] }`,
           })
+        }
+
+        if (!isRegistered) {
+          continue
+        }
+
+        sharpProp?.remove()
+        for (const entry of collectionEntries) {
+          removeMovedCollectionProps(entry)
         }
 
         ensureSharpTransformerImport(sourceFile)

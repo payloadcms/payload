@@ -199,7 +199,7 @@ export async function buildConfigWithDefaults({
   }
 
   // Auto-register the Sharp transformer so every test suite keeps its existing
-  // upload-time image processing (imageSizes/resizeOptions/crop/focalPoint).
+  // upload-time image processing (variants/resizeOptions/crop/focalPoint).
   // Suites that need to configure `upload.transformers` themselves (e.g. to add
   // a custom slug or fixture transformers) set their own array, which wins here.
   if (!config.upload) {

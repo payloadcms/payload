@@ -35,7 +35,7 @@ export const FilePreview: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation()
 
-  const hasImageSizes = uploadConfig?.imageSizes?.length > 0
+  const hasVariants = uploadConfig?.variants?.length > 0
   const mimeType = (data?.mimeType as string) ?? ''
   const isImageFile = isImage(mimeType)
   const fileSrc = (selectedSizeData?.url ?? data?.thumbnailURL ?? data?.url ?? null) as
@@ -90,7 +90,7 @@ export const FilePreview: React.FC<Props> = ({
 
   return (
     <div className={baseClass}>
-      {hasImageSizes && isImageFile && (
+      {hasVariants && isImageFile && (
         <MiniCarousel
           doc={data}
           imageCacheTag={imageCacheTag}

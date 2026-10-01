@@ -288,14 +288,14 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
 
   const canRemoveUpload = docPermissions?.update
 
-  const hasImageSizes = uploadConfig?.imageSizes?.length > 0
+  const hasVariants = uploadConfig?.variants?.length > 0
   const hasImageAdjustments = Boolean(uploadConfig?.hasImageAdjustments)
   // Explicity check if set to true, default is undefined
   const focalPointEnabled = uploadConfig?.focalPoint === true
 
   const { crop: showCrop = true, focalPoint = true } = uploadConfig
 
-  const showFocalPoint = focalPoint && (hasImageSizes || hasImageAdjustments || focalPointEnabled)
+  const showFocalPoint = focalPoint && (hasVariants || hasImageAdjustments || focalPointEnabled)
 
   const acceptMimeTypes = uploadConfig.mimeTypes?.join(', ')
 
@@ -341,7 +341,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
           />
         </EditDepthProvider>
       )}
-      {data && hasImageSizes && (
+      {data && hasVariants && (
         <Drawer
           className={`${baseClass}__previewDrawer`}
           hoverTitle
@@ -372,7 +372,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
           doc={data}
           enableAdjustments={showCrop || showFocalPoint}
           handleRemove={canRemoveUpload ? handleFileRemoval : undefined}
-          hasImageSizes={hasImageSizes}
+          hasImageSizes={hasVariants}
           hideRemoveFile={uploadConfig.hideRemoveFile}
           imageCacheTag={imageCacheTag}
           uploadConfig={uploadConfig}
@@ -452,7 +452,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
                 <UploadActions
                   customActions={customActions}
                   enableAdjustments={showCrop || showFocalPoint}
-                  enablePreviewSizes={hasImageSizes && data?.filename && !removedFile}
+                  enablePreviewSizes={hasVariants && data?.filename && !removedFile}
                   mimeType={value.type}
                 />
               </div>

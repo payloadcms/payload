@@ -134,6 +134,69 @@ describe('handleDynamicFileRequest', () => {
     )
   })
 
+  describe('failed pipeline cleanup', () => {
+    const makeTrackedSourceResponse = () => {
+      const onCancel = vi.fn()
+      const response = new Response(
+        new ReadableStream({
+          cancel: onCancel,
+          pull: (controller) => controller.enqueue(new TextEncoder().encode('source-bytes')),
+        }),
+      )
+
+      return { onCancel, response }
+    }
+
+    it('should close a source body the throwing transformer locked with its own reader', async () => {
+      const source = makeTrackedSourceResponse()
+      vi.mocked(getSourceFileResponse).mockResolvedValue(source.response)
+
+      const transformer: UploadTransformer = {
+        slug: 'throwing-transformer',
+        handleRequest: vi.fn().mockImplementation(async ({ getSourceFile }) => {
+          const sourceResponse: Response = await getSourceFile()
+          await sourceResponse.body!.getReader().read()
+          throw new Error('transform failed')
+        }),
+        mimeTypes: ['image/*'],
+      }
+      vi.mocked(planTransformerPipeline).mockResolvedValue([transformer])
+
+      await expect(
+        handleDynamicFileRequest({ collection, filename: 'logo.png', req: makeReq() }),
+      ).rejects.toThrow('transform failed')
+
+      await vi.waitFor(() => expect(source.onCancel).toHaveBeenCalled())
+    })
+
+    it('should cancel an earlier stage response no later stage read', async () => {
+      const stageOutput = makeTrackedSourceResponse()
+
+      const transformers: UploadTransformer[] = [
+        {
+          slug: 'first',
+          handleRequest: vi.fn().mockResolvedValue({
+            response: stageOutput.response,
+            status: 'continue',
+          }),
+          mimeTypes: ['image/*'],
+        },
+        {
+          slug: 'second',
+          handleRequest: vi.fn().mockRejectedValue(new Error('transform failed')),
+          mimeTypes: ['image/*'],
+        },
+      ]
+      vi.mocked(planTransformerPipeline).mockResolvedValue(transformers)
+
+      await expect(
+        handleDynamicFileRequest({ collection, filename: 'logo.png', req: makeReq() }),
+      ).rejects.toThrow('transform failed')
+
+      expect(stageOutput.onCancel).toHaveBeenCalled()
+    })
+  })
+
   describe('access control ordering', () => {
     beforeEach(() => {
       vi.mocked(resolveUploadDocument).mockResolvedValue(authorizedDocument)

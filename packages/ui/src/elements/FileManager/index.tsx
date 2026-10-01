@@ -98,11 +98,11 @@ export const FileManager: React.FC<FileManagerProps> = ({
   const acceptMimeTypes = uploadConfig.mimeTypes?.join(', ')
   const imageCacheTag = uploadConfig?.cacheTags && data?.updatedAt
 
-  const hasImageSizes = uploadConfig?.imageSizes?.length > 0
+  const hasVariants = uploadConfig?.variants?.length > 0
   const hasImageAdjustments = Boolean(uploadConfig?.hasImageAdjustments)
   const focalPointEnabled = uploadConfig?.focalPoint === true
   const { crop: showCrop = true, focalPoint = true } = uploadConfig
-  const showFocalPoint = focalPoint && (hasImageSizes || hasImageAdjustments || focalPointEnabled)
+  const showFocalPoint = focalPoint && (hasVariants || hasImageAdjustments || focalPointEnabled)
 
   const selectedSizeData = selectedSize
     ? (data?.sizes?.[selectedSize] as Record<string, unknown>)
@@ -294,7 +294,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
           />
         </EditDepthProvider>
       )}
-      {data && hasImageSizes && (
+      {data && hasVariants && (
         <Drawer
           className={`${baseClass}__preview-drawer`}
           hoverTitle

@@ -466,7 +466,7 @@ export const generateFileData = async <T>({
 
         req.payloadUploadSizes[sizeName] = sizeBuffer
 
-        const imageSizeConfig = collectionConfig.upload.imageSizes?.find(
+        const imageSizeConfig = collectionConfig.upload.variants?.find(
           (imageSize) => imageSize.name === sizeName,
         )
 

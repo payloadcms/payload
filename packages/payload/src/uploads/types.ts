@@ -373,13 +373,13 @@ export type checkFileRestrictionsParams = {
 }
 
 export type SanitizedUploadConfig = {
+  staticDir: UploadConfig['staticDir']
   /**
    * The collection's image sizes, as written at startup by a registered transformer such as
    * `sharpTransformer({ collections: { <slug>: { variants } } })`. Names and admin options
    * only — not authored on the collection.
    */
-  imageSizes?: ImageSize[]
-  staticDir: UploadConfig['staticDir']
+  variants?: ImageSize[]
 } & UploadConfig
 
 export type File = {

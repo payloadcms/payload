@@ -23,7 +23,7 @@ export const appendUploadSelectFields = ({
     select.updatedAt = true
   }
 
-  if (collectionConfig.upload.imageSizes && collectionConfig.upload.imageSizes.length > 0) {
+  if (collectionConfig.upload.variants && collectionConfig.upload.variants.length > 0) {
     if (
       collectionConfig.upload.adminThumbnail &&
       typeof collectionConfig.upload.adminThumbnail === 'string'
@@ -36,7 +36,7 @@ export const appendUploadSelectFields = ({
       }
     } else {
       /** Only return image size properties that are required for thumbnails */
-      select.sizes = collectionConfig.upload.imageSizes.reduce((acc, imageSizeConfig) => {
+      select.sizes = collectionConfig.upload.variants.reduce((acc, imageSizeConfig) => {
         return {
           ...acc,
           [imageSizeConfig.name]: {
