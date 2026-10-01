@@ -9,7 +9,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import { removeFiles } from '../__helpers/shared/removeFiles.js'
-import { mediaSlug, pagesSlug, siteSettingsSlug } from './shared.js'
+import { mediaSlug, pagesSlug, pagesWithImportedFieldsSlug, siteSettingsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -141,6 +141,59 @@ describe('@payloadcms/plugin-seo', () => {
     await payload.delete({ id: editorUserID, collection: 'users' })
     await payload.delete({ id: nonAdminUserID, collection: 'users' })
     await payload.destroy()
+  })
+
+  it.each([
+    [
+      'title',
+      '/plugin-seo/generate-title',
+      { title: 'Example page' },
+      'Website.com — Example page',
+    ],
+    [
+      'description',
+      '/plugin-seo/generate-description',
+      { excerpt: 'Example description' },
+      'Example description',
+    ],
+    [
+      'URL',
+      '/plugin-seo/generate-url',
+      { slug: 'example-page' },
+      'https://yoursite.com/example-page',
+    ],
+    [
+      'image',
+      '/plugin-seo/generate-image',
+      { featuredMedia: 'generated-image' },
+      'generated-image',
+    ],
+  ] as const)(
+    'should generate %s metadata for collections with manually configured SEO fields',
+    async (_, endpoint, doc, expectedResult) => {
+      const response = await restClient.POST(endpoint, {
+        body: JSON.stringify({
+          collectionSlug: pagesWithImportedFieldsSlug,
+          doc,
+        }),
+      })
+
+      expect(response.status).toBe(200)
+      expect(await response.json()).toEqual({ result: expectedResult })
+    },
+  )
+
+  it('should reject collections without SEO generation fields', async () => {
+    const response = await restClient.POST('/plugin-seo/generate-title', {
+      body: JSON.stringify({
+        collectionSlug: mediaSlug,
+        doc: {
+          title: 'Media title',
+        },
+      }),
+    })
+
+    expect(response.status).toBe(403)
   })
 
   it.each([
