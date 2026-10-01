@@ -335,26 +335,25 @@ export const updateByIDOperation = async <
     } as const
 
     const write = () => updateDocument<TSlug, TSelect>(updateArgs)
-    let result =
-      collectionConfig.versions && collectionConfig.upload.fileOperations
-        ? await runCloudFileUpdate({
-            id,
-            collection: collectionConfig,
-            current: docWithLocales,
-            data: updateArgs.data,
-            files: filesToUpload,
-            req,
-            write,
-          })
-        : await runLocalFileUpdate({
-            id,
-            collection: collectionConfig,
-            current: docWithLocales,
-            files: filesToUpload,
-            nextManifest: (newFileData as Record<string, unknown>)._managedFiles,
-            req,
-            write,
-          })
+    let result = collectionConfig.upload.fileOperations
+      ? await runCloudFileUpdate({
+          id,
+          collection: collectionConfig,
+          current: docWithLocales,
+          data: updateArgs.data,
+          files: filesToUpload,
+          req,
+          write,
+        })
+      : await runLocalFileUpdate({
+          id,
+          collection: collectionConfig,
+          current: docWithLocales,
+          files: filesToUpload,
+          nextManifest: (newFileData as Record<string, unknown>)._managedFiles,
+          req,
+          write,
+        })
 
     // /////////////////////////////////////
     // Add collection property for auth collections

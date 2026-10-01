@@ -71,11 +71,16 @@ export const runCloudFileUpdate = async <T>({
   write: () => Promise<T>
 }): Promise<T> => {
   const operations = collection.upload.fileOperations
+  const hasManagedRemoval =
+    Array.isArray(data._managedFiles) &&
+    data._managedFiles.length === 0 &&
+    Array.isArray(current._managedFiles) &&
+    current._managedFiles.length > 0
 
   if (
     !operations ||
     req.context?.skipCloudStorage ||
-    (files.length === 0 && !req.context?._payloadVerifiedProviderOriginal)
+    (files.length === 0 && !req.context?._payloadVerifiedProviderOriginal && !hasManagedRemoval)
   ) {
     return write()
   }

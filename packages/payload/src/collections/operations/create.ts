@@ -495,7 +495,6 @@ export const createOperation = async <
     let doc
 
     if (
-      collectionConfig.versions &&
       collectionConfig.upload.fileOperations &&
       (filesToUpload.length > 0 || req.context?._payloadVerifiedProviderOriginal)
     ) {

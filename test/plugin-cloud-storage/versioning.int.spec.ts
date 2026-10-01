@@ -1,6 +1,7 @@
 /* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options"] }] -- Tests use the shared fixture wrapper. */
 import type { Payload } from 'payload'
 
+import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { expect, vi } from 'vitest'
 
@@ -21,13 +22,15 @@ const secondFile = path.resolve(import.meta.dirname, '../uploads/small.png')
 
 const getManagedFiles = async ({
   id,
+  collection = versionedCloudMediaSlug,
   payload,
 }: {
+  collection?: typeof unversionedCloudMediaSlug | typeof versionedCloudMediaSlug
   id: number | string
   payload: Payload
 }): Promise<Array<{ key: string; roles: Array<{ type: string }> }>> => {
   const doc = await payload.db.findOne({
-    collection: versionedCloudMediaSlug,
+    collection,
     where: { id: { equals: id } },
   })
   return ((doc as { _managedFiles?: unknown } | null)?._managedFiles ?? []) as Array<{
@@ -83,6 +86,148 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       where: { parent: { equals: created.id } },
     })
     expect(docs.some(({ version }) => version.filename === created.filename)).toBe(true)
+  })
+
+  test('should store an unversioned upload as one managed original', async ({ payload }) => {
+    const created = await payload.create({
+      collection: unversionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      overrideAccess: true,
+    })
+    const manifest = await getManagedFiles({
+      id: created.id,
+      collection: unversionedCloudMediaSlug,
+      payload,
+    })
+
+    expect(created.filename).toBe('image-original.png')
+    expect(created.original?.filename).toBe(created.filename)
+    expect(created.original?.url).toBe(created.url)
+    expect(manifest).toEqual([
+      {
+        key: expect.stringMatching(/image-original\.png$/),
+        roles: [{ type: 'original' }, { type: 'default' }],
+        storageBackendId: `test-cloud:${unversionedCloudMediaSlug}`,
+      },
+    ])
+    expect([...versionedCloudFiles.keys()]).toEqual([manifest[0]!.key])
+    expect(versionedCloudFiles.get(manifest[0]!.key)).toEqual(await readFile(firstFile))
+    expect(versionedCloudCalls.uploads).toBe(1)
+  })
+
+  test('should clean up the outgoing unversioned file after replacement', async ({ payload }) => {
+    const created = await payload.create({
+      collection: unversionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      overrideAccess: true,
+    })
+    const firstManifest = await getManagedFiles({
+      id: created.id,
+      collection: unversionedCloudMediaSlug,
+      payload,
+    })
+    const firstKey = firstManifest[0]!.key
+    const replaced = await payload.update({
+      id: created.id,
+      collection: unversionedCloudMediaSlug,
+      data: {},
+      filePath: secondFile,
+      overrideAccess: true,
+    })
+    const secondManifest = await getManagedFiles({
+      id: created.id,
+      collection: unversionedCloudMediaSlug,
+      payload,
+    })
+
+    expect(secondManifest[0]!.key).not.toBe(firstKey)
+    expect(replaced.original?.filename).toBe(replaced.filename)
+    expect(versionedCloudFiles.get(secondManifest[0]!.key)).toEqual(await readFile(secondFile))
+    expect(versionedCloudFiles.has(firstKey)).toBe(false)
+    expect(versionedCloudCalls.deletes).toContain(firstKey)
+  })
+
+  test('should compensate a staged unversioned upload when the document claim fails', async ({
+    payload,
+  }) => {
+    const created = await payload.create({
+      collection: unversionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      overrideAccess: true,
+    })
+    const firstManifest = await getManagedFiles({
+      id: created.id,
+      collection: unversionedCloudMediaSlug,
+      payload,
+    })
+    const firstKey = firstManifest[0]!.key
+
+    const updateOne = payload.db.updateOne.bind(payload.db)
+    const spy = vi.spyOn(payload.db, 'updateOne').mockImplementation(async (args) => {
+      if (args.collection === unversionedCloudMediaSlug && '_fileRevision' in args.data) {
+        throw new Error('Cloud test document claim failed')
+      }
+      return updateOne(args as never)
+    })
+
+    try {
+      await expect(
+        payload.update({
+          id: created.id,
+          collection: unversionedCloudMediaSlug,
+          data: {},
+          filePath: secondFile,
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('Cloud test document claim failed')
+    } finally {
+      spy.mockRestore()
+    }
+
+    expect(
+      await getManagedFiles({ id: created.id, collection: unversionedCloudMediaSlug, payload }),
+    ).toEqual(firstManifest)
+    expect([...versionedCloudFiles.keys()]).toEqual([firstKey])
+    expect(versionedCloudFiles.get(firstKey)).toEqual(await readFile(firstFile))
+    expect(versionedCloudCalls.deletes).toEqual([expect.stringMatching(/small-original\.png$/)])
+  })
+
+  test('should delete an unversioned cloud file after removing it from the document', async ({
+    payload,
+  }) => {
+    const created = await payload.create({
+      collection: unversionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      overrideAccess: true,
+    })
+    const key = (
+      await getManagedFiles({
+        id: created.id,
+        collection: unversionedCloudMediaSlug,
+        payload,
+      })
+    )[0]!.key
+
+    await payload.update({
+      id: created.id,
+      collection: unversionedCloudMediaSlug,
+      data: {
+        _managedFiles: [],
+        filename: null,
+        original: { filename: null, filesize: null, mimeType: null, url: null },
+      },
+      overrideAccess: true,
+    })
+
+    expect(
+      await getManagedFiles({ id: created.id, collection: unversionedCloudMediaSlug, payload }),
+    ).toEqual([])
+    expect(versionedCloudFiles.has(key)).toBe(false)
+    expect(versionedCloudCalls.deletes).toContain(key)
   })
 
   test('should use native move for an unversioned rename', async ({ payload }) => {
@@ -274,7 +419,11 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     const oldKey = [...versionedCloudFiles.keys()][0]!
     await payload.db.updateOne({
       collection: unversionedCloudMediaSlug,
-      data: { url: 'https://external.example.test/image.png' },
+      data: {
+        _managedFiles: null,
+        original: null,
+        url: 'https://external.example.test/image.png',
+      },
       where: { id: { equals: created.id } },
     })
 
