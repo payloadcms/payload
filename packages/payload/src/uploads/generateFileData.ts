@@ -309,7 +309,7 @@ export const generateFileData = async <T>({
     let processedBuffer = fileBuffer?.data
 
     if (cropData && fileSupportsResize && sharp) {
-      const { data: croppedImage, info } = await cropImage({
+      let { data: croppedImage, info } = await cropImage({
         cropData,
         dimensions: dimensions!,
         file,
@@ -319,6 +319,12 @@ export const generateFileData = async <T>({
         widthInPixels: uploadEdits.widthInPixels!,
         withMetadata,
       })
+
+      if (formatOptions) {
+        ;({ data: croppedImage, info } = await sharp(croppedImage)
+          .toFormat(formatOptions.format, formatOptions.options)
+          .toBuffer({ resolveWithObject: true }))
+      }
 
       // Apply resize after cropping to ensure it conforms to resizeOptions
       if (resizeOptions && !resizeOptions.withoutEnlargement) {

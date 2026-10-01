@@ -11,7 +11,9 @@ import { Media } from '../collections/Media.js'
 import { MediaWithPrefix } from '../collections/MediaWithPrefix.js'
 import { Users } from '../collections/Users.js'
 import { mediaSlug, mediaWithPrefixSlug, prefix } from '../shared.js'
+import { ConvertedMedia } from './collections/ConvertedMedia.js'
 import { MediaContainer } from './collections/MediaContainer.js'
+import { convertedMediaSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -40,6 +42,7 @@ export default buildConfigWithDefaults({
         imageSizes: [{ name: 'square', height: 20, width: 30 }],
       },
     },
+    ConvertedMedia,
     MediaWithPrefix,
     MediaContainer,
     LegacyMedia,
@@ -61,6 +64,7 @@ export default buildConfigWithDefaults({
         access: ({ req }) => (req.headers.get('x-disallow-access') ? false : true),
       },
       collections: {
+        [convertedMediaSlug]: true,
         [legacyMediaSlug]: true,
         [mediaSlug]: true,
         [mediaWithPrefixSlug]: {
