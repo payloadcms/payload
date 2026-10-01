@@ -6,7 +6,15 @@ export const Posts: CollectionConfig = {
   slug: postsSlug,
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['id', 'title', '_status', 'content', 'updatedAt', 'createdAt'],
+    defaultColumns: [
+      'id',
+      'title',
+      'disabledForImportExport',
+      '_status',
+      'content',
+      'updatedAt',
+      'createdAt',
+    ],
   },
   versions: {
     drafts: true,
@@ -21,6 +29,15 @@ export const Posts: CollectionConfig = {
     {
       name: 'content',
       type: 'richText',
+    },
+    {
+      name: 'disabledForImportExport',
+      type: 'text',
+      custom: {
+        'plugin-import-export': {
+          disabled: true,
+        },
+      },
     },
   ],
 }
