@@ -1,7 +1,7 @@
 import type { UploadInstructions } from 'payload'
 
-import { del, head, list } from '@vercel/blob'
-import { put } from '@vercel/blob/client'
+import { del, head, list, put as putWithOverwriteHeader } from '@vercel/blob'
+import { getPayloadFromClientToken, put } from '@vercel/blob/client'
 import dotenv from 'dotenv'
 import { readFileSync } from 'fs'
 import { mkdtemp, readdir, rm } from 'node:fs/promises'
@@ -14,6 +14,7 @@ import { expect } from 'vitest'
 
 import { test } from '../../__helpers/int/vitest.js'
 import { mediaSlug, mediaWithPrefixSlug, prefix } from '../shared.js'
+import { convertedMediaSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -360,6 +361,130 @@ test.suite('@payloadcms/storage-vercel-blob clientUploads', { config: './config.
         })
       } finally {
         await payload.delete({ id: doc.id, collection: collectionSlug, overrideAccess: true })
+      }
+    })
+  }
+
+  for (const scenario of ['conversion', 'mime-mismatch', 'legacy-overwrite'] as const) {
+    test(`should save processed client upload bytes for ${scenario}`, async ({
+      payload,
+      restClient,
+    }) => {
+      const collectionSlug = scenario === 'conversion' ? convertedMediaSlug : mediaSlug
+      const file = await sharp({
+        create: { background: '#884422', channels: 3, height: 80, width: 120 },
+      })
+        .png()
+        .toBuffer()
+      const legacyDoc =
+        scenario === 'legacy-overwrite'
+          ? await payload.create({
+              collection: mediaSlug,
+              data: {},
+              filePath: path.resolve(dirname, '../../uploads/image.png'),
+              overrideAccess: true,
+            })
+          : undefined
+      const submittedMime = scenario === 'mime-mismatch' ? 'image/jpeg' : 'image/png'
+      const instructionsResponse = await restClient.POST(uploadInstructionsPath, {
+        body: JSON.stringify({
+          collectionSlug,
+          filename: legacyDoc?.filename ?? 'processed.png',
+          filesize: file.length,
+          mimeType: submittedMime,
+        }),
+      })
+
+      expect(instructionsResponse.status).toBe(200)
+
+      const instructions = (await instructionsResponse.json()) as VercelBlobUploadInstructions
+      expect(getPayloadFromClientToken(instructions.data.token).allowOverwrite === true).toBe(
+        scenario === 'legacy-overwrite',
+      )
+
+      const body = new Blob([file], { type: submittedMime })
+      const uploadOptions = {
+        access: 'public' as const,
+        contentType: submittedMime,
+        token: instructions.data.token,
+      }
+      // The emulator reads overwrite from a header, whereas Vercel reads the signed client token.
+      const uploaded =
+        scenario === 'legacy-overwrite'
+          ? await putWithOverwriteHeader(instructions.data.pathname, body, {
+              ...uploadOptions,
+              addRandomSuffix: false,
+              allowOverwrite: true,
+            })
+          : await put(instructions.data.pathname, body, uploadOptions)
+      const formData = new FormData()
+
+      formData.append('_payload', JSON.stringify({}))
+      formData.append('file', JSON.stringify(instructions.file))
+
+      const query = qs.stringify(
+        {
+          uploadEdits: {
+            crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
+            heightInPixels: 40,
+            widthInPixels: 60,
+          },
+        },
+        { addQueryPrefix: true },
+      )
+      const response = legacyDoc
+        ? await restClient.PATCH(`/${collectionSlug}/${legacyDoc.id}${query}`, { body: formData })
+        : await restClient.POST(`/${collectionSlug}${query}`, { body: formData })
+      const { doc } = await response.json()
+
+      expect(response.status).toBe(legacyDoc ? 200 : 201)
+
+      const storedDoc = await payload.findByID({
+        collection: collectionSlug,
+        id: doc.id,
+        overrideAccess: true,
+        showHiddenFields: true,
+      })
+      const { blobs } = await list()
+      const expectedFormat = scenario === 'conversion' ? 'webp' : 'png'
+      const mainPath = [storedDoc.prefix, storedDoc._objectKey, doc.filename]
+        .filter(Boolean)
+        .join('/')
+      const main = blobs.find((blob) => blob.pathname === mainPath)
+
+      expect(blobs).toHaveLength(2)
+      expect(main).toBeDefined()
+      expect(doc.mimeType).toBe(`image/${expectedFormat}`)
+      expect(mainPath === instructions.data.pathname).toBe(scenario === 'mime-mismatch')
+      expect(blobs.some((blob) => blob.pathname === uploaded.pathname)).toBe(
+        scenario === 'mime-mismatch',
+      )
+      expect(doc.filename).toBe(
+        scenario === 'conversion'
+          ? 'processed.webp'
+          : scenario === 'legacy-overwrite'
+            ? instructions.file.filename.replace(/\.png$/, '-1.png')
+            : instructions.file.filename,
+      )
+      expect(storedDoc._objectKey === undefined).toBe(scenario === 'legacy-overwrite')
+
+      for (const storedFile of [doc, doc.sizes.square]) {
+        const storagePath = [storedDoc.prefix, storedDoc._objectKey, storedFile.filename]
+          .filter(Boolean)
+          .join('/')
+        const blob = blobs.find((blob) => blob.pathname === storagePath)
+        const bytes = Buffer.from(await (await fetch(blob!.url)).arrayBuffer())
+        const served = await restClient.GET(storedFile.url.replace(/^\/api/, ''))
+
+        expect(blob!.size).toBe(storedFile.filesize)
+        expect(bytes.length).toBe(storedFile.filesize)
+        expect(await sharp(bytes).metadata()).toMatchObject({
+          format: expectedFormat,
+          height: storedFile.height,
+          width: storedFile.width,
+        })
+        expect(served.status).toBe(200)
+        expect(Buffer.from(await served.arrayBuffer()).equals(bytes)).toBe(true)
       }
     })
   }

@@ -15,6 +15,8 @@ it.each([
   { hasTempFile: false, mode: 'mime' },
   { hasTempFile: true, mode: 'format' },
   { hasTempFile: false, mode: 'format' },
+  { hasTempFile: true, mode: 'format-crop' },
+  { hasTempFile: false, mode: 'format-crop' },
   { hasTempFile: true, mode: 'crop' },
   { hasTempFile: false, mode: 'crop' },
 ])(
@@ -45,16 +47,15 @@ it.each([
           uploadReference: { signedReceipt: 'verified-receipt' },
         },
         payload: { config: { sharp }, logger: { error: vi.fn() } },
-        query:
-          mode === 'crop'
-            ? {
-                uploadEdits: {
-                  crop: { height: 50, width: 50, unit: '%', x: 0, y: 0 },
-                  heightInPixels: 40,
-                  widthInPixels: 60,
-                },
-              }
-            : {},
+        query: mode.includes('crop')
+          ? {
+              uploadEdits: {
+                crop: { height: 50, width: 50, unit: '%', x: 0, y: 0 },
+                heightInPixels: 40,
+                widthInPixels: 60,
+              },
+            }
+          : {},
       } as unknown as PayloadRequest
       const collection = {
         config: {
@@ -63,8 +64,11 @@ it.each([
             disableLocalStorage: true,
             focalPoint: false,
             staticDir: directory,
-            ...(mode === 'format'
-              ? { formatOptions: { format: 'webp' } }
+            ...(mode.startsWith('format')
+              ? {
+                  formatOptions: { format: 'webp' },
+                  ...(mode.includes('crop') ? { resizeOptions: { height: 20, width: 30 } } : {}),
+                }
               : { resizeOptions: { height: 20, width: 30 } }),
           },
         },
@@ -95,7 +99,7 @@ it.each([
       expect(req.file!.uploadReference).toBeUndefined()
       expect(bytes.length).toBe(metadata.filesize)
       expect(await sharp(bytes).metadata()).toMatchObject({
-        format: mode === 'format' ? 'webp' : 'png',
+        format: mode.startsWith('format') ? 'webp' : 'png',
         height: mode === 'format' ? 80 : 20,
         width: mode === 'format' ? 120 : 30,
       })
