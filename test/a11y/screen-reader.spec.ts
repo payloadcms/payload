@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url'
 import { formatAdminURL } from 'payload/shared'
 
 import { openGroupBy } from '../__helpers/e2e/groupBy/index.js'
+import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/e2e/initPage.js'
@@ -672,6 +673,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       // PYLD-3697
       // PYLD-3701
       await page.goto(`${serverURL}/admin`)
+      await openNav(page)
       await expectPopupCursorToMove({
         expectedItem: /account|preferences|logout/i,
         screenReader,
@@ -855,6 +857,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
     }) => {
       // PYLD-3645
       await page.goto(`${serverURL}/admin`)
+      await openNav(page)
       await page.locator('.user-menu__trigger').click()
       await page.getByRole('button', { name: 'Theme' }).click()
       const selectedTheme = page.locator('.popup-button-list__button--selected').last()
