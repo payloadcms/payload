@@ -49,6 +49,12 @@ export type ListViewSlots = {
   Table: React.ReactNode | React.ReactNode[]
 }
 
+export type ListViewGroup = {
+  data: PaginatedDocs
+  heading: string
+  value: string
+}
+
 /**
  * The `ListViewServerPropsOnly` approach is needed to ensure type strictness when injecting component props
  * There is no way to do something like `Omit<ListViewServerProps, keyof ListViewClientProps>`
@@ -73,7 +79,9 @@ export type ListViewClientProps = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   disableQueryPresets?: boolean
+  documentViewMode?: CollectionPreferences['documentViewMode']
   enableRowSelections?: boolean
+  groupedData?: ListViewGroup[]
   hasCreatePermission: boolean
   hasDeletePermission?: boolean
   hasTrashPermission?: boolean

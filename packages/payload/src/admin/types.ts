@@ -692,6 +692,7 @@ export type {
   BeforeListTableServerPropsOnly,
   HierarchyViewData,
   ListViewClientProps,
+  ListViewGroup,
   ListViewServerProps,
   ListViewServerPropsOnly,
   ListViewSlots,

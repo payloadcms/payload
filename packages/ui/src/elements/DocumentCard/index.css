@@ -18,6 +18,14 @@
   }
   .document-card__thumbnail--empty {
     min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      width: var(--spacer-6);
+      height: var(--spacer-6);
+    }
   }
   .document-card__content {
     padding: var(--spacer-2-5);

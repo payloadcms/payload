@@ -201,6 +201,23 @@ export const renderRoot = async ({
     })
   }
 
+  if (
+    collectionConfig?.hierarchy &&
+    segments.length === 2 &&
+    searchParams?.view !== 'all' &&
+    searchParams?.view !== 'hierarchy'
+  ) {
+    req.server.redirect(
+      `${currentRouteURL}${qs.stringify(
+        {
+          ...searchParams,
+          view: collectionPreferences?.listViewType === 'hierarchy' ? 'hierarchy' : 'all',
+        },
+        { addQueryPrefix: true },
+      )}`,
+    )
+  }
+
   const {
     DefaultView,
     documentSubViewType,
@@ -213,7 +230,6 @@ export const renderRoot = async ({
     adminRoute,
     adminViews,
     collectionConfig,
-    collectionPreferences,
     currentRoute: currentRouteToCompare,
     globalConfig,
     payload,

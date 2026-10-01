@@ -91,6 +91,71 @@ test.describe('Hierarchy Sidebar', () => {
     }
   })
 
+  test.describe('Document view modes', () => {
+    test.afterEach(async () => {
+      await page.goto(organizationsURL.hierarchy)
+      const tableView = page.getByRole('radio', { name: 'Table view' })
+
+      if (!(await tableView.isChecked())) {
+        const tablePreferenceSaved = page.waitForResponse(
+          (response) =>
+            response.url().includes('/api/payload-preferences/collection-organizations') &&
+            response.request().method() === 'POST' &&
+            response.ok(),
+        )
+
+        await tableView.click()
+        await tablePreferenceSaved
+      }
+
+      await page.getByRole('button', { name: 'All Organizations' }).click()
+    })
+
+    test('should keep grid mode across All and By Organization views and navigate from a card link', async () => {
+      await page.goto(organizationsURL.hierarchy)
+
+      const gridPreferenceSaved = page.waitForResponse(
+        (response) =>
+          response.url().includes('/api/payload-preferences/collection-organizations') &&
+          response.request().method() === 'POST' &&
+          response.ok(),
+      )
+
+      await page.getByRole('radio', { name: 'Grid view' }).click()
+      await gridPreferenceSaved
+      await expect(page.getByRole('list', { name: 'Organizations' })).toBeVisible()
+      await expect(page.locator('.table-section__header-inner .checkbox-input')).toHaveCount(0)
+
+      await page.getByRole('button', { name: 'All Organizations' }).click()
+      await expect(page).toHaveURL(/\/admin\/collections\/organizations\?view=all/)
+      await expect(page.getByRole('radio', { name: 'Grid view' })).toBeChecked()
+      await expect(page.getByRole('list', { name: 'Organizations' })).toBeVisible()
+
+      await page.getByRole('button', { name: 'By Organization' }).click()
+      await expect(page).toHaveURL(/\/admin\/collections\/organizations\?view=hierarchy/)
+      await expect(page.getByRole('radio', { name: 'Grid view' })).toBeChecked()
+
+      await page.goBack()
+      await expect(page).toHaveURL(/\/admin\/collections\/organizations\?view=all/)
+      await expect(page.getByRole('button', { name: 'All Organizations' })).toBeDisabled()
+
+      await page.goForward()
+      await expect(page).toHaveURL(/\/admin\/collections\/organizations\?view=hierarchy/)
+
+      await page.goto(organizationsURL.list)
+      await expect(page).toHaveURL(/\/admin\/collections\/organizations\?view=hierarchy/)
+
+      const acmeCard = page.locator('.document-card', { hasText: 'Acme Corp' })
+
+      await acmeCard.click()
+      await expect(acmeCard).toHaveAttribute('aria-pressed', 'true')
+
+      await acmeCard.getByRole('link', { name: 'Acme Corp' }).press('Enter')
+      await expect(page.getByRole('heading', { name: 'Acme Corp' })).toBeVisible()
+      await expect(page.getByRole('list', { name: 'Organizations' })).toBeVisible()
+    })
+  })
+
   test.describe('Tree Display', () => {
     test('should display hierarchy tree in sidebar', async () => {
       await page.goto(organizationsURL.list)
@@ -495,7 +560,7 @@ test.describe('Hierarchy Sidebar', () => {
         const multiTypeFolder = multiTypeFolders.docs[0]
 
         await page.goto(organizationsURL.list)
-        await page.goto(`${foldersURL.hierarchy}?parentFolder=${multiTypeFolder.id}`)
+        await page.goto(`${foldersURL.hierarchy}&parentFolder=${multiTypeFolder.id}`)
 
         const listControls = page.locator('.hierarchy-list__controls')
         await listControls.getByRole('button', { name: 'Create New' }).first().click()

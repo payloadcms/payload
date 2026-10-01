@@ -46,7 +46,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
   const [query, setQuery] = useState<ListQuery>(() => {
     if (modifySearchParams) {
-      return queryFromURL
+      return queryFromProps ? sanitizeQuery(queryFromProps) : queryFromURL
     } else {
       return {
         limit: queryFromProps.limit,

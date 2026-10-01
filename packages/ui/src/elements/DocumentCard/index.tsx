@@ -14,6 +14,7 @@ export type DocumentCardProps = {
   readonly href: string
   readonly isSelected?: boolean
   readonly onSelect?: () => void
+  readonly placeholder?: React.ReactNode
   readonly thumbnail?: DocumentCardThumbnail
   readonly title: string
 }
@@ -24,6 +25,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
   href,
   isSelected = false,
   onSelect,
+  placeholder,
   thumbnail,
   title,
 }) => {
@@ -93,7 +95,12 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
       {thumbnail ? (
         <img alt={thumbnail.alt || ''} className={`${baseClass}__thumbnail`} src={thumbnail.src} />
       ) : (
-        <div className={`${baseClass}__thumbnail ${baseClass}__thumbnail--empty`} />
+        <div
+          aria-hidden="true"
+          className={`${baseClass}__thumbnail ${baseClass}__thumbnail--empty`}
+        >
+          {placeholder}
+        </div>
       )}
       <div className={`${baseClass}__content`}>
         <Link

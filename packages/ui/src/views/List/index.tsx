@@ -6,6 +6,7 @@ import type {
   HierarchyViewData,
   ListQuery,
   ListViewClientProps,
+  ListViewGroup,
   ListViewServerPropsOnly,
   PaginatedDocs,
   PayloadComponent,
@@ -34,6 +35,7 @@ import {
   HierarchyListView,
   HydrateAuthProvider,
   HydrateHierarchyProvider,
+  HydratePreferences,
   ListQueryProvider,
 } from '../../exports/client/index.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
@@ -236,6 +238,7 @@ export const renderListView = async (
   }
 
   let Table: React.ReactNode | React.ReactNode[] = null
+  let groupedData: ListViewGroup[] | undefined
   let columnState: Column[] = []
   let data: PaginatedDocs = {
     // no results default
@@ -284,7 +287,7 @@ export const renderListView = async (
 
   /** Populate only the configured thumbnail relationship for flat collection grids. */
   const thumbnailFieldName =
-    collectionPreferences?.documentViewMode === 'grid' && !collectionConfig.hierarchy
+    collectionPreferences?.documentViewMode === 'grid' && viewType !== 'hierarchy'
       ? collectionConfig.admin.useAsThumbnail
       : undefined
   let thumbnailPopulate: PopulateType | undefined
@@ -361,7 +364,7 @@ export const renderListView = async (
 
   try {
     if (query.groupBy) {
-      ;({ columnState, data, Table } = await handleGroupBy({
+      ;({ columnState, data, groupedData, Table } = await handleGroupBy({
         clientCollectionConfig,
         clientConfig,
         collectionConfig,
@@ -374,6 +377,8 @@ export const renderListView = async (
         query,
         req,
         select,
+        thumbnailFieldName,
+        thumbnailPopulate,
         trash,
         user,
         viewType,
@@ -554,7 +559,9 @@ export const renderListView = async (
       disableBulkDelete: collectionConfig.disableBulkDelete ?? disableBulkDelete,
       disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
       disableQueryPresets,
+      documentViewMode: collectionPreferences?.documentViewMode,
       enableRowSelections,
+      groupedData,
       hasCreatePermission,
       hasDeletePermission,
       hasTrashPermission,
@@ -580,6 +587,7 @@ export const renderListView = async (
     List: (
       <Fragment>
         <HydrateAuthProvider permissions={permissions} />
+        <HydratePreferences collectionSlug={collectionSlug} preferences={collectionPreferences} />
         {isHierarchyView ? (
           <Fragment>
             <HydrateHierarchyProvider
