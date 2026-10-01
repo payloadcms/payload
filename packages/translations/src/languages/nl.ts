@@ -208,6 +208,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     browseByFolder: 'Bladeren op Map',
     byFolder: 'Op Map',
     deleteFolder: 'Verwijder map',
+    folder: 'Map',
     folderName: 'Mapnaam',
     folders: 'Mappen',
     folderTypeDescription:
@@ -271,7 +272,6 @@ export const nlTranslations: DefaultTranslationsObject = {
     changesNotSaved:
       'Uw wijzigingen zijn niet bewaard. Als u weggaat zullen de wijzigingen verloren gaan.',
     clear: 'Wissen',
-    clearAll: 'Alles wissen',
     close: 'Sluiten',
     collapse: 'Samenvouwen',
     collections: 'Collecties',
@@ -318,6 +318,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     deleting: 'Verwijderen...',
     depth: 'Diepte',
     descending: 'Aflopend',
+    deselectAll: 'Alles deselecteren',
     deselectAllRows: 'Deselecteer alle rijen',
     document: 'Document',
     documentIsTrashed: 'Dit {{label}} is verwijderd en is alleen-lezen.',
@@ -445,6 +446,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Toon alle {{label}}',
     sorryNotFound: 'Sorry, er is niets dat overeen komt met uw verzoek.',
     sort: 'Sorteer',
+    sortBy: 'Sorteren op',
     sortByLabelDirection: 'Sorteer op {{label}} {{direction}}',
     stayOnThisPage: 'Blijf op deze pagina',
     submissionSuccessful: 'Indiening succesvol.',
