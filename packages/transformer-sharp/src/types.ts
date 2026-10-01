@@ -60,7 +60,7 @@ declare module 'payload' {
 /**
  * A collection's Sharp-owned upload-time settings, authored via
  * `sharpTransformer({ collections: { <slug>: {...} } })`. `init()` writes a
- * narrowed, Sharp-agnostic projection of `variants` (as `imageSizes`)/`crop`/`focalPoint`
+ * narrowed, Sharp-agnostic projection of `variants`/`crop`/`focalPoint`
  * back onto the sanitized collection's `upload` config for core's own use (Admin UI,
  * field generation); this richer shape is what the transformer itself reads.
  */

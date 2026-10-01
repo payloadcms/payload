@@ -49,7 +49,7 @@ describe('initSharpCollections', () => {
     expect(result.collections?.[0]?.upload).toMatchObject({ crop: true, focalPoint: true })
   })
 
-  it('should write variants as imageSizes onto a copy, leaving the authored collection untouched', () => {
+  it('should write variants onto a copy, leaving the authored collection untouched', () => {
     const authoredUpload = { staticDir: 'media' }
     const authoredCollection = uploadCollection({ slug: 'media', upload: authoredUpload })
     const config = makeConfig([authoredCollection])
@@ -60,7 +60,7 @@ describe('initSharpCollections', () => {
     })
 
     expect(result.collections?.[0]?.upload).toMatchObject({
-      imageSizes: [{ name: 'thumbnail' }],
+      variants: [{ name: 'thumbnail' }],
       staticDir: 'media',
     })
     expect(authoredUpload).toEqual({ staticDir: 'media' })
