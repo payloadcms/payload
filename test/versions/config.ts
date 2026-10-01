@@ -26,6 +26,7 @@ import ErrorOnUnpublish from './collections/ErrorOnUnpublish.js'
 import LocalizedPosts from './collections/Localized.js'
 import { Media } from './collections/Media.js'
 import { Media2 } from './collections/Media2.js'
+import NestedArraySelect from './collections/NestedArraySelect.js'
 import Posts from './collections/Posts.js'
 import RestoreAccess from './collections/RestoreAccess.js'
 import RestoreAccessLocalized from './collections/RestoreAccessLocalized.js'
@@ -64,6 +65,7 @@ export default buildConfigWithDefaults({
     AutosavePosts,
     AutosaveWithDraftButtonPosts,
     AutosaveWithMultiSelectPosts,
+    NestedArraySelect,
     AutosaveWithDraftValidate,
     DraftPosts,
     DraftsNoReadVersions,
