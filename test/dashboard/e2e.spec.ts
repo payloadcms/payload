@@ -20,7 +20,7 @@ const { serverURL } = await initPayloadE2ENoConfig({
   dirname,
 })
 
-const TOTAL_WIDGETS = 15
+const TOTAL_WIDGETS = 16
 const url = new AdminUrlUtil(serverURL, 'users')
 
 describe('Dashboard', () => {
@@ -42,21 +42,32 @@ describe('Dashboard', () => {
     await expect(d.widgets).toHaveCount(TOTAL_WIDGETS)
 
     await d.assertIsEditing(false)
-    await d.assertWidget(1, 'collections', 'full')
-    await d.assertWidget(2, 'count', 'x-small')
-    await d.assertWidget(3, 'count', 'x-small')
+    await d.assertWidget(1, 'welcome', 'full')
+    await expect(d.widgetByPos(1).getByRole('heading', { level: 1 })).toContainText('Welcome')
+    await d.assertWidget(2, 'activity', 'full')
+    await d.assertWidget(3, 'collections', 'full')
+    const welcomeBox = await d.widgetByPos(1).locator('.welcome-widget').boundingBox()
+    const activityBox = await d.widgetByPos(2).locator('.widget-content').boundingBox()
+    const collectionsBox = await d.widgetByPos(3).locator('.widget-content').boundingBox()
+
+    expect(welcomeBox).not.toBeNull()
+    expect(activityBox).not.toBeNull()
+    expect(collectionsBox).not.toBeNull()
+    expect(activityBox!.y - (welcomeBox!.y + welcomeBox!.height)).toBe(24)
+    expect(collectionsBox!.y - (activityBox!.y + activityBox!.height)).toBe(12)
     await d.assertWidget(4, 'count', 'x-small')
     await d.assertWidget(5, 'count', 'x-small')
-    await d.assertWidget(6, 'revenue', 'full')
-    await d.assertWidget(7, 'private', 'full')
-    await d.assertWidget(8, 'collection-query', 'medium')
-    await d.assertWidget(9, 'collection-query', 'medium')
-    await d.assertWidget(10, 'collection-query', 'x-small')
-    await d.assertWidget(11, 'collection-query', 'x-small')
+    await d.assertWidget(6, 'count', 'x-small')
+    await d.assertWidget(7, 'count', 'x-small')
+    await d.assertWidget(8, 'revenue', 'full')
+    await d.assertWidget(9, 'private', 'full')
+    await d.assertWidget(10, 'collection-query', 'medium')
+    await d.assertWidget(11, 'collection-query', 'medium')
     await d.assertWidget(12, 'collection-query', 'x-small')
     await d.assertWidget(13, 'collection-query', 'x-small')
-    await d.assertWidget(14, 'collection-query', 'medium')
-    await d.assertWidget(15, 'activity', 'medium')
+    await d.assertWidget(14, 'collection-query', 'x-small')
+    await d.assertWidget(15, 'collection-query', 'x-small')
+    await d.assertWidget(16, 'collection-query', 'medium')
     await d.validateLayout()
   })
 
@@ -127,25 +138,25 @@ describe('Dashboard', () => {
   }) => {
     const d = new DashboardHelper(page)
 
-    await d.assertWidget(8, 'collection-query', 'medium')
-    await d.assertWidget(9, 'collection-query', 'medium')
-    await d.assertWidget(10, 'collection-query', 'x-small')
-    await d.assertWidget(11, 'collection-query', 'x-small')
+    await d.assertWidget(10, 'collection-query', 'medium')
+    await d.assertWidget(11, 'collection-query', 'medium')
     await d.assertWidget(12, 'collection-query', 'x-small')
     await d.assertWidget(13, 'collection-query', 'x-small')
+    await d.assertWidget(14, 'collection-query', 'x-small')
+    await d.assertWidget(15, 'collection-query', 'x-small')
     await expect(
-      d.widgetByPos(8).locator('.collection-query-widget .widget-card__title'),
+      d.widgetByPos(10).locator('.collection-query-widget .widget-card__title'),
     ).toHaveText('Top revenue entries')
     await expect(
-      d.widgetByPos(9).locator('.collection-query-widget .widget-card__title'),
+      d.widgetByPos(11).locator('.collection-query-widget .widget-card__title'),
     ).toHaveText('Event timeline')
   })
 
   test('collection-query short widget grows to its row height', async ({ page }) => {
     const d = new DashboardHelper(page)
 
-    const shortCard = d.widgetByPos(8).locator('.collection-query-widget')
-    const longCard = d.widgetByPos(9).locator('.collection-query-widget')
+    const shortCard = d.widgetByPos(10).locator('.collection-query-widget')
+    const longCard = d.widgetByPos(11).locator('.collection-query-widget')
     const shortRows = shortCard.locator('.widget-card__row')
 
     await expect(shortRows).toHaveCount(3)
@@ -167,8 +178,8 @@ describe('Dashboard', () => {
   test('collection-query row metadata shows configured sort values', async ({ page }) => {
     const d = new DashboardHelper(page)
 
-    const shortCard = d.widgetByPos(8).locator('.collection-query-widget')
-    const longCard = d.widgetByPos(9).locator('.collection-query-widget')
+    const shortCard = d.widgetByPos(10).locator('.collection-query-widget')
+    const longCard = d.widgetByPos(11).locator('.collection-query-widget')
 
     await expect(async () => {
       const amountLabels = await shortCard.locator('.widget-card__row-meta').allTextContents()
@@ -211,7 +222,7 @@ describe('Dashboard', () => {
     await page.goto(url.admin)
 
     const d = new DashboardHelper(page)
-    const timelineCard = d.widgetByPos(9).locator('.collection-query-widget')
+    const timelineCard = d.widgetByPos(11).locator('.collection-query-widget')
 
     // Spanish relative time via Intl.RelativeTimeFormat('es'): "hace ...", "dentro de ...",
     // "la semana pasada", "el próximo mes". None of these strings appear in the English output.
@@ -236,7 +247,7 @@ describe('Dashboard', () => {
   test('collection-query long widget shows five rows at a time and scrolls', async ({ page }) => {
     const d = new DashboardHelper(page)
 
-    const longCard = d.widgetByPos(9).locator('.collection-query-widget')
+    const longCard = d.widgetByPos(11).locator('.collection-query-widget')
     const longRows = longCard.locator('.widget-card__row')
     const maxVisibleRows = 5
 
@@ -309,11 +320,11 @@ describe('Dashboard', () => {
   test('collection-query sorts and renders a nested (dot-path) field', async ({ page }) => {
     const d = new DashboardHelper(page)
 
-    const nestedCard = d.widgetByPos(14).locator('.collection-query-widget')
+    const nestedCard = d.widgetByPos(16).locator('.collection-query-widget')
 
     await expect(nestedCard.locator('.widget-card__title')).toHaveText('Events by priority')
     // The nested sort field is valid, so the widget renders rows instead of a config error.
-    await expect(d.widgetByPos(14).locator('.collection-query-widget--error')).toHaveCount(0)
+    await expect(d.widgetByPos(16).locator('.collection-query-widget--error')).toHaveCount(0)
 
     const rows = nestedCard.locator('.widget-card__row')
     await expect(rows).toHaveCount(4)
@@ -345,7 +356,7 @@ describe('Dashboard', () => {
     await page.goto(url.admin)
 
     const d = new DashboardHelper(page)
-    const activityCard = d.widgetByPos(15).locator('.recently-viewed-widget')
+    const activityCard = d.widgetByPos(2).locator('.recently-viewed-widget')
 
     await expect(activityCard.locator('.widget-card__title')).toHaveText('You recently viewed')
 
@@ -375,12 +386,12 @@ describe('Dashboard', () => {
     await page.goto(url.admin)
 
     const d = new DashboardHelper(page)
-    const activityCard = d.widgetByPos(15).locator('.recently-viewed-widget')
+    const activityCard = d.widgetByPos(2).locator('.recently-viewed-widget')
     await expect(activityCard.locator('.widget-card__row-title')).toHaveCount(2)
 
     // Open the activity widget configuration.
     await d.setEditing()
-    const widget = d.widgetByPos(15)
+    const widget = d.widgetByPos(2)
     await widget.hover()
     await widget.locator('.widget-wrapper__edit-btn').click()
 
@@ -421,13 +432,13 @@ describe('Dashboard', () => {
     const d = new DashboardHelper(page)
     await d.setEditing()
     await d.assertWidthRange({ max: 'full', min: 'full', position: 1 })
-    await d.assertWidthRange({ max: 'medium', min: 'x-small', position: 2 })
-    await d.assertWidthRange({ max: 'medium', min: 'x-small', position: 3 })
+    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 2 })
+    await d.assertWidthRange({ max: 'full', min: 'full', position: 3 })
     await d.assertWidthRange({ max: 'medium', min: 'x-small', position: 4 })
     await d.assertWidthRange({ max: 'medium', min: 'x-small', position: 5 })
-    await d.assertWidthRange({ max: 'full', min: 'medium', position: 6 })
-    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 7 })
-    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 8 })
+    await d.assertWidthRange({ max: 'medium', min: 'x-small', position: 6 })
+    await d.assertWidthRange({ max: 'medium', min: 'x-small', position: 7 })
+    await d.assertWidthRange({ max: 'full', min: 'medium', position: 8 })
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 9 })
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 10 })
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 11 })
@@ -435,14 +446,15 @@ describe('Dashboard', () => {
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 13 })
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 14 })
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 15 })
+    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 16 })
   })
 
   test('resize widget', async ({ page }) => {
     const d = new DashboardHelper(page)
     await d.setEditing()
-    await d.assertWidget(2, 'count', 'x-small')
-    await d.resizeWidget(2, 'medium')
-    await d.assertWidget(2, 'count', 'medium')
+    await d.assertWidget(4, 'count', 'x-small')
+    await d.resizeWidget(4, 'medium')
+    await d.assertWidget(4, 'count', 'medium')
     await d.saveChangesAndValidate()
   })
 
@@ -457,9 +469,9 @@ describe('Dashboard', () => {
   test('delete widget', async ({ page }) => {
     const d = new DashboardHelper(page)
     await d.setEditing()
-    await d.deleteWidget(1)
-    await d.assertWidget(1, 'count', 'x-small')
-    await d.assertWidget(6, 'private', 'full')
+    await d.deleteWidget(3)
+    await d.assertWidget(3, 'count', 'x-small')
+    await d.assertWidget(8, 'private', 'full')
     await expect(d.widgets).toHaveCount(TOTAL_WIDGETS - 1)
     await d.saveChangesAndValidate()
   })
@@ -467,41 +479,41 @@ describe('Dashboard', () => {
   test('edit widget data is reverted when dashboard editing is canceled', async ({ page }) => {
     const d = new DashboardHelper(page)
     await d.setEditing()
-    let secondWidget = d.widgetByPos(2)
-    let secondWidgetTitle = secondWidget.locator('.count-widget h3')
-    await expect(secondWidgetTitle).toHaveText('Tickets')
+    let countWidget = d.widgetByPos(4)
+    let countWidgetTitle = countWidget.locator('.count-widget h3')
+    await expect(countWidgetTitle).toHaveText('Tickets')
 
-    await d.editWidget(2, 'Open Tickets')
-    await expect(secondWidgetTitle).toHaveText('Open Tickets')
+    await d.editWidget(4, 'Open Tickets')
+    await expect(countWidgetTitle).toHaveText('Open Tickets')
 
     await d.cancelEditing()
 
-    secondWidget = d.widgetByPos(2)
-    secondWidgetTitle = secondWidget.locator('.count-widget h3')
-    await expect(secondWidgetTitle).toHaveText('Tickets')
+    countWidget = d.widgetByPos(4)
+    countWidgetTitle = countWidget.locator('.count-widget h3')
+    await expect(countWidgetTitle).toHaveText('Tickets')
   })
 
   test('edit widget data persists after dashboard save and reload', async ({ page }) => {
     const d = new DashboardHelper(page)
     await d.setEditing()
-    const secondWidget = d.widgetByPos(2)
-    const secondWidgetTitle = secondWidget.locator('.count-widget h3')
-    await expect(secondWidgetTitle).toHaveText('Tickets')
+    const countWidget = d.widgetByPos(4)
+    const countWidgetTitle = countWidget.locator('.count-widget h3')
+    await expect(countWidgetTitle).toHaveText('Tickets')
 
-    await d.editWidget(2, 'Open Tickets')
-    await expect(secondWidgetTitle).toHaveText('Open Tickets')
+    await d.editWidget(4, 'Open Tickets')
+    await expect(countWidgetTitle).toHaveText('Open Tickets')
 
     await d.stepNavButtons.nth(1).click()
-    await expect(secondWidgetTitle).toHaveText('Open Tickets')
+    await expect(countWidgetTitle).toHaveText('Open Tickets')
 
     // Re-enter edit mode without page refresh and edit again.
     await d.setEditing()
-    await expect(secondWidgetTitle).toHaveText('Open Tickets')
-    await d.editWidget(2, 'Title changed again')
-    await expect(secondWidgetTitle).toHaveText('Title changed again')
+    await expect(countWidgetTitle).toHaveText('Open Tickets')
+    await d.editWidget(4, 'Title changed again')
+    await expect(countWidgetTitle).toHaveText('Title changed again')
 
     await d.saveChangesAndValidate()
-    await expect(secondWidgetTitle).toHaveText('Title changed again')
+    await expect(countWidgetTitle).toHaveText('Title changed again')
   })
 
   test('empty dashboard - delete all widgets', async ({ page }) => {
@@ -519,9 +531,9 @@ describe('Dashboard', () => {
     // For this test we need to put 2 widgets with different default heights in the same row
     const d = new DashboardHelper(page)
     await d.setEditing()
-    await d.deleteWidget(2)
-    await d.deleteWidget(2)
-    await d.resizeWidget(4, 'medium')
+    await d.deleteWidget(4)
+    await d.deleteWidget(4)
+    await d.resizeWidget(6, 'medium')
     // validateLayout already takes care of verifying that
     await d.saveChangesAndValidate()
   })
@@ -555,10 +567,10 @@ describe('Dashboard', () => {
     const contentHeight = await page.evaluate(() => document.body.scrollHeight)
     await page.setViewportSize({ height: Math.max(contentHeight + 100, 720), width })
     // moveWidget already contains validations
-    await d.moveWidget(2, 1) // to first position
-    await d.moveWidget(1, 2, 'after') // after last in row
+    await d.moveWidget(4, 1) // to first position
+    await d.moveWidget(1, 2, 'after') // after the Welcome widget
     await d.moveWidget(2, TOTAL_WIDGETS, 'after') // to last position
-    await d.moveWidget(TOTAL_WIDGETS, 5, 'before') // before first full-width row after counts
+    await d.moveWidget(TOTAL_WIDGETS, 7, 'before') // before first full-width row after counts
     await d.saveChangesAndValidate()
   })
 
@@ -567,7 +579,7 @@ describe('Dashboard', () => {
     await d.assertIsEditing(false)
 
     // Delete buttons should not be visible when not editing
-    const widget = d.widgetByPos(1)
+    const widget = d.widgetByPos(3)
     const dragHandle = widget.getByRole('button', { name: 'Drag to reorder' })
 
     await widget.hover()
@@ -600,7 +612,7 @@ describe('Dashboard', () => {
     const d = new DashboardHelper(page)
     await d.setEditing()
 
-    const widget = d.widgetByPos(2)
+    const widget = d.widgetByPos(4)
     await widget.hover()
     await widget.locator('.widget-wrapper__edit-btn').click()
 

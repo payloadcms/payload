@@ -108,6 +108,17 @@ export function DefaultListView(props: ListViewClientProps) {
   const isTrashEnabled = Boolean(collectionConfig.trash)
 
   const { i18n } = useTranslation()
+  const previousResults = useRef(data)
+  const [resultsAnnouncement, setResultsAnnouncement] = useState('')
+
+  useEffect(() => {
+    if (data && previousResults.current !== data) {
+      const label = getTranslation(data.totalDocs === 1 ? labels.singular : labels.plural, i18n)
+
+      setResultsAnnouncement(`${data.totalDocs} ${label}${query.search ? `: ${query.search}` : ''}`)
+      previousResults.current = data
+    }
+  }, [data, i18n, labels.plural, labels.singular, query.search])
 
   const collectionLabel = getTranslation(labels?.plural, i18n)
 
@@ -184,8 +195,16 @@ export function DefaultListView(props: ListViewClientProps) {
   ])
 
   return (
-    <TableIdentityProvider collectionSlug={collectionSlug}>
+    <TableIdentityProvider
+      collectionSlug={collectionSlug}
+      navigationLabel={
+        !isInDrawer && !hierarchyData && !collectionConfig.orderable ? collectionLabel : undefined
+      }
+    >
       <Fragment>
+        <span aria-atomic="true" className="sr-only" role="status">
+          {resultsAnnouncement}
+        </span>
         <TableColumnsProvider collectionSlug={collectionSlug} columnState={columnState}>
           <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
             <SelectionProvider docs={docs} totalDocs={data?.totalDocs}>

@@ -20,6 +20,7 @@ const baseClass = 'page-controls'
  */
 export const PageControlsComponent: React.FC<{
   AfterPageControls?: React.ReactNode
+  countLabel?: string
   data: PaginatedDocs
   handlePageChange?: IListQueryContext['handlePageChange']
   handlePerPageChange?: IListQueryContext['handlePerPageChange']
@@ -28,6 +29,7 @@ export const PageControlsComponent: React.FC<{
   tableId?: string
 }> = ({
   AfterPageControls,
+  countLabel,
   data,
   handlePageChange,
   handlePerPageChange,
@@ -37,6 +39,7 @@ export const PageControlsComponent: React.FC<{
 }) => {
   const { i18n } = useTranslation()
   const resolvedTableID = useTableID(tableId)
+  const label = countLabel ?? i18n.t(data.totalDocs === 1 ? 'general:item' : 'general:items')
 
   return (
     <div className={baseClass}>
@@ -62,6 +65,7 @@ export const PageControlsComponent: React.FC<{
                 ? data.limit * data.page
                 : data.totalDocs}{' '}
               {i18n.t('general:of')} {data.totalDocs}
+              <span className="sr-only"> {label}</span>
             </div>
             <PerPage
               handleChange={handlePerPageChange}
