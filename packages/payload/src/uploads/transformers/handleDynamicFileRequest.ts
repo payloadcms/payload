@@ -59,7 +59,7 @@ export async function handleDynamicFileRequest({
 
   if (
     resolvedDocument.original?.filename === filename &&
-    (resolvedDocument.filename !== filename || req.searchParams.get('original') === 'true')
+    (resolvedDocument.filename !== filename || req.searchParams.size === 0)
   ) {
     const permittedDocument = await withFileTransformAccessContext({
       callback: () => checkFileAccess({ collection, filename, prefix, req }),

@@ -420,6 +420,12 @@ export const generateFileData = async <T>({
     }
 
     let fsSafeName = getSanitizedUploadFilename(outputName, ext)
+    const isDuplicatingAnOriginal =
+      isDuplicating && file.name === (originalDoc as FileData | undefined)?.original?.filename
+
+    if (!fileWasTransformed && !retainedOriginal && !providerOriginal && !isDuplicatingAnOriginal) {
+      fsSafeName = getOriginalFilename({ filename: fsSafeName })
+    }
 
     if (
       !overwriteExistingFiles ||

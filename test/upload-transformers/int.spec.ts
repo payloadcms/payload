@@ -1,3 +1,4 @@
+/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options"] }] -- Tests use the shared fixture wrapper. */
 import type { CollectionSlug, Payload } from 'payload'
 
 import { createHash } from 'crypto'
@@ -72,11 +73,21 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
         overrideAccess: true,
       })
       docIDs.push(doc.id)
-      return doc as unknown as { filename: string; id: number | string }
+      return doc as unknown as {
+        filename: string
+        id: number | string
+        original?: { url?: string }
+        url: string
+      }
     }
 
     test('should serve the original file when no recognized query parameter is present', async () => {
       const doc = await uploadTransformerFixture()
+
+      expect(doc.original?.url).toBe(doc.url)
+      expect(new URL(doc.original!.url!, 'http://localhost').searchParams.has('original')).toBe(
+        false,
+      )
 
       const response = await restClient.GET(`/${transformerMediaSlug}/file/${doc.filename}`)
 

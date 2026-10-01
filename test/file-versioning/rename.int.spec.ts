@@ -52,14 +52,14 @@ test.suite('File rename', { config: './config.ts' }, () => {
     expect(renamed.filename).toBe('after.png')
     expect(renamed.original?.filename).toBe('after.png')
     expect(await readFile(path.join(mediaDir, 'after.png'))).toEqual(bytes)
-    expect(await readFile(path.join(mediaDir, 'before.png'))).toEqual(bytes)
+    expect(await readFile(path.join(mediaDir, created.filename!))).toEqual(bytes)
 
     const { docs } = await payload.db.findVersions({
       collection: mediaSlug,
       where: { parent: { equals: created.id } },
     })
 
-    expect(docs.some(({ version }) => version.filename === 'before.png')).toBe(true)
+    expect(docs.some(({ version }) => version.filename === created.filename)).toBe(true)
   })
 
   test('should rename every transformed representation without changing bytes', async ({
@@ -130,8 +130,8 @@ test.suite('File rename', { config: './config.ts' }, () => {
     })
 
     expect(renamed.filename).toBe('draft.png')
-    expect((published as { filename?: string } | null)?.filename).toBe('published.png')
-    expect(await readFile(path.join(draftMediaDir, 'published.png'))).toEqual(bytes)
+    expect((published as { filename?: string } | null)?.filename).toBe(created.filename)
+    expect(await readFile(path.join(draftMediaDir, created.filename!))).toEqual(bytes)
     expect(await readFile(path.join(draftMediaDir, 'draft.png'))).toEqual(bytes)
   })
 
@@ -158,7 +158,7 @@ test.suite('File rename', { config: './config.ts' }, () => {
       ).rejects.toThrow()
     }
 
-    await payload.create({
+    const collision = await payload.create({
       collection: mediaSlug,
       data: { alt: 'collision' },
       file: { name: 'taken.png', data: bytes, mimetype: 'image/png', size: bytes.length },
@@ -168,12 +168,12 @@ test.suite('File rename', { config: './config.ts' }, () => {
       renameFileOperation({
         id: created.id,
         collection: payload.collections[mediaSlug],
-        filename: 'taken.png',
+        filename: collision.filename!,
         overrideAccess: true,
         req: await createPayloadRequest({ payload }),
       }),
     ).rejects.toThrow('already exists')
-    expect(await readFile(path.join(mediaDir, 'before.png'))).toEqual(bytes)
+    expect(await readFile(path.join(mediaDir, created.filename!))).toEqual(bytes)
   })
 
   test('should remove the previous object after an unversioned rename', async ({ payload }) => {
@@ -183,6 +183,10 @@ test.suite('File rename', { config: './config.ts' }, () => {
       data: { alt: 'unversioned' },
       file: { name: 'old.png', data: bytes, mimetype: 'image/png', size: bytes.length },
     })
+
+    expect(created.filename).toBe('old-original.png')
+    expect(created.original?.filename).toBe(created.filename)
+    expect(created.original?.url).toBe(created.url)
 
     await renameFileOperation({
       id: created.id,
@@ -200,7 +204,7 @@ test.suite('File rename', { config: './config.ts' }, () => {
     expect((saved as { _managedFiles?: { key: string }[] } | null)?._managedFiles?.[0]?.key).toBe(
       'new.png',
     )
-    await expect(readFile(path.join(plainMediaDir, 'old.png'))).rejects.toMatchObject({
+    await expect(readFile(path.join(plainMediaDir, created.filename!))).rejects.toMatchObject({
       code: 'ENOENT',
     })
   })
@@ -223,9 +227,10 @@ test.suite('File rename', { config: './config.ts' }, () => {
       where: { id: { equals: created.id } },
     })
     const secondKey = stored!._managedFiles[1]!.key
+    const oldStem = path.parse(stored!.filename).name
     const target = path.join(
       transformedMediaDir,
-      path.basename(secondKey).replace(/^source/, 'blocked'),
+      path.basename(secondKey).replace(oldStem, 'blocked'),
     )
     await writeFile(target, Buffer.from('collision'))
 
@@ -243,7 +248,7 @@ test.suite('File rename', { config: './config.ts' }, () => {
     expect(await readFile(path.join(transformedMediaDir, stored!.filename))).toEqual(bytes)
     const firstTarget = path.join(
       transformedMediaDir,
-      path.basename(stored!._managedFiles[0]!.key).replace(/^source/, 'blocked'),
+      path.basename(stored!._managedFiles[0]!.key).replace(oldStem, 'blocked'),
     )
     await expect(readFile(firstTarget)).rejects.toMatchObject({ code: 'ENOENT' })
   })
@@ -359,7 +364,7 @@ test.suite('File rename', { config: './config.ts' }, () => {
 
     expect(gqlBody.errors).toBeUndefined()
     expect(gqlBody.data?.renameFileFileVersionedDraftMedia.filename).toBe('graphql-draft.png')
-    expect((published as { filename?: string } | null)?.filename).toBe('published.png')
+    expect((published as { filename?: string } | null)?.filename).toBe(created.filename)
   })
 
   test('should enforce update access through all three rename APIs', async ({
@@ -394,7 +399,7 @@ test.suite('File rename', { config: './config.ts' }, () => {
       })
       const gqlBody = (await gql.json()) as { errors?: { message: string }[] }
       expect(gqlBody.errors?.length).toBeGreaterThan(0)
-      expect(await readFile(path.join(mediaDir, 'protected.png'))).toEqual(bytes)
+      expect(await readFile(path.join(mediaDir, created.filename!))).toEqual(bytes)
     } finally {
       collection.config.access.update = previousAccess
     }

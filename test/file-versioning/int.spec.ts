@@ -92,7 +92,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     const created = await payload.create({
       collection: mediaSlug,
       data: { alt: 'uploaded' },
-      file: { name: 'photo.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+      file: { name: 'photo-1.png', data: bytes, mimetype: 'image/png', size: bytes.length },
     })
     const stored = await payload.findByID({
       id: created.id,
@@ -104,11 +104,16 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       where: { id: { equals: created.id } },
     })
 
+    expect(created.filename).toBe('photo-1-original.png')
     expect(stored.original).toMatchObject({
-      filename: created.filename,
+      filename: 'photo-1-original.png',
       filesize: bytes.length,
       mimeType: 'image/png',
     })
+    expect(created.original?.url).toBe(created.url)
+    expect(new URL(created.original!.url!, 'http://localhost').searchParams.has('original')).toBe(
+      false,
+    )
     expect(stored._managedFiles).toEqual([
       {
         key: created.filename,
@@ -125,6 +130,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
 
     expect(versions[0]?.version.original).toMatchObject(persisted?.original)
     expect(versions[0]?.version._managedFiles).toEqual(persisted?._managedFiles)
+    expect(await readdir(mediaDir)).toEqual(['photo-1-original.png'])
     expect(await readFile(path.join(mediaDir, created.filename!))).toEqual(bytes)
   })
 
@@ -167,9 +173,9 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
   test('should retain PDFs and videos without duplicating their source object', async ({
     payload,
   }) => {
-    for (const [fixture, mimetype, name] of [
-      [pdfFixture, 'application/pdf', 'document.pdf'],
-      [videoFixture, 'video/mp4', 'clip.mp4'],
+    for (const [fixture, mimetype, name, expectedFilename] of [
+      [pdfFixture, 'application/pdf', 'document.pdf', 'document-original.pdf'],
+      [videoFixture, 'video/mp4', 'clip.mp4', 'clip-original.mp4'],
     ]) {
       const bytes = await readFile(fixture)
       const created = await payload.create({
@@ -182,6 +188,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
         where: { id: { equals: created.id } },
       })
 
+      expect(stored?.filename).toBe(expectedFilename)
       expect(stored?.original?.filename).toBe(stored?.filename)
       expect(stored?._managedFiles).toEqual([
         {
@@ -493,9 +500,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       } as never,
     })
 
-    const readOriginal = { ...original, url: `${original.url}?original=true` }
-
-    expect(updated.original).toMatchObject(readOriginal)
+    expect(updated.original).toMatchObject(original)
     expect(updated._managedFiles).toBeUndefined()
 
     const internal = await payload.findByID({
@@ -511,7 +516,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       where: { parent: { equals: created.id } },
     })
 
-    expect(versions[0]?.version.original).toMatchObject(readOriginal)
+    expect(versions[0]?.version.original).toMatchObject(original)
     expect(versions[0]?.version._managedFiles).toEqual(managedFiles)
   })
 
@@ -756,7 +761,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     expect(Buffer.from(await response.arrayBuffer()).equals(bytes)).toBe(true)
   })
 
-  test('should distinguish a shared original URL from a dynamic top-level URL', async ({
+  test('should serve a shared original URL without a query parameter', async ({
     payload,
     restClient,
   }) => {
@@ -768,10 +773,9 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     })
     const originalURL = new URL(created.original!.url!, 'http://localhost')
 
-    expect(originalURL.searchParams.get('original')).toBe('true')
-    const response = await restClient.GET(
-      `/${mediaSlug}/file/${created.original!.filename}?original=true&width=40`,
-    )
+    expect(originalURL.searchParams.has('original')).toBe(false)
+    expect(created.original?.url).toBe(created.url)
+    const response = await restClient.GET(`/${mediaSlug}/file/${created.original!.filename}`)
 
     expect(response.status).toBe(200)
     expect(Buffer.from(await response.arrayBuffer()).equals(bytes)).toBe(true)
@@ -1686,7 +1690,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       filename: 'legacy.png',
       filesize: legacy.filesize,
       mimeType: 'image/png',
-      url: `/api/${mediaSlug}/file/legacy.png?original=true`,
+      url: `/api/${mediaSlug}/file/legacy.png`,
     })
     expect(read._managedFiles).toEqual([
       {

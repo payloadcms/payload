@@ -1,7 +1,6 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Config } from '../config/types.js'
 import type { Field } from '../fields/config/types.js'
-import type { PayloadRequest } from '../types/index.js'
 import type { SanitizedUploadConfig } from './types.js'
 
 import { managedFileManifestJSONSchema } from './fileVersioning/manifestJSONSchema.js'
@@ -187,7 +186,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
           hooks: {
             afterRead: [
               ({ data, originalDoc, req, value }) => {
-                const fileURL = generateFilePathOrURL({
+                return generateFilePathOrURL({
                   collectionSlug: collection.slug,
                   config,
                   filename: data?.original?.filename || originalDoc?.original?.filename,
@@ -195,13 +194,11 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
                   serverURL: req.payload.config.serverURL,
                   urlOrPath: value,
                 })
-
-                return markRawOriginalURL({ fileURL, req })
               },
             ],
             beforeChange: [
               ({ data, originalDoc, req, value }) => {
-                const fileURL = generateFilePathOrURL({
+                return generateFilePathOrURL({
                   collectionSlug: collection.slug,
                   config,
                   filename: data?.original?.filename || originalDoc?.original?.filename,
@@ -209,8 +206,6 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
                   serverURL: req.payload.config.serverURL,
                   urlOrPath: value,
                 })
-
-                return markRawOriginalURL({ fileURL, req })
               },
             ],
           },
@@ -353,24 +348,4 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     ])
   }
   return uploadFields
-}
-
-const markRawOriginalURL = ({
-  fileURL,
-  req,
-}: {
-  fileURL: null | string
-  req: PayloadRequest
-}): null | string => {
-  const serverURL = req.payload.config.serverURL
-
-  if (
-    !fileURL ||
-    req.payload.config.upload.transformers.length === 0 ||
-    (!fileURL.startsWith('/') && !(serverURL && fileURL.startsWith(serverURL)))
-  ) {
-    return fileURL
-  }
-
-  return `${fileURL}${fileURL.includes('?') ? '&' : '?'}original=true`
 }
