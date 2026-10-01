@@ -91,7 +91,18 @@ export function DefaultListView(props: ListViewClientProps) {
     getEntityConfig,
   } = useConfig()
 
-  const { data, hasActiveFilters, isGroupingBy, query } = useListQuery()
+  const {
+    data,
+    hasActiveFilters,
+    isGroupingBy,
+    query,
+    resolvedGroupBy,
+    resolvedSearch,
+    searchInput,
+  } = useListQuery()
+
+  const previousSearch = useRef(resolvedSearch || '')
+  const searchChangeResults = useRef<unknown>(null)
   const isDataGrouped = groupedData !== undefined
 
   const hasWhereParam = useRef(Boolean(query?.where))
@@ -130,6 +141,56 @@ export function DefaultListView(props: ListViewClientProps) {
   const isTrashEnabled = Boolean(collectionConfig.trash)
 
   const { i18n } = useTranslation()
+  const previousResults = useRef(data)
+  const [resultsAnnouncement, setResultsAnnouncement] = useState('')
+
+  const isSearchSettled =
+    (searchInput || '') === (resolvedSearch || '') &&
+    (query?.search || '') === (resolvedSearch || '') &&
+    (query?.groupBy || '') === (resolvedGroupBy || '')
+
+  useEffect(() => {
+    setResultsAnnouncement('')
+    if (previousSearch.current !== (resolvedSearch || '')) {
+      previousSearch.current = resolvedSearch || ''
+      searchChangeResults.current = data
+    }
+    const hasCompletedSearch = searchChangeResults.current === data
+
+    if (!isSearchSettled || !data || (!hasCompletedSearch && previousResults.current === data)) {
+      return
+    }
+
+    const announcement = hasCompletedSearch
+      ? i18n.t(
+          resolvedSearch
+            ? resolvedGroupBy
+              ? 'general:searchGroups'
+              : 'general:searchResults'
+            : 'general:searchCleared',
+          { count: data.totalDocs, search: resolvedSearch },
+        )
+      : `${data.totalDocs} ${getTranslation(
+          data.totalDocs === 1 ? labels.singular : labels.plural,
+          i18n,
+        )}`
+
+    const timeout = setTimeout(() => {
+      setResultsAnnouncement(announcement)
+      previousResults.current = data
+    }, 500)
+
+    return () => clearTimeout(timeout)
+  }, [
+    data,
+    i18n,
+    isSearchSettled,
+    labels.plural,
+    labels.singular,
+    resolvedGroupBy,
+    resolvedSearch,
+    searchInput,
+  ])
 
   const collectionLabel = getTranslation(labels?.plural, i18n)
 
@@ -206,7 +267,12 @@ export function DefaultListView(props: ListViewClientProps) {
   ])
 
   return (
-    <TableIdentityProvider collectionSlug={collectionSlug}>
+    <TableIdentityProvider
+      collectionSlug={collectionSlug}
+      navigationLabel={
+        !isInDrawer && !hierarchyData && !collectionConfig.orderable ? collectionLabel : undefined
+      }
+    >
       <Fragment>
         <TableColumnsProvider collectionSlug={collectionSlug} columnState={columnState}>
           <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
@@ -280,6 +346,15 @@ export function DefaultListView(props: ListViewClientProps) {
                   resolvedFilterOptions={resolvedFilterOptions}
                 />
               )}
+              <div
+                aria-atomic="true"
+                className={`${baseClass}__search-status sr-only`}
+                role="status"
+              >
+                {isSearchSettled && resultsAnnouncement && (
+                  <span key={resolvedSearch || ''}>{resultsAnnouncement}</span>
+                )}
+              </div>
               {BeforeListTable}
               {hierarchyData ? (
                 <DocumentSelectionProvider

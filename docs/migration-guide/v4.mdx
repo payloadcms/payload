@@ -512,6 +512,52 @@ Several types and utilities that were re-exported from `@payloadcms/ui` and `@pa
 
 Running `npx @payloadcms/codemod --transform migrate-aliased-exports` preserves old local bindings by importing renamed symbols with an `as` alias (e.g. `import type { CollectionPreferences as ListPreferences } from 'payload'` or `import { createPayloadRequestFromWebRequest as createPayloadRequest } from 'payload'`). Run `migrate-payload-request-creation` to complete the request helper's identifier and call-site migration, or drop the other aliases and rename their usages manually if you want to fully commit to the new names.
 
+### Field component types replaced by props types
+
+Field component aliases that wrapped props in `React.ComponentType<Props>` have been removed. Import the props type directly so each component can use `React.FC<Props>` or a function declaration.
+
+```diff
+- import type { TextFieldClientComponent } from 'payload'
++ import type { TextFieldClientProps } from 'payload'
++ import type React from 'react'
+
+- export const CustomTextField: TextFieldClientComponent = (props) => {
++ export const CustomTextField: React.FC<TextFieldClientProps> = (props) => {
+    // ...
+  }
+```
+
+Generic type arguments move to the props type:
+
+```diff
+- import type { FieldErrorClientComponent, TextFieldClient } from 'payload'
++ import type { FieldErrorClientProps, TextFieldClient } from 'payload'
++ import type React from 'react'
+
+- const Error: FieldErrorClientComponent<TextFieldClient> = (props) => null
++ const Error: React.FC<FieldErrorClientProps<TextFieldClient>> = (props) => null
+```
+
+Function declarations can annotate their parameter without a component wrapper:
+
+```tsx
+import type { TextFieldServerProps } from 'payload'
+
+export default async function CustomTextField(props: TextFieldServerProps) {
+  // ...
+}
+```
+
+This covers main field components, labels, descriptions, errors, diffs, and block row labels. Admin-view types such as `AdminViewComponent` and `DocumentTabComponent` are separate.
+
+#### Codemod
+
+To migrate automatically, there's a codemod for this change available by running:
+
+```bash
+npx @payloadcms/codemod --transform migrate-field-component-types
+```
+
 ### `DefaultValue` function variant is now typed to allow returning a `Promise` ([#17522](https://github.com/payloadcms/payload/pull/17522))
 
 The exported `DefaultValue` type's function variant previously declared a synchronous-only return type (`SerializableValue`), even though Payload has always awaited the result of a `defaultValue` function at runtime. The type now correctly reflects this and allows `Promise<SerializableValue> | SerializableValue`.
@@ -1041,9 +1087,9 @@ The deprecated `isHTMLElement` utility has been removed from `@payloadcms/richte
 
 `lexical`'s built-in `isHTMLElement` is the canonical implementation and narrows against the node's owning-document `HTMLElement`, so it is also safe across iframes and other realms.
 
-### Lexical: vendored `@lexical/markdown` fork removed and lexical upgraded to `0.50.0`
+### Lexical: vendored `@lexical/markdown` fork removed and lexical upgraded to `0.52.0`
 
-`@payloadcms/richtext-lexical` no longer ships a vendored copy of `@lexical/markdown`. The package is now a direct dependency, every `@lexical/*` package was upgraded from `0.41.0` to `0.50.0`, and `@payloadcms/richtext-lexical/lexical/markdown` is a pure passthrough of `@lexical/markdown`.
+`@payloadcms/richtext-lexical` no longer ships a vendored copy of `@lexical/markdown`. The package is now a direct dependency, every `@lexical/*` package was upgraded from `0.41.0` to `0.52.0`, and `@payloadcms/richtext-lexical/lexical/markdown` is a pure passthrough of `@lexical/markdown`.
 
 Most projects use markdown through the editor or through `convertMarkdownToLexical` / `convertLexicalToMarkdown` and need no changes. You are only affected if you import from `@payloadcms/richtext-lexical/lexical/markdown` directly.
 
@@ -1067,7 +1113,16 @@ If you keep calling `$convertFromMarkdownString` directly, pass `editorConfig.fe
 
 **Whitespace-only markdown table cells now import as an empty paragraph** instead of a text node of padding spaces. This comes from the lexical upgrade, not Payload's own code. No action is required unless you assert on those padding spaces in stored content.
 
-If you import lexical APIs directly through `@payloadcms/richtext-lexical/lexical/*`, also review the [lexical breaking changes](https://github.com/facebook/lexical/releases) between `0.41.0` and `0.50.0`. None of them require action for typical Payload usage.
+If you import lexical APIs directly through `@payloadcms/richtext-lexical/lexical/*`, also review the [lexical breaking changes](https://github.com/facebook/lexical/releases) between `0.41.0` and `0.52.0`. None of them require action for typical Payload usage.
+
+If your app imports Lexical types or adds custom features, check these changes from `0.50.0`. They also apply to imports through `@payloadcms/richtext-lexical/lexical` and its subpaths:
+
+- Lexical packages are ESM only. Use ESM imports; CommonJS `require()` needs Node.js 20.19 or later.
+- `SELECTION_CHANGE_COMMAND` now runs before DOM reconciliation. Defer DOM lookups and floating UI positioning with `$onUpdate(() => editor.read('latest', callback))`, or use an update listener for work that should run after every commit.
+- Call `node.getLatest().exportJSON()` when serializing a node reference retained across an update. Payload continues to write the full JSON format; compact export is not enabled.
+- `SerializedEditorState<T>`, `SerializedElementNode<T>`, and `SerializedRootNode<T>` no longer accept a type argument. Remove `<T>` if you only need the base node type. For a document with your own node types, use Payload's `TypedEditorState<T>` instead. Without a type argument, Lexical's `children` are still typed as `SerializedLexicalNode[]`.
+- `ReturnType<Node['exportJSON']>` can now infer partial JSON, making fields such as `version` and `url` optional. If your code expects the full format, use the node's explicit serialized type, such as `SerializedLinkNode`. A normal `node.exportJSON()` call still returns the full format.
+- `LexicalNode.getCommonAncestor` was removed. Use `$getCommonAncestor(a, b)?.commonAncestor ?? null`; pass the parents of non-element nodes if you need the old method's behavior.
 
 ### Lexical: `EXPERIMENTAL_TableFeature` renamed to `TableFeature`
 

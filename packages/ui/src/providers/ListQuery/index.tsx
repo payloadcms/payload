@@ -55,6 +55,8 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     }
   })
 
+  const [searchInput, setSearchInput] = useState(query?.search || '')
+
   const refineListData = useCallback(
     // eslint-disable-next-line @typescript-eslint/require-await
     async (incomingQuery: ListQuery, modified?: boolean) => {
@@ -209,7 +211,11 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         orderableFieldName,
         query,
         refineListData,
+        resolvedGroupBy: queryFromProps?.groupBy,
+        resolvedSearch: queryFromProps?.search,
+        searchInput,
         setModified,
+        setSearchInput,
         ...contextRef.current,
       }}
     >

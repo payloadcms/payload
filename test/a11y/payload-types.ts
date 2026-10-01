@@ -62,30 +62,60 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_9EE25F58".
+ * via the `definition` "LexicalNodes_B836F062".
  */
-export type LexicalNodes_9EE25F58 =
+export type LexicalNodes_B836F062 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_9EE25F58>
+  | SerializedParagraphNode<LexicalNodes_B836F062>
+  | SerializedBlockNode<Callout | NoHandle>
+  | SerializedTableNode<LexicalNodes_B836F062>
+  | SerializedTableCellNode<LexicalNodes_B836F062>
+  | SerializedTableRowNode<LexicalNodes_B836F062>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_9EE25F58>
+  | SerializedQuoteNode<LexicalNodes_B836F062>
   | SerializedRelationshipNode<
+      | 'users'
       | 'payload-folders'
       | 'posts'
       | 'payload-kv'
-      | 'users'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_9EE25F58, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_9EE25F58, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_9EE25F58>
-  | SerializedListItemNode<LexicalNodes_9EE25F58>
-  | SerializedHeadingNode<LexicalNodes_9EE25F58>;
+  | SerializedAutoLinkNode<LexicalNodes_B836F062, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_B836F062, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_B836F062>
+  | SerializedListItemNode<LexicalNodes_B836F062>
+  | SerializedHeadingNode<LexicalNodes_B836F062>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_404F6FF7".
+ */
+export type LexicalNodes_404F6FF7 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_404F6FF7>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'media'>
+  | SerializedQuoteNode<LexicalNodes_404F6FF7>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'payload-folders'
+      | 'posts'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_404F6FF7, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_404F6FF7, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_404F6FF7>
+  | SerializedListItemNode<LexicalNodes_404F6FF7>
+  | SerializedHeadingNode<LexicalNodes_404F6FF7>;
 
 export interface Config {
   auth: {
@@ -93,11 +123,11 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    users: User;
     'payload-folders': PayloadFolder;
     posts: Post;
     media: Media;
     'payload-kv': PayloadKv;
-    users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -108,11 +138,11 @@ export interface Config {
     };
   };
   collectionsSelect: {
+    users: UsersSelect<false> | UsersSelect<true>;
     'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
-    users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -159,12 +189,57 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  apiKey?: string | null;
+  apiKeyLast4?: string | null;
+  apiKeyIndex?: string | null;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-folders".
  */
 export interface PayloadFolder {
   id: string;
   '_h_payload-folders'?: (string | null) | PayloadFolder;
   name: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _h_slugPath?: string | null;
@@ -190,17 +265,18 @@ export interface PayloadFolder {
  */
 export interface Post {
   id: string;
-  title?: string | null;
+  title: string;
   /**
    * A subtitle field to test focus indicators in the admin UI, helps us detect exiting out of rich text editor properly.
    */
   subtitle?: string | null;
-  accessibilitySelect?: ('one' | 'two') | null;
+  accessibilitySelect: 'one' | 'two';
   accessibilitySortableSelect?: ('one' | 'two')[] | null;
   accessibilityDisabledSelect?: ('one' | 'two') | null;
+  requiredTags: string[];
   relatedPost?: (string | null) | Post;
   publishedOn?: string | null;
-  content?: LexicalRichText<LexicalNodes_9EE25F58> | null;
+  content?: LexicalRichText<LexicalNodes_B836F062> | null;
   items?:
     | {
         label?: string | null;
@@ -210,6 +286,40 @@ export interface Post {
     | null;
   layout?: (TextBlock | ImageBlock)[] | null;
   '_h_payload-folders'?: (string | null) | PayloadFolder;
+  featuredImage?: (string | null) | Media;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  location?: [number, number] | null;
+  settings?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  source?: string | null;
+  unlabelledSettings?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  unlabelledSource?: string | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -220,6 +330,7 @@ export interface Post {
  * via the `definition` "TextBlock".
  */
 export interface TextBlock {
+  body?: LexicalRichText<LexicalNodes_404F6FF7> | null;
   text?: string | null;
   date?: string | null;
   id?: string | null;
@@ -242,6 +353,15 @@ export interface ImageBlock {
  */
 export interface Media {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  alt: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -299,37 +419,15 @@ export interface PayloadKv {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  resetPasswordRequestedAt?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
   id: string;
   document?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
     | ({
         relationTo: 'payload-folders';
         value: string | PayloadFolder;
@@ -341,10 +439,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -390,11 +484,41 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  apiKey?: T;
+  apiKeyLast4?: T;
+  apiKeyIndex?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  resetPasswordRequestedAt?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-folders_select".
  */
 export interface PayloadFoldersSelect<T extends boolean = true> {
   '_h_payload-folders'?: T;
   name?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _h_slugPath?: T;
@@ -411,6 +535,7 @@ export interface PostsSelect<T extends boolean = true> {
   accessibilitySelect?: T;
   accessibilitySortableSelect?: T;
   accessibilityDisabledSelect?: T;
+  requiredTags?: T;
   relatedPost?: T;
   publishedOn?: T;
   content?: T;
@@ -427,6 +552,7 @@ export interface PostsSelect<T extends boolean = true> {
         textBlock?:
           | T
           | {
+              body?: T;
               text?: T;
               date?: T;
               id?: T;
@@ -441,6 +567,14 @@ export interface PostsSelect<T extends boolean = true> {
             };
       };
   '_h_payload-folders'?: T;
+  featuredImage?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  location?: T;
+  settings?: T;
+  source?: T;
+  unlabelledSettings?: T;
+  unlabelledSource?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -451,6 +585,9 @@ export interface PostsSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
+  alt?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -507,29 +644,6 @@ export interface PayloadKvSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_select".
- */
-export interface UsersSelect<T extends boolean = true> {
-  updatedAt?: T;
-  createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  resetPasswordRequestedAt?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
-  sessions?:
-    | T
-    | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
-      };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
@@ -567,6 +681,14 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface Menu {
   id: string;
   globalText?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -576,6 +698,8 @@ export interface Menu {
  */
 export interface MenuSelect<T extends boolean = true> {
   globalText?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -597,7 +721,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'payload-folders' | 'posts' | 'media' | 'users';
+    relatedCollection: 'users' | 'payload-folders' | 'posts' | 'media';
     where?:
       | {
           [k: string]: unknown;
@@ -619,9 +743,28 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('payload-folders' | 'posts' | 'media' | 'users')[] | null;
+    excludedCollections?: ('users' | 'payload-folders' | 'posts' | 'media')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Callout".
+ */
+export interface Callout {
+  id: string;
+  blockType: 'callout';
+  text?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NoHandle".
+ */
+export interface NoHandle {
+  id: string;
+  blockType: 'noHandle';
+  blockName?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -676,6 +819,39 @@ export interface SerializedParagraphNode<TChildren> extends SerializedLexicalEle
   type: 'paragraph';
   textFormat: number;
   textStyle: string;
+}
+
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'block';
+  format: LexicalElementFormat;
+  version: number;
+  fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'inlineBlock';
+  version: number;
+  fields: { id: string } & Omit<TFields, 'id'>;
+} : never;
+
+export interface SerializedTableNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'table';
+  colWidths?: number[];
+  frozenColumnCount?: number;
+  frozenRowCount?: number;
+  rowStriping?: boolean;
+}
+export interface SerializedTableRowNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'tablerow';
+  height?: number;
+}
+export interface SerializedTableCellNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'tablecell';
+  backgroundColor?: string | null;
+  colSpan?: number;
+  headerState: number;
+  rowSpan?: number;
+  verticalAlign?: string;
+  width?: number;
 }
 
 export interface SerializedHorizontalRuleNode {

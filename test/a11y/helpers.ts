@@ -2,16 +2,21 @@ import type { ScreenReaderPlaywright } from '@guidepup/playwright'
 import type { Browser, Locator, Page, TestInfo } from '@playwright/test'
 
 import { expect } from '@playwright/test'
+import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { formatAdminURL } from 'payload/shared'
 
 import { addBlock } from '../__helpers/e2e/fields/blocks/index.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
 import { openLocaleSelector, waitForFormReady } from '../__helpers/e2e/helpers.js'
 import { toggleLivePreview } from '../__helpers/e2e/live-preview/toggleLivePreview.js'
+import { selectInput } from '../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/e2e/initPage.js'
+import { devUser } from '../credentials.js'
+import { DashboardHelper } from '../dashboard/utils.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -32,6 +37,12 @@ export async function openAccessibilityTestPage({
   const { serverURL } = await initPayloadE2ENoConfig({ dirname })
   const postsURL = new AdminUrlUtil(serverURL, 'posts')
   const context = await browser.newContext()
+  const loginResponse = await context.request.post(
+    formatAdminURL({ apiRoute: '/api', path: '/users/login', serverURL }),
+    { data: devUser },
+  )
+
+  expect(loginResponse.ok()).toBe(true)
   const { page } = await initPage({ context, serverURL })
   page.removeAllListeners('console')
 
@@ -156,6 +167,13 @@ export async function gotoCreatePost({ page, postsURL }: { page: Page; postsURL:
   await waitForFormReady(page)
 }
 
+export async function gotoLabelTestLogin({ page, serverURL }: { page: Page; serverURL: string }) {
+  await page.context().clearCookies()
+  await page.setExtraHTTPHeaders({ DisableAutologin: 'true' })
+  await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/login', serverURL }))
+  await expect(page.locator('input[name="password"]')).toBeVisible()
+}
+
 export async function gotoPostsList({ page, postsURL }: { page: Page; postsURL: AdminUrlUtil }) {
   await page.goto(postsURL.list)
   await expect(page.locator('tbody tr').first()).toBeVisible()
@@ -232,7 +250,7 @@ export async function openRichTextRelationshipDrawer({
   await gotoCreatePost({ page, postsURL })
   await page.locator('.rich-text-lexical .toolbar-popup__dropdown-add').click()
   await page.locator('.toolbar-popup__dropdown-item[data-item-key="relationship"]').click()
-  const drawer = page.locator('[id^="list-drawer_1_"]')
+  const drawer = page.locator('dialog[id^="list-drawer_1_"]')
   await expect(drawer).toBeVisible()
   return drawer
 }
@@ -315,16 +333,49 @@ export async function openVersionComparison({
   page,
   postsURL,
   serverURL,
+  versionIndex = 1,
 }: {
   page: Page
   postsURL: AdminUrlUtil
   serverURL: string
+  versionIndex?: number
 }) {
   await openVersionsList({ page, postsURL, serverURL })
-  const versionLink = page.locator('main.versions table tbody tr td a').nth(1)
+  const versionLink = page.locator('main.versions table tbody tr td a').nth(versionIndex)
   await expect(versionLink).toBeVisible()
   await versionLink.click()
   await expect(page.locator('.view-version')).toBeVisible()
+}
+
+export async function openTableColumns({ page, postsURL }: { page: Page; postsURL: AdminUrlUtil }) {
+  await gotoPostsList({ page, postsURL })
+  await page.getByRole('button', { name: 'Columns', exact: true }).click()
+  const columns = page.locator('.column-selector')
+
+  await expect(columns).toBeVisible()
+  return columns
+}
+
+export async function openTableVersionHistory({
+  kind,
+  page,
+  postsURL,
+  serverURL,
+}: {
+  kind: 'collection' | 'global'
+  page: Page
+  postsURL: AdminUrlUtil
+  serverURL: string
+}) {
+  if (kind === 'collection') {
+    await openVersionsList({ page, postsURL, serverURL })
+  } else {
+    await page.goto(
+      formatAdminURL({ adminRoute: '/admin', path: '/globals/menu/versions', serverURL }),
+    )
+    await expect(page.locator('main.versions table tbody tr').first()).toBeVisible()
+  }
+  return page.locator('main.versions')
 }
 
 export async function openLocaleOptions({
@@ -423,4 +474,213 @@ export async function expectPopupCursorToMove({
 
   expect.soft(capture.itemText).toMatch(expectedItem)
   await trigger.page().keyboard.press('Escape')
+}
+
+export async function openWidgetDrawer({ page, serverURL }: { page: Page; serverURL: string }) {
+  await page.goto(formatAdminURL({ adminRoute: '/admin', serverURL }))
+  await new DashboardHelper(page).setEditing()
+  const trigger = page.locator('.dashboard-breadcrumb-dropdown__actions button').first()
+
+  return { drawer: page.locator('dialog[id^="widgets-drawer-"]'), trigger }
+}
+
+export async function openRelationshipCreationDrawer({
+  page,
+  postsURL,
+}: {
+  page: Page
+  postsURL: AdminUrlUtil
+}) {
+  await gotoCreatePost({ page, postsURL })
+  await page.locator('#relatedPost-add-new button').press('Enter')
+  const drawer = page.locator('dialog[id^="doc-drawer_posts_"]')
+
+  await expect(drawer).toBeVisible()
+  await expect(drawer.locator('#field-title')).toBeVisible()
+  return drawer
+}
+
+export async function openRichTextUploadDrawer({
+  page,
+  postsURL,
+}: {
+  page: Page
+  postsURL: AdminUrlUtil
+}) {
+  await gotoCreatePost({ page, postsURL })
+  await page.locator('.rich-text-lexical .toolbar-popup__dropdown-add').click()
+  await page.locator('.toolbar-popup__dropdown-item[data-item-key="upload"]').press('Enter')
+  const drawer = page.locator('dialog[id^="list-drawer_1_"]')
+
+  await expect(drawer).toBeVisible()
+  return drawer
+}
+
+const mediaFixtures = new WeakMap<Page, string[]>()
+
+export async function cleanupModalMedia({ page }: { page: Page }) {
+  for (const url of mediaFixtures.get(page) || []) {
+    const response = await page.request.delete(url)
+
+    expect(response.ok(), 'Remove the temporary media document and its generated image files').toBe(
+      true,
+    )
+  }
+  mediaFixtures.delete(page)
+}
+
+export async function openEditImageDialog({ page, serverURL }: { page: Page; serverURL: string }) {
+  const mediaURL = new AdminUrlUtil(serverURL, 'media')
+  const apiURL = formatAdminURL({ apiRoute: '/api', path: '/media', serverURL })
+  const response = await page.request.post(apiURL, {
+    multipart: {
+      _payload: JSON.stringify({}),
+      file: {
+        name: 'modal-dialog-regression.png',
+        buffer: await readFile(path.resolve(dirname, '../uploads/image.png')),
+        mimeType: 'image/png',
+      },
+    },
+  })
+
+  expect(response.ok(), 'Create a persisted image so production crop controls are available').toBe(
+    true,
+  )
+  const { doc } = await response.json()
+
+  mediaFixtures.set(page, [...(mediaFixtures.get(page) || []), `${apiURL}/${doc.id}`])
+  await page.goto(mediaURL.edit(doc.id))
+  await waitForFormReady(page)
+  await page.getByRole('button', { name: /edit image/i }).click()
+  const dialog = page.locator('.edit-upload__dialog')
+
+  await expect(dialog).toBeVisible()
+  await expect(dialog.getByRole('button', { name: /apply changes/i })).toBeEnabled()
+  return dialog
+}
+
+export async function openBulkUploadDialog({ page, serverURL }: { page: Page; serverURL: string }) {
+  const mediaURL = new AdminUrlUtil(serverURL, 'media')
+
+  await page.goto(mediaURL.list)
+  await page.getByRole('button', { name: /bulk upload/i }).click()
+  const dialog = page.locator('.bulk-upload--add-files')
+
+  await expect(dialog).toBeVisible()
+  return dialog
+}
+
+export async function openAPIKeyDialog({ page, serverURL }: { page: Page; serverURL: string }) {
+  await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/account', serverURL }))
+  await waitForFormReady(page)
+  await page.locator('#regenerate-api-key').click()
+  const dialog = page.locator('dialog[id^="generate-confirmation-"]')
+
+  await expect(dialog).toBeVisible()
+  return dialog
+}
+
+export async function openDrawerFilters({
+  collectionLabel,
+  drawer,
+}: {
+  collectionLabel?: string
+  drawer: Locator
+}) {
+  if (collectionLabel) {
+    await selectInput({
+      multiSelect: false,
+      option: collectionLabel,
+      page: drawer.page(),
+      selectLocator: drawer.locator('.list-drawer__select-collection-wrap'),
+    })
+    await expect(
+      drawer.locator('.list-drawer__select-collection-wrap .rs__single-value'),
+    ).toHaveText(collectionLabel)
+    if (collectionLabel === 'Post') {
+      await expect(drawer.locator('.collection-list--posts')).toBeVisible()
+    }
+  }
+  const drawerSelector = `dialog[id=${JSON.stringify(await drawer.getAttribute('id'))}]`
+  const { filterContainer: filters } = await openListFilters(drawer.page(), {
+    filterContainerSelector: `${drawerSelector} .where-builder`,
+    togglerSelector: `${drawerSelector} #toggle-list-filters`,
+  })
+  const comboboxes = filters.getByRole('combobox', { name: /^(Field|Filter)$/ })
+
+  if ((await comboboxes.count()) === 0) {
+    await filters.getByRole('button', { name: /add filter/i }).click()
+  }
+  await expect(comboboxes).toHaveCount(2)
+  return comboboxes
+}
+
+export async function openDashboardEditor({ page, serverURL }: { page: Page; serverURL: string }) {
+  await page.goto(formatAdminURL({ adminRoute: '/admin', serverURL }))
+  const trigger = page.locator('.dashboard-breadcrumb-dropdown .popup__trigger-wrap button')
+
+  await trigger.focus()
+  await trigger.press('Enter')
+  await page.getByRole('menuitem', { name: 'Edit Dashboard', exact: true }).press('Enter')
+  await expect(page.locator('.modular-dashboard.editing')).toBeVisible()
+  return page.locator('.dashboard-breadcrumb-dropdown__editing')
+}
+
+export async function addCollectionQueryWidget({ page }: { page: Page }) {
+  const widgets = page.locator('.widget[data-slug^="collection-query-"]')
+  const previousCount = await widgets.count()
+  const add = page
+    .locator('.dashboard-breadcrumb-dropdown__actions')
+    .getByRole('button', { name: 'Add +', exact: true })
+
+  await add.press('Enter')
+  const drawer = page.locator('dialog[id^="widgets-drawer-"]')
+  await expect(drawer).toBeVisible()
+  await drawer.getByRole('button', { name: /collection query/i }).press('Enter')
+  await expect(drawer).toBeHidden()
+  await expect(widgets).toHaveCount(previousCount + 1)
+  await expect(widgets.last().locator('.collection-query-widget')).toBeVisible()
+  await expect(widgets.last().locator('.draggable')).toBeFocused()
+  return widgets.last()
+}
+
+export async function insertTextBlockWithKeyboard({ page }: { page: Page }) {
+  const trigger = page.locator('#field-layout > .blocks-field__drawer-toggler')
+
+  await trigger.press('Enter')
+  const drawer = page.locator('[id^="drawer_1_blocks-drawer-"]')
+  await expect(drawer).toBeVisible()
+  await drawer.getByRole('button', { name: 'Text block', exact: true }).press('Enter')
+  await drawer.getByRole('button', { name: 'Insert', exact: true }).press('Enter')
+  await expect(drawer).toBeHidden()
+  const row = page.locator('#field-layout .blocks-field__row').last()
+  await expect(row).toBeVisible()
+  return row
+}
+
+export async function expectPaintedFocus({ page }: { page: Page }) {
+  const focused = page.locator(':focus')
+
+  await expect(focused).toBeVisible()
+  await expect
+    .poll(() =>
+      focused.evaluate((element) => {
+        for (let node: Element | null = element; node; node = node.parentElement) {
+          const style = getComputedStyle(node)
+          if (Number(style.opacity) === 0 || style.visibility === 'hidden') {
+            return false
+          }
+        }
+        const rect = element.getBoundingClientRect()
+        return (
+          rect.width > 0 &&
+          rect.height > 0 &&
+          rect.bottom > 0 &&
+          rect.right > 0 &&
+          rect.top < innerHeight &&
+          rect.left < innerWidth
+        )
+      }),
+    )
+    .toBe(true)
 }

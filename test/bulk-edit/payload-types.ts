@@ -182,61 +182,6 @@ export interface TextBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tabs".
- */
-export interface Tab {
-  id: string;
-  title?: string | null;
-  noLabelText?: string | null;
-  tabTab?: {
-    tabText?: string | null;
-    tabTabArray?:
-      | {
-          tabTabArrayText?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  noLabelGroup?: {
-    rowText?: string | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "restricted-tabs".
- */
-export interface RestrictedTab {
-  id: string;
-  title?: string | null;
-  noUpdate?: string | null;
-  namedTab?: {
-    namedTabText?: string | null;
-    namedTabNoUpdate?: string | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv".
- */
-export interface PayloadKv {
-  id: string;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -256,6 +201,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -309,6 +255,7 @@ export interface RestrictedTab {
   noUpdate?: string | null;
   namedTab?: {
     namedTabText?: string | null;
+    namedTabNoUpdate?: string | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -329,14 +276,6 @@ export interface PayloadKv {
     | number
     | boolean
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -494,21 +433,6 @@ export interface RestrictedTabsSelect<T extends boolean = true> {
     | T
     | {
         namedTabText?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "restricted-tabs_select".
- */
-export interface RestrictedTabsSelect<T extends boolean = true> {
-  title?: T;
-  noUpdate?: T;
-  namedTab?:
-    | T
-    | {
-        namedTabText?: T;
         namedTabNoUpdate?: T;
       };
   updatedAt?: T;
@@ -521,8 +445,6 @@ export interface RestrictedTabsSelect<T extends boolean = true> {
 export interface PayloadKvSelect<T extends boolean = true> {
   key?: T;
   data?: T;
-  createdBy?: T;
-  updatedBy?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -538,6 +460,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -633,6 +556,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

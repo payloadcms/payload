@@ -79,6 +79,7 @@
   }
 
   .edit-upload__section-title {
+    margin: 0;
     font-family: var(--text-body-medium-strong-font-family);
     font-size: var(--text-body-medium-strong-font-size);
     font-weight: var(--text-body-medium-strong-font-weight);
