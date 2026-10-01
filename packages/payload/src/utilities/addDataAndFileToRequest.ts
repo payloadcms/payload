@@ -1,5 +1,6 @@
 import type { PayloadRequest } from '../types/index.js'
 import type { ClientUploadData } from '../uploads/getFileFromClientUpload.js'
+import type { ClientUploadState } from '../uploads/types.js'
 
 import { APIError } from '../errors/APIError.js'
 import { verifyClientUploadReceipt } from '../uploads/clientUploadReceipt.js'
@@ -81,6 +82,8 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
           throw new APIError('Invalid upload collection.', 400)
         }
 
+        let clientUpload: ClientUploadState | undefined
+
         if (uploadConfig.requiresClientUploadReceipt) {
           const clientUploadContext = clientUploadFile.clientUploadContext
 
@@ -102,6 +105,7 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
             throw new APIError('Client upload reference does not match this request.', 400)
           }
 
+          clientUpload = { isProcessed: false, originalStorageFilePath: receipt.storageFilePath }
           clientUploadFile.clientUploadContext = receipt.context
         }
 
@@ -110,6 +114,7 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
           file: { ...clientUploadFile, collectionSlug },
           req,
         })
+        req.file.clientUpload = clientUpload
       }
     }
   }

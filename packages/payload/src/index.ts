@@ -1798,7 +1798,7 @@ export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
-
+export type { ClientUploadState } from './uploads/types.js'
 export type * from './uploads/types.js'
 export { unlinkClientUploadTempFile } from './uploads/unlinkClientUploadTempFile.js'
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
