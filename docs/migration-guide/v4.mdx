@@ -24,7 +24,7 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 ### Strict draft types are always enabled
 
-The `typescript.strictDraftTypes` option has been removed. Remove it from your config and regenerate your types with `payload generate:types`.
+The `typescript.strictDraftTypes` option has been removed. Remove it from your config and regenerate your types with `payload generate:types`. The `remove-strict-draft-types` transform in `@payloadcms/codemod` removes the option from inline config objects automatically.
 
 Local API draft reads (`find`, `findByID`, and `findGlobal` with `draft: true`) now type required fields as optional because drafts can skip validation. Check that a field is present before using it:
 
