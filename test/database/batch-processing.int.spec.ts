@@ -1,3 +1,5 @@
+/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options"] }] -- Tests use the shared fixture wrapper. */
+
 import type { PayloadRequest } from 'payload'
 
 import { commitTransaction, createPayloadRequest, initTransaction, killTransaction } from 'payload'
@@ -105,6 +107,49 @@ test.suite('Database batch processing', { config: './config.ts' }, () => {
       'updated in batch',
     ])
     expect(req.transactionID).toBeUndefined()
+  })
+
+  test('should continue after a failed operation when requested', async ({ payload }) => {
+    const existing = await payload.create({
+      collection: postsSlug,
+      data: { title: 'existing batch post' },
+      overrideAccess: true,
+    })
+    const req = { payload } as PayloadRequest
+
+    const results = await payload.db.batchProcessing({
+      batchSize: 1,
+      operations: [
+        {
+          args: {
+            collection: postsSlug,
+            customID: existing.id,
+            data: { title: 'duplicate batch post' },
+          },
+          operation: 'create',
+        },
+        {
+          args: {
+            collection: postsSlug,
+            data: { title: 'continued batch post' },
+          },
+          operation: 'create',
+        },
+      ],
+      req,
+      shouldContinueOnError: true,
+    })
+
+    expect(results[0]).toMatchObject({ index: 0, operation: 'create', status: 'failed' })
+    expect(results[1]).toMatchObject({ index: 1, operation: 'create', status: 'succeeded' })
+
+    const storedPosts = await payload.find({
+      collection: postsSlug,
+      overrideAccess: true,
+      where: { title: { equals: 'continued batch post' } },
+    })
+
+    expect(storedPosts.docs).toHaveLength(1)
   })
 
   test.options(

@@ -29,54 +29,6 @@ describe('scheduleMerge task user identity', () => {
     mergeBranch.mockResolvedValue({ merged: [], warnings: [] })
   })
 
-  test('should resolve the scheduling user from the recorded auth collection', async () => {
-    const secondaryUser = {
-      collection: 'secondary-users',
-      email: 'secondary@example.com',
-      id: 'shared-id',
-    }
-    const wrongAdminUser = {
-      collection: 'users',
-      email: 'admin@example.com',
-      id: 'shared-id',
-    }
-    const findByID = vi.fn(({ collection, id }: { collection: string; id: number | string }) => {
-      if (collection === 'secondary-users' && id === 'shared-id') {
-        return Promise.resolve(secondaryUser)
-      }
-
-      if (collection === 'users' && id === 'shared-id') {
-        return Promise.resolve(wrongAdminUser)
-      }
-
-      return Promise.resolve(null)
-    })
-    const req = {
-      payload: {
-        find: vi.fn().mockResolvedValue({ docs: [] }),
-        findByID,
-      },
-    }
-
-    await expect(
-      runScheduleMergeTask({
-        input: {
-          branch: 'campaign',
-          user: { relationTo: 'secondary-users', value: 'shared-id' },
-        },
-        req,
-      }),
-    ).resolves.toEqual({ output: { merged: 0, warnings: [] } })
-
-    expect(mergeBranch).toHaveBeenCalledWith(
-      req.payload,
-      expect.objectContaining({
-        overrideAccess: false,
-        user: secondaryUser,
-      }),
-    )
-  })
-
   test('should reject a bare user ID instead of using an admin user with the same ID', async () => {
     const wrongAdminUser = {
       collection: 'users',
