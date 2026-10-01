@@ -60,13 +60,13 @@ export function getFileContentRequirement({
   }
 
   const isResizableImage = canResizeImage(mimeType)
-  // `hasImageAdjustments` and `imageSizes` are the transformer-agnostic projection a file
+  // `hasImageAdjustments` and `variants` are the transformer-agnostic projection a file
   // transformer writes back onto the sanitized upload config at startup (see
   // `@payloadcms/transformer-sharp`'s `initSharpCollections`), so core can make this decision
   // without knowing which transformer is registered or how it is configured.
   const hasConfiguredAdjustments = Boolean(
     uploadConfig.hasImageAdjustments ||
-      (Array.isArray(uploadConfig.imageSizes) && uploadConfig.imageSizes.length > 0),
+      (Array.isArray(uploadConfig.variants) && uploadConfig.variants.length > 0),
   )
 
   if (hasSizeEdits || (isResizableImage && hasConfiguredAdjustments) || isAnimatedImage(mimeType)) {

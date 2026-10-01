@@ -227,7 +227,7 @@ export default buildConfig({
 })
 ```
 
-`sharpTransformer` writes a Sharp-agnostic projection of each configured `variants` entry (`name`, `admin`, and `generateImageName` only) back onto the collection's sanitized `upload.imageSizes`, so the rest of this section — and the generated `sizes` shape on your documents — is unaffected by where the configuration is authored. `imageSizes` can't be set on the collection itself.
+`sharpTransformer` writes a Sharp-agnostic projection of each configured `variants` entry (`name`, `admin`, and `generateImageName` only) back onto the collection's sanitized `upload.variants`, so the rest of this section — and the generated `sizes` shape on your documents — is unaffected by where the configuration is authored. Neither `imageSizes` nor `variants` can be set on the collection itself.
 
 #### Admin List View Options
 

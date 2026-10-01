@@ -60,15 +60,15 @@ export const MiniCarousel: React.FC<MiniCarouselProps> = ({
   uploadConfig,
 }) => {
   const { t } = useTranslation()
-  const { imageSizes } = uploadConfig
+  const { variants } = uploadConfig
   const { sizes, url: originalUrl } = doc
 
   const orderedSizeKeys = React.useMemo(() => {
-    if (!imageSizes || imageSizes.length === 0) {
+    if (!variants || variants.length === 0) {
       return Object.keys(sizes || {})
     }
-    return imageSizes.map(({ name }) => name).filter((name) => sizes?.[name]?.url)
-  }, [imageSizes, sizes])
+    return variants.map(({ name }) => name).filter((name) => sizes?.[name]?.url)
+  }, [variants, sizes])
 
   if (!originalUrl) {
     return null

@@ -71,20 +71,20 @@ describe('getFileContentRequirement', () => {
     ).toBe('full')
   })
 
-  it('requires the full file for an image with imageSizes configured, even with no other adjustments', () => {
+  it('requires the full file for an image with variants configured, even with no other adjustments', () => {
     expect(
       getFileContentRequirement({
         mimeType: 'image/png',
-        uploadConfig: createUploadConfig({ imageSizes: [{ name: 'thumbnail', width: 100 }] }),
+        uploadConfig: createUploadConfig({ variants: [{ name: 'thumbnail', width: 100 }] }),
       }),
     ).toBe('full')
   })
 
-  it('requires only the header for an image with an empty imageSizes array', () => {
+  it('requires only the header for an image with an empty variants array', () => {
     expect(
       getFileContentRequirement({
         mimeType: 'image/png',
-        uploadConfig: createUploadConfig({ imageSizes: [] }),
+        uploadConfig: createUploadConfig({ variants: [] }),
       }),
     ).toBe('header')
   })

@@ -184,7 +184,7 @@ const requestHasSizeEdits = (req: PayloadRequest): boolean => {
 /**
  * Whether a transformer that reads the whole file will run `transformFile` on this upload. A
  * bridge transformer (e.g. `sharpTransformer`) is excluded: it projects what it needs onto the
- * sanitized upload config (`hasImageAdjustments`, `imageSizes`) at startup instead.
+ * sanitized upload config (`hasImageAdjustments`, `variants`) at startup instead.
  */
 const hasTransformFileStages = async ({
   collectionSlug,

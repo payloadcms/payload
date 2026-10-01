@@ -171,7 +171,7 @@ describe('getFileFromUploadInstructions', () => {
         }),
     )
     const customReq = createReq([customHandler], {
-      imageSizes: [{ height: 100, name: 'preview', width: 100 }],
+      variants: [{ height: 100, name: 'preview', width: 100 }],
       mimeTypes: ['image/*'],
       uploadInstructions: undefined,
     })
@@ -192,7 +192,7 @@ describe('getFileFromUploadInstructions', () => {
 
     const handler = vi.fn(async () => new Response('existing file', { status: 200 }))
     const req = createReq([handler], {
-      imageSizes: [{ height: 100, name: 'preview', width: 100 }],
+      variants: [{ height: 100, name: 'preview', width: 100 }],
       mimeTypes: ['image/*'],
     })
 

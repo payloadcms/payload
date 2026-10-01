@@ -103,12 +103,12 @@ export const getFields = ({
 
   // Storage adapters add these fields during their `init`, after transformers (e.g. Sharp) have
   // written each collection's image sizes onto its upload config.
-  const imageSizes =
+  const variants =
     typeof collection.upload === 'object'
-      ? (collection.upload as SanitizedUploadConfig).imageSizes
+      ? (collection.upload as SanitizedUploadConfig).variants
       : undefined
 
-  if (imageSizes) {
+  if (variants) {
     let existingSizesFieldIndex = -1
 
     const existingSizesField = fields.find((existingField, i) => {
@@ -131,7 +131,7 @@ export const getFields = ({
       admin: {
         hidden: true,
       },
-      fields: imageSizes.map((size) => {
+      fields: variants.map((size) => {
         const existingSizeField = existingSizesField?.fields.find(
           (existingField) => 'name' in existingField && existingField.name === size.name,
         ) as GroupField

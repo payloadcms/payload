@@ -280,7 +280,7 @@ export default buildConfig({
 })
 ```
 
-At startup, `sharpTransformer` writes a Sharp-agnostic projection of `variants` (name, `admin`, and `generateImageName` only), `crop`, and `focalPoint` back onto the collection's sanitized `upload` config, as `upload.imageSizes`/`.crop`/`.focalPoint`. A `crop` or `focalPoint` set on `sharpTransformer` replaces the collection's own value; when it isn't set there, the collection's value is kept. So the Admin Panel, generated types, and the rest of core see the same sizes as before. The `sizes` shape on your documents is unchanged. `imageSizes` exists only on the sanitized config: setting it on the collection itself fails the build.
+At startup, `sharpTransformer` writes a Sharp-agnostic projection of `variants` (name, `admin`, and `generateImageName` only), `crop`, and `focalPoint` back onto the collection's sanitized `upload` config, as `upload.variants`/`.crop`/`.focalPoint`. A `crop` or `focalPoint` set on `sharpTransformer` replaces the collection's own value; when it isn't set there, the collection's value is kept. So the Admin Panel, generated types, and the rest of core see the same sizes as before. The `sizes` shape on your documents is unchanged. `variants` exists only on the sanitized config: setting it (or the removed `imageSizes`) on the collection itself fails the build.
 
 See [Image Sizes](./overview#image-sizes) for what each Sharp-specific image size option does, and [Crop and Focal Point Selector](./overview#crop-and-focal-point-selector) for the Admin Panel behavior these settings control.
 

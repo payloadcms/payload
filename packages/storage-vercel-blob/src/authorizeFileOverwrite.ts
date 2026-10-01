@@ -62,13 +62,13 @@ async function findMatchingDocs({
     return []
   }
 
-  const imageSizes =
+  const variants =
     collection.config.upload && typeof collection.config.upload === 'object'
-      ? collection.config.upload.imageSizes || []
+      ? collection.config.upload.variants || []
       : []
   const filenameQueries: Where[] = [
     { filename: { equals: requestedFilename } },
-    ...imageSizes.map(({ name }) => ({
+    ...variants.map(({ name }) => ({
       [`sizes.${name}.filename`]: { equals: requestedFilename },
     })),
   ]

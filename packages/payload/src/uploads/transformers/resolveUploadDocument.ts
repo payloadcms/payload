@@ -15,16 +15,16 @@ export type ResolvedUploadDocument = {
  */
 export function buildFilenameWhere({
   filename,
-  imageSizes,
+  variants,
 }: {
   filename: string
-  imageSizes?: { name: string }[]
+  variants?: { name: string }[]
 }): Where {
   const filenameCondition: Where = {
     or: [{ filename: { equals: filename } }],
   }
 
-  imageSizes?.forEach(({ name }) => {
+  variants?.forEach(({ name }) => {
     filenameCondition.or!.push({
       [`sizes.${name}.filename`]: { equals: filename },
     })
@@ -80,9 +80,7 @@ export async function resolveUploadDocument({
 
   const { config } = collection
 
-  const constraints: Where[] = [
-    buildFilenameWhere({ filename, imageSizes: config.upload.imageSizes }),
-  ]
+  const constraints: Where[] = [buildFilenameWhere({ filename, variants: config.upload.variants })]
 
   if (typeof prefix === 'string') {
     constraints.push({ prefix: { equals: prefix } })

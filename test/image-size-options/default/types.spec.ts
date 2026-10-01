@@ -3,7 +3,7 @@ import type { CollectionConfig, ImageSize, SanitizedUploadConfig } from 'payload
 import { describe, expect, test } from 'tstyche'
 
 type CollectionUploadConfig = Exclude<NonNullable<CollectionConfig['upload']>, boolean>
-type SanitizedImageSize = NonNullable<SanitizedUploadConfig['imageSizes']>[number]
+type SanitizedImageSize = NonNullable<SanitizedUploadConfig['variants']>[number]
 
 describe('default image size options', () => {
   test('should carry no processor-specific options when no provider is registered', () => {
@@ -24,5 +24,9 @@ describe('default image size options', () => {
 
   test('should not allow imageSizes to be authored on a collection upload configuration', () => {
     expect<'imageSizes' extends keyof CollectionUploadConfig ? true : false>().type.toBe<false>()
+  })
+
+  test('should not allow variants to be authored on a collection upload configuration', () => {
+    expect<'variants' extends keyof CollectionUploadConfig ? true : false>().type.toBe<false>()
   })
 })
