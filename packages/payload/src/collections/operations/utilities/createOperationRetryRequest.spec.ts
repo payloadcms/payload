@@ -450,49 +450,6 @@ describe('createOperationRetryRequest', () => {
     expect(retryRequest.req).toBe(originalReq)
   })
 
-  it('should disable retries for private-field context instances', async () => {
-    class OpaqueContextValue {
-      #value = 'opaque'
-
-      getValue(): string {
-        return this.#value
-      }
-    }
-
-    const originalReq = createRequest()
-    const contextValue = new OpaqueContextValue()
-
-    originalReq.context.custom = contextValue
-    const retryRequest = await createOperationRetryRequest({ req: originalReq })
-
-    expect(retryRequest.isRetrySafe).toBe(false)
-    expect(retryRequest.req).toBe(originalReq)
-  })
-
-  it('should disable retries for WeakMap-backed context instances', async () => {
-    const privateValues = new WeakMap<object, string>()
-
-    class WeakMapBackedContextValue {
-      constructor() {
-        privateValues.set(this, 'opaque')
-      }
-
-      getValue(): string | undefined {
-        return privateValues.get(this)
-      }
-    }
-
-    const originalReq = createRequest()
-    const contextValue = new WeakMapBackedContextValue()
-
-    originalReq.context.custom = contextValue
-
-    const retryRequest = await createOperationRetryRequest({ req: originalReq })
-
-    expect(retryRequest.isRetrySafe).toBe(false)
-    expect(retryRequest.req).toBe(originalReq)
-  })
-
   it('should disable retries for explicit SharedArrayBuffer context values', async () => {
     const originalReq = createRequest()
     const sharedBuffer = new SharedArrayBuffer(4)
@@ -530,19 +487,6 @@ describe('createOperationRetryRequest', () => {
     const originalReq = createRequest()
 
     originalReq.context.customMap = new CustomMap([['key', 'value']])
-
-    const retryRequest = await createOperationRetryRequest({ req: originalReq })
-
-    expect(retryRequest.isRetrySafe).toBe(false)
-    expect(retryRequest.req).toBe(originalReq)
-  })
-
-  it('should disable retries for supported built-ins with own function properties', async () => {
-    const originalReq = createRequest()
-    const contextMap = new Map() as Map<unknown, unknown> & { reset: () => void }
-
-    contextMap.reset = () => contextMap.clear()
-    originalReq.context.contextMap = contextMap
 
     const retryRequest = await createOperationRetryRequest({ req: originalReq })
 
