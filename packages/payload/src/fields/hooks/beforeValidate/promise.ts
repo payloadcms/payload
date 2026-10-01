@@ -353,7 +353,24 @@ export const promise = async <T>({
           )
 
       if (!accessResult) {
+        // Snapshot the stored DB value from siblingDoc BEFORE deleting it from
+        // siblingData. cloneDataFromOriginalDoc uses structuredClone, but when
+        // the original doc was filled in via getFallbackValue (itself called via
+        // cloneDataFromOriginalDoc), siblingData and siblingDoc may still share
+        // sub-objects in edge cases. Capturing the value now ensures the
+        // subsequent getFallbackValue call always reads the pre-mutation snapshot
+        // rather than the (possibly already deleted) post-mutation state.
+        // See: https://github.com/payloadcms/payload/issues/18415
+        const storedValueSnapshot = siblingDoc[field.name!]
         delete siblingData[field.name!]
+        // If the delete also wiped siblingDoc (shared reference), restore it
+        // so getFallbackValue can return the correct stored value below.
+        if (
+          typeof siblingDoc[field.name!] === 'undefined' &&
+          typeof storedValueSnapshot !== 'undefined'
+        ) {
+          ;(siblingDoc as JsonObject)[field.name!] = storedValueSnapshot
+        }
       }
     }
 
