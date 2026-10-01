@@ -1,5 +1,5 @@
 'use client'
-import type { PointFieldClientComponent, PointFieldValidation } from 'payload'
+import type { PointFieldClientProps, PointFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useMemo } from 'react'
@@ -9,16 +9,19 @@ import { RenderCustomComponent } from '../../elements/RenderCustomComponent/inde
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
+import { useForm } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.css'
 import { fieldBaseClass } from '../shared/index.js'
 
 const baseClass = 'point'
 
-export const PointFieldComponent: PointFieldClientComponent = (props) => {
+export const PointFieldComponent: React.FC<PointFieldClientProps> = (props) => {
   const {
     field,
     field: {
@@ -32,6 +35,8 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
     validate,
   } = props
 
+  const { uuid } = useForm()
+  const editDepth = useEditDepth()
   const { i18n, t } = useTranslation()
 
   const memoizedValidate: PointFieldValidation = useCallback(
@@ -111,6 +116,8 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
             CustomComponent={Label}
             Fallback={
               <FieldLabel
+                hasRequiredAccessibleState
+                htmlFor={generateFieldID(path, editDepth, uuid, 'field-longitude')}
                 label={getCoordinateFieldLabel('longitude')}
                 localized={localized}
                 path={path}
@@ -123,9 +130,10 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
             {/* disable eslint rule because the label is dynamic */}
             {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
+              aria-required={required || undefined}
               className="form-input"
               disabled={readOnly || disabled}
-              id={`field-longitude-${path?.replace(/\./g, '__')}`}
+              id={generateFieldID(path, editDepth, uuid, 'field-longitude')}
               name={`${path}.longitude`}
               onChange={(e) => handleChange(e, 0)}
               placeholder={getTranslation(placeholder, i18n)}
@@ -146,6 +154,8 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
             CustomComponent={Label}
             Fallback={
               <FieldLabel
+                hasRequiredAccessibleState
+                htmlFor={generateFieldID(path, editDepth, uuid, 'field-latitude')}
                 label={getCoordinateFieldLabel('latitude')}
                 localized={localized}
                 path={path}
@@ -162,9 +172,10 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
             {/* disable eslint rule because the label is dynamic */}
             {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
+              aria-required={required || undefined}
               className="form-input"
               disabled={readOnly || disabled}
-              id={`field-latitude-${path?.replace(/\./g, '__')}`}
+              id={generateFieldID(path, editDepth, uuid, 'field-latitude')}
               name={`${path}.latitude`}
               onChange={(e) => handleChange(e, 1)}
               placeholder={getTranslation(placeholder, i18n)}

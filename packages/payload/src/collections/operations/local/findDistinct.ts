@@ -12,9 +12,9 @@ import type {
   Where,
 } from '../../../index.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
-import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
+import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
 
-import { APIError, createLocalReq } from '../../../index.js'
+import { APIError, createPayloadRequest } from '../../../index.js'
 import { findDistinctOperation } from '../findDistinct.js'
 
 export type Options<
@@ -135,7 +135,10 @@ export async function findDistinct<
     overrideAccess,
     page,
     populate,
-    req: await createLocalReq(options as CreateLocalReqOptions, payload),
+    req: await createPayloadRequest({
+      ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
+      payload,
+    }),
     showHiddenFields,
     sort,
     trash,

@@ -143,6 +143,11 @@
     background-image: none;
     padding-right: var(--spacer-4);
 
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+      outline-offset: calc(var(--accessibility-outline-offset) * 2);
+    }
+
     option {
       background-color: var(--color-bg);
       color: var(--color-text);

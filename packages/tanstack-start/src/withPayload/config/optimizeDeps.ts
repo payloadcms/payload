@@ -51,6 +51,22 @@ export const optimizeDepsExcludeDefaults: string[] = [
   '@payloadcms/plugin-search',
   '@payloadcms/plugin-sentry',
   '@payloadcms/plugin-seo',
+  // Database adapters and their drivers. The client scan reaches them through the
+  // Payload config (it follows server functions' `import('@payload-config')`
+  // without TanStack's server-fn stripping), so Vite would pre-bundle the whole
+  // driver for a browser that never loads it. Mongoose 9 has no browser build, so
+  // that bundles `mongodb`, whose optional `@aws-sdk/credential-providers` peer —
+  // when linked, as in the monorepo via `@payloadcms/payload-cloud` — fails the
+  // same `MISSING_EXPORT` way. Published installs reach the adapter packages;
+  // the monorepo, which resolves them to source, reaches the drivers.
+  '@payloadcms/db-d1-sqlite',
+  '@payloadcms/db-mongodb',
+  '@payloadcms/db-postgres',
+  '@payloadcms/db-sqlite',
+  '@payloadcms/db-vercel-postgres',
+  '@payloadcms/drizzle',
+  'mongodb',
+  'mongoose',
 ]
 
 /**

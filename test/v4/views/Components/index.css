@@ -127,6 +127,33 @@
   min-height: var(--spacer-6);
 }
 
+.components-view__popup-menu-trigger {
+  --color-bg-selected: var(--color-bg-selected-strong);
+  --color-text-selected: var(--color-text-onselected-strong);
+
+  width: 100%;
+}
+
+.popup-button-list:has(> .popup > .popup__trigger-wrap [aria-expanded='true'])
+  > .popup
+  > .popup__trigger-wrap
+  .components-view__popup-menu-trigger[aria-expanded='false']:hover {
+  background-color: transparent;
+}
+
+.components-view__popup-menu {
+  flex: 1;
+  width: 100%;
+}
+
+.components-view__popup-menu .popup__trigger-wrap {
+  width: 100%;
+}
+
+.components-view__popup-menu .popup__trigger-wrap > div {
+  width: 100%;
+}
+
 /* Tooltip trigger */
 .components-view__tooltip-trigger {
   position: relative;

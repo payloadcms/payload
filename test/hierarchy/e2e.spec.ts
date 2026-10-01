@@ -163,8 +163,8 @@ test.describe('Hierarchy Sidebar', () => {
     test('should navigate tree via keyboard and load more with Enter without navigation', async () => {
       const prefs = await payload.find({
         collection: 'payload-preferences',
-        where: { key: { equals: 'hierarchy-tree-divisions' } },
         overrideAccess: true,
+        where: { key: { equals: 'hierarchy-tree-divisions' } },
       })
       for (const pref of prefs.docs) {
         await payload.delete({
@@ -421,16 +421,17 @@ test.describe('Hierarchy Sidebar', () => {
       await preferenceUpdate
 
       const searchInput = page.getByPlaceholder('Search Organizations')
+      const clearButton = page.getByRole('button', { name: 'Clear' })
 
       // Perform search
       await searchInput.fill('Engineering')
+      await expect(clearButton).toBeVisible()
       await searchInput.press('Enter')
 
       // Wait for tree to be hidden
       await expect(page.getByRole('tree')).toBeHidden()
 
       // Clear search (aria-label is t('general:clear') = "Clear")
-      const clearButton = page.getByRole('button', { name: 'Clear' })
       await clearButton.click()
 
       // Tree should be visible again
@@ -449,8 +450,8 @@ test.describe('Hierarchy Sidebar', () => {
       // Clear folder tree preferences to ensure clean filter state
       const prefs = await payload.find({
         collection: 'payload-preferences',
-        where: { key: { equals: 'hierarchy-tree-folders' } },
         overrideAccess: true,
+        where: { key: { equals: 'hierarchy-tree-folders' } },
       })
       for (const pref of prefs.docs) {
         await payload.delete({
@@ -468,8 +469,8 @@ test.describe('Hierarchy Sidebar', () => {
         const createdOrganizations = await payload.find({
           collection: 'organizations',
           draft: true,
-          where: { title: { equals: organizationTitle } },
           overrideAccess: true,
+          where: { title: { equals: organizationTitle } },
         })
 
         for (const organization of createdOrganizations.docs) {
@@ -488,8 +489,8 @@ test.describe('Hierarchy Sidebar', () => {
         const multiTypeFolders = await payload.find({
           collection: 'folders',
           limit: 1,
-          where: { name: { equals: 'Orgs and Products' } },
           overrideAccess: true,
+          where: { name: { equals: 'Orgs and Products' } },
         })
         const multiTypeFolder = multiTypeFolders.docs[0]
 
@@ -499,9 +500,11 @@ test.describe('Hierarchy Sidebar', () => {
         const listControls = page.locator('.hierarchy-list__controls')
         await listControls.getByRole('button', { name: 'Create New' }).first().click()
 
-        await expect(page.getByRole('button', { name: 'Organization', exact: true })).toBeVisible()
-        await expect(page.getByRole('button', { name: 'Product', exact: true })).toBeVisible()
-        await page.getByRole('button', { name: 'Organization', exact: true }).click()
+        await expect(
+          page.getByRole('menuitem', { name: 'Organization', exact: true }),
+        ).toBeVisible()
+        await expect(page.getByRole('menuitem', { name: 'Product', exact: true })).toBeVisible()
+        await page.getByRole('menuitem', { name: 'Organization', exact: true }).click()
 
         const drawer = page.locator('#hierarchy-create-folders')
         const titleInput = drawer.locator('#field-title')
@@ -515,8 +518,8 @@ test.describe('Hierarchy Sidebar', () => {
               collection: 'organizations',
               depth: 0,
               draft: true,
-              where: { title: { equals: organizationTitle } },
               overrideAccess: true,
+              where: { title: { equals: organizationTitle } },
             })
 
             return autosavedOrganizations.docs[0]?.parentFolder
@@ -639,7 +642,7 @@ test.describe('Hierarchy Sidebar', () => {
       await listControls.getByRole('button', { name: 'Create New' }).first().click()
 
       // Select "Folder" from the popup menu
-      await page.getByRole('button', { name: 'Folder', exact: true }).click()
+      await page.getByRole('menuitem', { name: 'Folder', exact: true }).click()
 
       // Wait for drawer to open
       const drawer = page.locator('.drawer__content')
@@ -666,8 +669,8 @@ test.describe('Hierarchy Sidebar', () => {
       // Clean up - delete the created folder
       const createdFolder = await payload.find({
         collection: 'folders',
-        where: { name: { equals: newFolderName } },
         overrideAccess: true,
+        where: { name: { equals: newFolderName } },
       })
       if (createdFolder.docs[0]) {
         await payload.delete({
@@ -705,7 +708,7 @@ test.describe('Hierarchy Sidebar', () => {
 
       const listControls = page.locator('.hierarchy-list__controls')
       await listControls.getByRole('button', { name: 'Create New' }).first().click()
-      await page.getByRole('button', { name: 'Folder', exact: true }).click()
+      await page.getByRole('menuitem', { name: 'Folder', exact: true }).click()
 
       const drawer = page.locator('.drawer__content')
       await expect(drawer).toBeVisible()
@@ -726,8 +729,8 @@ test.describe('Hierarchy Sidebar', () => {
       // Clean up
       const createdFolder = await payload.find({
         collection: 'folders',
-        where: { name: { equals: newFolderName } },
         overrideAccess: true,
+        where: { name: { equals: newFolderName } },
       })
       if (createdFolder.docs[0]) {
         await payload.delete({
@@ -819,8 +822,8 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(modal).toBeVisible()
 
       // Both folders should be visible in their respective columns
-      await expect(modal.getByRole('button', { name: parentFolderName })).toBeVisible()
-      await expect(modal.getByRole('button', { name: childFolderName })).toBeVisible()
+      await expect(modal.getByRole('button', { name: parentFolderName, exact: true })).toBeVisible()
+      await expect(modal.getByRole('button', { name: childFolderName, exact: true })).toBeVisible()
     })
 
     test('should reset transient selections after canceling and reopening the modal', async () => {
