@@ -185,7 +185,7 @@ describe('upload replacement cleanup', () => {
     const doc = { id: 1, filename: 'file.png', mimeType: 'image/png' }
     const update = vi.fn(async ({ req }) => {
       expect(req.file).toBeUndefined()
-      expect(req.context).not.toHaveProperty('_payloadClientUploadTempFile')
+      expect(req.context).not.toHaveProperty('payloadClientUploadTempFilePath')
       expect(req.context).not.toHaveProperty('_payloadCloudStorageTempFilePath')
       expect(req.context).not.toHaveProperty('_payloadCloudStorage')
       return doc
@@ -200,7 +200,7 @@ describe('upload replacement cleanup', () => {
       doc,
       operation: 'create',
       req: {
-        context: { _payloadClientUploadTempFile: '/tmp/outer-file' },
+        context: { payloadClientUploadTempFilePath: '/tmp/outer-file' },
         file: { data: Buffer.alloc(0), size: 10, tempFilePath: '/tmp/outer-file' },
         payload: { logger: { error: vi.fn() }, update },
       },
@@ -667,5 +667,124 @@ describe('upload replacement cleanup', () => {
     )
     expect(result).not.toHaveProperty('privateNote')
     expect(result).not.toHaveProperty('_objectKey')
+  })
+})
+
+describe('processed client original cleanup', () => {
+  it.each([
+    { mode: 'create', shouldDelete: true },
+    { mode: 'replacement', shouldDelete: true },
+    { mode: 'unchanged', shouldDelete: false },
+    { mode: 'size-key', shouldDelete: false },
+    { mode: 'published-key', shouldDelete: false },
+    { mode: 'new-draft-key', shouldDelete: true },
+    { mode: 'unprocessed', shouldDelete: false },
+  ])(
+    'should handle obsolete originals for $mode (delete: $shouldDelete)',
+    async ({ mode, shouldDelete }) => {
+      const events: string[] = []
+      const filename = mode === 'unchanged' ? 'image.png' : 'image.webp'
+      const doc = {
+        id: 1,
+        _objectKey: 'issued',
+        filename,
+        mimeType: 'image/webp',
+        ...(mode === 'size-key'
+          ? { sizes: { square: { filename: 'image.png', mimeType: 'image/png' } } }
+          : {}),
+        ...(mode.includes('key') && mode !== 'size-key' ? { _status: 'draft' } : {}),
+      }
+      const previousDoc =
+        mode === 'replacement' || mode === 'published-key' || mode === 'new-draft-key'
+          ? {
+              id: 1,
+              filename: 'image.png',
+              _objectKey: mode === 'new-draft-key' ? 'published' : 'issued',
+              _status: 'published',
+            }
+          : undefined
+      const handleDelete = vi.fn((_args: { storageFilePath: string }) => {
+        events.push('delete')
+      })
+      const handleUpload = vi.fn(({ file }) => {
+        events.push('upload')
+        return file.sizeName ? undefined : { url: '/final-image' }
+      })
+      const update = vi.fn(async () => {
+        events.push('metadata')
+        return { ...doc, url: '/final-image' }
+      })
+      const hook = getAfterChangeHook({
+        collection: { slug: 'media' },
+        adapter: { handleUpload, handleDelete },
+      } as never)
+
+      await hook({
+        data: doc,
+        doc,
+        previousDoc,
+        operation: previousDoc ? 'update' : 'create',
+        req: {
+          context: {},
+          file: {
+            clientUpload: {
+              isProcessed: mode !== 'unprocessed',
+              originalStorageFilePath: 'issued/image.png',
+            },
+            data: Buffer.from('processed'),
+            size: 9,
+          },
+          payload: { logger: { error: vi.fn() }, update },
+          payloadUploadSizes: mode === 'size-key' ? { square: Buffer.from('size') } : undefined,
+        },
+      } as never)
+
+      expect(handleDelete).toHaveBeenCalledTimes(shouldDelete ? 1 : 0)
+      const deletionPaths = handleDelete.mock.calls.map(([args]) => args.storageFilePath)
+      expect(deletionPaths).toEqual(shouldDelete ? ['issued/image.png'] : [])
+      expect(events.slice(-2)).toEqual(
+        shouldDelete
+          ? ['metadata', 'delete']
+          : mode === 'unprocessed'
+            ? []
+            : ['upload', 'metadata'],
+      )
+    },
+  )
+
+  it.each(['upload', 'metadata'])('should retain the original when %s fails', async (failure) => {
+    const doc = { id: 1, _objectKey: 'issued', filename: 'image.webp', mimeType: 'image/webp' }
+    const handleDelete = vi.fn()
+    const hook = getAfterChangeHook({
+      collection: { slug: 'media' },
+      adapter: {
+        handleUpload: () => {
+          if (failure === 'upload') {
+            throw new Error('upload failed')
+          }
+          return { url: '/final' }
+        },
+        handleDelete,
+      },
+    } as never)
+    const req = {
+      context: {},
+      file: {
+        clientUpload: { isProcessed: true, originalStorageFilePath: 'issued/image.png' },
+        data: Buffer.from('processed'),
+        size: 9,
+      },
+      payload: {
+        logger: { error: vi.fn() },
+        update: vi.fn(async () => {
+          throw new Error('metadata failed')
+        }),
+      },
+    }
+
+    await expect(hook({ data: doc, doc, operation: 'create', req } as never)).rejects.toThrow(
+      `${failure} failed`,
+    )
+    expect(handleDelete).not.toHaveBeenCalled()
   })
 })
