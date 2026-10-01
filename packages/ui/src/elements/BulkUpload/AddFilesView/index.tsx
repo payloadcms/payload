@@ -10,6 +10,7 @@ import { getFilesFromClipboard } from '../../../utilities/getFilesFromClipboard.
 import { DialogHeader, DialogModal } from '../../Dialog/index.js'
 import { Dropzone } from '../../Dropzone/index.js'
 import { UploadDropzoneContent } from '../../UploadDropzoneContent/index.js'
+import { useFormsManager } from '../FormsManager/index.js'
 import { useBulkUpload } from '../index.js'
 import { useCompatibleSelectableCollections } from '../useCompatibleSelectableCollections.js'
 import './index.css'
@@ -25,6 +26,7 @@ export function AddFilesView({ acceptMimeTypes, modalSlug: modalSlug, onDrop }: 
   const { t } = useTranslation()
   const { getEntityConfig } = useConfig()
   const { collectionSlug, setCollectionSlug } = useBulkUpload()
+  const { changeCollectionSlug, forms, isInitializing } = useFormsManager()
   const compatibleCollections = useCompatibleSelectableCollections()
 
   const handlePasteFromClipboard = React.useCallback(async () => {
@@ -52,7 +54,11 @@ export function AddFilesView({ acceptMimeTypes, modalSlug: modalSlug, onDrop }: 
           onChange={(option) => {
             if (option && typeof option === 'object' && 'value' in option) {
               if (typeof option.value === 'string') {
-                setCollectionSlug(option.value)
+                if (forms.length) {
+                  changeCollectionSlug(option.value)
+                } else {
+                  setCollectionSlug(option.value)
+                }
               }
             }
           }}
@@ -61,6 +67,7 @@ export function AddFilesView({ acceptMimeTypes, modalSlug: modalSlug, onDrop }: 
             value: slug,
           }))}
           path="uploadCollection"
+          readOnly={isInitializing}
           required
           value={collectionSlug}
         />

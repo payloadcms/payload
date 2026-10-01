@@ -8,6 +8,7 @@ import { useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
 import { Dropzone } from '../../elements/Dropzone/index.js'
 import { useModal } from '../../elements/Modal/index.js'
+import { ImageStackIcon } from '../../icons/ImageStack/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 
 type Props = {
@@ -63,7 +64,9 @@ export function UploadDropzoneWidgetClient({ collections }: Props) {
       onChange={onDrop}
     >
       <div className="upload-dropzone-widget__content">
-        <span aria-hidden="true" className="upload-dropzone-widget__icon" />
+        <span aria-hidden="true" className="upload-dropzone-widget__icon">
+          <ImageStackIcon />
+        </span>
         <p className="upload-dropzone-widget__description">
           {t('dashboard:widgetUploadDropzoneDescription')}
         </p>

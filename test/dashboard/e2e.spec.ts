@@ -4,7 +4,7 @@ import { rm, rmdir } from 'node:fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { selectInput } from '../__helpers/e2e/selectInput.js'
+import { getSelectMenu, openSelectMenu, selectInput } from '../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -422,6 +422,15 @@ describe('Dashboard', () => {
 
     const dropzone = widget.locator('.upload-dropzone-widget__dropzone')
     await expect(dropzone).toBeVisible()
+    const icon = widget.locator('.upload-dropzone-widget__icon')
+    await expect(icon).toHaveCSS('color', 'rgb(0, 123, 229)')
+    await page.evaluate(() => {
+      document.documentElement.dataset.theme = 'dark'
+    })
+    await expect(icon).toHaveCSS('color', 'rgb(128, 202, 255)')
+    await page.evaluate(() => {
+      document.documentElement.dataset.theme = 'light'
+    })
     await widget.getByRole('button', { name: 'Upload files' }).click()
 
     const modal = page.locator('#bulk-upload-modal-slug-1')
@@ -441,11 +450,51 @@ describe('Dashboard', () => {
       .setInputFiles(path.resolve(dirname, 'test/uploads/image.png'))
     await expect(modal.getByText('image.png')).toBeVisible()
     await expect(modal.locator('#field-description')).toBeVisible()
+    await modal.locator('#field-description').fill('Description before switching')
     const fileDestination = modal.locator('.file-selections__collectionSelect')
     await expect(fileDestination).toBeVisible()
 
+    await openSelectMenu({ page, selectLocator: fileDestination })
+    await getSelectMenu({ page }).getByText('Media', { exact: true }).click()
+    await expect(fileDestination.locator('.react-select--single-value')).toHaveText('Media')
+    await expect(modal.locator('#field-description')).toHaveCount(0)
+    await expect(modal.getByText('image.png')).toBeVisible()
+
+    const fileManager = modal.locator('.file-manager')
+    await fileManager.locator('.file-manager__remove').click()
+    const replacementInput = fileManager.locator('.upload-dropzone-content__hidden-input')
+    await replacementInput.setInputFiles({
+      name: 'incompatible.pdf',
+      buffer: Buffer.from('pdf'),
+      mimeType: 'application/pdf',
+    })
+    await expect(fileManager.locator('.file-manager__selected-preview')).toHaveCount(0)
+    await replacementInput.setInputFiles(path.resolve(dirname, 'test/uploads/image.png'))
+    await expect(fileManager.locator('#field-filemanager-filename')).toHaveValue('image.png')
+
     await modal.getByRole('button', { name: 'Add Files' }).click()
     const addMoreFiles = page.locator('#bulk-upload-modal--add-more-files')
+    const addMoreInput = addMoreFiles.locator('.upload-dropzone-content__hidden-input')
+    await expect(addMoreInput).toHaveAttribute('accept', 'image/*')
+    await addMoreInput.setInputFiles({
+      name: 'incompatible.pdf',
+      buffer: Buffer.from('pdf'),
+      mimeType: 'application/pdf',
+    })
+    await expect(addMoreFiles).toBeVisible()
+    await expect(modal.getByText('incompatible.pdf')).toHaveCount(0)
+    await addMoreFiles.getByRole('button', { name: 'Close', exact: true }).click()
+
+    await selectInput({
+      multiSelect: false,
+      option: 'Media Alt',
+      page,
+      selectLocator: fileDestination,
+    })
+    await expect(modal.locator('#field-description')).toBeVisible()
+    await expect(modal.locator('#field-description')).toHaveValue('Description before switching')
+
+    await modal.getByRole('button', { name: 'Add Files' }).click()
     await expect(addMoreFiles.locator('.bulk-upload--add-files__collectionSelect')).toBeVisible()
     await addMoreFiles.locator('.dropzone input[type="file"]').setInputFiles({
       name: 'dashboard.pdf',
@@ -457,7 +506,7 @@ describe('Dashboard', () => {
 
     await modal.getByRole('button', { name: 'Add Files' }).click()
     await expect(addMoreFiles.locator('.bulk-upload--add-files__collectionSelect')).toHaveCount(0)
-    await addMoreFiles.getByRole('button', { name: 'Close' }).click()
+    await addMoreFiles.getByRole('button', { name: 'Close', exact: true }).click()
     await modal.locator('.file-selections__remove--overlay').first().click()
     await expect(fileDestination).toBeVisible()
 

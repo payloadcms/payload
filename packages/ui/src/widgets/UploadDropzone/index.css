@@ -43,9 +43,7 @@
     height: var(--spacer-6);
     border-radius: var(--radius-full);
     background: var(--color-bg-selected);
-    background-image: url('./upload-icon.svg');
-    background-position: center;
-    background-repeat: no-repeat;
+    color: var(--color-icon-brand);
   }
 
   .upload-dropzone-widget__description,

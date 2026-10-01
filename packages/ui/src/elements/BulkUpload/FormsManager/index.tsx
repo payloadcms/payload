@@ -11,7 +11,7 @@ import type {
 } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, validateMimeType } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
@@ -35,11 +35,12 @@ import { formsManagementReducer } from './reducer.js'
 
 type FormsManagerContext = {
   readonly activeIndex: State['activeIndex']
-  readonly addFiles: (filelist: FileList) => Promise<void>
+  readonly addFiles: (filelist: FileList) => Promise<boolean>
   readonly bulkUpdateForm: (
     updatedFields: Record<string, unknown>,
     afterStateUpdate?: () => void,
   ) => Promise<void>
+  readonly changeCollectionSlug: (slug: string) => void
   readonly collectionSlug: string
   readonly docPermissions?: SanitizedDocumentPermissions
   readonly documentSlots: DocumentSlots
@@ -66,8 +67,9 @@ type FormsManagerContext = {
 
 const Context = React.createContext<FormsManagerContext>({
   activeIndex: 0,
-  addFiles: () => Promise.resolve(),
+  addFiles: () => Promise.resolve(false),
   bulkUpdateForm: () => null,
+  changeCollectionSlug: () => null,
   collectionSlug: '',
   docPermissions: undefined,
   documentSlots: {},
@@ -136,6 +138,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     modalSlug: drawerSlug,
     onSuccess,
     parentID,
+    selectableCollections,
+    setCollectionSlug,
     setInitialFiles,
     setInitialForms,
     setSuccessfullyUploaded,
@@ -156,6 +160,57 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const currentCollectionSlugRef = React.useRef(collectionSlug)
   currentCollectionSlugRef.current = collectionSlug
   const getFormDataRef = React.useRef<() => Data>(() => ({}))
+  const pendingCollectionChangeRef = React.useRef<{
+    forms: State['forms']
+    slug: string
+  }>(null)
+  const collectionFormsCacheRef = React.useRef<Record<string, State['forms']>>({})
+
+  const changeCollectionSlug = React.useCallback<FormsManagerContext['changeCollectionSlug']>(
+    (slug) => {
+      if (slug === collectionSlug || isInitializing || !selectableCollections?.includes(slug)) {
+        return
+      }
+
+      const mimeTypes = getEntityConfig({ collectionSlug: slug })?.upload?.mimeTypes
+      if (
+        mimeTypes?.length &&
+        forms.some(({ formState }) => {
+          const file = formState?.file?.value
+          return file instanceof File && !validateMimeType(file.type, mimeTypes)
+        })
+      ) {
+        toast.error(t('error:invalidFileType'))
+        return
+      }
+
+      const activeFormState = getFormDataRef.current()
+      const currentForms = forms.map((form, index) =>
+        index === activeIndex ? { ...form, formState: activeFormState } : form,
+      )
+      collectionFormsCacheRef.current[collectionSlug] = currentForms
+      pendingCollectionChangeRef.current = {
+        slug,
+        forms: currentForms,
+      }
+      setIsInitializing(true)
+      setHasInitializedState(false)
+      setHasInitializedDocPermissions(false)
+      setHasSavePermission(false)
+      setHasPublishPermission(false)
+      setCollectionSlug(slug)
+    },
+    [
+      activeIndex,
+      collectionSlug,
+      forms,
+      getEntityConfig,
+      isInitializing,
+      selectableCollections,
+      setCollectionSlug,
+      t,
+    ],
+  )
 
   const actionURL = formatAdminURL({
     apiRoute: api,
@@ -307,6 +362,17 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
   const addFiles = React.useCallback(
     async (files: FileList) => {
+      const mimeTypes = getEntityConfig({ collectionSlug })?.upload?.mimeTypes
+      const acceptedFiles = Array.from(files).filter(
+        (file) => !mimeTypes?.length || validateMimeType(file.type, mimeTypes),
+      )
+      if (acceptedFiles.length !== files.length) {
+        toast.error(t('error:invalidFileType'))
+      }
+      if (!acceptedFiles.length) {
+        return false
+      }
+
       if (forms.length) {
         // save the state of the current form before adding new files
         dispatch({
@@ -324,16 +390,17 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       }
       if (currentCollectionSlugRef.current !== collectionSlug || !initialFormState) {
         toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })
-        return
+        return false
       }
       dispatch({
         type: 'ADD_FORMS',
-        forms: Array.from(files).map((file) => ({
+        forms: acceptedFiles.map((file) => ({
           file,
           initialState: applyFolderToState(initialFormState),
         })),
       })
       toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })
+      return true
     },
     [
       initializeSharedFormState,
@@ -342,6 +409,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       activeIndex,
       forms,
       applyFolderToState,
+      getEntityConfig,
+      t,
     ],
   )
 
@@ -736,6 +805,42 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       hasInitializedDocPermissions &&
       initializedStateCollectionSlugRef.current === collectionSlug &&
       initializedPermissionsCollectionSlugRef.current === collectionSlug &&
+      pendingCollectionChangeRef.current?.slug === collectionSlug
+    ) {
+      const previousForms = pendingCollectionChangeRef.current.forms
+      const nextTemplate = applyFolderToState(initialStateRef.current)
+      const cachedForms = collectionFormsCacheRef.current[collectionSlug]
+      dispatch({
+        type: 'REPLACE',
+        state: {
+          forms: previousForms.map((form) => {
+            const formState: FormState = {}
+            const cachedForm = cachedForms?.find(({ formID }) => formID === form.formID)
+            for (const [path, field] of Object.entries(nextTemplate)) {
+              const previousField =
+                path === folderFieldName && parentID
+                  ? undefined
+                  : (cachedForm?.formState[path] ?? form.formState[path])
+              formState[path] = previousField
+                ? { ...field, initialValue: previousField.value, value: previousField.value }
+                : field
+            }
+            formState.file = form.formState.file
+            return { ...form, errorCount: 0, formState, uploadEdits: {} }
+          }),
+          totalErrorCount: 0,
+        },
+      })
+      pendingCollectionChangeRef.current = null
+      setHasSubmitted(false)
+      setIsInitializing(false)
+    }
+
+    if (
+      hasInitializedState &&
+      hasInitializedDocPermissions &&
+      initializedStateCollectionSlugRef.current === collectionSlug &&
+      initializedPermissionsCollectionSlugRef.current === collectionSlug &&
       (initialForms?.length || initialFiles?.length) &&
       !hasInitializedWithFiles.current
     ) {
@@ -756,6 +861,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     hasInitializedState,
     hasInitializedDocPermissions,
     initialForms,
+    applyFolderToState,
   ])
 
   return (
@@ -764,6 +870,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         activeIndex: state.activeIndex,
         addFiles,
         bulkUpdateForm,
+        changeCollectionSlug,
         collectionSlug,
         docPermissions,
         documentSlots,

@@ -19,7 +19,8 @@ import { useCompatibleSelectableCollections } from '../useCompatibleSelectableCo
 const baseClass = 'file-selections'
 
 export function FileSidebar() {
-  const { activeIndex, forms, isInitializing, removeFile, setActiveIndex } = useFormsManager()
+  const { activeIndex, changeCollectionSlug, forms, isInitializing, removeFile, setActiveIndex } =
+    useFormsManager()
   const { initialFiles, initialForms } = useBulkUpload()
   const { i18n, t } = useTranslation()
 
@@ -39,7 +40,7 @@ export function FileSidebar() {
     return formattedSize
   }, [])
 
-  const { collectionSlug: bulkUploadCollectionSlug, setCollectionSlug } = useBulkUpload()
+  const { collectionSlug: bulkUploadCollectionSlug } = useBulkUpload()
 
   const { getEntityConfig } = useConfig()
   const compatibleCollections = useCompatibleSelectableCollections()
@@ -57,7 +58,7 @@ export function FileSidebar() {
                 typeof e === 'object' && 'value' in e
                   ? (e?.value as string)
                   : (e as unknown as string)
-              setCollectionSlug(val)
+              changeCollectionSlug(val)
             }}
             options={
               compatibleCollections.map((coll) => {
@@ -66,6 +67,7 @@ export function FileSidebar() {
               }) || []
             }
             path="groupBy"
+            readOnly={isInitializing}
             required
             value={bulkUploadCollectionSlug}
           />
@@ -101,6 +103,7 @@ export function FileSidebar() {
               >
                 <button
                   className={`${baseClass}__fileRow`}
+                  disabled={isInitializing}
                   onClick={() => setActiveIndex(index)}
                   type="button"
                 >
