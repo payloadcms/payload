@@ -125,9 +125,14 @@ export const APIKey: React.FC<{ readonly readOnly?: boolean; readonly reveal?: b
       const result = await response.json()
 
       setHasUpdatedPersistedAPIKey(Boolean(apiKey))
-      dispatchFields({ type: 'REMOVE', path })
+      dispatchFields({ type: 'UPDATE', initialValue: undefined, path, value: undefined })
       // The `enableAPIKey` field is for backward compatibility only and will be removed in v4.
-      dispatchFields({ type: 'REMOVE', path: 'enableAPIKey' })
+      dispatchFields({
+        type: 'UPDATE',
+        initialValue: undefined,
+        path: 'enableAPIKey',
+        value: undefined,
+      })
 
       if (result.doc?.updatedAt) {
         setData(result.doc)
@@ -217,7 +222,7 @@ export const APIKey: React.FC<{ readonly readOnly?: boolean; readonly reveal?: b
       setHighlightedField(false)
       setRevealedKey(null)
       setShowCopyWarning(false)
-      dispatchFields({ type: 'REMOVE', path })
+      dispatchFields({ type: 'UPDATE', initialValue: undefined, path, value: undefined })
       setShowKey(false)
     }
 
