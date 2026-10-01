@@ -50,25 +50,13 @@ export function createVercelBlobAdapter({
       }),
 
     handleUpload: async ({
-      data,
-      file: { buffer, mimeType, tempFilePath },
-      req,
+      file: { buffer, clientUpload, mimeType, tempFilePath },
       storageFilePath,
     }) => {
-      const preservedFile = (
-        req.context?._payloadCloudStorage as { file?: typeof req.file } | undefined
-      )?.file
-      const clientUploadTempFilePath = req.context?.payloadClientUploadTempFilePath
-      const isProcessedClientUpload = Boolean(
-        clientUploads &&
-          data._objectKey &&
-          typeof clientUploadTempFilePath === 'string' &&
-          (req.file ?? preservedFile)?.tempFilePath === clientUploadTempFilePath,
-      )
       const result = await uploadFile({
         access,
-        // Processed client uploads must stay on their issued keys, including image sizes.
-        addRandomSuffix: isProcessedClientUpload ? false : addRandomSuffix,
+        // Processed client uploads must stay on their receipt-bound keys, including image sizes.
+        addRandomSuffix: clientUpload ? false : addRandomSuffix,
         buffer,
         cacheControlMaxAge,
         mimeType,
