@@ -341,6 +341,7 @@ export const generateFileData = async <T>({
     fileData.filename = fsSafeName
 
     let fileForResize = file
+    let processedBuffer = fileBuffer?.data
 
     if (cropData && fileSupportsResize && sharp && fileHasCompleteContents) {
       const { data: croppedImage, info } = await cropImage({
@@ -408,6 +409,7 @@ export const generateFileData = async <T>({
 
       delete file.uploadReference
       delete fileForResize.uploadReference
+      processedBuffer = fileForResize.data
       if (file.tempFilePath) {
         await fs.writeFile(file.tempFilePath, fileForResize.data)
       } else {
@@ -456,12 +458,24 @@ export const generateFileData = async <T>({
               req.file = {
                 ...file,
                 data: fileBuffer?.data || bufferToSave,
-                size: fileBuffer?.info.size,
+                size: fileBuffer?.info.size ?? file.size,
               }
             }
           }
         }
       }
+    }
+
+    if (processedBuffer) {
+      req.file = {
+        ...file,
+        name: fileData.filename,
+        clientUpload: file.clientUpload ? { ...file.clientUpload, isProcessed: true } : undefined,
+        data: file.tempFilePath ? Buffer.alloc(0) : processedBuffer,
+        mimetype: fileData.mimeType,
+        size: processedBuffer.length,
+      }
+      delete req.file.uploadReference
     }
 
     if (fileSupportsResize && (Array.isArray(imageSizes) || focalPointEnabled !== false)) {
