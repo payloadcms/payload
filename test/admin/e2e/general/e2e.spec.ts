@@ -414,10 +414,7 @@ describe('General', () => {
       const openThemeSubMenu = async () => {
         await openNav(page)
         await page.locator('button[aria-label="Account"]').click()
-        await page
-          .locator('.popup-button-list__button--submenu-trigger')
-          .filter({ hasText: 'Theme' })
-          .click()
+        await page.getByRole('menuitem', { name: 'Theme' }).hover()
       }
 
       const closePopups = async () => {
@@ -430,9 +427,7 @@ describe('General', () => {
         await openNav(page)
         await page.locator('button[aria-label="Account"]').click()
 
-        const language = page
-          .locator('.popup-button-list__button--submenu-trigger')
-          .filter({ hasText: 'Language' })
+        const language = page.getByRole('menuitem', { name: 'Language' })
 
         await language.hover()
         await expect(language).toHaveAttribute('aria-expanded', 'true')
