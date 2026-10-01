@@ -149,7 +149,7 @@ plugin-<name>/
     "copyfiles": "^2.4.1",
     "cross-env": "10.1.0",
     "eslint": "^9.39.2",
-    "next": "^16.3.5",
+    "next": "^16.3.8",
     "payload": "^3.82.1",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
