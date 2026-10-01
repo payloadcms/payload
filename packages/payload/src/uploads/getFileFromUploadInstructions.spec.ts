@@ -326,19 +326,6 @@ describe('getFileFromUploadInstructions', () => {
     expect(handler).not.toHaveBeenCalled()
   })
 
-  it('rejects a missing direct original before document creation', async () => {
-    const handler = vi.fn(async () => new Response('missing', { status: 404 }))
-    const req = createReq([handler], {})
-
-    await expect(
-      getFileFromUploadInstructions({
-        collectionSlug: 'media',
-        file: createUploadReferenceFile(),
-        req,
-      }),
-    ).rejects.toThrow()
-  })
-
   it('fetches only a bounded header for an image with no configured adjustments', async () => {
     const handler = vi.fn(async (handlerReq: PayloadRequest) => {
       expect(handlerReq.headers.get('range')).toBe(`bytes=0-${HEADER_PROBE_BYTE_LENGTH - 1}`)

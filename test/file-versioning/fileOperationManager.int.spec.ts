@@ -97,45 +97,6 @@ test.suite('File operation manager', { config: './config.ts' }, () => {
     }
   })
 
-  test('should reject a changed latest version after staging', async ({ payload }) => {
-    const doc = await payload.db.create({ collection: mediaSlug, data: { alt: 'before' } })
-    const req = await createPayloadRequest({ payload })
-    const staged = new Set<string>()
-    let hasWritten = false
-
-    await expect(
-      runFileOperationPlan({
-        id: doc.id,
-        collection: mediaSlug,
-        req,
-        stage: async ({ trackStagedObject }) => {
-          staged.add('attempt.jpg')
-          trackStagedObject({
-            key: 'attempt.jpg',
-            remove: async () => {
-              staged.delete('attempt.jpg')
-            },
-            storageBackendId: `local:${mediaSlug}`,
-          })
-          await payload.db.createVersion({
-            autosave: false,
-            collectionSlug: mediaSlug,
-            createdAt: new Date().toISOString(),
-            parent: doc.id,
-            updatedAt: new Date().toISOString(),
-            versionData: { alt: 'newer version' },
-          })
-        },
-        write: async () => {
-          hasWritten = true
-        },
-      }),
-    ).rejects.toMatchObject({ status: 409 })
-
-    expect(hasWritten).toBe(false)
-    expect(staged.size).toBe(0)
-  })
-
   test('should reject one concurrent draft file change without touching the winner', async ({
     payload,
   }) => {

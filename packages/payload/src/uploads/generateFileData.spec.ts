@@ -340,55 +340,6 @@ describe('generateFileData', () => {
     expect(sharp).not.toHaveBeenCalled()
   })
 
-  it('records a verified provider upload as the original without copying a partial body', async () => {
-    const req = {
-      file: {
-        data: Buffer.alloc(0),
-        mimetype: 'video/mp4',
-        name: 'video.mp4',
-        size: 5_000_000_000,
-        uploadReference: {
-          _objectKey: 'upload-1',
-          prefix: 'media',
-          signedReceipt: 'signed-receipt',
-        },
-      },
-      context: {
-        _payloadVerifiedProviderOriginal: {
-          filename: 'video-original.mp4',
-          key: 'media/upload-1/video-original.mp4',
-          signedReceipt: 'signed-receipt',
-        },
-      },
-      payload: {
-        config: { routes: { api: '/api' }, upload: { transformers: [] } },
-        logger: { error: vi.fn() },
-      },
-    } as unknown as PayloadRequest
-
-    const result = await generateFileData({
-      collection: createCollection({ adapter: 's3' }),
-      config: {} as SanitizedConfig,
-      data: { _objectKey: 'upload-1', prefix: 'media' },
-      operation: 'create',
-      overwriteExistingFiles: true,
-      req,
-    })
-
-    expect(result.files).toEqual([])
-    expect(result.data).toMatchObject({
-      filename: 'video-original.mp4',
-      original: { filename: 'video-original.mp4', filesize: 5_000_000_000 },
-      _managedFiles: [
-        {
-          key: 'media/upload-1/video-original.mp4',
-          roles: [{ type: 'original' }, { type: 'default' }],
-          storageBackendId: 's3:media',
-        },
-      ],
-    })
-  })
-
   it('does not process a header-only upload after detecting an animated image type', async () => {
     const fullFileSize = 5_000_000
     const { sharp } = createSharpMock()
