@@ -18,6 +18,7 @@ import {
 } from './globalMergeWrites.js'
 import { readLocalizedBranchWrite } from './readLocalizedBranchWrite.js'
 import { isolateBranchState } from './resolveBranch.js'
+import { stripBranchMergeData, stripBranchMergeGlobalData } from './stripBranchMergeData.js'
 import { branchChangesCollectionSlug, branchDocIDField, branchField, MAIN_BRANCH } from './types.js'
 
 export type { EffectiveOperation }
@@ -291,17 +292,20 @@ const getProposedWrites = async ({
     return [{ dataShape: 'flattened', req }]
   }
 
+  const fields = payload.collections[collectionSlug]!.config.fields
   const localeCodes = payload.config.localization
-    ? traverseForLocalizedFields(payload.collections[collectionSlug]!.config.fields)
+    ? traverseForLocalizedFields(fields)
       ? payload.config.localization.localeCodes
       : undefined
     : undefined
   if (!localeCodes?.length) {
     return [
       {
-        data: stripInternal(item.write.data),
+        data: stripBranchMergeData({ data: item.write.data, fields }),
         dataShape: 'withLocales',
-        previousData: item.previousWrite ? stripInternal(item.previousWrite.data) : undefined,
+        previousData: item.previousWrite
+          ? stripBranchMergeData({ data: item.previousWrite.data, fields })
+          : undefined,
         req,
       },
     ]
@@ -338,10 +342,10 @@ const getProposedWrites = async ({
       : undefined
 
     proposedWrites.push({
-      data: stripInternal(data),
+      data: stripBranchMergeData({ data, fields }),
       dataShape: 'flattened',
       locale,
-      previousData: previousData ? stripInternal(previousData) : undefined,
+      previousData: previousData ? stripBranchMergeData({ data: previousData, fields }) : undefined,
       req: localeReq,
     })
   }
@@ -405,7 +409,7 @@ export const runGlobalMergePreflight = async ({
           break
         }
 
-        const data = stripInternal({ ...storedData, globalType: undefined })
+        const data = stripBranchMergeGlobalData({ data: storedData, fields: globalConfig.fields })
         const result = await executeAccess(
           { slug: globalSlug, data, disableErrors: true, req: localeReq },
           globalConfig.access.update,
@@ -691,7 +695,7 @@ export const resolveMergeDependencies = async ({
 
         addReferencedBranchCreates({
           branchCreates,
-          data: stripInternal({ ...storedData, globalType: undefined }),
+          data: stripBranchMergeGlobalData({ data: storedData, fields: globalConfig.fields }),
           dataShape: 'flattened',
           dependencyChangeIDs,
           fields: globalConfig.flattenedFields,
@@ -857,18 +861,4 @@ const whereReferencesBranchMetadata = (value: unknown): boolean => {
       [branchDocIDField, branchField].includes(key.split('.')[0]!) ||
       whereReferencesBranchMetadata(nestedValue),
   )
-}
-
-/** Branch bookkeeping and server-owned timestamps are not part of the proposed user data. */
-const stripInternal = (data: Record<string, unknown>): Record<string, unknown> => {
-  const {
-    id: _id,
-    [branchDocIDField]: _docID,
-    [branchField]: _branch,
-    createdAt: _createdAt,
-    updatedAt: _updatedAt,
-    ...rest
-  } = data
-
-  return rest
 }

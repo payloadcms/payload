@@ -350,6 +350,12 @@ export interface Media {
 export interface UniqueDoc {
   id: string;
   slug?: string | null;
+  localizedSlug?: string | null;
+  metadata?: {
+    code?: string | null;
+  };
+  site?: string | null;
+  customSlug?: string | null;
   _branch: string;
   _branchDocID?: (string | null) | UniqueDoc;
   createdBy?: {
@@ -526,6 +532,18 @@ export interface LocalizedDoc {
 export interface NestedDoc {
   id: string;
   title?: string | null;
+  metadata?: {
+    score: number;
+  };
+  unstructuredMetadata?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   items?:
     | {
         label?: string | null;
@@ -810,17 +828,48 @@ export interface PayloadBranchChange {
 export interface PayloadBranchMerge {
   id: string;
   branch: string;
-  mergedAt: string;
+  mergedAt?: string | null;
+  startedAt?: string | null;
+  completedAt?: string | null;
+  targetBranch?: string | null;
+  status?: ('inProgress' | 'awaitingCommit' | 'succeeded' | 'failed' | 'cleanupFailed') | null;
+  error?: string | null;
   mergedByCollection?: string | null;
   mergedByID?: string | null;
   mergedByLabel?: string | null;
   changes?:
     | {
+        changeID?: string | null;
         collectionSlug?: string | null;
         docID?: string | null;
         docTitle?: string | null;
         globalSlug?: string | null;
         operation?: string | null;
+        applicationOutcome?:
+          | ('unattempted' | 'attempted' | 'applied' | 'committed' | 'failed' | 'rolledBack' | 'unknown')
+          | null;
+        recoveryOutcome?:
+          | ('notNeeded' | 'pending' | 'restored' | 'deleted' | 'unavailable' | 'failed' | 'unknown')
+          | null;
+        cleanupOutcome?: ('pending' | 'completed' | 'failed' | 'notNeeded' | 'superseded' | 'unknown') | null;
+        targetID?: string | null;
+        sourceID?: string | null;
+        sourceRevision?: string | null;
+        sourceUpdatedAt?: string | null;
+        sourceVersionIDs?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        beforeVersionID?: string | null;
+        afterVersionID?: string | null;
+        error?: string | null;
+        recoveryError?: string | null;
+        cleanupError?: string | null;
         before?:
           | {
               [k: string]: unknown;
@@ -1041,6 +1090,14 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface UniqueDocsSelect<T extends boolean = true> {
   slug?: T;
+  localizedSlug?: T;
+  metadata?:
+    | T
+    | {
+        code?: T;
+      };
+  site?: T;
+  customSlug?: T;
   _branch?: T;
   _branchDocID?: T;
   createdBy?: T;
@@ -1162,6 +1219,8 @@ export interface LocalizedDocsSelect<T extends boolean = true> {
  */
 export interface NestedDocsSelect<T extends boolean = true> {
   title?: T;
+  metadata?: T;
+  unstructuredMetadata?: T;
   items?:
     | T
     | {
@@ -1313,17 +1372,36 @@ export interface PayloadBranchChangesSelect<T extends boolean = true> {
 export interface PayloadBranchMergesSelect<T extends boolean = true> {
   branch?: T;
   mergedAt?: T;
+  startedAt?: T;
+  completedAt?: T;
+  targetBranch?: T;
+  status?: T;
+  error?: T;
   mergedByCollection?: T;
   mergedByID?: T;
   mergedByLabel?: T;
   changes?:
     | T
     | {
+        changeID?: T;
         collectionSlug?: T;
         docID?: T;
         docTitle?: T;
         globalSlug?: T;
         operation?: T;
+        applicationOutcome?: T;
+        recoveryOutcome?: T;
+        cleanupOutcome?: T;
+        targetID?: T;
+        sourceID?: T;
+        sourceRevision?: T;
+        sourceUpdatedAt?: T;
+        sourceVersionIDs?: T;
+        beforeVersionID?: T;
+        afterVersionID?: T;
+        error?: T;
+        recoveryError?: T;
+        cleanupError?: T;
         before?: T;
         after?: T;
         id?: T;

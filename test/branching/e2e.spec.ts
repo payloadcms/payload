@@ -15,6 +15,8 @@ import {
   branchChangesSlug,
   branchMergesSlug,
   headerGlobalSlug,
+  homepageGlobalSlug,
+  nestedSlug,
   pagesSlug,
   postsSlug,
 } from './shared.js'
@@ -62,6 +64,7 @@ async function switchBranch({ name, page }: { name: string; page: Page }): Promi
 
 test.describe('Branching', () => {
   let page: Page
+  let nestedURL: AdminUrlUtil
   let pagesURL: AdminUrlUtil
   let postsURL: AdminUrlUtil
 
@@ -83,6 +86,7 @@ test.describe('Branching', () => {
 
     payload = payloadFromInit
     serverURL = serverFromInit
+    nestedURL = new AdminUrlUtil(serverURL, nestedSlug)
     pagesURL = new AdminUrlUtil(serverURL, pagesSlug)
     postsURL = new AdminUrlUtil(serverURL, postsSlug)
 
@@ -93,37 +97,71 @@ test.describe('Branching', () => {
   test.afterEach(async () => {
     // Shadow rows are addressed by their real primary key, so these deletes
     // bypass branch resolution rather than writing tombstones.
-    const posts = await payload.find({ branch: false, collection: postsSlug, pagination: false })
+    for (const collection of [nestedSlug, pagesSlug, postsSlug] as const) {
+      const documents = await payload.find({ branch: false, collection, pagination: false })
 
-    for (const post of posts.docs) {
-      await payload.delete({ id: post.id, branch: false, collection: postsSlug }).catch(() => {})
+      for (const doc of documents.docs) {
+        await payload.delete({ id: doc.id, branch: false, collection }).catch(() => {})
+      }
     }
 
-    const changes = await payload.find({ collection: branchChangesSlug, pagination: false })
+    const changes = await payload.find({
+      collection: branchChangesSlug,
+      overrideAccess: true,
+      pagination: false,
+    })
 
     for (const change of changes.docs) {
-      await payload.delete({ id: change.id, collection: branchChangesSlug }).catch(() => {})
+      await payload
+        .delete({ id: change.id, collection: branchChangesSlug, overrideAccess: true })
+        .catch(() => {})
     }
 
     // The ledger is append-only and survives the branch being reset to `open`, so
     // without this a merge in one test puts a "last merged on…" line in every test
     // after it.
-    const merges = await payload.find({ collection: branchMergesSlug, pagination: false })
+    const merges = await payload.find({
+      collection: branchMergesSlug,
+      overrideAccess: true,
+      pagination: false,
+    })
 
     for (const merge of merges.docs) {
-      await payload.delete({ id: merge.id, collection: branchMergesSlug }).catch(() => {})
+      await payload
+        .delete({ id: merge.id, collection: branchMergesSlug, overrideAccess: true })
+        .catch(() => {})
+    }
+
+    const scheduledMergeJobs = await payload.find({
+      collection: 'payload-jobs',
+      overrideAccess: true,
+      pagination: false,
+      where: { taskSlug: { equals: 'scheduleMerge' } },
+    })
+
+    for (const scheduledMergeJob of scheduledMergeJobs.docs) {
+      await payload
+        .delete({
+          id: scheduledMergeJob.id,
+          collection: 'payload-jobs',
+          overrideAccess: true,
+        })
+        .catch(() => {})
     }
 
     // Reset the stored selection server-side rather than clicking back to main:
     // the panel is sometimes already on main, where a UI switch does nothing.
     const preferences = await payload.find({
       collection: 'payload-preferences',
+      overrideAccess: true,
       pagination: false,
       where: { key: { equals: 'admin' } },
     })
 
     for (const preference of preferences.docs) {
-      await payload.delete({ id: preference.id, collection: 'payload-preferences' }).catch(() => {})
+      await payload
+        .delete({ id: preference.id, collection: 'payload-preferences', overrideAccess: true })
+        .catch(() => {})
     }
   })
 
@@ -269,6 +307,7 @@ test.describe('Branching', () => {
 
       const rows = page.locator('.changed-docs__row')
       await expect(rows).toHaveCount(3)
+      await expect(page.locator('.pill-branch-changes')).toHaveText('3')
 
       const rowFor = (title: string) => rows.filter({ hasText: title })
 
@@ -418,6 +457,7 @@ test.describe('Branching', () => {
           id: branch.docs[0]!.id,
           collection: 'payload-branches',
           data: { mergedAt: null, status: 'open' },
+          overrideAccess: true,
         })
       }
     })
@@ -475,6 +515,7 @@ test.describe('Branching', () => {
 
       const jobs = await payload.find({
         collection: 'payload-jobs',
+        overrideAccess: true,
         pagination: false,
         where: { taskSlug: { equals: 'scheduleMerge' } },
       })
@@ -492,7 +533,7 @@ test.describe('Branching', () => {
       expect(onMain.docs).toHaveLength(0)
 
       for (const job of jobs.docs) {
-        await payload.delete({ id: job.id, collection: 'payload-jobs' })
+        await payload.delete({ id: job.id, collection: 'payload-jobs', overrideAccess: true })
       }
     })
 
@@ -607,10 +648,126 @@ test.describe('Branching', () => {
         pagination: false,
         where: { id: { equals: main.id } },
       })
-      const changes = await payload.find({ collection: branchChangesSlug, pagination: false })
+      const changes = await payload.find({
+        collection: branchChangesSlug,
+        overrideAccess: true,
+        pagination: false,
+      })
 
       expect(onMain.docs[0]?.title).toBe('Halloween Sale')
       expect(changes.docs).toHaveLength(0)
+    })
+
+    test('should keep nested array and block edits off main until the merge completes', async () => {
+      const main = await payload.create({
+        collection: nestedSlug,
+        data: {
+          items: [{ label: 'main item' }],
+          layout: [{ blockType: 'hero', heading: 'main hero' }],
+          title: 'Nested campaign',
+        },
+      })
+
+      await page.goto(nestedURL.list)
+      await switchBranch({ name: branchName, page })
+      await page.goto(nestedURL.edit(main.id))
+
+      await page.locator('#field-items__0__label').fill('branch item')
+      await page.locator('#field-layout__0__heading').fill('branch hero')
+      await page.locator('#action-save').click()
+      await expect(page.locator('.payload-toast-item')).toContainText('Updated successfully')
+
+      const beforeMerge = await payload.find({
+        branch: false,
+        collection: nestedSlug,
+        pagination: false,
+        where: { id: { equals: main.id } },
+      })
+
+      expect(beforeMerge.docs[0]?.items?.[0]?.label).toBe('main item')
+      expect(beforeMerge.docs[0]?.layout?.[0]?.heading).toBe('main hero')
+
+      await gotoBranchView()
+      await openMergeModal()
+      await page.locator('.merge-branch-modal .btn--style-primary').click()
+      await expect(page.locator('.merge-branch-modal__progress-fill--complete')).toBeVisible()
+
+      const afterMerge = await payload.find({
+        branch: false,
+        collection: nestedSlug,
+        pagination: false,
+        where: { id: { equals: main.id } },
+      })
+
+      expect(afterMerge.docs[0]?.items?.[0]?.label).toBe('branch item')
+      expect(afterMerge.docs[0]?.layout?.[0]?.heading).toBe('branch hero')
+    })
+
+    test('should merge only the newer draft after an earlier branch publication', async () => {
+      const main = await payload.create({
+        collection: pagesSlug,
+        data: { _status: 'published', title: 'Published on main' },
+      })
+
+      await page.goto(pagesURL.list)
+      await switchBranch({ name: branchName, page })
+      await page.goto(pagesURL.edit(main.id))
+
+      await page.locator('#field-title').fill('Published on branch')
+
+      const published = page.waitForResponse(
+        (response) =>
+          response.url().includes(`/api/${pagesSlug}/${main.id}`) &&
+          response.request().method() === 'PATCH' &&
+          response.ok(),
+      )
+
+      await page.locator('#action-save').click()
+      await published
+
+      await page.locator('#field-title').fill('Newer draft on branch')
+
+      const drafted = page.waitForResponse(
+        (response) =>
+          response.url().includes(`/api/${pagesSlug}/${main.id}`) &&
+          response.request().method() === 'PATCH' &&
+          response.ok(),
+      )
+
+      await page.locator('#action-save-draft').click()
+      await drafted
+
+      const beforeMerge = await payload.find({
+        branch: false,
+        collection: pagesSlug,
+        pagination: false,
+        where: { id: { equals: main.id } },
+      })
+
+      expect(beforeMerge.docs[0]?.title).toBe('Published on main')
+
+      await gotoBranchView()
+      await openMergeModal()
+      await page.locator('.merge-branch-modal .btn--style-primary').click()
+      await expect(page.locator('.merge-branch-modal__progress-fill--complete')).toBeVisible()
+
+      const publishedAfterMerge = await payload.find({
+        branch: false,
+        collection: pagesSlug,
+        pagination: false,
+        where: { id: { equals: main.id } },
+      })
+      const latestAfterMerge = await payload.find({
+        branch: false,
+        collection: pagesSlug,
+        draft: true,
+        pagination: false,
+        where: { id: { equals: main.id } },
+      })
+
+      expect(publishedAfterMerge.docs[0]?.title).toBe('Published on main')
+      expect(latestAfterMerge.docs[0]?.title).toBe('Newer draft on branch')
+      expect(latestAfterMerge.docs[0]?._status).toBe('draft')
     })
 
     test('should raise exactly one merge modal from the compare view', async () => {
@@ -659,15 +816,17 @@ test.describe('Branching', () => {
 
     test('should diff a merged document from the branch history', async () => {
       const main = await payload.create({
-        collection: postsSlug,
-        data: { order: 1, title: 'Autumn Sale' },
+        collection: pagesSlug,
+        data: { _status: 'published', title: 'Autumn Sale' },
+        draft: false,
       })
 
       await payload.update({
         id: main.id,
         branch: branchSlug,
-        collection: postsSlug,
-        data: { order: 99, title: 'Halloween Sale' },
+        collection: pagesSlug,
+        data: { _status: 'published', title: 'Halloween Sale' },
+        draft: false,
       })
 
       await gotoBranchView()
@@ -684,15 +843,40 @@ test.describe('Branching', () => {
       // on main, so aiming at the middle would follow it instead of expanding.
       await row.locator('.merge-ledger__row-header').click({ position: { x: 8, y: 12 } })
 
-      // Both sides come from the snapshots taken either side of the merge write —
-      // the live document alone could not produce this, since the branch's copy is
-      // gone and main has moved on.
+      // Both sides come from the exact target versions recorded either side of the
+      // merge write. The live document cannot reconstruct this after main moves on.
       const diff = row.locator('.merge-ledger__diff')
 
       await expect(diff.locator('.field-diff-label', { hasText: 'Title' })).toBeVisible()
       await expect(diff).toContainText('Autumn')
       await expect(diff).toContainText('Halloween')
-      await expect(diff.locator('.field-diff-label', { hasText: 'Order' })).toBeVisible()
+    })
+
+    test('should report unavailable history when the collection has no versions', async () => {
+      const main = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Autumn Sale' },
+      })
+
+      await payload.update({
+        id: main.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Halloween Sale' },
+      })
+
+      await gotoBranchView()
+      await openMergeModal()
+      await page.locator('.merge-branch-modal .btn--style-primary').click()
+      await expect(page.locator('.merge-branch-modal__progress-fill--complete')).toBeVisible()
+      await page.locator('.merge-branch-modal .btn--style-primary').click()
+
+      await gotoBranchView()
+
+      const row = page.locator('.merge-ledger__row').filter({ hasText: 'Halloween Sale' })
+
+      await row.locator('.merge-ledger__row-header').click({ position: { x: 8, y: 12 } })
+      await expect(row.locator('.merge-ledger__diff')).toContainText('Not Found')
     })
 
     /** Schedules from the open modal, which is the only way to create one. */
@@ -707,12 +891,13 @@ test.describe('Branching', () => {
     async function deleteScheduledJobs() {
       const jobs = await payload.find({
         collection: 'payload-jobs',
+        overrideAccess: true,
         pagination: false,
         where: { taskSlug: { equals: 'scheduleMerge' } },
       })
 
       for (const job of jobs.docs) {
-        await payload.delete({ id: job.id, collection: 'payload-jobs' })
+        await payload.delete({ id: job.id, collection: 'payload-jobs', overrideAccess: true })
       }
     }
 
@@ -802,6 +987,7 @@ test.describe('Branching', () => {
 
       const jobs = await payload.find({
         collection: 'payload-jobs',
+        overrideAccess: true,
         pagination: false,
         where: { taskSlug: { equals: 'scheduleMerge' } },
       })
@@ -972,7 +1158,11 @@ test.describe('Branching', () => {
         collection: postsSlug,
         pagination: false,
       })
-      const changes = await payload.find({ collection: branchChangesSlug, pagination: false })
+      const changes = await payload.find({
+        collection: branchChangesSlug,
+        overrideAccess: true,
+        pagination: false,
+      })
 
       expect(onBranch.docs.map((doc) => doc.title)).toEqual(['Autumn Sale'])
       expect(changes.docs).toHaveLength(0)
@@ -1017,7 +1207,11 @@ test.describe('Branching', () => {
         collection: postsSlug,
         pagination: false,
       })
-      const changes = await payload.find({ collection: branchChangesSlug, pagination: false })
+      const changes = await payload.find({
+        collection: branchChangesSlug,
+        overrideAccess: true,
+        pagination: false,
+      })
 
       expect(onBranch.docs.map((doc) => doc.title).sort()).toEqual([
         'Autumn Sale',
@@ -1058,7 +1252,11 @@ test.describe('Branching', () => {
         pagination: false,
         where: { id: { equals: main.id } },
       })
-      const changes = await payload.find({ collection: branchChangesSlug, pagination: false })
+      const changes = await payload.find({
+        collection: branchChangesSlug,
+        overrideAccess: true,
+        pagination: false,
+      })
 
       expect(onMain.docs[0]?.title).toBe('Halloween Sale')
       // The deselected create keeps the branch open.
@@ -1073,16 +1271,28 @@ test.describe('Branching', () => {
    */
   test.describe('Globals in the changeset', () => {
     test.afterEach(async () => {
-      const changes = await payload.find({ collection: branchChangesSlug, pagination: false })
+      const changes = await payload.find({
+        collection: branchChangesSlug,
+        overrideAccess: true,
+        pagination: false,
+      })
 
       for (const change of changes.docs) {
-        await payload.delete({ id: change.id, collection: branchChangesSlug }).catch(() => {})
+        await payload
+          .delete({ id: change.id, collection: branchChangesSlug, overrideAccess: true })
+          .catch(() => {})
       }
 
-      const merges = await payload.find({ collection: branchMergesSlug, pagination: false })
+      const merges = await payload.find({
+        collection: branchMergesSlug,
+        overrideAccess: true,
+        pagination: false,
+      })
 
       for (const merge of merges.docs) {
-        await payload.delete({ id: merge.id, collection: branchMergesSlug }).catch(() => {})
+        await payload
+          .delete({ id: merge.id, collection: branchMergesSlug, overrideAccess: true })
+          .catch(() => {})
       }
     })
 
@@ -1117,14 +1327,14 @@ test.describe('Branching', () => {
 
     test('should diff a merged global in the branch history', async () => {
       await payload.updateGlobal({
-        slug: headerGlobalSlug,
-        data: { navLabel: 'main label' },
+        slug: homepageGlobalSlug,
+        data: { heroTitle: 'main hero' },
       })
 
       await payload.updateGlobal({
-        slug: headerGlobalSlug,
+        slug: homepageGlobalSlug,
         branch: branchSlug,
-        data: { navLabel: 'branch label' },
+        data: { heroTitle: 'branch hero' },
       })
 
       await gotoBranchView()
@@ -1135,18 +1345,18 @@ test.describe('Branching', () => {
 
       await gotoBranchView()
 
-      const row = page.locator('.merge-ledger__row').filter({ hasText: 'Header' })
+      const row = page.locator('.merge-ledger__row').filter({ hasText: 'Homepage' })
 
       await expect(row).toHaveCount(1)
       await row.locator('.merge-ledger__row-header').click({ position: { x: 8, y: 12 } })
 
-      // Both sides come from the snapshots the ledger stored at merge time — the branch's
-      // copy of the global is gone by now.
+      // Both sides come from the exact target versions recorded at merge time. The
+      // branch's copy of the global is gone by now.
       const diff = row.locator('.merge-ledger__diff')
 
-      await expect(diff.locator('.field-diff-label', { hasText: 'Nav Label' })).toBeVisible()
-      await expect(diff).toContainText('main label')
-      await expect(diff).toContainText('branch label')
+      await expect(diff.locator('.field-diff-label', { hasText: 'Hero Title' })).toBeVisible()
+      await expect(diff).toContainText('main hero')
+      await expect(diff).toContainText('branch hero')
     })
   })
 

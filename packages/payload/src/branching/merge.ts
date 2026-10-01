@@ -58,6 +58,7 @@ import {
 import { readLocalizedBranchWrite } from './readLocalizedBranchWrite.js'
 import { readCollectionMergeSnapshot } from './readMergeSnapshot.js'
 import { isolateBranchState, refreshBranchState, withoutBranch } from './resolveBranch.js'
+import { stripBranchMergeData, stripBranchMergeGlobalData } from './stripBranchMergeData.js'
 import {
   branchChangesCollectionSlug,
   branchDocIDField,
@@ -1827,26 +1828,6 @@ export const mergeBranch = async (
   return result
 }
 
-/** Branch bookkeeping and server-owned timestamps never travel to main. */
-const stripInternal = (data: Record<string, unknown>): Record<string, unknown> => {
-  const {
-    id: _id,
-    [branchDocIDField]: _docID,
-    [branchField]: _branch,
-    createdAt: _createdAt,
-    updatedAt: _updatedAt,
-    ...rest
-  } = data
-
-  return rest
-}
-
-const stripGlobalInternal = (data: Record<string, unknown>): Record<string, unknown> => {
-  const { globalType: _globalType, ...globalData } = data
-
-  return stripInternal(globalData)
-}
-
 /**
  * A branch document's data, ready to be written onto main's row.
  *
@@ -1866,7 +1847,10 @@ const forMain = ({
 }): Record<string, unknown> =>
   copyDataWithFreshRowIDs({
     config: payload.config,
-    data: stripInternal(data),
+    data: stripBranchMergeData({
+      data,
+      fields: payload.collections[collectionSlug]!.config.fields,
+    }),
     existingDoc: {},
     fields: payload.collections[collectionSlug]!.config.fields,
   })
@@ -2260,6 +2244,8 @@ const applyChange = async ({
     return { cleanup: dropShadowRow, ...sourceIdentity }
   }
 
+  const fields = payload.collections[collectionSlug]!.config.fields
+
   if (change.operation === 'create') {
     const actionableWrites = writes.filter((write) => write.trashState !== 'access')
     const [rowWrite, ...laterWrites] = actionableWrites
@@ -2311,7 +2297,7 @@ const applyChange = async ({
         const branchDoc = localizedWrites?.[0]?.get(createLocale)
 
         if (branchDoc) {
-          const data = stripInternal(branchDoc)
+          const data = stripBranchMergeData({ data: branchDoc, fields })
 
           await updateByIDOperationForBranchMerge({
             id: shadowID,
@@ -2325,7 +2311,7 @@ const applyChange = async ({
           })
         }
       } else {
-        const data = stripInternal(rowWrite!.data)
+        const data = stripBranchMergeData({ data: rowWrite!.data, fields })
 
         await updateByIDOperationForBranchMerge({
           id: shadowID,
@@ -2349,17 +2335,21 @@ const applyChange = async ({
               continue
             }
 
+            const data = stripBranchMergeData({ data: branchDoc, fields })
+
             await updateMainDocument({
               id: shadowID,
-              data: stripInternal(branchDoc) as never,
+              data,
               draft: true,
               locale,
             })
           }
         } else {
+          const data = stripBranchMergeData({ data: write.data, fields })
+
           await updateMainDocument({
             id: shadowID,
-            data: stripInternal(write.data) as never,
+            data,
             draft: true,
           })
         }
@@ -2398,7 +2388,6 @@ const applyChange = async ({
     return { ...appliedCreate, ...sourceIdentity }
   }
 
-  const fields = payload.collections[collectionSlug]!.config.fields
   const localization = payload.config.localization
   const hasLocalizedFields = traverseForLocalizedFields(fields)
   const localeCodes = localization && hasLocalizedFields ? localization.localeCodes : undefined
@@ -2841,6 +2830,12 @@ const applyGlobalChange = async ({
     )
   }
 
+  const globalConfig = payload.globals.config.find(({ slug }) => slug === globalSlug)
+
+  if (!globalConfig) {
+    throw new Error(`Global "${globalSlug}" is not configured.`)
+  }
+
   const locales = getGlobalMergeLocales({ globalSlug, payload, req })
   const appliedSourceStates: {
     data: string
@@ -2869,7 +2864,7 @@ const applyGlobalChange = async ({
 
       await payload.updateGlobal({
         slug: globalSlug,
-        data: stripGlobalInternal(data) as never,
+        data: stripBranchMergeGlobalData({ data, fields: globalConfig.fields }) as never,
         draft: write.draft,
         locale,
         overrideAccess,
