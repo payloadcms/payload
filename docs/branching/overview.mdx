@@ -1,0 +1,330 @@
+---
+title: Content Branching
+label: Overview
+order: 10
+desc: Create isolated content branches, review their changes, and merge selected work into main.
+keywords: content branching, branches, merge, preview, workflow, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+Content Branching lets editors create named workspaces for content changes. A branch inherits content from `main` until a document or global changes on that branch. Branch changes stay isolated until an editor merges them into `main`.
+
+You can use branches for release campaigns, large editorial updates, or other work that must be reviewed as one set. Branches support collections, globals, drafts, versions, localization, relationships, uploads, and Trash.
+
+<Banner type="warning">
+  A merge always targets <code>main</code>. Content Branching does not provide
+  branch-to-branch merges, three-way conflict resolution, or field-level
+  conflict resolution.
+</Banner>
+
+## Enable Content Branching
+
+Set `branching` in the root Payload Config:
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  branching: true,
+  collections: [Pages, Media, Users],
+  globals: [Header],
+})
+```
+
+Branching applies to eligible collections and globals by default. Authentication-enabled collections cannot use branching. Payload's internal collections are excluded by default because they do not contain authored content.
+
+You can opt an entity out:
+
+```ts
+export const Media: CollectionConfig = {
+  slug: 'media',
+  branching: false,
+  fields: [],
+  upload: true,
+}
+```
+
+You can opt an eligible internal collection in with `branching: true`. The `payload-branches`, `payload-branch-changes`, and `payload-branch-merges` collections cannot themselves use branching.
+
+The object form supports lifecycle access, merge hooks, validation, exclusions, and the branch-read threshold:
+
+```ts
+import type { Config } from 'payload'
+
+export const config: Config = {
+  branching: {
+    access: {
+      createBranch: ({ req }) => Boolean(req.user),
+      deleteBranch: ({ req }) => Boolean(req.user),
+      readBranch: ({ req }) => Boolean(req.user),
+      updateBranch: ({ req }) => Boolean(req.user),
+    },
+    exclude: ['audit-events'],
+    hooks: {
+      beforeMerge: async ({ branch, changes, req, warnings }) => {
+        // Throw to stop the merge.
+      },
+      afterMerge: async ({ branch, req, results }) => {
+        // This runs after the target transaction commits.
+      },
+    },
+    maxShadowedIDs: 2000,
+  },
+}
+```
+
+Document and global access control still applies. Existing access functions can read `req.branch` when they need branch-specific rules.
+
+## Work with branches
+
+The Admin Panel adds a branch switcher when Content Branching is enabled. Editors can create a branch, switch between it and `main`, review pending changes, merge selected changes, discard selected changes, and inspect earlier merge events.
+
+The active branch affects reads and writes throughout the Admin Panel. A document keeps its logical ID when it first changes on a branch. Relationships therefore continue to point to the same logical document.
+
+If a branch has no replacement for a document, reads inherit the current document from `main`. After a document changes on the branch, branch reads use that branch-owned state. Deletes and Trash changes on a branch do not alter `main` before a merge.
+
+## Use branches through APIs
+
+Omitting `branch` uses `main`. Pass a branch slug to supported Local API operations:
+
+```ts
+const page = await payload.findByID({
+  id: pageID,
+  branch: 'fall-campaign',
+  collection: 'pages',
+  overrideAccess: false,
+  user,
+})
+
+await payload.update({
+  id: pageID,
+  branch: 'fall-campaign',
+  collection: 'pages',
+  data: { title: 'Fall campaign' },
+  overrideAccess: false,
+  user,
+})
+```
+
+For REST, pass the branch slug as the `branch` query parameter:
+
+```text
+GET /api/pages?branch=fall-campaign
+PATCH /api/pages/:id?branch=fall-campaign
+```
+
+For GraphQL, pass `branch` to the query or mutation field:
+
+```graphql
+query FallCampaignPages {
+  Pages(branch: "fall-campaign", limit: 10) {
+    docs {
+      id
+      title
+    }
+  }
+}
+```
+
+Branch selection is request-scoped. Nested relationship and join reads keep the same branch, and concurrent GraphQL root fields do not share branch state.
+
+## Merge and discard
+
+The Local API exposes `payload.branches.merge` and `payload.branches.discard`:
+
+```ts
+const preview = await payload.branches.merge({
+  branch: 'fall-campaign',
+  dryRun: true,
+  overrideAccess: false,
+  user,
+})
+
+if (preview.canMerge) {
+  const result = await payload.branches.merge({
+    branch: 'fall-campaign',
+    closeBranch: false,
+    overrideAccess: false,
+    user,
+  })
+}
+```
+
+Omit `changes` to merge or discard every pending change. Pass branch-change IDs to apply a selected subset. If work remains, Payload keeps the branch open. Set `closeBranch: true` only when merging all remaining work and the branch must become terminal.
+
+The REST endpoints use the branch document ID:
+
+```text
+POST /api/payload-branches/:id/merge
+POST /api/payload-branches/:id/discard
+```
+
+The merge body supports `changes`, `closeBranch`, `dryRun`, and `stream`. A streamed merge returns NDJSON progress events. A merge result separates:
+
+- `mergeable`: selected changes that passed prechecks
+- `merged`: changes that completed
+- `blocked`: permission or dependency failures
+- `validationErrors`: best-effort content validation failures
+- `warnings`: changes on `main` that the branch will overwrite
+
+A branch merge uses source-wins behavior. Payload writes the latest branch state to `main`; it does not reconcile fields. Normal target access control, field access, validation, hooks, versions, and database constraints run again during the real write.
+
+<Banner type="warning">
+  A successful dry run is not an authorization token or a guarantee that the
+  real merge will succeed. Hooks, permissions, content, and database constraints
+  can change before the write.
+</Banner>
+
+Discard removes only branch-owned work. It does not change `main`. Payload blocks removal of a branch-created document if a surviving document, global, or version still references it.
+
+## Customize merge validation
+
+By default, Payload performs a best-effort structural check on the prepared merge candidates. It checks known field structures but does not simulate every hook, relationship state, custom JSON schema, or database constraint.
+
+Set `branching.validate` to replace this precheck:
+
+```ts
+import type { Config } from 'payload'
+
+export const config: Config = {
+  branching: {
+    validate: async ({ branch, candidates, req, target }) => {
+      const errors = candidates.flatMap((candidate) => {
+        if (candidate.collectionSlug === 'pages' && !candidate.data?.title) {
+          return [
+            {
+              changeID: candidate.changeID,
+              collectionSlug: candidate.collectionSlug,
+              docID: candidate.docID,
+              message: 'A page title is required.',
+              path: 'title',
+            },
+          ]
+        }
+
+        return []
+      })
+
+      return { errors, valid: errors.length === 0 }
+    },
+  },
+}
+```
+
+The callback runs against candidates prepared for `main` and replaces only the default precheck. It cannot bypass branch access, document access, field access, normal write validation, hooks, or database constraints.
+
+## Schedule a merge
+
+When the Jobs Queue is configured, the Admin Panel can schedule a merge and cancel a job that has not started. The job stores the selected work and user. When it runs, it reloads current candidates and repeats access, dependency, and validation checks. It uses the same main-only merge and cleanup behavior as an immediate merge.
+
+Do not treat permission at schedule time as permission at execution time. A scheduled merge can fail if the stored user loses access or if the selected content becomes invalid.
+
+## Transactions, recovery, and visibility
+
+Payload uses the configured database transaction when the adapter and environment support it. Without a transaction, a later failure can occur after an earlier target write is already visible on `main`. Content Branching does not use a staging-and-switch publication model, so it does not guarantee atomic visibility for the whole selected merge.
+
+For versioned collections and globals, Payload records the exact target version before and after each merge write. If a transaction-free merge fails, Payload makes a best-effort recovery in reverse order using those target versions. It can also remove a target document that the failed merge created.
+
+Recovery has these limits:
+
+- If versioning is disabled, Payload may have no usable state to restore.
+- If a required version was pruned or cannot be read, recovery is unavailable.
+- An intervening edit on `main` can be overwritten by a recovery attempt.
+- A process interruption can leave an outcome as `unknown`; Payload does not run an automatic repair worker.
+
+The branch source stays available until the selected target work and final cleanup succeed. Review the Admin merge history and logs after any merge with failed, unavailable, or unknown outcomes.
+
+## Merge history and cleanup outcomes
+
+Payload records a durable merge event before target writes. Each item records application, recovery, and cleanup outcomes. New events store target version references instead of full content snapshots.
+
+Historical diffs therefore depend on normal version retention and version access. The Admin Panel reports history as unavailable when versioning is disabled or a referenced version is missing, pruned, or inaccessible. Older merge events that contain full snapshots remain readable.
+
+Source cleanup starts only after the selected target writes succeed and commit. If target content commits but cleanup fails:
+
+- the target content stays applied
+- the merge reports that cleanup needs attention
+- the source row and change record stay available
+- a later merge retries cleanup without repeating the committed target write
+- newer branch work is preserved and marks the older cleanup as superseded
+
+Do not undo a successful target write only because source cleanup failed.
+
+## Database indexes and migrations
+
+Branching adds branch identity to branchable content, global, and version storage. Unique fields and developer-defined unique indexes include the branch identity so separate branches can use the same value. The normal `main` constraint still applies during merge, so a collision on `main` fails the real write.
+
+Review generated migrations before deployment. For Postgres and SQLite, enable branching in the config and generate the normal schema migration:
+
+```text
+pnpm payload migrate:create enable-branching
+```
+
+For an existing MongoDB database, generate the predefined branching migration:
+
+```text
+pnpm payload migrate:create enable-branching --file @payloadcms/db-mongodb/branching
+```
+
+The MongoDB migration sets missing or null branch identities to `main` for branchable content, globals, and versions before it synchronizes indexes. If the backfill finds a uniqueness conflict, the migration stops before it removes the old index. Resolve the conflicting data and run the migration again.
+
+Run migrations before starting application code that expects branching fields and indexes. Do not rely on MongoDB schema defaults to rewrite existing documents.
+
+## Preview and visual editing
+
+Preview and Live Preview URL callbacks receive the active branch through `req.branch`. Include it in the generated URL so the frontend can query the same branch:
+
+```ts
+export const Pages: CollectionConfig = {
+  slug: 'pages',
+  admin: {
+    livePreview: {
+      url: ({ data, req }) => {
+        const search = new URLSearchParams({
+          branch: req.branch ?? 'main',
+          path: `/${String(data.slug)}`,
+        })
+
+        return `/preview?${search.toString()}`
+      },
+    },
+  },
+  fields: [],
+}
+```
+
+The preview route must authenticate the request, verify that the user can read the requested branch, and query with that user:
+
+```ts
+const page = await payload.find({
+  branch,
+  collection: 'pages',
+  overrideAccess: false,
+  user,
+  where: { slug: { equals: slug } },
+})
+```
+
+Do not accept an arbitrary branch query parameter and then read with `overrideAccess: true`. Use a signed preview URL or an authenticated preview route, validate all redirect paths, and keep the selected branch in the server-side query. See [Preview](/docs/admin/preview) and [Live Preview](/docs/live-preview/overview) for the complete setup.
+
+Content Branching supplies branch-aware content to these existing visual editing tools. It does not add a native Figma integration.
+
+## Multi-tenant limitation
+
+Content Branching and `@payloadcms/plugin-multi-tenant` are not supported together. Payload logs a warning when both are enabled. The warning does not add tenant isolation, and a custom field named `tenant` is not equivalent to the plugin.
+
+Do not enable both features in a production system that depends on tenant boundaries.
+
+## Current scope
+
+The current implementation does not include:
+
+- branch-to-branch merges or non-main merge destinations
+- three-way or field-level conflict resolution
+- atomic visibility across a transaction-free merge
+- guaranteed recovery for unversioned content
+- automatic repair of unknown, recovery-failed, or cleanup-failed outcomes
+- import/export migration to branch-aware batch processing
+- multi-tenant plugin compatibility
+- a native Figma integration
+
+Written with AI
