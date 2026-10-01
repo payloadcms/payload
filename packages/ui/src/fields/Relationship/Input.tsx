@@ -47,13 +47,13 @@ const baseClass = 'relationship'
 
 export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   const {
+    AddNewRelationButton,
     AfterInput,
     allowCreate = true,
     allowEdit = true,
     appearance = 'select',
     BeforeInput,
     className,
-    CreateButton,
     description,
     Description,
     Error,
@@ -954,25 +954,24 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                 value={valueToRender ?? null}
               />
             </div>
-            {!readOnly &&
-              (CreateButton ??
-                (allowCreate ? (
-                  <AddNewRelation
-                    path={path}
-                    relationTo={relationTo}
-                    {...(hasMany === true
-                      ? {
-                          hasMany,
-                          onChange,
-                          value,
-                        }
-                      : {
-                          hasMany,
-                          onChange,
-                          value,
-                        })}
-                  />
-                ) : null))}
+            {AddNewRelationButton ??
+              (!readOnly && allowCreate ? (
+                <AddNewRelation
+                  path={path}
+                  relationTo={relationTo}
+                  {...(hasMany === true
+                    ? {
+                        hasMany,
+                        onChange,
+                        value,
+                      }
+                    : {
+                        hasMany,
+                        onChange,
+                        value,
+                      })}
+                />
+              ) : null)}
           </div>
         )}
         {AfterInput}

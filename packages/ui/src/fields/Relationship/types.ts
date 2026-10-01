@@ -87,13 +87,13 @@ export type UpdateResults = (
 ) => void
 
 export type RelationshipInputProps = {
+  readonly AddNewRelationButton?: React.ReactNode
   readonly AfterInput?: React.ReactNode
   readonly allowCreate?: boolean
   readonly allowEdit?: boolean
   readonly appearance?: 'drawer' | 'select'
   readonly BeforeInput?: React.ReactNode
   readonly className?: string
-  readonly CreateButton?: React.ReactNode
   readonly Description?: React.ReactNode
   readonly description?: StaticDescription
   readonly Error?: React.ReactNode

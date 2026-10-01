@@ -184,6 +184,7 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
 
   return (
     <RelationshipInput
+      AddNewRelationButton={BrowseButton}
       AfterInput={
         <Fragment>
           {AfterInput}
@@ -197,7 +198,6 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
       allowEdit={false}
       BeforeInput={BeforeInput}
       className={[baseClass, className].filter(Boolean).join(' ')}
-      CreateButton={BrowseButton}
       Description={Description}
       description={description}
       Error={Error}
