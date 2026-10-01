@@ -29,12 +29,14 @@
   }
 
   .LexicalEditorTheme__paragraph {
-    font-family: var(--text-body-medium-font-family);
-    font-size: var(--text-body-medium-font-size);
-    font-weight: var(--text-body-medium-font-weight);
-    line-height: var(--text-body-medium-line-height);
-    letter-spacing: var(--text-body-medium-letter-spacing);
-    margin-block: var(--spacer-2);
+    font-family: var(--text-body-medium-paragraph-font-family);
+    /* font-size: var(--text-body-medium-paragraph-font-size); */
+    font-size: 14px;
+    font-weight: var(--text-body-medium-paragraph-font-weight);
+    /* line-height: var(--text-body-medium-paragraph-line-height); */
+    line-height: 20px;
+    letter-spacing: var(--text-body-medium-paragraph-letter-spacing);
+    margin-block: var(--spacer-3);
     position: relative;
   }
 
@@ -58,34 +60,46 @@
   .LexicalEditorTheme__h4,
   .LexicalEditorTheme__h5,
   .LexicalEditorTheme__h6 {
-    font-weight: 550;
+    font-weight: 600;
     line-height: 1.2;
     letter-spacing: -0.017em;
-    margin-block: 1em var(--spacer-2);
+    margin-block: var(--spacer-3);
   }
 
   .LexicalEditorTheme__h1 {
-    font-size: var(--lexical-h1-font-size);
+    /* font-size: var(--lexical-h1-font-size); */
+    font-size: 40px;
+    line-height: 47px;
   }
 
   .LexicalEditorTheme__h2 {
-    font-size: var(--lexical-h2-font-size);
+    /* font-size: var(--lexical-h2-font-size); */
+    font-size: 32px;
+    line-height: 40px;
   }
 
   .LexicalEditorTheme__h3 {
-    font-size: var(--lexical-h3-font-size);
+    /* font-size: var(--lexical-h3-font-size); */
+    font-size: 24px;
+    line-height: 31px;
   }
 
   .LexicalEditorTheme__h4 {
-    font-size: var(--lexical-h4-font-size);
+    /* font-size: var(--lexical-h4-font-size); */
+    font-size: 20px;
+    line-height: 27px;
   }
 
   .LexicalEditorTheme__h5 {
-    font-size: var(--lexical-h5-font-size);
+    /* font-size: var(--lexical-h5-font-size); */
+    font-size: 16px;
+    line-height: 22px;
   }
 
   .LexicalEditorTheme__h6 {
-    font-size: var(--lexical-h6-font-size);
+    /* font-size: var(--lexical-h6-font-size); */
+    font-size: 14px;
+    line-height: 20px;
   }
 
   .LexicalEditorTheme__textBold {

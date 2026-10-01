@@ -6,21 +6,6 @@
     flex-direction: column;
   }
 
-  .hierarchy-list > :not(.hierarchy-list__wrap),
-  .hierarchy-list__wrap > :not(.list-header):not(.list-controls-bar),
-  .hierarchy-list__wrap
-    > .list-header
-    > :is(.list-header__content, .list-header__after-header-content),
-  .hierarchy-list__wrap > .list-controls-bar > .list-controls-bar__inner {
-    width: 100%;
-    max-inline-size: var(--list-view-max-width);
-    margin-inline: auto;
-  }
-
-  .hierarchy-list__wrap > .no-results--with-margin {
-    width: calc(100% - (var(--gutter-h) * 2));
-  }
-
   .hierarchy-list__wrap {
     padding-bottom: var(--spacing-view-bottom);
     flex: 1;

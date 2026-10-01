@@ -26,10 +26,11 @@
   }
 
   .list-header__title {
-    font-size: var(--text-heading-large-font-size);
-    line-height: var(--text-heading-large-line-height);
-    font-weight: var(--text-heading-large-font-weight);
-    font-family: var(--text-heading-large-font-family);
+    font-family: var(--text-heading-xl-font-family);
+    font-size: var(--text-heading-xl-font-size);
+    font-weight: var(--text-heading-xl-font-weight);
+    line-height: var(--text-heading-xl-line-height);
+    letter-spacing: var(--text-heading-xl-letter-spacing);
   }
 
   .list-header__title-actions {

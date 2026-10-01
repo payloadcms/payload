@@ -1,42 +1,38 @@
 'use client'
 import React, { createContext, use, useCallback, useEffect, useState } from 'react'
 
-import type { EditViewWidth, Theme, TypeSize } from './shared.js'
+import type { EditViewAlignment, EditViewWidth, Theme, TypeSize } from './shared.js'
 
 import { useConfig } from '../Config/index.js'
 import { useSearchParams } from '../RouterAdapter/index.js'
-import { defaultTheme, getEditViewWidth, getTypeSize } from './shared.js'
+import { defaultTheme, getEditViewAlignment, getEditViewWidth, getTypeSize } from './shared.js'
 
 export { defaultTheme, type Theme }
 
 export type ThemeContext = {
   autoMode: boolean
+  editViewAlignment: EditViewAlignment
   editViewWidth: EditViewWidth
   highContrastMode: boolean
-  setEditViewHeaderAlignment: (args: { isEnabled: boolean }) => void
+  setEditViewAlignment: (args: { editViewAlignment: EditViewAlignment }) => void
   setEditViewWidth: (args: { editViewWidth: EditViewWidth }) => void
   setHighContrastMode: (isHighContrast: boolean, options?: { scoped?: boolean }) => void
-  setListViewMaxWidth: (args: { isEnabled: boolean }) => void
   setTheme: (theme: 'auto' | Theme, options?: { scoped?: boolean }) => void
   setTypeSize: (args: { typeSize: TypeSize }) => void
-  shouldAlignEditViewHeader: boolean
-  shouldApplyListViewMaxWidth: boolean
   theme: Theme
   typeSize: TypeSize
 }
 
 const initialContext: ThemeContext = {
   autoMode: true,
+  editViewAlignment: 'left',
   editViewWidth: 'full',
   highContrastMode: false,
-  setEditViewHeaderAlignment: () => null,
+  setEditViewAlignment: () => null,
   setEditViewWidth: () => null,
   setHighContrastMode: () => null,
-  setListViewMaxWidth: () => null,
   setTheme: () => null,
   setTypeSize: () => null,
-  shouldAlignEditViewHeader: false,
-  shouldApplyListViewMaxWidth: true,
   theme: 'light',
   typeSize: 'proposed',
 }
@@ -110,18 +106,16 @@ const isValidThemeParam = (value: null | string): value is 'auto' | Theme =>
  */
 export const ThemeProvider: React.FC<{
   children?: React.ReactNode
+  editViewAlignment?: EditViewAlignment
   editViewWidth?: EditViewWidth
   highContrastMode?: boolean
-  shouldAlignEditViewHeader?: boolean
-  shouldApplyListViewMaxWidth?: boolean
   theme?: Theme
   typeSize?: TypeSize
 }> = ({
   children,
+  editViewAlignment: initialEditViewAlignment = 'left',
   editViewWidth: initialEditViewWidth = 'full',
   highContrastMode: initialHighContrastMode,
-  shouldAlignEditViewHeader: initialHeaderAlignment = false,
-  shouldApplyListViewMaxWidth: initialListViewMaxWidth = true,
   theme: themeOverride,
   typeSize: initialTypeSize = 'proposed',
 }) => {
@@ -132,6 +126,39 @@ export const ThemeProvider: React.FC<{
   const preselectedTheme = config.admin.theme
   const themeCookieKey = `${config.cookiePrefix || 'payload'}-theme`
   const contrastCookieKey = `${config.cookiePrefix || 'payload'}-high-contrast-mode`
+
+  const editViewAlignmentCookieKey = `${config.cookiePrefix || 'payload'}-edit-view-alignment`
+  const [editViewAlignment, setEditViewAlignmentState] =
+    useState<EditViewAlignment>(initialEditViewAlignment)
+
+  const setEditViewAlignment = useCallback(
+    ({ editViewAlignment: nextEditViewAlignment }: { editViewAlignment: EditViewAlignment }) => {
+      if (isScoped) {
+        outerContext.setEditViewAlignment({ editViewAlignment: nextEditViewAlignment })
+        return
+      }
+
+      setEditViewAlignmentState(nextEditViewAlignment)
+      setCookie(editViewAlignmentCookieKey, nextEditViewAlignment, 365)
+      document.documentElement.setAttribute('data-edit-view-alignment', nextEditViewAlignment)
+    },
+    [editViewAlignmentCookieKey, isScoped, outerContext],
+  )
+
+  useEffect(() => {
+    if (isScoped) {
+      return
+    }
+
+    const value = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith(`${editViewAlignmentCookieKey}=`))
+      ?.split('=')[1]
+    const detectedEditViewAlignment = getEditViewAlignment({ value })
+
+    setEditViewAlignmentState(detectedEditViewAlignment)
+    document.documentElement.setAttribute('data-edit-view-alignment', detectedEditViewAlignment)
+  }, [editViewAlignmentCookieKey, isScoped])
 
   const editViewWidthCookieKey = `${config.cookiePrefix || 'payload'}-edit-view-width`
   const [editViewWidth, setEditViewWidthState] = useState<EditViewWidth>(initialEditViewWidth)
@@ -164,67 +191,6 @@ export const ThemeProvider: React.FC<{
     setEditViewWidthState(detectedEditViewWidth)
     document.documentElement.setAttribute('data-edit-view-width', detectedEditViewWidth)
   }, [isScoped, editViewWidthCookieKey])
-
-  const listViewMaxWidthCookieKey = `${config.cookiePrefix || 'payload'}-list-view-max-width`
-  const [shouldApplyListViewMaxWidth, setListViewMaxWidthState] = useState(initialListViewMaxWidth)
-
-  const setListViewMaxWidth = useCallback(
-    ({ isEnabled }: { isEnabled: boolean }) => {
-      if (isScoped) {
-        outerContext.setListViewMaxWidth({ isEnabled })
-        return
-      }
-
-      setListViewMaxWidthState(isEnabled)
-      setCookie(listViewMaxWidthCookieKey, String(isEnabled), 365)
-      document.documentElement.setAttribute('data-list-view-max-width', String(isEnabled))
-    },
-    [isScoped, outerContext, listViewMaxWidthCookieKey],
-  )
-
-  useEffect(() => {
-    if (isScoped) {
-      return
-    }
-
-    const value = document.cookie
-      .split('; ')
-      .find((row) => row.startsWith(`${listViewMaxWidthCookieKey}=`))
-      ?.split('=')[1]
-    const isEnabled = value !== 'false'
-
-    setListViewMaxWidthState(isEnabled)
-    document.documentElement.setAttribute('data-list-view-max-width', String(isEnabled))
-  }, [isScoped, listViewMaxWidthCookieKey])
-
-  const headerAlignmentCookieKey = `${config.cookiePrefix || 'payload'}-edit-view-header-alignment`
-  const [shouldAlignEditViewHeader, setHeaderAlignmentState] = useState(initialHeaderAlignment)
-
-  const setEditViewHeaderAlignment = useCallback(
-    ({ isEnabled }: { isEnabled: boolean }) => {
-      if (isScoped) {
-        outerContext.setEditViewHeaderAlignment({ isEnabled })
-        return
-      }
-
-      setHeaderAlignmentState(isEnabled)
-      setCookie(headerAlignmentCookieKey, String(isEnabled), 365)
-    },
-    [headerAlignmentCookieKey, isScoped, outerContext],
-  )
-
-  useEffect(() => {
-    if (isScoped) {
-      return
-    }
-
-    const value = document.cookie
-      .split('; ')
-      .find((row) => row.startsWith(`${headerAlignmentCookieKey}=`))
-      ?.split('=')[1]
-
-    setHeaderAlignmentState(value === 'true')
-  }, [headerAlignmentCookieKey, isScoped])
 
   const typeSizeCookieKey = `${config.cookiePrefix || 'payload'}-type-size`
   const [typeSize, setTypeSizeState] = useState<TypeSize>(initialTypeSize)
@@ -345,20 +311,14 @@ export const ThemeProvider: React.FC<{
     <Context
       value={{
         autoMode: isScoped ? outerContext.autoMode : autoMode,
+        editViewAlignment: isScoped ? outerContext.editViewAlignment : editViewAlignment,
         editViewWidth: isScoped ? outerContext.editViewWidth : editViewWidth,
         highContrastMode,
-        setEditViewHeaderAlignment,
+        setEditViewAlignment,
         setEditViewWidth,
         setHighContrastMode,
-        setListViewMaxWidth,
         setTheme,
         setTypeSize,
-        shouldAlignEditViewHeader: isScoped
-          ? outerContext.shouldAlignEditViewHeader
-          : shouldAlignEditViewHeader,
-        shouldApplyListViewMaxWidth: isScoped
-          ? outerContext.shouldApplyListViewMaxWidth
-          : shouldApplyListViewMaxWidth,
         theme: isScoped ? outerContext.theme : theme,
         typeSize: isScoped ? outerContext.typeSize : typeSize,
       }}

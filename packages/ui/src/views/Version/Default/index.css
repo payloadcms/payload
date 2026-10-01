@@ -8,17 +8,6 @@
   .view-version-controls-top__wrapper,
   .view-version-controls-bottom__wrapper {
     width: 100%;
-    max-inline-size: var(--edit-view-max-width);
-    margin-inline: auto;
-  }
-
-  :root[data-edit-view-width='full']
-    :is(
-      .view-version__diff-wrap,
-      .view-version-controls-top__wrapper,
-      .view-version-controls-bottom__wrapper
-    ) {
-    max-inline-size: none;
   }
 
   .view-version__toggle-locales-label {

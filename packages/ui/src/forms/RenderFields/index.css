@@ -48,7 +48,7 @@
       }
 
       &.group-field {
-        margin-top: calc(var(--spacing-field) * 4);
+        margin-top: calc(var(--spacing-field) * 2);
         margin-bottom: calc(var(--spacing-field) * 3);
 
         &:first-child {

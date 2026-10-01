@@ -98,11 +98,11 @@
 
   .group-field__title {
     margin-bottom: 0;
-    font-family: var(--text-heading-small-font-family);
-    font-size: var(--text-heading-small-font-size);
-    font-weight: var(--text-heading-small-font-weight);
-    line-height: var(--text-heading-small-line-height);
-    letter-spacing: var(--text-heading-small-letter-spacing);
+    font-family: var(--text-heading-large-font-family);
+    font-size: var(--text-heading-large-font-size);
+    font-weight: var(--text-heading-large-font-weight);
+    line-height: var(--text-heading-large-line-height);
+    letter-spacing: var(--text-heading-large-letter-spacing);
 
     .field-label:not(.unstyled) {
       font: inherit;

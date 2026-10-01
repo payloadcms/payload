@@ -1,14 +1,14 @@
 @layer payload-default {
   .render-title {
-    --render-title-letter-spacing: var(--text-heading-large-letter-spacing);
+    --render-title-letter-spacing: var(--text-heading-xl-letter-spacing);
 
     display: inline-flex;
     align-items: center;
-    min-height: var(--text-heading-large-line-height);
-    font-family: var(--text-heading-large-font-family);
-    font-size: var(--text-heading-large-font-size);
-    font-weight: var(--text-heading-large-font-weight);
-    line-height: var(--text-heading-large-line-height);
+    min-height: var(--text-heading-xl-line-height);
+    font-family: var(--text-heading-xl-font-family);
+    font-size: var(--text-heading-xl-font-size);
+    font-weight: var(--text-heading-xl-font-weight);
+    line-height: var(--text-heading-xl-line-height);
     letter-spacing: var(--render-title-letter-spacing);
     color: var(--color-text);
     margin: 0;

@@ -12,7 +12,11 @@ import React, { Suspense } from 'react'
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
 import { ProgressBar, RootProvider } from '../../exports/client/index.js'
-import { getEditViewWidth, getTypeSize } from '../../providers/Theme/shared.js'
+import {
+  getEditViewAlignment,
+  getEditViewWidth,
+  getTypeSize,
+} from '../../providers/Theme/shared.js'
 import { checkDependencies, type CheckDependenciesArgs } from '../../utilities/checkDependencies.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { getLanguageDir } from '../../utilities/getLanguageDir.js'
@@ -133,11 +137,9 @@ const RootLayoutContent = async ({
     value: cookies.get(`${config.cookiePrefix || 'payload'}-edit-view-width`),
   })
 
-  const shouldApplyListViewMaxWidth =
-    cookies.get(`${config.cookiePrefix || 'payload'}-list-view-max-width`) !== 'false'
-
-  const shouldAlignEditViewHeader =
-    cookies.get(`${config.cookiePrefix || 'payload'}-edit-view-header-alignment`) === 'true'
+  const editViewAlignment = getEditViewAlignment({
+    value: cookies.get(`${config.cookiePrefix || 'payload'}-edit-view-alignment`),
+  })
 
   const typeSize = getTypeSize({
     value: cookies.get(`${config.cookiePrefix || 'payload'}-type-size`),
@@ -177,9 +179,9 @@ const RootLayoutContent = async ({
     <html
       {...htmlProps}
       className={[...fontClassNames, htmlProps?.className].filter(Boolean).join(' ')}
+      data-edit-view-alignment={editViewAlignment}
       data-edit-view-width={editViewWidth}
       data-enhanced-contrast={highContrastMode ? '' : undefined}
-      data-list-view-max-width={shouldApplyListViewMaxWidth}
       data-theme={theme}
       data-type-size={typeSize}
       dir={dir}
@@ -195,6 +197,7 @@ const RootLayoutContent = async ({
         <RootProvider
           config={clientConfig}
           dateFNSKey={req.i18n.dateFNSKey}
+          editViewAlignment={editViewAlignment}
           editViewWidth={editViewWidth}
           embed={embed}
           fallbackLang={config.i18n.fallbackLanguage}
@@ -206,8 +209,6 @@ const RootLayoutContent = async ({
           permissions={user ? permissions : null}
           RouterAdapter={RouterAdapter}
           serverFunction={serverFunction}
-          shouldAlignEditViewHeader={shouldAlignEditViewHeader}
-          shouldApplyListViewMaxWidth={shouldApplyListViewMaxWidth}
           theme={theme}
           translations={req.i18n.translations}
           typeSize={typeSize}

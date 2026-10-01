@@ -11,3 +11,11 @@ export type EditViewWidth = '960' | '1200' | '1440' | 'full'
 
 export const getEditViewWidth = ({ value }: { value: null | string | undefined }): EditViewWidth =>
   value === '960' || value === '1200' || value === '1440' ? value : 'full'
+
+export type EditViewAlignment = 'center' | 'center-all' | 'left'
+
+export const getEditViewAlignment = ({
+  value,
+}: {
+  value: null | string | undefined
+}): EditViewAlignment => (value === 'center' || value === 'center-all' ? value : 'left')

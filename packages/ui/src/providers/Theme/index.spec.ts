@@ -34,11 +34,10 @@ beforeEach(() => {
 afterEach(() => {
   act(() => root.unmount())
   container.remove()
-  document.cookie = 'type-size-test-edit-view-header-alignment=; max-age=0; path=/'
+  document.cookie = 'type-size-test-edit-view-alignment=; max-age=0; path=/'
   document.cookie = 'type-size-test-edit-view-width=; max-age=0; path=/'
-  document.cookie = 'type-size-test-list-view-max-width=; max-age=0; path=/'
+  document.documentElement.removeAttribute('data-edit-view-alignment')
   document.documentElement.removeAttribute('data-edit-view-width')
-  document.documentElement.removeAttribute('data-list-view-max-width')
   document.cookie = 'type-size-test-type-size=; max-age=0; path=/'
   document.documentElement.removeAttribute('data-type-size')
   document.documentElement.removeAttribute('data-enhanced-contrast')
@@ -172,100 +171,57 @@ describe('edit view width preferences', () => {
   })
 })
 
-const ListWidthControl = () => {
-  const { setListViewMaxWidth, shouldApplyListViewMaxWidth } = useTheme()
+const AlignmentControl = () => {
+  const { editViewAlignment, setEditViewAlignment } = useTheme()
 
   return createElement(
     'button',
-    {
-      'aria-pressed': shouldApplyListViewMaxWidth,
-      onClick: () => setListViewMaxWidth({ isEnabled: !shouldApplyListViewMaxWidth }),
-    },
-    'Apply max width to list views',
+    { onClick: () => setEditViewAlignment({ editViewAlignment: 'center-all' }) },
+    editViewAlignment,
   )
 }
 
-describe('list view max width preference', () => {
-  it('should default to on and persist changes from a scoped settings popup', () => {
+describe('edit view alignment preferences', () => {
+  it('should update the root alignment from a scoped popup', () => {
     act(() => {
       root.render(
         createElement(
           ThemeProvider,
           null,
-          createElement(ListWidthControl),
-          createElement(ThemeProvider, { theme: 'dark' }, createElement(ListWidthControl)),
+          createElement(AlignmentControl),
+          createElement(ThemeProvider, { theme: 'dark' }, createElement(AlignmentControl)),
         ),
       )
     })
 
     const buttons = container.querySelectorAll('button')
 
-    expect(buttons[0].getAttribute('aria-pressed')).toBe('true')
-    act(() => buttons[1].click())
-    expect(buttons[0].getAttribute('aria-pressed')).toBe('false')
-    expect(buttons[1].getAttribute('aria-pressed')).toBe('false')
-    expect(document.documentElement.getAttribute('data-list-view-max-width')).toBe('false')
-    expect(document.cookie).toContain('type-size-test-list-view-max-width=false')
-  })
-
-  it.each(['true', 'false'])('should restore the saved %s preference', (value) => {
-    document.cookie = `type-size-test-list-view-max-width=${value}; path=/`
-
-    act(() => root.render(createElement(ThemeProvider, null, createElement(ListWidthControl))))
-
-    expect(container.querySelector('button').getAttribute('aria-pressed')).toBe(value)
-    expect(document.documentElement.getAttribute('data-list-view-max-width')).toBe(value)
-  })
-})
-
-const HeaderAlignmentControl = () => {
-  const { setEditViewHeaderAlignment, shouldAlignEditViewHeader } = useTheme()
-
-  return createElement(
-    'button',
-    {
-      'aria-pressed': shouldAlignEditViewHeader,
-      onClick: () => setEditViewHeaderAlignment({ isEnabled: !shouldAlignEditViewHeader }),
-    },
-    'Align header and controls',
-  )
-}
-
-describe('edit view header alignment preference', () => {
-  it('should default to off and persist toggles from a scoped settings popup', () => {
-    act(() => {
-      root.render(
-        createElement(
-          ThemeProvider,
-          null,
-          createElement(HeaderAlignmentControl),
-          createElement(ThemeProvider, { theme: 'dark' }, createElement(HeaderAlignmentControl)),
-        ),
-      )
-    })
-
-    const buttons = container.querySelectorAll('button')
-
-    expect(buttons[0].getAttribute('aria-pressed')).toBe('false')
-    act(() => buttons[1].click())
-    expect(buttons[0].getAttribute('aria-pressed')).toBe('true')
-    expect(buttons[1].getAttribute('aria-pressed')).toBe('true')
-    expect(document.cookie).toContain('type-size-test-edit-view-header-alignment=true')
+    expect(buttons[0].textContent).toBe('left')
+    expect(buttons[1].textContent).toBe('left')
 
     act(() => buttons[1].click())
-    expect(buttons[0].getAttribute('aria-pressed')).toBe('false')
-    expect(document.cookie).toContain('type-size-test-edit-view-header-alignment=false')
+
+    expect(buttons[0].textContent).toBe('center-all')
+    expect(buttons[1].textContent).toBe('center-all')
+    expect(document.documentElement.getAttribute('data-edit-view-alignment')).toBe('center-all')
+    expect(document.cookie).toContain('type-size-test-edit-view-alignment=center-all')
   })
 
-  it.each(['true', 'false', 'invalid'])('should restore the saved %s preference', (value) => {
-    document.cookie = `type-size-test-edit-view-header-alignment=${value}; path=/`
+  it.each(['left', 'center', 'center-all'])('should restore the saved %s alignment', (value) => {
+    document.cookie = `type-size-test-edit-view-alignment=${value}; path=/`
 
-    act(() =>
-      root.render(createElement(ThemeProvider, null, createElement(HeaderAlignmentControl))),
-    )
+    act(() => root.render(createElement(ThemeProvider, null, createElement(AlignmentControl))))
 
-    expect(container.querySelector('button').getAttribute('aria-pressed')).toBe(
-      String(value === 'true'),
-    )
+    expect(container.textContent).toBe(value)
+    expect(document.documentElement.getAttribute('data-edit-view-alignment')).toBe(value)
+  })
+
+  it('should fall back to left alignment for an invalid saved value', () => {
+    document.cookie = 'type-size-test-edit-view-alignment=invalid; path=/'
+
+    act(() => root.render(createElement(ThemeProvider, null, createElement(AlignmentControl))))
+
+    expect(container.textContent).toBe('left')
+    expect(document.documentElement.getAttribute('data-edit-view-alignment')).toBe('left')
   })
 })

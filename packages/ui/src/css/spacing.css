@@ -12,7 +12,6 @@
 
     /* Layout spacing */
     --edit-view-max-width: 960px;
-    --list-view-max-width: var(--edit-view-max-width);
     --gutter-h: var(--spacer-5);
     --spacing-field: var(--spacer-3);
     --spacing-view-bottom: var(--gutter-h);
@@ -30,11 +29,6 @@
 
   :root[data-edit-view-width='1440'] {
     --edit-view-max-width: 1440px;
-  }
-
-  :root[data-edit-view-width='full'],
-  :root[data-list-view-max-width='false'] {
-    --list-view-max-width: none;
   }
 
   /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */

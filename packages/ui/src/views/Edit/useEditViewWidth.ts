@@ -2,54 +2,40 @@ import type { RefObject } from 'react'
 
 import { useEffect } from 'react'
 
-import type { EditViewWidth } from '../../providers/Theme/shared.js'
+import type { EditViewAlignment, EditViewWidth } from '../../providers/Theme/shared.js'
 
 const fullWidthAttribute = 'data-edit-view-full-width'
-const contentWidthProperty = '--edit-view-content-width'
 
 export const useEditViewWidth = ({
+  editViewAlignment,
   editViewWidth,
   ref,
-  shouldAlignHeader = false,
 }: {
+  editViewAlignment: EditViewAlignment
   editViewWidth: EditViewWidth
   ref: RefObject<HTMLDivElement | null>
-  shouldAlignHeader?: boolean
 }): void => {
   useEffect(() => {
     const main = ref.current
-    const fields = main?.querySelector<HTMLElement>(':scope > .document-fields')
+    const documentFields = main?.querySelector<HTMLElement>(':scope > .document-fields')
+    const mainFields = main?.querySelector<HTMLElement>(
+      ':scope > .document-fields > .document-fields__main > .document-fields__edit',
+    )
+    const widthTarget = editViewAlignment === 'center-all' ? documentFields : mainFields
+    const widthContainer = editViewAlignment === 'center-all' ? main : mainFields?.parentElement
 
-    if (!main || !fields) {
+    if (!main || !widthTarget || !widthContainer) {
       return
     }
 
-    const editView = main.closest('.collection-edit')
-    const header = editView?.parentElement?.querySelector<HTMLElement>(':scope > .doc-header')
-    const controls = main
-      .closest('.collection-edit__form')
-      ?.querySelector<HTMLElement>(':scope > .doc-controls')
-    const bars = shouldAlignHeader
-      ? [header, controls].filter((element): element is HTMLElement => Boolean(element))
-      : []
-
     const updateWidth = () => {
-      const mainWidth = main.getBoundingClientRect().width
+      const availableWidth = widthContainer.getBoundingClientRect().width
 
-      // Measure the constrained form, including its actual sidebar and gutters.
-      // Remove the override first so a filled form can become constrained again.
       main.removeAttribute(fullWidthAttribute)
-      const constrainedWidth = fields.getBoundingClientRect().width
-      const shouldFill = editViewWidth === 'full' || mainWidth - constrainedWidth <= 128
+      const constrainedWidth = widthTarget.getBoundingClientRect().width
+      const shouldFill = editViewWidth === 'full' || availableWidth - constrainedWidth <= 128
 
       main.toggleAttribute(fullWidthAttribute, shouldFill)
-
-      const contentWidth = shouldFill ? mainWidth : constrainedWidth
-
-      for (const bar of bars) {
-        bar.style.setProperty(contentWidthProperty, `${contentWidth}px`)
-        bar.setAttribute('data-edit-view-aligned', '')
-      }
     }
 
     updateWidth()
@@ -57,10 +43,10 @@ export const useEditViewWidth = ({
     const observer = new ResizeObserver(updateWidth)
     const mutationObserver = new MutationObserver(updateWidth)
 
-    observer.observe(main)
-    observer.observe(fields)
+    observer.observe(widthContainer)
+    observer.observe(widthTarget)
     // Conditional fields and permissions can change sidebar presence without resizing the pane.
-    mutationObserver.observe(fields, {
+    mutationObserver.observe(widthTarget, {
       attributeFilter: ['class', 'hidden'],
       attributes: true,
       childList: true,
@@ -70,11 +56,7 @@ export const useEditViewWidth = ({
     return () => {
       observer.disconnect()
       mutationObserver.disconnect()
-      for (const bar of bars) {
-        bar.style.removeProperty(contentWidthProperty)
-        bar.removeAttribute('data-edit-view-aligned')
-      }
       main.removeAttribute(fullWidthAttribute)
     }
-  }, [editViewWidth, ref, shouldAlignHeader])
+  }, [editViewAlignment, editViewWidth, ref])
 }

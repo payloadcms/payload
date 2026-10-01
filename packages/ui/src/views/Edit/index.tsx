@@ -158,9 +158,9 @@ export function DefaultEditView({
   const { isPreviewEnabled, setPreviewURL } = usePreviewURL()
 
   const mainRef = useRef<HTMLDivElement>(null)
-  const { editViewWidth, shouldAlignEditViewHeader } = useTheme()
+  const { editViewAlignment, editViewWidth } = useTheme()
 
-  useEditViewWidth({ editViewWidth, ref: mainRef, shouldAlignHeader: shouldAlignEditViewHeader })
+  useEditViewWidth({ editViewAlignment, editViewWidth, ref: mainRef })
 
   const abortOnChangeRef = useRef<AbortController>(null)
   const abortOnSaveRef = useRef<AbortController>(null)

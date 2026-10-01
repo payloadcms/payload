@@ -14,21 +14,6 @@
     gap: var(--spacer-2-5);
   }
 
-  .template-default__wrap:has(> :is(.versions, .view-version, .query-inspector))
-    > .doc-header
-    > .doc-header__content {
-    max-inline-size: var(--edit-view-max-width);
-    margin-inline: auto;
-  }
-
-  :root[data-edit-view-width='full']
-    .template-default__wrap:has(> :is(.versions, .view-version, .query-inspector))
-    > .doc-header
-    > .doc-header__content,
-  .template-default__wrap:has(> .query-inspector--fullscreen) > .doc-header > .doc-header__content {
-    max-inline-size: none;
-  }
-
   .doc-header__title {
     flex-grow: 1;
     white-space: nowrap;

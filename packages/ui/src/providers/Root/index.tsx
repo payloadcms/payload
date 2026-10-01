@@ -15,7 +15,7 @@ import { ModalContainer, ModalProvider } from '@faceless-ui/modal'
 import { ScrollInfoProvider } from '@faceless-ui/scroll-info'
 import React from 'react'
 
-import type { EditViewWidth, Theme, TypeSize } from '../Theme/shared.js'
+import type { EditViewAlignment, EditViewWidth, Theme, TypeSize } from '../Theme/shared.js'
 
 import { CloseModalOnRouteChange } from '../../elements/CloseModalOnRouteChange/index.js'
 import { DrawerStackProvider } from '../../elements/Drawer/index.js'
@@ -45,6 +45,7 @@ type Props = {
   readonly children: React.ReactNode
   readonly config: ClientConfig
   readonly dateFNSKey: Language['dateFNSKey']
+  readonly editViewAlignment?: EditViewAlignment
   readonly editViewWidth?: EditViewWidth
   readonly embed?: boolean
   readonly fallbackLang: I18nOptions['fallbackLanguage']
@@ -56,8 +57,6 @@ type Props = {
   readonly permissions: SanitizedPermissions
   readonly RouterAdapter: RouterAdapterComponent
   readonly serverFunction: ServerFunctionClient
-  readonly shouldAlignEditViewHeader?: boolean
-  readonly shouldApplyListViewMaxWidth?: boolean
   readonly theme: Theme
   readonly translations: I18nClient['translations']
   readonly typeSize?: TypeSize
@@ -68,6 +67,7 @@ export const RootProvider: React.FC<Props> = ({
   children,
   config,
   dateFNSKey,
+  editViewAlignment,
   editViewWidth,
   embed,
   fallbackLang,
@@ -79,8 +79,6 @@ export const RootProvider: React.FC<Props> = ({
   permissions,
   RouterAdapter,
   serverFunction,
-  shouldAlignEditViewHeader,
-  shouldApplyListViewMaxWidth,
   theme,
   translations,
   typeSize,
@@ -121,10 +119,9 @@ export const RootProvider: React.FC<Props> = ({
                               <PreferencesProvider>
                                 <HierarchyProvider>
                                   <ThemeProvider
+                                    editViewAlignment={editViewAlignment}
                                     editViewWidth={editViewWidth}
                                     highContrastMode={highContrastMode}
-                                    shouldAlignEditViewHeader={shouldAlignEditViewHeader}
-                                    shouldApplyListViewMaxWidth={shouldApplyListViewMaxWidth}
                                     theme={theme}
                                     typeSize={typeSize}
                                   >

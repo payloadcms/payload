@@ -1,25 +1,17 @@
 'use client'
 import React from 'react'
 
-import type { EditViewWidth } from '../../../providers/Theme/shared.js'
+import type { EditViewAlignment, EditViewWidth } from '../../../providers/Theme/shared.js'
 
 import { useTheme } from '../../../providers/Theme/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { PopupList } from '../../Popup/index.js'
-import { Switch } from '../../Switch/index.js'
-import './index.css'
 
 const widths: EditViewWidth[] = ['960', '1200', '1440', 'full']
+const alignments: EditViewAlignment[] = ['left', 'center', 'center-all']
 
 export const EditViewWidthSettings: React.FC = () => {
-  const {
-    editViewWidth,
-    setEditViewHeaderAlignment,
-    setEditViewWidth,
-    setListViewMaxWidth,
-    shouldAlignEditViewHeader,
-    shouldApplyListViewMaxWidth,
-  } = useTheme()
+  const { editViewAlignment, editViewWidth, setEditViewAlignment, setEditViewWidth } = useTheme()
   const { t } = useTranslation()
 
   return (
@@ -36,18 +28,22 @@ export const EditViewWidthSettings: React.FC = () => {
           </PopupList.RadioGroupItem>
         ))}
       </PopupList.RadioGroup>
-      <Switch
-        checked={shouldApplyListViewMaxWidth}
-        className="edit-view-width-settings__list-views"
-        label={`${t('general:editViewWidth')}: ${t('dashboard:listView')}`}
-        onChange={(isEnabled) => setListViewMaxWidth({ isEnabled })}
-      />
-      <Switch
-        checked={shouldAlignEditViewHeader}
-        className="edit-view-width-settings__alignment"
-        label={t('general:alignHeaderAndControls')}
-        onChange={(isEnabled) => setEditViewHeaderAlignment({ isEnabled })}
-      />
+      <PopupList.GroupLabel label={t('general:editViewAlignment')} />
+      <PopupList.RadioGroup>
+        {alignments.map((alignment) => (
+          <PopupList.RadioGroupItem
+            active={editViewAlignment === alignment}
+            key={alignment}
+            onClick={() => setEditViewAlignment({ editViewAlignment: alignment })}
+          >
+            {alignment === 'left'
+              ? t('general:editViewAlignmentLeft')
+              : alignment === 'center'
+                ? t('general:editViewAlignmentCentered')
+                : t('general:editViewAlignmentCenterAll')}
+          </PopupList.RadioGroupItem>
+        ))}
+      </PopupList.RadioGroup>
     </div>
   )
 }
