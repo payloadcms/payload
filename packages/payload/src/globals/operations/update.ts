@@ -23,6 +23,8 @@ import { hasWhereAccessResult } from '../../auth/types.js'
 import { assertBranchReadable } from '../../branching/assertBranchReadable.js'
 import { recordBranchGlobalChange, resolveBranchGlobalWrite } from '../../branching/globals.js'
 import { runBranchMergeWriteGuard } from '../../branching/mergeWriteGuard.js'
+import { branchField, MAIN_BRANCH } from '../../branching/types.js'
+import { combineQueries } from '../../database/combineQueries.js'
 import { Forbidden } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
@@ -204,6 +206,14 @@ export const updateOperation = async <
     // /////////////////////////////////////
 
     const query: Where = overrideAccess ? undefined! : (accessResults as Where)
+    const writeBranch = resolveBranchGlobalWrite({
+      globalSlug: slug,
+      req,
+    })
+    const mainStorageQuery =
+      !writeBranch && config?.branching?.branchableGlobals.has(slug)
+        ? { [branchField]: { equals: MAIN_BRANCH } }
+        : undefined
 
     // /////////////////////////////////////
     // 2. Retrieve document
@@ -214,9 +224,10 @@ export const updateOperation = async <
       locale: publishAllLocales || unpublishAllLocales ? 'all' : locale!,
       payload,
       req,
+      storageWhere: mainStorageQuery,
       where: query,
     })
-    const { global, globalExists } = globalVersionResult || {}
+    const { global, globalExists, hasLiveGlobal } = globalVersionResult || {}
 
     if (
       hasWhereAccessResult(accessResults) &&
@@ -443,7 +454,7 @@ export const updateOperation = async <
             slug: globalConfig.slug,
             locale: 'all',
             req,
-            where: query,
+            where: mainStorageQuery === undefined ? query : combineQueries(query, mainStorageQuery),
           })
 
           localizedPublishData = buildLocalizedPublishData({
@@ -460,6 +471,10 @@ export const updateOperation = async <
     const dataToUpdate: JsonObject = { ...(localizedPublishData ?? result) }
 
     await runBranchMergeWriteGuard({ data: dataToUpdate, globalSlug: slug, req })
+
+    if (localizedPublishData) {
+      await runBranchMergeWriteGuard({ data: result, globalSlug: slug, req })
+    }
 
     const branchConflictFieldNames = new Set(incomingTopLevelFieldNames)
 
@@ -484,11 +499,6 @@ export const updateOperation = async <
     })
 
     let resultWithLocales: JsonObject = result
-    const writeBranch = resolveBranchGlobalWrite({
-      globalSlug: slug,
-      req,
-    })
-
     if (!isSavingDraft) {
       const now = new Date().toISOString()
       // Ensure global has createdAt
@@ -508,7 +518,7 @@ export const updateOperation = async <
       )
       branchConflictData.updatedAt = now
 
-      if (globalExists || writeBranch) {
+      if (hasLiveGlobal || writeBranch) {
         resultWithLocales = await payload.db.updateGlobal({
           slug,
           branchConflictData,
@@ -540,6 +550,10 @@ export const updateOperation = async <
     // Create version
     // /////////////////////////////////////
     if (globalConfig.versions) {
+      if (config?.branching?.branchableGlobals.has(slug)) {
+        resultWithLocales[branchField] = writeBranch ?? MAIN_BRANCH
+      }
+
       const { globalType } = resultWithLocales
       resultWithLocales = await saveVersion({
         autosave,

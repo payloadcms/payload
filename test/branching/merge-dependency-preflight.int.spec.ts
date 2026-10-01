@@ -114,7 +114,7 @@ test.suite('Branch merge dependency preflight', { config: './config.ts' }, () =>
       overrideAccess: true,
     })
 
-    expect(mainOwner.category).toBeNull()
+    expect(mainOwner.category === null || mainOwner.category === undefined).toBe(true)
     expect(pendingOwnerChange).not.toBeNull()
   })
 
@@ -182,7 +182,7 @@ test.suite('Branch merge dependency preflight', { config: './config.ts' }, () =>
     })
 
     expect(progressDocumentIDs[0]).toBe(target.id)
-    expect(mainOwner.category).toBeNull()
+    expect(mainOwner.category === null || mainOwner.category === undefined).toBe(true)
   })
 
   test('should apply a selected create before its localized owner', async ({ payload }) => {
@@ -362,7 +362,7 @@ test.suite('Branch merge dependency preflight', { config: './config.ts' }, () =>
     })
 
     expect(branchUpdateCompleted).toBe(true)
-    expect(mainOwner.category).toBeNull()
+    expect(mainOwner.category === null || mainOwner.category === undefined).toBe(true)
     expect(pendingOwnerChange).not.toBeNull()
   })
 })

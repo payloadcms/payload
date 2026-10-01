@@ -1,9 +1,52 @@
-import { expect, test } from 'vitest'
+import { expect, test, vi } from 'vitest'
 
 import {
   buildScheduledMergeCancellationWhere,
   buildUpcomingMergeWhere,
+  scheduleMergeHandler,
 } from './scheduleMergeHandler.js'
+
+test('should preserve the scheduling user auth collection in the queued merge', async () => {
+  const waitUntil = new Date('2026-10-01T09:00:00.000Z')
+  const queue = vi.fn().mockResolvedValue({ id: 'scheduled-merge' })
+  const req = {
+    i18n: { t: (key: string) => key },
+    payload: {
+      collections: {
+        'secondary-users': {
+          config: { access: { admin: () => true } },
+        },
+      },
+      config: { admin: { user: 'users' } },
+      findByID: vi.fn().mockResolvedValue({ id: 'branch-id', slug: 'campaign', status: 'open' }),
+      jobs: { queue },
+      logger: { error: vi.fn() },
+    },
+    t: (key: string) => key,
+    user: { collection: 'secondary-users', id: 'secondary-user-id' },
+  }
+
+  await scheduleMergeHandler({
+    branchID: 'branch-id',
+    date: waitUntil,
+    req,
+  } as never)
+
+  expect(queue).toHaveBeenCalledWith({
+    input: {
+      branch: 'campaign',
+      changes: undefined,
+      closeBranch: false,
+      user: {
+        relationTo: 'secondary-users',
+        value: 'secondary-user-id',
+      },
+    },
+    req,
+    task: 'scheduleMerge',
+    waitUntil,
+  })
+})
 
 test('should only cancel an unclaimed and incomplete scheduled merge', () => {
   const where = buildScheduledMergeCancellationWhere({

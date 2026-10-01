@@ -5,7 +5,11 @@ import type { ResolvedChange } from './effectiveOperations.js'
 import type { BlockedChange } from './preflight.js'
 import type { BranchOperation } from './types.js'
 
-import { updateByIDOperationForBranchMerge } from '../collections/operations/updateByID.js'
+import {
+  type BranchMergeUploadDataContext,
+  branchMergeUploadDataContextKey,
+  updateByIDOperationForBranchMerge,
+} from '../collections/operations/updateByID.js'
 import { copyDataWithFreshRowIDs } from '../collections/operations/utilities/copyDataWithFreshRowIDs.js'
 import { APIError, Forbidden } from '../errors/index.js'
 import { tabHasName } from '../fields/config/types.js'
@@ -125,7 +129,7 @@ export type MergeOptions = {
    * Called before each change is applied. Awaited, so a slow consumer throttles
    * the merge rather than falling behind it.
    */
-  onProgress?: (progress: MergeProgress) => Promise<void> | void
+  onProgress?: (progress: MergeProgress, req: PayloadRequest) => Promise<void> | void
   /**
    * Skip the per-document permission checks.
    *
@@ -432,13 +436,16 @@ export const mergeBranch = async (
     })
 
     for (const [index, change] of applicableInWriteOrder.entries()) {
-      await onProgress?.({
-        collectionSlug: change.collectionSlug as string,
-        current: index + 1,
-        docID: changeDocID(change),
-        operation: change.operation as BranchOperation,
-        total: applicableInWriteOrder.length,
-      })
+      await onProgress?.(
+        {
+          collectionSlug: change.collectionSlug as string,
+          current: index + 1,
+          docID: changeDocID(change),
+          operation: change.operation as BranchOperation,
+          total: applicableInWriteOrder.length,
+        },
+        req,
+      )
 
       const [resolvedChange] = await resolveEffectiveOperations({
         branch,
@@ -541,13 +548,16 @@ export const mergeBranch = async (
     for (const [index, change] of applicableGlobals.entries()) {
       const globalSlug = change.globalSlug as string
 
-      await onProgress?.({
-        collectionSlug: globalSlug,
-        current: applicableInWriteOrder.length + index + 1,
-        docID: globalSlug,
-        operation: 'update',
-        total: applicableInWriteOrder.length + applicableGlobals.length,
-      })
+      await onProgress?.(
+        {
+          collectionSlug: globalSlug,
+          current: applicableInWriteOrder.length + index + 1,
+          docID: globalSlug,
+          operation: 'update',
+          total: applicableInWriteOrder.length + applicableGlobals.length,
+        },
+        req,
+      )
 
       if (!overrideAccess) {
         const blockedAtUse = await runGlobalMergePreflight({ payload, pending: [change], req })
@@ -1015,6 +1025,13 @@ const applyChange = async ({
 
   const shadowID = shadow.id as number | string
   const branch = change.branch as string
+  const mainWriteReq = withoutBranch(req)
+
+  mainWriteReq.file = undefined
+  mainWriteReq.payloadUploadSizes = undefined
+  mainWriteReq.query = { ...mainWriteReq.query }
+  delete mainWriteReq.query.uploadEdits
+  delete (mainWriteReq.context as Record<string, unknown>)._payloadCloudStorage
 
   // The chain goes with the row. It hangs off the shadow row's primary key rather
   // than the canonical ID, so nothing addressing the document cascades to it, and a
@@ -1032,6 +1049,47 @@ const applyChange = async ({
       req,
       where: { id: { equals: shadowID } },
     })
+  }
+
+  const updateMainDocument = async ({
+    id,
+    data,
+    draft,
+    locale,
+  }: {
+    data: Record<string, unknown>
+    draft: boolean
+    id: number | string
+    locale?: string
+  }): Promise<Record<string, unknown>> => {
+    const reqContext = mainWriteReq.context as Record<PropertyKey, unknown>
+    const previousBranchMergeUploadData = reqContext[branchMergeUploadDataContextKey]
+    const branchMergeUploadData: BranchMergeUploadDataContext = {
+      id,
+      collectionSlug,
+      data,
+    }
+
+    reqContext[branchMergeUploadDataContextKey] = branchMergeUploadData
+
+    try {
+      return (await payload.update({
+        id,
+        branch: false,
+        collection: collectionSlug,
+        data: data as never,
+        draft,
+        locale,
+        overrideAccess,
+        req: mainWriteReq,
+      })) as Record<string, unknown>
+    } finally {
+      if (previousBranchMergeUploadData === undefined) {
+        delete reqContext[branchMergeUploadDataContextKey]
+      } else {
+        reqContext[branchMergeUploadDataContextKey] = previousBranchMergeUploadData
+      }
+    }
   }
 
   if (change.operation === 'delete') {
@@ -1059,7 +1117,8 @@ const applyChange = async ({
 
   if (change.operation === 'create') {
     const [rowWrite, ...laterWrites] = writes
-    const createReq = withoutBranch(req)
+    const createReq = mainWriteReq
+
     const localization = payload.config.localization
     const hasLocalizedFields = traverseForLocalizedFields(
       payload.collections[collectionSlug]!.config.fields,
@@ -1136,26 +1195,18 @@ const applyChange = async ({
               continue
             }
 
-            await payload.update({
+            await updateMainDocument({
               id: shadowID,
-              branch: false,
-              collection: collectionSlug,
               data: stripInternal(branchDoc) as never,
               draft: true,
               locale,
-              overrideAccess,
-              req: createReq,
             })
           }
         } else {
-          await payload.update({
+          await updateMainDocument({
             id: shadowID,
-            branch: false,
-            collection: collectionSlug,
             data: stripInternal(write.data) as never,
             draft: true,
-            overrideAccess,
-            req: createReq,
           })
         }
       }
@@ -1209,18 +1260,14 @@ const applyChange = async ({
         sourceData: write.data,
       })
 
-      const mergedData = (await payload.update({
+      const mergedData = await updateMainDocument({
         id: docID,
-        branch: false,
-        collection: collectionSlug,
-        data: data as never,
+        data,
         // A draft-only branch edit must stay a draft on main: main's published row
         // is not what the branch changed, and publishing it would push work the
         // author never published live.
         draft: write.draft,
-        overrideAccess,
-        req,
-      })) as Record<string, unknown>
+      })
 
       recordNestedRowIDs({
         fields,
@@ -1267,16 +1314,12 @@ const applyChange = async ({
         sourceData: branchDoc,
       })
 
-      const mergedData = (await payload.update({
+      const mergedData = await updateMainDocument({
         id: docID,
-        branch: false,
-        collection: collectionSlug,
-        data: data as never,
+        data,
         draft: write.draft,
         locale,
-        overrideAccess,
-        req,
-      })) as Record<string, unknown>
+      })
 
       recordNestedRowIDs({
         fields,

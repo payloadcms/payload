@@ -4103,6 +4103,76 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(current.title).toBe('current')
       })
 
+      test('should reject updates when the latest draft does not match access but the live global does', async ({
+        payload,
+      }) => {
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { _status: 'published', title: 'unlocked' },
+          overrideAccess: true,
+        })
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { title: 'locked draft' },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        await expect(
+          payload.updateGlobal({
+            slug: restoreAccessGlobalSlug,
+            data: { title: 'updated' },
+            draft: true,
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow(Forbidden)
+
+        const current = await payload.findGlobal({
+          slug: restoreAccessGlobalSlug,
+          draft: true,
+          overrideAccess: true,
+        })
+
+        expect(current.title).toBe('locked draft')
+      })
+
+      test('should reject an id-based access constraint without treating the id as a parent', async ({
+        payload,
+      }) => {
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { _status: 'published', title: 'id access live' },
+          overrideAccess: true,
+        })
+
+        const liveGlobal = await payload.findGlobal({
+          slug: restoreAccessGlobalSlug,
+          overrideAccess: true,
+        })
+
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { title: 'id access draft' },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        await expect(
+          payload.updateGlobal({
+            slug: restoreAccessGlobalSlug,
+            context: {
+              restoreAccessGlobalID: liveGlobal.id,
+              restoreAccessMode: 'idConstraint',
+            },
+            data: { title: 'id access updated' },
+            draft: true,
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow(Forbidden)
+      })
+
       test('should reject non-versioned global updates outside the access constraint', async ({
         payload,
       }) => {
@@ -4790,9 +4860,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
             value: draft.id,
           },
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       await wait(4000)
@@ -4841,9 +4911,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
             value: user.id,
           },
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       await wait(4000)
@@ -5004,9 +5074,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           },
           user: user.id,
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       const queuedJob = (
@@ -5063,9 +5133,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
             value: 0,
           },
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       const queuedJob = (
@@ -5121,9 +5191,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
             value: published.id,
           },
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       await wait(4000)
@@ -5167,9 +5237,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
             value: draft.id,
           },
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       await payload.delete({
@@ -5221,9 +5291,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
             value: draft.id,
           },
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       await payload.delete({
@@ -5269,9 +5339,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         input: {
           global: draftGlobalSlug,
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       await wait(4000)
@@ -5306,9 +5376,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           type: 'unpublish',
           global: draftGlobalSlug,
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       await wait(4000)

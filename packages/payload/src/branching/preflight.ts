@@ -450,12 +450,6 @@ export const runGlobalMergePreflight = async ({
             }
           }
         } else {
-          const where = {
-            and: [
-              ...(hasWhereAccessResult(result) ? [result] : []),
-              { [branchField]: { equals: MAIN_BRANCH } },
-            ],
-          }
           const { global, globalExists } = await getLatestGlobalVersion({
             slug: globalSlug,
             config: globalConfig,
@@ -463,7 +457,8 @@ export const runGlobalMergePreflight = async ({
             payload,
             published: !write.draft,
             req: localeReq,
-            where,
+            storageWhere: { [branchField]: { equals: MAIN_BRANCH } },
+            where: hasWhereAccessResult(result) ? result : undefined!,
           })
 
           currentGlobal = (global as null | Record<string, unknown>) ?? {}

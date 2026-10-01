@@ -2614,6 +2614,104 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
       })
     })
 
+    test.options(
+      'should preserve omitted localized child-table values in partial updates',
+      { db: (adapter) => adapter === 'postgres' },
+      async ({ payload }) => {
+        const englishRelationship = await payload.create({
+          collection: relationASlug,
+          data: { title: 'English relationship' },
+          overrideAccess: true,
+        })
+        const spanishRelationship = await payload.create({
+          collection: relationASlug,
+          data: { title: 'Spanish relationship' },
+          overrideAccess: true,
+        })
+        let documentID: number | string | undefined
+
+        try {
+          const document = await payload.create({
+            collection: customSchemaSlug,
+            data: {
+              localizedNumbers: [1],
+              localizedRelationship: [englishRelationship.id],
+              localizedSelect: ['a'],
+              localizedTexts: ['English text'],
+            },
+            locale: 'en',
+            overrideAccess: true,
+          })
+
+          documentID = document.id
+
+          await payload.update({
+            id: document.id,
+            collection: customSchemaSlug,
+            data: {
+              localizedNumbers: [2],
+              localizedRelationship: [spanishRelationship.id],
+              localizedSelect: ['b'],
+              localizedTexts: ['Spanish text'],
+            },
+            locale: 'es',
+            overrideAccess: true,
+          })
+
+          await payload.db.updateOne({
+            id: document.id,
+            collection: customSchemaSlug,
+            data: {
+              localizedNumbers: { en: [3] },
+              localizedRelationship: { en: [] },
+              localizedSelect: { en: [] },
+              localizedTexts: { en: ['Updated English text'] },
+            },
+          })
+
+          const updatedDocument = (await payload.findByID({
+            id: document.id,
+            collection: customSchemaSlug,
+            depth: 0,
+            locale: 'all',
+            overrideAccess: true,
+          })) as unknown as {
+            localizedNumbers: Record<string, number[]>
+            localizedRelationship: Record<string, (number | string)[]>
+            localizedSelect: Record<string, string[]>
+            localizedTexts: Record<string, string[]>
+          }
+
+          expect(updatedDocument.localizedRelationship).toEqual({ es: [spanishRelationship.id] })
+          expect(updatedDocument.localizedTexts).toEqual({
+            en: ['Updated English text'],
+            es: ['Spanish text'],
+          })
+          expect(updatedDocument.localizedNumbers).toEqual({ en: [3], es: [2] })
+          expect(updatedDocument.localizedSelect).toEqual({ es: ['b'] })
+        } finally {
+          if (documentID !== undefined) {
+            await payload.delete({
+              id: documentID,
+              collection: customSchemaSlug,
+              overrideAccess: true,
+            })
+          }
+
+          await payload.delete({
+            id: englishRelationship.id,
+            collection: relationASlug,
+            overrideAccess: true,
+          })
+          await payload.delete({
+            id: spanishRelationship.id,
+            collection: relationASlug,
+            overrideAccess: true,
+          })
+        }
+      },
+    )
+
     test('arrays should work with both long field names and dbName', async ({ payload }) => {
       const { id } = await payload.create({
         collection: 'aliases',

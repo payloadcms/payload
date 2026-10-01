@@ -37,8 +37,8 @@ const localizedCategoryBlock: Block = {
   fields: [
     {
       name: 'category',
-      localized: true,
       type: 'relationship',
+      localized: true,
       relationTo: categoriesSlug,
     },
   ],
@@ -158,8 +158,9 @@ export default buildConfigWithDefaults({
         ],
         hooks: {
           afterChange: [(args) => hookSpy.afterChange?.(args)],
+          afterDelete: [(args) => hookSpy.postAfterDelete?.(args)],
           beforeChange: [(args) => hookSpy.beforeChange?.(args)],
-          beforeOperation: [() => hookSpy.postBeforeOperation?.()],
+          beforeOperation: [(args) => hookSpy.postBeforeOperation?.(args)],
           beforeRead: [
             ({ doc }) => {
               hookSpy.postBeforeRead?.()
@@ -363,6 +364,32 @@ export default buildConfigWithDefaults({
             fields: [{ name: 'label', type: 'text', localized: true }],
           },
           {
+            name: 'mergeGuardCategory',
+            type: 'relationship',
+            hooks: {
+              beforeChange: [
+                ({ siblingDocWithLocales, value }) => {
+                  const targetID = hookSpy.mainMergeLocalizedCollectionDependencyTargetID
+
+                  if (targetID === undefined || !siblingDocWithLocales) {
+                    return value
+                  }
+
+                  const currentValue = siblingDocWithLocales.mergeGuardCategory
+
+                  siblingDocWithLocales.mergeGuardCategory = {
+                    ...(currentValue && typeof currentValue === 'object' ? currentValue : {}),
+                    es: targetID,
+                  }
+
+                  return value
+                },
+              ],
+            },
+            localized: true,
+            relationTo: categoriesSlug,
+          },
+          {
             name: 'computedDefault',
             type: 'text',
             defaultValue: () => {
@@ -467,6 +494,16 @@ export default buildConfigWithDefaults({
             type: 'array',
             fields: [{ name: 'label', type: 'text' }],
           },
+          {
+            name: 'navigationBlocks',
+            type: 'blocks',
+            blocks: [
+              {
+                slug: 'navigation-block',
+                fields: [{ name: 'label', type: 'text' }],
+              },
+            ],
+          },
         ],
         hooks: {
           beforeOperation: [() => hookSpy.headerBeforeOperation?.()],
@@ -494,6 +531,10 @@ export default buildConfigWithDefaults({
               return { _branch: { not_equals: 'main' } }
             }
 
+            if (data?.heroTitle === 'requires unlocked global') {
+              return { heroTitle: { equals: 'unlocked global' } }
+            }
+
             if (data?.localizedTitle === 'blocked Spanish draft' && req.locale === 'es') {
               return false
             }
@@ -504,7 +545,40 @@ export default buildConfigWithDefaults({
         fields: [
           { name: 'heroTitle', type: 'text' },
           { name: 'localizedTitle', type: 'text', localized: true },
+          {
+            name: 'mergeGuardCategory',
+            type: 'relationship',
+            hooks: {
+              beforeChange: [
+                ({ siblingDocWithLocales, value }) => {
+                  const targetID = hookSpy.mainMergeLocalizedGlobalDependencyTargetID
+
+                  if (targetID === undefined || !siblingDocWithLocales) {
+                    return value
+                  }
+
+                  const currentValue = siblingDocWithLocales.mergeGuardCategory
+
+                  siblingDocWithLocales.mergeGuardCategory = {
+                    ...(currentValue && typeof currentValue === 'object' ? currentValue : {}),
+                    es: targetID,
+                  }
+
+                  return value
+                },
+              ],
+            },
+            localized: true,
+            relationTo: categoriesSlug,
+          },
         ],
+        hooks: {
+          beforeChange: [
+            ({ originalDoc }) => {
+              hookSpy.mainMergeGlobalOriginalHeroTitles?.push(originalDoc.heroTitle)
+            },
+          ],
+        },
         versions: { drafts: true },
       },
       {

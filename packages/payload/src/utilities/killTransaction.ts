@@ -2,6 +2,7 @@ import type { MarkRequired } from 'ts-essentials'
 
 import type { PayloadRequest } from '../types/index.js'
 
+import { resetBranchState } from '../branching/resolveBranch.js'
 import { clearTransactionCommitCallbacks } from './transactionCallbacks.js'
 
 /**
@@ -26,5 +27,6 @@ export async function killTransaction(
     }
     delete req.transactionID
     clearTransactionCommitCallbacks({ req, transactionID })
+    resetBranchState(req as PayloadRequest)
   }
 }

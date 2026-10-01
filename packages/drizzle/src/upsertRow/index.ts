@@ -413,18 +413,24 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       const localeTable = adapter.tables[`${tableName}${adapter.localesSuffix}`]
 
       if (operation === 'update') {
-        await adapter.deleteWhere({
+        for (const localeRow of localesToInsert) {
+          await adapter.insert({
+            db,
+            onConflictDoUpdate: {
+              set: localeRow,
+              target: [localeTable._locale, localeTable._parentID],
+            },
+            tableName: localeTableName,
+            values: localeRow,
+          })
+        }
+      } else {
+        await adapter.insert({
           db,
           tableName: localeTableName,
-          where: eq(localeTable._parentID, insertedRow.id),
+          values: localesToInsert,
         })
       }
-
-      await adapter.insert({
-        db,
-        tableName: localeTableName,
-        values: localesToInsert,
-      })
     }
 
     // //////////////////////////////////
@@ -791,14 +797,45 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // INSERT hasMany SELECTS
     // //////////////////////////////////
 
-    for (const [selectTableName, tableRows] of Object.entries(selectsToInsert)) {
+    const selectTableNames = new Set([
+      ...Object.keys(nestedWrite.selectsToDelete),
+      ...Object.keys(selectsToInsert),
+    ])
+
+    for (const selectTableName of selectTableNames) {
+      const tableRows = selectsToInsert[selectTableName] ?? []
       const selectTable = adapter.tables[selectTableName]
       if (operation === 'update') {
-        await adapter.deleteWhere({
-          db,
-          tableName: selectTableName,
-          where: eq(selectTable.parent, insertedRow.id),
-        })
+        for (const selectToDelete of nestedWrite.selectsToDelete[selectTableName] ?? []) {
+          let selectParent = selectToDelete.parent ?? insertedRow.id
+
+          if (
+            (typeof selectParent === 'number' || typeof selectParent === 'string') &&
+            selectParent in arraysBlocksUUIDMap
+          ) {
+            selectParent = arraysBlocksUUIDMap[selectParent]
+          }
+
+          const deleteConstraints = [eq(selectTable.parent, selectParent)]
+
+          if (typeof selectToDelete.locale === 'string') {
+            if (!selectTable.locale) {
+              throw new Error(
+                `Could not limit the select replacement for table "${selectTableName}" to locale "${selectToDelete.locale}".`,
+              )
+            }
+
+            deleteConstraints.push(eq(selectTable.locale, selectToDelete.locale))
+          } else if (selectTable.locale) {
+            deleteConstraints.push(isNull(selectTable.locale))
+          }
+
+          await adapter.deleteWhere({
+            db,
+            tableName: selectTableName,
+            where: and(...deleteConstraints),
+          })
+        }
       }
 
       if (Object.keys(arraysBlocksUUIDMap).length > 0) {

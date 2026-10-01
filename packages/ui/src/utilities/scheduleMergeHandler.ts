@@ -116,7 +116,13 @@ export const scheduleMergeHandler: ServerFunction<ScheduleMergeHandlerArgs> = as
         branch: branchDoc.slug as string,
         changes: changes?.map(String),
         closeBranch: Boolean(closeBranch),
-        user: user.id,
+        user:
+          user && user.collection
+            ? {
+                relationTo: user.collection,
+                value: user.id,
+              }
+            : undefined,
       },
       req,
       task: 'scheduleMerge',

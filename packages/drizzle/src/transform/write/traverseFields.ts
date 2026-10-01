@@ -75,6 +75,7 @@ type Args = {
   selects: {
     [tableName: string]: Record<string, unknown>[]
   }
+  selectsToDelete: RowToInsert['selectsToDelete']
   texts: Record<string, unknown>[]
   textsToDelete: TextToDelete[]
   /**
@@ -110,6 +111,7 @@ export const traverseFields = ({
   relationshipsToDelete,
   row,
   selects,
+  selectsToDelete,
   texts,
   textsToDelete,
   withinArrayOrBlockLocale,
@@ -141,6 +143,10 @@ export const traverseFields = ({
     const isLocalized = fieldShouldBeLocalized({ field, parentIsLocalized })
 
     if (field.type === 'array') {
+      if (fieldData === undefined) {
+        return
+      }
+
       const arrayTableName = adapter.tableNameMap.get(`${parentTableName}_${columnName}`)
 
       if (isLocalized) {
@@ -176,6 +182,7 @@ export const traverseFields = ({
                 relationships,
                 relationshipsToDelete,
                 selects,
+                selectsToDelete,
                 texts,
                 textsToDelete,
                 withinArrayOrBlockLocale: localeKey,
@@ -218,6 +225,7 @@ export const traverseFields = ({
           relationships,
           relationshipsToDelete,
           selects,
+          selectsToDelete,
           texts,
           textsToDelete,
           withinArrayOrBlockLocale,
@@ -240,6 +248,10 @@ export const traverseFields = ({
     }
 
     if (field.type === 'blocks' && !adapter.blocksAsJSON) {
+      if (fieldData === undefined) {
+        return
+      }
+
       field.blocks.forEach((block) => {
         const matchedBlock =
           typeof block === 'string'
@@ -273,6 +285,7 @@ export const traverseFields = ({
                 relationships,
                 relationshipsToDelete,
                 selects,
+                selectsToDelete,
                 texts,
                 textsToDelete,
                 withinArrayOrBlockLocale: localeKey,
@@ -295,6 +308,7 @@ export const traverseFields = ({
           relationships,
           relationshipsToDelete,
           selects,
+          selectsToDelete,
           texts,
           textsToDelete,
           withinArrayOrBlockLocale,
@@ -337,6 +351,7 @@ export const traverseFields = ({
               relationshipsToDelete,
               row,
               selects,
+              selectsToDelete,
               texts,
               textsToDelete,
               withinArrayOrBlockLocale: localeKey,
@@ -373,6 +388,7 @@ export const traverseFields = ({
             relationshipsToDelete,
             row,
             selects,
+            selectsToDelete,
             texts,
             textsToDelete,
             withinArrayOrBlockLocale,
@@ -449,7 +465,7 @@ export const traverseFields = ({
 
           itemsToAppend.forEach((item) => {
             const relationshipToAppend: RelationshipToAppend = {
-              locale: isLocalized ? withinArrayOrBlockLocale : undefined,
+              locale: withinArrayOrBlockLocale,
               path: relationshipPath,
               value: item,
             }
@@ -529,7 +545,7 @@ export const traverseFields = ({
           itemsToRemove.forEach((item) => {
             const relationshipToDelete: RelationshipToDelete = {
               itemToRemove: item,
-              locale: isLocalized ? withinArrayOrBlockLocale : undefined,
+              locale: withinArrayOrBlockLocale,
               path: relationshipPath,
             }
 
@@ -550,7 +566,7 @@ export const traverseFields = ({
       ) {
         if (typeof fieldData === 'object') {
           Object.entries(fieldData).forEach(([localeKey, localeData]) => {
-            if (localeData === null) {
+            if (localeData === null || (Array.isArray(localeData) && localeData.length === 0)) {
               relationshipsToDelete.push({
                 locale: localeKey,
                 path: relationshipPath,
@@ -572,7 +588,10 @@ export const traverseFields = ({
         return
       } else if (Array.isArray(field.relationTo) || ('hasMany' in field && field.hasMany)) {
         if (fieldData === null || (Array.isArray(fieldData) && fieldData.length === 0)) {
-          relationshipsToDelete.push({ path: relationshipPath })
+          relationshipsToDelete.push({
+            locale: withinArrayOrBlockLocale,
+            path: relationshipPath,
+          })
           return
         }
 
@@ -704,13 +723,20 @@ export const traverseFields = ({
       if (!selects[selectTableName]) {
         selects[selectTableName] = []
       }
+      if (!selectsToDelete[selectTableName]) {
+        selectsToDelete[selectTableName] = []
+      }
+
+      const selectParent = insideArrayOrBlock ? (data._uuid ?? data.id) : undefined
 
       if (isLocalized) {
         if (typeof data[field.name] === 'object' && data[field.name] !== null) {
           Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
             if (Array.isArray(localeData)) {
+              selectsToDelete[selectTableName].push({ locale: localeKey, parent: selectParent })
+
               const newRows = transformSelects({
-                id: insideArrayOrBlock ? data._uuid || data.id : undefined,
+                id: selectParent,
                 data: localeData,
                 locale: localeKey,
               })
@@ -720,8 +746,13 @@ export const traverseFields = ({
           })
         }
       } else if (Array.isArray(data[field.name])) {
+        selectsToDelete[selectTableName].push({
+          locale: withinArrayOrBlockLocale,
+          parent: selectParent,
+        })
+
         const newRows = transformSelects({
-          id: insideArrayOrBlock ? data._uuid || data.id : undefined,
+          id: selectParent,
           data: data[field.name],
           locale: withinArrayOrBlockLocale,
         })
@@ -849,6 +880,7 @@ export const traverseFields = ({
           relationshipsToDelete,
           row,
           selects,
+          selectsToDelete,
           texts,
           textsToDelete,
           withinArrayOrBlockLocale,

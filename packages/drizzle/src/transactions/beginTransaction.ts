@@ -18,6 +18,8 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
 
     let transactionReady: () => void
     let transactionFailed: (err: unknown) => void
+    let hasTransactionStarted = false
+    const rollbackSignal = new Error('Payload transaction rollback requested')
 
     // Await initialization here
     // Prevent race conditions where the adapter may be
@@ -38,22 +40,28 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
             return done
           }
           reject = () => {
-            // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
-            rej()
+            rej(rollbackSignal)
             return done
           }
           transactionReady()
         })
       }, options || this.transactionOptions)
       .catch((err) => {
-        // Connection failed before callback ran - reject instead of hanging forever
-        transactionFailed(err)
+        if (!hasTransactionStarted) {
+          // Connection failed before callback ran - reject instead of hanging forever
+          transactionFailed(err)
+        } else if (err !== rollbackSignal) {
+          throw err
+        }
       })
 
     // Need to wait until the transaction is ready
     // before binding its `resolve` and `reject` methods below
     await new Promise<void>((res, rej) => {
-      transactionReady = res
+      transactionReady = () => {
+        hasTransactionStarted = true
+        res()
+      }
       transactionFailed = rej
     })
 

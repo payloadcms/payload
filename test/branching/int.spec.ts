@@ -1,24 +1,30 @@
+/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options"] }] -- Tests use the shared fixture wrapper. */
+
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
-import type { Payload, SanitizedCollectionConfig } from 'payload'
+import type { Payload, PayloadRequest, SanitizedCollectionConfig } from 'payload'
 
 import path from 'path'
 import {
   assertBranchReadable,
   createPayloadRequest,
+  initTransaction,
   isolateBranchState,
   isolateObjectProperty,
+  killTransaction,
   resolveEffectiveOperations,
 } from 'payload'
 import { fileURLToPath } from 'url'
 import { expect, vi } from 'vitest'
 
-// eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercises this internal boundary directly.
-import { readLocalizedBranchWrite } from '../../packages/payload/src/branching/readLocalizedBranchWrite.js'
-// eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercises this internal boundary directly.
-import { readCollectionMergeSnapshot } from '../../packages/payload/src/branching/readMergeSnapshot.js'
-import { scheduleMergeHandler } from '../../packages/ui/src/utilities/scheduleMergeHandler.js'
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
+// eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercises this internal boundary directly.
+import { readLocalizedBranchWrite } from '../../packages/payload/src/branching/readLocalizedBranchWrite.js'
+
+// eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercises this internal boundary directly.
+import { readCollectionMergeSnapshot } from '../../packages/payload/src/branching/readMergeSnapshot.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercises this internal boundary directly.
+import { scheduleMergeHandler } from '../../packages/ui/src/utilities/scheduleMergeHandler.js'
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { hookSpy } from './hookSpy.js'
@@ -2109,9 +2115,9 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
           collection: publicSlug,
           overrideAccess: false,
           user: {
+            id: 'restricted-user',
             collection: 'users',
             email: 'restricted@example.com',
-            id: 'restricted-user',
           } as never,
         }),
       ).rejects.toThrow()
@@ -2120,13 +2126,13 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
     test('should enforce branch access for Local API global reads', async () => {
       await expect(
         payload.findGlobal({
+          slug: headerGlobalSlug,
           branch: privateBranch,
           overrideAccess: false,
-          slug: headerGlobalSlug,
           user: {
+            id: 'restricted-user',
             collection: 'users',
             email: 'restricted@example.com',
-            id: 'restricted-user',
           } as never,
         }),
       ).rejects.toThrow()
@@ -2139,9 +2145,9 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
           dryRun: true,
           overrideAccess: false,
           user: {
+            id: 'restricted-user',
             collection: 'users',
             email: 'restricted@example.com',
-            id: 'restricted-user',
           } as never,
         }),
       ).rejects.toThrow()
@@ -3726,6 +3732,108 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(onMain.filename).toBe(media.filename)
     })
 
+    test.options(
+      'should preserve a temp-file upload across a transient final commit retry',
+      { db: 'mongo' },
+      async () => {
+        const fs = await import('fs/promises')
+        const os = await import('os')
+        const media = await createOnMain('temp-retry-main.txt')
+        const replacementData = Buffer.from('temp-file retry replacement bytes')
+        const temporaryDirectory = await fs.mkdtemp(path.join(os.tmpdir(), 'payload-temp-retry-'))
+        const tempFilePath = path.join(temporaryDirectory, 'replacement.txt')
+        const previousUseTempFiles = payload.config.upload.useTempFiles
+        const commitTransaction = payload.db.commitTransaction.bind(payload.db)
+        const commitError = Object.assign(new Error('Simulated first final commit conflict'), {
+          errorLabels: ['TransientTransactionError'],
+        })
+        let commitAttempts = 0
+
+        await fs.writeFile(tempFilePath, replacementData)
+        payload.config.upload.useTempFiles = true
+
+        const commitSpy = vi
+          .spyOn(payload.db, 'commitTransaction')
+          .mockImplementation(async (transactionID) => {
+            commitAttempts += 1
+
+            if (commitAttempts === 1) {
+              throw commitError
+            }
+
+            return commitTransaction(transactionID)
+          })
+
+        try {
+          const replaced = await payload.update({
+            id: media.id,
+            branch: 'uploadwork',
+            collection: mediaSlug,
+            data: { alt: 'temp-file branch replacement' },
+            file: {
+              name: 'temp-retry-replacement.txt',
+              data: Buffer.alloc(0),
+              mimetype: 'text/plain',
+              size: replacementData.length,
+              tempFilePath,
+            },
+          })
+          const replacementFilePath = path.resolve(dirname, 'media', replaced.filename)
+
+          expect(commitAttempts).toBe(2)
+          expect(await fs.readFile(replacementFilePath)).toEqual(replacementData)
+          await expect(fs.access(tempFilePath)).rejects.toMatchObject({ code: 'ENOENT' })
+        } finally {
+          commitSpy.mockRestore()
+          payload.config.upload.useTempFiles = previousUseTempFiles
+          await fs.rm(temporaryDirectory, { force: true, recursive: true })
+        }
+      },
+    )
+
+    test.options(
+      'should remove a branch upload when its final database commit fails',
+      { db: 'mongo' },
+      async () => {
+        const fs = await import('fs/promises')
+        const media = await createOnMain('upload-rollback-main.txt')
+        const originalFilePath = path.resolve(dirname, 'media', media.filename)
+        const replacementFilePath = path.resolve(dirname, 'media', 'upload-rollback-failed.txt')
+        const replacementData = Buffer.from('upload that must be rolled back')
+        const commitError = new Error('Simulated final commit failure')
+        let commitAttempts = 0
+        const commitSpy = vi.spyOn(payload.db, 'commitTransaction').mockImplementation(() => {
+          commitAttempts += 1
+          throw commitError
+        })
+
+        try {
+          await expect(
+            payload.update({
+              id: media.id,
+              branch: 'uploadwork',
+              collection: mediaSlug,
+              data: { alt: 'failed branch replacement' },
+              file: {
+                name: path.basename(replacementFilePath),
+                data: replacementData,
+                mimetype: 'text/plain',
+                size: replacementData.length,
+              },
+            }),
+          ).rejects.toBe(commitError)
+        } finally {
+          commitSpy.mockRestore()
+        }
+
+        expect(commitAttempts).toBe(1)
+        expect(await fs.readFile(originalFilePath, 'utf8')).toBe(
+          'bytes for upload-rollback-main.txt',
+        )
+        await expect(fs.access(replacementFilePath)).rejects.toMatchObject({ code: 'ENOENT' })
+      },
+    )
+
     test('should remove a replacement file when discarding a branch upload edit', async () => {
       const fs = await import('fs')
       const media = await createOnMain('keep-original-on-discard.txt')
@@ -3784,6 +3892,54 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(fs.existsSync(mainFilePath)).toBe(false)
       expect(fs.existsSync(replacementFilePath)).toBe(true)
       expect(onMain.filename).toBe(replaced.filename)
+    })
+
+    test('should ignore unrelated upload edits when merging a branch upload replacement', async () => {
+      const fs = await import('fs')
+      const mainFileData = fs.readFileSync(path.resolve(process.cwd(), 'test/uploads/image.png'))
+      const media = await payload.create({
+        collection: mediaSlug,
+        data: { alt: 'main image' },
+        file: {
+          name: 'merge-query-main.png',
+          data: mainFileData,
+          mimetype: 'image/png',
+          size: mainFileData.length,
+        },
+      })
+      const replacementData = fs.readFileSync(path.resolve(process.cwd(), 'test/uploads/image.jpg'))
+      const replaced = await payload.update({
+        id: media.id,
+        branch: 'uploadwork',
+        collection: mediaSlug,
+        data: { alt: 'branch image' },
+        file: {
+          name: 'merge-query-branch.jpg',
+          data: replacementData,
+          mimetype: 'image/jpeg',
+          size: replacementData.length,
+        },
+      })
+      const replacementFilePath = path.resolve(dirname, 'media', replaced.filename)
+      const expectedReplacementData = fs.readFileSync(replacementFilePath)
+      const req = await createPayloadRequest({ payload })
+      const uploadEdits = {
+        crop: { height: 50, unit: '%' as const, width: 50, x: 0, y: 0 },
+        heightInPixels: 20,
+        widthInPixels: 20,
+      }
+
+      cleanup.push(media.id)
+      req.query = { unrelated: 'preserve me', uploadEdits }
+
+      await payload.branches.merge({ branch: 'uploadwork', req })
+
+      const onMain = await payload.findByID({ id: media.id, collection: mediaSlug })
+
+      expect(onMain.filename).toBe(replaced.filename)
+      expect(fs.readFileSync(replacementFilePath)).toEqual(expectedReplacementData)
+      expect(req.query.unrelated).toBe('preserve me')
+      expect(req.query.uploadEdits).toBe(uploadEdits)
     })
 
     test('should hide an upload deleted on a branch from that branch only', async () => {
@@ -6638,9 +6794,9 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
           branch: 'discardwork',
           overrideAccess: false,
           user: {
+            id: 'restricted-user',
             collection: 'users',
             email: 'restricted@example.com',
-            id: 'restricted-user',
           } as never,
         }),
       ).rejects.toThrow()
@@ -6683,146 +6839,154 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       }
     })
 
-    test('should roll back every change in a non-streaming merge when a later change fails', async () => {
-      branchSlug = 'txnmerge'
+    test.options(
+      'should roll back every change in a non-streaming merge when a later change fails',
+      { db: 'mongo' },
+      async () => {
+        branchSlug = 'txnmerge'
 
-      const branchDoc = await payload.create({
-        collection: branchesSlug,
-        data: { name: 'Txn merge', slug: branchSlug },
-      })
+        const branchDoc = await payload.create({
+          collection: branchesSlug,
+          data: { name: 'Txn merge', slug: branchSlug },
+        })
 
-      const a = await payload.create({ collection: postsSlug, data: { title: 'A original' } })
-      const b = await payload.create({ collection: postsSlug, data: { title: 'B original' } })
-      const c = await payload.create({ collection: postsSlug, data: { title: 'C original' } })
+        const a = await payload.create({ collection: postsSlug, data: { title: 'A original' } })
+        const b = await payload.create({ collection: postsSlug, data: { title: 'B original' } })
+        const c = await payload.create({ collection: postsSlug, data: { title: 'C original' } })
 
-      await payload.update({
-        id: a.id,
-        branch: 'txnmerge',
-        collection: postsSlug,
-        data: { title: 'A edited' },
-      })
-      await payload.update({
-        id: b.id,
-        branch: 'txnmerge',
-        collection: postsSlug,
-        data: { title: 'B edited' },
-      })
-      await payload.update({
-        id: c.id,
-        branch: 'txnmerge',
-        collection: postsSlug,
-        data: { title: 'C edited' },
-      })
+        await payload.update({
+          id: a.id,
+          branch: 'txnmerge',
+          collection: postsSlug,
+          data: { title: 'A edited' },
+        })
+        await payload.update({
+          id: b.id,
+          branch: 'txnmerge',
+          collection: postsSlug,
+          data: { title: 'B edited' },
+        })
+        await payload.update({
+          id: c.id,
+          branch: 'txnmerge',
+          collection: postsSlug,
+          data: { title: 'C edited' },
+        })
 
-      hookSpy.beforeChange = ({ data }: { data: Record<string, unknown> }) => {
-        if (data.title === 'B edited') {
-          throw new Error('Simulated validation failure')
-        }
-      }
-
-      const res = await restClient.POST(`/${branchesSlug}/${branchDoc.id}/merge`, {
-        body: JSON.stringify({}),
-        headers: { Authorization: `JWT ${token}` },
-      })
-
-      hookSpy.beforeChange = undefined
-
-      expect(res.status).toBeGreaterThanOrEqual(400)
-
-      const onMainA = await payload.findByID({ id: a.id, collection: postsSlug })
-      const onMainB = await payload.findByID({ id: b.id, collection: postsSlug })
-      const onMainC = await payload.findByID({ id: c.id, collection: postsSlug })
-
-      // Not "B was rejected but A and C went through" — the batch is one unit.
-      expect(onMainA.title).toBe('A original')
-      expect(onMainB.title).toBe('B original')
-      expect(onMainC.title).toBe('C original')
-
-      const remainingChanges = await payload.find({
-        collection: branchChangesSlug,
-        pagination: false,
-        where: { branch: { equals: 'txnmerge' } },
-      })
-
-      expect(remainingChanges.docs).toHaveLength(3)
-    })
-
-    test('should roll back every change in a discard when a later change fails', async () => {
-      branchSlug = 'txndiscard'
-
-      const branchDoc = await payload.create({
-        collection: branchesSlug,
-        data: { name: 'Txn discard', slug: branchSlug },
-      })
-
-      const a = await payload.create({ collection: postsSlug, data: { title: 'A original' } })
-      const b = await payload.create({ collection: postsSlug, data: { title: 'B original' } })
-      const c = await payload.create({ collection: postsSlug, data: { title: 'C original' } })
-
-      await payload.update({
-        id: a.id,
-        branch: branchSlug,
-        collection: postsSlug,
-        data: { title: 'A edited' },
-      })
-      await payload.update({
-        id: b.id,
-        branch: branchSlug,
-        collection: postsSlug,
-        data: { title: 'B edited' },
-      })
-      await payload.update({
-        id: c.id,
-        branch: branchSlug,
-        collection: postsSlug,
-        data: { title: 'C edited' },
-      })
-
-      const shadowRows = await payload.find({
-        branch: false,
-        collection: postsSlug,
-        pagination: false,
-        showHiddenFields: true,
-        where: { _branch: { equals: branchSlug } },
-      })
-
-      const bShadow = shadowRows.docs.find((row) => String(row._branchDocID) === String(b.id))!
-
-      const originalDeleteOne = payload.db.deleteOne.bind(payload.db)
-
-      deleteOneSpy = vi.spyOn(payload.db, 'deleteOne').mockImplementation(async (args: any) => {
-        if (args?.where?.id?.equals === bShadow.id) {
-          throw new Error('Simulated database failure')
+        hookSpy.beforeChange = ({ data }: { data: Record<string, unknown> }) => {
+          if (data.title === 'B edited') {
+            throw new Error('Simulated validation failure')
+          }
         }
 
-        return originalDeleteOne(args)
-      })
+        const res = await restClient.POST(`/${branchesSlug}/${branchDoc.id}/merge`, {
+          body: JSON.stringify({}),
+          headers: { Authorization: `JWT ${token}` },
+        })
 
-      const res = await restClient.POST(`/${branchesSlug}/${branchDoc.id}/discard`, {
-        body: JSON.stringify({}),
-        headers: { Authorization: `JWT ${token}` },
-      })
+        hookSpy.beforeChange = undefined
 
-      expect(res.status).toBeGreaterThanOrEqual(400)
+        expect(res.status).toBeGreaterThanOrEqual(400)
 
-      // A's shadow row was already dropped by the time B failed — the whole
-      // batch is one transaction, so that drop must be undone too.
-      const onBranchA = await payload.findByID({
-        id: a.id,
-        branch: branchSlug,
-        collection: postsSlug,
-      })
+        const onMainA = await payload.findByID({ id: a.id, collection: postsSlug })
+        const onMainB = await payload.findByID({ id: b.id, collection: postsSlug })
+        const onMainC = await payload.findByID({ id: c.id, collection: postsSlug })
 
-      expect(onBranchA.title).toBe('A edited')
+        // Not "B was rejected but A and C went through" — the batch is one unit.
+        expect(onMainA.title).toBe('A original')
+        expect(onMainB.title).toBe('B original')
+        expect(onMainC.title).toBe('C original')
 
-      const remainingChanges = await payload.find({
-        collection: branchChangesSlug,
-        pagination: false,
-        where: { branch: { equals: branchSlug } },
-      })
+        const remainingChanges = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: 'txnmerge' } },
+        })
 
-      expect(remainingChanges.docs).toHaveLength(3)
-    })
+        expect(remainingChanges.docs).toHaveLength(3)
+      },
+    )
+
+    test.options(
+      'should roll back every change in a discard when a later change fails',
+      { db: 'mongo' },
+      async () => {
+        branchSlug = 'txndiscard'
+
+        const branchDoc = await payload.create({
+          collection: branchesSlug,
+          data: { name: 'Txn discard', slug: branchSlug },
+        })
+
+        const a = await payload.create({ collection: postsSlug, data: { title: 'A original' } })
+        const b = await payload.create({ collection: postsSlug, data: { title: 'B original' } })
+        const c = await payload.create({ collection: postsSlug, data: { title: 'C original' } })
+
+        await payload.update({
+          id: a.id,
+          branch: branchSlug,
+          collection: postsSlug,
+          data: { title: 'A edited' },
+        })
+        await payload.update({
+          id: b.id,
+          branch: branchSlug,
+          collection: postsSlug,
+          data: { title: 'B edited' },
+        })
+        await payload.update({
+          id: c.id,
+          branch: branchSlug,
+          collection: postsSlug,
+          data: { title: 'C edited' },
+        })
+
+        const shadowRows = await payload.find({
+          branch: false,
+          collection: postsSlug,
+          pagination: false,
+          showHiddenFields: true,
+          where: { _branch: { equals: branchSlug } },
+        })
+
+        const bShadow = shadowRows.docs.find((row) => String(row._branchDocID) === String(b.id))!
+
+        const originalDeleteOne = payload.db.deleteOne.bind(payload.db)
+
+        deleteOneSpy = vi.spyOn(payload.db, 'deleteOne').mockImplementation(async (args: any) => {
+          if (args?.where?.id?.equals === bShadow.id) {
+            throw new Error('Simulated database failure')
+          }
+
+          return originalDeleteOne(args)
+        })
+
+        const res = await restClient.POST(`/${branchesSlug}/${branchDoc.id}/discard`, {
+          body: JSON.stringify({}),
+          headers: { Authorization: `JWT ${token}` },
+        })
+
+        expect(res.status).toBeGreaterThanOrEqual(400)
+
+        // A's shadow row was already dropped by the time B failed — the whole
+        // batch is one transaction, so that drop must be undone too.
+        const onBranchA = await payload.findByID({
+          id: a.id,
+          branch: branchSlug,
+          collection: postsSlug,
+        })
+
+        expect(onBranchA.title).toBe('A edited')
+
+        const remainingChanges = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+
+        expect(remainingChanges.docs).toHaveLength(3)
+      },
+    )
 
     test('should leave a caller-owned transaction open when merge fails', async () => {
       branchSlug = 'caller-owned-merge'
@@ -7021,6 +7185,9 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
    */
   test.describe('Fork race safety', () => {
     test.afterEach(async () => {
+      hookSpy.postAfterDelete = undefined
+      hookSpy.postBeforeOperation = undefined
+
       await payload.db.deleteBranchGlobal?.({
         branch: 'racebranch',
         globalSlug: headerGlobalSlug,
@@ -7031,6 +7198,16 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
       for (const row of rows.docs) {
         await payload.delete({ id: row.id, branch: false, collection: postsSlug })
+      }
+
+      const hookWriteRows = await payload.find({
+        collection: excludedSlug,
+        pagination: false,
+        where: { title: { contains: 'race hook ' } },
+      })
+
+      for (const row of hookWriteRows.docs) {
+        await payload.delete({ id: row.id, collection: excludedSlug })
       }
 
       for (const collection of [branchChangesSlug, branchesSlug]) {
@@ -7053,21 +7230,86 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
 
       const doc = await payload.create({ collection: postsSlug, data: { title: 'racer' } })
+      const hookAttempts = new Map<string, number>()
+      const requestStateAtAttemptStart: {
+        context: unknown
+        query: unknown
+        routeParams: unknown
+      }[] = []
+      const create = payload.db.create.bind(payload.db)
+      let releaseShadowCreates!: () => void
+      let waitingShadowCreates = 0
+      const shadowCreatesReady = new Promise<void>((resolve) => {
+        releaseShadowCreates = resolve
+      })
+      const createSpy = vi.spyOn(payload.db, 'create').mockImplementation(async (args) => {
+        if (
+          args.collection === postsSlug &&
+          args.data?._branch === 'racebranch' &&
+          args.data?._branchOp === 'update'
+        ) {
+          waitingShadowCreates += 1
 
-      await Promise.all([
-        payload.update({
-          id: doc.id,
-          branch: 'racebranch',
-          collection: postsSlug,
-          data: { title: 'edit A' },
-        }),
-        payload.update({
-          id: doc.id,
-          branch: 'racebranch',
-          collection: postsSlug,
-          data: { title: 'edit B' },
-        }),
-      ])
+          if (waitingShadowCreates === 2) {
+            releaseShadowCreates()
+          }
+
+          await shadowCreatesReady
+        }
+
+        return create(args)
+      })
+
+      hookSpy.postBeforeOperation = async ({ args, req }) => {
+        const title = args.data?.title
+
+        if (
+          typeof title !== 'string' ||
+          (!title.startsWith('edit A') && !title.startsWith('edit B'))
+        ) {
+          return
+        }
+
+        const operationTitle = title.replace(/!+$/, '')
+
+        hookAttempts.set(operationTitle, (hookAttempts.get(operationTitle) ?? 0) + 1)
+        requestStateAtAttemptStart.push({
+          context: req.context.raceMutation,
+          query: req.query.raceMutation,
+          routeParams: req.routeParams?.raceMutation,
+        })
+        args.data!.title = `${title}!`
+        req.context.raceMutation = operationTitle
+        req.query.raceMutation = operationTitle
+        req.routeParams ??= {}
+        req.routeParams.raceMutation = operationTitle
+
+        await req.payload.db.create({
+          collection: excludedSlug,
+          data: { title: `race hook ${operationTitle}` },
+          req,
+        })
+      }
+
+      try {
+        await Promise.all([
+          payload.update({
+            id: doc.id,
+            branch: 'racebranch',
+            collection: postsSlug,
+            data: { title: 'edit A' },
+          }),
+          payload.update({
+            id: doc.id,
+            branch: 'racebranch',
+            collection: postsSlug,
+            data: { title: 'edit B' },
+          }),
+        ])
+      } finally {
+        releaseShadowCreates()
+        createSpy.mockRestore()
+      }
 
       const shadows = await payload.find({
         branch: false,
@@ -7080,6 +7322,16 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
 
       expect(shadows.docs).toHaveLength(1)
+      expect(['edit A!', 'edit B!']).toContain(shadows.docs[0]!.title)
+      expect([...hookAttempts.values()].sort()).toEqual([1, 2])
+
+      for (const requestState of requestStateAtAttemptStart) {
+        expect(requestState).toEqual({
+          context: undefined,
+          query: undefined,
+          routeParams: undefined,
+        })
+      }
 
       const changes = await payload.find({
         collection: branchChangesSlug,
@@ -7088,7 +7340,88 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
 
       expect(changes.docs).toHaveLength(1)
+
+      const hookWrites = await payload.find({
+        collection: excludedSlug,
+        pagination: false,
+        where: { title: { contains: 'race hook ' } },
+      })
+
+      expect(hookWrites.docs.map(({ title }) => title).sort()).toEqual([
+        'race hook edit A',
+        'race hook edit B',
+      ])
     })
+
+    test.options(
+      'should retry a first branch edit when its final transaction commit is transient',
+      { db: 'mongo' },
+      async () => {
+        await payload.create({
+          collection: branchesSlug,
+          data: { name: 'Race', slug: 'racebranch' },
+        })
+
+        const doc = await payload.create({ collection: postsSlug, data: { title: 'commit racer' } })
+        const commitTransaction = payload.db.commitTransaction.bind(payload.db)
+        const commitError = Object.assign(new Error('Simulated first final commit conflict'), {
+          errorLabels: ['TransientTransactionError'],
+        })
+        let hookAttempts = 0
+        let commitAttempts = 0
+
+        hookSpy.postBeforeOperation = async ({ args, req }) => {
+          if (typeof args.data?.title !== 'string' || !args.data.title.startsWith('commit retry')) {
+            return
+          }
+
+          hookAttempts += 1
+          args.data.title = `${args.data.title}!`
+
+          await req.payload.db.create({
+            collection: excludedSlug,
+            data: { title: 'race hook final commit' },
+            req,
+          })
+        }
+
+        const commitSpy = vi
+          .spyOn(payload.db, 'commitTransaction')
+          .mockImplementation(async (transactionID) => {
+            commitAttempts += 1
+
+            if (commitAttempts === 1) {
+              throw commitError
+            }
+
+            return commitTransaction(transactionID)
+          })
+
+        try {
+          const result = await payload.update({
+            id: doc.id,
+            branch: 'racebranch',
+            collection: postsSlug,
+            data: { title: 'commit retry' },
+          })
+
+          expect(result.title).toBe('commit retry!')
+        } finally {
+          commitSpy.mockRestore()
+        }
+
+        expect(commitAttempts).toBe(2)
+        expect(hookAttempts).toBe(2)
+
+        const hookWrites = await payload.find({
+          collection: excludedSlug,
+          pagination: false,
+          where: { title: { equals: 'race hook final commit' } },
+        })
+
+        expect(hookWrites.docs).toHaveLength(1)
+      },
+    )
 
     test('should create exactly one global row when first writes race', async () => {
       await payload.create({
@@ -7142,6 +7475,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         await payload.updateGlobal({
           slug: headerGlobalSlug,
           data: {
+            navigationBlocks: [{ blockType: 'navigation-block', label: 'main navigation block' }],
             navItems: [{ label: 'main item' }],
             navLabel: 'main label',
             secondaryLabel: 'main secondary',
@@ -7190,12 +7524,111 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         })
 
         expect(onBranch).toMatchObject({
+          navigationBlocks: [{ blockType: 'navigation-block', label: 'main navigation block' }],
           navItems: [{ label: 'main item' }],
           navLabel: 'branch label',
           secondaryLabel: 'branch secondary',
         })
       },
     )
+
+    test('should roll back a first branch tombstone when an afterDelete hook fails', async () => {
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Race', slug: 'racebranch' },
+      })
+
+      const doc = await payload.create({ collection: postsSlug, data: { title: 'hook failure' } })
+      const hookError = new Error('Simulated afterDelete failure')
+
+      hookSpy.postAfterDelete = () => {
+        throw hookError
+      }
+
+      try {
+        await expect(
+          payload.delete({ id: doc.id, branch: 'racebranch', collection: postsSlug }),
+        ).rejects.toBe(hookError)
+      } finally {
+        hookSpy.postAfterDelete = undefined
+      }
+
+      const shadows = await payload.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        showHiddenFields: true,
+        where: {
+          and: [{ _branch: { equals: 'racebranch' } }, { _branchDocID: { equals: doc.id } }],
+        },
+      })
+      const changes = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: 'racebranch' } },
+      })
+      const onBranch = await payload.findByID({
+        id: doc.id,
+        branch: 'racebranch',
+        collection: postsSlug,
+      })
+
+      expect(shadows.docs).toHaveLength(0)
+      expect(changes.docs).toHaveLength(0)
+      expect(onBranch.title).toBe('hook failure')
+    })
+
+    test('should reject a first branch delete inside a caller-owned transaction', async () => {
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Race', slug: 'racebranch' },
+      })
+
+      const doc = await payload.create({ collection: postsSlug, data: { title: 'caller delete' } })
+      const req = await createPayloadRequest({ branch: 'racebranch', payload })
+      const didStartTransaction = await initTransaction(req)
+      const callerTransactionID = await req.transactionID
+
+      expect(didStartTransaction).toBe(true)
+
+      try {
+        await expect(
+          payload.delete({
+            id: doc.id,
+            branch: 'racebranch',
+            collection: postsSlug,
+            req,
+          }),
+        ).rejects.toMatchObject({
+          message: 'Cannot delete an untouched branch document within an existing transaction.',
+          status: 409,
+        })
+
+        expect(req.transactionID).toBe(callerTransactionID)
+
+        const shadows = await payload.find({
+          branch: false,
+          collection: postsSlug,
+          pagination: false,
+          showHiddenFields: true,
+          where: {
+            and: [{ _branch: { equals: 'racebranch' } }, { _branchDocID: { equals: doc.id } }],
+          },
+        })
+        const changes = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: 'racebranch' } },
+        })
+
+        expect(shadows.docs).toHaveLength(0)
+        expect(changes.docs).toHaveLength(0)
+      } finally {
+        if (req.transactionID) {
+          await killTransaction(req)
+        }
+      }
+    })
 
     test('should create exactly one tombstone when two deletes race to remove the same never-forked document', async () => {
       await payload.create({
@@ -7204,24 +7637,80 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
 
       const doc = await payload.create({ collection: postsSlug, data: { title: 'doomed' } })
+      const deleteHookAttempts = new Map<string, number>()
+      const create = payload.db.create.bind(payload.db)
+      let releaseShadowCreates!: () => void
+      let waitingShadowCreates = 0
+      const shadowCreatesReady = new Promise<void>((resolve) => {
+        releaseShadowCreates = resolve
+      })
+      const createSpy = vi.spyOn(payload.db, 'create').mockImplementation(async (args) => {
+        if (
+          args.collection === postsSlug &&
+          args.data?._branch === 'racebranch' &&
+          args.data?._branchOp === 'delete'
+        ) {
+          waitingShadowCreates += 1
 
-      // Whichever delete loses the DB-level race recovers gracefully (asserted
-      // below by the row counts). Occasionally, though, one delete finishes
-      // entirely — tombstoning the document and hiding it on this branch —
-      // before the other's own lookup of the document to delete even runs;
-      // that lookup then legitimately finds nothing, which is `NotFound`, not
-      // a bug. Either outcome is acceptable here; a raw, unhandled database
-      // error from the race itself is not.
-      const results = await Promise.allSettled([
-        payload.delete({ id: doc.id, branch: 'racebranch', collection: postsSlug }),
-        payload.delete({ id: doc.id, branch: 'racebranch', collection: postsSlug }),
-      ])
+          if (waitingShadowCreates === 2) {
+            releaseShadowCreates()
+          }
 
-      const rejectedNames = results
-        .filter((result): result is PromiseRejectedResult => result.status === 'rejected')
-        .map((result) => (result.reason as { name?: string })?.name)
+          await shadowCreatesReady
+        }
 
-      expect(rejectedNames.every((name) => name === 'NotFound')).toBe(true)
+        return create(args)
+      })
+
+      hookSpy.postBeforeOperation = async ({ args, req }) => {
+        const raceOperation = req.context.raceOperation
+
+        if (String(args.id) !== String(doc.id) || typeof raceOperation !== 'string') {
+          return
+        }
+
+        deleteHookAttempts.set(raceOperation, (deleteHookAttempts.get(raceOperation) ?? 0) + 1)
+
+        await req.payload.db.create({
+          collection: excludedSlug,
+          data: { title: `race hook delete ${raceOperation}` },
+          req,
+        })
+      }
+
+      const firstReq = await createPayloadRequest({
+        branch: 'racebranch',
+        context: { raceOperation: 'A' },
+        payload,
+      })
+      const secondReq = await createPayloadRequest({
+        branch: 'racebranch',
+        context: { raceOperation: 'B' },
+        payload,
+      })
+
+      try {
+        await Promise.all([
+          payload.delete({
+            id: doc.id,
+            branch: 'racebranch',
+            collection: postsSlug,
+            req: firstReq,
+          }),
+          payload.delete({
+            id: doc.id,
+            branch: 'racebranch',
+            collection: postsSlug,
+            req: secondReq,
+          }),
+        ])
+      } finally {
+        releaseShadowCreates()
+        createSpy.mockRestore()
+      }
+
+      expect(waitingShadowCreates).toBe(2)
+      expect([...deleteHookAttempts.values()].sort()).toEqual([1, 2])
 
       const shadows = await payload.find({
         branch: false,
@@ -7243,7 +7732,252 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
 
       expect(changes.docs).toHaveLength(1)
+
+      const hookWrites = await payload.find({
+        collection: excludedSlug,
+        pagination: false,
+        where: { title: { contains: 'race hook delete ' } },
+      })
+
+      expect(hookWrites.docs.map(({ title }) => title).sort()).toEqual([
+        'race hook delete A',
+        'race hook delete B',
+      ])
     })
+
+    test.options(
+      'should replace a concurrent delete winner that is removed before the retry consumes it',
+      { db: 'mongo' },
+      async () => {
+        await payload.create({
+          collection: branchesSlug,
+          data: { name: 'Race', slug: 'racebranch' },
+        })
+
+        const doc = await payload.create({
+          collection: postsSlug,
+          data: { title: 'removed winner' },
+        })
+        const deleteHookAttempts = new Map<string, number>()
+        const create = payload.db.create.bind(payload.db)
+        const findOne = payload.db.findOne.bind(payload.db)
+        let releaseShadowCreates!: () => void
+        let waitingShadowCreates = 0
+        const shadowCreatesReady = new Promise<void>((resolve) => {
+          releaseShadowCreates = resolve
+        })
+        const createSpy = vi.spyOn(payload.db, 'create').mockImplementation(async (args) => {
+          if (
+            args.collection === postsSlug &&
+            args.data?._branch === 'racebranch' &&
+            args.data?._branchOp === 'delete'
+          ) {
+            waitingShadowCreates += 1
+
+            if (waitingShadowCreates === 2) {
+              releaseShadowCreates()
+            }
+
+            await shadowCreatesReady
+          }
+
+          return create(args)
+        })
+        let observedDeleteWinner: Record<string, unknown> | undefined
+        let reportRetryRevalidation!: (winner: Record<string, unknown>) => void
+        let releaseRetryRevalidation!: () => void
+        let didReachRetryRevalidation = false
+        const retryRevalidationReached = new Promise<Record<string, unknown>>((resolve) => {
+          reportRetryRevalidation = resolve
+        })
+        const retryRevalidationReleased = new Promise<void>((resolve) => {
+          releaseRetryRevalidation = resolve
+        })
+        const findOneSpy = vi.spyOn(payload.db, 'findOne').mockImplementation(async (args) => {
+          const conditions = (args.where as { and?: Record<string, unknown>[] } | undefined)?.and
+          const isRetryRevalidation = Boolean(
+            conditions?.some((condition) => '_branchOp' in condition) &&
+              conditions.some((condition) => 'id' in condition),
+          )
+
+          if (isRetryRevalidation && !didReachRetryRevalidation) {
+            didReachRetryRevalidation = true
+
+            if (!observedDeleteWinner) {
+              throw new Error('The competing delete winner was not observed before revalidation.')
+            }
+
+            reportRetryRevalidation(observedDeleteWinner)
+            await retryRevalidationReleased
+          }
+
+          const result = await findOne(args)
+          const branchResult = result as null | Record<string, unknown>
+
+          if (!isRetryRevalidation && branchResult?._branchOp === 'delete') {
+            observedDeleteWinner = branchResult
+          }
+
+          return result
+        })
+
+        hookSpy.postBeforeOperation = ({ args, req }) => {
+          const raceOperation = req.context.raceOperation
+
+          if (String(args.id) === String(doc.id) && typeof raceOperation === 'string') {
+            deleteHookAttempts.set(raceOperation, (deleteHookAttempts.get(raceOperation) ?? 0) + 1)
+          }
+        }
+
+        const firstReq = await createPayloadRequest({
+          branch: 'racebranch',
+          context: { raceOperation: 'A' },
+          payload,
+        })
+        const secondReq = await createPayloadRequest({
+          branch: 'racebranch',
+          context: { raceOperation: 'B' },
+          payload,
+        })
+        const deletes = Promise.all([
+          payload.delete({
+            id: doc.id,
+            branch: 'racebranch',
+            collection: postsSlug,
+            req: firstReq,
+          }),
+          payload.delete({
+            id: doc.id,
+            branch: 'racebranch',
+            collection: postsSlug,
+            req: secondReq,
+          }),
+        ])
+
+        try {
+          const winner = await retryRevalidationReached
+          const rawReq = await createPayloadRequest({ branch: false, payload })
+
+          await payload.db.deleteOne({
+            branch: false,
+            collection: postsSlug,
+            req: rawReq,
+            where: { id: { equals: winner.id as number | string } },
+          })
+          await payload.db.deleteMany({
+            collection: branchChangesSlug,
+            req: rawReq,
+            where: { branch: { equals: 'racebranch' } },
+          })
+          releaseRetryRevalidation()
+
+          const results = await deletes
+
+          expect(results.map(({ id }) => id)).toEqual([doc.id, doc.id])
+        } finally {
+          releaseShadowCreates()
+          releaseRetryRevalidation()
+          createSpy.mockRestore()
+          findOneSpy.mockRestore()
+          await deletes.catch(() => undefined)
+        }
+
+        expect([...deleteHookAttempts.values()].sort()).toEqual([1, 3])
+
+        const shadows = await payload.find({
+          branch: false,
+          collection: postsSlug,
+          pagination: false,
+          showHiddenFields: true,
+          where: {
+            and: [{ _branch: { equals: 'racebranch' } }, { _branchDocID: { equals: doc.id } }],
+          },
+        })
+        const changes = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: 'racebranch' } },
+        })
+
+        expect(shadows.docs).toHaveLength(1)
+        expect(shadows.docs[0]!._branchOp).toBe('delete')
+        expect(changes.docs).toHaveLength(1)
+      },
+    )
+
+    test.options(
+      'should complete a delete that starts before a competing first edit commits',
+      { db: 'mongo' },
+      async () => {
+        await payload.create({
+          collection: branchesSlug,
+          data: { name: 'Race', slug: 'racebranch' },
+        })
+
+        const doc = await payload.create({ collection: postsSlug, data: { title: 'mixed race' } })
+        const create = payload.db.create.bind(payload.db)
+        let releaseDeleteShadow!: () => void
+        let markDeleteShadowReady!: () => void
+        const deleteShadowReleased = new Promise<void>((resolve) => {
+          releaseDeleteShadow = resolve
+        })
+        const deleteShadowReady = new Promise<void>((resolve) => {
+          markDeleteShadowReady = resolve
+        })
+        const createSpy = vi.spyOn(payload.db, 'create').mockImplementation(async (args) => {
+          if (
+            args.collection === postsSlug &&
+            args.data?._branch === 'racebranch' &&
+            args.data?._branchOp === 'delete'
+          ) {
+            markDeleteShadowReady()
+            await deleteShadowReleased
+          }
+
+          return create(args)
+        })
+        const deletePromise = payload.delete({
+          id: doc.id,
+          branch: 'racebranch',
+          collection: postsSlug,
+        })
+
+        try {
+          await deleteShadowReady
+
+          const updateResult = await payload.update({
+            id: doc.id,
+            branch: 'racebranch',
+            collection: postsSlug,
+            data: { title: 'edit committed while delete waits' },
+          })
+
+          releaseDeleteShadow()
+
+          const deleteResult = await deletePromise
+
+          expect(updateResult.title).toBe('edit committed while delete waits')
+          expect(deleteResult.id).toBe(doc.id)
+        } finally {
+          releaseDeleteShadow()
+          createSpy.mockRestore()
+          await deletePromise.catch(() => undefined)
+        }
+
+        const shadows = await payload.find({
+          branch: false,
+          collection: postsSlug,
+          pagination: false,
+          showHiddenFields: true,
+          where: {
+            and: [{ _branch: { equals: 'racebranch' } }, { _branchDocID: { equals: doc.id } }],
+          },
+        })
+
+        expect(shadows.docs).toHaveLength(1)
+        expect(shadows.docs[0]!._branchOp).toBe('delete')
+      },
+    )
   })
 
   /**
@@ -7405,10 +8139,96 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(payload.config.jobs.tasks.map((task) => task.slug)).toContain('scheduleMerge')
     })
 
+    test.options(
+      'should complete a scheduled merge while recording progress in MongoDB',
+      { db: 'mongo' },
+      async () => {
+        const user = await asDevUser()
+
+        await runScheduledMerge({ user: { relationTo: 'users', value: user.id } })
+
+        expect(await mergeOutcome()).toMatchObject({
+          jobsRun: [],
+          pendingChanges: [],
+          status: 'merged',
+        })
+        expect((await readBranch()).mergeProgress).toBeFalsy()
+      },
+    )
+
+    test.options(
+      'should clear scheduled merge progress without replacing the merge error',
+      { db: 'mongo' },
+      async () => {
+        const user = await asDevUser()
+        const expectedError = 'Scheduled merge failed after progress was recorded'
+        let didObserveProgressBeforeFailure = false
+
+        await payload.update({
+          id: branchID,
+          collection: branchesSlug,
+          data: { mergeProgress: 'stale' },
+          overrideAccess: true,
+        })
+        expect((await readBranch()).mergeProgress).toBe('stale')
+
+        const job = await payload.jobs.queue({
+          input: { branch: branchSlug, user: { relationTo: 'users', value: user.id } },
+          overrideAccess: true,
+          task: 'scheduleMerge',
+          waitUntil: new Date(Date.now() - 60_000),
+        })
+
+        hookSpy.beforeChange = async ({
+          data,
+          req,
+        }: {
+          data: Record<string, unknown>
+          req: PayloadRequest
+        }) => {
+          if (data.title === 'edited on branch') {
+            const branchDuringMerge = await req.payload.findByID({
+              id: branchID,
+              collection: branchesSlug,
+            })
+
+            expect(branchDuringMerge.mergeProgress).toBe('running')
+            didObserveProgressBeforeFailure = true
+            throw new Error(expectedError)
+          }
+        }
+
+        try {
+          await payload.jobs.runByID({ id: job.id, overrideAccess: true })
+
+          const [branch, onMain, pendingChanges, ran] = await Promise.all([
+            readBranch(),
+            payload.findByID({ id: mainDocID, collection: postsSlug }),
+            payload.find({
+              collection: branchChangesSlug,
+              pagination: false,
+              where: { branch: { equals: branchSlug } },
+            }),
+            payload.findByID({ id: job.id, collection: 'payload-jobs' }),
+          ])
+
+          expect(branch.mergeProgress).toBeFalsy()
+          expect(branch.status).toBe('open')
+          expect(didObserveProgressBeforeFailure).toBe(true)
+          expect(onMain.title).toBe('original on main')
+          expect(pendingChanges.docs).toHaveLength(1)
+          expect(ran.error?.message).toBe(expectedError)
+          expect(ran.hasError).toBe(true)
+        } finally {
+          hookSpy.beforeChange = undefined
+        }
+      },
+    )
+
     test('should apply the branch when the job runs', async () => {
       const user = await asDevUser()
 
-      await runScheduledMerge({ user: user.id })
+      await runScheduledMerge({ user: { relationTo: 'users', value: user.id } })
 
       const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
 
@@ -7418,7 +8238,10 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
     test('should close the branch when the schedule asked for it', async () => {
       const user = await asDevUser()
 
-      await runScheduledMerge({ closeBranch: true, user: user.id })
+      await runScheduledMerge({
+        closeBranch: true,
+        user: { relationTo: 'users', value: user.id },
+      })
 
       // Nothing pending is what earns the close, so both are asserted together: a
       // status of `open` with a change still listed is a merge that did not run.
@@ -7430,7 +8253,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       // production, so the same fallback would turn a deleted account into an
       // unchecked one — this fails instead.
       const job = await payload.jobs.queue({
-        input: { branch: branchSlug, user: 999999 },
+        input: { branch: branchSlug, user: { relationTo: 'users', value: 999999 } },
         overrideAccess: true,
         task: 'scheduleMerge',
         waitUntil: new Date(Date.now() - 60_000),
@@ -7460,7 +8283,10 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         data: { email: 'restricted-canceller@example.com', password: 'test' },
       })
       const job = await payload.jobs.queue({
-        input: { branch: privateBranch.slug, user: restrictedUser.id },
+        input: {
+          branch: privateBranch.slug,
+          user: { relationTo: 'users', value: restrictedUser.id },
+        },
         overrideAccess: true,
         task: 'scheduleMerge',
         waitUntil: new Date(Date.now() + 60_000),
@@ -7512,7 +8338,10 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       const realChangeID = String(changes.docs[0]!.id)
 
       // A change discarded between queueing and firing simply does not match.
-      await runScheduledMerge({ changes: [realChangeID, '999999'], user: user.id })
+      await runScheduledMerge({
+        changes: [realChangeID, '999999'],
+        user: { relationTo: 'users', value: user.id },
+      })
 
       const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
 
@@ -7522,9 +8351,9 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
     test('should clear the branch progress marker when the job finishes', async () => {
       const user = await asDevUser()
 
-      await runScheduledMerge({ user: user.id })
+      await runScheduledMerge({ user: { relationTo: 'users', value: user.id } })
 
-      // A stale "1/1" outlives the run and reads as a merge still in flight.
+      // A stale "running" outlives the run and reads as a merge still in flight.
       expect((await readBranch()).mergeProgress).toBeFalsy()
     })
   })

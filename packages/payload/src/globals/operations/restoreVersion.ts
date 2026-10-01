@@ -6,12 +6,14 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { assertBranchReadable } from '../../branching/assertBranchReadable.js'
 import { recordBranchGlobalChange, resolveBranchGlobalWrite } from '../../branching/globals.js'
+import { branchField, MAIN_BRANCH } from '../../branching/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
@@ -97,7 +99,12 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
 
     // Overwrite draft status if draft is true
     if (draft) {
-      rawVersion.version._status = 'draft'
+      rawVersion.version._status =
+        payload.config.localization && hasLocalizeStatusEnabled(globalConfig)
+          ? Object.fromEntries(
+              payload.config.localization.localeCodes.map((localeCode) => [localeCode, 'draft']),
+            )
+          : 'draft'
     }
 
     // A localized `_status` can publish and unpublish locales in one restore, so authorize every
@@ -164,25 +171,20 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     })
 
     let result = rawVersion.version
+    const writeBranch = resolveBranchGlobalWrite({ globalSlug: globalConfig.slug, req })
+
+    if (payload.config.branching?.branchableGlobals.has(globalConfig.slug)) {
+      result[branchField] = writeBranch ?? MAIN_BRANCH
+    }
+
+    // Ensure updatedAt date is always updated
+    result.updatedAt = new Date().toISOString()
 
     if (global) {
-      // Ensure updatedAt date is always updated
-      result.updatedAt = new Date().toISOString()
       result = await payload.db.updateGlobal({
         slug: globalConfig.slug,
         data: result,
         req,
-      })
-
-      const now = new Date().toISOString()
-
-      result = await payload.db.createGlobalVersion({
-        autosave: false,
-        createdAt: result.createdAt ? new Date(result.createdAt).toISOString() : now,
-        globalSlug: globalConfig.slug,
-        req,
-        updatedAt: draft ? now : new Date(result.updatedAt).toISOString(),
-        versionData: result,
       })
     } else {
       result = await payload.db.createGlobal({
@@ -192,7 +194,16 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
       })
     }
 
-    const writeBranch = resolveBranchGlobalWrite({ globalSlug: globalConfig.slug, req })
+    const now = new Date().toISOString()
+
+    result = await payload.db.createGlobalVersion({
+      autosave: false,
+      createdAt: result.createdAt ? new Date(result.createdAt).toISOString() : now,
+      globalSlug: globalConfig.slug,
+      req,
+      updatedAt: draft ? now : new Date(result.updatedAt).toISOString(),
+      versionData: result,
+    })
 
     if (writeBranch) {
       await recordBranchGlobalChange({

@@ -16,9 +16,5 @@ export const commitTransaction: CommitTransaction = async function commitTransac
   // This ensures other operations can't retrieve this session while we're ending it
   delete this.sessions[transactionID]
 
-  try {
-    await session.resolve()
-  } catch (_) {
-    await session.reject()
-  }
+  await session.resolve()
 }

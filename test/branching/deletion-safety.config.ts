@@ -44,6 +44,25 @@ export default buildConfigWithDefaults({
               return doc
             },
           ],
+          afterDelete: [
+            async ({ doc }) => {
+              if (
+                deletionSafetySpy.rejectTargetAfterDeleteID !== undefined &&
+                String(doc.id) === String(deletionSafetySpy.rejectTargetAfterDeleteID)
+              ) {
+                throw new Error('Rejected target after delete')
+              }
+
+              await deletionSafetySpy.afterTargetDelete?.({ doc })
+
+              return doc
+            },
+          ],
+          beforeDelete: [
+            async ({ id, req }) => {
+              await deletionSafetySpy.beforeTargetDelete?.({ id, req })
+            },
+          ],
         },
         versions: false,
       },
@@ -112,6 +131,18 @@ export default buildConfigWithDefaults({
               }
             },
           ],
+          afterDelete: [
+            ({ doc }) => {
+              if (
+                deletionSafetySpy.rejectVersionedTargetAfterDeleteID !== undefined &&
+                String(doc.id) === String(deletionSafetySpy.rejectVersionedTargetAfterDeleteID)
+              ) {
+                throw new Error('Rejected versioned target after delete')
+              }
+
+              return doc
+            },
+          ],
         },
         versions: { drafts: true, maxPerDoc: 2 },
       },
@@ -120,12 +151,14 @@ export default buildConfigWithDefaults({
         fields: [{ name: 'alt', type: 'text' }],
         hooks: {
           afterChange: [
-            ({ doc, operation }) => {
+            async ({ doc, operation }) => {
               if (
                 operation === 'update' &&
-                deletionSafetySpy.rejectUploadAfterChangeID !== undefined &&
-                String(doc.id) === String(deletionSafetySpy.rejectUploadAfterChangeID)
+                (deletionSafetySpy.rejectUploadAfterChange ||
+                  (deletionSafetySpy.rejectUploadAfterChangeID !== undefined &&
+                    String(doc.id) === String(deletionSafetySpy.rejectUploadAfterChangeID)))
               ) {
+                await deletionSafetySpy.beforeRejectedUploadAfterChange?.()
                 throw new Error('Rejected upload after change')
               }
 
@@ -175,7 +208,32 @@ export default buildConfigWithDefaults({
             },
           ],
           beforeValidate: [
-            ({ data, operation, originalDoc }) => {
+            async ({ data, operation, originalDoc, req }) => {
+              if (operation === 'update' && originalDoc?.id !== undefined) {
+                deletionSafetySpy.uploadUpdateRequestFiles.push({
+                  id: originalDoc.id,
+                  name: req.file?.name,
+                })
+              }
+
+              if (
+                operation === 'update' &&
+                deletionSafetySpy.rejectUploadAfterHookWriteID !== undefined &&
+                String(originalDoc?.id) ===
+                  String(deletionSafetySpy.rejectUploadAfterHookWriteID) &&
+                deletionSafetySpy.uploadHookWriteTargetID !== undefined
+              ) {
+                await req.payload.update({
+                  id: deletionSafetySpy.uploadHookWriteTargetID,
+                  collection: deletionSafetyTargetsSlug,
+                  data: { title: 'written by rejected upload hook' },
+                  overrideAccess: true,
+                  req,
+                })
+
+                throw new Error('Rejected upload after hook write')
+              }
+
               const shouldRejectSelectedUpload =
                 deletionSafetySpy.rejectUploadBeforeValidateID !== undefined &&
                 String(originalDoc?.id) === String(deletionSafetySpy.rejectUploadBeforeValidateID)

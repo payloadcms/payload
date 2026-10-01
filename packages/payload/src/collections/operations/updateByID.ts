@@ -10,6 +10,7 @@ import type {
   TransformCollectionWithSelect,
   Where,
 } from '../../types/index.js'
+import type { UploadFileRollbacks } from '../../uploads/uploadFileRollback.js'
 import type { DeferredCleanupScope } from '../../utilities/transactionCallbacks.js'
 import type {
   Collection,
@@ -20,6 +21,10 @@ import type {
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
+import {
+  isConcurrentShadowOperationError,
+  retryConcurrentShadowOperation,
+} from '../../branching/createShadowRow.js'
 import { forkDocument } from '../../branching/forkDocument.js'
 import { resetBranchState, resolveBranch } from '../../branching/resolveBranch.js'
 import { branchField, MAIN_BRANCH } from '../../branching/types.js'
@@ -34,8 +39,15 @@ import {
   sanitizeUploadData,
 } from '../../uploads/sanitizeUploadData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
+import {
+  cleanupUploadFileRollbacks,
+  rollbackUploadFiles,
+} from '../../uploads/uploadFileRollback.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
-import { commitTransaction } from '../../utilities/commitTransaction.js'
+import {
+  commitTransaction,
+  shouldRollbackTransactionArtifacts,
+} from '../../utilities/commitTransaction.js'
 import { hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -55,7 +67,16 @@ import {
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
+import { createOperationRetryRequest } from './utilities/createOperationRetryRequest.js'
 import { updateDocument } from './utilities/update.js'
+
+export const branchMergeUploadDataContextKey = Symbol('branchMergeUploadData')
+
+export type BranchMergeUploadDataContext = {
+  collectionSlug: string
+  data: unknown
+  id: number | string
+}
 
 export type Arguments<TSlug extends CollectionSlug> = {
   autosave?: boolean
@@ -103,6 +124,7 @@ export const updateByIDOperationForBranchMerge = <
   updateByIDOperationWithLifecycle<TSlug, TSelect>({
     incomingArgs,
     lifecycleOperation: 'create',
+    trustedUploadData: incomingArgs.data,
   })
 
 const updateByIDOperationWithLifecycle = async <
@@ -111,19 +133,123 @@ const updateByIDOperationWithLifecycle = async <
 >({
   incomingArgs,
   lifecycleOperation,
+  trustedUploadData,
 }: {
   incomingArgs: Arguments<TSlug>
   lifecycleOperation: 'create' | 'update'
+  trustedUploadData?: unknown
+}): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
+  const reqContext = incomingArgs.req.context as Record<PropertyKey, unknown> | undefined
+  const pendingBranchMergeUploadData = reqContext?.[branchMergeUploadDataContextKey] as
+    | BranchMergeUploadDataContext
+    | undefined
+  let branchMergeUploadDataToTrust: BranchMergeUploadDataContext | undefined =
+    trustedUploadData === undefined
+      ? undefined
+      : {
+          id: incomingArgs.id,
+          collectionSlug: incomingArgs.collection.config.slug,
+          data: trustedUploadData,
+        }
+
+  if (
+    pendingBranchMergeUploadData?.collectionSlug === incomingArgs.collection.config.slug &&
+    pendingBranchMergeUploadData.id === incomingArgs.id
+  ) {
+    branchMergeUploadDataToTrust ??= pendingBranchMergeUploadData
+    delete reqContext![branchMergeUploadDataContextKey]
+  }
+
+  const hasCallerTransaction = Boolean(await incomingArgs.req.transactionID)
+  const pristineData = deepCopyObjectSimple(incomingArgs.data)
+  const shouldIsolateTempFile = Boolean(
+    !hasCallerTransaction &&
+      incomingArgs.req.file?.tempFilePath &&
+      (incomingArgs.req.payload.config.upload?.useTempFiles ||
+        incomingArgs.req.file.uploadReference ||
+        incomingArgs.req.context?._payloadClientUploadTempFile),
+  )
+  let didOwnAttemptTransaction = false
+  let didReachFinalCommit = false
+
+  try {
+    return await retryConcurrentShadowOperation({
+      operation: async () => {
+        didOwnAttemptTransaction = false
+        didReachFinalCommit = false
+
+        const attemptArgs = hasCallerTransaction
+          ? incomingArgs
+          : {
+              ...incomingArgs,
+              data: deepCopyObjectSimple(pristineData),
+              req: await createOperationRetryRequest({
+                copyFileTempPath: shouldIsolateTempFile,
+                req: incomingArgs.req,
+              }),
+            }
+
+        return updateByIDOperationWithLifecycleAttempt<TSlug, TSelect>({
+          branchMergeUploadDataToTrust,
+          hasCallerTransaction,
+          incomingArgs: attemptArgs,
+          lifecycleOperation,
+          reportFinalCommit: () => {
+            didReachFinalCommit = true
+          },
+          reportTransactionOwnership: ({ isOperationTransaction }) => {
+            didOwnAttemptTransaction = isOperationTransaction
+          },
+        })
+      },
+      shouldRetry: ({ error }) =>
+        !hasCallerTransaction &&
+        didOwnAttemptTransaction &&
+        (didReachFinalCommit || isConcurrentShadowOperationError(error)),
+    })
+  } finally {
+    if (shouldIsolateTempFile) {
+      await unlinkTempFiles({
+        collectionConfig: incomingArgs.collection.config,
+        config: incomingArgs.req.payload.config,
+        req: incomingArgs.req,
+      }).catch((unlinkError) => {
+        incomingArgs.req.payload.logger.error({
+          err: unlinkError,
+          msg: 'Failed to remove temp file',
+        })
+      })
+    }
+  }
+}
+
+const updateByIDOperationWithLifecycleAttempt = async <
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug> = SelectType,
+>({
+  branchMergeUploadDataToTrust,
+  hasCallerTransaction,
+  incomingArgs,
+  lifecycleOperation,
+  reportFinalCommit,
+  reportTransactionOwnership,
+}: {
+  branchMergeUploadDataToTrust?: BranchMergeUploadDataContext
+  hasCallerTransaction: boolean
+  incomingArgs: Arguments<TSlug>
+  lifecycleOperation: 'create' | 'update'
+  reportFinalCommit: () => void
+  reportTransactionOwnership: (args: { isOperationTransaction: boolean }) => void
 }): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
   let cleanupScope: DeferredCleanupScope | null = null
   let didResolveBranchFork = false
   let shouldCommit = false
+  const uploadFileRollbacks: UploadFileRollbacks = new Map()
 
   try {
-    const hasCallerTransaction = Boolean(await args.req.transactionID)
-
     shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+    reportTransactionOwnership({ isOperationTransaction: shouldCommit })
     cleanupScope = await beginDeferredCleanupScope({ req: args.req })
 
     if (args.collection.config.upload && !args.overrideAccess) {
@@ -285,7 +411,13 @@ const updateByIDOperationWithLifecycle = async <
     }
 
     if (collectionConfig.upload && !overrideAccess) {
-      data = mergeUploadDataWithDocument(data, docWithLocales, {
+      const trustedUploadDataForDocument =
+        branchMergeUploadDataToTrust?.collectionSlug === collectionConfig.slug &&
+        branchMergeUploadDataToTrust.id === id
+          ? branchMergeUploadDataToTrust.data
+          : docWithLocales
+
+      data = mergeUploadDataWithDocument(data, trustedUploadDataForDocument, {
         locale:
           locale === 'all' || !locale
             ? config.localization
@@ -347,6 +479,10 @@ const updateByIDOperationWithLifecycle = async <
       select: select!,
       showHiddenFields: showHiddenFields!,
       unpublishAllLocales,
+      uploadFileRollbacks:
+        shouldCommit && collectionConfig.upload && !collectionConfig.upload.disableLocalStorage
+          ? uploadFileRollbacks
+          : undefined,
     })
 
     // /////////////////////////////////////
@@ -385,11 +521,21 @@ const updateByIDOperationWithLifecycle = async <
       await flushDeferredCleanupScopeAfterOperation({ req, scope: cleanupScope })
     }
     if (shouldCommit) {
+      reportFinalCommit()
       await commitTransaction(req)
+
+      await cleanupUploadFileRollbacks({ rollbacks: uploadFileRollbacks }).catch((error) => {
+        args.req.payload.logger.error({
+          err: error,
+          msg: 'Failed to remove an upload rollback backup after committing its database write.',
+        })
+      })
     }
 
     return result
   } catch (error: unknown) {
+    const shouldRollbackArtifacts = shouldRollbackTransactionArtifacts({ error })
+
     if (cleanupScope) {
       clearDeferredCleanupScope({ req: args.req, scope: cleanupScope })
     }
@@ -405,6 +551,10 @@ const updateByIDOperationWithLifecycle = async <
       await killTransaction(args.req)
       if (didResolveBranchFork) {
         resetBranchState(args.req)
+      }
+
+      if (shouldRollbackArtifacts) {
+        await rollbackUploadFiles({ rollbacks: uploadFileRollbacks })
       }
     }
     throw error

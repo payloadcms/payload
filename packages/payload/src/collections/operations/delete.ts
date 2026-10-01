@@ -1,5 +1,6 @@
 import { status as httpStatus } from 'http-status'
 
+import type { BranchDeleteOutcome } from '../../branching/tombstone.js'
 import type { AccessResult } from '../../config/types.js'
 import type { CollectionSlug, FindOptions } from '../../index.js'
 import type { PayloadRequest, PopulateType, SelectType, Where } from '../../types/index.js'
@@ -12,9 +13,12 @@ import type {
 } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
-import { resolveBranch } from '../../branching/resolveBranch.js'
+import { resetBranchState, resolveBranch } from '../../branching/resolveBranch.js'
 import {
   assertBranchCreatedDeleteUnreferenced,
+  assertBranchDeleteCanUseCallerTransaction,
+  requireBranchDeleteOutcome,
+  setBranchDeleteOperation,
   willBranchAbsorbDelete,
 } from '../../branching/tombstone.js'
 import { MAIN_BRANCH } from '../../branching/types.js'
@@ -69,16 +73,19 @@ export const deleteOperation = async <
 ): Promise<BulkOperationResult<TSlug, TSelect>> => {
   let args = incomingArgs
   let cleanupScope: DeferredCleanupScope | null = null
+  let hasCallerTransaction = false
   let shouldCommit = false
   if (args.collection.config.disableBulkDelete && !args.overrideAccess) {
     throw new APIError(`Collection ${args.collection.config.slug} has disabled bulk delete`, 403)
   }
 
   try {
+    hasCallerTransaction = Boolean(await args.req.transactionID)
     shouldCommit =
       !args.disableTransaction &&
       !args.req.payload.db.bulkOperationsSingleTransaction &&
       (await initTransaction(args.req))
+    const hasSharedTransaction = hasCallerTransaction || shouldCommit
     cleanupScope = await beginDeferredCleanupScope({ req: args.req })
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -183,11 +190,13 @@ export const deleteOperation = async <
     } & CheckedDeleteEntry
 
     const deletedDocumentIDs = new Map<string, number | string>()
+    const hasWriteCapableBeforeDeleteHooks = Boolean(collectionConfig.hooks?.beforeDelete?.length)
+    const branch = resolveBranch(req)
     const isDeletingFromBranch =
       Boolean(
         config.branching?.enabled &&
           config.branching.branchableCollections.has(collectionConfig.slug),
-      ) && resolveBranch(req) !== MAIN_BRANCH
+      ) && branch !== MAIN_BRANCH
 
     const pushError = (id: number | string, error: unknown, message?: string) => {
       errors.push({
@@ -221,12 +230,20 @@ export const deleteOperation = async <
       }
     }
 
-    const runDeleteCleanup = async ({ fullDocument }: { fullDocument: Doc }): Promise<boolean> => {
-      const absorbedByBranch = willBranchAbsorbDelete({
-        collectionSlug: collectionConfig.slug,
-        doc: fullDocument,
-        req,
-      })
+    const runDeleteCleanup = async ({
+      fullDocument,
+      isTombstone,
+    }: {
+      fullDocument: Doc
+      isTombstone?: boolean
+    }): Promise<boolean> => {
+      const absorbedByBranch =
+        isTombstone ??
+        willBranchAbsorbDelete({
+          collectionSlug: collectionConfig.slug,
+          doc: fullDocument,
+          req,
+        })
 
       if (!absorbedByBranch) {
         await deleteAssociatedFiles({
@@ -239,6 +256,45 @@ export const deleteOperation = async <
       }
 
       return absorbedByBranch
+    }
+
+    const runBeforeDeleteHooksInDocumentTransaction = async ({
+      entry,
+    }: {
+      entry: CheckedDeleteEntry
+    }): Promise<CheckedDeleteEntry | null> => {
+      let hookCleanupScope: DeferredCleanupScope | null = null
+      let hookShouldCommit = false
+
+      try {
+        hookShouldCommit = await initTransaction(req)
+        hookCleanupScope = await beginDeferredCleanupScope({ req })
+
+        await runBeforeDeleteHooks({ doc: entry.doc })
+        await flushDeferredCleanupScope({ req, scope: hookCleanupScope })
+
+        if (hookShouldCommit) {
+          await commitTransaction(req)
+        }
+
+        return entry
+      } catch (error) {
+        if (hookCleanupScope) {
+          clearDeferredCleanupScope({ req, scope: hookCleanupScope })
+        }
+
+        if (hookShouldCommit) {
+          await killTransaction(req)
+        }
+
+        if (hasCallerTransaction) {
+          throw error
+        }
+
+        pushError(entry.doc.id, error)
+
+        return null
+      }
     }
 
     const prepareDocumentsForDelete = async (): Promise<CheckedDeleteEntry[]> => {
@@ -269,6 +325,15 @@ export const deleteOperation = async <
           try {
             const fullDocument = await assertDeleteUnreferenced({ doc: entry.doc })
 
+            if (hasCallerTransaction && isDeletingFromBranch) {
+              await assertBranchDeleteCanUseCallerTransaction({
+                branch,
+                collectionSlug: collectionConfig.slug,
+                docID: entry.doc.id,
+                req,
+              })
+            }
+
             return {
               ...entry,
               fullDocument,
@@ -285,36 +350,67 @@ export const deleteOperation = async <
         (entry): entry is CheckedDeleteEntry => entry !== null,
       )
 
-      const hookResults = await Promise.all(
-        initiallyChecked.map(async (entry): Promise<CheckedDeleteEntry | null> => {
-          try {
-            await runBeforeDeleteHooks({ doc: entry.doc })
+      const hookResults: (CheckedDeleteEntry | null)[] = []
 
-            return entry
-          } catch (error) {
-            pushError(entry.doc.id, error)
+      if (req.payload.db.bulkOperationsSingleTransaction) {
+        for (const entry of initiallyChecked) {
+          hookResults.push(
+            hasWriteCapableBeforeDeleteHooks
+              ? await runBeforeDeleteHooksInDocumentTransaction({ entry })
+              : entry,
+          )
+        }
+      } else if (hasSharedTransaction) {
+        for (const entry of initiallyChecked) {
+          await runBeforeDeleteHooks({ doc: entry.doc })
+          hookResults.push(entry)
+        }
+      } else {
+        hookResults.push(
+          ...(await Promise.all(
+            initiallyChecked.map(async (entry): Promise<CheckedDeleteEntry | null> => {
+              try {
+                await runBeforeDeleteHooks({ doc: entry.doc })
 
-            return null
-          }
-        }),
-      )
+                return entry
+              } catch (error) {
+                pushError(entry.doc.id, error)
+
+                return null
+              }
+            }),
+          )),
+        )
+      }
+
       const hookCompleted = hookResults.filter(
         (entry): entry is CheckedDeleteEntry => entry !== null,
       )
+      const postHookCheckResults: (CheckedDeleteEntry | null)[] = []
 
-      const postHookCheckResults = await Promise.all(
-        hookCompleted.map(async (entry): Promise<CheckedDeleteEntry | null> => {
-          try {
-            const fullDocument = await assertDeleteUnreferenced({ doc: entry.fullDocument })
+      if (hasSharedTransaction) {
+        for (const entry of hookCompleted) {
+          const fullDocument = await assertDeleteUnreferenced({ doc: entry.fullDocument })
 
-            return { ...entry, fullDocument }
-          } catch (error) {
-            pushError(entry.doc.id, error)
+          postHookCheckResults.push({ ...entry, fullDocument })
+        }
+      } else {
+        postHookCheckResults.push(
+          ...(await Promise.all(
+            hookCompleted.map(async (entry): Promise<CheckedDeleteEntry | null> => {
+              try {
+                const fullDocument = await assertDeleteUnreferenced({ doc: entry.fullDocument })
 
-            return null
-          }
-        }),
-      )
+                return { ...entry, fullDocument }
+              } catch (error) {
+                pushError(entry.doc.id, error)
+
+                return null
+              }
+            }),
+          )),
+        )
+      }
 
       return postHookCheckResults.filter((entry): entry is CheckedDeleteEntry => entry !== null)
     }
@@ -387,6 +483,7 @@ export const deleteOperation = async <
     }: CheckedDeleteEntry): Promise<null | ResultDoc> => {
       let docCleanupScope: DeferredCleanupScope | null = null
       let docShouldCommit = false
+      let hasReachedWriteCapableStage = hasCallerTransaction && hasWriteCapableBeforeDeleteHooks
 
       try {
         docShouldCommit = await initTransaction(req)
@@ -398,11 +495,13 @@ export const deleteOperation = async <
           doc: fullDocument,
           req,
         })
+        let branchDeleteOutcome: BranchDeleteOutcome | undefined
 
         if (!isDeletingFromBranch) {
           await runDeleteCleanup({ fullDocument })
 
           if (collectionConfig.versions) {
+            hasReachedWriteCapableStage = true
             await deleteCollectionVersions({
               id: doc.id,
               slug: collectionConfig.slug,
@@ -412,6 +511,7 @@ export const deleteOperation = async <
           }
 
           if (hasScheduledPublishEnabled(collectionConfig) && !absorbedByBranch) {
+            hasReachedWriteCapableStage = true
             await deleteScheduledPublishJobs({
               id: doc.id,
               slug: collectionConfig.slug,
@@ -421,6 +521,20 @@ export const deleteOperation = async <
           }
         }
 
+        hasReachedWriteCapableStage = true
+        if (isDeletingFromBranch) {
+          setBranchDeleteOperation({
+            branch,
+            collectionSlug: collectionConfig.slug,
+            docID: doc.id,
+            isTombstoneExpected: absorbedByBranch,
+            onResolved: (outcome) => {
+              branchDeleteOutcome = outcome
+            },
+            req,
+            useAmbientTransaction: docShouldCommit,
+          })
+        }
         await payload.db.deleteOne({
           collection: collectionConfig.slug,
           req,
@@ -432,12 +546,22 @@ export const deleteOperation = async <
           },
         })
 
-        deletedDocumentIDs.set(String(doc.id), doc.id)
+        const finalBranchDeleteOutcome = isDeletingFromBranch
+          ? requireBranchDeleteOutcome({ outcome: branchDeleteOutcome })
+          : ({ doc: fullDocument, tombstoned: false } as const)
+
+        if (!finalBranchDeleteOutcome.tombstoned) {
+          deletedDocumentIDs.set(String(doc.id), doc.id)
+        }
 
         if (isDeletingFromBranch) {
-          await runDeleteCleanup({ fullDocument })
+          await runDeleteCleanup({
+            fullDocument: finalBranchDeleteOutcome.doc as Doc,
+            isTombstone: finalBranchDeleteOutcome.tombstoned,
+          })
 
           if (collectionConfig.versions) {
+            hasReachedWriteCapableStage = true
             await deleteCollectionVersions({
               id: doc.id,
               slug: collectionConfig.slug,
@@ -446,7 +570,11 @@ export const deleteOperation = async <
             })
           }
 
-          if (hasScheduledPublishEnabled(collectionConfig) && !absorbedByBranch) {
+          if (
+            hasScheduledPublishEnabled(collectionConfig) &&
+            !finalBranchDeleteOutcome.tombstoned
+          ) {
+            hasReachedWriteCapableStage = true
             await deleteScheduledPublishJobs({
               id: doc.id,
               slug: collectionConfig.slug,
@@ -463,7 +591,9 @@ export const deleteOperation = async <
           req,
         })
 
-        const result = await runAfterDeleteWork(doc)
+        const result = await runAfterDeleteWork(
+          isDeletingFromBranch ? (finalBranchDeleteOutcome.doc as Doc) : doc,
+        )
 
         if (docCleanupScope) {
           await flushDeferredCleanupScope({ req, scope: docCleanupScope })
@@ -481,6 +611,11 @@ export const deleteOperation = async <
         if (docShouldCommit) {
           await killTransaction(req)
           deletedDocumentIDs.delete(String(doc.id))
+          resetBranchState(req)
+        }
+
+        if (hasCallerTransaction && hasReachedWriteCapableStage) {
+          throw error
         }
 
         pushError(doc.id, error)
@@ -510,21 +645,32 @@ export const deleteOperation = async <
           }),
         }))
       } else {
-        const cleanupResults = await Promise.all(
-          preparedDocuments.map(async (entry): Promise<DeleteEntry | null> => {
-            try {
-              const absorbedByBranch = await runDeleteCleanup({
-                fullDocument: entry.fullDocument,
-              })
+        const cleanupResults: (DeleteEntry | null)[] = []
 
-              return { ...entry, absorbedByBranch }
-            } catch (error) {
-              pushError(entry.doc.id, error)
+        for (const entry of preparedDocuments) {
+          let documentCleanupScope: DeferredCleanupScope | null = null
 
-              return null
+          try {
+            documentCleanupScope = await beginDeferredCleanupScope({ req })
+            const absorbedByBranch = await runDeleteCleanup({
+              fullDocument: entry.fullDocument,
+            })
+
+            await flushDeferredCleanupScope({ req, scope: documentCleanupScope })
+            cleanupResults.push({ ...entry, absorbedByBranch })
+          } catch (error) {
+            if (documentCleanupScope) {
+              clearDeferredCleanupScope({ req, scope: documentCleanupScope })
             }
-          }),
-        )
+
+            if (hasSharedTransaction && hasWriteCapableBeforeDeleteHooks) {
+              throw error
+            }
+
+            pushError(entry.doc.id, error)
+            cleanupResults.push(null)
+          }
+        }
 
         deletable = cleanupResults.filter((entry): entry is DeleteEntry => entry !== null)
       }
@@ -572,10 +718,22 @@ export const deleteOperation = async <
       // /////////////////////////////////////
 
       const deletedInBatch: (number | string)[] = []
+      const branchDeleteOutcomes = new Map<string, BranchDeleteOutcome>()
 
       try {
         if (isDeletingFromBranch) {
-          for (const { doc } of deletable) {
+          for (const { absorbedByBranch, doc } of deletable) {
+            setBranchDeleteOperation({
+              branch,
+              collectionSlug: collectionConfig.slug,
+              docID: doc.id,
+              isTombstoneExpected: absorbedByBranch,
+              onResolved: (outcome) => {
+                branchDeleteOutcomes.set(String(doc.id), outcome)
+              },
+              req,
+              useAmbientTransaction: shouldCommit,
+            })
             await payload.db.deleteOne({
               collection: collectionConfig.slug,
               req,
@@ -587,7 +745,13 @@ export const deleteOperation = async <
               },
             })
 
-            deletedDocumentIDs.set(String(doc.id), doc.id)
+            const finalBranchDeleteOutcome = requireBranchDeleteOutcome({
+              outcome: branchDeleteOutcomes.get(String(doc.id)),
+            })
+
+            if (!finalBranchDeleteOutcome.tombstoned) {
+              deletedDocumentIDs.set(String(doc.id), doc.id)
+            }
             deletedInBatch.push(doc.id)
           }
         } else {
@@ -608,7 +772,16 @@ export const deleteOperation = async <
         }
 
         if (isDeletingFromBranch) {
-          await Promise.all(deletable.map(({ fullDocument }) => runDeleteCleanup({ fullDocument })))
+          for (const { doc } of deletable) {
+            const finalBranchDeleteOutcome = requireBranchDeleteOutcome({
+              outcome: branchDeleteOutcomes.get(String(doc.id)),
+            })
+
+            await runDeleteCleanup({
+              fullDocument: finalBranchDeleteOutcome.doc as Doc,
+              isTombstone: finalBranchDeleteOutcome.tombstoned,
+            })
+          }
 
           if (collectionConfig.versions) {
             await deleteCollectionVersions({
@@ -619,10 +792,20 @@ export const deleteOperation = async <
             })
           }
 
-          if (hasScheduledPublishEnabled(collectionConfig) && hardDeleteIDs.length) {
+          const finalHardDeleteIDs = deletable
+            .filter(({ doc }) => {
+              const outcome = requireBranchDeleteOutcome({
+                outcome: branchDeleteOutcomes.get(String(doc.id)),
+              })
+
+              return !outcome.tombstoned
+            })
+            .map(({ doc }) => doc.id)
+
+          if (hasScheduledPublishEnabled(collectionConfig) && finalHardDeleteIDs.length) {
             await deleteScheduledPublishJobs({
               slug: collectionConfig.slug,
-              ids: hardDeleteIDs,
+              ids: finalHardDeleteIDs,
               payload,
               req,
             })
@@ -640,10 +823,15 @@ export const deleteOperation = async <
 
         if (shouldCommit) {
           await killTransaction(req)
+          resetBranchState(req)
 
           for (const id of deletedInBatch) {
             deletedDocumentIDs.delete(String(id))
           }
+        }
+
+        if (hasCallerTransaction) {
+          throw error
         }
 
         // The delete covers the whole batch, so a failure here belongs to the batch rather than to
@@ -660,15 +848,47 @@ export const deleteOperation = async <
         return results
       }
 
-      await Promise.all(
+      if (hasSharedTransaction) {
+        for (const entry of deletable) {
+          const resultDocument = isDeletingFromBranch
+            ? (requireBranchDeleteOutcome({
+                outcome: branchDeleteOutcomes.get(String(entry.doc.id)),
+              }).doc as Doc)
+            : entry.doc
+
+          results[entry.index] = await runAfterDeleteWork(resultDocument)
+        }
+
+        return results
+      }
+
+      const postDeleteResults = await Promise.all(
         deletable.map(async (entry) => {
           try {
-            results[entry.index] = await runAfterDeleteWork(entry.doc)
+            const resultDocument = isDeletingFromBranch
+              ? (requireBranchDeleteOutcome({
+                  outcome: branchDeleteOutcomes.get(String(entry.doc.id)),
+                }).doc as Doc)
+              : entry.doc
+
+            return {
+              entry,
+              result: await runAfterDeleteWork(resultDocument),
+              status: 'fulfilled' as const,
+            }
           } catch (error) {
-            pushError(entry.doc.id, error)
+            return { entry, error, status: 'rejected' as const }
           }
         }),
       )
+
+      for (const outcome of postDeleteResults) {
+        if (outcome.status === 'rejected') {
+          pushError(outcome.entry.doc.id, outcome.error)
+        } else {
+          results[outcome.entry.index] = outcome.result
+        }
+      }
 
       return results
     }
@@ -739,6 +959,7 @@ export const deleteOperation = async <
     if (shouldCommit) {
       await killTransaction(args.req)
     }
+    resetBranchState(args.req)
     throw error
   }
 }

@@ -8,6 +8,7 @@ import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
 import { commitTransaction } from '../utilities/commitTransaction.js'
+import { ErrorDeletingFile } from '../errors/ErrorDeletingFile.js'
 import { killTransaction } from '../utilities/killTransaction.js'
 import {
   beginDeferredCleanupScope,
@@ -189,6 +190,103 @@ describe('deleteAssociatedFiles', () => {
     expect(await fileExists(filePath)).toBe(false)
   })
 
+  it('should keep a file replaced after deferred deletion was scheduled', async () => {
+    const filename = 'concurrent-replacement.txt'
+    const filePath = path.join(staticDir, filename)
+    const databaseCommit = vi.fn().mockResolvedValue(undefined)
+    const req = {
+      context: {},
+      payload: { db: { commitTransaction: databaseCommit } },
+      t: vi.fn(),
+      transactionID: 'transaction-id',
+    } as unknown as PayloadRequest
+
+    await fs.writeFile(filePath, 'original')
+    await deleteAssociatedFiles({ ...getArgs({ filename }), req })
+    await fs.writeFile(filePath, 'concurrent replacement')
+
+    await commitTransaction(req)
+
+    expect(databaseCommit).toHaveBeenCalledWith('transaction-id')
+    expect(await fs.readFile(filePath, 'utf8')).toBe('concurrent replacement')
+  })
+
+  it('should keep a replacement installed immediately before deferred deletion mutates the path', async () => {
+    const filename = 'replacement-during-deferred-deletion.txt'
+    const filePath = path.join(staticDir, filename)
+    const databaseCommit = vi.fn().mockResolvedValue(undefined)
+    const req = {
+      context: {},
+      payload: { db: { commitTransaction: databaseCommit } },
+      t: vi.fn(),
+      transactionID: 'transaction-id',
+    } as unknown as PayloadRequest
+
+    await fs.writeFile(filePath, 'original')
+    await deleteAssociatedFiles({ ...getArgs({ filename }), req })
+
+    const rename = fs.rename.bind(fs)
+
+    vi.spyOn(fs, 'rename').mockImplementation(async (sourcePath, destinationPath) => {
+      if (sourcePath === filePath) {
+        await fs.writeFile(filePath, 'concurrent replacement')
+      }
+
+      return rename(sourcePath, destinationPath)
+    })
+
+    await commitTransaction(req)
+
+    expect(databaseCommit).toHaveBeenCalledWith('transaction-id')
+    expect(await fs.readFile(filePath, 'utf8')).toBe('concurrent replacement')
+  })
+
+  it('should keep a replacement written to the same path before deferred cleanup runs', async () => {
+    const filename = 'same-path-replacement.txt'
+    const filePath = path.join(staticDir, filename)
+    const databaseCommit = vi.fn().mockResolvedValue(undefined)
+    const req = {
+      context: {},
+      payload: { db: { commitTransaction: databaseCommit } },
+      t: vi.fn(),
+      transactionID: 'transaction-id',
+    } as unknown as PayloadRequest
+
+    await fs.writeFile(filePath, 'original')
+    await deleteAssociatedFiles({
+      ...getArgs({ filename }),
+      files: [{ buffer: Buffer.from('replacement'), path: filePath }],
+      overrideDelete: false,
+      req,
+    })
+    await fs.writeFile(filePath, 'replacement')
+
+    await commitTransaction(req)
+
+    expect(databaseCommit).toHaveBeenCalledWith('transaction-id')
+    expect(await fs.readFile(filePath, 'utf8')).toBe('replacement')
+  })
+
+  it('should keep a file created after a missing deletion target was checked', async () => {
+    const filename = 'created-after-cleanup-check.txt'
+    const filePath = path.join(staticDir, filename)
+    const databaseCommit = vi.fn().mockResolvedValue(undefined)
+    const req = {
+      context: {},
+      payload: { db: { commitTransaction: databaseCommit } },
+      t: vi.fn(),
+      transactionID: 'transaction-id',
+    } as unknown as PayloadRequest
+
+    await deleteAssociatedFiles({ ...getArgs({ filename }), req })
+    await fs.writeFile(filePath, 'replacement')
+
+    await commitTransaction(req)
+
+    expect(databaseCommit).toHaveBeenCalledWith('transaction-id')
+    expect(await fs.readFile(filePath, 'utf8')).toBe('replacement')
+  })
+
   it('should cancel deferred file deletion when the active transaction rolls back', async () => {
     const filename = 'rolled-back-document.txt'
     const filePath = path.join(staticDir, filename)
@@ -227,7 +325,7 @@ describe('deleteAssociatedFiles', () => {
       t: vi.fn(),
       transactionID: 'transaction-id',
     } as unknown as PayloadRequest
-    const unlinkSpy = vi.spyOn(fs, 'unlink').mockRejectedValueOnce(cleanupError)
+    const renameSpy = vi.spyOn(fs, 'rename').mockRejectedValueOnce(cleanupError)
 
     await fs.writeFile(filePath, 'document')
     await deleteAssociatedFiles({ ...getArgs({ filename }), req })
@@ -241,7 +339,7 @@ describe('deleteAssociatedFiles', () => {
     })
     expect(await fileExists(filePath)).toBe(true)
 
-    unlinkSpy.mockRestore()
+    renameSpy.mockRestore()
   })
 
   it('should report cleanup failure without rejecting a completed non-transactional operation', async () => {
@@ -258,7 +356,7 @@ describe('deleteAssociatedFiles', () => {
       t: vi.fn(),
     } as unknown as PayloadRequest
     const operationScope = await beginDeferredCleanupScope({ req })
-    const unlinkSpy = vi.spyOn(fs, 'unlink').mockRejectedValueOnce(cleanupError)
+    const renameSpy = vi.spyOn(fs, 'rename').mockRejectedValueOnce(cleanupError)
 
     await fs.writeFile(filePath, 'document')
     await deleteAssociatedFiles({ ...getArgs({ filename }), req })
@@ -273,7 +371,7 @@ describe('deleteAssociatedFiles', () => {
     })
     expect(await fileExists(filePath)).toBe(true)
 
-    unlinkSpy.mockRestore()
+    renameSpy.mockRestore()
   })
 
   it('should reject cleanup failure from a helper-owned non-transactional scope', async () => {
@@ -284,14 +382,16 @@ describe('deleteAssociatedFiles', () => {
       payload: { db: {} },
       t: vi.fn(),
     } as unknown as PayloadRequest
-    const unlinkSpy = vi.spyOn(fs, 'unlink').mockRejectedValueOnce(new Error('Unavailable'))
+    const renameSpy = vi.spyOn(fs, 'rename').mockRejectedValueOnce(new Error('Unavailable'))
 
     await fs.writeFile(filePath, 'document')
 
-    await expect(deleteAssociatedFiles({ ...getArgs({ filename }), req })).rejects.toThrow()
+    await expect(deleteAssociatedFiles({ ...getArgs({ filename }), req })).rejects.toBeInstanceOf(
+      ErrorDeletingFile,
+    )
     expect(await fileExists(filePath)).toBe(true)
 
-    unlinkSpy.mockRestore()
+    renameSpy.mockRestore()
   })
 
   it('should keep cleanup isolated when requests share context but use different transactions', async () => {
@@ -398,6 +498,96 @@ describe('deleteAssociatedFiles', () => {
 
     expect(await fileExists(firstFilePath)).toBe(false)
     expect(await fileExists(secondFilePath)).toBe(false)
+  })
+
+  it('should reject overlapping sibling cleanup scopes on the same request', async () => {
+    const failedFilename = 'failed-overlapping-document.txt'
+    const successfulFilename = 'successful-overlapping-document.txt'
+    const failedFilePath = path.join(staticDir, failedFilename)
+    const successfulFilePath = path.join(staticDir, successfulFilename)
+    const req = {
+      context: {},
+      payload: { db: {} },
+      t: vi.fn(),
+    } as unknown as PayloadRequest
+    const operationScope = await beginDeferredCleanupScope({ req })
+    let markFailedScopeReady!: () => void
+    let markSuccessfulScopeReady!: () => void
+    let markFailedCloseAttempted!: () => void
+    let markSuccessfulScopeClosed!: () => void
+    const failedScopeReady = new Promise<void>((resolve) => {
+      markFailedScopeReady = resolve
+    })
+    const successfulScopeReady = new Promise<void>((resolve) => {
+      markSuccessfulScopeReady = resolve
+    })
+    const failedCloseAttempted = new Promise<void>((resolve) => {
+      markFailedCloseAttempted = resolve
+    })
+    const successfulScopeClosed = new Promise<void>((resolve) => {
+      markSuccessfulScopeClosed = resolve
+    })
+
+    await Promise.all([
+      fs.writeFile(failedFilePath, 'failed document'),
+      fs.writeFile(successfulFilePath, 'successful document'),
+    ])
+
+    const failedOperation = async () => {
+      const failedScope = await beginDeferredCleanupScope({ req })
+
+      await deleteAssociatedFiles({ ...getArgs({ filename: failedFilename }), req })
+      markFailedScopeReady()
+      await successfulScopeReady
+
+      try {
+        expect(() => clearDeferredCleanupScope({ req, scope: failedScope })).toThrow(
+          'The deferred cleanup scope is no longer active.',
+        )
+      } finally {
+        markFailedCloseAttempted()
+      }
+
+      await successfulScopeClosed
+      clearDeferredCleanupScope({ req, scope: failedScope })
+    }
+
+    const successfulOperation = async () => {
+      await failedScopeReady
+
+      const successfulScope = await beginDeferredCleanupScope({ req })
+
+      await deleteAssociatedFiles({ ...getArgs({ filename: successfulFilename }), req })
+      markSuccessfulScopeReady()
+      await failedCloseAttempted
+      await flushDeferredCleanupScope({ req, scope: successfulScope })
+      markSuccessfulScopeClosed()
+    }
+
+    await Promise.all([failedOperation(), successfulOperation()])
+    await flushDeferredCleanupScope({ req, scope: operationScope })
+
+    expect(await fileExists(failedFilePath)).toBe(true)
+    expect(await fileExists(successfulFilePath)).toBe(true)
+  })
+
+  it('should reject an inactive scope when flushing cleanup after an operation', async () => {
+    const loggerError = vi.fn()
+    const req = {
+      context: {},
+      payload: { db: {}, logger: { error: loggerError } },
+      t: vi.fn(),
+    } as unknown as PayloadRequest
+    const inactiveScope = await beginDeferredCleanupScope({ req })
+    const activeScope = await beginDeferredCleanupScope({ req })
+
+    await expect(
+      flushDeferredCleanupScopeAfterOperation({ req, scope: inactiveScope }),
+    ).rejects.toThrow('The deferred cleanup scope is no longer active.')
+    expect(loggerError).not.toHaveBeenCalled()
+
+    clearDeferredCleanupScope({ req, scope: activeScope })
+    clearDeferredCleanupScope({ req, scope: inactiveScope })
   })
 
   it('should discard failed nested operation cleanup without removing earlier transaction cleanup', async () => {

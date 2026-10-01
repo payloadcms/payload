@@ -2,7 +2,29 @@ import type { MarkRequired } from 'ts-essentials'
 
 import type { PayloadRequest } from '../types/index.js'
 
-import { runTransactionCommitCallbacks } from './transactionCallbacks.js'
+import {
+  clearTransactionCommitCallbacks,
+  runTransactionCommitCallbacks,
+} from './transactionCallbacks.js'
+
+export const isUnknownTransactionCommitResult = (error: unknown): boolean => {
+  if (!error || typeof error !== 'object') {
+    return false
+  }
+
+  const labeledError = error as {
+    errorLabels?: string[]
+    hasErrorLabel?: (label: string) => boolean
+  }
+
+  return (
+    labeledError.hasErrorLabel?.('UnknownTransactionCommitResult') === true ||
+    labeledError.errorLabels?.includes('UnknownTransactionCommitResult') === true
+  )
+}
+
+export const shouldRollbackTransactionArtifacts = ({ error }: { error: unknown }): boolean =>
+  !isUnknownTransactionCommitResult(error)
 
 /**
  * complete a transaction calling adapter db.commitTransaction and delete the transactionID from req
@@ -13,7 +35,17 @@ export async function commitTransaction(
   const { payload, transactionID } = req
   const resolvedTransactionID = await transactionID!
 
-  await payload.db.commitTransaction(resolvedTransactionID)
+  try {
+    await payload.db.commitTransaction(resolvedTransactionID)
+  } catch (error) {
+    if (isUnknownTransactionCommitResult(error)) {
+      delete req.transactionID
+      clearTransactionCommitCallbacks({ req, transactionID: resolvedTransactionID })
+    }
+
+    throw error
+  }
+
   delete req.transactionID
 
   try {

@@ -1,11 +1,14 @@
 import type { PayloadRequest } from '../types/index.js'
 
 import { ValidationError } from '../errors/ValidationError.js'
-import { commitTransaction } from '../utilities/commitTransaction.js'
+import {
+  commitTransaction,
+  isUnknownTransactionCommitResult,
+} from '../utilities/commitTransaction.js'
 import { initTransaction } from '../utilities/initTransaction.js'
 import { isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
 import { killTransaction } from '../utilities/killTransaction.js'
-import { branchDocIDField, branchField } from './types.js'
+import { branchDocIDField, branchField, branchOpField } from './types.js'
 
 type Args = {
   branch: string
@@ -27,9 +30,134 @@ type Args = {
 
 const isShadowUniquenessError = (error: unknown): error is ValidationError =>
   error instanceof ValidationError &&
-  error.data.errors.some(
-    ({ path }) => path === branchDocIDField || path === '_branch_doc_id' || path === branchField,
+  error.data.errors.some(({ path }) =>
+    path
+      .split(',')
+      .map((fieldPath) => fieldPath.trim())
+      .some(
+        (fieldPath) =>
+          fieldPath === branchDocIDField ||
+          fieldPath === '_branch_doc_id' ||
+          fieldPath === '_branchdocid_id' ||
+          fieldPath === branchField,
+      ),
   )
+
+const isTransientTransactionError = (error: unknown): boolean => {
+  if (isUnknownTransactionCommitResult(error)) {
+    return false
+  }
+
+  if (!error || typeof error !== 'object') {
+    return false
+  }
+
+  const labeledError = error as {
+    errorLabels?: string[]
+    hasErrorLabel?: (label: string) => boolean
+  }
+
+  return (
+    labeledError.hasErrorLabel?.('TransientTransactionError') === true ||
+    labeledError.errorLabels?.includes('TransientTransactionError') === true
+  )
+}
+
+export const isRecoverableConcurrentShadowError = (error: unknown): boolean =>
+  isShadowUniquenessError(error) || isTransientTransactionError(error)
+
+const concurrentShadowOperationErrors = new WeakSet<object>()
+
+const markConcurrentShadowOperationError = (error: unknown): void => {
+  if (error && typeof error === 'object') {
+    concurrentShadowOperationErrors.add(error)
+  }
+}
+
+export const isConcurrentShadowOperationError = (error: unknown): boolean =>
+  Boolean(error && typeof error === 'object' && concurrentShadowOperationErrors.has(error))
+
+const maximumConcurrentShadowAttempts = 8
+
+export const waitForConcurrentShadowRetry = async ({
+  retryIndex,
+}: {
+  retryIndex: number
+}): Promise<void> => {
+  const delayMilliseconds = Math.min(25 * 2 ** retryIndex, 100)
+
+  await new Promise((resolve) => setTimeout(resolve, delayMilliseconds))
+}
+
+export const retryConcurrentShadowOperation = async <Result>({
+  onRetry,
+  operation,
+  shouldRetry,
+  waitForRetry = waitForConcurrentShadowRetry,
+}: {
+  onRetry?: (args: { error: unknown; retryIndex: number }) => Promise<void> | void
+  operation: () => Promise<Result>
+  shouldRetry: ((args: { error: unknown }) => boolean) | boolean
+  waitForRetry?: (args: { retryIndex: number }) => Promise<void>
+}): Promise<Result> => {
+  for (let attemptIndex = 0; attemptIndex < maximumConcurrentShadowAttempts; attemptIndex++) {
+    try {
+      return await operation()
+    } catch (error) {
+      const hasAnotherAttempt = attemptIndex < maximumConcurrentShadowAttempts - 1
+      const isRetryAllowed =
+        typeof shouldRetry === 'function' ? shouldRetry({ error }) : shouldRetry
+
+      if (!isRetryAllowed || !hasAnotherAttempt || !isRecoverableConcurrentShadowError(error)) {
+        throw error
+      }
+
+      await onRetry?.({ error, retryIndex: attemptIndex })
+      await waitForRetry({ retryIndex: attemptIndex })
+    }
+  }
+
+  throw new Error('Concurrent shadow retry attempts were exhausted.')
+}
+
+export const findCompetingShadow = async ({
+  branch,
+  collectionSlug,
+  docID,
+  req,
+}: {
+  branch: string
+  collectionSlug: string
+  docID: number | string
+  req: PayloadRequest
+}): Promise<null | Record<string, unknown>> => {
+  // A caller transaction keeps its earlier snapshot and cannot observe the winner. Read without
+  // that transaction, and allow a short bounded period for the winner to become visible.
+  const recoveryReq = isolateObjectProperty(req, ['transactionID'])
+
+  delete recoveryReq.transactionID
+
+  for (let attemptIndex = 0; attemptIndex < maximumConcurrentShadowAttempts; attemptIndex++) {
+    if (attemptIndex > 0) {
+      await waitForConcurrentShadowRetry({ retryIndex: attemptIndex - 1 })
+    }
+
+    const winner = (await req.payload.db.findOne({
+      branch: false,
+      collection: collectionSlug,
+      req: recoveryReq,
+      where: {
+        and: [{ [branchField]: { equals: branch } }, { [branchDocIDField]: { equals: docID } }],
+      },
+    })) as null | Record<string, unknown>
+
+    if (winner) {
+      return winner
+    }
+  }
+
+  return null
+}
 
 /**
  * Creates a branch's shadow row for a document, safe against two concurrent
@@ -45,8 +173,8 @@ const isShadowUniquenessError = (error: unknown): error is ValidationError =>
  * disturbing the write the caller is in the middle of.
  *
  * An operation that owns the request's existing transaction can opt into
- * creating the shadow and registry there instead. That path leaves all error
- * handling to the transaction owner and does not attempt race recovery.
+ * creating the shadow and registry there instead. Errors on that path remain
+ * with the operation owner, which can roll back and retry the full lifecycle.
  */
 export const createShadowRow = async ({
   branch,
@@ -65,15 +193,23 @@ export const createShadowRow = async ({
       throw new Error('Ambient shadow creation requires an active transaction.')
     }
 
-    const shadow = (await ambient.payload.db.create({
-      collection: collectionSlug,
-      data,
-      req: ambient,
-    })) as Record<string, unknown>
+    try {
+      const shadow = (await ambient.payload.db.create({
+        collection: collectionSlug,
+        data,
+        req: ambient,
+      })) as Record<string, unknown>
 
-    await onCreated(ambient, shadow)
+      await onCreated(ambient, shadow)
 
-    return shadow
+      return shadow
+    } catch (error) {
+      if (isRecoverableConcurrentShadowError(error)) {
+        markConcurrentShadowOperationError(error)
+      }
+
+      throw error
+    }
   }
 
   // Registry writes use the same request so that they share the branch fork's transaction.
@@ -95,33 +231,14 @@ export const createShadowRow = async ({
   } catch (error) {
     await killTransaction(isolated)
 
-    if (!isShadowUniquenessError(error)) {
+    if (!isRecoverableConcurrentShadowError(error)) {
       throw error
     }
 
-    // On MongoDB, an in-progress transaction's write is invisible to a plain read
-    // until it commits, and the loser's own conflict can surface before that commit
-    // lands — unlike Postgres, which blocks the losing insert until the winner's
-    // transaction resolves. A few short retries cover that gap without turning a
-    // genuine failure into an indefinite wait.
-    let winner: null | Record<string, unknown> = null
+    const winner = await findCompetingShadow({ branch, collectionSlug, docID, req })
 
-    for (let attempt = 0; !winner && attempt < 5; attempt++) {
-      if (attempt > 0) {
-        await new Promise((resolve) => setTimeout(resolve, 20))
-      }
-
-      winner = (await req.payload.db.findOne({
-        branch: false,
-        collection: collectionSlug,
-        req,
-        where: {
-          and: [{ [branchField]: { equals: branch } }, { [branchDocIDField]: { equals: docID } }],
-        },
-      })) as null | Record<string, unknown>
-    }
-
-    if (!winner) {
+    if (!winner || winner[branchOpField] !== data[branchOpField]) {
+      markConcurrentShadowOperationError(error)
       throw error
     }
 
@@ -138,6 +255,16 @@ export const createShadowRow = async ({
     return shadow
   } catch (error) {
     await killTransaction(isolated)
+
+    if (shouldCommit && isRecoverableConcurrentShadowError(error)) {
+      const winner = await findCompetingShadow({ branch, collectionSlug, docID, req })
+
+      if (winner && winner[branchOpField] === data[branchOpField]) {
+        return winner
+      }
+
+      markConcurrentShadowOperationError(error)
+    }
 
     const shadowID = shadow.id
 

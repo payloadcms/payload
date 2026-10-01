@@ -319,7 +319,7 @@ test.suite('Branching query cost', { config: './config.ts', resetBetweenTests: f
       // The write first reads an access-filtered document. A first write then creates the
       // shadow and reads it back; later writes still verify the resolved branch row before
       // mutation. These reads keep denied writes from creating branch state.
-    }).toMatchObject({ first: 7, later: 4 })
+    }).toMatchObject({ first: 7, later: 3 })
   })
 
   test('should charge a known amount for create, delete and global writes', async () => {
@@ -365,9 +365,10 @@ test.suite('Branching query cost', { config: './config.ts', resetBetweenTests: f
       global: branchGlobal.total - mainGlobal.total,
       globalQueries: branchGlobal.calls,
       // Branch-created delete safety reads branch reference state before hooks and again after
-      // hooks, because hooks can add references before the delete reaches the adapter.
+      // hooks, because hooks can add references before the delete reaches the adapter. The
+      // tombstone shares the delete operation's transaction instead of opening its own.
       // A branch global update also checks that the caller can read the target branch.
-    }).toMatchObject({ create: 2, delete: 8, global: 2 })
+    }).toMatchObject({ create: 2, delete: 7, global: 2 })
 
     // A human-readable table of the numbers above; the assertions are what actually guards them.
     fs.writeFileSync(

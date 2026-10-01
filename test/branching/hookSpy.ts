@@ -9,7 +9,7 @@ export const hookSpy: {
   allowRestrictedCreate?: boolean
   allowRestrictedLocalizedCreate?: boolean
   allowRestrictedNestedFieldWrite?: boolean
-  beforeChange?: (args: any) => void
+  beforeChange?: (args: any) => Promise<void> | void
   beforeMerge?: (args: any) => Promise<void> | void
   headerBeforeOperation?: () => void
   homepageGlobalAccessWrites?: {
@@ -20,10 +20,17 @@ export const hookSpy: {
   localizedChangeOperations?: string[]
   localizedChangeRows?: { ids: (number | string | undefined)[]; locale?: string }[]
   localizedCreateAccessTitles?: unknown[]
+  mainMergeGlobalOriginalHeroTitles?: unknown[]
+  mainMergeLocalizedCollectionDependencyTargetID?: number | string
+  mainMergeLocalizedGlobalDependencyTargetID?: number | string
   pageBeforeChange?: () => void
   pageBeforeOperation?: (args: { req: PayloadRequest }) => Promise<void> | void
   pageUpdateAccess?: () => void
-  postBeforeOperation?: () => void
+  postAfterDelete?: (args: any) => Promise<void> | void
+  postBeforeOperation?: (args: {
+    args: { data?: Record<string, unknown>; id?: number | string }
+    req: PayloadRequest
+  }) => Promise<void> | void
   postBeforeRead?: () => void
   postDefaultValueCount?: number
   postTitleAfterReadCount?: number

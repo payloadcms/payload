@@ -540,7 +540,11 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   // scheduled publish, it only ever fires if the jobs queue is actually running.
   if (branching.enabled) {
     ;((config.jobs ??= {} as SanitizedJobsConfig).tasks ??= []).push(
-      getScheduleMergeTask({ adminUserSlug: config.admin!.user }),
+      getScheduleMergeTask({
+        authCollectionSlugs: config
+          .collections!.filter(({ auth }) => Boolean(auth))
+          .map(({ slug }) => slug),
+      }),
     )
   }
 

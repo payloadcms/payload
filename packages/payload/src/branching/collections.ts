@@ -109,13 +109,14 @@ export const getBranchesCollection = (branching: SanitizedBranchingConfig): Coll
       admin: { readOnly: true },
     },
     {
-      // `"12/230"` while a scheduled merge is running, null otherwise.
+      // `"running"` while a scheduled merge is running, null otherwise.
       //
       // Lives here rather than on the job because it describes the branch, and
-      // because whoever wants it is looking at the branch. Written by the task at
-      // roughly twenty points regardless of branch size: an interactive merge streams
+      // because whoever wants it is looking at the branch. An interactive merge streams
       // its progress to the client that asked for it, so this exists only for the
-      // scheduled case, where nobody is holding a connection.
+      // scheduled case, where nobody is holding a connection. The task writes the marker
+      // before the merge transaction starts so it remains visible without modifying this
+      // branch row concurrently with that transaction.
       name: 'mergeProgress',
       type: 'text',
       access: { create: () => false, update: () => false },

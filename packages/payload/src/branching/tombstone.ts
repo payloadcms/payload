@@ -1,5 +1,8 @@
+import { status as httpStatus } from 'http-status'
+
 import type { PayloadRequest, Where } from '../types/index.js'
 
+import { APIError } from '../errors/index.js'
 import { isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
 import { assertBranchCreatedDocumentsUnreferenced } from './assertBranchCreatedDocumentsUnreferenced.js'
 import { assertBranchWritable } from './assertBranchWritable.js'
@@ -21,6 +24,32 @@ type Args = {
   where: undefined | Where
 }
 
+type ConcurrentBranchDelete = {
+  branch: string
+  collectionSlug: string
+  doc: Record<string, unknown>
+  docID: number | string
+  retryError: unknown
+  winnerID: number | string
+}
+
+export type BranchDeleteOutcome = {
+  doc: Record<string, unknown>
+  tombstoned: boolean
+}
+
+type BranchDeleteOperation = {
+  branch: string
+  collectionSlug: string
+  docID: number | string
+  isTombstoneExpected: boolean
+  onResolved: (outcome: BranchDeleteOutcome) => void
+  useAmbientTransaction: boolean
+}
+
+const concurrentBranchDeleteContextKey = Symbol('concurrentBranchDelete')
+const branchDeleteOperationContextKey = Symbol('branchDeleteOperation')
+
 type Result = {
   /** Narrows the caller's delete to this row's primary key. */
   deleteRowID?: number | string
@@ -28,6 +57,95 @@ type Result = {
   doc?: Record<string, unknown>
   /** True when the delete became a tombstone and must not proceed. */
   tombstoned: boolean
+}
+
+export const setConcurrentBranchDelete = ({
+  branch,
+  collectionSlug,
+  doc,
+  docID,
+  req,
+  retryError,
+  winnerID,
+}: { req: PayloadRequest } & ConcurrentBranchDelete): void => {
+  req.context ??= {}
+  ;(req.context as Record<PropertyKey, unknown>)[concurrentBranchDeleteContextKey] = {
+    branch,
+    collectionSlug,
+    doc,
+    docID,
+    retryError,
+    winnerID,
+  }
+}
+
+export const setBranchDeleteOperation = ({
+  branch,
+  collectionSlug,
+  docID,
+  isTombstoneExpected,
+  onResolved,
+  req,
+  useAmbientTransaction,
+}: { req: PayloadRequest } & BranchDeleteOperation): void => {
+  req.context ??= {}
+  ;(req.context as Record<PropertyKey, unknown>)[branchDeleteOperationContextKey] = {
+    branch,
+    collectionSlug,
+    docID,
+    isTombstoneExpected,
+    onResolved,
+    useAmbientTransaction,
+  }
+}
+
+const createBranchDeleteChangedError = (): APIError =>
+  new APIError(
+    'The branch document changed while it was being deleted. Retry the operation.',
+    httpStatus.CONFLICT,
+  )
+
+export const requireBranchDeleteOutcome = ({
+  outcome,
+}: {
+  outcome: BranchDeleteOutcome | undefined
+}): BranchDeleteOutcome => {
+  if (!outcome) {
+    throw createBranchDeleteChangedError()
+  }
+
+  return outcome
+}
+
+export const assertBranchDeleteCanUseCallerTransaction = async ({
+  branch,
+  collectionSlug,
+  docID,
+  req,
+}: {
+  branch: string
+  collectionSlug: string
+  docID: number | string
+  req: PayloadRequest
+}): Promise<void> => {
+  const branchDocument = await req.payload.db.findOne({
+    branch: false,
+    collection: collectionSlug,
+    req,
+    where: {
+      and: [
+        { [branchField]: { equals: branch } },
+        { or: [{ id: { equals: docID } }, { [branchDocIDField]: { equals: docID } }] },
+      ],
+    },
+  })
+
+  if (!branchDocument) {
+    throw new APIError(
+      'Cannot delete an untouched branch document within an existing transaction.',
+      httpStatus.CONFLICT,
+    )
+  }
 }
 
 /**
@@ -174,8 +292,73 @@ export const resolveBranchDelete = async ({
     return { tombstoned: false }
   }
 
-  // A delete is a write like any other, and a closed branch takes none.
+  const requestContext = req.context as Record<PropertyKey, unknown> | undefined
+  const branchDeleteOperation = requestContext?.[branchDeleteOperationContextKey] as
+    | BranchDeleteOperation
+    | undefined
+  const requestedDocID = (where?.id as { equals?: unknown })?.equals
+  const matchingBranchDeleteOperation =
+    branchDeleteOperation?.branch === branch &&
+    branchDeleteOperation.collectionSlug === collectionSlug &&
+    String(branchDeleteOperation.docID) === String(requestedDocID)
+      ? branchDeleteOperation
+      : undefined
+  const useAmbientTransaction = matchingBranchDeleteOperation?.useAmbientTransaction === true
+
+  delete requestContext?.[branchDeleteOperationContextKey]
+
+  // A delete is a write like any other, and a closed branch takes none. Consume the operation
+  // markers first so a failed validation cannot affect another delete on the same request.
   await assertBranchWritable({ branch, req: req as PayloadRequest })
+
+  const concurrentDelete = requestContext?.[concurrentBranchDeleteContextKey] as
+    | ConcurrentBranchDelete
+    | undefined
+
+  if (
+    concurrentDelete?.branch === branch &&
+    concurrentDelete.collectionSlug === collectionSlug &&
+    String(concurrentDelete.docID) === String((where?.id as { equals?: unknown })?.equals)
+  ) {
+    delete requestContext?.[concurrentBranchDeleteContextKey]
+
+    const latestCommittedReq = isolateObjectProperty(req as PayloadRequest, ['transactionID'])
+
+    delete latestCommittedReq.transactionID
+
+    const matchingWinner = await req.payload.db.findOne({
+      branch: false,
+      collection: collectionSlug,
+      req: latestCommittedReq,
+      where: {
+        and: [
+          { id: { equals: concurrentDelete.winnerID } },
+          { [branchField]: { equals: branch } },
+          { [branchDocIDField]: { equals: concurrentDelete.docID } },
+          { [branchOpField]: { equals: 'delete' } },
+        ],
+      },
+    })
+
+    if (matchingWinner) {
+      const outcome = { doc: concurrentDelete.doc, tombstoned: true }
+
+      if (matchingBranchDeleteOperation) {
+        if (!matchingBranchDeleteOperation.isTombstoneExpected) {
+          resetBranchState(req as PayloadRequest)
+          throw createBranchDeleteChangedError()
+        }
+
+        matchingBranchDeleteOperation.onResolved(outcome)
+      }
+
+      resetBranchState(req as PayloadRequest)
+
+      return outcome
+    }
+
+    throw concurrentDelete.retryError
+  }
 
   // Resolve which row the caller means *on this branch* — the branch's own copy
   // if it has one, otherwise the main row.
@@ -189,11 +372,38 @@ export const resolveBranchDelete = async ({
   })) as null | Record<string, unknown>
 
   if (!target) {
-    return { tombstoned: false }
+    resetBranchState(req as PayloadRequest)
+    throw createBranchDeleteChangedError()
   }
 
   const targetID = target.id as number | string
   const isOnThisBranch = target[branchField] === branch
+  const isTombstoneExpectedForTarget = !(isOnThisBranch && target[branchOpField] === 'create')
+  const canonicalID =
+    (target[branchDocIDField] as any)?.value ?? target[branchDocIDField] ?? targetID
+
+  if (
+    matchingBranchDeleteOperation &&
+    matchingBranchDeleteOperation.isTombstoneExpected !== isTombstoneExpectedForTarget
+  ) {
+    resetBranchState(req as PayloadRequest)
+    throw createBranchDeleteChangedError()
+  }
+
+  if (req.transactionID && !useAmbientTransaction && !isOnThisBranch) {
+    resetBranchState(req as PayloadRequest)
+    throw new APIError(
+      'Cannot delete an untouched branch document within an existing transaction.',
+      httpStatus.CONFLICT,
+    )
+  }
+
+  if (matchingBranchDeleteOperation) {
+    matchingBranchDeleteOperation.onResolved({
+      doc: isTombstoneExpectedForTarget ? { ...target, id: canonicalID } : target,
+      tombstoned: isTombstoneExpectedForTarget,
+    })
+  }
 
   // Created on this branch: no main row stands behind it, so a real delete
   // leaves nothing to hide.
@@ -223,11 +433,10 @@ export const resolveBranchDelete = async ({
       where: { and: [{ branch: { equals: branch } }, { 'doc.value': { equals: targetID } }] },
     })
 
+    resetBranchState(req as PayloadRequest)
+
     return { deleteRowID: targetID, tombstoned: false }
   }
-
-  const canonicalID =
-    (target[branchDocIDField] as any)?.value ?? target[branchDocIDField] ?? targetID
 
   if (isOnThisBranch) {
     // Already forked — turn the existing copy into the tombstone rather than
@@ -261,11 +470,6 @@ export const resolveBranchDelete = async ({
   } else {
     const { id: _discardedID, ...data } = target
 
-    // Two concurrent deletes of the same never-forked document on the same
-    // branch both land here — the row create is what can lose that race, so
-    // it (and the bookkeeping that must land with it) runs isolated from the
-    // caller's own transaction. A losing side simply accepts the winner's
-    // tombstone rather than recording a second one.
     await createShadowRow({
       branch,
       collectionSlug,
@@ -299,6 +503,7 @@ export const resolveBranchDelete = async ({
         })
       },
       req: req as PayloadRequest,
+      useAmbientTransaction,
     })
   }
 

@@ -65,7 +65,9 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
   };
-  blocks: {};
+  blocks: {
+    'localized-category-block': LocalizedCategoryBlock;
+  };
   collections: {
     posts: Post;
     pages: Page;
@@ -177,29 +179,13 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
+ * via the `definition` "LocalizedCategoryBlock".
  */
-export interface Post {
-  id: string;
-  title?: string | null;
-  order?: number | null;
-  confidential?: string | null;
-  computedDefault?: string | null;
-  internalNote?: string | null;
+export interface LocalizedCategoryBlock {
   category?: (string | null) | Category;
-  _branch: string;
-  _branchDocID?: (string | null) | Post;
-  _branchOp?: string | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localized-category-block';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -302,6 +288,34 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: string;
+  title?: string | null;
+  order?: number | null;
+  confidential?: string | null;
+  computedDefault?: string | null;
+  internalNote?: string | null;
+  category?: (string | null) | Category;
+  localizedCategory?: (string | null) | Category;
+  sharedLayout?: LocalizedCategoryBlock[] | null;
+  _branch: string;
+  _branchDocID?: (string | null) | Post;
+  _branchOp?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -499,6 +513,7 @@ export interface LocalizedDoc {
         id?: string | null;
       }[]
     | null;
+  mergeGuardCategory?: (string | null) | Category;
   computedDefault?: string | null;
   shared?: string | null;
   _branch: string;
@@ -970,6 +985,8 @@ export interface PostsSelect<T extends boolean = true> {
   computedDefault?: T;
   internalNote?: T;
   category?: T;
+  localizedCategory?: T;
+  sharedLayout?: T | {};
   _branch?: T;
   _branchDocID?: T;
   _branchOp?: T;
@@ -1151,6 +1168,7 @@ export interface LocalizedDocsSelect<T extends boolean = true> {
         label?: T;
         id?: T;
       };
+  mergeGuardCategory?: T;
   computedDefault?: T;
   shared?: T;
   _branch?: T;
@@ -1378,6 +1396,14 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface Header {
   id: string;
   navLabel?: string | null;
+  secondaryLabel?: string | null;
+  navItems?:
+    | {
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  navigationBlocks?: NavigationBlock[] | null;
   _branch: string;
   createdBy?: {
     relationTo: 'users';
@@ -1392,12 +1418,23 @@ export interface Header {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NavigationBlock".
+ */
+export interface NavigationBlock {
+  label?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'navigation-block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "homepage".
  */
 export interface Homepage {
   id: string;
   heroTitle?: string | null;
   localizedTitle?: string | null;
+  mergeGuardCategory?: (string | null) | Category;
   _branch: string;
   createdBy?: {
     relationTo: 'users';
@@ -1454,6 +1491,24 @@ export interface PayloadJobsStat {
  */
 export interface HeaderSelect<T extends boolean = true> {
   navLabel?: T;
+  secondaryLabel?: T;
+  navItems?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
+  navigationBlocks?:
+    | T
+    | {
+        'navigation-block'?:
+          | T
+          | {
+              label?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   _branch?: T;
   createdBy?: T;
   updatedBy?: T;
@@ -1468,6 +1523,7 @@ export interface HeaderSelect<T extends boolean = true> {
 export interface HomepageSelect<T extends boolean = true> {
   heroTitle?: T;
   localizedTitle?: T;
+  mergeGuardCategory?: T;
   _branch?: T;
   createdBy?: T;
   updatedBy?: T;
@@ -1584,7 +1640,10 @@ export interface TaskScheduleMerge {
     branch: string;
     changes?: string[] | null;
     closeBranch?: boolean | null;
-    user?: (string | null) | User;
+    user?: {
+      relationTo: 'users';
+      value: string | User;
+    } | null;
   };
   output?: unknown;
 }

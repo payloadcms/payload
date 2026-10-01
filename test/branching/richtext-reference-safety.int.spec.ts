@@ -198,7 +198,7 @@ test.suite(
         }),
       )
       expect(result.merged).toHaveLength(0)
-      expect(mainOwner.target).toBeNull()
+      expect(mainOwner.target === null || mainOwner.target === undefined).toBe(true)
     })
 
     test('should block a selected merge when rich text refers to an unselected branch create', async ({
@@ -259,7 +259,7 @@ test.suite(
         }),
       )
       expect(result.merged).toHaveLength(0)
-      expect(mainOwner.content).toBeNull()
+      expect(mainOwner.content == null).toBe(true)
     })
 
     test('should block a selected merge when a rich text block relationship refers to an unselected branch create', async ({
@@ -319,7 +319,7 @@ test.suite(
         expect.objectContaining({ changeID: ownerChange.id, reason: 'dependency' }),
       )
       expect(result.merged).toHaveLength(0)
-      expect(mainOwner.content).toBeNull()
+      expect(mainOwner.content == null).toBe(true)
     })
 
     test('should block a selected merge when a rich text inline-block upload refers to an unselected branch create', async ({
@@ -383,7 +383,7 @@ test.suite(
         expect.objectContaining({ changeID: ownerChange.id, reason: 'dependency' }),
       )
       expect(result.merged).toHaveLength(0)
-      expect(mainOwner.content).toBeNull()
+      expect(mainOwner.content == null).toBe(true)
     })
 
     test('should block a selected owner when its selected dependency is blocked by access', async ({

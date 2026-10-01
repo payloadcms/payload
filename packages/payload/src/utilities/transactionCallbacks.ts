@@ -9,12 +9,25 @@ export type DeferredCleanupScope = {
   database: object
   parent: DeferredCleanupScope | null
   startIndex: number
-  state: 'collecting' | 'flushing'
+  state: 'closed' | 'collecting' | 'flushing'
   transactionID?: TransactionID
 }
 
 const callbacksByDatabase = new WeakMap<object, Map<TransactionID, TransactionCallback[]>>()
 const deferredCleanupScopeContextKey = '_payloadDeferredCleanupScope'
+
+/** Creates a request context whose cleanup callbacks can be managed independently. */
+export const createIsolatedDeferredCleanupContext = ({
+  req,
+}: {
+  req: Partial<PayloadRequest>
+}): PayloadRequest['context'] => {
+  const context = { ...req.context }
+
+  delete context[deferredCleanupScopeContextKey]
+
+  return context
+}
 
 /**
  * Marks the current callback position so an operation can remove only the cleanup it registered.
@@ -169,9 +182,11 @@ export const flushDeferredCleanupScope = async ({
   req: MarkRequired<Partial<PayloadRequest>, 'payload'>
   scope: DeferredCleanupScope
 }): Promise<void> => {
-  if (req.context?.[deferredCleanupScopeContextKey] !== scope) {
-    throw new Error('The deferred cleanup scope is no longer active.')
+  if (scope.state === 'closed') {
+    return
   }
+
+  assertDeferredCleanupScopeIsActive({ req, scope })
 
   if (scope.transactionID !== undefined || scope.parent?.callbacks === scope.callbacks) {
     popScope({ req, scope })
@@ -200,6 +215,10 @@ export const flushDeferredCleanupScopeAfterOperation = async ({
   req: MarkRequired<Partial<PayloadRequest>, 'payload'>
   scope: DeferredCleanupScope
 }): Promise<void> => {
+  if (scope.state !== 'closed') {
+    assertDeferredCleanupScopeIsActive({ req, scope })
+  }
+
   try {
     await flushDeferredCleanupScope({ req, scope })
   } catch (err) {
@@ -214,9 +233,26 @@ export const clearDeferredCleanupScope = ({
   req: MarkRequired<Partial<PayloadRequest>, 'payload'>
   scope: DeferredCleanupScope
 }): void => {
+  if (scope.state === 'closed') {
+    return
+  }
+
+  assertDeferredCleanupScopeIsActive({ req, scope })
   scope.callbacks.splice(scope.startIndex)
   popScope({ req, scope })
   removeEmptyTransactionQueue({ scope })
+}
+
+const assertDeferredCleanupScopeIsActive = ({
+  req,
+  scope,
+}: {
+  req: MarkRequired<Partial<PayloadRequest>, 'payload'>
+  scope: DeferredCleanupScope
+}): void => {
+  if (req.context?.[deferredCleanupScopeContextKey] !== scope) {
+    throw new Error('The deferred cleanup scope is no longer active.')
+  }
 }
 
 const getTransactionCallbacks = ({
@@ -269,6 +305,8 @@ const popScope = ({
   } else {
     delete req.context[deferredCleanupScopeContextKey]
   }
+
+  scope.state = 'closed'
 }
 
 const closeTransactionScopes = ({

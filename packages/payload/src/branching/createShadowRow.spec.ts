@@ -3,11 +3,15 @@ import { expect, test, vi } from 'vitest'
 import type { PayloadRequest } from '../types/index.js'
 
 import { ValidationError } from '../errors/ValidationError.js'
-import { createShadowRow } from './createShadowRow.js'
+import {
+  createShadowRow,
+  isConcurrentShadowOperationError,
+  retryConcurrentShadowOperation,
+} from './createShadowRow.js'
 
 const branch = 'feature'
 const collectionSlug = 'posts'
-const data = { _branch: branch, _branchDocID: 'main-id', title: 'Shadow' }
+const data = { _branch: branch, _branchDocID: 'main-id', _branchOp: 'update', title: 'Shadow' }
 const docID = 'main-id'
 const shadow = { ...data, id: 'shadow-id' }
 
@@ -62,16 +66,18 @@ test('should create the shadow and registry in an ambient transaction without re
   expect(req.transactionID).toBe('operation-transaction')
 })
 
-test('should leave an ambient transaction owner to handle a uniqueness failure', async () => {
-  const createError = new ValidationError({
-    collection: collectionSlug,
-    errors: [{ message: 'Value must be unique', path: '_branchDocID' }],
-  })
-  const findOne = vi.fn().mockResolvedValue(shadow)
-  const rollbackTransaction = vi.fn()
+test('should leave a transient ambient failure for the transaction owner to handle', async () => {
+  const createError = {
+    hasErrorLabel: (label: string) => label === 'TransientTransactionError',
+    message: 'Please retry your operation or multi-document transaction.',
+  }
+  const beginTransaction = vi.fn()
+  const findOne = vi.fn()
+  const rollbackTransaction = vi.fn().mockResolvedValue(undefined)
   const req = {
     payload: {
       db: {
+        beginTransaction,
         create: vi.fn().mockRejectedValue(createError),
         findOne,
         rollbackTransaction,
@@ -92,9 +98,11 @@ test('should leave an ambient transaction owner to handle a uniqueness failure',
     }),
   ).rejects.toBe(createError)
 
-  expect(findOne).not.toHaveBeenCalled()
   expect(rollbackTransaction).not.toHaveBeenCalled()
+  expect(findOne).not.toHaveBeenCalled()
+  expect(beginTransaction).not.toHaveBeenCalled()
   expect(req.transactionID).toBe('operation-transaction')
+  expect(isConcurrentShadowOperationError(createError)).toBe(true)
 })
 
 test('should leave an ambient transaction owner to handle an onCreated failure', async () => {
@@ -127,6 +135,7 @@ test('should leave an ambient transaction owner to handle an onCreated failure',
   expect(deleteOne).not.toHaveBeenCalled()
   expect(rollbackTransaction).not.toHaveBeenCalled()
   expect(req.transactionID).toBe('operation-transaction')
+  expect(isConcurrentShadowOperationError(onCreatedError)).toBe(false)
 })
 
 test('should rethrow an onCreated failure when transactions are unavailable', async () => {
@@ -250,34 +259,192 @@ test('should rethrow an unrelated validation create failure when a shadow row is
   expect(findOne).not.toHaveBeenCalled()
 })
 
-test.each(['_branchDocID', '_branch_doc_id', '_branch'])(
-  'should return a competing shadow row after a %s uniqueness failure',
-  async (path) => {
-    const createError = new ValidationError({
-      collection: collectionSlug,
-      errors: [{ message: 'Value must be unique', path }],
-    })
-    const req = {
-      payload: {
-        db: {
-          create: vi.fn().mockRejectedValue(createError),
-          findOne: vi.fn().mockResolvedValue(shadow),
-        },
+test.each([
+  '_branchDocID',
+  '_branch_doc_id',
+  '_branchdocid_id',
+  '_branchdocid_id, _branch',
+  '_branch',
+])('should return a competing shadow row after a %s uniqueness failure', async (path) => {
+  const createError = new ValidationError({
+    collection: collectionSlug,
+    errors: [{ message: 'Value must be unique', path }],
+  })
+  const req = {
+    payload: {
+      db: {
+        create: vi.fn().mockRejectedValue(createError),
+        findOne: vi.fn().mockResolvedValue(shadow),
       },
-    } as unknown as PayloadRequest
+    },
+  } as unknown as PayloadRequest
 
-    await expect(
-      createShadowRow({
-        branch,
-        collectionSlug,
-        data,
-        docID,
-        onCreated: () => Promise.resolve(),
-        req,
-      }),
-    ).resolves.toBe(shadow)
-  },
-)
+  await expect(
+    createShadowRow({
+      branch,
+      collectionSlug,
+      data,
+      docID,
+      onCreated: () => Promise.resolve(),
+      req,
+    }),
+  ).resolves.toBe(shadow)
+})
+
+test('should retry outside a caller transaction until a delayed competing shadow is visible', async () => {
+  const createError = {
+    errorLabels: ['TransientTransactionError'],
+    message: 'Please retry your operation or multi-document transaction.',
+  }
+  let recoveryReads = 0
+  const findOne = vi.fn().mockImplementation(({ req: recoveryReq }: { req: PayloadRequest }) => {
+    if (recoveryReq.transactionID) {
+      return Promise.resolve(null)
+    }
+
+    recoveryReads += 1
+
+    return Promise.resolve(recoveryReads <= 5 ? null : shadow)
+  })
+  const rollbackTransaction = vi.fn().mockResolvedValue(undefined)
+  const req = {
+    payload: {
+      db: {
+        beginTransaction: vi.fn().mockResolvedValue('transaction-id'),
+        create: vi.fn().mockRejectedValue(createError),
+        findOne,
+        rollbackTransaction,
+      },
+    },
+    transactionID: 'outer-transaction',
+  } as unknown as PayloadRequest
+
+  await expect(
+    createShadowRow({
+      branch,
+      collectionSlug,
+      data,
+      docID,
+      onCreated: () => Promise.resolve(),
+      req,
+    }),
+  ).resolves.toBe(shadow)
+
+  expect(rollbackTransaction).toHaveBeenCalledWith('transaction-id')
+  expect(findOne).toHaveBeenCalledTimes(6)
+  expect(req.transactionID).toBe('outer-transaction')
+})
+
+test('should reject a competing shadow created for a different operation', async () => {
+  const createError = {
+    errorLabels: ['TransientTransactionError'],
+    message: 'Please retry your operation or multi-document transaction.',
+  }
+  const findOne = vi.fn().mockResolvedValue({ ...shadow, _branchOp: 'delete' })
+  const req = {
+    payload: {
+      db: {
+        beginTransaction: vi.fn().mockResolvedValue('transaction-id'),
+        create: vi.fn().mockRejectedValue(createError),
+        findOne,
+        rollbackTransaction: vi.fn().mockResolvedValue(undefined),
+      },
+    },
+  } as unknown as PayloadRequest
+
+  await expect(
+    createShadowRow({
+      branch,
+      collectionSlug,
+      data,
+      docID,
+      onCreated: () => Promise.resolve(),
+      req,
+    }),
+  ).rejects.toBe(createError)
+
+  expect(findOne).toHaveBeenCalledOnce()
+})
+
+test('should retry a whole operation until a transient branch conflict clears', async () => {
+  const createError = {
+    errorLabels: ['TransientTransactionError'],
+    message: 'Please retry your operation or multi-document transaction.',
+  }
+  const operation = vi
+    .fn<() => Promise<string>>()
+    .mockRejectedValueOnce(createError)
+    .mockRejectedValueOnce(createError)
+    .mockResolvedValue('updated')
+  const onRetry = vi.fn()
+  const waitForRetry = vi.fn().mockResolvedValue(undefined)
+
+  await expect(
+    retryConcurrentShadowOperation({
+      onRetry,
+      operation,
+      shouldRetry: true,
+      waitForRetry,
+    }),
+  ).resolves.toBe('updated')
+
+  expect(operation).toHaveBeenCalledTimes(3)
+  expect(onRetry).toHaveBeenCalledTimes(2)
+  expect(waitForRetry).toHaveBeenNthCalledWith(1, { retryIndex: 0 })
+  expect(waitForRetry).toHaveBeenNthCalledWith(2, { retryIndex: 1 })
+})
+
+test.each([
+  ['a caller-owned transaction', false, { errorLabels: ['TransientTransactionError'] }],
+  ['a business error', true, new Error('hook failed')],
+] as const)('should not retry %s', async (_scenario, shouldRetry, operationError) => {
+  const operation = vi.fn().mockRejectedValue(operationError)
+
+  await expect(
+    retryConcurrentShadowOperation({
+      operation,
+      shouldRetry,
+      waitForRetry: vi.fn(),
+    }),
+  ).rejects.toBe(operationError)
+
+  expect(operation).toHaveBeenCalledOnce()
+})
+
+test('should preserve the original transient error when retries are exhausted', async () => {
+  const operationError = { errorLabels: ['TransientTransactionError'] }
+  const operation = vi.fn().mockRejectedValue(operationError)
+  const onRetry = vi.fn()
+
+  await expect(
+    retryConcurrentShadowOperation({
+      onRetry,
+      operation,
+      shouldRetry: true,
+      waitForRetry: vi.fn().mockResolvedValue(undefined),
+    }),
+  ).rejects.toBe(operationError)
+
+  expect(operation).toHaveBeenCalledTimes(8)
+  expect(onRetry).toHaveBeenCalledTimes(7)
+})
+
+test('should not replay an operation whose commit result is unknown', async () => {
+  const commitError = {
+    errorLabels: ['TransientTransactionError', 'UnknownTransactionCommitResult'],
+  }
+  const operation = vi.fn().mockRejectedValue(commitError)
+
+  await expect(
+    retryConcurrentShadowOperation({
+      operation,
+      shouldRetry: true,
+      waitForRetry: vi.fn().mockResolvedValue(undefined),
+    }),
+  ).rejects.toBe(commitError)
+
+  expect(operation).toHaveBeenCalledOnce()
+})
 
 test('should rethrow a commit failure when the created shadow row is visible', async () => {
   const commitError = new Error('commit failed')
@@ -306,4 +473,38 @@ test('should rethrow a commit failure when the created shadow row is visible', a
   ).rejects.toBe(commitError)
 
   expect(findOne).not.toHaveBeenCalled()
+})
+
+test('should recover a competing shadow when commit reports a transient conflict', async () => {
+  const commitError = {
+    errorLabels: ['TransientTransactionError'],
+    message: 'Please retry your operation or multi-document transaction.',
+  }
+  const findOne = vi.fn().mockResolvedValueOnce(null).mockResolvedValue(shadow)
+  const rollbackTransaction = vi.fn().mockResolvedValue(undefined)
+  const req = {
+    payload: {
+      db: {
+        beginTransaction: vi.fn().mockResolvedValue('transaction-id'),
+        commitTransaction: vi.fn().mockRejectedValue(commitError),
+        create: vi.fn().mockResolvedValue(shadow),
+        findOne,
+        rollbackTransaction,
+      },
+    },
+  } as unknown as PayloadRequest
+
+  await expect(
+    createShadowRow({
+      branch,
+      collectionSlug,
+      data,
+      docID,
+      onCreated: () => Promise.resolve(),
+      req,
+    }),
+  ).resolves.toBe(shadow)
+
+  expect(rollbackTransaction).toHaveBeenCalledWith('transaction-id')
+  expect(findOne).toHaveBeenCalledTimes(2)
 })

@@ -17,6 +17,7 @@ import type {
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
+import type { UploadFileRollbacks } from '../../../uploads/uploadFileRollback.js'
 import type {
   DataFromCollectionSlug,
   SanitizedCollectionConfig,
@@ -79,6 +80,7 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   select: SelectType
   showHiddenFields: boolean
   unpublishAllLocales?: boolean
+  uploadFileRollbacks?: UploadFileRollbacks
 } & Pick<Required<SharedLocalAPIOptions>, 'overrideAccess'>
 
 /**
@@ -119,6 +121,7 @@ export const updateDocument = async <
   select,
   showHiddenFields,
   unpublishAllLocales: unpublishAllLocalesArg,
+  uploadFileRollbacks,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   validateAllLocalesPublicationFlags({
     publishAllLocales: publishAllLocalesArg,
@@ -322,7 +325,7 @@ export const updateDocument = async <
   // /////////////////////////////////////
 
   if (!collectionConfig.upload.disableLocalStorage) {
-    await uploadFiles(payload, filesToUpload, req)
+    await uploadFiles(payload, filesToUpload, req, { uploadFileRollbacks })
   }
 
   // /////////////////////////////////////
@@ -505,6 +508,14 @@ export const updateDocument = async <
     data: dataToUpdate,
     req,
   })
+
+  if (localizedPublishData) {
+    await runBranchMergeWriteGuard({
+      collectionSlug: collectionConfig.slug,
+      data: result,
+      req,
+    })
+  }
 
   // /////////////////////////////////////
   // Update

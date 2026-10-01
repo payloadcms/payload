@@ -1,7 +1,9 @@
-import type { User } from '../../index.js'
+import type { CollectionSlug, User } from '../../index.js'
 import type { TaskConfig } from '../../queues/config/types/taskTypes.js'
 import type { MergeResult } from '../merge.js'
 
+import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
+import { createIsolatedDeferredCleanupContext } from '../../utilities/transactionCallbacks.js'
 import { mergeBranch } from '../merge.js'
 import { branchesCollectionSlug } from '../types.js'
 
@@ -12,11 +14,17 @@ export type ScheduleMergeTaskInput = {
   changes?: string[]
   closeBranch?: boolean
   /** The user whose production permissions the merge is checked against. */
-  user?: number | string
+  user?:
+    | {
+        relationTo: CollectionSlug
+        value: number | string
+      }
+    | number
+    | string
 }
 
 type Args = {
-  adminUserSlug: string
+  authCollectionSlugs: string[]
 }
 
 /**
@@ -44,21 +52,35 @@ type Args = {
  * inspectable on the job afterwards.
  */
 export const getScheduleMergeTask = ({
-  adminUserSlug,
+  authCollectionSlugs,
 }: Args): TaskConfig<{
   input: ScheduleMergeTaskInput
   output: { merged: number; warnings: MergeResult['warnings'] }
 }> => ({
   slug: 'scheduleMerge',
   handler: async ({ input, req }) => {
-    const userID = input.user
-
     let user: null | User = null
 
-    if (userID) {
+    if (input.user != null) {
+      if (typeof input.user !== 'object') {
+        throw new Error(
+          `Scheduled merge of branch "${input.branch}" is missing the scheduling user auth collection and cannot run.`,
+        )
+      }
+
+      if (
+        typeof input.user.relationTo !== 'string' ||
+        !authCollectionSlugs.includes(input.user.relationTo) ||
+        (typeof input.user.value !== 'number' && typeof input.user.value !== 'string')
+      ) {
+        throw new Error(
+          `Scheduled merge of branch "${input.branch}" has an invalid scheduling user relationship and cannot run.`,
+        )
+      }
+
       user = (await req.payload.findByID({
-        id: userID,
-        collection: adminUserSlug,
+        id: input.user.value,
+        collection: input.user.relationTo,
         depth: 0,
         disableErrors: true,
         overrideAccess: true,
@@ -66,7 +88,7 @@ export const getScheduleMergeTask = ({
       })) as null | User
 
       if (user) {
-        user.collection = adminUserSlug
+        user.collection = input.user.relationTo
       }
     }
 
@@ -88,7 +110,12 @@ export const getScheduleMergeTask = ({
       })
     ).docs[0]
 
-    const writeProgress = async (mergeProgress: null | string) => {
+    const progressReq = isolateObjectProperty(req, ['context', 'transactionID'])
+
+    progressReq.context = createIsolatedDeferredCleanupContext({ req })
+    delete progressReq.transactionID
+
+    const writeProgress = async ({ mergeProgress }: { mergeProgress: null | string }) => {
       if (branchDoc) {
         await req.payload.update({
           id: branchDoc.id,
@@ -96,42 +123,41 @@ export const getScheduleMergeTask = ({
           data: { mergeProgress },
           depth: 0,
           overrideAccess: true,
-          req,
+          req: progressReq,
         })
       }
     }
 
-    // Throttled to about twenty writes regardless of branch size. A scheduled merge
-    // has no reader mid-run — this is only for whoever opens the branch page while it
-    // is going — so a write per document would double the transaction's work to
-    // narrate it to nobody, which is the cost the streamed path exists to avoid.
-    let lastWritten = 0
+    await writeProgress({ mergeProgress: 'running' })
+
+    let result: MergeResult
 
     try {
-      const result = await mergeBranch(req.payload, {
+      result = await mergeBranch(req.payload, {
         branch: input.branch,
         changes: input.changes?.length ? input.changes : undefined,
         closeBranch: Boolean(input.closeBranch),
-        onProgress: async ({ current, total }) => {
-          const step = Math.max(1, Math.floor(total / 20))
-
-          if (current === 1 || current === total || current - lastWritten >= step) {
-            lastWritten = current
-            await writeProgress(`${current}/${total}`)
-          }
-        },
         overrideAccess: false,
         req,
         user,
       })
-
-      return {
-        output: { merged: result.merged.length, warnings: result.warnings },
+    } catch (error) {
+      try {
+        await writeProgress({ mergeProgress: null })
+      } catch (err) {
+        req.payload.logger.error({ err, msg: 'Failed to clear scheduled merge progress.' })
       }
-    } finally {
-      // Cleared whether the merge finished or threw: a stale "12/230" outlives the
-      // run and reads as a merge still in flight.
-      await writeProgress(null)
+
+      throw error
+    }
+
+    // Cleared after a successful merge too: a stale "running" outlives the run and reads as a
+    // merge still in flight. A cleanup failure now fails the job because there is no primary merge
+    // error to preserve.
+    await writeProgress({ mergeProgress: null })
+
+    return {
+      output: { merged: result.merged.length, warnings: result.warnings },
     }
   },
   inputSchema: [
@@ -152,7 +178,7 @@ export const getScheduleMergeTask = ({
     {
       name: 'user',
       type: 'relationship',
-      relationTo: adminUserSlug,
+      relationTo: authCollectionSlugs,
     },
   ],
 })

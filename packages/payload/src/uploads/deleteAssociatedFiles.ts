@@ -5,6 +5,7 @@ import path from 'path'
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
+import type { FileIdentity } from './fileIdentity.js'
 import type { FileData, FileToSave } from './types.js'
 
 import { APIError, ErrorDeletingFile } from '../errors/index.js'
@@ -15,6 +16,8 @@ import {
   scheduleAfterTransactionCommit,
 } from '../utilities/transactionCallbacks.js'
 import { fileExists } from './fileExists.js'
+import { getFileIdentity, hasRenameStableFileIdentity } from './fileIdentity.js'
+import { discardQuarantinedFile, quarantineFile, restoreQuarantinedFile } from './fileQuarantine.js'
 
 type Args = {
   collectionConfig: SanitizedCollectionConfig
@@ -36,6 +39,7 @@ export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
     return
   }
   const cleanupScope = await beginDeferredCleanupScopeIfNeeded({ req })
+  const replacementFilePaths = new Set(files.map((file) => path.resolve(file.path)))
 
   try {
     if (overrideDelete || files.length > 0) {
@@ -46,7 +50,9 @@ export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
         staticPath,
       })
 
-      await scheduleFileDeletion({ filePath: fileToDelete, req, staticPath })
+      if (fileToDelete && !replacementFilePaths.has(fileToDelete)) {
+        await scheduleFileDeletion({ filePath: fileToDelete, req, staticPath })
+      }
 
       if (doc.sizes) {
         const sizes: FileData[] = Object.values(doc.sizes)
@@ -56,7 +62,9 @@ export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
 
         for (const size of sizes) {
           const sizeToDelete = resolveFilePath({ filename: size.filename, staticPath })
-          await scheduleFileDeletion({ filePath: sizeToDelete, req, staticPath })
+          if (sizeToDelete && !replacementFilePaths.has(sizeToDelete)) {
+            await scheduleFileDeletion({ filePath: sizeToDelete, req, staticPath })
+          }
         }
       }
     }
@@ -82,16 +90,28 @@ const scheduleFileDeletion = async ({
   req: PayloadRequest
   staticPath?: string
 }): Promise<void> => {
+  let isFileDeletionSafe: boolean
+
   try {
-    await assertFileDeletionIsSafe({ filePath, staticPath })
+    isFileDeletionSafe = await assertFileDeletionIsSafe({ filePath, staticPath })
   } catch (ignore) {
     throw new ErrorDeletingFile(req.t)
+  }
+
+  if (!isFileDeletionSafe) {
+    return
+  }
+
+  const fileIdentity = await getFileIdentity({ filePath: filePath! })
+
+  if (!fileIdentity) {
+    return
   }
 
   await scheduleAfterTransactionCommit({
     callback: async () => {
       try {
-        await deleteFile({ filePath, staticPath })
+        await deleteFile({ fileIdentity, filePath, staticPath })
       } catch (ignore) {
         throw new ErrorDeletingFile(req.t)
       }
@@ -121,12 +141,33 @@ const resolveFilePath = ({
   return filePath
 }
 
-const deleteFile = async ({ filePath, staticPath }: { filePath?: string; staticPath?: string }) => {
+const deleteFile = async ({
+  fileIdentity,
+  filePath,
+  staticPath,
+}: {
+  fileIdentity: FileIdentity
+  filePath?: string
+  staticPath?: string
+}) => {
   if (!(await assertFileDeletionIsSafe({ filePath, staticPath }))) {
     return
   }
 
-  await fs.unlink(filePath!)
+  const quarantinedFile = await quarantineFile({ filePath: filePath! })
+
+  if (!quarantinedFile) {
+    return
+  }
+
+  if (
+    !hasRenameStableFileIdentity({ actual: quarantinedFile.fileIdentity, expected: fileIdentity })
+  ) {
+    await restoreQuarantinedFile({ quarantinedFile, targetFilePath: filePath! })
+    return
+  }
+
+  await discardQuarantinedFile({ quarantinedFile })
 }
 
 const assertFileDeletionIsSafe = async ({
