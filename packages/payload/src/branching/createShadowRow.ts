@@ -1,5 +1,6 @@
 import type { CopyArgs } from '../database/types.js'
 import type { PayloadRequest } from '../types/index.js'
+import type { BranchOperation } from './types.js'
 
 import { APIError } from '../errors/index.js'
 import { ValidationError } from '../errors/ValidationError.js'
@@ -129,11 +130,13 @@ export const findCompetingShadow = async ({
   branch,
   collectionSlug,
   docID,
+  operation,
   req,
 }: {
   branch: string
   collectionSlug: string
   docID: number | string
+  operation?: BranchOperation
   req: PayloadRequest
 }): Promise<null | Record<string, unknown>> => {
   // A caller transaction keeps its earlier snapshot and cannot observe the winner. Read without
@@ -174,6 +177,12 @@ export const findCompetingShadow = async ({
           `The ${collectionSlug} branch row for document ${String(docID)} has no change record.`,
           409,
         )
+      }
+
+      const authoritativeOperation = (change as { operation?: BranchOperation }).operation
+
+      if (operation && authoritativeOperation !== operation) {
+        return null
       }
 
       return winner

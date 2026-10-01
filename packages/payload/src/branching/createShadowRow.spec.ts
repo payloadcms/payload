@@ -561,7 +561,11 @@ test('should recover a competing shadow when commit reports a transient conflict
     errorLabels: ['TransientTransactionError'],
     message: 'Please retry your operation or multi-document transaction.',
   }
-  const findOne = vi.fn().mockResolvedValueOnce(null).mockResolvedValue(shadow)
+  const findOne = vi
+    .fn()
+    .mockResolvedValueOnce(null)
+    .mockResolvedValueOnce(shadow)
+    .mockResolvedValueOnce({ id: 'change-id' })
   const rollbackTransaction = vi.fn().mockResolvedValue(undefined)
   const req = {
     payload: {
@@ -587,5 +591,5 @@ test('should recover a competing shadow when commit reports a transient conflict
   ).resolves.toBe(shadow)
 
   expect(rollbackTransaction).toHaveBeenCalledWith('transaction-id')
-  expect(findOne).toHaveBeenCalledTimes(2)
+  expect(findOne).toHaveBeenCalledTimes(3)
 })

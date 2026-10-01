@@ -423,19 +423,14 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
       draft: true,
       overrideAccess: true,
     })
+    const publishedFilePath = path.resolve(mergeSecurityUploadsDirectory, published.filename)
+    const draftFilePath = path.resolve(mergeSecurityUploadsDirectory, draft.filename)
 
-    expect(mergeSecuritySpy.uploadUpdateAccessChecks).toBeGreaterThan(0)
-    expect(publishedOnMain.filename).toBe(published.filename)
+    expect(mergeSecuritySpy.uploadUpdateAccessChecks).toBe(0)
+    expect(publishedOnMain.filename).toBe(draft.filename)
     expect(draftOnMain.filename).toBe(draft.filename)
-    expect(
-      fs.readFileSync(
-        path.resolve(mergeSecurityUploadsDirectory, publishedOnMain.filename),
-        'utf8',
-      ),
-    ).toBe('branch-created published upload bytes')
-    expect(
-      fs.readFileSync(path.resolve(mergeSecurityUploadsDirectory, draftOnMain.filename), 'utf8'),
-    ).toBe('branch-created draft upload bytes')
+    expect(fs.existsSync(publishedFilePath)).toBe(false)
+    expect(fs.readFileSync(draftFilePath, 'utf8')).toBe('branch-created draft upload bytes')
   })
 
   test('should ignore an unrelated file on a branch-created upload merge request', async ({

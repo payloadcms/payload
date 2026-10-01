@@ -17,7 +17,7 @@ function getRequestContext(
   context: RequestContext = {},
 ): RequestContext {
   if (req.context) {
-    if (Object.keys(req.context).length === 0 && req.context.constructor === Object) {
+    if (Reflect.ownKeys(req.context).length === 0 && req.context.constructor === Object) {
       // if req.context is `{}` avoid unnecessary spread
       return context
     } else {

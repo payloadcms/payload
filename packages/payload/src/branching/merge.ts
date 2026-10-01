@@ -1464,17 +1464,22 @@ export const mergeBranch = async (
             afterVersionID = String(capturedVersion.versionID)
           }
         }) satisfies CaptureSavedVersionID
-        const uploadSourceDoc =
-          change.operation === 'update' && collectionConfig.upload
-            ? ((await payload.db.findOne({
-                branch: false,
-                collection: collectionSlug,
-                req,
-                where: {
-                  and: [{ [branchField]: { equals: MAIN_BRANCH } }, { id: { equals: docID } }],
-                },
-              })) as null | Record<string, unknown>)
-            : null
+        let uploadSourceDoc: null | Record<string, unknown> = null
+
+        if (collectionConfig.upload) {
+          if (change.operation === 'create') {
+            uploadSourceDoc = resolvedChange.shadow
+          } else if (change.operation === 'update') {
+            uploadSourceDoc = (await payload.db.findOne({
+              branch: false,
+              collection: collectionSlug,
+              req,
+              where: {
+                and: [{ [branchField]: { equals: MAIN_BRANCH } }, { id: { equals: docID } }],
+              },
+            })) as null | Record<string, unknown>
+          }
+        }
 
         const dependencyBlockedAtUse = await runMergeDependencyPreflight({
           availableChangeIDs: appliedChangeIDs,
@@ -2202,8 +2207,8 @@ const applyChange = async ({
   }
 
   const updateMainDocument = async ({
-    coalesceLatestVersion,
     id,
+    coalesceLatestVersion,
     data,
     draft,
     locale,
@@ -2234,7 +2239,6 @@ const applyChange = async ({
     try {
       return (await payload.update({
         id,
-        branch: false,
         collection: collectionSlug,
         data: data as never,
         draft,
@@ -2509,8 +2513,8 @@ const applyChange = async ({
       })
 
       const mergedData = await updateMainDocument({
-        coalesceLatestVersion: localeIndex > 0,
         id: docID,
+        coalesceLatestVersion: localeIndex > 0,
         data,
         draft: write.draft,
         locale,

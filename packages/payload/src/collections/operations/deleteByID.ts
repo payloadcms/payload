@@ -97,15 +97,13 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
         branch,
         collectionSlug: incomingArgs.collection.config.slug,
         docID: incomingArgs.id,
+        operation: 'delete',
         req: incomingArgs.req,
       })
 
       const winnerID = winner?.id
 
-      if (
-        winner?.[branchOpField] === 'delete' &&
-        (typeof winnerID === 'number' || typeof winnerID === 'string')
-      ) {
+      if (typeof winnerID === 'number' || typeof winnerID === 'string') {
         concurrentDeleteRetryError = error
         concurrentDeleteWinnerID = winnerID
       }

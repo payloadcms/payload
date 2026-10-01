@@ -11039,7 +11039,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         if (
           args.collection === postsSlug &&
           args.data?._branch === 'racebranch' &&
-          args.data?._branchOp === 'update'
+          String(args.data?._branchDocID) === String(doc.id)
         ) {
           waitingShadowCreates += 1
 
@@ -11454,7 +11454,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         if (
           args.collection === postsSlug &&
           args.data?._branch === 'racebranch' &&
-          args.data?._branchOp === 'delete'
+          String(args.data?._branchDocID) === String(doc.id)
         ) {
           waitingShadowCreates += 1
 
@@ -11579,7 +11579,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
           if (
             args.collection === postsSlug &&
             args.data?._branch === 'racebranch' &&
-            args.data?._branchOp === 'delete'
+            String(args.data?._branchDocID) === String(doc.id)
           ) {
             waitingShadowCreates += 1
 
@@ -11605,7 +11605,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         const findOneSpy = vi.spyOn(payload.db, 'findOne').mockImplementation(async (args) => {
           const conditions = (args.where as { and?: Record<string, unknown>[] } | undefined)?.and
           const isRetryRevalidation = Boolean(
-            conditions?.some((condition) => '_branchOp' in condition) &&
+            conditions?.some((condition) => '_branchDocID' in condition) &&
               conditions.some((condition) => 'id' in condition),
           )
 
@@ -11623,7 +11623,11 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
           const result = await findOne(args)
           const branchResult = result as null | Record<string, unknown>
 
-          if (!isRetryRevalidation && branchResult?._branchOp === 'delete') {
+          if (
+            !isRetryRevalidation &&
+            branchResult?._branch === 'racebranch' &&
+            String(branchResult._branchDocID) === String(doc.id)
+          ) {
             observedDeleteWinner = branchResult
           }
 
@@ -11709,8 +11713,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         })
 
         expect(shadows.docs).toHaveLength(1)
-        expect(shadows.docs[0]!._branchOp).toBe('delete')
+        expect(shadows.docs[0]).not.toHaveProperty('_branchOp')
         expect(changes.docs).toHaveLength(1)
+        expect(changes.docs[0]).toMatchObject({
+          documentID: String(doc.id),
+          operation: 'delete',
+        })
       },
     )
 
@@ -11733,12 +11741,15 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         const deleteShadowReady = new Promise<void>((resolve) => {
           markDeleteShadowReady = resolve
         })
+        let hasPausedDeleteShadow = false
         const createSpy = vi.spyOn(payload.db, 'create').mockImplementation(async (args) => {
           if (
+            !hasPausedDeleteShadow &&
             args.collection === postsSlug &&
             args.data?._branch === 'racebranch' &&
-            args.data?._branchOp === 'delete'
+            String(args.data?._branchDocID) === String(doc.id)
           ) {
+            hasPausedDeleteShadow = true
             markDeleteShadowReady()
             await deleteShadowReleased
           }
@@ -11782,9 +11793,19 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
             and: [{ _branch: { equals: 'racebranch' } }, { _branchDocID: { equals: doc.id } }],
           },
         })
+        const changes = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: 'racebranch' } },
+        })
 
         expect(shadows.docs).toHaveLength(1)
-        expect(shadows.docs[0]!._branchOp).toBe('delete')
+        expect(shadows.docs[0]).not.toHaveProperty('_branchOp')
+        expect(changes.docs).toHaveLength(1)
+        expect(changes.docs[0]).toMatchObject({
+          documentID: String(doc.id),
+          operation: 'delete',
+        })
       },
     )
   })
