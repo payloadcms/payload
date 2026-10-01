@@ -48,6 +48,10 @@ export function getSizesToVariantsRenames({
   adapter: DrizzleAdapter
   direction: SizesToVariantsDirection
 }): SizesToVariantsTableRenames[] {
+  if (direction === 'up') {
+    assertLegacySizesDisabled({ adapter })
+  }
+
   const plan: SizesToVariantsTableRenames[] = []
 
   for (const collection of adapter.payload.config.collections) {
@@ -99,6 +103,18 @@ export function getSizesToVariantsRenames({
   }
 
   return plan
+}
+
+/**
+ * With `upload.legacySizes` on, variants stay stored under `sizes`, so the current schema has no
+ * `variants_*` columns to rename to, and the generated snapshot would describe the wrong layout.
+ */
+export function assertLegacySizesDisabled({ adapter }: { adapter: DrizzleAdapter }): void {
+  if (adapter.payload.config.upload?.legacySizes) {
+    throw new Error(
+      'The sizes-to-variants migration moves stored variants away from `sizes`, which `upload.legacySizes` still reads from. Remove `upload.legacySizes` from your config before running it.',
+    )
+  }
 }
 
 function planIndexRename({

@@ -1,7 +1,7 @@
 import { buildSizesToVariantsConfig } from './buildSizesToVariantsConfig.js'
 
 export default buildSizesToVariantsConfig({
-  legacySizes: false,
-  staticDirName: 'media',
-  suite: 'sizes-to-variants',
+  legacySizes: true,
+  staticDirName: 'media-legacy-sizes',
+  suite: 'sizes-to-variants-legacy-sizes',
 })

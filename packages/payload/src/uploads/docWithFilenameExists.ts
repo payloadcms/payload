@@ -1,5 +1,7 @@
 import type { PayloadRequest, Where } from '../types/index.js'
 
+import { getUploadVariantsFieldName } from './getUploadVariantsFieldName.js'
+
 type Args = {
   collectionSlug: string
   filename: string
@@ -21,6 +23,7 @@ export const docWithFilenameExists = async ({
   const hasPrefixField = (collection?.fields ?? []).some(
     (field) => 'name' in field && field.name === 'prefix',
   )
+  const variantsFieldName = getUploadVariantsFieldName({ config: req.payload.config })
   const filenameCondition: Where = {
     or: [
       {
@@ -30,7 +33,7 @@ export const docWithFilenameExists = async ({
       },
       ...(upload && typeof upload === 'object' && upload.variants
         ? upload.variants.map(({ name }) => ({
-            [`variants.${name}.filename`]: { equals: filename },
+            [`${variantsFieldName}.${name}.filename`]: { equals: filename },
           }))
         : []),
     ],

@@ -19,6 +19,7 @@ import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
+import { getUploadVariantsFieldName } from '../../uploads/getUploadVariantsFieldName.js'
 import {
   getLocalizedUploadProperties,
   restoreUploadDataFromDocument,
@@ -186,6 +187,7 @@ export const restoreVersionOperation = async <
     })
 
     // originalDoc with hoisted localized data
+    const variantsFieldName = getUploadVariantsFieldName({ config: payload.config })
     const validationLocale = payload.config.localization
       ? payload.config.localization.defaultLocale
       : locale!
@@ -206,8 +208,9 @@ export const restoreVersionOperation = async <
 
     if (collectionConfig.upload && !overrideAccess) {
       versionToRestoreWithLocales = restoreUploadDataFromDocument(
-        sanitizeUploadData(versionToRestoreWithLocales, 'update'),
+        sanitizeUploadData(versionToRestoreWithLocales, 'update', { variantsFieldName }),
         prevDocWithLocales,
+        { variantsFieldName },
       )
     }
 
@@ -228,11 +231,12 @@ export const restoreVersionOperation = async <
 
     if (collectionConfig.upload && !overrideAccess) {
       prevVersionDoc = restoreUploadDataFromDocument(
-        sanitizeUploadData(prevVersionDoc, 'update'),
+        sanitizeUploadData(prevVersionDoc, 'update', { variantsFieldName }),
         prevDocWithLocales,
         {
           locale: validationLocale,
           localizedProperties: getLocalizedUploadProperties(collectionConfig.flattenedFields),
+          variantsFieldName,
         },
       )
     }

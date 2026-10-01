@@ -1,5 +1,7 @@
 import type { CollectionConfig, FieldHook, ImageSize } from 'payload'
 
+import { getStoredUploadVariants } from 'payload'
+
 import type { GeneratedAdapter, GenerateFileURL } from '../types.js'
 
 import { sanitizePrefix } from '../utilities/sanitizePrefix.js'
@@ -29,10 +31,13 @@ const getObjectFolder = (data: unknown, originalDoc: unknown): string => {
 
 export const getBeforeChangeHook =
   ({ adapter, collection, disablePayloadAccessControl, generateFileURL, size }: Args): FieldHook =>
-  async ({ data, originalDoc, value }) => {
-    const newFilename = size ? data?.variants?.[size.name]?.filename : data?.filename
+  async ({ data, originalDoc, req, value }) => {
+    const newFilename = size
+      ? getStoredUploadVariants({ config: req.payload.config, doc: data })?.[size.name]?.filename
+      : data?.filename
     const originalFilename = size
-      ? originalDoc?.variants?.[size.name]?.filename
+      ? getStoredUploadVariants({ config: req.payload.config, doc: originalDoc })?.[size.name]
+          ?.filename
       : originalDoc?.filename
     const filename = newFilename || originalFilename
     const prefix = getObjectFolder(data, originalDoc)

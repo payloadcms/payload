@@ -873,6 +873,17 @@ export type FetchAPIFileUploadOptions = {
 
 export type GlobalUploadConfig = {
   /**
+   * Keep storing every upload collection's generated variants under the 3.x `sizes` field, so a
+   * database written by Payload 3 works without the `sizes-to-variants` migration. `variants` is
+   * then a read-only virtual alias of `sizes`: documents return both, and `where`, `select` and
+   * `sort` work on either path. Remove this flag before running the migration.
+   *
+   * @deprecated Move frontends to `variants`, remove this flag, and run the `sizes-to-variants`
+   * migration. Will be removed in the next major version.
+   * @default false
+   */
+  legacySizes?: boolean
+  /**
    * Ordered list of file transformers. Every eligible transformer joins the pipeline
    * for a given upload or dynamic request in declaration order. Slugs must be unique.
    *

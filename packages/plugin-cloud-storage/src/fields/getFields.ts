@@ -1,4 +1,11 @@
-import type { CollectionConfig, Field, GroupField, SanitizedUploadConfig, TextField } from 'payload'
+import type {
+  CollectionConfig,
+  Field,
+  GroupField,
+  SanitizedUploadConfig,
+  TextField,
+  UploadVariantsFieldName,
+} from 'payload'
 
 import path from 'path'
 
@@ -19,6 +26,8 @@ interface Args {
    * document field holds only the document-level segment.
    */
   useCompositePrefixes?: boolean
+  /** Where generated variants are stored; see `getUploadVariantsFieldName`. */
+  variantsFieldName?: UploadVariantsFieldName
 }
 
 export const getFields = ({
@@ -28,6 +37,7 @@ export const getFields = ({
   generateFileURL,
   prefix,
   useCompositePrefixes = false,
+  variantsFieldName = 'variants',
 }: Args): Field[] => {
   const baseURLField: TextField = {
     name: 'url',
@@ -112,7 +122,7 @@ export const getFields = ({
     let existingSizesFieldIndex = -1
 
     const existingSizesField = fields.find((existingField, i) => {
-      if ('name' in existingField && existingField.name === 'variants') {
+      if ('name' in existingField && existingField.name === variantsFieldName) {
         existingSizesFieldIndex = i
         return true
       }
@@ -126,7 +136,7 @@ export const getFields = ({
 
     const sizesField: Field = {
       ...(existingSizesField || {}),
-      name: 'variants',
+      name: variantsFieldName,
       type: 'group',
       admin: {
         hidden: true,

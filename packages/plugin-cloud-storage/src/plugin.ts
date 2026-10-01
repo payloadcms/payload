@@ -1,5 +1,7 @@
 import type { Config } from 'payload'
 
+import { getUploadVariantsFieldName } from 'payload'
+
 import type { Adapter, AllowList, PluginOptions } from './types.js'
 
 import { getFields } from './fields/getFields.js'
@@ -47,6 +49,7 @@ export const cloudStoragePlugin =
               generateFileURL: options.generateFileURL,
               prefix: options.prefix,
               useCompositePrefixes,
+              variantsFieldName: getUploadVariantsFieldName({ config: incomingConfig }),
             })
 
             return {
@@ -131,6 +134,7 @@ export const cloudStoragePlugin =
           generateFileURL: options.generateFileURL,
           prefix: options.prefix,
           useCompositePrefixes,
+          variantsFieldName: getUploadVariantsFieldName({ config: incomingConfig }),
         })
 
         const handlers = [

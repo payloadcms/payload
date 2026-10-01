@@ -41,7 +41,7 @@ describe('upload replacement cleanup', () => {
         req: {
           context: {},
           file: { data: Buffer.from('file'), size: 4 },
-          payload: { logger: { error: vi.fn() } },
+          payload: { config: {}, logger: { error: vi.fn() } },
         },
       } as never)
 

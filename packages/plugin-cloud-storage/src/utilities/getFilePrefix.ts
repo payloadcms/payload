@@ -1,5 +1,7 @@
 import type { CollectionConfig, PayloadRequest, SanitizedUploadConfig, TypeWithID } from 'payload'
 
+import { getUploadVariantsFieldName } from 'payload'
+
 import { buildPrefixWithObjectKey } from './buildPrefixWithObjectKey.js'
 import { buildUploadStoragePathData } from './buildStoragePathData.js'
 import { sanitizePrefix } from './sanitizePrefix.js'
@@ -72,7 +74,10 @@ export async function getFilePrefix({
         filename: { equals: filename },
       },
       ...variants.map((imageSize) => ({
-        [`variants.${imageSize.name}.filename`]: { equals: filename },
+        [`${getUploadVariantsFieldName({ config: req.payload.config })}.${imageSize.name}.filename`]:
+          {
+            equals: filename,
+          },
       })),
     ],
   }

@@ -8,6 +8,7 @@ import { NotFound } from '../../errors/NotFound.js'
 import { TransformerContractError } from '../../errors/TransformerContractError.js'
 import { checkFileAccess } from '../checkFileAccess.js'
 import { retrieveFileResponse } from '../endpoints/getFile.js'
+import { getUploadVariantsFieldName } from '../getUploadVariantsFieldName.js'
 import { createLazySourceGetter } from './createLazySourceGetter.js'
 import { finalizeFileResponse } from './finalizeFileResponse.js'
 import { getSourceFileResponse } from './getSourceFileResponse.js'
@@ -59,7 +60,11 @@ export async function handleDynamicFileRequest({
     resolvedDocument,
   })
 
-  const requestedFile = getRequestedFile({ document, filename })
+  const requestedFile = getRequestedFile({
+    document,
+    filename,
+    variantsFieldName: getUploadVariantsFieldName({ config: req.payload.config }),
+  })
 
   const source = createLazySourceGetter({
     retrieve: () => getSourceFileResponse({ collection, document, filename, prefix, req }),
@@ -170,7 +175,11 @@ function planRequestPipeline({
     args: {
       collectionSlug: collection.config.slug,
       documentID: document.id,
-      mimeType: getRequestedFile({ document, filename }).mimeType,
+      mimeType: getRequestedFile({
+        document,
+        filename,
+        variantsFieldName: getUploadVariantsFieldName({ config: req.payload.config }),
+      }).mimeType,
       operation: 'request',
       req,
     },
@@ -244,7 +253,11 @@ async function authorizeDocument({
   const hasCandidateTransformers =
     getCandidateTransformers({
       capability: 'handleRequest',
-      mimeType: getRequestedFile({ document: resolvedDocument, filename }).mimeType,
+      mimeType: getRequestedFile({
+        document: resolvedDocument,
+        filename,
+        variantsFieldName: getUploadVariantsFieldName({ config: req.payload.config }),
+      }).mimeType,
       transformers: req.payload.config.upload.transformers,
     }).length > 0
 

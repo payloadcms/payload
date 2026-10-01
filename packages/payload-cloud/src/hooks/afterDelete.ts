@@ -1,5 +1,7 @@
 import type { CollectionAfterDeleteHook, CollectionConfig, FileData, TypeWithID } from 'payload'
 
+import { getStoredUploadVariants } from 'payload'
+
 import type { TypeWithPrefix } from '../types.js'
 
 import { createKey } from '../utilities/createKey.js'
@@ -18,7 +20,7 @@ export const getAfterDeleteHook = ({
 
       const filesToDelete: string[] = [
         doc.filename || '',
-        ...Object.values(doc?.variants || [])
+        ...Object.values(getStoredUploadVariants({ config: req.payload.config, doc }) ?? {})
           .map((resizedFileData) => resizedFileData.filename)
           .filter((filename): filename is string => filename !== null),
       ]

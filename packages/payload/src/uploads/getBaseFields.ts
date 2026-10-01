@@ -4,6 +4,7 @@ import type { Field } from '../fields/config/types.js'
 import type { SanitizedUploadConfig } from './types.js'
 
 import { generateFilePathOrURL } from './generateFilePathOrURL.js'
+import { getUploadVariantsFieldName } from './getUploadVariantsFieldName.js'
 import { mimeTypeValidator } from './mimeTypeValidator.js'
 import { validateUploadFilename } from './validateUploadFilename.js'
 
@@ -25,6 +26,7 @@ type Options = {
 }
 
 export const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
+  const variantsFieldName = getUploadVariantsFieldName({ config })
   // `variants` only exists once a transformer (e.g. Sharp) has written it back during init.
   const uploadOptions: Partial<SanitizedUploadConfig> =
     typeof collection.upload === 'object' ? collection.upload : {}
@@ -61,13 +63,13 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
             config,
             filename:
               typeof adminThumbnail === 'string'
-                ? (originalDoc.variants?.[adminThumbnail]?.filename as string)
+                ? (originalDoc[variantsFieldName]?.[adminThumbnail]?.filename as string)
                 : undefined,
             relative: false,
             serverURL: req.payload.config.serverURL,
             urlOrPath:
               typeof adminThumbnail === 'string'
-                ? (originalDoc.variants?.[adminThumbnail]?.url as string)
+                ? (originalDoc[variantsFieldName]?.[adminThumbnail]?.url as string)
                 : undefined,
           })
         },
@@ -200,7 +202,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
   if (uploadOptions.variants) {
     uploadFields = uploadFields.concat([
       {
-        name: 'variants',
+        name: variantsFieldName,
         type: 'group',
         admin: {
           hidden: true,
@@ -226,8 +228,8 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
                       collectionSlug: collection?.slug as string,
                       config,
                       filename:
-                        data?.variants?.[size.name]?.filename ||
-                        originalDoc?.variants?.[size.name]?.filename,
+                        data?.[variantsFieldName]?.[size.name]?.filename ||
+                        originalDoc?.[variantsFieldName]?.[size.name]?.filename,
                       relative: false,
                       serverURL: req.payload.config.serverURL,
                       urlOrPath: value,
@@ -239,8 +241,8 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
                       collectionSlug: collection?.slug as string,
                       config,
                       filename:
-                        data?.variants?.[size.name]?.filename ||
-                        originalDoc?.variants?.[size.name]?.filename,
+                        data?.[variantsFieldName]?.[size.name]?.filename ||
+                        originalDoc?.[variantsFieldName]?.[size.name]?.filename,
                       relative: true,
                       serverURL: req.payload.config.serverURL,
                       urlOrPath: value,
@@ -290,6 +292,42 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
         label: ({ t }) => t('upload:sizes'),
       },
     ])
+
+    // With `legacySizes`, variants stay stored under the 3.x `sizes` field so an unmigrated
+    // database keeps working, and `variants` is the read-only alias of it.
+    if (variantsFieldName === 'sizes') {
+      uploadFields.push({
+        name: 'variants',
+        type: 'group',
+        admin: {
+          hidden: true,
+        },
+        // Same shape as `sizes`, without its hooks or indexes: the value is copied from `sizes` on
+        // read, and `where`/`select`/`sort` paths are rewritten to it.
+        fields: uploadOptions.variants.map((size) => ({
+          name: size.name,
+          type: 'group',
+          fields: [url, width, height, mimeType, filesize, filename].map(toLegacySizesAliasField),
+        })),
+        virtual: 'sizes',
+      })
+    }
   }
   return uploadFields
+}
+
+/** A plain copy of a base upload field for the read-only `variants` alias. */
+const toLegacySizesAliasField = (field: Field): Field => {
+  const {
+    hooks: _hooks,
+    index: _index,
+    unique: _unique,
+    ...aliasField
+  } = field as {
+    hooks?: unknown
+    index?: boolean
+    unique?: boolean
+  } & Field
+
+  return aliasField as Field
 }

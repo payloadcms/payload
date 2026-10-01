@@ -25,6 +25,12 @@ export async function migrateSizesToVariants({
   payload: Payload
   req?: Partial<PayloadRequest>
 }): Promise<void> {
+  if (direction === 'up' && payload.config.upload?.legacySizes) {
+    throw new Error(
+      'The sizes-to-variants migration moves stored variants away from `sizes`, which `upload.legacySizes` still reads from. Remove `upload.legacySizes` from your config before running it.',
+    )
+  }
+
   const adapter = payload.db as unknown as MongooseAdapter
   const session = await getSession(adapter, req)
   const [from, to] = direction === 'up' ? ['sizes', 'variants'] : ['variants', 'sizes']

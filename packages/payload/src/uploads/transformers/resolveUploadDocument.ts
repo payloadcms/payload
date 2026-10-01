@@ -1,13 +1,20 @@
 import type { Collection, TypeWithID } from '../../collections/config/types.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
+import type { UploadVariantsFieldName } from '../getUploadVariantsFieldName.js'
 
 import { Forbidden } from '../../errors/Forbidden.js'
+import { getUploadVariantsFieldName } from '../getUploadVariantsFieldName.js'
 
 export type ResolvedUploadDocument = {
   filename: string
   mimeType: string
-  variants?: Record<string, { filename?: null | string; mimeType?: null | string } | null>
-} & TypeWithID
+} & Partial<
+  Record<
+    UploadVariantsFieldName,
+    Record<string, { filename?: null | string; mimeType?: null | string } | null>
+  >
+> &
+  TypeWithID
 
 /**
  * The primary filename, or a configured legacy image size's filename, both match.
@@ -16,9 +23,12 @@ export type ResolvedUploadDocument = {
 export function buildFilenameWhere({
   filename,
   variants,
+  variantsFieldName = 'variants',
 }: {
   filename: string
   variants?: { name: string }[]
+  /** Where generated variants are stored; see `getUploadVariantsFieldName`. */
+  variantsFieldName?: UploadVariantsFieldName
 }): Where {
   const filenameCondition: Where = {
     or: [{ filename: { equals: filename } }],
@@ -26,7 +36,7 @@ export function buildFilenameWhere({
 
   variants?.forEach(({ name }) => {
     filenameCondition.or!.push({
-      [`variants.${name}.filename`]: { equals: filename },
+      [`${variantsFieldName}.${name}.filename`]: { equals: filename },
     })
   })
 
@@ -41,12 +51,17 @@ export function buildFilenameWhere({
 export function getRequestedFile({
   document,
   filename,
+  variantsFieldName = 'variants',
 }: {
   document: ResolvedUploadDocument
   filename: string
+  /** Where generated variants are stored; see `getUploadVariantsFieldName`. */
+  variantsFieldName?: UploadVariantsFieldName
 }): { filename: string; mimeType: string } {
   if (document.filename !== filename) {
-    const size = Object.values(document.variants ?? {}).find((size) => size?.filename === filename)
+    const size = Object.values(document[variantsFieldName] ?? {}).find(
+      (size) => size?.filename === filename,
+    )
 
     if (size?.filename && size.mimeType) {
       return { filename: size.filename, mimeType: size.mimeType }
@@ -80,7 +95,13 @@ export async function resolveUploadDocument({
 
   const { config } = collection
 
-  const constraints: Where[] = [buildFilenameWhere({ filename, variants: config.upload.variants })]
+  const constraints: Where[] = [
+    buildFilenameWhere({
+      filename,
+      variants: config.upload.variants,
+      variantsFieldName: getUploadVariantsFieldName({ config: req.payload.config }),
+    }),
+  ]
 
   if (typeof prefix === 'string') {
     constraints.push({ prefix: { equals: prefix } })

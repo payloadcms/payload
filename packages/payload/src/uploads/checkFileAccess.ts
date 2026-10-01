@@ -3,6 +3,7 @@ import type { PayloadRequest, Where } from '../types/index.js'
 
 import { executeAccess } from '../auth/executeAccess.js'
 import { Forbidden } from '../errors/Forbidden.js'
+import { getUploadVariantsFieldName } from './getUploadVariantsFieldName.js'
 import { buildFilenameWhere } from './transformers/resolveUploadDocument.js'
 
 export const checkFileAccess = async ({
@@ -37,7 +38,11 @@ export const checkFileAccess = async ({
   }
 
   if (constraints.length > 0) {
-    const filenameCondition = buildFilenameWhere({ filename, variants: config.upload.variants })
+    const filenameCondition = buildFilenameWhere({
+      filename,
+      variants: config.upload.variants,
+      variantsFieldName: getUploadVariantsFieldName({ config: req.payload.config }),
+    })
 
     const doc = await req.payload.db.findOne({
       collection: config.slug,
