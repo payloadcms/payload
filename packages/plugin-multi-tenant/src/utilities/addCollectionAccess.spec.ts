@@ -29,7 +29,7 @@ const createArgs = (slug = 'posts'): AccessArgs => ({
 })
 
 describe('addCollectionAccess', () => {
-  it('adds tenant constraints through base access without replacing collection access', async () => {
+  it('should add tenant constraints through base access without replacing collection access', async () => {
     const documentRead = vi.fn(() => ({ published: { equals: true } }))
     const collection: CollectionConfig = {
       slug: 'posts',
@@ -56,7 +56,7 @@ describe('addCollectionAccess', () => {
     expect(documentRead).not.toHaveBeenCalled()
   })
 
-  it('returns a boolean tenant result for collection create access', async () => {
+  it('should return a boolean tenant result for collection create access', async () => {
     const collection: CollectionConfig = { slug: 'posts', fields: [] }
     const config = {} as Config
 
@@ -65,7 +65,7 @@ describe('addCollectionAccess', () => {
     await expect(config.baseAccess?.collections?.create?.(createArgs())).resolves.toBe(true)
   })
 
-  it('falls back to update access for validate when accessResultCallback is configured', async () => {
+  it('should fall back to update access for validate when accessResultCallback is configured', async () => {
     const documentUpdate = vi.fn(() => true)
     const accessResultCallback = vi.fn(({ accessResult }) => accessResult)
     const collection: CollectionConfig = {
@@ -91,7 +91,7 @@ describe('addCollectionAccess', () => {
     )
   })
 
-  it('keeps callback wrapping when an access result override is configured', async () => {
+  it('should keep callback wrapping when an access result override is configured', async () => {
     const documentResult = { published: { equals: true } }
     const documentRead = vi.fn(() => documentResult)
     const accessResultCallback = vi.fn(({ accessResult }) => accessResult)

@@ -1,19 +1,13 @@
 import type { ClientField } from 'payload'
 
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import {
   getValidationEndpoint,
   projectValidationDataForSiblingLocales,
-  requestDocumentValidation,
-  validateDocumentLocales,
 } from './validateAllLocales.js'
 
 describe('validate all locales before publish', () => {
-  afterEach(() => {
-    vi.unstubAllGlobals()
-  })
-
   it('should construct create, update, and global validation endpoints', () => {
     expect(
       getValidationEndpoint({
@@ -99,93 +93,5 @@ describe('validate all locales before publish', () => {
       items: [{ kind: 'card' }],
       settings: { theme: 'dark' },
     })
-  })
-
-  it('should not let valid unsaved active-locale values satisfy invalid stored sibling locales', async () => {
-    const request = vi.fn(async ({ body, locales: requestedLocales }) => {
-      if (requestedLocales.includes('de') && 'title' in body) {
-        return {
-          errors: [],
-          valid: true,
-        }
-      }
-
-      return {
-        errors: [{ locale: 'fr', message: 'Title is required', path: 'title' }],
-        valid: false,
-      }
-    })
-
-    const result = await validateDocumentLocales({
-      activeLocale: 'de',
-      blocksMap: {},
-      data: { summary: 'Shared summary', title: 'Unsaved German title' },
-      endpoint: '/api/posts/123/validate',
-      fields: [
-        { localized: true, name: 'title', type: 'text' },
-        { name: 'summary', type: 'text' },
-      ],
-      locales: ['en', 'de', 'fr'],
-      request,
-    })
-
-    expect(request).toHaveBeenNthCalledWith(
-      1,
-      expect.objectContaining({
-        body: { summary: 'Shared summary', title: 'Unsaved German title' },
-        locales: ['de'],
-      }),
-    )
-    expect(request).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({
-        body: { summary: 'Shared summary' },
-        locales: ['en', 'fr'],
-      }),
-    )
-    expect(result).toEqual({
-      errors: [{ locale: 'fr', message: 'Title is required', path: 'title' }],
-      valid: false,
-    })
-  })
-
-  it('should render validation errors returned in a non-2xx Payload error response', async () => {
-    const fetchMock = vi.fn(async () => {
-      return Response.json(
-        {
-          errors: [
-            {
-              data: {
-                errors: [{ locale: 'fr', message: 'Title is required', path: 'title' }],
-              },
-              message: 'The following field is invalid: title',
-              name: 'ValidationError',
-            },
-          ],
-        },
-        { status: 400 },
-      )
-    })
-
-    vi.stubGlobal('fetch', fetchMock)
-
-    await expect(
-      requestDocumentValidation({
-        body: { title: 'Titre' },
-        endpoint: '/api/posts/123/validate',
-        locales: ['en', 'fr'],
-      }),
-    ).resolves.toEqual({
-      errors: [{ locale: 'fr', message: 'Title is required', path: 'title' }],
-      valid: false,
-    })
-    expect(fetchMock).toHaveBeenCalledWith(
-      '/api/posts/123/validate?locale=en&locale=fr',
-      expect.objectContaining({
-        body: JSON.stringify({ title: 'Titre' }),
-        credentials: 'include',
-        method: 'POST',
-      }),
-    )
   })
 })

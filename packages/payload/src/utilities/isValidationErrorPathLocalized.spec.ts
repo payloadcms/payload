@@ -88,132 +88,28 @@ const data = {
 }
 
 describe('isValidationErrorPathLocalized', () => {
-  it('returns false for a top-level non-localized field', () => {
-    expect(
-      isValidationErrorPathLocalized({ configBlockReferences: [], data, fields, path: 'shared' }),
-    ).toBe(false)
-  })
-
-  it('returns true for a top-level localized field', () => {
-    expect(
-      isValidationErrorPathLocalized({
-        configBlockReferences: [],
-        data,
-        fields,
-        path: 'localizedJSON',
-      }),
-    ).toBe(true)
-  })
-
-  it('returns true for any field nested inside a localized group, regardless of its own flag', () => {
+  it.each([
+    ['a top-level non-localized field', 'shared', false],
+    ['a top-level localized field', 'localizedJSON', true],
+    ['a field inside a localized group', 'localizedGroup.value', true],
+    ['a shared field inside a group', 'nested.shared', false],
+    ['a localized field inside a group', 'nested.localizedJSON', true],
+    ['a shared field inside an array row', 'nestedArray.0.shared', false],
+    ['a localized field inside an array row', 'nestedArray.0.localizedJSON', true],
+    ['a shared field inside a block row', 'nestedBlocks.0.shared', false],
+    ['a localized field inside a block row', 'nestedBlocks.0.localizedJSON', true],
+    ['a field inside a presentational row', 'rowShared', false],
+    ['a field inside a localized named tab', 'localizedTab.value', true],
+    ['a field inside an unnamed tab', 'unnamedTabShared', false],
+    ['an unresolvable path', 'doesNotExist', true],
+  ])('should identify %s at %s as localized=%s', (_description, path, expected) => {
     expect(
       isValidationErrorPathLocalized({
         configBlockReferences: [],
         data,
         fields,
-        path: 'localizedGroup.value',
+        path,
       }),
-    ).toBe(true)
-  })
-
-  it('returns false for a non-localized field nested inside a non-localized group', () => {
-    expect(
-      isValidationErrorPathLocalized({
-        configBlockReferences: [],
-        data,
-        fields,
-        path: 'nested.shared',
-      }),
-    ).toBe(false)
-  })
-
-  it('returns true for a localized field nested inside a non-localized group', () => {
-    expect(
-      isValidationErrorPathLocalized({
-        configBlockReferences: [],
-        data,
-        fields,
-        path: 'nested.localizedJSON',
-      }),
-    ).toBe(true)
-  })
-
-  it('resolves array row indices without consuming a field name', () => {
-    expect(
-      isValidationErrorPathLocalized({
-        configBlockReferences: [],
-        data,
-        fields,
-        path: 'nestedArray.0.shared',
-      }),
-    ).toBe(false)
-    expect(
-      isValidationErrorPathLocalized({
-        configBlockReferences: [],
-        data,
-        fields,
-        path: 'nestedArray.0.localizedJSON',
-      }),
-    ).toBe(true)
-  })
-
-  it('resolves blocks row indices via the row blockType', () => {
-    expect(
-      isValidationErrorPathLocalized({
-        configBlockReferences: [],
-        data,
-        fields,
-        path: 'nestedBlocks.0.shared',
-      }),
-    ).toBe(false)
-    expect(
-      isValidationErrorPathLocalized({
-        configBlockReferences: [],
-        data,
-        fields,
-        path: 'nestedBlocks.0.localizedJSON',
-      }),
-    ).toBe(true)
-  })
-
-  it('sees through unnamed presentational row fields', () => {
-    expect(
-      isValidationErrorPathLocalized({
-        configBlockReferences: [],
-        data,
-        fields,
-        path: 'rowShared',
-      }),
-    ).toBe(false)
-  })
-
-  it('resolves named and unnamed tabs', () => {
-    expect(
-      isValidationErrorPathLocalized({
-        configBlockReferences: [],
-        data,
-        fields,
-        path: 'localizedTab.value',
-      }),
-    ).toBe(true)
-    expect(
-      isValidationErrorPathLocalized({
-        configBlockReferences: [],
-        data,
-        fields,
-        path: 'unnamedTabShared',
-      }),
-    ).toBe(false)
-  })
-
-  it('conservatively treats an unresolvable path as localized', () => {
-    expect(
-      isValidationErrorPathLocalized({
-        configBlockReferences: [],
-        data,
-        fields,
-        path: 'doesNotExist',
-      }),
-    ).toBe(true)
+    ).toBe(expected)
   })
 })

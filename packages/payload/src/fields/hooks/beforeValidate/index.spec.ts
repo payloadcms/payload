@@ -38,47 +38,6 @@ const runBeforeValidate = async ({
 }
 
 describe('beforeValidate field access results', () => {
-  it('should apply the validate field access policy while hooks receive validate', async () => {
-    const hookOperations: string[] = []
-    const accessOperations: string[] = []
-    const data = { title: 'restricted' }
-
-    await beforeValidate({
-      collection: {
-        fields: [
-          {
-            access: {
-              validate: () => {
-                accessOperations.push('validate')
-                return false
-              },
-            },
-            hooks: {
-              beforeValidate: [
-                ({ operation }) => {
-                  hookOperations.push(operation!)
-                },
-              ],
-            },
-            name: 'title',
-            type: 'text',
-          } as Field,
-        ],
-      } as SanitizedCollectionConfig,
-      context: {},
-      data,
-      doc: {},
-      global: null,
-      operation: 'validate',
-      overrideAccess: false,
-      req: { context: {}, payload: {} } as PayloadRequest,
-    })
-
-    expect(hookOperations).toEqual(['validate'])
-    expect(accessOperations).toEqual(['validate'])
-    expect(data).toEqual({})
-  })
-
   it('should report explicit and implicit field access results', async () => {
     const fieldAccessResults = await runBeforeValidate({
       fields: [

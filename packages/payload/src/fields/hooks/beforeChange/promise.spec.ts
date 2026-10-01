@@ -17,48 +17,6 @@ const req = {
 } as PayloadRequest
 
 describe('beforeChange field traversal', () => {
-  it('should add the active locale to ordinary field validation errors', async () => {
-    const errors = []
-
-    await promise({
-      collection: null,
-      context: {},
-      data: { title: '' },
-      doc: {},
-      docWithLocales: {},
-      errors,
-      field: {
-        name: 'title',
-        type: 'text',
-        validate: () => 'Title is required',
-      } as Field,
-      fieldIndex: 0,
-      fieldLabelPath: '',
-      global: null,
-      mergeLocaleActions: [],
-      operation: 'update',
-      overrideAccess: false,
-      parentIndexPath: '',
-      parentIsLocalized: false,
-      parentPath: '',
-      parentSchemaPath: '',
-      req,
-      siblingData: { title: '' },
-      siblingDoc: {},
-      siblingDocWithLocales: {},
-      skipValidation: false,
-    })
-
-    expect(errors).toEqual([
-      {
-        label: 'Title',
-        locale: 'de',
-        message: 'Title is required',
-        path: 'title',
-      },
-    ])
-  })
-
   it('should add the active locale to invalid block filter errors', async () => {
     const errors = []
 

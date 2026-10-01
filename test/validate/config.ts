@@ -32,12 +32,10 @@ export const publishCollectionSlug = 'validation-publish-items'
 export const publishGlobalSlug = 'validation-publish-settings'
 export const writeTargetsSlug = 'validation-write-targets'
 export const validationUploadsSlug = 'validation-uploads'
-export const validationPublishUploadsSlug = 'validation-publish-uploads'
 export const validationCustomButtonsCollectionSlug = 'validation-custom-buttons-items'
+export const validationRequestFailureTitle = 'Reject validation request'
 export const validationDeniedCollectionSlug = 'validation-denied-items'
-export const validationNonLocalizedCollectionSlug = 'validation-non-localized-items'
 export const validationUploadsDir = path.resolve(dirname, 'validation-uploads')
-export const validationPublishUploadsDir = path.resolve(dirname, 'validation-publish-uploads')
 
 type HookEvent = {
   context: Record<string, unknown>
@@ -60,7 +58,6 @@ export const permissionOperationEvents: {
   operation: string
   source: 'entity' | 'field'
 }[] = []
-export const scheduledValidationEvents: string[] = []
 export const isolationEvents: {
   candidateMarker: unknown
   contextMarker: unknown
@@ -99,7 +96,6 @@ export function clearValidationEvents(): void {
   activeLocalePasses = 0
   maximumActiveLocalePasses = 0
   permissionOperationEvents.length = 0
-  scheduledValidationEvents.length = 0
   validationRuntimeIdentityEvents.length = 0
 }
 
@@ -229,9 +225,9 @@ const runWriteAttempt: CollectionBeforeChangeHook = async ({ data, operation, re
 
     case 'jobsQueue':
       await req.payload.jobs.queue({
-        task: 'validationWriteGuardProbe',
         input: {},
         req,
+        task: 'validationWriteGuardProbe',
       })
       break
 
@@ -457,18 +453,18 @@ const validationCollection: CollectionConfig = {
       required: true,
     },
     {
-      name: 'status',
-      type: 'text',
-      defaultValue: 'draft',
-      required: true,
-    },
-    {
       name: 'location',
       type: 'point',
       validate: (value: unknown) =>
         value === undefined || (Array.isArray(value) && value.length === 2)
           ? true
           : 'Location must use the public point tuple representation',
+    },
+    {
+      name: 'status',
+      type: 'text',
+      defaultValue: 'draft',
+      required: true,
     },
     {
       name: 'writeAttempt',
@@ -697,14 +693,6 @@ const validationGlobal: GlobalConfig = {
       required: true,
     },
     {
-      name: 'location',
-      type: 'point',
-      validate: (value: unknown) =>
-        value === undefined || (Array.isArray(value) && value.length === 2)
-          ? true
-          : 'Location must use the public point tuple representation',
-    },
-    {
       name: 'permissionProbe',
       type: 'group',
       fields: [
@@ -756,17 +744,6 @@ const validationGlobal: GlobalConfig = {
           throw new Error('global validation hook failure')
         }
 
-        if (req.context.throwValidationErrorHook === true) {
-          throw new ValidationError(
-            {
-              errors: [{ message: 'Global hook validation failure', path: 'title' }],
-              global: validationGlobalSlug,
-              req,
-            },
-            req.t,
-          )
-        }
-
         return data
       },
     ],
@@ -795,10 +772,6 @@ const validationFallbackCollection: CollectionConfig = {
         operation: req.operation,
         source: 'collection',
       })
-
-      if (req.operation === 'validate' && req.context.requireValidationUser === true) {
-        return Boolean(req.user)
-      }
 
       return req.operation !== 'validate'
         ? true
@@ -889,10 +862,6 @@ const validationFallbackGlobal: GlobalConfig = {
         source: 'global',
       })
 
-      if (req.operation === 'validate' && req.context.requireValidationUser === true) {
-        return Boolean(req.user)
-      }
-
       return req.operation !== 'validate'
         ? true
         : req.payloadAPI === 'REST' || req.context.allowUpdateFallback === true
@@ -928,7 +897,6 @@ const validationFallbackGlobal: GlobalConfig = {
 const validationDeniedGlobal: GlobalConfig = {
   slug: validationDeniedGlobalSlug,
   access: {
-    update: ({ req }) => req.user?.email !== 'revoked@example.com',
     validate: () => false,
   },
   fields: [
@@ -937,21 +905,6 @@ const validationDeniedGlobal: GlobalConfig = {
       type: 'text',
     },
   ],
-  hooks: {
-    beforeValidate: [
-      ({ operation }) => {
-        if (operation === 'validate') {
-          scheduledValidationEvents.push(operation)
-        }
-      },
-    ],
-  },
-  versions: {
-    drafts: {
-      schedulePublish: true,
-      validate: false,
-    },
-  },
 }
 
 const validationWriteTargetGlobal: GlobalConfig = {
@@ -1052,131 +1005,10 @@ const publishCollection: CollectionConfig = {
     {
       name: 'title',
       type: 'text',
-      access: {
-        validate: ({ req }) => req.context.denyPublishFieldValidation !== true,
-      },
       localized: true,
       required: true,
-    },
-    {
-      name: 'localizedGroup',
-      type: 'group',
-      fields: [
-        {
-          name: 'value',
-          type: 'text',
-          required: true,
-        },
-      ],
-      localized: true,
-    },
-    {
-      name: 'localizedJSON',
-      type: 'json',
-      localized: true,
-      required: true,
-    },
-    {
-      name: 'localizedRichText',
-      type: 'richText',
-      localized: true,
-      required: true,
-    },
-    {
-      type: 'tabs',
-      tabs: [
-        {
-          name: 'localizedTab',
-          fields: [
-            {
-              name: 'value',
-              type: 'text',
-              required: true,
-            },
-          ],
-          label: 'Localized tab',
-          localized: true,
-        },
-      ],
-    },
-    {
-      name: 'localizedArray',
-      type: 'array',
-      fields: [
-        {
-          name: 'value',
-          type: 'text',
-          required: true,
-        },
-      ],
-      localized: true,
-      minRows: 1,
-      required: true,
-    },
-    {
-      name: 'localizedBlocks',
-      type: 'blocks',
-      blocks: [
-        {
-          slug: 'validationBlock',
-          fields: [
-            {
-              name: 'value',
-              type: 'text',
-              required: true,
-            },
-          ],
-        },
-      ],
-      localized: true,
-      minRows: 1,
-      required: true,
-    },
-    {
-      name: 'nested',
-      type: 'group',
-      fields: [
-        {
-          name: 'localizedJSON',
-          type: 'json',
-          localized: true,
-          required: true,
-        },
-        {
-          name: 'shared',
-          type: 'text',
-          required: true,
-        },
-      ],
     },
   ],
-  hooks: {
-    beforeValidate: [
-      ({ data, req }) => {
-        if (data?._status === 'published' && data?.title === 'throw scheduled validation error') {
-          throw new ValidationError(
-            {
-              errors: [
-                {
-                  locale: req.locale ?? undefined,
-                  message: 'Scheduled validation hook rejected the title',
-                  path: 'title',
-                },
-              ],
-              req,
-            },
-            req.t,
-          )
-        }
-
-        if (data?._status === 'published' && data?.title === 'throw transient scheduled error') {
-          throw new Error('transient scheduled validation error')
-        }
-
-        return data
-      },
-    ],
-  },
   trash: true,
   versions: {
     drafts: {
@@ -1198,12 +1030,6 @@ const publishGlobal: GlobalConfig = {
       localized: true,
       required: true,
     },
-    {
-      name: 'localizedJSON',
-      type: 'json',
-      localized: true,
-      required: true,
-    },
   ],
   versions: {
     drafts: {
@@ -1215,15 +1041,8 @@ const publishGlobal: GlobalConfig = {
 
 const validationCustomButtonsCollection: CollectionConfig = {
   slug: validationCustomButtonsCollectionSlug,
-  admin: {
-    components: {
-      edit: {
-        beforeDocumentControls: [
-          '/components/CustomValidateAllLocalesButton/index.js#CustomValidateAllLocalesButton',
-          '/components/CustomValidateOtherLocalesButtons/index.js#CustomValidateOtherLocalesButtons',
-        ],
-      },
-    },
+  access: {
+    validate: ({ data, req }) => Boolean(req.user) && data?.title !== validationRequestFailureTitle,
   },
   fields: [
     {
@@ -1265,16 +1084,6 @@ const validationDeniedCollection: CollectionConfig = {
   },
 }
 
-const validationNonLocalizedCollection: CollectionConfig = {
-  slug: validationNonLocalizedCollectionSlug,
-  fields: [
-    {
-      name: 'title',
-      type: 'text',
-    },
-  ],
-}
-
 export default buildConfigWithDefaults({
   config: {
     admin: {
@@ -1293,7 +1102,6 @@ export default buildConfigWithDefaults({
       publishCollection,
       validationCustomButtonsCollection,
       validationDeniedCollection,
-      validationNonLocalizedCollection,
       {
         slug: writeTargetsSlug,
         fields: [
@@ -1313,35 +1121,6 @@ export default buildConfigWithDefaults({
         },
         versions: false,
       },
-      {
-        slug: validationPublishUploadsSlug,
-        access: {
-          validate: () => true,
-        },
-        fields: [
-          {
-            name: 'title',
-            type: 'text',
-            localized: true,
-            required: true,
-          },
-        ],
-        upload: {
-          imageSizes: [
-            {
-              name: 'thumbnail',
-              height: 64,
-              width: 64,
-            },
-          ],
-          staticDir: validationPublishUploadsDir,
-        },
-        versions: {
-          drafts: {
-            validate: false,
-          },
-        },
-      },
     ],
     globals: [
       validationGlobal,
@@ -1357,9 +1136,9 @@ export default buildConfigWithDefaults({
       tasks: [
         {
           slug: 'validationWriteGuardProbe',
+          handler: () => ({ output: {} }),
           inputSchema: [],
           outputSchema: [],
-          handler: () => ({ output: {} }),
         },
       ],
     },

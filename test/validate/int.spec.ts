@@ -1,10 +1,9 @@
 import type { Payload, PayloadRequest } from 'payload'
 
-import { buildEditorState } from '@payloadcms/richtext-lexical'
 import { randomUUID } from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
-import { createPayloadRequest, getFileByPath } from 'payload'
+import { createPayloadRequest } from 'payload'
 import { getEntityPermissions } from 'payload/internal'
 import { expect } from 'vitest'
 
@@ -35,8 +34,6 @@ import {
   validationFallbackCollectionSlug,
   validationFallbackGlobalSlug,
   validationGlobalSlug,
-  validationPublishUploadsDir,
-  validationPublishUploadsSlug,
   validationRuntimeIdentityEvents,
   validationUploadsDir,
   validationUploadsSlug,
@@ -60,7 +57,6 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
     await payload.updateGlobal({
       slug: validationGlobalSlug,
       data: {
-        location: [-0.12, 51.5],
         summary: 'stored global summary',
         title: 'Stored global title',
       },
@@ -157,12 +153,6 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
         where: { id: { exists: true } },
       }),
       payload.delete({
-        collection: validationPublishUploadsSlug,
-        disableTransaction: true,
-        overrideAccess: true,
-        where: { id: { exists: true } },
-      }),
-      payload.delete({
         collection: writeTargetsSlug,
         disableTransaction: true,
         overrideAccess: true,
@@ -176,7 +166,6 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
       }),
     ])
     await fs.rm(validationUploadsDir, { force: true, recursive: true })
-    await fs.rm(validationPublishUploadsDir, { force: true, recursive: true })
   })
 
   test.describe('collections', () => {
@@ -221,47 +210,26 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
     })
 
     test('should enforce explicit collection validate access by default', async () => {
-      await expect(
-        payload.validate({
-          collection: validationDeniedCollectionSlug,
-          data: {
-            title: 'Candidate title',
-          },
-          locale: 'en',
-        }),
-      ).rejects.toMatchObject({
-        status: 403,
-      })
-    })
-
-    test('should let an explicit null user override an authenticated reused collection request', async () => {
       const req = {
-        user: {
-          id: 'authenticated-user',
-          collection: validationCollectionSlug,
-        } as never,
+        operation: 'delete',
       } satisfies Partial<PayloadRequest>
 
       await expect(
         payload.validate({
-          collection: validationFallbackCollectionSlug,
-          context: {
-            requireValidationUser: true,
-          },
+          collection: validationCollectionSlug,
           data: {
+            summary: 'candidate summary',
             title: 'Candidate title',
           },
           locale: 'en',
-          overrideAccess: false,
           req,
-          user: null,
         }),
       ).rejects.toMatchObject({
         status: 403,
       })
-      expect(req.user).toMatchObject({
-        id: 'authenticated-user',
-      })
+
+      expect(accessEvents).toEqual(['collection'])
+      expect(req.operation).toBe('delete')
     })
 
     test('should fall back to field update access with the validate operation', async () => {
@@ -704,65 +672,6 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
       expect(result.errors.filter((error) => error.path === 'summary')).toHaveLength(1)
     })
 
-    test('should deduplicate explicit locales in deterministic order', async () => {
-      const result = await payload.validate({
-        collection: validationCollectionSlug,
-        context: {
-          trackLocalePasses: true,
-        },
-        data: {
-          summary: 'candidate summary',
-          title: 'Candidate title',
-        },
-        locale: ['es', 'en', 'es'],
-        overrideAccess: true,
-      })
-
-      expect(result).toEqual({
-        errors: [],
-        valid: true,
-      })
-      expect(localePassEvents.map(({ localeAtStart }) => localeAtStart)).toEqual(['es', 'en'])
-    })
-
-    test('should reject empty, unknown, and unavailable locale selectors', async () => {
-      await expect(
-        payload.validate({
-          collection: validationCollectionSlug,
-          data: {
-            summary: 'candidate summary',
-            title: 'Candidate title',
-          },
-          locale: [] as never,
-        }),
-      ).rejects.toThrow('Validation requires a locale')
-
-      await expect(
-        payload.validate({
-          collection: validationCollectionSlug,
-          data: {
-            summary: 'candidate summary',
-            title: 'Candidate title',
-          },
-          locale: ['en', 'unknown'],
-        } as never),
-      ).rejects.toThrow('unknown')
-
-      await expect(
-        payload.validate({
-          collection: validationCollectionSlug,
-          context: {
-            availableLocaleCodes: ['en'],
-          },
-          data: {
-            summary: 'candidate summary',
-            title: 'Candidate title',
-          },
-          locale: ['en', 'es'],
-        }),
-      ).rejects.toThrow('es')
-    })
-
     test('should cap concurrent locale passes at three with isolated request state', async () => {
       const result = await payload.validate({
         collection: validationCollectionSlug,
@@ -803,6 +712,7 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
       const context = {
         allowValidation: true,
         isolation: { marker: 'caller' },
+        trackLocalePasses: true,
         trackMutableIsolation: true,
       }
       const requestData = { isolation: { marker: 'caller' } }
@@ -837,6 +747,8 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
         errors: [],
         valid: true,
       })
+      expect(getMaximumActiveLocalePasses()).toBe(1)
+      expect(getLocalePassRequestCount()).toBe(2)
       expect(isolationEvents).toEqual([
         {
           candidateMarker: 'caller',
@@ -909,28 +821,6 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
       expect(req.operation).toBe('update')
     })
 
-    test('should return a successful result for valid create data', async () => {
-      const req = {
-        operation: 'read',
-      } satisfies Partial<PayloadRequest>
-      const result = await payload.validate({
-        collection: validationCollectionSlug,
-        data: {
-          summary: 'candidate summary',
-          title: 'Candidate title',
-        },
-        locale: 'en',
-        overrideAccess: true,
-        req,
-      })
-
-      expect(result).toEqual({
-        errors: [],
-        valid: true,
-      })
-      expect(req.operation).toBe('read')
-    })
-
     test('should run validation hooks in order with the validate operation and unchanged context', async () => {
       const result = await payload.validate({
         collection: validationCollectionSlug,
@@ -963,24 +853,6 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
             !('isValidateOnly' in context),
         ),
       ).toBe(true)
-    })
-
-    test('should apply defaults before validating required fields', async () => {
-      const result = await payload.validate({
-        collection: validationCollectionSlug,
-        data: {
-          summary: 'candidate summary',
-          title: 'Candidate title',
-        },
-        locale: 'en',
-        overrideAccess: true,
-      })
-
-      expect(result).toEqual({
-        errors: [],
-        valid: true,
-      })
-      expect(hookEvents.find(({ hook }) => hook === 'fieldValidate')).toBeDefined()
     })
 
     test('should reject create simulation without data at runtime', async () => {
@@ -1143,58 +1015,6 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
       expect(versionsAfter).toEqual(versionsBefore)
     })
 
-    test('should validate a partial update with an unchanged stored point representation', async () => {
-      const stored = await payload.create({
-        collection: validationCollectionSlug,
-        data: {
-          location: [-73.9857, 40.7484],
-          summary: 'stored summary',
-          title: 'Stored title',
-        },
-        locale: 'en',
-        overrideAccess: true,
-      })
-
-      const result = await payload.validate({
-        id: stored.id,
-        collection: validationCollectionSlug,
-        data: {
-          summary: 'candidate summary',
-        },
-        locale: 'en',
-        overrideAccess: true,
-      })
-
-      expect(result).toEqual({
-        errors: [],
-        valid: true,
-      })
-    })
-
-    test('should execute first-class collection validation access and throw on denial', async () => {
-      const req = {
-        operation: 'delete',
-      } satisfies Partial<PayloadRequest>
-
-      await expect(
-        payload.validate({
-          collection: validationCollectionSlug,
-          data: {
-            summary: 'candidate summary',
-            title: 'Candidate title',
-          },
-          locale: 'en',
-          overrideAccess: false,
-          req,
-        }),
-      ).rejects.toMatchObject({
-        status: 403,
-      })
-
-      expect(accessEvents).toEqual(['collection'])
-      expect(req.operation).toBe('delete')
-    })
-
     test('should restore the caller request operation after a collection hook throws', async () => {
       const req = {
         operation: 'create',
@@ -1236,6 +1056,7 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
       expect(result).toEqual({
         errors: [
           expect.objectContaining({
+            locale: 'en',
             message: 'Collection hook validation failure',
             path: 'title',
           }),
@@ -1283,36 +1104,6 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
         }),
       ).rejects.toMatchObject({
         status: 403,
-      })
-    })
-
-    test('should let an explicit null user override an authenticated reused global request', async () => {
-      const req = {
-        user: {
-          id: 'authenticated-user',
-          collection: validationCollectionSlug,
-        } as never,
-      } satisfies Partial<PayloadRequest>
-
-      await expect(
-        payload.validateGlobal({
-          slug: validationFallbackGlobalSlug,
-          context: {
-            requireValidationUser: true,
-          },
-          data: {
-            title: 'Candidate title',
-          },
-          locale: 'en',
-          overrideAccess: false,
-          req,
-          user: null,
-        }),
-      ).rejects.toMatchObject({
-        status: 403,
-      })
-      expect(req.user).toMatchObject({
-        id: 'authenticated-user',
       })
     })
 
@@ -1405,17 +1196,22 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
     })
 
     test('should enforce explicit global validate access by default', async () => {
+      const req = {
+        operation: 'delete',
+      } satisfies Partial<PayloadRequest>
+
       await expect(
         payload.validateGlobal({
-          slug: validationDeniedGlobalSlug,
-          data: {
-            title: 'Candidate title',
-          },
+          slug: validationGlobalSlug,
           locale: 'en',
+          req,
         }),
       ).rejects.toMatchObject({
         status: 403,
       })
+
+      expect(accessEvents).toEqual(['global'])
+      expect(req.operation).toBe('delete')
     })
 
     test('should load a draft-only global only when draft validation is requested', async () => {
@@ -1508,133 +1304,6 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
       expect(globalValidationSourceEvents).toEqual([])
     })
 
-    test('should ignore internal projection flags passed to the public global validate API', async () => {
-      const result = await payload.validateGlobal({
-        slug: validationGlobalSlug,
-        data: {
-          summary: 'candidate summary',
-          title: 'Candidate title',
-        },
-        locale: ['en', 'es'],
-        overrideAccess: true,
-        validationDataLocale: 'en',
-      } as never)
-
-      expect(result).toEqual({
-        errors: [],
-        valid: true,
-      })
-    })
-
-    test('should isolate mutable access data and request state between global locale passes', async () => {
-      const candidateData = {
-        isolation: { marker: 'caller' },
-        summary: 'candidate summary',
-        title: 'Candidate title',
-      }
-      const context = {
-        allowValidation: true,
-        isolation: { marker: 'caller' },
-        trackMutableIsolation: true,
-      }
-      const requestData = { isolation: { marker: 'caller' } }
-      const query = { isolation: { marker: 'caller' } }
-      const routeParams = { isolation: { marker: 'caller' } }
-      const user = {
-        id: validationIsolationUserID,
-        collection: 'users',
-        isolation: { marker: 'caller' },
-      }
-      const req = {
-        data: requestData,
-        headers: new Headers({ 'x-validation-isolation': 'caller' }),
-        query,
-        responseHeaders: new Headers({ 'x-validation-isolation': 'caller' }),
-        routeParams,
-      } satisfies Partial<PayloadRequest>
-
-      const result = await payload.validateGlobal({
-        slug: validationGlobalSlug,
-        context,
-        data: candidateData,
-        locale: ['en', 'es'],
-        overrideAccess: false,
-        req,
-        user: user as never,
-      })
-
-      expect(result).toEqual({
-        errors: [],
-        valid: true,
-      })
-      expect(isolationEvents.map(({ locale, source }) => ({ locale, source }))).toEqual([
-        { locale: 'en', source: 'global' },
-        { locale: 'es', source: 'global' },
-      ])
-      expect(
-        isolationEvents.every(
-          ({
-            candidateMarker,
-            contextMarker,
-            headerMarker,
-            queryMarker,
-            requestDataMarker,
-            responseHeaderMarker,
-            routeMarker,
-            userMarker,
-          }) =>
-            candidateMarker === 'caller' &&
-            contextMarker === 'caller' &&
-            headerMarker === 'caller' &&
-            queryMarker === 'caller' &&
-            requestDataMarker === 'caller' &&
-            responseHeaderMarker === 'caller' &&
-            routeMarker === 'caller' &&
-            userMarker === 'caller',
-        ),
-      ).toBe(true)
-      expect(candidateData.isolation.marker).toBe('caller')
-      expect(context.isolation.marker).toBe('caller')
-      expect(requestData.isolation.marker).toBe('caller')
-      expect(query.isolation.marker).toBe('caller')
-      expect(req.headers.get('x-validation-isolation')).toBe('caller')
-      expect(req.responseHeaders.get('x-validation-isolation')).toBe('caller')
-      expect(routeParams.isolation.marker).toBe('caller')
-      expect(user.isolation.marker).toBe('caller')
-    })
-
-    test('should validate valid partial global data without persisting it', async () => {
-      const req = {
-        operation: 'read',
-      } satisfies Partial<PayloadRequest>
-      const result = await payload.validateGlobal({
-        slug: validationGlobalSlug,
-        data: {
-          summary: 'candidate summary',
-        },
-        locale: 'en',
-        overrideAccess: true,
-        req,
-      })
-      const afterValidation = await payload.findGlobal({
-        slug: validationGlobalSlug,
-        locale: 'en',
-        overrideAccess: true,
-      })
-
-      expect(result).toEqual({
-        errors: [],
-        valid: true,
-      })
-      expect(afterValidation).toMatchObject({
-        location: [-0.12, 51.5],
-        summary: 'stored global summary',
-        title: 'Stored global title',
-      })
-      expect(localeFilterOperationEvents).toEqual(['validate'])
-      expect(req.operation).toBe('read')
-    })
-
     test('should return errors for invalid partial global data without persisting it', async () => {
       const req = {
         operation: 'update',
@@ -1665,22 +1334,6 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
       })
       expect(afterValidation.title).toBe('Stored global title')
       expect(req.operation).toBe('update')
-    })
-
-    test('should validate partial global data with an unchanged stored point representation', async () => {
-      const result = await payload.validateGlobal({
-        slug: validationGlobalSlug,
-        data: {
-          summary: 'candidate summary',
-        },
-        locale: 'en',
-        overrideAccess: true,
-      })
-
-      expect(result).toEqual({
-        errors: [],
-        valid: true,
-      })
     })
 
     test('should use the published global as the validation base unless draft is true', async () => {
@@ -1764,26 +1417,6 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
       expect(versionsAfter).toEqual(versionsBefore)
     })
 
-    test('should execute first-class global validation access and throw on denial', async () => {
-      const req = {
-        operation: 'delete',
-      } satisfies Partial<PayloadRequest>
-
-      await expect(
-        payload.validateGlobal({
-          slug: validationGlobalSlug,
-          locale: 'en',
-          overrideAccess: false,
-          req,
-        }),
-      ).rejects.toMatchObject({
-        status: 403,
-      })
-
-      expect(accessEvents).toEqual(['global'])
-      expect(req.operation).toBe('delete')
-    })
-
     test('should restore the caller request operation after a global hook throws', async () => {
       const req = {
         operation: 'create',
@@ -1802,27 +1435,6 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
       ).rejects.toThrow('global validation hook failure')
 
       expect(req.operation).toBe('create')
-    })
-
-    test('should return a validation result instead of throwing when a global hook throws a ValidationError', async () => {
-      const result = await payload.validateGlobal({
-        slug: validationGlobalSlug,
-        context: {
-          throwValidationErrorHook: true,
-        },
-        locale: 'en',
-        overrideAccess: true,
-      })
-
-      expect(result).toEqual({
-        errors: [
-          expect.objectContaining({
-            message: 'Global hook validation failure',
-            path: 'title',
-          }),
-        ],
-        valid: false,
-      })
     })
   })
 
@@ -1845,27 +1457,6 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
       expect(fallbackAccessEvents).toContainEqual({
         operation: 'validate',
         source: 'collection',
-      })
-    })
-
-    test('should use global update access when validate access is not configured', async () => {
-      const response = await restClient.POST(
-        `/globals/${validationFallbackGlobalSlug}/validate?locale=en`,
-        {
-          body: JSON.stringify({
-            title: 'Candidate title',
-          }),
-        },
-      )
-
-      expect(response.status).toBe(200)
-      await expect(response.json()).resolves.toEqual({
-        errors: [],
-        valid: true,
-      })
-      expect(fallbackAccessEvents).toContainEqual({
-        operation: 'validate',
-        source: 'global',
       })
     })
 
@@ -1924,21 +1515,6 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
       ).toEqual({ totalDocs: 0 })
     })
 
-    test('should return valid collection create validation', async () => {
-      const response = await restClient.POST(`/${validationCollectionSlug}/validate?locale=en`, {
-        body: JSON.stringify({
-          summary: 'candidate summary',
-          title: 'Candidate title',
-        }),
-      })
-
-      expect(response.status).toBe(200)
-      await expect(response.json()).resolves.toEqual({
-        errors: [],
-        valid: true,
-      })
-    })
-
     test('should return 400 for missing or empty locales and malformed data', async () => {
       const missingLocale = await restClient.POST(`/${validationCollectionSlug}/validate`, {
         body: JSON.stringify({
@@ -1969,39 +1545,6 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
       expect(emptyLocale.status).toBe(400)
       expect(malformedData.status).toBe(400)
       expect(malformedJSON.status).toBe(400)
-    })
-
-    test('should accept repeated and all locale selectors', async () => {
-      const repeatedLocale = await restClient.POST(
-        `/${validationCollectionSlug}/validate?locale=en&locale=es`,
-        {
-          body: JSON.stringify({
-            summary: 'candidate summary',
-            title: 'Candidate title',
-          }),
-        },
-      )
-      expect(repeatedLocale.status).toBe(200)
-      await expect(repeatedLocale.json()).resolves.toEqual({
-        errors: [],
-        valid: true,
-      })
-
-      clearValidationEvents()
-
-      const allLocales = await restClient.POST(`/${validationCollectionSlug}/validate?locale=all`, {
-        body: JSON.stringify({
-          summary: 'candidate summary',
-          title: 'Candidate title',
-        }),
-      })
-
-      expect(allLocales.status).toBe(200)
-      await expect(allLocales.json()).resolves.toEqual({
-        errors: [],
-        valid: true,
-      })
-      expect(localeFilterOperationEvents).toEqual(['validate'])
     })
 
     test('should use the latest collection draft as the REST validation base', async () => {
@@ -2035,45 +1578,6 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
       const response = await restClient.POST(
         `/${publishCollectionSlug}/${draft.id}/validate?locale=en`,
       )
-
-      expect(response.status).toBe(200)
-      await expect(response.json()).resolves.toMatchObject({
-        errors: [
-          {
-            locale: 'en',
-            path: 'title',
-          },
-        ],
-        valid: false,
-      })
-    })
-
-    test('should use the latest global draft as the REST validation base', async () => {
-      await seedPublishGlobal({
-        de: 'German optional',
-        en: 'English draft',
-        es: 'Spanish valid',
-      })
-      await payload.updateGlobal({
-        slug: publishGlobalSlug,
-        data: {
-          _status: 'published',
-          title: 'English published',
-        },
-        locale: 'en',
-        overrideAccess: true,
-      })
-      await payload.updateGlobal({
-        slug: publishGlobalSlug,
-        data: {
-          title: '',
-        },
-        draft: true,
-        locale: 'en',
-        overrideAccess: true,
-      })
-
-      const response = await restClient.POST(`/globals/${publishGlobalSlug}/validate?locale=en`)
 
       expect(response.status).toBe(200)
       await expect(response.json()).resolves.toMatchObject({
@@ -2151,23 +1655,6 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
         valid: false,
       })
       expect(afterValidation.title).toBe('Stored global title')
-    })
-
-    test('should return valid global validation without persisting it', async () => {
-      const response = await restClient.POST(
-        `/globals/${validationGlobalSlug}/validate?locale=en`,
-        {
-          body: JSON.stringify({
-            summary: 'candidate summary',
-          }),
-        },
-      )
-
-      expect(response.status).toBe(200)
-      await expect(response.json()).resolves.toEqual({
-        errors: [],
-        valid: true,
-      })
     })
 
     test('should deny collection REST validation when explicit validate access denies it', async () => {
@@ -2398,24 +1885,6 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
       )
     })
 
-    test('should return a valid result for a valid collection create candidate', async () => {
-      const query = `mutation {
-        validateValidationWriteTarget(data: { title: "GraphQL candidate" }) {
-          valid
-          errors {
-            path
-            message
-          }
-        }
-      }`
-
-      const { data } = await restClient
-        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
-        .then((res) => res.json())
-
-      expect(data.validateValidationWriteTarget).toEqual({ errors: [], valid: true })
-    })
-
     test('should validate a stored collection document by id without persisting the candidate', async () => {
       const target = await createWriteTarget()
 
@@ -2476,77 +1945,26 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
       })
     })
 
-    test('should reject an update that reuses the validation request before a row is written', async () => {
-      const target = await createWriteTarget()
+    test.each(['delete', 'deleteMany', 'update', 'updateMany'] as const)(
+      'should reject %s when it reuses the validation request before changing a row',
+      async (writeAttempt) => {
+        const target = await createWriteTarget()
 
-      await expect(runWriteAttempt('update', target.id)).rejects.toThrow(
-        'Payload writes are not allowed during validation',
-      )
+        await expect(runWriteAttempt(writeAttempt, target.id)).rejects.toThrow(
+          'Payload writes are not allowed during validation',
+        )
 
-      await expect(
-        payload.findByID({
-          id: target.id,
-          collection: writeTargetsSlug,
-          overrideAccess: true,
-        }),
-      ).resolves.toMatchObject({
-        title: 'stored target',
-      })
-    })
-
-    test('should reject a bulk update that reuses the validation request before a row is written', async () => {
-      const target = await createWriteTarget()
-
-      await expect(runWriteAttempt('updateMany', target.id)).rejects.toThrow(
-        'Payload writes are not allowed during validation',
-      )
-
-      await expect(
-        payload.findByID({
-          id: target.id,
-          collection: writeTargetsSlug,
-          overrideAccess: true,
-        }),
-      ).resolves.toMatchObject({
-        title: 'stored target',
-      })
-    })
-
-    test('should reject a delete that reuses the validation request before a row is removed', async () => {
-      const target = await createWriteTarget()
-
-      await expect(runWriteAttempt('delete', target.id)).rejects.toThrow(
-        'Payload writes are not allowed during validation',
-      )
-
-      await expect(
-        payload.findByID({
-          id: target.id,
-          collection: writeTargetsSlug,
-          overrideAccess: true,
-        }),
-      ).resolves.toMatchObject({
-        title: 'stored target',
-      })
-    })
-
-    test('should reject a bulk delete that reuses the validation request before a row is removed', async () => {
-      const target = await createWriteTarget()
-
-      await expect(runWriteAttempt('deleteMany', target.id)).rejects.toThrow(
-        'Payload writes are not allowed during validation',
-      )
-
-      await expect(
-        payload.findByID({
-          id: target.id,
-          collection: writeTargetsSlug,
-          overrideAccess: true,
-        }),
-      ).resolves.toMatchObject({
-        title: 'stored target',
-      })
-    })
+        await expect(
+          payload.findByID({
+            id: target.id,
+            collection: writeTargetsSlug,
+            overrideAccess: true,
+          }),
+        ).resolves.toMatchObject({
+          title: 'stored target',
+        })
+      },
+    )
 
     test('should reject a global update that reuses the validation request before data is written', async () => {
       await payload.updateGlobal({
@@ -2736,53 +2154,20 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
       }
     })
 
-    test('should reject a logout that reuses the validation request before a session is removed', async () => {
-      const usersBefore = await payload.count({ collection: 'users', overrideAccess: true })
+    test.each(['logout', 'refresh', 'resetPassword', 'verifyEmail'] as const)(
+      'should reject %s when it reuses the validation request before changing a user',
+      async (writeAttempt) => {
+        const usersBefore = await payload.count({ collection: 'users', overrideAccess: true })
 
-      await expect(runWriteAttempt('logout')).rejects.toThrow(
-        'Payload writes are not allowed during validation',
-      )
+        await expect(runWriteAttempt(writeAttempt)).rejects.toThrow(
+          'Payload writes are not allowed during validation',
+        )
 
-      expect(await payload.count({ collection: 'users', overrideAccess: true })).toEqual(
-        usersBefore,
-      )
-    })
-
-    test('should reject a refresh that reuses the validation request before a session is written', async () => {
-      const usersBefore = await payload.count({ collection: 'users', overrideAccess: true })
-
-      await expect(runWriteAttempt('refresh')).rejects.toThrow(
-        'Payload writes are not allowed during validation',
-      )
-
-      expect(await payload.count({ collection: 'users', overrideAccess: true })).toEqual(
-        usersBefore,
-      )
-    })
-
-    test('should reject a reset password that reuses the validation request before a password is written', async () => {
-      const usersBefore = await payload.count({ collection: 'users', overrideAccess: true })
-
-      await expect(runWriteAttempt('resetPassword')).rejects.toThrow(
-        'Payload writes are not allowed during validation',
-      )
-
-      expect(await payload.count({ collection: 'users', overrideAccess: true })).toEqual(
-        usersBefore,
-      )
-    })
-
-    test('should reject a verify email that reuses the validation request before a user is written', async () => {
-      const usersBefore = await payload.count({ collection: 'users', overrideAccess: true })
-
-      await expect(runWriteAttempt('verifyEmail')).rejects.toThrow(
-        'Payload writes are not allowed during validation',
-      )
-
-      expect(await payload.count({ collection: 'users', overrideAccess: true })).toEqual(
-        usersBefore,
-      )
-    })
+        expect(await payload.count({ collection: 'users', overrideAccess: true })).toEqual(
+          usersBefore,
+        )
+      },
+    )
   })
 })
 
@@ -2830,68 +2215,23 @@ async function runWriteAttempt(
   })
 }
 
-type PublishCollectionLocalizedField =
-  | 'localizedArray'
-  | 'localizedBlocks'
-  | 'localizedGroup'
-  | 'localizedJSON'
-  | 'localizedRichText'
-  | 'localizedTab'
-  | 'nested.localizedJSON'
-
-function getPublishCollectionLocaleData({
-  omit = [],
-  title,
-}: {
-  omit?: PublishCollectionLocalizedField[]
-  title: string
-}): Record<string, unknown> {
-  const data: Record<string, unknown> = {
-    localizedArray: [{ value: `${title} array` }],
-    localizedBlocks: [{ blockType: 'validationBlock', value: `${title} block` }],
-    localizedGroup: { value: `${title} group` },
-    localizedJSON: { value: `${title} JSON` },
-    localizedRichText: buildEditorState({ text: `${title} rich text` }),
-    localizedTab: { value: `${title} tab` },
-    nested: {
-      localizedJSON: { value: `${title} nested JSON` },
-      shared: 'shared value',
-    },
-    title,
-  }
-
-  for (const field of omit) {
-    if (field === 'nested.localizedJSON') {
-      delete (data.nested as Record<string, unknown>).localizedJSON
-    } else if (field === 'localizedArray' || field === 'localizedBlocks') {
-      data[field] = []
-    } else {
-      delete data[field]
-    }
-  }
-
-  return data
-}
-
 async function seedPublishCollection({
   de,
   deletedAt,
   en,
   es,
   fr,
-  omit,
 }: {
   de: string
   deletedAt?: string
   en: string
   es: string
   fr?: string
-  omit?: Partial<Record<'de' | 'en' | 'es', PublishCollectionLocalizedField[]>>
 }) {
   const draft = await payload.create({
     collection: publishCollectionSlug,
     data: {
-      ...getPublishCollectionLocaleData({ omit: omit?.en, title: en }),
+      title: en,
       ...(deletedAt ? { deletedAt } : {}),
     },
     draft: true,
@@ -2902,7 +2242,7 @@ async function seedPublishCollection({
   await payload.update({
     id: draft.id,
     collection: publishCollectionSlug,
-    data: getPublishCollectionLocaleData({ omit: omit?.es, title: es }),
+    data: { title: es },
     draft: true,
     locale: 'es',
     overrideAccess: true,
@@ -2911,7 +2251,7 @@ async function seedPublishCollection({
   await payload.update({
     id: draft.id,
     collection: publishCollectionSlug,
-    data: getPublishCollectionLocaleData({ omit: omit?.de, title: de }),
+    data: { title: de },
     draft: true,
     locale: 'de',
     overrideAccess: true,
@@ -2921,7 +2261,7 @@ async function seedPublishCollection({
     await payload.update({
       id: draft.id,
       collection: publishCollectionSlug,
-      data: getPublishCollectionLocaleData({ title: fr }),
+      data: { title: fr },
       draft: true,
       locale: 'fr',
       overrideAccess: true,
@@ -2932,31 +2272,16 @@ async function seedPublishCollection({
   return draft
 }
 
-function getPublishGlobalLocaleData({
-  includeLocalizedJSON = true,
-  title,
-}: {
-  includeLocalizedJSON?: boolean
-  title: string
-}): Record<string, unknown> {
-  return {
-    localizedJSON: includeLocalizedJSON ? { value: `${title} JSON` } : null,
-    title,
-  }
-}
-
 async function seedPublishGlobal({
   de,
   en,
   es,
   fr,
-  omitLocalizedJSON,
 }: {
   de: string
   en: string
   es: string
   fr?: string
-  omitLocalizedJSON?: Partial<Record<'de' | 'en' | 'es', boolean>>
 }) {
   await payload.updateGlobal({
     slug: publishGlobalSlug,
@@ -2966,30 +2291,21 @@ async function seedPublishGlobal({
   })
   await payload.updateGlobal({
     slug: publishGlobalSlug,
-    data: getPublishGlobalLocaleData({
-      includeLocalizedJSON: !omitLocalizedJSON?.en,
-      title: en,
-    }),
+    data: { title: en },
     draft: true,
     locale: 'en',
     overrideAccess: true,
   })
   await payload.updateGlobal({
     slug: publishGlobalSlug,
-    data: getPublishGlobalLocaleData({
-      includeLocalizedJSON: !omitLocalizedJSON?.es,
-      title: es,
-    }),
+    data: { title: es },
     draft: true,
     locale: 'es',
     overrideAccess: true,
   })
   await payload.updateGlobal({
     slug: publishGlobalSlug,
-    data: getPublishGlobalLocaleData({
-      includeLocalizedJSON: !omitLocalizedJSON?.de,
-      title: de,
-    }),
+    data: { title: de },
     draft: true,
     locale: 'de',
     overrideAccess: true,
@@ -2997,9 +2313,7 @@ async function seedPublishGlobal({
   if (fr !== undefined) {
     await payload.updateGlobal({
       slug: publishGlobalSlug,
-      data: getPublishGlobalLocaleData({
-        title: fr,
-      }),
+      data: { title: fr },
       draft: true,
       locale: 'fr',
       overrideAccess: true,

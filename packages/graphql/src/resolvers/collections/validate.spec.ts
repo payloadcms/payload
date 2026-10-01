@@ -15,7 +15,7 @@ const createContext = (validate: (args: { req: PayloadRequest }) => Promise<unkn
 })
 
 describe('collections validateResolver', () => {
-  it('isolates transactionID from the shared GraphQL request context', async () => {
+  it('should isolate transactionID from the shared GraphQL request context', async () => {
     const validate = vi.fn(async ({ req }: { req: PayloadRequest }) => {
       req.transactionID = 'validate-transaction'
       return { errors: [], valid: true }

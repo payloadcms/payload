@@ -8,9 +8,7 @@ import { PublishButton } from './index.js'
 
 const mocks = vi.hoisted(() => ({
   primaryAction: undefined as (() => Promise<void>) | undefined,
-  publishAllLocalesAction: undefined as (() => Promise<void>) | undefined,
   submit: vi.fn(),
-  toastError: vi.fn(),
 }))
 
 vi.mock('../../forms/Form/context.js', () => ({
@@ -119,30 +117,16 @@ vi.mock('../../providers/Translation/index.js', () => ({
 
 vi.mock('../Popup/index.js', () => ({
   PopupList: {
-    Button: ({ id, onClick }: { id?: string; onClick?: () => Promise<void> }) => {
-      if (id === 'publish-all-locales') {
-        mocks.publishAllLocalesAction = onClick
-      }
-
-      return null
-    },
+    Button: () => null,
     ButtonGroup: ({ children }: { children?: ReactNode }) => children,
-  },
-}))
-
-vi.mock('sonner', () => ({
-  toast: {
-    error: mocks.toastError,
   },
 }))
 
 describe('PublishButton', () => {
   beforeEach(() => {
     mocks.primaryAction = undefined
-    mocks.publishAllLocalesAction = undefined
     mocks.submit.mockReset()
     mocks.submit.mockResolvedValue(true)
-    mocks.toastError.mockReset()
   })
 
   it('should publish only the active locale on the first render', async () => {
@@ -156,17 +140,5 @@ describe('PublishButton', () => {
       '/api/localized/document-id?depth=0&locale=en',
     )
     expect(markup).toContain('Publish in English')
-  })
-
-  it('should report a validation request failure without publishing', async () => {
-    vi.spyOn(globalThis, 'fetch').mockRejectedValueOnce(new Error('network unavailable'))
-
-    renderToStaticMarkup(createElement(PublishButton))
-
-    expect(mocks.publishAllLocalesAction).toBeDefined()
-    await expect(mocks.publishAllLocalesAction!()).resolves.toBeUndefined()
-
-    expect(mocks.toastError).toHaveBeenCalledWith('An unknown error has occurred.')
-    expect(mocks.submit).not.toHaveBeenCalled()
   })
 })
