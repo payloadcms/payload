@@ -136,7 +136,7 @@ it.each([false, true])(
         mimetype: 'image/webp',
         name: 'animated.webp',
         size: source.length,
-        uploadReference: { signedReceipt: 'verified-receipt' },
+        clientUploadContext: { signedReceipt: 'verified-receipt' },
       },
       payload: { config: { sharp }, logger: { error: vi.fn() } },
       query: {

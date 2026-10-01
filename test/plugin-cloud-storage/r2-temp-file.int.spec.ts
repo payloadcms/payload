@@ -4,16 +4,15 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { getPlatformProxy } from 'wrangler'
 
 import { createR2Adapter } from '../../packages/storage-r2/src/adapter.js'
-import { test } from '../__helpers/int/vitest.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
-test.suite('R2 temporary file uploads', {}, () => {
-  test('should upload temporary file bytes to a real R2 binding', async () => {
+describe('R2 temporary file uploads', () => {
+  it('should upload temporary file bytes to a real R2 binding', async () => {
     const directory = await mkdtemp(path.join(tmpdir(), 'payload-r2-temp-'))
     const environment = await getPlatformProxy<{ R2: R2StorageOptions['bucket'] }>({
       configPath: path.resolve(dirname, '../storage-r2/wrangler.jsonc'),

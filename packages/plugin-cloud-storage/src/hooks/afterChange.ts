@@ -168,16 +168,13 @@ export const getAfterChangeHook =
             req: metadataReq,
           })
 
-          // Persist all adapter metadata, but do not add unselected fields to the response.
           docWithMetadata = { ...doc, ...uploadMetadata }
-          {
-            if (updatedDoc.url !== undefined) {
-              docWithMetadata.url = updatedDoc.url
-            }
-            if (updatedDoc.sizes) {
-              // Only return size fields that the collection actually persisted.
-              docWithMetadata.sizes = updatedDoc.sizes
-            }
+          if (updatedDoc.url !== undefined) {
+            docWithMetadata.url = updatedDoc.url
+          }
+          if (updatedDoc.sizes) {
+            // Only return size fields that the collection actually persisted.
+            docWithMetadata.sizes = updatedDoc.sizes
           }
         }
 
@@ -191,7 +188,7 @@ export const getAfterChangeHook =
           data: {
             ...uploadData,
             ...uploadMetadata,
-            ...(!select ? docWithMetadata : {}),
+            ...docWithMetadata,
           },
         })
         const previousLocations = previousDoc
@@ -208,7 +205,14 @@ export const getAfterChangeHook =
         }
 
         if (mainClientUpload?.isProcessed) {
-          const { originalStorageFilePath } = mainClientUpload
+          const originalSegments = mainClientUpload.originalStorageFilePath.split('/')
+          const originalFilename = originalSegments.pop()!
+          const { storageFilePath: originalStorageFilePath } = buildStoragePathData({
+            collectionPrefix,
+            docPrefix: originalSegments.join('/'),
+            filename: originalFilename,
+            useCompositePrefixes,
+          })
           const isRetainedPublishedFile =
             isDraftOverPublished && previousLocations.has(originalStorageFilePath)
           if (!newLocations.has(originalStorageFilePath) && !isRetainedPublishedFile) {

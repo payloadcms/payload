@@ -35,6 +35,25 @@ const collectionConfig = {
 const nonUploadCollectionConfig = {} as unknown as SanitizedCollectionConfig
 
 describe('unlinkTempFiles', () => {
+  it('should clean a processed client file after its old context is removed', async () => {
+    const tempFilePath = await createTempFile()
+    const req = {
+      file: {
+        data: Buffer.alloc(0),
+        tempFilePath,
+        clientUpload: { isProcessed: true, originalStorageFilePath: 'image.png' },
+      },
+    } as PayloadRequest
+
+    await unlinkTempFiles({
+      collectionConfig,
+      config: { upload: { useTempFiles: false } } as SanitizedConfig,
+      req,
+    })
+
+    expect(await fileExists(tempFilePath)).toBe(false)
+  })
+
   const tempFilesToRemove: string[] = []
 
   afterEach(async () => {

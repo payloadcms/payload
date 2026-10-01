@@ -1,17 +1,28 @@
+import type { Payload } from 'payload'
+
 import { mkdtemp, rm, stat, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { createPayloadRequest } from 'payload'
+import { fileURLToPath } from 'node:url'
+import { createLocalReq } from 'payload'
 import sharp from 'sharp'
-import { expect, vi } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
-import { test } from '../../__helpers/int/vitest.js'
+import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
 import { controls, mediaSlug, outerRequests, storedFiles } from './shared.js'
 
 const tempDirectories: string[] = []
 
-test.suite('cloud storage bulk request isolation', { config: './config.ts' }, () => {
-  test.afterEach(async () => {
+describe('cloud storage bulk request isolation', () => {
+  let payload: Payload
+  beforeAll(async () => {
+    ;({ payload } = await initPayloadInt(path.dirname(fileURLToPath(import.meta.url))))
+  })
+  afterAll(async () => {
+    await payload.destroy()
+  })
+  afterEach(async () => {
+    await payload.delete({ collection: mediaSlug, where: {}, overrideAccess: true })
     delete controls.onMetadataUpdate
     delete controls.onOuterUpdate
     outerRequests.length = 0
@@ -24,7 +35,7 @@ test.suite('cloud storage bulk request isolation', { config: './config.ts' }, ()
 
   for (const mode of ['reprocess', 'buffer', 'temp'] as const) {
     const hasSharedFile = mode !== 'reprocess'
-    test(`should preserve isolated crop state for bulk uploads (${mode})`, async ({ payload }) => {
+    it(`should preserve isolated crop state for bulk uploads (${mode})`, async () => {
       const docs: Array<{ id: number | string }> = []
 
       for (const [index, background] of ['#336699', '#996633'].entries()) {
@@ -49,7 +60,7 @@ test.suite('cloud storage bulk request isolation', { config: './config.ts' }, ()
       }
       outerRequests.length = 0
 
-      const req = await createPayloadRequest({ payload })
+      const req = await createLocalReq({}, payload)
       const uploadEdits = {
         crop: { height: 50, unit: '%' as const, width: 50, x: 0, y: 0 },
         heightInPixels: 40,

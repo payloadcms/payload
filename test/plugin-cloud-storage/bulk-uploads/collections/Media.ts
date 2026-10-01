@@ -6,7 +6,10 @@ export const Media: CollectionConfig = {
   slug: mediaSlug,
   versions: false,
   access: { create: () => true, read: () => true, update: () => true, delete: () => true },
-  fields: [{ name: 'storageVersion', type: 'number', defaultValue: 0 }],
+  fields: [
+    { name: 'prefix', type: 'text' },
+    { name: 'storageVersion', type: 'number', defaultValue: 0 },
+  ],
   hooks: {
     beforeChange: [
       async ({ data, operation, req }) => {

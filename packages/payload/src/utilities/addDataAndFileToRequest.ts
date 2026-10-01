@@ -105,7 +105,18 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
             throw new APIError('Client upload reference does not match this request.', 400)
           }
 
-          clientUpload = { isProcessed: false, originalStorageFilePath: receipt.storageFilePath }
+          if (typeof receipt.context.prefix === 'string') {
+            clientUpload = {
+              isProcessed: false,
+              originalStorageFilePath: [
+                receipt.context.prefix,
+                receipt.context._objectKey,
+                receipt.filename,
+              ]
+                .filter((segment) => typeof segment === 'string' && segment.length > 0)
+                .join('/'),
+            }
+          }
           clientUploadFile.clientUploadContext = receipt.context
         }
 
