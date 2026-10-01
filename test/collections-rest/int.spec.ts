@@ -11,6 +11,7 @@ import type { Relation } from './config.js'
 import type { Post } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
+import { databaseAdapterSupportsTransactions } from '../__helpers/shared/databaseAdapterCapabilities.js'
 import { getFormDataSize } from '../__helpers/shared/getFormDataSize.js'
 import { largeDocumentsCollectionSlug } from './collections/LargeDocuments.js'
 import {
@@ -648,7 +649,7 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
       })
 
       test('should return formatted errors for bulk deletes', async ({ payload, restClient }) => {
-        await payload.create({
+        const errorDoc = await payload.create({
           collection: errorOnHookSlug,
           data: {
             errorAfterDelete: true,
@@ -656,7 +657,7 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
           },
           overrideAccess: true,
         })
-        await payload.create({
+        const successDoc = await payload.create({
           collection: errorOnHookSlug,
           data: {
             errorAfterDelete: false,
@@ -669,12 +670,23 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
           query: { where: { text: { equals: 'test' } } },
         })
         const result = await response.json()
+        const usesAtomicBatchTransaction =
+          databaseAdapterSupportsTransactions({ adapter: process.env.PAYLOAD_DATABASE }) &&
+          !payload.db.bulkOperationsSingleTransaction
 
         expect(response.status).toEqual(400)
-        expect(result.docs).toHaveLength(1)
-        expect(result.errors).toHaveLength(1)
+        expect(result.docs).toHaveLength(usesAtomicBatchTransaction ? 0 : 1)
+        expect(result.errors).toHaveLength(usesAtomicBatchTransaction ? 2 : 1)
         expect(result.errors[0].message).toBeDefined()
         expect(result.errors[0].id).toBeDefined()
+        const remainingDocs = await payload.find({
+          collection: errorOnHookSlug,
+          overrideAccess: true,
+          pagination: false,
+          where: { id: { in: [errorDoc.id, successDoc.id] } },
+        })
+
+        expect(remainingDocs.docs).toHaveLength(usesAtomicBatchTransaction ? 2 : 1)
       })
     })
 

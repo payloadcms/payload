@@ -912,7 +912,34 @@ export const deleteOperation = async <
               }).doc as Doc)
             : entry.doc
 
-          results[entry.index] = await runAfterDeleteWork(resultDocument)
+          try {
+            results[entry.index] = await runAfterDeleteWork(resultDocument)
+          } catch (error) {
+            if (hasCallerTransaction) {
+              throw error
+            }
+
+            didBatchDeleteFail = true
+            await killTransaction(req)
+            resetBranchState(req)
+            results.fill(null)
+
+            for (const id of deletedInBatch) {
+              deletedDocumentIDs.delete(String(id))
+            }
+
+            for (const rolledBackEntry of deletable) {
+              pushError(
+                rolledBackEntry.doc.id,
+                error,
+                rolledBackEntry === entry
+                  ? undefined
+                  : `Bulk delete was rolled back because post-delete work failed for document ${entry.doc.id}.`,
+              )
+            }
+
+            return results
+          }
         }
 
         return results

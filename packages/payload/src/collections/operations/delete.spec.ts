@@ -173,17 +173,32 @@ describe('deleteOperation', () => {
     expect(req.transactionID).toBe('caller-transaction')
   })
 
-  it('should roll back an operation-owned shared transaction when afterDelete fails', async () => {
+  it('should return batch errors after rolling back an operation-owned shared transaction when afterDelete fails', async () => {
     const afterDeleteError = new Error('afterDelete failed in operation transaction')
-    const { commitDatabaseTransaction, req, rollbackDatabaseTransaction, runDelete } =
+    const processedDocumentIDs: number[] = []
+    const { commitDatabaseTransaction, deleteMany, req, rollbackDatabaseTransaction, runDelete } =
       createDeleteTestContext({
-        afterDelete: () => {
-          throw afterDeleteError
+        afterDelete: ({ doc }) => {
+          processedDocumentIDs.push(doc.id)
+
+          if (doc.id === 2) {
+            throw afterDeleteError
+          }
         },
         callerTransaction: false,
+        documents: [{ id: 1 }, { id: 2 }, { id: 3 }],
       })
 
-    await expect(runDelete()).rejects.toBe(afterDeleteError)
+    await expect(runDelete()).resolves.toEqual({
+      docs: [],
+      errors: [
+        expect.objectContaining({ id: 1, message: expect.stringContaining('rolled back') }),
+        expect.objectContaining({ id: 2, message: afterDeleteError.message }),
+        expect.objectContaining({ id: 3, message: expect.stringContaining('rolled back') }),
+      ],
+    })
+    expect(deleteMany).toHaveBeenCalledWith(expect.objectContaining({ collection: 'documents' }))
+    expect(processedDocumentIDs).toEqual([1, 2])
     expect(commitDatabaseTransaction).not.toHaveBeenCalled()
     expect(rollbackDatabaseTransaction).toHaveBeenCalledWith('operation-transaction')
     expect(req).not.toHaveProperty('transactionID')

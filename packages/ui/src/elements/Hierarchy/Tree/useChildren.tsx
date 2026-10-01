@@ -102,6 +102,7 @@ export const useChildren = ({
   const activeCacheKeyRef = useRef(cacheKey)
   activeCacheKeyRef.current = cacheKey
   const stateCacheKeyRef = useRef(cacheKey)
+  const stateFilterKeyRef = useRef(filterKey)
   // Refs for stable access inside load() without adding state to its dep array
   const childrenRef = useRef(children)
   childrenRef.current = stateCacheKeyRef.current === cacheKey ? children : null
@@ -254,11 +255,18 @@ export const useChildren = ({
 
   // Reset state whenever the cache identity changes, including branch and filter changes.
   useEffect(() => {
-    if (stateCacheKeyRef.current !== cacheKey) {
+    const hasFilterChanged = stateFilterKeyRef.current !== filterKey
+
+    if (stateCacheKeyRef.current !== cacheKey || hasFilterChanged) {
       stateCacheKeyRef.current = cacheKey
+      stateFilterKeyRef.current = filterKey
       initializedRef.current = false
 
-      const cachedDataForActiveBranch = cache?.current.get(cacheKey)
+      if (hasFilterChanged) {
+        cache?.current.delete(cacheKey)
+      }
+
+      const cachedDataForActiveBranch = hasFilterChanged ? undefined : cache?.current.get(cacheKey)
       const nextChildren = enabled ? (cachedDataForActiveBranch?.children ?? null) : null
 
       childrenRef.current = nextChildren
@@ -273,7 +281,7 @@ export const useChildren = ({
         void fetchPage(1, null)
       }
     }
-  }, [cache, cacheKey, enabled, fetchPage])
+  }, [cache, cacheKey, enabled, fetchPage, filterKey])
 
   // Load children explicitly. Safe to call multiple times — no-ops if already loaded or loading.
   const load = useCallback(async (): Promise<TreeDocument[]> => {
