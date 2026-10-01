@@ -2,7 +2,13 @@
 
 import type { Payload } from 'payload'
 
-import { commitTransaction, createPayloadRequest, initTransaction, killTransaction } from 'payload'
+import {
+  commitTransaction,
+  createDataloaderCacheKey,
+  createPayloadRequest,
+  initTransaction,
+  killTransaction,
+} from 'payload'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
@@ -399,6 +405,64 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
       collectionSlug: pagesSlug,
       operation: 'update',
     })
+  })
+
+  test('should refresh the caller request after restoring a collection version', async ({
+    payload,
+  }) => {
+    const mainDocument = await payload.create({
+      collection: pagesSlug,
+      data: { _status: 'published', title: 'historical main title' },
+      overrideAccess: true,
+    })
+
+    await payload.update({
+      id: mainDocument.id,
+      collection: pagesSlug,
+      data: { _status: 'published', title: 'current main title' },
+      overrideAccess: true,
+    })
+
+    const versions = await payload.findVersions({
+      collection: pagesSlug,
+      overrideAccess: true,
+      pagination: false,
+      where: { parent: { equals: mainDocument.id } },
+    })
+    const historicalVersion = versions.docs.find(
+      ({ version }) => version.title === 'historical main title',
+    )
+
+    expect(historicalVersion).toBeDefined()
+
+    const branch = await createBranch({ name: 'Restore Same Request', payload })
+    const req = await createPayloadRequest({ branch: branch.slug, payload })
+    const cacheKey = createDataloaderCacheKey({
+      branch: branch.slug,
+      collectionSlug: pagesSlug,
+      currentDepth: 0,
+      depth: 1,
+      docID: mainDocument.id,
+      draft: false,
+      fallbackLocale: req.fallbackLocale!,
+      locale: req.locale!,
+      overrideAccess: true,
+      showHiddenFields: false,
+      transactionID: req.transactionID!,
+    })
+    const beforeRestore = await req.payloadDataLoader.load(cacheKey)
+
+    await payload.restoreVersion({
+      id: historicalVersion!.id,
+      collection: pagesSlug,
+      overrideAccess: true,
+      req,
+    })
+
+    const afterRestore = await req.payloadDataLoader.load(cacheKey)
+
+    expect(beforeRestore.title).toBe('current main title')
+    expect(afterRestore.title).toBe('historical main title')
   })
 
   test.options(

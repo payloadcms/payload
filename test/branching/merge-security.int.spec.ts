@@ -14,6 +14,7 @@ import {
   mergeSecurityEditorEmail,
   mergeSecurityPagesSlug,
   mergeSecurityPostsSlug,
+  mergeSecurityTrashEditorEmail,
   mergeSecurityUploadsDirectory,
   mergeSecurityUploadsSlug,
 } from './merge-security.config.js'
@@ -117,6 +118,78 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
     })
 
     expect(persistedDocument.title).toBe('original protected title')
+  })
+
+  test('should report denied delete access before merging a branch Trash update', async ({
+    payload,
+  }) => {
+    const trashEditor = await payload.create({
+      collection: 'users',
+      data: { email: mergeSecurityTrashEditorEmail, password: 'test' },
+      overrideAccess: true,
+    })
+    const mainDocument = await payload.create({
+      collection: mergeSecurityPagesSlug,
+      data: { title: 'main page' },
+      overrideAccess: true,
+    })
+    const branch = await createBranch({ name: 'Denied Trash update', payload })
+
+    await payload.update({
+      id: mainDocument.id,
+      branch: branch.slug,
+      collection: mergeSecurityPagesSlug,
+      data: { deletedAt: new Date().toISOString() },
+      overrideAccess: true,
+    })
+
+    const result = await payload.branches.merge({
+      branch: branch.slug,
+      dryRun: true,
+      overrideAccess: false,
+      user: { ...trashEditor, collection: 'users' },
+    })
+
+    expect(result.blocked).toHaveLength(1)
+    expect(result.blocked[0]).toMatchObject({
+      docID: mainDocument.id,
+      operation: 'delete',
+      reason: 'access',
+    })
+  })
+
+  test('should report denied delete access before merging a branch-created trashed document', async ({
+    payload,
+  }) => {
+    const trashEditor = await payload.create({
+      collection: 'users',
+      data: { email: mergeSecurityTrashEditorEmail, password: 'test' },
+      overrideAccess: true,
+    })
+    const branch = await createBranch({ name: 'Denied trashed create', payload })
+    const branchDocument = await payload.create({
+      branch: branch.slug,
+      collection: mergeSecurityPagesSlug,
+      data: {
+        deletedAt: new Date().toISOString(),
+        title: 'trashed branch page',
+      },
+      overrideAccess: true,
+    })
+
+    const result = await payload.branches.merge({
+      branch: branch.slug,
+      dryRun: true,
+      overrideAccess: false,
+      user: { ...trashEditor, collection: 'users' },
+    })
+
+    expect(result.blocked).toHaveLength(1)
+    expect(result.blocked[0]).toMatchObject({
+      docID: branchDocument.id,
+      operation: 'delete',
+      reason: 'access',
+    })
   })
 
   test('should keep a rejected non-transactional branch create off main', async ({ payload }) => {
@@ -350,19 +423,14 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
       draft: true,
       overrideAccess: true,
     })
+    const publishedFilePath = path.resolve(mergeSecurityUploadsDirectory, published.filename)
+    const draftFilePath = path.resolve(mergeSecurityUploadsDirectory, draft.filename)
 
-    expect(mergeSecuritySpy.uploadUpdateAccessChecks).toBeGreaterThan(0)
-    expect(publishedOnMain.filename).toBe(published.filename)
+    expect(mergeSecuritySpy.uploadUpdateAccessChecks).toBe(0)
+    expect(publishedOnMain.filename).toBe(draft.filename)
     expect(draftOnMain.filename).toBe(draft.filename)
-    expect(
-      fs.readFileSync(
-        path.resolve(mergeSecurityUploadsDirectory, publishedOnMain.filename),
-        'utf8',
-      ),
-    ).toBe('branch-created published upload bytes')
-    expect(
-      fs.readFileSync(path.resolve(mergeSecurityUploadsDirectory, draftOnMain.filename), 'utf8'),
-    ).toBe('branch-created draft upload bytes')
+    expect(fs.existsSync(publishedFilePath)).toBe(false)
+    expect(fs.readFileSync(draftFilePath, 'utf8')).toBe('branch-created draft upload bytes')
   })
 
   test('should ignore an unrelated file on a branch-created upload merge request', async ({

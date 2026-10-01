@@ -19,6 +19,7 @@ test('should not let operation ownership authorise a different document', async 
         deleted: new Map(),
         manifest: new Map(),
         manifestLoaded: true,
+        operations: new Map(),
         rowIDs: new Map(),
       },
       _branchWritable: new Map([[branch, true]]),

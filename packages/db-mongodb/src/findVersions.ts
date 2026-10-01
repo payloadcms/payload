@@ -64,8 +64,10 @@ export const findVersions: FindVersions = async function findVersions(
 
   const query = await buildQuery({
     adapter: this,
+    branch,
     fields,
     locale,
+    req,
     where,
   })
 

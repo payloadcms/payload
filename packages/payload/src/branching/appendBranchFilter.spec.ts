@@ -8,6 +8,7 @@ describe('appendBranchFilter', () => {
   it('should return the query untouched when branching is disabled', () => {
     const result = appendBranchFilter({
       branch: 'main',
+      deletedIDs: [],
       enabled: false,
       shadowedIDs: [],
       where: userWhere,
@@ -21,6 +22,7 @@ describe('appendBranchFilter', () => {
   it('should add a single indexed equality on main', () => {
     const result = appendBranchFilter({
       branch: 'main',
+      deletedIDs: [],
       enabled: true,
       shadowedIDs: [1, 2, 3],
       where: userWhere,
@@ -34,6 +36,7 @@ describe('appendBranchFilter', () => {
   it('should select branch rows plus unshadowed main rows on a branch', () => {
     const result = appendBranchFilter({
       branch: 'halloween',
+      deletedIDs: [9],
       enabled: true,
       shadowedIDs: [7, 9],
       where: userWhere,
@@ -44,13 +47,14 @@ describe('appendBranchFilter', () => {
         userWhere,
         {
           or: [
-            { _branch: { equals: 'halloween' } },
+            {
+              and: [{ _branch: { equals: 'halloween' } }, { _branchDocID: { not_in: [9] } }],
+            },
             {
               and: [{ _branch: { equals: 'main' } }, { id: { not_in: [7, 9] } }],
             },
           ],
         },
-        { _branchOp: { not_equals: 'delete' } },
       ],
     })
   })
@@ -58,22 +62,21 @@ describe('appendBranchFilter', () => {
   it('should omit the not_in clause when the branch has shadowed nothing', () => {
     const result = appendBranchFilter({
       branch: 'halloween',
+      deletedIDs: [],
       enabled: true,
       shadowedIDs: [],
       where: {},
     })
 
     expect(result).toEqual({
-      and: [
-        { or: [{ _branch: { equals: 'halloween' } }, { _branch: { equals: 'main' } }] },
-        { _branchOp: { not_equals: 'delete' } },
-      ],
+      and: [{ or: [{ _branch: { equals: 'halloween' } }, { _branch: { equals: 'main' } }] }],
     })
   })
 
   it('should merge into an existing and-clause rather than nesting it', () => {
     const result = appendBranchFilter({
       branch: 'main',
+      deletedIDs: [],
       enabled: true,
       shadowedIDs: [],
       where: { and: [userWhere] },
@@ -84,25 +87,29 @@ describe('appendBranchFilter', () => {
     })
   })
 
-  it('should hide tombstones on a branch', () => {
+  it('should hide change-record tombstones on a branch', () => {
     const result = appendBranchFilter({
       branch: 'halloween',
+      deletedIDs: [7],
       enabled: true,
-      shadowedIDs: [],
+      shadowedIDs: [7],
       where: {},
     })
 
-    expect(result.and).toContainEqual({ _branchOp: { not_equals: 'delete' } })
+    expect(JSON.stringify(result)).toContain('"_branchDocID":{"not_in":[7]}')
+    expect(JSON.stringify(result)).not.toContain('_branchOp')
   })
 
-  it('should not filter tombstones on main, where they cannot exist', () => {
+  it('should not add deletion filtering on main, where tombstones cannot exist', () => {
     const result = appendBranchFilter({
       branch: 'main',
+      deletedIDs: [7],
       enabled: true,
       shadowedIDs: [],
       where: {},
     })
 
     expect(JSON.stringify(result)).not.toContain('_branchOp')
+    expect(JSON.stringify(result)).not.toContain('_branchDocID')
   })
 })

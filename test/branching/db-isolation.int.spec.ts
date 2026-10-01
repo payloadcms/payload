@@ -69,7 +69,6 @@ test.suite('Branching database isolation', { config: './config.ts' }, () => {
         name: 'branch category',
         _branch: branch.slug,
         _branchDocID: category.id,
-        _branchOp: 'update',
         createdAt: category.createdAt,
         updatedAt: category.updatedAt,
       },

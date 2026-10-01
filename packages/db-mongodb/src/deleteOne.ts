@@ -29,8 +29,10 @@ export const deleteOne: DeleteOne = async function deleteOne(
 
   const query = await buildQuery({
     adapter: this,
+    branch,
     collectionSlug,
     fields: collectionConfig.flattenedFields,
+    req,
     where,
   })
 

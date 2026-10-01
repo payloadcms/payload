@@ -15,7 +15,8 @@ export type RenderMergeDiffArgs = {
 }
 
 export type RenderMergeDiffResult = {
-  diff: React.ReactNode
+  diff?: React.ReactNode
+  status: 'ready' | 'unavailable'
 }
 
 const timestampFields = new Set(['createdAt', 'updatedAt'])
@@ -23,10 +24,9 @@ const timestampFields = new Set(['createdAt', 'updatedAt'])
 /**
  * Renders what one already-merged document changed, from the ledger.
  *
- * The live document is no longer a useful source here: main has moved on since, and
- * the branch's copy is gone. So this reads the two snapshots taken either side of
- * the merge write — the only record of that moment — and renders them through the
- * same version-comparison renderer the pre-merge diff uses.
+ * The live document is no longer a useful source here because main can move on.
+ * The target versions recorded by the merge are read with the current user's
+ * version access and rendered through the ordinary version-comparison renderer.
  *
  * Per change rather than with the page, for the reason `renderBranchDiff` is: a
  * branch's history can hold hundreds of documents and each diff is a full field-tree
@@ -56,9 +56,12 @@ export const renderMergeDiffHandler: ServerFunction<
     event as {
       changes?: {
         after?: unknown
+        afterVersionID?: string
         before?: unknown
+        beforeVersionID?: string
         collectionSlug?: string
         globalSlug?: string
+        operation?: 'create' | 'delete' | 'update'
       }[]
     }
   )?.changes?.[changeIndex]
@@ -75,6 +78,60 @@ export const renderMergeDiffHandler: ServerFunction<
 
   if (!change || !entityConfig) {
     throw new Error('Unknown merged change')
+  }
+
+  const hasLegacySnapshots =
+    Object.prototype.hasOwnProperty.call(change, 'before') ||
+    Object.prototype.hasOwnProperty.call(change, 'after')
+  const needsBeforeVersion = change.operation !== 'create'
+  const needsAfterVersion = change.operation !== 'delete'
+  let versionFromSiblingData: Record<string, unknown>
+  let versionToSiblingData: Record<string, unknown>
+
+  if (
+    (!needsBeforeVersion || change.beforeVersionID) &&
+    (!needsAfterVersion || change.afterVersionID)
+  ) {
+    try {
+      const readVersion = async ({ id }: { id: string }): Promise<Record<string, unknown>> => {
+        const version = collectionSlug
+          ? await payload.findVersionByID({
+              id,
+              collection: collectionSlug,
+              depth: 1,
+              locale: 'all',
+              overrideAccess: false,
+              req,
+              user: req.user,
+            })
+          : await payload.findGlobalVersionByID({
+              id,
+              slug: globalSlug,
+              depth: 1,
+              locale: 'all',
+              overrideAccess: false,
+              req,
+              user: req.user,
+            })
+
+        return (version.version ?? {}) as Record<string, unknown>
+      }
+
+      const [beforeVersion, afterVersion] = await Promise.all([
+        needsBeforeVersion ? readVersion({ id: change.beforeVersionID }) : Promise.resolve({}),
+        needsAfterVersion ? readVersion({ id: change.afterVersionID }) : Promise.resolve({}),
+      ])
+
+      versionFromSiblingData = beforeVersion
+      versionToSiblingData = afterVersion
+    } catch (_error) {
+      return { status: 'unavailable' }
+    }
+  } else if (hasLegacySnapshots) {
+    versionFromSiblingData = (change.before ?? {}) as Record<string, unknown>
+    versionToSiblingData = (change.after ?? {}) as Record<string, unknown>
+  } else {
+    return { status: 'unavailable' }
   }
 
   // Timestamps are bookkeeping, not content, and `updatedAt` differs on every
@@ -116,8 +173,9 @@ export const renderMergeDiffHandler: ServerFunction<
       parentSchemaPath: '',
       req,
       selectedLocales: [],
-      versionFromSiblingData: (change.before ?? {}) as Record<string, unknown>,
-      versionToSiblingData: (change.after ?? {}) as Record<string, unknown>,
+      versionFromSiblingData,
+      versionToSiblingData,
     }),
+    status: 'ready',
   }
 }

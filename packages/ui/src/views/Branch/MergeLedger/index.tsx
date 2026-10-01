@@ -51,9 +51,9 @@ const operationPillStyle = {
  * by then holds nothing — a merge consumes the change rows it applies and drops the
  * shadow rows behind them. Titles are the ones the documents had when they merged.
  *
- * Rows expand to the diff of what that merge did, rendered from the snapshots taken
- * either side of the write. Fetched per row, because a history can hold hundreds of
- * documents and each diff is a full field-tree render.
+ * Rows expand to the diff of what that merge did, rendered from the target versions
+ * recorded either side of the write. Fetched per row, because a history can hold
+ * hundreds of documents and each diff is a full field-tree render.
  */
 export const MergeLedger: React.FC<{ events: MergeEvent[] }> = ({ events }) => {
   const { config, getEntityConfig } = useConfig()
@@ -158,6 +158,7 @@ export const MergeLedger: React.FC<{ events: MergeEvent[] }> = ({ events }) => {
                 ? getEntityConfig({ globalSlug: change.globalSlug })
                 : undefined
               const key = `${event.id}-${changeIndex}`
+              const contentID = `${baseClass}-${key}-diff`
               const isExpanded = expanded.has(key)
               const state = loaded[key]
 
@@ -168,6 +169,7 @@ export const MergeLedger: React.FC<{ events: MergeEvent[] }> = ({ events }) => {
                       content sits above it with pointer events off. */}
                   <div className={`${baseClass}__row-header`}>
                     <button
+                      aria-controls={contentID}
                       aria-expanded={isExpanded}
                       className={`${baseClass}__toggle`}
                       onClick={() => toggle({ changeIndex, key, mergeID: event.id })}
@@ -217,13 +219,25 @@ export const MergeLedger: React.FC<{ events: MergeEvent[] }> = ({ events }) => {
                   </div>
 
                   {isExpanded && (
-                    <div className={`${baseClass}__diff`}>
-                      {state?.status === 'ready' ? state.result?.diff : null}
+                    <div className={`${baseClass}__diff`} id={contentID}>
+                      {state?.status === 'ready' && state.result?.status === 'ready'
+                        ? state.result.diff
+                        : null}
                       {state?.status === 'loading' || !state ? (
-                        <ShimmerEffect height="3rem" />
+                        <div aria-live="polite" role="status">
+                          <span className="sr-only">{t('general:loading')}</span>
+                          <ShimmerEffect height="3rem" />
+                        </div>
+                      ) : null}
+                      {state?.status === 'ready' && state.result?.status === 'unavailable' ? (
+                        <p className={`${baseClass}__error`} role="status">
+                          {t('general:notFound')}
+                        </p>
                       ) : null}
                       {state?.status === 'error' ? (
-                        <p className={`${baseClass}__error`}>{t('error:unknown')}</p>
+                        <p className={`${baseClass}__error`} role="status">
+                          {t('error:unknown')}
+                        </p>
                       ) : null}
                     </div>
                   )}

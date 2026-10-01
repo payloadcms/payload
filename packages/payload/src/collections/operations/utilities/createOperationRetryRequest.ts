@@ -6,7 +6,7 @@ import path from 'node:path'
 import type { PayloadRequest } from '../../../types/index.js'
 
 import { isConcurrentShadowOperationError } from '../../../branching/createShadowRow.js'
-import { resetBranchState } from '../../../branching/resolveBranch.js'
+import { refreshBranchState, resetBranchState } from '../../../branching/resolveBranch.js'
 import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { isolateObjectProperty } from '../../../utilities/isolateObjectProperty.js'
 import {
@@ -817,7 +817,7 @@ export const commitOperationRetryRequestContext = ({ req }: { req: PayloadReques
       msg: 'Failed to apply request state changes after committing an operation retry.',
     })
   } finally {
-    resetBranchState(originalReq)
+    refreshBranchState(originalReq)
     retryRequestStateByRequest.delete(req)
   }
 }

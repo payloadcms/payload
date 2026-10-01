@@ -19,7 +19,12 @@ import type {
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { forkDocument } from '../../branching/forkDocument.js'
-import { resetBranchState, resolveBranch } from '../../branching/resolveBranch.js'
+import { assertBranchMergeValidationWriteAllowed } from '../../branching/mergeWriteGuard.js'
+import {
+  refreshRequestDataLoader,
+  resetBranchState,
+  resolveBranch,
+} from '../../branching/resolveBranch.js'
 import { branchField, MAIN_BRANCH } from '../../branching/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
@@ -115,6 +120,8 @@ export const updateOperation = async <
   let shouldUsePerDocumentBranchTransactions = false
   let shouldCommit = false
   const uploadFileRollbacks: UploadFileRollbacks = new Map()
+
+  assertBranchMergeValidationWriteAllowed({ req: args.req })
 
   if (args.collection.config.disableBulkEdit && !args.overrideAccess) {
     throw new APIError(`Collection ${args.collection.config.slug} has disabled bulk edit`, 403)
@@ -698,6 +705,10 @@ export const updateOperation = async <
           msg: 'Failed to remove an upload rollback backup after committing its database write.',
         })
       })
+    }
+
+    if (isBranchUpdate) {
+      refreshRequestDataLoader(req)
     }
 
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve

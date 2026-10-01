@@ -1,7 +1,11 @@
 import type { ServerFunction, Where } from 'payload'
 
 import { canAccessAdmin, Forbidden } from 'payload'
-import { branchesCollectionSlug } from 'payload/shared'
+import { branchChangesCollectionSlug, branchesCollectionSlug } from 'payload/shared'
+
+import type { SummarizableChange } from '../elements/ChangeSummary/index.js'
+
+import { buildUpcomingMergeWhere } from './buildUpcomingMergeWhere.js'
 
 export type ScheduleMergeHandlerArgs = {
   /** `payload-branches` document ID, so read access can be checked before queueing. */
@@ -11,6 +15,143 @@ export type ScheduleMergeHandlerArgs = {
   date?: Date | string
   /** The job to cancel, instead of queueing one. */
   deleteID?: number | string
+}
+
+export type GetBranchMergeSummaryHandlerArgs = {
+  /** `payload-branches` document ID, so read access is checked before internal rows are read. */
+  branchID: number | string
+  sampleLimit: number
+}
+
+export type BranchMergeSummary = {
+  docs: SummarizableChange[]
+  totalDocs: number
+}
+
+export type UpcomingBranchMerge = {
+  id: number | string
+  waitUntil: string
+}
+
+/**
+ * Returns the safe summary used when the merge modal opens outside the branch view.
+ *
+ * The change registry denies direct API access. Resolve the branch through normal
+ * read access first, then read only the non-sensitive grouping fields internally.
+ */
+export const getBranchMergeSummaryHandler: ServerFunction<
+  GetBranchMergeSummaryHandlerArgs,
+  Promise<BranchMergeSummary>
+> = async ({ branchID, req, sampleLimit }) => {
+  const { payload, user } = req
+  const requestedSampleLimit = Number.isFinite(sampleLimit) ? Math.floor(sampleLimit) : 200
+  const sampleLimitToUse = Math.min(Math.max(requestedSampleLimit, 1), 200)
+
+  await canAccessAdmin({ req })
+
+  const branch = await payload.findByID({
+    id: branchID,
+    collection: branchesCollectionSlug,
+    depth: 0,
+    disableErrors: true,
+    overrideAccess: false,
+    req,
+    user,
+  })
+
+  if (!branch || typeof branch.slug !== 'string') {
+    throw new Forbidden(req.t)
+  }
+
+  const summary = await payload.find({
+    collection: branchChangesCollectionSlug,
+    depth: 0,
+    limit: sampleLimitToUse,
+    overrideAccess: true,
+    req,
+    select: {
+      collectionSlug: true,
+      globalSlug: true,
+      operation: true,
+    },
+    where: { branch: { equals: branch.slug } },
+  })
+
+  const docs = summary.docs.reduce<SummarizableChange[]>((summaries, change) => {
+    const collectionSlug =
+      typeof change.collectionSlug === 'string' ? change.collectionSlug : undefined
+    const globalSlug = typeof change.globalSlug === 'string' ? change.globalSlug : undefined
+    const operation =
+      change.operation === 'create' ||
+      change.operation === 'delete' ||
+      change.operation === 'update'
+        ? change.operation
+        : undefined
+
+    if ((!collectionSlug && !globalSlug) || !operation) {
+      return summaries
+    }
+
+    summaries.push({ collectionSlug, globalSlug, operation })
+
+    return summaries
+  }, [])
+
+  return {
+    docs,
+    totalDocs: summary.totalDocs,
+  }
+}
+
+/** Returns upcoming merge jobs only after confirming that the caller can read the branch. */
+export const getUpcomingBranchMergesHandler: ServerFunction<
+  { branchID: number | string },
+  Promise<UpcomingBranchMerge[]>
+> = async ({ branchID, req }) => {
+  const { payload, user } = req
+
+  await canAccessAdmin({ req })
+
+  const branch = await payload.findByID({
+    id: branchID,
+    collection: branchesCollectionSlug,
+    depth: 0,
+    disableErrors: true,
+    overrideAccess: false,
+    req,
+    user,
+  })
+
+  if (!branch || typeof branch.slug !== 'string') {
+    throw new Forbidden(req.t)
+  }
+
+  const jobs = await payload.find({
+    collection: 'payload-jobs',
+    depth: 0,
+    limit: 10,
+    overrideAccess: true,
+    req,
+    select: { waitUntil: true },
+    sort: 'waitUntil',
+    where: buildUpcomingMergeWhere({ branchSlug: branch.slug }),
+  })
+
+  return jobs.docs.reduce<UpcomingBranchMerge[]>((upcomingMerges, job) => {
+    const hasValidID = typeof job.id === 'number' || typeof job.id === 'string'
+    const waitUntil =
+      typeof job.waitUntil === 'string'
+        ? job.waitUntil
+        : job.waitUntil instanceof Date
+          ? job.waitUntil.toISOString()
+          : undefined
+
+    if (hasValidID && waitUntil) {
+      upcomingMerges.push({ id: job.id, waitUntil })
+    }
+
+    return upcomingMerges
+  }, [])
 }
 
 /**
@@ -156,3 +297,11 @@ export const buildScheduledMergeCancellationWhere = ({
     { 'input.branch': { equals: branchSlug } },
   ],
 })
+
+/**
+ * The `where` for a branch's upcoming scheduled merges.
+ *
+ * Mirrors `buildUpcomingScheduleWhere`: same collection, same shape, filtered on the
+ * branch slug carried in the job's input.
+ */
+export { buildUpcomingMergeWhere }

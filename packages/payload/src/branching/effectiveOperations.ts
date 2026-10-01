@@ -1,6 +1,11 @@
-import type { Payload, PayloadRequest } from '../types/index.js'
+import type { Payload, PayloadRequest, Where } from '../types/index.js'
 
-import { branchDocIDField, branchField } from './types.js'
+import { APIError } from '../errors/index.js'
+import { processInBatches } from '../utilities/processInBatches.js'
+import { traverseForLocalizedFields } from '../utilities/traverseForLocalizedFields.js'
+import { branchDocIDField, branchField, MAIN_BRANCH } from './types.js'
+
+const effectiveOperationReadBatchSize = 400
 
 /**
  * What a change will actually do to `main` when merged, which is not always what
@@ -10,13 +15,20 @@ import { branchDocIDField, branchField } from './types.js'
  */
 export type EffectiveOperation = 'create' | 'delete' | 'publish' | 'update'
 
-/** One write against main, in the order it must be applied. */
+/** One write against main for the selected source state or its Trash transition. */
 export type EffectiveWrite = {
   /** The document state to write. */
   data: Record<string, unknown>
   /** Whether the write is a draft save rather than a publish. */
   draft: boolean
   operation: EffectiveOperation
+  /**
+   * A row-level Trash transition that accompanies versioned content.
+   *
+   * `apply` updates main. `access` only adds the required permission check
+   * because a later published write already carries the same `deletedAt` state.
+   */
+  trashState?: 'access' | 'apply'
 }
 
 export type ResolvedChange = {
@@ -24,11 +36,7 @@ export type ResolvedChange = {
   collectionSlug: string
   docID: number | string
   shadow: null | Record<string, unknown>
-  /**
-   * Every operation this change performs against main, in order. A branch
-   * holding a published state *and* a newer draft on top of it yields two:
-   * main genuinely undergoes two transitions.
-   */
+  /** The latest source-state write and any separate Trash transition. */
   writes: EffectiveWrite[]
 }
 
@@ -58,40 +66,122 @@ export const resolveEffectiveOperations = async ({
   payload: Payload
   req: PayloadRequest
 }): Promise<ResolvedChange[]> => {
+  const shadowsByChange = await readChangeShadows({ branch, changes, payload, req })
   const resolved: ResolvedChange[] = []
 
   for (const change of changes) {
     const collectionSlug = change.collectionSlug as string
-    const docID = change.doc?.value ?? change.doc
+    const docID = relationshipValue(change.doc)
+    const shadow = shadowsByChange.get(changeKey({ collectionSlug, docID })) ?? null
 
-    const shadow = (await payload.db.findOne({
-      branch: false,
-      collection: collectionSlug,
-      req,
-      where: {
-        and: [
-          { [branchField]: { equals: branch } },
-          { or: [{ id: { equals: docID } }, { [branchDocIDField]: { equals: docID } }] },
-        ],
-      },
-    })) as null | Record<string, unknown>
+    if (!shadow) {
+      throw new APIError(
+        `The ${collectionSlug} branch row for document ${String(docID)} is missing.`,
+        409,
+      )
+    }
 
     resolved.push({
       change,
       collectionSlug,
       docID,
       shadow,
-      writes: await resolveWrites({ branch, change, collectionSlug, payload, req, shadow }),
+      writes: await resolveWrites({ branch, change, collectionSlug, docID, payload, req, shadow }),
     })
   }
 
   return resolved
 }
 
+const changeKey = ({
+  collectionSlug,
+  docID,
+}: {
+  collectionSlug: string
+  docID: number | string
+}): string => `${collectionSlug}:${String(docID)}`
+
+const readChangeShadows = async ({
+  branch,
+  changes,
+  payload,
+  req,
+}: {
+  branch: string
+  changes: Record<string, any>[]
+  payload: Payload
+  req: PayloadRequest
+}): Promise<Map<string, Record<string, unknown>>> => {
+  const changesByCollection = new Map<string, Record<string, any>[]>()
+  const shadowsByChange = new Map<string, Record<string, unknown>>()
+
+  for (const change of changes) {
+    const collectionSlug = change.collectionSlug as string
+    const collectionChanges = changesByCollection.get(collectionSlug) ?? []
+
+    collectionChanges.push(change)
+    changesByCollection.set(collectionSlug, collectionChanges)
+  }
+
+  for (const [collectionSlug, collectionChanges] of changesByCollection) {
+    await processInBatches({
+      batchSize: effectiveOperationReadBatchSize,
+      input: collectionChanges,
+      processBatch: async ({ batch }) => {
+        const createdDocumentIDs = batch
+          .filter(({ operation }) => operation === 'create')
+          .map((change) => relationshipValue(change.doc))
+        const existingDocumentIDs = batch
+          .filter(({ operation }) => operation !== 'create')
+          .map((change) => relationshipValue(change.doc))
+        const identityQueries: Where[] = []
+
+        if (createdDocumentIDs.length) {
+          identityQueries.push({ id: { in: createdDocumentIDs } })
+        }
+
+        if (existingDocumentIDs.length) {
+          identityQueries.push({ [branchDocIDField]: { in: existingDocumentIDs } })
+        }
+
+        const identityQuery: Where =
+          identityQueries.length === 1 ? identityQueries[0]! : { or: identityQueries }
+        const { docs } = await payload.db.find({
+          branch: false,
+          collection: collectionSlug,
+          limit: batch.length,
+          pagination: false,
+          req,
+          where: {
+            and: [{ [branchField]: { equals: branch } }, identityQuery],
+          },
+        })
+
+        for (const shadow of docs as Record<string, unknown>[]) {
+          const docID = relationshipValue(shadow[branchDocIDField] ?? shadow.id)
+
+          shadowsByChange.set(changeKey({ collectionSlug, docID }), shadow)
+        }
+      },
+    })
+  }
+
+  return shadowsByChange
+}
+
+const relationshipValue = (value: unknown): number | string => {
+  if (typeof value === 'object' && value !== null && 'value' in value) {
+    return (value as { value: number | string }).value
+  }
+
+  return value as number | string
+}
+
 const resolveWrites = async ({
   branch,
   change,
   collectionSlug,
+  docID,
   payload,
   req,
   shadow,
@@ -99,6 +189,7 @@ const resolveWrites = async ({
   branch: string
   change: Record<string, any>
   collectionSlug: string
+  docID: number | string
   payload: Payload
   req: PayloadRequest
   shadow: null | Record<string, unknown>
@@ -118,6 +209,7 @@ const resolveWrites = async ({
   // row itself is the whole change and ordinary update permission covers it.
   if (!hasDrafts) {
     return [
+      ...getTrashAccessWrites({ collectionSlug, payload, shadow }),
       {
         data: shadow,
         draft: false,
@@ -130,15 +222,17 @@ const resolveWrites = async ({
   const newerDraft = await findNewerDraft({ collectionSlug, payload, req, shadow })
 
   if (change.operation === 'create') {
-    // A document created on the branch is new to main either way; the row's own
-    // status decides whether it arrives published or as a draft.
-    const writes: EffectiveWrite[] = [{ data: shadow, draft: !rowIsPublished, operation: 'create' }]
-
-    if (newerDraft) {
-      writes.push({ data: newerDraft, draft: true, operation: 'update' })
-    }
-
-    return writes
+    // Only the latest source state is applied. If a branch published and then
+    // drafted, the draft creates an unpublished target without replaying the
+    // earlier publication first.
+    return [
+      ...getTrashAccessWrites({ collectionSlug, payload, shadow }),
+      {
+        data: newerDraft ?? shadow,
+        draft: Boolean(newerDraft) || !rowIsPublished,
+        operation: 'create',
+      },
+    ]
   }
 
   // Forked. Only a publish rewrites the shadow row, so a row still carrying the
@@ -155,20 +249,119 @@ const resolveWrites = async ({
     rowIsPublished &&
     (!matchesForkPoint({ baseUpdatedAt: change.baseUpdatedAt, shadow }) ||
       (await hasBranchPublishedVersion({ branch, collectionSlug, payload, req, shadow })))
+  const trashStateWrite = await resolveTrashStateWrite({
+    collectionSlug,
+    docID,
+    payload,
+    req,
+    shadow,
+  })
+
+  if (newerDraft) {
+    return [
+      ...(trashStateWrite
+        ? [{ ...trashStateWrite, trashState: 'apply' as const }]
+        : getTrashAccessWrites({ collectionSlug, payload, shadow })),
+      { data: newerDraft, draft: true, operation: 'update' },
+    ]
+  }
 
   if (!publishedOnBranch) {
     // Nothing to apply when the branch has neither published nor drafted: the
     // fork itself is not a change to main.
-    return newerDraft ? [{ data: newerDraft, draft: true, operation: 'update' }] : []
+    return [
+      ...(trashStateWrite
+        ? [{ ...trashStateWrite, trashState: 'apply' as const }]
+        : getTrashAccessWrites({ collectionSlug, payload, shadow })),
+    ]
   }
 
-  const writes: EffectiveWrite[] = [{ data: shadow, draft: false, operation: 'publish' }]
-
-  if (newerDraft) {
-    writes.push({ data: newerDraft, draft: true, operation: 'update' })
-  }
+  const writes: EffectiveWrite[] = [
+    ...(trashStateWrite
+      ? [{ ...trashStateWrite, trashState: 'access' as const }]
+      : getTrashAccessWrites({ collectionSlug, payload, shadow })),
+    { data: shadow, draft: false, operation: 'publish' },
+  ]
 
   return writes
+}
+
+const getTrashAccessWrites = ({
+  collectionSlug,
+  payload,
+  shadow,
+}: {
+  collectionSlug: string
+  payload: Payload
+  shadow: Record<string, unknown>
+}): EffectiveWrite[] => {
+  if (!payload.collections[collectionSlug]?.config.trash || shadow.deletedAt == null) {
+    return []
+  }
+
+  return [
+    {
+      data: shadow,
+      draft: false,
+      operation: 'delete',
+      trashState: 'access',
+    },
+  ]
+}
+
+const resolveTrashStateWrite = async ({
+  collectionSlug,
+  docID,
+  payload,
+  req,
+  shadow,
+}: {
+  collectionSlug: string
+  docID: number | string
+  payload: Payload
+  req: PayloadRequest
+  shadow: Record<string, unknown>
+}): Promise<EffectiveWrite | null> => {
+  if (!payload.collections[collectionSlug]?.config.trash) {
+    return null
+  }
+
+  const main = (await payload.db.findOne({
+    branch: false,
+    collection: collectionSlug,
+    req,
+    where: {
+      and: [{ [branchField]: { equals: MAIN_BRANCH } }, { id: { equals: docID } }],
+    },
+  })) as null | Record<string, unknown>
+
+  if (!main || toTrashState(main.deletedAt) === toTrashState(shadow.deletedAt)) {
+    return null
+  }
+
+  return {
+    data: shadow,
+    draft: false,
+    operation: shadow.deletedAt == null ? 'update' : 'delete',
+  }
+}
+
+const toTrashState = (value: unknown): null | number | string => {
+  if (value == null) {
+    return null
+  }
+
+  if (value instanceof Date) {
+    return value.getTime()
+  }
+
+  if (typeof value !== 'number' && typeof value !== 'string') {
+    return null
+  }
+
+  const time = new Date(value).getTime()
+
+  return Number.isNaN(time) ? value : time
 }
 
 /**
@@ -260,11 +453,21 @@ const findNewerDraft = async ({
   req: PayloadRequest
   shadow: Record<string, unknown>
 }): Promise<null | Record<string, unknown>> => {
+  const collectionConfig = payload.collections[collectionSlug]!.config
+  const localization = payload.config.localization
+  const hasLocalizedFields = traverseForLocalizedFields(collectionConfig.fields)
+  const locale = localization
+    ? hasLocalizedFields
+      ? 'all'
+      : req.locale && req.locale !== 'all'
+        ? req.locale
+        : localization.defaultLocale
+    : undefined
   const { docs } = await payload.db.findVersions({
     branch: false,
     collection: collectionSlug,
     limit: 1,
-    locale: payload.config.localization ? 'all' : undefined,
+    locale,
     pagination: false,
     req,
     sort: '-updatedAt',
@@ -274,15 +477,19 @@ const findNewerDraft = async ({
   const latest = docs?.[0] as { version?: Record<string, unknown> } | undefined
   const version = latest?.version
 
-  if (!version || !isDraft(version._status)) {
+  if (!version || !isDraft({ locale, status: version._status })) {
     return null
   }
 
   return version
 }
 
-const isDraft = (status: unknown): boolean => {
+const isDraft = ({ locale, status }: { locale?: string; status: unknown }): boolean => {
   if (typeof status === 'object' && status !== null) {
+    if (locale && locale !== 'all') {
+      return (status as Record<string, unknown>)[locale] === 'draft'
+    }
+
     return Object.values(status as Record<string, unknown>).includes('draft')
   }
 

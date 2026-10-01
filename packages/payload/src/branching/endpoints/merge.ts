@@ -83,7 +83,11 @@ export const mergeBranchHandler: PayloadHandler = async (req) => {
   // Nothing could be applied and something was refused: report it as a refusal
   // rather than an empty success, so a programmatic caller sees the same
   // per-document reasons the admin UI would show.
-  const status = !result.canMerge && result.blocked.length ? httpStatus.FORBIDDEN : httpStatus.OK
+  const status = result.validationErrors.length
+    ? httpStatus.UNPROCESSABLE_ENTITY
+    : !result.canMerge && result.blocked.length
+      ? httpStatus.FORBIDDEN
+      : httpStatus.OK
 
   return Response.json(result, {
     headers: headersWithCors({ headers: new Headers(), req }),

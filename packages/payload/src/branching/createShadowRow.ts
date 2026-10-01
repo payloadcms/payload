@@ -1,5 +1,8 @@
+import type { CopyArgs } from '../database/types.js'
 import type { PayloadRequest } from '../types/index.js'
+import type { BranchOperation } from './types.js'
 
+import { APIError } from '../errors/index.js'
 import { ValidationError } from '../errors/ValidationError.js'
 import {
   commitTransaction,
@@ -8,7 +11,7 @@ import {
 import { initTransaction } from '../utilities/initTransaction.js'
 import { isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
 import { killTransaction } from '../utilities/killTransaction.js'
-import { branchDocIDField, branchField, branchOpField } from './types.js'
+import { branchChangesCollectionSlug, branchDocIDField, branchField } from './types.js'
 
 type Args = {
   branch: string
@@ -24,6 +27,8 @@ type Args = {
    */
   onCreated: (req: PayloadRequest, shadow: Record<string, unknown>) => Promise<unknown>
   req: PayloadRequest
+  /** Copies an exact logical source document instead of creating from data alone. */
+  source?: CopyArgs['source']
   /** Uses the request's existing transaction and leaves commit or rollback to its owner. */
   useAmbientTransaction?: boolean
 }
@@ -39,6 +44,7 @@ const isShadowUniquenessError = (error: unknown): error is ValidationError =>
           fieldPath === branchDocIDField ||
           fieldPath === '_branch_doc_id' ||
           fieldPath === '_branchdocid_id' ||
+          fieldPath === 'documentID' ||
           fieldPath === branchField,
       ),
   )
@@ -124,11 +130,13 @@ export const findCompetingShadow = async ({
   branch,
   collectionSlug,
   docID,
+  operation,
   req,
 }: {
   branch: string
   collectionSlug: string
   docID: number | string
+  operation?: BranchOperation
   req: PayloadRequest
 }): Promise<null | Record<string, unknown>> => {
   // A caller transaction keeps its earlier snapshot and cannot observe the winner. Read without
@@ -152,6 +160,31 @@ export const findCompetingShadow = async ({
     })) as null | Record<string, unknown>
 
     if (winner) {
+      const change = await req.payload.db.findOne({
+        collection: branchChangesCollectionSlug,
+        req: recoveryReq,
+        where: {
+          and: [
+            { branch: { equals: branch } },
+            { collectionSlug: { equals: collectionSlug } },
+            { documentID: { equals: String(docID) } },
+          ],
+        },
+      })
+
+      if (!change) {
+        throw new APIError(
+          `The ${collectionSlug} branch row for document ${String(docID)} has no change record.`,
+          409,
+        )
+      }
+
+      const authoritativeOperation = (change as { operation?: BranchOperation }).operation
+
+      if (operation && authoritativeOperation !== operation) {
+        return null
+      }
+
       return winner
     }
   }
@@ -183,6 +216,7 @@ export const createShadowRow = async ({
   docID,
   onCreated,
   req,
+  source,
   useAmbientTransaction = false,
 }: Args): Promise<Record<string, unknown>> => {
   if (useAmbientTransaction) {
@@ -194,11 +228,13 @@ export const createShadowRow = async ({
     }
 
     try {
-      const shadow = (await ambient.payload.db.create({
-        collection: collectionSlug,
+      const shadow = await createShadowContent({
+        branch,
+        collectionSlug,
         data,
         req: ambient,
-      })) as Record<string, unknown>
+        source,
+      })
 
       await onCreated(ambient, shadow)
 
@@ -223,11 +259,13 @@ export const createShadowRow = async ({
   let shadow: Record<string, unknown>
 
   try {
-    shadow = (await isolated.payload.db.create({
-      collection: collectionSlug,
+    shadow = await createShadowContent({
+      branch,
+      collectionSlug,
       data,
       req: isolated,
-    })) as Record<string, unknown>
+      source,
+    })
   } catch (error) {
     await killTransaction(isolated)
 
@@ -237,7 +275,7 @@ export const createShadowRow = async ({
 
     const winner = await findCompetingShadow({ branch, collectionSlug, docID, req })
 
-    if (!winner || winner[branchOpField] !== data[branchOpField]) {
+    if (!winner) {
       markConcurrentShadowOperationError(error)
       throw error
     }
@@ -259,7 +297,7 @@ export const createShadowRow = async ({
     if (shouldCommit && isRecoverableConcurrentShadowError(error)) {
       const winner = await findCompetingShadow({ branch, collectionSlug, docID, req })
 
-      if (winner && winner[branchOpField] === data[branchOpField]) {
+      if (winner) {
         return winner
       }
 
@@ -283,4 +321,34 @@ export const createShadowRow = async ({
 
     throw error
   }
+}
+
+const createShadowContent = async ({
+  branch,
+  collectionSlug,
+  data,
+  req,
+  source,
+}: {
+  branch: string
+  collectionSlug: string
+  data: Record<string, unknown>
+  req: PayloadRequest
+  source?: CopyArgs['source']
+}): Promise<Record<string, unknown>> => {
+  if (source) {
+    return req.payload.db.copy({
+      collection: collectionSlug,
+      data,
+      destination: { branch },
+      req,
+      source,
+    }) as Promise<Record<string, unknown>>
+  }
+
+  return req.payload.db.create({
+    collection: collectionSlug,
+    data,
+    req,
+  }) as Promise<Record<string, unknown>>
 }

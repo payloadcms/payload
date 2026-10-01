@@ -25,6 +25,7 @@ import { transform } from './utilities/transform.js'
 export const queryDrafts: QueryDrafts = async function queryDrafts(
   this: MongooseAdapter,
   {
+    branch,
     collection: collectionSlug,
     joins,
     limit,
@@ -68,6 +69,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   }
 
   const branchedWhere = await resolveBranchVersionQuery({
+    branch,
     collectionSlug,
     req,
     where,
@@ -77,8 +79,10 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 
   const versionQuery = await buildQuery({
     adapter: this,
+    branch,
     fields,
     locale,
+    req,
     where: combinedWhere,
   })
 
@@ -149,6 +153,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 
   const aggregate = await buildJoinAggregation({
     adapter: this,
+    branch,
     collection: collectionSlug,
     collectionConfig,
     joins,
@@ -182,6 +187,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   if (!this.useJoinAggregations) {
     await resolveJoins({
       adapter: this,
+      branch,
       collectionSlug,
       docs: result.docs as Record<string, unknown>[],
       joins,

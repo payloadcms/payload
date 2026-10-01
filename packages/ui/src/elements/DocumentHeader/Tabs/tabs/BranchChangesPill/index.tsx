@@ -1,12 +1,9 @@
 'use client'
 
-import { branchChangesCollectionSlug, formatAdminURL } from 'payload/shared'
-import * as qs from 'qs-esm'
 import React, { useEffect, useState } from 'react'
 
-import { useConfig } from '../../../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../../../providers/DocumentInfo/index.js'
-import { requests } from '../../../../../utilities/api.js'
+import { useServerFunctions } from '../../../../../providers/ServerFunctions/index.js'
 import './index.css'
 
 const baseClass = 'pill-branch-changes'
@@ -20,48 +17,26 @@ const baseClass = 'pill-branch-changes'
  * from it instead of issuing its own request.
  */
 export const BranchChangesPill: React.FC = () => {
-  const { data } = useDocumentInfo()
-
-  const {
-    config: {
-      routes: { api },
-      serverURL,
-    },
-  } = useConfig()
+  const { id } = useDocumentInfo()
+  const { serverFunction } = useServerFunctions()
 
   const [count, setCount] = useState<null | number>(null)
 
-  const slug = (data as { slug?: string } | undefined)?.slug
-
   useEffect(() => {
-    if (!slug) {
+    if (id === undefined || id === null) {
       return
     }
 
-    let active = true
-
-    const query = qs.stringify(
-      { depth: 0, limit: 0, where: { branch: { equals: slug } } },
-      { addQueryPrefix: true },
-    )
+    let isActive = true
 
     void (async () => {
       try {
-        const response = await requests.get(
-          formatAdminURL({
-            apiRoute: api,
-            path: `/${branchChangesCollectionSlug}${query}`,
-            serverURL,
-          }),
-        )
+        const { totalDocs } = (await serverFunction({
+          name: 'get-branch-merge-summary',
+          args: { branchID: id, sampleLimit: 1 },
+        })) as { totalDocs?: number }
 
-        if (!response.ok) {
-          return
-        }
-
-        const { totalDocs } = (await response.json()) as { totalDocs?: number }
-
-        if (active && typeof totalDocs === 'number') {
+        if (isActive && typeof totalDocs === 'number') {
           setCount(totalDocs)
         }
       } catch (_err) {
@@ -71,9 +46,9 @@ export const BranchChangesPill: React.FC = () => {
     })()
 
     return () => {
-      active = false
+      isActive = false
     }
-  }, [api, serverURL, slug])
+  }, [id, serverFunction])
 
   if (count === null) {
     return null

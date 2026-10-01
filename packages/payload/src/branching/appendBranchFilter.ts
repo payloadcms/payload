@@ -1,10 +1,12 @@
 import type { Where } from '../types/index.js'
 
-import { branchField, branchOpField, MAIN_BRANCH } from './types.js'
+import { branchDocIDField, branchField, MAIN_BRANCH } from './types.js'
 
 type Args = {
   /** The active branch slug, or `'main'`. */
   branch: string
+  /** Canonical IDs deleted on this branch, from the change manifest. */
+  deletedIDs: (number | string)[]
   /** Whether branching is active for this entity. */
   enabled: boolean
   /**
@@ -39,7 +41,13 @@ const and = (where: Where, ...constraints: Where[]): Where => {
  * afterwards: filtering, sorting, `totalDocs` and pagination are all computed
  * by the database, and a post-query pass cannot correct any of them.
  */
-export const appendBranchFilter = ({ branch, enabled, shadowedIDs, where }: Args): Where => {
+export const appendBranchFilter = ({
+  branch,
+  deletedIDs,
+  enabled,
+  shadowedIDs,
+  where,
+}: Args): Where => {
   if (!enabled) {
     return where
   }
@@ -58,9 +66,16 @@ export const appendBranchFilter = ({ branch, enabled, shadowedIDs, where }: Args
       }
     : { [branchField]: { equals: MAIN_BRANCH } }
 
-  return and(
-    where,
-    { or: [{ [branchField]: { equals: branch } }, mainRows] },
-    { [branchOpField]: { not_equals: 'delete' } },
-  )
+  // A delete change is authoritative. Exclude its branch row by canonical ID
+  // rather than relying on mutable bookkeeping stored on the tombstone itself.
+  const branchRows: Where = deletedIDs.length
+    ? {
+        and: [
+          { [branchField]: { equals: branch } },
+          { [branchDocIDField]: { not_in: deletedIDs } },
+        ],
+      }
+    : { [branchField]: { equals: branch } }
+
+  return and(where, { or: [branchRows, mainRows] })
 }

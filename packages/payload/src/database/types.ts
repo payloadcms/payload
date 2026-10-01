@@ -16,6 +16,7 @@ export type { TypeWithVersion }
 
 export interface BaseDatabaseAdapter {
   allowIDOnCreate?: boolean
+  batchProcessing: BatchProcessing
   /**
    * Start a transaction, requiring commitTransaction() to be called for any changes to be made.
    * @returns an identifier for the transaction or null if one cannot be established
@@ -39,6 +40,7 @@ export interface BaseDatabaseAdapter {
    * Open the connection to the database
    */
   connect?: Connect
+  copy: Copy
   count: Count
   countGlobalVersions: CountGlobalVersions
   countVersions: CountVersions
@@ -192,6 +194,72 @@ type ConnectArgs = {
 export type Connect = (args?: ConnectArgs) => Promise<void>
 
 export type Destroy = () => Promise<void>
+
+export type CopyArgs = {
+  collection: CollectionSlug
+  /** Top-level field values that replace values from the source document. */
+  data?: Record<string, unknown>
+  destination: {
+    branch: string
+  }
+  req?: Partial<PayloadRequest>
+  source: {
+    branch: string
+    /** Logical document ID on the source branch. */
+    id: number | string
+  }
+}
+
+export type Copy = (this: BaseDatabaseAdapter, args: CopyArgs) => Promise<Document>
+
+export type BatchProcessingOperation =
+  | {
+      args: WithoutRequest<CreateArgs>
+      operation: 'create'
+    }
+  | {
+      args: WithoutRequest<DeleteOneArgs>
+      operation: 'deleteOne'
+    }
+  | {
+      args: WithoutRequest<UpdateOneArgs>
+      operation: 'updateOne'
+    }
+
+type WithoutRequest<T> = T extends unknown ? Omit<T, 'req'> : never
+
+export type BatchProcessingResult = {
+  index: number
+  operation: BatchProcessingOperation['operation']
+} & (
+  | {
+      document?: Document
+      documentID: number | string
+      status: 'succeeded'
+    }
+  | {
+      error: unknown
+      status: 'failed'
+    }
+  | {
+      status: 'noMatch'
+    }
+  | {
+      status: 'unattempted'
+    }
+)
+
+export type BatchProcessingArgs = {
+  batchSize?: number
+  operations: BatchProcessingOperation[]
+  req?: Partial<PayloadRequest>
+  shouldContinueOnError?: boolean
+}
+
+export type BatchProcessing = (
+  this: BaseDatabaseAdapter,
+  args: BatchProcessingArgs,
+) => Promise<BatchProcessingResult[]>
 
 export type CreateMigration = (args: {
   file?: string

@@ -6,8 +6,8 @@ import type {
 } from '../index.js'
 
 import { assertBranchWritable } from './assertBranchWritable.js'
-import { resolveBranch } from './resolveBranch.js'
-import { branchChangesCollectionSlug, branchField, branchOpField, MAIN_BRANCH } from './types.js'
+import { addToBranchManifest, refreshRequestDataLoader, resolveBranch } from './resolveBranch.js'
+import { branchChangesCollectionSlug, branchField, MAIN_BRANCH } from './types.js'
 
 /**
  * Stamps documents created on a branch so the read predicate can find them.
@@ -28,7 +28,6 @@ export const stampBranchOnCreate: CollectionBeforeChangeHook = ({ data, operatio
   return {
     ...data,
     [branchField]: branch,
-    [branchOpField]: 'create',
   }
 }
 
@@ -59,12 +58,21 @@ export const recordBranchCreate: CollectionAfterChangeHook = async ({
       branch,
       collectionSlug: collection.slug,
       doc: { relationTo: collection.slug, value: doc.id },
+      documentID: String(doc.id),
       entityType: 'collection',
       operation: 'create',
     },
     overrideAccess: true,
     req,
   })
+
+  addToBranchManifest({
+    collectionSlug: collection.slug,
+    docID: doc.id,
+    operation: 'create',
+    req,
+  })
+  refreshRequestDataLoader(req)
 
   return doc
 }

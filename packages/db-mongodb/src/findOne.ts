@@ -28,9 +28,11 @@ export const findOne: FindOne = async function findOne(
 
   const query = await buildQuery({
     adapter: this,
+    branch,
     collectionSlug,
     fields: collectionConfig.flattenedFields,
     locale,
+    req,
     where,
   })
 
@@ -42,6 +44,7 @@ export const findOne: FindOne = async function findOne(
 
   const aggregate = await buildJoinAggregation({
     adapter: this,
+    branch,
     collection: collectionSlug,
     collectionConfig,
     draftsEnabled,
@@ -79,6 +82,7 @@ export const findOne: FindOne = async function findOne(
   if (doc && !this.useJoinAggregations) {
     await resolveJoins({
       adapter: this,
+      branch,
       collectionSlug,
       docs: [doc] as Record<string, unknown>[],
       joins,

@@ -53,6 +53,7 @@ export const updateMany: UpdateMany = async function updateMany(
     collectionSlug,
     fields: collectionConfig.flattenedFields,
     locale,
+    req,
     where,
   })
 

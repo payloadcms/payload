@@ -6,6 +6,7 @@ import {
   branchesCollectionSlug,
   branchMergesCollectionSlug,
 } from './types.js'
+import { defaultBranchMergeValidation } from './validation.js'
 
 /**
  * Built-in Payload collections. Branching is off for these by default because
@@ -60,10 +61,22 @@ export const sanitizeBranchingConfig = (config: Config): SanitizedBranchingConfi
     branchableGlobals: new Set<string>(),
     enabled: false,
     maxShadowedIDs: branching.maxShadowedIDs ?? DEFAULT_MAX_SHADOWED_IDS,
+    validate: branching.validate ?? defaultBranchMergeValidation,
   }
 
   if (!enabled) {
     return disabled
+  }
+
+  const isMultiTenantPluginEnabled = config.plugins?.some(
+    (plugin) =>
+      plugin.slug === '@payloadcms/plugin-multi-tenant' && plugin.options?.enabled !== false,
+  )
+
+  if (isMultiTenantPluginEnabled) {
+    console.warn(
+      '[Payload] Content branching and @payloadcms/plugin-multi-tenant are enabled together. This combination is not supported and does not provide tenant isolation.',
+    )
   }
 
   const explicitlyExcluded = new Set<string>(branching.exclude ?? [])
@@ -132,5 +145,6 @@ export const sanitizeBranchingConfig = (config: Config): SanitizedBranchingConfi
     enabled: true,
     hooks: branching.hooks,
     maxShadowedIDs: branching.maxShadowedIDs ?? DEFAULT_MAX_SHADOWED_IDS,
+    validate: branching.validate ?? defaultBranchMergeValidation,
   }
 }

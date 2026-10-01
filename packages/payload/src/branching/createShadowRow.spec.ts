@@ -11,9 +11,127 @@ import {
 
 const branch = 'feature'
 const collectionSlug = 'posts'
-const data = { _branch: branch, _branchDocID: 'main-id', _branchOp: 'update', title: 'Shadow' }
+const data = { _branch: branch, _branchDocID: 'main-id', title: 'Shadow' }
 const docID = 'main-id'
 const shadow = { ...data, id: 'shadow-id' }
+
+const createCopyConflictRequest = ({
+  hasChangeRecord,
+}: {
+  hasChangeRecord: boolean
+}): {
+  create: ReturnType<typeof vi.fn>
+  findOne: ReturnType<typeof vi.fn>
+  req: PayloadRequest
+} => {
+  const copyError = new ValidationError({
+    collection: collectionSlug,
+    errors: [{ message: 'Value must be unique', path: '_branchDocID' }],
+  })
+  const create = vi.fn()
+  const findOne = vi
+    .fn()
+    .mockImplementation(({ collection }: { collection: string }) =>
+      Promise.resolve(
+        collection === 'payload-branch-changes'
+          ? hasChangeRecord
+            ? { id: 'change-id', operation: 'update' }
+            : null
+          : shadow,
+      ),
+    )
+  const req = {
+    payload: {
+      db: {
+        copy: vi.fn().mockRejectedValue(copyError),
+        create,
+        findOne,
+      },
+    },
+  } as unknown as PayloadRequest
+
+  return { create, findOne, req }
+}
+
+test('should use database copy for a shadow with an explicit source', async () => {
+  const copy = vi.fn().mockResolvedValue(shadow)
+  const create = vi.fn()
+  const onCreated = vi.fn().mockResolvedValue(undefined)
+  const req = {
+    payload: {
+      db: {
+        beginTransaction: vi.fn().mockResolvedValue('copy-transaction'),
+        commitTransaction: vi.fn().mockResolvedValue(undefined),
+        copy,
+        create,
+        rollbackTransaction: vi.fn().mockResolvedValue(undefined),
+      },
+    },
+  } as unknown as PayloadRequest
+
+  await expect(
+    createShadowRow({
+      branch,
+      collectionSlug,
+      data,
+      docID,
+      onCreated,
+      req,
+      source: { branch: 'main', id: docID },
+    }),
+  ).resolves.toBe(shadow)
+
+  const copyReq = copy.mock.calls[0]![0].req as PayloadRequest
+
+  expect(copy).toHaveBeenCalledWith({
+    collection: collectionSlug,
+    data,
+    destination: { branch },
+    req: copyReq,
+    source: { branch: 'main', id: docID },
+  })
+  expect(create).not.toHaveBeenCalled()
+  expect(onCreated).toHaveBeenCalledWith(copyReq, shadow)
+})
+
+test('should recover a competing database copy after a uniqueness failure', async () => {
+  const { create, findOne, req } = createCopyConflictRequest({ hasChangeRecord: true })
+
+  await expect(
+    createShadowRow({
+      branch,
+      collectionSlug,
+      data,
+      docID,
+      onCreated: vi.fn(),
+      req,
+      source: { branch: 'main', id: docID },
+    }),
+  ).resolves.toBe(shadow)
+
+  expect(create).not.toHaveBeenCalled()
+  expect(findOne).toHaveBeenCalledTimes(2)
+  expect(findOne.mock.calls[1]![0]).toMatchObject({ collection: 'payload-branch-changes' })
+})
+
+test('should reject a competing shadow without a change record', async () => {
+  const { findOne, req } = createCopyConflictRequest({ hasChangeRecord: false })
+
+  await expect(
+    createShadowRow({
+      branch,
+      collectionSlug,
+      data,
+      docID,
+      onCreated: vi.fn(),
+      req,
+      source: { branch: 'main', id: docID },
+    }),
+  ).rejects.toMatchObject({ status: 409 })
+
+  expect(findOne).toHaveBeenCalledTimes(2)
+  expect(findOne.mock.calls[1]![0]).toMatchObject({ collection: 'payload-branch-changes' })
+})
 
 test('should create the shadow and registry in an ambient transaction without resolving it', async () => {
   const callerFile = { name: 'upload.txt' }
@@ -264,6 +382,7 @@ test.each([
   '_branch_doc_id',
   '_branchdocid_id',
   '_branchdocid_id, _branch',
+  'documentID',
   '_branch',
 ])('should return a competing shadow row after a %s uniqueness failure', async (path) => {
   const createError = new ValidationError({
@@ -331,39 +450,9 @@ test('should retry outside a caller transaction until a delayed competing shadow
   ).resolves.toBe(shadow)
 
   expect(rollbackTransaction).toHaveBeenCalledWith('transaction-id')
-  expect(findOne).toHaveBeenCalledTimes(6)
+  expect(findOne).toHaveBeenCalledTimes(7)
+  expect(findOne.mock.calls[6]![0]).toMatchObject({ collection: 'payload-branch-changes' })
   expect(req.transactionID).toBe('outer-transaction')
-})
-
-test('should reject a competing shadow created for a different operation', async () => {
-  const createError = {
-    errorLabels: ['TransientTransactionError'],
-    message: 'Please retry your operation or multi-document transaction.',
-  }
-  const findOne = vi.fn().mockResolvedValue({ ...shadow, _branchOp: 'delete' })
-  const req = {
-    payload: {
-      db: {
-        beginTransaction: vi.fn().mockResolvedValue('transaction-id'),
-        create: vi.fn().mockRejectedValue(createError),
-        findOne,
-        rollbackTransaction: vi.fn().mockResolvedValue(undefined),
-      },
-    },
-  } as unknown as PayloadRequest
-
-  await expect(
-    createShadowRow({
-      branch,
-      collectionSlug,
-      data,
-      docID,
-      onCreated: () => Promise.resolve(),
-      req,
-    }),
-  ).rejects.toBe(createError)
-
-  expect(findOne).toHaveBeenCalledOnce()
 })
 
 test('should retry a whole operation until a transient branch conflict clears', async () => {
@@ -480,7 +569,11 @@ test('should recover a competing shadow when commit reports a transient conflict
     errorLabels: ['TransientTransactionError'],
     message: 'Please retry your operation or multi-document transaction.',
   }
-  const findOne = vi.fn().mockResolvedValueOnce(null).mockResolvedValue(shadow)
+  const findOne = vi
+    .fn()
+    .mockResolvedValueOnce(null)
+    .mockResolvedValueOnce(shadow)
+    .mockResolvedValueOnce({ id: 'change-id' })
   const rollbackTransaction = vi.fn().mockResolvedValue(undefined)
   const req = {
     payload: {
@@ -506,5 +599,5 @@ test('should recover a competing shadow when commit reports a transient conflict
   ).resolves.toBe(shadow)
 
   expect(rollbackTransaction).toHaveBeenCalledWith('transaction-id')
-  expect(findOne).toHaveBeenCalledTimes(2)
+  expect(findOne).toHaveBeenCalledTimes(3)
 })

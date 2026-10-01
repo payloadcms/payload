@@ -66,9 +66,11 @@ export const find: Find = async function find(
 
   const query = await buildQuery({
     adapter: this,
+    branch,
     collectionSlug,
     fields: collectionConfig.flattenedFields,
     locale,
+    req,
     where,
   })
 
@@ -155,6 +157,7 @@ export const find: Find = async function find(
 
   const aggregate = await buildJoinAggregation({
     adapter: this,
+    branch,
     collection: collectionSlug,
     collectionConfig,
     draftsEnabled,
@@ -188,6 +191,7 @@ export const find: Find = async function find(
   if (!this.useJoinAggregations) {
     await resolveJoins({
       adapter: this,
+      branch,
       collectionSlug,
       docs: result.docs as Record<string, unknown>[],
       joins,

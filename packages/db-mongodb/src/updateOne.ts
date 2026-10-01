@@ -38,9 +38,11 @@ export const updateOne: UpdateOne = async function updateOne(
 
   const query = await buildQuery({
     adapter: this,
+    branch,
     collectionSlug,
     fields: collectionConfig.flattenedFields,
     locale,
+    req,
     where,
   })
 

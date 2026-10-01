@@ -16,7 +16,12 @@ import {
   isConcurrentShadowOperationError,
   retryConcurrentShadowOperation,
 } from '../../branching/createShadowRow.js'
-import { resetBranchState, resolveBranch } from '../../branching/resolveBranch.js'
+import { assertBranchMergeValidationWriteAllowed } from '../../branching/mergeWriteGuard.js'
+import {
+  refreshBranchState,
+  resetBranchState,
+  resolveBranch,
+} from '../../branching/resolveBranch.js'
 import {
   assertBranchCreatedDeleteUnreferenced,
   assertBranchDeleteCanUseCallerTransaction,
@@ -25,7 +30,7 @@ import {
   setConcurrentBranchDelete,
   willBranchAbsorbDelete,
 } from '../../branching/tombstone.js'
-import { branchOpField, MAIN_BRANCH } from '../../branching/types.js'
+import { MAIN_BRANCH } from '../../branching/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
@@ -92,15 +97,13 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
         branch,
         collectionSlug: incomingArgs.collection.config.slug,
         docID: incomingArgs.id,
+        operation: 'delete',
         req: incomingArgs.req,
       })
 
       const winnerID = winner?.id
 
-      if (
-        winner?.[branchOpField] === 'delete' &&
-        (typeof winnerID === 'number' || typeof winnerID === 'string')
-      ) {
+      if (typeof winnerID === 'number' || typeof winnerID === 'string') {
         concurrentDeleteRetryError = error
         concurrentDeleteWinnerID = winnerID
       }
@@ -174,6 +177,8 @@ const deleteByIDOperationAttempt = async <
   let cleanupScope: DeferredCleanupScope | null = null
   let shouldCommit = false
 
+  assertBranchMergeValidationWriteAllowed({ req: args.req })
+
   try {
     shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
     reportTransactionOwnership({ isOperationTransaction: shouldCommit })
@@ -208,6 +213,11 @@ const deleteByIDOperationAttempt = async <
       showHiddenFields,
       trash = false,
     } = args
+    const isDeletingFromBranch =
+      Boolean(
+        config.branching?.enabled &&
+          config.branching.branchableCollections.has(collectionConfig.slug),
+      ) && resolveBranch(req) !== MAIN_BRANCH
 
     // /////////////////////////////////////
     // Access
@@ -526,6 +536,10 @@ const deleteByIDOperationAttempt = async <
     if (shouldCommit) {
       reportFinalCommit()
       await commitTransaction(req)
+    }
+
+    if (isDeletingFromBranch) {
+      refreshBranchState(req)
     }
 
     return result as TransformCollectionWithSelect<TSlug, TSelect>

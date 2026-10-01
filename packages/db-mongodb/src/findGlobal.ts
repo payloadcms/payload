@@ -30,9 +30,11 @@ export const findGlobal: FindGlobal = async function findGlobal(
 
   const query = await buildQuery({
     adapter: this,
+    branch,
     fields,
     globalSlug,
     locale,
+    req,
     where: combineQueries({ globalType: { equals: globalSlug } }, branchedWhere ?? {}),
   })
 

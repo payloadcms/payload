@@ -1,20 +1,15 @@
-import type { CollectionConfig } from '../collections/config/types.js'
+import type { CollectionConfig, CompoundIndex } from '../collections/config/types.js'
 import type { Field, TextField } from '../fields/config/types.js'
 import type { GlobalConfig } from '../globals/config/types.js'
 
+import { fieldAffectsData, tabHasName } from '../fields/config/types.js'
 import {
   assertBranchWritableBeforeCollectionWrite,
   assertBranchWritableBeforeGlobalWrite,
   recordBranchCreate,
   stampBranchOnCreate,
 } from './hooks.js'
-import {
-  branchDocIDField,
-  branchField,
-  branchOpField,
-  branchParentField,
-  MAIN_BRANCH,
-} from './types.js'
+import { branchDocIDField, branchField, branchParentField, MAIN_BRANCH } from './types.js'
 
 /**
  * These columns are branch bookkeeping, not content. They are `admin.hidden`,
@@ -91,15 +86,6 @@ export const buildBranchDocIDField = (slug: string): Field => ({
   relationTo: slug,
 })
 
-/** `_branchOp` — what this row represents on its branch. Null on main rows. */
-export const buildBranchOpField = (): Field => ({
-  name: branchOpField,
-  type: 'text',
-  ...bookkeepingOnly,
-  index: true,
-  label: 'Branch Operation',
-})
-
 /** `_branchParent` — the canonical parent document, for version rows. */
 export const buildBranchParentField = (slug: string): Field => ({
   name: branchParentField,
@@ -113,6 +99,51 @@ export const buildBranchParentField = (slug: string): Field => ({
 
 const hasField = (fields: Field[], name: string): boolean =>
   fields.some((field) => 'name' in field && field.name === name)
+
+const joinFieldPath = ({ name, parentPath }: { name: string; parentPath: string }): string =>
+  parentPath ? `${parentPath}.${name}` : name
+
+const rewriteUniqueFields = ({
+  fields,
+  indexes,
+  parentPath = '',
+}: {
+  fields: Field[]
+  indexes: CompoundIndex[]
+  parentPath?: string
+}): void => {
+  for (const field of fields) {
+    if (fieldAffectsData(field) && 'unique' in field && field.unique) {
+      const fieldPath = joinFieldPath({ name: field.name, parentPath })
+
+      field.unique = false
+      indexes.push({
+        fields: [fieldPath, branchField],
+        ...(field.required === true ? {} : { requireExists: [fieldPath] }),
+        unique: true,
+      })
+    }
+
+    if (field.type === 'collapsible' || field.type === 'group' || field.type === 'row') {
+      rewriteUniqueFields({
+        fields: field.fields,
+        indexes,
+        parentPath:
+          field.type === 'group' && fieldAffectsData(field)
+            ? joinFieldPath({ name: field.name, parentPath })
+            : parentPath,
+      })
+    } else if (field.type === 'tabs') {
+      for (const tab of field.tabs) {
+        rewriteUniqueFields({
+          fields: tab.fields,
+          indexes,
+          parentPath: tabHasName(tab) ? joinFieldPath({ name: tab.name, parentPath }) : parentPath,
+        })
+      }
+    }
+  }
+}
 
 /**
  * Injects the branch discriminator fields and rewrites `unique: true` fields
@@ -131,11 +162,11 @@ export const injectBranchFields = (collection: CollectionConfig): CollectionConf
     collection.fields.push(buildBranchDocIDField(collection.slug))
   }
 
-  if (!hasField(collection.fields, branchOpField)) {
-    collection.fields.push(buildBranchOpField())
-  }
-
-  const indexes = collection.indexes ?? []
+  const indexes = (collection.indexes ?? []).map((index) =>
+    index.unique && !index.fields.includes(branchField)
+      ? { ...index, fields: [...index.fields, branchField] }
+      : index,
+  )
 
   // Catches two concurrent first-edits of the same document on the same branch:
   // whichever write loses the race gets a constraint violation from the
@@ -148,12 +179,7 @@ export const injectBranchFields = (collection: CollectionConfig): CollectionConf
     unique: true,
   })
 
-  for (const field of collection.fields) {
-    if ('name' in field && 'unique' in field && field.unique) {
-      field.unique = false
-      indexes.push({ fields: [field.name, branchField], unique: true })
-    }
-  }
+  rewriteUniqueFields({ fields: collection.fields, indexes })
 
   collection.indexes = indexes
 
@@ -166,8 +192,10 @@ export const injectBranchFields = (collection: CollectionConfig): CollectionConf
   if (collection.upload) {
     const upload = collection.upload === true ? {} : collection.upload
 
-    if (!upload.filenameCompoundIndex) {
-      upload.filenameCompoundIndex = ['filename', branchField]
+    upload.filenameCompoundIndex ??= ['filename']
+
+    if (!upload.filenameCompoundIndex.includes(branchField)) {
+      upload.filenameCompoundIndex.push(branchField)
     }
 
     collection.upload = upload
@@ -189,8 +217,6 @@ export const injectBranchFields = (collection: CollectionConfig): CollectionConf
  *
  * No `_branchDocID`, because a global's identity is its slug and is stable
  * across branches — the whole canonical-ID translation problem does not arise.
- * No `_branchOp`, because globals cannot be created or deleted through the API,
- * so there are no tombstones.
  */
 export const injectGlobalBranchFields = (global: GlobalConfig): GlobalConfig => {
   if (!hasField(global.fields, branchField)) {

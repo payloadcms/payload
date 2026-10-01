@@ -8,7 +8,9 @@ import { getLatestCollectionVersion } from '../versions/getLatestCollectionVersi
 import { getLatestGlobalVersion } from '../versions/getLatestGlobalVersion.js'
 import {
   type BranchCreatedTarget,
+  getPossibleRelationshipCollectionSlugs,
   hasBranchCreatedDocumentReference,
+  hasConfiguredRelationshipValue,
 } from './assertBranchCreatedDocumentsUnreferenced.js'
 import { checkFieldAccess } from './checkFieldAccess.js'
 import {
@@ -18,13 +20,8 @@ import {
 } from './globalMergeWrites.js'
 import { readLocalizedBranchWrite } from './readLocalizedBranchWrite.js'
 import { isolateBranchState } from './resolveBranch.js'
-import {
-  branchChangesCollectionSlug,
-  branchDocIDField,
-  branchField,
-  branchOpField,
-  MAIN_BRANCH,
-} from './types.js'
+import { stripBranchMergeData, stripBranchMergeGlobalData } from './stripBranchMergeData.js'
+import { branchChangesCollectionSlug, branchDocIDField, branchField, MAIN_BRANCH } from './types.js'
 
 export type { EffectiveOperation }
 
@@ -73,6 +70,7 @@ type MergeDependencyPreflightResult = {
 }
 
 type RunMergeDependencyPreflightArgs = {
+  availableChangeIDs?: Set<string>
   initiallyBlocked: BlockedChange[]
   payload: Payload
   pending: ResolvedChange[]
@@ -83,9 +81,8 @@ type RunMergeDependencyPreflightArgs = {
 /**
  * Flattens resolved changes into the operations each one performs.
  *
- * A change can require two permissions — a branch holding a published state and
- * a newer draft publishes *and* updates — and §7 blocks such a change as a whole
- * rather than letting a user who can update but not publish get the draft half.
+ * A content change has one latest source-state operation. A separate Trash
+ * transition can add another permission check for the same change.
  */
 const toPendingOperations = (pending: ResolvedChange[]): PendingOperation[] =>
   pending.flatMap((resolved) =>
@@ -297,17 +294,20 @@ const getProposedWrites = async ({
     return [{ dataShape: 'flattened', req }]
   }
 
+  const fields = payload.collections[collectionSlug]!.config.fields
   const localeCodes = payload.config.localization
-    ? traverseForLocalizedFields(payload.collections[collectionSlug]!.config.fields)
+    ? traverseForLocalizedFields(fields)
       ? payload.config.localization.localeCodes
       : undefined
     : undefined
   if (!localeCodes?.length) {
     return [
       {
-        data: stripInternal(item.write.data),
+        data: stripBranchMergeData({ data: item.write.data, fields }),
         dataShape: 'withLocales',
-        previousData: item.previousWrite ? stripInternal(item.previousWrite.data) : undefined,
+        previousData: item.previousWrite
+          ? stripBranchMergeData({ data: item.previousWrite.data, fields })
+          : undefined,
         req,
       },
     ]
@@ -344,10 +344,10 @@ const getProposedWrites = async ({
       : undefined
 
     proposedWrites.push({
-      data: stripInternal(data),
+      data: stripBranchMergeData({ data, fields }),
       dataShape: 'flattened',
       locale,
-      previousData: previousData ? stripInternal(previousData) : undefined,
+      previousData: previousData ? stripBranchMergeData({ data: previousData, fields }) : undefined,
       req: localeReq,
     })
   }
@@ -411,7 +411,7 @@ export const runGlobalMergePreflight = async ({
           break
         }
 
-        const data = stripInternal({ ...storedData, globalType: undefined })
+        const data = stripBranchMergeGlobalData({ data: storedData, fields: globalConfig.fields })
         const result = await executeAccess(
           { slug: globalSlug, data, disableErrors: true, req: localeReq },
           globalConfig.access.update,
@@ -519,6 +519,7 @@ export const runGlobalMergePreflight = async ({
  * blocked, every selected change which depends on that create becomes blocked in turn.
  */
 export const runMergeDependencyPreflight = async ({
+  availableChangeIDs,
   initiallyBlocked,
   payload,
   pending,
@@ -527,6 +528,7 @@ export const runMergeDependencyPreflight = async ({
 }: RunMergeDependencyPreflightArgs): Promise<BlockedChange[]> =>
   (
     await resolveMergeDependencies({
+      availableChangeIDs,
       initiallyBlocked,
       payload,
       pending,
@@ -536,12 +538,14 @@ export const runMergeDependencyPreflight = async ({
   ).blocked
 
 export const hasUnavailableBranchCreatedDependency = async ({
+  availableChangeIDs,
   collectionSlug,
   data,
   globalSlug,
   payload,
   req,
 }: {
+  availableChangeIDs?: Set<string>
   collectionSlug?: string
   data: Record<string, unknown>
   globalSlug?: string
@@ -556,30 +560,53 @@ export const hasUnavailableBranchCreatedDependency = async ({
     return false
   }
 
-  const branchCreates = await findPendingBranchCreates({ payload, req })
-
-  return branchCreates.some((target) =>
-    hasBranchCreatedDocumentReference({
+  if (
+    !hasConfiguredRelationshipValue({
       data,
       dataShape: 'withLocales',
       fields,
       payloadBlocks: payload.blocks,
-      req,
-      target,
-    }),
+    })
+  ) {
+    return false
+  }
+
+  const collectionSlugs = getPossibleRelationshipCollectionSlugs({
+    fields,
+    payloadBlocks: payload.blocks,
+  })
+  const branchCreates = await findPendingBranchCreates({ collectionSlugs, payload, req })
+
+  return branchCreates.some(
+    (target) =>
+      !availableChangeIDs?.has(String(target.changeID)) &&
+      hasBranchCreatedDocumentReference({
+        data,
+        dataShape: 'withLocales',
+        fields,
+        payloadBlocks: payload.blocks,
+        req,
+        target,
+      }),
   )
 }
 
 export const resolveMergeDependencies = async ({
+  availableChangeIDs,
   initiallyBlocked,
   payload,
   pending,
   pendingGlobals,
   req,
 }: RunMergeDependencyPreflightArgs): Promise<MergeDependencyPreflightResult> => {
+  if (!hasPendingRelationshipValues({ payload, pending, pendingGlobals })) {
+    return { blocked: [], dependencyChangeIDsByChangeID: new Map() }
+  }
+
   // Deliberately spans every branch. A stored relationship can name a document
   // created on another branch, and that target is unavailable on main too.
-  const branchCreates = await findPendingBranchCreates({ payload, req })
+  const collectionSlugs = getDependencyCollectionSlugs({ payload, pending, pendingGlobals })
+  const branchCreates = await findPendingBranchCreates({ collectionSlugs, payload, req })
 
   if (!branchCreates.length) {
     return { blocked: [], dependencyChangeIDsByChangeID: new Map() }
@@ -587,6 +614,7 @@ export const resolveMergeDependencies = async ({
 
   const blockedChangeIDs = new Set(initiallyBlocked.map(({ changeID }) => String(changeID)))
   const selectedChangeIDs = new Set([
+    ...(availableChangeIDs ?? []),
     ...pending.map(({ change }) => String(change.id)),
     ...pendingGlobals.map(({ id }) => String(id)),
   ])
@@ -643,7 +671,10 @@ export const resolveMergeDependencies = async ({
           docTitle: String(resolved.docID),
           message:
             'This change refers to branch-created content that will not be available on main.',
-          operation: resolved.writes[0]?.operation ?? 'update',
+          operation:
+            resolved.writes.find((write) => !write.trashState)?.operation ??
+            resolved.writes[0]?.operation ??
+            'update',
           reason: 'dependency',
         },
         dependencyChangeIDs,
@@ -686,7 +717,7 @@ export const resolveMergeDependencies = async ({
 
         addReferencedBranchCreates({
           branchCreates,
-          data: stripInternal({ ...storedData, globalType: undefined }),
+          data: stripBranchMergeGlobalData({ data: storedData, fields: globalConfig.fields }),
           dataShape: 'flattened',
           dependencyChangeIDs,
           fields: globalConfig.flattenedFields,
@@ -747,13 +778,52 @@ export const resolveMergeDependencies = async ({
   return { blocked: dependencyBlocked, dependencyChangeIDsByChangeID }
 }
 
+const hasPendingRelationshipValues = ({
+  payload,
+  pending,
+  pendingGlobals,
+}: {
+  payload: Payload
+  pending: ResolvedChange[]
+  pendingGlobals: Record<string, unknown>[]
+}): boolean => {
+  if (pendingGlobals.length) {
+    return true
+  }
+
+  return pending.some((resolved) => {
+    const fields = payload.collections[resolved.collectionSlug]?.config.flattenedFields
+
+    if (!fields) {
+      return false
+    }
+
+    return resolved.writes.some(
+      (write) =>
+        write.operation !== 'delete' &&
+        hasConfiguredRelationshipValue({
+          data: write.data,
+          dataShape: 'withLocales',
+          fields,
+          payloadBlocks: payload.blocks,
+        }),
+    )
+  })
+}
+
 const findPendingBranchCreates = async ({
+  collectionSlugs,
   payload,
   req,
 }: {
+  collectionSlugs?: Set<string>
   payload: Payload
   req: PayloadRequest
 }): Promise<BranchCreateChange[]> => {
+  if (collectionSlugs?.size === 0) {
+    return []
+  }
+
   const pendingBranchCreates = await payload.find({
     collection: branchChangesCollectionSlug,
     depth: 0,
@@ -762,13 +832,59 @@ const findPendingBranchCreates = async ({
     pagination: false,
     req,
     where: {
-      and: [{ entityType: { equals: 'collection' } }, { operation: { equals: 'create' } }],
+      and: [
+        { entityType: { equals: 'collection' } },
+        { operation: { equals: 'create' } },
+        ...(collectionSlugs ? [{ collectionSlug: { in: [...collectionSlugs] } }] : []),
+      ],
     },
   })
 
   return getBranchCreateChanges({
     changes: pendingBranchCreates.docs as Record<string, unknown>[],
   })
+}
+
+const getDependencyCollectionSlugs = ({
+  payload,
+  pending,
+  pendingGlobals,
+}: {
+  payload: Payload
+  pending: ResolvedChange[]
+  pendingGlobals: Record<string, unknown>[]
+}): Set<string> | undefined => {
+  const collectionSlugs = new Set<string>()
+  const fieldTrees = [
+    ...pending.map(
+      ({ collectionSlug }) => payload.collections[collectionSlug]?.config.flattenedFields,
+    ),
+    ...pendingGlobals.map(
+      (change) =>
+        payload.globals.config.find(({ slug }) => slug === change.globalSlug)?.flattenedFields,
+    ),
+  ]
+
+  for (const fields of fieldTrees) {
+    if (!fields) {
+      continue
+    }
+
+    const possibleCollectionSlugs = getPossibleRelationshipCollectionSlugs({
+      fields,
+      payloadBlocks: payload.blocks,
+    })
+
+    if (!possibleCollectionSlugs) {
+      return undefined
+    }
+
+    for (const collectionSlug of possibleCollectionSlugs) {
+      collectionSlugs.add(collectionSlug)
+    }
+  }
+
+  return collectionSlugs
 }
 
 const getBranchCreateChanges = ({
@@ -849,22 +965,7 @@ const whereReferencesBranchMetadata = (value: unknown): boolean => {
 
   return Object.entries(value).some(
     ([key, nestedValue]) =>
-      [branchDocIDField, branchField, branchOpField].includes(key.split('.')[0]!) ||
+      [branchDocIDField, branchField].includes(key.split('.')[0]!) ||
       whereReferencesBranchMetadata(nestedValue),
   )
-}
-
-/** Branch bookkeeping and server-owned timestamps are not part of the proposed user data. */
-const stripInternal = (data: Record<string, unknown>): Record<string, unknown> => {
-  const {
-    id: _id,
-    [branchDocIDField]: _docID,
-    [branchField]: _branch,
-    [branchOpField]: _op,
-    createdAt: _createdAt,
-    updatedAt: _updatedAt,
-    ...rest
-  } = data
-
-  return rest
 }

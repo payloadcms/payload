@@ -3,9 +3,127 @@ import type { PayloadRequest } from '../types/index.js'
 
 import { describe, expect, it } from 'vitest'
 
-import { hasBranchCreatedDocumentReference } from './assertBranchCreatedDocumentsUnreferenced.js'
+import {
+  getPossibleRelationshipCollectionSlugs,
+  hasBranchCreatedDocumentReference,
+  hasConfiguredRelationshipValue,
+} from './assertBranchCreatedDocumentsUnreferenced.js'
 
 const req = {} as PayloadRequest
+
+describe('getPossibleRelationshipCollectionSlugs', () => {
+  it('should collect relationship targets from nested and referenced block fields', () => {
+    const collectionSlugs = getPossibleRelationshipCollectionSlugs({
+      fields: [
+        {
+          blocks: ['category-block'],
+          flattenedFields: [],
+          name: 'layout',
+          type: 'blocks',
+        } as unknown as FlattenedField,
+        {
+          flattenedFields: [
+            {
+              name: 'owner',
+              relationTo: ['users', 'teams'],
+              type: 'relationship',
+            },
+          ],
+          name: 'metadata',
+          type: 'group',
+        } as unknown as FlattenedField,
+      ],
+      payloadBlocks: {
+        'category-block': {
+          flattenedFields: [
+            {
+              name: 'category',
+              relationTo: 'categories',
+              type: 'relationship',
+            },
+          ],
+          slug: 'category-block',
+        },
+      } as PayloadRequest['payload']['blocks'],
+    })
+
+    expect(collectionSlugs).toEqual(new Set(['categories', 'users', 'teams']))
+  })
+
+  it('should keep dependency lookup unbounded for rich text fields', () => {
+    expect(
+      getPossibleRelationshipCollectionSlugs({
+        fields: [{ name: 'content', type: 'richText' } as FlattenedField],
+        payloadBlocks: {},
+      }),
+    ).toBeUndefined()
+  })
+})
+
+describe('hasConfiguredRelationshipValue', () => {
+  const fields = [
+    {
+      name: 'category',
+      relationTo: 'categories',
+      type: 'relationship',
+    },
+    {
+      blocks: ['category-block'],
+      flattenedFields: [],
+      name: 'layout',
+      type: 'blocks',
+    },
+  ] as unknown as FlattenedField[]
+  const payloadBlocks = {
+    'category-block': {
+      flattenedFields: [
+        {
+          name: 'category',
+          relationTo: 'categories',
+          type: 'relationship',
+        },
+      ],
+      slug: 'category-block',
+    },
+  } as PayloadRequest['payload']['blocks']
+
+  it('should ignore configured relationship fields without values', () => {
+    expect(
+      hasConfiguredRelationshipValue({
+        data: { layout: [{ blockType: 'category-block' }] },
+        dataShape: 'withLocales',
+        fields,
+        payloadBlocks,
+      }),
+    ).toBe(false)
+  })
+
+  it('should detect relationship values inside referenced blocks', () => {
+    expect(
+      hasConfiguredRelationshipValue({
+        data: {
+          layout: [{ blockType: 'category-block', category: 'branch-category' }],
+        },
+        dataShape: 'withLocales',
+        fields,
+        payloadBlocks,
+      }),
+    ).toBe(true)
+  })
+
+  it('should keep dependency lookup enabled for an unknown stored block type', () => {
+    expect(
+      hasConfiguredRelationshipValue({
+        data: {
+          layout: [{ blockType: 'removed-block', category: 'branch-category' }],
+        },
+        dataShape: 'withLocales',
+        fields,
+        payloadBlocks,
+      }),
+    ).toBe(true)
+  })
+})
 
 describe('hasBranchCreatedDocumentReference', () => {
   it('should detect a flattened localized relationship to branch-created content', () => {

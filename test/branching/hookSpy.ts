@@ -1,4 +1,4 @@
-import type { PayloadRequest } from 'payload'
+import type { BranchMergeValidate, PayloadRequest } from 'payload'
 
 /**
  * Mutable hook sink, so tests can observe which document hooks merge fires
@@ -11,6 +11,7 @@ export const hookSpy: {
   allowRestrictedNestedFieldWrite?: boolean
   beforeChange?: (args: any) => Promise<void> | void
   beforeMerge?: (args: any) => Promise<void> | void
+  branchValidation?: BranchMergeValidate
   headerBeforeOperation?: () => void
   homepageGlobalAccessWrites?: {
     heroTitle?: unknown

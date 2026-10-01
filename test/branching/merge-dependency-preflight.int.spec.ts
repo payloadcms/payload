@@ -93,13 +93,11 @@ test.suite('Branch merge dependency preflight', { config: './config.ts' }, () =>
       })
     }
 
-    await expect(
-      payload.branches.merge({
-        branch: branch.slug,
-        changes: [ownerChange.id],
-        overrideAccess: true,
-      }),
-    ).rejects.toMatchObject({ status: 409 })
+    const result = await payload.branches.merge({
+      branch: branch.slug,
+      changes: [ownerChange.id],
+      overrideAccess: true,
+    })
 
     const mainOwner = await payload.findByID({
       id: owner.id,
@@ -114,6 +112,13 @@ test.suite('Branch merge dependency preflight', { config: './config.ts' }, () =>
       overrideAccess: true,
     })
 
+    expect(result.canMerge).toBe(false)
+    expect(result.blocked).toContainEqual(
+      expect.objectContaining({
+        changeID: ownerChange.id,
+        reason: 'dependency',
+      }),
+    )
     expect(mainOwner.category === null || mainOwner.category === undefined).toBe(true)
     expect(pendingOwnerChange).not.toBeNull()
   })

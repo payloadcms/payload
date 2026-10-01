@@ -17,7 +17,7 @@ import {
 } from '../utilities/transactionCallbacks.js'
 import { assertBranchCreatedDocumentsUnreferenced } from './assertBranchCreatedDocumentsUnreferenced.js'
 import { assertBranchWritable } from './assertBranchWritable.js'
-import { resetBranchState, withoutBranch } from './resolveBranch.js'
+import { refreshBranchState, resetBranchState, withoutBranch } from './resolveBranch.js'
 import {
   branchChangesCollectionSlug,
   branchDocIDField,
@@ -406,6 +406,10 @@ const discardBranchChangesInternal = async (
       await killTransaction(req)
     }
     throw error
+  } finally {
+    if (incomingReq) {
+      refreshBranchState(incomingReq)
+    }
   }
 
   // The manifest this request memoized still lists the discarded documents as

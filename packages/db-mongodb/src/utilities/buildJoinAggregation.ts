@@ -26,6 +26,7 @@ import { getCollection } from './getEntity.js'
 
 type BuildJoinAggregationArgs = {
   adapter: MongooseAdapter
+  branch?: false | string
   collection: CollectionSlug
   collectionConfig: SanitizedCollectionConfig
   draftsEnabled?: boolean
@@ -41,6 +42,7 @@ type BuildJoinAggregationArgs = {
 
 export const buildJoinAggregation = async ({
   adapter,
+  branch,
   collection,
   collectionConfig,
   draftsEnabled,
@@ -113,8 +115,10 @@ export const buildJoinAggregation = async ({
 
     const $match = await buildQuery({
       adapter,
+      branch,
       fields: aggregatedFields,
       locale,
+      req,
       where: whereJoin,
     })
 
@@ -132,14 +136,17 @@ export const buildJoinAggregation = async ({
       aliases.push(alias)
 
       const joinBranchPredicate = getBranchPredicateSync({
+        branch,
         collectionSlug,
         req,
       })
       const branchMatch = joinBranchPredicate
         ? await buildQuery({
             adapter,
+            branch,
             fields: adapter.payload.collections[collectionSlug]!.config.flattenedFields,
             locale,
+            req,
             where: joinBranchPredicate,
           })
         : undefined
@@ -350,12 +357,14 @@ export const buildJoinAggregation = async ({
       // A join subquery must carry the same branch predicate as the top-level
       // read, or a branch would see main's related documents.
       const joinBranchPredicate = getBranchPredicateSync({
+        branch,
         collectionSlug: collectionConfig.slug,
         req,
       })
 
       const resolvedWhereJoin = useDrafts
         ? ((await resolveBranchVersionQuery({
+            branch,
             collectionSlug: collectionConfig.slug,
             req,
             where: appendVersionToQueryKey(whereJoin),
@@ -365,8 +374,10 @@ export const buildJoinAggregation = async ({
           : whereJoin
 
       const $match = await JoinModel.buildQuery({
+        branch,
         locale,
         payload: adapter.payload,
+        req,
         where: useDrafts
           ? combineQueries(resolvedWhereJoin, {
               latest: {

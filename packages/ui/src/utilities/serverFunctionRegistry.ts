@@ -11,7 +11,11 @@ import { renderListHandler } from '../views/List/handleServerFunction.js'
 import { buildFormStateHandler } from './buildFormState.js'
 import { buildTableStateHandler } from './buildTableState.js'
 import { copyDataFromLocaleHandler } from './copyDataFromLocale.js'
-import { scheduleMergeHandler } from './scheduleMergeHandler.js'
+import {
+  getBranchMergeSummaryHandler,
+  getUpcomingBranchMergesHandler,
+  scheduleMergeHandler,
+} from './scheduleMergeHandler.js'
 import {
   getUpcomingScheduledPublishHandler,
   schedulePublishHandler,
@@ -37,7 +41,9 @@ import { switchLanguageHandler } from './switchLanguageHandler.js'
 export const sharedServerFunctions: Record<string, ServerFunction<any, any>> = {
   'copy-data-from-locale': copyDataFromLocaleHandler,
   'form-state': buildFormStateHandler,
+  'get-branch-merge-summary': getBranchMergeSummaryHandler,
   'get-default-layout': getDefaultLayoutHandler,
+  'get-upcoming-branch-merges': getUpcomingBranchMergesHandler,
   'get-upcoming-scheduled-publish': getUpcomingScheduledPublishHandler,
   'render-branch-diff': renderBranchDiffHandler,
   'render-document': renderDocumentHandler,

@@ -2,6 +2,7 @@ import type { Block, Payload } from 'payload'
 
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import { defaultBranchMergeValidation } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -91,6 +92,10 @@ export default buildConfigWithDefaults({
       hooks: {
         beforeMerge: (args) => hookSpy.beforeMerge?.(args),
       },
+      validate: (args) =>
+        hookSpy.branchValidation
+          ? hookSpy.branchValidation(args)
+          : defaultBranchMergeValidation(args),
     },
     collections: [
       {
@@ -236,12 +241,32 @@ export default buildConfigWithDefaults({
       {
         slug: mediaSlug,
         fields: [{ name: 'alt', type: 'text' }],
-        upload: { staticDir: path.resolve(dirname, 'media') },
+        upload: {
+          filenameCompoundIndex: ['filename', 'alt'],
+          staticDir: path.resolve(dirname, 'media'),
+        },
         versions: false,
       },
       {
         slug: uniqueSlug,
-        fields: [{ name: 'slug', type: 'text', unique: true }],
+        fields: [
+          { name: 'slug', type: 'text', unique: true },
+          { name: 'localizedSlug', type: 'text', localized: true, unique: true },
+          {
+            name: 'metadata',
+            type: 'group',
+            fields: [{ name: 'code', type: 'text', unique: true }],
+          },
+          { name: 'site', type: 'text' },
+          { name: 'customSlug', type: 'text' },
+        ],
+        indexes: [
+          {
+            fields: ['site', 'customSlug'],
+            requireExists: ['site', 'customSlug'],
+            unique: true,
+          },
+        ],
         versions: false,
       },
       {
@@ -426,6 +451,21 @@ export default buildConfigWithDefaults({
         admin: { useAsTitle: 'title' },
         fields: [
           { name: 'title', type: 'text' },
+          {
+            name: 'metadata',
+            type: 'json',
+            jsonSchema: {
+              fileMatch: ['branch-metadata.json'],
+              schema: {
+                type: 'object',
+                additionalProperties: false,
+                properties: { score: { type: 'number' } },
+                required: ['score'],
+              },
+              uri: 'payload://branch-metadata.json',
+            },
+          },
+          { name: 'unstructuredMetadata', type: 'json' },
           {
             name: 'items',
             type: 'array',

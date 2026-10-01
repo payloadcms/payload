@@ -15,6 +15,7 @@ export const mergeSecurityCloudUploadsDirectory = path.resolve(
 export const mergeSecurityCloudUploadsSlug = 'merge-security-cloud-uploads'
 export const mergeSecurityPagesSlug = 'merge-security-pages'
 export const mergeSecurityPostsSlug = 'merge-security-posts'
+export const mergeSecurityTrashEditorEmail = 'merge-security-trash-editor@example.com'
 export const mergeSecurityUploadsDirectory = path.resolve(dirname, 'merge-security-uploads')
 export const mergeSecurityUploadsSlug = 'merge-security-uploads'
 
@@ -27,11 +28,13 @@ export default buildConfigWithDefaults({
         access: {
           create: ({ req }) =>
             req.user?.email !== mergeSecurityEditorEmail || mergeSecuritySpy.allowPageCreate,
+          delete: ({ req }) => req.user?.email !== mergeSecurityTrashEditorEmail,
           read: ({ req }) => req.user?.email !== mergeSecurityEditorEmail,
           update: ({ req }) => req.user?.email !== mergeSecurityEditorEmail,
         },
         admin: { useAsTitle: 'title' },
         fields: [{ name: 'title', type: 'text' }],
+        trash: true,
         versions: false,
       },
       {

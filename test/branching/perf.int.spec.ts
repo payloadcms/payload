@@ -317,9 +317,9 @@ test.suite('Branching query cost', { config: './config.ts', resetBetweenTests: f
       later: laterWrite.total - mainWrite.total,
       laterQueries: laterWrite.calls,
       // The write first reads an access-filtered document. A first write then creates the
-      // shadow and reads it back; later writes still verify the resolved branch row before
-      // mutation. These reads keep denied writes from creating branch state.
-    }).toMatchObject({ first: 7, later: 3 })
+      // shadow, records its change and verifies that pair. Later writes reuse the resolved
+      // branch row identity. These reads keep denied or inconsistent writes from changing state.
+    }).toMatchObject({ first: 8, later: 3 })
   })
 
   test('should charge a known amount for create, delete and global writes', async () => {

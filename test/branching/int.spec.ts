@@ -3,14 +3,19 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { Payload, PayloadRequest, SanitizedCollectionConfig } from 'payload'
 
+import { Types } from 'mongoose'
 import path from 'path'
 import {
   assertBranchReadable,
+  commitTransaction,
+  createDataloaderCacheKey,
   createPayloadRequest,
+  defaultBranchMergeValidation,
   initTransaction,
   isolateBranchState,
   isolateObjectProperty,
   killTransaction,
+  resolveBranch,
   resolveEffectiveOperations,
 } from 'payload'
 import { fileURLToPath } from 'url'
@@ -18,6 +23,7 @@ import { expect, vi } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
+import { migrateBranching } from '../../packages/db-mongodb/src/predefinedMigrations/migrateBranching.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercises this internal boundary directly.
 import { readLocalizedBranchWrite } from '../../packages/payload/src/branching/readLocalizedBranchWrite.js'
 
@@ -58,6 +64,30 @@ let payload: Payload
 let restClient: NextRESTClient
 let token: string
 
+type BranchMergeTestChange = {
+  afterVersionID?: string
+  applicationOutcome?: string
+  beforeVersionID?: string
+  cleanupError?: string
+  cleanupOutcome?: string
+  collectionSlug?: string
+  error?: string
+  globalSlug?: string
+  operation?: string
+  recoveryError?: string
+  recoveryOutcome?: string
+  sourceID?: string
+  sourceRevision?: string
+  sourceUpdatedAt?: string
+  sourceVersionIDs?: string[]
+}
+
+type BranchMergeTestEvent = {
+  changes: BranchMergeTestChange[]
+  error?: null | string
+  status: string
+}
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const expectedConcurrentOperationAttemptCounts = databaseAdapterSupportsTransactions({
@@ -77,6 +107,32 @@ const fieldNames = (collection: SanitizedCollectionConfig): string[] =>
 
 const collectionConfig = (slug: string): SanitizedCollectionConfig =>
   payload.collections[slug]!.config
+
+const createBranchRecord = ({ name, slug }: { name: string; slug: string }) =>
+  payload.create({ collection: branchesSlug, data: { name, slug } })
+
+const findBranchChanges = ({ branch }: { branch: string }) =>
+  payload.find({
+    collection: branchChangesSlug,
+    pagination: false,
+    where: { branch: { equals: branch } },
+  })
+
+const findBranchMergeEvent = async ({
+  branch,
+}: {
+  branch: string
+}): Promise<BranchMergeTestEvent> => {
+  const mergeEvents = await payload.find({
+    collection: branchMergesSlug,
+    pagination: false,
+    where: { branch: { equals: branch } },
+  })
+
+  expect(mergeEvents.docs).toHaveLength(1)
+
+  return mergeEvents.docs[0] as unknown as BranchMergeTestEvent
+}
 
 test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () => {
   test.beforeAll(async ({ payloadInstance, restClientInstance }) => {
@@ -98,7 +154,62 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
       expect(names).toContain('_branch')
       expect(names).toContain('_branchDocID')
-      expect(names).toContain('_branchOp')
+      expect(names).not.toContain('_branchOp')
+    })
+
+    test('should enforce one collection change per branch and logical document', () => {
+      const changesCollection = collectionConfig(branchChangesSlug)
+
+      expect(fieldNames(changesCollection)).toContain('documentID')
+      expect(changesCollection.indexes).toContainEqual({
+        fields: ['branch', 'collectionSlug', 'documentID'],
+        requireExists: ['collectionSlug', 'documentID'],
+        unique: true,
+      })
+    })
+
+    test('should reject a duplicate collection change identity', async () => {
+      const branch = await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Unique collection change identity' },
+        overrideAccess: true,
+      })
+      const document = await payload.create({
+        collection: postsSlug,
+        data: { title: 'unique change target' },
+        overrideAccess: true,
+      })
+      const changeData = {
+        branch: branch.slug,
+        collectionSlug: postsSlug,
+        doc: { relationTo: postsSlug, value: document.id },
+        documentID: String(document.id),
+        entityType: 'collection' as const,
+        operation: 'update' as const,
+      }
+      const change = await payload.create({
+        collection: branchChangesSlug,
+        data: changeData,
+        overrideAccess: true,
+      })
+
+      try {
+        await expect(
+          payload.create({
+            collection: branchChangesSlug,
+            data: changeData,
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow()
+      } finally {
+        await payload.delete({
+          id: change.id,
+          collection: branchChangesSlug,
+          overrideAccess: true,
+        })
+        await payload.delete({ id: document.id, collection: postsSlug, overrideAccess: true })
+        await payload.delete({ id: branch.id, collection: branchesSlug, overrideAccess: true })
+      }
     })
 
     test('should not inject branch fields into a collection opted out with branching: false', () => {
@@ -151,6 +262,169 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
           unique: true,
         }),
       )
+      expect(config.indexes).toContainEqual({
+        fields: ['site', 'customSlug', '_branch'],
+        requireExists: ['site', 'customSlug'],
+        unique: true,
+      })
+      expect(config.sanitizedIndexes).toContainEqual(
+        expect.objectContaining({
+          fields: expect.arrayContaining([
+            expect.objectContaining({ path: 'metadata.code' }),
+            expect.objectContaining({ path: '_branch' }),
+          ]),
+          requireExists: ['metadata.code'],
+          unique: true,
+        }),
+      )
+    })
+
+    test('should add branch scope to a custom upload filename index', () => {
+      expect(collectionConfig(mediaSlug).upload.filenameCompoundIndex).toEqual([
+        'filename',
+        'alt',
+        '_branch',
+      ])
+    })
+
+    test.options(
+      'should build one branch-scoped unique index for each localized value',
+      { db: 'mongo' },
+      () => {
+        const indexes = (payload.db as MongooseAdapter).collections[
+          uniqueSlug
+        ].schema.indexes() as [Record<string, 1>, Record<string, unknown>][]
+
+        expect(indexes).toContainEqual([
+          { _branch: 1, 'localizedSlug.en': 1 },
+          {
+            partialFilterExpression: { 'localizedSlug.en': { $exists: true } },
+            unique: true,
+          },
+        ])
+        expect(indexes).toContainEqual([
+          { _branch: 1, 'localizedSlug.es': 1 },
+          {
+            partialFilterExpression: { 'localizedSlug.es': { $exists: true } },
+            unique: true,
+          },
+        ])
+        expect(
+          indexes.some(
+            ([definition]) => 'localizedSlug.en' in definition && 'localizedSlug.es' in definition,
+          ),
+        ).toBe(false)
+      },
+    )
+  })
+
+  test.options.describe('Existing MongoDB data migration', { db: 'mongo' }, () => {
+    test('should backfill main data and replace a stale unrestricted unique index', async () => {
+      const adapter = payload.db as MongooseAdapter
+      const page = await payload.create({
+        collection: pagesSlug,
+        data: { _status: 'published', title: 'legacy page' },
+      })
+      const unique = await payload.create({
+        collection: uniqueSlug,
+        data: { slug: 'legacy-unique' },
+      })
+
+      await payload.updateGlobal({
+        data: { heroTitle: 'legacy global' },
+        slug: homepageGlobalSlug,
+      })
+
+      await adapter.collections[pagesSlug].updateOne({ _id: page.id }, { $unset: { _branch: 1 } })
+      await adapter.versions[pagesSlug].updateMany({ parent: page.id }, { $unset: { _branch: 1 } })
+      await adapter.globals.updateOne(
+        { globalType: homepageGlobalSlug },
+        { $set: { _branch: null } },
+      )
+      await adapter.versions[homepageGlobalSlug].updateMany(
+        { 'version.heroTitle': 'legacy global' },
+        { $set: { _branch: null } },
+      )
+      await adapter.collections[uniqueSlug].collection.createIndex(
+        { slug: 1 },
+        { name: 'legacy_slug_unique', sparse: true, unique: true },
+      )
+
+      await expect(
+        payload.create({
+          branch: 'cow',
+          collection: uniqueSlug,
+          data: { slug: 'legacy-unique' },
+        }),
+      ).rejects.toThrow()
+
+      await migrateBranching({ payload })
+
+      const migratedPage = await adapter.collections[pagesSlug]
+        .findById(page.id)
+        .lean<Record<string, unknown>>()
+      const migratedVersions = await adapter.versions[pagesSlug]
+        .find({ parent: page.id })
+        .lean<Record<string, unknown>[]>()
+      const migratedGlobal = await adapter.globals
+        .findOne({ globalType: homepageGlobalSlug })
+        .lean<Record<string, unknown>>()
+      const migratedGlobalVersions = await adapter.versions[homepageGlobalSlug]
+        .find({ 'version.heroTitle': 'legacy global' })
+        .lean<Record<string, unknown>[]>()
+
+      expect(migratedPage?._branch).toBe('main')
+      expect(migratedVersions.every((version) => version._branch === 'main')).toBe(true)
+      expect(migratedGlobal?._branch).toBe('main')
+      expect(migratedGlobalVersions.every((version) => version._branch === 'main')).toBe(true)
+
+      const indexes = await adapter.collections[uniqueSlug].collection.indexes()
+
+      expect(indexes.some((index) => index.name === 'legacy_slug_unique')).toBe(false)
+
+      const onBranch = await payload.create({
+        branch: 'cow',
+        collection: uniqueSlug,
+        data: { slug: 'legacy-unique' },
+      })
+
+      expect(onBranch.slug).toBe('legacy-unique')
+
+      await payload.delete({ id: onBranch.id, branch: false, collection: uniqueSlug })
+      await payload.delete({ id: unique.id, branch: false, collection: uniqueSlug })
+      await payload.delete({ id: page.id, branch: false, collection: pagesSlug })
+
+      const changes = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { collectionSlug: { equals: uniqueSlug } },
+      })
+
+      for (const change of changes.docs) {
+        await payload.delete({ id: change.id, collection: branchChangesSlug })
+      }
+    })
+
+    test('should report a conflict before replacing indexes', async () => {
+      const adapter = payload.db as MongooseAdapter
+      const existing = await payload.create({
+        collection: uniqueSlug,
+        data: { slug: 'migration-conflict' },
+      })
+      const legacy = await adapter.collections[uniqueSlug].collection.insertOne({
+        slug: 'migration-conflict',
+      })
+
+      await expect(migrateBranching({ payload })).rejects.toThrow()
+
+      const legacyAfterFailure = await adapter.collections[uniqueSlug].collection.findOne({
+        _id: legacy.insertedId,
+      })
+
+      expect(legacyAfterFailure?._branch).toBeUndefined()
+
+      await adapter.collections[uniqueSlug].collection.deleteOne({ _id: legacy.insertedId })
+      await payload.delete({ id: existing.id, branch: false, collection: uniqueSlug })
     })
   })
 
@@ -190,6 +464,16 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       ).rejects.toThrow()
 
       await payload.delete({ id: first.id, collection: uniqueSlug })
+    })
+
+    test('should allow several documents without an optional unique value', async () => {
+      const first = await payload.create({ collection: uniqueSlug, data: {} })
+      const second = await payload.create({ collection: uniqueSlug, data: {} })
+
+      expect(first.id).not.toBe(second.id)
+
+      await payload.delete({ id: first.id, collection: uniqueSlug })
+      await payload.delete({ id: second.id, collection: uniqueSlug })
     })
   })
 
@@ -340,6 +624,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(changes.docs).toHaveLength(5)
       expect(changes.docs[0]).toMatchObject({
         collectionSlug: postsSlug,
+        documentID: String(changes.docs[0]!.doc?.value),
         entityType: 'collection',
         operation: 'create',
       })
@@ -527,7 +812,20 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         data: { category: category.id, title: 'points at branch category' },
       })
 
-      await payload.branches.merge({ branch })
+      const result = await payload.branches.merge({ branch })
+
+      expect(result.blocked).toEqual([])
+      expect(result.validationErrors).toEqual([])
+      expect(result.merged).toHaveLength(2)
+
+      const rawPost = await payload.db.findOne({
+        branch: false,
+        collection: postsSlug,
+        req: await createPayloadRequest({ branch: false, payload }),
+        where: { id: { equals: post.id } },
+      })
+
+      expect(rawPost).toMatchObject({ _branch: 'main' })
 
       const onMain = await payload.findByID({ id: post.id, collection: postsSlug, depth: 1 })
       const related = onMain.category as { id?: number | string; name?: string } | null
@@ -796,10 +1094,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
 
       expect(draftOnMain.items?.map((item) => item.label)).toEqual(['second draft', 'first draft'])
-      expect(draftOnMain.items?.map((item) => item.id)).toEqual([
-        publishedOnMain.items?.[1]?.id,
+      expect(publishedOnMain.items?.map((item) => item.label)).toEqual(['main row'])
+      expect(draftOnMain.items?.map((item) => item.id)).toHaveLength(2)
+      expect(draftOnMain.items?.every((item) => Boolean(item.id))).toBe(true)
+      expect(draftOnMain.items?.map((item) => item.id)).not.toContain(
         publishedOnMain.items?.[0]?.id,
-      ])
+      )
     })
 
     test('should preserve nested row identity when a later branch draft removes a row', async () => {
@@ -859,10 +1159,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
 
       expect(draftOnMain.items?.map((item) => item.label)).toEqual(['second draft', 'third draft'])
-      expect(draftOnMain.items?.map((item) => item.id)).toEqual([
-        publishedOnMain.items?.[1]?.id,
-        publishedOnMain.items?.[2]?.id,
-      ])
+      expect(publishedOnMain.items?.map((item) => item.label)).toEqual(['main row'])
+      expect(draftOnMain.items?.map((item) => item.id)).toHaveLength(2)
+      expect(draftOnMain.items?.every((item) => Boolean(item.id))).toBe(true)
+      expect(draftOnMain.items?.map((item) => item.id)).not.toContain(
+        publishedOnMain.items?.[0]?.id,
+      )
     })
 
     test('should read exact localized merge data without evaluating defaults', async () => {
@@ -1121,7 +1423,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
     })
 
     test.afterEach(async () => {
-      for (const collection of [postsSlug, categoriesSlug] as const) {
+      for (const collection of [postsSlug, categoriesSlug, numericIDSlug] as const) {
         const rows = await payload.find({ branch: false, collection, pagination: false })
 
         for (const row of rows.docs) {
@@ -1194,6 +1496,120 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
       expect((onBranch.category as { name?: string })?.name).toBe('branch category')
       expect((onMain.category as { name?: string })?.name).toBe('main category')
+    })
+
+    test.each([
+      [
+        'single',
+        ({ categoryID, req }: { categoryID: number | string; req: PayloadRequest }) =>
+          payload.update({
+            id: categoryID,
+            collection: categoriesSlug,
+            data: { name: 'branch category' },
+            req,
+          }),
+      ],
+      [
+        'bulk',
+        ({ categoryID, req }: { categoryID: number | string; req: PayloadRequest }) =>
+          payload.update({
+            collection: categoriesSlug,
+            data: { name: 'branch category' },
+            req,
+            where: { id: { equals: categoryID } },
+          }),
+      ],
+    ] as const)(
+      'should refresh populated relationships after a %s branch update on the same request',
+      async (_operation, updateCategory) => {
+        const category = await payload.create({
+          collection: categoriesSlug,
+          data: { name: 'main category' },
+        })
+        const post = await payload.create({
+          collection: postsSlug,
+          data: { category: category.id, title: 'points at updated category' },
+        })
+        const req = await createPayloadRequest({ branch, payload })
+        const beforeUpdate = await payload.findByID({
+          id: post.id,
+          collection: postsSlug,
+          depth: 1,
+          req,
+        })
+
+        await updateCategory({ categoryID: category.id, req })
+
+        const afterUpdate = await payload.findByID({
+          id: post.id,
+          collection: postsSlug,
+          depth: 1,
+          req,
+        })
+
+        expect((beforeUpdate.category as { name?: string })?.name).toBe('main category')
+        expect((afterUpdate.category as { name?: string })?.name).toBe('branch category')
+      },
+    )
+
+    test('should refresh populated relationships after a branch delete on the same request', async () => {
+      const category = await payload.create({
+        collection: categoriesSlug,
+        data: { name: 'main category' },
+      })
+      const post = await payload.create({
+        collection: postsSlug,
+        data: { category: category.id, title: 'points at deleted category' },
+      })
+      const req = await createPayloadRequest({ branch, payload })
+      const beforeDelete = await payload.findByID({
+        id: post.id,
+        collection: postsSlug,
+        depth: 1,
+        req,
+      })
+
+      await payload.delete({ id: category.id, collection: categoriesSlug, req })
+
+      const afterDelete = await payload.findByID({
+        id: post.id,
+        collection: postsSlug,
+        depth: 1,
+        req,
+      })
+
+      expect((beforeDelete.category as { name?: string })?.name).toBe('main category')
+      expect(String(afterDelete.category)).toBe(String(category.id))
+    })
+
+    test('should refresh populated relationships after a branch create on the same request', async () => {
+      const req = await createPayloadRequest({ branch, payload })
+      const documentID = 9_812_345
+      const cacheKey = createDataloaderCacheKey({
+        branch,
+        collectionSlug: numericIDSlug,
+        currentDepth: 0,
+        depth: 1,
+        docID: documentID,
+        draft: false,
+        fallbackLocale: req.fallbackLocale!,
+        locale: req.locale!,
+        overrideAccess: true,
+        showHiddenFields: false,
+        transactionID: req.transactionID!,
+      })
+      const beforeCreate = await req.payloadDataLoader.load(cacheKey)
+
+      await payload.create({
+        collection: numericIDSlug,
+        data: { id: documentID, title: 'created on branch' },
+        req,
+      })
+
+      const afterCreate = await req.payloadDataLoader.load(cacheKey)
+
+      expect(beforeCreate).toBeNull()
+      expect(afterCreate).toMatchObject({ id: documentID, title: 'created on branch' })
     })
 
     test('should not serve one branch a populated document cached for another', async () => {
@@ -1479,7 +1895,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(changes[0]!.globalSlug).toBe(headerGlobalSlug)
     })
 
-    test('should apply global read constraints without running global read hooks for ledger snapshots', async () => {
+    test('should not run global read hooks or store snapshots for a merge event', async () => {
       const mergingUser = await payload.create({
         collection: 'users',
         data: { email: 'ledger-reader@example.com', password: 'test' },
@@ -1488,8 +1904,6 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       hookSpy.postBeforeRead = () => {
         throw new Error('snapshot global read hook must not run')
       }
-      hookSpy.restrictLedgerSnapshotGlobalRead = true
-
       const result = await payload.branches.merge({
         branch,
         overrideAccess: true,
@@ -1507,8 +1921,8 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       }
 
       expect(result.merged).toHaveLength(1)
-      expect(event.changes[0]?.before?.navLabel).toBe('main label')
-      expect(event.changes[0]?.after).toBeNull()
+      expect(event.changes[0]?.before).toBeUndefined()
+      expect(event.changes[0]?.after).toBeUndefined()
     })
 
     test('should return the global to main state on discard', async () => {
@@ -1697,7 +2111,56 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(draftOnMain.heroTitle).toBe('branch draft')
     })
 
-    test('should merge a published global and its newer draft', async () => {
+    test('should record the exact target versions for a versioned global merge', async () => {
+      const req = await createPayloadRequest({ branch: false, payload })
+      const beforeVersions = await payload.db.findGlobalVersions({
+        branch: false,
+        global: homepageGlobalSlug,
+        limit: 1,
+        pagination: false,
+        req,
+        sort: '-updatedAt',
+        where: { _branch: { equals: 'main' } },
+      })
+
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch,
+        data: { heroTitle: 'global version reference after' },
+        draft: true,
+      })
+      await payload.branches.merge({ branch })
+
+      const afterVersions = await payload.db.findGlobalVersions({
+        branch: false,
+        global: homepageGlobalSlug,
+        limit: 1,
+        pagination: false,
+        req,
+        sort: '-updatedAt',
+        where: { _branch: { equals: 'main' } },
+      })
+      const mergeEvent = (
+        await payload.find({
+          collection: branchMergesSlug,
+          pagination: false,
+          where: { branch: { equals: branch } },
+        })
+      ).docs[0] as unknown as {
+        changes: { afterVersionID?: string; beforeVersionID?: string }[]
+      }
+
+      expect(mergeEvent.changes[0]?.beforeVersionID).toBe(String(beforeVersions.docs[0]?.id))
+      expect(mergeEvent.changes[0]?.afterVersionID).toBe(String(afterVersions.docs[0]?.id))
+      expect(mergeEvent.changes[0]?.afterVersionID).not.toBe(mergeEvent.changes[0]?.beforeVersionID)
+    })
+
+    test('should merge only the latest global draft after an earlier branch publish', async () => {
+      const mainVersionsBefore = await payload.findGlobalVersions({
+        slug: homepageGlobalSlug,
+        pagination: false,
+      })
+
       await payload.updateGlobal({
         slug: homepageGlobalSlug,
         branch,
@@ -1714,12 +2177,22 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
       const publishedOnMain = await payload.findGlobal({ slug: homepageGlobalSlug })
       const draftOnMain = await payload.findGlobal({ slug: homepageGlobalSlug, draft: true })
+      const mainVersionsAfter = await payload.findGlobalVersions({
+        slug: homepageGlobalSlug,
+        pagination: false,
+      })
 
-      expect(publishedOnMain.heroTitle).toBe('branch published')
+      expect(publishedOnMain.heroTitle).toBe('main published')
       expect(draftOnMain.heroTitle).toBe('branch draft')
+      expect(mainVersionsAfter.docs).toHaveLength(mainVersionsBefore.docs.length + 1)
     })
 
     test('should merge every localized value of a versioned global', async () => {
+      const mainVersionsBefore = await payload.findGlobalVersions({
+        slug: homepageGlobalSlug,
+        pagination: false,
+      })
+
       await payload.updateGlobal({
         slug: homepageGlobalSlug,
         data: { _status: 'published', localizedTitle: 'main English' },
@@ -1747,9 +2220,59 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
       const mainEN = await payload.findGlobal({ slug: homepageGlobalSlug, locale: 'en' })
       const mainES = await payload.findGlobal({ slug: homepageGlobalSlug, locale: 'es' })
+      const mainVersionsAfter = await payload.findGlobalVersions({
+        slug: homepageGlobalSlug,
+        locale: 'all',
+        pagination: false,
+      })
 
       expect(mainEN.localizedTitle).toBe('branch English')
       expect(mainES.localizedTitle).toBe('branch Spanish')
+      expect(mainVersionsAfter.docs).toHaveLength(mainVersionsBefore.docs.length + 3)
+      expect(mainVersionsAfter.docs[0]?.version.localizedTitle).toEqual({
+        en: 'branch English',
+        es: 'branch Spanish',
+      })
+    })
+
+    test('should preserve each locale status from the latest global version', async () => {
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        data: { _status: 'published', localizedTitle: 'main English' },
+        locale: 'en',
+      })
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        data: { _status: 'published', localizedTitle: 'main Spanish' },
+        locale: 'es',
+      })
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch,
+        data: { _status: 'published', localizedTitle: 'branch English' },
+        locale: 'en',
+      })
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch,
+        data: { localizedTitle: 'branch Spanish draft' },
+        draft: true,
+        locale: 'es',
+      })
+
+      await payload.branches.merge({ branch })
+
+      const publishedEN = await payload.findGlobal({ slug: homepageGlobalSlug, locale: 'en' })
+      const publishedES = await payload.findGlobal({ slug: homepageGlobalSlug, locale: 'es' })
+      const draftES = await payload.findGlobal({
+        slug: homepageGlobalSlug,
+        draft: true,
+        locale: 'es',
+      })
+
+      expect(publishedEN.localizedTitle).toBe('branch English')
+      expect(publishedES.localizedTitle).toBe('main Spanish')
+      expect(draftES.localizedTitle).toBe('branch Spanish draft')
     })
 
     test('should check access against every exact global write and locale', async () => {
@@ -1804,16 +2327,6 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
 
       expect(hookSpy.homepageGlobalAccessWrites).toEqual([
-        {
-          heroTitle: 'branch published',
-          locale: 'en',
-          localizedTitle: 'published English',
-        },
-        {
-          heroTitle: 'branch published',
-          locale: 'es',
-          localizedTitle: 'published Spanish',
-        },
         { heroTitle: 'branch draft', locale: 'en', localizedTitle: 'draft English' },
         { heroTitle: 'branch draft', locale: 'es', localizedTitle: 'draft Spanish' },
       ])
@@ -2550,6 +3063,39 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(onMain.title).toBe('original on main')
     })
 
+    test('should refresh branch state across several writes on one request', async () => {
+      const req = await createPayloadRequest({ branch: 'cow', payload })
+      const beforeWrites = await payload.findByID({ id: mainDocID, collection: postsSlug, req })
+
+      const created = await payload.create({
+        collection: postsSlug,
+        data: { title: 'created on branch' },
+        req,
+      })
+      const afterCreate = await payload.findByID({ id: created.id, collection: postsSlug, req })
+
+      await payload.update({
+        id: mainDocID,
+        collection: postsSlug,
+        data: { title: 'edited on branch' },
+        req,
+      })
+      const afterUpdate = await payload.findByID({ id: mainDocID, collection: postsSlug, req })
+
+      await payload.delete({ id: mainDocID, collection: postsSlug, req })
+      const afterDelete = await payload.findByID({
+        id: mainDocID,
+        collection: postsSlug,
+        disableErrors: true,
+        req,
+      })
+
+      expect(beforeWrites.title).toBe('original on main')
+      expect(afterCreate.title).toBe('created on branch')
+      expect(afterUpdate.title).toBe('edited on branch')
+      expect(afterDelete).toBeNull()
+    })
+
     test('should create exactly one shadow row on first branch edit', async () => {
       await payload.update({
         id: mainDocID,
@@ -2558,8 +3104,8 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         data: { title: 'edited on branch' },
       })
 
-      // `_branchOp` and `_branchDocID` are `hidden`, so they are stripped from API
-      // responses — inspecting them is exactly what `showHiddenFields` is for.
+      // `_branchDocID` is `hidden`, so it is stripped from API responses.
+      // Inspecting it is exactly what `showHiddenFields` is for.
       const shadows = await payload.find({
         branch: false,
         collection: postsSlug,
@@ -2569,7 +3115,8 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
 
       expect(shadows.docs).toHaveLength(1)
-      expect(shadows.docs[0]).toMatchObject({ _branchOp: 'update', title: 'edited on branch' })
+      expect(shadows.docs[0]).not.toHaveProperty('_branchOp')
+      expect(shadows.docs[0]).toMatchObject({ title: 'edited on branch' })
       expect(String(shadows.docs[0]!._branchDocID)).toBe(String(mainDocID))
     })
 
@@ -2846,6 +3393,91 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(onMain.docs).toHaveLength(0)
     })
 
+    test('should hide a matching main document when its branch replacement does not match', async () => {
+      await payload.update({
+        id: mainDocID,
+        branch: 'cow',
+        collection: postsSlug,
+        data: { title: 'does not match main' },
+      })
+
+      const onBranch = await payload.find({
+        branch: 'cow',
+        collection: postsSlug,
+        limit: 1,
+        page: 1,
+        where: { title: { equals: 'original on main' } },
+      })
+      const count = await payload.count({
+        branch: 'cow',
+        collection: postsSlug,
+        where: { title: { equals: 'original on main' } },
+      })
+      const onMain = await payload.find({
+        collection: postsSlug,
+        pagination: false,
+        where: { title: { equals: 'original on main' } },
+      })
+
+      expect(onBranch.docs).toHaveLength(0)
+      expect(onBranch.totalDocs).toBe(0)
+      expect(onBranch.totalPages).toBe(1)
+      expect(count.totalDocs).toBe(0)
+      expect(onMain.docs).toHaveLength(1)
+    })
+
+    test('should hide a relationship-path match replaced by nonmatching branch content', async () => {
+      const category = await payload.create({
+        collection: categoriesSlug,
+        data: { name: 'main relationship match' },
+      })
+
+      await payload.update({
+        id: mainDocID,
+        collection: postsSlug,
+        data: { category: category.id },
+      })
+      await payload.update({
+        id: category.id,
+        branch: 'cow',
+        collection: categoriesSlug,
+        data: { name: 'branch relationship replacement' },
+      })
+
+      const mainValueOnBranch = await payload.find({
+        branch: 'cow',
+        collection: postsSlug,
+        pagination: false,
+        where: { 'category.name': { equals: 'main relationship match' } },
+      })
+      const branchValueOnBranch = await payload.find({
+        branch: 'cow',
+        collection: postsSlug,
+        pagination: false,
+        where: { 'category.name': { equals: 'branch relationship replacement' } },
+      })
+
+      expect(mainValueOnBranch.docs).toHaveLength(0)
+      expect(branchValueOnBranch.docs.map((doc) => String(doc.id))).toContain(String(mainDocID))
+
+      const categoryRows = await payload.find({
+        branch: false,
+        collection: categoriesSlug,
+        pagination: false,
+        where: {
+          or: [{ id: { equals: category.id } }, { _branchDocID: { equals: category.id } }],
+        },
+      })
+
+      for (const categoryRow of categoryRows.docs) {
+        await payload.delete({
+          id: categoryRow.id,
+          branch: false,
+          collection: categoriesSlug,
+        })
+      }
+    })
+
     test('should record the update in the changeset registry', async () => {
       await payload.update({
         id: mainDocID,
@@ -2861,7 +3493,11 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
 
       expect(changes.docs).toHaveLength(1)
-      expect(changes.docs[0]).toMatchObject({ collectionSlug: postsSlug, operation: 'update' })
+      expect(changes.docs[0]).toMatchObject({
+        collectionSlug: postsSlug,
+        documentID: String(mainDocID),
+        operation: 'update',
+      })
     })
 
     test('should tombstone rather than delete when deleting a main document on a branch', async () => {
@@ -2884,6 +3520,32 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
       expect(onBranch.docs.map((doc) => String(doc.id))).not.toContain(String(mainDocID))
       expect(onMain.docs.map((doc) => String(doc.id))).toContain(String(mainDocID))
+    })
+
+    test('should store deletion state only in the delete change', async () => {
+      await payload.delete({ id: mainDocID, branch: 'cow', collection: postsSlug })
+
+      const rawReq = await createPayloadRequest({ branch: false, payload })
+      const tombstone = await payload.db.findOne({
+        branch: false,
+        collection: postsSlug,
+        req: rawReq,
+        where: {
+          and: [{ _branch: { equals: 'cow' } }, { _branchDocID: { equals: mainDocID } }],
+        },
+      })
+
+      const onBranch = await payload.findByID({
+        id: mainDocID,
+        branch: 'cow',
+        collection: postsSlug,
+        disableErrors: true,
+      })
+      const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
+
+      expect(tombstone).not.toHaveProperty('_branchOp')
+      expect(onBranch).toBeNull()
+      expect(onMain.title).toBe('original on main')
     })
 
     test('should record the delete in the changeset registry', async () => {
@@ -2917,6 +3579,155 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
       expect(rows.docs).toHaveLength(0)
     })
+
+    test('should use the create change to hard-delete a branch-created document', async () => {
+      const created = await payload.create({
+        branch: 'cow',
+        collection: postsSlug,
+        data: { title: 'created then deleted by change operation' },
+      })
+      const rawReq = await createPayloadRequest({ branch: false, payload })
+
+      await payload.delete({ id: created.id, branch: 'cow', collection: postsSlug })
+
+      const rows = await payload.db.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        req: rawReq,
+        where: { id: { equals: created.id } },
+      })
+      const changes = await payload.db.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        req: rawReq,
+        where: { documentID: { equals: String(created.id) } },
+      })
+
+      expect(rows.docs).toHaveLength(0)
+      expect(changes.docs).toHaveLength(0)
+    })
+
+    test('should use the update change to tombstone an edited main document', async () => {
+      await payload.update({
+        id: mainDocID,
+        branch: 'cow',
+        collection: postsSlug,
+        data: { title: 'edited before delete' },
+      })
+
+      const rawReq = await createPayloadRequest({ branch: false, payload })
+      await payload.delete({ id: mainDocID, branch: 'cow', collection: postsSlug })
+
+      const onBranch = await payload.findByID({
+        id: mainDocID,
+        branch: 'cow',
+        collection: postsSlug,
+        disableErrors: true,
+      })
+      const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
+      const changes = await payload.db.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        req: rawReq,
+        where: { documentID: { equals: String(mainDocID) } },
+      })
+
+      expect(onBranch).toBeNull()
+      expect(onMain.title).toBe('original on main')
+      expect(changes.docs).toHaveLength(1)
+      expect(changes.docs[0]).toMatchObject({ operation: 'delete' })
+    })
+
+    test('should reject a delete when the branch row has no change record', async () => {
+      await payload.update({
+        id: mainDocID,
+        branch: 'cow',
+        collection: postsSlug,
+        data: { title: 'orphaned branch edit' },
+      })
+
+      const rawReq = await createPayloadRequest({ branch: false, payload })
+      const changes = await payload.db.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        req: rawReq,
+        where: { documentID: { equals: String(mainDocID) } },
+      })
+
+      await payload.db.deleteOne({
+        collection: branchChangesSlug,
+        req: rawReq,
+        where: { id: { equals: changes.docs[0]!.id } },
+      })
+
+      await expect(
+        payload.delete({ id: mainDocID, branch: 'cow', collection: postsSlug }),
+      ).rejects.toMatchObject({ status: 409 })
+
+      const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
+      const shadows = await payload.db.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        req: rawReq,
+        where: {
+          and: [{ _branch: { equals: 'cow' } }, { _branchDocID: { equals: mainDocID } }],
+        },
+      })
+
+      expect(onMain.title).toBe('original on main')
+      expect(shadows.docs).toHaveLength(1)
+      expect(shadows.docs[0]!.title).toBe('orphaned branch edit')
+    })
+
+    test('should reject an update when the branch row has no change record', async () => {
+      await payload.update({
+        id: mainDocID,
+        branch: 'cow',
+        collection: postsSlug,
+        data: { title: 'orphaned branch edit' },
+      })
+
+      const rawReq = await createPayloadRequest({ branch: false, payload })
+      const changes = await payload.db.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        req: rawReq,
+        where: { documentID: { equals: String(mainDocID) } },
+      })
+
+      await payload.db.deleteOne({
+        collection: branchChangesSlug,
+        req: rawReq,
+        where: { id: { equals: changes.docs[0]!.id } },
+      })
+
+      await expect(
+        payload.update({
+          id: mainDocID,
+          branch: 'cow',
+          collection: postsSlug,
+          data: { title: 'second branch edit' },
+        }),
+      ).rejects.toMatchObject({ status: 409 })
+
+      const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
+      const shadows = await payload.db.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        req: rawReq,
+        where: {
+          and: [{ _branch: { equals: 'cow' } }, { _branchDocID: { equals: mainDocID } }],
+        },
+      })
+
+      expect(onMain.title).toBe('original on main')
+      expect(shadows.docs).toHaveLength(1)
+      expect(shadows.docs[0]!.title).toBe('orphaned branch edit')
+    })
+
     test('should allow the same unique value on two different branches', async () => {
       const onMain = await payload.create({
         collection: uniqueSlug,
@@ -2957,6 +3768,130 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       for (const change of changes.docs) {
         await payload.delete({ id: change.id, collection: branchChangesSlug })
       }
+    })
+
+    test('should enforce localized uniqueness per locale and branch', async () => {
+      const onMain = await payload.create({
+        collection: uniqueSlug,
+        data: { localizedSlug: 'localized-shared' },
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: onMain.id,
+        collection: uniqueSlug,
+        data: { localizedSlug: 'main-spanish' },
+        locale: 'es',
+      })
+
+      const onCow = await payload.create({
+        branch: 'cow',
+        collection: uniqueSlug,
+        data: { localizedSlug: 'localized-shared' },
+        locale: 'en',
+      })
+
+      await expect(
+        payload.create({
+          collection: uniqueSlug,
+          data: { localizedSlug: 'localized-shared' },
+          locale: 'en',
+        }),
+      ).rejects.toThrow()
+      await expect(
+        payload.create({
+          branch: 'cow',
+          collection: uniqueSlug,
+          data: { localizedSlug: 'localized-shared' },
+          locale: 'en',
+        }),
+      ).rejects.toThrow()
+
+      for (const id of [onMain.id, onCow.id]) {
+        await payload.delete({ id, branch: false, collection: uniqueSlug })
+      }
+
+      const changes = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { collectionSlug: { equals: uniqueSlug } },
+      })
+
+      for (const change of changes.docs) {
+        await payload.delete({ id: change.id, collection: branchChangesSlug })
+      }
+    })
+
+    test('should allow a nested unique value on main and a branch', async () => {
+      const onMain = await payload.create({
+        collection: uniqueSlug,
+        data: { metadata: { code: 'nested-shared' } },
+      })
+      const onBranch = await payload.create({
+        branch: 'cow',
+        collection: uniqueSlug,
+        data: { metadata: { code: 'nested-shared' } },
+      })
+
+      expect(String(onBranch.id)).not.toBe(String(onMain.id))
+
+      for (const id of [onMain.id, onBranch.id]) {
+        await payload.delete({ id, branch: false, collection: uniqueSlug })
+      }
+    })
+
+    test('should reject a duplicate nested unique value within one branch', async () => {
+      const first = await payload.create({
+        branch: 'cow',
+        collection: uniqueSlug,
+        data: { metadata: { code: 'nested-duplicate' } },
+      })
+
+      await expect(
+        payload.create({
+          branch: 'cow',
+          collection: uniqueSlug,
+          data: { metadata: { code: 'nested-duplicate' } },
+        }),
+      ).rejects.toThrow()
+
+      await payload.delete({ id: first.id, branch: false, collection: uniqueSlug })
+    })
+
+    test('should allow a custom compound value on main and a branch', async () => {
+      const onMain = await payload.create({
+        collection: uniqueSlug,
+        data: { customSlug: 'shared', site: 'example' },
+      })
+      const onBranch = await payload.create({
+        branch: 'cow',
+        collection: uniqueSlug,
+        data: { customSlug: 'shared', site: 'example' },
+      })
+
+      expect(String(onBranch.id)).not.toBe(String(onMain.id))
+
+      for (const id of [onMain.id, onBranch.id]) {
+        await payload.delete({ id, branch: false, collection: uniqueSlug })
+      }
+    })
+
+    test('should reject a duplicate custom compound value within one branch', async () => {
+      const first = await payload.create({
+        branch: 'cow',
+        collection: uniqueSlug,
+        data: { customSlug: 'duplicate', site: 'example' },
+      })
+
+      await expect(
+        payload.create({
+          branch: 'cow',
+          collection: uniqueSlug,
+          data: { customSlug: 'duplicate', site: 'example' },
+        }),
+      ).rejects.toThrow()
+
+      await payload.delete({ id: first.id, branch: false, collection: uniqueSlug })
     })
   })
 
@@ -4324,6 +5259,36 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(ids.filter((id) => id === String(mainPostID))).toHaveLength(1)
     })
 
+    test('should filter join paths with the active branch content', async () => {
+      await payload.update({
+        id: mainPostID,
+        branch: 'joinwork',
+        collection: postsSlug,
+        data: { title: 'edited join title' },
+      })
+
+      const mainTitleOnBranch = await payload.find({
+        branch: 'joinwork',
+        collection: categoriesSlug,
+        where: { 'posts.title': { equals: 'main post' } },
+      })
+      const branchTitleOnBranch = await payload.find({
+        branch: 'joinwork',
+        collection: categoriesSlug,
+        where: { 'posts.title': { equals: 'edited join title' } },
+      })
+      const mainTitleCount = await payload.count({
+        branch: 'joinwork',
+        collection: categoriesSlug,
+        where: { 'posts.title': { equals: 'main post' } },
+      })
+
+      expect(mainTitleOnBranch.docs).toHaveLength(0)
+      expect(mainTitleOnBranch.totalDocs).toBe(0)
+      expect(mainTitleCount.totalDocs).toBe(0)
+      expect(branchTitleOnBranch.docs.map((doc) => String(doc.id))).toContain(String(categoryID))
+    })
+
     test('should use the active branch draft in a join read', async () => {
       const page = await payload.create({
         collection: pagesSlug,
@@ -4666,7 +5631,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       )
     })
 
-    test('should evaluate access for sequential writes against the preceding proposed state', async () => {
+    test('should evaluate a latest draft against the current main state', async () => {
       const page = await payload.create({
         collection: pagesSlug,
         data: { _status: 'published', title: 'original sequential state' },
@@ -4694,8 +5659,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         user: (await asEditor()) as never,
       })
 
-      expect(result.blocked).not.toContainEqual(
-        expect.objectContaining({ collectionSlug: pagesSlug, docID: page.id }),
+      expect(result.blocked).toContainEqual(
+        expect.objectContaining({
+          collectionSlug: pagesSlug,
+          docID: page.id,
+          operation: 'update',
+        }),
       )
     })
 
@@ -4833,7 +5802,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
     })
 
-    test('should report a blocked multi-write change once', async () => {
+    test('should not require publish access for a newer draft', async () => {
       await payload.update({
         id: publicID,
         branch: 'accesswork',
@@ -4853,7 +5822,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         result.blocked.filter(
           (each) => each.collectionSlug === publicSlug && String(each.docID) === String(publicID),
         ),
-      ).toHaveLength(1)
+      ).toHaveLength(0)
     })
 
     test('should evaluate global access against the exact proposed data', async () => {
@@ -4940,25 +5909,13 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(blockedIDs).not.toContain(String(allowedID))
     })
 
-    test('should exclude blocked documents from mergeable rather than failing the whole merge', async () => {
-      const result = await payload.branches.merge({
-        branch: 'accesswork',
-        dryRun: true,
-        overrideAccess: false,
-        user: (await asEditor()) as never,
+    test('should leave all selected changes pending when one is blocked', async () => {
+      const before = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: 'accesswork' } },
       })
-
-      const mergeableIDs = result.mergeable.map((each) => String(each.docID))
-
-      expect(mergeableIDs).toContain(String(allowedID))
-      expect(result.mergeable).not.toContainEqual(
-        expect.objectContaining({ collectionSlug: restrictedSlug, docID: restrictedID }),
-      )
-      expect(result.canMerge).toBe(true)
-    })
-
-    test('should apply only the permitted changes and leave blocked ones on the branch', async () => {
-      await payload.branches.merge({
+      const result = await payload.branches.merge({
         branch: 'accesswork',
         overrideAccess: false,
         user: (await asEditor()) as never,
@@ -4972,12 +5929,67 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         where: { branch: { equals: 'accesswork' } },
       })
 
+      expect(result.canMerge).toBe(false)
+      expect(result.merged).toHaveLength(0)
+      expect(allowed.title).toBe('allowed on main')
+      expect(restricted.title).toBe('restricted on main')
+      expect(remaining.docs).toHaveLength(before.docs.length)
+    })
+
+    test('should merge a deliberately smaller permitted selection', async () => {
+      const allowedChange = (
+        await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: {
+            and: [
+              { branch: { equals: 'accesswork' } },
+              { collectionSlug: { equals: whereAccessSlug } },
+            ],
+          },
+        })
+      ).docs.find((change) => String(change.doc?.value) === String(allowedID))
+
+      expect(allowedChange).toBeDefined()
+
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        changes: [allowedChange!.id],
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
+      const allowed = await payload.findByID({ id: allowedID, collection: whereAccessSlug })
+      const restricted = await payload.findByID({ id: restrictedID, collection: restrictedSlug })
+      const pendingAllowedChange = await payload.findByID({
+        id: allowedChange!.id,
+        collection: branchChangesSlug,
+        disableErrors: true,
+      })
+
+      expect(result.merged).toContainEqual(
+        expect.objectContaining({ collectionSlug: whereAccessSlug, docID: allowedID }),
+      )
       expect(allowed.title).toBe('edited on branch')
       expect(restricted.title).toBe('restricted on main')
-      expect(remaining.docs.length).toBeGreaterThan(0)
+      expect(pendingAllowedChange).toBeNull()
     })
 
     test('should recheck Where access after beforeMerge changes main', async () => {
+      const allowedChange = (
+        await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: {
+            and: [
+              { branch: { equals: 'accesswork' } },
+              { collectionSlug: { equals: whereAccessSlug } },
+            ],
+          },
+        })
+      ).docs.find((change) => String(change.doc?.value) === String(allowedID))
+
+      expect(allowedChange).toBeDefined()
+
       hookSpy.beforeMerge = async ({ req }) => {
         await req.payload.update({
           id: allowedID,
@@ -4989,13 +6001,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         })
       }
 
-      await expect(
-        payload.branches.merge({
-          branch: 'accesswork',
-          overrideAccess: false,
-          user: (await asEditor()) as never,
-        }),
-      ).rejects.toThrow()
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        changes: [allowedChange!.id],
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
 
       const onMain = await payload.findByID({ id: allowedID, collection: whereAccessSlug })
       const pending = await payload.find({
@@ -5010,6 +6021,10 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
 
       expect(onMain.title).toBe('allowed on main')
+      expect(result.canMerge).toBe(false)
+      expect(result.blocked).toContainEqual(
+        expect.objectContaining({ collectionSlug: whereAccessSlug, docID: allowedID }),
+      )
       expect(pending.docs.some((change) => String(change.doc?.value) === String(allowedID))).toBe(
         true,
       )
@@ -5033,14 +6048,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
       expect(nestedChange).toBeDefined()
 
-      await expect(
-        payload.branches.merge({
-          branch: 'accesswork',
-          changes: [nestedChange!.id],
-          overrideAccess: false,
-          user: (await asEditor()) as never,
-        }),
-      ).rejects.toThrow()
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        changes: [nestedChange!.id],
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
 
       const onMain = await payload.findByID({ id: nestedID, collection: nestedSlug })
       const pending = await payload.findByID({
@@ -5050,6 +6063,10 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
 
       expect(onMain.items?.[0]?.label).toBe('protected on main')
+      expect(result.canMerge).toBe(false)
+      expect(result.blocked).toContainEqual(
+        expect.objectContaining({ collectionSlug: nestedSlug, docID: nestedID }),
+      )
       expect(pending).not.toBeNull()
     })
 
@@ -5079,14 +6096,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         hookSpy.allowRestrictedCreate = false
       }
 
-      await expect(
-        payload.branches.merge({
-          branch: 'accesswork',
-          changes: [createdChange!.id],
-          overrideAccess: false,
-          user: (await asEditor()) as never,
-        }),
-      ).rejects.toThrow()
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        changes: [createdChange!.id],
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
 
       const onMain = await payload.find({
         collection: pagesSlug,
@@ -5100,6 +6115,10 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
 
       expect(onMain.docs).toHaveLength(0)
+      expect(result.canMerge).toBe(false)
+      expect(result.blocked).toContainEqual(
+        expect.objectContaining({ collectionSlug: pagesSlug, docID: created.id }),
+      )
       expect(pending).not.toBeNull()
       expect(hookSpy.restrictedCreateAccessResults).toContain(true)
       expect(hookSpy.restrictedCreateAccessResults?.at(-1)).toBe(false)
@@ -5144,14 +6163,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         hookSpy.allowRestrictedLocalizedCreate = false
       }
 
-      await expect(
-        payload.branches.merge({
-          branch: 'accesswork',
-          changes: [createdChange!.id],
-          overrideAccess: false,
-          user: (await asEditor()) as never,
-        }),
-      ).rejects.toThrow()
+      const result = await payload.branches.merge({
+        branch: 'accesswork',
+        changes: [createdChange!.id],
+        overrideAccess: false,
+        user: (await asEditor()) as never,
+      })
 
       const pending = await payload.findByID({
         id: createdChange!.id,
@@ -5159,6 +6176,10 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         disableErrors: true,
       })
 
+      expect(result.canMerge).toBe(false)
+      expect(result.blocked).toContainEqual(
+        expect.objectContaining({ collectionSlug: localizedSlug, docID: created.id }),
+      )
       expect(pending).not.toBeNull()
       expect(hookSpy.localizedCreateAccessTitles).toEqual([
         'allowed localized create',
@@ -5570,6 +6591,328 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
     })
   })
 
+  test.describe('Merge validation', () => {
+    const branch = 'validation-work'
+    let mainDocumentID: number | string
+
+    const corruptBranchTitle = async () => {
+      const req = await createPayloadRequest({ branch: false, payload })
+      const shadow = await payload.db.findOne({
+        branch: false,
+        collection: pagesSlug,
+        req,
+        where: {
+          and: [{ _branch: { equals: branch } }, { _branchDocID: { equals: mainDocumentID } }],
+        },
+      })
+
+      await (payload.db as MongooseAdapter).collections[pagesSlug]!.collection.updateOne(
+        { _id: new Types.ObjectId(String(shadow!.id)) },
+        { $set: { title: { invalid: true } } },
+      )
+    }
+
+    test.beforeEach(async () => {
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Validation work', slug: branch },
+      })
+
+      const mainDocument = await payload.create({
+        collection: pagesSlug,
+        data: { _status: 'published', title: 'main validation title' },
+      })
+
+      mainDocumentID = mainDocument.id
+
+      await payload.update({
+        id: mainDocumentID,
+        branch,
+        collection: pagesSlug,
+        data: { _status: 'published', title: 'branch validation title' },
+      })
+    })
+
+    test.afterEach(async () => {
+      hookSpy.beforeMerge = undefined
+      hookSpy.branchValidation = undefined
+      hookSpy.pageBeforeOperation = undefined
+
+      for (const collection of [pagesSlug, uniqueSlug]) {
+        const rows = await payload.find({ branch: false, collection, pagination: false })
+
+        for (const row of rows.docs) {
+          await payload.delete({ id: row.id, branch: false, collection })
+        }
+      }
+
+      for (const collection of [branchChangesSlug, branchesSlug]) {
+        const rows = await payload.find({
+          collection,
+          pagination: false,
+          where: { [collection === branchesSlug ? 'slug' : 'branch']: { equals: branch } },
+        })
+
+        for (const row of rows.docs) {
+          await payload.delete({ id: row.id, collection })
+        }
+      }
+    })
+
+    test('should reject malformed prepared content with the default validator', async () => {
+      await corruptBranchTitle()
+
+      const result = await payload.branches.merge({ branch, dryRun: true })
+      const onMain = await payload.findByID({ id: mainDocumentID, collection: pagesSlug })
+
+      expect(result.canMerge).toBe(false)
+      expect(result.mergeable).toHaveLength(0)
+      expect(result.validationErrors).toContainEqual(
+        expect.objectContaining({
+          collectionSlug: pagesSlug,
+          docID: mainDocumentID,
+          path: 'data.title',
+        }),
+      )
+      expect(onMain.title).toBe('main validation title')
+    })
+
+    test('should pass the latest candidate to replacement validation in main context', async () => {
+      await payload.update({
+        id: mainDocumentID,
+        branch,
+        collection: pagesSlug,
+        data: { title: 'latest validation draft' },
+        draft: true,
+      })
+
+      const calls: Parameters<NonNullable<typeof hookSpy.branchValidation>>[0][] = []
+
+      hookSpy.branchValidation = (args) => {
+        calls.push(args)
+
+        return { errors: [], valid: true }
+      }
+
+      await payload.branches.merge({ branch, dryRun: true })
+
+      expect(calls).toHaveLength(1)
+      expect(calls[0]?.target).toBe('main')
+      expect(resolveBranch(calls[0]!.req)).toBe('main')
+      expect(calls[0]!.req.operation).toBe('validate')
+      expect((calls[0]!.req.context as Record<string, unknown>)._branchBypass).toBeUndefined()
+      expect(calls[0]?.candidates).toContainEqual(
+        expect.objectContaining({
+          collectionSlug: pagesSlug,
+          data: expect.objectContaining({ title: 'latest validation draft' }),
+          docID: mainDocumentID,
+          draft: true,
+          operation: 'update',
+        }),
+      )
+    })
+
+    test('should let replacement validation replace only the precheck', async () => {
+      await corruptBranchTitle()
+      hookSpy.branchValidation = () => ({ errors: [], valid: true })
+
+      const preview = await payload.branches.merge({ branch, dryRun: true })
+
+      expect(preview.canMerge).toBe(true)
+      expect(preview.validationErrors).toHaveLength(0)
+
+      await expect(payload.branches.merge({ branch })).rejects.toThrow()
+
+      const onMain = await payload.findByID({ id: mainDocumentID, collection: pagesSlug })
+
+      expect(onMain.title).toBe('main validation title')
+    })
+
+    test('should recheck replacement validation after beforeMerge changes policy', async () => {
+      let validationCalls = 0
+
+      hookSpy.branchValidation = () => {
+        validationCalls += 1
+
+        return {
+          errors: [],
+          valid: true,
+        }
+      }
+      hookSpy.beforeMerge = () => {
+        hookSpy.branchValidation = ({ candidates }) => ({
+          errors: [
+            {
+              changeID: candidates[0]!.changeID,
+              collectionSlug: candidates[0]!.collectionSlug,
+              docID: candidates[0]!.docID,
+              message: 'Policy changed before execution.',
+            },
+          ],
+          valid: false,
+        })
+      }
+
+      const result = await payload.branches.merge({ branch })
+      const onMain = await payload.findByID({ id: mainDocumentID, collection: pagesSlug })
+
+      expect(validationCalls).toBe(1)
+      expect(result.canMerge).toBe(false)
+      expect(result.validationErrors).toContainEqual(
+        expect.objectContaining({ message: 'Policy changed before execution.' }),
+      )
+      expect(onMain.title).toBe('main validation title')
+    })
+
+    test('should propagate a replacement validation exception', async () => {
+      hookSpy.branchValidation = () => {
+        throw new Error('Replacement validation failed unexpectedly.')
+      }
+
+      await expect(payload.branches.merge({ branch, dryRun: true })).rejects.toThrow(
+        'Replacement validation failed unexpectedly.',
+      )
+    })
+
+    test('should validate known JSON, array, and block structures', async () => {
+      const req = await createPayloadRequest({ branch: false, payload })
+      const result = await defaultBranchMergeValidation({
+        branch,
+        candidates: [
+          {
+            changeID: 'structured-candidate',
+            collectionSlug: nestedSlug,
+            data: {
+              items: { invalid: true },
+              layout: [{ blockType: 'hero', heading: 42 }],
+              metadata: { score: 'high' },
+              unstructuredMetadata: { arbitrary: ['content', 42] },
+            },
+            docID: mainDocumentID,
+            draft: false,
+            entityType: 'collection',
+            operation: 'update',
+          },
+        ],
+        req,
+        target: 'main',
+      })
+
+      expect(result.valid).toBe(false)
+      expect(result.errors.map(({ path }) => path)).toEqual(
+        expect.arrayContaining(['data.items', 'data.layout[0].heading', 'data.metadata.score']),
+      )
+      expect(result.errors.some(({ path }) => path?.startsWith('data.unstructuredMetadata'))).toBe(
+        false,
+      )
+    })
+
+    test('should preserve the caller request and skip merge hooks during preview', async () => {
+      const req = await createPayloadRequest({ branch, payload })
+      const initialContext = req.context
+      const initialTransactionID = req.transactionID
+      const beforeMerge = vi.fn()
+
+      hookSpy.beforeMerge = beforeMerge
+
+      await payload.branches.merge({ branch, dryRun: true, req })
+
+      expect(beforeMerge).not.toHaveBeenCalled()
+      expect(req.context).toBe(initialContext)
+      expect(req.transactionID).toBe(initialTransactionID)
+      expect(resolveBranch(req)).toBe(branch)
+    })
+
+    test('should reject writes made with the validation request', async () => {
+      hookSpy.branchValidation = async ({ req }) => {
+        await payload.update({
+          id: mainDocumentID,
+          collection: pagesSlug,
+          data: { title: 'validation side effect' },
+          req,
+        })
+
+        return { errors: [], valid: true }
+      }
+
+      await expect(payload.branches.merge({ branch, dryRun: true })).rejects.toThrow(
+        'Content cannot be changed during branch merge validation.',
+      )
+
+      const onMain = await payload.findByID({ id: mainDocumentID, collection: pagesSlug })
+
+      expect(onMain.title).toBe('main validation title')
+    })
+
+    test('should let the database reject a conflict after preview succeeds', async () => {
+      const mainUnique = await payload.create({
+        collection: uniqueSlug,
+        data: { slug: 'merge-conflict' },
+      })
+      const branchUnique = await payload.create({
+        branch,
+        collection: uniqueSlug,
+        data: { slug: 'merge-conflict' },
+      })
+      const branchUniqueChange = (
+        await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: {
+            and: [{ branch: { equals: branch } }, { collectionSlug: { equals: uniqueSlug } }],
+          },
+        })
+      ).docs.find((change) => String(change.doc?.value) === String(branchUnique.id))
+
+      expect(branchUniqueChange).toBeDefined()
+
+      const preview = await payload.branches.merge({
+        branch,
+        changes: [branchUniqueChange!.id],
+        dryRun: true,
+      })
+
+      expect(preview.canMerge).toBe(true)
+      await expect(
+        payload.branches.merge({ branch, changes: [branchUniqueChange!.id] }),
+      ).rejects.toThrow()
+
+      const mainRows = await payload.find({
+        collection: uniqueSlug,
+        pagination: false,
+        where: { slug: { equals: 'merge-conflict' } },
+      })
+      const pendingChange = await payload.findByID({
+        id: branchUniqueChange!.id,
+        collection: branchChangesSlug,
+        disableErrors: true,
+      })
+
+      expect(mainRows.docs.map(({ id }) => String(id))).toEqual([String(mainUnique.id)])
+      expect(pendingChange).not.toBeNull()
+    })
+
+    test('should run target content hooks in main context', async () => {
+      const hookRequests: PayloadRequest[] = []
+      const branchReq = await createPayloadRequest({ branch, payload })
+
+      hookSpy.pageBeforeOperation = ({ req }) => {
+        hookRequests.push(req)
+      }
+
+      await payload.branches.merge({ branch, req: branchReq })
+
+      expect(hookRequests.length).toBeGreaterThan(0)
+      expect(hookRequests.every((req) => resolveBranch(req) === 'main')).toBe(true)
+      expect(
+        hookRequests.every(
+          (req) => (req.context as Record<string, unknown>)._branchBypass === undefined,
+        ),
+      ).toBe(true)
+      expect(resolveBranch(branchReq)).toBe(branch)
+    })
+  })
+
   test.describe('Merge', () => {
     let mainDocID: number | string
     let branchOnlyID: number | string
@@ -5648,39 +6991,17 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(onMain.title).toBe('original on main')
     })
 
-    test('should apply a branch edit to main', async () => {
+    test('should apply every change and finalize the branch state', async () => {
       await payload.branches.merge({ branch: 'mergeme' })
 
-      const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
-
-      expect(onMain.title).toBe('edited on branch')
-    })
-
-    test('should publish a branch-created document to main keeping its ID', async () => {
-      await payload.branches.merge({ branch: 'mergeme' })
-
-      const onMain = await payload.findByID({ id: branchOnlyID, collection: postsSlug })
-
-      expect(onMain.title).toBe('created on branch')
-      expect(String(onMain.id)).toBe(String(branchOnlyID))
-    })
-
-    test('should leave no shadow rows behind after merging', async () => {
-      await payload.branches.merge({ branch: 'mergeme' })
-
-      const shadows = await payload.find({
+      const editedOnMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
+      const createdOnMain = await payload.findByID({ id: branchOnlyID, collection: postsSlug })
+      const rows = await payload.find({
         branch: false,
         collection: postsSlug,
         pagination: false,
-        where: { _branch: { not_equals: 'main' } },
+        showHiddenFields: true,
       })
-
-      expect(shadows.docs).toHaveLength(0)
-    })
-
-    test('should mark the branch merged and clear its changeset', async () => {
-      await payload.branches.merge({ branch: 'mergeme' })
-
       const changes = await payload.find({
         collection: branchChangesSlug,
         pagination: false,
@@ -5692,8 +7013,56 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         where: { slug: { equals: 'mergeme' } },
       })
 
+      expect(editedOnMain.title).toBe('edited on branch')
+      expect(createdOnMain.title).toBe('created on branch')
+      expect(String(createdOnMain.id)).toBe(String(branchOnlyID))
+      expect(rows.docs.every((doc) => doc._branch === 'main')).toBe(true)
       expect(changes.docs).toHaveLength(0)
       expect(branchDoc.docs[0]!.status).toBe('merged')
+    })
+
+    test('should reject an update change when its branch row is missing', async () => {
+      const changes = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: {
+          and: [
+            { branch: { equals: 'mergeme' } },
+            { collectionSlug: { equals: postsSlug } },
+            { documentID: { equals: String(mainDocID) } },
+          ],
+        },
+      })
+      const change = changes.docs[0]!
+      const shadow = await payload.db.findOne({
+        branch: false,
+        collection: postsSlug,
+        req: await createPayloadRequest({ branch: false, payload }),
+        where: {
+          and: [{ _branch: { equals: 'mergeme' } }, { _branchDocID: { equals: mainDocID } }],
+        },
+      })
+
+      await payload.db.deleteOne({
+        branch: false,
+        collection: postsSlug,
+        req: await createPayloadRequest({ branch: false, payload }),
+        where: { id: { equals: shadow!.id } },
+      })
+
+      await expect(
+        payload.branches.merge({ branch: 'mergeme', changes: [change.id] }),
+      ).rejects.toMatchObject({ status: 409 })
+
+      const remainingChanges = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { id: { equals: change.id } },
+      })
+      const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
+
+      expect(remainingChanges.docs).toHaveLength(1)
+      expect(onMain.title).toBe('original on main')
     })
 
     test('should apply only the selected changes and leave the rest on an open branch', async () => {
@@ -5719,6 +7088,34 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(onMain.title).toBe('edited on branch')
       expect(remaining.docs).toHaveLength(1)
       expect(branchDoc.docs[0]!.status).toBe('open')
+    })
+
+    test('should refresh the caller request after merging a change', async () => {
+      const req = await createPayloadRequest({ branch: 'mergeme', payload })
+      const beforeMerge = await payload.findByID({ id: mainDocID, collection: postsSlug, req })
+      const changes = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: {
+          and: [
+            { branch: { equals: 'mergeme' } },
+            { collectionSlug: { equals: postsSlug } },
+            { documentID: { equals: String(mainDocID) } },
+          ],
+        },
+      })
+
+      await payload.branches.merge({
+        branch: 'mergeme',
+        changes: [changes.docs[0]!.id],
+        overrideAccess: true,
+        req,
+      })
+
+      const afterMerge = await payload.findByID({ id: mainDocID, collection: postsSlug, req })
+
+      expect(beforeMerge.title).toBe('edited on branch')
+      expect(afterMerge.title).toBe('edited on branch')
     })
 
     test('should apply a branch delete to main', async () => {
@@ -5794,22 +7191,6 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
       expect(ran).toBeGreaterThan(0)
     })
-
-    test('should not leave a shadow row behind from the merge writes themselves', async () => {
-      await payload.branches.merge({ branch: 'mergeme' })
-
-      // `_branch` is `hidden`, so asserting on it needs `showHiddenFields`.
-      const all = await payload.find({
-        branch: false,
-        collection: postsSlug,
-        pagination: false,
-        showHiddenFields: true,
-      })
-
-      for (const doc of all.docs) {
-        expect(doc._branch).toBe('main')
-      }
-    })
   })
 
   /**
@@ -5835,10 +7216,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
     })
 
     test.afterEach(async () => {
-      const rows = await payload.find({ branch: false, collection: pagesSlug, pagination: false })
+      for (const collection of [autosaveSlug, pagesSlug] as const) {
+        const rows = await payload.find({ branch: false, collection, pagination: false })
 
-      for (const row of rows.docs) {
-        await payload.delete({ id: row.id, branch: false, collection: pagesSlug })
+        for (const row of rows.docs) {
+          await payload.delete({ id: row.id, branch: false, collection })
+        }
       }
 
       for (const collection of [branchChangesSlug, branchesSlug]) {
@@ -5857,6 +7240,8 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
     })
 
     test('should merge a draft-only branch edit as a draft, leaving main published state alone', async () => {
+      const before = await payload.findByID({ id: pageID, collection: pagesSlug })
+
       await payload.update({
         id: pageID,
         branch: 'draftmerge',
@@ -5869,10 +7254,18 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
       const published = await payload.findByID({ id: pageID, collection: pagesSlug })
       const latest = await payload.findByID({ id: pageID, collection: pagesSlug, draft: true })
+      const rows = await payload.find({
+        branch: false,
+        collection: pagesSlug,
+        pagination: false,
+        showHiddenFields: true,
+      })
 
       expect(published.title).toBe('published on main')
+      expect(published.updatedAt).toBe(before.updatedAt)
       expect(latest.title).toBe('draft on branch')
       expect(latest._status).toBe('draft')
+      expect(rows.docs.every((row) => row._branch === 'main')).toBe(true)
     })
 
     test('should report a draft-only branch edit as an update rather than a publish', async () => {
@@ -5906,23 +7299,51 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         id: pageID,
         branch: 'draftmerge',
         collection: pagesSlug,
-        data: { _status: 'published', title: 'published on branch' },
+        data: { _status: 'published', title: 'first publish on branch' },
+      })
+
+      await payload.update({
+        id: pageID,
+        branch: 'draftmerge',
+        collection: pagesSlug,
+        data: { _status: 'published', title: 'latest publish on branch' },
       })
 
       await payload.branches.merge({ branch: 'draftmerge' })
 
       const published = await payload.findByID({ id: pageID, collection: pagesSlug })
 
-      expect(published.title).toBe('published on branch')
+      expect(published.title).toBe('latest publish on branch')
       expect(published._status).toBe('published')
     })
 
-    test('should apply both states when a branch published and then drafted on top', async () => {
+    test('should apply only the latest draft after an earlier branch publish', async () => {
+      const mainVersionsBefore = await payload.findVersions({
+        collection: pagesSlug,
+        pagination: false,
+        where: { parent: { equals: pageID } },
+      })
+
       await payload.update({
         id: pageID,
         branch: 'draftmerge',
         collection: pagesSlug,
-        data: { _status: 'published', title: 'published on branch' },
+        data: { _status: 'published', title: 'first publish on branch' },
+      })
+
+      await payload.update({
+        id: pageID,
+        branch: 'draftmerge',
+        collection: pagesSlug,
+        data: { _status: 'published', title: 'latest publish on branch' },
+      })
+
+      await payload.update({
+        id: pageID,
+        branch: 'draftmerge',
+        collection: pagesSlug,
+        data: { title: 'first draft after publishing' },
+        draft: true,
       })
 
       await payload.update({
@@ -5937,12 +7358,61 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
       const published = await payload.findByID({ id: pageID, collection: pagesSlug })
       const latest = await payload.findByID({ id: pageID, collection: pagesSlug, draft: true })
+      const mainVersionsAfter = await payload.findVersions({
+        collection: pagesSlug,
+        pagination: false,
+        where: { parent: { equals: pageID } },
+      })
 
-      // Main goes through both transitions the branch went through, rather than
-      // collapsing the publish into the draft above it.
-      expect(published.title).toBe('published on branch')
+      expect(published.title).toBe('published on main')
       expect(latest.title).toBe('drafted after publishing')
       expect(latest._status).toBe('draft')
+      expect(mainVersionsAfter.docs).toHaveLength(mainVersionsBefore.docs.length + 1)
+    })
+
+    test('should merge only the latest autosave', async () => {
+      const autosaveDocument = await payload.create({
+        collection: autosaveSlug,
+        data: { _status: 'published', title: 'autosave published on main' },
+      })
+      const mainVersionsBefore = await payload.findVersions({
+        collection: autosaveSlug,
+        pagination: false,
+        where: { parent: { equals: autosaveDocument.id } },
+      })
+
+      for (const title of ['first autosave', 'second autosave', 'latest autosave']) {
+        await payload.update({
+          id: autosaveDocument.id,
+          autosave: true,
+          branch: 'draftmerge',
+          collection: autosaveSlug,
+          data: { title },
+          draft: true,
+        })
+      }
+
+      await payload.branches.merge({ branch: 'draftmerge' })
+
+      const published = await payload.findByID({
+        id: autosaveDocument.id,
+        collection: autosaveSlug,
+      })
+      const latest = await payload.findByID({
+        id: autosaveDocument.id,
+        collection: autosaveSlug,
+        draft: true,
+      })
+      const mainVersionsAfter = await payload.findVersions({
+        collection: autosaveSlug,
+        pagination: false,
+        where: { parent: { equals: autosaveDocument.id } },
+      })
+
+      expect(published.title).toBe('autosave published on main')
+      expect(latest.title).toBe('latest autosave')
+      expect(latest._status).toBe('draft')
+      expect(mainVersionsAfter.docs).toHaveLength(mainVersionsBefore.docs.length + 1)
     })
 
     test('should merge a draft created on a branch as an unpublished document on main', async () => {
@@ -5980,47 +7450,39 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(mainVersions.docs.map(({ version }) => version._status)).not.toContain('published')
     })
 
-    test('should leave main published state untouched by a draft-only merge', async () => {
-      const before = await payload.findByID({ id: pageID, collection: pagesSlug })
-
-      await payload.update({
-        id: pageID,
+    test('should create only the latest draft after an earlier branch publication', async () => {
+      const created = await payload.create({
         branch: 'draftmerge',
         collection: pagesSlug,
-        data: { title: 'draft on branch' },
+        data: { _status: 'published', title: 'branch-created publication' },
+      })
+
+      await payload.update({
+        id: created.id,
+        branch: 'draftmerge',
+        collection: pagesSlug,
+        data: { title: 'newer branch-created draft' },
         draft: true,
       })
 
       await payload.branches.merge({ branch: 'draftmerge' })
 
-      const after = await payload.findByID({ id: pageID, collection: pagesSlug })
-
-      // Publishing state is main's own, so the row it lives on must be byte-identical.
-      expect(after.updatedAt).toBe(before.updatedAt)
-      expect(after.title).toBe('published on main')
-    })
-
-    test('should not leave a shadow row behind after merging a draft-only edit', async () => {
-      await payload.update({
-        id: pageID,
-        branch: 'draftmerge',
+      const onMain = await payload.findByID({
+        id: created.id,
         collection: pagesSlug,
-        data: { title: 'draft on branch' },
         draft: true,
       })
-
-      await payload.branches.merge({ branch: 'draftmerge' })
-
-      const rows = await payload.find({
-        branch: false,
+      const mainVersions = await payload.findVersions({
         collection: pagesSlug,
         pagination: false,
-        showHiddenFields: true,
+        where: { parent: { equals: created.id } },
       })
 
-      for (const row of rows.docs) {
-        expect(row._branch).toBe('main')
-      }
+      expect(onMain.title).toBe('newer branch-created draft')
+      expect(onMain._status).toBe('draft')
+      expect(mainVersions.docs).toHaveLength(1)
+      expect(mainVersions.docs[0]?.version.title).toBe('newer branch-created draft')
+      expect(mainVersions.docs[0]?.version._status).toBe('draft')
     })
   })
 
@@ -6073,10 +7535,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       hookSpy.restrictLedgerSnapshotEntityRead = undefined
       hookSpy.restrictLedgerSnapshotGlobalRead = undefined
 
-      const rows = await payload.find({ branch: false, collection: postsSlug, pagination: false })
+      for (const collection of [pagesSlug, postsSlug]) {
+        const rows = await payload.find({ branch: false, collection, pagination: false })
 
-      for (const row of rows.docs) {
-        await payload.delete({ id: row.id, branch: false, collection: postsSlug })
+        for (const row of rows.docs) {
+          await payload.delete({ id: row.id, branch: false, collection })
+        }
       }
 
       for (const collection of [branchChangesSlug, branchMergesSlug, branchesSlug]) {
@@ -6130,7 +7594,52 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
     })
 
-    test('should snapshot both sides of each merged change so the diff survives', async () => {
+    test('should checkpoint large merge events with bounded database writes', async () => {
+      for (let index = 0; index < 100; index += 1) {
+        await payload.create({
+          branch: 'lifecycle',
+          collection: postsSlug,
+          data: { title: `checkpoint document ${index}` },
+        })
+      }
+
+      const updateOne = payload.db.updateOne.bind(payload.db)
+      let mergeEventUpdateCount = 0
+      const updateOneSpy = vi.spyOn(payload.db, 'updateOne').mockImplementation(async (args) => {
+        if (args.collection === branchMergesSlug) {
+          mergeEventUpdateCount += 1
+        }
+
+        return updateOne(args)
+      })
+
+      try {
+        await payload.branches.merge({ branch: 'lifecycle' })
+      } finally {
+        updateOneSpy.mockRestore()
+      }
+
+      const mergeEvent = (
+        await payload.find({
+          collection: branchMergesSlug,
+          pagination: false,
+          where: { branch: { equals: 'lifecycle' } },
+        })
+      ).docs[0] as unknown as {
+        changes: { applicationOutcome: string; cleanupOutcome: string }[]
+      }
+
+      expect(mergeEvent.changes).toHaveLength(101)
+      expect(
+        mergeEvent.changes.every(
+          ({ applicationOutcome, cleanupOutcome }) =>
+            applicationOutcome === 'committed' && cleanupOutcome === 'completed',
+        ),
+      ).toBe(true)
+      expect(mergeEventUpdateCount).toBeLessThan(20)
+    })
+
+    test('should not store full document snapshots in a merge event', async () => {
       await payload.branches.merge({ branch: 'lifecycle' })
 
       const event = (
@@ -6143,12 +7652,67 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         changes: { after?: Record<string, unknown>; before?: Record<string, unknown> }[]
       }
 
-      // Both sides exist only in the moment of the merge: the branch's copy is
-      // dropped and main then holds the merged values on the one remaining row.
-      expect(event.changes[0]?.before?.title).toBe('original on main')
-      expect(event.changes[0]?.after?.title).toBe('edited on branch')
-      expect(event.changes[0]?.before).not.toHaveProperty('_branch')
-      expect(event.changes[0]?.after).not.toHaveProperty('_branch')
+      expect(event.changes[0]?.before).toBeUndefined()
+      expect(event.changes[0]?.after).toBeUndefined()
+    })
+
+    test('should record the exact target version before and after a versioned merge', async () => {
+      const page = await payload.create({
+        collection: pagesSlug,
+        data: { title: 'version reference before' },
+      })
+
+      try {
+        const beforeVersions = await payload.db.findVersions({
+          branch: false,
+          collection: pagesSlug,
+          limit: 1,
+          pagination: false,
+          req: await createPayloadRequest({ branch: false, payload }),
+          sort: '-updatedAt',
+          where: { parent: { equals: page.id } },
+        })
+
+        await payload.update({
+          id: page.id,
+          branch: 'lifecycle',
+          collection: pagesSlug,
+          data: { title: 'version reference after' },
+        })
+        await payload.branches.merge({ branch: 'lifecycle' })
+
+        const afterVersions = await payload.db.findVersions({
+          branch: false,
+          collection: pagesSlug,
+          limit: 1,
+          pagination: false,
+          req: await createPayloadRequest({ branch: false, payload }),
+          sort: '-updatedAt',
+          where: { parent: { equals: page.id } },
+        })
+        const mergeEvent = (
+          await payload.find({
+            collection: branchMergesSlug,
+            pagination: false,
+            where: { branch: { equals: 'lifecycle' } },
+          })
+        ).docs[0] as unknown as {
+          changes: {
+            afterVersionID?: string
+            beforeVersionID?: string
+            collectionSlug?: string
+          }[]
+        }
+        const pageChange = mergeEvent.changes.find(
+          ({ collectionSlug }) => collectionSlug === pagesSlug,
+        )
+
+        expect(pageChange?.beforeVersionID).toBe(String(beforeVersions.docs[0]?.id))
+        expect(pageChange?.afterVersionID).toBe(String(afterVersions.docs[0]?.id))
+        expect(pageChange?.afterVersionID).not.toBe(pageChange?.beforeVersionID)
+      } finally {
+        await payload.delete({ id: page.id, branch: false, collection: pagesSlug })
+      }
     })
 
     test('should expose a merge ledger entry only to the user who created it', async () => {
@@ -6207,7 +7771,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(collidingAuthCollectionEvents.docs).toHaveLength(0)
     })
 
-    test('should enforce field and hidden-field read rules for ledger snapshots when merge writes override access', async () => {
+    test('should enforce field read rules when recording a merge-event title', async () => {
       const mergingUser = await payload.create({
         collection: 'users',
         data: { email: 'ledger-reader@example.com', password: 'test' },
@@ -6233,16 +7797,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         }[]
       }
 
-      expect(event.changes[0]?.before).not.toHaveProperty('confidential')
-      expect(event.changes[0]?.after).not.toHaveProperty('confidential')
-      expect(event.changes[0]?.before).not.toHaveProperty('internalNote')
-      expect(event.changes[0]?.after).not.toHaveProperty('internalNote')
-      expect(event.changes[0]?.before).not.toHaveProperty('title')
-      expect(event.changes[0]?.after).not.toHaveProperty('title')
+      expect(event.changes[0]?.before).toBeUndefined()
+      expect(event.changes[0]?.after).toBeUndefined()
       expect(event.changes[0]?.docTitle).toBe(String(mainDocID))
     })
 
-    test('should apply collection read constraints to each ledger snapshot', async () => {
+    test('should apply collection read constraints to a merge-event title', async () => {
       const mergingUser = await payload.create({
         collection: 'users',
         data: { email: 'ledger-reader@example.com', password: 'test' },
@@ -6270,14 +7830,19 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
           where: { branch: { equals: 'lifecycle' } },
         })
       ).docs[0]! as unknown as {
-        changes: { after?: null | Record<string, unknown>; before?: Record<string, unknown> }[]
+        changes: {
+          after?: null | Record<string, unknown>
+          before?: Record<string, unknown>
+          docTitle?: string
+        }[]
       }
 
-      expect(event.changes[0]?.before?.order).toBe(1)
-      expect(event.changes[0]?.after).toBeNull()
+      expect(event.changes[0]?.before).toBeUndefined()
+      expect(event.changes[0]?.after).toBeUndefined()
+      expect(event.changes[0]?.docTitle).toBe(String(mainDocID))
     })
 
-    test('should not evaluate field defaults while capturing a collection ledger snapshot', async () => {
+    test('should not evaluate field defaults while resolving a merge-event title', async () => {
       const req = await createPayloadRequest({ branch: false, payload })
 
       hookSpy.postDefaultValueCount = 0
@@ -6293,7 +7858,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(snapshot).not.toHaveProperty('computedDefault')
     })
 
-    test('should not run field read hooks while capturing a collection ledger snapshot', async () => {
+    test('should not run field read hooks while resolving a merge-event title', async () => {
       const req = await createPayloadRequest({ branch: false, payload })
 
       hookSpy.postTitleAfterReadCount = 0
@@ -6369,7 +7934,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
     })
 
-    test('should snapshot an empty before for a branch-created document', async () => {
+    test('should record a branch-created title without full document snapshots', async () => {
       const created = await payload.create({
         branch: 'lifecycle',
         collection: postsSlug,
@@ -6400,9 +7965,9 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         changes: { after?: Record<string, unknown>; before?: null | Record<string, unknown> }[]
       }
 
-      // Nothing stood on main before it, so there is no "before" to diff against.
-      expect(event.changes[0]?.before).toBeFalsy()
-      expect(event.changes[0]?.after?.title).toBe('created on branch')
+      expect(event.changes[0]?.before).toBeUndefined()
+      expect(event.changes[0]?.after).toBeUndefined()
+      expect((event.changes[0] as { docTitle?: string })?.docTitle).toBe('created on branch')
     })
 
     test('should keep the branch open when only some changes are merged', async () => {
@@ -6625,7 +8190,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       }
     })
 
-    test('should revert a branch edit to main state', async () => {
+    test('should discard every change and restore an open, clean branch', async () => {
       await payload.branches.discard({ branch: 'discardwork' })
 
       const onBranch = await payload.findByID({
@@ -6633,22 +8198,55 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         branch: 'discardwork',
         collection: postsSlug,
       })
-
-      expect(onBranch.title).toBe('original on main')
-      expect(onBranch.order).toBe(1)
-    })
-
-    test('should remove a document created on the branch', async () => {
-      await payload.branches.discard({ branch: 'discardwork' })
-
-      const rows = await payload.find({
+      const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
+      const branchCreatedRows = await payload.find({
         branch: false,
         collection: postsSlug,
         pagination: false,
         where: { id: { equals: createdOnBranchID } },
       })
+      const shadows = await payload.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        showHiddenFields: true,
+        where: { _branch: { not_equals: 'main' } },
+      })
+      const branch = (
+        await payload.find({
+          collection: branchesSlug,
+          pagination: false,
+          where: { slug: { equals: 'discardwork' } },
+        })
+      ).docs[0]
 
-      expect(rows.docs).toHaveLength(0)
+      expect(onBranch.title).toBe('original on main')
+      expect(onBranch.order).toBe(1)
+      expect(onMain.title).toBe('original on main')
+      expect(onMain.order).toBe(1)
+      expect(branchCreatedRows.docs).toHaveLength(0)
+      expect(shadows.docs).toHaveLength(0)
+      expect((await pendingChanges()).docs).toHaveLength(0)
+      expect(branch?.status).toBe('open')
+    })
+
+    test('should refresh the caller request after discarding a change', async () => {
+      const req = await createPayloadRequest({ branch: 'discardwork', payload })
+      const beforeDiscard = await payload.findByID({ id: mainDocID, collection: postsSlug, req })
+      const changes = await pendingChanges()
+      const updateChange = changes.docs.find((change) => change.operation === 'update')
+
+      await payload.branches.discard({
+        branch: 'discardwork',
+        changes: [updateChange!.id],
+        overrideAccess: true,
+        req,
+      })
+
+      const afterDiscard = await payload.findByID({ id: mainDocID, collection: postsSlug, req })
+
+      expect(beforeDiscard.title).toBe('edited on branch')
+      expect(afterDiscard.title).toBe('original on main')
     })
 
     test('should restore a document the branch had deleted', async () => {
@@ -6685,21 +8283,6 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(restored.docs[0]!.title).toBe('doomed on main')
     })
 
-    test('should leave main untouched', async () => {
-      await payload.branches.discard({ branch: 'discardwork' })
-
-      const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
-
-      expect(onMain.title).toBe('original on main')
-      expect(onMain.order).toBe(1)
-    })
-
-    test('should clear the changeset it discarded', async () => {
-      await payload.branches.discard({ branch: 'discardwork' })
-
-      expect((await pendingChanges()).docs).toHaveLength(0)
-    })
-
     test('should discard only the selected changes', async () => {
       const changes = await pendingChanges()
       const updateChange = changes.docs.find((change) => change.operation === 'update')
@@ -6726,35 +8309,6 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(reverted.title).toBe('original on main')
       expect(stillThere.title).toBe('created on branch')
       expect((await pendingChanges()).docs).toHaveLength(1)
-    })
-
-    test('should leave no shadow rows behind', async () => {
-      await payload.branches.discard({ branch: 'discardwork' })
-
-      const shadows = await payload.find({
-        branch: false,
-        collection: postsSlug,
-        pagination: false,
-        showHiddenFields: true,
-        where: { _branch: { not_equals: 'main' } },
-      })
-
-      expect(shadows.docs).toHaveLength(0)
-    })
-
-    test('should not mark the branch merged when everything is discarded', async () => {
-      await payload.branches.discard({ branch: 'discardwork' })
-
-      const branch = (
-        await payload.find({
-          collection: branchesSlug,
-          pagination: false,
-          where: { slug: { equals: 'discardwork' } },
-        })
-      ).docs[0]
-
-      // Nothing reached main, so the branch is simply empty again — not merged.
-      expect(branch?.status).toBe('open')
     })
 
     test('should refuse to discard on a closed branch', async () => {
@@ -6830,16 +8384,19 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
     test.afterEach(async () => {
       hookSpy.beforeChange = undefined
+      hookSpy.headerBeforeOperation = undefined
       deleteOneSpy?.mockRestore()
       deleteOneSpy = undefined
 
-      const rows = await payload.find({ branch: false, collection: postsSlug, pagination: false })
+      for (const collection of [pagesSlug, postsSlug]) {
+        const rows = await payload.find({ branch: false, collection, pagination: false })
 
-      for (const row of rows.docs) {
-        await payload.delete({ id: row.id, branch: false, collection: postsSlug })
+        for (const row of rows.docs) {
+          await payload.delete({ id: row.id, branch: false, collection })
+        }
       }
 
-      for (const collection of [branchChangesSlug, branchesSlug]) {
+      for (const collection of [branchChangesSlug, branchMergesSlug, branchesSlug]) {
         const found = await payload.find({
           collection,
           pagination: false,
@@ -6915,10 +8472,1466 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
           pagination: false,
           where: { branch: { equals: 'txnmerge' } },
         })
+        const mergeEvents = await payload.find({
+          collection: branchMergesSlug,
+          pagination: false,
+          where: { branch: { equals: 'txnmerge' } },
+        })
+        const mergeEvent = mergeEvents.docs[0] as unknown as {
+          changes: { applicationOutcome: string }[]
+          status: string
+        }
 
         expect(remainingChanges.docs).toHaveLength(3)
+        expect(mergeEvents.docs).toHaveLength(1)
+        expect(mergeEvent.status).toBe('failed')
+        expect(mergeEvent.changes.map(({ applicationOutcome }) => applicationOutcome)).toEqual([
+          'rolledBack',
+          'failed',
+          'unattempted',
+        ])
       },
     )
+
+    test('should retain source state when a later non-transactional merge write fails', async () => {
+      branchSlug = 'non-transactional-merge'
+
+      await createBranchRecord({ name: 'Non-transactional merge', slug: branchSlug })
+
+      const first = await payload.create({
+        collection: postsSlug,
+        data: { title: 'First original' },
+      })
+      const second = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Second original' },
+      })
+
+      await payload.update({
+        id: first.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'First edited' },
+      })
+      await payload.update({
+        id: second.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Second edited' },
+      })
+
+      const beginTransactionSpy = vi.spyOn(payload.db, 'beginTransaction').mockResolvedValue(null)
+
+      hookSpy.beforeChange = ({ data }: { data: Record<string, unknown> }) => {
+        if (data.title === 'Second edited') {
+          throw new Error('Simulated non-transactional merge failure')
+        }
+      }
+
+      try {
+        await expect(
+          payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+        ).rejects.toThrow('Simulated non-transactional merge failure')
+
+        const sourceRows = await payload.find({
+          branch: false,
+          collection: postsSlug,
+          pagination: false,
+          showHiddenFields: true,
+          where: { _branch: { equals: branchSlug } },
+        })
+        const remainingChanges = await findBranchChanges({ branch: branchSlug })
+        const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+
+        expect(sourceRows.docs).toHaveLength(2)
+        expect(remainingChanges.docs).toHaveLength(2)
+        expect(mergeEvent.status).toBe('failed')
+        expect(mergeEvent.error).toContain('Simulated non-transactional merge failure')
+        expect(mergeEvent.changes.map(({ applicationOutcome }) => applicationOutcome)).toEqual([
+          'applied',
+          'failed',
+        ])
+        expect(mergeEvent.changes[1]?.error).toContain('Simulated non-transactional merge failure')
+      } finally {
+        beginTransactionSpy.mockRestore()
+      }
+    })
+
+    test('should restore an earlier versioned target after a later non-transactional failure', async () => {
+      branchSlug = 'non-transactional-version-recovery'
+
+      await createBranchRecord({ name: 'Non-transactional version recovery', slug: branchSlug })
+      const versionedDocument = await payload.create({
+        collection: pagesSlug,
+        data: { title: 'Versioned original' },
+      })
+      const failingDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Failure original' },
+      })
+
+      await payload.update({
+        id: versionedDocument.id,
+        branch: branchSlug,
+        collection: pagesSlug,
+        data: { title: 'Versioned edited' },
+      })
+      await payload.update({
+        id: failingDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Failure edited' },
+      })
+
+      const beginTransactionSpy = vi.spyOn(payload.db, 'beginTransaction').mockResolvedValue(null)
+
+      hookSpy.beforeChange = ({ data }: { data: Record<string, unknown> }) => {
+        if (data.title === 'Failure edited') {
+          throw new Error('Simulated failure after versioned write')
+        }
+      }
+
+      try {
+        await expect(
+          payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+        ).rejects.toThrow('Simulated failure after versioned write')
+
+        const onMain = await payload.findByID({
+          id: versionedDocument.id,
+          collection: pagesSlug,
+          draft: true,
+        })
+        const onBranch = await payload.findByID({
+          id: versionedDocument.id,
+          branch: branchSlug,
+          collection: pagesSlug,
+          draft: true,
+        })
+        const remainingChanges = await findBranchChanges({ branch: branchSlug })
+        const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+        const recoveredChange = mergeEvent.changes.find(
+          ({ collectionSlug }) => collectionSlug === pagesSlug,
+        )
+
+        expect(onMain.title).toBe('Versioned original')
+        expect(onBranch.title).toBe('Versioned edited')
+        expect(remainingChanges.docs).toHaveLength(2)
+        expect(mergeEvent.status).toBe('failed')
+        expect(recoveredChange).toMatchObject({
+          applicationOutcome: 'applied',
+          recoveryOutcome: 'restored',
+        })
+        expect(recoveredChange?.beforeVersionID).toBeTruthy()
+        expect(recoveredChange?.afterVersionID).toBeTruthy()
+      } finally {
+        beginTransactionSpy.mockRestore()
+      }
+    })
+
+    test('should restore an earlier versioned global after a later non-transactional failure', async () => {
+      branchSlug = 'non-transactional-global-version-recovery'
+
+      await createBranchRecord({ name: 'Non-transactional global recovery', slug: branchSlug })
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        data: { _status: 'published', heroTitle: 'Global versioned original' },
+      })
+      await payload.updateGlobal({
+        slug: headerGlobalSlug,
+        data: { navLabel: 'Global failure original' },
+      })
+      await payload.updateGlobal({
+        slug: homepageGlobalSlug,
+        branch: branchSlug,
+        data: { heroTitle: 'Global versioned edited' },
+        draft: true,
+      })
+      await payload.updateGlobal({
+        slug: headerGlobalSlug,
+        branch: branchSlug,
+        data: { navLabel: 'Global failure edited' },
+      })
+
+      const beginTransactionSpy = vi.spyOn(payload.db, 'beginTransaction').mockResolvedValue(null)
+
+      hookSpy.headerBeforeOperation = () => {
+        throw new Error('Simulated failure after versioned global write')
+      }
+
+      try {
+        await expect(
+          payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+        ).rejects.toThrow('Simulated failure after versioned global write')
+
+        const onMain = await payload.findGlobal({
+          slug: homepageGlobalSlug,
+          draft: true,
+        })
+        const onBranch = await payload.findGlobal({
+          slug: homepageGlobalSlug,
+          branch: branchSlug,
+          draft: true,
+        })
+        const remainingChanges = await findBranchChanges({ branch: branchSlug })
+        const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+        const recoveredChange = mergeEvent.changes.find(
+          ({ globalSlug }) => globalSlug === homepageGlobalSlug,
+        )
+
+        expect(onMain.heroTitle).toBe('Global versioned original')
+        expect(onBranch.heroTitle).toBe('Global versioned edited')
+        expect(remainingChanges.docs).toHaveLength(2)
+        expect(mergeEvent.status).toBe('failed')
+        expect(recoveredChange).toMatchObject({
+          applicationOutcome: 'applied',
+          recoveryOutcome: 'restored',
+        })
+        expect(recoveredChange?.beforeVersionID).toBeTruthy()
+        expect(recoveredChange?.afterVersionID).toBeTruthy()
+      } finally {
+        hookSpy.headerBeforeOperation = undefined
+        beginTransactionSpy.mockRestore()
+
+        const req = await createPayloadRequest({ branch: false, payload })
+
+        await payload.db.deleteBranchGlobal?.({
+          branch: branchSlug,
+          globalSlug: homepageGlobalSlug,
+          req,
+        })
+        await payload.db.deleteBranchGlobal?.({
+          branch: branchSlug,
+          globalSlug: headerGlobalSlug,
+          req,
+        })
+        await payload.updateGlobal({
+          slug: homepageGlobalSlug,
+          data: { _status: 'published', heroTitle: 'main published' },
+        })
+        await payload.updateGlobal({
+          slug: headerGlobalSlug,
+          data: { navLabel: 'main label' },
+        })
+      }
+    })
+
+    test('should remove a branch-created target after a later non-transactional failure', async () => {
+      branchSlug = 'non-transactional-create-recovery'
+
+      await createBranchRecord({ name: 'Non-transactional create recovery', slug: branchSlug })
+      const createdOnBranch = await payload.create({
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Created on branch' },
+      })
+      const failingDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Failure original' },
+      })
+
+      await payload.update({
+        id: failingDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Failure edited' },
+      })
+
+      const beginTransactionSpy = vi.spyOn(payload.db, 'beginTransaction').mockResolvedValue(null)
+
+      hookSpy.beforeChange = ({ data }: { data: Record<string, unknown> }) => {
+        if (data.title === 'Failure edited') {
+          throw new Error('Simulated failure after branch create')
+        }
+      }
+
+      try {
+        await expect(
+          payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+        ).rejects.toThrow('Simulated failure after branch create')
+
+        const onMain = await payload.find({
+          branch: false,
+          collection: postsSlug,
+          pagination: false,
+          where: {
+            and: [{ id: { equals: createdOnBranch.id } }, { _branch: { equals: 'main' } }],
+          },
+        })
+        const onBranch = await payload.findByID({
+          id: createdOnBranch.id,
+          branch: branchSlug,
+          collection: postsSlug,
+        })
+        const remainingChanges = await findBranchChanges({ branch: branchSlug })
+        const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+        const recoveredChange = mergeEvent.changes.find(
+          ({ collectionSlug, operation }) => collectionSlug === postsSlug && operation === 'create',
+        )
+
+        expect(onMain.docs).toHaveLength(0)
+        expect(onBranch.title).toBe('Created on branch')
+        expect(remainingChanges.docs).toHaveLength(2)
+        expect(mergeEvent.status).toBe('failed')
+        expect(recoveredChange).toMatchObject({
+          applicationOutcome: 'applied',
+          recoveryOutcome: 'deleted',
+        })
+      } finally {
+        beginTransactionSpy.mockRestore()
+      }
+    })
+
+    test('should record an unknown outcome when application progress cannot be persisted', async () => {
+      branchSlug = 'non-transactional-unknown-application'
+
+      await createBranchRecord({ name: 'Non-transactional unknown application', slug: branchSlug })
+      const versionedDocument = await payload.create({
+        collection: pagesSlug,
+        data: { title: 'Unknown application original' },
+      })
+
+      await payload.update({
+        id: versionedDocument.id,
+        branch: branchSlug,
+        collection: pagesSlug,
+        data: { title: 'Unknown application edited' },
+      })
+
+      const beginTransactionSpy = vi.spyOn(payload.db, 'beginTransaction').mockResolvedValue(null)
+      const updateOne = payload.db.updateOne.bind(payload.db)
+      const updateOneSpy = vi.spyOn(payload.db, 'updateOne').mockImplementation(async (args) => {
+        const changes = (args.data as { changes?: { applicationOutcome?: string }[] }).changes
+
+        if (
+          args.collection === branchMergesSlug &&
+          changes?.some(({ applicationOutcome }) => applicationOutcome === 'applied')
+        ) {
+          updateOneSpy.mockImplementation(updateOne)
+          throw new Error('Simulated application progress failure')
+        }
+
+        return updateOne(args)
+      })
+
+      try {
+        await expect(
+          payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+        ).rejects.toThrow('Simulated application progress failure')
+
+        const onMain = await payload.findByID({
+          id: versionedDocument.id,
+          collection: pagesSlug,
+          draft: true,
+        })
+        const onBranch = await payload.findByID({
+          id: versionedDocument.id,
+          branch: branchSlug,
+          collection: pagesSlug,
+          draft: true,
+        })
+        const remainingChanges = await findBranchChanges({ branch: branchSlug })
+        const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+
+        expect(onMain.title).toBe('Unknown application edited')
+        expect(onBranch.title).toBe('Unknown application edited')
+        expect(remainingChanges.docs).toHaveLength(1)
+        expect(mergeEvent.status).toBe('failed')
+        expect(mergeEvent.error).toContain('Simulated application progress failure')
+        expect(mergeEvent.changes[0]).toMatchObject({
+          applicationOutcome: 'unknown',
+          recoveryOutcome: 'unknown',
+        })
+        expect(mergeEvent.changes[0]?.error).toContain('Simulated application progress failure')
+      } finally {
+        updateOneSpy.mockRestore()
+        beginTransactionSpy.mockRestore()
+      }
+    })
+
+    test('should preserve the merge error when recovery progress cannot be persisted', async () => {
+      branchSlug = 'non-transactional-unknown-recovery'
+
+      await createBranchRecord({ name: 'Non-transactional unknown recovery', slug: branchSlug })
+      const versionedDocument = await payload.create({
+        collection: pagesSlug,
+        data: { title: 'Unknown recovery original' },
+      })
+      const failingDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Unknown recovery failure original' },
+      })
+
+      await payload.update({
+        id: versionedDocument.id,
+        branch: branchSlug,
+        collection: pagesSlug,
+        data: { title: 'Unknown recovery edited' },
+      })
+      await payload.update({
+        id: failingDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Unknown recovery failure edited' },
+      })
+
+      const beginTransactionSpy = vi.spyOn(payload.db, 'beginTransaction').mockResolvedValue(null)
+      const updateOne = payload.db.updateOne.bind(payload.db)
+      const updateOneSpy = vi.spyOn(payload.db, 'updateOne').mockImplementation(async (args) => {
+        const changes = (args.data as { changes?: { recoveryOutcome?: string }[] }).changes
+
+        if (
+          args.collection === branchMergesSlug &&
+          changes?.some(({ recoveryOutcome }) => recoveryOutcome === 'pending')
+        ) {
+          updateOneSpy.mockImplementation(updateOne)
+          throw new Error('Simulated recovery progress failure')
+        }
+
+        return updateOne(args)
+      })
+
+      hookSpy.beforeChange = ({ data }: { data: Record<string, unknown> }) => {
+        if (data.title === 'Unknown recovery failure edited') {
+          throw new Error('Simulated original merge failure')
+        }
+      }
+
+      try {
+        await expect(
+          payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+        ).rejects.toThrow('Simulated original merge failure')
+
+        const onMain = await payload.findByID({
+          id: versionedDocument.id,
+          collection: pagesSlug,
+          draft: true,
+        })
+        const onBranch = await payload.findByID({
+          id: versionedDocument.id,
+          branch: branchSlug,
+          collection: pagesSlug,
+          draft: true,
+        })
+        const remainingChanges = await findBranchChanges({ branch: branchSlug })
+        const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+        const unresolvedChange = mergeEvent.changes.find(
+          ({ collectionSlug }) => collectionSlug === pagesSlug,
+        )
+
+        expect(onMain.title).toBe('Unknown recovery edited')
+        expect(onBranch.title).toBe('Unknown recovery edited')
+        expect(remainingChanges.docs).toHaveLength(2)
+        expect(mergeEvent.status).toBe('failed')
+        expect(mergeEvent.error).toContain('Simulated original merge failure')
+        expect(unresolvedChange).toMatchObject({
+          applicationOutcome: 'applied',
+          recoveryOutcome: 'unknown',
+        })
+        expect(unresolvedChange?.recoveryError).toContain('Simulated recovery progress failure')
+      } finally {
+        updateOneSpy.mockRestore()
+        beginTransactionSpy.mockRestore()
+      }
+    })
+
+    test('should report recovery as unavailable when the target version was pruned', async () => {
+      branchSlug = 'non-transactional-pruned-recovery'
+
+      await createBranchRecord({ name: 'Non-transactional pruned recovery', slug: branchSlug })
+      const versionedDocument = await payload.create({
+        collection: pagesSlug,
+        data: { title: 'Pruned recovery original' },
+      })
+      const failingDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Pruned recovery failure original' },
+      })
+      const req = await createPayloadRequest({ branch: false, payload })
+      const beforeVersions = await payload.db.findVersions({
+        branch: false,
+        collection: pagesSlug,
+        limit: 1,
+        pagination: false,
+        req,
+        sort: '-updatedAt',
+        where: { parent: { equals: versionedDocument.id } },
+      })
+      const beforeVersionID = beforeVersions.docs[0]!.id
+
+      await payload.update({
+        id: versionedDocument.id,
+        branch: branchSlug,
+        collection: pagesSlug,
+        data: { title: 'Pruned recovery edited' },
+      })
+      await payload.update({
+        id: failingDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Pruned recovery failure edited' },
+      })
+
+      const beginTransactionSpy = vi.spyOn(payload.db, 'beginTransaction').mockResolvedValue(null)
+
+      hookSpy.beforeChange = async ({ data }: { data: Record<string, unknown> }) => {
+        if (data.title === 'Pruned recovery failure edited') {
+          await payload.db.deleteVersions({
+            collection: pagesSlug,
+            req,
+            where: { id: { equals: beforeVersionID } },
+          })
+          throw new Error('Simulated failure after pruning the recovery version')
+        }
+      }
+
+      try {
+        await expect(
+          payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+        ).rejects.toThrow('Simulated failure after pruning the recovery version')
+
+        const onMain = await payload.findByID({
+          id: versionedDocument.id,
+          collection: pagesSlug,
+          draft: true,
+        })
+        const onBranch = await payload.findByID({
+          id: versionedDocument.id,
+          branch: branchSlug,
+          collection: pagesSlug,
+          draft: true,
+        })
+        const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+        const unresolvedChange = mergeEvent.changes.find(
+          ({ collectionSlug }) => collectionSlug === pagesSlug,
+        )
+
+        expect(onMain.title).toBe('Pruned recovery edited')
+        expect(onBranch.title).toBe('Pruned recovery edited')
+        expect(mergeEvent.status).toBe('failed')
+        expect(mergeEvent.error).toContain('Simulated failure after pruning the recovery version')
+        expect(unresolvedChange).toMatchObject({
+          applicationOutcome: 'applied',
+          recoveryOutcome: 'unavailable',
+        })
+        expect(unresolvedChange?.recoveryError).toBeUndefined()
+      } finally {
+        beginTransactionSpy.mockRestore()
+      }
+    })
+
+    test('should report that recovery restored over an intervening target edit', async () => {
+      branchSlug = 'non-transactional-intervening-target-recovery'
+
+      await createBranchRecord({ name: 'Intervening target recovery', slug: branchSlug })
+      const versionedDocument = await payload.create({
+        collection: pagesSlug,
+        data: { title: 'Intervening recovery original' },
+      })
+      const failingDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Intervening recovery failure original' },
+      })
+
+      await payload.update({
+        id: versionedDocument.id,
+        branch: branchSlug,
+        collection: pagesSlug,
+        data: { title: 'Intervening recovery branch edit' },
+      })
+      await payload.update({
+        id: failingDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Intervening recovery failure edit' },
+      })
+
+      const beginTransactionSpy = vi.spyOn(payload.db, 'beginTransaction').mockResolvedValue(null)
+
+      hookSpy.beforeChange = async ({ data }: { data: Record<string, unknown> }) => {
+        if (data.title === 'Intervening recovery failure edit') {
+          await payload.update({
+            id: versionedDocument.id,
+            collection: pagesSlug,
+            data: { title: 'Intervening main edit' },
+            draft: true,
+          })
+          throw new Error('Simulated failure after intervening target edit')
+        }
+      }
+
+      try {
+        await expect(
+          payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+        ).rejects.toThrow('Simulated failure after intervening target edit')
+
+        const onMain = await payload.findByID({
+          id: versionedDocument.id,
+          collection: pagesSlug,
+          draft: true,
+        })
+        const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+        const recoveredChange = mergeEvent.changes.find(
+          ({ collectionSlug }) => collectionSlug === pagesSlug,
+        )
+
+        expect(onMain.title).toBe('Intervening recovery original')
+        expect(mergeEvent.status).toBe('failed')
+        expect(mergeEvent.error).toContain('Simulated failure after intervening target edit')
+        expect(recoveredChange).toMatchObject({
+          applicationOutcome: 'applied',
+          recoveryOutcome: 'restored',
+        })
+      } finally {
+        hookSpy.beforeChange = undefined
+        beginTransactionSpy.mockRestore()
+      }
+    })
+
+    test('should retain the original merge error when target recovery fails', async () => {
+      branchSlug = 'non-transactional-target-recovery-failure'
+
+      await createBranchRecord({ name: 'Target recovery failure', slug: branchSlug })
+      const versionedDocument = await payload.create({
+        collection: pagesSlug,
+        data: { title: 'Recovery failure original' },
+      })
+      const failingDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Later failure original' },
+      })
+
+      await payload.update({
+        id: versionedDocument.id,
+        branch: branchSlug,
+        collection: pagesSlug,
+        data: { title: 'Recovery failure branch edit' },
+      })
+      await payload.update({
+        id: failingDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Later failure branch edit' },
+      })
+
+      const beginTransactionSpy = vi.spyOn(payload.db, 'beginTransaction').mockResolvedValue(null)
+      const restoreVersionSpy = vi
+        .spyOn(payload, 'restoreVersion')
+        .mockRejectedValueOnce(new Error('Simulated target recovery failure'))
+
+      hookSpy.beforeChange = ({ data }: { data: Record<string, unknown> }) => {
+        if (data.title === 'Later failure branch edit') {
+          throw new Error('Simulated original merge failure before recovery')
+        }
+      }
+
+      try {
+        await expect(
+          payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+        ).rejects.toThrow('Simulated original merge failure before recovery')
+
+        const onMain = await payload.findByID({
+          id: versionedDocument.id,
+          collection: pagesSlug,
+          draft: true,
+        })
+        const remainingChanges = await findBranchChanges({ branch: branchSlug })
+        const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+        const failedRecovery = mergeEvent.changes.find(
+          ({ collectionSlug }) => collectionSlug === pagesSlug,
+        )
+
+        expect(onMain.title).toBe('Recovery failure branch edit')
+        expect(remainingChanges.docs).toHaveLength(2)
+        expect(mergeEvent.status).toBe('failed')
+        expect(mergeEvent.error).toContain('Simulated original merge failure before recovery')
+        expect(failedRecovery).toMatchObject({
+          applicationOutcome: 'applied',
+          recoveryOutcome: 'failed',
+        })
+        expect(failedRecovery?.recoveryError).toContain('Simulated target recovery failure')
+      } finally {
+        hookSpy.beforeChange = undefined
+        restoreVersionSpy.mockRestore()
+        beginTransactionSpy.mockRestore()
+      }
+    })
+
+    test('should retain committed target content when post-commit source cleanup fails', async () => {
+      branchSlug = 'post-commit-cleanup-failure'
+
+      await createBranchRecord({ name: 'Post-commit cleanup failure', slug: branchSlug })
+      const mainDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Cleanup original' },
+      })
+
+      await payload.update({
+        id: mainDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Cleanup edited' },
+      })
+
+      const shadow = (
+        await payload.find({
+          branch: false,
+          collection: postsSlug,
+          pagination: false,
+          showHiddenFields: true,
+          where: { _branch: { equals: branchSlug } },
+        })
+      ).docs[0]!
+      const originalDeleteOne = payload.db.deleteOne.bind(payload.db)
+
+      deleteOneSpy = vi.spyOn(payload.db, 'deleteOne').mockImplementation(async (args: any) => {
+        if (args?.where?.id?.equals === shadow.id) {
+          throw new Error('Simulated post-commit source cleanup failure')
+        }
+
+        return originalDeleteOne(args)
+      })
+
+      const result = await payload.branches.merge({
+        branch: branchSlug,
+        overrideAccess: true,
+      })
+
+      expect(result.merged).toHaveLength(1)
+
+      const onMain = await payload.findByID({ id: mainDocument.id, collection: postsSlug })
+      const sourceRows = await payload.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        showHiddenFields: true,
+        where: { _branch: { equals: branchSlug } },
+      })
+      const remainingChanges = await findBranchChanges({ branch: branchSlug })
+      const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+
+      expect(onMain.title).toBe('Cleanup edited')
+      expect(sourceRows.docs).toHaveLength(1)
+      expect(remainingChanges.docs).toHaveLength(1)
+      expect(mergeEvent.status).toBe('cleanupFailed')
+      expect(mergeEvent.error).toContain('Simulated post-commit source cleanup failure')
+      expect(mergeEvent.changes[0]).toMatchObject({
+        applicationOutcome: 'committed',
+        cleanupOutcome: 'failed',
+      })
+      expect(mergeEvent.changes[0]?.cleanupError).toContain(
+        'Simulated post-commit source cleanup failure',
+      )
+    })
+
+    test('should retry failed source cleanup without repeating the committed target write', async () => {
+      branchSlug = 'post-commit-cleanup-retry'
+
+      await createBranchRecord({ name: 'Post-commit cleanup retry', slug: branchSlug })
+      const mainDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Cleanup retry original' },
+      })
+
+      await payload.update({
+        id: mainDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Cleanup retry edited' },
+      })
+
+      const shadow = (
+        await payload.find({
+          branch: false,
+          collection: postsSlug,
+          pagination: false,
+          showHiddenFields: true,
+          where: { _branch: { equals: branchSlug } },
+        })
+      ).docs[0]!
+      const originalDeleteOne = payload.db.deleteOne.bind(payload.db)
+      let cleanupAttempts = 0
+      let targetWriteCount = 0
+
+      deleteOneSpy = vi.spyOn(payload.db, 'deleteOne').mockImplementation(async (args: any) => {
+        if (args?.where?.id?.equals === shadow.id && cleanupAttempts++ === 0) {
+          throw new Error('Simulated retryable source cleanup failure')
+        }
+
+        return originalDeleteOne(args)
+      })
+      hookSpy.beforeChange = ({ data }: { data: Record<string, unknown> }) => {
+        if (data.title === 'Cleanup retry edited') {
+          targetWriteCount += 1
+        }
+      }
+
+      await payload.branches.merge({ branch: branchSlug, overrideAccess: true })
+
+      expect(targetWriteCount).toBeGreaterThan(0)
+
+      const targetWriteCountAfterFirstMerge = targetWriteCount
+
+      const failedEvent = await findBranchMergeEvent({ branch: branchSlug })
+
+      expect(failedEvent).toMatchObject({
+        changes: [
+          {
+            applicationOutcome: 'committed',
+            cleanupOutcome: 'failed',
+            sourceID: String(shadow.id),
+            sourceUpdatedAt: shadow.updatedAt,
+          },
+        ],
+        status: 'cleanupFailed',
+      })
+
+      await payload.branches.merge({ branch: branchSlug, overrideAccess: true })
+
+      const onMain = await payload.findByID({ id: mainDocument.id, collection: postsSlug })
+      const sourceRows = await payload.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        showHiddenFields: true,
+        where: { _branch: { equals: branchSlug } },
+      })
+      const remainingChanges = await findBranchChanges({ branch: branchSlug })
+      const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+
+      expect(onMain.title).toBe('Cleanup retry edited')
+      expect(targetWriteCount).toBe(targetWriteCountAfterFirstMerge)
+      expect(sourceRows.docs).toHaveLength(0)
+      expect(remainingChanges.docs).toHaveLength(0)
+      expect(mergeEvent.status).toBe('succeeded')
+      expect(mergeEvent.error).toBeNull()
+      expect(mergeEvent.changes[0]).toMatchObject({
+        applicationOutcome: 'committed',
+        cleanupOutcome: 'completed',
+      })
+    })
+
+    test('should preserve newer source work during a failed cleanup retry', async () => {
+      branchSlug = 'post-commit-cleanup-retry-newer-source'
+
+      await createBranchRecord({ name: 'Cleanup retry with newer source', slug: branchSlug })
+      const mainDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Cleanup retry original' },
+      })
+
+      await payload.update({
+        id: mainDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'First merged source' },
+      })
+
+      const shadow = (
+        await payload.find({
+          branch: false,
+          collection: postsSlug,
+          pagination: false,
+          showHiddenFields: true,
+          where: { _branch: { equals: branchSlug } },
+        })
+      ).docs[0]!
+      const originalDeleteOne = payload.db.deleteOne.bind(payload.db)
+      let cleanupAttempts = 0
+
+      deleteOneSpy = vi.spyOn(payload.db, 'deleteOne').mockImplementation(async (args: any) => {
+        if (args?.where?.id?.equals === shadow.id && cleanupAttempts++ === 0) {
+          throw new Error('Simulated source cleanup failure before newer work')
+        }
+
+        return originalDeleteOne(args)
+      })
+
+      await payload.branches.merge({ branch: branchSlug, overrideAccess: true })
+      await payload.update({
+        id: mainDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Newer source work' },
+      })
+
+      const retryResult = await payload.branches.merge({
+        branch: branchSlug,
+        overrideAccess: true,
+      })
+      const onMain = await payload.findByID({ id: mainDocument.id, collection: postsSlug })
+      const onBranch = await payload.findByID({
+        id: mainDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+      })
+      const sourceRows = await payload.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        showHiddenFields: true,
+        where: { _branch: { equals: branchSlug } },
+      })
+      const remainingChanges = await findBranchChanges({ branch: branchSlug })
+      const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+
+      expect(retryResult.merged).toHaveLength(0)
+      expect(onMain.title).toBe('First merged source')
+      expect(onBranch.title).toBe('Newer source work')
+      expect(sourceRows.docs).toHaveLength(1)
+      expect(remainingChanges.docs).toHaveLength(1)
+      expect(mergeEvent.status).toBe('succeeded')
+      expect(mergeEvent.error).toBeNull()
+      expect(mergeEvent.changes[0]).toMatchObject({
+        applicationOutcome: 'committed',
+        cleanupOutcome: 'superseded',
+      })
+    })
+
+    test('should retry branch-created version cleanup without repeating the target write', async () => {
+      branchSlug = 'post-commit-created-version-cleanup-retry'
+
+      await createBranchRecord({ name: 'Branch-created version cleanup retry', slug: branchSlug })
+      const createdOnBranch = await payload.create({
+        branch: branchSlug,
+        collection: pagesSlug,
+        data: { title: 'Created version cleanup retry' },
+      })
+      const beginTransactionSpy = vi.spyOn(payload.db, 'beginTransaction').mockResolvedValue(null)
+      const originalDeleteVersions = payload.db.deleteVersions.bind(payload.db)
+      let sourceVersionCleanupAttempts = 0
+      let targetWriteCount = 0
+      const deleteVersionsSpy = vi
+        .spyOn(payload.db, 'deleteVersions')
+        .mockImplementation(async (args) => {
+          if (args.collection === pagesSlug && sourceVersionCleanupAttempts++ === 0) {
+            throw new Error('Simulated branch-created source version cleanup failure')
+          }
+
+          return originalDeleteVersions(args)
+        })
+
+      hookSpy.pageBeforeChange = () => {
+        targetWriteCount += 1
+      }
+
+      try {
+        await payload.branches.merge({ branch: branchSlug, overrideAccess: true })
+
+        const targetWriteCountAfterFirstMerge = targetWriteCount
+        const failedEvent = await findBranchMergeEvent({ branch: branchSlug })
+
+        expect(failedEvent.status).toBe('cleanupFailed')
+        expect(failedEvent.changes[0]?.sourceVersionIDs?.length).toBeGreaterThan(0)
+
+        const retryResult = await payload.branches.merge({
+          branch: branchSlug,
+          overrideAccess: true,
+        })
+        const onMain = await payload.findByID({
+          id: createdOnBranch.id,
+          collection: pagesSlug,
+          draft: true,
+        })
+        const remainingChanges = await findBranchChanges({ branch: branchSlug })
+        const eventAfterRetry = await findBranchMergeEvent({ branch: branchSlug })
+
+        expect(retryResult.merged).toHaveLength(1)
+        expect(onMain.title).toBe('Created version cleanup retry')
+        expect(targetWriteCount).toBe(targetWriteCountAfterFirstMerge)
+        expect(remainingChanges.docs).toHaveLength(0)
+        expect(eventAfterRetry.status).toBe('succeeded')
+        expect(eventAfterRetry.error).toBeNull()
+        expect(eventAfterRetry.changes[0]).toMatchObject({
+          applicationOutcome: 'committed',
+          cleanupOutcome: 'completed',
+        })
+      } finally {
+        hookSpy.pageBeforeChange = undefined
+        deleteVersionsSpy.mockRestore()
+        beginTransactionSpy.mockRestore()
+      }
+    })
+
+    test('should retry failed deletion-marker cleanup without repeating the deletion', async () => {
+      branchSlug = 'post-commit-deletion-cleanup-failure'
+
+      await createBranchRecord({ name: 'Post-commit deletion cleanup failure', slug: branchSlug })
+      const mainDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Delete after commit' },
+      })
+
+      await payload.delete({
+        id: mainDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+      })
+
+      const deletionMarker = (
+        await payload.find({
+          branch: false,
+          collection: postsSlug,
+          pagination: false,
+          showHiddenFields: true,
+          where: { _branch: { equals: branchSlug } },
+        })
+      ).docs[0]!
+      const originalDeleteOne = payload.db.deleteOne.bind(payload.db)
+      let cleanupAttempts = 0
+
+      deleteOneSpy = vi.spyOn(payload.db, 'deleteOne').mockImplementation(async (args: any) => {
+        if (args?.where?.id?.equals === deletionMarker.id && cleanupAttempts++ === 0) {
+          throw new Error('Simulated deletion-marker cleanup failure')
+        }
+
+        return originalDeleteOne(args)
+      })
+
+      const result = await payload.branches.merge({
+        branch: branchSlug,
+        overrideAccess: true,
+      })
+
+      const onMain = await payload.find({
+        collection: postsSlug,
+        pagination: false,
+        where: { id: { equals: mainDocument.id } },
+      })
+      const sourceRows = await payload.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        showHiddenFields: true,
+        where: { _branch: { equals: branchSlug } },
+      })
+      const remainingChanges = await findBranchChanges({ branch: branchSlug })
+      const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+
+      expect(result.merged).toHaveLength(1)
+      expect(onMain.docs).toHaveLength(0)
+      expect(sourceRows.docs).toHaveLength(1)
+      expect(remainingChanges.docs).toHaveLength(1)
+      expect(mergeEvent.status).toBe('cleanupFailed')
+      expect(mergeEvent.changes[0]).toMatchObject({
+        applicationOutcome: 'committed',
+        cleanupOutcome: 'failed',
+      })
+
+      const retryResult = await payload.branches.merge({
+        branch: branchSlug,
+        overrideAccess: true,
+      })
+      const sourceRowsAfterRetry = await payload.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+        showHiddenFields: true,
+        where: { _branch: { equals: branchSlug } },
+      })
+      const changesAfterRetry = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: branchSlug } },
+      })
+      const eventAfterRetry = await findBranchMergeEvent({ branch: branchSlug })
+
+      expect(retryResult.merged).toHaveLength(1)
+      expect(sourceRowsAfterRetry.docs).toHaveLength(0)
+      expect(changesAfterRetry.docs).toHaveLength(0)
+      expect(eventAfterRetry.status).toBe('succeeded')
+      expect(eventAfterRetry.error).toBeNull()
+      expect(eventAfterRetry.changes[0]).toMatchObject({
+        applicationOutcome: 'committed',
+        cleanupOutcome: 'completed',
+      })
+    })
+
+    test('should retry failed global cleanup without repeating the committed target write', async () => {
+      branchSlug = 'post-commit-global-cleanup-failure'
+
+      await createBranchRecord({ name: 'Post-commit global cleanup failure', slug: branchSlug })
+      await payload.updateGlobal({
+        slug: headerGlobalSlug,
+        data: { navLabel: 'Global cleanup original' },
+      })
+      await payload.updateGlobal({
+        slug: headerGlobalSlug,
+        branch: branchSlug,
+        data: { navLabel: 'Global cleanup edited' },
+      })
+
+      const deleteBranchGlobalSpy = vi
+        .spyOn(payload.db, 'deleteBranchGlobal')
+        .mockRejectedValueOnce(new Error('Simulated global source cleanup failure'))
+      let targetWriteCount = 0
+
+      hookSpy.headerBeforeOperation = () => {
+        targetWriteCount += 1
+      }
+
+      try {
+        const result = await payload.branches.merge({
+          branch: branchSlug,
+          overrideAccess: true,
+        })
+        const onMain = await payload.findGlobal({ slug: headerGlobalSlug })
+        const onBranch = await payload.findGlobal({ branch: branchSlug, slug: headerGlobalSlug })
+        const remainingChanges = await findBranchChanges({ branch: branchSlug })
+        const failedEvent = await findBranchMergeEvent({ branch: branchSlug })
+
+        expect(result.merged).toHaveLength(1)
+        expect(onMain.navLabel).toBe('Global cleanup edited')
+        expect(onBranch.navLabel).toBe('Global cleanup edited')
+        expect(remainingChanges.docs).toHaveLength(1)
+        expect(failedEvent.status).toBe('cleanupFailed')
+        expect(failedEvent.changes[0]).toMatchObject({
+          applicationOutcome: 'committed',
+          cleanupOutcome: 'failed',
+        })
+        expect(failedEvent.changes[0]?.sourceRevision).toBeTruthy()
+
+        const targetWriteCountAfterFirstMerge = targetWriteCount
+        const retryResult = await payload.branches.merge({
+          branch: branchSlug,
+          overrideAccess: true,
+        })
+        const changesAfterRetry = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+        const eventAfterRetry = await findBranchMergeEvent({ branch: branchSlug })
+
+        expect(retryResult.merged).toHaveLength(1)
+        expect(targetWriteCount).toBe(targetWriteCountAfterFirstMerge)
+        expect(changesAfterRetry.docs).toHaveLength(0)
+        expect(eventAfterRetry.status).toBe('succeeded')
+        expect(eventAfterRetry.error).toBeNull()
+        expect(eventAfterRetry.changes[0]).toMatchObject({
+          applicationOutcome: 'committed',
+          cleanupOutcome: 'completed',
+        })
+      } finally {
+        deleteBranchGlobalSpy.mockRestore()
+
+        await payload.db.deleteBranchGlobal?.({
+          branch: branchSlug,
+          globalSlug: headerGlobalSlug,
+          req: await createPayloadRequest({ branch: false, payload }),
+        })
+        await payload.updateGlobal({
+          slug: headerGlobalSlug,
+          data: { navLabel: 'main label' },
+        })
+      }
+    })
+
+    test('should preserve newer global source work during a failed cleanup retry', async () => {
+      branchSlug = 'post-commit-global-cleanup-newer-source'
+
+      await createBranchRecord({ name: 'Global cleanup retry with newer source', slug: branchSlug })
+      await payload.updateGlobal({
+        slug: headerGlobalSlug,
+        data: { navLabel: 'Global cleanup retry original' },
+      })
+      await payload.updateGlobal({
+        slug: headerGlobalSlug,
+        branch: branchSlug,
+        data: { navLabel: 'First global merged source' },
+      })
+
+      const deleteBranchGlobalSpy = vi
+        .spyOn(payload.db, 'deleteBranchGlobal')
+        .mockRejectedValueOnce(new Error('Simulated global cleanup failure before newer work'))
+
+      try {
+        await payload.branches.merge({ branch: branchSlug, overrideAccess: true })
+        await payload.updateGlobal({
+          slug: headerGlobalSlug,
+          branch: branchSlug,
+          data: { navLabel: 'Newer global source work' },
+        })
+
+        const retryResult = await payload.branches.merge({
+          branch: branchSlug,
+          overrideAccess: true,
+        })
+        const onMain = await payload.findGlobal({ slug: headerGlobalSlug })
+        const onBranch = await payload.findGlobal({
+          slug: headerGlobalSlug,
+          branch: branchSlug,
+        })
+        const remainingChanges = await findBranchChanges({ branch: branchSlug })
+        const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+
+        expect(retryResult.merged).toHaveLength(0)
+        expect(onMain.navLabel).toBe('First global merged source')
+        expect(onBranch.navLabel).toBe('Newer global source work')
+        expect(remainingChanges.docs).toHaveLength(1)
+        expect(mergeEvent.status).toBe('succeeded')
+        expect(mergeEvent.error).toBeNull()
+        expect(mergeEvent.changes[0]).toMatchObject({
+          applicationOutcome: 'committed',
+          cleanupOutcome: 'superseded',
+        })
+      } finally {
+        deleteBranchGlobalSpy.mockRestore()
+
+        await payload.db.deleteBranchGlobal?.({
+          branch: branchSlug,
+          globalSlug: headerGlobalSlug,
+          req: await createPayloadRequest({ branch: false, payload }),
+        })
+        await payload.updateGlobal({
+          slug: headerGlobalSlug,
+          data: { navLabel: 'main label' },
+        })
+      }
+    })
+
+    test('should batch registry cleanup after ordered target lifecycle writes', async () => {
+      branchSlug = 'batched-registry-cleanup'
+
+      await createBranchRecord({ name: 'Batched registry cleanup', slug: branchSlug })
+      const firstDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Batch cleanup first original' },
+      })
+      const secondDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Batch cleanup second original' },
+      })
+
+      await payload.update({
+        id: firstDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Batch cleanup first edited' },
+      })
+      await payload.update({
+        id: secondDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Batch cleanup second edited' },
+      })
+
+      const pendingChanges = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        sort: 'createdAt',
+        where: { branch: { equals: branchSlug } },
+      })
+      const batchProcessing = payload.db.batchProcessing.bind(payload.db)
+      const batchProcessingSpy = vi
+        .spyOn(payload.db, 'batchProcessing')
+        .mockImplementation((args) => batchProcessing(args))
+      const targetHookTitles: string[] = []
+      let earlierTitleObservedBySecondHook: string | undefined
+
+      hookSpy.beforeChange = async ({
+        data,
+        req,
+      }: {
+        data: Record<string, unknown>
+        req: PayloadRequest
+      }) => {
+        if (typeof data.title === 'string') {
+          targetHookTitles.push(data.title)
+        }
+
+        if (data.title === 'Batch cleanup second edited') {
+          const earlierTarget = await payload.findByID({
+            id: firstDocument.id,
+            collection: postsSlug,
+            req,
+          })
+
+          earlierTitleObservedBySecondHook = earlierTarget.title
+        }
+      }
+
+      try {
+        await payload.branches.merge({ branch: branchSlug, overrideAccess: true })
+
+        expect(batchProcessingSpy).toHaveBeenCalledWith({
+          operations: pendingChanges.docs.map(({ id }) => ({
+            args: {
+              branch: false,
+              collection: branchChangesSlug,
+              returning: false,
+              where: { id: { equals: id } },
+            },
+            operation: 'deleteOne',
+          })),
+          req: expect.any(Object),
+        })
+        expect(targetHookTitles.indexOf('Batch cleanup first edited')).toBeLessThan(
+          targetHookTitles.indexOf('Batch cleanup second edited'),
+        )
+        expect(earlierTitleObservedBySecondHook).toBe('Batch cleanup first edited')
+
+        const onMain = await payload.find({
+          collection: postsSlug,
+          pagination: false,
+          sort: 'createdAt',
+          where: { id: { in: [firstDocument.id, secondDocument.id] } },
+        })
+
+        expect(onMain.docs.map(({ title }) => title)).toEqual([
+          'Batch cleanup first edited',
+          'Batch cleanup second edited',
+        ])
+      } finally {
+        batchProcessingSpy.mockRestore()
+      }
+    })
+
+    test('should preserve failed and unattempted outcomes from registry cleanup batches', async () => {
+      branchSlug = 'partial-registry-cleanup-batch'
+
+      await createBranchRecord({ name: 'Partial registry cleanup batch', slug: branchSlug })
+      const firstDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Partial batch first original' },
+      })
+      const secondDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Partial batch second original' },
+      })
+
+      await payload.update({
+        id: firstDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Partial batch first edited' },
+      })
+      await payload.update({
+        id: secondDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Partial batch second edited' },
+      })
+
+      const deleteOne = payload.db.deleteOne.bind(payload.db)
+      let hasFailedRegistryDelete = false
+      const registryDeleteSpy = vi
+        .spyOn(payload.db, 'deleteOne')
+        .mockImplementation(async (args) => {
+          if (args.collection === branchChangesSlug && !hasFailedRegistryDelete) {
+            hasFailedRegistryDelete = true
+            throw new Error('Simulated registry cleanup operation failure')
+          }
+
+          return deleteOne(args)
+        })
+
+      try {
+        const result = await payload.branches.merge({
+          branch: branchSlug,
+          overrideAccess: true,
+        })
+        const remainingChanges = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          sort: 'createdAt',
+          where: { branch: { equals: branchSlug } },
+        })
+        const failedEvent = await findBranchMergeEvent({ branch: branchSlug })
+
+        expect(result.merged).toHaveLength(2)
+        expect(remainingChanges.docs).toHaveLength(2)
+        expect(failedEvent.status).toBe('cleanupFailed')
+        expect(failedEvent.changes).toMatchObject([
+          {
+            cleanupError: 'Simulated registry cleanup operation failure',
+            cleanupOutcome: 'failed',
+          },
+          {
+            cleanupError: 'Branch change registry cleanup was not attempted.',
+            cleanupOutcome: 'failed',
+          },
+        ])
+
+        const retryResult = await payload.branches.merge({
+          branch: branchSlug,
+          overrideAccess: true,
+        })
+        const changesAfterRetry = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: branchSlug } },
+        })
+
+        expect(retryResult.merged).toHaveLength(2)
+        expect(changesAfterRetry.docs).toHaveLength(0)
+      } finally {
+        registryDeleteSpy.mockRestore()
+      }
+    })
+
+    test('should retry a rejected registry cleanup batch without repeating target writes', async () => {
+      branchSlug = 'rejected-registry-cleanup-batch'
+
+      await createBranchRecord({ name: 'Rejected registry cleanup batch', slug: branchSlug })
+      const mainDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Rejected batch original' },
+      })
+
+      await payload.update({
+        id: mainDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Rejected batch edited' },
+      })
+
+      const batchProcessing = payload.db.batchProcessing.bind(payload.db)
+      const batchProcessingSpy = vi
+        .spyOn(payload.db, 'batchProcessing')
+        .mockRejectedValueOnce(new Error('Simulated registry cleanup batch rejection'))
+        .mockImplementation((args) => batchProcessing(args))
+      let targetWriteCount = 0
+
+      hookSpy.beforeChange = ({ data }: { data: Record<string, unknown> }) => {
+        if (data.title === 'Rejected batch edited') {
+          targetWriteCount += 1
+        }
+      }
+
+      try {
+        const firstResult = await payload.branches.merge({
+          branch: branchSlug,
+          overrideAccess: true,
+        })
+        const targetWriteCountAfterFirstMerge = targetWriteCount
+        const failedEvent = await findBranchMergeEvent({ branch: branchSlug })
+
+        expect(firstResult.merged).toHaveLength(1)
+        expect(failedEvent.status).toBe('cleanupFailed')
+        expect(failedEvent.error).toContain('Simulated registry cleanup batch rejection')
+        expect(failedEvent.changes[0]).toMatchObject({
+          cleanupError: 'Simulated registry cleanup batch rejection',
+          cleanupOutcome: 'failed',
+        })
+
+        const retryResult = await payload.branches.merge({
+          branch: branchSlug,
+          overrideAccess: true,
+        })
+        const remainingChanges = await findBranchChanges({ branch: branchSlug })
+        const eventAfterRetry = await findBranchMergeEvent({ branch: branchSlug })
+
+        expect(retryResult.merged).toHaveLength(1)
+        expect(targetWriteCount).toBe(targetWriteCountAfterFirstMerge)
+        expect(remainingChanges.docs).toHaveLength(0)
+        expect(eventAfterRetry.status).toBe('succeeded')
+        expect(eventAfterRetry.error).toBeNull()
+        expect(eventAfterRetry.changes[0]).toMatchObject({ cleanupOutcome: 'completed' })
+      } finally {
+        hookSpy.beforeChange = undefined
+        batchProcessingSpy.mockRestore()
+      }
+    })
 
     test.options(
       'should roll back every change in a discard when a later change fails',
@@ -6991,11 +10004,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
         expect(onBranchA.title).toBe('A edited')
 
-        const remainingChanges = await payload.find({
-          collection: branchChangesSlug,
-          pagination: false,
-          where: { branch: { equals: branchSlug } },
-        })
+        const remainingChanges = await findBranchChanges({ branch: branchSlug })
 
         expect(remainingChanges.docs).toHaveLength(3)
       },
@@ -7004,10 +10013,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
     test('should leave a caller-owned transaction open when merge fails', async () => {
       branchSlug = 'caller-owned-merge'
 
-      await payload.create({
-        collection: branchesSlug,
-        data: { name: 'Caller-owned merge', slug: branchSlug },
-      })
+      await createBranchRecord({ name: 'Caller-owned merge', slug: branchSlug })
       const mainDoc = await payload.create({
         collection: postsSlug,
         data: { title: 'Caller-owned original' },
@@ -7044,13 +10050,217 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       }
     })
 
+    test('should finalise a successful merge only after its caller-owned transaction commits', async () => {
+      branchSlug = 'caller-owned-successful-merge'
+
+      await createBranchRecord({ name: 'Caller-owned successful merge', slug: branchSlug })
+      const mainDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Caller-owned success original' },
+      })
+
+      await payload.update({
+        id: mainDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Caller-owned success edited' },
+      })
+
+      const req = await createPayloadRequest({ branch: false, payload })
+
+      expect(await initTransaction(req)).toBe(true)
+
+      try {
+        await payload.branches.merge({ branch: branchSlug, overrideAccess: true, req })
+
+        const beforeCommit = await findBranchMergeEvent({ branch: branchSlug })
+
+        expect(beforeCommit.status).toBe('awaitingCommit')
+        expect(beforeCommit.changes[0]?.applicationOutcome).toBe('applied')
+        expect(beforeCommit.changes[0]?.cleanupOutcome).toBe('pending')
+
+        await commitTransaction(req)
+
+        const afterCommit = await findBranchMergeEvent({ branch: branchSlug })
+
+        expect(afterCommit.status).toBe('succeeded')
+        expect(afterCommit.changes[0]?.applicationOutcome).toBe('committed')
+        expect(afterCommit.changes[0]?.cleanupOutcome).toBe('completed')
+      } finally {
+        if (req.transactionID) {
+          await killTransaction(req)
+        }
+      }
+    })
+
+    test('should preserve newer source work created before caller-owned cleanup', async () => {
+      branchSlug = 'caller-owned-newer-source-work'
+
+      await createBranchRecord({ name: 'Caller-owned newer source work', slug: branchSlug })
+      const mainDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Newer source original' },
+      })
+
+      await payload.update({
+        id: mainDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Merge candidate' },
+      })
+
+      const req = await createPayloadRequest({ branch: false, payload })
+
+      expect(await initTransaction(req)).toBe(true)
+
+      try {
+        await payload.branches.merge({ branch: branchSlug, overrideAccess: true, req })
+
+        await payload.update({
+          id: mainDocument.id,
+          branch: branchSlug,
+          collection: postsSlug,
+          data: { title: 'Newer branch work' },
+        })
+
+        await commitTransaction(req)
+
+        const onMain = await payload.findByID({ id: mainDocument.id, collection: postsSlug })
+        const onBranch = await payload.findByID({
+          id: mainDocument.id,
+          branch: branchSlug,
+          collection: postsSlug,
+        })
+        const remainingChanges = await findBranchChanges({ branch: branchSlug })
+        const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+
+        expect(onMain.title).toBe('Merge candidate')
+        expect(onBranch.title).toBe('Newer branch work')
+        expect(remainingChanges.docs).toHaveLength(1)
+        expect(mergeEvent.status).toBe('succeeded')
+        expect(mergeEvent.changes[0]).toMatchObject({
+          applicationOutcome: 'committed',
+          cleanupOutcome: 'superseded',
+        })
+      } finally {
+        if (req.transactionID) {
+          await killTransaction(req)
+        }
+      }
+    })
+
+    test('should preserve newer global work created before caller-owned cleanup', async () => {
+      branchSlug = 'caller-owned-newer-global-work'
+
+      await createBranchRecord({ name: 'Caller-owned newer global work', slug: branchSlug })
+      await payload.updateGlobal({
+        slug: headerGlobalSlug,
+        data: { navLabel: 'Global source original' },
+      })
+      await payload.updateGlobal({
+        slug: headerGlobalSlug,
+        branch: branchSlug,
+        data: { navLabel: 'Global merge candidate' },
+      })
+
+      const req = await createPayloadRequest({ branch: false, payload })
+
+      expect(await initTransaction(req)).toBe(true)
+
+      try {
+        await payload.branches.merge({ branch: branchSlug, overrideAccess: true, req })
+
+        await payload.updateGlobal({
+          slug: headerGlobalSlug,
+          branch: branchSlug,
+          data: { navLabel: 'Newer global branch work' },
+        })
+
+        await commitTransaction(req)
+
+        const onMain = await payload.findGlobal({ slug: headerGlobalSlug })
+        const onBranch = await payload.findGlobal({ branch: branchSlug, slug: headerGlobalSlug })
+        const remainingChanges = await findBranchChanges({ branch: branchSlug })
+        const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+
+        expect(onMain.navLabel).toBe('Global merge candidate')
+        expect(onBranch.navLabel).toBe('Newer global branch work')
+        expect(remainingChanges.docs).toHaveLength(1)
+        expect(mergeEvent.status).toBe('succeeded')
+        expect(mergeEvent.changes[0]).toMatchObject({
+          applicationOutcome: 'committed',
+          cleanupOutcome: 'superseded',
+        })
+      } finally {
+        if (req.transactionID) {
+          await killTransaction(req)
+        }
+
+        await payload.db.deleteBranchGlobal?.({
+          branch: branchSlug,
+          globalSlug: headerGlobalSlug,
+          req: await createPayloadRequest({ branch: false, payload }),
+        })
+        await payload.updateGlobal({
+          slug: headerGlobalSlug,
+          data: { navLabel: 'main label' },
+        })
+      }
+    })
+
+    test('should record a successful merge as rolled back when its caller-owned transaction rolls back', async () => {
+      branchSlug = 'caller-owned-rolled-back-merge'
+
+      await createBranchRecord({ name: 'Caller-owned rolled-back merge', slug: branchSlug })
+      const mainDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Caller-owned rollback original' },
+      })
+
+      await payload.update({
+        id: mainDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Caller-owned rollback edited' },
+      })
+
+      const req = await createPayloadRequest({ branch: false, payload })
+
+      expect(await initTransaction(req)).toBe(true)
+
+      try {
+        await payload.branches.merge({ branch: branchSlug, overrideAccess: true, req })
+        await killTransaction(req)
+
+        const onMain = await payload.findByID({ id: mainDocument.id, collection: postsSlug })
+        const onBranch = await payload.findByID({
+          id: mainDocument.id,
+          branch: branchSlug,
+          collection: postsSlug,
+        })
+        const remainingChanges = await findBranchChanges({ branch: branchSlug })
+        const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+
+        expect(onMain.title).toBe('Caller-owned rollback original')
+        expect(onBranch.title).toBe('Caller-owned rollback edited')
+        expect(remainingChanges.docs).toHaveLength(1)
+        expect(mergeEvent.status).toBe('failed')
+        expect(mergeEvent.error).toContain('Caller-owned transaction rolled back')
+        expect(mergeEvent.changes[0]).toMatchObject({
+          applicationOutcome: 'rolledBack',
+          cleanupOutcome: 'pending',
+        })
+      } finally {
+        if (req.transactionID) {
+          await killTransaction(req)
+        }
+      }
+    })
+
     test('should leave a caller-owned transaction open when discard fails', async () => {
       branchSlug = 'caller-owned-discard'
 
-      await payload.create({
-        collection: branchesSlug,
-        data: { name: 'Caller-owned discard', slug: branchSlug },
-      })
+      await createBranchRecord({ name: 'Caller-owned discard', slug: branchSlug })
       const mainDoc = await payload.create({
         collection: postsSlug,
         data: { title: 'Caller-owned original' },
@@ -7102,10 +10312,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
     test('should leave a caller-owned transaction open when a global merge fails', async () => {
       branchSlug = 'caller-owned-global-merge'
 
-      await payload.create({
-        collection: branchesSlug,
-        data: { name: 'Caller-owned global merge', slug: branchSlug },
-      })
+      await createBranchRecord({ name: 'Caller-owned global merge', slug: branchSlug })
       await payload.updateGlobal({
         slug: headerGlobalSlug,
         data: { navLabel: 'Caller-owned global original' },
@@ -7151,10 +10358,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
     test('should leave a caller-owned transaction open when a delete merge fails', async () => {
       branchSlug = 'caller-owned-delete-merge'
 
-      await payload.create({
-        collection: branchesSlug,
-        data: { name: 'Caller-owned delete merge', slug: branchSlug },
-      })
+      await createBranchRecord({ name: 'Caller-owned delete merge', slug: branchSlug })
       const mainDoc = await payload.create({
         collection: postsSlug,
         data: { title: 'Caller-owned delete original' },
@@ -7259,7 +10463,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         if (
           args.collection === postsSlug &&
           args.data?._branch === 'racebranch' &&
-          args.data?._branchOp === 'update'
+          String(args.data?._branchDocID) === String(doc.id)
         ) {
           waitingShadowCreates += 1
 
@@ -7674,7 +10878,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         if (
           args.collection === postsSlug &&
           args.data?._branch === 'racebranch' &&
-          args.data?._branchOp === 'delete'
+          String(args.data?._branchDocID) === String(doc.id)
         ) {
           waitingShadowCreates += 1
 
@@ -7751,7 +10955,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
 
       expect(shadows.docs).toHaveLength(1)
-      expect(shadows.docs[0]!._branchOp).toBe('delete')
+      expect(shadows.docs[0]).not.toHaveProperty('_branchOp')
 
       const changes = await payload.find({
         collection: branchChangesSlug,
@@ -7760,6 +10964,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
 
       expect(changes.docs).toHaveLength(1)
+      expect(changes.docs[0]).toMatchObject({ operation: 'delete' })
 
       const hookWrites = await payload.find({
         collection: excludedSlug,
@@ -7798,7 +11003,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
           if (
             args.collection === postsSlug &&
             args.data?._branch === 'racebranch' &&
-            args.data?._branchOp === 'delete'
+            String(args.data?._branchDocID) === String(doc.id)
           ) {
             waitingShadowCreates += 1
 
@@ -7824,7 +11029,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         const findOneSpy = vi.spyOn(payload.db, 'findOne').mockImplementation(async (args) => {
           const conditions = (args.where as { and?: Record<string, unknown>[] } | undefined)?.and
           const isRetryRevalidation = Boolean(
-            conditions?.some((condition) => '_branchOp' in condition) &&
+            conditions?.some((condition) => '_branchDocID' in condition) &&
               conditions.some((condition) => 'id' in condition),
           )
 
@@ -7842,7 +11047,11 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
           const result = await findOne(args)
           const branchResult = result as null | Record<string, unknown>
 
-          if (!isRetryRevalidation && branchResult?._branchOp === 'delete') {
+          if (
+            !isRetryRevalidation &&
+            branchResult?._branch === 'racebranch' &&
+            String(branchResult._branchDocID) === String(doc.id)
+          ) {
             observedDeleteWinner = branchResult
           }
 
@@ -7928,8 +11137,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         })
 
         expect(shadows.docs).toHaveLength(1)
-        expect(shadows.docs[0]!._branchOp).toBe('delete')
+        expect(shadows.docs[0]).not.toHaveProperty('_branchOp')
         expect(changes.docs).toHaveLength(1)
+        expect(changes.docs[0]).toMatchObject({
+          documentID: String(doc.id),
+          operation: 'delete',
+        })
       },
     )
 
@@ -7952,12 +11165,15 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         const deleteShadowReady = new Promise<void>((resolve) => {
           markDeleteShadowReady = resolve
         })
+        let hasPausedDeleteShadow = false
         const createSpy = vi.spyOn(payload.db, 'create').mockImplementation(async (args) => {
           if (
+            !hasPausedDeleteShadow &&
             args.collection === postsSlug &&
             args.data?._branch === 'racebranch' &&
-            args.data?._branchOp === 'delete'
+            String(args.data?._branchDocID) === String(doc.id)
           ) {
+            hasPausedDeleteShadow = true
             markDeleteShadowReady()
             await deleteShadowReleased
           }
@@ -8001,9 +11217,19 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
             and: [{ _branch: { equals: 'racebranch' } }, { _branchDocID: { equals: doc.id } }],
           },
         })
+        const changes = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: 'racebranch' } },
+        })
 
         expect(shadows.docs).toHaveLength(1)
-        expect(shadows.docs[0]!._branchOp).toBe('delete')
+        expect(shadows.docs[0]).not.toHaveProperty('_branchOp')
+        expect(changes.docs).toHaveLength(1)
+        expect(changes.docs[0]).toMatchObject({
+          documentID: String(doc.id),
+          operation: 'delete',
+        })
       },
     )
   })

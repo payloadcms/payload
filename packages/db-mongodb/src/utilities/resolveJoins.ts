@@ -21,6 +21,8 @@ import { transform } from './transform.js'
 export type ResolveJoinsArgs = {
   /** The MongoDB adapter instance */
   adapter: MongooseAdapter
+  /** Explicit branch override for related document reads */
+  branch?: false | string
   /** The slug of the collection being queried */
   collectionSlug: string
   /** Array of documents to resolve joins for */
@@ -44,6 +46,7 @@ export type ResolveJoinsArgs = {
  */
 export async function resolveJoins({
   adapter,
+  branch,
   collectionSlug,
   docs,
   joins,
@@ -167,20 +170,24 @@ export async function resolveJoins({
       // A join subquery must carry the same branch predicate as the top-level
       // read, or a branch would see main's related documents.
       const joinBranchPredicate = getBranchPredicateSync({
+        branch,
         collectionSlug: joinCollectionSlug,
         req,
       })
 
       if (useDrafts) {
         const branchVersionWhere = await resolveBranchVersionQuery({
+          branch,
           collectionSlug: joinCollectionSlug,
           req,
           where: appendVersionToQueryKey(whereQuery as Where),
         })
 
         whereQuery = await JoinModel.buildQuery({
+          branch,
           locale,
           payload: adapter.payload,
+          req,
           where: combineQueries(branchVersionWhere ?? {}, {
             latest: {
               equals: true,
@@ -194,9 +201,11 @@ export async function resolveJoins({
 
         whereQuery = await buildQuery({
           adapter,
+          branch,
           collectionSlug: joinCollectionSlug,
           fields: targetConfig.flattenedFields,
           locale,
+          req,
           where: whereQuery as Where,
         })
       }

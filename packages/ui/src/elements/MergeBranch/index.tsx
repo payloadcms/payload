@@ -2,12 +2,7 @@
 
 import type { MergeResult, MergeStreamEvent } from 'payload'
 
-import {
-  branchChangesCollectionSlug,
-  branchesCollectionSlug,
-  formatAdminURL,
-  MAIN_BRANCH,
-} from 'payload/shared'
+import { branchesCollectionSlug, formatAdminURL, MAIN_BRANCH } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -21,8 +16,6 @@ import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { requests } from '../../utilities/api.js'
-import { buildUpcomingMergeWhere } from '../../utilities/buildUpcomingMergeWhere.js'
 import { Button } from '../Button/index.js'
 import { ChangeSummary } from '../ChangeSummary/index.js'
 import { DatePickerField } from '../DatePicker/index.js'
@@ -90,7 +83,7 @@ export const MergeBranchModal: React.FC = () => {
   const [upcoming, setUpcoming] = useState<{ id: number | string; waitUntil: string }[]>([])
 
   const isOpen = isModalOpen(mergeBranchModalSlug)
-  const branchSlug = target?.branchSlug
+  const branchID = target?.branchID
   const knownChanges = target?.changes
 
   // Offered only when nothing is left behind. Merging a subset means there is still
@@ -103,33 +96,20 @@ export const MergeBranchModal: React.FC = () => {
   // from anywhere, and a summary nobody has asked to see is a query on every page
   // load. Skipped entirely when the opener already knows what it is merging.
   useEffect(() => {
-    if (!isOpen || !branchSlug || knownChanges) {
+    if (!isOpen || branchID === undefined || branchID === null || knownChanges) {
       return
     }
 
-    const controller = new AbortController()
+    let isCancelled = false
 
     const readChanges = async () => {
       try {
-        const response = await requests.get(
-          formatAdminURL({ apiRoute: api, path: `/${branchChangesCollectionSlug}`, serverURL }),
-          {
-            params: {
-              depth: 0,
-              limit: SUMMARY_SAMPLE_LIMIT,
-              select: { collectionSlug: true, operation: true },
-              where: { branch: { equals: branchSlug } },
-            },
-            signal: controller.signal,
-          },
-        )
+        const json = (await serverFunction({
+          name: 'get-branch-merge-summary',
+          args: { branchID, sampleLimit: SUMMARY_SAMPLE_LIMIT },
+        })) as { docs?: SummarizableChange[]; totalDocs?: number }
 
-        const json = (await response.json()) as {
-          docs?: SummarizableChange[]
-          totalDocs?: number
-        }
-
-        if (typeof json?.totalDocs === 'number') {
+        if (!isCancelled && typeof json?.totalDocs === 'number') {
           setCountedChanges(json.totalDocs)
 
           // Only when the sample is the whole set. A breakdown of the first 200 of
@@ -145,42 +125,29 @@ export const MergeBranchModal: React.FC = () => {
 
     void readChanges()
 
-    return () => controller.abort()
-  }, [api, branchSlug, isOpen, knownChanges, serverURL])
+    return () => {
+      isCancelled = true
+    }
+  }, [branchID, isOpen, knownChanges, serverFunction])
 
   // Upcoming schedules for this branch, loaded when the schedule option is chosen
   // rather than with the modal — most merges are immediate and never ask.
   const loadUpcoming = useCallback(async () => {
-    if (!branchSlug) {
+    if (branchID === undefined || branchID === null) {
       return
     }
 
     try {
-      const response = await requests.get(
-        formatAdminURL({ apiRoute: api, path: '/payload-jobs', serverURL }),
-        {
-          params: {
-            depth: 0,
-            limit: 10,
-            sort: 'waitUntil',
-            where: buildUpcomingMergeWhere({ branchSlug }),
-          },
-        },
-      )
+      const upcomingMerges = (await serverFunction({
+        name: 'get-upcoming-branch-merges',
+        args: { branchID },
+      })) as { id: number | string; waitUntil: string }[]
 
-      const json = (await response.json()) as {
-        docs?: { id: number | string; waitUntil?: string }[]
-      }
-
-      setUpcoming(
-        (json.docs ?? [])
-          .filter((doc) => Boolean(doc.waitUntil))
-          .map((doc) => ({ id: doc.id, waitUntil: String(doc.waitUntil) })),
-      )
+      setUpcoming(upcomingMerges)
     } catch (_err) {
       // A missing list costs the reader context, not the action.
     }
-  }, [api, branchSlug, serverURL])
+  }, [branchID, serverFunction])
 
   useEffect(() => {
     if (isOpen && mode === 'schedule') {

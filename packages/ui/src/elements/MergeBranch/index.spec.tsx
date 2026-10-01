@@ -13,7 +13,6 @@ vi.mock('sonner', () => ({
 }))
 
 vi.mock('payload/shared', () => ({
-  branchChangesCollectionSlug: 'payload-branch-changes',
   branchesCollectionSlug: 'payload-branches',
   formatAdminURL: ({ path }: { path: string }) => path,
   MAIN_BRANCH: 'main',
@@ -63,9 +62,6 @@ vi.mock('../../providers/Translation/index.js', () => ({
   }),
 }))
 vi.mock('../../utilities/api.js', () => ({ requests: { get: vi.fn() } }))
-vi.mock('../../utilities/buildUpcomingMergeWhere.js', () => ({
-  buildUpcomingMergeWhere: () => ({}),
-}))
 vi.mock('../Button/index.js', () => ({
   Button: ({
     children,

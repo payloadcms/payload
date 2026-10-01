@@ -1516,16 +1516,21 @@ export type {
   BranchOperation,
   SanitizedBranchingConfig,
 } from './branching/types.js'
-
 export {
   branchChangesCollectionSlug,
   branchDocIDField,
   branchesCollectionSlug,
   branchField,
-  branchOpField,
   branchParentField,
   MAIN_BRANCH,
 } from './branching/types.js'
+export { defaultBranchMergeValidation } from './branching/validation.js'
+export type {
+  BranchMergeValidate,
+  BranchMergeValidationCandidate,
+  BranchMergeValidationError,
+  BranchMergeValidationResult,
+} from './branching/validation.js'
 export {
   projectBranchVersionParent,
   projectBranchVersionParents,
@@ -1671,9 +1676,15 @@ export { validateSearchParam } from './database/queryValidation/validateSearchPa
 
 export type {
   BaseDatabaseAdapter,
+  BatchProcessing,
+  BatchProcessingArgs,
+  BatchProcessingOperation,
+  BatchProcessingResult,
   BeginTransaction,
   CommitTransaction,
   Connect,
+  Copy,
+  CopyArgs,
   Count,
   CountArgs,
   CountGlobalVersionArgs,
@@ -2172,6 +2183,11 @@ export { mergeHeaders } from './utilities/mergeHeaders.js'
 export { parseDocumentID } from './utilities/parseDocumentID.js'
 export { parseParams } from './utilities/parseParams/index.js'
 export type { ParsedParams, RawParams } from './utilities/parseParams/index.js'
+export {
+  type ProcessBatchResult,
+  processInBatches,
+  type ProcessInBatchesArgs,
+} from './utilities/processInBatches.js'
 export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
 export { sanitizeJoinParams } from './utilities/sanitizeJoinParams.js'
 export type { JoinParams } from './utilities/sanitizeJoinParams.js'

@@ -13,7 +13,12 @@ import type {
 } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
-import { resetBranchState, resolveBranch } from '../../branching/resolveBranch.js'
+import { assertBranchMergeValidationWriteAllowed } from '../../branching/mergeWriteGuard.js'
+import {
+  refreshBranchState,
+  resetBranchState,
+  resolveBranch,
+} from '../../branching/resolveBranch.js'
 import {
   assertBranchCreatedDeleteUnreferenced,
   assertBranchDeleteCanUseCallerTransaction,
@@ -76,6 +81,9 @@ export const deleteOperation = async <
   let cleanupScope: DeferredCleanupScope | null = null
   let hasCallerTransaction = false
   let shouldCommit = false
+
+  assertBranchMergeValidationWriteAllowed({ req: args.req })
+
   if (args.collection.config.disableBulkDelete && !args.overrideAccess) {
     throw new APIError(`Collection ${args.collection.config.slug} has disabled bulk delete`, 403)
   }
@@ -1031,6 +1039,10 @@ export const deleteOperation = async <
     }
     if (shouldCommit && !didBatchDeleteFail) {
       await commitTransaction(req)
+    }
+
+    if (isDeletingFromBranch) {
+      refreshBranchState(req)
     }
 
     return result

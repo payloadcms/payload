@@ -7,15 +7,9 @@ import { isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
 import { assertBranchCreatedDocumentsUnreferenced } from './assertBranchCreatedDocumentsUnreferenced.js'
 import { assertBranchWritable } from './assertBranchWritable.js'
 import { createShadowRow } from './createShadowRow.js'
-import { resetBranchState, resolveBranch } from './resolveBranch.js'
+import { peekBranchOperation, resetBranchState, resolveBranch } from './resolveBranch.js'
 import { resolveBranchQuery } from './resolveBranchQuery.js'
-import {
-  branchChangesCollectionSlug,
-  branchDocIDField,
-  branchField,
-  branchOpField,
-  MAIN_BRANCH,
-} from './types.js'
+import { branchChangesCollectionSlug, branchDocIDField, branchField, MAIN_BRANCH } from './types.js'
 
 type Args = {
   branch?: false | string
@@ -196,7 +190,14 @@ export const assertBranchCreatedDeleteUnreferenced = async ({
     },
   })) as null | Record<string, unknown>
 
-  if (!branchDocument || branchDocument[branchOpField] !== 'create') {
+  if (
+    !branchDocument ||
+    peekBranchOperation({
+      collectionSlug,
+      docID: branchDocument.id as number | string,
+      req,
+    }) !== 'create'
+  ) {
     return doc
   }
 
@@ -253,15 +254,22 @@ export const willBranchAbsorbDelete = ({
     return false
   }
 
-  return !(doc[branchField] === branch && doc[branchOpField] === 'create')
+  return !(
+    doc[branchField] === branch &&
+    peekBranchOperation({
+      collectionSlug,
+      docID: doc.id as number | string,
+      req,
+    }) === 'create'
+  )
 }
 
 /**
  * Turns a delete on a branch into a tombstone against main.
  *
  * A branch cannot delete production content, so deleting a main document from
- * a branch records the intent instead: a shadow row marked `_branchOp: delete`,
- * which the read predicate hides on that branch and nowhere else.
+ * a branch records the intent in its authoritative change record. The read
+ * predicate hides the matching canonical ID on that branch and nowhere else.
  *
  * A document created on the branch has no main row behind it, so it is deleted
  * outright — nothing is left to hide.
@@ -335,12 +343,25 @@ export const resolveBranchDelete = async ({
           { id: { equals: concurrentDelete.winnerID } },
           { [branchField]: { equals: branch } },
           { [branchDocIDField]: { equals: concurrentDelete.docID } },
-          { [branchOpField]: { equals: 'delete' } },
         ],
       },
     })
+    const matchingWinnerChange = matchingWinner
+      ? await req.payload.db.findOne({
+          collection: branchChangesCollectionSlug,
+          req: latestCommittedReq,
+          where: {
+            and: [
+              { branch: { equals: branch } },
+              { collectionSlug: { equals: collectionSlug } },
+              { documentID: { equals: String(concurrentDelete.docID) } },
+              { operation: { equals: 'delete' } },
+            ],
+          },
+        })
+      : null
 
-    if (matchingWinner) {
+    if (matchingWinner && matchingWinnerChange) {
       const outcome = { doc: concurrentDelete.doc, tombstoned: true }
 
       if (matchingBranchDeleteOperation) {
@@ -378,9 +399,10 @@ export const resolveBranchDelete = async ({
 
   const targetID = target.id as number | string
   const isOnThisBranch = target[branchField] === branch
-  const isTombstoneExpectedForTarget = !(isOnThisBranch && target[branchOpField] === 'create')
   const canonicalID =
     (target[branchDocIDField] as any)?.value ?? target[branchDocIDField] ?? targetID
+  const operation = peekBranchOperation({ collectionSlug, docID: canonicalID, req })
+  const isTombstoneExpectedForTarget = !(isOnThisBranch && operation === 'create')
 
   if (
     matchingBranchDeleteOperation &&
@@ -405,9 +427,16 @@ export const resolveBranchDelete = async ({
     })
   }
 
+  if (isOnThisBranch && !operation) {
+    throw new APIError(
+      `The ${collectionSlug} branch row for document ${String(canonicalID)} has no change record.`,
+      409,
+    )
+  }
+
   // Created on this branch: no main row stands behind it, so a real delete
   // leaves nothing to hide.
-  if (isOnThisBranch && target[branchOpField] === 'create') {
+  if (isOnThisBranch && operation === 'create') {
     await assertBranchCreatedDeleteUnreferenced({
       branch,
       collectionSlug,
@@ -439,16 +468,6 @@ export const resolveBranchDelete = async ({
   }
 
   if (isOnThisBranch) {
-    // Already forked — turn the existing copy into the tombstone rather than
-    // adding a second row for the same document.
-    await req.payload.db.updateOne({
-      id: targetID,
-      branch: false,
-      collection: collectionSlug,
-      data: { [branchOpField]: 'delete' },
-      req,
-    })
-
     await req.payload.db.deleteMany({
       collection: branchChangesCollectionSlug,
       req,
@@ -461,6 +480,7 @@ export const resolveBranchDelete = async ({
         branch,
         collectionSlug,
         doc: { relationTo: collectionSlug, value: canonicalID },
+        documentID: String(canonicalID),
         entityType: 'collection',
         operation: 'delete',
       },
@@ -477,7 +497,6 @@ export const resolveBranchDelete = async ({
         ...data,
         [branchDocIDField]: canonicalID,
         [branchField]: branch,
-        [branchOpField]: 'delete',
       },
       docID: canonicalID,
       onCreated: async (createReq) => {
@@ -495,6 +514,7 @@ export const resolveBranchDelete = async ({
             branch,
             collectionSlug,
             doc: { relationTo: collectionSlug, value: canonicalID },
+            documentID: String(canonicalID),
             entityType: 'collection',
             operation: 'delete',
           },
