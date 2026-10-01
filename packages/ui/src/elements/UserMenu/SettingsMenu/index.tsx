@@ -57,6 +57,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ groups, onMobileOpen
 
   return (
     <Popup
+      hoverSubmenu
       popupType="menu"
       renderButton={({ active, onClick, onKeyDown, ...aria }) => (
         <button

@@ -64,6 +64,7 @@ export const ThemeMenu: React.FC<{
 
   return (
     <Popup
+      hoverSubmenu
       popupType="menu"
       renderButton={({ active, onClick, onKeyDown, ...aria }) => (
         <button

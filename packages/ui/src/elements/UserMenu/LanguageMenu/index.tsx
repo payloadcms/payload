@@ -58,6 +58,7 @@ export const LanguageMenu: React.FC<{
 
   return (
     <Popup
+      hoverSubmenu
       popupType="menu"
       renderButton={({ active, onClick, onKeyDown, ...aria }) => (
         <button
