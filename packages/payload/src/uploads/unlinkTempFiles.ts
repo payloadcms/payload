@@ -25,7 +25,8 @@ export const unlinkTempFiles: (args: Args) => Promise<void> = async ({
     file?.tempFilePath ??
     (typeof preservedTempFilePath === 'string' ? preservedTempFilePath : undefined)
   const isClientUploadTempFile = Boolean(
-    file?.tempFilePath && Object.prototype.hasOwnProperty.call(file, 'clientUploadContext'),
+    file?.clientUpload ||
+      (file?.tempFilePath && Object.prototype.hasOwnProperty.call(file, 'clientUploadContext')),
   )
   let unlinkedTempFilePath: string | undefined
 

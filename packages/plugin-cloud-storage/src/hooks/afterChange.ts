@@ -1,6 +1,7 @@
 import type { CollectionAfterChangeHook, CollectionConfig, FileData, TypeWithID } from 'payload'
 
 import { isDeepStrictEqual } from 'node:util'
+import { isolateObjectProperty } from 'payload'
 
 import type { GeneratedAdapter } from '../types.js'
 
@@ -140,26 +141,34 @@ export const getAfterChangeHook =
         let docWithMetadata = doc
 
         if (Object.keys(uploadMetadata).length > 0) {
-          if (!req.context) {
-            req.context = {}
-          }
-          req.context.skipCloudStorage = true
+          const metadataReq = isolateObjectProperty(req, [
+            'context',
+            'file',
+            'payloadUploadSizes',
+            'query',
+          ])
+          metadataReq.context = { ...req.context, skipCloudStorage: true }
+          metadataReq.query = { ...req.query }
+          metadataReq.file = undefined
+          metadataReq.payloadUploadSizes = undefined
+          delete metadataReq.query.uploadEdits
+          delete metadataReq.context._payloadCloudStorage
+          delete metadataReq.context._payloadCloudStorageTempFilePath
+          delete metadataReq.context.payloadClientUploadTempFilePath
 
-          const uploadEdits = req.query?.uploadEdits
-          if (req.query) {
-            delete req.query.uploadEdits
-          }
+          const updatedDoc = await req.payload.update({
+            id: doc.id,
+            collection: collection.slug,
+            data: uploadMetadata,
+            depth: 0,
+            draft: isDraftSave,
+            overrideAccess: true,
+            req: metadataReq,
+          })
 
-          try {
-            const updatedDoc = await req.payload.update({
-              id: doc.id,
-              collection: collection.slug,
-              data: uploadMetadata,
-              depth: 0,
-              draft: isDraftSave,
-              req,
-            })
-            docWithMetadata = { ...doc, ...uploadMetadata }
+          // Persist all adapter metadata, but do not add unselected fields to the response.
+          docWithMetadata = { ...doc, ...uploadMetadata }
+          {
             if (updatedDoc.url !== undefined) {
               docWithMetadata.url = updatedDoc.url
             }
@@ -167,11 +176,6 @@ export const getAfterChangeHook =
               // Only return size fields that the collection actually persisted.
               docWithMetadata.sizes = updatedDoc.sizes
             }
-          } finally {
-            if (req.query && uploadEdits !== undefined) {
-              req.query.uploadEdits = uploadEdits
-            }
-            delete req.context.skipCloudStorage
           }
         }
 
