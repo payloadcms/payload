@@ -38,7 +38,7 @@ export function createPrepareLegacyUpload({
   collections: Partial<Record<string, SharpCollectionConfig>>
   sharpDependency: SharpDependency
 }): NonNullable<UploadTransformerInternal['prepareUpload']> {
-  return async ({ collectionSlug, file, transform, uploadEdits }) => {
+  return async ({ collectionSlug, file, req, transform, uploadEdits }) => {
     const collectionUpload = collections[collectionSlug] ?? {}
 
     const fileSupportsResize = canResizeImage(file.type)
@@ -91,7 +91,11 @@ export function createPrepareLegacyUpload({
       ? { height: mainResult.height!, width: mainResult.width! }
       : originalDimensions
 
-    const focalPointEnabled = collectionUpload.focalPoint !== false
+    // Same precedence `init()` applies: Sharp's setting, else the collection's own `focalPoint`.
+    const effectiveFocalPoint =
+      collectionUpload.focalPoint ??
+      req.payload.collections[collectionSlug]?.config.upload?.focalPoint
+    const focalPointEnabled = effectiveFocalPoint !== false
     const variants = collectionUpload.variants
 
     if (canProcessAsImage && Array.isArray(variants) && sizeSourceDimensions) {

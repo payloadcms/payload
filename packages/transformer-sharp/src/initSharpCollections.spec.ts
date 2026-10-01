@@ -67,6 +67,20 @@ describe('initSharpCollections', () => {
     expect(result.collections?.[0]).not.toBe(authoredCollection)
   })
 
+  it("should return a new root config, leaving the caller's config untouched", () => {
+    const authoredCollections = [uploadCollection({ slug: 'media' })]
+    const config = makeConfig(authoredCollections)
+
+    const result = initSharpCollections({
+      collections: { media: { variants: [{ name: 'thumbnail', width: 100 }] } },
+      config,
+    })
+
+    expect(result).not.toBe(config)
+    expect(config.collections).toBe(authoredCollections)
+    expect(config.collections?.[0]?.upload).toEqual({})
+  })
+
   it('should throw when a configured collection slug does not exist in the config', () => {
     const config = makeConfig([uploadCollection({ slug: 'media' })])
 

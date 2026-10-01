@@ -83,9 +83,9 @@ export function initSharpCollections({
     )
   }
 
-  // Write onto copies, never the authored collection objects: a rebuilt config (e.g. on a dev
-  // reload) would otherwise see `upload.variants` on the collection and reject it as authored.
-  config.collections = config.collections?.map((collection) => {
+  // Write onto copies, never the caller's config or collection objects: a rebuilt config (e.g. on
+  // a dev reload) would otherwise see `upload.variants` on the collection and reject it as authored.
+  const sanitizedCollections = config.collections?.map((collection) => {
     const sharpConfig = collections[collection.slug]
 
     if (!sharpConfig || !collection.upload) {
@@ -117,5 +117,5 @@ export function initSharpCollections({
     return { ...collection, upload }
   })
 
-  return config
+  return { ...config, collections: sanitizedCollections }
 }
