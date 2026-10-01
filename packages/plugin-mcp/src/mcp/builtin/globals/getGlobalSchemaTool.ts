@@ -1,12 +1,11 @@
-import { getAccessResults } from 'payload'
+import { getAccessResults, getGlobalInputSchema, getGlobalSchemaInputSchema } from 'payload'
 
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineGlobalTool } from '../../../defineTool.js'
-import { getGlobalInputSchema } from '../../../utils/schemaConversion/getEntityInputSchema.js'
 
 export const getGlobalSchemaTool = defineGlobalTool({
   access: (args) => {
-    const permissions = args.permissions?.globals?.[args.globalSlug]
+    const permissions = args.permissions?.globals?.[args.slug]
 
     return defaultAccess(args) && Boolean(permissions?.update)
   },
@@ -18,17 +17,18 @@ export const getGlobalSchemaTool = defineGlobalTool({
     title: 'Get Global Schema',
   },
   description: 'Get the input schema for updating a global.',
-}).handler(async ({ authorizedMCP, globalSlug, req }) => {
+  input: getGlobalSchemaInputSchema,
+}).handler(async ({ slug, authorizedMCP, req }) => {
   const permissions = authorizedMCP.overrideAccess
     ? null
-    : (await getAccessResults({ req })).globals?.[globalSlug]
+    : (await getAccessResults({ req })).globals?.[slug]
 
   if (!authorizedMCP.overrideAccess && !permissions?.update) {
     return {
       content: [
         {
           type: 'text',
-          text: `Error: MCP access to "getGlobalSchema" is not enabled for global "${globalSlug}"`,
+          text: `Error: MCP access to "getGlobalSchema" is not enabled for global "${slug}"`,
         },
       ],
       isError: true,
@@ -36,14 +36,14 @@ export const getGlobalSchemaTool = defineGlobalTool({
   }
 
   const inputSchema = getGlobalInputSchema({
-    globalSlug,
+    globalSlug: slug,
     req,
     ...(permissions ? { permissions } : {}),
   })
 
   if (!inputSchema) {
     return {
-      content: [{ type: 'text', text: `Error: Global "${globalSlug}" not found` }],
+      content: [{ type: 'text', text: `Error: Global "${slug}" not found` }],
       isError: true,
     }
   }
@@ -52,11 +52,11 @@ export const getGlobalSchemaTool = defineGlobalTool({
     content: [
       {
         type: 'text',
-        text: `Schema for global "${globalSlug}":\n\`\`\`json\n${JSON.stringify(inputSchema)}\n\`\`\``,
+        text: `Schema for global "${slug}":\n\`\`\`json\n${JSON.stringify(inputSchema)}\n\`\`\``,
       },
     ],
     structuredContent: {
-      globalSlug,
+      slug,
       schema: inputSchema,
     },
   }

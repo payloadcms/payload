@@ -1,13 +1,14 @@
 // @ts-ignore
 import { type MongooseAdapter } from '@payloadcms/db-mongodb'
 import { buildConfig, getPayload } from 'payload'
-import { afterEach, expect, it, vi } from 'vitest'
+import { expect, vi } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 
-test
-  .options({ db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atlas' })
-  .describe('mongodb read path selection', () => {
+test.suite(
+  'mongodb read path selection',
+  { db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atlas' },
+  () => {
     const createdIDs: (number | string)[] = []
 
     const getPayloadInstance = async () =>
@@ -52,6 +53,7 @@ test
         collection: 'categories',
         // @ts-expect-error not generated
         data: { title: 'a' },
+        overrideAccess: true,
       })
       createdIDs.push(category.id)
 
@@ -62,19 +64,19 @@ test
       }
     }
 
-    afterEach(async () => {
+    test.afterEach(async () => {
       vi.restoreAllMocks()
 
       const payload = await getPayloadInstance()
 
       for (const id of createdIDs) {
-        await payload.delete({ collection: 'categories', id })
+        await payload.delete({ collection: 'categories', id, overrideAccess: true })
       }
 
       createdIDs.length = 0
     })
 
-    it('should use Model.paginate when a select excludes every join field', async () => {
+    test('should use Model.paginate when a select excludes every join field', async () => {
       const { adapter, payload } = await seedCategory()
       const Model = adapter.collections.categories!
 
@@ -87,13 +89,14 @@ test
         // @ts-expect-error not generated
         select: { title: true },
         where: { title: { equals: 'a' } },
+        overrideAccess: true,
       })
 
       expect(aggregateSpy).not.toHaveBeenCalled()
       expect(paginateSpy).toHaveBeenCalledTimes(1)
     })
 
-    it('should use Model.paginate when every join is disabled individually', async () => {
+    test('should use Model.paginate when every join is disabled individually', async () => {
       const { adapter, payload } = await seedCategory()
       const Model = adapter.collections.categories!
 
@@ -106,13 +109,14 @@ test
         joins: { posts: false },
         limit: 20,
         where: { title: { equals: 'a' } },
+        overrideAccess: true,
       })
 
       expect(aggregateSpy).not.toHaveBeenCalled()
       expect(paginateSpy).toHaveBeenCalledTimes(1)
     })
 
-    it('should use Model.findOne for findByID when a select excludes every join field', async () => {
+    test('should use Model.findOne for findByID when a select excludes every join field', async () => {
       const { adapter, category, payload } = await seedCategory()
       const Model = adapter.collections.categories!
 
@@ -124,13 +128,14 @@ test
         id: category.id,
         // @ts-expect-error not generated
         select: { title: true },
+        overrideAccess: true,
       })
 
       expect(aggregateSpy).not.toHaveBeenCalled()
       expect(findOneSpy).toHaveBeenCalledTimes(1)
     })
 
-    it('should still use Model.aggregate when a join field is actually selected', async () => {
+    test('should still use Model.aggregate when a join field is actually selected', async () => {
       const { adapter, payload } = await seedCategory()
       const Model = adapter.collections.categories!
 
@@ -141,9 +146,11 @@ test
         collection: 'categories',
         limit: 20,
         where: { title: { equals: 'a' } },
+        overrideAccess: true,
       })
 
       expect(aggregateSpy).toHaveBeenCalledTimes(1)
       expect(paginateSpy).not.toHaveBeenCalled()
     })
-  })
+  },
+)

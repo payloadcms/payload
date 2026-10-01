@@ -1,5 +1,5 @@
 import type { SerializedEditorState } from 'lexical'
-import type { RichTextFieldDiffServerComponent } from 'payload'
+import type { RichTextFieldDiffServerProps } from 'payload'
 
 import { FieldDiffContainer, getHTMLDiffComponents } from '@payloadcms/ui/rsc'
 
@@ -25,7 +25,7 @@ import { UploadDiffHTMLConverterAsync } from './converters/upload/index.js'
 
 const baseClass = 'lexical-diff'
 
-export const LexicalDiffComponent: RichTextFieldDiffServerComponent = async (args) => {
+export const LexicalDiffComponent: React.FC<RichTextFieldDiffServerProps> = async (args) => {
   const {
     comparisonValue: valueFrom,
     field,
@@ -87,6 +87,7 @@ export const LexicalDiffComponent: RichTextFieldDiffServerComponent = async (arg
   const payloadPopulateFn = await getPayloadPopulateFn({
     currentDepth: 0,
     depth: 1,
+    overrideAccess: false,
     req,
   })
   const fromHTML = await convertLexicalToHTMLAsync({

@@ -6,15 +6,20 @@ import { Cron } from 'croner'
 import type { CLICommand, CLICommandResult, CLIHelp, CLIRuntime } from '../../config/types.js'
 
 import { getCommandInput } from './getCommandInput.js'
-import { CLICommandError, getCLIErrorOutput, isJSONOutput, writeCLIJSON } from './output.js'
-import { redirectOutputToStderr } from './redirectOutputToStderr.js'
+import {
+  CLICommandError,
+  getCLIErrorOutput,
+  isJSONOutput,
+  withCLIOutputMode,
+  writeCLIJSON,
+} from './output.js'
 
 /**
  * Runs a command through Payload's shared CLI behavior.
  *
  * For example, `payload jobs:run --limit 2 --json` goes through these steps:
  *
- * - reads arguments and options, or the complete JSON value passed through `--input`
+ * - reads arguments and options and merges them over the JSON value passed through `--input`
  * - validates the input and includes the schema when reporting validation errors
  * - passes the validated `args` and runtime helpers to the command handler
  * - sends logs to stderr and writes a consistent JSON response to stdout in JSON mode
@@ -56,21 +61,19 @@ export const invokeCLICommand = async ({
 
   const callHandler = async (): Promise<void> => {
     const isJSON = isJSONOutput(command)
-    const previousJSONSetting = process.env.PAYLOAD_CLI_JSON
-    const restoreOutput = isJSON ? redirectOutputToStderr() : undefined
     let handlerResult: CLICommandResult | number | void
 
-    if (isJSON) {
-      process.env.PAYLOAD_CLI_JSON = '1'
-    }
-
     try {
-      handlerResult = await definition.handler({
-        args: validation.value,
-        getConfig: runtime.getConfig,
-        getPayload: runtime.getPayload,
-        help,
+      handlerResult = await withCLIOutputMode({
         isJSON,
+        run: () =>
+          definition.handler({
+            args: validation.value,
+            getConfig: runtime.getConfig,
+            getPayload: runtime.getPayload,
+            help,
+            isJSON,
+          }),
       })
     } catch (error) {
       if (error instanceof CLICommandError) {
@@ -86,14 +89,6 @@ export const invokeCLICommand = async ({
         command: command.name(),
         message: error instanceof Error ? error.message : 'Unknown error',
       })
-    } finally {
-      restoreOutput?.()
-
-      if (previousJSONSetting === undefined) {
-        delete process.env.PAYLOAD_CLI_JSON
-      } else {
-        process.env.PAYLOAD_CLI_JSON = previousJSONSetting
-      }
     }
 
     const { exitCode, result } =

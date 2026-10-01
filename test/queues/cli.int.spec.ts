@@ -1,25 +1,25 @@
 import { _internal_jobSystemGlobals, _internal_resetJobSystemGlobals, getPayload } from 'payload'
 import { wait } from 'payload/shared'
-import { describe, expect } from 'vitest'
+import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { waitUntilAutorunIsDone } from './utilities.js'
 
-describe('Queues - CLI', () => {
+test.suite('Queues - CLI', { config: './config.ts', cron: false }, () => {
   test('ensure consecutive getPayload call with cron: true will autorun jobs', async ({
     config,
+    payload,
   }) => {
-    const payload = await getPayload({
-      config,
-    })
-
     await payload.jobs.queue({
       workflow: 'inlineTaskTest',
       queue: 'autorunSecond',
       input: {
         message: 'hello!',
       },
+      overrideAccess: true,
     })
+
+    const previousDropDatabase = process.env.PAYLOAD_DROP_DATABASE
 
     process.env.PAYLOAD_DROP_DATABASE = 'false'
 
@@ -37,6 +37,7 @@ describe('Queues - CLI', () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)
@@ -49,10 +50,18 @@ describe('Queues - CLI', () => {
     // Wait 3 seconds to ensure all currently-running crons are done. If we shut down the db while a function is running, it can cause issues
     // Cron function runs may persist after a test has finished
     await wait(3000)
-    // Now we can destroy the payload instance
-    await _payload2.destroy()
-    await payload.destroy()
+    // getPayload may return the fixture-owned instance for the same config. Leave that instance
+    // connected for the fixture's next per-test reset; the file-scoped fixture destroys it later.
+    if (_payload2 !== payload) {
+      await _payload2.destroy()
+    }
     _internal_resetJobSystemGlobals()
+
+    if (previousDropDatabase === undefined) {
+      delete process.env.PAYLOAD_DROP_DATABASE
+    } else {
+      process.env.PAYLOAD_DROP_DATABASE = previousDropDatabase
+    }
   })
 
   test('can run migrate CLI without jobs attempting to run', async ({ cli }) => {

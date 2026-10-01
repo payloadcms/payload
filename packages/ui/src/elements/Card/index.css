@@ -1,11 +1,11 @@
 @layer payload-default {
   .card {
-    background: var(--color-bg-secondary);
-    padding: var(--spacer-2-5) var(--spacer-3);
+    background: var(--color-bg);
+    padding: var(--spacer-2-5);
     width: 100%;
     min-height: 4rem;
     position: relative;
-    border-radius: var(--radius-medium);
+    border-radius: var(--radius-large);
     border: var(--stroke-width-small) solid var(--color-border);
     display: flex;
     align-items: stretch;
@@ -36,7 +36,7 @@
     cursor: pointer;
 
     &:hover {
-      background: var(--color-bg-secondary-hover);
+      background: var(--color-bg-secondary);
     }
 
     &:has(.card__click:active) {

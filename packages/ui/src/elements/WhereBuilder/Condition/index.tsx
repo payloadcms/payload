@@ -191,11 +191,13 @@ export const Condition: React.FC<Props> = (props) => {
             <ReactSelect
               aria-label={t('general:filterField')}
               disabled={disabled}
-              filterOption={(option, inputValue) =>
-                ((option?.data?.plainTextLabel as string) || option.label)
-                  .toLowerCase()
-                  .includes(inputValue.toLowerCase())
-              }
+              filterOption={(option, inputValue) => {
+                const label =
+                  typeof option?.data?.plainTextLabel === 'string'
+                    ? option.data.plainTextLabel
+                    : option.label
+                return label.toLowerCase().includes(inputValue.toLowerCase())
+              }}
               isClearable={false}
               onChange={handleFieldChange}
               options={reducedFields

@@ -42,7 +42,7 @@ export const testEslintConfig = [
         // Ensures the eslint plugin recognizes our custom `it`/`test` wrappers:
         // - `test/__helpers/int/vitest.ts` (db-aware wrapper)
         // - any suite-local `helpers/**/*Fixtures.ts` re-exporting an `it` extended via `test.extend()`
-        vitestImports: [/helpers\/int\/vitest/, /helpers\/.*Fixtures/],
+        vitestImports: [/int\/vitest/, /helpers\/.*Fixtures/],
       },
     },
     rules: {
@@ -53,6 +53,14 @@ export const testEslintConfig = [
           additionalTestBlockFunctions: ['it.options', 'test.options', 'describe.options'],
         },
       ],
+    },
+  },
+  {
+    files: ['**/*.unit.spec.ts'],
+    settings: {
+      vitest: {
+        vitestImports: [/memory\/vitest/],
+      },
     },
   },
   {

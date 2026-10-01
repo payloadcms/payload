@@ -27,7 +27,6 @@ describe('Lexical Views Provider', () => {
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false'
     ;({ payload: _payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     const page = await browser.newPage()
@@ -139,6 +138,7 @@ describe('Lexical Views Provider', () => {
           },
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       try {
@@ -163,6 +163,7 @@ describe('Lexical Views Provider', () => {
         await _payload.delete({
           id: doc.id,
           collection: lexicalViewsProviderSlug,
+          overrideAccess: true,
         })
       }
     })

@@ -17,6 +17,7 @@ type CLICommandDefinition<TInput extends CLIInputSchema> = {
     | false
     | Partial<Record<Extract<keyof StandardSchemaV1.InferInput<TInput>, string>, CLIFieldOverride>>
   description: string
+  examples?: string[]
   /**
    * Runs after Payload validates the command input. `args` contains the validated values.
    *

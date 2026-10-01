@@ -10,6 +10,15 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { HEADER_PROBE_BYTE_LENGTH } from './getFileContentRequirement.js'
 import { getFileFromUploadInstructions } from './getFileFromUploadInstructions.js'
 
+vi.mock('./clientUploadReceipt.js', () => ({
+  verifyClientUploadReceipt: vi.fn(({ signedReceipt }: { signedReceipt: unknown }) => {
+    if (typeof signedReceipt !== 'string') {
+      throw new Error('Invalid upload reference.')
+    }
+    return JSON.parse(signedReceipt)
+  }),
+}))
+
 // A minimal valid 1x1 transparent PNG, small enough that a header-only fetch gets all of it.
 const MINIMAL_PNG = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==',
@@ -25,13 +34,18 @@ const createReq = (
       collections: {
         media: {
           config: {
+            fields: [{ name: 'prefix', type: 'text' }],
             upload: {
               disableLocalStorage: true,
               handlers,
+              uploadInstructions: { requiresUploadReceipt: true },
               ...uploadConfigOverrides,
             },
           },
         },
+      },
+      db: {
+        findOne: vi.fn(async () => null),
       },
       config: {
         upload: {},
@@ -45,14 +59,27 @@ const createReq = (
 
 const createUploadReferenceFile = (
   overrides: Partial<UploadInstructions['file']> = {},
-): UploadInstructions['file'] =>
-  ({
+): UploadInstructions['file'] => {
+  const filename = overrides.filename ?? 'video.mp4'
+  const uploadReference = overrides.uploadReference ?? {}
+  const prefix = typeof uploadReference.prefix === 'string' ? uploadReference.prefix : ''
+  const storageFilePath = prefix ? `${prefix}/${filename}` : `media/${filename}`
+  return {
     filename: 'video.mp4',
     mimeType: 'video/mp4',
     size: 18,
-    uploadReference: { key: 'media/video.mp4' },
     ...overrides,
-  }) as UploadInstructions['file']
+    uploadReference: {
+      ...uploadReference,
+      signedReceipt: JSON.stringify({
+        collectionSlug: 'media',
+        filePrefix: prefix,
+        filename,
+        storageFilePath,
+      }),
+    },
+  } as UploadInstructions['file']
+}
 
 describe('getFileFromUploadInstructions', () => {
   const tempFilesToClean: string[] = []
@@ -66,13 +93,21 @@ describe('getFileFromUploadInstructions', () => {
   })
 
   it('streams the fetched file to a temp file instead of buffering it in memory', async () => {
-    const handler = vi.fn(
-      async () =>
-        new Response('some file contents', {
-          headers: { 'Content-Type': 'video/mp4' },
-          status: 200,
-        }),
-    )
+    const response = new Response('some file contents', {
+      headers: { 'Content-Type': 'video/mp4' },
+      status: 200,
+    })
+
+    const arrayBufferTripwire = vi.fn(async () => {
+      throw new Error('Unexpected whole-body buffering')
+    })
+
+    Object.defineProperty(response, 'arrayBuffer', {
+      configurable: true,
+      value: arrayBufferTripwire,
+    })
+
+    const handler = vi.fn(async () => response)
 
     const req = createReq([handler])
     const uploadReferenceFile = createUploadReferenceFile()
@@ -88,8 +123,12 @@ describe('getFileFromUploadInstructions', () => {
 
     expect(file.data.length).toBe(0)
     expect(fs.readFileSync(file.tempFilePath!, 'utf8')).toBe('some file contents')
-    expect(file.uploadReference).toBe(uploadReferenceFile.uploadReference)
+    expect(file.uploadReference).toEqual({
+      prefix: '',
+      signedReceipt: expect.any(String),
+    })
     expect(file.mimetype).toBe('video/mp4')
+    expect(arrayBufferTripwire).not.toHaveBeenCalled()
   })
 
   it('writes the temp file under the configured tempFileDir', async () => {
@@ -123,8 +162,131 @@ describe('getFileFromUploadInstructions', () => {
     ).rejects.toThrow()
   })
 
+  it('should require receipts only when configured by the upload adapter', async () => {
+    const customHandler = vi.fn(
+      async () =>
+        new Response(MINIMAL_PNG, {
+          headers: { 'Content-Type': 'image/png' },
+          status: 200,
+        }),
+    )
+    const customReq = createReq([customHandler], {
+      imageSizes: [{ height: 100, name: 'preview', width: 100 }],
+      mimeTypes: ['image/*'],
+      uploadInstructions: undefined,
+    })
+
+    const customFile = await getFileFromUploadInstructions({
+      collectionSlug: 'media',
+      file: {
+        filename: 'reference.png',
+        mimeType: 'image/png',
+        size: MINIMAL_PNG.length,
+        uploadReference: { prefix: '' },
+      },
+      req: customReq,
+    })
+
+    tempFilesToClean.push(customFile.tempFilePath!)
+    expect(customHandler).toHaveBeenCalled()
+
+    const handler = vi.fn(async () => new Response('existing file', { status: 200 }))
+    const req = createReq([handler], {
+      imageSizes: [{ height: 100, name: 'preview', width: 100 }],
+      mimeTypes: ['image/*'],
+    })
+
+    await expect(
+      getFileFromUploadInstructions({
+        collectionSlug: 'media',
+        file: {
+          filename: 'reference.png',
+          mimeType: 'image/png',
+          size: 18,
+          uploadReference: { prefix: 'private' },
+        },
+        req,
+      }),
+    ).rejects.toThrow('Invalid upload reference.')
+
+    expect(handler).not.toHaveBeenCalled()
+    expect(req.payload.db.findOne).not.toHaveBeenCalled()
+
+    vi.mocked(req.payload.db.findOne).mockResolvedValueOnce({ id: 'existing' })
+
+    await expect(
+      getFileFromUploadInstructions({
+        collectionSlug: 'media',
+        file: createUploadReferenceFile({
+          filename: 'preview.png',
+          mimeType: 'image/png',
+          uploadReference: { prefix: 'private' },
+        }),
+        req,
+      }),
+    ).rejects.toThrow('Invalid upload reference.')
+
+    expect(handler).not.toHaveBeenCalled()
+    expect(req.payload.db.findOne).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          or: [
+            { filename: { equals: 'preview.png' } },
+            { 'sizes.preview.filename': { equals: 'preview.png' } },
+          ],
+        },
+      }),
+    )
+
+    const overwriteReq = createReq([handler])
+    vi.mocked(overwriteReq.payload.db.findOne).mockResolvedValueOnce({ id: 'existing' })
+    const overwriteFile = createUploadReferenceFile()
+    overwriteFile.uploadReference.signedReceipt = JSON.stringify({
+      ...JSON.parse(overwriteFile.uploadReference.signedReceipt as string),
+      allowOverwrite: true,
+    })
+
+    await expect(
+      getFileFromUploadInstructions({
+        collectionSlug: 'media',
+        file: overwriteFile,
+        req: overwriteReq,
+      }),
+    ).resolves.toMatchObject({ name: 'video.mp4' })
+
+    expect(overwriteReq.payload.db.findOne).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    {
+      filename: 'preview.png',
+      label: 'prefix',
+      uploadReference: { prefix: '../private' },
+    },
+    {
+      filename: 'nested/preview.png',
+      label: 'filename',
+      uploadReference: { prefix: 'private' },
+    },
+  ])('rejects a non-canonical provider $label', async ({ filename, uploadReference }) => {
+    const handler = vi.fn(async () => new Response('other file', { status: 200 }))
+    const req = createReq([handler])
+
+    await expect(
+      getFileFromUploadInstructions({
+        collectionSlug: 'media',
+        file: createUploadReferenceFile({ filename, uploadReference }),
+        req,
+      }),
+    ).rejects.toThrow('Invalid upload reference.')
+
+    expect(handler).not.toHaveBeenCalled()
+  })
+
   it('skips fetching entirely when nothing downstream needs the file content', async () => {
-    const handler = vi.fn(async () => new Response('unused', { status: 200 }))
+    const handler = vi.fn(() => {
+      throw new Error('No-content handler was invoked')
+    })
     const req = createReq([handler], {})
 
     const file = await getFileFromUploadInstructions({
@@ -147,6 +309,10 @@ describe('getFileFromUploadInstructions', () => {
     })
 
     const req = createReq([handler], {})
+    const sharp = vi.fn(() => {
+      throw new Error('Unexpected image processing')
+    })
+    req.payload.config.sharp = sharp
 
     const file = await getFileFromUploadInstructions({
       collectionSlug: 'media',
@@ -162,6 +328,7 @@ describe('getFileFromUploadInstructions', () => {
     expect(file.tempFilePath).toBeUndefined()
     expect(file.data.equals(MINIMAL_PNG)).toBe(true)
     expect(file.mimetype).toBe('image/png')
+    expect(sharp).not.toHaveBeenCalled()
   })
 
   it('fetches the full file for an image with no configured adjustments when the request includes a crop edit', async () => {
@@ -191,29 +358,31 @@ describe('getFileFromUploadInstructions', () => {
   })
 
   it('stops reading once it has enough bytes to probe dimensions, even if the handler ignores the range hint', async () => {
-    const totalSize = HEADER_PROBE_BYTE_LENGTH * 4
-    let cancelled = false
-    let bytesProduced = 0
+    const prefix = Buffer.alloc(HEADER_PROBE_BYTE_LENGTH)
+    MINIMAL_PNG.copy(prefix)
 
-    const stream = new ReadableStream({
-      cancel() {
-        cancelled = true
+    let cancelled = false
+    let hasReadPastBoundary = false
+    let servedPrefix = false
+
+    const stream = new ReadableStream(
+      {
+        cancel() {
+          cancelled = true
+        },
+        pull(controller) {
+          if (!servedPrefix) {
+            servedPrefix = true
+            controller.enqueue(prefix)
+            return
+          }
+
+          hasReadPastBoundary = true
+          controller.error(new Error('Read past header boundary'))
+        },
       },
-      pull(controller) {
-        if (bytesProduced === 0) {
-          controller.enqueue(MINIMAL_PNG)
-          bytesProduced += MINIMAL_PNG.length
-          return
-        }
-        if (bytesProduced >= totalSize) {
-          controller.close()
-          return
-        }
-        const chunkSize = Math.min(64 * 1024, totalSize - bytesProduced)
-        controller.enqueue(new Uint8Array(chunkSize))
-        bytesProduced += chunkSize
-      },
-    })
+      { highWaterMark: 0 },
+    )
 
     const handler = vi.fn(
       async () => new Response(stream, { headers: { 'Content-Type': 'image/png' }, status: 200 }),
@@ -223,16 +392,17 @@ describe('getFileFromUploadInstructions', () => {
     const file = await getFileFromUploadInstructions({
       collectionSlug: 'media',
       file: createUploadReferenceFile({
-        filename: 'photo.png',
+        filename: 'header-boundary-tripwire.png',
         mimeType: 'image/png',
-        size: totalSize,
+        size: HEADER_PROBE_BYTE_LENGTH * 4,
       }),
       req,
     })
 
     expect(file.tempFilePath).toBeUndefined()
-    expect(file.data.length).toBeLessThanOrEqual(HEADER_PROBE_BYTE_LENGTH)
+    expect(file.data.length).toBe(HEADER_PROBE_BYTE_LENGTH)
     expect(cancelled).toBe(true)
+    expect(hasReadPastBoundary).toBe(false)
   })
 
   it('preserves native Request accessors like signal on the request passed to a range-scoped handler', async () => {
@@ -259,6 +429,9 @@ describe('getFileFromUploadInstructions', () => {
               },
             },
           },
+        },
+        db: {
+          findOne: vi.fn(async () => null),
         },
         config: {
           upload: {},

@@ -28,12 +28,12 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
   const findOptions: QueryOptions = {
     ...baseOptions,
     lean: true,
-    new: true,
     projection: buildProjectionFromSelect({
       adapter: this,
       fields: globalConfig.flattenedFields,
       select,
     }),
+    returnDocument: 'after',
   }
 
   if (returning === false) {

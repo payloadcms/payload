@@ -360,22 +360,28 @@ function TableCellResizer({ editor }: { editor: LexicalEditor }): JSX.Element {
     if (activeCell) {
       const { height, left, top, width } = activeCell.elem.getBoundingClientRect()
       const zoom = calculateZoomLevel(activeCell.elem)
+      const isInModal = Boolean(editor.getRootElement()?.closest('dialog, [role="dialog"]'))
+      const scrollX = isInModal ? 0 : window.scrollX
+      const scrollY = isInModal ? 0 : window.scrollY
+      const position = isInModal ? ('fixed' as const) : ('absolute' as const)
       const zoneWidth = 10 // Pixel width of the zone where you can drag the edge
       const styles = {
         bottom: {
           backgroundColor: 'none',
           cursor: 'row-resize',
           height: `${zoneWidth}px`,
-          left: `${window.scrollX + left}px`,
-          top: `${window.scrollY + top + height - zoneWidth / 2}px`,
+          left: `${scrollX + left}px`,
+          position,
+          top: `${scrollY + top + height - zoneWidth / 2}px`,
           width: `${width}px`,
         },
         right: {
           backgroundColor: 'none',
           cursor: 'col-resize',
           height: `${height}px`,
-          left: `${window.scrollX + left + width - zoneWidth / 2}px`,
-          top: `${window.scrollY + top}px`,
+          left: `${scrollX + left + width - zoneWidth / 2}px`,
+          position,
+          top: `${scrollY + top}px`,
           width: `${zoneWidth}px`,
         },
       }
@@ -384,13 +390,13 @@ function TableCellResizer({ editor }: { editor: LexicalEditor }): JSX.Element {
 
       if (draggingDirection && mouseCurrentPos && tableRect) {
         if (isHeightChanging(draggingDirection)) {
-          styles[draggingDirection].left = `${window.scrollX + tableRect.left}px`
-          styles[draggingDirection].top = `${window.scrollY + mouseCurrentPos.y / zoom}px`
+          styles[draggingDirection].left = `${scrollX + tableRect.left}px`
+          styles[draggingDirection].top = `${scrollY + mouseCurrentPos.y / zoom}px`
           styles[draggingDirection].height = '3px'
           styles[draggingDirection].width = `${tableRect.width}px`
         } else {
-          styles[draggingDirection].top = `${window.scrollY + tableRect.top}px`
-          styles[draggingDirection].left = `${window.scrollX + mouseCurrentPos.x / zoom}px`
+          styles[draggingDirection].top = `${scrollY + tableRect.top}px`
+          styles[draggingDirection].left = `${scrollX + mouseCurrentPos.x / zoom}px`
           styles[draggingDirection].width = '3px'
           styles[draggingDirection].height = `${tableRect.height}px`
         }
@@ -407,7 +413,7 @@ function TableCellResizer({ editor }: { editor: LexicalEditor }): JSX.Element {
         top: null,
       })
     }
-  }, [activeCell, draggingDirection, mouseCurrentPos])
+  }, [activeCell, draggingDirection, editor, mouseCurrentPos])
 
   return (
     <div ref={resizerRef}>
@@ -432,9 +438,21 @@ function TableCellResizer({ editor }: { editor: LexicalEditor }): JSX.Element {
 export const TableCellResizerPlugin: PluginComponent = () => {
   const [editor] = useLexicalComposerContext()
   const isEditable = useLexicalEditable()
+  const [portalTarget, setPortalTarget] = useState<Element | null>(null)
+
+  useEffect(
+    () =>
+      editor.registerRootListener((root) => {
+        setPortalTarget(root?.closest('dialog, [role="dialog"]') ?? document.body)
+      }),
+    [editor],
+  )
 
   return useMemo(
-    () => (isEditable ? createPortal(<TableCellResizer editor={editor} />, document.body) : null),
-    [editor, isEditable],
+    () =>
+      isEditable && portalTarget
+        ? createPortal(<TableCellResizer editor={editor} />, portalTarget)
+        : null,
+    [editor, isEditable, portalTarget],
   )
 }

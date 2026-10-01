@@ -65,6 +65,12 @@
     color: var(--popup-item-color-hover, var(--color-text-onselected-strong));
   }
 
+  .popup-button-list:has(> .popup > .popup__trigger-wrap [aria-expanded='true'])
+    > .popup-button-list__button:not(.popup-button-list__button--selected):hover {
+    background-color: transparent;
+    color: var(--popup-item-color, var(--color-text));
+  }
+
   .popup-button-list__disabled {
     cursor: not-allowed;
     color: var(--color-text-disabled);

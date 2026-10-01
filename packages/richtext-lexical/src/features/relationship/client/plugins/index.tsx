@@ -14,7 +14,7 @@ import {
 import { useEffect } from 'react'
 
 import type { PluginComponent } from '../../../typesClient.js'
-import type { RelationshipFeatureProps } from '../../server/index.js'
+import type { RelationshipFeatureClientProps } from '../../server/index.js'
 import type { RelationshipData } from '../../server/schema.js'
 
 import { RelationshipDrawer } from '../drawer/index.js'
@@ -25,12 +25,13 @@ export const INSERT_RELATIONSHIP_COMMAND: LexicalCommand<RelationshipData> = cre
   'INSERT_RELATIONSHIP_COMMAND',
 )
 
-export const RelationshipPlugin: PluginComponent<RelationshipFeatureProps> = ({ clientProps }) => {
+export const RelationshipPlugin: PluginComponent<RelationshipFeatureClientProps> = ({
+  clientProps,
+}) => {
   const [editor] = useLexicalComposerContext()
 
   const { enabledCollectionSlugs } = useEnabledRelationships({
-    collectionSlugsBlacklist: clientProps?.disabledCollections,
-    collectionSlugsWhitelist: clientProps?.enabledCollections,
+    enabledCollectionSlugs: clientProps.enabledCollectionSlugs,
   })
 
   useEffect(() => {

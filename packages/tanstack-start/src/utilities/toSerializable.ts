@@ -1,5 +1,7 @@
 import type { Serializable, SerializableExtensions } from '@tanstack/react-router'
 
+import { setOwnProperty } from 'payload/shared'
+
 /** A record sanitized for TanStack's server-function transport. */
 export type SerializableRecord = Record<string, unknown> & SerializableExtensions['TsrSerializable']
 
@@ -121,7 +123,7 @@ function stripUnserializable(
   for (const key of Object.keys(obj)) {
     const v = stripUnserializable(obj[key], cache, ancestors)
     if (v !== undefined) {
-      result[key] = v
+      setOwnProperty({ key, target: result, value: v })
     }
   }
   ancestors.delete(obj)

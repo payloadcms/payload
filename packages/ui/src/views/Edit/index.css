@@ -183,6 +183,7 @@
     border-radius: var(--radius-small);
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .collection-edit__auth {
       margin-top: 0;

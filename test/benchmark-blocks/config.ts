@@ -14,34 +14,40 @@ const dirname = path.dirname(filename)
 const USE_BLOCK_REFERENCES = true
 
 export default buildConfigWithDefaults({
-  collections: [
-    PostsCollection,
-    {
-      slug: 'pages',
-      access: {
-        create: () => true,
-        read: () => true,
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
       },
-      fields: generateBlockFields(40, 30 * 20, USE_BLOCK_REFERENCES),
-      versions: false,
     },
-    MediaCollection,
-  ],
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+    collections: [
+      PostsCollection,
+      {
+        slug: 'pages',
+        access: {
+          create: () => true,
+          read: () => true,
+        },
+        fields: generateBlockFields(40, 30 * 20, USE_BLOCK_REFERENCES),
+        versions: false,
+      },
+      MediaCollection,
+    ],
+    editor: lexicalEditor({}),
+    // @ts-expect-error -- The benchmark intentionally produces more block types than generated types include.
+    blocks: USE_BLOCK_REFERENCES ? generateBlocks(30 * 20, false) : undefined,
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  editor: lexicalEditor({}),
-  // @ts-expect-error
-  blocks: USE_BLOCK_REFERENCES ? generateBlocks(30 * 20, false) : undefined,
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -49,9 +55,8 @@ export default buildConfigWithDefaults({
       data: {
         title: 'example post',
       },
+      overrideAccess: true,
     })
   },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
+  suite: 'benchmark-blocks',
 })

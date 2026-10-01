@@ -237,6 +237,7 @@ If you store files in a Payload collection with `upload: true`, you can attach t
 ```ts
 const mediaDoc = await payload.findByID({
   collection: 'media',
+  overrideAccess: true,
   id: 'your-file-id',
 })
 
@@ -277,6 +278,7 @@ await payload.sendEmail({
 ```ts
 const mediaDoc = await payload.findByID({
   collection: 'media',
+  overrideAccess: true,
   id: 'your-file-id',
 })
 

@@ -1,4 +1,4 @@
-import { Command } from 'commander'
+import { Command, Option } from 'commander'
 import { config as configureZod } from 'zod/mini'
 import en from 'zod/v4/locales/en.js'
 
@@ -10,9 +10,8 @@ import { normalizeHelpArguments } from './program/normalizeHelpArguments.js'
 import { registerCLICommand } from './program/registerCommand.js'
 import { createCLIRuntime } from './runtime/createRuntime.js'
 import { loadEnv } from './runtime/loadEnv.js'
-import { withErrorHandling } from './runtime/output.js'
-
-configureZod(en())
+import { isJSONOutput, withCLIOutputMode, withErrorHandling } from './runtime/output.js'
+import { writeToCLIStdout } from './runtime/redirectOutputToStderr.js'
 
 export const bin = withErrorHandling(async (): Promise<void> => {
   // /////////////////////////////////////
@@ -21,19 +20,31 @@ export const bin = withErrorHandling(async (): Promise<void> => {
   loadEnv()
   process.env.DISABLE_PAYLOAD_HMR = 'true'
 
+  const isJSON = isJSONOutput()
+  const shouldExit = await withCLIOutputMode({
+    isJSON,
+    run: () => runCLI({ isJSON }),
+  })
+
+  if (shouldExit) {
+    process.exit(process.exitCode ?? 0)
+  }
+})
+
+const runCLI = async ({ isJSON }: { isJSON: boolean }): Promise<boolean> => {
   const runtime = createCLIRuntime()
 
   // /////////////////////////////////////
   // Create and register commands
   // /////////////////////////////////////
-  const cli = await createCLI(runtime)
+  const cli = await createCLI(runtime, { isJSON })
 
   // /////////////////////////////////////
-  // Output help if requested
+  // Output help if no command was provided
   // /////////////////////////////////////
   if (process.argv.length === 2) {
-    cli.outputHelp()
-    return
+    writeToCLIStdout({ output: cli.helpInformation() })
+    return false
   }
 
   // /////////////////////////////////////
@@ -46,12 +57,30 @@ export const bin = withErrorHandling(async (): Promise<void> => {
     }
   })
 
-  if (!runtime.isScheduled) {
-    process.exit(process.exitCode ?? 0)
-  }
-})
+  return !runtime.isScheduled
+}
 
-export const createCLI = async (runtime: CLIRuntime): Promise<Command> => {
+export const createCLI = async (
+  runtime: CLIRuntime,
+  { isJSON = isJSONOutput() }: { isJSON?: boolean } = {},
+): Promise<Command> => {
+  configureZod(en())
+
+  const jsonOption = new Option(
+    '--json',
+    'Write one JSON response to stdout; send logs to stderr (do not use 2>&1).',
+  )
+  const noJSONOption = new Option(
+    '--no-json',
+    'Use human-readable output even when PAYLOAD_CLI_JSON is set.',
+  )
+
+  if (isJSON) {
+    jsonOption.hideHelp()
+  } else {
+    noJSONOption.hideHelp()
+  }
+
   const cli = new Command()
     .name('payload')
     .description('Manage and operate a local Payload project.')
@@ -59,7 +88,8 @@ export const createCLI = async (runtime: CLIRuntime): Promise<Command> => {
     .showHelpAfterError()
     .showSuggestionAfterError()
     .option('--cron <expression>', 'Run the command on a cron schedule.')
-    .option('--json', 'Return machine-readable JSON output.')
+    .addOption(jsonOption)
+    .addOption(noJSONOption)
 
   // /////////////////////////////////////
   // Load, validate and register commands

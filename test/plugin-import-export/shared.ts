@@ -26,6 +26,14 @@ export const postsWithHooksExportSlug = 'posts-with-hooks-export'
 
 export const postsWithHooksImportSlug = 'posts-with-hooks-import'
 
+export const postsWithHooksJobsSlug = 'posts-with-hooks-jobs'
+
+export const postsWithHooksJobsExportSlug = 'posts-with-hooks-jobs-export'
+
+export const postsWithHooksJobsImportSlug = 'posts-with-hooks-jobs-import'
+
+export const batchRefFieldName = 'batchRef'
+
 export const postsWithFieldHooksSlug = 'posts-with-field-hooks'
 
 export const postsWithColumnMapSlug = 'posts-with-column-map'

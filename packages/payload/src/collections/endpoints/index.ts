@@ -16,6 +16,12 @@ import { restoreVersionHandler } from './restoreVersion.js'
 import { updateHandler } from './update.js'
 import { updateByIDHandler } from './updateByID.js'
 
+export const duplicateEndpoint: Endpoint = {
+  handler: duplicateHandler,
+  method: 'post',
+  path: '/:id/duplicate',
+}
+
 export const defaultCollectionEndpoints: Endpoint[] = [
   ...wrapInternalEndpoints([
     {
@@ -54,11 +60,7 @@ export const defaultCollectionEndpoints: Endpoint[] = [
     //   method: 'get',
     //   path: '/distinct',
     // },
-    {
-      handler: duplicateHandler,
-      method: 'post',
-      path: '/:id/duplicate',
-    },
+    duplicateEndpoint,
     {
       handler: findHandler,
       method: 'get',

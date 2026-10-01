@@ -88,8 +88,6 @@ describe('General', () => {
     const prebuild = false // Boolean(process.env.CI)
 
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       prebuild,
@@ -119,7 +117,6 @@ describe('General', () => {
 
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'adminTests',
     })
 
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
@@ -330,6 +327,52 @@ describe('General', () => {
   })
 
   describe('theme', () => {
+    test('should resolve the automatic dark theme before hydration without a usable client hint', async ({
+      browser,
+    }) => {
+      const themeContext = await browser.newContext({ colorScheme: 'dark' })
+      const themePage = await themeContext.newPage()
+
+      try {
+        const themeCookies = (await themeContext.cookies(postsUrl.admin)).filter(({ name }) =>
+          name.endsWith('-theme'),
+        )
+
+        expect(themeCookies).toHaveLength(0)
+
+        await themePage.route('**/*', async (route) => {
+          const request = route.request()
+
+          if (request.resourceType() === 'script') {
+            await route.abort()
+            return
+          }
+
+          if (request.isNavigationRequest()) {
+            const headers = { ...request.headers() }
+
+            // Chromium can re-inject secured client hints after interception.
+            // Fetching outside its network stack forces the server fallback path.
+            headers['sec-ch-prefers-color-scheme'] = 'unsupported'
+            const response = await route.fetch({ headers })
+
+            await route.fulfill({ response })
+            return
+          }
+
+          await route.continue()
+        })
+
+        const response = await themePage.goto(postsUrl.admin, { waitUntil: 'domcontentloaded' })
+        const serverHTML = await response?.text()
+
+        expect(serverHTML).toMatch(/<html[^>]*data-theme="light"/)
+        await expect(themePage.locator('html')).toHaveAttribute('data-theme', 'dark')
+      } finally {
+        await themeContext.close()
+      }
+    })
+
     test('should default to automatic theme mode', async () => {
       await page.goto(postsUrl.admin)
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
@@ -369,6 +412,7 @@ describe('General', () => {
 
     describe('user menu', () => {
       const openThemeSubMenu = async () => {
+        await openNav(page)
         await page.locator('button[aria-label="Account"]').click()
         await page
           .locator('.popup-button-list__button--submenu-trigger')
@@ -445,6 +489,7 @@ describe('General', () => {
         await page.goto(postsUrl.admin)
 
         // Logout lives inside the user menu popup
+        await openNav(page)
         await page.locator('button[aria-label="Account"]').click()
 
         // The custom Logout component (admin.components.logout.Button) renders an
@@ -1261,6 +1306,7 @@ async function createPost(overrides?: Partial<Post>): Promise<Post> {
       title,
       ...overrides,
     },
+    overrideAccess: true,
   }) as unknown as Promise<Post>
 }
 
@@ -1271,5 +1317,6 @@ async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
       point: [4, -4],
       ...overrides,
     },
+    overrideAccess: true,
   }) as unknown as Promise<Geo>
 }

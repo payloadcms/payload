@@ -1,7 +1,7 @@
 import * as z from 'zod/mini'
 
+import { strictObject } from '../../../utilities/zod.js'
 import { defineCLICommand } from '../../defineCLICommand.js'
-import { strictObject } from '../../zod.js'
 
 export const createJobsRunCommand = defineCLICommand({
   description: 'Run queued jobs.',
@@ -18,6 +18,7 @@ export const createJobsRunCommand = defineCLICommand({
     await payload.jobs.run({
       allQueues: args.allQueues,
       limit: args.limit,
+      overrideAccess: true,
       queue: args.queue,
     })
   },

@@ -46,6 +46,6 @@ export const normalizeHelpArguments = ({
     script,
     'help',
     ...(selectedCommand ? [selectedCommand.name()] : []),
-    ...(payloadArguments.includes('--json') ? ['--json'] : []),
+    ...payloadArguments.filter((argument) => argument === '--json' || argument === '--no-json'),
   ]
 }

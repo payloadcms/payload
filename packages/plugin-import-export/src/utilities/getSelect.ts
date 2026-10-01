@@ -1,8 +1,7 @@
 import type { SelectIncludeType } from 'payload'
 
 import { APIError } from 'payload'
-
-import { hasUnsupportedFieldPathSegment } from './fieldPath.js'
+import { hasUnsupportedFieldPathSegment } from 'payload/shared'
 
 const createSelect = (): SelectIncludeType => Object.create(null) as SelectIncludeType
 
@@ -20,7 +19,7 @@ export const getSelect = (fields: string[]): SelectIncludeType => {
   fields.forEach((field) => {
     const segments = field.split('.')
 
-    if (hasUnsupportedFieldPathSegment(segments)) {
+    if (hasUnsupportedFieldPathSegment({ segments })) {
       throw new APIError('Invalid field path.', 400, null, true)
     }
 

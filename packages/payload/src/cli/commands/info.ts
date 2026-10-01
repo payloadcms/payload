@@ -2,9 +2,9 @@ import { execFileSync } from 'node:child_process'
 import os from 'node:os'
 
 import { getDependencies } from '../../index.js'
+import { strictObject } from '../../utilities/zod.js'
 import { PAYLOAD_PACKAGE_LIST } from '../../versions/payloadPackageList.js'
 import { defineCLICommand } from '../defineCLICommand.js'
-import { strictObject } from '../zod.js'
 
 export const createInfoCommand = defineCLICommand({
   description: 'Print environment and dependency information.',
