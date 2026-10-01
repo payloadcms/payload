@@ -55,6 +55,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
   const hasFileOperationScope = Boolean(args.collection.config.upload)
+  let managedDeleteIdentity: string | undefined
 
   if (hasFileOperationScope) {
     beginFileOperationScope({ req: args.req })
@@ -167,6 +168,14 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
             : []),
         ]
       : []
+
+    if (Array.isArray((docToDelete as Record<string, unknown>)._managedFiles)) {
+      managedDeleteIdentity = JSON.stringify([collectionConfig.slug, String(id)])
+      req.context ??= {}
+      const managedDeletedUploads = (req.context._payloadManagedDeletedUploads ??=
+        new Set()) as Set<string>
+      managedDeletedUploads.add(managedDeleteIdentity)
+    }
 
     await deleteAssociatedFiles({
       collectionConfig,
@@ -334,5 +343,15 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       abortFileOperationScope({ req: args.req })
     }
     throw error
+  } finally {
+    if (managedDeleteIdentity) {
+      const managedDeletedUploads = args.req.context?._payloadManagedDeletedUploads as
+        | Set<string>
+        | undefined
+      managedDeletedUploads?.delete(managedDeleteIdentity)
+      if (managedDeletedUploads?.size === 0) {
+        delete args.req.context._payloadManagedDeletedUploads
+      }
+    }
   }
 }

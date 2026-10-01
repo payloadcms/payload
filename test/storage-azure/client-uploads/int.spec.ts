@@ -1,3 +1,4 @@
+/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options", "test.for", "test.each"] }] -- Tests use the shared fixture wrapper. */
 import type { ContainerClient } from '@azure/storage-blob'
 import type { Payload, UploadInstructions } from 'payload'
 
@@ -98,7 +99,13 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
     // Seed persisted pre-upgrade metadata directly; current upload hooks must not run.
     const doc = await payload.db.create({
       collection: mediaWithDocPrefixSlug,
-      data: { filename, filesize: file.length, mimeType: 'image/png', prefix },
+      data: {
+        filename,
+        filesize: file.length,
+        mimeType: 'image/png',
+        prefix,
+        url: `/api/${mediaWithDocPrefixSlug}/file/${filename}`,
+      },
     })
 
     return { doc: { ...doc, filename, prefix }, file, key: `${prefix}/${filename}` }
@@ -234,18 +241,23 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
     })
 
     expect(updated.prefix).toBe('docprefix-collection/legacy-invoices')
-    expect(
-      await containerClient.getBlockBlobClient(`${updated.prefix}/${updated.filename}`).exists(),
-    ).toBe(true)
+    const stored = await payload.db.findOne<{
+      _managedFiles: { key: string }[]
+      id: number | string
+    }>({
+      collection: mediaWithDocPrefixSlug,
+      where: { id: { equals: doc.id } },
+    })
+    const currentKey = stored!._managedFiles.find(({ key }) =>
+      key.endsWith(`/${updated.filename}`),
+    )?.key
+
+    expect(currentKey?.startsWith(`${updated.prefix}/`)).toBe(true)
+    expect(await containerClient.getBlockBlobClient(currentKey!).exists()).toBe(true)
     expect(await containerClient.getBlockBlobClient(key).exists()).toBe(false)
   })
 
-  /**
-   * When a doc with the same filename already exists, the upload-instructions
-   * endpoint dedupes the filename (duplicate-target-1.png) and issues an
-   * prefixed key (e.g. `<uuid>/duplicate-target-1.png`) so the
-   * browser SDK upload lands on a fresh blob instead of overwriting the existing one.
-   */
+  /** A second upload must keep both its document name and provider object distinct. */
   test('should issue a unique filename when a duplicate already exists', async ({
     payload,
     restClient,
@@ -261,7 +273,7 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
     const { doc: seedDoc }: { doc: { filename: string; id: number | string } } =
       await seedRes.json()
 
-    expect(seedDoc.filename).toBe(dupFilename)
+    expect(seedDoc.filename).toBe('duplicate-target-original.png')
 
     const signedURLRes = await restClient.POST('/upload-instructions', {
       body: JSON.stringify({
@@ -300,7 +312,21 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
 
     expect(blobKey).toMatch(/^[0-9a-f-]+\/duplicate-target-1-original\.png$/)
 
+    await new BlockBlobClient(signedURL).uploadData(fileBuffer, {
+      blobHTTPHeaders: { blobContentType: 'image/png' },
+    })
+    const secondForm = new FormData()
+    secondForm.append('file', JSON.stringify(instructions.file))
+    const secondResponse = await restClient.POST(`/${mediaSlug}`, { body: secondForm })
+    const { doc: secondDoc }: { doc: { filename: string; id: number | string } } =
+      await secondResponse.json()
+
+    expect(secondResponse.status).toBe(201)
+    expect(secondDoc.filename).toBe('duplicate-target-1-original.png')
+    expect(await containerClient.getBlobClient(blobKey).exists()).toBe(true)
+
     await payload.delete({ id: seedDoc.id, collection: mediaSlug, overrideAccess: true })
+    await payload.delete({ id: secondDoc.id, collection: mediaSlug, overrideAccess: true })
   })
 
   test('should preserve prefix.defaultValue while storing the file beneath the collection prefix', async ({
@@ -314,10 +340,19 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
     })
 
     expect(upload.prefix).toMatch(/^docprefix-collection\/doc-[a-z0-9]{1,8}$/)
+    const stored = await payload.db.findOne<{
+      _managedFiles: { key: string }[]
+      id: number | string
+    }>({
+      collection: mediaWithDocPrefixSlug,
+      where: { id: { equals: upload.id } },
+    })
+    const currentKey = stored!._managedFiles.find(({ key }) =>
+      key.endsWith(`/${upload.filename}`),
+    )?.key
 
-    const props = await containerClient
-      .getBlobClient(`${upload.prefix}/${upload.filename}`)
-      .getProperties()
+    expect(currentKey?.startsWith(`${upload.prefix}/`)).toBe(true)
+    const props = await containerClient.getBlobClient(currentKey!).getProperties()
     expect(props.contentLength).toBeGreaterThan(0)
   })
 

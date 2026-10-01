@@ -371,118 +371,161 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     expect(versionedCloudCalls.deletes).toContain(key)
   })
 
-  test('should use native move for an unversioned rename', async ({ payload }) => {
-    const created = await payload.create({
-      collection: unversionedCloudMediaSlug,
-      data: {},
-      filePath: firstFile,
-      overrideAccess: true,
-    })
-    const oldKey = [...versionedCloudFiles.keys()][0]!
-    expect(
-      payload.collections[unversionedCloudMediaSlug].config.upload.fileOperations?.move,
-    ).toBeTypeOf('function')
+  test.options(
+    'should use native move for an unversioned rename',
+    { db: 'mongo' },
+    async ({ payload }) => {
+      const created = await payload.create({
+        collection: unversionedCloudMediaSlug,
+        data: {},
+        filePath: firstFile,
+        overrideAccess: true,
+      })
+      const oldKey = [...versionedCloudFiles.keys()][0]!
+      expect(
+        payload.collections[unversionedCloudMediaSlug].config.upload.fileOperations?.move,
+      ).toBeTypeOf('function')
 
-    const renamed = await payload.renameFile({
-      id: created.id,
-      collection: unversionedCloudMediaSlug,
-      filename: 'moved.png',
-      overrideAccess: true,
-    })
-
-    expect(renamed.filename).toBe('moved.png')
-    expect(versionedCloudCalls.moves).toBe(1)
-    expect(versionedCloudFiles.has(oldKey)).toBe(false)
-    const current = await payload.db.findOne<{ _managedFiles: { key: string }[] }>({
-      collection: unversionedCloudMediaSlug,
-      where: { id: { equals: created.id } },
-    })
-    expect(versionedCloudFiles.has(current!._managedFiles[0]!.key)).toBe(true)
-  })
-
-  test('should restore earlier objects when a later native move fails', async ({ payload }) => {
-    const created = await payload.create({
-      collection: unversionedCloudMediaSlug,
-      data: {},
-      filePath: firstFile,
-      overrideAccess: true,
-    })
-    const originalKey = [...versionedCloudFiles.keys()][0]!
-    const thumbnailKey = originalKey.replace(/\.png$/, '-thumbnail.png')
-    versionedCloudFiles.set(thumbnailKey, Buffer.from('thumbnail'))
-    await payload.db.updateOne({
-      collection: unversionedCloudMediaSlug,
-      data: {
-        _managedFiles: [
-          {
-            key: originalKey,
-            roles: [{ type: 'default' }, { type: 'original' }],
-            storageBackendId: `test-cloud:${unversionedCloudMediaSlug}`,
-          },
-          {
-            key: thumbnailKey,
-            roles: [{ type: 'thumbnail' }],
-            storageBackendId: `test-cloud:${unversionedCloudMediaSlug}`,
-          },
-        ],
-      },
-      where: { id: { equals: created.id } },
-    })
-    versionedCloudFailure.moveNumber = 2
-
-    await expect(
-      payload.renameFile({
+      const renamed = await payload.renameFile({
         id: created.id,
         collection: unversionedCloudMediaSlug,
-        filename: 'later.png',
+        filename: 'moved.png',
         overrideAccess: true,
-      }),
-    ).rejects.toThrow('Cloud test move failed')
+      })
 
-    expect(versionedCloudFiles.has(originalKey)).toBe(true)
-    expect(versionedCloudFiles.has(thumbnailKey)).toBe(true)
-    expect([...versionedCloudFiles.keys()].some((key) => key.endsWith('/later.png'))).toBe(false)
-    const saved = await payload.db.findOne({
-      collection: unversionedCloudMediaSlug,
-      where: { id: { equals: created.id } },
-    })
-    expect(saved?.filename).toBe(created.filename)
-  })
+      expect(renamed.filename).toBe('moved.png')
+      expect(versionedCloudCalls.moves).toBe(1)
+      expect(versionedCloudFiles.has(oldKey)).toBe(false)
+      const current = await payload.db.findOne<{ _managedFiles: { key: string }[] }>({
+        collection: unversionedCloudMediaSlug,
+        where: { id: { equals: created.id } },
+      })
+      expect(versionedCloudFiles.has(current!._managedFiles[0]!.key)).toBe(true)
+    },
+  )
 
-  test('should restore a native move when the database commit fails', async ({ payload }) => {
-    const created = await payload.create({
-      collection: unversionedCloudMediaSlug,
-      data: {},
-      filePath: firstFile,
-      overrideAccess: true,
-    })
-    const oldKey = [...versionedCloudFiles.keys()][0]!
-    const commitTransaction = payload.db.commitTransaction
-    payload.db.commitTransaction = () => Promise.reject(new Error('Cloud test commit failed'))
+  test.options(
+    'should copy an unversioned rename when the database has no transactions',
+    { db: (adapter) => adapter === 'sqlite' },
+    async ({ payload }) => {
+      const created = await payload.create({
+        collection: unversionedCloudMediaSlug,
+        data: {},
+        filePath: firstFile,
+        overrideAccess: true,
+      })
+      const oldKey = (
+        await getManagedFiles({ id: created.id, collection: unversionedCloudMediaSlug, payload })
+      )[0]!.key
 
-    try {
+      const renamed = await payload.renameFile({
+        id: created.id,
+        collection: unversionedCloudMediaSlug,
+        filename: 'moved.png',
+        overrideAccess: true,
+      })
+      const newKey = (
+        await getManagedFiles({ id: created.id, collection: unversionedCloudMediaSlug, payload })
+      )[0]!.key
+
+      expect(renamed.filename).toBe('moved.png')
+      expect(versionedCloudCalls.moves).toBe(0)
+      expect(versionedCloudFiles.has(oldKey)).toBe(false)
+      expect(versionedCloudFiles.get(newKey)).toEqual(await readFile(firstFile))
+    },
+  )
+
+  test.options(
+    'should restore earlier objects when a later native move fails',
+    { db: 'mongo' },
+    async ({ payload }) => {
+      const created = await payload.create({
+        collection: unversionedCloudMediaSlug,
+        data: {},
+        filePath: firstFile,
+        overrideAccess: true,
+      })
+      const originalKey = [...versionedCloudFiles.keys()][0]!
+      const thumbnailKey = originalKey.replace(/\.png$/, '-thumbnail.png')
+      versionedCloudFiles.set(thumbnailKey, Buffer.from('thumbnail'))
+      await payload.db.updateOne({
+        collection: unversionedCloudMediaSlug,
+        data: {
+          _managedFiles: [
+            {
+              key: originalKey,
+              roles: [{ type: 'default' }, { type: 'original' }],
+              storageBackendId: `test-cloud:${unversionedCloudMediaSlug}`,
+            },
+            {
+              key: thumbnailKey,
+              roles: [{ type: 'thumbnail' }],
+              storageBackendId: `test-cloud:${unversionedCloudMediaSlug}`,
+            },
+          ],
+        },
+        where: { id: { equals: created.id } },
+      })
+      versionedCloudFailure.moveNumber = 2
+
       await expect(
         payload.renameFile({
           id: created.id,
           collection: unversionedCloudMediaSlug,
-          filename: 'uncommitted.png',
+          filename: 'later.png',
           overrideAccess: true,
         }),
-      ).rejects.toThrow('Cloud test commit failed')
-    } finally {
-      payload.db.commitTransaction = commitTransaction
-    }
+      ).rejects.toThrow('Cloud test move failed')
 
-    expect(versionedCloudFiles.has(oldKey)).toBe(true)
-    expect([...versionedCloudFiles.keys()].some((key) => key.endsWith('/uncommitted.png'))).toBe(
-      false,
-    )
-    const saved = await payload.db.findOne({
-      collection: unversionedCloudMediaSlug,
-      where: { id: { equals: created.id } },
-    })
-    expect(saved?.filename).toBe(created.filename)
-  })
+      expect(versionedCloudFiles.has(originalKey)).toBe(true)
+      expect(versionedCloudFiles.has(thumbnailKey)).toBe(true)
+      expect([...versionedCloudFiles.keys()].some((key) => key.endsWith('/later.png'))).toBe(false)
+      const saved = await payload.db.findOne({
+        collection: unversionedCloudMediaSlug,
+        where: { id: { equals: created.id } },
+      })
+      expect(saved?.filename).toBe(created.filename)
+    },
+  )
+
+  test.options(
+    'should restore a native move when the database commit fails',
+    { db: 'mongo' },
+    async ({ payload }) => {
+      const created = await payload.create({
+        collection: unversionedCloudMediaSlug,
+        data: {},
+        filePath: firstFile,
+        overrideAccess: true,
+      })
+      const oldKey = [...versionedCloudFiles.keys()][0]!
+      const commitTransaction = payload.db.commitTransaction
+      payload.db.commitTransaction = () => Promise.reject(new Error('Cloud test commit failed'))
+
+      try {
+        await expect(
+          payload.renameFile({
+            id: created.id,
+            collection: unversionedCloudMediaSlug,
+            filename: 'uncommitted.png',
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow('Cloud test commit failed')
+      } finally {
+        payload.db.commitTransaction = commitTransaction
+      }
+
+      expect(versionedCloudFiles.has(oldKey)).toBe(true)
+      expect([...versionedCloudFiles.keys()].some((key) => key.endsWith('/uncommitted.png'))).toBe(
+        false,
+      )
+      const saved = await payload.db.findOne({
+        collection: unversionedCloudMediaSlug,
+        where: { id: { equals: created.id } },
+      })
+      expect(saved?.filename).toBe(created.filename)
+    },
+  )
 
   test('should copy then remove the source when an unversioned adapter has no native move', async ({
     payload,
@@ -969,9 +1012,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     expect(current.url).toMatch(/^https:\/\/files\.example\.test\//)
   })
 
-  test('should remove a staged cloud object when upload or a later hook fails', async ({
-    payload,
-  }) => {
+  test('should remove staged cloud bytes when an upload fails', async ({ payload }) => {
     const first = await payload.create({
       collection: versionedCloudMediaSlug,
       data: {},
@@ -991,29 +1032,76 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
         overrideAccess: true,
       }),
     ).rejects.toThrow('Cloud test upload failed')
-    expect([...versionedCloudFiles.keys()]).toEqual(originalKeys)
 
-    versionedCloudFailure.uploadNumber = 0
-    versionedCloudFailure.afterChange = true
-    await expect(
-      payload.update({
-        id: first.id,
+    expect((await getManagedFiles({ id: first.id, payload }))[0]?.key).toBe(firstKey)
+    expect([...versionedCloudFiles.keys()]).toEqual(originalKeys)
+  })
+
+  test.options(
+    'should remove staged cloud bytes when a later hook fails with a transaction',
+    { db: 'mongo' },
+    async ({ payload }) => {
+      const first = await payload.create({
         collection: versionedCloudMediaSlug,
         data: {},
-        filePath: secondFile,
+        filePath: firstFile,
         overrideAccess: true,
-      }),
-    ).rejects.toThrow('Cloud test afterChange failed')
+      })
+      const firstKey = (await getManagedFiles({ id: first.id, payload }))[0]!.key
+      const originalKeys = [...versionedCloudFiles.keys()]
 
-    const current = await payload.findByID({
-      id: first.id,
-      collection: versionedCloudMediaSlug,
-      overrideAccess: true,
-    })
-    expect((await getManagedFiles({ id: current.id, payload }))[0]?.key).toBe(firstKey)
-    expect([...versionedCloudFiles.keys()]).toEqual(originalKeys)
-    expect(versionedCloudCalls.deletes).not.toContain(firstKey)
-  })
+      versionedCloudFailure.afterChange = true
+      await expect(
+        payload.update({
+          id: first.id,
+          collection: versionedCloudMediaSlug,
+          data: {},
+          filePath: secondFile,
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('Cloud test afterChange failed')
+
+      const current = await payload.findByID({
+        id: first.id,
+        collection: versionedCloudMediaSlug,
+        overrideAccess: true,
+      })
+      expect((await getManagedFiles({ id: current.id, payload }))[0]?.key).toBe(firstKey)
+      expect([...versionedCloudFiles.keys()]).toEqual(originalKeys)
+      expect(versionedCloudCalls.deletes).not.toContain(firstKey)
+    },
+  )
+
+  test.options(
+    'should retain the saved cloud file when a hook fails without a transaction',
+    { db: (adapter) => adapter === 'sqlite' },
+    async ({ payload }) => {
+      const first = await payload.create({
+        collection: versionedCloudMediaSlug,
+        data: {},
+        filePath: firstFile,
+        overrideAccess: true,
+      })
+      const firstKey = (await getManagedFiles({ id: first.id, payload }))[0]!.key
+      versionedCloudFailure.afterChange = true
+
+      await expect(
+        payload.update({
+          id: first.id,
+          collection: versionedCloudMediaSlug,
+          data: {},
+          filePath: secondFile,
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('Cloud test afterChange failed')
+
+      const currentKey = (await getManagedFiles({ id: first.id, payload }))[0]!.key
+
+      expect(currentKey).not.toBe(firstKey)
+      expect(versionedCloudFiles.get(currentKey)).toEqual(await readFile(secondFile))
+      expect(versionedCloudFiles.get(firstKey)).toEqual(await readFile(firstFile))
+    },
+  )
 
   test('should keep published bytes when saving a draft replacement', async ({ payload }) => {
     const published = await payload.create({
@@ -1052,41 +1140,84 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     expect((await getManagedFiles({ id: current.id, payload }))[0]?.key).toBe(publishedKey)
   })
 
-  test('should remove staged cloud bytes when the document write fails', async ({ payload }) => {
-    const first = await payload.create({
-      collection: versionedCloudMediaSlug,
-      data: {},
-      filePath: firstFile,
-      overrideAccess: true,
-    })
-    const firstKey = (await getManagedFiles({ id: first.id, payload }))[0]!.key
-    const originalKeys = [...versionedCloudFiles.keys()]
-    const updateOne = payload.db.updateOne.bind(payload.db)
-    const spy = vi.spyOn(payload.db, 'updateOne').mockImplementation(async (args) => {
-      if (args.collection === versionedCloudMediaSlug && 'filename' in args.data) {
-        throw new Error('Cloud test document write failed')
+  test.options(
+    'should remove staged cloud bytes when the document write fails',
+    { db: 'mongo' },
+    async ({ payload }) => {
+      const first = await payload.create({
+        collection: versionedCloudMediaSlug,
+        data: {},
+        filePath: firstFile,
+        overrideAccess: true,
+      })
+      const firstKey = (await getManagedFiles({ id: first.id, payload }))[0]!.key
+      const originalKeys = [...versionedCloudFiles.keys()]
+      const updateOne = payload.db.updateOne.bind(payload.db)
+      const spy = vi.spyOn(payload.db, 'updateOne').mockImplementation(async (args) => {
+        if (args.collection === versionedCloudMediaSlug && 'filename' in args.data) {
+          throw new Error('Cloud test document write failed')
+        }
+        return updateOne(args as never)
+      })
+
+      try {
+        await expect(
+          payload.update({
+            id: first.id,
+            collection: versionedCloudMediaSlug,
+            data: {},
+            filePath: secondFile,
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow('Cloud test document write failed')
+      } finally {
+        spy.mockRestore()
       }
-      return updateOne(args as never)
-    })
 
-    try {
-      await expect(
-        payload.update({
-          id: first.id,
-          collection: versionedCloudMediaSlug,
-          data: {},
-          filePath: secondFile,
-          overrideAccess: true,
-        }),
-      ).rejects.toThrow('Cloud test document write failed')
-    } finally {
-      spy.mockRestore()
-    }
+      expect((await getManagedFiles({ id: first.id, payload }))[0]?.key).toBe(firstKey)
+      expect([...versionedCloudFiles.keys()]).toEqual(originalKeys)
+      expect(versionedCloudCalls.deletes).not.toContain(firstKey)
+    },
+  )
 
-    expect((await getManagedFiles({ id: first.id, payload }))[0]?.key).toBe(firstKey)
-    expect([...versionedCloudFiles.keys()]).toEqual(originalKeys)
-    expect(versionedCloudCalls.deletes).not.toContain(firstKey)
-  })
+  test.options(
+    'should retain the current cloud file when a document write fails without a transaction',
+    { db: (adapter) => adapter === 'sqlite' },
+    async ({ payload }) => {
+      const first = await payload.create({
+        collection: versionedCloudMediaSlug,
+        data: {},
+        filePath: firstFile,
+        overrideAccess: true,
+      })
+      const firstKey = (await getManagedFiles({ id: first.id, payload }))[0]!.key
+      const updateOne = payload.db.updateOne.bind(payload.db)
+      const spy = vi.spyOn(payload.db, 'updateOne').mockImplementation(async (args) => {
+        if (args.collection === versionedCloudMediaSlug && 'filename' in args.data) {
+          throw new Error('Cloud test document write failed')
+        }
+        return updateOne(args as never)
+      })
+
+      try {
+        await expect(
+          payload.update({
+            id: first.id,
+            collection: versionedCloudMediaSlug,
+            data: {},
+            filePath: secondFile,
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow('Cloud test document write failed')
+      } finally {
+        spy.mockRestore()
+      }
+
+      expect((await getManagedFiles({ id: first.id, payload }))[0]?.key).toBe(firstKey)
+      expect(versionedCloudFiles.get(firstKey)).toEqual(await readFile(firstFile))
+      expect(versionedCloudCalls.deletes).not.toContain(firstKey)
+    },
+  )
 
   test('should give repeated writes with the same filename distinct objects', async ({
     payload,

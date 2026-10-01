@@ -1,17 +1,18 @@
 import type { CollectionSlug, Payload } from 'payload'
 
 import * as AWS from '@aws-sdk/client-s3'
+import path from 'node:path'
 import { expect } from 'vitest'
 
 export const getAWSClient = () =>
   new AWS.S3({
-    endpoint: process.env.S3_ENDPOINT!,
-    forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
-    region: process.env.S3_REGION!,
     credentials: {
       accessKeyId: process.env.S3_ACCESS_KEY_ID!,
       secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
     },
+    endpoint: process.env.S3_ENDPOINT!,
+    forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
+    region: process.env.S3_REGION!,
   })
 
 export const getTestBucketName = () => process.env.S3_BUCKET!
@@ -56,27 +57,38 @@ export async function clearTestBucket() {
 
 export async function verifyUploads({
   collectionSlug,
-  uploadId,
-  prefix = '',
   payload,
+  prefix = '',
+  uploadId,
 }: {
   collectionSlug: string
   payload: Payload
   prefix?: string
   uploadId: number | string
 }) {
-  const uploadData = (await payload.findByID({
+  const uploadData = await payload.db.findOne<{
+    _managedFiles?: Array<{ key: string }>
+    filename?: string
+    original?: { filename?: string }
+    sizes?: Record<string, { filename?: string }>
+  }>({
     collection: collectionSlug as CollectionSlug,
-    id: uploadId,
-    overrideAccess: true,
-  })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
-
-  const fileKeys = Object.keys(uploadData.sizes || {}).map((key) => {
-    const rawFilename = uploadData?.sizes?.[key]?.filename
-    return prefix ? `${prefix}/${rawFilename}` : rawFilename
+    where: { id: { equals: uploadId } },
   })
+  const fileKeys = uploadData?._managedFiles?.map(({ key }) => key) ?? []
+  const filenames = [
+    uploadData?.filename,
+    uploadData?.original?.filename,
+    ...Object.values(uploadData?.sizes ?? {}).map(({ filename }) => filename),
+  ].filter((filename): filename is string => Boolean(filename))
 
-  fileKeys.push(`${prefix ? `${prefix}/` : ''}${uploadData.filename}`)
+  expect(fileKeys.length).toBeGreaterThan(0)
+  for (const filename of filenames) {
+    expect(fileKeys.some((key) => path.posix.basename(key) === filename)).toBe(true)
+  }
+  if (prefix) {
+    expect(fileKeys.every((key) => key.startsWith(`${prefix}/`))).toBe(true)
+  }
   try {
     for (const key of fileKeys) {
       const { $metadata } = await getAWSClient().send(

@@ -74,6 +74,7 @@ export const deleteOperation = async <
 
   const hasFileOperationScope =
     Boolean(args.collection.config.upload) && !args.req.payload.db.bulkOperationsSingleTransaction
+  const markedManagedDeletes = new Set<string>()
 
   if (hasFileOperationScope) {
     beginFileOperationScope({ req: args.req })
@@ -176,6 +177,9 @@ export const deleteOperation = async <
     let didBatchDeleteFail = false
     let hasAfterDeleteFailure = false
     const deletedFilesByID = new Map<number | string, ManagedFileManifest>()
+    req.context ??= {}
+    const managedDeletedUploads = (req.context._payloadManagedDeletedUploads ??=
+      new Set()) as Set<string>
 
     type Doc = DataFromCollectionSlug<TSlug>
     type ResultDoc = BulkOperationResult<TSlug, TSelect>['docs'][number]
@@ -211,6 +215,11 @@ export const deleteOperation = async <
             ? await collectVersionFiles({ collection: collectionConfig, parentID: doc.id, req })
             : []),
         ])
+        if (Array.isArray((doc as Record<string, unknown>)._managedFiles)) {
+          const identity = JSON.stringify([collectionConfig.slug, String(doc.id)])
+          managedDeletedUploads.add(identity)
+          markedManagedDeletes.add(identity)
+        }
       }
 
       await deleteAssociatedFiles({
@@ -566,5 +575,15 @@ export const deleteOperation = async <
       abortFileOperationScope({ req: args.req })
     }
     throw error
+  } finally {
+    const managedDeletedUploads = args.req.context?._payloadManagedDeletedUploads as
+      | Set<string>
+      | undefined
+    for (const identity of markedManagedDeletes) {
+      managedDeletedUploads?.delete(identity)
+    }
+    if (managedDeletedUploads?.size === 0) {
+      delete args.req.context._payloadManagedDeletedUploads
+    }
   }
 }

@@ -1,3 +1,4 @@
+/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test"] }] -- Tests use the shared fixture wrapper. */
 import type { ContainerClient } from '@azure/storage-blob'
 import type { CollectionSlug, Payload } from 'payload'
 
@@ -107,13 +108,11 @@ test.suite('@payloadcms/storage-azure', { config: './config.ts', resetBetweenTes
       { payload },
       {
         collectionSlug: mediaWithPrefixSlug,
-        uploadId: upload.id,
         prefix,
+        uploadId: upload.id,
       },
     )
-    expect(upload.url).toEqual(
-      `/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}?prefix=${prefix}`,
-    )
+    expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}`)
   })
 
   test('returns 404 for non-existing file', async ({ restClient }) => {
@@ -141,27 +140,39 @@ test.suite('@payloadcms/storage-azure', { config: './config.ts', resetBetweenTes
     { payload }: { payload: Payload },
     {
       collectionSlug,
-      uploadId,
       prefix = '',
+      uploadId,
     }: {
       collectionSlug: CollectionSlug
       prefix?: string
       uploadId: number | string
     },
   ) {
-    const uploadData = (await payload.findByID({
+    const uploadData = (await payload.db.findOne({
       collection: collectionSlug,
-      id: uploadId,
-      overrideAccess: true,
-    })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
+      where: { id: { equals: uploadId } },
+    })) as unknown as {
+      _managedFiles: { key: string }[]
+      filename: string
+      original?: { filename?: string }
+      sizes: Record<string, { filename: string }>
+    }
+    const fileKeys = uploadData._managedFiles.map(({ key }) => key)
+    const filenames = [
+      uploadData.filename,
+      uploadData.original?.filename,
+      ...Object.values(uploadData.sizes || {}).map(({ filename }) => filename),
+    ].filter((filename): filename is string => Boolean(filename))
 
-    const fileKeys = Object.values(uploadData.sizes || {}).map(({ filename: rawFilename }) =>
-      prefix ? `${prefix}/${rawFilename}` : rawFilename,
-    )
-
-    fileKeys.push(`${prefix ? `${prefix}/` : ''}${uploadData.filename}`)
+    expect(fileKeys.length).toBeGreaterThan(0)
+    for (const filename of filenames) {
+      expect(fileKeys.some((key) => path.basename(key) === filename)).toBe(true)
+    }
 
     for (const key of fileKeys) {
+      if (prefix) {
+        expect(key.startsWith(`${prefix}/`)).toBe(true)
+      }
       const blobClient = client.getBlobClient(key)
       try {
         const props = await blobClient.getProperties()

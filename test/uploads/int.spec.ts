@@ -464,8 +464,8 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       )
       const replacementPath = path.resolve(dirname, './test-image.png')
       const metadata = await sharp(replacementPath).metadata()
-      const height = Math.floor(metadata.height! / 2)
-      const width = Math.floor(metadata.width! / 2)
+      const height = Math.floor(metadata.height / 2)
+      const width = Math.floor(metadata.width / 2)
       const { file, handle } = await createStreamableFile(replacementPath)
       const formData = new FormData()
       formData.append('_payload', JSON.stringify({ prefix: 'replacement' }))
@@ -3095,9 +3095,10 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
       const { sizes } = result as unknown as Enlarge
       const expectedPath = path.join(dirname, './media/enlarge')
+      const sourceName = path.parse(result.filename!).name
 
       // Check for files
-      expect(await fileExists(path.join(expectedPath, small.name))).toBe(true)
+      expect(await fileExists(path.join(expectedPath, result.filename!))).toBe(true)
       expect(await fileExists(path.join(expectedPath, sizes.resizedLarger.filename))).toBe(true)
       expect(await fileExists(path.join(expectedPath, sizes.resizedSmaller.filename))).toBe(true)
       expect(await fileExists(path.join(expectedPath, sizes.accidentalSameSize.filename))).toBe(
@@ -3109,16 +3110,16 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
       // Check api response
       expect(sizes.sameSizeWithNewFormat.mimeType).toBe('image/jpeg')
-      expect(sizes.sameSizeWithNewFormat.filename).toBe('small-320x80.jpg')
+      expect(sizes.sameSizeWithNewFormat.filename).toBe(`${sourceName}-320x80.jpg`)
 
       expect(sizes.resizedLarger.mimeType).toBe('image/png')
-      expect(sizes.resizedLarger.filename).toBe('small-640x480.png')
+      expect(sizes.resizedLarger.filename).toBe(`${sourceName}-640x480.png`)
 
       expect(sizes.resizedSmaller.mimeType).toBe('image/png')
-      expect(sizes.resizedSmaller.filename).toBe('small-180x50.png')
+      expect(sizes.resizedSmaller.filename).toBe(`${sourceName}-180x50.png`)
 
       expect(sizes.accidentalSameSize.mimeType).toBe('image/png')
-      expect(sizes.accidentalSameSize.filename).toBe('small-320x80.png')
+      expect(sizes.accidentalSameSize.filename).toBe(`${sourceName}-320x80.png`)
 
       await payload.delete({
         id: result.id,
@@ -3144,6 +3145,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
       const { sizes } = result
       const expectedPath = path.join(dirname, './media/enlarge')
+      const sourceName = path.parse(result.filename!).name
 
       // Check for files
       expect(await fileExists(path.join(expectedPath, sizes.widthLowerHeightLarger.filename))).toBe(
@@ -3151,7 +3153,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       )
       // Check api response
       expect(sizes.widthLowerHeightLarger.mimeType).toBe('image/png')
-      expect(sizes.widthLowerHeightLarger.filename).toBe('small-300x300.png')
+      expect(sizes.widthLowerHeightLarger.filename).toBe(`${sourceName}-300x300.png`)
       await payload.delete({
         id: result.id,
         collection: enlargeSlug,
@@ -3175,11 +3177,12 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
       const { sizes } = result as unknown as Enlarge
       const expectedPath = path.join(dirname, './media/reduce')
+      const sourceName = path.parse(result.filename!).name
 
       // Check for files
-      expect(await fileExists(path.join(expectedPath, small.name))).toBe(true)
-      expect(await fileExists(path.join(expectedPath, 'small-640x480.png'))).toBe(false)
-      expect(await fileExists(path.join(expectedPath, 'small-180x50.png'))).toBe(false)
+      expect(await fileExists(path.join(expectedPath, result.filename!))).toBe(true)
+      expect(await fileExists(path.join(expectedPath, `${sourceName}-640x480.png`))).toBe(false)
+      expect(await fileExists(path.join(expectedPath, `${sourceName}-180x50.png`))).toBe(false)
       expect(await fileExists(path.join(expectedPath, sizes.accidentalSameSize.filename))).toBe(
         true,
       )
@@ -3189,16 +3192,16 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
       // Check api response
       expect(sizes.sameSizeWithNewFormat.mimeType).toBe('image/jpeg')
-      expect(sizes.sameSizeWithNewFormat.filename).toBe('small-320x80.jpg')
+      expect(sizes.sameSizeWithNewFormat.filename).toBe(`${sourceName}-320x80.jpg`)
 
       expect(sizes.resizedLarger.mimeType).toBeNull()
       expect(sizes.resizedLarger.filename).toBeNull()
 
       expect(sizes.accidentalSameSize.mimeType).toBe('image/png')
-      expect(sizes.resizedSmaller.filename).toBe('small-320x80.png')
+      expect(sizes.resizedSmaller.filename).toBe(`${sourceName}-320x80.png`)
 
       expect(sizes.accidentalSameSize.mimeType).toBe('image/png')
-      expect(sizes.accidentalSameSize.filename).toBe('small-320x80.png')
+      expect(sizes.accidentalSameSize.filename).toBe(`${sourceName}-320x80.png`)
 
       await payload.delete({ id: result.id, collection: reduceSlug, overrideAccess: true })
     })
@@ -3862,7 +3865,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           overrideAccess: true,
         })
 
-        expect(doc.filename).toBe('cdn-image.png')
+        expect(doc.filename).toBe('cdn-image-original.png')
         expect(doc.mimeType).toBe('image/png')
       } finally {
         cdnServer.close()

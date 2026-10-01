@@ -9,6 +9,7 @@ vi.mock('payload/internal', () => ({
     filename.replace(/(\.[^.]+)?$/, '-original$1'),
   ),
   getSafeFileName: vi.fn(async ({ desiredFilename }) => desiredFilename),
+  incrementName: vi.fn((filename: string) => filename.replace(/(\.[^.]+)?$/, '-1$1')),
 }))
 
 describe('resolveSignedURLKey', () => {
@@ -17,7 +18,7 @@ describe('resolveSignedURLKey', () => {
   })
 
   it('checks the normalized filename before resolving the storage key', async () => {
-    vi.mocked(getSafeFileName).mockResolvedValueOnce('photo-1.png')
+    vi.mocked(getSafeFileName).mockResolvedValueOnce('photo-original-1.png')
 
     const result = await resolveSignedURLKey({
       collectionPrefix: 'media',
@@ -28,7 +29,7 @@ describe('resolveSignedURLKey', () => {
 
     expect(getSafeFileName).toHaveBeenCalledWith({
       collectionSlug: 'uploads',
-      desiredFilename: 'photo.png',
+      desiredFilename: 'photo-original.png',
       req: {},
     })
     expect(createClientUploadReceipt).toHaveBeenCalledWith({
@@ -52,7 +53,7 @@ describe('resolveSignedURLKey', () => {
   })
 
   it('should mint the receipt for a key contained by the collection prefix', async () => {
-    vi.mocked(getSafeFileName).mockResolvedValueOnce('photo-1.jpg')
+    vi.mocked(getSafeFileName).mockResolvedValueOnce('photo-original-1.jpg')
 
     const result = await resolveSignedURLKey({
       collectionPrefix: 'media',

@@ -1,3 +1,4 @@
+/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test"] }] -- Tests use the shared fixture wrapper. */
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
@@ -73,8 +74,8 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
 
     await verifyUploads({
       collectionSlug: mediaSlug,
-      uploadId: upload.id,
       payload,
+      uploadId: upload.id,
     })
 
     expect(upload.url).toEqual(`/api/${mediaSlug}/file/${String(upload.filename)}`)
@@ -92,13 +93,11 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
 
     await verifyUploads({
       collectionSlug: mediaWithPrefixSlug,
-      uploadId: upload.id,
-      prefix,
       payload,
+      prefix,
+      uploadId: upload.id,
     })
-    expect(upload.url).toEqual(
-      `/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}?prefix=${prefix}`,
-    )
+    expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}`)
   })
 
   test('has prefix field by default even when plugin is disabled', async ({ payload }) => {
@@ -118,34 +117,40 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
   })
 
   test('can download with signed downloads', async ({ payload, restClient }) => {
-    await payload.create({
+    const upload = await payload.create({
       collection: mediaWithSignedDownloadsSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
       overrideAccess: true,
     })
 
-    const response = await restClient.GET(`/${mediaWithSignedDownloadsSlug}/file/image.png`)
+    const response = await restClient.GET(
+      `/${mediaWithSignedDownloadsSlug}/file/${upload.filename}`,
+    )
     expect(response.status).toBe(302)
     const url = response.headers.get('Location')
     expect(url).toBeDefined()
-    expect(url).toContain(`/${getTestBucketName()}/image.png`)
+    expect(url).toContain(`/${getTestBucketName()}/`)
+    expect(url).toContain(`/${upload.filename}`)
     expect(new URLSearchParams(url).get('x-id')).toBe('GetObject')
     const file = await fetch(url)
     expect(file.headers.get('Content-Type')).toBe('image/png')
   })
 
   test('should skip signed download', async ({ payload, restClient }) => {
-    await payload.create({
+    const upload = await payload.create({
       collection: mediaWithSignedDownloadsSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/small.png'),
       overrideAccess: true,
     })
 
-    const response = await restClient.GET(`/${mediaWithSignedDownloadsSlug}/file/small.png`, {
-      headers: { 'X-Disable-Signed-URL': 'true' },
-    })
+    const response = await restClient.GET(
+      `/${mediaWithSignedDownloadsSlug}/file/${upload.filename}`,
+      {
+        headers: { 'X-Disable-Signed-URL': 'true' },
+      },
+    )
     expect(response.status).toBe(200)
     expect(response.headers.get('Content-Type')).toBe('image/png')
   })
@@ -166,16 +171,19 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
     payload,
     restClient,
   }) => {
-    await payload.create({
+    const upload = await payload.create({
       collection: mediaWithSignedDownloadsSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/temp.png'),
       overrideAccess: true,
     })
 
-    const response = await restClient.GET(`/${mediaWithSignedDownloadsSlug}/file/temp.png`, {
-      headers: { 'X-Disable-Signed-URL': 'true', 'If-None-Match': 'invalid-etag-1234' },
-    })
+    const response = await restClient.GET(
+      `/${mediaWithSignedDownloadsSlug}/file/${upload.filename}`,
+      {
+        headers: { 'If-None-Match': 'invalid-etag-1234', 'X-Disable-Signed-URL': 'true' },
+      },
+    )
     expect(response.status).toBe(200)
     expect(response.headers.get('Content-Type')).toBe('image/png')
 
@@ -183,11 +191,11 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
     expect(etag).toBeDefined()
 
     const responseNotModified = await restClient.GET(
-      `/${mediaWithSignedDownloadsSlug}/file/temp.png`,
+      `/${mediaWithSignedDownloadsSlug}/file/${upload.filename}`,
       {
         headers: {
-          'X-Disable-Signed-URL': 'true',
           'If-None-Match': etag!,
+          'X-Disable-Signed-URL': 'true',
         },
       },
     )
@@ -208,13 +216,13 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
       })
 
       expect(upload.id).toBeTruthy()
-      expect(upload.filename).toBe('image with spaces.png')
+      expect(upload.filename).toBe('image with spaces-original.png')
 
       // When disablePayloadAccessControl is true, URL should point directly to S3
       // and the filename should be URL-encoded
       expect(upload.url).toContain(process.env.S3_ENDPOINT)
       expect(upload.url).toContain(getTestBucketName())
-      expect(upload.url).toContain('image%20with%20spaces.png')
+      expect(upload.url).toContain('image%20with%20spaces-original.png')
 
       // Verify the file can be fetched using the URL
       const response = await fetch(upload.url)
@@ -272,8 +280,8 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
       expect(dbDoc.sizes.thumbnail.url).not.toMatch(/^\/api\//)
 
       await payload.delete({
-        collection: mediaWithDirectAccessSlug,
         id: upload.id,
+        collection: mediaWithDirectAccessSlug,
         overrideAccess: true,
       })
     })
@@ -293,7 +301,7 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
       // URL should point directly to S3
       expect(upload.url).toContain(process.env.S3_ENDPOINT)
       expect(upload.url).toContain(getTestBucketName())
-      expect(upload.url).toContain('image.png')
+      expect(upload.url).toContain('image-original.png')
 
       // Verify the file can be fetched
       const response = await fetch(upload.url)
@@ -331,18 +339,18 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
       // Clear database records before each test
       await payload.delete({
         collection: mediaWithPrefixSlug,
-        where: {},
         overrideAccess: true,
+        where: {},
       })
       await payload.delete({
         collection: mediaSlug,
-        where: {},
         overrideAccess: true,
+        where: {},
       })
       await payload.delete({
         collection: mediaWithAlwaysInsertFieldsSlug,
-        where: {},
         overrideAccess: true,
+        where: {},
       })
     })
 
@@ -364,8 +372,8 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
         overrideAccess: true,
       })
 
-      expect(upload1.filename).toBe('image.png')
-      expect(upload2.filename).toBe('image-1.png')
+      expect(upload1.filename).toBe('image-original.png')
+      expect(upload2.filename).toBe('image-original-1.png')
       expect(upload1.prefix).toBe(prefix)
       expect(upload2.prefix).toBe(prefix)
     })
@@ -417,8 +425,8 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
         overrideAccess: true,
       })
 
-      expect(upload1.filename).toBe('image.png')
-      expect(upload2.filename).toBe('image.png') // Should NOT increment
+      expect(upload1.filename).toBe('image-original.png')
+      expect(upload2.filename).toBe('image-original.png') // Should NOT increment
       expect(upload1.prefix).toBe(prefix) // 'test-prefix'
       // New uploads store the document prefix beneath the collection prefix.
       expect(upload2.prefix).toBe(`${prefix}/different-prefix`)
@@ -450,8 +458,8 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
       })
 
       // Both should keep original filename
-      expect(tenantAUpload.filename).toBe('image.png')
-      expect(tenantBUpload.filename).toBe('image.png')
+      expect(tenantAUpload.filename).toBe('image-original.png')
+      expect(tenantBUpload.filename).toBe('image-original.png')
       expect(tenantAUpload.prefix).toBe('tenant-a')
       expect(tenantBUpload.prefix).toBe('tenant-b')
     })

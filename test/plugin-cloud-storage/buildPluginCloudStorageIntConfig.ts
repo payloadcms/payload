@@ -59,7 +59,7 @@ export type BuildPluginCloudStorageIntConfigArgs = {
   useCompositePrefixes: boolean
 }
 
-export const recordedCleanupTargets: Array<{ filename: string; prefix?: string }> = []
+export const recordedCleanupTargets: Array<{ filename: string; storageFilePath: string }> = []
 
 export function buildPluginCloudStorageIntConfig({
   useCompositePrefixes,
@@ -197,15 +197,15 @@ export function buildPluginCloudStorageIntConfig({
               throw new Error('Cannot copy test storage file')
             }
 
-            uploadedTestFiles.set(to, { ...source, filename: to })
+            uploadedTestFiles.set(to, { ...source, filename: path.posix.basename(to) })
             return Promise.resolve()
           },
-          handleDelete: ({ doc, filename }) => {
-            recordedCleanupTargets.push({ filename, prefix: doc.prefix })
-            uploadedTestFiles.delete(filename)
+          handleDelete: ({ filename, storageFilePath }) => {
+            recordedCleanupTargets.push({ filename, storageFilePath })
+            uploadedTestFiles.delete(storageFilePath)
           },
-          handleUpload: ({ data, file }) => {
-            uploadedTestFiles.set(file.filename, { ...file, prefix: data.prefix })
+          handleUpload: ({ data, file, storageFilePath }) => {
+            uploadedTestFiles.set(storageFilePath, { ...file, prefix: data.prefix })
 
             const metadata = {
               ...data,

@@ -18,9 +18,16 @@ export const getAfterDeleteHook = ({
   collectionPrefix,
   useCompositePrefixes,
 }: Args): CollectionAfterDeleteHook<FileData & TypeWithID & TypeWithPrefix> => {
-  return async ({ doc, req }) => {
+  return async ({ id, doc, req }) => {
     // Managed objects are deleted after the operation commits and all references are checked.
-    if (collection.versions || Array.isArray(doc._managedFiles)) {
+    const managedDeletedUploads = req.context?._payloadManagedDeletedUploads as
+      | Set<string>
+      | undefined
+    if (
+      collection.versions ||
+      Array.isArray(doc._managedFiles) ||
+      managedDeletedUploads?.has(JSON.stringify([collection.slug, String(id)]))
+    ) {
       return doc
     }
 

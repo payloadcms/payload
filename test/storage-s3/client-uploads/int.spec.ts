@@ -1,3 +1,4 @@
+/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options", "test.for", "test.each"] }] -- Tests use the shared fixture wrapper. */
 import type { UploadInstructions } from 'payload'
 
 import { readFileSync } from 'fs'
@@ -161,6 +162,7 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
   }
 
   test('should persist adapter-backed SVG only after document validation', async ({
+    payload,
     restClient,
   }) => {
     const safeSVG =
@@ -173,9 +175,21 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
     const { doc } = await safeResponse.json()
 
     expect(safeResponse.status).toBe(201)
-    expect(doc.filename).toBe('reference.svg')
+    expect(doc.filename).toBe('reference-original.svg')
+    const stored = await payload.db.findOne<{
+      _managedFiles: { key: string }[]
+      id: number | string
+    }>({
+      collection: 'media',
+      where: { id: { equals: doc.id } },
+    })
+    const currentKey = stored!._managedFiles.find(({ key }) =>
+      key.endsWith(`/${doc.filename}`),
+    )?.key
+
+    expect(currentKey).toBeTruthy()
     await expect(
-      getAWSClient().headObject({ Bucket: getTestBucketName(), Key: 'reference.svg' }),
+      getAWSClient().headObject({ Bucket: getTestBucketName(), Key: currentKey! }),
     ).resolves.toMatchObject({ ContentType: 'image/svg+xml' })
 
     await clearTestBucket()

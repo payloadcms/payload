@@ -36,6 +36,23 @@ import { clearTestBucket, createTestBucket } from './utils.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+async function getManagedKeys({
+  collectionSlug,
+  payload,
+  uploadId,
+}: {
+  collectionSlug: keyof Config['collections']
+  payload: Payload
+  uploadId: number | string
+}): Promise<string[]> {
+  const uploadData = await payload.db.findOne<{ _managedFiles?: Array<{ key: string }> }>({
+    collection: collectionSlug,
+    where: { id: { equals: uploadId } },
+  })
+
+  return uploadData?._managedFiles?.map(({ key }) => key) ?? []
+}
+
 async function verifyUploads({
   client,
   collectionSlug,
@@ -51,24 +68,29 @@ async function verifyUploads({
   TEST_BUCKET: string
   uploadId: number | string
 }) {
-  const uploadData = (await payload.findByID({
-    id: uploadId,
+  const uploadData = await payload.db.findOne<{
+    _managedFiles?: Array<{ key: string }>
+    filename?: string
+    original?: { filename?: string }
+    sizes?: Record<string, { filename?: string }>
+  }>({
     collection: collectionSlug,
-    overrideAccess: true,
-  })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
-
-  const sizes = uploadData.sizes ?? {}
-  const fileKeys = Object.keys(sizes).map((key) => {
-    const entry = sizes[key]
-    if (!entry) {
-      throw new Error(`Missing sizes entry for key: ${key}`)
-    }
-
-    const rawFilename = entry.filename
-    return prefix ? `${prefix}/${rawFilename}` : rawFilename
+    where: { id: { equals: uploadId } },
   })
+  const fileKeys = uploadData?._managedFiles?.map(({ key }) => key) ?? []
+  const filenames = [
+    uploadData?.filename,
+    uploadData?.original?.filename,
+    ...Object.values(uploadData?.sizes ?? {}).map(({ filename }) => filename),
+  ].filter((filename): filename is string => Boolean(filename))
 
-  fileKeys.push(`${prefix ? `${prefix}/` : ''}${uploadData.filename}`)
+  expect(fileKeys.length).toBeGreaterThan(0)
+  for (const filename of filenames) {
+    expect(fileKeys.some((key) => path.posix.basename(key) === filename)).toBe(true)
+  }
+  if (prefix) {
+    expect(fileKeys.every((key) => key.startsWith(`${prefix}/`))).toBe(true)
+  }
   try {
     for (const key of fileKeys) {
       const { $metadata } = await client.send(
@@ -519,9 +541,7 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
             TEST_BUCKET,
             uploadId: upload.id,
           })
-          expect(upload.url).toEqual(
-            `/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}?prefix=${prefix}`,
-          )
+          expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}`)
         })
 
         test('should not upload to S3 when mimeType validation fails', async ({ payload }) => {
@@ -559,20 +579,13 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
 
           expect(upload.id).toBeTruthy()
 
-          const filename = upload.filename
-          if (filename == null || filename === '') {
-            throw new Error('expected filename after upload')
-          }
-
-          // Verify the file was uploaded to S3
-          const { $metadata } = await client.send(
-            new AWS.HeadObjectCommand({
-              Bucket: TEST_BUCKET,
-              Key: filename,
-            }),
-          )
-
-          expect($metadata.httpStatusCode).toBe(200)
+          await verifyUploads({
+            client,
+            collectionSlug: restrictedMediaSlug,
+            payload,
+            TEST_BUCKET,
+            uploadId: upload.id,
+          })
         })
 
         test('should store correct URLs for sized images', async ({ payload }) => {
@@ -632,9 +645,7 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
           })
 
           expect(upload.filename).toBeTruthy()
-          expect(upload.url).toEqual(
-            `/api/${mediaWithPrefixSlug}/file/${upload.filename}?prefix=${prefix}`,
-          )
+          expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${upload.filename}`)
           expect((upload as any).sizes).toBeFalsy()
 
           const rawDbData = await payload.db.findOne({
@@ -773,10 +784,11 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
 
         createdIDs.push(upload.id)
 
-        const originalFilenames = [
-          upload.filename,
-          ...Object.values(upload.sizes || {}).map((size) => size?.filename),
-        ].filter((value): value is string => typeof value === 'string')
+        const originalKeys = await getManagedKeys({
+          collectionSlug: testMetadataSlug,
+          payload,
+          uploadId: upload.id,
+        })
 
         const updateResponse = await restClient.PATCH(`/${testMetadataSlug}/${upload.id}`, {
           body: JSON.stringify({
@@ -792,12 +804,18 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
 
         expect(updateResponse.status).toBe(200)
 
-        await payload.delete({ id: upload.id, collection: testMetadataSlug, overrideAccess: true })
+        await payload.delete({
+          collection: testMetadataSlug,
+          overrideAccess: true,
+          where: { id: { equals: upload.id } },
+        })
         createdIDs.length = 0
 
-        expect(recordedCleanupTargets.map(({ filename }) => filename)).toEqual(originalFilenames)
-        expect(new Set(recordedCleanupTargets.map(({ prefix }) => prefix)).size).toBe(1)
-        expect(recordedCleanupTargets[0]?.prefix).toBe('test-metadata')
+        expect(recordedCleanupTargets.map(({ storageFilePath }) => storageFilePath).sort()).toEqual(
+          originalKeys.sort(),
+        )
+        expect(originalKeys.every((key) => key.startsWith('test-metadata/'))).toBe(true)
+        expect(uploadedTestFiles.size).toBe(0)
       })
 
       test('should preserve cleanup metadata across a metadata override attempt and replacement', async ({
@@ -817,10 +835,11 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
 
         createdIDs.push(upload.id)
 
-        const originalFilenames = [
-          upload.filename,
-          ...Object.values(upload.sizes || {}).map((size) => size?.filename),
-        ].filter((value): value is string => typeof value === 'string')
+        const originalKeys = await getManagedKeys({
+          collectionSlug: testMetadataSlug,
+          payload,
+          uploadId: upload.id,
+        })
 
         const metadataUpdateResponse = await restClient.PATCH(`/${testMetadataSlug}/${upload.id}`, {
           body: JSON.stringify({
@@ -863,19 +882,22 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
         })
 
         expect(updateResponse.status).toBe(200)
-        expect(recordedCleanupTargets.map(({ filename }) => filename)).toEqual(originalFilenames)
-        expect(new Set(recordedCleanupTargets.map(({ prefix }) => prefix)).size).toBe(1)
-        expect(recordedCleanupTargets[0]?.prefix).toBe('test-metadata')
+        expect(recordedCleanupTargets.map(({ storageFilePath }) => storageFilePath).sort()).toEqual(
+          originalKeys.sort(),
+        )
+        expect(originalKeys.every((key) => key.startsWith('test-metadata/'))).toBe(true)
 
         const replacement = await payload.findByID({
           id: upload.id,
           collection: testMetadataSlug,
           overrideAccess: true,
         })
-        const replacementFilenames = [
-          replacement.filename,
-          ...Object.values(replacement.sizes || {}).map((size) => size?.filename),
-        ].filter((value): value is string => typeof value === 'string')
+        const replacementKeys = await getManagedKeys({
+          collectionSlug: testMetadataSlug,
+          payload,
+          uploadId: upload.id,
+        })
+        const replacementFilenames = replacementKeys.map((key) => path.posix.basename(key))
 
         expect(replacement.filename).not.toBe('submitted.png')
         expect(replacementFilenames).not.toContain('submitted-thumbnail.png')
@@ -884,9 +906,10 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
         await payload.delete({ id: upload.id, collection: testMetadataSlug, overrideAccess: true })
         createdIDs.length = 0
 
-        expect(recordedCleanupTargets.map(({ filename }) => filename)).toEqual(replacementFilenames)
-        expect(new Set(recordedCleanupTargets.map(({ prefix }) => prefix)).size).toBe(1)
-        expect(recordedCleanupTargets[0]?.prefix).toBe('test-metadata')
+        expect(recordedCleanupTargets.map(({ storageFilePath }) => storageFilePath).sort()).toEqual(
+          replacementKeys.sort(),
+        )
+        expect(uploadedTestFiles.size).toBe(0)
       })
 
       test('should upload the original and image sizes when create only selects id', async ({
@@ -930,12 +953,12 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
             expect.objectContaining({
               filename: saved.filename,
               mimeType: saved.mimeType,
-              prefix: 'test-metadata',
+              prefix: expect.stringMatching(/^test-metadata\//),
             }),
             expect.objectContaining({
               filename: saved.sizes?.thumbnail?.filename,
               mimeType: saved.sizes?.thumbnail?.mimeType,
-              prefix: 'test-metadata',
+              prefix: expect.stringMatching(/^test-metadata\//),
             }),
           ]),
         )
@@ -951,7 +974,11 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
 
         createdIDs.push(upload.id)
 
-        const originalFiles = [...uploadedTestFiles.values()]
+        const originalKeys = await getManagedKeys({
+          collectionSlug: testMetadataSlug,
+          payload,
+          uploadId: upload.id,
+        })
         const updated = await payload.update({
           id: upload.id,
           collection: testMetadataSlug,
@@ -963,18 +990,16 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
         })
 
         expect(updated).toEqual({ id: upload.id })
-        expect(uploadedTestFiles.size).toBe(originalFiles.length)
+        const updatedKeys = await getManagedKeys({
+          collectionSlug: testMetadataSlug,
+          payload,
+          uploadId: upload.id,
+        })
 
-        for (const original of originalFiles) {
-          const replaced = uploadedTestFiles.get(original.filename)
-
-          expect(replaced).not.toBe(original)
-          expect(replaced).toMatchObject({
-            filename: original.filename,
-            mimeType: original.mimeType,
-            prefix: original.prefix,
-          })
-        }
+        expect(updatedKeys).toHaveLength(originalKeys.length)
+        expect(updatedKeys.every((key) => uploadedTestFiles.has(key))).toBe(true)
+        expect(originalKeys.every((key) => !uploadedTestFiles.has(key))).toBe(true)
+        expect(uploadedTestFiles.size).toBe(updatedKeys.length)
       })
 
       test('should automatically persist metadata returned by custom adapters', async ({
@@ -1175,7 +1200,12 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
 
         createdIDs.push(initial.id)
 
-        const initialKey = `${initial.filename}`
+        const initialKeys = await getManagedKeys({
+          collectionSlug: mediaWithThrowingHookSlug,
+          payload,
+          uploadId: initial.id,
+        })
+        const initialKey = initialKeys.find((key) => path.posix.basename(key) === initial.filename)!
         const before = await client.send(
           new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: initialKey }),
         )
@@ -1243,7 +1273,13 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
 
         expect(initialSizeKeys.length).toBeGreaterThan(0)
 
-        for (const key of [initial.filename, ...initialSizeKeys]) {
+        const initialKeys = await getManagedKeys({
+          collectionSlug: mediaWithOverwriteSlug,
+          payload,
+          uploadId: initial.id,
+        })
+
+        for (const key of initialKeys) {
           const head = await client.send(
             new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: key }),
           )
@@ -1269,10 +1305,20 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
           .map((s) => s?.filename)
           .filter((f): f is string => typeof f === 'string')
 
-        expect(updatedSizeKeys.sort()).toEqual(initialSizeKeys.sort())
+        expect(updatedSizeKeys).toHaveLength(initialSizeKeys.length)
 
-        // All keys (main + every size variant) should still exist in S3.
-        for (const key of [updated.filename, ...updatedSizeKeys]) {
+        const updatedKeys = await getManagedKeys({
+          collectionSlug: mediaWithOverwriteSlug,
+          payload,
+          uploadId: initial.id,
+        })
+
+        expect(updatedKeys).toHaveLength(initialKeys.length)
+        for (const filename of updatedSizeKeys) {
+          expect(updatedKeys.some((key) => path.posix.basename(key) === filename)).toBe(true)
+        }
+        // All current keys (main, original, and every size variant) should exist in S3.
+        for (const key of updatedKeys) {
           const head = await client.send(
             new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: key }),
           )

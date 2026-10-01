@@ -98,7 +98,7 @@ export const runCloudFileUpdate = async <T>({
     req,
     stage: async ({ trackStagedObject }) => {
       const staged = await operations.stage({
-        data,
+        data: { ...storedCurrent, ...data },
         files,
         req,
         trackStagedObject,
