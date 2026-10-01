@@ -19,6 +19,7 @@ export type InitialLexicalFormState = {
   [nodeID: string]: {
     [key: string]: any
     formState?: FormState
+    schemaPath?: string
   }
 }
 
@@ -96,6 +97,7 @@ export async function buildInitialState({
       }
 
       initialState[id].formState = formStateResult
+      initialState[id].schemaPath = schemaFieldsPath
 
       if (node.type === 'block') {
         const currentFieldPreferences = context.preferences?.fields?.[context.field.name]
