@@ -412,6 +412,7 @@ describe('General', () => {
 
     describe('user menu', () => {
       const openThemeSubMenu = async () => {
+        await openNav(page)
         await page.locator('button[aria-label="Account"]').click()
         await page
           .locator('.popup-button-list__button--submenu-trigger')
@@ -488,6 +489,7 @@ describe('General', () => {
         await page.goto(postsUrl.admin)
 
         // Logout lives inside the user menu popup
+        await openNav(page)
         await page.locator('button[aria-label="Account"]').click()
 
         // The custom Logout component (admin.components.logout.Button) renders an
