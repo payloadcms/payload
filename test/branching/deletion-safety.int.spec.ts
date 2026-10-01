@@ -1319,14 +1319,16 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
       payload.db.bulkOperationsSingleTransaction = false
 
       try {
-        await expect(
-          payload.delete({
-            branch: branch.slug,
-            collection: deletionSafetyTargetsSlug,
-            overrideAccess: true,
-            where: { id: { equals: target.id } },
-          }),
-        ).rejects.toThrow('Rejected target after delete')
+        const rejectedDelete = await payload.delete({
+          branch: branch.slug,
+          collection: deletionSafetyTargetsSlug,
+          overrideAccess: true,
+          where: { id: { equals: target.id } },
+        })
+
+        expect(rejectedDelete.docs).toHaveLength(0)
+        expect(rejectedDelete.errors).toHaveLength(1)
+        expect(rejectedDelete.errors[0]?.message).toContain('Rejected target after delete')
 
         await expectBranchDeleteToHaveRolledBack({
           id: target.id,
@@ -1558,15 +1560,19 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
       payload.db.bulkOperationsSingleTransaction = false
 
       try {
-        await expect(
-          payload.delete({
-            branch: branch.slug,
-            collection: deletionSafetyVersionedTargetsSlug,
-            overrideAccess: true,
-            req,
-            where: { id: { equals: target.id } },
-          }),
-        ).rejects.toThrow('Rejected versioned target after delete')
+        const rejectedDelete = await payload.delete({
+          branch: branch.slug,
+          collection: deletionSafetyVersionedTargetsSlug,
+          overrideAccess: true,
+          req,
+          where: { id: { equals: target.id } },
+        })
+
+        expect(rejectedDelete.docs).toHaveLength(0)
+        expect(rejectedDelete.errors).toHaveLength(1)
+        expect(rejectedDelete.errors[0]?.message).toContain(
+          'Rejected versioned target after delete',
+        )
 
         deletionSafetySpy.rejectVersionedTargetAfterDeleteID = undefined
 

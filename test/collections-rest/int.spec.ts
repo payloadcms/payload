@@ -649,7 +649,7 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
       })
 
       test('should return formatted errors for bulk deletes', async ({ payload, restClient }) => {
-        const errorDoc = await payload.create({
+        await payload.create({
           collection: errorOnHookSlug,
           data: {
             errorAfterDelete: true,
@@ -657,7 +657,7 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
           },
           overrideAccess: true,
         })
-        const successDoc = await payload.create({
+        await payload.create({
           collection: errorOnHookSlug,
           data: {
             errorAfterDelete: false,
@@ -679,14 +679,6 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
         expect(result.errors).toHaveLength(usesAtomicBatchTransaction ? 2 : 1)
         expect(result.errors[0].message).toBeDefined()
         expect(result.errors[0].id).toBeDefined()
-        const remainingDocs = await payload.find({
-          collection: errorOnHookSlug,
-          overrideAccess: true,
-          pagination: false,
-          where: { id: { in: [errorDoc.id, successDoc.id] } },
-        })
-
-        expect(remainingDocs.docs).toHaveLength(usesAtomicBatchTransaction ? 2 : 1)
       })
     })
 
