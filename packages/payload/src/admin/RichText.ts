@@ -272,10 +272,10 @@ type RichTextAdapterBase<
   /** Editors configured for specific uses, initialized independently from this editor. */
   presets?: {
     /**
-     * Editor for LLM instructions. Must provide both Markdown converters.
+     * Editor to use for LLM instructions collection, with both Markdown converters.
      * This provider should select its own features without inheriting unrestricted root features.
      */
-    llmInstructions?: RichTextAdapterProvider<Value, AdapterProps, ExtraFieldProperties>
+    llmInstructions?: MarkdownRichTextAdapterProvider<Value, AdapterProps, ExtraFieldProperties>
   }
   /**
    * Provide validation function for the richText field. This function is run the same way
@@ -332,3 +332,22 @@ export type RichTextAdapterProvider<
   isRoot?: boolean
   parentIsLocalized: boolean
 }) => RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>
+
+/** A rich-text adapter that supports conversion to and from Markdown. */
+export type MarkdownRichTextAdapter<
+  Value extends object = any,
+  AdapterProps = any,
+  ExtraFieldProperties = any,
+> = {
+  converters: Required<
+    NonNullable<RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>['converters']>
+  >
+} & RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>
+
+export type MarkdownRichTextAdapterProvider<
+  Value extends object = object,
+  AdapterProps = any,
+  ExtraFieldProperties = {},
+> = (
+  args: Parameters<RichTextAdapterProvider<Value, AdapterProps, ExtraFieldProperties>>[0],
+) => MarkdownRichTextAdapter<Value, AdapterProps, ExtraFieldProperties>
