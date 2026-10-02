@@ -108,7 +108,7 @@
 
   .blocks-field__block-number {
     flex-shrink: 0;
-    color: var(--color-text);
+    color: var(--color-text-secondary);
   }
 
   .blocks-field__block-pill {
