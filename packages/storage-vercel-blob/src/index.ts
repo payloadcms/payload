@@ -23,7 +23,8 @@ export type VercelBlobStorageOptions = {
   access?: 'public'
 
   /**
-   * Add a random suffix to the uploaded file name in Vercel Blob storage
+   * Add a random suffix to the uploaded file name in Vercel Blob storage.
+   * Processed direct-client uploads use their server-issued keys without a second suffix.
    *
    * @default false
    */

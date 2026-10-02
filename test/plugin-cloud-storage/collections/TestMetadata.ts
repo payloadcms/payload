@@ -1,14 +1,17 @@
 import type { CollectionConfig } from 'payload'
 
+import { APIError } from 'payload'
+
 import { testMetadataSlug } from '../shared.js'
+import { throwingHookError } from './MediaWithThrowingHook.js'
 
 export const TestMetadata: CollectionConfig = {
   slug: testMetadataSlug,
   access: {
     create: () => true,
+    delete: () => true,
     read: () => true,
     update: () => true,
-    delete: () => true,
   },
   fields: [
     {
@@ -19,6 +22,21 @@ export const TestMetadata: CollectionConfig = {
       },
     },
   ],
+  hooks: {
+    afterChange: [
+      ({ doc, operation, req }) => {
+        if (
+          operation === 'update' &&
+          req.context?.skipCloudStorage &&
+          doc.testNote === 'Throw on internal update'
+        ) {
+          throw new APIError(throwingHookError, 500, null, true)
+        }
+
+        return doc
+      },
+    ],
+  },
   upload: {
     adminThumbnail: 'thumbnail',
     imageSizes: [
