@@ -48,6 +48,7 @@ export const TreeFocusProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const unregisterItem = useCallback((id: string) => {
     itemsRef.current.delete(id)
+    setFocusedIdState((focusedId) => (focusedId === id ? null : focusedId))
   }, [])
 
   const moveFocus = useCallback(

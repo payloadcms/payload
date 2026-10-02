@@ -141,7 +141,18 @@ test.describe('WCAG 2.2 Level AA', () => {
       await page.keyboard.press('Enter')
       await expect(children.last()).toHaveAttribute('aria-selected', 'true')
       await expect(page).toHaveURL(/_h_payload-folders=/)
-      await parent.press('ArrowLeft')
+      await children.first().focus()
+      await expect(children.first()).toBeFocused()
+      await toggle.click()
+      await expect(children).toHaveCount(0)
+      await expect(sidebar.locator('[role=treeitem][tabindex="0"]')).toHaveCount(1)
+      await sidebar.locator('.tree__create-button').focus()
+      await page.keyboard.press('Shift+Tab')
+      const all = sidebar.getByRole('treeitem', { name: /all.*folders/i })
+
+      await expect(all).toBeFocused()
+      await all.press('ArrowDown')
+      await expect(parent).toBeFocused()
     })
 
     test('should expose column editor headings and named toggles', async () => {
