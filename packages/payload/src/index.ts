@@ -2093,6 +2093,11 @@ export { mergeHeaders } from './utilities/mergeHeaders.js'
 export { parseDocumentID } from './utilities/parseDocumentID.js'
 export { parseParams } from './utilities/parseParams/index.js'
 export type { ParsedParams, RawParams } from './utilities/parseParams/index.js'
+export {
+  type ProcessBatchResult,
+  processInBatches,
+  type ProcessInBatchesArgs,
+} from './utilities/processInBatches.js'
 export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
 export { sanitizeJoinParams } from './utilities/sanitizeJoinParams.js'
 export type { JoinParams } from './utilities/sanitizeJoinParams.js'
