@@ -118,6 +118,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Søk widgets...',
     widgetCollectionRequired: 'Collectie er påkrevd.',
     widgetConfigurationError: 'Feil i widget-konfigurasjon',
+    widgetDropFilesToUpload: 'Dra og slipp en fil',
     widgetInvalidCollection: 'Collection "{{collection}}" finnes ikke.',
     widgetInvalidFilterField:
       'Filter-feltet "{{field}}" finnes ikke i kolleksjonen "{{collection}}".',
@@ -135,6 +136,9 @@ export const nbTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sorter Field',
     widgetTitleFallback: 'Forespørsel om Collection',
     widgetTitleLabel: 'Tittel',
+    widgetUploadDropzoneDescription:
+      'Last opp fra datamaskinen din ved å dra og slippe, eller klikk på knappen nedenfor',
+    widgetUploadFiles: 'Legg til filer',
   },
   error: {
     accountAlreadyActivated: 'Denne kontoen er allerede aktivert.',

@@ -5,6 +5,8 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Events } from './collections/Events.js'
+import { Media } from './collections/Media.js'
+import { MediaAlt } from './collections/MediaAlt.js'
 import { Revenue } from './collections/Revenue.js'
 import { Tickets } from './collections/Tickets.js'
 import { seed } from './seed.js'
@@ -274,6 +276,8 @@ export default buildConfigWithDefaults({
       Tickets,
       Revenue,
       Events,
+      Media,
+      MediaAlt,
       // ...Array.from({ length: 35 }, () => ({
       //   slug: `collection-${Math.random().toString(36).substring(2, 15)}`,
       //   fields: [],

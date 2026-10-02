@@ -5,7 +5,6 @@ import React from 'react'
 
 import { SelectInput } from '../../../fields/Select/Input.js'
 import { XIcon } from '../../../icons/X/index.js'
-import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { ErrorPill } from '../../ErrorPill/index.js'
 import { ShimmerEffect } from '../../ShimmerEffect/index.js'
@@ -14,11 +13,13 @@ import { Thumbnail } from '../../Thumbnail/index.js'
 import './index.css'
 import { useFormsManager } from '../FormsManager/index.js'
 import { useBulkUpload } from '../index.js'
+import { useUploadCollectionOptions } from '../useUploadCollectionOptions.js'
 
 const baseClass = 'file-selections'
 
 export function FileSidebar() {
-  const { activeIndex, forms, isInitializing, removeFile, setActiveIndex } = useFormsManager()
+  const { activeIndex, changeCollectionSlug, forms, isInitializing, removeFile, setActiveIndex } =
+    useFormsManager()
   const { initialFiles, initialForms } = useBulkUpload()
   const { i18n, t } = useTranslation()
 
@@ -38,36 +39,30 @@ export function FileSidebar() {
     return formattedSize
   }, [])
 
-  const {
-    collectionSlug: bulkUploadCollectionSlug,
-    selectableCollections,
-    setCollectionSlug,
-  } = useBulkUpload()
+  const { collectionSlug: bulkUploadCollectionSlug } = useBulkUpload()
 
-  const { getEntityConfig } = useConfig()
+  const collectionOptions = useUploadCollectionOptions()
 
   return (
     <div className={baseClass}>
-      {selectableCollections?.length > 1 && (
+      {collectionOptions.length > 1 && (
         <div className={`${baseClass}__header`}>
           <SelectInput
             className={`${baseClass}__collectionSelect`}
             isClearable={false}
+            Label={null}
+            label={t('general:collection')}
             name="groupBy"
             onChange={(e) => {
               const val: string =
                 typeof e === 'object' && 'value' in e
                   ? (e?.value as string)
                   : (e as unknown as string)
-              setCollectionSlug(val)
+              changeCollectionSlug(val)
             }}
-            options={
-              selectableCollections?.map((coll) => {
-                const config = getEntityConfig({ collectionSlug: coll })
-                return { label: config.labels.singular, value: config.slug }
-              }) || []
-            }
+            options={collectionOptions}
             path="groupBy"
+            readOnly={isInitializing}
             required
             value={bulkUploadCollectionSlug}
           />
@@ -103,6 +98,7 @@ export function FileSidebar() {
               >
                 <button
                   className={`${baseClass}__fileRow`}
+                  disabled={isInitializing}
                   onClick={() => setActiveIndex(index)}
                   type="button"
                 >

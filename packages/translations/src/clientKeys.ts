@@ -89,6 +89,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'dashboard:noItems',
   'dashboard:widgetCollectionRequired',
   'dashboard:widgetConfigurationError',
+  'dashboard:widgetDropFilesToUpload',
   'dashboard:widgetInvalidCollection',
   'dashboard:widgetInvalidFilterField',
   'dashboard:widgetInvalidSortField',
@@ -103,6 +104,8 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'dashboard:widgetSortFieldLabel',
   'dashboard:widgetTitleFallback',
   'dashboard:widgetTitleLabel',
+  'dashboard:widgetUploadDropzoneDescription',
+  'dashboard:widgetUploadFiles',
 
   'error:autosaving',
   'error:correctInvalidFields',

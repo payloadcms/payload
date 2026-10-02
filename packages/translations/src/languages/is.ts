@@ -120,6 +120,7 @@ export const isTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Leita að græjum...',
     widgetCollectionRequired: 'Safn er skylt.',
     widgetConfigurationError: 'Villa við stillingu búnaðar',
+    widgetDropFilesToUpload: 'Dragðu og slepptu skrá',
     widgetInvalidCollection: 'Kolekcja „{{collection}}” nie istnieje.',
     widgetInvalidFilterField: 'Sía reitur "{{field}}" er ekki til í safni "{{collection}}".',
     widgetInvalidSortField: 'Röðunarreiturinn "{{field}}" er ekki til í safninu "{{collection}}".',
@@ -135,6 +136,9 @@ export const isTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Raða Field',
     widgetTitleFallback: 'Safnafyrirspurn',
     widgetTitleLabel: 'Titill',
+    widgetUploadDropzoneDescription:
+      'Hladdu skjölum inn frá tölvunni þinni með því að draga þau hingað eða smelltu á hnappinn hér að neðan',
+    widgetUploadFiles: 'Bæta við skrám',
   },
   error: {
     accountAlreadyActivated: 'Þessi aðgangur hefur þegar verið virkjaður.',
