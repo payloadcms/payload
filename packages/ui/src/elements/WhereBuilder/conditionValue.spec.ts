@@ -1,10 +1,38 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  getDateFilterValue,
   getDisplayedConditionValue,
   isEmptyConditionValue,
   isNoOpConditionValueUpdate,
 } from './conditionValue.js'
+
+describe('getDateFilterValue', () => {
+  it.each([
+    ['greater_than_equal', '2026-03-29T00:00:00.000Z'],
+    ['less_than', '2026-03-29T00:00:00.000Z'],
+    ['greater_than', '2026-03-29T22:59:59.999Z'],
+    ['less_than_equal', '2026-03-29T22:59:59.999Z'],
+  ] as const)('should use the configured day boundary for %s', (operator, expected) => {
+    const result = getDateFilterValue({
+      date: new Date('2026-03-29T12:00:00.000Z'),
+      operator,
+      timezone: 'Europe/London',
+    })
+
+    expect(result).toEqual(new Date(expected))
+  })
+
+  it('should use UTC boundaries for date-only fields without a configured timezone', () => {
+    const result = getDateFilterValue({
+      date: new Date('2026-06-15T12:00:00.000Z'),
+      operator: 'greater_than_equal',
+      timezone: 'UTC',
+    })
+
+    expect(result).toEqual(new Date('2026-06-15T00:00:00.000Z'))
+  })
+})
 
 describe('isEmptyConditionValue', () => {
   it.each([
