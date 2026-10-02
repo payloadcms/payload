@@ -101,6 +101,30 @@ type FormsManagerProps = {
   readonly children: React.ReactNode
 }
 
+export type BulkUploadFilePreparationDetail = {
+  collectionSlug: CollectionSlug
+  files: File[]
+  preparation: null | Promise<File[]>
+}
+
+export type BulkUploadFailureDetail = {
+  collectionSlug: CollectionSlug
+  error: unknown
+  fileIndex: number
+  responseContentType: null | string
+  responseStatus: null | number
+  totalFiles: number
+}
+
+/**
+ * Dispatched before bulk-upload forms are created. A synchronous listener can replace the files by
+ * assigning a promise to `event.detail.preparation`; form creation waits for that promise.
+ */
+export const bulkUploadPrepareFilesEvent = 'payload:bulk-upload-prepare-files'
+
+/** Dispatched when a bulk-upload request or response cannot be processed. */
+export const bulkUploadFailureEvent = 'payload:bulk-upload-failure'
+
 export function FormsManagerProvider({ children }: FormsManagerProps) {
   const { config } = useConfig()
   const {
@@ -297,9 +321,31 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       if (!hasInitializedState) {
         await initializeSharedFormState()
       }
+
+      const preparationDetail: BulkUploadFilePreparationDetail = {
+        collectionSlug,
+        files: Array.from(files),
+        preparation: null,
+      }
+      globalThis.dispatchEvent(
+        new CustomEvent<BulkUploadFilePreparationDetail>(bulkUploadPrepareFilesEvent, {
+          detail: preparationDetail,
+        }),
+      )
+
+      let preparedFiles: File[]
+      try {
+        preparedFiles = await (preparationDetail.preparation ??
+          Promise.resolve(preparationDetail.files))
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Unable to prepare files for upload.')
+        toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })
+        return
+      }
+
       dispatch({
         type: 'ADD_FORMS',
-        forms: Array.from(files).map((file) => ({
+        forms: preparedFiles.map((file) => ({
           file,
           initialState: applyFolderToState(initialStateRef.current),
         })),
@@ -313,6 +359,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       activeIndex,
       forms,
       applyFolderToState,
+      collectionSlug,
     ],
   )
 
@@ -374,6 +421,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       setIsUploading(true)
 
       for (let i = 0; i < currentForms.length; i++) {
+        let uploadResponse: Response | undefined
+
         try {
           const form = currentForms[i]
           const fileValue = form.formState?.file?.value
@@ -390,7 +439,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             },
           )}`
 
-          const req = await fetch(actionURLWithParams, {
+          const req = (uploadResponse = await fetch(actionURLWithParams, {
             body: await createFormData(
               form.formState,
               overrides,
@@ -401,7 +450,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             ),
             credentials: 'include',
             method: 'POST',
-          })
+          }))
 
           const json = await req.json()
 
@@ -517,8 +566,22 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
               })
             }
           }
-        } catch (_) {
-          // swallow
+        } catch (error) {
+          const failureDetail: BulkUploadFailureDetail = {
+            collectionSlug,
+            error,
+            fileIndex: i,
+            responseContentType: uploadResponse?.headers.get('content-type') ?? null,
+            responseStatus: uploadResponse?.status ?? null,
+            totalFiles: currentForms.length,
+          }
+          globalThis.dispatchEvent(
+            new CustomEvent<BulkUploadFailureDetail>(bulkUploadFailureEvent, {
+              detail: failureDetail,
+            }),
+          )
+          currentForms[i].errorCount = Math.max(currentForms[i].errorCount, 1)
+          toast.error('The upload request failed before Payload returned a valid response.')
         }
       }
 

@@ -67,6 +67,7 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    'bulk-operations-sequential': BulkOperationsSequential;
     noTimeStamps: NoTimeStamp;
     categories: Category;
     simple: Simple;
@@ -105,6 +106,7 @@ export interface Config {
     };
   };
   collectionsSelect: {
+    'bulk-operations-sequential': BulkOperationsSequentialSelect<false> | BulkOperationsSequentialSelect<true>;
     noTimeStamps: NoTimeStampsSelect<false> | NoTimeStampsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     simple: SimpleSelect<false> | SimpleSelect<true>;
@@ -182,6 +184,16 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bulk-operations-sequential".
+ */
+export interface BulkOperationsSequential {
+  id: string;
+  text?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -794,6 +806,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -813,6 +826,10 @@ export interface User {
 export interface PayloadLockedDocument {
   id: string;
   document?:
+    | ({
+        relationTo: 'bulk-operations-sequential';
+        value: string | BulkOperationsSequential;
+      } | null)
     | ({
         relationTo: 'noTimeStamps';
         value: string | NoTimeStamp;
@@ -962,6 +979,15 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bulk-operations-sequential_select".
+ */
+export interface BulkOperationsSequentialSelect<T extends boolean = true> {
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1488,6 +1514,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
