@@ -38,7 +38,7 @@ export const generateSlug =
   async ({ collection, data, global, operation, originalDoc, req, value: isChecked }) => {
     if (operation === 'create') {
       if (data) {
-        data[slugFieldName] = await slugify({
+        const slugResult = slugify({
           customSlugify,
           data,
           req,
@@ -46,6 +46,12 @@ export const generateSlug =
           // Use a generic falsy check here to include empty strings
           valueToSlugify: data?.[slugFieldName] || data?.[useAsSlug],
         })
+
+        // Assign synchronously when not a Promise so sibling required field validation doesn't fail (#18334)
+        data[slugFieldName] =
+          slugResult instanceof Promise || (typeof slugResult === 'object' && slugResult !== null && typeof (slugResult as any).then === 'function')
+            ? await slugResult
+            : slugResult
       }
 
       return Boolean(!data?.[slugFieldName])
