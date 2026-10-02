@@ -12,9 +12,14 @@ import './index.css'
 
 const baseClass = 'field-error'
 
-export const FieldError: React.FC<GenericErrorProps> = (props) => {
+export const FieldError: React.FC<
+  {
+    announce?: boolean
+  } & GenericErrorProps
+> = (props) => {
   const {
     alignCaret = 'right',
+    announce = false,
     message: messageFromProps,
     path,
     showError: showErrorFromProps,
@@ -30,19 +35,24 @@ export const FieldError: React.FC<GenericErrorProps> = (props) => {
   const message = messageFromProps || errorMessage
   const showMessage = showErrorFromProps || (hasSubmitted && valid === false)
 
-  if (showMessage && message?.length) {
-    return (
-      <Tooltip
-        alignCaret={alignCaret}
-        className={baseClass}
-        delay={0}
-        id={generateFieldID(path, editDepth, uuid, 'field-error')}
-        staticPositioning
-      >
-        {message}
-      </Tooltip>
-    )
-  }
-
-  return null
+  return (
+    <React.Fragment>
+      {announce && (
+        <span aria-atomic="true" className="sr-only" role="alert">
+          {showMessage ? message : ''}
+        </span>
+      )}
+      {showMessage && message?.length ? (
+        <Tooltip
+          alignCaret={alignCaret}
+          className={baseClass}
+          delay={0}
+          id={generateFieldID(path, editDepth, uuid, 'field-error')}
+          staticPositioning
+        >
+          {message}
+        </Tooltip>
+      ) : null}
+    </React.Fragment>
+  )
 }

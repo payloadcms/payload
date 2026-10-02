@@ -894,6 +894,104 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
     })
   })
   test.describe('4.1.3 Status Messages (AA)', () => {
+    test('should announce the unsaved Copy to locale toast without its close button', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3669
+      await gotoFirstPost({ page, postsURL, serverURL })
+      await screenReader.navigateToWebContent()
+      await page.locator('#field-title').fill('Unsaved toast announcement regression')
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+      const capture = await captureScreenReader({
+        action: async () => {
+          await page.locator('#copy-locale-data__button').click()
+          await expect(
+            page.locator('[data-sonner-toast]').filter({ hasText: /unsaved/i }),
+          ).toBeVisible()
+        },
+        screenReader,
+      })
+
+      expect(capture.spokenPhrase).toMatch(/unsaved/i)
+      expect(capture.spokenPhrase).not.toMatch(/close toast/i)
+    })
+
+    test('should retain the trash toast while the screen-reader cursor reads it', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3580
+      const apiURL = formatAdminURL({ apiRoute: '/api', path: '/posts', serverURL })
+      const response = await page.request.post(apiURL, {
+        data: { title: 'Toast cursor persistence regression' },
+      })
+      expect(response.ok()).toBe(true)
+      const { doc } = await response.json()
+
+      try {
+        await gotoPostsList({ page, postsURL })
+        const row = page
+          .locator('tbody tr')
+          .filter({ hasText: 'Toast cursor persistence regression' })
+        await row.locator('.cell-_select input').check()
+        await page.locator('.list-selection__button[aria-label="Delete"]').click()
+        await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
+        const toast = page.locator('[data-sonner-toast]').filter({ hasText: /moved to trash/i })
+        await expect(toast).toBeVisible()
+        await screenReader.navigateToWebContent()
+        for (let step = 0; step < 150; step++) {
+          if (/moved to trash/i.test(await screenReader.itemText())) {
+            break
+          }
+          await screenReader.next()
+        }
+        expect(
+          await screenReader.itemText(),
+          'The virtual cursor must reach the toast before testing persistence',
+        ).toMatch(/moved to trash/i)
+        // Real elapsed time matters: virtual cursor focus is not DOM focus or hover.
+        await page.waitForTimeout(5000)
+        await expect(toast).toBeVisible()
+        expect(await screenReader.itemText()).toMatch(/moved to trash/i)
+      } finally {
+        const cleanup = await page.request.delete(`${apiURL}/${doc.id}?trash=true`)
+        expect(cleanup.ok()).toBe(true)
+      }
+    })
+
+    test('should announce global API depth changes while focus stays on the stepper', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3618
+      await page.goto(
+        formatAdminURL({ adminRoute: '/admin', path: '/globals/menu/api', serverURL }),
+      )
+      const depth = page.getByRole('spinbutton', { name: 'Depth', exact: true })
+      await expect(depth).toBeVisible()
+      await screenReader.navigateToWebContent()
+      const initialDepth = Number(await depth.inputValue())
+      const field = page.locator('.field-type.number').filter({ has: depth })
+
+      for (const { name, value } of [
+        { name: 'Increment', value: initialDepth + 1 },
+        { name: 'Decrement', value: initialDepth },
+      ]) {
+        const stepper = field.getByRole('button', { name, exact: true })
+        await stepper.focus()
+        const capture = await captureScreenReader({
+          action: async () => {
+            await stepper.press('Enter')
+            await expect(depth).toHaveValue(String(value))
+          },
+          screenReader,
+        })
+        await expect(stepper).toBeFocused()
+        expect.soft(capture.spokenPhrase).toMatch(new RegExp(`\\b${value}\\b`))
+      }
+    })
+
     test('should announce table search result changes without moving focus', async ({
       page,
       screenReader,

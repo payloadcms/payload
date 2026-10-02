@@ -103,10 +103,27 @@ export const ItemsDrawer: React.FC<ItemsDrawerProps> = (props) => {
   const { addRowIndex, drawerSlug, items, labels, onItemClick, searchPlaceholder, title } = props
 
   const [searchTerm, setSearchTerm] = useState('')
+  const [resultsAnnouncement, setResultsAnnouncement] = useState('')
   const [filteredItems, setFilteredItems] = useState(items)
   const { closeModal, isModalOpen } = useModal()
   const { i18n, t } = useTranslation()
   const { config } = useConfig()
+  const isOpen = isModalOpen(drawerSlug)
+
+  useEffect(() => {
+    if (!isOpen) {
+      setResultsAnnouncement('')
+      return
+    }
+
+    const timeout = setTimeout(() => {
+      setResultsAnnouncement(
+        `${t('general:items')}: ${filteredItems.length}${searchTerm ? `: ${searchTerm}` : ''}`,
+      )
+    }, 300)
+
+    return () => clearTimeout(timeout)
+  }, [filteredItems.length, isOpen, searchTerm, t])
 
   const itemGroups = useMemo(() => {
     const groups: Record<string, (DrawerItem | string)[]> = {
@@ -168,6 +185,9 @@ export const ItemsDrawer: React.FC<ItemsDrawerProps> = (props) => {
 
   return (
     <Drawer slug={drawerSlug} title={finalTitle}>
+      <span aria-atomic="true" className="sr-only" role="status">
+        {resultsAnnouncement}
+      </span>
       <ItemSearch
         placeholder={searchPlaceholder || t('fields:searchForBlock')}
         setSearchTerm={setSearchTerm}

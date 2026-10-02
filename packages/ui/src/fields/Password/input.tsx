@@ -73,7 +73,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
       <div className={`${fieldBaseClass}__wrap`}>
         <RenderCustomComponent
           CustomComponent={Error}
-          Fallback={<FieldError path={path} showError={showError} />}
+          Fallback={<FieldError announce path={path} showError={showError} />}
         />
         <div className="password__input-wrap">
           {BeforeInput}
