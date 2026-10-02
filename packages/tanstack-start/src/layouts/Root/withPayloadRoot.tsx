@@ -1,23 +1,10 @@
 'use client'
-import type { Theme } from '@payloadcms/ui'
-import type { RequestThemeSource } from '@payloadcms/ui/utilities/getRequestTheme'
+import type { DocumentRootProps } from '@payloadcms/ui/layouts/DocumentRoot'
+import type { RootLayoutData } from '@payloadcms/ui/utilities/getRootLayoutData'
 
-import { ResolveThemeOnClient } from '@payloadcms/ui/layouts/Root/ResolveThemeOnClient'
-import { getLanguageDir } from '@payloadcms/ui/utilities/getLanguageDir'
+import { DocumentRoot } from '@payloadcms/ui/layouts/DocumentRoot'
 import { HeadContent, Scripts, useRouterState } from '@tanstack/react-router'
 import React from 'react'
-
-type AdminHTMLProps = {
-  'data-theme'?: Theme
-  dir: 'ltr' | 'rtl'
-  lang?: string
-}
-
-type AdminShellState = {
-  htmlProps: AdminHTMLProps
-  serverTheme: Theme
-  themeSource: RequestThemeSource
-}
 
 export type PayloadAdminShellProps = {
   readonly children: React.ReactNode
@@ -27,30 +14,23 @@ export type PayloadAdminShellProps = {
  * The `<html>` document shell for Payload admin routes — the TanStack Start
  * equivalent of `@payloadcms/next`'s root layout `<html>`. Sets
  * `data-theme`/`lang`/`dir` on `<html>` from the server-computed layout data
- * (`getLayoutData`, exposed on the `/_payload` route loader). A blocking script
- * resolves the server's default theme from the browser preference before first paint,
- * while the server-provided language and text direction remain authoritative.
+ * (`getLayoutData`, exposed on the `/_payload` route loader), so the admin
+ * panel shares document rendering and request preferences with Next's `RootLayout`.
+ * A blocking script resolves the default theme from the browser preference before first paint.
  */
 export function PayloadAdminShell({ children }: PayloadAdminShellProps) {
-  const { htmlProps, serverTheme, themeSource } = useRouterState({
-    select: (state): AdminShellState => {
+  const documentProps = useRouterState({
+    select: (state): Partial<DocumentRootProps> => {
       for (const match of state.matches) {
-        const data = match.loaderData as
-          | {
-              languageCode?: string
-              theme?: Theme
-              themeSource?: RequestThemeSource
-            }
-          | undefined
+        const data = match.loaderData as Partial<RootLayoutData> | undefined
 
         if (data?.theme && data?.languageCode) {
           return {
-            htmlProps: {
-              'data-theme': data.theme,
-              dir: getLanguageDir({ languageCode: data.languageCode }),
-              lang: data.languageCode,
-            },
-            serverTheme: data.theme,
+            dir: data.dir,
+            highContrastMode: data.highContrastMode,
+            languageCode: data.languageCode,
+            suppressHydrationWarning: data.suppressHydrationWarning,
+            theme: data.theme,
             themeSource: data.themeSource ?? 'default',
           }
         }
@@ -59,27 +39,15 @@ export function PayloadAdminShell({ children }: PayloadAdminShellProps) {
       // No layout data yet (fresh session before the loader resolves): default
       // to `ltr` so the `[dir='ltr']`-scoped admin layout rules (e.g. the
       // document sidebar divider) still match, matching Next's `ltr` default.
-      return {
-        htmlProps: { dir: 'ltr' },
-        serverTheme: 'light',
-        themeSource: 'default',
-      }
+      return { dir: 'ltr', suppressHydrationWarning: true, themeSource: 'default' }
     },
   })
 
   return (
-    // eslint-disable-next-line jsx-a11y/html-has-lang -- `lang` is set from server-computed layout data when available
-    <html {...htmlProps} suppressHydrationWarning>
-      <head>
-        {themeSource === 'default' && <ResolveThemeOnClient serverTheme={serverTheme} />}
-        <style>{`@layer payload-default, payload;`}</style>
-        <HeadContent />
-      </head>
-      <body>
-        {children}
-        <Scripts />
-      </body>
-    </html>
+    <DocumentRoot {...documentProps} head={<HeadContent />}>
+      {children}
+      <Scripts />
+    </DocumentRoot>
   )
 }
 
