@@ -7,6 +7,7 @@ import type {
   RollbackTransaction,
 } from './types.js'
 
+import { defaultCopy } from './defaultCopy.js'
 import { createMigration } from './migrations/createMigration.js'
 import { migrate } from './migrations/migrate.js'
 import { migrateDown } from './migrations/migrateDown.js'
@@ -25,6 +26,7 @@ export function createDatabaseAdapter<T extends BaseDatabaseAdapter>(
     T,
     | 'allowIDOnCreate'
     | 'bulkOperationsSingleTransaction'
+    | 'copy'
     | 'createMigration'
     | 'migrate'
     | 'migrateDown'
@@ -41,6 +43,7 @@ export function createDatabaseAdapter<T extends BaseDatabaseAdapter>(
     beginTransaction,
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     commitTransaction,
+    copy: defaultCopy,
     createMigration,
     migrate,
     migrateDown,

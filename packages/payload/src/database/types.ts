@@ -39,6 +39,10 @@ export interface BaseDatabaseAdapter {
    * Open the connection to the database
    */
   connect?: Connect
+  /**
+   * Copy one stored collection document without running Local API operations.
+   */
+  copy: Copy
   count: Count
   countGlobalVersions: CountGlobalVersions
   countVersions: CountVersions
@@ -181,6 +185,17 @@ type ConnectArgs = {
 export type Connect = (args?: ConnectArgs) => Promise<void>
 
 export type Destroy = () => Promise<void>
+
+export type CopyArgs = {
+  collection: CollectionSlug
+  /** Top-level field values that replace values from the source document. */
+  data?: Record<string, unknown>
+  req?: Partial<PayloadRequest>
+  /** Selects the stored source document. */
+  where: Where
+}
+
+export type Copy = (this: BaseDatabaseAdapter, args: CopyArgs) => Promise<Document>
 
 export type CreateMigration = (args: {
   file?: string

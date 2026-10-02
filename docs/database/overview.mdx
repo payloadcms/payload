@@ -72,3 +72,26 @@ You should prefer a relational DB like Postgres or SQLite if:
 It's important to note that nearly every Payload feature is available in all of our officially supported Database Adapters, including [Localization](../configuration/localization), [Arrays](../fields/array), [Blocks](../fields/blocks), etc. The only thing that is not supported in SQLite yet is the [Point Field](/docs/fields/point), but that should be added soon.
 
 It's up to you to choose which database you would like to use based on the requirements of your project. Payload has no opinion on which database you should ultimately choose.
+
+## Copying a stored document
+
+Use `payload.db.copy` to copy one stored collection document. The method selects the source with a `where` query and creates a new database record. Use `data` to replace top-level source values. Payload also assigns new IDs to copied array and block rows.
+
+```ts
+const copiedPost = await payload.db.copy({
+  collection: 'posts',
+  data: {
+    title: 'Copied post',
+  },
+  req,
+  where: {
+    id: {
+      equals: sourcePostID,
+    },
+  },
+})
+```
+
+This is a low-level database method. It does not run collection access control, hooks, field validation, or upload handling. Use the [Local API duplicate flow](/docs/local-api/overview#collection-create) for normal application requests.
+
+The default implementation uses existing adapter methods. Custom adapters created with `createDatabaseAdapter` receive this implementation automatically. Direct implementations of `BaseDatabaseAdapter` must provide `copy` after this change.
