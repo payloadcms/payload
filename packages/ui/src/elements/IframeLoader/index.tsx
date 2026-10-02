@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
+import { useTranslation } from '../../providers/Translation/index.js'
 import { DelayedSpinner } from '../DelayedSpinner/index.js'
 import './index.css'
 
@@ -18,7 +19,8 @@ export const IframeLoader: React.FC<IframeLoaderProps> = ({
   title,
   ...rest
 }) => {
-  const [isLoading, setIsLoading] = useState(Boolean(src))
+  const { t } = useTranslation()
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     setIsLoading(Boolean(src))
@@ -36,6 +38,9 @@ export const IframeLoader: React.FC<IframeLoaderProps> = ({
 
   return (
     <div className={`${baseClass}__container`}>
+      <span aria-atomic="true" className="sr-only" role="status">
+        {isLoading ? t('general:loading') : ''}
+      </span>
       <DelayedSpinner baseClass={baseClass} isLoading={isLoading} />
       <iframe
         {...rest}

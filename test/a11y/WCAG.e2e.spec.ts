@@ -2922,6 +2922,23 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    test('should expose Media Filters as collapsed and expanded', async () => {
+      // PYLD-3605
+      await page.goto(
+        formatAdminURL({ adminRoute: '/admin', path: '/collections/media', serverURL }),
+      )
+      const filters = page.getByRole('button', { name: 'Filters', exact: true })
+
+      await expect(filters).toBeVisible()
+      await expect.soft(filters).toHaveAttribute('aria-expanded', 'false')
+      await filters.press('Enter')
+      await expect(page.locator('.where-builder')).toBeVisible()
+      await expect.soft(filters).toHaveAttribute('aria-expanded', 'true')
+      await filters.press('Enter')
+      await expect(page.locator('.where-builder')).toBeHidden()
+      await expect(filters).toHaveAttribute('aria-expanded', 'false')
+    })
+
     test('should expose the upload dropzone without detectable accessibility violations', async ({
       browser: _browser,
     }, testInfo) => {
@@ -3350,6 +3367,200 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
   test.describe('4.1.3 Status Messages (AA)', () => {
+    test('should announce toast content separately from its close control', async () => {
+      // Additional coverage for PYLD-3669; spoken output is tested in screen-reader.spec.ts.
+      await gotoFirstPost({ page, postsURL, serverURL })
+      await page.locator('#field-title').fill('Unsaved toast announcement regression')
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+      await page.locator('#copy-locale-data__button').click()
+      const notification = page.locator('[data-sonner-toast]').filter({ hasText: /unsaved/i })
+      const announcement = page
+        .locator('[role="status"], [aria-live="polite"]')
+        .filter({ hasText: /unsaved/i })
+        .first()
+
+      await expect(notification).toBeVisible()
+      await expect(announcement).toBeAttached()
+      expect(await announcement.getByRole('button').count()).toBe(0)
+      await expect(notification.getByRole('button', { name: /close toast/i })).toBeVisible()
+    })
+
+    test('should give a default toast six seconds before automatic dismissal', async () => {
+      // Additional coverage for PYLD-3580; extra reading time does not guarantee virtual cursor persistence.
+      await gotoFirstPost({ page, postsURL, serverURL })
+      await page.locator('#field-title').fill('Persistent toast regression')
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+      await page.locator('#copy-locale-data__button').click()
+      const notification = page.locator('[data-sonner-toast]').filter({ hasText: /unsaved/i })
+
+      await expect(notification).toBeVisible()
+      await page.mouse.move(0, 0)
+      // The default must outlast the former four-second timeout without hover or DOM focus.
+      await page.waitForTimeout(5000)
+      await expect(notification).toBeVisible()
+      await expect(notification).toBeHidden({ timeout: 5000 })
+      await expect(page.getByRole('status').filter({ hasText: /unsaved/i })).toHaveCount(0)
+    })
+
+    test('should expose global API depth stepper changes as a status', async () => {
+      // Additional coverage for PYLD-3618; actual speech is tested in screen-reader.spec.ts.
+      await page.goto(
+        formatAdminURL({ adminRoute: '/admin', path: '/globals/menu/api', serverURL }),
+      )
+      const depth = page.getByRole('spinbutton', { name: 'Depth', exact: true })
+      const initialDepth = Number(await depth.inputValue())
+      const field = page.locator('.field-type.number').filter({ has: depth })
+
+      for (const { name, value } of [
+        { name: 'Increment', value: initialDepth + 1 },
+        { name: 'Decrement', value: initialDepth },
+      ]) {
+        const stepper = field.getByRole('button', { name, exact: true })
+        await stepper.focus()
+        await stepper.press('Enter')
+        await expect(depth).toHaveValue(String(value))
+        await expect(stepper).toBeFocused()
+        await expect
+          .soft(page.getByRole('status').filter({ hasText: new RegExp(`Depth: ${value}\\b`) }))
+          .toBeVisible()
+      }
+    })
+
+    test('should expose preview loading as a live status without moving focus', async () => {
+      // PYLD-3724
+      let releasePreview: () => void = () => {}
+      const pendingPreview = new Promise<void>((resolve) => {
+        releasePreview = resolve
+      })
+
+      await page.route('**/preview/**', async (route) => {
+        await pendingPreview
+        await route.fulfill({
+          body: '<html><body>Preview ready</body></html>',
+          contentType: 'text/html',
+        })
+      })
+      try {
+        await gotoFirstPost({ page, postsURL, serverURL })
+        const trigger = page.locator('#live-preview-toggler')
+
+        if (
+          await trigger.evaluate((element) =>
+            element.classList.contains('live-preview-toggler--active'),
+          )
+        ) {
+          await trigger.click()
+        }
+        await trigger.focus()
+        await trigger.press('Enter')
+        const loading = page.locator('.live-preview-window .iframe-loader__loading')
+        await expect(loading).toBeVisible()
+        await expect(loading).toContainText(/loading/i)
+        await expect(trigger).toBeFocused()
+        await expect(
+          page
+            .locator('.live-preview-window')
+            .locator(
+              '[role="status"], [role="alert"], [aria-live="polite"], [aria-live="assertive"]',
+            )
+            .filter({ hasText: /loading/i })
+            .first(),
+        ).toBeVisible()
+        await expect(trigger).toBeFocused()
+      } finally {
+        releasePreview()
+        await page.unrouteAll({ behavior: 'wait' })
+      }
+    })
+
+    test('should expose successful Copy to locale as a live status', async () => {
+      // PYLD-3686
+      const drawer = await openCopyToLocaleDrawer({ page, postsURL, serverURL })
+      const combobox = drawer.locator('#field-toLocale input[role="combobox"]')
+
+      try {
+        await combobox.press('ArrowDown')
+        await page.getByRole('option', { name: 'Spanish', exact: true }).click()
+        await drawer.getByRole('button', { name: 'Copy', exact: true }).click()
+        await expect(page).toHaveURL(/locale=es/)
+        await expect(drawer).toBeHidden()
+        await expect(
+          page
+            .locator(
+              '[role="status"], [role="alert"], [aria-live="polite"], [aria-live="assertive"]',
+            )
+            .filter({ hasText: /copied|copy.*success/i })
+            .first(),
+        ).toBeVisible()
+      } finally {
+        // Copy changes the persisted locale; restore it for subsequent English UI tests.
+        await page.goto(`${postsURL.list}?locale=en`)
+        await expect(page.locator('.localizer')).toContainText('en')
+      }
+    })
+
+    test('should expose the password error when a login password is cleared', async ({
+      browser,
+    }) => {
+      // PYLD-3612
+      const loginPage = await browser.newPage({ extraHTTPHeaders: { DisableAutologin: 'true' } })
+
+      try {
+        await loginPage.goto(formatAdminURL({ adminRoute: '/admin', path: '/login', serverURL }))
+        await loginPage.locator('#field-email').fill('dev@payloadcms.com')
+        const password = loginPage.locator('#field-password')
+        const error = loginPage.locator('.field-error[role="alert"]')
+
+        // Validation appears only after a submission; the report omits this prerequisite.
+        await loginPage.getByRole('button', { name: 'Login', exact: true }).click()
+        await expect(error).toBeVisible()
+        await password.fill('test')
+        await expect(error).toBeHidden()
+        await password.fill('')
+        await expect(error).toBeVisible()
+        await expect(error).toContainText(/required/i)
+        await expect(
+          loginPage
+            .locator(
+              '[role="alert"], [role="status"], [aria-live="polite"], [aria-live="assertive"]',
+            )
+            .filter({ hasText: /required/i })
+            .first(),
+        ).toBeVisible()
+      } finally {
+        await loginPage.close()
+      }
+    })
+
+    test('should expose Add Widget search result changes without moving focus', async () => {
+      // PYLD-3593
+      const { drawer, trigger } = await openWidgetDrawer({ page, serverURL })
+      await trigger.click()
+      const search = drawer.getByRole('textbox')
+      const cards = drawer.locator('.items-drawer__item')
+
+      await expect(cards.first()).toBeVisible()
+      const label = (await cards.first().innerText()).trim()
+      for (const query of [label, 'no-such-widget-accessibility']) {
+        await search.fill(query)
+        if (query === label) {
+          await expect(cards.first()).toContainText(label)
+        } else {
+          await expect(cards).toHaveCount(0)
+        }
+        await expect(search).toBeFocused()
+        const count = await cards.count()
+        await expect
+          .soft(
+            drawer
+              .locator('[role="status"], [aria-live="polite"], [aria-live="assertive"]')
+              .filter({ hasText: new RegExp(`\\b${count}\\b`) })
+              .first(),
+          )
+          .toBeVisible()
+      }
+    })
+
     test('should announce completed collection searches', async () => {
       await page.clock.install()
       await page.goto(`${postsURL.list}?groupBy=&search=`)
