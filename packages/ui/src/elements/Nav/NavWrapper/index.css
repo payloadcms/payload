@@ -4,7 +4,9 @@
     top: 0;
     left: 0;
     flex-shrink: 0;
-    height: 100vh;
+    height: 100dvh;
+    max-block-size: 100dvh;
+    min-block-size: 0;
     width: var(--nav-width);
     border-right: var(--stroke-width-small) solid var(--color-border);
     [dir='rtl'] & {
