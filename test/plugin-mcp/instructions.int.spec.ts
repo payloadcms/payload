@@ -1,14 +1,29 @@
 import type { Payload } from 'payload'
 
+import { buildEditorState } from '@payloadcms/richtext-lexical'
 import { randomUUID } from 'node:crypto'
+import { instructionsCollectionSlug } from 'payload/shared'
 import { assert, expect, onTestFinished } from 'vitest'
 
 import type { TestRBAC } from '../__helpers/plugins/rbac/index.js'
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import type { PayloadLlmInstruction } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { createMcpClient } from './helpers/mcpClient.js'
+
+const additionalInstructions = buildEditorState<PayloadLlmInstruction['additionalInstructions']>({
+  text: 'Keep page summaries under 100 words.',
+})
+const paragraph = additionalInstructions.root.children[0]
+
+assert(paragraph?.type === 'paragraph')
+
+const text = paragraph.children[0]
+
+assert(text?.type === 'text')
+text.format = 1
 
 test.suite('Shared LLM instructions', { config: './config.ts' }, () => {
   for (const target of [
@@ -20,22 +35,18 @@ test.suite('Shared LLM instructions', { config: './config.ts' }, () => {
       payload,
       restClient,
     }) => {
-      const targetConfig =
-        target.type === 'collection'
-          ? payload.collections[target.slug].config
-          : payload.config.globals.find(({ slug }) => slug === target.slug)!
-      const originalInstructions = targetConfig.llmInstructions
-
-      if (target.type === 'global') {
-        targetConfig.llmInstructions = 'Preserve existing site settings.'
-        onTestFinished(() => {
-          targetConfig.llmInstructions = originalInstructions
-        })
-      }
+      await saveAdditionalInstructions({
+        ...(target.type === 'collection'
+          ? { collectionSlug: target.slug }
+          : { globalSlug: target.slug }),
+        payload,
+      })
 
       const rbac: TestRBAC = {
         collections: Object.fromEntries(
-          payload.config.collections.map(({ slug }) => [slug, { read: false }]),
+          payload.config.collections
+            .filter(({ slug }) => slug !== instructionsCollectionSlug)
+            .map(({ slug }) => [slug, { read: false }]),
         ),
         globals: Object.fromEntries(
           payload.config.globals.map(({ slug }) => [slug, { read: false }]),
@@ -65,37 +76,42 @@ test.suite('Shared LLM instructions', { config: './config.ts' }, () => {
         schema: expect.any(Object),
       })
       expect(response.structuredContent?.instructions).toBe(configured || undefined)
+      expect(JSON.stringify(response.content)).not.toContain('Keep page summaries under 100 words.')
     })
   }
 
-  test('should return the same configured instructions through MCP and CLI', async ({
-    cli,
-    payload,
-    restClient,
-  }) => {
-    const client = await connectMcp({ payload, restClient })
-    const response = await client.callTool({
-      name: 'getCollectionSchema',
-      arguments: { slug: 'pages' },
-    })
-    const output = await cli('getCollectionSchema --slug pages --json')
-    const cliResponse = JSON.parse(output.stdout)
+  for (const { target, name, slug } of [
+    { target: { collectionSlug: 'pages' }, name: 'getCollectionSchema', slug: 'pages' },
+    { target: { globalSlug: 'site-settings' }, name: 'getGlobalSchema', slug: 'site-settings' },
+  ]) {
+    test(`should return the same instructions alongside the ${name} schema through MCP and CLI`, async ({
+      cli,
+      payload,
+      restClient,
+    }) => {
+      await saveAdditionalInstructions({ ...target, payload })
 
-    expect(response.isError).not.toBe(true)
-    expect(cliResponse).toMatchObject({ result: { slug: 'pages' }, success: true })
-    expect(cliResponse.result.instructions).toBe(payload.collections.pages.config.llmInstructions)
-    expect(response.structuredContent).toMatchObject({
-      slug: 'pages',
-      schema: expect.any(Object),
-      instructions: cliResponse.result.instructions,
-    })
-    expect(response.content).toContainEqual({
-      type: 'text',
-      text: cliResponse.result.instructions,
-    })
-  })
+      const client = await connectMcp({ payload, restClient })
+      const response = await client.callTool({ name, arguments: { slug } })
+      const output = await cli(`${name} --slug ${slug} --json`)
+      const cliResponse = JSON.parse(output.stdout)
 
-  test('should omit MCP schema instructions when none are configured', async ({
+      expect(response.isError).not.toBe(true)
+      expect(cliResponse).toMatchObject({ result: { slug }, success: true })
+      expect(cliResponse.result.instructions).toContain('**Keep page summaries under 100 words.**')
+      expect(response.structuredContent).toMatchObject({
+        slug,
+        schema: expect.any(Object),
+        instructions: cliResponse.result.instructions,
+      })
+      expect(response.content).toContainEqual({
+        type: 'text',
+        text: cliResponse.result.instructions,
+      })
+    })
+  }
+
+  test('should omit MCP schema instructions when none are configured or saved', async ({
     payload,
     restClient,
   }) => {
@@ -111,22 +127,27 @@ test.suite('Shared LLM instructions', { config: './config.ts' }, () => {
     expect(response.content).toHaveLength(1)
   })
 
-  for (const { input, name } of [
-    { input: { slug: 'pages' }, name: 'countDocuments' },
+  for (const { target, input, name } of [
+    { target: { collectionSlug: 'pages' }, input: { slug: 'pages' }, name: 'countDocuments' },
     {
+      target: { globalSlug: 'site-settings' },
       input: { slug: 'site-settings' },
       name: 'findGlobal',
     },
     {
+      target: { collectionSlug: 'pages' },
       input: { slug: 'pages', documents: [{ data: { title: 'New page' } }] },
       name: 'createDocuments',
     },
     {
+      target: { globalSlug: 'site-settings' },
       input: { slug: 'site-settings', data: { siteName: 'New site name' } },
       name: 'updateGlobal',
     },
   ]) {
     test(`should omit instructions from MCP ${name} responses`, async ({ payload, restClient }) => {
+      await saveAdditionalInstructions({ ...target, payload })
+
       const client = await connectMcp({ payload, restClient })
       const response = await client.callTool({ name, arguments: input })
       const text = JSON.stringify(response.content)
@@ -134,6 +155,7 @@ test.suite('Shared LLM instructions', { config: './config.ts' }, () => {
       expect(response.isError).not.toBe(true)
       expect(response.structuredContent ?? {}).not.toHaveProperty('instructions')
       expect(text).not.toContain('Use the configured layout blocks.')
+      expect(text).not.toContain('Keep page summaries under 100 words.')
     })
   }
 })
@@ -165,4 +187,33 @@ const connectMcp = async ({
   onTestFinished(() => mcp.close())
 
   return mcp.connect(apiKey)
+}
+
+const saveAdditionalInstructions = async ({
+  collectionSlug,
+  globalSlug,
+  payload,
+}: {
+  collectionSlug?: string
+  globalSlug?: string
+  payload: Payload
+}) => {
+  const { user } = await payload.login({ collection: 'users', data: devUser })
+  const { docs } = await payload.find({
+    collection: instructionsCollectionSlug,
+    overrideAccess: false,
+    user,
+    where: collectionSlug
+      ? { collectionSlug: { equals: collectionSlug } }
+      : { globalSlug: { equals: globalSlug } },
+  })
+  const doc = docs[0]!
+
+  return payload.update({
+    id: doc.id,
+    collection: instructionsCollectionSlug,
+    data: { additionalInstructions },
+    overrideAccess: false,
+    user,
+  })
 }

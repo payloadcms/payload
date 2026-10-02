@@ -561,6 +561,24 @@ export const jaTranslations: DefaultTranslationsObject = {
     noResults: '「{{query}}」に一致する結果がありません',
     searchLabel: '{{label}}を検索する',
   },
+  llmInstructions: {
+    additionalInstructions: '追加の指示',
+    collectionDescription:
+      '{{label}} コレクションにカスタム指示を追加して、LLM がプロンプトにより適した回答を生成できるようにします。',
+    collectionSystemDescription:
+      'これらのシステム指示はコレクションの設定ファイルから提供され、常に含まれます。',
+    editInstructions: 'LLM の指示を編集',
+    global: 'グローバル',
+    globalDescription:
+      '{{label}} グローバルにカスタム指示を追加して、LLM がプロンプトにより適した回答を生成できるようにします。',
+    globalSystemDescription:
+      'これらのシステム指示はグローバルの設定ファイルから提供され、常に含まれます。',
+    instructions: 'LLM の指示',
+    systemInstructions: 'システム指示（読み取り専用）',
+    targetCannotBeChanged: '指示の対象は変更できません。',
+    targetRequired: 'collectionSlug または globalSlug のいずれか一方のみを指定してください。',
+    title: 'タイトル',
+  },
   localization: {
     cannotCopySameLocale: '同じロケールにはコピーできません',
     copyFrom: 'からコピーする',

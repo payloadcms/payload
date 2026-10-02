@@ -1555,6 +1555,15 @@ export type Config = {
    * ```
    */
   kv?: KVAdapterResult
+  /** Manage instructions shared by MCP and CLI consumers. Set to false to disable the management UI and collection. */
+  llmInstructions?:
+    | {
+        /** Who may edit saved instructions, in addition to the target's read and update access. Defaults to users of the admin auth collection. */
+        access?: Access
+        /** Editor for instructions. Defaults to the root editor's llmInstructions preset, or plain text if unavailable. */
+        editor?: Config['editor']
+      }
+    | false
   /**
    * Translate your content to different languages/locales.
    *

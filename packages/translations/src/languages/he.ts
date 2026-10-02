@@ -544,6 +544,22 @@ export const heTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'חפש {{label}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'הנחיות נוספות',
+    collectionDescription:
+      'הוסיפו הנחיות מותאמות אישית לאוסף {{label}} כדי לעזור למודלי LLM להתאים טוב יותר את תשובותיהם לבקשות.',
+    collectionSystemDescription: 'הנחיות מערכת אלה מגיעות מקובץ התצורה של האוסף ונכללות תמיד.',
+    editInstructions: 'עריכת הנחיות LLM',
+    global: 'מסמך גלובלי',
+    globalDescription:
+      'הוסיפו הנחיות מותאמות אישית למסמך הגלובלי {{label}} כדי לעזור למודלי LLM להתאים טוב יותר את תשובותיהם לבקשות.',
+    globalSystemDescription: 'הנחיות מערכת אלה מגיעות מקובץ התצורה של המסמך הגלובלי ונכללות תמיד.',
+    instructions: 'הנחיות LLM',
+    systemInstructions: 'הנחיות מערכת (לקריאה בלבד)',
+    targetCannotBeChanged: 'לא ניתן לשנות את יעד ההנחיות.',
+    targetRequired: 'יש לציין בדיוק אחד מהשדות collectionSlug או globalSlug.',
+    title: 'כותרת',
+  },
   localization: {
     cannotCopySameLocale: 'לא ניתן להעתיק לאותו מקום',
     copyFrom: 'העתק מ',

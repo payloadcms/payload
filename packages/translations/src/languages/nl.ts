@@ -569,6 +569,24 @@ export const nlTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Zoek {{label}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Aanvullende instructies',
+    collectionDescription:
+      "Voeg aangepaste instructies toe voor de collectie {{label}} zodat LLM's hun antwoorden op prompts beter kunnen afstemmen.",
+    collectionSystemDescription:
+      'Deze systeeminstructies komen uit het configuratiebestand van de collectie en worden altijd opgenomen.',
+    editInstructions: 'LLM-instructies bewerken',
+    global: 'Global',
+    globalDescription:
+      "Voeg aangepaste instructies toe voor de global {{label}} zodat LLM's hun antwoorden op prompts beter kunnen afstemmen.",
+    globalSystemDescription:
+      'Deze systeeminstructies komen uit het configuratiebestand van de global en worden altijd opgenomen.',
+    instructions: 'LLM-instructies',
+    systemInstructions: 'Systeeminstructies (alleen-lezen)',
+    targetCannotBeChanged: 'Het doel van de instructies kan niet worden gewijzigd.',
+    targetRequired: 'Geef precies één van de velden collectionSlug of globalSlug op.',
+    title: 'Titel',
+  },
   localization: {
     cannotCopySameLocale: 'Kan niet naar dezelfde taal kopiëren',
     copyFrom: 'Kopiëren van',

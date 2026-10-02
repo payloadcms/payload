@@ -22,6 +22,7 @@ import React from 'react'
 
 import { Banner } from '../../elements/Banner/index.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
+import { filterLLMInstructionsMenuItems } from '../../utilities/filterLLMInstructionsMenuItems.js'
 
 type Args = {
   clientProps: ListViewSlotSharedClientProps
@@ -51,9 +52,13 @@ export const renderListViewSlots = ({
     })
   }
 
-  const listMenuItems = collectionConfig.admin.components?.listMenuItems
+  const listMenuItems = filterLLMInstructionsMenuItems({
+    collectionSlug: collectionConfig.slug,
+    menuItems: collectionConfig.admin.components?.listMenuItems,
+    permissions: serverProps.permissions,
+  })
 
-  if (Array.isArray(listMenuItems)) {
+  if (listMenuItems?.length) {
     result.listMenuItems = [
       RenderServerComponent({
         clientProps,

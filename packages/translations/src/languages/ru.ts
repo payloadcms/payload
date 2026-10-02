@@ -566,6 +566,24 @@ export const ruTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Поиск {{label}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Дополнительные инструкции',
+    collectionDescription:
+      'Добавьте пользовательские инструкции для коллекции {{label}}, чтобы помочь LLM лучше адаптировать ответы на запросы.',
+    collectionSystemDescription:
+      'Эти системные инструкции заданы в файле конфигурации коллекции и включаются всегда.',
+    editInstructions: 'Редактировать инструкции для LLM',
+    global: 'Глобальный документ',
+    globalDescription:
+      'Добавьте пользовательские инструкции для глобального документа {{label}}, чтобы помочь LLM лучше адаптировать ответы на запросы.',
+    globalSystemDescription:
+      'Эти системные инструкции заданы в файле конфигурации глобального документа и включаются всегда.',
+    instructions: 'Инструкции для LLM',
+    systemInstructions: 'Системные инструкции (только для чтения)',
+    targetCannotBeChanged: 'Нельзя изменить объект, к которому относятся инструкции.',
+    targetRequired: 'Укажите ровно одно из полей collectionSlug или globalSlug.',
+    title: 'Заголовок',
+  },
   localization: {
     cannotCopySameLocale: 'Невозможно скопировать в ту же локаль',
     copyFrom: 'Скопировать из',

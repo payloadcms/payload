@@ -34,6 +34,7 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'i18n'
   | 'jobs'
   | 'kv'
+  | 'llmInstructions'
   | 'logger'
   | 'onInit'
   | 'plugins'
@@ -101,6 +102,7 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'jobs',
   'logger',
   'kv',
+  'llmInstructions',
   'queryPresets',
   'storage',
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately

@@ -17,9 +17,10 @@ export const createGetGlobalSchemaCommand = defineCLICommand({
       throw new Error(`Global "${slug}" not found.`)
     }
 
-    const instructions = getLLMInstructions({
+    const instructions = await getLLMInstructions({
       slug,
       type: 'global',
+      overrideAccess: true,
       req,
     })
     const result = { slug, schema, ...(instructions ? { instructions } : {}) }

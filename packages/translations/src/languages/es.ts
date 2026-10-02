@@ -568,6 +568,24 @@ export const esTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Buscar {{label}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Instrucciones adicionales',
+    collectionDescription:
+      'Añada instrucciones personalizadas para la colección {{label}} para ayudar a los LLM a adaptar mejor sus respuestas a las indicaciones.',
+    collectionSystemDescription:
+      'Estas instrucciones del sistema proceden del archivo de configuración de la colección y se incluyen siempre.',
+    editInstructions: 'Editar instrucciones de LLM',
+    global: 'Global',
+    globalDescription:
+      'Añada instrucciones personalizadas para el global {{label}} para ayudar a los LLM a adaptar mejor sus respuestas a las indicaciones.',
+    globalSystemDescription:
+      'Estas instrucciones del sistema proceden del archivo de configuración del global y se incluyen siempre.',
+    instructions: 'Instrucciones de LLM',
+    systemInstructions: 'Instrucciones del sistema (solo lectura)',
+    targetCannotBeChanged: 'No se puede cambiar el destino de las instrucciones.',
+    targetRequired: 'Proporcione exactamente uno de los campos collectionSlug o globalSlug.',
+    title: 'Título',
+  },
   localization: {
     cannotCopySameLocale: 'No se puede copiar al mismo idioma',
     copyFrom: 'Copiar desde',

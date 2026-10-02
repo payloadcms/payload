@@ -102,6 +102,7 @@ export {
 } from '../hierarchy/constants.js'
 
 export type { ClientHierarchyConfig, FolderBreadcrumb } from '../hierarchy/types.js'
+export { instructionsCollectionSlug } from '../llm-instructions/shared.js'
 export { PREFERENCE_KEYS } from '../preferences/keys.js'
 
 export {

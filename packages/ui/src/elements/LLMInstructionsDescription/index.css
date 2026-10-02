@@ -1,0 +1,59 @@
+@layer payload-default {
+  .llm-instructions.tabs-field {
+    margin-block-start: var(--spacer-0);
+  }
+
+  .llm-instructions .tabs-field__tab-button {
+    font-size: var(--text-body-large-font-size);
+    line-height: var(--text-body-large-line-height);
+  }
+
+  .llm-instructions__description {
+    color: var(--color-text-secondary);
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
+    margin-block: var(--spacer-0) var(--spacer-3);
+  }
+
+  .llm-instructions__editor {
+    .rich-text-lexical__label-row {
+      display: none;
+    }
+
+    .editor {
+      --content-editable-padding-block-start: var(--spacer-4);
+      --content-editable-padding-inline-start: var(--spacer-5);
+    }
+
+    .ContentEditable__root {
+      min-block-size: calc(var(--spacer-6) * 8);
+    }
+
+    .LexicalEditorTheme {
+      --lexical-h2-font-size: var(--text-heading-medium-font-size);
+      --lexical-h2-line-height: var(--text-heading-medium-line-height);
+      --lexical-h3-font-size: var(--text-heading-small-font-size);
+      --lexical-h4-font-size: var(--text-heading-small-font-size);
+
+      font-size: var(--text-body-large-font-size);
+      line-height: var(--text-body-large-line-height);
+    }
+
+    .LexicalEditorTheme__h2,
+    .LexicalEditorTheme__h3,
+    .LexicalEditorTheme__h4 {
+      margin-block: var(--spacer-2-5);
+    }
+  }
+
+  .llm-instructions__editor--system .LexicalEditorTheme {
+    color: var(--color-text-secondary);
+  }
+
+  .llm-instructions__editor--system .editor-container .editor {
+    animation: none;
+    background-color: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-medium);
+  }
+}

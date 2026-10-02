@@ -563,6 +563,24 @@ export const taTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: '{{label}} ஐ தேடு',
   },
+  llmInstructions: {
+    additionalInstructions: 'கூடுதல் வழிமுறைகள்',
+    collectionDescription:
+      'LLM-கள் கோரிக்கைகளுக்கு மேலும் பொருத்தமான பதில்களை வழங்க உதவ, {{label}} தொகுப்பிற்குத் தனிப்பயன் வழிமுறைகளைச் சேர்க்கவும்.',
+    collectionSystemDescription:
+      'இந்த அமைப்பு வழிமுறைகள் தொகுப்பின் உள்ளமைவுக் கோப்பிலிருந்து வழங்கப்படுகின்றன; அவை எப்போதும் சேர்க்கப்படும்.',
+    editInstructions: 'LLM வழிமுறைகளைத் திருத்து',
+    global: 'உலகளாவிய ஆவணம்',
+    globalDescription:
+      'LLM-கள் கோரிக்கைகளுக்கு மேலும் பொருத்தமான பதில்களை வழங்க உதவ, {{label}} உலகளாவிய ஆவணத்திற்குத் தனிப்பயன் வழிமுறைகளைச் சேர்க்கவும்.',
+    globalSystemDescription:
+      'இந்த அமைப்பு வழிமுறைகள் உலகளாவிய ஆவணத்தின் உள்ளமைவுக் கோப்பிலிருந்து வழங்கப்படுகின்றன; அவை எப்போதும் சேர்க்கப்படும்.',
+    instructions: 'LLM வழிமுறைகள்',
+    systemInstructions: 'அமைப்பு வழிமுறைகள் (படிக்க மட்டும்)',
+    targetCannotBeChanged: 'வழிமுறைகளின் இலக்கை மாற்ற முடியாது.',
+    targetRequired: 'collectionSlug அல்லது globalSlug ஆகியவற்றில் ஒன்றை மட்டும் குறிப்பிடவும்.',
+    title: 'தலைப்பு',
+  },
   localization: {
     cannotCopySameLocale: 'அதே மொழி அமைவுக்கு நகலெடுக்க முடியாது',
     copyFrom: 'இதிலிருந்து நகலெடு',
