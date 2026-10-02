@@ -189,6 +189,7 @@ test.suite('LLM instructions', { config: './config.ts' }, () => {
       ...(originalHooks ?? []),
       ({ args, req }) => {
         if (req.context.syncLLMInstructions) {
+          expect(req.transactionID).toBeFalsy()
           syncRequests.push({
             header: req.headers.get('x-request-id'),
             method: req.method,
@@ -239,12 +240,14 @@ test.suite('LLM instructions', { config: './config.ts' }, () => {
           collection: instructionsCollectionSlug,
           depth: 0,
           overrideAccess: false,
+          pagination: false,
           req,
         }),
         payload.find({
           collection: instructionsCollectionSlug,
           depth: 0,
           overrideAccess: false,
+          pagination: false,
           req: concurrentReq,
         }),
       ])
