@@ -54,19 +54,28 @@ export interface BaseDatabaseAdapter {
   create: Create
 
   createGlobal: CreateGlobal
-
   createGlobalVersion: CreateGlobalVersion
+
   /**
    * Output a migration file
    */
   createMigration: CreateMigration
-
   createVersion: CreateVersion
 
   /**
    * Specify if the ID is a text or number field by default within this database adapter.
    */
   defaultIDType: 'number' | 'text'
+
+  /**
+   * Removes a branch's copy of a global, so the branch reads through to `main` again.
+   *
+   * Optional because it exists only for branching: globals are singletons, so no other
+   * part of Payload ever deletes one. Storage differs too much to do this generically —
+   * Mongo keeps every global in one discriminated collection, Drizzle gives each its own
+   * table — which is the same reason the branch-aware upsert lives in the adapters.
+   */
+  deleteBranchGlobal?: DeleteBranchGlobal
 
   deleteMany: DeleteMany
 
@@ -178,6 +187,8 @@ export interface BaseDatabaseAdapter {
   updateOne: UpdateOne
   updateVersion: UpdateVersion
   upsert: Upsert
+  /** Atomically registers the first write to a global on a branch. */
+  upsertBranchGlobalChange?: UpsertBranchGlobalChange
 }
 
 export type Init = () => Promise<void> | void
@@ -298,6 +309,11 @@ export type RollbackTransaction = (id: number | Promise<number | string> | strin
 export type CommitTransaction = (id: number | Promise<number | string> | string) => Promise<void>
 
 export type QueryDraftsArgs = {
+  /**
+   * Branch to scope this operation to. `false` bypasses branching entirely,
+   * for the merge engine and cross-branch reads.
+   */
+  branch?: false | string
   collection: CollectionSlug
   joins?: JoinQuery
   limit?: number
@@ -313,6 +329,11 @@ export type QueryDraftsArgs = {
 export type QueryDrafts = <T = TypeWithID>(args: QueryDraftsArgs) => Promise<PaginatedDocs<T>>
 
 export type FindOneArgs = {
+  /**
+   * Branch to scope this operation to. `false` bypasses branching entirely,
+   * for the merge engine and cross-branch reads.
+   */
+  branch?: false | string
   collection: CollectionSlug
   draftsEnabled?: boolean
   joins?: JoinQuery
@@ -325,6 +346,11 @@ export type FindOneArgs = {
 export type FindOne = <T extends TypeWithID>(args: FindOneArgs) => Promise<null | T>
 
 export type FindArgs = {
+  /**
+   * Branch to scope this operation to. `false` bypasses branching entirely,
+   * for the merge engine and cross-branch reads.
+   */
+  branch?: false | string
   collection: CollectionSlug
   draftsEnabled?: boolean
   joins?: JoinQuery
@@ -348,6 +374,11 @@ export type FindArgs = {
 export type Find = <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>
 
 export type CountArgs = {
+  /**
+   * Branch to scope this operation to. `false` bypasses branching entirely,
+   * for the merge engine and cross-branch reads.
+   */
+  branch?: false | string
   collection: CollectionSlug
   locale?: string
   req?: Partial<PayloadRequest>
@@ -368,6 +399,10 @@ export type CountGlobalVersionArgs = {
 export type CountGlobalVersions = (args: CountGlobalVersionArgs) => Promise<{ totalDocs: number }>
 
 type BaseVersionArgs = {
+  /**
+   * Branch to scope this operation to. `false` bypasses branching entirely.
+   */
+  branch?: false | string
   limit?: number
   locale?: string
   page?: number
@@ -396,6 +431,10 @@ export type FindGlobalVersionsArgs = {
 } & BaseVersionArgs
 
 export type FindGlobalArgs = {
+  /**
+   * Branch to scope this operation to. `false` bypasses branching entirely.
+   */
+  branch?: false | string
   locale?: string
   req?: Partial<PayloadRequest>
   select?: SelectType
@@ -464,6 +503,14 @@ export type CreateGlobal = <T extends Record<string, unknown> = any>(
 ) => Promise<T>
 
 export type UpdateGlobalArgs<T extends Record<string, unknown> = any> = {
+  /**
+   * Branch to scope this operation to. `false` bypasses branching entirely.
+   */
+  branch?: false | string
+  /**
+   * Fields to apply if a concurrent first branch write already inserted the branch row.
+   */
+  branchConflictData?: T
   data: T
   /**
    * Additional database adapter specific options to pass to the query
@@ -532,6 +579,10 @@ export type CreateVersion = <T extends JsonObject = JsonObject>(
 
 export type CreateGlobalVersionArgs<T extends JsonObject = JsonObject> = {
   autosave: boolean
+  /**
+   * Branch to scope this operation to. `false` bypasses branching entirely.
+   */
+  branch?: false | string
   createdAt: string
   globalSlug: GlobalSlug
   publishedLocale?: string
@@ -615,7 +666,27 @@ export type CreateArgs = {
   select?: SelectType
 }
 
+export type DeleteBranchGlobalArgs = {
+  branch: string
+  globalSlug: string
+  req?: Partial<PayloadRequest>
+}
+
+export type DeleteBranchGlobal = (args: DeleteBranchGlobalArgs) => Promise<void>
+
+export type UpsertBranchGlobalChangeArgs = {
+  branch: string
+  globalSlug: string
+  req?: Partial<PayloadRequest>
+}
+
+export type UpsertBranchGlobalChange = (args: UpsertBranchGlobalChangeArgs) => Promise<void>
+
 export type FindDistinctArgs = {
+  /**
+   * Branch to scope this operation to. `false` bypasses branching entirely.
+   */
+  branch?: false | string
   collection: CollectionSlug
   field: string
   limit?: number
@@ -651,6 +722,10 @@ export type FindDistinct = (
 export type Create = (args: CreateArgs) => Promise<Document>
 
 export type UpdateOneArgs = {
+  /**
+   * Branch to scope this operation to. `false` bypasses branching entirely.
+   */
+  branch?: false | string
   collection: CollectionSlug
   data: Record<string, unknown>
   draft?: boolean
@@ -760,6 +835,10 @@ export type UpsertArgs = {
 export type Upsert = (args: UpsertArgs) => Promise<Document>
 
 export type DeleteOneArgs = {
+  /**
+   * Branch to scope this operation to. `false` bypasses branching entirely.
+   */
+  branch?: false | string
   collection: CollectionSlug
   joins?: JoinQuery
   req?: Partial<PayloadRequest>

@@ -53,6 +53,7 @@ export const updateMany: UpdateMany = async function updateMany(
     collectionSlug,
     fields: collectionConfig.flattenedFields,
     locale,
+    req,
     where,
   })
 
@@ -106,6 +107,7 @@ export const updateMany: UpdateMany = async function updateMany(
       fields: collectionConfig.flattenedFields,
       select,
     }),
+    returnDocument: 'after',
   }
 
   try {

@@ -70,6 +70,7 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
       graphqlResult.Query.fields[formattedName] = {
         type: graphqlResult.globals.graphQL[slug].type,
         args: {
+          branch: { type: GraphQLString },
           draft: { type: GraphQLBoolean },
           ...(config.localization
             ? {
@@ -89,6 +90,9 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
           scope: 'docAccess',
           typeSuffix: 'DocAccess',
         }),
+        args: {
+          branch: { type: GraphQLString },
+        },
         resolve: docAccessResolver(global),
       }
     }
@@ -100,6 +104,7 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
           ...(updateMutationInputType
             ? { data: { type: graphqlResult.globals.graphQL[slug].mutationInputType } }
             : {}),
+          branch: { type: GraphQLString },
           draft: { type: GraphQLBoolean },
           ...(config.localization
             ? {
@@ -146,6 +151,7 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
           type: graphqlResult.globals.graphQL[slug].versionType,
           args: {
             id: { type: idType },
+            branch: { type: GraphQLString },
             draft: { type: GraphQLBoolean },
             ...(config.localization
               ? {
@@ -163,6 +169,7 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
             graphqlResult.globals.graphQL[slug].versionType,
           ),
           args: {
+            branch: { type: GraphQLString },
             where: {
               type: buildWhereInputType({
                 name: `versions${formattedName}`,
@@ -191,6 +198,7 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
           type: graphqlResult.globals.graphQL[slug].type,
           args: {
             id: { type: idType },
+            branch: { type: GraphQLString },
             draft: { type: GraphQLBoolean },
           },
           resolve: restoreVersion(global),

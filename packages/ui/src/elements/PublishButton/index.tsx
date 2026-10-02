@@ -10,6 +10,7 @@ import React, { useCallback } from 'react'
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { useHotkey } from '../../hooks/useHotkey.js'
+import { useBranchParam } from '../../providers/Branch/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
@@ -42,6 +43,7 @@ export function PublishButton({
   const editDepth = useEditDepth()
   const locale = useLocale()
   const localeCode = locale?.code
+  const branch = useBranchParam()
   const {
     localization,
     routes: { api },
@@ -89,6 +91,7 @@ export function PublishButton({
 
     const params = qs.stringify(
       {
+        branch,
         depth: 0,
         draft: true,
         'fallback-locale': 'null',
@@ -125,7 +128,7 @@ export function PublishButton({
       },
       skipValidation: true,
     })
-  }, [disabled, localeCode, collectionSlug, globalSlug, submit, api, id])
+  }, [branch, disabled, localeCode, collectionSlug, globalSlug, submit, api, id])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
     e.preventDefault()
@@ -145,6 +148,7 @@ export function PublishButton({
 
     const params = qs.stringify(
       {
+        branch,
         depth: 0,
         locale: localeCode,
         ...(localizeStatusEnabled && { publishAllLocales: true }),
@@ -172,6 +176,7 @@ export function PublishButton({
       setHasPublishedDoc(true)
     }
   }, [
+    branch,
     localeCode,
     localizeStatusEnabled,
     api,

@@ -1,5 +1,6 @@
 import type { Count, SanitizedCollectionConfig } from 'payload'
 
+import { resolveBranchQuery } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -9,7 +10,7 @@ import { getTransaction } from './utilities/getTransaction.js'
 
 export const count: Count = async function count(
   this: DrizzleAdapter,
-  { collection, locale, req, where: whereArg },
+  { branch, collection, locale, req, where: whereArg },
 ) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
 
@@ -20,7 +21,12 @@ export const count: Count = async function count(
     fields: collectionConfig.flattenedFields,
     locale,
     tableName,
-    where: whereArg,
+    where: await resolveBranchQuery({
+      branch,
+      collectionSlug: collectionConfig.slug,
+      req,
+      where: whereArg,
+    }),
   })
 
   const db = await getTransaction(this, req)

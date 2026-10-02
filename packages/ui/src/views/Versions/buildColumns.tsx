@@ -15,6 +15,7 @@ import type { CreatedAtCellProps } from './cells/CreatedAt/index.js'
 /* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds */
 import {
   VersionsAutosaveCell as AutosaveCell,
+  VersionsBranchCell as BranchCell,
   VersionsCreatedAtCell as CreatedAtCell,
   VersionsIDCell as IDCell,
   SortColumn,
@@ -22,6 +23,7 @@ import {
 /* eslint-enable payload/no-imports-from-exports-dir */
 
 export const buildVersionColumns = ({
+  branchingEnabled,
   collectionConfig,
   CreatedAtCellOverride,
   currentlyPublishedVersion,
@@ -32,6 +34,7 @@ export const buildVersionColumns = ({
   isTrashed,
   latestDraftVersion,
 }: {
+  branchingEnabled?: boolean
   collectionConfig?: SanitizedCollectionConfig
   CreatedAtCellOverride?: React.ComponentType<CreatedAtCellProps>
   currentlyPublishedVersion?: TypeWithVersion<any>
@@ -93,6 +96,23 @@ export const buildVersionColumns = ({
           />
         )
       }),
+    })
+  }
+
+  // History on a branch includes main's rows as its ancestry, so without this the
+  // list gives no way to tell whose version you are looking at.
+  if (branchingEnabled) {
+    columns.push({
+      accessor: '_branch',
+      active: true,
+      field: {
+        name: '',
+        type: 'text',
+      },
+      Heading: <SortColumn Label={t('branching:branch')} name="_branch" />,
+      renderedCells: docs.map((doc, i) => (
+        <BranchCell branch={(doc as { _branch?: string })._branch} key={i} />
+      )),
     })
   }
 

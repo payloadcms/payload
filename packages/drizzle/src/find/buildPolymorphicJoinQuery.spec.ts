@@ -1,12 +1,12 @@
 import type { Client } from '@libsql/client'
 import type { SQL } from 'drizzle-orm'
-import type { Field, FlattenedJoinField, Where } from 'payload'
+import type { Field, FlattenedJoinField, PayloadRequest, Where } from 'payload'
 
 import { createClient } from '@libsql/client'
 import { getTableName, like, notLike } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/libsql'
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
-import { flattenAllFields } from 'payload'
+import { flattenAllFields, resolveBranch } from 'payload'
 import toSnakeCase from 'to-snake-case'
 import { afterAll, describe, expect, it } from 'vitest'
 
@@ -21,6 +21,8 @@ const parentsTable = sqliteTable('join_parents', {
 })
 
 const articlesTable = sqliteTable('join_articles', {
+  _branch: text('_branch'),
+  _branchDocID: integer('_branch_doc_id'),
   id: integer('id').primaryKey(),
   createdAt: text('created_at'),
   details_rank: integer('details_rank'),
@@ -30,6 +32,8 @@ const articlesTable = sqliteTable('join_articles', {
 })
 
 const notesTable = sqliteTable('join_notes', {
+  _branch: text('_branch'),
+  _branchDocID: integer('_branch_doc_id'),
   id: integer('id').primaryKey(),
   parent: integer('parent_id'),
   title: text('title'),
@@ -129,6 +133,7 @@ const buildQuery = ({
   limit = 0,
   page,
   path = '',
+  req,
   shouldCount = false,
   sort,
   where,
@@ -138,6 +143,7 @@ const buildQuery = ({
   limit?: number
   page?: number
   path?: string
+  req?: Partial<PayloadRequest>
   shouldCount?: boolean
   sort?: string | string[]
   where?: Where
@@ -149,6 +155,7 @@ const buildQuery = ({
     limit,
     page,
     path,
+    req,
     shouldCount,
     sort,
     where,
@@ -235,6 +242,52 @@ describe('buildPolymorphicJoinQuery', () => {
     expect(query.params.filter((value) => value === 'available')).toHaveLength(2)
     expect(query.params).toContain('articles')
     expect(query.params).toContain('notes')
+  })
+
+  it('scopes every target to the active branch and returns canonical IDs', () => {
+    const branchFields: Field[] = [
+      { name: '_branch', type: 'text' },
+      { name: '_branchDocID', relationTo: 'articles', type: 'relationship' },
+    ]
+    const branchAdapter = createAdapter({
+      articles: {
+        fields: [
+          ...branchFields,
+          { name: 'parent', relationTo: 'join-parents', type: 'relationship' },
+        ],
+        table: articlesTable,
+      },
+      notes: {
+        fields: [
+          ...branchFields.map((field) =>
+            field.name === '_branchDocID' ? ({ ...field, relationTo: 'notes' } as Field) : field,
+          ),
+          { name: 'parent', relationTo: 'join-parents', type: 'relationship' },
+        ],
+        table: notesTable,
+      },
+    })
+    const req = {
+      branch: 'campaign',
+      context: {},
+      payload: {
+        config: {
+          branching: {
+            branchableCollections: new Set(['articles', 'notes']),
+            enabled: true,
+          },
+        },
+      },
+    } as unknown as PayloadRequest
+
+    resolveBranch(req)
+
+    const query = renderQuery(buildQuery({ adapter: branchAdapter, req }))
+
+    expect(query.sql.match(/"_branch" = \?/g)).toHaveLength(4)
+    expect(query.sql).not.toContain('_branch_op')
+    expect(query.sql.match(/COALESCE\("_branch_doc_id", "id"\) as "id"/g)).toHaveLength(2)
+    expect(query.params.filter((value) => value === 'campaign')).toHaveLength(2)
   })
 
   it('adds a correlated count only when requested', () => {

@@ -6,9 +6,10 @@ import type { JsonObject, PayloadRequest, SelectType } from '../types/index.js'
 import { deepCopyObjectSimple } from '../index.js'
 import { getVersionsMax, hasLocalizeStatusEnabled } from '../utilities/getVersionsConfig.js'
 import { sanitizeInternalFields } from '../utilities/sanitizeInternalFields.js'
+import { markTransactionWrite } from '../utilities/transactionMutationTracker.js'
 import { getQueryDraftsSelect } from './drafts/getQueryDraftsSelect.js'
 import { enforceMaxVersions } from './enforceMaxVersions.js'
-import { updateLatestVersion } from './updateLatestVersion.js'
+import { coalesceLatestVersionContextKey, updateLatestVersion } from './updateLatestVersion.js'
 
 type Args<T extends JsonObject = JsonObject> = {
   autosave?: boolean
@@ -24,6 +25,14 @@ type Args<T extends JsonObject = JsonObject> = {
   select?: SelectType
   unpublish?: boolean
 }
+
+export const captureSavedVersionIDContextKey = Symbol('captureSavedVersionID')
+
+export type CaptureSavedVersionID = (args: {
+  collectionSlug?: string
+  globalSlug?: string
+  versionID: number | string
+}) => void
 
 export async function saveVersion<TData extends JsonObject = JsonObject>(
   args: { returning: false } & Args<TData>,
@@ -55,6 +64,10 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
     _status?: 'draft'
     updatedAt?: string
   } & TData = deepCopyObjectSimple(docWithLocales)
+  const shouldCoalesceLatestVersion =
+    (req?.context as Record<PropertyKey, unknown> | undefined)?.[
+      coalesceLatestVersionContextKey
+    ] === true
 
   if ((collection?.timestamps || global) && draft) {
     versionData.updatedAt = now
@@ -80,7 +93,7 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
   }
 
   try {
-    if (unpublish || autosave) {
+    if (unpublish || autosave || shouldCoalesceLatestVersion) {
       result = await updateLatestVersion({
         id,
         collection,
@@ -88,9 +101,16 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
         now,
         payload,
         req,
-        shouldUpdate: autosave ? (v) => 'autosave' in v && v.autosave === true : undefined,
+        shouldUpdate: shouldCoalesceLatestVersion
+          ? undefined
+          : autosave
+            ? (v) => 'autosave' in v && v.autosave === true
+            : undefined,
         versionData,
       })
+      if (result) {
+        markTransactionWrite({ req })
+      }
     }
 
     if (!result) {
@@ -118,6 +138,7 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
         createVersionArgs.globalSlug = global.slug
         result = await payload.db.createGlobalVersion(createVersionArgs as CreateGlobalVersionArgs)
       }
+      markTransactionWrite({ req })
     }
   } catch (err) {
     let errorMessage: string | undefined
@@ -144,6 +165,20 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
       req,
     })
   }
+
+  const versionID = result?.id
+  const captureSavedVersionID = (req?.context as Record<PropertyKey, unknown> | undefined)?.[
+    captureSavedVersionIDContextKey
+  ] as CaptureSavedVersionID | undefined
+
+  if (captureSavedVersionID && (typeof versionID === 'number' || typeof versionID === 'string')) {
+    captureSavedVersionID({
+      collectionSlug: collection?.slug,
+      globalSlug: global?.slug,
+      versionID,
+    })
+  }
+
   if (returning === false) {
     return null
   }

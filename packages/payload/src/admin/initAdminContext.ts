@@ -13,10 +13,12 @@ import type { AdminContext } from './functions/index.js'
 import { applyUserReadAccess } from '../auth/applyUserReadAccess.js'
 import { executeAuthStrategies } from '../auth/executeAuthStrategies.js'
 import { getAccessResults } from '../auth/getAccessResults.js'
+import { assertBranchReadable } from '../branching/assertBranchReadable.js'
 import { getPayload } from '../index.js'
 import { createPayloadRequest } from '../utilities/createPayloadRequest.js'
 import { getRequestLanguage } from '../utilities/getRequestLanguage.js'
 import { parseCookies } from '../utilities/parseCookies.js'
+import { getRequestBranch } from './getRequestBranch.js'
 import { getRequestLocale } from './getRequestLocale.js'
 
 export type PartialAdminContext = {
@@ -155,6 +157,12 @@ export async function initAdminContext({
       : await resolveLocale()
 
     req.locale = locale?.code
+
+    if (!req.branch && !(req.context as Record<string, unknown> | undefined)?._branchBypass) {
+      req.branch = await getRequestBranch({ req })
+    }
+
+    await assertBranchReadable({ req })
 
     let userWithReadAccess = req.user
 

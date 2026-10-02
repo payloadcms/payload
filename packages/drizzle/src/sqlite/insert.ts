@@ -6,7 +6,7 @@ export const insert: Insert = async function (
   // Here 'this' is not a parameter. See:
   // https://www.typescriptlang.org/docs/handbook/2/classes.html#this-parameters
   this: BaseSQLiteAdapter,
-  { db, onConflictDoUpdate, tableName, values },
+  { db, onConflictDoNothing, onConflictDoUpdate, tableName, values },
 ): Promise<Record<string, unknown>[]> {
   const table = this.tables[tableName]
 
@@ -22,9 +22,12 @@ export const insert: Insert = async function (
     for (let i = 0; i < values.length; i += maxRowsPerBatch) {
       const batch = values.slice(i, i + maxRowsPerBatch)
 
-      const batchResult = onConflictDoUpdate
-        ? await db.insert(table).values(batch).onConflictDoUpdate(onConflictDoUpdate).returning()
-        : await db.insert(table).values(batch).returning()
+      const insertQuery = db.insert(table).values(batch)
+      const batchResult = onConflictDoNothing
+        ? await insertQuery.onConflictDoNothing(onConflictDoNothing).returning()
+        : onConflictDoUpdate
+          ? await insertQuery.onConflictDoUpdate(onConflictDoUpdate).returning()
+          : await insertQuery.returning()
 
       results.push(...(batchResult as Record<string, unknown>[]))
     }
@@ -32,9 +35,12 @@ export const insert: Insert = async function (
     return results
   }
 
-  const result = onConflictDoUpdate
-    ? await db.insert(table).values(values).onConflictDoUpdate(onConflictDoUpdate).returning()
-    : await db.insert(table).values(values).returning()
+  const insertQuery = db.insert(table).values(values)
+  const result = onConflictDoNothing
+    ? await insertQuery.onConflictDoNothing(onConflictDoNothing).returning()
+    : onConflictDoUpdate
+      ? await insertQuery.onConflictDoUpdate(onConflictDoUpdate).returning()
+      : await insertQuery.returning()
 
   // See https://github.com/payloadcms/payload/pull/11831#discussion_r2010431908
   return result as Record<string, unknown>[]

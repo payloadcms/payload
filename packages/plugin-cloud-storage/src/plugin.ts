@@ -4,7 +4,7 @@ import type { Adapter, AllowList, PluginOptions } from './types.js'
 
 import { getFields } from './fields/getFields.js'
 import { getAfterChangeHook } from './hooks/afterChange.js'
-import { getAfterDeleteHook } from './hooks/afterDelete.js'
+import { getAfterDeleteHook, getDeleteFiles } from './hooks/afterDelete.js'
 import { getNormalizeUploadPrefixHook } from './hooks/normalizeUploadPrefix.js'
 import { getPreserveFileDataHook } from './hooks/preserveFileData.js'
 
@@ -225,6 +225,12 @@ export const cloudStoragePlugin =
           upload: {
             ...(typeof existingCollection.upload === 'object' ? existingCollection.upload : {}),
             adapter: adapter.name,
+            deleteFiles: getDeleteFiles({
+              adapter,
+              collection: existingCollection,
+              collectionPrefix: options.prefix,
+              useCompositePrefixes,
+            }),
             ...(uploadInstructions && {
               uploadInstructions,
             }),

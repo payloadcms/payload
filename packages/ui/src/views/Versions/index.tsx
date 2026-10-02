@@ -1,6 +1,6 @@
 import type { DocumentViewServerProps, PaginatedDocs } from 'payload'
 
-import { formatAdminURL, hasDraftsEnabled, isNumber } from 'payload/shared'
+import { hasDraftsEnabled, isNumber } from 'payload/shared'
 import React from 'react'
 
 /* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds */
@@ -25,12 +25,7 @@ export async function VersionsView(props: DocumentViewServerProps) {
       docID: id,
       globalConfig,
       req,
-      req: {
-        i18n,
-        payload: { config },
-        t,
-        user,
-      },
+      req: { i18n, t, user },
     },
     routeSegments: segments,
     searchParams: { limit, page, sort },
@@ -43,10 +38,6 @@ export async function VersionsView(props: DocumentViewServerProps) {
   const globalSlug = globalConfig?.slug
 
   const isTrashed = segments[2] === 'trash'
-
-  const {
-    routes: { api: apiRoute },
-  } = config
 
   const defaultLimit = collectionSlug ? collectionConfig?.admin?.pagination?.defaultLimit : 10
 
@@ -115,16 +106,12 @@ export async function VersionsView(props: DocumentViewServerProps) {
       : Promise.resolve(null),
   ])
 
-  const fetchURL = formatAdminURL({
-    apiRoute,
-    path: collectionSlug ? `/${collectionSlug}/versions` : `/${globalSlug}/versions`,
-  })
-
   const resolvedCreatedAtCellOverride =
     CreatedAtCellOverride ??
     (useVersionDrawerCreatedAtCell ? VersionDrawerCreatedAtCell : undefined)
 
   const columns = buildVersionColumns({
+    branchingEnabled: Boolean(req.payload.config.branching?.enabled),
     collectionConfig,
     CreatedAtCellOverride: resolvedCreatedAtCellOverride,
     currentlyPublishedVersion,
@@ -166,7 +153,6 @@ export async function VersionsView(props: DocumentViewServerProps) {
             <VersionsViewClient
               baseClass={baseClass}
               columns={columns}
-              fetchURL={fetchURL}
               paginationLimits={collectionConfig?.admin?.pagination?.limits}
             />
           </ListQueryProvider>

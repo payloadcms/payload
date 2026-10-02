@@ -9,6 +9,7 @@ import { useActions } from '../../providers/Actions/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { BranchSelector } from '../BranchSelector/index.js'
 import { Button } from '../Button/index.js'
 import { Localizer } from '../Localizer/index.js'
 import { useNav } from '../Nav/context.js'
@@ -70,6 +71,9 @@ export function AppHeader() {
                 onClick={() => setNavOpen(!navOpen, true)}
                 type="button"
               />
+              {/* Ahead of the trail rather than inside it: the trail collapses under
+                  width pressure, and the active branch must never collapse away. */}
+              <BranchSelector className={`${baseClass}__branch-selector`} />
               <div className={`${baseClass}__step-nav-wrapper`}>
                 <StepNav className={`${baseClass}__step-nav`} />
               </div>

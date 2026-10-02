@@ -41,12 +41,19 @@ import {
   GraphQLUnionType,
 } from 'graphql'
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
-import { combineQueries, createDataloaderCacheKey, MissingEditorProp, toWords } from 'payload'
+import {
+  combineQueries,
+  createDataloaderCacheKey,
+  MissingEditorProp,
+  resolveBranch,
+  toWords,
+} from 'payload'
 import { fieldAffectsData, tabHasName } from 'payload/shared'
 
 import type { Context } from '../resolvers/types.js'
 
 import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
+import { getGraphQLRequestForNestedField } from '../resolvers/getGraphQLRequest.js'
 import { combineParentName } from '../utilities/combineParentName.js'
 import { formatName } from '../utilities/formatName.js'
 import { formatOptions } from '../utilities/formatOptions.js'
@@ -434,9 +441,9 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       async resolve(parent, args, context, info) {
         const { collection } = field
         const { count = false, limit, page, sort, where } = args
-        const { req } = context
+        const req = getGraphQLRequestForNestedField({ context, info })
 
-        const draft = Boolean(args.draft ?? context.req.query?.draft)
+        const draft = Boolean(args.draft ?? req.query?.draft)
         const select = resolveSelect(info, context.select, context)
 
         const targetField = (field as FlattenedJoinField).targetField
@@ -676,11 +683,12 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         field,
       },
       async resolve(parent, args, context, info) {
+        const req = getGraphQLRequestForNestedField({ context, info })
         const value = parent[field.name]
-        const locale = args.locale || context.req.locale
-        const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
+        const locale = args.locale || req.locale
+        const fallbackLocale = args.fallbackLocale || req.fallbackLocale
         let relatedCollectionSlug = field.relationTo
-        const draft = Boolean(args.draft ?? context.req.query?.draft)
+        const draft = Boolean(args.draft ?? req.query?.draft)
         const select = resolveSelect(info, context.select, context)
 
         if (hasManyValues) {
@@ -700,8 +708,9 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
                 id = relatedDoc.value
               }
 
-              const result = await context.req.payloadDataLoader.load(
+              const result = await req.payloadDataLoader.load(
                 createDataloaderCacheKey({
+                  branch: resolveBranch(req),
                   collectionSlug: collectionSlug as string,
                   currentDepth: 0,
                   depth: 0,
@@ -712,7 +721,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
                   overrideAccess: false,
                   select,
                   showHiddenFields: false,
-                  transactionID: context.req.transactionID,
+                  transactionID: req.transactionID,
                 }),
               )
 
@@ -750,8 +759,9 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
 
         if (id) {
           if (graphQLCollections.some((collection) => collection.slug === relatedCollectionSlug)) {
-            const relatedDocument = await context.req.payloadDataLoader.load(
+            const relatedDocument = await req.payloadDataLoader.load(
               createDataloaderCacheKey({
+                branch: resolveBranch(req),
                 collectionSlug: relatedCollectionSlug as string,
                 currentDepth: 0,
                 depth: 0,
@@ -762,7 +772,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
                 overrideAccess: false,
                 select,
                 showHiddenFields: false,
-                transactionID: context.req.transactionID,
+                transactionID: req.transactionID,
               }),
             )
 
@@ -810,7 +820,8 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       extensions: {
         field,
       },
-      async resolve(parent, args, context: Context) {
+      async resolve(parent, args, context: Context, info) {
+        const req = getGraphQLRequestForNestedField({ context, info })
         let depth = config.defaultDepth
         if (typeof args.depth !== 'undefined') {
           depth = args.depth
@@ -837,7 +848,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
             field?.maxDepth !== undefined && field?.maxDepth < depth ? field?.maxDepth : depth
 
           editor?.graphQLPopulationPromises({
-            context,
+            context: { ...context, req },
             depth: populateDepth,
             draft: args.draft,
             field,
@@ -847,7 +858,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
             overrideAccess: false,
             parentIsLocalized,
             populationPromises,
-            req: context.req,
+            req,
             showHiddenFields: false,
             siblingDoc: parent,
           })
@@ -1095,11 +1106,12 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         field,
       },
       async resolve(parent, args, context, info) {
+        const req = getGraphQLRequestForNestedField({ context, info })
         const value = parent[field.name]
-        const locale = args.locale || context.req.locale
-        const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
+        const locale = args.locale || req.locale
+        const fallbackLocale = args.fallbackLocale || req.fallbackLocale
         let relatedCollectionSlug = field.relationTo
-        const draft = Boolean(args.draft ?? context.req.query?.draft)
+        const draft = Boolean(args.draft ?? req.query?.draft)
         const select = resolveSelect(info, context.select, context)
 
         if (hasManyValues) {
@@ -1119,8 +1131,9 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
                 id = relatedDoc.value
               }
 
-              const result = await context.req.payloadDataLoader.load(
+              const result = await req.payloadDataLoader.load(
                 createDataloaderCacheKey({
+                  branch: resolveBranch(req),
                   collectionSlug: collectionSlug as string,
                   currentDepth: 0,
                   depth: 0,
@@ -1131,7 +1144,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
                   overrideAccess: false,
                   select,
                   showHiddenFields: false,
-                  transactionID: context.req.transactionID,
+                  transactionID: req.transactionID,
                 }),
               )
 
@@ -1169,8 +1182,9 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
 
         if (id) {
           if (graphQLCollections.some((collection) => collection.slug === relatedCollectionSlug)) {
-            const relatedDocument = await context.req.payloadDataLoader.load(
+            const relatedDocument = await req.payloadDataLoader.load(
               createDataloaderCacheKey({
+                branch: resolveBranch(req),
                 collectionSlug: relatedCollectionSlug as string,
                 currentDepth: 0,
                 depth: 0,
@@ -1181,7 +1195,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
                 overrideAccess: false,
                 select,
                 showHiddenFields: false,
-                transactionID: context.req.transactionID,
+                transactionID: req.transactionID,
               }),
             )
 

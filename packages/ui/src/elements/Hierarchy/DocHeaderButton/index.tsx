@@ -1,10 +1,12 @@
 'use client'
 import { formatAdminURL } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { SelectionWithPath } from '../Modal/types.js'
 
 import { useForm, useFormFields } from '../../../forms/Form/context.js'
+import { useBranchParam } from '../../../providers/Branch/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -35,6 +37,7 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
   const { config, getEntityConfig } = useConfig()
   const { collectionSlug: documentCollectionSlug } = useDocumentInfo()
   const { disabled: formDisabled, setModified } = useForm()
+  const branch = useBranchParam()
   const readOnly = readOnlyFromProps || formDisabled
   const dispatchField = useFormFields(([_, dispatch]) => dispatch)
 
@@ -69,10 +72,11 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
       if (currentId && (typeof currentId === 'string' || typeof currentId === 'number')) {
         setIsLoading(true)
         try {
+          const queryString = qs.stringify({ branch }, { addQueryPrefix: true })
           const response = await fetch(
             formatAdminURL({
               apiRoute: config.routes.api,
-              path: `/${hierarchyCollectionSlug}/${currentId}`,
+              path: `/${hierarchyCollectionSlug}/${currentId}${queryString}`,
               serverURL: config.serverURL,
             }),
             { credentials: 'include' },
@@ -98,7 +102,15 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
     }
 
     void fetchItemName()
-  }, [currentId, hierarchyCollectionSlug, config.routes.api, config.serverURL, useAsTitle, t])
+  }, [
+    branch,
+    config.routes.api,
+    config.serverURL,
+    currentId,
+    hierarchyCollectionSlug,
+    t,
+    useAsTitle,
+  ])
 
   const handleModalSave = useCallback(
     ({

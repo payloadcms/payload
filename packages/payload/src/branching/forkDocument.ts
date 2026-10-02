@@ -1,0 +1,145 @@
+import type { PayloadRequest } from '../types/index.js'
+
+import { APIError } from '../errors/index.js'
+import { createShadowRow } from './createShadowRow.js'
+import {
+  addToBranchManifest,
+  loadBranchManifest,
+  peekBranchOperation,
+  peekBranchRowID,
+  rememberBranchRowID,
+  resolveBranch,
+} from './resolveBranch.js'
+import { branchChangesCollectionSlug, branchDocIDField, branchField, MAIN_BRANCH } from './types.js'
+
+type Args = {
+  collectionSlug: string
+  id: number | string
+  req: PayloadRequest
+  /** Creates a new shadow in the request's existing transaction. */
+  useAmbientTransaction?: boolean
+}
+
+/**
+ * Copy-on-write: ensures the active branch has its own row for a document, and
+ * returns that row's primary key.
+ *
+ * Returns the id unchanged on main, or when the branch already has a shadow
+ * row. Otherwise it copies the main row wholesale — a full copy rather than a
+ * diff, so the branch's version can be filtered and sorted on by the database
+ * like any other row.
+ */
+export const forkDocument = async ({
+  id,
+  collectionSlug,
+  req,
+  useAmbientTransaction = false,
+}: Args): Promise<number | string> => {
+  const branch = resolveBranch(req)
+
+  if (branch === MAIN_BRANCH) {
+    return id
+  }
+
+  const branching = req.payload.config.branching
+
+  if (!branching?.enabled || !branching.branchableCollections.has(collectionSlug)) {
+    return id
+  }
+
+  const remembered = peekBranchRowID({ collectionSlug, docID: id, req })
+
+  if (remembered !== undefined) {
+    await loadBranchManifest(req)
+
+    if (!peekBranchOperation({ collectionSlug, docID: id, req })) {
+      throw new APIError(
+        `The ${collectionSlug} branch row for document ${String(id)} has no change record.`,
+        409,
+      )
+    }
+
+    return remembered
+  }
+
+  // One query for all three questions this used to ask separately: does the branch
+  // already have a copy (by canonical ID), is this row the branch's own creation (by its
+  // primary key), and failing both, what does main hold? A branch row wins when both come
+  // back — the same pick `pickBranchGlobal` makes for globals.
+  const { docs } = await req.payload.db.find({
+    branch: false,
+    collection: collectionSlug,
+    limit: 2,
+    pagination: false,
+    req,
+    where: {
+      and: [
+        { [branchField]: { in: [branch, MAIN_BRANCH] } },
+        { or: [{ id: { equals: id } }, { [branchDocIDField]: { equals: id } }] },
+      ],
+    },
+  })
+
+  const rows = docs as Record<string, unknown>[]
+  const onBranch = rows.find((row) => row[branchField] === branch)
+
+  if (onBranch) {
+    await loadBranchManifest(req)
+
+    if (!peekBranchOperation({ collectionSlug, docID: id, req })) {
+      throw new APIError(
+        `The ${collectionSlug} branch row for document ${String(id)} has no change record.`,
+        409,
+      )
+    }
+
+    const rowID = onBranch.id as number | string
+
+    rememberBranchRowID({ collectionSlug, docID: id, req, rowID })
+
+    return rowID
+  }
+
+  const mainDoc = rows.find((row) => row[branchField] === MAIN_BRANCH)
+
+  if (!mainDoc) {
+    return id
+  }
+
+  const shadow = await createShadowRow({
+    branch,
+    collectionSlug,
+    data: {
+      [branchDocIDField]: id,
+      [branchField]: branch,
+    },
+    docID: id,
+    onCreated: (createReq, createdShadow) =>
+      createReq.payload.create({
+        collection: branchChangesCollectionSlug,
+        data: {
+          baseUpdatedAt: mainDoc.updatedAt,
+          branch,
+          collectionSlug,
+          doc: { relationTo: collectionSlug, value: id },
+          documentID: String(id),
+          entityType: 'collection',
+          operation: 'update',
+          rowID: String(createdShadow.id),
+        },
+        overrideAccess: true,
+        req: createReq,
+      }),
+    req,
+    source: { id, branch: MAIN_BRANCH },
+    useAmbientTransaction,
+  })
+
+  // The manifest now has one more entry. Added rather than reloaded: dropping the memoized
+  // copy made the next read in this request re-query every change row on the branch to
+  // learn one ID, and every save the admin panel makes is a write followed by a read.
+  addToBranchManifest({ collectionSlug, docID: id, operation: 'update', req })
+  rememberBranchRowID({ collectionSlug, docID: id, req, rowID: shadow.id as number | string })
+
+  return shadow.id as number | string
+}

@@ -1,7 +1,7 @@
 import type { PipelineStage } from 'mongoose'
 import type { FindDistinct, FlattenedField } from 'payload'
 
-import { getFieldByPath } from 'payload'
+import { getFieldByPath, resolveBranchQuery } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -50,7 +50,16 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
     collectionSlug: args.collection,
   })
 
-  const { where = {} } = args
+  // Distinct values describe the documents the caller can see, so they are subject to
+  // the same branch predicate as a list read. Without it a branch's shadow rows fed
+  // main's distinct values and the branch's own edits were invisible in its own.
+  const where =
+    (await resolveBranchQuery({
+      branch: args.branch,
+      collectionSlug: args.collection,
+      req: args.req,
+      where: args.where,
+    })) ?? {}
 
   let sortAggregation: PipelineStage[] = []
 
@@ -66,9 +75,11 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
 
   const query = await buildQuery({
     adapter: this,
+    branch: args.branch,
     collectionSlug: args.collection,
     fields: collectionConfig.flattenedFields,
     locale: args.locale,
+    req: args.req,
     where,
   })
 
@@ -171,21 +182,30 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
         collectionSlug: relationTo,
       })
       const relatedAccess = args.relatedAccess?.[fieldPath]
-      const relatedAccessQuery = relatedAccess
-        ? await buildQuery({
-            adapter: this,
-            collectionSlug: relationTo,
-            fields: foreignCollectionConfig.flattenedFields,
-            locale: args.locale,
-            where: relatedAccess,
-          })
-        : null
+      const relatedWhere = await resolveBranchQuery({
+        branch: args.branch,
+        collectionSlug: relationTo,
+        req: args.req,
+        where: relatedAccess,
+      })
+      const relatedQuery =
+        relatedWhere && Object.keys(relatedWhere).length
+          ? await buildQuery({
+              adapter: this,
+              branch: args.branch,
+              collectionSlug: relationTo,
+              fields: foreignCollectionConfig.flattenedFields,
+              locale: args.locale,
+              req: args.req,
+              where: relatedWhere,
+            })
+          : null
 
       relationLookup.push({
         $lookup: {
           as: fieldPath,
           from: foreignModel.collection.name,
-          ...(relatedAccessQuery
+          ...(relatedQuery
             ? {
                 let: { relatedIDs: `$${fieldPath}` },
                 pipeline: [
@@ -195,13 +215,17 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
                         {
                           $expr: {
                             $cond: {
-                              else: { $eq: ['$_id', '$$relatedIDs'] },
+                              else: {
+                                $eq: [{ $ifNull: ['$_branchDocID', '$_id'] }, '$$relatedIDs'],
+                              },
                               if: { $isArray: '$$relatedIDs' },
-                              then: { $in: ['$_id', '$$relatedIDs'] },
+                              then: {
+                                $in: [{ $ifNull: ['$_branchDocID', '$_id'] }, '$$relatedIDs'],
+                              },
                             },
                           },
                         },
-                        relatedAccessQuery,
+                        relatedQuery,
                       ],
                     },
                   },

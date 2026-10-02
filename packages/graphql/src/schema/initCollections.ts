@@ -202,6 +202,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
         type: collection.graphQL.type,
         args: {
           id: { type: new GraphQLNonNull(idType) },
+          branch: { type: GraphQLString },
           draft: { type: GraphQLBoolean },
           ...(config.localization
             ? {
@@ -218,6 +219,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
       graphqlResult.Query.fields[pluralName] = {
         type: buildPaginatedListType(pluralName, collection.graphQL.type),
         args: {
+          branch: { type: GraphQLString },
           draft: { type: GraphQLBoolean },
           where: { type: collection.graphQL.whereInputType },
           ...(config.localization
@@ -244,6 +246,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           },
         }),
         args: {
+          branch: { type: GraphQLString },
           draft: { type: GraphQLBoolean },
           trash: { type: GraphQLBoolean },
           where: { type: collection.graphQL.whereInputType },
@@ -265,6 +268,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
         }),
         args: {
           id: { type: new GraphQLNonNull(idType) },
+          branch: { type: GraphQLString },
         },
         resolve: docAccessResolver(collection),
       }
@@ -277,6 +281,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           ...(createMutationInputType
             ? { data: { type: collection.graphQL.mutationInputType } }
             : {}),
+          branch: { type: GraphQLString },
           draft: { type: GraphQLBoolean },
           ...(config.localization
             ? {
@@ -295,6 +300,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           ...(updateMutationInputType
             ? { data: { type: collection.graphQL.updateMutationInputType } }
             : {}),
+          branch: { type: GraphQLString },
           draft: { type: GraphQLBoolean },
           ...(config.localization
             ? {
@@ -310,6 +316,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
         type: collection.graphQL.type,
         args: {
           id: { type: new GraphQLNonNull(idType) },
+          branch: { type: GraphQLString },
           trash: { type: GraphQLBoolean },
         },
         resolve: getDeleteResolver(collection),
@@ -320,6 +327,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           type: collection.graphQL.type,
           args: {
             id: { type: new GraphQLNonNull(idType) },
+            branch: { type: GraphQLString },
             ...(createMutationInputType
               ? { data: { type: collection.graphQL.mutationInputType } }
               : {}),
@@ -364,6 +372,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           type: collection.graphQL.versionType,
           args: {
             id: { type: versionIDType },
+            branch: { type: GraphQLString },
             ...(config.localization
               ? {
                   fallbackLocale: { type: graphqlResult.types.fallbackLocaleInputType },
@@ -380,6 +389,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
             collection.graphQL.versionType,
           ),
           args: {
+            branch: { type: GraphQLString },
             where: {
               type: buildWhereInputType({
                 name: `versions${singularName}`,
@@ -409,6 +419,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           type: collection.graphQL.type,
           args: {
             id: { type: versionIDType },
+            branch: { type: GraphQLString },
             draft: { type: GraphQLBoolean },
           },
           resolve: restoreVersionResolver(collection),

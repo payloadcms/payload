@@ -20,6 +20,7 @@ import { CreateDocumentButton } from '../../../elements/CreateDocumentButton/ind
 import { NoListResults } from '../../../elements/NoListResults/index.js'
 import { SimplePagination } from '../../../elements/Pagination/SimplePagination/index.js'
 import { TableSection } from '../../../elements/TableSection/index.js'
+import { useBranchParam } from '../../../providers/Branch/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentSelection } from '../../../providers/DocumentSelection/index.js'
 import { useRouteCache } from '../../../providers/RouteCache/index.js'
@@ -87,6 +88,8 @@ export function HierarchyTable({
     },
     getEntityConfig,
   } = useConfig()
+
+  const branch = useBranchParam()
 
   // Children pagination state
   const [childDocs, setChildDocs] = useState(childrenData?.docs || [])
@@ -167,7 +170,7 @@ export function HierarchyTable({
         const where = combineWhereConstraints([parentCondition, searchCondition, baseFilter])
 
         const queryString = qs.stringify(
-          { limit: DEFAULT_HIERARCHY_LIST_LIMIT, page, where },
+          { branch, limit: DEFAULT_HIERARCHY_LIST_LIMIT, page, where },
           { addQueryPrefix: true },
         )
         const url = formatAdminURL({
@@ -201,6 +204,7 @@ export function HierarchyTable({
       }
     },
     [
+      branch,
       apiRoute,
       baseFilter,
       childLoading,
@@ -264,7 +268,7 @@ export function HierarchyTable({
         ])
 
         const queryString = qs.stringify(
-          { limit: DEFAULT_HIERARCHY_LIST_LIMIT, page, where },
+          { branch, limit: DEFAULT_HIERARCHY_LIST_LIMIT, page, where },
           { addQueryPrefix: true },
         )
         const url = formatAdminURL({
@@ -303,6 +307,7 @@ export function HierarchyTable({
       }
     },
     [
+      branch,
       apiRoute,
       getEntityConfig,
       parentFieldName,

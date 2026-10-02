@@ -1,16 +1,23 @@
 import type { Payload, RequestContext, TypedLocale, User } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
+import { peekResolvedBranch, resetBranchState } from '../branching/resolveBranch.js'
+import { MAIN_BRANCH } from '../branching/types.js'
 import { getDataLoader } from '../collections/dataloader.js'
 import { getLocalI18n } from '../translations/getLocalI18n.js'
 import { sanitizeFallbackLocale } from '../utilities/sanitizeFallbackLocale.js'
+import { isolateObjectProperty } from './isolateObjectProperty.js'
+import {
+  createIsolatedDeferredCleanupContext,
+  hasActiveDeferredCleanupScope,
+} from './transactionCallbacks.js'
 
 function getRequestContext(
   req: Partial<PayloadRequest> = { context: null } as unknown as PayloadRequest,
   context: RequestContext = {},
 ): RequestContext {
   if (req.context) {
-    if (Object.keys(req.context).length === 0 && req.context.constructor === Object) {
+    if (Reflect.ownKeys(req.context).length === 0 && req.context.constructor === Object) {
       // if req.context is `{}` avoid unnecessary spread
       return context
     } else {
@@ -86,6 +93,11 @@ const attachFakeURLProperties = (req: Partial<PayloadRequest>, urlSuffix?: strin
 }
 
 export type CreatePayloadRequestArgs = {
+  /**
+   * Read and write against this branch instead of the request's own.
+   * `false` bypasses branching entirely.
+   */
+  branch?: false | string
   context?: RequestContext
   depth?: number
   fallbackLocale?: false | TypedLocale
@@ -99,6 +111,7 @@ export type CreatePayloadRequestArgs = {
 type CreatePayloadRequest = (args: CreatePayloadRequestArgs) => Promise<PayloadRequest>
 
 export const createPayloadRequest: CreatePayloadRequest = async ({
+  branch,
   context,
   depth,
   fallbackLocale,
@@ -109,6 +122,12 @@ export const createPayloadRequest: CreatePayloadRequest = async ({
   user,
 }): Promise<PayloadRequest> => {
   const localization = payload.config?.localization
+  let shouldCreateIsolatedDataLoader = false
+
+  if (hasActiveDeferredCleanupScope({ req })) {
+    req = isolateObjectProperty(req, 'context')
+    req.context = createIsolatedDeferredCleanupContext({ req })
+  }
 
   if (localization) {
     const locale = localeArg === '*' ? 'all' : localeArg
@@ -136,6 +155,28 @@ export const createPayloadRequest: CreatePayloadRequest = async ({
   }
 
   req.context = getRequestContext(req, context)
+
+  if (branch !== undefined) {
+    const targetBranch = branch === false ? MAIN_BRANCH : branch
+    const currentBranch =
+      peekResolvedBranch(req) ??
+      (typeof req.branch === 'string'
+        ? req.branch
+        : typeof req.query?.branch === 'string'
+          ? req.query.branch
+          : undefined)
+
+    if (currentBranch !== undefined && currentBranch !== targetBranch) {
+      req = isolateObjectProperty(req, ['branch', 'context', 'payloadDataLoader'])
+      req.context = { ...req.context }
+      resetBranchState(req as PayloadRequest)
+      shouldCreateIsolatedDataLoader = true
+    }
+
+    req.branch = branch === false ? undefined : branch
+    ;(req.context as Record<string, unknown>)._branchBypass = branch === false
+  }
+
   req.payloadAPI = req?.payloadAPI || 'local'
   req.payload = payload
   req.i18n = i18n
@@ -148,7 +189,9 @@ export const createPayloadRequest: CreatePayloadRequest = async ({
     req.user = { ...req.user, collection: payload.config.admin.user }
   }
 
-  req.payloadDataLoader = req?.payloadDataLoader || getDataLoader(req as PayloadRequest)
+  req.payloadDataLoader = shouldCreateIsolatedDataLoader
+    ? getDataLoader(req as PayloadRequest)
+    : req?.payloadDataLoader || getDataLoader(req as PayloadRequest)
   req.routeParams = req?.routeParams || {}
   req.query = req?.query || {}
 

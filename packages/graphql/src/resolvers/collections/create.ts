@@ -1,3 +1,4 @@
+import type { GraphQLResolveInfo } from 'graphql'
 import type {
   Collection,
   CollectionSlug,
@@ -6,13 +7,16 @@ import type {
   RequiredDataFromCollectionSlug,
 } from 'payload'
 
-import { createOperation, isolateObjectProperty } from 'payload'
+import { createOperation } from 'payload'
 
 import type { Context } from '../types.js'
+
+import { getGraphQLRequest } from '../getGraphQLRequest.js'
 
 export type Resolver<TSlug extends CollectionSlug> = (
   _: unknown,
   args: {
+    branch?: string
     data: RequiredDataFromCollectionSlug<TSlug>
     draft: boolean
     locale?: string
@@ -20,22 +24,27 @@ export type Resolver<TSlug extends CollectionSlug> = (
   context: {
     req: PayloadRequest
   },
+  info: GraphQLResolveInfo,
 ) => Promise<DataFromCollectionSlug<TSlug>>
 
 export function createResolver<TSlug extends CollectionSlug>(
   collection: Collection,
 ): Resolver<TSlug> {
-  return async function resolver(_, args, context: Context) {
-    if (args.locale) {
-      context.req.locale = args.locale
-    }
+  return async function resolver(_, args, context: Context, info) {
+    const req = await getGraphQLRequest({
+      branch: args.branch,
+      collectionSlug: collection.config.slug,
+      context,
+      info,
+      locale: args.locale,
+    })
 
     const result = await createOperation({
       collection,
       data: args.data,
       depth: 0,
       draft: args.draft,
-      req: isolateObjectProperty(context.req, 'transactionID'),
+      req,
     })
 
     return result

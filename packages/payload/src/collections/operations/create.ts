@@ -19,6 +19,10 @@ import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
 import { executeAccess } from '../../auth/executeAccess.js'
 import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
 import { registerLocalStrategy } from '../../auth/strategies/local/register.js'
+import {
+  assertBranchMergeValidationWriteAllowed,
+  runBranchMergeWriteGuard,
+} from '../../branching/mergeWriteGuard.js'
 import { getDuplicateDocumentData } from '../../duplicateDocument/index.js'
 import { APIError } from '../../errors/index.js'
 import { fillEmptyLocalizedSlugs } from '../../fields/baseFields/slug/fillEmptyLocalizedSlugs.js'
@@ -46,6 +50,7 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { markTransactionWrite } from '../../utilities/transactionMutationTracker.js'
 import {
   buildAllLocalesPublicationHookDoc,
   getAllLocalesPublicationStatus,
@@ -82,6 +87,8 @@ export const createOperation = async <
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
   let externalUploadSource: ReturnType<typeof getExternalUploadSource>
+
+  assertBranchMergeValidationWriteAllowed({ req: args.req })
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
@@ -464,6 +471,12 @@ export const createOperation = async <
         dataWithLocales._verificationToken = crypto.randomBytes(20).toString('hex')
       }
 
+      await runBranchMergeWriteGuard({
+        collectionSlug: collectionConfig.slug,
+        data: dataWithLocales,
+        req,
+      })
+
       doc = await registerLocalStrategy({
         collection: collectionConfig,
         doc: dataWithLocales,
@@ -472,12 +485,19 @@ export const createOperation = async <
         req,
       })
     } else {
+      await runBranchMergeWriteGuard({
+        collectionSlug: collectionConfig.slug,
+        data: dataWithLocales,
+        req,
+      })
+
       doc = await payload.db.create({
         collection: collectionConfig.slug,
         data: dataWithLocales,
         req,
       })
     }
+    markTransactionWrite({ req })
 
     const verificationToken = doc._verificationToken
     let resultWithLocales: Document = sanitizeInternalFields(doc)

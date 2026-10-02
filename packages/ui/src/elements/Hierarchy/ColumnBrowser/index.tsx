@@ -17,6 +17,7 @@ import type {
 
 import { useEffectEvent } from '../../../hooks/useEffectEvent.js'
 import { useAuth } from '../../../providers/Auth/index.js'
+import { useBranchParam } from '../../../providers/Branch/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { isSuperset } from '../../../utilities/isSuperset.js'
@@ -62,6 +63,8 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
     ? getTranslation(collectionConfig.labels?.singular || hierarchyCollectionSlug, i18n)
     : hierarchyCollectionSlug
   const canCreate = Boolean(permissions?.collections?.[hierarchyCollectionSlug]?.create)
+
+  const branch = useBranchParam()
 
   const [columns, setColumns] = useState<ColumnState[]>([])
   const [expandedPath, setExpandedPath] = useState<(number | string)[]>([])
@@ -131,7 +134,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
       const whereWithBaseFilter = combineWhereConstraints([where, baseFilter])
 
       const queryString = qs.stringify(
-        { limit: treeLimit, page, sort: useAsTitle, where: whereWithBaseFilter },
+        { branch, limit: treeLimit, page, sort: useAsTitle, where: whereWithBaseFilter },
         { addQueryPrefix: true },
       )
 
@@ -180,6 +183,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
       }
     },
     [
+      branch,
       api,
       baseFilter,
       filterByCollection,

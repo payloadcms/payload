@@ -10,6 +10,9 @@ import type {
   BlocksField,
   BlocksFieldLabelClientProps,
   BlocksFieldLabelServerProps,
+  BranchingConfig,
+  BranchOperation,
+  branchOperations,
   BulkOperationResult,
   CollapsibleField,
   CollectionSlug,
@@ -25,6 +28,10 @@ import type {
   JoinFieldServerProps,
   JoinQuery,
   MeOperationResult,
+  MergeableChange,
+  MergeProgress,
+  MergeStreamEvent,
+  MergeWarning,
   NamedGroupField,
   NamedTab,
   PaginatedDocs,
@@ -112,6 +119,33 @@ import type {
 } from './payload-types.js'
 
 describe('Types testing', () => {
+  describe('branching', () => {
+    test('should expose exact merge hook argument types', () => {
+      type AfterMergeArgs = Parameters<
+        NonNullable<NonNullable<BranchingConfig['hooks']>['afterMerge']>
+      >[0]
+      type BeforeMergeArgs = Parameters<
+        NonNullable<NonNullable<BranchingConfig['hooks']>['beforeMerge']>
+      >[0]
+
+      expect<AfterMergeArgs['req']>().type.toBe<PayloadRequest>()
+      expect<AfterMergeArgs['results']>().type.toBe<MergeableChange[]>()
+      expect<BeforeMergeArgs['changes']>().type.toBe<MergeableChange[]>()
+      expect<BeforeMergeArgs['req']>().type.toBe<PayloadRequest>()
+      expect<BeforeMergeArgs['warnings']>().type.toBe<MergeWarning[]>()
+    })
+
+    test('should derive branch operations from the shared values', () => {
+      expect<(typeof branchOperations)[number]>().type.toBe<BranchOperation>()
+    })
+
+    test('should require complete progress data in merge stream events', () => {
+      type ProgressEvent = Extract<MergeStreamEvent, { type: 'progress' }>
+
+      expect<Omit<ProgressEvent, 'type'>>().type.toBe<MergeProgress>()
+    })
+  })
+
   test('sanitized collection readVersions access is required', () => {
     expect<SanitizedCollectionConfig['access']['readVersions']>().type.toBe<Access>()
   })

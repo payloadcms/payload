@@ -1,5 +1,3 @@
-import { ar } from '@payloadcms/translations/languages/ar'
-
 import type { FindOptions } from '../../collections/operations/local/find.js'
 import type { AccessResult } from '../../config/types.js'
 import type {
@@ -12,6 +10,7 @@ import type {
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { assertBranchReadable } from '../../branching/assertBranchReadable.js'
 import { NotFound } from '../../errors/NotFound.js'
 import { afterRead, type AfterReadArgs } from '../../fields/hooks/afterRead/index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
@@ -61,6 +60,10 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
 
   const includeLockStatus =
     includeLockStatusFromArgs && req.payload.collections?.[lockedDocumentsCollectionSlug]
+
+  if (!overrideAccess) {
+    await assertBranchReadable({ globalSlug: globalConfig.slug, req })
+  }
 
   // /////////////////////////////////////
   // beforeOperation - Global

@@ -8,7 +8,7 @@ import type {
   TextField,
 } from 'payload'
 
-import { and, eq, getTableName, like, sql } from 'drizzle-orm'
+import { and, eq, getTableName, like, or, sql } from 'drizzle-orm'
 import { type PgTableWithColumns } from 'drizzle-orm/pg-core'
 import { APIError, getFieldByPath } from 'payload'
 import { fieldShouldBeLocalized, tabHasName } from 'payload/shared'
@@ -117,7 +117,9 @@ export const getTableColumnFromPath = ({
   let newTableName = tableName
 
   if (!field && fieldPath === 'id') {
-    selectFields.id = adapter.tables[newTableName].id
+    const idTable = aliasTable ?? adapter.tables[newTableName]
+
+    selectFields.id = idTable.id
     return {
       columnName: 'id',
       constraints,
@@ -125,7 +127,7 @@ export const getTableColumnFromPath = ({
         name: 'id',
         type: isUUIDType(adapter.idType) ? 'text' : 'number',
       } as NumberField | TextField,
-      table: adapter.tables[newTableName],
+      table: idTable,
     }
   }
 
@@ -639,6 +641,8 @@ export const getTableColumnFromPath = ({
       case 'relationship':
       case 'upload': {
         const newCollectionPath = pathSegments.slice(1).join('.')
+        const relationshipQueryPath = `${getTableName(tableContainingField)}.${fieldStoragePath}._rels`
+        const targetQueryPath = `${getTableName(tableContainingField)}.${fieldStoragePath}._target`
 
         if (Array.isArray(field.relationTo) || field.hasMany) {
           const relationshipPath = resolveRelationshipPath({
@@ -657,7 +661,7 @@ export const getTableColumnFromPath = ({
           let relationshipFields: FlattenedField[]
           const relationTableName = `${rootTableName}${adapter.relationshipsSuffix}`
 
-          const existingJoin = joins.find((e) => e.queryPath === `${constraintPath}.${field.name}`)
+          const existingJoin = joins.find((e) => e.queryPath === relationshipQueryPath)
 
           let aliasRelationshipTable: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
           let aliasRelationshipTableName: string
@@ -694,7 +698,7 @@ export const getTableColumnFromPath = ({
             addJoinTable({
               condition: and(...conditions),
               joins,
-              queryPath: `${constraintPath}.${field.name}`,
+              queryPath: relationshipQueryPath,
               table: aliasRelationshipTable,
             })
           } else {
@@ -705,7 +709,7 @@ export const getTableColumnFromPath = ({
                 like(aliasRelationshipTable.path, relationshipPath.path),
               ),
               joins,
-              queryPath: `${constraintPath}.${field.name}`,
+              queryPath: relationshipQueryPath,
               table: aliasRelationshipTable,
             })
           }
@@ -721,14 +725,30 @@ export const getTableColumnFromPath = ({
 
             // parent to relationship join table
             relationshipFields = relationshipConfig.flattenedFields
-            ;({ newAliasTable } = getTableAlias({ adapter, tableName: newTableName }))
+            const existingTargetJoin = joins.find((join) => join.queryPath === targetQueryPath)
 
-            joins.push({
-              condition: eq(newAliasTable.id, aliasRelationshipTable[`${field.relationTo}ID`]),
-              table: newAliasTable,
-            })
+            if (existingTargetJoin) {
+              newAliasTable = existingTargetJoin.table
+            } else {
+              ;({ newAliasTable } = getTableAlias({ adapter, tableName: newTableName }))
 
-            if (newCollectionPath === '' || newCollectionPath === 'id') {
+              const relationshipID = aliasRelationshipTable[`${field.relationTo}ID`]
+              const condition =
+                value === DistinctSymbol && newAliasTable._branchDocID
+                  ? or(
+                      eq(newAliasTable.id, relationshipID),
+                      eq(newAliasTable._branchDocID, relationshipID),
+                    )
+                  : eq(newAliasTable.id, relationshipID)
+
+              joins.push({
+                condition,
+                queryPath: targetQueryPath,
+                table: newAliasTable,
+              })
+            }
+
+            if (newCollectionPath === '' || (newCollectionPath === 'id' && !existingTargetJoin)) {
               return {
                 columnName: `${field.relationTo}ID`,
                 constraints,
@@ -884,16 +904,21 @@ export const getTableColumnFromPath = ({
           })
         } else if (
           pathSegments.length > 1 &&
-          !(pathSegments.length === 2 && pathSegments[1] === 'id')
+          (!(pathSegments.length === 2 && pathSegments[1] === 'id') ||
+            joins.some((join) => join.queryPath === targetQueryPath))
         ) {
           // simple relationships
           const columnName = `${columnPrefix}${field.name}`
           const newTableName = adapter.tableNameMap.get(
             toSnakeCase(adapter.payload.collections[field.relationTo].config.slug),
           )
-          const { newAliasTable } = getTableAlias({ adapter, tableName: newTableName })
+          const existingTargetJoin = joins.find((join) => join.queryPath === targetQueryPath)
+          const newAliasTable = (existingTargetJoin?.table ??
+            getTableAlias({ adapter, tableName: newTableName }).newAliasTable) as ReturnType<
+            typeof getTableAlias
+          >['newAliasTable']
 
-          if (isFieldLocalized && adapter.payload.config.localization) {
+          if (!existingTargetJoin && isFieldLocalized && adapter.payload.config.localization) {
             const { newAliasTable: aliasLocaleTable } = getTableAlias({
               adapter,
               tableName: `${rootTableName}${adapter.localesSuffix}`,
@@ -917,18 +942,32 @@ export const getTableColumnFromPath = ({
               table: localesTable,
             })
 
+            const condition =
+              value === DistinctSymbol && newAliasTable._branchDocID
+                ? or(
+                    eq(newAliasTable.id, localesTable[columnName]),
+                    eq(newAliasTable._branchDocID, localesTable[columnName]),
+                  )
+                : eq(newAliasTable.id, localesTable[columnName])
+
             joins.push({
-              condition: eq(localesTable[columnName], newAliasTable.id),
+              condition,
+              queryPath: targetQueryPath,
               table: newAliasTable,
             })
-          } else {
-            joins.push({
-              condition: eq(
-                newAliasTable.id,
-                aliasTable ? aliasTable[columnName] : adapter.tables[tableName][columnName],
-              ),
-              table: newAliasTable,
-            })
+          } else if (!existingTargetJoin) {
+            const relationshipID = aliasTable
+              ? aliasTable[columnName]
+              : adapter.tables[tableName][columnName]
+            const condition =
+              value === DistinctSymbol && newAliasTable._branchDocID
+                ? or(
+                    eq(newAliasTable.id, relationshipID),
+                    eq(newAliasTable._branchDocID, relationshipID),
+                  )
+                : eq(newAliasTable.id, relationshipID)
+
+            joins.push({ condition, queryPath: targetQueryPath, table: newAliasTable })
           }
 
           return getTableColumnFromPath({

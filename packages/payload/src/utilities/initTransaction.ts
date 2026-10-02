@@ -12,7 +12,20 @@ export async function initTransaction(
   const { payload, transactionID } = req
   if (transactionID instanceof Promise) {
     // wait for whoever else is already creating the transaction
-    await transactionID
+    let resolvedTransactionID: Awaited<typeof transactionID>
+
+    try {
+      resolvedTransactionID = await transactionID
+    } catch (error) {
+      if (req.transactionID === transactionID) {
+        delete req.transactionID
+      }
+      throw error
+    }
+
+    if (!resolvedTransactionID && req.transactionID === transactionID) {
+      delete req.transactionID
+    }
     return false
   }
 
@@ -22,14 +35,38 @@ export async function initTransaction(
   }
   if (typeof payload.db.beginTransaction === 'function') {
     // create a new transaction
-    req.transactionID = payload.db.beginTransaction().then((transactionID) => {
-      if (transactionID) {
-        req.transactionID = transactionID
-      }
+    const pendingTransactionID = payload.db.beginTransaction()
+    const pendingTransactionToken = pendingTransactionID as Promise<number | string>
 
-      return transactionID!
-    })
-    return !!(await req.transactionID)
+    req.transactionID = pendingTransactionToken
+    let resolvedTransactionID: Awaited<typeof pendingTransactionID>
+
+    try {
+      resolvedTransactionID = await pendingTransactionID
+    } catch (error) {
+      if (req.transactionID === pendingTransactionToken) {
+        delete req.transactionID
+      }
+      throw error
+    }
+
+    if (!resolvedTransactionID && req.transactionID === pendingTransactionToken) {
+      delete req.transactionID
+    }
+
+    if (!resolvedTransactionID) {
+      return false
+    }
+
+    if (req.transactionID !== pendingTransactionToken) {
+      await payload.db.rollbackTransaction(resolvedTransactionID)
+
+      return false
+    }
+
+    req.transactionID = resolvedTransactionID
+
+    return true
   }
   return false
 }

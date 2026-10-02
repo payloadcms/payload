@@ -10,6 +10,7 @@ import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
 import { useForm } from '../../forms/Form/context.js'
+import { useBranchParam } from '../../providers/Branch/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -40,6 +41,7 @@ export function UnpublishButton({
   const locale = useLocale()
   const localeCode = locale?.code
   const localeLabel = locale?.label
+  const branch = useBranchParam()
   const [unpublishAll, setUnpublishAll] = useState(false)
   const unPublishModalSlug = `confirm-un-publish-${id}`
 
@@ -68,6 +70,7 @@ export function UnpublishButton({
 
         const queryString = qs.stringify(
           {
+            branch,
             depth: 0,
             'fallback-locale': 'null',
             locale: unpublishAll ? undefined : localeCode,
@@ -138,6 +141,7 @@ export function UnpublishButton({
       })
     },
     [
+      branch,
       dataFromProps,
       resetForm,
       collectionSlug,
