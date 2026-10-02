@@ -8,6 +8,7 @@ import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+import { storageMediaSharpOptions } from '../__helpers/shared/storageMediaSharpOptions.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
@@ -64,28 +65,8 @@ export default buildConfigWithDefaults({
       transformers: [
         sharpTransformer({
           collections: {
-            'media-client': {
-              resizeOptions: {
-                position: 'center',
-                width: 200,
-                height: 200,
-              },
-              variants: [
-                { height: 400, width: 400, crop: 'center', name: 'square' },
-                { width: 900, height: 450, crop: 'center', name: 'sixteenByNineMedium' },
-              ],
-            },
-            [mediaSlug]: {
-              resizeOptions: {
-                position: 'center',
-                width: 200,
-                height: 200,
-              },
-              variants: [
-                { height: 400, width: 400, crop: 'center', name: 'square' },
-                { width: 900, height: 450, crop: 'center', name: 'sixteenByNineMedium' },
-              ],
-            },
+            'media-client': storageMediaSharpOptions,
+            [mediaSlug]: storageMediaSharpOptions,
           },
         }),
       ],

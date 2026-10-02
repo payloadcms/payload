@@ -6,6 +6,7 @@ import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import dotenv from 'dotenv'
 import path from 'path'
 
+import { storageMediaSharpOptions } from '../__helpers/shared/storageMediaSharpOptions.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Documents } from './collections/Documents.js'
@@ -35,12 +36,7 @@ export default buildConfigWithDefaults({
       transformers: [
         sharpTransformer({
           collections: {
-            media: {
-              variants: [
-                { height: 400, width: 400, crop: 'center', name: 'square' },
-                { width: 900, height: 450, crop: 'center', name: 'sixteenByNineMedium' },
-              ],
-            },
+            media: { variants: storageMediaSharpOptions.variants },
           },
         }),
       ],

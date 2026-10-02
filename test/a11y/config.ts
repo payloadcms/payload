@@ -1,14 +1,13 @@
 import type { CollectionConfig } from 'payload'
 
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import sharp from 'sharp'
 
+import { mediaSharpTransformer } from '../__helpers/shared/mediaSharpTransformer.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { MediaCollection, mediaSharpOptions, mediaSlug } from './collections/Media/index.js'
+import { MediaCollection, mediaSlug } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { UsersCollection, usersSlug } from './collections/Users/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
@@ -38,7 +37,7 @@ const FolderCollection = {
 export default buildConfigWithDefaults({
   config: {
     upload: {
-      transformers: [sharpTransformer({ collections: { [mediaSlug]: mediaSharpOptions }, sharp })],
+      transformers: [mediaSharpTransformer({ mediaSlug })],
     },
     // ...extend config here
     admin: {
