@@ -10,11 +10,14 @@ const baseClass = 'html-diff'
 
 export const getHTMLDiffComponents = ({
   fromHTML,
+  fromLabel,
   postProcess,
   toHTML,
   tokenizeByCharacter,
+  toLabel,
 }: {
   fromHTML: string
+  fromLabel?: string
   /**
    * Optional function to transform the HTML output after diffing.
    * Useful for converting escape sequences to HTML entities.
@@ -22,6 +25,7 @@ export const getHTMLDiffComponents = ({
   postProcess?: (html: string) => string
   toHTML: string
   tokenizeByCharacter?: boolean
+  toLabel?: string
 }): {
   From: React.ReactNode
   To: React.ReactNode
@@ -39,15 +43,19 @@ export const getHTMLDiffComponents = ({
 
   const From = oldHTML ? (
     <div
+      aria-label={fromLabel}
       className={`${baseClass}__diff-old html-diff`}
       dangerouslySetInnerHTML={{ __html: oldHTML }}
+      role={fromLabel ? 'group' : undefined}
     />
   ) : null
 
   const To = newHTML ? (
     <div
+      aria-label={toLabel}
       className={`${baseClass}__diff-new html-diff`}
       dangerouslySetInnerHTML={{ __html: newHTML }}
+      role={toLabel ? 'group' : undefined}
     />
   ) : null
 

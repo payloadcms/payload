@@ -200,7 +200,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
               {showCrop && (
                 <div className={`${baseClass}__section`}>
                   <div className={`${baseClass}__section-header`}>
-                    <span className={`${baseClass}__section-title`}>{t('upload:crop')}</span>
+                    <h3 className={`${baseClass}__section-title`}>{t('upload:crop')}</h3>
                     <button
                       aria-label={t('general:reset')}
                       className={`${baseClass}__reset`}
@@ -236,7 +236,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
               {showFocalPoint && (
                 <div className={`${baseClass}__section`}>
                   <div className={`${baseClass}__section-header`}>
-                    <span className={`${baseClass}__section-title`}>{t('upload:focalPoint')}</span>
+                    <h3 className={`${baseClass}__section-title`}>{t('upload:focalPoint')}</h3>
                     <button
                       aria-label={t('general:reset')}
                       className={`${baseClass}__reset`}
@@ -311,6 +311,8 @@ const DraggableElement = ({
   onDragEnd,
   setCheckBounds,
 }) => {
+  const { t } = useTranslation()
+
   const [position, setPosition] = useState({ x: initialPosition.x, y: initialPosition.y })
   const [isDragging, setIsDragging] = useState(false)
   const dragRef = useRef<HTMLButtonElement | undefined>(undefined)
@@ -331,6 +333,42 @@ const DraggableElement = ({
   const handleMouseDown = (event) => {
     event.preventDefault()
     setIsDragging(true)
+  }
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (event.altKey || event.ctrlKey || event.metaKey || isDragging) {
+      return
+    }
+    const step = event.shiftKey ? 10 : 1
+    let { x, y } = positionRef.current
+
+    switch (event.key) {
+      case 'ArrowDown':
+        y += step
+        break
+      case 'ArrowLeft':
+        x -= step
+        break
+      case 'ArrowRight':
+        x += step
+        break
+      case 'ArrowUp':
+        y -= step
+        break
+      default:
+        return
+    }
+
+    event.preventDefault()
+    event.stopPropagation()
+    const nextPosition = {
+      x: Math.max(0, Math.min(100, x)),
+      y: Math.max(0, Math.min(100, y)),
+    }
+
+    positionRef.current = nextPosition
+    setPosition(nextPosition)
+    onDragEnd(nextPosition)
   }
 
   // Attach global listeners while dragging — this ensures events fire even when
@@ -381,7 +419,10 @@ const DraggableElement = ({
   return (
     <div className={`${baseClass}__draggable-container`}>
       <button
+        aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown Shift+ArrowLeft Shift+ArrowRight Shift+ArrowUp Shift+ArrowDown"
+        aria-label={t('upload:setFocalPoint')}
         className={[`${baseClass}__draggable`, className].filter(Boolean).join(' ')}
+        onKeyDown={handleKeyDown}
         onMouseDown={handleMouseDown}
         ref={dragRef}
         style={{ left: `${position.x}%`, top: `${position.y}%` }}

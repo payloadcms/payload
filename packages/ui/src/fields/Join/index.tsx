@@ -4,7 +4,7 @@ import type {
   ClientConfig,
   ClientField,
   JoinFieldClient,
-  JoinFieldClientComponent,
+  JoinFieldClientProps,
   PaginatedDocs,
   Where,
 } from 'payload'
@@ -123,7 +123,7 @@ const getInitialDrawerData = ({
   }
 }
 
-const JoinFieldComponent: JoinFieldClientComponent = (props) => {
+const JoinFieldComponent: React.FC<JoinFieldClientProps> = (props) => {
   const {
     field,
     field: { admin: { allowCreate, description } = {}, collection, label, localized, on, required },

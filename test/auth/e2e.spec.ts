@@ -11,6 +11,7 @@ import type { Config } from './payload-types.js'
 import { login } from '../__helpers/e2e/auth/login.js'
 import { logout } from '../__helpers/e2e/auth/logout.js'
 import { getRoutes, saveDocAndAssert } from '../__helpers/e2e/helpers.js'
+import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -58,6 +59,7 @@ describe('Auth', () => {
 
       await payload.delete({
         collection: slug,
+        overrideAccess: true,
         where: {
           email: {
             exists: true,
@@ -174,6 +176,7 @@ describe('Auth', () => {
         const { docs } = await payload.find({
           collection: slug,
           limit: 1,
+          overrideAccess: true,
           where: { email: { equals: devUser.email } },
         })
 
@@ -181,6 +184,7 @@ describe('Auth', () => {
           id: docs[0]!.id,
           collection: slug,
           data: { password: devUser.password },
+          overrideAccess: true,
         })
       })
 
@@ -328,6 +332,7 @@ describe('Auth', () => {
           const lockedDocs = await payload.find({
             collection: 'payload-locked-documents',
             limit: 1,
+            overrideAccess: true,
             pagination: false,
           })
 
@@ -338,6 +343,7 @@ describe('Auth', () => {
 
         await expect.poll(countLockedDocs, { timeout: POLL_TOPASS_TIMEOUT }).toBe(1)
 
+        await openNav(page)
         await page.locator('.user-menu__trigger').click()
         await page.locator('a[href$="/logout"]').click()
 
@@ -374,6 +380,7 @@ describe('Auth', () => {
         const users = await payload.find({
           collection: slug,
           limit: 1,
+          overrideAccess: true,
         })
 
         const userDocumentRoute = formatAdminURL({
@@ -409,6 +416,7 @@ describe('Auth', () => {
         const notInUserCollection = await payload.create({
           collection: 'relationsCollection',
           data: {},
+          overrideAccess: true,
         })
 
         await logout(page, serverURL)

@@ -301,6 +301,7 @@ const SelectFields: CollectionConfig = {
           collection: selectFieldsSlug,
           limit: 0,
           req,
+          overrideAccess: true,
         })
 
         return data.disallowOption2

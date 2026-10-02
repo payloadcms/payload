@@ -22,14 +22,14 @@ export function useControllableState<T, D>(
   fallbackValue?: D,
 ): [T extends NonNullable<T> ? T : D | NonNullable<T>, (value: ((prev: T) => T) | T) => void] {
   const [localValue, setLocalValue] = useState<T>(propValue)
-  const initialRenderRef = useRef(true)
+  const previousPropValue = useRef(propValue)
 
   useEffect(() => {
-    if (initialRenderRef.current) {
-      initialRenderRef.current = false
+    if (Object.is(previousPropValue.current, propValue)) {
       return
     }
 
+    previousPropValue.current = propValue
     setLocalValue(propValue)
   }, [propValue])
 

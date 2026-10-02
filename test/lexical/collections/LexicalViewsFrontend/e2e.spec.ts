@@ -129,6 +129,7 @@ describe('Lexical Views', () => {
           }),
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       try {
@@ -166,6 +167,7 @@ describe('Lexical Views', () => {
         await _payload.delete({
           id: doc.id,
           collection: lexicalViewsFrontendSlug,
+          overrideAccess: true,
         })
       }
     })
@@ -197,6 +199,7 @@ describe('Lexical Views', () => {
           }),
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       try {
@@ -243,6 +246,7 @@ describe('Lexical Views', () => {
         await _payload.delete({
           id: doc.id,
           collection: lexicalViewsFrontendSlug,
+          overrideAccess: true,
         })
       }
     })
@@ -272,6 +276,7 @@ describe('Lexical Views', () => {
           }),
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       try {
@@ -317,6 +322,7 @@ describe('Lexical Views', () => {
         await _payload.delete({
           id: doc.id,
           collection: lexicalViewsFrontendSlug,
+          overrideAccess: true,
         })
       }
     })

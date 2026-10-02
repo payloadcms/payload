@@ -10,6 +10,14 @@ const here = dirname(fileURLToPath(import.meta.url))
 const fixture = (name: string) => readFile(join(here, name), 'utf8')
 
 describe('migrate-aliased-exports', () => {
+  it('should migrate legacy request helpers directly to the canonical export while preserving local bindings', async () => {
+    const source = await fixture('request.input.ts')
+    const output = await fixture('request.output.ts')
+
+    expect(await runTransform({ source, transform: migrateAliasedExports })).toBe(output)
+    expect(await runTransform({ source: output, transform: migrateAliasedExports })).toBe(output)
+  })
+
   it('moves pass-through re-exports to canonical sources', async () => {
     const input = await fixture('basic.input.ts')
     const output = await fixture('basic.output.ts')

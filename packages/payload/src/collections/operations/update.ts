@@ -469,6 +469,8 @@ export const updateOperation = async <
       collectionConfig,
       config,
       req,
+    }).catch((unlinkError) => {
+      req.payload.logger.error({ err: unlinkError, msg: 'Failed to remove temp file' })
     })
 
     let result = {

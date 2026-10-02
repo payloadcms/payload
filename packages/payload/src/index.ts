@@ -837,6 +837,7 @@ export class BasePayload {
               await this.jobs.run({
                 allQueues: cronConfig.allQueues,
                 limit: cronConfig.limit ?? DEFAULT_LIMIT,
+                overrideAccess: true,
                 queue: cronConfig.queue,
                 silent: cronConfig.silent,
               })
@@ -1504,9 +1505,10 @@ export type {
 export type { CompoundIndex, FoldersConfig, TagsConfig } from './collections/config/types.js'
 
 export type { SanitizedCompoundIndex } from './collections/config/types.js'
-export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
 
+export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
 export { countOperation } from './collections/operations/count.js'
+
 export { createOperation } from './collections/operations/create.js'
 export { deleteOperation } from './collections/operations/delete.js'
 export { deleteByIDOperation } from './collections/operations/deleteByID.js'
@@ -1557,9 +1559,9 @@ export {
 export { addDefaultsToConfig } from './config/defaults.js'
 
 export { definePlugin } from './config/definePlugin.js'
-
 export { type OrderableEndpointBody } from './config/orderable/index.js'
 export { sanitizeConfig } from './config/sanitize.js'
+
 export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
 export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
@@ -1684,6 +1686,8 @@ export {
 } from './errors/index.js'
 
 export type { ValidationFieldError } from './errors/index.js'
+export type { Authorship, SanitizedAuthorship } from './fields/baseFields/authorship/index.js'
+export { createCreatedByField, createUpdatedByField } from './fields/baseFields/authorship/index.js'
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 export { baseIDField } from './fields/baseFields/baseIDField.js'
 
@@ -2019,8 +2023,11 @@ export {
   withNullableJSONSchemaType,
 } from './utilities/configToJSONSchema.js'
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
-export { createLocalReq } from './utilities/createLocalReq.js'
-export { createPayloadRequest } from './utilities/createPayloadRequest.js'
+export {
+  createPayloadRequest,
+  type CreatePayloadRequestArgs,
+} from './utilities/createPayloadRequest.js'
+export { createPayloadRequestFromWebRequest } from './utilities/createPayloadRequestFromWebRequest.js'
 export {
   deepCopyObject,
   deepCopyObjectComplex,

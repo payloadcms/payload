@@ -17,12 +17,12 @@ import { RenderServerComponent } from '../../elements/RenderServerComponent/inde
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 import { FieldDescription, WatchCondition } from '../../exports/client/index.js'
 
-const defaultUIFieldComponentKeys: Array<'Cell' | 'Description' | 'Field' | 'Filter'> = [
+const defaultUIFieldComponentKeys: ReadonlySet<string> = new Set([
   'Cell',
   'Description',
   'Field',
   'Filter',
-]
+])
 
 export const renderField: RenderFieldMethod = ({
   id,
@@ -278,7 +278,7 @@ export const renderField: RenderFieldMethod = ({
       if (fieldConfig?.admin?.components) {
         // Render any extra, untyped components
         for (const key in fieldConfig.admin.components) {
-          if (key in defaultUIFieldComponentKeys) {
+          if (defaultUIFieldComponentKeys.has(key)) {
             continue
           }
 
