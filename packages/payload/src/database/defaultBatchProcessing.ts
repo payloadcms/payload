@@ -5,7 +5,7 @@ import type {
   BatchProcessingResult,
 } from './types.js'
 
-import { processInBatches } from '../utilities/processInBatches.js'
+import { batchProcessing } from '../utilities/batchProcessing.js'
 
 export const defaultBatchProcessing: BatchProcessing = async function defaultBatchProcessing({
   batchSize,
@@ -16,7 +16,7 @@ export const defaultBatchProcessing: BatchProcessing = async function defaultBat
   const results: BatchProcessingResult[] = []
   let shouldStop = false
 
-  await processInBatches({
+  await batchProcessing({
     batchSize,
     input: operations.map((operation, index) => ({ index, operation })),
     processBatch: async ({ batch }) => {

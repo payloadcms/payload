@@ -186,6 +186,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     searchWidgets: '搜索小工具...',
     widgetCollectionRequired: 'Collection 為必填項目。',
     widgetConfigurationError: '元件組態錯誤',
+    widgetDropFilesToUpload: '拖放檔案',
     widgetInvalidCollection: 'Collection「{{collection}}」不存在。',
     widgetInvalidFilterField: '篩選欄位「{{field}}」不存在於 Collection「{{collection}}」中。',
     widgetInvalidSortField: '排序欄位「{{field}}」在集合「{{collection}}」中不存在。',
@@ -200,6 +201,8 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: '排序欄位',
     widgetTitleFallback: 'Collection 查詢',
     widgetTitleLabel: '標題',
+    widgetUploadDropzoneDescription: '透過拖放從您的電腦上傳，或點擊下方按鈕。',
+    widgetUploadFiles: '新增多個檔案',
   },
   error: {
     accountAlreadyActivated: '此帳戶已啟用。',

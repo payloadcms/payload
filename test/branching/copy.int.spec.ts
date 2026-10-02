@@ -1,3 +1,5 @@
+/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options"] }] -- Tests use the shared fixture wrapper. */
+
 import type { PayloadRequest } from 'payload'
 
 import { initTransaction, killTransaction, ValidationError } from 'payload'
@@ -36,12 +38,15 @@ test.suite('Database copy', { config: './config.ts' }, () => {
     const copied = (await payload.db.copy({
       collection: nestedSlug,
       data: {
+        _branch: 'copy-test',
+        _branchDocID: source.id,
         items: [{ label: 'replacement item' }],
         title: 'replacement title',
       },
-      destination: { branch: 'copy-test' },
       req,
-      source: { id: source.id, branch: 'main' },
+      where: {
+        and: [{ _branch: { equals: 'main' } }, { id: { equals: source.id } }],
+      },
     })) as NestedDocument
 
     expect(copied.id).not.toBe(source.id)
@@ -84,9 +89,14 @@ test.suite('Database copy', { config: './config.ts' }, () => {
     await expect(
       payload.db.copy({
         collection: nestedSlug,
-        destination: { branch: 'copy-test' },
+        data: {
+          _branch: 'copy-test',
+          _branchDocID: source.id,
+        },
         req: { payload },
-        source: { id: source.id, branch: 'missing-branch' },
+        where: {
+          and: [{ _branch: { equals: 'missing-branch' } }, { id: { equals: source.id } }],
+        },
       }),
     ).rejects.toMatchObject({ name: 'NotFound' })
   })
@@ -99,14 +109,53 @@ test.suite('Database copy', { config: './config.ts' }, () => {
     })
     const copyArgs = {
       collection: nestedSlug,
-      destination: { branch: 'copy-test' },
+      data: {
+        _branch: 'copy-test',
+        _branchDocID: source.id,
+      },
       req: { payload },
-      source: { id: source.id, branch: 'main' },
+      where: {
+        and: [{ _branch: { equals: 'main' } }, { id: { equals: source.id } }],
+      },
     } as const
 
     await payload.db.copy(copyArgs)
 
     await expect(payload.db.copy(copyArgs)).rejects.toBeInstanceOf(ValidationError)
+  })
+
+  test('should select a stored branch source using the supplied where query', async ({
+    payload,
+  }) => {
+    const source = await payload.create({
+      collection: nestedSlug,
+      data: { title: 'main source' },
+      overrideAccess: true,
+    })
+    const req = { payload } as PayloadRequest
+    const branchSource = await payload.db.create({
+      collection: nestedSlug,
+      data: {
+        _branch: 'source-branch',
+        _branchDocID: source.id,
+        title: 'source branch value',
+      },
+      req,
+    })
+
+    const copied = (await payload.db.copy({
+      collection: nestedSlug,
+      data: {
+        _branch: 'destination-branch',
+        _branchDocID: source.id,
+      },
+      req,
+      where: { id: { equals: branchSource.id } },
+    })) as NestedDocument
+
+    expect(copied._branch).toBe('destination-branch')
+    expect(copied._branchDocID).toBe(source.id)
+    expect(copied.title).toBe('source branch value')
   })
 
   test.options(
@@ -128,9 +177,14 @@ test.suite('Database copy', { config: './config.ts' }, () => {
       try {
         const copied = await payload.db.copy({
           collection: nestedSlug,
-          destination: { branch: 'transaction-copy' },
+          data: {
+            _branch: 'transaction-copy',
+            _branchDocID: source.id,
+          },
           req,
-          source: { id: source.id, branch: 'main' },
+          where: {
+            and: [{ _branch: { equals: 'main' } }, { id: { equals: source.id } }],
+          },
         })
 
         copiedID = copied.id

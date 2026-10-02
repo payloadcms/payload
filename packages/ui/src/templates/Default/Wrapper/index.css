@@ -19,10 +19,6 @@
 
   /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1440px) {
-    .template-default--nav-hydrated.template-default--nav-open {
-      grid-template-columns: var(--nav-width) auto;
-    }
-
     .template-default {
       grid-template-columns: 1fr auto;
 
@@ -36,6 +32,25 @@
 
       .nav {
         display: flex;
+      }
+    }
+
+    .template-default--nav-open {
+      grid-template-columns: var(--nav-width) auto;
+
+      .nav {
+        display: flex;
+      }
+    }
+  }
+
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
+  @media (max-width: 768px) {
+    .template-default--nav-open:not(.template-default--nav-hydrated) {
+      grid-template-columns: 1fr auto;
+
+      .nav {
+        display: none;
       }
     }
   }

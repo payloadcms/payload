@@ -197,6 +197,7 @@ export const caTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Cerca de ginys...',
     widgetCollectionRequired: 'Cal especificar una Collection.',
     widgetConfigurationError: 'Error de configuració del widget',
+    widgetDropFilesToUpload: 'Arrossega i deixa anar un fitxer',
     widgetInvalidCollection: 'La Collection "{{collection}}" no existeix.',
     widgetInvalidFilterField:
       'El camp de filtre "{{field}}" no existeix a la Collection "{{collection}}".',
@@ -214,6 +215,9 @@ export const caTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Ordenar camp',
     widgetTitleFallback: 'Consulta de la Collection',
     widgetTitleLabel: 'Títol',
+    widgetUploadDropzoneDescription:
+      'Carregueu des del vostre ordinador arrossegant i deixant anar, o feu clic al botó següent',
+    widgetUploadFiles: 'Afegir fitxers',
   },
   error: {
     accountAlreadyActivated: 'Aquest compte ja ha estat activat.',

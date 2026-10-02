@@ -227,7 +227,7 @@ test.suite('Database batch processing', { config: './config.ts' }, () => {
   )
 
   test.options(
-    'should stop a later group failure without resolving the caller transaction',
+    'should stop a later batch failure without resolving the caller transaction',
     { db: (adapter) => adapter === 'mongodb' || adapter === 'postgres' },
     async ({ payload }) => {
       const existing = await payload.create({
@@ -246,19 +246,19 @@ test.suite('Database batch processing', { config: './config.ts' }, () => {
           batchSize: 1,
           operations: [
             {
-              args: { collection: postsSlug, data: { title: 'first batch group' } },
+              args: { collection: postsSlug, data: { title: 'first batch' } },
               operation: 'create',
             },
             {
               args: {
                 collection: postsSlug,
                 customID: existing.id,
-                data: { title: 'duplicate batch group' },
+                data: { title: 'duplicate batch' },
               },
               operation: 'create',
             },
             {
-              args: { collection: postsSlug, data: { title: 'unattempted batch group' } },
+              args: { collection: postsSlug, data: { title: 'unattempted batch' } },
               operation: 'create',
             },
           ],
@@ -278,7 +278,7 @@ test.suite('Database batch processing', { config: './config.ts' }, () => {
       const afterRollback = await payload.find({
         collection: postsSlug,
         overrideAccess: true,
-        where: { title: { in: ['first batch group', 'unattempted batch group'] } },
+        where: { title: { in: ['first batch', 'unattempted batch'] } },
       })
 
       expect(afterRollback.docs).toHaveLength(0)

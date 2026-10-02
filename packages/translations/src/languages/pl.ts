@@ -196,6 +196,7 @@ export const plTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Szukaj widgetów...',
     widgetCollectionRequired: 'Collection jest wymagana.',
     widgetConfigurationError: 'Błąd konfiguracji widgetu',
+    widgetDropFilesToUpload: 'Przeciągnij i upuść plik',
     widgetInvalidCollection: 'Kolekcja "{{collection}}" nie istnieje.',
     widgetInvalidFilterField:
       'Pole filtrujące „{{field}}” nie istnieje w kolekcji „{{collection}}”.',
@@ -212,6 +213,9 @@ export const plTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sortuj Pole',
     widgetTitleFallback: 'Zapytanie dotyczące Collection',
     widgetTitleLabel: 'Tytuł',
+    widgetUploadDropzoneDescription:
+      'Prześlij z komputera, przeciągając i upuszczając plik lub kliknij przycisk poniżej',
+    widgetUploadFiles: 'Dodaj pliki',
   },
   error: {
     accountAlreadyActivated: 'To konto zostało już aktywowane.',

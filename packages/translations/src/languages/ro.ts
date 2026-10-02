@@ -199,6 +199,7 @@ export const roTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Caută widgeturi...',
     widgetCollectionRequired: 'Colecția este obligatorie.',
     widgetConfigurationError: 'Eroare de configurare a widgetului',
+    widgetDropFilesToUpload: 'Trageți și plasați un fișier',
     widgetInvalidCollection: 'Colecția "{{collection}}" nu există.',
     widgetInvalidFilterField:
       'Câmpul de filtrare "{{field}}" nu există în colecția "{{collection}}".',
@@ -215,6 +216,9 @@ export const roTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sortare Field',
     widgetTitleFallback: 'Interogare de colecție',
     widgetTitleLabel: 'Titlu',
+    widgetUploadDropzoneDescription:
+      'Încărcați de pe computerul dumneavoastră prin tragere și fixare sau faceți clic pe butonul de mai jos',
+    widgetUploadFiles: 'Adăugați fișiere',
   },
   error: {
     accountAlreadyActivated: 'Acest cont a fost deja activat.',

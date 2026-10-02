@@ -199,6 +199,7 @@ export const huTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Keresés widgetek...',
     widgetCollectionRequired: 'A Collection megadása kötelező.',
     widgetConfigurationError: 'Widget konfigurációs hiba',
+    widgetDropFilesToUpload: 'Húzzon ide egy fájlt',
     widgetInvalidCollection: 'A(z) "{{collection}}" Collection nem létezik.',
     widgetInvalidFilterField:
       'A(z) „{{field}}” szűrőmező nem létezik a(z) „{{collection}}” Collection-ben.',
@@ -216,6 +217,9 @@ export const huTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Mező rendezése',
     widgetTitleFallback: 'Gyűjtemény lekérdezés',
     widgetTitleLabel: 'Cím',
+    widgetUploadDropzoneDescription:
+      'Töltsön fel a számítógépéről húzással és ejtéssel, vagy kattintson az alábbi gombra',
+    widgetUploadFiles: 'Fájlok hozzáadása',
   },
   error: {
     accountAlreadyActivated: 'Ez a fiók már aktiválva van.',

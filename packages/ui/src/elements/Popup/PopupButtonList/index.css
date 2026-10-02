@@ -6,6 +6,10 @@
     text-align: left;
   }
 
+  .popup-button-list > .popup {
+    align-self: stretch;
+  }
+
   [dir='rtl'] .popup-button-list__text-align--left {
     text-align: right;
   }
@@ -35,6 +39,7 @@
     display: flex;
     align-items: stretch;
     flex: 1;
+    width: 100%;
     color: var(--popup-item-color, var(--color-text));
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
@@ -65,7 +70,15 @@
     color: var(--popup-item-color-hover, var(--color-text-onselected-strong));
   }
 
-  .popup-button-list:has(> .popup > .popup__trigger-wrap [aria-expanded='true'])
+  .popup__content[role='menu']:has(
+      > .popup__scroll-container
+        > .popup-button-list
+        > .popup
+        > .popup__trigger-wrap
+        [aria-expanded='true']
+    )
+    > .popup__scroll-container
+    > .popup-button-list
     > .popup-button-list__button:not(.popup-button-list__button--selected):hover {
     background-color: transparent;
     color: var(--popup-item-color, var(--color-text));
@@ -159,6 +172,13 @@
     align-items: center;
   }
 
+  .popup-button-list__button--submenu-trigger:hover,
+  .popup-button-list__button--submenu-trigger.popup-button-list__button--selected,
+  .popup-button-list__button--submenu-trigger.popup-button-list__button--selected:hover {
+    background-color: var(--popup-item-bg-hover, var(--color-bg-brand));
+    color: var(--popup-item-color-hover, var(--color-text-onbrand));
+  }
+
   .popup-button-list__submenu-icon {
     display: flex;
     align-items: center;
@@ -170,11 +190,5 @@
     display: flex;
     align-items: center;
     margin-left: auto;
-    opacity: 0.5;
-  }
-
-  .popup-button-list__button--submenu-trigger:hover .popup-button-list__chevron,
-  .popup-button-list__button--selected .popup-button-list__chevron {
-    opacity: 1;
   }
 }

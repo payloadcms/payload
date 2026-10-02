@@ -4,51 +4,47 @@ import type { SanitizedConfig } from '../config/types.js'
 import type { Field } from '../fields/config/types.js'
 import type { Copy } from './types.js'
 
-import { branchDocIDField, branchField } from '../branching/types.js'
 import { NotFound } from '../errors/NotFound.js'
 import { deepCopyObjectSimple } from '../utilities/deepCopyObject.js'
 import { traverseFields } from '../utilities/traverseFields.js'
 
-export const defaultCopy: Copy = async function defaultCopy({
-  collection,
-  data = {},
-  destination,
-  req,
-  source,
-}) {
+export const defaultCopy: Copy = async function defaultCopy({ collection, data = {}, req, where }) {
+  const collectionConfig = this.payload.collections[collection]!
+  const { customIDType } = collectionConfig
+  const hasValidCustomID =
+    customIDType === 'number' ? typeof data.id === 'number' : typeof data.id === 'string'
+
+  if (customIDType && !hasValidCustomID) {
+    throw new TypeError(
+      `Database copy for collection "${collection}" requires data.id to match its custom ${customIDType} ID type`,
+    )
+  }
+
   const sourceDocument = await this.findOne({
     branch: false,
     collection,
     req,
-    where: {
-      and: [
-        { [branchField]: { equals: source.branch } },
-        {
-          or: [{ id: { equals: source.id } }, { [branchDocIDField]: { equals: source.id } }],
-        },
-      ],
-    },
+    where,
   })
 
   if (!sourceDocument) {
     throw new NotFound(req?.t)
   }
 
-  const { id: _sourceRowID, ...sourceData } = sourceDocument
-  const destinationData = copyDataWithFreshRowIDs({
+  const { id: _sourceID, ...sourceData } = sourceDocument
+  const copiedData = copyDataWithFreshRowIDs({
     config: this.payload.config,
     data: {
       ...sourceData,
       ...data,
-      [branchDocIDField]: source.id,
-      [branchField]: destination.branch,
     },
-    fields: this.payload.collections[collection]!.config.fields,
+    fields: collectionConfig.config.fields,
   })
 
   return this.create({
     collection,
-    data: destinationData,
+    ...(customIDType ? { customID: data.id as number | string } : {}),
+    data: copiedData,
     req,
   })
 }

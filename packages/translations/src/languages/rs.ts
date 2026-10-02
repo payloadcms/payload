@@ -197,6 +197,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Pretraži widgete...',
     widgetCollectionRequired: 'Kolekcija je obavezna.',
     widgetConfigurationError: 'Greška u konfiguraciji vidžeta',
+    widgetDropFilesToUpload: 'Превуците и испустите датотеку',
     widgetInvalidCollection: 'Kolekcija "{{collection}}" ne postoji.',
     widgetInvalidFilterField: 'Filter polje "{{field}}" ne postoji u kolekciji "{{collection}}".',
     widgetInvalidSortField:
@@ -213,6 +214,9 @@ export const rsTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sortiraj polje',
     widgetTitleFallback: 'Upit za kolekciju',
     widgetTitleLabel: 'Naslov',
+    widgetUploadDropzoneDescription:
+      'Отпремите са свог рачунара превлачењем и испуштањем или кликните на дугме испод',
+    widgetUploadFiles: 'Dodaj datoteke',
   },
   error: {
     accountAlreadyActivated: 'Овај налог је већ активиран.',

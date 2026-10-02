@@ -196,6 +196,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Пошук віджетів...',
     widgetCollectionRequired: 'Collection є обов’язковим.',
     widgetConfigurationError: 'Помилка конфігурації віджета',
+    widgetDropFilesToUpload: 'Перемістіть файл',
     widgetInvalidCollection: 'Collection "{{collection}}" не існує.',
     widgetInvalidFilterField: 'Поле фільтрації "{{field}}" не існує у колекції "{{collection}}".',
     widgetInvalidSortField: 'Поле сортування "{{field}}" не існує у Collection "{{collection}}".',
@@ -211,6 +212,9 @@ export const ukTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Поле сортування',
     widgetTitleFallback: 'Запит колекції',
     widgetTitleLabel: 'Заголовок',
+    widgetUploadDropzoneDescription:
+      'Завантажте з вашого комп’ютера шляхом перетягування або натисніть кнопку нижче',
+    widgetUploadFiles: 'Додати файли',
   },
   error: {
     accountAlreadyActivated: 'Цей обліковий запис вже активований',

@@ -195,6 +195,7 @@ export const daTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Søg widgets...',
     widgetCollectionRequired: 'Collection er påkrævet.',
     widgetConfigurationError: 'Konfigurationsfejl for widget',
+    widgetDropFilesToUpload: 'Træk og slip en fil',
     widgetInvalidCollection: 'Collection "{{collection}}" eksisterer ikke.',
     widgetInvalidFilterField: 'Filterfeltet "{{field}}" findes ikke i Collection "{{collection}}".',
     widgetInvalidSortField:
@@ -211,6 +212,9 @@ export const daTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sortér felt',
     widgetTitleFallback: 'Collectionsforespørgsel',
     widgetTitleLabel: 'Titel',
+    widgetUploadDropzoneDescription:
+      'Upload fra din computer via træk og slip, eller klik på knappen nedenfor',
+    widgetUploadFiles: 'Tilføj Filer',
   },
   error: {
     accountAlreadyActivated: 'Denne konto er allerede blevet aktiveret.',

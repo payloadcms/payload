@@ -36,6 +36,7 @@ export const MediaCollection: CollectionConfig = {
         width: 1200,
       },
     ],
+    mimeTypes: ['image/*'],
   },
   versions: false,
 }

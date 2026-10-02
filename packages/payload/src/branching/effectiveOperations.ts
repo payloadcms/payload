@@ -1,7 +1,7 @@
 import type { Payload, PayloadRequest, Where } from '../types/index.js'
 
 import { APIError } from '../errors/index.js'
-import { processInBatches } from '../utilities/processInBatches.js'
+import { batchProcessing } from '../utilities/batchProcessing.js'
 import { traverseForLocalizedFields } from '../utilities/traverseForLocalizedFields.js'
 import { branchDocIDField, branchField, MAIN_BRANCH } from './types.js'
 
@@ -124,7 +124,7 @@ const readChangeShadows = async ({
   }
 
   for (const [collectionSlug, collectionChanges] of changesByCollection) {
-    await processInBatches({
+    await batchProcessing({
       batchSize: effectiveOperationReadBatchSize,
       input: collectionChanges,
       processBatch: async ({ batch }) => {

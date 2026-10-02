@@ -1,8 +1,8 @@
-export type ProcessBatchResult = {
+export type BatchProcessorResult = {
   shouldContinue?: boolean
 }
 
-export type ProcessInBatchesArgs<T> = {
+export type BatchProcessingOptions<T> = {
   /**
    * The maximum number of items supplied to one processor call.
    *
@@ -13,19 +13,19 @@ export type ProcessInBatchesArgs<T> = {
   processBatch: (args: {
     batch: T[]
     batchIndex: number
-  }) => ProcessBatchResult | Promise<ProcessBatchResult | void> | void
+  }) => BatchProcessorResult | Promise<BatchProcessorResult | void> | void
 }
 
 /**
- * Processes iterable input in ordered, bounded groups. Processing is sequential and stops when the
+ * Processes iterable input in ordered, bounded batches. Processing is sequential and stops when the
  * processor returns `shouldContinue: false` or throws. This utility does not retry work or manage
  * transactions.
  */
-export const processInBatches = async <T>({
+export const batchProcessing = async <T>({
   batchSize = 100,
   input,
   processBatch,
-}: ProcessInBatchesArgs<T>): Promise<void> => {
+}: BatchProcessingOptions<T>): Promise<void> => {
   if (!Number.isInteger(batchSize) || batchSize < 1) {
     throw new TypeError('batchSize must be a positive integer')
   }

@@ -196,6 +196,7 @@ export const slTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Išči gradnike...',
     widgetCollectionRequired: 'Zbirka je obvezna.',
     widgetConfigurationError: 'Napaka pri konfiguraciji gradnika',
+    widgetDropFilesToUpload: 'Povlecite in spustite datoteko',
     widgetInvalidCollection: 'Zbirka "{{collection}}" ne obstaja.',
     widgetInvalidFilterField: 'Filter polje "{{field}}" ne obstaja v zbirki "{{collection}}".',
     widgetInvalidSortField: 'Početno polje "{{field}}" ne obstaja v zbirki "{{collection}}".',
@@ -211,6 +212,9 @@ export const slTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Razvrsti Field',
     widgetTitleFallback: 'Poizvedba zbirke',
     widgetTitleLabel: 'Naslov',
+    widgetUploadDropzoneDescription:
+      'Naložite s svojega računalnika z metodo povleci in spusti ali kliknite spodnji gumb.',
+    widgetUploadFiles: 'Dodaj datoteke',
   },
   error: {
     accountAlreadyActivated: 'Ta račun je že aktiviran.',

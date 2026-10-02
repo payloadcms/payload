@@ -197,6 +197,7 @@ export const enTranslations = {
     searchWidgets: 'Search widgets...',
     widgetCollectionRequired: 'Collection is required.',
     widgetConfigurationError: 'Widget configuration error',
+    widgetDropFilesToUpload: 'Drop files to upload',
     widgetInvalidCollection: 'Collection "{{collection}}" does not exist.',
     widgetInvalidFilterField:
       'Filter field "{{field}}" does not exist on collection "{{collection}}".',
@@ -213,6 +214,9 @@ export const enTranslations = {
     widgetSortFieldLabel: 'Sort Field',
     widgetTitleFallback: 'Collection query',
     widgetTitleLabel: 'Title',
+    widgetUploadDropzoneDescription:
+      'Upload from your computer via drag-and-drop, or click the button below',
+    widgetUploadFiles: 'Upload files',
   },
   error: {
     accountAlreadyActivated: 'This account has already been activated.',

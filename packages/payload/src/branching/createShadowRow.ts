@@ -1,4 +1,3 @@
-import type { CopyArgs } from '../database/types.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { BranchOperation } from './types.js'
 
@@ -12,6 +11,11 @@ import { initTransaction } from '../utilities/initTransaction.js'
 import { isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
 import { killTransaction } from '../utilities/killTransaction.js'
 import { branchChangesCollectionSlug, branchDocIDField, branchField } from './types.js'
+
+type ShadowSource = {
+  branch: string
+  id: number | string
+}
 
 type Args = {
   branch: string
@@ -28,7 +32,7 @@ type Args = {
   onCreated: (req: PayloadRequest, shadow: Record<string, unknown>) => Promise<unknown>
   req: PayloadRequest
   /** Copies an exact logical source document instead of creating from data alone. */
-  source?: CopyArgs['source']
+  source?: ShadowSource
   /** Uses the request's existing transaction and leaves commit or rollback to its owner. */
   useAmbientTransaction?: boolean
 }
@@ -334,15 +338,25 @@ const createShadowContent = async ({
   collectionSlug: string
   data: Record<string, unknown>
   req: PayloadRequest
-  source?: CopyArgs['source']
+  source?: ShadowSource
 }): Promise<Record<string, unknown>> => {
   if (source) {
     return req.payload.db.copy({
       collection: collectionSlug,
-      data,
-      destination: { branch },
+      data: {
+        ...data,
+        [branchDocIDField]: source.id,
+        [branchField]: branch,
+      },
       req,
-      source,
+      where: {
+        and: [
+          { [branchField]: { equals: source.branch } },
+          {
+            or: [{ id: { equals: source.id } }, { [branchDocIDField]: { equals: source.id } }],
+          },
+        ],
+      },
     }) as Promise<Record<string, unknown>>
   }
 

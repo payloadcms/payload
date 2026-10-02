@@ -215,6 +215,13 @@ const addDefaultDashboardWidgets = ({
     },
   ]
 
+  const uploadCollections = (config.collections ?? []).filter(
+    (collection) =>
+      collection.upload &&
+      collection.upload.bulkUpload !== false &&
+      collection.admin?.hidden !== true,
+  )
+
   const adminConfig: NonNullable<Config['admin']> = config.admin ?? { dashboard: { widgets: [] } }
   const dashboard: DashboardConfig = (adminConfig.dashboard ??= { widgets: [] })
 
@@ -257,6 +264,38 @@ const addDefaultDashboardWidgets = ({
     label: ({ t }) => t('dashboard:widgetRecentlyViewedTitle'),
     minWidth: 'x-small',
   })
+  if (uploadCollections.length > 0) {
+    dashboard.widgets.push({
+      slug: 'upload-dropzone',
+      Component: '@payloadcms/ui/rsc#UploadDropzoneWidget',
+      fields: sanitizeFields({
+        config: config as unknown as Config,
+        existingFieldNames: new Set(),
+        fields: [
+          {
+            name: 'excludedCollections',
+            type: 'select',
+            admin: {
+              components: {
+                Field: '@payloadcms/ui#UploadDropzoneCollectionsField',
+              },
+            },
+            hasMany: true,
+            label: ({ t }) => t('general:collections'),
+            options: uploadCollections.map((collection) => ({
+              label: collection.labels?.plural || collection.slug,
+              value: collection.slug,
+            })),
+          },
+        ],
+        parentIsLocalized: false,
+        richTextSanitizers,
+        validRelationships,
+      }),
+      label: ({ t }) => t('dashboard:widgetUploadFiles'),
+      minWidth: 'x-small',
+    })
+  }
   dashboard.defaultLayout ??= [
     {
       widgetSlug: 'welcome',

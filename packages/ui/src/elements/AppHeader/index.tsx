@@ -68,7 +68,7 @@ export function AppHeader() {
                 buttonStyle="ghost"
                 className={`${baseClass}__sidebar-toggle`}
                 icon={<SidebarIcon />}
-                onClick={() => setNavOpen(!navOpen)}
+                onClick={() => setNavOpen(!navOpen, true)}
                 type="button"
               />
               {/* Ahead of the trail rather than inside it: the trail collapses under
