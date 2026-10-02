@@ -8,6 +8,8 @@ import dotenv from 'dotenv'
 import { readFileSync } from 'fs'
 import { createServer } from 'node:http'
 import path from 'path'
+import { createLocalReq } from 'payload'
+import { getSafeFileName } from 'payload/internal'
 import * as qs from 'qs-esm'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
@@ -498,6 +500,16 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
         },
         { addQueryPrefix: true },
       )
+      const expectedFilename =
+        scenario === 'conversion'
+          ? 'processed.webp'
+          : legacyDoc
+            ? await getSafeFileName({
+                collectionSlug,
+                desiredFilename: instructions.file.filename,
+                req: await createLocalReq({}, payload),
+              })
+            : instructions.file.filename
       const response = legacyDoc
         ? await restClient.PATCH(`/${collectionSlug}/${legacyDoc.id}${query}`, { body: formData })
         : await restClient.POST(`/${collectionSlug}${query}`, { body: formData })
@@ -525,14 +537,8 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
       expect(blobs.some((blob) => blob.pathname === uploaded.pathname)).toBe(
         scenario === 'mime-mismatch',
       )
-      expect(doc.filename).toBe(
-        scenario === 'conversion'
-          ? 'processed.webp'
-          : scenario === 'legacy-overwrite'
-            ? instructions.file.filename.replace(/\.png$/, '-1.png')
-            : instructions.file.filename,
-      )
-      expect(storedDoc._objectKey === undefined).toBe(scenario === 'legacy-overwrite')
+      expect(doc.filename).toBe(expectedFilename)
+      expect(Boolean(storedDoc._objectKey)).toBe(scenario !== 'legacy-overwrite')
 
       for (const storedFile of [doc, doc.sizes.square]) {
         const storagePath = [storedDoc.prefix, storedDoc._objectKey, storedFile.filename]
