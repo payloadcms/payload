@@ -383,10 +383,9 @@ test.describe('WCAG 2.2 Level AA', () => {
         const comparison = await compareHeadingWithOriginalSpan({
           heading,
           originalStyle: `
-            font-family: var(--text-body-medium-strong-font-family);
-            font-size: var(--text-body-medium-strong-font-size);
-            font-weight: var(--text-body-medium-strong-font-weight);
-            line-height: var(--text-body-medium-strong-line-height);
+            font-size: var(--text-body-medium-bold-font-size);
+            font-weight: var(--text-body-medium-bold-font-weight);
+            line-height: var(--text-body-medium-bold-line-height);
             color: var(--color-text);
           `,
         })
@@ -530,6 +529,114 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('1.4.10 Reflow (AA)', () => {
+    for (const viewport of [
+      { height: 180, width: 1280 },
+      { height: 180, width: 375 },
+    ]) {
+      test(`should keep the account header stationary while scrolling navigation at ${viewport.width}px`, async ({
+        context,
+      }) => {
+        await context.addCookies(await page.context().cookies())
+        const scrollingPage = await context.newPage()
+
+        await scrollingPage.setViewportSize(viewport)
+        await scrollingPage.goto(`${serverURL}/admin`)
+        await expect(scrollingPage.locator('.template-default--nav-hydrated')).toBeVisible()
+        await openNavigationForUserMenu({ page: scrollingPage })
+
+        const nav = scrollingPage.locator('aside.nav')
+        const header = nav.locator('.nav__header')
+        const scroll = nav.locator('.nav__scroll')
+
+        await expect(nav).not.toHaveAttribute('inert')
+
+        const initialHeaderBox = await header.boundingBox()
+        const navBox = await nav.boundingBox()
+
+        expect(initialHeaderBox).not.toBeNull()
+        expect(navBox).not.toBeNull()
+        expect(navBox!.height).toBeLessThanOrEqual(viewport.height)
+        expect(navBox!.y + navBox!.height).toBeLessThanOrEqual(viewport.height)
+
+        const metrics = await scroll.evaluate((element) => ({
+          clientHeight: element.clientHeight,
+          overscrollBehaviorY: getComputedStyle(element).overscrollBehaviorY,
+          scrollHeight: element.scrollHeight,
+        }))
+
+        expect(metrics.scrollHeight).toBeGreaterThan(metrics.clientHeight)
+        await expect(scroll).toHaveCSS('overflow-x', 'hidden')
+        await expect(scroll).toHaveCSS('overscroll-behavior-x', 'auto')
+        expect(metrics.overscrollBehaviorY).toBe('contain')
+
+        await scroll.hover()
+        await scrollingPage.mouse.wheel(0, metrics.scrollHeight)
+        await expect.poll(() => scroll.evaluate((element) => element.scrollTop)).toBeGreaterThan(0)
+        expect(await header.boundingBox()).toEqual(initialHeaderBox)
+
+        const lastLink = scroll.locator('a.nav__link').last()
+
+        await lastLink.focus()
+        await expect(lastLink).toBeFocused()
+        await expect(lastLink).toBeInViewport()
+        expect(await header.boundingBox()).toEqual(initialHeaderBox)
+      })
+    }
+
+    for (const viewport of [
+      { height: 300, width: 1280 },
+      { height: 300, width: 375 },
+    ]) {
+      test(`should isolate main scrolling from the sidebar at ${viewport.width}px`, async ({
+        context,
+      }) => {
+        await context.addCookies(await page.context().cookies())
+        const scrollingPage = await context.newPage()
+
+        await scrollingPage.setViewportSize(viewport)
+        await scrollingPage.goto(`${serverURL}/admin`)
+        await expect(scrollingPage.locator('.template-default--nav-hydrated')).toBeVisible()
+        await openNavigationForUserMenu({ page: scrollingPage })
+
+        const main = scrollingPage.locator('.template-default__wrap')
+        const header = scrollingPage.locator('.nav__header')
+        const navScroll = scrollingPage.locator('.nav__scroll')
+        const initialHeaderBox = await header.boundingBox()
+        const initialNavScrollTop = await navScroll.evaluate((element) => element.scrollTop)
+        const metrics = await main.evaluate((element) => ({
+          clientHeight: element.clientHeight,
+          overscrollBehaviorY: getComputedStyle(element).overscrollBehaviorY,
+          scrollHeight: element.scrollHeight,
+        }))
+
+        expect(metrics.scrollHeight).toBeGreaterThan(metrics.clientHeight)
+        expect(metrics.clientHeight).toBeLessThanOrEqual(viewport.height)
+        await expect(main).toHaveCSS('overflow-x', 'hidden')
+        await expect(main).toHaveCSS('overscroll-behavior-x', 'auto')
+        expect(metrics.overscrollBehaviorY).toBe('contain')
+
+        if (viewport.width < 768) {
+          await scrollingPage.locator('.nav__close').click()
+          await expect(scrollingPage.locator('aside.nav')).toHaveAttribute('inert')
+        }
+
+        await main.hover()
+        await scrollingPage.mouse.wheel(0, metrics.scrollHeight)
+        await expect.poll(() => main.evaluate((element) => element.scrollTop)).toBeGreaterThan(0)
+        await scrollingPage.mouse.wheel(0, metrics.scrollHeight)
+        expect(await header.boundingBox()).toEqual(initialHeaderBox)
+        expect(await navScroll.evaluate((element) => element.scrollTop)).toBe(initialNavScrollTop)
+        expect(await scrollingPage.evaluate(() => window.scrollY)).toBe(0)
+
+        const lastLink = main.locator('a[href]:visible').last()
+
+        await lastLink.focus()
+        await expect(lastLink).toBeFocused()
+        await expect(lastLink).toBeInViewport()
+        expect(await header.boundingBox()).toEqual(initialHeaderBox)
+      })
+    }
+
     test('should truncate a long account label without obscuring the menu icon', async () => {
       await page.goto(`${serverURL}/admin`)
       await openNavigationForUserMenu({ page })

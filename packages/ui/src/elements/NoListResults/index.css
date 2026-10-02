@@ -17,10 +17,9 @@
 
   .no-results__title {
     color: var(--color-text);
-    font-family: var(--text-body-large-strong-font-family);
-    font-size: var(--text-body-large-strong-font-size);
+    font-size: var(--text-body-large-bold-font-size);
     font-weight: var(--font-weight-strong);
-    line-height: var(--text-body-large-strong-line-height);
+    line-height: var(--text-body-large-bold-line-height);
   }
 
   .no-results__description {
