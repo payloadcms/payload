@@ -116,6 +116,7 @@
     "pretest": "pnpm build"
   },
   "dependencies": {
+    "@date-fns/tz": "1.2.0",
     "@next/env": "16.3.8",
     "@payloadcms/translations": "workspace:*",
     "@standard-schema/spec": "1.1.0",
