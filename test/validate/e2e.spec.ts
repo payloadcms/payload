@@ -9,7 +9,11 @@ import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
 import { initPage } from '../__setup/e2e/initPage.js'
-import { validationCustomButtonsCollectionSlug, validationRequestFailureTitle } from './config.js'
+import {
+  validationCustomButtonsCollectionSlug,
+  validationRequestFailureTitle,
+  validationTranslatedLabelTitle,
+} from './config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -98,6 +102,26 @@ test.describe('Publish all locales', () => {
     await expect(page.locator('.payload-toast-container')).toContainText(
       'An unknown error has occurred.',
     )
+    await expect.poll(() => getLocaleStatus({ id, locale: 'en' })).toBe('draft')
+  })
+
+  test('should render a translated validation label', async () => {
+    const id = await createDraft({
+      englishTitle: validationTranslatedLabelTitle,
+      frenchTitle: 'Titre en français',
+      germanTitle: 'Deutscher Titel',
+      spanishTitle: 'Título en español',
+    })
+
+    await openDraft(id)
+    await saveDocAndAssert(page, '#publish-all-locales', 'error', {
+      disableDismissAllToasts: true,
+    })
+
+    const toast = page.locator('.payload-toast-container')
+
+    await expect(toast).toContainText('Translated title')
+    await expect(toast).not.toContainText('[object Object]')
     await expect.poll(() => getLocaleStatus({ id, locale: 'en' })).toBe('draft')
   })
 

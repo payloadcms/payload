@@ -4,7 +4,9 @@ import { describe, expect, it } from 'vitest'
 
 import {
   getValidationEndpoint,
+  hasLocalizedFields,
   projectValidationDataForSiblingLocales,
+  validateDocumentLocales,
 } from './validateAllLocales.js'
 
 describe('validate all locales before publish', () => {
@@ -93,5 +95,38 @@ describe('validate all locales before publish', () => {
       items: [{ kind: 'card' }],
       settings: { theme: 'dark' },
     })
+  })
+
+  it('should reject validation when no locales are selected', async () => {
+    await expect(
+      validateDocumentLocales({
+        activeLocale: 'en',
+        blocksMap: {},
+        data: {},
+        endpoint: '/api/posts/validate',
+        fields: [],
+        locales: [],
+      }),
+    ).rejects.toThrow('Document validation requires at least one locale.')
+  })
+
+  it('should find localized fields in referenced blocks', () => {
+    expect(
+      hasLocalizedFields({
+        blocksMap: {
+          hero: {
+            fields: [{ localized: true, name: 'heading', type: 'text' }],
+            slug: 'hero',
+          },
+        },
+        fields: [
+          {
+            blocks: ['hero'],
+            name: 'layout',
+            type: 'blocks',
+          },
+        ] as ClientField[],
+      }),
+    ).toBe(true)
   })
 })

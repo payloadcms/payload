@@ -34,6 +34,7 @@ export const writeTargetsSlug = 'validation-write-targets'
 export const validationUploadsSlug = 'validation-uploads'
 export const validationCustomButtonsCollectionSlug = 'validation-custom-buttons-items'
 export const validationRequestFailureTitle = 'Reject validation request'
+export const validationTranslatedLabelTitle = 'Return translated validation label'
 export const validationDeniedCollectionSlug = 'validation-denied-items'
 export const validationUploadsDir = path.resolve(dirname, 'validation-uploads')
 
@@ -278,6 +279,15 @@ const runWriteAttempt: CollectionBeforeChangeHook = async ({ data, operation, re
       })
       break
 
+    case 'unlock':
+      await req.payload.unlock({
+        collection: 'users',
+        data: { email: 'validation-isolation@example.com' },
+        overrideAccess: true,
+        req,
+      })
+      break
+
     case 'update':
       await req.payload.update({
         id: targetID!,
@@ -311,15 +321,6 @@ const runWriteAttempt: CollectionBeforeChangeHook = async ({ data, operation, re
             equals: targetID!,
           },
         },
-      })
-      break
-
-    case 'unlock':
-      await req.payload.unlock({
-        collection: 'users',
-        data: { email: 'validation-isolation@example.com' },
-        overrideAccess: true,
-        req,
       })
       break
 
@@ -1052,7 +1053,29 @@ const publishGlobal: GlobalConfig = {
 const validationCustomButtonsCollection: CollectionConfig = {
   slug: validationCustomButtonsCollectionSlug,
   access: {
-    validate: ({ data, req }) => Boolean(req.user) && data?.title !== validationRequestFailureTitle,
+    validate: ({ data, req }) => {
+      if (!req.user) {
+        return false
+      }
+
+      if (req.method === 'POST' && data?.title === validationRequestFailureTitle) {
+        throw new ValidationError(
+          {
+            errors: [
+              {
+                label: { en: 'Request failure title' },
+                message: 'The validation request failed.',
+                path: 'title',
+              },
+            ],
+            req,
+          },
+          req.t,
+        )
+      }
+
+      return true
+    },
   },
   fields: [
     {
@@ -1067,6 +1090,32 @@ const validationCustomButtonsCollection: CollectionConfig = {
       required: true,
     },
   ],
+  hooks: {
+    beforeValidate: [
+      ({ data, operation, req }) => {
+        if (operation === 'validate' && data?.title === validationTranslatedLabelTitle) {
+          throw new ValidationError(
+            {
+              errors: [
+                {
+                  label: {
+                    de: 'Übersetzter Titel',
+                    en: 'Translated title',
+                  },
+                  message: 'The translated title is invalid.',
+                  path: 'title',
+                },
+              ],
+              req,
+            },
+            req.t,
+          )
+        }
+
+        return data
+      },
+    ],
+  },
   versions: {
     drafts: {
       validate: false,

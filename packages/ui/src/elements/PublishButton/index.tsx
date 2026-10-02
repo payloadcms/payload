@@ -17,10 +17,13 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { PopupList } from '../Popup/index.js'
 import { FieldErrorsToast } from '../Toasts/fieldErrors.js'
-import { getValidationEndpoint, validateDocumentLocales } from './validateAllLocales.js'
+import {
+  hasLocalizedFields as fieldsContainLocalizedData,
+  getValidationEndpoint,
+  validateDocumentLocales,
+} from './validateAllLocales.js'
 import './index.css'
 
 export function PublishButton({
@@ -77,7 +80,11 @@ export function PublishButton({
   const hasLocalizedFields = React.useMemo(
     () =>
       Boolean(
-        entityConfig?.fields && traverseForLocalizedFields(entityConfig.fields, { blocksMap }),
+        entityConfig?.fields &&
+          fieldsContainLocalizedData({
+            blocksMap,
+            fields: entityConfig.fields,
+          }),
       ),
     [blocksMap, entityConfig?.fields],
   )
@@ -175,7 +182,12 @@ export function PublishButton({
       if (!validation.valid) {
         const introMessage = t('error:followingFieldsInvalid', { count: validation.errors.length })
         const fieldList = validation.errors
-          .map((error) => `${error.locale ? `[${error.locale}] ` : ''}${error.label ?? error.path}`)
+          .map(
+            (error) =>
+              `${error.locale ? `[${error.locale}] ` : ''}${
+                error.label ? getTranslation(error.label, i18n) : error.path
+              }`,
+          )
           .join(', ')
 
         toast.error(<FieldErrorsToast errorMessage={`${introMessage} ${fieldList}`} />)
@@ -223,6 +235,7 @@ export function PublishButton({
     hasLocalizedFields,
     id,
     localization,
+    i18n,
     setHasPublishedDoc,
     submit,
     setUnpublishedVersionCount,
