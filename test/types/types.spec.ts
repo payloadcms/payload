@@ -4,6 +4,7 @@ import type {
   Access,
   ArrayField,
   AuthenticatedUser,
+  BeforeValidateOperation,
   Block,
   BlockRowLabelClientProps,
   BlockRowLabelServerProps,
@@ -24,6 +25,7 @@ import type {
   FieldClientProps,
   FieldErrorServerProps,
   FieldHookArgs,
+  FieldOperation,
   FieldPermissions,
   FieldServerProps,
   GeneratedTypes,
@@ -40,6 +42,7 @@ import type {
   MeOperationResult,
   NamedGroupField,
   NamedTab,
+  Operation,
   PaginatedDocs,
   PayloadClientComponentProps,
   PayloadRequest,
@@ -129,6 +132,13 @@ import type {
 
 describe('Types testing', () => {
   describe('validate operation types', () => {
+    test('should expose beforeValidate operations', () => {
+      expect<BeforeValidateOperation>().type.toBe<'create' | 'update' | 'validate'>()
+      expect<FieldOperation>().type.toBe<'create' | 'read' | 'update' | 'validate'>()
+      expect<Operation>().type.toBe<'create' | 'delete' | 'read' | 'update' | 'validate'>()
+      expect<PayloadRequest['operation']>().type.toBe<Operation | undefined>()
+    })
+
     test('should expose validate only to validation lifecycle types', () => {
       expect<{
         locale?: string
@@ -176,13 +186,13 @@ describe('Types testing', () => {
       expect<FieldPermissions>().type.toHaveProperty('validate')
     })
 
-    test('should require collection create data and a locale', () => {
+    test('should require collection create data and allow the locale to be omitted', () => {
       expect(payload.validate).type.toBeCallableWith({
         collection: 'pages',
         data: {},
         locale: null,
       })
-      expect(payload.validate).type.not.toBeCallableWith({
+      expect(payload.validate).type.toBeCallableWith({
         collection: 'pages',
         data: {},
       })
@@ -202,7 +212,14 @@ describe('Types testing', () => {
       expect(payload.validate).type.toBeCallableWith({
         id: 'document-id',
         collection: 'pages',
+      })
+      expect(payload.validate).type.toBeCallableWith({
+        id: 'document-id',
+        collection: 'pages',
         locale: null,
+      })
+      expect(payload.validateGlobal).type.toBeCallableWith({
+        slug: 'menu',
       })
       expect(payload.validateGlobal).type.toBeCallableWith({
         slug: 'menu',

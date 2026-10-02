@@ -36,6 +36,7 @@ import {
   validationNonLocalizedCollectionSlug,
   validationPublishUploadsDir,
   validationPublishUploadsSlug,
+  validationUniqueCollectionSlug,
   validationUploadsDir,
   validationUploadsSlug,
   validationWhereCollectionSlug,
@@ -946,6 +947,36 @@ const validationEmptyCollection: CollectionConfig = {
   versions: false,
 }
 
+const validationUniqueCollection: CollectionConfig = {
+  slug: validationUniqueCollectionSlug,
+  fields: [
+    {
+      name: 'uniqueValue',
+      type: 'text',
+      hooks: {
+        beforeChange: [({ value }) => (typeof value === 'string' ? value.trim() : value)],
+      },
+      unique: true,
+    },
+    {
+      name: 'compoundScope',
+      type: 'text',
+    },
+    {
+      name: 'compoundValue',
+      type: 'text',
+    },
+  ],
+  indexes: [
+    {
+      fields: ['compoundScope', 'compoundValue'],
+      unique: true,
+    },
+  ],
+  timestamps: false,
+  versions: false,
+}
+
 export const validationCollections: CollectionConfig[] = [
   validationCollection,
   validationFallbackCollection,
@@ -958,6 +989,7 @@ export const validationCollections: CollectionConfig[] = [
   validationAuthCollection,
   validationCustomIDCollection,
   validationEmptyCollection,
+  validationUniqueCollection,
   {
     slug: writeTargetsSlug,
     fields: [
