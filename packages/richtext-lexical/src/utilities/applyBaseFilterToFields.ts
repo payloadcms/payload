@@ -1,4 +1,4 @@
-import type { Field, SanitizedConfig, User } from 'payload'
+import type { Field, SanitizedConfig } from 'payload'
 
 import { combineWhereConstraints } from 'payload/shared'
 
@@ -20,7 +20,7 @@ export function applyBaseFilterToFields(fields: Field[], config: SanitizedConfig
 
       // Create new filterOptions that includes baseFilter
       relationshipField.filterOptions = async (args) => {
-        const { relationTo, req, user } = args
+        const { relationTo, req } = args
 
         // Call original filterOptions if it exists
         const originalResult =
@@ -35,12 +35,6 @@ export function applyBaseFilterToFields(fields: Field[], config: SanitizedConfig
 
         // Get the collection's admin config
         const admin = config.collections.find(({ slug }) => slug === relationTo)?.admin
-
-        // Check if collection is hidden
-        const hidden = admin?.hidden
-        if (typeof hidden === 'function' && hidden({ user } as { user: User })) {
-          return false
-        }
 
         // Apply baseFilter (with backwards compatibility for baseListFilter)
         const baseFilter = admin?.baseFilter ?? admin?.baseListFilter
