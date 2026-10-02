@@ -6,7 +6,9 @@ import { formatAdminURL } from 'payload/shared'
 import type { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 
 import { addGroupBy, clearGroupBy, openGroupBy } from '../__helpers/e2e/groupBy/index.js'
-import { selectInput } from '../__helpers/e2e/selectInput.js'
+import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
+import { getSelectMenu, selectInput } from '../__helpers/e2e/selectInput.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import {
   addCollectionQueryWidget,
   addTextBlock,
@@ -38,9 +40,22 @@ import {
   openRelationshipCreationDrawer,
   openRichTextRelationshipDrawer,
   openRichTextUploadDrawer,
+  openTableColumns,
+  openTableVersionHistory,
   openVersionComparison,
   openWidgetDrawer,
 } from './helpers.js'
+
+const openNavigationForUserMenu = async ({ page }: { page: Page }): Promise<void> => {
+  const openNavigation = page.locator('.app-header--nav-open')
+
+  if ((await openNavigation.count()) === 0) {
+    await page.getByRole('button', { name: /open menu/i }).click()
+    await expect(openNavigation).toHaveCount(1)
+  }
+
+  await expect(page.locator('.user-menu__trigger')).toBeVisible()
+}
 
 test.describe('WCAG 2.2 Level AA', () => {
   let page: Page
@@ -82,6 +97,271 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('1.3.1 Info and Relationships (A)', () => {
+    test('should expose column editor headings and named toggles', async () => {
+      test.setTimeout(60000)
+      const columns = await openTableColumns({ page, postsURL })
+
+      await test.step('should expose table column editor titles as headings', async () => {
+        // PYLD-3749
+
+        for (const name of ['Edit Columns', 'Shown in table', 'Not shown in table']) {
+          await expect
+            .soft(columns.getByRole('heading', { name: new RegExp(`^${name}$`, 'i') }))
+            .toBeVisible()
+        }
+      })
+
+      await test.step('should name each table column toggle after its visible column label', async () => {
+        // PYLD-3748
+        const items = columns.locator('.column-selector__item')
+
+        await expect(items.first()).toBeVisible()
+        for (const item of await items.all()) {
+          const label = (await item.locator('.column-selector__item-label').innerText()).trim()
+
+          const snapshot = await item.getByRole('checkbox').ariaSnapshot()
+
+          expect.soft(snapshot.match(/^- checkbox "(.*?)"/)?.[1]).toBe(label)
+        }
+      })
+    })
+
+    test('should give collection and version counts context', async () => {
+      test.setTimeout(120000)
+      await test.step('should give table item counts document context', async () => {
+        // PYLD-3693
+        await gotoPostsList({ page, postsURL })
+        const count = page.locator('.page-controls__page-info')
+
+        await expect(count).toBeVisible()
+        expect(await count.ariaSnapshot()).toMatch(/posts|documents|items|results/i)
+      })
+
+      await test.step('should give version table counts version context', async () => {
+        // PYLD-3711
+        for (const kind of ['collection', 'global'] as const) {
+          const view = await openTableVersionHistory({ kind, page, postsURL, serverURL })
+          const count = view.locator('.page-controls__page-info')
+
+          await expect(count).toBeVisible()
+          expect.soft(await count.ariaSnapshot(), kind).toMatch(/versions/i)
+        }
+      })
+    })
+
+    test('should associate table page input and total with their table', async () => {
+      // PYLD-3694
+      test.setTimeout(60000)
+      try {
+        await page.goto(`${postsURL.list}?limit=1`)
+        const table = page.locator('table').first()
+        const paginator = page.locator('.paginator')
+        const input = paginator.getByRole('textbox')
+
+        await expect(table.locator('tbody tr')).toHaveCount(1)
+        await expect(input).toHaveAccessibleName('Go to table page')
+        const tableID = table
+
+        await expect(tableID).toHaveAttribute('id')
+        await expect(input).toHaveAttribute('aria-controls', tableID)
+        await expect(input).toHaveAccessibleDescription('Enter a page number from 1 to 3.')
+      } finally {
+        await page.goto(`${postsURL.list}?limit=10`)
+      }
+    })
+
+    test('should keep rich-text drawer table header names free of sort commands', async () => {
+      // PYLD-3659
+      test.setTimeout(60000)
+      for (const openDrawer of [openRichTextRelationshipDrawer, openRichTextUploadDrawer]) {
+        if (openDrawer === openRichTextUploadDrawer) {
+          await openEditImageDialog({ page, serverURL })
+        }
+        const drawer = await openDrawer({ page, postsURL })
+        const headers = drawer.locator('th:has(.sort-column__button)')
+
+        await expect(headers.first()).toBeVisible()
+        for (const header of await headers.all()) {
+          const label = (await header.locator('.sort-column__label').innerText()).trim()
+
+          await expect.soft(header).toHaveAccessibleName(label)
+        }
+      }
+    })
+
+    test('should associate coordinate labels with their inputs', async () => {
+      // PYLD-3824, PYLD-3607
+      await gotoCreatePost({ page, postsURL })
+      for (const coordinate of ['Longitude', 'Latitude']) {
+        const label = page.locator('.point label').filter({ hasText: `Location - ${coordinate}` })
+        const input = page.locator(`input[name="location.${coordinate.toLowerCase()}"]`)
+
+        await expect(label).toBeVisible()
+        await expect(input).toBeVisible()
+        await expect.soft(input).toHaveAccessibleName(new RegExp(`Location.*${coordinate}`, 'i'))
+        await label.click()
+        await expect.soft(input).toBeFocused()
+        expect
+          .soft(await label.evaluate((element: HTMLLabelElement) => element.control?.id))
+          .toBe(await input.getAttribute('id'))
+      }
+    })
+
+    test('should associate JSON and Code labels with their editors', async () => {
+      // PYLD-3822
+      test.setTimeout(60000)
+      await gotoCreatePost({ page, postsURL })
+      for (const [field, labelText] of [
+        ['settings', 'Settings'],
+        ['source', 'Source'],
+      ] as const) {
+        const wrapper = page.locator(`#field-${field}`)
+        const input = wrapper.getByRole('textbox')
+        const label = page.locator('.field-label').filter({ hasText: new RegExp(`^${labelText}$`) })
+
+        await wrapper.scrollIntoViewIfNeeded()
+        await expect(input).toBeAttached()
+        await label.click()
+        await expect.soft(input).toBeFocused()
+        await expect.soft(input).toHaveAccessibleName(new RegExp(labelText, 'i'))
+      }
+      for (const field of ['unlabelledSettings', 'unlabelledSource']) {
+        const wrapper = page.locator(`#field-${field}`)
+
+        await wrapper.scrollIntoViewIfNeeded()
+        await expect.soft(wrapper.getByRole('textbox')).toHaveAccessibleName('Editor content')
+      }
+    })
+
+    test('should focus select inputs when their labels are clicked', async () => {
+      // PYLD-3814
+      await gotoCreatePost({ page, postsURL })
+      for (const name of ['Accessibility Select', 'Required Tags']) {
+        const label = page.locator('label').filter({ hasText: name })
+        const field = page.locator('.field-type').filter({ has: label })
+        const input = field.getByRole('combobox')
+
+        await expect(input).toHaveAccessibleName(name)
+        await label.click()
+        await expect(input).toBeFocused()
+        expect(await label.evaluate((element: HTMLLabelElement) => element.control?.id)).toBe(
+          await input.getAttribute('id'),
+        )
+      }
+    })
+
+    test('should associate rich-text toolbars with their fields', async () => {
+      // PYLD-3788, PYLD-3780, PYLD-3742
+      await addTextBlock({ page, postsURL })
+      for (const [selector, name] of [
+        ['[data-field-path="content"]', 'Content'],
+        ['[data-field-path="layout.0.body"]', 'Body'],
+      ] as const) {
+        const field = page.locator(selector)
+        const toolbar = field.locator('.fixed-toolbar')
+        const editor = field.locator('[contenteditable="true"]').first()
+
+        await expect(editor).toBeVisible()
+        await expect(editor).toHaveAccessibleName(name)
+
+        await expect(toolbar).toBeVisible()
+        await expect(toolbar.getByRole('button').first()).toBeVisible()
+        const namedContainer = page
+          .getByRole('group', { name: new RegExp(name, 'i') })
+          .or(page.getByRole('toolbar', { name: new RegExp(name, 'i') }))
+          .or(page.getByRole('region', { name: new RegExp(name, 'i') }))
+
+        for (const button of await toolbar.getByRole('button').all()) {
+          await expect.soft(namedContainer.getByRole('button').and(button)).toHaveCount(1)
+        }
+      }
+    })
+
+    test('should name and operate collection and version sort controls', async () => {
+      test.setTimeout(120000)
+      await test.step('should name table sort controls with the column and direction', async () => {
+        // PYLD-3597
+        await page.goto(`${postsURL.list}?sort=-updatedAt`)
+        const headers = page.locator('th:has(.sort-column__button)')
+
+        await expect(headers.first()).toBeVisible()
+        for (const header of await headers.all()) {
+          const label = (await header.locator('.sort-column__label').innerText()).trim()
+
+          await expect(header.locator('.sort-column__button')).toHaveCount(2)
+          for (const direction of ['ascending', 'descending']) {
+            const button = header.getByRole('button', { name: new RegExp(direction, 'i') })
+
+            await expect(button).toHaveAccessibleName(
+              new RegExp(label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'),
+            )
+          }
+        }
+
+        const header = page.locator('#heading-title')
+        const descending = header.getByRole('button', { name: /descending/i })
+        const ascending = header.getByRole('button', { name: /ascending/i })
+
+        await page.getByRole('grid').locator('thead').getByRole('checkbox').focus()
+        await page.keyboard.press('ArrowRight')
+        await expect(descending).toBeFocused()
+        await expect(header).toHaveRole('columnheader')
+        await expect(header.getByRole('button')).toHaveCount(2)
+        await page.keyboard.press('ArrowRight')
+        await expect(ascending).toBeFocused()
+        await page.keyboard.press('ArrowRight')
+        await expect(
+          page.locator('#heading-accessibilitySelect').getByRole('button', { name: /descending/i }),
+        ).toBeFocused()
+        await page.keyboard.press('ArrowLeft')
+        await expect(ascending).toBeFocused()
+        await page.keyboard.press('Enter')
+        await expect(header).toHaveAttribute('aria-sort', 'ascending')
+        await expect(ascending).toBeFocused()
+        await page.keyboard.press('ArrowLeft')
+        await expect(descending).toBeFocused()
+        await page.keyboard.press('Enter')
+        await expect(header).toHaveAttribute('aria-sort', 'descending')
+        await expect(descending).toBeFocused()
+        await page.keyboard.press('Escape')
+        await expect(descending).toBeFocused()
+        await page.keyboard.press('ArrowDown')
+        await expect(
+          page.getByRole('grid').locator('tbody tr').first().locator('.cell-title'),
+        ).toBeFocused()
+        await page.keyboard.press('ArrowUp')
+        await expect(descending).toBeFocused()
+        await page.keyboard.press('ArrowRight')
+        await expect(ascending).toBeFocused()
+        await page.keyboard.press('Tab')
+        await expect
+          .poll(() =>
+            page.getByRole('grid').evaluate((grid) => grid.contains(document.activeElement)),
+          )
+          .toBe(false)
+      })
+
+      await test.step('should resolve version table sort labels before any sort selection', async () => {
+        // PYLD-3709
+        for (const kind of ['collection', 'global'] as const) {
+          const view = await openTableVersionHistory({ kind, page, postsURL, serverURL })
+          const headers = view.locator('th:has(.sort-column__button)')
+
+          await expect(headers.first()).toBeVisible()
+          for (const header of await headers.all()) {
+            const label = (await header.locator('.sort-column__label').innerText()).trim()
+
+            for (const button of await header.getByRole('button').all()) {
+              const snapshot = await button.ariaSnapshot()
+
+              expect.soft(snapshot).not.toMatch(/\{\{|undefined|object Object/i)
+              expect.soft(snapshot).toContain(label)
+            }
+          }
+        }
+      })
+    })
+
     test('should expose image-edit section titles as headings', async () => {
       // PYLD-3576
       const dialog = await openEditImageDialog({ page, serverURL })
@@ -197,20 +477,33 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(page.locator(`#${tableId}`)).toHaveCount(1)
     })
 
-    test('should give every grouped table a unique ID', async () => {
+    test('should give every grouped table a unique ID and group-specific name', async () => {
       // Additional coverage for PYLD-3692.
       await gotoPostsList({ page, postsURL })
       await addGroupBy(page, {
         fieldLabel: 'Accessibility Select',
         fieldPath: 'accessibilitySelect',
       })
-      const tableIds = await page
-        .locator('table[id^="payload-table-"]')
-        .evaluateAll((tables) => tables.map((table) => table.id))
+      try {
+        await expect
+          .poll(() => page.locator('table[id^="payload-table-"]').count())
+          .toBeGreaterThan(1)
+        const tableIds = await page
+          .locator('table[id^="payload-table-"]')
+          .evaluateAll((tables) => tables.map((table) => table.id))
 
-      expect(tableIds.length).toBeGreaterThan(1)
-      expect(new Set(tableIds).size).toBe(tableIds.length)
-      await clearGroupBy(page)
+        expect(tableIds.length).toBeGreaterThan(1)
+        expect(new Set(tableIds).size).toBe(tableIds.length)
+        await expect(
+          page.getByRole('grid', { name: 'Posts: Value One', exact: true }),
+        ).toBeVisible()
+        await expect(
+          page.getByRole('grid', { name: 'Posts: Value Two', exact: true }),
+        ).toBeVisible()
+      } finally {
+        await clearGroupBy(page)
+        await expect(page.locator('table')).toHaveCount(1)
+      }
     })
 
     test('should expose the active sort direction on relationship table headers and buttons', async () => {
@@ -237,6 +530,70 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('1.4.10 Reflow (AA)', () => {
+    test('should truncate a long account label without obscuring the menu icon', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await openNavigationForUserMenu({ page })
+
+      const navHeader = page.locator('.nav__header')
+      const trigger = page.locator('.user-menu__trigger')
+      const label = trigger.locator('.btn__label')
+      const icon = trigger.locator('.btn__icon')
+
+      await label.evaluate((element) => {
+        element.textContent = 'devthisismynameandiloveit@payloadcms.com'
+      })
+
+      const [headerBox, triggerBox, labelBox, iconBox] = await Promise.all([
+        navHeader.boundingBox(),
+        trigger.boundingBox(),
+        label.boundingBox(),
+        icon.boundingBox(),
+      ])
+      const labelMetrics = await label.evaluate((element) => ({
+        clientWidth: element.clientWidth,
+        overflow: getComputedStyle(element).overflow,
+        scrollWidth: element.scrollWidth,
+        textOverflow: getComputedStyle(element).textOverflow,
+      }))
+
+      expect(headerBox).not.toBeNull()
+      expect(triggerBox).not.toBeNull()
+      expect(labelBox).not.toBeNull()
+      expect(iconBox).not.toBeNull()
+      expect(triggerBox!.x + triggerBox!.width).toBeLessThanOrEqual(headerBox!.x + headerBox!.width)
+      expect(labelBox!.x + labelBox!.width).toBeLessThanOrEqual(iconBox!.x)
+      expect(iconBox!.x + iconBox!.width).toBeLessThanOrEqual(triggerBox!.x + triggerBox!.width)
+      expect(labelMetrics).toMatchObject({
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+      })
+      expect(labelMetrics.scrollWidth).toBeGreaterThan(labelMetrics.clientWidth)
+    })
+
+    test('should keep collection cards within a 320px viewport', async () => {
+      const previousViewport = page.viewportSize()
+
+      try {
+        await page.setViewportSize({ height: 720, width: 320 })
+        await page.goto(`${serverURL}/admin`)
+
+        const cards = page.locator('.collections__card-list .card')
+
+        expect(await cards.count()).toBeGreaterThan(0)
+        for (const card of await cards.all()) {
+          const box = await card.boundingBox()
+
+          expect(box).not.toBeNull()
+          expect(box!.x).toBeGreaterThanOrEqual(0)
+          expect(box!.x + box!.width).toBeLessThanOrEqual(320)
+        }
+      } finally {
+        if (previousViewport) {
+          await page.setViewportSize(previousViewport)
+        }
+      }
+    })
+
     test('should ellipsize long selected values without obscuring their remove control', async () => {
       // Additional coverage for PYLD-3811.
       const fieldSelect = await openBulkEditFieldSelect({ page, postsURL })
@@ -316,6 +673,333 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.1.1 Keyboard (A)', () => {
+    test('should open the upload dropzone modal from its button with the keyboard', async () => {
+      // PYLD-4166
+      await page.goto(`${serverURL}/admin`)
+
+      const widget = page.locator('.upload-dropzone-widget')
+      const button = widget.getByRole('button', { name: 'Upload files' })
+      const dropzone = widget.locator('.upload-dropzone-widget__dropzone')
+
+      await expect(button).toBeVisible()
+      await expect(dropzone).not.toHaveAttribute('tabindex', '0')
+      await button.focus()
+      await expect(button).toBeFocused()
+      await button.press('Enter')
+
+      const modal = page.locator('#bulk-upload-modal-slug-1')
+      await expect(modal).toBeVisible()
+      await expect(modal.locator('.bulk-upload--add-files')).toBeVisible()
+      await modal.getByRole('button', { name: 'Close' }).click()
+      await expect(button).toBeFocused()
+    })
+
+    test('should choose the upload collection from the dropzone modal with the keyboard', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await page
+        .locator('.upload-dropzone-widget')
+        .getByRole('button', { name: 'Upload files' })
+        .click()
+
+      const modal = page.locator('#bulk-upload-modal-slug-1')
+      const collection = modal.getByRole('combobox', { name: 'Collection' })
+      await expect(collection).toBeVisible()
+      await collection.focus()
+      await collection.pressSequentially('Media Alt')
+      await collection.press('Enter')
+
+      await expect(modal.locator('.bulk-upload--add-files__collectionSelect')).toContainText(
+        'Media Alt',
+      )
+    })
+
+    test('should keep incompatible upload destinations visible and skip them with the keyboard', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await page
+        .locator('.upload-dropzone-widget')
+        .getByRole('button', { name: 'Upload files' })
+        .click()
+
+      const modal = page.locator('#bulk-upload-modal-slug-1')
+
+      await selectInput({
+        multiSelect: false,
+        option: 'Media Alt',
+        page,
+        selectLocator: modal.locator('.bulk-upload--add-files__collectionSelect'),
+      })
+      await modal.locator('.dropzone input[type="file"]').setInputFiles({
+        name: 'keyboard.pdf',
+        buffer: Buffer.from('pdf'),
+        mimeType: 'application/pdf',
+      })
+
+      const destination = modal.locator('.file-selections__collectionSelect')
+      const input = destination.getByRole('combobox', { name: 'Collection', exact: true })
+
+      await expect(input).toBeVisible()
+      await input.focus()
+      await input.press('ArrowDown')
+      await expect(
+        getSelectMenu({ page }).getByRole('option', {
+          name: 'Media (Accepts: image/*)',
+          exact: true,
+        }),
+      ).toHaveAttribute('aria-disabled', 'true')
+      await input.press('Home')
+      await input.press('Enter')
+      await expect(destination.locator('.react-select--single-value')).toHaveText('Media Alt')
+      await expect(input).toBeFocused()
+
+      await modal.locator('.file-selections__remove--overlay').click()
+
+      const addFilesDestination = modal.locator('.bulk-upload--add-files__collectionSelect')
+      const addFilesInput = addFilesDestination.getByRole('combobox', {
+        name: 'Collection',
+        exact: true,
+      })
+
+      await addFilesInput.focus()
+      await addFilesInput.press('ArrowDown')
+      await expect(
+        getSelectMenu({ page }).getByRole('option', { name: 'Media', exact: true }),
+      ).not.toHaveAttribute('aria-disabled', 'true')
+      await addFilesInput.press('Home')
+      await addFilesInput.press('Enter')
+      await expect(addFilesDestination.locator('.react-select--single-value')).toHaveText('Media')
+    })
+
+    test('should navigate and select collection grid rows without trapping keyboard focus', async () => {
+      await gotoPostsList({ page, postsURL })
+      const grid = page.getByRole('grid', { name: 'Posts', exact: true })
+      const rows = grid.locator('tbody tr')
+      const originalDirection = await page.locator('html').getAttribute('dir')
+
+      await expect(rows.nth(0)).toHaveAccessibleName('1')
+      await rows.nth(0).locator('.cell-title').focus()
+      await page.keyboard.press('ArrowDown')
+      await expect(rows.nth(1).locator('.cell-title')).toBeFocused()
+      await page.keyboard.press('ArrowRight')
+      await expect(rows.nth(1).locator('.cell-accessibilitySelect')).toBeFocused()
+      await page.keyboard.press('ArrowUp')
+      await expect(rows.nth(0).locator('.cell-accessibilitySelect')).toBeFocused()
+      await page.keyboard.press('Home')
+      const checkbox = rows.nth(0).getByRole('checkbox')
+
+      await expect(checkbox).toBeFocused()
+      const title = await rows.nth(0).locator('.cell-title').innerText()
+
+      await expect(checkbox).toHaveAccessibleName(`Select ${title}, Row 1`)
+      await expect(checkbox).not.toBeChecked()
+      await page.keyboard.press('Space')
+      await expect(rows.nth(0)).toHaveAttribute('aria-selected', 'true')
+      await page.keyboard.press('Space')
+      await expect(rows.nth(0)).toHaveAttribute('aria-selected', 'false')
+      await page.keyboard.press('End')
+      await expect(rows.nth(0).locator('td').last()).toBeFocused()
+      await page.keyboard.press('Tab')
+      await expect
+        .poll(() => grid.evaluate((element) => element.contains(document.activeElement)))
+        .toBe(false)
+      await page.keyboard.press('Shift+Tab')
+      await expect(rows.nth(0).locator('td').last()).toBeFocused()
+
+      try {
+        await page.locator('html').evaluate((element) => element.setAttribute('dir', 'rtl'))
+        await rows.nth(0).locator('.cell-title').focus()
+        await page.keyboard.press('ArrowLeft')
+        await expect(rows.nth(0).locator('.cell-accessibilitySelect')).toBeFocused()
+        await page.keyboard.press('Control+Home')
+        await expect(grid.locator('thead').getByRole('checkbox')).toBeFocused()
+        await page.keyboard.press('ArrowUp')
+        await expect(grid.locator('thead').getByRole('checkbox')).toBeFocused()
+        await page.keyboard.press('Control+End')
+        await expect(rows.last().locator('td').last()).toBeFocused()
+        await page.keyboard.press('ArrowDown')
+        await expect(rows.last().locator('td').last()).toBeFocused()
+      } finally {
+        await page.locator('html').evaluate((element, direction) => {
+          if (direction === null) {
+            element.removeAttribute('dir')
+          } else {
+            element.setAttribute('dir', direction)
+          }
+        }, originalDirection)
+      }
+
+      await grid
+        .locator('#heading-title')
+        .getByRole('button', { name: /ascending/i })
+        .click()
+      await rows.nth(0).getByRole('checkbox').click()
+      await page.keyboard.press('ArrowDown')
+      await expect(rows.nth(1).getByRole('checkbox')).toBeFocused()
+      await rows.nth(0).getByRole('checkbox').uncheck()
+    })
+
+    test('should enter and leave custom collection grid controls while respecting their keys', async () => {
+      const columns = encodeURIComponent(JSON.stringify(['title', 'subtitle']))
+
+      try {
+        await page.goto(`${postsURL.list}?columns=${columns}&limit=10`)
+        const grid = page.getByRole('grid', { name: 'Posts', exact: true })
+        const row = grid.locator('tbody tr').first()
+        const cell = row.locator('.cell-subtitle')
+        const input = cell.getByRole('textbox', { name: 'Cell note' })
+        const listbox = cell.getByRole('listbox', { name: 'Cell choices' })
+
+        await expect(listbox).toHaveAttribute('tabindex', '-1')
+        await cell.focus()
+        await page.keyboard.press('F2')
+        await expect(input).toBeFocused()
+        await input.evaluate((element: HTMLInputElement) => {
+          element.disabled = true
+        })
+        await expect(cell).toBeFocused()
+        await expect(cell).toHaveAttribute('tabindex', '0')
+        await input.evaluate((element: HTMLInputElement) => {
+          element.disabled = false
+        })
+        await cell.evaluate((element: HTMLElement) => {
+          element.hidden = true
+        })
+        await expect(row.locator('.cell-title')).toBeFocused()
+        await cell.evaluate((element: HTMLElement) => {
+          element.hidden = false
+        })
+        await cell.focus()
+        await page.keyboard.press('F2')
+        await expect(input).toBeFocused()
+        await page.keyboard.press('ArrowLeft')
+        await expect(input).toBeFocused()
+        await input.fill('Unsaved edit')
+        await page.keyboard.press('Escape')
+        await expect(input).toHaveValue('Example note')
+        await expect(input).toBeFocused()
+        await page.keyboard.press('Escape')
+        await expect(cell).toBeFocused()
+        await page.keyboard.press('Enter')
+        await page.keyboard.press('Shift+Tab')
+        await expect
+          .poll(() => grid.evaluate((element) => element.contains(document.activeElement)))
+          .toBe(false)
+        await cell.focus()
+        await page.keyboard.press('F2')
+        await page.keyboard.press('Tab')
+        await expect(cell.getByRole('button', { name: 'Clear note', exact: true })).toBeFocused()
+        await page.keyboard.press('Enter')
+        await expect(input).toHaveValue('')
+        await page.keyboard.press('Tab')
+        await expect(listbox).toBeFocused()
+        await page.keyboard.press('Tab')
+        const firstAction = cell.getByRole('button', { name: 'First action', exact: true })
+        const secondAction = cell.getByRole('button', { name: 'Second action', exact: true })
+
+        await expect(firstAction).toBeFocused()
+        await page.keyboard.press('ArrowRight')
+        await expect(secondAction).toBeFocused()
+        await expect(firstAction).toHaveAttribute('tabindex', '-1')
+        await expect(secondAction).toHaveAttribute('tabindex', '0')
+        await page.keyboard.press('Escape')
+        await expect(cell).toBeFocused()
+        await page.keyboard.press('F2')
+        await page.keyboard.press('Tab')
+        await page.keyboard.press('Tab')
+        await page.keyboard.press('Tab')
+        await expect(secondAction).toBeFocused()
+        await page.keyboard.press('Tab')
+        await expect
+          .poll(() => grid.evaluate((element) => element.contains(document.activeElement)))
+          .toBe(false)
+      } finally {
+        const defaults = encodeURIComponent(
+          JSON.stringify(['title', 'accessibilitySelect', 'updatedAt']),
+        )
+
+        await page.goto(`${postsURL.list}?columns=${defaults}&limit=10`)
+      }
+    })
+
+    test('should reset grid entry after record navigation and retain it through column changes', async () => {
+      await gotoPostsList({ page, postsURL })
+      const grid = page.getByRole('grid', { name: 'Posts', exact: true })
+      const title = grid.getByRole('link', { name: 'Example post two', exact: true })
+      const defaults = encodeURIComponent(
+        JSON.stringify(['title', 'accessibilitySelect', 'updatedAt']),
+      )
+
+      try {
+        await title.focus()
+        await page.keyboard.press('Enter')
+        await expect(page).toHaveURL(/\/posts\/[^/?]+$/)
+        await expect(page.locator('#field-title')).toHaveValue('Example post two')
+        await page.locator('.step-nav').getByRole('link', { name: 'Posts', exact: true }).click()
+        const firstCell = grid.locator('tbody .cell--linked').first()
+
+        await expect(firstCell).toHaveAttribute('tabindex', '0')
+        await page.getByRole('link', { name: 'Create New', exact: true }).focus()
+        await page.keyboard.press('Tab')
+        await expect(firstCell).toBeFocused()
+        const target = grid.locator('tbody tr').first().locator('.cell-updatedAt')
+
+        await target.focus()
+        await page.getByRole('button', { name: 'Columns', exact: true }).click()
+        await page
+          .locator('.column-selector')
+          .getByRole('checkbox', { name: 'Title', exact: true })
+          .uncheck()
+        await expect(grid.locator('#heading-title')).toHaveCount(0)
+        await page.keyboard.press('Escape')
+        await page.getByRole('link', { name: 'Create New', exact: true }).focus()
+        await page.keyboard.press('Tab')
+        await expect(target).toBeFocused()
+      } finally {
+        await page.goto(`${postsURL.list}?columns=${defaults}&limit=10`)
+      }
+    })
+
+    test('should toggle table columns off and on with the keyboard', async () => {
+      // PYLD-3772
+      test.setTimeout(60000)
+      const columns = await openTableColumns({ page, postsURL })
+      await expect(columns.locator('[role="button"] input')).toHaveCount(0)
+      const dragHandle = columns.getByRole('button', { name: /^Drag to reorder: Title$/i })
+
+      await page.keyboard.press('Tab')
+      await dragHandle.focus()
+      await expect(dragHandle).toBeFocused()
+      await expect(dragHandle).toHaveCSS('opacity', '1')
+      await page.keyboard.press('Space')
+      await expect(page.locator('body')).toHaveClass(/is-dragging/)
+      await page.keyboard.press('Space')
+      await expect(page.locator('body')).not.toHaveClass(/is-dragging/)
+      await expect(dragHandle).toBeFocused()
+      const toggle = columns
+        .locator('.column-selector__item')
+        .filter({
+          has: page.locator('.column-selector__item-label', { hasText: /^Title$/ }),
+        })
+        .getByRole('checkbox')
+      const titleHeader = page
+        .locator('th')
+        .filter({ has: page.locator('.sort-column__label', { hasText: /^Title$/ }) })
+
+      await expect(toggle).toBeChecked()
+      try {
+        await toggle.focus()
+        await toggle.press('Space')
+        await expect(toggle).not.toBeChecked()
+        await expect(titleHeader).toHaveCount(0)
+        await toggle.press('Space')
+        await expect(toggle).toBeChecked()
+        await expect(titleHeader).toBeVisible()
+      } finally {
+        if (!(await toggle.isChecked())) {
+          await toggle.check()
+        }
+      }
+    })
+
     test('should move the focal-point handle with arrow keys and clamp it to the image', async () => {
       const dialog = await openEditImageDialog({ page, serverURL })
       const handle = dialog.getByRole('button', { name: 'Set focal point', exact: true })
@@ -610,6 +1294,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       try {
         await page.setViewportSize({ height: 180, width: 320 })
         await page.goto(`${serverURL}/admin`)
+        await openNavigationForUserMenu({ page })
         await page.locator('.user-menu__trigger').click()
         const popup = page.locator('.user-menu > .popup__content')
         const popupBox = await popup.boundingBox()
@@ -629,6 +1314,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       try {
         await page.setViewportSize({ height: 720, width: 800 })
         await page.goto(`${serverURL}/admin`)
+        await openNavigationForUserMenu({ page })
         await page.locator('.user-menu__trigger').click()
         await page.getByRole('menuitem', { name: /theme/i }).click()
         const submenu = page.locator('.user-menu .popup__content').last()
@@ -858,7 +1544,13 @@ test.describe('WCAG 2.2 Level AA', () => {
         page.getByRole('status').filter({ hasText: 'Picked up draggable item' }),
       ).toHaveCount(1)
       await page.keyboard.press('ArrowLeft')
-      await expect(page.getByRole('status').filter({ hasText: `${firstID}-before` })).toHaveCount(1)
+      const overFirstWidget = page.getByRole('status').filter({ hasText: firstID! })
+
+      await expect(overFirstWidget).toContainText(new RegExp(`${firstID}-(before|after)`))
+      if ((await overFirstWidget.innerText()).includes(`${firstID}-after`)) {
+        await page.keyboard.press('ArrowLeft')
+      }
+      await expect(overFirstWidget).toContainText(`${firstID}-before`)
       await page.keyboard.press('Space')
       await expect(widgets.first()).toHaveAttribute('data-slug', lastID!)
       await expect(widgets.last()).toHaveAttribute('data-slug', firstID!)
@@ -873,31 +1565,34 @@ test.describe('WCAG 2.2 Level AA', () => {
 
       await expectFocusInside({ container: header, page })
       await test.step('Read widget content before its named actions', async () => {
-        const widget = page.locator('.widget[data-slug^="activity-"]')
+        const widget = page.locator('.widget[data-slug^="upload-dropzone-"]')
         const card = widget.locator('.draggable')
         const drag = widget.getByRole('button', { name: 'Drag to reorder', exact: true })
-        const text = (await widget.locator('.widget-content').innerText())
-          .replace(/\s+/g, ' ')
-          .trim()
 
+        await expect(
+          widget
+            .getByRole('region', { name: 'Upload files' })
+            .getByText('Upload from your computer via drag-and-drop, or click the button below'),
+        ).toBeVisible()
         await card.focus()
         await page.keyboard.press('Shift+Tab')
         await page.keyboard.press('Tab')
         await expect(card).toBeFocused()
-        await expect(card).toHaveAccessibleName(text)
+        await expect(card).toHaveAccessibleName('Upload files')
+        await expect(drag).toHaveAccessibleDescription(/Upload files/)
         await page.keyboard.press('Tab')
         await expect(drag).toBeFocused()
         await page.keyboard.press('Tab')
         await expect(
-          widget.getByRole('button', { name: 'Edit You recently viewed', exact: true }),
+          widget.getByRole('button', { name: 'Edit Upload files', exact: true }),
         ).toBeFocused()
         await page.keyboard.press('Tab')
         await expect(
-          widget.getByRole('button', { name: /^Resize You recently viewed, current size: small$/ }),
+          widget.getByRole('button', { name: /^Resize Upload files, current size: small$/ }),
         ).toBeFocused()
         await page.keyboard.press('Tab')
         await expect(
-          widget.getByRole('button', { name: 'Delete You recently viewed', exact: true }),
+          widget.getByRole('button', { name: 'Delete Upload files', exact: true }),
         ).toBeFocused()
       })
       const widget = await addCollectionQueryWidget({ page })
@@ -991,6 +1686,7 @@ test.describe('WCAG 2.2 Level AA', () => {
     test('should visit every theme option with arrow keys including the middle option', async () => {
       // PYLD-3636
       await page.goto(formatAdminURL({ adminRoute: '/admin', serverURL }))
+      await openNavigationForUserMenu({ page })
       await page.locator('.user-menu__trigger').press('Enter')
       await page.getByRole('menuitem', { name: /theme/i }).press('Enter')
       const options = page.getByRole('menuitemradio')
@@ -1100,6 +1796,92 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(menu).toHaveCount(0)
       await expect(trigger).toBeFocused()
     })
+
+    test('should move keyboard focus into the table column editor', async () => {
+      // PYLD-3771
+      test.setTimeout(60000)
+      await gotoPostsList({ page, postsURL })
+      const trigger = page.getByRole('button', { name: 'Columns', exact: true })
+
+      await openPopupWithKeyboard({ page, popup: page.locator('.column-selector'), trigger })
+      await page.keyboard.press('Escape')
+      await expect(trigger).toBeFocused()
+    })
+    for (const form of ['document', 'login'] as const) {
+      test(`should associate ${form} errors with their fields and focus order`, async () => {
+        // PYLD-3581, PYLD-3613, PYLD-3611
+        const context = await page.context().browser()!.newContext()
+        const { page: formPage } = await initPage({ context, serverURL })
+
+        try {
+          if (form === 'login') {
+            await context.clearCookies()
+            await context.route(
+              (url) => url.origin === new URL(serverURL).origin,
+              async (route) => {
+                await route.continue({
+                  headers: { ...route.request().headers(), DisableAutologin: 'true' },
+                })
+              },
+            )
+            await formPage.goto(formatAdminURL({ adminRoute: '/admin', path: '/login', serverURL }))
+            await formPage.locator('input[name="email"]').fill('dev@payloadcms.com')
+            const password = formPage.locator('input[name="password"]')
+
+            await expectRequiredState({ input: password })
+            await password.fill('temporary')
+            await password.fill('')
+            await password.press('Tab')
+            await formPage.getByRole('button', { name: 'Login', exact: true }).click()
+          } else {
+            await gotoCreatePost({ page: formPage, postsURL })
+            await formPage.getByRole('button', { name: /^Publish(?: in English)?$/ }).click()
+          }
+
+          const input = formPage.locator(
+            form === 'login' ? 'input[name="password"]' : '#field-title',
+          )
+          const error = formPage.locator('.field-type').filter({ has: input }).getByRole('alert')
+
+          await expect(error).toHaveCount(1)
+          await expect(error).toBeVisible()
+          await expect(error).not.toHaveAttribute('aria-hidden', 'true')
+          await expect(input).toHaveAccessibleDescription((await error.innerText()).trim())
+          await expectErrorTabOrder({ error, input })
+          const originalMessage = await error.locator('.tooltip-content').textContent()
+
+          try {
+            await error.locator('.tooltip-content').evaluate((element) => {
+              element.textContent =
+                'Please enter a valid value for this required field before saving your changes. ' +
+                'A'.repeat(100)
+            })
+            for (const width of [390, 1280]) {
+              await formPage.setViewportSize({ height: 900, width })
+              await input.scrollIntoViewIfNeeded()
+              await expect(error).toBeVisible()
+              await expect
+                .poll(async () => {
+                  const box = await error.boundingBox()
+
+                  return box && box.x >= 0 && box.x + box.width <= width
+                })
+                .toBe(true)
+              expect(
+                await error.evaluate((element) => element.scrollWidth <= element.clientWidth),
+              ).toBe(true)
+              await expectErrorTabOrder({ error, input })
+            }
+          } finally {
+            await error.locator('.tooltip-content').evaluate((element, message) => {
+              element.textContent = message
+            }, originalMessage)
+          }
+        } finally {
+          await context.close()
+        }
+      })
+    }
 
     for (const key of ['Enter', 'Space']) {
       test(`should retain focus after moving a rich-text block without a drag handle using ${key}`, async () => {
@@ -1344,6 +2126,7 @@ test.describe('WCAG 2.2 Level AA', () => {
     test('should navigate User menu items without entering hidden submenus', async () => {
       // Additional coverage for PYLD-3645 and PYLD-3697.
       await page.goto(`${serverURL}/admin`)
+      await openNavigationForUserMenu({ page })
       const trigger = page.locator('.user-menu__trigger')
 
       await trigger.focus()
@@ -1373,6 +2156,7 @@ test.describe('WCAG 2.2 Level AA', () => {
     test('should close the full User menu chain when tabbing from a nested menu', async () => {
       // Additional coverage for PYLD-3645 and PYLD-3697.
       await page.goto(`${serverURL}/admin`)
+      await openNavigationForUserMenu({ page })
       const trigger = page.locator('.user-menu__trigger')
 
       await trigger.focus()
@@ -1393,6 +2177,7 @@ test.describe('WCAG 2.2 Level AA', () => {
     test('should restore visible focus when shift-tabbing from a nested User menu', async () => {
       // Additional coverage for PYLD-3645 and PYLD-3697.
       await page.goto(`${serverURL}/admin`)
+      await openNavigationForUserMenu({ page })
       const trigger = page.locator('.user-menu__trigger')
 
       await trigger.focus()
@@ -1415,6 +2200,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       // Additional coverage for PYLD-3645 and PYLD-3697.
       await page.setViewportSize({ height: 720, width: 320 })
       await page.goto(`${serverURL}/admin`)
+      await openNavigationForUserMenu({ page })
       const trigger = page.locator('.user-menu__trigger')
 
       await trigger.focus()
@@ -1716,6 +2502,25 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.6 Headings and Labels (AA)', () => {
+    test('should include the visible version count in the table history link name', async () => {
+      // PYLD-3707
+      test.setTimeout(60000)
+      for (const kind of ['collection', 'global'] as const) {
+        if (kind === 'collection') {
+          await gotoFirstPost({ page, postsURL, serverURL })
+        } else {
+          await page.goto(
+            formatAdminURL({ adminRoute: '/admin', path: '/globals/menu', serverURL }),
+          )
+        }
+        const tab = page.locator('.doc-tab', { hasText: 'Versions' })
+        const count = (await tab.innerText()).match(/\d+/)?.[0]
+
+        expect(count).toBeTruthy()
+        await expect.soft(tab).toHaveAccessibleName(new RegExp(`Versions.*${count}`, 'i'))
+      }
+    })
+
     test('should distinguish new-folder actions by their destination column', async () => {
       // PYLD-3584
       // No criterion was supplied in the report; 2.4.6 is the best-fit classification.
@@ -1772,6 +2577,33 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.7 Focus Visible (AA)', () => {
+    test('should reveal the collection card create action and its focus indicator by keyboard', async ({
+      browser: _browser,
+    }, testInfo) => {
+      await page.goto(`${serverURL}/admin`)
+      await page.mouse.move(0, 0)
+
+      const scan = await runAxeScan({ include: ['.collections'], page, testInfo })
+      const card = page.locator('.collections__card-list .card').first()
+      const createLink = card.locator('.card__actions a')
+      const actions = card.locator('.card__actions')
+      const unfocusedStyle = await getFocusIndicatorStyle(createLink)
+
+      expect(scan.violations).toHaveLength(0)
+      await expect(actions).toHaveCSS('opacity', '0')
+      await card.locator('.card__click').focus()
+      await page.keyboard.press('Tab')
+
+      await expect(createLink).toBeFocused()
+      await expect(actions).toHaveCSS('opacity', '1')
+      expect(
+        hasRenderedFocusIndicator({
+          focusedStyle: await getFocusIndicatorStyle(createLink),
+          unfocusedStyle,
+        }),
+      ).toBe(true)
+    })
+
     test('should paint a keyboard focus indicator on the dashboard Add button', async () => {
       // PYLD-3631
       const header = await openDashboardEditor({ page, serverURL })
@@ -1925,7 +2757,344 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
 
+  test.describe('3.2.2 On Input (A)', () => {
+    test('should retain focus during automatic search', async () => {
+      // Additional coverage for PYLD-3773.
+      for (const isColumnSearch of [false, true]) {
+        await page.goto(`${postsURL.list}?search=`)
+        if (isColumnSearch) {
+          await page.locator('.columns-button__button').click()
+        }
+        const search = isColumnSearch
+          ? page
+              .getByRole('dialog', { name: /columns/i })
+              .getByRole('textbox', { name: /search columns/i })
+          : page.locator('#search-filter-input')
+
+        await expect(search).toHaveAccessibleDescription(/automatically as you type/i)
+        await search.fill('no-matching-accessibility-result')
+        if (isColumnSearch) {
+          await expect(
+            page.getByText('No matches found for this search', { exact: true }),
+          ).toBeVisible()
+        } else {
+          await expect(page.locator('tbody tr')).toHaveCount(0)
+          await expect(page.locator('.no-results__title')).toHaveText('No Results.')
+        }
+        await expect(search).toBeFocused()
+      }
+    })
+  })
+
+  test.describe('3.3.2 Labels or Instructions (A)', () => {
+    test('should expose required state without naming the asterisk', async () => {
+      // PYLD-3579, PYLD-3779, PYLD-3715
+      for (const { name, collection, field, localized } of [
+        { name: 'Alt', collection: 'media', field: 'alt', localized: false },
+        { name: 'Title', collection: 'posts', field: 'title', localized: true },
+      ]) {
+        await page.goto(
+          formatAdminURL({
+            adminRoute: '/admin',
+            path: `/collections/${collection}/create`,
+            serverURL,
+          }),
+        )
+        const input = page.locator(`#field-${field}`)
+
+        await expect(input).toBeVisible()
+        await expect(input).toHaveAccessibleName(new RegExp(name))
+        await expect(input).not.toHaveAccessibleName(/\*/)
+        await expectRequiredState({ input })
+        if (localized) {
+          await expect(page.locator('label').filter({ hasText: /^Title/ })).toContainText('English')
+        }
+      }
+    })
+
+    test('should expose select requirements and validation errors', async () => {
+      await gotoCreatePost({ page, postsURL })
+      const select = page.locator('#field-accessibilitySelect')
+      const tags = page
+        .locator('.field-type.text')
+        .filter({ has: page.locator('.field-requiredTags') })
+
+      const selectInput = select.getByRole('combobox')
+
+      await selectInput.focus()
+      await expect(selectInput).toHaveAttribute('aria-describedby', /live-region/)
+      await expect(selectInput).toHaveAttribute('aria-required', 'true')
+      await select.locator('.clear-indicator').click()
+      await tags.locator('.multi-value-remove').click()
+      await page.getByRole('button', { name: /^Publish(?: in English)?$/ }).click()
+
+      for (const field of [select, tags]) {
+        const input = field.getByRole('combobox')
+        const error = field.locator('.field-error[role="alert"]')
+
+        await expect(error).toContainText(/require/i)
+        await expect(input).toHaveAttribute('aria-required', 'true')
+        await expect(input).toHaveAttribute('aria-invalid', 'true')
+        await expect(input).toHaveAccessibleDescription(
+          new RegExp((await error.textContent())!.trim()),
+        )
+        await expect(field.locator('input[required]')).toHaveCount(0)
+        await expect(input).toHaveAttribute('aria-describedby', /placeholder/)
+        await input.focus()
+        await expect(input).toHaveAccessibleDescription(/require/i)
+      }
+    })
+
+    test('should update accessibility states on non-searchable selects', async () => {
+      await gotoCreatePost({ page, postsURL })
+      const input = page.getByRole('combobox', { name: 'Non-searchable required select' })
+
+      await expect(input).toHaveAttribute('aria-required', 'true')
+      await expect(input).toHaveAttribute('aria-invalid', 'true')
+      await expect(input).toHaveAccessibleDescription('Choose an option An option is required.')
+      await input.focus()
+      await expect(input).toHaveAccessibleDescription('Choose an option An option is required.')
+      await expect(input.locator('..').locator('input[required]')).toHaveCount(0)
+      await page.getByRole('button', { name: 'Clear select requirements' }).click()
+      await expect(input).not.toHaveAttribute('aria-required', 'true')
+      await expect(input).not.toHaveAttribute('aria-invalid', 'true')
+      await expect(input).toHaveAccessibleDescription('Choose an option')
+    })
+
+    test('should open and dismiss required-field help', async () => {
+      // PYLD-3778
+      await gotoCreatePost({ page, postsURL })
+      const message = 'Fields marked with * are required.'
+      const trigger = page.getByRole('button', { name: message, exact: true })
+      const explanation = page.getByText(message, { exact: true })
+
+      await expect(trigger).toBeVisible()
+      await expect(trigger).toHaveText('')
+      const spacing = await trigger.evaluate((button) => {
+        const icon = button.closest('.required-fields-info')!
+        const parent = icon.parentElement!
+        const next = icon.nextSibling
+        const fields = parent.querySelector('.document-fields__fields')!
+        const before = fields.getBoundingClientRect().top
+
+        icon.remove()
+        const after = fields.getBoundingClientRect().top
+
+        parent.insertBefore(icon, next)
+        return { after, before }
+      })
+
+      expect(spacing.after).toBe(spacing.before)
+      await expect(explanation).toBeHidden()
+      await trigger.hover()
+      await expect(explanation).toBeVisible()
+      await explanation.hover()
+      await expect(explanation).toBeVisible()
+      await page.keyboard.press('Escape')
+      await expect(explanation).toBeHidden()
+      await page.locator('#field-title').focus()
+      await trigger.focus()
+      await expect(explanation).toBeVisible()
+      await trigger.press('Escape')
+      await expect(explanation).toBeHidden()
+      await trigger.press('Enter')
+      await expect(explanation).toBeVisible()
+      await page.locator('#field-title').click()
+      await expect(explanation).toBeHidden()
+      await trigger.click()
+      await expect(explanation).toBeVisible()
+      const box = await trigger.boundingBox()
+
+      expect(box?.width).toBeGreaterThanOrEqual(24)
+      expect(box?.height).toBeGreaterThanOrEqual(24)
+      await trigger.press('Escape')
+      await page.locator('#relatedPost-add-new button').click()
+      const drawer = page.locator('dialog[id^="doc-drawer_posts_"]')
+      const drawerTrigger = drawer.getByRole('button', { name: message, exact: true })
+      const drawerExplanation = drawer.getByText(message, { exact: true })
+
+      await drawerTrigger.focus()
+      await expect(drawerExplanation).toBeVisible()
+      await drawerTrigger.press('Escape')
+      await expect(drawerExplanation).toBeHidden()
+      await expect(drawer).toBeVisible()
+    })
+  })
+
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    test('should expose the upload dropzone without detectable accessibility violations', async ({
+      browser: _browser,
+    }, testInfo) => {
+      // PYLD-4166
+      await page.goto(`${serverURL}/admin`)
+      await expect(page.locator('.upload-dropzone-widget')).toBeVisible()
+
+      const results = await runAxeScan({
+        include: ['.upload-dropzone-widget'],
+        page,
+        testInfo,
+      })
+
+      expect(results.violations).toEqual([])
+    })
+
+    test('should give the navigation close control an accessible name', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await openNavigationForUserMenu({ page })
+
+      await expect(page.locator('.nav__close')).toHaveAccessibleName(/hide sidebar/i)
+    })
+
+    test('should expose table Columns and Group By expansion states', async () => {
+      // PYLD-3781
+      // PYLD-3705
+      test.setTimeout(60000)
+      await gotoPostsList({ page, postsURL })
+      for (const name of [/^Columns$/, /^Group by(?: |$)/]) {
+        const trigger = page.getByRole('button', { name, exact: true })
+
+        await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+        await trigger.click()
+        await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+        await page.keyboard.press('Escape')
+        await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+      }
+    })
+
+    test('should give collection and global version tables descriptive names', async () => {
+      // PYLD-3708
+      test.setTimeout(60000)
+      for (const kind of ['collection', 'global'] as const) {
+        const view = await openTableVersionHistory({ kind, page, postsURL, serverURL })
+
+        const grid = view.getByRole('grid', { name: /versions/i })
+
+        await expect(grid).toBeVisible()
+        const row = grid.locator('tbody tr').first()
+
+        await expect(row).toHaveAccessibleName('1')
+        await row.locator('td').first().focus()
+        const cells = row.locator('td')
+
+        for (let columnIndex = 1; columnIndex < (await cells.count()); columnIndex++) {
+          await page.keyboard.press('ArrowRight')
+          await expect(cells.nth(columnIndex)).toBeFocused()
+        }
+        await page.keyboard.press('Home')
+        await expect(row.locator('td').first()).toBeFocused()
+        await page.keyboard.press('Tab')
+        await expect
+          .poll(() => grid.evaluate((element) => element.contains(document.activeElement)))
+          .toBe(false)
+      }
+    })
+
+    test('should name version table per-page controls with their value and purpose', async () => {
+      // PYLD-3712
+      test.setTimeout(60000)
+      for (const kind of ['collection', 'global'] as const) {
+        const view = await openTableVersionHistory({ kind, page, postsURL, serverURL })
+        const button = view.locator('.per-page').getByRole('button')
+        const value = (await button.innerText()).trim()
+
+        await expect.soft(button).toHaveAccessibleName(`Per Page: ${value}`)
+      }
+    })
+
+    test('should name pagination arrows in collection, version, and drawer tables', async () => {
+      test.setTimeout(120000)
+      await test.step('should name both version table pagination arrows', async () => {
+        // PYLD-3710
+        for (const kind of ['collection', 'global'] as const) {
+          await openTableVersionHistory({ kind, page, postsURL, serverURL })
+          const url = new URL(page.url())
+
+          try {
+            url.searchParams.set('limit', '1')
+            await page.goto(url.toString())
+            await expect(page.locator('main.versions tbody tr')).toHaveCount(1)
+            await expect
+              .soft(page.locator('.paginator .clickable-arrow--left'))
+              .toHaveAccessibleName('Previous table page')
+            await expect
+              .soft(page.locator('.paginator .clickable-arrow--right'))
+              .toHaveAccessibleName('Next table page')
+          } finally {
+            url.searchParams.set('limit', '10')
+            await page.goto(url.toString())
+            await expect(page.locator('main.versions tbody tr')).toHaveCount(3)
+          }
+        }
+      })
+
+      await test.step('should name both collection table pagination arrows', async () => {
+        // PYLD-3695
+        try {
+          await page.goto(`${postsURL.list}?limit=1`)
+          await expect(page.locator('tbody tr')).toHaveCount(1)
+          await expect
+            .soft(page.locator('.paginator .clickable-arrow--left'))
+            .toHaveAccessibleName('Previous table page')
+          await expect
+            .soft(page.locator('.paginator .clickable-arrow--right'))
+            .toHaveAccessibleName('Next table page')
+        } finally {
+          await page.goto(`${postsURL.list}?limit=10`)
+          await expect(page.locator('tbody tr')).toHaveCount(3)
+        }
+      })
+
+      await test.step('should name rich-text selection table pagination arrows', async () => {
+        // PYLD-3658
+        for (const openDrawer of [openRichTextRelationshipDrawer, openRichTextUploadDrawer]) {
+          if (openDrawer === openRichTextUploadDrawer) {
+            await openEditImageDialog({ page, serverURL })
+          }
+          const drawer = await openDrawer({ page, postsURL })
+
+          await expect
+            .soft(drawer.locator('.paginator .clickable-arrow--left'))
+            .toHaveAccessibleName('Previous table page')
+          await expect
+            .soft(drawer.locator('.paginator .clickable-arrow--right'))
+            .toHaveAccessibleName('Next table page')
+        }
+      })
+    })
+
+    test('should expose required authentication fields and their errors', async () => {
+      await page.goto(
+        formatAdminURL({ adminRoute: '/admin', path: '/collections/users/create', serverURL }),
+      )
+      const fields = [
+        { name: 'Email', selector: 'input[name="email"]' },
+        { name: 'New Password', selector: 'input[name="password"]' },
+        { name: 'Confirm Password', selector: 'input[name="confirm-password"]' },
+      ]
+
+      for (const { name, selector } of fields) {
+        const input = page.locator(selector)
+
+        await expect(input).toHaveAccessibleName(name)
+        await expectRequiredState({ input })
+        await expect(input).not.toHaveAttribute('aria-invalid', 'true')
+        await expect(input).toHaveAccessibleDescription('')
+      }
+
+      await page.getByRole('button', { name: 'Save', exact: true }).click()
+
+      for (const { name, selector } of fields) {
+        const input = page.locator(selector)
+        const error = page.locator('.field-type').filter({ has: input }).getByRole('alert')
+
+        await expect(error).toBeVisible()
+        await expect(input).toHaveAccessibleName(name)
+        await expect(input).toHaveAttribute('aria-invalid', 'true')
+        await expect(input).toHaveAccessibleDescription((await error.innerText()).trim())
+        await expectErrorTabOrder({ error, input })
+      }
+    })
+
     for (const { label, open } of [
       { label: 'upload', open: openRichTextUploadDrawer },
       { label: 'relationship', open: openRichTextRelationshipDrawer },
@@ -1996,6 +3165,7 @@ test.describe('WCAG 2.2 Level AA', () => {
     test('should expose nested User menu triggers as items in one menu', async () => {
       // Additional coverage for PYLD-3645 and PYLD-3697.
       await page.goto(`${serverURL}/admin`)
+      await openNavigationForUserMenu({ page })
       const trigger = page.locator('.user-menu__trigger')
 
       await trigger.press('Enter')
@@ -2115,11 +3285,11 @@ test.describe('WCAG 2.2 Level AA', () => {
       // PYLD-3754
       test.slow()
       const whereBuilder = await openPostsFilter({ page, postsURL })
-      const filterComboboxes = whereBuilder.locator('input[role="combobox"]')
+      const filterComboboxes = whereBuilder.getByRole('combobox')
 
-      expect(await filterComboboxes.count()).toBeGreaterThan(0)
+      await expect(filterComboboxes.first()).toBeVisible()
       await expect
-        .soft(whereBuilder.locator('.condition__field input[role="combobox"]'))
+        .soft(whereBuilder.locator('.condition__field').getByRole('combobox'))
         .toHaveAccessibleName(/where|field/i)
       for (let index = 0; index < (await filterComboboxes.count()); index++) {
         await expect.soft(filterComboboxes.nth(index)).toHaveAccessibleName(/\S/)
@@ -2180,6 +3350,108 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
   test.describe('4.1.3 Status Messages (AA)', () => {
+    test('should announce completed collection searches', async () => {
+      await page.clock.install()
+      await page.goto(`${postsURL.list}?groupBy=&search=`)
+      const search = page.locator('#search-filter-input')
+      const status = page.locator('.collection-list__search-status')
+
+      await expect(status).toHaveAttribute('role', 'status')
+      await expect(status).toBeEmpty()
+      await search.fill('no-matching-accessibility-result')
+      await expect(status).toHaveText('Results found for “no-matching-accessibility-result”: 0.')
+      await expect(search).toBeFocused()
+      const previousMessage = await status.locator('span').elementHandle()
+
+      let releaseResponse!: () => void
+      const responseGate = new Promise<void>((resolve) => {
+        releaseResponse = resolve
+      })
+      let hasPendingRequest = false
+      const routePattern = (url: URL) =>
+        url.pathname === new URL(postsURL.list).pathname ||
+        (url.pathname.startsWith('/_serverFn/') &&
+          Boolean(url.searchParams.get('payload')?.includes('"collections/posts"')))
+
+      await page.route(routePattern, async (route) => {
+        hasPendingRequest = true
+        await responseGate
+        await route.continue()
+      })
+      try {
+        await page.clock.pauseAt(new Date())
+        await search.fill('another-no-matching-accessibility-result')
+        await expect(status).toBeEmpty()
+        await page.clock.resume()
+        await expect.poll(() => hasPendingRequest).toBe(true)
+        await expect(status).toBeEmpty()
+        releaseResponse()
+        await expect(status).toHaveText(
+          'Results found for “another-no-matching-accessibility-result”: 0.',
+        )
+        expect(await previousMessage.evaluate((element) => element.isConnected)).toBe(false)
+      } finally {
+        await page.clock.resume()
+        releaseResponse()
+        await page.unrouteAll({ behavior: 'wait' })
+      }
+      await search.fill('')
+      await expect(status).toHaveText('Search cleared.')
+      await expect(search).toBeFocused()
+      await addGroupBy(page, {
+        fieldLabel: 'Accessibility Select',
+        fieldPath: 'accessibilitySelect',
+      })
+      await expect(status).toHaveText(/^\d+ Posts?$/)
+      await page.keyboard.press('Escape')
+      await clearGroupBy(page)
+      await expect(status).toHaveText(/^\d+ Posts?$/)
+      await page.keyboard.press('Escape')
+      try {
+        await search.fill('third version')
+        await expect(status).toHaveText('Results found for “third version”: 1.')
+        await expect(page.getByRole('status').filter({ hasText: /\S/ })).toHaveCount(1)
+        await expect(search).toBeFocused()
+        await search.fill('Example')
+        await expect(status).toHaveText(/Results found for “Example”: \d+\./)
+        for (const groupBy of ['accessibilitySelect', '']) {
+          let releaseGrouping!: () => void
+          let isGroupingPending = false
+          const groupingGate = new Promise<void>((resolve) => {
+            releaseGrouping = resolve
+          })
+          await page.route(routePattern, async (route) => {
+            isGroupingPending = true
+            await groupingGate
+            await route.continue()
+          })
+          try {
+            const { groupByContent } = await openGroupBy(page)
+            if (groupBy) {
+              await groupByContent.locator('.group-by-control__select-trigger').first().click()
+              await page
+                .locator('.popup-button-list .popup-button-list__button')
+                .filter({ hasText: /^Accessibility Select$/ })
+                .click()
+            } else {
+              await groupByContent.getByRole('button', { name: 'Clear', exact: true }).click()
+            }
+            await expect.poll(() => isGroupingPending).toBe(true)
+            await expect(status).toBeEmpty()
+            releaseGrouping()
+            await expect(status).toHaveText(/^\d+ Posts?$/)
+          } finally {
+            releaseGrouping()
+            await page.unrouteAll({ behavior: 'wait' })
+          }
+          await page.keyboard.press('Escape')
+        }
+      } finally {
+        await page.goto(`${postsURL.list}?groupBy=&search=`)
+        await expect(search).toHaveValue('')
+      }
+    })
+
     test('should expose and dismiss a failed drawer submission notification', async () => {
       const drawer = await openRelationshipCreationDrawer({ page, postsURL })
 
@@ -2286,4 +3558,22 @@ async function openRichTextContext({
   }
   await gotoCreatePost({ page, postsURL })
   return page.locator('main')
+}
+
+async function expectErrorTabOrder({ error, input }: { error: Locator; input: Locator }) {
+  await input.focus()
+  await input.press('Shift+Tab')
+  await expect(error).toBeFocused()
+  await expect(error).toHaveCSS('outline-style', 'solid')
+  await error.press('Tab')
+  await expect(input).toBeFocused()
+}
+
+async function expectRequiredState({ input }: { input: Locator }) {
+  expect(
+    await input.evaluate(
+      (element: HTMLInputElement) =>
+        element.required || element.getAttribute('aria-required') === 'true',
+    ),
+  ).toBe(true)
 }

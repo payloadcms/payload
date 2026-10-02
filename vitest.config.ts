@@ -72,7 +72,7 @@ export default defineConfig({
           include: [
             'packages/**/*.spec.ts',
             'tools/**/*.spec.ts',
-            'test/benchmark-blocks/**/*.unit.spec.ts',
+            'test/**/*.unit.spec.ts',
             '.github/scripts/**/*.spec.mjs',
           ],
           name: 'unit',

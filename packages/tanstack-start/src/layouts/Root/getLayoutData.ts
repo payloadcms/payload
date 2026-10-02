@@ -1,5 +1,6 @@
 import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
 import type { Theme } from '@payloadcms/ui'
+import type { RequestThemeSource } from '@payloadcms/ui/utilities/getRequestTheme'
 import type {
   ClientConfig,
   ImportMap,
@@ -39,6 +40,8 @@ export type RootLayoutData = {
    */
   providers?: React.ReactNode
   theme: Theme
+  /** The request input used to resolve `theme`. */
+  themeSource: RequestThemeSource
   translations: I18nClient['translations']
   user: null | User
 }
@@ -68,7 +71,12 @@ export async function getLayoutData({
     user,
   } = await initAdminContext({ configPromise, importMap })
 
-  const theme = getRequestTheme({ config, cookies, headers })
+  const { theme, themeSource } = getRequestTheme({
+    config,
+    cookies,
+    headers,
+  })
+
   const isEmbedded = getRequestEmbed({ config, cookies })
 
   const languageOptions: LanguageOptions = Object.entries(
@@ -141,6 +149,7 @@ export async function getLayoutData({
     permissions,
     providers,
     theme,
+    themeSource,
     translations: req.i18n.translations,
     user: user ?? null,
   }
