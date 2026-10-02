@@ -1,4 +1,5 @@
 import type {
+  ClientUploadState,
   CollectionConfig,
   Field,
   FileData,
@@ -13,9 +14,11 @@ import type {
 
 export interface File {
   buffer: Buffer
+  clientUpload?: ClientUploadState
   filename: string
   filesize: number
   mimeType: string
+  sizeName?: string
   tempFilePath?: string
   uploadReference?: unknown
 }

@@ -4,8 +4,6 @@ import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
-import { mapAsync } from '../utilities/mapAsync.js'
-
 type Args = {
   collectionConfig: SanitizedCollectionConfig
   config: SanitizedConfig
@@ -20,21 +18,27 @@ export const unlinkTempFiles: (args: Args) => Promise<void> = async ({
   req,
 }) => {
   const { file } = req
+  const clientUploadTempFilePath = req.context?._payloadClientUploadTempFile
+  const preservedTempFilePath = req.context?._payloadCloudStorageTempFilePath
+  const tempFilePath =
+    file?.tempFilePath ??
+    (typeof preservedTempFilePath === 'string' ? preservedTempFilePath : undefined) ??
+    (typeof clientUploadTempFilePath === 'string' ? clientUploadTempFilePath : undefined)
 
   // A file fetched from a client-upload reference always gets its own temp file for
   // post-processing (see getFileFromUploadInstructions.ts), regardless of the global
   // useTempFiles setting, so it must always be cleaned up here too.
   const isClientUploadTempFile = Boolean(
-    file?.uploadReference || req.context?._payloadClientUploadTempFile,
+    file?.clientUpload || file?.uploadReference || clientUploadTempFilePath,
   )
 
   if (collectionConfig.upload && (config.upload?.useTempFiles || isClientUploadTempFile)) {
-    const fileArray = [{ file }]
-    await mapAsync(fileArray, async ({ file }) => {
-      // Still need this check because this will not be populated if using local API
-      if (file?.tempFilePath) {
-        await fs.unlink(file.tempFilePath)
+    if (tempFilePath) {
+      await fs.unlink(tempFilePath)
+      if (req.context) {
+        delete req.context._payloadCloudStorageTempFilePath
+        delete req.context._payloadClientUploadTempFile
       }
-    })
+    }
   }
 }
