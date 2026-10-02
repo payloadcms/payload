@@ -1,6 +1,5 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { ValidationResult } from '../../../collections/operations/local/validate.js'
 import type {
   GlobalSlug,
   Payload,
@@ -9,6 +8,7 @@ import type {
   User,
 } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
+import type { ValidationResult } from '../../../types/validation.js'
 import type { ValidationLocaleSelector } from '../../../utilities/resolveValidationLocales.js'
 import type { DataFromGlobalSlug, DraftFlagFromGlobalSlug } from '../../config/types.js'
 
@@ -46,43 +46,11 @@ export type ValidateGlobalOptions<TSlug extends GlobalSlug> = {
 } & DraftFlagFromGlobalSlug<TSlug> &
   Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
-type InternalValidateGlobalOptions<TSlug extends GlobalSlug> = {
-  /**
-   * Whether `data` stores each localized field as a locale-code-keyed object, as the internal
-   * publish-all-locales candidate does, rather than a flat, single-locale candidate.
-   */
-  dataIsLocaleKeyed?: boolean
-  validationDataLocale?: string
-} & ValidateGlobalOptions<TSlug>
-
 export async function validateGlobalLocal<TSlug extends GlobalSlug>(
   payload: Payload,
   options: ValidateGlobalOptions<TSlug>,
 ): Promise<ValidationResult> {
-  return validateGlobalLocalWithDataLocale(payload, {
-    slug: options.slug,
-    context: options.context,
-    data: options.data,
-    draft: options.draft,
-    locale: options.locale,
-    overrideAccess: options.overrideAccess,
-    req: options.req,
-    user: options.user,
-  })
-}
-
-export async function validateGlobalLocalWithDataLocale<TSlug extends GlobalSlug>(
-  payload: Payload,
-  options: InternalValidateGlobalOptions<TSlug>,
-): Promise<ValidationResult> {
-  const {
-    slug,
-    data,
-    dataIsLocaleKeyed,
-    locale,
-    overrideAccess = false,
-    validationDataLocale,
-  } = options
+  const { slug, data, locale, overrideAccess = false } = options
   const { draft = false } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === slug)
@@ -102,7 +70,6 @@ export async function validateGlobalLocalWithDataLocale<TSlug extends GlobalSlug
       validateOperation({
         slug,
         data: validationData,
-        dataIsLocaleKeyed,
         draft,
         globalConfig,
         onValidationData,
@@ -110,6 +77,5 @@ export async function validateGlobalLocalWithDataLocale<TSlug extends GlobalSlug
         req,
       }),
     user: options.user,
-    validationDataLocale,
   })
 }

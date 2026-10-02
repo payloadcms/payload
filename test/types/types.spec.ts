@@ -25,6 +25,7 @@ import type {
   FieldClientProps,
   FieldErrorServerProps,
   FieldHookArgs,
+  FieldOperation,
   FieldPermissions,
   FieldServerProps,
   GeneratedTypes,
@@ -41,6 +42,7 @@ import type {
   MeOperationResult,
   NamedGroupField,
   NamedTab,
+  Operation,
   PaginatedDocs,
   PayloadClientComponentProps,
   PayloadRequest,
@@ -132,6 +134,9 @@ describe('Types testing', () => {
   describe('validate operation types', () => {
     test('should expose beforeValidate operations', () => {
       expect<BeforeValidateOperation>().type.toBe<'create' | 'update' | 'validate'>()
+      expect<FieldOperation>().type.toBe<'create' | 'read' | 'update' | 'validate'>()
+      expect<Operation>().type.toBe<'create' | 'delete' | 'read' | 'update' | 'validate'>()
+      expect<PayloadRequest['operation']>().type.toBe<Operation | undefined>()
     })
 
     test('should expose validate only to validation lifecycle types', () => {

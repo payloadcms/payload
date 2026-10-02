@@ -3,7 +3,6 @@ import type { DeepPartial } from 'ts-essentials'
 import type { FindOptions } from '../../collections/operations/local/find.js'
 import type { GlobalSlug, JsonObject } from '../../index.js'
 import type {
-  Operation,
   PayloadRequest,
   PopulateType,
   SelectType,
@@ -352,7 +351,7 @@ export const updateOperation = async <
       docWithLocales: globalJSON,
       fieldsToValidate: submittedTopLevelFieldNames,
       global: globalConfig,
-      operation: 'update' as Operation,
+      operation: 'update' as const,
       req,
       skipValidation: isSavingDraft && !hasDraftValidationEnabled(globalConfig),
     }

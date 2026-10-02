@@ -1,5 +1,5 @@
-import type { ValidationResult } from '../collections/operations/local/validate.js'
 import type { PayloadRequest } from '../types/index.js'
+import type { ValidationResult } from '../types/validation.js'
 
 import { ValidationError } from '../errors/index.js'
 

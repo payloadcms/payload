@@ -52,7 +52,10 @@ export class ValidationError extends APIError<{
     // delete to avoid logging the whole req
     delete results['req']
 
-    const spansMultipleLocales = new Set(results.errors.map((f) => f.locale)).size > 1
+    const locales = results.errors
+      .map((fieldError) => fieldError.locale)
+      .filter((locale): locale is string => Boolean(locale))
+    const spansMultipleLocales = new Set(locales).size > 1
 
     super(
       `${message} ${results.errors

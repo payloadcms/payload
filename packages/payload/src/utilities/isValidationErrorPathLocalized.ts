@@ -12,8 +12,8 @@ type IsValidationErrorPathLocalizedArgs = {
 }
 
 /**
- * Reports whether a `ValidationFieldError.path` refers to a localized field, by walking `fields`
- * and `data` together the same way `projectNonLocalizedData` does. Used to tell apart a candidate
+ * Reports whether a `ValidationFieldError.path` refers to a localized field by walking `fields`
+ * and `data` together. Used to tell apart a candidate
  * error that's inherently per-locale from one for a shared, non-localized field that every locale
  * pass in `runLocaleScopedValidation` re-validates identically. A path that can't be resolved
  * (unknown field, malformed path) is conservatively treated as localized, since wrongly collapsing

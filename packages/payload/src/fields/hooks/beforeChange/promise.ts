@@ -262,7 +262,6 @@ export const promise = async ({
 
                 errors.push({
                   label: blockLabelPath,
-                  locale: req.locale ?? undefined,
                   message: req.t('validation:invalidBlock', { block: block.blockType }),
                   path: `${path}.${rowIndex}.id`,
                 })
@@ -281,7 +280,6 @@ export const promise = async ({
 
           errors.push({
             label: fieldLabel,
-            locale: req.locale ?? undefined,
             message: validationResult,
             path,
           })

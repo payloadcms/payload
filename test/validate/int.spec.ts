@@ -4,7 +4,7 @@ import { buildEditorState } from '@payloadcms/richtext-lexical'
 import { randomUUID } from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
-import { createPayloadRequest } from 'payload'
+import { createPayloadRequest, ValidationError } from 'payload'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
@@ -78,6 +78,81 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
   })
 
   test.describe('collections', () => {
+    test('should not add locale metadata to normal create validation errors', async ({
+      payload,
+    }) => {
+      let validationError: unknown
+
+      try {
+        await payload.create({
+          collection: publishCollectionSlug,
+          data: {
+            ...getPublishCollectionLocaleData({ title: '' }),
+            localizedArray: 'invalid',
+          } as never,
+          locale: 'en',
+          overrideAccess: true,
+        })
+      } catch (error) {
+        validationError = error
+      }
+
+      expect(validationError).toBeInstanceOf(ValidationError)
+      expect((validationError as ValidationError).data.errors).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ path: 'localizedArray' }),
+          expect.objectContaining({ path: 'title' }),
+        ]),
+      )
+      expect(
+        (validationError as ValidationError).data.errors.every(
+          (fieldError) => fieldError.locale === undefined,
+        ),
+      ).toBe(true)
+      expect((validationError as ValidationError).message).not.toContain('[en]')
+    })
+
+    test('should not add locale metadata to normal update validation errors', async ({
+      payload,
+    }) => {
+      const stored = await payload.create({
+        collection: publishCollectionSlug,
+        data: getPublishCollectionLocaleData({ title: 'Stored title' }),
+        locale: 'en',
+        overrideAccess: true,
+      })
+      let validationError: unknown
+
+      try {
+        await payload.update({
+          id: stored.id,
+          collection: publishCollectionSlug,
+          data: {
+            localizedArray: 'invalid',
+            title: '',
+          } as never,
+          locale: 'en',
+          overrideAccess: true,
+        })
+      } catch (error) {
+        validationError = error
+      }
+
+      expect(validationError).toBeInstanceOf(ValidationError)
+      expect((validationError as ValidationError).data.errors).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ path: 'localizedArray' }),
+          expect.objectContaining({ path: 'title' }),
+        ]),
+      )
+      expect(
+        (validationError as ValidationError).data.errors.every(
+          (fieldError) => fieldError.locale === undefined,
+        ),
+      ).toBe(true)
+      expect((validationError as ValidationError).message).not.toContain('[en]')
+    })
+
     test('should report a configured unique field conflict', async ({ payload }) => {
       await payload.create({
         collection: validationUniqueCollectionSlug,
@@ -626,57 +701,6 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
           overrideAccess: true,
         }),
       ).resolves.toBeDefined()
-    })
-
-    test('should ignore internal projection flags passed to the public collection validate API', async ({
-      payload,
-    }) => {
-      const stored = await payload.create({
-        collection: validationCollectionSlug,
-        data: {
-          summary: 'stored summary',
-          title: 'Stored title',
-        },
-        locale: 'en',
-        overrideAccess: true,
-      })
-
-      const result = await payload.validate({
-        id: stored.id,
-        collection: validationCollectionSlug,
-        data: {
-          summary: 'candidate summary',
-          title: 'Candidate title',
-        },
-        locale: ['en', 'es'],
-        validationDataLocale: 'en',
-      } as never)
-
-      expect(result).toEqual({
-        errors: [],
-        valid: true,
-      })
-    })
-
-    test('should ignore internal trash-source flags passed to the public collection validate API', async ({
-      payload,
-    }) => {
-      const stored = await seedPublishCollection({
-        de: 'German optional',
-        deletedAt: new Date().toISOString(),
-        en: 'English draft',
-        es: 'Spanish valid',
-        payload,
-      })
-
-      await expect(
-        payload.validate({
-          id: stored.id,
-          collection: publishCollectionSlug,
-          locale: 'en',
-          validationTrash: true,
-        } as never),
-      ).rejects.toThrow(/not found/i)
     })
 
     test('should resolve all to every available locale through locale filtering', async ({
@@ -2018,25 +2042,6 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
       })
 
       expect(globalValidationSourceEvents).toEqual([])
-    })
-
-    test('should ignore internal projection flags passed to the public global validate API', async ({
-      payload,
-    }) => {
-      const result = await payload.validateGlobal({
-        slug: validationGlobalSlug,
-        data: {
-          summary: 'candidate summary',
-          title: 'Candidate title',
-        },
-        locale: ['en', 'es'],
-        validationDataLocale: 'en',
-      } as never)
-
-      expect(result).toEqual({
-        errors: [],
-        valid: true,
-      })
     })
 
     test('should validate valid partial global data without persisting it', async ({ payload }) => {

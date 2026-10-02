@@ -1,22 +1,18 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type { TypeWithID } from '../../collections/config/types.js'
-import type { ValidationResult } from '../../collections/operations/local/validate.js'
 import type { AccessResult } from '../../config/types.js'
 import type { GlobalSlug, JsonObject } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
+import type { ValidationResult } from '../../types/validation.js'
 import type { DataFromGlobalSlug, SanitizedGlobalConfig } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { Forbidden } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
-import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
-import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
-import { deepMergeWithSourceArraysIgnoringUndefined } from '../../utilities/deepMerge.js'
-import { flattenDataByLocale } from '../../utilities/flattenDataByLocale.js'
-import { toValidationResult } from '../../utilities/toValidationResult.js'
+import { runValidationLifecycle } from '../../utilities/runValidationLifecycle.js'
 import {
   findDraftVersion,
   getDocumentFromDraftVersion,
@@ -24,12 +20,6 @@ import {
 
 export type Arguments<TSlug extends GlobalSlug> = {
   data?: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
-  /**
-   * Whether `data` stores each localized field as a locale-code-keyed object, as the internal
-   * publish-all-locales candidate does, rather than a flat, single-locale candidate.
-   * @default false
-   */
-  dataIsLocaleKeyed?: boolean
   draft: boolean
   globalConfig: SanitizedGlobalConfig
   onValidationData?: (data: JsonObject) => void
@@ -54,7 +44,6 @@ export async function validateOperation<TSlug extends GlobalSlug>(
 async function validateOperationWithScopedRequest<TSlug extends GlobalSlug>({
   slug,
   data: incomingData,
-  dataIsLocaleKeyed = false,
   draft,
   globalConfig,
   onValidationData,
@@ -93,80 +82,16 @@ async function validateOperationWithScopedRequest<TSlug extends GlobalSlug>({
     showHiddenFields: true,
   })
 
-  let data = flattenDataByLocale({
-    configBlockReferences: req.payload.config.blocks,
-    dataIsLocaleKeyed,
-    docWithLocales: deepCopyObjectSimple(incomingData ?? {}) as JsonObject,
-    fields: globalConfig.fields,
-    locale: req.locale!,
+  return runValidationLifecycle({
+    collection: null,
+    docWithLocales,
+    global: globalConfig,
+    incomingData: incomingData as JsonObject | undefined,
+    onValidationData,
+    originalDoc,
+    overrideAccess,
+    req,
   })
-
-  try {
-    onValidationData?.(deepMergeWithSourceArraysIgnoringUndefined<JsonObject>(originalDoc, data))
-
-    data = await beforeValidate({
-      collection: null,
-      context: req.context,
-      data,
-      doc: originalDoc,
-      global: globalConfig,
-      operation: 'validate',
-      overrideAccess,
-      req,
-    })
-    onValidationData?.(data)
-
-    if (globalConfig.hooks.beforeValidate?.length) {
-      for (const hook of globalConfig.hooks.beforeValidate) {
-        data =
-          (await hook({
-            context: req.context,
-            data,
-            global: globalConfig,
-            operation: 'validate',
-            originalDoc,
-            overrideAccess,
-            req,
-          })) || data
-      }
-    }
-
-    if (globalConfig.hooks.beforeChange?.length) {
-      for (const hook of globalConfig.hooks.beforeChange) {
-        data =
-          (await hook({
-            context: req.context,
-            data,
-            global: globalConfig,
-            operation: 'validate',
-            originalDoc,
-            overrideAccess,
-            req,
-          })) || data
-      }
-    }
-
-    onValidationData?.(data)
-
-    await beforeChange({
-      collection: null,
-      context: req.context,
-      data,
-      doc: originalDoc,
-      docWithLocales,
-      global: globalConfig,
-      operation: 'validate',
-      overrideAccess,
-      req,
-    })
-  } catch (error) {
-    return toValidationResult({ error, req })
-  }
-
-  return {
-    errors: [],
-    valid: true,
-  }
 }
 
 /**

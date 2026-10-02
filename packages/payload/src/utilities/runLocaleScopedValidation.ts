@@ -1,20 +1,28 @@
-import type { ValidationResult } from '../collections/operations/local/validate.js'
 import type { ValidationFieldError } from '../errors/index.js'
 import type { Field } from '../fields/config/types.js'
-import type { Payload, RequestContext, SanitizedConfig, User } from '../index.js'
+import type { Payload, RequestContext, User } from '../index.js'
 import type { JsonObject, PayloadRequest } from '../types/index.js'
+import type { ValidationResult } from '../types/validation.js'
 
+import {
+  cloneValidationContext,
+  cloneValidationData,
+  cloneValidationRequest,
+  cloneValidationUser,
+} from './cloneValidationRequest.js'
 import { createPayloadRequest } from './createPayloadRequest.js'
 import { isValidationErrorPathLocalized } from './isValidationErrorPathLocalized.js'
-import { projectNonLocalizedData } from './projectNonLocalizedData.js'
 import {
-  cloneValidationRequest,
-  cloneValidationValue,
   resolveValidationConcurrency,
   resolveValidationLocales,
   runValidationLocalePasses,
   type ValidationLocaleSelector,
 } from './resolveValidationLocales.js'
+
+type ClassifiedValidationError = {
+  error: ValidationFieldError
+  isLocalized: boolean
+}
 
 /**
  * Clones the caller's request into one scoped to `validate`, resolves the selected locales, runs
@@ -31,7 +39,6 @@ export async function runLocaleScopedValidation<TData>({
   req,
   runPass,
   user,
-  validationDataLocale,
 }: {
   context: RequestContext | undefined
   data: TData
@@ -45,14 +52,13 @@ export async function runLocaleScopedValidation<TData>({
     req: PayloadRequest
   }) => Promise<ValidationResult>
   user: null | undefined | User
-  validationDataLocale: string | undefined
 }): Promise<ValidationResult> {
   const baseReq = await createPayloadRequest({
-    context: cloneValidationValue(context),
+    context: cloneValidationContext({ context }),
     fallbackLocale: false,
     payload,
-    req: cloneValidationRequest(req),
-    user: cloneValidationValue(user),
+    req: cloneValidationRequest({ request: req }),
+    user: cloneValidationUser({ user }),
   })
   baseReq.operation = 'validate'
   const localeSelector = locale === undefined ? (baseReq.locale ?? null) : locale
@@ -68,17 +74,9 @@ export async function runLocaleScopedValidation<TData>({
         fallbackLocale: false,
         locale: validationLocale ?? undefined,
         payload,
-        req: cloneValidationRequest(baseReq),
+        req: cloneValidationRequest({ request: baseReq }),
       })
-      const validationCandidateData = cloneValidationValue(data)
-      const validationData: TData =
-        validationDataLocale && validationLocale !== validationDataLocale && validationCandidateData
-          ? (projectNonLocalizedData({
-              configBlockReferences: payload.config.blocks,
-              data: validationCandidateData as JsonObject,
-              fields,
-            }) as TData)
-          : validationCandidateData
+      const validationData = cloneValidationData({ data })
 
       let mergedValidationData = validationData as JsonObject
       const result = await runPass({
@@ -89,21 +87,26 @@ export async function runLocaleScopedValidation<TData>({
         req: localeReq,
       })
 
-      return { data: mergedValidationData, result }
+      return result.errors.map((error) => ({
+        error,
+        isLocalized: isValidationErrorPathLocalized({
+          configBlockReferences: payload.config.blocks,
+          data: mergedValidationData,
+          fields,
+          path: error.path,
+        }),
+      }))
     },
   })
-  const rawErrors = results.flatMap(({ result }) => result.errors)
+  const classifiedErrors = results.flat()
+  const rawErrors = classifiedErrors.map(({ error }) => error)
 
   // A non-localized field carries one shared value, so every locale pass validates it
   // identically and would otherwise report the same failure once per resolved locale.
   const errors =
     locales.length > 1
       ? dedupeNonLocalizedFieldErrors({
-          configBlockReferences: payload.config.blocks,
-          errors: results.flatMap(({ data: validationData, result }) =>
-            result.errors.map((error) => ({ data: validationData, error })),
-          ),
-          fields,
+          errors: classifiedErrors,
         })
       : rawErrors
 
@@ -114,25 +117,14 @@ export async function runLocaleScopedValidation<TData>({
 }
 
 function dedupeNonLocalizedFieldErrors({
-  configBlockReferences,
   errors,
-  fields,
 }: {
-  configBlockReferences: SanitizedConfig['blocks']
-  errors: { data: JsonObject; error: ValidationFieldError }[]
-  fields: Field[]
+  errors: ClassifiedValidationError[]
 }): ValidationFieldError[] {
   const seenNonLocalizedErrors = new Set<string>()
   const deduped: ValidationFieldError[] = []
 
-  for (const { data, error } of errors) {
-    const isLocalized = isValidationErrorPathLocalized({
-      configBlockReferences,
-      data,
-      fields,
-      path: error.path,
-    })
-
+  for (const { error, isLocalized } of errors) {
     if (isLocalized) {
       deduped.push(error)
       continue
