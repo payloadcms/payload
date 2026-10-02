@@ -715,7 +715,7 @@ export const myPlugin = definePlugin<MyPluginOptions>({
 
 ### `next/navigation` and `next/link` replaced by framework-agnostic `RouterAdapter` hooks
 
-`@payloadcms/ui` no longer depends on `next` directly. Custom admin components (field components, custom views, plugins) that previously imported router hooks or the `Link` component from `next/*` must now import the framework-agnostic equivalents from `@payloadcms/ui`. Behavior is identical when running on Next.js — the `NextRouterAdapter` shipped by `@payloadcms/next` wires `next/navigation` hooks and `next/link` into the same context — but ui code can now also run on non-Next adapters (e.g. TanStack Start) without modification.
+`@payloadcms/ui` no longer depends on `next` directly. Custom admin components (field components, custom views, plugins) that previously imported router hooks or the `Link` component from `next/*` must now import the framework-agnostic equivalents from `@payloadcms/ui`. The `NextRouterAdapter` shipped by `@payloadcms/next` wires `next/navigation` hooks and `next/link` into the same context, so UI code can also run on non-Next adapters (e.g. TanStack Start) without modification.
 
 **Hooks** — import from `@payloadcms/ui` instead of `next/navigation`:
 
@@ -766,6 +766,10 @@ If you were relying on Next-specific extras like `prefetch()` on the router inst
     /* ... */
   />
 ```
+
+### `sanitizeID` removed
+
+`sanitizeID` has been removed from `@payloadcms/ui/shared`. Payload's admin route params are already decoded by framework adapters, so remove the import and use IDs directly. For URL-encoded strings you handle outside admin routing, use `decodeURIComponent`.
 
 ### `@payloadcms/next/client`, `@payloadcms/next/rsc`, and `@payloadcms/next/templates` removed
 
