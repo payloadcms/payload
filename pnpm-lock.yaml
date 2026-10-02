@@ -2310,8 +2310,8 @@ importers:
         specifier: ^3.614.0
         version: 3.1059.0
       '@azure/storage-blob':
-        specifier: ^12.34.0
-        version: 12.34.0
+        specifier: 12.32.0
+        version: 12.32.0
       '@cloudflare/workers-types':
         specifier: 4.20260218.0
         version: 4.20260218.0
@@ -3193,10 +3193,6 @@ packages:
   '@azure/storage-blob@12.32.0':
     resolution: {integrity: sha512-80LzSNnFQye2LCCBFghAJS6jJQJ7N4bfgZ6qDMgVGRtugZ7TLDKQZ2hczMigmZH3jAcMRdma/IygsC5+0gT7Tw==}
     engines: {node: '>=20.0.0'}
-
-  '@azure/storage-blob@12.34.0':
-    resolution: {integrity: sha512-cXDTCAMwDx8Ng9yUe82kOOd2kPnZ8AQqe4FkLMcpaQ3Mvr3/PXVdvRhyP0FtY5/U5Oh6JGk3EcEibaFOymRLFw==}
-    engines: {node: '>=22.0.0'}
 
   '@azure/storage-common@12.5.0':
     resolution: {integrity: sha512-bttzuhQiCIwrkzjPDA+AtAR7dg19L/CC6ztcqJ5LfvWpXuys9mHp0UQ0udYnoUvv9SCT9KTR5kqFvFr0e6k0lQ==}
@@ -8945,10 +8941,6 @@ packages:
     resolution: {integrity: sha512-KMReFUr0B4t+D+OBkjR3KYqvocp2XaSzO55UcB6mgQMd3KbcE+mWTyvVV7D/zsdEbNnV6acZUutkiHQXvTr1Rw==}
     engines: {node: '>= 8'}
 
-  apache-arrow@21.2.0:
-    resolution: {integrity: sha512-Hxe6Agq26gQOM954qpzYSllJBPJl+e16U5CkfuMUhLrNba+5nKkttIVlflaovN6oaTratqMGAO8H5u/aNhmHWQ==}
-    hasBin: true
-
   arch@3.0.0:
     resolution: {integrity: sha512-AmIAC+Wtm2AU8lGfTtHsw0Y9Qtftx2YXEEtiBP10xFUtMOA+sHHx6OAddyL52mUKh1vsXQ6/w1mVDptZCyUt4Q==}
 
@@ -10895,9 +10887,6 @@ packages:
   flat-cache@6.1.22:
     resolution: {integrity: sha512-N2dnzVJIphnNsjHcrxGW7DePckJ6haPrSFqpsBUhHYgwtKGVq4JrBGielEGD2fCVnsGm1zlBVZ8wGhkyuetgug==}
 
-  flatbuffers@25.9.23:
-    resolution: {integrity: sha512-MI1qs7Lo4Syw0EOzUl0xjs2lsoeqFku44KpngfIduHBYvzm8h2+7K8YMQh1JtVVVrUvhLpNwqVi4DERegUJhPQ==}
-
   flatted@3.4.2:
     resolution: {integrity: sha512-PjDse7RzhcPkIJwy5t7KPWQSZ9cAbzQXcafsetQoD7sOJRQlGikNbx7yZp2OotDnJyrDcbyRq3Ttb18iYOqkxA==}
 
@@ -11789,9 +11778,6 @@ packages:
 
   json-stable-stringify-without-jsonify@1.0.1:
     resolution: {integrity: sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw==}
-
-  json-with-bigint@3.5.12:
-    resolution: {integrity: sha512-uwbF/wSSuOgC7qqlq27Xp5B6a2MHVug3t0idZdTqu0JnlFvgJuH7ju+KAk/J06C7GfhoYy2gnb9wz2INqcne7w==}
 
   json5@1.0.2:
     resolution: {integrity: sha512-g1MWMLBiz8FKi1e4w0UyVL3w+iJceWAFBAaBnnGKOpNa5f8TLktkbre1+s6oICydWAm+HRUGTmI+//xv2hvXYA==}
@@ -16349,26 +16335,6 @@ snapshots:
       '@azure/core-xml': 1.5.1
       '@azure/logger': 1.3.0
       '@azure/storage-common': 12.5.0(@azure/core-client@1.10.1)
-      events: 3.3.0
-      tslib: 2.8.1
-    transitivePeerDependencies:
-      - supports-color
-
-  '@azure/storage-blob@12.34.0':
-    dependencies:
-      '@azure/abort-controller': 2.1.2
-      '@azure/core-auth': 1.10.1
-      '@azure/core-client': 1.10.1
-      '@azure/core-http-compat': 2.4.0(@azure/core-client@1.10.1)(@azure/core-rest-pipeline@1.25.0)
-      '@azure/core-lro': 2.7.2
-      '@azure/core-paging': 1.6.2
-      '@azure/core-rest-pipeline': 1.25.0
-      '@azure/core-tracing': 1.3.1
-      '@azure/core-util': 1.13.1
-      '@azure/core-xml': 1.5.1
-      '@azure/logger': 1.3.0
-      '@azure/storage-common': 12.5.0(@azure/core-client@1.10.1)
-      apache-arrow: 21.2.0
       events: 3.3.0
       tslib: 2.8.1
     transitivePeerDependencies:
@@ -21573,6 +21539,7 @@ snapshots:
   '@types/node@25.9.9':
     dependencies:
       undici-types: 7.24.6
+    optional: true
 
   '@types/nodemailer@8.0.0':
     dependencies:
@@ -22443,13 +22410,6 @@ snapshots:
     dependencies:
       normalize-path: 3.0.0
       picomatch: 2.3.2
-
-  apache-arrow@21.2.0:
-    dependencies:
-      '@types/node': 25.9.9
-      flatbuffers: 25.9.23
-      json-with-bigint: 3.5.12
-      tslib: 2.8.1
 
   arch@3.0.0: {}
 
@@ -24785,8 +24745,6 @@ snapshots:
       flatted: 3.4.2
       hookified: 1.15.1
 
-  flatbuffers@25.9.23: {}
-
   flatted@3.4.2: {}
 
   focus-trap@7.5.4:
@@ -25687,8 +25645,6 @@ snapshots:
   json-schema@0.4.0: {}
 
   json-stable-stringify-without-jsonify@1.0.1: {}
-
-  json-with-bigint@3.5.12: {}
 
   json5@1.0.2:
     dependencies:
@@ -29117,7 +29073,8 @@ snapshots:
 
   undici-types@6.21.0: {}
 
-  undici-types@7.24.6: {}
+  undici-types@7.24.6:
+    optional: true
 
   undici@5.28.4:
     dependencies:
