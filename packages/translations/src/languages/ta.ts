@@ -118,6 +118,7 @@ export const taTranslations: DefaultTranslationsObject = {
     searchWidgets: 'தேடல் கருவிகள்...',
     widgetCollectionRequired: 'Collection அவசியமாக 필요.',
     widgetConfigurationError: 'விட்ஜெட் உள்ளமைவு பிழை',
+    widgetDropFilesToUpload: 'கோப்பை இழுத்து விடுக',
     widgetInvalidCollection: 'Collection "{{collection}}" இல்லை.',
     widgetInvalidFilterField:
       'Filter field "{{field}}" குறிப்பாக Collection "{{collection}}" இல் இருப்பதில்லை.',
@@ -136,6 +137,9 @@ export const taTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Field ஐ வரிசைப்படுத்து',
     widgetTitleFallback: 'Collection வினா',
     widgetTitleLabel: 'தலைப்பு',
+    widgetUploadDropzoneDescription:
+      'உங்கள் கணினியில் இருந்து இழுத்து விடுவதன் மூலம் பதிவேற்றவும், அல்லது கீழேயுள்ள பொத்தானை கிளிக் செய்யவும்',
+    widgetUploadFiles: 'கோப்புகளை சேர்க்கவும்',
   },
   error: {
     accountAlreadyActivated: 'இந்த கணக்கு ஏற்கனவே செயல்படுத்தப்பட்டுள்ளது.',
@@ -462,6 +466,7 @@ export const taTranslations: DefaultTranslationsObject = {
     remove: 'நீக்கு',
     rename: 'பெயர் மாற்று',
     replaceRow: 'வரிசையை மாற்றவும்',
+    requiredFields: '* குறியிடப்பட்ட புலங்கள் கட்டாயமானவை.',
     reset: 'மீட்டமை',
     resetPreferences: 'அமைப்புகளை மீட்டமை',
     resetPreferencesDescription:
@@ -478,8 +483,12 @@ export const taTranslations: DefaultTranslationsObject = {
     saveChanges: 'மாற்றங்களை சேமி',
     saving: 'சேமிக்கிறது...',
     schedulePublishFor: '{{title}} வெளியீட்டை திட்டமிடு',
+    searchAutomatically: 'நீங்கள் தட்டச்சு செய்யும்போது முடிவுகள் தானாகவே புதுப்பிக்கப்படும்.',
     searchBy: '{{label}} மூலம் தேடு',
+    searchCleared: 'தேடல் அழிக்கப்பட்டது.',
     searchColumns: 'தேடல் நெடுவரிசைகள்',
+    searchGroups: '“{{search}}” என்பதற்கான குழுக்கள்: {{count}}.',
+    searchResults: '“{{search}}” என்பதற்கான முடிவுகள்: {{count}}.',
     select: 'தேர்வு செய்',
     selectAll: 'அனைத்து {{count}} {{label}}-ஐத் தேர்ந்தெடு',
     selectAllRows: 'அனைத்து வரிசைகளையும் தேர்ந்தெடு',

@@ -119,6 +119,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Ieškokite valdiklių...',
     widgetCollectionRequired: 'Collection yra privaloma.',
     widgetConfigurationError: 'Valdiklio konfigūracijos klaida',
+    widgetDropFilesToUpload: 'Temkite ir numeskite failą',
     widgetInvalidCollection: 'Kolekcija "{{collection}}" neegzistuoja.',
     widgetInvalidFilterField:
       'Filtravimo laukas „{{field}}“ neegzistuoja kolekcijoje „{{collection}}“.',
@@ -136,6 +137,9 @@ export const ltTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Rikiuoti lauką',
     widgetTitleFallback: 'Kolekcijos užklausa',
     widgetTitleLabel: 'Pavadinimas',
+    widgetUploadDropzoneDescription:
+      'Įkelkite iš savo kompiuterio vilkdami ir numesdami, arba spustelėkite mygtuką žemiau',
+    widgetUploadFiles: 'Pridėti failus',
   },
   error: {
     accountAlreadyActivated: 'Ši paskyra jau aktyvuota.',
@@ -464,6 +468,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     remove: 'Pašalinti',
     rename: 'Pervadinti',
     replaceRow: 'Pakeisti eilutę',
+    requiredFields: '* pažymėti laukai yra privalomi.',
     reset: 'Atstatyti',
     resetPreferences: 'Atstatyti nuostatas',
     resetPreferencesDescription: 'Tai atstatys visas jūsų nuostatas į numatytąsias reikšmes.',
@@ -479,8 +484,12 @@ export const ltTranslations: DefaultTranslationsObject = {
     saveChanges: 'Išsaugoti pakeitimus',
     saving: 'Išsaugoti...',
     schedulePublishFor: 'Suplanuokite publikaciją „{{title}}“',
+    searchAutomatically: 'Rezultatai automatiškai atnaujinami rašant.',
     searchBy: 'Ieškokite pagal {{label}}',
+    searchCleared: 'Paieška išvalyta.',
     searchColumns: 'Search columns',
+    searchGroups: '„{{search}}“ paieškos grupės: {{count}}.',
+    searchResults: '„{{search}}“ paieškos rezultatai: {{count}}.',
     select: 'Pasirinkite',
     selectAll: 'Pasirinkite visus {{count}} {{label}}',
     selectAllRows: 'Pasirinkite visas eilutes',

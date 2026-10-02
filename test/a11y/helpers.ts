@@ -167,6 +167,13 @@ export async function gotoCreatePost({ page, postsURL }: { page: Page; postsURL:
   await waitForFormReady(page)
 }
 
+export async function gotoLabelTestLogin({ page, serverURL }: { page: Page; serverURL: string }) {
+  await page.context().clearCookies()
+  await page.setExtraHTTPHeaders({ DisableAutologin: 'true' })
+  await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/login', serverURL }))
+  await expect(page.locator('input[name="password"]')).toBeVisible()
+}
+
 export async function gotoPostsList({ page, postsURL }: { page: Page; postsURL: AdminUrlUtil }) {
   await page.goto(postsURL.list)
   await expect(page.locator('tbody tr').first()).toBeVisible()

@@ -120,6 +120,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Поиск виджетов...',
     widgetCollectionRequired: 'Collection является обязательным.',
     widgetConfigurationError: 'Ошибка конфигурации виджета',
+    widgetDropFilesToUpload: 'Перетащите файл',
     widgetInvalidCollection: 'Коллекция "{{collection}}" не существует.',
     widgetInvalidFilterField:
       'Поле фильтра «{{field}}» не существует в коллекции «{{collection}}».',
@@ -137,6 +138,9 @@ export const ruTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Сортировать поле',
     widgetTitleFallback: 'Запрос к Collection',
     widgetTitleLabel: 'Заголовок',
+    widgetUploadDropzoneDescription:
+      'Загрузите с вашего компьютера путем перетаскивания файла или нажмите кнопку ниже',
+    widgetUploadFiles: 'Добавить файлы',
   },
   error: {
     accountAlreadyActivated: 'Этот аккаунт уже был активирован.',
@@ -465,6 +469,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     remove: 'Удалить',
     rename: 'Переименовать',
     replaceRow: 'Заменить строку',
+    requiredFields: 'Поля, отмеченные *, обязательны для заполнения.',
     reset: 'Сброс',
     resetPreferences: 'Сбросить настройки',
     resetPreferencesDescription: 'Это сбросит все ваши настройки до значений по умолчанию.',
@@ -480,8 +485,12 @@ export const ruTranslations: DefaultTranslationsObject = {
     saveChanges: 'Сохранить изменения',
     saving: 'Сохранение...',
     schedulePublishFor: 'Запланировать публикацию для {{title}}',
+    searchAutomatically: 'Результаты обновляются автоматически по мере ввода.',
     searchBy: 'Искать по',
+    searchCleared: 'Поиск очищен.',
     searchColumns: 'Поиск по столбцам',
+    searchGroups: 'Группы для «{{search}}»: {{count}}.',
+    searchResults: 'Результаты поиска «{{search}}»: {{count}}.',
     select: 'Выбрать',
     selectAll: 'Выбрать все {{count}} {{label}}',
     selectAllRows: 'Выбрать все строки',

@@ -118,6 +118,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Търсене на джаджи...',
     widgetCollectionRequired: 'Collection е задължително.',
     widgetConfigurationError: 'Грешка при конфигуриране на уиджета',
+    widgetDropFilesToUpload: 'Дръпни и пусни файл',
     widgetInvalidCollection: 'Collection "{{collection}}" не съществува.',
     widgetInvalidFilterField:
       'Филтър полето "{{field}}" не съществува в колекцията "{{collection}}".',
@@ -135,6 +136,9 @@ export const bgTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Сортирай Field',
     widgetTitleFallback: 'Заявка към Collection',
     widgetTitleLabel: 'Заглавие',
+    widgetUploadDropzoneDescription:
+      'Качете от вашия компютър чрез плъзгане и пускане или натиснете бутона по-долу.',
+    widgetUploadFiles: 'Добави файлове',
   },
   error: {
     accountAlreadyActivated: 'Този профил вече е активиран.',
@@ -461,6 +465,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     remove: 'Премахни',
     rename: 'Преименувайте',
     replaceRow: 'Заменете ред',
+    requiredFields: 'Полетата, отбелязани с *, са задължителни.',
     reset: 'Нулиране',
     resetPreferences: 'Нулиране на предпочитанията',
     resetPreferencesDescription:
@@ -477,8 +482,12 @@ export const bgTranslations: DefaultTranslationsObject = {
     saveChanges: 'Запази промените',
     saving: 'Запазване...',
     schedulePublishFor: 'Планирано публикуване за {{title}}',
+    searchAutomatically: 'Резултатите се обновяват автоматично, докато пишете.',
     searchBy: 'Търси по {{label}}',
+    searchCleared: 'Търсенето е изчистено.',
     searchColumns: 'Търсене на колони',
+    searchGroups: 'Групи за „{{search}}“: {{count}}.',
+    searchResults: 'Резултати за „{{search}}“: {{count}}.',
     select: 'Изберете',
     selectAll: 'Избери всички {{count}} {{label}}',
     selectAllRows: 'Избери всички редове',

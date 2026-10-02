@@ -6,10 +6,12 @@ import React, { useCallback, useEffect, useState } from 'react'
 import type { UserMenuSettingsGroup } from './SettingsMenu/index.js'
 
 import { Account } from '../../graphics/Account/index.js'
+import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { LogOutIcon } from '../../icons/LogOut/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { Button } from '../Button/index.js'
 import { MenuSeparator } from '../MenuSeparator/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
@@ -25,12 +27,14 @@ type UserMenuProps = {
   CustomAvatar?: React.ReactNode
   CustomLogoutButton?: React.ReactNode
   settingsItemGroups?: UserMenuSettingsGroup[]
+  showTitle?: boolean
 }
 
 export const UserMenu: React.FC<UserMenuProps> = ({
   CustomAvatar,
   CustomLogoutButton,
   settingsItemGroups = [],
+  showTitle = false,
 }) => {
   const { user } = useAuth()
   const { languageOptions, t } = useTranslation()
@@ -100,16 +104,18 @@ export const UserMenu: React.FC<UserMenuProps> = ({
       onToggleClose={() => setActiveMobileSubmenu(null)}
       popupType="menu"
       renderButton={({ active, ...ariaProps }) => (
-        <button
+        <Button
           {...ariaProps}
           aria-label={t('authentication:account')}
-          className={[`${baseClass}__trigger`, active && `${baseClass}__trigger--active`]
-            .filter(Boolean)
-            .join(' ')}
+          buttonStyle="ghost"
+          className={`${baseClass}__trigger${showTitle ? ` ${baseClass}__trigger--with-title` : ''}`}
+          icon={<ChevronIcon direction="down" size={16} />}
+          margin={false}
+          selected={active}
           type="button"
         >
-          <RenderCustomComponent CustomComponent={CustomAvatar} Fallback={<Account />} />
-        </button>
+          {showTitle && (titleString || identifier) ? titleString || identifier : undefined}
+        </Button>
       )}
       size="large"
       theme="dark"
@@ -162,18 +168,22 @@ export const UserMenu: React.FC<UserMenuProps> = ({
 
           {/* Preferences group: Theme + Language */}
           {showPreferencesGroup && (
-            <PopupList.ButtonGroup>
+            <>
               {showThemeMenu && (
-                <ThemeMenu
-                  onMobileOpen={isMobile ? () => setActiveMobileSubmenu('theme') : undefined}
-                />
+                <PopupList.MenuItem>
+                  <ThemeMenu
+                    onMobileOpen={isMobile ? () => setActiveMobileSubmenu('theme') : undefined}
+                  />
+                </PopupList.MenuItem>
               )}
               {hasMultipleLanguages && (
-                <LanguageMenu
-                  onMobileOpen={isMobile ? () => setActiveMobileSubmenu('language') : undefined}
-                />
+                <PopupList.MenuItem>
+                  <LanguageMenu
+                    onMobileOpen={isMobile ? () => setActiveMobileSubmenu('language') : undefined}
+                  />
+                </PopupList.MenuItem>
               )}
-            </PopupList.ButtonGroup>
+            </>
           )}
 
           <MenuSeparator />
@@ -181,16 +191,15 @@ export const UserMenu: React.FC<UserMenuProps> = ({
           {/* Settings group */}
           {hasSettingsItems && (
             <>
-              <PopupList.ButtonGroup>
+              <PopupList.MenuItem>
                 <SettingsMenu
                   groups={settingsItemGroups}
                   onMobileOpen={isMobile ? () => setActiveMobileSubmenu('settings') : undefined}
                 />
-              </PopupList.ButtonGroup>
+              </PopupList.MenuItem>
               <MenuSeparator />
             </>
           )}
-
           {/* Account actions */}
           <PopupList.MenuItem>
             {CustomLogoutButton ?? (
