@@ -54,6 +54,7 @@ jobs:
               - 'pnpm-lock.yaml'
               - 'package.json'
               - 'templates/**'
+              - 'vitest.config.ts'
             needs_tests:
               - '.github/workflows/main.yml'
               - '.github/actions/start-services/**'
@@ -61,6 +62,7 @@ jobs:
               - 'test/**'
               - 'pnpm-lock.yaml'
               - 'package.json'
+              - 'vitest.config.ts'
             templates:
               - 'templates/**'
             # Also gates tests-unit via its own `if`. Excludes plain `packages/**/*.ts` changes on
@@ -172,29 +174,7 @@ jobs:
           NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
 
       - name: Lint CSS
-        env:
-          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
-          HEAD_SHA: ${{ github.sha }}
-        run: |
-          if [ -z "$BASE_SHA" ] || ! git cat-file -e "$BASE_SHA" 2>/dev/null; then
-            echo "No usable base commit found, linting all CSS files"
-            pnpm run lint:css
-            exit $?
-          fi
-
-          changed_css_files=()
-          while IFS= read -r file; do
-            changed_css_files+=("$file")
-          done < <(git diff --name-only --diff-filter=ACMR "$BASE_SHA...$HEAD_SHA" -- 'packages/ui/src/**/*.css' 'templates/**/*.css')
-
-          if [ ${#changed_css_files[@]} -eq 0 ]; then
-            echo "No changed CSS files, skipping stylelint"
-            exit 0
-          fi
-
-          echo "Linting changed CSS files:"
-          printf '  %s\n' "${changed_css_files[@]}"
-          pnpm exec stylelint "${changed_css_files[@]}"
+        run: pnpm run lint:css
 
   build:
     needs: changes
@@ -244,6 +224,12 @@ jobs:
         run: pnpm test:unit
         env:
           NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
+
+      - name: Browser setup
+        uses: ./.github/actions/setup-playwright
+
+      - name: Component Tests
+        run: pnpm test:components
 
   tests-types:
     runs-on: ubuntu-24.04

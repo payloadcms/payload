@@ -132,6 +132,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
       setTimeout(() => {
         const element = document.getElementById(widgetId)
         if (element) {
+          element.focus({ preventScroll: true })
           element.scrollIntoView({
             behavior: 'smooth',
             block: 'center',

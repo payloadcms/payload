@@ -107,6 +107,7 @@ describe('Auth (Basic)', () => {
           exists: true,
         },
       },
+      overrideAccess: true,
     })
 
     await ensureCompilationIsDone({
@@ -124,6 +125,7 @@ describe('Auth (Basic)', () => {
           exists: true,
         },
       },
+      overrideAccess: true,
     })
   })
 
@@ -142,6 +144,7 @@ describe('Auth (Basic)', () => {
       await expect(async () => {
         const users = await payload.find({
           collection: 'users',
+          overrideAccess: true,
         })
 
         expect(users.totalDocs).toBe(1)

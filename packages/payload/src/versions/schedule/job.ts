@@ -33,6 +33,7 @@ export const getSchedulePublishTask = ({
           id: input.user.value,
           collection: input.user.relationTo,
           depth: 0,
+          overrideAccess: true,
         })) as User
 
         user.collection = input.user.relationTo

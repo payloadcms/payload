@@ -92,11 +92,13 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
       email: 'demo@payloadcms.com',
       password: 'demo',
     },
+    overrideAccess: true,
   })
 
   const { id: examplePageID } = await payload.create({
     collection: 'pages',
     data: examplePage as any, // eslint-disable-line
+    overrideAccess: true,
   })
 
   const { id: ogHomePageID } = await payload.create({
@@ -105,12 +107,14 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
       title: 'Home',
       richText: [],
     },
+    overrideAccess: true,
   })
 
   const { id: homePageID } = await payload.update({
     id: ogHomePageID,
     collection: 'pages',
     data: home(ogHomePageID),
+    overrideAccess: true,
   })
 
   await payload.updateGlobal({
@@ -149,5 +153,6 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
         },
       ],
     },
+    overrideAccess: true,
   })
 }

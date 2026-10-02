@@ -27,6 +27,7 @@ import type {
   StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
+import type { Authorship, SanitizedAuthorship } from '../../fields/baseFields/authorship/types.js'
 import type {
   Field,
   FlattenedField,
@@ -597,6 +598,16 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   auth?: boolean | IncomingAuthType
   /**
+   * Automatically track the user that created and last updated each document via
+   * polymorphic `createdBy` / `updatedBy` relationship fields to your auth collections.
+   *
+   * Use `true` (default) to enable both, `false` to disable both, or an object to
+   * toggle each field independently, e.g. `{ updatedBy: false }`.
+   *
+   * @default true
+   */
+  authorship?: Authorship | boolean
+  /**
    * Configuration for bulk operations
    */
   /** Extension point to add your custom data. Server only. */
@@ -804,6 +815,7 @@ export interface SanitizedCollectionConfig
       | 'access'
       | 'admin'
       | 'auth'
+      | 'authorship'
       | 'custom'
       | 'endpoints'
       | 'folder'
@@ -820,9 +832,12 @@ export interface SanitizedCollectionConfig
     >,
     Required<Pick<CollectionConfig, 'admin' | 'custom' | 'indexes' | 'timestamps'>> {
   _sanitized: true
-  access: Pick<CollectionAccess, 'admin' | 'readVersions'> &
-    Required<Pick<CollectionAccess, 'create' | 'delete' | 'read' | 'unlock' | 'update'>>
+  access: Pick<CollectionAccess, 'admin'> &
+    Required<
+      Pick<CollectionAccess, 'create' | 'delete' | 'read' | 'readVersions' | 'unlock' | 'update'>
+    >
   auth: Auth
+  authorship: SanitizedAuthorship
   endpoints: Endpoint[] | false
   /**
    * Fields in the database schema structure

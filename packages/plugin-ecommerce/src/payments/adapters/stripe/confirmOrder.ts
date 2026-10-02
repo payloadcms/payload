@@ -126,6 +126,7 @@ const findTransaction = async ({
     collection: transactionsSlug,
     depth: 0,
     limit: 2,
+    overrideAccess: true,
     pagination: false,
     req,
     where: {

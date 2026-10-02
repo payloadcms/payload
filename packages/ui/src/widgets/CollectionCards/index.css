@@ -1,46 +1,47 @@
 @layer payload-default {
   .collections {
-    display: flex;
     width: 100%;
-    --gap: var(--spacer-3);
-    --cols: 5;
   }
 
   .collections__wrap {
-    width: 100%;
     display: flex;
     flex-direction: column;
-    gap: var(--spacer-3);
-    padding-bottom: var(--spacer-6);
+    gap: var(--spacer-5);
+    width: 100%;
+    background: var(--color-bg);
   }
 
   .collections__group {
     display: flex;
     flex-direction: column;
-    gap: var(--gap);
-    padding-top: var(--spacer-2);
+    gap: var(--spacer-2-5);
   }
 
   .collections__label {
     margin: 0;
+    color: var(--color-text);
     font-family: var(--text-heading-medium-font-family);
     font-size: var(--text-heading-medium-font-size);
     font-weight: var(--text-heading-medium-font-weight);
     line-height: var(--text-heading-medium-line-height);
     letter-spacing: var(--text-heading-medium-letter-spacing);
-    color: var(--color-text);
   }
 
   .collections__card-list {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: var(--spacer-2-5);
     padding: 0;
     margin: 0;
     list-style: none;
-    gap: var(--spacer-3);
-    display: grid;
-    grid-template-columns: repeat(var(--cols), 1fr);
 
-    .card {
-      height: 100%;
+    .card:has(.card__actions) .card__title {
+      max-width: calc(100% - var(--spacer-4));
+    }
+
+    .card__actions {
+      right: auto;
+      inset-inline-end: var(--spacer-2);
     }
   }
 
@@ -49,36 +50,32 @@
     justify-content: unset;
   }
 
-  @media (max-width: 1440px) {
-    .collections {
-      --cols: 4;
+  @media (hover: hover) and (pointer: fine) {
+    .collections__card-list .card__actions:has(.btn) {
+      opacity: 0;
+    }
+
+    .collections__card-list .card:hover .card__actions,
+    .collections__card-list .card:focus-within .card__actions {
+      opacity: 1;
     }
   }
 
-  @media (max-width: 1024px) {
-    .collections {
-      --gap: var(--spacer-3);
-      --cols: 2;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .collections {
-      --cols: 2;
-    }
-
-    .collections__wrap {
-      gap: var(--spacer-3);
-    }
-
+  @media (min-width: 400px) {
     .collections__card-list {
-      gap: var(--spacer-2);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 
-  @media (max-width: 400px) {
-    .collections {
-      --cols: 1;
+  @media (min-width: 768px) {
+    .collections__card-list {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .collections__card-list {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
     }
   }
 }

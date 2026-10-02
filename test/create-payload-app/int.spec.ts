@@ -46,7 +46,7 @@ const tanStackCreateArgs = [
   '--non-interactive',
 ]
 
-test.suite({})('create-payload-app', () => {
+test.suite('create-payload-app', {}, () => {
   test.beforeAll(() => {
     // Runs copyfiles copy app/(payload) -> dist/app/(payload)
     shelljs.exec('pnpm build:create-payload-app')

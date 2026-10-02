@@ -101,7 +101,7 @@ export async function saveDocAndAssert(
     | '#action-publish'
     | '#action-save'
     | '#action-save-draft'
-    | '#publish-locale'
+    | '#publish-all-locales'
     | string = '#action-save',
   expectation: 'error' | 'success' = 'success',
   options?: {
@@ -112,7 +112,7 @@ export async function saveDocAndAssert(
   },
 ): Promise<void> {
   await wait(500) // TODO: Fix this
-  if (selector === '#publish-locale') {
+  if (selector === '#publish-all-locales') {
     // open dropdown
     const chevronButton = page.locator('.form-submit .popup__trigger-wrap > .popup-button')
     await chevronButton.click()
@@ -169,7 +169,7 @@ export async function openCreateDocDrawer(page: Page, fieldSelector: string): Pr
 }
 
 export async function openLocaleSelector(page: Page): Promise<void> {
-  const button = page.locator('.localizer button')
+  const button = page.locator('.localizer .popup__trigger-wrap > button')
   const popup = page.locator('.popup__content')
 
   if (!(await popup.isVisible())) {

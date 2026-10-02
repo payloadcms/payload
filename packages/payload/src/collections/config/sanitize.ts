@@ -14,6 +14,11 @@ import { apiKeyRevealEndpoint, authCollectionEndpoints } from '../../auth/endpoi
 import { getBaseAuthFields } from '../../auth/getAuthFields.js'
 import { withBaseAccess, withBaseAdminAccess } from '../../auth/withBaseAccess.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
+import {
+  createCreatedByField,
+  createUpdatedByField,
+  sanitizeAuthorship,
+} from '../../fields/baseFields/authorship/index.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
@@ -26,8 +31,16 @@ import { formatLabels } from '../../utilities/formatLabels.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
+import {
+  isInheritedReadVersionsAccess,
+  markInheritedReadVersionsAccess,
+} from '../../versions/isInheritedReadVersionsAccess.js'
 import { defaultCollectionEndpoints, duplicateEndpoint } from '../endpoints/index.js'
-import { addDefaultsToAuthConfig, addDefaultsToCollectionConfig } from './defaults.js'
+import {
+  addDefaultsToAuthConfig,
+  addDefaultsToCollectionConfig,
+  createInheritedReadVersionsAccess,
+} from './defaults.js'
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
 import { validateUseAsTitle } from './useAsTitle.js'
 
@@ -137,6 +150,53 @@ export const sanitizeCollection = (
   const joins: SanitizedJoins = {}
 
   const polymorphicJoins: SanitizedJoin[] = []
+
+  // Inject createdBy / updatedBy (unless already defined) before sanitizing fields.
+  const authorship = sanitizeAuthorship(sanitized.authorship)
+  sanitized.authorship = authorship
+
+  if (authorship.createdBy || authorship.updatedBy) {
+    const authCollections = config
+      .collections!.filter((collectionConfig) => collectionConfig.auth)
+      .map((collectionConfig) => collectionConfig.slug)
+
+    let hasCreatedBy = false
+    let hasUpdatedBy = false
+
+    sanitized.fields.some((field) => {
+      if (fieldAffectsData(field)) {
+        if (field.name === 'createdBy') {
+          hasCreatedBy = true
+        }
+
+        if (field.name === 'updatedBy') {
+          hasUpdatedBy = true
+        }
+
+        // A user may spread `getAuthorshipFields` into their `fields` to customize these
+        // without knowing the auth collections; backfill the polymorphic relationTo here.
+        if (
+          (field.name === 'createdBy' || field.name === 'updatedBy') &&
+          field.type === 'relationship' &&
+          (!field.relationTo || (Array.isArray(field.relationTo) && field.relationTo.length === 0))
+        ) {
+          field.relationTo = authCollections
+        }
+      }
+
+      return hasCreatedBy && hasUpdatedBy
+    })
+
+    if (authCollections.length > 0) {
+      if (authorship.createdBy && !hasCreatedBy) {
+        sanitized.fields.push(createCreatedByField({ authCollections }))
+      }
+
+      if (authorship.updatedBy && !hasUpdatedBy) {
+        sanitized.fields.push(createUpdatedByField({ authCollections }))
+      }
+    }
+  }
 
   sanitized.fields = sanitizeFields({
     collectionConfig: sanitized,
@@ -373,12 +433,20 @@ export const sanitizeCollection = (
   })
 
   if (sanitized.versions) {
-    sanitized.access!.readVersions = withBaseAccess({
+    const inheritsReadAccess = isInheritedReadVersionsAccess(sanitized.access!.readVersions)
+    const readVersions = inheritsReadAccess
+      ? createInheritedReadVersionsAccess(sanitized.access!.read!)
+      : sanitized.access!.readVersions
+    const readVersionsWithBaseAccess = withBaseAccess({
       slug: sanitized.slug,
-      access: sanitized.access?.readVersions,
+      access: readVersions,
       entityType: 'collection',
       operation: 'readVersions',
     })
+
+    sanitized.access!.readVersions = inheritsReadAccess
+      ? markInheritedReadVersionsAccess(readVersionsWithBaseAccess)
+      : readVersionsWithBaseAccess
   }
 
   validateUseAsTitle(sanitized)

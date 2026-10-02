@@ -1,13 +1,9 @@
-import type {
-  ImportMap,
-  LanguageOptions,
-  SanitizedConfig,
-  ServerAdapter,
-  ServerFunctionClient,
-} from 'payload'
+import type { ImportMap, LanguageOptions, SanitizedConfig, ServerFunctionClient } from 'payload'
 
 import { applyLocaleFiltering } from 'payload/shared'
 import React, { Suspense } from 'react'
+
+import type { InitAdminContextFn } from '../../views/Root/index.js'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
@@ -18,8 +14,8 @@ import { getLanguageDir } from '../../utilities/getLanguageDir.js'
 import { getRequestEmbed } from '../../utilities/getRequestEmbed.js'
 import { getRequestHighContrast } from '../../utilities/getRequestHighContrast.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
-import { initReq } from '../../utilities/initReq.js'
 import { NestProviders } from './NestProviders.js'
+import { ResolveThemeOnClient } from './ResolveThemeOnClient.js'
 import { getViewportMeta } from './viewport.js'
 // eslint-disable-next-line payload/no-imports-from-self -- Self-import via package path ensures consumer's bundler resolves the full CSS chain (design tokens, preflight, etc.) in prod builds
 import '@payloadcms/ui/css/app.css'
@@ -68,16 +64,12 @@ type RootLayoutProps = {
   readonly head?: React.ReactNode
   readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
   readonly importMap: ImportMap
+  readonly initAdminContext: InitAdminContextFn
   /**
    * Client router adapter. Caller supplies a framework-specific provider
    * (for Next.js use the `NextRouterAdapter` exported from `@payloadcms/next`).
    */
   readonly RouterAdapter: React.FC<{ children: React.ReactNode }>
-  /**
-   * Server adapter providing framework-specific access to headers, cookies, redirects,
-   * and other server APIs (for Next.js use `nextServerAdapter` from `@payloadcms/next`).
-   */
-  readonly serverAdapter: ServerAdapter
   readonly serverFunction: ServerFunctionClient
 }
 
@@ -100,8 +92,8 @@ const RootLayoutContent = async ({
   head: headFromProps,
   htmlProps = {},
   importMap,
+  initAdminContext,
   RouterAdapter,
-  serverAdapter,
   serverFunction,
 }: RootLayoutProps) => {
   const {
@@ -114,9 +106,9 @@ const RootLayoutContent = async ({
       payload: { config },
     },
     user,
-  } = await initReq({ configPromise, importMap, key: 'RootLayout', serverAdapter })
+  } = await initAdminContext({ configPromise, importMap, key: 'RootLayout' })
 
-  const theme = getRequestTheme({
+  const { theme, themeSource } = getRequestTheme({
     config,
     cookies,
     headers,
@@ -166,9 +158,12 @@ const RootLayoutContent = async ({
       data-theme={theme}
       dir={dir}
       lang={languageCode}
-      suppressHydrationWarning={config?.admin?.suppressHydrationWarning ?? false}
+      suppressHydrationWarning={
+        config.admin.theme === 'all' || config.admin.suppressHydrationWarning
+      }
     >
       <head>
+        {themeSource === 'default' && <ResolveThemeOnClient serverTheme={theme} />}
         {viewportMeta}
         <style>{`@layer payload-default, payload;`}</style>
         {headFromProps}

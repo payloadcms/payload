@@ -821,6 +821,7 @@ export default buildConfigWithDefaults({
       data: {
         title: englishTitle,
       },
+      overrideAccess: true,
     })
 
     const localizedPost = await payload.create({
@@ -828,6 +829,7 @@ export default buildConfigWithDefaults({
       data: {
         title: englishTitle,
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -836,6 +838,7 @@ export default buildConfigWithDefaults({
         date: new Date().toISOString(),
         localizedDate: new Date().toISOString(),
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -845,6 +848,7 @@ export default buildConfigWithDefaults({
         password: devUser.password,
         relation: localizedPost.id,
       },
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -854,6 +858,7 @@ export default buildConfigWithDefaults({
         title: spanishTitle,
       },
       locale: spanishLocale,
+      overrideAccess: true,
     })
 
     const localizedRelation = await payload.create({
@@ -861,6 +866,7 @@ export default buildConfigWithDefaults({
       data: {
         title: relationEnglishTitle,
       },
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -870,6 +876,7 @@ export default buildConfigWithDefaults({
         title: relationSpanishTitle,
       },
       locale: spanishLocale,
+      overrideAccess: true,
     })
 
     const localizedRelation2 = await payload.create({
@@ -877,6 +884,7 @@ export default buildConfigWithDefaults({
       data: {
         title: relationEnglishTitle2,
       },
+      overrideAccess: true,
     })
     await payload.update({
       id: localizedPost.id,
@@ -885,6 +893,7 @@ export default buildConfigWithDefaults({
         title: relationSpanishTitle2,
       },
       locale: spanishLocale,
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -898,6 +907,7 @@ export default buildConfigWithDefaults({
         ],
         relationship: localizedRelation.id,
       },
+      overrideAccess: true,
     })
     const relationshipLocalized = await payload.create({
       collection: relationshipLocalizedSlug,
@@ -916,6 +926,7 @@ export default buildConfigWithDefaults({
         relationshipHasMany: [localizedRelation.id, localizedRelation2.id],
       },
       locale: 'en',
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -925,6 +936,7 @@ export default buildConfigWithDefaults({
         relationMultiRelationTo: { relationTo: collection, value: localizedPost.id },
       },
       locale: 'es',
+      overrideAccess: true,
     })
 
     const globalArray = await payload.updateGlobal({
@@ -939,6 +951,7 @@ export default buildConfigWithDefaults({
           },
         ],
       },
+      overrideAccess: true,
     })
 
     await payload.updateGlobal({
@@ -950,6 +963,7 @@ export default buildConfigWithDefaults({
         })),
       },
       locale: 'es',
+      overrideAccess: true,
     })
   },
 })
