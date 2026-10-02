@@ -1,6 +1,7 @@
 import crypto from 'crypto'
-
 import { describe, expect, it } from 'vitest'
+
+import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 
 import { authenticateLocalStrategy } from './authenticate.js'
 
@@ -66,6 +67,21 @@ describe('authenticateLocalStrategy', () => {
     const result = await authenticateLocalStrategy({ doc, password })
 
     expect(result).toEqual({ doc, shouldUpdatePasswordHash: false })
+  })
+
+  it('should flag a v2 hash for rehashing when it differs from the configured iterations', async () => {
+    const password = 'test-password'
+    const salt = crypto.randomBytes(32).toString('hex')
+    const hashRaw = crypto.pbkdf2Sync(password, salt, 100000, 32, 'sha256').toString('hex')
+    const doc = { id: 1, hash: `pbkdf2-sha256-v2-i100000-l32:${hashRaw}`, salt }
+    const collection = {
+      slug: 'users',
+      auth: { passwordHashing: { iterations: 600000 } },
+    } as SanitizedCollectionConfig
+
+    const result = await authenticateLocalStrategy({ collection, doc, password })
+
+    expect(result).toEqual({ doc, shouldUpdatePasswordHash: true })
   })
 
   it('should return null when password is invalid', async () => {

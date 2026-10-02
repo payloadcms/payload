@@ -5,6 +5,7 @@ import type { CollectionConfig, SanitizedCollectionConfig } from './types.js'
 import { defaultAccess } from '../../auth/defaultAccess.js'
 import { defaultUnlockAccess } from '../../auth/defaultUnlockAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
+import { InvalidConfiguration } from '../../errors/InvalidConfiguration.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import {
   markInheritedReadVersionsAccess,
@@ -154,6 +155,16 @@ export const addDefaultsToAuthConfig = (auth: IncomingAuthType): Auth => {
       )
     : false
   auth.maxLoginAttempts = auth.maxLoginAttempts ?? 5
+
+  const passwordHashIterations = auth.passwordHashing?.iterations
+  if (
+    passwordHashIterations !== undefined &&
+    !(Number.isSafeInteger(passwordHashIterations) && passwordHashIterations > 0)
+  ) {
+    throw new InvalidConfiguration(
+      `auth.passwordHashing.iterations must be a positive integer, received ${passwordHashIterations}`,
+    )
+  }
   auth.tokenExpiration = auth.tokenExpiration ?? 7200
   auth.useSessions = auth.useSessions ?? true
   auth.verify = auth.verify ?? false

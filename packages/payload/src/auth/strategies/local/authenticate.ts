@@ -1,9 +1,9 @@
 // @ts-strict-ignore
 import crypto from 'crypto'
 
-import type { TypeWithID } from '../../../collections/config/types.js'
+import type { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types.js'
 
-import { getPasswordHashParameters, isCurrentPasswordHash } from './generatePasswordSaltHash.js'
+import { getPasswordHashParameters, shouldUpdatePasswordHash } from './generatePasswordSaltHash.js'
 
 type Doc = Record<string, unknown> & TypeWithID
 
@@ -13,11 +13,13 @@ type AuthenticationResult = {
 }
 
 type Args = {
+  collection?: Pick<SanitizedCollectionConfig, 'auth'>
   doc: Doc
   password: string
 }
 
 export const authenticateLocalStrategy = async ({
+  collection,
   doc,
   password,
 }: Args): Promise<AuthenticationResult | null> => {
@@ -40,7 +42,7 @@ export const authenticateLocalStrategy = async ({
           ) {
             resolve({
               doc,
-              shouldUpdatePasswordHash: !isCurrentPasswordHash(hash),
+              shouldUpdatePasswordHash: shouldUpdatePasswordHash({ collection, hash }),
             })
           } else {
             reject(new Error('Invalid password'))

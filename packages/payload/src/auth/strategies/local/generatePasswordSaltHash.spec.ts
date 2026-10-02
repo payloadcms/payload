@@ -3,6 +3,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { PayloadRequest } from '../../../types/index.js'
 
+const withIterations = (iterations: number): SanitizedCollectionConfig =>
+  ({ slug: 'users', auth: { passwordHashing: { iterations } } }) as SanitizedCollectionConfig
+
 describe('generatePasswordSaltHash', () => {
   afterEach(() => {
     vi.unstubAllGlobals()
@@ -98,6 +101,95 @@ describe('generatePasswordSaltHash', () => {
       hash: 'pbkdf2-sha256-v2-i100000-l32',
       iterations: 25000,
       keyLength: 512,
+    })
+  })
+
+  it('should embed the configured iterations in Node.js', async () => {
+    const { generatePasswordSaltHash, getPasswordHashParameters } = await import(
+      './generatePasswordSaltHash.js'
+    )
+
+    const { hash } = await generatePasswordSaltHash({
+      collection: withIterations(100000),
+      isPasswordAuthenticated: true,
+      password: 'test-password',
+      req: {} as PayloadRequest,
+    })
+
+    expect(getPasswordHashParameters(hash)).toMatchObject({ iterations: 100000, keyLength: 32 })
+  })
+
+  it('should prefer the configured iterations over the Workers default', async () => {
+    vi.stubGlobal('navigator', { userAgent: 'Cloudflare-Workers' })
+    const { generatePasswordSaltHash, getPasswordHashParameters } = await import(
+      './generatePasswordSaltHash.js'
+    )
+
+    const { hash } = await generatePasswordSaltHash({
+      collection: withIterations(50000),
+      isPasswordAuthenticated: true,
+      password: 'test-password',
+      req: {} as PayloadRequest,
+    })
+
+    expect(getPasswordHashParameters(hash)).toMatchObject({ iterations: 50000 })
+  })
+
+  it('should resolve the target iterations from config, then the runtime', async () => {
+    const { getTargetPasswordHashIterations } = await import('./generatePasswordSaltHash.js')
+
+    expect(getTargetPasswordHashIterations({ slug: 'users' } as SanitizedCollectionConfig)).toBe(
+      600000,
+    )
+    expect(getTargetPasswordHashIterations(withIterations(200000))).toBe(200000)
+
+    vi.stubGlobal('navigator', { userAgent: 'Cloudflare-Workers' })
+
+    expect(getTargetPasswordHashIterations({ slug: 'users' } as SanitizedCollectionConfig)).toBe(
+      100000,
+    )
+    expect(getTargetPasswordHashIterations(withIterations(200000))).toBe(200000)
+  })
+
+  describe('shouldUpdatePasswordHash', () => {
+    it('should migrate legacy and v1 hashes regardless of config', async () => {
+      const { shouldUpdatePasswordHash } = await import('./generatePasswordSaltHash.js')
+
+      for (const collection of [undefined, withIterations(100000)]) {
+        expect(shouldUpdatePasswordHash({ collection, hash: 'deadbeef' })).toBe(true)
+        expect(shouldUpdatePasswordHash({ collection, hash: 'pbkdf2-sha256-v1:deadbeef' })).toBe(
+          true,
+        )
+      }
+    })
+
+    it('should keep v2 hashes as they are when iterations are not configured', async () => {
+      // Without a configured value the target depends on the runtime, so a
+      // login from Node.js must not rehash a Workers-created hash to 600000
+      // and lock that user out on Workers.
+      const { shouldUpdatePasswordHash } = await import('./generatePasswordSaltHash.js')
+
+      expect(
+        shouldUpdatePasswordHash({
+          collection: { slug: 'users' } as SanitizedCollectionConfig,
+          hash: 'pbkdf2-sha256-v2-i100000-l32:deadbeef',
+        }),
+      ).toBe(false)
+    })
+
+    it('should rehash v2 hashes whose iterations differ from the configured value', async () => {
+      const { shouldUpdatePasswordHash } = await import('./generatePasswordSaltHash.js')
+      const collection = withIterations(300000)
+
+      expect(
+        shouldUpdatePasswordHash({ collection, hash: 'pbkdf2-sha256-v2-i100000-l32:deadbeef' }),
+      ).toBe(true)
+      expect(
+        shouldUpdatePasswordHash({ collection, hash: 'pbkdf2-sha256-v2-i600000-l32:deadbeef' }),
+      ).toBe(true)
+      expect(
+        shouldUpdatePasswordHash({ collection, hash: 'pbkdf2-sha256-v2-i300000-l32:deadbeef' }),
+      ).toBe(false)
     })
   })
 

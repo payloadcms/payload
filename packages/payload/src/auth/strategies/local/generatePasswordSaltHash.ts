@@ -32,16 +32,23 @@ const legacyV1PasswordHashKeyLength = 32
 const legacyPasswordHashIterations = 25000
 const legacyPasswordHashKeyLength = 512
 
-// Cloudflare Workers rejects PBKDF2 iteration counts above 100,000, so cap
-// iterations when running in the Workers runtime. Everywhere else keeps the
-// stronger default.
+// Cloudflare Workers rejects PBKDF2 iteration counts above 100,000, so that is
+// the default there unless iterations are configured.
 const cloudflareWorkersMaxPBKDF2Iterations = 100000
-const isCloudflareWorkersRuntime =
+const isCloudflareWorkersRuntime = (): boolean =>
   typeof navigator !== 'undefined' && navigator.userAgent === 'Cloudflare-Workers'
 
-const currentPasswordHashIterations = isCloudflareWorkersRuntime
-  ? Math.min(defaultPasswordHashIterations, cloudflareWorkersMaxPBKDF2Iterations)
-  : defaultPasswordHashIterations
+const getConfiguredPasswordHashIterations = (
+  collection: Pick<SanitizedCollectionConfig, 'auth'> | undefined,
+): number | undefined => collection?.auth?.passwordHashing?.iterations
+
+export const getTargetPasswordHashIterations = (
+  collection?: Pick<SanitizedCollectionConfig, 'auth'>,
+): number =>
+  getConfiguredPasswordHashIterations(collection) ??
+  (isCloudflareWorkersRuntime()
+    ? Math.min(defaultPasswordHashIterations, cloudflareWorkersMaxPBKDF2Iterations)
+    : defaultPasswordHashIterations)
 
 // The parameters a hash was created with are embedded in the hash itself so
 // verification does not depend on which runtime created it:
@@ -76,16 +83,17 @@ export const generatePasswordSaltHash = async ({
     }
   }
 
+  const iterations = getTargetPasswordHashIterations(collection)
   const saltBuffer = await randomBytes()
   const salt = saltBuffer.toString('hex')
 
   const hashRaw = await pbkdf2Promisified({
-    iterations: currentPasswordHashIterations,
+    iterations,
     keyLength: currentPasswordHashKeyLength,
     password: passwordToSet,
     salt,
   })
-  const hash = `pbkdf2-sha256-v2-i${currentPasswordHashIterations}-l${currentPasswordHashKeyLength}:${hashRaw.toString('hex')}`
+  const hash = `pbkdf2-sha256-v2-i${iterations}-l${currentPasswordHashKeyLength}:${hashRaw.toString('hex')}`
 
   return { hash, salt }
 }
@@ -118,6 +126,35 @@ export const getPasswordHashParameters = (hash: string): PasswordHashParameters 
 
 export const isCurrentPasswordHash = (hash: unknown): hash is string =>
   typeof hash === 'string' && currentPasswordHashRegex.test(hash)
+
+/**
+ * Legacy and v1 hashes are always rehashed after a successful login. A v2 hash
+ * is rehashed only when its parameters differ from configured iterations: the
+ * runtime default differs between Node.js and Workers, so following it would
+ * rehash a Workers-created hash on a Node.js login and lock that user out of
+ * Workers.
+ */
+export const shouldUpdatePasswordHash = ({
+  collection,
+  hash,
+}: {
+  collection?: Pick<SanitizedCollectionConfig, 'auth'>
+  hash: string
+}): boolean => {
+  if (!isCurrentPasswordHash(hash)) {
+    return true
+  }
+
+  const configuredIterations = getConfiguredPasswordHashIterations(collection)
+
+  if (configuredIterations === undefined) {
+    return false
+  }
+
+  const { iterations, keyLength } = getPasswordHashParameters(hash)
+
+  return iterations !== configuredIterations || keyLength !== currentPasswordHashKeyLength
+}
 
 function randomBytes(): Promise<Buffer> {
   return new Promise((resolve, reject) =>
