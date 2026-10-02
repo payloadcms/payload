@@ -253,6 +253,7 @@ export const getInstructionsCollection = ({
               await req.payload.create({
                 collection: instructionsCollectionSlug,
                 data: { id, [field]: target.slug },
+                disableTransaction: true,
                 overrideAccess: false,
                 req: syncReq,
                 user: req.user,

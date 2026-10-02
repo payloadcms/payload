@@ -939,6 +939,8 @@ test.describe('WCAG 2.2 Level AA', () => {
         await expect(firstCell).toHaveAttribute('tabindex', '0')
         await page.getByRole('link', { name: 'Create New', exact: true }).focus()
         await page.keyboard.press('Tab')
+        await expect(page.getByRole('button', { name: 'More options', exact: true })).toBeFocused()
+        await page.keyboard.press('Tab')
         await expect(firstCell).toBeFocused()
         const target = grid.locator('tbody tr').first().locator('.cell-updatedAt')
 
@@ -951,6 +953,8 @@ test.describe('WCAG 2.2 Level AA', () => {
         await expect(grid.locator('#heading-title')).toHaveCount(0)
         await page.keyboard.press('Escape')
         await page.getByRole('link', { name: 'Create New', exact: true }).focus()
+        await page.keyboard.press('Tab')
+        await expect(page.getByRole('button', { name: 'More options', exact: true })).toBeFocused()
         await page.keyboard.press('Tab')
         await expect(target).toBeFocused()
       } finally {
