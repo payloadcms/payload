@@ -117,6 +117,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Որոնել վիջեթներ...',
     widgetCollectionRequired: 'Collection-ը պարտադիր է։',
     widgetConfigurationError: 'Վիջեթի կազմաձևման սխալ',
+    widgetDropFilesToUpload: 'Քաշեք և գցեք ֆայլը',
     widgetInvalidCollection: 'Collection "{{collection}}" չի գոյություն ունի։',
     widgetInvalidFilterField:
       'Զտիչ դաշտը "{{field}}" գոյություն չունի Collection "{{collection}}"-ում։',
@@ -134,6 +135,9 @@ export const hyTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Դաշտի դասավորում',
     widgetTitleFallback: 'Collection-ի հարցում',
     widgetTitleLabel: 'Վերնագիր',
+    widgetUploadDropzoneDescription:
+      'Վերբեռնեք ձեր համակարգչից քաշել և գցել գործողությամբ կամ սեղմեք ներքևի կոճակը',
+    widgetUploadFiles: 'Ավելացնել ֆայլեր',
   },
   error: {
     accountAlreadyActivated: 'Այս հաշիվն արդեն ակտիվացված է։',

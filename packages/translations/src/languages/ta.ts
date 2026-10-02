@@ -118,6 +118,7 @@ export const taTranslations: DefaultTranslationsObject = {
     searchWidgets: 'தேடல் கருவிகள்...',
     widgetCollectionRequired: 'Collection அவசியமாக 필요.',
     widgetConfigurationError: 'விட்ஜெட் உள்ளமைவு பிழை',
+    widgetDropFilesToUpload: 'கோப்பை இழுத்து விடுக',
     widgetInvalidCollection: 'Collection "{{collection}}" இல்லை.',
     widgetInvalidFilterField:
       'Filter field "{{field}}" குறிப்பாக Collection "{{collection}}" இல் இருப்பதில்லை.',
@@ -136,6 +137,9 @@ export const taTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Field ஐ வரிசைப்படுத்து',
     widgetTitleFallback: 'Collection வினா',
     widgetTitleLabel: 'தலைப்பு',
+    widgetUploadDropzoneDescription:
+      'உங்கள் கணினியில் இருந்து இழுத்து விடுவதன் மூலம் பதிவேற்றவும், அல்லது கீழேயுள்ள பொத்தானை கிளிக் செய்யவும்',
+    widgetUploadFiles: 'கோப்புகளை சேர்க்கவும்',
   },
   error: {
     accountAlreadyActivated: 'இந்த கணக்கு ஏற்கனவே செயல்படுத்தப்பட்டுள்ளது.',

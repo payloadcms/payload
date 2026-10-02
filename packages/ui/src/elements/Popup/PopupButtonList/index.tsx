@@ -21,6 +21,7 @@ const Group: React.FC<{
 
 export { PopupListDivider as Divider } from '../PopupDivider/index.js'
 export { PopupListGroupLabel as GroupLabel } from '../PopupGroupLabel/index.js'
+export { SubmenuTrigger } from './SubmenuTrigger/index.js'
 
 export const ButtonGroup: React.FC<{
   buttonSize?: 'default' | 'medium'

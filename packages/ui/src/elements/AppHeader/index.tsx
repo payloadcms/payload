@@ -67,7 +67,7 @@ export function AppHeader() {
                 buttonStyle="ghost"
                 className={`${baseClass}__sidebar-toggle`}
                 icon={<SidebarIcon />}
-                onClick={() => setNavOpen(!navOpen)}
+                onClick={() => setNavOpen(!navOpen, true)}
                 type="button"
               />
               <div className={`${baseClass}__step-nav-wrapper`}>

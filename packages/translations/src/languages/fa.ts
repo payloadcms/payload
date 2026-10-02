@@ -117,6 +117,7 @@ export const faTranslations: DefaultTranslationsObject = {
     searchWidgets: 'جستجوی ابزارک‌ها...',
     widgetCollectionRequired: 'Collection الزامی است.',
     widgetConfigurationError: 'خطای پیکربندی ابزارک',
+    widgetDropFilesToUpload: 'یک فایل را اینجا بکشید و رها کنید',
     widgetInvalidCollection: 'Collection "{{collection}}" وجود ندارد.',
     widgetInvalidFilterField: 'فیلد فیلتر "{{field}}" در Collection "{{collection}}" وجود ندارد.',
     widgetInvalidSortField: 'فیلد مرتب‌سازی "{{field}}" در Collection "{{collection}}" وجود ندارد.',
@@ -132,6 +133,9 @@ export const faTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'مرتب‌سازی Field',
     widgetTitleFallback: 'کوئری Collection',
     widgetTitleLabel: 'عنوان',
+    widgetUploadDropzoneDescription:
+      'بارگذاری از رایانه خود از طریق کشیدن و رها کردن، یا با کلیک بر روی دکمه زیر',
+    widgetUploadFiles: 'افزودن فایل‌ها',
   },
   error: {
     accountAlreadyActivated: 'این حساب کاربری قبلاً فعال شده است.',

@@ -1,8 +1,10 @@
 /* eslint-disable playwright/expect-expect */
 import { expect, test } from '@playwright/test'
+import { rm, rmdir } from 'node:fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import { getSelectMenu, openSelectMenu, selectInput } from '../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -398,7 +400,7 @@ describe('Dashboard', () => {
     const drawer = page.locator('.drawer__content:visible')
     await expect(drawer).toBeVisible()
 
-    const collectionsField = drawer.locator('.recently-viewed-collections-field')
+    const collectionsField = drawer
     await expect(collectionsField).toBeVisible()
 
     // Every collection is included (checked) by default - the stored exclusion list is empty.
@@ -464,6 +466,234 @@ describe('Dashboard', () => {
     await d.addWidget('revenue')
     await d.assertWidget(TOTAL_WIDGETS + 1, 'revenue', 'medium')
     await d.saveChangesAndValidate()
+  })
+
+  test('should include every upload collection by default and use the selected destination', async ({
+    page,
+  }) => {
+    test.setTimeout(60000)
+    const d = new DashboardHelper(page)
+
+    await expect(page.locator('.upload-dropzone-widget')).toHaveCount(0)
+    await d.setEditing()
+    await d.addWidget('Upload files')
+
+    const widget = d.widgetByPos(TOTAL_WIDGETS + 1)
+    await widget.hover()
+    await widget.locator('.widget-wrapper__edit-btn').click()
+
+    const drawer = page.locator('.drawer__content:visible')
+    const collectionsField = drawer
+    await expect(
+      collectionsField.getByRole('checkbox', { name: 'Media', exact: true }),
+    ).toBeChecked()
+    await expect(
+      collectionsField.getByRole('checkbox', { name: 'Media Alts', exact: true }),
+    ).toBeChecked()
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await expect(drawer).toBeHidden()
+    await d.saveChangesAndValidate()
+
+    const dropzone = widget.locator('.upload-dropzone-widget__dropzone')
+    await expect(dropzone).toBeVisible()
+    const icon = widget.locator('.upload-dropzone-widget__icon')
+    await expect(icon).toHaveCSS('color', 'rgb(0, 123, 229)')
+    await page.evaluate(() => {
+      document.documentElement.dataset.theme = 'dark'
+    })
+    await expect(icon).toHaveCSS('color', 'rgb(128, 202, 255)')
+    await page.evaluate(() => {
+      document.documentElement.dataset.theme = 'light'
+    })
+    await widget.getByRole('button', { name: 'Upload files' }).click()
+
+    const modal = page.locator('#bulk-upload-modal-slug-1')
+    await expect(modal).toBeVisible()
+    await expect(modal.locator('.bulk-upload--add-files')).toBeVisible()
+    const destination = modal.locator('.bulk-upload--add-files__collectionSelect')
+    await expect(destination).toBeVisible()
+    await selectInput({
+      multiSelect: false,
+      option: 'Media Alt',
+      page,
+      selectLocator: destination,
+    })
+    await expect(destination).toContainText('Media Alt')
+    await modal
+      .locator('.dropzone input[type="file"]')
+      .setInputFiles(path.resolve(dirname, 'test/uploads/image.png'))
+    await expect(modal.getByText('image.png')).toBeVisible()
+    await expect(modal.locator('#field-description')).toBeVisible()
+    await modal.locator('#field-description').fill('Description before switching')
+    const fileDestination = modal.locator('.file-selections__collectionSelect')
+    await expect(fileDestination).toBeVisible()
+
+    await openSelectMenu({ page, selectLocator: fileDestination })
+    await getSelectMenu({ page }).getByText('Media', { exact: true }).click()
+    await expect(fileDestination.locator('.react-select--single-value')).toHaveText('Media')
+    await expect(modal.locator('#field-description')).toHaveCount(0)
+    await expect(modal.getByText('image.png')).toBeVisible()
+
+    const fileManager = modal.locator('.file-manager')
+    await fileManager.locator('.file-manager__remove').click()
+    const replacementInput = fileManager.locator('.upload-dropzone-content__hidden-input')
+    await replacementInput.setInputFiles({
+      name: 'incompatible.pdf',
+      buffer: Buffer.from('pdf'),
+      mimeType: 'application/pdf',
+    })
+    await expect(fileManager.locator('.file-manager__selected-preview')).toHaveCount(0)
+    await replacementInput.setInputFiles(path.resolve(dirname, 'test/uploads/image.png'))
+    await expect(fileManager.locator('#field-filemanager-filename')).toHaveValue('image.png')
+
+    await modal.getByRole('button', { name: 'Add Files' }).click()
+    const addMoreFiles = page.locator('#bulk-upload-modal--add-more-files')
+    const addMoreInput = addMoreFiles.locator('.upload-dropzone-content__hidden-input')
+    await expect(addMoreInput).toHaveAttribute('accept', 'image/*')
+    await addMoreInput.setInputFiles({
+      name: 'incompatible.pdf',
+      buffer: Buffer.from('pdf'),
+      mimeType: 'application/pdf',
+    })
+    await expect(addMoreFiles).toBeVisible()
+    await expect(modal.getByText('incompatible.pdf')).toHaveCount(0)
+    await addMoreFiles.getByRole('button', { name: 'Close', exact: true }).click()
+
+    await selectInput({
+      multiSelect: false,
+      option: 'Media Alt',
+      page,
+      selectLocator: fileDestination,
+    })
+    await expect(modal.locator('#field-description')).toBeVisible()
+    await expect(modal.locator('#field-description')).toHaveValue('Description before switching')
+
+    await modal.getByRole('button', { name: 'Add Files' }).click()
+    await expect(addMoreFiles.locator('.bulk-upload--add-files__collectionSelect')).toBeVisible()
+    await addMoreFiles.locator('.dropzone input[type="file"]').setInputFiles({
+      name: 'dashboard.pdf',
+      buffer: Buffer.from('pdf'),
+      mimeType: 'application/pdf',
+    })
+    await expect(modal.getByText('dashboard.pdf')).toBeVisible()
+    await expect(fileDestination).toBeVisible()
+    await openSelectMenu({ page, selectLocator: fileDestination })
+    const incompatibleDestination = getSelectMenu({ page }).getByRole('option', {
+      name: 'Media (Accepts: image/*)',
+      exact: true,
+    })
+    await expect(incompatibleDestination).toHaveAttribute('aria-disabled', 'true')
+    await incompatibleDestination.click({ force: true })
+    await expect(fileDestination.locator('.react-select--single-value')).toHaveText('Media Alt')
+    await modal.locator('.dialog-title').click()
+
+    await modal.getByRole('button', { name: 'Add Files' }).click()
+    const addMoreDestination = addMoreFiles.locator('.bulk-upload--add-files__collectionSelect')
+    await expect(addMoreDestination).toBeVisible()
+    await openSelectMenu({ page, selectLocator: addMoreDestination })
+    await expect(
+      getSelectMenu({ page }).getByRole('option', {
+        name: 'Media (Accepts: image/*)',
+        exact: true,
+      }),
+    ).toHaveAttribute('aria-disabled', 'true')
+    await addMoreFiles.locator('.dialog-title').click()
+    await addMoreFiles.getByRole('button', { name: 'Close', exact: true }).click()
+    await modal
+      .locator('.file-selections__fileRowContainer')
+      .filter({ hasText: 'dashboard.pdf' })
+      .locator('.file-selections__remove--overlay')
+      .click()
+    await expect(fileDestination).toBeVisible()
+    await openSelectMenu({ page, selectLocator: fileDestination })
+    await expect(
+      getSelectMenu({ page }).getByRole('option', { name: 'Media', exact: true }),
+    ).not.toHaveAttribute('aria-disabled', 'true')
+    await modal.locator('.dialog-title').click()
+
+    await modal.locator('#field-description').fill('Uploaded from the dashboard')
+    try {
+      await modal.locator('.bulk-upload--actions-bar__saveButtons button').click()
+      await expect(modal).toBeHidden()
+      const uploadedMedia = await page.request.get(`${serverURL}/api/media-alt?limit=10`)
+      expect(uploadedMedia.ok()).toBe(true)
+      expect((await uploadedMedia.json()).docs).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            description: 'Uploaded from the dashboard',
+            filename: 'image.png',
+          }),
+        ]),
+      )
+
+      await dropzone.dispatchEvent('dragenter')
+      await expect(dropzone).toHaveClass(/dragging/)
+      await expect(dropzone.getByText('Drop files to upload')).toBeVisible()
+
+      await dropzone.evaluate((element) => {
+        const transfer = new DataTransfer()
+        transfer.items.add(new File(['pdf'], 'dashboard.pdf', { type: 'application/pdf' }))
+        element.dispatchEvent(new DragEvent('drop', { bubbles: true, dataTransfer: transfer }))
+      })
+
+      await expect(modal).toBeVisible()
+      await expect(modal.getByText('dashboard.pdf')).toBeVisible()
+      await expect(fileDestination).toBeVisible()
+      await openSelectMenu({ page, selectLocator: fileDestination })
+      await expect(
+        getSelectMenu({ page }).getByRole('option', {
+          name: 'Media (Accepts: image/*)',
+          exact: true,
+        }),
+      ).toHaveAttribute('aria-disabled', 'true')
+    } finally {
+      const uploadDirectory = path.resolve(dirname, 'media-alt')
+      await rm(path.join(uploadDirectory, 'image.png'), { force: true })
+      await rmdir(uploadDirectory).catch((err: NodeJS.ErrnoException) => {
+        if (err.code !== 'ENOENT' && err.code !== 'ENOTEMPTY') {
+          throw err
+        }
+      })
+    }
+  })
+
+  test('should exclude an upload collection and preserve the choice after reload', async ({
+    page,
+  }) => {
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+    await d.addWidget('Upload files')
+    const widget = d.widgetByPos(TOTAL_WIDGETS + 1)
+    await widget.hover()
+    await widget.locator('.widget-wrapper__edit-btn').click()
+
+    const drawer = page.locator('.drawer__content:visible')
+    const collectionsField = drawer.locator('.recently-viewed-collections-field')
+    await collectionsField.getByRole('checkbox', { name: 'Media', exact: true }).uncheck()
+    await expect(
+      collectionsField.getByRole('checkbox', { name: 'Media Alts', exact: true }),
+    ).toBeChecked()
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await d.saveChangesAndValidate()
+    await page.reload()
+
+    const dropzoneWidget = page.locator('.upload-dropzone-widget')
+    await dropzoneWidget.getByRole('button', { name: 'Upload files' }).click()
+    const modal = page.locator('#bulk-upload-modal-slug-1')
+    await expect(modal.locator('.bulk-upload--add-files__collectionSelect')).toHaveCount(0)
+    await modal.getByRole('button', { name: 'Close' }).click()
+
+    await d.setEditing()
+    await d.widgetByPos(TOTAL_WIDGETS + 1).hover()
+    await d
+      .widgetByPos(TOTAL_WIDGETS + 1)
+      .locator('.widget-wrapper__edit-btn')
+      .click()
+    const savedField = page.locator('.drawer__content:visible')
+    await expect(savedField.getByRole('checkbox', { name: 'Media', exact: true })).not.toBeChecked()
+    await expect(
+      savedField.getByRole('checkbox', { name: 'Media Alts', exact: true }),
+    ).toBeChecked()
   })
 
   test('delete widget', async ({ page }) => {

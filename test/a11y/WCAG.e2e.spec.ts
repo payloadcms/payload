@@ -7,7 +7,7 @@ import type { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 
 import { addGroupBy, clearGroupBy, openGroupBy } from '../__helpers/e2e/groupBy/index.js'
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
-import { selectInput } from '../__helpers/e2e/selectInput.js'
+import { getSelectMenu, selectInput } from '../__helpers/e2e/selectInput.js'
 import { initPage } from '../__setup/e2e/initPage.js'
 import {
   addCollectionQueryWidget,
@@ -673,6 +673,102 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.1.1 Keyboard (A)', () => {
+    test('should open the upload dropzone modal from its button with the keyboard', async () => {
+      // PYLD-4166
+      await page.goto(`${serverURL}/admin`)
+
+      const widget = page.locator('.upload-dropzone-widget')
+      const button = widget.getByRole('button', { name: 'Upload files' })
+      const dropzone = widget.locator('.upload-dropzone-widget__dropzone')
+
+      await expect(button).toBeVisible()
+      await expect(dropzone).not.toHaveAttribute('tabindex', '0')
+      await button.focus()
+      await expect(button).toBeFocused()
+      await button.press('Enter')
+
+      const modal = page.locator('#bulk-upload-modal-slug-1')
+      await expect(modal).toBeVisible()
+      await expect(modal.locator('.bulk-upload--add-files')).toBeVisible()
+      await modal.getByRole('button', { name: 'Close' }).click()
+      await expect(button).toBeFocused()
+    })
+
+    test('should choose the upload collection from the dropzone modal with the keyboard', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await page
+        .locator('.upload-dropzone-widget')
+        .getByRole('button', { name: 'Upload files' })
+        .click()
+
+      const modal = page.locator('#bulk-upload-modal-slug-1')
+      const collection = modal.getByRole('combobox', { name: 'Collection' })
+      await expect(collection).toBeVisible()
+      await collection.focus()
+      await collection.pressSequentially('Media Alt')
+      await collection.press('Enter')
+
+      await expect(modal.locator('.bulk-upload--add-files__collectionSelect')).toContainText(
+        'Media Alt',
+      )
+    })
+
+    test('should keep incompatible upload destinations visible and skip them with the keyboard', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await page
+        .locator('.upload-dropzone-widget')
+        .getByRole('button', { name: 'Upload files' })
+        .click()
+
+      const modal = page.locator('#bulk-upload-modal-slug-1')
+
+      await selectInput({
+        multiSelect: false,
+        option: 'Media Alt',
+        page,
+        selectLocator: modal.locator('.bulk-upload--add-files__collectionSelect'),
+      })
+      await modal.locator('.dropzone input[type="file"]').setInputFiles({
+        name: 'keyboard.pdf',
+        buffer: Buffer.from('pdf'),
+        mimeType: 'application/pdf',
+      })
+
+      const destination = modal.locator('.file-selections__collectionSelect')
+      const input = destination.getByRole('combobox', { name: 'Collection', exact: true })
+
+      await expect(input).toBeVisible()
+      await input.focus()
+      await input.press('ArrowDown')
+      await expect(
+        getSelectMenu({ page }).getByRole('option', {
+          name: 'Media (Accepts: image/*)',
+          exact: true,
+        }),
+      ).toHaveAttribute('aria-disabled', 'true')
+      await input.press('Home')
+      await input.press('Enter')
+      await expect(destination.locator('.react-select--single-value')).toHaveText('Media Alt')
+      await expect(input).toBeFocused()
+
+      await modal.locator('.file-selections__remove--overlay').click()
+
+      const addFilesDestination = modal.locator('.bulk-upload--add-files__collectionSelect')
+      const addFilesInput = addFilesDestination.getByRole('combobox', {
+        name: 'Collection',
+        exact: true,
+      })
+
+      await addFilesInput.focus()
+      await addFilesInput.press('ArrowDown')
+      await expect(
+        getSelectMenu({ page }).getByRole('option', { name: 'Media', exact: true }),
+      ).not.toHaveAttribute('aria-disabled', 'true')
+      await addFilesInput.press('Home')
+      await addFilesInput.press('Enter')
+      await expect(addFilesDestination.locator('.react-select--single-value')).toHaveText('Media')
+    })
+
     test('should navigate and select collection grid rows without trapping keyboard focus', async () => {
       await gotoPostsList({ page, postsURL })
       const grid = page.getByRole('grid', { name: 'Posts', exact: true })
@@ -1469,31 +1565,34 @@ test.describe('WCAG 2.2 Level AA', () => {
 
       await expectFocusInside({ container: header, page })
       await test.step('Read widget content before its named actions', async () => {
-        const widget = page.locator('.widget[data-slug^="activity-"]')
+        const widget = page.locator('.widget[data-slug^="upload-dropzone-"]')
         const card = widget.locator('.draggable')
         const drag = widget.getByRole('button', { name: 'Drag to reorder', exact: true })
-        const text = (await widget.locator('.widget-content').innerText())
-          .replace(/\s+/g, ' ')
-          .trim()
 
+        await expect(
+          widget
+            .getByRole('region', { name: 'Upload files' })
+            .getByText('Upload from your computer via drag-and-drop, or click the button below'),
+        ).toBeVisible()
         await card.focus()
         await page.keyboard.press('Shift+Tab')
         await page.keyboard.press('Tab')
         await expect(card).toBeFocused()
-        await expect(card).toHaveAccessibleName(text)
+        await expect(card).toHaveAccessibleName('Upload files')
+        await expect(drag).toHaveAccessibleDescription(/Upload files/)
         await page.keyboard.press('Tab')
         await expect(drag).toBeFocused()
         await page.keyboard.press('Tab')
         await expect(
-          widget.getByRole('button', { name: 'Edit You recently viewed', exact: true }),
+          widget.getByRole('button', { name: 'Edit Upload files', exact: true }),
         ).toBeFocused()
         await page.keyboard.press('Tab')
         await expect(
-          widget.getByRole('button', { name: /^Resize You recently viewed, current size: full$/ }),
+          widget.getByRole('button', { name: /^Resize Upload files, current size: small$/ }),
         ).toBeFocused()
         await page.keyboard.press('Tab')
         await expect(
-          widget.getByRole('button', { name: 'Delete You recently viewed', exact: true }),
+          widget.getByRole('button', { name: 'Delete Upload files', exact: true }),
         ).toBeFocused()
       })
       const widget = await addCollectionQueryWidget({ page })
@@ -2853,6 +2952,22 @@ test.describe('WCAG 2.2 Level AA', () => {
       await secondInput.pressSequentially('Separate value')
       await expect(secondInput).toHaveValue('Separate value')
       await expect(input).toHaveValue('Accessible bulk edit')
+    })
+
+    test('should expose the upload dropzone without detectable accessibility violations', async ({
+      browser: _browser,
+    }, testInfo) => {
+      // PYLD-4166
+      await page.goto(`${serverURL}/admin`)
+      await expect(page.locator('.upload-dropzone-widget')).toBeVisible()
+
+      const results = await runAxeScan({
+        include: ['.upload-dropzone-widget'],
+        page,
+        testInfo,
+      })
+
+      expect(results.violations).toEqual([])
     })
 
     test('should give the navigation close control an accessible name', async () => {

@@ -53,6 +53,148 @@ test('should preserve ancestor menus while nested hover menus are active', async
   await expect.element(color).toHaveAttribute('aria-expanded', 'true')
 })
 
+test('should keep a reusable submenu trigger full width and highlighted over its child menu', async () => {
+  const screen = await render(
+    <div style={{ '--color-bg-selected-strong': 'rgb(1, 2, 3)' } as CSSProperties}>
+      <Popup button="Root" popupType="menu" size="large" theme="auto">
+        <PopupList.MenuItem>
+          <Popup
+            hoverSubmenu
+            popupType="menu"
+            renderButton={(buttonProps) => (
+              <PopupList.SubmenuTrigger
+                buttonProps={buttonProps}
+                icon={<span aria-hidden="true">◆</span>}
+                trailingIcon={<span aria-hidden="true">›</span>}
+              >
+                Theme
+              </PopupList.SubmenuTrigger>
+            )}
+            side="right"
+            theme="auto"
+          >
+            <PopupList.MenuItem>
+              <PopupList.Button onClick={() => {}}>Light</PopupList.Button>
+            </PopupList.MenuItem>
+          </Popup>
+          <PopupList.Button onClick={() => {}}>Account</PopupList.Button>
+        </PopupList.MenuItem>
+      </Popup>
+    </div>,
+  )
+
+  await screen.getByRole('button', { name: 'Root' }).click()
+  const theme = screen.getByRole('menuitem', { name: 'Theme' })
+  const account = screen.getByRole('menuitem', { name: 'Account' })
+
+  expect(Math.round(theme.element().getBoundingClientRect().width)).toBe(
+    Math.round(account.element().getBoundingClientRect().width),
+  )
+
+  await theme.hover()
+  await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
+  expect(getComputedStyle(theme.element()).backgroundColor).toBe('rgb(1, 2, 3)')
+
+  await screen.getByRole('menuitem', { name: 'Light' }).hover()
+  expect(getComputedStyle(theme.element()).backgroundColor).toBe('rgb(1, 2, 3)')
+})
+
+test('should defer hover styling on a submenu trigger in a separate group', async () => {
+  const screen = await render(
+    <div style={{ '--color-bg-selected-strong': 'rgb(1, 2, 3)' } as CSSProperties}>
+      <Popup button="Root" popupType="menu" theme="auto">
+        <PopupList.MenuItem>
+          <Popup
+            hoverSubmenu
+            popupType="menu"
+            renderButton={(buttonProps) => (
+              <PopupList.SubmenuTrigger buttonProps={buttonProps}>Theme</PopupList.SubmenuTrigger>
+            )}
+            side="left"
+            theme="auto"
+          >
+            <PopupList.MenuItem>
+              <PopupList.Button onClick={() => {}}>Light</PopupList.Button>
+            </PopupList.MenuItem>
+          </Popup>
+        </PopupList.MenuItem>
+        <PopupList.MenuItem>
+          <Popup
+            hoverSubmenu
+            popupType="menu"
+            renderButton={(buttonProps) => (
+              <PopupList.SubmenuTrigger buttonProps={buttonProps}>
+                Language
+              </PopupList.SubmenuTrigger>
+            )}
+            side="left"
+            theme="auto"
+          >
+            <PopupList.MenuItem>
+              <PopupList.Button onClick={() => {}}>English</PopupList.Button>
+            </PopupList.MenuItem>
+          </Popup>
+        </PopupList.MenuItem>
+      </Popup>
+    </div>,
+  )
+
+  await screen.getByRole('button', { name: 'Root' }).click()
+  const theme = screen.getByRole('menuitem', { name: 'Theme' })
+  const language = screen.getByRole('menuitem', { name: 'Language' })
+
+  await theme.hover()
+  await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
+  await language.hover()
+
+  expect(theme.element().getAttribute('aria-expanded')).toBe('true')
+  expect(getComputedStyle(language.element()).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+
+  await expect.element(language).toHaveAttribute('aria-expanded', 'true')
+  expect(getComputedStyle(language.element()).backgroundColor).toBe('rgb(1, 2, 3)')
+})
+
+test('should defer hover styling on an action in a separate group', async () => {
+  const screen = await render(
+    <div style={{ '--popup-item-bg-hover': 'rgb(1, 2, 3)' } as CSSProperties}>
+      <Popup button="Root" popupType="menu" theme="auto">
+        <PopupList.MenuItem>
+          <Popup
+            hoverSubmenu
+            popupType="menu"
+            renderButton={(buttonProps) => (
+              <PopupList.SubmenuTrigger buttonProps={buttonProps}>Theme</PopupList.SubmenuTrigger>
+            )}
+            side="right"
+            theme="auto"
+          >
+            <PopupList.MenuItem>
+              <PopupList.Button onClick={() => {}}>Light</PopupList.Button>
+            </PopupList.MenuItem>
+          </Popup>
+        </PopupList.MenuItem>
+        <PopupList.MenuItem>
+          <PopupList.Button onClick={() => {}}>Account</PopupList.Button>
+        </PopupList.MenuItem>
+      </Popup>
+    </div>,
+  )
+
+  await screen.getByRole('button', { name: 'Root' }).click()
+  const theme = screen.getByRole('menuitem', { name: 'Theme' })
+  const account = screen.getByRole('menuitem', { name: 'Account' })
+
+  await account.hover()
+  expect(getComputedStyle(account.element()).backgroundColor).toBe('rgb(1, 2, 3)')
+
+  await theme.hover()
+  await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
+  await account.hover()
+
+  expect(theme.element().getAttribute('aria-expanded')).toBe('true')
+  expect(getComputedStyle(account.element()).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+})
+
 test('should defer a sibling leaf hover state while a submenu is active', async () => {
   const screen = await render(
     <div style={{ '--popup-item-bg-hover': 'rgb(1, 2, 3)' } as CSSProperties}>
@@ -118,12 +260,9 @@ test('should open and close nested menus with keyboard focus restoration', async
     <Popup button="Root" popupType="menu" theme="auto">
       <PopupList.MenuItem>
         <Popup
-          renderButton={({ active: _active, ...props }) => (
-            <button {...props} type="button">
-              Theme
-            </button>
+          renderButton={(buttonProps) => (
+            <PopupList.SubmenuTrigger buttonProps={buttonProps}>Theme</PopupList.SubmenuTrigger>
           )}
-          buttonType="custom"
           popupType="menu"
           theme="auto"
           render={() => <PopupList.Button onClick={() => {}}>Light</PopupList.Button>}

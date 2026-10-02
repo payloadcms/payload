@@ -119,6 +119,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     searchWidgets: 'ウィジェットを検索...',
     widgetCollectionRequired: 'Collectionは必須です。',
     widgetConfigurationError: 'ウィジェット設定エラー',
+    widgetDropFilesToUpload: 'ファイルをドラッグ & ドロップする',
     widgetInvalidCollection: 'Collection「{{collection}}」は存在しません。',
     widgetInvalidFilterField:
       'コレクション「{{collection}}」にフィルターField「{{field}}」は存在しません。',
@@ -136,6 +137,9 @@ export const jaTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'ソートフィールド',
     widgetTitleFallback: 'コレクションクエリ',
     widgetTitleLabel: 'タイトル',
+    widgetUploadDropzoneDescription:
+      'ドラッグアンドドロップでコンピューターからアップロードするか、下のボタンをクリックしてください。',
+    widgetUploadFiles: 'ファイルを追加する',
   },
   error: {
     accountAlreadyActivated: 'このアカウントはすでに有効です。',
