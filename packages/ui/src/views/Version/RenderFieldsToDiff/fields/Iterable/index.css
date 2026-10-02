@@ -8,7 +8,6 @@
 
   .iterable-diff__label {
     color: var(--color-text-secondary);
-    font-family: var(--text-body-medium-bold-font-family);
     font-size: var(--text-body-medium-bold-font-size);
     font-style: normal;
     font-weight: var(--font-weight-strong);

@@ -17,7 +17,6 @@
 
   .no-results__title {
     color: var(--color-text);
-    font-family: var(--text-body-large-bold-font-family);
     font-size: var(--text-body-large-bold-font-size);
     font-weight: var(--font-weight-strong);
     line-height: var(--text-body-large-bold-line-height);

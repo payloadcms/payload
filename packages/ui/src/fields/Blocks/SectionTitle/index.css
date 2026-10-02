@@ -20,7 +20,6 @@
 
   .section-title:after,
   .section-title__input {
-    font-family: var(--text-body-medium-bold-font-family);
     font-weight: var(--text-body-medium-bold-font-weight);
     font-size: var(--text-body-medium-bold-font-size);
     line-height: var(--text-body-medium-bold-line-height);
@@ -36,7 +35,6 @@
 
     &::placeholder {
       color: var(--color-text-tertiary);
-      font-family: var(--text-body-medium-font-family);
       font-weight: var(--text-body-medium-font-weight);
     }
     min-width: min-content;

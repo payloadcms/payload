@@ -98,7 +98,6 @@
 
   .group-field__title {
     margin-bottom: 0;
-    font-family: var(--text-heading-medium-font-family);
     font-size: var(--text-heading-medium-font-size);
     font-weight: var(--text-heading-medium-font-weight);
     line-height: var(--text-heading-medium-line-height);

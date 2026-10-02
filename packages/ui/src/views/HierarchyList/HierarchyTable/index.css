@@ -103,7 +103,6 @@
   .hierarchy-tables__group-label {
     color: var(--color-text);
     letter-spacing: var(--text-body-large-letter-spacing);
-    font-family: var(--text-body-large-bold-font-family);
     font-size: var(--text-body-large-bold-font-size);
     font-weight: var(--text-body-large-bold-font-weight);
     line-height: var(--text-body-large-bold-line-height);
@@ -127,7 +126,6 @@
   .hierarchy-tables__plane-pagination-label {
     color: var(--color-text);
     white-space: nowrap;
-    font-family: var(--text-body-medium-bold-font-family);
     font-size: var(--text-body-medium-bold-font-size);
     font-weight: var(--text-body-medium-bold-font-weight);
     line-height: var(--text-body-medium-bold-line-height);

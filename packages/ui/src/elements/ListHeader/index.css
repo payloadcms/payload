@@ -24,7 +24,6 @@
     font-size: var(--text-heading-large-font-size);
     line-height: var(--text-heading-large-line-height);
     font-weight: var(--text-heading-large-font-weight);
-    font-family: var(--text-heading-large-font-family);
   }
 
   .list-header__title-actions {

@@ -11,7 +11,6 @@
     background: var(--color-bg);
     border: var(--stroke-width-small) solid var(--color-border);
     border-radius: var(--radius-medium);
-    font-family: var(--font-body);
     margin-block: var(--spacer-2);
     color: var(--color-text);
 
@@ -42,7 +41,6 @@
   }
 
   .LexicalEditorTheme__relationship__label {
-    font-family: var(--text-body-small-font-family);
     font-size: var(--text-body-small-font-size);
     font-weight: var(--text-body-small-font-weight);
     line-height: var(--text-body-small-line-height);
@@ -55,7 +53,6 @@
   }
 
   .LexicalEditorTheme__relationship__title {
-    font-family: var(--text-body-medium-bold-font-family);
     font-size: var(--text-body-medium-bold-font-size);
     font-weight: var(--text-body-medium-bold-font-weight);
     line-height: var(--text-body-medium-bold-line-height);

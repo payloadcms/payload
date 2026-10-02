@@ -13,7 +13,6 @@
   .field-label--with-control:not(.unstyled) {
     display: flex;
     color: var(--field-color-label);
-    font-family: var(--text-body-medium-bold-font-family);
     font-weight: var(--text-body-medium-bold-font-weight);
     letter-spacing: var(--field-label-letter-spacing);
 

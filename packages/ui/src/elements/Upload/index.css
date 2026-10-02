@@ -156,7 +156,6 @@
     height: 16px;
     border-radius: var(--radius-small);
     background: var(--color-bg-secondary-hover);
-    font-family: var(--text-body-medium-bold-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-bold-font-weight);
     line-height: var(--text-body-medium-bold-line-height);

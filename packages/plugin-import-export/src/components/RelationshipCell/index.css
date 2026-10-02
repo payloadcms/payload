@@ -13,7 +13,6 @@
 
   .import-preview-relationship__collection {
     color: var(--color-text-secondary);
-    font-family: var(--text-body-small-bold-font-family);
     font-size: var(--text-body-medium-bold-font-size);
     font-weight: var(--text-body-large-font-weight);
     letter-spacing: var(--text-body-small-bold-letter-spacing);
@@ -24,7 +23,6 @@
   .import-preview-relationship__more {
     display: block;
     color: var(--color-text-secondary);
-    font-family: var(--text-body-small-font-family);
     font-size: var(--text-body-small-font-size);
     font-weight: var(--text-body-small-font-weight);
     line-height: var(--text-body-small-line-height);

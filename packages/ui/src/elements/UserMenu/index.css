@@ -12,7 +12,6 @@
 .user-menu__trigger {
   max-width: 100%;
   min-width: 0;
-  font-family: var(--text-body-medium-bold-font-family);
   font-size: var(--text-body-medium-bold-font-size);
   font-weight: var(--text-body-medium-bold-font-weight);
   line-height: var(--text-body-medium-bold-line-height);
@@ -63,7 +62,6 @@
 
 .user-menu__name,
 .user-menu__identifier {
-  font-family: var(--text-body-medium-bold-font-family);
   font-size: var(--text-body-medium-bold-font-size);
   font-weight: var(--text-body-medium-bold-font-weight);
   line-height: var(--text-body-medium-bold-line-height);
@@ -114,7 +112,6 @@
 .user-menu__submenu-title {
   margin: 0;
   color: inherit;
-  font-family: var(--text-body-medium-font-family);
   font-size: var(--text-body-medium-font-size);
   font-weight: var(--text-body-medium-font-weight);
   line-height: var(--text-body-medium-line-height);

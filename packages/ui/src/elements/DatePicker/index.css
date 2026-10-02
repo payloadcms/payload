@@ -11,8 +11,6 @@
 
   .react-datepicker {
     --time-column-width: 120px;
-
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
@@ -94,7 +92,6 @@
   .react-datepicker-time__header {
     margin-top: 0;
     color: var(--color-text);
-    font-family: var(--text-body-medium-bold-font-family);
     font-size: var(--text-body-medium-bold-font-size);
     font-weight: var(--text-body-medium-bold-font-weight);
     line-height: var(--text-body-medium-bold-line-height);
@@ -135,7 +132,6 @@
     cursor: pointer;
     padding: 0 var(--spacer-2);
     color: var(--color-text);
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     -webkit-appearance: none;
@@ -440,7 +436,6 @@
     line-height: var(--text-body-medium-line-height);
     text-align: center;
     margin: 0;
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     position: relative;
@@ -657,7 +652,6 @@
             height: auto;
             padding: var(--spacer-1) var(--spacer-2);
             white-space: nowrap;
-            font-family: var(--text-body-medium-font-family);
             font-size: var(--text-body-medium-font-size);
             font-weight: var(--text-body-medium-font-weight);
             line-height: var(--text-body-medium-line-height);
@@ -828,7 +822,6 @@
 
   /* ——— Input field ——— */
   .date-time-picker .react-datepicker__input-container input {
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
