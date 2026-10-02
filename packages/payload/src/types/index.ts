@@ -200,6 +200,7 @@ export type Document = any
  */
 export type Operation = 'create' | 'delete' | 'read' | 'update' | 'validate'
 export type FieldOperation = Operation
+export type BeforeValidateOperation = Extract<FieldOperation, 'create' | 'update' | 'validate'>
 export type VersionOperations = 'readVersions'
 export type AuthOperations = 'unlock'
 export type AllOperations = AuthOperations | Operation | VersionOperations

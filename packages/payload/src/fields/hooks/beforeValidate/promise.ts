@@ -2,7 +2,12 @@ import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
-import type { JsonObject, JsonValue, PayloadRequest } from '../../../types/index.js'
+import type {
+  BeforeValidateOperation,
+  JsonObject,
+  JsonValue,
+  PayloadRequest,
+} from '../../../types/index.js'
 import type { Block, Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
@@ -31,7 +36,7 @@ type Args<T> = {
   global: null | SanitizedGlobalConfig
   id?: number | string
   onFieldAccess?: (args: { accessResult: boolean; path: string }) => void
-  operation: 'create' | 'update' | 'validate'
+  operation: BeforeValidateOperation
   overrideAccess: boolean
   parentIndexPath: string
   parentIsLocalized: boolean

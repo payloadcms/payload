@@ -38,6 +38,7 @@ import {
   validationFallbackCollectionSlug,
   validationFallbackGlobalSlug,
   validationGlobalSlug,
+  validationUniqueCollectionSlug,
   validationUploadsDir,
   validationUploadsSlug,
   validationWhereCollectionSlug,
@@ -77,6 +78,106 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
   })
 
   test.describe('collections', () => {
+    test('should report a configured unique field conflict', async ({ payload }) => {
+      await payload.create({
+        collection: validationUniqueCollectionSlug,
+        data: {
+          uniqueValue: 'already-used',
+        },
+        overrideAccess: true,
+      })
+
+      const result = await payload.validate({
+        collection: validationUniqueCollectionSlug,
+        data: {
+          uniqueValue: ' already-used ',
+        },
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      expect(result).toMatchObject({
+        errors: [
+          {
+            path: 'uniqueValue',
+          },
+        ],
+        valid: false,
+      })
+    })
+
+    test('should report a configured compound unique index conflict for a partial update', async ({
+      payload,
+    }) => {
+      await payload.create({
+        collection: validationUniqueCollectionSlug,
+        data: {
+          compoundScope: 'scope-a',
+          compoundValue: 'shared-value',
+          uniqueValue: 'first-unique-value',
+        },
+        overrideAccess: true,
+      })
+      const storedDocument = await payload.create({
+        collection: validationUniqueCollectionSlug,
+        data: {
+          compoundScope: 'scope-b',
+          compoundValue: 'shared-value',
+          uniqueValue: 'second-unique-value',
+        },
+        overrideAccess: true,
+      })
+
+      const result = await payload.validate({
+        id: storedDocument.id,
+        collection: validationUniqueCollectionSlug,
+        data: {
+          compoundScope: 'scope-a',
+        },
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      expect(result).toMatchObject({
+        errors: [
+          {
+            path: 'compoundScope',
+          },
+          {
+            path: 'compoundValue',
+          },
+        ],
+        valid: false,
+      })
+    })
+
+    test('should exclude the stored document from configured uniqueness checks', async ({
+      payload,
+    }) => {
+      const storedDocument = await payload.create({
+        collection: validationUniqueCollectionSlug,
+        data: {
+          compoundScope: 'stored-scope',
+          compoundValue: 'stored-compound-value',
+          uniqueValue: 'stored-unique-value',
+        },
+        overrideAccess: true,
+      })
+
+      const result = await payload.validate({
+        id: storedDocument.id,
+        collection: validationUniqueCollectionSlug,
+        data: {},
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      expect(result).toEqual({
+        errors: [],
+        valid: true,
+      })
+    })
+
     test('should use collection update access as the validate fallback', async ({ payload }) => {
       await expect(
         payload.validate({

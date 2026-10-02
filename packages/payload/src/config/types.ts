@@ -721,8 +721,6 @@ export type LocalizationConfigWithLabels = Prettify<
   } & BaseLocalizationConfig
 >
 
-export type SanitizedLocale = Locale
-
 export type SanitizedLocalizationConfig = Prettify<
   {
     /**
@@ -730,7 +728,7 @@ export type SanitizedLocalizationConfig = Prettify<
      * @example `["en", "es", "fr", "nl", "de", "jp"]`
      */
     localeCodes: string[]
-    locales: SanitizedLocale[]
+    locales: Locale[]
   } & Omit<LocalizationConfigWithLabels, 'fallback' | 'locales'> &
     Required<Pick<LocalizationConfigWithLabels, 'fallback'>>
 >

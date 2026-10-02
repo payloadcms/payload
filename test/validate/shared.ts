@@ -26,6 +26,7 @@ export const validationNonLocalizedCollectionSlug = 'validation-non-localized-it
 export const validationAuthCollectionSlug = 'validation-auth-items'
 export const validationCustomIDCollectionSlug = 'validation-custom-id-items'
 export const validationEmptyCollectionSlug = 'validation-empty-items'
+export const validationUniqueCollectionSlug = 'validation-unique-items'
 export const validationUploadsDir = path.resolve(dirname, 'validation-uploads')
 export const validationPublishUploadsDir = path.resolve(dirname, 'validation-publish-uploads')
 

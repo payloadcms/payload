@@ -6,6 +6,7 @@ import type {
   CollectionSlug,
   Payload,
   RequestContext,
+  SharedLocalAPIOptions,
   User,
   ValidationFieldError,
 } from '../../../index.js'
@@ -54,11 +55,6 @@ type BaseOptions<TSlug extends CollectionSlug> = {
    */
   locale: ValidationLocaleSelector
   /**
-   * Skip collection and field access control.
-   * @default false
-   */
-  overrideAccess?: boolean
-  /**
    * An existing request to reuse for user, locale, and context.
    */
   req?: Partial<PayloadRequest>
@@ -66,7 +62,8 @@ type BaseOptions<TSlug extends CollectionSlug> = {
    * The user used by access control when `overrideAccess` is `false`.
    */
   user?: null | User
-} & DraftFlagFromCollectionSlug<TSlug>
+} & DraftFlagFromCollectionSlug<TSlug> &
+  Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 /**
  * Options for validating a collection document without persisting it.

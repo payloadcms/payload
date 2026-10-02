@@ -1,7 +1,6 @@
 import type {
   Collection,
   CollectionSlug,
-  PayloadRequest,
   RequiredDataFromCollectionSlug,
   ValidationResult,
 } from 'payload'
@@ -19,9 +18,7 @@ export type Resolver<TSlug extends CollectionSlug> = (
     id?: number | string
     locale?: string
   },
-  context: {
-    req: PayloadRequest
-  },
+  context: Context,
 ) => Promise<ValidationResult>
 
 /**

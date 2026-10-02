@@ -4,6 +4,7 @@ import type {
   Access,
   ArrayField,
   AuthenticatedUser,
+  BeforeValidateOperation,
   Block,
   BlockRowLabelClientProps,
   BlockRowLabelServerProps,
@@ -129,6 +130,10 @@ import type {
 
 describe('Types testing', () => {
   describe('validate operation types', () => {
+    test('should expose beforeValidate operations', () => {
+      expect<BeforeValidateOperation>().type.toBe<'create' | 'update' | 'validate'>()
+    })
+
     test('should expose validate only to validation lifecycle types', () => {
       expect<{
         locale?: string

@@ -20,6 +20,7 @@ import { deepMergeWithSourceArraysIgnoringUndefined } from '../../utilities/deep
 import { flattenDataByLocale } from '../../utilities/flattenDataByLocale.js'
 import { toValidationResult } from '../../utilities/toValidationResult.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
+import { validateUniqueConstraints } from './utilities/validateUniqueConstraints.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
   collection: Collection
@@ -235,6 +236,8 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
 
     onValidationData?.(data)
 
+    let processedData = data
+
     await beforeChange({
       id,
       collection: collectionConfig,
@@ -243,8 +246,24 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
       doc: originalDoc,
       docWithLocales,
       global: null,
+      onDataProcessed: (result) => {
+        processedData = result
+      },
       operation: 'validate',
       overrideAccess,
+      req,
+    })
+
+    const validationData = deepMergeWithSourceArraysIgnoringUndefined<JsonObject>(
+      originalDoc,
+      processedData,
+    )
+    onValidationData?.(validationData)
+
+    await validateUniqueConstraints({
+      id,
+      collection: collectionConfig,
+      data: validationData,
       req,
     })
   } catch (error) {

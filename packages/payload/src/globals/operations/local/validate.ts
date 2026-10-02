@@ -3,7 +3,13 @@ import type { DeepPartial } from 'ts-essentials'
 import { status as httpStatus } from 'http-status'
 
 import type { ValidationResult } from '../../../collections/operations/local/validate.js'
-import type { GlobalSlug, Payload, RequestContext, User } from '../../../index.js'
+import type {
+  GlobalSlug,
+  Payload,
+  RequestContext,
+  SharedLocalAPIOptions,
+  User,
+} from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
 import type { ValidationLocaleSelector } from '../../../utilities/resolveValidationLocales.js'
 import type { DataFromGlobalSlug, DraftFlagFromGlobalSlug } from '../../config/types.js'
@@ -33,18 +39,14 @@ export type ValidateGlobalOptions<TSlug extends GlobalSlug> = {
    * for projects without localization.
    */
   locale: ValidationLocaleSelector
-  /**
-   * Skip global and field access control.
-   * @default false
-   */
-  overrideAccess?: boolean
   /** An existing request to reuse for user, locale, and context. */
   req?: Partial<PayloadRequest>
   /** The global slug to validate against. */
   slug: TSlug
   /** The user used by access control when `overrideAccess` is `false`. */
   user?: null | User
-} & DraftFlagFromGlobalSlug<TSlug>
+} & DraftFlagFromGlobalSlug<TSlug> &
+  Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 type InternalValidateGlobalOptions<TSlug extends GlobalSlug> = {
   /**

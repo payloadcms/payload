@@ -1,7 +1,6 @@
 import type {
   DataFromGlobalSlug,
   GlobalSlug,
-  PayloadRequest,
   SanitizedGlobalConfig,
   ValidationResult,
 } from 'payload'
@@ -18,9 +17,7 @@ export type Resolver<TSlug extends GlobalSlug> = (
     draft?: boolean
     locale?: string
   },
-  context: {
-    req: PayloadRequest
-  },
+  context: Context,
 ) => Promise<ValidationResult>
 
 /**
