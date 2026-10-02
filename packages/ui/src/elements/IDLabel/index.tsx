@@ -15,7 +15,8 @@ export const IDLabel: React.FC<{
   className?: string
   id: number | string
   prefix?: string
-}> = ({ id, className, prefix = 'ID' }) => {
+  variant?: 'inline' | 'title'
+}> = ({ id, className, prefix = 'ID', variant = 'inline' }) => {
   const {
     config: {
       routes: { admin: adminRoute },
@@ -30,7 +31,12 @@ export const IDLabel: React.FC<{
   // Only render as link if we're inside a drawer and have document context
   const shouldRenderLink = drawerDepth > 0 && (collectionSlug || globalSlug)
 
-  const classes = [baseClass, shouldRenderLink && `${baseClass}--is-link`, className]
+  const classes = [
+    baseClass,
+    `${baseClass}--${variant}`,
+    shouldRenderLink && `${baseClass}--is-link`,
+    className,
+  ]
     .filter(Boolean)
     .join(' ')
 
@@ -41,19 +47,19 @@ export const IDLabel: React.FC<{
     })
 
     return (
-      <div className={classes} title={String(id)}>
-        <span className={`${baseClass}__prefix`}>{prefix}</span>
+      <span className={classes} title={String(id)}>
+        {variant === 'title' && <span className={`${baseClass}__prefix`}>{prefix}</span>}
         <Link className={`${baseClass}__link`} href={docPath}>
           {sanitizedID}
         </Link>
-      </div>
+      </span>
     )
   }
 
   return (
-    <div className={classes} title={String(id)}>
-      <span className={`${baseClass}__prefix`}>{prefix}</span>
+    <span className={classes} title={String(id)}>
+      {variant === 'title' && <span className={`${baseClass}__prefix`}>{prefix}</span>}
       <span className={`${baseClass}__value`}>{sanitizedID}</span>
-    </div>
+    </span>
   )
 }

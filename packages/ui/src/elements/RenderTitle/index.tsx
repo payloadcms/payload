@@ -70,7 +70,7 @@ export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
       {isInitializing ? (
         EmptySpace
       ) : idAsTitle ? (
-        <IDLabel className={`${baseClass}__id`} id={id} />
+        <IDLabel className={`${baseClass}__id`} id={id} variant="title" />
       ) : docPath ? (
         <Link className={`${baseClass}__link`} href={docPath}>
           {title || EmptySpace}

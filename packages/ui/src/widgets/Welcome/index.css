@@ -1,17 +1,18 @@
 @layer payload-default {
   .welcome-widget {
     overflow-wrap: anywhere;
-    padding-block-start: var(--spacer-2-5);
-    margin-block-end: var(--spacer-2-5);
   }
 
   .welcome-widget__heading {
-    margin: 0;
-    padding-block-start: var(--spacer-1);
     color: var(--color-text);
-    font-size: var(--text-heading-large-font-size);
-    font-weight: var(--text-heading-large-font-weight);
-    line-height: var(--text-heading-large-line-height);
-    letter-spacing: var(--text-heading-large-letter-spacing);
+    font-size: var(--text-heading-xl-font-size);
+    font-weight: var(--text-heading-xl-font-weight);
+    line-height: var(--text-heading-xl-line-height);
+    letter-spacing: var(--text-heading-xl-letter-spacing);
+    height: var(--spacer-5);
+  }
+
+  .widget:first-of-type:has(.welcome-widget) .welcome-widget {
+    padding-block-start: var(--spacer-2);
   }
 }
