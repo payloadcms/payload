@@ -119,6 +119,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     searchWidgets: 'উইজেট অনুসন্ধান করুন...',
     widgetCollectionRequired: 'Collection প্রয়োজনীয়।',
     widgetConfigurationError: 'উইজেট কনফিগারেশন ত্রুটি',
+    widgetDropFilesToUpload: 'একটি ফাইল টেনে এনে ছেড়ে দিন',
     widgetInvalidCollection: 'Collection "{{collection}}" বিদ্যমান নেই।',
     widgetInvalidFilterField:
       'ফিল্টার field "{{field}}" -টি collection "{{collection}}" -এ উপস্থিত নেই।',
@@ -136,6 +137,9 @@ export const bnInTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Field ক্রমবদ্ধ করুন',
     widgetTitleFallback: 'Collection অনুসন্ধান',
     widgetTitleLabel: 'শিরোনাম',
+    widgetUploadDropzoneDescription:
+      'আপনার কম্পিউটার থেকে ড্র্যাগ-এন্ড-ড্রপের মাধ্যমে আপলোড করুন, অথবা নিচের বোতামে ক্লিক করুন।',
+    widgetUploadFiles: 'ফাইলগুলি যোগ করুন',
   },
   error: {
     accountAlreadyActivated: 'এই অ্যাকাউন্ট ইতিমধ্যে সক্রিয় করা হয়েছে।',
@@ -467,6 +471,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     remove: 'অপসারণ করুন',
     rename: 'নাম পরিবর্তন করুন',
     replaceRow: 'সারি প্রতিস্থাপন করুন',
+    requiredFields: '* চিহ্নিত ঘরগুলি পূরণ করা আবশ্যক।',
     reset: 'রিসেট করুন',
     resetPreferences: 'পছন্দগুলি রিসেট করুন',
     resetPreferencesDescription: 'এটি আপনার সমস্ত পছন্দগুলি তাদের ডিফল্ট সেটিংসে রিসেট করবে।',
@@ -483,8 +488,12 @@ export const bnInTranslations: DefaultTranslationsObject = {
     saveChanges: 'পরিবর্তনগুলি সংরক্ষণ করুন',
     saving: 'সংরক্ষণ করা হচ্ছে...',
     schedulePublishFor: '{{title}} এর জন্য প্রকাশ নির্ধারণ করুন',
+    searchAutomatically: 'আপনি টাইপ করার সঙ্গে সঙ্গে ফলাফল স্বয়ংক্রিয়ভাবে আপডেট হয়।',
     searchBy: '{{label}} দ্বারা অনুসন্ধান করুন',
+    searchCleared: 'অনুসন্ধান মুছে ফেলা হয়েছে।',
     searchColumns: 'অনুসন্ধান কলামসমূহ',
+    searchGroups: '“{{search}}” এর গ্রুপ: {{count}}।',
+    searchResults: '“{{search}}” এর ফলাফল: {{count}}।',
     select: 'নির্বাচন করুন',
     selectAll: 'সমস্ত {{count}} {{label}} নির্বাচন করুন',
     selectAllRows: 'সমস্ত সারি নির্বাচন করুন',

@@ -119,6 +119,7 @@ export const plTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Szukaj widgetów...',
     widgetCollectionRequired: 'Collection jest wymagana.',
     widgetConfigurationError: 'Błąd konfiguracji widgetu',
+    widgetDropFilesToUpload: 'Przeciągnij i upuść plik',
     widgetInvalidCollection: 'Kolekcja "{{collection}}" nie istnieje.',
     widgetInvalidFilterField:
       'Pole filtrujące „{{field}}” nie istnieje w kolekcji „{{collection}}”.',
@@ -135,6 +136,9 @@ export const plTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sortuj Pole',
     widgetTitleFallback: 'Zapytanie dotyczące Collection',
     widgetTitleLabel: 'Tytuł',
+    widgetUploadDropzoneDescription:
+      'Prześlij z komputera, przeciągając i upuszczając plik lub kliknij przycisk poniżej',
+    widgetUploadFiles: 'Dodaj pliki',
   },
   error: {
     accountAlreadyActivated: 'To konto zostało już aktywowane.',
@@ -461,6 +465,7 @@ export const plTranslations: DefaultTranslationsObject = {
     remove: 'Usuń',
     rename: 'Zmień nazwę',
     replaceRow: 'Zastąp wiersz',
+    requiredFields: 'Pola oznaczone * są wymagane.',
     reset: 'Zresetuj',
     resetPreferences: 'Zresetuj preferencje',
     resetPreferencesDescription: 'To zresetuje wszystkie Twoje preferencje do ustawień domyślnych.',
@@ -476,8 +481,12 @@ export const plTranslations: DefaultTranslationsObject = {
     saveChanges: 'Zapisz Zmiany',
     saving: 'Zapisywanie...',
     schedulePublishFor: 'Zaplanuj publikację dla {{title}}',
+    searchAutomatically: 'Wyniki aktualizują się automatycznie podczas pisania.',
     searchBy: 'Szukaj według',
+    searchCleared: 'Wyszukiwanie wyczyszczone.',
     searchColumns: 'Przeszukuj kolumny',
+    searchGroups: 'Grupy dla „{{search}}”: {{count}}.',
+    searchResults: 'Wyniki dla „{{search}}”: {{count}}.',
     select: 'Wybierz',
     selectAll: 'Wybierz wszystkie {{count}} {{label}}',
     selectAllRows: 'Wybierz wszystkie wiersze',

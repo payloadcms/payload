@@ -117,6 +117,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Որոնել վիջեթներ...',
     widgetCollectionRequired: 'Collection-ը պարտադիր է։',
     widgetConfigurationError: 'Վիջեթի կազմաձևման սխալ',
+    widgetDropFilesToUpload: 'Քաշեք և գցեք ֆայլը',
     widgetInvalidCollection: 'Collection "{{collection}}" չի գոյություն ունի։',
     widgetInvalidFilterField:
       'Զտիչ դաշտը "{{field}}" գոյություն չունի Collection "{{collection}}"-ում։',
@@ -134,6 +135,9 @@ export const hyTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Դաշտի դասավորում',
     widgetTitleFallback: 'Collection-ի հարցում',
     widgetTitleLabel: 'Վերնագիր',
+    widgetUploadDropzoneDescription:
+      'Վերբեռնեք ձեր համակարգչից քաշել և գցել գործողությամբ կամ սեղմեք ներքևի կոճակը',
+    widgetUploadFiles: 'Ավելացնել ֆայլեր',
   },
   error: {
     accountAlreadyActivated: 'Այս հաշիվն արդեն ակտիվացված է։',
@@ -462,6 +466,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     remove: 'Հեռացնել',
     rename: 'Վերանվանել',
     replaceRow: 'Տողը փոխարինել',
+    requiredFields: '* նշանով դաշտերը պարտադիր են։',
     reset: 'Վերակայել',
     resetPreferences: 'Վերակայել նախընտրությունները',
     resetPreferencesDescription:
@@ -479,8 +484,12 @@ export const hyTranslations: DefaultTranslationsObject = {
     saveChanges: 'Պահպանել փոփոխությունները',
     saving: 'Պահպանվում է...',
     schedulePublishFor: 'Հրապարակման ժամանակ նշանակել {{title}}-ի համար',
+    searchAutomatically: 'Արդյունքները ինքնաբերաբար թարմացվում են մուտքագրելիս։',
     searchBy: 'Որոնել ըստ {{label}}-ի',
+    searchCleared: 'Որոնումը մաքրված է։',
     searchColumns: 'Որոնել սյունակներ',
+    searchGroups: '«{{search}}» որոնման խմբերը՝ {{count}}։',
+    searchResults: '«{{search}}» որոնման արդյունքները՝ {{count}}։',
     select: 'Ընտրել',
     selectAll: 'Ընտրել բոլոր {{count}} {{label}}',
     selectAllRows: 'Ընտրել բոլոր տողերը',

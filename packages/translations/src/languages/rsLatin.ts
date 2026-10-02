@@ -119,6 +119,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Pretraži dodatke...',
     widgetCollectionRequired: 'Kolekcija je obavezna.',
     widgetConfigurationError: 'Greška u konfiguraciji vidžeta',
+    widgetDropFilesToUpload: 'Prevucite i ispustite datoteku',
     widgetInvalidCollection: 'Kolekcija "{{collection}}" ne postoji.',
     widgetInvalidFilterField:
       'Polje za filtriranje "{{field}}" ne postoji u kolekciji "{{collection}}".',
@@ -135,6 +136,9 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sortiraj Field',
     widgetTitleFallback: 'Upit kolekcije',
     widgetTitleLabel: 'Naslov',
+    widgetUploadDropzoneDescription:
+      'Otpremite sa svog računara prevlačenjem i ispuštanjem ili kliknite na dugme ispod',
+    widgetUploadFiles: 'Dodaj Datoteke',
   },
   error: {
     accountAlreadyActivated: 'Ovaj nalog je već aktiviran.',
@@ -461,6 +465,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     remove: 'Ukloni',
     rename: 'Preimenuj',
     replaceRow: 'Zameni red',
+    requiredFields: 'Polja označena sa * su obavezna.',
     reset: 'Ponovo postavi',
     resetPreferences: 'Poništi podešavanja',
     resetPreferencesDescription:
@@ -477,8 +482,12 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     saveChanges: 'Sačuvaj Promene',
     saving: 'Čuvanje u toku...',
     schedulePublishFor: 'Zakaži objavljivanje za {{title}}',
+    searchAutomatically: 'Rezultati se automatski ažuriraju dok kucate.',
     searchBy: 'Traži po {{label}}',
+    searchCleared: 'Pretraga je obrisana.',
     searchColumns: 'Pretraži kolone',
+    searchGroups: 'Grupe za „{{search}}”: {{count}}.',
+    searchResults: 'Rezultati za „{{search}}”: {{count}}.',
     select: 'Izaberite',
     selectAll: 'Odaberite sve {{count}} {{label}}',
     selectAllRows: 'Odaberite sve redove',

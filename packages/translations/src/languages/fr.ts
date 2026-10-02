@@ -120,6 +120,7 @@ export const frTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Rechercher des widgets...',
     widgetCollectionRequired: 'La Collection est requise.',
     widgetConfigurationError: 'Erreur de configuration du widget',
+    widgetDropFilesToUpload: 'Glisser-déposer un fichier',
     widgetInvalidCollection: 'La Collection « {{collection}} » n’existe pas.',
     widgetInvalidFilterField:
       'Le champ de filtrage « {{field}} » n’existe pas dans la Collection « {{collection}} ».',
@@ -137,6 +138,9 @@ export const frTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Champ de tri',
     widgetTitleFallback: 'Requête de Collection',
     widgetTitleLabel: 'Titre',
+    widgetUploadDropzoneDescription:
+      'Téléversez depuis votre ordinateur par glisser-déposer, ou cliquez sur le bouton ci-dessous',
+    widgetUploadFiles: 'Ajouter des fichiers',
   },
   error: {
     accountAlreadyActivated: 'Ce compte a déjà été activé.',
@@ -472,6 +476,7 @@ export const frTranslations: DefaultTranslationsObject = {
     remove: 'Retirer',
     rename: 'Renommer',
     replaceRow: 'Remplacer la ligne',
+    requiredFields: 'Les champs marqués d’un * sont obligatoires.',
     reset: 'Réinitialiser',
     resetPreferences: 'Réinitialiser les préférences',
     resetPreferencesDescription:
@@ -488,8 +493,12 @@ export const frTranslations: DefaultTranslationsObject = {
     saveChanges: 'Enregistrer les modifications',
     saving: 'Sauvegarde en cours...',
     schedulePublishFor: 'Programmer la publication pour {{titre}}',
+    searchAutomatically: 'Les résultats se mettent à jour automatiquement pendant la saisie.',
     searchBy: 'Rechercher par {{label}}',
+    searchCleared: 'Recherche effacée.',
     searchColumns: 'Colonnes de recherche',
+    searchGroups: 'Groupes pour « {{search}} » : {{count}}.',
+    searchResults: 'Résultats pour « {{search}} » : {{count}}.',
     select: 'Sélectionner',
     selectAll: 'Tout sélectionner {{count}} {{label}}',
     selectAllRows: 'Sélectionnez toutes les lignes',

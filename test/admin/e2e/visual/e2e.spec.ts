@@ -5,6 +5,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { expectScreenshot } from '../../../__helpers/e2e/expectScreenshot.js'
+import { closeNav } from '../../../__helpers/e2e/toggleNav.js'
 import { visual } from '../../../__helpers/e2e/visual.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -32,6 +33,7 @@ test.describe('Visual', () => {
 
   visual('renders the posts list view', async () => {
     await page.goto(url.list)
+    await closeNav(page)
 
     const textCell = page.locator('.row-1 .cell-title')
     await expect(textCell).toBeVisible()

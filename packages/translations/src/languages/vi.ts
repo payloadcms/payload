@@ -119,6 +119,7 @@ export const viTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Tìm kiếm các widget...',
     widgetCollectionRequired: 'Collection là bắt buộc.',
     widgetConfigurationError: 'Lỗi cấu hình Widget',
+    widgetDropFilesToUpload: 'Kéo và thả một tập tin',
     widgetInvalidCollection: 'Collection "{{collection}}" không tồn tại.',
     widgetInvalidFilterField:
       'Trường lọc "{{field}}" không tồn tại trong Collection "{{collection}}".',
@@ -136,6 +137,9 @@ export const viTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sắp xếp Field',
     widgetTitleFallback: 'Truy vấn Collection',
     widgetTitleLabel: 'Tiêu đề',
+    widgetUploadDropzoneDescription:
+      'Tải lên từ máy tính của bạn bằng cách kéo và thả, hoặc nhấp vào nút bên dưới',
+    widgetUploadFiles: 'Thêm tệp',
   },
   error: {
     accountAlreadyActivated: 'Lỗi - Tài khoản này đã được kích hoạt.',
@@ -463,6 +467,7 @@ export const viTranslations: DefaultTranslationsObject = {
     remove: 'Xóa',
     rename: 'Đổi tên',
     replaceRow: 'Thay thế hàng',
+    requiredFields: 'Các trường được đánh dấu * là bắt buộc.',
     reset: 'Đặt lại',
     resetPreferences: 'Đặt lại tuỳ chỉnh cá nhân',
     resetPreferencesDescription: 'Điều này sẽ đặt lại tất cả các tuỳ chỉnh của bạn về mặc định.',
@@ -478,8 +483,12 @@ export const viTranslations: DefaultTranslationsObject = {
     saveChanges: 'Lưu Thay Đổi',
     saving: 'Đang lưu...',
     schedulePublishFor: 'Lên lịch xuất bản cho {{title}}',
+    searchAutomatically: 'Kết quả tự động cập nhật khi bạn nhập.',
     searchBy: 'Tìm với {{label}}',
+    searchCleared: 'Đã xóa tìm kiếm.',
     searchColumns: 'Tìm kiếm các cột',
+    searchGroups: 'Nhóm cho “{{search}}”: {{count}}.',
+    searchResults: 'Kết quả cho “{{search}}”: {{count}}.',
     select: 'Chọn',
     selectAll: 'Chọn tất cả {{count}} {{label}}',
     selectAllRows: 'Chọn tất cả các hàng',

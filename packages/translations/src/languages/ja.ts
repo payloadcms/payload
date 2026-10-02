@@ -119,6 +119,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     searchWidgets: 'ウィジェットを検索...',
     widgetCollectionRequired: 'Collectionは必須です。',
     widgetConfigurationError: 'ウィジェット設定エラー',
+    widgetDropFilesToUpload: 'ファイルをドラッグ & ドロップする',
     widgetInvalidCollection: 'Collection「{{collection}}」は存在しません。',
     widgetInvalidFilterField:
       'コレクション「{{collection}}」にフィルターField「{{field}}」は存在しません。',
@@ -136,6 +137,9 @@ export const jaTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'ソートフィールド',
     widgetTitleFallback: 'コレクションクエリ',
     widgetTitleLabel: 'タイトル',
+    widgetUploadDropzoneDescription:
+      'ドラッグアンドドロップでコンピューターからアップロードするか、下のボタンをクリックしてください。',
+    widgetUploadFiles: 'ファイルを追加する',
   },
   error: {
     accountAlreadyActivated: 'このアカウントはすでに有効です。',
@@ -463,6 +467,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     remove: '削除',
     rename: '名前を変更する',
     replaceRow: '行を置換',
+    requiredFields: '* が付いた項目は必須です。',
     reset: 'リセット',
     resetPreferences: '設定をリセット',
     resetPreferencesDescription: 'これにより、すべての設定がデフォルト設定にリセットされます。',
@@ -478,8 +483,12 @@ export const jaTranslations: DefaultTranslationsObject = {
     saveChanges: '変更を保存する',
     saving: '保存しています...',
     schedulePublishFor: '{{title}}の公開を予定する',
+    searchAutomatically: '入力に応じて検索結果が自動的に更新されます。',
     searchBy: '{{label}} で検索',
+    searchCleared: '検索をクリアしました。',
     searchColumns: '検索列',
+    searchGroups: '「{{search}}」のグループ：{{count}}件。',
+    searchResults: '「{{search}}」の検索結果：{{count}}件。',
     select: '選択してください。',
     selectAll: 'すべての{{count}}つの{{label}}を選択',
     selectAllRows: 'すべての行を選択します',

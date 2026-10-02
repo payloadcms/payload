@@ -117,6 +117,7 @@ export const etTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Otsi vidinaid...',
     widgetCollectionRequired: 'Kogu on nõutav.',
     widgetConfigurationError: 'Vidina konfiguratsiooni viga',
+    widgetDropFilesToUpload: 'Lohista ja aseta fail',
     widgetInvalidCollection: 'Kogumikku "{{collection}}" ei eksisteeri.',
     widgetInvalidFilterField: 'Filtri väli "{{field}}" ei eksisteeri kogumikus "{{collection}}".',
     widgetInvalidSortField:
@@ -133,6 +134,9 @@ export const etTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sorteeri väli',
     widgetTitleFallback: 'Kogumi päring',
     widgetTitleLabel: 'Pealkiri',
+    widgetUploadDropzoneDescription:
+      'Laad üles oma arvutist, lohistades faili siia või klõpsates allolevat nuppu.',
+    widgetUploadFiles: 'Lisa failid',
   },
   error: {
     accountAlreadyActivated: 'See konto on juba aktiveeritud.',
@@ -458,6 +462,7 @@ export const etTranslations: DefaultTranslationsObject = {
     remove: 'Eemalda',
     rename: 'Nimeta ümber',
     replaceRow: 'Asenda rida',
+    requiredFields: 'Tärniga * tähistatud väljad on kohustuslikud.',
     reset: 'Lähtesta',
     resetPreferences: 'Lähtesta eelistused',
     resetPreferencesDescription: 'See lähtestab kõik teie eelistused vaikeväärtustele.',
@@ -473,8 +478,12 @@ export const etTranslations: DefaultTranslationsObject = {
     saveChanges: 'Salvesta muudatused',
     saving: 'Salvestamine...',
     schedulePublishFor: 'Planeeri avaldamine {{title}} jaoks',
+    searchAutomatically: 'Tulemusi värskendatakse tippimise ajal automaatselt.',
     searchBy: 'Otsi {{label}} järgi',
+    searchCleared: 'Otsing tühjendatud.',
     searchColumns: 'Otsingutulbad',
+    searchGroups: 'Otsingu „{{search}}” rühmad: {{count}}.',
+    searchResults: 'Otsingu „{{search}}” tulemused: {{count}}.',
     select: 'Vali',
     selectAll: 'Vali kõik {{count}} {{label}}',
     selectAllRows: 'Vali kõik read',

@@ -120,6 +120,7 @@ export const trTranslations: DefaultTranslationsObject = {
     searchWidgets: "Arama widget'ları...",
     widgetCollectionRequired: 'Collection gereklidir.',
     widgetConfigurationError: 'Widget yapılandırma hatası',
+    widgetDropFilesToUpload: 'Bir dosya sürükleyip bırakabilirsiniz',
     widgetInvalidCollection: 'Collection "{{collection}}" mevcut değil.',
     widgetInvalidFilterField:
       'Filtre alanı "{{field}}", "{{collection}}" koleksiyonunda mevcut değil.',
@@ -137,6 +138,9 @@ export const trTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Field Sıralama',
     widgetTitleFallback: 'Collection sorgusu',
     widgetTitleLabel: 'Başlık',
+    widgetUploadDropzoneDescription:
+      'Bilgisayarınızdan sürükleyip bırakarak yükleyin veya aşağıdaki butona tıklayın.',
+    widgetUploadFiles: 'Dosya Ekle',
   },
   error: {
     accountAlreadyActivated: 'Hesap zaten etkinleştirildi.',
@@ -466,6 +470,7 @@ export const trTranslations: DefaultTranslationsObject = {
     remove: 'Kaldır',
     rename: 'Yeniden adlandır',
     replaceRow: 'Satırı Değiştir',
+    requiredFields: '* ile işaretlenmiş alanlar zorunludur.',
     reset: 'Sıfırla',
     resetPreferences: 'Tercihleri sıfırla',
     resetPreferencesDescription:
@@ -483,8 +488,12 @@ export const trTranslations: DefaultTranslationsObject = {
     saveChanges: 'Değişiklikleri Kaydet',
     saving: 'Kaydediliyor...',
     schedulePublishFor: '{{title}} için yayınlama programı ayarlayın.',
+    searchAutomatically: 'Siz yazdıkça sonuçlar otomatik olarak güncellenir.',
     searchBy: 'Şuna göre sırala: {{label}}',
+    searchCleared: 'Arama temizlendi.',
     searchColumns: 'Arama sütunları',
+    searchGroups: '“{{search}}” için gruplar: {{count}}.',
+    searchResults: '“{{search}}” için sonuçlar: {{count}}.',
     select: 'Seçiniz',
     selectAll: "Tüm {{count}} {{label}}'ı seçin",
     selectAllRows: 'Tüm satırları seçin',
