@@ -65,43 +65,53 @@ describe('addCollectionAccess', () => {
     await expect(config.baseAccess?.collections?.create?.(createArgs())).resolves.toBe(true)
   })
 
-  it('falls back to base update access for validate when validate access is not configured', async () => {
-    const baseUpdate = vi.fn(() => false)
+  it('uses explicit base validate access and otherwise falls back to update access', async () => {
     const collection: CollectionConfig = { slug: 'posts', fields: [] }
-    const config = {
+    let fallbackUpdateCalls = 0
+    const fallbackConfig = {
       baseAccess: {
         collections: {
-          update: baseUpdate,
+          update: () => {
+            fallbackUpdateCalls += 1
+            return false
+          },
         },
       },
     } as Config
 
-    addCollectionAccess({ config, scopes: [createScope(collection)] })
+    addCollectionAccess({ config: fallbackConfig, scopes: [createScope(collection)] })
 
-    await expect(config.baseAccess?.collections?.validate?.(createArgs())).resolves.toBe(false)
-    expect(baseUpdate).toHaveBeenCalledOnce()
-  })
+    await expect(fallbackConfig.baseAccess?.collections?.validate?.(createArgs())).resolves.toBe(
+      false,
+    )
+    expect(fallbackUpdateCalls).toBe(1)
 
-  it('prefers explicit base validate access over base update access', async () => {
-    const baseUpdate = vi.fn(() => false)
-    const baseValidate = vi.fn(() => true)
-    const collection: CollectionConfig = { slug: 'posts', fields: [] }
-    const config = {
+    let explicitUpdateCalls = 0
+    let explicitValidateCalls = 0
+    const explicitConfig = {
       baseAccess: {
         collections: {
-          update: baseUpdate,
-          validate: baseValidate,
+          update: () => {
+            explicitUpdateCalls += 1
+            return false
+          },
+          validate: () => {
+            explicitValidateCalls += 1
+            return true
+          },
         },
       },
     } as Config
 
-    addCollectionAccess({ config, scopes: [createScope(collection)] })
+    addCollectionAccess({ config: explicitConfig, scopes: [createScope(collection)] })
 
-    await expect(config.baseAccess?.collections?.validate?.(createArgs())).resolves.toEqual({
-      tenant: { in: ['tenant-1'] },
-    })
-    expect(baseValidate).toHaveBeenCalledOnce()
-    expect(baseUpdate).not.toHaveBeenCalled()
+    await expect(explicitConfig.baseAccess?.collections?.validate?.(createArgs())).resolves.toEqual(
+      {
+        tenant: { in: ['tenant-1'] },
+      },
+    )
+    expect(explicitUpdateCalls).toBe(0)
+    expect(explicitValidateCalls).toBe(1)
   })
 
   it('keeps callback wrapping when an access result override is configured', async () => {
