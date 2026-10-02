@@ -1,0 +1,18 @@
+@layer payload-default {
+  .welcome-widget {
+    overflow-wrap: anywhere;
+    padding-block-start: var(--spacer-2-5);
+    margin-block-end: var(--spacer-2-5);
+  }
+
+  .welcome-widget__heading {
+    margin: 0;
+    padding-block-start: var(--spacer-1);
+    color: var(--color-text);
+    font-family: var(--text-heading-large-font-family);
+    font-size: var(--text-heading-large-font-size);
+    font-weight: var(--text-heading-large-font-weight);
+    line-height: var(--text-heading-large-line-height);
+    letter-spacing: var(--text-heading-large-letter-spacing);
+  }
+}
