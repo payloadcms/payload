@@ -1,13 +1,12 @@
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
-import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import path from 'path'
 import { getFileByPath } from 'payload'
-import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
+import { mediaSharpTransformer } from '../__helpers/shared/mediaSharpTransformer.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { MediaCollection, mediaSharpOptions, mediaSlug } from './collections/Media/index.js'
+import { MediaCollection, mediaSlug } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
 
@@ -29,7 +28,7 @@ export default buildConfigWithDefaults({
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
     upload: {
-      transformers: [sharpTransformer({ collections: { [mediaSlug]: mediaSharpOptions }, sharp })],
+      transformers: [mediaSharpTransformer({ mediaSlug })],
     },
   },
   seed: async (payload) => {

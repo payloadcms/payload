@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+import { storageMediaSharpOptions } from '../__helpers/shared/storageMediaSharpOptions.js'
 import { proveSourceHashTransformer } from '../__helpers/shared/transformSourceTests.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -109,17 +110,7 @@ export default buildConfigWithDefaults({
         proveSourceHashTransformer,
         sharpTransformer({
           collections: {
-            [mediaSlug]: {
-              resizeOptions: {
-                position: 'center',
-                width: 200,
-                height: 200,
-              },
-              variants: [
-                { height: 400, width: 400, crop: 'center', name: 'square' },
-                { width: 900, height: 450, crop: 'center', name: 'sixteenByNineMedium' },
-              ],
-            },
+            [mediaSlug]: storageMediaSharpOptions,
             [mediaWithDirectAccessSlug]: {
               variants: [{ name: 'thumbnail', width: 400, height: 300, crop: 'center' }],
             },
