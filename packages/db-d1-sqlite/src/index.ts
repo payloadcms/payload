@@ -51,7 +51,7 @@ import {
   insert,
   requireDrizzleKit,
 } from '@payloadcms/drizzle/sqlite'
-import { like, notLike } from 'drizzle-orm'
+import { notLike, sql } from 'drizzle-orm'
 import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
 import { fileURLToPath } from 'url'
 
@@ -77,11 +77,16 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
       rejectInitializing = rej
     })
 
+    // Search values arrive with `%`, `_` and `\` escaped by `\`. SQLite has no default LIKE escape
+    // character, so the clause has to name it.
+    const likeWithEscape = (column: unknown, value: unknown) =>
+      sql`${column} like ${value} escape '\\'`
+
     // sqlite's like operator is case-insensitive, so we overwrite the DrizzleAdapter operators to not use ilike
     const operators = {
       ...operatorMap,
-      contains: like,
-      like,
+      contains: likeWithEscape,
+      like: likeWithEscape,
       not_like: notLike,
     } as unknown as Operators
 

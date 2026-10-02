@@ -295,6 +295,15 @@ describe('buildPolymorphicJoinWhere', () => {
     expect(query.params).toEqual(['%available%', '%child%'])
   })
 
+  it('escapes LIKE wildcards in a scalar like comparison', () => {
+    const query = renderWhere({
+      where: { title: { like: '50% a_b a\\b' } },
+      wherePlan: scalarPlan({ columnPath: 'title' }),
+    })
+
+    expect(query.params).toEqual(['%50\\%%', '%a\\_b%', '%a\\\\b%'])
+  })
+
   it('applies configured operator handlers to scalar comparisons', () => {
     const transformOperands = vi.fn(({ column, value }) => ({
       column,
