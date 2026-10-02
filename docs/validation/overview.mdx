@@ -174,19 +174,7 @@ The collection create endpoint requires an object body. The collection by-ID and
 allow the body to be omitted. Those endpoints use the newest available draft as their base,
 falling back to the main document when no draft exists.
 
-The body is always candidate document data. Authentication, access context, and other operation
-controls come from the HTTP request, not body properties.
-
-| Outcome                                    | Status |
-| ------------------------------------------ | ------ |
-| Valid or invalid field data                | `200`  |
-| Missing, unknown, or unavailable locale    | `400`  |
-| Missing or malformed required request data | `400`  |
-| Validation access denied                   | `403`  |
-| Collection document not found              | `404`  |
-
-Other errors use Payload's normal REST error handling. REST validation always enforces access
-control.
+REST validation always enforces access control.
 
 ## GraphQL API
 
@@ -219,15 +207,8 @@ uses the locales returned by `localization.filterAvailableLocales`, when configu
 localized validation passes are tagged with the locale that failed; non-localized validation may
 omit `locale`.
 
-A public multi-locale Local or REST call has one `data` payload. Payload independently merges that
-same candidate into every selected locale, then aggregates the results. If a custom interface has
-unsaved localized values for only its active locale, do not send those values as a flat
-multi-locale candidate.
-
-Publish-all operations do not automatically run on-demand validation for every locale. When an
-application needs this check before publishing, call the Local or REST validation API with
-`locale: 'all'` first. Automatic validation of every locale during publish-all will be added in a
-follow-up change.
+When validating multiple locales, Payload validates the same `data` against each selected locale
+and combines the results.
 
 Fallback locale values are disabled during on-demand validation. Missing data must pass validation
 in the locale being checked.
@@ -272,23 +253,11 @@ Collection, global, and field access functions receive `req.operation === 'valid
 validators and `beforeValidate` and `beforeChange` hooks receive `operation: 'validate'`. Payload
 does not report the operation as `create` or `update`.
 
-When `validate` access returns a `where` constraint, validation throws `Forbidden` if the stored
-document does not match it. Collection create validation requires boolean access because there is no
-stored document to test against the constraint.
+`where` access constraints apply when validating stored documents. Collection create validation
+requires boolean access because there is no stored document to evaluate against a constraint.
 
-A collection create-candidate validation has no stored document against which Payload can evaluate
-a `where` constraint. Its `validate` access must therefore return a boolean. Payload throws
-`Forbidden` if it returns a `where` constraint for a validation call without an `id`.
-
-For draft-enabled globals, Payload identifies the newest draft before it applies a `where` access
-constraint. If that exact draft does not satisfy the constraint, validation throws `Forbidden`
-instead of selecting an older draft that does satisfy it. Payload uses the main global only when no
-draft is available.
-
-The validation lifecycle itself does not persist the candidate. Payload also rejects document,
-global, upload, and version writes that reuse the active validation request. Hooks still run,
-however, and can cause side effects through other Payload APIs, an external service, a raw database
-client, or a separate Payload request. Branch side-effecting hooks when needed:
+Validation does not persist the candidate, but hooks can still cause side effects through Payload
+APIs or external services. Check the operation before running side-effecting hooks:
 
 ```ts
 import type { CollectionBeforeChangeHook } from 'payload'
@@ -305,10 +274,3 @@ const beforeChange: CollectionBeforeChangeHook = async ({
   return data
 }
 ```
-
-## Current scope
-
-On-demand validation is available through the Local, REST, and GraphQL APIs. GraphQL only
-validates one locale per call; multi-locale and `'all'` validation are Local and REST API only. It
-does not add a standalone "validate all locales" Admin UI action, bulk Admin validation, or
-fallback-locale validation.
