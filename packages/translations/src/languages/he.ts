@@ -483,6 +483,7 @@ export const heTranslations: DefaultTranslationsObject = {
     showAllLabel: 'הצג את כל ה{{label}}',
     shownInTable: 'מוצג בטבלה',
     showSidebar: 'הצג סרגל צד',
+    skipToContent: 'דילוג לתוכן',
     sorryNotFound: 'מצטערים - אין תוצאות התואמות את הבקשה.',
     sort: 'מיין',
     sortByLabelDirection: 'מיין לפי {{label}} {{direction}}',
@@ -543,6 +544,7 @@ export const heTranslations: DefaultTranslationsObject = {
     noParent: 'אין הורה',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'חפש {{label}}',
+    searchResults: 'נמצאו {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'לא ניתן להעתיק לאותו מקום',

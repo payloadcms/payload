@@ -495,6 +495,7 @@ export const isTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Sýna allar {{label}}',
     shownInTable: 'Sýnt í töflu',
     showSidebar: 'Sýna hliðarstiku',
+    skipToContent: 'Fara beint í efni',
     sorryNotFound: 'Því miður, það er ekkert sem samsvarar beiðninni þinni.',
     sort: 'Raða',
     sortByLabelDirection: 'Raða eftir {{label}} {{direction}}',
@@ -558,6 +559,7 @@ export const isTranslations: DefaultTranslationsObject = {
     noParent: 'Engin foreldri',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Leita {{label}}',
+    searchResults: 'Fann {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Ekki hægt að afrita í sömu staðfærslu',
