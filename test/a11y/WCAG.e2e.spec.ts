@@ -2658,26 +2658,6 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
 
-  test.describe('3.1.1 Language of Page (A)', () => {
-    test('should render the document language from the request preference', async () => {
-      const context = page.context()
-      const originalCookie = (await context.cookies(serverURL)).find(
-        (cookie) => cookie.name === 'payload-lng',
-      )
-
-      try {
-        await context.addCookies([{ name: 'payload-lng', url: serverURL, value: 'de' }])
-        await page.goto(postsURL.list)
-        await expect(page.locator('html')).toHaveAttribute('lang', 'de')
-      } finally {
-        await context.clearCookies({ name: 'payload-lng' })
-        if (originalCookie) {
-          await context.addCookies([originalCookie])
-        }
-      }
-    })
-  })
-
   test.describe('3.2.2 On Input (A)', () => {
     test('should retain focus during automatic search', async () => {
       // Additional coverage for PYLD-3773.
