@@ -228,6 +228,7 @@ export const getVersions = async ({
           locale,
           overrideAccess: true,
           select: {
+            _status: true,
             updatedAt: true,
           },
           user,
