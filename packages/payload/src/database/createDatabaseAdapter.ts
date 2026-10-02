@@ -7,6 +7,7 @@ import type {
   RollbackTransaction,
 } from './types.js'
 
+import { defaultBatchProcessing } from './defaultBatchProcessing.js'
 import { defaultCopy } from './defaultCopy.js'
 import { createMigration } from './migrations/createMigration.js'
 import { migrate } from './migrations/migrate.js'
@@ -25,6 +26,7 @@ export function createDatabaseAdapter<T extends BaseDatabaseAdapter>(
   args: MarkOptional<
     T,
     | 'allowIDOnCreate'
+    | 'batchProcessing'
     | 'bulkOperationsSingleTransaction'
     | 'copy'
     | 'createMigration'
@@ -38,6 +40,7 @@ export function createDatabaseAdapter<T extends BaseDatabaseAdapter>(
   >,
 ): T {
   return {
+    batchProcessing: defaultBatchProcessing,
     // Default 'null' transaction functions
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     beginTransaction,

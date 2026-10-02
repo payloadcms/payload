@@ -17,6 +17,10 @@ export type { TypeWithVersion }
 export interface BaseDatabaseAdapter {
   allowIDOnCreate?: boolean
   /**
+   * Process ordered create, update, and delete operations in bounded batches.
+   */
+  batchProcessing: BatchProcessing
+  /**
    * Start a transaction, requiring commitTransaction() to be called for any changes to be made.
    * @returns an identifier for the transaction or null if one cannot be established
    */
@@ -185,6 +189,55 @@ type ConnectArgs = {
 export type Connect = (args?: ConnectArgs) => Promise<void>
 
 export type Destroy = () => Promise<void>
+
+export type BatchProcessingOperation =
+  | {
+      args: WithoutRequest<CreateArgs>
+      operation: 'create'
+    }
+  | {
+      args: WithoutRequest<DeleteOneArgs>
+      operation: 'deleteOne'
+    }
+  | {
+      args: WithoutRequest<UpdateOneArgs>
+      operation: 'updateOne'
+    }
+
+type WithoutRequest<T> = T extends unknown ? Omit<T, 'req'> : never
+
+export type BatchProcessingResult = {
+  index: number
+  operation: BatchProcessingOperation['operation']
+} & (
+  | {
+      document?: Document
+      documentID: number | string
+      status: 'succeeded'
+    }
+  | {
+      error: unknown
+      status: 'failed'
+    }
+  | {
+      status: 'noMatch'
+    }
+  | {
+      status: 'unattempted'
+    }
+)
+
+export type BatchProcessingArgs = {
+  batchSize?: number
+  operations: BatchProcessingOperation[]
+  req?: Partial<PayloadRequest>
+  shouldContinueOnError?: boolean
+}
+
+export type BatchProcessing = (
+  this: BaseDatabaseAdapter,
+  args: BatchProcessingArgs,
+) => Promise<BatchProcessingResult[]>
 
 export type CopyArgs = {
   collection: CollectionSlug
