@@ -1,6 +1,7 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type { FindOptions } from '../../collections/operations/local/find.js'
+import type { Args as BeforeChangeArgs } from '../../fields/hooks/beforeChange/index.js'
 import type { GlobalSlug, JsonObject } from '../../index.js'
 import type {
   PayloadRequest,
@@ -351,10 +352,10 @@ export const updateOperation = async <
       docWithLocales: globalJSON,
       fieldsToValidate: submittedTopLevelFieldNames,
       global: globalConfig,
-      operation: 'update' as const,
+      operation: 'update',
       req,
       skipValidation: isSavingDraft && !hasDraftValidationEnabled(globalConfig),
-    }
+    } satisfies BeforeChangeArgs<JsonObject>
 
     let statusFieldValue: unknown
 
