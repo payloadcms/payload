@@ -1,12 +1,12 @@
 import { describe, expect, test } from 'vitest'
 
-import { processInBatches } from './processInBatches.js'
+import { batchProcessing } from './batchProcessing.js'
 
-describe('processInBatches', () => {
+describe('batchProcessing', () => {
   test('should process an empty input without calling the processor', async () => {
     let processedBatchCount = 0
 
-    await processInBatches({
+    await batchProcessing({
       input: [],
       processBatch: () => {
         processedBatchCount += 1
@@ -19,7 +19,7 @@ describe('processInBatches', () => {
   test('should process batches of 100 by default and include the final partial batch', async () => {
     const processedBatches: number[][] = []
 
-    await processInBatches({
+    await batchProcessing({
       input: Array.from({ length: 205 }, (_, index) => index),
       processBatch: ({ batch }) => {
         processedBatches.push(batch)
@@ -43,7 +43,7 @@ describe('processInBatches', () => {
       }
     }
 
-    await processInBatches({
+    await batchProcessing({
       batchSize: 2,
       input: input(),
       processBatch: async ({ batch, batchIndex }) => {
@@ -72,7 +72,7 @@ describe('processInBatches', () => {
     'should reject the invalid batch size %s',
     async (batchSize) => {
       await expect(
-        processInBatches({
+        batchProcessing({
           batchSize,
           input: [1],
           processBatch: () => undefined,
@@ -93,7 +93,7 @@ describe('processInBatches', () => {
     }
 
     await expect(
-      processInBatches({
+      batchProcessing({
         batchSize: 2,
         input: input(),
         processBatch: ({ batch, batchIndex }) => {
@@ -124,7 +124,7 @@ describe('processInBatches', () => {
       }
     }
 
-    await processInBatches({
+    await batchProcessing({
       batchSize: 2,
       input: input(),
       processBatch: ({ batch, batchIndex }) => {
@@ -151,7 +151,7 @@ describe('processInBatches', () => {
     }
 
     await expect(
-      processInBatches({
+      batchProcessing({
         batchSize: 3,
         input: input(),
         processBatch: ({ batch }) => {
