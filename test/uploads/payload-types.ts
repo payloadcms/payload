@@ -1508,6 +1508,14 @@ export interface AnimatedTypeMedia {
       filesize?: number | null;
       filename?: string | null;
     };
+    focalCrop?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
   };
 }
 /**
@@ -4120,6 +4128,16 @@ export interface AnimatedTypeMediaSelect<T extends boolean = true> {
               filename?: T;
             };
         undefinedAll?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        focalCrop?:
           | T
           | {
               url?: T;

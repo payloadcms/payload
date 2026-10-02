@@ -1235,7 +1235,8 @@ describe('Uploads', () => {
       auth: true,
     })
 
-    const acceptableFileSizes = [9431, 9435]
+    // EXIF plus the compact sRGB ICC profile embedded by sharp >= 0.33 (libvips 8.15+)
+    const acceptableFileSizes = [2989]
 
     await expect
       .poll(() => acceptableFileSizes.includes(mediaDoc.sizes.sizeOne.filesize))
@@ -1277,7 +1278,7 @@ describe('Uploads', () => {
       auth: true,
     })
 
-    const acceptableFileSizesForJPEG = [9554, 9575]
+    const acceptableFileSizesForJPEG = [3112]
 
     // without metadata appended, the jpeg image filesize would be 2424
     await expect

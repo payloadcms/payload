@@ -5,6 +5,7 @@ import { BlobServiceClient, BlockBlobClient } from '@azure/storage-blob'
 import { readFileSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import path from 'path'
+import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 import { expect, vi } from 'vitest'
 
@@ -154,6 +155,55 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
     } finally {
       collection.access.read = originalRead
       findSpy.mockRestore()
+    }
+  })
+
+  test('should serve and transform only the access-checked document when another prefix has the same filename', async ({
+    payload,
+    restClient,
+  }) => {
+    const sharedFilename = 'shared.png'
+    const seeded = await Promise.all(
+      [
+        { fixture: 'image.png', prefix: 'tenant-a', resizedHeight: 32 },
+        { fixture: 'small.png', prefix: 'tenant-b', resizedHeight: 8 },
+      ].map(async ({ fixture, prefix, resizedHeight }) => {
+        const file = await readFile(path.resolve(dirname, `../../uploads/${fixture}`))
+
+        await containerClient.getBlockBlobClient(`${prefix}/${sharedFilename}`).uploadData(file, {
+          blobHTTPHeaders: { blobContentType: 'image/png' },
+        })
+
+        const doc = await payload.db.create({
+          collection: mediaWithDocPrefixSlug,
+          data: { filename: sharedFilename, filesize: file.length, mimeType: 'image/png', prefix },
+        })
+
+        return { doc, file, resizedHeight }
+      }),
+    )
+    const collection = payload.collections[mediaWithDocPrefixSlug].config
+    const originalRead = collection.access.read
+
+    try {
+      // The unfiltered filename lookup can only match one of the two documents, so allowing
+      // each in turn makes one iteration hit a lookup that matched the unreadable document.
+      for (const { doc, file, resizedHeight } of seeded) {
+        collection.access.read = () => ({ id: { equals: doc.id } })
+
+        const original = await restClient.GET(`/${mediaWithDocPrefixSlug}/file/${sharedFilename}`)
+
+        expect(Buffer.from(await original.arrayBuffer())).toEqual(file)
+
+        const resized = await restClient.GET(
+          `/${mediaWithDocPrefixSlug}/file/${sharedFilename}?width=32`,
+        )
+        const metadata = await sharp(Buffer.from(await resized.arrayBuffer())).metadata()
+
+        expect(metadata.height).toBe(resizedHeight)
+      }
+    } finally {
+      collection.access.read = originalRead
     }
   })
 
@@ -332,7 +382,8 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
    *
    * The same collection also covers the `'none'` content requirement: content requirement
    * depends on the uploaded MIME type as well as collection configuration, so `audio/mpeg`
-   * selects `'none'` while `image/jpeg` selects `'header'`.
+   * selects `'none'` (its only transformer declines it) while `image/jpeg` selects `'header'`
+   * and `text/plain`, which a transformer handles, needs the whole file.
    */
   test.describe('header-only and no-content requirements (real Azure handler)', () => {
     const createdIds: (number | string)[] = []
@@ -376,6 +427,37 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
         getPropertiesSpy.mockRestore()
         downloadSpy.mockRestore()
       }
+    })
+
+    test('fetches the whole client-uploaded file for a transformer that handles its type', async ({
+      restClient,
+    }) => {
+      const form = await stageAzureClientUpload({
+        collectionSlug: mediaHeaderOnlySlug,
+        file: Buffer.from('client text'),
+        filename: 'note.txt',
+        mimeType: 'text/plain',
+        restClient,
+      })
+
+      const downloadSpy = vi.spyOn(BlockBlobClient.prototype, 'download')
+
+      try {
+        const createRes = await restClient.POST(`/${mediaHeaderOnlySlug}`, { body: form })
+        expect(createRes.status).toBe(201)
+
+        const { doc } = await createRes.json()
+        createdIds.push(doc.id)
+
+        expect(downloadSpy).toHaveBeenCalledTimes(1)
+        expect(downloadSpy.mock.calls[0]![1]).toBeUndefined()
+      } finally {
+        downloadSpy.mockRestore()
+      }
+
+      const stored = await restClient.GET(`/${mediaHeaderOnlySlug}/file/note.txt`)
+
+      expect(await stored.text()).toBe('CLIENT TEXT')
     })
 
     test('creates a document from a client-uploaded image via the real Azure handler', async ({
