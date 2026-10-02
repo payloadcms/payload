@@ -59,12 +59,6 @@ const globalResult = await payload.validateGlobal({
 })
 ```
 
-If you omit `locale`, Payload uses the request locale or the configured default locale. Projects
-without localization do not need to provide one.
-
-Use `context` to add values to `req.context` for the validation lifecycle. You can also reuse a
-partial request with `req`.
-
 ### Workflow readiness
 
 Validation failures do not throw a `ValidationError`. Check `valid` and use the locale, path, and
@@ -104,8 +98,8 @@ authoritative for uniqueness constraints.
 
 ## REST API
 
-Validation endpoints use `POST`. Send candidate data as a JSON object. The optional `locale` query
-parameter selects locales; otherwise Payload uses the request locale or configured default locale.
+Validation endpoints use `POST`. Send candidate data as a JSON object. Provide a `locale` query
+parameter otherwise Payload uses the request locale or configured default locale.
 
 ```ts
 // Collection create candidate
@@ -187,11 +181,6 @@ use the Local or REST API for that. GraphQL validation always enforces access co
 
 ## Locale semantics
 
-`locale` accepts one locale, a non-empty array, or `'all'`, and defaults to the request locale or the
-configured default locale. Duplicate locales are removed. `'all'` uses the locales returned by
-`localization.filterAvailableLocales`, when configured. Errors from localized validation passes are
-tagged with the locale that failed; non-localized validation may omit `locale`.
-
 When validating multiple locales, Payload validates the same `data` against each selected locale
 and combines the results.
 
@@ -201,7 +190,7 @@ in the locale being checked.
 ## Access control and hooks
 
 Validation falls back to the corresponding `update` access function for collections, globals, and
-fields. The fallback still receives `req.operation === 'validate'`. Configure `validate` only when
+fields. The fallback still receives `req.operation === 'validate'`. Configure `validate` when
 validation should use a different policy:
 
 ```ts
@@ -242,7 +231,7 @@ does not report the operation as `create` or `update`.
 requires boolean access because there is no stored document to evaluate against a constraint.
 
 Validation does not persist the candidate, but hooks can still cause side effects through Payload
-APIs or external services. Check the operation before running side-effecting hooks:
+APIs or external services. You must check the operation before running side-effecting hooks:
 
 ```ts
 import type { CollectionBeforeChangeHook } from 'payload'
