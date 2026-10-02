@@ -31,7 +31,7 @@ type Args<T> = {
   global: null | SanitizedGlobalConfig
   id?: number | string
   onFieldAccess?: (args: { accessResult: boolean; path: string }) => void
-  operation: 'create' | 'update'
+  operation: 'create' | 'update' | 'validate'
   overrideAccess: boolean
   parentIndexPath: string
   parentIsLocalized: boolean

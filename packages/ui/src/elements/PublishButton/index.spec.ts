@@ -12,7 +12,7 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock('../../forms/Form/context.js', () => ({
-  useForm: () => ({ submit: mocks.submit }),
+  useForm: () => ({ getData: () => ({ title: 'Title' }), submit: mocks.submit }),
   useFormModified: () => true,
 }))
 
@@ -23,13 +23,20 @@ vi.mock('../../forms/Submit/index.js', async () => {
     FormSubmit: ({
       children,
       onClick,
+      SubMenuPopupContent,
     }: {
       children?: ReactNode
       onClick?: () => Promise<void>
+      SubMenuPopupContent?: () => ReactNode
     }) => {
       mocks.primaryAction = onClick
 
-      return createElement('button', null, children)
+      return createElement(
+        'div',
+        null,
+        createElement('button', null, children),
+        SubMenuPopupContent ? createElement(SubMenuPopupContent) : null,
+      )
     },
   }
 })
@@ -99,6 +106,10 @@ vi.mock('../../providers/Translation/index.js', () => ({
         return 'Publish all locales'
       }
 
+      if (key === 'error:unknown') {
+        return 'An unknown error has occurred.'
+      }
+
       return 'Publish changes'
     },
   }),
@@ -107,7 +118,7 @@ vi.mock('../../providers/Translation/index.js', () => ({
 vi.mock('../Popup/index.js', () => ({
   PopupList: {
     Button: () => null,
-    ButtonGroup: () => null,
+    ButtonGroup: ({ children }: { children?: ReactNode }) => children,
   },
 }))
 

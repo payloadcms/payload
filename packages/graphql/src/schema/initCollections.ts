@@ -38,6 +38,7 @@ import { findVersionByIDResolver } from '../resolvers/collections/findVersionByI
 import { findVersionsResolver } from '../resolvers/collections/findVersions.js'
 import { restoreVersionResolver } from '../resolvers/collections/restoreVersion.js'
 import { updateResolver } from '../resolvers/collections/update.js'
+import { validateResolver } from '../resolvers/collections/validate.js'
 import { formatName } from '../utilities/formatName.js'
 import { buildMutationInputType, getCollectionIDType } from './buildMutationInputType.js'
 import { buildObjectType } from './buildObjectType.js'
@@ -304,6 +305,21 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           trash: { type: GraphQLBoolean },
         },
         resolve: updateResolver(collection),
+      }
+
+      graphqlResult.Mutation.fields[`validate${singularName}`] = {
+        type: graphqlResult.types.validationResultType,
+        args: {
+          id: { type: idType },
+          ...(updateMutationInputType ? { data: { type: updateMutationInputType } } : {}),
+          draft: { type: GraphQLBoolean },
+          ...(config.localization
+            ? {
+                locale: { type: graphqlResult.types.localeInputType },
+              }
+            : {}),
+        },
+        resolve: validateResolver(collection),
       }
 
       graphqlResult.Mutation.fields[`delete${singularName}`] = {
