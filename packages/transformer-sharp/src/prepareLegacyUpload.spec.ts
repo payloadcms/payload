@@ -45,22 +45,19 @@ const runPrepareUpload = async ({
 const variants = [{ name: 'card', height: 200, width: 400 }]
 
 describe('createPrepareLegacyUpload', () => {
-  it('should not apply the focal point when Sharp leaves it unset and the collection sets focalPoint: false', async () => {
-    expect(
-      await runPrepareUpload({ collectionFocalPoint: false, sharpConfig: { variants } }),
-    ).toBeUndefined()
-  })
-
-  it("should let Sharp's focalPoint override the collection's", async () => {
-    expect(
-      await runPrepareUpload({
-        collectionFocalPoint: false,
-        sharpConfig: { focalPoint: true, variants },
-      }),
-    ).toEqual({ x: 10, y: 90 })
-  })
-
-  it('should apply the focal point when neither Sharp nor the collection disables it', async () => {
-    expect(await runPrepareUpload({ sharpConfig: { variants } })).toEqual({ x: 10, y: 90 })
-  })
+  it.each([
+    { collectionFocalPoint: false, expected: undefined, sharpFocalPoint: undefined },
+    { collectionFocalPoint: false, expected: { x: 10, y: 90 }, sharpFocalPoint: true },
+    { collectionFocalPoint: undefined, expected: { x: 10, y: 90 }, sharpFocalPoint: undefined },
+  ])(
+    'should resolve the size focal point from Sharp ($sharpFocalPoint) over the collection ($collectionFocalPoint)',
+    async ({ collectionFocalPoint, expected, sharpFocalPoint }) => {
+      expect(
+        await runPrepareUpload({
+          collectionFocalPoint,
+          sharpConfig: { focalPoint: sharpFocalPoint, variants },
+        }),
+      ).toEqual(expected)
+    },
+  )
 })
