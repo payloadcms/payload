@@ -4,7 +4,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { transformerMediaSlug } from '../../shared.js'
-import { transformerMediaHookCallCounts } from '../../transformerFixtures.js'
+import { fileRequestEvents, transformerMediaHookCallCounts } from '../../transformerFixtures.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -13,7 +13,18 @@ export const TransformerMedia: CollectionConfig = {
   slug: transformerMediaSlug,
   access: {
     // Ordinary reads are public; a dynamic transformation request requires an authenticated user.
-    read: ({ req }) => (req.fileTransform ? Boolean(req.user) : true),
+    // An `x-deny-plain-read` or `x-deny-transform-read` header denies that access mode outright.
+    read: ({ req }) => {
+      const accessMode = req.fileTransform ? 'transform' : 'plain'
+
+      fileRequestEvents.push(`access:${accessMode}`)
+
+      if (req.headers.get(`x-deny-${accessMode}-read`)) {
+        return false
+      }
+
+      return req.fileTransform ? Boolean(req.user) : true
+    },
   },
   fields: [
     {
@@ -40,7 +51,6 @@ export const TransformerMedia: CollectionConfig = {
     ],
   },
   upload: {
-    mimeTypes: ['application/pdf'],
     staticDir: path.resolve(dirname, '../../media'),
   },
   versions: false,

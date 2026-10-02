@@ -1,4 +1,4 @@
-import type { CollectionSlug, Payload } from 'payload'
+import type { CollectionSlug, Payload, File as PayloadFile } from 'payload'
 
 import { createHash } from 'crypto'
 import fs from 'fs'
@@ -18,6 +18,7 @@ import {
   usersSlug,
 } from './shared.js'
 import {
+  fileRequestEvents,
   resetTransformerCallCounts,
   resetTransformerMediaHookCallCounts,
   transformerCallCounts,
@@ -62,17 +63,27 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
       docIDs.length = 0
     })
 
-    const uploadTransformerFixture = async (data: Record<string, unknown> = {}) => {
-      const filePath = path.resolve(dirname, '../uploads/test-pdf.pdf')
-      const file = await getFileByPath(filePath)
+    const uploadTransformerFixture = async ({
+      context,
+      file,
+    }: {
+      context?: Record<string, unknown>
+      file?: PayloadFile
+    } = {}) => {
       const doc = await payload.create({
         collection: transformerMediaSlug as CollectionSlug,
-        data,
-        file,
+        context,
+        data: {},
+        file: file ?? (await getFileByPath(path.resolve(dirname, '../uploads/test-pdf.pdf'))),
         overrideAccess: true,
       })
       docIDs.push(doc.id)
-      return doc as unknown as { filename: string; id: number | string }
+      return doc as unknown as {
+        filename: string
+        filesize: number
+        id: number | string
+        mimeType: string
+      }
     }
 
     test('should serve the original file when no recognized query parameter is present', async () => {
@@ -84,7 +95,7 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
       expect(await response.text()).toBe(originalPdfText)
     })
 
-    test('should run a single-stage transformer and return its transformed bytes', async () => {
+    test('should run a single-stage transformer for an authenticated request and return its transformed bytes', async () => {
       const doc = await uploadTransformerFixture()
 
       const response = await restClient.GET(
@@ -208,17 +219,6 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
       expect(response.status).toBe(403)
     })
 
-    test('should allow an authenticated dynamic-transform request', async () => {
-      const doc = await uploadTransformerFixture()
-
-      const response = await restClient.GET(
-        `/${transformerMediaSlug}/file/${doc.filename}?suffix=1`,
-      )
-
-      expect(response.status).toBe(200)
-      expect(await response.text()).toBe(`${originalPdfText}-suffix`)
-    })
-
     test('should return 403 for a dynamic-transform request with a non-matching prefix, matching the existing checkFileAccess-only path', async () => {
       const doc = await uploadTransformerFixture()
 
@@ -227,20 +227,6 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
       )
 
       expect(response.status).toBe(403)
-    })
-
-    test('should never persist dynamic output: the document is unchanged after a transform request', async () => {
-      const doc = await uploadTransformerFixture()
-
-      await restClient.GET(`/${transformerMediaSlug}/file/${doc.filename}?suffix=1&uppercase=1`)
-
-      const afterRequest = await payload.findByID({
-        id: doc.id,
-        collection: transformerMediaSlug as CollectionSlug,
-        overrideAccess: true,
-      })
-
-      expect(afterRequest.filename).toBe(doc.filename)
     })
 
     test('should never persist dynamic output: no document-mutation hook fires for a transform request', async () => {
@@ -283,6 +269,120 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
       const authenticatedResponse = await restClient.GET(pathWithoutAPIPrefix as `/${string}`)
       expect(authenticatedResponse.status).toBe(200)
       expect(await authenticatedResponse.text()).toBe(`${originalPdfText}-suffix`)
+    })
+
+    test.describe('read access modes', () => {
+      const denyHeaders = (...accessModes: ('plain' | 'transform')[]) =>
+        Object.fromEntries(accessModes.map((accessMode) => [`x-deny-${accessMode}-read`, 'true']))
+
+      test('should not run canTransform when read access is denied in both modes', async () => {
+        const doc = await uploadTransformerFixture()
+
+        const response = await restClient.GET(
+          `/${transformerMediaSlug}/file/${doc.filename}?suffix=1`,
+          { headers: denyHeaders('plain', 'transform') },
+        )
+
+        expect(response.status).toBe(403)
+        expect(fileRequestEvents).toEqual(['access:transform', 'access:plain'])
+      })
+
+      test('should check transform access before canTransform and transform when only it is allowed', async () => {
+        const doc = await uploadTransformerFixture()
+
+        const response = await restClient.GET(
+          `/${transformerMediaSlug}/file/${doc.filename}?suffix=1`,
+          { headers: denyHeaders('plain') },
+        )
+
+        expect(response.status).toBe(200)
+        expect(await response.text()).toBe(`${originalPdfText}-suffix`)
+        expect(fileRequestEvents).toEqual(['access:transform', 'canTransform'])
+      })
+
+      test('should serve the original when transform access is denied and no transformer applies', async () => {
+        const doc = await uploadTransformerFixture()
+
+        const response = await restClient.GET(`/${transformerMediaSlug}/file/${doc.filename}`, {
+          headers: denyHeaders('transform'),
+        })
+
+        expect(response.status).toBe(200)
+        expect(await response.text()).toBe(originalPdfText)
+        expect(fileRequestEvents).toEqual(['access:transform', 'access:plain', 'canTransform'])
+      })
+
+      test('should not serve the original when only transform access is allowed and no transformer applies', async () => {
+        const doc = await uploadTransformerFixture()
+
+        const response = await restClient.GET(`/${transformerMediaSlug}/file/${doc.filename}`, {
+          headers: denyHeaders('plain'),
+        })
+
+        expect(response.status).toBe(403)
+        expect(fileRequestEvents).toEqual(['access:transform', 'canTransform', 'access:plain'])
+      })
+
+      test('should check only ordinary read access when no transformer matches the MIME type', async () => {
+        const doc = await uploadTransformerFixture({
+          file: { name: 'note.txt', data: Buffer.from('note'), mimetype: 'text/plain', size: 4 },
+        })
+
+        const response = await restClient.GET(
+          `/${transformerMediaSlug}/file/${doc.filename}?suffix=1`,
+          { headers: denyHeaders('transform') },
+        )
+
+        expect(response.status).toBe(200)
+        expect(await response.text()).toBe('note')
+        expect(fileRequestEvents).toEqual(['access:plain'])
+      })
+
+      test('should return 403, not 404, for a missing file when ordinary read access is denied', async () => {
+        const response = await restClient.GET(
+          `/${transformerMediaSlug}/file/does-not-exist.html?suffix=1`,
+          { headers: denyHeaders('plain') },
+        )
+
+        expect(response.status).toBe(403)
+      })
+    })
+
+    test.describe('upload-time output metadata', () => {
+      const uploadJSONReplacedWith = (transformedFile: File) =>
+        uploadTransformerFixture({
+          context: { transformedFile },
+          file: {
+            name: 'data.json',
+            data: Buffer.from('{"a":1}'),
+            mimetype: 'application/json',
+            size: 7,
+          },
+        })
+
+      test('should use the returned file name and type when the output bytes have no detectable type', async () => {
+        const doc = await uploadJSONReplacedWith(
+          new File(['a\n1\n'], 'report.csv', { type: 'text/csv' }),
+        )
+
+        expect(doc).toMatchObject({ filename: 'report.csv', filesize: 4, mimeType: 'text/csv' })
+      })
+
+      test('should prefer the detected type over a stale name and type on the returned file', async () => {
+        const png = fs.readFileSync(path.resolve(dirname, '../uploads/small.png'))
+
+        const doc = await uploadJSONReplacedWith(
+          new File([png], 'data.json', { type: 'application/json' }),
+        )
+
+        expect(doc).toMatchObject({ filename: 'data.png', mimeType: 'image/png' })
+      })
+
+      test('should fall back to the upload name and type when the returned file declares neither', async () => {
+        const doc = await uploadJSONReplacedWith(new File(['{"a":2}'], ''))
+
+        expect(doc).toMatchObject({ filename: 'data.json', mimeType: 'application/json' })
+      })
     })
   })
 
