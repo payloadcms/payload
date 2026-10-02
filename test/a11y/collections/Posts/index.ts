@@ -183,6 +183,11 @@ export const PostsCollection: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'collapsible',
+      fields: [{ name: 'publishingNote', type: 'text' }],
+      label: 'Publishing details',
+    },
     createFolderField({ relationTo: 'payload-folders' }),
     {
       name: 'featuredImage',

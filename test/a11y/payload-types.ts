@@ -284,6 +284,7 @@ export interface Post {
       }[]
     | null;
   layout?: (TextBlock | ImageBlock)[] | null;
+  publishingNote?: string | null;
   '_h_payload-folders'?: (string | null) | PayloadFolder;
   featuredImage?: (string | null) | Media;
   createdBy?: {
@@ -538,6 +539,7 @@ export interface PostsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  publishingNote?: T;
   '_h_payload-folders'?: T;
   featuredImage?: T;
   createdBy?: T;

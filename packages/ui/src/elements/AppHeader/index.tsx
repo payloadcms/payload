@@ -74,6 +74,7 @@ export function AppHeader({ CustomAvatar, CustomLogoutButton, settingsItemGroups
           <div className={`${baseClass}__controls-wrapper`}>
             <div className={`${baseClass}__step-nav-wrapper`}>
               <Button
+                aria-expanded={navOpen}
                 aria-label={`${navOpen ? t('general:close') : t('general:open')} ${t('general:menu')}`}
                 buttonStyle="ghost"
                 className={`${baseClass}__sidebar-toggle`}
