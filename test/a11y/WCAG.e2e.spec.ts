@@ -136,11 +136,6 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(children.first()).toBeFocused()
       await page.keyboard.press('ArrowUp')
       await expect(parent).toBeFocused()
-      await page.keyboard.press('ArrowDown')
-      await page.keyboard.press('ArrowDown')
-      await page.keyboard.press('Enter')
-      await expect(children.last()).toHaveAttribute('aria-selected', 'true')
-      await expect(page).toHaveURL(/_h_payload-folders=/)
       await children.first().focus()
       await expect(children.first()).toBeFocused()
       await toggle.click()
@@ -153,6 +148,16 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(all).toBeFocused()
       await all.press('ArrowDown')
       await expect(parent).toBeFocused()
+      await parent.press('ArrowRight')
+      await expect(children).toHaveCount(2)
+      await page.keyboard.press('ArrowDown')
+      await page.keyboard.press('ArrowDown')
+      await page.keyboard.press('Enter')
+      await expect(children.last()).toHaveAttribute('aria-selected', 'true')
+      await expect(page).toHaveURL(/_h_payload-folders=/)
+      await expect(
+        page.getByRole('heading', { name: 'Accessibility final child folder', exact: true }),
+      ).toBeVisible()
     })
 
     test('should expose column editor headings and named toggles', async () => {
@@ -1576,6 +1581,7 @@ test.describe('WCAG 2.2 Level AA', () => {
             await openMainNavigation({ page, postsURL })
           } else if (view === 'dashboard') {
             await page.goto(formatAdminURL({ adminRoute: '/admin', serverURL }))
+            await expect(page.locator('.dashboard')).toBeVisible()
           } else {
             await gotoPostsList({ page, postsURL })
           }
@@ -3097,15 +3103,6 @@ test.describe('WCAG 2.2 Level AA', () => {
         }
       }
       expect(hasReachedSelected).toBe(true)
-      const toggle = page.locator('.nav-group__toggle').filter({ hasText: /^Collections$/ })
-
-      await expect(toggle).toHaveAttribute('aria-expanded', 'true')
-      await toggle.press('Enter')
-      await expect(selected).toBeHidden()
-      await expect(toggle).toHaveAttribute('aria-expanded', 'false')
-      await toggle.press('Enter')
-      await expect(selected).toBeVisible()
-      await expect(toggle).toHaveAttribute('aria-expanded', 'true')
       for (const view of ['create', 'edit', 'versions'] as const) {
         if (view === 'create') {
           await gotoCreatePost({ page, postsURL })
@@ -3117,6 +3114,15 @@ test.describe('WCAG 2.2 Level AA', () => {
         await openNavigation({ page })
         await expect(page.locator('#nav-posts')).toHaveAttribute('aria-current', 'location')
       }
+      const toggle = page.locator('.nav-group__toggle').filter({ hasText: /^Collections$/ })
+
+      await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+      await toggle.press('Enter')
+      await expect(selected).toBeHidden()
+      await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+      await toggle.press('Enter')
+      await expect(selected).toBeVisible()
+      await expect(toggle).toHaveAttribute('aria-expanded', 'true')
     })
 
     test('should expose the upload dropzone without detectable accessibility violations', async ({
