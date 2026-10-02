@@ -67,6 +67,32 @@ You should prefer a relational DB like Postgres or SQLite if:
 - You require enforced data consistency at the database level
 - You have a lot of relationships between collections and require relationships to be enforced
 
+## Processing database operations in batches
+
+Use `payload.db.batchProcessing` to run ordered `create`, `updateOne`, and `deleteOne` database operations in bounded batches. Each result includes the source operation index and a `succeeded`, `failed`, `noMatch`, or `unattempted` status.
+
+```ts
+const results = await payload.db.batchProcessing({
+  batchSize: 100,
+  operations: [
+    {
+      args: {
+        collection: 'posts',
+        data: { title: 'Created in a batch' },
+      },
+      operation: 'create',
+    },
+  ],
+  req,
+})
+```
+
+Processing stops after the first failed operation by default. Set `shouldContinueOnError: true` to attempt later operations. The method does not start, commit, or roll back a transaction. When you supply a request with a transaction, the caller remains responsible for that transaction.
+
+This is a low-level database method. Its operations do not run Local API access control, hooks, field validation, or upload handling.
+
+The default implementation uses existing adapter methods. Custom adapters created with `createDatabaseAdapter` receive this implementation automatically.
+
 ## Payload Differences
 
 It's important to note that nearly every Payload feature is available in all of our officially supported Database Adapters, including [Localization](../configuration/localization), [Arrays](../fields/array), [Blocks](../fields/blocks), etc. The only thing that is not supported in SQLite yet is the [Point Field](/docs/fields/point), but that should be added soon.
