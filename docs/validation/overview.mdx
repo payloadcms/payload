@@ -6,8 +6,8 @@ desc: Validate collection and global document candidates without saving them.
 keywords: validation, local api, rest api, localization, publishing, access control, hooks, drafts
 ---
 
-Use on-demand validation to check collection or global data without saving it. Payload runs access
-control, hooks, and field validation without creating a document, version, or file.
+You can validate a collection document or global without writing it to the database. Call
+`payload.validate()` for a collection or `payload.validateGlobal()` for a global.
 
 Field validation failures are returned in the result:
 
@@ -25,10 +25,9 @@ documents, invalid arguments, and other hook errors throw normally.
 
 ## Local API
 
-Use `payload.validate()` for collections and `payload.validateGlobal()` for globals. Omit `id` and
-provide `data` to validate a collection create candidate. For stored documents and globals, partial
-`data` is merged with the main document. Set `draft: true` to use the newest draft, with the main
-document as a fallback.
+Omit `id` and provide `data` to validate a collection create candidate. For stored documents and
+globals, partial `data` is merged with the main document. Set `draft: true` to use the newest draft,
+with the main document as a fallback.
 
 ```ts
 // Validate collection create data in one locale
