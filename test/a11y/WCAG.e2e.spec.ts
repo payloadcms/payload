@@ -2922,6 +2922,38 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    test('should expose independent names and values for contextual custom fields in the bulk-edit drawer', async () => {
+      const fieldSelect = await openBulkEditFieldSelect({ page, postsURL })
+
+      await selectInput({
+        multiSelect: true,
+        options: ['Contextual text', 'Second contextual text'],
+        page,
+        selectLocator: fieldSelect,
+      })
+
+      const drawer = page.locator('#edit-posts')
+      const input = drawer.getByRole('textbox', { name: 'Contextual text', exact: true })
+      const secondInput = drawer.getByRole('textbox', {
+        name: 'Second contextual text',
+        exact: true,
+      })
+
+      await expect(input).toHaveAttribute('id', 'field-contextualText')
+      await expect(input).toHaveAttribute('name', 'contextualText')
+      await expect(secondInput).toHaveAccessibleName('Second contextual text')
+      await input.focus()
+      await input.pressSequentially('Accessible bulk edit')
+      await expect(input).toHaveValue('Accessible bulk edit')
+      await expect(input).toBeFocused()
+      await input.press('Tab')
+      await expect(input).not.toBeFocused()
+      await secondInput.focus()
+      await secondInput.pressSequentially('Separate value')
+      await expect(secondInput).toHaveValue('Separate value')
+      await expect(input).toHaveValue('Accessible bulk edit')
+    })
+
     test('should expose the upload dropzone without detectable accessibility violations', async ({
       browser: _browser,
     }, testInfo) => {

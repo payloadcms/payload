@@ -147,7 +147,9 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     'media-alt': MediaAltSelect<false> | MediaAltSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
-    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-locked-documents':
+      | PayloadLockedDocumentsSelect<false>
+      | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
@@ -163,6 +165,7 @@ export interface Config {
   };
   locale: 'en' | 'es';
   widgets: {
+    welcome: WelcomeWidget;
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
     activity: ActivityWidget;
@@ -275,6 +278,8 @@ export interface Post {
    * A subtitle field to test focus indicators in the admin UI, helps us detect exiting out of rich text editor properly.
    */
   subtitle?: string | null;
+  contextualText?: string | null;
+  secondContextualText?: string | null;
   accessibilitySelect: 'one' | 'two';
   accessibilitySortableSelect?: ('one' | 'two')[] | null;
   accessibilityDisabledSelect?: ('one' | 'two') | null;
@@ -292,14 +297,6 @@ export interface Post {
   layout?: (TextBlock | ImageBlock)[] | null;
   '_h_payload-folders'?: (string | null) | PayloadFolder;
   featuredImage?: (string | null) | Media;
-  createdBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
   /**
    * @minItems 2
    * @maxItems 2
@@ -325,6 +322,14 @@ export interface Post {
     | boolean
     | null;
   unlabelledSource?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -358,6 +363,7 @@ export interface ImageBlock {
  */
 export interface Media {
   id: string;
+  alt: string;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -366,7 +372,6 @@ export interface Media {
     relationTo: 'users';
     value: string | User;
   } | null;
-  alt: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -567,6 +572,8 @@ export interface PayloadFoldersSelect<T extends boolean = true> {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   subtitle?: T;
+  contextualText?: T;
+  secondContextualText?: T;
   accessibilitySelect?: T;
   accessibilitySortableSelect?: T;
   accessibilityDisabledSelect?: T;
@@ -603,13 +610,13 @@ export interface PostsSelect<T extends boolean = true> {
       };
   '_h_payload-folders'?: T;
   featuredImage?: T;
-  createdBy?: T;
-  updatedBy?: T;
   location?: T;
   settings?: T;
   source?: T;
   unlabelledSettings?: T;
   unlabelledSource?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -620,9 +627,9 @@ export interface PostsSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
   createdBy?: T;
   updatedBy?: T;
-  alt?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -760,6 +767,16 @@ export interface MenuSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "welcome_widget".
+ */
+export interface WelcomeWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -879,23 +896,29 @@ export interface SerializedLineBreakNode {
   version: number;
 }
 
-export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+export interface SerializedParagraphNode<TChildren>
+  extends SerializedLexicalElementBase<TChildren> {
   type: 'paragraph';
   textFormat: number;
   textStyle: string;
 }
 
-export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
-  type: 'block';
-  format: LexicalElementFormat;
-  version: number;
-  fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
-} : never;
-export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
-  type: 'inlineBlock';
-  version: number;
-  fields: { id: string } & Omit<TFields, 'id'>;
-} : never;
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown
+  ? {
+      type: 'block';
+      format: LexicalElementFormat;
+      version: number;
+      fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
+    }
+  : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> =
+  TFields extends unknown
+    ? {
+        type: 'inlineBlock';
+        version: number;
+        fields: { id: string } & Omit<TFields, 'id'>;
+      }
+    : never;
 
 export interface SerializedTableNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
   type: 'table';
@@ -908,7 +931,8 @@ export interface SerializedTableRowNode<TChildren> extends SerializedLexicalElem
   type: 'tablerow';
   height?: number;
 }
-export interface SerializedTableCellNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+export interface SerializedTableCellNode<TChildren>
+  extends SerializedLexicalElementBase<TChildren> {
   type: 'tablecell';
   backgroundColor?: string | null;
   colSpan?: number;
@@ -923,7 +947,10 @@ export interface SerializedHorizontalRuleNode {
   version: number;
 }
 
-export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+export type SerializedUploadNode<
+  TSlugs extends keyof Config['collections'],
+  TFields = { [k: string]: unknown },
+> = {
   type: 'upload';
   format: LexicalElementFormat;
   id: string;
@@ -955,18 +982,22 @@ export interface LexicalLinkFields {
   [k: string]: unknown;
   doc?: {
     relationTo: string;
-    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
+    value:
+      | Config['db']['defaultIDType']
+      | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
   } | null;
   linkType: 'custom' | 'internal';
   newTab: boolean;
   url?: string;
 }
-export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields>
+  extends SerializedLexicalElementBase<TChildren> {
   type: 'link';
   fields: TFields;
   id?: string;
 }
-export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields>
+  extends SerializedLexicalElementBase<TChildren> {
   type: 'autolink';
   fields: TFields;
 }
@@ -1004,7 +1035,6 @@ export interface LexicalRichText<TNode> {
     version: number;
   };
 }
-
 
 declare module 'payload' {
   // @ts-ignore
