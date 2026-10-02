@@ -9,6 +9,17 @@ import { deepCopyObjectSimple } from '../utilities/deepCopyObject.js'
 import { traverseFields } from '../utilities/traverseFields.js'
 
 export const defaultCopy: Copy = async function defaultCopy({ collection, data = {}, req, where }) {
+  const collectionConfig = this.payload.collections[collection]!
+  const { customIDType } = collectionConfig
+  const hasValidCustomID =
+    customIDType === 'number' ? typeof data.id === 'number' : typeof data.id === 'string'
+
+  if (customIDType && !hasValidCustomID) {
+    throw new TypeError(
+      `Database copy for collection "${collection}" requires data.id to match its custom ${customIDType} ID type`,
+    )
+  }
+
   const sourceDocument = await this.findOne({
     collection,
     req,
@@ -26,11 +37,12 @@ export const defaultCopy: Copy = async function defaultCopy({ collection, data =
       ...sourceData,
       ...data,
     },
-    fields: this.payload.collections[collection]!.config.fields,
+    fields: collectionConfig.config.fields,
   })
 
   return this.create({
     collection,
+    ...(customIDType ? { customID: data.id as number | string } : {}),
     data: copiedData,
     req,
   })

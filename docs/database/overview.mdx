@@ -96,6 +96,7 @@ const copiedPost = await payload.db.copy({
 
 - `payload.db.copy` makes a one-to-one storage copy: one current source document becomes one new database record. It does not copy version history.
 - It copies stored values as-is, except document, array, and block row IDs. Unique fields and custom database indexes can reject the new record. Use `data` overrides or handle these conflicts yourself.
+- Custom-ID collections require `data.id` with the configured ID type. ID hooks do not run, so the caller must supply a unique destination ID.
 - It does not run access control, hooks, field validation, or upload handling. Use [`payload.duplicate`](/docs/local-api/overview#collection-create) for normal application duplication.
 
 The default implementation uses existing adapter methods. Custom adapters created with `createDatabaseAdapter` receive this implementation automatically. Direct implementations of `BaseDatabaseAdapter` must provide `copy` after this change.

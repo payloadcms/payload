@@ -188,7 +188,10 @@ export type Destroy = () => Promise<void>
 
 export type CopyArgs = {
   collection: CollectionSlug
-  /** Top-level field values that replace values from the source document. */
+  /**
+   * Top-level field values that replace values from the source document.
+   * Custom-ID collections require an `id` that matches the configured ID type.
+   */
   data?: Record<string, unknown>
   req?: Partial<PayloadRequest>
   /** Selects the stored source document. */

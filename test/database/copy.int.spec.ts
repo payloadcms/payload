@@ -6,7 +6,7 @@ import { initTransaction, killTransaction } from 'payload'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import { postsSlug } from './shared.js'
+import { customIDsSlug, postsSlug } from './shared.js'
 
 type CopyTestPost = {
   arrayWithIDs?: { id?: string; text?: string }[]
@@ -50,6 +50,43 @@ test.suite('Database copy', { config: './config.ts' }, () => {
         where: { id: { equals: 'missing-document' } },
       }),
     ).rejects.toMatchObject({ name: 'NotFound' })
+  })
+
+  test('should require a destination ID for a custom-ID collection', async ({ payload }) => {
+    const source = await payload.create({
+      collection: customIDsSlug,
+      data: { title: 'custom ID source' },
+      overrideAccess: true,
+    })
+
+    await expect(
+      payload.db.copy({
+        collection: customIDsSlug,
+        req: { payload },
+        where: { id: { equals: source.id } },
+      }),
+    ).rejects.toThrow('requires data.id')
+  })
+
+  test('should copy a custom-ID document when given a destination ID', async ({ payload }) => {
+    const source = await payload.create({
+      collection: customIDsSlug,
+      data: { title: 'custom ID source' },
+      overrideAccess: true,
+    })
+
+    const copied = await payload.db.copy({
+      collection: customIDsSlug,
+      data: {
+        id: 'copied-custom-id',
+        title: 'custom ID copy',
+      },
+      req: { payload },
+      where: { id: { equals: source.id } },
+    })
+
+    expect(copied.id).toBe('copied-custom-id')
+    expect(copied.title).toBe('custom ID copy')
   })
 
   test.options(
