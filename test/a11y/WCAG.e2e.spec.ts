@@ -2936,6 +2936,8 @@ test.describe('WCAG 2.2 Level AA', () => {
       })
 
       expect(results.violations).toEqual([])
+    })
+
     test('should give the navigation close control an accessible name', async () => {
       await page.goto(`${serverURL}/admin`)
       await openNavigationForUserMenu({ page })
