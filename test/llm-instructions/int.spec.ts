@@ -161,18 +161,23 @@ test.suite('LLM instructions', { config: './config.ts' }, () => {
     ).toBe(false)
   })
 
-  test('should preserve Request properties while isolating sync context', async ({ payload }) => {
+  test('should preserve concurrent request properties while isolating sync context', async ({
+    payload,
+  }) => {
     const { user } = await payload.login({ collection: 'users', data: devUser })
-    const request = new Request('https://example.test/api/mcp', {
-      headers: { 'x-request-id': 'instructions-sync' },
-      method: 'POST',
-    })
-    const req = await createPayloadRequest({
-      context: { caller: true },
-      payload,
-      req: request,
-      user,
-    })
+    const requests = await Promise.all(
+      ['first', 'second'].map((caller) =>
+        createPayloadRequest({
+          context: { caller },
+          payload,
+          req: new Request(`https://example.test/api/${caller}`, {
+            headers: { 'x-request-id': caller },
+            method: 'POST',
+          }),
+          user,
+        }),
+      ),
+    )
     const hooks = payload.collections[instructionsCollectionSlug].config.hooks
     const originalHooks = hooks.beforeOperation
     const syncRequests: { header: null | string; method: string; url: string }[] = []
@@ -196,21 +201,29 @@ test.suite('LLM instructions', { config: './config.ts' }, () => {
       },
     ]
 
-    await payload.find({ collection: instructionsCollectionSlug, overrideAccess: false, req })
+    await Promise.all(
+      requests.map((req) =>
+        payload.find({ collection: instructionsCollectionSlug, overrideAccess: false, req }),
+      ),
+    )
 
-    expect(syncRequests.length).toBeGreaterThan(0)
+    const expectedRequests = requests.map((req) => ({
+      header: req.headers.get('x-request-id'),
+      method: req.method,
+      url: req.url,
+    }))
+
+    expect(syncRequests).toEqual(expect.arrayContaining(expectedRequests))
     for (const syncRequest of syncRequests) {
-      expect(syncRequest).toEqual({
-        header: 'instructions-sync',
-        method: 'POST',
-        url: request.url,
-      })
+      expect(expectedRequests).toContainEqual(syncRequest)
     }
-    expect(req.context).toEqual({ caller: true })
+    for (const req of requests) {
+      expect(req.context).toEqual({ caller: req.headers.get('x-request-id') })
+    }
   })
 
   test.options(
-    'should keep shared sync results when the first caller rolls back its transaction',
+    'should keep initialized instructions when a caller rolls back its transaction',
     { db: (adapter) => adapter === 'postgres' || adapter === 'mongodb' },
     async ({ payload }) => {
       const { user } = await payload.login({ collection: 'users', data: devUser })
