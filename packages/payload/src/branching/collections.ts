@@ -16,7 +16,11 @@ import {
   branchChangesCollectionSlug,
   branchesCollectionSlug,
   branchMergesCollectionSlug,
+  branchOperations,
   MAIN_BRANCH,
+  mergeApplicationOutcomes,
+  mergeCleanupOutcomes,
+  mergeRecoveryOutcomes,
 } from './types.js'
 
 export const getBranchesCollection = (branching: SanitizedBranchingConfig): CollectionConfig => ({
@@ -211,7 +215,7 @@ export const getBranchChangesCollection = (config: Config): CollectionConfig => 
       {
         name: 'operation',
         type: 'select',
-        options: ['create', 'update', 'delete'],
+        options: [...branchOperations],
         required: true,
       },
       {
@@ -352,37 +356,21 @@ export const getBranchMergesCollection = (): CollectionConfig => ({
         { name: 'docTitle', type: 'text' },
         /** Set instead of `collectionSlug`/`docID` when the merged change was a global. */
         { name: 'globalSlug', type: 'text' },
-        { name: 'operation', type: 'text' },
+        { name: 'operation', type: 'select', options: [...branchOperations] },
         {
           name: 'applicationOutcome',
           type: 'select',
-          options: [
-            'unattempted',
-            'attempted',
-            'applied',
-            'committed',
-            'failed',
-            'rolledBack',
-            'unknown',
-          ],
+          options: [...mergeApplicationOutcomes],
         },
         {
           name: 'recoveryOutcome',
           type: 'select',
-          options: [
-            'notNeeded',
-            'pending',
-            'restored',
-            'deleted',
-            'unavailable',
-            'failed',
-            'unknown',
-          ],
+          options: [...mergeRecoveryOutcomes],
         },
         {
           name: 'cleanupOutcome',
           type: 'select',
-          options: ['pending', 'completed', 'failed', 'notNeeded', 'superseded', 'unknown'],
+          options: [...mergeCleanupOutcomes],
         },
         { name: 'targetID', type: 'text' },
         { name: 'sourceID', type: 'text' },

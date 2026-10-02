@@ -1,5 +1,6 @@
 import type { PayloadRequest, Where, WhereField } from '../types/index.js'
 
+import { extractRelationshipID } from '../utilities/extractRelationshipID.js'
 import { isBranchProjectionActive } from './branchSelect.js'
 import { branchDocIDField, branchParentField } from './types.js'
 
@@ -100,8 +101,7 @@ export const projectBranchIDs = <T extends Record<string, any>>(docs: T[]): T[] 
     const canonical = doc?.[branchDocIDField]
 
     if (canonical !== undefined && canonical !== null) {
-      ;(doc as Record<string, unknown>).id =
-        typeof canonical === 'object' ? canonical.value : canonical
+      ;(doc as Record<string, unknown>).id = extractRelationshipID({ relationship: canonical })
     }
   }
 

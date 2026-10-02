@@ -2,6 +2,7 @@ import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
 import type { MergeResult } from '../merge.js'
+import type { MergeProgress } from '../types.js'
 
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
@@ -16,9 +17,9 @@ import { branchesCollectionSlug } from '../types.js'
  * and one JSON object per line is trivially parseable from a reader loop.
  */
 export type MergeStreamEvent =
-  | { [key: string]: unknown; type: 'progress' }
   | { message: string; type: 'error' }
   | { result: MergeResult; type: 'complete' }
+  | ({ type: 'progress' } & MergeProgress)
 
 /**
  * `POST /<branches>/:id/merge`

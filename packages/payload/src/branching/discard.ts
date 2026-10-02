@@ -18,6 +18,7 @@ import {
 import { assertBranchCreatedDocumentsUnreferenced } from './assertBranchCreatedDocumentsUnreferenced.js'
 import { assertBranchWritable } from './assertBranchWritable.js'
 import { refreshBranchState, resetBranchState, withoutBranch } from './resolveBranch.js'
+import { selectBranchChanges } from './selectBranchChanges.js'
 import {
   branchChangesCollectionSlug,
   branchDocIDField,
@@ -180,9 +181,7 @@ const discardBranchChangesInternal = async (
     },
   })
 
-  const applicable = allChanges.docs.filter(
-    (change) => !selected || selected.map(String).includes(String(change.id)),
-  )
+  const applicable = selectBranchChanges({ changes: allChanges.docs, selected })
 
   const result: DiscardResult = { discarded: [] }
 

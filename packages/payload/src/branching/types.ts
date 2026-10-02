@@ -1,4 +1,5 @@
 import type { CollectionSlug } from '../index.js'
+import type { PayloadRequest } from '../types/index.js'
 import type { Access } from './../config/types.js'
 import type { BranchMergeValidate } from './validation.js'
 
@@ -29,7 +30,91 @@ export const branchField = '_branch'
 export const branchDocIDField = '_branchDocID'
 export const branchParentField = '_branchParent'
 
-export type BranchOperation = 'create' | 'delete' | 'update'
+export const branchOperations = ['create', 'update', 'delete'] as const
+export const mergeApplicationOutcomes = [
+  'unattempted',
+  'attempted',
+  'applied',
+  'committed',
+  'failed',
+  'rolledBack',
+  'unknown',
+] as const
+export const mergeCleanupOutcomes = [
+  'pending',
+  'completed',
+  'failed',
+  'notNeeded',
+  'superseded',
+  'unknown',
+] as const
+export const mergeRecoveryOutcomes = [
+  'notNeeded',
+  'pending',
+  'restored',
+  'deleted',
+  'unavailable',
+  'failed',
+  'unknown',
+] as const
+
+export type BranchOperation = (typeof branchOperations)[number]
+export type MergeApplicationOutcome = (typeof mergeApplicationOutcomes)[number]
+export type MergeCleanupOutcome = (typeof mergeCleanupOutcomes)[number]
+export type MergeRecoveryOutcome = (typeof mergeRecoveryOutcomes)[number]
+
+export type MergeableChange = {
+  changeID: number | string
+  /** Absent for a global, which is identified by `globalSlug` instead. */
+  collectionSlug?: string
+  /** Absent for a global: there is one of it, so there is nothing to identify. */
+  docID?: number | string
+  entityType: 'collection' | 'global'
+  globalSlug?: string
+  operation: BranchOperation
+}
+
+export type MergeEventChange = {
+  after?: unknown
+  afterVersionID?: string
+  applicationOutcome: MergeApplicationOutcome
+  before?: unknown
+  beforeVersionID?: string
+  changeID: string
+  cleanupError?: string
+  cleanupOutcome: MergeCleanupOutcome
+  collectionSlug?: string
+  docID?: string
+  docTitle: string
+  error?: string
+  globalSlug?: string
+  operation: BranchOperation
+  recoveryError?: string
+  recoveryOutcome: MergeRecoveryOutcome
+  sourceID?: string
+  sourceRevision?: string
+  sourceUpdatedAt?: string
+  sourceVersionIDs?: (number | string)[]
+  targetID?: string
+}
+
+export type MergeProgress = {
+  collectionSlug: string
+  /** 1-based position of the change being applied. */
+  current: number
+  docID: number | string
+  operation: BranchOperation
+  /** Total changes this merge will apply. */
+  total: number
+}
+
+export type MergeWarning = {
+  changeID: number | string
+  collectionSlug: string
+  docID: number | string
+  message: string
+  reason: 'main-moved'
+}
 
 export type BranchingConfig = {
   /**
@@ -54,15 +139,15 @@ export type BranchingConfig = {
     /** Fires after commit, so a failing webhook cannot undo a merge. */
     afterMerge?: (args: {
       branch: string
-      req: unknown
-      results: unknown[]
+      req: PayloadRequest
+      results: MergeableChange[]
     }) => Promise<void> | void
     /** Throw to block a merge. */
     beforeMerge?: (args: {
       branch: string
-      changes: unknown[]
-      req: unknown
-      warnings: unknown[]
+      changes: MergeableChange[]
+      req: PayloadRequest
+      warnings: MergeWarning[]
     }) => Promise<void> | void
   }
   /**

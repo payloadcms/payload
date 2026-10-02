@@ -2,6 +2,7 @@ import type { Payload, PayloadRequest, Where } from '../types/index.js'
 
 import { APIError } from '../errors/index.js'
 import { batchProcessing } from '../utilities/batchProcessing.js'
+import { extractRelationshipID } from '../utilities/extractRelationshipID.js'
 import { traverseForLocalizedFields } from '../utilities/traverseForLocalizedFields.js'
 import { branchDocIDField, branchField, MAIN_BRANCH } from './types.js'
 
@@ -71,7 +72,7 @@ export const resolveEffectiveOperations = async ({
 
   for (const change of changes) {
     const collectionSlug = change.collectionSlug as string
-    const docID = relationshipValue(change.doc)
+    const docID = getBranchChangeDocumentID({ change, collectionSlug })
     const shadow = shadowsByChange.get(changeKey({ collectionSlug, docID })) ?? null
 
     if (!shadow) {
@@ -130,10 +131,10 @@ const readChangeShadows = async ({
       processBatch: async ({ batch }) => {
         const createdDocumentIDs = batch
           .filter(({ operation }) => operation === 'create')
-          .map((change) => relationshipValue(change.doc))
+          .map((change) => getBranchChangeDocumentID({ change, collectionSlug }))
         const existingDocumentIDs = batch
           .filter(({ operation }) => operation !== 'create')
-          .map((change) => relationshipValue(change.doc))
+          .map((change) => getBranchChangeDocumentID({ change, collectionSlug }))
         const identityQueries: Where[] = []
 
         if (createdDocumentIDs.length) {
@@ -158,7 +159,13 @@ const readChangeShadows = async ({
         })
 
         for (const shadow of docs as Record<string, unknown>[]) {
-          const docID = relationshipValue(shadow[branchDocIDField] ?? shadow.id)
+          const docID = extractRelationshipID({
+            relationship: shadow[branchDocIDField] ?? shadow.id,
+          })
+
+          if (docID === undefined) {
+            continue
+          }
 
           shadowsByChange.set(changeKey({ collectionSlug, docID }), shadow)
         }
@@ -169,12 +176,20 @@ const readChangeShadows = async ({
   return shadowsByChange
 }
 
-const relationshipValue = (value: unknown): number | string => {
-  if (typeof value === 'object' && value !== null && 'value' in value) {
-    return (value as { value: number | string }).value
+const getBranchChangeDocumentID = ({
+  change,
+  collectionSlug,
+}: {
+  change: Record<string, any>
+  collectionSlug: string
+}): number | string => {
+  const docID = extractRelationshipID({ relationship: change.doc })
+
+  if (docID === undefined) {
+    throw new APIError(`The ${collectionSlug} branch change has no document ID.`, 409)
   }
 
-  return value as number | string
+  return docID
 }
 
 const resolveWrites = async ({

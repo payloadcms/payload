@@ -1490,13 +1490,7 @@ export {
   resolveBranchGlobalWrite,
 } from './branching/globals.js'
 export { getBranchesLocalAPI, mergeBranch } from './branching/merge.js'
-export type {
-  MergeableChange,
-  MergeOptions,
-  MergeProgress,
-  MergeResult,
-  MergeWarning,
-} from './branching/merge.js'
+export type { MergeOptions, MergeResult } from './branching/merge.js'
 
 export type { BlockedChange } from './branching/preflight.js'
 export { runMergePreflight } from './branching/preflight.js'
@@ -1514,6 +1508,13 @@ export { resolveBranchDelete, willBranchAbsorbDelete } from './branching/tombsto
 export type {
   BranchingConfig,
   BranchOperation,
+  MergeableChange,
+  MergeApplicationOutcome,
+  MergeCleanupOutcome,
+  MergeEventChange,
+  MergeProgress,
+  MergeRecoveryOutcome,
+  MergeWarning,
   SanitizedBranchingConfig,
 } from './branching/types.js'
 export {
@@ -1521,8 +1522,12 @@ export {
   branchDocIDField,
   branchesCollectionSlug,
   branchField,
+  branchOperations,
   branchParentField,
   MAIN_BRANCH,
+  mergeApplicationOutcomes,
+  mergeCleanupOutcomes,
+  mergeRecoveryOutcomes,
 } from './branching/types.js'
 export { defaultBranchMergeValidation } from './branching/validation.js'
 export type {

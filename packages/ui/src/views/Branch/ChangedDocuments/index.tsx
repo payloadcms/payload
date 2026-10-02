@@ -1,5 +1,6 @@
 'use client'
 
+import type { BranchOperation } from 'payload'
 import type React from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -24,7 +25,7 @@ export type BranchChange = {
   docID?: number | string
   globalSlug?: string
   id: string
-  operation: 'create' | 'delete' | 'update'
+  operation: BranchOperation
 }
 
 type LoadState = {

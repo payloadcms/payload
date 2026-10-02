@@ -5,7 +5,13 @@ import type { Payload, PayloadRequest } from '../types/index.js'
 import type { DiscardOptions } from './discard.js'
 import type { ResolvedChange } from './effectiveOperations.js'
 import type { BlockedChange } from './preflight.js'
-import type { BranchOperation } from './types.js'
+import type {
+  BranchOperation,
+  MergeableChange,
+  MergeEventChange,
+  MergeProgress,
+  MergeWarning,
+} from './types.js'
 import type { BranchMergeValidationError } from './validation.js'
 
 import {
@@ -58,6 +64,7 @@ import {
 import { readLocalizedBranchWrite } from './readLocalizedBranchWrite.js'
 import { readCollectionMergeSnapshot } from './readMergeSnapshot.js'
 import { isolateBranchState, refreshBranchState, withoutBranch } from './resolveBranch.js'
+import { selectBranchChanges } from './selectBranchChanges.js'
 import { stripBranchMergeData, stripBranchMergeGlobalData } from './stripBranchMergeData.js'
 import {
   branchChangesCollectionSlug,
@@ -75,25 +82,6 @@ import {
 } from './validation.js'
 import { deleteBranchGlobalVersionChain, deleteBranchVersionChain } from './versions.js'
 
-export type MergeableChange = {
-  changeID: number | string
-  /** Absent for a global, which is identified by `globalSlug` instead. */
-  collectionSlug?: string
-  /** Absent for a global: there is one of it, so there is nothing to identify. */
-  docID?: number | string
-  entityType: 'collection' | 'global'
-  globalSlug?: string
-  operation: BranchOperation
-}
-
-export type MergeWarning = {
-  changeID: number | string
-  collectionSlug: string
-  docID: number | string
-  message: string
-  reason: 'main-moved'
-}
-
 export type MergeResult = {
   /** Changes that cannot be applied because of access or an unavailable dependency. */
   blocked: BlockedChange[]
@@ -103,46 +91,6 @@ export type MergeResult = {
   merged: MergeableChange[]
   validationErrors: BranchMergeValidationError[]
   warnings: MergeWarning[]
-}
-
-type MergeApplicationOutcome =
-  | 'applied'
-  | 'attempted'
-  | 'committed'
-  | 'failed'
-  | 'rolledBack'
-  | 'unattempted'
-  | 'unknown'
-
-type MergeEventChange = {
-  after?: unknown
-  afterVersionID?: string
-  applicationOutcome: MergeApplicationOutcome
-  before?: unknown
-  beforeVersionID?: string
-  changeID: string
-  cleanupError?: string
-  cleanupOutcome: 'completed' | 'failed' | 'notNeeded' | 'pending' | 'superseded' | 'unknown'
-  collectionSlug?: string
-  docID?: string
-  docTitle: string
-  error?: string
-  globalSlug?: string
-  operation: BranchOperation
-  recoveryError?: string
-  recoveryOutcome:
-    | 'deleted'
-    | 'failed'
-    | 'notNeeded'
-    | 'pending'
-    | 'restored'
-    | 'unavailable'
-    | 'unknown'
-  sourceID?: string
-  sourceRevision?: string
-  sourceUpdatedAt?: string
-  sourceVersionIDs?: (number | string)[]
-  targetID?: string
 }
 
 type SourceCleanupOutcome = 'completed' | 'superseded'
@@ -176,16 +124,6 @@ type PersistedMergeEvent = {
  * question. Reported by callback rather than persisted: the caller decides
  * whether that means a streamed HTTP response, a log line, or nothing.
  */
-export type MergeProgress = {
-  collectionSlug: string
-  /** 1-based position of the change being applied. */
-  current: number
-  docID: number | string
-  operation: BranchOperation
-  /** Total changes this merge will apply. */
-  total: number
-}
-
 export type MergeOptions = {
   branch: string
   /** Change IDs to apply. Omit to apply every pending change. */
@@ -806,11 +744,11 @@ export const mergeBranch = async (
     where: { branch: { equals: branch } },
   })
 
-  const selectedChanges = allChanges.docs.filter(
-    (change) =>
-      !cleanupRetry.handledChangeIDs.has(String(change.id)) &&
-      (!selected || selected.map(String).includes(String(change.id))),
-  )
+  const selectedChanges = selectBranchChanges({
+    changes: allChanges.docs,
+    excluded: cleanupRetry.handledChangeIDs,
+    selected,
+  })
 
   // Globals travel the same registry but not the same pipeline: there is one of each, so
   // there is no shadow row to resolve, no effective-operation table to consult (§7 is

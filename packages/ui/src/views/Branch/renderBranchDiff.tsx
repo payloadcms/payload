@@ -1,4 +1,4 @@
-import type { CollectionSlug, ServerFunction } from 'payload'
+import type { BranchOperation, CollectionSlug, ServerFunction } from 'payload'
 import type React from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -6,10 +6,7 @@ import { isolateBranchState } from 'payload'
 import { MAIN_BRANCH } from 'payload/shared'
 
 import { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
-import { getClientConfig } from '../../utilities/getClientConfig.js'
-import { getClientSchemaMap } from '../../utilities/getClientSchemaMap.js'
-import { getSchemaMap } from '../../utilities/getSchemaMap.js'
-import { RenderDiff } from '../Version/RenderFieldsToDiff/index.js'
+import { renderBranchEntityDiff } from './renderBranchEntityDiff.js'
 
 export type RenderBranchDiffArgs = {
   branch: string
@@ -18,15 +15,13 @@ export type RenderBranchDiffArgs = {
   /** Absent for a global. */
   docID?: number | string
   globalSlug?: string
-  operation: 'create' | 'delete' | 'update'
+  operation: BranchOperation
 }
 
 export type RenderBranchDiffResult = {
   diff: React.ReactNode
   title: string
 }
-
-const timestampFields = new Set(['createdAt', 'updatedAt'])
 
 /**
  * Renders one changed document's diff, on demand.
@@ -108,47 +103,11 @@ export const renderBranchDiffHandler: ServerFunction<
     operation === 'delete' ? Promise.resolve(null) : read(branch),
   ])
 
-  // Timestamps are bookkeeping, not content. A branched document is written when
-  // it is branched, so `updatedAt` differs on every single change — it would be
-  // the one row present in every diff, and never the one worth reading.
-  const contentFields = entityConfig.fields.filter(
-    (field) => !('name' in field) || !timestampFields.has(field.name),
-  )
-
-  const schemaMap = getSchemaMap({ collectionSlug, config, globalSlug, i18n })
-
-  const clientConfig = getClientConfig({
-    config,
-    i18n,
-    importMap: payload.importMap,
-    user: req.user,
-  })
-
-  const clientSchemaMap = getClientSchemaMap({
+  const { clientConfig, diff } = renderBranchEntityDiff({
     collectionSlug,
-    config: clientConfig,
+    fields: entityConfig.fields,
     globalSlug,
-    i18n,
-    payload,
-    schemaMap,
-  })
-
-  const diff = RenderDiff({
-    clientSchemaMap,
-    customDiffComponents: {},
-    entitySlug: globalSlug ?? collectionSlug,
-    fields: contentFields,
-    i18n,
-    // Only what the branch changed. The unchanged remainder of a document is
-    // noise when the question is "what does merging this do?".
-    fieldsPermissions: true,
-    modifiedOnly: true,
-    parentIndexPath: '',
-    parentIsLocalized: false,
-    parentPath: '',
-    parentSchemaPath: '',
     req,
-    selectedLocales: [],
     versionFromSiblingData: before ?? {},
     versionToSiblingData: after ?? {},
   })

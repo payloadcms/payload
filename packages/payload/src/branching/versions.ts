@@ -1,6 +1,7 @@
 import type { Payload } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 
+import { extractRelationshipID } from '../utilities/extractRelationshipID.js'
 import { rewriteBranchVersionParents } from './branchIDs.js'
 import {
   loadBranchDeletions,
@@ -213,7 +214,7 @@ export const projectBranchVersionParents = (docs: Record<string, any>[]): void =
     const canonical = doc?.[branchParentField]
 
     if (canonical !== undefined && canonical !== null) {
-      doc.parent = typeof canonical === 'object' ? canonical.value : canonical
+      doc.parent = extractRelationshipID({ relationship: canonical })
     }
   }
 }

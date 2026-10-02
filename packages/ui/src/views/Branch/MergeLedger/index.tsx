@@ -1,5 +1,7 @@
 'use client'
 
+import type { MergeEventChange as PersistedMergeEventChange } from 'payload'
+
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useRef, useState } from 'react'
@@ -17,14 +19,10 @@ import './index.css'
 
 const baseClass = 'merge-ledger'
 
-export type MergeEventChange = {
-  collectionSlug: string
-  docID: string
-  docTitle: string
-  /** Set instead of `collectionSlug`/`docID` when the merged change was a global. */
-  globalSlug?: string
-  operation: 'create' | 'delete' | 'update'
-}
+export type MergeEventChange = Pick<
+  PersistedMergeEventChange,
+  'collectionSlug' | 'docID' | 'docTitle' | 'globalSlug' | 'operation'
+>
 
 export type MergeEvent = {
   changes: MergeEventChange[]

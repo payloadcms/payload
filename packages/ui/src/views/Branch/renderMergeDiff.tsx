@@ -1,12 +1,9 @@
-import type { ServerFunction } from 'payload'
+import type { MergeEventChange, ServerFunction } from 'payload'
 import type React from 'react'
 
 import { branchMergesCollectionSlug } from 'payload/shared'
 
-import { getClientConfig } from '../../utilities/getClientConfig.js'
-import { getClientSchemaMap } from '../../utilities/getClientSchemaMap.js'
-import { getSchemaMap } from '../../utilities/getSchemaMap.js'
-import { RenderDiff } from '../Version/RenderFieldsToDiff/index.js'
+import { renderBranchEntityDiff } from './renderBranchEntityDiff.js'
 
 export type RenderMergeDiffArgs = {
   /** Position within the merge event's `changes` array. */
@@ -18,8 +15,6 @@ export type RenderMergeDiffResult = {
   diff?: React.ReactNode
   status: 'ready' | 'unavailable'
 }
-
-const timestampFields = new Set(['createdAt', 'updatedAt'])
 
 /**
  * Renders what one already-merged document changed, from the ledger.
@@ -40,7 +35,7 @@ export const renderMergeDiffHandler: ServerFunction<
     throw new Error('Unauthorized')
   }
 
-  const { i18n, payload } = req
+  const { payload } = req
   const { config } = payload
 
   const event = await payload.findByID({
@@ -54,15 +49,18 @@ export const renderMergeDiffHandler: ServerFunction<
 
   const change = (
     event as {
-      changes?: {
-        after?: unknown
-        afterVersionID?: string
-        before?: unknown
-        beforeVersionID?: string
-        collectionSlug?: string
-        globalSlug?: string
-        operation?: 'create' | 'delete' | 'update'
-      }[]
+      changes?: Partial<
+        Pick<
+          MergeEventChange,
+          | 'after'
+          | 'afterVersionID'
+          | 'before'
+          | 'beforeVersionID'
+          | 'collectionSlug'
+          | 'globalSlug'
+          | 'operation'
+        >
+      >[]
     }
   )?.changes?.[changeIndex]
 
@@ -134,48 +132,17 @@ export const renderMergeDiffHandler: ServerFunction<
     return { status: 'unavailable' }
   }
 
-  // Timestamps are bookkeeping, not content, and `updatedAt` differs on every
-  // merged document by definition — it would be the one row present in every diff.
-  const contentFields = entityConfig.fields.filter(
-    (field) => !('name' in field) || !timestampFields.has(field.name),
-  )
-
-  const schemaMap = getSchemaMap({ collectionSlug, config, globalSlug, i18n })
-
-  const clientConfig = getClientConfig({
-    config,
-    i18n,
-    importMap: payload.importMap,
-    user: req.user,
-  })
-
-  const clientSchemaMap = getClientSchemaMap({
+  const { diff } = renderBranchEntityDiff({
     collectionSlug,
-    config: clientConfig,
+    fields: entityConfig.fields,
     globalSlug,
-    i18n,
-    payload,
-    schemaMap,
+    req,
+    versionFromSiblingData,
+    versionToSiblingData,
   })
 
   return {
-    diff: RenderDiff({
-      clientSchemaMap,
-      customDiffComponents: {},
-      entitySlug: globalSlug ?? collectionSlug,
-      fields: contentFields,
-      fieldsPermissions: true,
-      i18n,
-      modifiedOnly: true,
-      parentIndexPath: '',
-      parentIsLocalized: false,
-      parentPath: '',
-      parentSchemaPath: '',
-      req,
-      selectedLocales: [],
-      versionFromSiblingData,
-      versionToSiblingData,
-    }),
+    diff,
     status: 'ready',
   }
 }

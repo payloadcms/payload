@@ -1,11 +1,15 @@
 'use client'
 
-import type { MergeResult, MergeStreamEvent } from 'payload'
+import type { MergeProgress, MergeResult, MergeStreamEvent } from 'payload'
 
 import { branchesCollectionSlug, formatAdminURL, MAIN_BRANCH } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+import type {
+  BranchMergeSummary,
+  UpcomingBranchMerge,
+} from '../../utilities/scheduleMergeHandler.js'
 import type { SummarizableChange } from '../ChangeSummary/index.js'
 
 import { CheckboxInput } from '../../fields/Checkbox/Input.js'
@@ -38,11 +42,6 @@ type MergeMode = 'now' | 'schedule'
  */
 const SUMMARY_SAMPLE_LIMIT = 200
 
-type Progress = {
-  current: number
-  total: number
-}
-
 /**
  * The modal every merge entry point opens.
  *
@@ -72,7 +71,7 @@ export const MergeBranchModal: React.FC = () => {
   const [mode, setMode] = useState<MergeMode>('now')
   const [scheduledFor, setScheduledFor] = useState<Date | undefined>()
   const [isMerging, setIsMerging] = useState(false)
-  const [progress, setProgress] = useState<null | Progress>(null)
+  const [progress, setProgress] = useState<MergeProgress | null>(null)
   const [countedChanges, setCountedChanges] = useState<null | number>(null)
   /** The branch's changes, read here when the opener did not already know them. */
   const [sampledChanges, setSampledChanges] = useState<null | SummarizableChange[]>(null)
@@ -80,7 +79,7 @@ export const MergeBranchModal: React.FC = () => {
   const [outcome, setOutcome] = useState<MergeResult | null>(null)
   const [closeBranch, setCloseBranch] = useState(false)
   const [isScheduling, setIsScheduling] = useState(false)
-  const [upcoming, setUpcoming] = useState<{ id: number | string; waitUntil: string }[]>([])
+  const [upcoming, setUpcoming] = useState<UpcomingBranchMerge[]>([])
 
   const isOpen = isModalOpen(mergeBranchModalSlug)
   const branchID = target?.branchID
@@ -107,7 +106,7 @@ export const MergeBranchModal: React.FC = () => {
         const json = (await serverFunction({
           name: 'get-branch-merge-summary',
           args: { branchID, sampleLimit: SUMMARY_SAMPLE_LIMIT },
-        })) as { docs?: SummarizableChange[]; totalDocs?: number }
+        })) as BranchMergeSummary
 
         if (!isCancelled && typeof json?.totalDocs === 'number') {
           setCountedChanges(json.totalDocs)
@@ -141,7 +140,7 @@ export const MergeBranchModal: React.FC = () => {
       const upcomingMerges = (await serverFunction({
         name: 'get-upcoming-branch-merges',
         args: { branchID },
-      })) as { id: number | string; waitUntil: string }[]
+      })) as UpcomingBranchMerge[]
 
       setUpcoming(upcomingMerges)
     } catch (_err) {
@@ -605,7 +604,7 @@ const readMergeStream = async ({
   onProgress,
 }: {
   body: ReadableStream<Uint8Array>
-  onProgress: (progress: Progress) => void
+  onProgress: (progress: MergeProgress) => void
 }): Promise<Extract<MergeStreamEvent, { type: 'complete' | 'error' }> | null> => {
   const reader = body.getReader()
   const decoder = new TextDecoder()
@@ -630,7 +629,7 @@ const readMergeStream = async ({
     }
 
     if (event.type === 'progress') {
-      onProgress({ current: Number(event.current), total: Number(event.total) })
+      onProgress(event)
 
       return null
     }

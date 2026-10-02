@@ -1,5 +1,6 @@
 'use client'
 
+import type { BranchOperation } from 'payload'
 import type React from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -15,7 +16,7 @@ export type SummarizableChange = {
   /** Absent for a global. */
   collectionSlug?: string
   globalSlug?: string
-  operation?: 'create' | 'delete' | 'update'
+  operation?: BranchOperation
 }
 
 /** Beyond this the sentence stops being readable, and the rest is rolled into a count. */

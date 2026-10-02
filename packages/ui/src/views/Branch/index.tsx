@@ -1,9 +1,10 @@
-import type { DocumentViewServerProps } from 'payload'
+import type { BranchOperation, DocumentViewServerProps } from 'payload'
 
 import {
   branchChangesCollectionSlug,
   branchesCollectionSlug,
   branchMergesCollectionSlug,
+  extractRelationshipID,
 } from 'payload/shared'
 import React from 'react'
 
@@ -91,7 +92,7 @@ export async function BranchChangesView(props: DocumentViewServerProps) {
         return acc
       }
 
-      const docID = typeof row.doc === 'object' ? row.doc?.value : row.doc
+      const docID = extractRelationshipID({ relationship: row.doc })
 
       if (row.collectionSlug && docID !== undefined && docID !== null && row.operation) {
         acc.push({
@@ -195,7 +196,7 @@ export async function BranchChangesView(props: DocumentViewServerProps) {
         docID?: string
         docTitle?: string
         globalSlug?: string
-        operation?: string
+        operation?: BranchOperation
       }[]
       id: number | string
       mergedAt?: string
@@ -209,7 +210,7 @@ export async function BranchChangesView(props: DocumentViewServerProps) {
         docID: change.docID ?? '',
         docTitle: change.docTitle ?? change.docID ?? '',
         globalSlug: change.globalSlug,
-        operation: (change.operation ?? 'update') as BranchChange['operation'],
+        operation: change.operation ?? 'update',
       })),
       mergedAt: row.mergedAt ?? '',
       mergedByLabel: row.mergedByLabel,

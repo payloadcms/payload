@@ -147,6 +147,7 @@ export {
   deepMergeWithSourceArrays,
 } from '../utilities/deepMerge.js'
 export { extractID } from '../utilities/extractID.js'
+export { extractRelationshipID } from '../utilities/extractRelationshipID.js'
 
 export {
   expandOwnDottedKey,
