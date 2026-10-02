@@ -181,13 +181,13 @@ describe('Types testing', () => {
       expect<FieldPermissions>().type.toHaveProperty('validate')
     })
 
-    test('should require collection create data and a locale', () => {
+    test('should require collection create data and allow the locale to be omitted', () => {
       expect(payload.validate).type.toBeCallableWith({
         collection: 'pages',
         data: {},
         locale: null,
       })
-      expect(payload.validate).type.not.toBeCallableWith({
+      expect(payload.validate).type.toBeCallableWith({
         collection: 'pages',
         data: {},
       })
@@ -207,7 +207,14 @@ describe('Types testing', () => {
       expect(payload.validate).type.toBeCallableWith({
         id: 'document-id',
         collection: 'pages',
+      })
+      expect(payload.validate).type.toBeCallableWith({
+        id: 'document-id',
+        collection: 'pages',
         locale: null,
+      })
+      expect(payload.validateGlobal).type.toBeCallableWith({
+        slug: 'menu',
       })
       expect(payload.validateGlobal).type.toBeCallableWith({
         slug: 'menu',

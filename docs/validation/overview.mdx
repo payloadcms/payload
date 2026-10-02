@@ -59,8 +59,8 @@ const globalResult = await payload.validateGlobal({
 })
 ```
 
-For projects without localization, pass `locale: null` to the Local API or use `?locale=all` with
-the REST API.
+If you omit `locale`, Payload uses the request locale or the configured default locale. Projects
+without localization do not need to provide one.
 
 Use `context` to add values to `req.context` for the validation lifecycle. You can also reuse a
 partial request with `req`.
@@ -104,8 +104,8 @@ authoritative for uniqueness constraints.
 
 ## REST API
 
-Validation endpoints use `POST`. Send candidate data as a JSON object and select locales with the
-required `locale` query parameter.
+Validation endpoints use `POST`. Send candidate data as a JSON object. The optional `locale` query
+parameter selects locales; otherwise Payload uses the request locale or configured default locale.
 
 ```ts
 // Collection create candidate
@@ -187,10 +187,10 @@ use the Local or REST API for that. GraphQL validation always enforces access co
 
 ## Locale semantics
 
-`locale` accepts one locale, a non-empty array, or `'all'`. Duplicate locales are removed. `'all'`
-uses the locales returned by `localization.filterAvailableLocales`, when configured. Errors from
-localized validation passes are tagged with the locale that failed; non-localized validation may
-omit `locale`.
+`locale` accepts one locale, a non-empty array, or `'all'`, and defaults to the request locale or the
+configured default locale. Duplicate locales are removed. `'all'` uses the locales returned by
+`localization.filterAvailableLocales`, when configured. Errors from localized validation passes are
+tagged with the locale that failed; non-localized validation may omit `locale`.
 
 When validating multiple locales, Payload validates the same `data` against each selected locale
 and combines the results.

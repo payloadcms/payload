@@ -872,6 +872,26 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
       expect(localePassEvents.map(({ localeAtStart }) => localeAtStart)).toEqual(['es', 'en'])
     })
 
+    test('should use the default locale when locale is omitted', async ({ payload }) => {
+      const result = await payload.validate({
+        collection: validationCollectionSlug,
+        data: {
+          summary: 'candidate summary',
+          title: '',
+        },
+      })
+
+      expect(result).toMatchObject({
+        errors: [
+          {
+            locale: 'en',
+            path: 'title',
+          },
+        ],
+        valid: false,
+      })
+    })
+
     test('should reject empty, unknown, and unavailable locale selectors', async ({ payload }) => {
       await expect(
         payload.validate({
@@ -1229,16 +1249,6 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
             locale: 'en',
           },
           errorMessage: 'Validation create simulation requires data',
-        },
-        {
-          args: {
-            collection: validationCollectionSlug,
-            data: {
-              summary: 'candidate summary',
-              title: 'Candidate title',
-            },
-          },
-          errorMessage: 'Validation requires a locale',
         },
       ]
 
@@ -2060,6 +2070,27 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
       expect(req.operation).toBe('read')
     })
 
+    test('should use the default locale for global validation when locale is omitted', async ({
+      payload,
+    }) => {
+      const result = await payload.validateGlobal({
+        slug: validationGlobalSlug,
+        data: {
+          title: '',
+        },
+      })
+
+      expect(result).toMatchObject({
+        errors: [
+          {
+            locale: 'en',
+            path: 'title',
+          },
+        ],
+        valid: false,
+      })
+    })
+
     test('should return errors for invalid partial global data without persisting it', async ({
       payload,
     }) => {
@@ -2390,7 +2421,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
       payload,
       restClient,
     }) => {
-      const response = await restClient.POST(`/${validationCollectionSlug}/validate?locale=en`, {
+      const response = await restClient.POST(`/${validationCollectionSlug}/validate`, {
         body: JSON.stringify({
           summary: 'candidate summary',
           title: '',
@@ -2421,11 +2452,6 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
         endpoint: `/${string}`
         expectedMessage: string
       }> = [
-        {
-          body: { summary: 'candidate summary', title: 'Candidate title' },
-          endpoint: `/${validationCollectionSlug}/validate`,
-          expectedMessage: 'Validation requires a locale.',
-        },
         {
           body: { summary: 'candidate summary', title: 'Candidate title' },
           endpoint: `/${validationCollectionSlug}/validate?locale=`,
@@ -2615,14 +2641,11 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
     })
 
     test('should validate global data without persisting it', async ({ payload, restClient }) => {
-      const response = await restClient.POST(
-        `/globals/${validationGlobalSlug}/validate?locale=en`,
-        {
-          body: JSON.stringify({
-            title: '',
-          }),
-        },
-      )
+      const response = await restClient.POST(`/globals/${validationGlobalSlug}/validate`, {
+        body: JSON.stringify({
+          title: '',
+        }),
+      })
       const afterValidation = await payload.findGlobal({
         slug: validationGlobalSlug,
         locale: 'en',

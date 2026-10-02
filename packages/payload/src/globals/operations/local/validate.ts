@@ -1,7 +1,5 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import { status as httpStatus } from 'http-status'
-
 import type { ValidationResult } from '../../../collections/operations/local/validate.js'
 import type {
   GlobalSlug,
@@ -32,13 +30,13 @@ export type ValidateGlobalOptions<TSlug extends GlobalSlug> = {
   /** Optional partial candidate data to merge over the selected stored global. */
   data?: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
   /**
-   * A locale, a non-empty locale array, or `'all'`.
+   * A locale, a non-empty locale array, or `'all'`. Defaults to the request locale, or the
+   * configured default locale.
    *
    * Each selected locale receives an independent copy of the same candidate `data`.
-   * `'all'` resolves through `localization.filterAvailableLocales` when configured. Use `null`
-   * for projects without localization.
+   * `'all'` resolves through `localization.filterAvailableLocales` when configured.
    */
-  locale: ValidationLocaleSelector
+  locale?: ValidationLocaleSelector
   /** An existing request to reuse for user, locale, and context. */
   req?: Partial<PayloadRequest>
   /** The global slug to validate against. */
@@ -86,10 +84,6 @@ export async function validateGlobalLocalWithDataLocale<TSlug extends GlobalSlug
     validationDataLocale,
   } = options
   const { draft = false } = options
-
-  if (locale === undefined) {
-    throw new APIError('Validation requires a locale.', httpStatus.BAD_REQUEST)
-  }
 
   const globalConfig = payload.globals.config.find((config) => config.slug === slug)
 

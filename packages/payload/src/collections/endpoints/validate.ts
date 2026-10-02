@@ -16,12 +16,14 @@ import { validateLocal } from '../operations/local/validate.js'
 /**
  * Validates collection create candidate data.
  *
- * `POST {routes.api}/{collection}/validate` requires an object body and one or more `locale` query
- * parameters, or `locale=all`. Field validation failures return a `200` ValidationResult.
+ * `POST {routes.api}/{collection}/validate` requires an object body. The optional `locale` query
+ * parameter accepts one or more locales, or `locale=all`. Field validation failures return a
+ * `200` ValidationResult.
  */
 export const validateHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
-  const locale = parseValidationLocaleSelector(req.query.locale)
+  const locale =
+    req.query.locale === undefined ? undefined : parseValidationLocaleSelector(req.query.locale)
 
   assertValidationData(req.data)
 
@@ -45,14 +47,15 @@ export const validateHandler: PayloadHandler = async (req) => {
 /**
  * Validates a stored collection document with optional partial candidate data.
  *
- * `POST {routes.api}/{collection}/{id}/validate` accepts an optional object body and requires one
- * or more `locale` query parameters, or `locale=all`. The newest available draft is used as the
- * base, falling back to the main document. Field validation failures return a `200`
+ * `POST {routes.api}/{collection}/{id}/validate` accepts an optional object body. The optional
+ * `locale` query parameter accepts one or more locales, or `locale=all`. The newest available draft
+ * is used as the base, falling back to the main document. Field validation failures return a `200`
  * ValidationResult.
  */
 export const validateByIDHandler: PayloadHandler = async (req) => {
   const { id, collection } = getRequestCollectionWithID(req)
-  const locale = parseValidationLocaleSelector(req.query.locale)
+  const locale =
+    req.query.locale === undefined ? undefined : parseValidationLocaleSelector(req.query.locale)
 
   if (req.data !== undefined) {
     assertValidationData(req.data)

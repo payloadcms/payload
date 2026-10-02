@@ -36,7 +36,7 @@ export async function runLocaleScopedValidation<TData>({
   context: RequestContext | undefined
   data: TData
   fields: Field[]
-  locale: ValidationLocaleSelector
+  locale: undefined | ValidationLocaleSelector
   payload: Payload
   req: Partial<PayloadRequest> | undefined
   runPass: (args: {
@@ -55,8 +55,9 @@ export async function runLocaleScopedValidation<TData>({
     user: cloneValidationValue(user),
   })
   baseReq.operation = 'validate'
+  const localeSelector = locale === undefined ? (baseReq.locale ?? null) : locale
   const locales = await resolveValidationLocales({
-    locale,
+    locale: localeSelector,
     req: baseReq,
   })
   const results = await runValidationLocalePasses({

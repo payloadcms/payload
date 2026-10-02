@@ -47,13 +47,13 @@ type BaseOptions<TSlug extends CollectionSlug> = {
    */
   context?: RequestContext
   /**
-   * A locale, a non-empty locale array, or `'all'`.
+   * A locale, a non-empty locale array, or `'all'`. Defaults to the request locale, or the
+   * configured default locale.
    *
    * Each selected locale receives an independent copy of the same candidate `data`.
-   * `'all'` resolves through `localization.filterAvailableLocales` when configured. Use `null`
-   * for projects without localization.
+   * `'all'` resolves through `localization.filterAvailableLocales` when configured.
    */
-  locale: ValidationLocaleSelector
+  locale?: ValidationLocaleSelector
   /**
    * An existing request to reuse for user, locale, and context.
    */
@@ -146,10 +146,6 @@ export async function validateLocalWithDataLocale<TSlug extends CollectionSlug>(
     validationDataLocale,
     validationTrash,
   } = options
-
-  if (locale === undefined) {
-    throw new APIError('Validation requires a locale.', httpStatus.BAD_REQUEST)
-  }
 
   if (id === undefined && data === undefined) {
     throw new APIError('Validation create simulation requires data.', httpStatus.BAD_REQUEST)
