@@ -101,10 +101,26 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
     })
 
     test('should sort by multiple fields', async ({ payload, restClient }) => {
-      const doc1 = await payload.create({ collection: 'sort', data: { title: 'a', number: 1 }, overrideAccess: true })
-      const doc2 = await payload.create({ collection: 'sort', data: { title: 'b', number: 1 }, overrideAccess: true })
-      const doc3 = await payload.create({ collection: 'sort', data: { title: 'a', number: 2 }, overrideAccess: true })
-      const doc4 = await payload.create({ collection: 'sort', data: { title: 'b', number: 3 }, overrideAccess: true })
+      const doc1 = await payload.create({
+        collection: 'sort',
+        data: { title: 'a', number: 1 },
+        overrideAccess: true,
+      })
+      const doc2 = await payload.create({
+        collection: 'sort',
+        data: { title: 'b', number: 1 },
+        overrideAccess: true,
+      })
+      const doc3 = await payload.create({
+        collection: 'sort',
+        data: { title: 'a', number: 2 },
+        overrideAccess: true,
+      })
+      const doc4 = await payload.create({
+        collection: 'sort',
+        data: { title: 'b', number: 3 },
+        overrideAccess: true,
+      })
 
       const query = `query {
         Sorts(sort: "title, number") {
@@ -1177,7 +1193,11 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
           overrideAccess: true,
         })
 
-        await payload.delete({ collection: 'relation', id: relation_1_draft.id, overrideAccess: true })
+        await payload.delete({
+          collection: 'relation',
+          id: relation_1_draft.id,
+          overrideAccess: true,
+        })
 
         const query = `query {
           Posts(draft:true,where: { title: { equals: "post with relations in draft" }}) {
