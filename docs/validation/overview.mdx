@@ -112,22 +112,9 @@ internal calls that must skip access control.
 
 ### Database uniqueness checks
 
-Collection validation checks fields configured with `unique: true` and collection compound indexes
-configured with `unique: true`. It checks the complete candidate after field hooks and validators
-run. For partial updates, Payload combines the candidate with the stored document and excludes that
-document from the database query.
-
-These checks apply across the collection, even if the caller cannot read a conflicting document.
-They only cover constraints declared in the Payload collection configuration. They do not inspect
-indexes created directly in the database or by a migration. Upload `filenameCompoundIndex`
-constraints are also not checked in this initial implementation.
-
-Payload skips uniqueness checks for `null` and missing values. It checks a compound index only when
-every indexed field has a non-null value. Database adapters have different rules for these values,
-so the database remains authoritative for those candidates. Checks use the main collection and do
-not include draft-only versions. The check is also not a lock: another request can write the same
-value after validation succeeds. Applications must still handle a uniqueness error from the later
-write.
+Payload manually checks fields and compound indexes configured with `unique: true` during collection
+validation. These checks can identify conflicts before a write, but the database remains
+authoritative for uniqueness constraints.
 
 ## REST API
 
