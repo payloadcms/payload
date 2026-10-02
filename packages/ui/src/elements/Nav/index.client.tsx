@@ -64,7 +64,7 @@ export const DefaultNavClient: React.FC<{
               return (
                 <div className={`${baseClass}__link-wrapper`} key={i}>
                   <Link
-                    aria-current={isActive ? 'page' : undefined}
+                    aria-current={isActive ? (pathname === href ? 'page' : 'location') : undefined}
                     className={linkClass}
                     href={href}
                     id={id}
