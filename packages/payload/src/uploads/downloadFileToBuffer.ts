@@ -91,7 +91,10 @@ export const downloadFileToBuffer = async ({ data, req, uploadConfig }: Args): P
       name: filename,
       data: Buffer.from(data),
       mimetype: response.headers.get('content-type') || undefined!,
-      size: Number(response.headers.get('content-length')) || 0,
+      // Use the size of the body that was actually read. The content-length header
+      // is unreliable here: it is absent on chunked/compressed responses, and when
+      // compressed it describes the encoded size, not the decoded one.
+      size: data.byteLength,
     }
   }
 
