@@ -314,7 +314,7 @@ export const getInstructionsCollection = ({
           }
 
           // Keep one configuration-owned row per target without unique indexes on nullable slugs.
-          const id = collectionSlug ? `collection:${collectionSlug}` : `global:${globalSlug}`
+          const id = collectionSlug ? `collection-${collectionSlug}` : `global-${globalSlug}`
 
           if (operation === 'update' && originalDoc?.id !== id) {
             throw new ValidationError({

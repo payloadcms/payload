@@ -20,11 +20,11 @@ test('should manage LLM instructions from the collection menu', async ({ page })
   await expect(page.getByRole('menuitem', { name: 'Edit LLM instructions' })).toHaveCount(1)
   await expect(page.getByRole('menuitem', { name: 'Edit LLM instructions' })).toHaveAttribute(
     'href',
-    new URL(`${instructionsURL}/collection%3Apages`).pathname,
+    new URL(`${instructionsURL}/collection-pages`).pathname,
   )
   await page.getByRole('menuitem', { name: 'Edit LLM instructions' }).click()
 
-  await expect(page).toHaveURL(`${instructionsURL}/collection%3Apages`)
+  await expect(page).toHaveURL(`${instructionsURL}/collection-pages`)
   await page.getByRole('tab', { name: 'Additional instructions', exact: true }).click()
   await expect(page.locator('.llm-instructions__description')).toContainText('Pages collection')
 
@@ -81,11 +81,11 @@ test('should open the correct instructions document from the global menu', async
   await page.getByRole('button', { name: 'More options', exact: true }).click()
   await expect(page.getByRole('menuitem', { name: 'Edit LLM instructions' })).toHaveAttribute(
     'href',
-    new URL(`${instructionsURL}/global%3Asite-settings`).pathname,
+    new URL(`${instructionsURL}/global-site-settings`).pathname,
   )
   await page.getByRole('menuitem', { name: 'Edit LLM instructions' }).click()
 
-  await expect(page).toHaveURL(`${instructionsURL}/global%3Asite-settings`)
+  await expect(page).toHaveURL(`${instructionsURL}/global-site-settings`)
   await page.getByRole('tab', { name: 'Additional instructions', exact: true }).click()
   await expect(page.locator('.llm-instructions__description')).toContainText('Site Settings global')
   await page.getByRole('tab', { name: 'System instructions (read-only)' }).click()
