@@ -98,3 +98,31 @@ The default implementation uses existing adapter methods. Custom adapters create
 It's important to note that nearly every Payload feature is available in all of our officially supported Database Adapters, including [Localization](../configuration/localization), [Arrays](../fields/array), [Blocks](../fields/blocks), etc. The only thing that is not supported in SQLite yet is the [Point Field](/docs/fields/point), but that should be added soon.
 
 It's up to you to choose which database you would like to use based on the requirements of your project. Payload has no opinion on which database you should ultimately choose.
+
+## Copying a stored document
+
+Use `payload.db.copy` to copy one stored collection document. The method selects the source with a `where` query and creates a new database record. Use `data` to replace top-level source values. Payload also assigns new IDs to copied array and block rows.
+
+```ts
+const copiedPost = await payload.db.copy({
+  collection: 'posts',
+  data: {
+    title: 'Copied post',
+  },
+  req,
+  where: {
+    id: {
+      equals: sourcePostID,
+    },
+  },
+})
+```
+
+### Key differences
+
+- `payload.db.copy` makes a one-to-one storage copy: one current source document becomes one new database record. It does not copy version history.
+- It copies stored values as-is, except document, array, and block row IDs. Unique fields and custom database indexes can reject the new record. Use `data` overrides or handle these conflicts yourself.
+- Custom-ID collections require `data.id` with the configured ID type. ID hooks do not run, so the caller must supply a unique destination ID.
+- It does not run access control, hooks, field validation, or upload handling. Use [`payload.duplicate`](/docs/local-api/overview#collection-create) for normal application duplication.
+
+The default implementation uses existing adapter methods. Custom adapters created with `createDatabaseAdapter` receive this implementation automatically. Direct implementations of `BaseDatabaseAdapter` must provide `copy` after this change.
