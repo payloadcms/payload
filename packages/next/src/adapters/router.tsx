@@ -12,6 +12,8 @@ import {
 } from 'next/navigation.js'
 import React from 'react'
 
+import { decodeParams } from '../utilities/decodeParams.js'
+
 type LinkComponent = React.FC<
   {
     children?: React.ReactNode
@@ -47,7 +49,8 @@ export const NextRouterAdapter: React.FC<{ children: React.ReactNode }> = ({ chi
   const nextRouter = useNextRouter()
   const pathname = useNextPathname()
   const searchParams = useNextSearchParams()
-  const params = useNextParams()
+  const nextParams = useNextParams()
+  const params = React.useMemo(() => decodeParams({ params: nextParams }), [nextParams])
 
   const router = React.useMemo<RouterAdapterContextValue['router']>(
     () => ({

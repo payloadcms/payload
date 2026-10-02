@@ -11,6 +11,7 @@ export type GeneratePageMetadataArgs = {
   adminViews: AdminViewAdapter<unknown, MetaConfig>
   config: SanitizedConfig
   i18n: I18nClient
+  /** Decoded route params, normalized by the framework adapter. */
   params: { [key: string]: string | string[] | undefined; segments?: string | string[] }
 }
 
@@ -37,7 +38,7 @@ export const generatePageMetadata = async ({
 }: GeneratePageMetadataArgs): Promise<MetaConfig> => {
   const rawSegments = params.segments
   const segments = Array.isArray(rawSegments) ? rawSegments : []
-  const currentRoute = `/${segments.join('/')}`
+  const currentRoute = `/${segments.map(encodeURIComponent).join('/')}`
   const [segmentOne, segmentTwo, segmentThree] = segments
 
   const isCollection = segmentOne === 'collections'

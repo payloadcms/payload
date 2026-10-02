@@ -65,7 +65,13 @@ export interface FileRouteTypes {
   fullPaths: '/' | '/admin/$' | '/api/$' | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/admin/$' | '/api/$' | '/admin'
-  id: '__root__' | '/' | '/_payload' | '/_payload/admin/$' | '/_payload/api/$' | '/_payload/admin/'
+  id:
+    | '__root__'
+    | '/'
+    | '/_payload'
+    | '/_payload/admin/$'
+    | '/_payload/api/$'
+    | '/_payload/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -125,7 +131,8 @@ const PayloadRouteChildren: PayloadRouteChildren = {
   PayloadAdminIndexRoute: PayloadAdminIndexRoute,
 }
 
-const PayloadRouteWithChildren = PayloadRoute._addFileChildren(PayloadRouteChildren)
+const PayloadRouteWithChildren =
+  PayloadRoute._addFileChildren(PayloadRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,

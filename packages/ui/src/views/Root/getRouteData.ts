@@ -5,7 +5,6 @@ import type {
   CustomComponent,
   DocumentSubViewTypes,
   Payload,
-  PayloadComponent,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
@@ -19,7 +18,6 @@ import { formatAdminURL, isNumber } from 'payload/shared'
 import type { ViewFromConfig } from './getCustomViewByRoute.js'
 
 import { isPathMatchingRoute } from '../../utilities/isPathMatchingRoute.js'
-import { sanitizeID } from '../../utilities/sanitizeID.js'
 import { TrashView } from '../CollectionTrash/index.js'
 import { DocumentView } from '../Document/index.js'
 import { forgotPasswordBaseClass } from '../ForgotPassword/index.js'
@@ -83,6 +81,7 @@ export type GetRouteDataArgs = {
   searchParams: {
     [key: string]: string | string[]
   }
+  /** Decoded path segments, normalized by the framework adapter. */
   segments: string[]
 }
 
@@ -417,7 +416,7 @@ export const getRouteData = ({
   if (collectionConfig) {
     if (routeParams.id) {
       routeParams.id = parseDocumentID({
-        id: sanitizeID(routeParams.id),
+        id: routeParams.id,
         collectionSlug: collectionConfig.slug,
         payload,
       })
@@ -425,7 +424,7 @@ export const getRouteData = ({
 
     if (routeParams.versionID) {
       routeParams.versionID = parseDocumentID({
-        id: sanitizeID(routeParams.versionID),
+        id: routeParams.versionID,
         collectionSlug: collectionConfig.slug,
         payload,
       })
@@ -433,8 +432,6 @@ export const getRouteData = ({
   }
 
   if (globalConfig && routeParams.versionID) {
-    routeParams.versionID = sanitizeID(routeParams.versionID)
-
     routeParams.versionID =
       payload.db.defaultIDType === 'number' && isNumber(routeParams.versionID)
         ? Number(routeParams.versionID)

@@ -6239,7 +6239,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
     })
   })
 
-  test('should decode custom IDs once when loading an admin document route', async ({
+  test('should preserve decoded custom IDs when loading an admin document route', async ({
     payload,
   }) => {
     const doc = await payload.create({
@@ -6253,14 +6253,14 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
     })
 
     const req = await createPayloadRequest({ payload, user: user.user })
-    const segments = ['collections', customIDSlug, encodeURIComponent(doc.id)]
+    const segments = ['collections', customIDSlug, doc.id]
     const { routeParams } = getRouteData({
       adminRoute: payload.config.routes.admin,
       adminViews: defaultAdminViews,
       collectionConfig: payload.collections[customIDSlug].config,
       currentRoute: formatAdminURL({
         adminRoute: payload.config.routes.admin,
-        path: `/${segments.join('/')}`,
+        path: `/${segments.map(encodeURIComponent).join('/')}`,
       }),
       payload,
       searchParams: {},

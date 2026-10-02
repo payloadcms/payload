@@ -57,6 +57,7 @@ export type RenderRootArgs = {
   key?: string
   /** Framework notFound implementation (e.g. next/navigation notFound). Called before req is available. */
   notFound: () => never
+  /** Decoded path segments, normalized by the framework adapter. */
   params: Promise<{ segments: string[] }>
   /** Framework redirect implementation (e.g. next/navigation redirect). Called before req is available. */
   redirect: (url: string) => never
@@ -90,7 +91,9 @@ export const renderRoot = async ({
   // route with possible trailing slash
   const currentRouteURL = formatAdminURL({
     adminRoute,
-    path: Array.isArray(params.segments) ? `/${params.segments.join('/')}` : null,
+    path: Array.isArray(params.segments)
+      ? `/${params.segments.map(encodeURIComponent).join('/')}`
+      : null,
   })
   // route without possible trailing slash
   const currentRouteToCompare = stripTrailingSlash(currentRouteURL)

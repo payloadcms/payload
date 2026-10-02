@@ -5,6 +5,7 @@ import React, { createContext, use } from 'react'
 
 export type RouterAdapterContextValue = {
   Link: React.ComponentType<LinkAdapterProps>
+  /** Decoded route params, normalized by the framework adapter. */
   params: Record<string, string | string[]>
   pathname: string
   router: RouterAdapterRouter

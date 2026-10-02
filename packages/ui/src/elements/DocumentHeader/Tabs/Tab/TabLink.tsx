@@ -40,14 +40,14 @@ export const DocumentTabLink: React.FC<{
 
   let docPath = formatAdminURL({
     adminRoute,
-    path: `/${isCollection ? 'collections' : 'globals'}/${entitySlug}`,
+    path: `/${isCollection ? 'collections' : 'globals'}/${encodeURIComponent(entitySlug)}`,
   })
 
   if (isCollection) {
     if (segmentThree === 'trash' && segmentFour) {
-      docPath += `/trash/${segmentFour}`
+      docPath += `/trash/${encodeURIComponent(segmentFour)}`
     } else if (segmentThree) {
-      docPath += `/${segmentThree}`
+      docPath += `/${encodeURIComponent(segmentThree)}`
     }
   }
 

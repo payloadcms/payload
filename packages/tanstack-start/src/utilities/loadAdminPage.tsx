@@ -14,6 +14,7 @@ export type LoadAdminPageArgs = {
   config: SanitizedConfig
   importMap: ImportMap
   search?: Record<string, string | string[]>
+  /** Path after the admin route, already decoded by TanStack Router. */
   splat?: string
 }
 
