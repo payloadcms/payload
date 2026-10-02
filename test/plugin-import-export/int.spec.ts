@@ -6819,7 +6819,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
     test('should exclude disabled default columns from the export field selection', ({
       payload,
     }) => {
-      const postsConfig = payload.collections.posts.config
+      const postsConfig = payload.collections['posts-exports-only'].config
       const disabledFields =
         postsConfig.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
       const fieldOptions = reduceFields({
