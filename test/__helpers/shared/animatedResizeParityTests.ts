@@ -17,7 +17,7 @@ type SizeExpectation = {
 type AnimatedUploadResult = {
   height: null | number
   id: number | string
-  sizes: Record<string, { height?: null | number; width?: null | number }>
+  variants: Record<string, { height?: null | number; width?: null | number }>
   width: null | number
 }
 
@@ -53,8 +53,8 @@ export function runAnimatedResizeReportsPerFrameDimensionsTest({
       expect(result.width).toBe(mainDimensions.width)
 
       for (const size of sizes) {
-        expect(result.sizes?.[size.name]?.height).toBe(size.height)
-        expect(result.sizes?.[size.name]?.width).toBe(size.width)
+        expect(result.variants?.[size.name]?.height).toBe(size.height)
+        expect(result.variants?.[size.name]?.width).toBe(size.width)
       }
     })
   })
@@ -87,8 +87,8 @@ export function runAnimatedFocalPointResizeStaysValidTest({
       } as unknown as Parameters<Payload['create']>[0]
       const result = (await payload.create(createArgs)) as unknown as AnimatedUploadResult
 
-      expect(result.sizes?.[size.name]?.height).toBe(size.height)
-      expect(result.sizes?.[size.name]?.width).toBe(size.width)
+      expect(result.variants?.[size.name]?.height).toBe(size.height)
+      expect(result.variants?.[size.name]?.width).toBe(size.width)
     })
   })
 }

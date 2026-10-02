@@ -109,7 +109,7 @@ export function createPrepareLegacyUpload({
 
       const sizeResults = await mapWithBoundedConcurrency(variants, async (rawConfig) => {
         const imageResizeConfig = sanitizeResizeConfig(rawConfig)
-        const fieldPath = `sizes.${imageResizeConfig.name}` as const
+        const fieldPath = `variants.${imageResizeConfig.name}` as const
 
         const resizeAction = getImageResizeAction({
           dimensions: sizeSourceDimensions,

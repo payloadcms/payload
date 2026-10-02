@@ -120,7 +120,7 @@ The following fields are added to [upload-enabled collections](../upload/overvie
 | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `filename`, `mimeType`, `filesize`, `width`, `height`, `url`, `thumbnailURL` | Uploads are enabled.                                                                                                                                                  |
 | `focalX`, `focalY`                                                           | Uploads are enabled, unless `focalPoint` is `false` and no Sharp `variants` or image adjustment options (`resizeOptions`, `formatOptions`, and so on) are configured. |
-| `sizes`                                                                      | Sharp `variants` are configured. Matching fields nested under `sizes` are also merged recursively.                                                                    |
+| `variants`                                                                   | Sharp `variants` are configured. Matching fields nested under `variants` are also merged recursively.                                                                 |
 
 The `file` field is reserved and cannot be overridden.
 

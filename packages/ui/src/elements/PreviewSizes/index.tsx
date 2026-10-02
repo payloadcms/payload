@@ -78,7 +78,7 @@ const PreviewSizeCard: React.FC<PreviewSizeCardProps> = ({
 
 export type PreviewSizesProps = {
   doc: {
-    sizes?: FilesSizesWithUrl
+    variants?: FilesSizesWithUrl
   } & Data
   imageCacheTag?: false | string
   uploadConfig: SanitizedCollectionConfig['upload']
@@ -86,7 +86,7 @@ export type PreviewSizesProps = {
 
 export const PreviewSizes: React.FC<PreviewSizesProps> = ({ doc, imageCacheTag, uploadConfig }) => {
   const { variants } = uploadConfig
-  const { sizes } = doc
+  const { variants: sizes } = doc
 
   const alt = (doc as { alt?: string })?.alt || doc.filename || ''
 
@@ -108,7 +108,7 @@ export const PreviewSizes: React.FC<PreviewSizesProps> = ({ doc, imageCacheTag, 
   }, [sizes, variants, imageCacheTag])
 
   const mainPreviewSrc = selectedSize
-    ? generateImageUrl(doc.sizes[selectedSize])
+    ? generateImageUrl(doc.variants[selectedSize])
     : generateImageUrl(doc)
 
   const originalImage = useMemo(

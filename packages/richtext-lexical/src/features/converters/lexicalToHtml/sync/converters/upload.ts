@@ -35,7 +35,7 @@ export const UploadHTMLConverter: HTMLConverters<SerializedUploadNode> = {
     }
 
     // 2) If image has no different sizes, return a simple <img />
-    if (!uploadDoc.sizes || !Object.keys(uploadDoc.sizes).length) {
+    if (!uploadDoc.variants || !Object.keys(uploadDoc.variants).length) {
       return `
         <img${providedStyleTag}
           alt="${alt}"
@@ -49,8 +49,8 @@ export const UploadHTMLConverter: HTMLConverters<SerializedUploadNode> = {
     // 3) If image has different sizes, build a <picture> element with <source> tags
     let pictureHTML = ''
 
-    for (const size in uploadDoc.sizes) {
-      const imageSize = uploadDoc.sizes[size] as FileSize
+    for (const size in uploadDoc.variants) {
+      const imageSize = uploadDoc.variants[size] as FileSize
 
       if (
         !imageSize ||

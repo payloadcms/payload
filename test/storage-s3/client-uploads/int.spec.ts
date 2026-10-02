@@ -539,9 +539,9 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
 
       expect(doc.filesize).toBe(file.length)
       expect(doc.mimeType).toBe('image/jpeg')
-      expect(doc.sizes.thumbnail.width).toBe(400)
-      expect(doc.sizes.thumbnail.height).toBe(300)
-      expect(doc.sizes.thumbnail.filename).toBeTruthy()
+      expect(doc.variants.thumbnail.width).toBe(400)
+      expect(doc.variants.thumbnail.height).toBe(300)
+      expect(doc.variants.thumbnail.filename).toBeTruthy()
     }, 60000)
   })
 

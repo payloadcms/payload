@@ -445,7 +445,7 @@ export const generateFileData = async <T>({
       const { name: baseName, ext: baseExt } = parseFilename(fsSafeName)
 
       for (const result of sizeResults) {
-        const sizeName = result.fieldPath.slice('sizes.'.length)
+        const sizeName = result.fieldPath.slice('variants.'.length)
 
         if (!result.file) {
           sizes[sizeName] = {
@@ -502,7 +502,7 @@ export const generateFileData = async <T>({
         })
       }
 
-      fileData.sizes = sizes
+      fileData.variants = sizes
     }
   } catch (err) {
     req.payload.logger.error(err)

@@ -47,7 +47,7 @@ sharpTransformer({
 })
 ```
 
-`variants`, `crop`, and `focalPoint` are also written back onto the collection's own sanitized `upload` config at startup (name/`admin`/`generateImageName` only, for `variants`), so the Admin Panel, generated types, and the `sizes` shape on your documents behave exactly as before.
+`variants`, `crop`, and `focalPoint` are also written back onto the collection's own sanitized `upload` config at startup (name/`admin`/`generateImageName` only, for `variants`), so the Admin Panel and generated types pick them up. Generated files are stored under each document's `variants` field.
 
 ### Dynamic (request-time) resizing
 
