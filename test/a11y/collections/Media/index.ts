@@ -8,7 +8,16 @@ export const MediaCollection: CollectionConfig = {
     create: () => true,
     read: () => true,
   },
-  fields: [],
-  upload: true,
+  fields: [
+    {
+      name: 'alt',
+      type: 'text',
+      defaultValue: 'Accessibility test image',
+      required: true,
+    },
+  ],
+  upload: {
+    mimeTypes: ['image/*'],
+  },
   versions: false,
 }

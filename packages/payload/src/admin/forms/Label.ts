@@ -4,10 +4,12 @@ import type { ClientFieldWithOptionalType, ServerComponentProps } from './Field.
 
 export type GenericLabelProps = {
   readonly as?: 'h3' | 'label' | 'span'
+  readonly hasRequiredAccessibleState?: boolean
   readonly hideLocale?: boolean
   readonly htmlFor?: string
   readonly label?: StaticLabel
   readonly localized?: boolean
+  readonly onClick?: React.MouseEventHandler<HTMLElement>
   readonly path?: string
   readonly required?: boolean
   readonly unstyled?: boolean
