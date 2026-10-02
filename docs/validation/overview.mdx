@@ -9,20 +9,6 @@ keywords: validation, local api, rest api, localization, publishing, access cont
 You can validate a collection document or global without writing it to the database. Call
 `payload.validate()` for a collection or `payload.validateGlobal()` for a global.
 
-Field validation failures are returned in the result:
-
-```ts
-import type { ValidationFieldError } from 'payload'
-
-type ValidationResult = {
-  valid: boolean
-  errors: ValidationFieldError[]
-}
-```
-
-Every error has a `path` and `message`. Localized errors also set `locale`. Access denials, missing
-documents, invalid arguments, and other hook errors throw normally.
-
 ## Local API
 
 Omit `id` and provide `data` to validate a collection create candidate. For stored documents and
@@ -119,8 +105,7 @@ authoritative for uniqueness constraints.
 ## REST API
 
 Validation endpoints use `POST`. Send candidate data as a JSON object and select locales with the
-required `locale` query parameter. These examples use the default `/api` base path; custom
-`routes.api` configuration changes that prefix.
+required `locale` query parameter.
 
 ```ts
 // Collection create candidate
