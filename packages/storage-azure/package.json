@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "@azure/abort-controller": "^1.1.0",
-    "@azure/storage-blob": "^12.11.0",
+    "@azure/storage-blob": "^12.34.0",
     "@payloadcms/plugin-cloud-storage": "workspace:*"
   },
   "devDependencies": {
@@ -58,7 +58,7 @@
     "payload": "workspace:*"
   },
   "engines": {
-    "node": ">=20.18.1"
+    "node": ">=22.0.0"
   },
   "publishConfig": {
     "exports": {
