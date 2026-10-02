@@ -38,17 +38,15 @@ export const getLLMInstructions = async ({
   let additionalInstructions = ''
 
   try {
-    const { docs } = await req.payload.find({
+    const doc = await req.payload.findByID({
+      id: `${type}-${slug}`,
       collection: instructionsCollectionSlug,
       depth: 0,
       disableErrors: true,
-      limit: 1,
       overrideAccess,
       req,
-      user: req.user,
-      where: { [type === 'collection' ? 'collectionSlug' : 'globalSlug']: { equals: slug } },
     })
-    const value = docs[0]?.additionalInstructions
+    const value = doc?.additionalInstructions
 
     if (typeof value === 'string') {
       additionalInstructions = value

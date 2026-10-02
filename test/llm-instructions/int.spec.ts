@@ -43,6 +43,19 @@ test.suite('LLM instructions', { config: './config.ts' }, () => {
     })
   }
 
+  test('should return configured instructions when no saved document exists', async ({
+    payload,
+  }) => {
+    const req = await createPayloadRequest({ payload })
+
+    expect(
+      await payload.count({ collection: instructionsCollectionSlug, overrideAccess: true }),
+    ).toMatchObject({ totalDocs: 0 })
+    await expect(
+      getLLMInstructions({ slug: 'pages', type: 'collection', overrideAccess: true, req }),
+    ).resolves.toBe(payload.collections.pages.config.llmInstructions)
+  })
+
   test('should keep configured instructions when reading saved instructions fails', async ({
     payload,
   }) => {
