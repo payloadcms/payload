@@ -1,3 +1,5 @@
+import type { Operator } from 'payload'
+
 export const getOperatorValueTypes = (fieldType) => {
   return {
     all: 'any',
@@ -31,4 +33,34 @@ export const getOperatorValueTypes = (fieldType) => {
     not_like: 'string',
     within: 'any',
   }
+}
+
+/**
+ * Determines whether the current condition value should be reset when switching operators.
+ *
+ * A value produced by `exists` is always the string 'true'/'false'. It counts as a valid
+ * value for 'any'-typed operators like `equals`, but on e.g. a relationship field it is
+ * cast to NaN server-side and crashes the query — so it never carries over to another operator.
+ */
+export const shouldResetValueOnOperatorChange = ({
+  fieldType,
+  newOperator,
+  previousOperator,
+  value,
+}: {
+  fieldType?: string
+  newOperator: Operator
+  previousOperator: Operator
+  value: unknown
+}): boolean => {
+  const operatorValueTypes = getOperatorValueTypes(fieldType)
+  const validOperatorValue = operatorValueTypes[newOperator] || 'any'
+  const isValidValue =
+    validOperatorValue === 'any' ||
+    typeof value === validOperatorValue ||
+    (validOperatorValue === 'boolean' && (value === 'true' || value === 'false'))
+
+  const isStaleExistsValue = previousOperator === 'exists' && newOperator !== 'exists'
+
+  return !isValidValue || isStaleExistsValue
 }
