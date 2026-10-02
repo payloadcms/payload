@@ -314,6 +314,15 @@ const runWriteAttempt: CollectionBeforeChangeHook = async ({ data, operation, re
       })
       break
 
+    case 'unlock':
+      await req.payload.unlock({
+        collection: 'users',
+        data: { email: 'validation-isolation@example.com' },
+        overrideAccess: true,
+        req,
+      })
+      break
+
     case 'upload': {
       const fileData = Buffer.from('must not be uploaded')
 
@@ -483,6 +492,7 @@ const validationCollection: CollectionConfig = {
         'update',
         'updateGlobal',
         'updateMany',
+        'unlock',
         'upload',
         'verifyEmail',
         'version',

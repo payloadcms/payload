@@ -4691,6 +4691,35 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
   })
 
   test.describe('blocks', () => {
+    test('should include the active locale in invalid block filter errors', async ({ payload }) => {
+      let error: undefined | ValidationError
+
+      try {
+        await payload.create({
+          collection: blockFieldsSlug,
+          data: {
+            blocksWithDynamicFilterOptions: [
+              {
+                blockType: 'blockOne',
+              },
+            ],
+            enabledBlocks: 'blockTwo',
+          },
+          locale: 'de',
+          overrideAccess: true,
+        })
+      } catch (caughtError) {
+        error = caughtError as ValidationError
+      }
+
+      expect(error?.data.errors).toContainEqual(
+        expect.objectContaining({
+          locale: 'de',
+          path: 'blocksWithDynamicFilterOptions.0.id',
+        }),
+      )
+    })
+
     test('should retrieve doc with blocks', async ({ payload }) => {
       const blockFields = await payload.find({
         collection: 'block-fields',

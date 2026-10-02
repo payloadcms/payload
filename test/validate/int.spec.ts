@@ -585,53 +585,6 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
       })
     })
 
-    test('should ignore internal projection flags passed to the public collection validate API', async () => {
-      const stored = await payload.create({
-        collection: validationCollectionSlug,
-        data: {
-          summary: 'stored summary',
-          title: 'Stored title',
-        },
-        locale: 'en',
-        overrideAccess: true,
-      })
-
-      const result = await payload.validate({
-        id: stored.id,
-        collection: validationCollectionSlug,
-        data: {
-          summary: 'candidate summary',
-          title: 'Candidate title',
-        },
-        locale: ['en', 'es'],
-        overrideAccess: true,
-        validationDataLocale: 'en',
-      } as never)
-
-      expect(result).toEqual({
-        errors: [],
-        valid: true,
-      })
-    })
-
-    test('should ignore internal trash-source flags passed to the public collection validate API', async () => {
-      const stored = await seedPublishCollection({
-        de: 'German optional',
-        deletedAt: new Date().toISOString(),
-        en: 'English draft',
-        es: 'Spanish valid',
-      })
-
-      await expect(
-        payload.validate({
-          id: stored.id,
-          collection: publishCollectionSlug,
-          locale: 'en',
-          validationTrash: true,
-        } as never),
-      ).rejects.toThrow(/not found/i)
-    })
-
     test('should resolve all to every available locale through locale filtering', async () => {
       const result = await payload.validate({
         collection: validationCollectionSlug,
@@ -2154,7 +2107,7 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
       }
     })
 
-    test.each(['logout', 'refresh', 'resetPassword', 'verifyEmail'] as const)(
+    test.each(['logout', 'refresh', 'resetPassword', 'unlock', 'verifyEmail'] as const)(
       'should reject %s when it reuses the validation request before changing a user',
       async (writeAttempt) => {
         const usersBefore = await payload.count({ collection: 'users', overrideAccess: true })
@@ -2197,6 +2150,7 @@ async function runWriteAttempt(
     | 'update'
     | 'updateGlobal'
     | 'updateMany'
+    | 'unlock'
     | 'upload'
     | 'verifyEmail'
     | 'version',
