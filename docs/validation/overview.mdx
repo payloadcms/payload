@@ -6,11 +6,10 @@ desc: Validate collection and global document candidates without saving them.
 keywords: validation, local api, rest api, localization, publishing, access control, hooks, drafts
 ---
 
-On-demand validation checks a collection or global document candidate without saving the candidate,
-creating a version, or writing files. Use it for workflow readiness checks, multi-locale review, and
-validation before a custom publish flow.
+Use on-demand validation to check collection or global data without saving it. Payload runs access
+control, hooks, and field validation without creating a document, version, or file.
 
-Field validation failures are returned as a result:
+Field validation failures are returned in the result:
 
 ```ts
 import type { ValidationFieldError } from 'payload'
@@ -21,19 +20,15 @@ type ValidationResult = {
 }
 ```
 
-Every error has a `path` and `message`. Errors from localized validation passes also set `locale`;
-non-localized validation may omit it. Optional field label and table metadata may be present.
-
-Access denials, missing documents, invalid arguments, and non-validation errors thrown by hooks still
-throw normally.
+Every error has a `path` and `message`. Localized errors also set `locale`. Access denials, missing
+documents, invalid arguments, and other hook errors throw normally.
 
 ## Local API
 
-Use `payload.validate()` for collections and `payload.validateGlobal()` for globals. A collection
-call without `id` validates a create candidate and requires `data`. For collection by-ID and global
-validation, the stored main or published document is the base by default. Set `draft: true` to use
-the newest available draft version instead, falling back to the main document when no draft exists.
-Optional, partial `data` is merged over that base.
+Use `payload.validate()` for collections and `payload.validateGlobal()` for globals. Omit `id` and
+provide `data` to validate a collection create candidate. For stored documents and globals, partial
+`data` is merged with the main document. Set `draft: true` to use the newest draft, with the main
+document as a fallback.
 
 ```ts
 // Validate collection create data in one locale
@@ -268,18 +263,13 @@ export const SiteSettings: GlobalConfig = {
 }
 ```
 
-Whether configured directly or inherited from `update`, collection, global, and field access
-functions all receive the first-class
-`req.operation === 'validate'`. Field `beforeValidate` and `beforeChange` hooks, field validators,
-and collection/global `beforeValidate` and `beforeChange` hooks also receive
-`operation: 'validate'`. Payload never simulates `'create'` or `'update'` as the access operation.
+Collection, global, and field access functions receive `req.operation === 'validate'`. Field
+validators and `beforeValidate` and `beforeChange` hooks receive `operation: 'validate'`. Payload
+does not report the operation as `create` or `update`.
 
-When `validate` access returns a `where` constraint and a document exists but doesn't match it,
-validation throws `Forbidden` rather than treating the document as absent. Without this, candidate
-data could validate against an empty base as though the restricted document didn't exist yet.
-Collections already apply this through their existing `update`-by-ID access checks; globals apply
-the same rule for validation specifically, even though a global's `find` and `update` stay silent
-about a document being restricted rather than absent.
+When `validate` access returns a `where` constraint, validation throws `Forbidden` if the stored
+document does not match it. Collection create validation requires boolean access because there is no
+stored document to test against the constraint.
 
 A collection create-candidate validation has no stored document against which Payload can evaluate
 a `where` constraint. Its `validate` access must therefore return a boolean. Payload throws
