@@ -2,7 +2,6 @@ import { getTranslation } from '@payloadcms/translations'
 
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Access, SanitizedConfig } from '../config/types.js'
-import type { Payload } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { InstructionTargetFields } from './shared.js'
 
@@ -14,7 +13,6 @@ import { getInstructionTargetAccess } from './getInstructionTargetAccess.js'
 import { instructionsCollectionSlug } from './shared.js'
 
 const syncContextKey = 'syncLLMInstructions'
-const pendingSyncs = new WeakMap<Payload, Promise<void>>()
 
 export const getInstructionsCollection = ({
   config,
@@ -221,67 +219,62 @@ export const getInstructionsCollection = ({
             return args
           }
 
-          let pending = pendingSyncs.get(req.payload)
+          // Only configuration-owned identities are created here. Client requests cannot set context.
+          const syncReq = isolateObjectProperty(req, [
+            'context',
+            'payloadDataLoader',
+            'transactionID',
+          ])
 
-          if (!pending) {
-            // Only configuration-owned identities are created here. Client requests cannot set context.
-            const syncReq = isolateObjectProperty(req, [
-              'context',
-              'payloadDataLoader',
-              'transactionID',
-            ])
+          syncReq.context = { ...req.context, [syncContextKey]: true }
+          // Initialization must persist even if the caller rolls back its transaction.
+          delete syncReq.transactionID
+          syncReq.payloadDataLoader = getDataLoader(syncReq)
 
-            syncReq.context = { ...req.context, [syncContextKey]: true }
-            // Concurrent readers share this sync, so it must commit independently of the caller.
-            delete syncReq.transactionID
-            syncReq.payloadDataLoader = getDataLoader(syncReq)
+          for (const target of targets) {
+            const id = `${target.type}-${target.slug}`
+            const existing = await req.payload.findByID({
+              id,
+              collection: instructionsCollectionSlug,
+              depth: 0,
+              disableErrors: true,
+              overrideAccess: false,
+              req: syncReq,
+              select: { id: true },
+            })
 
-            pending = (async () => {
-              const existing = await req.payload.find({
+            if (existing) {
+              continue
+            }
+
+            const field = target.type === 'collection' ? 'collectionSlug' : 'globalSlug'
+
+            try {
+              await req.payload.create({
                 collection: instructionsCollectionSlug,
-                depth: 0,
-                limit: 0,
+                data: { id, [field]: target.slug },
                 overrideAccess: false,
-                pagination: false,
                 req: syncReq,
-                select: { collectionSlug: true, globalSlug: true },
                 user: req.user,
               })
+            } catch (error) {
+              // The unique ID allows only one concurrent request to create this entry.
+              const existingDoc = await req.payload.findByID({
+                id,
+                collection: instructionsCollectionSlug,
+                depth: 0,
+                disableErrors: true,
+                overrideAccess: false,
+                req: syncReq,
+                select: { id: true },
+              })
 
-              for (const target of targets) {
-                const field = target.type === 'collection' ? 'collectionSlug' : 'globalSlug'
-
-                if (!existing.docs.some((doc) => doc[field] === target.slug)) {
-                  try {
-                    await req.payload.create({
-                      collection: instructionsCollectionSlug,
-                      data: { [field]: target.slug },
-                      overrideAccess: false,
-                      req: syncReq,
-                      user: req.user,
-                    })
-                  } catch (error) {
-                    // Another server may have initialized the same configuration entry concurrently.
-                    const existingDoc = await req.payload.find({
-                      collection: instructionsCollectionSlug,
-                      limit: 1,
-                      overrideAccess: false,
-                      req: syncReq,
-                      user: req.user,
-                      where: { [field]: { equals: target.slug } },
-                    })
-
-                    if (!existingDoc.docs.length) {
-                      throw error
-                    }
-                  }
-                }
+              if (!existingDoc) {
+                throw error
               }
-            })().finally(() => pendingSyncs.delete(req.payload))
-            pendingSyncs.set(req.payload, pending)
+            }
           }
 
-          await pending
           return args
         },
       ],
