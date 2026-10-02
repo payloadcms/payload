@@ -121,6 +121,7 @@ export const roTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Caută widgeturi...',
     widgetCollectionRequired: 'Colecția este obligatorie.',
     widgetConfigurationError: 'Eroare de configurare a widgetului',
+    widgetDropFilesToUpload: 'Trageți și plasați un fișier',
     widgetInvalidCollection: 'Colecția "{{collection}}" nu există.',
     widgetInvalidFilterField:
       'Câmpul de filtrare "{{field}}" nu există în colecția "{{collection}}".',
@@ -137,6 +138,9 @@ export const roTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sortare Field',
     widgetTitleFallback: 'Interogare de colecție',
     widgetTitleLabel: 'Titlu',
+    widgetUploadDropzoneDescription:
+      'Încărcați de pe computerul dumneavoastră prin tragere și fixare sau faceți clic pe butonul de mai jos',
+    widgetUploadFiles: 'Adăugați fișiere',
   },
   error: {
     accountAlreadyActivated: 'Acest cont a fost deja activat.',
@@ -467,6 +471,7 @@ export const roTranslations: DefaultTranslationsObject = {
     remove: 'Eliminați',
     rename: 'Redenumire',
     replaceRow: 'Înlocuire rând',
+    requiredFields: 'Câmpurile marcate cu * sunt obligatorii.',
     reset: 'Resetare',
     resetPreferences: 'Resetare preferințe',
     resetPreferencesDescription: 'Aceasta va reseta toate preferințele tale la setările implicite.',
@@ -483,8 +488,12 @@ export const roTranslations: DefaultTranslationsObject = {
     saveChanges: 'Salvați Modificările',
     saving: 'Salvare...',
     schedulePublishFor: 'Planificați publicarea pentru {{title}}',
+    searchAutomatically: 'Rezultatele se actualizează automat pe măsură ce tastați.',
     searchBy: 'Căutați după {{label}}',
+    searchCleared: 'Căutarea a fost ștearsă.',
     searchColumns: 'Căutați coloane',
+    searchGroups: 'Grupuri pentru „{{search}}”: {{count}}.',
+    searchResults: 'Rezultate pentru „{{search}}”: {{count}}.',
     select: 'Selectați',
     selectAll: 'Selectați toate {{count}} {{label}}',
     selectAllRows: 'Selectează toate rândurile',

@@ -118,6 +118,7 @@ export const svTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Sök efter widget...',
     widgetCollectionRequired: 'Collection är obligatorisk.',
     widgetConfigurationError: 'Fel i widgetkonfiguration',
+    widgetDropFilesToUpload: 'Dra och släpp en fil',
     widgetInvalidCollection: 'Collection "{{collection}}" finns inte.',
     widgetInvalidFilterField: 'Filterfältet "{{field}}" finns inte i Collection "{{collection}}".',
     widgetInvalidSortField:
@@ -134,6 +135,9 @@ export const svTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sorteringsfält',
     widgetTitleFallback: 'Collectiefråga',
     widgetTitleLabel: 'Titel',
+    widgetUploadDropzoneDescription:
+      'Ladda upp från din dator genom att dra och släppa, eller klicka på knappen nedan.',
+    widgetUploadFiles: 'Lägg till filer',
   },
   error: {
     accountAlreadyActivated: 'Detta konto har redan aktiverats',
@@ -462,6 +466,7 @@ export const svTranslations: DefaultTranslationsObject = {
     remove: 'Ta bort',
     rename: 'Byt namn',
     replaceRow: 'Ersätt rad',
+    requiredFields: 'Fält markerade med * är obligatoriska.',
     reset: 'Återställ',
     resetPreferences: 'Återställ preferenser',
     resetPreferencesDescription:
@@ -479,8 +484,12 @@ export const svTranslations: DefaultTranslationsObject = {
     saveChanges: 'Spara Ändringar',
     saving: 'Sparar...',
     schedulePublishFor: 'Schemalägg publicering för {{title}}',
+    searchAutomatically: 'Resultaten uppdateras automatiskt medan du skriver.',
     searchBy: 'Sök efter {{label}}',
+    searchCleared: 'Sökningen har rensats.',
     searchColumns: 'Sök kolumner',
+    searchGroups: 'Grupper för ”{{search}}”: {{count}}.',
+    searchResults: 'Resultat för ”{{search}}”: {{count}}.',
     select: 'Välj',
     selectAll: 'Välj alla {{count}} {{label}}',
     selectAllRows: 'Välj alla rader',

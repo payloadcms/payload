@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 
 import { useDebounce } from '../../../hooks/useDebounce.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
 import { SearchInput } from '../SearchInput/index.js'
 
 type ListSearchFilterProps = {
@@ -10,6 +11,7 @@ type ListSearchFilterProps = {
   disabled?: boolean
   label?: string
   onSearchChange: (search: string) => void
+  onSearchInputChange?: (search: string) => void
   searchQueryParam?: string
 }
 
@@ -18,8 +20,11 @@ export function ListSearchFilter({
   disabled,
   label = 'Search...',
   onSearchChange,
+  onSearchInputChange,
   searchQueryParam,
 }: ListSearchFilterProps) {
+  const { t } = useTranslation()
+  const descriptionID = React.useId()
   const [search, setSearch] = useState(
     typeof searchQueryParam === 'string' ? searchQueryParam : undefined,
   )
@@ -33,6 +38,7 @@ export function ListSearchFilter({
     if (searchQueryParam !== previousSearch.current) {
       shouldUpdateState.current = false
       setSearch(searchQueryParam)
+      onSearchInputChange?.(searchQueryParam || '')
       previousSearch.current = searchQueryParam
     }
 
@@ -40,7 +46,7 @@ export function ListSearchFilter({
       shouldUpdateState.current = true
       previousSearch.current = undefined
     }
-  }, [searchQueryParam])
+  }, [onSearchInputChange, searchQueryParam])
 
   useEffect(() => {
     if (debouncedSearch !== previousSearch.current && shouldUpdateState.current) {
@@ -50,21 +56,29 @@ export function ListSearchFilter({
   }, [debouncedSearch, onSearchChange])
 
   return (
-    <SearchInput
-      autoComplete="off"
-      className={className}
-      disabled={disabled}
-      id="search-filter-input"
-      onChange={(value) => {
-        shouldUpdateState.current = true
-        setSearch(value)
-      }}
-      onClear={() => {
-        shouldUpdateState.current = true
-        setSearch('')
-      }}
-      placeholder={label}
-      value={search || ''}
-    />
+    <>
+      <span className="sr-only" id={descriptionID}>
+        {t('general:searchAutomatically')}
+      </span>
+      <SearchInput
+        aria-describedby={descriptionID}
+        autoComplete="off"
+        className={className}
+        disabled={disabled}
+        id="search-filter-input"
+        onChange={(value) => {
+          shouldUpdateState.current = true
+          setSearch(value)
+          onSearchInputChange?.(value)
+        }}
+        onClear={() => {
+          shouldUpdateState.current = true
+          setSearch('')
+          onSearchInputChange?.('')
+        }}
+        placeholder={label}
+        value={search || ''}
+      />
+    </>
   )
 }

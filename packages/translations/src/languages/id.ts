@@ -119,6 +119,7 @@ export const idTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Cari widget...',
     widgetCollectionRequired: 'Collection wajib diisi.',
     widgetConfigurationError: 'Kesalahan konfigurasi widget',
+    widgetDropFilesToUpload: 'Seret dan lepas file',
     widgetInvalidCollection: 'Collection "{{collection}}" tidak ada.',
     widgetInvalidFilterField:
       'Filter field "{{field}}" tidak ada pada Collection "{{collection}}".',
@@ -135,6 +136,9 @@ export const idTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Urutkan Field',
     widgetTitleFallback: 'Kueri Collection',
     widgetTitleLabel: 'Judul',
+    widgetUploadDropzoneDescription:
+      'Unggah dari komputer Anda dengan cara seret dan lepas, atau klik tombol di bawah ini',
+    widgetUploadFiles: 'Tambah file',
   },
   error: {
     accountAlreadyActivated: 'Akun ini sudah diaktifkan.',
@@ -463,6 +467,7 @@ export const idTranslations: DefaultTranslationsObject = {
     remove: 'Hapus',
     rename: 'Ganti Nama',
     replaceRow: 'Ganti Baris',
+    requiredFields: 'Kolom yang ditandai dengan * wajib diisi.',
     reset: 'Atur Ulang',
     resetPreferences: 'Atur Ulang Preferensi',
     resetPreferencesDescription:
@@ -479,8 +484,12 @@ export const idTranslations: DefaultTranslationsObject = {
     saveChanges: 'Simpan Perubahan',
     saving: 'Menyimpan...',
     schedulePublishFor: 'Jadwalkan publikasi untuk {{title}}',
+    searchAutomatically: 'Hasil diperbarui secara otomatis saat Anda mengetik.',
     searchBy: 'Cari berdasarkan {{label}}',
+    searchCleared: 'Pencarian dihapus.',
     searchColumns: 'Kolom pencarian',
+    searchGroups: 'Grup untuk “{{search}}”: {{count}}.',
+    searchResults: 'Hasil untuk “{{search}}”: {{count}}.',
     select: 'Pilih',
     selectAll: 'Pilih semua {{count}} {{label}}',
     selectAllRows: 'Pilih semua baris',

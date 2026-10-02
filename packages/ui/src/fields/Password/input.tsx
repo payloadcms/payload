@@ -10,8 +10,11 @@ import { RenderCustomComponent } from '../../elements/RenderCustomComponent/inde
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
+import { useForm } from '../../forms/Form/context.js'
 import { EyeIcon } from '../../icons/Eye/index.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.css'
 
@@ -44,7 +47,11 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
     width,
   } = props
 
+  const { uuid } = useForm()
+  const editDepth = useEditDepth()
   const { i18n, t } = useTranslation()
+  const errorID = showError ? generateFieldID(path, editDepth, uuid, 'field-error') : undefined
+
   const [showPassword, setShowPassword] = useState(false)
 
   return (
@@ -67,18 +74,27 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
       <RenderCustomComponent
         CustomComponent={Label}
         Fallback={
-          <FieldLabel label={label} localized={localized} path={path} required={required} />
+          <FieldLabel
+            hasRequiredAccessibleState
+            label={label}
+            localized={localized}
+            path={path}
+            required={required}
+          />
         }
       />
       <div className={`${fieldBaseClass}__wrap`}>
         <RenderCustomComponent
           CustomComponent={Error}
-          Fallback={<FieldError announce path={path} showError={showError} />}
+          Fallback={<FieldError path={path} showError={showError} />}
         />
         <div className="password__input-wrap">
           {BeforeInput}
           <input
+            aria-describedby={errorID}
+            aria-invalid={showError || undefined}
             aria-label={getTranslation(label, i18n)}
+            aria-required={required || undefined}
             autoComplete={autoComplete}
             className="form-input"
             data-rtl={rtl}

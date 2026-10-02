@@ -121,6 +121,7 @@ export const huTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Keresés widgetek...',
     widgetCollectionRequired: 'A Collection megadása kötelező.',
     widgetConfigurationError: 'Widget konfigurációs hiba',
+    widgetDropFilesToUpload: 'Húzzon ide egy fájlt',
     widgetInvalidCollection: 'A(z) "{{collection}}" Collection nem létezik.',
     widgetInvalidFilterField:
       'A(z) „{{field}}” szűrőmező nem létezik a(z) „{{collection}}” Collection-ben.',
@@ -138,6 +139,9 @@ export const huTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Mező rendezése',
     widgetTitleFallback: 'Gyűjtemény lekérdezés',
     widgetTitleLabel: 'Cím',
+    widgetUploadDropzoneDescription:
+      'Töltsön fel a számítógépéről húzással és ejtéssel, vagy kattintson az alábbi gombra',
+    widgetUploadFiles: 'Fájlok hozzáadása',
   },
   error: {
     accountAlreadyActivated: 'Ez a fiók már aktiválva van.',
@@ -466,6 +470,7 @@ export const huTranslations: DefaultTranslationsObject = {
     remove: 'Törlés',
     rename: 'Átnevez',
     replaceRow: 'Sor cseréje',
+    requiredFields: 'A *-gal jelölt mezők kitöltése kötelező.',
     reset: 'Visszaállítás',
     resetPreferences: 'Beállítások visszaállítása',
     resetPreferencesDescription:
@@ -483,8 +488,12 @@ export const huTranslations: DefaultTranslationsObject = {
     saveChanges: 'Mentése a változásoknak',
     saving: 'Mentés...',
     schedulePublishFor: 'Tervezett közzététel a(z) {{title}} című számára',
+    searchAutomatically: 'Az eredmények gépelés közben automatikusan frissülnek.',
     searchBy: 'Keresés a következő szerint: {{label}}',
+    searchCleared: 'Keresés törölve.',
     searchColumns: 'Oszlopok keresése',
+    searchGroups: 'Csoportok erre: „{{search}}”: {{count}}.',
+    searchResults: 'Találatok erre: „{{search}}”: {{count}}.',
     select: 'Válasszon',
     selectAll: 'Az összes kijelölése: {{count}} {{label}}',
     selectAllRows: 'Válassza ki az összes sort',
