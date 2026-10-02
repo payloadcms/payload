@@ -17,10 +17,17 @@ export const transformerCallCounts = {
   uppercase: 0,
 }
 
+/**
+ * Read access checks and `canTransform` calls in the order they ran, so a test can prove
+ * access is decided before any transformer code runs.
+ */
+export const fileRequestEvents: string[] = []
+
 export function resetTransformerCallCounts(): void {
   for (const key of Object.keys(transformerCallCounts) as (keyof typeof transformerCallCounts)[]) {
     transformerCallCounts[key] = 0
   }
+  fileRequestEvents.length = 0
 }
 
 /**
@@ -46,7 +53,10 @@ const hasQueryParam = (paramName: string) => (args: { req: { searchParams?: URLS
 
 export const appendSuffixTransformer: UploadTransformer = {
   slug: 'append-suffix',
-  canTransform: hasQueryParam('suffix'),
+  canTransform: (args) => {
+    fileRequestEvents.push('canTransform')
+    return hasQueryParam('suffix')(args)
+  },
   handleRequest: async ({ getSourceFile }) => {
     transformerCallCounts.appendSuffix += 1
     const source = await getSourceFile()
@@ -129,6 +139,18 @@ export const consumeWithoutResponseTransformer: UploadTransformer = {
   mimeTypes: ['application/pdf'],
 }
 
+/**
+ * Replaces a JSON upload with the `File` a test passes as `context.transformedFile`, so a test
+ * controls the name, type and bytes of the transformer's output.
+ */
+export const replaceFileTransformer: UploadTransformer = {
+  slug: 'replace-file',
+  canTransform: ({ req }) => req.context.transformedFile instanceof File,
+  mimeTypes: ['application/json'],
+  transformFile: ({ req }) =>
+    Promise.resolve({ file: req.context.transformedFile as File, status: 'complete' }),
+}
+
 export const testTransformers: UploadTransformer[] = [
   appendSuffixTransformer,
   uppercaseTransformer,
@@ -137,4 +159,5 @@ export const testTransformers: UploadTransformer[] = [
   throwingTransformer,
   sourceConsumingErrorTransformer,
   consumeWithoutResponseTransformer,
+  replaceFileTransformer,
 ]
