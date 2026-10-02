@@ -221,7 +221,7 @@ The agent reads the collection's upload settings before acting. MIME type and fi
 
 The `getCollectionSchema` and `getGlobalSchema` tools return [LLM instructions](../configuration/llm-instructions) in `structuredContent.instructions` alongside `schema`, and in a text content block. Read them before creating or updating content.
 
-These instructions come from your collection or global config. To read them, the caller needs permission to create or update documents in that collection, or to update that global. These permission checks are skipped when `overrideAccess` is enabled.
+These instructions come from your collection or global config and can include additional instructions saved in the Admin Panel. To read them, the caller needs permission to create or update documents in that collection, or to update that global. Saved instructions also require the caller to be logged in and have read permission for the collection or global. These permission checks are skipped when `overrideAccess` is enabled.
 
 ## HTTP transport
 
