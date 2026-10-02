@@ -111,10 +111,12 @@ test.suite('Upload transformers', { config: './config.ts' }, () => {
     test('should preserve the accumulator when a stage returns continue without a replacement', async () => {
       const doc = await uploadFixture()
 
-      const response = await restClient.GET(`/${transformerMediaSlug}/file/${doc.filename}?noop=1`)
+      const response = await restClient.GET(
+        `/${transformerMediaSlug}/file/${doc.filename}?suffix=1&noop=1`,
+      )
 
       expect(response.status).toBe(200)
-      expect(await response.text()).toBe(originalPdfText)
+      expect(await response.text()).toBe(`${originalPdfText}-suffix`)
       expect(transformerCallCounts.noop).toBe(1)
     })
 
