@@ -143,6 +143,39 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
     expect(Buffer.from(await stored.Body!.transformToByteArray())).toEqual(file)
   })
 
+  test('should reject a provider object shorter than its declared upload size', async ({
+    payload,
+    restClient,
+  }) => {
+    const instructions = await restClient
+      .POST(signedURLEndpoint, {
+        body: signedURLBody(mediaSlug, 'incomplete.txt', 100, 'text/plain'),
+      })
+      .then((response) => response.json<UploadInstructions>())
+
+    if (instructions.type !== 'http') {
+      throw new Error('Expected HTTP upload instructions')
+    }
+
+    const key = decodeURIComponent(
+      new URL(instructions.request.url).pathname.split('/').slice(2).join('/'),
+    )
+    await getAWSClient().putObject({
+      Body: Buffer.from('incomplete'),
+      Bucket: getTestBucketName(),
+      ContentType: 'text/plain',
+      Key: key,
+    })
+
+    const formData = new FormData()
+    formData.append('file', JSON.stringify(instructions.file))
+    const response = await restClient.POST(`/${mediaSlug}`, { body: formData })
+
+    expect(response.status).toBe(400)
+    const docs = await payload.find({ collection: mediaSlug, overrideAccess: true })
+    expect(docs.totalDocs).toBe(0)
+  })
+
   for (const [uploadFilename, mimeType] of [
     ['reference.svg', 'image/svg+xml'],
     ['reference.xml', 'application/xml'],

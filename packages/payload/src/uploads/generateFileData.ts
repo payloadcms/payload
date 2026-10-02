@@ -286,6 +286,25 @@ export const generateFileData = async <T>({
   let newData = incomingFileData as T
   const filesToSave: FileToSave[] = []
   const fileData: Partial<FileData> = {}
+  const crop = uploadEdits?.crop
+  const isResettingCrop =
+    retainedOriginal &&
+    crop?.unit === '%' &&
+    Number(crop.width) === 100 &&
+    Number(crop.height) === 100 &&
+    Number(crop.x) === 0 &&
+    Number(crop.y) === 0 &&
+    (uploadEdits.widthInPixels === undefined ||
+      Number(uploadEdits.widthInPixels) === retainedOriginal.width) &&
+    (uploadEdits.heightInPixels === undefined ||
+      Number(uploadEdits.heightInPixels) === retainedOriginal.height)
+  const hasFocalPointChange =
+    uploadEdits?.focalPoint &&
+    (Number(uploadEdits.focalPoint.x) !== (currentFileData?.focalX ?? 50) ||
+      Number(uploadEdits.focalPoint.y) !== (currentFileData?.focalY ?? 50))
+  const editsForTransformer = isResettingCrop
+    ? { ...uploadEdits, crop: undefined, heightInPixels: undefined, widthInPixels: undefined }
+    : uploadEdits
 
   try {
     const pipeline = await planTransformerPipeline({
@@ -336,7 +355,7 @@ export const generateFileData = async <T>({
               pipeline,
               req,
             }),
-          uploadEdits,
+          uploadEdits: editsForTransformer,
         })
 
         const mainResult = results.find((result) => result.fieldPath === 'filename')
@@ -373,12 +392,52 @@ export const generateFileData = async <T>({
     }
 
     const fileWasTransformed = Boolean(mainWebFile && mainWebFile !== originalWebFile)
+    const originalFile = currentFileData?._managedFiles?.find((managedFile) =>
+      managedFile.roles.some((role) => role.type === 'original'),
+    )
+    const hasReusableOriginalMain = Boolean(isResettingCrop && !fileWasTransformed && originalFile)
+    if (hasReusableOriginalMain && !hasFocalPointChange && originalFile && retainedOriginal) {
+      const references: ManagedFileReference[] = (currentFileData?._managedFiles ?? []).flatMap(
+        (managedFile) =>
+          managedFile.roles
+            .filter((role) => role.type !== 'default')
+            .map((role) => ({
+              key: managedFile.key,
+              role,
+              storageBackendId: managedFile.storageBackendId,
+            })),
+      )
+      references.push({
+        key: originalFile.key,
+        role: { type: 'default' },
+        storageBackendId: originalFile.storageBackendId,
+      })
+
+      return {
+        data: {
+          ...incomingFileData,
+          _managedFiles: createManagedFileManifest({ references }),
+          filename: retainedOriginal.filename,
+          filesize: retainedOriginal.filesize,
+          height: retainedOriginal.height,
+          mimeType: retainedOriginal.mimeType,
+          original: retainedOriginal,
+          sizes: currentFileData?.sizes,
+          url: retainedOriginal.url,
+          width: retainedOriginal.width,
+          ...(draft ? { _status: 'draft' } : {}),
+        } as T,
+        files: [],
+      }
+    }
     const mainBuffer = fileWasTransformed
       ? Buffer.from(await mainWebFile!.arrayBuffer())
       : undefined
 
     // A transformed file is named after what the transformer returned, not the upload.
-    const outputName = (fileWasTransformed && mainWebFile!.name) || file.name
+    const outputName = hasReusableOriginalMain
+      ? retainedOriginal!.filename
+      : (fileWasTransformed && mainWebFile!.name) || file.name
 
     let mimeType: string
     let ext: string | undefined
@@ -425,7 +484,9 @@ export const generateFileData = async <T>({
       fsSafeName = getOriginalFilename({ filename: fsSafeName })
     }
 
-    if (
+    if (hasReusableOriginalMain) {
+      fsSafeName = retainedOriginal!.filename
+    } else if (
       !overwriteExistingFiles ||
       !disableLocalStorage ||
       (shouldStageCloudFiles && retainedOriginal)
@@ -442,6 +503,9 @@ export const generateFileData = async <T>({
     }
 
     fileData.filename = fsSafeName
+    if (hasReusableOriginalMain) {
+      fileData.url = retainedOriginal!.url
+    }
 
     if (shouldStageCloudFiles) {
       fileData._objectKey = randomUUID()
@@ -525,7 +589,14 @@ export const generateFileData = async <T>({
           managedFile.roles.some((role) => role.type === 'original'),
         )
         if (originalFile) {
-          fileData._managedFiles = [{ ...originalFile, roles: [{ type: 'original' }] }]
+          fileData._managedFiles = [
+            {
+              ...originalFile,
+              roles: hasReusableOriginalMain
+                ? [{ type: 'original' }, { type: 'default' }]
+                : [{ type: 'original' }],
+            },
+          ]
         }
       }
     }
@@ -549,7 +620,7 @@ export const generateFileData = async <T>({
           size: mainBuffer.length,
         }
       }
-    } else {
+    } else if (!hasReusableOriginalMain) {
       // file.data is empty when useTempFiles is on, so the real content lives at
       // file.tempFilePath instead (see the function doc for why we avoid buffering it).
       const tempFileHandling = resolveTempFileHandling({

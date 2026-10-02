@@ -144,11 +144,10 @@ export const cloudStoragePlugin =
 
         if (!options.disablePayloadAccessControl) {
           handlers.push(adapter.staticHandler)
-          // Else if disablePayloadAccessControl: true and upload instructions are used
-          // Build the "proxied" handler that responds only when addDataAndFileToRequest fetches the uploaded file
-        } else if (uploadInstructions) {
+          // Public files still need a server path when Payload reads them for a transform.
+        } else {
           handlers.push((req, args) => {
-            if ('uploadReference' in args.params) {
+            if ('uploadReference' in args.params || args.params.operation === 'transform') {
               return adapter.staticHandler(req, args)
             }
           })
@@ -203,6 +202,8 @@ export const cloudStoragePlugin =
                 adapter,
                 collection: existingCollection,
                 collectionPrefix: options.prefix,
+                disablePayloadAccessControl: options.disablePayloadAccessControl,
+                hasCustomFileURL: Boolean(options.generateFileURL),
                 useCompositePrefixes,
               }),
             ],

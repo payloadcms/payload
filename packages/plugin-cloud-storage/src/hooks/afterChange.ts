@@ -10,11 +10,14 @@ import {
   buildUploadStoragePathData,
 } from '../utilities/buildStoragePathData.js'
 import { getIncomingFiles } from '../utilities/getIncomingFiles.js'
+import { appendProxyPrefix } from './afterRead.js'
 
 interface Args {
   adapter: GeneratedAdapter
   collection: CollectionConfig
   collectionPrefix?: string
+  disablePayloadAccessControl?: boolean
+  hasCustomFileURL?: boolean
   useCompositePrefixes?: boolean
 }
 
@@ -29,6 +32,8 @@ export const getAfterChangeHook =
     adapter,
     collection,
     collectionPrefix,
+    disablePayloadAccessControl,
+    hasCustomFileURL,
     useCompositePrefixes,
   }: Args): CollectionAfterChangeHook<FileData & TypeWithID> =>
   async ({ data, doc, operation, previousDoc, req, select }) => {
@@ -39,6 +44,26 @@ export const getAfterChangeHook =
 
     // Restore upload metadata removed by select, including partially selected image sizes.
     const uploadData = select ? deepMergeWithSourceArrays<FileData & TypeWithID>(data, doc) : doc
+    const withProxyPrefix = (upload: FileData & TypeWithID): FileData & TypeWithID => {
+      const { prefix } = upload as { prefix?: string } & FileData & TypeWithID
+
+      if (disablePayloadAccessControl || hasCustomFileURL || !useCompositePrefixes || !prefix) {
+        return upload
+      }
+
+      return {
+        ...upload,
+        ...(upload.url && {
+          url: appendProxyPrefix({ prefix, url: upload.url }),
+        }),
+        ...(upload.original?.url && {
+          original: {
+            ...upload.original,
+            url: appendProxyPrefix({ prefix, url: upload.original.url }),
+          },
+        }),
+      }
+    }
     const isDraftSave = (uploadData as { _status?: string })._status === 'draft'
     const isDraftOverPublished =
       isDraftSave && (previousDoc as { _status?: string } | undefined)?._status === 'published'
@@ -49,7 +74,7 @@ export const getAfterChangeHook =
         | undefined
 
       if (!metadata || Object.keys(metadata).length === 0) {
-        return doc
+        return withProxyPrefix(doc)
       }
 
       req.context.skipCloudStorage = true
@@ -71,7 +96,7 @@ export const getAfterChangeHook =
           select,
         })
 
-        return select ? { ...doc, ...updatedDoc } : { ...doc, ...metadata }
+        return withProxyPrefix(select ? { ...doc, ...updatedDoc } : { ...doc, ...metadata })
       } finally {
         req.query = originalQuery
         delete req.context.skipCloudStorage

@@ -422,6 +422,125 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     ).toEqual(originalSizePixels)
   })
 
+  test('should reset a saved crop to the retained original without copying its bytes', async ({
+    payload,
+    restClient,
+  }) => {
+    const bytes = await readFile(imageFixture)
+    const created = await payload.create({
+      collection: transformedMediaSlug,
+      data: { alt: 'source' },
+      file: { name: 'landscape.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+    })
+    const crop = await restClient.PATCH(`/${transformedMediaSlug}/${created.id}`, {
+      body: JSON.stringify({ alt: 'cropped' }),
+      query: {
+        uploadEdits: {
+          crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
+          heightInPixels: 800,
+          widthInPixels: 800,
+        },
+      },
+    })
+    expect(crop.status).toBe(200)
+    const cropped = (await crop.json()).doc as typeof created
+
+    const reset = await restClient.PATCH(`/${transformedMediaSlug}/${created.id}`, {
+      body: JSON.stringify({ alt: 'reset' }),
+      query: {
+        uploadEdits: {
+          crop: { height: 100, unit: '%', width: 100, x: 0, y: 0 },
+          heightInPixels: 1600,
+          widthInPixels: 1600,
+        },
+      },
+    })
+    expect(reset.status).toBe(200)
+    const resetDoc = (await reset.json()).doc as typeof created
+    const current = await payload.findByID({
+      id: created.id,
+      collection: transformedMediaSlug,
+      showHiddenFields: true,
+    })
+
+    expect(resetDoc.filename).toBe(created.original!.filename)
+    expect(resetDoc.url).toBe(created.original!.url)
+    expect(
+      current._managedFiles?.find((file) => file.key === created.original!.filename)?.roles,
+    ).toEqual([{ type: 'original' }, { type: 'default' }])
+    expect(await readFile(path.join(transformedMediaDir, resetDoc.filename!))).toEqual(bytes)
+    expect(current.sizes?.small?.filename).toBe(cropped.sizes?.small?.filename)
+
+    const { docs: versions } = await payload.db.findVersions({
+      collection: transformedMediaSlug,
+      where: { parent: { equals: created.id } },
+    })
+    const savedCrop = versions.find(({ version }) => version.alt === 'cropped')
+    expect(savedCrop).toBeDefined()
+    const savedCropKey = savedCrop?.version._managedFiles?.find((file) =>
+      file.roles.some((role) => role.type === 'default'),
+    )?.key
+    expect(savedCropKey).toBeTruthy()
+    await expect(
+      sharp(path.join(transformedMediaDir, savedCropKey)).metadata(),
+    ).resolves.toMatchObject({
+      height: 800,
+      width: 800,
+    })
+  })
+
+  test('should reuse the original main file when resetting a crop and moving the focal point', async ({
+    payload,
+    restClient,
+  }) => {
+    const bytes = await readFile(imageFixture)
+    const created = await payload.create({
+      collection: transformedMediaSlug,
+      data: { alt: 'source' },
+      file: { name: 'landscape.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+    })
+    const crop = await restClient.PATCH(`/${transformedMediaSlug}/${created.id}`, {
+      body: JSON.stringify({ alt: 'cropped' }),
+      query: {
+        uploadEdits: {
+          crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
+          heightInPixels: 800,
+          widthInPixels: 800,
+        },
+      },
+    })
+    expect(crop.status).toBe(200)
+    const cropped = (await crop.json()).doc as typeof created
+
+    const reset = await restClient.PATCH(`/${transformedMediaSlug}/${created.id}`, {
+      body: JSON.stringify({ alt: 'reset', focalX: 75, focalY: 25 }),
+      query: {
+        uploadEdits: {
+          crop: { height: 100, unit: '%', width: 100, x: 0, y: 0 },
+          heightInPixels: 1600,
+          widthInPixels: 1600,
+        },
+      },
+    })
+    expect(reset.status).toBe(200)
+    const resetDoc = (await reset.json()).doc as typeof created
+    const current = await payload.findByID({
+      id: created.id,
+      collection: transformedMediaSlug,
+      showHiddenFields: true,
+    })
+
+    expect(resetDoc.filename).toBe(created.original!.filename)
+    expect(resetDoc.url).toBe(created.original!.url)
+    expect(current.focalX).toBe(75)
+    expect(current.focalY).toBe(25)
+    expect(current.sizes?.small?.filename).not.toBe(cropped.sizes?.small?.filename)
+    expect(
+      current._managedFiles?.find((file) => file.key === created.original!.filename)?.roles,
+    ).toEqual([{ type: 'original' }, { type: 'default' }])
+    expect(await readFile(path.join(transformedMediaDir, resetDoc.filename!))).toEqual(bytes)
+  })
+
   test('should keep the uploaded original after repeated edits and version pruning', async ({
     payload,
     restClient,

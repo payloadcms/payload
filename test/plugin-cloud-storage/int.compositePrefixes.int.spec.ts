@@ -1,3 +1,4 @@
+/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options"] }] -- Tests use the shared fixture wrapper. */
 import type { SuiteAPI } from 'vitest'
 
 import * as AWS from '@aws-sdk/client-s3'
@@ -35,7 +36,7 @@ const configPath = './config.compositePrefixes.ts'
 test.suite('@payloadcms/plugin-cloud-storage (composite prefixes)', { config: configPath }, () => {
   let TEST_BUCKET: string
 
-  test.beforeEach(async () => {
+  test.beforeEach(() => {
     TEST_BUCKET = process.env.S3_BUCKET!
   })
 
@@ -76,7 +77,20 @@ test.suite('@payloadcms/plugin-cloud-storage (composite prefixes)', { config: co
 
         expect(upload.id).toBeTruthy()
 
-        const expectedKey = `${collectionPrefix}/${docPrefix}/${upload.filename}`
+        const stored = await payload.db.findOne({
+          collection: mediaWithCompositePrefixesSlug,
+          where: { id: { equals: upload.id } },
+        })
+        const expectedKey = stored?._managedFiles?.find((file) =>
+          file.roles.some((role) => role.type === 'default'),
+        )?.key
+
+        expect(expectedKey?.split('/')).toEqual([
+          collectionPrefix,
+          docPrefix,
+          expect.stringMatching(/^[0-9a-f-]+$/),
+          upload.filename,
+        ])
 
         const { $metadata } = await client.send(
           new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: expectedKey }),
@@ -87,6 +101,7 @@ test.suite('@payloadcms/plugin-cloud-storage (composite prefixes)', { config: co
         expect(upload.url).toEqual(
           `/api/${mediaWithCompositePrefixesSlug}/file/${String(upload.filename)}?prefix=${docPrefix}`,
         )
+        expect(upload.original?.url).toBe(upload.url)
       })
 
       test('can upload with composite prefixes (collection prefix only)', async ({ payload }) => {
@@ -99,7 +114,19 @@ test.suite('@payloadcms/plugin-cloud-storage (composite prefixes)', { config: co
 
         expect(upload.id).toBeTruthy()
 
-        const expectedKey = `${collectionPrefix}/${upload.filename}`
+        const stored = await payload.db.findOne({
+          collection: mediaWithCompositePrefixesSlug,
+          where: { id: { equals: upload.id } },
+        })
+        const expectedKey = stored?._managedFiles?.find((file) =>
+          file.roles.some((role) => role.type === 'default'),
+        )?.key
+
+        expect(expectedKey?.split('/')).toEqual([
+          collectionPrefix,
+          expect.stringMatching(/^[0-9a-f-]+$/),
+          upload.filename,
+        ])
 
         const { $metadata } = await client.send(
           new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: expectedKey }),

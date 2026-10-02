@@ -2,7 +2,7 @@ import type { ReadableStream } from 'node:stream/web'
 
 import { randomUUID } from 'node:crypto'
 import fs from 'node:fs'
-import { mkdir, rm } from 'node:fs/promises'
+import { mkdir, rm, stat } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { Readable } from 'node:stream'
@@ -181,6 +181,7 @@ export const getFileFromUploadInstructions = async ({
       req,
       uploadConfig,
     })
+    assertProviderFileSize({ expectedSize: file.size, response })
     const prefix = await readBoundedPrefix(response, 1)
     if (file.size > 0 && prefix.length === 0) {
       throw new APIError('Uploaded source is not readable.', 400)
@@ -218,6 +219,10 @@ export const getFileFromUploadInstructions = async ({
   })
 
   const tempFilePath = await streamResponseToTempFile({ req, response })
+  if ((await stat(tempFilePath)).size !== file.size) {
+    await rm(tempFilePath, { force: true })
+    throw new APIError('Uploaded source size does not match the declared size.', 400)
+  }
   req.context ??= {}
   req.context._payloadClientUploadTempFile = true
   rememberVerifiedOriginal()
@@ -271,6 +276,7 @@ const fetchHeaderOnly = async ({
     req,
     uploadConfig,
   })
+  assertProviderFileSize({ expectedSize: file.size, response })
 
   const headerBuffer = await readBoundedPrefix(response, HEADER_PROBE_BYTE_LENGTH)
 
@@ -293,6 +299,28 @@ const fetchHeaderOnly = async ({
     mimetype: response.headers.get('Content-Type') || file.mimeType,
     size: file.size,
     uploadReference: file.uploadReference,
+  }
+}
+
+const assertProviderFileSize = ({
+  expectedSize,
+  response,
+}: {
+  expectedSize: number
+  response: Response
+}): void => {
+  const contentRange = response.headers.get('Content-Range')
+  const reportedSize =
+    response.status === 206
+      ? contentRange?.match(/^bytes \d+-\d+\/(\d+)$/)?.[1]
+      : response.headers.get('Content-Length')
+
+  if (
+    reportedSize === undefined ||
+    reportedSize === null ||
+    Number(reportedSize) !== expectedSize
+  ) {
+    throw new APIError('Uploaded source size does not match the declared size.', 400)
   }
 }
 

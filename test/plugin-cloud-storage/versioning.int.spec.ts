@@ -116,6 +116,189 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     expect(versionedCloudCalls.uploads).toBe(1)
   })
 
+  test('should reset a cloud crop to the retained original without another upload', async ({
+    payload,
+    restClient,
+  }) => {
+    const sourceBytes = await readFile(firstFile)
+    const created = await payload.create({
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      overrideAccess: true,
+    })
+    const crop = await restClient.PATCH(`/${versionedCloudMediaSlug}/${created.id}`, {
+      body: JSON.stringify({}),
+      query: {
+        uploadEdits: {
+          crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
+          heightInPixels: 800,
+          widthInPixels: 800,
+        },
+      },
+    })
+    expect(crop.status).toBe(200)
+    const cropped = (await crop.json()).doc as typeof created
+    const uploadsAfterCrop = versionedCloudCalls.uploads
+
+    const reset = await restClient.PATCH(`/${versionedCloudMediaSlug}/${created.id}`, {
+      body: JSON.stringify({}),
+      query: {
+        uploadEdits: {
+          crop: { height: 100, unit: '%', width: 100, x: 0, y: 0 },
+          heightInPixels: 1600,
+          widthInPixels: 1600,
+        },
+      },
+    })
+    expect(reset.status).toBe(200)
+    const resetDoc = (await reset.json()).doc as typeof created
+    const manifest = await getManagedFiles({ id: created.id, payload })
+    const original = manifest.find((file) => file.roles.some((role) => role.type === 'original'))
+
+    expect(resetDoc.filename).toBe(created.original!.filename)
+    expect(resetDoc.url).toBe(created.original!.url)
+    expect(original?.roles).toEqual([{ type: 'original' }, { type: 'default' }])
+    expect(versionedCloudCalls.uploads).toBe(uploadsAfterCrop)
+    expect(versionedCloudFiles.get(original!.key)).toEqual(sourceBytes)
+
+    const { docs: versions } = await payload.db.findVersions({
+      collection: versionedCloudMediaSlug,
+      where: { parent: { equals: created.id } },
+    })
+    expect(versions.some(({ version }) => version.filename === cropped.filename)).toBe(true)
+  })
+
+  test('should retain the original cloud object when resetting a crop and moving the focal point', async ({
+    payload,
+    restClient,
+  }) => {
+    const created = await payload.create({
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+    })
+    const crop = await restClient.PATCH(`/${versionedCloudMediaSlug}/${created.id}`, {
+      body: JSON.stringify({}),
+      query: {
+        uploadEdits: {
+          crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
+          heightInPixels: 800,
+          widthInPixels: 800,
+        },
+      },
+    })
+    expect(crop.status).toBe(200)
+    const uploadsAfterCrop = versionedCloudCalls.uploads
+
+    const reset = await restClient.PATCH(`/${versionedCloudMediaSlug}/${created.id}`, {
+      body: JSON.stringify({ focalX: 75, focalY: 25 }),
+      query: {
+        uploadEdits: {
+          crop: { height: 100, unit: '%', width: 100, x: 0, y: 0 },
+          heightInPixels: 1600,
+          widthInPixels: 1600,
+        },
+      },
+    })
+    expect(reset.status).toBe(200)
+    const resetDoc = (await reset.json()).doc as typeof created
+    const manifest = await getManagedFiles({ id: created.id, payload })
+    const original = manifest.find((file) => file.roles.some((role) => role.type === 'original'))
+
+    expect(resetDoc.filename).toBe(created.original!.filename)
+    expect(resetDoc.focalX).toBe(75)
+    expect(resetDoc.focalY).toBe(25)
+    expect(original?.roles).toEqual([{ type: 'original' }, { type: 'default' }])
+    expect(versionedCloudCalls.uploads).toBe(uploadsAfterCrop)
+  })
+
+  test('should remove an unversioned cloud crop after resetting to the original', async ({
+    payload,
+    restClient,
+  }) => {
+    const created = await payload.create({
+      collection: unversionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+    })
+    const crop = await restClient.PATCH(`/${unversionedCloudMediaSlug}/${created.id}`, {
+      body: JSON.stringify({}),
+      query: {
+        uploadEdits: {
+          crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
+          heightInPixels: 800,
+          widthInPixels: 800,
+        },
+      },
+    })
+    expect(crop.status).toBe(200)
+    const croppedManifest = await getManagedFiles({
+      id: created.id,
+      collection: unversionedCloudMediaSlug,
+      payload,
+    })
+    const croppedKey = croppedManifest.find((file) =>
+      file.roles.some((role) => role.type === 'default'),
+    )!.key
+
+    const reset = await restClient.PATCH(`/${unversionedCloudMediaSlug}/${created.id}`, {
+      body: JSON.stringify({}),
+      query: {
+        uploadEdits: {
+          crop: { height: 100, unit: '%', width: 100, x: 0, y: 0 },
+          heightInPixels: 1600,
+          widthInPixels: 1600,
+        },
+      },
+    })
+    expect(reset.status).toBe(200)
+    expect(versionedCloudFiles.has(croppedKey)).toBe(false)
+    expect(versionedCloudFiles.size).toBe(1)
+  })
+
+  test('should keep a direct public URL on the retained original after crop reset', async ({
+    payload,
+    restClient,
+  }) => {
+    const created = await payload.create({
+      collection: versionedPublicCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+    })
+    const originalURL = created.original!.url
+    const crop = await restClient.PATCH(`/${versionedPublicCloudMediaSlug}/${created.id}`, {
+      body: JSON.stringify({}),
+      query: {
+        uploadEdits: {
+          crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
+          heightInPixels: 800,
+          widthInPixels: 800,
+        },
+      },
+    })
+    expect(crop.status).toBe(200)
+
+    const reset = await restClient.PATCH(`/${versionedPublicCloudMediaSlug}/${created.id}`, {
+      body: JSON.stringify({}),
+      query: {
+        uploadEdits: {
+          crop: { height: 100, unit: '%', width: 100, x: 0, y: 0 },
+          heightInPixels: 1600,
+          widthInPixels: 1600,
+        },
+      },
+    })
+    expect(reset.status).toBe(200)
+    const current = await payload.findByID({
+      id: created.id,
+      collection: versionedPublicCloudMediaSlug,
+    })
+
+    expect(current.url).toBe(originalURL)
+    expect(current.original?.url).toBe(originalURL)
+  })
+
   test('should read and replace a legacy cloud file through verified storage state', async ({
     payload,
   }) => {

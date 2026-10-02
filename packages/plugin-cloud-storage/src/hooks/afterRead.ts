@@ -52,10 +52,17 @@ export const getAfterReadHook =
           prefix: objectFolder,
         })
       } else if (url && prefix) {
-        const separator = url.includes('?') ? '&' : '?'
-        url = `${url}${separator}prefix=${encodeURIComponent(prefix)}`
+        url = appendProxyPrefix({ prefix, url })
       }
     }
 
     return url
   }
+
+export const appendProxyPrefix = ({ prefix, url }: { prefix: string; url: string }): string => {
+  if (new URL(url, 'http://payload.local').searchParams.has('prefix')) {
+    return url
+  }
+  const separator = url.includes('?') ? '&' : '?'
+  return `${url}${separator}prefix=${encodeURIComponent(prefix)}`
+}

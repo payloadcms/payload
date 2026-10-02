@@ -1,11 +1,12 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { JsonObject, PayloadRequest } from '../../types/index.js'
 import type { FileToSave } from '../types.js'
+import type { ManagedFileManifest } from './types.js'
 
 import { saveVersion } from '../../versions/saveVersion.js'
 import { collectManagedFiles, scheduleUnreferencedFileCleanup } from './cleanup.js'
 import { runFileCreationPlan, runFileOperationPlan } from './fileOperationManager.js'
-import { withLegacyCloudUploadFileData } from './manifest.js'
+import { getManagedFileIdentity, withLegacyCloudUploadFileData } from './manifest.js'
 
 export const runCloudFileCreation = async <T>({
   collection,
@@ -76,16 +77,22 @@ export const runCloudFileUpdate = async <T>({
   const storedCurrent = operations
     ? await withLegacyCloudUploadFileData({ collection, doc: current, req })
     : current
-  const hasManagedRemoval =
-    Array.isArray(data._managedFiles) &&
-    data._managedFiles.length === 0 &&
-    Array.isArray(storedCurrent._managedFiles) &&
-    storedCurrent._managedFiles.length > 0
+  const nextManifest = Array.isArray(data._managedFiles)
+    ? (data._managedFiles as ManagedFileManifest)
+    : undefined
+  const currentManifest = Array.isArray(storedCurrent._managedFiles)
+    ? (storedCurrent._managedFiles as ManagedFileManifest)
+    : []
+  const nextIdentities = new Set(nextManifest?.map(getManagedFileIdentity))
+  const hasManagedFileChange =
+    nextManifest !== undefined &&
+    (nextIdentities.size !== currentManifest.length ||
+      currentManifest.some((file) => !nextIdentities.has(getManagedFileIdentity(file))))
 
   if (
     !operations ||
     req.context?.skipCloudStorage ||
-    (files.length === 0 && !req.context?._payloadVerifiedProviderOriginal && !hasManagedRemoval)
+    (files.length === 0 && !req.context?._payloadVerifiedProviderOriginal && !hasManagedFileChange)
   ) {
     return write()
   }
@@ -97,6 +104,9 @@ export const runCloudFileUpdate = async <T>({
     collection: collection.slug,
     req,
     stage: async ({ trackStagedObject }) => {
+      if (files.length === 0 && !req.context?._payloadVerifiedProviderOriginal) {
+        return
+      }
       const staged = await operations.stage({
         data: { ...storedCurrent, ...data },
         files,
