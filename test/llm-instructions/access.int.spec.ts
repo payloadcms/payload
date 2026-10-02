@@ -36,7 +36,7 @@ test.suite('LLM instruction target access', { config: './config.ts' }, () => {
     { slug: 'pages', type: 'collection' },
     { slug: 'site-settings', type: 'global' },
   ] as const) {
-    const id = `${target.type}:${target.slug}`
+    const id = `${target.type}-${target.slug}`
     const getTargetConfig = ({ payload }: { payload: Payload }) =>
       target.type === 'collection'
         ? payload.collections[target.slug].config
@@ -57,7 +57,7 @@ test.suite('LLM instruction target access', { config: './config.ts' }, () => {
       })
 
       expect(result.docs.map(({ id }) => id)).not.toContain(id)
-      expect(result.docs.map(({ id }) => id)).toContain('collection:users')
+      expect(result.docs.map(({ id }) => id)).toContain('collection-users')
     })
 
     test(`should deny direct reads of ${target.type} instructions without target read access`, async ({

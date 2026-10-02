@@ -12,7 +12,7 @@ export const LLMInstructionsMenuItem = ({ collectionSlug }: { collectionSlug?: s
   const { config } = useConfig()
   const { globalSlug } = useDocumentInfo()
   const { t } = useTranslation()
-  const id = collectionSlug ? `collection:${collectionSlug}` : `global:${globalSlug}`
+  const id = collectionSlug ? `collection-${collectionSlug}` : `global-${globalSlug}`
 
   return (
     <React.Fragment>

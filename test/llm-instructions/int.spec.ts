@@ -126,8 +126,14 @@ test.suite('LLM instructions', { config: './config.ts' }, () => {
 
     expect(first.docs).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ collectionSlug: 'pages', type: 'collection', title: 'Pages' }),
         expect.objectContaining({
+          id: 'collection-pages',
+          collectionSlug: 'pages',
+          type: 'collection',
+          title: 'Pages',
+        }),
+        expect.objectContaining({
+          id: 'global-site-settings',
           globalSlug: 'site-settings',
           type: 'global',
           title: 'Site Settings',
