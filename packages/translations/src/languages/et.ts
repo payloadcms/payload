@@ -117,6 +117,7 @@ export const etTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Otsi vidinaid...',
     widgetCollectionRequired: 'Kogu on nõutav.',
     widgetConfigurationError: 'Vidina konfiguratsiooni viga',
+    widgetDropFilesToUpload: 'Lohista ja aseta fail',
     widgetInvalidCollection: 'Kogumikku "{{collection}}" ei eksisteeri.',
     widgetInvalidFilterField: 'Filtri väli "{{field}}" ei eksisteeri kogumikus "{{collection}}".',
     widgetInvalidSortField:
@@ -133,6 +134,9 @@ export const etTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sorteeri väli',
     widgetTitleFallback: 'Kogumi päring',
     widgetTitleLabel: 'Pealkiri',
+    widgetUploadDropzoneDescription:
+      'Laad üles oma arvutist, lohistades faili siia või klõpsates allolevat nuppu.',
+    widgetUploadFiles: 'Lisa failid',
   },
   error: {
     accountAlreadyActivated: 'See konto on juba aktiveeritud.',

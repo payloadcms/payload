@@ -119,6 +119,7 @@ export const viTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Tìm kiếm các widget...',
     widgetCollectionRequired: 'Collection là bắt buộc.',
     widgetConfigurationError: 'Lỗi cấu hình Widget',
+    widgetDropFilesToUpload: 'Kéo và thả một tập tin',
     widgetInvalidCollection: 'Collection "{{collection}}" không tồn tại.',
     widgetInvalidFilterField:
       'Trường lọc "{{field}}" không tồn tại trong Collection "{{collection}}".',
@@ -136,6 +137,9 @@ export const viTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sắp xếp Field',
     widgetTitleFallback: 'Truy vấn Collection',
     widgetTitleLabel: 'Tiêu đề',
+    widgetUploadDropzoneDescription:
+      'Tải lên từ máy tính của bạn bằng cách kéo và thả, hoặc nhấp vào nút bên dưới',
+    widgetUploadFiles: 'Thêm tệp',
   },
   error: {
     accountAlreadyActivated: 'Lỗi - Tài khoản này đã được kích hoạt.',

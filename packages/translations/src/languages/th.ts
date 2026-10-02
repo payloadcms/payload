@@ -116,6 +116,7 @@ export const thTranslations: DefaultTranslationsObject = {
     searchWidgets: 'ค้นหาวิดเจ็ต...',
     widgetCollectionRequired: 'Collection เป็นข้อมูลที่จำเป็น',
     widgetConfigurationError: 'เกิดข้อผิดพลาดในการกำหนดค่าของวิดเจ็ต',
+    widgetDropFilesToUpload: 'ลากและวางไฟล์',
     widgetInvalidCollection: 'Collection "{{collection}}" ไม่มีอยู่ในระบบ',
     widgetInvalidFilterField: 'ฟิลด์ตัวกรอง "{{field}}" ไม่มีอยู่ใน Collection "{{collection}}"',
     widgetInvalidSortField:
@@ -132,6 +133,8 @@ export const thTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'จัดเรียง Field',
     widgetTitleFallback: 'การค้นหาข้อมูลใน Collection',
     widgetTitleLabel: 'ชื่อเรื่อง',
+    widgetUploadDropzoneDescription: 'อัปโหลดจากคอมพิวเตอร์ของคุณโดยลากและวาง หรือคลิกปุ่มด้านล่าง',
+    widgetUploadFiles: 'เพิ่มไฟล์',
   },
   error: {
     accountAlreadyActivated: 'บัญชีนี้ถูกเปิดใช้งานไปแล้ว',

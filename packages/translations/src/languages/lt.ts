@@ -119,6 +119,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Ieškokite valdiklių...',
     widgetCollectionRequired: 'Collection yra privaloma.',
     widgetConfigurationError: 'Valdiklio konfigūracijos klaida',
+    widgetDropFilesToUpload: 'Temkite ir numeskite failą',
     widgetInvalidCollection: 'Kolekcija "{{collection}}" neegzistuoja.',
     widgetInvalidFilterField:
       'Filtravimo laukas „{{field}}“ neegzistuoja kolekcijoje „{{collection}}“.',
@@ -136,6 +137,9 @@ export const ltTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Rikiuoti lauką',
     widgetTitleFallback: 'Kolekcijos užklausa',
     widgetTitleLabel: 'Pavadinimas',
+    widgetUploadDropzoneDescription:
+      'Įkelkite iš savo kompiuterio vilkdami ir numesdami, arba spustelėkite mygtuką žemiau',
+    widgetUploadFiles: 'Pridėti failus',
   },
   error: {
     accountAlreadyActivated: 'Ši paskyra jau aktyvuota.',

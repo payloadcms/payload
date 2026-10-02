@@ -119,6 +119,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     searchWidgets: 'উইজেট অনুসন্ধান করুন...',
     widgetCollectionRequired: 'Collection প্রয়োজনীয়।',
     widgetConfigurationError: 'উইজেট কনফিগারেশন ত্রুটি',
+    widgetDropFilesToUpload: 'একটি ফাইল টেনে এনে ছেড়ে দিন',
     widgetInvalidCollection: 'Collection "{{collection}}" বিদ্যমান নেই।',
     widgetInvalidFilterField:
       'ফিল্টার field "{{field}}" -টি collection "{{collection}}" -এ উপস্থিত নেই।',
@@ -136,6 +137,9 @@ export const bnInTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Field ক্রমবদ্ধ করুন',
     widgetTitleFallback: 'Collection অনুসন্ধান',
     widgetTitleLabel: 'শিরোনাম',
+    widgetUploadDropzoneDescription:
+      'আপনার কম্পিউটার থেকে ড্র্যাগ-এন্ড-ড্রপের মাধ্যমে আপলোড করুন, অথবা নিচের বোতামে ক্লিক করুন।',
+    widgetUploadFiles: 'ফাইলগুলি যোগ করুন',
   },
   error: {
     accountAlreadyActivated: 'এই অ্যাকাউন্ট ইতিমধ্যে সক্রিয় করা হয়েছে।',

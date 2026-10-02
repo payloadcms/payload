@@ -115,6 +115,7 @@ export const heTranslations: DefaultTranslationsObject = {
     searchWidgets: "חפש ווידג'טים...",
     widgetCollectionRequired: 'Collection נדרשת.',
     widgetConfigurationError: "שגיאת תצורת ווידג'ט",
+    widgetDropFilesToUpload: 'גרור ושחרר קובץ',
     widgetInvalidCollection: 'ה-Collection "{{collection}}" אינו קיים.',
     widgetInvalidFilterField: 'שדה הסינון "{{field}}" אינו קיים ב-Collection "{{collection}}".',
     widgetInvalidSortField: 'שדה המיון "{{field}}" אינו קיים ב-Collection "{{collection}}".',
@@ -130,6 +131,9 @@ export const heTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'שדה מיון',
     widgetTitleFallback: 'שאילתת Collection',
     widgetTitleLabel: 'כותרת',
+    widgetUploadDropzoneDescription:
+      'העלו מהמחשב שלכם באמצעות גרירה ושחרור, או לחצו על הכפתור למטה',
+    widgetUploadFiles: 'הוסף קבצים',
   },
   error: {
     accountAlreadyActivated: 'חשבון זה כבר הופעל.',

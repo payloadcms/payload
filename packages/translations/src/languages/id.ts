@@ -119,6 +119,7 @@ export const idTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Cari widget...',
     widgetCollectionRequired: 'Collection wajib diisi.',
     widgetConfigurationError: 'Kesalahan konfigurasi widget',
+    widgetDropFilesToUpload: 'Seret dan lepas file',
     widgetInvalidCollection: 'Collection "{{collection}}" tidak ada.',
     widgetInvalidFilterField:
       'Filter field "{{field}}" tidak ada pada Collection "{{collection}}".',
@@ -135,6 +136,9 @@ export const idTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Urutkan Field',
     widgetTitleFallback: 'Kueri Collection',
     widgetTitleLabel: 'Judul',
+    widgetUploadDropzoneDescription:
+      'Unggah dari komputer Anda dengan cara seret dan lepas, atau klik tombol di bawah ini',
+    widgetUploadFiles: 'Tambah file',
   },
   error: {
     accountAlreadyActivated: 'Akun ini sudah diaktifkan.',

@@ -118,6 +118,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Търсене на джаджи...',
     widgetCollectionRequired: 'Collection е задължително.',
     widgetConfigurationError: 'Грешка при конфигуриране на уиджета',
+    widgetDropFilesToUpload: 'Дръпни и пусни файл',
     widgetInvalidCollection: 'Collection "{{collection}}" не съществува.',
     widgetInvalidFilterField:
       'Филтър полето "{{field}}" не съществува в колекцията "{{collection}}".',
@@ -135,6 +136,9 @@ export const bgTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Сортирай Field',
     widgetTitleFallback: 'Заявка към Collection',
     widgetTitleLabel: 'Заглавие',
+    widgetUploadDropzoneDescription:
+      'Качете от вашия компютър чрез плъзгане и пускане или натиснете бутона по-долу.',
+    widgetUploadFiles: 'Добави файлове',
   },
   error: {
     accountAlreadyActivated: 'Този профил вече е активиран.',
