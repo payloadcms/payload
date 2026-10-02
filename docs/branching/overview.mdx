@@ -308,6 +308,10 @@ Do not accept an arbitrary branch query parameter and then read with `overrideAc
 
 Content Branching supplies branch-aware content to these existing visual editing tools. It does not add a native Figma integration.
 
+## Custom-ID limitation
+
+The Content Branching MVP does not support collections that define a custom `id` field. Branch copies need a separate physical ID, and Payload cannot generate one for every custom ID scheme.
+
 ## Multi-tenant limitation
 
 Content Branching and `@payloadcms/plugin-multi-tenant` are not supported together. Payload logs a warning when both are enabled. The warning does not add tenant isolation, and a custom field named `tenant` is not equivalent to the plugin.
@@ -324,6 +328,7 @@ The current implementation does not include:
 - guaranteed recovery for unversioned content
 - automatic repair of unknown, recovery-failed, or cleanup-failed outcomes
 - import/export migration to branch-aware batch processing
+- collections with custom IDs
 - multi-tenant plugin compatibility
 - a native Figma integration
 
