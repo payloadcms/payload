@@ -115,11 +115,12 @@ export const POST =
     await addDataAndFileToRequest(req)
     addLocalesToRequestFromData(req)
 
-    const { schema, validationRules } = await getGraphql(config)
+    const { execute, schema, validationRules } = await getGraphql(config)
 
     const headers = {}
     const apiResponse = await createHandler({
       context: { headers, req },
+      execute,
       onOperation: async (request, args, result) => {
         const response =
           typeof payload.extensions === 'function'
