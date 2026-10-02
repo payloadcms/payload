@@ -46,6 +46,17 @@ import {
   openWidgetDrawer,
 } from './helpers.js'
 
+const openNavigationForUserMenu = async ({ page }: { page: Page }): Promise<void> => {
+  const openNavigation = page.locator('.app-header--nav-open')
+
+  if ((await openNavigation.count()) === 0) {
+    await page.getByRole('button', { name: /open menu/i }).click()
+    await expect(openNavigation).toHaveCount(1)
+  }
+
+  await expect(page.locator('.user-menu__trigger')).toBeVisible()
+}
+
 test.describe('WCAG 2.2 Level AA', () => {
   let page: Page
   let postsURL: AdminUrlUtil
@@ -519,6 +530,46 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('1.4.10 Reflow (AA)', () => {
+    test('should truncate a long account label without obscuring the menu icon', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await openNavigationForUserMenu({ page })
+
+      const navHeader = page.locator('.nav__header')
+      const trigger = page.locator('.user-menu__trigger')
+      const label = trigger.locator('.btn__label')
+      const icon = trigger.locator('.btn__icon')
+
+      await label.evaluate((element) => {
+        element.textContent = 'devthisismynameandiloveit@payloadcms.com'
+      })
+
+      const [headerBox, triggerBox, labelBox, iconBox] = await Promise.all([
+        navHeader.boundingBox(),
+        trigger.boundingBox(),
+        label.boundingBox(),
+        icon.boundingBox(),
+      ])
+      const labelMetrics = await label.evaluate((element) => ({
+        clientWidth: element.clientWidth,
+        overflow: getComputedStyle(element).overflow,
+        scrollWidth: element.scrollWidth,
+        textOverflow: getComputedStyle(element).textOverflow,
+      }))
+
+      expect(headerBox).not.toBeNull()
+      expect(triggerBox).not.toBeNull()
+      expect(labelBox).not.toBeNull()
+      expect(iconBox).not.toBeNull()
+      expect(triggerBox!.x + triggerBox!.width).toBeLessThanOrEqual(headerBox!.x + headerBox!.width)
+      expect(labelBox!.x + labelBox!.width).toBeLessThanOrEqual(iconBox!.x)
+      expect(iconBox!.x + iconBox!.width).toBeLessThanOrEqual(triggerBox!.x + triggerBox!.width)
+      expect(labelMetrics).toMatchObject({
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+      })
+      expect(labelMetrics.scrollWidth).toBeGreaterThan(labelMetrics.clientWidth)
+    })
+
     test('should keep collection cards within a 320px viewport', async () => {
       const previousViewport = page.viewportSize()
 
@@ -1243,6 +1294,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       try {
         await page.setViewportSize({ height: 180, width: 320 })
         await page.goto(`${serverURL}/admin`)
+        await openNavigationForUserMenu({ page })
         await page.locator('.user-menu__trigger').click()
         const popup = page.locator('.user-menu > .popup__content')
         const popupBox = await popup.boundingBox()
@@ -1262,6 +1314,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       try {
         await page.setViewportSize({ height: 720, width: 800 })
         await page.goto(`${serverURL}/admin`)
+        await openNavigationForUserMenu({ page })
         await page.locator('.user-menu__trigger').click()
         await page.getByRole('menuitem', { name: /theme/i }).click()
         const submenu = page.locator('.user-menu .popup__content').last()
@@ -1633,6 +1686,7 @@ test.describe('WCAG 2.2 Level AA', () => {
     test('should visit every theme option with arrow keys including the middle option', async () => {
       // PYLD-3636
       await page.goto(formatAdminURL({ adminRoute: '/admin', serverURL }))
+      await openNavigationForUserMenu({ page })
       await page.locator('.user-menu__trigger').press('Enter')
       await page.getByRole('menuitem', { name: /theme/i }).press('Enter')
       const options = page.getByRole('menuitemradio')
@@ -2072,6 +2126,7 @@ test.describe('WCAG 2.2 Level AA', () => {
     test('should navigate User menu items without entering hidden submenus', async () => {
       // Additional coverage for PYLD-3645 and PYLD-3697.
       await page.goto(`${serverURL}/admin`)
+      await openNavigationForUserMenu({ page })
       const trigger = page.locator('.user-menu__trigger')
 
       await trigger.focus()
@@ -2101,6 +2156,7 @@ test.describe('WCAG 2.2 Level AA', () => {
     test('should close the full User menu chain when tabbing from a nested menu', async () => {
       // Additional coverage for PYLD-3645 and PYLD-3697.
       await page.goto(`${serverURL}/admin`)
+      await openNavigationForUserMenu({ page })
       const trigger = page.locator('.user-menu__trigger')
 
       await trigger.focus()
@@ -2121,6 +2177,7 @@ test.describe('WCAG 2.2 Level AA', () => {
     test('should restore visible focus when shift-tabbing from a nested User menu', async () => {
       // Additional coverage for PYLD-3645 and PYLD-3697.
       await page.goto(`${serverURL}/admin`)
+      await openNavigationForUserMenu({ page })
       const trigger = page.locator('.user-menu__trigger')
 
       await trigger.focus()
@@ -2143,6 +2200,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       // Additional coverage for PYLD-3645 and PYLD-3697.
       await page.setViewportSize({ height: 720, width: 320 })
       await page.goto(`${serverURL}/admin`)
+      await openNavigationForUserMenu({ page })
       const trigger = page.locator('.user-menu__trigger')
 
       await trigger.focus()
@@ -2878,6 +2936,11 @@ test.describe('WCAG 2.2 Level AA', () => {
       })
 
       expect(results.violations).toEqual([])
+    test('should give the navigation close control an accessible name', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await openNavigationForUserMenu({ page })
+
+      await expect(page.locator('.nav__close')).toHaveAccessibleName(/hide sidebar/i)
     })
 
     test('should expose table Columns and Group By expansion states', async () => {
@@ -3100,6 +3163,7 @@ test.describe('WCAG 2.2 Level AA', () => {
     test('should expose nested User menu triggers as items in one menu', async () => {
       // Additional coverage for PYLD-3645 and PYLD-3697.
       await page.goto(`${serverURL}/admin`)
+      await openNavigationForUserMenu({ page })
       const trigger = page.locator('.user-menu__trigger')
 
       await trigger.press('Enter')
