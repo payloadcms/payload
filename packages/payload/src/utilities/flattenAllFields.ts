@@ -16,10 +16,6 @@ export const flattenBlock = ({ block }: { block: Block }): FlattenedBlock => {
   }
 }
 
-/**
- * A WeakMap, so arrays built per call (e.g. `buildVersionCollectionFields` on every version read/write)
- * are garbage collected together with their cache entry instead of piling up for the lifetime of the process.
- */
 const flattenedFieldsCache = new WeakMap<Field[], FlattenedField[]>()
 
 /**
