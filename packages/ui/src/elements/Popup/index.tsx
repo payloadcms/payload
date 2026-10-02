@@ -715,7 +715,9 @@ export const Popup: React.FC<PopupProps> = (props) => {
             {Trigger}
           </div>
         ) : hoverSubmenu && isSubmenu ? (
-          <div {...pointerIntent}>{Trigger}</div>
+          <div {...pointerIntent} className={`${baseClass}__submenu-hover-watch`}>
+            {Trigger}
+          </div>
         ) : (
           Trigger
         )}

@@ -40,16 +40,12 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
         render={() => (
           <PopupList.MenuItem>
             <Popup
-              buttonType="custom"
-              className="components-view__popup-menu"
               hoverSubmenu
               popupAriaLabel="Theme menu"
               popupType="menu"
               render={() => (
                 <PopupList.MenuItem>
                   <Popup
-                    buttonType="custom"
-                    className="components-view__popup-menu"
                     horizontalAlign="right"
                     hoverSubmenu
                     popupAriaLabel="Color menu"
@@ -60,41 +56,23 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
                         <PopupList.Button onClick={() => {}}>Dark</PopupList.Button>
                       </PopupList.MenuItem>
                     )}
-                    renderButton={({ active, role, tabIndex, ...props }) => (
-                      <Button
-                        {...props}
-                        buttonStyle="ghost"
-                        className="components-view__popup-menu-trigger"
-                        extraButtonProps={{ role, tabIndex }}
-                        margin={false}
-                        selected={active}
-                      >
+                    renderButton={(buttonProps) => (
+                      <PopupList.SubmenuTrigger buttonProps={buttonProps}>
                         Color
-                      </Button>
+                      </PopupList.SubmenuTrigger>
                     )}
                     size="large"
                   />
                   <PopupList.Button onClick={() => {}}>Typography</PopupList.Button>
                 </PopupList.MenuItem>
               )}
-              renderButton={({ active, role, tabIndex, ...props }) => (
-                <Button
-                  {...props}
-                  buttonStyle="ghost"
-                  className="components-view__popup-menu-trigger"
-                  extraButtonProps={{ role, tabIndex }}
-                  margin={false}
-                  selected={active}
-                >
-                  Theme
-                </Button>
+              renderButton={(buttonProps) => (
+                <PopupList.SubmenuTrigger buttonProps={buttonProps}>Theme</PopupList.SubmenuTrigger>
               )}
               side="right"
               size="large"
             />
             <Popup
-              buttonType="custom"
-              className="components-view__popup-menu"
               hoverSubmenu
               popupAriaLabel="Language menu"
               popupType="menu"
@@ -104,17 +82,10 @@ export const PopupSection: React.FC<{ selectedComponent: string }> = ({ selected
                   <PopupList.Button onClick={() => {}}>French</PopupList.Button>
                 </PopupList.MenuItem>
               )}
-              renderButton={({ active, role, tabIndex, ...props }) => (
-                <Button
-                  {...props}
-                  buttonStyle="ghost"
-                  className="components-view__popup-menu-trigger"
-                  extraButtonProps={{ role, tabIndex }}
-                  margin={false}
-                  selected={active}
-                >
+              renderButton={(buttonProps) => (
+                <PopupList.SubmenuTrigger buttonProps={buttonProps}>
                   Language
-                </Button>
+                </PopupList.SubmenuTrigger>
               )}
               side="right"
               size="large"
