@@ -331,8 +331,8 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
 
       await payload.updateGlobal({
-        data: { heroTitle: 'legacy global' },
         slug: homepageGlobalSlug,
+        data: { heroTitle: 'legacy global' },
       })
 
       await adapter.collections[pagesSlug].updateOne({ _id: page.id }, { $unset: { _branch: 1 } })
@@ -1661,116 +1661,6 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
       expect((first.category as { name?: string })?.name).toBe('first branch category')
       expect((second.category as { name?: string })?.name).toBe('second branch category')
-    })
-  })
-
-  /**
-   * GraphQL had no branch mechanism at all — not an argument anywhere in the schema — so
-   * the only way to reach a branch was a query param on the POST URL, which nothing used
-   * and nothing tested. `branch` is now an argument, resolved onto the request the same way
-   * `locale` is.
-   */
-  test.describe('GraphQL', () => {
-    const branch = 'graphqlwork'
-    let docID: number | string
-
-    test.beforeAll(async () => {
-      const existing = await payload.find({
-        collection: branchesSlug,
-        pagination: false,
-        where: { slug: { equals: branch } },
-      })
-
-      if (!existing.docs.length) {
-        await payload.create({
-          collection: branchesSlug,
-          data: { name: 'GraphQL work', slug: branch },
-        })
-      }
-    })
-
-    test.beforeEach(async () => {
-      const doc = await payload.create({ collection: postsSlug, data: { title: 'on main' } })
-
-      docID = doc.id
-
-      await payload.update({
-        id: docID,
-        branch,
-        collection: postsSlug,
-        data: { title: 'on branch' },
-      })
-    })
-
-    test.afterEach(async () => {
-      const rows = await payload.find({ branch: false, collection: postsSlug, pagination: false })
-
-      for (const row of rows.docs) {
-        await payload.delete({ id: row.id, branch: false, collection: postsSlug }).catch(() => {})
-      }
-
-      const changes = await payload.find({
-        collection: branchChangesSlug,
-        pagination: false,
-        where: { branch: { equals: branch } },
-      })
-
-      for (const change of changes.docs) {
-        await payload.delete({ id: change.id, collection: branchChangesSlug }).catch(() => {})
-      }
-    })
-
-    // Numeric-ID adapters need a bare ID, string-ID adapters a quoted one, and GraphQL
-    // rejects the wrong form outright.
-    const gqlID = (id: number | string) =>
-      payload.db.defaultIDType === 'number' ? String(id) : `"${id}"`
-
-    const gql = async (query: string) =>
-      restClient
-        .GRAPHQL_POST({
-          body: JSON.stringify({ query }),
-          headers: { Authorization: `JWT ${token}` },
-        })
-        .then((res) => res.json())
-
-    test('should read a document on a branch', async () => {
-      const onBranch = await gql(`query {
-        Post(id: ${gqlID(docID)}, branch: "${branch}") { title }
-      }`)
-
-      const onMain = await gql(`query {
-        Post(id: ${gqlID(docID)}) { title }
-      }`)
-
-      expect(onBranch.data.Post.title).toBe('on branch')
-      expect(onMain.data.Post.title).toBe('on main')
-    })
-
-    test('should list documents on a branch', async () => {
-      const result = await gql(`query {
-        Posts(branch: "${branch}") { docs { id title } }
-      }`)
-
-      const matching = (result.data.Posts.docs as { id: string; title: string }[]).filter(
-        (doc) => String(doc.id) === String(docID),
-      )
-
-      expect(matching).toHaveLength(1)
-      expect(matching[0]!.title).toBe('on branch')
-    })
-
-    test('should fork onto the branch when updating through GraphQL', async () => {
-      await gql(`mutation {
-        updatePost(id: ${gqlID(docID)}, branch: "${branch}", data: { title: "written through graphql" }) {
-          title
-        }
-      }`)
-
-      const onBranch = await payload.findByID({ id: docID, branch, collection: postsSlug })
-      const onMain = await payload.findByID({ id: docID, collection: postsSlug })
-
-      expect(onBranch.title).toBe('written through graphql')
-      expect(onMain.title).toBe('on main')
     })
   })
 
@@ -9575,7 +9465,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
           overrideAccess: true,
         })
         const onMain = await payload.findGlobal({ slug: headerGlobalSlug })
-        const onBranch = await payload.findGlobal({ branch: branchSlug, slug: headerGlobalSlug })
+        const onBranch = await payload.findGlobal({ slug: headerGlobalSlug, branch: branchSlug })
         const remainingChanges = await findBranchChanges({ branch: branchSlug })
         const failedEvent = await findBranchMergeEvent({ branch: branchSlug })
 
@@ -10179,7 +10069,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         await commitTransaction(req)
 
         const onMain = await payload.findGlobal({ slug: headerGlobalSlug })
-        const onBranch = await payload.findGlobal({ branch: branchSlug, slug: headerGlobalSlug })
+        const onBranch = await payload.findGlobal({ slug: headerGlobalSlug, branch: branchSlug })
         const remainingChanges = await findBranchChanges({ branch: branchSlug })
         const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
 

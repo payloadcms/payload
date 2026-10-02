@@ -328,6 +328,16 @@ test.describe('Branching', () => {
       for (let i = 0; i < 3; i++) {
         await expect(checkboxes.nth(i)).toBeChecked()
       }
+
+      await expect(rowFor('Halloween Sale').getByRole('checkbox')).toHaveAccessibleName(
+        'Select Halloween Sale',
+      )
+      await expect(rowFor('Spooky Exclusive').getByRole('checkbox')).toHaveAccessibleName(
+        'Select Spooky Exclusive',
+      )
+      await expect(rowFor('Doomed Post').getByRole('checkbox')).toHaveAccessibleName(
+        'Select Doomed Post',
+      )
     })
 
     test('should render only the changed fields when a document is expanded', async () => {
@@ -375,6 +385,11 @@ test.describe('Branching', () => {
     test('should offer the active branch its own actions at the top of the switcher', async () => {
       await gotoBranchView()
       await switchBranch({ name: branchName, page })
+
+      await expect(page.locator('.branch-selector__trigger')).toHaveAccessibleName(
+        `Select branch: ${branchName}`,
+      )
+
       await page.locator('.branch-selector__trigger').click()
 
       const current = page.locator('.branch-selector__current')

@@ -200,6 +200,49 @@ test.suite('Branching GraphQL', { config: './config.ts' }, () => {
     expect(result.data?.countPosts.totalDocs).toBe(1)
   })
 
+  test('should update a collection document on the field-level branch', async ({
+    payload,
+    restClient,
+  }) => {
+    const branch = await createBranch({ name: 'GraphQL Update', payload })
+    const post = await payload.create({
+      collection: postsSlug,
+      data: { title: 'main title' },
+      overrideAccess: true,
+    })
+
+    const result = await executeGraphQL({
+      query: `mutation {
+        updatePost(
+          id: ${formatGraphQLID({ id: post.id, payload })}
+          branch: "${branch}"
+          data: { title: "branch title" }
+        ) {
+          title
+        }
+      }`,
+      restClient,
+    })
+
+    expect(result.errors).toBeUndefined()
+    expect(result.data?.updatePost.title).toBe('branch title')
+
+    const onBranch = await payload.findByID({
+      id: post.id,
+      branch,
+      collection: postsSlug,
+      overrideAccess: true,
+    })
+    const onMain = await payload.findByID({
+      id: post.id,
+      collection: postsSlug,
+      overrideAccess: true,
+    })
+
+    expect(onBranch.title).toBe('branch title')
+    expect(onMain.title).toBe('main title')
+  })
+
   test('should restore a collection version on the field-level branch', async ({
     payload,
     restClient,
