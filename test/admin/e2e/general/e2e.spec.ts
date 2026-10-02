@@ -698,6 +698,70 @@ describe('General', () => {
       await expect(link).toBeHidden()
     })
 
+    test('nav — should persist explicit open and close preferences without overwriting group preferences', async () => {
+      await page.setViewportSize({ height: 800, width: 1280 })
+      await page.goto(postsUrl.admin)
+      await openNav(page)
+
+      const groupToggle = page.locator('#nav-group-One .nav-group__toggle')
+      const groupLink = page.locator('#nav-group-one-collection-ones')
+      const navColumnWidth = () =>
+        page
+          .locator('.template-default')
+          .evaluate((element) => Number.parseFloat(getComputedStyle(element).gridTemplateColumns))
+      const waitForNavPreferenceUpdate = () =>
+        page.waitForResponse(
+          (response) =>
+            new URL(response.url()).pathname.endsWith('/payload-preferences/nav') &&
+            response.request().method() === 'POST',
+        )
+
+      await expect.poll(navColumnWidth).toBeGreaterThan(0)
+
+      await Promise.all([waitForNavPreferenceUpdate(), groupToggle.click()])
+      await expect(groupLink).toBeHidden()
+
+      await Promise.all([waitForNavPreferenceUpdate(), page.locator('.nav__close').click()])
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeHidden()
+      await expect.poll(navColumnWidth).toBe(0)
+
+      await page.reload()
+      await expect(page.locator('.template-default--nav-hydrated')).toBeVisible()
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeHidden()
+      await expect.poll(navColumnWidth).toBe(0)
+
+      await Promise.all([
+        waitForNavPreferenceUpdate(),
+        page.locator('.app-header__sidebar-toggle').click(),
+      ])
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
+      await expect.poll(navColumnWidth).toBeGreaterThan(0)
+
+      await page.reload()
+      await expect(page.locator('.template-default--nav-hydrated')).toBeVisible()
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
+      await expect.poll(navColumnWidth).toBeGreaterThan(0)
+      await expect(groupLink).toBeHidden()
+    })
+
+    test('nav — should not persist an automatic responsive close', async () => {
+      await page.setViewportSize({ height: 800, width: 1280 })
+      await page.goto(postsUrl.admin)
+      await openNav(page)
+
+      await page.setViewportSize({ height: 800, width: 500 })
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeHidden()
+
+      await page.reload()
+      await expect(page.locator('.template-default--nav-hydrated')).toBeVisible()
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeHidden()
+
+      await page.setViewportSize({ height: 800, width: 1280 })
+      await page.reload()
+      await expect(page.locator('.template-default--nav-hydrated')).toBeVisible()
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
+    })
+
     test('should disable active nav item', async () => {
       await page.goto(postsUrl.list)
       await openNav(page)

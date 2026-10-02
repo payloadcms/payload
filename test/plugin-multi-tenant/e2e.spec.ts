@@ -1436,7 +1436,9 @@ async function selectDocumentTenant({
   payload: PayloadTestSDK<Config>
   tenant: string
 }): Promise<void> {
-  await closeNav(page)
+  if (!(await page.locator('#assign-tenant-field-modal').isVisible())) {
+    await closeNav(page)
+  }
   await openAssignTenantModal({ page, payload })
   await selectInput({
     multiSelect: false,
