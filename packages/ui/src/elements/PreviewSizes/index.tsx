@@ -16,14 +16,14 @@ type FilesSizesWithUrl = {
   [key: string]: FileInfo
 }
 
-const sortSizes = (sizes: FilesSizesWithUrl, imageSizes: SanitizedUploadConfig['imageSizes']) => {
-  if (!imageSizes || imageSizes.length === 0) {
+const sortSizes = (sizes: FilesSizesWithUrl, variants: SanitizedUploadConfig['variants']) => {
+  if (!variants || variants.length === 0) {
     return sizes
   }
 
   const orderedSizes: FilesSizesWithUrl = {}
 
-  imageSizes.forEach(({ name }) => {
+  variants.forEach(({ name }) => {
     if (sizes[name]) {
       orderedSizes[name] = sizes[name]
     }
@@ -85,13 +85,13 @@ export type PreviewSizesProps = {
 }
 
 export const PreviewSizes: React.FC<PreviewSizesProps> = ({ doc, imageCacheTag, uploadConfig }) => {
-  const { imageSizes } = uploadConfig
+  const { variants } = uploadConfig
   const { sizes } = doc
 
   const alt = (doc as { alt?: string })?.alt || doc.filename || ''
 
   const [orderedSizes, setOrderedSizes] = useState<FilesSizesWithUrl>(() =>
-    sortSizes(sizes, imageSizes),
+    sortSizes(sizes, variants),
   )
   const [selectedSize, setSelectedSize] = useState<null | string>(null)
 
@@ -104,8 +104,8 @@ export const PreviewSizes: React.FC<PreviewSizesProps> = ({ doc, imageCacheTag, 
     }
   }
   useEffect(() => {
-    setOrderedSizes(sortSizes(sizes, imageSizes))
-  }, [sizes, imageSizes, imageCacheTag])
+    setOrderedSizes(sortSizes(sizes, variants))
+  }, [sizes, variants, imageCacheTag])
 
   const mainPreviewSrc = selectedSize
     ? generateImageUrl(doc.sizes[selectedSize])

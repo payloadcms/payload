@@ -1,7 +1,7 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Config } from '../config/types.js'
 import type { Field } from '../fields/config/types.js'
-import type { UploadConfig } from './types.js'
+import type { SanitizedUploadConfig } from './types.js'
 
 import { generateFilePathOrURL } from './generateFilePathOrURL.js'
 import { mimeTypeValidator } from './mimeTypeValidator.js'
@@ -25,7 +25,9 @@ type Options = {
 }
 
 export const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
-  const uploadOptions: UploadConfig = typeof collection.upload === 'object' ? collection.upload : {}
+  // `variants` only exists once a transformer (e.g. Sharp) has written it back during init.
+  const uploadOptions: Partial<SanitizedUploadConfig> =
+    typeof collection.upload === 'object' ? collection.upload : {}
 
   const mimeType: Field = {
     name: 'mimeType',
@@ -174,8 +176,8 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
   // Add focal point fields if not disabled
   if (
     uploadOptions.focalPoint !== false ||
-    uploadOptions.imageSizes ||
-    uploadOptions.resizeOptions
+    uploadOptions.variants ||
+    uploadOptions.hasImageAdjustments
   ) {
     uploadFields = uploadFields.concat(
       ['focalX', 'focalY'].map((name) => {
@@ -195,7 +197,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     mimeType.validate = mimeTypeValidator(uploadOptions.mimeTypes)
   }
 
-  if (uploadOptions.imageSizes) {
+  if (uploadOptions.variants) {
     uploadFields = uploadFields.concat([
       {
         name: 'sizes',
@@ -203,7 +205,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
         admin: {
           hidden: true,
         },
-        fields: uploadOptions.imageSizes.map((size) => ({
+        fields: uploadOptions.variants.map((size) => ({
           name: size.name,
           type: 'group',
           admin: {
