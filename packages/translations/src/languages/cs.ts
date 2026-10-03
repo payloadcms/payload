@@ -469,8 +469,7 @@ export const csTranslations: DefaultTranslationsObject = {
     restore: 'Obnovit',
     restoreAsPublished: 'Obnovit jako publikovanou verzi',
     restoredCountSuccessfully: 'Úspěšně obnoveno {{count}} {{label}}.',
-    restoring:
-      'Respektujte význam původního textu v kontextu Payload. Zde je seznam běžných termínů Payload, které nesou velmi specifické významy:\n    - Collection: Sbírka je skupina dokumentů, které sdílejí společnou strukturu a účel. Sbírky se používají k organizaci a správě obsahu v Payload.\n    - Field: Field je specifický prvek dat v dokumentu ve sbírce. Field definuje strukturu a typ dat, které mohou',
+    restoring: 'Obnovování...',
     retry: 'Opakovat',
     row: 'Řádek',
     rows: 'Řádky',

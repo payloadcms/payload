@@ -479,8 +479,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     restore: 'পুনরুদ্ধার করুন',
     restoreAsPublished: 'প্রকাশিত সংস্করণ হিসাবে পুনরুদ্ধার করুন',
     restoredCountSuccessfully: '{{count}} {{label}} সফলভাবে পুনরুদ্ধার করা হয়েছে।',
-    restoring:
-      'প্রস্থাপনার অর্থকে সম্মান করুন। এখানে Payload এর সাথে সম্পর্কিত কিছু সাধারণ পদগুলির তালিকা রয়েছে যা খুব নির্দিষ্ট অর্থ বহন করে:\n    - কালেক',
+    restoring: 'পুনরুদ্ধার করা হচ্ছে...',
     retry: 'পুনরায় চেষ্টা করুন',
     row: 'সারি',
     rows: 'সারিগুলি',

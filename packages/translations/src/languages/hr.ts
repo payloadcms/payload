@@ -472,8 +472,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     restore: 'Obnovi',
     restoreAsPublished: 'Vrati kao objavljenu verziju',
     restoredCountSuccessfully: 'Uspješno obnovljeno {{count}} {{label}}.',
-    restoring:
-      'Poštujte značenje izvornog teksta unutar konteksta Payloada. Evo popisa uobičajenih pojmova Payloada koji imaju vrlo specifična značenja:\n    - Kolekcija: Kolekcija je skup dokumenata koji dijele zajedničku strukturu i svrhu. Kolekcije se koriste za organiziranje i upravljanje sadržajem u Payloadu.\n    - Polje: Polje je specifičan dio podataka unutar dokumenta u kolekciji. Polja definiraju strukturu i vrstu podataka koji',
+    restoring: 'Obnavljanje...',
     retry: 'Pokušaj ponovo',
     row: 'Red',
     rows: 'Redovi',
@@ -690,10 +689,9 @@ export const hrTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'Samo modificirano',
     moreVersions: 'Više verzija...',
     noFurtherVersionsFound: 'Nisu pronađene daljnje verzije',
-    noLabelGroup:
-      'Poštujte značenje izvornog teksta unutar konteksta Payloada. Evo popisa uobičajenih Payload izraza koji nose vrlo specifična značenja:\n    - Zbirka: Zbirka je skupina dokumenata koji dijele zajedničku strukturu i svrhu. Zbirke se koriste za organiziranje i upravljanje sadržajem u Payloadu.\n    - Polje: Polje je specifičan dio podataka unutar dokumenta u zbirci. Polja definiraju strukturu i vrstu podataka koji se mogu p',
+    noLabelGroup: 'Neimenovana grupa',
     noRowsFound: '{{label}} nije pronađeno',
-    noRowsSelected: 'Nije odabrana {{oznaka}}',
+    noRowsSelected: 'Nije odabrana {{label}}',
     preview: 'Pregled',
     previouslyDraft: 'Prethodno Nacrt',
     previouslyPublished: 'Prethodno objavljeno',

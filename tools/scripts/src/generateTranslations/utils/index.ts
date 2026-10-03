@@ -17,6 +17,7 @@ import { findMissingKeys } from './findMissingKeys.js'
 import { generateTsObjectLiteral } from './generateTsObjectLiteral.js'
 import { sortKeys } from './sortKeys.js'
 import { translateText } from './translateText.js'
+import { validateTranslation } from './validateTranslation.js'
 
 /**
  *
@@ -146,7 +147,11 @@ export async function translateObject(props: {
       }
 
       translationPromises.push(
-        translateText(sourceText, targetLang).then((translated) => {
+        translateAndValidate({ key: missingKey, sourceText, targetLang }).then((translated) => {
+          if (translated === undefined) {
+            return
+          }
+
           if (!allOnlyNewTranslatedTranslationsObject[targetLang]) {
             allOnlyNewTranslatedTranslationsObject[targetLang] = {}
           }
@@ -254,4 +259,45 @@ export async function translateObject(props: {
   }
 
   return allTranslatedTranslationsObject
+}
+
+const MAX_TRANSLATION_ATTEMPTS = 3
+
+/**
+ * Machine translations can drop or rename placeholders, lose tags, or return the model's own
+ * instructions instead of a translation. Invalid results are retried and, if they keep failing,
+ * left out so the key stays missing (and fails type-checking) instead of shipping a broken string.
+ */
+async function translateAndValidate({
+  key,
+  sourceText,
+  targetLang,
+}: {
+  key: string
+  sourceText: string
+  targetLang: AcceptedLanguages
+}): Promise<string | undefined> {
+  let problems: string[] = []
+
+  for (let attempt = 1; attempt <= MAX_TRANSLATION_ATTEMPTS; attempt += 1) {
+    const translated = await translateText(sourceText, targetLang)
+
+    problems = validateTranslation({ sourceText, translatedText: translated })
+
+    if (!problems.length) {
+      return translated
+    }
+
+    console.warn(
+      `Invalid translation for ${key} in lang ${targetLang} (attempt ${attempt}/${MAX_TRANSLATION_ATTEMPTS}):`,
+      problems,
+    )
+  }
+
+  console.error(
+    `Could not translate ${key} in lang ${targetLang}. Translate it manually. Problems:`,
+    problems,
+  )
+
+  return undefined
 }

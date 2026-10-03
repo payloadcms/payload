@@ -52,7 +52,7 @@ export const thTranslations: DefaultTranslationsObject = {
     logoutSuccessful: 'ออกจากระบบสำเร็จ',
     logoutUser: 'ออกจากระบบ',
     newAccountCreated:
-      'ระบบได้สร้างบัญชีผู้ใช้ให้คุณสำหรับเข้าใช้งาน <a href="{{serverURL}}">{{serverURL}}</a> เรียบร้อยแล้ว กรุณากดลิงก์ด้านล่างเพื่อยืนยันอีเมล หลังจากยืนยันอีเมลเสร็จสิ้น คุณจะสามารถเข้าใช้งานระบบได้',
+      'ระบบได้สร้างบัญชีผู้ใช้ให้คุณสำหรับเข้าใช้งาน <a href="{{serverURL}}">{{serverURL}}</a> เรียบร้อยแล้ว กรุณากดลิงก์ด้านล่างหรือคัดลอก URL ไปวางในเบราว์เซอร์เพื่อยืนยันอีเมล: <a href="{{verificationURL}}">{{verificationURL}}</a><br> หลังจากยืนยันอีเมลเสร็จสิ้น คุณจะสามารถเข้าใช้งานระบบได้',
     newAPIKeyGenerated: 'สร้าง API Key ใหม่แล้ว',
     newPassword: 'รหัสผ่านใหม่',
     notRedirected: 'ไม่ได้รับการเปลี่ยนเส้นทางใช่หรือไม่? <0>เข้าสู่ระบบที่นี่</0>',
@@ -283,8 +283,7 @@ export const thTranslations: DefaultTranslationsObject = {
     cancel: 'ยกเลิก',
     changesNotSaved: 'การเปลี่ยนแปลงยังไม่ได้ถูกบันทึก ถ้าคุณออกตอนนี้ สิ่งที่แก้ไขไว้จะหายไป',
     checked: 'ตรวจสอบแล้ว',
-    clear:
-      'ให้เคารพความหมายของข้อความต้นฉบับภายในบริบทของ Payload นี่คือรายการของคำที่มักใช้ใน Payload ที่มีความหมายที่เฉพาะเจาะจงมาก:\n    - Collection: Collection คือกลุ่มของเอกสารที่มีโครงสร้างและจุดประสงค์ท',
+    clear: 'ล้าง',
     clearAll: 'ล้างทั้งหมด',
     close: 'ปิด',
     collapse: 'ยุบ',
@@ -464,8 +463,7 @@ export const thTranslations: DefaultTranslationsObject = {
     restore: 'กู้คืน',
     restoreAsPublished: 'เรียกคืนเป็นเวอร์ชันที่เผยแพร่',
     restoredCountSuccessfully: 'ได้ทำการกู้คืน {{count}} {{label}} สำเร็จแล้ว',
-    restoring:
-      'สนับสนุนความหมายของข้อความต้นฉบับในบริบทของ Payload นี่คือรายการของคำที่เกี่ยวข้องกับ Payload ที่มีความหมายเฉพาะเจาะจง:\n    - Collection: Collection เป็นกลุ่มของเอกสารที่มีโครงสร้างและจุดประสงค์ที่เหมือน',
+    restoring: 'กำลังกู้คืน...',
     retry: 'ลองใหม่',
     row: 'แถว',
     rows: 'แถว',
@@ -666,7 +664,7 @@ export const thTranslations: DefaultTranslationsObject = {
     confirmRevertToSaved: 'ยืนยันย้อนการแก้ไข',
     confirmUnpublish: 'ยืนยันการยกเลิกการเผยแพร่',
     confirmVersionRestoration: 'ยืนยันการกู้คืนเวอร์ชัน',
-    currentDocumentStatus: 'เอกสารปัจจุบัน',
+    currentDocumentStatus: 'เอกสาร{{docStatus}}ปัจจุบัน',
     currentDraft: 'ร่างปัจจุบัน',
     currentlyPublished: 'ปัจจุบันได้รับการเผยแพร่',
     currentlyViewing: 'กำลังดูอยู่ในขณะนี้',
@@ -678,8 +676,7 @@ export const thTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'แก้ไขเท่านั้น',
     moreVersions: 'เพิ่มเวอร์ชั่น...',
     noFurtherVersionsFound: 'ไม่พบเวอร์ชันอื่น ๆ',
-    noLabelGroup:
-      'ร่วมให้ความหมายของข้อความต้นฉบับภายในบริบทของ Payload นี่คือรายการของคำศัพท์ Payload ทั่วไปที่มีความหมายที่แน่นอนมาก :\n    - Collection: Collection คือกลุ่มของเอกสารที่มีโครงสร้างและจุดประสงค์ที่เหม',
+    noLabelGroup: 'กลุ่มที่ไม่มีชื่อ',
     noRowsFound: 'ไม่พบ {{label}}',
     noRowsSelected: 'ไม่มี {{label}} ที่ถูกเลือก',
     preview: 'ตัวอย่าง',

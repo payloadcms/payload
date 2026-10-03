@@ -473,8 +473,7 @@ export const daTranslations: DefaultTranslationsObject = {
     restore: 'Gendan',
     restoreAsPublished: 'Gendan som udgivet version',
     restoredCountSuccessfully: 'Gendannede {{count}} {{label}} succesfuldt.',
-    restoring:
-      'Respekter betydningen af den originale tekst inden for konteksten Payload. Her er en liste over almindelige Payload-udtryk, der bærer meget specifikke betydninger:\n    - Samling: En samling er en gruppe af dokumenter, der deler en fælles struktur og formål. Samlinger anvendes til at organisere og administrere indhold i Payload.\n    - Felt: Et felt er et specifikt stykke data i et dokument i en samling. Felter definerer struktur og type af data, der kan gemmes i et dokument.\n    - Dokument: Et dokument er en individuel post inden for',
+    restoring: 'Gendanner...',
     retry: 'Prøv igen',
     row: 'Række',
     rows: 'Rækker',
@@ -705,7 +704,7 @@ export const daTranslations: DefaultTranslationsObject = {
     publishAllLocales: 'Udgiv alle lokalindstillinger',
     publishChanges: 'Offentliggør ændringer',
     published: 'Offentliggjort',
-    publishIn: 'Offentliggør i',
+    publishIn: 'Offentliggør i {{locale}}',
     publishing: 'Offentliggør',
     restoreAsDraft: 'Gendan som kladde',
     restoredSuccessfully: 'Gendannet.',

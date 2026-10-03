@@ -417,7 +417,7 @@ export const idTranslations: DefaultTranslationsObject = {
     moveUp: 'Pindah ke Atas',
     moving: 'Memindahkan',
     movingCount: 'Memindahkan {{count}} {{label}}',
-    newLabel: '',
+    newLabel: '{{label}} baru',
     newPassword: 'Kata Sandi Baru',
     next: 'Berikutnya',
     nextPage: 'Halaman tabel berikutnya',

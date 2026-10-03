@@ -475,8 +475,7 @@ export const svTranslations: DefaultTranslationsObject = {
     restore: 'Återställ',
     restoreAsPublished: 'Återställ som publicerad version',
     restoredCountSuccessfully: 'Återställde {{count}} {{label}}.',
-    restoring:
-      'Respektera innebörden av den ursprungliga texten inom kontexten av Payload. Här är en lista över gemensamma Payload-termer som bär väldigt specifika betydelser:\n    - Samling: En samling är en grupp dokument som delar en gemensam struktur och syfte. Samlingar används för att organisera och hantera innehåll i Payload.\n    - Fält: Ett fält är en specifik data inom ett dokument i en samling. Fält definierar strukturen och typen av data som kan lagras i ett dokument.\n    - Dokument: Ett dokument är en',
+    restoring: 'Återställer...',
     retry: 'Försök igen',
     row: 'Rad',
     rows: 'Rader',

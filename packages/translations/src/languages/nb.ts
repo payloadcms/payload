@@ -476,8 +476,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     restore: 'Gjenopprett',
     restoreAsPublished: 'Gjenopprett som publisert versjon',
     restoredCountSuccessfully: 'Gjenopprettet {{count}} {{label}} vellykket.',
-    restoring:
-      'Respekter betydningen av den opprinnelige teksten innenfor konteksten av Payload. Her er en liste over vanlige Payload-uttrykk som har veldig spesifikke betydninger:\n    - Samling: En samling er en gruppe dokumenter som deler en felles struktur og formål. Samlinger brukes til å organisere og håndtere innhold i Payload.\n    - Felt: Et felt er et bestemt stykke data innenfor et dokument i en samling. Felt definerer strukturen og typen data som kan lagres i et dokument.\n    - Dokument: Et dokument er en individuell post innen',
+    restoring: 'Gjenoppretter...',
     retry: 'Prøv på nytt',
     row: 'Rad',
     rows: 'Rader',
@@ -567,7 +566,7 @@ export const nbTranslations: DefaultTranslationsObject = {
   localization: {
     cannotCopySameLocale: 'Kan ikke kopiere til samme språk',
     copyFrom: 'Kopier fra',
-    copyFromTo: 'Kopiering fra {{fra}} til {{til}}',
+    copyFromTo: 'Kopiering fra {{from}} til {{to}}',
     copyTo: 'Kopier til',
     copyToLocale: 'Kopiere til språk',
     localeToPublish: 'Språk å publisere',
