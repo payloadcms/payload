@@ -72,7 +72,10 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       if (modifySearchParams) {
         const search = `?${qs.stringify({
           ...newQuery,
-          columns: JSON.stringify(newQuery.columns),
+          columns:
+            typeof newQuery.columns === 'string'
+              ? newQuery.columns
+              : JSON.stringify(newQuery.columns),
           queryByGroup: JSON.stringify(newQuery.queryByGroup),
         })}`
         if (window.location.search !== search) {
