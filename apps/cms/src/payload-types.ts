@@ -78,6 +78,33 @@ export type LexicalNodes_EF84AAF3 =
   | SerializedQuoteNode<LexicalNodes_EF84AAF3>
   | SerializedListNode<LexicalNodes_EF84AAF3>
   | SerializedListItemNode<LexicalNodes_EF84AAF3>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_1F690F76".
+ */
+export type LexicalNodes_1F690F76 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_1F690F76>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'media'>
+  | SerializedQuoteNode<LexicalNodes_1F690F76>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'posts'
+      | 'pages'
+      | 'profiles'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_1F690F76, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_1F690F76, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_1F690F76>
+  | SerializedListItemNode<LexicalNodes_1F690F76>
+  | SerializedHeadingNode<LexicalNodes_1F690F76>;
 
 export interface Config {
   auth: {
@@ -88,6 +115,8 @@ export interface Config {
     users: User;
     media: Media;
     posts: Post;
+    pages: Page;
+    profiles: Profile;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -98,6 +127,8 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
+    profiles: ProfilesSelect<false> | ProfilesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -255,6 +286,122 @@ export interface Post {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: string;
+  title: string;
+  /**
+   * One or two sentences for search results and link previews.
+   */
+  description?: string | null;
+  heroImage?: (string | null) | Media;
+  content: LexicalRichText<LexicalNodes_EF84AAF3>;
+  /**
+   * Identifies the page, e.g. "about" for /about.
+   */
+  slug: string;
+  /**
+   * Optional. Overrides the title and description shown by search engines and link previews.
+   */
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+  };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "profiles".
+ */
+export interface Profile {
+  id: string;
+  name: string;
+  /**
+   * e.g. Software Engineer
+   */
+  headline?: string | null;
+  photo?: (string | null) | Media;
+  bio?: LexicalRichText<LexicalNodes_1F690F76> | null;
+  links?:
+    | {
+        platform: 'github' | 'linkedin' | 'youtube' | 'x' | 'website' | 'other';
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  skills?:
+    | {
+        name: string;
+        /**
+         * e.g. Back-End Development
+         */
+        category?: string | null;
+        /**
+         * 1 (basic) to 5 (expert)
+         */
+        level?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  experience?:
+    | {
+        organization: string;
+        role?: string | null;
+        startDate?: string | null;
+        /**
+         * Leave empty if current
+         */
+        endDate?: string | null;
+        description?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  education?:
+    | {
+        institution: string;
+        /**
+         * e.g. BSc (Business Administration)
+         */
+        qualification?: string | null;
+        startDate?: string | null;
+        /**
+         * Leave empty if current
+         */
+        endDate?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  slug: string;
+  email?: string | null;
+  /**
+   * e.g. New York
+   */
+  location?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -288,6 +435,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts';
         value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: string | Page;
+      } | null)
+    | ({
+        relationTo: 'profiles';
+        value: string | Profile;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -405,6 +560,80 @@ export interface PostsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  heroImage?: T;
+  content?: T;
+  slug?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "profiles_select".
+ */
+export interface ProfilesSelect<T extends boolean = true> {
+  name?: T;
+  headline?: T;
+  photo?: T;
+  bio?: T;
+  links?:
+    | T
+    | {
+        platform?: T;
+        url?: T;
+        id?: T;
+      };
+  skills?:
+    | T
+    | {
+        name?: T;
+        category?: T;
+        level?: T;
+        id?: T;
+      };
+  experience?:
+    | T
+    | {
+        organization?: T;
+        role?: T;
+        startDate?: T;
+        endDate?: T;
+        description?: T;
+        id?: T;
+      };
+  education?:
+    | T
+    | {
+        institution?: T;
+        qualification?: T;
+        startDate?: T;
+        endDate?: T;
+        id?: T;
+      };
+  slug?: T;
+  email?: T;
+  location?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -460,7 +689,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'users' | 'media' | 'posts';
+    relatedCollection: 'users' | 'media' | 'posts' | 'pages' | 'profiles';
     where?:
       | {
           [k: string]: unknown;
@@ -482,7 +711,7 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('users' | 'media' | 'posts')[] | null;
+    excludedCollections?: ('users' | 'media' | 'posts' | 'pages' | 'profiles')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
@@ -684,6 +913,17 @@ export interface LexicalRichText<TNode> {
     version: number;
   };
 }
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
 
 
 declare module 'payload' {

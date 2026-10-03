@@ -2,54 +2,20 @@ import type { CollectionConfig, FieldHook } from 'payload'
 
 import {
   BlocksFeature,
-  CodeBlock,
   FixedToolbarFeature,
   HeadingFeature,
   lexicalEditor,
   LinkFeature,
 } from '@payloadcms/richtext-lexical'
 
+import { publishedOrLoggedIn } from '../access/publishedOrLoggedIn'
+import { Code } from '../blocks/Code'
 import { YouTube } from '../blocks/YouTube'
 import {
   rememberLivePost,
   revalidatePostAfterChange,
   revalidatePostAfterDelete,
 } from '../hooks/revalidateWebsite'
-
-/**
- * Code blocks in posts. Keys are Monaco language IDs (highlighting while editing); the website
- * highlights them with Prism on the published page.
- */
-const Code = CodeBlock({
-  defaultLanguage: 'typescript',
-  languages: {
-    cpp: 'C++',
-    css: 'CSS',
-    dockerfile: 'Dockerfile',
-    go: 'Go',
-    graphql: 'GraphQL',
-    html: 'HTML',
-    java: 'Java',
-    javascript: 'JavaScript',
-    json: 'JSON',
-    kotlin: 'Kotlin',
-    markdown: 'Markdown',
-    'objective-c': 'Objective-C',
-    php: 'PHP',
-    plaintext: 'Plain Text',
-    python: 'Python',
-    ruby: 'Ruby',
-    rust: 'Rust',
-    scss: 'SCSS',
-    shell: 'Shell',
-    solidity: 'Solidity',
-    sql: 'SQL',
-    swift: 'Swift',
-    typescript: 'TypeScript',
-    xml: 'XML',
-    yaml: 'YAML',
-  },
-})
 
 /** Stores tags in the form the website uses for its tag pages: "Next.js" -> "next-js" */
 const normalizeTags: FieldHook = ({ value }) =>
@@ -75,8 +41,7 @@ const normalizeTags: FieldHook = ({ value }) =>
 export const Posts: CollectionConfig = {
   slug: 'posts',
   access: {
-    // Logged-in users see drafts; everyone else (e.g. the website) only sees published posts
-    read: ({ req }) => (req.user ? true : { _status: { equals: 'published' } }),
+    read: publishedOrLoggedIn,
   },
   admin: {
     defaultColumns: ['title', 'publishedAt', '_status', 'featured'],

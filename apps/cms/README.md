@@ -25,6 +25,8 @@ installs the app against them. This is the same approach Payload's CI uses to te
 | `src/endpoints/health.ts`             | `GET /api/health`: pings MongoDB (used by the Docker healthcheck) |
 | `src/storage/s3.ts`                   | Optional S3 storage for uploads, turned on by `S3_BUCKET`       |
 | `src/collections/Posts.ts`            | Blog posts for the personal website (see "Blog posts")           |
+| `src/collections/Pages.ts`            | Standalone pages such as About or Services (see "Pages and profiles") |
+| `src/collections/Profiles.ts`         | Profiles: bio, links, skills, work history, education           |
 | `src/hooks/revalidateWebsite.ts`      | Tells the website to refresh its pages when a post changes      |
 | `Dockerfile`                          | Multi-stage build from the repo root → small standalone image    |
 | `docker-compose.yml`, `Caddyfile`     | Production stack on the app EC2                                  |
@@ -315,6 +317,20 @@ After a publish, `docker compose logs cms` shows `Revalidated website` with the 
 The website reads the API from its own server, so it doesn't need to be in `CORS_ORIGINS`. With uploads in
 S3, set `PAYLOAD_MEDIA_URL` on the website to `S3_PUBLIC_URL` (or `https://<bucket>.s3.<region>.amazonaws.com`
 when that is empty) so it is allowed to load the images.
+
+## Pages and profiles
+
+Both collections have drafts: **Save Draft** keeps a document private, **Publish** makes it readable
+without logging in.
+
+- **Pages** (`GET /api/pages`): standalone pages such as About or Services, with a title, description,
+  hero image, rich text (including code and YouTube blocks), a slug and SEO overrides. Fetch one page with
+  `GET /api/pages?where[slug][equals]=about-me`.
+- **Profiles** (`GET /api/profiles`): name, headline, photo, bio, location, and tabs for links (GitHub,
+  LinkedIn, …), skills (category and level 1–5), work experience and education. The email address is only
+  returned to logged-in users.
+
+The website doesn't read these yet; they are ready for it the same way as posts.
 
 ## Troubleshooting
 
