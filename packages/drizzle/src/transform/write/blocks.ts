@@ -8,6 +8,7 @@ import type {
   BlockRowToInsert,
   NumberToDelete,
   RelationshipToDelete,
+  RowToInsert,
   TextToDelete,
 } from './types.js'
 
@@ -23,11 +24,16 @@ type Args = {
   blocksToDelete: Set<string>
   data: Record<string, unknown>[]
   field: FlattenedBlocksField
+  /**
+   * Tracks whether these blocks are traversed within an array - see `traverseFields`.
+   */
+  insideArray?: boolean
   locale?: string
   numbers: Record<string, unknown>[]
   numbersToDelete: NumberToDelete[]
   parentIsLocalized: boolean
   path: string
+  pathPrefixesToDelete: RowToInsert['pathPrefixesToDelete']
   relationships: Record<string, unknown>[]
   relationshipsToDelete: RelationshipToDelete[]
   selects: {
@@ -48,11 +54,13 @@ export const transformBlocks = ({
   blocksToDelete,
   data,
   field,
+  insideArray,
   locale,
   numbers,
   numbersToDelete,
   parentIsLocalized,
   path,
+  pathPrefixesToDelete,
   relationships,
   relationshipsToDelete,
   selects,
@@ -125,6 +133,7 @@ export const transformBlocks = ({
       data: blockRow,
       fieldPrefix: '',
       fields: matchedBlock.flattenedFields,
+      insideArray,
       insideArrayOrBlock: true,
       locales: newRow.locales,
       numbers,
@@ -132,6 +141,7 @@ export const transformBlocks = ({
       parentIsLocalized: parentIsLocalized || field.localized,
       parentTableName: blockTableName,
       path: `${path || ''}${field.name}.${i}.`,
+      pathPrefixesToDelete,
       relationships,
       relationshipsToAppend: [],
       relationshipsToDelete,
