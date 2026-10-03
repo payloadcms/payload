@@ -463,7 +463,7 @@ export const arTranslations: DefaultTranslationsObject = {
     restore: 'استعادة',
     restoreAsPublished: 'استعادة كإصدار منشور',
     restoredCountSuccessfully: 'تمت استعادة {{count}} {{label}} بنجاح.',
-    restoring: 'يتمّ الاستعادة...',
+    restoring: 'تتمّ الاستعادة...',
     retry: 'أعد المحاولة',
     row: 'سطر',
     rows: 'أسطُر',
