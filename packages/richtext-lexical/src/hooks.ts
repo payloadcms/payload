@@ -550,7 +550,10 @@ export const getLexicalHooks: (args: {
         /**
          * Now that the maps for all hooks are set up, we can run the validate hook
          */
-        if (!editorConfig.features.nodeHooks?.beforeValidate?.size) {
+        if (
+          !editorConfig.features.nodeHooks?.beforeValidate?.size &&
+          !editorConfig.features.getSubFields?.size
+        ) {
           return value
         }
         const nodeIDMap: {
@@ -564,7 +567,7 @@ export const getLexicalHooks: (args: {
 
         // eslint-disable-next-line prefer-const
         for (let [id, node] of Object.entries(nodeIDMap)) {
-          const beforeValidateHooks = editorConfig.features.nodeHooks.beforeValidate
+          const beforeValidateHooks = editorConfig.features.nodeHooks?.beforeValidate
           const beforeValidateHooksForNode = beforeValidateHooks?.get(node.type)
           if (beforeValidateHooksForNode) {
             for (const hook of beforeValidateHooksForNode) {
