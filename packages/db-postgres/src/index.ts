@@ -54,6 +54,7 @@ import {
   execute,
   init,
   insert,
+  makePostgresDropsIdempotent,
   requireDrizzleKit,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
@@ -109,7 +110,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       sqlExecute: string
       statements: string[]
     }): string => {
-      return `${sqlExecute}\n ${statements.join('\n')}\`)`
+      return `${sqlExecute}\n ${makePostgresDropsIdempotent(statements).join('\n')}\`)`
     }
 
     const executeMethod = 'execute'
