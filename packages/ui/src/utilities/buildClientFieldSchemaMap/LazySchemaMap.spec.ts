@@ -67,3 +67,18 @@ describe('LazySchemaMap', () => {
     expect([...map]).toEqual([])
   })
 })
+
+it('preserves native order when deferred descendants precede ordinary sibling fields', () => {
+  const map = new LazySchemaMap({ source: new Map([['page.body.child', 2]]), convert: String })
+  map.set('page', '0')
+  map.set('page.body', '1')
+  map.defer('page.body')
+  map.set('page.after', '3')
+  map.set('page.body.child', 'override')
+  expect([...map]).toEqual([
+    ['page', '0'],
+    ['page.body', '1'],
+    ['page.body.child', 'override'],
+    ['page.after', '3'],
+  ])
+})
