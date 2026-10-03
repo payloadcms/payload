@@ -104,11 +104,11 @@ export function UnpublishButton({
           })
 
           if (res.status === 200) {
-            void resetForm({
-              ...(dataFromProps || {}),
-              _status: 'draft',
-            })
+            const json = await res.json()
 
+            void resetForm({
+              ...(json?.doc || json),
+            })
             toast.success(t('version:unpublishedSuccessfully'))
             if (!unpublishAll) {
               incrementVersionCount()
