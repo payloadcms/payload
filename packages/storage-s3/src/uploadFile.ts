@@ -7,6 +7,7 @@ interface UploadArgs {
   acl?: 'private' | 'public-read'
   bucket: string
   buffer: Buffer
+  cacheControl?: string
   client: AWS.S3
   mimeType: string
   storageFilePath: string
@@ -19,6 +20,7 @@ export async function uploadFile({
   acl,
   bucket,
   buffer,
+  cacheControl,
   client,
   mimeType,
   storageFilePath,
@@ -31,6 +33,7 @@ export async function uploadFile({
       ACL: acl,
       Body: fileBufferOrStream,
       Bucket: bucket,
+      CacheControl: cacheControl,
       ContentType: mimeType,
       Key: storageFilePath,
     })
@@ -44,6 +47,7 @@ export async function uploadFile({
       ACL: acl,
       Body: fileBufferOrStream,
       Bucket: bucket,
+      CacheControl: cacheControl,
       ContentType: mimeType,
       Key: storageFilePath,
     },
