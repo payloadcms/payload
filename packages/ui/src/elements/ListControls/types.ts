@@ -38,5 +38,6 @@ export type ListControlsProps = {
   readonly queryPresetPermissions?: SanitizedCollectionPermission
   readonly renderedFilters?: Map<string, React.ReactNode>
   readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
+  readonly viewModeToggle?: React.ReactNode
   readonly viewType?: ViewTypes
 }

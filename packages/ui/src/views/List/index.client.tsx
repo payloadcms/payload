@@ -1,6 +1,6 @@
 'use client'
 
-import type { ListViewClientProps } from 'payload'
+import type { CollectionPreferences, ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL, formatFilesize } from 'payload/shared'
@@ -19,10 +19,13 @@ import { useStepNav } from '../../elements/StepNav/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { TableIdentityProvider } from '../../elements/Table/TableIdentity.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
+import { type DocumentViewMode, ViewModeToggle } from '../../elements/ViewModeToggle/index.js'
 import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
+import { usePreferences } from '../../providers/Preferences/index.js'
+import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -30,6 +33,8 @@ import { useWindowInfo } from '../../providers/WindowInfo/index.js'
 import { ListSelection } from '../../views/List/ListSelection/index.js'
 import { DocumentListSelection } from '../HierarchyList/DocumentListSelection/index.js'
 import { HierarchyTable } from '../HierarchyList/HierarchyTable/index.js'
+import { DocumentGrid } from './DocumentGrid/index.js'
+import { GroupedDocumentGrid } from './GroupedDocumentGrid/index.js'
 import { CollectionListHeader } from './ListHeader/index.js'
 import './index.css'
 
@@ -48,7 +53,9 @@ export function DefaultListView(props: ListViewClientProps) {
     disableBulkDelete,
     disableBulkEdit,
     disableQueryPresets,
+    documentViewMode,
     enableRowSelections,
+    groupedData,
     hasCreatePermission: hasCreatePermissionFromProps,
     hasDeletePermission,
     hasTrashPermission,
@@ -65,8 +72,11 @@ export function DefaultListView(props: ListViewClientProps) {
   } = props
 
   const [Table] = useControllableState(InitialTable)
+  const [viewMode, setViewMode] = useState<DocumentViewMode>(documentViewMode ?? 'table')
 
   const { allowCreate, createNewDrawerSlug, isInDrawer, onBulkSelect } = useListDrawerContext()
+  const { setPreference } = usePreferences()
+  const router = useRouter()
 
   const hasCreatePermission =
     allowCreate !== undefined
@@ -93,6 +103,7 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const previousSearch = useRef(resolvedSearch || '')
   const searchChangeResults = useRef<unknown>(null)
+  const isDataGrouped = groupedData !== undefined
 
   const hasWhereParam = useRef(Boolean(query?.where))
   const [isWhereOpen, setIsWhereOpen] = useState(hasActiveFilters)
@@ -109,6 +120,17 @@ export function DefaultListView(props: ListViewClientProps) {
   const { openModal } = useModal()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
+
+  const handleViewModeChange = async (nextViewMode: DocumentViewMode) => {
+    const preferencesKey = `collection-${collectionSlug}`
+
+    setViewMode(nextViewMode)
+    await setPreference<CollectionPreferences>(preferencesKey, (preferences) => ({
+      ...(preferences ?? {}),
+      documentViewMode: nextViewMode,
+    }))
+    router.refresh()
+  }
 
   const { labels, upload } = collectionConfig
 
@@ -307,6 +329,11 @@ export function DefaultListView(props: ListViewClientProps) {
                 queryPresetPermissions={queryPresetPermissions}
                 renderedFilters={renderedFilters}
                 resolvedFilterOptions={resolvedFilterOptions}
+                viewModeToggle={
+                  !hierarchyData && !isInDrawer ? (
+                    <ViewModeToggle onChange={handleViewModeChange} viewMode={viewMode} />
+                  ) : undefined
+                }
                 viewType={viewType}
               />
               {isWhereOpen && (
@@ -363,7 +390,20 @@ export function DefaultListView(props: ListViewClientProps) {
                   />
                 </DocumentSelectionProvider>
               ) : docs?.length > 0 ? (
-                <RelationshipProvider>{Table}</RelationshipProvider>
+                viewMode === 'grid' && isDataGrouped ? (
+                  <GroupedDocumentGrid collectionSlug={collectionSlug} groups={groupedData} />
+                ) : viewMode === 'grid' ? (
+                  <DocumentGrid
+                    adminRoute={adminRoute}
+                    collectionLabel={collectionLabel}
+                    collectionSlug={collectionSlug}
+                    docs={docs}
+                    useAsThumbnail={collectionConfig.admin.useAsThumbnail}
+                    useAsTitle={collectionConfig.admin.useAsTitle}
+                  />
+                ) : (
+                  <RelationshipProvider>{Table}</RelationshipProvider>
+                )
               ) : null}
               {/* HierarchyTable handles its own empty state, skip for hierarchy views */}
               {docs?.length === 0 &&

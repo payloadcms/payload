@@ -1,11 +1,11 @@
 'use client'
 
-import type { ListViewClientProps } from 'payload'
+import type { CollectionPreferences, ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { Fragment, useCallback, useEffect, useMemo } from 'react'
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { CollectionOption } from '../../elements/CreateDocumentButton/index.js'
 import type { StepNavItem } from '../../elements/StepNav/index.js'
@@ -17,9 +17,11 @@ import { RenderCustomComponent } from '../../elements/RenderCustomComponent/inde
 import { ListSearchFilter } from '../../elements/Search/ListSearchFilter/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
+import { type DocumentViewMode, ViewModeToggle } from '../../elements/ViewModeToggle/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useHierarchy } from '../../providers/Hierarchy/index.js'
+import { usePreferences } from '../../providers/Preferences/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouter, useSearchParams } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
@@ -38,6 +40,7 @@ export function HierarchyListView(props: ListViewClientProps) {
     BeforeList,
     collectionSlug,
     Description,
+    documentViewMode,
     hasCreatePermission: hasCreatePermissionFromProps,
     hierarchyData,
     HierarchyIcon,
@@ -46,6 +49,8 @@ export function HierarchyListView(props: ListViewClientProps) {
   } = props
 
   const router = useRouter()
+  const { setPreference } = usePreferences()
+  const [viewMode, setViewMode] = useState<DocumentViewMode>(documentViewMode ?? 'table')
   const searchParams = useSearchParams()
   const { startRouteTransition } = useRouteTransition()
 
@@ -84,6 +89,15 @@ export function HierarchyListView(props: ListViewClientProps) {
     clearRouteCache()
     refreshTree(collectionSlug)
   }, [clearRouteCache, collectionSlug, refreshTree])
+
+  const handleViewModeChange = async (nextViewMode: DocumentViewMode) => {
+    setViewMode(nextViewMode)
+    await setPreference<CollectionPreferences>(`collection-${collectionSlug}`, (preferences) => ({
+      ...(preferences ?? {}),
+      documentViewMode: nextViewMode,
+    }))
+    router.refresh()
+  }
 
   // Get search from URL params
   const searchFromURL = searchParams.get('search') || ''
@@ -372,6 +386,9 @@ export function HierarchyListView(props: ListViewClientProps) {
                   onSave={handleSave}
                 />
               )}
+              {!isInDrawer && (
+                <ViewModeToggle onChange={handleViewModeChange} viewMode={viewMode} />
+              )}
             </ListControlsBar>
 
             <HierarchyTable
@@ -392,6 +409,7 @@ export function HierarchyListView(props: ListViewClientProps) {
               relatedGroups={filteredRelatedGroups}
               search={searchFromURL}
               useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
+              viewMode={viewMode}
             />
           </div>
         </DocumentSelectionProvider>

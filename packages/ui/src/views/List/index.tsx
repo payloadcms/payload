@@ -6,11 +6,14 @@ import type {
   HierarchyViewData,
   ListQuery,
   ListViewClientProps,
+  ListViewGroup,
   ListViewServerPropsOnly,
   PaginatedDocs,
   PayloadComponent,
+  PopulateType,
   QueryPreset,
   SanitizedCollectionPermission,
+  SelectType,
 } from 'payload'
 
 import {
@@ -32,6 +35,7 @@ import {
   HierarchyListView,
   HydrateAuthProvider,
   HydrateHierarchyProvider,
+  HydratePreferences,
   ListQueryProvider,
 } from '../../exports/client/index.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
@@ -234,6 +238,7 @@ export const renderListView = async (
   }
 
   let Table: React.ReactNode | React.ReactNode[] = null
+  let groupedData: ListViewGroup[] | undefined
   let columnState: Column[] = []
   let data: PaginatedDocs = {
     // no results default
@@ -263,6 +268,12 @@ export const renderListView = async (
   /** Automatically force select active columns. */
   const select = transformColumnsToSelect(columns)
 
+  /** Grid cards need their title, timestamp, and thumbnail regardless of visible table columns. */
+  if (collectionConfig.admin.useAsTitle) {
+    select[collectionConfig.admin.useAsTitle] = true
+  }
+  select.updatedAt = true
+
   /** Force select `useAsTitle` for accessible row-selection labels, even if its column is hidden. */
   if (enableRowSelections && collectionConfig.admin.useAsTitle) {
     select[collectionConfig.admin.useAsTitle] = true
@@ -273,6 +284,44 @@ export const renderListView = async (
     collectionConfig,
     select,
   })
+
+  /** Populate only the configured thumbnail relationship for flat collection grids. */
+  const thumbnailFieldName =
+    collectionPreferences?.documentViewMode === 'grid' && viewType !== 'hierarchy'
+      ? collectionConfig.admin.useAsThumbnail
+      : undefined
+  let thumbnailPopulate: PopulateType | undefined
+
+  if (thumbnailFieldName) {
+    select[thumbnailFieldName] = true
+
+    const thumbnailField = collectionConfig.flattenedFields.find(
+      (field) => field.name === thumbnailFieldName && field.type === 'upload',
+    )
+
+    if (thumbnailField && 'relationTo' in thumbnailField) {
+      const relatedSlugs = Array.isArray(thumbnailField.relationTo)
+        ? thumbnailField.relationTo
+        : [thumbnailField.relationTo]
+
+      thumbnailPopulate = {}
+
+      for (const relatedSlug of relatedSlugs) {
+        const relatedCollectionConfig = payload.collections[relatedSlug]?.config
+
+        if (relatedCollectionConfig) {
+          const relatedSelect: SelectType = {}
+
+          appendUploadSelectFields({
+            collectionConfig: relatedCollectionConfig,
+            select: relatedSelect,
+          })
+
+          thumbnailPopulate[relatedSlug] = relatedSelect
+        }
+      }
+    }
+  }
 
   /** Force select `_tz` siblings for any timezone-enabled date fields in select */
   appendDateTimezoneSelectFields({
@@ -315,7 +364,7 @@ export const renderListView = async (
 
   try {
     if (query.groupBy) {
-      ;({ columnState, data, Table } = await handleGroupBy({
+      ;({ columnState, data, groupedData, Table } = await handleGroupBy({
         clientCollectionConfig,
         clientConfig,
         collectionConfig,
@@ -328,6 +377,8 @@ export const renderListView = async (
         query,
         req,
         select,
+        thumbnailFieldName,
+        thumbnailPopulate,
         trash,
         user,
         viewType,
@@ -343,7 +394,7 @@ export const renderListView = async (
     } else {
       data = await req.payload.find({
         collection: collectionSlug,
-        depth: 0,
+        depth: thumbnailFieldName ? 1 : 0,
         draft: true,
         fallbackLocale: false,
         includeLockStatus: true,
@@ -351,6 +402,7 @@ export const renderListView = async (
         locale: req.locale,
         overrideAccess: false,
         page: query?.page ? Number(query.page) : undefined,
+        populate: thumbnailPopulate,
         req,
         select,
         sort: query?.sort,
@@ -507,7 +559,9 @@ export const renderListView = async (
       disableBulkDelete: collectionConfig.disableBulkDelete ?? disableBulkDelete,
       disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
       disableQueryPresets,
+      documentViewMode: collectionPreferences?.documentViewMode,
       enableRowSelections,
+      groupedData,
       hasCreatePermission,
       hasDeletePermission,
       hasTrashPermission,
@@ -533,6 +587,7 @@ export const renderListView = async (
     List: (
       <Fragment>
         <HydrateAuthProvider permissions={permissions} />
+        <HydratePreferences collectionSlug={collectionSlug} preferences={collectionPreferences} />
         {isHierarchyView ? (
           <Fragment>
             <HydrateHierarchyProvider
