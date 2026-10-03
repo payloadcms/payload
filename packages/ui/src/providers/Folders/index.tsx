@@ -32,6 +32,17 @@ export type FileCardData = {
   url: string
 }
 
+/**
+ * The outcome of a `moveToFolder` call. Bulk moves are issued as one request per
+ * collection group, and the server can report some documents moved and others
+ * failed (e.g. a locked document) within the same batch. `movedCount` reflects
+ * only what the server actually confirmed moved, never the number requested.
+ */
+export type MoveToFolderResult = {
+  hasErrors: boolean
+  movedCount: number
+}
+
 export type FolderContextValue = {
   /**
    * The collection slugs that a view can be filtered by
@@ -63,7 +74,7 @@ export type FolderContextValue = {
   moveToFolder: (args: {
     itemsToMove: FolderOrDocument[]
     toFolderID?: number | string
-  }) => Promise<void>
+  }) => Promise<MoveToFolderResult>
   onItemClick: (args: { event: React.MouseEvent; index: number; item: FolderOrDocument }) => void
   onItemKeyPress: (args: {
     event: React.KeyboardEvent
@@ -102,7 +113,7 @@ const Context = React.createContext<FolderContextValue>({
   getSelectedItems: () => [],
   isDragging: false,
   itemKeysToMove: undefined,
-  moveToFolder: () => Promise.resolve(undefined),
+  moveToFolder: () => Promise.resolve({ hasErrors: false, movedCount: 0 }),
   onItemClick: () => undefined,
   onItemKeyPress: () => undefined,
   refineFolderData: () => undefined,
@@ -666,21 +677,27 @@ export function FolderProvider({
   )
 
   /**
-   * Makes requests to the server to update the folder field on passed in documents
+   * Makes requests to the server to update the folder field on passed in documents.
    *
-   * Might rewrite this in the future to return the promises so errors can be handled contextually
+   * Returns how many items the server actually confirmed as moved, rather than the
+   * number requested — a bulk PATCH can report some documents moved and others
+   * failed (e.g. a locked document) within the same batch, so the caller must not
+   * assume the whole selection succeeded just because the request didn't throw.
    */
   const moveToFolder: FolderContextValue['moveToFolder'] = React.useCallback(
     async (args) => {
       const { itemsToMove: items, toFolderID } = args
       if (!items.length) {
-        return
+        return { hasErrors: false, movedCount: 0 }
       }
 
       const movingCurrentFolder =
         items.length === 1 &&
         items[0].relationTo === folderCollectionSlug &&
         items[0].value.id === folderID
+
+      let movedCount = 0
+      let hasErrors = false
 
       if (movingCurrentFolder) {
         const queryParams = qs.stringify(
@@ -706,7 +723,10 @@ export function FolderProvider({
             method: 'PATCH',
           },
         )
-        if (req.status !== 200) {
+        if (req.status === 200) {
+          movedCount = 1
+        } else {
+          hasErrors = true
           toast.error(t('general:error'))
         }
       } else {
@@ -727,7 +747,7 @@ export function FolderProvider({
             },
           )
           try {
-            await fetch(
+            const response = await fetch(
               formatAdminURL({
                 apiRoute: routes.api,
                 path: `/${collectionSlug}${queryParams}`,
@@ -741,7 +761,24 @@ export function FolderProvider({
                 method: 'PATCH',
               },
             )
+
+            // A partial failure is still reported as a 400 (the bulk update
+            // endpoint only returns 200 when nothing failed), and that 400
+            // body still carries `docs` for whatever succeeded alongside
+            // `errors` for whatever didn't — so the body must be parsed on
+            // both statuses, not skipped on failure.
+            const json: { docs?: unknown[]; errors?: unknown[] } = await response
+              .json()
+              .catch(() => ({}))
+
+            movedCount += json?.docs?.length ?? 0
+
+            if (response.status >= 400 || json?.errors?.length) {
+              hasErrors = true
+              toast.error(t('general:error'))
+            }
           } catch (error) {
+            hasErrors = true
             toast.error(t('general:error'))
             // eslint-disable-next-line no-console
             console.error(error)
@@ -751,6 +788,8 @@ export function FolderProvider({
       }
 
       clearSelections()
+
+      return { hasErrors, movedCount }
     },
     [folderID, clearSelections, folderCollectionSlug, folderFieldName, routes.api, t, localeCode],
   )
