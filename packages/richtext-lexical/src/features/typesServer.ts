@@ -314,6 +314,8 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
       isRequired: boolean
     }) => JSONSchema4
   }
+  /** Relative schema keys consumed by this client feature. Omit to include all descendants. */
+  clientSchemaMapKeys?: string[]
   generateSchemaMap?: (args: {
     config: SanitizedConfig
     field: RichTextField

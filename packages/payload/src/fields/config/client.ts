@@ -84,10 +84,12 @@ export const createClientBlocks = ({
   defaultIDType,
   i18n,
   importMap,
+  schemaCache = new WeakMap<object, unknown>(),
 }: {
   blocks: (Block | string)[]
   defaultIDType: Payload['config']['db']['defaultIDType']
   i18n: I18nClient
+  schemaCache?: WeakMap<object, unknown>
   importMap: ImportMap
 }): (ClientBlock | string)[] | ClientBlock[] => {
   const clientBlocks: (ClientBlock | string)[] = []
@@ -97,6 +99,11 @@ export const createClientBlocks = ({
     if (typeof block === 'string') {
       // Do not process blocks that are just strings - they are processed once in the client config
       clientBlocks.push(block)
+      continue
+    }
+
+    if (schemaCache.has(block)) {
+      clientBlocks.push(schemaCache.get(block) as ClientBlock)
       continue
     }
 
@@ -164,8 +171,10 @@ export const createClientBlocks = ({
       fields: block.fields,
       i18n,
       importMap,
+      schemaCache,
     })
 
+    schemaCache.set(block, clientBlock)
     clientBlocks.push(clientBlock)
   }
 
@@ -177,12 +186,16 @@ export const createClientField = ({
   field: incomingField,
   i18n,
   importMap,
+  schemaCache = new WeakMap<object, unknown>(),
 }: {
   defaultIDType: Payload['config']['db']['defaultIDType']
   field: Field
   i18n: I18nClient
+  schemaCache?: WeakMap<object, unknown>
   importMap: ImportMap
 }): ClientField => {
+  if (schemaCache.has(incomingField)) return schemaCache.get(incomingField) as ClientField
+
   const clientField: ClientField = {} as ClientField
 
   for (const key in incomingField) {
@@ -286,6 +299,7 @@ export const createClientField = ({
         fields: incomingField.fields,
         i18n,
         importMap,
+        schemaCache,
       })
 
       break
@@ -317,6 +331,7 @@ export const createClientField = ({
           defaultIDType,
           i18n,
           importMap,
+          schemaCache,
         })
       }
 
@@ -326,6 +341,7 @@ export const createClientField = ({
           defaultIDType,
           i18n,
           importMap,
+          schemaCache,
         }) as ClientBlock[]
       }
 
@@ -423,6 +439,7 @@ export const createClientField = ({
                 fields: tab.fields,
                 i18n,
                 importMap,
+                schemaCache,
               })
             } else if (
               (key === 'label' || key === 'description') &&
@@ -473,6 +490,7 @@ export const createClientField = ({
       break
   }
 
+  schemaCache.set(incomingField, clientField)
   return clientField
 }
 
@@ -482,11 +500,13 @@ export const createClientFields = ({
   fields,
   i18n,
   importMap,
+  schemaCache = new WeakMap<object, unknown>(),
 }: {
   defaultIDType: Payload['config']['db']['defaultIDType']
   disableAddingID?: boolean
   fields: Field[]
   i18n: I18nClient
+  schemaCache?: WeakMap<object, unknown>
   importMap: ImportMap
 }): ClientField[] => {
   const clientFields: ClientField[] = []
@@ -499,6 +519,7 @@ export const createClientFields = ({
       field,
       i18n,
       importMap,
+      schemaCache,
     })
 
     clientFields.push(clientField)
