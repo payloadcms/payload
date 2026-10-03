@@ -27,6 +27,10 @@ export const CollectionWithHooks: CollectionConfig = {
   specific fields. [More details](./fields).
 </Banner>
 
+For successful-path hook ordering, transaction boundaries, and field
+concurrency across create, update, delete, read, restore, and import flows, see
+the [Hook Lifecycle](./lifecycle) page.
+
 ## Config Options
 
 All Collection Hooks accept an array of [synchronous or asynchronous functions](./overview#async-vs-synchronous). Each Collection Hook receives specific arguments based on its own type, and has the ability to modify specific outputs.
