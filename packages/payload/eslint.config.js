@@ -21,7 +21,7 @@ export const index = [
         tsconfigRootDir: import.meta.dirname,
         projectService: {
             // See comment in packages/eslint-config/index.mjs
-            allowDefaultProject: ['bin.js', 'bundle.js', 'rollup.dts.config.mjs'],
+            allowDefaultProject: ['bin.js', 'bundle.js', 'lexicalLoader.mjs', 'rollup.dts.config.mjs'],
           },
       },
     },

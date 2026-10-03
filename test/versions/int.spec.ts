@@ -6,7 +6,14 @@ import {
 } from '@payloadcms/ui/utilities/schedulePublishHandler'
 import fs from 'fs'
 import path from 'path'
-import { createLocalReq, Forbidden, getFileByPath, saveVersion, ValidationError } from 'payload'
+import {
+  createLocalReq,
+  Forbidden,
+  getFileByPath,
+  NotFound,
+  saveVersion,
+  ValidationError,
+} from 'payload'
 import { wait } from 'payload/shared'
 import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
@@ -116,6 +123,20 @@ describe('Versions', () => {
   })
 
   describe('Collections - Local', () => {
+    it('should reject invalid IDs before finding a draft collection document', async () => {
+      const invalidIDs: unknown[] = [undefined, null, '', Number.NaN, Number.POSITIVE_INFINITY, {}]
+
+      for (const invalidID of invalidIDs) {
+        await expect(
+          payload.findByID({
+            id: invalidID as string,
+            collection: draftCollectionSlug,
+            draft: true,
+          }),
+        ).rejects.toBeInstanceOf(NotFound)
+      }
+    })
+
     describe('Create', () => {
       it('should allow creating a draft with missing required field data', async () => {
         const draft = await payload.create({
@@ -778,6 +799,110 @@ describe('Versions', () => {
           where: { parent: { equals: doc.id } },
         })
         expect(res.docs).toHaveLength(101)
+      })
+    })
+
+    describe('Draft read access', () => {
+      const createdDocumentIDs: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of createdDocumentIDs) {
+          await payload.delete({ id, collection: draftCollectionSlug })
+        }
+        createdDocumentIDs.length = 0
+      })
+
+      it('should return a base document without versions when reading drafts', async () => {
+        const document = await payload.db.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Document created before drafts were enabled',
+          },
+        })
+        createdDocumentIDs.push(document.id)
+
+        const result = await payload.findByID({
+          id: document.id,
+          collection: draftCollectionSlug,
+          context: {
+            draftAccessDescription: 'Document created before drafts were enabled',
+          },
+          draft: true,
+          overrideAccess: false,
+        })
+
+        expect(result).toMatchObject({
+          id: document.id,
+          description: 'Document created before drafts were enabled',
+        })
+      })
+
+      it('should evaluate findByID access against the latest draft when the base document is denied', async () => {
+        const document = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'base denied',
+            title: 'Draft access allowed',
+          },
+          draft: true,
+        })
+        createdDocumentIDs.push(document.id)
+
+        await payload.update({
+          id: document.id,
+          collection: draftCollectionSlug,
+          data: {
+            description: 'draft allowed',
+          },
+          draft: true,
+        })
+
+        const result = await payload.findByID({
+          id: document.id,
+          collection: draftCollectionSlug,
+          context: {
+            draftAccessDescription: 'draft allowed',
+          },
+          disableErrors: true,
+          draft: true,
+          overrideAccess: false,
+        })
+
+        expect(result?.description).toBe('draft allowed')
+      })
+
+      it('should deny findByID access when only the base document matches', async () => {
+        const document = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'base allowed',
+            title: 'Draft access denied',
+          },
+          draft: true,
+        })
+        createdDocumentIDs.push(document.id)
+
+        await payload.update({
+          id: document.id,
+          collection: draftCollectionSlug,
+          data: {
+            description: 'draft denied',
+          },
+          draft: true,
+        })
+
+        const result = await payload.findByID({
+          id: document.id,
+          collection: draftCollectionSlug,
+          context: {
+            draftAccessDescription: 'base allowed',
+          },
+          disableErrors: true,
+          draft: true,
+          overrideAccess: false,
+        })
+
+        expect(result).toBeNull()
       })
     })
 
@@ -3297,6 +3422,26 @@ describe('Versions', () => {
     })
 
     describe('Read', () => {
+      it('should reject invalid IDs before finding a global version', async () => {
+        const invalidIDs: unknown[] = [
+          undefined,
+          null,
+          '',
+          Number.NaN,
+          Number.POSITIVE_INFINITY,
+          {},
+        ]
+
+        for (const invalidID of invalidIDs) {
+          await expect(
+            payload.findGlobalVersionByID({
+              id: invalidID as string,
+              slug: autoSaveGlobalSlug,
+            }),
+          ).rejects.toBeInstanceOf(NotFound)
+        }
+      })
+
       it('should allow a version to be retrieved by ID', async () => {
         const version = await payload.findGlobalVersionByID({
           id: globalVersionID,

@@ -88,6 +88,7 @@ export const cloudStoragePlugin =
 
           const fields = getFields({
             adapter,
+            alwaysInsertFields,
             collection: existingCollection,
             disablePayloadAccessControl: options.disablePayloadAccessControl,
             generateFileURL: options.generateFileURL,

@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.90.1",
+  "version": "3.90.2",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -82,7 +82,8 @@
   },
   "files": [
     "dist",
-    "bin.js"
+    "bin.js",
+    "lexicalLoader.mjs"
   ],
   "scripts": {
     "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm bundle:types && echo skipping esbuild",
@@ -127,7 +128,7 @@
     "sanitize-filename": "1.6.3",
     "sax": "1.6.1",
     "ts-essentials": "10.0.3",
-    "tsx": "4.22.4",
+    "tsx": "4.23.15",
     "undici": "7.29.0",
     "uuid": "13.0.2",
     "ws": "^8.16.0"
