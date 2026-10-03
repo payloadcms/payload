@@ -574,6 +574,37 @@ test.describe('Multi Tenant', () => {
   })
 
   test.describe('Globals', () => {
+    test('should keep the navigation visible when opening a global from the sidebar', async () => {
+      await loginClientSide({ data: credentials.admin, page, serverURL })
+      await setTenantFilter({ page, tenant: 'Blue Dog', urlUtil: tenantsURL })
+      await expect(page.locator('.nav__wrap')).toBeVisible()
+
+      const navigation = await page.evaluateHandle(() => {
+        const hiddenPaths: string[] = []
+        let frameID: number
+
+        const sample = () => {
+          if (!document.querySelector('.nav__wrap')?.checkVisibility()) {
+            hiddenPaths.push(window.location.pathname)
+          }
+          frameID = requestAnimationFrame(sample)
+        }
+
+        sample()
+
+        return { hiddenPaths, stop: () => cancelAnimationFrame(frameID) }
+      })
+
+      try {
+        await page.locator(`#nav-${menuSlug}`).click()
+        await expect(page.locator('#field-title')).toHaveValue('Blue Dog Menu')
+        expect(await navigation.evaluate(({ hiddenPaths }) => hiddenPaths)).toEqual([])
+      } finally {
+        await navigation.evaluate(({ stop }) => stop())
+        await navigation.dispose()
+      }
+    })
+
     test('should redirect list view to edit view', async () => {
       await loginClientSide({
         data: credentials.admin,
