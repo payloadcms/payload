@@ -62,16 +62,9 @@ export type ClientConfig = {
 } & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | 'i18n' | ServerOnlyRootProperties>
 
 export type UnauthenticatedClientConfig = {
-  admin: {
-    routes: ClientConfig['admin']['routes']
-    user: ClientConfig['admin']['user']
-  }
-  collections: [
-    {
-      auth: ClientCollectionConfig['auth']
-      slug: string
-    },
-  ]
+  admin: ClientConfig['admin']
+  collections: ClientCollectionConfig[]
+  custom?: Record<string, any>
   globals: []
   routes: ClientConfig['routes']
   serverURL: ClientConfig['serverURL']
@@ -135,19 +128,12 @@ export const createUnauthenticatedClientConfig = ({
    */
   const adminUserCollection = clientConfig.collections.find(
     ({ slug }) => slug === clientConfig.admin.user,
-  )!
+  )
 
   return {
-    admin: {
-      routes: clientConfig.admin.routes,
-      user: clientConfig.admin.user,
-    },
-    collections: [
-      {
-        slug: adminUserCollection.slug,
-        auth: adminUserCollection.auth,
-      },
-    ],
+    admin: clientConfig.admin,
+    collections: adminUserCollection ? [adminUserCollection] : [],
+    custom: clientConfig.custom,
     globals: [],
     routes: clientConfig.routes,
     serverURL: clientConfig.serverURL,
