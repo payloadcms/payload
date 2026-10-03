@@ -30,6 +30,7 @@ import {
 import { openDocControls } from '../__helpers/e2e/openDocControls.js'
 import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
+import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../__helpers/shared/assertToastErrors.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -211,6 +212,109 @@ describe('Relationship Field', () => {
       await saveDocAndAssert(page)
       await wait(200)
     })
+  })
+
+  test('should batch multiple relationship value fetches into a single request', async () => {
+    // Create additional relation-one docs so we have many values to fetch
+    const extraDocs = await Promise.all(
+      Array.from({ length: 3 }, (_, i) =>
+        payload.create({
+          collection: relationOneSlug,
+          data: { name: `batch-test-${i}` },
+          overrideAccess: true,
+        }),
+      ),
+    )
+
+    const allRelationIds = [
+      relationOneDoc.id,
+      anotherRelationOneDoc.id,
+      ...extraDocs.map((d) => d.id),
+    ]
+
+    // Create a doc with multiple hasMany relationship values
+    const doc = await payload.create({
+      collection: slug,
+      data: {
+        relationship: relationOneDoc.id,
+        relationshipHasMany: allRelationIds,
+      },
+      overrideAccess: true,
+    })
+
+    // Navigate to the edit page of this doc and assert that only a single
+    // request is made to /api/relation-one to resolve all relationship values.
+    // Without batching, each value would trigger its own request (N requests).
+    const requests = await assertNetworkRequests(
+      page,
+      `/api/${relationOneSlug}`,
+      async () => {
+        await page.goto(url.edit(doc.id))
+
+        // Wait for relationship field values to be fully resolved
+        const hasManyValues = page.locator(
+          '#field-relationshipHasMany .relationship--multi-value-label__text',
+        )
+
+        await expect(hasManyValues).toHaveCount(allRelationIds.length, { timeout: 10000 })
+      },
+      {
+        allowedNumberOfRequests: 1,
+        requestFilter: (request) => {
+          if (
+            request.method() !== 'POST' ||
+            request.headers()['x-payload-http-method-override'] !== 'GET'
+          ) {
+            return false
+          }
+
+          // Distinguish batch value-resolution requests (where[id][in])
+          // from dropdown-options requests (where[and])
+          const body = request.postData() ?? ''
+          return body.includes('where%5Bid%5D%5Bin%5D') || body.includes('where[id][in]')
+        },
+        timeout: 5000,
+      },
+    )
+
+    // Verify the single request fetched all IDs in one batch
+    const batchRequest = requests.find((r) => {
+      const body = r.postData() ?? ''
+      return allRelationIds.every((id) => body.includes(String(id)))
+    })
+
+    expect(batchRequest).toBeDefined()
+
+    // Clean up
+    await payload.delete({ id: doc.id, collection: slug, overrideAccess: true })
+
+    for (const extraDoc of extraDocs) {
+      await payload.delete({ id: extraDoc.id, collection: relationOneSlug, overrideAccess: true })
+    }
+  })
+
+  test('should not show stale relationship labels after client-side navigation', async () => {
+    const label = page.locator('#field-relationshipWithTitle .relationship--single-value__text')
+
+    await page.goto(url.edit(docWithExistingRelations.id))
+    await expect(label).toHaveText(relationWithTitle.name as string)
+
+    const updatedName = 'updated-while-cached'
+
+    await payload.update({
+      id: relationWithTitle.id,
+      collection: relationWithTitleSlug,
+      data: { name: updatedName },
+      overrideAccess: true,
+    })
+
+    // Navigate away and back client-side so the root providers (and their caches) stay mounted
+    await openNav(page)
+    await page.locator(`#nav-${relationWithTitleSlug}`).click()
+    await expect.poll(() => page.url()).toContain(`/collections/${relationWithTitleSlug}`)
+    await page.goBack()
+
+    await expect(label).toHaveText(updatedName)
   })
 
   // TODO: Flaky test in CI - fix this. https://github.com/payloadcms/payload/actions/runs/8559547748/job/23456806365
@@ -852,6 +956,20 @@ describe('Relationship Field', () => {
       const options = page.locator('.rs__option')
 
       await expect(options).toHaveCount(1) // None + 1 Unitled ID
+    })
+
+    test('should show untitled ID without edit button for a deleted relation', async () => {
+      await payload.delete({
+        id: relationOneDoc.id,
+        collection: relationOneSlug,
+        overrideAccess: true,
+      })
+
+      await page.goto(url.edit(docWithExistingRelations.id))
+      const field = page.locator('#field-relationship')
+
+      await expect(field).toContainText(`Untitled - ID: ${relationOneDoc.id}`)
+      await expect(field.locator('.relationship--single-value__drawer-toggler')).toHaveCount(0)
     })
 
     test('should search within the relationship field', async () => {
