@@ -33,6 +33,7 @@ import {
   openEditImageDialog,
   openFirstBlockActions,
   openFolderCreationLocation,
+  openGlobalAPI,
   openLivePreview,
   openLocaleOptions,
   openPopupWithKeyboard,
@@ -97,6 +98,49 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('1.3.1 Info and Relationships (A)', () => {
+    test('should expose the rich-text callout first toggle state through collapse and return', async () => {
+      // PYLD-3667
+      test.slow()
+      await gotoCreatePost({ page, postsURL })
+      const callout = getCallouts({ container: page.locator('main') }).first()
+      const toggle = callout.locator('.collapsible__toggle')
+      const content = callout.locator('.collapsible__content')
+
+      await expect(content).toBeVisible()
+      await toggle.focus()
+      await expect.soft(toggle).toHaveAttribute('aria-expanded', 'true')
+      await toggle.press('Enter')
+      await expect(content).toBeHidden()
+      await toggle.press('Tab')
+      await page.keyboard.press('Shift+Tab')
+      await expect(toggle).toBeFocused()
+      await expect.soft(toggle).toHaveAttribute('aria-expanded', 'false')
+      await toggle.press('Space')
+      await expect(content).toBeVisible()
+      await expect.soft(toggle).toHaveAttribute('aria-expanded', 'true')
+    })
+
+    test('should associate bulk collapse and show commands with their Array and Blocks labels', async () => {
+      // PYLD-3629
+      test.slow()
+      await addTextBlock({ page, postsURL })
+      await page.locator('#field-items .array-field__add-row').click()
+
+      for (const [selector, name] of [
+        ['#field-items', /items/i],
+        ['#field-layout', /layout/i],
+      ] as const) {
+        const field = page.locator(selector)
+
+        for (const command of [/collapse all/i, /show all/i]) {
+          const button = field.getByRole('button', { name: command })
+
+          await expect(button).toBeVisible()
+          await expect.soft(button).toHaveAccessibleName(name)
+        }
+      }
+    })
+
     test('should expose column editor headings and named toggles', async () => {
       test.setTimeout(60000)
       const columns = await openTableColumns({ page, postsURL })
@@ -160,10 +204,10 @@ test.describe('WCAG 2.2 Level AA', () => {
 
         await expect(table.locator('tbody tr')).toHaveCount(1)
         await expect(input).toHaveAccessibleName('Go to table page')
-        const tableID = table
+        await expect(table).toHaveAttribute('id', /\S/)
+        const tableID = await table.getAttribute('id')
 
-        await expect(tableID).toHaveAttribute('id')
-        await expect(input).toHaveAttribute('aria-controls', tableID)
+        await expect(input).toHaveAttribute('aria-controls', tableID!)
         await expect(input).toHaveAccessibleDescription('Enter a page number from 1 to 3.')
       } finally {
         await page.goto(`${postsURL.list}?limit=10`)
@@ -663,9 +707,9 @@ test.describe('WCAG 2.2 Level AA', () => {
         }
       })
 
-      expect(centers.chip).not.toBeNull()
-      expect(centers.icon).not.toBeNull()
-      expect(centers.text).not.toBeNull()
+      if (centers.icon === null || centers.text === null) {
+        throw new Error('Expected the multi-value chip to contain its icon and text')
+      }
       expect(Math.abs(centers.text - centers.chip)).toBeLessThanOrEqual(0.5)
       expect(Math.abs(centers.icon - centers.chip)).toBeLessThanOrEqual(0.5)
       await expect(removeButton).toBeVisible()
@@ -971,6 +1015,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(dragHandle).toHaveCSS('opacity', '1')
       await page.keyboard.press('Space')
       await expect(page.locator('body')).toHaveClass(/is-dragging/)
+      await expect(dragHandle).toHaveAttribute('aria-pressed', 'true')
       await page.keyboard.press('Space')
       await expect(page.locator('body')).not.toHaveClass(/is-dragging/)
       await expect(dragHandle).toBeFocused()
@@ -1413,24 +1458,6 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
 
-  test.describe('2.1.4 Character Key Shortcuts (A)', () => {
-    test('should close only the top popup when Escape is pressed in a rich-text flyout', async () => {
-      // PYLD-3661
-      const drawer = await openRichTextRelationshipDrawer({ page, postsURL })
-      const { groupByContent: groupByPopup } = await openGroupBy(page)
-
-      await groupByPopup.locator('.group-by-control__select-trigger').first().click()
-      const nestedOption = page.locator('.popup__content').last().getByRole('menuitemradio').first()
-      await expect(nestedOption).toBeVisible()
-      await nestedOption.focus()
-      await page.keyboard.press('Escape')
-
-      await expect(drawer).toBeVisible()
-      await expect(groupByPopup).toBeVisible()
-      await expect(nestedOption).toBeHidden()
-    })
-  })
-
   test.describe('2.1.2 No Keyboard Trap (A)', () => {
     test('should only intercept Escape while a non-dismissible dialog is open', async () => {
       await page.goto(
@@ -1504,6 +1531,24 @@ test.describe('WCAG 2.2 Level AA', () => {
           }
         }
       }
+    })
+  })
+
+  test.describe('2.1.4 Character Key Shortcuts (A)', () => {
+    test('should close only the top popup when Escape is pressed in a rich-text flyout', async () => {
+      // PYLD-3661
+      const drawer = await openRichTextRelationshipDrawer({ page, postsURL })
+      const { groupByContent: groupByPopup } = await openGroupBy(page)
+
+      await groupByPopup.locator('.group-by-control__select-trigger').first().click()
+      const nestedOption = page.locator('.popup__content').last().getByRole('menuitemradio').first()
+      await expect(nestedOption).toBeVisible()
+      await nestedOption.focus()
+      await page.keyboard.press('Escape')
+
+      await expect(drawer).toBeVisible()
+      await expect(groupByPopup).toBeVisible()
+      await expect(nestedOption).toBeHidden()
     })
   })
 
@@ -1787,7 +1832,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         ['ArrowUp', 'Remove'],
         ['Home', 'Move Up'],
         ['End', 'Remove'],
-      ]) {
+      ] as const) {
         await page.keyboard.press(key)
         await expect(menu.getByRole('menuitem', { name, exact: true })).toBeFocused()
       }
@@ -2757,6 +2802,44 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
 
+  test.describe('3.2.1 On Focus (A)', () => {
+    test('should retain keyboard focus on Global API toolbar controls without activating them', async () => {
+      // PYLD-3621
+      await openGlobalAPI({ page, serverURL })
+      const apiURL = page.getByRole('textbox', { name: 'API URL', exact: true })
+      const initialURL = page.url()
+      const initialPageCount = page.context().pages().length
+
+      await apiURL.focus()
+      for (const control of [
+        page.getByRole('link', { name: 'Open in new window', exact: true }),
+        page.getByRole('button', { name: 'toggle fullscreen', exact: true }),
+      ]) {
+        await page.keyboard.press('Tab')
+        await expect(control).toBeFocused()
+        // Observe delayed editor focus effects without retrying away a transient focus loss.
+        const retainedFocus = await control.evaluate(async (element) => {
+          let hasLostFocus = document.activeElement !== element
+          const onFocus = () => {
+            hasLostFocus ||= document.activeElement !== element
+          }
+
+          document.addEventListener('focusin', onFocus)
+          await new Promise((resolve) => setTimeout(resolve, 500))
+          document.removeEventListener('focusin', onFocus)
+          return !hasLostFocus && document.activeElement === element
+        })
+
+        expect(retainedFocus).toBe(true)
+        await expect(page.locator('.query-inspector')).not.toHaveClass(
+          /query-inspector--fullscreen/,
+        )
+        expect(page.url()).toBe(initialURL)
+        expect(page.context().pages()).toHaveLength(initialPageCount)
+      }
+    })
+  })
+
   test.describe('3.2.2 On Input (A)', () => {
     test('should retain focus during automatic search', async () => {
       // Additional coverage for PYLD-3773.
@@ -2922,6 +3005,182 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    test('should expose a labelled region for expanded collapsible field content', async () => {
+      // PYLD-3818
+      await gotoCreatePost({ page, postsURL })
+      const field = page.locator('.collapsible-field').filter({ hasText: 'Publishing details' })
+      const toggle = field.locator('.collapsible__toggle')
+      const input = field.getByRole('textbox', { name: 'Publishing Note', exact: true })
+      const region = field.getByRole('region', { name: /publishing details/i })
+
+      await expect(input).toBeVisible()
+      await expect(region).toBeVisible()
+      await expect(
+        region.getByRole('textbox', { name: 'Publishing Note', exact: true }),
+      ).toBeVisible()
+      await expect(toggle).toHaveAttribute('aria-labelledby', /\S/)
+      await expect(region).toHaveAttribute('id', /\S/)
+      const regionID = await region.getAttribute('id')
+      await expect(toggle).toHaveAccessibleName('Publishing details Toggle block')
+      await expect(region).toHaveAccessibleName('Publishing details')
+      await expect(region).toHaveAttribute('aria-label', 'Publishing details')
+      await expect(toggle).toHaveAttribute('aria-controls', regionID!)
+      await toggle.press('Enter')
+      await expect(region).toBeHidden()
+      await toggle.press('Space')
+      await expect(region).toBeVisible()
+    })
+
+    test('should name Block and Collapsible group toggles and expose their current state', async () => {
+      // PYLD-3792
+      test.setTimeout(90000)
+      await addTextBlock({ page, postsURL })
+      const fields = [
+        { name: /text block/i, container: page.locator('#field-layout .collapsible').first() },
+        {
+          name: /publishing details/i,
+          container: page.locator('.collapsible-field').filter({ hasText: 'Publishing details' }),
+        },
+      ]
+
+      for (const { name, container } of fields) {
+        const toggle = container.locator('.collapsible__toggle')
+        const content = container.locator('.collapsible__content').first()
+
+        await expect(content).toBeVisible()
+        await expect.soft(toggle).toHaveAccessibleName(name)
+        await expect.soft(toggle).toHaveAttribute('aria-expanded', 'true')
+        await toggle.press('Enter')
+        await expect(content).toBeHidden()
+        await expect.soft(toggle).toHaveAttribute('aria-expanded', 'false')
+        await toggle.press('Space')
+        await expect(content).toBeVisible()
+        await expect.soft(toggle).toHaveAttribute('aria-expanded', 'true')
+      }
+    })
+
+    test('should expose bulk collapse and show state for multiple Array and Blocks rows', async () => {
+      // PYLD-3786
+      test.setTimeout(120000)
+      await addTextBlock({ page, postsURL })
+      await page.locator('#field-layout .array-actions__button').first().click()
+      await page.getByRole('menuitem', { name: /duplicate/i }).click()
+      await page.locator('#field-items .array-field__add-row').click()
+      await page.locator('#field-items .array-field__add-row').click()
+
+      for (const selector of ['#field-items', '#field-layout']) {
+        const field = page.locator(selector)
+        const contents = field.locator('.collapsible__content')
+        const collapse = field.getByRole('button', { name: /collapse all/i })
+        const show = field.getByRole('button', { name: /show all/i })
+
+        await expect(contents).toHaveCount(2)
+        await expect(field.getByRole('region')).toHaveCount(0)
+        for (const content of await contents.all()) {
+          await expect(content).toBeVisible()
+        }
+        for (const command of [collapse, show]) {
+          await expect.soft(command).toHaveAttribute('aria-expanded', 'true')
+        }
+        const rows = field.locator('.array-field__draggable-rows, .blocks-field__rows')
+        await expect(rows).toHaveAttribute('id', /\S/)
+        const rowsID = await rows.getAttribute('id')
+        for (const command of [collapse, show]) {
+          await expect(command).toHaveAttribute('aria-controls', rowsID!)
+        }
+        await field.locator('.collapsible__toggle').first().press('Enter')
+        await expect(contents.first()).toBeHidden()
+        await expect(contents.nth(1)).toBeVisible()
+        for (const command of [collapse, show]) {
+          await expect(command).toHaveAttribute('aria-expanded', 'true')
+        }
+        await collapse.press('Enter')
+        for (const content of await contents.all()) {
+          await expect(content).toBeHidden()
+        }
+        for (const command of [collapse, show]) {
+          await expect.soft(command).toHaveAttribute('aria-expanded', 'false')
+        }
+        await show.press('Space')
+        for (const content of await contents.all()) {
+          await expect(content).toBeVisible()
+        }
+        for (const command of [collapse, show]) {
+          await expect.soft(command).toHaveAttribute('aria-expanded', 'true')
+        }
+      }
+    })
+
+    test('should expose navigation disclosure state while opening and closing the menu', async () => {
+      // PYLD-3803
+      test.slow()
+      const originalViewport = page.viewportSize()
+
+      try {
+        await page.setViewportSize({ height: 900, width: 768 })
+        await gotoPostsList({ page, postsURL })
+        const toggle = page.locator('.app-header__sidebar-toggle')
+        const close = page.getByRole('button', { name: 'Hide sidebar', exact: true })
+        const nav = page
+          .locator('aside')
+          .filter({ has: page.getByRole('navigation', { includeHidden: true }) })
+
+        await expect(nav).toHaveClass(/nav-hydrated/)
+        await expect(toggle).toHaveAccessibleName(/open menu/i)
+        await expect.soft(toggle).toHaveAttribute('aria-expanded', 'false')
+        await toggle.press('Enter')
+        await expect(toggle).toBeHidden()
+        await expect(close).toBeVisible()
+        await expect(close).toHaveAttribute('aria-expanded', 'true')
+        await expect(nav).not.toHaveAttribute('inert', '')
+        await expect.soft(toggle).toHaveAttribute('aria-expanded', 'true')
+        await close.press('Space')
+        await expect(toggle).toHaveAccessibleName(/open menu/i)
+        await expect(nav).toHaveAttribute('inert', '')
+        await expect.soft(toggle).toHaveAttribute('aria-expanded', 'false')
+      } finally {
+        if (originalViewport) {
+          await page.setViewportSize(originalViewport)
+        }
+      }
+    })
+
+    test('should expose the initial and changed More options state on versioned document creation', async () => {
+      // PYLD-3714
+      test.slow()
+      await gotoCreatePost({ page, postsURL })
+      const toggle = page
+        .locator('.doc-controls')
+        .getByRole('button', { name: 'More options', exact: true })
+
+      await expect(toggle).toHaveAccessibleName('More options')
+      await expect.soft(toggle).toHaveAttribute('aria-expanded', 'false')
+      await toggle.press('Enter')
+      await expect(page.getByRole('menu')).toBeVisible()
+      await expect.soft(toggle).toHaveAttribute('aria-expanded', 'true')
+      await page.keyboard.press('Escape')
+      await expect(page.getByRole('menu')).toBeHidden()
+      await expect(toggle).toBeFocused()
+      await expect.soft(toggle).toHaveAttribute('aria-expanded', 'false')
+    })
+
+    test('should expose the Global API fullscreen toggle state through both transitions', async () => {
+      // PYLD-3622
+      test.slow()
+      await openGlobalAPI({ page, serverURL })
+      const toggle = page.getByRole('button', { name: 'toggle fullscreen', exact: true })
+      const view = page.locator('.query-inspector')
+
+      await expect(view).not.toHaveClass(/query-inspector--fullscreen/)
+      await expect.soft(toggle).toHaveAttribute('aria-pressed', 'false')
+      await toggle.press('Enter')
+      await expect(view).toHaveClass(/query-inspector--fullscreen/)
+      await expect.soft(toggle).toHaveAttribute('aria-pressed', 'true')
+      await toggle.press('Space')
+      await expect(view).not.toHaveClass(/query-inspector--fullscreen/)
+      await expect.soft(toggle).toHaveAttribute('aria-pressed', 'false')
+    })
+
     test('should expose the upload dropzone without detectable accessibility violations', async ({
       browser: _browser,
     }, testInfo) => {
@@ -3251,7 +3510,9 @@ test.describe('WCAG 2.2 Level AA', () => {
       const options = page.locator('.rs__option')
       const accessibleNames = await expectOptionsToHaveAccessibleNames(options, { areUnique: true })
 
-      expect(accessibleNames[0]).toMatch(/^Previous Version .+ \d{4}, \d{1,2}:\d{2} [AP]M$/)
+      await expect(
+        page.getByRole('option', { name: /^Previous Version .+ \d{4}, \d{1,2}:\d{2} [AP]M$/ }),
+      ).toBeVisible()
       expect(accessibleNames).toContain('More versions...')
     })
 
@@ -3272,10 +3533,10 @@ test.describe('WCAG 2.2 Level AA', () => {
 
       await expect(blocksButton).toHaveAccessibleName(/layout|text block/i)
       await expect(arrayButton).toHaveAccessibleName(/item/i)
-      await expect(blocksButton).not.toHaveAttribute(
-        'aria-label',
-        await arrayButton.getAttribute('aria-label'),
-      )
+      await expect(arrayButton).toHaveAttribute('aria-label', /\S/)
+      const arrayLabel = await arrayButton.getAttribute('aria-label')
+
+      await expect(blocksButton).not.toHaveAttribute('aria-label', arrayLabel!)
       await expect(blocksButton).toHaveAttribute('aria-haspopup', /true|menu/)
       await expect(arrayButton).toHaveAttribute('aria-haspopup', /true|menu/)
     })
@@ -3509,7 +3770,7 @@ async function compareHeadingWithOriginalSpan({
   originalStyle: string
 }) {
   return heading.evaluate((element, styleText) => {
-    const measure = (node: HTMLElement) => {
+    const measure = (node: Element) => {
       const style = getComputedStyle(node)
       const bounds = node.getBoundingClientRect()
 

@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useId, useState } from 'react'
 
 import type { DragHandleProps } from '../DraggableSortable/DraggableSortableItem/types.js'
 
@@ -23,6 +23,8 @@ export type CollapsibleProps = {
   children: React.ReactNode
   className?: string
   collapsibleStyle?: 'default' | 'error'
+  /** Opt into a named region for significant sections, rather than individual rows. */
+  contentAriaLabel?: string
   /**
    * If set to true, clicking on the collapsible header will not toggle the collapsible state.
    * This is useful if the collapsible state is controlled externally (e.g. from a parent component or custom button).
@@ -45,6 +47,7 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
   children,
   className,
   collapsibleStyle = 'default',
+  contentAriaLabel,
   disableHeaderToggle = false,
   disableToggleIndicator = false,
   dragHandleProps,
@@ -53,6 +56,10 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
   isCollapsed: collapsedFromProps,
   onToggle,
 }) => {
+  const id = useId()
+  const headerID = `${id}-header`
+  const toggleLabelID = `${id}-toggle-label`
+  const contentID = `${id}-content`
   const [collapsedLocal, setCollapsedLocal] = useState(Boolean(initCollapsed))
   const [hoveringToggle, setHoveringToggle] = useState(false)
   const { isWithinCollapsible } = useCollapsible()
@@ -89,6 +96,9 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
         >
           {!disableHeaderToggle && (
             <button
+              aria-controls={contentID}
+              aria-expanded={!isCollapsed}
+              aria-labelledby={header ? `${headerID} ${toggleLabelID}` : undefined}
               className={[
                 `${baseClass}__toggle`,
                 `${baseClass}__toggle--${isCollapsed ? 'collapsed' : 'open'}`,
@@ -98,7 +108,7 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
               onClick={toggleCollapsible}
               type="button"
             >
-              <span>{t('fields:toggleBlock')}</span>
+              <span id={toggleLabelID}>{t('fields:toggleBlock')}</span>
             </button>
           )}
 
@@ -120,6 +130,7 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
               ]
                 .filter(Boolean)
                 .join(' ')}
+              id={headerID}
             >
               {header}
             </div>
@@ -128,6 +139,9 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
             {actions ? <div className={`${baseClass}__actions`}>{actions}</div> : null}
             {!disableToggleIndicator && (
               <button
+                aria-controls={contentID}
+                aria-describedby={header ? headerID : undefined}
+                aria-expanded={!isCollapsed}
                 aria-label={t(isCollapsed ? 'general:expand' : 'general:collapse')}
                 className={`${baseClass}__indicator`}
                 onClick={toggleCollapsible}
@@ -140,7 +154,14 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
           </div>
         </div>
         <AnimateHeight height={isCollapsed ? 0 : 'auto'}>
-          <div className={`${baseClass}__content`}>{children}</div>
+          <div
+            aria-label={contentAriaLabel || undefined}
+            className={`${baseClass}__content`}
+            id={contentID}
+            role={contentAriaLabel ? 'region' : undefined}
+          >
+            {children}
+          </div>
         </AnimateHeight>
         {AfterCollapsible}
       </CollapsibleProvider>

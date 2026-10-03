@@ -684,3 +684,10 @@ export async function expectPaintedFocus({ page }: { page: Page }) {
     )
     .toBe(true)
 }
+
+export async function openGlobalAPI({ page, serverURL }: { page: Page; serverURL: string }) {
+  await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/globals/menu', serverURL }))
+  await page.getByRole('link', { name: 'API', exact: true }).click()
+  await expect(page.locator('.query-inspector .monaco-editor')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'toggle fullscreen', exact: true })).toBeVisible()
+}
