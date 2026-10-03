@@ -7,6 +7,8 @@ const PLACEHOLDER_REGEX = /\{\{.*?\}\}/g
  */
 const TAG_REGEX = /<\/?(\d+|[abip]|br|code|em|span|strong)(?:\s[^>]*)?\/?>/gi
 
+const PLURAL_SUFFIX_REGEX = /_(?:zero|one|two|few|many|other)$/
+
 /**
  * Translations longer than this many times the source text (and longer than MIN_SUSPICIOUS_LENGTH)
  * are rejected. This catches responses where the model returned (a translation of) its own
@@ -20,9 +22,14 @@ const MIN_SUSPICIOUS_LENGTH = 80
  * An empty list means the translation can be written to the language file.
  */
 export function validateTranslation({
+  key,
   sourceText,
   translatedText,
 }: {
+  /**
+   * The translation key, e.g. `general.aboutToDeleteCount_one`. Used to allow plural forms without `{{count}}`.
+   */
+  key?: string
   sourceText: string
   translatedText: string | undefined
 }): string[] {
@@ -36,11 +43,22 @@ export function validateTranslation({
 
   const problems: string[] = []
 
-  const sourcePlaceholders = getSortedMatches({ regex: PLACEHOLDER_REGEX, text: sourceText })
-  const translatedPlaceholders = getSortedMatches({
-    regex: PLACEHOLDER_REGEX,
-    text: translatedText,
-  })
+  // A placeholder may appear a different number of times in the translation, so compare unique sets
+  const translatedPlaceholders = [
+    ...new Set(getSortedMatches({ regex: PLACEHOLDER_REGEX, text: translatedText })),
+  ]
+  const sourcePlaceholders = [
+    ...new Set(getSortedMatches({ regex: PLACEHOLDER_REGEX, text: sourceText })),
+  ].filter(
+    // Plural forms such as the singular may spell out the number instead of using {{count}}
+    (placeholder) =>
+      !(
+        placeholder === '{{count}}' &&
+        key &&
+        PLURAL_SUFFIX_REGEX.test(key) &&
+        !translatedPlaceholders.includes(placeholder)
+      ),
+  )
 
   if (sourcePlaceholders.join() !== translatedPlaceholders.join()) {
     problems.push(

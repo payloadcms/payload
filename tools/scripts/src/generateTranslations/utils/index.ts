@@ -282,7 +282,7 @@ async function translateAndValidate({
   for (let attempt = 1; attempt <= MAX_TRANSLATION_ATTEMPTS; attempt += 1) {
     const translated = await translateText(sourceText, targetLang)
 
-    problems = validateTranslation({ sourceText, translatedText: translated })
+    problems = validateTranslation({ key, sourceText, translatedText: translated })
 
     if (!problems.length) {
       return translated

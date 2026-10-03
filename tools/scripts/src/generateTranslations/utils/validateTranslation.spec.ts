@@ -35,6 +35,27 @@ describe('validateTranslation', () => {
     ).toHaveLength(1)
   })
 
+  it('should accept a placeholder that is repeated a different number of times', () => {
+    expect(
+      validateTranslation({
+        sourceText: 'No {{label}} found. Either no {{label}} exist yet or none match the filters.',
+        translatedText: 'Keine {{label}} gefunden.',
+      }),
+    ).toEqual([])
+  })
+
+  it('should accept singular plural forms without {{count}}', () => {
+    const sourceText = 'You are about to delete {{count}} {{label}}'
+    const translatedText = 'Sie sind dabei, ein {{label}} zu löschen'
+
+    expect(
+      validateTranslation({ key: 'general.aboutToDeleteCount_one', sourceText, translatedText }),
+    ).toEqual([])
+    expect(
+      validateTranslation({ key: 'general.aboutToDelete', sourceText, translatedText }),
+    ).toHaveLength(1)
+  })
+
   it('should reject unbalanced braces', () => {
     expect(
       validateTranslation({
