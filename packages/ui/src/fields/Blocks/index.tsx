@@ -514,6 +514,8 @@ const BlocksFieldComponent: React.FC<BlocksFieldClientProps> = (props) => {
                       block={blockConfig}
                       // Pass all blocks, not just clientBlocksAfterFilter, as existing blocks should still be displayed even if they don't match the new filter
                       blocks={clientBlocks}
+                      // Pass only filtered blocks for use in the "Add Below" drawer
+                      blocksToAdd={clientBlocksAfterFilter}
                       copyRow={copyRow}
                       duplicateRow={duplicateRow}
                       errorCount={rowErrorCount}
