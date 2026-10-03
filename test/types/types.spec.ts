@@ -2091,9 +2091,75 @@ describe('Types testing', () => {
     })
   })
 
-  describe('strictDraftTypes flag', () => {
+  describe('strict draft types', () => {
     describe('query operations', () => {
-      test('draft find query returns optional required fields when flag is enabled', async () => {
+      test('should return optional required fields when finding a draft by ID', async () => {
+        const doc = await payload.findByID({ id: 'id', collection: 'draft-posts', draft: true })
+
+        expect(doc.title).type.toBe<string | undefined>()
+        expect(doc.description).type.toBe<string | undefined>()
+        expect(doc.id).type.toBe<string>()
+      })
+
+      test('should preserve selected fields and nullable draft results by ID', async () => {
+        const doc = await payload.findByID({
+          id: 'id',
+          collection: 'draft-posts',
+          disableErrors: true,
+          draft: true,
+          select: { title: true },
+        })
+
+        expect(doc).type.toBe<{ id: string; title?: string } | null>()
+      })
+
+      test('should keep published fields required when finding by ID', async () => {
+        const doc = await payload.findByID({ id: 'id', collection: 'draft-posts' })
+        const published = await payload.findByID({
+          id: 'id',
+          collection: 'draft-posts',
+          draft: false,
+        })
+
+        expect(doc.title).type.toBe<string>()
+        expect(published.title).type.toBe<string>()
+      })
+
+      test('should return optional required fields when reading a draft global', async () => {
+        const doc = await payload.findGlobal({ slug: 'settings', draft: true })
+
+        expect(doc.siteName).type.toBe<string | undefined>()
+        expect(doc.id).type.toBe<string>()
+      })
+
+      test('should keep published global fields required', async () => {
+        const doc = await payload.findGlobal({ slug: 'settings' })
+        const published = await payload.findGlobal({ slug: 'settings', draft: false })
+
+        expect(doc.siteName).type.toBe<string>()
+        expect(published.siteName).type.toBe<string>()
+      })
+
+      test('should preserve selected draft global fields', async () => {
+        const doc = await payload.findGlobal({
+          slug: 'settings',
+          draft: true,
+          select: { siteName: true },
+        })
+
+        expect(doc).type.toBe<{ id: string; siteName?: string }>()
+      })
+
+      test('should allow incomplete results when the draft flag is a boolean', async () => {
+        const isDraft = true as boolean
+        const doc = await payload.findByID({ id: 'id', collection: 'draft-posts', draft: isDraft })
+        const global = await payload.findGlobal({ slug: 'settings', draft: isDraft })
+
+        expect(doc.title).type.toBe<string | undefined>()
+        expect(global.siteName).type.toBe<string | undefined>()
+      })
+
+      test('should return optional required fields when finding drafts', async () => {
         const result = await payload.find({
           collection: 'draft-posts',
           draft: true,
@@ -2102,7 +2168,7 @@ describe('Types testing', () => {
 
         const doc = result.docs[0]!
 
-        // With strictDraftTypes enabled, user-defined required fields should be optional in draft queries
+        // Drafts skip validation, so user-defined required fields may be absent.
         expect(doc.description).type.toBe<string | undefined>()
         expect(doc.title).type.toBe<string | undefined>()
 
