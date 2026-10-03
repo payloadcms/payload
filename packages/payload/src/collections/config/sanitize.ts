@@ -41,6 +41,7 @@ import {
   addDefaultsToCollectionConfig,
   createInheritedReadVersionsAccess,
 } from './defaults.js'
+import { validateListSearchableFields } from './listSearchableFields.js'
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
 import { validateUseAsTitle } from './useAsTitle.js'
 
@@ -450,6 +451,7 @@ export const sanitizeCollection = (
   }
 
   validateUseAsTitle(sanitized)
+  validateListSearchableFields(sanitized)
 
   const sanitizedConfig = sanitized as SanitizedCollectionConfig
 
