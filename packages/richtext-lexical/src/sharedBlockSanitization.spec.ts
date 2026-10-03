@@ -16,22 +16,30 @@ it('finishes shared block sanitization before another editor captures its fields
     ],
   }
   const editor = () => lexicalEditor({ features: [BlocksFeature({ blocks: [shared] })] })
-  const config = await buildConfig({
+  const config = (await buildConfig({
     secret: 'shared-block-test',
     db: mongooseAdapter({ url: 'mongodb://127.0.0.1:1/shared-block-test' }),
-    collections: [{ slug: 'pages', fields: [
-      { name: 'one', type: 'richText', editor: editor() },
-      { name: 'two', type: 'richText', editor: editor() },
-    ] }],
-  }) as SanitizedConfig
+    collections: [
+      {
+        slug: 'pages',
+        fields: [
+          { name: 'one', type: 'richText', editor: editor() },
+          { name: 'two', type: 'richText', editor: editor() },
+        ],
+      },
+    ],
+  })) as SanitizedConfig
 
   const collection = config.collections.find(({ slug }) => slug === 'pages')!
   for (const name of ['one', 'two']) {
-    const field = collection.fields?.find(field => 'name' in field && field.name === name) as RichTextField
+    const field = collection.fields?.find(
+      (field) => 'name' in field && field.name === name,
+    ) as RichTextField
     const adapter = field.editor as LexicalRichTextAdapter
     const blocks = adapter.editorConfig.resolvedFeatureMap.get('blocks')!
-    const node = blocks.nodes!.find(node => node.node.getType() === 'block')!
+    const node = blocks.nodes!.find((node) => node.node.getType() === 'block')!
     const fields = node.getSubFields!({ node: { fields: { blockType: 'shared' } } } as never)
-    expect(fields?.find(field => 'name' in field && field.name === 'items')?.validate).toBeTypeOf('function')
+    const array = fields?.find((field) => 'name' in field && field.name === 'items')
+    expect(array && 'validate' in array ? array.validate : undefined).toBeTypeOf('function')
   }
 })
