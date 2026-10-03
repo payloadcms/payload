@@ -6,6 +6,9 @@ import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
 import { Media } from './collections/Media'
+import { Pages } from './collections/Pages'
+import { Posts } from './collections/Posts'
+import { Profiles } from './collections/Profiles'
 import { Users } from './collections/Users'
 import { healthEndpoint } from './endpoints/health'
 import { s3StorageAdapter } from './storage/s3'
@@ -39,7 +42,7 @@ export default buildConfig({
     },
     user: Users.slug,
   },
-  collections: [Users, Media],
+  collections: [Users, Media, Posts, Pages, Profiles],
   cors: allowedOrigins,
   csrf: allowedOrigins,
   db: mongooseAdapter({

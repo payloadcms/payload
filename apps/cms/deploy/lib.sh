@@ -56,6 +56,20 @@ validate_env() {
     has_error=true
   fi
 
+  local website_url website_revalidate_secret
+  website_url="$(env_value WEBSITE_URL)"
+  website_revalidate_secret="$(env_value WEBSITE_REVALIDATE_SECRET)"
+
+  if [[ -n "$website_url" && -z "$website_revalidate_secret" ]] || [[ -z "$website_url" && -n "$website_revalidate_secret" ]]; then
+    echo "Set both WEBSITE_URL and WEBSITE_REVALIDATE_SECRET, or neither." >&2
+    has_error=true
+  fi
+
+  if [[ -n "$website_url" && ! "$website_url" =~ ^https?://[^/]+$ ]]; then
+    echo "WEBSITE_URL must be the website's origin without a trailing slash, e.g. https://www.example.com" >&2
+    has_error=true
+  fi
+
   if [[ "$has_error" == true ]]; then
     exit 1
   fi

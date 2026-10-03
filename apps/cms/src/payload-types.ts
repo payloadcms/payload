@@ -60,6 +60,51 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_EF84AAF3".
+ */
+export type LexicalNodes_EF84AAF3 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_EF84AAF3>
+  | SerializedBlockNode<Code | YouTubeBlock>
+  | SerializedAutoLinkNode<LexicalNodes_EF84AAF3, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_EF84AAF3, LexicalLinkFields>
+  | SerializedHeadingNode<LexicalNodes_EF84AAF3, 'h2' | 'h3' | 'h4'>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'media'>
+  | SerializedQuoteNode<LexicalNodes_EF84AAF3>
+  | SerializedListNode<LexicalNodes_EF84AAF3>
+  | SerializedListItemNode<LexicalNodes_EF84AAF3>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_1F690F76".
+ */
+export type LexicalNodes_1F690F76 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_1F690F76>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'media'>
+  | SerializedQuoteNode<LexicalNodes_1F690F76>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'posts'
+      | 'pages'
+      | 'profiles'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_1F690F76, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_1F690F76, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_1F690F76>
+  | SerializedListItemNode<LexicalNodes_1F690F76>
+  | SerializedHeadingNode<LexicalNodes_1F690F76>;
 
 export interface Config {
   auth: {
@@ -69,6 +114,9 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    posts: Post;
+    pages: Page;
+    profiles: Profile;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -78,6 +126,9 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
+    profiles: ProfilesSelect<false> | ProfilesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -184,6 +235,173 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: string;
+  title: string;
+  /**
+   * One or two sentences shown on post cards, in search results and in the RSS feed.
+   */
+  description: string;
+  /**
+   * The first image is the cover on post cards. All images appear in the gallery at the top of the post.
+   */
+  images?: (string | Media)[] | null;
+  content: LexicalRichText<LexicalNodes_EF84AAF3>;
+  /**
+   * The post is published at /blog/<slug>.
+   */
+  slug: string;
+  /**
+   * Set automatically when the post is first published. Posts are sorted by it.
+   */
+  publishedAt?: string | null;
+  /**
+   * Show this post under "Featured" on the home page.
+   */
+  featured?: boolean | null;
+  /**
+   * e.g. react, next-js. A tag links to its page on the website when one exists (content/tags/<tag>.md).
+   */
+  tags?: string[] | null;
+  /**
+   * Optional. Overrides the title and description shown by search engines and link previews.
+   */
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+  };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: string;
+  title: string;
+  /**
+   * One or two sentences for search results and link previews.
+   */
+  description?: string | null;
+  heroImage?: (string | null) | Media;
+  content: LexicalRichText<LexicalNodes_EF84AAF3>;
+  /**
+   * Identifies the page, e.g. "about" for /about.
+   */
+  slug: string;
+  /**
+   * Optional. Overrides the title and description shown by search engines and link previews.
+   */
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+  };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "profiles".
+ */
+export interface Profile {
+  id: string;
+  name: string;
+  /**
+   * e.g. Software Engineer
+   */
+  headline?: string | null;
+  photo?: (string | null) | Media;
+  bio?: LexicalRichText<LexicalNodes_1F690F76> | null;
+  links?:
+    | {
+        platform: 'github' | 'linkedin' | 'youtube' | 'x' | 'website' | 'other';
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  skills?:
+    | {
+        name: string;
+        /**
+         * e.g. Back-End Development
+         */
+        category?: string | null;
+        /**
+         * 1 (basic) to 5 (expert)
+         */
+        level?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  experience?:
+    | {
+        organization: string;
+        role?: string | null;
+        startDate?: string | null;
+        /**
+         * Leave empty if current
+         */
+        endDate?: string | null;
+        description?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  education?:
+    | {
+        institution: string;
+        /**
+         * e.g. BSc (Business Administration)
+         */
+        qualification?: string | null;
+        startDate?: string | null;
+        /**
+         * Leave empty if current
+         */
+        endDate?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  slug: string;
+  email?: string | null;
+  /**
+   * e.g. New York
+   */
+  location?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -213,6 +431,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: string | Page;
+      } | null)
+    | ({
+        relationTo: 'profiles';
+        value: string | Profile;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -305,6 +535,105 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  images?: T;
+  content?: T;
+  slug?: T;
+  publishedAt?: T;
+  featured?: T;
+  tags?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  heroImage?: T;
+  content?: T;
+  slug?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "profiles_select".
+ */
+export interface ProfilesSelect<T extends boolean = true> {
+  name?: T;
+  headline?: T;
+  photo?: T;
+  bio?: T;
+  links?:
+    | T
+    | {
+        platform?: T;
+        url?: T;
+        id?: T;
+      };
+  skills?:
+    | T
+    | {
+        name?: T;
+        category?: T;
+        level?: T;
+        id?: T;
+      };
+  experience?:
+    | T
+    | {
+        organization?: T;
+        role?: T;
+        startDate?: T;
+        endDate?: T;
+        description?: T;
+        id?: T;
+      };
+  education?:
+    | T
+    | {
+        institution?: T;
+        qualification?: T;
+        startDate?: T;
+        endDate?: T;
+        id?: T;
+      };
+  slug?: T;
+  email?: T;
+  location?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -360,7 +689,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'users' | 'media';
+    relatedCollection: 'users' | 'media' | 'posts' | 'pages' | 'profiles';
     where?:
       | {
           [k: string]: unknown;
@@ -382,9 +711,65 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('users' | 'media')[] | null;
+    excludedCollections?: ('users' | 'media' | 'posts' | 'pages' | 'profiles')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Code".
+ */
+export interface Code {
+  id: string;
+  blockType: 'Code';
+  language?:
+    | (
+        | 'cpp'
+        | 'css'
+        | 'dockerfile'
+        | 'go'
+        | 'graphql'
+        | 'html'
+        | 'java'
+        | 'javascript'
+        | 'json'
+        | 'kotlin'
+        | 'markdown'
+        | 'objective-c'
+        | 'php'
+        | 'plaintext'
+        | 'python'
+        | 'ruby'
+        | 'rust'
+        | 'scss'
+        | 'shell'
+        | 'solidity'
+        | 'sql'
+        | 'swift'
+        | 'typescript'
+        | 'xml'
+        | 'yaml'
+      )
+    | null;
+  code?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "YouTubeBlock".
+ */
+export interface YouTubeBlock {
+  id: string;
+  blockType: 'youtube';
+  /**
+   * e.g. https://www.youtube.com/watch?v=W4UhNo3HAMw or https://youtu.be/W4UhNo3HAMw
+   */
+  url: string;
+  /**
+   * Describes the video for screen readers.
+   */
+  title?: string | null;
+  blockName?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -393,6 +778,152 @@ export interface ActivityWidget {
 export interface Auth {
   [k: string]: unknown;
 }
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'block';
+  format: LexicalElementFormat;
+  version: number;
+  fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'inlineBlock';
+  version: number;
+  fields: { id: string } & Omit<TFields, 'id'>;
+} : never;
+
+export interface LexicalLinkFields {
+  [k: string]: unknown;
+  doc?: {
+    relationTo: string;
+    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
+  } | null;
+  linkType: 'custom' | 'internal';
+  newTab: boolean;
+  url?: string;
+}
+export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'link';
+  fields: TFields;
+  id?: string;
+}
+export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'autolink';
+  fields: TFields;
+}
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
+}
+
+export interface SerializedHorizontalRuleNode {
+  type: 'horizontalrule';
+  version: number;
+}
+
+export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'quote';
+}
+
+export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'list';
+  checked?: boolean;
+  listType: 'number' | 'bullet' | 'check';
+  start: number;
+  tag: 'ul' | 'ol';
+}
+
+export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'listitem';
+  checked?: boolean;
+  value: number;
+}
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
+}
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
 
 
 declare module 'payload' {
