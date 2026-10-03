@@ -285,6 +285,21 @@ export interface IncomingAuthType {
    * Only allow a user to attempt logging in X amount of times. Automatically locks out a user from authenticating if this limit is passed. Set to 0 to disable.
    */
   maxLoginAttempts?: number
+  /**
+   * Configure how the local strategy hashes passwords.
+   * @link https://payloadcms.com/docs/authentication/overview#password-hashing
+   */
+  passwordHashing?: {
+    /**
+     * PBKDF2-SHA256 iterations for new password hashes. When set, stored hashes with a different
+     * count are rehashed on the next successful login.
+     *
+     * Leave unset to use the runtime default: 600,000, or 100,000 on Cloudflare Workers, which
+     * rejects higher counts. Set it explicitly when users are created or log in from more than
+     * one runtime, e.g. a Node.js seed script against a database that a Worker also serves.
+     */
+    iterations?: number
+  }
   /***
    * Set to true if you want to remove the token from the returned authentication API responses such as login or refresh.
    */
