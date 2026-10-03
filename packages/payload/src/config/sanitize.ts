@@ -540,13 +540,11 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     }
   }
 
-  const promises: Promise<void>[] = []
-
+  // Shared blocks can be marked sanitized before their asynchronous fields finish.
+  // Finish each editor before another editor captures those shared field definitions.
   for (const sanitizeFunction of richTextSanitizationPromises) {
-    promises.push(sanitizeFunction(config as SanitizedConfig))
+    await sanitizeFunction(config as SanitizedConfig)
   }
-
-  await Promise.all(promises)
 
   return config as SanitizedConfig
 }
