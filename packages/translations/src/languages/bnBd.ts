@@ -296,8 +296,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     changesNotSaved:
       'আপনার পরিবর্তনগুলি সংরক্ষণ করা হয়নি। আপনি যদি এখন চলে যান, তাহলে আপনার পরিবর্তনগুলি হারিয়ে যাবে।',
     checked: 'পরীক্ষিত',
-    clear:
-      'মূল পাঠের অর্থ সম্মান করুন পেলোড প্রসঙ্গে। এখানে পেলোড নির্দিষ্ট বিশেষ অর্থ বহন করে এরকম একটি সাধারণ টার্মের তালিকা:\n    - সংগ্রহ',
+    clear: 'সাফ করুন',
     clearAll: 'সমস্ত সাফ করুন',
     close: 'বন্ধ করুন',
     collapse: 'সংকুচিত করুন',
@@ -480,8 +479,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     restore: 'পুনরুদ্ধার করুন',
     restoreAsPublished: 'প্রকাশিত সংস্করণ হিসাবে পুনরুদ্ধার করুন',
     restoredCountSuccessfully: '{{count}} {{label}} সফলভাবে পুনরুদ্ধার করা হয়েছে।',
-    restoring:
-      'Payload এর প্রসঙ্গে মূল পাঠের অর্থ সম্মান করুন। এখানে Payload পদ গুলির একটি তালিকা রয়েছে যা খুব নির্দিষ্ট অর্থ বহন করে:\n     - সংগ্রহ: একটি সং',
+    restoring: 'পুনরুদ্ধার করা হচ্ছে...',
     retry: 'পুনরায় চেষ্টা করুন',
     row: 'সারি',
     rows: 'সারিগুলি',
@@ -700,8 +698,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     modifiedOnly: 'শুধুমাত্র পরিবর্তিত',
     moreVersions: 'আরও সংস্করণ...',
     noFurtherVersionsFound: 'আর কোনো সংস্করণ পাওয়া যায়নি',
-    noLabelGroup:
-      'মূল বাক্যের অর্থ প্রেিত্ষ্যে সম্মান রাখুন। নিম্নে পেলোডের কিছু সাধারণ শর্তাবলীর তালিকা প্রদান করেছে যা খুব নির্দিষ্ট অর্থ বহন করে:',
+    noLabelGroup: 'নামহীন গ্রুপ',
     noRowsFound: 'কোনো {{label}} পাওয়া যায়নি',
     noRowsSelected: 'কোনো {{label}} নির্বাচিত হয়নি',
     preview: 'প্রাকদর্শন',

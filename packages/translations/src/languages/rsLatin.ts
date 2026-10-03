@@ -518,7 +518,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     time: 'Vreme',
     timezone: 'Vremenska zona',
     titleDeleted: '{{label}} "{{title}}" uspešno obrisano.',
-    titleRestored: 'Oznaka "{{title}}" uspešno obnovljena.',
+    titleRestored: 'Uspešno obnovljeno: {{label}} "{{title}}".',
     titleTrashed: '{{label}} "{{title}}" premešteno u smeće.',
     toggle: 'Prekidač',
     trash: 'Otpad',

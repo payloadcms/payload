@@ -692,7 +692,7 @@ export const skTranslations: DefaultTranslationsObject = {
     noFurtherVersionsFound: 'Nenájdené ďalšie verzie',
     noLabelGroup: 'Nepomenovaná skupina',
     noRowsFound: 'Nenájdené {{label}}',
-    noRowsSelected: 'Nie je vybraté žiadne {{označenie}}',
+    noRowsSelected: 'Nie je vybraté žiadne {{label}}',
     preview: 'Náhľad',
     previouslyDraft: 'Predtým Koncept',
     previouslyPublished: 'Predtým publikované',
