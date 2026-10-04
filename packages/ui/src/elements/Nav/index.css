@@ -6,10 +6,12 @@
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
-    height: 100vh;
+    height: 100dvh;
+    max-block-size: 100dvh;
+    min-block-size: 0;
     width: var(--nav-width);
     border-right: var(--stroke-width-small) solid var(--color-border);
-    overflow: hidden;
+    overflow: clip;
     --nav-padding-inline-start: var(--spacer-2-5);
     --nav-padding-inline-end: var(--spacer-2-5);
     --nav-padding-block-start: var(--spacer-2-5);
@@ -35,7 +37,9 @@
     width: 100%;
     display: flex;
     flex-direction: column;
+    overflow-x: hidden;
     overflow-y: auto;
+    overscroll-behavior: auto contain;
 
     &::-webkit-scrollbar {
       display: none;
@@ -48,6 +52,7 @@
     flex-direction: column;
     align-items: flex-start;
     flex-grow: 1;
+    flex-shrink: 0;
   }
 
   .nav__label {

@@ -3,9 +3,20 @@ export const scrollToID = (id: string): void => {
 
   if (element) {
     const bounds = element.getBoundingClientRect()
-    window.scrollBy({
+    let scrollContainer = element.parentElement
+
+    while (
+      scrollContainer &&
+      !['auto', 'scroll'].includes(getComputedStyle(scrollContainer).overflowY)
+    ) {
+      scrollContainer = scrollContainer.parentElement
+    }
+
+    const scrollTarget = scrollContainer ?? window
+
+    scrollTarget.scrollBy({
       behavior: 'smooth',
-      top: bounds.top - 100,
+      top: bounds.top - (scrollContainer?.getBoundingClientRect().top ?? 0) - 100,
     })
   }
 }

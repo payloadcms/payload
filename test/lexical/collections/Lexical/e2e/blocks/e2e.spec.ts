@@ -194,8 +194,8 @@ describe('lexicalBlocks', () => {
     { blockType: 'nestedBlock', description: 'referenced', sourceField: 'sourceReference' },
   ]) {
     test(`should preserve the editor when pasting an unsupported ${description} block`, async ({
-      page,
       context,
+      page,
     }) => {
       await initPage({ page, serverURL })
       await context.grantPermissions(['clipboard-read', 'clipboard-write'])
@@ -806,8 +806,8 @@ describe('lexicalBlocks', () => {
         await page.keyboard.press('ArrowRight')
       }
 
-      // Now scroll down, so that the following slash menu is positioned below the cursor and not above it
-      await page.mouse.wheel(0, 600)
+      // Leave enough room below the cursor for the menu inside the scrolling panel.
+      await spanInSubEditor.evaluate((element) => element.scrollIntoView({ block: 'center' }))
 
       await page.keyboard.press('Enter')
       await page.keyboard.press('/')
@@ -826,43 +826,60 @@ describe('lexicalBlocks', () => {
         .first()
       await expect(popoverHeading2Button).toBeVisible()
 
-      // scroll slash menu down
-      await popoverHeading2Button.hover()
+      // Move directly onto the visible menu so hovering does not scroll its ancestors.
+      const menuBounds = await popover.boundingBox()
+
+      expect(menuBounds).not.toBeNull()
+
+      const visibleMenuTop = Math.max(menuBounds!.y, 0)
+      const visibleMenuBottom = Math.min(
+        menuBounds!.y + menuBounds!.height,
+        page.viewportSize()!.height,
+      )
+
+      await page.mouse.move(
+        menuBounds!.x + menuBounds!.width / 2,
+        (visibleMenuTop + visibleMenuBottom) / 2,
+      )
       await page.mouse.wheel(0, 250)
-      await popoverHeading2Button.scrollIntoViewIfNeeded()
+      await expect.poll(() => popover.evaluate((element) => element.scrollTop)).toBeGreaterThan(0)
+      await popoverHeading2Button.evaluate((element) => {
+        const menu = element.closest('.slash-menu-popup')
 
-      await expect(async () => {
-        // Make sure that, even though it's "visible", it's not actually covered by something else due to z-index issues
-        const popoverHeading2ButtonBoundingBox = await popoverHeading2Button.boundingBox()
-        expect(popoverHeading2ButtonBoundingBox).not.toBeNull()
-        expect(popoverHeading2ButtonBoundingBox).not.toBeUndefined()
-        expect(popoverHeading2ButtonBoundingBox?.height).toBeGreaterThan(0)
-        expect(popoverHeading2ButtonBoundingBox?.width).toBeGreaterThan(0)
-
-        // Now click the button to see if it actually works. Simulate an actual mouse click instead of using .click()
-        // by using page.mouse and the correct coordinates
-        // .isVisible() and .click() might work fine EVEN if the slash menu is not actually visible by humans
-        // see: https://github.com/microsoft/playwright/issues/9923
-        // This is why we use page.mouse.click() here. It's the most effective way of detecting such a z-index issue
-        // and usually the only method which works.
-
-        const x =
-          (popoverHeading2ButtonBoundingBox?.x ?? 0) +
-          (popoverHeading2ButtonBoundingBox?.width ?? 0) / 2
-        const y =
-          (popoverHeading2ButtonBoundingBox?.y ?? 0) +
-          (popoverHeading2ButtonBoundingBox?.height ?? 0) / 2
-
-        await page.mouse.click(x, y, { button: 'left' })
-
-        await page.keyboard.type('A Heading')
-
-        const newHeadingInSubEditor = lexicalBlock.locator('p ~ h2').getByText('A Heading').first()
-
-        await expect(newHeadingInSubEditor).toBeVisible()
-      }).toPass({
-        timeout: POLL_TOPASS_TIMEOUT,
+        menu.scrollBy({
+          behavior: 'instant',
+          top: element.getBoundingClientRect().top - menu.getBoundingClientRect().top,
+        })
       })
+
+      // Check the real click target after menu scrolling and repositioning settle.
+      await expect
+        .poll(() =>
+          popoverHeading2Button.evaluate((element) => {
+            const bounds = element.getBoundingClientRect()
+            const target = document.elementFromPoint(
+              bounds.x + bounds.width / 2,
+              bounds.y + bounds.height / 2,
+            )
+
+            return element.contains(target)
+          }),
+        )
+        .toBe(true)
+
+      const bounds = await popoverHeading2Button.boundingBox()
+
+      expect(bounds).not.toBeNull()
+      expect(bounds!.height).toBeGreaterThan(0)
+      expect(bounds!.width).toBeGreaterThan(0)
+
+      // A coordinate click verifies the menu is not covered by another block.
+      await page.mouse.click(bounds!.x + bounds!.width / 2, bounds!.y + bounds!.height / 2)
+      await page.keyboard.type('A Heading')
+
+      const newHeadingInSubEditor = lexicalBlock.locator('p ~ h2').getByText('A Heading').first()
+
+      await expect(newHeadingInSubEditor).toBeVisible()
     })
     test('should allow adding new blocks to a sub-blocks field, part of a parent lexical blocks field', async () => {
       const { richTextField } = await navigateToLexicalFields()
@@ -1533,15 +1550,18 @@ describe('lexicalBlocks', () => {
       const nestedBlock = richTextField.locator('.LexicalEditorTheme__block').nth(2)
       await expect(nestedBlock.locator('.fixed-toolbar__scroll').first()).toBeVisible()
 
-      const initialScrollY = await page.evaluate(() => window.scrollY)
+      const scrollContainer = page.locator('.template-default__wrap')
 
-      // Well above either toolbar's position, over ordinary page content
-      await page.mouse.move(200, 100)
+      await page.locator('#field-title').hover()
+
+      const initialScrollTop = await scrollContainer.evaluate((el) => el.scrollTop)
+
       await page.mouse.wheel(0, 300)
 
       await expect(async () => {
-        const scrollY = await page.evaluate(() => window.scrollY)
-        expect(scrollY).toBeGreaterThan(initialScrollY)
+        const scrollTop = await scrollContainer.evaluate((el) => el.scrollTop)
+
+        expect(scrollTop).toBeGreaterThan(initialScrollTop)
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
   })
