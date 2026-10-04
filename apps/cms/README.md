@@ -27,6 +27,8 @@ installs the app against them. This is the same approach Payload's CI uses to te
 | `src/collections/Posts.ts`            | Blog posts for the personal website (see "Blog posts")           |
 | `src/collections/Pages.ts`            | Standalone pages such as About or Services (see "Pages and profiles") |
 | `src/collections/Profiles.ts`         | Profiles: bio, links, skills, work history, education           |
+| `src/collections/Clients.ts`          | Private client records: contacts, business type, importance (see "Clients and events") |
+| `src/collections/Events.ts`           | Private records of sales events and exhibitions worldwide       |
 | `src/hooks/revalidateWebsite.ts`      | Tells the website to refresh its pages when a post changes      |
 | `Dockerfile`                          | Multi-stage build from the repo root → small standalone image    |
 | `docker-compose.yml`, `Caddyfile`     | Production stack on the app EC2                                  |
@@ -331,6 +333,22 @@ without logging in.
   returned to logged-in users.
 
 The website doesn't read these yet; they are ready for it the same way as posts.
+
+## Clients and events
+
+Both appear under **Business** in the admin panel and are private: every request, including reading,
+needs a logged-in user, so `GET /api/clients` and `GET /api/events` return `403` to everyone else.
+
+- **Clients**: company, contact person, job title, email, phone, website, address, business type,
+  industry, notes, **importance** (1–5 stars), status (lead, active, inactive) and source. Each client also
+  lists the events it is linked to.
+- **Events**: name, type (exhibition, trade show, sales event, conference, meeting, other), start and end
+  date and time with the **time zone** of the event, venue, booth, address, city, country, organizer,
+  website, linked clients, notes, status (planned, confirmed, completed, cancelled) and attachments. The
+  list is sorted with the latest event first, and an end date before the start date is rejected.
+
+Attachments are stored in Media, whose files are publicly readable by URL. Don't attach confidential
+documents to events.
 
 ## Troubleshooting
 
