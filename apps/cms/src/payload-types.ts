@@ -186,6 +186,24 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: string;
+  /**
+   * Set up at the first login. To move to a new phone, use "Reset two-factor" on /admin/2fa.
+   */
+  twoFactorEnabled?: boolean | null;
+  twoFactorSecret?: string | null;
+  twoFactorPendingSecret?: string | null;
+  twoFactorBackupCodes?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  twoFactorLastStep?: number | null;
+  twoFactorFailedAttempts?: number | null;
+  twoFactorLockUntil?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -621,6 +639,13 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  twoFactorEnabled?: T;
+  twoFactorSecret?: T;
+  twoFactorPendingSecret?: T;
+  twoFactorBackupCodes?: T;
+  twoFactorLastStep?: T;
+  twoFactorFailedAttempts?: T;
+  twoFactorLockUntil?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;

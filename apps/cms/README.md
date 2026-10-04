@@ -29,6 +29,7 @@ installs the app against them. This is the same approach Payload's CI uses to te
 | `src/collections/Profiles.ts`         | Profiles: bio, links, skills, work history, education           |
 | `src/collections/Clients.ts`          | Private client records: contacts, business type, importance (see "Clients and events") |
 | `src/collections/Events.ts`           | Private records of sales events and exhibitions worldwide       |
+| `src/proxy.ts`, `src/twoFactor/`     | Two-factor authentication for every login (see "Two-factor authentication") |
 | `src/hooks/revalidateWebsite.ts`      | Tells the website to refresh its pages when a post changes      |
 | `Dockerfile`                          | Multi-stage build from the repo root → small standalone image    |
 | `docker-compose.yml`, `Caddyfile`     | Production stack on the app EC2                                  |
@@ -349,6 +350,44 @@ needs a logged-in user, so `GET /api/clients` and `GET /api/events` return `403`
 
 Attachments are stored in Media, whose files are publicly readable by URL. Don't attach confidential
 documents to events.
+
+## Two-factor authentication
+
+Every account must use an authenticator app (Google Authenticator, Microsoft Authenticator, 1Password,
+Authy, …) in addition to its password. No email or SMS service is involved.
+
+- **First login after deploying:** after the password, `/admin/2fa` shows a QR code. Scan it, enter the
+  6-digit code, and store the 10 backup codes shown once (e.g. in a password manager). Set this up right
+  after deploying: until an account has done so, anyone with its password could set it up instead.
+- **Every login:** after the password, enter the current code from the app, or a backup code (each works
+  once).
+- **New phone:** open `/admin/2fa` while logged in, enter a current code or a backup code, press **Reset
+  two-factor**, then scan the new QR code.
+- **5 wrong codes** lock the code check for 15 minutes. A code is accepted only once, and a verified login
+  asks again after 12 hours.
+
+How it works: `src/proxy.ts` checks every `/admin` and `/api` request that carries a login token. Unless
+the request also has the `payload-2fa` cookie for that login session (signed with `PAYLOAD_SECRET`), admin
+pages redirect to `/admin/2fa` and API requests get `403`. Requests without a login token, like the
+website reading published posts, are not affected. The authenticator secret is stored encrypted with
+`PAYLOAD_SECRET`, backup codes only as hashes, and neither can be read through the API. Changing
+`PAYLOAD_SECRET` therefore makes every account set up two-factor again (after the reset below).
+
+**Lost the phone and the backup codes?** Reset the account from the app server; it must set up two-factor
+again at the next login:
+
+```bash
+cd ~/payloadcms/apps/cms
+docker run --rm mongo:8 mongosh "$(grep '^DATABASE_URL=' .env | cut -d= -f2-)" --quiet --eval '
+  db.users.updateOne({ email: "you@example.com" }, {
+    $set: { twoFactorEnabled: false },
+    $unset: { twoFactorSecret: "", twoFactorPendingSecret: "", twoFactorBackupCodes: "",
+              twoFactorLastStep: "", twoFactorFailedAttempts: "", twoFactorLockUntil: "" },
+  })'
+```
+
+The codes depend on the server clock. EC2 keeps it in sync by default; if codes are always rejected,
+check `timedatectl` on the app server.
 
 ## Troubleshooting
 
