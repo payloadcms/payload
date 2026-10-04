@@ -12,6 +12,7 @@ import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
 import { Profiles } from './collections/Profiles'
 import { Users } from './collections/Users'
+import { sendgridAdapter } from './email/sendgrid'
 import { healthEndpoint } from './endpoints/health'
 import { s3StorageAdapter } from './storage/s3'
 
@@ -65,6 +66,8 @@ export default buildConfig({
     url: process.env.DATABASE_URL || '',
   }),
   editor: lexicalEditor(),
+  // Sends emails such as "forgot password" through SendGrid when SENDGRID_API_KEY is set
+  email: sendgridAdapter(),
   endpoints: [healthEndpoint],
   secret: process.env.PAYLOAD_SECRET || '',
   serverURL,
