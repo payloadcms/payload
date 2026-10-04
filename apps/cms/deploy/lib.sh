@@ -70,6 +70,20 @@ validate_env() {
     has_error=true
   fi
 
+  local sendgrid_api_key email_from_address
+  sendgrid_api_key="$(env_value SENDGRID_API_KEY)"
+  email_from_address="$(env_value EMAIL_FROM_ADDRESS)"
+
+  if [[ -n "$sendgrid_api_key" && ! "$email_from_address" =~ ^[^@[:space:]]+@[^@[:space:]]+$ ]]; then
+    echo "EMAIL_FROM_ADDRESS must be the sender address you verified in SendGrid, e.g. cms@example.com" >&2
+    has_error=true
+  fi
+
+  if [[ -n "$sendgrid_api_key" && ! "$sendgrid_api_key" =~ ^SG\. ]]; then
+    echo "SENDGRID_API_KEY doesn't look like a SendGrid API key (they start with \"SG.\")." >&2
+    has_error=true
+  fi
+
   if [[ "$has_error" == true ]]; then
     exit 1
   fi

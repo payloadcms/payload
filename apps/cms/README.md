@@ -19,26 +19,27 @@ installs the app against them. This is the same approach Payload's CI uses to te
         └────────────────────────────────────────────────┘
 ```
 
-| File                                  | Purpose                                                          |
-| ------------------------------------- | ---------------------------------------------------------------- |
-| `src/payload.config.ts`               | Payload config: MongoDB via `DATABASE_URL`, `SERVER_URL`, CORS/CSRF |
-| `src/endpoints/health.ts`             | `GET /api/health`: pings MongoDB (used by the Docker healthcheck) |
-| `src/storage/s3.ts`                   | Optional S3 storage for uploads, turned on by `S3_BUCKET`       |
-| `src/collections/Posts.ts`            | Blog posts for the personal website (see "Blog posts")           |
-| `src/collections/Pages.ts`            | Standalone pages such as About or Services (see "Pages and profiles") |
-| `src/collections/Profiles.ts`         | Profiles: bio, links, skills, work history, education           |
-| `src/collections/Clients.ts`          | Private client records: contacts, business type, importance (see "Clients and events") |
-| `src/collections/Events.ts`           | Private records of sales events and exhibitions worldwide       |
-| `src/proxy.ts`, `src/twoFactor/`     | Two-factor authentication for every login (see "Two-factor authentication") |
-| `src/hooks/revalidateWebsite.ts`      | Tells the website to refresh its pages when a post changes      |
-| `Dockerfile`                          | Multi-stage build from the repo root → small standalone image    |
-| `docker-compose.yml`, `Caddyfile`     | Production stack on the app EC2                                  |
-| `.env.example`                        | Every setting the server needs                                   |
-| `deploy/setup-app-server.sh`          | One-time bootstrap of a fresh EC2 (Docker, swap, clone)          |
-| `deploy/check-db.sh`                  | Checks that the app EC2 can reach and write to MongoDB           |
-| `deploy/deploy.sh`                    | Build + (re)start + wait until healthy                           |
-| `deploy/mongodb/create-payload-user.js` | Creates the MongoDB user for Payload (run on the DB EC2)       |
-| `scripts/pack-local-packages.mjs`     | Packs `packages/*` into tarballs for the app (used by the Dockerfile) |
+| File                                    | Purpose                                                                                |
+| --------------------------------------- | -------------------------------------------------------------------------------------- |
+| `src/payload.config.ts`                 | Payload config: MongoDB via `DATABASE_URL`, `SERVER_URL`, CORS/CSRF                    |
+| `src/endpoints/health.ts`               | `GET /api/health`: pings MongoDB (used by the Docker healthcheck)                      |
+| `src/storage/s3.ts`                     | Optional S3 storage for uploads, turned on by `S3_BUCKET`                              |
+| `src/collections/Posts.ts`              | Blog posts for the personal website (see "Blog posts")                                 |
+| `src/collections/Pages.ts`              | Standalone pages such as About or Services (see "Pages and profiles")                  |
+| `src/collections/Profiles.ts`           | Profiles: bio, links, skills, work history, education                                  |
+| `src/collections/Clients.ts`            | Private client records: contacts, business type, importance (see "Clients and events") |
+| `src/collections/Events.ts`             | Private records of sales events and exhibitions worldwide                              |
+| `src/proxy.ts`, `src/twoFactor/`        | Two-factor authentication for every login (see "Two-factor authentication")            |
+| `src/email/sendgrid.ts`                 | Sends emails such as "forgot password" through SendGrid (see "Email (SendGrid)")       |
+| `src/hooks/revalidateWebsite.ts`        | Tells the website to refresh its pages when a post changes                             |
+| `Dockerfile`                            | Multi-stage build from the repo root → small standalone image                          |
+| `docker-compose.yml`, `Caddyfile`       | Production stack on the app EC2                                                        |
+| `.env.example`                          | Every setting the server needs                                                         |
+| `deploy/setup-app-server.sh`            | One-time bootstrap of a fresh EC2 (Docker, swap, clone)                                |
+| `deploy/check-db.sh`                    | Checks that the app EC2 can reach and write to MongoDB                                 |
+| `deploy/deploy.sh`                      | Build + (re)start + wait until healthy                                                 |
+| `deploy/mongodb/create-payload-user.js` | Creates the MongoDB user for Payload (run on the DB EC2)                               |
+| `scripts/pack-local-packages.mjs`       | Packs `packages/*` into tarballs for the app (used by the Dockerfile)                  |
 
 ---
 
@@ -46,12 +47,12 @@ installs the app against them. This is the same approach Payload's CI uses to te
 
 Put both instances in the **same VPC** and connect through the database's **private IP**.
 
-| Security group | Inbound rule                     | Source                                   |
-| -------------- | -------------------------------- | ---------------------------------------- |
-| `cms-app-sg`   | TCP 80, TCP 443 (and UDP 443)    | `0.0.0.0/0` (and `::/0` for IPv6)        |
-| `cms-app-sg`   | TCP 22                           | your IP only                             |
-| `mongodb-sg`   | TCP 27017                        | **the security group `cms-app-sg`** (not an IP) |
-| `mongodb-sg`   | TCP 22                           | your IP only                             |
+| Security group | Inbound rule                  | Source                                          |
+| -------------- | ----------------------------- | ----------------------------------------------- |
+| `cms-app-sg`   | TCP 80, TCP 443 (and UDP 443) | `0.0.0.0/0` (and `::/0` for IPv6)               |
+| `cms-app-sg`   | TCP 22                        | your IP only                                    |
+| `mongodb-sg`   | TCP 27017                     | **the security group `cms-app-sg`** (not an IP) |
+| `mongodb-sg`   | TCP 22                        | your IP only                                    |
 
 Never open 27017 to `0.0.0.0/0`.
 
@@ -118,14 +119,15 @@ cd ~/payloadcms/apps/cms
 nano .env
 ```
 
-| Variable         | Value                                                                                   |
-| ---------------- | --------------------------------------------------------------------------------------- |
-| `DATABASE_URL`   | `mongodb://payload:<password>@<mongo-private-ip>:27017/payload?authSource=admin`       |
-| `PAYLOAD_SECRET` | output of `openssl rand -hex 32`. Keep it stable; changing it logs everyone out         |
-| `SERVER_URL`     | exactly what you type in the browser, no trailing slash: `http://<ec2-public-ip>` or `https://cms.example.com` |
-| `SITE_ADDRESS`   | `:80` for plain HTTP on the IP, or `cms.example.com` for automatic HTTPS               |
-| `CORS_ORIGINS`   | optional, comma-separated frontend origins that call the API with cookies               |
-| `WEBSITE_URL`, `WEBSITE_REVALIDATE_SECRET` | optional, refresh the website as soon as a post is published (see "Blog posts") |
+| Variable                                                    | Value                                                                                                          |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                                              | `mongodb://payload:<password>@<mongo-private-ip>:27017/payload?authSource=admin`                               |
+| `PAYLOAD_SECRET`                                            | output of `openssl rand -hex 32`. Keep it stable; changing it logs everyone out                                |
+| `SERVER_URL`                                                | exactly what you type in the browser, no trailing slash: `http://<ec2-public-ip>` or `https://cms.example.com` |
+| `SITE_ADDRESS`                                              | `:80` for plain HTTP on the IP, or `cms.example.com` for automatic HTTPS                                       |
+| `CORS_ORIGINS`                                              | optional, comma-separated frontend origins that call the API with cookies                                      |
+| `WEBSITE_URL`, `WEBSITE_REVALIDATE_SECRET`                  | optional, refresh the website as soon as a post is published (see "Blog posts")                                |
+| `SENDGRID_API_KEY`, `EMAIL_FROM_ADDRESS`, `EMAIL_FROM_NAME` | optional, send "forgot password" emails (see "Email (SendGrid)")                                               |
 
 URL-encode special characters in the MongoDB password: `@` → `%40`, `:` → `%3A`, `/` → `%2F`,
 `#` → `%23`, `?` → `%3F`.
@@ -299,9 +301,9 @@ logged-in users.
 | ------------ | ----------------------------------------------------------------------------------------------- |
 | Title        | Post title                                                                                      |
 | Description  | Text on post cards, in search results and in the RSS feed                                       |
-| Images       | The first one is the cover on post cards; all of them form the gallery at the top of the post  |
+| Images       | The first one is the cover on post cards; all of them form the gallery at the top of the post   |
 | Content      | The post: headings, lists, quotes, links (to URLs or other posts), images, code, YouTube videos |
-| Slug         | The URL, `/blog/<slug>`. Generated from the title once and kept when the title changes         |
+| Slug         | The URL, `/blog/<slug>`. Generated from the title once and kept when the title changes          |
 | Published At | The post date. Filled in when the post is first published                                       |
 | Featured     | Lists the post under "Featured" on the home page                                                |
 | Tags         | Tag chips. A tag links to `/tags/<tag>` when the website has `content/tags/<tag>.md`            |
@@ -389,17 +391,45 @@ docker run --rm mongo:8 mongosh "$(grep '^DATABASE_URL=' .env | cut -d= -f2-)" -
 The codes depend on the server clock. EC2 keeps it in sync by default; if codes are always rejected,
 check `timedatectl` on the app server.
 
+## Email (SendGrid)
+
+Payload sends "forgot password" emails. Without an email service it only writes them to the log
+(`docker compose logs cms`). To send them through SendGrid:
+
+1. **Verify a sender** in SendGrid (_Settings → Sender Authentication_). Either verify a single address
+   (_Single Sender Verification_, done in a minute), or authenticate your domain by adding the DNS records
+   SendGrid shows, which keeps the emails out of spam folders.
+2. **Create an API key** (_Settings → API Keys → Create API Key_): choose _Restricted Access_, set
+   _Mail Send_ to _Full Access_, and copy the key; SendGrid shows it only once.
+3. **Add to `.env`** and run `./deploy/deploy.sh`:
+
+   ```bash
+   SENDGRID_API_KEY=SG.xxxxxxxx
+   EMAIL_FROM_ADDRESS=cms@example.com   # the sender verified in step 1
+   EMAIL_FROM_NAME=Payload CMS
+   ```
+
+4. **Test:** log out, choose **Forgot password?**, and enter your email. The link in the email opens
+   `SERVER_URL/admin/reset/…`, is valid for one hour and works once. After choosing a new password you still
+   need your two-factor code.
+
+Payload sends at most one reset email per account every 15 seconds, and answers the same way for unknown
+addresses, so the form doesn't reveal which accounts exist. If no email arrives, look for
+`SendGrid rejected the email` in `docker compose logs cms`: `401`/`403` means the key is wrong or lacks the
+Mail Send permission; a sender error means `EMAIL_FROM_ADDRESS` isn't verified. SendGrid's _Activity Feed_
+shows whether an email was delivered.
+
 ## Troubleshooting
 
-| Symptom                                               | Cause / fix                                                                                   |
-| ----------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| Login succeeds but you're bounced back to login, or API calls return 403 | `SERVER_URL` doesn't exactly match the browser URL (http vs https, IP vs domain, port). Fix `.env` and redeploy. |
-| `/api/health` → `503` / logs say `cannot connect to MongoDB` | Run `./deploy/check-db.sh`. Timeout → security group or `bindIp`. `Authentication failed` → user/password/`authSource`, or an un-encoded special character in the password. |
-| Build killed / `exit code: 137`                       | Out of memory. Use an 8 GB instance or check that swap is on (`swapon --show`).                   |
-| Caddy can't get a certificate                         | DNS doesn't point at the instance yet, or port 80/443 is closed. Check `docker compose logs caddy`. |
-| Upload fails: `Could not load credentials` / `AccessDenied` | S3 access. Check that the IAM role is attached with the policy above and that the metadata hop limit is 2, or set the key pair in `.env`. |
-| Upload works but images are broken (403)              | The files aren't public. Add the bucket policy (and untick the bucket-policy public-access blocks), or check the CloudFront origin access settings. |
-| Website only shows a published post after a minute   | `docker compose logs cms` shows `Could not revalidate`: `401` means the two secrets differ; `ECONNREFUSED` or a timeout means `WEBSITE_URL` is wrong. |
+| Symptom                                                                  | Cause / fix                                                                                                                                                                 |
+| ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Login succeeds but you're bounced back to login, or API calls return 403 | `SERVER_URL` doesn't exactly match the browser URL (http vs https, IP vs domain, port). Fix `.env` and redeploy.                                                            |
+| `/api/health` → `503` / logs say `cannot connect to MongoDB`             | Run `./deploy/check-db.sh`. Timeout → security group or `bindIp`. `Authentication failed` → user/password/`authSource`, or an un-encoded special character in the password. |
+| Build killed / `exit code: 137`                                          | Out of memory. Use an 8 GB instance or check that swap is on (`swapon --show`).                                                                                             |
+| Caddy can't get a certificate                                            | DNS doesn't point at the instance yet, or port 80/443 is closed. Check `docker compose logs caddy`.                                                                         |
+| Upload fails: `Could not load credentials` / `AccessDenied`              | S3 access. Check that the IAM role is attached with the policy above and that the metadata hop limit is 2, or set the key pair in `.env`.                                   |
+| Upload works but images are broken (403)                                 | The files aren't public. Add the bucket policy (and untick the bucket-policy public-access blocks), or check the CloudFront origin access settings.                         |
+| Website only shows a published post after a minute                       | `docker compose logs cms` shows `Could not revalidate`: `401` means the two secrets differ; `ECONNREFUSED` or a timeout means `WEBSITE_URL` is wrong.                       |
 
 ## Local development
 
