@@ -229,8 +229,6 @@ const droppableJumpKeyboardCoordinateGetter: KeyboardCoordinateGetter = (
   if (targetDroppable) {
     const viewportHeight = window.innerHeight
     const targetRect = targetDroppable.rect
-    const scrollContainer =
-      targetDroppable.element.closest<HTMLElement>('.template-default__wrap') ?? window
     const scrollPadding = 20 // Extra padding to ensure element is fully visible
 
     // Check if target droppable is fully visible in viewport
@@ -241,10 +239,10 @@ const droppableJumpKeyboardCoordinateGetter: KeyboardCoordinateGetter = (
     if (isAboveViewport) {
       const scrollAmount = targetRect.top - scrollPadding
       // don't use smooth scroll here, because it will mess up the delta calculation
-      scrollContainer.scrollBy({ behavior: 'instant', top: scrollAmount })
+      window.scrollBy({ behavior: 'instant', top: scrollAmount })
     } else if (isBelowViewport) {
       const scrollAmount = targetRect.bottom - viewportHeight + scrollPadding
-      scrollContainer.scrollBy({ behavior: 'instant', top: scrollAmount })
+      window.scrollBy({ behavior: 'instant', top: scrollAmount })
     }
 
     // After scroll, recalculate target position (it may have changed due to scroll)

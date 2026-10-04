@@ -94,6 +94,18 @@ export const NavProvider: React.FC<{
     previousPathname.current = pathname
   }, [pathname, setNavOpen, smallBreak])
 
+  // on open and close, lock the body scroll
+  // do not do this on desktop, the sidebar is not a modal
+  useEffect(() => {
+    if (navRef.current) {
+      if (navOpen && midBreak) {
+        navRef.current.style.overscrollBehavior = 'contain'
+      } else {
+        navRef.current.style.overscrollBehavior = 'auto'
+      }
+    }
+  }, [navOpen, midBreak])
+
   // on smaller screens where the nav is a modal
   // close the nav when the user resizes down to mobile
   // the sidebar is a modal on mobile
@@ -117,6 +129,15 @@ export const NavProvider: React.FC<{
       setHydrated(true)
     }
   }, [largeBreak, midBreak, setNavOpen, smallBreak])
+
+  // when the component unmounts, clear all body scroll locks
+  useEffect(() => {
+    return () => {
+      if (navRef.current) {
+        navRef.current.style.overscrollBehavior = 'auto'
+      }
+    }
+  }, [])
 
   return <NavContext value={{ hydrated, navOpen, navRef, setNavOpen }}>{children}</NavContext>
 }

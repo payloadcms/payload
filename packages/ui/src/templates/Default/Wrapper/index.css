@@ -1,7 +1,6 @@
 @layer payload-default {
   .template-default {
-    height: 100dvh;
-    overflow: clip;
+    min-height: 100vh;
     display: grid;
     position: relative;
     isolation: isolate;

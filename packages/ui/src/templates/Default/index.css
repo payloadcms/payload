@@ -6,16 +6,13 @@
 
   .template-default__wrap {
     min-width: 0;
-    min-block-size: 0;
     width: 100%;
     flex-grow: 1;
     position: relative;
     display: flex;
     flex-direction: column;
     background-color: var(--color-bg);
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior: auto contain;
+
   }
 
   /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */

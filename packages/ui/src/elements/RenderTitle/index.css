@@ -13,6 +13,14 @@
     margin: 0;
   }
 
+  .render-title--has-id {
+    /* Reset heading typography when showing IDLabel */
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+  }
+
   .render-title--placeholder {
     color: var(--color-text-secondary);
   }
@@ -20,6 +28,10 @@
   .render-title__id {
     vertical-align: middle;
     position: relative;
+    font-size: var(--text-mono-large-font-size);
+    font-weight: var(--text-mono-large-weight);
+    line-height: var(--text-mono-large-line-height);
+    letter-spacing: var(--text-mono-large-letter-spacing);
   }
 
   .render-title__link {
