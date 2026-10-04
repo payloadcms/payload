@@ -39,6 +39,16 @@ const allowedOrigins = [
 
 export default buildConfig({
   admin: {
+    components: {
+      views: {
+        // Two-factor setup and login check, see src/proxy.ts
+        twoFactor: {
+          Component: '/components/TwoFactorView#TwoFactorView',
+          exact: true,
+          path: '/2fa',
+        },
+      },
+    },
     importMap: {
       baseDir: path.resolve(dirname),
     },

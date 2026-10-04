@@ -1,5 +1,8 @@
 import type { CollectionConfig } from 'payload'
 
+import { twoFactorEndpoints } from '../twoFactor/endpoints'
+import { twoFactorFields } from '../twoFactor/fields'
+
 export const Users: CollectionConfig = {
   slug: 'users',
   admin: {
@@ -13,8 +16,10 @@ export const Users: CollectionConfig = {
     lockTime: 10 * 60 * 1000,
     maxLoginAttempts: 5,
   },
+  // Two-factor authentication (src/twoFactor, enforced by src/proxy.ts)
+  endpoints: twoFactorEndpoints,
   fields: [
     // Email added by default
-    // Add more fields as needed
+    ...twoFactorFields,
   ],
 }
