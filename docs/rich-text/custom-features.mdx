@@ -554,6 +554,106 @@ export const MyNodePlugin: PluginComponent = () => {
 
 In this example, we register a lexical command, which simply inserts a new MyNode into the editor. This command can be called from anywhere within lexical, e.g. from within a custom node.
 
+### Extensions
+
+Extensions add behavior to the editor, like [commands](https://lexical.dev/docs/concepts/commands), [node transforms](https://lexical.dev/docs/concepts/transforms) or [listeners](https://lexical.dev/docs/concepts/listeners), without rendering React components. The editor is built using the [Lexical Extension API](https://lexical.dev/docs/extensions/intro), and the extensions of all enabled features are added to it.
+
+Extensions are registered when the editor mounts, before its initial state is set and before the effects of any plugin run. This means node transforms also run on the initial content of the editor.
+
+The plugin above can also be written as an extension. Define it with `defineExtension` and add it to the `extensions` array in your client feature:
+
+```ts
+'use client'
+
+import { createClientFeature } from '@payloadcms/richtext-lexical/client'
+import { MyNodeExtension } from './extension'
+
+export const MyClientFeature = createClientFeature({
+  extensions: [MyNodeExtension],
+})
+```
+
+Example extension.ts:
+
+```ts
+import {
+  $getSelection,
+  $isRangeSelection,
+  COMMAND_PRIORITY_EDITOR,
+  defineExtension,
+} from '@payloadcms/richtext-lexical/lexical'
+import { $insertNodeToNearestRoot } from '@payloadcms/richtext-lexical/lexical/utils'
+
+import { $createMyNode } from '../nodes/MyNode'
+import { INSERT_MYNODE_COMMAND } from './plugin'
+
+export const MyNodeExtension = defineExtension({
+  // The name of an extension needs to be unique within the editor
+  name: 'myFeature/MyNode',
+  register: (editor) =>
+    // Return a function which cleans up everything you registered
+    editor.registerCommand(
+      INSERT_MYNODE_COMMAND,
+      () => {
+        const selection = $getSelection()
+
+        if (!$isRangeSelection(selection)) {
+          return false
+        }
+
+        $insertNodeToNearestRoot($createMyNode())
+
+        return true
+      },
+      COMMAND_PRIORITY_EDITOR,
+    ),
+})
+```
+
+Extensions have to be stable references, so define them at module scope. If your extension depends on the props of your feature, give it a `config` and override it from within your client feature using `configExtension`:
+
+```ts
+'use client'
+
+import { createClientFeature } from '@payloadcms/richtext-lexical/client'
+import {
+  configExtension,
+  defineExtension,
+  safeCast,
+} from '@payloadcms/richtext-lexical/lexical'
+
+type MyFeatureProps = {
+  maxLength: number
+}
+
+const MyExtension = defineExtension({
+  name: 'myFeature/MyExtension',
+  // Default config of the extension
+  config: safeCast<MyFeatureProps>({ maxLength: 100 }),
+  register: (editor, { maxLength }) =>
+    editor.registerTextContentListener((textContent) => {
+      if (textContent.length > maxLength) {
+        // ...
+      }
+    }),
+})
+
+export const MyClientFeature = createClientFeature<MyFeatureProps>(
+  ({ props }) => ({
+    extensions: [configExtension(MyExtension, { maxLength: props.maxLength })],
+  }),
+)
+```
+
+Extensions can depend on other extensions, including the [extensions included in lexical](https://lexical.dev/docs/extensions/included-extensions). An extension is only registered once per editor, even if multiple features add it or depend on it. Other extension utilities, like signals, can be imported from `@payloadcms/richtext-lexical/lexical/extension`.
+
+<Banner type="warning">
+  Payload ships its own rich text and link behavior. Do not add lexical's
+  `RichTextExtension`, `LinkExtension`, `AutoLinkExtension` or
+  `ClickableLinkExtension` to the editor - they register nodes which are
+  controlled by Payload features, or conflict with Payload's own nodes.
+</Banner>
+
 ### Toolbar groups
 
 Toolbar groups are visual containers which hold toolbar items. There are different toolbar group types which determine _how_ a toolbar item is displayed: `dropdown` and `buttons`.

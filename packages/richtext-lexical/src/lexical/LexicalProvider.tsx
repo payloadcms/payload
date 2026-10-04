@@ -1,11 +1,19 @@
 'use client'
-import type { InitialConfigType } from '@lexical/react/LexicalComposer.js'
-import type { EditorState, LexicalEditor, SerializedEditorState } from 'lexical'
+import type { EditorChildrenComponentProps } from '@lexical/react/ReactExtension'
+import type {
+  AnyLexicalExtension,
+  EditorState,
+  LexicalEditor,
+  SerializedEditorState,
+} from 'lexical'
 
-import { LexicalComposer } from '@lexical/react/LexicalComposer.js'
+import { getExtensionDependencyFromEditor, LexicalBuilder } from '@lexical/extension'
+import { ReactExtension } from '@lexical/react/ReactExtension'
+import { ReactProviderExtension } from '@lexical/react/ReactProviderExtension'
 import { useEditDepth } from '@payloadcms/ui'
+import { configExtension, defineExtension } from 'lexical'
 import * as React from 'react'
-import { useMemo } from 'react'
+import { createContext, use, useLayoutEffect, useMemo } from 'react'
 
 import type { LexicalRichTextFieldProps } from '../types/index.js'
 import type { SanitizedClientEditorConfig } from './config/types.js'
@@ -51,6 +59,14 @@ const NestProviders = ({
   return <Component>{children}</Component>
 }
 
+type EditorConfigProviderProps = Omit<React.ComponentProps<typeof EditorConfigProvider>, 'children'>
+
+/**
+ * Lexical renders `EditorChildren` itself, so we can't pass props to it directly.
+ * Instead, `LexicalProvider` passes them through this context.
+ */
+const EditorConfigProviderPropsContext = createContext<EditorConfigProviderProps | null>(null)
+
 export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
   const {
     composerKey,
@@ -72,7 +88,7 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
   const editorContainerRef = React.useRef<HTMLDivElement>(null)
 
   // useMemo for the initialConfig that depends on readOnly and value
-  const initialConfig = useMemo<InitialConfigType>(() => {
+  const initialConfig = useMemo<AnyLexicalExtension>(() => {
     if (value && typeof value !== 'object') {
       throw new Error(
         'The value passed to the Lexical editor is not an object. This is not supported. Please remove the data from the field and start again. This is the value that was passed in: ' +
@@ -95,9 +111,14 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
     // Use the 'default' view if available, otherwise undefined
     const nodeViews = views?.[currentView]?.nodes
 
-    return {
+    return defineExtension({
+      name: '@payloadcms/richtext-lexical/Editor',
+      $initialEditorState: value != null ? JSON.stringify(value) : undefined,
+      dependencies: [
+        configExtension(ReactExtension, { EditorChildrenComponent: EditorChildren }),
+        ...editorConfig.features.extensions,
+      ],
       editable: readOnly !== true,
-      editorState: value != null ? JSON.stringify(value) : undefined,
       namespace: editorConfig.lexical.namespace,
       nodes: getEnabledNodes({
         editorConfig,
@@ -107,10 +128,23 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
         throw error
       },
       theme: editorConfig.lexical.theme,
-    }
+    })
     // Important: do not add readOnly and value to the dependencies array. This will cause the entire lexical editor to re-render if the document is saved, which will
     // cause the editor to lose focus.
   }, [editorConfig, views, currentView])
+
+  const editorConfigProviderProps = useMemo<EditorConfigProviderProps>(
+    () => ({
+      editorConfig,
+      editorContainerRef,
+      fieldProps,
+      /**
+       * Parent editor is not truly the parent editor, if the current editor is part of a drawer and the parent editor is the main editor.
+       */
+      parentContext: parentContext?.editDepth === editDepth ? parentContext : undefined,
+    }),
+    [editDepth, editorConfig, fieldProps, parentContext],
+  )
 
   if (!initialConfig) {
     return <p>Loading...</p>
@@ -120,29 +154,92 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
   // Without it, there were cases where lexical editors inside drawers turn readOnly initially - a few miliseconds later they turn editable, but the editor does not re-render and stays readOnly.
   // We also add currentView to force re-render when the view changes.
   return (
-    <LexicalComposer
-      initialConfig={initialConfig}
-      key={composerKey + initialConfig.editable + currentView}
-    >
-      <EditorConfigProvider
-        editorConfig={editorConfig}
-        editorContainerRef={editorContainerRef}
-        fieldProps={fieldProps}
-        /**
-         * Parent editor is not truly the parent editor, if the current editor is part of a drawer and the parent editor is the main editor.
-         */
-        parentContext={parentContext?.editDepth === editDepth ? parentContext : undefined}
+    <EditorConfigProviderPropsContext value={editorConfigProviderProps}>
+      <ExtensionComposer
+        extension={initialConfig}
+        key={composerKey + initialConfig.editable + currentView}
       >
-        <NestProviders providers={editorConfig.features.providers}>
-          <LexicalEditorComponent
-            editorConfig={editorConfig}
-            editorContainerRef={editorContainerRef}
-            isSmallWidthViewport={isSmallWidthViewport}
-            onChange={onChange}
-            rtl={rtl}
-          />
-        </NestProviders>
-      </EditorConfigProvider>
-    </LexicalComposer>
+        <LexicalEditorComponent
+          editorConfig={editorConfig}
+          editorContainerRef={editorContainerRef}
+          isSmallWidthViewport={isSmallWidthViewport}
+          onChange={onChange}
+          rtl={rtl}
+        />
+      </ExtensionComposer>
+    </EditorConfigProviderPropsContext>
+  )
+}
+
+/**
+ * For each editor, a function that turns its extensions off again. Calling it removes
+ * everything the extensions added to the editor, like commands, listeners and node transforms.
+ */
+const editorRegistrations = new WeakMap<LexicalEditor, () => void>()
+
+/**
+ * Creates the Lexical editor from the given extension and turns its extensions on.
+ *
+ * Lexical has its own component for this, `LexicalExtensionComposer`, but we can't use it: it
+ * destroys the editor when its effect is cleaned up. React sometimes cleans up effects without
+ * removing the component from the page, for example when a Suspense boundary above it shows its
+ * fallback again. Once the content is visible again, React runs the effects again. The editor
+ * would still be on the page, but none of its extensions would work anymore.
+ *
+ * This component never destroys the editor. It turns the extensions off when the effect is
+ * cleaned up, and turns them on again when the effect runs again.
+ */
+function ExtensionComposer({
+  children,
+  extension,
+}: {
+  children: React.ReactNode
+  extension: AnyLexicalExtension
+}) {
+  const { builder, editor } = useMemo(() => {
+    const builder = LexicalBuilder.fromExtensions([
+      ReactProviderExtension,
+      // We render the content editable ourselves, in LexicalEditorComponent
+      configExtension(ReactExtension, { contentEditable: null }),
+      extension,
+    ])
+    const editor = builder.constructEditor()
+    // Turn the extensions on right away, so the editor already has its initial content
+    // when the content editable is rendered for the first time
+    editorRegistrations.set(editor, builder.registerEditor(editor))
+    return { builder, editor }
+  }, [extension])
+
+  // useLayoutEffect runs before any useEffect. Plugins register their commands in useEffect, so
+  // after a cleanup, the extensions are turned on again before the plugins - like on the first render.
+  useLayoutEffect(() => {
+    if (!editorRegistrations.has(editor)) {
+      // Lexical only sets the initial content the first time, so this keeps the user's changes
+      editorRegistrations.set(editor, builder.registerEditor(editor))
+    }
+    return () => {
+      editorRegistrations.get(editor)?.()
+      editorRegistrations.delete(editor)
+    }
+  }, [builder, editor])
+
+  const { Component } = getExtensionDependencyFromEditor(editor, ReactExtension).output
+
+  return <Component>{children}</Component>
+}
+
+function EditorChildren({ children }: EditorChildrenComponentProps) {
+  const editorConfigProviderProps = use(EditorConfigProviderPropsContext)
+
+  if (!editorConfigProviderProps) {
+    throw new Error('EditorChildren must be rendered within a LexicalProvider')
+  }
+
+  return (
+    <EditorConfigProvider {...editorConfigProviderProps}>
+      <NestProviders providers={editorConfigProviderProps.editorConfig.features.providers}>
+        {children}
+      </NestProviders>
+    </EditorConfigProvider>
   )
 }

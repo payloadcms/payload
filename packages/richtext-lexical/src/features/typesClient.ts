@@ -1,5 +1,6 @@
 import type { Transformer } from '@lexical/markdown'
 import type {
+  AnyLexicalExtensionArgument,
   Klass,
   LexicalEditor,
   LexicalNode,
@@ -107,6 +108,18 @@ export type ClientFeature<ClientFeatureProps> = {
    * The text formats which are enabled by this feature.
    */
   enableFormats?: TextFormatType[]
+  /**
+   * Lexical extensions to add to the editor. Use them for behavior, like commands, node transforms
+   * or listeners. For React components that render UI, use `plugins`.
+   *
+   * Extensions are turned on when the editor is created, before its initial content is loaded and
+   * before any plugin runs. For example, a node transform also runs on the content the editor starts with.
+   *
+   * If several features add an extension with the same name, it is only added once.
+   *
+   * @see https://lexical.dev/docs/extensions/intro
+   */
+  extensions?: AnyLexicalExtensionArgument[]
   markdownTransformers?: (
     | ((props: {
         allNodes: Array<Klass<LexicalNode> | LexicalNodeReplacement>
@@ -217,6 +230,10 @@ export type SanitizedClientFeatures = {
   /** The keys of all enabled features */
   enabledFeatures: string[]
   enabledFormats: TextFormatType[]
+  /**
+   * Lexical extensions of all enabled features, in feature order
+   */
+  extensions: AnyLexicalExtensionArgument[]
   markdownTransformers: Transformer[]
 
   /**

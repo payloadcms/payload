@@ -1444,6 +1444,9 @@ importers:
       '@lexical/clipboard':
         specifier: 0.52.0
         version: 0.52.0(typescript@7.0.2)
+      '@lexical/extension':
+        specifier: 0.52.0
+        version: 0.52.0(typescript@7.0.2)
       '@lexical/headless':
         specifier: 0.52.0
         version: 0.52.0(bufferutil@4.1.0)(typescript@7.0.2)
