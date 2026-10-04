@@ -1,6 +1,7 @@
 @layer payload-default {
   .welcome-widget {
     overflow-wrap: anywhere;
+    padding-block: var(--spacer-2);
   }
 
   .welcome-widget__heading {
@@ -9,10 +10,16 @@
     font-weight: var(--text-heading-xl-font-weight);
     line-height: var(--text-heading-xl-line-height);
     letter-spacing: var(--text-heading-xl-letter-spacing);
-    height: var(--spacer-5);
+    min-height: var(--spacer-5);
+    margin-block: 0;
   }
 
-  .widget:first-of-type:has(.welcome-widget) .welcome-widget {
-    padding-block-start: var(--spacer-2);
+  .widget-wrapper--editing .welcome-widget {
+    padding-inline-end: calc(var(--spacer-6) + var(--spacer-3));
+  }
+
+  .widget-wrapper:has(.welcome-widget) .widget-wrapper__controls {
+    inset-block-start: 50%;
+    transform: translateY(-50%);
   }
 }

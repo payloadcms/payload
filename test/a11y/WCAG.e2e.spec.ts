@@ -1539,9 +1539,8 @@ test.describe('WCAG 2.2 Level AA', () => {
       await drag.focus()
       await page.keyboard.press('Space')
       await expect(page.locator('.drag-overlay')).toBeVisible()
-      await expect(
-        page.getByRole('status').filter({ hasText: 'Picked up draggable item' }),
-      ).toHaveCount(1)
+      await expect(drag).toHaveAttribute('aria-pressed', 'true')
+      await expect(page.getByRole('status').filter({ hasText: lastID! })).toHaveCount(1)
       await page.keyboard.press('ArrowLeft')
       const overFirstWidget = page.getByRole('status').filter({ hasText: firstID! })
 
