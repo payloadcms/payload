@@ -80,31 +80,33 @@ export type LexicalNodes_EF84AAF3 =
   | SerializedListItemNode<LexicalNodes_EF84AAF3>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_1F690F76".
+ * via the `definition` "LexicalNodes_48B06E2D".
  */
-export type LexicalNodes_1F690F76 =
+export type LexicalNodes_48B06E2D =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_1F690F76>
+  | SerializedParagraphNode<LexicalNodes_48B06E2D>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_1F690F76>
+  | SerializedQuoteNode<LexicalNodes_48B06E2D>
   | SerializedRelationshipNode<
       | 'users'
       | 'posts'
       | 'pages'
       | 'profiles'
+      | 'clients'
+      | 'events'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_1F690F76, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_1F690F76, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_1F690F76>
-  | SerializedListItemNode<LexicalNodes_1F690F76>
-  | SerializedHeadingNode<LexicalNodes_1F690F76>;
+  | SerializedAutoLinkNode<LexicalNodes_48B06E2D, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_48B06E2D, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_48B06E2D>
+  | SerializedListItemNode<LexicalNodes_48B06E2D>
+  | SerializedHeadingNode<LexicalNodes_48B06E2D>;
 
 export interface Config {
   auth: {
@@ -117,18 +119,26 @@ export interface Config {
     posts: Post;
     pages: Page;
     profiles: Profile;
+    clients: Client;
+    events: Event;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    clients: {
+      events: 'events';
+    };
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     profiles: ProfilesSelect<false> | ProfilesSelect<true>;
+    clients: ClientsSelect<false> | ClientsSelect<true>;
+    events: EventsSelect<false> | EventsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -332,7 +342,7 @@ export interface Profile {
    */
   headline?: string | null;
   photo?: (string | null) | Media;
-  bio?: LexicalRichText<LexicalNodes_1F690F76> | null;
+  bio?: LexicalRichText<LexicalNodes_48B06E2D> | null;
   links?:
     | {
         platform: 'github' | 'linkedin' | 'youtube' | 'x' | 'website' | 'other';
@@ -402,6 +412,118 @@ export interface Profile {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "clients".
+ */
+export interface Client {
+  id: string;
+  company: string;
+  /**
+   * Main contact person
+   */
+  contactName?: string | null;
+  jobTitle?: string | null;
+  email?: string | null;
+  /**
+   * With country code, e.g. +852 1234 5678
+   */
+  phone?: string | null;
+  website?: string | null;
+  address?: {
+    street?: string | null;
+    city?: string | null;
+    country?: string | null;
+  };
+  businessType?:
+    ('retailer' | 'wholesaler' | 'distributor' | 'manufacturer' | 'ecommerce' | 'brand' | 'services' | 'other') | null;
+  /**
+   * e.g. Jewelry, Fashion, Electronics
+   */
+  industry?: string | null;
+  notes?: string | null;
+  /**
+   * Events where you met or worked with this client (set on the event).
+   */
+  events?: {
+    docs?: (string | Event)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * How important this client is to the business
+   */
+  importance?: ('5' | '4' | '3' | '2' | '1') | null;
+  status: 'lead' | 'active' | 'inactive';
+  /**
+   * How you found them, e.g. a referral or an event
+   */
+  source?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events".
+ */
+export interface Event {
+  id: string;
+  name: string;
+  type: 'exhibition' | 'tradeShow' | 'salesEvent' | 'conference' | 'meeting' | 'other';
+  startDate: string;
+  startDate_tz: SupportedTimezones;
+  /**
+   * Leave empty for a single-day event
+   */
+  endDate?: string | null;
+  endDate_tz?: SupportedTimezones;
+  location: {
+    /**
+     * e.g. Hong Kong Convention and Exhibition Centre
+     */
+    venue?: string | null;
+    /**
+     * Hall / booth number
+     */
+    booth?: string | null;
+    address?: string | null;
+    city: string;
+    country: string;
+  };
+  organizer?: string | null;
+  website?: string | null;
+  /**
+   * Clients you met or worked with at this event
+   */
+  clients?: (string | Client)[] | null;
+  /**
+   * Results, leads, follow-ups
+   */
+  notes?: string | null;
+  status: 'planned' | 'confirmed' | 'completed' | 'cancelled';
+  /**
+   * Brochures, floor plans, photos
+   */
+  attachments?: (string | Media)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -443,6 +565,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'profiles';
         value: string | Profile;
+      } | null)
+    | ({
+        relationTo: 'clients';
+        value: string | Client;
+      } | null)
+    | ({
+        relationTo: 'events';
+        value: string | Event;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -634,6 +764,67 @@ export interface ProfilesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "clients_select".
+ */
+export interface ClientsSelect<T extends boolean = true> {
+  company?: T;
+  contactName?: T;
+  jobTitle?: T;
+  email?: T;
+  phone?: T;
+  website?: T;
+  address?:
+    | T
+    | {
+        street?: T;
+        city?: T;
+        country?: T;
+      };
+  businessType?: T;
+  industry?: T;
+  notes?: T;
+  events?: T;
+  importance?: T;
+  status?: T;
+  source?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events_select".
+ */
+export interface EventsSelect<T extends boolean = true> {
+  name?: T;
+  type?: T;
+  startDate?: T;
+  startDate_tz?: T;
+  endDate?: T;
+  endDate_tz?: T;
+  location?:
+    | T
+    | {
+        venue?: T;
+        booth?: T;
+        address?: T;
+        city?: T;
+        country?: T;
+      };
+  organizer?: T;
+  website?: T;
+  clients?: T;
+  notes?: T;
+  status?: T;
+  attachments?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -689,7 +880,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'users' | 'media' | 'posts' | 'pages' | 'profiles';
+    relatedCollection: 'users' | 'media' | 'posts' | 'pages' | 'profiles' | 'clients' | 'events';
     where?:
       | {
           [k: string]: unknown;
@@ -711,7 +902,7 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('users' | 'media' | 'posts' | 'pages' | 'profiles')[] | null;
+    excludedCollections?: ('users' | 'media' | 'posts' | 'pages' | 'profiles' | 'clients' | 'events')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

@@ -5,6 +5,8 @@ import { buildConfig } from 'payload'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
+import { Clients } from './collections/Clients'
+import { Events } from './collections/Events'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
@@ -42,7 +44,7 @@ export default buildConfig({
     },
     user: Users.slug,
   },
-  collections: [Users, Media, Posts, Pages, Profiles],
+  collections: [Users, Media, Posts, Pages, Profiles, Clients, Events],
   cors: allowedOrigins,
   csrf: allowedOrigins,
   db: mongooseAdapter({
