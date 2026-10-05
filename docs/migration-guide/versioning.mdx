@@ -28,12 +28,12 @@ Adding things isn't breaking, unless you have to implement them, like a new requ
 
 ## Exceptions
 
-These can change in a minor release:
+We keep breaking changes in minor releases to a minimum, but the following can still change:
 
 - **Internals.** `payload/internal`, anything marked `@internal`, undocumented exports, imports from `dist/`, and undocumented subpaths like `@payloadcms/ui/utilities/*`. These exist so our own packages can share code.
 - **Experimental and beta APIs.** Anything marked `@experimental` in its types, or labeled experimental or beta in the docs. Once the label is removed, the usual rules apply.
 - **Prereleases.** Canary and beta builds make no promises to each other. Migration guides only cover changes between stable versions.
-- **Admin UI markup and styling.** DOM structure, class names, layout and colors. You can target class names in your CSS, but expect to touch it up after upgrades.
+- **Admin UI markup.** DOM structure, class names and layout. We don't change these lightly, but targeting them in your CSS is at your own risk. Design tokens, the [CSS variables](/docs/admin/customizing-css) we document, are covered, so use them to customize the admin panel where you can.
 - **Wording.** Error messages, logs and translation strings.
 - **Bugs.** If something contradicts the docs, fixing it isn't a breaking change, even if you relied on it. The same goes for small type fixes where the old type didn't match runtime behavior. We'll call out fixes that are likely to affect a lot of projects.
 - **Lexical.** Lexical hasn't reached 1.0, so any of its releases can break things, and we may upgrade it in a Payload minor. If you use Lexical's APIs directly, for example through `@payloadcms/richtext-lexical/lexical/*`, check [Lexical's release notes](https://github.com/facebook/lexical/releases) when you upgrade. Payload's own rich text APIs are still covered.
