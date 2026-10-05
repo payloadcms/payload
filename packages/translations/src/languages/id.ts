@@ -120,14 +120,12 @@ export const idTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'Sematkan dokumen',
     widgetCollectionRequired: 'Collection wajib diisi.',
     widgetConfigurationError: 'Kesalahan konfigurasi widget',
-    widgetGridView: 'Tampilan grid',
     widgetDropFilesToUpload: 'Seret dan lepas file',
     widgetInvalidCollection: 'Collection "{{collection}}" tidak ada.',
     widgetInvalidFilterField:
       'Filter field "{{field}}" tidak ada pada Collection "{{collection}}".',
     widgetInvalidSortField: 'Field urut "{{field}}" tidak ada pada Collection "{{collection}}".',
     widgetLimitLabel: 'Batas',
-    widgetListView: 'Tampilan daftar',
     widgetNonSortableSortField:
       'Field pengurutan "{{field}}" tidak dapat diurutkan pada Collection "{{collection}}".',
     widgetPinned: 'Disematkan',
@@ -135,9 +133,6 @@ export const idTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'Dokumen yang Anda sematkan akan muncul di sini',
     widgetPinnedSaveError: 'Tidak dapat menyimpan dokumen yang disematkan.',
     widgetQueryError: 'Tidak dapat memuat dokumen untuk widget ini.',
-    widgetRecentDrafts: 'Draf terbaru',
-    widgetRecentDraftsEmpty: 'Tidak ada draf terbaru',
-    widgetRecentDraftsEmptyDescription: 'Draf dokumen yang Anda edit akan muncul di sini',
     widgetRecentlyViewedEmpty: 'Tidak ada dokumen terbaru',
     widgetRecentlyViewedEmptyDescription: 'Dokumen yang Anda edit akan muncul di sini',
     widgetRecentlyViewedTitle: 'Baru saja dilihat',
@@ -149,8 +144,6 @@ export const idTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Urutkan Field',
     widgetTitleFallback: 'Kueri Collection',
     widgetTitleLabel: 'Judul',
-    widgetUpdated: 'Diperbarui',
-    widgetUpdatedBy: 'Diperbarui oleh',
     widgetUploadDropzoneDescription:
       'Unggah dari komputer Anda dengan cara seret dan lepas, atau klik tombol di bawah ini',
     widgetUploadFiles: 'Tambah file',

@@ -119,7 +119,6 @@ export const azTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'Sənədi sabitləyin',
     widgetCollectionRequired: 'Collection tələb olunur.',
     widgetConfigurationError: 'Vidjet konfiqurasiyası xətası',
-    widgetGridView: 'Şəbəkə görünüşü',
     widgetDropFilesToUpload: 'Faylı buraya sürükləyin və buraxın',
     widgetInvalidCollection: 'Collection "{{collection}}" mövcud deyil.',
     widgetInvalidFilterField:
@@ -127,7 +126,6 @@ export const azTranslations: DefaultTranslationsObject = {
     widgetInvalidSortField:
       'Sıralama field-i "{{field}}" "{{collection}}" collection-unda mövcud deyil.',
     widgetLimitLabel: 'Limit',
-    widgetListView: 'Siyahı görünüşü',
     widgetNonSortableSortField:
       'Sıralama sahəsi "{{field}}" "{{collection}}" kolleksiyasında sıralana bilmir.',
     widgetPinned: 'Sabitlənmiş',
@@ -135,9 +133,6 @@ export const azTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'Sabitlədiyiniz sənədlər burada görünəcək',
     widgetPinnedSaveError: 'Sabitlənmiş sənədləri saxlamaq mümkün olmadı.',
     widgetQueryError: 'Bu vidjet üçün sənədləri yükləmək mümkün olmadı.',
-    widgetRecentDrafts: 'Son qaralamalar',
-    widgetRecentDraftsEmpty: 'Son qaralama yoxdur',
-    widgetRecentDraftsEmptyDescription: 'Redaktə etdiyiniz qaralama sənədlər burada görünəcək',
     widgetRecentlyViewedEmpty: 'Son sənəd yoxdur',
     widgetRecentlyViewedEmptyDescription: 'Redaktə etdiyiniz sənədlər burada görünəcək',
     widgetRecentlyViewedTitle: 'Son baxılanlar',
@@ -149,8 +144,6 @@ export const azTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Field-u sırala',
     widgetTitleFallback: 'Collection sorğusu',
     widgetTitleLabel: 'Başlıq',
-    widgetUpdated: 'Yeniləndi',
-    widgetUpdatedBy: 'Yeniləyən',
     widgetUploadDropzoneDescription:
       'Kompüterinizdən yükləmək üçün sürükləyib buraxa və ya aşağıdakı düyməni klikləyə bilərsiniz.',
     widgetUploadFiles: 'Faylları Əlavə Edin',

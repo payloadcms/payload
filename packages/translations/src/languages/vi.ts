@@ -120,7 +120,6 @@ export const viTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'Ghim tài liệu',
     widgetCollectionRequired: 'Collection là bắt buộc.',
     widgetConfigurationError: 'Lỗi cấu hình Widget',
-    widgetGridView: 'Chế độ lưới',
     widgetDropFilesToUpload: 'Kéo và thả một tập tin',
     widgetInvalidCollection: 'Collection "{{collection}}" không tồn tại.',
     widgetInvalidFilterField:
@@ -128,7 +127,6 @@ export const viTranslations: DefaultTranslationsObject = {
     widgetInvalidSortField:
       'Trường sắp xếp "{{field}}" không tồn tại trong Collection "{{collection}}".',
     widgetLimitLabel: 'Giới hạn',
-    widgetListView: 'Chế độ danh sách',
     widgetNonSortableSortField:
       'Trường sắp xếp "{{field}}" không thể sắp xếp được trên Collection "{{collection}}".',
     widgetPinned: 'Đã ghim',
@@ -136,9 +134,6 @@ export const viTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'Các tài liệu bạn ghim sẽ xuất hiện tại đây',
     widgetPinnedSaveError: 'Không thể lưu các tài liệu đã ghim.',
     widgetQueryError: 'Không thể tải tài liệu cho tiện ích này.',
-    widgetRecentDrafts: 'Bản nháp gần đây',
-    widgetRecentDraftsEmpty: 'Không có bản nháp gần đây',
-    widgetRecentDraftsEmptyDescription: 'Các bản nháp bạn chỉnh sửa sẽ xuất hiện tại đây',
     widgetRecentlyViewedEmpty: 'Không có tài liệu gần đây',
     widgetRecentlyViewedEmptyDescription: 'Các tài liệu bạn chỉnh sửa sẽ xuất hiện tại đây',
     widgetRecentlyViewedTitle: 'Đã xem gần đây',
@@ -150,8 +145,6 @@ export const viTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sắp xếp Field',
     widgetTitleFallback: 'Truy vấn Collection',
     widgetTitleLabel: 'Tiêu đề',
-    widgetUpdated: 'Đã cập nhật',
-    widgetUpdatedBy: 'Cập nhật bởi',
     widgetUploadDropzoneDescription:
       'Tải lên từ máy tính của bạn bằng cách kéo và thả, hoặc nhấp vào nút bên dưới',
     widgetUploadFiles: 'Thêm tệp',

@@ -120,14 +120,12 @@ export const plTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'Przypnij dokument',
     widgetCollectionRequired: 'Collection jest wymagana.',
     widgetConfigurationError: 'Błąd konfiguracji widgetu',
-    widgetGridView: 'Widok siatki',
     widgetDropFilesToUpload: 'Przeciągnij i upuść plik',
     widgetInvalidCollection: 'Kolekcja "{{collection}}" nie istnieje.',
     widgetInvalidFilterField:
       'Pole filtrujące „{{field}}” nie istnieje w kolekcji „{{collection}}”.',
     widgetInvalidSortField: 'Pole sortujące „{{field}}” nie istnieje w kolekcji „{{collection}}”.',
     widgetLimitLabel: 'Limit',
-    widgetListView: 'Widok listy',
     widgetNonSortableSortField:
       'Pole sortujące "{{field}}" nie jest sortowalne w kolekcji "{{collection}}".',
     widgetPinned: 'Przypięte',
@@ -135,9 +133,6 @@ export const plTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'Przypięte dokumenty pojawią się tutaj',
     widgetPinnedSaveError: 'Nie można zapisać przypiętych dokumentów.',
     widgetQueryError: 'Nie można załadować dokumentów dla tego widżetu.',
-    widgetRecentDrafts: 'Ostatnie wersje robocze',
-    widgetRecentDraftsEmpty: 'Brak ostatnich wersji roboczych',
-    widgetRecentDraftsEmptyDescription: 'Edytowane wersje robocze pojawią się tutaj',
     widgetRecentlyViewedEmpty: 'Brak ostatnich dokumentów',
     widgetRecentlyViewedEmptyDescription: 'Edytowane dokumenty pojawią się tutaj',
     widgetRecentlyViewedTitle: 'Ostatnio przeglądane',
@@ -149,8 +144,6 @@ export const plTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sortuj Pole',
     widgetTitleFallback: 'Zapytanie dotyczące Collection',
     widgetTitleLabel: 'Tytuł',
-    widgetUpdated: 'Zaktualizowano',
-    widgetUpdatedBy: 'Zaktualizowano przez',
     widgetUploadDropzoneDescription:
       'Prześlij z komputera, przeciągając i upuszczając plik lub kliknij przycisk poniżej',
     widgetUploadFiles: 'Dodaj pliki',

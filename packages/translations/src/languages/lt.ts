@@ -120,7 +120,6 @@ export const ltTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'Prisegti dokumentą',
     widgetCollectionRequired: 'Collection yra privaloma.',
     widgetConfigurationError: 'Valdiklio konfigūracijos klaida',
-    widgetGridView: 'Tinklelio vaizdas',
     widgetDropFilesToUpload: 'Temkite ir numeskite failą',
     widgetInvalidCollection: 'Kolekcija "{{collection}}" neegzistuoja.',
     widgetInvalidFilterField:
@@ -128,7 +127,6 @@ export const ltTranslations: DefaultTranslationsObject = {
     widgetInvalidSortField:
       'Rikiavimo laukas „{{field}}“ neegzistuoja kolekcijoje „{{collection}}“.',
     widgetLimitLabel: 'Ribojimas',
-    widgetListView: 'Sąrašo vaizdas',
     widgetNonSortableSortField:
       'Rūšiavimo laukas "{{field}}" negali būti rūšiuojamas kolekcijoje "{{collection}}".',
     widgetPinned: 'Prisegta',
@@ -136,9 +134,6 @@ export const ltTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'Čia bus rodomi jūsų prisegti dokumentai',
     widgetPinnedSaveError: 'Nepavyko išsaugoti prisegtų dokumentų.',
     widgetQueryError: 'Nepavyko įkelti dokumentų šiam valdikliui.',
-    widgetRecentDrafts: 'Naujausi juodraščiai',
-    widgetRecentDraftsEmpty: 'Nėra naujausių juodraščių',
-    widgetRecentDraftsEmptyDescription: 'Čia bus rodomi jūsų redaguojami juodraščiai',
     widgetRecentlyViewedEmpty: 'Nėra naujausių dokumentų',
     widgetRecentlyViewedEmptyDescription: 'Čia bus rodomi jūsų redaguojami dokumentai',
     widgetRecentlyViewedTitle: 'Neseniai peržiūrėti',
@@ -150,8 +145,6 @@ export const ltTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Rikiuoti lauką',
     widgetTitleFallback: 'Kolekcijos užklausa',
     widgetTitleLabel: 'Pavadinimas',
-    widgetUpdated: 'Atnaujinta',
-    widgetUpdatedBy: 'Atnaujino',
     widgetUploadDropzoneDescription:
       'Įkelkite iš savo kompiuterio vilkdami ir numesdami, arba spustelėkite mygtuką žemiau',
     widgetUploadFiles: 'Pridėti failus',

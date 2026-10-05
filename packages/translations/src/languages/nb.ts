@@ -119,7 +119,6 @@ export const nbTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'Fest dokument',
     widgetCollectionRequired: 'Collectie er påkrevd.',
     widgetConfigurationError: 'Feil i widget-konfigurasjon',
-    widgetGridView: 'Rutenettvisning',
     widgetDropFilesToUpload: 'Dra og slipp en fil',
     widgetInvalidCollection: 'Collection "{{collection}}" finnes ikke.',
     widgetInvalidFilterField:
@@ -127,7 +126,6 @@ export const nbTranslations: DefaultTranslationsObject = {
     widgetInvalidSortField:
       'Sorteringsfeltet "{{field}}" finnes ikke i kolleksjonen "{{collection}}".',
     widgetLimitLabel: 'Begrens',
-    widgetListView: 'Listevisning',
     widgetNonSortableSortField:
       'Sorteringsfeltet "{{field}}" kan ikke sorteres i Collection "{{collection}}".',
     widgetPinned: 'Festet',
@@ -135,9 +133,6 @@ export const nbTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'Dokumenter du fester vil vises her',
     widgetPinnedSaveError: 'Kunne ikke lagre festede dokumenter.',
     widgetQueryError: 'Kunne ikke laste dokumenter for denne widgeten.',
-    widgetRecentDrafts: 'Nylige utkast',
-    widgetRecentDraftsEmpty: 'Ingen nylige utkast',
-    widgetRecentDraftsEmptyDescription: 'Utkast du redigerer vil vises her',
     widgetRecentlyViewedEmpty: 'Ingen nylige dokumenter',
     widgetRecentlyViewedEmptyDescription: 'Dokumenter du redigerer vil vises her',
     widgetRecentlyViewedTitle: 'Nylig vist',
@@ -149,8 +144,6 @@ export const nbTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sorter Field',
     widgetTitleFallback: 'Forespørsel om Collection',
     widgetTitleLabel: 'Tittel',
-    widgetUpdated: 'Oppdatert',
-    widgetUpdatedBy: 'Oppdatert av',
     widgetUploadDropzoneDescription:
       'Last opp fra datamaskinen din ved å dra og slippe, eller klikk på knappen nedenfor',
     widgetUploadFiles: 'Legg til filer',

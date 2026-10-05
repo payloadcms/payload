@@ -120,7 +120,6 @@ export const caTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'Fixa el document',
     widgetCollectionRequired: 'Cal especificar una Collection.',
     widgetConfigurationError: 'Error de configuració del widget',
-    widgetGridView: 'Vista de graella',
     widgetDropFilesToUpload: 'Arrossega i deixa anar un fitxer',
     widgetInvalidCollection: 'La Collection "{{collection}}" no existeix.',
     widgetInvalidFilterField:
@@ -128,7 +127,6 @@ export const caTranslations: DefaultTranslationsObject = {
     widgetInvalidSortField:
       'El camp d\'ordenació "{{field}}" no existeix a la col·lecció "{{collection}}".',
     widgetLimitLabel: 'Límit',
-    widgetListView: 'Vista de llista',
     widgetNonSortableSortField:
       'El camp d’ordenació "{{field}}" no es pot ordenar a la col·lecció "{{collection}}".',
     widgetPinned: 'Fixat',
@@ -136,9 +134,6 @@ export const caTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'Els documents que fixis apareixeran aquí',
     widgetPinnedSaveError: "No s'han pogut desar els documents fixats.",
     widgetQueryError: "No s'han pogut carregar els documents per a aquest widget.",
-    widgetRecentDrafts: 'Esborranys recents',
-    widgetRecentDraftsEmpty: 'No hi ha esborranys recents',
-    widgetRecentDraftsEmptyDescription: 'Els esborranys que editis apareixeran aquí',
     widgetRecentlyViewedEmpty: 'No hi ha documents recents',
     widgetRecentlyViewedEmptyDescription: 'Els documents que editis apareixeran aquí',
     widgetRecentlyViewedTitle: 'Vist recentment',
@@ -150,8 +145,6 @@ export const caTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Ordenar camp',
     widgetTitleFallback: 'Consulta de la Collection',
     widgetTitleLabel: 'Títol',
-    widgetUpdated: 'Actualitzat',
-    widgetUpdatedBy: 'Actualitzat per',
     widgetUploadDropzoneDescription:
       'Carregueu des del vostre ordinador arrossegant i deixant anar, o feu clic al botó següent',
     widgetUploadFiles: 'Afegir fitxers',

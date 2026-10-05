@@ -67,6 +67,7 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    'draft-posts': DraftPost;
     tickets: Ticket;
     revenue: Revenue;
     events: Event;
@@ -74,12 +75,14 @@ export interface Config {
     'media-alt': MediaAlt;
     'payload-kv': PayloadKv;
     users: User;
+    'payload-pinned-documents': PayloadPinnedDocument;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
   collectionsSelect: {
+    'draft-posts': DraftPostsSelect<false> | DraftPostsSelect<true>;
     tickets: TicketsSelect<false> | TicketsSelect<true>;
     revenue: RevenueSelect<false> | RevenueSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
@@ -87,12 +90,13 @@ export interface Config {
     'media-alt': MediaAltSelect<false> | MediaAltSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'payload-pinned-documents': PayloadPinnedDocumentsSelect<false> | PayloadPinnedDocumentsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globals: {};
@@ -104,6 +108,7 @@ export interface Config {
     revenue: RevenueWidget;
     'page-query': PageQueryWidget;
     configurable: ConfigurableWidget;
+    welcome: WelcomeWidget;
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
     activity: ActivityWidget;
@@ -135,39 +140,36 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tickets".
+ * via the `definition` "draft-posts".
  */
-export interface Ticket {
-  id: string;
+export interface DraftPost {
+  id: number;
   title: string;
-  description?: string | null;
-  status: 'open' | 'in-progress' | 'closed';
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  assignee?: (string | null) | User;
   createdBy?: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   } | null;
   updatedBy?: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   } | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   createdBy?: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   } | null;
   updatedBy?: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -191,10 +193,32 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tickets".
+ */
+export interface Ticket {
+  id: number;
+  title: string;
+  description?: string | null;
+  status: 'open' | 'in-progress' | 'closed';
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  assignee?: (number | null) | User;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "revenue".
  */
 export interface Revenue {
-  id: string;
+  id: number;
   amount: number;
   description: string;
   date: string;
@@ -202,11 +226,11 @@ export interface Revenue {
   source?: string | null;
   createdBy?: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   } | null;
   updatedBy?: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -216,14 +240,14 @@ export interface Revenue {
  * via the `definition` "events".
  */
 export interface Event {
-  id: string;
+  id: number;
   title: string;
   description?: string | null;
   startDate: string;
   endDate?: string | null;
   location?: string | null;
   type: 'meeting' | 'conference' | 'workshop' | 'webinar' | 'other';
-  organizer?: (string | null) | User;
+  organizer?: (number | null) | User;
   status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
   details?: {
     priority?: number | null;
@@ -231,11 +255,11 @@ export interface Event {
   };
   createdBy?: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   } | null;
   updatedBy?: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -245,14 +269,14 @@ export interface Event {
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
+  id: number;
   createdBy?: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   } | null;
   updatedBy?: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -271,15 +295,15 @@ export interface Media {
  * via the `definition` "media-alt".
  */
 export interface MediaAlt {
-  id: string;
+  id: number;
   description: string;
   createdBy?: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   } | null;
   updatedBy?: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -298,7 +322,7 @@ export interface MediaAlt {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -312,39 +336,90 @@ export interface PayloadKv {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-pinned-documents".
+ */
+export interface PayloadPinnedDocument {
+  id: number;
+  key: string;
+  document:
+    | {
+        relationTo: 'draft-posts';
+        value: number | DraftPost;
+      }
+    | {
+        relationTo: 'tickets';
+        value: number | Ticket;
+      }
+    | {
+        relationTo: 'revenue';
+        value: number | Revenue;
+      }
+    | {
+        relationTo: 'events';
+        value: number | Event;
+      }
+    | {
+        relationTo: 'media';
+        value: number | Media;
+      }
+    | {
+        relationTo: 'media-alt';
+        value: number | MediaAlt;
+      }
+    | {
+        relationTo: 'payload-kv';
+        value: number | PayloadKv;
+      }
+    | {
+        relationTo: 'users';
+        value: number | User;
+      };
+  user: {
+    relationTo: 'users';
+    value: number | User;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
+        relationTo: 'draft-posts';
+        value: number | DraftPost;
+      } | null)
+    | ({
         relationTo: 'tickets';
-        value: string | Ticket;
+        value: number | Ticket;
       } | null)
     | ({
         relationTo: 'revenue';
-        value: string | Revenue;
+        value: number | Revenue;
       } | null)
     | ({
         relationTo: 'events';
-        value: string | Event;
+        value: number | Event;
       } | null)
     | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
       } | null)
     | ({
         relationTo: 'media-alt';
-        value: string | MediaAlt;
+        value: number | MediaAlt;
       } | null)
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -354,10 +429,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -377,11 +452,23 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-posts_select".
+ */
+export interface DraftPostsSelect<T extends boolean = true> {
+  title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -511,6 +598,17 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-pinned-documents_select".
+ */
+export interface PayloadPinnedDocumentsSelect<T extends boolean = true> {
+  key?: T;
+  document?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
@@ -590,12 +688,22 @@ export interface ConfigurableWidget {
   data?: {
     title: string;
     description?: string | null;
-    relatedTicket?: (string | null) | Ticket;
+    relatedTicket?: (number | null) | Ticket;
     nestedGroup?: {
       nestedText?: string | null;
     };
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "welcome_widget".
+ */
+export interface WelcomeWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -614,7 +722,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'tickets' | 'revenue' | 'events' | 'media' | 'media-alt' | 'users';
+    relatedCollection: 'draft-posts' | 'tickets' | 'revenue' | 'events' | 'media' | 'media-alt' | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -636,9 +744,9 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('tickets' | 'revenue' | 'events' | 'media' | 'media-alt' | 'users')[] | null;
+    excludedCollections?: ('draft-posts' | 'tickets' | 'revenue' | 'events' | 'media' | 'media-alt' | 'users')[] | null;
   };
-  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+  width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -120,14 +120,12 @@ export const enTranslations = {
     widgetAddPin: 'Pin document',
     widgetCollectionRequired: 'Collection is required.',
     widgetConfigurationError: 'Widget configuration error',
-    widgetGridView: 'Grid view',
     widgetDropFilesToUpload: 'Drop files to upload',
     widgetInvalidCollection: 'Collection "{{collection}}" does not exist.',
     widgetInvalidFilterField:
       'Filter field "{{field}}" does not exist on collection "{{collection}}".',
     widgetInvalidSortField: 'Sort field "{{field}}" does not exist on collection "{{collection}}".',
     widgetLimitLabel: 'Limit',
-    widgetListView: 'List view',
     widgetNonSortableSortField:
       'Sort field "{{field}}" is not sortable on collection "{{collection}}".',
     widgetPinned: 'Pinned',
@@ -135,9 +133,6 @@ export const enTranslations = {
     widgetPinnedEmptyDescription: 'Documents you pin will appear here',
     widgetPinnedSaveError: 'Could not save pinned documents.',
     widgetQueryError: 'Could not load documents for this widget.',
-    widgetRecentDrafts: 'Recent drafts',
-    widgetRecentDraftsEmpty: 'No recent drafts',
-    widgetRecentDraftsEmptyDescription: 'Draft documents you edit will appear here',
     widgetRecentlyViewedEmpty: 'No recent documents',
     widgetRecentlyViewedEmptyDescription: 'Documents you edit will appear here',
     widgetRecentlyViewedTitle: 'Recently viewed',
@@ -149,8 +144,6 @@ export const enTranslations = {
     widgetSortFieldLabel: 'Sort Field',
     widgetTitleFallback: 'Collection query',
     widgetTitleLabel: 'Title',
-    widgetUpdated: 'Updated',
-    widgetUpdatedBy: 'Updated by',
     widgetUploadDropzoneDescription:
       'Upload from your computer via drag-and-drop, or click the button below',
     widgetUploadFiles: 'Upload files',

@@ -122,14 +122,12 @@ export const roTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'Fixează documentul',
     widgetCollectionRequired: 'Colecția este obligatorie.',
     widgetConfigurationError: 'Eroare de configurare a widgetului',
-    widgetGridView: 'Vizualizare în grid',
     widgetDropFilesToUpload: 'Trageți și plasați un fișier',
     widgetInvalidCollection: 'Colecția "{{collection}}" nu există.',
     widgetInvalidFilterField:
       'Câmpul de filtrare "{{field}}" nu există în colecția "{{collection}}".',
     widgetInvalidSortField: 'Câmpul de sortare "{{field}}" nu există în colecția "{{collection}}".',
     widgetLimitLabel: 'Limită',
-    widgetListView: 'Vizualizare în listă',
     widgetNonSortableSortField:
       'Câmpul de sortare "{{field}}" nu poate fi sortat în colecția "{{collection}}".',
     widgetPinned: 'Fixate',
@@ -137,9 +135,6 @@ export const roTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'Documentele fixate vor apărea aici',
     widgetPinnedSaveError: 'Nu s-au putut salva documentele fixate.',
     widgetQueryError: 'Nu s-au putut încărca documentele pentru acest widget.',
-    widgetRecentDrafts: 'Ciorne recente',
-    widgetRecentDraftsEmpty: 'Nicio ciornă recentă',
-    widgetRecentDraftsEmptyDescription: 'Ciornele pe care le editați vor apărea aici',
     widgetRecentlyViewedEmpty: 'Niciun document recent',
     widgetRecentlyViewedEmptyDescription: 'Documentele pe care le editați vor apărea aici',
     widgetRecentlyViewedTitle: 'Vizualizate recent',
@@ -151,8 +146,6 @@ export const roTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sortare Field',
     widgetTitleFallback: 'Interogare de colecție',
     widgetTitleLabel: 'Titlu',
-    widgetUpdated: 'Actualizat',
-    widgetUpdatedBy: 'Actualizat de',
     widgetUploadDropzoneDescription:
       'Încărcați de pe computerul dumneavoastră prin tragere și fixare sau faceți clic pe butonul de mai jos',
     widgetUploadFiles: 'Adăugați fișiere',

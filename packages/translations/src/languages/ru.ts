@@ -121,7 +121,6 @@ export const ruTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'Закрепить документ',
     widgetCollectionRequired: 'Collection является обязательным.',
     widgetConfigurationError: 'Ошибка конфигурации виджета',
-    widgetGridView: 'Вид сеткой',
     widgetDropFilesToUpload: 'Перетащите файл',
     widgetInvalidCollection: 'Коллекция "{{collection}}" не существует.',
     widgetInvalidFilterField:
@@ -129,7 +128,6 @@ export const ruTranslations: DefaultTranslationsObject = {
     widgetInvalidSortField:
       'Поле сортировки "{{field}}" не существует в коллекции "{{collection}}".',
     widgetLimitLabel: 'Ограничение',
-    widgetListView: 'Вид списком',
     widgetNonSortableSortField:
       'Поле сортировки "{{field}}" не может быть отсортировано в коллекции "{{collection}}".',
     widgetPinned: 'Закреплено',
@@ -137,9 +135,6 @@ export const ruTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'Закреплённые вами документы будут отображаться здесь',
     widgetPinnedSaveError: 'Не удалось сохранить закреплённые документы.',
     widgetQueryError: 'Не удалось загрузить документы для этого виджета.',
-    widgetRecentDrafts: 'Недавние черновики',
-    widgetRecentDraftsEmpty: 'Нет недавних черновиков',
-    widgetRecentDraftsEmptyDescription: 'Отредактированные вами черновики будут отображаться здесь',
     widgetRecentlyViewedEmpty: 'Нет недавних документов',
     widgetRecentlyViewedEmptyDescription:
       'Отредактированные вами документы будут отображаться здесь',
@@ -152,8 +147,6 @@ export const ruTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Сортировать поле',
     widgetTitleFallback: 'Запрос к Collection',
     widgetTitleLabel: 'Заголовок',
-    widgetUpdated: 'Обновлено',
-    widgetUpdatedBy: 'Обновлено пользователем',
     widgetUploadDropzoneDescription:
       'Загрузите с вашего компьютера путем перетаскивания файла или нажмите кнопку ниже',
     widgetUploadFiles: 'Добавить файлы',

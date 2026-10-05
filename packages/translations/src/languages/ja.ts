@@ -120,7 +120,6 @@ export const jaTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'ドキュメントをピン留め',
     widgetCollectionRequired: 'Collectionは必須です。',
     widgetConfigurationError: 'ウィジェット設定エラー',
-    widgetGridView: 'グリッド表示',
     widgetDropFilesToUpload: 'ファイルをドラッグ & ドロップする',
     widgetInvalidCollection: 'Collection「{{collection}}」は存在しません。',
     widgetInvalidFilterField:
@@ -128,7 +127,6 @@ export const jaTranslations: DefaultTranslationsObject = {
     widgetInvalidSortField:
       'コレクション「{{collection}}」に並べ替え用のフィールド「{{field}}」が存在しません。',
     widgetLimitLabel: '制限',
-    widgetListView: 'リスト表示',
     widgetNonSortableSortField:
       'コレクション「{{collection}}」でソートフィールド「{{field}}」はソートできません。',
     widgetPinned: 'ピン留め済み',
@@ -136,9 +134,6 @@ export const jaTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'ここにピン留めしたドキュメントが表示されます',
     widgetPinnedSaveError: 'ピン留めドキュメントを保存できませんでした。',
     widgetQueryError: 'このウィジェットのドキュメントを読み込めませんでした。',
-    widgetRecentDrafts: '最近の下書き',
-    widgetRecentDraftsEmpty: '最近の下書きはありません',
-    widgetRecentDraftsEmptyDescription: '編集した下書きドキュメントがここに表示されます',
     widgetRecentlyViewedEmpty: '最近のドキュメントはありません',
     widgetRecentlyViewedEmptyDescription: '編集したドキュメントがここに表示されます',
     widgetRecentlyViewedTitle: '最近表示したドキュメント',
@@ -150,8 +145,6 @@ export const jaTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'ソートフィールド',
     widgetTitleFallback: 'コレクションクエリ',
     widgetTitleLabel: 'タイトル',
-    widgetUpdated: '更新済み',
-    widgetUpdatedBy: '更新者',
     widgetUploadDropzoneDescription:
       'ドラッグアンドドロップでコンピューターからアップロードするか、下のボタンをクリックしてください。',
     widgetUploadFiles: 'ファイルを追加する',

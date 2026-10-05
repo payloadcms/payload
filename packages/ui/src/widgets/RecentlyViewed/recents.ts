@@ -1,23 +1,8 @@
 import type { Field, RecentlyViewedItem } from 'payload'
 
 export type PinnedItem = Pick<RecentlyViewedItem, 'collectionSlug' | 'id'>
-export type PinnedPreferences = { items: PinnedItem[] }
-
 export const documentKey = ({ id, collectionSlug }: PinnedItem): string =>
   `${collectionSlug}:${String(id)}`
-
-export function togglePinnedItem({
-  existing,
-  item,
-}: {
-  existing: PinnedItem[]
-  item: PinnedItem
-}): PinnedItem[] {
-  const key = documentKey(item)
-  const isPinned = existing.some((entry) => documentKey(entry) === key)
-
-  return isPinned ? existing.filter((entry) => documentKey(entry) !== key) : [item, ...existing]
-}
 
 export function getThumbnailURL({
   doc,

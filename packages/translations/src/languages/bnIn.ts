@@ -120,7 +120,6 @@ export const bnInTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'ডকুমেন্ট পিন করুন',
     widgetCollectionRequired: 'Collection প্রয়োজনীয়।',
     widgetConfigurationError: 'উইজেট কনফিগারেশন ত্রুটি',
-    widgetGridView: 'গ্রিড ভিউ',
     widgetDropFilesToUpload: 'একটি ফাইল টেনে এনে ছেড়ে দিন',
     widgetInvalidCollection: 'Collection "{{collection}}" বিদ্যমান নেই।',
     widgetInvalidFilterField:
@@ -128,7 +127,6 @@ export const bnInTranslations: DefaultTranslationsObject = {
     widgetInvalidSortField:
       'ক্রম বাছাইয়ের জন্য "{{field}}" ক্ষেত্রটি "{{collection}}" সংগ্রহে বিদ্যমান নেই।',
     widgetLimitLabel: 'সীমা',
-    widgetListView: 'তালিকা ভিউ',
     widgetNonSortableSortField:
       'সংগ্রহ "{{collection}}"-এ শ্রেণীবিন্যাস ক্ষেত্র "{{field}}" শ্রেণীবিন্যাসযোগ্য নয়।',
     widgetPinned: 'পিন করা',
@@ -136,10 +134,6 @@ export const bnInTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'আপনি যে ডকুমেন্ট পিন করবেন, তা এখানে দেখা যাবে',
     widgetPinnedSaveError: 'পিন করা ডকুমেন্ট সংরক্ষণ করা যায়নি।',
     widgetQueryError: 'এই উইজেটের জন্য ডকুমেন্ট লোড করতে ব্যর্থ হয়েছে।',
-    widgetRecentDrafts: 'সাম্প্রতিক ড্রাফট',
-    widgetRecentDraftsEmpty: 'কোনো সাম্প্রতিক ড্রাফট নেই',
-    widgetRecentDraftsEmptyDescription:
-      'আপনি যে ড্রাফট ডকুমেন্ট সম্পাদনা করবেন, তা এখানে দেখা যাবে',
     widgetRecentlyViewedEmpty: 'কোনো সাম্প্রতিক ডকুমেন্ট নেই',
     widgetRecentlyViewedEmptyDescription: 'আপনি যে ডকুমেন্ট সম্পাদনা করবেন, তা এখানে দেখা যাবে',
     widgetRecentlyViewedTitle: 'সাম্প্রতিক দেখা',
@@ -151,8 +145,6 @@ export const bnInTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Field ক্রমবদ্ধ করুন',
     widgetTitleFallback: 'Collection অনুসন্ধান',
     widgetTitleLabel: 'শিরোনাম',
-    widgetUpdated: 'আপডেট হয়েছে',
-    widgetUpdatedBy: 'আপডেট করেছেন',
     widgetUploadDropzoneDescription:
       'আপনার কম্পিউটার থেকে ড্র্যাগ-এন্ড-ড্রপের মাধ্যমে আপলোড করুন, অথবা নিচের বোতামে ক্লিক করুন।',
     widgetUploadFiles: 'ফাইলগুলি যোগ করুন',

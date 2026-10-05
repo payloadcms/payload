@@ -118,7 +118,6 @@ export const hyTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'Ամրագրել փաստաթուղթը',
     widgetCollectionRequired: 'Collection-ը պարտադիր է։',
     widgetConfigurationError: 'Վիջեթի կազմաձևման սխալ',
-    widgetGridView: 'Ցանցային տեսք',
     widgetDropFilesToUpload: 'Քաշեք և գցեք ֆայլը',
     widgetInvalidCollection: 'Collection "{{collection}}" չի գոյություն ունի։',
     widgetInvalidFilterField:
@@ -126,7 +125,6 @@ export const hyTranslations: DefaultTranslationsObject = {
     widgetInvalidSortField:
       'Դասաբանման Field-ը "{{field}}" գոյություն չունի Collection "{{collection}}"-ում։',
     widgetLimitLabel: 'Սահմանաչափ',
-    widgetListView: 'Ցանկի տեսք',
     widgetNonSortableSortField:
       'Դասակարգման դաշտը "{{field}}" հնարավոր չէ դասակարգել հավաքածուում "{{collection}}":',
     widgetPinned: 'Ամրագրված',
@@ -134,9 +132,6 @@ export const hyTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'Այստեղ կհայտնվեն ձեր ամրագրված փաստաթղթերը',
     widgetPinnedSaveError: 'Չհաջողվեց պահպանել ամրագրված փաստաթղթերը։',
     widgetQueryError: 'Չհաջողվեց բեռնել փաստաթղթերը այս վիդջեթի համար:',
-    widgetRecentDrafts: 'Վերջին սևագրերը',
-    widgetRecentDraftsEmpty: 'Վերջին սևագրեր չկան',
-    widgetRecentDraftsEmptyDescription: 'Այստեղ կհայտնվեն ձեր խմբագրած սևագրերը',
     widgetRecentlyViewedEmpty: 'Վերջին փաստաթղթեր չկան',
     widgetRecentlyViewedEmptyDescription: 'Այստեղ կհայտնվեն ձեր խմբագրած փաստաթղթերը',
     widgetRecentlyViewedTitle: 'Վերջերս դիտված',
@@ -148,8 +143,6 @@ export const hyTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Դաշտի դասավորում',
     widgetTitleFallback: 'Collection-ի հարցում',
     widgetTitleLabel: 'Վերնագիր',
-    widgetUpdated: 'Թարմացված է',
-    widgetUpdatedBy: 'Թարմացրել է',
     widgetUploadDropzoneDescription:
       'Վերբեռնեք ձեր համակարգչից քաշել և գցել գործողությամբ կամ սեղմեք ներքևի կոճակը',
     widgetUploadFiles: 'Ավելացնել ֆայլեր',

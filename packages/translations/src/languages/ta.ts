@@ -119,7 +119,6 @@ export const taTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'ஆவணத்தை பின் செய்யவும்',
     widgetCollectionRequired: 'Collection அவசியமாக 필요.',
     widgetConfigurationError: 'விட்ஜெட் உள்ளமைவு பிழை',
-    widgetGridView: 'கட்டமைப்பு பார்வை',
     widgetDropFilesToUpload: 'கோப்பை இழுத்து விடுக',
     widgetInvalidCollection: 'Collection "{{collection}}" இல்லை.',
     widgetInvalidFilterField:
@@ -127,7 +126,6 @@ export const taTranslations: DefaultTranslationsObject = {
     widgetInvalidSortField:
       'வரிசைப்படுத்தும் Field "{{field}}" என்பது Collection "{{collection}}" இல் காணப்படவில்லை.',
     widgetLimitLabel: 'வரம்பு',
-    widgetListView: 'பட்டியல் பார்வை',
     widgetNonSortableSortField:
       'வரிசைப்படுத்தும் களம் "{{field}}" என்பது தொகுப்பு "{{collection}}" இல் வரிசைப்படுத்த முடியாததாகும்.',
     widgetPinned: 'பின் செய்யப்பட்டவை',
@@ -135,9 +133,6 @@ export const taTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'நீங்கள் பின் செய்யும் ஆவணங்கள் இங்கே தோன்றும்',
     widgetPinnedSaveError: 'பின் செய்யப்பட்ட ஆவணங்களை சேமிக்க முடியவில்லை.',
     widgetQueryError: 'இந்த வித்‌ஜெட்டிற்கான ஆவணங்களை ஏற்ற முடியவில்லை.',
-    widgetRecentDrafts: 'சமீபத்திய வரைவுகள்',
-    widgetRecentDraftsEmpty: 'சமீபத்திய வரைவுகள் இல்லை',
-    widgetRecentDraftsEmptyDescription: 'நீங்கள் திருத்தும் வரைவு ஆவணங்கள் இங்கே தோன்றும்',
     widgetRecentlyViewedEmpty: 'சமீபத்திய ஆவணங்கள் இல்லை',
     widgetRecentlyViewedEmptyDescription: 'நீங்கள் திருத்தும் ஆவணங்கள் இங்கே தோன்றும்',
     widgetRecentlyViewedTitle: 'சமீபத்தில் பார்க்கப்பட்டது',
@@ -150,8 +145,6 @@ export const taTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Field ஐ வரிசைப்படுத்து',
     widgetTitleFallback: 'Collection வினா',
     widgetTitleLabel: 'தலைப்பு',
-    widgetUpdated: 'புதுப்பிக்கப்பட்டது',
-    widgetUpdatedBy: 'புதுப்பித்தவர்',
     widgetUploadDropzoneDescription:
       'உங்கள் கணினியில் இருந்து இழுத்து விடுவதன் மூலம் பதிவேற்றவும், அல்லது கீழேயுள்ள பொத்தானை கிளிக் செய்யவும்',
     widgetUploadFiles: 'கோப்புகளை சேர்க்கவும்',

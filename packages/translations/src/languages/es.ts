@@ -120,7 +120,6 @@ export const esTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'Fijar documento',
     widgetCollectionRequired: 'La Colección es requerida.',
     widgetConfigurationError: 'Error de configuración del widget',
-    widgetGridView: 'Vista de cuadrícula',
     widgetDropFilesToUpload: 'Suelta archivos para subirlos',
     widgetInvalidCollection: 'La Colección "{{collection}}" no existe.',
     widgetInvalidFilterField:
@@ -128,7 +127,6 @@ export const esTranslations: DefaultTranslationsObject = {
     widgetInvalidSortField:
       'El campo de ordenación "{{field}}" no existe en la colección "{{collection}}".',
     widgetLimitLabel: 'Límite',
-    widgetListView: 'Vista de lista',
     widgetNonSortableSortField:
       'El campo de ordenación "{{field}}" no se puede ordenar en la colección "{{collection}}".',
     widgetPinned: 'Fijados',
@@ -136,9 +134,6 @@ export const esTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'Los documentos que fije aparecerán aquí',
     widgetPinnedSaveError: 'No se pudieron guardar los documentos fijados.',
     widgetQueryError: 'No se pudieron cargar los documentos para este widget.',
-    widgetRecentDrafts: 'Borradores recientes',
-    widgetRecentDraftsEmpty: 'No hay borradores recientes',
-    widgetRecentDraftsEmptyDescription: 'Los borradores que edite aparecerán aquí',
     widgetRecentlyViewedEmpty: 'No hay documentos recientes',
     widgetRecentlyViewedEmptyDescription: 'Los documentos que edite aparecerán aquí',
     widgetRecentlyViewedTitle: 'Visto recientemente',
@@ -150,8 +145,6 @@ export const esTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Campo de ordenación',
     widgetTitleFallback: 'Consulta de colección',
     widgetTitleLabel: 'Título',
-    widgetUpdated: 'Actualizado',
-    widgetUpdatedBy: 'Actualizado por',
     widgetUploadDropzoneDescription:
       'Sube archivos desde tu ordenador arrastrándolos aquí o haciendo clic en el botón de abajo',
     widgetUploadFiles: 'Añadir archivos',

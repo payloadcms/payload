@@ -120,7 +120,6 @@ export const itTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'Fissa documento',
     widgetCollectionRequired: 'Collection è obbligatoria.',
     widgetConfigurationError: 'Errore di configurazione del widget',
-    widgetGridView: 'Vista a griglia',
     widgetDropFilesToUpload: 'Trascina e rilascia un file',
     widgetInvalidCollection: 'La Collection "{{collection}}" non esiste.',
     widgetInvalidFilterField:
@@ -128,7 +127,6 @@ export const itTranslations: DefaultTranslationsObject = {
     widgetInvalidSortField:
       'Il campo di ordinamento "{{field}}" non esiste nella Collection "{{collection}}".',
     widgetLimitLabel: 'Limite',
-    widgetListView: 'Vista elenco',
     widgetNonSortableSortField:
       'Il campo di ordinamento "{{field}}" non può essere ordinato nella Collection "{{collection}}".',
     widgetPinned: 'Fissato',
@@ -136,9 +134,6 @@ export const itTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'I documenti che fissi appariranno qui',
     widgetPinnedSaveError: 'Impossibile salvare i documenti fissati.',
     widgetQueryError: 'Impossibile caricare i documenti per questo widget.',
-    widgetRecentDrafts: 'Bozze recenti',
-    widgetRecentDraftsEmpty: 'Nessuna bozza recente',
-    widgetRecentDraftsEmptyDescription: 'Le bozze che modifichi appariranno qui',
     widgetRecentlyViewedEmpty: 'Nessun documento recente',
     widgetRecentlyViewedEmptyDescription: 'I documenti che modifichi appariranno qui',
     widgetRecentlyViewedTitle: 'Visualizzati di recente',
@@ -150,8 +145,6 @@ export const itTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Campo di ordinamento',
     widgetTitleFallback: 'Query di Collection',
     widgetTitleLabel: 'Titolo',
-    widgetUpdated: 'Aggiornato',
-    widgetUpdatedBy: 'Aggiornato da',
     widgetUploadDropzoneDescription:
       'Carica dal tuo computer tramite trascinamento, oppure clicca il pulsante qui sotto',
     widgetUploadFiles: 'Aggiungi File',

@@ -2,6 +2,9 @@ import type { CollectionConfig } from 'payload'
 
 export const Tickets: CollectionConfig = {
   slug: 'tickets',
+  access: {
+    read: ({ req: { user } }) => Boolean(user) && user.email !== 'pins-restricted@payloadcms.com',
+  },
   admin: {
     group: 'Dashboard Data',
     useAsTitle: 'title',
@@ -19,7 +22,6 @@ export const Tickets: CollectionConfig = {
     {
       name: 'status',
       type: 'select',
-      required: true,
       defaultValue: 'open',
       options: [
         {
@@ -35,11 +37,11 @@ export const Tickets: CollectionConfig = {
           value: 'closed',
         },
       ],
+      required: true,
     },
     {
       name: 'priority',
       type: 'select',
-      required: true,
       defaultValue: 'medium',
       options: [
         {
@@ -59,6 +61,7 @@ export const Tickets: CollectionConfig = {
           value: 'critical',
         },
       ],
+      required: true,
     },
     {
       name: 'assignee',

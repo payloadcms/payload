@@ -121,7 +121,6 @@ export const trTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'Belgeyi sabitle',
     widgetCollectionRequired: 'Collection gereklidir.',
     widgetConfigurationError: 'Widget yapılandırma hatası',
-    widgetGridView: 'Izgara görünümü',
     widgetDropFilesToUpload: 'Bir dosya sürükleyip bırakabilirsiniz',
     widgetInvalidCollection: 'Collection "{{collection}}" mevcut değil.',
     widgetInvalidFilterField:
@@ -129,7 +128,6 @@ export const trTranslations: DefaultTranslationsObject = {
     widgetInvalidSortField:
       'Sıralama Field\'i "{{field}}", "{{collection}}" Collection\'ında mevcut değildir.',
     widgetLimitLabel: 'Sınırla',
-    widgetListView: 'Liste görünümü',
     widgetNonSortableSortField:
       '"{{field}}" sıralama alanı, "{{collection}}" koleksiyonu üzerinde sıralanabilir değildir.',
     widgetPinned: 'Sabitlendi',
@@ -137,9 +135,6 @@ export const trTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'Sabitlediğiniz belgeler burada görünecek',
     widgetPinnedSaveError: 'Sabitlenmiş belgeler kaydedilemedi.',
     widgetQueryError: 'Bu widget için belgeler yüklenemedi.',
-    widgetRecentDrafts: 'Son taslaklar',
-    widgetRecentDraftsEmpty: 'Son taslak yok',
-    widgetRecentDraftsEmptyDescription: 'Düzenlediğiniz taslak belgeler burada görünecek',
     widgetRecentlyViewedEmpty: 'Son belgeler yok',
     widgetRecentlyViewedEmptyDescription: 'Düzenlediğiniz belgeler burada görünecek',
     widgetRecentlyViewedTitle: 'Son görüntülenenler',
@@ -151,8 +146,6 @@ export const trTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Field Sıralama',
     widgetTitleFallback: 'Collection sorgusu',
     widgetTitleLabel: 'Başlık',
-    widgetUpdated: 'Güncellendi',
-    widgetUpdatedBy: '{{updatedBy}} tarafından güncellendi',
     widgetUploadDropzoneDescription:
       'Bilgisayarınızdan sürükleyip bırakarak yükleyin veya aşağıdaki butona tıklayın.',
     widgetUploadFiles: 'Dosya Ekle',

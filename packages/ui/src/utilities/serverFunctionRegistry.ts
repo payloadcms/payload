@@ -6,6 +6,7 @@ import { getDefaultLayoutHandler, renderWidgetHandler } from '../views/Dashboard
 import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
 import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlots.js'
 import { renderListHandler } from '../views/List/handleServerFunction.js'
+import { getDashboardDocumentsHandler } from '../widgets/RecentlyViewed/getDocuments.js'
 import { buildFormStateHandler } from './buildFormState.js'
 import { buildTableStateHandler } from './buildTableState.js'
 import { copyDataFromLocaleHandler } from './copyDataFromLocale.js'
@@ -34,6 +35,7 @@ import { switchLanguageHandler } from './switchLanguageHandler.js'
 export const sharedServerFunctions: Record<string, ServerFunction<any, any>> = {
   'copy-data-from-locale': copyDataFromLocaleHandler,
   'form-state': buildFormStateHandler,
+  'get-dashboard-documents': getDashboardDocumentsHandler,
   'get-default-layout': getDefaultLayoutHandler,
   'get-upcoming-scheduled-publish': getUpcomingScheduledPublishHandler,
   'render-document': renderDocumentHandler,

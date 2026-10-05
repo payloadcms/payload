@@ -638,6 +638,123 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
 
+  test.describe('1.4.3 Contrast (Minimum) (AA)', () => {
+    test('should keep dashboard document labels readable in both themes', async () => {
+      const preference = await (
+        await page.request.get(`${serverURL}/api/payload-preferences/recently-viewed`)
+      ).json()
+      const documents = (await (await page.request.get(`${serverURL}/api/posts?limit=3`)).json())
+        .docs
+      const originalTheme = await page.locator('html').getAttribute('data-theme')
+
+      try {
+        await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
+          data: {
+            value: {
+              items: documents.map((doc) => ({
+                id: doc.id,
+                collectionSlug: 'posts',
+                viewedAt: new Date().toISOString(),
+              })),
+            },
+          },
+        })
+        await page.goto(`${serverURL}/admin`)
+        const widget = page.locator('.recents-widget')
+
+        for (const theme of ['light', 'dark']) {
+          await page
+            .locator('html')
+            .evaluate((element, value) => element.setAttribute('data-theme', value), theme)
+          await widget.getByRole('button', { name: 'Recently viewed' }).click()
+          await expect(widget.locator('.recents-widget__meta').first()).toBeVisible()
+          const ratios = await widget.evaluate((element) => {
+            const rgba = ({ value }: { value: string }) => {
+              const values = value.match(/[\d.]+/g)!.map(Number)
+              const divisor = value.startsWith('color(srgb') ? 1 : 255
+
+              return [values[0] / divisor, values[1] / divisor, values[2] / divisor, values[3] ?? 1]
+            }
+            const composite = ({
+              background,
+              foreground,
+            }: {
+              background: number[]
+              foreground: number[]
+            }) =>
+              foreground
+                .slice(0, 3)
+                .map(
+                  (channel, index) =>
+                    channel * foreground[3] + background[index] * (1 - foreground[3]),
+                )
+            const luminance = ({ color }: { color: number[] }) =>
+              color.reduce((sum, channel, index) => {
+                const linear =
+                  channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
+
+                return sum + linear * [0.2126, 0.7152, 0.0722][index]
+              }, 0)
+
+            return [
+              '.recents-widget__tab',
+              '.recents-widget__meta',
+              '.recents-widget__status-pill',
+              '.recents-widget__pagination button:not(:disabled)',
+              '.recents-widget__pagination span',
+            ].flatMap((selector) =>
+              Array.from(element.querySelectorAll(selector)).map((text) => {
+                const ancestors: Element[] = []
+                let ancestor: Element | null = text
+
+                while (ancestor) {
+                  ancestors.unshift(ancestor)
+                  ancestor = ancestor.parentElement
+                }
+                const background = ancestors.reduce(
+                  (color, node) =>
+                    composite({
+                      background: color,
+                      foreground: rgba({ value: getComputedStyle(node).backgroundColor }),
+                    }),
+                  [1, 1, 1],
+                )
+                const foreground = composite({
+                  background,
+                  foreground: rgba({ value: getComputedStyle(text).color }),
+                })
+                const lighter = Math.max(
+                  luminance({ color: foreground }),
+                  luminance({ color: background }),
+                )
+                const darker = Math.min(
+                  luminance({ color: foreground }),
+                  luminance({ color: background }),
+                )
+
+                return { ratio: (lighter + 0.05) / (darker + 0.05), selector }
+              }),
+            )
+          })
+
+          expect(ratios.length).toBeGreaterThan(3)
+          for (const { ratio, selector } of ratios) {
+            expect(ratio, `${theme}: ${selector}`).toBeGreaterThanOrEqual(4.5)
+          }
+        }
+      } finally {
+        await page.locator('html').evaluate((element, value) => {
+          if (value) {
+            element.setAttribute('data-theme', value)
+          }
+        }, originalTheme)
+        await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
+          data: { value: preference?.value ?? { items: [] } },
+        })
+      }
+    })
+  })
+
   test.describe('1.4.10 Reflow (AA)', () => {
     test('should truncate a long account label without obscuring the menu icon', async () => {
       await page.goto(`${serverURL}/admin`)
@@ -782,23 +899,128 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.1.1 Keyboard (A)', () => {
-    test('should switch dashboard document views with keyboard and expose pressed states', async () => {
+    test('should switch dashboard document tabs with keyboard and expose pressed states', async () => {
       await page.goto(`${serverURL}/admin`)
       const widget = page.locator('.recents-widget')
-      const drafts = widget.getByRole('button', { name: 'Recent drafts' })
-      const list = widget.getByRole('button', { name: 'List view' })
+      const pinned = widget.getByRole('button', { name: 'Pinned', exact: true })
+      const recents = widget.getByRole('button', { name: 'Recently viewed' })
 
-      await drafts.focus()
-      await drafts.press('Enter')
-      await expect(drafts).toHaveAttribute('aria-pressed', 'true')
+      await pinned.focus()
+      await pinned.press('Enter')
+      await expect(pinned).toHaveAttribute('aria-pressed', 'true')
       await expect(widget.getByRole('button', { name: 'Recently viewed' })).toHaveAttribute(
         'aria-pressed',
         'false',
       )
 
-      await list.focus()
-      await list.press('Space')
-      await expect(list).toHaveAttribute('aria-pressed', 'true')
+      await recents.focus()
+      await recents.press('Space')
+      await expect(recents).toHaveAttribute('aria-pressed', 'true')
+    })
+
+    test('should paginate and pin dashboard documents with the keyboard while retaining focus', async () => {
+      const previousViewport = page.viewportSize()
+      const preference = await (
+        await page.request.get(`${serverURL}/api/payload-preferences/recently-viewed`)
+      ).json()
+      const documents = (await (await page.request.get(`${serverURL}/api/posts?limit=3`)).json())
+        .docs
+      let pinID: number | string | undefined
+
+      try {
+        await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
+          data: {
+            value: {
+              items: documents.map((doc) => ({
+                id: doc.id,
+                collectionSlug: 'posts',
+                viewedAt: new Date().toISOString(),
+              })),
+            },
+          },
+        })
+        await page.setViewportSize({ height: 900, width: 375 })
+        await page.goto(`${serverURL}/admin`)
+        const widget = page.locator('.recents-widget')
+        const recents = widget.getByRole('button', { name: 'Recently viewed' })
+        const next = widget.getByRole('button', { name: 'Next', exact: true })
+        const previous = widget.getByRole('button', { name: 'Previous', exact: true })
+
+        await recents.focus()
+        await recents.press('Enter')
+        await expect(widget.locator('.recents-widget__name')).toHaveCount(1)
+        await expect(previous).toBeDisabled()
+        await next.focus()
+        await next.press('Space')
+        await expect(widget.locator('.recents-widget__name')).toHaveText(documents[1].title)
+        await expect(next).toBeFocused()
+        await expect(widget.locator('.recents-widget__pagination [aria-live]')).toContainText(
+          '2 of 3',
+        )
+        await next.press('Enter')
+        await expect(widget.locator('.recents-widget__name')).toHaveText(documents[2].title)
+        await expect(previous).toBeFocused()
+        await previous.press('Space')
+        await expect(widget.locator('.recents-widget__pagination [aria-live]')).toContainText(
+          '2 of 3',
+        )
+        await previous.focus()
+        await previous.press('Enter')
+        await expect(next).toBeFocused()
+        const pin = widget.getByRole('button', {
+          name: `Pin document: ${documents[0].title}`,
+          exact: true,
+        })
+
+        await pin.focus()
+        await expect(pin).toBeVisible()
+        await expect
+          .poll(() => pin.evaluate((element) => getComputedStyle(element).opacity))
+          .toBe('1')
+        await pin.press('Enter')
+        await expect(
+          widget.getByRole('button', {
+            name: `Unpin document: ${documents[0].title}`,
+            exact: true,
+          }),
+        ).toBeEnabled()
+        const savedPins = (
+          await (await page.request.get(`${serverURL}/api/payload-pinned-documents?depth=0`)).json()
+        ).docs
+
+        pinID = savedPins.find(
+          (entry) => String(entry.document.value) === String(documents[0].id),
+        )?.id
+        const pinned = widget.getByRole('button', { name: 'Pinned', exact: true })
+
+        await pinned.focus()
+        await pinned.press('Enter')
+        const unpin = widget.getByRole('button', {
+          name: `Unpin document: ${documents[0].title}`,
+          exact: true,
+        })
+
+        await unpin.focus()
+        await unpin.press('Space')
+        await expect(pinned).toBeFocused()
+        await expect(widget.locator('.recents-widget__empty-title')).toHaveText(
+          'No pinned documents',
+        )
+        pinID = undefined
+        await expect
+          .poll(() => widget.evaluate((element) => element.scrollWidth <= element.clientWidth))
+          .toBe(true)
+      } finally {
+        if (pinID !== undefined) {
+          await page.request.delete(`${serverURL}/api/payload-pinned-documents/${pinID}`)
+        }
+        await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
+          data: { value: preference?.value ?? { items: [] } },
+        })
+        if (previousViewport) {
+          await page.setViewportSize(previousViewport)
+        }
+      }
     })
 
     test('should open the upload dropzone modal from its button with the keyboard', async () => {
@@ -3032,6 +3254,29 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('3.3.2 Labels or Instructions (A)', () => {
+    test('should describe the dashboard collection filter as applying only to Recently viewed', async () => {
+      await openDashboardEditor({ page, serverURL })
+      const widget = page.locator('.widget[data-slug^="activity-"]')
+      const edit = widget.getByRole('button', { name: 'Edit Recents and pinned', exact: true })
+
+      await edit.focus()
+      await edit.press('Enter')
+      const drawer = page.locator('dialog[id^="widget-editor-"]')
+      const collections = drawer.getByRole('group', { name: 'Collections', exact: true })
+
+      await expect(collections).toHaveAccessibleDescription('Filter Recently viewed only.')
+      await expect(collections.getByText('Filter Recently viewed only.')).toBeVisible()
+      await expect(collections.locator('[lang="en"]')).toContainText('Filter Recently viewed only.')
+      const checkbox = collections.getByRole('checkbox').first()
+
+      await checkbox.focus()
+      await expect(checkbox).toBeFocused()
+      await expect(checkbox).toBeChecked()
+      await checkbox.press('Space')
+      await expect(checkbox).not.toBeChecked()
+      await page.keyboard.press('Escape')
+    })
+
     test('should expose required state without naming the asterisk', async () => {
       // PYLD-3579, PYLD-3779, PYLD-3715
       for (const { name, collection, field, localized } of [

@@ -59,6 +59,7 @@ export default buildConfigWithDefaults({
         defaultLayout: [
           { widgetSlug: 'collections', width: 'full' },
           { widgetSlug: 'upload-dropzone', width: 'small' },
+          { widgetSlug: 'activity', width: 'full' },
         ],
         widgets: [],
       },

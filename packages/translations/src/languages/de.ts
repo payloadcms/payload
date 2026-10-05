@@ -122,7 +122,6 @@ export const deTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'Dokument anheften',
     widgetCollectionRequired: 'Collection ist erforderlich.',
     widgetConfigurationError: 'Widget-Konfigurationsfehler',
-    widgetGridView: 'Rasteransicht',
     widgetDropFilesToUpload: 'Datei per Drag & Drop verschieben',
     widgetInvalidCollection: 'Collection „{{collection}}“ existiert nicht.',
     widgetInvalidFilterField:
@@ -130,7 +129,6 @@ export const deTranslations: DefaultTranslationsObject = {
     widgetInvalidSortField:
       'Sortierfeld „{{field}}“ existiert nicht in der Collection „{{collection}}“.',
     widgetLimitLabel: 'Begrenzung',
-    widgetListView: 'Listenansicht',
     widgetNonSortableSortField:
       'Das Sortierfeld "{{field}}" ist in der Collection "{{collection}}" nicht sortierbar.',
     widgetPinned: 'Angeheftet',
@@ -138,9 +136,6 @@ export const deTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'Dokumente, die Sie anheften, erscheinen hier',
     widgetPinnedSaveError: 'Angeheftete Dokumente konnten nicht gespeichert werden.',
     widgetQueryError: 'Dokumente für dieses Widget konnten nicht geladen werden.',
-    widgetRecentDrafts: 'Letzte Entwürfe',
-    widgetRecentDraftsEmpty: 'Keine aktuellen Entwürfe',
-    widgetRecentDraftsEmptyDescription: 'Entwurfsdokumente, die Sie bearbeiten, erscheinen hier',
     widgetRecentlyViewedEmpty: 'Keine aktuellen Dokumente',
     widgetRecentlyViewedEmptyDescription: 'Dokumente, die Sie bearbeiten, erscheinen hier',
     widgetRecentlyViewedTitle: 'Kürzlich angesehen',
@@ -153,8 +148,6 @@ export const deTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sortierfeld',
     widgetTitleFallback: 'Sammlungsabfrage',
     widgetTitleLabel: 'Titel',
-    widgetUpdated: 'Aktualisiert',
-    widgetUpdatedBy: 'Aktualisiert von',
     widgetUploadDropzoneDescription:
       'Laden Sie von Ihrem Computer hoch, indem Sie per Drag-and-Drop ziehen, oder klicken Sie auf die Schaltfläche unten.',
     widgetUploadFiles: 'Dateien hinzufügen',

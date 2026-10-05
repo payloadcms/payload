@@ -118,14 +118,12 @@ export const daTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'Fastgør dokument',
     widgetCollectionRequired: 'Collection er påkrævet.',
     widgetConfigurationError: 'Konfigurationsfejl for widget',
-    widgetGridView: 'Gittervisning',
     widgetDropFilesToUpload: 'Træk og slip en fil',
     widgetInvalidCollection: 'Collection "{{collection}}" eksisterer ikke.',
     widgetInvalidFilterField: 'Filterfeltet "{{field}}" findes ikke i Collection "{{collection}}".',
     widgetInvalidSortField:
       'Sorteringsfeltet "{{field}}" findes ikke i Collection "{{collection}}".',
     widgetLimitLabel: 'Begrænsning',
-    widgetListView: 'Listevisning',
     widgetNonSortableSortField:
       'Sorteringsfeltet "{{field}}" kan ikke sorteres i Collection "{{collection}}".',
     widgetPinned: 'Fastgjort',
@@ -133,9 +131,6 @@ export const daTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'Dokumenter, du fastgør, vises her',
     widgetPinnedSaveError: 'Kunne ikke gemme fastgjorte dokumenter.',
     widgetQueryError: 'Kunne ikke indlæse dokumenter til denne widget.',
-    widgetRecentDrafts: 'Seneste kladder',
-    widgetRecentDraftsEmpty: 'Ingen seneste kladder',
-    widgetRecentDraftsEmptyDescription: 'Kladder, du redigerer, vises her',
     widgetRecentlyViewedEmpty: 'Ingen seneste dokumenter',
     widgetRecentlyViewedEmptyDescription: 'Dokumenter, du redigerer, vises her',
     widgetRecentlyViewedTitle: 'Senest viste',
@@ -147,8 +142,6 @@ export const daTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sortér felt',
     widgetTitleFallback: 'Collectionsforespørgsel',
     widgetTitleLabel: 'Titel',
-    widgetUpdated: 'Opdateret',
-    widgetUpdatedBy: 'Opdateret af',
     widgetUploadDropzoneDescription:
       'Upload fra din computer via træk og slip, eller klik på knappen nedenfor',
     widgetUploadFiles: 'Tilføj Filer',

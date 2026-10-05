@@ -180,12 +180,32 @@ export default async function SalesSummaryWidgetComponent({
 ### Built-in Widgets
 
 Payload includes built-in `welcome`, `activity`, `collections`, and `collection-query` widgets.
-The `activity` widget has Recently Viewed, Recent Drafts, and Pinned tabs. It supports grid and list views. Pins are saved per user. Its configuration lets users exclude collections from all three tabs.
+The `activity` widget has Recently Viewed and Pinned tabs. It loads the visible page on demand and displays a single grid row, with up to four documents per page. Its collection filter applies only to Recently Viewed.
 The `collections` widget displays collection and global cards.
 The `collection-query` widget displays documents from a selected collection.
 
 If you don't define a `defaultLayout`, `welcome`, `activity`, and `collections` appear in that order, each at full width.
 The `collection-query` widget is available through the **Add +** menu.
+
+Pins are stored per user in the hidden `payload-pinned-documents` collection. Each record relates a `user` to a `document`; both relationships include the collection slug and document ID. The internal `key` field prevents duplicate pins. Users can read, update, and delete their own pins, and can only pin documents they can read.
+
+Use `pinnedDocuments.collectionOverrides` to customize the collection, including access control. Preserve the default fields and hooks when changing access:
+
+```ts
+export default buildConfig({
+  pinnedDocuments: {
+    collectionOverrides: ({ defaultCollection }) => ({
+      ...defaultCollection,
+      access: {
+        ...defaultCollection.access,
+        create: ({ req }) => Boolean(req.user?.canPinDocuments),
+      },
+    }),
+  },
+})
+```
+
+The `payload-pinned-documents` slug is reserved and cannot be changed by overrides. The dashboard always displays the current user's pins and respects access control for the referenced documents.
 
 ### User Customization
 

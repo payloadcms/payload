@@ -119,7 +119,6 @@ export const bgTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'Закачи документ',
     widgetCollectionRequired: 'Collection е задължително.',
     widgetConfigurationError: 'Грешка при конфигуриране на уиджета',
-    widgetGridView: 'Изглед на мрежа',
     widgetDropFilesToUpload: 'Дръпни и пусни файл',
     widgetInvalidCollection: 'Collection "{{collection}}" не съществува.',
     widgetInvalidFilterField:
@@ -127,7 +126,6 @@ export const bgTranslations: DefaultTranslationsObject = {
     widgetInvalidSortField:
       'Полето за сортиране "{{field}}" не съществува в collection "{{collection}}".',
     widgetLimitLabel: 'Ограничение',
-    widgetListView: 'Списъчен изглед',
     widgetNonSortableSortField:
       'Полето за сортиране "{{field}}" не може да бъде сортирано в Collection "{{collection}}".',
     widgetPinned: 'Закачени',
@@ -135,9 +133,6 @@ export const bgTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'Документите, които закачите, ще се появят тук',
     widgetPinnedSaveError: 'Неуспешно запазване на закачените документи.',
     widgetQueryError: 'Неуспешно зареждане на документи за този уиджет.',
-    widgetRecentDrafts: 'Последни чернови',
-    widgetRecentDraftsEmpty: 'Няма последни чернови',
-    widgetRecentDraftsEmptyDescription: 'Черновите документи, които редактирате, ще се появят тук',
     widgetRecentlyViewedEmpty: 'Няма последни документи',
     widgetRecentlyViewedEmptyDescription: 'Документите, които редактирате, ще се появят тук',
     widgetRecentlyViewedTitle: 'Последно прегледани',
@@ -149,8 +144,6 @@ export const bgTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Сортирай Field',
     widgetTitleFallback: 'Заявка към Collection',
     widgetTitleLabel: 'Заглавие',
-    widgetUpdated: 'Актуализиран',
-    widgetUpdatedBy: 'Актуализиран от',
     widgetUploadDropzoneDescription:
       'Качете от вашия компютър чрез плъзгане и пускане или натиснете бутона по-долу.',
     widgetUploadFiles: 'Добави файлове',

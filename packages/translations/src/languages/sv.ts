@@ -119,14 +119,12 @@ export const svTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'Fäst dokument',
     widgetCollectionRequired: 'Collection är obligatorisk.',
     widgetConfigurationError: 'Fel i widgetkonfiguration',
-    widgetGridView: 'Rutnätsvy',
     widgetDropFilesToUpload: 'Dra och släpp en fil',
     widgetInvalidCollection: 'Collection "{{collection}}" finns inte.',
     widgetInvalidFilterField: 'Filterfältet "{{field}}" finns inte i Collection "{{collection}}".',
     widgetInvalidSortField:
       'Sorteringsfältet "{{field}}" finns inte i Collection "{{collection}}".',
     widgetLimitLabel: 'Begränsning',
-    widgetListView: 'Listvy',
     widgetNonSortableSortField:
       'Sorteringsfältet "{{field}}" kan inte sorteras i Collection "{{collection}}".',
     widgetPinned: 'Fästa',
@@ -134,9 +132,6 @@ export const svTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'Dokument du fäster visas här',
     widgetPinnedSaveError: 'Kunde inte spara fästa dokument.',
     widgetQueryError: 'Kunde inte läsa in dokument för denna widget.',
-    widgetRecentDrafts: 'Senaste utkasten',
-    widgetRecentDraftsEmpty: 'Inga senaste utkast',
-    widgetRecentDraftsEmptyDescription: 'Utkast du redigerar visas här',
     widgetRecentlyViewedEmpty: 'Inga senaste dokument',
     widgetRecentlyViewedEmptyDescription: 'Dokument du redigerar visas här',
     widgetRecentlyViewedTitle: 'Senast visade',
@@ -148,8 +143,6 @@ export const svTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sorteringsfält',
     widgetTitleFallback: 'Collectiefråga',
     widgetTitleLabel: 'Titel',
-    widgetUpdated: 'Uppdaterad',
-    widgetUpdatedBy: 'Uppdaterad av',
     widgetUploadDropzoneDescription:
       'Ladda upp från din dator genom att dra och släppa, eller klicka på knappen nedan.',
     widgetUploadFiles: 'Lägg till filer',

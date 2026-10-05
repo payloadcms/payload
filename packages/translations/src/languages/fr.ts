@@ -121,7 +121,6 @@ export const frTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'Épingler le document',
     widgetCollectionRequired: 'La Collection est requise.',
     widgetConfigurationError: 'Erreur de configuration du widget',
-    widgetGridView: 'Vue en grille',
     widgetDropFilesToUpload: 'Glisser-déposer un fichier',
     widgetInvalidCollection: 'La Collection « {{collection}} » n’existe pas.',
     widgetInvalidFilterField:
@@ -129,7 +128,6 @@ export const frTranslations: DefaultTranslationsObject = {
     widgetInvalidSortField:
       'Le champ de tri "{{field}}" n’existe pas dans la Collection "{{collection}}".',
     widgetLimitLabel: 'Limiter',
-    widgetListView: 'Vue en liste',
     widgetNonSortableSortField:
       'Le champ de tri "{{field}}" n\'est pas triable dans la Collection "{{collection}}".',
     widgetPinned: 'Épinglé',
@@ -137,9 +135,6 @@ export const frTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'Les documents que vous épinglez apparaîtront ici',
     widgetPinnedSaveError: 'Impossible d’enregistrer les documents épinglés.',
     widgetQueryError: 'Impossible de charger les documents pour ce widget.',
-    widgetRecentDrafts: 'Brouillons récents',
-    widgetRecentDraftsEmpty: 'Aucun brouillon récent',
-    widgetRecentDraftsEmptyDescription: 'Les brouillons que vous modifiez apparaîtront ici',
     widgetRecentlyViewedEmpty: 'Aucun document récent',
     widgetRecentlyViewedEmptyDescription: 'Les documents que vous modifiez apparaîtront ici',
     widgetRecentlyViewedTitle: 'Récemment consultés',
@@ -151,8 +146,6 @@ export const frTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Champ de tri',
     widgetTitleFallback: 'Requête de Collection',
     widgetTitleLabel: 'Titre',
-    widgetUpdated: 'Mis à jour',
-    widgetUpdatedBy: 'Mis à jour par',
     widgetUploadDropzoneDescription:
       'Téléversez depuis votre ordinateur par glisser-déposer, ou cliquez sur le bouton ci-dessous',
     widgetUploadFiles: 'Ajouter des fichiers',

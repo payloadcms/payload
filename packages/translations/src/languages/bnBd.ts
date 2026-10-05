@@ -120,7 +120,6 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'ডকুমেন্ট পিন করুন',
     widgetCollectionRequired: 'Collection প্রয়োজনীয়।',
     widgetConfigurationError: 'উইজেট কনফিগারেশন ত্রুটি',
-    widgetGridView: 'গ্রিড ভিউ',
     widgetDropFilesToUpload: 'একটি ফাইল টেনে এনে ছেড়ে দিন',
     widgetInvalidCollection: 'Collection "{{collection}}" বিদ্যমান নেই।',
     widgetInvalidFilterField:
@@ -128,7 +127,6 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     widgetInvalidSortField:
       'সংগ্রহ "{{collection}}" এ "{{field}}" নামক কোন sort field বিদ্যমান নেই।',
     widgetLimitLabel: 'সীমা',
-    widgetListView: 'তালিকা ভিউ',
     widgetNonSortableSortField:
       'Collection "{{collection}}"-এ "{{field}}" fieldটি সাজানো (sortable) নয়।',
     widgetPinned: 'পিন করা',
@@ -136,10 +134,6 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'আপনি যে ডকুমেন্টগুলো পিন করবেন, সেগুলো এখানে দেখাবে',
     widgetPinnedSaveError: 'পিন করা ডকুমেন্ট সংরক্ষণ করা যায়নি।',
     widgetQueryError: 'এই উইজেটের জন্য ডকুমেন্টসমূহ লোড করা যায়নি।',
-    widgetRecentDrafts: 'সাম্প্রতিক খসড়া',
-    widgetRecentDraftsEmpty: 'কোনো সাম্প্রতিক খসড়া নেই',
-    widgetRecentDraftsEmptyDescription:
-      'আপনি যে খসড়া ডকুমেন্ট সম্পাদনা করবেন, সেগুলো এখানে দেখাবে',
     widgetRecentlyViewedEmpty: 'কোনো সাম্প্রতিক ডকুমেন্ট নেই',
     widgetRecentlyViewedEmptyDescription: 'আপনি যে ডকুমেন্ট সম্পাদনা করবেন, সেগুলো এখানে দেখাবে',
     widgetRecentlyViewedTitle: 'সাম্প্রতিক দেখা',
@@ -151,8 +145,6 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Field বিন্যাস করুন',
     widgetTitleFallback: 'Collection অনুসন্ধান',
     widgetTitleLabel: 'শিরোনাম',
-    widgetUpdated: 'আপডেট হয়েছে',
-    widgetUpdatedBy: 'আপডেট করেছেন',
     widgetUploadDropzoneDescription:
       'আপনার কম্পিউটার থেকে ড্র্যাগ-এন্ড-ড্রপ এর মাধ্যমে আপলোড করুন, অথবা নিচের বাটনে ক্লিক করুন',
     widgetUploadFiles: 'ফাইলগুলি যোগ করুন',

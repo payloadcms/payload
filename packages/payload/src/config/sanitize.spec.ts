@@ -14,6 +14,15 @@ const configDefaults: Config = {
 }
 
 describe('sanitizeConfig', () => {
+  it('should reserve the internal pinned documents collection slug', () => {
+    expect(() =>
+      sanitizeConfig({
+        ...configDefaults,
+        collections: [{ slug: 'payload-pinned-documents', fields: [] }],
+      }),
+    ).toThrow('Collection slug already in use: "payload-pinned-documents"')
+  })
+
   it('should populate sanitized root config defaults for a minimal config', () => {
     const config: Config = {
       ...configDefaults,

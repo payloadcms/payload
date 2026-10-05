@@ -122,7 +122,6 @@ export const huTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'Dokumentum rögzítése',
     widgetCollectionRequired: 'A Collection megadása kötelező.',
     widgetConfigurationError: 'Widget konfigurációs hiba',
-    widgetGridView: 'Rácsnézet',
     widgetDropFilesToUpload: 'Húzzon ide egy fájlt',
     widgetInvalidCollection: 'A(z) "{{collection}}" Collection nem létezik.',
     widgetInvalidFilterField:
@@ -130,7 +129,6 @@ export const huTranslations: DefaultTranslationsObject = {
     widgetInvalidSortField:
       'A "{{field}}" rendezési mező nem létezik a(z) "{{collection}}" Collection-ben.',
     widgetLimitLabel: 'Korlátozás',
-    widgetListView: 'Listanézet',
     widgetNonSortableSortField:
       'A(z) "{{field}}" mező nem rendezhető a(z) "{{collection}}" Collection-ben.',
     widgetPinned: 'Rögzítve',
@@ -138,9 +136,6 @@ export const huTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'A rögzített dokumentumok itt jelennek meg',
     widgetPinnedSaveError: 'A rögzített dokumentumok mentése nem sikerült.',
     widgetQueryError: 'Nem sikerült betölteni a dokumentumokat ehhez a widgethez.',
-    widgetRecentDrafts: 'Legutóbbi piszkozatok',
-    widgetRecentDraftsEmpty: 'Nincs legutóbbi piszkozat',
-    widgetRecentDraftsEmptyDescription: 'Az Ön által szerkesztett piszkozatok itt jelennek meg',
     widgetRecentlyViewedEmpty: 'Nincs legutóbbi dokumentum',
     widgetRecentlyViewedEmptyDescription: 'Az Ön által szerkesztett dokumentumok itt jelennek meg',
     widgetRecentlyViewedTitle: 'Legutóbb megtekintett',
@@ -152,8 +147,6 @@ export const huTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Mező rendezése',
     widgetTitleFallback: 'Gyűjtemény lekérdezés',
     widgetTitleLabel: 'Cím',
-    widgetUpdated: 'Frissítve',
-    widgetUpdatedBy: 'Frissítette',
     widgetUploadDropzoneDescription:
       'Töltsön fel a számítógépéről húzással és ejtéssel, vagy kattintson az alábbi gombra',
     widgetUploadFiles: 'Fájlok hozzáadása',

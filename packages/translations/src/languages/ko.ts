@@ -118,14 +118,12 @@ export const koTranslations: DefaultTranslationsObject = {
     widgetAddPin: '문서 고정',
     widgetCollectionRequired: 'Collection이 필요합니다.',
     widgetConfigurationError: '위젯 구성 오류',
-    widgetGridView: '그리드 보기',
     widgetDropFilesToUpload: '파일을 끌어다 놓으세요',
     widgetInvalidCollection: 'Collection "{{collection}}"이(가) 존재하지 않습니다.',
     widgetInvalidFilterField:
       '컬렉션 "{{collection}}"에 필터 필드 "{{field}}"가 존재하지 않습니다.',
     widgetInvalidSortField: '정렬 필드 "{{field}}"는 컬렉션 "{{collection}}"에 존재하지 않습니다.',
     widgetLimitLabel: '제한',
-    widgetListView: '목록 보기',
     widgetNonSortableSortField:
       '정렬 필드 "{{field}}"는 컬렉션 "{{collection}}"에서 정렬할 수 없습니다.',
     widgetPinned: '고정됨',
@@ -133,9 +131,6 @@ export const koTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: '여기에 고정한 문서가 표시됩니다',
     widgetPinnedSaveError: '고정된 문서를 저장할 수 없습니다.',
     widgetQueryError: '이 위젯에 대한 문서를 불러올 수 없습니다.',
-    widgetRecentDrafts: '최근 초안',
-    widgetRecentDraftsEmpty: '최근 초안 없음',
-    widgetRecentDraftsEmptyDescription: '편집한 초안 문서가 여기에 표시됩니다',
     widgetRecentlyViewedEmpty: '최근 문서 없음',
     widgetRecentlyViewedEmptyDescription: '편집한 문서가 여기에 표시됩니다',
     widgetRecentlyViewedTitle: '최근 본 문서',
@@ -147,8 +142,6 @@ export const koTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: '정렬 필드',
     widgetTitleFallback: '컬렉션 쿼리',
     widgetTitleLabel: '제목',
-    widgetUpdated: '업데이트됨',
-    widgetUpdatedBy: '업데이트한 사람',
     widgetUploadDropzoneDescription:
       '드래그 앤 드롭으로 컴퓨터에서 업로드하거나, 아래 버튼을 클릭하십시오.',
     widgetUploadFiles: '파일 추가',

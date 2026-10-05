@@ -120,14 +120,12 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'Prikvači dokument',
     widgetCollectionRequired: 'Kolekcija je obavezna.',
     widgetConfigurationError: 'Greška u konfiguraciji vidžeta',
-    widgetGridView: 'Prikaz u mreži',
     widgetDropFilesToUpload: 'Prevucite i ispustite datoteku',
     widgetInvalidCollection: 'Kolekcija "{{collection}}" ne postoji.',
     widgetInvalidFilterField:
       'Polje za filtriranje "{{field}}" ne postoji u kolekciji "{{collection}}".',
     widgetInvalidSortField: 'Sort polje "{{field}}" ne postoji u kolekciji "{{collection}}".',
     widgetLimitLabel: 'Ograničenje',
-    widgetListView: 'Prikaz u listi',
     widgetNonSortableSortField:
       'Polje za sortiranje "{{field}}" nije moguće sortirati u kolekciji "{{collection}}".',
     widgetPinned: 'Prikvačeno',
@@ -135,9 +133,6 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'Dokumenti koje prikvačite će se pojaviti ovde',
     widgetPinnedSaveError: 'Nije moguće sačuvati prikvačene dokumente.',
     widgetQueryError: 'Nije moguće učitati dokumente za ovaj vidžet.',
-    widgetRecentDrafts: 'Nedavni nacrti',
-    widgetRecentDraftsEmpty: 'Nema nedavnih nacrta',
-    widgetRecentDraftsEmptyDescription: 'Nacrti dokumenata koje uređujete će se pojaviti ovde',
     widgetRecentlyViewedEmpty: 'Nema nedavnih dokumenata',
     widgetRecentlyViewedEmptyDescription: 'Dokumenti koje uređujete će se pojaviti ovde',
     widgetRecentlyViewedTitle: 'Nedavno pregledano',
@@ -149,8 +144,6 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sortiraj Field',
     widgetTitleFallback: 'Upit kolekcije',
     widgetTitleLabel: 'Naslov',
-    widgetUpdated: 'Ažurirano',
-    widgetUpdatedBy: 'Ažurirao/la',
     widgetUploadDropzoneDescription:
       'Otpremite sa svog računara prevlačenjem i ispuštanjem ili kliknite na dugme ispod',
     widgetUploadFiles: 'Dodaj Datoteke',

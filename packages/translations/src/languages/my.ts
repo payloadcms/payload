@@ -120,7 +120,6 @@ export const myTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'စာရွက်စာတမ်းကို ပင်ထည့်ပါ',
     widgetCollectionRequired: 'Collection သည် မဖြစ်မနေလိုအပ်ပါသည်။',
     widgetConfigurationError: 'Widget အတည်ပြုခြင်းအမှား',
-    widgetGridView: 'ဇယားအမြင်',
     widgetDropFilesToUpload: 'ဖိုင်တစ်ဖိုင်ကို ဆွဲချလိုက်ပါ။',
     widgetInvalidCollection: 'Collection "{{collection}}" မရှိပါ။',
     widgetInvalidFilterField:
@@ -128,7 +127,6 @@ export const myTranslations: DefaultTranslationsObject = {
     widgetInvalidSortField:
       'မည်သည့် Sort field "{{field}}" မဟုတ်ပါ collection "{{collection}}" တွင် မတည်ရှိပါ။',
     widgetLimitLabel: 'ကန့်သတ်ချက်',
-    widgetListView: 'စာရင်းအမြင်',
     widgetNonSortableSortField:
       'အမျိုးအစား "{{collection}}" တွင် Sort field "{{field}}" ကို စီခန့်နိုင်မှုမရှိပါ။',
     widgetPinned: 'ပင်ထည့်ပြီး',
@@ -136,10 +134,6 @@ export const myTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'သင်ပင်ထည့်သော စာရွက်စာတမ်းများသည် ဤနေရာတွင် ပြသပါမည်',
     widgetPinnedSaveError: 'ပင်ထည့်ထားသော စာရွက်စာတမ်းများကို သိမ်းဆည်း၍ မရနိုင်ပါ။',
     widgetQueryError: 'ဤ widget အတွက် Document များကို မဖော်ပြနိုင်ခဲ့ပါ။',
-    widgetRecentDrafts: 'မကြာသေးမီ မူကြမ်းများ',
-    widgetRecentDraftsEmpty: 'မကြာသေးမီ မူကြမ်းများ မရှိပါ',
-    widgetRecentDraftsEmptyDescription:
-      'သင်တည်းဖြတ်သော မူကြမ်းစာရွက်စာတမ်းများသည် ဤနေရာတွင် ပေါ်လာမည်',
     widgetRecentlyViewedEmpty: 'မကြာသေးမီ စာရွက်စာတမ်း မရှိပါ',
     widgetRecentlyViewedEmptyDescription: 'သင်တည်းဖြတ်သော စာရွက်စာတမ်းများသည် ဤနေရာတွင် ပြသပါမည်',
     widgetRecentlyViewedTitle: 'မကြာသေးမီ တွေ့မြင်ခဲ့သည်များ',
@@ -151,8 +145,6 @@ export const myTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Field တူညီခြင်း အလိုက် စီစဉ်ရန်',
     widgetTitleFallback: 'Collection query (မေးခွန်း)',
     widgetTitleLabel: 'ခေါင်းစဉ်',
-    widgetUpdated: 'အသစ်ပြင်ဆင်ပြီး',
-    widgetUpdatedBy: 'ပြင်ဆင်သူ',
     widgetUploadDropzoneDescription:
       'သင့်ကွန်ပျူတာမှ ဖိုင်များကို ဤနေရာသို့ ဆွဲယူပြီး ချထား၍ တင်နိုင်ပါသည်၊ သို့မဟုတ် အောက်ပါခလုတ်ကို နှိပ်ပါ။',
     widgetUploadFiles: 'ဖိုင်များ ထည့်ပါ',

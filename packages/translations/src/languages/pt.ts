@@ -120,7 +120,6 @@ export const ptTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'Fixar documento',
     widgetCollectionRequired: 'Coleção é obrigatória.',
     widgetConfigurationError: 'Erro de configuração do widget',
-    widgetGridView: 'Visualização em grade',
     widgetDropFilesToUpload: 'Arraste e solte um arquivo',
     widgetInvalidCollection: 'A Coleção "{{collection}}" não existe.',
     widgetInvalidFilterField:
@@ -128,7 +127,6 @@ export const ptTranslations: DefaultTranslationsObject = {
     widgetInvalidSortField:
       'O campo de ordenação "{{field}}" não existe na coleção "{{collection}}".',
     widgetLimitLabel: 'Limite',
-    widgetListView: 'Visualização em lista',
     widgetNonSortableSortField:
       'O campo de ordenação "{{field}}" não pode ser ordenado na Collection "{{collection}}".',
     widgetPinned: 'Fixados',
@@ -136,9 +134,6 @@ export const ptTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'Os documentos que você fixar aparecerão aqui',
     widgetPinnedSaveError: 'Não foi possível salvar os documentos fixados.',
     widgetQueryError: 'Não foi possível carregar os documentos para este widget.',
-    widgetRecentDrafts: 'Rascunhos recentes',
-    widgetRecentDraftsEmpty: 'Nenhum rascunho recente',
-    widgetRecentDraftsEmptyDescription: 'Os rascunhos que você editar aparecerão aqui',
     widgetRecentlyViewedEmpty: 'Nenhum documento recente',
     widgetRecentlyViewedEmptyDescription: 'Os documentos que você editar aparecerão aqui',
     widgetRecentlyViewedTitle: 'Visualizados recentemente',
@@ -150,8 +145,6 @@ export const ptTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Campo de Ordenação',
     widgetTitleFallback: 'Consulta de Collection',
     widgetTitleLabel: 'Título',
-    widgetUpdated: 'Atualizado',
-    widgetUpdatedBy: 'Atualizado por',
     widgetUploadDropzoneDescription:
       'Carregue do seu computador via arrastar e soltar, ou clique no botão abaixo',
     widgetUploadFiles: 'Adicionar Arquivos',

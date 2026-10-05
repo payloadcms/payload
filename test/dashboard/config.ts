@@ -289,6 +289,17 @@ export default buildConfigWithDefaults({
       defaultLocale: 'en',
       locales: ['en', 'es'],
     },
+    pinnedDocuments: {
+      collectionOverrides: ({ defaultCollection }) => ({
+        ...defaultCollection,
+        access: {
+          ...defaultCollection.access,
+          create: (args) =>
+            args.req.user?.email !== 'pins-disabled@payloadcms.com' &&
+            defaultCollection.access.create(args),
+        },
+      }),
+    },
   },
   seed,
   suite: 'dashboard',

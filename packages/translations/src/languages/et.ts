@@ -118,14 +118,12 @@ export const etTranslations: DefaultTranslationsObject = {
     widgetAddPin: 'Kinnita dokument',
     widgetCollectionRequired: 'Kogu on nõutav.',
     widgetConfigurationError: 'Vidina konfiguratsiooni viga',
-    widgetGridView: 'Ruudustikuvaade',
     widgetDropFilesToUpload: 'Lohista ja aseta fail',
     widgetInvalidCollection: 'Kogumikku "{{collection}}" ei eksisteeri.',
     widgetInvalidFilterField: 'Filtri väli "{{field}}" ei eksisteeri kogumikus "{{collection}}".',
     widgetInvalidSortField:
       'Sorteerimisväli "{{field}}" ei eksisteeri kollektsioonis "{{collection}}".',
     widgetLimitLabel: 'Piirang',
-    widgetListView: 'Nimekirjavaade',
     widgetNonSortableSortField:
       'Sortimisväli "{{field}}" ei ole kogu "{{collection}}" puhul sorditav.',
     widgetPinned: 'Kinnitatud',
@@ -133,9 +131,6 @@ export const etTranslations: DefaultTranslationsObject = {
     widgetPinnedEmptyDescription: 'Siia ilmuvad dokumendid, mille kinnitate',
     widgetPinnedSaveError: 'Kinnitatud dokumente ei õnnestunud salvestada.',
     widgetQueryError: 'Selle vidina jaoks ei õnnestunud dokumente laadida.',
-    widgetRecentDrafts: 'Viimased mustandid',
-    widgetRecentDraftsEmpty: 'Viimaseid mustandeid pole',
-    widgetRecentDraftsEmptyDescription: 'Siia ilmuvad mustandid, mida redigeerite',
     widgetRecentlyViewedEmpty: 'Viimaseid dokumente pole',
     widgetRecentlyViewedEmptyDescription: 'Siia ilmuvad dokumendid, mida redigeerite',
     widgetRecentlyViewedTitle: 'Hiljuti vaadatud',
@@ -147,8 +142,6 @@ export const etTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sorteeri väli',
     widgetTitleFallback: 'Kogumi päring',
     widgetTitleLabel: 'Pealkiri',
-    widgetUpdated: 'Uuendatud',
-    widgetUpdatedBy: 'Uuendatud kasutaja poolt',
     widgetUploadDropzoneDescription:
       'Laad üles oma arvutist, lohistades faili siia või klõpsates allolevat nuppu.',
     widgetUploadFiles: 'Lisa failid',
