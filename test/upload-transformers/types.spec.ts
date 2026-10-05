@@ -1,3 +1,4 @@
+import type { SharpDependency } from '@payloadcms/transformer-sharp'
 import type {
   Config,
   GlobalUploadConfig,
@@ -29,5 +30,13 @@ describe('upload transformer contracts', () => {
 
   test('should export the same generatePayloadFileURL from payload and payload/shared', () => {
     expect(generatePayloadFileURL).type.toBe<typeof generatePayloadFileURLFromShared>()
+  })
+
+  test('should accept a custom Sharp wrapper with the existing input and options signature', () => {
+    type ExistingSharpWrapper = (
+      ...args: Parameters<SharpDependency>
+    ) => ReturnType<SharpDependency>
+
+    expect<ExistingSharpWrapper>().type.toBeAssignableTo<SharpDependency>()
   })
 })

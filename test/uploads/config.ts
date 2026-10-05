@@ -33,6 +33,7 @@ import {
   allowListMediaSlug,
   animatedTypeMedia,
   audioSlug,
+  clientUploadTempFileSlug,
   constructorOptionsSlug,
   customFileNameMediaSlug,
   enlargeSlug,
@@ -98,6 +99,9 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
       { name: 'small', height: 100, width: 100 },
       { name: 'medium', height: 200, width: 200 },
     ],
+  },
+  [clientUploadTempFileSlug]: {
+    variants: [{ name: 'thumbnail', height: 50, width: 50 }],
   },
   [fileAccessMediaSlug]: {
     variants: [{ name: 'thumbnail', height: 100, width: 100 }],

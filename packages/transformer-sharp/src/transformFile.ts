@@ -3,15 +3,12 @@ import type { ResizeOptions, SharpOptions } from 'sharp'
 
 import type { SharpDependency, SharpUploadTaskOptions } from './types.js'
 
+import { createSharpFromFile } from './createSharpFromFile.js'
 import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
 
 const ANIMATED_MIME_TYPES = ['image/avif', 'image/gif', 'image/webp']
 
 const percentToPixel = (value: number, dimension: number) => Math.floor((value / 100) * dimension)
-
-async function toBuffer(file: File): Promise<Buffer> {
-  return Buffer.from(await file.arrayBuffer())
-}
 
 /**
  * The Sharp package's public one-file-in/one-file-out upload primitive.
@@ -69,7 +66,6 @@ async function transformMain({
     return { status: 'continue' }
   }
 
-  const buffer = await toBuffer(file)
   const sharpOptions: SharpOptions = { ...constructorOptions }
 
   if (fileIsAnimatedType) {
@@ -77,7 +73,9 @@ async function transformMain({
   }
 
   // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
-  let sharpFile = sharpDependency(buffer, sharpOptions).rotate()
+  let sharpFile = (
+    await createSharpFromFile({ file, options: sharpOptions, sharpDependency })
+  ).rotate()
 
   if (resizeOptions) {
     sharpFile = sharpFile.resize(resizeOptions)
@@ -116,7 +114,6 @@ async function transformCrop({
   withMetadata: SharpUploadTaskOptions['collectionUpload']['withMetadata']
 }): Promise<TransformFileResult> {
   const { cropData, heightInPixels, originalDimensions, widthInPixels } = crop
-  const buffer = await toBuffer(file)
 
   const sharpOptions: SharpOptions = fileIsAnimatedType ? { animated: true } : {}
 
@@ -125,11 +122,9 @@ async function transformCrop({
   const dimensionsChanged =
     originalDimensions.width !== newWidth || originalDimensions.height !== newHeight
 
-  let croppedBuffer: Buffer
+  let croppedFile = file
 
-  if (!dimensionsChanged) {
-    croppedBuffer = buffer
-  } else {
+  if (dimensionsChanged) {
     const formattedCropData = {
       height: newHeight,
       left: percentToPixel(cropData.x, originalDimensions.width),
@@ -137,14 +132,17 @@ async function transformCrop({
       width: newWidth,
     }
 
-    let cropped = sharpDependency(buffer, sharpOptions).extract(formattedCropData)
+    let cropped = (
+      await createSharpFromFile({ file, options: sharpOptions, sharpDependency })
+    ).extract(formattedCropData)
     cropped = await optionallyAppendMetadata({ req, sharpFile: cropped, withMetadata })
     const { data } = await cropped.toBuffer({ resolveWithObject: true })
-    croppedBuffer = data
+    croppedFile = new File([data], file.name, { type: file.type })
   }
 
   if (resizeOptions && !resizeOptions.withoutEnlargement) {
-    const { data: resizedBuffer } = await sharpDependency(croppedBuffer)
+    const sharpFile = await createSharpFromFile({ file: croppedFile, sharpDependency })
+    const { data: resizedBuffer } = await sharpFile
       .resize({
         fit: resizeOptions.fit || 'cover',
         height: resizeOptions.height,
@@ -160,7 +158,7 @@ async function transformCrop({
   }
 
   return {
-    file: new File([croppedBuffer], file.name, { type: file.type }),
+    file: croppedFile,
     status: 'continue',
   }
 }
@@ -180,10 +178,11 @@ async function transformSize({
   const { withMetadata } = collectionUpload
 
   const fileIsAnimatedType = ANIMATED_MIME_TYPES.includes(file.type)
-  const buffer = await toBuffer(file)
   const sharpOptions: SharpOptions = fileIsAnimatedType ? { animated: true } : {}
 
-  const sharpBase = sharpDependency(buffer, sharpOptions).rotate()
+  const sharpBase = (
+    await createSharpFromFile({ file, options: sharpOptions, sharpDependency })
+  ).rotate()
   const originalImageMeta = await sharpBase.metadata()
 
   let adjustedDimensions = { ...originalDimensions }

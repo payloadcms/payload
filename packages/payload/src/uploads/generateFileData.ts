@@ -1,5 +1,6 @@
 import { fileTypeFromBuffer } from 'file-type'
 import fs from 'fs/promises'
+import { openAsBlob } from 'node:fs'
 
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
@@ -24,7 +25,10 @@ import { isProcessableImage } from './isProcessableImage.js'
 import { parseFilename } from './parseFilename.js'
 import { planTransformerPipeline } from './transformers/planTransformerPipeline.js'
 import { transformUploadFile } from './transformers/transformUploadFile.js'
-import { getUploadTransformerInternal } from './transformers/uploadTransformerBridge.js'
+import {
+  getUploadTransformerInternal,
+  setUploadFilePath,
+} from './transformers/uploadTransformerBridge.js'
 type Args<T> = {
   collection: Collection
   config: SanitizedConfig
@@ -259,11 +263,11 @@ export const generateFileData = async <T>({
     let sizeResults: PreparedUploadTransformation[] = []
 
     if (canRunTransformers) {
-      originalWebFile = new File(
-        [file.tempFilePath ? await fs.readFile(file.tempFilePath) : file.data],
-        file.name,
-        { type: file.mimetype },
-      )
+      const fileContents = file.tempFilePath ? await openAsBlob(file.tempFilePath) : file.data
+      originalWebFile = new File([fileContents], file.name, { type: file.mimetype })
+      if (file.tempFilePath) {
+        setUploadFilePath(originalWebFile, file.tempFilePath)
+      }
 
       if (bridgeTransformer) {
         const bridge = getUploadTransformerInternal(bridgeTransformer)!

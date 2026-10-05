@@ -29,7 +29,9 @@ export { parseRangeHeader } from '../uploads/parseRangeHeader.js'
 export { externalURLInputSchema, resolveURLUploadInput } from '../uploads/resolveURLUploadInput.js'
 export type { ExternalURLInput } from '../uploads/resolveURLUploadInput.js'
 export {
+  getUploadFilePath,
   getUploadTransformerInternal,
+  setUploadFilePath,
   uploadTransformerInternal,
 } from '../uploads/transformers/uploadTransformerBridge.js'
 export type {

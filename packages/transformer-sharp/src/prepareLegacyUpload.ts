@@ -6,6 +6,7 @@ import { isNumber } from 'payload/shared'
 import type { SharpCollectionConfig, SharpDependency, SharpUploadTaskOptions } from './types.js'
 
 import { canResizeImage } from './canResizeImage.js'
+import { createSharpFromFile } from './createSharpFromFile.js'
 import { getImageResizeAction } from './getImageResizeAction.js'
 import { mapWithBoundedConcurrency } from './mapWithBoundedConcurrency.js'
 import { sanitizeResizeConfig } from './sanitizeResizeConfig.js'
@@ -16,8 +17,8 @@ import { sanitizeResizeConfig } from './sanitizeResizeConfig.js'
  */
 async function tryProbe(file: File, sharpDependency: SharpDependency) {
   try {
-    const buffer = Buffer.from(await file.arrayBuffer())
-    const metadata = await sharpDependency(buffer).metadata()
+    const sharpFile = await createSharpFromFile({ file, sharpDependency })
+    const metadata = await sharpFile.metadata()
     return metadata.width && metadata.height ? metadata : undefined
   } catch {
     return undefined
