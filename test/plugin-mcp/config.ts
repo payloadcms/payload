@@ -228,7 +228,7 @@ export default buildConfigWithDefaults({
                 user: req.user?.id,
               },
               req,
-              version: 'draft',
+              version: 'published',
               overrideAccess: authorizedMCP.overrideAccess,
             })
 
@@ -262,7 +262,7 @@ export default buildConfigWithDefaults({
                 user: req.user?.id,
               },
               req,
-              version: 'draft',
+              version: 'published',
               overrideAccess: false,
             })
 
@@ -300,7 +300,7 @@ export default buildConfigWithDefaults({
                   user: req.user?.id,
                 },
                 req,
-                version: 'draft',
+                version: 'published',
                 overrideAccess: false,
               })
 
@@ -331,7 +331,7 @@ export default buildConfigWithDefaults({
                   user: req.user?.id,
                 },
                 req,
-                version: 'draft',
+                version: 'published',
                 overrideAccess: false,
               })
 

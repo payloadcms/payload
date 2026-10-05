@@ -525,7 +525,10 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         expect(createDocuments.inputSchema.properties.documents.items.required).toContain('data')
         expect(createDocuments.inputSchema.properties.documents.items.properties.file).toBeDefined()
         expect(createDocuments.inputSchema.properties.depth).toBeDefined()
-        expect(createDocuments.inputSchema.properties.draft).toBeDefined()
+        expect(new Set(createDocuments.inputSchema.properties.version.enum)).toEqual(
+          new Set(['draft', 'published']),
+        )
+        expect(createDocuments.inputSchema.properties.draft).toBeUndefined()
         expect(createDocuments.inputSchema.properties.fallbackLocale).toBeDefined()
         expect(createDocuments.inputSchema.properties.locale).toBeDefined()
         expect(createDocuments.inputSchema.properties.returning).toMatchObject({
@@ -999,6 +1002,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         const callResponse = await client.callTool({
           arguments: {
             slug: 'posts',
+            version: 'published',
             documents: [
               { data: { content: 'First bulk content', title: 'First bulk post' } },
               { data: { content: 'Missing the required title' } },
@@ -1392,6 +1396,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             title: 'Test Post for Finding',
           },
           overrideAccess: true,
+          version: 'published',
         })
         createdPostIDs.push(post.id)
 
@@ -1429,6 +1434,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             title: 'Select Test Post',
           },
           overrideAccess: true,
+          version: 'published',
         })
         const apiKey = await getApiKey()
         const client = await mcp.connect(apiKey)
@@ -1576,6 +1582,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             title: 'Versioned Post',
           },
           overrideAccess: true,
+          version: 'published',
         })
         await payload.update({
           id: post.id,
@@ -1674,6 +1681,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             title: 'Find Options Pass Through',
           },
           overrideAccess: true,
+          version: 'published',
         })
         const apiKey = await getApiKey()
         const client = await mcp.connect(apiKey)
@@ -1721,6 +1729,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             title: 'Find By ID Options Pass Through',
           },
           overrideAccess: true,
+          version: 'published',
         })
         const apiKey = await getApiKey()
         const client = await mcp.connect(apiKey)
@@ -1759,6 +1768,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             title: 'Test Post for Updating',
           },
           overrideAccess: true,
+          version: 'published',
         })
         const apiKey = await getApiKey()
         const client = await mcp.connect(apiKey)
@@ -1894,6 +1904,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             title: 'Union Type Null Test',
           },
           overrideAccess: true,
+          version: 'published',
         })
         const apiKey = await getApiKey()
         const client = await mcp.connect(apiKey)
@@ -1928,6 +1939,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             title: 'Union Type Relationship Test',
           },
           overrideAccess: true,
+          version: 'published',
         })
         const apiKey = await getApiKey()
         const client = await mcp.connect(apiKey)
@@ -1963,6 +1975,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             title: 'Select Update Post',
           },
           overrideAccess: true,
+          version: 'published',
         })
         const apiKey = await getApiKey()
         const client = await mcp.connect(apiKey)
@@ -2007,6 +2020,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             title: 'Test Post for Deleting',
           },
           overrideAccess: true,
+          version: 'published',
         })
         const apiKey = await getApiKey()
         const client = await mcp.connect(apiKey)
@@ -2041,6 +2055,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             title: 'Where Object Update Match',
           },
           overrideAccess: true,
+          version: 'published',
         })
         const excluded = await payload.create({
           collection: 'posts',
@@ -2049,12 +2064,14 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             title: 'Where Object Update Excluded',
           },
           overrideAccess: true,
+          version: 'published',
         })
         const apiKey = await getApiKey()
         const client = await mcp.connect(apiKey)
         const callResponse = await client.callTool({
           arguments: {
             slug: 'posts',
+            version: 'published',
             data: {
               content: 'Updated by object where',
             },
@@ -2095,6 +2112,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             title: 'Where Object Delete One',
           },
           overrideAccess: true,
+          version: 'published',
         })
         await payload.create({
           collection: 'posts',
@@ -2103,6 +2121,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             title: 'Where Object Delete Two',
           },
           overrideAccess: true,
+          version: 'published',
         })
         const apiKey = await getApiKey()
         const client = await mcp.connect(apiKey)
@@ -2182,6 +2201,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             title: 'Post to Update Location',
           },
           overrideAccess: true,
+          version: 'published',
         })
         const callResponse = await client.callTool({
           arguments: {
@@ -2416,6 +2436,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           collection: 'posts',
           data: { title: 'Virtual Field Update Test' },
           overrideAccess: true,
+          version: 'published',
         })
         const apiKey = await getApiKey()
         const client = await mcp.connect(apiKey)
@@ -2448,6 +2469,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             title: 'Test Post for Finding',
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         onTestFinished(async () => {
@@ -3004,6 +3026,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             content: 'Content for minified test.',
           },
           overrideAccess: true,
+          version: 'published',
         })
         createdIDs.push(doc.id)
 
@@ -3057,6 +3080,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             content: 'Content for findByID minified test.',
           },
           overrideAccess: true,
+          version: 'published',
         })
         createdIDs.push(doc.id)
 
@@ -3137,6 +3161,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             title: 'English Title',
           },
           overrideAccess: true,
+          version: 'published',
         })
         // Update with Spanish translation via MCP
         const apiKey = await getApiKey()
@@ -3164,15 +3189,19 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         const post = await payload.create({
           collection: 'posts',
           data: {
+            _status: 'published',
             content: 'English Content',
             title: 'English Post',
           },
           overrideAccess: true,
+          version: 'published',
         })
         await payload.update({
           id: post.id,
           collection: 'posts',
+          version: 'latest',
           data: {
+            _status: 'published',
             content: 'Contenido Español',
             title: 'Publicación Española',
           },
@@ -3201,15 +3230,19 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         const post = await payload.create({
           collection: 'posts',
           data: {
+            _status: 'published',
             content: 'English Content',
             title: 'English Title',
           },
           overrideAccess: true,
+          version: 'published',
         })
         await payload.update({
           id: post.id,
           collection: 'posts',
+          version: 'latest',
           data: {
+            _status: 'published',
             content: 'Contenido Español',
             title: 'Título Español',
           },
@@ -3219,7 +3252,9 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         await payload.update({
           id: post.id,
           collection: 'posts',
+          version: 'latest',
           data: {
+            _status: 'published',
             content: 'Contenu Français',
             title: 'Titre Français',
           },
@@ -3260,6 +3295,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           },
           locale: 'en',
           overrideAccess: true,
+          version: 'published',
         })
         // Try to find in French (which doesn't exist)
         const apiKey = await getApiKey()
@@ -3267,6 +3303,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         const json = await client.callTool({
           arguments: {
             slug: 'posts',
+            version: 'latest',
             id: post.id,
             locale: 'fr',
           },
