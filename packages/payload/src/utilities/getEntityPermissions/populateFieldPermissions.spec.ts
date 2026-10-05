@@ -65,7 +65,7 @@ describe('populateFieldPermissions shared schema traversal', () => {
     expect(output.field99).not.toHaveProperty('delete')
   })
 
-  it.each([false, true])('runs custom access for every reference (async: %s)', async (isAsync) => {
+  it.each([false, true])('runs custom access for every reference (async: %s)', async (isAsync: boolean) => {
     const access = vi.fn(() => (isAsync ? Promise.resolve(false) : false))
     const blocks: Record<string, Block> = {
       shared: {
