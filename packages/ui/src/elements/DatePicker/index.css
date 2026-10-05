@@ -64,7 +64,10 @@
     border-radius: 0;
     padding: 0;
     position: relative;
-    width: min-content;
+    /* Fill the calendar's width without widening it. The weekday row (which used to set this
+       width) is no longer rendered inside the header since react-datepicker 9. */
+    width: var(--spacer-0);
+    min-width: 100%;
 
     & h2 {
       display: none;
@@ -361,6 +364,9 @@
 
   .react-datepicker__month-container {
     position: relative;
+    /* react-datepicker sizes the time list from this container's height and re-measures it on
+       resize. Stretching it to the time column's height would grow both forever. */
+    align-self: flex-start;
   }
 
   .react-datepicker__month {
@@ -422,6 +428,19 @@
     border-top: var(--stroke-width-small) solid var(--color-border);
     width: 100%;
     order: 3;
+  }
+
+  /* Visually hidden full weekday names, read by screen readers instead of "Su", "Mo", ... */
+  .react-datepicker__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
   }
 
   .react-datepicker__week {
