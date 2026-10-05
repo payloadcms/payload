@@ -1045,7 +1045,9 @@ describe('Versions', () => {
     })
 
     describe.skip('A11y', () => {
-      test('Versions list view should have no accessibility violations', async (_fixtures, testInfo) => {
+      test('Versions list view should have no accessibility violations', async ({
+        browser: _browser,
+      }, testInfo) => {
         await page.goto(url.list)
         const firstRowLink = page.locator('tbody tr .cell-title a').first()
         const docHref = await firstRowLink.getAttribute('href')
@@ -1063,7 +1065,9 @@ describe('Versions', () => {
         expect(scanResults.violations.length).toBe(0)
       })
 
-      test('Versions list view elements have focus indicators', async (_fixtures, testInfo) => {
+      test('Versions list view elements have focus indicators', async ({
+        browser: _browser,
+      }, testInfo) => {
         await page.goto(url.list)
         const firstRowLink = page.locator('tbody tr .cell-title a').first()
         const docHref = await firstRowLink.getAttribute('href')
@@ -1084,7 +1088,7 @@ describe('Versions', () => {
 
       test.fixme(
         'Version view should have no accessibility violations',
-        async (_fixtures, testInfo) => {
+        async ({ browser: _browser }, testInfo) => {
           await page.goto(url.list)
           const firstRowLink = page.locator('tbody tr .cell-title a').first()
           const docHref = await firstRowLink.getAttribute('href')
@@ -1109,7 +1113,9 @@ describe('Versions', () => {
         },
       )
 
-      test('Version view elements have focus indicators', async (_fixtures, testInfo) => {
+      test('Version view elements have focus indicators', async ({
+        browser: _browser,
+      }, testInfo) => {
         await page.goto(url.list)
         const firstRowLink = page.locator('tbody tr .cell-title a').first()
         const docHref = await firstRowLink.getAttribute('href')
