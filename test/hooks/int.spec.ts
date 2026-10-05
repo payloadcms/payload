@@ -782,6 +782,7 @@ test.suite('Hooks', { config: './config.ts', resetBetweenTests: false }, () => {
         collection: beforeOperationSlug,
         data: {},
         overrideAccess: true,
+        version: 'published',
       })
 
       expect(getLastOperation()).toEqual('create')
@@ -792,6 +793,7 @@ test.suite('Hooks', { config: './config.ts', resetBetweenTests: false }, () => {
         collection: beforeOperationSlug,
         data: {},
         overrideAccess: true,
+        version: 'published',
       })
 
       await payload.update({
@@ -809,6 +811,7 @@ test.suite('Hooks', { config: './config.ts', resetBetweenTests: false }, () => {
         collection: beforeOperationSlug,
         data: {},
         overrideAccess: true,
+        version: 'published',
       })
 
       await payload.update({
@@ -826,6 +829,7 @@ test.suite('Hooks', { config: './config.ts', resetBetweenTests: false }, () => {
         collection: beforeOperationSlug,
         data: {},
         overrideAccess: true,
+        version: 'published',
       })
 
       await payload.findByID({
@@ -842,6 +846,7 @@ test.suite('Hooks', { config: './config.ts', resetBetweenTests: false }, () => {
         collection: beforeOperationSlug,
         data: {},
         overrideAccess: true,
+        version: 'published',
       })
 
       clearLastOperation()
@@ -861,16 +866,19 @@ test.suite('Hooks', { config: './config.ts', resetBetweenTests: false }, () => {
         collection: beforeOperationSlug,
         data: { category: 'test1' },
         overrideAccess: true,
+        version: 'published',
       })
       await payload.create({
         collection: beforeOperationSlug,
         data: { category: 'test2' },
         overrideAccess: true,
+        version: 'published',
       })
       await payload.create({
         collection: beforeOperationSlug,
         data: { category: 'test1' },
         overrideAccess: true,
+        version: 'published',
       })
 
       await payload.findDistinct({
@@ -887,6 +895,7 @@ test.suite('Hooks', { config: './config.ts', resetBetweenTests: false }, () => {
         collection: beforeOperationSlug,
         data: {},
         overrideAccess: true,
+        version: 'published',
       })
 
       await payload.delete({
@@ -903,6 +912,7 @@ test.suite('Hooks', { config: './config.ts', resetBetweenTests: false }, () => {
         collection: beforeOperationSlug,
         data: {},
         overrideAccess: true,
+        version: 'published',
       })
 
       await payload.delete({
@@ -919,6 +929,7 @@ test.suite('Hooks', { config: './config.ts', resetBetweenTests: false }, () => {
         collection: beforeOperationSlug,
         data: {},
         overrideAccess: true,
+        version: 'published',
       })
 
       await payload.count({
@@ -934,6 +945,7 @@ test.suite('Hooks', { config: './config.ts', resetBetweenTests: false }, () => {
         collection: beforeOperationSlug,
         data: {},
         overrideAccess: true,
+        version: 'published',
       })
 
       await payload.countVersions({
@@ -954,6 +966,7 @@ test.suite('Hooks', { config: './config.ts', resetBetweenTests: false }, () => {
         collection: beforeOperationSlug,
         data: {},
         overrideAccess: true,
+        version: 'published',
       })
 
       await payload.findVersions({
@@ -974,6 +987,7 @@ test.suite('Hooks', { config: './config.ts', resetBetweenTests: false }, () => {
         collection: beforeOperationSlug,
         data: { category: 'v1' },
         overrideAccess: true,
+        version: 'published',
       })
 
       // Update to create a version
@@ -1010,6 +1024,7 @@ test.suite('Hooks', { config: './config.ts', resetBetweenTests: false }, () => {
         collection: beforeOperationSlug,
         data: { category: 'v1' },
         overrideAccess: true,
+        version: 'published',
       })
 
       // Update to create a version

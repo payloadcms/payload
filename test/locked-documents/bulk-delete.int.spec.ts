@@ -34,6 +34,7 @@ test.suite('Locked documents - bulk delete', { config: './config.ts' }, () => {
         text: 'bulk delete locked post',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     const unlockedPost = await payload.create({
@@ -42,6 +43,7 @@ test.suite('Locked documents - bulk delete', { config: './config.ts' }, () => {
         text: 'bulk delete unlocked post',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     // Give locking ownership of one of the two documents to another user

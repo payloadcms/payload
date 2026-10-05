@@ -141,6 +141,7 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
           items: [],
         },
         overrideAccess: true,
+        version: 'published',
       })
       createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
 
@@ -172,6 +173,7 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
           items: [],
         },
         overrideAccess: true,
+        version: 'published',
       })
       createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
 
@@ -206,6 +208,7 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
           content: [initialBlock],
         },
         overrideAccess: true,
+        version: 'published',
       })
       createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
 
@@ -238,6 +241,7 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
           content: [],
         },
         overrideAccess: true,
+        version: 'published',
       })
       createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
 
@@ -278,6 +282,7 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
         collection: updateShapesSlug as any,
         data: {},
         overrideAccess: true,
+        version: 'published',
       })
       createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
 
@@ -320,6 +325,7 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
             relations: [relation.id],
           },
           overrideAccess: true,
+          version: 'published',
         })
         createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
         let data

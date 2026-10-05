@@ -51,6 +51,7 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
         text: 'some post',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     await payload.create({
@@ -130,6 +131,7 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
         text: 'new post 2',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     // Set lock duration to 1 second for testing purposes
@@ -260,6 +262,7 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
         text: 'some post',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     // Give locking ownership to another user
@@ -350,6 +353,7 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
         text: 'new post 3',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     // Give locking ownership to another user
@@ -399,6 +403,7 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
         text: 'new post 4',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     // Set lock duration to 1 second for testing purposes
@@ -471,6 +476,7 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
         text: 'new post 5',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     // Give locking ownership to another user
@@ -589,6 +595,7 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
         text: 'new post 6',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     // Give locking ownership to another user
@@ -656,6 +663,7 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
         text: 'new post 7',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     const lockedDocInstance = await payload.create({

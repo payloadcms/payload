@@ -6324,7 +6324,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
           dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
           dateWithOffsetTimezone_tz: '+05:30',
         },
-        version: 'draft',
+        version: 'published',
         overrideAccess: true,
       })
 
@@ -6340,7 +6340,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
           dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
           dateWithMixedTimezones_tz: 'America/New_York',
         },
-        version: 'draft',
+        version: 'published',
         overrideAccess: true,
       })
 
@@ -6366,7 +6366,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
           dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
           dateWithOffsetTimezone_tz: '+05:30',
         },
-        version: 'draft',
+        version: 'published',
         overrideAccess: true,
       })
 
@@ -6377,7 +6377,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
           dateWithOffsetTimezone: '2027-08-12T08:00:00.000Z',
           dateWithOffsetTimezone_tz: '-08:00',
         },
-        version: 'draft',
+        version: 'published',
         overrideAccess: true,
       })
 
@@ -6405,7 +6405,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
           dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
           dateWithMixedTimezones_tz: 'America/New_York',
         },
-        version: 'draft',
+        version: 'published',
         overrideAccess: true,
       })
 
@@ -6419,7 +6419,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
           dateWithMixedTimezones: '2027-08-12T04:30:00.000Z',
           dateWithMixedTimezones_tz: '+05:30',
         },
-        version: 'draft',
+        version: 'published',
         overrideAccess: true,
       })
 
@@ -6435,7 +6435,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
           dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
           dateWithOffsetTimezone_tz: '+05:30',
         },
-        version: 'draft',
+        version: 'published',
         overrideAccess: true,
       })
 
@@ -6449,7 +6449,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
           dateWithOffsetTimezone: '2027-08-12T16:00:00.000Z',
           dateWithOffsetTimezone_tz: '-08:00',
         },
-        version: 'draft',
+        version: 'published',
         overrideAccess: true,
       })
 
@@ -6463,7 +6463,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
           dateWithOffsetTimezone: '2027-08-12T10:00:00.000Z',
           dateWithOffsetTimezone_tz: '+00:00',
         },
-        version: 'draft',
+        version: 'published',
         overrideAccess: true,
       })
 
@@ -6483,7 +6483,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
             dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
             dateWithOffsetTimezone_tz: '+05:30',
           },
-          version: 'draft',
+          version: 'published',
           overrideAccess: true,
         })
 
@@ -6519,7 +6519,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
             dateWithOffsetTimezone: '2027-08-12T16:00:00.000Z',
             dateWithOffsetTimezone_tz: '-08:00',
           },
-          version: 'draft',
+          version: 'published',
           overrideAccess: true,
         })
 
@@ -6549,7 +6549,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
             dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
             dateWithMixedTimezones_tz: 'America/New_York',
           },
-          version: 'draft',
+          version: 'published',
           overrideAccess: true,
         })
 
@@ -6652,7 +6652,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
             dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
             dateWithOffsetTimezone_tz: '+05:30',
           },
-          version: 'draft',
+          version: 'published',
           overrideAccess: true,
         })
 
@@ -6729,7 +6729,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
             dateWithMixedTimezones: '2027-08-12T04:30:00.000Z',
             dateWithMixedTimezones_tz: '+05:30',
           },
-          version: 'draft',
+          version: 'published',
           overrideAccess: true,
         })
 
@@ -6767,7 +6767,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
             dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
             dateWithOffsetTimezone_tz: '+05:30',
           },
-          version: 'draft',
+          version: 'published',
           overrideAccess: true,
         })
 
@@ -6778,7 +6778,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
             dateWithOffsetTimezone: '2027-08-12T16:00:00.000Z',
             dateWithOffsetTimezone_tz: '-08:00',
           },
-          version: 'draft',
+          version: 'published',
           overrideAccess: true,
         })
 
@@ -6861,7 +6861,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
           dateWithTimezoneWithDisabledColumns: '2027-08-12T10:00:00.000Z',
           dateWithTimezoneWithDisabledColumns_tz: 'America/New_York',
         },
-        version: 'draft',
+        version: 'published',
         overrideAccess: true,
       })
 
@@ -6894,7 +6894,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
           ...dataWithoutNoDefaultTz,
           dateWithTimezoneNoDefault: '2027-08-12T14:00:00.000Z',
         },
-        version: 'draft',
+        version: 'published',
         overrideAccess: true,
       })
 
@@ -6910,7 +6910,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
           ...dataWithoutMixedTz,
           dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
         },
-        version: 'draft',
+        version: 'published',
         overrideAccess: true,
       })
 

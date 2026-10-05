@@ -853,12 +853,14 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
         collection: 'categories-versions',
         data: {},
         overrideAccess: true,
+        version: 'published',
       })
 
       const version = await payload.create({
         collection: 'versions',
         data: { categoryVersion: category.id, title: 'version' },
         overrideAccess: true,
+        version: 'published',
       })
 
       const res = await payload.find({
@@ -877,12 +879,14 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
         collection: 'categories-versions',
         data: {},
         overrideAccess: true,
+        version: 'published',
       })
 
       const version = await payload.create({
         collection: 'versions',
         data: { categoryVersions: [category.id], title: 'version' },
         overrideAccess: true,
+        version: 'published',
       })
 
       const res = await payload.find({
