@@ -37,5 +37,6 @@ export const seed = async (payload: Payload) => {
       title: 'Page',
     },
     overrideAccess: true,
+    version: 'published',
   })
 }
