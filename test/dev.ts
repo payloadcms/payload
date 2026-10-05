@@ -137,18 +137,14 @@ switch (framework) {
   }
   case 'tanstack-start': {
     if (prodServer) {
-      const { startTanStackStartProdServer } = await import(
-        './__setup/server/tanstackStartProdServer.js'
-      )
-      serverResult = await startTanStackStartProdServer({
+      const { startTanstackProdServer } = await import('./__setup/server/tanstackProdServer.js')
+      serverResult = await startTanstackProdServer({
         port: availablePort,
         testSuiteArg,
       })
     } else {
-      const { startTanStackStartDevServer } = await import(
-        './__setup/server/tanstackStartDevServer.js'
-      )
-      serverResult = await startTanStackStartDevServer({
+      const { startTanstackDevServer } = await import('./__setup/server/tanstackDevServer.js')
+      serverResult = await startTanstackDevServer({
         port: availablePort,
         testSuiteArg,
       })

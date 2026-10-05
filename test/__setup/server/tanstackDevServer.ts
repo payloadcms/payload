@@ -6,7 +6,7 @@ import type { DevServerResult } from './nextDevServer.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-export async function startTanStackStartDevServer({
+export async function startTanstackDevServer({
   port,
   testSuiteArg,
 }: {
