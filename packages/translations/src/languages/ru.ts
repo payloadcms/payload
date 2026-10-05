@@ -580,6 +580,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Показать все {{label}}',
     shownInTable: 'Показано в таблице',
     showSidebar: 'Показать боковую панель',
+    skipToContent: 'Перейти к содержимому',
     sorryNotFound: 'К сожалению, ничего подходящего под ваш запрос нет.',
     sort: 'Сортировать',
     sortByLabelDirection: 'Сортировать по {{label}} {{direction}}',
@@ -644,6 +645,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     noParent: 'Нет родителя',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Поиск {{label}}',
+    searchResults: 'Найдено: {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Невозможно скопировать в ту же локаль',

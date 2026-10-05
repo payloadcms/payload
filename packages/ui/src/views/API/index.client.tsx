@@ -247,6 +247,7 @@ export const APIViewClient: React.FC = () => {
               />
               <Button
                 aria-label="toggle fullscreen"
+                aria-pressed={fullscreen}
                 buttonStyle="secondary"
                 className={`${baseClass}__toggle-fullscreen-button`}
                 icon={<MinimizeMaximizeIcon isMinimized={!fullscreen} />}

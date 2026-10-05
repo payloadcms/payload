@@ -581,6 +581,7 @@ export const caTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Mostra totes {{label}}',
     shownInTable: 'Mostrat en taula',
     showSidebar: 'Mostra la barra lateral',
+    skipToContent: 'Salta al contingut',
     sorryNotFound: "Ho sento, no s'ha trobat la pàgina que busques.",
     sort: 'Ordena',
     sortByLabelDirection: 'Ordena per {{label}} {{direction}}',
@@ -643,6 +644,7 @@ export const caTranslations: DefaultTranslationsObject = {
     noParent: 'Sense Pare',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Cerca {{label}}',
+    searchResults: 'S’han trobat {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'No es pot copiar al mateix idioma',

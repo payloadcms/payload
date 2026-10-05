@@ -1,4 +1,4 @@
-import type { CollectionConfig, PayloadRequest, TypeWithID, UploadConfig } from 'payload'
+import type { CollectionConfig, PayloadRequest, SanitizedUploadConfig, TypeWithID } from 'payload'
 
 import { buildPrefixWithObjectKey } from './buildPrefixWithObjectKey.js'
 import { buildUploadStoragePathData } from './buildStoragePathData.js'
@@ -64,15 +64,15 @@ export async function getFilePrefix({
   }
 
   // Reads without a query prefix or read-access constraints skip the endpoint's document lookup.
-  const imageSizes = (collection?.upload as UploadConfig)?.imageSizes || []
+  const variants = (collection?.upload as SanitizedUploadConfig)?.variants || []
 
   const filenameClause = {
     or: [
       {
         filename: { equals: filename },
       },
-      ...imageSizes.map((imageSize) => ({
-        [`sizes.${imageSize.name}.filename`]: { equals: filename },
+      ...variants.map((imageSize) => ({
+        [`variants.${imageSize.name}.filename`]: { equals: filename },
       })),
     ],
   }

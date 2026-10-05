@@ -574,6 +574,7 @@ export const koTranslations: DefaultTranslationsObject = {
     showAllLabel: '{{label}} 모두 표시',
     shownInTable: '표에 표시됨',
     showSidebar: '사이드바 표시',
+    skipToContent: '본문으로 건너뛰기',
     sorryNotFound: '죄송합니다. 요청과 일치하는 항목이 없습니다.',
     sort: '정렬',
     sortByLabelDirection: '{{label}} {{direction}}으로 정렬',
@@ -635,6 +636,7 @@ export const koTranslations: DefaultTranslationsObject = {
     noParent: '부모 없음',
     noResults: 'No results for "{{query}}"',
     searchLabel: '{{label}} 검색',
+    searchResults: '{{count}}개 찾음',
   },
   localization: {
     cannotCopySameLocale: '동일한 로캘에 복사할 수 없습니다.',

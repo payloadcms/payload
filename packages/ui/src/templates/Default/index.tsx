@@ -226,6 +226,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
                     {NavComponent}
                     <div className={`${baseClass}__wrap`}>
                       <AppHeader />
+                      <span className="sr-only" id="payload-main-content" tabIndex={-1} />
                       {children}
                     </div>
                   </Wrapper>

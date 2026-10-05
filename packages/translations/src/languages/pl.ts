@@ -575,6 +575,7 @@ export const plTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Pokaż wszystkie {{label}}',
     shownInTable: 'Wyświetlane w tabeli',
     showSidebar: 'Pokaż pasek boczny',
+    skipToContent: 'Przejdź do treści',
     sorryNotFound: 'Przepraszamy — nie ma nic, co odpowiadałoby twojemu zapytaniu.',
     sort: 'Sortuj',
     sortByLabelDirection: 'Sortuj według {{label}} {{direction}}',
@@ -637,6 +638,7 @@ export const plTranslations: DefaultTranslationsObject = {
     noParent: 'Brak rodzica',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Szukaj {{label}}',
+    searchResults: 'Znaleziono: {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Nie można skopiować do tego samego miejsca.',

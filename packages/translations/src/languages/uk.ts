@@ -572,6 +572,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Показати всі {{label}}',
     shownInTable: 'Показано у таблиці',
     showSidebar: 'Показати бічну панель',
+    skipToContent: 'Перейти до вмісту',
     sorryNotFound: 'Вибачте, немає нічого, що відповідало б Вашому запиту.',
     sort: 'Сортувати',
     sortByLabelDirection: 'Сортувати за {{label}} {{direction}}',
@@ -634,6 +635,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     noParent: 'Без батьківського елемента',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Пошук {{label}}',
+    searchResults: 'Знайдено: {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Не можна копіювати в ту ж саму локалізацію',

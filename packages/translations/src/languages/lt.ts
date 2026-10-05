@@ -579,6 +579,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Rodyti visus {{label}}',
     shownInTable: 'Rodoma lentelėje',
     showSidebar: 'Rodyti šoninę juostą',
+    skipToContent: 'Pereiti prie turinio',
     sorryNotFound: 'Atsiprašau - nėra nieko, atitinkančio jūsų užklausą.',
     sort: 'Rūšiuoti',
     sortByLabelDirection: 'Rūšiuoti pagal {{label}} {{direction}}',
@@ -641,6 +642,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     noParent: 'Be tėvų',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Ieškoti {{label}}',
+    searchResults: 'Rasta: {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Negalima kopijuoti į tą pačią vietovę',

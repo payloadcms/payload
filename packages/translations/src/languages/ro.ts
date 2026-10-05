@@ -583,6 +583,7 @@ export const roTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Afișează toate {{eticheta}}',
     shownInTable: 'Afișat în tabel',
     showSidebar: 'Afișați bara laterală',
+    skipToContent: 'Sari la conținut',
     sorryNotFound: 'Ne pare rău - nu există nimic care să corespundă cu cererea dvs.',
     sort: 'Sortează',
     sortByLabelDirection: 'Sortează după {{etichetă}} {{direcţie}}',
@@ -645,6 +646,7 @@ export const roTranslations: DefaultTranslationsObject = {
     noParent: 'Fără părinte',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Caută {{label}}',
+    searchResults: 'Rezultate găsite: {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Nu se poate copia în aceeași localizare',

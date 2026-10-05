@@ -579,6 +579,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Ցուցադրել բոլոր {{label}}-ները',
     shownInTable: 'Արտացոլված է աղյուսակում',
     showSidebar: 'Ցուցադրել կողային վահանակը',
+    skipToContent: 'Անցնել բովանդակությանը',
     sorryNotFound: 'Ներողություն, Ձեր հարցմանը համապատասխան ոչինչ չկա։',
     sort: 'Տեսակավորել',
     sortByLabelDirection: 'Տեսակավորել ըստ {{label}} {{direction}}',
@@ -643,6 +644,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     noParent: 'Ոչ ծնող',
     noResults: '«{{query}}»-ի համար արդյունքներ չկան',
     searchLabel: 'Որոնել {{label}}',
+    searchResults: 'Գտնվել է {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Հնարավոր չէ պատճենել նույն լոկալին',

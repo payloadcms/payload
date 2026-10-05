@@ -576,6 +576,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Прикажи све {{label}}',
     shownInTable: 'Prikazano u tabeli',
     showSidebar: 'Prikaži bočnu traku',
+    skipToContent: 'Пређи на садржај',
     sorryNotFound: 'Нажалост, не постоји ништа што одговара вашем захтеву.',
     sort: 'Сортирај',
     sortByLabelDirection: 'Сортирај према {{label}} {{дирецтион}}',
@@ -638,6 +639,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     noParent: 'Без родитеља',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Pretraga {{label}}',
+    searchResults: 'Пронађено: {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Не може се копирати на исту локацију.',

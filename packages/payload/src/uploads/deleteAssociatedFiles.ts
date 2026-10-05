@@ -54,16 +54,16 @@ export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
         await scheduleFileDeletion({ filePath: fileToDelete, req, staticPath })
       }
 
-      if (doc.sizes) {
-        const sizes: FileData[] = Object.values(doc.sizes)
+      if (doc.variants) {
+        const variants: FileData[] = Object.values(doc.variants)
         // Since forEach will not wait until unlink is finished it could
         // happen that two operations will try to delete the same file.
         // To avoid this it is recommended to use "sync" instead
 
-        for (const size of sizes) {
-          const sizeToDelete = resolveFilePath({ filename: size.filename, staticPath })
-          if (sizeToDelete && !replacementFilePaths.has(sizeToDelete)) {
-            await scheduleFileDeletion({ filePath: sizeToDelete, req, staticPath })
+        for (const variant of variants) {
+          const variantToDelete = resolveFilePath({ filename: variant.filename, staticPath })
+          if (variantToDelete && !replacementFilePaths.has(variantToDelete)) {
+            await scheduleFileDeletion({ filePath: variantToDelete, req, staticPath })
           }
         }
       }

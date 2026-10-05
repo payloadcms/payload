@@ -69,7 +69,7 @@ describe('deleteAssociatedFiles', () => {
       deleteAssociatedFiles(
         getArgs({
           filename,
-          sizes: {
+          variants: {
             preview: { filename: path.join('..', generatedFilename) },
           },
         }),
@@ -94,7 +94,7 @@ describe('deleteAssociatedFiles', () => {
     await deleteAssociatedFiles(
       getArgs({
         filename,
-        sizes: {
+        variants: {
           preview: { filename: generatedFilename },
         },
       }),
@@ -113,7 +113,7 @@ describe('deleteAssociatedFiles', () => {
     await deleteAssociatedFiles(
       getArgs({
         filename,
-        sizes: {
+        variants: {
           preview: { filename: null },
         },
       }),

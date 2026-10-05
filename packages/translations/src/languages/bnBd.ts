@@ -584,6 +584,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     showAllLabel: 'সমস্ত {{label}} দেখান',
     shownInTable: 'টেবিলে প্রদর্শিত',
     showSidebar: 'সাইডবার দেখান',
+    skipToContent: 'বিষয়বস্তুতে যান',
     sorryNotFound: 'দুঃখিত—আপনার অনুরোধের সাথে মিলে এমন কিছুই নেই।',
     sort: 'সাজান',
     sortByLabelDirection: '{{label}} দ্বারা {{direction}} সাজান',
@@ -648,6 +649,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     noParent: 'কোন অভিভাবক নেই',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'অনুসন্ধান করুন {{label}}',
+    searchResults: '{{count}}টি পাওয়া গেছে',
   },
   localization: {
     cannotCopySameLocale: 'একই লোকেলে কপি করা যাবে না',

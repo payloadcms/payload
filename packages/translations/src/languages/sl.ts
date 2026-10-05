@@ -575,6 +575,7 @@ export const slTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Pokaži vse {{label}}',
     shownInTable: 'Prikazano v tabeli',
     showSidebar: 'Prikaži stransko vrstico',
+    skipToContent: 'Preskoči na vsebino',
     sorryNotFound: 'Oprostite - ničesar ni mogoče najti, kar bi ustrezalo vaši zahtevi.',
     sort: 'Razvrsti',
     sortByLabelDirection: 'Razvrsti po {{label}} {{direction}}',
@@ -637,6 +638,7 @@ export const slTranslations: DefaultTranslationsObject = {
     noParent: 'Brez nadrejenega',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Iskanje {{label}}',
+    searchResults: 'Najdeno: {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Ni mogoče kopirati v isti jezik',

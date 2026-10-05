@@ -27,7 +27,7 @@ describe('upload replacement cleanup', () => {
         id: 1,
         filename: 'file.png',
         mimeType: 'image/png',
-        sizes: { thumbnail: { filename: 'thumb.png' } },
+        variants: { thumbnail: { filename: 'thumb.png' } },
         prefix: newPrefix,
       }
       const req = {
@@ -45,7 +45,7 @@ describe('upload replacement cleanup', () => {
           id: 1,
           filename: 'file.png',
           mimeType: 'image/png',
-          sizes: { thumbnail: { filename: 'thumb.png' } },
+          variants: { thumbnail: { filename: 'thumb.png' } },
           prefix: oldPrefix,
         },
         operation: 'update',
