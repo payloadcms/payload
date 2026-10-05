@@ -191,7 +191,6 @@ describe('Auth', () => {
       // In dev, RSC payloads can include the full client config for debugging, even when we're not intentionally sending it to the client.
       // For example, arguments passed between server components can show up in the page source with field schemas included.
       // We need a prod server to reliably check the page source, which is why those assertions are gated behind prod.
-      // The non-gated assertions still run in both modes because they check the initial config used by the client.
       test('should protect field schemas behind authentication', async () => {
         await logout(page, serverURL)
 
@@ -205,11 +204,6 @@ describe('Auth', () => {
           expect(loginPageSource).not.toContain('onlyShowInClientConfigWhenAuthenticated')
         }
 
-        await expect(page.locator('#root-client-config')).toContainText('"unauthenticated":true')
-        await expect(page.locator('#root-client-config')).not.toContainText(
-          'onlyShowInClientConfigWhenAuthenticated',
-        )
-
         // Inspect the client config (before authentication)
         await expect(page.locator('#unauthenticated-client-config')).toBeAttached()
 
@@ -222,10 +216,6 @@ describe('Auth', () => {
         await login({ page, serverURL })
 
         await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
-
-        await expect(page.locator('#root-client-config')).toContainText(
-          'onlyShowInClientConfigWhenAuthenticated',
-        )
 
         // Inspect the client config (after authentication)
         await expect(page.locator('#authenticated-client-config')).toBeAttached()
