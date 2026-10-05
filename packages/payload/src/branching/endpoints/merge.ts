@@ -7,6 +7,7 @@ import type { MergeProgress } from '../types.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { mergeBranch } from '../merge.js'
+import { isolateBranchState } from '../resolveBranch.js'
 import { branchesCollectionSlug } from '../types.js'
 
 /**
@@ -116,17 +117,17 @@ const streamMerge = ({
         controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`))
 
       try {
-        // Deliberately not this request's `req`. The merge outlives the handler's
-        // return — the response headers are already sent by then — so it must own
-        // the transaction it commits rather than borrow one whose lifecycle ends
-        // with the handler. `user` keeps the preflight enforcing the same
-        // permissions the non-streaming path enforces.
+        const mergeReq = isolateBranchState(req)
+
+        delete mergeReq.transactionID
+
         const result = await mergeBranch(payload, {
           branch,
           changes,
           closeBranch,
           onProgress: (progress) => send({ type: 'progress', ...progress }),
           overrideAccess: false,
+          req: mergeReq,
           user: user!,
         })
 

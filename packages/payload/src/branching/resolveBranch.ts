@@ -214,7 +214,7 @@ export const loadBranchDeletions = async (
  * serve one branch's document to the other.
  */
 export const isolateBranchState = (req: PayloadRequest): PayloadRequest => {
-  const isolated = { ...req, context: { ...req.context } } as PayloadRequest
+  const isolated = { ...req, context: { ...req.context }, headers: req.headers } as PayloadRequest
 
   resetBranchState(isolated)
   isolated.payloadDataLoader = getDataLoader(isolated)

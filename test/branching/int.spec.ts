@@ -7427,6 +7427,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
     })
 
     test.afterEach(async () => {
+      hookSpy.beforeMerge = undefined
       hookSpy.postBeforeRead = undefined
       hookSpy.postDefaultValueCount = undefined
       hookSpy.postTitleAfterReadCount = undefined
@@ -7462,6 +7463,96 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       for (const ledgerReader of ledgerReaders.docs) {
         await payload.delete({ id: ledgerReader.id, collection: 'users' })
       }
+    })
+
+    test('should allow only one concurrent merge while the branch status is merging', async () => {
+      let beforeMergeCalls = 0
+      let statusDuringFirstMerge: string | undefined
+      let markFirstMergeReady!: () => void
+      let markSecondMergeStarted!: () => void
+      let releaseFirstMerge!: () => void
+      const firstMergeReady = new Promise<void>((resolve) => {
+        markFirstMergeReady = resolve
+      })
+      const secondMergeStarted = new Promise<'started'>((resolve) => {
+        markSecondMergeStarted = () => resolve('started')
+      })
+      const firstMergeReleased = new Promise<void>((resolve) => {
+        releaseFirstMerge = resolve
+      })
+
+      hookSpy.beforeMerge = async () => {
+        beforeMergeCalls += 1
+
+        if (beforeMergeCalls === 1) {
+          statusDuringFirstMerge = (await branchStatus('lifecycle'))?.status
+          markFirstMergeReady()
+          await firstMergeReleased
+        } else {
+          markSecondMergeStarted()
+          throw new Error('A second merge reached the merge hook')
+        }
+      }
+
+      const firstMerge = payload.branches.merge({ branch: 'lifecycle' })
+
+      await firstMergeReady
+
+      const secondMerge = payload.branches.merge({ branch: 'lifecycle' })
+      const secondOutcome = await Promise.race([
+        secondMerge.then(
+          () => 'fulfilled' as const,
+          (error: unknown) => error,
+        ),
+        secondMergeStarted,
+      ])
+
+      releaseFirstMerge()
+
+      const [firstResult] = await Promise.all([firstMerge, secondMerge.catch(() => undefined)])
+      const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
+
+      expect(secondOutcome).toMatchObject({ status: 409 })
+      expect(beforeMergeCalls).toBe(1)
+      expect(statusDuringFirstMerge).toBe('merging')
+      expect(firstResult.merged).toHaveLength(1)
+      expect(onMain.title).toBe('edited on branch')
+    })
+
+    test('should reject writes while a branch is merging', async () => {
+      const branch = await branchStatus('lifecycle')
+
+      await payload.update({
+        id: branch!.id,
+        collection: branchesSlug,
+        data: { status: 'merging' },
+        overrideAccess: true,
+      })
+
+      await expect(
+        payload.update({
+          id: mainDocID,
+          branch: 'lifecycle',
+          collection: postsSlug,
+          data: { title: 'write during merge' },
+        }),
+      ).rejects.toThrow()
+
+      const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
+
+      expect(onMain.title).toBe('original on main')
+    })
+
+    test('should restore an open branch when a merge hook fails', async () => {
+      hookSpy.beforeMerge = () => {
+        throw new Error('Simulated merge hook failure')
+      }
+
+      await expect(payload.branches.merge({ branch: 'lifecycle' })).rejects.toThrow(
+        'Simulated merge hook failure',
+      )
+
+      expect((await branchStatus('lifecycle'))?.status).toBe('open')
     })
 
     test('should record a ledger entry naming what the merge applied', async () => {
@@ -7868,7 +7959,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect((event.changes[0] as { docTitle?: string })?.docTitle).toBe('created on branch')
     })
 
-    test('should keep the branch open when only some changes are merged', async () => {
+    test('should return a partially merged branch to open', async () => {
       const second = await payload.create({
         branch: 'lifecycle',
         collection: postsSlug,
@@ -10037,11 +10128,19 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
             collection: postsSlug,
           })
           const remainingChanges = await findBranchChanges({ branch: branchSlug })
+          const branch = (
+            await payload.find({
+              collection: branchesSlug,
+              pagination: false,
+              where: { slug: { equals: branchSlug } },
+            })
+          ).docs[0]
           const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
 
           expect(onMain.title).toBe('Merge candidate')
           expect(onBranch.title).toBe('Newer branch work')
           expect(remainingChanges.docs).toHaveLength(1)
+          expect(branch?.status).toBe('open')
           expect(mergeEvent.status).toBe('succeeded')
           expect(mergeEvent.changes[0]).toMatchObject({
             applicationOutcome: 'committed',
@@ -10152,11 +10251,19 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
             collection: postsSlug,
           })
           const remainingChanges = await findBranchChanges({ branch: branchSlug })
+          const branch = (
+            await payload.find({
+              collection: branchesSlug,
+              pagination: false,
+              where: { slug: { equals: branchSlug } },
+            })
+          ).docs[0]
           const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
 
           expect(onMain.title).toBe('Caller-owned rollback original')
           expect(onBranch.title).toBe('Caller-owned rollback edited')
           expect(remainingChanges.docs).toHaveLength(1)
+          expect(branch?.status).toBe('open')
           expect(mergeEvent.status).toBe('failed')
           expect(mergeEvent.error).toContain('Caller-owned transaction rolled back')
           expect(mergeEvent.changes[0]).toMatchObject({
@@ -11552,6 +11659,8 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
     })
 
     test.afterEach(async () => {
+      hookSpy.beforeMerge = undefined
+
       const rows = await payload.find({ branch: false, collection: postsSlug, pagination: false })
 
       for (const row of rows.docs) {
@@ -11743,6 +11852,31 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
         expect(onMain.title).toBe('edited on branch')
         expect(created.title).toBe('created on branch')
+      })
+
+      test('should preserve REST request details for a streamed merge', async () => {
+        let mergeRequest:
+          | {
+              header: null | string
+              payloadAPI: string
+            }
+          | undefined
+
+        hookSpy.beforeMerge = ({ req }: { req: PayloadRequest }) => {
+          mergeRequest = {
+            header: req.headers.get('x-merge-request'),
+            payloadAPI: req.payloadAPI,
+          }
+        }
+
+        const res = await restClient.POST(`/${branchesSlug}/${branchID}/merge`, {
+          body: JSON.stringify({ stream: true }),
+          headers: { Authorization: `JWT ${token}`, 'x-merge-request': 'retained' },
+        })
+        const events = readEvents(await res.text())
+
+        expect(events.some((event) => event.type === 'complete')).toBe(true)
+        expect(mergeRequest).toEqual({ header: 'retained', payloadAPI: 'REST' })
       })
 
       test('should stream only the selected changes', async () => {

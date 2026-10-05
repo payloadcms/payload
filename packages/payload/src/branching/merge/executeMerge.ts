@@ -242,7 +242,8 @@ export const executeMerge = async ({
       uploadCleanupPlans,
     })
 
-  const recordRollback = (): Promise<void> => recordMergeRollback({ incomingReq, ledger })
+  const recordRollback = (): Promise<void> =>
+    recordMergeRollback({ branchDoc, incomingReq, ledger, payload, req })
 
   try {
     const writeTargetReq = createMainBranchRequest({ req })

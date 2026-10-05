@@ -7,6 +7,7 @@ import type { SourceCleanupOutcome, SourceRecoveryOutcome } from './utilities.js
 import { deleteUploadFilesExclusiveToDocument } from '../../uploads/deleteUploadFilesExclusiveToDocument.js'
 import { refreshBranchState } from '../resolveBranch.js'
 import { branchChangesCollectionSlug, branchesCollectionSlug } from '../types.js'
+import { restoreBranchAfterMerge } from './branchMergeStatus.js'
 import { getMergeErrorMessage } from './utilities.js'
 
 export type SourceCleanupPlan = {
@@ -180,17 +181,24 @@ export const finalizeMergeAfterCommit = async ({
       where: { branch: { equals: branch } },
     })
 
-    if (remaining.totalDocs === 0) {
-      await payload.update({
-        id: branchDoc.id,
-        collection: branchesCollectionSlug,
-        data: { mergedAt, status: closeBranch ? 'closed' : 'merged' },
-        overrideAccess: true,
-        req,
-      })
-    }
+    await payload.update({
+      id: branchDoc.id,
+      collection: branchesCollectionSlug,
+      data:
+        remaining.totalDocs === 0
+          ? { mergedAt, status: closeBranch ? 'closed' : 'merged' }
+          : { mergedAt: null, status: 'open' },
+      overrideAccess: true,
+      req,
+    })
   } catch (error) {
     cleanupErrors.push(getMergeErrorMessage({ error }))
+
+    try {
+      await restoreBranchAfterMerge({ branchDocID: branchDoc.id, payload, req })
+    } catch (restoreError) {
+      cleanupErrors.push(getMergeErrorMessage({ error: restoreError }))
+    }
   }
 
   const completedAt = new Date().toISOString()
@@ -210,11 +218,17 @@ export const finalizeMergeAfterCommit = async ({
 }
 
 export const recordMergeRollback = async ({
+  branchDoc,
   incomingReq,
   ledger,
+  payload,
+  req,
 }: {
+  branchDoc: { id: number | string }
   incomingReq?: PayloadRequest
   ledger: MergeLedger
+  payload: Payload
+  req: PayloadRequest
 }): Promise<void> => {
   ledger.mapChanges({
     update: (change) =>
@@ -227,6 +241,7 @@ export const recordMergeRollback = async ({
     error: 'Caller-owned transaction rolled back.',
     status: 'failed',
   })
+  await restoreBranchAfterMerge({ branchDocID: branchDoc.id, payload, req })
 
   if (incomingReq) {
     refreshBranchState(incomingReq)

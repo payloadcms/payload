@@ -7,7 +7,7 @@ import { MAIN_BRANCH } from './types.js'
 const stateKey = '_branchWritable'
 
 /**
- * Refuses a write when the branch it targets has been closed.
+ * Refuses a write when the branch it targets is merging or has been closed.
  *
  * Closing is the terminal state a merge can put a branch into, and it has to be
  * enforced rather than merely displayed: the switcher already hides closed
@@ -49,7 +49,8 @@ export const assertBranchWritable = async ({
   // A branch that does not exist is left alone: creating rows against an unknown
   // slug is a separate problem, and failing here would make this the place that
   // decides branch existence.
-  const isWritable = (row as { status?: string } | null)?.status !== 'closed'
+  const status = (row as { status?: string } | null)?.status
+  const isWritable = status !== 'closed' && status !== 'merging'
 
   cache.set(branch, isWritable)
 

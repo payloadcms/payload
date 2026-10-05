@@ -5,6 +5,7 @@ import type { MergeableChange, MergeProgress, MergeWarning } from './types.js'
 import type { BranchMergeValidationError } from './validation.js'
 
 import { discardBranchChanges } from './discard.js'
+import { beginBranchMerge, restoreBranchAfterMerge } from './merge/branchMergeStatus.js'
 import { executeMerge } from './merge/executeMerge.js'
 import { prepareMerge, revalidatePreparedMerge } from './merge/prepareMerge.js'
 import { refreshBranchState } from './resolveBranch.js'
@@ -135,45 +136,62 @@ export const mergeBranch = async (
     return result
   }
 
-  await payload.config.branching?.hooks?.beforeMerge?.({
-    branch,
-    changes: mergeable,
-    req,
-    warnings: result.warnings,
-  })
+  await beginBranchMerge({ branchDocID: branchDoc.id, payload, req })
 
-  const revalidation = await revalidatePreparedMerge({
-    applicable,
-    applicableGlobals,
-    branch,
-    overrideAccess,
-    payload,
-    req,
-  })
+  try {
+    await payload.config.branching?.hooks?.beforeMerge?.({
+      branch,
+      changes: mergeable,
+      req,
+      warnings: result.warnings,
+    })
 
-  if (!revalidation.isValid) {
-    result.blocked = revalidation.blocked
-    result.canMerge = false
-    result.mergeable = []
-    result.validationErrors = revalidation.validationErrors
+    const revalidation = await revalidatePreparedMerge({
+      applicable,
+      applicableGlobals,
+      branch,
+      overrideAccess,
+      payload,
+      req,
+    })
 
-    return result
+    if (!revalidation.isValid) {
+      result.blocked = revalidation.blocked
+      result.canMerge = false
+      result.mergeable = []
+      result.validationErrors = revalidation.validationErrors
+
+      await restoreBranchAfterMerge({ branchDocID: branchDoc.id, payload, req })
+
+      return result
+    }
+
+    return await executeMerge({
+      applicable,
+      applicableGlobals,
+      branch,
+      branchDoc,
+      closeBranch,
+      incomingReq,
+      mergeable,
+      onProgress,
+      overrideAccess,
+      payload,
+      req,
+      result,
+    })
+  } catch (error) {
+    try {
+      await restoreBranchAfterMerge({ branchDocID: branchDoc.id, payload, req })
+    } catch (restoreError) {
+      payload.logger.error({
+        err: restoreError,
+        msg: `Failed to restore branch "${branch}" after a merge error`,
+      })
+    }
+
+    throw error
   }
-
-  return executeMerge({
-    applicable,
-    applicableGlobals,
-    branch,
-    branchDoc,
-    closeBranch,
-    incomingReq,
-    mergeable,
-    onProgress,
-    overrideAccess,
-    payload,
-    req,
-    result,
-  })
 }
 
 /**
