@@ -2698,7 +2698,7 @@ describe('Uploads', () => {
         overrideAccess: true,
       })
     ).docs[0]?.filename
-    expect(filenameFromAPI).toBe('test-image.jpg')
+    expect(filenameFromAPI).toBe('test-image-original.jpg')
   })
 
   test('should not show image sizes in column selector in list view if imageSize has admin.disableListColumn true', async () => {
