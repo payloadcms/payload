@@ -326,7 +326,11 @@ export interface Page {
   heroImage?: (string | null) | Media;
   content: LexicalRichText<LexicalNodes_EF84AAF3>;
   /**
-   * Identifies the page, e.g. "about" for /about.
+   * The websites and apps that show this page.
+   */
+  sites: ('personal' | 'business' | 'ios-app')[];
+  /**
+   * Identifies the page within each site, e.g. "about" for /about. Filled in from the title when left empty.
    */
   slug: string;
   /**
@@ -722,6 +726,7 @@ export interface PagesSelect<T extends boolean = true> {
   description?: T;
   heroImage?: T;
   content?: T;
+  sites?: T;
   slug?: T;
   seo?:
     | T
