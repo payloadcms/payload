@@ -129,6 +129,45 @@ export default buildConfig({
     )
   })
 
+  it('leaves a local function named sharpTransformer untouched', async () => {
+    const input = `const sharpTransformer = (args: { collections: Record<string, unknown> }) => args
+
+export const transformers = [
+  sharpTransformer({ collections: { media: { imageSizes: [{ name: 'thumbnail' }] } } }),
+]
+`
+    const result = await runTransform({ source: input, transform: migrateSharpToTransformer })
+
+    expect(result).toBe(input)
+  })
+
+  it('imports sharpTransformer under a collision-free alias when the name is already taken', async () => {
+    const input = `import sharp from 'sharp'
+import { buildConfig } from 'payload'
+
+const sharpTransformer = (args: { collections: Record<string, unknown> }) => args
+
+export const transformers = [
+  sharpTransformer({ collections: { media: { imageSizes: [{ name: 'thumbnail' }] } } }),
+]
+
+export default buildConfig({
+  collections: [],
+  sharp,
+})
+`
+    const result = await runTransform({ source: input, transform: migrateSharpToTransformer })
+
+    expect(result).toContain(
+      "import { sharpTransformer as sharpTransformer2 } from '@payloadcms/transformer-sharp'\n",
+    )
+    expect(result).toContain('transformers: [sharpTransformer2({ sharp })]')
+    expect(result).toContain("media: { imageSizes: [{ name: 'thumbnail' }] }")
+    expect(await runTransform({ source: result, transform: migrateSharpToTransformer })).toBe(
+      result,
+    )
+  })
+
   it('renames imageSizes to variants in an already-migrated sharpTransformer config', async () => {
     const input = `import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import { buildConfig } from 'payload'
