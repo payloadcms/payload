@@ -281,8 +281,9 @@ export type MCPPluginConfig = {
   }
   mcp?: {
     /**
-     * Largest HTTP request body, in bytes, that the MCP endpoint accepts. Larger requests
-     * are answered with `413`. Base64 file uploads count toward this limit.
+     * Largest HTTP request body, in bytes, that the MCP endpoint accepts. Must be positive
+     * and finite. Larger requests are answered with `413`. Base64 file uploads count toward
+     * this limit.
      *
      * @default 4194304 (4 MiB, the MCP SDK default)
      */

@@ -3,7 +3,6 @@ import type { PayloadHandler, PayloadRequest } from 'payload'
 import {
   createMcpHandler,
   isLegacyRequest,
-  readRequestBody,
   WebStandardStreamableHTTPServerTransport,
 } from '@modelcontextprotocol/server'
 import { APIError } from 'payload'
@@ -11,6 +10,7 @@ import { APIError } from 'payload'
 import { buildMcpServer } from '../mcp/buildMcpServer.js'
 import { getPluginConfig } from '../utils/getPluginConfig.js'
 import { getAuthorizedMCP } from './access.js'
+import { parseRequestBody } from './parseRequestBody.js'
 
 export const mcpEndpoint: PayloadHandler = async (req) => {
   if (!req.url) {
@@ -37,7 +37,13 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
   const maxRequestBodySize = pluginConfig.mcp?.maxRequestBodySize
   // Payload augments the original web-standard Request in place.
   const mcpRequest = req as PayloadRequest & Request
-  const parsedBody = await parseRequestBody({ maxRequestBodySize, request: mcpRequest })
+  const body = await parseRequestBody({ maxRequestBodySize, request: mcpRequest })
+
+  if ('response' in body) {
+    return body.response
+  }
+
+  const { parsedBody } = body
 
   // Keep the old JSON-only, stateless behavior because the SDK's 2025 fallback uses SSE.
   if (await isLegacyRequest(mcpRequest, parsedBody, { maxRequestBodySize })) {
@@ -78,30 +84,5 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
     await handler.close().catch((err) => {
       req.payload.logger.error({ err, msg: 'Error closing modern MCP handler' })
     })
-  }
-}
-
-/**
- * Parses a POST body once so the era check and the SDK handler can share it. The SDK
- * skips its size limit for a pre-parsed body, so this reads with the same limit. It reads
- * a clone and returns `undefined` for any body the SDK should reject (too large, unreadable,
- * or not JSON), leaving the original request for the SDK to read and answer.
- */
-const parseRequestBody = async ({
-  maxRequestBodySize,
-  request,
-}: {
-  maxRequestBodySize?: number
-  request: Request
-}): Promise<unknown> => {
-  if (request.method.toUpperCase() !== 'POST') {
-    return undefined
-  }
-
-  try {
-    const body = await readRequestBody(request.clone(), maxRequestBodySize)
-    return body.tooLarge ? undefined : JSON.parse(body.text)
-  } catch {
-    return undefined
   }
 }

@@ -2083,6 +2083,8 @@ By default, MCP items require an authenticated user. Built-in collection and glo
 
 **Dependencies.** The plugin now builds on `@modelcontextprotocol/server` instead of `@modelcontextprotocol/sdk` + `mcp-handler`. It no longer depends on Zod directly; its built-in tools use the Zod Mini export from `payload`. If your custom tools use regular Zod, install Zod v4 in your project and import it directly.
 
+**Modern HTTP requests require headers.** Hand-written clients sending 2026-07-28 requests must send `MCP-Protocol-Version: 2026-07-28` and `Mcp-Method` matching the JSON-RPC method. Methods that mirror a name, URI, or task ID also require `Mcp-Name` matching that value. SDK clients send these headers automatically. Legacy 2025 requests retain their existing header behavior.
+
 **HTTP requests have a size limit.** `POST /api/mcp` now answers request bodies over 4 MiB with `413`. Base64 file uploads count toward this limit. Raise it with `mcp.maxRequestBodySize`.
 
 ### `@payloadcms/ui/scss` export removed and legacy `--theme-*` tokens retired
