@@ -118,7 +118,9 @@ export const ItemsDrawer: React.FC<ItemsDrawerProps> = (props) => {
 
     const timeout = setTimeout(() => {
       setResultsAnnouncement(
-        `${t('general:items')}: ${filteredItems.length}${searchTerm ? `: ${searchTerm}` : ''}`,
+        searchTerm
+          ? t('general:searchResults', { count: filteredItems.length, search: searchTerm })
+          : t('hierarchy:searchResults', { count: filteredItems.length }),
       )
     }, 300)
 

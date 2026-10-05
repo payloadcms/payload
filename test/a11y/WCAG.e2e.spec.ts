@@ -6,6 +6,7 @@ import { formatAdminURL } from 'payload/shared'
 import type { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 
 import { addGroupBy, clearGroupBy, openGroupBy } from '../__helpers/e2e/groupBy/index.js'
+import { waitForFormReady } from '../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { getSelectMenu, selectInput } from '../__helpers/e2e/selectInput.js'
 import { initPage } from '../__setup/e2e/initPage.js'
@@ -3570,7 +3571,80 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
   test.describe('4.1.3 Status Messages (AA)', () => {
-    test('should announce toast content separately from its close control', async () => {
+    test('should keep the toast close button accessible with its live announcements off', async () => {
+      await page.goto(`${postsURL.admin}/status-messages`)
+      await page.getByRole('button', { name: 'Show action toast' }).click()
+      const region = page.getByRole('region', { name: 'Notifications alt+T' })
+      const close = region.getByRole('button', { name: 'Close toast', exact: true })
+
+      await expect(region).toHaveAttribute('aria-live', 'polite')
+      await expect(close).toHaveAttribute('aria-live', 'off')
+      await expect(close).toBeVisible()
+      await expect
+        .poll(async () => {
+          const snapshot = await page.locator('body').ariaSnapshot()
+          return (snapshot.match(/Action notification/g) ?? []).length
+        })
+        .toBe(1)
+      await close.focus()
+      await expect(close).toBeFocused()
+      await close.press('Enter')
+      await expect(page.locator('[data-sonner-toast]')).toHaveCount(0)
+    })
+
+    test('should expose toast actions and descriptions in the native live region', async () => {
+      await page.goto(`${postsURL.admin}/status-messages`)
+      await page.getByRole('button', { name: 'Show action toast' }).click()
+      const announcement = page.getByRole('region', { name: 'Notifications alt+T' })
+
+      await expect(announcement).toContainText('Action notification')
+      await expect(announcement).toContainText('Action description')
+      await expect(announcement).toContainText('Undo change')
+      await page.getByRole('button', { name: 'Undo change', exact: true }).click()
+      await expect(page.locator('[data-sonner-toast]')).toHaveCount(0)
+    })
+
+    test('should preserve accessible names and controls in the native toast content', async () => {
+      await page.goto(`${postsURL.admin}/status-messages`)
+      await page.getByRole('button', { name: 'Show custom toast' }).click()
+      const announcement = page.getByRole('region', { name: 'Notifications alt+T' })
+
+      await expect(announcement).toContainText('Custom notification')
+      await expect(announcement.getByRole('img', { name: 'Upload complete' })).toBeVisible()
+      await expect(announcement.getByRole('button', { name: 'Retry upload' })).toBeVisible()
+      await expect(announcement).toContainText('View details')
+      await expect(announcement.getByRole('button', { name: 'Download file' })).toBeVisible()
+      await page.getByRole('button', { name: 'Retry upload' }).focus()
+      await expect(page.getByRole('button', { name: 'Retry upload' })).toBeFocused()
+      await page.getByRole('link', { name: 'View details' }).focus()
+      await expect(page.getByRole('link', { name: 'View details' })).toBeFocused()
+    })
+
+    test('should retain both rapid toast messages in the native live region', async () => {
+      await page.goto(`${postsURL.admin}/status-messages`)
+      await page.getByRole('button', { name: 'Show rapid toasts' }).click()
+      const region = page.getByRole('region', { name: 'Notifications alt+T' })
+
+      await expect(region).toHaveAttribute('aria-live', 'polite')
+      await expect(region.locator('[data-sonner-toast]')).toHaveCount(2)
+      await expect(region).toContainText('First rapid notification')
+      await expect(region).toContainText('Second rapid notification')
+    })
+
+    test('should expose promise toast completion in the native live region', async () => {
+      await page.goto(`${postsURL.admin}/status-messages`)
+      await page.getByRole('button', { name: 'Start upload' }).click()
+      await expect(page.getByRole('region', { name: 'Notifications alt+T' })).toHaveText(
+        'Uploading file',
+      )
+      await page.getByRole('button', { name: 'Finish upload' }).click()
+      await expect(page.getByRole('region', { name: 'Notifications alt+T' })).toHaveText(
+        'File uploaded',
+      )
+      await expect(page.locator('[data-sonner-toast]')).toHaveCount(1)
+    })
+
+    test('should disable close-control live announcements for the unsaved toast', async () => {
       // Additional coverage for PYLD-3669; spoken output is tested in screen-reader.spec.ts.
       await gotoFirstPost({ page, postsURL, serverURL })
       await page.locator('#field-title').fill('Unsaved toast announcement regression')
@@ -3584,7 +3658,11 @@ test.describe('WCAG 2.2 Level AA', () => {
 
       await expect(notification).toBeVisible()
       await expect(announcement).toBeAttached()
-      expect(await announcement.getByRole('button').count()).toBe(0)
+      await expect(announcement).toHaveAttribute('aria-live', 'polite')
+      await expect(notification.getByRole('button', { name: /close toast/i })).toHaveAttribute(
+        'aria-live',
+        'off',
+      )
       await expect(notification.getByRole('button', { name: /close toast/i })).toBeVisible()
     })
 
@@ -3602,7 +3680,9 @@ test.describe('WCAG 2.2 Level AA', () => {
       await page.waitForTimeout(5000)
       await expect(notification).toBeVisible()
       await expect(notification).toBeHidden({ timeout: 5000 })
-      await expect(page.getByRole('status').filter({ hasText: /unsaved/i })).toHaveCount(0)
+      await expect(page.locator('[data-sonner-toast]').filter({ hasText: /unsaved/i })).toHaveCount(
+        0,
+      )
     })
 
     test('should expose global API depth stepper changes as a status', async () => {
@@ -3678,25 +3758,36 @@ test.describe('WCAG 2.2 Level AA', () => {
 
     test('should expose successful Copy to locale as a live status', async () => {
       // PYLD-3686
-      const drawer = await openCopyToLocaleDrawer({ page, postsURL, serverURL })
-      const combobox = drawer.locator('#field-toLocale input[role="combobox"]')
+      const apiURL = formatAdminURL({ apiRoute: '/api', path: '/posts', serverURL })
+      const response = await page.request.post(apiURL, {
+        data: { title: 'Disposable locale copy regression' },
+      })
+      expect(response.ok()).toBe(true)
+      const { doc } = await response.json()
 
       try {
+        await page.goto(`${postsURL.list}/${doc.id}?locale=en`)
+        await waitForFormReady(page)
+        await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+        await page.locator('#copy-locale-data__button').click()
+        const drawer = page.locator('#copy-locale')
+        const combobox = drawer.locator('#field-toLocale input[role="combobox"]')
+
         await combobox.press('ArrowDown')
         await page.getByRole('option', { name: 'Spanish', exact: true }).click()
         await drawer.getByRole('button', { name: 'Copy', exact: true }).click()
         await expect(page).toHaveURL(/locale=es/)
         await expect(drawer).toBeHidden()
+        const notifications = page.getByRole('region', { name: 'Notifications alt+T' })
+
+        await expect(notifications).toHaveAttribute('aria-live', 'polite')
         await expect(
-          page
-            .locator(
-              '[role="status"], [role="alert"], [aria-live="polite"], [aria-live="assertive"]',
-            )
-            .filter({ hasText: /copied|copy.*success/i })
-            .first(),
+          notifications.locator('[data-sonner-toast]').filter({ hasText: /copied|copy.*success/i }),
         ).toBeVisible()
       } finally {
-        // Copy changes the persisted locale; restore it for subsequent English UI tests.
+        const cleanup = await page.request.delete(`${apiURL}/${doc.id}?trash=true`)
+        expect(cleanup.ok()).toBe(true)
+        // Reset the locale preference as well as deleting the copied data.
         await page.goto(`${postsURL.list}?locale=en`)
         await expect(page.locator('.localizer')).toContainText('en')
       }
@@ -3744,9 +3835,9 @@ test.describe('WCAG 2.2 Level AA', () => {
 
       await expect(cards.first()).toBeVisible()
       const label = (await cards.first().innerText()).trim()
-      for (const query of [label, 'no-such-widget-accessibility']) {
+      for (const query of [label, 'no-such-widget-accessibility', '']) {
         await search.fill(query)
-        if (query === label) {
+        if (query === label || query === '') {
           await expect(cards.first()).toContainText(label)
         } else {
           await expect(cards).toHaveCount(0)

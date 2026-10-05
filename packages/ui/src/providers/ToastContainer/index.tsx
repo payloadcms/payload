@@ -20,73 +20,9 @@ export const ToastContainer: React.FC<{
 
   const { modalState } = useModal()
   const [portalContainer, setPortalContainer] = useState<HTMLDivElement | null>(null)
-  const [announcement, setAnnouncement] = useState({ sequence: 0, text: '' })
-  const setToasterRef = useCallback((element: HTMLElement | null) => {
-    // Sonner's live region includes the close and action controls. Announce only its message below.
-    element?.setAttribute('aria-live', 'off')
+  const setCloseIconRef = useCallback((element: HTMLSpanElement | null) => {
+    element?.closest('[data-close-button]')?.setAttribute('aria-live', 'off')
   }, [])
-
-  useLayoutEffect(() => {
-    if (!portalContainer) {
-      return
-    }
-
-    const announcedMessages = new WeakMap<Element, string>()
-    let announcementSources = new Map<Element, string>()
-    const announceMessages = () => {
-      const messages = new Map<Element, string>()
-      const currentMessages = new Map<Element, string>()
-
-      for (const notification of portalContainer.querySelectorAll('[data-sonner-toast]')) {
-        const content = notification.querySelector('[data-content], .toast-content') ?? notification
-        const message = content.cloneNode(true) as HTMLElement
-
-        message
-          .querySelectorAll(
-            'button, [role="button"], input, select, textarea, [aria-hidden="true"], [hidden], [data-icon]',
-          )
-          .forEach((control) => control.remove())
-        const walker = document.createTreeWalker(message, NodeFilter.SHOW_TEXT)
-        const parts: string[] = []
-        let node: Node | null
-
-        while ((node = walker.nextNode())) {
-          const part = node.textContent?.trim()
-
-          if (part) {
-            parts.push(part)
-          }
-        }
-        const text = parts.join(' ')
-
-        if (text) {
-          currentMessages.set(notification, text)
-          if (announcedMessages.get(notification) !== text) {
-            messages.set(notification, text)
-          }
-        }
-        announcedMessages.set(notification, text)
-      }
-
-      const remainingSources = new Map(
-        [...announcementSources].filter(([source]) => currentMessages.has(source)),
-      )
-
-      if (messages.size || remainingSources.size !== announcementSources.size) {
-        announcementSources = messages.size ? messages : remainingSources
-        setAnnouncement((previous) => ({
-          sequence: previous.sequence + 1,
-          text: [...announcementSources.values()].join(' '),
-        }))
-      }
-    }
-    // Observe rendered messages so custom React titles and promise updates are announced too.
-    const observer = new MutationObserver(announceMessages)
-
-    observer.observe(portalContainer, { characterData: true, childList: true, subtree: true })
-    announceMessages()
-    return () => observer.disconnect()
-  }, [portalContainer])
 
   useLayoutEffect(() => {
     const container = document.createElement('div')
@@ -127,52 +63,50 @@ export const ToastContainer: React.FC<{
   }
 
   return createPortal(
-    <>
-      <span aria-atomic="true" className="sr-only" role="status">
-        <span key={announcement.sequence}>{announcement.text}</span>
-      </span>
-      <Toaster
-        className="payload-toast-container"
-        closeButton
-        // @ts-expect-error - Sonner's `dir` prop is typed as `Direction`, but passing "undefined" opts out of RTL/LTR handling
-        dir="undefined"
-        duration={duration ?? 6000}
-        expand={expand ?? false}
-        gap={8}
-        icons={{
-          close: <XIcon size={24} />,
-          error: <WarningIcon />,
-          info: <InfoIcon />,
-          success: <CheckIcon size={24} />,
-          warning: <WarningIcon />,
-        }}
-        offset={{
-          bottom: 'var(--spacer-6)',
-          right: 'var(--spacer-6)',
-        }}
-        position={position ?? 'bottom-right'}
-        ref={setToasterRef}
-        style={{
-          width: '280px',
-        }}
-        theme="dark"
-        toastOptions={{
-          classNames: {
-            closeButton: 'payload-toast-close-button',
-            content: 'toast-content',
-            error: 'toast-error',
-            icon: 'toast-icon',
-            info: 'toast-info',
-            success: 'toast-success',
-            title: 'toast-title',
-            toast: 'payload-toast-item',
-            warning: 'toast-warning',
-          },
-          unstyled: true,
-        }}
-        visibleToasts={limit ?? 5}
-      />
-    </>,
+    <Toaster
+      className="payload-toast-container"
+      closeButton
+      // @ts-expect-error - Sonner's `dir` prop is typed as `Direction`, but passing "undefined" opts out of RTL/LTR handling
+      dir="undefined"
+      duration={duration ?? 6000}
+      expand={expand ?? false}
+      gap={8}
+      icons={{
+        close: (
+          <span aria-hidden="true" ref={setCloseIconRef} style={{ display: 'contents' }}>
+            <XIcon size={24} />
+          </span>
+        ),
+        error: <WarningIcon />,
+        info: <InfoIcon />,
+        success: <CheckIcon size={24} />,
+        warning: <WarningIcon />,
+      }}
+      offset={{
+        bottom: 'var(--spacer-6)',
+        right: 'var(--spacer-6)',
+      }}
+      position={position ?? 'bottom-right'}
+      style={{
+        width: '280px',
+      }}
+      theme="dark"
+      toastOptions={{
+        classNames: {
+          closeButton: 'payload-toast-close-button',
+          content: 'toast-content',
+          error: 'toast-error',
+          icon: 'toast-icon',
+          info: 'toast-info',
+          success: 'toast-success',
+          title: 'toast-title',
+          toast: 'payload-toast-item',
+          warning: 'toast-warning',
+        },
+        unstyled: true,
+      }}
+      visibleToasts={limit ?? 5}
+    />,
     portalContainer,
   )
 }
