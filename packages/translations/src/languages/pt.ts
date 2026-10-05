@@ -119,6 +119,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Pesquisar widgets...',
     widgetCollectionRequired: 'Coleção é obrigatória.',
     widgetConfigurationError: 'Erro de configuração do widget',
+    widgetDropFilesToUpload: 'Arraste e solte um arquivo',
     widgetInvalidCollection: 'A Coleção "{{collection}}" não existe.',
     widgetInvalidFilterField:
       'O campo de filtro "{{field}}" não existe na coleção "{{collection}}".',
@@ -136,6 +137,9 @@ export const ptTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Campo de Ordenação',
     widgetTitleFallback: 'Consulta de Collection',
     widgetTitleLabel: 'Título',
+    widgetUploadDropzoneDescription:
+      'Carregue do seu computador via arrastar e soltar, ou clique no botão abaixo',
+    widgetUploadFiles: 'Adicionar Arquivos',
   },
   error: {
     accountAlreadyActivated: 'Essa conta já foi ativada.',
@@ -497,6 +501,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Mostre todos {{label}}',
     shownInTable: 'Exibido em tabela',
     showSidebar: 'Mostrar barra lateral',
+    skipToContent: 'Saltar para o conteúdo',
     sorryNotFound: 'Desculpe—não há nada que corresponda à sua requisição.',
     sort: 'Ordenar',
     sortByLabelDirection: 'Ordenar por {{label}} {{direction}}',
@@ -559,6 +564,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     noParent: 'Sem Parentesco',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Pesquisar {{label}}',
+    searchResults: 'Encontrados: {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Não é possível copiar para o mesmo local',

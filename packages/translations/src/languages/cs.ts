@@ -118,6 +118,7 @@ export const csTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Hledat widgety...',
     widgetCollectionRequired: 'Collection je povinná.',
     widgetConfigurationError: 'Chyba v konfiguraci widgetu',
+    widgetDropFilesToUpload: 'Přetáhněte soubor',
     widgetInvalidCollection: 'Collection "{{collection}}" neexistuje.',
     widgetInvalidFilterField: 'Filtrační pole "{{field}}" neexistuje v kolekci "{{collection}}".',
     widgetInvalidSortField: 'Třídicí field "{{field}}" neexistuje v kolekci "{{collection}}".',
@@ -132,6 +133,9 @@ export const csTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Řadicí pole',
     widgetTitleFallback: 'Dotaz na Collection',
     widgetTitleLabel: 'Název',
+    widgetUploadDropzoneDescription:
+      'Nahrajte ze svého počítače přetažením souboru nebo klikněte na tlačítko níže.',
+    widgetUploadFiles: 'Přidat soubory',
   },
   error: {
     accountAlreadyActivated: 'Tento účet již byl aktivován.',
@@ -490,6 +494,7 @@ export const csTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Zobrazit všechny {{label}}',
     shownInTable: 'Zobrazeno v tabulce',
     showSidebar: 'Zobrazit postranní panel',
+    skipToContent: 'Přejít na obsah',
     sorryNotFound: 'Je nám líto, ale neexistuje nic, co by odpovídalo vašemu požadavku.',
     sort: 'Třídit',
     sortByLabelDirection: 'Seřadit podle {{label}} {{direction}}',
@@ -552,6 +557,7 @@ export const csTranslations: DefaultTranslationsObject = {
     noParent: 'Bez nadřazeného',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Hledat {{label}}',
+    searchResults: 'Nalezeno: {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Nelze kopírovat do stejného umístění',

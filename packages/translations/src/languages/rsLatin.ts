@@ -119,6 +119,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Pretraži dodatke...',
     widgetCollectionRequired: 'Kolekcija je obavezna.',
     widgetConfigurationError: 'Greška u konfiguraciji vidžeta',
+    widgetDropFilesToUpload: 'Prevucite i ispustite datoteku',
     widgetInvalidCollection: 'Kolekcija "{{collection}}" ne postoji.',
     widgetInvalidFilterField:
       'Polje za filtriranje "{{field}}" ne postoji u kolekciji "{{collection}}".',
@@ -135,6 +136,9 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sortiraj Field',
     widgetTitleFallback: 'Upit kolekcije',
     widgetTitleLabel: 'Naslov',
+    widgetUploadDropzoneDescription:
+      'Otpremite sa svog računara prevlačenjem i ispuštanjem ili kliknite na dugme ispod',
+    widgetUploadFiles: 'Dodaj Datoteke',
   },
   error: {
     accountAlreadyActivated: 'Ovaj nalog je već aktiviran.',
@@ -494,6 +498,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Prikaži sve {{label}}',
     shownInTable: 'Prikazano u tabeli',
     showSidebar: 'Prikaži bočnu traku',
+    skipToContent: 'Pređi na sadržaj',
     sorryNotFound: 'Nažalost, ne postoji ništa što odgovara vašem zahtevu.',
     sort: 'Sortiraj',
     sortByLabelDirection: 'Sortiraj prema {{label}} {{direction}}',
@@ -556,6 +561,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     noParent: 'Bez roditelja',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Pretraga {{label}}',
+    searchResults: 'Pronađeno: {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Ne može se kopirati na istu lokaciju',

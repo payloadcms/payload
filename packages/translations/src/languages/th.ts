@@ -116,6 +116,7 @@ export const thTranslations: DefaultTranslationsObject = {
     searchWidgets: 'ค้นหาวิดเจ็ต...',
     widgetCollectionRequired: 'Collection เป็นข้อมูลที่จำเป็น',
     widgetConfigurationError: 'เกิดข้อผิดพลาดในการกำหนดค่าของวิดเจ็ต',
+    widgetDropFilesToUpload: 'ลากและวางไฟล์',
     widgetInvalidCollection: 'Collection "{{collection}}" ไม่มีอยู่ในระบบ',
     widgetInvalidFilterField: 'ฟิลด์ตัวกรอง "{{field}}" ไม่มีอยู่ใน Collection "{{collection}}"',
     widgetInvalidSortField:
@@ -132,6 +133,8 @@ export const thTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'จัดเรียง Field',
     widgetTitleFallback: 'การค้นหาข้อมูลใน Collection',
     widgetTitleLabel: 'ชื่อเรื่อง',
+    widgetUploadDropzoneDescription: 'อัปโหลดจากคอมพิวเตอร์ของคุณโดยลากและวาง หรือคลิกปุ่มด้านล่าง',
+    widgetUploadFiles: 'เพิ่มไฟล์',
   },
   error: {
     accountAlreadyActivated: 'บัญชีนี้ถูกเปิดใช้งานไปแล้ว',
@@ -486,6 +489,7 @@ export const thTranslations: DefaultTranslationsObject = {
     showAllLabel: 'แสดง {{label}} ทั้งหมด',
     shownInTable: 'แสดงในตาราง',
     showSidebar: 'แสดงแถบด้านข้าง',
+    skipToContent: 'ข้ามไปยังเนื้อหา',
     sorryNotFound: 'ขออภัย ไม่สามารถทำตามคำขอของคุณได้',
     sort: 'เรียง',
     sortByLabelDirection: 'เรียงลำดับตาม {{label}} {{direction}}',
@@ -547,6 +551,7 @@ export const thTranslations: DefaultTranslationsObject = {
     noParent: 'ไม่มีผู้ปกครอง',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'ค้นหา {{label}}',
+    searchResults: 'พบ {{count}} รายการ',
   },
   localization: {
     cannotCopySameLocale: 'ไม่สามารถคัดลอกไปยังตำแหน่งที่ตั้งเดียวกัน',

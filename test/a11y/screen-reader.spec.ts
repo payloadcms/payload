@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url'
 import { formatAdminURL } from 'payload/shared'
 
 import { openGroupBy } from '../__helpers/e2e/groupBy/index.js'
+import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/e2e/initPage.js'
@@ -36,6 +37,7 @@ import {
   openFolderCreationLocation,
   openLivePreview,
   openLocaleOptions,
+  openNavigationFolders,
   openPostsFilter,
   openRichTextRelationshipDrawer,
   openRichTextUploadDrawer,
@@ -672,6 +674,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       // PYLD-3697
       // PYLD-3701
       await page.goto(`${serverURL}/admin`)
+      await openNav(page)
       await expectPopupCursorToMove({
         expectedItem: /account|preferences|logout/i,
         screenReader,
@@ -855,6 +858,7 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
     }) => {
       // PYLD-3645
       await page.goto(`${serverURL}/admin`)
+      await openNav(page)
       await page.locator('.user-menu__trigger').click()
       await page.getByRole('button', { name: 'Theme' }).click()
       const selectedTheme = page.locator('.popup-button-list__button--selected').last()
@@ -1074,6 +1078,33 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
         await expect(search).toBeFocused()
         expect(capture.spokenPhrase).toMatch(speech)
       }
+    })
+
+    test('should announce navigation folder search results without moving focus', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3582
+      const sidebar = await openNavigationFolders({ page, serverURL })
+      const search = sidebar.getByRole('textbox')
+      const originalURL = page.url()
+
+      await search.fill('Accessibility child folder')
+      const capture = await captureScreenReader({
+        action: async () => {
+          await search.press('Enter')
+          await expect(sidebar.locator('.hierarchy-search-results__list')).toContainText(
+            'Accessibility child folder',
+          )
+        },
+        screenReader,
+      })
+
+      await expect(search).toBeFocused()
+      await expect(page).toHaveURL(originalURL)
+      expect(capture.spokenPhrase).toMatch(
+        /(?:1|one)\s+(?:search\s+)?result|(?:1|one)\s+folder|found\s+(?:1|one)|showing\s+(?:1|one)\s+of\s+(?:1|one)/i,
+      )
     })
   })
 })

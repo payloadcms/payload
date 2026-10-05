@@ -119,6 +119,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     searchWidgets: 'উইজেটগুলি অনুসন্ধান করুন...',
     widgetCollectionRequired: 'Collection প্রয়োজনীয়।',
     widgetConfigurationError: 'উইজেট কনফিগারেশন ত্রুটি',
+    widgetDropFilesToUpload: 'একটি ফাইল টেনে এনে ছেড়ে দিন',
     widgetInvalidCollection: 'Collection "{{collection}}" বিদ্যমান নেই।',
     widgetInvalidFilterField:
       'ফিল্টার Field "{{field}}" সংশ্লিষ্ট Collection "{{collection}}" -এ বিদ্যমান নয়।',
@@ -136,6 +137,9 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Field বিন্যাস করুন',
     widgetTitleFallback: 'Collection অনুসন্ধান',
     widgetTitleLabel: 'শিরোনাম',
+    widgetUploadDropzoneDescription:
+      'আপনার কম্পিউটার থেকে ড্র্যাগ-এন্ড-ড্রপ এর মাধ্যমে আপলোড করুন, অথবা নিচের বাটনে ক্লিক করুন',
+    widgetUploadFiles: 'ফাইলগুলি যোগ করুন',
   },
   error: {
     accountAlreadyActivated: 'এই অ্যাকাউন্ট ইতিমধ্যে সক্রিয় করা হয়েছে।',
@@ -501,6 +505,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     showAllLabel: 'সমস্ত {{label}} দেখান',
     shownInTable: 'টেবিলে প্রদর্শিত',
     showSidebar: 'সাইডবার দেখান',
+    skipToContent: 'বিষয়বস্তুতে যান',
     sorryNotFound: 'দুঃখিত—আপনার অনুরোধের সাথে মিলে এমন কিছুই নেই।',
     sort: 'সাজান',
     sortByLabelDirection: '{{label}} দ্বারা {{direction}} সাজান',
@@ -565,6 +570,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     noParent: 'কোন অভিভাবক নেই',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'অনুসন্ধান করুন {{label}}',
+    searchResults: '{{count}}টি পাওয়া গেছে',
   },
   localization: {
     cannotCopySameLocale: 'একই লোকেলে কপি করা যাবে না',

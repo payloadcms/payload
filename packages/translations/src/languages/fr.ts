@@ -120,6 +120,7 @@ export const frTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Rechercher des widgets...',
     widgetCollectionRequired: 'La Collection est requise.',
     widgetConfigurationError: 'Erreur de configuration du widget',
+    widgetDropFilesToUpload: 'Glisser-déposer un fichier',
     widgetInvalidCollection: 'La Collection « {{collection}} » n’existe pas.',
     widgetInvalidFilterField:
       'Le champ de filtrage « {{field}} » n’existe pas dans la Collection « {{collection}} ».',
@@ -137,6 +138,9 @@ export const frTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Champ de tri',
     widgetTitleFallback: 'Requête de Collection',
     widgetTitleLabel: 'Titre',
+    widgetUploadDropzoneDescription:
+      'Téléversez depuis votre ordinateur par glisser-déposer, ou cliquez sur le bouton ci-dessous',
+    widgetUploadFiles: 'Ajouter des fichiers',
   },
   error: {
     accountAlreadyActivated: 'Ce compte a déjà été activé.',
@@ -505,6 +509,7 @@ export const frTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Afficher tous les {{label}}',
     shownInTable: 'Affiché dans un tableau',
     showSidebar: 'Afficher la barre latérale',
+    skipToContent: 'Aller au contenu',
     sorryNotFound: 'Désolé, rien ne correspond à votre demande.',
     sort: 'Trier',
     sortByLabelDirection: 'Trier par {{label}} {{direction}}',
@@ -569,6 +574,7 @@ export const frTranslations: DefaultTranslationsObject = {
     noParent: 'Aucun parent',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Recherche {{label}}',
+    searchResults: '{{count}} trouvés',
   },
   localization: {
     cannotCopySameLocale: 'Impossible de copier dans le même endroit',

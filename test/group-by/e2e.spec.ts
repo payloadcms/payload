@@ -610,8 +610,7 @@ test.describe('Group By', () => {
     await addGroupBy(page, { fieldLabel: 'Title', fieldPath: 'title' })
 
     // Global pagination controls should be visible when group-by produces many groups
-    // The page-controls component is rendered as sibling after collection-list when totalPages > 1
-    await expect(page.locator('.collection-list ~ .page-controls')).toBeVisible()
+    await expect(page.locator('.collection-list > .page-controls')).toBeVisible()
   })
 
   test('should paginate globally when grouping by virtual relationship field', async () => {
@@ -638,10 +637,10 @@ test.describe('Group By', () => {
     await expect(page).toHaveURL(/&groupBy=page\.title/)
 
     // Should show global pagination controls when there are 30 distinct page titles
-    await expect(page.locator('.collection-list ~ .page-controls')).toBeVisible()
+    await expect(page.locator('.collection-list > .page-controls')).toBeVisible()
 
     // Verify we have multiple pages (30 pages with default limit of 10 = 3 pages)
-    const pageInfo = page.locator('.collection-list ~ .page-controls .page-controls__page-info')
+    const pageInfo = page.locator('.collection-list > .page-controls .page-controls__page-info')
     await expect(pageInfo).toBeVisible()
     await expect(pageInfo).toContainText('of 30')
   })

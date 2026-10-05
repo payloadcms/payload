@@ -118,6 +118,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Søk widgets...',
     widgetCollectionRequired: 'Collectie er påkrevd.',
     widgetConfigurationError: 'Feil i widget-konfigurasjon',
+    widgetDropFilesToUpload: 'Dra og slipp en fil',
     widgetInvalidCollection: 'Collection "{{collection}}" finnes ikke.',
     widgetInvalidFilterField:
       'Filter-feltet "{{field}}" finnes ikke i kolleksjonen "{{collection}}".',
@@ -135,6 +136,9 @@ export const nbTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sorter Field',
     widgetTitleFallback: 'Forespørsel om Collection',
     widgetTitleLabel: 'Tittel',
+    widgetUploadDropzoneDescription:
+      'Last opp fra datamaskinen din ved å dra og slippe, eller klikk på knappen nedenfor',
+    widgetUploadFiles: 'Legg til filer',
   },
   error: {
     accountAlreadyActivated: 'Denne kontoen er allerede aktivert.',
@@ -497,6 +501,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Vis alle {{label}}',
     shownInTable: 'Vist i tabell',
     showSidebar: 'Vis sidepanel',
+    skipToContent: 'Hopp til innhold',
     sorryNotFound: 'Beklager, det er ingenting som samsvarer med forespørselen din.',
     sort: 'Sortér',
     sortByLabelDirection: 'Sorter etter {{label}} {{direction}}',
@@ -559,6 +564,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     noParent: 'Ingen forelder',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Søk {{label}}',
+    searchResults: 'Fant {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Kan ikke kopiere til samme språk',

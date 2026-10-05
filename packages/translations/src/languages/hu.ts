@@ -121,6 +121,7 @@ export const huTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Keresés widgetek...',
     widgetCollectionRequired: 'A Collection megadása kötelező.',
     widgetConfigurationError: 'Widget konfigurációs hiba',
+    widgetDropFilesToUpload: 'Húzzon ide egy fájlt',
     widgetInvalidCollection: 'A(z) "{{collection}}" Collection nem létezik.',
     widgetInvalidFilterField:
       'A(z) „{{field}}” szűrőmező nem létezik a(z) „{{collection}}” Collection-ben.',
@@ -138,6 +139,9 @@ export const huTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Mező rendezése',
     widgetTitleFallback: 'Gyűjtemény lekérdezés',
     widgetTitleLabel: 'Cím',
+    widgetUploadDropzoneDescription:
+      'Töltsön fel a számítógépéről húzással és ejtéssel, vagy kattintson az alábbi gombra',
+    widgetUploadFiles: 'Fájlok hozzáadása',
   },
   error: {
     accountAlreadyActivated: 'Ez a fiók már aktiválva van.',
@@ -500,6 +504,7 @@ export const huTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Mutasd az összes {{címke}}',
     shownInTable: 'Táblázatban megjelenítve',
     showSidebar: 'Oldalsáv megjelenítése',
+    skipToContent: 'Ugrás a tartalomhoz',
     sorryNotFound: 'Sajnáljuk – nincs semmi, ami megfelelne a kérésének.',
     sort: 'Rendezés',
     sortByLabelDirection: 'Rendezés {{label}} {{direction}} szerint',
@@ -562,6 +567,7 @@ export const huTranslations: DefaultTranslationsObject = {
     noParent: 'Nincs Szülő',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Keresés {{label}}',
+    searchResults: 'Találatok száma: {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Nem lehet ugyanarra a helyre másolni',

@@ -412,17 +412,35 @@ describe('General', () => {
 
     describe('user menu', () => {
       const openThemeSubMenu = async () => {
+        await openNav(page)
         await page.locator('button[aria-label="Account"]').click()
-        await page
-          .locator('.popup-button-list__button--submenu-trigger')
-          .filter({ hasText: 'Theme' })
-          .click()
+        await page.getByRole('menuitem', { name: 'Theme' }).hover()
       }
 
       const closePopups = async () => {
         await page.keyboard.press('Escape')
         await page.keyboard.press('Escape')
       }
+
+      test('should keep the open submenu parent highlighted while hovering a child item', async () => {
+        await page.goto(postsUrl.admin)
+        await openNav(page)
+        await page.locator('button[aria-label="Account"]').click()
+
+        const language = page.getByRole('menuitem', { name: 'Language' })
+
+        await language.hover()
+        await expect(language).toHaveAttribute('aria-expanded', 'true')
+
+        const highlightedBackground = await language.evaluate(
+          (element) => getComputedStyle(element).backgroundColor,
+        )
+
+        expect(highlightedBackground).not.toBe('rgba(0, 0, 0, 0)')
+
+        await page.getByRole('menuitemradio').first().hover()
+        await expect(language).toHaveCSS('background-color', highlightedBackground)
+      })
 
       test('should switch to dark theme via user menu and reflect correct active state', async () => {
         await page.goto(postsUrl.admin)
@@ -488,6 +506,7 @@ describe('General', () => {
         await page.goto(postsUrl.admin)
 
         // Logout lives inside the user menu popup
+        await openNav(page)
         await page.locator('button[aria-label="Account"]').click()
 
         // The custom Logout component (admin.components.logout.Button) renders an
@@ -657,7 +676,6 @@ describe('General', () => {
       const anchorHref = await anchor.getAttribute('href')
       await anchor.click()
       // flaky
-      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(1000)
       await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain(anchorHref)
     })
@@ -696,13 +714,81 @@ describe('General', () => {
       await expect(link).toBeHidden()
     })
 
-    test('should disable active nav item', async () => {
+    test('nav — should persist explicit open and close preferences without overwriting group preferences', async () => {
+      await page.setViewportSize({ height: 800, width: 1280 })
+      await page.goto(postsUrl.admin)
+      await openNav(page)
+
+      const groupToggle = page.locator('#nav-group-One .nav-group__toggle')
+      const groupLink = page.locator('#nav-group-one-collection-ones')
+      const navColumnWidth = () =>
+        page
+          .locator('.template-default')
+          .evaluate((element) => Number.parseFloat(getComputedStyle(element).gridTemplateColumns))
+      const waitForNavPreferenceUpdate = () =>
+        page.waitForResponse(
+          (response) =>
+            new URL(response.url()).pathname.endsWith('/payload-preferences/nav') &&
+            response.request().method() === 'POST',
+        )
+
+      await expect.poll(navColumnWidth).toBeGreaterThan(0)
+
+      await Promise.all([waitForNavPreferenceUpdate(), groupToggle.click()])
+      await expect(groupLink).toBeHidden()
+
+      await Promise.all([waitForNavPreferenceUpdate(), page.locator('.nav__close').click()])
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeHidden()
+      await expect.poll(navColumnWidth).toBe(0)
+
+      await page.reload()
+      await expect(page.locator('.template-default--nav-hydrated')).toBeVisible()
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeHidden()
+      await expect.poll(navColumnWidth).toBe(0)
+
+      await Promise.all([
+        waitForNavPreferenceUpdate(),
+        page.locator('.app-header__sidebar-toggle').click(),
+      ])
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
+      await expect.poll(navColumnWidth).toBeGreaterThan(0)
+
+      await page.reload()
+      await expect(page.locator('.template-default--nav-hydrated')).toBeVisible()
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
+      await expect.poll(navColumnWidth).toBeGreaterThan(0)
+      await expect(groupLink).toBeHidden()
+    })
+
+    test('nav — should not persist an automatic responsive close', async () => {
+      await page.setViewportSize({ height: 800, width: 1280 })
+      await page.goto(postsUrl.admin)
+      await openNav(page)
+
+      await page.setViewportSize({ height: 800, width: 500 })
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeHidden()
+
+      await page.reload()
+      await expect(page.locator('.template-default--nav-hydrated')).toBeVisible()
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeHidden()
+
+      await page.setViewportSize({ height: 800, width: 1280 })
+      await page.reload()
+      await expect(page.locator('.template-default--nav-hydrated')).toBeVisible()
+      await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
+    })
+
+    test('should keep the active nav item keyboard-accessible in the list view', async () => {
       await page.goto(postsUrl.list)
       await openNav(page)
       const activeItem = page.locator('.nav .nav__link--selected')
       await expect(activeItem).toBeVisible()
-      const tagName = await activeItem.evaluate((el) => el.tagName.toLowerCase())
-      expect(tagName).toBe('div')
+      await expect(activeItem).toHaveRole('link')
+      await expect(activeItem).toHaveJSProperty('href', postsUrl.list)
+      await expect(activeItem).toHaveAttribute('aria-current', 'page')
+      await expect(activeItem).toHaveJSProperty('tabIndex', 0)
+      await activeItem.focus()
+      await expect(activeItem).toBeFocused()
     })
 
     test('should keep active nav item enabled in the edit view', async () => {
@@ -710,8 +796,8 @@ describe('General', () => {
       await openNav(page)
       const activeItem = page.locator('.nav .nav__link--selected')
       await expect(activeItem).toBeVisible()
-      const tagName = await activeItem.evaluate((el) => el.tagName.toLowerCase())
-      expect(tagName).toBe('a')
+      await expect(activeItem).toHaveRole('link')
+      await expect(activeItem).toHaveJSProperty('href', postsUrl.list)
     })
 
     test('should only have one nav item active at a time', async () => {
@@ -795,7 +881,6 @@ describe('General', () => {
       await wait(1000)
       await page.locator('.collections__card-list .card__click').first().click()
       // flaky
-      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(1000)
       // wait for the search params to get injected into the URL
       const escapedAdminURL = postsUrl.admin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')

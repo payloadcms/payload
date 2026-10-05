@@ -118,6 +118,7 @@ export const azTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Widgetləri axtarın...',
     widgetCollectionRequired: 'Collection tələb olunur.',
     widgetConfigurationError: 'Vidjet konfiqurasiyası xətası',
+    widgetDropFilesToUpload: 'Faylı buraya sürükləyin və buraxın',
     widgetInvalidCollection: 'Collection "{{collection}}" mövcud deyil.',
     widgetInvalidFilterField:
       'Filter sahəsi "{{field}}" "{{collection}}" kolleksiyasında mövcud deyil.',
@@ -135,6 +136,9 @@ export const azTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Field-u sırala',
     widgetTitleFallback: 'Collection sorğusu',
     widgetTitleLabel: 'Başlıq',
+    widgetUploadDropzoneDescription:
+      'Kompüterinizdən yükləmək üçün sürükləyib buraxa və ya aşağıdakı düyməni klikləyə bilərsiniz.',
+    widgetUploadFiles: 'Faylları Əlavə Edin',
   },
   error: {
     accountAlreadyActivated: 'Bu hesab artıq aktivləşdirilib.',
@@ -498,6 +502,7 @@ export const azTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Bütün {{label}}-ı göstər',
     shownInTable: 'Cədvəldə göstərilir',
     showSidebar: 'Yan paneli göstər',
+    skipToContent: 'Məzmuna keç',
     sorryNotFound: 'Üzr istəyirik - sizin tələbinizə uyğun heç nə yoxdur.',
     sort: 'Sırala',
     sortByLabelDirection: '{{label}} {{direction}} ilə sırala',
@@ -562,6 +567,7 @@ export const azTranslations: DefaultTranslationsObject = {
     noParent: 'Heç bir Valideyn',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Axtar {{label}}',
+    searchResults: '{{count}} tapıldı',
   },
   localization: {
     cannotCopySameLocale: 'Eyni dildə köçürmək mümkün deyil',

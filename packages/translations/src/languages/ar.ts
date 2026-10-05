@@ -119,6 +119,7 @@ export const arTranslations: DefaultTranslationsObject = {
     searchWidgets: 'ابحث عن الأدوات...',
     widgetCollectionRequired: 'المجموعة مطلوبة.',
     widgetConfigurationError: 'خطأ في تكوين الودجة',
+    widgetDropFilesToUpload: 'قم بسحب وإسقاط ملفّ',
     widgetInvalidCollection: 'مجموعة "{{collection}}" غير موجودة.',
     widgetInvalidFilterField: 'حقل التصفية "{{field}}" غير موجود في المجموعة "{{collection}}".',
     widgetInvalidSortField: 'حقل الفرز "{{field}}" غير موجود في Collection "{{collection}}".',
@@ -134,6 +135,9 @@ export const arTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'ترتيب Field',
     widgetTitleFallback: 'استعلام Collection',
     widgetTitleLabel: 'العنوان',
+    widgetUploadDropzoneDescription:
+      'قم بالتحميل من جهازك عن طريق السحب والإفلات، أو انقر على الزر أدناه.',
+    widgetUploadFiles: 'أضف ملفات',
   },
   error: {
     accountAlreadyActivated: 'تم تفعيل هذا الحساب بالفعل.',
@@ -484,6 +488,7 @@ export const arTranslations: DefaultTranslationsObject = {
     showAllLabel: 'عرض كل {{label}}',
     shownInTable: 'معروض في جدول',
     showSidebar: 'إظهار الشريط الجانبي',
+    skipToContent: 'تخطي إلى المحتوى',
     sorryNotFound: 'عذرًا - لا يوجد شيء يتوافق مع طلبك.',
     sort: 'ترتيب',
     sortByLabelDirection: 'رتّب حسب {{label}} {{direction}}',
@@ -545,6 +550,7 @@ export const arTranslations: DefaultTranslationsObject = {
     noParent: 'لا والدين',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'البحث {{label}}',
+    searchResults: 'تم العثور على {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'لا يمكن النسخ إلى نفس الموقع',

@@ -120,6 +120,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Поиск виджетов...',
     widgetCollectionRequired: 'Collection является обязательным.',
     widgetConfigurationError: 'Ошибка конфигурации виджета',
+    widgetDropFilesToUpload: 'Перетащите файл',
     widgetInvalidCollection: 'Коллекция "{{collection}}" не существует.',
     widgetInvalidFilterField:
       'Поле фильтра «{{field}}» не существует в коллекции «{{collection}}».',
@@ -137,6 +138,9 @@ export const ruTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Сортировать поле',
     widgetTitleFallback: 'Запрос к Collection',
     widgetTitleLabel: 'Заголовок',
+    widgetUploadDropzoneDescription:
+      'Загрузите с вашего компьютера путем перетаскивания файла или нажмите кнопку ниже',
+    widgetUploadFiles: 'Добавить файлы',
   },
   error: {
     accountAlreadyActivated: 'Этот аккаунт уже был активирован.',
@@ -497,6 +501,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Показать все {{label}}',
     shownInTable: 'Показано в таблице',
     showSidebar: 'Показать боковую панель',
+    skipToContent: 'Перейти к содержимому',
     sorryNotFound: 'К сожалению, ничего подходящего под ваш запрос нет.',
     sort: 'Сортировать',
     sortByLabelDirection: 'Сортировать по {{label}} {{direction}}',
@@ -561,6 +566,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     noParent: 'Нет родителя',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Поиск {{label}}',
+    searchResults: 'Найдено: {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Невозможно скопировать в ту же локаль',

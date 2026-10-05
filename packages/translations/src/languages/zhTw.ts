@@ -112,6 +112,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     searchWidgets: '搜索小工具...',
     widgetCollectionRequired: 'Collection 為必填項目。',
     widgetConfigurationError: '元件組態錯誤',
+    widgetDropFilesToUpload: '拖放檔案',
     widgetInvalidCollection: 'Collection「{{collection}}」不存在。',
     widgetInvalidFilterField: '篩選欄位「{{field}}」不存在於 Collection「{{collection}}」中。',
     widgetInvalidSortField: '排序欄位「{{field}}」在集合「{{collection}}」中不存在。',
@@ -126,6 +127,8 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: '排序欄位',
     widgetTitleFallback: 'Collection 查詢',
     widgetTitleLabel: '標題',
+    widgetUploadDropzoneDescription: '透過拖放從您的電腦上傳，或點擊下方按鈕。',
+    widgetUploadFiles: '新增多個檔案',
   },
   error: {
     accountAlreadyActivated: '此帳戶已啟用。',
@@ -469,6 +472,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     showAllLabel: '顯示所有 {{label}}',
     shownInTable: '以表格方式顯示',
     showSidebar: '顯示側邊欄',
+    skipToContent: '跳至內容',
     sorryNotFound: '很抱歉，找不到符合條件的內容。',
     sort: '排序',
     sortByLabelDirection: '依 {{label}} {{direction}} 排序',
@@ -529,6 +533,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     noParent: '無父項',
     noResults: 'No results for "{{query}}"',
     searchLabel: '搜尋 {{label}}',
+    searchResults: '找到 {{count}} 項',
   },
   localization: {
     cannotCopySameLocale: '無法複製到相同語言地區',

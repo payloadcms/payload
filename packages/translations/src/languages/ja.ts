@@ -119,6 +119,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     searchWidgets: 'ウィジェットを検索...',
     widgetCollectionRequired: 'Collectionは必須です。',
     widgetConfigurationError: 'ウィジェット設定エラー',
+    widgetDropFilesToUpload: 'ファイルをドラッグ & ドロップする',
     widgetInvalidCollection: 'Collection「{{collection}}」は存在しません。',
     widgetInvalidFilterField:
       'コレクション「{{collection}}」にフィルターField「{{field}}」は存在しません。',
@@ -136,6 +137,9 @@ export const jaTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'ソートフィールド',
     widgetTitleFallback: 'コレクションクエリ',
     widgetTitleLabel: 'タイトル',
+    widgetUploadDropzoneDescription:
+      'ドラッグアンドドロップでコンピューターからアップロードするか、下のボタンをクリックしてください。',
+    widgetUploadFiles: 'ファイルを追加する',
   },
   error: {
     accountAlreadyActivated: 'このアカウントはすでに有効です。',
@@ -495,6 +499,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     showAllLabel: 'すべての{{label}}を表示する',
     shownInTable: '表に表示',
     showSidebar: 'サイドバーを表示',
+    skipToContent: 'コンテンツへスキップ',
     sorryNotFound: '申し訳ありません。リクエストに対応する内容が見つかりませんでした。',
     sort: '並び替え',
     sortByLabelDirection: '{{label}}により並べ替え {{direction}}',
@@ -556,6 +561,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     noParent: '親なし',
     noResults: '「{{query}}」に一致する結果がありません',
     searchLabel: '{{label}}を検索する',
+    searchResults: '{{count}}件見つかりました',
   },
   localization: {
     cannotCopySameLocale: '同じロケールにはコピーできません',

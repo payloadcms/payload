@@ -115,6 +115,7 @@ export const heTranslations: DefaultTranslationsObject = {
     searchWidgets: "חפש ווידג'טים...",
     widgetCollectionRequired: 'Collection נדרשת.',
     widgetConfigurationError: "שגיאת תצורת ווידג'ט",
+    widgetDropFilesToUpload: 'גרור ושחרר קובץ',
     widgetInvalidCollection: 'ה-Collection "{{collection}}" אינו קיים.',
     widgetInvalidFilterField: 'שדה הסינון "{{field}}" אינו קיים ב-Collection "{{collection}}".',
     widgetInvalidSortField: 'שדה המיון "{{field}}" אינו קיים ב-Collection "{{collection}}".',
@@ -130,6 +131,9 @@ export const heTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'שדה מיון',
     widgetTitleFallback: 'שאילתת Collection',
     widgetTitleLabel: 'כותרת',
+    widgetUploadDropzoneDescription:
+      'העלו מהמחשב שלכם באמצעות גרירה ושחרור, או לחצו על הכפתור למטה',
+    widgetUploadFiles: 'הוסף קבצים',
   },
   error: {
     accountAlreadyActivated: 'חשבון זה כבר הופעל.',
@@ -479,6 +483,7 @@ export const heTranslations: DefaultTranslationsObject = {
     showAllLabel: 'הצג את כל ה{{label}}',
     shownInTable: 'מוצג בטבלה',
     showSidebar: 'הצג סרגל צד',
+    skipToContent: 'דילוג לתוכן',
     sorryNotFound: 'מצטערים - אין תוצאות התואמות את הבקשה.',
     sort: 'מיין',
     sortByLabelDirection: 'מיין לפי {{label}} {{direction}}',
@@ -539,6 +544,7 @@ export const heTranslations: DefaultTranslationsObject = {
     noParent: 'אין הורה',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'חפש {{label}}',
+    searchResults: 'נמצאו {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'לא ניתן להעתיק לאותו מקום',

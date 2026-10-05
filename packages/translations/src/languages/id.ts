@@ -119,6 +119,7 @@ export const idTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Cari widget...',
     widgetCollectionRequired: 'Collection wajib diisi.',
     widgetConfigurationError: 'Kesalahan konfigurasi widget',
+    widgetDropFilesToUpload: 'Seret dan lepas file',
     widgetInvalidCollection: 'Collection "{{collection}}" tidak ada.',
     widgetInvalidFilterField:
       'Filter field "{{field}}" tidak ada pada Collection "{{collection}}".',
@@ -135,6 +136,9 @@ export const idTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Urutkan Field',
     widgetTitleFallback: 'Kueri Collection',
     widgetTitleLabel: 'Judul',
+    widgetUploadDropzoneDescription:
+      'Unggah dari komputer Anda dengan cara seret dan lepas, atau klik tombol di bawah ini',
+    widgetUploadFiles: 'Tambah file',
   },
   error: {
     accountAlreadyActivated: 'Akun ini sudah diaktifkan.',
@@ -496,6 +500,7 @@ export const idTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Tampilkan semua {{label}}',
     shownInTable: 'Ditampilkan dalam tabel',
     showSidebar: 'Tampilkan bilah samping',
+    skipToContent: 'Lewati ke konten',
     sorryNotFound: 'Maaf—tidak ada yang sesuai dengan permintaan Anda.',
     sort: 'Urutkan',
     sortByLabelDirection: 'Urutkan berdasarkan {{label}} {{direction}}',
@@ -560,6 +565,7 @@ export const idTranslations: DefaultTranslationsObject = {
     noParent: 'Tanpa Orang Tua',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Cari {{label}}',
+    searchResults: 'Ditemukan {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Tidak dapat menyalin ke lokal yang sama',

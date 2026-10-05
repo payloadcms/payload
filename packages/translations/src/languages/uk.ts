@@ -119,6 +119,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Пошук віджетів...',
     widgetCollectionRequired: 'Collection є обов’язковим.',
     widgetConfigurationError: 'Помилка конфігурації віджета',
+    widgetDropFilesToUpload: 'Перемістіть файл',
     widgetInvalidCollection: 'Collection "{{collection}}" не існує.',
     widgetInvalidFilterField: 'Поле фільтрації "{{field}}" не існує у колекції "{{collection}}".',
     widgetInvalidSortField: 'Поле сортування "{{field}}" не існує у Collection "{{collection}}".',
@@ -134,6 +135,9 @@ export const ukTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Поле сортування',
     widgetTitleFallback: 'Запит колекції',
     widgetTitleLabel: 'Заголовок',
+    widgetUploadDropzoneDescription:
+      'Завантажте з вашого комп’ютера шляхом перетягування або натисніть кнопку нижче',
+    widgetUploadFiles: 'Додати файли',
   },
   error: {
     accountAlreadyActivated: 'Цей обліковий запис вже активований',
@@ -490,6 +494,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Показати всі {{label}}',
     shownInTable: 'Показано у таблиці',
     showSidebar: 'Показати бічну панель',
+    skipToContent: 'Перейти до вмісту',
     sorryNotFound: 'Вибачте, немає нічого, що відповідало б Вашому запиту.',
     sort: 'Сортувати',
     sortByLabelDirection: 'Сортувати за {{label}} {{direction}}',
@@ -552,6 +557,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     noParent: 'Без батьківського елемента',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Пошук {{label}}',
+    searchResults: 'Знайдено: {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Не можна копіювати в ту ж саму локалізацію',

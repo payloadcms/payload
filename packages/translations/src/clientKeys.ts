@@ -89,6 +89,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'dashboard:noItems',
   'dashboard:widgetCollectionRequired',
   'dashboard:widgetConfigurationError',
+  'dashboard:widgetDropFilesToUpload',
   'dashboard:widgetInvalidCollection',
   'dashboard:widgetInvalidFilterField',
   'dashboard:widgetInvalidSortField',
@@ -103,6 +104,8 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'dashboard:widgetSortFieldLabel',
   'dashboard:widgetTitleFallback',
   'dashboard:widgetTitleLabel',
+  'dashboard:widgetUploadDropzoneDescription',
+  'dashboard:widgetUploadFiles',
 
   'error:autosaving',
   'error:correctInvalidFields',
@@ -192,6 +195,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'hierarchy:noParent',
   'hierarchy:noResults',
   'hierarchy:searchLabel',
+  'hierarchy:searchResults',
 
   'general:all',
   'general:aboutToDeleteCount',
@@ -417,6 +421,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:showAllLabel',
   'general:showSidebar',
   'general:shownInTable',
+  'general:skipToContent',
   'general:sorryNotFound',
   'general:sort',
   'general:sortByLabelDirection',

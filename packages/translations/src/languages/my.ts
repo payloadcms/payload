@@ -119,6 +119,7 @@ export const myTranslations: DefaultTranslationsObject = {
     searchWidgets: 'ဝစ်ဂျက်များ ရှာဖွေပါ...',
     widgetCollectionRequired: 'Collection သည် မဖြစ်မနေလိုအပ်ပါသည်။',
     widgetConfigurationError: 'Widget အတည်ပြုခြင်းအမှား',
+    widgetDropFilesToUpload: 'ဖိုင်တစ်ဖိုင်ကို ဆွဲချလိုက်ပါ။',
     widgetInvalidCollection: 'Collection "{{collection}}" မရှိပါ။',
     widgetInvalidFilterField:
       'Filter field "{{field}}" သည် collection "{{collection}}" တွင် မရှိပါ။',
@@ -136,6 +137,9 @@ export const myTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Field တူညီခြင်း အလိုက် စီစဉ်ရန်',
     widgetTitleFallback: 'Collection query (မေးခွန်း)',
     widgetTitleLabel: 'ခေါင်းစဉ်',
+    widgetUploadDropzoneDescription:
+      'သင့်ကွန်ပျူတာမှ ဖိုင်များကို ဤနေရာသို့ ဆွဲယူပြီး ချထား၍ တင်နိုင်ပါသည်၊ သို့မဟုတ် အောက်ပါခလုတ်ကို နှိပ်ပါ။',
+    widgetUploadFiles: 'ဖိုင်များ ထည့်ပါ',
   },
   error: {
     accountAlreadyActivated: 'ဤအကောင့်ကို အသက်သွင်းပြီးဖြစ်သည်။',
@@ -500,6 +504,7 @@ export const myTranslations: DefaultTranslationsObject = {
     showAllLabel: '{{label}} အားလုံး ပြပါ',
     shownInTable: 'ဇယားတွင် ပြသထားသည်။',
     showSidebar: 'ဘေးဘက်လမ်းညွှန်ပြရန်',
+    skipToContent: 'အကြောင်းအရာသို့ ကျော်သွားရန်',
     sorryNotFound: 'ဝမ်းနည်းပါသည်။ သင်ရှာနေတဲ့ဟာ ဒီမှာမရှိပါ။',
     sort: 'အစဉ်လိုက်',
     sortByLabelDirection: 'အစဉ်အလိုက် စီမံခန့်ခွဲထားသည် {{label}} {{direction}}',
@@ -564,6 +569,7 @@ export const myTranslations: DefaultTranslationsObject = {
     noParent: 'မိဘ မရှိပါ',
     noResults: '"{{query}}" အတွက် ရလဒ်မရှိပါ',
     searchLabel: '{{label}} ရှာဖွေပါ',
+    searchResults: '{{count}} ခု တွေ့ရှိသည်',
   },
   localization: {
     cannotCopySameLocale: 'တူညီသော ဒေသသို့ ကူးယူ၍မရပါ',

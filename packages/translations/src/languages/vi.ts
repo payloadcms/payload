@@ -119,6 +119,7 @@ export const viTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Tìm kiếm các widget...',
     widgetCollectionRequired: 'Collection là bắt buộc.',
     widgetConfigurationError: 'Lỗi cấu hình Widget',
+    widgetDropFilesToUpload: 'Kéo và thả một tập tin',
     widgetInvalidCollection: 'Collection "{{collection}}" không tồn tại.',
     widgetInvalidFilterField:
       'Trường lọc "{{field}}" không tồn tại trong Collection "{{collection}}".',
@@ -136,6 +137,9 @@ export const viTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sắp xếp Field',
     widgetTitleFallback: 'Truy vấn Collection',
     widgetTitleLabel: 'Tiêu đề',
+    widgetUploadDropzoneDescription:
+      'Tải lên từ máy tính của bạn bằng cách kéo và thả, hoặc nhấp vào nút bên dưới',
+    widgetUploadFiles: 'Thêm tệp',
   },
   error: {
     accountAlreadyActivated: 'Lỗi - Tài khoản này đã được kích hoạt.',
@@ -495,6 +499,7 @@ export const viTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Hiển thị tất cả {{label}}',
     shownInTable: 'Hiển thị trong bảng',
     showSidebar: 'Hiển thị thanh bên',
+    skipToContent: 'Chuyển đến nội dung',
     sorryNotFound: 'Xin lỗi, không có kết quả nào tương ứng với yêu cầu của bạn.',
     sort: 'Sắp xếp',
     sortByLabelDirection: 'Sắp xếp theo {{label}} {{direction}}',
@@ -557,6 +562,7 @@ export const viTranslations: DefaultTranslationsObject = {
     noParent: 'Không có bố mẹ',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Tìm kiếm {{label}}',
+    searchResults: 'Tìm thấy {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Không thể sao chép vào cùng một vị trí',

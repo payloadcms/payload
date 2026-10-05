@@ -117,6 +117,7 @@ export const etTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Otsi vidinaid...',
     widgetCollectionRequired: 'Kogu on nõutav.',
     widgetConfigurationError: 'Vidina konfiguratsiooni viga',
+    widgetDropFilesToUpload: 'Lohista ja aseta fail',
     widgetInvalidCollection: 'Kogumikku "{{collection}}" ei eksisteeri.',
     widgetInvalidFilterField: 'Filtri väli "{{field}}" ei eksisteeri kogumikus "{{collection}}".',
     widgetInvalidSortField:
@@ -133,6 +134,9 @@ export const etTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sorteeri väli',
     widgetTitleFallback: 'Kogumi päring',
     widgetTitleLabel: 'Pealkiri',
+    widgetUploadDropzoneDescription:
+      'Laad üles oma arvutist, lohistades faili siia või klõpsates allolevat nuppu.',
+    widgetUploadFiles: 'Lisa failid',
   },
   error: {
     accountAlreadyActivated: 'See konto on juba aktiveeritud.',
@@ -490,6 +494,7 @@ export const etTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Näita kõiki {{label}}',
     shownInTable: 'Kuvatud tabelis',
     showSidebar: 'Kuva külgriba',
+    skipToContent: 'Liigu sisu juurde',
     sorryNotFound: 'Vabandust - teie päringule vastavat sisu ei leitud.',
     sort: 'Sorteeri',
     sortByLabelDirection: 'Sorteeri {{label}} {{direction}}',
@@ -552,6 +557,7 @@ export const etTranslations: DefaultTranslationsObject = {
     noParent: 'Ei Vanem',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Otsi {{label}}',
+    searchResults: 'Leitud: {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Ei saa kopeerida samasse keelde',

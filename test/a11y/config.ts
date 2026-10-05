@@ -33,6 +33,12 @@ const FolderCollection = {
   },
 } satisfies CollectionConfig
 
+const MediaAltCollection = {
+  slug: 'media-alt',
+  fields: [],
+  upload: true,
+} satisfies CollectionConfig
+
 export default buildConfigWithDefaults({
   config: {
     // ...extend config here
@@ -49,11 +55,24 @@ export default buildConfigWithDefaults({
           },
         },
       },
+      dashboard: {
+        defaultLayout: [
+          { widgetSlug: 'collections', width: 'full' },
+          { widgetSlug: 'upload-dropzone', width: 'small' },
+        ],
+        widgets: [],
+      },
       importMap: {
         baseDir: path.resolve(dirname),
       },
     },
-    collections: [UsersCollection, FolderCollection, PostsCollection, MediaCollection],
+    collections: [
+      UsersCollection,
+      FolderCollection,
+      PostsCollection,
+      MediaCollection,
+      MediaAltCollection,
+    ],
     editor: lexicalEditor({}),
     globals: [
       // ...add more globals here
@@ -112,6 +131,15 @@ export default buildConfigWithDefaults({
         overrideAccess: true,
       })
     }
+
+    await payload.create({
+      collection: 'payload-folders',
+      data: {
+        name: 'Accessibility final child folder',
+        '_h_payload-folders': parentFolder.id,
+      },
+      overrideAccess: true,
+    })
 
     const firstPost = await payload.create({
       collection: postsSlug,

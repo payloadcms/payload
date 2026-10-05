@@ -120,6 +120,7 @@ export const isTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Leita að græjum...',
     widgetCollectionRequired: 'Safn er skylt.',
     widgetConfigurationError: 'Villa við stillingu búnaðar',
+    widgetDropFilesToUpload: 'Dragðu og slepptu skrá',
     widgetInvalidCollection: 'Kolekcja „{{collection}}” nie istnieje.',
     widgetInvalidFilterField: 'Sía reitur "{{field}}" er ekki til í safni "{{collection}}".',
     widgetInvalidSortField: 'Röðunarreiturinn "{{field}}" er ekki til í safninu "{{collection}}".',
@@ -135,6 +136,9 @@ export const isTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Raða Field',
     widgetTitleFallback: 'Safnafyrirspurn',
     widgetTitleLabel: 'Titill',
+    widgetUploadDropzoneDescription:
+      'Hladdu skjölum inn frá tölvunni þinni með því að draga þau hingað eða smelltu á hnappinn hér að neðan',
+    widgetUploadFiles: 'Bæta við skrám',
   },
   error: {
     accountAlreadyActivated: 'Þessi aðgangur hefur þegar verið virkjaður.',
@@ -491,6 +495,7 @@ export const isTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Sýna allar {{label}}',
     shownInTable: 'Sýnt í töflu',
     showSidebar: 'Sýna hliðarstiku',
+    skipToContent: 'Fara beint í efni',
     sorryNotFound: 'Því miður, það er ekkert sem samsvarar beiðninni þinni.',
     sort: 'Raða',
     sortByLabelDirection: 'Raða eftir {{label}} {{direction}}',
@@ -554,6 +559,7 @@ export const isTranslations: DefaultTranslationsObject = {
     noParent: 'Engin foreldri',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Leita {{label}}',
+    searchResults: 'Fann {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Ekki hægt að afrita í sömu staðfærslu',

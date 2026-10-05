@@ -118,6 +118,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Meklēt logrīkus...',
     widgetCollectionRequired: 'Kolekcija ir obligāta.',
     widgetConfigurationError: 'Sīkrīka konfigurācijas kļūda',
+    widgetDropFilesToUpload: 'Ievelciet un nometiet failu',
     widgetInvalidCollection: 'Collection "{{collection}}" neeksistē.',
     widgetInvalidFilterField: 'Filtra lauks "{{field}}" neeksistē kolekcijā "{{collection}}".',
     widgetInvalidSortField: 'Kārtošanas lauks "{{field}}" neeksistē kolekcijā "{{collection}}".',
@@ -133,6 +134,9 @@ export const lvTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Kārtot lauku',
     widgetTitleFallback: 'Kolekcijas vaicājums',
     widgetTitleLabel: 'Virsraksts',
+    widgetUploadDropzoneDescription:
+      'Augšupielādējiet no sava datora, velkot un nometot, vai noklikšķiniet uz pogas zemāk.',
+    widgetUploadFiles: 'Pievienot failus',
   },
   error: {
     accountAlreadyActivated: 'Šis konts jau ir aktivizēts.',
@@ -493,6 +497,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Rādīt visus {{label}}',
     shownInTable: 'Parādīts tabulā',
     showSidebar: 'Rādīt sānu joslu',
+    skipToContent: 'Pāriet uz saturu',
     sorryNotFound: 'Atvainojiet — jūsu pieprasījumam neatbilst nekas.',
     sort: 'Kārtot',
     sortByLabelDirection: 'Kārtot pēc {{label}} {{direction}}',
@@ -554,6 +559,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     noParent: 'Nav vecāku',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Meklēt {{label}}',
+    searchResults: 'Atrasts: {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Nevar kopēt uz to pašu lokalizāciju',

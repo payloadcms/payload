@@ -117,6 +117,7 @@ export const koTranslations: DefaultTranslationsObject = {
     searchWidgets: '위젯 검색...',
     widgetCollectionRequired: 'Collection이 필요합니다.',
     widgetConfigurationError: '위젯 구성 오류',
+    widgetDropFilesToUpload: '파일을 끌어다 놓으세요',
     widgetInvalidCollection: 'Collection "{{collection}}"이(가) 존재하지 않습니다.',
     widgetInvalidFilterField:
       '컬렉션 "{{collection}}"에 필터 필드 "{{field}}"가 존재하지 않습니다.',
@@ -133,6 +134,9 @@ export const koTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: '정렬 필드',
     widgetTitleFallback: '컬렉션 쿼리',
     widgetTitleLabel: '제목',
+    widgetUploadDropzoneDescription:
+      '드래그 앤 드롭으로 컴퓨터에서 업로드하거나, 아래 버튼을 클릭하십시오.',
+    widgetUploadFiles: '파일 추가',
   },
   error: {
     accountAlreadyActivated: '이 계정은 이미 활성화되었습니다.',
@@ -492,6 +496,7 @@ export const koTranslations: DefaultTranslationsObject = {
     showAllLabel: '{{label}} 모두 표시',
     shownInTable: '표에 표시됨',
     showSidebar: '사이드바 표시',
+    skipToContent: '본문으로 건너뛰기',
     sorryNotFound: '죄송합니다. 요청과 일치하는 항목이 없습니다.',
     sort: '정렬',
     sortByLabelDirection: '{{label}} {{direction}}으로 정렬',
@@ -553,6 +558,7 @@ export const koTranslations: DefaultTranslationsObject = {
     noParent: '부모 없음',
     noResults: 'No results for "{{query}}"',
     searchLabel: '{{label}} 검색',
+    searchResults: '{{count}}개 찾음',
   },
   localization: {
     cannotCopySameLocale: '동일한 로캘에 복사할 수 없습니다.',

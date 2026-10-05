@@ -120,6 +120,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Zoek widgets...',
     widgetCollectionRequired: 'Collectie is vereist.',
     widgetConfigurationError: 'Fout in de configuratie van de widget',
+    widgetDropFilesToUpload: 'Sleep een bestand',
     widgetInvalidCollection: 'Collectie "{{collection}}" bestaat niet.',
     widgetInvalidFilterField: 'Filterveld "{{field}}" bestaat niet in collectie "{{collection}}".',
     widgetInvalidSortField: 'Sorteerveld "{{field}}" bestaat niet in collectie "{{collection}}".',
@@ -135,6 +136,9 @@ export const nlTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sorteerveld',
     widgetTitleFallback: 'Collectiequery',
     widgetTitleLabel: 'Titel',
+    widgetUploadDropzoneDescription:
+      'Upload vanaf uw computer via slepen en neerzetten, of klik op de knop hieronder.',
+    widgetUploadFiles: 'Bestanden toevoegen',
   },
   error: {
     accountAlreadyActivated: 'Dit account is al geactiveerd.',
@@ -502,6 +506,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Toon alle {{label}}',
     shownInTable: 'Weergegeven in tabel',
     showSidebar: 'Zijbalk weergeven',
+    skipToContent: 'Ga naar inhoud',
     sorryNotFound: 'Sorry, er is niets dat overeen komt met uw verzoek.',
     sort: 'Sorteer',
     sortByLabelDirection: 'Sorteer op {{label}} {{direction}}',
@@ -564,6 +569,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     noParent: 'Geen Ouder',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Zoek {{label}}',
+    searchResults: '{{count}} gevonden',
   },
   localization: {
     cannotCopySameLocale: 'Kan niet naar dezelfde taal kopiëren',

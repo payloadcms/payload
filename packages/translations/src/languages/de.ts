@@ -121,6 +121,7 @@ export const deTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Suche Widgets...',
     widgetCollectionRequired: 'Collection ist erforderlich.',
     widgetConfigurationError: 'Widget-Konfigurationsfehler',
+    widgetDropFilesToUpload: 'Datei per Drag & Drop verschieben',
     widgetInvalidCollection: 'Collection „{{collection}}“ existiert nicht.',
     widgetInvalidFilterField:
       'Das Filter-Feld "{{field}}" existiert nicht in der Collection "{{collection}}".',
@@ -139,6 +140,9 @@ export const deTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sortierfeld',
     widgetTitleFallback: 'Sammlungsabfrage',
     widgetTitleLabel: 'Titel',
+    widgetUploadDropzoneDescription:
+      'Laden Sie von Ihrem Computer hoch, indem Sie per Drag-and-Drop ziehen, oder klicken Sie auf die Schaltfläche unten.',
+    widgetUploadFiles: 'Dateien hinzufügen',
   },
   error: {
     accountAlreadyActivated: 'Dieses Benutzerkonto wurde bereits aktiviert',
@@ -504,6 +508,7 @@ export const deTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Alle {{label}} anzeigen',
     shownInTable: 'In Tabelle angezeigt',
     showSidebar: 'Seitenleiste anzeigen',
+    skipToContent: 'Zum Inhalt springen',
     sorryNotFound:
       'Es tut uns leid, aber wir haben nichts gefunden, was deiner Anfrage entspricht.',
     sort: 'Sortieren',
@@ -569,6 +574,7 @@ export const deTranslations: DefaultTranslationsObject = {
     noParent: 'Kein Elternteil',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Suche {{label}}',
+    searchResults: '{{count}} gefunden',
   },
   localization: {
     cannotCopySameLocale: 'Kann nicht in dieselbe Sprache kopiert werden',
