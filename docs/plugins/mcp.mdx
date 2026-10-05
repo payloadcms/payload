@@ -163,6 +163,7 @@ authenticated user, provide an override object with `access: () => true`.
 | `disabled`                             | `boolean`    | Skip MCP endpoint registration.                                                                                                               |
 | `hooks.afterToolCall`                  | `function[]` | Run cross-cutting hooks after tool handlers return. See [MCP plugin hooks](#mcp-plugin-hooks).                                                |
 | `overrideGetAuthorizedMCP`             | `function`   | Replace the default MCP authorization resolver. See [Custom auth](#custom-auth).                                                              |
+| `mcp.maxRequestBodySize`               | `number`     | Largest HTTP request body in bytes. Larger requests get a `413` response. Base64 file uploads count toward it. Default `4194304` (4 MiB).     |
 | `mcp.serverOptions.serverInfo.name`    | `string`     | The MCP server name advertised to clients. Default `'Payload MCP Server'`.                                                                    |
 | `mcp.serverOptions.serverInfo.version` | `string`     | The MCP server version. Default `'1.0.0'`.                                                                                                    |
 | `mcp.serverOptions.options`            | `object`     | Raw options passed through to the underlying `McpServer` from `@modelcontextprotocol/server`.                                                 |

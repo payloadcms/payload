@@ -33,14 +33,16 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
   }
 
   const authorizedMCP = await getAuthorizedMCP({ overrideAccess, req })
+  const maxRequestBodySize = pluginConfig.mcp?.maxRequestBodySize
   // Payload augments the original web-standard Request in place.
   const mcpRequest = req as PayloadRequest & Request
 
   // Keep the old JSON-only, stateless behavior because the SDK's 2025 fallback uses SSE.
-  if (await isLegacyRequest(mcpRequest)) {
+  if (await isLegacyRequest(mcpRequest, undefined, { maxRequestBodySize })) {
     const server = buildMcpServer({ authorizedMCP, pluginConfig, req })
     const transport = new WebStandardStreamableHTTPServerTransport({
       enableJsonResponse: true,
+      maxRequestBodySize,
       sessionIdGenerator: undefined, // stateless mode
     })
     transport.onerror = (err) => {
@@ -59,6 +61,7 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
 
   const handler = createMcpHandler(() => buildMcpServer({ authorizedMCP, pluginConfig, req }), {
     legacy: 'reject',
+    maxRequestBodySize,
     // SDK subscriptions always use SSE, so disable them to keep every response JSON-only.
     maxSubscriptions: 0,
     onerror: (err) => {
