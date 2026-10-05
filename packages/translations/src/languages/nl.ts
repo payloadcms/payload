@@ -120,6 +120,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Zoek widgets...',
     widgetCollectionRequired: 'Collectie is vereist.',
     widgetConfigurationError: 'Fout in de configuratie van de widget',
+    widgetDropFilesToUpload: 'Sleep een bestand',
     widgetInvalidCollection: 'Collectie "{{collection}}" bestaat niet.',
     widgetInvalidFilterField: 'Filterveld "{{field}}" bestaat niet in collectie "{{collection}}".',
     widgetInvalidSortField: 'Sorteerveld "{{field}}" bestaat niet in collectie "{{collection}}".',
@@ -135,6 +136,9 @@ export const nlTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sorteerveld',
     widgetTitleFallback: 'Collectiequery',
     widgetTitleLabel: 'Titel',
+    widgetUploadDropzoneDescription:
+      'Upload vanaf uw computer via slepen en neerzetten, of klik op de knop hieronder.',
+    widgetUploadFiles: 'Bestanden toevoegen',
   },
   error: {
     accountAlreadyActivated: 'Dit account is al geactiveerd.',
@@ -468,6 +472,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     remove: 'Verwijderen',
     rename: 'Hernoemen',
     replaceRow: 'Rij vervangen',
+    requiredFields: 'Velden gemarkeerd met * zijn verplicht.',
     reset: 'Resetten',
     resetPreferences: 'Voorkeuren resetten',
     resetPreferencesDescription:
@@ -485,8 +490,12 @@ export const nlTranslations: DefaultTranslationsObject = {
     saveChanges: 'Wijzigingen Opslaan',
     saving: 'Bewaren...',
     schedulePublishFor: 'Plan publicatie voor {{title}}',
+    searchAutomatically: 'De resultaten worden automatisch bijgewerkt terwijl u typt.',
     searchBy: 'Zoeken op {{label}}',
+    searchCleared: 'Zoekopdracht gewist.',
     searchColumns: 'Zoekkolommen',
+    searchGroups: 'Groepen voor ‘{{search}}’: {{count}}.',
+    searchResults: 'Resultaten voor ‘{{search}}’: {{count}}.',
     select: 'Selecteer',
     selectAll: 'Alles selecteren {{count}} {{label}}',
     selectAllRows: 'Selecteer alle rijen',

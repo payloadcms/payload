@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+/* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. MODIFY AT YOUR OWN RISK. */
 
 import { payloadLayoutRoute } from '@payloadcms/tanstack-start/client'
 import { createFileRoute } from '@tanstack/react-router'

@@ -119,6 +119,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Pesquisar widgets...',
     widgetCollectionRequired: 'Coleção é obrigatória.',
     widgetConfigurationError: 'Erro de configuração do widget',
+    widgetDropFilesToUpload: 'Arraste e solte um arquivo',
     widgetInvalidCollection: 'A Coleção "{{collection}}" não existe.',
     widgetInvalidFilterField:
       'O campo de filtro "{{field}}" não existe na coleção "{{collection}}".',
@@ -136,6 +137,9 @@ export const ptTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Campo de Ordenação',
     widgetTitleFallback: 'Consulta de Collection',
     widgetTitleLabel: 'Título',
+    widgetUploadDropzoneDescription:
+      'Carregue do seu computador via arrastar e soltar, ou clique no botão abaixo',
+    widgetUploadFiles: 'Adicionar Arquivos',
   },
   error: {
     accountAlreadyActivated: 'Essa conta já foi ativada.',
@@ -463,6 +467,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     remove: 'Remover',
     rename: 'Renomear',
     replaceRow: 'Substituir Linha',
+    requiredFields: 'Os campos marcados com * são obrigatórios.',
     reset: 'Redefinir',
     resetPreferences: 'Redefinir preferências',
     resetPreferencesDescription:
@@ -480,8 +485,12 @@ export const ptTranslations: DefaultTranslationsObject = {
     saveChanges: 'Salvar Alterações',
     saving: 'Salvando...',
     schedulePublishFor: 'Agendar publicação para {{title}}',
+    searchAutomatically: 'Os resultados são atualizados automaticamente enquanto escreve.',
     searchBy: 'Buscar por {{label}}',
+    searchCleared: 'Pesquisa limpa.',
     searchColumns: 'Pesquisar colunas',
+    searchGroups: 'Grupos para “{{search}}”: {{count}}.',
+    searchResults: 'Resultados para “{{search}}”: {{count}}.',
     select: 'Selecionar',
     selectAll: 'Selecione tudo {{count}} {{label}}',
     selectAllRows: 'Selecione todas as linhas',

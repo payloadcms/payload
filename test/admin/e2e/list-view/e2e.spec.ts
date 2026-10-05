@@ -57,6 +57,7 @@ import { getSelectMenu } from '../../../__helpers/e2e/selectInput.js'
 import { expectPerPageLimits, setPerPageLimit } from '../../../__helpers/e2e/setPerPageLimit.js'
 import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
 import { closeListDrawer } from '../../../__helpers/e2e/toggleListDrawer.js'
+import { openNav } from '../../../__helpers/e2e/toggleNav.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { listViewSelectAPISlug } from '../../../admin/collections/ListViewSelectAPI/index.js'
 import { noTimestampsSlug } from '../../../admin/collections/NoTimestamps.js'
@@ -377,7 +378,7 @@ describe('List View', () => {
 
       await expect(page.locator('#search-filter-input')).toHaveValue('test')
 
-      await page.locator('.app-header__sidebar-toggle').click()
+      await openNav(page)
       await expect(page.locator('#nav-uploads')).toContainText('Uploads')
 
       const uploadsUrl = await page.locator('#nav-uploads').getAttribute('href')

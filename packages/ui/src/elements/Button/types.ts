@@ -13,7 +13,7 @@ export type Props = {
   'aria-label'?: AriaAttributes['aria-label']
   'aria-pressed'?: AriaAttributes['aria-pressed']
   buttonId?: string
-  buttonStyle?: 'dashed' | 'destructive' | 'ghost' | 'pill' | 'primary' | 'secondary'
+  buttonStyle?: 'dashed' | 'destructive' | 'ghost' | 'link' | 'pill' | 'primary' | 'secondary'
   children?: React.ReactNode
   className?: string
   disabled?: boolean

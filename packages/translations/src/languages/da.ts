@@ -117,6 +117,7 @@ export const daTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Søg widgets...',
     widgetCollectionRequired: 'Collection er påkrævet.',
     widgetConfigurationError: 'Konfigurationsfejl for widget',
+    widgetDropFilesToUpload: 'Træk og slip en fil',
     widgetInvalidCollection: 'Collection "{{collection}}" eksisterer ikke.',
     widgetInvalidFilterField: 'Filterfeltet "{{field}}" findes ikke i Collection "{{collection}}".',
     widgetInvalidSortField:
@@ -133,6 +134,9 @@ export const daTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sortér felt',
     widgetTitleFallback: 'Collectionsforespørgsel',
     widgetTitleLabel: 'Titel',
+    widgetUploadDropzoneDescription:
+      'Upload fra din computer via træk og slip, eller klik på knappen nedenfor',
+    widgetUploadFiles: 'Tilføj Filer',
   },
   error: {
     accountAlreadyActivated: 'Denne konto er allerede blevet aktiveret.',
@@ -460,6 +464,7 @@ export const daTranslations: DefaultTranslationsObject = {
     remove: 'Fjern',
     rename: 'Omdøb',
     replaceRow: 'Erstat række',
+    requiredFields: 'Felter markeret med * er obligatoriske.',
     reset: 'Nulstil',
     resetPreferences: 'Nulstil præferencer',
     resetPreferencesDescription:
@@ -477,8 +482,12 @@ export const daTranslations: DefaultTranslationsObject = {
     saveChanges: 'Gem ændringer',
     saving: 'Gemmer...',
     schedulePublishFor: 'Planlæg offentliggørelse for {{title}}',
+    searchAutomatically: 'Resultaterne opdateres automatisk, mens du skriver.',
     searchBy: 'Søg efter {{label}}',
+    searchCleared: 'Søgningen er ryddet.',
     searchColumns: 'Søg kolonner',
+    searchGroups: 'Grupper for “{{search}}”: {{count}}.',
+    searchResults: 'Resultater for “{{search}}”: {{count}}.',
     select: 'Vælg',
     selectAll: 'Vælg alle {{count}} {{label}}',
     selectAllRows: 'Vælg alle rækker',

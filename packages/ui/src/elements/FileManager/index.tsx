@@ -2,8 +2,9 @@
 import type { SanitizedCollectionConfig, UploadEdits } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { formatFilesize, isImage } from 'payload/shared'
+import { formatFilesize, isImage, validateMimeType } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 import { FieldError } from '../../fields/FieldError/index.js'
 import { fieldBaseClass } from '../../fields/shared/index.js'
@@ -35,16 +36,6 @@ import './index.css'
 
 const baseClass = 'file-manager'
 
-const validate = (value) => {
-  if (!value && value !== undefined) {
-    return 'A file is required.'
-  }
-  if (value && (!value.name || value.name === '')) {
-    return 'A file name is required.'
-  }
-  return true
-}
-
 export type FileManagerProps = {
   readonly collectionSlug: string
   readonly initialState?: import('payload').FormState
@@ -74,6 +65,25 @@ export const FileManager: React.FC<FileManagerProps> = ({
   const { t } = useTranslation()
   const { setModified } = useForm()
   const { data } = useDocumentInfo()
+  const validate = useCallback(
+    (file: File | null | undefined) => {
+      if (!file && file !== undefined) {
+        return 'A file is required.'
+      }
+      if (file && (!file.name || file.name === '')) {
+        return 'A file name is required.'
+      }
+      if (
+        file instanceof File &&
+        uploadConfig.mimeTypes?.length &&
+        !validateMimeType(file.type, uploadConfig.mimeTypes)
+      ) {
+        return t('error:invalidFileType')
+      }
+      return true
+    },
+    [t, uploadConfig.mimeTypes],
+  )
   const { errorMessage, setValue, showError, value } = useField<File>({
     path: 'file',
     validate,
@@ -125,6 +135,14 @@ export const FileManager: React.FC<FileManagerProps> = ({
 
   const handleFileChange = useCallback(
     ({ file, isNewFile = true }: { file: File | null; isNewFile?: boolean }) => {
+      if (
+        file instanceof File &&
+        uploadConfig.mimeTypes?.length &&
+        !validateMimeType(file.type, uploadConfig.mimeTypes)
+      ) {
+        toast.error(t('error:invalidFileType'))
+        return
+      }
       if (isNewFile && file instanceof File) {
         setFileSrc(URL.createObjectURL(file))
       }
@@ -133,7 +151,14 @@ export const FileManager: React.FC<FileManagerProps> = ({
       setUploadControlFileName(null)
       setUploadControlFile(null)
     },
-    [setValue, setUploadControlFile, setUploadControlFileName, setUploadControlFileUrl],
+    [
+      setValue,
+      setUploadControlFile,
+      setUploadControlFileName,
+      setUploadControlFileUrl,
+      t,
+      uploadConfig.mimeTypes,
+    ],
   )
 
   const handleFileNameChange = useCallback(

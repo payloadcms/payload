@@ -232,7 +232,12 @@ export interface IncomingAuthType {
    */
   depth?: number
   /**
-   * Advanced - disable Payload's built-in local auth strategy. Only use this property if you have replaced Payload's auth mechanisms with your own.
+   * Controls whether Payload's built-in local auth strategy is disabled. Set to `true` to disable
+   * local authentication or `false` to keep it enabled.
+   *
+   * Pass an object to disable local authentication while configuring how its fields are retained.
+   * Only disable local authentication if you have replaced Payload's auth mechanisms with your own.
+   * @default false
    */
   disableLocalStrategy?:
     | {
@@ -241,9 +246,12 @@ export interface IncomingAuthType {
          * Useful when you do not want the database or types to vary depending on the auth configuration.
          */
         enableFields?: true
+        /**
+         * When auth fields are retained, make the password field optional.
+         */
         optionalPassword?: true
       }
-    | true
+    | boolean
   /**
    * Customize the way that the forgotPassword operation functions.
    * @link https://payloadcms.com/docs/authentication/email#forgot-password
