@@ -143,7 +143,8 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(page).toHaveURL(/\/admin\/collections\/organizations\?view=hierarchy/)
 
       await page.goto(organizationsURL.list)
-      await expect(page).toHaveURL(/\/admin\/collections\/organizations\?view=hierarchy/)
+      await expect(page).toHaveURL(organizationsURL.list)
+      await expect(page.getByRole('button', { name: 'By Organization' })).toBeDisabled()
 
       const acmeCard = page.locator('.document-card', { hasText: 'Acme Corp' })
 

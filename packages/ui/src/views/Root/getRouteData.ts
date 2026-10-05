@@ -1,6 +1,7 @@
 import type {
   AdminViewAdapter,
   AdminViewServerProps,
+  CollectionPreferences,
   CustomComponent,
   DocumentSubViewTypes,
   Payload,
@@ -66,6 +67,7 @@ export type GetRouteDataArgs = {
   adminRoute: string
   adminViews: AdminViewAdapter
   collectionConfig?: SanitizedCollectionConfig
+  collectionPreferences?: CollectionPreferences
   currentRoute: string
   globalConfig?: SanitizedGlobalConfig
   payload: Payload
@@ -79,6 +81,7 @@ export const getRouteData = ({
   adminRoute,
   adminViews,
   collectionConfig,
+  collectionPreferences,
   currentRoute,
   globalConfig,
   payload,
@@ -199,7 +202,11 @@ export const getRouteData = ({
         // --> /collections/:collectionSlug'
         routeParams.collection = collectionConfig.slug
 
-        if (searchParams.view === 'hierarchy' && collectionConfig.hierarchy) {
+        if (
+          collectionConfig.hierarchy &&
+          (searchParams.view === 'hierarchy' ||
+            (!searchParams.view && collectionPreferences?.listViewType === 'hierarchy'))
+        ) {
           ViewToRender = {
             Component: HierarchyView,
           }
