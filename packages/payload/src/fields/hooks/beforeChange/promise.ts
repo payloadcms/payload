@@ -183,6 +183,22 @@ export const promise = async ({
     // Validate
     if (!skipValidationFromHere && 'validate' in field && field.validate) {
       const valueToValidate = siblingData[field.name]
+
+      // With `locale: 'all'`, a localized field holds a locale-keyed object; validate each locale's value.
+      const isLocaleKeyedValue =
+        operationLocale === 'all' &&
+        localization &&
+        fieldShouldBeLocalized({ field, parentIsLocalized }) &&
+        valueToValidate !== null &&
+        typeof valueToValidate === 'object' &&
+        !Array.isArray(valueToValidate)
+
+      const valuesToValidate = isLocaleKeyedValue
+        ? localization.localeCodes
+            .filter((locale) => locale in valueToValidate)
+            .map((locale) => (valueToValidate as Record<string, unknown>)[locale])
+        : [valueToValidate]
+
       let jsonError: object
 
       if (field.type === 'json' && typeof siblingData[field.name] === 'string') {
@@ -200,23 +216,31 @@ export const promise = async ({
         object
       >
 
-      const validationResult = await validateFn(valueToValidate as never, {
-        ...field,
-        id,
-        blockData: blockData!,
-        collectionSlug: collection?.slug,
-        data: deepMergeWithSourceArrays(doc, data),
-        event: 'submit',
-        // @ts-expect-error
-        jsonError,
-        operation,
-        overrideAccess,
-        path: pathSegments,
-        preferences: { fields: {} },
-        previousValue: siblingDoc[field.name],
-        req,
-        siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
-      })
+      let validationResult: string | true = true
+
+      for (const value of valuesToValidate) {
+        validationResult = await validateFn(value as never, {
+          ...field,
+          id,
+          blockData: blockData!,
+          collectionSlug: collection?.slug,
+          data: deepMergeWithSourceArrays(doc, data),
+          event: 'submit',
+          // @ts-expect-error
+          jsonError,
+          operation,
+          overrideAccess,
+          path: pathSegments,
+          preferences: { fields: {} },
+          previousValue: siblingDoc[field.name],
+          req,
+          siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
+        })
+
+        if (typeof validationResult === 'string') {
+          break
+        }
+      }
 
       if (typeof validationResult === 'string') {
         let filterOptionsError = false

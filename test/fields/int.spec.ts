@@ -1444,6 +1444,53 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       await payload.delete({ collection: 'text-fields', id: doc.id, overrideAccess: true })
     })
 
+    test('should enforce localized text length validation with locale all', async ({ payload }) => {
+      await expect(
+        payload.create({
+          collection: 'text-fields',
+          data: {
+            text: 'required',
+            // @ts-expect-error locale 'all' accepts object values for localized fields
+            localizedRequiredText: {
+              en: 'English text',
+              es: 'no',
+            },
+          },
+          locale: 'all',
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('The following field is invalid: Localized Required Text')
+    })
+
+    test('should skip validation for locales omitted from a locale all write', async ({
+      payload,
+    }) => {
+      const doc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          // @ts-expect-error locale 'all' accepts object values for localized fields
+          localizedRequiredText: {
+            en: 'English text',
+          },
+        },
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      const allLocales = await payload.findByID({
+        id: doc.id,
+        collection: 'text-fields',
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      // @ts-expect-error locale 'all' returns locale-keyed object for localized fields
+      expect(allLocales.localizedRequiredText.en).toEqual('English text')
+
+      await payload.delete({ collection: 'text-fields', id: doc.id, overrideAccess: true })
+    })
+
     test('should query hasMany in', async ({ payload }) => {
       const hit = await payload.create({
         collection: 'text-fields',
