@@ -46,6 +46,13 @@ export default buildConfigWithDefaults({
         localeFilterOperationEvents.push(req.operation)
         const availableLocaleCodes = req.context.availableLocaleCodes as string[] | undefined
 
+        if (
+          req.context.excludeNonEnglishValidationLocales === true &&
+          req.operation === 'validate'
+        ) {
+          return locales.filter(({ code }) => code === 'en')
+        }
+
         return availableLocaleCodes
           ? locales.filter(({ code }) => availableLocaleCodes.includes(code))
           : locales

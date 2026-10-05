@@ -27,6 +27,7 @@ import type {
 import { ensureUsernameOrEmail } from '../../../auth/ensureUsernameOrEmail.js'
 import { removeExpiredSessions } from '../../../auth/sessions.js'
 import { generatePasswordSaltHash } from '../../../auth/strategies/local/generatePasswordSaltHash.js'
+import { ValidationError } from '../../../errors/index.js'
 import { afterChange } from '../../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../../fields/hooks/beforeChange/index.js'
@@ -49,6 +50,7 @@ import {
   validateAllLocalesPublicationFlags,
 } from '../../../versions/allLocalesPublicationStatus.js'
 import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePublishData.js'
+import { validateLocalWithLocaleKeyedData } from '../local/validate.js'
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
   collectionConfig: SanitizedCollectionConfig
@@ -324,23 +326,6 @@ export const updateDocument = async <
     result._status = { ...docWithLocales._status }
   }
 
-  // File deletion and writes must occur after beforeChange's field validation. Validation
-  // failures leave both the persisted upload and local files untouched.
-  if (!isDraftOverPublished) {
-    await deleteAssociatedFiles({
-      collectionConfig,
-      config,
-      doc: docWithLocales,
-      files: filesToUpload,
-      overrideDelete: false,
-      req,
-    })
-  }
-
-  if (!collectionConfig.upload.disableLocalStorage) {
-    await uploadFiles(payload, filesToUpload, req)
-  }
-
   if (
     config.localization &&
     hasLocalizeStatusEnabled(collectionConfig) &&
@@ -412,6 +397,63 @@ export const updateDocument = async <
         })
       }
     }
+  }
+
+  if (
+    config.localization &&
+    hasDraftsEnabled(collectionConfig) &&
+    publishAllLocales &&
+    !unpublishAllLocales &&
+    hasAuthorizedPublicationStatus
+  ) {
+    const validationResult = await validateLocalWithLocaleKeyedData({
+      operation: 'update',
+      options: {
+        id,
+        collection: collectionConfig.slug,
+        data: result,
+        draft: true,
+        locale: 'all',
+        overrideAccess,
+        req,
+      },
+      payload,
+      sourceData: {
+        docWithLocales,
+        originalDoc: publicationHookDoc,
+        originalLocale: locale,
+      },
+      trash: Boolean(originalDoc?.deletedAt),
+    })
+
+    if (!validationResult.valid) {
+      throw new ValidationError(
+        {
+          id,
+          collection: collectionConfig.slug,
+          errors: validationResult.errors,
+          req,
+        },
+        req.t,
+      )
+    }
+  }
+
+  // File deletion and writes must occur after the final publish validation. Validation failures
+  // leave both the persisted upload and local files untouched.
+  if (!isDraftOverPublished) {
+    await deleteAssociatedFiles({
+      collectionConfig,
+      config,
+      doc: docWithLocales,
+      files: filesToUpload,
+      overrideDelete: false,
+      req,
+    })
+  }
+
+  if (!collectionConfig.upload.disableLocalStorage) {
+    await uploadFiles(payload, filesToUpload, req)
   }
 
   const dataToUpdate: JsonObject = { ...(localizedPublishData ?? result) }

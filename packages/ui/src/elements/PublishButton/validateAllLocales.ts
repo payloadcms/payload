@@ -61,6 +61,7 @@ export function projectValidationDataForSiblingLocales({
   fields: ClientField[]
 }): Data {
   const projectedData = cloneValidationData(data)
+  const status = projectedData._status
 
   processLocalizedFields({
     blocksMap,
@@ -69,6 +70,10 @@ export function projectValidationDataForSiblingLocales({
     parentIsLocalized: false,
     visitedBlockSlugs: new Set(),
   })
+
+  if (status !== undefined) {
+    projectedData._status = status
+  }
 
   return projectedData
 }

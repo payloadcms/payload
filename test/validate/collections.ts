@@ -680,8 +680,49 @@ const publishCollection: CollectionConfig = {
       access: {
         validate: ({ req }) => req.context.denyPublishFieldValidation !== true,
       },
+      hooks: {
+        afterRead: [
+          ({ context, operation, req, value }) => {
+            if (context.trackPublishAfterRead === true) {
+              recordHook({
+                context,
+                hook: 'publishTitleAfterRead',
+                operation,
+                requestOperation: req.operation,
+              })
+            }
+
+            return value
+          },
+        ],
+        beforeChange: [
+          ({ context, operation, req, value }) => {
+            if (context.trackPublishBeforeChange === true) {
+              recordHook({
+                context,
+                hook: 'publishTitleBeforeChange',
+                operation,
+                requestOperation: req.operation,
+              })
+            }
+
+            return value
+          },
+        ],
+      },
       localized: true,
       required: true,
+      validate: (value, { data, operation }) => {
+        if (
+          data?._status === 'published' &&
+          operation === 'update' &&
+          value === 'reject only during update validation'
+        ) {
+          return 'The title is invalid during an update'
+        }
+
+        return typeof value === 'string' && value.length > 0 ? true : 'Title is required'
+      },
     },
     {
       name: 'localizedGroup',

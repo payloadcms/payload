@@ -3435,6 +3435,429 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
     })
   })
 
+  test.describe('publish all locale enforcement', () => {
+    test('should reject collection create when another locale is invalid', async ({ payload }) => {
+      const documentsBefore = await payload.count({
+        collection: publishCollectionSlug,
+        draft: true,
+        overrideAccess: true,
+      })
+
+      await expect(
+        payload.create({
+          collection: publishCollectionSlug,
+          data: {
+            ...getPublishCollectionLocaleData({ title: 'English candidate' }),
+            _status: 'published',
+          },
+          locale: 'en',
+          overrideAccess: true,
+          publishAllLocales: true,
+        }),
+      ).rejects.toMatchObject({
+        data: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({
+              locale: 'de',
+              path: 'title',
+            }),
+          ]),
+        },
+      })
+
+      await expect(
+        payload.count({
+          collection: publishCollectionSlug,
+          draft: true,
+          overrideAccess: true,
+        }),
+      ).resolves.toMatchObject({ totalDocs: documentsBefore.totalDocs })
+    })
+
+    test('should reject collection publish-all through the REST API', async ({
+      payload,
+      restClient,
+    }) => {
+      const draft = await seedPublishCollection({
+        de: '',
+        en: 'English valid',
+        es: 'Spanish valid',
+        payload,
+      })
+      const response = await restClient.PATCH(
+        `/${publishCollectionSlug}/${draft.id}?locale=en&publishAllLocales=true`,
+        {
+          body: JSON.stringify({ _status: 'published' }),
+        },
+      )
+      const responseBody = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(responseBody).toMatchObject({
+        errors: [
+          {
+            name: 'ValidationError',
+            data: {
+              errors: expect.arrayContaining([
+                expect.objectContaining({
+                  locale: 'de',
+                  path: 'title',
+                }),
+              ]),
+            },
+          },
+        ],
+      })
+    })
+
+    test('should reject collection publish-all when a sibling changes after precheck', async ({
+      payload,
+    }) => {
+      const draft = await seedPublishCollection({
+        de: 'German valid',
+        en: 'English valid',
+        es: 'Spanish valid',
+        fr: 'French valid',
+        payload,
+      })
+      const precheck = await payload.validate({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        data: {
+          _status: 'published',
+        },
+        draft: true,
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      expect(precheck.valid).toBe(true)
+
+      await payload.update({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        data: {
+          title: 'reject only during update validation',
+        },
+        draft: true,
+        locale: 'de',
+        overrideAccess: true,
+      })
+
+      await expect(
+        payload.update({
+          id: draft.id,
+          collection: publishCollectionSlug,
+          data: {
+            _status: 'published',
+          },
+          locale: 'en',
+          overrideAccess: true,
+          publishAllLocales: true,
+        }),
+      ).rejects.toMatchObject({
+        data: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({
+              locale: 'de',
+              path: 'title',
+            }),
+          ]),
+        },
+      })
+
+      const latestDraft = await payload.findByID({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        draft: true,
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      expect(latestDraft._status).toMatchObject({
+        de: 'draft',
+        en: 'draft',
+        es: 'draft',
+      })
+    })
+
+    test('should use the publication operation when filtering final validation locales', async ({
+      payload,
+    }) => {
+      const draft = await seedPublishCollection({
+        de: '',
+        en: 'English valid',
+        es: 'Spanish valid',
+        fr: 'French valid',
+        payload,
+      })
+
+      await expect(
+        payload.update({
+          id: draft.id,
+          collection: publishCollectionSlug,
+          context: {
+            excludeNonEnglishValidationLocales: true,
+          },
+          data: {
+            _status: 'published',
+          },
+          locale: 'en',
+          overrideAccess: true,
+          publishAllLocales: true,
+        }),
+      ).rejects.toMatchObject({
+        data: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({
+              locale: 'de',
+              path: 'title',
+            }),
+          ]),
+        },
+      })
+    })
+
+    test('should reject collection publish-all when a sibling uses a null localized fallback', async ({
+      payload,
+    }) => {
+      const draft = await seedPublishCollection({
+        de: 'German valid',
+        en: 'English valid',
+        es: 'Spanish valid',
+        fr: 'French valid',
+        payload,
+      })
+
+      await payload.update({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        data: {
+          localizedArray: null,
+        } as never,
+        draft: true,
+        locale: 'de',
+        overrideAccess: true,
+      })
+
+      await expect(
+        payload.update({
+          id: draft.id,
+          collection: publishCollectionSlug,
+          data: {
+            _status: 'published',
+          },
+          locale: 'en',
+          overrideAccess: true,
+          publishAllLocales: true,
+        }),
+      ).rejects.toMatchObject({
+        data: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({
+              locale: 'de',
+              path: 'localizedArray',
+            }),
+          ]),
+        },
+      })
+    })
+
+    test('should not rerun beforeChange hooks while checking the final publish candidate', async ({
+      payload,
+    }) => {
+      const draft = await seedPublishCollection({
+        de: 'German valid',
+        en: 'English valid',
+        es: 'Spanish valid',
+        fr: 'French valid',
+        payload,
+      })
+
+      clearValidationEvents()
+
+      await payload.update({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        context: {
+          trackPublishBeforeChange: true,
+        },
+        data: {
+          _status: 'published',
+        },
+        locale: 'en',
+        overrideAccess: true,
+        publishAllLocales: true,
+      })
+
+      expect(hookEvents.filter(({ hook }) => hook === 'publishTitleBeforeChange')).toMatchObject([
+        {
+          operation: 'update',
+        },
+      ])
+    })
+
+    test('should not rerun afterRead hooks while checking the final publish candidate', async ({
+      payload,
+    }) => {
+      const draft = await seedPublishCollection({
+        de: 'German valid',
+        en: 'English valid',
+        es: 'Spanish valid',
+        fr: 'French valid',
+        payload,
+      })
+
+      clearValidationEvents()
+
+      await payload.update({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        context: {
+          trackPublishAfterRead: true,
+        },
+        data: {
+          _status: 'published',
+        },
+        locale: 'en',
+        overrideAccess: true,
+        publishAllLocales: true,
+      })
+
+      expect(hookEvents.filter(({ hook }) => hook === 'publishTitleAfterRead')).toHaveLength(2)
+    })
+
+    test('should reject global publish-all when a sibling locale is invalid', async ({
+      payload,
+    }) => {
+      await seedPublishGlobal({
+        de: '',
+        en: 'English valid',
+        es: 'Spanish valid',
+        payload,
+      })
+
+      await expect(
+        payload.updateGlobal({
+          slug: publishGlobalSlug,
+          data: {
+            _status: 'published',
+          },
+          locale: 'en',
+          overrideAccess: true,
+          publishAllLocales: true,
+        }),
+      ).rejects.toMatchObject({
+        data: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({
+              locale: 'de',
+              path: 'title',
+            }),
+          ]),
+        },
+      })
+
+      const latestDraft = await payload.findGlobal({
+        slug: publishGlobalSlug,
+        draft: true,
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      expect(latestDraft._status).toMatchObject({
+        de: 'draft',
+        en: 'draft',
+        es: 'draft',
+      })
+    })
+
+    test('should reject scheduled publish-all when a sibling locale is invalid', async ({
+      payload,
+    }) => {
+      const draft = await seedPublishCollection({
+        de: 'German valid',
+        en: 'English valid',
+        es: 'Spanish valid',
+        fr: 'French valid',
+        payload,
+      })
+      const job = await payload.jobs.queue({
+        input: {
+          doc: {
+            relationTo: publishCollectionSlug,
+            value: draft.id.toString(),
+          },
+        },
+        overrideAccess: true,
+        task: 'schedulePublish',
+      })
+
+      await payload.update({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        data: {
+          title: '',
+        },
+        draft: true,
+        locale: 'de',
+        overrideAccess: true,
+      })
+
+      const result = await payload.jobs.run({ overrideAccess: true, silent: true })
+      const latestDraft = await payload.findByID({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        draft: true,
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      expect(result.jobStatus?.[job.id]?.status).toBe('error-reached-max-retries')
+      expect(latestDraft._status).toMatchObject({
+        de: 'draft',
+        en: 'draft',
+        es: 'draft',
+      })
+    })
+
+    test('should continue to publish one locale when sibling locales are invalid', async ({
+      payload,
+    }) => {
+      const draft = await seedPublishCollection({
+        de: '',
+        en: 'English valid',
+        es: '',
+        payload,
+      })
+
+      await payload.update({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        data: {
+          _status: 'published',
+        },
+        locale: 'en',
+        overrideAccess: true,
+        publishAllLocales: false,
+      })
+
+      const latestDraft = await payload.findByID({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        draft: true,
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      expect(latestDraft._status).toMatchObject({
+        de: 'draft',
+        en: 'published',
+        es: 'draft',
+      })
+    })
+  })
+
   test.describe('write safety', () => {
     test('should reject a create that reuses the validation request before a row is written', async ({
       payload,

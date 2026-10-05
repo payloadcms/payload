@@ -21,10 +21,12 @@ export type Args<T extends JsonObject> = {
   fieldsToValidate?: ReadonlySet<string>
   global: null | SanitizedGlobalConfig
   id?: number | string
+  isValidationOperation?: boolean
   onDataProcessed?: (data: T) => void
   operation: FieldOperation
   overrideAccess?: boolean
   req: PayloadRequest
+  skipHooks?: boolean
   skipValidation?: boolean
 }
 
@@ -46,10 +48,12 @@ export const beforeChange = async <T extends JsonObject>({
   docWithLocales,
   fieldsToValidate: submittedTopLevelFieldNames,
   global,
+  isValidationOperation,
   onDataProcessed,
   operation,
   overrideAccess,
   req,
+  skipHooks,
   skipValidation,
 }: Args<T>): Promise<T> => {
   const data = deepCopyObjectSimple(incomingData)
@@ -67,6 +71,7 @@ export const beforeChange = async <T extends JsonObject>({
     fieldLabelPath: '',
     fields: (collection?.fields || global?.fields)!,
     global,
+    isValidationOperation,
     mergeLocaleActions,
     operation,
     overrideAccess: overrideAccess!,
@@ -78,6 +83,7 @@ export const beforeChange = async <T extends JsonObject>({
     siblingData: data,
     siblingDoc: doc,
     siblingDocWithLocales: docWithLocales,
+    skipHooks,
     skipValidation,
     submittedTopLevelFieldNames,
   })

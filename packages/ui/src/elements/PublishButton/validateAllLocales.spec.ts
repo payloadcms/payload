@@ -97,6 +97,24 @@ describe('validate all locales before publish', () => {
     })
   })
 
+  it('should preserve the published status for sibling-locale validation', () => {
+    expect(
+      projectValidationDataForSiblingLocales({
+        blocksMap: {},
+        data: {
+          _status: 'published',
+          title: 'Active title',
+        },
+        fields: [
+          { localized: true, name: '_status', type: 'text' },
+          { localized: true, name: 'title', type: 'text' },
+        ] as ClientField[],
+      }),
+    ).toEqual({
+      _status: 'published',
+    })
+  })
+
   it('should reject validation when no locales are selected', async () => {
     await expect(
       validateDocumentLocales({

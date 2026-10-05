@@ -21,6 +21,12 @@ type EntityArgs =
       id?: number | string
     }
 
+export type ValidationSourceData = {
+  docWithLocales: JsonObject
+  originalDoc: JsonObject
+  originalLocale: string
+}
+
 type RunValidationLifecycleArgs = {
   beforeValidation?: (args: { data: JsonObject }) => Promise<void> | void
   docWithLocales: JsonObject
@@ -29,7 +35,9 @@ type RunValidationLifecycleArgs = {
   originalDoc: JsonObject
   overrideAccess: boolean
   req: PayloadRequest
+  skipMutationHooks?: boolean
   validateData?: (args: { data: JsonObject }) => Promise<void> | void
+  validationOperation?: 'create' | 'update' | 'validate'
 } & EntityArgs
 
 /**
@@ -50,80 +58,88 @@ export async function runValidationLifecycle(
     originalDoc,
     overrideAccess,
     req,
+    skipMutationHooks = false,
     validateData,
+    validationOperation = 'validate',
   } = args
   let data = deepCopyObjectSimple(incomingData ?? {})
 
   try {
     onValidationData?.(deepMergeWithSourceArraysIgnoringUndefined<JsonObject>(originalDoc, data))
-    await beforeValidation?.({ data })
+    if (!skipMutationHooks) {
+      await beforeValidation?.({ data })
 
-    data = await beforeValidate({
-      id,
-      collection,
-      context: req.context,
-      data,
-      doc: originalDoc,
-      global,
-      operation: 'validate',
-      overrideAccess,
-      req,
-    })
-    onValidationData?.(data)
+      data = await beforeValidate({
+        id,
+        collection,
+        context: req.context,
+        data,
+        doc: originalDoc,
+        global,
+        operation: validationOperation,
+        overrideAccess,
+        req,
+      })
+      onValidationData?.(data)
 
-    if (collection) {
-      for (const hook of collection.hooks.beforeValidate ?? []) {
-        data =
-          (await hook({
-            collection,
-            context: req.context,
-            data,
-            operation: 'validate',
-            originalDoc,
-            req,
-          })) || data
+      if (collection) {
+        for (const hook of collection.hooks.beforeValidate ?? []) {
+          data =
+            (await hook({
+              collection,
+              context: req.context,
+              data,
+              operation: validationOperation,
+              originalDoc,
+              req,
+            })) || data
+        }
+
+        for (const hook of collection.hooks.beforeChange ?? []) {
+          data =
+            (await hook({
+              collection,
+              context: req.context,
+              data,
+              operation: validationOperation,
+              originalDoc,
+              req,
+            })) || data
+        }
+      } else {
+        if (validationOperation === 'create') {
+          throw new Error('Global validation does not support the create operation.')
+        }
+
+        for (const hook of global.hooks.beforeValidate ?? []) {
+          data =
+            (await hook({
+              context: req.context,
+              data,
+              global,
+              operation: validationOperation,
+              originalDoc,
+              overrideAccess,
+              req,
+            })) || data
+        }
+
+        for (const hook of global.hooks.beforeChange ?? []) {
+          data =
+            (await hook({
+              context: req.context,
+              data,
+              global,
+              operation: validationOperation,
+              originalDoc,
+              overrideAccess,
+              req,
+            })) || data
+        }
       }
 
-      for (const hook of collection.hooks.beforeChange ?? []) {
-        data =
-          (await hook({
-            collection,
-            context: req.context,
-            data,
-            operation: 'validate',
-            originalDoc,
-            req,
-          })) || data
-      }
-    } else {
-      for (const hook of global.hooks.beforeValidate ?? []) {
-        data =
-          (await hook({
-            context: req.context,
-            data,
-            global,
-            operation: 'validate',
-            originalDoc,
-            overrideAccess,
-            req,
-          })) || data
-      }
-
-      for (const hook of global.hooks.beforeChange ?? []) {
-        data =
-          (await hook({
-            context: req.context,
-            data,
-            global,
-            operation: 'validate',
-            originalDoc,
-            overrideAccess,
-            req,
-          })) || data
-      }
+      onValidationData?.(data)
     }
-
-    onValidationData?.(data)
 
     let processedData = data
 
@@ -135,12 +151,14 @@ export async function runValidationLifecycle(
       doc: originalDoc,
       docWithLocales,
       global,
+      isValidationOperation: true,
       onDataProcessed: (result) => {
-        processedData = result
+        processedData = deepCopyObjectSimple(result)
       },
-      operation: 'validate',
+      operation: validationOperation,
       overrideAccess,
       req,
+      skipHooks: skipMutationHooks,
     })
 
     const validationData = deepMergeWithSourceArraysIgnoringUndefined<JsonObject>(
