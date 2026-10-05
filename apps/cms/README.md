@@ -29,6 +29,8 @@ installs the app against them. This is the same approach Payload's CI uses to te
 | `src/collections/Profiles.ts`              | Profiles: bio, links, skills, work history, education                                  |
 | `src/collections/Clients.ts`               | Private client records: contacts, business type, importance (see "Clients and events") |
 | `src/collections/Events.ts`                | Private records of sales events and exhibitions worldwide                              |
+| `scripts/import-events.ts`                 | Imports events from a JSON file (see "Importing events")                               |
+| `src/timezones.ts`                         | Time zones offered for event dates                                                     |
 | `src/proxy.ts`, `src/twoFactor/`           | Two-factor authentication for every login (see "Two-factor authentication")            |
 | `src/email/sendgrid.ts`                    | Sends emails such as "forgot password" through SendGrid (see "Email (SendGrid)")       |
 | `src/hooks/revalidateWebsite.ts`           | Tells the website to refresh its pages when a post changes                             |
@@ -38,6 +40,7 @@ installs the app against them. This is the same approach Payload's CI uses to te
 | `deploy/setup-app-server.sh`               | One-time bootstrap of a fresh EC2 (Docker, swap, clone)                                |
 | `deploy/check-db.sh`                       | Checks that the app EC2 can reach and write to MongoDB                                 |
 | `deploy/deploy.sh`                         | Build + (re)start + wait until healthy                                                 |
+| `deploy/import-events.sh`                  | Runs the events import on the server                                                   |
 | `deploy/mongodb/create-payload-user.js`    | Creates the MongoDB user for Payload (run on the DB EC2)                               |
 | `scripts/pack-local-packages.mjs`          | Packs `packages/*` into tarballs for the app (used by the Dockerfile)                  |
 
@@ -387,13 +390,78 @@ needs a logged-in user, so `GET /api/clients` and `GET /api/events` return `403`
 - **Clients**: company, contact person, job title, email, phone, website, address, business type,
   industry, notes, **importance** (1–5 stars), status (lead, active, inactive) and source. Each client also
   lists the events it is linked to.
-- **Events**: name, type (exhibition, trade show, sales event, conference, meeting, other), start and end
+- **Events**: name, type (exhibition, trade show, sales event, conference, meeting, other), description, start and end
   date and time with the **time zone** of the event, venue, booth, address, city, country, organizer,
   website, linked clients, notes, status (planned, confirmed, completed, cancelled) and attachments. The
   list is sorted with the latest event first, and an end date before the start date is rejected.
 
 Attachments are stored in Media, whose files are publicly readable by URL. Don't attach confidential
 documents to events.
+
+### Importing events
+
+`deploy/import-events.sh` adds events from a JSON file, such as a yearly list of exhibitions:
+
+```json
+{
+  "exhibitions": [
+    {
+      "event_name": "JCK Las Vegas",
+      "exact_date": "June 4 - 7, 2027",
+      "duration_days": 4,
+      "location": "The Venetian Expo, Las Vegas, NV, USA",
+      "business_nature": "World's Largest Global Fine Jewelry Industry Trade Event"
+    }
+  ]
+}
+```
+
+1. **Copy the file to the app server** (from your computer):
+
+   ```bash
+   scp exhibitions.json <user>@<app-server-ip>:~/
+   ```
+
+2. **Preview** on the app server. Nothing is saved; every event is listed with its dates, city and time zone:
+
+   ```bash
+   cd ~/payloadcms/apps/cms
+   ./deploy/import-events.sh ~/exhibitions.json --dry-run
+   ```
+
+3. **Import:**
+
+   ```bash
+   ./deploy/import-events.sh ~/exhibitions.json
+   ```
+
+Run it right after `./deploy/deploy.sh`. It then takes seconds, because it reuses the deploy's build. If the
+code changed since the last deploy, it builds first (5–10 minutes).
+
+How the file becomes events:
+
+| JSON              | Event                                                                                                      |
+| ----------------- | ---------------------------------------------------------------------------------------------------------- |
+| `event_name`      | Name                                                                                                       |
+| `exact_date`      | Start and end date at midnight, in the time zone of the city, e.g. `October 30 - November 1, 2026`         |
+| `location`        | Venue, address (parts starting with a number), city and country; for the USA, the state sets the time zone |
+| `business_nature` | Description; also sets the type (conference, trade show or exhibition)                                     |
+| `duration_days`   | Only checked against the dates; a mismatch is noted                                                        |
+
+- Every event starts as **Planned**.
+- **Dates "to be confirmed"**, such as `April 2027 (exact dates TBC)`, start on the 1st of the month and keep
+  the original text in the notes. Remarks in brackets after a location, e.g.
+  `(confirm with organiser)`, go to the notes too. The preview marks these with `[see notes]`.
+- **Running a file again is safe:** an event with the same name starting within 60 days of an existing one is
+  skipped, so your own changes (status, clients, notes) stay. When an organiser announces the exact dates of a
+  "TBC" event, change them in the admin panel.
+- **Nothing is saved when an entry can't be read.** The script lists each problem, e.g. a date it doesn't
+  understand, or a country without a time zone (add it to `COUNTRY_TIMEZONES` in
+  `scripts/import-events.ts`). Fix the file and run it again.
+- `Hong Kong` and `Singapore` are both city and country. Without a city, e.g. `Australia (venue TBC)`, the
+  city is `TBC`.
+
+Locally, run `pnpm payload run scripts/import-events.ts <file.json> [--dry-run]` in this folder instead.
 
 ## Two-factor authentication
 
