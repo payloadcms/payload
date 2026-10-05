@@ -180,6 +180,94 @@ test.suite('ecommerce', { config: './config.ts', resetBetweenTests: false }, () 
     expect(variants).toBeTruthy()
   })
 
+  test('should reject duplicate variant options beyond the first 10 variants', async ({
+    payload,
+  }) => {
+    const variantType = await payload.create({
+      collection: 'variantTypes',
+      data: {
+        label: 'Join Limit Size',
+        name: 'join-limit-size',
+      },
+      overrideAccess: true,
+    })
+
+    const optionIDs: (number | string)[] = []
+
+    for (let i = 1; i <= 12; i++) {
+      const option = await payload.create({
+        collection: 'variantOptions',
+        data: {
+          label: `Size ${i}`,
+          value: `size-${i}`,
+          variantType: variantType.id,
+        },
+        overrideAccess: true,
+      })
+
+      optionIDs.push(option.id)
+    }
+
+    const product = await payload.create({
+      collection: 'products',
+      data: {
+        enableVariants: true,
+        name: 'Join Limit Product',
+        variantTypes: [variantType.id],
+      },
+      overrideAccess: true,
+    })
+
+    // 11 sibling variants: one more than the join default limit of 10 that the
+    // duplicate validation in validateOptions used to be capped by
+    const variantIDs: (number | string)[] = []
+
+    for (const optionID of optionIDs.slice(0, 11)) {
+      const variant = await payload.create({
+        collection: 'variants',
+        data: {
+          options: [optionID],
+          priceInUSD: 1999,
+          priceInUSDEnabled: true,
+          product: product.id,
+        },
+        overrideAccess: true,
+      })
+
+      variantIDs.push(variant.id)
+    }
+
+    // A duplicate of any existing combination must be rejected, including the
+    // combinations outside the first 10 join results
+    for (const optionID of optionIDs.slice(0, 11)) {
+      await expect(
+        payload.create({
+          collection: 'variants',
+          data: {
+            options: [optionID],
+            priceInUSD: 1999,
+            priceInUSDEnabled: true,
+            product: product.id,
+          },
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow()
+    }
+
+    // The suite shares state between tests, so remove everything created here
+    for (const variantID of variantIDs) {
+      await payload.delete({ collection: 'variants', id: variantID, overrideAccess: true })
+    }
+
+    await payload.delete({ collection: 'products', id: product.id, overrideAccess: true })
+
+    for (const optionID of optionIDs) {
+      await payload.delete({ collection: 'variantOptions', id: optionID, overrideAccess: true })
+    }
+
+    await payload.delete({ collection: 'variantTypes', id: variantType.id, overrideAccess: true })
+  })
+
   test('should not inject authorship fields into ecommerce collections', ({ payload }) => {
     const ecommerceSlugs = [
       'products',
