@@ -199,6 +199,49 @@ export const loadBranchDeletions = async (
   return state?.deleted ?? new Map()
 }
 
+export const loadBranchOperation = async ({
+  collectionSlug,
+  docID,
+  req,
+}: {
+  collectionSlug: string
+  docID: number | string
+  req: PayloadRequest
+}): Promise<BranchOperation | undefined> => {
+  const branch = resolveBranch(req)
+  const state = (req.context as Record<string, unknown> | undefined)?.[stateKey] as
+    | BranchState
+    | undefined
+  const operationKey = `${collectionSlug}:${String(docID)}`
+  const cachedOperation = state?.operations.get(operationKey)
+
+  if (cachedOperation || branch === MAIN_BRANCH) {
+    return cachedOperation
+  }
+
+  const change = await req.payload.db.findOne({
+    branch: false,
+    collection: 'payload-branch-changes',
+    req,
+    where: {
+      and: [
+        { branch: { equals: branch } },
+        { collectionSlug: { equals: collectionSlug } },
+        { documentID: { equals: String(docID) } },
+      ],
+    },
+  })
+  const operation = (change as { operation?: unknown } | null)?.operation
+
+  if (operation === 'create' || operation === 'delete' || operation === 'update') {
+    state?.operations.set(operationKey, operation)
+
+    return operation
+  }
+
+  return undefined
+}
+
 /**
  * A copy of the request that can resolve a branch of its own.
  *

@@ -1,6 +1,12 @@
 import type { Find, SanitizedCollectionConfig } from 'payload'
 
-import { applyBranchIDProjection, resolveBranchQuery, withBranchIDSelect } from 'payload'
+import {
+  applyBranchIDProjection,
+  resolveBranchQuery,
+  resolveBranchReadState,
+  rewriteBranchIDs,
+  withBranchIDSelect,
+} from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -29,15 +35,25 @@ export const find: Find = async function find(
 
   const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
 
-  const branchedWhere = await resolveBranchQuery({
+  const branchReadState = resolveBranchReadState({
     branch,
     collectionSlug: collectionConfig.slug,
     req,
-    where,
   })
+  const branchedWhere = branchReadState.useBranching
+    ? rewriteBranchIDs(where)
+    : await resolveBranchQuery({
+        branch,
+        collectionSlug: collectionConfig.slug,
+        req,
+        where,
+      })
 
   const result = await findMany({
     adapter: this,
+    branchVisibility: branchReadState.useBranching
+      ? { branch: branchReadState.branch, collectionSlug: collectionConfig.slug }
+      : undefined,
     collectionSlug: collectionConfig.slug,
     draftsEnabled,
     fields: collectionConfig.flattenedFields,

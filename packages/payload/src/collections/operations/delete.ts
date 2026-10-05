@@ -248,11 +248,11 @@ export const deleteOperation = async <
     }): Promise<boolean> => {
       const absorbedByBranch =
         isTombstone ??
-        willBranchAbsorbDelete({
+        (await willBranchAbsorbDelete({
           collectionSlug: collectionConfig.slug,
           doc: fullDocument,
           req,
-        })
+        }))
 
       if (!absorbedByBranch) {
         await deleteAssociatedFiles({
@@ -551,7 +551,7 @@ export const deleteOperation = async <
         docCleanupScope = await beginDeferredCleanupScope({ req })
 
         const fullDocument = await assertDeleteUnreferenced({ doc: initiallyCheckedDocument })
-        const absorbedByBranch = willBranchAbsorbDelete({
+        const absorbedByBranch = await willBranchAbsorbDelete({
           collectionSlug: collectionConfig.slug,
           doc: fullDocument,
           req,
@@ -698,14 +698,16 @@ export const deleteOperation = async <
       let deletable: DeleteEntry[]
 
       if (isDeletingFromBranch) {
-        deletable = preparedDocuments.map((entry) => ({
-          ...entry,
-          absorbedByBranch: willBranchAbsorbDelete({
-            collectionSlug: collectionConfig.slug,
-            doc: entry.fullDocument,
-            req,
-          }),
-        }))
+        deletable = await Promise.all(
+          preparedDocuments.map(async (entry) => ({
+            ...entry,
+            absorbedByBranch: await willBranchAbsorbDelete({
+              collectionSlug: collectionConfig.slug,
+              doc: entry.fullDocument,
+              req,
+            }),
+          })),
+        )
       } else {
         const cleanupResults: (DeleteEntry | null)[] = []
 

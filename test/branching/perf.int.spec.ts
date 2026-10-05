@@ -112,7 +112,7 @@ test.suite('Branching query cost', { config: './config.ts', resetBetweenTests: f
     await payload.create({ collection: branchesSlug, data: { name: 'Perf', slug: branch } })
   })
 
-  test('should add one query per request to reads, and none on main', async () => {
+  test('should keep branch reads to one database query, like main', async () => {
     const post = await payload.create({ collection: postsSlug, data: { title: 'main' } })
     const page = await payload.create({
       collection: pagesSlug,
@@ -124,40 +124,39 @@ test.suite('Branching query cost', { config: './config.ts', resetBetweenTests: f
         label: 'find',
         onBranch: () => payload.find({ branch, collection: postsSlug, pagination: false }),
         onMain: () => payload.find({ collection: postsSlug, pagination: false }),
-        overhead: 1,
+        overhead: 0,
       },
       {
         label: 'findByID',
         onBranch: () => payload.findByID({ id: post.id, branch, collection: postsSlug }),
         onMain: () => payload.findByID({ id: post.id, collection: postsSlug }),
-        overhead: 1,
+        overhead: 0,
       },
       {
         label: 'count',
         onBranch: () => payload.count({ branch, collection: postsSlug }),
         onMain: () => payload.count({ collection: postsSlug }),
-        overhead: 1,
+        overhead: 0,
       },
       {
         label: 'findDistinct',
         onBranch: () => payload.findDistinct({ branch, collection: postsSlug, field: 'title' }),
         onMain: () => payload.findDistinct({ collection: postsSlug, field: 'title' }),
-        overhead: 1,
+        overhead: 0,
       },
       {
         label: 'find (drafts)',
         onBranch: () =>
           payload.find({ branch, collection: pagesSlug, draft: true, pagination: false }),
         onMain: () => payload.find({ collection: pagesSlug, draft: true, pagination: false }),
-        overhead: 1,
+        overhead: 0,
       },
       {
-        // Version *history* is resolved synchronously — main's versions are the branch's
-        // ancestry, so there is no manifest to load.
+        // Version history resolves the branch fork boundary before querying versions.
         label: 'findVersions',
         onBranch: () => payload.findVersions({ branch, collection: pagesSlug, pagination: false }),
         onMain: () => payload.findVersions({ collection: pagesSlug, pagination: false }),
-        overhead: 0,
+        overhead: 1,
       },
       {
         // A global fetches both candidate rows in one query and picks.
@@ -252,10 +251,10 @@ test.suite('Branching query cost', { config: './config.ts', resetBetweenTests: f
       many: many.total,
       manyQueries: many.calls,
       one: one.total,
-    }).toMatchObject({ many: 2, one: 2 })
+    }).toMatchObject({ many: 1, one: 1 })
 
     expect({ drafts: manyDrafts.total, draftsQueries: manyDrafts.calls }).toMatchObject({
-      drafts: 2,
+      drafts: 1,
     })
 
     for (const id of [...mainDocs, ...branchDocs]) {
@@ -263,7 +262,7 @@ test.suite('Branching query cost', { config: './config.ts', resetBetweenTests: f
     }
   })
 
-  test('should pay the manifest once per request rather than once per read', async () => {
+  test('should not load a manifest for database-native reads', async () => {
     const req = { branch } as never
 
     const shared = await measure(async () => {
@@ -274,9 +273,8 @@ test.suite('Branching query cost', { config: './config.ts', resetBetweenTests: f
 
     record({ branch: shared, label: 'three reads sharing one request' })
 
-    // Three content queries, one manifest.
-    expect(shared.branching).toBe(1)
-    expect(shared.total).toBe(4)
+    expect(shared.branching).toBe(0)
+    expect(shared.total).toBe(3)
   })
 
   test('should cost nothing on a branchable collection read from main', async () => {
@@ -319,7 +317,7 @@ test.suite('Branching query cost', { config: './config.ts', resetBetweenTests: f
       // The write first reads an access-filtered document. A first write then creates the
       // shadow, records its change and verifies that pair. Later writes reuse the resolved
       // branch row identity. These reads keep denied or inconsistent writes from changing state.
-    }).toMatchObject({ first: 8, later: 3 })
+    }).toMatchObject({ first: 7, later: 3 })
   })
 
   test('should charge a known amount for create, delete and global writes', async () => {

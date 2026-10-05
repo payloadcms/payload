@@ -9,14 +9,16 @@ import type {
   Where,
 } from 'payload'
 
-import { count, sql } from 'drizzle-orm'
+import { and, count, sql } from 'drizzle-orm'
 import {
   appendVersionToQueryKey,
   buildVersionCollectionFields,
   combineQueries,
   getBranchPredicateSync,
   getQueryDraftsSort,
+  resolveBranchReadState,
   resolveBranchVersionQuerySync,
+  rewriteBranchVersionParents,
 } from 'payload'
 import { fieldIsVirtual, fieldShouldBeLocalized, hasDraftsEnabled } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
@@ -24,6 +26,7 @@ import toSnakeCase from 'to-snake-case'
 import type { BuildQueryJoinAliases, DrizzleAdapter, GenericColumn } from '../types.js'
 import type { Result } from './buildFindManyArgs.js'
 
+import { buildBranchVisibility } from '../queries/buildBranchVisibility.js'
 import { buildQuery } from '../queries/buildQuery.js'
 import { getTableAlias } from '../queries/getTableAlias.js'
 import { getArrayRelationName } from '../utilities/getArrayRelationName.js'
@@ -495,20 +498,29 @@ export const traverseFields = ({
 
           // A join subquery must carry the same branch predicate as the
           // top-level read, or a branch would see main's related documents.
-          const joinBranchPredicate = getBranchPredicateSync({
+          const branchReadState = resolveBranchReadState({
             collectionSlug: field.collection,
             req,
           })
+          const joinBranchPredicate = branchReadState.useBranching
+            ? null
+            : getBranchPredicateSync({
+                collectionSlug: field.collection,
+                req,
+              })
 
           if (useDrafts) {
-            const branchVersionWhere = resolveBranchVersionQuerySync({
-              collectionSlug: field.collection,
-              req,
-              where: appendVersionToQueryKey(joinQueryWhere),
-            })
+            const versionWhere = appendVersionToQueryKey(joinQueryWhere)
+            const branchVersionWhere = branchReadState.useBranching
+              ? rewriteBranchVersionParents(versionWhere)
+              : resolveBranchVersionQuerySync({
+                  collectionSlug: field.collection,
+                  req,
+                  where: versionWhere,
+                })
 
             joinQueryWhere = combineQueries(branchVersionWhere ?? {}, { latest: { equals: true } })
-          } else if (joinBranchPredicate) {
+          } else if (!branchReadState.useBranching && joinBranchPredicate) {
             joinQueryWhere = { and: [joinQueryWhere, joinBranchPredicate] }
           }
 
@@ -543,6 +555,20 @@ export const traverseFields = ({
             tableName: joinCollectionTableName,
             where: joinQueryWhere,
           })
+          const nativeBranchVisibility = branchReadState.useBranching
+            ? buildBranchVisibility({
+                adapter,
+                branch: branchReadState.branch,
+                canonicalIDExpression: useDrafts
+                  ? sql`COALESCE(${newAliasTable._branchParent}, ${newAliasTable.parent})`
+                  : undefined,
+                collectionSlug: field.collection,
+                table: newAliasTable,
+              })
+            : undefined
+          const visibleSubQueryWhere = nativeBranchVisibility
+            ? and(subQueryWhere, nativeBranchVisibility)
+            : subQueryWhere
 
           for (let key in selectFields) {
             const val = selectFields[key]
@@ -567,7 +593,7 @@ export const traverseFields = ({
           // Surface the canonical document ID rather than the shadow row's own
           // primary key, so join results address documents the same way every
           // other read does.
-          if (joinBranchPredicate && newAliasTable._branchDocID) {
+          if ((branchReadState.useBranching || joinBranchPredicate) && newAliasTable._branchDocID) {
             // `selectFields` is typed as a column map, but Drizzle accepts an
             // aliased expression in the same position — as the sibling
             // `sql\`...\`.as()` assignments above already rely on.
@@ -579,7 +605,7 @@ export const traverseFields = ({
           let query: SQLiteSelect = db
             .select(selectFields as any)
             .from(newAliasTable)
-            .where(subQueryWhere)
+            .where(visibleSubQueryWhere)
             .orderBy(() => orderBy.map(({ column, order }) => order(column)))
             .$dynamic()
 
@@ -605,7 +631,7 @@ export const traverseFields = ({
               .select(selectFields as any)
 
               .from(newAliasTable)
-              .where(subQueryWhere)
+              .where(visibleSubQueryWhere)
               .$dynamic()
 
             joins.forEach(({ type, condition, table }) => {

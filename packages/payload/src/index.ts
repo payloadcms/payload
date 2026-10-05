@@ -1493,7 +1493,12 @@ export {
   resetBranchState,
   resolveBranch,
 } from './branching/resolveBranch.js'
-export { getBranchPredicateSync, resolveBranchQuery } from './branching/resolveBranchQuery.js'
+export {
+  getBranchPredicateSync,
+  resolveBranchQuery,
+  resolveBranchReadState,
+} from './branching/resolveBranchQuery.js'
+export type { BranchReadState } from './branching/resolveBranchQuery.js'
 export { resolveBranchRowID } from './branching/resolveBranchRowID.js'
 export { resolveBranchDelete, willBranchAbsorbDelete } from './branching/tombstone.js'
 export type {

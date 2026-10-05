@@ -24,6 +24,40 @@ type Args = {
   where: undefined | Where
 }
 
+export type BranchReadState = {
+  branch: string
+  useBranching: boolean
+}
+
+export const resolveBranchReadState = ({
+  branch: branchOverride,
+  collectionSlug,
+  globalSlug,
+  req,
+}: Omit<Args, 'where'>): BranchReadState => {
+  const branch =
+    typeof branchOverride === 'string'
+      ? branchOverride
+      : req?.payload
+        ? resolveBranch(req as PayloadRequest)
+        : MAIN_BRANCH
+  const branching = req?.payload?.config?.branching
+  const isBranchable = collectionSlug
+    ? Boolean(branching?.branchableCollections.has(collectionSlug))
+    : globalSlug
+      ? Boolean(branching?.branchableGlobals.has(globalSlug))
+      : false
+  const isBypassed =
+    branchOverride === false ||
+    Boolean((req?.context as Record<string, unknown> | undefined)?._branchBypass)
+
+  return {
+    branch,
+    useBranching:
+      Boolean(branching?.enabled) && isBranchable && branch !== MAIN_BRANCH && !isBypassed,
+  }
+}
+
 /**
  * The single entry point adapters call to make a read branch-aware.
  *

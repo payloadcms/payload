@@ -327,7 +327,7 @@ const deleteByIDOperationAttempt = async <
     // cascades below, which all address the canonical document, would strip data
     // main still depends on. The version cascade is scoped to the branch rather
     // than skipped, since a branch's own version rows do go with it.
-    const absorbedByBranch = willBranchAbsorbDelete({
+    const absorbedByBranch = await willBranchAbsorbDelete({
       collectionSlug: collectionConfig.slug,
       doc: documentToDelete,
       req,

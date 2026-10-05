@@ -4,7 +4,9 @@ import {
   buildVersionCollectionFields,
   combineQueries,
   projectBranchVersionParent,
+  resolveBranchReadState,
   resolveBranchVersionQuery,
+  rewriteBranchVersionParents,
   withBranchVersionSelect,
 } from 'payload'
 import toSnakeCase from 'to-snake-case'
@@ -23,16 +25,22 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   )
   const fields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
 
-  const branchedWhere = await resolveBranchVersionQuery({
-    collectionSlug: collection,
-    req,
-    where,
-  })
+  const branchReadState = resolveBranchReadState({ collectionSlug: collection, req })
+  const branchedWhere = branchReadState.useBranching
+    ? rewriteBranchVersionParents(where)
+    : await resolveBranchVersionQuery({
+        collectionSlug: collection,
+        req,
+        where,
+      })
 
   const combinedWhere = combineQueries({ latest: { equals: true } }, branchedWhere ?? {})
 
   const result = await findMany({
     adapter: this,
+    branchVisibility: branchReadState.useBranching
+      ? { branch: branchReadState.branch, collectionSlug: collection }
+      : undefined,
     collectionSlug: collection,
     fields,
     joins,

@@ -2,12 +2,13 @@ import type { SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
 
-import { asc, count, desc, eq, sql } from 'drizzle-orm'
+import { and, asc, count, desc, eq, sql } from 'drizzle-orm'
 import {
   combineQueries,
   type FlattenedJoinField,
   getBranchPredicateSync,
   type PayloadRequest,
+  resolveBranchReadState,
   type Where,
 } from 'payload'
 import toSnakeCase from 'to-snake-case'
@@ -15,6 +16,7 @@ import toSnakeCase from 'to-snake-case'
 import type { DrizzleAdapter, GenericTable } from '../types.js'
 import type { PolymorphicJoinWherePlan } from './createPolymorphicJoinWherePlan.js'
 
+import { buildBranchVisibility } from '../queries/buildBranchVisibility.js'
 import { jsonAggBuildObject } from '../utilities/json.js'
 import { buildPolymorphicJoinWhere } from './buildPolymorphicJoinWhere.js'
 import { createPolymorphicJoinWherePlan } from './createPolymorphicJoinWherePlan.js'
@@ -111,7 +113,10 @@ export const buildPolymorphicJoinQuery = ({
   let unionQuery: null | SQLiteSelect = null
 
   for (const { collection, table } of collectionTables) {
-    const branchPredicate = getBranchPredicateSync({ collectionSlug: collection, req })
+    const branchReadState = resolveBranchReadState({ collectionSlug: collection, req })
+    const branchPredicate = branchReadState.useBranching
+      ? null
+      : getBranchPredicateSync({ collectionSlug: collection, req })
     const collectionWhere = branchPredicate ? combineQueries(where ?? {}, branchPredicate) : where
     const wherePlan: PolymorphicJoinWherePlan = collectionWhere
       ? createPolymorphicJoinWherePlan({ adapter, collections, where: collectionWhere })
@@ -119,14 +124,14 @@ export const buildPolymorphicJoinQuery = ({
     const sortColumn = table[sortPath]
     const selectFields = {
       id:
-        branchPredicate && table['_branchDocID']
+        (branchReadState.useBranching || branchPredicate) && table['_branchDocID']
           ? sql`COALESCE(${table['_branchDocID']}, ${table['id']})`.as('id')
           : table['id'],
       parent: sql`${table[onPath]}`.as(onPath),
       relationTo: sql`${collection}`.as('relationTo'),
       sortPath: sql`${sortColumn ?? null}`.as('sortPath'),
     }
-    const collectionWhereSQL =
+    const parsedCollectionWhere =
       collectionWhere && Object.keys(collectionWhere).length > 0
         ? buildPolymorphicJoinWhere({
             adapter,
@@ -137,6 +142,17 @@ export const buildPolymorphicJoinQuery = ({
             wherePlan,
           })
         : undefined
+    const collectionWhereSQL = branchReadState.useBranching
+      ? and(
+          parsedCollectionWhere,
+          buildBranchVisibility({
+            adapter,
+            branch: branchReadState.branch,
+            collectionSlug: collection,
+            table,
+          }),
+        )
+      : parsedCollectionWhere
     let collectionQuery = db.select(selectFields).from(table).$dynamic()
 
     if (collectionWhereSQL) {

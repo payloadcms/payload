@@ -1,6 +1,12 @@
 import type { FindOneArgs, SanitizedCollectionConfig, TypeWithID } from 'payload'
 
-import { applyBranchIDProjection, resolveBranchQuery, withBranchIDSelect } from 'payload'
+import {
+  applyBranchIDProjection,
+  resolveBranchQuery,
+  resolveBranchReadState,
+  rewriteBranchIDs,
+  withBranchIDSelect,
+} from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -15,10 +21,16 @@ export async function findOne<T extends TypeWithID>(
 
   const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
 
-  const branchedWhere = await resolveBranchQuery({ branch, collectionSlug: collection, req, where })
+  const branchReadState = resolveBranchReadState({ branch, collectionSlug: collection, req })
+  const branchedWhere = branchReadState.useBranching
+    ? rewriteBranchIDs(where)
+    : await resolveBranchQuery({ branch, collectionSlug: collection, req, where })
 
   const { docs } = await findMany({
     adapter: this,
+    branchVisibility: branchReadState.useBranching
+      ? { branch: branchReadState.branch, collectionSlug: collection }
+      : undefined,
     collectionSlug: collection,
     draftsEnabled,
     fields: collectionConfig.flattenedFields,

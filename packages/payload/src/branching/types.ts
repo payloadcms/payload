@@ -152,8 +152,10 @@ export type BranchingConfig = {
   }
   /**
    * Ceiling on the number of shadowed document IDs injected into a single read
-   * predicate before falling back to a scalar strategy.
+   * predicate by database adapters that use the legacy branch visibility fallback.
+   * Official adapters use database-native branch visibility instead.
    *
+   * @deprecated Retained for adapters that use the legacy branch visibility fallback.
    * @default 2000
    */
   maxShadowedIDs?: number

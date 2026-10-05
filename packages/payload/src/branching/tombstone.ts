@@ -7,7 +7,12 @@ import { isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
 import { assertBranchCreatedDocumentsUnreferenced } from './assertBranchCreatedDocumentsUnreferenced.js'
 import { assertBranchWritable } from './assertBranchWritable.js'
 import { createShadowRow } from './createShadowRow.js'
-import { peekBranchOperation, resetBranchState, resolveBranch } from './resolveBranch.js'
+import {
+  loadBranchOperation,
+  peekBranchOperation,
+  resetBranchState,
+  resolveBranch,
+} from './resolveBranch.js'
 import { resolveBranchQuery } from './resolveBranchQuery.js'
 import { branchChangesCollectionSlug, branchDocIDField, branchField, MAIN_BRANCH } from './types.js'
 import { findBranchVersionForkBoundary } from './versions.js'
@@ -193,11 +198,11 @@ export const assertBranchCreatedDeleteUnreferenced = async ({
 
   if (
     !branchDocument ||
-    peekBranchOperation({
+    (await loadBranchOperation({
       collectionSlug,
       docID: branchDocument.id as number | string,
-      req,
-    }) !== 'create'
+      req: req as PayloadRequest,
+    })) !== 'create'
   ) {
     return doc
   }
@@ -225,7 +230,7 @@ export const assertBranchCreatedDeleteUnreferenced = async ({
  * read. A document created on the branch is exempt — nothing of main's stands
  * behind it, so its side effects are its own to clean up.
  */
-export const willBranchAbsorbDelete = ({
+export const willBranchAbsorbDelete = async ({
   collectionSlug,
   doc,
   req,
@@ -234,7 +239,7 @@ export const willBranchAbsorbDelete = ({
   collectionSlug: string
   doc: null | Record<string, unknown> | undefined
   req?: Partial<PayloadRequest>
-}): boolean => {
+}): Promise<boolean> => {
   if (!doc || !req?.payload) {
     return false
   }
@@ -255,14 +260,17 @@ export const willBranchAbsorbDelete = ({
     return false
   }
 
-  return !(
-    doc[branchField] === branch &&
-    peekBranchOperation({
-      collectionSlug,
-      docID: doc.id as number | string,
-      req,
-    }) === 'create'
-  )
+  if (doc[branchField] !== branch) {
+    return true
+  }
+
+  const operation = await loadBranchOperation({
+    collectionSlug,
+    docID: doc.id as number | string,
+    req: req as PayloadRequest,
+  })
+
+  return operation !== 'create'
 }
 
 /**

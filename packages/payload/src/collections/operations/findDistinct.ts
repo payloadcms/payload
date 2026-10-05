@@ -126,25 +126,28 @@ export const findDistinctOperation = async (
     where: where ?? {},
   })
 
-  const fieldResult = getFieldByPath({
-    config: payload.config,
-    fields: collectionConfig.flattenedFields,
-    includeRelationships: true,
-    path: args.field,
-  })
+  const isIDField = args.field === 'id'
+  const fieldResult = isIDField
+    ? undefined
+    : getFieldByPath({
+        config: payload.config,
+        fields: collectionConfig.flattenedFields,
+        includeRelationships: true,
+        path: args.field,
+      })
 
-  if (!fieldResult) {
+  if (!isIDField && !fieldResult) {
     throw new APIError(
       `Field ${args.field} was not found in the collection ${collectionConfig.slug}`,
       httpStatus.BAD_REQUEST,
     )
   }
 
-  if (fieldResult.field.hidden && !showHiddenFields) {
+  if (fieldResult?.field.hidden && !showHiddenFields) {
     throw new Forbidden(req.t)
   }
 
-  if (fieldResult.field.access?.read) {
+  if (fieldResult?.field.access?.read) {
     const hasAccess = await fieldResult.field.access.read({
       collection: collectionConfig,
       req,
@@ -246,7 +249,7 @@ export const findDistinctOperation = async (
     })
   }
 
-  if ('virtual' in fieldResult.field && fieldResult.field.virtual) {
+  if (fieldResult && 'virtual' in fieldResult.field && fieldResult.field.virtual) {
     if (typeof fieldResult.field.virtual !== 'string') {
       throw new APIError(
         `Cannot findDistinct by a virtual field that isn't linked to a relationship field.`,
@@ -311,6 +314,7 @@ export const findDistinctOperation = async (
   })
 
   if (
+    fieldResult &&
     (fieldResult.field.type === 'relationship' || fieldResult.field.type === 'upload') &&
     args.depth
   ) {

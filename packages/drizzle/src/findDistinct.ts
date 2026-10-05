@@ -1,11 +1,13 @@
-import type { asc, desc, SQL } from 'drizzle-orm'
+import type { SQL } from 'drizzle-orm'
 
-import { max, sql } from 'drizzle-orm'
+import { and, asc, desc, max, sql } from 'drizzle-orm'
 import {
   type FindDistinct,
   getFieldByPath,
   getLocalizedPaths,
   resolveBranchQuery,
+  resolveBranchReadState,
+  rewriteBranchIDs,
   type SanitizedCollectionConfig,
   type Where,
 } from 'payload'
@@ -13,6 +15,7 @@ import toSnakeCase from 'to-snake-case'
 
 import type { BuildQueryJoinAliases, DrizzleAdapter, GenericColumn } from './types.js'
 
+import { buildBranchVisibility } from './queries/buildBranchVisibility.js'
 import { buildQuery } from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
 import { getTransaction } from './utilities/getTransaction.js'
@@ -62,14 +65,26 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
   const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
 
   // Same predicate a list read gets: distinct values describe the visible documents.
-  const branchScopedWhere = await resolveBranchQuery({
+  const branchReadState = resolveBranchReadState({
     branch: args.branch,
     collectionSlug: args.collection,
     req: args.req,
-    where: args.where,
   })
+  const branchScopedWhere = branchReadState.useBranching
+    ? rewriteBranchIDs(args.where)
+    : await resolveBranchQuery({
+        branch: args.branch,
+        collectionSlug: args.collection,
+        req: args.req,
+        where: args.where,
+      })
 
   const relatedBranchConstraints: Where[] = []
+  const nativeRelatedBranchReads: {
+    branch: string
+    collectionSlug: string
+    relationshipPath: string
+  }[] = []
   const fieldPaths = getLocalizedPaths({
     collectionSlug: args.collection,
     fields: collectionConfig.flattenedFields,
@@ -90,12 +105,27 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
       .slice(0, pathIndex)
       .map(({ path }) => path)
       .join('.')
-    const relatedWhere = await resolveBranchQuery({
+    const relatedBranchReadState = resolveBranchReadState({
       branch: args.branch,
       collectionSlug: relatedCollectionSlug,
       req: args.req,
-      where: args.relatedAccess?.[relationshipPath],
     })
+    const relatedWhere = relatedBranchReadState.useBranching
+      ? rewriteBranchIDs(args.relatedAccess?.[relationshipPath])
+      : await resolveBranchQuery({
+          branch: args.branch,
+          collectionSlug: relatedCollectionSlug,
+          req: args.req,
+          where: args.relatedAccess?.[relationshipPath],
+        })
+
+    if (relatedBranchReadState.useBranching) {
+      nativeRelatedBranchReads.push({
+        branch: relatedBranchReadState.branch,
+        collectionSlug: relatedCollectionSlug,
+        relationshipPath,
+      })
+    }
 
     if (relatedWhere && Object.keys(relatedWhere).length) {
       relatedBranchConstraints.push(
@@ -104,7 +134,12 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
     }
   }
 
-  const { joins, orderBy, selectFields, where } = buildQuery({
+  const {
+    joins,
+    orderBy,
+    selectFields,
+    where: queryWhere,
+  } = buildQuery({
     adapter: this,
     fields: collectionConfig.flattenedFields,
     locale: args.locale,
@@ -124,10 +159,47 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
   })
 
   orderBy.pop()
+  const table = this.tables[tableName]
+  const canonicalIDExpression =
+    branchReadState.useBranching && args.field === 'id'
+      ? sql`COALESCE(${table._branchDocID}, ${table.id})`
+      : undefined
+
+  if (canonicalIDExpression) {
+    selectFields['_selected'] = canonicalIDExpression.as('_selected') as unknown as GenericColumn
+  }
+
+  const branchVisibilityWhere = branchReadState.useBranching
+    ? buildBranchVisibility({
+        adapter: this,
+        branch: branchReadState.branch,
+        collectionSlug: args.collection,
+        table,
+      })
+    : undefined
+  const relatedBranchVisibility = nativeRelatedBranchReads.flatMap((relatedBranchRead) => {
+    const relatedTable = joins.find(({ queryPath }) =>
+      queryPath?.endsWith(`${relatedBranchRead.relationshipPath}._target`),
+    )?.table
+
+    return relatedTable
+      ? [
+          buildBranchVisibility({
+            adapter: this,
+            branch: relatedBranchRead.branch,
+            collectionSlug: relatedBranchRead.collectionSlug,
+            table: relatedTable,
+          }),
+        ]
+      : []
+  })
+  const where = and(queryWhere, branchVisibilityWhere, ...relatedBranchVisibility)
 
   const db = await getTransaction(this, args.req)
 
-  const _order = getOrderColumn(orderBy, selectFields, joins)
+  const _order = canonicalIDExpression ? null : getOrderColumn(orderBy, selectFields, joins)
+  const firstSort = Array.isArray(args.sort) ? args.sort[0] : args.sort
+  const canonicalIDOrder = firstSort?.startsWith('-') ? desc : asc
 
   const selectDistinctResult = await selectDistinct({
     adapter: this,
@@ -136,7 +208,9 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
     hasAggregates: Boolean(_order) && !joins.length,
     joins,
     query: ({ query }) => {
-      if (_order && orderBy.length > 0 && !joins.length) {
+      if (canonicalIDExpression) {
+        query = query.orderBy(canonicalIDOrder(sql`_selected`))
+      } else if (_order && orderBy.length > 0 && !joins.length) {
         query = query.orderBy(orderBy[0].order(sql`_order`))
       } else {
         query = query.orderBy(() => orderBy.map(({ column, order }) => order(column)))
@@ -187,7 +261,7 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
 
   if (args.limit) {
     const totalDocs = await this.countDistinct({
-      column: selectFields['_selected'],
+      column: (canonicalIDExpression ?? selectFields['_selected']) as GenericColumn,
       db,
       joins,
       tableName,

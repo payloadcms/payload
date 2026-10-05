@@ -12,7 +12,7 @@ import type {
 
 import { and, eq, getTableName, isNull, like, notInArray, or, sql } from 'drizzle-orm'
 import { type PgTableWithColumns } from 'drizzle-orm/pg-core'
-import { APIError, getBranchPredicateSync, getFieldByPath } from 'payload'
+import { APIError, getBranchPredicateSync, getFieldByPath, resolveBranchReadState } from 'payload'
 import { fieldShouldBeLocalized, tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 import { validate as uuidValidate } from 'uuid'
@@ -26,6 +26,7 @@ import { jsonBuildObject } from '../utilities/json.js'
 import { DistinctSymbol } from '../utilities/rawConstraint.js'
 import { resolveBlockTableName } from '../utilities/validateExistingBlockIsIdentical.js'
 import { addJoinTable } from './addJoinTable.js'
+import { buildBranchVisibility } from './buildBranchVisibility.js'
 import { getTableAlias } from './getTableAlias.js'
 import { appendFieldToStoragePath, resolveRelationshipPath } from './resolveRelationshipPath.js'
 
@@ -80,39 +81,58 @@ type Args = {
 }
 
 const getRelationshipJoinCondition = ({
+  adapter,
   collectionSlug,
   relationshipID,
   req,
   table,
   value,
 }: {
+  adapter: DrizzleAdapter
   collectionSlug: string
   relationshipID: GenericColumn
   req?: Partial<PayloadRequest>
   table: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
   value: unknown
 }): SQL => {
-  const branchPredicate = getBranchPredicateSync({ collectionSlug, req })
+  const branchReadState = resolveBranchReadState({ collectionSlug, req })
+  const branchPredicate = branchReadState.useBranching
+    ? null
+    : getBranchPredicateSync({ collectionSlug, req })
   const shouldMatchCanonicalID = Boolean(
-    table._branchDocID && (branchPredicate || value === DistinctSymbol),
+    table._branchDocID &&
+      (branchReadState.useBranching || branchPredicate || value === DistinctSymbol),
   )
   const identityCondition = shouldMatchCanonicalID
     ? or(eq(table.id, relationshipID), eq(table._branchDocID, relationshipID))
     : eq(table.id, relationshipID)
-  const branchCondition = getBranchTableCondition({ collectionSlug, req, table })
+  const branchCondition = getBranchTableCondition({ adapter, collectionSlug, req, table })
 
   return branchCondition ? and(identityCondition, branchCondition) : identityCondition
 }
 
 const getBranchTableCondition = ({
+  adapter,
   collectionSlug,
   req,
   table,
 }: {
+  adapter: DrizzleAdapter
   collectionSlug: string
   req?: Partial<PayloadRequest>
   table: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
 }): SQL | undefined => {
+  const branchReadState = resolveBranchReadState({ collectionSlug, req })
+
+  if (branchReadState.useBranching) {
+    return buildBranchVisibility({
+      adapter,
+      branch: branchReadState.branch,
+      collectionSlug,
+      table,
+    })
+  }
+
   const branchPredicate = getBranchPredicateSync({ collectionSlug, req })
 
   return branchPredicate
@@ -557,6 +577,7 @@ export const getTableColumnFromPath = ({
 
           if (!existingMainTable) {
             const branchCondition = getBranchTableCondition({
+              adapter,
               collectionSlug: field.collection,
               req,
               table: relationshipTable,
@@ -636,6 +657,7 @@ export const getTableColumnFromPath = ({
               condition: (() => {
                 const relationshipCondition = eq(newAliasTable['id'], arrayAliasTable._parentID)
                 const branchCondition = getBranchTableCondition({
+                  adapter,
                   collectionSlug: field.collection,
                   req,
                   table: newAliasTable,
@@ -654,6 +676,7 @@ export const getTableColumnFromPath = ({
               aliasTable ? aliasTable.id : adapter.tables[tableName].id,
             )
             const branchCondition = getBranchTableCondition({
+              adapter,
               collectionSlug: field.collection,
               req,
               table: newAliasTable,
@@ -851,6 +874,7 @@ export const getTableColumnFromPath = ({
 
               const relationshipID = aliasRelationshipTable[`${field.relationTo}ID`]
               const condition = getRelationshipJoinCondition({
+                adapter,
                 collectionSlug: field.relationTo,
                 relationshipID,
                 req,
@@ -1061,6 +1085,7 @@ export const getTableColumnFromPath = ({
             })
 
             const condition = getRelationshipJoinCondition({
+              adapter,
               collectionSlug: field.relationTo,
               relationshipID: localesTable[columnName],
               req,
@@ -1078,6 +1103,7 @@ export const getTableColumnFromPath = ({
               ? aliasTable[columnName]
               : adapter.tables[tableName][columnName]
             const condition = getRelationshipJoinCondition({
+              adapter,
               collectionSlug: field.relationTo,
               relationshipID,
               req,
