@@ -16,6 +16,7 @@ test.suite('@payloadcms/plugin-redirects', { config: './config.ts' }, () => {
         title: 'Test',
       },
       overrideAccess: true,
+      version: 'published',
     })
   })
 

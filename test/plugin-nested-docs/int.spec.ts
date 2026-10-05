@@ -50,6 +50,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
           slug: '11-children',
         },
         overrideAccess: true,
+        version: 'published',
       })
 
       // create 11 children docs
@@ -143,6 +144,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
           slug: 'parent',
         },
         overrideAccess: true,
+        version: 'published',
       })
 
       const childDoc = await payload.create({

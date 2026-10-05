@@ -152,6 +152,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
       const { totalDocs: totalNumberOfDocs } = await payload.count({
         collection: 'pages',
         overrideAccess: true,
+        version: 'latest',
       })
 
       expect(doc.filename).toBeDefined()
@@ -185,6 +186,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
       const { totalDocs: totalNumberOfDocs } = await payload.count({
         collection: 'pages',
         overrideAccess: true,
+        version: 'latest',
       })
 
       expect(doc.filename).toBeDefined()
@@ -220,6 +222,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         limit: 100,
         overrideAccess: true,
         page: 1,
+        version: 'latest',
       })
 
       const firstDocOnPage1 = pages.docs?.[0]
@@ -258,6 +261,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         limit: 100,
         overrideAccess: true,
         page: 2,
+        version: 'latest',
       })
 
       const firstDocOnPage2 = pages.docs?.[0]
@@ -2299,6 +2303,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           id: existingPage.id,
           collection: 'pages',
           overrideAccess: true,
+          version: 'latest',
         })
 
         expect(updatedPage.jsonField).toEqual(updatedJson)
@@ -2368,6 +2373,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           id: existingPage.id,
           collection: 'pages',
           overrideAccess: true,
+          version: 'latest',
         })
 
         expect(updatedPage.jsonField).toEqual(updatedExistingJson)
@@ -2378,6 +2384,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           where: {
             title: { equals: `JSON Upsert New ${timestamp}` },
           },
+          version: 'latest',
         })
 
         expect(newPages.docs).toHaveLength(1)
@@ -2501,6 +2508,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           id: page.id,
           collection: 'pages',
           overrideAccess: true,
+          version: 'latest',
         })
         expect(updatedPage.jsonField).toEqual(jsonV2)
 
@@ -2533,6 +2541,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           id: page.id,
           collection: 'pages',
           overrideAccess: true,
+          version: 'latest',
         })
         expect(updatedPage.jsonField).toEqual(jsonV3)
 
@@ -3459,6 +3468,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         id: page1.id,
         collection: 'pages',
         overrideAccess: true,
+        version: 'latest',
       })
 
       expect(updatedPage1.title).toBe('Updated Test 1')
@@ -4031,7 +4041,12 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
       payload,
     }) => {
       const users = await payload.find({ collection: 'users', limit: 1, overrideAccess: true })
-      const posts = await payload.find({ collection: 'posts', limit: 1, overrideAccess: true })
+      const posts = await payload.find({
+        collection: 'posts',
+        limit: 1,
+        overrideAccess: true,
+        version: 'latest',
+      })
       const userId = users.docs[0]?.id
       const postId = posts.docs[0]?.id
 
@@ -4090,6 +4105,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         id: existingPage.id,
         collection: 'pages',
         overrideAccess: true,
+        version: 'latest',
       })
 
       expect(updatedPage.title).toBe('Updated Title')
@@ -6976,6 +6992,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           where: {
             title: { contains: 'Sync Import Test' },
           },
+          version: 'latest',
         })
 
         expect(importedDocs.totalDocs).toBe(3)
@@ -7393,6 +7410,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           id: post.id,
           collection: 'posts-imports-only',
           overrideAccess: true,
+          version: 'latest',
         })
 
         expect(previewResponse.status).toBe(400)

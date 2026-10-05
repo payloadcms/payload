@@ -68,6 +68,7 @@ test.suite('@payloadcms/plugin-seo', { config: './config.ts' }, () => {
       },
       depth: 0,
       overrideAccess: true,
+      version: 'published',
     })
 
     readablePage = await payload.create({
@@ -81,6 +82,7 @@ test.suite('@payloadcms/plugin-seo', { config: './config.ts' }, () => {
       },
       depth: 0,
       overrideAccess: true,
+      version: 'published',
     })
 
     trashedPage = await payload.create({
@@ -95,6 +97,7 @@ test.suite('@payloadcms/plugin-seo', { config: './config.ts' }, () => {
       },
       depth: 0,
       overrideAccess: true,
+      version: 'published',
     })
 
     mediaDoc2 = await payload.create({
@@ -571,6 +574,7 @@ test.suite('@payloadcms/plugin-seo', { config: './config.ts' }, () => {
     await payload.update({
       id: page.id,
       collection: 'pages',
+      version: 'published',
       data: {
         meta: {
           description: 'This is a test page',
@@ -585,7 +589,9 @@ test.suite('@payloadcms/plugin-seo', { config: './config.ts' }, () => {
     const pageWithLocalizedMeta = await payload.update({
       id: page.id,
       collection: 'pages',
+      version: 'latest',
       data: {
+        _status: 'published',
         meta: {
           description: 'Esta es una página de prueba',
           title: 'Hola, mundo!',

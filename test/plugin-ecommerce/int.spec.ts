@@ -1418,6 +1418,7 @@ test.suite('ecommerce', { config: './config.ts', resetBetweenTests: false }, () 
         await payload.update({
           id: product.id,
           collection: 'products',
+          version: 'published',
           data: {
             inventory: 10,
           },

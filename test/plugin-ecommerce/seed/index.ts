@@ -79,6 +79,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         enableVariants: true,
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     const hoodieSmallWhite = await payload.create({
@@ -91,6 +92,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         priceInUSD: 1999,
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     const hoodieMediumWhite = await payload.create({
@@ -103,6 +105,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         priceInUSD: 1999,
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     const hatProduct = await payload.create({
@@ -115,6 +118,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         priceInEUR: 2599,
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     const pendingPaymentRecord = await payload.create({
