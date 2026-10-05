@@ -1,4 +1,4 @@
-import type { Payload, TypeWithID } from 'payload'
+import type { Payload, TypeWithID, Where } from 'payload'
 
 import path from 'path'
 import { getFileByPath } from 'payload'
@@ -129,6 +129,97 @@ describe('Joins Field', () => {
 
   afterAll(async () => {
     await payload.destroy()
+  })
+
+  describe('Join field where immutability', () => {
+    const createdPosts: TypeWithID['id'][] = []
+    const createdUsers: TypeWithID['id'][] = []
+    const createdCategories: TypeWithID['id'][] = []
+    let restoreConfig: () => void
+
+    afterEach(async () => {
+      restoreConfig()
+
+      for (const id of createdPosts) {
+        await payload.delete({ collection: postsSlug, id })
+      }
+      for (const id of createdUsers) {
+        await payload.delete({ collection: 'users', id })
+      }
+      for (const id of createdCategories) {
+        await payload.delete({ collection: categoriesSlug, id })
+      }
+      createdPosts.length = 0
+      createdUsers.length = 0
+      createdCategories.length = 0
+    })
+
+    it('should preserve nested configured where across reads with different relationship access', async () => {
+      const join = payload.collections[categoriesSlug].config.joins[postsSlug].find(
+        ({ joinPath }) => joinPath === 'filtered',
+      )!
+      const usersConfig = payload.collections.users.config
+      const originalWhere = join.field.where
+      const originalReadAccess = usersConfig.access.read
+      const configuredWhere: Where = {
+        and: [{ 'author.email': { exists: true } }],
+      }
+
+      restoreConfig = () => {
+        join.field.where = originalWhere
+        usersConfig.access.read = originalReadAccess
+      }
+
+      const category = await payload.create({
+        collection: categoriesSlug,
+        data: { name: 'Join where immutability' },
+        overrideAccess: true,
+      })
+
+      createdCategories.push(category.id)
+
+      const authorPosts = []
+
+      for (const name of ['first', 'second']) {
+        const author = await payload.create({
+          collection: 'users',
+          data: { email: `${name}-author@example.com`, password: 'test' },
+          overrideAccess: true,
+        })
+
+        createdUsers.push(author.id)
+
+        const post = await payload.create({
+          collection: postsSlug,
+          data: { author: author.id, category: category.id, title: `${name} author post` },
+          overrideAccess: true,
+        })
+
+        createdPosts.push(post.id)
+        authorPosts.push({ author, post })
+      }
+
+      join.field.where = configuredWhere
+      usersConfig.access.read = ({ req }) => ({
+        id: { equals: req.context.readableAuthorID },
+      })
+
+      for (const { author, post } of authorPosts) {
+        const result = await payload.findByID({
+          id: category.id,
+          collection: categoriesSlug,
+          context: { readableAuthorID: author.id },
+          depth: 0,
+          overrideAccess: false,
+          user: author,
+        })
+
+        expect(join.field.where).toEqual({
+          and: [{ 'author.email': { exists: true } }],
+        })
+        expect(result.filtered.docs).toEqual([post.id])
+      }
+    })
   })
 
   it('should populate joins using findByID', async () => {
