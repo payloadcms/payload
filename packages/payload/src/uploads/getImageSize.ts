@@ -20,8 +20,12 @@ export async function getImageSize({ file, sharp }: Args): Promise<ProbedImageSi
 
   if (sharp) {
     try {
-      const { height, width } = await sharp(tempFilePath ?? file!.data).metadata()
+      const { height, orientation, width } = await sharp(tempFilePath ?? file!.data).metadata()
       if (width && height) {
+        // EXIF orientations 5, 6, 7, and 8 transpose width and height in display / viewer orientation
+        if (orientation && [5, 6, 7, 8].includes(orientation)) {
+          return { height: width, width: height }
+        }
         return { height, width }
       }
     } catch {

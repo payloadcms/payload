@@ -236,4 +236,24 @@ describe('getImageSize', () => {
       expect(await getImageSize({ file })).toEqual({ height: 48, width: 64 })
     })
   })
+it('should swap width and height when EXIF orientation transposes dimensions (5-8)', async () => {
+    const mockMetadata = vi.fn().mockResolvedValue({
+      height: 800,
+      orientation: 6,
+      width: 1200,
+    })
+    const mockSharp = vi.fn(() => ({
+      metadata: mockMetadata,
+    })) as never
+
+    const file = {
+      data: Buffer.from('jpeg-with-exif'),
+      mimetype: 'image/jpeg',
+      name: 'portrait.jpg',
+      size: 14,
+    } as PayloadRequest['file']
+
+    const dimensions = await getImageSize({ file, sharp: mockSharp })
+    expect(dimensions).toEqual({ height: 1200, width: 800 })
+  })
 })
