@@ -1422,11 +1422,12 @@ type RootTypeScriptConfig = {
 
   /**
    * Enable strict type safety for draft operations. When enabled, draft selectors are forbidden
-   * on collections without drafts, and query results with `version: 'draft'` or `version: 'latest'` type required fields as optional.
-   * This prevents invalid draft usage at compile time and ensures type correctness across all Local API operations.
+   * on collections without drafts, and `find` results with `version: 'draft'` or `version: 'latest'` type user fields as optional.
+   * These checks use the generated types.
    *
-   * @default false
-   * @todo Remove in v4. Strict draft types will become the default behavior.
+   * Set to false to opt out. Regenerate types after changing this option.
+   *
+   * @default true
    */
   strictDraftTypes?: boolean
 }
@@ -1821,8 +1822,11 @@ type SanitizedGraphQLConfig = Omit<
     >
   >
 
-type SanitizedTypeScriptConfig = Omit<RootTypeScriptConfig, 'autoGenerate' | 'outputFile'> &
-  Required<Pick<RootTypeScriptConfig, 'autoGenerate' | 'outputFile'>>
+type SanitizedTypeScriptConfig = Omit<
+  RootTypeScriptConfig,
+  'autoGenerate' | 'outputFile' | 'strictDraftTypes'
+> &
+  Required<Pick<RootTypeScriptConfig, 'autoGenerate' | 'outputFile' | 'strictDraftTypes'>>
 
 export interface SanitizedConfig
   extends Omit<

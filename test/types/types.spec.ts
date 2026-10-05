@@ -2092,6 +2092,10 @@ describe('Types testing', () => {
   })
 
   describe('strictDraftTypes flag', () => {
+    test('should expose the normalized strict draft option as a boolean', () => {
+      expect(payload.config.typescript.strictDraftTypes).type.toBe<boolean>()
+    })
+
     describe('query operations', () => {
       test('draft find query returns optional required fields when flag is enabled', async () => {
         const result = await payload.find({

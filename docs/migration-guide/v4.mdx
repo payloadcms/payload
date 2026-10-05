@@ -376,6 +376,12 @@ await payload.update({
 
 See [Drafts](../versions/drafts) for selection and publication examples and [GraphQL](../graphql/overview) for locale-map inputs and structured localized output.
 
+### Strict draft types are enabled by default
+
+`typescript.strictDraftTypes` now defaults to `true`. Regenerate your types with `payload generate:types` to apply the default to the Local API. Draft and latest `find` results type user fields as optional, and TypeScript rejects draft or latest operations on collections and globals without drafts.
+
+You can retain the previous opt-in typing behavior by setting `typescript.strictDraftTypes: false` and regenerating types. This option affects TypeScript checks, not runtime draft behavior.
+
 ### Version read access inherits collection and global read access
 
 When `readVersions` is not configured, version access now inherits the Collection or Global `read` Access Control instead of requiring an authenticated user by default.
