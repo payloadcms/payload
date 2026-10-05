@@ -4,7 +4,7 @@ import type { ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL, formatFilesize } from 'payload/shared'
-import React, { Fragment, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import { Button } from '../../elements/Button/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
@@ -17,6 +17,7 @@ import { RenderCustomComponent } from '../../elements/RenderCustomComponent/inde
 import { SelectMany } from '../../elements/SelectMany/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
+import { TableIdentityProvider } from '../../elements/Table/TableIdentity.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -80,7 +81,18 @@ export function DefaultListView(props: ListViewClientProps) {
     getEntityConfig,
   } = useConfig()
 
-  const { data, hasActiveFilters, isGroupingBy, query } = useListQuery()
+  const {
+    data,
+    hasActiveFilters,
+    isGroupingBy,
+    query,
+    resolvedGroupBy,
+    resolvedSearch,
+    searchInput,
+  } = useListQuery()
+
+  const previousSearch = useRef(resolvedSearch || '')
+  const searchChangeResults = useRef<unknown>(null)
 
   const hasWhereParam = useRef(Boolean(query?.where))
   const [isWhereOpen, setIsWhereOpen] = useState(hasActiveFilters)
@@ -107,6 +119,56 @@ export function DefaultListView(props: ListViewClientProps) {
   const isTrashEnabled = Boolean(collectionConfig.trash)
 
   const { i18n } = useTranslation()
+  const previousResults = useRef(data)
+  const [resultsAnnouncement, setResultsAnnouncement] = useState('')
+
+  const isSearchSettled =
+    (searchInput || '') === (resolvedSearch || '') &&
+    (query?.search || '') === (resolvedSearch || '') &&
+    (query?.groupBy || '') === (resolvedGroupBy || '')
+
+  useEffect(() => {
+    setResultsAnnouncement('')
+    if (previousSearch.current !== (resolvedSearch || '')) {
+      previousSearch.current = resolvedSearch || ''
+      searchChangeResults.current = data
+    }
+    const hasCompletedSearch = searchChangeResults.current === data
+
+    if (!isSearchSettled || !data || (!hasCompletedSearch && previousResults.current === data)) {
+      return
+    }
+
+    const announcement = hasCompletedSearch
+      ? i18n.t(
+          resolvedSearch
+            ? resolvedGroupBy
+              ? 'general:searchGroups'
+              : 'general:searchResults'
+            : 'general:searchCleared',
+          { count: data.totalDocs, search: resolvedSearch },
+        )
+      : `${data.totalDocs} ${getTranslation(
+          data.totalDocs === 1 ? labels.singular : labels.plural,
+          i18n,
+        )}`
+
+    const timeout = setTimeout(() => {
+      setResultsAnnouncement(announcement)
+      previousResults.current = data
+    }, 500)
+
+    return () => clearTimeout(timeout)
+  }, [
+    data,
+    i18n,
+    isSearchSettled,
+    labels.plural,
+    labels.singular,
+    resolvedGroupBy,
+    resolvedSearch,
+    searchInput,
+  ])
 
   const collectionLabel = getTranslation(labels?.plural, i18n)
 
@@ -182,10 +244,17 @@ export function DefaultListView(props: ListViewClientProps) {
     collectionLabel,
   ])
 
+  const Container = isInDrawer ? 'div' : 'main'
+
   return (
-    <Fragment>
-      <TableColumnsProvider collectionSlug={collectionSlug} columnState={columnState}>
-        <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
+    <TableIdentityProvider
+      collectionSlug={collectionSlug}
+      navigationLabel={
+        !isInDrawer && !hierarchyData && !collectionConfig.orderable ? collectionLabel : undefined
+      }
+    >
+      <Container className={`${baseClass} ${baseClass}--${collectionSlug}`}>
+        <TableColumnsProvider collectionSlug={collectionSlug} columnState={columnState}>
           <SelectionProvider docs={docs} totalDocs={data?.totalDocs}>
             {BeforeList}
             <CollectionListHeader
@@ -212,7 +281,6 @@ export function DefaultListView(props: ListViewClientProps) {
               hasTrashPermission={hasTrashPermission}
               i18n={i18n}
               isBulkUploadEnabled={isBulkUploadEnabled && !upload.hideFileInputOnCreate}
-              isTrashEnabled={isTrashEnabled}
               newDocumentURL={newDocumentURL}
               smallBreak={smallBreak}
               viewType={viewType}
@@ -231,6 +299,7 @@ export function DefaultListView(props: ListViewClientProps) {
                 collectionConfig?.enableQueryPresets !== true || disableQueryPresets
               }
               hasCreatePermission={hasCreatePermission && viewType !== 'trash' && !isInDrawer}
+              hasDeletePermission={hasDeletePermission}
               isWhereOpen={isWhereOpen}
               listMenuItems={listMenuItems}
               newDocumentURL={newDocumentURL}
@@ -239,6 +308,7 @@ export function DefaultListView(props: ListViewClientProps) {
               queryPresetPermissions={queryPresetPermissions}
               renderedFilters={renderedFilters}
               resolvedFilterOptions={resolvedFilterOptions}
+              viewType={viewType}
             />
             {isWhereOpen && (
               <ListWhereBuilder
@@ -250,6 +320,11 @@ export function DefaultListView(props: ListViewClientProps) {
                 resolvedFilterOptions={resolvedFilterOptions}
               />
             )}
+            <div aria-atomic="true" className={`${baseClass}__search-status sr-only`} role="status">
+              {isSearchSettled && resultsAnnouncement && (
+                <span key={resolvedSearch || ''}>{resultsAnnouncement}</span>
+              )}
+            </div>
             {BeforeListTable}
             {hierarchyData ? (
               <DocumentSelectionProvider
@@ -353,14 +428,15 @@ export function DefaultListView(props: ListViewClientProps) {
                   ) : null
                 }
                 collectionConfig={collectionConfig}
+                tableId={hierarchyData ? undefined : `payload-table-${collectionConfig.slug}`}
               />
             )}
           </SelectionProvider>
-        </div>
-      </TableColumnsProvider>
-      {docs?.length > 0 && isGroupingBy && data.totalPages > 1 && (
-        <PageControls collectionConfig={collectionConfig} />
-      )}
-    </Fragment>
+        </TableColumnsProvider>
+        {docs?.length > 0 && isGroupingBy && data.totalPages > 1 && (
+          <PageControls collectionConfig={collectionConfig} />
+        )}
+      </Container>
+    </TableIdentityProvider>
   )
 }

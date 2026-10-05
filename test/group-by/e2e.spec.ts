@@ -65,6 +65,7 @@ test.describe('Group By', () => {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
   })
 
@@ -266,6 +267,7 @@ test.describe('Group By', () => {
         category: null,
         title: 'My Post',
       },
+      overrideAccess: true,
     })
 
     await page.goto(url.list)
@@ -286,6 +288,7 @@ test.describe('Group By', () => {
         date: null,
         title: 'My Post',
       },
+      overrideAccess: true,
     })
 
     await page.goto(url.list)
@@ -307,6 +310,7 @@ test.describe('Group By', () => {
           checkbox: null,
           title: 'Null Post',
         },
+        overrideAccess: true,
       }),
       await payload.create({
         collection: postsSlug,
@@ -314,6 +318,7 @@ test.describe('Group By', () => {
           checkbox: true,
           title: 'True Post',
         },
+        overrideAccess: true,
       }),
       await payload.create({
         collection: postsSlug,
@@ -321,6 +326,7 @@ test.describe('Group By', () => {
           checkbox: false,
           title: 'False Post',
         },
+        overrideAccess: true,
       }),
     ])
 
@@ -513,8 +519,7 @@ test.describe('Group By', () => {
     await addGroupBy(page, { fieldLabel: 'Title', fieldPath: 'title' })
 
     // Global pagination controls should be visible when group-by produces many groups
-    // The page-controls component is rendered as sibling after collection-list when totalPages > 1
-    await expect(page.locator('.collection-list ~ .page-controls')).toBeVisible()
+    await expect(page.locator('.collection-list > .page-controls')).toBeVisible()
   })
 
   test('should paginate globally when grouping by virtual relationship field', async () => {
@@ -541,10 +546,10 @@ test.describe('Group By', () => {
     await expect(page).toHaveURL(/&groupBy=page\.title/)
 
     // Should show global pagination controls when there are 30 distinct page titles
-    await expect(page.locator('.collection-list ~ .page-controls')).toBeVisible()
+    await expect(page.locator('.collection-list > .page-controls')).toBeVisible()
 
     // Verify we have multiple pages (30 pages with default limit of 10 = 3 pages)
-    const pageInfo = page.locator('.collection-list ~ .page-controls .page-controls__page-info')
+    const pageInfo = page.locator('.collection-list > .page-controls .page-controls__page-info')
     await expect(pageInfo).toBeVisible()
     await expect(pageInfo).toContainText('of 30')
   })
@@ -977,6 +982,7 @@ test.describe('Group By', () => {
         ...data,
         deletedAt: new Date().toISOString(), // Set the post as trashed
       },
+      overrideAccess: true,
     }) as unknown as Promise<Post>
   }
 
@@ -1045,6 +1051,7 @@ test.describe('Group By', () => {
           title: 'Virtual Field Cell Test',
           where: {},
         },
+        overrideAccess: true,
         user,
       })
 
@@ -1084,6 +1091,7 @@ test.describe('Group By', () => {
           title: presetTitle,
           where: {},
         },
+        overrideAccess: true,
         user,
       })
 

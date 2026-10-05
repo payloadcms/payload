@@ -33,6 +33,7 @@ export const exclusiveConcurrencyWorkflow: WorkflowConfig<'exclusiveConcurrency'
           data: {
             title: `started:${job.input.resourceId}:${job.id}`,
           },
+          overrideAccess: true,
         })
 
         // Simulate some work
@@ -50,6 +51,7 @@ export const exclusiveConcurrencyWorkflow: WorkflowConfig<'exclusiveConcurrency'
           data: {
             title: `completed:${job.input.resourceId}:${job.id}`,
           },
+          overrideAccess: true,
         })
 
         return { output: {} }

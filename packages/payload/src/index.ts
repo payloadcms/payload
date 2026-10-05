@@ -304,18 +304,18 @@ export interface UntypedPayloadTypes {
     _verificationToken?: null | string
     /** Whether the email is verified. Only with `auth.verify`. */
     _verified?: boolean | null
-    /** The user's API key. Only with `auth.useAPIKey`, once enabled for this user. */
+    /** The user's API key. Write-only: accepted on `create`/`update`, never returned on reads. */
     apiKey?: null | string
-    /** Internal lookup index for the API key. Hidden (needs `showHiddenFields`). Only with `auth.useAPIKey`. */
+    /** Internal lookup index for the API key. Never returned on reads. */
     apiKeyIndex?: null | string
+    /** The API key's final four characters. Only with `auth.useAPIKey`. */
+    apiKeyLast4?: null | string
     /** Slug of the auth collection this user belongs to. Always present; identifies the source collection. */
     collection: string
     /** When the user was created. Not present when timestamps are disabled. */
     createdAt?: string
     /** The user's email. Absent if email login is disabled via `auth.loginWithUsername`. */
     email?: null | string
-    /** Whether API key auth is enabled for this user. Only with `auth.useAPIKey`. */
-    enableAPIKey?: boolean | null
     /** Hashed password. Hidden (needs `showHiddenFields`). Only with the local strategy. */
     hash?: null | string
     /** The user's ID. Always present. */
@@ -328,6 +328,8 @@ export interface UntypedPayloadTypes {
     password?: null | string
     /** Reset-token expiry. Hidden (needs `showHiddenFields`). Only after `forgotPassword`, until reset. */
     resetPasswordExpiration?: null | string
+    /** Last password-reset email time. Hidden (needs `showHiddenFields`). */
+    resetPasswordRequestedAt?: null | string
     /** Active password-reset token. Hidden (needs `showHiddenFields`). Only after `forgotPassword`, until reset. */
     resetPasswordToken?: null | string
     /** Password salt. Hidden (needs `showHiddenFields`). Only with the local strategy. */
@@ -828,7 +830,6 @@ export class BasePayload {
                 const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
 
                 if (!shouldAutoRun) {
-                  jobAutorunCron.stop()
                   return
                 }
               }
@@ -836,6 +837,7 @@ export class BasePayload {
               await this.jobs.run({
                 allQueues: cronConfig.allQueues,
                 limit: cronConfig.limit ?? DEFAULT_LIMIT,
+                overrideAccess: true,
                 queue: cronConfig.queue,
                 silent: cronConfig.silent,
               })
@@ -1409,6 +1411,8 @@ export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
 export * from './auth/index.js'
 export { jwtSign } from './auth/jwt.js'
+export { JWT_AUTH_VERSION } from './auth/jwtAuth.js'
+export type { JWTAuthVersion } from './auth/jwtAuth.js'
 export { accessOperation } from './auth/operations/access.js'
 export { forgotPasswordOperation } from './auth/operations/forgotPassword.js'
 export { initOperation } from './auth/operations/init.js'
@@ -1501,9 +1505,10 @@ export type {
 export type { CompoundIndex, FoldersConfig, TagsConfig } from './collections/config/types.js'
 
 export type { SanitizedCompoundIndex } from './collections/config/types.js'
-export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
 
+export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
 export { countOperation } from './collections/operations/count.js'
+
 export { createOperation } from './collections/operations/create.js'
 export { deleteOperation } from './collections/operations/delete.js'
 export { deleteByIDOperation } from './collections/operations/deleteByID.js'
@@ -1554,9 +1559,9 @@ export {
 export { addDefaultsToConfig } from './config/defaults.js'
 
 export { definePlugin } from './config/definePlugin.js'
-
 export { type OrderableEndpointBody } from './config/orderable/index.js'
 export { sanitizeConfig } from './config/sanitize.js'
+
 export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
 export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
@@ -1582,9 +1587,15 @@ export { validateQueryPaths } from './database/queryValidation/validateQueryPath
 export { validateSearchParam } from './database/queryValidation/validateSearchParams.js'
 export type {
   BaseDatabaseAdapter,
+  BatchProcessing,
+  BatchProcessingArgs,
+  BatchProcessingOperation,
+  BatchProcessingResult,
   BeginTransaction,
   CommitTransaction,
   Connect,
+  Copy,
+  CopyArgs,
   Count,
   CountArgs,
   CountGlobalVersionArgs,
@@ -1681,6 +1692,8 @@ export {
 } from './errors/index.js'
 
 export type { ValidationFieldError } from './errors/index.js'
+export type { Authorship, SanitizedAuthorship } from './fields/baseFields/authorship/index.js'
+export { createCreatedByField, createUpdatedByField } from './fields/baseFields/authorship/index.js'
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 export { baseIDField } from './fields/baseFields/baseIDField.js'
 
@@ -2003,6 +2016,11 @@ export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
 export type * from './uploads/types.js'
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
+export {
+  batchProcessing,
+  type BatchProcessingOptions,
+  type BatchProcessorResult,
+} from './utilities/batchProcessing.js'
 export { canAccessAdmin } from './utilities/canAccessAdmin.js'
 export { commitTransaction } from './utilities/commitTransaction.js'
 export {
@@ -2016,8 +2034,11 @@ export {
   withNullableJSONSchemaType,
 } from './utilities/configToJSONSchema.js'
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
-export { createLocalReq } from './utilities/createLocalReq.js'
-export { createPayloadRequest } from './utilities/createPayloadRequest.js'
+export {
+  createPayloadRequest,
+  type CreatePayloadRequestArgs,
+} from './utilities/createPayloadRequest.js'
+export { createPayloadRequestFromWebRequest } from './utilities/createPayloadRequestFromWebRequest.js'
 export {
   deepCopyObject,
   deepCopyObjectComplex,

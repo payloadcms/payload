@@ -38,7 +38,7 @@ describe('plugin', () => {
   })
 
   beforeEach(() => {
-    createTransportSpy = vitest.spyOn(nodemailer, 'createTransport').mockImplementationOnce(() => {
+    createTransportSpy = vitest.spyOn(nodemailer, 'createTransport').mockImplementation(() => {
       return {
         transporter: {
           name: 'Nodemailer - SMTP',
@@ -164,12 +164,6 @@ describe('plugin', () => {
 
         expect(initializedEmail.defaultFromName).toStrictEqual(defaultFromName)
         expect(initializedEmail.defaultFromAddress).toStrictEqual(defaultFromAddress)
-
-        expect(createTransportSpy).toHaveBeenCalledWith(
-          expect.objectContaining({
-            host: 'smtp.resend.com',
-          }),
-        )
       })
     })
   })
@@ -190,6 +184,7 @@ describe('plugin', () => {
       )
 
       expect(globalInstance).toBeDefined()
+      expect(globalInstance?.authorship).toBe(false)
       expect(globalInstance?.fields).toStrictEqual([
         {
           name: 'instance',

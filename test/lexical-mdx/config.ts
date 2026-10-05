@@ -48,11 +48,13 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     await payload.delete({
       collection: 'posts',
       where: {},
+      overrideAccess: true,
     })
 
     // Recursively collect all paths to .mdx files RELATIVE to basePath
@@ -79,6 +81,7 @@ export default buildConfigWithDefaults({
           docPath: file,
         },
         depth: 0,
+        overrideAccess: true,
       })
     }
   },

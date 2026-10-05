@@ -15,6 +15,11 @@ concurrency:
 env:
   DO_NOT_TRACK: 1 # Disable Turbopack telemetry
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
+  NODE_OPTIONS: --max-old-space-size=4096
+  NODE_HEAP_HIGH: --max-old-space-size=8192
+
+permissions:
+  contents: read
 
 jobs:
   changes:
@@ -49,6 +54,7 @@ jobs:
               - 'pnpm-lock.yaml'
               - 'package.json'
               - 'templates/**'
+              - 'vitest.config.ts'
             needs_tests:
               - '.github/workflows/main.yml'
               - '.github/actions/start-services/**'
@@ -56,6 +62,7 @@ jobs:
               - 'test/**'
               - 'pnpm-lock.yaml'
               - 'package.json'
+              - 'vitest.config.ts'
             templates:
               - 'templates/**'
             # Also gates tests-unit via its own `if`. Excludes plain `packages/**/*.ts` changes on
@@ -163,31 +170,11 @@ jobs:
 
       - name: Lint TypeScript/JavaScript
         run: pnpm lint -- --quiet
+        env:
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
 
       - name: Lint CSS
-        env:
-          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
-          HEAD_SHA: ${{ github.sha }}
-        run: |
-          if [ -z "$BASE_SHA" ] || ! git cat-file -e "$BASE_SHA" 2>/dev/null; then
-            echo "No usable base commit found, linting all CSS files"
-            pnpm run lint:css
-            exit $?
-          fi
-
-          changed_css_files=()
-          while IFS= read -r file; do
-            changed_css_files+=("$file")
-          done < <(git diff --name-only --diff-filter=ACMR "$BASE_SHA...$HEAD_SHA" -- 'packages/ui/src/**/*.css' 'templates/**/*.css')
-
-          if [ ${#changed_css_files[@]} -eq 0 ]; then
-            echo "No changed CSS files, skipping stylelint"
-            exit 0
-          fi
-
-          echo "Linting changed CSS files:"
-          printf '  %s\n' "${changed_css_files[@]}"
-          pnpm exec stylelint "${changed_css_files[@]}"
+        run: pnpm run lint:css
 
   build:
     needs: changes
@@ -236,7 +223,13 @@ jobs:
       - name: Unit Tests
         run: pnpm test:unit
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
+
+      - name: Browser setup
+        uses: ./.github/actions/setup-playwright
+
+      - name: Component Tests
+        run: pnpm test:components
 
   tests-types:
     runs-on: ubuntu-24.04
@@ -253,7 +246,7 @@ jobs:
       - name: Types Tests
         run: pnpm test:types --target '>=5.7'
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
 
   # Generate the integration test matrix from TypeScript config
   int-matrix:
@@ -314,7 +307,7 @@ jobs:
 
       - name: Integration Tests
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
@@ -505,8 +498,6 @@ jobs:
     needs: [changes, build]
     if: needs.changes.outputs.needs_visual == 'true'
     timeout-minutes: 30
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v5
 
@@ -658,7 +649,7 @@ jobs:
           pnpm run script:pack --all --dest templates/${{ matrix.template }}
           pnpm run script:build-template-with-local-pkgs ${{ matrix.template }} $DB_CONNECTION
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           DB_CONNECTION: ${{ steps.db.outputs.POSTGRES_URL || steps.db.outputs.MONGODB_URL }}
 
       - name: Setup Playwright
@@ -668,7 +659,7 @@ jobs:
       - name: Runs Template Int Tests
         run: pnpm --filter ${{ matrix.template }} run test:int
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
@@ -676,7 +667,7 @@ jobs:
       - name: Runs Template E2E Tests
         run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.template }}.json pnpm --filter ${{ matrix.template }} test:e2e
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
@@ -844,7 +835,7 @@ jobs:
         continue-on-error: true
         run: pnpm test:int:summary
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           PAYLOAD_DATABASE: content-api
 
       - name: Dump Content API logs on failure

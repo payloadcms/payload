@@ -55,6 +55,7 @@ export const seed = async ({
         context: {
           disableRevalidate: true,
         },
+        overrideAccess: true,
       }),
     ),
   )
@@ -79,6 +80,7 @@ export const seed = async ({
         equals: 'demo-author@example.com',
       },
     },
+    overrideAccess: true,
   })
 
   payload.logger.info(`— Seeding media...`)
@@ -106,26 +108,31 @@ export const seed = async ({
         email: 'demo-author@example.com',
         password: 'password',
       },
+      overrideAccess: true,
     }),
     payload.create({
       collection: 'media',
       data: image1,
       file: image1Buffer,
+      overrideAccess: true,
     }),
     payload.create({
       collection: 'media',
       data: image2,
       file: image2Buffer,
+      overrideAccess: true,
     }),
     payload.create({
       collection: 'media',
       data: image2,
       file: image3Buffer,
+      overrideAccess: true,
     }),
     payload.create({
       collection: 'media',
       data: imageHero1,
       file: hero1Buffer,
+      overrideAccess: true,
     }),
     categories.map((category) =>
       payload.create({
@@ -134,6 +141,7 @@ export const seed = async ({
           title: category,
           slug: category,
         },
+        overrideAccess: true,
       }),
     ),
   ])
@@ -149,6 +157,7 @@ export const seed = async ({
       disableRevalidate: true,
     },
     data: post1({ heroImage: image1Doc, blockImage: image2Doc, author: demoAuthor }),
+    overrideAccess: true,
   })
 
   const post2Doc = await payload.create({
@@ -158,6 +167,7 @@ export const seed = async ({
       disableRevalidate: true,
     },
     data: post2({ heroImage: image2Doc, blockImage: image3Doc, author: demoAuthor }),
+    overrideAccess: true,
   })
 
   const post3Doc = await payload.create({
@@ -167,6 +177,7 @@ export const seed = async ({
       disableRevalidate: true,
     },
     data: post3({ heroImage: image3Doc, blockImage: image1Doc, author: demoAuthor }),
+    overrideAccess: true,
   })
 
   // update each post with related posts
@@ -176,6 +187,7 @@ export const seed = async ({
     data: {
       relatedPosts: [post2Doc.id, post3Doc.id],
     },
+    overrideAccess: true,
   })
   await payload.update({
     id: post2Doc.id,
@@ -183,6 +195,7 @@ export const seed = async ({
     data: {
       relatedPosts: [post1Doc.id, post3Doc.id],
     },
+    overrideAccess: true,
   })
   await payload.update({
     id: post3Doc.id,
@@ -190,6 +203,7 @@ export const seed = async ({
     data: {
       relatedPosts: [post1Doc.id, post2Doc.id],
     },
+    overrideAccess: true,
   })
 
   payload.logger.info(`— Seeding contact form...`)
@@ -198,6 +212,7 @@ export const seed = async ({
     collection: 'forms',
     depth: 0,
     data: contactFormData,
+    overrideAccess: true,
   })
 
   payload.logger.info(`— Seeding pages...`)
@@ -207,11 +222,13 @@ export const seed = async ({
       collection: 'pages',
       depth: 0,
       data: home({ heroImage: imageHomeDoc, metaImage: image2Doc }),
+      overrideAccess: true,
     }),
     payload.create({
       collection: 'pages',
       depth: 0,
       data: contactPageData({ contactForm: contactForm }),
+      overrideAccess: true,
     }),
   ])
 
@@ -241,6 +258,7 @@ export const seed = async ({
           },
         ],
       },
+      overrideAccess: true,
     }),
     payload.updateGlobal({
       slug: 'footer',
@@ -271,6 +289,7 @@ export const seed = async ({
           },
         ],
       },
+      overrideAccess: true,
     }),
   ])
 

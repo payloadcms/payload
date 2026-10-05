@@ -137,6 +137,11 @@
     background-color: var(--color-bg-selected);
   }
 
+  .rs__option--is-disabled {
+    color: var(--color-text-disabled);
+    cursor: not-allowed;
+  }
+
   .react-select--error {
     div.rs__control {
       border: var(--stroke-width-small) solid var(--field-color-border-error);

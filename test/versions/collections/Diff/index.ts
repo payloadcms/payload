@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { lexicalEditor, ParagraphFeature, RelationshipFeature } from '@payloadcms/richtext-lexical'
+
 import { diffCollectionSlug, draftCollectionSlug, textCollectionSlug } from '../../slugs.js'
 
 export const Diff: CollectionConfig = {
@@ -262,6 +264,13 @@ export const Diff: CollectionConfig = {
     {
       name: 'richtext',
       type: 'richText',
+    },
+    {
+      name: 'richtextWithConstrainedRelationship',
+      type: 'richText',
+      editor: lexicalEditor({
+        features: [ParagraphFeature(), RelationshipFeature({ maxDepth: 0 })],
+      }),
     },
     {
       name: 'richtextWithCustomDiff',

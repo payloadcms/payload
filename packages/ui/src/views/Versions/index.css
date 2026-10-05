@@ -71,6 +71,7 @@
 
   /* on mobile, extend the table all the way to the viewport edges */
   /* this is to visually indicate overflowing content */
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .versions .table {
       display: flex;
