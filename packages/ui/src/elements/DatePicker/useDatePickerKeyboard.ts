@@ -91,6 +91,11 @@ export const useDatePickerKeyboard = ({ overrides }: Props) => {
       ['ArrowDown', 'ArrowUp', 'Enter'].includes(event.key)
     ) {
       event.preventDefault()
+      // Enter confirms typed input instead of opening the calendar over nearby controls.
+      if (event.key === 'Enter' && datePickerRef.current.state.inputValue !== null) {
+        datePickerRef.current.setOpen(false)
+        return
+      }
       shouldFocusCalendar.current = true
       datePickerRef.current?.setOpen(true)
     }
