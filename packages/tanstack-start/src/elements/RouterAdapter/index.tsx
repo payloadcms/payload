@@ -5,15 +5,11 @@ import type { LinkAdapterProps, RouterAdapterComponent } from 'payload'
 
 import { RouterAdapterContext } from '@payloadcms/ui/providers/RouterAdapter'
 import { useRouteTransition } from '@payloadcms/ui/providers/RouteTransition'
-import {
-  Link as TanStackLink,
-  useLocation,
-  useParams,
-  useRouter,
-  useRouterState,
-} from '@tanstack/react-router'
+import { useLocation, useParams, useRouter, useRouterState } from '@tanstack/react-router'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo } from 'react'
+
+import { TanStackLink } from './Link/index.js'
 
 const normalizeNavigationTarget = ({
   path,
@@ -51,6 +47,7 @@ const TanStackLinkAdapter: React.FC<LinkAdapterProps> = ({
 }) => {
   return (
     <TanStackLink
+      ariaCurrent={rest['aria-current']}
       preload={prefetch === false ? false : 'intent'}
       ref={ref}
       replace={replace}

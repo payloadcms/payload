@@ -495,6 +495,7 @@ export const skTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Zobraziť všetky {{label}}',
     shownInTable: 'Zobrazené v tabuľke',
     showSidebar: 'Zobraziť bočný panel',
+    skipToContent: 'Prejsť na obsah',
     sorryNotFound: 'Je nám ľúto, ale neexistuje nič, čo by zodpovedalo vášmu požiadavku.',
     sort: 'Zoradiť',
     sortByLabelDirection: 'Zoradiť podľa {{label}} {{direction}}',
@@ -557,6 +558,7 @@ export const skTranslations: DefaultTranslationsObject = {
     noParent: 'Žiadny rodič',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Vyhľadávanie {{label}}',
+    searchResults: 'Nájdené: {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Nemožno kopírovať do rovnakej lokalizácie.',
