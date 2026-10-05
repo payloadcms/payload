@@ -3362,7 +3362,8 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(all).toBeFocused()
       await expect(sidebar.locator('[role=treeitem][tabindex="0"]')).toHaveCount(1)
       await all.press('Enter')
-      await expect(page).toHaveURL(/collections\/payload-folders\/hierarchy/)
+      await expect(page).toHaveURL(/\/admin\/collections\/payload-folders(?:\?|$)/)
+      await expect(page).toHaveURL(/[?&]view=hierarchy(?:&|$)/)
       await expect(page.locator('.hierarchy-list')).toBeVisible()
     })
 
