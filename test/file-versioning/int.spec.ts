@@ -964,7 +964,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     expect(current._managedFiles).toHaveLength(2)
   })
 
-  test('should restore saved size bytes after the configured size is removed', async ({
+  test('should retain a removed variant in history without restoring it to the current file', async ({
     payload,
     restClient,
   }) => {
@@ -996,9 +996,12 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       where: { parent: { equals: created.id } },
     })
     const selected = docs.find(({ version }) => version.alt === 'size A')!
-    const variants = payload.collections[transformedMediaSlug].config.upload.variants
+    const collection = payload.collections[transformedMediaSlug].config
+    const variants = collection.upload.variants
+    const maxPerDoc = collection.versions.maxPerDoc
 
-    payload.collections[transformedMediaSlug].config.upload.variants = []
+    collection.upload.variants = []
+    collection.versions.maxPerDoc = 3
     try {
       const historical = await restClient.GET(
         `/${transformedMediaSlug}/file/${selected.version.variants!.small!.filename}`,
@@ -1017,16 +1020,20 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
         collection: transformedMediaSlug,
         showHiddenFields: true,
       })
-      const savedSize = current._managedFiles?.find(({ roles }) =>
+      const restoredSize = current._managedFiles?.find(({ roles }) =>
         roles.some((role) => role.type === 'size' && role.sizeKey === 'small'),
       )
 
-      expect(savedSize).toBeDefined()
-      expect(
-        (await readFile(path.join(transformedMediaDir, savedSize!.key))).equals(firstSize),
-      ).toBe(true)
+      expect(restoredSize).toBeUndefined()
+      expect(current.variants?.small?.filename).toBeFalsy()
+      const historicalAfterRestore = await restClient.GET(
+        `/${transformedMediaSlug}/file/${selected.version.variants!.small!.filename}`,
+      )
+      expect(historicalAfterRestore.status).toBe(200)
+      expect(Buffer.from(await historicalAfterRestore.arrayBuffer()).equals(firstSize)).toBe(true)
     } finally {
-      payload.collections[transformedMediaSlug].config.upload.variants = variants
+      collection.upload.variants = variants
+      collection.versions.maxPerDoc = maxPerDoc
     }
   })
 

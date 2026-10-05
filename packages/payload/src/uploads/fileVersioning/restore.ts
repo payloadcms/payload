@@ -35,9 +35,42 @@ export const runManagedFileRestore = async <T>({
     config: req.payload.config,
     doc: selected,
   }) as JsonObject
-  const manifest = Array.isArray(stored._managedFiles)
-    ? (stored._managedFiles as ManagedFileManifest)
+  const configuredSizeKeys = new Set(collection.upload.variants?.map(({ name }) => name) ?? [])
+  const manifest: ManagedFileManifest = Array.isArray(stored._managedFiles)
+    ? (stored._managedFiles as ManagedFileManifest).flatMap((file) => {
+        const roles = file.roles.filter(
+          (role) => role.type !== 'size' || configuredSizeKeys.has(role.sizeKey),
+        )
+        return roles.length ? [{ ...file, roles }] : []
+      })
     : []
+  const selectedVariants =
+    stored.variants && typeof stored.variants === 'object' && !Array.isArray(stored.variants)
+      ? stored.variants
+      : {}
+  const currentVariants =
+    current.variants && typeof current.variants === 'object' && !Array.isArray(current.variants)
+      ? current.variants
+      : {}
+  // SQL adapters flatten variant groups, so clearing the group alone leaves its fields behind.
+  const restoredVariants = Object.fromEntries(
+    [...new Set([...Object.keys(currentVariants), ...Object.keys(selectedVariants)])].map(
+      (sizeKey) => [
+        sizeKey,
+        configuredSizeKeys.has(sizeKey) && selectedVariants[sizeKey]
+          ? selectedVariants[sizeKey]
+          : {
+              filename: null,
+              filesize: null,
+              height: null,
+              mimeType: null,
+              url: null,
+              width: null,
+            },
+      ],
+    ),
+  )
+  const selectedForCurrent = { ...stored, _managedFiles: manifest, variants: restoredVariants }
 
   const staticDir = collection.upload.staticDir
   const storageBackendId = `local:${collection.slug}`
@@ -65,12 +98,12 @@ export const runManagedFileRestore = async <T>({
     : []
 
   if (!manifest.length && !currentManifest.length) {
-    return write(stored)
+    return write(selectedForCurrent)
   }
 
   const currentIdentities = new Set(currentManifest.map(getManagedFileIdentity))
   const replacements = new Map<string, string>()
-  let restored = stored
+  let restored: JsonObject = selectedForCurrent
 
   return runFileOperationPlan({
     id,
@@ -104,7 +137,9 @@ export const runManagedFileRestore = async <T>({
         replacements.set(getManagedFileIdentity(file), key)
       }
 
-      restored = replaceManagedFileReferences({ replacements, version: stored }) ?? stored
+      restored =
+        replaceManagedFileReferences({ replacements, version: selectedForCurrent }) ??
+        selectedForCurrent
     },
     write: async ({ trackStagedObject }) => {
       if (staticDir && !collection.upload.disableLocalStorage) {
