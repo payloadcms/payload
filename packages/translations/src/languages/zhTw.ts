@@ -472,6 +472,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     showAllLabel: '顯示所有 {{label}}',
     shownInTable: '以表格方式顯示',
     showSidebar: '顯示側邊欄',
+    skipToContent: '跳至內容',
     sorryNotFound: '很抱歉，找不到符合條件的內容。',
     sort: '排序',
     sortByLabelDirection: '依 {{label}} {{direction}} 排序',
@@ -532,6 +533,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     noParent: '無父項',
     noResults: 'No results for "{{query}}"',
     searchLabel: '搜尋 {{label}}',
+    searchResults: '找到 {{count}} 項',
   },
   localization: {
     cannotCopySameLocale: '無法複製到相同語言地區',

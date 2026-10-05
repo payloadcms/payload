@@ -136,6 +136,15 @@ export default buildConfigWithDefaults({
       })
     }
 
+    await payload.create({
+      collection: 'payload-folders',
+      data: {
+        name: 'Accessibility final child folder',
+        '_h_payload-folders': parentFolder.id,
+      },
+      overrideAccess: true,
+    })
+
     const firstPost = await payload.create({
       collection: postsSlug,
       data: {
