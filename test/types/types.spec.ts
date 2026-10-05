@@ -793,6 +793,16 @@ describe('Types testing', () => {
     ).type.toBe<Promise<TypeWithVersion<Menu>>>()
   })
 
+  test('branch-aware Local API options', () => {
+    void payload.duplicate({ id: 'id', branch: 'campaign', collection: 'posts' })
+    void payload.findDistinct({ branch: 'campaign', collection: 'posts', field: 'id' })
+    void payload.findVersionByID({ id: 'id', branch: 'campaign', collection: 'posts' })
+    void payload.restoreVersion({ id: 'id', branch: false, collection: 'posts' })
+    void payload.countGlobalVersions({ branch: 'campaign', global: 'menu' })
+    void payload.findGlobalVersionByID({ id: 'id', slug: 'menu', branch: 'campaign' })
+    void payload.restoreGlobalVersion({ id: 'id', slug: 'menu', branch: false })
+  })
+
   describe('select', () => {
     test('should include only ID if select is an empty object', () => {
       expect(
