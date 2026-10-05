@@ -54,7 +54,15 @@ export function finalizeFileResponse({
 
   const finalHeaders = headersWithCors({ headers: modifiedHeaders, req })
 
-  const body = req.method === 'HEAD' ? null : response.body
+  const isHeadRequest = req.method === 'HEAD'
+
+  if (isHeadRequest && response.body && !response.body.locked) {
+    void response.body.cancel().catch(() => {
+      // A clean-up failure must not prevent the HEAD response.
+    })
+  }
+
+  const body = isHeadRequest ? null : response.body
 
   return new Response(body, {
     headers: finalHeaders,

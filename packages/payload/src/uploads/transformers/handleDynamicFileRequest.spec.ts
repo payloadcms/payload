@@ -111,4 +111,137 @@ describe('handleDynamicFileRequest', () => {
       expect(stageOutput.onCancel).toHaveBeenCalled()
     })
   })
+
+  describe('successful pipeline cleanup', () => {
+    const makeTrackedResponse = () => {
+      const onCancel = vi.fn()
+      const response = new Response(
+        new ReadableStream({
+          cancel: onCancel,
+          pull: (controller) => controller.enqueue(new TextEncoder().encode('source-bytes')),
+        }),
+      )
+
+      return { onCancel, response }
+    }
+
+    it('should cancel a fetched source body when the transformer returns a separate response', async () => {
+      const source = makeTrackedResponse()
+      vi.mocked(getSourceFileResponse).mockResolvedValue(source.response)
+
+      const transformer: UploadTransformer = {
+        slug: 'replacement',
+        handleRequest: vi.fn().mockImplementation(async ({ getSourceFile }) => {
+          await getSourceFile()
+
+          return { response: new Response('replacement'), status: 'complete' }
+        }),
+        mimeTypes: ['image/*'],
+      }
+      vi.mocked(planTransformerPipeline).mockResolvedValue([transformer])
+
+      const result = await handleDynamicFileRequest({
+        collection,
+        filename: 'logo.png',
+        req: makeReq(),
+      })
+
+      expect(await result.text()).toBe('replacement')
+      await vi.waitFor(() => expect(source.onCancel).toHaveBeenCalled())
+    })
+
+    it('should abort a locked source body when the transformer returns a separate response', async () => {
+      const source = makeTrackedResponse()
+      vi.mocked(getSourceFileResponse).mockResolvedValue(source.response)
+
+      const transformer: UploadTransformer = {
+        slug: 'locked-replacement',
+        handleRequest: vi.fn().mockImplementation(async ({ getSourceFile }) => {
+          const sourceResponse: Response = await getSourceFile()
+          await sourceResponse.body!.getReader().read()
+
+          return { response: new Response('replacement'), status: 'complete' }
+        }),
+        mimeTypes: ['image/*'],
+      }
+      vi.mocked(planTransformerPipeline).mockResolvedValue([transformer])
+
+      const result = await handleDynamicFileRequest({
+        collection,
+        filename: 'logo.png',
+        req: makeReq(),
+      })
+
+      expect(await result.text()).toBe('replacement')
+      await vi.waitFor(() => expect(source.onCancel).toHaveBeenCalled())
+    })
+
+    it('should cancel an earlier response when a later transformer replaces it without reading it', async () => {
+      const earlierResponse = makeTrackedResponse()
+      const transformers: UploadTransformer[] = [
+        {
+          slug: 'first',
+          handleRequest: vi.fn().mockResolvedValue({
+            response: earlierResponse.response,
+            status: 'continue',
+          }),
+          mimeTypes: ['image/*'],
+        },
+        {
+          slug: 'second',
+          handleRequest: vi.fn().mockResolvedValue({
+            response: new Response('replacement'),
+            status: 'complete',
+          }),
+          mimeTypes: ['image/*'],
+        },
+      ]
+      vi.mocked(planTransformerPipeline).mockResolvedValue(transformers)
+
+      const result = await handleDynamicFileRequest({
+        collection,
+        filename: 'logo.png',
+        req: makeReq(),
+      })
+
+      expect(await result.text()).toBe('replacement')
+      expect(earlierResponse.onCancel).toHaveBeenCalled()
+    })
+
+    it('should abort a locked earlier source when a later transformer replaces it without reading it', async () => {
+      const source = makeTrackedResponse()
+      vi.mocked(getSourceFileResponse).mockResolvedValue(source.response)
+
+      const transformers: UploadTransformer[] = [
+        {
+          slug: 'first',
+          handleRequest: vi.fn().mockImplementation(async ({ getSourceFile }) => {
+            const sourceResponse: Response = await getSourceFile()
+            await sourceResponse.body!.getReader().read()
+
+            return { response: sourceResponse, status: 'continue' }
+          }),
+          mimeTypes: ['image/*'],
+        },
+        {
+          slug: 'second',
+          handleRequest: vi.fn().mockResolvedValue({
+            response: new Response('replacement'),
+            status: 'complete',
+          }),
+          mimeTypes: ['image/*'],
+        },
+      ]
+      vi.mocked(planTransformerPipeline).mockResolvedValue(transformers)
+
+      const result = await handleDynamicFileRequest({
+        collection,
+        filename: 'logo.png',
+        req: makeReq(),
+      })
+
+      expect(await result.text()).toBe('replacement')
+      await vi.waitFor(() => expect(source.onCancel).toHaveBeenCalled())
+    })
+  })
 })
