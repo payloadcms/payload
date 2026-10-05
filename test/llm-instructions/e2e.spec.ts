@@ -25,6 +25,7 @@ test('should manage LLM instructions from the collection menu', async ({ page })
   await page.getByRole('menuitem', { name: 'Edit LLM instructions' }).click()
 
   await expect(page).toHaveURL(`${instructionsURL}/collection-pages`)
+  await expect(page.getByRole('heading', { name: 'pages', exact: true })).toBeVisible()
   await page.getByRole('tab', { name: 'Additional instructions', exact: true }).click()
   await expect(page.locator('.llm-instructions__description')).toContainText('Pages collection')
 
@@ -61,9 +62,16 @@ test('should manage LLM instructions from the collection menu', async ({ page })
     )
     await expect(page.getByRole('link', { name: 'Create New', exact: true })).toHaveCount(0)
     await expect(page.getByRole('columnheader', { name: 'Type', exact: true })).toBeVisible()
+    await expect(
+      page.getByRole('columnheader', { name: 'Title', exact: true }).getByRole('button'),
+    ).toHaveCount(0)
     await page.getByRole('textbox', { name: 'Search', exact: true }).fill('Pages')
     await expect(
       page.locator('.llm-instructions-cell').filter({ hasText: instructionText }),
+    ).toBeVisible()
+    await page.getByRole('textbox', { name: 'Search', exact: true }).fill('site-settings')
+    await expect(
+      page.locator('tbody').getByRole('link', { name: 'Site Settings', exact: true }),
     ).toBeVisible()
   } finally {
     const restored = await page.request.patch(documentURL, {
@@ -86,6 +94,7 @@ test('should open the correct instructions document from the global menu', async
   await page.getByRole('menuitem', { name: 'Edit LLM instructions' }).click()
 
   await expect(page).toHaveURL(`${instructionsURL}/global-site-settings`)
+  await expect(page.getByRole('heading', { name: 'site-settings', exact: true })).toBeVisible()
   await page.getByRole('tab', { name: 'Additional instructions', exact: true }).click()
   await expect(page.locator('.llm-instructions__description')).toContainText('Site Settings global')
   await page.getByRole('tab', { name: 'System instructions (read-only)' }).click()

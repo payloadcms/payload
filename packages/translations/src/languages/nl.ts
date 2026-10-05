@@ -590,7 +590,6 @@ export const nlTranslations: DefaultTranslationsObject = {
     instructions: 'LLM-instructies',
     systemInstructions: 'Systeeminstructies (alleen-lezen)',
     targetCannotBeChanged: 'Het doel van de instructies kan niet worden gewijzigd.',
-    targetRequired: 'Geef precies één van de velden collectionSlug of globalSlug op.',
     title: 'Titel',
   },
   localization: {

@@ -657,10 +657,9 @@ export interface PayloadMigration {
  */
 export interface PayloadLlmInstruction {
   id: string;
-  collectionSlug?: string | null;
-  globalSlug?: string | null;
+  entitySlug: string;
   title?: string | null;
-  type?: ('collection' | 'global') | null;
+  entityType: 'collection' | 'global';
   additionalInstructions?: LexicalRichText<LexicalNodes_4EE6A29F> | null;
   systemInstructions?: LexicalRichText<LexicalNodes_4EE6A29F> | null;
   createdBy?: {
@@ -932,10 +931,9 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface PayloadLlmInstructionsSelect<T extends boolean = true> {
   id?: T;
-  collectionSlug?: T;
-  globalSlug?: T;
+  entitySlug?: T;
   title?: T;
-  type?: T;
+  entityType?: T;
   additionalInstructions?: T;
   systemInstructions?: T;
   createdBy?: T;

@@ -550,7 +550,6 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     instructions: 'LLM 指令',
     systemInstructions: '系統指令（唯讀）',
     targetCannotBeChanged: '無法變更指令的目標。',
-    targetRequired: '請僅提供 collectionSlug 或 globalSlug 中的一項。',
     title: '標題',
   },
   localization: {

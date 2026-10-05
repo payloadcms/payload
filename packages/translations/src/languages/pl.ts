@@ -581,7 +581,6 @@ export const plTranslations: DefaultTranslationsObject = {
     instructions: 'Instrukcje LLM',
     systemInstructions: 'Instrukcje systemowe (tylko do odczytu)',
     targetCannotBeChanged: 'Nie można zmienić celu instrukcji.',
-    targetRequired: 'Podaj dokładnie jedno z pól collectionSlug lub globalSlug.',
     title: 'Tytuł',
   },
   localization: {

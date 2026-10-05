@@ -590,7 +590,6 @@ export const huTranslations: DefaultTranslationsObject = {
     instructions: 'LLM-utasítások',
     systemInstructions: 'Rendszerutasítások (csak olvasható)',
     targetCannotBeChanged: 'Az utasítások célja nem módosítható.',
-    targetRequired: 'Pontosan a collectionSlug vagy a globalSlug mező egyikét adja meg.',
     title: 'Cím',
   },
   localization: {

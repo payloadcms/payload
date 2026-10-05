@@ -113,6 +113,7 @@ export interface Config {
   };
   locale: null;
   widgets: {
+    welcome: WelcomeWidget;
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
     activity: ActivityWidget;
@@ -294,10 +295,9 @@ export interface PayloadMigration {
  */
 export interface PayloadLlmInstruction {
   id: string;
-  collectionSlug?: string | null;
-  globalSlug?: string | null;
+  entitySlug: string;
   title?: string | null;
-  type?: ('collection' | 'global') | null;
+  entityType: 'collection' | 'global';
   additionalInstructions?: LexicalRichText<LexicalNodes_4EE6A29F> | null;
   systemInstructions?: LexicalRichText<LexicalNodes_4EE6A29F> | null;
   createdBy?: {
@@ -403,10 +403,9 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface PayloadLlmInstructionsSelect<T extends boolean = true> {
   id?: T;
-  collectionSlug?: T;
-  globalSlug?: T;
+  entitySlug?: T;
   title?: T;
-  type?: T;
+  entityType?: T;
   additionalInstructions?: T;
   systemInstructions?: T;
   createdBy?: T;
@@ -471,6 +470,16 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "welcome_widget".
+ */
+export interface WelcomeWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -606,6 +615,6 @@ export interface LexicalRichText<TNode> {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

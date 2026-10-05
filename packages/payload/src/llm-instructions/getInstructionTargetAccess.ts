@@ -40,7 +40,7 @@ export const getInstructionTargetAccess = async ({
 
       // Like admin permissions, a document filter grants conditional entity access.
       // Scope instructions by target instead of applying that filter to instruction documents.
-      return { [type === 'collection' ? 'collectionSlug' : 'globalSlug']: { equals: slug } }
+      return { entitySlug: { equals: slug }, entityType: { equals: type } }
     }),
   )
   const where = constraints.filter((constraint): constraint is Where => constraint !== false)

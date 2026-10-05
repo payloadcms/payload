@@ -586,7 +586,6 @@ export const ltTranslations: DefaultTranslationsObject = {
     instructions: 'LLM nurodymai',
     systemInstructions: 'Sistemos nurodymai (tik skaitomi)',
     targetCannotBeChanged: 'Nurodymų paskirties keisti negalima.',
-    targetRequired: 'Nurodykite tik vieną iš laukų collectionSlug arba globalSlug.',
     title: 'Pavadinimas',
   },
   localization: {

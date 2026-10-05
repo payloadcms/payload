@@ -578,7 +578,6 @@ export const csTranslations: DefaultTranslationsObject = {
     instructions: 'Pokyny LLM',
     systemInstructions: 'Systémové pokyny (pouze pro čtení)',
     targetCannotBeChanged: 'Cíl pokynů nelze změnit.',
-    targetRequired: 'Vyplňte právě jedno z polí collectionSlug nebo globalSlug.',
     title: 'Název',
   },
   localization: {

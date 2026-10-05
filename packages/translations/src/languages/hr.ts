@@ -581,7 +581,6 @@ export const hrTranslations: DefaultTranslationsObject = {
     instructions: 'Upute za LLM',
     systemInstructions: 'Sistemske upute (samo za čitanje)',
     targetCannotBeChanged: 'Cilj uputa nije moguće promijeniti.',
-    targetRequired: 'Navedite točno jedno od polja collectionSlug ili globalSlug.',
     title: 'Naslov',
   },
   localization: {

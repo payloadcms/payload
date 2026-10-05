@@ -7,6 +7,6 @@ export type InstructionTarget = {
 }
 
 export type InstructionTargetFields = {
-  collectionSlug?: null | string
-  globalSlug?: null | string
+  entitySlug?: null | string
+  entityType?: InstructionTarget['type'] | null
 }

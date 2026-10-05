@@ -563,7 +563,6 @@ export const heTranslations: DefaultTranslationsObject = {
     instructions: 'הנחיות LLM',
     systemInstructions: 'הנחיות מערכת (לקריאה בלבד)',
     targetCannotBeChanged: 'לא ניתן לשנות את יעד ההנחיות.',
-    targetRequired: 'יש לציין בדיוק אחד מהשדות collectionSlug או globalSlug.',
     title: 'כותרת',
   },
   localization: {

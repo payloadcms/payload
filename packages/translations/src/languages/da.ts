@@ -582,7 +582,6 @@ export const daTranslations: DefaultTranslationsObject = {
     instructions: 'LLM-instruktioner',
     systemInstructions: 'Systeminstruktioner (skrivebeskyttet)',
     targetCannotBeChanged: 'Instruktionernes mål kan ikke ændres.',
-    targetRequired: 'Angiv præcis ét af felterne collectionSlug eller globalSlug.',
     title: 'Titel',
   },
   localization: {

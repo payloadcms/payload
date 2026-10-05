@@ -580,7 +580,6 @@ export const isTranslations: DefaultTranslationsObject = {
     instructions: 'LLM-leiðbeiningar',
     systemInstructions: 'Kerfisleiðbeiningar (skrifvarið)',
     targetCannotBeChanged: 'Ekki er hægt að breyta markmiði leiðbeininganna.',
-    targetRequired: 'Tilgreindu nákvæmlega annað hvort collectionSlug eða globalSlug.',
     title: 'Titill',
   },
   localization: {

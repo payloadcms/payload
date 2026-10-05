@@ -2,7 +2,6 @@ import type { Payload, PayloadRequest } from 'payload'
 
 import { buildEditorState } from '@payloadcms/richtext-lexical'
 import { instructionsCollectionSlug } from 'payload/shared'
-import { expect } from 'vitest'
 
 import type { PayloadLlmInstruction } from './payload-types.js'
 
@@ -13,16 +12,16 @@ export const additionalInstructions = buildEditorState<
 >({ text: 'Keep page summaries under 100 words.' })
 
 export const saveAdditionalInstructions = async ({
-  collectionSlug,
-  globalSlug,
+  entitySlug,
+  entityType,
   payload,
 }: {
-  collectionSlug?: string
-  globalSlug?: string
+  entitySlug: string
+  entityType: 'collection' | 'global'
   payload: Payload
 }) => {
   const { user } = await payload.login({ collection: 'users', data: devUser })
-  const doc = await findInstructions({ collectionSlug, globalSlug, payload, user })
+  const doc = await findInstructions({ entitySlug, entityType, payload, user })
 
   return payload.update({
     id: doc.id,
@@ -34,26 +33,22 @@ export const saveAdditionalInstructions = async ({
 }
 
 export const findInstructions = async ({
-  collectionSlug,
-  globalSlug,
+  entitySlug,
+  entityType,
   payload,
   user,
 }: {
-  collectionSlug?: string
-  globalSlug?: string
+  entitySlug: string
+  entityType: 'collection' | 'global'
   payload: Payload
   user: PayloadRequest['user']
 }) => {
-  const { docs } = await payload.find({
+  const doc = await payload.findByID({
+    id: `${entityType}-${entitySlug}`,
     collection: instructionsCollectionSlug,
     overrideAccess: false,
     user,
-    where: collectionSlug
-      ? { collectionSlug: { equals: collectionSlug } }
-      : { globalSlug: { equals: globalSlug } },
   })
 
-  expect(docs).toHaveLength(1)
-
-  return docs[0]!
+  return doc
 }

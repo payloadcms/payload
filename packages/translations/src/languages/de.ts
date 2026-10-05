@@ -597,7 +597,6 @@ export const deTranslations: DefaultTranslationsObject = {
     instructions: 'LLM-Anweisungen',
     systemInstructions: 'Systemanweisungen (schreibgeschützt)',
     targetCannotBeChanged: 'Das Ziel der Anweisungen kann nicht geändert werden.',
-    targetRequired: 'Geben Sie genau eines der Felder collectionSlug oder globalSlug an.',
     title: 'Titel',
   },
   localization: {

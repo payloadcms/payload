@@ -590,7 +590,6 @@ export const itTranslations: DefaultTranslationsObject = {
     instructions: 'Istruzioni LLM',
     systemInstructions: 'Istruzioni di sistema (sola lettura)',
     targetCannotBeChanged: 'La destinazione delle istruzioni non può essere modificata.',
-    targetRequired: 'Specifica esattamente uno dei campi collectionSlug o globalSlug.',
     title: 'Titolo',
   },
   localization: {

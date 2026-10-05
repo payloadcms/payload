@@ -582,7 +582,6 @@ export const jaTranslations: DefaultTranslationsObject = {
     instructions: 'LLM の指示',
     systemInstructions: 'システム指示（読み取り専用）',
     targetCannotBeChanged: '指示の対象は変更できません。',
-    targetRequired: 'collectionSlug または globalSlug のいずれか一方のみを指定してください。',
     title: 'タイトル',
   },
   localization: {

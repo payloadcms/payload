@@ -18,7 +18,7 @@ test.suite('CLI LLM instructions', { config: './config.ts' }, () => {
       instructions: 'Preserve hidden settings.',
     },
     { command: 'getCollectionSchema', slug: instructionsCollectionSlug, instructions: undefined },
-  ]) {
+  ] as const) {
     test(`should return the schema for non-target ${slug}`, async ({ cli }) => {
       const output = await cli(`${command} --slug ${slug} --json`)
       const response = JSON.parse(output.stdout)
@@ -35,7 +35,7 @@ test.suite('CLI LLM instructions', { config: './config.ts' }, () => {
     cli,
     payload,
   }) => {
-    await saveAdditionalInstructions({ globalSlug: 'site-settings', payload })
+    await saveAdditionalInstructions({ entitySlug: 'site-settings', entityType: 'global', payload })
 
     const output = await cli('getGlobalSchema --slug site-settings --json')
     const response = JSON.parse(output.stdout)
@@ -55,7 +55,7 @@ test.suite('CLI LLM instructions', { config: './config.ts' }, () => {
     cli,
     payload,
   }) => {
-    await saveAdditionalInstructions({ collectionSlug: 'pages', payload })
+    await saveAdditionalInstructions({ entitySlug: 'pages', entityType: 'collection', payload })
 
     const output = await cli('getCollectionSchema --slug pages --json')
     const response = JSON.parse(output.stdout)
@@ -70,7 +70,7 @@ test.suite('CLI LLM instructions', { config: './config.ts' }, () => {
   })
 
   test('should include instructions in the normal CLI schema output', async ({ cli, payload }) => {
-    await saveAdditionalInstructions({ collectionSlug: 'pages', payload })
+    await saveAdditionalInstructions({ entitySlug: 'pages', entityType: 'collection', payload })
 
     const output = await cli('getCollectionSchema --slug pages --no-json')
 
@@ -81,17 +81,23 @@ test.suite('CLI LLM instructions', { config: './config.ts' }, () => {
   })
 
   for (const { command, target } of [
-    { command: 'countDocuments --slug pages', target: { collectionSlug: 'pages' } },
-    { command: 'findGlobal --slug site-settings', target: { globalSlug: 'site-settings' } },
+    {
+      command: 'countDocuments --slug pages',
+      target: { entitySlug: 'pages', entityType: 'collection' },
+    },
+    {
+      command: 'findGlobal --slug site-settings',
+      target: { entitySlug: 'site-settings', entityType: 'global' },
+    },
     {
       command: `createDocuments --slug pages --documents '[{"data":{"title":"New page"}}]'`,
-      target: { collectionSlug: 'pages' },
+      target: { entitySlug: 'pages', entityType: 'collection' },
     },
     {
       command: `updateGlobal --slug site-settings --data '{"title":"New site title"}'`,
-      target: { globalSlug: 'site-settings' },
+      target: { entitySlug: 'site-settings', entityType: 'global' },
     },
-  ]) {
+  ] as const) {
     test(`should omit instructions from ${command.split(' ')[0]} responses`, async ({
       cli,
       payload,

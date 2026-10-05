@@ -581,7 +581,6 @@ export const lvTranslations: DefaultTranslationsObject = {
     instructions: 'LLM norādījumi',
     systemInstructions: 'Sistēmas norādījumi (tikai lasāmi)',
     targetCannotBeChanged: 'Norādījumu mērķi nevar mainīt.',
-    targetRequired: 'Norādiet tieši vienu no laukiem collectionSlug vai globalSlug.',
     title: 'Virsraksts',
   },
   localization: {

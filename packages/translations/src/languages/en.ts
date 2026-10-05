@@ -581,7 +581,6 @@ export const enTranslations = {
     instructions: 'LLM Instructions',
     systemInstructions: 'System instructions (read-only)',
     targetCannotBeChanged: 'The instruction target cannot be changed.',
-    targetRequired: 'Provide exactly one of collectionSlug or globalSlug.',
     title: 'Title',
   },
   localization: {

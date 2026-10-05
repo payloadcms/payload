@@ -587,7 +587,6 @@ export const ruTranslations: DefaultTranslationsObject = {
     instructions: 'Инструкции для LLM',
     systemInstructions: 'Системные инструкции (только для чтения)',
     targetCannotBeChanged: 'Нельзя изменить объект, к которому относятся инструкции.',
-    targetRequired: 'Укажите ровно одно из полей collectionSlug или globalSlug.',
     title: 'Заголовок',
   },
   localization: {

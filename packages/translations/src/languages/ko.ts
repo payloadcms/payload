@@ -578,7 +578,6 @@ export const koTranslations: DefaultTranslationsObject = {
     instructions: 'LLM 지침',
     systemInstructions: '시스템 지침 (읽기 전용)',
     targetCannotBeChanged: '지침의 대상을 변경할 수 없습니다.',
-    targetRequired: 'collectionSlug 또는 globalSlug 중 정확히 하나만 지정하세요.',
     title: '제목',
   },
   localization: {

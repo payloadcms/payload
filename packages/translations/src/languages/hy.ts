@@ -586,7 +586,6 @@ export const hyTranslations: DefaultTranslationsObject = {
     instructions: 'LLM-ի հրահանգներ',
     systemInstructions: 'Համակարգային հրահանգներ (միայն ընթերցման համար)',
     targetCannotBeChanged: 'Հրահանգների թիրախը հնարավոր չէ փոխել։',
-    targetRequired: 'Նշեք collectionSlug կամ globalSlug դաշտերից միայն մեկը։',
     title: 'Վերնագիր',
   },
   localization: {

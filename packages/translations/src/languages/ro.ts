@@ -588,7 +588,6 @@ export const roTranslations: DefaultTranslationsObject = {
     instructions: 'Instrucțiuni LLM',
     systemInstructions: 'Instrucțiuni de sistem (doar citire)',
     targetCannotBeChanged: 'Destinația instrucțiunilor nu poate fi schimbată.',
-    targetRequired: 'Furnizați exact unul dintre câmpurile collectionSlug sau globalSlug.',
     title: 'Titlu',
   },
   localization: {

@@ -572,7 +572,6 @@ export const thTranslations: DefaultTranslationsObject = {
     instructions: 'คำแนะนำ LLM',
     systemInstructions: 'คำแนะนำระบบ (อ่านอย่างเดียว)',
     targetCannotBeChanged: 'ไม่สามารถเปลี่ยนเป้าหมายของคำแนะนำได้',
-    targetRequired: 'ระบุเพียงหนึ่งฟิลด์ระหว่าง collectionSlug หรือ globalSlug',
     title: 'ชื่อเรื่อง',
   },
   localization: {

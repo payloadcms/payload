@@ -591,7 +591,6 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     instructions: 'LLM নির্দেশনা',
     systemInstructions: 'সিস্টেম নির্দেশনা (শুধু পড়ার জন্য)',
     targetCannotBeChanged: 'নির্দেশনার লক্ষ্য পরিবর্তন করা যাবে না।',
-    targetRequired: 'collectionSlug বা globalSlug-এর মধ্যে ঠিক একটি দিন।',
     title: 'শিরোনাম',
   },
   localization: {

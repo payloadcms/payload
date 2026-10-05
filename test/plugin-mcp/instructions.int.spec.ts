@@ -36,9 +36,8 @@ test.suite('Shared LLM instructions', { config: './config.ts' }, () => {
       restClient,
     }) => {
       await saveAdditionalInstructions({
-        ...(target.type === 'collection'
-          ? { collectionSlug: target.slug }
-          : { globalSlug: target.slug }),
+        entitySlug: target.slug,
+        entityType: target.type,
         payload,
       })
 
@@ -81,9 +80,17 @@ test.suite('Shared LLM instructions', { config: './config.ts' }, () => {
   }
 
   for (const { target, name, slug } of [
-    { target: { collectionSlug: 'pages' }, name: 'getCollectionSchema', slug: 'pages' },
-    { target: { globalSlug: 'site-settings' }, name: 'getGlobalSchema', slug: 'site-settings' },
-  ]) {
+    {
+      target: { entitySlug: 'pages', entityType: 'collection' },
+      name: 'getCollectionSchema',
+      slug: 'pages',
+    },
+    {
+      target: { entitySlug: 'site-settings', entityType: 'global' },
+      name: 'getGlobalSchema',
+      slug: 'site-settings',
+    },
+  ] as const) {
     test(`should return the same instructions alongside the ${name} schema through MCP and CLI`, async ({
       cli,
       payload,
@@ -128,23 +135,27 @@ test.suite('Shared LLM instructions', { config: './config.ts' }, () => {
   })
 
   for (const { target, input, name } of [
-    { target: { collectionSlug: 'pages' }, input: { slug: 'pages' }, name: 'countDocuments' },
     {
-      target: { globalSlug: 'site-settings' },
+      target: { entitySlug: 'pages', entityType: 'collection' },
+      input: { slug: 'pages' },
+      name: 'countDocuments',
+    },
+    {
+      target: { entitySlug: 'site-settings', entityType: 'global' },
       input: { slug: 'site-settings' },
       name: 'findGlobal',
     },
     {
-      target: { collectionSlug: 'pages' },
+      target: { entitySlug: 'pages', entityType: 'collection' },
       input: { slug: 'pages', documents: [{ data: { title: 'New page' } }] },
       name: 'createDocuments',
     },
     {
-      target: { globalSlug: 'site-settings' },
+      target: { entitySlug: 'site-settings', entityType: 'global' },
       input: { slug: 'site-settings', data: { siteName: 'New site name' } },
       name: 'updateGlobal',
     },
-  ]) {
+  ] as const) {
     test(`should omit instructions from MCP ${name} responses`, async ({ payload, restClient }) => {
       await saveAdditionalInstructions({ ...target, payload })
 
@@ -190,24 +201,21 @@ const connectMcp = async ({
 }
 
 const saveAdditionalInstructions = async ({
-  collectionSlug,
-  globalSlug,
+  entitySlug,
+  entityType,
   payload,
 }: {
-  collectionSlug?: string
-  globalSlug?: string
+  entitySlug: string
+  entityType: 'collection' | 'global'
   payload: Payload
 }) => {
   const { user } = await payload.login({ collection: 'users', data: devUser })
-  const { docs } = await payload.find({
+  const doc = await payload.findByID({
+    id: `${entityType}-${entitySlug}`,
     collection: instructionsCollectionSlug,
     overrideAccess: false,
     user,
-    where: collectionSlug
-      ? { collectionSlug: { equals: collectionSlug } }
-      : { globalSlug: { equals: globalSlug } },
   })
-  const doc = docs[0]!
 
   return payload.update({
     id: doc.id,

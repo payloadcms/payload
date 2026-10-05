@@ -584,7 +584,6 @@ export const taTranslations: DefaultTranslationsObject = {
     instructions: 'LLM வழிமுறைகள்',
     systemInstructions: 'அமைப்பு வழிமுறைகள் (படிக்க மட்டும்)',
     targetCannotBeChanged: 'வழிமுறைகளின் இலக்கை மாற்ற முடியாது.',
-    targetRequired: 'collectionSlug அல்லது globalSlug ஆகியவற்றில் ஒன்றை மட்டும் குறிப்பிடவும்.',
     title: 'தலைப்பு',
   },
   localization: {

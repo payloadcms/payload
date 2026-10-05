@@ -578,7 +578,6 @@ export const ukTranslations: DefaultTranslationsObject = {
     instructions: 'Інструкції для LLM',
     systemInstructions: 'Системні інструкції (лише для читання)',
     targetCannotBeChanged: 'Неможливо змінити об’єкт, якого стосуються інструкції.',
-    targetRequired: 'Укажіть рівно одне з полів collectionSlug або globalSlug.',
     title: 'Заголовок',
   },
   localization: {

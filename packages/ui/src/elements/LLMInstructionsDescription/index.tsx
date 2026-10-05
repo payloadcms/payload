@@ -9,7 +9,7 @@ import './index.css'
 export const LLMInstructionsDescription = ({ isSystem = false }: { isSystem?: boolean }) => {
   const { data } = useDocumentInfo()
   const { t } = useTranslation()
-  const isGlobal = data?.type === 'global'
+  const isGlobal = data?.entityType === 'global'
 
   return (
     <p className="llm-instructions__description">

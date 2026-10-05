@@ -571,7 +571,6 @@ export const arTranslations: DefaultTranslationsObject = {
     instructions: 'تعليمات LLM',
     systemInstructions: 'تعليمات النظام (للقراءة فقط)',
     targetCannotBeChanged: 'لا يمكن تغيير هدف التعليمات.',
-    targetRequired: 'حدد حقلًا واحدًا فقط من collectionSlug أو globalSlug.',
     title: 'العنوان',
   },
   localization: {

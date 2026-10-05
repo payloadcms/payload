@@ -583,7 +583,6 @@ export const viTranslations: DefaultTranslationsObject = {
     instructions: 'Hướng dẫn LLM',
     systemInstructions: 'Hướng dẫn hệ thống (chỉ đọc)',
     targetCannotBeChanged: 'Không thể thay đổi đối tượng đích của hướng dẫn.',
-    targetRequired: 'Chỉ cung cấp một trong hai trường collectionSlug hoặc globalSlug.',
     title: 'Tiêu đề',
   },
   localization: {

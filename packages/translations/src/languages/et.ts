@@ -578,7 +578,6 @@ export const etTranslations: DefaultTranslationsObject = {
     instructions: 'LLM-i juhised',
     systemInstructions: 'Süsteemijuhised (kirjutuskaitstud)',
     targetCannotBeChanged: 'Juhiste sihtmärki ei saa muuta.',
-    targetRequired: 'Määrake täpselt üks väljadest collectionSlug või globalSlug.',
     title: 'Pealkiri',
   },
   localization: {

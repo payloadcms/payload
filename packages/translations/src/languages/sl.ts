@@ -580,7 +580,6 @@ export const slTranslations: DefaultTranslationsObject = {
     instructions: 'Navodila za LLM',
     systemInstructions: 'Sistemska navodila (samo za branje)',
     targetCannotBeChanged: 'Cilja navodil ni mogoče spremeniti.',
-    targetRequired: 'Navedite natanko eno od polj collectionSlug ali globalSlug.',
     title: 'Naslov',
   },
   localization: {

@@ -585,7 +585,6 @@ export const nbTranslations: DefaultTranslationsObject = {
     instructions: 'LLM-instruksjoner',
     systemInstructions: 'Systeminstruksjoner (skrivebeskyttet)',
     targetCannotBeChanged: 'Målet for instruksjonene kan ikke endres.',
-    targetRequired: 'Oppgi nøyaktig ett av feltene collectionSlug eller globalSlug.',
     title: 'Tittel',
   },
   localization: {

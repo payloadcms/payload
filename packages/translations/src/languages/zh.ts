@@ -552,7 +552,6 @@ export const zhTranslations: DefaultTranslationsObject = {
     instructions: 'LLM 指令',
     systemInstructions: '系统指令（只读）',
     targetCannotBeChanged: '无法更改指令的目标。',
-    targetRequired: '请仅提供 collectionSlug 或 globalSlug 中的一项。',
     title: '标题',
   },
   localization: {

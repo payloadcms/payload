@@ -574,7 +574,6 @@ export const faTranslations: DefaultTranslationsObject = {
     instructions: 'دستورالعمل‌های LLM',
     systemInstructions: 'دستورالعمل‌های سیستم (فقط خواندنی)',
     targetCannotBeChanged: 'هدف دستورالعمل‌ها قابل تغییر نیست.',
-    targetRequired: 'دقیقاً یکی از فیلدهای collectionSlug یا globalSlug را مشخص کنید.',
     title: 'عنوان',
   },
   localization: {

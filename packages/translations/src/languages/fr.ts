@@ -596,7 +596,6 @@ export const frTranslations: DefaultTranslationsObject = {
     instructions: 'Instructions LLM',
     systemInstructions: 'Instructions système (lecture seule)',
     targetCannotBeChanged: 'La cible des instructions ne peut pas être modifiée.',
-    targetRequired: 'Renseignez exactement un des champs collectionSlug ou globalSlug.',
     title: 'Titre',
   },
   localization: {

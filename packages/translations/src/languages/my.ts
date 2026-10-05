@@ -592,7 +592,6 @@ export const myTranslations: DefaultTranslationsObject = {
     instructions: 'LLM ညွှန်ကြားချက်များ',
     systemInstructions: 'စနစ်ညွှန်ကြားချက်များ (ဖတ်ရန်သာ)',
     targetCannotBeChanged: 'ညွှန်ကြားချက်များ၏ ပစ်မှတ်ကို ပြောင်းလဲ၍မရပါ။',
-    targetRequired: 'collectionSlug သို့မဟုတ် globalSlug တစ်ခုတည်းကိုသာ သတ်မှတ်ပါ။',
     title: 'ခေါင်းစဉ်',
   },
   localization: {

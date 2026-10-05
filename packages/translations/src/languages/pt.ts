@@ -586,7 +586,6 @@ export const ptTranslations: DefaultTranslationsObject = {
     instructions: 'Instruções de LLM',
     systemInstructions: 'Instruções do sistema (somente leitura)',
     targetCannotBeChanged: 'O destino das instruções não pode ser alterado.',
-    targetRequired: 'Forneça exatamente um dos campos collectionSlug ou globalSlug.',
     title: 'Título',
   },
   localization: {

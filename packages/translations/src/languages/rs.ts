@@ -581,7 +581,6 @@ export const rsTranslations: DefaultTranslationsObject = {
     instructions: 'Упутства за LLM',
     systemInstructions: 'Системска упутства (само за читање)',
     targetCannotBeChanged: 'Циљ упутстава није могуће променити.',
-    targetRequired: 'Наведите тачно једно од поља collectionSlug или globalSlug.',
     title: 'Наслов',
   },
   localization: {

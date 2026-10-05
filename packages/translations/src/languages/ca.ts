@@ -586,7 +586,6 @@ export const caTranslations: DefaultTranslationsObject = {
     instructions: 'Instruccions dels LLM',
     systemInstructions: 'Instruccions del sistema (només lectura)',
     targetCannotBeChanged: 'No es pot canviar la destinació de les instruccions.',
-    targetRequired: 'Proporcioneu exactament un dels camps collectionSlug o globalSlug.',
     title: 'Títol',
   },
   localization: {

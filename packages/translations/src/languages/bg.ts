@@ -582,7 +582,6 @@ export const bgTranslations: DefaultTranslationsObject = {
     instructions: 'Инструкции за LLM',
     systemInstructions: 'Системни инструкции (само за четене)',
     targetCannotBeChanged: 'Целта на инструкциите не може да бъде променена.',
-    targetRequired: 'Посочете точно едно от полетата collectionSlug или globalSlug.',
     title: 'Заглавие',
   },
   localization: {

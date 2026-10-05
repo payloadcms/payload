@@ -13,6 +13,40 @@ test.suite('LLM instruction target access', { config: './config.ts' }, () => {
     vi.restoreAllMocks()
   })
 
+  test('should not grant access to another entity type with the same slug', async ({ payload }) => {
+    const { user } = await payload.login({ collection: 'users', data: devUser })
+
+    // Simulate an instruction record left over from a previously configured global.
+    await payload.db.create({
+      collection: instructionsCollectionSlug,
+      data: { id: 'global-pages', entitySlug: 'pages', entityType: 'global' },
+    })
+
+    const { docs } = await payload.find({
+      collection: instructionsCollectionSlug,
+      overrideAccess: false,
+      user,
+      where: { entitySlug: { equals: 'pages' } },
+    })
+
+    expect(docs).toEqual([
+      expect.objectContaining({
+        id: 'collection-pages',
+        entitySlug: 'pages',
+        entityType: 'collection',
+      }),
+    ])
+    await expect(
+      payload.update({
+        id: 'global-pages',
+        collection: instructionsCollectionSlug,
+        data: { additionalInstructions: null },
+        overrideAccess: false,
+        user,
+      }),
+    ).rejects.toThrow()
+  })
+
   test('should return configured instructions without logging an error when all target reads are denied', async ({
     payload,
   }) => {

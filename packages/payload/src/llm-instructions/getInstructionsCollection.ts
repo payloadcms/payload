@@ -42,10 +42,8 @@ export const getInstructionsCollection = ({
     configuredEditor?.converters?.fromMarkdown && configuredEditor.converters.toMarkdown
       ? configuredEditor
       : undefined
-  const getTarget = ({ collectionSlug, globalSlug }: InstructionTargetFields = {}) =>
-    targets.find((target) =>
-      target.type === 'collection' ? target.slug === collectionSlug : target.slug === globalSlug,
-    )
+  const getTarget = ({ entitySlug, entityType }: InstructionTargetFields = {}) =>
+    targets.find((target) => target.slug === entitySlug && target.type === entityType)
   const getTitle = ({ data, req }: { data?: InstructionTargetFields; req: PayloadRequest }) => {
     const target = getTarget(data)
 
@@ -94,10 +92,10 @@ export const getInstructionsCollection = ({
       },
     },
     admin: {
-      defaultColumns: ['title', 'updatedAt', 'type', 'additionalInstructions'],
+      defaultColumns: ['title', 'updatedAt', 'entityType', 'additionalInstructions'],
       group: false,
-      listSearchableFields: ['title'],
-      useAsTitle: 'title',
+      listSearchableFields: ['entitySlug'],
+      useAsTitle: 'entitySlug',
     },
     disableBulkEdit: true,
     disableDuplicate: true,
@@ -108,16 +106,11 @@ export const getInstructionsCollection = ({
         admin: { hidden: true },
       },
       {
-        name: 'collectionSlug',
+        name: 'entitySlug',
         type: 'text',
         admin: { hidden: true },
         index: true,
-      },
-      {
-        name: 'globalSlug',
-        type: 'text',
-        admin: { hidden: true },
-        index: true,
+        required: true,
       },
       {
         name: 'title',
@@ -125,23 +118,20 @@ export const getInstructionsCollection = ({
         admin: { hidden: true },
         hooks: {
           afterRead: [({ data, req }) => getTitle({ data, req })],
-          beforeChange: [
-            ({ data, originalDoc, req }) => getTitle({ data: { ...originalDoc, ...data }, req }),
-          ],
         },
         label: ({ t }) => t('llmInstructions:title'),
+        virtual: true,
       },
       {
-        name: 'type',
+        name: 'entityType',
         type: 'select',
         admin: { hidden: true },
-        hooks: { afterRead: [({ data }) => getTarget(data)?.type] },
         label: ({ t }) => t('version:type'),
         options: [
           { label: ({ t }) => t('general:collection'), value: 'collection' },
           { label: ({ t }) => t('llmInstructions:global'), value: 'global' },
         ],
-        virtual: true,
+        required: true,
       },
       {
         type: 'tabs',
@@ -247,12 +237,10 @@ export const getInstructionsCollection = ({
               continue
             }
 
-            const field = target.type === 'collection' ? 'collectionSlug' : 'globalSlug'
-
             try {
               await req.payload.create({
                 collection: instructionsCollectionSlug,
-                data: { id, [field]: target.slug },
+                data: { id, entitySlug: target.slug, entityType: target.type },
                 disableTransaction: true,
                 overrideAccess: false,
                 req: syncReq,
@@ -281,34 +269,29 @@ export const getInstructionsCollection = ({
       ],
       beforeValidate: [
         ({ data, operation, originalDoc, req }) => {
-          const { collectionSlug, globalSlug } = { ...originalDoc, ...data }
+          const { entitySlug, entityType } = { ...originalDoc, ...data }
 
-          if (Boolean(collectionSlug) === Boolean(globalSlug)) {
-            throw new ValidationError({
-              collection: instructionsCollectionSlug,
-              errors: ['collectionSlug', 'globalSlug'].map((path) => ({
-                message: req.t('llmInstructions:targetRequired'),
-                path,
-              })),
-              req,
-            })
+          if (!entitySlug || !entityType) {
+            return data
           }
 
-          if (!getTarget({ collectionSlug, globalSlug })) {
+          if (!getTarget({ entitySlug, entityType })) {
             throw new ValidationError({
               collection: instructionsCollectionSlug,
               errors: [
                 {
                   message: req.t('validation:invalidInput'),
-                  path: collectionSlug ? 'collectionSlug' : 'globalSlug',
+                  path:
+                    entityType === 'collection' || entityType === 'global'
+                      ? 'entitySlug'
+                      : 'entityType',
                 },
               ],
               req,
             })
           }
 
-          // Keep one configuration-owned row per target without unique indexes on nullable slugs.
-          const id = collectionSlug ? `collection-${collectionSlug}` : `global-${globalSlug}`
+          const id = `${entityType}-${entitySlug}`
 
           if (operation === 'update' && originalDoc?.id !== id) {
             throw new ValidationError({
@@ -316,7 +299,7 @@ export const getInstructionsCollection = ({
               errors: [
                 {
                   message: req.t('llmInstructions:targetCannotBeChanged'),
-                  path: collectionSlug ? 'collectionSlug' : 'globalSlug',
+                  path: originalDoc?.entityType !== entityType ? 'entityType' : 'entitySlug',
                 },
               ],
               req,
@@ -338,13 +321,13 @@ export const getInstructionsCollection = ({
       }
 
       if (getSelectMode(select) === 'include') {
-        return { ...select, collectionSlug: true, globalSlug: true }
+        return { ...select, entitySlug: true, entityType: true }
       }
 
       const targetSelect = { ...select }
 
-      delete targetSelect.collectionSlug
-      delete targetSelect.globalSlug
+      delete targetSelect.entitySlug
+      delete targetSelect.entityType
 
       return targetSelect
     },

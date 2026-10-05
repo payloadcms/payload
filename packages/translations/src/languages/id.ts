@@ -586,7 +586,6 @@ export const idTranslations: DefaultTranslationsObject = {
     instructions: 'Instruksi LLM',
     systemInstructions: 'Instruksi sistem (hanya baca)',
     targetCannotBeChanged: 'Target instruksi tidak dapat diubah.',
-    targetRequired: 'Isi tepat satu dari field collectionSlug atau globalSlug.',
     title: 'Judul',
   },
   localization: {

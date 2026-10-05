@@ -1,6 +1,7 @@
+import { initI18n } from '@payloadcms/translations'
 import { createPayloadRequest, initTransaction, killTransaction } from 'payload'
 import { getLLMInstructions } from 'payload/internal'
-import { instructionsCollectionSlug } from 'payload/shared'
+import { instructionsCollectionSlug, mergeListSearchAndWhere } from 'payload/shared'
 import { expect, onTestFinished } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
@@ -9,19 +10,133 @@ import { additionalInstructions, findInstructions, saveAdditionalInstructions } 
 import { hiddenCollectionSlug, hiddenGlobalSlug } from './slugs.js'
 
 test.suite('LLM instructions', { config: './config.ts' }, () => {
-  for (const field of ['collectionSlug', 'globalSlug']) {
-    test(`should allow querying ${field} with a slug outside the configured targets`, async ({
+  test('should search and sort instructions by slug regardless of the display language', async ({
+    payload,
+  }) => {
+    const collectionConfig = payload.collections[instructionsCollectionSlug].config
+    const germanReq = await createPayloadRequest({
       payload,
-    }) => {
-      const result = await payload.find({
+      req: {
+        i18n: await initI18n({ config: payload.config.i18n, context: 'api', language: 'de' }),
+      },
+    })
+
+    for (const target of [
+      {
+        slug: 'pages',
+        data: { entitySlug: 'pages', entityType: 'collection' },
+        titles: { de: 'Seiten', en: 'Pages' },
+      },
+      {
+        slug: 'site-settings',
+        data: { entitySlug: 'site-settings', entityType: 'global' },
+        titles: { de: 'Einstellungen', en: 'Site Settings' },
+      },
+    ] as const) {
+      const created = await payload.create({
         collection: instructionsCollectionSlug,
+        data: target.data,
         overrideAccess: true,
-        where: { [field]: { equals: 'removed-target' } },
+        req: germanReq,
+      })
+      const stored = await payload.db.findOne({
+        collection: instructionsCollectionSlug,
+        where: { id: { equals: created.id } },
       })
 
-      expect(result.docs).toEqual([])
+      expect(created.title).toBe(target.titles.de)
+      expect(stored).toMatchObject(target.data)
+      expect(stored).not.toHaveProperty('title')
+
+      for (const language of ['en', 'de'] as const) {
+        const req = await createPayloadRequest({
+          payload,
+          req: {
+            i18n: await initI18n({ config: payload.config.i18n, context: 'api', language }),
+          },
+        })
+        const { docs } = await payload.find({
+          collection: instructionsCollectionSlug,
+          overrideAccess: true,
+          req,
+          where: mergeListSearchAndWhere({ collectionConfig, search: target.slug }),
+        })
+
+        expect(docs).toEqual([
+          expect.objectContaining({ id: created.id, title: target.titles[language] }),
+        ])
+      }
+    }
+
+    const { docs } = await payload.find({
+      collection: instructionsCollectionSlug,
+      overrideAccess: true,
+      req: germanReq,
+      sort: 'entitySlug',
     })
-  }
+
+    expect(docs.map(({ id }) => id)).toEqual(['collection-pages', 'global-site-settings'])
+  })
+
+  test('should display changed config labels without rewriting searchable instructions', async ({
+    payload,
+  }) => {
+    const pages = await payload.create({
+      collection: instructionsCollectionSlug,
+      data: { entitySlug: 'pages', entityType: 'collection' },
+      overrideAccess: true,
+    })
+    const settings = await payload.create({
+      collection: instructionsCollectionSlug,
+      data: { entitySlug: 'site-settings', entityType: 'global' },
+      overrideAccess: true,
+    })
+    const pageConfig = payload.collections.pages.config
+    const settingsConfig = payload.config.globals.find(({ slug }) => slug === 'site-settings')!
+    const originalLabels = pageConfig.labels
+    const originalLabel = settingsConfig.label
+
+    onTestFinished(() => {
+      pageConfig.labels = originalLabels
+      settingsConfig.label = originalLabel
+    })
+    pageConfig.labels = { ...originalLabels, plural: 'Articles' }
+    settingsConfig.label = 'Website Settings'
+
+    for (const target of [
+      { slug: 'pages', doc: pages, title: 'Articles' },
+      { slug: 'site-settings', doc: settings, title: 'Website Settings' },
+    ] as const) {
+      const { docs } = await payload.find({
+        collection: instructionsCollectionSlug,
+        overrideAccess: true,
+        where: mergeListSearchAndWhere({
+          collectionConfig: payload.collections[instructionsCollectionSlug].config,
+          search: target.slug,
+        }),
+      })
+
+      expect(docs).toEqual([
+        expect.objectContaining({
+          id: target.doc.id,
+          title: target.title,
+          updatedAt: target.doc.updatedAt,
+        }),
+      ])
+    }
+  })
+
+  test('should allow querying an entity slug outside the configured targets', async ({
+    payload,
+  }) => {
+    const result = await payload.find({
+      collection: instructionsCollectionSlug,
+      overrideAccess: true,
+      where: { entitySlug: { equals: 'removed-target' } },
+    })
+
+    expect(result.docs).toEqual([])
+  })
 
   for (const target of [
     { slug: hiddenCollectionSlug, type: 'collection', instructions: 'Keep hidden pages private.' },
@@ -61,7 +176,7 @@ test.suite('LLM instructions', { config: './config.ts' }, () => {
   }) => {
     const { user } = await payload.login({ collection: 'users', data: devUser })
 
-    await saveAdditionalInstructions({ collectionSlug: 'pages', payload })
+    await saveAdditionalInstructions({ entitySlug: 'pages', entityType: 'collection', payload })
 
     const req = await createPayloadRequest({ payload, user })
     const hooks = payload.collections[instructionsCollectionSlug].config.hooks
@@ -82,12 +197,12 @@ test.suite('LLM instructions', { config: './config.ts' }, () => {
   })
 
   for (const data of [
-    { collectionSlug: 'unknown-collection' },
-    { globalSlug: 'unknown-global' },
-    { collectionSlug: hiddenCollectionSlug },
-    { globalSlug: hiddenGlobalSlug },
-    { collectionSlug: instructionsCollectionSlug },
-  ]) {
+    { entitySlug: 'unknown-collection', entityType: 'collection' },
+    { entitySlug: 'unknown-global', entityType: 'global' },
+    { entitySlug: hiddenCollectionSlug, entityType: 'collection' },
+    { entitySlug: hiddenGlobalSlug, entityType: 'global' },
+    { entitySlug: instructionsCollectionSlug, entityType: 'collection' },
+  ] as const) {
     test(`should reject creating instructions for non-target ${JSON.stringify(data)}`, async ({
       payload,
     }) => {
@@ -95,14 +210,14 @@ test.suite('LLM instructions', { config: './config.ts' }, () => {
         payload.create({ collection: instructionsCollectionSlug, data, overrideAccess: true }),
       ).rejects.toMatchObject({
         name: 'ValidationError',
-        data: { errors: [expect.objectContaining({ path: Object.keys(data)[0] })] },
+        data: { errors: [expect.objectContaining({ path: 'entitySlug' })] },
       })
     })
   }
 
   for (const target of [
-    { slug: 'pages', type: 'collection', collectionSlug: 'pages' },
-    { slug: 'site-settings', type: 'global', globalSlug: 'site-settings' },
+    { slug: 'pages', type: 'collection', entitySlug: 'pages', entityType: 'collection' },
+    { slug: 'site-settings', type: 'global', entitySlug: 'site-settings', entityType: 'global' },
   ] as const) {
     test(`should combine configured and saved ${target.type} instructions as Markdown`, async ({
       payload,
@@ -141,14 +256,14 @@ test.suite('LLM instructions', { config: './config.ts' }, () => {
       expect.arrayContaining([
         expect.objectContaining({
           id: 'collection-pages',
-          collectionSlug: 'pages',
-          type: 'collection',
+          entitySlug: 'pages',
+          entityType: 'collection',
           title: 'Pages',
         }),
         expect.objectContaining({
           id: 'global-site-settings',
-          globalSlug: 'site-settings',
-          type: 'global',
+          entitySlug: 'site-settings',
+          entityType: 'global',
           title: 'Site Settings',
         }),
       ]),
@@ -275,39 +390,28 @@ test.suite('LLM instructions', { config: './config.ts' }, () => {
     const { docs } = await payload.find({
       collection: instructionsCollectionSlug,
       overrideAccess: false,
-      select: { title: true, type: true, additionalInstructions: true },
+      select: { title: true, additionalInstructions: true },
       user,
-      where: { collectionSlug: { equals: 'pages' } },
+      where: { entitySlug: { equals: 'pages' }, entityType: { equals: 'collection' } },
     })
 
-    expect(docs).toEqual([expect.objectContaining({ title: 'Pages', type: 'collection' })])
-  })
-
-  test('should allow a null unused slug for multiple targets', async ({ payload }) => {
-    const pages = await payload.create({
-      collection: instructionsCollectionSlug,
-      data: { collectionSlug: 'pages', globalSlug: null },
-      overrideAccess: true,
-    })
-    const users = await payload.create({
-      collection: instructionsCollectionSlug,
-      data: { collectionSlug: 'users', globalSlug: null },
-      overrideAccess: true,
-    })
-
-    expect(pages.collectionSlug).toBe('pages')
-    expect(users.collectionSlug).toBe('users')
+    expect(docs).toEqual([expect.objectContaining({ title: 'Pages', entityType: 'collection' })])
   })
 
   test('should prevent changing a configuration-owned target', async ({ payload }) => {
     const { user } = await payload.login({ collection: 'users', data: devUser })
-    const doc = await findInstructions({ collectionSlug: 'pages', payload, user })
+    const doc = await findInstructions({
+      entitySlug: 'pages',
+      entityType: 'collection',
+      payload,
+      user,
+    })
 
     await expect(
       payload.update({
         id: doc.id,
         collection: instructionsCollectionSlug,
-        data: { collectionSlug: null, globalSlug: 'site-settings' },
+        data: { entitySlug: 'site-settings', entityType: 'global' },
         overrideAccess: false,
         user,
       }),
@@ -319,58 +423,60 @@ test.suite('LLM instructions', { config: './config.ts' }, () => {
     })
   })
 
-  for (const { name, data } of [
-    { name: 'neither target', data: {} },
-    { name: 'null targets', data: { collectionSlug: null, globalSlug: null } },
-    { name: 'both targets', data: { collectionSlug: 'pages', globalSlug: 'site-settings' } },
+  for (const { data, path } of [
+    { data: {}, path: 'entitySlug' },
+    { data: { entityType: 'collection' }, path: 'entitySlug' },
+    { data: { entitySlug: 'pages' }, path: 'entityType' },
   ] as const) {
-    test(`should reject creating instructions with ${name}`, async ({ payload }) => {
+    test(`should require ${path} when creating instructions with ${JSON.stringify(data)}`, async ({
+      payload,
+    }) => {
       await expect(
+        // @ts-expect-error Deliberately omit required fields to exercise runtime validation.
         payload.create({ collection: instructionsCollectionSlug, data, overrideAccess: true }),
       ).rejects.toMatchObject({
         name: 'ValidationError',
-        data: {
-          errors: expect.arrayContaining([
-            expect.objectContaining({
-              message: 'Provide exactly one of collectionSlug or globalSlug.',
-            }),
-          ]),
-        },
+        data: { errors: expect.arrayContaining([expect.objectContaining({ path })]) },
       })
     })
   }
 
-  for (const { name, data } of [
-    { name: 'neither target', data: { collectionSlug: null } },
-    { name: 'an empty target', data: { collectionSlug: '' } },
-    { name: 'both targets', data: { globalSlug: 'site-settings' } },
+  for (const { data, path } of [
+    { data: { entitySlug: null }, path: 'entitySlug' },
+    { data: { entitySlug: '' }, path: 'entitySlug' },
+    { data: { entityType: null }, path: 'entityType' },
   ] as const) {
-    test(`should reject updating instructions to ${name}`, async ({ payload }) => {
+    test(`should require ${path} when updating instructions with ${JSON.stringify(data)}`, async ({
+      payload,
+    }) => {
       const { user } = await payload.login({ collection: 'users', data: devUser })
-      const doc = await findInstructions({ collectionSlug: 'pages', payload, user })
+      const doc = await findInstructions({
+        entitySlug: 'pages',
+        entityType: 'collection',
+        payload,
+        user,
+      })
 
       await expect(
         payload.update({
           id: doc.id,
           collection: instructionsCollectionSlug,
+          // @ts-expect-error Deliberately clear required fields to exercise runtime validation.
           data,
           overrideAccess: false,
           user,
         }),
       ).rejects.toMatchObject({
         name: 'ValidationError',
-        data: {
-          errors: expect.arrayContaining([
-            expect.objectContaining({
-              message: 'Provide exactly one of collectionSlug or globalSlug.',
-            }),
-          ]),
-        },
+        data: { errors: expect.arrayContaining([expect.objectContaining({ path })]) },
       })
     })
   }
 
-  for (const target of [{ collectionSlug: 'pages' }, { globalSlug: 'site-settings' }] as const) {
+  for (const target of [
+    { entitySlug: 'pages', entityType: 'collection' },
+    { entitySlug: 'site-settings', entityType: 'global' },
+  ] as const) {
     test(`should reject duplicate instructions for ${JSON.stringify(target)}`, async ({
       payload,
     }) => {
@@ -402,27 +508,29 @@ test.suite('LLM instructions', { config: './config.ts' }, () => {
     const { user } = await payload.login({ collection: 'users', data: devUser })
     const original = await findInstructions({
       payload,
-      collectionSlug: 'pages',
+      entitySlug: 'pages',
+      entityType: 'collection',
       user,
     })
     const updated = await payload.update({
       id: original.id,
       collection: instructionsCollectionSlug,
-      data: { type: 'global', systemInstructions: additionalInstructions, title: 'Changed title' },
+      data: { systemInstructions: additionalInstructions, title: 'Changed title' },
       overrideAccess: false,
       user,
     })
 
     expect(updated.systemInstructions).toEqual(original.systemInstructions)
     expect(updated.title).toBe('Pages')
-    expect(updated.type).toBe('collection')
+    expect(updated.entityType).toBe('collection')
   })
 
   test('should leave system instructions empty when none are configured', async ({ payload }) => {
     const { user } = await payload.login({ collection: 'users', data: devUser })
     const doc = await findInstructions({
       payload,
-      globalSlug: 'site-settings',
+      entitySlug: 'site-settings',
+      entityType: 'global',
       user,
     })
 
@@ -430,7 +538,11 @@ test.suite('LLM instructions', { config: './config.ts' }, () => {
   })
 
   test('should reject anonymous reads and edits', async ({ payload }) => {
-    const doc = await saveAdditionalInstructions({ collectionSlug: 'pages', payload })
+    const doc = await saveAdditionalInstructions({
+      entitySlug: 'pages',
+      entityType: 'collection',
+      payload,
+    })
 
     await expect(
       payload.find({ collection: instructionsCollectionSlug, overrideAccess: false, user: null }),
@@ -457,7 +569,8 @@ test.suite('LLM instructions', { config: './config.ts' }, () => {
     const user = { ...viewer, collection: 'users' as const }
     const doc = await findInstructions({
       payload,
-      collectionSlug: 'pages',
+      entitySlug: 'pages',
+      entityType: 'collection',
       user,
     })
 
@@ -481,12 +594,17 @@ test.suite('LLM instructions', { config: './config.ts' }, () => {
     await expect(
       payload.create({
         collection: instructionsCollectionSlug,
-        data: { collectionSlug: 'pages', title: 'Invented' },
+        data: { entitySlug: 'pages', entityType: 'collection', title: 'Invented' },
         overrideAccess: false,
         user,
       }),
     ).rejects.toThrow()
-    const doc = await findInstructions({ collectionSlug: 'pages', payload, user })
+    const doc = await findInstructions({
+      entitySlug: 'pages',
+      entityType: 'collection',
+      payload,
+      user,
+    })
 
     await expect(
       payload.delete({

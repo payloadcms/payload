@@ -589,7 +589,6 @@ export const trTranslations: DefaultTranslationsObject = {
     instructions: 'LLM Talimatları',
     systemInstructions: 'Sistem talimatları (salt okunur)',
     targetCannotBeChanged: 'Talimatların hedefi değiştirilemez.',
-    targetRequired: 'collectionSlug veya globalSlug alanlarından tam olarak birini belirtin.',
     title: 'Başlık',
   },
   localization: {

@@ -588,7 +588,6 @@ export const azTranslations: DefaultTranslationsObject = {
     instructions: 'LLM təlimatları',
     systemInstructions: 'Sistem təlimatları (yalnız oxumaq üçün)',
     targetCannotBeChanged: 'Təlimatların hədəfi dəyişdirilə bilməz.',
-    targetRequired: 'collectionSlug və ya globalSlug sahələrindən dəqiq birini göstərin.',
     title: 'Başlıq',
   },
   localization: {

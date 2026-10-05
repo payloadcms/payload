@@ -584,7 +584,6 @@ export const svTranslations: DefaultTranslationsObject = {
     instructions: 'LLM-instruktioner',
     systemInstructions: 'Systeminstruktioner (skrivskyddade)',
     targetCannotBeChanged: 'Instruktionernas mål kan inte ändras.',
-    targetRequired: 'Ange exakt ett av fälten collectionSlug eller globalSlug.',
     title: 'Titel',
   },
   localization: {
