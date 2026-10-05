@@ -124,7 +124,7 @@ Large areas will use separate commits:
 
 Focused integration tests will cover MongoDB, PostgreSQL, and SQLite where adapter behaviour differs. Final verification will include the affected integration suites, unit or component tests, type checks, accessibility evidence, formatting or lint checks for changed files, and a fresh review of the complete branch diff.
 
-Each commit message will include the required `Written with AI` label. The completed commit series will be pushed directly to `origin/feat/content-branching` after verification.
+The completed commit series will be pushed directly to `origin/feat/content-branching` after verification.
 
 ## Deferred Findings
 
