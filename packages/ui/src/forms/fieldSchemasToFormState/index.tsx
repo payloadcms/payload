@@ -4,10 +4,10 @@ import type {
   Data,
   DocumentPreferences,
   Field,
+  FieldOperation,
   FieldSchemaMap,
   FormState,
   FormStateWithoutComponents,
-  Operation,
   PayloadRequest,
   SanitizedFieldsPermissions,
   SelectMode,
@@ -60,7 +60,7 @@ type Args = {
    */
   initialBlockData?: Data
   mockRSCs?: BuildFormStateArgs['mockRSCs']
-  operation?: Operation
+  operation?: FieldOperation
   permissions: SanitizedFieldsPermissions
   preferences: DocumentPreferences
   /**

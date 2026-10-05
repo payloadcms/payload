@@ -1,5 +1,6 @@
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import type { useAuth } from '@payloadcms/ui'
+import type { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToFormState'
 import type {
   Access,
   ArrayField,
@@ -52,6 +53,7 @@ import type {
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   SelectType,
+  ServerComponentProps,
   TabsField,
   TextField,
   TextFieldClientProps,
@@ -137,6 +139,13 @@ describe('Types testing', () => {
       expect<FieldOperation>().type.toBe<'create' | 'read' | 'update' | 'validate'>()
       expect<Operation>().type.toBe<'create' | 'delete' | 'read' | 'update' | 'validate'>()
       expect<PayloadRequest['operation']>().type.toBe<Operation | undefined>()
+    })
+
+    test('should limit form state operations to field operations', () => {
+      expect<Parameters<typeof fieldSchemasToFormState>[0]['operation']>().type.toBe<
+        FieldOperation | undefined
+      >()
+      expect<ServerComponentProps['operation']>().type.toBe<FieldOperation>()
     })
 
     test('should expose validate only to validation lifecycle types', () => {

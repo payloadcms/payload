@@ -4,10 +4,10 @@ import type {
   Data,
   DocumentPreferences,
   Field,
+  FieldOperation,
   FieldSchemaMap,
   FormState,
   FormStateWithoutComponents,
-  Operation,
   PayloadRequest,
   SanitizedFieldsPermissions,
   SelectMode,
@@ -58,7 +58,7 @@ type Args = {
   /**
    * operation is only needed for validation
    */
-  operation: Operation
+  operation: FieldOperation
   parentIndexPath: string
   parentPassesCondition?: boolean
   parentPath: string

@@ -3,9 +3,9 @@ import type {
   ClientFieldSchemaMap,
   ComponentRenderer,
   DocumentPreferences,
+  FieldOperation,
   FieldSchemaMap,
   FormState,
-  Operation,
   PayloadRequest,
   RichTextField,
   SanitizedFieldPermissions,
@@ -32,7 +32,7 @@ type Props = {
     fieldSchemaMap: FieldSchemaMap
     id?: number | string
     lexicalFieldSchemaPath: string
-    operation: Operation
+    operation: FieldOperation
     permissions?: SanitizedFieldPermissions
     preferences: DocumentPreferences
     renderComponent: ComponentRenderer
