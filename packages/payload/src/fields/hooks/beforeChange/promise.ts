@@ -201,7 +201,7 @@ export const promise = async ({
             .map((locale) => ({ locale, value: (valueToValidate as JsonObject)[locale] }))
         : [{ value: valueToValidate }]
 
-      // An empty locale map validates once as empty so required/optional still apply.
+      // No recognized locales (e.g. `{}`): validate `undefined` once so required/optional still apply.
       if (localizedValuesToValidate.length === 0) {
         localizedValuesToValidate.push({ value: undefined })
       }
