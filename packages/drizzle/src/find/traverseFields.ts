@@ -532,6 +532,7 @@ export const traverseFields = ({
             joins,
             locale,
             parentIsLocalized,
+            req,
             selectLocale: true,
             sort: useDrafts
               ? getQueryDraftsSort({

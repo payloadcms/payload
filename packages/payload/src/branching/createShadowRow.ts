@@ -177,6 +177,10 @@ export const findCompetingShadow = async ({
       })
 
       if (!change) {
+        if (attemptIndex < maximumConcurrentShadowAttempts - 1) {
+          continue
+        }
+
         throw new APIError(
           `The ${collectionSlug} branch row for document ${String(docID)} has no change record.`,
           409,

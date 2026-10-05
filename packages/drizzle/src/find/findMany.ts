@@ -53,6 +53,7 @@ export const findMany = async function find({
     adapter,
     fields,
     locale,
+    req,
     sort,
     tableName,
     where: whereArg,

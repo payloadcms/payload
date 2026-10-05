@@ -1811,8 +1811,8 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       }
 
       expect(result.merged).toHaveLength(1)
-      expect(event.changes[0]?.before).toBeUndefined()
-      expect(event.changes[0]?.after).toBeUndefined()
+      expect(event.changes[0]?.before == null).toBe(true)
+      expect(event.changes[0]?.after == null).toBe(true)
     })
 
     test('should return the global to main state on discard', async () => {
@@ -6549,23 +6549,27 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       }
     })
 
-    test('should reject malformed prepared content with the default validator', async () => {
-      await corruptBranchTitle()
+    test.options(
+      'should reject malformed prepared content with the default validator',
+      { db: 'mongo' },
+      async () => {
+        await corruptBranchTitle()
 
-      const result = await payload.branches.merge({ branch, dryRun: true })
-      const onMain = await payload.findByID({ id: mainDocumentID, collection: pagesSlug })
+        const result = await payload.branches.merge({ branch, dryRun: true })
+        const onMain = await payload.findByID({ id: mainDocumentID, collection: pagesSlug })
 
-      expect(result.canMerge).toBe(false)
-      expect(result.mergeable).toHaveLength(0)
-      expect(result.validationErrors).toContainEqual(
-        expect.objectContaining({
-          collectionSlug: pagesSlug,
-          docID: mainDocumentID,
-          path: 'data.title',
-        }),
-      )
-      expect(onMain.title).toBe('main validation title')
-    })
+        expect(result.canMerge).toBe(false)
+        expect(result.mergeable).toHaveLength(0)
+        expect(result.validationErrors).toContainEqual(
+          expect.objectContaining({
+            collectionSlug: pagesSlug,
+            docID: mainDocumentID,
+            path: 'data.title',
+          }),
+        )
+        expect(onMain.title).toBe('main validation title')
+      },
+    )
 
     test('should pass the latest candidate to replacement validation in main context', async () => {
       await payload.update({
@@ -6602,21 +6606,25 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       )
     })
 
-    test('should let replacement validation replace only the precheck', async () => {
-      await corruptBranchTitle()
-      hookSpy.branchValidation = () => ({ errors: [], valid: true })
+    test.options(
+      'should let replacement validation replace only the precheck',
+      { db: 'mongo' },
+      async () => {
+        await corruptBranchTitle()
+        hookSpy.branchValidation = () => ({ errors: [], valid: true })
 
-      const preview = await payload.branches.merge({ branch, dryRun: true })
+        const preview = await payload.branches.merge({ branch, dryRun: true })
 
-      expect(preview.canMerge).toBe(true)
-      expect(preview.validationErrors).toHaveLength(0)
+        expect(preview.canMerge).toBe(true)
+        expect(preview.validationErrors).toHaveLength(0)
 
-      await expect(payload.branches.merge({ branch })).rejects.toThrow()
+        await expect(payload.branches.merge({ branch })).rejects.toThrow()
 
-      const onMain = await payload.findByID({ id: mainDocumentID, collection: pagesSlug })
+        const onMain = await payload.findByID({ id: mainDocumentID, collection: pagesSlug })
 
-      expect(onMain.title).toBe('main validation title')
-    })
+        expect(onMain.title).toBe('main validation title')
+      },
+    )
 
     test('should recheck replacement validation after beforeMerge changes policy', async () => {
       let validationCalls = 0
@@ -7542,8 +7550,8 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         changes: { after?: Record<string, unknown>; before?: Record<string, unknown> }[]
       }
 
-      expect(event.changes[0]?.before).toBeUndefined()
-      expect(event.changes[0]?.after).toBeUndefined()
+      expect(event.changes[0]?.before == null).toBe(true)
+      expect(event.changes[0]?.after == null).toBe(true)
     })
 
     test('should record the exact target version before and after a versioned merge', async () => {
@@ -7687,8 +7695,8 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         }[]
       }
 
-      expect(event.changes[0]?.before).toBeUndefined()
-      expect(event.changes[0]?.after).toBeUndefined()
+      expect(event.changes[0]?.before == null).toBe(true)
+      expect(event.changes[0]?.after == null).toBe(true)
       expect(event.changes[0]?.docTitle).toBe(String(mainDocID))
     })
 
@@ -7727,8 +7735,8 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         }[]
       }
 
-      expect(event.changes[0]?.before).toBeUndefined()
-      expect(event.changes[0]?.after).toBeUndefined()
+      expect(event.changes[0]?.before == null).toBe(true)
+      expect(event.changes[0]?.after == null).toBe(true)
       expect(event.changes[0]?.docTitle).toBe(String(mainDocID))
     })
 
@@ -7855,8 +7863,8 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         changes: { after?: Record<string, unknown>; before?: null | Record<string, unknown> }[]
       }
 
-      expect(event.changes[0]?.before).toBeUndefined()
-      expect(event.changes[0]?.after).toBeUndefined()
+      expect(event.changes[0]?.before == null).toBe(true)
+      expect(event.changes[0]?.after == null).toBe(true)
       expect((event.changes[0] as { docTitle?: string })?.docTitle).toBe('created on branch')
     })
 
@@ -8903,7 +8911,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
           applicationOutcome: 'applied',
           recoveryOutcome: 'unavailable',
         })
-        expect(unresolvedChange?.recoveryError).toBeUndefined()
+        expect(unresolvedChange?.recoveryError == null).toBe(true)
       } finally {
         beginTransactionSpy.mockRestore()
       }
@@ -9940,212 +9948,228 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       }
     })
 
-    test('should finalise a successful merge only after its caller-owned transaction commits', async () => {
-      branchSlug = 'caller-owned-successful-merge'
+    test.options(
+      'should finalise a successful merge only after its caller-owned transaction commits',
+      { db: (adapter) => databaseAdapterSupportsTransactions({ adapter }) },
+      async () => {
+        branchSlug = 'caller-owned-successful-merge'
 
-      await createBranchRecord({ name: 'Caller-owned successful merge', slug: branchSlug })
-      const mainDocument = await payload.create({
-        collection: postsSlug,
-        data: { title: 'Caller-owned success original' },
-      })
-
-      await payload.update({
-        id: mainDocument.id,
-        branch: branchSlug,
-        collection: postsSlug,
-        data: { title: 'Caller-owned success edited' },
-      })
-
-      const req = await createPayloadRequest({ branch: false, payload })
-
-      expect(await initTransaction(req)).toBe(true)
-
-      try {
-        await payload.branches.merge({ branch: branchSlug, overrideAccess: true, req })
-
-        const beforeCommit = await findBranchMergeEvent({ branch: branchSlug })
-
-        expect(beforeCommit.status).toBe('awaitingCommit')
-        expect(beforeCommit.changes[0]?.applicationOutcome).toBe('applied')
-        expect(beforeCommit.changes[0]?.cleanupOutcome).toBe('pending')
-
-        await commitTransaction(req)
-
-        const afterCommit = await findBranchMergeEvent({ branch: branchSlug })
-
-        expect(afterCommit.status).toBe('succeeded')
-        expect(afterCommit.changes[0]?.applicationOutcome).toBe('committed')
-        expect(afterCommit.changes[0]?.cleanupOutcome).toBe('completed')
-      } finally {
-        if (req.transactionID) {
-          await killTransaction(req)
-        }
-      }
-    })
-
-    test('should preserve newer source work created before caller-owned cleanup', async () => {
-      branchSlug = 'caller-owned-newer-source-work'
-
-      await createBranchRecord({ name: 'Caller-owned newer source work', slug: branchSlug })
-      const mainDocument = await payload.create({
-        collection: postsSlug,
-        data: { title: 'Newer source original' },
-      })
-
-      await payload.update({
-        id: mainDocument.id,
-        branch: branchSlug,
-        collection: postsSlug,
-        data: { title: 'Merge candidate' },
-      })
-
-      const req = await createPayloadRequest({ branch: false, payload })
-
-      expect(await initTransaction(req)).toBe(true)
-
-      try {
-        await payload.branches.merge({ branch: branchSlug, overrideAccess: true, req })
+        await createBranchRecord({ name: 'Caller-owned successful merge', slug: branchSlug })
+        const mainDocument = await payload.create({
+          collection: postsSlug,
+          data: { title: 'Caller-owned success original' },
+        })
 
         await payload.update({
           id: mainDocument.id,
           branch: branchSlug,
           collection: postsSlug,
-          data: { title: 'Newer branch work' },
+          data: { title: 'Caller-owned success edited' },
         })
 
-        await commitTransaction(req)
+        const req = await createPayloadRequest({ branch: false, payload })
 
-        const onMain = await payload.findByID({ id: mainDocument.id, collection: postsSlug })
-        const onBranch = await payload.findByID({
+        expect(await initTransaction(req)).toBe(true)
+
+        try {
+          await payload.branches.merge({ branch: branchSlug, overrideAccess: true, req })
+
+          const beforeCommit = await findBranchMergeEvent({ branch: branchSlug })
+
+          expect(beforeCommit.status).toBe('awaitingCommit')
+          expect(beforeCommit.changes[0]?.applicationOutcome).toBe('applied')
+          expect(beforeCommit.changes[0]?.cleanupOutcome).toBe('pending')
+
+          await commitTransaction(req)
+
+          const afterCommit = await findBranchMergeEvent({ branch: branchSlug })
+
+          expect(afterCommit.status).toBe('succeeded')
+          expect(afterCommit.changes[0]?.applicationOutcome).toBe('committed')
+          expect(afterCommit.changes[0]?.cleanupOutcome).toBe('completed')
+        } finally {
+          if (req.transactionID) {
+            await killTransaction(req)
+          }
+        }
+      },
+    )
+
+    test.options(
+      'should preserve newer source work created before caller-owned cleanup',
+      { db: (adapter) => databaseAdapterSupportsTransactions({ adapter }) },
+      async () => {
+        branchSlug = 'caller-owned-newer-source-work'
+
+        await createBranchRecord({ name: 'Caller-owned newer source work', slug: branchSlug })
+        const mainDocument = await payload.create({
+          collection: postsSlug,
+          data: { title: 'Newer source original' },
+        })
+
+        await payload.update({
           id: mainDocument.id,
           branch: branchSlug,
           collection: postsSlug,
+          data: { title: 'Merge candidate' },
         })
-        const remainingChanges = await findBranchChanges({ branch: branchSlug })
-        const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
 
-        expect(onMain.title).toBe('Merge candidate')
-        expect(onBranch.title).toBe('Newer branch work')
-        expect(remainingChanges.docs).toHaveLength(1)
-        expect(mergeEvent.status).toBe('succeeded')
-        expect(mergeEvent.changes[0]).toMatchObject({
-          applicationOutcome: 'committed',
-          cleanupOutcome: 'superseded',
-        })
-      } finally {
-        if (req.transactionID) {
-          await killTransaction(req)
+        const req = await createPayloadRequest({ branch: false, payload })
+
+        expect(await initTransaction(req)).toBe(true)
+
+        try {
+          await payload.branches.merge({ branch: branchSlug, overrideAccess: true, req })
+
+          await payload.update({
+            id: mainDocument.id,
+            branch: branchSlug,
+            collection: postsSlug,
+            data: { title: 'Newer branch work' },
+          })
+
+          await commitTransaction(req)
+
+          const onMain = await payload.findByID({ id: mainDocument.id, collection: postsSlug })
+          const onBranch = await payload.findByID({
+            id: mainDocument.id,
+            branch: branchSlug,
+            collection: postsSlug,
+          })
+          const remainingChanges = await findBranchChanges({ branch: branchSlug })
+          const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+
+          expect(onMain.title).toBe('Merge candidate')
+          expect(onBranch.title).toBe('Newer branch work')
+          expect(remainingChanges.docs).toHaveLength(1)
+          expect(mergeEvent.status).toBe('succeeded')
+          expect(mergeEvent.changes[0]).toMatchObject({
+            applicationOutcome: 'committed',
+            cleanupOutcome: 'superseded',
+          })
+        } finally {
+          if (req.transactionID) {
+            await killTransaction(req)
+          }
         }
-      }
-    })
+      },
+    )
 
-    test('should preserve newer global work created before caller-owned cleanup', async () => {
-      branchSlug = 'caller-owned-newer-global-work'
+    test.options(
+      'should preserve newer global work created before caller-owned cleanup',
+      { db: (adapter) => databaseAdapterSupportsTransactions({ adapter }) },
+      async () => {
+        branchSlug = 'caller-owned-newer-global-work'
 
-      await createBranchRecord({ name: 'Caller-owned newer global work', slug: branchSlug })
-      await payload.updateGlobal({
-        slug: headerGlobalSlug,
-        data: { navLabel: 'Global source original' },
-      })
-      await payload.updateGlobal({
-        slug: headerGlobalSlug,
-        branch: branchSlug,
-        data: { navLabel: 'Global merge candidate' },
-      })
-
-      const req = await createPayloadRequest({ branch: false, payload })
-
-      expect(await initTransaction(req)).toBe(true)
-
-      try {
-        await payload.branches.merge({ branch: branchSlug, overrideAccess: true, req })
-
+        await createBranchRecord({ name: 'Caller-owned newer global work', slug: branchSlug })
+        await payload.updateGlobal({
+          slug: headerGlobalSlug,
+          data: { navLabel: 'Global source original' },
+        })
         await payload.updateGlobal({
           slug: headerGlobalSlug,
           branch: branchSlug,
-          data: { navLabel: 'Newer global branch work' },
+          data: { navLabel: 'Global merge candidate' },
         })
 
-        await commitTransaction(req)
+        const req = await createPayloadRequest({ branch: false, payload })
 
-        const onMain = await payload.findGlobal({ slug: headerGlobalSlug })
-        const onBranch = await payload.findGlobal({ slug: headerGlobalSlug, branch: branchSlug })
-        const remainingChanges = await findBranchChanges({ branch: branchSlug })
-        const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+        expect(await initTransaction(req)).toBe(true)
 
-        expect(onMain.navLabel).toBe('Global merge candidate')
-        expect(onBranch.navLabel).toBe('Newer global branch work')
-        expect(remainingChanges.docs).toHaveLength(1)
-        expect(mergeEvent.status).toBe('succeeded')
-        expect(mergeEvent.changes[0]).toMatchObject({
-          applicationOutcome: 'committed',
-          cleanupOutcome: 'superseded',
-        })
-      } finally {
-        if (req.transactionID) {
-          await killTransaction(req)
+        try {
+          await payload.branches.merge({ branch: branchSlug, overrideAccess: true, req })
+
+          await payload.updateGlobal({
+            slug: headerGlobalSlug,
+            branch: branchSlug,
+            data: { navLabel: 'Newer global branch work' },
+          })
+
+          await commitTransaction(req)
+
+          const onMain = await payload.findGlobal({ slug: headerGlobalSlug })
+          const onBranch = await payload.findGlobal({ slug: headerGlobalSlug, branch: branchSlug })
+          const remainingChanges = await findBranchChanges({ branch: branchSlug })
+          const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+
+          expect(onMain.navLabel).toBe('Global merge candidate')
+          expect(onBranch.navLabel).toBe('Newer global branch work')
+          expect(remainingChanges.docs).toHaveLength(1)
+          expect(mergeEvent.status).toBe('succeeded')
+          expect(mergeEvent.changes[0]).toMatchObject({
+            applicationOutcome: 'committed',
+            cleanupOutcome: 'superseded',
+          })
+        } finally {
+          if (req.transactionID) {
+            await killTransaction(req)
+          }
+
+          await payload.db.deleteBranchGlobal?.({
+            branch: branchSlug,
+            globalSlug: headerGlobalSlug,
+            req: await createPayloadRequest({ branch: false, payload }),
+          })
+          await payload.updateGlobal({
+            slug: headerGlobalSlug,
+            data: { navLabel: 'main label' },
+          })
         }
+      },
+    )
 
-        await payload.db.deleteBranchGlobal?.({
-          branch: branchSlug,
-          globalSlug: headerGlobalSlug,
-          req: await createPayloadRequest({ branch: false, payload }),
+    test.options(
+      'should record a successful merge as rolled back when its caller-owned transaction rolls back',
+      { db: (adapter) => databaseAdapterSupportsTransactions({ adapter }) },
+      async () => {
+        branchSlug = 'caller-owned-rolled-back-merge'
+
+        await createBranchRecord({ name: 'Caller-owned rolled-back merge', slug: branchSlug })
+        const mainDocument = await payload.create({
+          collection: postsSlug,
+          data: { title: 'Caller-owned rollback original' },
         })
-        await payload.updateGlobal({
-          slug: headerGlobalSlug,
-          data: { navLabel: 'main label' },
-        })
-      }
-    })
 
-    test('should record a successful merge as rolled back when its caller-owned transaction rolls back', async () => {
-      branchSlug = 'caller-owned-rolled-back-merge'
-
-      await createBranchRecord({ name: 'Caller-owned rolled-back merge', slug: branchSlug })
-      const mainDocument = await payload.create({
-        collection: postsSlug,
-        data: { title: 'Caller-owned rollback original' },
-      })
-
-      await payload.update({
-        id: mainDocument.id,
-        branch: branchSlug,
-        collection: postsSlug,
-        data: { title: 'Caller-owned rollback edited' },
-      })
-
-      const req = await createPayloadRequest({ branch: false, payload })
-
-      expect(await initTransaction(req)).toBe(true)
-
-      try {
-        await payload.branches.merge({ branch: branchSlug, overrideAccess: true, req })
-        await killTransaction(req)
-
-        const onMain = await payload.findByID({ id: mainDocument.id, collection: postsSlug })
-        const onBranch = await payload.findByID({
+        await payload.update({
           id: mainDocument.id,
           branch: branchSlug,
           collection: postsSlug,
+          data: { title: 'Caller-owned rollback edited' },
         })
-        const remainingChanges = await findBranchChanges({ branch: branchSlug })
-        const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
 
-        expect(onMain.title).toBe('Caller-owned rollback original')
-        expect(onBranch.title).toBe('Caller-owned rollback edited')
-        expect(remainingChanges.docs).toHaveLength(1)
-        expect(mergeEvent.status).toBe('failed')
-        expect(mergeEvent.error).toContain('Caller-owned transaction rolled back')
-        expect(mergeEvent.changes[0]).toMatchObject({
-          applicationOutcome: 'rolledBack',
-          cleanupOutcome: 'pending',
-        })
-      } finally {
-        if (req.transactionID) {
+        const req = await createPayloadRequest({ branch: false, payload })
+
+        expect(await initTransaction(req)).toBe(true)
+
+        try {
+          await payload.branches.merge({ branch: branchSlug, overrideAccess: true, req })
           await killTransaction(req)
+
+          const onMain = await payload.findByID({ id: mainDocument.id, collection: postsSlug })
+          const onBranch = await payload.findByID({
+            id: mainDocument.id,
+            branch: branchSlug,
+            collection: postsSlug,
+          })
+          const remainingChanges = await findBranchChanges({ branch: branchSlug })
+          const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+
+          expect(onMain.title).toBe('Caller-owned rollback original')
+          expect(onBranch.title).toBe('Caller-owned rollback edited')
+          expect(remainingChanges.docs).toHaveLength(1)
+          expect(mergeEvent.status).toBe('failed')
+          expect(mergeEvent.error).toContain('Caller-owned transaction rolled back')
+          expect(mergeEvent.changes[0]).toMatchObject({
+            applicationOutcome: 'rolledBack',
+            cleanupOutcome: 'pending',
+          })
+        } finally {
+          if (req.transactionID) {
+            await killTransaction(req)
+          }
         }
-      }
-    })
+      },
+    )
 
     test('should leave a caller-owned transaction open when discard fails', async () => {
       branchSlug = 'caller-owned-discard'

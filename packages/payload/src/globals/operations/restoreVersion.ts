@@ -200,6 +200,8 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
         operation: 'restoreVersion',
         payload,
         req,
+        returning: true,
+        shouldReturnVersionDocument: true,
       })
     } else {
       result = await payload.db.createGlobal({

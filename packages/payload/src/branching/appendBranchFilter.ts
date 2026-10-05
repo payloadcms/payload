@@ -72,7 +72,12 @@ export const appendBranchFilter = ({
     ? {
         and: [
           { [branchField]: { equals: branch } },
-          { [branchDocIDField]: { not_in: deletedIDs } },
+          {
+            or: [
+              { [branchDocIDField]: { not_in: deletedIDs } },
+              { [branchDocIDField]: { equals: null } },
+            ],
+          },
         ],
       }
     : { [branchField]: { equals: branch } }

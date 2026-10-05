@@ -23,6 +23,7 @@ type Args<T extends JsonObject = JsonObject> = {
   req?: PayloadRequest
   returning?: boolean
   select?: SelectType
+  shouldReturnVersionDocument?: boolean
   unpublish?: boolean
 }
 
@@ -55,6 +56,7 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
   req,
   returning,
   select,
+  shouldReturnVersionDocument,
   unpublish,
 }: Args<TData>): Promise<JsonObject | null> {
   let result: JsonObject | undefined
@@ -181,6 +183,10 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
 
   if (returning === false) {
     return null
+  }
+
+  if (shouldReturnVersionDocument) {
+    return result as JsonObject
   }
 
   let createdVersion = (result as any).version

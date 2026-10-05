@@ -20,6 +20,7 @@ export const count: Count = async function count(
     adapter: this,
     fields: collectionConfig.flattenedFields,
     locale,
+    req,
     tableName,
     where: await resolveBranchQuery({
       branch,

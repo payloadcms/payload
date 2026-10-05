@@ -4,13 +4,15 @@ import type {
   FlattenedBlock,
   FlattenedField,
   NumberField,
+  PayloadRequest,
   RelationshipField,
   TextField,
+  Where,
 } from 'payload'
 
-import { and, eq, getTableName, like, or, sql } from 'drizzle-orm'
+import { and, eq, getTableName, isNull, like, notInArray, or, sql } from 'drizzle-orm'
 import { type PgTableWithColumns } from 'drizzle-orm/pg-core'
-import { APIError, getFieldByPath } from 'payload'
+import { APIError, getBranchPredicateSync, getFieldByPath } from 'payload'
 import { fieldShouldBeLocalized, tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 import { validate as uuidValidate } from 'uuid'
@@ -62,6 +64,7 @@ type Args = {
   parentAliasTable?: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
   parentIsLocalized: boolean
   pathSegments: string[]
+  req?: Partial<PayloadRequest>
   rootTableName?: string
   selectFields: Record<string, GenericColumn>
   selectLocale?: boolean
@@ -75,6 +78,88 @@ type Args = {
    */
   value: unknown
 }
+
+const getRelationshipJoinCondition = ({
+  collectionSlug,
+  relationshipID,
+  req,
+  table,
+  value,
+}: {
+  collectionSlug: string
+  relationshipID: GenericColumn
+  req?: Partial<PayloadRequest>
+  table: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
+  value: unknown
+}): SQL => {
+  const branchPredicate = getBranchPredicateSync({ collectionSlug, req })
+  const shouldMatchCanonicalID = Boolean(
+    table._branchDocID && (branchPredicate || value === DistinctSymbol),
+  )
+  const identityCondition = shouldMatchCanonicalID
+    ? or(eq(table.id, relationshipID), eq(table._branchDocID, relationshipID))
+    : eq(table.id, relationshipID)
+  const branchCondition = getBranchTableCondition({ collectionSlug, req, table })
+
+  return branchCondition ? and(identityCondition, branchCondition) : identityCondition
+}
+
+const getBranchTableCondition = ({
+  collectionSlug,
+  req,
+  table,
+}: {
+  collectionSlug: string
+  req?: Partial<PayloadRequest>
+  table: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
+}): SQL | undefined => {
+  const branchPredicate = getBranchPredicateSync({ collectionSlug, req })
+
+  return branchPredicate
+    ? buildBranchPredicateCondition({ table, where: branchPredicate })
+    : undefined
+}
+
+const buildBranchPredicateCondition = ({
+  table,
+  where,
+}: {
+  table: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
+  where: Where
+}): SQL | undefined => {
+  const conditions: SQL[] = []
+
+  for (const [fieldName, condition] of Object.entries(where)) {
+    if ((fieldName === 'and' || fieldName === 'or') && Array.isArray(condition)) {
+      const nestedConditions = condition
+        .map((nestedWhere) => buildBranchPredicateCondition({ table, where: nestedWhere }))
+        .filter((nestedCondition): nestedCondition is SQL => Boolean(nestedCondition))
+      const nestedResult = fieldName === 'and' ? and(...nestedConditions) : or(...nestedConditions)
+
+      if (nestedResult) {
+        conditions.push(nestedResult)
+      }
+      continue
+    }
+
+    const column = table[fieldName]
+
+    if (!column || !condition || typeof condition !== 'object') {
+      continue
+    }
+
+    if ('equals' in condition) {
+      conditions.push(condition.equals === null ? isNull(column) : eq(column, condition.equals))
+    }
+
+    if ('not_in' in condition && Array.isArray(condition.not_in) && condition.not_in.length > 0) {
+      conditions.push(notInArray(column, condition.not_in))
+    }
+  }
+
+  return conditions.length === 1 ? conditions[0] : and(...conditions)
+}
+
 /**
  * Resolves a field path to the database table and column that store its value.
  *
@@ -100,6 +185,7 @@ export const getTableColumnFromPath = ({
   parentAliasTable,
   parentIsLocalized,
   pathSegments: incomingSegments,
+  req,
   rootTableName: incomingRootTableName,
   selectFields,
   selectLocale,
@@ -197,6 +283,7 @@ export const getTableColumnFromPath = ({
           parentAliasTable: aliasTable,
           parentIsLocalized: parentIsLocalized || field.localized,
           pathSegments: pathSegments.slice(1),
+          req,
           rootTableName,
           selectFields,
           selectLocale,
@@ -300,6 +387,7 @@ export const getTableColumnFromPath = ({
               locale,
               parentIsLocalized: parentIsLocalized || field.localized,
               pathSegments: pathSegments.slice(1),
+              req,
               rootTableName,
               selectFields: blockSelectFields,
               selectLocale,
@@ -367,6 +455,7 @@ export const getTableColumnFromPath = ({
           locale,
           parentIsLocalized: parentIsLocalized || field.localized,
           pathSegments: pathSegments.slice(1),
+          req,
           rootTableName,
           selectFields,
           selectLocale,
@@ -467,8 +556,17 @@ export const getTableColumnFromPath = ({
             }).newAliasTable) as PgTableWithColumns<any>
 
           if (!existingMainTable) {
+            const branchCondition = getBranchTableCondition({
+              collectionSlug: field.collection,
+              req,
+              table: relationshipTable,
+            })
+            const relationshipCondition = eq(aliasRelationshipTable.parent, relationshipTable.id)
+
             joins.push({
-              condition: eq(aliasRelationshipTable.parent, relationshipTable.id),
+              condition: branchCondition
+                ? and(relationshipCondition, branchCondition)
+                : relationshipCondition,
               queryPath: `${constraintPath}${field.name}`,
               table: relationshipTable,
             })
@@ -485,6 +583,7 @@ export const getTableColumnFromPath = ({
             // A join reads from a different collection, so localization does not carry over
             parentIsLocalized: false,
             pathSegments: pathSegments.slice(1),
+            req,
             rootTableName: relationshipTableName,
             selectFields,
             selectLocale,
@@ -534,19 +633,36 @@ export const getTableColumnFromPath = ({
             })
 
             joins.push({
-              condition: eq(
-                (newAliasTable as PgTableWithColumns<any>).id,
-                arrayAliasTable._parentID,
-              ),
+              condition: (() => {
+                const relationshipCondition = eq(newAliasTable['id'], arrayAliasTable._parentID)
+                const branchCondition = getBranchTableCondition({
+                  collectionSlug: field.collection,
+                  req,
+                  table: newAliasTable,
+                })
+
+                return branchCondition
+                  ? and(relationshipCondition, branchCondition)
+                  : relationshipCondition
+              })(),
               queryPath: `${constraintPath}${field.name}`,
               table: newAliasTable,
             })
           } else {
+            const relationshipCondition = eq(
+              newAliasTable[field.on.replaceAll('.', '_')],
+              aliasTable ? aliasTable.id : adapter.tables[tableName].id,
+            )
+            const branchCondition = getBranchTableCondition({
+              collectionSlug: field.collection,
+              req,
+              table: newAliasTable,
+            })
+
             joins.push({
-              condition: eq(
-                newAliasTable[field.on.replaceAll('.', '_')],
-                aliasTable ? aliasTable.id : adapter.tables[tableName].id,
-              ),
+              condition: branchCondition
+                ? and(relationshipCondition, branchCondition)
+                : relationshipCondition,
               queryPath: `${constraintPath}${field.name}`,
               table: newAliasTable,
             })
@@ -577,6 +693,7 @@ export const getTableColumnFromPath = ({
           // A join reads from a different collection, so localization does not carry over
           parentIsLocalized: false,
           pathSegments: pathSegments.slice(1),
+          req,
           selectFields,
           tableName: newTableName,
           value,
@@ -733,13 +850,13 @@ export const getTableColumnFromPath = ({
               ;({ newAliasTable } = getTableAlias({ adapter, tableName: newTableName }))
 
               const relationshipID = aliasRelationshipTable[`${field.relationTo}ID`]
-              const condition =
-                value === DistinctSymbol && newAliasTable._branchDocID
-                  ? or(
-                      eq(newAliasTable.id, relationshipID),
-                      eq(newAliasTable._branchDocID, relationshipID),
-                    )
-                  : eq(newAliasTable.id, relationshipID)
+              const condition = getRelationshipJoinCondition({
+                collectionSlug: field.relationTo,
+                relationshipID,
+                req,
+                table: newAliasTable,
+                value,
+              })
 
               joins.push({
                 condition,
@@ -896,6 +1013,7 @@ export const getTableColumnFromPath = ({
             // A relationship jumps to a different collection, so localization does not carry over
             parentIsLocalized: false,
             pathSegments: pathSegments.slice(1),
+            req,
             rootTableName: newTableName,
             selectFields,
             selectLocale,
@@ -942,13 +1060,13 @@ export const getTableColumnFromPath = ({
               table: localesTable,
             })
 
-            const condition =
-              value === DistinctSymbol && newAliasTable._branchDocID
-                ? or(
-                    eq(newAliasTable.id, localesTable[columnName]),
-                    eq(newAliasTable._branchDocID, localesTable[columnName]),
-                  )
-                : eq(newAliasTable.id, localesTable[columnName])
+            const condition = getRelationshipJoinCondition({
+              collectionSlug: field.relationTo,
+              relationshipID: localesTable[columnName],
+              req,
+              table: newAliasTable,
+              value,
+            })
 
             joins.push({
               condition,
@@ -959,13 +1077,13 @@ export const getTableColumnFromPath = ({
             const relationshipID = aliasTable
               ? aliasTable[columnName]
               : adapter.tables[tableName][columnName]
-            const condition =
-              value === DistinctSymbol && newAliasTable._branchDocID
-                ? or(
-                    eq(newAliasTable.id, relationshipID),
-                    eq(newAliasTable._branchDocID, relationshipID),
-                  )
-                : eq(newAliasTable.id, relationshipID)
+            const condition = getRelationshipJoinCondition({
+              collectionSlug: field.relationTo,
+              relationshipID,
+              req,
+              table: newAliasTable,
+              value,
+            })
 
             joins.push({ condition, queryPath: targetQueryPath, table: newAliasTable })
           }
@@ -982,6 +1100,7 @@ export const getTableColumnFromPath = ({
             // A relationship jumps to a different collection, so localization does not carry over
             parentIsLocalized: false,
             pathSegments: pathSegments.slice(1),
+            req,
             selectFields,
             tableName: newTableName,
             value,
@@ -1045,6 +1164,7 @@ export const getTableColumnFromPath = ({
             locale,
             parentIsLocalized: parentIsLocalized || field.localized,
             pathSegments: pathSegments.slice(1),
+            req,
             rootTableName,
             selectFields,
             selectLocale,
@@ -1065,6 +1185,7 @@ export const getTableColumnFromPath = ({
           locale,
           parentIsLocalized: parentIsLocalized || field.localized,
           pathSegments: pathSegments.slice(1),
+          req,
           rootTableName,
           selectFields,
           selectLocale,
