@@ -12,6 +12,7 @@ import type {
   NoResultsClientProps,
   NoResultsServerPropsOnly,
   Payload,
+  PayloadRequest,
   SanitizedCollectionConfig,
   StaticDescription,
   ViewDescriptionClientProps,
@@ -30,17 +31,19 @@ type Args = {
   description?: StaticDescription
   notFoundDocId?: null | string
   payload: Payload
+  req: PayloadRequest
   serverProps: ListViewServerPropsOnly
 }
 
-export const renderListViewSlots = ({
+export const renderListViewSlots = async ({
   clientProps,
   collectionConfig,
   description,
   notFoundDocId,
   payload,
+  req,
   serverProps,
-}: Args): ListViewSlots => {
+}: Args): Promise<ListViewSlots> => {
   const result: ListViewSlots = {} as ListViewSlots
 
   if (collectionConfig.admin.components?.afterList) {
@@ -52,10 +55,11 @@ export const renderListViewSlots = ({
     })
   }
 
-  const listMenuItems = filterLLMInstructionsMenuItems({
+  const listMenuItems = await filterLLMInstructionsMenuItems({
     collectionSlug: collectionConfig.slug,
     menuItems: collectionConfig.admin.components?.listMenuItems,
     permissions: serverProps.permissions,
+    req,
   })
 
   if (listMenuItems?.length) {

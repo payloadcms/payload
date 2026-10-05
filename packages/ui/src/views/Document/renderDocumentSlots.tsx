@@ -39,7 +39,7 @@ export const renderDocumentSlots: (args: {
   permissions: SanitizedPermissions
   req: PayloadRequest
   user?: PayloadRequest['user']
-}) => DocumentSlots = (args) => {
+}) => Promise<DocumentSlots> = async (args) => {
   const {
     id,
     collectionConfig,
@@ -93,13 +93,14 @@ export const renderDocumentSlots: (args: {
     })
   }
 
-  const EditMenuItems = filterLLMInstructionsMenuItems({
+  const EditMenuItems = await filterLLMInstructionsMenuItems({
     collectionSlug: collectionConfig?.slug,
     globalSlug: globalConfig?.slug,
     menuItems:
       collectionConfig?.admin?.components?.edit?.editMenuItems ||
       globalConfig?.admin?.components?.edit?.editMenuItems,
     permissions,
+    req,
   })
 
   if (EditMenuItems?.length) {

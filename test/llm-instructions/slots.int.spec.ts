@@ -2,8 +2,11 @@ import type { Payload } from 'payload'
 
 import { renderDocumentSlots } from '@payloadcms/ui/views/Document/renderDocumentSlots'
 import { createPayloadRequest, getAccessResults } from 'payload'
+import { instructionsCollectionSlug } from 'payload/shared'
 import { expect, onTestFinished } from 'vitest'
 
+// eslint-disable-next-line payload/no-relative-monorepo-imports -- Rebuild access for this test's temporary config.
+import { getInstructionsCollection } from '../../packages/payload/src/llm-instructions/getInstructionsCollection.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercise the internal slot builder without adding a public export for tests.
 import { renderListViewSlots } from '../../packages/ui/src/views/List/renderListViewSlots.js'
 import { test } from '../__helpers/int/vitest.js'
@@ -32,6 +35,32 @@ test.suite('LLM instructions menu slots', { config: './config.ts' }, () => {
 
     expect(slots.list.listMenuItems).toHaveLength(1)
     expect(slots.document.EditMenuItems).toHaveLength(1)
+  })
+
+  test('should only include instruction menus for records matching conditional update access', async ({
+    payload,
+  }) => {
+    const { user } = await payload.login({ collection: 'users', data: devUser })
+    const originalOptions = payload.config.llmInstructions
+    const collectionConfig = payload.collections[instructionsCollectionSlug].config
+    const originalUpdate = collectionConfig.access.update
+
+    onTestFinished(() => {
+      payload.config.llmInstructions = originalOptions
+      collectionConfig.access.update = originalUpdate
+    })
+    payload.config.llmInstructions = {
+      ...originalOptions,
+      access: () => ({ id: { equals: 'collection-pages' } }),
+    }
+    collectionConfig.access.update = getInstructionsCollection({
+      config: payload.config,
+    }).access!.update!
+
+    const slots = await renderSlots({ payload, user })
+
+    expect(slots.list.listMenuItems).toHaveLength(1)
+    expect(slots.document.EditMenuItems).toBeUndefined()
   })
 
   test('should preserve custom menu items when the instructions item is denied', async ({
@@ -80,7 +109,7 @@ const renderSlots = async ({
   }
 
   return {
-    list: renderListViewSlots({
+    list: await renderListViewSlots({
       clientProps: {
         collectionSlug: collectionConfig.slug,
         hasCreatePermission: true,
@@ -101,6 +130,7 @@ const renderSlots = async ({
         },
       },
       payload,
+      req,
       serverProps: {
         collectionConfig,
         data: {},
@@ -115,7 +145,7 @@ const renderSlots = async ({
         user,
       },
     }),
-    document: renderDocumentSlots({
+    document: await renderDocumentSlots({
       globalConfig: {
         ...globalConfig,
         admin: {
