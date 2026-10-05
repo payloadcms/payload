@@ -1054,6 +1054,70 @@ describe('Localization', () => {
       })
     })
 
+    describe('Localized - global length validation', () => {
+      it('should validate each locale on a global write with locale all', async () => {
+        const updated: any = await payload.updateGlobal({
+          slug: 'global-text',
+          data: {
+            localizedTextWithLength: {
+              en: 'valid english',
+              es: 'valido en es',
+            },
+          },
+          locale: 'all',
+        })
+
+        expect(updated.localizedTextWithLength.en).toStrictEqual('valid english')
+        expect(updated.localizedTextWithLength.es).toStrictEqual('valido en es')
+      })
+
+      it('should reject a global write where one locale violates minLength with locale all', async () => {
+        await expect(
+          payload.updateGlobal({
+            slug: 'global-text',
+            data: {
+              localizedTextWithLength: {
+                en: 'valid english',
+                es: 'no',
+              },
+            },
+            locale: 'all',
+          }),
+        ).rejects.toThrow('Localized Text With Length (es)')
+      })
+    })
+
+    describe('Localized - nested length validation', () => {
+      it('should reject a locale that violates minLength on a localized scalar inside a non-localized group', async () => {
+        await expect(
+          payload.create({
+            collection: allFieldsLocalizedSlug,
+            data: {
+              text: { en: 'valid text', es: 'valido es' },
+              nonLocalizedGroup: {
+                localizedText: { en: 'group english', es: 'no' },
+                nonLocalizedText: 'shared',
+              },
+            } as any,
+            locale: 'all',
+          }),
+        ).rejects.toThrow('Localized Text (es)')
+      })
+
+      it('should reject a locale that violates minLength on a localized scalar inside a non-localized array', async () => {
+        await expect(
+          payload.create({
+            collection: allFieldsLocalizedSlug,
+            data: {
+              text: { en: 'valid text', es: 'valido es' },
+              nonLocalizedArray: [{ localizedItem: { en: 'array english', es: 'no' } }],
+            } as any,
+            locale: 'all',
+          }),
+        ).rejects.toThrow('Localized Item (es)')
+      })
+    })
+
     describe('Localized - required', () => {
       it('should update without passing all required fields', async () => {
         const newDoc = await payload.create({

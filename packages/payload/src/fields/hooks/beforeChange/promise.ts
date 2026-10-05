@@ -9,6 +9,7 @@ import { MissingEditorProp } from '../../../errors/index.js'
 import { type RequestContext, validateBlocksFilterOptions } from '../../../index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
 import { getTranslatedLabel } from '../../../utilities/getTranslatedLabel.js'
+import { isolateObjectProperty } from '../../../utilities/isolateObjectProperty.js'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../config/types.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
@@ -183,20 +184,27 @@ export const promise = async ({
     if (!skipValidationFromHere && 'validate' in field && field.validate) {
       const valueToValidate = siblingData[field.name]
 
-      // With `locale: 'all'`, a localized field holds a locale-keyed object; validate each locale's value.
+      // With `locale: 'all'`, a localized scalar holds a locale-keyed object (`{ en, es }`); validate each
+      // locale's value, not the wrapper. Localized containers are left to normal child traversal.
       const isLocaleKeyedValue =
         operationLocale === 'all' &&
         localization &&
         fieldShouldBeLocalized({ field, parentIsLocalized }) &&
+        field.type !== 'group' &&
         valueToValidate !== null &&
         typeof valueToValidate === 'object' &&
         !Array.isArray(valueToValidate)
 
-      const valuesToValidate = isLocaleKeyedValue
+      const localizedValuesToValidate: { locale?: string; value: unknown }[] = isLocaleKeyedValue
         ? localization.localeCodes
-            .filter((locale) => locale in valueToValidate)
-            .map((locale) => valueToValidate[locale])
-        : [valueToValidate]
+            .filter((locale) => locale in (valueToValidate as JsonObject))
+            .map((locale) => ({ locale, value: (valueToValidate as JsonObject)[locale] }))
+        : [{ value: valueToValidate }]
+
+      // An empty locale map validates once as empty so required/optional still apply.
+      if (localizedValuesToValidate.length === 0) {
+        localizedValuesToValidate.push({ value: undefined })
+      }
 
       let jsonError: object
 
@@ -216,9 +224,16 @@ export const promise = async ({
       >
 
       let validationResult: string | true = true
+      let failedLocale: string | undefined
 
-      for (const value of valuesToValidate) {
-        validationResult = await validateFn(value, {
+      for (const { locale, value } of localizedValuesToValidate) {
+        // Scope `req.locale` to the locale being validated without mutating the shared request.
+        const validationReq = locale ? isolateObjectProperty(req, 'locale') : req
+        if (locale) {
+          validationReq.locale = locale
+        }
+
+        validationResult = await validateFn(value as never, {
           ...field,
           id,
           blockData: blockData!,
@@ -231,12 +246,15 @@ export const promise = async ({
           overrideAccess,
           path: pathSegments,
           preferences: { fields: {} },
-          previousValue: siblingDoc[field.name],
-          req,
+          previousValue: locale
+            ? (siblingDoc[field.name] as JsonObject)?.[locale]
+            : siblingDoc[field.name],
+          req: validationReq,
           siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
         })
 
         if (typeof validationResult === 'string') {
+          failedLocale = locale
           break
         }
       }
@@ -299,7 +317,7 @@ export const promise = async ({
           )
 
           errors.push({
-            label: fieldLabel,
+            label: failedLocale ? `${fieldLabel} (${failedLocale})` : fieldLabel,
             message: validationResult,
             path,
           })
