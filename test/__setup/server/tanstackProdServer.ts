@@ -21,7 +21,7 @@ const READY_SENTINEL = 'Listening on'
  * The build bundles Payload's own code but leaves its packages external, and Node can't reach them walking up from `dist/`.
  * Before serving we link them onto the output's resolution chain — direct deps from `test/node_modules`, transitive deps from pnpm's flat virtual store.
  */
-export async function startTanStackStartProdServer({
+export async function startTanstackProdServer({
   port,
   testSuiteArg,
 }: {
@@ -30,7 +30,7 @@ export async function startTanStackStartProdServer({
 }): Promise<DevServerResult> {
   const adminRoute = '/admin'
 
-  const testDir = path.resolve(__dirname, '..')
+  const testDir = path.resolve(__dirname, '../..')
   const repoRoot = path.resolve(testDir, '..')
   const viteBin = path.resolve(testDir, 'node_modules/.bin/vite')
   const configPath = path.resolve(testDir, 'vite.tanstack.prod.config.ts')

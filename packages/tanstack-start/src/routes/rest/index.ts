@@ -33,7 +33,7 @@ export function payloadApiHandlers({
   getConfig: () => Promise<SanitizedConfig>
 }): Record<'DELETE' | 'GET' | 'OPTIONS' | 'PATCH' | 'POST' | 'PUT', ApiRouteHandler> {
   const handler: ApiRouteHandler = async ({ request }) => {
-    const { handleAPIRoute } = await import('../utilities/handleAPIRoute.server.js')
+    const { handleAPIRoute } = await import('./handler.server.js')
     return handleAPIRoute({ config: await getConfig(), request })
   }
 

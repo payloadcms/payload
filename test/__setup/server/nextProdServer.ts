@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 
 import type { DevServerResult } from './nextDevServer.js'
 
-import { getNextRootDir } from '../__helpers/shared/getNextRootDir.js'
+import { getNextRootDir } from '../../__helpers/shared/getNextRootDir.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -33,7 +33,7 @@ export async function startNextProdServer({
 }): Promise<DevServerResult> {
   const { adminRoute, rootDir } = getNextRootDir(testSuiteArg)
 
-  const nextBin = path.resolve(__dirname, '..', 'node_modules/.bin/next')
+  const nextBin = path.resolve(__dirname, '../..', 'node_modules/.bin/next')
 
   const env = {
     ...process.env,
