@@ -18,7 +18,6 @@ import type {
 } from '../types.js'
 
 import { defaultAccess } from '../defaultAccess.js'
-import { validateMaxRequestBodySize } from '../utils/validateMaxRequestBodySize.js'
 import {
   COLLECTION_AUTH_BUILTIN_ENTRIES,
   COLLECTION_AUTH_BUILTINS,
@@ -46,8 +45,6 @@ export const sanitizeMCPConfig = ({
   config: Config | SanitizedConfig
   pluginConfig: MCPPluginConfig
 }): SanitizedMCPPluginConfig => {
-  validateMaxRequestBodySize({ value: pluginConfig.mcp?.maxRequestBodySize })
-
   const items: MCPItem[] = []
 
   for (const collection of config.collections ?? []) {
