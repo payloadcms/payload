@@ -10170,7 +10170,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
     )
 
     test.options(
-      'should preserve newer source work created before caller-owned cleanup',
+      'should reject newer source work before caller-owned cleanup',
       { db: (adapter) => databaseAdapterSupportsTransactions({ adapter }) },
       async () => {
         branchSlug = 'caller-owned-newer-source-work'
@@ -10195,12 +10195,14 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         try {
           await payload.branches.merge({ branch: branchSlug, overrideAccess: true, req })
 
-          await payload.update({
-            id: mainDocument.id,
-            branch: branchSlug,
-            collection: postsSlug,
-            data: { title: 'Newer branch work' },
-          })
+          await expect(
+            payload.update({
+              id: mainDocument.id,
+              branch: branchSlug,
+              collection: postsSlug,
+              data: { title: 'Newer branch work' },
+            }),
+          ).rejects.toMatchObject({ status: 403 })
 
           await commitTransaction(req)
 
@@ -10221,13 +10223,13 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
           const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
 
           expect(onMain.title).toBe('Merge candidate')
-          expect(onBranch.title).toBe('Newer branch work')
-          expect(remainingChanges.docs).toHaveLength(1)
-          expect(branch?.status).toBe('open')
+          expect(onBranch.title).toBe('Merge candidate')
+          expect(remainingChanges.docs).toHaveLength(0)
+          expect(branch?.status).toBe('merged')
           expect(mergeEvent.status).toBe('succeeded')
           expect(mergeEvent.changes[0]).toMatchObject({
             applicationOutcome: 'committed',
-            cleanupOutcome: 'superseded',
+            cleanupOutcome: 'completed',
           })
         } finally {
           if (req.transactionID) {
@@ -10238,7 +10240,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
     )
 
     test.options(
-      'should preserve newer global work created before caller-owned cleanup',
+      'should reject newer global work before caller-owned cleanup',
       { db: (adapter) => databaseAdapterSupportsTransactions({ adapter }) },
       async () => {
         branchSlug = 'caller-owned-newer-global-work'
@@ -10261,11 +10263,13 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         try {
           await payload.branches.merge({ branch: branchSlug, overrideAccess: true, req })
 
-          await payload.updateGlobal({
-            slug: headerGlobalSlug,
-            branch: branchSlug,
-            data: { navLabel: 'Newer global branch work' },
-          })
+          await expect(
+            payload.updateGlobal({
+              slug: headerGlobalSlug,
+              branch: branchSlug,
+              data: { navLabel: 'Newer global branch work' },
+            }),
+          ).rejects.toMatchObject({ status: 403 })
 
           await commitTransaction(req)
 
@@ -10275,12 +10279,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
           const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
 
           expect(onMain.navLabel).toBe('Global merge candidate')
-          expect(onBranch.navLabel).toBe('Newer global branch work')
-          expect(remainingChanges.docs).toHaveLength(1)
+          expect(onBranch.navLabel).toBe('Global merge candidate')
+          expect(remainingChanges.docs).toHaveLength(0)
           expect(mergeEvent.status).toBe('succeeded')
           expect(mergeEvent.changes[0]).toMatchObject({
             applicationOutcome: 'committed',
-            cleanupOutcome: 'superseded',
+            cleanupOutcome: 'completed',
           })
         } finally {
           if (req.transactionID) {

@@ -46,6 +46,39 @@ const findBranchChange = async ({
   return changes.docs[0]!
 }
 
+const updateBranchPostDirectly = async ({
+  branch,
+  data,
+  docID,
+  req,
+}: {
+  branch: string
+  data: Record<string, unknown>
+  docID: number | string
+  req: PayloadRequest
+}) => {
+  const shadow = await req.payload.db.findOne({
+    branch: false,
+    collection: postsSlug,
+    req,
+    where: {
+      and: [{ _branch: { equals: branch } }, { _branchDocID: { equals: docID } }],
+    },
+  })
+
+  if (!shadow) {
+    throw new Error(`Branch shadow for post ${String(docID)} was not found`)
+  }
+
+  await req.payload.db.updateOne({
+    branch: false,
+    collection: postsSlug,
+    data,
+    req,
+    where: { id: { equals: shadow.id } },
+  })
+}
+
 test.suite('Branch merge dependency preflight', { config: './config.ts' }, () => {
   test.afterEach(() => {
     hookSpy.beforeMerge = undefined
@@ -83,12 +116,10 @@ test.suite('Branch merge dependency preflight', { config: './config.ts' }, () =>
     })
 
     hookSpy.beforeMerge = async ({ req }) => {
-      await req.payload.update({
-        id: owner.id,
+      await updateBranchPostDirectly({
         branch: branch.slug,
-        collection: postsSlug,
         data: { category: target.id },
-        overrideAccess: true,
+        docID: owner.id,
         req,
       })
     }
@@ -339,12 +370,14 @@ test.suite('Branch merge dependency preflight', { config: './config.ts' }, () =>
         branch: branch.slug,
         changes: [ownerChange.id],
         onProgress: async () => {
-          await payload.update({
-            id: owner.id,
+          if (!mergeRequest) {
+            throw new Error('Merge request was not captured')
+          }
+
+          await updateBranchPostDirectly({
             branch: branch.slug,
-            collection: postsSlug,
             data: { category: target.id },
-            overrideAccess: true,
+            docID: owner.id,
             req: mergeRequest,
           })
           branchUpdateCompleted = true
