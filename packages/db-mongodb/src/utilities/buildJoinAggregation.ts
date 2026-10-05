@@ -11,7 +11,10 @@ import {
   getQueryDraftsSort,
   type JoinQuery,
   type PayloadRequest,
+  resolveBranchReadState,
   resolveBranchVersionQuery,
+  rewriteBranchIDs,
+  rewriteBranchVersionParents,
   type SanitizedCollectionConfig,
   type Where,
 } from 'payload'
@@ -20,6 +23,7 @@ import { fieldShouldBeLocalized, hasDraftsEnabled } from 'payload/shared'
 import type { MongooseAdapter } from '../index.js'
 import type { CollectionModel } from '../types.js'
 
+import { buildBranchVisibilityStages } from '../queries/buildBranchVisibility.js'
 import { buildQuery } from '../queries/buildQuery.js'
 import { buildSortParam } from '../queries/buildSortParam.js'
 import { getCollection } from './getEntity.js'
@@ -140,6 +144,11 @@ export const buildJoinAggregation = async ({
         collectionSlug,
         req,
       })
+      const joinBranchReadState = resolveBranchReadState({
+        branch,
+        collectionSlug,
+        req,
+      })
       const branchMatch = joinBranchPredicate
         ? await buildQuery({
             adapter,
@@ -150,6 +159,13 @@ export const buildJoinAggregation = async ({
             where: joinBranchPredicate,
           })
         : undefined
+      const branchVisibility = joinBranchReadState.useBranching
+        ? buildBranchVisibilityStages({
+            adapter,
+            branch: joinBranchReadState.branch,
+            collectionSlug,
+          })
+        : []
       const basePipeline: Exclude<PipelineStage, PipelineStage.Merge | PipelineStage.Out>[] = [
         {
           $addFields: {
@@ -171,7 +187,8 @@ export const buildJoinAggregation = async ({
             ],
           },
         },
-        ...(joinBranchPredicate
+        ...branchVisibility,
+        ...(joinBranchPredicate || branchVisibility.length
           ? ([{ $set: { _id: { $ifNull: ['$_branchDocID', '$_id'] } } }] as Exclude<
               PipelineStage,
               PipelineStage.Merge | PipelineStage.Out
@@ -361,17 +378,26 @@ export const buildJoinAggregation = async ({
         collectionSlug: collectionConfig.slug,
         req,
       })
+      const joinBranchReadState = resolveBranchReadState({
+        branch,
+        collectionSlug: collectionConfig.slug,
+        req,
+      })
 
       const resolvedWhereJoin = useDrafts
-        ? ((await resolveBranchVersionQuery({
-            branch,
-            collectionSlug: collectionConfig.slug,
-            req,
-            where: appendVersionToQueryKey(whereJoin),
-          })) ?? {})
-        : joinBranchPredicate
-          ? ({ and: [whereJoin, joinBranchPredicate] } as Where)
-          : whereJoin
+        ? joinBranchReadState.useBranching
+          ? (rewriteBranchVersionParents(appendVersionToQueryKey(whereJoin)) ?? {})
+          : ((await resolveBranchVersionQuery({
+              branch,
+              collectionSlug: collectionConfig.slug,
+              req,
+              where: appendVersionToQueryKey(whereJoin),
+            })) ?? {})
+        : joinBranchReadState.useBranching
+          ? (rewriteBranchIDs(whereJoin) ?? {})
+          : joinBranchPredicate
+            ? ({ and: [whereJoin, joinBranchPredicate] } as Where)
+            : whereJoin
 
       const $match = await JoinModel.buildQuery({
         branch,
@@ -386,13 +412,22 @@ export const buildJoinAggregation = async ({
             })
           : resolvedWhereJoin,
       })
+      const branchVisibility = joinBranchReadState.useBranching
+        ? buildBranchVisibilityStages({
+            adapter,
+            branch: joinBranchReadState.branch,
+            collectionSlug: collectionConfig.slug,
+            mode: useDrafts ? 'drafts' : 'documents',
+          })
+        : []
 
       const pipeline: Exclude<PipelineStage, PipelineStage.Merge | PipelineStage.Out>[] = [
         { $match },
+        ...branchVisibility,
         // Surface the canonical document ID rather than the shadow row's own
         // primary key, so join results address documents the same way every
         // other read does.
-        ...(joinBranchPredicate
+        ...(joinBranchPredicate || branchVisibility.length
           ? ([
               useDrafts
                 ? { $set: { parent: { $ifNull: ['$_branchParent', '$parent'] } } }
@@ -433,6 +468,7 @@ export const buildJoinAggregation = async ({
                 {
                   $match,
                 },
+                ...branchVisibility,
                 {
                   $count: 'result',
                 },

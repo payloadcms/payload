@@ -4,11 +4,14 @@ import {
   applyBranchIDProjection,
   type FindOne,
   resolveBranchQuery,
+  resolveBranchReadState,
+  rewriteBranchIDs,
   withBranchIDSelect,
 } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildBranchVisibilityStages } from './queries/buildBranchVisibility.js'
 import { buildQuery } from './queries/buildQuery.js'
 import { aggregatePaginate } from './utilities/aggregatePaginate.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
@@ -23,8 +26,18 @@ export const findOne: FindOne = async function findOne(
   { branch, collection: collectionSlug, draftsEnabled, joins, locale, req, select, where = {} },
 ) {
   const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
+  const branchReadState = resolveBranchReadState({ branch, collectionSlug, req })
 
-  where = (await resolveBranchQuery({ branch, collectionSlug, req, where })) ?? {}
+  where = branchReadState.useBranching
+    ? (rewriteBranchIDs(where) ?? {})
+    : ((await resolveBranchQuery({ branch, collectionSlug, req, where })) ?? {})
+  const branchVisibility = branchReadState.useBranching
+    ? buildBranchVisibilityStages({
+        adapter: this,
+        branch: branchReadState.branch,
+        collectionSlug,
+      })
+    : []
 
   const query = await buildQuery({
     adapter: this,
@@ -62,9 +75,10 @@ export const findOne: FindOne = async function findOne(
   }
 
   let doc
-  if (aggregate.length > 0) {
+  if (aggregate.length > 0 || branchVisibility.length > 0) {
     const { docs } = await aggregatePaginate({
       adapter: this,
+      branchVisibility,
       joinAggregation: aggregate,
       limit: 1,
       Model,

@@ -1,10 +1,16 @@
 import type { CountOptions } from 'mongodb'
 import type { Count } from 'payload'
 
-import { flattenWhereToOperators, resolveBranchQuery } from 'payload'
+import {
+  flattenWhereToOperators,
+  resolveBranchQuery,
+  resolveBranchReadState,
+  rewriteBranchIDs,
+} from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildBranchVisibilityStages } from './queries/buildBranchVisibility.js'
 import { buildQuery } from './queries/buildQuery.js'
 import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
@@ -14,8 +20,18 @@ export const count: Count = async function count(
   { branch, collection: collectionSlug, locale, req, where = {} },
 ) {
   const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
+  const branchReadState = resolveBranchReadState({ branch, collectionSlug, req })
 
-  where = (await resolveBranchQuery({ branch, collectionSlug, req, where })) ?? {}
+  where = branchReadState.useBranching
+    ? (rewriteBranchIDs(where) ?? {})
+    : ((await resolveBranchQuery({ branch, collectionSlug, req, where })) ?? {})
+  const branchVisibility = branchReadState.useBranching
+    ? buildBranchVisibilityStages({
+        adapter: this,
+        branch: branchReadState.branch,
+        collectionSlug,
+      })
+    : []
 
   let hasNearConstraint = false
 
@@ -35,7 +51,8 @@ export const count: Count = async function count(
   })
 
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
-  const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
+  const useEstimatedCount =
+    !branchVisibility.length && (hasNearConstraint || !query || Object.keys(query).length === 0)
 
   const options: CountOptions = {
     session: await getSession(this, req),
@@ -63,7 +80,12 @@ export const count: Count = async function count(
   }
 
   let result: number
-  if (useEstimatedCount) {
+  if (branchVisibility.length) {
+    result = await Model.aggregate(
+      [{ $match: query }, ...branchVisibility, { $count: 'count' }],
+      options,
+    ).then((rows) => rows[0]?.count ?? 0)
+  } else if (useEstimatedCount) {
     result = await Model.estimatedDocumentCount({ session: options.session })
   } else {
     result = await Model.countDocuments(query, options)

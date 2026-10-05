@@ -5,14 +5,18 @@ import {
   buildVersionCollectionFields,
   flattenWhereToOperators,
   projectBranchVersionParents,
+  resolveBranchReadState,
   resolveBranchVersionHistoryQuery,
+  rewriteBranchVersionParents,
   withBranchVersionSelect,
 } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildBranchVisibilityStages } from './queries/buildBranchVisibility.js'
 import { buildQuery } from './queries/buildQuery.js'
 import { buildSortParam } from './queries/buildSortParam.js'
+import { aggregatePaginate } from './utilities/aggregatePaginate.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
@@ -38,8 +42,19 @@ export const findVersions: FindVersions = async function findVersions(
     collectionSlug,
     versions: true,
   })
+  const branchReadState = resolveBranchReadState({ branch, collectionSlug, req })
 
-  where = (await resolveBranchVersionHistoryQuery({ branch, collectionSlug, req, where })) ?? {}
+  where = branchReadState.useBranching
+    ? (rewriteBranchVersionParents(where) ?? {})
+    : ((await resolveBranchVersionHistoryQuery({ branch, collectionSlug, req, where })) ?? {})
+  const branchVisibility = branchReadState.useBranching
+    ? buildBranchVisibilityStages({
+        adapter: this,
+        branch: branchReadState.branch,
+        collectionSlug,
+        mode: 'history',
+      })
+    : []
 
   let hasNearConstraint = false
 
@@ -81,7 +96,8 @@ export const findVersions: FindVersions = async function findVersions(
   }
 
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
-  const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
+  const useEstimatedCount =
+    !branchVisibility.length && (hasNearConstraint || !query || Object.keys(query).length === 0)
   const paginationOptions: PaginateOptions = {
     lean: true,
     leanWithId: true,
@@ -150,7 +166,22 @@ export const findVersions: FindVersions = async function findVersions(
     }
   }
 
-  const result = await Model.paginate(query, paginationOptions)
+  const result = branchVisibility.length
+    ? await aggregatePaginate({
+        adapter: this,
+        branchVisibility,
+        collation: paginationOptions.collation,
+        limit: paginationOptions.limit,
+        Model,
+        page: paginationOptions.page,
+        pagination: paginationOptions.pagination,
+        projection: paginationOptions.projection,
+        query,
+        session: paginationOptions.options?.session ?? undefined,
+        sort: paginationOptions.sort as object,
+        useEstimatedCount: false,
+      })
+    : await Model.paginate(query, paginationOptions)
 
   transform({
     adapter: this,

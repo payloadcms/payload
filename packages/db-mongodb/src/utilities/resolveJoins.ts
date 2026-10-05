@@ -8,12 +8,16 @@ import {
   getBranchPredicateSync,
   getQueryDraftsSort,
   projectBranchVersionParent,
+  resolveBranchReadState,
   resolveBranchVersionQuery,
+  rewriteBranchIDs,
+  rewriteBranchVersionParents,
 } from 'payload'
 import { fieldShouldBeLocalized } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 
+import { buildBranchVisibilityStages } from '../queries/buildBranchVisibility.js'
 import { buildQuery } from '../queries/buildQuery.js'
 import { buildSortParam } from '../queries/buildSortParam.js'
 import { transform } from './transform.js'
@@ -174,14 +178,21 @@ export async function resolveJoins({
         collectionSlug: joinCollectionSlug,
         req,
       })
+      const joinBranchReadState = resolveBranchReadState({
+        branch,
+        collectionSlug: joinCollectionSlug,
+        req,
+      })
 
       if (useDrafts) {
-        const branchVersionWhere = await resolveBranchVersionQuery({
-          branch,
-          collectionSlug: joinCollectionSlug,
-          req,
-          where: appendVersionToQueryKey(whereQuery as Where),
-        })
+        const branchVersionWhere = joinBranchReadState.useBranching
+          ? rewriteBranchVersionParents(appendVersionToQueryKey(whereQuery as Where))
+          : await resolveBranchVersionQuery({
+              branch,
+              collectionSlug: joinCollectionSlug,
+              req,
+              where: appendVersionToQueryKey(whereQuery as Where),
+            })
 
         whereQuery = await JoinModel.buildQuery({
           branch,
@@ -195,7 +206,9 @@ export async function resolveJoins({
           }),
         })
       } else {
-        if (joinBranchPredicate) {
+        if (joinBranchReadState.useBranching) {
+          whereQuery = rewriteBranchIDs(whereQuery as Where) ?? {}
+        } else if (joinBranchPredicate) {
           whereQuery = { and: [whereQuery as Where, joinBranchPredicate] }
         }
 
@@ -276,16 +289,47 @@ export async function resolveJoins({
         dbFieldName,
         useDrafts,
         sort,
-        Boolean(joinBranchPredicate),
+        Boolean(joinBranchPredicate) || joinBranchReadState.useBranching,
       )
+      const branchVisibility = joinBranchReadState.useBranching
+        ? buildBranchVisibilityStages({
+            adapter,
+            branch: joinBranchReadState.branch,
+            collectionSlug: joinCollectionSlug,
+            mode: useDrafts ? 'drafts' : 'documents',
+          })
+        : []
 
-      const [results, dbCount] = await Promise.all([
-        JoinModel.find(whereQuery, projection, {
-          sort,
-          ...(isPolymorphicJoin ? {} : { limit, skip }),
-        }).lean(),
-        isPolymorphicJoin ? Promise.resolve(0) : JoinModel.countDocuments(whereQuery),
-      ])
+      const [results, dbCount] = branchVisibility.length
+        ? await Promise.all([
+            JoinModel.aggregate([
+              { $match: whereQuery },
+              ...branchVisibility,
+              {
+                $sort: Object.fromEntries(
+                  Object.entries(sort).map(([key, value]) => [key, value === 'asc' ? 1 : -1]),
+                ),
+              },
+              ...(isPolymorphicJoin
+                ? []
+                : [{ $skip: skip }, ...(limit > 0 ? [{ $limit: limit }] : [])]),
+              { $project: projection },
+            ]),
+            isPolymorphicJoin
+              ? Promise.resolve(0)
+              : JoinModel.aggregate([
+                  { $match: whereQuery },
+                  ...branchVisibility,
+                  { $count: 'count' },
+                ]).then((rows) => rows[0]?.count ?? 0),
+          ])
+        : await Promise.all([
+            JoinModel.find(whereQuery, projection, {
+              sort,
+              ...(isPolymorphicJoin ? {} : { limit, skip }),
+            }).lean(),
+            isPolymorphicJoin ? Promise.resolve(0) : JoinModel.countDocuments(whereQuery),
+          ])
 
       const count = isPolymorphicJoin ? results.length : dbCount
 

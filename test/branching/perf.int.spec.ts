@@ -152,11 +152,12 @@ test.suite('Branching query cost', { config: './config.ts', resetBetweenTests: f
         overhead: 0,
       },
       {
-        // Version history resolves the branch fork boundary before querying versions.
+        // Drizzle resolves the branch fork boundary before querying versions. MongoDB
+        // performs the indexed boundary lookup in the version aggregation itself.
         label: 'findVersions',
         onBranch: () => payload.findVersions({ branch, collection: pagesSlug, pagination: false }),
         onMain: () => payload.findVersions({ collection: pagesSlug, pagination: false }),
-        overhead: 1,
+        overhead: payload.db.name === 'mongoose' ? 0 : 1,
       },
       {
         // A global fetches both candidate rows in one query and picks.

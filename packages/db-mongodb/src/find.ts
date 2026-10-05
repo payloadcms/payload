@@ -5,11 +5,14 @@ import {
   applyBranchIDProjection,
   flattenWhereToOperators,
   resolveBranchQuery,
+  resolveBranchReadState,
+  rewriteBranchIDs,
   withBranchIDSelect,
 } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildBranchVisibilityStages } from './queries/buildBranchVisibility.js'
 import { buildQuery } from './queries/buildQuery.js'
 import { buildSortParam } from './queries/buildSortParam.js'
 import { aggregatePaginate } from './utilities/aggregatePaginate.js'
@@ -39,8 +42,18 @@ export const find: Find = async function find(
   },
 ) {
   const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
+  const branchReadState = resolveBranchReadState({ branch, collectionSlug, req })
 
-  where = (await resolveBranchQuery({ branch, collectionSlug, req, where })) ?? {}
+  where = branchReadState.useBranching
+    ? (rewriteBranchIDs(where) ?? {})
+    : ((await resolveBranchQuery({ branch, collectionSlug, req, where })) ?? {})
+  const branchVisibility = branchReadState.useBranching
+    ? buildBranchVisibilityStages({
+        adapter: this,
+        branch: branchReadState.branch,
+        collectionSlug,
+      })
+    : []
 
   let hasNearConstraint = false
 
@@ -77,7 +90,8 @@ export const find: Find = async function find(
   const session = await getSession(this, req)
 
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
-  const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
+  const useEstimatedCount =
+    !branchVisibility.length && (hasNearConstraint || !query || Object.keys(query).length === 0)
   const paginationOptions: PaginateOptions = {
     lean: true,
     leanWithId: true,
@@ -168,9 +182,10 @@ export const find: Find = async function find(
     req,
   })
 
-  if (aggregate.length > 0 || sortAggregation.length > 0) {
+  if (aggregate.length > 0 || branchVisibility.length > 0 || sortAggregation.length > 0) {
     result = await aggregatePaginate({
       adapter: this,
+      branchVisibility,
       collation: paginationOptions.collation,
       joinAggregation: aggregate,
       limit: paginationOptions.limit,

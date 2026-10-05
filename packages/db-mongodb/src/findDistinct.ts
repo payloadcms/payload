@@ -1,10 +1,16 @@
 import type { PipelineStage } from 'mongoose'
 import type { FindDistinct, FlattenedField } from 'payload'
 
-import { getFieldByPath, resolveBranchQuery } from 'payload'
+import {
+  getFieldByPath,
+  resolveBranchQuery,
+  resolveBranchReadState,
+  rewriteBranchIDs,
+} from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildBranchVisibilityStages } from './queries/buildBranchVisibility.js'
 import { buildQuery } from './queries/buildQuery.js'
 import { buildSortParam } from './queries/buildSortParam.js'
 import { getCollection } from './utilities/getEntity.js'
@@ -49,17 +55,30 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
     adapter: this,
     collectionSlug: args.collection,
   })
+  const branchReadState = resolveBranchReadState({
+    branch: args.branch,
+    collectionSlug: args.collection,
+    req: args.req,
+  })
 
   // Distinct values describe the documents the caller can see, so they are subject to
   // the same branch predicate as a list read. Without it a branch's shadow rows fed
   // main's distinct values and the branch's own edits were invisible in its own.
-  const where =
-    (await resolveBranchQuery({
-      branch: args.branch,
-      collectionSlug: args.collection,
-      req: args.req,
-      where: args.where,
-    })) ?? {}
+  const where = branchReadState.useBranching
+    ? (rewriteBranchIDs(args.where) ?? {})
+    : ((await resolveBranchQuery({
+        branch: args.branch,
+        collectionSlug: args.collection,
+        req: args.req,
+        where: args.where,
+      })) ?? {})
+  const branchVisibility = branchReadState.useBranching
+    ? buildBranchVisibilityStages({
+        adapter: this,
+        branch: branchReadState.branch,
+        collectionSlug: args.collection,
+      })
+    : []
 
   let sortAggregation: PipelineStage[] = []
 
@@ -89,7 +108,7 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
     includeRelationships: true,
     path: args.field,
   })
-  let fieldPath = args.field
+  let fieldPath = args.field === 'id' ? '_id' : args.field
   if (fieldPathResult?.pathHasLocalized && args.locale) {
     fieldPath = fieldPathResult.localizedPath.replace('<locale>', args.locale)
   }
@@ -182,12 +201,19 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
         collectionSlug: relationTo,
       })
       const relatedAccess = args.relatedAccess?.[fieldPath]
-      const relatedWhere = await resolveBranchQuery({
+      const relatedBranchReadState = resolveBranchReadState({
         branch: args.branch,
         collectionSlug: relationTo,
         req: args.req,
-        where: relatedAccess,
       })
+      const relatedWhere = relatedBranchReadState.useBranching
+        ? rewriteBranchIDs(relatedAccess)
+        : await resolveBranchQuery({
+            branch: args.branch,
+            collectionSlug: relationTo,
+            req: args.req,
+            where: relatedAccess,
+          })
       const relatedQuery =
         relatedWhere && Object.keys(relatedWhere).length
           ? await buildQuery({
@@ -200,12 +226,19 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
               where: relatedWhere,
             })
           : null
+      const relatedBranchVisibility = relatedBranchReadState.useBranching
+        ? buildBranchVisibilityStages({
+            adapter: this,
+            branch: relatedBranchReadState.branch,
+            collectionSlug: relationTo,
+          })
+        : []
 
       relationLookup.push({
         $lookup: {
           as: fieldPath,
           from: foreignModel.collection.name,
-          ...(relatedQuery
+          ...(relatedQuery || relatedBranchVisibility.length
             ? {
                 let: { relatedIDs: `$${fieldPath}` },
                 pipeline: [
@@ -225,10 +258,11 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
                             },
                           },
                         },
-                        relatedQuery,
+                        ...(relatedQuery ? [relatedQuery] : []),
                       ],
                     },
                   },
+                  ...relatedBranchVisibility,
                 ],
               }
             : {
@@ -262,7 +296,10 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
 
   if (!$group) {
     $group = {
-      _id: `$${fieldPath}`,
+      _id:
+        args.field === 'id' && branchReadState.useBranching
+          ? { $ifNull: ['$_branchDocID', '$_id'] }
+          : `$${fieldPath}`,
       ...(sortProperty === fieldPath
         ? {}
         : {
@@ -275,6 +312,7 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
     {
       $match: query,
     },
+    ...branchVisibility,
     ...(sortAggregation.length > 0 ? sortAggregation : []),
     ...(relationLookup?.length ? relationLookup : []),
     ...($unwind
@@ -319,6 +357,7 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
       {
         $match: query,
       },
+      ...branchVisibility,
       ...(sortAggregation.length > 0 ? sortAggregation : []),
       ...(relationLookup?.length ? relationLookup : []),
       ...($unwind
