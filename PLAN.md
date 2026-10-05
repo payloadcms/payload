@@ -69,7 +69,7 @@ When neither `version` nor `data._status` is supplied, updates edit the publishe
 | Save a draft                                            | `update({ id, data, draft: true })`                                     | `update({ id, data, version: 'draft' })`                                          |
 | Edit published content while preserving a pending draft | No direct copy selector, `draft: false` does not guarantee this         | `update({ id, data, version: 'published' })`                                      |
 | Edit the active draft, otherwise published              | No equivalent `draft` boolean                                           | `update({ id, data, version: 'latest' })`                                         |
-| Publish the current draft                               | `update({ id, data: { _status: 'published' } })`                        | Same call                                                                         |
+| Publish the current draft                               | `update({ id, data: { _status: 'published' } })`                        | `update({ id, version: 'draft', data: { _status: 'published' } })`                |
 | Unpublish                                               | `update({ id, data: { _status: 'draft' }, unpublishAllLocales: true })` | `update({ id, version: 'published', locale: 'all', data: { _status: 'draft' } })` |
 
 These tables aren't the clearest presentation form for engineers so below is code.
@@ -97,6 +97,7 @@ update({ id, data, version: 'latest' }) // Edit the draft if present, otherwise 
 ```
 
 Ambiguous Examples:
+// TODO: review these examples.
 
 ```ts
 update({ id, version: 'draft', data: { _status: 'published' } }) // publishes latest draft?
@@ -120,7 +121,8 @@ update({ id, version: 'published', data: { _status: 'draft' } })
 // Preserve any draft
 
 update({ id, data: { _status: 'published' } })
-// Publish the latest draft, replacing published content if it exists
+// Targets the published copy by default and keeps it published
+// Any pending draft is preserved but not published, use version: 'draft' for that
 
 update({ id, version: 'draft', data })
 // Update the active draft
@@ -134,7 +136,8 @@ update({ id, version: 'published', data })
 // Update the current published copy and preserve any draft
 
 update({ id, data: { _status: 'draft' } })
-// Update to the latest draft, does not unpublish as it targets a 'draft' by default
+// Targets the published copy by default, so this unpublishes it
+// Same as version: 'published', use version: 'draft' to only save a draft
 ```
 
 ## Localisation
@@ -147,11 +150,11 @@ update({ id, data: { _status: 'published' }, publishAllLocales: true })
 update({ id, data: { _status: 'draft' }, unpublishAllLocales: true })
 
 // After
-update({ id, data: { _status: 'published' }, locale: 'all' }) // Publish all
-update({ id, version: 'published', data: { _status: 'draft' }, locale: 'all' }) // Unpublish all
+update({ id, version: 'draft', data: { _status: 'published' }, locale: 'all' }) // Publish all
+update({ id, data: { _status: 'draft' }, locale: 'all' }) // Unpublish all
 
 // Target one locale using the same structure.
-update({ id, data: { _status: 'published' }, locale: 'en' }) // Publish english
+update({ id, version: 'draft', data: { _status: 'published' }, locale: 'en' }) // Publish english
 update({ id, version: 'published', data: { _status: 'draft' }, locale: 'en' }) // Unpublish english
 ```
 
@@ -165,7 +168,7 @@ find({ locale: 'en' })
 find({ locale: 'all' })
 
 // Read the active draft where present, otherwise published,
-// resolving that choice separately for each locale.
+// resolving that choice separately for each locale. // TODO: review "separately"
 find({ locale: 'all', version: 'latest' })
 
 // Read active French drafts only.
@@ -201,7 +204,7 @@ create({
   data: localizedData,
 })
 
-// The same publication request through _status.
+// The same publication request through _status. // TODO: Ok. Just make sure combinations of _status and version are tested.
 create({
   locale: 'all',
   data: { ...localizedData, _status: 'published' },
