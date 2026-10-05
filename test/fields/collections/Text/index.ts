@@ -56,6 +56,8 @@ const TextFields: CollectionConfig = {
       name: 'localizedRequiredText',
       type: 'text',
       localized: true,
+      maxLength: 20,
+      minLength: 5,
       required: true,
       defaultValue: 'default',
     },
