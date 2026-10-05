@@ -7,7 +7,7 @@ import type { InitAdminContextFn } from '../../views/Root/index.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference client bundle for proper client boundary in production
 import { DocumentRoot, RootProviders } from '../../exports/client/index.js'
 import { checkDependencies, type CheckDependenciesArgs } from '../../utilities/checkDependencies.js'
-import { getRootLayoutData } from '../../utilities/getRootLayoutData.js'
+import { getRootLayoutData } from './getRootLayoutData.js'
 import { NestProviders } from './NestProviders.js'
 import { getViewportMeta } from './viewport.js'
 // eslint-disable-next-line payload/no-imports-from-self -- Self-import ensures the consumer bundler resolves the full CSS chain

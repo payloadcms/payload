@@ -1,6 +1,6 @@
 'use client'
 import type { DocumentRootProps } from '@payloadcms/ui/layouts/DocumentRoot'
-import type { RootLayoutData } from '@payloadcms/ui/utilities/getRootLayoutData'
+import type { RootLayoutData } from '@payloadcms/ui/layouts/Root/getRootLayoutData'
 
 import { DocumentRoot } from '@payloadcms/ui/layouts/DocumentRoot'
 import { HeadContent, Scripts, useRouterState } from '@tanstack/react-router'

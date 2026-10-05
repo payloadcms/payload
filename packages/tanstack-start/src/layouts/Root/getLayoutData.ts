@@ -1,9 +1,9 @@
-import type { RootLayoutData as UIRootLayoutData } from '@payloadcms/ui/utilities/getRootLayoutData'
+import type { RootLayoutData as UIRootLayoutData } from '@payloadcms/ui/layouts/Root/getRootLayoutData'
 import type { ImportMap, SanitizedConfig, ServerProps } from 'payload'
 import type { ReactNode } from 'react'
 
 import { NestProviders } from '@payloadcms/ui/layouts/NestProviders'
-import { getRootLayoutData } from '@payloadcms/ui/utilities/getRootLayoutData'
+import { getRootLayoutData } from '@payloadcms/ui/layouts/Root/getRootLayoutData'
 import { Outlet } from '@tanstack/react-router'
 import { createElement } from 'react'
 

@@ -56,6 +56,11 @@
       "types": "./src/layouts/Root/ResolveThemeOnClient.tsx",
       "default": "./src/layouts/Root/ResolveThemeOnClient.tsx"
     },
+    "./layouts/Root/getRootLayoutData": {
+      "import": "./src/layouts/Root/getRootLayoutData.ts",
+      "types": "./src/layouts/Root/getRootLayoutData.ts",
+      "default": "./src/layouts/Root/getRootLayoutData.ts"
+    },
     "./icons/*": {
       "import": "./src/icons/*/index.tsx",
       "types": "./src/icons/*/index.tsx",
@@ -291,11 +296,6 @@
       "types": "./src/utilities/handleAuthRedirect.ts",
       "default": "./src/utilities/handleAuthRedirect.ts"
     },
-    "./utilities/getRootLayoutData": {
-      "import": "./src/utilities/getRootLayoutData.ts",
-      "types": "./src/utilities/getRootLayoutData.ts",
-      "default": "./src/utilities/getRootLayoutData.ts"
-    },
     "./utilities/getPreferences": {
       "import": "./src/utilities/getPreferences.ts",
       "types": "./src/utilities/getPreferences.ts",
@@ -484,6 +484,11 @@
         "import": "./dist/layouts/Root/ResolveThemeOnClient.js",
         "types": "./dist/layouts/Root/ResolveThemeOnClient.d.ts",
         "default": "./dist/layouts/Root/ResolveThemeOnClient.js"
+      },
+      "./layouts/Root/getRootLayoutData": {
+        "import": "./dist/layouts/Root/getRootLayoutData.js",
+        "types": "./dist/layouts/Root/getRootLayoutData.d.ts",
+        "default": "./dist/layouts/Root/getRootLayoutData.js"
       },
       "./css": {
         "import": "./dist/styles.css",

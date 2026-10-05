@@ -11,15 +11,15 @@ import type {
 
 import { applyLocaleFiltering } from 'payload/shared'
 
-import type { Theme } from '../providers/Theme/shared.js'
-import type { RequestThemeSource } from './getRequestTheme.js'
+import type { Theme } from '../../providers/Theme/shared.js'
+import type { RequestThemeSource } from '../../utilities/getRequestTheme.js'
 
-import { getNavPrefs } from '../elements/Nav/getNavPrefs.js'
-import { getClientConfig } from './getClientConfig.js'
-import { getLanguageDir } from './getLanguageDir.js'
-import { getRequestEmbed } from './getRequestEmbed.js'
-import { getRequestHighContrast } from './getRequestHighContrast.js'
-import { getRequestTheme } from './getRequestTheme.js'
+import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
+import { getClientConfig } from '../../utilities/getClientConfig.js'
+import { getLanguageDir } from '../../utilities/getLanguageDir.js'
+import { getRequestEmbed } from '../../utilities/getRequestEmbed.js'
+import { getRequestHighContrast } from '../../utilities/getRequestHighContrast.js'
+import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 
 export type RootLayoutData = {
   clientConfig: ClientConfig
