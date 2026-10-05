@@ -17,6 +17,7 @@ type Args = {
   branchVisibility?: {
     branch: string
     collectionSlug: string
+    mode?: 'documents' | 'history'
   }
   collectionSlug?: string
   fields: FlattenedField[]
@@ -78,6 +79,7 @@ export const findMany = async function find({
           ? sql`COALESCE(${table._branchParent}, ${table.parent})`
           : undefined,
         collectionSlug: branchVisibility.collectionSlug,
+        mode: branchVisibility.mode,
         table,
       })
     : undefined

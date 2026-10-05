@@ -343,6 +343,74 @@ test.suite('Branching database isolation', { config: './config.ts' }, () => {
   })
 
   test.options(
+    'should use database-native visibility for Drizzle version history',
+    { db: 'drizzle' },
+    async ({ payload }) => {
+      const branch = await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Native History Visibility Branch' },
+        overrideAccess: true,
+      })
+      const page = await payload.create({
+        collection: pagesSlug,
+        data: { title: 'history on main' },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        id: page.id,
+        branch: branch.slug,
+        collection: pagesSlug,
+        data: { title: 'history on branch' },
+        draft: true,
+        overrideAccess: true,
+      })
+      await payload.update({
+        id: page.id,
+        collection: pagesSlug,
+        data: { title: 'later history on main' },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      const databaseFind = payload.db.find.bind(payload.db)
+      let branchChangeQueries = 0
+      const findSpy = vi.spyOn(payload.db, 'find').mockImplementation(async (args) => {
+        if (args.collection === branchChangesSlug) {
+          branchChangeQueries += 1
+        }
+
+        return databaseFind(args)
+      })
+
+      try {
+        const history = await payload.findVersions({
+          branch: branch.slug,
+          collection: pagesSlug,
+          overrideAccess: true,
+          pagination: false,
+          where: { parent: { equals: page.id } },
+        })
+        const count = await payload.countVersions({
+          branch: branch.slug,
+          collection: pagesSlug,
+          overrideAccess: true,
+          where: { parent: { equals: page.id } },
+        })
+
+        expect(history.docs.map((version) => version.version?.title)).not.toContain(
+          'later history on main',
+        )
+        expect(count.totalDocs).toBe(history.docs.length)
+        expect(branchChangeQueries).toBe(0)
+      } finally {
+        findSpy.mockRestore()
+      }
+    },
+  )
+
+  test.options(
     'should update only the main global row when branch copies exist',
     { db: 'mongo' },
     async ({ payload }) => {

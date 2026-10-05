@@ -3,7 +3,9 @@ import type { FindVersions, SanitizedCollectionConfig } from 'payload'
 import {
   buildVersionCollectionFields,
   projectBranchVersionParents,
+  resolveBranchReadState,
   resolveBranchVersionHistoryQuery,
+  rewriteBranchVersionParents,
   withBranchVersionSelect,
 } from 'payload'
 import toSnakeCase from 'to-snake-case'
@@ -25,15 +27,21 @@ export const findVersions: FindVersions = async function findVersions(
 
   const fields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
 
-  const branchedWhere = await resolveBranchVersionHistoryQuery({
-    branch,
-    collectionSlug: collection,
-    req,
-    where,
-  })
+  const branchReadState = resolveBranchReadState({ branch, collectionSlug: collection, req })
+  const branchedWhere = branchReadState.useBranching
+    ? rewriteBranchVersionParents(where)
+    : await resolveBranchVersionHistoryQuery({
+        branch,
+        collectionSlug: collection,
+        req,
+        where,
+      })
 
   const result = await findMany({
     adapter: this,
+    branchVisibility: branchReadState.useBranching
+      ? { branch: branchReadState.branch, collectionSlug: collection, mode: 'history' }
+      : undefined,
     fields,
     joins: false,
     limit,
