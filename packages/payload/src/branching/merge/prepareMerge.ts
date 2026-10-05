@@ -23,7 +23,7 @@ import {
   createMainBranchRequest,
   prepareBranchMergeValidationCandidates,
 } from '../validation.js'
-import { retryFailedCleanups } from './retryFailedCleanups.js'
+import { inspectFailedCleanups } from './retryFailedCleanups.js'
 import { changeDocID } from './utilities.js'
 
 export type PreparedBranchChange = {
@@ -32,14 +32,13 @@ export type PreparedBranchChange = {
 } & Record<string, unknown>
 
 export type PreparedMerge = {
-  allChangesCount: number
   applicable: PreparedBranchChange[]
   applicableGlobals: PreparedBranchChange[]
   branchDoc: { id: number | string }
   mergeable: MergeableChange[]
   req: PayloadRequest
   result: MergeResult
-  retriedCleanups: MergeableChange[]
+  retryableCleanups: MergeableChange[]
 }
 
 export const prepareMerge = async ({
@@ -82,9 +81,9 @@ export const prepareMerge = async ({
   }
 
   const cleanupRetry = dryRun
-    ? { handledChangeIDs: new Set<string>(), retried: [] }
-    : await retryFailedCleanups({ branch, payload, req, selected })
-  const retriedCleanups = cleanupRetry.retried
+    ? { handledChangeIDs: new Set<string>(), retryable: [] }
+    : await inspectFailedCleanups({ branch, payload, req, selected })
+  const retryableCleanups = cleanupRetry.retryable
   const allChanges = await payload.find({
     collection: branchChangesCollectionSlug,
     overrideAccess: true,
@@ -140,7 +139,7 @@ export const prepareMerge = async ({
   const applicable = hasPreflightErrors ? [] : pending
   const applicableGlobals = hasPreflightErrors ? [] : pendingGlobals
   const mergeable: MergeableChange[] = [
-    ...retriedCleanups,
+    ...retryableCleanups,
     ...applicable.map((change) => ({
       changeID: change.id,
       collectionSlug: change.collectionSlug as string,
@@ -192,7 +191,6 @@ export const prepareMerge = async ({
   }
 
   return {
-    allChangesCount: allChanges.docs.length,
     applicable,
     applicableGlobals,
     branchDoc,
@@ -202,11 +200,11 @@ export const prepareMerge = async ({
       blocked,
       canMerge: mergeable.length > 0,
       mergeable,
-      merged: [...retriedCleanups],
+      merged: [],
       validationErrors: validation.errors,
       warnings,
     },
-    retriedCleanups,
+    retryableCleanups,
   }
 }
 

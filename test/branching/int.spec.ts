@@ -9382,6 +9382,79 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
     })
 
+    test('should claim the branch before retrying failed source cleanup', async () => {
+      branchSlug = 'post-commit-cleanup-retry-claim'
+
+      const branchDocument = await createBranchRecord({
+        name: 'Cleanup retry claim',
+        slug: branchSlug,
+      })
+      const mainDocument = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Cleanup retry claim original' },
+      })
+
+      await payload.update({
+        id: mainDocument.id,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'Cleanup retry claim edited' },
+      })
+
+      const shadow = (
+        await payload.find({
+          branch: false,
+          collection: postsSlug,
+          pagination: false,
+          showHiddenFields: true,
+          where: { _branch: { equals: branchSlug } },
+        })
+      ).docs[0]!
+      const originalDeleteOne = payload.db.deleteOne.bind(payload.db)
+      let cleanupAttempts = 0
+
+      deleteOneSpy = vi.spyOn(payload.db, 'deleteOne').mockImplementation(async (args: any) => {
+        if (args?.where?.id?.equals === shadow.id && cleanupAttempts++ === 0) {
+          throw new Error('Simulated cleanup failure before claimed retry')
+        }
+
+        return originalDeleteOne(args)
+      })
+
+      await payload.branches.merge({ branch: branchSlug, overrideAccess: true })
+
+      deleteOneSpy.mockRestore()
+
+      const originalUpdate = payload.update.bind(payload)
+      let statusWhenCleanupRetryStarted: string | undefined
+      const updateSpy = vi.spyOn(payload, 'update').mockImplementation(async (args: any) => {
+        if (!statusWhenCleanupRetryStarted && args.collection === branchMergesSlug) {
+          statusWhenCleanupRetryStarted = (
+            await payload.findByID({
+              id: branchDocument.id,
+              collection: branchesSlug,
+              overrideAccess: true,
+            })
+          ).status
+        }
+
+        return originalUpdate(args)
+      })
+      const retryResult = await payload.branches
+        .merge({
+          branch: branchSlug,
+          overrideAccess: true,
+        })
+        .finally(() => {
+          updateSpy.mockRestore()
+        })
+      const remainingChanges = await findBranchChanges({ branch: branchSlug })
+
+      expect(statusWhenCleanupRetryStarted).toBe('merging')
+      expect(retryResult.merged).toHaveLength(1)
+      expect(remainingChanges.docs).toHaveLength(0)
+    })
+
     test('should preserve newer source work during a failed cleanup retry', async () => {
       branchSlug = 'post-commit-cleanup-retry-newer-source'
 

@@ -9,8 +9,9 @@ import { discardBranchChanges } from './discard.js'
 import { beginBranchMerge, restoreBranchAfterMerge } from './merge/branchMergeStatus.js'
 import { executeMerge } from './merge/executeMerge.js'
 import { prepareMerge, revalidatePreparedMerge } from './merge/prepareMerge.js'
+import { retryFailedCleanups } from './merge/retryFailedCleanups.js'
 import { refreshBranchState } from './resolveBranch.js'
-import { branchesCollectionSlug } from './types.js'
+import { branchChangesCollectionSlug, branchesCollectionSlug } from './types.js'
 
 export type MergeResult = {
   /** Changes that cannot be applied because of access or an unavailable dependency. */
@@ -105,45 +106,64 @@ export const mergeBranch = async (
     selected,
     user,
   })
-  const {
-    allChangesCount,
-    applicable,
-    applicableGlobals,
-    branchDoc,
-    mergeable,
-    req,
-    result,
-    retriedCleanups,
-  } = prepared
-  const hasChangesToApply = applicable.length > 0 || applicableGlobals.length > 0
+  const { applicable, applicableGlobals, branchDoc, mergeable, req, result, retryableCleanups } =
+    prepared
+  const hasChangesToApply =
+    applicable.length > 0 || applicableGlobals.length > 0 || retryableCleanups.length > 0
 
   if (closeBranch && !dryRun && !overrideAccess) {
     await assertBranchUpdateAccess({ branchDoc, req })
   }
 
   if (dryRun || !hasChangesToApply) {
-    if (!dryRun && retriedCleanups.length && allChangesCount === 0) {
-      const mergedAt = new Date().toISOString()
-
-      await payload.update({
-        id: branchDoc.id,
-        collection: branchesCollectionSlug,
-        data: { mergedAt, status: closeBranch ? 'closed' : 'merged' },
-        overrideAccess: true,
-        req,
-      })
-
-      if (incomingReq) {
-        refreshBranchState(incomingReq)
-      }
-    }
-
     return result
   }
 
   await beginBranchMerge({ branchDocID: branchDoc.id, payload, req })
 
   try {
+    if (retryableCleanups.length) {
+      const cleanupRetry = await retryFailedCleanups({ branch, payload, req, selected })
+      const retryableChangeIDs = new Set(retryableCleanups.map(({ changeID }) => String(changeID)))
+      const retriedChangeIDs = new Set(cleanupRetry.retried.map(({ changeID }) => String(changeID)))
+      const currentMergeable = mergeable.filter(
+        ({ changeID }) =>
+          !retryableChangeIDs.has(String(changeID)) || retriedChangeIDs.has(String(changeID)),
+      )
+
+      mergeable.splice(0, mergeable.length, ...currentMergeable)
+      result.canMerge = mergeable.length > 0
+      result.mergeable = mergeable
+      result.merged.push(...cleanupRetry.retried)
+
+      if (applicable.length === 0 && applicableGlobals.length === 0) {
+        const remaining = await payload.count({
+          collection: branchChangesCollectionSlug,
+          overrideAccess: true,
+          req,
+          where: { branch: { equals: branch } },
+        })
+        const mergedAt = new Date().toISOString()
+
+        await payload.update({
+          id: branchDoc.id,
+          collection: branchesCollectionSlug,
+          data:
+            remaining.totalDocs === 0
+              ? { mergedAt, status: closeBranch ? 'closed' : 'merged' }
+              : { mergedAt: null, status: 'open' },
+          overrideAccess: true,
+          req,
+        })
+
+        if (incomingReq) {
+          refreshBranchState(incomingReq)
+        }
+
+        return result
+      }
+    }
+
     await payload.config.branching?.hooks?.beforeMerge?.({
       branch,
       changes: mergeable,
