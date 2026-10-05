@@ -2,6 +2,7 @@
 
 import React, { createContext, use, useId } from 'react'
 
+import { Tooltip } from '../Tooltip/index.js'
 import './index.css'
 
 const baseClass = 'segmented-control'
@@ -41,15 +42,19 @@ const Root: React.FC<SegmentedControlRootProps> = ({
 export type SegmentedControlOptionProps = {
   readonly 'aria-label': string
   readonly icon: React.ReactNode
+  readonly tooltip?: string
   readonly value: string
 }
 
 const Option: React.FC<SegmentedControlOptionProps> = ({
   'aria-label': ariaLabel,
   icon,
+  tooltip = ariaLabel,
   value: optionValue,
 }) => {
   const context = use(Context)
+  const [showTooltip, setShowTooltip] = React.useState(false)
+
   if (!context) {
     throw new Error('SegmentedControl.Option must be rendered within a SegmentedControl.Root')
   }
@@ -58,13 +63,20 @@ const Option: React.FC<SegmentedControlOptionProps> = ({
 
   return (
     <div className={`${baseClass}__option`}>
+      <Tooltip aria-hidden={true} delay={300} position="top" show={showTooltip}>
+        {tooltip}
+      </Tooltip>
       <input
         aria-label={ariaLabel}
         checked={value === optionValue}
         className={`${baseClass}__input`}
         id={id}
         name={name}
+        onBlur={() => setShowTooltip(false)}
         onChange={() => onChange(optionValue)}
+        onFocus={() => setShowTooltip(true)}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
         type="radio"
         value={optionValue}
       />

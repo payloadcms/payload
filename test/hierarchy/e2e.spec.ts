@@ -91,12 +91,12 @@ test.describe('Hierarchy Sidebar', () => {
     }
   })
 
-  test.describe('Document view modes', () => {
+  test.describe('Document layouts', () => {
     test.afterEach(async () => {
       await page.goto(organizationsURL.hierarchy)
-      const tableView = page.getByRole('radio', { name: 'Table view' })
+      const tableLayout = page.getByRole('radio', { name: 'Table' })
 
-      if (!(await tableView.isChecked())) {
+      if (!(await tableLayout.isChecked())) {
         const tablePreferenceSaved = page.waitForResponse(
           (response) =>
             response.url().includes('/api/payload-preferences/collection-organizations') &&
@@ -104,14 +104,14 @@ test.describe('Hierarchy Sidebar', () => {
             response.ok(),
         )
 
-        await tableView.click()
+        await tableLayout.click()
         await tablePreferenceSaved
       }
 
       await page.getByRole('button', { name: 'All Organizations' }).click()
     })
 
-    test('should keep grid mode across All and By Organization views and navigate from a card link', async () => {
+    test('should keep the grid layout across All and By Organization views and navigate from a card link', async () => {
       await page.goto(organizationsURL.hierarchy)
 
       const gridPreferenceSaved = page.waitForResponse(
@@ -121,19 +121,19 @@ test.describe('Hierarchy Sidebar', () => {
           response.ok(),
       )
 
-      await page.getByRole('radio', { name: 'Grid view' }).click()
+      await page.getByRole('radio', { name: 'Grid' }).click()
       await gridPreferenceSaved
       await expect(page.getByRole('list', { name: 'Organizations' })).toBeVisible()
       await expect(page.locator('.table-section__header-inner .checkbox-input')).toHaveCount(0)
 
       await page.getByRole('button', { name: 'All Organizations' }).click()
       await expect(page).toHaveURL(/\/admin\/collections\/organizations\?view=all/)
-      await expect(page.getByRole('radio', { name: 'Grid view' })).toBeChecked()
+      await expect(page.getByRole('radio', { name: 'Grid' })).toBeChecked()
       await expect(page.getByRole('list', { name: 'Organizations' })).toBeVisible()
 
       await page.getByRole('button', { name: 'By Organization' }).click()
       await expect(page).toHaveURL(/\/admin\/collections\/organizations\?view=hierarchy/)
-      await expect(page.getByRole('radio', { name: 'Grid view' })).toBeChecked()
+      await expect(page.getByRole('radio', { name: 'Grid' })).toBeChecked()
 
       await page.goBack()
       await expect(page).toHaveURL(/\/admin\/collections\/organizations\?view=all/)
@@ -158,9 +158,9 @@ test.describe('Hierarchy Sidebar', () => {
     test('should preserve the hierarchy view while navigating through hierarchy items', async () => {
       await page.goto(organizationsURL.hierarchy)
 
-      const tableView = page.getByRole('radio', { name: 'Table view' })
+      const tableLayout = page.getByRole('radio', { name: 'Table' })
 
-      if (!(await tableView.isChecked())) {
+      if (!(await tableLayout.isChecked())) {
         const tablePreferenceSaved = page.waitForResponse(
           (response) =>
             response.url().includes('/api/payload-preferences/collection-organizations') &&
@@ -168,7 +168,7 @@ test.describe('Hierarchy Sidebar', () => {
             response.ok(),
         )
 
-        await tableView.click()
+        await tableLayout.click()
         await tablePreferenceSaved
       }
 
@@ -179,9 +179,9 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(page).toHaveURL(/[?&]view=hierarchy(?:&|$)/)
       await expect(page.getByRole('heading', { name: 'Acme Corp' })).toBeVisible()
 
-      const gridView = page.getByRole('radio', { name: 'Grid view' })
+      const gridLayout = page.getByRole('radio', { name: 'Grid' })
 
-      if (!(await gridView.isChecked())) {
+      if (!(await gridLayout.isChecked())) {
         const gridPreferenceSaved = page.waitForResponse(
           (response) =>
             response.url().includes('/api/payload-preferences/collection-organizations') &&
@@ -189,7 +189,7 @@ test.describe('Hierarchy Sidebar', () => {
             response.ok(),
         )
 
-        await gridView.click()
+        await gridLayout.click()
         await gridPreferenceSaved
       }
 

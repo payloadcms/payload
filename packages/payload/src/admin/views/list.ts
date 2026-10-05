@@ -79,7 +79,7 @@ export type ListViewClientProps = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   disableQueryPresets?: boolean
-  documentViewMode?: CollectionPreferences['documentViewMode']
+  documentLayout?: CollectionPreferences['documentLayout']
   enableRowSelections?: boolean
   groupedData?: ListViewGroup[]
   hasCreatePermission: boolean

@@ -15,7 +15,7 @@ import React, { useCallback, useMemo, useState } from 'react'
 
 import type { CollectionOption } from '../../../elements/CreateDocumentButton/index.js'
 import type { HierarchyDocument } from '../../../elements/Hierarchy/Tree/types.js'
-import type { DocumentViewMode } from '../../../elements/ViewModeToggle/index.js'
+import type { DocumentLayout } from '../../../elements/LayoutToggle/index.js'
 import type { SlotColumn } from './SlotTable.js'
 import type { RelatedGroup, TableRow } from './types.js'
 
@@ -64,6 +64,7 @@ export type HierarchyTableProps = {
   /** Resolved hierarchy icon component */
   HierarchyIcon?: React.ReactNode
   hierarchyLabel: string
+  layout?: DocumentLayout
   parentFieldName?: string
   parentId: null | number | string
   /** Base filters for related collections (keyed by collection slug) */
@@ -71,7 +72,6 @@ export type HierarchyTableProps = {
   relatedGroups: RelatedGroup[]
   search?: string
   useAsTitle: string
-  viewMode?: DocumentViewMode
 }
 
 export function HierarchyTable({
@@ -82,13 +82,13 @@ export function HierarchyTable({
   hasCreatePermission,
   HierarchyIcon,
   hierarchyLabel,
+  layout = 'table',
   parentFieldName,
   parentId,
   relatedBaseFilters,
   relatedGroups,
   search,
   useAsTitle,
-  viewMode = 'table',
 }: HierarchyTableProps) {
   const { i18n, t } = useTranslation()
   const { clearRouteCache } = useRouteCache()
@@ -545,7 +545,7 @@ export function HierarchyTable({
             <SimplePagination data={group.paginationData} onChange={group.onPageChange} />
           </TableSection.Header>
           <TableSection.Content>
-            {viewMode === 'grid' ? (
+            {layout === 'grid' ? (
               <CardGrid
                 ariaLabel={group.label}
                 getItemClassName={(row) =>

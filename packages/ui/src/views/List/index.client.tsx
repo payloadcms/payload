@@ -6,9 +6,10 @@ import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL, formatFilesize } from 'payload/shared'
 import React, { useEffect, useRef, useState } from 'react'
 
-import type { DocumentViewMode } from '../../elements/ViewModeToggle/index.js'
+import type { DocumentLayout } from '../../elements/LayoutToggle/index.js'
 
 import { Button } from '../../elements/Button/index.js'
+import { LayoutToggle } from '../../elements/LayoutToggle/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { ListWhereBuilder } from '../../elements/ListWhereBuilder/index.js'
@@ -21,7 +22,6 @@ import { useStepNav } from '../../elements/StepNav/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { TableIdentityProvider } from '../../elements/Table/TableIdentity.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
-import { ViewModeToggle } from '../../elements/ViewModeToggle/index.js'
 import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
@@ -56,7 +56,7 @@ export function DefaultListView(props: ListViewClientProps) {
     disableBulkDelete,
     disableBulkEdit,
     disableQueryPresets,
-    documentViewMode,
+    documentLayout,
     enableRowSelections,
     groupedData,
     hasCreatePermission: hasCreatePermissionFromProps,
@@ -75,7 +75,7 @@ export function DefaultListView(props: ListViewClientProps) {
   } = props
 
   const [Table] = useControllableState(InitialTable)
-  const [viewMode, setViewMode] = useState<DocumentViewMode>(documentViewMode ?? 'table')
+  const [layout, setLayout] = useState<DocumentLayout>(documentLayout ?? 'table')
 
   const { allowCreate, createNewDrawerSlug, isInDrawer, onBulkSelect } = useListDrawerContext()
   const { setPreference } = usePreferences()
@@ -124,13 +124,13 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const collectionConfig = getEntityConfig({ collectionSlug })
 
-  const handleViewModeChange = async (nextViewMode: DocumentViewMode) => {
+  const handleLayoutChange = async (nextLayout: DocumentLayout) => {
     const preferencesKey = `collection-${collectionSlug}`
 
-    setViewMode(nextViewMode)
+    setLayout(nextLayout)
     await setPreference<CollectionPreferences>(preferencesKey, (preferences) => ({
       ...(preferences ?? {}),
-      documentViewMode: nextViewMode,
+      documentLayout: nextLayout,
     }))
     router.refresh()
   }
@@ -331,6 +331,11 @@ export function DefaultListView(props: ListViewClientProps) {
               hasCreatePermission={hasCreatePermission && viewType !== 'trash' && !isInDrawer}
               hasDeletePermission={hasDeletePermission}
               isWhereOpen={isWhereOpen}
+              layoutToggle={
+                !hierarchyData && !isInDrawer ? (
+                  <LayoutToggle layout={layout} onChange={handleLayoutChange} />
+                ) : undefined
+              }
               listMenuItems={listMenuItems}
               newDocumentURL={newDocumentURL}
               onWhereToggle={() => setIsWhereOpen((prev) => !prev)}
@@ -338,11 +343,6 @@ export function DefaultListView(props: ListViewClientProps) {
               queryPresetPermissions={queryPresetPermissions}
               renderedFilters={renderedFilters}
               resolvedFilterOptions={resolvedFilterOptions}
-              viewModeToggle={
-                !hierarchyData && !isInDrawer ? (
-                  <ViewModeToggle onChange={handleViewModeChange} viewMode={viewMode} />
-                ) : undefined
-              }
               viewType={viewType}
             />
             {isWhereOpen && (
@@ -395,9 +395,9 @@ export function DefaultListView(props: ListViewClientProps) {
                 />
               </DocumentSelectionProvider>
             ) : docs?.length > 0 ? (
-              viewMode === 'grid' && isDataGrouped ? (
+              layout === 'grid' && isDataGrouped ? (
                 <GroupedDocumentGrid collectionSlug={collectionSlug} groups={groupedData} />
-              ) : viewMode === 'grid' ? (
+              ) : layout === 'grid' ? (
                 <DocumentGrid
                   adminRoute={adminRoute}
                   collectionLabel={collectionLabel}

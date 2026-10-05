@@ -179,11 +179,11 @@ test.describe('Group By', () => {
     await expect(table2CategoryCells.first()).toHaveText(/Category 2/)
   })
 
-  test('should render grouped document cards and preserve group pagination in grid view', async () => {
+  test('should render grouped document cards and preserve group pagination in grid layout', async () => {
     await page.goto(url.list)
 
     await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
-    await page.getByRole('radio', { name: 'Grid view' }).click()
+    await page.getByRole('radio', { name: 'Grid' }).click()
 
     const category1 = page.locator('.table-wrap--group-by', {
       has: page.getByRole('heading', { name: 'Category 1' }),
@@ -204,15 +204,15 @@ test.describe('Group By', () => {
     await expect(category1.locator('.document-card')).toHaveCount(6)
     await expect(category2.locator('.document-card')).toHaveCount(10)
 
-    await page.getByRole('radio', { name: 'Table view' }).click()
+    await page.getByRole('radio', { name: 'Table' }).click()
     await expect(category1.locator('tbody tr')).toHaveCount(6)
   })
 
-  test('should apply group header spacing only in grid view', async () => {
+  test('should apply group header spacing only in grid layout', async () => {
     await page.goto(url.list)
 
     await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
-    await page.getByRole('radio', { name: 'Grid view' }).click()
+    await page.getByRole('radio', { name: 'Grid' }).click()
 
     const groups = page.locator('.table-wrap--group-by')
     const firstHeader = groups.first().locator('.table-section__header-inner')
@@ -245,7 +245,7 @@ test.describe('Group By', () => {
 
     expect(hasPrimaryHeadingColor).toBe(true)
 
-    await page.getByRole('radio', { name: 'Table view' }).click()
+    await page.getByRole('radio', { name: 'Table' }).click()
 
     await expect(groups.first().locator('.table-section__header-inner')).toHaveCSS(
       'min-height',

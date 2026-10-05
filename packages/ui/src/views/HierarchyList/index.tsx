@@ -7,17 +7,17 @@ import * as qs from 'qs-esm'
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { CollectionOption } from '../../elements/CreateDocumentButton/index.js'
+import type { DocumentLayout } from '../../elements/LayoutToggle/index.js'
 import type { StepNavItem } from '../../elements/StepNav/index.js'
-import type { DocumentViewMode } from '../../elements/ViewModeToggle/index.js'
 
 import { CreateDocumentButton } from '../../elements/CreateDocumentButton/index.js'
+import { LayoutToggle } from '../../elements/LayoutToggle/index.js'
 import { ListControlsBar } from '../../elements/ListControlsBar/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { ListSearchFilter } from '../../elements/Search/ListSearchFilter/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
-import { ViewModeToggle } from '../../elements/ViewModeToggle/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useHierarchy } from '../../providers/Hierarchy/index.js'
@@ -41,7 +41,7 @@ export function HierarchyListView(props: ListViewClientProps) {
     BeforeList,
     collectionSlug,
     Description,
-    documentViewMode,
+    documentLayout,
     hasCreatePermission: hasCreatePermissionFromProps,
     hierarchyData,
     HierarchyIcon,
@@ -51,7 +51,7 @@ export function HierarchyListView(props: ListViewClientProps) {
 
   const router = useRouter()
   const { setPreference } = usePreferences()
-  const [viewMode, setViewMode] = useState<DocumentViewMode>(documentViewMode ?? 'table')
+  const [layout, setLayout] = useState<DocumentLayout>(documentLayout ?? 'table')
   const searchParams = useSearchParams()
   const { startRouteTransition } = useRouteTransition()
 
@@ -91,11 +91,11 @@ export function HierarchyListView(props: ListViewClientProps) {
     refreshTree(collectionSlug)
   }, [clearRouteCache, collectionSlug, refreshTree])
 
-  const handleViewModeChange = async (nextViewMode: DocumentViewMode) => {
-    setViewMode(nextViewMode)
+  const handleLayoutChange = async (nextLayout: DocumentLayout) => {
+    setLayout(nextLayout)
     await setPreference<CollectionPreferences>(`collection-${collectionSlug}`, (preferences) => ({
       ...(preferences ?? {}),
-      documentViewMode: nextViewMode,
+      documentLayout: nextLayout,
     }))
     router.refresh()
   }
@@ -388,9 +388,7 @@ export function HierarchyListView(props: ListViewClientProps) {
                   onSave={handleSave}
                 />
               )}
-              {!isInDrawer && (
-                <ViewModeToggle onChange={handleViewModeChange} viewMode={viewMode} />
-              )}
+              {!isInDrawer && <LayoutToggle layout={layout} onChange={handleLayoutChange} />}
             </ListControlsBar>
 
             <HierarchyTable
@@ -406,12 +404,12 @@ export function HierarchyListView(props: ListViewClientProps) {
               )
                 .map(([slug, r]) => `${slug}:${r.result.totalDocs}`)
                 .join(',')}`}
+              layout={layout}
               parentFieldName={parentFieldName}
               parentId={parentId}
               relatedGroups={filteredRelatedGroups}
               search={searchFromURL}
               useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
-              viewMode={viewMode}
             />
           </div>
         </DocumentSelectionProvider>

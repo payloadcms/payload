@@ -287,7 +287,7 @@ export const renderListView = async (
 
   /** Populate only the configured thumbnail relationship for flat collection grids. */
   const thumbnailFieldName =
-    collectionPreferences?.documentViewMode === 'grid' && viewType !== 'hierarchy'
+    collectionPreferences?.documentLayout === 'grid' && viewType !== 'hierarchy'
       ? collectionConfig.admin.useAsThumbnail
       : undefined
   let thumbnailPopulate: PopulateType | undefined
@@ -559,7 +559,7 @@ export const renderListView = async (
       disableBulkDelete: collectionConfig.disableBulkDelete ?? disableBulkDelete,
       disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
       disableQueryPresets,
-      documentViewMode: collectionPreferences?.documentViewMode,
+      documentLayout: collectionPreferences?.documentLayout,
       enableRowSelections,
       groupedData,
       hasCreatePermission,
