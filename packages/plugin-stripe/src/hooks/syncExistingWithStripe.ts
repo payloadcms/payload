@@ -5,7 +5,7 @@ import Stripe from 'stripe'
 
 import type { StripePluginConfig } from '../types.js'
 
-import { deepen } from '../utilities/deepen.js'
+import { getSyncedFields } from '../utilities/deepen.js'
 
 type HookArgsWithCustomCollection = {
   collection: CollectionConfig
@@ -33,17 +33,11 @@ export const syncExistingWithStripe: CollectionBeforeChangeHookWithArgs = async 
     if (syncConfig) {
       if (operation === 'update') {
         // combine all fields of this object and match their respective values within the document
-        let syncedFields = syncConfig.fields.reduce(
-          (acc, field) => {
-            const { fieldPath, stripeProperty } = field
-
-            acc[stripeProperty] = data[fieldPath]
-            return acc
-          },
-          {} as Record<string, any>,
-        )
-
-        syncedFields = deepen(syncedFields)
+        const syncedFields = getSyncedFields({
+          data,
+          fields: syncConfig.fields,
+          source: 'payload',
+        })
 
         if (logs) {
           payload.logger.info(

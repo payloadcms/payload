@@ -170,6 +170,7 @@
     border-radius: 0;
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1024px) {
     .query-inspector__content {
       display: flex;

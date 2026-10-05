@@ -2,7 +2,7 @@
 
 import type { ComponentProps } from 'react'
 
-import { ProgressBar, RootProvider } from '@payloadcms/ui'
+import { RootProviders } from '@payloadcms/ui/layouts/RootProviders'
 import { Outlet, useLoaderData } from '@tanstack/react-router'
 
 import type { LoadLayoutDataResult } from '../utilities/loadLayoutData.js'
@@ -18,48 +18,29 @@ export type LayoutLoad = () => Promise<LoadLayoutDataResult>
 
 /**
  * Route options for the Payload admin layout (`/_payload`). Maps the layout
- * loader data onto `RootProvider` and renders the admin chrome (progress bar,
+ * loader data onto `RootProviders` and renders the admin chrome (progress bar,
  * custom-provider tree or router `<Outlet />`, portal mount). The app supplies
  * `load` (the layout-data server fn) and `serverFunction` (the server-function
- * client wired into `RootProvider`); everything else is adapter-owned.
+ * client wired into `RootProviders`); everything else is adapter-owned.
  */
 export function payloadLayoutRoute({
   load,
   serverFunction,
 }: {
   load: LayoutLoad
-  serverFunction: ComponentProps<typeof RootProvider>['serverFunction']
+  serverFunction: ComponentProps<typeof RootProviders>['serverFunction']
 }) {
   function PayloadLayout() {
     const data = useLoaderData({ strict: false })
 
     return (
-      <>
-        <RootProvider
-          config={data.clientConfig}
-          dateFNSKey={data.dateFNSKey}
-          embed={data.isEmbedded}
-          fallbackLang={data.fallbackLang}
-          highContrastMode={false}
-          isNavOpen={data.isNavOpen}
-          languageCode={data.languageCode}
-          languageOptions={data.languageOptions}
-          locale={data.locale}
-          permissions={data.user ? data.permissions : null}
-          RouterAdapter={TanStackRouterAdapter}
-          serverFunction={serverFunction}
-          theme={data.theme}
-          translations={data.translations}
-          user={data.user}
-        >
-          <ProgressBar />
-          {/* `data.providers` is the custom-provider tree (config.admin.components.providers)
-              already wrapping the router <Outlet />; falls back to a bare <Outlet /> when
-              no custom providers are configured. */}
-          {data.providers ?? <Outlet />}
-        </RootProvider>
-        <div id="portal" />
-      </>
+      <RootProviders
+        data={data}
+        RouterAdapter={TanStackRouterAdapter}
+        serverFunction={serverFunction}
+      >
+        {data.providers ?? <Outlet />}
+      </RootProviders>
     )
   }
 

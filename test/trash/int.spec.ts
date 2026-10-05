@@ -1,5 +1,6 @@
 import type { CollectionSlug } from 'payload'
 
+import { ValidationError } from 'payload'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
@@ -17,7 +18,7 @@ import { usersSlug } from './collections/Users/index.js'
 
 let user: any
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
+test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
   let restrictedCollectionDoc: RestrictedCollection
   let postsDocOne: Post
   let postsDocTwo: Post
@@ -34,6 +35,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         email: regularUser.email,
         password: regularUser.password,
       },
+      overrideAccess: true,
     })
 
     restrictedCollectionDoc = await payload.create({
@@ -41,6 +43,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       data: {
         title: 'With Access Control one',
       },
+      overrideAccess: true,
     })
 
     postsDocOne = await payload.create({
@@ -48,20 +51,23 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       data: {
         title: 'Doc one',
       },
+      overrideAccess: true,
     })
 
     postsDocTwo = await payload.create({
       collection: postsSlug,
       data: {
-        title: 'Doc two',
         deletedAt: new Date().toISOString(),
+        title: 'Doc two',
       },
+      overrideAccess: true,
     })
   })
 
   test.afterEach(async ({ payload }) => {
     await payload.delete({
       collection: postsSlug,
+      overrideAccess: true,
       trash: true,
       where: {
         title: {
@@ -83,6 +89,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
           data: {
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: false, // Override access to false to test access control
           user, // Regular user does not have delete access
           where: {
             // Using where to target multiple documents
@@ -90,12 +97,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
               equals: restrictedCollectionDoc.title,
             },
           },
-          overrideAccess: false, // Override access to false to test access control
         }),
       ).rejects.toMatchObject({
-        status: 403,
         name: 'Forbidden',
         message: expect.stringContaining('You are not allowed'),
+        status: 403,
       })
     })
 
@@ -104,18 +110,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
     }) => {
       await expect(
         payload.update({
+          id: restrictedCollectionDoc.id, // Using ID to target specific document
           collection: restrictedCollectionSlug as CollectionSlug,
           data: {
             deletedAt: new Date().toISOString(),
           },
-          id: restrictedCollectionDoc.id, // Using ID to target specific document
-          user, // Regular user does not have delete access
           overrideAccess: false, // Override access to false to test access control
+          user, // Regular user does not have delete access
         }),
       ).rejects.toMatchObject({
-        status: 403,
         name: 'Forbidden',
         message: expect.stringContaining('You are not allowed'),
+        status: 403,
       })
     })
   })
@@ -139,6 +145,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
     })
 
@@ -147,8 +154,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       for (const id of createdDocIds) {
         try {
           await payload.delete({
-            collection: differentiatedTrashCollectionSlug as CollectionSlug,
             id,
+            collection: differentiatedTrashCollectionSlug as CollectionSlug,
+            overrideAccess: true,
             trash: true,
           })
         } catch (_e) {
@@ -164,19 +172,20 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         const doc = await payload.create({
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: { title: 'Regular user trash test' },
+          overrideAccess: true,
         })
 
         createdDocIds.push(doc.id)
 
         // Regular user should be able to trash the document
         const trashedDoc = await payload.update({
-          collection: differentiatedTrashCollectionSlug as CollectionSlug,
           id: doc.id,
+          collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: {
             deletedAt: new Date().toISOString(),
           },
-          user, // Regular user from outer scope
           overrideAccess: false,
+          user, // Regular user from outer scope
         })
 
         expect(trashedDoc.deletedAt).toBeDefined()
@@ -187,19 +196,20 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         const doc = await payload.create({
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: { title: 'Admin trash test' },
+          overrideAccess: true,
         })
 
         createdDocIds.push(doc.id)
 
         // Admin should be able to trash the document
         const trashedDoc = await payload.update({
-          collection: differentiatedTrashCollectionSlug as CollectionSlug,
           id: doc.id,
+          collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: {
             deletedAt: new Date().toISOString(),
           },
-          user: adminUser.user,
           overrideAccess: false,
+          user: adminUser.user,
         })
 
         expect(trashedDoc.deletedAt).toBeDefined()
@@ -214,9 +224,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         const doc = await payload.create({
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: {
-            title: 'Regular user perm delete test',
             deletedAt: new Date().toISOString(),
+            title: 'Regular user perm delete test',
           },
+          overrideAccess: true,
         })
 
         createdDocIds.push(doc.id)
@@ -224,16 +235,16 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         // Regular user should NOT be able to permanently delete
         await expect(
           payload.delete({
-            collection: differentiatedTrashCollectionSlug as CollectionSlug,
             id: doc.id,
+            collection: differentiatedTrashCollectionSlug as CollectionSlug,
+            overrideAccess: false,
             trash: true,
             user, // Regular user from outer scope
-            overrideAccess: false,
           }),
         ).rejects.toMatchObject({
-          status: 403,
           name: 'Forbidden',
           message: expect.stringContaining('You are not allowed'),
+          status: 403,
         })
       })
 
@@ -242,18 +253,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         const doc = await payload.create({
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: {
-            title: 'Admin perm delete test',
             deletedAt: new Date().toISOString(),
+            title: 'Admin perm delete test',
           },
+          overrideAccess: true,
         })
 
         // Admin should be able to permanently delete
         const deletedDoc = await payload.delete({
-          collection: differentiatedTrashCollectionSlug as CollectionSlug,
           id: doc.id,
+          collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          overrideAccess: false,
           trash: true,
           user: adminUser.user,
-          overrideAccess: false,
         })
 
         expect(deletedDoc.id).toBe(doc.id)
@@ -261,8 +273,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         // Verify document is gone
         await expect(
           payload.findByID({
-            collection: differentiatedTrashCollectionSlug as CollectionSlug,
             id: doc.id,
+            collection: differentiatedTrashCollectionSlug as CollectionSlug,
+            overrideAccess: true,
             trash: true,
           }),
         ).rejects.toThrow('Not Found')
@@ -275,11 +288,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         const doc1 = await payload.create({
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: { title: 'Bulk trash test 1' },
+          overrideAccess: true,
         })
 
         const doc2 = await payload.create({
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: { title: 'Bulk trash test 2' },
+          overrideAccess: true,
         })
 
         createdDocIds.push(doc1.id, doc2.id)
@@ -290,13 +305,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
           data: {
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: false,
+          user, // Regular user from outer scope
           where: {
             title: {
               like: 'Bulk trash test',
             },
           },
-          user, // Regular user from outer scope
-          overrideAccess: false,
         })
 
         expect(result.docs.length).toBe(2)
@@ -310,17 +325,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         const doc1 = await payload.create({
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: {
-            title: 'Bulk perm delete test 1',
             deletedAt: new Date().toISOString(),
+            title: 'Bulk perm delete test 1',
           },
+          overrideAccess: true,
         })
 
         const doc2 = await payload.create({
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: {
-            title: 'Bulk perm delete test 2',
             deletedAt: new Date().toISOString(),
+            title: 'Bulk perm delete test 2',
           },
+          overrideAccess: true,
         })
 
         createdDocIds.push(doc1.id, doc2.id)
@@ -329,24 +346,25 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         await expect(
           payload.delete({
             collection: differentiatedTrashCollectionSlug as CollectionSlug,
+            overrideAccess: false,
+            trash: true,
+            user, // Regular user from outer scope
             where: {
               title: {
                 like: 'Bulk perm delete test',
               },
             },
-            trash: true,
-            user, // Regular user from outer scope
-            overrideAccess: false,
           }),
         ).rejects.toMatchObject({
-          status: 403,
           name: 'Forbidden',
           message: expect.stringContaining('You are not allowed'),
+          status: 403,
         })
 
         // Verify documents still exist
         const remaining = await payload.find({
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          overrideAccess: true,
           trash: true,
           where: {
             title: {
@@ -365,30 +383,32 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         const doc1 = await payload.create({
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: {
-            title: 'Admin bulk perm delete 1',
             deletedAt: new Date().toISOString(),
+            title: 'Admin bulk perm delete 1',
           },
+          overrideAccess: true,
         })
 
         const doc2 = await payload.create({
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: {
-            title: 'Admin bulk perm delete 2',
             deletedAt: new Date().toISOString(),
+            title: 'Admin bulk perm delete 2',
           },
+          overrideAccess: true,
         })
 
         // Admin should be able to bulk permanently delete
         const result = await payload.delete({
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          overrideAccess: false,
+          trash: true,
+          user: adminUser.user,
           where: {
             title: {
               like: 'Admin bulk perm delete',
             },
           },
-          trash: true,
-          user: adminUser.user,
-          overrideAccess: false,
         })
 
         expect(result.docs.length).toBe(2)
@@ -399,6 +419,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         // Verify documents are gone
         const remaining = await payload.find({
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          overrideAccess: true,
           trash: true,
           where: {
             title: {
@@ -419,6 +440,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       }) => {
         const allDocs = await payload.find({
           collection: postsSlug,
+          overrideAccess: true,
           trash: true,
         })
 
@@ -428,12 +450,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       test('should return only soft-deleted docs in find with trash: true', async ({ payload }) => {
         const trashedDocs = await payload.find({
           collection: postsSlug,
+          overrideAccess: true,
+          trash: true,
           where: {
             deletedAt: {
               exists: true,
             },
           },
-          trash: true,
         })
 
         expect(trashedDocs.totalDocs).toEqual(1)
@@ -445,6 +468,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       }) => {
         const normalDocs = await payload.find({
           collection: postsSlug,
+          overrideAccess: true,
           trash: false,
         })
 
@@ -456,17 +480,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         payload,
       }) => {
         await payload.update({
-          collection: postsSlug,
           id: postsDocTwo.id,
+          collection: postsSlug,
           data: {
             deletedAt: null,
           },
+          overrideAccess: true,
           trash: true,
         })
 
         const result = await payload.find({
           collection: postsSlug,
-          trash: false, // Normal query should return it now
+          overrideAccess: true, // Normal query should return it now
+          trash: false,
         })
 
         const restored = result.docs.find(
@@ -486,11 +512,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         await payload.create({
           collection: postsSlug,
           data: { title: 'Doc one' },
+          overrideAccess: true,
         })
 
         const result = await payload.findDistinct({
           collection: postsSlug,
           field: 'title',
+          overrideAccess: true,
         })
 
         const titles = result.values.map((v) => v.title)
@@ -505,6 +533,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         const result = await payload.findDistinct({
           collection: postsSlug,
           field: 'title',
+          overrideAccess: true,
           trash: true,
         })
 
@@ -520,6 +549,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         const result = await payload.findDistinct({
           collection: postsSlug,
           field: 'title',
+          overrideAccess: true,
           trash: true,
           where: {
             deletedAt: { exists: true },
@@ -534,6 +564,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         const result = await payload.findDistinct({
           collection: postsSlug,
           field: 'title',
+          overrideAccess: true,
           trash: true,
           where: {
             title: { equals: 'Doc two' },
@@ -548,8 +579,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
     test.describe('findByID operation', () => {
       test('should return a soft-deleted document when trash: true', async ({ payload }) => {
         const trashedPostDoc: Post = await payload.findByID({
-          collection: postsSlug,
           id: postsDocTwo.id,
+          collection: postsSlug,
+          overrideAccess: true,
           trash: true,
         })
 
@@ -564,15 +596,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       }) => {
         await expect(
           payload.findByID({
-            collection: postsSlug,
             id: postsDocTwo.id,
+            collection: postsSlug,
+            overrideAccess: true,
           }),
         ).rejects.toThrow('Not Found')
 
         await expect(
           payload.findByID({
-            collection: postsSlug,
             id: postsDocTwo.id,
+            collection: postsSlug,
+            overrideAccess: true,
             trash: false,
           }),
         ).rejects.toThrow('Not Found')
@@ -585,6 +619,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       }) => {
         const allVersions = await payload.findVersions({
           collection: postsSlug,
+          overrideAccess: true,
           trash: true,
         })
 
@@ -598,12 +633,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       }) => {
         const trashedVersions = await payload.findVersions({
           collection: postsSlug,
+          overrideAccess: true,
+          trash: true,
           where: {
             'version.deletedAt': {
               exists: true,
             },
           },
-          trash: true,
         })
 
         expect(trashedVersions.totalDocs).toEqual(1)
@@ -615,6 +651,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       }) => {
         const normalVersions = await payload.findVersions({
           collection: postsSlug,
+          overrideAccess: true,
           trash: false,
         })
 
@@ -626,16 +663,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         payload,
       }) => {
         await payload.update({
-          collection: postsSlug,
           id: postsDocTwo.id,
+          collection: postsSlug,
           data: {
             deletedAt: null,
           },
+          overrideAccess: true,
           trash: true,
         })
 
         const versions = await payload.findVersions({
           collection: postsSlug,
+          overrideAccess: true,
           trash: true,
           where: {
             'version.deletedAt': {
@@ -654,12 +693,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       }) => {
         const trashedVersions = await payload.findVersions({
           collection: postsSlug,
+          overrideAccess: true,
+          trash: true,
           where: {
             'version.deletedAt': {
               exists: true,
             },
           },
-          trash: true,
         })
 
         expect(trashedVersions.docs).toHaveLength(1)
@@ -667,8 +707,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         const version = trashedVersions.docs[0]
 
         const trashedVersionDoc = await payload.findVersionByID({
-          collection: postsSlug,
           id: version!.id,
+          collection: postsSlug,
+          overrideAccess: true,
           trash: true,
         })
 
@@ -683,12 +724,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       }) => {
         const trashedVersions = await payload.findVersions({
           collection: postsSlug,
+          overrideAccess: true,
+          trash: true,
           where: {
             'version.deletedAt': {
               exists: true,
             },
           },
-          trash: true,
         })
 
         expect(trashedVersions.docs).toHaveLength(1)
@@ -697,15 +739,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
 
         await expect(
           payload.findVersionByID({
-            collection: postsSlug,
             id: version!.id,
+            collection: postsSlug,
+            overrideAccess: true,
           }),
         ).rejects.toThrow('Not Found')
 
         await expect(
           payload.findVersionByID({
-            collection: postsSlug,
             id: version!.id,
+            collection: postsSlug,
+            overrideAccess: true,
             trash: false,
           }),
         ).rejects.toThrow('Not Found')
@@ -715,11 +759,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
     test.describe('updateByID operation', () => {
       test('should update a single soft-deleted document when trash: true', async ({ payload }) => {
         const updatedPostDoc: Post = await payload.update({
-          collection: postsSlug,
           id: postsDocTwo.id,
+          collection: postsSlug,
           data: {
             title: 'Updated Doc Two',
           },
+          overrideAccess: true,
           trash: true,
         })
 
@@ -735,21 +780,23 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       }) => {
         await expect(
           payload.update({
-            collection: postsSlug,
             id: postsDocTwo.id,
+            collection: postsSlug,
             data: {
               title: 'Updated Doc Two',
             },
+            overrideAccess: true,
           }),
         ).rejects.toThrow('Not Found')
 
         await expect(
           payload.update({
-            collection: postsSlug,
             id: postsDocTwo.id,
+            collection: postsSlug,
             data: {
               title: 'Updated Doc Two',
             },
+            overrideAccess: true,
             trash: false,
           }),
         ).rejects.toThrow('Not Found')
@@ -757,11 +804,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
 
       test('should update a single normal document when trash: false', async ({ payload }) => {
         const updatedPostDoc: Post = await payload.update({
-          collection: postsSlug,
           id: postsDocOne.id,
+          collection: postsSlug,
           data: {
             title: 'Updated Doc One',
           },
+          overrideAccess: true,
         })
 
         expect(updatedPostDoc).toBeDefined()
@@ -774,11 +822,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         payload,
       }) => {
         const restored = await payload.update({
-          collection: postsSlug,
           id: postsDocTwo.id,
+          collection: postsSlug,
           data: {
             deletedAt: null,
           },
+          overrideAccess: true,
           trash: true,
         })
 
@@ -787,6 +836,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         // Should now show up in trash: false queries
         const result = await payload.find({
           collection: postsSlug,
+          overrideAccess: true,
           trash: false,
         })
 
@@ -803,6 +853,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
           data: {
             title: 'Updated Doc',
           },
+          overrideAccess: true,
           trash: false,
           where: {
             title: {
@@ -829,6 +880,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
           data: {
             title: 'A New Updated Doc',
           },
+          overrideAccess: true,
           trash: true,
           where: {
             title: {
@@ -856,9 +908,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         const docThree = await payload.create({
           collection: postsSlug,
           data: {
-            title: 'Doc three',
             deletedAt: new Date().toISOString(),
+            title: 'Doc three',
           },
+          overrideAccess: true,
         })
 
         const result = await payload.update({
@@ -866,6 +919,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
           data: {
             title: 'Updated Soft Deleted Doc',
           },
+          overrideAccess: true,
           trash: true,
           where: {
             deletedAt: {
@@ -883,8 +937,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
 
         // Clean up
         await payload.delete({
-          collection: postsSlug,
           id: docThree.id,
+          collection: postsSlug,
+          overrideAccess: true,
           trash: true,
         })
       })
@@ -896,6 +951,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       }) => {
         await payload.delete({
           collection: postsSlug,
+          overrideAccess: true,
           trash: true,
           where: {
             title: {
@@ -906,6 +962,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
 
         const allDocs = await payload.find({
           collection: postsSlug,
+          overrideAccess: true,
           trash: true,
         })
 
@@ -915,6 +972,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       test('should only perma delete normal docs when trash: false', async ({ payload }) => {
         await payload.delete({
           collection: postsSlug,
+          overrideAccess: true,
           trash: false,
           where: {
             title: {
@@ -925,6 +983,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
 
         const allDocs = await payload.find({
           collection: postsSlug,
+          overrideAccess: true,
           trash: true,
         })
 
@@ -934,6 +993,127 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
     })
 
     test.describe('trashing documents with validation issues', () => {
+      test('should validate submitted fields when trashing a document', async ({ payload }) => {
+        const doc = await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'Validate trash update',
+          },
+          overrideAccess: true,
+        })
+
+        try {
+          await expect(
+            payload.update({
+              id: doc.id,
+              collection: postsSlug,
+              data: {
+                deletedAt: new Date().toISOString(),
+                title: '',
+              },
+              overrideAccess: true,
+            }),
+          ).rejects.toThrow(ValidationError)
+        } finally {
+          await payload.delete({
+            id: doc.id,
+            collection: postsSlug,
+            overrideAccess: true,
+            trash: true,
+          })
+        }
+      })
+
+      test('should validate submitted fields when updating a trashed document', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: postsSlug,
+          data: {
+            deletedAt: new Date().toISOString(),
+            title: 'Validate trashed update',
+          },
+          overrideAccess: true,
+        })
+
+        try {
+          await expect(
+            payload.update({
+              id: doc.id,
+              collection: postsSlug,
+              data: {
+                title: '',
+              },
+              overrideAccess: true,
+              trash: true,
+            }),
+          ).rejects.toThrow(ValidationError)
+        } finally {
+          await payload.delete({
+            id: doc.id,
+            collection: postsSlug,
+            overrideAccess: true,
+            trash: true,
+          })
+        }
+      })
+
+      test('should allow trashing a draft with an omitted incomplete rich text field', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: postsSlug,
+          data: {
+            richText: {
+              root: {
+                type: 'root',
+                children: [
+                  {
+                    type: 'block',
+                    fields: {
+                      id: 'incomplete-rich-text-block',
+                      blockName: '',
+                      blockType: 'myBlock',
+                      radios: 'option2',
+                      someText: 'Optional text',
+                    },
+                    format: '',
+                    version: 2,
+                  },
+                ],
+                direction: null,
+                format: '',
+                indent: 0,
+                version: 1,
+              },
+            },
+            title: 'Incomplete rich text draft',
+          },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        try {
+          const trashedDoc = await payload.update({
+            id: doc.id,
+            collection: postsSlug,
+            data: {
+              deletedAt: new Date().toISOString(),
+            },
+            overrideAccess: true,
+          })
+
+          expect(trashedDoc.deletedAt).toBeDefined()
+        } finally {
+          await payload.delete({
+            id: doc.id,
+            collection: postsSlug,
+            overrideAccess: true,
+            trash: true,
+          })
+        }
+      })
+
       test('should allow trashing documents with empty required fields (draft scenario)', async ({
         payload,
       }) => {
@@ -941,10 +1121,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         const draftDoc = await payload.create({
           collection: postsSlug,
           data: {
-            title: '', // Empty required field
             _status: 'draft',
+            title: '', // Empty required field
           },
           draft: true,
+          overrideAccess: true,
         })
 
         expect(draftDoc.title).toBe('')
@@ -952,11 +1133,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
 
         // Should be able to trash the document even with empty required field
         const trashedDoc = await payload.update({
-          collection: postsSlug,
           id: draftDoc.id,
+          collection: postsSlug,
           data: {
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         expect(trashedDoc.deletedAt).toBeDefined()
@@ -965,8 +1147,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
 
         // Clean up
         await payload.delete({
-          collection: postsSlug,
           id: draftDoc.id,
+          collection: postsSlug,
+          overrideAccess: true,
           trash: true,
         })
       })
@@ -978,29 +1161,32 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         const draftDoc = await payload.create({
           collection: postsSlug,
           data: {
-            title: '', // Empty required field
             _status: 'draft',
+            title: '', // Empty required field
           },
           draft: true,
+          overrideAccess: true,
         })
 
         // Trash it
         await payload.update({
-          collection: postsSlug,
           id: draftDoc.id,
+          collection: postsSlug,
           data: {
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         // Should be able to restore as draft without validation errors
         const restoredDoc = await payload.update({
-          collection: postsSlug,
           id: draftDoc.id,
+          collection: postsSlug,
           data: {
-            deletedAt: null,
             _status: 'draft',
+            deletedAt: null,
           },
+          overrideAccess: true,
           trash: true,
         })
 
@@ -1010,8 +1196,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
 
         // Clean up
         await payload.delete({
-          collection: postsSlug,
           id: draftDoc.id,
+          collection: postsSlug,
+          overrideAccess: true,
           trash: true,
         })
       })
@@ -1023,38 +1210,42 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         const draftDoc = await payload.create({
           collection: postsSlug,
           data: {
-            title: '', // Empty required field
             _status: 'draft',
+            title: '', // Empty required field
           },
           draft: true,
+          overrideAccess: true,
         })
 
         // Trash it
         await payload.update({
-          collection: postsSlug,
           id: draftDoc.id,
+          collection: postsSlug,
           data: {
             deletedAt: new Date().toISOString(),
           },
+          overrideAccess: true,
         })
 
         // Should NOT be able to restore as published - should fail validation
         await expect(
           payload.update({
-            collection: postsSlug,
             id: draftDoc.id,
+            collection: postsSlug,
             data: {
-              deletedAt: null,
               _status: 'published',
+              deletedAt: null,
             },
+            overrideAccess: true,
             trash: true,
           }),
         ).rejects.toThrow(/invalid/i)
 
         // Clean up
         await payload.delete({
-          collection: postsSlug,
           id: draftDoc.id,
+          collection: postsSlug,
+          overrideAccess: true,
           trash: true,
         })
       })
@@ -1066,15 +1257,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       }) => {
         await expect(
           payload.delete({
-            collection: postsSlug,
             id: postsDocTwo.id,
+            collection: postsSlug,
+            overrideAccess: true,
           }),
         ).rejects.toThrow('Not Found')
 
         await expect(
           payload.delete({
-            collection: postsSlug,
             id: postsDocTwo.id,
+            collection: postsSlug,
+            overrideAccess: true,
             trash: false,
           }),
         ).rejects.toThrow('Not Found')
@@ -1082,13 +1275,15 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
 
       test('should delete a soft-deleted document when trash: true', async ({ payload }) => {
         await payload.delete({
-          collection: postsSlug,
           id: postsDocTwo.id,
+          collection: postsSlug,
+          overrideAccess: true,
           trash: true,
         })
 
         const allDocs = await payload.find({
           collection: postsSlug,
+          overrideAccess: true,
           trash: true,
         })
 
@@ -1103,14 +1298,16 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       }) => {
         // Create a version of postsDocTwo (which is soft-deleted)
         await payload.update({
-          collection: postsSlug,
           id: postsDocTwo.id,
+          collection: postsSlug,
           data: { title: 'Updated Before Restore Attempt' },
+          overrideAccess: true,
           trash: true,
         })
 
         const { docs: versions } = await payload.findVersions({
           collection: postsSlug,
+          overrideAccess: true,
           trash: true,
         })
         const version = versions.find((v) => v.parent === postsDocTwo.id)
@@ -1119,8 +1316,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
 
         await expect(
           payload.restoreVersion({
-            collection: postsSlug,
             id: version!.id,
+            collection: postsSlug,
+            overrideAccess: true,
           }),
         ).rejects.toThrow(/Cannot restore a version of a trashed document/i)
       })
@@ -1132,6 +1330,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       }) => {
         const result = await payload.count({
           collection: postsSlug,
+          overrideAccess: true,
         })
 
         expect(result.totalDocs).toEqual(1) // Only postsDocOne
@@ -1142,6 +1341,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       }) => {
         const result = await payload.count({
           collection: postsSlug,
+          overrideAccess: true,
           trash: true,
         })
 
@@ -1153,6 +1353,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       }) => {
         const result = await payload.count({
           collection: postsSlug,
+          overrideAccess: true,
           trash: true,
           where: { deletedAt: { exists: true } },
         })
@@ -1170,33 +1371,36 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       const post = await payload.create({
         collection: postsSlug,
         data: {
-          title: 'Draft with Localized Field',
           _status: 'draft',
+          title: 'Draft with Localized Field',
         },
+        overrideAccess: true,
       })
 
       // Update en locale as draft - isSavingDraft = true skips updateOne on the main table,
       // storing localized data only in the versions table
       await payload.update({
-        collection: postsSlug,
         id: post.id,
-        locale: 'en',
+        collection: postsSlug,
         data: {
-          localizedField: localizedFieldValueEN,
           _status: 'draft',
+          localizedField: localizedFieldValueEN,
         },
         draft: true,
+        locale: 'en',
+        overrideAccess: true,
       })
 
       await payload.update({
-        collection: postsSlug,
         id: post.id,
-        locale: 'es',
+        collection: postsSlug,
         data: {
-          localizedField: localizedFieldValueES,
           _status: 'draft',
+          localizedField: localizedFieldValueES,
         },
         draft: true,
+        locale: 'es',
+        overrideAccess: true,
       })
 
       // Bulk trash the document (simulates list view "Move to Trash")
@@ -1206,6 +1410,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         data: {
           deletedAt: new Date().toISOString(),
         },
+        overrideAccess: true,
         where: {
           id: {
             equals: post.id,
@@ -1218,18 +1423,20 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
 
       // Fetch the latest draft version of the trashed document for each locale
       const trashedDocEN = await payload.findByID({
-        collection: postsSlug,
         id: post.id,
-        locale: 'en',
+        collection: postsSlug,
         draft: true,
+        locale: 'en',
+        overrideAccess: true,
         trash: true,
       })
 
       const trashedDocES = await payload.findByID({
-        collection: postsSlug,
         id: post.id,
-        locale: 'es',
+        collection: postsSlug,
         draft: true,
+        locale: 'es',
+        overrideAccess: true,
         trash: true,
       })
 
@@ -1486,9 +1693,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         const docThree = await payload.create({
           collection: postsSlug,
           data: {
-            title: 'Doc three',
             deletedAt: new Date().toISOString(),
+            title: 'Doc three',
           },
+          overrideAccess: true,
         })
 
         const res = await restClient.PATCH(`/${postsSlug}${query}`, {
@@ -1508,8 +1716,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
 
         // Clean up
         await payload.delete({
-          collection: postsSlug,
           id: docThree.id,
+          collection: postsSlug,
+          overrideAccess: true,
           trash: true,
         })
       })
@@ -1578,6 +1787,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
 
         const { docs: versions } = await payload.findVersions({
           collection: postsSlug,
+          overrideAccess: true,
           trash: true,
         })
         const version = versions.find((v) => v.parent === postsDocTwo.id)
@@ -2278,7 +2488,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
 
     test.afterEach(async ({ payload }) => {
       for (const id of createdPageIDs) {
-        await payload.delete({ collection: pagesSlug, id })
+        await payload.delete({ id, collection: pagesSlug, overrideAccess: true })
       }
       createdPageIDs.length = 0
     })
@@ -2290,16 +2500,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       const page = await payload.create({
         collection: pagesSlug,
         data: {
-          title: 'Page with related posts',
           relatedPosts: [postsDocOne.id, postsDocTwo.id],
+          title: 'Page with related posts',
         },
+        overrideAccess: true,
       })
       createdPageIDs.push(page.id)
 
       const result = await payload.findByID({
-        collection: pagesSlug,
         id: page.id,
+        collection: pagesSlug,
         depth: 1,
+        overrideAccess: true,
       })
 
       // The trashed post (postsDocTwo) should be absent from the relationship array
@@ -2315,16 +2527,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       const page = await payload.create({
         collection: pagesSlug,
         data: {
-          title: 'Page with featured post',
           featuredPost: postsDocTwo.id,
+          title: 'Page with featured post',
         },
+        overrideAccess: true,
       })
       createdPageIDs.push(page.id)
 
       const result = await payload.findByID({
-        collection: pagesSlug,
         id: page.id,
+        collection: pagesSlug,
         depth: 1,
+        overrideAccess: true,
       })
 
       expect(result.featuredPost).toBeNull()
@@ -2334,16 +2548,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       const page = await payload.create({
         collection: pagesSlug,
         data: {
-          title: 'Page with featured post',
           featuredPost: postsDocOne.id,
+          title: 'Page with featured post',
         },
+        overrideAccess: true,
       })
       createdPageIDs.push(page.id)
 
       const result = await payload.findByID({
-        collection: pagesSlug,
         id: page.id,
+        collection: pagesSlug,
         depth: 1,
+        overrideAccess: true,
       })
 
       expect((result.featuredPost as Post)?.id).toBe(postsDocOne.id)
@@ -2354,16 +2570,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       const page = await payload.create({
         collection: pagesSlug,
         data: {
-          title: 'Page with related posts depth 0',
           relatedPosts: [postsDocOne.id, postsDocTwo.id],
+          title: 'Page with related posts depth 0',
         },
+        overrideAccess: true,
       })
       createdPageIDs.push(page.id)
 
       const result = await payload.findByID({
-        collection: pagesSlug,
         id: page.id,
+        collection: pagesSlug,
         depth: 0,
+        overrideAccess: true,
       })
 
       // At depth=0, no population occurs - raw IDs are returned as stored
@@ -2379,7 +2597,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
 
     test.afterEach(async ({ payload }) => {
       for (const id of createdRegistrationIDs) {
-        await payload.delete({ id, collection: registrationsSlug })
+        await payload.delete({ id, collection: registrationsSlug, overrideAccess: true })
       }
       createdRegistrationIDs.length = 0
     })
@@ -2395,11 +2613,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
           post: postsDocTwo.id,
           title: 'Registration for a trashed post',
         },
+        overrideAccess: true,
       })
       createdRegistrationIDs.push(registration.id)
 
       const result = await payload.find({
         collection: registrationsSlug,
+        overrideAccess: true,
         where: {
           id: {
             equals: registration.id,
@@ -2428,6 +2648,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
 
       const result = await payload.find({
         collection: registrationsSlug,
+        overrideAccess: true,
         where: {
           id: {
             equals: doc.id,

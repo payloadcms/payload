@@ -13,7 +13,7 @@ import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts' })('@payloadcms/storage-azure streamingUploads', () => {
+test.suite('@payloadcms/storage-azure streamingUploads', { config: './config.ts' }, () => {
   let TEST_CONTAINER: string
   let client: ContainerClient
 
@@ -52,6 +52,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure streamingUpload
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -64,6 +65,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure streamingUpload
       collection: mediaWithPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -106,6 +108,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure streamingUpload
     const uploadData = (await payload.findByID({
       collection: collectionSlug,
       id: uploadId,
+      overrideAccess: true,
     })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
 
     const fileKeys = Object.keys(uploadData.sizes || {}).map((key) => {

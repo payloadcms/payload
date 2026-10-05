@@ -1,6 +1,7 @@
 import type React from 'react'
 
 import { renderServerComponent } from '@tanstack/react-start/rsc'
+import { setOwnProperty } from 'payload/shared'
 import { createElement, Fragment } from 'react'
 
 /**
@@ -113,11 +114,14 @@ async function walk(
     const isReactElementArray =
       items.length > 0 &&
       items.every(
-        (item) => typeof item === 'object' && typeof (item as { $$typeof?: unknown }).$$typeof === 'symbol',
+        (item) =>
+          typeof item === 'object' && typeof (item as { $$typeof?: unknown }).$$typeof === 'symbol',
       )
     if (isReactElementArray) {
       ancestors.delete(obj)
-      return await renderServerComponent(createElement(Fragment, null, ...(obj as React.ReactNode[])))
+      return await renderServerComponent(
+        createElement(Fragment, null, ...(obj as React.ReactNode[])),
+      )
     }
 
     const arr: unknown[] = []
@@ -139,7 +143,7 @@ async function walk(
   for (const key of Object.keys(obj)) {
     const v = await walk(obj[key], cache, ancestors)
     if (v !== undefined) {
-      result[key] = v
+      setOwnProperty({ key, target: result, value: v })
     }
   }
   ancestors.delete(obj)

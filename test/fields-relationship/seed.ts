@@ -76,34 +76,32 @@ export const seed = async (_payload: Payload) => {
   for (const title of ['relation-title', 'word boundary search']) {
     const { id } = await _payload.create({
       collection: relationWithTitleSlug,
-      depth: 0,
-      overrideAccess: true,
       data: {
         name: title,
         meta: {
           title,
         },
       },
+      depth: 0,
+      overrideAccess: true,
     })
     relationsWithTitle.push(id)
   }
 
   await _payload.create({
     collection: slug,
-    depth: 0,
-    overrideAccess: true,
     data: {
       relationship: relationOneDocId,
       relationshipRestricted: restrictedDocId,
       relationshipWithTitle: relationsWithTitle[0],
     },
+    depth: 0,
+    overrideAccess: true,
   })
 
   for (let i = 0; i < 11; i++) {
     await _payload.create({
       collection: slug,
-      depth: 0,
-      overrideAccess: true,
       data: {
         relationship: relationOneDocId,
         relationshipHasManyMultiple: relationOneIDs.map((id) => ({
@@ -112,6 +110,8 @@ export const seed = async (_payload: Payload) => {
         })),
         relationshipRestricted: restrictedDocId,
       },
+      depth: 0,
+      overrideAccess: true,
     })
   }
 
@@ -121,8 +121,6 @@ export const seed = async (_payload: Payload) => {
 
     await _payload.create({
       collection: slug,
-      depth: 0,
-      overrideAccess: true,
       data: {
         relationship: relationOneDocId,
         relationshipHasMany: [relationOneID],
@@ -130,26 +128,28 @@ export const seed = async (_payload: Payload) => {
         relationshipReadOnly: relationOneID,
         relationshipRestricted: restrictedDocId,
       },
+      depth: 0,
+      overrideAccess: true,
     })
   }
 
   for (let i = 0; i < 15; i++) {
     await _payload.create({
       collection: collection1Slug,
-      depth: 0,
-      overrideAccess: true,
       data: {
         name: `relationship-test ${i}`,
       },
+      depth: 0,
+      overrideAccess: true,
     })
 
     await _payload.create({
       collection: collection2Slug,
-      depth: 0,
-      overrideAccess: true,
       data: {
         name: `relationship-test ${i}`,
       },
+      depth: 0,
+      overrideAccess: true,
     })
   }
 
@@ -160,6 +160,7 @@ export const seed = async (_payload: Payload) => {
         id: i,
         title: `Video ${i}`,
       },
+      overrideAccess: true,
     })
 
     await _payload.create({
@@ -168,6 +169,7 @@ export const seed = async (_payload: Payload) => {
         id: i,
         title: `Podcast ${i}`,
       },
+      overrideAccess: true,
     })
   }
 }

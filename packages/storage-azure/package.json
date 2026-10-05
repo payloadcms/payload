@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/storage-azure",
-  "version": "4.0.0-canary.14",
+  "version": "4.0.0-canary.37",
   "description": "Payload storage adapter for Azure Blob Storage",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "@azure/abort-controller": "^1.1.0",
-    "@azure/storage-blob": "^12.11.0",
+    "@azure/storage-blob": "^12.33.0",
     "@payloadcms/plugin-cloud-storage": "workspace:*"
   },
   "devDependencies": {

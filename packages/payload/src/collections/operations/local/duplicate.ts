@@ -2,8 +2,14 @@ import type { DeepPartial } from 'ts-essentials'
 
 import type { CollectionSlug, TypedLocale } from '../../..//index.js'
 import type { FindOptions, Payload, RequestContext, User } from '../../../index.js'
-import type { PayloadRequest, PopulateType, SelectType, TransformCollectionWithSelect } from '../../../types/index.js'
-import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
+import type {
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  TransformCollectionWithSelect,
+} from '../../../types/index.js'
+import type { SharedLocalAPIOptions } from '../../../types/operations.js'
+import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
 import type {
   DraftFlagFromCollectionSlug,
   RequiredDataFromCollectionSlug,
@@ -11,7 +17,7 @@ import type {
 } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { duplicateOperation } from '../duplicate.js'
 
 type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
@@ -52,12 +58,6 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
    */
   locale?: TypedLocale
   /**
-   * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
-   * @default true
-   */
-  overrideAccess?: boolean
-  /**
    * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
    */
   populate?: PopulateType
@@ -80,7 +80,8 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: null | User
-} & Pick<FindOptions<TSlug, TSelect>, 'select'>
+} & Pick<FindOptions<TSlug, TSelect>, 'select'> &
+  Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = BaseOptions<
   TSlug,
@@ -102,7 +103,7 @@ export async function duplicateLocal<
     depth,
     disableTransaction,
     draft,
-    overrideAccess = true,
+    overrideAccess = false,
     populate,
     select,
     selectedLocales,
@@ -124,7 +125,10 @@ export async function duplicateLocal<
     )
   }
 
-  const req = await createLocalReq(options as CreateLocalReqOptions, payload)
+  const req = await createPayloadRequest({
+    ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
+    payload,
+  })
 
   return duplicateOperation<TSlug, TSelect>({
     id,

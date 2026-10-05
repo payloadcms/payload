@@ -2,7 +2,7 @@ import type { PayloadRequest } from 'payload'
 
 import { addDataAndFileToRequest } from 'payload'
 
-import type { ImportPreviewResponse } from '../types.js'
+import type { ImportDoc, ImportPreviewResponse } from '../types.js'
 
 import {
   DEFAULT_PREVIEW_LIMIT,
@@ -12,6 +12,7 @@ import {
 } from '../constants.js'
 import { applyFieldHooks } from '../utilities/applyFieldHooks.js'
 import { getImportFieldFunctions } from '../utilities/getImportFieldFunctions.js'
+import { getSubmittedFormValues } from '../utilities/getSubmittedFormValues.js'
 import { parseCSV } from '../utilities/parseCSV.js'
 import { parseJSON } from '../utilities/parseJSON.js'
 import { removeDisabledFields } from '../utilities/removeDisabledFields.js'
@@ -25,12 +26,14 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
     collectionSlug,
     fileData,
     format,
+    formData,
     previewLimit: rawPreviewLimit = DEFAULT_PREVIEW_LIMIT,
     previewPage: rawPreviewPage = 1,
   } = req.data as {
     collectionSlug: string
     fileData?: string
     format?: 'csv' | 'json'
+    formData?: Record<string, unknown>
     previewLimit?: number
     previewPage?: number
   }
@@ -108,6 +111,9 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
         batchNumber: 1,
         data: parsedData as unknown as Parameters<typeof importHooks.before>[0]['data'],
         format: format ?? 'csv',
+        importDoc: getSubmittedFormValues({
+          formData: formData ?? {},
+        }) as ImportDoc,
         originalData: originalDocs,
         req,
         totalBatches: 1,
