@@ -1893,6 +1893,16 @@ GraphQL queries select `variants { thumbnail { url } }` instead of `sizes { thum
 
 Existing documents must be migrated. Create the predefined migration for your database adapter and run it:
 
+<Banner type="warning">
+  Payload 4 uses `variants` as the top-level field for generated upload
+  variants. If an upload collection already defines a custom field named
+  `variants`, rename that field before you run the predefined migration. Choose
+  a new name, update your config, and write a custom migration that moves the
+  existing custom data from `variants` to the new field. Then run the predefined
+  `sizes-to-variants` migration. The predefined migration cannot choose a new
+  name or merge this custom data for you.
+</Banner>
+
 ```sh
 # MongoDB
 payload migrate:create --file @payloadcms/db-mongodb/sizes-to-variants
