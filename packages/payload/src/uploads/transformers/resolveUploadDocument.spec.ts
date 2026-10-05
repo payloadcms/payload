@@ -23,7 +23,7 @@ describe('getRequestedFile', () => {
     id: '1',
     filename: 'logo.png',
     mimeType: 'image/png',
-    sizes: {
+    variants: {
       card: { filename: 'logo-640x480.webp', mimeType: 'image/webp' },
       skipped: { filename: null, mimeType: null },
     },

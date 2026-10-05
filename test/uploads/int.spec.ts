@@ -305,10 +305,10 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         body: JSON.stringify({
           filename: restrictedDoc.filename,
           prefix: 'restricted',
-          sizes: {
+          variants: {
             thumbnail: {
-              ...readableDoc.sizes.thumbnail,
-              filename: restrictedDoc.sizes.thumbnail.filename,
+              ...readableDoc.variants.thumbnail,
+              filename: restrictedDoc.variants.thumbnail.filename,
             },
           },
           url: restrictedDoc.url,
@@ -326,7 +326,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
       expect(updatedDoc.filename).toBe(readableDoc.filename)
       expect(updatedDoc.prefix).toBe('public')
-      expect(updatedDoc.sizes.thumbnail.filename).toBe(readableDoc.sizes.thumbnail.filename)
+      expect(updatedDoc.variants.thumbnail.filename).toBe(readableDoc.variants.thumbnail.filename)
       expect(updatedDoc.url).toBe(readableDoc.url)
 
       const fileResponse = await restClient.GET(
@@ -355,7 +355,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
       const sizeFilenameResponse = await restClient.PATCH(`/${fileAccessMediaSlug}/${doc.id}`, {
         body: JSON.stringify({
-          sizes: { thumbnail: { filename: '..\\invalid-thumbnail.png' } },
+          variants: { thumbnail: { filename: '..\\invalid-thumbnail.png' } },
         }),
       })
       expect(sizeFilenameResponse.status).toBe(400)
@@ -388,7 +388,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       expect(updatedDoc.focalX).toBe(75)
       expect(updatedDoc.focalY).toBe(25)
       expect(updatedDoc.prefix).toBe('public')
-      expect(updatedDoc.sizes.thumbnail.filename).toBe(doc.sizes.thumbnail.filename)
+      expect(updatedDoc.variants.thumbnail.filename).toBe(doc.variants.thumbnail.filename)
       expect(updatedDoc.url).toBe(doc.url)
     })
 
@@ -416,7 +416,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         body: JSON.stringify({
           filename: 'submitted.png',
           prefix: 'submitted',
-          sizes: { thumbnail: { filename: 'submitted-thumbnail.png' } },
+          variants: { thumbnail: { filename: 'submitted-thumbnail.png' } },
           url: '/api/file-access-media/file/submitted.png',
         }),
         query: { where: { id: { in: docs.map(({ id }) => id) } } },
@@ -433,7 +433,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         expect(updatedDoc.filename).toBe(doc.filename)
         expect(updatedDoc.prefix).toBe(doc.prefix)
         expect(updatedDoc.requestMetadata).toContain('PATCH:application/json:')
-        expect(updatedDoc.sizes.thumbnail.filename).toBe(doc.sizes.thumbnail.filename)
+        expect(updatedDoc.variants.thumbnail.filename).toBe(doc.variants.thumbnail.filename)
         expect(updatedDoc.url).toBe(doc.url)
       }
     })
@@ -459,8 +459,8 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       )
       const replacementPath = path.resolve(dirname, './test-image.png')
       const metadata = await sharp(replacementPath).metadata()
-      const height = Math.floor(metadata.height! / 2)
-      const width = Math.floor(metadata.width! / 2)
+      const height = Math.floor(metadata.height / 2)
+      const width = Math.floor(metadata.width / 2)
       const { file, handle } = await createStreamableFile(replacementPath)
       const formData = new FormData()
       formData.append('_payload', JSON.stringify({ prefix: 'replacement' }))
@@ -549,7 +549,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
       expect(updatedDoc.filename).not.toBe(doc.filename)
       expect(updatedDoc.prefix).toBe('public')
-      expect(updatedDoc.sizes.thumbnail.filename).toBeTruthy()
+      expect(updatedDoc.variants.thumbnail.filename).toBeTruthy()
     })
 
     test('should replace a file using its submitted prefix', async ({ payload, restClient }) => {
@@ -586,7 +586,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
       expect(updatedDoc.filename).not.toBe(doc.filename)
       expect(updatedDoc.prefix).toBe('replacement')
-      expect(updatedDoc.sizes.thumbnail.filename).toBeTruthy()
+      expect(updatedDoc.variants.thumbnail.filename).toBeTruthy()
     })
 
     test('should retain current file data when restoring a version', async ({
@@ -645,7 +645,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           height: 1,
           mimeType: 'image/jpeg',
           prefix: otherDoc.prefix,
-          sizes: otherDoc.sizes,
+          variants: otherDoc.variants,
           thumbnailURL: '/version-thumbnail.jpg',
           url: { en: otherDoc.url, es: '/otro.png', fr: '/autre.png' },
           width: 1,
@@ -674,7 +674,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       expect(restoredDoc.height).toBe(currentDoc.height)
       expect(restoredDoc.mimeType).toBe(currentDoc.mimeType)
       expect(restoredDoc.prefix).toBe(currentDoc.prefix)
-      expect(restoredDoc.sizes).toEqual(currentDoc.sizes)
+      expect(restoredDoc.variants).toEqual(currentDoc.variants)
       expect(restoredDoc.thumbnailURL).toBe(currentDoc.thumbnailURL)
       expect(restoredDoc.url).toBe(currentDoc.url)
       expect(restoredDoc.width).toBe(currentDoc.width)
@@ -732,7 +732,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         expect(doc.alt).toBe('Staged image')
         expect(doc.filename).toBe('staged-image.png')
         expect(doc.width).toBeDefined()
-        expect(doc.sizes.tablet.filename).toBeDefined()
+        expect(doc.variants.tablet.filename).toBeDefined()
 
         await payload.delete({ id: doc.id, collection: mediaSlug, overrideAccess: true })
       })
@@ -896,29 +896,29 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
         expect(response.status).toBe(201)
 
-        const { sizes } = doc
+        const { variants } = doc
         const expectedPath = path.join(dirname, './media')
 
         // Check for files
         expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
         expect(
-          await fileExists(path.join(expectedPath, sizes.maintainedAspectRatio.filename)),
+          await fileExists(path.join(expectedPath, variants.maintainedAspectRatio.filename)),
         ).toBe(true)
-        expect(await fileExists(path.join(expectedPath, sizes.tablet.filename))).toBe(true)
-        expect(await fileExists(path.join(expectedPath, sizes.mobile.filename))).toBe(true)
-        expect(await fileExists(path.join(expectedPath, sizes.icon.filename))).toBe(true)
+        expect(await fileExists(path.join(expectedPath, variants.tablet.filename))).toBe(true)
+        expect(await fileExists(path.join(expectedPath, variants.mobile.filename))).toBe(true)
+        expect(await fileExists(path.join(expectedPath, variants.icon.filename))).toBe(true)
 
         // Check api response
         expect(doc.mimeType).toEqual('image/png')
         expect(doc.focalX).toEqual(50)
         expect(doc.focalY).toEqual(50)
-        expect(sizes.maintainedAspectRatio.url).toContain('/api/media/file/image')
-        expect(sizes.maintainedAspectRatio.url).toContain('.png')
-        expect(sizes.maintainedAspectRatio.width).toEqual(1024)
-        expect(sizes.maintainedAspectRatio.height).toEqual(1024)
-        expect(sizes).toHaveProperty('tablet')
-        expect(sizes).toHaveProperty('mobile')
-        expect(sizes).toHaveProperty('icon')
+        expect(variants.maintainedAspectRatio.url).toContain('/api/media/file/image')
+        expect(variants.maintainedAspectRatio.url).toContain('.png')
+        expect(variants.maintainedAspectRatio.width).toEqual(1024)
+        expect(variants.maintainedAspectRatio.height).toEqual(1024)
+        expect(variants).toHaveProperty('tablet')
+        expect(variants).toHaveProperty('mobile')
+        expect(variants).toHaveProperty('icon')
       })
 
       test('creates from a remote source without reusing submitted file identity', async ({
@@ -1000,13 +1000,13 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         expect(mediaDoc.url).not.toContain(' ')
 
         // Check that size URLs are also properly encoded
-        expect(mediaDoc.sizes?.tablet?.url).toBeDefined()
-        expect(mediaDoc.sizes?.tablet?.url).toContain('%20')
-        expect(mediaDoc.sizes?.tablet?.url).not.toContain(' ')
+        expect(mediaDoc.variants?.tablet?.url).toBeDefined()
+        expect(mediaDoc.variants?.tablet?.url).toContain('%20')
+        expect(mediaDoc.variants?.tablet?.url).not.toContain(' ')
 
-        expect(mediaDoc.sizes?.icon?.url).toBeDefined()
-        expect(mediaDoc.sizes?.icon?.url).toContain('%20')
-        expect(mediaDoc.sizes?.icon?.url).not.toContain(' ')
+        expect(mediaDoc.variants?.icon?.url).toBeDefined()
+        expect(mediaDoc.variants?.icon?.url).toContain('%20')
+        expect(mediaDoc.variants?.icon?.url).not.toContain(' ')
 
         await payload.delete({ id: mediaDoc.id, collection: mediaSlug, overrideAccess: true })
       })
@@ -1033,7 +1033,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
         // Check api response
         expect(doc.mimeType).toEqual('image/svg+xml')
-        expect(doc.sizes.maintainedAspectRatio.url).toBeFalsy()
+        expect(doc.variants.maintainedAspectRatio.url).toBeFalsy()
         expect(doc.width).toBeDefined()
         expect(doc.height).toBeDefined()
       })
@@ -1100,11 +1100,11 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         // Check for files
         expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
         expect(await fileExists(path.join(expectedPath, 'small-640x480.png'))).toBe(false)
-        expect(await fileExists(path.join(expectedPath, doc.sizes.icon.filename))).toBe(true)
+        expect(await fileExists(path.join(expectedPath, doc.variants.icon.filename))).toBe(true)
 
         // Check api response
-        expect(doc.sizes.tablet.filename).toBeNull()
-        expect(doc.sizes.icon.filename).toBeDefined()
+        expect(doc.variants.tablet.filename).toBeNull()
+        expect(doc.variants.icon.filename).toBeDefined()
       })
 
       test('should not set url on image sizes that cannot be generated', async ({
@@ -1128,12 +1128,12 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         expect(response.status).toBe(201)
 
         // Check ungenerated sizes are empty, including the URL
-        expect(doc.sizes.tablet.filename).toBeNull()
-        expect(doc.sizes.tablet.width).toBeNull()
-        expect(doc.sizes.tablet.height).toBeNull()
-        expect(doc.sizes.tablet.mimeType).toBeNull()
-        expect(doc.sizes.tablet.filesize).toBeNull()
-        expect(doc.sizes.tablet.url).toBeNull()
+        expect(doc.variants.tablet.filename).toBeNull()
+        expect(doc.variants.tablet.width).toBeNull()
+        expect(doc.variants.tablet.height).toBeNull()
+        expect(doc.variants.tablet.mimeType).toBeNull()
+        expect(doc.variants.tablet.filesize).toBeNull()
+        expect(doc.variants.tablet.url).toBeNull()
 
         // Also verify the database
         const dbDoc = await payload.db.findOne({
@@ -1141,7 +1141,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           where: { id: { equals: doc.id } },
         })
 
-        expect(dbDoc.sizes.tablet.url).toBeNull()
+        expect(dbDoc.variants.tablet.url).toBeNull()
       })
 
       test('creates images from a different format', async ({ restClient }) => {
@@ -1164,15 +1164,15 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
         // Check for files
         expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
-        expect(await fileExists(path.join(expectedPath, doc.sizes.tablet.filename))).toBe(true)
+        expect(await fileExists(path.join(expectedPath, doc.variants.tablet.filename))).toBe(true)
 
         // Check api response
         expect(doc.filename).toContain('.png')
         expect(doc.mimeType).toEqual('image/png')
-        expect(doc.sizes.maintainedAspectRatio.filename).toContain('.png')
-        expect(doc.sizes.maintainedAspectRatio.mimeType).toContain('image/png')
-        expect(doc.sizes.differentFormatFromMainImage.filename).toContain('.jpg')
-        expect(doc.sizes.differentFormatFromMainImage.mimeType).toContain('image/jpeg')
+        expect(doc.variants.maintainedAspectRatio.filename).toContain('.png')
+        expect(doc.variants.maintainedAspectRatio.mimeType).toContain('image/png')
+        expect(doc.variants.differentFormatFromMainImage.filename).toContain('.jpg')
+        expect(doc.variants.differentFormatFromMainImage.mimeType).toContain('image/jpeg')
       })
 
       test('creates media without storing a file', async ({ restClient }) => {
@@ -1275,9 +1275,9 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         const response = await restClient.PATCH(`/${mediaSlug}/${mediaDoc.id}`, {
           body: JSON.stringify({
             filename: `archive/../${mediaDoc.filename}`,
-            sizes: {
+            variants: {
               icon: {
-                filename: `archive/../${mediaDoc.sizes.icon.filename}`,
+                filename: `archive/../${mediaDoc.variants.icon.filename}`,
               },
             },
           }),
@@ -1292,7 +1292,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         })) as unknown as Media
 
         expect(unchangedDoc.filename).toBe(mediaDoc.filename)
-        expect(unchangedDoc.sizes.icon.filename).toBe(mediaDoc.sizes.icon.filename)
+        expect(unchangedDoc.variants.icon.filename).toBe(mediaDoc.variants.icon.filename)
 
         await payload.delete({ id: mediaDoc.id, collection: mediaSlug, overrideAccess: true })
       })
@@ -1327,7 +1327,9 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
         // Check that previously existing files were removed
         expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(false)
-        expect(await fileExists(path.join(expectedPath, mediaDoc.sizes.icon.filename))).toBe(false)
+        expect(await fileExists(path.join(expectedPath, mediaDoc.variants.icon.filename))).toBe(
+          false,
+        )
       })
 
       test('should replace image and delete old files - where query', async ({
@@ -1370,7 +1372,9 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
         // Check that previously existing files were removed
         expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(false)
-        expect(await fileExists(path.join(expectedPath, mediaDoc.sizes.icon.filename))).toBe(false)
+        expect(await fileExists(path.join(expectedPath, mediaDoc.variants.icon.filename))).toBe(
+          false,
+        )
       })
     })
     test.describe('delete', () => {
@@ -1480,7 +1484,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         })) as unknown as Media
 
         try {
-          const size = mediaDoc.sizes!.differentFormatFromMainImage!
+          const size = mediaDoc.variants!.differentFormatFromMainImage!
 
           expect(size.mimeType).toBe('image/jpeg')
 
@@ -1677,7 +1681,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         const svgFilePath = path.resolve(dirname, './svgWithXml.svg')
         const fileBuffer = fs.readFileSync(svgFilePath)
 
-        // SVGs cannot be resized, so sizes.small should have null fields
+        // SVGs cannot be resized, so variants.small should have null fields
         const doc = await payload.create({
           collection: adminThumbnailSizeSlug as CollectionSlug,
           data: {},
@@ -2035,8 +2039,8 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           overrideAccess: true,
         })) as unknown as Media
 
-        expect(doc.sizes.icon).toBeDefined()
-        expect(doc.sizes.tablet.width).toBeNull()
+        expect(doc.variants.icon).toBeDefined()
+        expect(doc.variants.tablet.width).toBeNull()
       })
 
       test('should remove sizes that do not pertain to the new image - where query', async ({
@@ -2063,8 +2067,8 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           },
         })) as unknown as { docs: Media[] }
 
-        expect(doc.docs[0].sizes.icon).toBeDefined()
-        expect(doc.docs[0].sizes.tablet.width).toBeNull()
+        expect(doc.docs[0].variants.icon).toBeDefined()
+        expect(doc.docs[0].variants.tablet.width).toBeNull()
       })
 
       test('should allow removing file from upload relationship field - by ID', async ({
@@ -2670,14 +2674,16 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           _internal_safeFetchGlobal.lookup = globalCachedFn
 
           // Now ensure this throws if we pass the IP address directly, without the mock
+          const allowedURLMessageMatcher = expect.not.stringContaining('unsafe')
+          const blockedURLMessageMatcher = expect.stringContaining(errorContains)
           const directURLFailure =
             collection === allowListMediaSlug
               ? {
-                  message: expect.not.stringContaining('unsafe'),
+                  message: allowedURLMessageMatcher,
                 }
               : {
                   name: 'FileRetrievalError',
-                  message: expect.stringContaining(errorContains),
+                  message: blockedURLMessageMatcher,
                 }
 
           await expect(
@@ -3042,9 +3048,9 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
         expect(response.status).toBe(200)
         expect(doc).toMatchObject({ height: 800, width: 800 })
-        expect(doc.sizes?.maintainedImageSize).toMatchObject({ height: 800, width: 800 })
+        expect(doc.variants?.maintainedImageSize).toMatchObject({ height: 800, width: 800 })
 
-        const sizePath = path.join(dirname, './media', doc.sizes!.maintainedImageSize!.filename!)
+        const sizePath = path.join(dirname, './media', doc.variants!.maintainedImageSize!.filename!)
 
         await expect(sharp(sizePath).metadata()).resolves.toMatchObject({
           height: 800,
@@ -3069,32 +3075,32 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
       expect(result).toBeTruthy()
 
-      const { sizes } = result as unknown as Enlarge
+      const { variants } = result as unknown as Enlarge
       const expectedPath = path.join(dirname, './media/enlarge')
 
       // Check for files
       expect(await fileExists(path.join(expectedPath, small.name))).toBe(true)
-      expect(await fileExists(path.join(expectedPath, sizes.resizedLarger.filename))).toBe(true)
-      expect(await fileExists(path.join(expectedPath, sizes.resizedSmaller.filename))).toBe(true)
-      expect(await fileExists(path.join(expectedPath, sizes.accidentalSameSize.filename))).toBe(
+      expect(await fileExists(path.join(expectedPath, variants.resizedLarger.filename))).toBe(true)
+      expect(await fileExists(path.join(expectedPath, variants.resizedSmaller.filename))).toBe(true)
+      expect(await fileExists(path.join(expectedPath, variants.accidentalSameSize.filename))).toBe(
         true,
       )
-      expect(await fileExists(path.join(expectedPath, sizes.sameSizeWithNewFormat.filename))).toBe(
-        true,
-      )
+      expect(
+        await fileExists(path.join(expectedPath, variants.sameSizeWithNewFormat.filename)),
+      ).toBe(true)
 
       // Check api response
-      expect(sizes.sameSizeWithNewFormat.mimeType).toBe('image/jpeg')
-      expect(sizes.sameSizeWithNewFormat.filename).toBe('small-320x80.jpg')
+      expect(variants.sameSizeWithNewFormat.mimeType).toBe('image/jpeg')
+      expect(variants.sameSizeWithNewFormat.filename).toBe('small-320x80.jpg')
 
-      expect(sizes.resizedLarger.mimeType).toBe('image/png')
-      expect(sizes.resizedLarger.filename).toBe('small-640x480.png')
+      expect(variants.resizedLarger.mimeType).toBe('image/png')
+      expect(variants.resizedLarger.filename).toBe('small-640x480.png')
 
-      expect(sizes.resizedSmaller.mimeType).toBe('image/png')
-      expect(sizes.resizedSmaller.filename).toBe('small-180x50.png')
+      expect(variants.resizedSmaller.mimeType).toBe('image/png')
+      expect(variants.resizedSmaller.filename).toBe('small-180x50.png')
 
-      expect(sizes.accidentalSameSize.mimeType).toBe('image/png')
-      expect(sizes.accidentalSameSize.filename).toBe('small-320x80.png')
+      expect(variants.accidentalSameSize.mimeType).toBe('image/png')
+      expect(variants.accidentalSameSize.filename).toBe('small-320x80.png')
 
       await payload.delete({
         id: result.id,
@@ -3118,16 +3124,16 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
       expect(result).toBeTruthy()
 
-      const { sizes } = result
+      const { variants } = result
       const expectedPath = path.join(dirname, './media/enlarge')
 
       // Check for files
-      expect(await fileExists(path.join(expectedPath, sizes.widthLowerHeightLarger.filename))).toBe(
-        true,
-      )
+      expect(
+        await fileExists(path.join(expectedPath, variants.widthLowerHeightLarger.filename)),
+      ).toBe(true)
       // Check api response
-      expect(sizes.widthLowerHeightLarger.mimeType).toBe('image/png')
-      expect(sizes.widthLowerHeightLarger.filename).toBe('small-300x300.png')
+      expect(variants.widthLowerHeightLarger.mimeType).toBe('image/png')
+      expect(variants.widthLowerHeightLarger.filename).toBe('small-300x300.png')
       await payload.delete({
         id: result.id,
         collection: enlargeSlug,
@@ -3149,32 +3155,32 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
       expect(result).toBeTruthy()
 
-      const { sizes } = result as unknown as Enlarge
+      const { variants } = result as unknown as Enlarge
       const expectedPath = path.join(dirname, './media/reduce')
 
       // Check for files
       expect(await fileExists(path.join(expectedPath, small.name))).toBe(true)
       expect(await fileExists(path.join(expectedPath, 'small-640x480.png'))).toBe(false)
       expect(await fileExists(path.join(expectedPath, 'small-180x50.png'))).toBe(false)
-      expect(await fileExists(path.join(expectedPath, sizes.accidentalSameSize.filename))).toBe(
+      expect(await fileExists(path.join(expectedPath, variants.accidentalSameSize.filename))).toBe(
         true,
       )
-      expect(await fileExists(path.join(expectedPath, sizes.sameSizeWithNewFormat.filename))).toBe(
-        true,
-      )
+      expect(
+        await fileExists(path.join(expectedPath, variants.sameSizeWithNewFormat.filename)),
+      ).toBe(true)
 
       // Check api response
-      expect(sizes.sameSizeWithNewFormat.mimeType).toBe('image/jpeg')
-      expect(sizes.sameSizeWithNewFormat.filename).toBe('small-320x80.jpg')
+      expect(variants.sameSizeWithNewFormat.mimeType).toBe('image/jpeg')
+      expect(variants.sameSizeWithNewFormat.filename).toBe('small-320x80.jpg')
 
-      expect(sizes.resizedLarger.mimeType).toBeNull()
-      expect(sizes.resizedLarger.filename).toBeNull()
+      expect(variants.resizedLarger.mimeType).toBeNull()
+      expect(variants.resizedLarger.filename).toBeNull()
 
-      expect(sizes.accidentalSameSize.mimeType).toBe('image/png')
-      expect(sizes.resizedSmaller.filename).toBe('small-320x80.png')
+      expect(variants.accidentalSameSize.mimeType).toBe('image/png')
+      expect(variants.resizedSmaller.filename).toBe('small-320x80.png')
 
-      expect(sizes.accidentalSameSize.mimeType).toBe('image/png')
-      expect(sizes.accidentalSameSize.filename).toBe('small-320x80.png')
+      expect(variants.accidentalSameSize.mimeType).toBe('image/png')
+      expect(variants.accidentalSameSize.filename).toBe('small-320x80.png')
 
       await payload.delete({ id: result.id, collection: reduceSlug, overrideAccess: true })
     })
@@ -3193,9 +3199,9 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
       expect(result).toBeTruthy()
 
-      const { sizes } = result as unknown as Enlarge
+      const { variants } = result as unknown as Enlarge
 
-      expect(sizes.undefinedHeightWithoutEnlargement).toMatchObject({
+      expect(variants.undefinedHeightWithoutEnlargement).toMatchObject({
         filename: null,
         filesize: null,
         height: null,
@@ -3213,7 +3219,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
     // A wrong per-frame divisor on the 44-frame, 200x200 animated.webp would report the frame
     // stack's height or fail the resize, so exact single-frame dimensions prove both paths.
-    test('should report single-frame dimensions for an animated image and its sizes', async ({
+    test('should report single-frame dimensions for an animated image and its variants', async ({
       payload,
     }) => {
       const doc = await payload.create({
@@ -3225,7 +3231,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
       expect(doc).toMatchObject({
         height: 200,
-        sizes: {
+        variants: {
           focalCrop: { height: 150, width: 300 },
           // A real enlargement (200x200 -> 480x480), not a no-op.
           squareSmall: { height: 480, width: 480 },
@@ -3393,8 +3399,8 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
         // payload.find should return full URLs with serverURL prefix (through afterRead hooks)
         expect(mediaDoc.url).toContain('http://local-images:3000')
-        expect(mediaDoc.sizes?.tablet?.url).toContain('http://local-images:3000')
-        expect(mediaDoc.sizes?.icon?.url).toContain('http://local-images:3000')
+        expect(mediaDoc.variants?.tablet?.url).toContain('http://local-images:3000')
+        expect(mediaDoc.variants?.icon?.url).toContain('http://local-images:3000')
 
         // Direct database query should return relative URLs (no hooks applied)
         const dbDoc = (await payload.db.findOne({
@@ -3412,13 +3418,13 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         expect(dbDoc.url).toMatch(/^\/api\/media\/file\//)
 
         // Check that size URLs are also relative in the database
-        expect(dbDoc.sizes?.tablet?.url).toBeDefined()
-        expect(dbDoc.sizes?.tablet?.url).not.toContain('http://local-images:3000')
-        expect(dbDoc.sizes?.tablet?.url).toMatch(/^\/api\/media\/file\//)
+        expect(dbDoc.variants?.tablet?.url).toBeDefined()
+        expect(dbDoc.variants?.tablet?.url).not.toContain('http://local-images:3000')
+        expect(dbDoc.variants?.tablet?.url).toMatch(/^\/api\/media\/file\//)
 
-        expect(dbDoc.sizes?.icon?.url).toBeDefined()
-        expect(dbDoc.sizes?.icon?.url).not.toContain('http://local-images:3000')
-        expect(dbDoc.sizes?.icon?.url).toMatch(/^\/api\/media\/file\//)
+        expect(dbDoc.variants?.icon?.url).toBeDefined()
+        expect(dbDoc.variants?.icon?.url).not.toContain('http://local-images:3000')
+        expect(dbDoc.variants?.icon?.url).toMatch(/^\/api\/media\/file\//)
 
         await payload.delete({ id: mediaDoc.id, collection: mediaSlug, overrideAccess: true })
       } finally {
@@ -3481,9 +3487,9 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         expect(dbDoc.url).toMatch(/^\/api\/media\/file\//)
 
         // Check that size URLs are also relative in the database
-        expect(dbDoc.sizes?.tablet?.url).toBeDefined()
-        expect(dbDoc.sizes?.tablet?.url).not.toContain('http://local-images:3000')
-        expect(dbDoc.sizes?.tablet?.url).toMatch(/^\/api\/media\/file\//)
+        expect(dbDoc.variants?.tablet?.url).toBeDefined()
+        expect(dbDoc.variants?.tablet?.url).not.toContain('http://local-images:3000')
+        expect(dbDoc.variants?.tablet?.url).toMatch(/^\/api\/media\/file\//)
 
         await payload.delete({ id: mediaDoc.id, collection: mediaSlug, overrideAccess: true })
         await payload.delete({ id: duplicatedDoc.id, collection: mediaSlug, overrideAccess: true })
@@ -3547,9 +3553,9 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         expect(dbDoc.url).toMatch(/^\/api\/media\/file\//)
 
         // Check that size URLs are also relative in the database
-        expect(dbDoc.sizes?.tablet?.url).toBeDefined()
-        expect(dbDoc.sizes?.tablet?.url).not.toContain('http://local-images:3000')
-        expect(dbDoc.sizes?.tablet?.url).toMatch(/^\/api\/media\/file\//)
+        expect(dbDoc.variants?.tablet?.url).toBeDefined()
+        expect(dbDoc.variants?.tablet?.url).not.toContain('http://local-images:3000')
+        expect(dbDoc.variants?.tablet?.url).toMatch(/^\/api\/media\/file\//)
 
         await payload.delete({ id: mediaDoc.id, collection: mediaSlug, overrideAccess: true })
       } finally {
@@ -3971,13 +3977,16 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
     test.each([
       { description: 'absolute path like /tmp', dir: '/tmp', expectedPrefix: '/tmp' },
       { description: 'relative path', dir: 'tmp', expectedPrefix: path.join(process.cwd(), 'tmp') },
-    ])('creates temp files in correct location for $description', ({ dir, expectedPrefix }) => {
-      const handler = tempFileHandler({ tempFileDir: dir }, 'field', 'file.png')
-      const filePath = handler.getFilePath()
+    ])(
+      'creates temp files in correct location for $description',
+      async ({ dir, expectedPrefix }) => {
+        const handler = tempFileHandler({ tempFileDir: dir }, 'field', 'file.png')
+        const filePath = handler.getFilePath()
 
-      expect(filePath.startsWith(expectedPrefix)).toBe(true)
-      handler.cleanup()
-    })
+        expect(filePath.startsWith(expectedPrefix)).toBe(true)
+        await handler.cleanup()
+      },
+    )
   })
 
   test.describe('prefix query parameter', () => {

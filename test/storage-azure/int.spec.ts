@@ -131,9 +131,9 @@ test.suite('@payloadcms/storage-azure', { config: './config.ts', resetBetweenTes
       collection: collectionSlug,
       id: uploadId,
       overrideAccess: true,
-    })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
+    })) as unknown as { filename: string; variants: Record<string, { filename: string }> }
 
-    const fileKeys = Object.values(uploadData.sizes || {}).map(({ filename: rawFilename }) =>
+    const fileKeys = Object.values(uploadData.variants || {}).map(({ filename: rawFilename }) =>
       prefix ? `${prefix}/${rawFilename}` : rawFilename,
     )
 

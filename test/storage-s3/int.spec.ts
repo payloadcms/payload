@@ -224,8 +224,8 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
       expect(upload.id).toBeTruthy()
 
       // Verify image sizes URLs are returned correctly
-      expect(upload.sizes?.thumbnail?.url).toContain(process.env.S3_ENDPOINT)
-      expect(upload.sizes?.thumbnail?.url).toContain(getTestBucketName())
+      expect(upload.variants?.thumbnail?.url).toContain(process.env.S3_ENDPOINT)
+      expect(upload.variants?.thumbnail?.url).toContain(getTestBucketName())
 
       // CRITICAL: Verify that image size URLs are also stored as full S3 URLs in the database
       const dbDoc = await payload.db.findOne({
@@ -238,9 +238,9 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
       })
 
       expect(dbDoc).toBeDefined()
-      expect(dbDoc.sizes.thumbnail.url).toContain(process.env.S3_ENDPOINT)
-      expect(dbDoc.sizes.thumbnail.url).toContain(getTestBucketName())
-      expect(dbDoc.sizes.thumbnail.url).not.toMatch(/^\/api\//)
+      expect(dbDoc.variants.thumbnail.url).toContain(process.env.S3_ENDPOINT)
+      expect(dbDoc.variants.thumbnail.url).toContain(getTestBucketName())
+      expect(dbDoc.variants.thumbnail.url).not.toMatch(/^\/api\//)
 
       await payload.delete({
         collection: mediaWithDirectAccessSlug,

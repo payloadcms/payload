@@ -118,7 +118,7 @@ export const getFields = ({
     let existingSizesFieldIndex = -1
 
     const existingSizesField = fields.find((existingField, i) => {
-      if ('name' in existingField && existingField.name === 'sizes') {
+      if ('name' in existingField && existingField.name === 'variants') {
         existingSizesFieldIndex = i
         return true
       }
@@ -132,7 +132,7 @@ export const getFields = ({
 
     const sizesField: Field = {
       ...(existingSizesField || {}),
-      name: 'sizes',
+      name: 'variants',
       type: 'group',
       admin: {
         hidden: true,

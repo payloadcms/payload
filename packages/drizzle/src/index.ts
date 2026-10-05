@@ -91,6 +91,7 @@ export {
   getBlocksToJsonMigrator,
 } from './utilities/blocksToJsonMigrator.js'
 export { buildCreateMigration } from './utilities/buildCreateMigration.js'
+export { buildDynamicPredefinedSizesToVariantsMigration } from './utilities/buildDynamicPredefinedSizesToVariantsMigration.js'
 export { buildIndexName } from './utilities/buildIndexName.js'
 export { createSchemaGenerator } from './utilities/createSchemaGenerator.js'
 export { executeSchemaHooks } from './utilities/executeSchemaHooks.js'

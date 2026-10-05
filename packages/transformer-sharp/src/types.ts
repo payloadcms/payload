@@ -37,7 +37,7 @@ export type SharpImageSizeOptions = {
   crop?: string // comes from sharp package
   formatOptions?: ImageUploadFormatOptions
   trimOptions?: ImageUploadTrimOptions
-  /** Image sizes generated for each upload, stored under the document's `sizes`. */
+  /** Image sizes generated for each upload, stored under the document's `variants`. */
   variants?: ImageSize[]
   /**
    * When an uploaded image is smaller than the defined image size, we have 3 options:
@@ -71,7 +71,7 @@ export type SharpCollectionConfig = {
   formatOptions?: ImageUploadFormatOptions
   resizeOptions?: ResizeOptions
   trimOptions?: ImageUploadTrimOptions
-  /** Image sizes generated for each upload, stored under the document's `sizes`. */
+  /** Image sizes generated for each upload, stored under the document's `variants`. */
   variants?: ImageSize[]
   withMetadata?: WithMetadata
 }

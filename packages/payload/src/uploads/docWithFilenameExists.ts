@@ -30,7 +30,7 @@ export const docWithFilenameExists = async ({
       },
       ...(upload && typeof upload === 'object' && upload.variants
         ? upload.variants.map(({ name }) => ({
-            [`sizes.${name}.filename`]: { equals: filename },
+            [`variants.${name}.filename`]: { equals: filename },
           }))
         : []),
     ],
