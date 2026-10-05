@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionAfterReadHook, CollectionConfig } from 'payload'
 
 import {
   BlocksFeature,
@@ -13,8 +13,42 @@ import {
 
 import { lexicalFullyFeaturedSlug } from '../../slugs.js'
 
+type RegressionBlockNode = {
+  children?: RegressionBlockNode[]
+  fields?: Record<string, unknown>
+}
+
+const returnNullItemsForBlockStateRegression: CollectionAfterReadHook = ({ doc }) => {
+  const setNullItems = (nodes: RegressionBlockNode[]) => {
+    for (const node of nodes) {
+      if (
+        node.fields?.id === 'regular-block' ||
+        node.fields?.id === 'empty-array-block' ||
+        node.fields?.id === 'localized-empty-array-block' ||
+        node.fields?.id === 'inline-block'
+      ) {
+        node.fields.items = null
+      }
+
+      if (node.children) {
+        setNullItems(node.children)
+      }
+    }
+  }
+
+  const nodes = doc.richText?.root?.children as RegressionBlockNode[] | undefined
+  if (nodes) {
+    setNullItems(nodes)
+  }
+
+  return doc
+}
+
 export const LexicalFullyFeatured: CollectionConfig = {
   slug: lexicalFullyFeaturedSlug,
+  hooks: {
+    afterRead: [returnNullItemsForBlockStateRegression],
+  },
   labels: {
     singular: 'Lexical Fully Featured',
     plural: 'Lexical Fully Featured',
@@ -75,6 +109,17 @@ export const LexicalFullyFeatured: CollectionConfig = {
                     name: 'someText',
                     type: 'text',
                   },
+                  {
+                    name: 'items',
+                    type: 'array',
+                    localized: true,
+                    fields: [
+                      {
+                        name: 'label',
+                        type: 'text',
+                      },
+                    ],
+                  },
                 ],
               },
               {
@@ -94,6 +139,16 @@ export const LexicalFullyFeatured: CollectionConfig = {
                   {
                     name: 'someText',
                     type: 'text',
+                  },
+                  {
+                    name: 'items',
+                    type: 'array',
+                    fields: [
+                      {
+                        name: 'label',
+                        type: 'text',
+                      },
+                    ],
                   },
                 ],
               },

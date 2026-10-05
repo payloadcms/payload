@@ -119,6 +119,7 @@ export const caTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Cerca de ginys...',
     widgetCollectionRequired: 'Cal especificar una Collection.',
     widgetConfigurationError: 'Error de configuració del widget',
+    widgetDropFilesToUpload: 'Arrossega i deixa anar un fitxer',
     widgetInvalidCollection: 'La Collection "{{collection}}" no existeix.',
     widgetInvalidFilterField:
       'El camp de filtre "{{field}}" no existeix a la Collection "{{collection}}".',
@@ -136,6 +137,9 @@ export const caTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Ordenar camp',
     widgetTitleFallback: 'Consulta de la Collection',
     widgetTitleLabel: 'Títol',
+    widgetUploadDropzoneDescription:
+      'Carregueu des del vostre ordinador arrossegant i deixant anar, o feu clic al botó següent',
+    widgetUploadFiles: 'Afegir fitxers',
   },
   error: {
     accountAlreadyActivated: 'Aquest compte ja ha estat activat.',
@@ -465,6 +469,7 @@ export const caTranslations: DefaultTranslationsObject = {
     remove: 'Elimina',
     rename: 'Canvia el nom',
     replaceRow: 'Reemplaça fila',
+    requiredFields: 'Els camps marcats amb * són obligatoris.',
     reset: 'Restableix',
     resetPreferences: 'Restablir les preferències',
     resetPreferencesDescription:
@@ -481,8 +486,12 @@ export const caTranslations: DefaultTranslationsObject = {
     saveChanges: 'Desa els canvis',
     saving: 'Desant...',
     schedulePublishFor: 'Programa la publicacio {{title}}',
+    searchAutomatically: 'Els resultats s’actualitzen automàticament mentre escriviu.',
     searchBy: 'Cerca per {{label}}',
+    searchCleared: 'S’ha esborrat la cerca.',
     searchColumns: 'Cercar columnes',
+    searchGroups: 'Grups per a «{{search}}»: {{count}}.',
+    searchResults: 'Resultats per a «{{search}}»: {{count}}.',
     select: 'Selecciona',
     selectAll: 'Selecciona totes les {{count}} {{label}}',
     selectAllRows: 'Selecciona totes les files',
@@ -493,6 +502,7 @@ export const caTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Mostra totes {{label}}',
     shownInTable: 'Mostrat en taula',
     showSidebar: 'Mostra la barra lateral',
+    skipToContent: 'Salta al contingut',
     sorryNotFound: "Ho sento, no s'ha trobat la pàgina que busques.",
     sort: 'Ordena',
     sortByLabelDirection: 'Ordena per {{label}} {{direction}}',
@@ -555,6 +565,7 @@ export const caTranslations: DefaultTranslationsObject = {
     noParent: 'Sense Pare',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Cerca {{label}}',
+    searchResults: 'S’han trobat {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'No es pot copiar al mateix idioma',

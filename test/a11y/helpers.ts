@@ -167,6 +167,13 @@ export async function gotoCreatePost({ page, postsURL }: { page: Page; postsURL:
   await waitForFormReady(page)
 }
 
+export async function gotoLabelTestLogin({ page, serverURL }: { page: Page; serverURL: string }) {
+  await page.context().clearCookies()
+  await page.setExtraHTTPHeaders({ DisableAutologin: 'true' })
+  await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/login', serverURL }))
+  await expect(page.locator('input[name="password"]')).toBeVisible()
+}
+
 export async function gotoPostsList({ page, postsURL }: { page: Page; postsURL: AdminUrlUtil }) {
   await page.goto(postsURL.list)
   await expect(page.locator('tbody tr').first()).toBeVisible()
@@ -676,4 +683,42 @@ export async function expectPaintedFocus({ page }: { page: Page }) {
       }),
     )
     .toBe(true)
+}
+
+export async function openGlobalAPI({ page, serverURL }: { page: Page; serverURL: string }) {
+  await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/globals/menu', serverURL }))
+  await page.getByRole('link', { name: 'API', exact: true }).click()
+  await expect(page.locator('.query-inspector .monaco-editor')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'toggle fullscreen', exact: true })).toBeVisible()
+}
+
+export async function openNavigation({ page }: { page: Page }) {
+  await expect(page.locator('aside.nav--nav-hydrated')).toBeVisible()
+  const openMenu = page.getByRole('button', { name: 'Open Menu', exact: true })
+
+  if (await openMenu.isVisible()) {
+    await openMenu.click()
+  }
+  await expect(page.locator('aside.nav')).toHaveClass(/nav--nav-open/)
+}
+
+export async function openNavigationFolders({
+  page,
+  serverURL,
+}: {
+  page: Page
+  serverURL: string
+}) {
+  await page.goto(formatAdminURL({ adminRoute: '/admin', serverURL }))
+  await openNavigation({ page })
+  const tab = page.getByRole('tab', { name: /folders/i })
+
+  await tab.click()
+  const sidebar = page.locator('.hierarchy-sidebar-tab:visible')
+
+  await expect(sidebar.getByRole('tree')).toBeVisible()
+  await expect(
+    sidebar.locator('.tree-node__title', { hasText: /^Accessibility folder$/ }),
+  ).toBeVisible()
+  return sidebar
 }

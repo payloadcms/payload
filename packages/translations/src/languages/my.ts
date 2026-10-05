@@ -119,6 +119,7 @@ export const myTranslations: DefaultTranslationsObject = {
     searchWidgets: 'ဝစ်ဂျက်များ ရှာဖွေပါ...',
     widgetCollectionRequired: 'Collection သည် မဖြစ်မနေလိုအပ်ပါသည်။',
     widgetConfigurationError: 'Widget အတည်ပြုခြင်းအမှား',
+    widgetDropFilesToUpload: 'ဖိုင်တစ်ဖိုင်ကို ဆွဲချလိုက်ပါ။',
     widgetInvalidCollection: 'Collection "{{collection}}" မရှိပါ။',
     widgetInvalidFilterField:
       'Filter field "{{field}}" သည် collection "{{collection}}" တွင် မရှိပါ။',
@@ -136,6 +137,9 @@ export const myTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Field တူညီခြင်း အလိုက် စီစဉ်ရန်',
     widgetTitleFallback: 'Collection query (မေးခွန်း)',
     widgetTitleLabel: 'ခေါင်းစဉ်',
+    widgetUploadDropzoneDescription:
+      'သင့်ကွန်ပျူတာမှ ဖိုင်များကို ဤနေရာသို့ ဆွဲယူပြီး ချထား၍ တင်နိုင်ပါသည်၊ သို့မဟုတ် အောက်ပါခလုတ်ကို နှိပ်ပါ။',
+    widgetUploadFiles: 'ဖိုင်များ ထည့်ပါ',
   },
   error: {
     accountAlreadyActivated: 'ဤအကောင့်ကို အသက်သွင်းပြီးဖြစ်သည်။',
@@ -467,6 +471,7 @@ export const myTranslations: DefaultTranslationsObject = {
     remove: 'ဖယ်ရှားမည်။',
     rename: 'အမည်ပြောင်း',
     replaceRow: 'တန်းစီအစားထိုးရန်',
+    requiredFields: '* ဖြင့် အမှတ်အသားပြုထားသော အကွက်များကို မဖြစ်မနေ ဖြည့်ရပါမည်။',
     reset: 'ပြန်လည်သတ်မှတ်ပါ',
     resetPreferences: 'ကြိုတင်သတ်မှတ်ချက်များ ပြန်လည်တပ်ဆင်မည်',
     resetPreferencesDescription:
@@ -483,8 +488,12 @@ export const myTranslations: DefaultTranslationsObject = {
     saveChanges: 'ပြောင်းလဲမှုများ သိမ်းဆည်းပါ',
     saving: 'သိမ်းနေဆဲ ...',
     schedulePublishFor: '{{title}} အတွက် ထုတ်ဝေချိန်း သတ်မှတ်ပါ',
+    searchAutomatically: 'စာရိုက်နေစဉ် ရလဒ်များကို အလိုအလျောက် အပ်ဒိတ်လုပ်ပါသည်။',
     searchBy: 'ရှာဖွေပါ။',
+    searchCleared: 'ရှာဖွေမှုကို ရှင်းလင်းပြီးပါပြီ။',
     searchColumns: 'ကော်လံများကို ရှာဖွေပါ',
+    searchGroups: '“{{search}}” အတွက် အုပ်စုများ: {{count}}။',
+    searchResults: '“{{search}}” အတွက် ရလဒ်များ: {{count}}။',
     select: 'ရွေးချယ်ပါ',
     selectAll: '{{count}} {{label}} အားလုံးကို ရွေးပါ',
     selectAllRows: 'အားလုံးကိုရွေးချယ်ပါ',
@@ -495,6 +504,7 @@ export const myTranslations: DefaultTranslationsObject = {
     showAllLabel: '{{label}} အားလုံး ပြပါ',
     shownInTable: 'ဇယားတွင် ပြသထားသည်။',
     showSidebar: 'ဘေးဘက်လမ်းညွှန်ပြရန်',
+    skipToContent: 'အကြောင်းအရာသို့ ကျော်သွားရန်',
     sorryNotFound: 'ဝမ်းနည်းပါသည်။ သင်ရှာနေတဲ့ဟာ ဒီမှာမရှိပါ။',
     sort: 'အစဉ်လိုက်',
     sortByLabelDirection: 'အစဉ်အလိုက် စီမံခန့်ခွဲထားသည် {{label}} {{direction}}',
@@ -559,6 +569,7 @@ export const myTranslations: DefaultTranslationsObject = {
     noParent: 'မိဘ မရှိပါ',
     noResults: '"{{query}}" အတွက် ရလဒ်မရှိပါ',
     searchLabel: '{{label}} ရှာဖွေပါ',
+    searchResults: '{{count}} ခု တွေ့ရှိသည်',
   },
   localization: {
     cannotCopySameLocale: 'တူညီသော ဒေသသို့ ကူးယူ၍မရပါ',

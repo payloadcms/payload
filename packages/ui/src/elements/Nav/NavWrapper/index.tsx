@@ -10,8 +10,9 @@ import './index.css'
 export const NavWrapper: React.FC<{
   baseClass?: string
   children: React.ReactNode
+  header?: React.ReactNode
 }> = (props) => {
-  const { baseClass, children } = props
+  const { baseClass, children, header } = props
 
   const { hydrated, navOpen, navRef } = useNav()
 
@@ -26,6 +27,7 @@ export const NavWrapper: React.FC<{
         .join(' ')}
       inert={!navOpen ? true : undefined}
     >
+      {header}
       <div className={`${baseClass}__scroll`} ref={navRef}>
         {children}
       </div>
