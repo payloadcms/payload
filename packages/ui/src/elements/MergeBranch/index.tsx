@@ -1,5 +1,7 @@
 'use client'
 
+import type { MergeResult } from 'payload'
+
 import { MAIN_BRANCH } from 'payload/shared'
 import React, { useCallback, useMemo, useState } from 'react'
 
@@ -22,15 +24,25 @@ import './index.css'
 const baseClass = 'merge-branch-modal'
 
 const getModalPhase = ({
-  hasOutcome,
   isMerging,
   isScheduling,
+  outcome,
 }: {
-  hasOutcome: boolean
   isMerging: boolean
   isScheduling: boolean
+  outcome: MergeResult | null
 }): MergeBranchModalPhase => {
-  if (hasOutcome) {
+  if (outcome) {
+    const hasProblems = outcome.blocked.length > 0 || outcome.validationErrors.length > 0
+
+    if (hasProblems && outcome.merged.length === 0) {
+      return 'blocked'
+    }
+
+    if (hasProblems) {
+      return 'partial'
+    }
+
     return 'complete'
   }
 
@@ -114,20 +126,25 @@ export const MergeBranchModal: React.FC = () => {
   }
 
   const phase = getModalPhase({
-    hasOutcome: Boolean(outcome),
     isMerging,
     isScheduling,
+    outcome,
   })
-  const isComplete = phase === 'complete'
+  const hasOutcome = phase === 'blocked' || phase === 'complete' || phase === 'partial'
   const isBusy = phase === 'merging' || phase === 'scheduling'
+  const problems = outcome ? [...outcome.blocked, ...outcome.validationErrors] : []
   let title = t('branching:mergeBranchInto', {
     branch: target.branchName,
     target: MAIN_BRANCH,
   })
   let submitLabel = t('branching:merge')
 
-  if (isComplete) {
+  if (phase === 'complete') {
     title = t('branching:mergeComplete')
+  } else if (phase === 'partial') {
+    title = t('branching:mergePartial')
+  } else if (phase === 'blocked') {
+    title = t('branching:mergeBlocked')
   }
 
   if (phase === 'merging') {
@@ -150,7 +167,7 @@ export const MergeBranchModal: React.FC = () => {
     <DialogModal className={baseClass} closeOnBlur={!isMerging} slug={mergeBranchModalSlug}>
       <DialogHeader showClose={!isMerging} title={title} />
       <DialogBody>
-        {!isComplete && (
+        {!hasOutcome && (
           <MergeBranchForm
             canCloseBranch={canCloseBranch}
             closeBranch={closeBranch}
@@ -170,18 +187,22 @@ export const MergeBranchModal: React.FC = () => {
           />
         )}
 
-        {(isMerging || isComplete) && <MergeProgress outcome={outcome} progress={progress} />}
+        {(isMerging || hasOutcome) && (
+          <MergeProgress outcome={outcome} phase={phase} progress={progress} />
+        )}
 
-        {outcome && outcome.blocked.length > 0 && (
-          <ul className={`${baseClass}__blocked`}>
-            {outcome.blocked.map((blockedChange) => (
-              <li key={String(blockedChange.changeID)}>{blockedChange.message}</li>
-            ))}
-          </ul>
+        {problems.length > 0 && (
+          <div role="alert">
+            <ul className={`${baseClass}__blocked`}>
+              {problems.map((problem, index) => (
+                <li key={`${String(problem.changeID)}-${index}`}>{problem.message}</li>
+              ))}
+            </ul>
+          </div>
         )}
       </DialogBody>
       <DialogFooter>
-        {isComplete ? (
+        {hasOutcome ? (
           <Button buttonStyle="primary" onClick={dismiss} size="medium">
             {t('general:close')}
           </Button>

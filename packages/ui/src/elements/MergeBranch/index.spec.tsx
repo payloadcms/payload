@@ -50,9 +50,12 @@ vi.mock('../../providers/Translation/index.js', () => ({
           'branching:merge': 'Merge',
           'branching:mergeAllCount': 'Merge all changes',
           'branching:mergeBranchInto': 'Merge branch',
+          'branching:mergeBlocked': 'Merge blocked',
           'branching:mergeComplete': 'Merge complete',
+          'branching:mergePartial': 'Merge partially complete',
           'branching:mergeNow': 'Merge now',
           'branching:mergeStarting': 'Starting merge',
+          'branching:mergedCount': `${values?.count} change(s) merged.`,
           'branching:scheduleMerge': 'Schedule merge',
           'general:cancel': 'Cancel',
           'general:close': 'Close',
@@ -146,6 +149,7 @@ test('should expose merge progress and completion to assistive technology', asyn
           canMerge: false,
           mergeable: [],
           merged: [{ changeID: 'change-id' }],
+          validationErrors: [],
           warnings: [],
         },
         type: 'complete',
@@ -157,7 +161,7 @@ test('should expose merge progress and completion to assistive technology', asyn
   await expect.element(screen.getByRole('status')).toHaveTextContent('Merged 1 of 1')
 })
 
-test('should expose a valid completed range when no changes were merged', async () => {
+test('should report a blocked merge without a completed progress bar', async () => {
   const screen = await render(<MergeBranchModal />)
 
   await screen.getByRole('button', { name: 'Merge' }).click()
@@ -166,10 +170,23 @@ test('should expose a valid completed range when no changes were merged', async 
     new TextEncoder().encode(
       `${JSON.stringify({
         result: {
-          blocked: [],
+          blocked: [
+            {
+              changeID: 'blocked-change',
+              message: 'A dependency is unavailable',
+              operation: 'update',
+              reason: 'dependency',
+            },
+          ],
           canMerge: false,
           mergeable: [],
           merged: [],
+          validationErrors: [
+            {
+              changeID: 'invalid-change',
+              message: 'A required field is missing',
+            },
+          ],
           warnings: [],
         },
         type: 'complete',
@@ -178,10 +195,48 @@ test('should expose a valid completed range when no changes were merged', async 
   )
   mergeStreamController.close()
 
-  const progressbar = screen.getByRole('progressbar')
+  await expect.element(screen.getByRole('heading', { name: 'Merge blocked' })).toBeVisible()
+  await expect.element(screen.getByRole('status')).toHaveTextContent('Merge blocked')
+  await expect.element(screen.getByRole('progressbar')).not.toBeInTheDocument()
+  await expect.element(screen.getByRole('alert')).toBeVisible()
+  await expect.element(screen.getByText('A dependency is unavailable')).toBeVisible()
+  await expect.element(screen.getByText('A required field is missing')).toBeVisible()
+})
 
-  await expect.element(progressbar).toHaveAttribute('aria-valuemax', '1')
-  await expect.element(progressbar).toHaveAttribute('aria-valuenow', '1')
-  await expect.element(progressbar).toHaveAttribute('aria-valuetext', 'Merged 0 of 0')
-  await expect.element(screen.getByRole('status')).toHaveTextContent('Merged 0 of 0')
+test('should report a partial merge with the actual merged count and problems', async () => {
+  const screen = await render(<MergeBranchModal />)
+
+  await screen.getByRole('button', { name: 'Merge' }).click()
+
+  mergeStreamController.enqueue(
+    new TextEncoder().encode(
+      `${JSON.stringify({
+        result: {
+          blocked: [
+            {
+              changeID: 'blocked-change',
+              message: 'One change could not be applied',
+              operation: 'update',
+              reason: 'access',
+            },
+          ],
+          canMerge: true,
+          mergeable: [],
+          merged: [{ changeID: 'merged-change' }],
+          validationErrors: [],
+          warnings: [],
+        },
+        type: 'complete',
+      })}\n`,
+    ),
+  )
+  mergeStreamController.close()
+
+  await expect
+    .element(screen.getByRole('heading', { name: 'Merge partially complete' }))
+    .toBeVisible()
+  await expect.element(screen.getByRole('status')).toHaveTextContent('1 change(s) merged.')
+  await expect
+    .element(screen.getByRole('alert'))
+    .toHaveTextContent('One change could not be applied')
 })

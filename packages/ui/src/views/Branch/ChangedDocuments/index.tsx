@@ -207,6 +207,9 @@ const ChangedDocumentRow: React.FC<{
 }) => {
   const { t } = useTranslation()
   const rowRef = useRef<HTMLLIElement>(null)
+  const rowID = `${baseClass}-${encodeURIComponent(change.id)}`
+  const diffPanelID = `${rowID}-diff`
+  const toggleID = `${rowID}-toggle`
 
   // Prefetch on approach, so the diff is usually already there by the time the row
   // is opened. Disconnects after firing once — this is a warm-up, not a subscription.
@@ -241,8 +244,10 @@ const ChangedDocumentRow: React.FC<{
           pointer events off, and the checkbox turns them back on for itself. */}
       <div className={`${baseClass}__header`}>
         <button
+          aria-controls={diffPanelID}
           aria-expanded={isExpanded}
           className={`${baseClass}__toggle`}
+          id={toggleID}
           onClick={() => toggleExpanded(change)}
           type="button"
         >
@@ -284,11 +289,25 @@ const ChangedDocumentRow: React.FC<{
       </div>
 
       {isExpanded ? (
-        <div className={`${baseClass}__diff`}>
+        <div
+          aria-labelledby={toggleID}
+          className={`${baseClass}__diff`}
+          id={diffPanelID}
+          role="region"
+        >
           {state?.status === 'ready' ? state.result?.diff : null}
-          {state?.status === 'loading' || !state ? <ShimmerEffect height="3rem" /> : null}
+          {state?.status === 'loading' || !state ? (
+            <>
+              <span className="sr-only" role="status">
+                {t('general:loading')}
+              </span>
+              <ShimmerEffect aria-hidden="true" height="3rem" />
+            </>
+          ) : null}
           {state?.status === 'error' ? (
-            <p className={`${baseClass}__error`}>{t('error:unknown')}</p>
+            <p className={`${baseClass}__error`} role="alert">
+              {t('error:unknown')}
+            </p>
           ) : null}
         </div>
       ) : null}

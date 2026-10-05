@@ -1,3 +1,9 @@
-export type MergeBranchModalPhase = 'complete' | 'merging' | 'ready' | 'scheduling'
+export type MergeBranchModalPhase =
+  | 'blocked'
+  | 'complete'
+  | 'merging'
+  | 'partial'
+  | 'ready'
+  | 'scheduling'
 
 export type MergeMode = 'now' | 'schedule'

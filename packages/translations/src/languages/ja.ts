@@ -122,6 +122,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     merge: 'マージ',
     mergeAllChanges: 'このブランチのすべての変更が適用されます。',
     mergeAllCount: 'このブランチの変更されたドキュメント {{count}} 件すべてが適用されます。',
+    mergeBlocked: 'マージがブロックされています',
     mergeBranchInto: '{{branch}} を {{target}} にマージ',
     mergeChanges: '変更をマージ',
     mergeComplete: 'マージ完了',
@@ -134,6 +135,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     mergeInterrupted: 'マージが中断され、何も適用されませんでした。もう一度お試しください。',
     mergeNow: '今すぐマージ',
     mergeOnlySelected: 'マージする変更を選択',
+    mergePartial: '部分的に完了したものを統合',
     mergeScheduledFor: '{{date}} にマージを予約しました。',
     mergeSelectedOfTotal:
       '変更されたドキュメント {{total}} 件のうち {{selected}} 件が適用されます。',
