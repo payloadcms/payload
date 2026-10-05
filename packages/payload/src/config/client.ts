@@ -118,7 +118,7 @@ export type CreateClientConfigArgs = {
    * For example, allow `true` to generate a client config for the "create first user" page
    * where there is no user yet, but the config should still be complete.
    */
-  user: true | User
+  user?: null | true | User
 }
 
 export const createUnauthenticatedClientConfig = ({

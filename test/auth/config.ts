@@ -35,6 +35,7 @@ export default buildConfigWithDefaults({
       components: {
         beforeDashboard: ['./BeforeDashboard.js#BeforeDashboard'],
         beforeLogin: ['./BeforeLogin.js#BeforeLogin'],
+        providers: ['./RootConfigProvider/index.js#RootConfigProvider'],
         views: {
           'create-first-user': {
             Component: './CreateFirstUser.js#CreateFirstUser',
@@ -231,8 +232,8 @@ export default buildConfigWithDefaults({
           },
           {
             // This is a uniquely identifiable field that we use to ensure it doesn't appear in the page source when unauthenticated
-            // E.g. if the user is authenticated, it will appear in the both the client config
-            name: 'shouldNotShowInClientConfigUnlessAuthenticated',
+            // E.g. if the user is authenticated, it will appear in both full config as well as the client config
+            name: 'onlyShowInClientConfigWhenAuthenticated',
             type: 'text',
             access: {
               // Setting this forces the field to show up in the permissions object
