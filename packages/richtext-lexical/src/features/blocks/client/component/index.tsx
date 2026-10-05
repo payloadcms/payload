@@ -605,6 +605,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
                     ) : isEditable ? (
                       <Popup
                         button={<MoreIcon />}
+                        buttonAriaLabel={t('general:moreOptions')}
                         buttonClassName={`${baseClass}__actions-button`}
                         caret={false}
                         horizontalAlign="right"

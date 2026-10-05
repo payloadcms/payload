@@ -373,6 +373,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
               {value && fileSrc && (
                 <Fragment>
                   <Button
+                    aria-label={t('general:cancel')}
                     buttonStyle="secondary"
                     className={`${baseClass}__remove`}
                     icon="x"

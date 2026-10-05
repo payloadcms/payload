@@ -274,6 +274,7 @@ export interface Post {
   accessibilitySortableSelect?: ('one' | 'two')[] | null;
   accessibilityDisabledSelect?: ('one' | 'two') | null;
   relatedPost?: (string | null) | Post;
+  status?: ('draft' | 'published') | null;
   publishedOn?: string | null;
   content?: LexicalRichText<LexicalNodes_B836F062> | null;
   items?:
@@ -509,6 +510,7 @@ export interface PostsSelect<T extends boolean = true> {
   accessibilitySortableSelect?: T;
   accessibilityDisabledSelect?: T;
   relatedPost?: T;
+  status?: T;
   publishedOn?: T;
   content?: T;
   items?:

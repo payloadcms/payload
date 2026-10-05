@@ -9,6 +9,7 @@ import { devUser } from '../credentials.js'
 import { MediaCollection } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { UsersCollection, usersSlug } from './collections/Users/index.js'
+import { seededAPIKey } from './constants.js'
 import { MenuGlobal } from './globals/Menu/index.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -81,7 +82,7 @@ export default buildConfigWithDefaults({
     await payload.create({
       collection: usersSlug,
       data: {
-        apiKey: 'a11y-modal-dialog-fixture-key-1234',
+        apiKey: seededAPIKey,
         email: devUser.email,
         password: devUser.password,
       },

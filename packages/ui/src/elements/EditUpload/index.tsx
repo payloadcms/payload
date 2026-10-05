@@ -202,7 +202,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                   <div className={`${baseClass}__section-header`}>
                     <h3 className={`${baseClass}__section-title`}>{t('upload:crop')}</h3>
                     <button
-                      aria-label={t('general:reset')}
+                      aria-label={`${t('general:reset')}: ${t('upload:crop')}`}
                       className={`${baseClass}__reset`}
                       onClick={() => setCrop({ height: 100, unit: '%', width: 100, x: 0, y: 0 })}
                       type="button"
@@ -238,7 +238,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                   <div className={`${baseClass}__section-header`}>
                     <h3 className={`${baseClass}__section-title`}>{t('upload:focalPoint')}</h3>
                     <button
-                      aria-label={t('general:reset')}
+                      aria-label={`${t('general:reset')}: ${t('upload:focalPoint')}`}
                       className={`${baseClass}__reset`}
                       onClick={centerFocalPoint}
                       type="button"
