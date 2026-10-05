@@ -499,6 +499,7 @@ export const taTranslations: DefaultTranslationsObject = {
     showAllLabel: 'அனைத்து {{label}}-ஐக் காட்டு',
     shownInTable: 'அட்டவணையில் காண்பிக்கப்பட்டுள்ளது',
     showSidebar: 'விளைவு பட்டியலை காட்டு',
+    skipToContent: 'உள்ளடக்கத்திற்குச் செல்லவும்',
     sorryNotFound: 'மன்னிக்கவும் — உங்கள் கோரிக்கைக்கு பொருந்த எதுவும் இல்லை.',
     sort: 'வரிசைப்படுத்து',
     sortByLabelDirection: '{{label}}-ஐ {{direction}} வரிசைப்படுத்து',
@@ -562,6 +563,7 @@ export const taTranslations: DefaultTranslationsObject = {
     noParent: 'பெற்றோர் இல்லை',
     noResults: 'No results for "{{query}}"',
     searchLabel: '{{label}} ஐ தேடு',
+    searchResults: '{{count}} கிடைத்தன',
   },
   localization: {
     cannotCopySameLocale: 'அதே மொழி அமைவுக்கு நகலெடுக்க முடியாது',

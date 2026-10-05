@@ -130,7 +130,7 @@ const CollapsibleFieldComponent: React.FC<CollapsibleFieldClientProps> = (props)
         <CollapsibleElement
           className={`${baseClass}__collapsible`}
           collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
-          contentAriaLabel={getTranslation(label ?? '', i18n)}
+          hasContentRegion={Boolean(Label || getTranslation(label ?? '', i18n))}
           header={
             <div className={`${baseClass}__row-label-wrap`}>
               <RowLabel CustomComponent={Label} label={getTranslation(label, i18n)} path={path} />

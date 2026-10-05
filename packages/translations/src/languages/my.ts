@@ -504,6 +504,7 @@ export const myTranslations: DefaultTranslationsObject = {
     showAllLabel: '{{label}} အားလုံး ပြပါ',
     shownInTable: 'ဇယားတွင် ပြသထားသည်။',
     showSidebar: 'ဘေးဘက်လမ်းညွှန်ပြရန်',
+    skipToContent: 'အကြောင်းအရာသို့ ကျော်သွားရန်',
     sorryNotFound: 'ဝမ်းနည်းပါသည်။ သင်ရှာနေတဲ့ဟာ ဒီမှာမရှိပါ။',
     sort: 'အစဉ်လိုက်',
     sortByLabelDirection: 'အစဉ်အလိုက် စီမံခန့်ခွဲထားသည် {{label}} {{direction}}',
@@ -568,6 +569,7 @@ export const myTranslations: DefaultTranslationsObject = {
     noParent: 'မိဘ မရှိပါ',
     noResults: '"{{query}}" အတွက် ရလဒ်မရှိပါ',
     searchLabel: '{{label}} ရှာဖွေပါ',
+    searchResults: '{{count}} ခု တွေ့ရှိသည်',
   },
   localization: {
     cannotCopySameLocale: 'တူညီသော ဒေသသို့ ကူးယူ၍မရပါ',

@@ -36,6 +36,8 @@ import {
   openGlobalAPI,
   openLivePreview,
   openLocaleOptions,
+  openNavigation,
+  openNavigationFolders,
   openPopupWithKeyboard,
   openPostsFilter,
   openRelationshipCreationDrawer,
@@ -141,6 +143,67 @@ test.describe('WCAG 2.2 Level AA', () => {
       }
     })
 
+    test('should identify the navigation create-folder action before opening it', async () => {
+      const sidebar = await openNavigationFolders({ page, serverURL })
+      const create = sidebar.locator('.tree__create-button')
+
+      await expect(create).toHaveAccessibleName(/create.*folder/i)
+      await create.press('Enter')
+      await expect(page.locator('dialog[id^="tree-create-"]')).toBeVisible()
+    })
+
+    test('should expose folder names and hierarchy during keyboard navigation', async () => {
+      const sidebar = await openNavigationFolders({ page, serverURL })
+      const parent = sidebar.getByRole('treeitem', { name: 'Accessibility folder', exact: true })
+      const toggle = parent.locator(':scope > .tree-node__content-wrapper .tree-node__toggle')
+
+      await expect(parent).toHaveAccessibleName('Accessibility folder')
+      await expect(toggle).toHaveAccessibleName(/accessibility folder/i)
+      await parent.focus()
+      await parent.press('ArrowRight')
+      const children = parent.getByRole('group').getByRole('treeitem')
+
+      await expect(parent).toHaveAttribute('aria-level', '1')
+      await expect(parent).toHaveAttribute('aria-expanded', 'true')
+      await expect(parent).toHaveAccessibleName('Accessibility folder')
+      await expect(toggle).toHaveAccessibleName(/accessibility folder/i)
+      await expect(children).toHaveCount(2)
+      await expect(children.first()).toHaveAttribute('aria-level', '2')
+      await expect(children.first()).toHaveAccessibleName('Accessibility child folder')
+      for (const child of await children.all()) {
+        await page.keyboard.press('ArrowDown')
+        await expect(child).toBeFocused()
+      }
+      await page.keyboard.press('ArrowDown')
+      await expect(children.last()).toBeFocused()
+      await page.keyboard.press('ArrowUp')
+      await expect(children.first()).toBeFocused()
+      await page.keyboard.press('ArrowUp')
+      await expect(parent).toBeFocused()
+      await children.first().focus()
+      await expect(children.first()).toBeFocused()
+      await toggle.click()
+      await expect(children).toHaveCount(0)
+      await expect(sidebar.locator('[role=treeitem][tabindex="0"]')).toHaveCount(1)
+      await sidebar.locator('.tree__create-button').focus()
+      await page.keyboard.press('Shift+Tab')
+      const all = sidebar.getByRole('treeitem', { name: /all.*folders/i })
+
+      await expect(all).toBeFocused()
+      await all.press('ArrowDown')
+      await expect(parent).toBeFocused()
+      await parent.press('ArrowRight')
+      await expect(children).toHaveCount(2)
+      await page.keyboard.press('ArrowDown')
+      await page.keyboard.press('ArrowDown')
+      await page.keyboard.press('Enter')
+      await expect(children.last()).toHaveAttribute('aria-selected', 'true')
+      await expect(page).toHaveURL(/_h_payload-folders=/)
+      await expect(
+        page.getByRole('heading', { name: 'Accessibility final child folder', exact: true }),
+      ).toBeVisible()
+    })
+
     test('should expose column editor headings and named toggles', async () => {
       test.setTimeout(60000)
       const columns = await openTableColumns({ page, postsURL })
@@ -223,6 +286,8 @@ test.describe('WCAG 2.2 Level AA', () => {
         }
         const drawer = await openDrawer({ page, postsURL })
         const headers = drawer.locator('th:has(.sort-column__button)')
+
+        await expect(drawer.getByRole('main')).toHaveCount(0)
 
         await expect(headers.first()).toBeVisible()
         for (const header of await headers.all()) {
@@ -1552,7 +1617,85 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
 
+  test.describe('2.4.1 Bypass Blocks (A)', () => {
+    test('should skip navigation on collection, dashboard, and mobile views', async () => {
+      for (const view of ['collection', 'dashboard', 'mobile'] as const) {
+        try {
+          if (view === 'mobile') {
+            await page.setViewportSize({ height: 844, width: 390 })
+            await openMainNavigation({ page, postsURL })
+          } else if (view === 'dashboard') {
+            await page.goto(formatAdminURL({ adminRoute: '/admin', serverURL }))
+            await expect(page.locator('.dashboard')).toBeVisible()
+          } else {
+            await gotoPostsList({ page, postsURL })
+          }
+          const skip = page.getByRole('link', { name: /skip to content/i })
+
+          if (view === 'mobile') {
+            await skip.focus()
+          } else {
+            await page.keyboard.press('Tab')
+          }
+          await expect(skip).toBeFocused()
+          await expect(skip).toBeInViewport()
+          await skip.press('Enter')
+          if (view === 'dashboard') {
+            await expect(page.locator('#payload-main-content')).toBeFocused()
+          } else {
+            await expect(page.getByRole('main')).toBeFocused()
+          }
+          if (view === 'mobile') {
+            await expect(page.locator('aside.nav')).not.toHaveClass(/nav--nav-open/)
+          }
+          await page.keyboard.press('Tab')
+          await expectFocusInside({
+            container: view === 'dashboard' ? page.locator('.dashboard') : page.getByRole('main'),
+            page,
+          })
+          await expect(page.locator(':focus')).toBeInViewport()
+        } finally {
+          await page.setViewportSize({ height: 720, width: 1280 })
+        }
+      }
+    })
+
+    test('should include grouped pagination in the main landmark', async () => {
+      await page.goto(`${postsURL.list}?groupBy=accessibilitySelect&limit=1`)
+      try {
+        const pagination = page.getByRole('button', { name: 'Next table page', exact: true })
+
+        await expect(pagination).toBeVisible()
+        await expect(
+          page.getByRole('main').getByRole('button', { name: 'Next table page', exact: true }),
+        ).toBeVisible()
+      } finally {
+        await page.goto(`${postsURL.list}?groupBy=&limit=10`)
+        await expect(page.locator('tbody tr')).toHaveCount(3)
+      }
+    })
+  })
+
   test.describe('2.4.3 Focus Order (A)', () => {
+    test('should return focus to each list-options trigger after its Close button', async () => {
+      for (const [selector, name] of [
+        ['#toggle-group-by', /group by/i],
+        ['.columns-button__button', /columns/i],
+      ] as const) {
+        await gotoPostsList({ page, postsURL })
+        const trigger = page.locator(selector)
+
+        await trigger.press('Enter')
+        const dialog = page.getByRole('dialog', { name })
+        const close = dialog.getByRole('button', { name: /close/i })
+
+        await expect(close).toBeFocused()
+        await page.keyboard.press('Enter')
+        await expect(dialog).toBeHidden()
+        await expect.soft(trigger).toBeFocused()
+      }
+    })
+
     test('should reorder widgets using the dedicated keyboard drag control', async () => {
       // PYLD-3642: browser coverage complements the NVDA regression.
       await openDashboardEditor({ page, serverURL })
@@ -3023,12 +3166,37 @@ test.describe('WCAG 2.2 Level AA', () => {
       const regionID = await region.getAttribute('id')
       await expect(toggle).toHaveAccessibleName('Publishing details Toggle block')
       await expect(region).toHaveAccessibleName('Publishing details')
-      await expect(region).toHaveAttribute('aria-label', 'Publishing details')
+      await expect(region).toHaveAttribute('aria-labelledby', /\S/)
       await expect(toggle).toHaveAttribute('aria-controls', regionID!)
       await toggle.press('Enter')
       await expect(region).toBeHidden()
       await toggle.press('Space')
       await expect(region).toBeVisible()
+    })
+
+    test('should name a collapsible region from its custom Label without a config label', async () => {
+      await gotoCreatePost({ page, postsURL })
+      const field = page.locator('.collapsible-field').filter({ hasText: 'Editorial details' })
+      const region = field.getByRole('region', { name: 'Editorial details', exact: true })
+      const toggle = field.locator('.collapsible__toggle')
+
+      await expect(field.getByText('Editorial details', { exact: true })).toBeVisible()
+      await expect(region).toBeVisible()
+      await expect(
+        region.getByRole('textbox', { name: 'Custom Label Note', exact: true }),
+      ).toBeVisible()
+      await expect(toggle).toHaveAccessibleName('Editorial details Toggle block')
+      await expect(region).toHaveAttribute('id', /\S/)
+      const regionID = await region.getAttribute('id')
+
+      await expect(toggle).toHaveAttribute('aria-controls', regionID!)
+      await toggle.press('Enter')
+      await expect(region).toBeHidden()
+      await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+      await toggle.press('Space')
+      await expect(region).toBeVisible()
+      await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+      await expect(region).toHaveAccessibleName('Editorial details')
     })
 
     test('should name Block and Collapsible group toggles and expose their current state', async () => {
@@ -3179,6 +3347,66 @@ test.describe('WCAG 2.2 Level AA', () => {
       await toggle.press('Space')
       await expect(view).not.toHaveClass(/query-inspector--fullscreen/)
       await expect.soft(toggle).toHaveAttribute('aria-pressed', 'false')
+    })
+
+    test('should expose and operate the All Folders navigation item by keyboard', async () => {
+      const sidebar = await openNavigationFolders({ page, serverURL })
+      const all = sidebar.getByRole('treeitem', { name: /all.*folders/i })
+      const parent = sidebar.getByRole('treeitem', { name: 'Accessibility folder', exact: true })
+
+      await expect(sidebar.locator('[role=treeitem][tabindex="0"]')).toHaveCount(1)
+      await all.focus()
+      await all.press('ArrowDown')
+      await expect(parent).toBeFocused()
+      await parent.press('ArrowUp')
+      await expect(all).toBeFocused()
+      await expect(sidebar.locator('[role=treeitem][tabindex="0"]')).toHaveCount(1)
+      await all.press('Enter')
+      await expect(page).toHaveURL(/collections\/payload-folders\/hierarchy/)
+      await expect(page.locator('.hierarchy-list')).toBeVisible()
+    })
+
+    test('should identify all navigation routes and preserve keyboard access', async () => {
+      test.setTimeout(60_000)
+      await openMainNavigation({ page, postsURL })
+      const selected = page.locator('#nav-posts')
+
+      await expect(selected).toHaveAttribute('aria-current', 'page')
+      await expect(selected).toHaveAccessibleName('Posts')
+      await expect(page.locator('#nav-users')).not.toHaveAttribute('aria-current', 'page')
+      const group = page.locator('.nav-group').filter({ has: selected })
+
+      await group.locator('.nav-group__toggle').focus()
+      let hasReachedSelected = false
+
+      for (let index = 0; index < 30; index++) {
+        await page.keyboard.press('Tab')
+        if (await selected.evaluate((element) => element === document.activeElement)) {
+          hasReachedSelected = true
+          break
+        }
+      }
+      expect(hasReachedSelected).toBe(true)
+      for (const view of ['create', 'edit', 'versions'] as const) {
+        if (view === 'create') {
+          await gotoCreatePost({ page, postsURL })
+        } else if (view === 'edit') {
+          await gotoFirstPost({ page, postsURL, serverURL })
+        } else {
+          await openTableVersionHistory({ kind: 'collection', page, postsURL, serverURL })
+        }
+        await openNavigation({ page })
+        await expect(page.locator('#nav-posts')).toHaveAttribute('aria-current', 'location')
+      }
+      const toggle = page.locator('.nav-group__toggle').filter({ hasText: /^Collections$/ })
+
+      await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+      await toggle.press('Enter')
+      await expect(selected).toBeHidden()
+      await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+      await toggle.press('Enter')
+      await expect(selected).toBeVisible()
+      await expect(toggle).toHaveAttribute('aria-expanded', 'true')
     })
 
     test('should expose the upload dropzone without detectable accessibility violations', async ({
@@ -3611,6 +3839,32 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
   test.describe('4.1.3 Status Messages (AA)', () => {
+    test('should announce folder search results and clear status without moving focus', async () => {
+      const sidebar = await openNavigationFolders({ page, serverURL })
+      const search = sidebar.getByRole('textbox')
+      const status = sidebar.getByRole('status')
+
+      await expect(status).toBeEmpty()
+      await search.fill('no-such-navigation-folder')
+      await search.press('Enter')
+      await expect(status).toContainText('No results for "no-such-navigation-folder"')
+      await expect(search).toBeFocused()
+      await search.fill('Accessibility child folder')
+      await expect(status).toContainText('No results for "no-such-navigation-folder"')
+      const originalURL = page.url()
+
+      await search.press('Enter')
+      await expect(status).toHaveText('Found 1')
+      await expect(sidebar.locator('.hierarchy-search-results__list')).toContainText(
+        'Accessibility child folder',
+      )
+      await expect(search).toBeFocused()
+      await expect(page).toHaveURL(originalURL)
+      await sidebar.getByRole('button', { name: 'Clear', exact: true }).click()
+      await expect(status).toBeEmpty()
+      await expect(sidebar.getByRole('tree')).toBeVisible()
+    })
+
     test('should announce completed collection searches', async () => {
       await page.clock.install()
       await page.goto(`${postsURL.list}?groupBy=&search=`)
@@ -3837,4 +4091,17 @@ async function expectRequiredState({ input }: { input: Locator }) {
         element.required || element.getAttribute('aria-required') === 'true',
     ),
   ).toBe(true)
+}
+
+async function openMainNavigation({ page, postsURL }: { page: Page; postsURL: AdminUrlUtil }) {
+  await gotoPostsList({ page, postsURL })
+  await openNavigation({ page })
+  await page.getByRole('tab', { name: /collections/i }).click()
+  const group = page.locator('.nav-group').filter({ has: page.locator('#nav-posts') })
+
+  if (!(await page.locator('#nav-posts').isVisible())) {
+    await page.locator('.nav-group__toggle').filter({ hasText: 'Collections' }).click()
+  }
+  await expect(group).toBeVisible()
+  await expect(page.locator('#nav-posts')).toBeVisible()
 }

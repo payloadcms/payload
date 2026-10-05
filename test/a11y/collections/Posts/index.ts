@@ -209,6 +209,13 @@ export const PostsCollection: CollectionConfig = {
       fields: [{ name: 'publishingNote', type: 'text' }],
       label: 'Publishing details',
     },
+    {
+      type: 'collapsible',
+      admin: {
+        components: { Label: '/components/CustomCollapsibleLabel/index.js#CustomCollapsibleLabel' },
+      },
+      fields: [{ name: 'customLabelNote', type: 'text' }],
+    },
     createFolderField({ relationTo: 'payload-folders' }),
     {
       name: 'featuredImage',

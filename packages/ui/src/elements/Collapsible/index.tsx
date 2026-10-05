@@ -23,8 +23,6 @@ export type CollapsibleProps = {
   children: React.ReactNode
   className?: string
   collapsibleStyle?: 'default' | 'error'
-  /** Opt into a named region for significant sections, rather than individual rows. */
-  contentAriaLabel?: string
   /**
    * If set to true, clicking on the collapsible header will not toggle the collapsible state.
    * This is useful if the collapsible state is controlled externally (e.g. from a parent component or custom button).
@@ -35,6 +33,8 @@ export type CollapsibleProps = {
    */
   disableToggleIndicator?: boolean
   dragHandleProps?: DragHandleProps
+  /** Opt into a region named by the rendered header for significant sections, not individual rows. */
+  hasContentRegion?: boolean
   header?: React.ReactNode
   initCollapsed?: boolean
   isCollapsed?: boolean
@@ -47,10 +47,10 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
   children,
   className,
   collapsibleStyle = 'default',
-  contentAriaLabel,
   disableHeaderToggle = false,
   disableToggleIndicator = false,
   dragHandleProps,
+  hasContentRegion = false,
   header,
   initCollapsed,
   isCollapsed: collapsedFromProps,
@@ -155,10 +155,10 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
         </div>
         <AnimateHeight height={isCollapsed ? 0 : 'auto'}>
           <div
-            aria-label={contentAriaLabel || undefined}
+            aria-labelledby={hasContentRegion && header ? headerID : undefined}
             className={`${baseClass}__content`}
             id={contentID}
-            role={contentAriaLabel ? 'region' : undefined}
+            role={hasContentRegion && header ? 'region' : undefined}
           >
             {children}
           </div>
