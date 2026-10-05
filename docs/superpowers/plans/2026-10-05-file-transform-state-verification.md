@@ -76,3 +76,13 @@ The reviewer set aside full file localization, concrete video/PDF engines and un
 ## Deferred minors
 
 None reported by the fresh reviewer.
+
+## Additional spec: optional custom definitions
+
+The user added: `_transforms` accepts arbitrary additional JSON-compatible keys without registration; built-in keys retain their standard shapes and validation and cannot be redefined; an adapter needing a different shape uses a different custom key. Each adapter owns custom-key validation and operation order and may provide optional definitions for stronger generated types and JSDoc.
+
+Implemented `UploadTransformer.transformDefinitions` and exported `TransformDefinition`. Each custom definition is a JSON schema that enriches generated collection types and descriptions. Core custom-value runtime validation remains JSON compatibility only; executor validation and exact coverage remain independent. Existing schemas are cloned so definitions cannot contaminate another collection/configuration.
+
+Verification: five schema tests (including failing-before-fix definition merging, built-in redefinition and conflict regressions), 55 files / 533 units passed, 28 focused Mongo integration tests passed, 11 type tests / 17 assertions passed, and core TypeScript passed. Generated fixtures include optional watermark properties and their property/type JSDoc. The integration regression verifies that optional custom definitions do not become mandatory core runtime validation. No database schema or file-processing behavior changed; additional database/e2e runs were not needed.
+
+Ruling: reject conflicting schemas for the same custom key, while allowing identical schemas across adapters — the generated collection type needs one unambiguous definition, and shared media-specific adapters can describe the same key — cost if wrong: adapters must choose distinct keys or agree on one schema.

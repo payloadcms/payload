@@ -101,6 +101,8 @@ transformFile: (args: {
   >
 ```
 
+Adapters may optionally provide `transformDefinitions`, a map of custom keys to JSON schemas for generated types and JSDoc. Definitions never register required keys, replace built-in shapes, claim execution, or replace adapter-owned custom-value validation. See [optional adapter definitions](./transform-state#optional-adapter-definitions).
+
 `transformFile` processes one current source and never writes to storage. Its `options` come only from that stage's own `canTransform` result. The retained original remains separately available when a stage replaces the current source. The full working document includes custom fields and `_transforms`; the entry snapshot is deeply frozen.
 
 `FileSource` exposes `filename`, `mimeType`, optional `size`, lazy `stream()`, bounded `read({ length, offset? })`, and `arrayBuffer({ maxBytes })`. Custom stages can probe temporary or provider sources without eager whole-file downloads. Consumers must declare a whole-file byte limit. Sharp defaults to 64 MiB through `maxSourceBytes`.

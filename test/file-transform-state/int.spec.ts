@@ -270,6 +270,16 @@ test.suite('File transform state', { config: './config.ts' }, () => {
     })
   })
 
+  test('should leave optional custom-definition validation to adapters', async ({ restClient }) => {
+    const response = await restClient.POST(`/${mediaSlug}`, {
+      body: JSON.stringify({ _transforms: { unregistered: { value: true }, watermark: 42 } }),
+    })
+    const { doc } = await response.json()
+
+    expect(response.status).toBe(201)
+    expect(doc._transforms).toEqual({ unregistered: { value: true }, watermark: 42 })
+  })
+
   test('should expose transform state as writable GraphQL JSON', async ({ restClient }) => {
     const state = { rotate: { angle: 90 }, vendor: { values: [1, 'a', true, null] } }
     const response = await restClient.GRAPHQL_POST({
