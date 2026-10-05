@@ -488,6 +488,7 @@ export const arTranslations: DefaultTranslationsObject = {
     showAllLabel: 'عرض كل {{label}}',
     shownInTable: 'معروض في جدول',
     showSidebar: 'إظهار الشريط الجانبي',
+    skipToContent: 'تخطي إلى المحتوى',
     sorryNotFound: 'عذرًا - لا يوجد شيء يتوافق مع طلبك.',
     sort: 'ترتيب',
     sortByLabelDirection: 'رتّب حسب {{label}} {{direction}}',
@@ -549,6 +550,7 @@ export const arTranslations: DefaultTranslationsObject = {
     noParent: 'لا والدين',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'البحث {{label}}',
+    searchResults: 'تم العثور على {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'لا يمكن النسخ إلى نفس الموقع',
