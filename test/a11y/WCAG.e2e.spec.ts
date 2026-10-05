@@ -2035,21 +2035,26 @@ test.describe('WCAG 2.2 Level AA', () => {
                 'Please enter a valid value for this required field before saving your changes. ' +
                 'A'.repeat(100)
             })
-            for (const width of [390, 1280]) {
-              await formPage.setViewportSize({ height: 900, width })
-              await input.scrollIntoViewIfNeeded()
-              await expect(error).toBeVisible()
-              await expect
-                .poll(async () => {
-                  const box = await error.boundingBox()
+            for (const direction of ['ltr', 'rtl']) {
+              await formPage.locator('html').evaluate((element, dir) => {
+                element.dir = dir
+              }, direction)
+              for (const width of [390, 1280]) {
+                await formPage.setViewportSize({ height: 900, width })
+                await input.scrollIntoViewIfNeeded()
+                await expect(error).toBeVisible()
+                await expect
+                  .poll(async () => {
+                    const box = await error.boundingBox()
 
-                  return box && box.x >= 0 && box.x + box.width <= width
-                })
-                .toBe(true)
-              expect(
-                await error.evaluate((element) => element.scrollWidth <= element.clientWidth),
-              ).toBe(true)
-              await expectErrorTabOrder({ error, input })
+                    return box && box.x >= 0 && box.x + box.width <= width
+                  })
+                  .toBe(true)
+                expect(
+                  await error.evaluate((element) => element.scrollWidth <= element.clientWidth),
+                ).toBe(true)
+                await expectErrorTabOrder({ error, input })
+              }
             }
           } finally {
             await error.locator('.tooltip-content').evaluate((element, message) => {
