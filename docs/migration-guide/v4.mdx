@@ -1899,8 +1899,10 @@ Existing documents must be migrated. Create the predefined migration for your da
   `variants`, rename that field before you run the predefined migration. Choose
   a new name, update your config, and write a custom migration that moves the
   existing custom data from `variants` to the new field. Then run the predefined
-  `sizes-to-variants` migration. The predefined migration cannot choose a new
-  name or merge this custom data for you.
+  `sizes-to-variants` migration. If legacy `sizes` data or columns and custom
+  `variants` data or columns are both present, the predefined migration stops
+  before it changes data or indexes. It cannot choose a new name or merge this
+  custom data for you.
 </Banner>
 
 ```sh

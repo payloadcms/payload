@@ -5,7 +5,10 @@ import { sql } from 'drizzle-orm'
 import type { SizesToVariantsDirection } from '../../../utilities/getSizesToVariantsRenames.js'
 import type { BasePostgresAdapter } from '../../types.js'
 
-import { getSizesToVariantsRenames } from '../../../utilities/getSizesToVariantsRenames.js'
+import {
+  assertNoSizesToVariantsColumnCollisions,
+  getSizesToVariantsRenames,
+} from '../../../utilities/getSizesToVariantsRenames.js'
 
 /**
  * Moves every upload collection's stored image sizes between the legacy `sizes_*` columns and
@@ -25,9 +28,29 @@ export async function migratePostgresSizesToVariants({
   const adapter = payload.db as unknown as BasePostgresAdapter
   const schemaName = adapter.schemaName || 'public'
   const plan = getSizesToVariantsRenames({ adapter, direction })
+  const plannedTables: Array<
+    (typeof plan)[number] & {
+      existingColumns: Set<string>
+    }
+  > = []
 
-  for (const { columns, indexes, tableName } of plan) {
-    const existingColumns = await getColumnNames({ db, schemaName, tableName })
+  for (const tablePlan of plan) {
+    const existingColumns = await getColumnNames({
+      db,
+      schemaName,
+      tableName: tablePlan.tableName,
+    })
+
+    assertNoSizesToVariantsColumnCollisions({
+      columns: tablePlan.columns,
+      existingColumns,
+      tableName: tablePlan.tableName,
+    })
+
+    plannedTables.push({ ...tablePlan, existingColumns })
+  }
+
+  for (const { columns, existingColumns, indexes, tableName } of plannedTables) {
     let renamedCount = 0
 
     for (const { from, to } of columns) {
@@ -35,9 +58,10 @@ export async function migratePostgresSizesToVariants({
         continue
       }
 
-      await db.execute(
-        sql.raw(`ALTER TABLE "${schemaName}"."${tableName}" RENAME COLUMN "${from}" TO "${to}"`),
-      )
+      await db.execute(sql`
+        ALTER TABLE ${sql.identifier(schemaName)}.${sql.identifier(tableName)}
+        RENAME COLUMN ${sql.identifier(from)} TO ${sql.identifier(to)}
+      `)
       renamedCount++
     }
 
@@ -57,9 +81,10 @@ export async function migratePostgresSizesToVariants({
         continue
       }
 
-      await db.execute(
-        sql.raw(`ALTER INDEX "${schemaName}"."${existingName}" RENAME TO "${index.to}"`),
-      )
+      await db.execute(sql`
+        ALTER INDEX ${sql.identifier(schemaName)}.${sql.identifier(existingName)}
+        RENAME TO ${sql.identifier(index.to)}
+      `)
     }
 
     payload.logger.info({
