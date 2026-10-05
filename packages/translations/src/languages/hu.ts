@@ -501,6 +501,8 @@ export const huTranslations: DefaultTranslationsObject = {
     selectAll: 'Az összes kijelölése: {{count}} {{label}}',
     selectAllRows: 'Válassza ki az összes sort',
     selectedCount: '{{count}} {{label}} kiválasztva',
+    selectedDocument:
+      'Kiválasztva. A kijelölés módosításához nyomja meg az Enter vagy a szóköz billentyűt.',
     selectLabel: 'Válassza ki a(z) {{label}} opciót',
     selectValue: 'Válasszon ki egy értéket',
     settings: 'Beállítások',
@@ -580,8 +582,6 @@ export const huTranslations: DefaultTranslationsObject = {
     copyTo: 'Másolja ide',
     copyToLocale: 'Másolás a helyi verzióba',
     localeToPublish: 'Közzététel helye',
-    selectedDocument:
-      'Kiválasztva. A kijelölés módosításához nyomja meg az Enter vagy a szóköz billentyűt.',
     selectedLocales: 'Kiválasztott helyi beállítások',
     selectLocaleToCopy: 'Válassza ki a másolni kívánt területet.',
     selectLocaleToDuplicate: 'Válassza ki a másolandó helyszínekent.',

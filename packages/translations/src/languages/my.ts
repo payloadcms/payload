@@ -501,6 +501,8 @@ export const myTranslations: DefaultTranslationsObject = {
     selectAll: '{{count}} {{label}} အားလုံးကို ရွေးပါ',
     selectAllRows: 'အားလုံးကိုရွေးချယ်ပါ',
     selectedCount: '{{count}} {{label}} ကို ရွေးထားသည်။',
+    selectedDocument:
+      'ရွေးချယ်ထားသည်။ ရွေးချယ်မှုကို ပြောင်းရန် Enter သို့မဟုတ် Space ကို နှိပ်ပါ။',
     selectLabel: '{{label}} ရွေးချယ်ပါ',
     selectValue: 'တစ်ခုခုကို ရွေးချယ်ပါ။',
     settings: 'ဆက်တင်များ',
@@ -582,8 +584,6 @@ export const myTranslations: DefaultTranslationsObject = {
     copyTo: 'သို့ ကူးယူပါ',
     copyToLocale: 'ဒေသသို့ ကူးယူပါ',
     localeToPublish: 'ထုတ်ဝေရန် ဒေသ',
-    selectedDocument:
-      'ရွေးချယ်ထားသည်။ ရွေးချယ်မှုကို ပြောင်းရန် Enter သို့မဟုတ် Space ကို နှိပ်ပါ။',
     selectedLocales: 'ရွေးချယ်ထားသော ဒေသများ',
     selectLocaleToCopy: 'ကူးယူရန် ဒေသ ရွေးချယ်ပါ',
     selectLocaleToDuplicate: 'ပုံတူပွားရန် ဒေသများ ရွေးချယ်ပါ',

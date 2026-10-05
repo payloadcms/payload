@@ -497,6 +497,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     selectAll: 'Pasirinkite visus {{count}} {{label}}',
     selectAllRows: 'Pasirinkite visas eilutes',
     selectedCount: '{{count}} {{label}} pasirinkta',
+    selectedDocument:
+      'Pasirinkta. Norėdami pakeisti pasirinkimą, paspauskite Enter arba tarpo klavišą.',
     selectLabel: 'Pasirinkite {{label}}',
     selectValue: 'Pasirinkite reikšmę',
     settings: 'Nustatymai',
@@ -576,8 +578,6 @@ export const ltTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopijuoti į',
     copyToLocale: 'Kopijuoti į vietovę',
     localeToPublish: 'Publikuoti lokacijoje',
-    selectedDocument:
-      'Pasirinkta. Norėdami pakeisti pasirinkimą, paspauskite Enter arba tarpo klavišą.',
     selectedLocales: 'Pasirinktos lokalės',
     selectLocaleToCopy: 'Pasirinkite lokalės kopijavimui',
     selectLocaleToDuplicate: 'Pasirinkite vietoves, kurias norite dubliuoti',

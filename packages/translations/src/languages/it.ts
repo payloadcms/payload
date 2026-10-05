@@ -501,6 +501,8 @@ export const itTranslations: DefaultTranslationsObject = {
     selectAll: 'Seleziona tutto {{count}} {{label}}',
     selectAllRows: 'Seleziona tutte le righe',
     selectedCount: '{{count}} {{label}} selezionato',
+    selectedDocument:
+      'Selezionato. Premi Invio o la barra spaziatrice per modificare la selezione.',
     selectLabel: 'Seleziona {{label}}',
     selectValue: 'Seleziona un valore',
     settings: 'Impostazioni',
@@ -580,8 +582,6 @@ export const itTranslations: DefaultTranslationsObject = {
     copyTo: 'Copia per',
     copyToLocale: 'Copia in locale',
     localeToPublish: 'Località da pubblicare',
-    selectedDocument:
-      'Selezionato. Premi Invio o la barra spaziatrice per modificare la selezione.',
     selectedLocales: 'Località Selezionate',
     selectLocaleToCopy: 'Seleziona la località da copiare',
     selectLocaleToDuplicate: 'Seleziona le località da duplicare',

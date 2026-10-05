@@ -505,6 +505,8 @@ export const deTranslations: DefaultTranslationsObject = {
     selectAll: 'Alle {{count}} {{label}} auswählen',
     selectAllRows: 'Alle Zeilen auswählen',
     selectedCount: '{{count}} {{label}} ausgewählt',
+    selectedDocument:
+      'Ausgewählt. Drücken Sie die Eingabetaste oder die Leertaste, um die Auswahl zu ändern.',
     selectLabel: '{{label}} auswählen',
     selectValue: 'Wert auswählen',
     settings: 'Einstellungen',
@@ -587,8 +589,6 @@ export const deTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopieren nach',
     copyToLocale: 'In Sprachvariante kopieren',
     localeToPublish: 'Zu veröffentlichende Sprache',
-    selectedDocument:
-      'Ausgewählt. Drücken Sie die Eingabetaste oder die Leertaste, um die Auswahl zu ändern.',
     selectedLocales: 'Ausgewählte Sprachen',
     selectLocaleToCopy: 'Sprache zum Kopieren auswählen',
     selectLocaleToDuplicate: 'Sprachen zum Duplizieren auswählen',
