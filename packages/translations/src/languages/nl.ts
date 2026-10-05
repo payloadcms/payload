@@ -506,6 +506,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Toon alle {{label}}',
     shownInTable: 'Weergegeven in tabel',
     showSidebar: 'Zijbalk weergeven',
+    skipToContent: 'Ga naar inhoud',
     sorryNotFound: 'Sorry, er is niets dat overeen komt met uw verzoek.',
     sort: 'Sorteer',
     sortByLabelDirection: 'Sorteer op {{label}} {{direction}}',
@@ -568,6 +569,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     noParent: 'Geen Ouder',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Zoek {{label}}',
+    searchResults: '{{count}} gevonden',
   },
   localization: {
     cannotCopySameLocale: 'Kan niet naar dezelfde taal kopiëren',

@@ -498,6 +498,7 @@ export const daTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Vis alle {{label}}',
     shownInTable: 'Vises i tabel',
     showSidebar: 'Vis sidepanel',
+    skipToContent: 'Spring til indhold',
     sorryNotFound: 'Beklager—der er intet, der svarer til din handling.',
     sort: 'Sorter',
     sortByLabelDirection: 'Sorter efter {{label}} {{direction}}',
@@ -560,6 +561,7 @@ export const daTranslations: DefaultTranslationsObject = {
     noParent: 'Ingen Forælder',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Søg {{label}}',
+    searchResults: 'Fandt {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Kan ikke kopiere til den samme lokalitet',
