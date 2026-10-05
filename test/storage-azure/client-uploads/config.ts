@@ -35,7 +35,6 @@ dotenv.config({
 })
 
 export default buildConfigWithDefaults({
-  suite: 'storage-azure-client-uploads',
   config: {
     admin: {
       importMap: {
@@ -101,8 +100,16 @@ export default buildConfigWithDefaults({
         {
           slug: 'uppercase-text',
           mimeTypes: ['text/plain'],
-          transformFile: async ({ file }) => ({
-            file: new File([(await file.text()).toUpperCase()], file.name, { type: file.type }),
+          transformFile: async ({ source }) => ({
+            file: new File(
+              [
+                new TextDecoder()
+                  .decode(await source.arrayBuffer({ maxBytes: 1024 * 1024 }))
+                  .toUpperCase(),
+              ],
+              source.filename,
+              { type: source.mimeType },
+            ),
             status: 'complete',
           }),
         },
@@ -119,4 +126,5 @@ export default buildConfigWithDefaults({
       overrideAccess: true,
     })
   },
+  suite: 'storage-azure-client-uploads',
 })

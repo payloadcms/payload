@@ -4,6 +4,7 @@ import type { UploadCollectionSlug } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { StagedObject } from './fileVersioning/fileOperationManager.js'
 import type { ManagedFileManifest } from './fileVersioning/types.js'
+import type { TransformState } from './transformState/types.js'
 
 export type OriginalFileData = {
   filename: string
@@ -30,6 +31,7 @@ export type FileSizes = {
 export type FileData = {
   _managedFiles?: ManagedFileManifest | null
   _objectKey?: string
+  _transforms?: null | TransformState
   filename: string
   filesize: number
   focalX?: number

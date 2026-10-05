@@ -482,8 +482,9 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
         const { doc } = await createRes.json()
         createdIds.push(doc.id)
 
-        expect(downloadSpy).toHaveBeenCalledTimes(1)
-        expect(downloadSpy.mock.calls[0]![1]).toBeUndefined()
+        expect(downloadSpy).toHaveBeenCalledTimes(2)
+        expect(downloadSpy.mock.calls[0]![1]).toBe(1)
+        expect(downloadSpy.mock.calls[1]![1]).toBeUndefined()
       } finally {
         downloadSpy.mockRestore()
       }

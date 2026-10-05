@@ -333,10 +333,12 @@ describe('getFileFromUploadInstructions', () => {
     expect(handler).not.toHaveBeenCalled()
   })
 
-  it('fetches the full file when a custom transformFile transformer matches its mime type', async () => {
+  it('should keep a custom transformer source lazy while probing image metadata', async () => {
     const handler = vi.fn(async (handlerReq: PayloadRequest) => {
-      expect(handlerReq.headers.get('range')).toBeNull()
-      return new Response(MINIMAL_PNG, { headers: { 'Content-Type': 'image/png' } })
+      expect(handlerReq.headers.get('range')).toBe(`bytes=0-${HEADER_PROBE_BYTE_LENGTH - 1}`)
+      return new Response(MINIMAL_PNG, {
+        headers: { 'Content-Type': 'image/png', 'Content-Length': String(MINIMAL_PNG.length) },
+      })
     })
 
     const req = createReq([handler], {})
@@ -354,11 +356,8 @@ describe('getFileFromUploadInstructions', () => {
       req,
     })
 
-    tempFilesToClean.push(file.tempFilePath!)
-
     expect(handler).toHaveBeenCalledTimes(1)
-    expect(file.tempFilePath).toBeDefined()
-    expect(fs.readFileSync(file.tempFilePath!).equals(MINIMAL_PNG)).toBe(true)
+    expect(file.tempFilePath).toBeUndefined()
   })
 
   it('uses a bounded existence probe when a transformer declines the upload', async () => {

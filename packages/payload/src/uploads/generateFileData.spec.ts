@@ -44,6 +44,7 @@ const createCollection = (uploadOverrides: Record<string, unknown> = {}): Collec
   ({
     config: {
       slug: 'media',
+      fields: [],
       upload: {
         disableLocalStorage: true,
         focalPoint: false,
@@ -80,6 +81,67 @@ describe('generateFileData', () => {
       },
     }) as unknown as PayloadRequest
 
+  it('should replay a retained original through bounded reads without eager buffering', async () => {
+    const filename = path.basename(tempFilePath)
+    const req = createReq(undefined)
+    req.file = undefined
+    req.payload.config.routes = { api: '/api' } as any
+    req.payload.config.upload = {
+      transformers: [
+        {
+          slug: 'inspect',
+          mimeTypes: ['image/png'],
+          canTransform: () => ({ canTransform: true, handledTransformKeys: ['inspect'] }),
+          transformFile: async ({ source }) => {
+            expect(Buffer.from(await source.read({ length: 8 }))).toEqual(
+              PNG_SIGNATURE.subarray(0, 8),
+            )
+            return { status: 'continue' }
+          },
+        },
+      ],
+    } as any
+    const originalDoc = {
+      id: '1',
+      filename,
+      mimeType: 'image/png',
+      original: {
+        filename,
+        url: '/original',
+        mimeType: 'image/png',
+        filesize: PNG_SIGNATURE.length,
+        width: 1,
+        height: 1,
+      },
+      _managedFiles: [
+        { key: filename, storageBackendId: 'local:media', roles: [{ type: 'original' }] },
+      ],
+    }
+    const readFile = vi
+      .spyOn(fs, 'readFile')
+      .mockRejectedValue(new Error('Unexpected whole original read.'))
+
+    try {
+      const result = await generateFileData({
+        collection: createCollection({
+          disableLocalStorage: false,
+          staticDir: path.dirname(tempFilePath),
+        }),
+        config: {} as SanitizedConfig,
+        data: { _transforms: { inspect: true } },
+        originalDoc,
+        operation: 'update',
+        overwriteExistingFiles: true,
+        req,
+      })
+
+      expect(result.files).toEqual([])
+      expect(readFile).not.toHaveBeenCalled()
+    } finally {
+      readFile.mockRestore()
+    }
+  })
+
   it('does not run full sharp processing on an image with no configured adjustments, even when it arrives via tempFilePath', async () => {
     const { sharp, toBufferMock } = createSharpMock()
 
@@ -111,7 +173,7 @@ describe('generateFileData', () => {
         query,
       }) as unknown as PayloadRequest
 
-    it('should default the focal point to the center on create', async () => {
+    it('should leave canonical focal intent absent by default', async () => {
       const result = await generateFileData({
         collection: createCollection({ focalPoint: true }),
         config: {} as SanitizedConfig,
@@ -121,10 +183,10 @@ describe('generateFileData', () => {
         req: createPngReq(),
       })
 
-      expect(result.data).toMatchObject({ focalX: 50, focalY: 50 })
+      expect(result.data).toMatchObject({ _transforms: null, focalX: null, focalY: null })
     })
 
-    it('should save a focal point sent through the uploadEdits query param', async () => {
+    it('should keep query focal overrides out of persisted state', async () => {
       const result = await generateFileData({
         collection: createCollection({ focalPoint: true }),
         config: {} as SanitizedConfig,
@@ -134,7 +196,7 @@ describe('generateFileData', () => {
         req: createPngReq({ query: { uploadEdits: { focalPoint: { x: 20.4, y: 80.6 } } } }),
       })
 
-      expect(result.data).toMatchObject({ focalX: 20, focalY: 81 })
+      expect(result.data).toMatchObject({ _transforms: null, focalX: null, focalY: null })
     })
 
     it('should not save a focal point when focalPoint is disabled', async () => {
@@ -147,7 +209,7 @@ describe('generateFileData', () => {
         req: createPngReq(),
       })
 
-      expect(result.data).not.toHaveProperty('focalX')
+      expect(result.data).toMatchObject({ _transforms: null, focalX: null, focalY: null })
     })
   })
 
@@ -398,7 +460,7 @@ describe('generateFileData', () => {
 
     expect(files).toEqual([
       {
-        path: `${os.tmpdir()}/document.pdf`,
+        path: `${os.tmpdir()}/document-original.pdf`,
         sourcePath: tempFilePath,
       },
     ])

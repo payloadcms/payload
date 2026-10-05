@@ -132,6 +132,8 @@ export const sanitizeUploadData = <T>(data: T, operation: Operation): T => {
   delete sanitizedData._managedFiles
   delete sanitizedData._fileRevision
   delete sanitizedData.original
+  delete sanitizedData.focalX
+  delete sanitizedData.focalY
 
   // On update, `prefix` is restored from the stored document (file identity); kept on create.
   if (operation === 'update') {

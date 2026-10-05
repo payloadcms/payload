@@ -93,12 +93,10 @@ test.suite('Upload transformers', { config: './config.ts' }, () => {
     ])('should serve $name', async ({ expected, headers, query }) => {
       const doc = await uploadFixture()
 
-      if (!query) {
-        expect(doc.original?.url).toBe(doc.url)
-        expect(new URL(doc.original!.url!, 'http://localhost').searchParams.has('original')).toBe(
-          false,
-        )
-      }
+      expect(doc.original?.url).toBe(doc.url)
+      expect(new URL(doc.original!.url!, 'http://localhost').searchParams.has('original')).toBe(
+        false,
+      )
 
       const response = await restClient.GET(
         `/${transformerMediaSlug}/file/${doc.filename}?${query}`,
@@ -242,17 +240,17 @@ test.suite('Upload transformers', { config: './config.ts' }, () => {
           status: 200,
         },
         {
-          name: 'should serve the retained original through ordinary read access',
+          name: 'should serve a shared original and default after checking dynamic eligibility',
           denied: ['transform'],
-          events: ['access:plain'],
+          events: ['access:transform', 'access:plain', 'canTransform'],
           expected: originalPdfText,
           query: '',
           status: 200,
         },
         {
-          name: 'should deny the retained original when ordinary read access is denied',
+          name: 'should deny an ordinary shared original and default when plain read access is denied',
           denied: ['plain'],
-          events: ['access:plain'],
+          events: ['access:transform', 'canTransform', 'access:plain'],
           query: '',
           status: 403,
         },

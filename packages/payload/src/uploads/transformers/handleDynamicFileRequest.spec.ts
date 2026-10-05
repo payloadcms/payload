@@ -103,6 +103,78 @@ describe('handleDynamicFileRequest', () => {
     vi.mocked(retrieveFileResponse).mockResolvedValue(new Response('original-bytes'))
   })
 
+  it('should apply saved state from the original before request overrides without mutating the document', async () => {
+    const document = {
+      ...authorizedDocument,
+      _transforms: { custom: 'saved' },
+      original: { filename: 'original.png', mimeType: 'image/png' },
+    }
+    const order: string[] = []
+    const transformer: UploadTransformer = {
+      slug: 'state',
+      mimeTypes: ['image/*'],
+      canTransform: (args) =>
+        args.operation === 'request' && args.purpose === 'persisted-default'
+          ? { canTransform: true, handledTransformKeys: ['custom'], options: 'saved-options' }
+          : { canTransform: true, options: 'override-options' },
+      handleRequest: async ({ doc, getSourceFile, options, purpose }) => {
+        const source = await getSourceFile()
+        order.push(`${purpose}:${options}:${await source.text()}`)
+        doc.title = 'request-only'
+
+        return {
+          response: new Response(purpose === 'persisted-default' ? 'default' : 'override', {
+            headers: { 'Content-Type': 'image/png' },
+          }),
+          status: 'continue',
+        }
+      },
+    }
+    vi.mocked(resolveUploadDocument).mockResolvedValue(document)
+    vi.mocked(checkFileAccess).mockResolvedValue(document)
+    vi.mocked(getSourceFileResponse).mockResolvedValue(
+      new Response('original', { headers: { 'Content-Type': 'image/png' } }),
+    )
+
+    const response = await handleDynamicFileRequest({
+      collection,
+      filename: document.filename,
+      req: makeReq([transformer]),
+    })
+
+    expect(await response.text()).toBe('override')
+    expect(order).toEqual([
+      'persisted-default:saved-options:original',
+      'request-override:override-options:default',
+    ])
+    expect(document).not.toHaveProperty('title')
+    expect(getSourceFileResponse).toHaveBeenCalledWith(
+      expect.objectContaining({ filename: 'original.png' }),
+    )
+  })
+
+  it('should reject unclaimed saved keys before fetching the source', async () => {
+    const document = { ...authorizedDocument, _transforms: { custom: 'saved' } }
+    const transformer: UploadTransformer = {
+      slug: 'declining',
+      mimeTypes: ['image/*'],
+      canTransform: () => false,
+      handleRequest: vi.fn(),
+    }
+    vi.mocked(resolveUploadDocument).mockResolvedValue(document)
+    vi.mocked(checkFileAccess).mockResolvedValue(document)
+
+    await expect(
+      handleDynamicFileRequest({
+        collection,
+        filename: document.filename,
+        req: makeReq([transformer]),
+      }),
+    ).rejects.toThrow('custom')
+    expect(getSourceFileResponse).not.toHaveBeenCalled()
+    expect(transformer.handleRequest).not.toHaveBeenCalled()
+  })
+
   it('should serve the access-checked document when the unfiltered lookup matched another document with the same filename', async () => {
     vi.mocked(planTransformerPipeline).mockResolvedValue([])
 
@@ -122,7 +194,7 @@ describe('handleDynamicFileRequest', () => {
       })),
       mimeTypes: ['image/*'],
     }
-    vi.mocked(planTransformerPipeline).mockResolvedValue([transformer])
+    vi.mocked(planTransformerPipeline).mockResolvedValue([{ transformer }])
 
     await handleDynamicFileRequest({ collection, filename: 'logo.png', req: makeReq() })
 
@@ -130,7 +202,7 @@ describe('handleDynamicFileRequest', () => {
       expect.objectContaining({ document: authorizedDocument }),
     )
     expect(transformer.handleRequest).toHaveBeenCalledWith(
-      expect.objectContaining({ documentID: authorizedDocument.id }),
+      expect.objectContaining({ doc: expect.objectContaining({ id: authorizedDocument.id }) }),
     )
   })
 
@@ -160,7 +232,7 @@ describe('handleDynamicFileRequest', () => {
         }),
         mimeTypes: ['image/*'],
       }
-      vi.mocked(planTransformerPipeline).mockResolvedValue([transformer])
+      vi.mocked(planTransformerPipeline).mockResolvedValue([{ transformer }])
 
       await expect(
         handleDynamicFileRequest({ collection, filename: 'logo.png', req: makeReq() }),
@@ -187,7 +259,9 @@ describe('handleDynamicFileRequest', () => {
           mimeTypes: ['image/*'],
         },
       ]
-      vi.mocked(planTransformerPipeline).mockResolvedValue(transformers)
+      vi.mocked(planTransformerPipeline).mockResolvedValue(
+        transformers.map((transformer) => ({ transformer })),
+      )
 
       await expect(
         handleDynamicFileRequest({ collection, filename: 'logo.png', req: makeReq() }),
