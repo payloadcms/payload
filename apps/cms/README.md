@@ -19,27 +19,27 @@ installs the app against them. This is the same approach Payload's CI uses to te
         └────────────────────────────────────────────────┘
 ```
 
-| File                                    | Purpose                                                                                |
-| --------------------------------------- | -------------------------------------------------------------------------------------- |
-| `src/payload.config.ts`                 | Payload config: MongoDB via `DATABASE_URL`, `SERVER_URL`, CORS/CSRF                    |
-| `src/endpoints/health.ts`               | `GET /api/health`: pings MongoDB (used by the Docker healthcheck)                      |
-| `src/storage/s3.ts`                     | Optional S3 storage for uploads, turned on by `S3_BUCKET`                              |
-| `src/collections/Posts.ts`              | Blog posts for the personal website (see "Blog posts")                                 |
-| `src/collections/Pages.ts`              | Standalone pages such as About or Services (see "Pages and profiles")                  |
-| `src/collections/Profiles.ts`           | Profiles: bio, links, skills, work history, education                                  |
-| `src/collections/Clients.ts`            | Private client records: contacts, business type, importance (see "Clients and events") |
-| `src/collections/Events.ts`             | Private records of sales events and exhibitions worldwide                              |
-| `src/proxy.ts`, `src/twoFactor/`        | Two-factor authentication for every login (see "Two-factor authentication")            |
-| `src/email/sendgrid.ts`                 | Sends emails such as "forgot password" through SendGrid (see "Email (SendGrid)")       |
-| `src/hooks/revalidateWebsite.ts`        | Tells the website to refresh its pages when a post changes                             |
-| `Dockerfile`                            | Multi-stage build from the repo root → small standalone image                          |
-| `docker-compose.yml`, `Caddyfile`       | Production stack on the app EC2                                                        |
-| `.env.example`                          | Every setting the server needs                                                         |
-| `deploy/setup-app-server.sh`            | One-time bootstrap of a fresh EC2 (Docker, swap, clone)                                |
-| `deploy/check-db.sh`                    | Checks that the app EC2 can reach and write to MongoDB                                 |
-| `deploy/deploy.sh`                      | Build + (re)start + wait until healthy                                                 |
-| `deploy/mongodb/create-payload-user.js` | Creates the MongoDB user for Payload (run on the DB EC2)                               |
-| `scripts/pack-local-packages.mjs`       | Packs `packages/*` into tarballs for the app (used by the Dockerfile)                  |
+| File                                       | Purpose                                                                                |
+| ------------------------------------------ | -------------------------------------------------------------------------------------- |
+| `src/payload.config.ts`                    | Payload config: MongoDB via `DATABASE_URL`, `SERVER_URL`, CORS/CSRF                    |
+| `src/endpoints/health.ts`                  | `GET /api/health`: pings MongoDB (used by the Docker healthcheck)                      |
+| `src/storage/s3.ts`                        | Optional S3 storage for uploads, turned on by `S3_BUCKET`                              |
+| `src/collections/Posts.ts`                 | Blog posts for the personal website (see "Blog posts")                                 |
+| `src/collections/Pages.ts`, `src/sites.ts` | Pages for each website and app (see "Pages for several websites and apps")             |
+| `src/collections/Profiles.ts`              | Profiles: bio, links, skills, work history, education                                  |
+| `src/collections/Clients.ts`               | Private client records: contacts, business type, importance (see "Clients and events") |
+| `src/collections/Events.ts`                | Private records of sales events and exhibitions worldwide                              |
+| `src/proxy.ts`, `src/twoFactor/`           | Two-factor authentication for every login (see "Two-factor authentication")            |
+| `src/email/sendgrid.ts`                    | Sends emails such as "forgot password" through SendGrid (see "Email (SendGrid)")       |
+| `src/hooks/revalidateWebsite.ts`           | Tells the website to refresh its pages when a post changes                             |
+| `Dockerfile`                               | Multi-stage build from the repo root → small standalone image                          |
+| `docker-compose.yml`, `Caddyfile`          | Production stack on the app EC2                                                        |
+| `.env.example`                             | Every setting the server needs                                                         |
+| `deploy/setup-app-server.sh`               | One-time bootstrap of a fresh EC2 (Docker, swap, clone)                                |
+| `deploy/check-db.sh`                       | Checks that the app EC2 can reach and write to MongoDB                                 |
+| `deploy/deploy.sh`                         | Build + (re)start + wait until healthy                                                 |
+| `deploy/mongodb/create-payload-user.js`    | Creates the MongoDB user for Payload (run on the DB EC2)                               |
+| `scripts/pack-local-packages.mjs`          | Packs `packages/*` into tarballs for the app (used by the Dockerfile)                  |
 
 ---
 
@@ -328,14 +328,56 @@ when that is empty) so it is allowed to load the images.
 Both collections have drafts: **Save Draft** keeps a document private, **Publish** makes it readable
 without logging in.
 
-- **Pages** (`GET /api/pages`): standalone pages such as About or Services, with a title, description,
-  hero image, rich text (including code and YouTube blocks), a slug and SEO overrides. Fetch one page with
-  `GET /api/pages?where[slug][equals]=about-me`.
+- **Pages** (`GET /api/pages`): standalone pages such as About or Services for all your websites and apps
+  (see "Pages for several websites and apps"), with a title, description, hero image, rich text (including
+  code and YouTube blocks), a slug and SEO overrides.
 - **Profiles** (`GET /api/profiles`): name, headline, photo, bio, location, and tabs for links (GitHub,
   LinkedIn, …), skills (category and level 1–5), work experience and education. The email address is only
   returned to logged-in users.
 
 The website doesn't read these yet; they are ready for it the same way as posts.
+
+### Pages for several websites and apps
+
+Every page has a **Sites** field (in the sidebar) that says which websites and apps show it. A page can
+belong to several, e.g. one privacy policy for the business website and the iOS app. The sites are listed
+in `src/sites.ts`:
+
+| Site             | Value it sends |
+| ---------------- | -------------- |
+| Personal website | `personal`     |
+| Business website | `business`     |
+| iOS app          | `ios-app`      |
+
+Each website or app asks only for its own pages by adding its value to the request:
+
+```bash
+# All pages of the business website
+GET /api/pages?where[sites][in]=business
+
+# One page: the iOS app's "privacy-policy"
+GET /api/pages?where[sites][in]=ios-app&where[slug][equals]=privacy-policy
+```
+
+The slug is unique per site, so the personal and business websites can each have their own `about` page.
+It's filled in from the title when left empty. Using a slug that another page already has on the same site
+shows an error on the slug field.
+
+To add a site (e.g. a second app), add a line to `src/sites.ts` and deploy. Don't change the value of a site
+that is live, since its website or app sends it; the label can change freely.
+
+**Pages created before the Sites field existed** don't belong to any site yet, so no website or app gets them.
+Either open each one and choose its sites, or assign them all to one site at once from the app server:
+
+```bash
+cd ~/payloadcms/apps/cms
+docker run --rm mongo:8 mongosh "$(grep '^DATABASE_URL=' .env | cut -d= -f2-)" --quiet --eval '
+  db.pages.updateMany({ sites: { $exists: false } }, { $set: { sites: ["personal"] } });
+  db.getCollection("_pages_versions").updateMany(
+    { "version.sites": { $exists: false } },
+    { $set: { "version.sites": ["personal"] } },
+  )'
+```
 
 ## Clients and events
 
