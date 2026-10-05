@@ -80,17 +80,29 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
     onSelect()
   }
 
+  const cardInteractionProps: React.HTMLAttributes<HTMLDivElement> = onSelect
+    ? {
+        'aria-describedby': selectionStatusID,
+        'aria-label': title,
+        'aria-pressed': isSelected,
+        onClick: handleCardClick,
+        onDoubleClick: handleCardDoubleClick,
+        onKeyDown: handleCardKeyDown,
+        role: 'button',
+        tabIndex: 0,
+      }
+    : {}
+
   return (
     <div
-      aria-describedby={onSelect ? selectionStatusID : undefined}
-      aria-label={onSelect ? title : undefined}
-      aria-pressed={onSelect ? isSelected : undefined}
-      className={[baseClass, isSelected && `${baseClass}--selected`].filter(Boolean).join(' ')}
-      onClick={onSelect ? handleCardClick : undefined}
-      onDoubleClick={onSelect ? handleCardDoubleClick : undefined}
-      onKeyDown={onSelect ? handleCardKeyDown : undefined}
-      role="button"
-      tabIndex={onSelect ? 0 : undefined}
+      {...cardInteractionProps}
+      className={[
+        baseClass,
+        !onSelect && `${baseClass}--link`,
+        isSelected && `${baseClass}--selected`,
+      ]
+        .filter(Boolean)
+        .join(' ')}
     >
       {thumbnail ? (
         <img alt={thumbnail.alt || ''} className={`${baseClass}__thumbnail`} src={thumbnail.src} />

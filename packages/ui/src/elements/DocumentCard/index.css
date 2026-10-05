@@ -44,6 +44,17 @@
     vertical-align: top;
     white-space: nowrap;
   }
+  .document-card--link .document-card__title::after {
+    position: absolute;
+    content: '';
+    inset: 0;
+  }
+  .document-card--link
+    .document-card__metadata
+    :is(a, button, input, select, textarea, [tabindex]) {
+    position: relative;
+    z-index: 1;
+  }
   .document-card__title:focus:not(:focus-visible) {
     opacity: 1;
   }

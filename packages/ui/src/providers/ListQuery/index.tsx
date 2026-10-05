@@ -1,7 +1,6 @@
 'use client'
 import { type ListQuery, type Where } from 'payload'
 import { transformWhereQuery, validateWhereQuery } from 'payload/shared'
-import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { IListQueryContext, ListQueryProps } from './types.js'
@@ -12,47 +11,11 @@ import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useRouter, useSearchParams } from '../RouterAdapter/index.js'
 import { ListQueryContext, ListQueryModifiedContext } from './context.js'
+import { getSearchWithListQuery } from './getSearchWithListQuery.js'
 import { mergeQuery } from './mergeQuery.js'
 import { sanitizeQuery } from './sanitizeQuery.js'
 
 export { useListQuery } from './context.js'
-
-const listQueryKeys = new Set([
-  'columns',
-  'groupBy',
-  'limit',
-  'page',
-  'preset',
-  'queryByGroup',
-  'search',
-  'sort',
-  'where',
-])
-
-const getSearchWithListQuery = ({
-  query,
-  updatedQuery,
-}: {
-  query: ListQuery
-  updatedQuery?: ListQuery
-}): string => {
-  // Server query props can include route params like locale and view; only explicit refinements own custom keys.
-  const keysToUpdate = new Set([...listQueryKeys, ...Object.keys(updatedQuery || {})])
-  const currentURLQuery = parseSearchParams(new URLSearchParams(window.location.search))
-  const unchangedQuery = Object.fromEntries(
-    Object.entries(currentURLQuery).filter(([key]) => !keysToUpdate.has(key)),
-  )
-  const listQuery = Object.fromEntries(
-    Object.entries(query).filter(([key]) => keysToUpdate.has(key)),
-  )
-
-  return `?${qs.stringify({
-    ...unchangedQuery,
-    ...listQuery,
-    columns: JSON.stringify(query.columns),
-    queryByGroup: JSON.stringify(query.queryByGroup),
-  })}`
-}
 
 export const ListQueryProvider: React.FC<ListQueryProps> = ({
   children,
@@ -107,7 +70,11 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       })
 
       if (modifySearchParams) {
-        const search = getSearchWithListQuery({ query: newQuery, updatedQuery: incomingQuery })
+        const search = getSearchWithListQuery({
+          currentSearch: window.location.search,
+          query: newQuery,
+          updatedQuery: incomingQuery,
+        })
         if (window.location.search !== search) {
           startRouteTransition(() => router.replace(search, { scroll: false }))
         }
@@ -173,7 +140,10 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const syncPropsToURL = useEffectEvent(() => {
     const newQuery = sanitizeQuery({ ...(query || {}), ...(queryFromProps || {}) })
 
-    const search = getSearchWithListQuery({ query: newQuery })
+    const search = getSearchWithListQuery({
+      currentSearch: window.location.search,
+      query: newQuery,
+    })
 
     if (window.location.search !== search) {
       setQuery(newQuery)
