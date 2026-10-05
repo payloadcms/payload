@@ -4149,17 +4149,100 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       }
     })
 
-    /**
-     * Versions main records *after* a branch forked are not that branch's past, so
-     * its history should stop at the fork point. Blocked on there being a marker to
-     * stop at: the registry stores `baseUpdatedAt`, which is main's *document*
-     * `updatedAt` at fork, and version rows are written just after the document — so
-     * comparing a version's `updatedAt` against it excludes main's latest version,
-     * the one that matters most for ancestry. Needs a fork-time marker of its own;
-     * `baseUpdatedAt` cannot be repurposed because §16's "main moved" warning depends
-     * on its current meaning.
-     */
-    test.todo('should exclude main versions recorded after the branch forked')
+    test('should exclude main versions recorded after the branch forked', async () => {
+      await payload.update({
+        id: pageID,
+        branch: 'draftwork',
+        collection: pagesSlug,
+        data: { title: 'edited on branch' },
+        draft: true,
+      })
+
+      await payload.update({
+        id: pageID,
+        collection: pagesSlug,
+        data: { title: 'later draft on main' },
+        draft: true,
+      })
+
+      const history = await payload.findVersions({
+        branch: 'draftwork',
+        collection: pagesSlug,
+        pagination: false,
+        where: { parent: { equals: pageID } },
+      })
+      const counted = await payload.countVersions({
+        branch: 'draftwork',
+        collection: pagesSlug,
+        where: { parent: { equals: pageID } },
+      })
+      const titles = history.docs.map((doc) => doc.version?.title)
+
+      expect(titles).toContain('edited on branch')
+      expect(titles).toContain('published on main')
+      expect(titles).not.toContain('later draft on main')
+      expect(counted.totalDocs).toBe(history.docs.length)
+    })
+
+    test('should preserve the version fork boundary when update becomes delete', async () => {
+      await payload.update({
+        id: pageID,
+        branch: 'draftwork',
+        collection: pagesSlug,
+        data: { title: 'edited on branch' },
+        draft: true,
+      })
+
+      const beforeDelete = (
+        await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: {
+            and: [
+              { branch: { equals: 'draftwork' } },
+              { collectionSlug: { equals: pagesSlug } },
+              { documentID: { equals: String(pageID) } },
+            ],
+          },
+        })
+      ).docs[0] as unknown as {
+        baseUpdatedAt?: string
+        baseVersionID?: string
+        baseVersionUpdatedAt?: string
+      }
+
+      expect(beforeDelete.baseUpdatedAt).toBeTruthy()
+      expect(beforeDelete.baseVersionID).toBeTruthy()
+      expect(beforeDelete.baseVersionUpdatedAt).toBeTruthy()
+
+      await payload.delete({ id: pageID, branch: 'draftwork', collection: pagesSlug })
+
+      const afterDelete = (
+        await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: {
+            and: [
+              { branch: { equals: 'draftwork' } },
+              { collectionSlug: { equals: pagesSlug } },
+              { documentID: { equals: String(pageID) } },
+            ],
+          },
+        })
+      ).docs[0] as unknown as {
+        baseUpdatedAt?: string
+        baseVersionID?: string
+        baseVersionUpdatedAt?: string
+        operation?: string
+      }
+
+      expect(afterDelete).toMatchObject({
+        baseUpdatedAt: beforeDelete.baseUpdatedAt,
+        baseVersionID: beforeDelete.baseVersionID,
+        baseVersionUpdatedAt: beforeDelete.baseVersionUpdatedAt,
+        operation: 'delete',
+      })
+    })
 
     // The Versions tab count and the Versions list came from different queries, and
     // only the list was branch-aware — so the tab said 3 while 4 rows rendered.

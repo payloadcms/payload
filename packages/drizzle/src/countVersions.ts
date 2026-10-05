@@ -22,7 +22,7 @@ export const countVersions: CountVersions = async function countVersions(
 
   // Shares the list's predicate so the count in the Versions tab can never
   // disagree with the rows the Versions view actually renders.
-  const branchedWhere = resolveBranchVersionHistoryQuery({
+  const branchedWhere = await resolveBranchVersionHistoryQuery({
     branch,
     collectionSlug: collection,
     req,

@@ -25,7 +25,7 @@ export const countVersions: CountVersions = async function countVersions(
 
   // Shares the list's predicate so the count in the Versions tab can never
   // disagree with the rows the Versions view actually renders.
-  where = resolveBranchVersionHistoryQuery({ branch, collectionSlug, req, where }) ?? {}
+  where = (await resolveBranchVersionHistoryQuery({ branch, collectionSlug, req, where })) ?? {}
 
   let hasNearConstraint = false
 

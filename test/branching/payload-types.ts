@@ -812,6 +812,7 @@ export interface PayloadBranchChange {
   operation: 'create' | 'update' | 'delete';
   baseUpdatedAt?: string | null;
   baseVersionID?: string | null;
+  baseVersionUpdatedAt?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -1362,6 +1363,7 @@ export interface PayloadBranchChangesSelect<T extends boolean = true> {
   operation?: T;
   baseUpdatedAt?: T;
   baseVersionID?: T;
+  baseVersionUpdatedAt?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -1733,6 +1735,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

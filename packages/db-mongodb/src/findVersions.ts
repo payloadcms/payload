@@ -39,7 +39,7 @@ export const findVersions: FindVersions = async function findVersions(
     versions: true,
   })
 
-  where = resolveBranchVersionHistoryQuery({ branch, collectionSlug, req, where }) ?? {}
+  where = (await resolveBranchVersionHistoryQuery({ branch, collectionSlug, req, where })) ?? {}
 
   let hasNearConstraint = false
 

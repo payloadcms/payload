@@ -11,6 +11,7 @@ import {
   resolveBranch,
 } from './resolveBranch.js'
 import { branchChangesCollectionSlug, branchDocIDField, branchField, MAIN_BRANCH } from './types.js'
+import { findBranchVersionForkBoundary } from './versions.js'
 
 type Args = {
   collectionSlug: string
@@ -114,11 +115,18 @@ export const forkDocument = async ({
       [branchField]: branch,
     },
     docID: id,
-    onCreated: (createReq, createdShadow) =>
-      createReq.payload.create({
+    onCreated: async (createReq, createdShadow) => {
+      const versionBoundary = await findBranchVersionForkBoundary({
+        collectionSlug,
+        docID: id,
+        req: createReq,
+      })
+
+      return createReq.payload.create({
         collection: branchChangesCollectionSlug,
         data: {
           baseUpdatedAt: mainDoc.updatedAt,
+          ...versionBoundary,
           branch,
           collectionSlug,
           doc: { relationTo: collectionSlug, value: id },
@@ -129,7 +137,8 @@ export const forkDocument = async ({
         },
         overrideAccess: true,
         req: createReq,
-      }),
+      })
+    },
     req,
     source: { id, branch: MAIN_BRANCH },
     useAmbientTransaction,

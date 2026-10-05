@@ -10,6 +10,7 @@ import { createShadowRow } from './createShadowRow.js'
 import { peekBranchOperation, resetBranchState, resolveBranch } from './resolveBranch.js'
 import { resolveBranchQuery } from './resolveBranchQuery.js'
 import { branchChangesCollectionSlug, branchDocIDField, branchField, MAIN_BRANCH } from './types.js'
+import { findBranchVersionForkBoundary } from './versions.js'
 
 type Args = {
   branch?: false | string
@@ -468,6 +469,18 @@ export const resolveBranchDelete = async ({
   }
 
   if (isOnThisBranch) {
+    const previousBranchChange = (await req.payload.db.findOne({
+      collection: branchChangesCollectionSlug,
+      req,
+      where: {
+        and: [
+          { branch: { equals: branch } },
+          { collectionSlug: { equals: collectionSlug } },
+          { documentID: { equals: String(canonicalID) } },
+        ],
+      },
+    })) as null | Record<string, unknown>
+
     await req.payload.db.deleteMany({
       collection: branchChangesCollectionSlug,
       req,
@@ -477,6 +490,9 @@ export const resolveBranchDelete = async ({
     await req.payload.create({
       collection: branchChangesCollectionSlug,
       data: {
+        baseUpdatedAt: previousBranchChange?.baseUpdatedAt,
+        baseVersionID: previousBranchChange?.baseVersionID,
+        baseVersionUpdatedAt: previousBranchChange?.baseVersionUpdatedAt,
         branch,
         collectionSlug,
         doc: { relationTo: collectionSlug, value: canonicalID },
@@ -500,6 +516,12 @@ export const resolveBranchDelete = async ({
       },
       docID: canonicalID,
       onCreated: async (createReq) => {
+        const versionBoundary = await findBranchVersionForkBoundary({
+          collectionSlug,
+          docID: canonicalID,
+          req: createReq,
+        })
+
         await createReq.payload.db.deleteMany({
           collection: branchChangesCollectionSlug,
           req: createReq,
@@ -511,6 +533,8 @@ export const resolveBranchDelete = async ({
         await createReq.payload.create({
           collection: branchChangesCollectionSlug,
           data: {
+            baseUpdatedAt: target.updatedAt,
+            ...versionBoundary,
             branch,
             collectionSlug,
             doc: { relationTo: collectionSlug, value: canonicalID },

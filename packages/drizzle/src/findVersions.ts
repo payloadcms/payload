@@ -25,7 +25,7 @@ export const findVersions: FindVersions = async function findVersions(
 
   const fields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
 
-  const branchedWhere = resolveBranchVersionHistoryQuery({
+  const branchedWhere = await resolveBranchVersionHistoryQuery({
     branch,
     collectionSlug: collection,
     req,

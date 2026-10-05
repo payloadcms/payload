@@ -226,6 +226,10 @@ export const getBranchChangesCollection = (config: Config): CollectionConfig => 
         name: 'baseVersionID',
         type: 'text',
       },
+      {
+        name: 'baseVersionUpdatedAt',
+        type: 'date',
+      },
     ],
     hooks: {
       // A branch marked `merged` had nothing pending. Recording a new change means

@@ -11,7 +11,12 @@ import {
   resolveBranch,
 } from './resolveBranch.js'
 import { resolveBranchRowID } from './resolveBranchRowID.js'
-import { branchField, branchParentField, MAIN_BRANCH } from './types.js'
+import {
+  branchChangesCollectionSlug,
+  branchField,
+  branchParentField,
+  MAIN_BRANCH,
+} from './types.js'
 
 type QueryArgs = {
   branch?: false | string
@@ -20,10 +25,58 @@ type QueryArgs = {
   where: undefined | Where
 }
 
+type BranchVersionHistoryChange = {
+  baseVersionID?: null | number | string
+  baseVersionUpdatedAt?: Date | null | string
+  doc?: unknown
+  operation?: null | string
+}
+
 const bypassed = (branch: false | string | undefined, req?: Partial<PayloadRequest>): boolean =>
   branch === false ||
   !req?.payload ||
   Boolean((req.context as Record<string, unknown> | undefined)?._branchBypass)
+
+export const findBranchVersionForkBoundary = async ({
+  collectionSlug,
+  docID,
+  req,
+}: {
+  collectionSlug: string
+  docID: number | string
+  req: PayloadRequest
+}): Promise<{ baseVersionID?: string; baseVersionUpdatedAt?: string }> => {
+  if (!req.payload.collections[collectionSlug]?.config.versions) {
+    return {}
+  }
+
+  const { docs } = await req.payload.db.findVersions({
+    branch: false,
+    collection: collectionSlug,
+    limit: 1,
+    pagination: false,
+    req,
+    sort: '-updatedAt',
+    where: {
+      and: [{ [branchField]: { equals: MAIN_BRANCH } }, { parent: { equals: docID } }],
+    },
+  })
+  const latestMainVersion = docs[0] as
+    | { id?: number | string; updatedAt?: Date | string }
+    | undefined
+
+  if (latestMainVersion?.id === undefined || !latestMainVersion.updatedAt) {
+    return {}
+  }
+
+  return {
+    baseVersionID: String(latestMainVersion.id),
+    baseVersionUpdatedAt:
+      latestMainVersion.updatedAt instanceof Date
+        ? latestMainVersion.updatedAt.toISOString()
+        : latestMainVersion.updatedAt,
+  }
+}
 
 const buildBranchVersionQuery = ({
   branch,
@@ -162,12 +215,12 @@ export const resolveBranchVersionQuerySync = ({
  * versions for any shadowed document, which is right when listing one row per
  * document and exactly wrong here: those hidden rows are the ancestry.
  */
-export const resolveBranchVersionHistoryQuery = ({
+export const resolveBranchVersionHistoryQuery = async ({
   branch: branchOverride,
   collectionSlug,
   req,
   where,
-}: QueryArgs): undefined | Where => {
+}: QueryArgs): Promise<undefined | Where> => {
   if (bypassed(branchOverride, req)) {
     return where
   }
@@ -188,21 +241,111 @@ export const resolveBranchVersionHistoryQuery = ({
 
   const rewritten = rewriteBranchVersionParents(where)
   const base = rewritten && Object.keys(rewritten).length ? [rewritten] : []
+  const requestedParentIDs = findVersionHistoryParentIDs({ where })
+  const changeWhere: Where[] = [
+    { branch: { equals: branch } },
+    { collectionSlug: { equals: collectionSlug } },
+  ]
 
-  // Main's history is the branch's ancestry, so it is included rather than hidden.
-  //
-  // Not yet cut off at the fork point: versions main records *after* the branch
-  // forked are not the branch's past, but the only marker available is
-  // `baseUpdatedAt` — main's *document* `updatedAt` at fork — and version rows are
-  // written just after the document, so comparing against it excludes main's latest
-  // version, the one that matters most. Cutting this off needs a fork-time marker
-  // of its own; `baseUpdatedAt` cannot be repurposed because §16's "main moved"
-  // warning depends on its current meaning.
-  const mainHistory: Where = { [branchField]: { equals: MAIN_BRANCH } }
+  if (requestedParentIDs.length) {
+    changeWhere.push({ documentID: { in: requestedParentIDs.map(String) } })
+  }
+
+  const changes = await req!.payload!.db.find({
+    branch: false,
+    collection: branchChangesCollectionSlug,
+    pagination: false,
+    req,
+    where: { and: changeWhere },
+  })
+  const branchChanges = changes.docs as BranchVersionHistoryChange[]
+  const changedDocumentIDs = branchChanges.flatMap((change) => {
+    const documentID = extractRelationshipID({ relationship: change.doc })
+
+    return documentID === undefined ? [] : [documentID]
+  })
+  const mainDocumentHistories: Where[] = []
+
+  if (changedDocumentIDs.length) {
+    mainDocumentHistories.push({
+      and: [{ [branchField]: { equals: MAIN_BRANCH } }, { parent: { not_in: changedDocumentIDs } }],
+    })
+  } else {
+    mainDocumentHistories.push({ [branchField]: { equals: MAIN_BRANCH } })
+  }
+
+  for (const change of branchChanges) {
+    if (change.operation === 'create') {
+      continue
+    }
+
+    const documentID = extractRelationshipID({ relationship: change.doc })
+
+    if (documentID === undefined) {
+      continue
+    }
+
+    const boundary: Where[] = []
+
+    if (change.baseVersionID) {
+      boundary.push({ id: { equals: change.baseVersionID } })
+    }
+
+    if (change.baseVersionUpdatedAt) {
+      boundary.push({ updatedAt: { less_than_equal: change.baseVersionUpdatedAt } })
+    }
+
+    mainDocumentHistories.push({
+      and: [
+        { [branchField]: { equals: MAIN_BRANCH } },
+        { parent: { equals: documentID } },
+        ...(boundary.length ? [{ or: boundary }] : []),
+      ],
+    })
+  }
 
   return {
-    and: [...base, { or: [{ [branchField]: { equals: branch } }, mainHistory] }],
+    and: [...base, { or: [{ [branchField]: { equals: branch } }, ...mainDocumentHistories] }],
   }
+}
+
+const findVersionHistoryParentIDs = ({
+  where,
+}: {
+  where: undefined | Where
+}): (number | string)[] => {
+  if (!where || typeof where !== 'object') {
+    return []
+  }
+
+  const parentIDs: (number | string)[] = []
+
+  for (const [key, value] of Object.entries(where)) {
+    if ((key === 'and' || key === 'or') && Array.isArray(value)) {
+      for (const clause of value) {
+        parentIDs.push(...findVersionHistoryParentIDs({ where: clause }))
+      }
+
+      continue
+    }
+
+    if (key !== 'parent' || !value || typeof value !== 'object') {
+      continue
+    }
+
+    const constraint = value as { equals?: unknown; in?: unknown[] }
+    const values = constraint.in ?? [constraint.equals]
+
+    for (const candidate of values) {
+      const parentID = extractRelationshipID({ relationship: candidate })
+
+      if (parentID !== undefined) {
+        parentIDs.push(parentID)
+      }
+    }
+  }
+
+  return [...new Set(parentIDs)]
 }
 
 /**
