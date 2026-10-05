@@ -499,6 +499,7 @@ export const viTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Hiển thị tất cả {{label}}',
     shownInTable: 'Hiển thị trong bảng',
     showSidebar: 'Hiển thị thanh bên',
+    skipToContent: 'Chuyển đến nội dung',
     sorryNotFound: 'Xin lỗi, không có kết quả nào tương ứng với yêu cầu của bạn.',
     sort: 'Sắp xếp',
     sortByLabelDirection: 'Sắp xếp theo {{label}} {{direction}}',
@@ -561,6 +562,7 @@ export const viTranslations: DefaultTranslationsObject = {
     noParent: 'Không có bố mẹ',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Tìm kiếm {{label}}',
+    searchResults: 'Tìm thấy {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Không thể sao chép vào cùng một vị trí',
