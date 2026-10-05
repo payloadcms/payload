@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/transformer-sharp",
-  "version": "4.0.0-canary.14",
+  "version": "4.0.0-canary.37",
   "description": "Official Sharp-based file transformer for Payload: request-time image resizing and upload-time image processing",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -42,8 +42,6 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "file-type": "22.0.1",
-    "sanitize-filename": "1.6.4",
     "sharp": "0.35.4"
   },
   "devDependencies": {

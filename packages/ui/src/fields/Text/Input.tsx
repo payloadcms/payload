@@ -12,7 +12,10 @@ import { RenderCustomComponent } from '../../elements/RenderCustomComponent/inde
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
+import { useForm } from '../../forms/Form/context.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.css'
 
@@ -46,7 +49,13 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
     valueToRender,
   } = props
 
+  const { uuid } = useForm()
+  const editDepth = useEditDepth()
   const { i18n, t } = useTranslation()
+
+  const inputID =
+    idFromProps ?? (hasMany ? generateFieldID(path, editDepth, uuid, 'input') : undefined)
+  const errorID = showError ? generateFieldID(path, editDepth, uuid, 'field-error') : undefined
 
   const editableProps: ReactSelectAdapterProps['customProps']['editableProps'] = (
     data,
@@ -117,7 +126,8 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
         CustomComponent={Label}
         Fallback={
           <FieldLabel
-            htmlFor={idFromProps}
+            hasRequiredAccessibleState
+            htmlFor={inputID}
             label={label}
             localized={localized}
             path={path}
@@ -133,6 +143,9 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
         {BeforeInput}
         {hasMany ? (
           <ReactSelect
+            aria-describedby={errorID}
+            aria-invalid={showError || undefined}
+            aria-required={required || undefined}
             className={`field-${path.replace(/\./g, '__')}`}
             components={{ DropdownIndicator: null }}
             customProps={{
@@ -143,6 +156,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
             filterOption={() =>
               !maxRows ? true : !(Array.isArray(value) && maxRows && value.length >= maxRows)
             }
+            inputId={inputID}
             isClearable={false}
             isCreatable
             isMulti
@@ -163,6 +177,9 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
           />
         ) : (
           <input
+            aria-describedby={errorID}
+            aria-invalid={showError || undefined}
+            aria-required={required || undefined}
             className="form-input"
             data-rtl={rtl}
             disabled={readOnly}

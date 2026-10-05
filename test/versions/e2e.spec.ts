@@ -703,7 +703,10 @@ describe('Versions', () => {
       await expect
         .poll(
           async () =>
-            await page.locator('.doc-tab[aria-label="Versions"] .pill-version-count').textContent(),
+            await page
+              .getByRole('link', { name: /^Versions\b/ })
+              .locator('.pill-version-count')
+              .textContent(),
           { timeout: POLL_TOPASS_TIMEOUT },
         )
         .toEqual('2')

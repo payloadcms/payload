@@ -620,7 +620,7 @@ describe('Localization', () => {
         })
 
       // only throttle test after initial load to avoid timeouts
-      const cdpSession = await throttleTest({
+      const stopThrottling = await throttleTest({
         context,
         delay: 'Fast 4G',
         page,
@@ -634,14 +634,7 @@ describe('Localization', () => {
       await expect(page.locator('#field-title')).toBeEnabled()
       await closeLocaleSelector(page)
 
-      await cdpSession.send('Network.emulateNetworkConditions', {
-        downloadThroughput: -1,
-        latency: 0,
-        offline: false,
-        uploadThroughput: -1,
-      })
-
-      await cdpSession.detach()
+      await stopThrottling()
     })
 
     test('should not show fallback data after saving data', async () => {

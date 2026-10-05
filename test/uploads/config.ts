@@ -1,4 +1,5 @@
 import type { SharpCollectionConfig } from '@payloadcms/transformer-sharp'
+import type { ImageSize } from 'payload'
 
 import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import path from 'path'
@@ -70,29 +71,36 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = getTestSuiteDir({ fallbackDir: path.dirname(filename), suitePath: 'uploads' })
 
+const focalTestVariants: ImageSize[] = [
+  { name: 'focalTest', height: 300, width: 400 },
+  { name: 'focalTest2', height: 300, width: 600 },
+  { name: 'focalTest3', height: 300, width: 900 },
+]
+
+const smallAndLargeGifVariants: ImageSize[] = [
+  {
+    name: 'small',
+    formatOptions: { format: 'gif', options: { quality: 90 } },
+    height: 100,
+    width: 100,
+  },
+  {
+    name: 'large',
+    formatOptions: { format: 'gif', options: { quality: 90 } },
+    height: 1000,
+    width: 1000,
+  },
+]
+
 const sharpCollections: Record<string, SharpCollectionConfig> = {
   [adminThumbnailSizeSlug]: {
     variants: [
-      {
-        name: 'small',
-        height: 100,
-        width: 100,
-      },
-      {
-        name: 'medium',
-        height: 200,
-        width: 200,
-      },
+      { name: 'small', height: 100, width: 100 },
+      { name: 'medium', height: 200, width: 200 },
     ],
   },
   [fileAccessMediaSlug]: {
-    variants: [
-      {
-        name: 'thumbnail',
-        height: 100,
-        width: 100,
-      },
-    ],
+    variants: [{ name: 'thumbnail', height: 100, width: 100 }],
   },
   'gif-resize': {
     formatOptions: {
@@ -103,36 +111,10 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
       position: 'center',
       width: 200,
     },
-    variants: [
-      {
-        name: 'small',
-        formatOptions: { format: 'gif', options: { quality: 90 } },
-        height: 100,
-        width: 100,
-      },
-      {
-        name: 'large',
-        formatOptions: { format: 'gif', options: { quality: 90 } },
-        height: 1000,
-        width: 1000,
-      },
-    ],
+    variants: smallAndLargeGifVariants,
   },
   'filename-compound-index': {
-    variants: [
-      {
-        name: 'small',
-        formatOptions: { format: 'gif', options: { quality: 90 } },
-        height: 100,
-        width: 100,
-      },
-      {
-        name: 'large',
-        formatOptions: { format: 'gif', options: { quality: 90 } },
-        height: 1000,
-        width: 1000,
-      },
-    ],
+    variants: smallAndLargeGifVariants,
   },
   'no-image-sizes': {
     resizeOptions: {
@@ -143,61 +125,22 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
   },
   'object-fit': {
     variants: [
-      {
-        name: 'fitContain',
-        fit: 'contain',
-        height: 300,
-        width: 400,
-      },
-      {
-        name: 'fitInside',
-        fit: 'inside',
-        height: 400,
-        width: 300,
-      },
-      {
-        name: 'fitCover',
-        fit: 'cover',
-        height: 300,
-        width: 900,
-      },
-      {
-        name: 'fitOutside',
-        fit: 'outside',
-        height: 200,
-        width: 900,
-      },
+      { name: 'fitContain', fit: 'contain', height: 300, width: 400 },
+      { name: 'fitInside', fit: 'inside', height: 400, width: 300 },
+      { name: 'fitCover', fit: 'cover', height: 300, width: 900 },
+      { name: 'fitOutside', fit: 'outside', height: 200, width: 900 },
     ],
   },
   'with-meta-data': {
-    variants: [
-      {
-        name: 'sizeOne',
-        height: 300,
-        width: 400,
-      },
-    ],
+    variants: [{ name: 'sizeOne', height: 300, width: 400 }],
     withMetadata: true,
   },
   'without-meta-data': {
-    variants: [
-      {
-        name: 'sizeTwo',
-        height: 400,
-        width: 300,
-      },
-    ],
+    variants: [{ name: 'sizeTwo', height: 400, width: 300 }],
     withMetadata: false,
   },
   'with-only-jpeg-meta-data': {
-    variants: [
-      {
-        name: 'sizeThree',
-        height: 400,
-        width: 300,
-        withoutEnlargement: false,
-      },
-    ],
+    variants: [{ name: 'sizeThree', height: 400, width: 300, withoutEnlargement: false }],
     // eslint-disable-next-line @typescript-eslint/require-await
     withMetadata: async ({ metadata }) => {
       if (metadata.format === 'jpeg') {
@@ -208,58 +151,18 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
   },
   'crop-only': {
     focalPoint: false,
-    variants: [
-      {
-        name: 'focalTest',
-        height: 300,
-        width: 400,
-      },
-      {
-        name: 'focalTest2',
-        height: 300,
-        width: 600,
-      },
-      {
-        name: 'focalTest3',
-        height: 300,
-        width: 900,
-      },
-    ],
+    variants: focalTestVariants,
   },
   'focal-only': {
     crop: false,
-    variants: [
-      {
-        name: 'focalTest',
-        height: 300,
-        width: 400,
-      },
-      {
-        name: 'focalTest2',
-        height: 300,
-        width: 600,
-      },
-      {
-        name: 'focalTest3',
-        height: 300,
-        width: 900,
-      },
-    ],
+    variants: focalTestVariants,
   },
   [imageSizesOnlySlug]: {
     crop: false,
     focalPoint: false,
     variants: [
-      {
-        name: 'sizeOne',
-        height: 300,
-        width: 400,
-      },
-      {
-        name: 'sizeTwo',
-        height: 400,
-        width: 300,
-      },
+      { name: 'sizeOne', height: 300, width: 400 },
+      { name: 'sizeTwo', height: 400, width: 300 },
     ],
   },
   [focalNoSizesSlug]: {
@@ -286,78 +189,23 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
         height: undefined,
         width: 200,
       },
-      {
-        name: 'maintainedImageSize',
-        height: undefined,
-        width: undefined,
-      },
+      { name: 'maintainedImageSize', height: undefined, width: undefined },
       {
         name: 'maintainedImageSizeWithNewFormat',
         formatOptions: { format: 'jpg', options: { quality: 90 } },
         height: undefined,
         width: undefined,
       },
-      {
-        name: 'accidentalSameSize',
-        height: 80,
-        position: 'top',
-        width: 320,
-      },
-      {
-        name: 'tablet',
-        height: 480,
-        width: 640,
-      },
-      {
-        name: 'mobile',
-        crop: 'left top',
-        height: 240,
-        width: 320,
-      },
-      {
-        name: 'icon',
-        height: 16,
-        width: 16,
-      },
-      {
-        name: 'focalTest',
-        height: 300,
-        width: 400,
-      },
-      {
-        name: 'focalTest2',
-        height: 300,
-        width: 600,
-      },
-      {
-        name: 'focalTest3',
-        height: 300,
-        width: 900,
-      },
-      {
-        name: 'focalTest4',
-        height: 400,
-        width: 300,
-      },
-      {
-        name: 'focalTest5',
-        height: 600,
-        width: 300,
-      },
-      {
-        name: 'focalTest6',
-        height: 800,
-        width: 300,
-      },
-      {
-        name: 'focalTest7',
-        height: 300,
-        width: 300,
-      },
-      {
-        name: 'undefinedHeight',
-        width: 300,
-      },
+      { name: 'accidentalSameSize', height: 80, position: 'top', width: 320 },
+      { name: 'tablet', height: 480, width: 640 },
+      { name: 'mobile', crop: 'left top', height: 240, width: 320 },
+      { name: 'icon', height: 16, width: 16 },
+      ...focalTestVariants,
+      { name: 'focalTest4', height: 400, width: 300 },
+      { name: 'focalTest5', height: 600, width: 300 },
+      { name: 'focalTest6', height: 800, width: 300 },
+      { name: 'focalTest7', height: 300, width: 300 },
+      { name: 'undefinedHeight', width: 300 },
     ],
   },
   [animatedTypeMedia]: {
@@ -374,37 +222,15 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
         position: 'centre',
         withoutEnlargement: false,
       },
-      {
-        name: 'undefinedHeight',
-        width: 300,
-        height: undefined,
-      },
-      {
-        name: 'undefinedWidth',
-        width: undefined,
-        height: 300,
-      },
-      {
-        name: 'undefinedAll',
-        width: undefined,
-        height: undefined,
-      },
-      {
-        name: 'focalCrop',
-        width: 300,
-        height: 150,
-        withoutEnlargement: false,
-      },
+      { name: 'undefinedHeight', width: 300, height: undefined },
+      { name: 'undefinedWidth', width: undefined, height: 300 },
+      { name: 'undefinedAll', width: undefined, height: undefined },
+      { name: 'focalCrop', width: 300, height: 150, withoutEnlargement: false },
     ],
   },
   [enlargeSlug]: {
     variants: [
-      {
-        name: 'accidentalSameSize',
-        height: 80,
-        width: 320,
-        withoutEnlargement: false,
-      },
+      { name: 'accidentalSameSize', height: 80, width: 320, withoutEnlargement: false },
       {
         name: 'sameSizeWithNewFormat',
         formatOptions: { format: 'jpg', options: { quality: 90 } },
@@ -412,23 +238,9 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
         width: 320,
         withoutEnlargement: false,
       },
-      {
-        name: 'resizedLarger',
-        height: 480,
-        width: 640,
-        withoutEnlargement: false,
-      },
-      {
-        name: 'resizedSmaller',
-        height: 50,
-        width: 180,
-      },
-      {
-        name: 'widthLowerHeightLarger',
-        fit: 'contain',
-        height: 300,
-        width: 300,
-      },
+      { name: 'resizedLarger', height: 480, width: 640, withoutEnlargement: false },
+      { name: 'resizedSmaller', height: 50, width: 180 },
+      { name: 'widthLowerHeightLarger', fit: 'contain', height: 300, width: 300 },
       {
         name: 'undefinedHeightWithoutEnlargement',
         width: 4000,
@@ -447,12 +259,7 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
   },
   [reduceSlug]: {
     variants: [
-      {
-        name: 'accidentalSameSize',
-        height: 80,
-        width: 320,
-        withoutEnlargement: false,
-      },
+      { name: 'accidentalSameSize', height: 80, width: 320, withoutEnlargement: false },
       {
         name: 'sameSizeWithNewFormat',
         formatOptions: { format: 'jpg', options: { quality: 90 } },
@@ -460,34 +267,15 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
         width: 320,
         withoutReduction: true,
       },
-      {
-        name: 'resizedLarger',
-        height: 480,
-        width: 640,
-      },
-      {
-        name: 'resizedSmaller',
-        height: 50,
-        width: 180,
-        withoutReduction: true,
-      },
+      { name: 'resizedLarger', height: 480, width: 640 },
+      { name: 'resizedSmaller', height: 50, width: 180, withoutReduction: true },
     ],
   },
   'media-trim': {
     trimOptions: 0,
     variants: [
-      {
-        name: 'trimNumber',
-        height: undefined,
-        trimOptions: 0,
-        width: 1024,
-      },
-      {
-        name: 'trimString',
-        height: undefined,
-        trimOptions: 0,
-        width: 1024,
-      },
+      { name: 'trimNumber', height: undefined, trimOptions: 0, width: 1024 },
+      { name: 'trimString', height: undefined, trimOptions: 0, width: 1024 },
       {
         name: 'trimOptions',
         height: undefined,
@@ -541,132 +329,35 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
           disabled: { filter: true },
         },
       },
-      {
-        name: 'four',
-        height: 400,
-        width: 300,
-      },
+      { name: 'four', height: 400, width: 300 },
     ],
   },
   [mediaWithFieldsSlug]: {
     crop: true,
     variants: [
-      {
-        name: 'thumbnail',
-        width: 300,
-        height: 300,
-        crop: 'centre',
-      },
-      {
-        name: 'card',
-        width: 768,
-        height: 512,
-      },
-      {
-        name: 'hero',
-        width: 1920,
-        height: 1080,
-      },
-      {
-        name: 'carousel1',
-        height: 100,
-        width: 100,
-      },
-      {
-        name: 'carousel2',
-        height: 100,
-        width: 150,
-      },
-      {
-        name: 'carousel3',
-        height: 150,
-        width: 100,
-      },
-      {
-        name: 'carousel4',
-        height: 120,
-        width: 200,
-      },
-      {
-        name: 'carousel5',
-        height: 200,
-        width: 120,
-      },
-      {
-        name: 'carousel6',
-        height: 250,
-        width: 250,
-      },
-      {
-        name: 'carousel7',
-        height: 180,
-        width: 320,
-      },
-      {
-        name: 'carousel8',
-        height: 320,
-        width: 180,
-      },
-      {
-        name: 'carousel9',
-        height: 300,
-        width: 400,
-      },
-      {
-        name: 'carousel10',
-        height: 400,
-        width: 300,
-      },
-      {
-        name: 'carousel11',
-        height: 200,
-        width: 500,
-      },
-      {
-        name: 'carousel12',
-        height: 500,
-        width: 200,
-      },
-      {
-        name: 'carousel13',
-        height: 360,
-        width: 640,
-      },
-      {
-        name: 'carousel14',
-        height: 640,
-        width: 360,
-      },
-      {
-        name: 'carousel15',
-        height: 128,
-        width: 128,
-      },
-      {
-        name: 'carousel16',
-        height: 96,
-        width: 96,
-      },
-      {
-        name: 'carousel17',
-        height: 64,
-        width: 64,
-      },
-      {
-        name: 'carousel18',
-        height: 450,
-        width: 800,
-      },
-      {
-        name: 'carousel19',
-        height: 800,
-        width: 450,
-      },
-      {
-        name: 'carousel20',
-        height: 1000,
-        width: 1000,
-      },
+      { name: 'thumbnail', width: 300, height: 300, crop: 'centre' },
+      { name: 'card', width: 768, height: 512 },
+      { name: 'hero', width: 1920, height: 1080 },
+      { name: 'carousel1', height: 100, width: 100 },
+      { name: 'carousel2', height: 100, width: 150 },
+      { name: 'carousel3', height: 150, width: 100 },
+      { name: 'carousel4', height: 120, width: 200 },
+      { name: 'carousel5', height: 200, width: 120 },
+      { name: 'carousel6', height: 250, width: 250 },
+      { name: 'carousel7', height: 180, width: 320 },
+      { name: 'carousel8', height: 320, width: 180 },
+      { name: 'carousel9', height: 300, width: 400 },
+      { name: 'carousel10', height: 400, width: 300 },
+      { name: 'carousel11', height: 200, width: 500 },
+      { name: 'carousel12', height: 500, width: 200 },
+      { name: 'carousel13', height: 360, width: 640 },
+      { name: 'carousel14', height: 640, width: 360 },
+      { name: 'carousel15', height: 128, width: 128 },
+      { name: 'carousel16', height: 96, width: 96 },
+      { name: 'carousel17', height: 64, width: 64 },
+      { name: 'carousel18', height: 450, width: 800 },
+      { name: 'carousel19', height: 800, width: 450 },
+      { name: 'carousel20', height: 1000, width: 1000 },
     ],
   },
 }

@@ -1,13 +1,12 @@
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import sharp from 'sharp'
 
+import { mediaSharpTransformer } from '../__helpers/shared/mediaSharpTransformer.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { generateBlockFields, generateBlocks } from './blocks/blocks.js'
-import { MediaCollection, mediaSharpOptions, mediaSlug } from './collections/Media/index.js'
+import { MediaCollection, mediaSlug } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -37,7 +36,7 @@ export default buildConfigWithDefaults({
     ],
     editor: lexicalEditor({}),
     upload: {
-      transformers: [sharpTransformer({ collections: { [mediaSlug]: mediaSharpOptions }, sharp })],
+      transformers: [mediaSharpTransformer({ mediaSlug })],
     },
     // @ts-expect-error -- The benchmark intentionally produces more block types than generated types include.
     blocks: USE_BLOCK_REFERENCES ? generateBlocks(30 * 20, false) : undefined,

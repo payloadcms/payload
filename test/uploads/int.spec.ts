@@ -26,10 +26,6 @@ import { downloadFileToBuffer } from '../../packages/payload/src/uploads/downloa
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { tempFileHandler } from '../../packages/payload/src/uploads/fetchAPI-multipart/handlers.js'
 import { test } from '../__helpers/int/vitest.js'
-import {
-  runAnimatedFocalPointResizeStaysValidTest,
-  runAnimatedResizeReportsPerFrameDimensionsTest,
-} from '../__helpers/shared/animatedResizeParityTests.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
   adminThumbnailSizeSlug,
@@ -3248,20 +3244,26 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       })
     })
 
-    runAnimatedResizeReportsPerFrameDimensionsTest({
-      collection: animatedTypeMedia as CollectionSlug,
-      mainDimensions: { height: 200, width: 200 },
-      sizes: [
-        // A real enlargement (200x200 -> 480x480), not a no-op — a wrong
-        // per-frame height would show up here instead of being masked.
-        { name: 'squareSmall', height: 480, width: 480 },
-      ],
-    })
+    // A wrong per-frame divisor on the 44-frame, 200x200 animated.webp would report the frame
+    // stack's height or fail the resize, so exact single-frame dimensions prove both paths.
+    test('should report single-frame dimensions for an animated image and its variants', async ({
+      payload,
+    }) => {
+      const doc = await payload.create({
+        collection: animatedTypeMedia as CollectionSlug,
+        data: { focalX: 80, focalY: 50 },
+        filePath: path.resolve(dirname, './animated.webp'),
+        overrideAccess: true,
+      })
 
-    runAnimatedFocalPointResizeStaysValidTest({
-      collection: animatedTypeMedia as CollectionSlug,
-      focalPoint: { x: 80, y: 50 },
-      size: { name: 'focalCrop', height: 150, width: 300 },
+      expect(doc).toMatchObject({
+        height: 200,
+        variants: {
+          focalCrop: { height: 150, width: 300 },
+          squareSmall: { height: 480, width: 480 },
+        },
+        width: 200,
+      })
     })
   })
 

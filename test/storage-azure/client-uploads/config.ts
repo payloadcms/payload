@@ -89,7 +89,23 @@ export default buildConfigWithDefaults({
               ],
             },
           },
+          dynamic: { collections: [mediaWithDocPrefixSlug] },
         }),
+        // Declines every upload, so a client upload of a type it lists must still not be read.
+        {
+          slug: 'declining',
+          canTransform: () => false,
+          mimeTypes: ['audio/*'],
+          transformFile: () => Promise.reject(new Error('A declining transformer ran')),
+        },
+        {
+          slug: 'uppercase-text',
+          mimeTypes: ['text/plain'],
+          transformFile: async ({ file }) => ({
+            file: new File([(await file.text()).toUpperCase()], file.name, { type: file.type }),
+            status: 'complete',
+          }),
+        },
       ],
     },
   },

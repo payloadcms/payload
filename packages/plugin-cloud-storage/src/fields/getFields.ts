@@ -43,6 +43,12 @@ export const getFields = ({
     name: 'prefix',
     type: 'text',
     admin: {
+      disabled: {
+        bulkEdit: true,
+        column: true,
+        filter: true,
+        groupBy: true,
+      },
       hidden: true,
       readOnly: true,
     },

@@ -6,7 +6,10 @@ import { readdirSync, readFileSync, writeFileSync } from 'fs'
 import type { DrizzleAdapter } from '../types.js'
 import type { SizesToVariantsTableRenames } from './getSizesToVariantsRenames.js'
 
-import { getSizesToVariantsRenames } from './getSizesToVariantsRenames.js'
+import {
+  findSizesToVariantsFieldCollision,
+  getSizesToVariantsRenames,
+} from './getSizesToVariantsRenames.js'
 
 type SnapshotIndex = {
   columns: ({ expression: string } | string)[]
@@ -101,10 +104,34 @@ function applySizesToVariantsRenames({
       continue
     }
 
+    const existingColumns = new Set(Object.values(table.columns).map(({ name }) => name))
+
+    for (const { from, to } of columns) {
+      if (existingColumns.has(from) && existingColumns.has(to)) {
+        throw new Error(
+          `Cannot create the sizes-to-variants migration because snapshot table "${tableName}" contains both "${from}" and "${to}". Move or rename the existing destination data before creating this migration.`,
+        )
+      }
+    }
+
+    const fieldCollision = findSizesToVariantsFieldCollision({ columns, existingColumns })
+
+    if (fieldCollision) {
+      throw new Error(
+        `Cannot create the sizes-to-variants migration because snapshot table "${tableName}" contains both the "${fieldCollision.from}" and "${fieldCollision.to}" fields. Move or rename the existing destination data before creating this migration.`,
+      )
+    }
+
     for (const { from, to } of columns) {
       const column = table.columns[from]
 
       if (column) {
+        if (table.columns[to]) {
+          throw new Error(
+            `Cannot create the sizes-to-variants migration because snapshot table "${tableName}" contains both "${from}" and "${to}". Move or rename the existing destination data before creating this migration.`,
+          )
+        }
+
         delete table.columns[from]
         table.columns[to] = { ...column, name: to }
       }
@@ -126,6 +153,12 @@ function applySizesToVariantsRenames({
 
       if (!target) {
         continue
+      }
+
+      if (key !== target.to && table.indexes?.[target.to]) {
+        throw new Error(
+          `Cannot create the sizes-to-variants migration because snapshot table "${tableName}" contains both indexes "${key}" and "${target.to}". Move or rename the existing destination index before creating this migration.`,
+        )
       }
 
       delete table.indexes[key]

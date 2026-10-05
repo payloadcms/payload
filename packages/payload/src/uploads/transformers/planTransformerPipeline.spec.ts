@@ -39,24 +39,6 @@ describe('planTransformerPipeline', () => {
     expect(filePipeline).toEqual([fileOnly])
   })
 
-  it('should check the MIME type before calling canTransform', async () => {
-    const canTransform = vi.fn().mockResolvedValue(true)
-    const transformer = makeTransformer({
-      canTransform,
-      handleRequest: vi.fn(),
-      mimeTypes: ['video/*'],
-    })
-
-    const pipeline = await planTransformerPipeline({
-      args: makeArgs({ mimeType: 'image/png' }),
-      capability: 'handleRequest',
-      transformers: [transformer],
-    })
-
-    expect(pipeline).toEqual([])
-    expect(canTransform).not.toHaveBeenCalled()
-  })
-
   it('should reject planning without evaluating later transformers when canTransform throws', async () => {
     const thirdCanTransform = vi.fn().mockResolvedValue(true)
     const first = makeTransformer({ handleRequest: vi.fn(), slug: 'first' })

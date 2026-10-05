@@ -106,7 +106,7 @@ const TextFields: CollectionConfig = {
       name: 'fieldWithDefaultValue',
       type: 'text',
       defaultValue: async () => {
-        const defaultValue = new Promise((resolve) => setTimeout(() => resolve('some-value'), 1000))
+        const defaultValue = new Promise((resolve) => setTimeout(() => resolve('some-value'), 1))
 
         return defaultValue
       },

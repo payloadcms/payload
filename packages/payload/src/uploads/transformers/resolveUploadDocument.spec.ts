@@ -29,24 +29,15 @@ describe('getRequestedFile', () => {
     },
   }
 
-  it('should return the primary file when the primary filename is requested', () => {
-    expect(getRequestedFile({ document, filename: 'logo.png' })).toEqual({
-      filename: 'logo.png',
-      mimeType: 'image/png',
-    })
-  })
-
-  it('should return the matched image size filename and mimeType', () => {
-    expect(getRequestedFile({ document, filename: 'logo-640x480.webp' })).toEqual({
-      filename: 'logo-640x480.webp',
-      mimeType: 'image/webp',
-    })
-  })
-
-  it('should fall back to the primary file when no image size matches', () => {
-    expect(getRequestedFile({ document, filename: 'unknown.png' })).toEqual({
-      filename: 'logo.png',
-      mimeType: 'image/png',
-    })
+  it.each([
+    ['the primary filename', 'logo.png', { filename: 'logo.png', mimeType: 'image/png' }],
+    [
+      'an image size filename',
+      'logo-640x480.webp',
+      { filename: 'logo-640x480.webp', mimeType: 'image/webp' },
+    ],
+    ['an unmatched filename', 'unknown.png', { filename: 'logo.png', mimeType: 'image/png' }],
+  ])('should resolve the requested file for %s', (_, filename, expected) => {
+    expect(getRequestedFile({ document, filename })).toEqual(expected)
   })
 })

@@ -4,6 +4,7 @@ import path from 'path'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import { buildDynamicPredefinedSizesToVariantsMigration } from './buildDynamicPredefinedSizesToVariantsMigration.js'
+import { getSizesToVariantsRenames } from './getSizesToVariantsRenames.js'
 
 const tempDirs: string[] = []
 
@@ -43,7 +44,16 @@ const makePayload = ({ migrationDir }: { migrationDir: string }) =>
   ({
     db: {
       migrationDir,
-      payload: { config: { collections: [{ slug: 'media', upload: {} }] } },
+      payload: {
+        config: {
+          collections: [
+            {
+              slug: 'media',
+              upload: { variants: [{ name: 'heroLarge' }] },
+            },
+          ],
+        },
+      },
       rawTables: {
         media: {
           name: 'media',
@@ -113,6 +123,117 @@ describe('buildDynamicPredefinedSizesToVariantsMigration', () => {
       filePath,
       payload: makePayload({ migrationDir }),
     })
+
+    expect(fs.existsSync(`${filePath}.json`)).toBe(false)
+  })
+
+  it('should only plan columns for configured generated variants', () => {
+    const migrationDir = makeMigrationDir()
+    const payload = makePayload({ migrationDir })
+    const collection = payload.db.payload.config.collections[0]
+
+    collection.fields = [
+      {
+        fields: [{ name: 'customValue', type: 'text' }],
+        name: 'variants',
+        type: 'group',
+      },
+    ]
+    payload.db.rawTables.media.columns.variants_heroLarge_credit = {
+      name: 'variants_hero_large_credit',
+    }
+
+    expect(getSizesToVariantsRenames({ adapter: payload.db, direction: 'up' })[0]?.columns).toEqual(
+      [
+        {
+          from: 'sizes_hero_large_filename',
+          to: 'variants_hero_large_filename',
+        },
+      ],
+    )
+  })
+
+  it('should reject a snapshot that contains both source and destination columns', async () => {
+    const migrationDir = makeMigrationDir()
+    const filePath = path.join(migrationDir, '20260102_000000_sizes_to_variants')
+    const snapshotWithCollision = structuredClone(legacySnapshot)
+
+    snapshotWithCollision.tables['public.media'].columns.variants_hero_large_filename = {
+      name: 'variants_hero_large_filename',
+    }
+
+    fs.writeFileSync(
+      path.join(migrationDir, '20260101_000000_initial.json'),
+      JSON.stringify(snapshotWithCollision),
+    )
+
+    await expect(
+      buildDynamicPredefinedSizesToVariantsMigration({
+        packageName: '@payloadcms/db-postgres',
+      })({
+        filePath,
+        payload: makePayload({ migrationDir }),
+      }),
+    ).rejects.toThrow(
+      'contains both "sizes_hero_large_filename" and "variants_hero_large_filename"',
+    )
+
+    expect(fs.existsSync(`${filePath}.json`)).toBe(false)
+  })
+
+  it('should reject a snapshot that contains legacy sizes and a disjoint custom variants field', async () => {
+    const migrationDir = makeMigrationDir()
+    const filePath = path.join(migrationDir, '20260102_000000_sizes_to_variants')
+    const snapshotWithCustomVariants = structuredClone(legacySnapshot)
+
+    snapshotWithCustomVariants.tables['public.media'].columns.variants_custom_value = {
+      name: 'variants_custom_value',
+    }
+
+    fs.writeFileSync(
+      path.join(migrationDir, '20260101_000000_initial.json'),
+      JSON.stringify(snapshotWithCustomVariants),
+    )
+
+    await expect(
+      buildDynamicPredefinedSizesToVariantsMigration({
+        packageName: '@payloadcms/db-postgres',
+      })({
+        filePath,
+        payload: makePayload({ migrationDir }),
+      }),
+    ).rejects.toThrow('contains both the "sizes" and "variants" fields')
+
+    expect(fs.existsSync(`${filePath}.json`)).toBe(false)
+  })
+
+  it('should reject a snapshot that contains both source and destination indexes', async () => {
+    const migrationDir = makeMigrationDir()
+    const filePath = path.join(migrationDir, '20260102_000000_sizes_to_variants')
+    const snapshotWithCollision = structuredClone(legacySnapshot)
+
+    snapshotWithCollision.tables[
+      'public.media'
+    ].indexes.media_variants_hero_large_variants_hero_large_filename_idx = {
+      name: 'media_variants_hero_large_variants_hero_large_filename_idx',
+      columns: [{ expression: 'variants_hero_large_filename', isExpression: false }],
+    }
+
+    fs.writeFileSync(
+      path.join(migrationDir, '20260101_000000_initial.json'),
+      JSON.stringify(snapshotWithCollision),
+    )
+
+    await expect(
+      buildDynamicPredefinedSizesToVariantsMigration({
+        packageName: '@payloadcms/db-postgres',
+      })({
+        filePath,
+        payload: makePayload({ migrationDir }),
+      }),
+    ).rejects.toThrow(
+      'contains both indexes "media_sizes_hero_large_sizes_hero_large_filename_idx" and "media_variants_hero_large_variants_hero_large_filename_idx"',
+    )
 
     expect(fs.existsSync(`${filePath}.json`)).toBe(false)
   })

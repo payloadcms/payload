@@ -17,17 +17,14 @@ describe('validateTransformers', () => {
     expect(() => validateTransformers({ transformers: [transformer] })).toThrow(/slug/i)
   })
 
-  it('should throw when a transformer declares no MIME types', () => {
-    const transformer = makeTransformer({ mimeTypes: [] })
+  it.each([{ mimeTypes: [] }, { mimeTypes: ['image'] }, { mimeTypes: ['*/png'] }])(
+    'should throw for the invalid MIME types $mimeTypes',
+    ({ mimeTypes }) => {
+      const transformer = makeTransformer({ mimeTypes })
 
-    expect(() => validateTransformers({ transformers: [transformer] })).toThrow(/mime/i)
-  })
-
-  it.each(['image', '*/png'])('should throw for the invalid MIME pattern %j', (mimeType) => {
-    const transformer = makeTransformer({ mimeTypes: [mimeType] })
-
-    expect(() => validateTransformers({ transformers: [transformer] })).toThrow(/mime/i)
-  })
+      expect(() => validateTransformers({ transformers: [transformer] })).toThrow(/mime/i)
+    },
+  )
 
   it.each(['init', 'canTransform', 'transformFile', 'handleRequest'] as const)(
     'should throw when %s is present but not a function',

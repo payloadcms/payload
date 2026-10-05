@@ -103,20 +103,49 @@ export async function getFile({
       })
     }
 
-    const readableStream = new ReadableStream({
+    const streamOptions =
+      rangeResult.type === 'partial'
+        ? { end: rangeResult.rangeEnd, start: rangeResult.rangeStart }
+        : {}
+    const nodeStream = file.createReadStream(streamOptions)
+
+    // A consumer that stops reading (a failed transform, a disconnected client) must end the
+    // GCS download too, otherwise the underlying connection stays open until it drains.
+    let onAbort: (() => void) | undefined
+    const removeAbortListener = () => {
+      if (onAbort) {
+        req.signal?.removeEventListener('abort', onAbort)
+      }
+    }
+    const stopReading = () => {
+      removeAbortListener()
+      nodeStream.destroy()
+    }
+
+    const readableStream = new ReadableStream<Uint8Array>({
+      cancel: stopReading,
       start(controller) {
-        const streamOptions =
-          rangeResult.type === 'partial'
-            ? { end: rangeResult.rangeEnd, start: rangeResult.rangeStart }
-            : {}
-        const nodeStream = file.createReadStream(streamOptions)
+        onAbort = () => {
+          stopReading()
+          controller.error(req.signal?.reason)
+        }
+
+        if (req.signal?.aborted) {
+          onAbort()
+          return
+        }
+
+        req.signal?.addEventListener('abort', onAbort, { once: true })
+
         nodeStream.on('data', (chunk) => {
           controller.enqueue(new Uint8Array(chunk))
         })
         nodeStream.on('end', () => {
+          removeAbortListener()
           controller.close()
         })
         nodeStream.on('error', (err) => {
+          removeAbortListener()
           controller.error(err)
         })
       },

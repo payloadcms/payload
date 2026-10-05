@@ -1,14 +1,13 @@
 import type { CollectionConfig } from 'payload'
 
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import sharp from 'sharp'
 
+import { mediaSharpTransformer } from '../__helpers/shared/mediaSharpTransformer.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { MediaCollection, mediaSharpOptions, mediaSlug } from './collections/Media/index.js'
+import { MediaCollection, mediaSlug } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { UsersCollection, usersSlug } from './collections/Users/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
@@ -35,10 +34,16 @@ const FolderCollection = {
   },
 } satisfies CollectionConfig
 
+const MediaAltCollection = {
+  slug: 'media-alt',
+  fields: [],
+  upload: true,
+} satisfies CollectionConfig
+
 export default buildConfigWithDefaults({
   config: {
     upload: {
-      transformers: [sharpTransformer({ collections: { [mediaSlug]: mediaSharpOptions }, sharp })],
+      transformers: [mediaSharpTransformer({ mediaSlug })],
     },
     // ...extend config here
     admin: {
@@ -54,11 +59,24 @@ export default buildConfigWithDefaults({
           },
         },
       },
+      dashboard: {
+        defaultLayout: [
+          { widgetSlug: 'collections', width: 'full' },
+          { widgetSlug: 'upload-dropzone', width: 'small' },
+        ],
+        widgets: [],
+      },
       importMap: {
         baseDir: path.resolve(dirname),
       },
     },
-    collections: [UsersCollection, FolderCollection, PostsCollection, MediaCollection],
+    collections: [
+      UsersCollection,
+      FolderCollection,
+      PostsCollection,
+      MediaCollection,
+      MediaAltCollection,
+    ],
     editor: lexicalEditor({}),
     globals: [
       // ...add more globals here
@@ -105,6 +123,23 @@ export default buildConfigWithDefaults({
       collection: 'payload-folders',
       data: {
         name: 'Accessibility child folder',
+        '_h_payload-folders': parentFolder.id,
+      },
+      overrideAccess: true,
+    })
+
+    for (const globalText of ['Original menu text', 'Updated menu text', 'Current menu text']) {
+      await payload.updateGlobal({
+        slug: 'menu',
+        data: { globalText },
+        overrideAccess: true,
+      })
+    }
+
+    await payload.create({
+      collection: 'payload-folders',
+      data: {
+        name: 'Accessibility final child folder',
         '_h_payload-folders': parentFolder.id,
       },
       overrideAccess: true,
