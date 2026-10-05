@@ -119,6 +119,7 @@ export const esTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Buscar widgets...',
     widgetCollectionRequired: 'La Colección es requerida.',
     widgetConfigurationError: 'Error de configuración del widget',
+    widgetDropFilesToUpload: 'Suelta archivos para subirlos',
     widgetInvalidCollection: 'La Colección "{{collection}}" no existe.',
     widgetInvalidFilterField:
       'El campo de filtro "{{field}}" no existe en la colección "{{collection}}".',
@@ -136,6 +137,9 @@ export const esTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Campo de ordenación',
     widgetTitleFallback: 'Consulta de colección',
     widgetTitleLabel: 'Título',
+    widgetUploadDropzoneDescription:
+      'Sube archivos desde tu ordenador arrastrándolos aquí o haciendo clic en el botón de abajo',
+    widgetUploadFiles: 'Añadir archivos',
   },
   error: {
     accountAlreadyActivated: 'Esta cuenta ya fue activada.',
@@ -468,6 +472,7 @@ export const esTranslations: DefaultTranslationsObject = {
     remove: 'Eliminar',
     rename: 'Renombrar',
     replaceRow: 'Reemplazar fila',
+    requiredFields: 'Los campos marcados con * son obligatorios.',
     reset: 'Restablecer',
     resetPreferences: 'Restablecer preferencias',
     resetPreferencesDescription:
@@ -484,8 +489,12 @@ export const esTranslations: DefaultTranslationsObject = {
     saveChanges: 'Guardar Cambios',
     saving: 'Guardando...',
     schedulePublishFor: 'Programar publicación para {{title}}',
+    searchAutomatically: 'Los resultados se actualizan automáticamente mientras escribe.',
     searchBy: 'Buscar por {{label}}',
+    searchCleared: 'Búsqueda borrada.',
     searchColumns: 'Buscar columnas',
+    searchGroups: 'Grupos para «{{search}}»: {{count}}.',
+    searchResults: 'Resultados para «{{search}}»: {{count}}.',
     select: 'Seleccionar',
     selectAll: 'Seleccionar {{count}} {{label}}',
     selectAllRows: 'Seleccionar todas las filas',
@@ -496,6 +505,7 @@ export const esTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Mostrar todos los elementos de {{label}}',
     shownInTable: 'Mostrado en tabla',
     showSidebar: 'Mostrar barra lateral',
+    skipToContent: 'Saltar al contenido',
     sorryNotFound: 'Lo sentimos, no hay nada que coincida con tu solicitud.',
     sort: 'Ordenar',
     sortByLabelDirection: 'Ordenar por {{label}} {{direction}}',
@@ -558,6 +568,7 @@ export const esTranslations: DefaultTranslationsObject = {
     noParent: 'Sin Padre',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Buscar {{label}}',
+    searchResults: 'Se encontraron {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'No se puede copiar al mismo idioma',

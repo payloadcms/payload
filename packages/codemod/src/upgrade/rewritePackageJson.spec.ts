@@ -111,6 +111,38 @@ describe('rewritePackageJson', () => {
     expect(data.engines).toEqual({ node: '>=24.15.0' })
   })
 
+  it('keeps toolchain versions already at or above the floor', () => {
+    const data: Record<string, unknown> = {
+      devDependencies: { '@types/node': '^24.12.3', typescript: '^6.2.0' },
+      engines: { node: '>=24.20.0' },
+    }
+
+    const summary = rewritePackageJson({ data, resolved })
+
+    expect(data.devDependencies).toEqual({ '@types/node': '^24.12.3', typescript: '^6.2.0' })
+    expect(data.engines).toEqual({ node: '>=24.20.0' })
+    expect(summary.floorsWritten).toEqual([])
+  })
+
+  it('leaves placeholder and non-semver toolchain specs untouched', () => {
+    const data: Record<string, unknown> = {
+      devDependencies: { '@types/node': 'latest', typescript: 'catalog:' },
+    }
+
+    const summary = rewritePackageJson({ data, resolved })
+
+    expect(data.devDependencies).toEqual({ '@types/node': 'latest', typescript: 'catalog:' })
+    expect(summary.floorsWritten).toEqual(['engines.node'])
+  })
+
+  it('reports only the floors it wrote', () => {
+    const data = baseInput() as Record<string, unknown>
+
+    const summary = rewritePackageJson({ data, resolved })
+
+    expect(summary.floorsWritten).toEqual(['typescript', '@types/node', 'engines.node'])
+  })
+
   it('is idempotent', () => {
     const data = baseInput() as Record<string, unknown>
 

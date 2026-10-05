@@ -6,6 +6,7 @@ export type Props = {
   children: React.ReactNode
   className?: string
   droppableRef?: Ref<HTMLElement>
+  id?: string
   ids: string[]
   onDragEnd: (e: { event: DragEndEvent; moveFromIndex: number; moveToIndex: number }) => void
   onDragStart?: (e: { event: DragStartEvent; id: number | string }) => void

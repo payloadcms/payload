@@ -118,6 +118,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Søk widgets...',
     widgetCollectionRequired: 'Collectie er påkrevd.',
     widgetConfigurationError: 'Feil i widget-konfigurasjon',
+    widgetDropFilesToUpload: 'Dra og slipp en fil',
     widgetInvalidCollection: 'Collection "{{collection}}" finnes ikke.',
     widgetInvalidFilterField:
       'Filter-feltet "{{field}}" finnes ikke i kolleksjonen "{{collection}}".',
@@ -135,6 +136,9 @@ export const nbTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sorter Field',
     widgetTitleFallback: 'Forespørsel om Collection',
     widgetTitleLabel: 'Tittel',
+    widgetUploadDropzoneDescription:
+      'Last opp fra datamaskinen din ved å dra og slippe, eller klikk på knappen nedenfor',
+    widgetUploadFiles: 'Legg til filer',
   },
   error: {
     accountAlreadyActivated: 'Denne kontoen er allerede aktivert.',
@@ -463,6 +467,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     remove: 'Fjern',
     rename: 'Endre navn',
     replaceRow: 'Erstatt rad',
+    requiredFields: 'Felter merket med * er obligatoriske.',
     reset: 'Tilbakestill',
     resetPreferences: 'Tilbakestill preferanser',
     resetPreferencesDescription:
@@ -480,8 +485,12 @@ export const nbTranslations: DefaultTranslationsObject = {
     saveChanges: 'Lagre endringer',
     saving: 'Lagrer...',
     schedulePublishFor: 'Planlegg publisering for {{title}}',
+    searchAutomatically: 'Resultatene oppdateres automatisk mens du skriver.',
     searchBy: 'Søk etter {{label}}',
+    searchCleared: 'Søket er tømt.',
     searchColumns: 'Søkekolonner',
+    searchGroups: 'Grupper for «{{search}}»: {{count}}.',
+    searchResults: 'Resultater for «{{search}}»: {{count}}.',
     select: 'Velg',
     selectAll: 'Velg alle {{count}} {{label}}',
     selectAllRows: 'Velg alle rader',
@@ -492,6 +501,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Vis alle {{label}}',
     shownInTable: 'Vist i tabell',
     showSidebar: 'Vis sidepanel',
+    skipToContent: 'Hopp til innhold',
     sorryNotFound: 'Beklager, det er ingenting som samsvarer med forespørselen din.',
     sort: 'Sortér',
     sortByLabelDirection: 'Sorter etter {{label}} {{direction}}',
@@ -554,6 +564,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     noParent: 'Ingen forelder',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Søk {{label}}',
+    searchResults: 'Fant {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Kan ikke kopiere til samme språk',

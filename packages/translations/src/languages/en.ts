@@ -119,6 +119,7 @@ export const enTranslations = {
     searchWidgets: 'Search widgets...',
     widgetCollectionRequired: 'Collection is required.',
     widgetConfigurationError: 'Widget configuration error',
+    widgetDropFilesToUpload: 'Drop files to upload',
     widgetInvalidCollection: 'Collection "{{collection}}" does not exist.',
     widgetInvalidFilterField:
       'Filter field "{{field}}" does not exist on collection "{{collection}}".',
@@ -135,6 +136,9 @@ export const enTranslations = {
     widgetSortFieldLabel: 'Sort Field',
     widgetTitleFallback: 'Collection query',
     widgetTitleLabel: 'Title',
+    widgetUploadDropzoneDescription:
+      'Upload from your computer via drag-and-drop, or click the button below',
+    widgetUploadFiles: 'Upload files',
   },
   error: {
     accountAlreadyActivated: 'This account has already been activated.',
@@ -461,6 +465,7 @@ export const enTranslations = {
     remove: 'Remove',
     rename: 'Rename',
     replaceRow: 'Replace Row',
+    requiredFields: 'Fields marked with * are required.',
     reset: 'Reset',
     resetPreferences: 'Reset Preferences',
     resetPreferencesDescription:
@@ -477,8 +482,12 @@ export const enTranslations = {
     saveChanges: 'Save Changes',
     saving: 'Saving...',
     schedulePublishFor: 'Schedule publish for {{title}}',
+    searchAutomatically: 'Results update automatically as you type.',
     searchBy: 'Search by {{label}}',
+    searchCleared: 'Search cleared.',
     searchColumns: 'Search columns',
+    searchGroups: 'Groups found for “{{search}}”: {{count}}.',
+    searchResults: 'Results found for “{{search}}”: {{count}}.',
     select: 'Select',
     selectAll: 'Select all {{count}} {{label}}',
     selectAllRows: 'Select all rows',
@@ -489,6 +498,7 @@ export const enTranslations = {
     showAllLabel: 'Show all {{label}}',
     shownInTable: 'Shown in table',
     showSidebar: 'Show sidebar',
+    skipToContent: 'Skip to content',
     sorryNotFound: 'Sorry—there is nothing to correspond with your request.',
     sort: 'Sort',
     sortByLabelDirection: 'Sort by {{label}} {{direction}}',
@@ -550,6 +560,7 @@ export const enTranslations = {
     noParent: 'No Parent',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Search {{label}}',
+    searchResults: 'Found {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Cannot copy to the same locale',
