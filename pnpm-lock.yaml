@@ -2310,7 +2310,7 @@ importers:
         specifier: ^3.614.0
         version: 3.1059.0
       '@azure/storage-blob':
-        specifier: 12.34.0
+        specifier: ^12.34.0
         version: 12.34.0
       '@cloudflare/workers-types':
         specifier: 4.20260218.0
