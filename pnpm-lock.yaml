@@ -1726,8 +1726,8 @@ importers:
   packages/translations:
     dependencies:
       date-fns:
-        specifier: 4.1.0
-        version: 4.1.0
+        specifier: 4.4.0
+        version: 4.4.0
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -1796,8 +1796,8 @@ importers:
         specifier: 2.0.4
         version: 2.0.4
       date-fns:
-        specifier: 4.1.0
-        version: 4.1.0
+        specifier: 4.4.0
+        version: 4.4.0
       dequal:
         specifier: 2.0.3
         version: 2.0.3
@@ -10230,6 +10230,9 @@ packages:
 
   date-fns@4.1.0:
     resolution: {integrity: sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==}
+
+  date-fns@4.4.0:
+    resolution: {integrity: sha512-+1UMbeh68lH1SegH83CGWwpb6OHHbpSgr3+s5Eww5M4CAgswBpoWS0AjTOfEJ33HiYKz1hdj/KTFprzXHmq/6w==}
 
   dateformat@4.6.3:
     resolution: {integrity: sha512-2P0p0pFGzHS5EMnhdxQi7aJN+iMheud0UhG4dlE1DLAlvL8JHjJJTX/CSm4JXwV0Ka5nGk3zC5mcb5bUQUxxMA==}
@@ -24374,6 +24377,8 @@ snapshots:
 
   date-fns@4.1.0: {}
 
+  date-fns@4.4.0: {}
+
   dateformat@4.6.3: {}
 
   debounce-fn@6.0.0:
@@ -28428,7 +28433,7 @@ snapshots:
     dependencies:
       '@floating-ui/react': 0.27.20(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       clsx: 2.1.1
-      date-fns: 4.1.0
+      date-fns: 4.4.0
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
 
