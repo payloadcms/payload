@@ -297,7 +297,7 @@ describe('Uploads', () => {
       .locator('tr', { hasText: 'Polymorphic upload two' })
       .locator('.select-row__checkbox')
       .click()
-    await listDrawer.getByRole('button', { name: 'Select 1' }).click()
+    await listDrawer.getByRole('button', { name: 'Confirm' }).click()
 
     await saveDocAndAssert(page)
 
