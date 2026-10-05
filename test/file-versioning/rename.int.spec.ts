@@ -339,7 +339,6 @@ test.suite('File rename', { config: './config.ts' }, () => {
     payload,
     restClient,
   }) => {
-    await payload.create({ collection: 'users', data: devUser, overrideAccess: true })
     await restClient.login({ slug: 'users', credentials: devUser })
     const bytes = await readFile(imageFixture)
     const created = await payload.create({
@@ -416,7 +415,6 @@ test.suite('File rename', { config: './config.ts' }, () => {
     payload,
     restClient,
   }) => {
-    await payload.create({ collection: 'users', data: devUser, overrideAccess: true })
     await restClient.login({ slug: 'users', credentials: devUser })
     const bytes = await readFile(imageFixture)
     const created = await payload.create({
@@ -455,7 +453,6 @@ test.suite('File rename', { config: './config.ts' }, () => {
     payload,
     restClient,
   }) => {
-    await payload.create({ collection: 'users', data: devUser, overrideAccess: true })
     await restClient.login({ slug: 'users', credentials: devUser })
     const bytes = await readFile(imageFixture)
     const created = await payload.create({

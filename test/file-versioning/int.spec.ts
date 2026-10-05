@@ -256,7 +256,6 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     payload,
     restClient,
   }) => {
-    await payload.create({ collection: 'users', data: devUser, overrideAccess: true })
     await restClient.login({ slug: 'users', credentials: devUser })
 
     const bytes = await readFile(imageFixture)
@@ -1113,9 +1112,12 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     })
     const archived = docs.find(({ version }) => version.original?.filename !== updated.filename)!
 
-    const currentResponse = await restClient.GET(`/${mediaSlug}/file/${updated.filename}`)
+    const currentResponse = await restClient.GET(`/${mediaSlug}/file/${updated.filename}`, {
+      auth: false,
+    })
     const archivedResponse = await restClient.GET(
       `/${mediaSlug}/file/${archived.version.original!.filename}`,
+      { auth: false },
     )
 
     expect(currentResponse.status).toBe(403)
@@ -1128,7 +1130,6 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       }),
     ).rejects.toThrow()
 
-    await payload.create({ collection: 'users', data: devUser, overrideAccess: true })
     await restClient.login({ slug: 'users', credentials: devUser })
 
     const authorizedResponse = await restClient.GET(
@@ -1173,9 +1174,12 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     })
     const archived = docs.find(({ version }) => version.alt === 'version restricted')!
 
-    const currentResponse = await restClient.GET(`/${mediaSlug}/file/${updated.filename}`)
+    const currentResponse = await restClient.GET(`/${mediaSlug}/file/${updated.filename}`, {
+      auth: false,
+    })
     const archivedResponse = await restClient.GET(
       `/${mediaSlug}/file/${archived.version.original!.filename}`,
+      { auth: false },
     )
 
     expect(currentResponse.status).toBe(200)

@@ -3,6 +3,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
 import { ConvertedMedia } from './collections/ConvertedMedia/index.js'
 import { DraftMedia } from './collections/DraftMedia/index.js'
 import { LegacyMedia } from './collections/LegacyMedia/index.js'
@@ -57,6 +58,13 @@ export default buildConfigWithDefaults({
     },
     ...(migrationDb ? { db: migrationDb } : {}),
     typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },
+  },
+  seed: async (payload) => {
+    await payload.create({
+      collection: 'users',
+      data: { email: devUser.email, password: devUser.password },
+      overrideAccess: true,
+    })
   },
   suite: 'file-versioning',
 })
