@@ -260,23 +260,34 @@ export const generateFileData = async <T>({
       sharpOptions.animated = true
     }
 
-    if (sharp && fileHasCompleteContents && (fileIsAnimatedType || fileHasAdjustments)) {
+    // Only enter the sharp encode pipeline when there is actual work for sharp to do.
+    // An animated file (WebP, GIF, TIFF) with no adjustments is stored as uploaded,
+    // matching the JPEG/PNG behaviour, to avoid silent quality loss and colour-profile
+    // stripping. Its frame metadata is read separately below. (#18386)
+    if (sharp && fileHasCompleteContents && fileHasAdjustments) {
       // rotate() auto-rotates based on EXIF data - see #3081
       sharpFile = file.tempFilePath
         ? sharp(file.tempFilePath, sharpOptions).rotate()
         : sharp(file.data, sharpOptions).rotate()
 
-      if (fileHasAdjustments) {
-        if (resizeOptions) {
-          sharpFile = sharpFile.resize(resizeOptions)
-        }
-        if (formatOptions) {
-          sharpFile = sharpFile.toFormat(formatOptions.format, formatOptions.options)
-        }
-        if (trimOptions) {
-          sharpFile = sharpFile.trim(trimOptions)
-        }
+      if (resizeOptions) {
+        sharpFile = sharpFile.resize(resizeOptions)
       }
+      if (formatOptions) {
+        sharpFile = sharpFile.toFormat(formatOptions.format, formatOptions.options)
+      }
+      if (trimOptions) {
+        sharpFile = sharpFile.trim(trimOptions)
+      }
+    }
+
+    // For animated files with no adjustments, read frame metadata without re-encoding.
+    let animatedOnlyMetadata: Awaited<ReturnType<NonNullable<typeof sharpFile>['metadata']>> | undefined
+    if (sharp && fileHasCompleteContents && fileIsAnimatedType && !fileHasAdjustments) {
+      const metaSharp = file.tempFilePath
+        ? sharp(file.tempFilePath, sharpOptions)
+        : sharp(file.data, sharpOptions)
+      animatedOnlyMetadata = await metaSharp.metadata()
     }
 
     if (fileSupportsResize || isImage(file.mimetype)) {
@@ -310,6 +321,11 @@ export const generateFileData = async <T>({
     } else {
       mime = file.mimetype
       fileData.filesize = file.size
+
+      // Animated files with no adjustments: correct height for multi-frame images.
+      if (animatedOnlyMetadata?.pages && dimensions) {
+        fileData.height = dimensions.height / animatedOnlyMetadata.pages
+      }
 
       if (file.name.includes('.')) {
         ext = getFileExtension(getSanitizedUploadFilename(file.name))
