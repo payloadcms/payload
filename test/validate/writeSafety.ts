@@ -6,7 +6,6 @@ import { logoutOperation, refreshOperation, saveVersion } from 'payload'
 // Direct internal import intentionally exercises the upload write guard.
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { uploadFiles } from '../../packages/payload/src/uploads/uploadFiles.js'
-import { devUser } from '../credentials.js'
 import {
   validationUploadsDir,
   validationWriteTargetGlobalSlug,
@@ -78,7 +77,10 @@ export const runWriteAttempt: CollectionBeforeChangeHook = async ({ data, operat
     case 'login':
       await req.payload.login({
         collection: 'users',
-        data: { email: devUser.email, password: 'not-the-real-password' },
+        data: {
+          email: 'validation-write-guard-login@example.com',
+          password: 'not-the-real-password',
+        },
         req,
       })
       break

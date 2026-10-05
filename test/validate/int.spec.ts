@@ -82,6 +82,10 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
     await fs.rm(validationTempFilesDir, { force: true, recursive: true })
   })
 
+  test.afterEach(async () => {
+    await fs.rm(validationUploadsDir, { force: true, recursive: true })
+  })
+
   test.describe('collections', () => {
     test('should not add locale metadata to normal create validation errors', async ({
       payload,

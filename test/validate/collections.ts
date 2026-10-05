@@ -22,8 +22,6 @@ import {
   validationEmptyCollectionSlug,
   validationFallbackCollectionSlug,
   validationNonLocalizedCollectionSlug,
-  validationPublishUploadsDir,
-  validationPublishUploadsSlug,
   validationUniqueCollectionSlug,
   validationUploadsDir,
   validationUploadsSlug,
@@ -731,34 +729,5 @@ export const validationCollections: CollectionConfig[] = [
       staticDir: validationUploadsDir,
     },
     versions: false,
-  },
-  {
-    slug: validationPublishUploadsSlug,
-    access: {
-      validate: () => true,
-    },
-    fields: [
-      {
-        name: 'title',
-        type: 'text',
-        localized: true,
-        required: true,
-      },
-    ],
-    upload: {
-      imageSizes: [
-        {
-          name: 'thumbnail',
-          height: 64,
-          width: 64,
-        },
-      ],
-      staticDir: validationPublishUploadsDir,
-    },
-    versions: {
-      drafts: {
-        validate: false,
-      },
-    },
   },
 ]
