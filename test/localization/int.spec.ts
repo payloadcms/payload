@@ -1058,8 +1058,8 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
     })
 
     test.describe('Localized - global length validation', () => {
-      test('should validate each locale on a global write with locale all', async ({ payload }) => {
-        const updated: any = await payload.updateGlobal({
+      test('should persist each locale on a global write with locale all', async ({ payload }) => {
+        await payload.updateGlobal({
           slug: 'global-text',
           data: {
             localizedTextWithLength: {
@@ -1071,8 +1071,14 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
           overrideAccess: true,
         })
 
-        expect(updated.localizedTextWithLength.en).toStrictEqual('valid english')
-        expect(updated.localizedTextWithLength.es).toStrictEqual('valido en es')
+        const refetched: any = await payload.findGlobal({
+          slug: 'global-text',
+          locale: 'all',
+          overrideAccess: true,
+        })
+
+        expect(refetched.localizedTextWithLength.en).toStrictEqual('valid english')
+        expect(refetched.localizedTextWithLength.es).toStrictEqual('valido en es')
       })
 
       test('should reject a global write where one locale violates minLength with locale all', async ({

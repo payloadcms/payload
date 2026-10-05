@@ -330,11 +330,25 @@ export const promise = async ({
       mergeLocaleActions.push(() => {
         const localeData: Record<string, unknown> = {}
 
+        // With `locale: 'all'`, siblingData holds a locale-keyed object (`{ en, es }`) rather than a single
+        // locale's value - take each submitted locale, falling back to the existing doc for ones not sent.
+        const submittedValue = siblingData[field.name!]
+        const isAllLocales =
+          req.locale === 'all' &&
+          submittedValue !== null &&
+          typeof submittedValue === 'object' &&
+          !Array.isArray(submittedValue)
+
         for (const locale of localization.localeCodes) {
-          const fieldValue =
-            locale === req.locale
-              ? siblingData[field.name!]
-              : siblingDocWithLocales?.[field.name!]?.[locale]
+          const existingValue = siblingDocWithLocales?.[field.name!]?.[locale]
+
+          const fieldValue = isAllLocales
+            ? locale in (submittedValue as Record<string, unknown>)
+              ? (submittedValue as Record<string, unknown>)[locale]
+              : existingValue
+            : locale === req.locale
+              ? submittedValue
+              : existingValue
 
           // update locale value if it's not undefined
           if (typeof fieldValue !== 'undefined') {
