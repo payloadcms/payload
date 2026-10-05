@@ -138,5 +138,36 @@
     --text-mono-xl-weight: 400;
     --text-mono-xl-line-height: 1.75rem; /* 28px */
     --text-mono-xl-letter-spacing: 0.085px;
+
+    /* Legacy names default to the new tokens and remain independently overridable. */
+    --font-family-sans: var(--text-body-family);
+    --font-family-mono: var(--text-mono-family);
+    --text-letter-spacing: var(--text-body-medium-letter-spacing);
+
+    --text-body-small-font-family: var(--font-family-sans, var(--text-body-family));
+    --text-body-medium-font-family: var(--font-family-sans, var(--text-body-family));
+    --text-body-large-font-family: var(--font-family-sans, var(--text-body-family));
+
+    --text-body-small-strong-font-family: var(--font-family-sans, var(--text-body-family));
+    --text-body-small-strong-font-size: var(--text-body-small-bold-font-size);
+    --text-body-small-strong-font-weight: var(--text-body-small-bold-font-weight);
+    --text-body-small-strong-line-height: var(--text-body-small-bold-line-height);
+    --text-body-small-strong-letter-spacing: var(--text-body-small-bold-letter-spacing);
+
+    --text-body-medium-strong-font-family: var(--font-family-sans, var(--text-body-family));
+    --text-body-medium-strong-font-size: var(--text-body-medium-bold-font-size);
+    --text-body-medium-strong-font-weight: var(--text-body-medium-bold-font-weight);
+    --text-body-medium-strong-line-height: var(--text-body-medium-bold-line-height);
+    --text-body-medium-strong-letter-spacing: var(--text-body-medium-bold-letter-spacing);
+
+    --text-body-large-strong-font-family: var(--font-family-sans, var(--text-body-family));
+    --text-body-large-strong-font-size: var(--text-body-large-bold-font-size);
+    --text-body-large-strong-font-weight: var(--text-body-large-bold-font-weight);
+    --text-body-large-strong-line-height: var(--text-body-large-bold-line-height);
+    --text-body-large-strong-letter-spacing: var(--text-body-large-bold-letter-spacing);
+
+    --text-heading-small-font-family: var(--text-heading-family);
+    --text-heading-medium-font-family: var(--text-heading-family);
+    --text-heading-large-font-family: var(--text-heading-family);
   }
 }
