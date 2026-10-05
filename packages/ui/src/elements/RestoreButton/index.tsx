@@ -73,6 +73,7 @@ export const RestoreButton: React.FC<Props> = (props) => {
         path: `/${collectionSlug}${qs.stringify(
           {
             trash: true,
+            version: collectionConfig?.versions?.drafts ? 'draft' : undefined,
             where: {
               and: [{ id: { equals: id } }, { deletedAt: { exists: true } }],
             },

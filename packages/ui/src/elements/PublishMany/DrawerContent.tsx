@@ -109,7 +109,7 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
   const handlePublish = useCallback(async () => {
     const url = formatAdminURL({
       apiRoute: api,
-      path: `/${slug}${queryString}`,
+      path: `/${slug}${queryString}&version=draft`,
     })
     await requests
       .patch(url, {

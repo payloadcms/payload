@@ -39,10 +39,11 @@ export function update<TSlug extends GlobalSlug>(
     }
 
     const { slug } = globalConfig
+    const version = args.version ?? 'published'
 
     context.req.query = {
       ...context.req.query,
-      version: args.version ?? (globalConfig.versions?.drafts ? 'draft' : 'published'),
+      version,
     }
 
     const options = {
@@ -57,7 +58,7 @@ export function update<TSlug extends GlobalSlug>(
     const result = await updateOperationGlobal<TSlug, SelectType>(options)
     return rememberDocumentVersion({
       data: result,
-      version: args.version ?? (globalConfig.versions?.drafts ? 'draft' : 'published'),
+      version,
     })
   }
 }

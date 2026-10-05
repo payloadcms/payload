@@ -1,4 +1,3 @@
-/* eslint-disable vitest/no-standalone-expect -- Shared test fixture callbacks are test blocks. */
 import { configToSchema } from '@payloadcms/graphql'
 import { graphql } from 'graphql'
 import { createPayloadRequest, formatNames } from 'payload'
@@ -179,6 +178,7 @@ test.suite('Version selector APIs', { config: './config.ts' }, () => {
       id: child.id,
       collection: draftPostsSlug,
       data: { title: 'Pending child' },
+      version: 'draft',
     })
     const { schema } = configToSchema(payload.config)
     const names = formatNames(draftPostsSlug)
@@ -290,11 +290,13 @@ test.suite('Version selector APIs', { config: './config.ts' }, () => {
       id: child.id,
       collection: draftPostsSlug,
       data: { title: 'Pending child' },
+      version: 'draft',
     })
     await payload.update({
       id: parent.id,
       collection: draftPostsSlug,
       data: { title: 'Pending parent' },
+      version: 'draft',
     })
     const { schema } = configToSchema(payload.config)
     const names = formatNames(draftPostsSlug)
@@ -378,7 +380,7 @@ test.suite('Version selector APIs', { config: './config.ts' }, () => {
       contextValue: { req: await createPayloadRequest({ payload }) },
       schema,
       source: `mutation {
-        updated: ${updateField.name}(id: ${JSON.stringify((created.data?.created as { id: number | string }).id)}, locale: all,
+        updated: ${updateField.name}(id: ${JSON.stringify((created.data?.created as { id: number | string }).id)}, locale: all, version: draft,
           data: {title: {fr: "Updated French title"}}
         ) { title localizedRows_locales }
       }`,
@@ -585,6 +587,7 @@ test.suite('Version selector APIs', { config: './config.ts' }, () => {
       collection: localizedPostsSlug,
       data: { title: 'Working English' },
       locale: 'en',
+      version: 'draft',
     })
     await payload.restoreVersion({
       id: String(originalVersion.id),
@@ -618,6 +621,7 @@ test.suite('Version selector APIs', { config: './config.ts' }, () => {
       slug: draftGlobalSlug,
       data: { _status: 'published', title: { en: 'Original English', fr: 'Original French' } },
       locale: 'all',
+      version: 'draft',
     })
 
     const versions = await payload.findGlobalVersions({ slug: draftGlobalSlug, locale: 'all' })
@@ -633,6 +637,7 @@ test.suite('Version selector APIs', { config: './config.ts' }, () => {
       slug: draftGlobalSlug,
       data: { title: 'Working English' },
       locale: 'en',
+      version: 'draft',
     })
     await payload.restoreGlobalVersion({
       id: String(originalVersion.id),

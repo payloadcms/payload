@@ -1578,6 +1578,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             title: 'Versioned Post Updated',
           },
           overrideAccess: true,
+          version: 'draft',
         })
         const versions = await payload.findVersions({
           collection: 'posts',
@@ -1758,6 +1759,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         const client = await mcp.connect(apiKey)
         const callResponse = await client.callTool({
           arguments: {
+            version: 'draft',
             slug: 'posts',
             id: post.id,
             data: {
@@ -1894,6 +1896,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         const client = await mcp.connect(apiKey)
         const callResponse = await client.callTool({
           arguments: {
+            version: 'draft',
             slug: 'posts',
             id: post.id,
             data: {
@@ -1928,6 +1931,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         const client = await mcp.connect(apiKey)
         const callResponse = await client.callTool({
           arguments: {
+            version: 'draft',
             slug: 'posts',
             id: post.id,
             data: {
@@ -1964,6 +1968,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
 
         const invalidResponse = await client.callTool({
           arguments: {
+            version: 'draft',
             slug: 'posts',
             id: post.id,
             data: { title: 'Invalid select update' },
@@ -1977,6 +1982,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
 
         const callResponse = await client.callTool({
           arguments: {
+            version: 'draft',
             slug: 'posts',
             id: post.id,
             data: {
@@ -2180,6 +2186,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         })
         const callResponse = await client.callTool({
           arguments: {
+            version: 'draft',
             slug: 'posts',
             id: createdPost.id,
             data: {
@@ -2416,6 +2423,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         const client = await mcp.connect(apiKey)
         const callResponse = await client.callTool({
           arguments: {
+            version: 'draft',
             slug: 'posts',
             id: post.id,
             data: { title: 'Virtual Field Updated Title' },
@@ -3138,6 +3146,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         const client = await mcp.connect(apiKey)
         const callResponse = await client.callTool({
           arguments: {
+            version: 'draft',
             slug: 'posts',
             id: englishPost.id,
             data: {

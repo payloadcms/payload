@@ -41,7 +41,12 @@ test.suite('Version selector reads', { config: './config.ts' }, () => {
       data: { title: 'Live' },
       version: 'published',
     })
-    await payload.update({ id: live.id, collection: draftPostsSlug, data: { title: 'Pending' } })
+    await payload.update({
+      id: live.id,
+      collection: draftPostsSlug,
+      data: { title: 'Pending' },
+      version: 'draft',
+    })
     await payload.create({ collection: draftPostsSlug, data: { title: 'Unpublished' } })
 
     const published = await payload.findDistinct({ collection: draftPostsSlug, field: 'title' })
@@ -84,6 +89,7 @@ test.suite('Version selector reads', { config: './config.ts' }, () => {
       collection: draftPostsSlug,
       data: { title: 'Work' },
       overrideAccess: true,
+      version: 'draft',
     })
 
     expect(
@@ -111,6 +117,7 @@ test.suite('Version selector reads', { config: './config.ts' }, () => {
       collection: draftPostsSlug,
       data: { _status: 'published' },
       overrideAccess: true,
+      version: 'draft',
     })
 
     expect(
@@ -141,6 +148,7 @@ test.suite('Version selector reads', { config: './config.ts' }, () => {
         collection: draftPostsSlug,
         data: { _status: 'published' },
         depth: 0,
+        version: 'draft',
       })
 
       const active = await payload.findVersions({
@@ -178,6 +186,7 @@ test.suite('Version selector reads', { config: './config.ts' }, () => {
       data: { title: 'Brouillon' },
       locale: 'fr',
       overrideAccess: true,
+      version: 'draft',
     })
     await payload.update({
       id: live.id,

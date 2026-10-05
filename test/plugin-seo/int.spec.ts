@@ -478,6 +478,7 @@ test.suite('@payloadcms/plugin-seo', { config: './config.ts' }, () => {
     // Update it to mediaDoc2 and we expect to see different previousValue and value in the hook
     const context: { identicalCount?: number } = {}
     await payload.update({
+      version: 'draft',
       id: page.id,
       collection: 'pages',
       context,
@@ -497,6 +498,7 @@ test.suite('@payloadcms/plugin-seo', { config: './config.ts' }, () => {
 
   test('should add meta title', async ({ payload }) => {
     const pageWithTitle = await payload.update({
+      version: 'draft',
       id: page.id,
       collection: 'pages',
       data: {
@@ -515,6 +517,7 @@ test.suite('@payloadcms/plugin-seo', { config: './config.ts' }, () => {
 
   test('should add meta description', async ({ payload }) => {
     const pageWithDescription = await payload.update({
+      version: 'draft',
       id: page.id,
       collection: 'pages',
       data: {
@@ -533,6 +536,7 @@ test.suite('@payloadcms/plugin-seo', { config: './config.ts' }, () => {
 
   test('should add meta image', async ({ payload }) => {
     const pageWithImage = await payload.update({
+      version: 'draft',
       id: page.id,
       collection: 'pages',
       data: {
@@ -551,6 +555,7 @@ test.suite('@payloadcms/plugin-seo', { config: './config.ts' }, () => {
 
   test('should add custom meta field', async ({ payload }) => {
     const pageWithCustomField = await payload.update({
+      version: 'draft',
       id: page.id,
       collection: 'pages',
       data: {

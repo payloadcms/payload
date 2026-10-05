@@ -31,7 +31,7 @@ export const updateHandler: PayloadHandler = async (req) => {
 
   let message = req.t('general:updatedSuccessfully')
 
-  if (version === 'draft' || (version === undefined && globalConfig.versions?.drafts)) {
+  if (version === 'draft') {
     message = req.t('version:draftSavedSuccessfully')
   }
   if (autosave) {

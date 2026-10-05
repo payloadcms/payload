@@ -90,6 +90,7 @@ export const RestoreMany: React.FC<Props> = (props) => {
           locale,
           select: {},
           trash: true, // Ensure trashed docs are returned
+          version: collectionConfig?.versions?.drafts ? 'draft' : undefined,
           where: mergeListSearchAndWhere({
             collectionConfig,
             search: parseSearchParams(searchParams)?.search as string,

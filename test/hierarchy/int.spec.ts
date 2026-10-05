@@ -229,6 +229,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
 
       // Move child to root
       const updatedChild = await payload.update({
+        version: 'draft',
         id: childPage.id,
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
@@ -259,6 +260,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
 
       await expect(
         payload.update({
+          version: 'draft',
           id: page.id,
           collection: 'organizations',
           data: { parent: page.id },
@@ -340,6 +342,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
 
       // Moving child from page1 to page2 should work
       const updated = await payload.update({
+        version: 'draft',
         id: child.id,
         collection: 'organizations',
         context: { computeHierarchyPaths: true },

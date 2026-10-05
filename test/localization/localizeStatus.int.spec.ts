@@ -91,6 +91,7 @@ test.suite('localizeStatus migration', { config: './localizeStatus.config.ts' },
           collection: 'testMigrationPosts',
           data: { _status: 'published', title: 'Post 1 Updated' },
           overrideAccess: true,
+          version: 'draft',
         })
 
         // Step 2: Verify "before" state
@@ -695,6 +696,7 @@ test.suite('localizeStatus migration', { config: './localizeStatus.config.ts' },
           collection: 'testMigrationPosts',
           data: { _status: 'published', title: 'Post 1 Updated' },
           overrideAccess: true,
+          version: 'draft',
         })
 
         const beforeVersions = (await drizzle.all(

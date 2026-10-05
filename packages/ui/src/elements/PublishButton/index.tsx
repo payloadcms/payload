@@ -143,6 +143,7 @@ export function PublishButton({
   })
 
   const localizeStatusEnabled = hasLocalizeStatusEnabled(entityConfig)
+  const isUpdate = Boolean(globalSlug || id)
 
   const publish = useCallback(async () => {
     if (uploadStatus === 'uploading') {
@@ -153,6 +154,7 @@ export function PublishButton({
       {
         depth: 0,
         locale: localizeStatusEnabled ? 'all' : localeCode,
+        version: isUpdate ? 'draft' : undefined,
       },
       { addQueryPrefix: true },
     )
@@ -195,6 +197,7 @@ export function PublishButton({
     collectionSlug,
     globalSlug,
     id,
+    isUpdate,
     setHasPublishedDoc,
     submit,
     setUnpublishedVersionCount,
@@ -212,6 +215,7 @@ export function PublishButton({
         {
           depth: 0,
           locale,
+          version: isUpdate ? 'draft' : undefined,
         },
         { addQueryPrefix: true },
       )
@@ -242,6 +246,7 @@ export function PublishButton({
       collectionSlug,
       globalSlug,
       id,
+      isUpdate,
       setHasPublishedDoc,
       setMostRecentVersionIsAutosaved,
       setUnpublishedVersionCount,

@@ -141,6 +141,7 @@ async function createLocalizedPendingDraft({
     collection: localizedPostsSlug,
     data: { title: 'French pending' },
     locale: 'fr',
+    version: 'draft',
   })
   await payload.update({
     id: doc.id,

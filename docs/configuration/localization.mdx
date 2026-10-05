@@ -195,11 +195,12 @@ await payload.update({
   overrideAccess: true,
   id,
   locale: 'es',
+  version: 'draft',
   data: { _status: 'published' },
 })
 ```
 
-To publish or unpublish every locale at once, use `locale: 'all'` and set `_status`. Publishing promotes the selected draft content; use `version: 'published'` when unpublishing the live content while retaining any pending draft:
+To publish or unpublish every locale at once, use `locale: 'all'` and set `_status`. Use `version: 'draft'` to promote the pending draft content, and `version: 'published'` when unpublishing the live content while retaining any pending draft:
 
 ```ts
 // Publishes every locale
@@ -208,6 +209,7 @@ await payload.update({
   overrideAccess: true,
   id,
   locale: 'all',
+  version: 'draft',
   data: { _status: 'published' },
 })
 

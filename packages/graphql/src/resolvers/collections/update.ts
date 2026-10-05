@@ -43,11 +43,9 @@ export function updateResolver<TSlug extends CollectionSlug>(
       req.query = {}
     }
 
-    const version = args.version ?? (collection.config.versions?.drafts ? 'draft' : 'published')
+    const version = args.version ?? 'published'
 
-    if (version !== undefined) {
-      req.query.version = version
-    }
+    req.query.version = version
 
     context.req = req
 
@@ -66,7 +64,7 @@ export function updateResolver<TSlug extends CollectionSlug>(
 
     return rememberDocumentVersion({
       data: result,
-      version: args.version ?? (collection.config.versions?.drafts ? 'draft' : 'published'),
+      version,
     })
   }
 }

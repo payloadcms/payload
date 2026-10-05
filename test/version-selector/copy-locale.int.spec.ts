@@ -29,6 +29,7 @@ test.suite('Copy locale version selection', { config: './config.ts' }, () => {
                 ...(hasDrafts ? { _status: 'published' } : {}),
               },
               locale: 'all',
+              ...(hasDrafts ? { version: 'draft' as const } : {}),
             })
           : await payload.create({
               collection,

@@ -76,6 +76,7 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
 
   test('should update unlocked document - collection', async ({ payload }) => {
     const updatedPost = await payload.update({
+      version: 'draft',
       collection: postsSlug,
       data: {
         text: 'updated post',
@@ -155,6 +156,7 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
     await wait(1100)
 
     const updateLockedDoc = await payload.update({
+      version: 'draft',
       collection: postsSlug,
       data: {
         text: 'updated post 2',
@@ -491,6 +493,7 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
     })
 
     const updateLockedDoc = await payload.update({
+      version: 'draft',
       collection: postsSlug,
       data: {
         text: 'updated post 5',

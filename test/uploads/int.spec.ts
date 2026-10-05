@@ -2024,6 +2024,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         })
 
         const doc = await payload.update({
+          version: 'draft',
           id: related.id,
           collection: relationSlug,
           data: {
@@ -2056,6 +2057,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         })
 
         const doc = await payload.update({
+          version: 'draft',
           collection: relationSlug,
           data: {
             image: null,
@@ -2106,6 +2108,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         expect(res.blocks[0]?.relatedMedia).toEqual([id])
 
         const res_2 = await payload.update({
+          version: 'draft',
           id: res.id,
           collection: 'relation',
           data: {

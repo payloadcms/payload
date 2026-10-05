@@ -386,6 +386,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
     })
 
     await payload.update({
+      version: 'draft',
       collection: 'posts',
       id: createdDoc.id,
       data: {
@@ -768,6 +769,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
       overrideAccess: true,
     })
     await payload.update({
+      version: 'draft',
       collection: postsSlug,
       id: post.id,
       locale: 'es',
@@ -778,6 +780,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
       overrideAccess: true,
     })
     await payload.update({
+      version: 'draft',
       collection: postsSlug,
       id: post.id,
       locale: 'de',
@@ -989,6 +992,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
 
       // Update the post in Spanish locale
       await payload.update({
+        version: 'draft',
         collection: postsSlug,
         id: post.id,
         locale: 'es',
@@ -1001,6 +1005,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
 
       // Update the post in German locale
       await payload.update({
+        version: 'draft',
         collection: postsSlug,
         id: post.id,
         locale: 'de',

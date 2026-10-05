@@ -298,7 +298,7 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
       const updatedTitle = 'updated title'
 
       const query = `mutation {
-        updatePost(id: ${existingDocGraphQLID}, data: { title: "${updatedTitle}"}) {
+        updatePost(id: ${existingDocGraphQLID}, version: draft, data: { title: "${updatedTitle}"}) {
           id
           title
         }

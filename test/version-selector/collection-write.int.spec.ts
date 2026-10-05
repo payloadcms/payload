@@ -21,6 +21,7 @@ test.suite('Collection version selectors', { config: './config.ts' }, () => {
       collection: localizedPostsSlug,
       data: { title: 'Restricted pending' },
       locale: 'en',
+      version: 'draft',
     })
 
     await expect(
@@ -31,6 +32,7 @@ test.suite('Collection version selectors', { config: './config.ts' }, () => {
         data: { title: 'Replacement' },
         locale: 'en',
         overrideAccess: false,
+        version: 'draft',
       }),
     ).rejects.toMatchObject({ status: 403 })
     expect(
@@ -53,7 +55,12 @@ test.suite('Collection version selectors', { config: './config.ts' }, () => {
       data: { title: 'Live' },
       version: 'published',
     })
-    await payload.update({ id: live.id, collection: draftPostsSlug, data: { title: 'Pending' } })
+    await payload.update({
+      id: live.id,
+      collection: draftPostsSlug,
+      data: { title: 'Pending' },
+      version: 'draft',
+    })
 
     const statusField = payload.collections[draftPostsSlug].config.fields.find(
       (field) => 'name' in field && field.name === '_status',
@@ -68,6 +75,7 @@ test.suite('Collection version selectors', { config: './config.ts' }, () => {
         collection: draftPostsSlug,
         data: { _status: 'published', title: 'Edited pending' },
         overrideAccess: false,
+        version: 'draft',
       })
 
       const published = await payload.findByID({ id: live.id, collection: draftPostsSlug })
@@ -136,7 +144,12 @@ test.suite('Collection version selectors', { config: './config.ts' }, () => {
       version: 'published',
     })
 
-    await payload.update({ id: doc.id, collection: draftPostsSlug, data: { title: 'Pending' } })
+    await payload.update({
+      id: doc.id,
+      collection: draftPostsSlug,
+      data: { title: 'Pending' },
+      version: 'draft',
+    })
     await payload.update({
       id: doc.id,
       collection: draftPostsSlug,
@@ -162,7 +175,12 @@ test.suite('Collection version selectors', { config: './config.ts' }, () => {
   test('should publish the active draft when status requests publication', async ({ payload }) => {
     const doc = await payload.create({ collection: draftPostsSlug, data: { title: 'Pending' } })
 
-    await payload.update({ id: doc.id, collection: draftPostsSlug, data: { _status: 'published' } })
+    await payload.update({
+      id: doc.id,
+      collection: draftPostsSlug,
+      data: { _status: 'published' },
+      version: 'draft',
+    })
 
     const live = await payload.findByID({
       id: doc.id,
@@ -246,7 +264,12 @@ test.suite('Collection version selectors', { config: './config.ts' }, () => {
       version: 'published',
     })
 
-    await payload.update({ id: doc.id, collection: draftPostsSlug, data: { title: 'Pending' } })
+    await payload.update({
+      id: doc.id,
+      collection: draftPostsSlug,
+      data: { title: 'Pending' },
+      version: 'draft',
+    })
     await payload.update({
       id: doc.id,
       collection: draftPostsSlug,
@@ -291,14 +314,57 @@ test.suite('Collection version selectors', { config: './config.ts' }, () => {
     ).rejects.toThrow()
   })
 
-  test('should fork published content for an omitted update selector', async ({ payload }) => {
+  test('should edit the published document and preserve its pending draft for an omitted update selector', async ({
+    payload,
+  }) => {
     const doc = await payload.create({
       collection: draftPostsSlug,
       data: { title: 'Live' },
       version: 'published',
     })
 
-    await payload.update({ id: doc.id, collection: draftPostsSlug, data: { title: 'Pending' } })
+    await payload.update({
+      id: doc.id,
+      collection: draftPostsSlug,
+      data: { title: 'Pending' },
+      version: 'draft',
+    })
+    await payload.update({ id: doc.id, collection: draftPostsSlug, data: { title: 'Live edit' } })
+
+    const live = await payload.findByID({ id: doc.id, collection: draftPostsSlug })
+    const draft = await payload.findByID({
+      id: doc.id,
+      collection: draftPostsSlug,
+      version: 'draft',
+    })
+
+    expect(live.title).toBe('Live edit')
+    expect(draft.title).toBe('Pending')
+  })
+
+  test('should reject an omitted update selector for a document that has never been published', async ({
+    payload,
+  }) => {
+    const doc = await payload.create({ collection: draftPostsSlug, data: { title: 'Draft' } })
+
+    await expect(
+      payload.update({ id: doc.id, collection: draftPostsSlug, data: { title: 'Live edit' } }),
+    ).rejects.toThrow()
+  })
+
+  test('should fork published content with the draft update selector', async ({ payload }) => {
+    const doc = await payload.create({
+      collection: draftPostsSlug,
+      data: { title: 'Live' },
+      version: 'published',
+    })
+
+    await payload.update({
+      id: doc.id,
+      collection: draftPostsSlug,
+      data: { title: 'Pending' },
+      version: 'draft',
+    })
 
     const live = await payload.findByID({
       id: doc.id,
@@ -357,6 +423,7 @@ test.suite('Collection version selectors', { config: './config.ts' }, () => {
       collection: localizedPostsSlug,
       data: { _status: 'published' },
       locale: 'en',
+      version: 'draft',
     })
 
     const english = await payload.findByID({
@@ -389,6 +456,7 @@ test.suite('Collection version selectors', { config: './config.ts' }, () => {
       collection: localizedPostsSlug,
       data: { _status: 'published' },
       locale: 'all',
+      version: 'draft',
     })
 
     const published = await payload.findByID({
@@ -434,7 +502,12 @@ test.suite('Collection version selectors', { config: './config.ts' }, () => {
       version: 'published',
     })
 
-    await payload.update({ id: doc.id, collection: draftPostsSlug, data: { title: 'Pending' } })
+    await payload.update({
+      id: doc.id,
+      collection: draftPostsSlug,
+      data: { title: 'Pending' },
+      version: 'draft',
+    })
 
     const result = await payload.update({
       collection: draftPostsSlug,

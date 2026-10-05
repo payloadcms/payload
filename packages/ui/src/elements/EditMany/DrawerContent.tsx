@@ -374,7 +374,7 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
                   <PublishButton
                     action={formatAdminURL({
                       apiRoute,
-                      path: `/${collection.slug}${queryString}`,
+                      path: `/${collection.slug}${queryString}&version=draft`,
                     })}
                     disabled={selectedFields.length === 0}
                   />

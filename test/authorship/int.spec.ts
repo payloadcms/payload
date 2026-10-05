@@ -440,6 +440,7 @@ test.suite('Authorship', { config: './config.ts', resetBetweenTests: false }, ()
     expect(created).not.toHaveProperty('updatedBy')
 
     const updated = await payload.update({
+      version: 'draft',
       id: created.id,
       collection: createdOnlySlug,
       data: { title: 'updated' },
@@ -466,6 +467,7 @@ test.suite('Authorship', { config: './config.ts', resetBetweenTests: false }, ()
     expect(created).not.toHaveProperty('createdBy')
 
     const updated = await payload.update({
+      version: 'draft',
       id: created.id,
       collection: updatedOnlySlug,
       data: { title: 'updated' },

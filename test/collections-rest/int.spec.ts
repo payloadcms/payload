@@ -175,7 +175,7 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
       })
       createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
 
-      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}`, {
+      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?version=draft`, {
         body: JSON.stringify({
           items: [
             {

@@ -795,6 +795,7 @@ test.suite('Hooks', { config: './config.ts', resetBetweenTests: false }, () => {
       })
 
       await payload.update({
+        version: 'draft',
         id: doc.id,
         collection: beforeOperationSlug,
         data: {},
@@ -812,6 +813,7 @@ test.suite('Hooks', { config: './config.ts', resetBetweenTests: false }, () => {
       })
 
       await payload.update({
+        version: 'draft',
         id: doc.id,
         collection: beforeOperationSlug,
         data: {},
@@ -978,6 +980,7 @@ test.suite('Hooks', { config: './config.ts', resetBetweenTests: false }, () => {
 
       // Update to create a version
       await payload.update({
+        version: 'draft',
         id: doc.id,
         collection: beforeOperationSlug,
         data: { category: 'v2' },
@@ -1014,6 +1017,7 @@ test.suite('Hooks', { config: './config.ts', resetBetweenTests: false }, () => {
 
       // Update to create a version
       await payload.update({
+        version: 'draft',
         id: doc.id,
         collection: beforeOperationSlug,
         data: { category: 'v2' },

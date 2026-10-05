@@ -3,7 +3,7 @@ import type { ViewTypes, Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL, mergeListSearchAndWhere } from 'payload/shared'
+import { formatAdminURL, hasDraftsEnabled, mergeListSearchAndWhere } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
@@ -184,15 +184,18 @@ export function DeleteMany({
                 'Content-Type': 'application/json',
               },
             })
-          : await requests.patch(url, {
-              body: JSON.stringify({
-                deletedAt: new Date().toISOString(),
-              }),
-              headers: {
-                'Accept-Language': i18n.language,
-                'Content-Type': 'application/json',
+          : await requests.patch(
+              hasDraftsEnabled(collectionConfig) ? `${url}&version=draft` : url,
+              {
+                body: JSON.stringify({
+                  deletedAt: new Date().toISOString(),
+                }),
+                headers: {
+                  'Accept-Language': i18n.language,
+                  'Content-Type': 'application/json',
+                },
               },
-            })
+            )
 
         try {
           const { plural, singular } = collectionConfig.labels

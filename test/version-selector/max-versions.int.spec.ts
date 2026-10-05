@@ -14,7 +14,12 @@ test.suite('Active draft version retention', { config: './max-config.ts' }, () =
       version: 'published',
     })
 
-    await payload.update({ id: doc.id, collection: maxPostsSlug, data: { title: 'Pending' } })
+    await payload.update({
+      id: doc.id,
+      collection: maxPostsSlug,
+      data: { title: 'Pending' },
+      version: 'draft',
+    })
     await payload.update({
       id: doc.id,
       collection: maxPostsSlug,

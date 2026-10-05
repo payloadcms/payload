@@ -3,7 +3,7 @@ import type { SanitizedCollectionConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, hasDraftsEnabled } from 'payload/shared'
 import React, { Fragment, useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -95,7 +95,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
               'Content-Type': 'application/json',
             },
           })
-        : await requests.patch(url, {
+        : await requests.patch(hasDraftsEnabled(collectionConfig) ? `${url}?version=draft` : url, {
             body: JSON.stringify({
               deletedAt: new Date().toISOString(),
             }),

@@ -14,7 +14,11 @@ test.suite('Global version selectors', { config: './config.ts' }, () => {
       version: 'published',
     })
 
-    await payload.updateGlobal({ slug, data: { related: child.id, title: 'Pending global' } })
+    await payload.updateGlobal({
+      slug,
+      data: { related: child.id, title: 'Pending global' },
+      version: 'draft',
+    })
     const draft = await payload.findGlobal({ slug, depth: 1, version: 'draft' })
     const latest = await payload.findGlobal({ slug, depth: 1, version: 'latest' })
 
@@ -35,12 +39,14 @@ test.suite('Global version selectors', { config: './config.ts' }, () => {
       id: child.id,
       collection: draftPostsSlug,
       data: { title: 'Pending child' },
+      version: 'draft',
     })
     await payload.updateGlobal({
       slug,
       data: { _status: 'published', related: child.id, title: 'Published global' },
+      version: 'draft',
     })
-    await payload.updateGlobal({ slug, data: { title: 'Pending global' } })
+    await payload.updateGlobal({ slug, data: { title: 'Pending global' }, version: 'draft' })
 
     expect(
       (await payload.findGlobal({ slug, depth: 1, version: 'published' })).related,
@@ -61,7 +67,11 @@ test.suite('Global version selectors', { config: './config.ts' }, () => {
       data: { title: 'Private child' },
     })
 
-    await payload.updateGlobal({ slug, data: { related: child.id, title: 'Pending global' } })
+    await payload.updateGlobal({
+      slug,
+      data: { related: child.id, title: 'Pending global' },
+      version: 'draft',
+    })
     const access = payload.collections[draftPostsSlug].config.access
     const previousRead = access.read
 
@@ -85,8 +95,9 @@ test.suite('Global version selectors', { config: './config.ts' }, () => {
       slug,
       data: { _status: 'published', title: 'Published' },
       locale: 'en',
+      version: 'draft',
     })
-    await payload.updateGlobal({ slug, data: { title: 'Pending' }, locale: 'en' })
+    await payload.updateGlobal({ slug, data: { title: 'Pending' }, locale: 'en', version: 'draft' })
 
     const statusField = payload.globals.config
       .find((global) => global.slug === slug)!
@@ -101,6 +112,7 @@ test.suite('Global version selectors', { config: './config.ts' }, () => {
         data: { _status: 'published', title: 'Updated pending' },
         locale: 'en',
         overrideAccess: false,
+        version: 'draft',
       })
 
       const published = await payload.findGlobal({ slug, locale: 'en' })
@@ -120,6 +132,7 @@ test.suite('Global version selectors', { config: './config.ts' }, () => {
       slug,
       data: { _status: 'published', title: 'Published' },
       locale: 'en',
+      version: 'draft',
     })
 
     const statusField = payload.globals.config
@@ -135,6 +148,7 @@ test.suite('Global version selectors', { config: './config.ts' }, () => {
         data: { _status: 'published', title: 'New pending' },
         locale: 'en',
         overrideAccess: false,
+        version: 'draft',
       })
 
       const published = await payload.findGlobal({ slug, locale: 'en' })
@@ -154,8 +168,14 @@ test.suite('Global version selectors', { config: './config.ts' }, () => {
       slug,
       data: { _status: 'published', title: 'Allowed' },
       locale: 'en',
+      version: 'draft',
     })
-    await payload.updateGlobal({ slug, data: { title: 'Restricted pending' }, locale: 'en' })
+    await payload.updateGlobal({
+      slug,
+      data: { title: 'Restricted pending' },
+      locale: 'en',
+      version: 'draft',
+    })
 
     await expect(
       payload.updateGlobal({
@@ -164,6 +184,7 @@ test.suite('Global version selectors', { config: './config.ts' }, () => {
         data: { title: 'Replacement' },
         locale: 'en',
         overrideAccess: false,
+        version: 'draft',
       }),
     ).rejects.toMatchObject({ status: 403 })
     expect((await payload.findGlobal({ slug, locale: 'en', version: 'draft' })).title).toBe(
@@ -178,6 +199,7 @@ test.suite('Global version selectors', { config: './config.ts' }, () => {
       slug,
       data: { title: 'Private pending' },
       locale: 'en',
+      version: 'draft',
     })
 
     await expect(
@@ -187,6 +209,7 @@ test.suite('Global version selectors', { config: './config.ts' }, () => {
         data: { title: 'Unauthorized replacement' },
         locale: 'en',
         overrideAccess: false,
+        version: 'draft',
       }),
     ).rejects.toMatchObject({ status: 403 })
 
@@ -196,7 +219,7 @@ test.suite('Global version selectors', { config: './config.ts' }, () => {
   })
 
   test('should keep an initial draft out of published reads', async ({ payload }) => {
-    await payload.updateGlobal({ slug, data: { title: 'Draft' } })
+    await payload.updateGlobal({ slug, data: { title: 'Draft' }, version: 'draft' })
 
     const draft = await payload.findGlobal({ slug, version: 'draft' })
     const published = await payload.findGlobal({ slug })
@@ -205,10 +228,40 @@ test.suite('Global version selectors', { config: './config.ts' }, () => {
     expect(published.title).toBeUndefined()
   })
 
-  test('should publish the pending draft when the selector is omitted', async ({ payload }) => {
-    await payload.updateGlobal({ slug, data: { _status: 'published', title: 'Published' } })
-    await payload.updateGlobal({ slug, data: { title: 'Pending' } })
-    await payload.updateGlobal({ slug, data: { _status: 'published' } })
+  test('should edit the published global and preserve its pending draft when the selector is omitted', async ({
+    payload,
+  }) => {
+    await payload.updateGlobal({
+      slug,
+      data: { _status: 'published', title: 'Published' },
+      version: 'draft',
+    })
+    await payload.updateGlobal({ slug, data: { title: 'Pending' }, version: 'draft' })
+    await payload.updateGlobal({ slug, data: { title: 'Live edit' } })
+
+    const published = await payload.findGlobal({ slug })
+    const draft = await payload.findGlobal({ slug, version: 'draft' })
+
+    expect(published.title).toBe('Live edit')
+    expect(draft.title).toBe('Pending')
+  })
+
+  test('should reject an omitted selector update for a global that has never been published', async ({
+    payload,
+  }) => {
+    await payload.updateGlobal({ slug, data: { title: 'Draft' }, version: 'draft' })
+
+    await expect(payload.updateGlobal({ slug, data: { title: 'Live edit' } })).rejects.toThrow()
+  })
+
+  test('should publish the pending draft with the draft selector', async ({ payload }) => {
+    await payload.updateGlobal({
+      slug,
+      data: { _status: 'published', title: 'Published' },
+      version: 'draft',
+    })
+    await payload.updateGlobal({ slug, data: { title: 'Pending' }, version: 'draft' })
+    await payload.updateGlobal({ slug, data: { _status: 'published' }, version: 'draft' })
 
     const published = await payload.findGlobal({ slug })
     const draft = await payload.findGlobal({ slug, disableErrors: true, version: 'draft' })
@@ -218,8 +271,12 @@ test.suite('Global version selectors', { config: './config.ts' }, () => {
   })
 
   test('should retain a pending draft when editing the published version', async ({ payload }) => {
-    await payload.updateGlobal({ slug, data: { _status: 'published', title: 'Published' } })
-    await payload.updateGlobal({ slug, data: { title: 'Pending' } })
+    await payload.updateGlobal({
+      slug,
+      data: { _status: 'published', title: 'Published' },
+      version: 'draft',
+    })
+    await payload.updateGlobal({ slug, data: { title: 'Pending' }, version: 'draft' })
     await payload.updateGlobal({ slug, data: { title: 'Live edit' }, version: 'published' })
 
     const published = await payload.findGlobal({ slug })
@@ -234,7 +291,11 @@ test.suite('Global version selectors', { config: './config.ts' }, () => {
   test('should edit the published version with latest when no draft exists', async ({
     payload,
   }) => {
-    await payload.updateGlobal({ slug, data: { _status: 'published', title: 'Published' } })
+    await payload.updateGlobal({
+      slug,
+      data: { _status: 'published', title: 'Published' },
+      version: 'draft',
+    })
     await payload.updateGlobal({ slug, data: { title: 'Live edit' }, version: 'latest' })
 
     const published = await payload.findGlobal({ slug })
@@ -245,7 +306,7 @@ test.suite('Global version selectors', { config: './config.ts' }, () => {
   })
 
   test('should reject published updates when there is only a draft', async ({ payload }) => {
-    await payload.updateGlobal({ slug, data: { title: 'Draft' } })
+    await payload.updateGlobal({ slug, data: { title: 'Draft' }, version: 'draft' })
 
     await expect(
       payload.updateGlobal({ slug, data: { title: 'Live edit' }, version: 'published' }),
@@ -255,8 +316,12 @@ test.suite('Global version selectors', { config: './config.ts' }, () => {
   test('should unpublish the live version without replacing its pending draft', async ({
     payload,
   }) => {
-    await payload.updateGlobal({ slug, data: { _status: 'published', title: 'Published' } })
-    await payload.updateGlobal({ slug, data: { title: 'Pending' } })
+    await payload.updateGlobal({
+      slug,
+      data: { _status: 'published', title: 'Published' },
+      version: 'draft',
+    })
+    await payload.updateGlobal({ slug, data: { title: 'Pending' }, version: 'draft' })
     await payload.updateGlobal({ slug, data: { _status: 'draft' }, version: 'published' })
 
     const published = await payload.findGlobal({ slug })
@@ -267,9 +332,24 @@ test.suite('Global version selectors', { config: './config.ts' }, () => {
   })
 
   test('should publish every locale with locale all', async ({ payload }) => {
-    await payload.updateGlobal({ slug, data: { title: 'English draft' }, locale: 'en' })
-    await payload.updateGlobal({ slug, data: { title: 'French draft' }, locale: 'fr' })
-    await payload.updateGlobal({ slug, data: { _status: 'published' }, locale: 'all' })
+    await payload.updateGlobal({
+      slug,
+      data: { title: 'English draft' },
+      locale: 'en',
+      version: 'draft',
+    })
+    await payload.updateGlobal({
+      slug,
+      data: { title: 'French draft' },
+      locale: 'fr',
+      version: 'draft',
+    })
+    await payload.updateGlobal({
+      slug,
+      data: { _status: 'published' },
+      locale: 'all',
+      version: 'draft',
+    })
 
     const published = await payload.findGlobal({ slug, locale: 'all' })
 
@@ -288,6 +368,7 @@ test.suite('Global version selectors', { config: './config.ts' }, () => {
         title: { en: 'English', fr: 'French' },
       },
       locale: 'all',
+      version: 'draft',
     })
 
     const response = await payload.updateGlobal({
@@ -322,8 +403,14 @@ test.suite('Global version selectors', { config: './config.ts' }, () => {
         title: { en: 'English', fr: 'French' },
       },
       locale: 'all',
+      version: 'draft',
     })
-    await payload.updateGlobal({ slug, data: { title: 'French pending' }, locale: 'fr' })
+    await payload.updateGlobal({
+      slug,
+      data: { title: 'French pending' },
+      locale: 'fr',
+      version: 'draft',
+    })
 
     const response = await payload.updateGlobal({
       slug,
@@ -354,6 +441,7 @@ test.suite('Global version selectors', { config: './config.ts' }, () => {
       slug,
       data: { _status: 'published', title: { en: 'English', fr: 'French' } },
       locale: 'all',
+      version: 'draft',
     })
 
     const published = await payload.findGlobal({ slug, locale: 'all', select: { title: true } })
@@ -363,7 +451,11 @@ test.suite('Global version selectors', { config: './config.ts' }, () => {
   })
 
   test('should unpublish the latest live version when no draft exists', async ({ payload }) => {
-    await payload.updateGlobal({ slug, data: { _status: 'published', title: 'Published' } })
+    await payload.updateGlobal({
+      slug,
+      data: { _status: 'published', title: 'Published' },
+      version: 'draft',
+    })
     await payload.updateGlobal({ slug, data: { _status: 'draft' }, version: 'latest' })
 
     const published = await payload.findGlobal({ slug })
@@ -378,8 +470,14 @@ test.suite('Global version selectors', { config: './config.ts' }, () => {
       slug,
       data: { _status: 'published', title: { en: 'English', fr: 'French' } },
       locale: 'all',
+      version: 'draft',
     })
-    await payload.updateGlobal({ slug, data: { title: 'English draft' }, locale: 'en' })
+    await payload.updateGlobal({
+      slug,
+      data: { title: 'English draft' },
+      locale: 'en',
+      version: 'draft',
+    })
     await payload.updateGlobal({
       slug,
       data: { title: 'French live edit' },
@@ -403,6 +501,7 @@ test.suite('Global version selectors', { config: './config.ts' }, () => {
       slug,
       data: { _status: 'published', title: { en: 'English', fr: 'French' } },
       locale: 'all',
+      version: 'draft',
     })
     await payload.updateGlobal({
       slug,

@@ -75,6 +75,7 @@ test.suite('Version selector upload preservation', { config: './upload-config.ts
         context: { rejectUpload: true },
         data: {},
         file: { name: 'rejected.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+        version: 'draft',
       }),
     ).rejects.toThrow('Rejected upload replacement')
     expect(await readFile(path.join(uploadDirectory, draft.filename))).toEqual(bytes)
@@ -119,7 +120,12 @@ test.suite('Version selector upload preservation', { config: './upload-config.ts
       })
 
       if (hasPendingSnapshot) {
-        await payload.update({ id: published.id, collection, data: { title: 'Pending metadata' } })
+        await payload.update({
+          id: published.id,
+          collection,
+          data: { title: 'Pending metadata' },
+          version: 'draft',
+        })
       }
 
       const draft = await payload.update({
@@ -180,7 +186,12 @@ test.suite('Version selector upload preservation', { config: './upload-config.ts
       version: 'published',
     })
 
-    await payload.update({ id: published.id, collection, data: { title: 'Pending metadata' } })
+    await payload.update({
+      id: published.id,
+      collection,
+      data: { title: 'Pending metadata' },
+      version: 'draft',
+    })
     await payload.update({
       id: published.id,
       collection,
@@ -208,6 +219,7 @@ test.suite('Version selector upload preservation', { config: './upload-config.ts
       collection,
       data: {},
       file: { name: 'new-draft.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+      version: 'draft',
     })
 
     await expect(readFile(path.join(uploadDirectory, draft.filename))).rejects.toMatchObject({

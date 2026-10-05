@@ -1742,6 +1742,7 @@ test.suite('Select', { config: './config.ts', resetBetweenTests: false }, () => 
     }) => {
       // First, update the post with select to only return the id field
       const updatedPost = await payload.update({
+        version: 'draft',
         id: postId,
         collection: 'versioned-posts',
         data: {

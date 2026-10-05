@@ -149,6 +149,7 @@ test.suite('Relationship Fields', { config: './config.ts' }, () => {
       })
 
       const version2 = await payload.update({
+        version: 'draft',
         id: version1.id,
         collection: versionedRelationshipFieldSlug,
         data: {

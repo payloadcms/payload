@@ -43,6 +43,7 @@ test.suite('Local API playground', { config: './config.ts' }, () => {
       id: post.id,
       collection: draftPostsSlug,
       data: { _status: 'published' },
+      version: 'draft',
     })
 
     const published = await payload.findByID({
@@ -98,6 +99,7 @@ test.suite('Local API playground', { config: './config.ts' }, () => {
       id: post.id,
       collection: draftPostsSlug,
       data: { title: 'Pending redesign' },
+      version: 'draft',
     })
     await payload.update({
       id: post.id,
@@ -193,6 +195,7 @@ test.suite('Local API playground', { config: './config.ts' }, () => {
       slug: draftGlobalSlug,
       data: { _status: 'published', title: 'Live homepage' },
       locale: 'en',
+      version: 'draft',
     })
     await payload.updateGlobal({
       slug: draftGlobalSlug,

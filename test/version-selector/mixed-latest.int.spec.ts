@@ -37,6 +37,7 @@ test.suite('Mixed locale latest writes', { config: './config.ts' }, () => {
     const target = { id: created.id, collection: localizedPostsSlug }
 
     await payload.update({
+      version: 'draft',
       ...target,
       data: {
         richText: {
@@ -79,6 +80,7 @@ test.suite('Mixed locale latest writes', { config: './config.ts' }, () => {
               slug: draftGlobalSlug,
               data: { ...initialData, _status: 'published' },
               locale: 'all',
+              version: 'draft',
             })
           : await payload.create({
               collection: localizedPostsSlug,
@@ -90,9 +92,13 @@ test.suite('Mixed locale latest writes', { config: './config.ts' }, () => {
         const pendingTitle = isInvalid ? '' : 'Pending English'
 
         if (isGlobal) {
-          await payload.updateGlobal({ slug: draftGlobalSlug, data: { title: pendingTitle } })
+          await payload.updateGlobal({
+            slug: draftGlobalSlug,
+            data: { title: pendingTitle },
+            version: 'draft',
+          })
         } else {
-          await payload.update({ ...target, data: { title: pendingTitle } })
+          await payload.update({ ...target, data: { title: pendingTitle }, version: 'draft' })
         }
         const config = isGlobal
           ? payload.globals.config.find((global) => global.slug === draftGlobalSlug)!
@@ -150,6 +156,7 @@ test.suite('Mixed locale latest writes', { config: './config.ts' }, () => {
               slug: draftGlobalSlug,
               data: { ...initialData, _status: 'published' },
               locale: 'all',
+              version: 'draft',
             })
           : await payload.create({
               collection: localizedPostsSlug,
@@ -160,9 +167,14 @@ test.suite('Mixed locale latest writes', { config: './config.ts' }, () => {
         const target = { id: created.id, collection: localizedPostsSlug }
 
         if (isGlobal) {
-          await payload.updateGlobal({ slug: draftGlobalSlug, data: { title: '' }, locale: 'en' })
+          await payload.updateGlobal({
+            slug: draftGlobalSlug,
+            data: { title: '' },
+            locale: 'en',
+            version: 'draft',
+          })
         } else {
-          await payload.update({ ...target, data: { title: '' }, locale: 'en' })
+          await payload.update({ ...target, data: { title: '' }, locale: 'en', version: 'draft' })
         }
         const data = { _status: isStatusMap ? { en: 'published', fr: 'published' } : 'published' }
 
@@ -196,6 +208,7 @@ test.suite('Mixed locale latest writes', { config: './config.ts' }, () => {
               slug: draftGlobalSlug,
               data: { ...initialData, _status: 'published' },
               locale: 'all',
+              version: 'draft',
             })
           : await payload.create({
               collection: localizedPostsSlug,
@@ -206,9 +219,13 @@ test.suite('Mixed locale latest writes', { config: './config.ts' }, () => {
         const target = { id: created.id, collection: localizedPostsSlug }
 
         if (isGlobal) {
-          await payload.updateGlobal({ slug: draftGlobalSlug, data: { title: 'Pending English' } })
+          await payload.updateGlobal({
+            slug: draftGlobalSlug,
+            data: { title: 'Pending English' },
+            version: 'draft',
+          })
         } else {
-          await payload.update({ ...target, data: { title: 'Pending English' } })
+          await payload.update({ ...target, data: { title: 'Pending English' }, version: 'draft' })
         }
 
         const previousBeginTransaction = payload.db.beginTransaction
@@ -261,6 +278,7 @@ test.suite('Mixed locale latest writes', { config: './config.ts' }, () => {
               slug: draftGlobalSlug,
               data: { ...initialData, _status: 'published' },
               locale: 'all',
+              version: 'draft',
             })
           : await payload.create({
               collection: localizedPostsSlug,
@@ -275,9 +293,15 @@ test.suite('Mixed locale latest writes', { config: './config.ts' }, () => {
             slug: draftGlobalSlug,
             data: { title: 'Pending English' },
             locale: 'en',
+            version: 'draft',
           })
         } else {
-          await payload.update({ ...target, data: { title: 'Pending English' }, locale: 'en' })
+          await payload.update({
+            ...target,
+            data: { title: 'Pending English' },
+            locale: 'en',
+            version: 'draft',
+          })
         }
 
         const data = {
@@ -329,6 +353,7 @@ test.suite('Mixed locale latest writes', { config: './config.ts' }, () => {
       collection: localizedPostsSlug,
       data: { title: 'Pending English' },
       locale: 'en',
+      version: 'draft',
     })
     const updated = await payload.update({
       collection: localizedPostsSlug,
@@ -376,6 +401,7 @@ test.suite('Mixed locale latest writes', { config: './config.ts' }, () => {
       collection: localizedPostsSlug,
       data: { title: 'Pending English' },
       locale: 'en',
+      version: 'draft',
     })
     await payload.update({
       id: created.id,
@@ -424,11 +450,13 @@ test.suite('Mixed locale latest writes', { config: './config.ts' }, () => {
       slug: draftGlobalSlug,
       data: { _status: 'published', title: { en: 'Live English', fr: 'Live French' } },
       locale: 'all',
+      version: 'draft',
     })
     await payload.updateGlobal({
       slug: draftGlobalSlug,
       data: { title: 'Pending English' },
       locale: 'en',
+      version: 'draft',
     })
 
     await expect(
@@ -467,6 +495,7 @@ test.suite('Mixed locale latest writes', { config: './config.ts' }, () => {
             slug: draftGlobalSlug,
             data: { _status: 'published', title: { en: 'Live English', fr: 'Live French' } },
             locale: 'all',
+            version: 'draft',
           })
         : await payload.create({
             collection: localizedPostsSlug,
@@ -481,9 +510,15 @@ test.suite('Mixed locale latest writes', { config: './config.ts' }, () => {
           slug: draftGlobalSlug,
           data: { title: 'Pending English' },
           locale: 'en',
+          version: 'draft',
         })
       } else {
-        await payload.update({ ...target, data: { title: 'Pending English' }, locale: 'en' })
+        await payload.update({
+          ...target,
+          data: { title: 'Pending English' },
+          locale: 'en',
+          version: 'draft',
+        })
       }
       const fields = isGlobal
         ? payload.globals.config.find((global) => global.slug === draftGlobalSlug)!.fields
@@ -530,6 +565,7 @@ test.suite('Mixed locale latest writes', { config: './config.ts' }, () => {
             slug: draftGlobalSlug,
             data: { _status: 'published', title: { en: 'Live English', fr: 'Live French' } },
             locale: 'all',
+            version: 'draft',
           })
         : await payload.create({
             collection: localizedPostsSlug,
@@ -544,6 +580,7 @@ test.suite('Mixed locale latest writes', { config: './config.ts' }, () => {
           slug: draftGlobalSlug,
           data: { title: 'Pending English' },
           locale: 'en',
+          version: 'draft',
         })
         await payload.updateGlobal({
           slug: draftGlobalSlug,
@@ -552,7 +589,12 @@ test.suite('Mixed locale latest writes', { config: './config.ts' }, () => {
           version: 'latest',
         })
       } else {
-        await payload.update({ ...target, data: { title: 'Pending English' }, locale: 'en' })
+        await payload.update({
+          ...target,
+          data: { title: 'Pending English' },
+          locale: 'en',
+          version: 'draft',
+        })
         await payload.update({
           ...target,
           data: { _status: 'published' },

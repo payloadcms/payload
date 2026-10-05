@@ -16,7 +16,7 @@ The labels you provide for your Collections and Globals are used to name the Gra
 
 Queries accept `version: published`, `version: draft`, or `version: latest`. Omitted selectors read published documents. `draft` reads only a working draft; `latest` reads a working draft when present and otherwise reads the published document. Related documents use the same selector.
 
-Create mutations accept `version: published` or `version: draft`. Update mutations also accept `version: latest`. When drafts are enabled, omitted selectors save drafts and draft create inputs may omit required fields. Publishing validates required fields. The previous `draft`, `publishAllLocales`, and `unpublishAllLocales` arguments are no longer supported.
+Create mutations accept `version: published` or `version: draft`. Update mutations also accept `version: latest`. When drafts are enabled, creates without a selector save drafts, updates without a selector edit the published copy, and draft create inputs may omit required fields. Publishing validates required fields. The previous `draft`, `publishAllLocales`, and `unpublishAllLocales` arguments are no longer supported.
 
 With localization enabled, `locale: all` allows mutations to provide locale maps for localized fields. Nonlocalized fields retain their ordinary input shape. For example, a localized `title` and a localized `rows` array can be written together:
 

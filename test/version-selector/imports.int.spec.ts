@@ -122,6 +122,7 @@ test.suite('Version selector import consumers', { config: './config.ts' }, () =>
       id: created.id,
       collection,
       data: { summary: 'Pending match', title: 'Pending title' },
+      version: 'draft',
     })
     const result = await createImportBatchProcessor().processImport({
       collectionSlug: collection,

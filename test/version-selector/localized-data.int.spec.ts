@@ -18,12 +18,14 @@ test.suite('Localized version data', { config: './config.ts' }, () => {
       collection: localizedPostsSlug,
       data: { title: 'English draft' },
       locale: 'en',
+      version: 'draft',
     })
     await payload.update({
       id: doc.id,
       collection: localizedPostsSlug,
       data: { title: 'French draft' },
       locale: 'fr',
+      version: 'draft',
     })
 
     const draft = await payload.findByID({
@@ -54,6 +56,7 @@ test.suite('Localized version data', { config: './config.ts' }, () => {
       collection: localizedPostsSlug,
       data: { _status: 'published' },
       locale: 'all',
+      version: 'draft',
     })
 
     const published = await payload.findByID({
@@ -99,6 +102,7 @@ test.suite('Localized version data', { config: './config.ts' }, () => {
         title: 'French draft',
       },
       locale: 'fr',
+      version: 'draft',
     })
     await payload.update({
       id: doc.id,

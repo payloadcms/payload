@@ -1,6 +1,7 @@
 'use client'
 import type { DefaultCellComponentProps, RelationshipFieldClient } from 'payload'
 
+import { hasDraftsEnabled } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { SelectionWithPath } from '../../../../Hierarchy/Modal/types.js'
@@ -167,8 +168,11 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
 
       // Update the document via API
       try {
+        const versionQuery = hasDraftsEnabled(getEntityConfig({ collectionSlug }))
+          ? '?version=draft'
+          : ''
         const response = await fetch(
-          `${config.serverURL}${config.routes.api}/${collectionSlug}/${rowData.id}`,
+          `${config.serverURL}${config.routes.api}/${collectionSlug}/${rowData.id}${versionQuery}`,
           {
             body: JSON.stringify({
               [field.name]: newValue,
@@ -200,7 +204,16 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
 
       closeModal()
     },
-    [collectionSlug, config, field.name, hasMany, rowData, relationTo, getRelationships],
+    [
+      collectionSlug,
+      config,
+      field.name,
+      getEntityConfig,
+      hasMany,
+      rowData,
+      relationTo,
+      getRelationships,
+    ],
   )
 
   // Build display labels

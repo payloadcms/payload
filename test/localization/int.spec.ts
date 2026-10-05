@@ -2587,6 +2587,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
         })
 
         const updated = await payload.update({
+          version: 'draft',
           id: doc.id,
           collection: 'blocks-fields',
           data: {
@@ -5757,6 +5758,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
       payload,
     }) => {
       await payload.updateGlobal({
+        version: 'draft',
         slug: globalWithDraftsSlug,
         data: { _status: 'published', text: 'global count en' },
         locale: defaultLocale,
@@ -5764,6 +5766,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
       })
 
       await payload.updateGlobal({
+        version: 'draft',
         slug: globalWithDraftsSlug,
         data: { _status: 'published', text: 'global count es' },
         locale: spanishLocale,

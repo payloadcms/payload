@@ -55,7 +55,7 @@ The REST, GraphQL, and Local APIs use `version` to select the copy you are inter
 
 | Selector    | Reads                             | Creates                                               | Updates                                                          |
 | ----------- | --------------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------- |
-| Omitted     | Published content only            | Create a draft, unless `_status` requests publication | Edit the active draft, or create one from published content      |
+| Omitted     | Published content only            | Create a draft, unless `_status` requests publication | Edit published content while preserving pending drafts           |
 | `published` | Published content only            | Create published content                              | Edit published content while preserving pending drafts           |
 | `draft`     | Active drafts only                | Create a draft                                        | Edit the active draft, or create one from published content      |
 | `latest`    | Active draft, otherwise published | Unsupported                                           | Edit the active draft, otherwise edit published content directly |
@@ -78,13 +78,14 @@ const page = await payload.create({
 
 For creates, an explicit `version` overrides `data._status`. Without a selector, `_status: 'published'` creates published content; otherwise creation defaults to a draft. `version: 'latest'` is not supported for creation.
 
-For updates, `version` selects the starting copy and `_status` requests its publication state. With neither option supplied, the update saves a draft and leaves published content unchanged.
+For updates, `version` selects the starting copy and `_status` requests its publication state. Without a selector, updates target the published copy, the same as `version: 'published'`, so pending drafts are preserved.
 
 ```ts
 // Publish the active draft.
 await payload.update({
   collection: 'pages',
   id: page.id,
+  version: 'draft',
   data: { _status: 'published' },
 })
 
@@ -92,6 +93,7 @@ await payload.update({
 await payload.update({
   collection: 'pages',
   id: page.id,
+  version: 'draft',
   data: { title: 'Pending title' },
 })
 
@@ -99,7 +101,6 @@ await payload.update({
 await payload.update({
   collection: 'pages',
   id: page.id,
-  version: 'published',
   data: { title: 'Corrected live title' },
 })
 
@@ -112,7 +113,7 @@ await payload.update({
 })
 ```
 
-An explicit published update requires a published copy. A document that has never been published is not returned by published reads and cannot be updated with `version: 'published'`. Draft-only reads return no result when there is no active draft; historical draft versions do not count as active drafts.
+A published update, including one that omits `version`, requires a published copy. A document that has never been published is not returned by published reads and must be updated with `version: 'draft'` or `version: 'latest'`. Draft-only reads return no result when there is no active draft; historical draft versions do not count as active drafts.
 
 REST uses the same selector, for example `GET /api/pages?version=latest` or `PATCH /api/pages/123?version=published`. GraphQL uses an enum, for example `Pages(version: latest)` or `createPages(data: { title: "Hello" }, version: published)`.
 
@@ -133,6 +134,7 @@ await payload.update({
   collection: 'pages',
   id: page.id,
   locale: 'all',
+  version: 'draft',
   data: { _status: 'published' },
 })
 
@@ -152,7 +154,7 @@ await payload.update({
 
 #### Migrating from `draft`
 
-Replace preview reads using `draft: true` with `version: 'latest'`, draft saves with `version: 'draft'`, and live edits with `version: 'published'`. Replace `publishAllLocales` and `unpublishAllLocales` with `locale: 'all'`. Existing calls that omitted `draft` now read published content or save drafts by default; add an explicit selector when those new defaults do not match your intent.
+Replace preview reads using `draft: true` with `version: 'latest'`, draft saves with `version: 'draft'`, and live edits with `version: 'published'`. Replace `publishAllLocales` and `unpublishAllLocales` with `locale: 'all'`. Existing calls that omitted `draft` now read and update published content by default; add an explicit selector when those new defaults do not match your intent.
 
 Published-only reads are a safe default, but callers can still request drafts explicitly. Configure read access to restrict who can preview unpublished work.
 

@@ -160,7 +160,7 @@ export const updateOperation = async <
       showHiddenFields,
       sort: incomingSort,
       trash = false,
-      version = 'draft',
+      version = 'published',
       where,
     } = args
 

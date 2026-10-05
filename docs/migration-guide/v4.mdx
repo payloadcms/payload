@@ -341,9 +341,9 @@ The public `draft` boolean is replaced by `version: 'published' | 'latest' | 'dr
 | -------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Read                       | Published content                           | `latest` chooses an active draft per locale, falling back to published content; `draft` returns active drafts only                                     |
 | Create with drafts enabled | Draft, unless `data._status` is `published` | `draft` or `published` overrides `_status`; `latest` is invalid                                                                                        |
-| Update with drafts enabled | Edit or create the active draft             | `published` edits the published copy and preserves pending drafts; `latest` edits the active draft or the published copy when there is no active draft |
+| Update with drafts enabled | Edit the published copy and preserve pending drafts | `draft` edits or creates the active draft; `latest` edits the active draft or the published copy when there is no active draft |
 
-Use `_status` to publish or unpublish the selected copy. A published update fails if the document has never been published. Historical draft versions do not count as active drafts. Collections and globals with drafts disabled retain ordinary writes.
+Use `_status` to publish or unpublish the selected copy. A published update, including one that omits `version`, fails if the document has never been published. Historical draft versions do not count as active drafts. Collections and globals with drafts disabled retain ordinary writes.
 
 ```diff
 -const preview = await payload.find({ collection: 'posts', draft: true })
@@ -353,7 +353,7 @@ Use `_status` to publish or unpublish the selected copy. A published update fail
 +await payload.update({ collection: 'posts', id, data: changes, version: 'latest' })
 ```
 
-The update example retains the old behavior of editing the latest available copy. To save work in a draft, omit `version` or use `version: 'draft'`. To create published content, set `version: 'published'` or `data._status: 'published'` explicitly.
+The update example retains the old behavior of editing the latest available copy. To save work in a draft, use `version: 'draft'`. To create published content, set `version: 'published'` or `data._status: 'published'` explicitly.
 
 For publication across locales, pass `locale: 'all'` and `_status` instead of the removed publication flags. Localized input fields use locale-keyed maps:
 
@@ -362,6 +362,7 @@ await payload.update({
   collection: 'posts',
   id,
   locale: 'all',
+  version: 'draft',
   data: { _status: 'published', title: { en: 'Hello', fr: 'Bonjour' } },
 })
 

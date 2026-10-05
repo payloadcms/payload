@@ -143,7 +143,7 @@ describe('PublishButton', () => {
 
     expect(mocks.submit).toHaveBeenCalledOnce()
     expect(mocks.submit.mock.calls[0]?.[0]?.action).toBe(
-      '/api/localized/document-id?depth=0&locale=en',
+      '/api/localized/document-id?depth=0&locale=en&version=draft',
     )
     expect(markup).toContain('Publish in English')
   })
@@ -156,7 +156,7 @@ describe('PublishButton', () => {
     const options: SubmitOptions = mocks.submit.mock.calls[0]?.[0]
     const overrides = options.overrides
 
-    expect(options.action).toBe('/api/localized/document-id?depth=0&locale=all')
+    expect(options.action).toBe('/api/localized/document-id?depth=0&locale=all&version=draft')
     expect(options.context).toEqual({ responseLocale: 'all' })
     expect(typeof overrides).toBe('function')
 

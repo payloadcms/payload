@@ -179,6 +179,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
 
         // Regular user should be able to trash the document
         const trashedDoc = await payload.update({
+          version: 'draft',
           id: doc.id,
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: {
@@ -203,6 +204,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
 
         // Admin should be able to trash the document
         const trashedDoc = await payload.update({
+          version: 'draft',
           id: doc.id,
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: {
@@ -301,6 +303,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
 
         // Regular user should be able to bulk trash
         const result = await payload.update({
+          version: 'draft',
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: {
             deletedAt: new Date().toISOString(),
@@ -663,6 +666,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
         payload,
       }) => {
         await payload.update({
+          version: 'draft',
           id: postsDocTwo.id,
           collection: postsSlug,
           data: {
@@ -759,6 +763,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
     test.describe('updateByID operation', () => {
       test('should update a single soft-deleted document when trash: true', async ({ payload }) => {
         const updatedPostDoc: Post = await payload.update({
+          version: 'draft',
           id: postsDocTwo.id,
           collection: postsSlug,
           data: {
@@ -804,6 +809,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
 
       test('should update a single normal document when trash: false', async ({ payload }) => {
         const updatedPostDoc: Post = await payload.update({
+          version: 'draft',
           id: postsDocOne.id,
           collection: postsSlug,
           data: {
@@ -849,6 +855,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
     test.describe('update operation', () => {
       test('should update only normal document when trash: false', async ({ payload }) => {
         const result = await payload.update({
+          version: 'draft',
           collection: postsSlug,
           data: {
             title: 'Updated Doc',
@@ -876,6 +883,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
         payload,
       }) => {
         const result = await payload.update({
+          version: 'draft',
           collection: postsSlug,
           data: {
             title: 'A New Updated Doc',
@@ -915,6 +923,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
         })
 
         const result = await payload.update({
+          version: 'draft',
           collection: postsSlug,
           data: {
             title: 'Updated Soft Deleted Doc',
@@ -1298,6 +1307,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
       }) => {
         // Create a version of postsDocTwo (which is soft-deleted)
         await payload.update({
+          version: 'draft',
           id: postsDocTwo.id,
           collection: postsSlug,
           data: { title: 'Updated Before Restore Attempt' },
@@ -1542,7 +1552,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
       test('should find versions where version.deletedAt is null after restore via REST', async ({
         restClient,
       }) => {
-        await restClient.PATCH(`/${postsSlug}/${postsDocTwo.id}?trash=true`, {
+        await restClient.PATCH(`/${postsSlug}/${postsDocTwo.id}?trash=true&version=draft`, {
           body: JSON.stringify({
             deletedAt: null,
           }),
@@ -1605,11 +1615,14 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
 
     test.describe('updateByID endpoint', () => {
       test('should update a single soft-deleted doc when trash=true', async ({ restClient }) => {
-        const res = await restClient.PATCH(`/${postsSlug}/${postsDocTwo.id}?trash=true`, {
-          body: JSON.stringify({
-            title: 'Updated via REST',
-          }),
-        })
+        const res = await restClient.PATCH(
+          `/${postsSlug}/${postsDocTwo.id}?trash=true&version=draft`,
+          {
+            body: JSON.stringify({
+              title: 'Updated via REST',
+            }),
+          },
+        )
 
         const result = await res.json()
         expect(result.doc.title).toBe('Updated via REST')
@@ -1626,9 +1639,12 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
       })
 
       test('should update a single normal document when trash: false', async ({ restClient }) => {
-        const res = await restClient.PATCH(`/${postsSlug}/${postsDocOne.id}?trash=false`, {
-          body: JSON.stringify({ title: 'Updated Normal via REST' }),
-        })
+        const res = await restClient.PATCH(
+          `/${postsSlug}/${postsDocOne.id}?trash=false&version=draft`,
+          {
+            body: JSON.stringify({ title: 'Updated Normal via REST' }),
+          },
+        )
         const result = await res.json()
         expect(result.doc.title).toBe('Updated Normal via REST')
         expect(result.doc.deletedAt).toBeFalsy()
@@ -1657,7 +1673,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
 
     test.describe('update endpoint', () => {
       test('should update only normal document when trash: false', async ({ restClient }) => {
-        const query = `?trash=false&where[id][equals]=${postsDocOne.id}`
+        const query = `?trash=false&version=draft&where[id][equals]=${postsDocOne.id}`
 
         const res = await restClient.PATCH(`/${postsSlug}${query}`, {
           body: JSON.stringify({ title: 'Updated Normal via REST' }),
@@ -1673,7 +1689,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
       test('should update all documents including soft-deleted documents when trash: true', async ({
         restClient,
       }) => {
-        const query = `?trash=true&where[title][exists]=true`
+        const query = `?trash=true&version=draft&where[title][exists]=true`
 
         const res = await restClient.PATCH(`/${postsSlug}${query}`, {
           body: JSON.stringify({ title: 'Bulk Updated All' }),
@@ -1688,7 +1704,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
         payload,
         restClient,
       }) => {
-        const query = `?trash=true&where[deletedAt][exists]=true`
+        const query = `?trash=true&version=draft&where[deletedAt][exists]=true`
 
         const docThree = await payload.create({
           collection: postsSlug,
@@ -1780,9 +1796,12 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
         payload,
         restClient,
       }) => {
-        const updateRes = await restClient.PATCH(`/${postsSlug}/${postsDocTwo.id}?trash=true`, {
-          body: JSON.stringify({ title: 'Updated Soft Deleted for Restore Test' }),
-        })
+        const updateRes = await restClient.PATCH(
+          `/${postsSlug}/${postsDocTwo.id}?trash=true&version=draft`,
+          {
+            body: JSON.stringify({ title: 'Updated Soft Deleted for Restore Test' }),
+          },
+        )
         expect(updateRes.status).toBe(200)
 
         const { docs: versions } = await payload.findVersions({
@@ -2218,7 +2237,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
       }) => {
         const query = `
           mutation {
-            updatePost(id: ${idToString(postsDocTwo.id, payload)}, trash: true, data: { title: "Updated Soft Deleted via GQL" }) {
+            updatePost(id: ${idToString(postsDocTwo.id, payload)}, trash: true, version: draft, data: { title: "Updated Soft Deleted via GQL" }) {
               id
               title
               deletedAt
@@ -2257,7 +2276,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
       }) => {
         const query = `
           mutation {
-            updatePost(id: ${idToString(postsDocOne.id, payload)}, trash: false, data: { title: "Updated Normal via GQL" }) {
+            updatePost(id: ${idToString(postsDocOne.id, payload)}, trash: false, version: draft, data: { title: "Updated Normal via GQL" }) {
               id
               title
               deletedAt

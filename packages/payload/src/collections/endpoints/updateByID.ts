@@ -31,7 +31,7 @@ export const updateByIDHandler: PayloadHandler = async (req) => {
 
   let message = req.t('general:updatedSuccessfully')
 
-  if (version === 'draft' || (version === undefined && collection.config.versions?.drafts)) {
+  if (version === 'draft') {
     message = req.t('version:draftSavedSuccessfully')
   }
   if (autosave) {

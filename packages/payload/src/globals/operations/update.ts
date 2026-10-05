@@ -107,7 +107,7 @@ export const updateOperation = async <
       },
       select: incomingSelect,
       showHiddenFields,
-      version = 'draft',
+      version = 'published',
     } = args
 
     let { data } = args

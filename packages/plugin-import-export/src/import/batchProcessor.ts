@@ -403,10 +403,10 @@ async function processImportBatch({
               collection: collectionSlug,
               data: flatData,
               depth: 0,
-              // Don't specify draft - this creates a new draft for versioned collections
               overrideAccess: false,
               req: defaultLocaleReq,
               user,
+              ...(collectionHasDrafts ? { version: 'draft' as const } : {}),
             })
 
             if (savedDocument && Object.keys(localeUpdates).length > 0) {
@@ -426,6 +426,7 @@ async function processImportBatch({
                     overrideAccess: false,
                     req: { ...req, locale },
                     user,
+                    ...(collectionHasDrafts ? { version: 'draft' as const } : {}),
                   })
                 } catch (error) {
                   req.payload.logger.error({
@@ -452,17 +453,15 @@ async function processImportBatch({
                 })
               }
 
-              // Update the document - don't specify draft to let Payload handle versions properly
-              // This will create a new draft version for collections with versions enabled
               savedDocument = await req.payload.update({
                 id: existingDoc.id as number | string,
                 collection: collectionSlug,
                 data: updateData,
                 depth: 0,
-                // Don't specify draft - this creates a new draft for versioned collections
                 overrideAccess: false,
                 req,
                 user,
+                ...(collectionHasDrafts ? { version: 'draft' as const } : {}),
               })
 
               if (req.payload.config.debug && savedDocument) {

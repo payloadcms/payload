@@ -1075,6 +1075,7 @@ test.suite('Lexical', { config: './config.ts' }, () => {
 
       // Simulate autosave by updating the document
       await payload.update({
+        version: 'draft',
         id: doc.id,
         collection: 'lexical-autosave',
         data: {

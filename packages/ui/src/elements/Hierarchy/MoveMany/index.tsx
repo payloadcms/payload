@@ -3,7 +3,7 @@ import type { ClientCollectionConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, hasDraftsEnabled } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -183,9 +183,11 @@ export function MoveMany({
           continue
         }
 
+        const collectionConfig = collections.find((c) => c.slug === collectionSlug)
         const queryString = qs.stringify(
           {
             locale,
+            version: collectionConfig && hasDraftsEnabled(collectionConfig) ? 'draft' : undefined,
             where: { id: { in: ids } },
           },
           { addQueryPrefix: true },
@@ -255,7 +257,19 @@ export function MoveMany({
     } finally {
       setDestination(null)
     }
-  }, [closeModal, destination, selections, parentFieldName, locale, api, i18n, t, label, onSuccess])
+  }, [
+    closeModal,
+    destination,
+    selections,
+    collections,
+    parentFieldName,
+    locale,
+    api,
+    i18n,
+    t,
+    label,
+    onSuccess,
+  ])
 
   if (count === 0 || !canMove) {
     return null

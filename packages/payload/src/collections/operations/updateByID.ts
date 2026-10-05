@@ -139,7 +139,7 @@ export const updateByIDOperation = async <
       select: incomingSelect,
       showHiddenFields,
       trash = false,
-      version = 'draft',
+      version = 'published',
     } = args
 
     if (!id) {

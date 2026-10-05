@@ -23,6 +23,7 @@ export const hierarchyCollectionAfterDelete =
         },
         overrideAccess: true,
         req,
+        version: 'latest',
         where: {
           [fieldName]: {
             equals: id,

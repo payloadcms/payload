@@ -147,6 +147,7 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
       })
 
       await payload.update({
+        version: 'draft',
         id: doc.id,
         collection: 'custom-ids',
         data: {},
@@ -154,6 +155,7 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
       })
 
       await payload.update({
+        version: 'draft',
         id: doc.id,
         collection: 'custom-ids',
         data: {},
@@ -648,6 +650,7 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
         overrideAccess: true,
       })
       await payload.update({
+        version: 'draft',
         id: category.id,
         collection: 'categories',
         data: {
@@ -704,6 +707,7 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
         overrideAccess: true,
       })
       await payload.update({
+        version: 'draft',
         id: category.id,
         collection: 'categories',
         data: {
@@ -4511,6 +4515,7 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
       })
 
       const updated = await payload.update({
+        version: 'draft',
         id: doc.id,
         collection: 'virtual-relations',
         data: { post: post.id },
