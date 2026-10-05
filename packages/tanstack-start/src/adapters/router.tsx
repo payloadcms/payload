@@ -5,11 +5,27 @@ import type { LinkAdapterProps, RouterAdapterComponent } from 'payload'
 
 import { RouterAdapterContext } from '@payloadcms/ui/providers/RouterAdapter'
 import { useRouteTransition } from '@payloadcms/ui/providers/RouteTransition'
-import { useLocation, useParams, useRouter, useRouterState } from '@tanstack/react-router'
+import {
+  createLink,
+  useLocation,
+  useParams,
+  useRouter,
+  useRouterState,
+} from '@tanstack/react-router'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo } from 'react'
 
-import { TanStackLink } from '../elements/RouterAdapter/Link/index.js'
+type LinkProps = {
+  ariaCurrent?: React.AriaAttributes['aria-current']
+} & React.ComponentPropsWithRef<'a'>
+
+const TanStackLink = createLink(function Link({ ariaCurrent, children, ...props }: LinkProps) {
+  return (
+    <a {...props} aria-current={ariaCurrent ?? props['aria-current']}>
+      {children}
+    </a>
+  )
+})
 
 const normalizeNavigationTarget = ({
   path,
