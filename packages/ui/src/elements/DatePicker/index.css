@@ -73,7 +73,6 @@
 
   .react-datepicker__header {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
     text-align: center;
     text-transform: none;
@@ -128,7 +127,6 @@
     min-width: min-content;
     gap: var(--spacer-2);
     align-items: center;
-    order: 1;
     padding: var(--spacer-2);
     margin: 0 var(--spacer-5);
   }
@@ -440,7 +438,6 @@
     padding-bottom: 0;
     border-top: var(--stroke-width-small) solid var(--color-border);
     width: 100%;
-    order: 3;
   }
 
   .react-datepicker__week {
