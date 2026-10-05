@@ -88,6 +88,13 @@ export default buildConfigWithDefaults({
             ? true
             : { slug: { not_equals: 'private-visibility' } }
         },
+        updateBranch: ({ req }) => {
+          if (req.payloadAPI === 'local' && !req.user) {
+            return true
+          }
+
+          return req.user?.email === devUser.email ? true : { slug: { not_equals: 'scheduled' } }
+        },
       },
       hooks: {
         beforeMerge: (args) => hookSpy.beforeMerge?.(args),

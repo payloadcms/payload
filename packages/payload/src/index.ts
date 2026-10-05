@@ -1450,6 +1450,7 @@ export type {
 } from './auth/types.js'
 export { appendBranchFilter } from './branching/appendBranchFilter.js'
 export { assertBranchReadable } from './branching/assertBranchReadable.js'
+export { assertBranchUpdateAccess } from './branching/assertBranchUpdateAccess.js'
 export {
   applyBranchIDProjection,
   projectBranchIDs,

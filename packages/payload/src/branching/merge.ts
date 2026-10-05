@@ -4,6 +4,7 @@ import type { BlockedChange } from './preflight.js'
 import type { MergeableChange, MergeProgress, MergeWarning } from './types.js'
 import type { BranchMergeValidationError } from './validation.js'
 
+import { assertBranchUpdateAccess } from './assertBranchUpdateAccess.js'
 import { discardBranchChanges } from './discard.js'
 import { beginBranchMerge, restoreBranchAfterMerge } from './merge/branchMergeStatus.js'
 import { executeMerge } from './merge/executeMerge.js'
@@ -115,6 +116,10 @@ export const mergeBranch = async (
     retriedCleanups,
   } = prepared
   const hasChangesToApply = applicable.length > 0 || applicableGlobals.length > 0
+
+  if (closeBranch && !dryRun && !overrideAccess) {
+    await assertBranchUpdateAccess({ branchDoc, req })
+  }
 
   if (dryRun || !hasChangesToApply) {
     if (!dryRun && retriedCleanups.length && allChangesCount === 0) {

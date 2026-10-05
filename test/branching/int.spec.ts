@@ -11338,6 +11338,12 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         })
       ).docs[0]!
 
+    const createLifecycleRestrictedUser = async () =>
+      payload.create({
+        collection: 'users',
+        data: { email: 'lifecycle-reader@example.com', password: 'test' },
+      })
+
     test.beforeEach(async () => {
       const branchDoc = await payload.create({
         collection: branchesSlug,
@@ -11402,7 +11408,9 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       const restrictedUsers = await payload.find({
         collection: 'users',
         pagination: false,
-        where: { email: { equals: 'restricted-canceller@example.com' } },
+        where: {
+          email: { in: ['lifecycle-reader@example.com', 'restricted-canceller@example.com'] },
+        },
       })
 
       for (const restrictedUser of restrictedUsers.docs) {
@@ -11521,6 +11529,73 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       // Nothing pending is what earns the close, so both are asserted together: a
       // status of `open` with a change still listed is a merge that did not run.
       expect(await mergeOutcome()).toMatchObject({ pendingChanges: [], status: 'closed' })
+    })
+
+    test('should deny closeBranch when updateBranch access fails', async () => {
+      const user = await createLifecycleRestrictedUser()
+
+      await expect(
+        payload.branches.merge({
+          branch: branchSlug,
+          closeBranch: true,
+          overrideAccess: false,
+          user: { ...user, collection: 'users' },
+        }),
+      ).rejects.toThrow()
+
+      const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
+
+      expect(onMain.title).toBe('original on main')
+      expect(await mergeOutcome()).toMatchObject({
+        pendingChanges: [{ collectionSlug: postsSlug, operation: 'update' }],
+        status: 'open',
+      })
+    })
+
+    test('should deny scheduling when updateBranch access fails', async () => {
+      const user = await createLifecycleRestrictedUser()
+      const req = await createPayloadRequest({
+        payload,
+        user: { ...user, collection: 'users' },
+      })
+
+      const result = await scheduleMergeHandler({
+        branchID,
+        date: new Date(Date.now() + 60_000),
+        req,
+      })
+      const jobs = await payload.find({
+        collection: 'payload-jobs',
+        pagination: false,
+        where: { 'input.branch': { equals: branchSlug } },
+      })
+
+      expect(result).toHaveProperty('error')
+      expect(jobs.docs).toHaveLength(0)
+    })
+
+    test('should deny cancellation when updateBranch access fails', async () => {
+      const user = await createLifecycleRestrictedUser()
+      const job = await payload.jobs.queue({
+        input: { branch: branchSlug },
+        overrideAccess: true,
+        task: 'scheduleMerge',
+        waitUntil: new Date(Date.now() + 60_000),
+      })
+      const req = await createPayloadRequest({
+        payload,
+        user: { ...user, collection: 'users' },
+      })
+
+      const result = await scheduleMergeHandler({ deleteID: job.id, req })
+      const retainedJob = await payload.findByID({
+        id: job.id,
+        collection: 'payload-jobs',
+        disableErrors: true,
+      })
+
+      expect(result).toHaveProperty('error')
+      expect(retainedJob).not.toBeNull()
     })
 
     test('should refuse to merge when the queueing user no longer resolves', async () => {

@@ -1,6 +1,6 @@
 import type { ServerFunction, Where } from 'payload'
 
-import { canAccessAdmin, Forbidden } from 'payload'
+import { assertBranchUpdateAccess, canAccessAdmin, Forbidden } from 'payload'
 import { branchChangesCollectionSlug, branchesCollectionSlug } from 'payload/shared'
 
 import type { SummarizableChange } from '../elements/ChangeSummary/index.js'
@@ -215,6 +215,8 @@ export const scheduleMergeHandler: ServerFunction<ScheduleMergeHandlerArgs> = as
         throw new Forbidden(req.t)
       }
 
+      await assertBranchUpdateAccess({ branchDoc: readableBranch, req })
+
       await payload.delete({
         collection: 'payload-jobs',
         overrideAccess: true,
@@ -245,6 +247,8 @@ export const scheduleMergeHandler: ServerFunction<ScheduleMergeHandlerArgs> = as
     if (!branchDoc) {
       return { error: 'Branch not found.' }
     }
+
+    await assertBranchUpdateAccess({ branchDoc, req })
 
     // A closed branch takes no further merges, so it must not take a promise of one
     // either — the job would fail at fire time with nobody watching.
