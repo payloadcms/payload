@@ -111,8 +111,8 @@ export const createFileOperations = ({
 
       add({ filename: doc.filename, role: { type: 'default' } })
       add({ filename: doc.filename, role: { type: 'original' } })
-      if (doc.sizes && typeof doc.sizes === 'object' && !Array.isArray(doc.sizes)) {
-        for (const [sizeKey, size] of Object.entries(doc.sizes)) {
+      if (doc.variants && typeof doc.variants === 'object' && !Array.isArray(doc.variants)) {
+        for (const [sizeKey, size] of Object.entries(doc.variants)) {
           if (
             size &&
             typeof size === 'object' &&
@@ -121,7 +121,7 @@ export const createFileOperations = ({
           ) {
             const imageSize = req.payload.collections[
               collection.slug
-            ]?.config.upload.imageSizes?.find(({ name }) => name === sizeKey)
+            ]?.config.upload.variants?.find(({ name }) => name === sizeKey)
             if (
               !('url' in size) ||
               typeof size.url !== 'string' ||
@@ -279,8 +279,8 @@ export const createFileOperations = ({
           storageBackendId,
         })
       }
-      if (data.sizes && typeof data.sizes === 'object') {
-        for (const [sizeKey, size] of Object.entries(data.sizes)) {
+      if (data.variants && typeof data.variants === 'object') {
+        for (const [sizeKey, size] of Object.entries(data.variants)) {
           const filename = (size as { filename?: string } | null)?.filename
           if (filename && keyByFilename.has(filename)) {
             references.push({
@@ -311,8 +311,8 @@ const getMimeType = ({
       return original.mimeType
     }
   }
-  if (data.sizes && typeof data.sizes === 'object') {
-    for (const size of Object.values(data.sizes)) {
+  if (data.variants && typeof data.variants === 'object') {
+    for (const size of Object.values(data.variants)) {
       const candidate = size as { filename?: string; mimeType?: string } | null
       if (candidate?.filename === filename && candidate.mimeType) {
         return candidate.mimeType

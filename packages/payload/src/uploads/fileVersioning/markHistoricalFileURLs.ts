@@ -43,9 +43,9 @@ export const markHistoricalFileURLs = <T extends Record<string, unknown>>({
       typeof original.url === 'string' ? { ...original, url: mark(original.url) } : original
   }
 
-  if (doc.sizes && typeof doc.sizes === 'object' && !Array.isArray(doc.sizes)) {
-    marked.sizes = Object.fromEntries(
-      Object.entries(doc.sizes).map(([name, size]) =>
+  if (doc.variants && typeof doc.variants === 'object' && !Array.isArray(doc.variants)) {
+    marked.variants = Object.fromEntries(
+      Object.entries(doc.variants).map(([name, size]) =>
         size &&
         typeof size === 'object' &&
         !Array.isArray(size) &&

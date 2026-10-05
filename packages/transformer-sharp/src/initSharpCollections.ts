@@ -10,7 +10,7 @@ const RESERVED_IMAGE_SIZE_NAMES = [
   'height',
   'url',
   'thumbnailURL',
-  'sizes',
+  'variants',
   'focalX',
   'focalY',
 ]
@@ -18,7 +18,7 @@ const RESERVED_IMAGE_SIZE_NAMES = [
 /**
  * Validates `sharpTransformer({ collections })` against the config's real
  * collections, then writes a narrowed, Sharp-agnostic projection of
- * `variants` (as `imageSizes`)/`crop`/`focalPoint`/`hasImageAdjustments` back onto each
+ * `variants`/`crop`/`focalPoint`/`hasImageAdjustments` back onto each
  * targeted collection's sanitized `upload` config, so core's own field
  * generation and Admin UI keep working without knowing about Sharp.
  */
@@ -83,9 +83,9 @@ export function initSharpCollections({
     )
   }
 
-  // Write onto copies, never the authored collection objects: a rebuilt config (e.g. on a dev
-  // reload) would otherwise see `upload.imageSizes` on the collection and reject it as legacy.
-  config.collections = config.collections?.map((collection) => {
+  // Write onto copies, never the caller's config or collection objects: a rebuilt config (e.g. on
+  // a dev reload) would otherwise see `upload.variants` on the collection and reject it as authored.
+  const sanitizedCollections = config.collections?.map((collection) => {
     const sharpConfig = collections[collection.slug]
 
     if (!sharpConfig || !collection.upload) {
@@ -107,7 +107,7 @@ export function initSharpCollections({
           sharpConfig.constructorOptions ||
           sharpConfig.withMetadata,
       ),
-      imageSizes: sharpConfig.variants?.map(({ name, admin, generateImageName }) => ({
+      variants: sharpConfig.variants?.map(({ name, admin, generateImageName }) => ({
         name,
         admin,
         generateImageName,
@@ -117,5 +117,5 @@ export function initSharpCollections({
     return { ...collection, upload }
   })
 
-  return config
+  return { ...config, collections: sanitizedCollections }
 }

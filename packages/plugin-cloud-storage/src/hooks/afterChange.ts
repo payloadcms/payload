@@ -191,9 +191,9 @@ export const getAfterChangeHook =
             filesToDelete.push(previousDoc.filename)
           }
 
-          if (typeof previousDoc.sizes === 'object') {
+          if (typeof previousDoc.variants === 'object') {
             filesToDelete = filesToDelete.concat(
-              Object.values(previousDoc?.sizes || []).map(
+              Object.values(previousDoc?.variants || []).map(
                 (resizedFileData) => resizedFileData?.filename as string,
               ),
             )
@@ -206,8 +206,8 @@ export const getAfterChangeHook =
           if (typeof newFileData.filename === 'string') {
             newFilenames.add(newFileData.filename)
           }
-          if (typeof newFileData.sizes === 'object') {
-            for (const size of Object.values(newFileData.sizes || {})) {
+          if (typeof newFileData.variants === 'object') {
+            for (const size of Object.values(newFileData.variants || {})) {
               if (size?.filename && typeof size.filename === 'string') {
                 newFilenames.add(size.filename)
               }

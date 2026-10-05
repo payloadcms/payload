@@ -49,7 +49,7 @@ describe('initSharpCollections', () => {
     expect(result.collections?.[0]?.upload).toMatchObject({ crop: true, focalPoint: true })
   })
 
-  it('should write variants as imageSizes onto a copy, leaving the authored collection untouched', () => {
+  it('should write variants onto a copy, leaving the authored collection untouched', () => {
     const authoredUpload = { staticDir: 'media' }
     const authoredCollection = uploadCollection({ slug: 'media', upload: authoredUpload })
     const config = makeConfig([authoredCollection])
@@ -60,11 +60,25 @@ describe('initSharpCollections', () => {
     })
 
     expect(result.collections?.[0]?.upload).toMatchObject({
-      imageSizes: [{ name: 'thumbnail' }],
+      variants: [{ name: 'thumbnail' }],
       staticDir: 'media',
     })
     expect(authoredUpload).toEqual({ staticDir: 'media' })
     expect(result.collections?.[0]).not.toBe(authoredCollection)
+  })
+
+  it("should return a new root config, leaving the caller's config untouched", () => {
+    const authoredCollections = [uploadCollection({ slug: 'media' })]
+    const config = makeConfig(authoredCollections)
+
+    const result = initSharpCollections({
+      collections: { media: { variants: [{ name: 'thumbnail', width: 100 }] } },
+      config,
+    })
+
+    expect(result).not.toBe(config)
+    expect(config.collections).toBe(authoredCollections)
+    expect(config.collections?.[0]?.upload).toEqual({})
   })
 
   it('should throw when a configured collection slug does not exist in the config', () => {

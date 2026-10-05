@@ -86,13 +86,13 @@ test.suite('@payloadcms/storage-gcs', { config: './config.ts', resetBetweenTests
       _managedFiles: { key: string }[]
       filename: string
       original?: { filename?: string }
-      sizes: Record<string, { filename: string }>
+      variants: Record<string, { filename: string }>
     }
     const fileKeys = uploadData._managedFiles.map(({ key }) => key)
     const filenames = [
       uploadData.filename,
       uploadData.original?.filename,
-      ...Object.values(uploadData.sizes || {}).map(({ filename }) => filename),
+      ...Object.values(uploadData.variants || {}).map(({ filename }) => filename),
     ].filter((filename): filename is string => Boolean(filename))
 
     expect(fileKeys.length).toBeGreaterThan(0)

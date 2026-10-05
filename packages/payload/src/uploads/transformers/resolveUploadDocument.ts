@@ -7,7 +7,7 @@ export type ResolvedUploadDocument = {
   filename: string
   mimeType: string
   original?: { filename?: null | string; mimeType?: null | string } | null
-  sizes?: Record<string, { filename?: null | string; mimeType?: null | string } | null>
+  variants?: Record<string, { filename?: null | string; mimeType?: null | string } | null>
 } & TypeWithID
 
 /**
@@ -16,18 +16,18 @@ export type ResolvedUploadDocument = {
  */
 export function buildFilenameWhere({
   filename,
-  imageSizes,
+  variants,
 }: {
   filename: string
-  imageSizes?: { name: string }[]
+  variants?: { name: string }[]
 }): Where {
   const filenameCondition: Where = {
     or: [{ filename: { equals: filename } }, { 'original.filename': { equals: filename } }],
   }
 
-  imageSizes?.forEach(({ name }) => {
+  variants?.forEach(({ name }) => {
     filenameCondition.or!.push({
-      [`sizes.${name}.filename`]: { equals: filename },
+      [`variants.${name}.filename`]: { equals: filename },
     })
   })
 
@@ -51,7 +51,7 @@ export function getRequestedFile({
       return { filename, mimeType: document.original.mimeType }
     }
 
-    const size = Object.values(document.sizes ?? {}).find((size) => size?.filename === filename)
+    const size = Object.values(document.variants ?? {}).find((size) => size?.filename === filename)
 
     if (size?.filename && size.mimeType) {
       return { filename: size.filename, mimeType: size.mimeType }
@@ -85,9 +85,7 @@ export async function resolveUploadDocument({
 
   const { config } = collection
 
-  const constraints: Where[] = [
-    buildFilenameWhere({ filename, imageSizes: config.upload.imageSizes }),
-  ]
+  const constraints: Where[] = [buildFilenameWhere({ filename, variants: config.upload.variants })]
 
   if (typeof prefix === 'string') {
     constraints.push({ prefix: { equals: prefix } })

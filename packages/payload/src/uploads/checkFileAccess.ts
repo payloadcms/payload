@@ -41,7 +41,7 @@ export const checkFileAccess = async ({
   if (constraints.length > 0 || documentID !== undefined) {
     const filenameCondition =
       documentID === undefined
-        ? buildFilenameWhere({ filename, imageSizes: config.upload.imageSizes })
+        ? buildFilenameWhere({ filename, variants: config.upload.variants })
         : { id: { equals: documentID } }
 
     const doc = await req.payload.db.findOne({

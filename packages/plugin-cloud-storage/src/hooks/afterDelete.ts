@@ -40,7 +40,7 @@ export const getAfterDeleteHook = ({
 
       const filesToDelete: string[] = [
         doc.filename,
-        ...Object.values(doc?.sizes || []).map(
+        ...Object.values(doc?.variants || []).map(
           (resizedFileData) => resizedFileData?.filename as string,
         ),
       ]

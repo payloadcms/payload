@@ -313,7 +313,7 @@ export interface FileVersionedTransformedMedia {
   _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     small?: {
       url?: string | null;
       width?: number | null;
@@ -665,7 +665,7 @@ export interface FileVersionedTransformedMediaSelect<T extends boolean = true> {
   _fileRevision?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         small?:

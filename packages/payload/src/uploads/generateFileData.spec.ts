@@ -327,7 +327,7 @@ describe('generateFileData', () => {
     } as unknown as PayloadRequest
 
     await generateFileData({
-      collection: createCollection({ imageSizes: [] }),
+      collection: createCollection({ variants: [] }),
       config: {} as SanitizedConfig,
       data: {},
       operation: 'create',

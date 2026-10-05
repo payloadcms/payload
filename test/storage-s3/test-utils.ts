@@ -70,7 +70,7 @@ export async function verifyUploads({
     _managedFiles?: Array<{ key: string }>
     filename?: string
     original?: { filename?: string }
-    sizes?: Record<string, { filename?: string }>
+    variants?: Record<string, { filename?: string }>
   }>({
     collection: collectionSlug as CollectionSlug,
     where: { id: { equals: uploadId } },
@@ -79,7 +79,7 @@ export async function verifyUploads({
   const filenames = [
     uploadData?.filename,
     uploadData?.original?.filename,
-    ...Object.values(uploadData?.sizes ?? {}).map(({ filename }) => filename),
+    ...Object.values(uploadData?.variants ?? {}).map(({ filename }) => filename),
   ].filter((filename): filename is string => Boolean(filename))
 
   expect(fileKeys.length).toBeGreaterThan(0)

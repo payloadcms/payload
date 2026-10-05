@@ -338,7 +338,7 @@ export const replaceManagedFileReferences = ({
           stored = archived.original as JsonObject | undefined
           break
         case 'size':
-          stored = (archived.sizes as Record<string, JsonObject> | undefined)?.[role.sizeKey]
+          stored = (archived.variants as Record<string, JsonObject> | undefined)?.[role.sizeKey]
           break
       }
 

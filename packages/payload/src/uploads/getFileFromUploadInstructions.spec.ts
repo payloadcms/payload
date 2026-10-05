@@ -147,7 +147,11 @@ describe('getFileFromUploadInstructions', () => {
 
     const file = await getFileFromUploadInstructions({
       collectionSlug: 'media',
-      file: createUploadReferenceFile({ filename: 'x.bin', mimeType: 'application/octet-stream' }),
+      file: createUploadReferenceFile({
+        filename: 'x.bin',
+        mimeType: 'application/octet-stream',
+        size: 1,
+      }),
       req,
     })
 
@@ -179,7 +183,7 @@ describe('getFileFromUploadInstructions', () => {
         }),
     )
     const customReq = createReq([customHandler], {
-      imageSizes: [{ height: 100, name: 'preview', width: 100 }],
+      variants: [{ height: 100, name: 'preview', width: 100 }],
       mimeTypes: ['image/*'],
       uploadInstructions: undefined,
     })
@@ -198,9 +202,9 @@ describe('getFileFromUploadInstructions', () => {
     tempFilesToClean.push(customFile.tempFilePath!)
     expect(customHandler).toHaveBeenCalled()
 
-    const handler = vi.fn(async () => new Response('existing file', { status: 200 }))
+    const handler = vi.fn(async () => new Response(Buffer.alloc(18), { status: 200 }))
     const req = createReq([handler], {
-      imageSizes: [{ height: 100, name: 'preview', width: 100 }],
+      variants: [{ height: 100, name: 'preview', width: 100 }],
       mimeTypes: ['image/*'],
     })
 
@@ -240,7 +244,7 @@ describe('getFileFromUploadInstructions', () => {
         where: {
           or: [
             { filename: { equals: 'preview.png' } },
-            { 'sizes.preview.filename': { equals: 'preview.png' } },
+            { 'variants.preview.filename': { equals: 'preview.png' } },
           ],
         },
       }),
@@ -294,7 +298,10 @@ describe('getFileFromUploadInstructions', () => {
   it('checks that an unchanged direct upload exists without downloading its contents', async () => {
     const handler = vi.fn(async (handlerReq: PayloadRequest) => {
       expect(handlerReq.headers.get('range')).toBe('bytes=0-0')
-      return new Response('x', { status: 206 })
+      return new Response('x', {
+        headers: { 'Content-Range': 'bytes 0-0/18' },
+        status: 206,
+      })
     })
     const req = createReq([handler], {})
 
@@ -326,10 +333,72 @@ describe('getFileFromUploadInstructions', () => {
     expect(handler).not.toHaveBeenCalled()
   })
 
+  it('fetches the full file when a custom transformFile transformer matches its mime type', async () => {
+    const handler = vi.fn(async (handlerReq: PayloadRequest) => {
+      expect(handlerReq.headers.get('range')).toBeNull()
+      return new Response(MINIMAL_PNG, { headers: { 'Content-Type': 'image/png' } })
+    })
+
+    const req = createReq([handler], {})
+    req.payload.config.upload.transformers = [
+      { slug: 'custom', mimeTypes: ['image/*'], transformFile: vi.fn() },
+    ]
+
+    const file = await getFileFromUploadInstructions({
+      collectionSlug: 'media',
+      file: createUploadReferenceFile({
+        filename: 'photo.png',
+        mimeType: 'image/png',
+        size: MINIMAL_PNG.length,
+      }),
+      req,
+    })
+
+    tempFilesToClean.push(file.tempFilePath!)
+
+    expect(handler).toHaveBeenCalledTimes(1)
+    expect(file.tempFilePath).toBeDefined()
+    expect(fs.readFileSync(file.tempFilePath!).equals(MINIMAL_PNG)).toBe(true)
+  })
+
+  it('uses a bounded existence probe when a transformer declines the upload', async () => {
+    const handler = vi.fn((handlerReq: PayloadRequest) => {
+      expect(handlerReq.headers.get('range')).toBe('bytes=0-0')
+      return new Response('x', {
+        headers: { 'Content-Range': 'bytes 0-0/18' },
+        status: 206,
+      })
+    })
+
+    const req = createReq([handler], {})
+    req.payload.config.upload.transformers = [
+      {
+        slug: 'custom',
+        canTransform: () => false,
+        mimeTypes: ['*/*'],
+        transformFile: vi.fn(),
+      },
+    ]
+
+    await getFileFromUploadInstructions({
+      collectionSlug: 'media',
+      file: createUploadReferenceFile(),
+      req,
+    })
+
+    expect(handler).toHaveBeenCalledOnce()
+  })
+
   it('fetches only a bounded header for an image with no configured adjustments', async () => {
     const handler = vi.fn(async (handlerReq: PayloadRequest) => {
       expect(handlerReq.headers.get('range')).toBe(`bytes=0-${HEADER_PROBE_BYTE_LENGTH - 1}`)
-      return new Response(MINIMAL_PNG, { headers: { 'Content-Type': 'image/png' }, status: 206 })
+      return new Response(MINIMAL_PNG, {
+        headers: {
+          'Content-Range': `bytes 0-${MINIMAL_PNG.length - 1}/${MINIMAL_PNG.length}`,
+          'Content-Type': 'image/png',
+        },
+        status: 206,
+      })
     })
 
     const req = createReq([handler], {})
@@ -404,7 +473,14 @@ describe('getFileFromUploadInstructions', () => {
     )
 
     const handler = vi.fn(
-      async () => new Response(stream, { headers: { 'Content-Type': 'image/png' }, status: 200 }),
+      async () =>
+        new Response(stream, {
+          headers: {
+            'Content-Length': String(HEADER_PROBE_BYTE_LENGTH * 4),
+            'Content-Type': 'image/png',
+          },
+          status: 200,
+        }),
     )
     const req = createReq([handler], {})
 
@@ -434,7 +510,13 @@ describe('getFileFromUploadInstructions', () => {
 
     const handler = vi.fn(async (handlerReq: PayloadRequest) => {
       observedSignal = handlerReq.signal
-      return new Response(MINIMAL_PNG, { headers: { 'Content-Type': 'image/png' }, status: 206 })
+      return new Response(MINIMAL_PNG, {
+        headers: {
+          'Content-Range': `bytes 0-${MINIMAL_PNG.length - 1}/${MINIMAL_PNG.length}`,
+          'Content-Type': 'image/png',
+        },
+        status: 206,
+      })
     })
 
     const req = Object.assign(baseRequest, {
@@ -515,14 +597,22 @@ describe('getFileFromUploadInstructions', () => {
 
   it('falls back to a full fetch when the header is not enough to determine image dimensions', async () => {
     const garbage = Buffer.from('not a real image')
+    const fullImageStandIn = 'full-image-bytes-stand-in'
+    const expectedSize = Buffer.byteLength(fullImageStandIn)
     let callCount = 0
 
     const handler = vi.fn(async (handlerReq: PayloadRequest) => {
       callCount += 1
       if (handlerReq.headers.get('range')) {
-        return new Response(garbage, { headers: { 'Content-Type': 'image/png' }, status: 206 })
+        return new Response(garbage, {
+          headers: {
+            'Content-Range': `bytes 0-${garbage.length - 1}/${expectedSize}`,
+            'Content-Type': 'image/png',
+          },
+          status: 206,
+        })
       }
-      return new Response('full-image-bytes-stand-in', {
+      return new Response(fullImageStandIn, {
         headers: { 'Content-Type': 'image/png' },
         status: 200,
       })
@@ -532,13 +622,17 @@ describe('getFileFromUploadInstructions', () => {
 
     const file = await getFileFromUploadInstructions({
       collectionSlug: 'media',
-      file: createUploadReferenceFile({ filename: 'photo.png', mimeType: 'image/png', size: 26 }),
+      file: createUploadReferenceFile({
+        filename: 'photo.png',
+        mimeType: 'image/png',
+        size: expectedSize,
+      }),
       req,
     })
 
     expect(callCount).toBe(2)
     expect(file.tempFilePath).toBeTruthy()
     tempFilesToClean.push(file.tempFilePath!)
-    expect(fs.readFileSync(file.tempFilePath!, 'utf8')).toBe('full-image-bytes-stand-in')
+    expect(fs.readFileSync(file.tempFilePath!, 'utf8')).toBe(fullImageStandIn)
   })
 })

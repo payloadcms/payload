@@ -35,6 +35,14 @@ describe('assertNoLegacySharpConfig', () => {
     },
   )
 
+  it('should throw when a collection sets variants directly on its upload config', () => {
+    const config = {
+      collections: [{ slug: 'media', upload: { variants: [{ name: 'thumbnail' }] } }],
+    } as unknown as Config
+
+    expect(() => assertNoLegacySharpConfig({ config })).toThrow(/upload\.variants/)
+  })
+
   it.each([
     { collections: [{ slug: 'media', upload: { imageSizes: [{ name: 'thumbnail' }] } }] },
     {

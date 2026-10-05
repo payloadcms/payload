@@ -422,8 +422,8 @@ export const generateFileData = async <T>({
           height: retainedOriginal.height,
           mimeType: retainedOriginal.mimeType,
           original: retainedOriginal,
-          sizes: currentFileData?.sizes,
           url: retainedOriginal.url,
+          variants: currentFileData?.variants,
           width: retainedOriginal.width,
           ...(draft ? { _status: 'draft' } : {}),
         } as T,
@@ -671,7 +671,7 @@ export const generateFileData = async <T>({
       const plannedSizeBuffers = new Map<string, Buffer>()
 
       for (const result of sizeResults) {
-        const sizeName = result.fieldPath.slice('sizes.'.length)
+        const sizeName = result.fieldPath.slice('variants.'.length)
 
         if (!result.file) {
           sizes[sizeName] = {
@@ -692,7 +692,7 @@ export const generateFileData = async <T>({
 
         req.payloadUploadSizes[sizeName] = sizeBuffer
 
-        const imageSizeConfig = collectionConfig.upload.imageSizes?.find(
+        const imageSizeConfig = collectionConfig.upload.variants?.find(
           (imageSize) => imageSize.name === sizeName,
         )
 
@@ -755,7 +755,7 @@ export const generateFileData = async <T>({
         }
       }
 
-      fileData.sizes = sizes
+      fileData.variants = sizes
     }
 
     if (!disableLocalStorage && fileData.original) {
@@ -769,7 +769,7 @@ export const generateFileData = async <T>({
         { key: fsSafeName, role: { type: 'default' as const }, storageBackendId },
       ]
 
-      for (const [sizeKey, size] of Object.entries(fileData.sizes ?? {})) {
+      for (const [sizeKey, size] of Object.entries(fileData.variants ?? {})) {
         if (size.filename) {
           references.push({
             key: size.filename,

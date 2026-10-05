@@ -141,7 +141,7 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
         filename: 'legacy-original.png',
         mimeType: 'image/png',
         prefix,
-        sizes: { thumbnail: { filename: sizeFilename, mimeType: 'image/png' } },
+        variants: { thumbnail: { filename: sizeFilename, mimeType: 'image/png' } },
       },
     })
     const collection = payload.collections[mediaHeaderOnlyWithSizesSlug].config
@@ -454,13 +454,13 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
   })
 
   /**
-   * `media-header-only-with-sizes` has `imageSizes` configured but no `resizeOptions`, so a
+   * `media-header-only-with-sizes` has `variants` configured but no `resizeOptions`, so a
    * client upload larger than `HEADER_PROBE_BYTE_LENGTH` (1MB) is a regression test for a bug
-   * where `getFileContentRequirement` ignored `imageSizes` and chose the `'header'` content
+   * where `getFileContentRequirement` ignored `variants` and chose the `'header'` content
    * requirement anyway - handing `createImageSizes` a truncated buffer and crashing instead of
    * fetching the full file through the real Azure handler.
    */
-  test.describe('imageSizes with a large upload (real Azure handler)', () => {
+  test.describe('variants with a large upload (real Azure handler)', () => {
     const createdIds: (number | string)[] = []
 
     test.afterEach(async ({ payload }) => {
@@ -497,9 +497,9 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
 
         expect(doc.filesize).toBe(file.length)
         expect(doc.mimeType).toBe('image/jpeg')
-        expect(doc.sizes.thumbnail.width).toBe(400)
-        expect(doc.sizes.thumbnail.height).toBe(300)
-        expect(doc.sizes.thumbnail.filename).toBeTruthy()
+        expect(doc.variants.thumbnail.width).toBe(400)
+        expect(doc.variants.thumbnail.height).toBe(300)
+        expect(doc.variants.thumbnail.filename).toBeTruthy()
 
         expect(downloadSpy).toHaveBeenCalledTimes(1)
 

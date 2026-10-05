@@ -247,7 +247,7 @@ const collectUploadAndMedia = (config: SanitizedConfig): FeatureInfo => {
         ({ upload }) => isObject(upload) && upload.focalPoint === false,
       ).length,
       imageSizesCollectionCount: collections.filter(
-        ({ upload }) => isObject(upload) && Boolean(upload.imageSizes?.length),
+        ({ upload }) => isObject(upload) && Boolean(upload.variants?.length),
       ).length,
       mimeRestrictedCollectionCount: collections.filter(
         ({ upload }) => isObject(upload) && Boolean(upload.mimeTypes?.length),

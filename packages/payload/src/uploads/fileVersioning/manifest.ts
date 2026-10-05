@@ -123,8 +123,8 @@ export const withLegacyUploadFileData = ({
     { key, role: { type: 'default' }, storageBackendId },
   ]
 
-  if (doc.sizes && typeof doc.sizes === 'object' && !Array.isArray(doc.sizes)) {
-    for (const [sizeKey, size] of Object.entries(doc.sizes)) {
+  if (doc.variants && typeof doc.variants === 'object' && !Array.isArray(doc.variants)) {
+    for (const [sizeKey, size] of Object.entries(doc.variants)) {
       if (!size || typeof size !== 'object' || Array.isArray(size)) {
         continue
       }

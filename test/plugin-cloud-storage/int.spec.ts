@@ -1,3 +1,4 @@
+/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options"] }] -- Tests use the shared fixture wrapper. */
 import type { R2StorageOptions } from '@payloadcms/storage-r2'
 import type { Payload, UploadInstructions } from 'payload'
 import type { SuiteAPI } from 'vitest'
@@ -72,7 +73,7 @@ async function verifyUploads({
     _managedFiles?: Array<{ key: string }>
     filename?: string
     original?: { filename?: string }
-    sizes?: Record<string, { filename?: string }>
+    variants?: Record<string, { filename?: string }>
   }>({
     collection: collectionSlug,
     where: { id: { equals: uploadId } },
@@ -81,7 +82,7 @@ async function verifyUploads({
   const filenames = [
     uploadData?.filename,
     uploadData?.original?.filename,
-    ...Object.values(uploadData?.sizes ?? {}).map(({ filename }) => filename),
+    ...Object.values(uploadData?.variants ?? {}).map(({ filename }) => filename),
   ].filter((filename): filename is string => Boolean(filename))
 
   expect(fileKeys.length).toBeGreaterThan(0)
@@ -601,11 +602,11 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
             collection: mediaSlug,
             overrideAccess: true,
           })
-          expect(apiResponse.sizes).toBeTruthy()
+          expect(apiResponse.variants).toBeTruthy()
 
-          const apiSizeKeys = Object.keys(apiResponse.sizes || {})
+          const apiSizeKeys = Object.keys(apiResponse.variants || {})
           for (const sizeKey of apiSizeKeys) {
-            const size = apiResponse.sizes?.[sizeKey as keyof typeof apiResponse.sizes]
+            const size = apiResponse.variants?.[sizeKey as keyof typeof apiResponse.variants]
             if (!size) {
               continue
             }
@@ -621,16 +622,16 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
 
           const dbRecord = rawDbData as unknown as {
             filename: string
-            sizes: Record<string, { filename: string; url: string }>
             url: string
+            variants: Record<string, { filename: string; url: string }>
           }
           type SizeData = { filename: string; url: string }
 
-          const sizeKeys = Object.keys(dbRecord.sizes)
+          const sizeKeys = Object.keys(dbRecord.variants)
           expect(sizeKeys.length).toBeGreaterThan(0)
 
           for (const sizeKey of sizeKeys) {
-            const size: SizeData = dbRecord.sizes[sizeKey] as SizeData
+            const size: SizeData = dbRecord.variants[sizeKey] as SizeData
             expect(size.url).not.toEqual(`/api/${mediaSlug}/file/${dbRecord.filename}`)
             expect(size.url).toEqual(`/api/${mediaSlug}/file/${size.filename}`)
           }
@@ -646,7 +647,7 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
 
           expect(upload.filename).toBeTruthy()
           expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${upload.filename}`)
-          expect((upload as any).sizes).toBeFalsy()
+          expect((upload as any).variants).toBeFalsy()
 
           const rawDbData = await payload.db.findOne({
             collection: mediaWithPrefixSlug,
@@ -662,7 +663,7 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
 
           expect(dbRecord.filename).toEqual(upload.filename)
           expect(dbRecord.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${upload.filename}`)
-          expect((rawDbData as any)?.sizes).toBeFalsy()
+          expect((rawDbData as any)?.variants).toBeFalsy()
         })
 
         test('should use custom generateFileURL in beforeChange when disablePayloadAccessControl is true', async ({
@@ -794,7 +795,7 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
           body: JSON.stringify({
             filename: 'submitted.png',
             prefix: 'submitted-prefix',
-            sizes: {
+            variants: {
               thumbnail: {
                 filename: 'submitted-thumbnail.png',
               },
@@ -845,7 +846,7 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
           body: JSON.stringify({
             filename: 'submitted.png',
             prefix: 'submitted-prefix',
-            sizes: {
+            variants: {
               thumbnail: {
                 filename: 'submitted-thumbnail.png',
               },
@@ -863,7 +864,7 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
 
         expect(preservedUpload.filename).toBe(upload.filename)
         expect(preservedUpload.prefix).toBe('test-metadata')
-        expect(preservedUpload.sizes).toEqual(upload.sizes)
+        expect(preservedUpload.variants).toEqual(upload.variants)
 
         recordedCleanupTargets.length = 0
 
@@ -947,7 +948,7 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
         expect(saved.filename).toBeTruthy()
         expect(saved.filename).not.toBe(original.filename)
         expect(saved.mimeType).toBe('image/webp')
-        expect(saved.sizes?.thumbnail?.filename).toBeTruthy()
+        expect(saved.variants?.thumbnail?.filename).toBeTruthy()
         expect([...uploadedTestFiles.values()]).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
@@ -956,8 +957,8 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
               prefix: expect.stringMatching(/^test-metadata\//),
             }),
             expect.objectContaining({
-              filename: saved.sizes?.thumbnail?.filename,
-              mimeType: saved.sizes?.thumbnail?.mimeType,
+              filename: saved.variants?.thumbnail?.filename,
+              mimeType: saved.variants?.thumbnail?.mimeType,
               prefix: expect.stringMatching(/^test-metadata\//),
             }),
           ]),
@@ -1084,8 +1085,8 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
         const { doc } = await createResponse.json<{
           doc: {
             id: number | string
-            sizes: { thumbnail: { filename: string } }
             storageProvider: string
+            variants: { thumbnail: { filename: string } }
           }
         }>()
 
@@ -1093,7 +1094,7 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
 
         expect(createResponse.status).toBe(201)
         expect(doc.storageProvider).toBe('test-adapter')
-        expect(doc.sizes.thumbnail.filename).toBeTruthy()
+        expect(doc.variants.thumbnail.filename).toBeTruthy()
       })
 
       test('should persist metadata on update operations', async ({ payload }) => {
@@ -1262,12 +1263,12 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
         })) as unknown as {
           filename: string
           id: number | string
-          sizes: Record<string, { filename: string }>
+          variants: Record<string, { filename: string }>
         }
 
         createdIDs.push(initial.id)
 
-        const initialSizeKeys = Object.values(initial.sizes ?? {})
+        const initialSizeKeys = Object.values(initial.variants ?? {})
           .map((s) => s?.filename)
           .filter((f): f is string => typeof f === 'string')
 
@@ -1295,13 +1296,13 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
           overwriteExistingFiles: true,
         })) as unknown as {
           filename: string
-          sizes: Record<string, { filename: string }>
+          variants: Record<string, { filename: string }>
         }
 
         // Filenames should match because overwriteExistingFiles is enabled.
         expect(updated.filename).toBe(initial.filename)
 
-        const updatedSizeKeys = Object.values(updated.sizes ?? {})
+        const updatedSizeKeys = Object.values(updated.variants ?? {})
           .map((s) => s?.filename)
           .filter((f): f is string => typeof f === 'string')
 

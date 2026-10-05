@@ -364,14 +364,14 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     restClient,
   }) => {
     const bytes = await readFile(imageFixture)
-    expect(payload.collections[transformedMediaSlug]?.config.upload.imageSizes).toHaveLength(1)
+    expect(payload.collections[transformedMediaSlug]?.config.upload.variants).toHaveLength(1)
     const created = await payload.create({
       collection: transformedMediaSlug,
       data: { alt: 'source' },
       file: { name: 'landscape.png', data: bytes, mimetype: 'image/png', size: bytes.length },
     })
     const originalSizePixels = await sharp(
-      path.join(transformedMediaDir, created.sizes!.small!.filename!),
+      path.join(transformedMediaDir, created.variants!.small!.filename!),
     )
       .raw()
       .toBuffer()
@@ -394,7 +394,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       collection: transformedMediaSlug,
       where: { id: { equals: doc.id } },
     })
-    expect(stored?.sizes?.small?.filename).toBeTruthy()
+    expect(stored?.variants?.small?.filename).toBeTruthy()
     expect(doc).toMatchObject({ height: 800, width: 800 })
 
     expect(stored?.original).toMatchObject({
@@ -415,10 +415,10 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       width: 800,
     })
     await expect(
-      sharp(path.join(transformedMediaDir, stored!.sizes.small.filename)).metadata(),
+      sharp(path.join(transformedMediaDir, stored!.variants.small.filename)).metadata(),
     ).resolves.toMatchObject({ height: 200, width: 200 })
     expect(
-      await sharp(path.join(transformedMediaDir, stored!.sizes.small.filename)).raw().toBuffer(),
+      await sharp(path.join(transformedMediaDir, stored!.variants.small.filename)).raw().toBuffer(),
     ).toEqual(originalSizePixels)
   })
 
@@ -469,7 +469,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       current._managedFiles?.find((file) => file.key === created.original!.filename)?.roles,
     ).toEqual([{ type: 'original' }, { type: 'default' }])
     expect(await readFile(path.join(transformedMediaDir, resetDoc.filename!))).toEqual(bytes)
-    expect(current.sizes?.small?.filename).toBe(cropped.sizes?.small?.filename)
+    expect(current.variants?.small?.filename).toBe(cropped.variants?.small?.filename)
 
     const { docs: versions } = await payload.db.findVersions({
       collection: transformedMediaSlug,
@@ -534,7 +534,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     expect(resetDoc.url).toBe(created.original!.url)
     expect(current.focalX).toBe(75)
     expect(current.focalY).toBe(25)
-    expect(current.sizes?.small?.filename).not.toBe(cropped.sizes?.small?.filename)
+    expect(current.variants?.small?.filename).not.toBe(cropped.variants?.small?.filename)
     expect(
       current._managedFiles?.find((file) => file.key === created.original!.filename)?.roles,
     ).toEqual([{ type: 'original' }, { type: 'default' }])
@@ -976,7 +976,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       file: { name: 'size.png', data: firstBytes, mimetype: 'image/png', size: firstBytes.length },
     })
     const firstSize = await readFile(
-      path.join(transformedMediaDir, created.sizes!.small!.filename!),
+      path.join(transformedMediaDir, created.variants!.small!.filename!),
     )
 
     await payload.update({
@@ -996,12 +996,12 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       where: { parent: { equals: created.id } },
     })
     const selected = docs.find(({ version }) => version.alt === 'size A')!
-    const imageSizes = payload.collections[transformedMediaSlug].config.upload.imageSizes
+    const variants = payload.collections[transformedMediaSlug].config.upload.variants
 
-    payload.collections[transformedMediaSlug].config.upload.imageSizes = []
+    payload.collections[transformedMediaSlug].config.upload.variants = []
     try {
       const historical = await restClient.GET(
-        `/${transformedMediaSlug}/file/${selected.version.sizes!.small!.filename}`,
+        `/${transformedMediaSlug}/file/${selected.version.variants!.small!.filename}`,
       )
 
       expect(historical.status).toBe(200)
@@ -1026,7 +1026,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
         (await readFile(path.join(transformedMediaDir, savedSize!.key))).equals(firstSize),
       ).toBe(true)
     } finally {
-      payload.collections[transformedMediaSlug].config.upload.imageSizes = imageSizes
+      payload.collections[transformedMediaSlug].config.upload.variants = variants
     }
   })
 
