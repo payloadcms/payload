@@ -53,6 +53,7 @@ import type {
   TransformCollectionWithSelect,
   TransformGlobalWithSelect,
 } from './types/index.js'
+import type { ValidationResult } from './types/validation.js'
 import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 
 import { countLocal, type CountOptions } from './collections/operations/local/count.js'
@@ -101,7 +102,6 @@ import {
 import {
   type ValidateCollectionOptions,
   validateLocal,
-  type ValidationResult,
 } from './collections/operations/local/validate.js'
 import {
   countGlobalVersionsLocal,
@@ -1586,10 +1586,7 @@ export {
   updateDocumentInputSchema,
   updateDocumentLocalInputSchema,
 } from './collections/operations/inputSchemas.js'
-export type {
-  ValidateCollectionOptions,
-  ValidationResult,
-} from './collections/operations/local/validate.js'
+export type { ValidateCollectionOptions } from './collections/operations/local/validate.js'
 export { restoreVersionOperation } from './collections/operations/restoreVersion.js'
 export { updateOperation } from './collections/operations/update.js'
 export { updateByIDOperation } from './collections/operations/updateByID.js'
@@ -2058,6 +2055,7 @@ export {
 } from './queues/utilities/getCurrentDate.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
+export type { ValidationResult } from './types/validation.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
 export type * from './uploads/types.js'

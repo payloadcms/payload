@@ -128,6 +128,7 @@ test.suite('baseAccess', { config: './config.ts' }, () => {
           title: 'denied',
         },
         locale: null,
+        overrideAccess: false,
         req,
       }),
     ).rejects.toThrow(Forbidden)
@@ -148,6 +149,7 @@ test.suite('baseAccess', { config: './config.ts' }, () => {
           title: 'denied',
         },
         locale: null,
+        overrideAccess: false,
         req,
       }),
     ).rejects.toThrow(Forbidden)

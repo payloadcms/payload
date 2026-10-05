@@ -193,6 +193,16 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
       collection.graphQL.updateMutationInputType = new GraphQLNonNull(updateMutationInputType)
     }
 
+    const validationMutationInputType = buildMutationInputType({
+      name: `${singularName}Validation`,
+      config,
+      fields: mutationCreateInputFields,
+      forceNullable: true,
+      graphqlResult,
+      parentIsLocalized: false,
+      parentName: `${singularName}Validation`,
+    })
+
     const queriesEnabled =
       typeof collectionConfig.graphQL !== 'object' || !collectionConfig.graphQL.disableQueries
     const mutationsEnabled =
@@ -311,7 +321,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
         type: graphqlResult.types.validationResultType,
         args: {
           id: { type: idType },
-          ...(updateMutationInputType ? { data: { type: updateMutationInputType } } : {}),
+          ...(validationMutationInputType ? { data: { type: validationMutationInputType } } : {}),
           draft: { type: GraphQLBoolean },
           ...(config.localization
             ? {

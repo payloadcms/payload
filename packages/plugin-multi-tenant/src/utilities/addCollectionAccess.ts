@@ -76,16 +76,12 @@ const getTenantAccessResult = ({
 
 const wrapCollectionAccess = (scope: TenantAccessConfig): void => {
   scope.collection.access ??= {}
-  const originalUpdateAccess = scope.collection.access.update
+  const updateAccessFallback = scope.collection.access.update
 
   for (const accessKey of collectionAccessKeys) {
-    // A collection without its own `validate` access is governed by `update`, matching core's
-    // fallback contract, rather than the generic "any authenticated user" default below.
-    const updateAccessFallback = accessKey === 'validate' ? originalUpdateAccess : undefined
-
     const accessFunction =
       scope.collection.access[accessKey] ??
-      updateAccessFallback ??
+      (accessKey === 'validate' ? updateAccessFallback : undefined) ??
       (({ req }: AccessArgs) => Boolean(req.user))
 
     scope.collection.access[accessKey] = async (args) =>
@@ -123,8 +119,12 @@ export const addCollectionAccess = ({
   config.baseAccess ??= {}
   config.baseAccess.collections ??= {}
 
+  const originalBaseAccess = { ...config.baseAccess.collections }
+
   for (const accessKey of collectionAccessKeys) {
-    const baseAccessFunction = config.baseAccess.collections[accessKey]
+    const baseAccessFunction =
+      originalBaseAccess[accessKey] ??
+      (accessKey === 'validate' ? originalBaseAccess.update : undefined)
 
     config.baseAccess.collections[accessKey] = async (args) => {
       const baseResult = baseAccessFunction ? await baseAccessFunction(args) : true

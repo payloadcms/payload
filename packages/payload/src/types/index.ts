@@ -131,7 +131,7 @@ export interface PayloadRequest
     PayloadRequestData {
   headers: Request['headers']
   /** The active Payload operation. */
-  operation?: FieldOperation
+  operation?: Operation
 }
 
 export type { HasManyRelationshipOperator, Operator }
@@ -199,7 +199,8 @@ export type Document = any
  * or `update`.
  */
 export type Operation = 'create' | 'delete' | 'read' | 'update' | 'validate'
-export type FieldOperation = Operation
+export type FieldOperation = Exclude<Operation, 'delete'>
+export type BeforeValidateOperation = Extract<FieldOperation, 'create' | 'update' | 'validate'>
 export type VersionOperations = 'readVersions'
 export type AuthOperations = 'unlock'
 export type AllOperations = AuthOperations | Operation | VersionOperations

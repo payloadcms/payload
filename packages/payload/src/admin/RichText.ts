@@ -13,7 +13,13 @@ import type {
 } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { RequestContext, TypedFallbackLocale } from '../index.js'
-import type { FieldOperation, JsonObject, PayloadRequest, PopulateType } from '../types/index.js'
+import type {
+  BeforeValidateOperation,
+  FieldOperation,
+  JsonObject,
+  PayloadRequest,
+  PopulateType,
+} from '../types/index.js'
 import type { FieldsToJSONSchemaArgs } from '../utilities/configToJSONSchema.js'
 import type { RichTextFieldClientProps, RichTextFieldServerProps } from './fields/RichText.js'
 import type { FieldDiffClientProps, FieldDiffServerProps, FieldSchemaMap } from './types.js'
@@ -77,7 +83,7 @@ export type BeforeValidateRichTextHookArgs<
   TSiblingData = any,
 > = {
   /** A string relating to which operation the field type is currently executing within. */
-  operation: 'create' | 'update' | 'validate'
+  operation: BeforeValidateOperation
   overrideAccess?: boolean
   /** The sibling data of the document before changes being applied. */
   previousSiblingDoc?: TSiblingData

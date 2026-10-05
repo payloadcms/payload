@@ -6,34 +6,14 @@ desc: Validate collection and global document candidates without saving them.
 keywords: validation, local api, rest api, localization, publishing, access control, hooks, drafts
 ---
 
-On-demand validation checks a collection or global document candidate without saving the candidate,
-creating a version, or writing files. Use it for workflow readiness checks, multi-locale review, and
-validation before a custom publish flow.
-
-Field validation failures are returned as a result:
-
-```ts
-import type { ValidationFieldError } from 'payload'
-
-type ValidationResult = {
-  valid: boolean
-  errors: ValidationFieldError[]
-}
-```
-
-Every error has a `path` and `message`. Errors from localized validation passes also set `locale`;
-non-localized validation may omit it. Optional field label and table metadata may be present.
-
-Access denials, missing documents, invalid arguments, and non-validation errors thrown by hooks still
-throw normally.
+You can validate a collection document or global without writing it to the database. Call
+`payload.validate()` for a collection or `payload.validateGlobal()` for a global.
 
 ## Local API
 
-Use `payload.validate()` for collections and `payload.validateGlobal()` for globals. A collection
-call without `id` validates a create candidate and requires `data`. For collection by-ID and global
-validation, the stored main or published document is the base by default. Set `draft: true` to use
-the newest available draft version instead, falling back to the main document when no draft exists.
-Optional, partial `data` is merged over that base.
+Omit `id` and provide `data` to validate a collection create candidate. For stored documents and
+globals, partial `data` is merged with the main document. Set `draft: true` to use the newest draft,
+with the main document as a fallback.
 
 ```ts
 // Validate collection create data in one locale
@@ -79,12 +59,6 @@ const globalResult = await payload.validateGlobal({
 })
 ```
 
-For projects without localization, pass `locale: null` to the Local API or use `?locale=all` with
-the REST API.
-
-Use `context` to add values to `req.context` for the validation lifecycle. You can also reuse a
-partial request with `req`.
-
 ### Workflow readiness
 
 Validation failures do not throw a `ValidationError`. Check `valid` and use the locale, path, and
@@ -113,15 +87,19 @@ if (!result.valid) {
 return { ready: true }
 ```
 
-The Local API enforces access control by default. Set `overrideAccess: true` only for trusted server
-operations that must bypass access control. Pass `user` or `req` when validation must use a specific
-user.
+The Local API enforces access control by default. Set `overrideAccess: true` only for trusted
+internal calls that must skip access control.
+
+### Database uniqueness checks
+
+Payload manually checks fields and compound indexes configured with `unique: true` during collection
+validation. These checks can identify conflicts before a write, but the database remains
+authoritative for uniqueness constraints.
 
 ## REST API
 
-Validation endpoints use `POST`. Send candidate data as a JSON object and select locales with the
-required `locale` query parameter. These examples use the default `/api` base path; custom
-`routes.api` configuration changes that prefix.
+Validation endpoints use `POST`. Send candidate data as a JSON object. Provide a `locale` query
+parameter otherwise Payload uses the request locale or configured default locale.
 
 ```ts
 // Collection create candidate
@@ -175,19 +153,7 @@ The collection create endpoint requires an object body. The collection by-ID and
 allow the body to be omitted. Those endpoints use the newest available draft as their base,
 falling back to the main document when no draft exists.
 
-The body is always candidate document data. Authentication, access context, and other operation
-controls come from the HTTP request, not body properties.
-
-| Outcome                                    | Status |
-| ------------------------------------------ | ------ |
-| Valid or invalid field data                | `200`  |
-| Missing, unknown, or unavailable locale    | `400`  |
-| Missing or malformed required request data | `400`  |
-| Validation access denied                   | `403`  |
-| Collection document not found              | `404`  |
-
-Other errors use Payload's normal REST error handling. REST validation always enforces access
-control.
+REST validation always enforces access control.
 
 ## GraphQL API
 
@@ -215,20 +181,8 @@ use the Local or REST API for that. GraphQL validation always enforces access co
 
 ## Locale semantics
 
-`locale` accepts one locale, a non-empty array, or `'all'`. Duplicate locales are removed. `'all'`
-uses the locales returned by `localization.filterAvailableLocales`, when configured. Errors from
-localized validation passes are tagged with the locale that failed; non-localized validation may
-omit `locale`.
-
-A public multi-locale Local or REST call has one `data` payload. Payload independently merges that
-same candidate into every selected locale, then aggregates the results. If a custom interface has
-unsaved localized values for only its active locale, do not send those values as a flat
-multi-locale candidate.
-
-Publishing every locale at once has this same problem: the request only carries unsaved data for
-the locale being edited. Payload validates that locale with the submitted data, then validates
-every other locale using only its stored, non-localized-field-stripped candidate, so sibling
-locales are never checked against localized values that were never meant for them.
+When validating multiple locales, Payload validates the same `data` against each selected locale
+and combines the results.
 
 Fallback locale values are disabled during on-demand validation. Missing data must pass validation
 in the locale being checked.
@@ -236,7 +190,7 @@ in the locale being checked.
 ## Access control and hooks
 
 Validation falls back to the corresponding `update` access function for collections, globals, and
-fields. The fallback still receives `req.operation === 'validate'`. Configure `validate` only when
+fields. The fallback still receives `req.operation === 'validate'`. Configure `validate` when
 validation should use a different policy:
 
 ```ts
@@ -269,23 +223,15 @@ export const SiteSettings: GlobalConfig = {
 }
 ```
 
-Whether configured directly or inherited from `update`, collection, global, and field access
-functions all receive the first-class
-`req.operation === 'validate'`. Field `beforeValidate` and `beforeChange` hooks, field validators,
-and collection/global `beforeValidate` and `beforeChange` hooks also receive
-`operation: 'validate'`. Payload never simulates `'create'` or `'update'` as the access operation.
+Collection, global, and field access functions receive `req.operation === 'validate'`. Field
+validators and `beforeValidate` and `beforeChange` hooks receive `operation: 'validate'`. Payload
+does not report the operation as `create` or `update`.
 
-When `validate` access returns a `where` constraint and a document exists but doesn't match it,
-validation throws `Forbidden` rather than treating the document as absent. Without this, candidate
-data could validate against an empty base as though the restricted document didn't exist yet.
-Collections already apply this through their existing `update`-by-ID access checks; globals apply
-the same rule for validation specifically, even though a global's `find` and `update` stay silent
-about a document being restricted rather than absent.
+`where` access constraints apply when validating stored documents. Collection create validation
+requires boolean access because there is no stored document to evaluate against a constraint.
 
-The validation lifecycle itself does not persist the candidate. Payload also rejects document,
-global, upload, and version writes that reuse the active validation request. Hooks still run,
-however, and can cause side effects through other Payload APIs, an external service, a raw database
-client, or a separate Payload request. Branch side-effecting hooks when needed:
+Validation does not persist the candidate, but hooks can still cause side effects through Payload
+APIs or external services. You must check the operation before running side-effecting hooks:
 
 ```ts
 import type { CollectionBeforeChangeHook } from 'payload'
@@ -302,10 +248,3 @@ const beforeChange: CollectionBeforeChangeHook = async ({
   return data
 }
 ```
-
-## Current scope
-
-On-demand validation is available through the Local, REST, and GraphQL APIs. GraphQL only
-validates one locale per call; multi-locale and `'all'` validation are Local and REST API only. It
-does not add a standalone "validate all locales" Admin UI action, bulk Admin validation, or
-fallback-locale validation.

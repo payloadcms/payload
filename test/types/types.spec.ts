@@ -1,9 +1,11 @@
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import type { useAuth } from '@payloadcms/ui'
+import type { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToFormState'
 import type {
   Access,
   ArrayField,
   AuthenticatedUser,
+  BeforeValidateOperation,
   Block,
   BlockRowLabelClientProps,
   BlockRowLabelServerProps,
@@ -24,6 +26,7 @@ import type {
   FieldClientProps,
   FieldErrorServerProps,
   FieldHookArgs,
+  FieldOperation,
   FieldPermissions,
   FieldServerProps,
   GeneratedTypes,
@@ -40,6 +43,7 @@ import type {
   MeOperationResult,
   NamedGroupField,
   NamedTab,
+  Operation,
   PaginatedDocs,
   PayloadClientComponentProps,
   PayloadRequest,
@@ -49,6 +53,7 @@ import type {
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   SelectType,
+  ServerComponentProps,
   TabsField,
   TextField,
   TextFieldClientProps,
@@ -61,8 +66,6 @@ import type {
   UntypedPayloadTypes,
   UploadFieldErrorServerProps,
   Validate,
-  ValidateCollectionOptions,
-  ValidateGlobalOptions,
   ValidationFieldError,
   ValidationResult,
   Where,
@@ -131,6 +134,20 @@ import type {
 
 describe('Types testing', () => {
   describe('validate operation types', () => {
+    test('should expose beforeValidate operations', () => {
+      expect<BeforeValidateOperation>().type.toBe<'create' | 'update' | 'validate'>()
+      expect<FieldOperation>().type.toBe<'create' | 'read' | 'update' | 'validate'>()
+      expect<Operation>().type.toBe<'create' | 'delete' | 'read' | 'update' | 'validate'>()
+      expect<PayloadRequest['operation']>().type.toBe<Operation | undefined>()
+    })
+
+    test('should limit form state operations to field operations', () => {
+      expect<Parameters<typeof fieldSchemasToFormState>[0]['operation']>().type.toBe<
+        FieldOperation | undefined
+      >()
+      expect<ServerComponentProps['operation']>().type.toBe<FieldOperation>()
+    })
+
     test('should expose validate only to validation lifecycle types', () => {
       expect<{
         locale?: string
@@ -178,13 +195,13 @@ describe('Types testing', () => {
       expect<FieldPermissions>().type.toHaveProperty('validate')
     })
 
-    test('should require collection create data and a locale', () => {
+    test('should require collection create data and allow the locale to be omitted', () => {
       expect(payload.validate).type.toBeCallableWith({
         collection: 'pages',
         data: {},
         locale: null,
       })
-      expect(payload.validate).type.not.toBeCallableWith({
+      expect(payload.validate).type.toBeCallableWith({
         collection: 'pages',
         data: {},
       })
@@ -198,14 +215,13 @@ describe('Types testing', () => {
         fallbackLocale: null,
         locale: null,
       })
-      expect<{
-        collection: 'pages'
-        data: Record<never, never>
-        locale: null
-      }>().type.toBeAssignableTo<ValidateCollectionOptions<'pages'>>()
     })
 
     test('should allow collection update and global validation data to be omitted', () => {
+      expect(payload.validate).type.toBeCallableWith({
+        id: 'document-id',
+        collection: 'pages',
+      })
       expect(payload.validate).type.toBeCallableWith({
         id: 'document-id',
         collection: 'pages',
@@ -213,17 +229,16 @@ describe('Types testing', () => {
       })
       expect(payload.validateGlobal).type.toBeCallableWith({
         slug: 'menu',
-        locale: null,
       })
-      expect(payload.validateGlobal).type.not.toBeCallableWith({
-        fallbackLocale: null,
+      expect(payload.validateGlobal).type.toBeCallableWith({
         slug: 'menu',
         locale: null,
       })
-      expect<{
-        locale: null
-        slug: 'menu'
-      }>().type.toBeAssignableTo<ValidateGlobalOptions<'menu'>>()
+      expect(payload.validateGlobal).type.not.toBeCallableWith({
+        slug: 'menu',
+        fallbackLocale: null,
+        locale: null,
+      })
       expect(
         payload.validate({
           collection: 'pages',
@@ -260,14 +275,6 @@ describe('Types testing', () => {
       })
       expect(payload.validateGlobal).type.toBeCallableWith({
         slug: 'menu',
-        locale: mutableLocales,
-      })
-      expect(payload.validateGlobal).type.toBeCallableWith({
-        slug: 'menu',
-        locale: readonlyLocales,
-      })
-      expect(payload.validateGlobal).type.toBeCallableWith({
-        slug: 'menu',
         locale: 'all',
       })
       expect(payload.validate).type.not.toBeCallableWith({
@@ -276,19 +283,11 @@ describe('Types testing', () => {
         data: {},
         locale: 'all',
       })
-      expect(payload.validateGlobal).type.not.toBeCallableWith({
-        slug: 'menu',
-        concurrency: 4,
-        locale: 'all',
-      })
-
-      const invalidOptions: ValidateCollectionOptions<'pages'> = {
+      expect(payload.validate).type.not.toBeCallableWith({
         collection: 'pages',
         data: {},
-        // @ts-expect-error Type '[]' is not assignable to type 'ValidationLocaleSelector'.
         locale: [],
-      }
-      expect(invalidOptions).type.toBe<ValidateCollectionOptions<'pages'>>()
+      })
     })
   })
 
@@ -2336,8 +2335,8 @@ describe('Types testing', () => {
         expect(payload.create).type.toBeCallableWith({
           collection: 'draft-posts',
           data: {
-            title: 'Test',
             description: 'Description',
+            title: 'Test',
           },
           draft: false,
         })
@@ -2356,8 +2355,8 @@ describe('Types testing', () => {
         expect(payload.create).type.toBeCallableWith({
           collection: 'draft-posts',
           data: {
-            title: 'Test',
             description: 'Description',
+            title: 'Test',
           },
         })
       })
@@ -2392,9 +2391,9 @@ describe('Types testing', () => {
         expect(payload.create).type.not.toBeCallableWith({
           collection: 'draft-posts',
           data: {
-            title: 'Test',
             description: 'Description',
             invalidProperty: 'should error',
+            title: 'Test',
           },
           draft: false,
         })
@@ -2402,8 +2401,8 @@ describe('Types testing', () => {
         expect(payload.create).type.not.toBeCallableWith({
           collection: 'draft-posts',
           data: {
-            title: 'Test',
             invalidProperty: 'should error',
+            title: 'Test',
           },
           draft: true,
         })
@@ -2447,32 +2446,32 @@ describe('Types testing', () => {
 
       test('findByID with draft:true on non-draft collection should error', () => {
         expect(payload.findByID).type.not.toBeCallableWith({
-          collection: 'pages',
           id: 1,
+          collection: 'pages',
           draft: true,
         })
       })
 
       test('findByID with draft:false on non-draft collection should error', () => {
         expect(payload.findByID).type.not.toBeCallableWith({
-          collection: 'pages',
           id: 1,
+          collection: 'pages',
           draft: false,
         })
       })
 
       test('findByID with draft:true on draft-enabled collection should work', () => {
         expect(payload.findByID).type.toBeCallableWith({
-          collection: 'draft-posts',
           id: 1,
+          collection: 'draft-posts',
           draft: true,
         })
       })
 
       test('update with draft:true on non-draft collection should error', () => {
         expect(payload.update).type.not.toBeCallableWith({
-          collection: 'pages',
           id: 1,
+          collection: 'pages',
           data: { title: 'Test' },
           draft: true,
         })
@@ -2480,8 +2479,8 @@ describe('Types testing', () => {
 
       test('update with draft:false on non-draft collection should error', () => {
         expect(payload.update).type.not.toBeCallableWith({
-          collection: 'pages',
           id: 1,
+          collection: 'pages',
           data: { title: 'Test' },
           draft: false,
         })
@@ -2489,8 +2488,8 @@ describe('Types testing', () => {
 
       test('update with draft:true on draft-enabled collection should work', () => {
         expect(payload.update).type.toBeCallableWith({
-          collection: 'draft-posts',
           id: 1,
+          collection: 'draft-posts',
           data: { title: 'Test' },
           draft: true,
         })
@@ -2498,24 +2497,24 @@ describe('Types testing', () => {
 
       test('duplicate with draft:true on non-draft collection should error', () => {
         expect(payload.duplicate).type.not.toBeCallableWith({
-          collection: 'pages',
           id: 1,
+          collection: 'pages',
           draft: true,
         })
       })
 
       test('duplicate with draft:false on non-draft collection should error', () => {
         expect(payload.duplicate).type.not.toBeCallableWith({
-          collection: 'pages',
           id: 1,
+          collection: 'pages',
           draft: false,
         })
       })
 
       test('duplicate with draft:true on draft-enabled collection should work', () => {
         expect(payload.duplicate).type.toBeCallableWith({
-          collection: 'draft-posts',
           id: 1,
+          collection: 'draft-posts',
           draft: true,
         })
       })

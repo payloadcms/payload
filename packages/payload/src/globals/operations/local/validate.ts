@@ -1,10 +1,14 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import { status as httpStatus } from 'http-status'
-
-import type { ValidationResult } from '../../../collections/operations/local/validate.js'
-import type { GlobalSlug, Payload, RequestContext, User } from '../../../index.js'
+import type {
+  GlobalSlug,
+  Payload,
+  RequestContext,
+  SharedLocalAPIOptions,
+  User,
+} from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
+import type { ValidationResult } from '../../../types/validation.js'
 import type { ValidationLocaleSelector } from '../../../utilities/resolveValidationLocales.js'
 import type { DataFromGlobalSlug, DraftFlagFromGlobalSlug } from '../../config/types.js'
 
@@ -26,68 +30,28 @@ export type ValidateGlobalOptions<TSlug extends GlobalSlug> = {
   /** Optional partial candidate data to merge over the selected stored global. */
   data?: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
   /**
-   * A locale, a non-empty locale array, or `'all'`.
+   * A locale, a non-empty locale array, or `'all'`. Defaults to the request locale, or the
+   * configured default locale.
    *
    * Each selected locale receives an independent copy of the same candidate `data`.
-   * `'all'` resolves through `localization.filterAvailableLocales` when configured. Use `null`
-   * for projects without localization.
+   * `'all'` resolves through `localization.filterAvailableLocales` when configured.
    */
-  locale: ValidationLocaleSelector
-  /**
-   * Skip global and field access control.
-   * @default false
-   */
-  overrideAccess?: boolean
+  locale?: ValidationLocaleSelector
   /** An existing request to reuse for user, locale, and context. */
   req?: Partial<PayloadRequest>
   /** The global slug to validate against. */
   slug: TSlug
   /** The user used by access control when `overrideAccess` is `false`. */
   user?: null | User
-} & DraftFlagFromGlobalSlug<TSlug>
-
-type InternalValidateGlobalOptions<TSlug extends GlobalSlug> = {
-  /**
-   * Whether `data` stores each localized field as a locale-code-keyed object, as the internal
-   * publish-all-locales candidate does, rather than a flat, single-locale candidate.
-   */
-  dataIsLocaleKeyed?: boolean
-  validationDataLocale?: string
-} & ValidateGlobalOptions<TSlug>
+} & DraftFlagFromGlobalSlug<TSlug> &
+  Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 export async function validateGlobalLocal<TSlug extends GlobalSlug>(
   payload: Payload,
   options: ValidateGlobalOptions<TSlug>,
 ): Promise<ValidationResult> {
-  return validateGlobalLocalWithDataLocale(payload, {
-    slug: options.slug,
-    context: options.context,
-    data: options.data,
-    draft: options.draft,
-    locale: options.locale,
-    overrideAccess: options.overrideAccess,
-    req: options.req,
-    user: options.user,
-  })
-}
-
-export async function validateGlobalLocalWithDataLocale<TSlug extends GlobalSlug>(
-  payload: Payload,
-  options: InternalValidateGlobalOptions<TSlug>,
-): Promise<ValidationResult> {
-  const {
-    slug,
-    data,
-    dataIsLocaleKeyed,
-    locale,
-    overrideAccess = false,
-    validationDataLocale,
-  } = options
+  const { slug, data, locale, overrideAccess = false } = options
   const { draft = false } = options
-
-  if (locale === undefined) {
-    throw new APIError('Validation requires a locale.', httpStatus.BAD_REQUEST)
-  }
 
   const globalConfig = payload.globals.config.find((config) => config.slug === slug)
 
@@ -102,17 +66,16 @@ export async function validateGlobalLocalWithDataLocale<TSlug extends GlobalSlug
     locale,
     payload,
     req: options.req,
-    runPass: ({ data: validationData, req }) =>
+    runPass: ({ data: validationData, onValidationData, req }) =>
       validateOperation({
         slug,
         data: validationData,
-        dataIsLocaleKeyed,
         draft,
         globalConfig,
+        onValidationData,
         overrideAccess,
         req,
       }),
     user: options.user,
-    validationDataLocale,
   })
 }

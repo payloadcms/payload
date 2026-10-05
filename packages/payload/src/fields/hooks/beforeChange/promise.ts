@@ -130,11 +130,15 @@ export const promise = async ({
   let skipValidationFromHere = skipValidation || isOutsideSubmittedFieldScope || !passesCondition
 
   if (fieldAffectsData(field)) {
-    // skip validation if the field is localized and the incoming data is null
-    if (fieldShouldBeLocalized({ field, parentIsLocalized }) && operationLocale !== defaultLocale) {
-      if (['array', 'blocks'].includes(field.type) && siblingData[field.name!] === null) {
-        skipValidationFromHere = true
-      }
+    const shouldSkipValidationForLocalizedFallback =
+      operation !== 'validate' &&
+      fieldShouldBeLocalized({ field, parentIsLocalized }) &&
+      operationLocale !== defaultLocale &&
+      ['array', 'blocks'].includes(field.type) &&
+      siblingData[field.name!] === null
+
+    if (shouldSkipValidationForLocalizedFallback) {
+      skipValidationFromHere = true
     }
 
     // Execute hooks
@@ -258,7 +262,6 @@ export const promise = async ({
 
                 errors.push({
                   label: blockLabelPath,
-                  locale: req.locale ?? undefined,
                   message: req.t('validation:invalidBlock', { block: block.blockType }),
                   path: `${path}.${rowIndex}.id`,
                 })
@@ -277,7 +280,6 @@ export const promise = async ({
 
           errors.push({
             label: fieldLabel,
-            locale: req.locale ?? undefined,
             message: validationResult,
             path,
           })

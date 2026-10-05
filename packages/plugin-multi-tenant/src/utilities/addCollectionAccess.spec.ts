@@ -65,6 +65,46 @@ describe('addCollectionAccess', () => {
     await expect(config.baseAccess?.collections?.create?.(createArgs())).resolves.toBe(true)
   })
 
+  it('should use explicit base validate access and otherwise fall back to update access', async () => {
+    const collection: CollectionConfig = { slug: 'posts', fields: [] }
+    const fallbackUpdate = vi.fn(() => false)
+    const fallbackConfig = {
+      baseAccess: {
+        collections: {
+          update: fallbackUpdate,
+        },
+      },
+    } as Config
+
+    addCollectionAccess({ config: fallbackConfig, scopes: [createScope(collection)] })
+
+    await expect(fallbackConfig.baseAccess?.collections?.validate?.(createArgs())).resolves.toBe(
+      false,
+    )
+    expect(fallbackUpdate).toHaveBeenCalledOnce()
+
+    const explicitUpdate = vi.fn(() => false)
+    const explicitValidate = vi.fn(() => true)
+    const explicitConfig = {
+      baseAccess: {
+        collections: {
+          update: explicitUpdate,
+          validate: explicitValidate,
+        },
+      },
+    } as Config
+
+    addCollectionAccess({ config: explicitConfig, scopes: [createScope(collection)] })
+
+    await expect(explicitConfig.baseAccess?.collections?.validate?.(createArgs())).resolves.toEqual(
+      {
+        tenant: { in: ['tenant-1'] },
+      },
+    )
+    expect(explicitUpdate).not.toHaveBeenCalled()
+    expect(explicitValidate).toHaveBeenCalledOnce()
+  })
+
   it('should fall back to update access for validate when accessResultCallback is configured', async () => {
     const documentUpdate = vi.fn(() => true)
     const accessResultCallback = vi.fn(({ accessResult }) => accessResult)

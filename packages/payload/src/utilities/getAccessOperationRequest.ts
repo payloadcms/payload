@@ -1,4 +1,4 @@
-import type { FieldOperation, PayloadRequest } from '../types/index.js'
+import type { Operation, PayloadRequest } from '../types/index.js'
 
 import { isolateObjectProperty } from './isolateObjectProperty.js'
 
@@ -10,7 +10,7 @@ export function getAccessOperationRequest({
   operation,
   req,
 }: {
-  operation: FieldOperation
+  operation: Operation
   req: PayloadRequest
 }): PayloadRequest {
   const operationRequest = isolateObjectProperty(req, 'operation')

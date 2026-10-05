@@ -41,6 +41,7 @@ import {
   hasDraftValidationEnabled,
   hasLocalizeStatusEnabled,
 } from '../../../utilities/getVersionsConfig.js'
+import { resolvePublishAllLocales } from '../../../utilities/resolvePublishAllLocales.js'
 import {
   buildAllLocalesPublicationHookDoc,
   getAllLocalesPublicationStatus,
@@ -113,9 +114,12 @@ export const updateDocument = async <
     unpublishAllLocales: unpublishAllLocalesArg,
   })
 
-  const publishAllLocales =
-    !draftArg &&
-    (publishAllLocalesArg ?? !(hasLocalizeStatusEnabled(collectionConfig) && locale !== 'all'))
+  const publishAllLocales = resolvePublishAllLocales({
+    draft: draftArg,
+    hasLocalizeStatusEnabled: hasLocalizeStatusEnabled(collectionConfig),
+    locale,
+    publishAllLocalesArg,
+  })
   const unpublishAllLocales =
     typeof unpublishAllLocalesArg === 'string'
       ? unpublishAllLocalesArg === 'true'

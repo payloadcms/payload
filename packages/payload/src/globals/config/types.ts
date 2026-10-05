@@ -25,7 +25,13 @@ import type {
   TypedGlobal,
   TypedGlobalSelect,
 } from '../../index.js'
-import type { PayloadRequest, SelectIncludeType, Where, WithSelectFn } from '../../types/index.js'
+import type {
+  FieldOperation,
+  PayloadRequest,
+  SelectIncludeType,
+  Where,
+  WithSelectFn,
+} from '../../types/index.js'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
 
 export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
@@ -80,13 +86,15 @@ export type DraftFlagFromGlobalSlug<TSlug extends GlobalSlug> = GeneratedTypes e
       draft?: boolean
     }
 
+type GlobalChangeOperation = Extract<FieldOperation, 'update' | 'validate'>
+
 export type BeforeValidateHook = (args: {
   context: RequestContext
   data?: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
   /** Hook operation being performed. */
-  operation: 'update' | 'validate'
+  operation: GlobalChangeOperation
   originalDoc?: any
   /**
    * Whether access control is being overridden for this operation
@@ -101,7 +109,7 @@ export type BeforeChangeHook = (args: {
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
   /** Hook operation being performed. */
-  operation: 'update' | 'validate'
+  operation: GlobalChangeOperation
   originalDoc?: any
   /**
    * Whether access control is being overridden for this operation

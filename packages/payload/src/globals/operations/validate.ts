@@ -1,32 +1,28 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type { TypeWithID } from '../../collections/config/types.js'
-import type { ValidationResult } from '../../collections/operations/local/validate.js'
 import type { AccessResult } from '../../config/types.js'
 import type { GlobalSlug, JsonObject } from '../../index.js'
-import type { PayloadRequest, Where } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
+import type { ValidationResult } from '../../types/validation.js'
 import type { DataFromGlobalSlug, SanitizedGlobalConfig } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { Forbidden } from '../../errors/index.js'
-import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
-import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
+import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
-import { flattenDataByLocale } from '../../utilities/flattenDataByLocale.js'
-import { toValidationResult } from '../../utilities/toValidationResult.js'
-import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
+import { runValidationLifecycle } from '../../utilities/runValidationLifecycle.js'
+import {
+  findDraftVersion,
+  getDocumentFromDraftVersion,
+} from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 
 export type Arguments<TSlug extends GlobalSlug> = {
   data?: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
-  /**
-   * Whether `data` stores each localized field as a locale-code-keyed object, as the internal
-   * publish-all-locales candidate does, rather than a flat, single-locale candidate.
-   * @default false
-   */
-  dataIsLocaleKeyed?: boolean
   draft: boolean
   globalConfig: SanitizedGlobalConfig
+  onValidationData?: (data: JsonObject) => void
   overrideAccess: boolean
   req: PayloadRequest
   slug: string
@@ -48,9 +44,9 @@ export async function validateOperation<TSlug extends GlobalSlug>(
 async function validateOperationWithScopedRequest<TSlug extends GlobalSlug>({
   slug,
   data: incomingData,
-  dataIsLocaleKeyed = false,
   draft,
   globalConfig,
+  onValidationData,
   overrideAccess,
   req,
 }: Arguments<TSlug>): Promise<ValidationResult> {
@@ -72,135 +68,36 @@ async function validateOperationWithScopedRequest<TSlug extends GlobalSlug>({
     delete docWithLocales._id
   }
 
-  const originalDoc = flattenDataByLocale({
-    configBlockReferences: req.payload.config.blocks,
-    docWithLocales,
-    fields: globalConfig.fields,
-    locale: req.locale!,
-  })
-
-  let data = flattenDataByLocale({
-    configBlockReferences: req.payload.config.blocks,
-    dataIsLocaleKeyed,
-    docWithLocales: deepCopyObjectSimple(incomingData ?? {}) as JsonObject,
-    fields: globalConfig.fields,
-    locale: req.locale!,
-  })
-
-  data = await beforeValidate({
+  const originalDoc = await afterRead({
     collection: null,
     context: req.context,
-    data,
-    doc: originalDoc,
+    depth: 0,
+    doc: deepCopyObjectSimple(docWithLocales),
+    draft,
+    fallbackLocale: req.fallbackLocale!,
     global: globalConfig,
-    operation: 'validate',
+    locale: req.locale!,
+    overrideAccess: true,
+    req,
+    showHiddenFields: true,
+  })
+
+  return runValidationLifecycle({
+    collection: null,
+    docWithLocales,
+    global: globalConfig,
+    incomingData: incomingData as JsonObject | undefined,
+    onValidationData,
+    originalDoc,
     overrideAccess,
     req,
   })
-
-  try {
-    if (globalConfig.hooks.beforeValidate?.length) {
-      for (const hook of globalConfig.hooks.beforeValidate) {
-        data =
-          (await hook({
-            context: req.context,
-            data,
-            global: globalConfig,
-            operation: 'validate',
-            originalDoc,
-            overrideAccess,
-            req,
-          })) || data
-      }
-    }
-
-    if (globalConfig.hooks.beforeChange?.length) {
-      for (const hook of globalConfig.hooks.beforeChange) {
-        data =
-          (await hook({
-            context: req.context,
-            data,
-            global: globalConfig,
-            operation: 'validate',
-            originalDoc,
-            overrideAccess,
-            req,
-          })) || data
-      }
-    }
-
-    await beforeChange({
-      collection: null,
-      context: req.context,
-      data,
-      doc: originalDoc,
-      docWithLocales,
-      global: globalConfig,
-      operation: 'validate',
-      overrideAccess,
-      req,
-    })
-  } catch (error) {
-    return toValidationResult({ error, req })
-  }
-
-  return {
-    errors: [],
-    valid: true,
-  }
 }
 
 /**
- * Loads the global through `where`, then substitutes the newest available draft when requested.
- * Reports whether a main document existed so the caller can tell "no document yet" apart from
- * "a document exists but this candidate wasn't derived from it" once a draft substitution runs.
- */
-async function loadValidationGlobalCandidate({
-  slug,
-  accessResult,
-  draft,
-  globalConfig,
-  overrideAccess,
-  req,
-  where,
-}: {
-  accessResult: AccessResult
-  draft: boolean
-  globalConfig: SanitizedGlobalConfig
-  overrideAccess: boolean
-  req: PayloadRequest
-  slug: string
-  where: undefined | Where
-}): Promise<{ base: JsonObject; hasMain: boolean; source: JsonObject }> {
-  const main = await req.payload.db.findGlobal({
-    slug,
-    locale: req.locale!,
-    req,
-    where,
-  })
-  const hasMain = hasGlobalSource(main)
-  const base = hasMain ? main : { globalType: slug }
-  // Global version lookups are slug-scoped; the shared helper's ID constraint applies to collections.
-  const source =
-    draft && globalConfig.versions?.drafts
-      ? await replaceWithDraftIfAvailable({
-          accessResult,
-          doc: base as JsonObject & TypeWithID,
-          entity: globalConfig,
-          entityType: 'global',
-          overrideAccess,
-          req,
-        })
-      : base
-
-  return { base, hasMain, source }
-}
-
-/**
- * Deliberately more revealing than `findOne`/`update`, which treat an access-restricted global
- * the same as an unconfigured one and stay silent. Validation instead throws `Forbidden` once it
- * confirms real data exists behind the `where` policy - otherwise a restricted, already-configured
- * global would validate the candidate against an empty base, as if it were still unset.
+ * Selects the newest stored source before it applies a `where` access policy. This prevents an
+ * older accessible draft from replacing a newer restricted draft. If no draft exists, the main
+ * global remains the validation source.
  */
 async function resolveValidationGlobalSource({
   slug,
@@ -217,37 +114,69 @@ async function resolveValidationGlobalSource({
   req: PayloadRequest
   slug: string
 }): Promise<JsonObject> {
-  const accessible = await loadValidationGlobalCandidate({
+  const main = await req.payload.db.findGlobal({
     slug,
-    accessResult,
-    draft,
-    globalConfig,
-    overrideAccess,
+    locale: req.locale!,
     req,
-    where: overrideAccess ? undefined : (accessResult as Where),
   })
+  const hasMain = hasGlobalSource(main)
+  const base = (hasMain ? main : { globalType: slug }) as JsonObject & TypeWithID
 
-  if (accessible.hasMain || accessible.source !== accessible.base) {
-    return accessible.source
-  }
-
-  if (hasWhereAccessResult(accessResult)) {
-    const unrestricted = await loadValidationGlobalCandidate({
-      slug,
+  if (draft && globalConfig.versions?.drafts) {
+    const newestDraft = await findDraftVersion({
       accessResult: true,
-      draft,
-      globalConfig,
+      doc: base,
+      entity: globalConfig,
+      entityType: 'global',
       overrideAccess: true,
       req,
-      where: undefined,
     })
 
-    if (unrestricted.hasMain || unrestricted.source !== unrestricted.base) {
-      throw new Forbidden(req.t)
+    if (newestDraft) {
+      if (hasWhereAccessResult(accessResult)) {
+        const accessibleDraft = await findDraftVersion({
+          accessResult,
+          doc: base,
+          draftVersionID: newestDraft.id,
+          entity: globalConfig,
+          entityType: 'global',
+          overrideAccess,
+          req,
+        })
+
+        if (!accessibleDraft) {
+          throw new Forbidden(req.t)
+        }
+      }
+
+      return getDocumentFromDraftVersion({
+        doc: base,
+        draftVersion: newestDraft,
+        entityType: 'global',
+      })
     }
   }
 
-  return {}
+  if (!hasMain) {
+    return {}
+  }
+
+  if (!hasWhereAccessResult(accessResult)) {
+    return main
+  }
+
+  const accessibleMain = await req.payload.db.findGlobal({
+    slug,
+    locale: req.locale!,
+    req,
+    where: accessResult,
+  })
+
+  if (!hasGlobalSource(accessibleMain)) {
+    throw new Forbidden(req.t)
+  }
+
+  return accessibleMain
 }
 
 function hasGlobalSource(source: JsonObject | null | undefined): source is JsonObject {

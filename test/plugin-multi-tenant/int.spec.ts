@@ -9,6 +9,7 @@ import type { Relationship } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
+import { multiTenantPostsAccessResultEvents } from './config.base.js'
 import {
   autosaveGlobalSlug,
   menuSlug,
@@ -631,6 +632,55 @@ test.suite('@payloadcms/plugin-multi-tenant', suiteOptions, () => {
   })
 
   test.describe('hasMany tenant field filtering', () => {
+    test('should use update access for validation when an access result callback is configured', async ({
+      payload,
+    }) => {
+      const adminUser = await payload
+        .find({
+          collection: usersSlug,
+          limit: 1,
+          overrideAccess: true,
+          where: { email: { equals: devUser.email } },
+        })
+        .then(({ docs }) => docs[0])
+      const tenant = await payload
+        .find({
+          collection: tenantsSlug,
+          limit: 1,
+          overrideAccess: true,
+        })
+        .then(({ docs }) => docs[0])
+
+      multiTenantPostsAccessResultEvents.length = 0
+
+      await expect(
+        payload.validate({
+          collection: multiTenantPostsSlug,
+          context: { allowMultiTenantPostUpdate: false },
+          data: { tenant: [tenant.id], title: 'Denied candidate' },
+          locale: 'en',
+          overrideAccess: false,
+          user: adminUser,
+        }),
+      ).rejects.toMatchObject({ status: 403 })
+
+      await expect(
+        payload.validate({
+          collection: multiTenantPostsSlug,
+          context: { allowMultiTenantPostUpdate: true },
+          data: { tenant: [tenant.id], title: 'Allowed candidate' },
+          locale: 'en',
+          overrideAccess: false,
+          user: adminUser,
+        }),
+      ).resolves.toMatchObject({ valid: true })
+
+      expect(multiTenantPostsAccessResultEvents).toEqual([
+        { accessKey: 'validate', accessResult: false },
+        { accessKey: 'validate', accessResult: true },
+      ])
+    })
+
     test('should not double-wrap tenant arrays in filterOptions', async ({ payload }) => {
       const tenant1 = await payload.create({
         collection: tenantsSlug,
