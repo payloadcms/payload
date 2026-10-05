@@ -26,7 +26,7 @@ type CreateCollectionModelArgs = {
   model: RuntimeAdminPageModel
   page: Page
   root: LocatorRoot
-  routes?: Pick<NonNullable<Config['routes']>, 'admin'>
+  routes?: Pick<NonNullable<Config['routes']>, 'admin' | 'api'>
   scope?: string
   serverURL: string
 }
@@ -176,7 +176,12 @@ export const createCollectionModel = <
     }),
     list: createNavigationTarget(page, listURL),
     save: async () => {
-      const collectionAPIPath = `/api/${descriptor.slug}`
+      const collectionAPIURL = formatAdminURL({
+        apiRoute: routes?.api ?? '/api',
+        path: `/${descriptor.slug}`,
+        serverURL,
+      })
+      const collectionAPIPath = new URL(collectionAPIURL).pathname
       const saveResponse = page.waitForResponse((response) => {
         const method = response.request().method()
         const pathname = new URL(response.url()).pathname

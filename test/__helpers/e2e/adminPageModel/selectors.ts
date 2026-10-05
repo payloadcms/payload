@@ -7,6 +7,9 @@ export const selectors = {
   arrayRows: (instancePath: string): string => {
     return `${selectors.fieldWrapper(instancePath)} > .array-field__draggable-rows > div > .array-field__row`
   },
+  blockDrawerOption: (slug: string): string => {
+    return `[data-block-slug=${JSON.stringify(slug)}] button.thumbnail-card`
+  },
   blockDrawerToggler: (instancePath: string): string => {
     return `${selectors.fieldWrapper(instancePath)} > .blocks-field__drawer-toggler`
   },

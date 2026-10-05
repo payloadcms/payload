@@ -36,6 +36,7 @@ export type FieldsModelContext = {
   root: LocatorRoot
   routes?: {
     admin?: string
+    api?: string
   }
   schemaParentPath?: string
   scope: string

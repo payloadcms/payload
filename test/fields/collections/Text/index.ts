@@ -203,6 +203,10 @@ const TextFields: CollectionConfig = {
               hasMany: true,
             },
           ],
+          labels: {
+            plural: { en: 'Blocks With Text' },
+            singular: { en: 'Block With Text' },
+          },
         },
       ],
     },

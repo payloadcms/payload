@@ -1,8 +1,11 @@
 import type { SanitizedConfig } from 'payload'
 
-import { describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
+import { test } from '../../int/vitest.js'
 import { createAdminPageModelDescriptor, createAdminPageModelSource } from './generate.js'
+
+const describe = test.suite({})
 
 const config = {
   blocks: [
@@ -130,6 +133,11 @@ const config = {
           type: 'relationship',
           relationTo: ['users', 'guests'],
         },
+        {
+          name: 'heroImage',
+          type: 'upload',
+          relationTo: 'media',
+        },
       ],
     },
     {
@@ -140,7 +148,7 @@ const config = {
 } as unknown as SanitizedConfig
 
 describe('createAdminPageModelDescriptor', () => {
-  it('generates selected collections and nested field metadata', () => {
+  test('should generate selected collections and nested field metadata', () => {
     const descriptor = createAdminPageModelDescriptor(config, {
       collections: ['articles'],
     })
@@ -177,6 +185,11 @@ describe('createAdminPageModelDescriptor', () => {
                 },
               },
               path: 'content',
+            },
+            heroImage: {
+              type: 'upload',
+              path: 'heroImage',
+              relationTo: ['media'],
             },
             items: {
               type: 'array',
@@ -260,7 +273,7 @@ describe('createAdminPageModelDescriptor', () => {
     })
   })
 
-  it('reports a requested collection that does not exist', () => {
+  test('should report a requested collection that does not exist', () => {
     expect(() =>
       createAdminPageModelDescriptor(config, {
         collections: ['missing'],
@@ -270,7 +283,7 @@ describe('createAdminPageModelDescriptor', () => {
 })
 
 describe('createAdminPageModelSource', () => {
-  it('creates a standalone literal descriptor module', () => {
+  test('should create a standalone literal descriptor module', () => {
     const result = createAdminPageModelSource(config, { collections: ['articles'] })
 
     expect(result).toContain('export const adminPageModel = {')

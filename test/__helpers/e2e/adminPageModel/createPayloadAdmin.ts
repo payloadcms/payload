@@ -9,7 +9,7 @@ import { createCollectionModel } from './collection.js'
 export type CreatePayloadAdminArgs<Model extends RuntimeAdminPageModel> = {
   model: Model
   page: Page
-  routes?: Pick<NonNullable<Config['routes']>, 'admin'>
+  routes?: Pick<NonNullable<Config['routes']>, 'admin' | 'api'>
   serverURL: string
 }
 

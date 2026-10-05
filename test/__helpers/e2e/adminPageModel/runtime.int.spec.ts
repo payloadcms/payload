@@ -1,10 +1,13 @@
 import type { Locator, Page, Response } from '@playwright/test'
 
-import { describe, expect, it, vi } from 'vitest'
+import { expect, vi } from 'vitest'
 
 import { adminPageModel } from '../../../fields/admin-page-model.generated.js'
+import { test } from '../../int/vitest.js'
 import { formatBlockTypeContext } from './errors.js'
 import { createPayloadAdmin, formatIndexedLocatorContext, selectors } from './index.js'
+
+const describe = test.suite({})
 
 const createLocator = (): Locator => {
   return {
@@ -19,7 +22,7 @@ const createLocator = (): Locator => {
 }
 
 describe('Admin page model selectors', () => {
-  it('creates selectors for scalar and multi-value text controls', () => {
+  test('should create selectors for scalar and multi-value text controls', () => {
     expect(selectors.textInput('array.0.texts')).toBe('#field-array__0__texts')
     expect(selectors.textFieldWrapper('array.0.texts')).toBe(
       '.field-type.text:has(#field-array__0__texts)',
@@ -28,13 +31,13 @@ describe('Admin page model selectors', () => {
     expect(selectors.hasManyTextInput('array.0.texts')).toBe('.field-array__0__texts input')
   })
 
-  it('creates zero-based list selectors with escaped schema paths', () => {
+  test('should create zero-based list selectors with escaped schema paths', () => {
     expect(selectors.listHeading('group.value')).toBe('#heading-group__value')
     expect(selectors.listCell('group.value', 0)).toBe('.row-1 .cell-group__value')
     expect(selectors.listCell('group.value', 3)).toBe('.row-4 .cell-group__value')
   })
 
-  it('creates direct array and block selectors', () => {
+  test('should create direct array and block selectors', () => {
     expect(selectors.arrayRows('content.items')).toBe(
       '#field-content__items > .array-field__draggable-rows > div > .array-field__row',
     )
@@ -48,9 +51,12 @@ describe('Admin page model selectors', () => {
       '#field-content__blocks > .blocks-field__drawer-toggler',
     )
     expect(selectors.blockTypePill('quote')).toBe('.blocks-field__block-pill-quote')
+    expect(selectors.blockDrawerOption('quote')).toBe(
+      '[data-block-slug="quote"] button.thumbnail-card',
+    )
   })
 
-  it('creates relationship and document drawer selectors', () => {
+  test('should create relationship and document drawer selectors', () => {
     expect(selectors.relationshipAddButton('items.0.author')).toBe(
       '#field-items__0__author .relationship-add-new__add-button',
     )
@@ -62,7 +68,7 @@ describe('Admin page model selectors', () => {
 })
 
 describe('formatIndexedLocatorContext', () => {
-  it('reports an empty row collection', () => {
+  test('should report an empty row collection', () => {
     expect(
       formatIndexedLocatorContext({
         availableCount: 0,
@@ -83,7 +89,7 @@ Available rows: 0
 Valid indexes: none`)
   })
 
-  it('reports the valid range for a non-empty block collection', () => {
+  test('should report the valid range for a non-empty block collection', () => {
     expect(
       formatIndexedLocatorContext({
         availableCount: 5,
@@ -104,7 +110,7 @@ Available blocks: 5
 Valid indexes: 0-4`)
   })
 
-  it('reports the only valid index when one value exists', () => {
+  test('should report the only valid index when one value exists', () => {
     expect(
       formatIndexedLocatorContext({
         availableCount: 1,
@@ -119,7 +125,7 @@ Valid indexes: 0-4`)
 Valid indexes: 0-0`)
   })
 
-  it('reports the requested block type and location', () => {
+  test('should report the requested block type and location', () => {
     expect(
       formatBlockTypeContext({
         slug: 'quote',
@@ -139,7 +145,7 @@ Requested block type: quote`)
 })
 
 describe('createPayloadAdmin', () => {
-  it('provides collection URLs and navigation', async () => {
+  test('should provide collection URLs and navigation', async () => {
     const goto = vi.fn().mockResolvedValue(null)
     const page = {
       goto,
@@ -174,7 +180,7 @@ describe('createPayloadAdmin', () => {
     )
   })
 
-  it('uses generated scalar text selectors and direct locator actions', async () => {
+  test('should use generated scalar text selectors and direct locator actions', async () => {
     const fill = vi.fn()
     const inputValue = vi.fn().mockResolvedValue('current value')
     const textInput = {
@@ -211,7 +217,7 @@ describe('createPayloadAdmin', () => {
     expect(inputValue).toHaveBeenCalledOnce()
   })
 
-  it('does not catch or replace a locator fill error', async () => {
+  test('should not catch or replace a locator fill error', async () => {
     const playwrightError = new Error('Playwright fill failed')
     const fill = vi.fn().mockRejectedValue(playwrightError)
     const textInput = {
@@ -237,7 +243,7 @@ describe('createPayloadAdmin', () => {
     await expect(textField.fill('next value')).rejects.toBe(playwrightError)
   })
 
-  it('observes failed save responses without matching a similar collection slug', async () => {
+  test('should observe failed save responses without matching a similar collection slug', async () => {
     let responsePredicate: ((response: Response) => boolean | Promise<boolean>) | undefined
     const saveClickError = new Error('Playwright save click failed')
     const saveButton = {
@@ -275,5 +281,43 @@ describe('createPayloadAdmin', () => {
     expect(await responsePredicate?.(response('PATCH', '/api/text-fields/123', false))).toBe(true)
     expect(await responsePredicate?.(response('POST', '/api/text-fields-other', true))).toBe(false)
     expect(await responsePredicate?.(response('GET', '/api/text-fields', true))).toBe(false)
+  })
+
+  test('should observe save responses on a configured API route', async () => {
+    let responsePredicate: ((response: Response) => boolean | Promise<boolean>) | undefined
+    const saveClickError = new Error('Playwright save click failed')
+    const saveButton = {
+      ...createLocator(),
+      click: vi.fn().mockRejectedValue(saveClickError),
+    } as unknown as Locator
+    const waitForResponse = vi.fn(
+      (predicate: (response: Response) => boolean | Promise<boolean>): Promise<Response> => {
+        responsePredicate = predicate
+        return new Promise(() => undefined)
+      },
+    )
+    const page = {
+      goto: vi.fn(),
+      locator: vi.fn((selector: string) => {
+        return selector === '#action-save' ? saveButton : createLocator()
+      }),
+      waitForResponse,
+    } as unknown as Page
+    const textFields = createPayloadAdmin({
+      model: adminPageModel,
+      page,
+      routes: { api: '/custom-api' },
+      serverURL: 'https://example.com',
+    }).collection('text-fields')
+    const response = (pathname: string) =>
+      ({
+        request: () => ({ method: () => 'POST' }),
+        url: () => `https://example.com${pathname}`,
+      }) as Response
+
+    await expect(textFields.save()).rejects.toBe(saveClickError)
+    expect(responsePredicate).toBeTypeOf('function')
+    expect(await responsePredicate?.(response('/custom-api/text-fields'))).toBe(true)
+    expect(await responsePredicate?.(response('/api/text-fields'))).toBe(false)
   })
 })

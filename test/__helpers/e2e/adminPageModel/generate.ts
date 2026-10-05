@@ -60,6 +60,22 @@ const getBlockLabel = (block: { labels?: { singular?: unknown }; slug: string })
   return typeof block.labels?.singular === 'string' ? block.labels.singular : block.slug
 }
 
+const getRelationshipTargets = (field: Field): string[] | undefined => {
+  if (!('relationTo' in field)) {
+    return undefined
+  }
+
+  if (typeof field.relationTo === 'string') {
+    return [field.relationTo]
+  }
+
+  if (Array.isArray(field.relationTo)) {
+    return field.relationTo
+  }
+
+  return undefined
+}
+
 const createFieldsDescriptor = (
   fields: Field[],
   blocksBySlug: Readonly<Record<string, Block>>,
@@ -95,6 +111,7 @@ const createFieldsDescriptor = (
 
     const path = joinPath(parentPath, field.name)
     const commonMetadata = getCommonFieldMetadata(field, path)
+    const relationshipTargets = getRelationshipTargets(field)
     let fieldDescriptor: AdminFieldDescriptor
 
     if (field.type === 'text') {
@@ -142,11 +159,12 @@ const createFieldsDescriptor = (
         ...commonMetadata,
         type: 'relationship',
         hasMany: field.hasMany === true,
-        relationTo: Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo],
+        relationTo: relationshipTargets ?? [],
       }
     } else {
       fieldDescriptor = {
         ...commonMetadata,
+        ...(relationshipTargets ? { relationTo: relationshipTargets } : {}),
         type: field.type,
       }
     }

@@ -45,6 +45,7 @@ export type AdminRelationshipFieldDescriptor = {
 } & AdminFieldDescriptorBase
 
 export type AdminUnsupportedFieldDescriptor = {
+  relationTo?: string[]
   type: Exclude<string, 'array' | 'blocks' | 'group' | 'relationship' | 'text'>
 } & AdminFieldDescriptorBase
 

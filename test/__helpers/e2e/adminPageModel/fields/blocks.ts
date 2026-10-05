@@ -108,15 +108,13 @@ export const createBlocksFieldModel = ({
     ...baseField,
     addBlock: async (slug) => {
       const previousCount = await rows.count()
-      const blockDescriptor = getBlockDescriptor(slug)
+      getBlockDescriptor(slug)
 
       await root.locator(selectors.blockDrawerToggler(instancePath)).click()
 
       const blocksDrawer = page.locator(selectors.blocksDrawer).last()
       await expect(blocksDrawer).toBeVisible()
-      await blocksDrawer
-        .locator('button.thumbnail-card', { hasText: blockDescriptor.label })
-        .dblclick()
+      await blocksDrawer.locator(selectors.blockDrawerOption(slug)).dblclick()
       await expect(
         rows,
         `Expected addBlock("${slug}") to add one block to "${descriptor.path}" in collection "${collectionSlug}".`,

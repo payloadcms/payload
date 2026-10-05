@@ -805,7 +805,7 @@ export const adminPageModel = {
                   hasMany: false,
                 },
               },
-              label: 'Block With Text',
+              label: 'blockWithText',
             },
           },
         },
