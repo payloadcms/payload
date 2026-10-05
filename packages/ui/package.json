@@ -416,7 +416,7 @@
     "object-to-formdata": "4.5.1",
     "path-to-regexp": "6.3.0",
     "qs-esm": "8.0.1",
-    "react-datepicker": "7.6.0",
+    "react-datepicker": "9.1.0",
     "react-image-crop": "10.1.8",
     "react-select": "5.9.0",
     "scheduler": "0.25.0",

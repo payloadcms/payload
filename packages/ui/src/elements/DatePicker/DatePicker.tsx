@@ -124,7 +124,7 @@ const DatePicker: React.FC<Props> = (props) => {
 
   const onChange: Extract<
     DatePickerProps,
-    { selectsMultiple?: never; selectsRange?: never }
+    { selectsMultiple?: false; selectsRange?: false }
   >['onChange'] = (incomingDate) => {
     const newDate = incomingDate
     if (newDate instanceof Date && ['dayOnly', 'default', 'monthOnly'].includes(pickerAppearance)) {
@@ -145,7 +145,7 @@ const DatePicker: React.FC<Props> = (props) => {
 
   const dateTimePickerProps: Extract<
     DatePickerProps,
-    { selectsMultiple?: never; selectsRange?: never }
+    { selectsMultiple?: false; selectsRange?: false }
   > = {
     calendarContainer,
     customInputRef: 'ref',
@@ -175,7 +175,7 @@ const DatePicker: React.FC<Props> = (props) => {
     timeIntervals,
     ...(overrides as Extract<
       DatePickerProps,
-      { selectsMultiple?: never; selectsRange?: never } // to satisfy TypeScript. Overrides can enable selectsMultiple or selectsRange but then it's up to the user to ensure they pass in the correct onChange
+      { selectsMultiple?: false; selectsRange?: false } // to satisfy TypeScript. Overrides can enable selectsMultiple or selectsRange but then it's up to the user to ensure they pass in the correct onChange
     >),
   }
 
