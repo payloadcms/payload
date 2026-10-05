@@ -339,77 +339,78 @@ test.suite('Sort', { config: './config.ts', resetBetweenTests: false }, () => {
         const testData1 = await payload.create({
           collection: 'drafts',
           data: { number: 10, text: 'Post 1 draft' },
-          draft: true,
+          version: 'draft',
           overrideAccess: true,
         })
         await payload.update({
           id: testData1.id,
           collection: 'drafts',
           data: { number: 20, text: 'Post 1 draft updated' },
-          draft: true,
+          version: 'draft',
           overrideAccess: true,
         })
         await payload.update({
           id: testData1.id,
           collection: 'drafts',
           data: { number: 30, text: 'Post 1 draft updated' },
-          draft: true,
+          version: 'draft',
           overrideAccess: true,
         })
         await payload.update({
           id: testData1.id,
           collection: 'drafts',
-          data: { number: 15, text: 'Post 1 published' },
-          draft: false,
+          data: { _status: 'published', number: 15, text: 'Post 1 published' },
+          version: 'draft',
           overrideAccess: true,
         })
         const testData2 = await payload.create({
           collection: 'drafts',
           data: { number: 1, text: 'Post 2 draft' },
-          draft: true,
+          version: 'draft',
           overrideAccess: true,
         })
         await payload.update({
           id: testData2.id,
           collection: 'drafts',
-          data: { number: 2, text: 'Post 2 published' },
-          draft: false,
+          data: { _status: 'published', number: 2, text: 'Post 2 published' },
+          version: 'draft',
           overrideAccess: true,
         })
         await payload.update({
           id: testData2.id,
           collection: 'drafts',
           data: { number: 100, text: 'Post 2 newdraft' },
-          draft: true,
+          version: 'draft',
           overrideAccess: true,
         })
         await payload.create({
           collection: 'drafts',
           data: { number: 3, text: 'Post 3 draft' },
-          draft: true,
+          version: 'draft',
           overrideAccess: true,
         })
       })
 
-      test('should sort latest without draft', async ({ payload }) => {
+      test('should sort published copies and exclude documents that only have drafts', async ({
+        payload,
+      }) => {
         const posts = await payload.find({
           collection: 'drafts',
-          draft: false,
+          version: 'published',
           overrideAccess: true,
           sort: 'number',
         })
 
         expect(posts.docs.map((post) => post.text)).toEqual([
           'Post 2 published', // 2
-          'Post 3 draft', // 3
           'Post 1 published', // 15
         ])
       })
 
-      test('should sort latest with draft', async ({ payload }) => {
+      test('should sort latest copies including drafts', async ({ payload }) => {
         const posts = await payload.find({
           collection: 'drafts',
-          draft: true,
+          version: 'latest',
           overrideAccess: true,
           sort: 'number',
         })
@@ -424,7 +425,6 @@ test.suite('Sort', { config: './config.ts', resetBetweenTests: false }, () => {
       test('should sort versions', async ({ payload }) => {
         const posts = await payload.findVersions({
           collection: 'drafts',
-          draft: false,
           overrideAccess: true,
           sort: 'version.number',
         })
@@ -901,7 +901,7 @@ test.suite('Sort', { config: './config.ts', resetBetweenTests: false }, () => {
 
         const ordered = await payload.find({
           collection: draftsSlug,
-          draft: true,
+          version: 'latest',
           overrideAccess: true,
           where: {
             text: {
@@ -946,7 +946,7 @@ test.suite('Sort', { config: './config.ts', resetBetweenTests: false }, () => {
           data: {
             text: 'Published with newer draft - edited',
           },
-          draft: true,
+          version: 'draft',
           overrideAccess: true,
         })
 

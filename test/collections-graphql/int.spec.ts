@@ -101,10 +101,26 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
     })
 
     test('should sort by multiple fields', async ({ payload, restClient }) => {
-      const doc1 = await payload.create({ collection: 'sort', data: { title: 'a', number: 1 }, overrideAccess: true })
-      const doc2 = await payload.create({ collection: 'sort', data: { title: 'b', number: 1 }, overrideAccess: true })
-      const doc3 = await payload.create({ collection: 'sort', data: { title: 'a', number: 2 }, overrideAccess: true })
-      const doc4 = await payload.create({ collection: 'sort', data: { title: 'b', number: 3 }, overrideAccess: true })
+      const doc1 = await payload.create({
+        collection: 'sort',
+        data: { title: 'a', number: 1 },
+        overrideAccess: true,
+      })
+      const doc2 = await payload.create({
+        collection: 'sort',
+        data: { title: 'b', number: 1 },
+        overrideAccess: true,
+      })
+      const doc3 = await payload.create({
+        collection: 'sort',
+        data: { title: 'a', number: 2 },
+        overrideAccess: true,
+      })
+      const doc4 = await payload.create({
+        collection: 'sort',
+        data: { title: 'b', number: 3 },
+        overrideAccess: true,
+      })
 
       const query = `query {
         Sorts(sort: "title, number") {
@@ -1156,7 +1172,7 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
         const relation_1_draft = await payload.create({
           collection: 'relation',
           data: { _status: 'draft', name: 'relation_1_draft' },
-          draft: true,
+          version: 'draft',
           overrideAccess: true,
         })
 
@@ -1168,7 +1184,7 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
 
         await payload.create({
           collection: 'posts',
-          draft: true,
+          version: 'draft',
           data: {
             _status: 'draft',
             title: 'post with relations in draft',
@@ -1177,10 +1193,14 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
           overrideAccess: true,
         })
 
-        await payload.delete({ collection: 'relation', id: relation_1_draft.id, overrideAccess: true })
+        await payload.delete({
+          collection: 'relation',
+          id: relation_1_draft.id,
+          overrideAccess: true,
+        })
 
         const query = `query {
-          Posts(draft:true,where: { title: { equals: "post with relations in draft" }}) {
+          Posts(version: latest,where: { title: { equals: "post with relations in draft" }}) {
             docs {
               id
               title
@@ -1221,7 +1241,7 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
 
         await payload.create({
           collection: 'posts',
-          draft: true,
+          version: 'draft',
           data: {
             _status: 'draft',
             title: 'post with relation restricted',
@@ -1231,7 +1251,7 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
         })
 
         const query = `query {
-          Posts(draft:true,where: { title: { equals: "post with relation restricted" }}) {
+          Posts(version: latest,where: { title: { equals: "post with relation restricted" }}) {
             docs {
               id
               title
@@ -1266,7 +1286,7 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
       data: {
         title: publishValue,
       },
-      draft: false,
+      version: 'published',
       overrideAccess: true,
     })
 
@@ -1287,15 +1307,15 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
       data: {
         title: draftValue,
       },
-      draft: true,
+      version: 'draft',
       overrideAccess: true,
     })
 
     const draftParentPublishedChild = `{
-      CyclicalRelationships(draft: true) {
+      CyclicalRelationships(version: latest) {
         docs {
           title
-          relationToSelf(draft: false) {
+          relationToSelf(version: published) {
             title
           }
         }
@@ -1312,10 +1332,10 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
     expect(queriedDoc.relationToSelf.title).toEqual(publishValue)
 
     const publishedParentDraftChild = `{
-      CyclicalRelationships(draft: false) {
+      CyclicalRelationships(version: published) {
         docs {
           title
-          relationToSelf(draft: true) {
+          relationToSelf(version: latest) {
             title
           }
         }

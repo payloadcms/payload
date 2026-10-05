@@ -601,7 +601,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       test('should generate the slug from the source on a draft create', async ({ payload }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          version: 'draft',
           data: { title: 'Draft One' },
           overrideAccess: true,
         })
@@ -614,7 +614,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          version: 'draft',
           data: {},
           overrideAccess: true,
         })
@@ -626,7 +626,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
         const latestDraft = await payload.findByID({
           collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          version: 'latest',
           overrideAccess: true,
         })
         expect(latestDraft.slug).toBe('slug-autosave-1')
@@ -637,7 +637,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          version: 'draft',
           data: { slug: '!!!' },
           overrideAccess: true,
         })
@@ -650,7 +650,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       }) => {
         const first = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          version: 'draft',
           data: {},
           overrideAccess: true,
         })
@@ -658,7 +658,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
 
         const second = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          version: 'draft',
           data: {},
           overrideAccess: true,
         })
@@ -671,7 +671,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       test('should reject a draft slug that collides with another draft', async ({ payload }) => {
         const first = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          version: 'draft',
           data: { title: 'First', slug: 'shared-draft-slug' },
           overrideAccess: true,
         })
@@ -681,7 +681,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
         await expect(
           payload.create({
             collection: 'slug-autosave',
-            draft: true,
+            version: 'draft',
             data: { title: 'Second', slug: 'shared-draft-slug' },
             overrideAccess: true,
           }),
@@ -693,14 +693,14 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       }) => {
         const a = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          version: 'draft',
           data: { title: 'A', slug: 'draft-a' },
           overrideAccess: true,
         })
         created.push(a.id)
         const b = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          version: 'draft',
           data: { title: 'B', slug: 'draft-b' },
           overrideAccess: true,
         })
@@ -710,7 +710,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
           payload.update({
             collection: 'slug-autosave',
             id: b.id,
-            draft: true,
+            version: 'draft',
             data: { slug: 'draft-a' },
             overrideAccess: true,
           }),
@@ -722,7 +722,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       }) => {
         const en = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          version: 'draft',
           data: { localizedTitle: 'One', localizedSlug: 'shared-draft-localized' },
           locale: 'en',
           overrideAccess: true,
@@ -733,7 +733,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
         // Same value in a different locale is fine — uniqueness is per-locale.
         const es = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          version: 'draft',
           data: { localizedTitle: 'Uno', localizedSlug: 'shared-draft-localized' },
           locale: 'es',
           overrideAccess: true,
@@ -745,7 +745,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
         await expect(
           payload.create({
             collection: 'slug-autosave',
-            draft: true,
+            version: 'draft',
             data: { localizedTitle: 'Two', localizedSlug: 'shared-draft-localized' },
             locale: 'en',
             overrideAccess: true,
@@ -758,7 +758,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          version: 'draft',
           data: {},
           locale: 'en',
           overrideAccess: true,
@@ -770,7 +770,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
         const latestDraft = await payload.findByID({
           collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          version: 'latest',
           locale: 'en',
           overrideAccess: true,
         })
@@ -791,7 +791,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          version: 'draft',
           data: {},
           locale: 'en',
           overrideAccess: true,
@@ -801,7 +801,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
         const allLocales = await payload.findByID({
           collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          version: 'latest',
           locale: 'all',
           overrideAccess: true,
         })
@@ -815,7 +815,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       }) => {
         const en = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          version: 'draft',
           data: {},
           locale: 'en',
           overrideAccess: true,
@@ -827,7 +827,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
         const es = await payload.update({
           collection: 'slug-autosave',
           id: en.id,
-          draft: true,
+          version: 'draft',
           data: {},
           locale: 'es',
           overrideAccess: true,
@@ -838,7 +838,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       test('should give a duplicated draft its own unique slug', async ({ payload }) => {
         const original = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          version: 'draft',
           data: { title: 'Dup Me', slug: 'dup-me' },
           overrideAccess: true,
         })
@@ -861,7 +861,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          version: 'draft',
           data: { title: 'Draft One', slug: 'user-typed' },
           overrideAccess: true,
         })
@@ -872,7 +872,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       test('should freeze the slug across subsequent autosaves once set', async ({ payload }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          version: 'draft',
           data: { title: 'Draft One' },
           overrideAccess: true,
         })
@@ -882,7 +882,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
         const updated = await payload.update({
           collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          version: 'draft',
           data: { title: 'Draft One Updated' },
           overrideAccess: true,
         })
@@ -892,7 +892,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       test('should keep an admin overwrite across subsequent autosaves', async ({ payload }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          version: 'draft',
           data: { title: 'Draft One' },
           overrideAccess: true,
         })
@@ -901,7 +901,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
         await payload.update({
           collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          version: 'draft',
           data: { title: 'Draft Two' },
           overrideAccess: true,
         })
@@ -909,7 +909,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
         const overwritten = await payload.update({
           collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          version: 'draft',
           data: { slug: 'human-chosen-slug' },
           overrideAccess: true,
         })
@@ -918,7 +918,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
         const afterMoreEdits = await payload.update({
           collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          version: 'draft',
           data: { title: 'Draft Three' },
           overrideAccess: true,
         })
@@ -928,7 +928,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       test('should not change an already-set slug on publish or after', async ({ payload }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          version: 'draft',
           data: { title: 'Draft One' },
           overrideAccess: true,
         })
@@ -938,7 +938,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
         await payload.update({
           collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          version: 'draft',
           data: { title: 'Publishable Title' },
           overrideAccess: true,
         })
@@ -2414,7 +2414,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       const array = await payload.create({
         collection: 'select-versions-fields',
         data: { array: [{ hasManyArr: ['a', 'b'] }] },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
@@ -2441,7 +2441,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
         id: data.id,
         collection: 'select-versions-fields',
         data: { hasMany: ['a'] },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
       expect(data.hasMany).toStrictEqual(['a'])
@@ -2450,7 +2450,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
         id: data.id,
         collection: 'select-versions-fields',
         data: { hasMany: ['a', 'b', 'c', 'd'] },
-        draft: true,
+        version: 'draft',
         autosave: true,
         overrideAccess: true,
       })
@@ -2460,7 +2460,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
         id: data.id,
         collection: 'select-versions-fields',
         data: { hasMany: ['a'] },
-        draft: true,
+        version: 'draft',
         autosave: true,
         overrideAccess: true,
       })
@@ -6324,7 +6324,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
           dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
           dateWithOffsetTimezone_tz: '+05:30',
         },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
@@ -6340,7 +6340,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
           dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
           dateWithMixedTimezones_tz: 'America/New_York',
         },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
@@ -6366,7 +6366,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
           dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
           dateWithOffsetTimezone_tz: '+05:30',
         },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
@@ -6377,7 +6377,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
           dateWithOffsetTimezone: '2027-08-12T08:00:00.000Z',
           dateWithOffsetTimezone_tz: '-08:00',
         },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
@@ -6405,7 +6405,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
           dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
           dateWithMixedTimezones_tz: 'America/New_York',
         },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
@@ -6419,7 +6419,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
           dateWithMixedTimezones: '2027-08-12T04:30:00.000Z',
           dateWithMixedTimezones_tz: '+05:30',
         },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
@@ -6435,7 +6435,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
           dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
           dateWithOffsetTimezone_tz: '+05:30',
         },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
@@ -6449,7 +6449,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
           dateWithOffsetTimezone: '2027-08-12T16:00:00.000Z',
           dateWithOffsetTimezone_tz: '-08:00',
         },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
@@ -6463,7 +6463,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
           dateWithOffsetTimezone: '2027-08-12T10:00:00.000Z',
           dateWithOffsetTimezone_tz: '+00:00',
         },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
@@ -6483,7 +6483,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
             dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
             dateWithOffsetTimezone_tz: '+05:30',
           },
-          draft: true,
+          version: 'draft',
           overrideAccess: true,
         })
 
@@ -6519,7 +6519,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
             dateWithOffsetTimezone: '2027-08-12T16:00:00.000Z',
             dateWithOffsetTimezone_tz: '-08:00',
           },
-          draft: true,
+          version: 'draft',
           overrideAccess: true,
         })
 
@@ -6549,7 +6549,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
             dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
             dateWithMixedTimezones_tz: 'America/New_York',
           },
-          draft: true,
+          version: 'draft',
           overrideAccess: true,
         })
 
@@ -6652,7 +6652,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
             dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
             dateWithOffsetTimezone_tz: '+05:30',
           },
-          draft: true,
+          version: 'draft',
           overrideAccess: true,
         })
 
@@ -6729,7 +6729,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
             dateWithMixedTimezones: '2027-08-12T04:30:00.000Z',
             dateWithMixedTimezones_tz: '+05:30',
           },
-          draft: true,
+          version: 'draft',
           overrideAccess: true,
         })
 
@@ -6767,7 +6767,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
             dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
             dateWithOffsetTimezone_tz: '+05:30',
           },
-          draft: true,
+          version: 'draft',
           overrideAccess: true,
         })
 
@@ -6778,7 +6778,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
             dateWithOffsetTimezone: '2027-08-12T16:00:00.000Z',
             dateWithOffsetTimezone_tz: '-08:00',
           },
-          draft: true,
+          version: 'draft',
           overrideAccess: true,
         })
 
@@ -6861,7 +6861,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
           dateWithTimezoneWithDisabledColumns: '2027-08-12T10:00:00.000Z',
           dateWithTimezoneWithDisabledColumns_tz: 'America/New_York',
         },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
@@ -6894,7 +6894,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
           ...dataWithoutNoDefaultTz,
           dateWithTimezoneNoDefault: '2027-08-12T14:00:00.000Z',
         },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
@@ -6910,7 +6910,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
           ...dataWithoutMixedTz,
           dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
         },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 

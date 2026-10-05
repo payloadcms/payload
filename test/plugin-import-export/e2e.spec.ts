@@ -908,7 +908,7 @@ test.describe('Import Export Plugin', () => {
 
       const importedDocs = await payload.find({
         collection: 'pages',
-        draft: false,
+        version: 'published',
         where: {
           title: { contains: 'E2E Published Status Test' },
         },
@@ -953,7 +953,7 @@ test.describe('Import Export Plugin', () => {
 
       const draftDocs = await payload.find({
         collection: 'pages',
-        draft: true,
+        version: 'latest',
         where: {
           title: { equals: 'E2E Explicit Draft Test' },
         },
@@ -965,7 +965,7 @@ test.describe('Import Export Plugin', () => {
 
       const publishedDocs = await payload.find({
         collection: 'pages',
-        draft: false,
+        version: 'published',
         where: {
           title: { equals: 'E2E Explicit Published Test' },
         },

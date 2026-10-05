@@ -1089,7 +1089,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
             },
             title: 'Incomplete rich text draft',
           },
-          draft: true,
+          version: 'draft',
           overrideAccess: true,
         })
 
@@ -1124,7 +1124,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
             _status: 'draft',
             title: '', // Empty required field
           },
-          draft: true,
+          version: 'draft',
           overrideAccess: true,
         })
 
@@ -1164,7 +1164,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
             _status: 'draft',
             title: '', // Empty required field
           },
-          draft: true,
+          version: 'draft',
           overrideAccess: true,
         })
 
@@ -1213,7 +1213,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
             _status: 'draft',
             title: '', // Empty required field
           },
-          draft: true,
+          version: 'draft',
           overrideAccess: true,
         })
 
@@ -1386,7 +1386,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
           _status: 'draft',
           localizedField: localizedFieldValueEN,
         },
-        draft: true,
+        version: 'draft',
         locale: 'en',
         overrideAccess: true,
       })
@@ -1398,7 +1398,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
           _status: 'draft',
           localizedField: localizedFieldValueES,
         },
-        draft: true,
+        version: 'draft',
         locale: 'es',
         overrideAccess: true,
       })
@@ -1425,7 +1425,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
       const trashedDocEN = await payload.findByID({
         id: post.id,
         collection: postsSlug,
-        draft: true,
+        version: 'latest',
         locale: 'en',
         overrideAccess: true,
         trash: true,
@@ -1434,7 +1434,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
       const trashedDocES = await payload.findByID({
         id: post.id,
         collection: postsSlug,
-        draft: true,
+        version: 'latest',
         locale: 'es',
         overrideAccess: true,
         trash: true,

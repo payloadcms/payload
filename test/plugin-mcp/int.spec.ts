@@ -15,7 +15,7 @@ const dirname = path.dirname(fileURLToPath(import.meta.url))
 type CreateOneDocumentInput = {
   data: Record<string, unknown>
   depth?: number
-  draft?: boolean
+  version?: 'draft' | 'published'
   fallbackLocale?: string
   file?: Record<string, unknown>
   locale?: string
@@ -725,8 +725,14 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         expect(updateToolSchema.inputSchema.properties.select.description).toContain(
           "Optional: define exactly which fields you'd like to return in the response",
         )
-        expect(updateToolSchema.inputSchema.properties.publishAllLocales).toBeDefined()
-        expect(updateToolSchema.inputSchema.properties.publishAllLocales.type).toBe('boolean')
+        expect(updateToolSchema.inputSchema.properties.version.enum).toEqual([
+          'published',
+          'draft',
+          'latest',
+        ])
+        expect(updateToolSchema.inputSchema.properties.draft).toBeUndefined()
+        expect(updateToolSchema.inputSchema.properties.publishAllLocales).toBeUndefined()
+        expect(updateToolSchema.inputSchema.properties.unpublishAllLocales).toBeUndefined()
         expect(updateToolSchema.inputSchema.properties.file).toBeDefined()
         expect(updateToolSchema.inputSchema.properties.filePath).toBeUndefined()
         expect(updateToolSchema.inputSchema.properties.overwriteExistingFiles).toBeUndefined()
@@ -962,7 +968,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           arguments: {
             slug: 'posts',
             documents: [{ data: { content: 'Incomplete draft' } }],
-            draft: true,
+            version: 'draft',
             returning: true,
           },
           name: 'createDocuments',
@@ -1274,7 +1280,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
               _status: 'published',
               title: 'Published through MCP',
             },
-            draft: false,
+            version: 'published',
             locale: 'en',
           },
         })
@@ -1286,7 +1292,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         const storedPost = await payload.findByID({
           id: createdPost.id,
           collection: 'posts',
-          draft: false,
+          version: 'published',
           locale: 'all',
           overrideAccess: true,
         })
@@ -1814,7 +1820,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           await payload.delete({ id: page.id, collection: 'pages', overrideAccess: true })
         }
       })
-      it('should forward publishAllLocales when updating a document', async ({
+      it('should publish one locale from a draft while preserving other locale drafts', async ({
         mcp,
         getApiKey,
         payload,
@@ -1824,7 +1830,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           data: {
             title: 'English draft title',
           },
-          draft: true,
+          version: 'draft',
           locale: 'en',
           overrideAccess: true,
         })
@@ -1833,7 +1839,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             id: post.id,
             collection: 'posts',
             data: { title: 'Spanish draft title' },
-            draft: true,
+            version: 'draft',
             locale: 'es',
             overrideAccess: true,
           })
@@ -1847,27 +1853,26 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
                 _status: 'published',
                 title: 'Published English title',
               },
-              draft: false,
+              version: 'draft',
               locale: 'en',
-              publishAllLocales: false,
             },
             name: 'updateDocument',
           })
           const publishedPost = await payload.findByID({
             id: post.id,
             collection: 'posts',
-            draft: false,
+            version: 'published',
             locale: 'all',
             overrideAccess: true,
           })
           const spanishDraft = await payload.findByID({
             id: post.id,
             collection: 'posts',
-            draft: true,
+            version: 'latest',
             locale: 'es',
             overrideAccess: true,
           })
-          expect(callResponse).toBeDefined()
+          expect(callResponse.isError).not.toBe(true)
           expect(publishedPost._status).toMatchObject({ en: 'published' })
           expect(publishedPost._status).not.toMatchObject({ es: 'published' })
           expect(publishedPost._status).not.toMatchObject({ fr: 'published' })

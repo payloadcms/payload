@@ -166,7 +166,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
     await payload.update({
       collection: 'pages',
       id: publishedPage.id,
-      draft: true,
+      version: 'draft',
       data: {
         _status: 'draft',
         title: 'Draft title!',

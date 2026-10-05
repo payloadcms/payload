@@ -4472,7 +4472,7 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
       })
       const found = await payload.find({
         collection: 'virtual-relations',
-        draft: true,
+        version: 'latest',
         overrideAccess: true,
         where: { postCategoryTitle: { equals: '3-category' } },
       })
@@ -5488,7 +5488,7 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
     })
     const res = await payload.find({
       collection: 'categories',
-      draft: true,
+      version: 'latest',
       overrideAccess: true,
       where: { id: { like: typeof category.id === 'number' ? `${category.id}` : category.id } },
     })
@@ -6908,7 +6908,7 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
         const doc = await payload.create({
           collection: 'categories',
           data: { name: `Category ${i}` },
-          draft: true,
+          version: 'draft',
           overrideAccess: true,
         })
         createdIds.push(doc.id)
@@ -6920,7 +6920,7 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
       // Query drafts WITHOUT sort - this is the scenario that breaks
       const resultsNoSort = await payload.find({
         collection: 'categories',
-        draft: true,
+        version: 'latest',
         limit: 10,
         overrideAccess: true,
         // No sort parameter

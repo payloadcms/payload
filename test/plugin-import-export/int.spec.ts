@@ -3474,7 +3474,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           excerpt: 'existing',
           title: `Upsert Test ${timestamp}`,
         },
-        draft: false,
+        version: 'published',
         overrideAccess: true,
       })
 
@@ -3531,7 +3531,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         id: existingPage.id,
         collection: 'pages',
         depth: 0,
-        draft: false, // Get published version
+        version: 'published', // Get published version
         overrideAccess: true,
       })
 
@@ -3539,7 +3539,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         id: existingPage.id,
         collection: 'pages',
         depth: 0,
-        draft: true, // Get draft version
+        version: 'latest', // Get draft version
         overrideAccess: true,
       })
 
@@ -4267,7 +4267,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
       const draftPages = await payload.find({
         collection: 'pages',
-        draft: true,
+        version: 'latest',
         overrideAccess: true,
         where: {
           title: { contains: 'Draft Import ' },
@@ -4279,7 +4279,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
       const publishedPages = await payload.find({
         collection: 'pages',
-        draft: false,
+        version: 'published',
         overrideAccess: true, // Query for published documents only
         where: {
           title: { contains: 'Published Import ' },
@@ -4331,7 +4331,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
       const pages = await payload.find({
         collection: 'pages',
-        draft: false,
+        version: 'published',
         overrideAccess: true, // Query for published documents
         where: {
           title: { contains: 'Default Status Test ' },
@@ -4483,7 +4483,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
       const validPage1 = await payload.find({
         collection: 'pages',
-        draft: true,
+        version: 'latest',
         overrideAccess: true,
         where: {
           title: { equals: `Partial Valid ${timestamp}-1` },
@@ -4491,7 +4491,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
       })
       const validPage2 = await payload.find({
         collection: 'pages',
-        draft: true,
+        version: 'latest',
         overrideAccess: true,
         where: {
           title: { equals: `Partial Valid ${timestamp}-2` },
@@ -4508,7 +4508,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
         const allPages = await payload.find({
           collection: 'pages',
-          draft: true,
+          version: 'latest',
           limit: 100,
           overrideAccess: true,
         })
@@ -5705,7 +5705,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
         const publishedPages = await payload.find({
           collection: 'pages',
-          draft: false,
+          version: 'published',
           overrideAccess: true,
           where: {
             title: { contains: 'Default Status Test ' },
@@ -5763,7 +5763,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
         const draftPages = await payload.find({
           collection: 'pages',
-          draft: true,
+          version: 'latest',
           overrideAccess: true,
           where: {
             title: { contains: 'Explicit Draft Test ' },
@@ -5822,7 +5822,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
         const publishedPages = await payload.find({
           collection: 'pages',
-          draft: false,
+          version: 'published',
           overrideAccess: true,
           where: {
             title: { contains: 'Upsert New Published Test ' },
@@ -7071,7 +7071,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
         const draftDocs = await payload.find({
           collection: 'posts-imports-only',
-          draft: true,
+          version: 'latest',
           overrideAccess: true,
           where: {
             title: { contains: 'Default Draft Config Test' },
@@ -7085,7 +7085,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
         const publishedDocs = await payload.find({
           collection: 'posts-imports-only',
-          draft: false,
+          version: 'published',
           overrideAccess: true,
           where: {
             title: { equals: 'Default Draft Config Override Test' },

@@ -1228,7 +1228,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
           }),
           payload.find({
             collection: 'fields-and-top-access',
-            draft: true,
+            version: 'latest',
             overrideAccess: false,
             sort: 'secret',
           }),
@@ -1891,7 +1891,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
       // assert find draft: true
       const resFindDraft = await payload.find({
         collection: 'fields-and-top-access',
-        draft: true,
+        version: 'latest',
         overrideAccess: false,
       })
 

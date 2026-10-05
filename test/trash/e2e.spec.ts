@@ -1293,7 +1293,7 @@ describe('Trash', () => {
         _status: 'draft',
         localizedField: localizedFieldValueEN,
       },
-      draft: true,
+      version: 'draft',
       locale: 'en',
       overrideAccess: true,
     })
@@ -1305,7 +1305,7 @@ describe('Trash', () => {
         _status: 'draft',
         localizedField: localizedFieldValueES,
       },
-      draft: true,
+      version: 'draft',
       locale: 'es',
       overrideAccess: true,
     })
@@ -1361,7 +1361,7 @@ describe('Trash', () => {
         _status: 'draft',
         localizedField: localizedFieldValueEN,
       },
-      draft: true,
+      version: 'draft',
       locale: 'en',
       overrideAccess: true,
     })
@@ -1374,7 +1374,7 @@ describe('Trash', () => {
         _status: 'draft',
         localizedField: localizedFieldValueES,
       },
-      draft: true,
+      version: 'draft',
       locale: 'es',
       overrideAccess: true,
     })

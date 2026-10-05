@@ -1,4 +1,4 @@
-import type { TypeWithID, Where, WhereField } from 'payload'
+import type { DocumentVersion, TypeWithID, Where, WhereField } from 'payload'
 import type { DeepPartial, MarkOptional } from 'ts-essentials'
 
 type CollectionDoc = {
@@ -52,7 +52,6 @@ export type CreateArgs<
   >
   depth?: number
   disableTransaction?: boolean
-  draft?: boolean
   fallbackLocale?: string
   file?: File
   filePath?: string
@@ -61,6 +60,7 @@ export type CreateArgs<
   overwriteExistingFiles?: boolean
   showHiddenFields?: boolean
   user?: TypeWithID
+  version?: Exclude<DocumentVersion, 'latest'>
 } & BaseArgs
 
 export type UpdateByIDArgs<
@@ -87,7 +87,6 @@ export type UpdateBaseArgs<
   collection: TSlug
   data: DeepPartial<TGeneratedTypes['collections'][TSlug]>
   depth?: number
-  draft?: boolean
   fallbackLocale?: string
   file?: File
   filePath?: string
@@ -96,6 +95,7 @@ export type UpdateBaseArgs<
   overwriteExistingFiles?: boolean
   showHiddenFields?: boolean
   user?: TypeWithID
+  version?: DocumentVersion
 } & BaseArgs
 
 export type UpdateArgs<
@@ -110,6 +110,7 @@ export type UpdateGlobalArgs<
   data: DeepPartial<TGeneratedTypes['globals'][TSlug]>
   overrideAccess: boolean
   slug: TSlug
+  version?: DocumentVersion
 } & BaseArgs
 
 export type FindArgs<
@@ -119,7 +120,6 @@ export type FindArgs<
   collection: TSlug
   depth?: number
   disableErrors?: boolean
-  draft?: boolean
   fallbackLocale?: string
   limit?: number
   locale?: string
@@ -130,6 +130,7 @@ export type FindArgs<
   sort?: string
   trash?: boolean
   user?: TypeWithID
+  version?: DocumentVersion
   where?: Where
 } & BaseArgs
 

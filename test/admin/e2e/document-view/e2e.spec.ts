@@ -770,7 +770,7 @@ describe('Document View', () => {
         data: {
           title: 'English draft',
         },
-        draft: true,
+        version: 'draft',
         locale: 'en',
       })
 
@@ -780,7 +780,7 @@ describe('Document View', () => {
         data: {
           title: 'Spanish draft',
         },
-        draft: true,
+        version: 'draft',
         locale: 'es',
       })
 
@@ -789,7 +789,7 @@ describe('Document View', () => {
 
       const publishedDocuments = await payload.find({
         collection: localizedCollectionSlug,
-        draft: true,
+        version: 'latest',
         locale: 'all',
         where: {
           id: {

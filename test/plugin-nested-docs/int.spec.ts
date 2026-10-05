@@ -234,7 +234,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
       const initialPublished = await payload.findByID({
         id: childDoc.id,
         collection: 'pages',
-        draft: false,
+        version: 'published',
         overrideAccess: true,
       })
       expect(initialPublished._status).toBe('published')
@@ -247,7 +247,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
         data: {
           title: 'Version Child Draft Edit',
         },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
@@ -267,7 +267,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
       const publishedChild = await payload.findByID({
         id: childDoc.id,
         collection: 'pages',
-        draft: false,
+        version: 'published',
         overrideAccess: true,
       })
 
@@ -280,7 +280,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
       const draftChild = await payload.findByID({
         id: childDoc.id,
         collection: 'pages',
-        draft: true,
+        version: 'latest',
         overrideAccess: true,
       })
 
@@ -333,7 +333,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
       const updatedDraftChild = await payload.findByID({
         id: draftChild.id,
         collection: 'pages',
-        draft: true,
+        version: 'latest',
         overrideAccess: true,
       })
 
@@ -374,7 +374,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
         data: {
           title: 'Breadcrumb Child Draft',
         },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
@@ -393,7 +393,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
       const published = await payload.findByID({
         id: child.id,
         collection: 'pages',
-        draft: false,
+        version: 'published',
         overrideAccess: true,
       })
 
@@ -404,7 +404,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
       const draft = await payload.findByID({
         id: child.id,
         collection: 'pages',
-        draft: true,
+        version: 'latest',
         overrideAccess: true,
       })
 
@@ -424,7 +424,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
           title: 'Scheduled Page',
           slug: 'scheduled-page',
         },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
@@ -456,7 +456,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
       const retrieved = await payload.findByID({
         id: draft.id,
         collection: 'pages',
-        draft: false,
+        version: 'published',
         overrideAccess: true,
       })
 

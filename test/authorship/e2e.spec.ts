@@ -67,7 +67,7 @@ test.describe('Authorship', () => {
       collection: draftPostsSlug,
       data: { title: 'version two' },
       depth: 0,
-      draft: true,
+      version: 'draft',
     })
 
     const versions = await payload.findVersions({
@@ -163,7 +163,7 @@ test.describe('Authorship', () => {
       collection: draftPostsSlug,
       data: { title: 'restricted version two' },
       depth: 0,
-      draft: true,
+      version: 'draft',
     })
 
     const versions = await payload.findVersions({
@@ -243,7 +243,7 @@ test.describe('Authorship', () => {
       collection: createdOnlySlug,
       data: { title: 'created only v2' },
       depth: 0,
-      draft: true,
+      version: 'draft',
     })
 
     const versions = await payload.findVersions({
@@ -275,7 +275,7 @@ test.describe('Authorship', () => {
       collection: updatedOnlySlug,
       data: { title: 'updated only v2' },
       depth: 0,
-      draft: true,
+      version: 'draft',
     })
 
     const versions = await payload.findVersions({

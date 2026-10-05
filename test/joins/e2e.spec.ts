@@ -937,7 +937,7 @@ describe('Join Field', () => {
       data: {
         title: 'Version 1 - Draft',
       },
-      draft: true,
+      version: 'draft',
       overrideAccess: true,
     })
 
