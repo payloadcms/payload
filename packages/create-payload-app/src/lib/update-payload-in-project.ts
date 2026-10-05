@@ -50,7 +50,10 @@ export async function updatePayloadInNextProject({
 
   info(`Updating Payload Next.js files...`)
 
-  const templateFilesPath = resolveNextTemplateRoot()
+  const templateFilesPath =
+    process.env.JEST_WORKER_ID !== undefined
+      ? path.resolve(dirname, '../../../../templates/blank')
+      : path.resolve(dirname, '../..', 'dist/template')
 
   const templateSrcDir = path.resolve(templateFilesPath, 'src/app/(payload)')
   const payloadDirPath = path.resolve(
@@ -194,12 +197,6 @@ async function performPayloadPackageUpdate({
   info('Payload packages updated successfully.')
 
   return { isUpdated: true, message: 'Payload updated successfully.', success: true }
-}
-
-function resolveNextTemplateRoot(): string {
-  return path.basename(path.dirname(dirname)) === 'dist'
-    ? path.resolve(dirname, '../template')
-    : path.resolve(dirname, '../../../../templates/blank')
 }
 
 function resolveTanStackTemplateRoot(): string {
