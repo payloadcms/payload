@@ -1722,12 +1722,6 @@ importers:
 
   packages/transformer-sharp:
     dependencies:
-      file-type:
-        specifier: 22.0.1
-        version: 22.0.1
-      sanitize-filename:
-        specifier: 1.6.4
-        version: 1.6.4
       sharp:
         specifier: 0.35.4
         version: 0.35.4(@types/node@24.12.3)
