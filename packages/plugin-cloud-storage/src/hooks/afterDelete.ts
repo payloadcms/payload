@@ -25,10 +25,7 @@ interface Args {
   useCompositePrefixes?: boolean
 }
 
-type UploadDocument = { _objectKey?: string } &
-  FileData &
-  TypeWithID &
-  TypeWithPrefix
+type UploadDocument = { _objectKey?: string } & FileData & TypeWithID & TypeWithPrefix
 
 export const getAfterDeleteHook = ({
   adapter,
@@ -36,7 +33,15 @@ export const getAfterDeleteHook = ({
   collectionPrefix,
   useCompositePrefixes,
 }: Args): CollectionAfterDeleteHook<FileData & TypeWithID & TypeWithPrefix> => {
-  const logDeleteError = ({ doc, err, req }: { doc: TypeWithID; err: unknown; req: PayloadRequest }) => {
+  const logDeleteError = ({
+    doc,
+    err,
+    req,
+  }: {
+    doc: TypeWithID
+    err: unknown
+    req: PayloadRequest
+  }) => {
     req.payload.logger.error({
       err,
       msg: `There was an error while deleting files for collection ${collection.slug} document ${doc.id}.`,
@@ -151,5 +156,5 @@ export const getDeleteFiles =
 const getFilenames = (doc: FileData): string[] =>
   [
     doc.filename,
-    ...Object.values(doc.sizes || {}).map((resizedFileData) => resizedFileData?.filename),
+    ...Object.values(doc.variants || {}).map((variantFileData) => variantFileData?.filename),
   ].filter((filename): filename is string => typeof filename === 'string' && filename.length > 0)

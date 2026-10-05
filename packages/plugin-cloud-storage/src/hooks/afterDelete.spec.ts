@@ -62,6 +62,33 @@ describe('cloud upload deletion', () => {
     expect(handleDelete).not.toHaveBeenCalled()
   })
 
+  it('should delete generated upload variants', async () => {
+    const handleDelete = vi.fn().mockResolvedValue(undefined)
+    const req = { context: {}, payload: { db: {} } } as unknown as PayloadRequest
+    const deleteFiles = getDeleteFiles({
+      adapter: { handleDelete } as never,
+      collection: { slug: 'media' } as never,
+      collectionPrefix: 'media',
+    })
+
+    await deleteFiles({
+      req,
+      sourceDoc: {
+        filename: 'document.png',
+        id: 1,
+        variants: { thumbnail: { filename: 'document-thumbnail.png' } },
+      },
+    })
+
+    expect(handleDelete).toHaveBeenCalledTimes(2)
+    expect(handleDelete).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filename: 'document-thumbnail.png',
+        storageFilePath: 'media/document-thumbnail.png',
+      }),
+    )
+  })
+
   it('should log deferred deletion errors without failing an already committed delete', async () => {
     const deletionError = new Error('Cloud deletion failed')
     const handleDelete = vi.fn().mockRejectedValue(deletionError)
