@@ -613,7 +613,10 @@ test.describe('Hierarchy Sidebar', () => {
         await page.goto(`${foldersURL.hierarchy}&parentFolder=${multiTypeFolder.id}`)
 
         const listControls = page.locator('.hierarchy-list__controls')
-        await listControls.getByRole('button', { name: 'Create New' }).first().click()
+        const createButton = listControls.getByRole('button', { name: 'Create New' }).first()
+
+        await createButton.click()
+        await expect(createButton).toHaveClass(/btn--selected/)
 
         await expect(
           page.getByRole('menuitem', { name: 'Organization', exact: true }),

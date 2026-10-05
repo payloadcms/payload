@@ -522,6 +522,7 @@ export function HierarchyTable({
           canShowCreateButton
             ? [
                 <CreateDocumentButton
+                  buttonStyle="primary"
                   collections={collections}
                   drawerSlug={`hierarchy-create-empty-${collectionSlug}`}
                   key="create"
