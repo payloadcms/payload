@@ -114,7 +114,7 @@ transformFile: (args: {
   see the main file must not be combined with Sharp for image uploads.
 </Banner>
 
-Transformers only run on uploads whose full bytes are available. When a client uploads directly to cloud storage (`clientUploads`) on a collection with `disableLocalStorage`, Payload downloads the whole file only when `upload.mimeTypes` restricts the allowed types, the request carries a crop or resize edit, the file is an animated image, or the collection has Sharp `variants` or image adjustments (`resizeOptions`, `formatOptions`, and so on). Otherwise the upload is saved without running any transformer.
+Transformers only run on uploads whose full bytes are available. When a client uploads directly to cloud storage (`clientUploads`) on a collection with `disableLocalStorage`, Payload downloads the whole file only when `upload.mimeTypes` restricts the allowed types, a transformer other than `sharpTransformer` has a `transformFile` that is eligible for the upload (its `mimeTypes` match and its `canTransform`, if any, returns `true`), the request carries a crop or resize edit, the file is an animated image, or the collection has Sharp `variants` or image adjustments (`resizeOptions`, `formatOptions`, and so on). Otherwise the upload is saved without running any transformer.
 
 The stored `filename` is based on the returned `File`'s `name`. Its `mimeType` and extension come from the output bytes when their format can be detected, such as an image converted to WebP. Otherwise, as for text-like output like CSV or JSON, they come from the returned `File`'s `type` and `name`. Set both on the `File` you return when your transformer changes the format.
 

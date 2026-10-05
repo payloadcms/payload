@@ -174,7 +174,7 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
         expect(result).toBe('relative/path')
       })
 
-      test('should normalize backslash separators', async () => {
+      test('should normalize backslash separators in prefixes', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
           filename: 'test.png',
@@ -242,7 +242,7 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
       expect(sanitizeFilename('a/b/../../c/d/../file.txt')).toBe('file.txt')
     })
 
-    test('should normalize backslash separators', () => {
+    test('should normalize backslash separators in filenames', () => {
       expect(sanitizeFilename('..\\..\\windows\\system32\\config')).toBe('config')
     })
 
@@ -427,8 +427,8 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
 
           const dbRecord = rawDbData as unknown as {
             filename: string
-            variants: Record<string, { filename: string; url: string }>
             url: string
+            variants: Record<string, { filename: string; url: string }>
           }
           type SizeData = { filename: string; url: string }
 
@@ -878,8 +878,8 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
         const { doc } = await createResponse.json<{
           doc: {
             id: number | string
-            variants: { thumbnail: { filename: string } }
             storageProvider: string
+            variants: { thumbnail: { filename: string } }
           }
         }>()
 
@@ -1101,11 +1101,11 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
     })
 
     test.describe('Azure', () => {
-      test.todo('can upload')
+      test.todo('can upload to Azure')
     })
 
     test.describe('GCS', () => {
-      test.todo('can upload')
+      test.todo('can upload to GCS')
     })
 
     test.describe('R2', () => {

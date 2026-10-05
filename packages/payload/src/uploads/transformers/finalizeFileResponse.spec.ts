@@ -50,21 +50,18 @@ describe('finalizeFileResponse', () => {
     expect(result.headers.get('Content-Security-Policy')).toBe(uploadContentSecurityPolicy)
   })
 
-  it.each([
-    'image/svg+xml; charset=utf-8',
-    'Image/SVG+XML',
-    'application/xhtml+xml',
-    'application/xml',
-    'text/xml',
-    'application/rss+xml',
-  ])('should apply the upload CSP header to a %s response', async (contentType) => {
-    const collection = makeCollection()
-    const response = new Response('<root />', { headers: { 'Content-Type': contentType } })
+  // XML classification itself is covered by getFileTypeIdentity.spec.ts.
+  it.each(['image/svg+xml; charset=utf-8', 'application/xml'])(
+    'should apply the upload CSP header to a %s response',
+    async (contentType) => {
+      const collection = makeCollection()
+      const response = new Response('<root />', { headers: { 'Content-Type': contentType } })
 
-    const result = await finalizeFileResponse({ collection, req: makeReq(), response })
+      const result = await finalizeFileResponse({ collection, req: makeReq(), response })
 
-    expect(result.headers.get('Content-Security-Policy')).toBe(uploadContentSecurityPolicy)
-  })
+      expect(result.headers.get('Content-Security-Policy')).toBe(uploadContentSecurityPolicy)
+    },
+  )
 
   it('should apply the upload CSP header when modifyResponseHeaders sets an XML content type', async () => {
     const modifyResponseHeaders = vi.fn(({ headers }: { headers: Headers }) => {

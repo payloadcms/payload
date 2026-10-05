@@ -1,6 +1,7 @@
 'use client'
 import type { StaticLabel } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
 import React, { useId, useRef } from 'react'
 
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
@@ -23,7 +24,8 @@ const baseClass = 'sort-column'
 export const SortColumn: React.FC<SortColumnProps> = (props) => {
   const { name, appearance, disable = false, Label, label } = props
   const { handleSortChange, query } = useListQuery()
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
+  const resolvedLabel = getTranslation(label || (typeof Label === 'string' ? Label : name), i18n)
 
   const { sort } = query
 
@@ -52,11 +54,11 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
 
   const descLabel = t('general:sortByLabelDirection', {
     direction: t('general:descending'),
-    label,
+    label: resolvedLabel,
   })
   const ascLabel = t('general:sortByLabelDirection', {
     direction: t('general:ascending'),
-    label,
+    label: resolvedLabel,
   })
 
   return (
@@ -71,10 +73,10 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
       ref={rootRef}
     >
       <span className={`${baseClass}__label`} id={labelId}>
-        {Label ?? <FieldLabel hideLocale label={label} unstyled />}
+        {Label ?? <FieldLabel hideLocale label={resolvedLabel} unstyled />}
       </span>
       {!disable && (
-        <div className={`${baseClass}__buttons`}>
+        <div className={`${baseClass}__buttons`} data-grid-sort-controls="">
           <button
             aria-label={descLabel}
             aria-pressed={sort === desc}

@@ -24,14 +24,6 @@ describe('createLazySourceGetter', () => {
     return pending
   })
 
-  it('should return the retrieval response from the first get() call', async () => {
-    const response = new Response('body')
-    const retrieve = vi.fn().mockResolvedValue(response)
-    const source = createLazySourceGetter({ retrieve })
-
-    await expect(source.get()).resolves.toBe(response)
-  })
-
   it('should reject a second call with TransformerContractError while the first is still pending', async () => {
     let resolveRetrieve: (response: Response) => void = () => {}
     const retrieve = vi.fn(

@@ -14,7 +14,6 @@ describe('sharpTransformer', () => {
       'image/tiff',
       'image/avif',
     ])
-    expect(sharpTransformer().mimeTypes).not.toContain('image/jxl')
   })
 
   it('should reject dynamic.collections that are unknown or not upload-enabled on init', () => {

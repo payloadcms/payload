@@ -25,10 +25,6 @@ import { downloadFileToBuffer } from '../../packages/payload/src/uploads/downloa
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { tempFileHandler } from '../../packages/payload/src/uploads/fetchAPI-multipart/handlers.js'
 import { test } from '../__helpers/int/vitest.js'
-import {
-  runAnimatedFocalPointResizeStaysValidTest,
-  runAnimatedResizeReportsPerFrameDimensionsTest,
-} from '../__helpers/shared/animatedResizeParityTests.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
   adminThumbnailSizeSlug,
@@ -463,8 +459,8 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       )
       const replacementPath = path.resolve(dirname, './test-image.png')
       const metadata = await sharp(replacementPath).metadata()
-      const height = Math.floor(metadata.height! / 2)
-      const width = Math.floor(metadata.width! / 2)
+      const height = Math.floor(metadata.height / 2)
+      const width = Math.floor(metadata.width / 2)
       const { file, handle } = await createStreamableFile(replacementPath)
       const formData = new FormData()
       formData.append('_payload', JSON.stringify({ prefix: 'replacement' }))
@@ -2678,14 +2674,16 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           _internal_safeFetchGlobal.lookup = globalCachedFn
 
           // Now ensure this throws if we pass the IP address directly, without the mock
+          const allowedURLMessageMatcher = expect.not.stringContaining('unsafe')
+          const blockedURLMessageMatcher = expect.stringContaining(errorContains)
           const directURLFailure =
             collection === allowListMediaSlug
               ? {
-                  message: expect.not.stringContaining('unsafe'),
+                  message: allowedURLMessageMatcher,
                 }
               : {
                   name: 'FileRetrievalError',
-                  message: expect.stringContaining(errorContains),
+                  message: blockedURLMessageMatcher,
                 }
 
           await expect(
@@ -3219,20 +3217,27 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       })
     })
 
-    runAnimatedResizeReportsPerFrameDimensionsTest({
-      collection: animatedTypeMedia as CollectionSlug,
-      mainDimensions: { height: 200, width: 200 },
-      sizes: [
-        // A real enlargement (200x200 -> 480x480), not a no-op — a wrong
-        // per-frame height would show up here instead of being masked.
-        { name: 'squareSmall', height: 480, width: 480 },
-      ],
-    })
+    // A wrong per-frame divisor on the 44-frame, 200x200 animated.webp would report the frame
+    // stack's height or fail the resize, so exact single-frame dimensions prove both paths.
+    test('should report single-frame dimensions for an animated image and its variants', async ({
+      payload,
+    }) => {
+      const doc = await payload.create({
+        collection: animatedTypeMedia as CollectionSlug,
+        data: { focalX: 80, focalY: 50 },
+        filePath: path.resolve(dirname, './animated.webp'),
+        overrideAccess: true,
+      })
 
-    runAnimatedFocalPointResizeStaysValidTest({
-      collection: animatedTypeMedia as CollectionSlug,
-      focalPoint: { x: 80, y: 50 },
-      size: { name: 'focalCrop', height: 150, width: 300 },
+      expect(doc).toMatchObject({
+        height: 200,
+        variants: {
+          focalCrop: { height: 150, width: 300 },
+          // A real enlargement (200x200 -> 480x480), not a no-op.
+          squareSmall: { height: 480, width: 480 },
+        },
+        width: 200,
+      })
     })
   })
 
@@ -3972,13 +3977,16 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
     test.each([
       { description: 'absolute path like /tmp', dir: '/tmp', expectedPrefix: '/tmp' },
       { description: 'relative path', dir: 'tmp', expectedPrefix: path.join(process.cwd(), 'tmp') },
-    ])('creates temp files in correct location for $description', ({ dir, expectedPrefix }) => {
-      const handler = tempFileHandler({ tempFileDir: dir }, 'field', 'file.png')
-      const filePath = handler.getFilePath()
+    ])(
+      'creates temp files in correct location for $description',
+      async ({ dir, expectedPrefix }) => {
+        const handler = tempFileHandler({ tempFileDir: dir }, 'field', 'file.png')
+        const filePath = handler.getFilePath()
 
-      expect(filePath.startsWith(expectedPrefix)).toBe(true)
-      handler.cleanup()
-    })
+        expect(filePath.startsWith(expectedPrefix)).toBe(true)
+        await handler.cleanup()
+      },
+    )
   })
 
   test.describe('prefix query parameter', () => {

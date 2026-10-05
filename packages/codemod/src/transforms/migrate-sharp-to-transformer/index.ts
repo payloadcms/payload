@@ -15,58 +15,9 @@ const TRANSFORMER_NAME = 'sharpTransformer'
 const VARIANTS_KEY = 'variants'
 
 const IDENTIFIER_PATTERN = /^[A-Z_$][\w$]*$/i
-const RESERVED_WORDS = new Set([
-  'await',
-  'break',
-  'case',
-  'catch',
-  'class',
-  'const',
-  'continue',
-  'debugger',
-  'default',
-  'delete',
-  'do',
-  'else',
-  'enum',
-  'export',
-  'extends',
-  'false',
-  'finally',
-  'for',
-  'function',
-  'if',
-  'implements',
-  'import',
-  'in',
-  'instanceof',
-  'interface',
-  'let',
-  'new',
-  'null',
-  'package',
-  'private',
-  'protected',
-  'public',
-  'return',
-  'static',
-  'super',
-  'switch',
-  'this',
-  'throw',
-  'true',
-  'try',
-  'typeof',
-  'var',
-  'void',
-  'while',
-  'with',
-  'yield',
-])
-
 /** Whether `value` can be used as a plain (unquoted, non-bracketed) object literal key. */
 function isSafePlainObjectKey(value: string): boolean {
-  return IDENTIFIER_PATTERN.test(value) && !RESERVED_WORDS.has(value)
+  return IDENTIFIER_PATTERN.test(value)
 }
 
 /** Fields moved from a collection's `upload` object into `sharpTransformer({ collections })`. */
@@ -98,29 +49,63 @@ const findBuildConfigLocalNames = (file: SourceFile): Set<string> => {
   return localNames
 }
 
+type SharpTransformerBinding = {
+  /** Whether `localName` is a value import of `sharpTransformer` from `@payloadcms/transformer-sharp`. */
+  isImported: boolean
+  /** The identifier `sharpTransformer` is (or will be) called through in this file. */
+  localName: string
+}
+
 /**
- * The local binding `sharpTransformer` is imported under in this file, honoring an alias such as
- * `import { sharpTransformer as st }`. Falls back to `sharpTransformer` when it isn't imported yet.
+ * Resolves the local binding of the imported `sharpTransformer`, honoring an alias such as
+ * `import { sharpTransformer as st }`. When it isn't imported yet, picks a name no other
+ * identifier in the file uses, so a local `sharpTransformer` function is never mistaken for it.
  */
-function getSharpTransformerLocalName(sourceFile: SourceFile): string {
+function resolveSharpTransformerBinding(sourceFile: SourceFile): SharpTransformerBinding {
   const namedImports = sourceFile
     .getImportDeclarations()
-    .filter((decl) => decl.getModuleSpecifierValue() === TRANSFORMER_MODULE)
+    .filter((decl) => decl.getModuleSpecifierValue() === TRANSFORMER_MODULE && !decl.isTypeOnly())
     .flatMap((decl) => decl.getNamedImports())
-    .filter((named) => named.getName() === TRANSFORMER_NAME)
+    .filter((named) => named.getName() === TRANSFORMER_NAME && !named.isTypeOnly())
 
   const unaliasedImport = namedImports.find((named) => !named.getAliasNode())
   const aliasedImport = namedImports.find((named) => named.getAliasNode())
 
-  return unaliasedImport
-    ? TRANSFORMER_NAME
-    : (aliasedImport?.getAliasNode()?.getText() ?? TRANSFORMER_NAME)
+  if (unaliasedImport) {
+    return { isImported: true, localName: TRANSFORMER_NAME }
+  }
+
+  if (aliasedImport) {
+    return { isImported: true, localName: aliasedImport.getAliasNode()!.getText() }
+  }
+
+  const usedIdentifiers = new Set(
+    sourceFile
+      .getDescendantsOfKind(SyntaxKind.Identifier)
+      .map((identifier) => identifier.getText()),
+  )
+
+  let localName = TRANSFORMER_NAME
+  for (let suffix = 2; usedIdentifiers.has(localName); suffix++) {
+    localName = `${TRANSFORMER_NAME}${suffix}`
+  }
+
+  return { isImported: false, localName }
 }
 
-function ensureSharpTransformerImport(sourceFile: SourceFile): void {
+function ensureSharpTransformerImport({
+  localName,
+  sourceFile,
+}: {
+  localName: string
+  sourceFile: SourceFile
+}): void {
+  const namedImport =
+    localName === TRANSFORMER_NAME ? TRANSFORMER_NAME : { name: TRANSFORMER_NAME, alias: localName }
+
   const existing = sourceFile
     .getImportDeclarations()
-    .find((decl) => decl.getModuleSpecifierValue() === TRANSFORMER_MODULE)
+    .find((decl) => decl.getModuleSpecifierValue() === TRANSFORMER_MODULE && !decl.isTypeOnly())
 
   if (!existing) {
     const otherImports = sourceFile.getImportDeclarations()
@@ -129,7 +114,7 @@ function ensureSharpTransformerImport(sourceFile: SourceFile): void {
 
     const insertedImport = sourceFile.addImportDeclaration({
       moduleSpecifier: TRANSFORMER_MODULE,
-      namedImports: [TRANSFORMER_NAME],
+      namedImports: [namedImport],
     })
 
     // ts-morph always appends a semicolon; strip it when the file's other imports don't use them.
@@ -145,10 +130,15 @@ function ensureSharpTransformerImport(sourceFile: SourceFile): void {
 
   const alreadyImported = existing
     .getNamedImports()
-    .some((named) => named.getName() === TRANSFORMER_NAME)
+    .some(
+      (named) =>
+        named.getName() === TRANSFORMER_NAME &&
+        !named.isTypeOnly() &&
+        (named.getAliasNode()?.getText() ?? TRANSFORMER_NAME) === localName,
+    )
 
   if (!alreadyImported) {
-    existing.addNamedImport(TRANSFORMER_NAME)
+    existing.addNamedImport(namedImport)
   }
 }
 
@@ -385,9 +375,13 @@ export const migrateSharpToTransformer: Transform = {
     const notes: string[] = []
 
     for (const sourceFile of project.getSourceFiles()) {
-      const transformerLocalName = getSharpTransformerLocalName(sourceFile)
+      const { isImported, localName: transformerLocalName } =
+        resolveSharpTransformerBinding(sourceFile)
 
-      if (renameImageSizesInSharpTransformerCalls({ notes, sourceFile, transformerLocalName })) {
+      if (
+        isImported &&
+        renameImageSizesInSharpTransformerCalls({ notes, sourceFile, transformerLocalName })
+      ) {
         filesChanged.add(sourceFile.getFilePath())
       }
 
@@ -518,7 +512,7 @@ export const migrateSharpToTransformer: Transform = {
           removeMovedCollectionProps(entry)
         }
 
-        ensureSharpTransformerImport(sourceFile)
+        ensureSharpTransformerImport({ localName: transformerLocalName, sourceFile })
         filesChanged.add(sourceFile.getFilePath())
       }
     }

@@ -61,18 +61,32 @@ const getOutputMetadata = async (result: Awaited<ReturnType<typeof resizeReal>>)
   sharp(Buffer.from(await result.response!.arrayBuffer())).metadata()
 
 describe('createHandleRequest', () => {
-  it('should reject a width-only request whose aspect-ratio-derived output exceeds maxPixels', async () => {
-    const sourceBuffer = await makeSourceImage({ height: 100, width: 10 })
+  it.each([
+    // 10x100 source.
+    { orientation: undefined, sourceHeight: 100, sourceWidth: 10 },
+    // Stored 100x10 but tagged orientation 6, so it displays as 10x100.
+    { orientation: 6, sourceHeight: 10, sourceWidth: 100 },
+  ])(
+    'should reject a width-only request whose displayed aspect ratio exceeds maxPixels (orientation $orientation)',
+    async ({ orientation, sourceHeight, sourceWidth }) => {
+      const source = sharp(
+        await makeSourceImage({ format: 'jpeg', height: sourceHeight, width: sourceWidth }),
+      )
+      const sourceBuffer = await (
+        orientation ? source.withMetadata({ orientation }) : source
+      ).toBuffer()
 
-    // 10x100 source at width=100 renders 100x1000 = 100,000 pixels, 10x the limit.
-    const result = await resizeReal({
-      dynamicDefaults: resolveSharpDynamicDefaults({ maxPixels: 10_000 }),
-      query: 'width=100',
-      sourceBuffer,
-    })
+      // Displayed 10x100 at width=100 renders 100x1000 = 100,000 pixels, 10x the limit.
+      const result = await resizeReal({
+        dynamicDefaults: resolveSharpDynamicDefaults({ maxPixels: 10_000 }),
+        mimeType: 'image/jpeg',
+        query: 'width=100',
+        sourceBuffer,
+      })
 
-    expect(result.response?.status).toBe(400)
-  })
+      expect(result.response?.status).toBe(400)
+    },
+  )
 
   it.each(['width=1000&height=1000', 'width=1000'])(
     'should count every frame of an animated source against maxPixels (%s)',
@@ -121,53 +135,25 @@ describe('createHandleRequest', () => {
     expect(metadata.height).toBe(200)
   })
 
-  it('should budget maxPixels against the EXIF-oriented source dimensions', async () => {
-    // Stored 100x10 but tagged orientation 6, so it displays as 10x100.
-    const sourceBuffer = await sharp(
-      await makeSourceImage({ format: 'jpeg', height: 10, width: 100 }),
-    )
-      .withMetadata({ orientation: 6 })
-      .toBuffer()
+  it.each([
+    { expectedWidth: 100, query: 'width=300' },
+    { expectedWidth: 300, query: 'width=300&withoutEnlargement=false' },
+  ])(
+    'should apply a configured withoutEnlargement=true default unless the request overrides it ($query)',
+    async ({ expectedWidth, query }) => {
+      const sourceBuffer = await makeSourceImage({ height: 100, width: 100 })
 
-    // Displayed 10x100 at width=100 renders 100x1000 = 100,000 pixels, 10x the limit.
-    const result = await resizeReal({
-      dynamicDefaults: resolveSharpDynamicDefaults({ maxPixels: 10_000 }),
-      mimeType: 'image/jpeg',
-      query: 'width=100',
-      sourceBuffer,
-    })
+      const metadata = await getOutputMetadata(
+        await resizeReal({
+          dynamicDefaults: resolveSharpDynamicDefaults({ withoutEnlargement: true }),
+          query,
+          sourceBuffer,
+        }),
+      )
 
-    expect(result.response?.status).toBe(400)
-  })
-
-  it('should not upscale when withoutEnlargement is configured as the default', async () => {
-    const sourceBuffer = await makeSourceImage({ height: 100, width: 100 })
-
-    const metadata = await getOutputMetadata(
-      await resizeReal({
-        dynamicDefaults: resolveSharpDynamicDefaults({ withoutEnlargement: true }),
-        query: 'width=300',
-        sourceBuffer,
-      }),
-    )
-
-    expect(metadata.width).toBe(100)
-    expect(metadata.height).toBe(100)
-  })
-
-  it('should allow a per-request withoutEnlargement=false to override a configured withoutEnlargement=true default', async () => {
-    const sourceBuffer = await makeSourceImage({ height: 100, width: 100 })
-
-    const metadata = await getOutputMetadata(
-      await resizeReal({
-        dynamicDefaults: resolveSharpDynamicDefaults({ withoutEnlargement: true }),
-        query: 'width=300&withoutEnlargement=false',
-        sourceBuffer,
-      }),
-    )
-
-    expect(metadata.width).toBe(300)
-  })
+      expect(metadata.width).toBe(expectedWidth)
+    },
+  )
 
   it.each([
     ['jpeg', 'jpeg'],

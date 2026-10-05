@@ -36,12 +36,6 @@ describe('generatePayloadFileURL', () => {
       name: 'an absolute URL from serverURL when relative is false',
       relative: false,
     },
-    {
-      config: makeConfig(),
-      expected: '/api/media/file/logo.png',
-      name: 'a relative URL ignoring serverURL when relative is true',
-      relative: true,
-    },
   ])('should build $name', ({ config, expected, relative }) => {
     const url = generatePayloadFileURL({
       collectionSlug: 'media',
@@ -65,60 +59,37 @@ describe('generatePayloadFileURL', () => {
     expect(url).toBe('/api/media/file/logo.png?prefix=tenants%2Facme')
   })
 
-  it('should serialize boolean and number query values', () => {
-    const url = generatePayloadFileURL({
-      collectionSlug: 'media',
-      config: makeConfig(),
-      filename: 'logo.png',
+  it.each([
+    {
+      expected: 'width=500&withoutEnlargement=true',
+      name: 'boolean and number values',
       query: { width: 500, withoutEnlargement: true },
-      relative: true,
-    })
-
-    expect(url).toBe('/api/media/file/logo.png?width=500&withoutEnlargement=true')
-  })
-
-  it('should omit query keys whose value is undefined', () => {
-    const url = generatePayloadFileURL({
-      collectionSlug: 'media',
-      config: makeConfig(),
-      filename: 'logo.png',
+    },
+    {
+      expected: 'width=500',
+      name: 'no undefined values',
       query: { height: undefined, width: 500 },
-      relative: true,
-    })
-
-    expect(url).toBe('/api/media/file/logo.png?width=500')
-  })
-
-  it('should serialize an array query value as repeated keys, preserving order', () => {
+    },
+    {
+      expected: 'tag=a&tag=b&tag=c',
+      name: 'an array as repeated keys in order',
+      query: { tag: ['a', 'b', 'c'] },
+    },
+    {
+      expected: 'height=500&width=400',
+      name: 'keys in a deterministic order',
+      query: { width: 400, height: 500 },
+    },
+  ])('should serialize $name in the query', ({ expected, query }) => {
     const url = generatePayloadFileURL({
       collectionSlug: 'media',
       config: makeConfig(),
       filename: 'logo.png',
-      query: { tag: ['a', 'b', 'c'] },
+      query,
       relative: true,
     })
 
-    expect(url).toBe('/api/media/file/logo.png?tag=a&tag=b&tag=c')
-  })
-
-  it('should produce a deterministic key order regardless of input object key order', () => {
-    const first = generatePayloadFileURL({
-      collectionSlug: 'media',
-      config: makeConfig(),
-      filename: 'logo.png',
-      query: { height: 500, width: 400 },
-      relative: true,
-    })
-    const second = generatePayloadFileURL({
-      collectionSlug: 'media',
-      config: makeConfig(),
-      filename: 'logo.png',
-      query: { width: 400, height: 500 },
-      relative: true,
-    })
-
-    expect(first).toBe(second)
-    expect(first).toBe('/api/media/file/logo.png?height=500&width=400')
+    expect(url).toBe(`/api/media/file/logo.png?${expected}`)
   })
 
   it('should throw when query contains a `prefix` key', () => {

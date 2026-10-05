@@ -59,7 +59,11 @@ const getHMRURL = (): string => {
   const port = process.env.PORT || '3000'
   const hasHTTPS = process.env.USE_HTTPS === 'true' || process.argv.includes('--experimental-https')
   const protocol = hasHTTPS ? 'wss' : 'ws'
-  const prefix = process.env.__NEXT_ASSET_PREFIX ?? ''
+  /**
+   * Next.js only inlines __NEXT_ASSET_PREFIX into bundled code. In dev, withPayload keeps `payload`
+   * external, so fall back to NEXT_BASE_PATH, which withPayload sets on process.env at runtime.
+   */
+  const prefix = process.env.__NEXT_ASSET_PREFIX || process.env.NEXT_BASE_PATH || ''
 
   return `${protocol}://localhost:${port}${prefix}${getHMRPath()}`
 }

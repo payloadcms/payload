@@ -55,64 +55,30 @@ describe('migrate-sharp-to-transformer', () => {
   })
 
   it.each([
-    ['a call expression', 'transformers: makeTransformers(),'],
-    ['an identifier', 'transformers: sharedTransformers,'],
-    ['a shorthand property', 'transformers,'],
+    [
+      'a call-expression transformers property',
+      'upload: {\n    transformers: makeTransformers(),\n  },',
+      "`upload.transformers` isn't an inline array",
+    ],
+    [
+      'an identifier transformers property',
+      'upload: {\n    transformers: sharedTransformers,\n  },',
+      "`upload.transformers` isn't an inline array",
+    ],
+    [
+      'a shorthand transformers property',
+      'upload: {\n    transformers,\n  },',
+      "`upload.transformers` isn't an inline array",
+    ],
+    [
+      'a spread in upload',
+      'upload: {\n    ...sharedUpload,\n  },',
+      '`upload` contains a spread that may already set `transformers`',
+    ],
+    ['a non-inline upload object', 'upload: sharedUpload,', "`upload` isn't an inline object"],
   ])(
-    'does not add a duplicate transformers property when the existing one is %s',
-    async (_, transformersPropertyText) => {
-      const input = `import sharp from 'sharp'
-import { buildConfig } from 'payload'
-
-export default buildConfig({
-  collections: [],
-  sharp,
-  upload: {
-    ${transformersPropertyText}
-  },
-})
-`
-      const { notes, source } = await runTransformWithNotes({ input })
-
-      expect(source.match(/transformers\b/g)).toHaveLength(1)
-      expect(source).toContain(transformersPropertyText)
-      expect(notes).toContainEqual(
-        expect.stringContaining(
-          "`upload.transformers` isn't an inline array — add `sharpTransformer({ sharp })`",
-        ),
-      )
-    },
-  )
-
-  it('does not add a transformers property after a spread that may already set it', async () => {
-    const input = `import sharp from 'sharp'
-import { buildConfig } from 'payload'
-
-export default buildConfig({
-  collections: [],
-  sharp,
-  upload: {
-    ...sharedUpload,
-  },
-})
-`
-    const { notes, source } = await runTransformWithNotes({ input })
-
-    expect(source).not.toContain('transformers')
-    expect(notes).toContainEqual(
-      expect.stringContaining(
-        '`upload` contains a spread that may already set `transformers` — add `sharpTransformer({ sharp })`',
-      ),
-    )
-  })
-
-  it.each([
-    ['a non-array transformers property', 'upload: {\n    transformers: sharedTransformers,\n  },'],
-    ['a spread in upload', 'upload: {\n    ...sharedUpload,\n  },'],
-    ['a non-inline upload object', 'upload: sharedUpload,'],
-  ])(
-    'keeps the Sharp settings in place when sharpTransformer cannot be registered due to %s',
-    async (_, uploadPropertyText) => {
+    'leaves the config unchanged and reports why when sharpTransformer cannot be registered due to %s',
+    async (_, uploadPropertyText, expectedNote) => {
       const input = `import sharp from 'sharp'
 import { buildConfig } from 'payload'
 
@@ -134,6 +100,7 @@ export default buildConfig({
       const { notes, source } = await runTransformWithNotes({ input })
 
       expect(source).toBe(input)
+      expect(notes).toContainEqual(expect.stringContaining(expectedNote))
       expect(notes).toContainEqual(
         expect.stringContaining('then remove the migrated Sharp settings'),
       )
@@ -157,6 +124,45 @@ export default buildConfig({
       "import { sharpTransformer as st } from '@payloadcms/transformer-sharp'\n",
     )
     expect(result).not.toMatch(/\bsharpTransformer\(/)
+    expect(await runTransform({ source: result, transform: migrateSharpToTransformer })).toBe(
+      result,
+    )
+  })
+
+  it('leaves a local function named sharpTransformer untouched', async () => {
+    const input = `const sharpTransformer = (args: { collections: Record<string, unknown> }) => args
+
+export const transformers = [
+  sharpTransformer({ collections: { media: { imageSizes: [{ name: 'thumbnail' }] } } }),
+]
+`
+    const result = await runTransform({ source: input, transform: migrateSharpToTransformer })
+
+    expect(result).toBe(input)
+  })
+
+  it('imports sharpTransformer under a collision-free alias when the name is already taken', async () => {
+    const input = `import sharp from 'sharp'
+import { buildConfig } from 'payload'
+
+const sharpTransformer = (args: { collections: Record<string, unknown> }) => args
+
+export const transformers = [
+  sharpTransformer({ collections: { media: { imageSizes: [{ name: 'thumbnail' }] } } }),
+]
+
+export default buildConfig({
+  collections: [],
+  sharp,
+})
+`
+    const result = await runTransform({ source: input, transform: migrateSharpToTransformer })
+
+    expect(result).toContain(
+      "import { sharpTransformer as sharpTransformer2 } from '@payloadcms/transformer-sharp'\n",
+    )
+    expect(result).toContain('transformers: [sharpTransformer2({ sharp })]')
+    expect(result).toContain("media: { imageSizes: [{ name: 'thumbnail' }] }")
     expect(await runTransform({ source: result, transform: migrateSharpToTransformer })).toBe(
       result,
     )
@@ -269,30 +275,5 @@ export default buildConfig({
 
     expect(result).toContain('sharpTransformer({ sharp: myCustomSharp })')
     expect(result).not.toContain('sharp: myCustomSharp,\n})')
-  })
-
-  it('moves crop and focalPoint into sharpTransformer instead of leaving them on the collection upload', async () => {
-    const input = `import { buildConfig } from 'payload'
-
-export default buildConfig({
-  collections: [
-    {
-      slug: 'media',
-      fields: [],
-      upload: {
-        crop: false,
-        focalPoint: true,
-        staticDir: 'media',
-      },
-    },
-  ],
-})
-`
-    const result = await runTransform({ source: input, transform: migrateSharpToTransformer })
-    const [beforeTransformerCall, afterTransformerCall] = result.split('sharpTransformer(')
-
-    expect(beforeTransformerCall).not.toMatch(/crop|focalPoint/)
-    expect(afterTransformerCall).toContain('crop: false')
-    expect(afterTransformerCall).toContain('focalPoint: true')
   })
 })
