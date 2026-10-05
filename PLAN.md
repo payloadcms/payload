@@ -241,3 +241,19 @@ update({
   data: { title: 'Corrected title' },
 })
 ```
+
+## Future: lint rule to require an explicit `version` on `update`
+
+These two calls behave consistently with the rules above, but they are easy to misread:
+
+```ts
+update({ id, data: { _status: 'draft' } }) // Reads as "save a draft", but unpublishes
+update({ id, data: { _status: 'published' } }) // Reads as "publish", but does not publish the pending draft
+```
+
+In the future we could add a lint rule that requires `version` to be explicit on `update`, or at least whenever `data` contains `_status`. The caller would then have to state which copy they are changing, and the confusion above would disappear without changing any runtime behaviour.
+
+```ts
+update({ id, version: 'published', data: { _status: 'draft' } }) // Clearly unpublishes
+update({ id, version: 'draft', data: { _status: 'published' } }) // Clearly publishes the draft
+```
