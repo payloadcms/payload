@@ -156,6 +156,8 @@ export type SharpTransformerOptions = {
    * @default false
    */
   dynamic?: boolean | SharpDynamicOptions
+  /** Maximum bytes buffered from a source. Defaults to 64 MiB. */
+  maxSourceBytes?: number
   /** Inject a compatible custom Sharp build or version. Defaults to the bundled dependency. */
   sharp?: SharpDependency
   /** @default 'sharp' */

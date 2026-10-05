@@ -37,6 +37,7 @@ import {
   stageLocalUploadFiles,
 } from '../../uploads/fileVersioning/fileOperationManager.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
+import { prepareUploadData } from '../../uploads/prepareUploadData.js'
 import {
   getExternalUploadSource,
   getUploadDestination,
@@ -209,6 +210,10 @@ export const createOperation = async <
 
     const isDuplicating = duplicateFromID !== undefined && duplicateFromID !== null
 
+    if (collectionConfig.upload && !isDuplicating) {
+      externalUploadSource ??= getExternalUploadSource(data)
+    }
+
     if (isDuplicating && collectionConfig.disableDuplicate === true) {
       throw new APIError(
         `The collection with slug ${String(collectionConfig.slug)} cannot be duplicated.`,
@@ -248,22 +253,13 @@ export const createOperation = async <
     // Generate data for all files and sizes
     // /////////////////////////////////////
 
-    const { data: newFileData, files: filesToUpload } = await generateFileData({
-      collection,
-      config,
+    data = await prepareUploadData({
+      collection: collectionConfig,
       data,
-      draft: isSavingDraft,
-      externalUploadSource,
       isDuplicating,
-      operation: 'create',
       originalDoc: duplicatedFromDoc,
-      overwriteExistingFiles,
       req,
-      throwOnMissingFile:
-        !isSavingDraft && collection.config.upload.filesRequiredOnCreate !== false,
     })
-
-    data = newFileData
 
     // /////////////////////////////////////
     // beforeValidate - Fields
@@ -350,7 +346,7 @@ export const createOperation = async <
       ? { ...duplicatedFromDocWithLocales, _status: {} }
       : duplicatedFromDocWithLocales
 
-    const dataWithLocales = await beforeChange<JsonObject>({
+    let dataWithLocales = await beforeChange<JsonObject>({
       collection: collectionConfig,
       context: req.context,
       data,
@@ -365,6 +361,25 @@ export const createOperation = async <
       req,
       skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
     })
+
+    const { data: newFileData, files: filesToUpload } = await generateFileData({
+      collection,
+      config,
+      data: dataWithLocales,
+      draft: isSavingDraft,
+      externalUploadSource,
+      isDuplicating,
+      operation: 'create',
+      originalDoc: duplicatedFromDoc,
+      overrideAccess,
+      overwriteExistingFiles,
+      req,
+      throwOnMissingFile:
+        !isSavingDraft && collection.config.upload.filesRequiredOnCreate !== false,
+    })
+
+    dataWithLocales = newFileData
+    data = newFileData as typeof data
 
     const hasAuthorizedPublicationStatus = hasAuthorizedAllLocalesPublicationStatus({
       data: publicationData,

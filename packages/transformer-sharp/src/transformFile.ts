@@ -5,6 +5,7 @@ import type { SharpDependency, SharpUploadTaskOptions } from './types.js'
 
 import { createSharpFromFile } from './createSharpFromFile.js'
 import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
+import { transformState } from './transformState.js'
 
 const ANIMATED_MIME_TYPES = ['image/avif', 'image/gif', 'image/webp']
 
@@ -16,14 +17,79 @@ const percentToPixel = (value: number, dimension: number) => Math.floor((value /
  * cropped, with `resizeOptions` re-applied to the crop output), or one named
  * legacy image size. Never writes to storage.
  */
-export function createTransformFile({ sharpDependency }: { sharpDependency: SharpDependency }) {
+export function createTransformFile({
+  maxSourceBytes = 64 * 1024 * 1024,
+  sharpDependency,
+}: {
+  maxSourceBytes?: number
+  sharpDependency: SharpDependency
+}) {
   return async function transformFile({
-    file,
+    doc,
     options,
     req,
+    source,
   }: TransformFileArgs<SharpUploadTaskOptions>): Promise<TransformFileResult> {
+    const state = doc._transforms
+    const shouldApplySavedState =
+      state && Object.keys(state).some((key) => key !== 'focalPoint') && options.kind === 'main'
+    const input = source
+    let file = new File(
+      [Buffer.from(await input.arrayBuffer({ maxBytes: maxSourceBytes }))],
+      input.filename,
+      {
+        type: input.mimeType,
+      },
+    )
+
+    if (shouldApplySavedState) {
+      file = await transformState({
+        buffer: Buffer.from(await file.arrayBuffer()),
+        filename: file.name,
+        mimeType: file.type,
+        sharpDependency,
+        state,
+      })
+    }
+
+    const metadataMode = state?.metadataPolicy?.mode
+    const encoding = state?.encoding
+    const formatOptions =
+      options.kind === 'size'
+        ? options.imageResizeConfig.formatOptions
+        : options.collectionUpload.formatOptions
+    const canonicalFormatOptions = encoding
+      ? {
+          format: formatOptions?.format ?? (file.type.slice('image/'.length) as 'jpeg'),
+          options: { ...formatOptions?.options, ...encoding },
+        }
+      : formatOptions
+    const collectionUpload = {
+      ...options.collectionUpload,
+      withMetadata: metadataMode
+        ? metadataMode === 'preserve'
+        : options.collectionUpload.withMetadata,
+    }
+
+    options =
+      options.kind === 'main'
+        ? {
+            ...options,
+            collectionUpload: { ...collectionUpload, formatOptions: canonicalFormatOptions },
+          }
+        : {
+            ...options,
+            collectionUpload,
+            imageResizeConfig: {
+              ...options.imageResizeConfig,
+              formatOptions: canonicalFormatOptions,
+            },
+          }
+
     if (options.kind === 'main') {
-      return transformMain({ file, options, req, sharpDependency })
+      const result = await transformMain({ file, options, req, sharpDependency })
+
+      return shouldApplySavedState && !result.file ? { file, status: 'continue' } : result
     }
 
     return transformSize({ file, options, req, sharpDependency })
@@ -88,10 +154,10 @@ async function transformMain({
   }
 
   sharpFile = await optionallyAppendMetadata({ req, sharpFile, withMetadata })
-  const { data: outputData } = await sharpFile.toBuffer({ resolveWithObject: true })
+  const { data: outputData, info } = await sharpFile.toBuffer({ resolveWithObject: true })
 
   return {
-    file: new File([outputData], file.name, { type: file.type }),
+    file: new File([outputData], file.name, { type: `image/${info.format}` }),
     status: 'continue',
   }
 }
@@ -185,14 +251,7 @@ async function transformSize({
   ).rotate()
   const originalImageMeta = await sharpBase.metadata()
 
-  let adjustedDimensions = { ...originalDimensions }
-
-  if ([5, 6, 7, 8].includes(originalImageMeta.orientation!)) {
-    adjustedDimensions = {
-      height: originalDimensions.width,
-      width: originalDimensions.height,
-    }
-  }
+  const adjustedDimensions = originalDimensions
 
   let resized = sharpBase.clone()
 
@@ -276,10 +335,10 @@ async function transformSize({
   }
 
   resized = await optionallyAppendMetadata({ req, sharpFile: resized, withMetadata })
-  const { data: outputData } = await resized.toBuffer({ resolveWithObject: true })
+  const { data: outputData, info } = await resized.toBuffer({ resolveWithObject: true })
 
   return {
-    file: new File([outputData], file.name, { type: file.type }),
+    file: new File([outputData], file.name, { type: `image/${info.format}` }),
     status: 'continue',
   }
 }

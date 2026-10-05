@@ -1,6 +1,6 @@
 'use client'
 
-import type { UploadEdits } from 'payload'
+import type { TransformState, UploadEdits } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import React, { useRef, useState } from 'react'
@@ -14,6 +14,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { appendCacheTag } from '../../utilities/appendCacheTag.js'
 import { Button } from '../Button/index.js'
 import { DialogFooter, DialogHeader, DialogModal } from '../Dialog/index.js'
+import { toPercentCrop, toPixelCrop } from './cropState.js'
 import './index.css'
 import './library.css'
 
@@ -30,7 +31,8 @@ export type EditUploadProps = {
   imageCacheTag?: false | string
   initialCrop?: UploadEdits['crop']
   initialFocalPoint?: FocalPosition
-  onSave?: (uploadEdits: UploadEdits) => void
+  initialTransforms?: null | TransformState
+  onSave?: (transforms: null | TransformState) => void
   showCrop?: boolean
   showFocalPoint?: boolean
 }
@@ -49,6 +51,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
   imageCacheTag,
   initialCrop,
   initialFocalPoint,
+  initialTransforms,
   onSave,
   showCrop,
   showFocalPoint,
@@ -65,10 +68,14 @@ export const EditUpload: React.FC<EditUploadProps> = ({
 
   const [focalPosition, setFocalPosition] = useState<FocalPosition>(() => ({
     ...defaultFocalPosition,
-    ...initialFocalPoint,
+    ...(initialTransforms?.focalPoint ?? initialFocalPoint),
   }))
 
-  const [checkBounds, setCheckBounds] = useState<boolean>(false)
+  const [hasCropChanged, setHasCropChanged] = useState(
+    Boolean(initialCrop && !initialTransforms?.crop),
+  )
+  const [inputErrors, setInputErrors] = useState<Record<string, string>>({})
+  const [hasFocalPointChanged, setHasFocalPointChanged] = useState(false)
   const [uncroppedPixelHeight, setUncroppedPixelHeight] = useState<number>(0)
   const [uncroppedPixelWidth, setUncroppedPixelWidth] = useState<number>(0)
 
@@ -78,23 +85,48 @@ export const EditUpload: React.FC<EditUploadProps> = ({
 
   const [imageLoaded, setImageLoaded] = useState<boolean>(false)
 
-  const onImageLoad = (e) => {
-    setUncroppedPixelHeight(e.currentTarget.naturalHeight)
-    setUncroppedPixelWidth(e.currentTarget.naturalWidth)
+  const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const height = e.currentTarget.naturalHeight
+    const width = e.currentTarget.naturalWidth
+
+    setUncroppedPixelHeight(height)
+    setUncroppedPixelWidth(width)
+    setCrop(
+      initialTransforms?.crop
+        ? toPercentCrop({ crop: initialTransforms.crop, height, width })
+        : (initialCrop ?? defaultCrop),
+    )
+    setFocalPosition(initialTransforms?.focalPoint ?? initialFocalPoint ?? { x: 50, y: 50 })
+    setHasCropChanged(Boolean(initialCrop && !initialTransforms?.crop))
+    setHasFocalPointChanged(false)
+    setInputErrors({})
     setImageLoaded(true)
   }
 
   const fineTuneCrop = ({ dimension, value }: { dimension: 'height' | 'width'; value: string }) => {
-    const intValue = parseInt(value)
-    if (Number.isNaN(intValue)) {
+    const intValue = Number(value)
+    if (value === '' || !Number.isInteger(intValue)) {
+      setInputErrors((previous) => ({
+        ...previous,
+        [dimension]: `${t(dimension === 'width' ? 'upload:width' : 'upload:height')}: ${t('validation:enterNumber')}`,
+      }))
       return null
     }
     const percentage =
       100 * (intValue / (dimension === 'width' ? uncroppedPixelWidth : uncroppedPixelHeight))
-    if (percentage <= 0 || percentage > 100) {
+    if (percentage <= 0 || percentage > 100 - crop[dimension === 'width' ? 'x' : 'y']) {
+      setInputErrors((previous) => ({
+        ...previous,
+        [dimension]: `${t(dimension === 'width' ? 'upload:width' : 'upload:height')}: ${t('validation:invalidInput')}`,
+      }))
       return null
     }
-    setCrop((prev) => ({ ...prev, [dimension]: percentage }))
+    clearInputError({ key: dimension })
+    setHasCropChanged(true)
+    setCrop((prev) => ({
+      ...prev,
+      [dimension]: Math.min(percentage, 100 - prev[dimension === 'width' ? 'x' : 'y']),
+    }))
   }
 
   const fineTuneFocalPosition = ({
@@ -104,30 +136,98 @@ export const EditUpload: React.FC<EditUploadProps> = ({
     coordinate: 'x' | 'y'
     value: string
   }) => {
-    const intValue = parseInt(value)
-    if (intValue >= 0 && intValue <= 100) {
+    const intValue = Number(value)
+    if (value !== '' && Number.isFinite(intValue) && intValue >= 0 && intValue <= 100) {
+      clearInputError({ key: `focal${coordinate}` })
+      setHasFocalPointChanged(true)
       setFocalPosition((prevPosition) => ({ ...prevPosition, [coordinate]: intValue }))
+    } else {
+      setInputErrors((previous) => ({
+        ...previous,
+        [`focal${coordinate}`]: `${t('upload:focalPoint')} ${coordinate.toUpperCase()}: ${t('validation:invalidInput')}`,
+      }))
     }
   }
 
-  const saveEdits = () => {
-    if (typeof onSave === 'function') {
-      onSave({
-        crop: crop ? crop : undefined,
-        focalPoint: focalPosition,
-        heightInPixels: Math.round((crop.height / 100) * uncroppedPixelHeight),
-        widthInPixels: Math.round((crop.width / 100) * uncroppedPixelWidth),
-      })
+  const fineTuneCropPosition = ({
+    coordinate,
+    value,
+  }: {
+    coordinate: 'x' | 'y'
+    value: string
+  }) => {
+    const pixels = Number(value)
+    const dimension = coordinate === 'x' ? uncroppedPixelWidth : uncroppedPixelHeight
+
+    if (!Number.isInteger(pixels) || pixels < 0 || pixels >= dimension || value === '') {
+      setInputErrors((previous) => ({
+        ...previous,
+        [coordinate]: `${t('upload:crop')} ${coordinate.toUpperCase()}: ${t('validation:invalidInput')}`,
+      }))
+      return
     }
+
+    clearInputError({ key: coordinate })
+    setHasCropChanged(true)
+    setCrop((previous) => {
+      const offset = (pixels / dimension) * 100
+      const size = coordinate === 'x' ? 'width' : 'height'
+
+      return { ...previous, [coordinate]: offset, [size]: Math.min(previous[size], 100 - offset) }
+    })
+  }
+
+  function clearInputError({ key }: { key: string }) {
+    setInputErrors((previous) => {
+      const next = { ...previous }
+      delete next[key]
+
+      return next
+    })
+  }
+
+  function renderInputError({ key }: { key: string }) {
+    return inputErrors[key] ? <div role="alert">{inputErrors[key]}</div> : null
+  }
+
+  const saveEdits = () => {
+    if (Object.keys(inputErrors).length) {
+      return
+    }
+    const transforms = { ...initialTransforms }
+
+    if (showCrop && hasCropChanged) {
+      if (crop.x === 0 && crop.y === 0 && crop.width === 100 && crop.height === 100) {
+        delete transforms.crop
+      } else {
+        transforms.crop = toPixelCrop({
+          crop,
+          height: uncroppedPixelHeight,
+          width: uncroppedPixelWidth,
+        })
+      }
+    }
+    if (showFocalPoint && hasFocalPointChanged) {
+      if (focalPosition.x === 50 && focalPosition.y === 50) {
+        delete transforms.focalPoint
+      } else {
+        transforms.focalPoint = focalPosition
+      }
+    }
+
+    onSave?.(Object.keys(transforms).length ? transforms : null)
     closeModal(editDrawerSlug)
   }
 
   const onDragEnd = React.useCallback(({ x, y }) => {
     setFocalPosition({ x, y })
-    setCheckBounds(false)
+    setHasFocalPointChanged(true)
   }, [])
 
   const centerFocalPoint = () => {
+    setHasFocalPointChanged(true)
+    clearInputError({ key: 'focalx' })
+    clearInputError({ key: 'focaly' })
     setFocalPosition({ x: 50, y: 50 })
   }
 
@@ -157,8 +257,10 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                 <ReactCrop
                   className={`${baseClass}__reactCrop`}
                   crop={crop}
-                  onChange={(_, c) => setCrop(c)}
-                  onComplete={() => setCheckBounds(true)}
+                  onChange={(_, c) => {
+                    setHasCropChanged(true)
+                    setCrop(c)
+                  }}
                   renderSelectionAddon={() => (
                     <div className={`${baseClass}__crop-window`} ref={cropRef} />
                   )}
@@ -180,13 +282,10 @@ export const EditUpload: React.FC<EditUploadProps> = ({
               )}
               {showFocalPoint && (
                 <DraggableElement
-                  boundsRef={showCrop ? cropRef : imageRef}
-                  checkBounds={showCrop ? checkBounds : false}
                   className={`${baseClass}__focalPoint`}
                   containerRef={focalWrapRef}
                   initialPosition={focalPosition}
                   onDragEnd={onDragEnd}
-                  setCheckBounds={showCrop ? setCheckBounds : false}
                 >
                   <PlusIcon />
                 </DraggableElement>
@@ -204,7 +303,11 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                     <button
                       aria-label={t('general:reset')}
                       className={`${baseClass}__reset`}
-                      onClick={() => setCrop({ height: 100, unit: '%', width: 100, x: 0, y: 0 })}
+                      onClick={() => {
+                        setHasCropChanged(true)
+                        setInputErrors({})
+                        setCrop(defaultCrop)
+                      }}
                       type="button"
                     >
                       <ResetIcon />
@@ -212,20 +315,58 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                   </div>
                   <div className={`${baseClass}__fieldset`}>
                     <NumberInput
+                      ariaLabel={`${t('upload:crop')} X`}
+                      Error={renderInputError({ key: 'x' })}
+                      max={imageLoaded ? uncroppedPixelWidth - 1 : undefined}
+                      min={0}
+                      onChange={(e) =>
+                        fineTuneCropPosition({ coordinate: 'x', value: e.target.value })
+                      }
+                      path="cropX"
+                      prefix="X"
+                      readOnly={!imageLoaded}
+                      showError={Boolean(inputErrors['x'])}
+                      size="medium"
+                      value={Math.round((crop.x / 100) * uncroppedPixelWidth)}
+                    />
+                    <NumberInput
+                      ariaLabel={`${t('upload:crop')} Y`}
+                      Error={renderInputError({ key: 'y' })}
+                      max={imageLoaded ? uncroppedPixelHeight - 1 : undefined}
+                      min={0}
+                      onChange={(e) =>
+                        fineTuneCropPosition({ coordinate: 'y', value: e.target.value })
+                      }
+                      path="cropY"
+                      prefix="Y"
+                      readOnly={!imageLoaded}
+                      showError={Boolean(inputErrors['y'])}
+                      size="medium"
+                      value={Math.round((crop.y / 100) * uncroppedPixelHeight)}
+                    />
+                    <NumberInput
                       ariaLabel={t('upload:width')}
+                      Error={renderInputError({ key: 'width' })}
+                      max={uncroppedPixelWidth - Math.round((crop.x * uncroppedPixelWidth) / 100)}
+                      min={1}
                       onChange={(e) => fineTuneCrop({ dimension: 'width', value: e.target.value })}
                       path="cropWidth"
                       prefix="W"
                       readOnly={!imageLoaded}
+                      showError={Boolean(inputErrors['width'])}
                       size="medium"
                       value={Number(cropWidthPx)}
                     />
                     <NumberInput
                       ariaLabel={t('upload:height')}
+                      Error={renderInputError({ key: 'height' })}
+                      max={uncroppedPixelHeight - Math.round((crop.y * uncroppedPixelHeight) / 100)}
+                      min={1}
                       onChange={(e) => fineTuneCrop({ dimension: 'height', value: e.target.value })}
                       path="cropHeight"
                       prefix="H"
                       readOnly={!imageLoaded}
+                      showError={Boolean(inputErrors['height'])}
                       size="medium"
                       value={Number(cropHeightPx)}
                     />
@@ -249,6 +390,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                   <div className={`${baseClass}__fieldset`}>
                     <NumberInput
                       ariaLabel={`${t('upload:focalPoint')} X`}
+                      Error={renderInputError({ key: 'focalx' })}
                       max={100}
                       min={0}
                       onChange={(e) =>
@@ -256,12 +398,15 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                       }
                       path="focalX"
                       prefix="X"
+                      showError={Boolean(inputErrors['focalx'])}
                       size="medium"
+                      step="any"
                       suffix="%"
-                      value={Math.round(focalPosition.x)}
+                      value={focalPosition.x}
                     />
                     <NumberInput
                       ariaLabel={`${t('upload:focalPoint')} Y`}
+                      Error={renderInputError({ key: 'focaly' })}
                       max={100}
                       min={0}
                       onChange={(e) =>
@@ -269,9 +414,11 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                       }
                       path="focalY"
                       prefix="Y"
+                      showError={Boolean(inputErrors['focaly'])}
                       size="medium"
+                      step="any"
                       suffix="%"
-                      value={Math.round(focalPosition.y)}
+                      value={focalPosition.y}
                     />
                   </div>
                 </div>
@@ -290,8 +437,8 @@ export const EditUpload: React.FC<EditUploadProps> = ({
         </Button>
         <Button
           aria-label={t('general:applyChanges')}
-          buttonStyle="primary"
-          disabled={!imageLoaded}
+          buttonStyle="secondary"
+          disabled={!imageLoaded || Object.keys(inputErrors).length > 0}
           onClick={saveEdits}
         >
           {t('general:applyChanges')}
@@ -302,14 +449,11 @@ export const EditUpload: React.FC<EditUploadProps> = ({
 }
 
 const DraggableElement = ({
-  boundsRef,
-  checkBounds,
   children,
   className,
   containerRef,
   initialPosition = { x: 50, y: 50 },
   onDragEnd,
-  setCheckBounds,
 }) => {
   const { t } = useTranslation()
 
@@ -399,18 +543,6 @@ const DraggableElement = ({
       document.removeEventListener('mouseup', handleUp)
     }
   }, [isDragging, getCoordinates, onDragEnd, containerRef])
-
-  // Re-check position when crop changes (the crop window may have moved)
-  React.useEffect(() => {
-    if (isDragging || !checkBounds || !dragRef.current) {
-      return
-    }
-    const { height, left, top, width } = dragRef.current.getBoundingClientRect()
-    const { x, y } = getCoordinates(left + width / 2, top + height / 2)
-    onDragEnd({ x, y })
-    setPosition({ x, y })
-    setCheckBounds(false)
-  }, [getCoordinates, isDragging, checkBounds, setCheckBounds, onDragEnd])
 
   React.useEffect(() => {
     setPosition({ x: initialPosition.x, y: initialPosition.y })

@@ -30,6 +30,7 @@ import {
 } from '../../uploads/fileVersioning/fileOperationManager.js'
 import { withLegacyCloudUploadFileData } from '../../uploads/fileVersioning/storedFiles.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
+import { prepareUploadData } from '../../uploads/prepareUploadData.js'
 import {
   getLocalizedUploadProperties,
   getUploadDestination,
@@ -53,7 +54,7 @@ import {
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
-import { updateDocument } from './utilities/update.js'
+import { prepareUpdateDocument } from './utilities/update.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
   autosave?: boolean
@@ -296,15 +297,11 @@ export const updateByIDOperation = async <
     // Generate data for all files and sizes
     // /////////////////////////////////////
 
-    const { data: newFileData, files: filesToUpload } = await generateFileData({
-      collection,
-      config,
+    data = await prepareUploadData({
+      collection: collectionConfig,
       data,
-      operation: 'update',
       originalDoc: docWithLocales,
-      overwriteExistingFiles,
       req,
-      throwOnMissingFile: false,
     })
 
     const select = sanitizeSelect({
@@ -326,12 +323,12 @@ export const updateByIDOperation = async <
       autosave,
       collectionConfig,
       config,
-      data: deepCopyObjectSimple(newFileData),
+      data: deepCopyObjectSimple(data),
       depth: depth!,
       docWithLocales,
       draftArg,
       fallbackLocale: fallbackLocale!,
-      filesToUpload,
+      filesToUpload: [],
       locale: locale!,
       overrideAccess: overrideAccess!,
       overrideLock: overrideLock!,
@@ -342,15 +339,28 @@ export const updateByIDOperation = async <
       select: select!,
       showHiddenFields: showHiddenFields!,
       unpublishAllLocales,
-    } as const
+    }
 
-    const write = () => updateDocument<TSlug, TSelect>(updateArgs)
+    const prepared = await prepareUpdateDocument<TSlug, TSelect>(updateArgs)
+    const { data: newFileData, files: filesToUpload } = await generateFileData({
+      collection,
+      config,
+      data: prepared.data,
+      operation: 'update',
+      originalDoc: docWithLocales,
+      overrideAccess,
+      overwriteExistingFiles,
+      req,
+      throwOnMissingFile: false,
+    })
+
+    const write = () => prepared.write({ data: newFileData, filesToUpload })
     let result = collectionConfig.upload.fileOperations
       ? await runCloudFileUpdate({
           id,
           collection: collectionConfig,
           current: storedDocWithLocales,
-          data: updateArgs.data,
+          data: newFileData,
           files: filesToUpload,
           req,
           write,

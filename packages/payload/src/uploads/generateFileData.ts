@@ -1,37 +1,52 @@
 import { fileTypeFromBuffer } from 'file-type'
 import fs from 'fs/promises'
 import { randomUUID } from 'node:crypto'
-import { openAsBlob } from 'node:fs'
+import { createReadStream } from 'node:fs'
+import { Readable } from 'node:stream'
 
 import type { Collection, TypeWithID } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { Document, PayloadRequest } from '../types/index.js'
 import type { ExternalUploadSource } from './sanitizeUploadData.js'
+import type { FileSource, PlannedTransformer } from './transformers/types.js'
 import type { PreparedUploadTransformation } from './transformers/uploadTransformerBridge.js'
 import type { FileData, FileSizes, FileToSave, UploadEdits } from './types.js'
 
-import { FileRetrievalError, FileUploadError, Forbidden, MissingFile } from '../errors/index.js'
+import {
+  FileRetrievalError,
+  FileUploadError,
+  Forbidden,
+  MissingFile,
+  ValidationError,
+} from '../errors/index.js'
 import { formatAdminURL } from '../utilities/formatAdminURL.js'
-import { isNumber } from '../utilities/isNumber.js'
 import { canResizeImage } from './canResizeImage.js'
 import { checkFileRestrictions } from './checkFileRestrictions.js'
 import { downloadFileToBuffer } from './downloadFileToBuffer.js'
 import { getOriginalFilename } from './fileVersioning/naming.js'
+import { generateFilePathOrURL } from './generateFilePathOrURL.js'
 import { generateImageSizeFilename } from './generateImageSizeFilename.js'
 import { getFileByPath } from './getFileByPath.js'
 import { getFileExtension, getSanitizedUploadFilename } from './getFileTypeIdentity.js'
 import { getImageSize } from './getImageSize.js'
 import { getSafeFileName, incrementName } from './getSafeFilename.js'
-import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
 import { hasFullFileContents } from './hasFullFileContents.js'
 import { isProcessableImage } from './isProcessableImage.js'
 import { parseFilename } from './parseFilename.js'
+import { createDocumentSnapshot } from './transformers/createDocumentSnapshot.js'
+import { createFileSource } from './transformers/createFileSource.js'
+import { createUploadFileSource } from './transformers/createUploadFileSource.js'
+import { matchesMimeType } from './transformers/matchesMimeType.js'
 import { planTransformerPipeline } from './transformers/planTransformerPipeline.js'
 import { transformUploadFile } from './transformers/transformUploadFile.js'
 import {
   getUploadTransformerInternal,
   setUploadFilePath,
 } from './transformers/uploadTransformerBridge.js'
+import { assertTransformCoverage } from './transformState/assertTransformCoverage.js'
+import { resolveTransformStateWrite } from './transformState/resolveTransformStateWrite.js'
+import { validateTransformState } from './transformState/validateTransformState.js'
+import { validateTransformedDocument } from './validateTransformedDocument.js'
 type Args<T> = {
   collection: Collection
   config: SanitizedConfig
@@ -39,8 +54,10 @@ type Args<T> = {
   draft?: boolean
   externalUploadSource?: ExternalUploadSource
   isDuplicating?: boolean
+  isReplayRequired?: boolean
   operation: 'create' | 'update'
   originalDoc?: T
+  overrideAccess?: boolean
   overwriteExistingFiles?: boolean
   req: PayloadRequest
   throwOnMissingFile?: boolean
@@ -50,33 +67,6 @@ type Result<T> = Promise<{
   data: T
   files: FileToSave[]
 }>
-
-const shouldReupload = (
-  uploadEdits: undefined | UploadEdits,
-  fileData: Record<string, unknown> | undefined,
-) => {
-  if (!fileData || !uploadEdits) {
-    return false
-  }
-
-  if (hasCropOrResizeEdit(uploadEdits)) {
-    return true
-  }
-
-  // Since uploadEdits always has focalPoint, compare to the value in the data if it was changed
-  if (uploadEdits.focalPoint) {
-    const incomingFocalX = uploadEdits.focalPoint.x
-    const incomingFocalY = uploadEdits.focalPoint.y
-
-    const currentFocalX = 'focalX' in fileData && fileData.focalX
-    const currentFocalY = 'focalY' in fileData && fileData.focalY
-
-    const isEqual = incomingFocalX === currentFocalX && incomingFocalY === currentFocalY
-    return !isEqual
-  }
-
-  return false
-}
 
 export type TempFileHandling =
   | { sourcePath: string; type: 'copyFromTempFile' }
@@ -122,8 +112,10 @@ export const generateFileData = async <T>({
   draft,
   externalUploadSource,
   isDuplicating,
+  isReplayRequired = false,
   operation,
   originalDoc,
+  overrideAccess = false,
   overwriteExistingFiles,
   req,
   throwOnMissingFile,
@@ -139,21 +131,35 @@ export const generateFileData = async <T>({
 
   let file = isDuplicating ? undefined : req.file
 
-  const uploadEdits = parseUploadEditsFromReqOrIncomingData({
+  const hasSubmittedTransformState = Object.prototype.hasOwnProperty.call(data, '_transforms')
+  const transformStateWrite = resolveTransformStateWrite({
     data,
-    isDuplicating,
-    operation,
-    // Only a duplication source informs edit parsing. Updates now also pass `originalDoc` so the
-    // stored file can be reprocessed, and that must not change which edits are applied.
-    originalDoc: isDuplicating ? originalDoc : undefined,
-    req,
+    isReplacingOriginal: Boolean(file || externalUploadSource),
+    originalDoc: originalDoc ?? (isDuplicating ? data : undefined),
   })
 
-  const {
-    disableLocalStorage,
-    focalPoint: focalPointEnabled = true,
-    staticDir,
-  } = collectionConfig.upload
+  transformStateWrite.hasChanged ||= isReplayRequired
+
+  if (transformStateWrite.shouldValidate || isReplayRequired) {
+    validateTransformState({
+      collectionSlug: collectionConfig.slug,
+      doc: file || externalUploadSource ? undefined : originalDoc,
+      req,
+      value: transformStateWrite.value,
+    })
+  }
+
+  data = {
+    ...data,
+    _transforms: transformStateWrite.value,
+    ...(hasSubmittedTransformState || file || externalUploadSource
+      ? { focalX: null, focalY: null }
+      : {}),
+  }
+
+  const uploadEdits = getCanonicalUploadEdits({ data, operation })
+
+  const { disableLocalStorage, staticDir } = collectionConfig.upload
   const hasManagedCloudStorage = Boolean(collectionConfig.upload.fileOperations)
   const uploadReference = file?.uploadReference
   const hasProviderDirectReference =
@@ -184,7 +190,8 @@ export const generateFileData = async <T>({
 
   const staticPath = staticDir
 
-  const incomingFileData: Document = isDuplicating ? originalDoc : data
+  const incomingFileData: Document = isDuplicating ? { ...originalDoc, ...data } : data
+  const validationBaseline = structuredClone(incomingFileData)
   const currentFileData = (operation === 'update' ? originalDoc : incomingFileData) as
     | FileData
     | undefined
@@ -196,15 +203,73 @@ export const generateFileData = async <T>({
     typeof currentFileData.original.url === 'string'
       ? currentFileData.original
       : undefined
-  const fileSourceData = externalUploadSource ?? retainedOriginal ?? currentFileData
+  const fileSourceData = isDuplicating
+    ? (currentFileData?.original ?? currentFileData)
+    : (externalUploadSource ?? retainedOriginal ?? currentFileData)
   let isLocalFile = false
+  let replayPipeline: PlannedTransformer[] | undefined
+  let replaySource: FileSource | undefined
+
+  if (!file && retainedOriginal && transformStateWrite.hasChanged) {
+    const candidate = { ...currentFileData, ...incomingFileData }
+
+    replayPipeline = await planTransformerPipeline({
+      args: {
+        collectionSlug: collectionConfig.slug,
+        doc: candidate,
+        operation: 'upload',
+        originalDoc: createDocumentSnapshot({ doc: candidate }),
+        req,
+      },
+      capability: 'transformFile',
+      mimeType: retainedOriginal.mimeType,
+      transformers: req.payload.config.upload?.transformers ?? [],
+    })
+
+    if (candidate._transforms && replayPipeline.length) {
+      assertTransformCoverage({ pipeline: replayPipeline, state: candidate._transforms })
+    }
+  }
+
+  if (isDuplicating && incomingFileData._transforms) {
+    const duplicateMimeType = currentFileData?.original?.mimeType ?? currentFileData?.mimeType
+    const candidate = structuredClone({ ...incomingFileData, mimeType: duplicateMimeType })
+    const originalSnapshot = createDocumentSnapshot({ doc: candidate })
+    replayPipeline = await planTransformerPipeline({
+      args: {
+        collectionSlug: collectionConfig.slug,
+        doc: candidate,
+        operation: 'upload',
+        originalDoc: originalSnapshot,
+        req,
+      },
+      capability: 'transformFile',
+      mimeType: duplicateMimeType,
+      transformers: req.payload.config.upload?.transformers ?? [],
+    })
+    const coveragePipeline = replayPipeline.length
+      ? replayPipeline
+      : await planTransformerPipeline({
+          args: {
+            collectionSlug: collectionConfig.slug,
+            doc: candidate,
+            operation: 'request',
+            originalDoc: originalSnapshot,
+            purpose: 'persisted-default',
+            req,
+          },
+          capability: 'handleRequest',
+          mimeType: duplicateMimeType,
+          transformers: req.payload.config.upload?.transformers ?? [],
+        })
+
+    assertTransformCoverage({ pipeline: coveragePipeline, state: incomingFileData._transforms })
+  }
 
   if (
     !file &&
     fileSourceData &&
-    (externalUploadSource ||
-      isDuplicating ||
-      shouldReupload(uploadEdits, incomingFileData as Record<string, unknown>))
+    (externalUploadSource || isDuplicating || Boolean(replayPipeline?.length))
   ) {
     const { filename, url } = fileSourceData
     if (filename && (filename.includes('../') || filename.includes('..\\'))) {
@@ -216,31 +281,41 @@ export const generateFileData = async <T>({
     }
 
     try {
-      if (!externalUploadSource && !disableLocalStorage && isLocalFile) {
+      if (retainedOriginal) {
+        const filePath = `${staticPath}/${filename}`
+        replaySource = createFileSource({
+          filename,
+          mimeType: retainedOriginal.mimeType,
+          retrieve: async () => {
+            if (!disableLocalStorage && isLocalFile) {
+              return new Response(
+                Readable.toWeb(createReadStream(filePath)) as ReadableStream<Uint8Array>,
+              )
+            }
+            const { retrieveFileResponse } = await import('./endpoints/getFile.js')
+
+            return retrieveFileResponse({
+              collection: { config: collectionConfig },
+              doc: originalDoc as TypeWithID,
+              filename,
+              operation: 'transform',
+              req,
+            })
+          },
+          size: retainedOriginal.filesize,
+        })
+        file = {
+          name: filename,
+          data: Buffer.alloc(0),
+          mimetype: retainedOriginal.mimeType,
+          size: retainedOriginal.filesize,
+        }
+        overwriteExistingFiles = true
+      } else if (!externalUploadSource && !disableLocalStorage && isLocalFile) {
         // File is stored locally
         const filePath = `${staticPath}/${filename}`
         const response = await getFileByPath(filePath)
         file = response
-        overwriteExistingFiles = true
-      } else if (filename && retainedOriginal && hasManagedCloudStorage) {
-        const { retrieveFileResponse } = await import('./endpoints/getFile.js')
-        const response = await retrieveFileResponse({
-          collection: { config: collectionConfig },
-          doc: originalDoc as TypeWithID,
-          filename,
-          operation: 'transform',
-          req,
-        })
-        if (!response.ok) {
-          throw new Error(`Unable to read retained original ${filename}`)
-        }
-        const buffer = Buffer.from(await response.arrayBuffer())
-        file = {
-          name: filename,
-          data: buffer,
-          mimetype: retainedOriginal.mimeType,
-          size: buffer.length,
-        }
         overwriteExistingFiles = true
       } else if (filename && url) {
         // File is remote
@@ -269,17 +344,80 @@ export const generateFileData = async <T>({
       throw new MissingFile(req.t)
     }
 
+    if (retainedOriginal && transformStateWrite.hasChanged && !replayPipeline?.length) {
+      const candidate = { ...currentFileData, ...incomingFileData }
+      const state = transformStateWrite.value
+      const hasSavedIntent = Boolean(state && Object.keys(state).length)
+
+      if (hasSavedIntent) {
+        const pipeline = await planTransformerPipeline({
+          args: {
+            collectionSlug: collectionConfig.slug,
+            doc: candidate,
+            operation: 'request',
+            originalDoc: createDocumentSnapshot({ doc: candidate }),
+            purpose: 'persisted-default',
+            req,
+          },
+          capability: 'handleRequest',
+          mimeType: retainedOriginal.mimeType,
+          transformers: req.payload.config.upload?.transformers ?? [],
+        })
+
+        assertTransformCoverage({ pipeline, state: candidate._transforms })
+      }
+
+      const { name: stem, ext } = parseFilename(retainedOriginal.filename)
+      const logicalFilename = hasSavedIntent
+        ? candidate.filename !== retainedOriginal.filename
+          ? candidate.filename
+          : await getSafeFileName({
+              collectionSlug: collectionConfig.slug,
+              desiredFilename: `${stem}-default${ext ? `.${ext}` : ''}`,
+              prefix: candidate.prefix,
+              req,
+              staticPath,
+            })
+        : retainedOriginal.filename
+
+      return {
+        data: {
+          ...candidate,
+          _objectKey: hasSavedIntent ? null : retainedOriginal._objectKey,
+          filename: logicalFilename,
+          filesize: hasSavedIntent ? null : retainedOriginal.filesize,
+          height: hasSavedIntent ? null : retainedOriginal.height,
+          mimeType: hasSavedIntent
+            ? (candidate.mimeType ?? retainedOriginal.mimeType)
+            : retainedOriginal.mimeType,
+          original: retainedOriginal,
+          url: undefined,
+          variants: hasSavedIntent
+            ? getLogicalVariants({ collection: collectionConfig, filename: logicalFilename })
+            : getLogicalVariants({
+                collection: collectionConfig,
+                filename: logicalFilename,
+                shouldClear: true,
+              }),
+          width: hasSavedIntent ? null : retainedOriginal.width,
+        } as T,
+        files: [],
+      }
+    }
+
     return {
       data: incomingFileData!,
       files: [],
     }
   }
 
-  const detectedFileType = await checkFileRestrictions({
-    collection: collectionConfig,
-    file,
-    req,
-  })
+  const detectedFileType = replaySource
+    ? undefined
+    : await checkFileRestrictions({
+        collection: collectionConfig,
+        file,
+        req,
+      })
 
   const shouldUseDetectedFileType =
     detectedFileType &&
@@ -296,50 +434,112 @@ export const generateFileData = async <T>({
   let newData = incomingFileData as T
   const filesToSave: FileToSave[] = []
   const fileData: Partial<FileData> = {}
-  const crop = uploadEdits?.crop
-  const isResettingCrop =
-    retainedOriginal &&
-    crop?.unit === '%' &&
-    Number(crop.width) === 100 &&
-    Number(crop.height) === 100 &&
-    Number(crop.x) === 0 &&
-    Number(crop.y) === 0 &&
-    (uploadEdits.widthInPixels === undefined ||
-      Number(uploadEdits.widthInPixels) === retainedOriginal.width) &&
-    (uploadEdits.heightInPixels === undefined ||
-      Number(uploadEdits.heightInPixels) === retainedOriginal.height)
-  const hasFocalPointChange =
-    uploadEdits?.focalPoint &&
-    (Number(uploadEdits.focalPoint.x) !== (currentFileData?.focalX ?? 50) ||
-      Number(uploadEdits.focalPoint.y) !== (currentFileData?.focalY ?? 50))
-  const editsForTransformer = isResettingCrop
-    ? { ...uploadEdits, crop: undefined, heightInPixels: undefined, widthInPixels: undefined }
-    : uploadEdits
+  let isRequestOnlyDefault = false
+  let expectedDefaultMimeType: string | undefined
 
   try {
-    const pipeline = await planTransformerPipeline({
-      args: {
-        collectionSlug: collectionConfig.slug,
-        mimeType: file.mimetype,
-        operation: 'upload',
-        req,
-      },
-      capability: 'transformFile',
-      transformers: req.payload.config.upload?.transformers ?? [],
+    const workingDoc = structuredClone({
+      ...currentFileData,
+      ...incomingFileData,
+      mimeType: file.mimetype,
     })
 
-    // A large client upload can arrive as a bounded probe alongside a temp file. Transformers
-    // need the whole file, so leave such an upload untouched rather than buffering it.
-    const canRunTransformers = pipeline.length > 0 && hasFullFileContents(file)
+    if (!retainedOriginal && (req.file || externalUploadSource)) {
+      let dimensions: { height: number; width: number } | undefined
+
+      if (canResizeImage(file.mimetype)) {
+        try {
+          dimensions = await getImageSize({ file })
+        } catch {
+          // An unrecognized image has no known bounds; its adapter validates the source.
+        }
+      }
+
+      workingDoc.original = {
+        filename: file.name,
+        filesize: file.size,
+        mimeType: file.mimetype,
+        ...dimensions,
+      }
+    }
+
+    if (transformStateWrite.shouldValidate) {
+      validateTransformState({
+        collectionSlug: collectionConfig.slug,
+        doc: workingDoc,
+        req,
+        value: workingDoc._transforms,
+      })
+    }
+    const pipelineOriginalDoc = createDocumentSnapshot({ doc: workingDoc })
+    const plannedPipeline =
+      replayPipeline ??
+      (await planTransformerPipeline({
+        args: {
+          collectionSlug: collectionConfig.slug,
+          doc: workingDoc,
+          operation: 'upload',
+          originalDoc: pipelineOriginalDoc,
+          req,
+        },
+        capability: 'transformFile',
+        transformers: req.payload.config.upload?.transformers ?? [],
+      }))
+
+    const originalSource =
+      replaySource ??
+      createUploadFileSource({
+        collectionSlug: collectionConfig.slug,
+        file,
+        req,
+      })
+    // The legacy variants bridge needs a complete input; public stages consume lazy sources.
+    const pipeline = plannedPipeline.filter(
+      ({ transformer }) =>
+        Boolean(replaySource) ||
+        hasFullFileContents(file) ||
+        !getUploadTransformerInternal(transformer)?.prepareUpload,
+    )
+    const canRunTransformers = pipeline.length > 0
+    isRequestOnlyDefault =
+      !canRunTransformers &&
+      Boolean(workingDoc._transforms && Object.keys(workingDoc._transforms).length)
+
+    if (isRequestOnlyDefault) {
+      const requestPipeline = await planTransformerPipeline({
+        args: {
+          collectionSlug: collectionConfig.slug,
+          doc: workingDoc,
+          operation: 'request',
+          originalDoc: pipelineOriginalDoc,
+          purpose: 'persisted-default',
+          req,
+        },
+        capability: 'handleRequest',
+        mimeType: originalSource.mimeType,
+        transformers: req.payload.config.upload?.transformers ?? [],
+      })
+
+      assertTransformCoverage({ pipeline: requestPipeline, state: workingDoc._transforms })
+      expectedDefaultMimeType = workingDoc.mimeType
+    }
+
+    if (canRunTransformers && workingDoc._transforms) {
+      assertTransformCoverage({ pipeline, state: workingDoc._transforms })
+    }
 
     const bridgeTransformers = canRunTransformers
-      ? pipeline.filter((transformer) =>
-          Boolean(getUploadTransformerInternal(transformer)?.prepareUpload),
+      ? pipeline.filter(
+          ({ transformer }) =>
+            Boolean(getUploadTransformerInternal(transformer)?.prepareUpload) &&
+            transformer.mimeTypes.some((pattern) =>
+              matchesMimeType({ mimeType: originalSource.mimeType, pattern }),
+            ),
         )
       : []
 
     const bridgeTransformer =
-      bridgeTransformers.find((transformer) =>
+      bridgeTransformers.find(({ transformer }) =>
         getUploadTransformerInternal(transformer)!.handlesCollection?.({
           collectionSlug: collectionConfig.slug,
         }),
@@ -347,8 +547,7 @@ export const generateFileData = async <T>({
 
     // The chosen bridge's task options are private to it, so other bridges must not see them.
     const bridgeTaskPipeline = pipeline.filter(
-      (transformer) =>
-        transformer === bridgeTransformer || !bridgeTransformers.includes(transformer),
+      (stage) => stage === bridgeTransformer || !bridgeTransformers.includes(stage),
     )
 
     let originalWebFile: File | undefined
@@ -357,28 +556,52 @@ export const generateFileData = async <T>({
     let sizeResults: PreparedUploadTransformation[] = []
 
     if (canRunTransformers) {
-      const fileContents = file.tempFilePath ? await openAsBlob(file.tempFilePath) : file.data
-      originalWebFile = new File([fileContents], file.name, { type: file.mimetype })
-      if (file.tempFilePath) {
-        setUploadFilePath(originalWebFile, file.tempFilePath)
-      }
-
       if (bridgeTransformer) {
-        const bridge = getUploadTransformerInternal(bridgeTransformer)!
-
+        const bridge = getUploadTransformerInternal(bridgeTransformer.transformer)!
+        originalWebFile = new File(
+          [
+            Buffer.from(
+              await originalSource.arrayBuffer({
+                maxBytes: bridge.maxSourceBytes ?? 64 * 1024 * 1024,
+              }),
+            ),
+          ],
+          file.name,
+          { type: file.mimetype },
+        )
+        if (file.tempFilePath) {
+          setUploadFilePath(originalWebFile, file.tempFilePath)
+        }
         const results = await bridge.prepareUpload!({
           collectionSlug: collectionConfig.slug,
+          doc: workingDoc,
           file: originalWebFile,
           req,
           transform: (task) =>
             transformUploadFile({
               collectionSlug: collectionConfig.slug,
+              doc: task.fieldPath === 'filename' ? workingDoc : structuredClone(workingDoc),
               file: task.file ?? originalWebFile!,
-              options: task.options,
-              pipeline: bridgeTaskPipeline,
+              originalDoc: pipelineOriginalDoc,
+              originalSource,
+              pipeline: (task.fieldPath === 'filename'
+                ? bridgeTaskPipeline
+                : [bridgeTransformer]
+              ).map((stage) =>
+                stage === bridgeTransformer ? { ...stage, options: task.options } : stage,
+              ),
               req,
+              transformers: (task.fieldPath === 'filename'
+                ? (req.payload.config.upload?.transformers ?? [])
+                : [bridgeTransformer.transformer]
+              ).filter(
+                (transformer) =>
+                  Boolean(replaySource) ||
+                  hasFullFileContents(file) ||
+                  !getUploadTransformerInternal(transformer)?.prepareUpload,
+              ),
             }),
-          uploadEdits: editsForTransformer,
+          uploadEdits,
         })
 
         const mainResult = results.find((result) => result.fieldPath === 'filename')
@@ -391,52 +614,34 @@ export const generateFileData = async <T>({
       } else {
         mainWebFile = await transformUploadFile({
           collectionSlug: collectionConfig.slug,
-          file: originalWebFile,
-          options: undefined,
+          doc: workingDoc,
+          originalDoc: pipelineOriginalDoc,
           pipeline,
           req,
+          source: originalSource,
+          transformers: (req.payload.config.upload?.transformers ?? []).filter(
+            (transformer) =>
+              Boolean(replaySource) ||
+              hasFullFileContents(file) ||
+              !getUploadTransformerInternal(transformer)?.prepareUpload,
+          ),
         })
       }
     }
 
-    // Saved for any resizable image, not just one a transformer processed, so it's kept with no
-    // transformer registered and on a header-only client upload.
-    if (
-      focalPointEnabled &&
-      uploadEdits?.focalPoint &&
-      (hasDimensionsFromBridge || canResizeImage(file.mimetype))
-    ) {
-      fileData.focalX = isNumber(uploadEdits.focalPoint.x)
-        ? Math.round(uploadEdits.focalPoint.x)
-        : 50
-      fileData.focalY = isNumber(uploadEdits.focalPoint.y)
-        ? Math.round(uploadEdits.focalPoint.y)
-        : 50
+    newData = { ...incomingFileData, ...workingDoc } as T
+
+    if (mainWebFile && workingDoc._transforms) {
+      validateTransformState({
+        collectionSlug: collectionConfig.slug,
+        doc: workingDoc,
+        req,
+        value: workingDoc._transforms,
+      })
     }
 
     const fileWasTransformed = Boolean(mainWebFile && mainWebFile !== originalWebFile)
-    const hasReusableOriginalMain = Boolean(
-      isResettingCrop && !fileWasTransformed && retainedOriginal,
-    )
-    if (hasReusableOriginalMain && !hasFocalPointChange && retainedOriginal) {
-      return {
-        data: {
-          ...incomingFileData,
-          _objectKey: retainedOriginal._objectKey,
-          filename: retainedOriginal.filename,
-          filesize: retainedOriginal.filesize,
-          height: retainedOriginal.height,
-          mimeType: retainedOriginal.mimeType,
-          original: retainedOriginal,
-          prefix: retainedOriginal.prefix,
-          url: retainedOriginal.url,
-          variants: currentFileData?.variants,
-          width: retainedOriginal.width,
-          ...(draft ? { _status: 'draft' } : {}),
-        } as T,
-        files: [],
-      }
-    }
+    const hasReusableOriginalMain = Boolean(retainedOriginal && !fileWasTransformed)
     const mainBuffer = fileWasTransformed
       ? Buffer.from(await mainWebFile!.arrayBuffer())
       : undefined
@@ -471,6 +676,10 @@ export const generateFileData = async <T>({
 
     // Only probe formats that could carry dimensions - probing reads the file, and a large
     // non-image upload may only exist as a temp file we deliberately never buffer.
+    if (replaySource && !mainBuffer) {
+      fileData.width = retainedOriginal?.width ?? undefined
+      fileData.height = retainedOriginal?.height ?? undefined
+    }
     if (!hasDimensionsFromBridge && isProcessableImage(mimeType)) {
       try {
         const probed = await getImageSize({
@@ -510,6 +719,14 @@ export const generateFileData = async <T>({
     }
 
     fileData.filename = fsSafeName
+    fileData.url =
+      generateFilePathOrURL({
+        collectionSlug: collectionConfig.slug,
+        config: req.payload.config,
+        filename: fsSafeName,
+        relative: true,
+        urlOrPath: undefined,
+      }) ?? undefined
     if (hasReusableOriginalMain) {
       fileData.url = retainedOriginal!.url
     }
@@ -584,7 +801,7 @@ export const generateFileData = async <T>({
 
       if (fileWasTransformed && !retainedOriginal && !providerOriginal) {
         filesToSave.push({
-          buffer: Buffer.from(await originalWebFile!.arrayBuffer()),
+          buffer: Buffer.from(await originalSource.arrayBuffer({ maxBytes: file.size })),
           path: `${staticPath}/${originalFilename}`,
         })
       }
@@ -733,7 +950,13 @@ export const generateFileData = async <T>({
           height: result.height!,
           mimeType: sizeMimeType,
           prefix: providerOriginal?.prefix ?? currentFileData?.prefix,
-          url: null,
+          url: generateFilePathOrURL({
+            collectionSlug: collectionConfig.slug,
+            config: req.payload.config,
+            filename: imageName,
+            relative: true,
+            urlOrPath: undefined,
+          }),
           width: result.width!,
         }
 
@@ -749,8 +972,25 @@ export const generateFileData = async <T>({
       fileData.variants = sizes
     }
   } catch (err) {
+    if (err instanceof ValidationError) {
+      throw err
+    }
     req.payload.logger.error(err)
     throw new FileUploadError(req.t)
+  }
+
+  const urlField = collectionConfig.flattenedFields?.find((field) => field.name === 'url')
+  if (urlField?.localized && 'url' in fileData && req.payload.config.localization) {
+    const priorURLs = (newData as Document).url
+    const locale =
+      req.locale === 'all'
+        ? req.payload.config.localization.defaultLocale
+        : (req.locale ?? req.payload.config.localization.defaultLocale)
+
+    ;(fileData as Document).url = {
+      ...(typeof priorURLs === 'object' && priorURLs !== null ? priorURLs : {}),
+      [locale]: fileData.url,
+    }
   }
 
   newData = {
@@ -759,67 +999,90 @@ export const generateFileData = async <T>({
     ...(draft ? { _status: 'draft' } : {}),
   }
 
+  if (isRequestOnlyDefault && fileData.original) {
+    const { name: stem, ext } = parseFilename(fileData.original.filename)
+    const filename = await getSafeFileName({
+      collectionSlug: collectionConfig.slug,
+      desiredFilename: `${stem}-default${ext ? `.${ext}` : ''}`,
+      prefix: (newData as Document).prefix,
+      req,
+      staticPath,
+    })
+
+    newData = {
+      ...newData,
+      _objectKey: null,
+      filename,
+      filesize: null,
+      height: null,
+      mimeType: expectedDefaultMimeType,
+      url: null,
+      variants: getLogicalVariants({ collection: collectionConfig, filename }),
+      width: null,
+    }
+  }
+
+  validateTransformState({
+    collectionSlug: collectionConfig.slug,
+    doc: newData,
+    req,
+    value: (newData as Document)._transforms,
+  })
+  await validateTransformedDocument({
+    collection: collectionConfig,
+    doc: newData,
+    operation,
+    originalDoc: validationBaseline,
+    overrideAccess,
+    req,
+  })
+
   return {
     data: newData,
     files: filesToSave,
   }
 }
 
-/**
- * Parse upload edits from req or incoming data
- */
-function parseUploadEditsFromReqOrIncomingData(args: {
+function getCanonicalUploadEdits({
+  data,
+  operation,
+}: {
   data: unknown
-  isDuplicating?: boolean
   operation: 'create' | 'update'
-  originalDoc: unknown
-  req: PayloadRequest
 }): UploadEdits {
-  const { data, isDuplicating, operation, originalDoc, req } = args
+  const focalPoint = (data as FileData)?._transforms?.focalPoint
 
-  // Get intended focal point change from query string or incoming data
-  const uploadEdits =
-    req.query?.uploadEdits && typeof req.query.uploadEdits === 'object'
-      ? (req.query.uploadEdits as UploadEdits)
+  return focalPoint
+    ? { focalPoint }
+    : operation === 'create'
+      ? { focalPoint: { x: 50, y: 50 } }
       : {}
+}
 
-  if (uploadEdits.focalPoint) {
-    return uploadEdits
-  }
+function getLogicalVariants({
+  collection,
+  filename,
+  shouldClear = false,
+}: {
+  collection: Collection['config']
+  filename: string
+  shouldClear?: boolean
+}): FileSizes {
+  const { name: stem, ext } = parseFilename(filename)
 
-  const incomingData = data as FileData
-  const origDoc = originalDoc as FileData
-
-  if (origDoc && 'focalX' in origDoc && 'focalY' in origDoc) {
-    // Admin always resends the current focal point, so treat an unchanged value as no edit.
-    if (incomingData?.focalX === origDoc.focalX && incomingData?.focalY === origDoc.focalY) {
-      return undefined!
-    }
-
-    if (isDuplicating) {
-      uploadEdits.focalPoint = {
-        x: incomingData?.focalX || origDoc.focalX!,
-        y: incomingData?.focalY || origDoc.focalY!,
-      }
-      return uploadEdits
-    }
-  }
-
-  if (incomingData?.focalX && incomingData?.focalY) {
-    uploadEdits.focalPoint = {
-      x: incomingData.focalX,
-      y: incomingData.focalY,
-    }
-    return uploadEdits
-  }
-
-  // If no focal point is set, default to center
-  if (operation === 'create') {
-    uploadEdits.focalPoint = {
-      x: 50,
-      y: 50,
-    }
-  }
-
-  return uploadEdits
+  return Object.fromEntries(
+    (collection.upload.variants ?? []).map(({ name }) => [
+      name,
+      {
+        filename: shouldClear
+          ? null
+          : getSanitizedUploadFilename(`${stem}-${name}${ext ? `.${ext}` : ''}`),
+        filesize: null,
+        height: null,
+        mimeType: null,
+        url: null,
+        width: null,
+      },
+    ]),
+  ) as FileSizes
 }

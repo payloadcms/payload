@@ -1,9 +1,13 @@
 import type { HandleTransformRequestArgs, HandleTransformRequestResult } from 'payload'
 import type { SharpOptions } from 'sharp'
 
-import type { SharpDependency, SharpDynamicDefaults } from './types.js'
+import { createFileSource } from 'payload/internal'
+
+import type { SharpCollectionConfig, SharpDependency, SharpDynamicDefaults } from './types.js'
 
 import { parseDynamicResize } from './parseDynamicResize.js'
+import { resolveFocalPoint } from './resolveFocalPoint.js'
+import { transformState } from './transformState.js'
 
 // Must match generateFileData.ts's allow-list — the only MIME types Sharp auto-detects multi-frame animation for.
 const ANIMATED_MIME_TYPES = ['image/avif', 'image/gif', 'image/webp']
@@ -16,13 +20,99 @@ const ANIMATED_MIME_TYPES = ['image/avif', 'image/gif', 'image/webp']
  * uncaught; Payload's orchestrator logs and aborts the pipeline.
  */
 export function createHandleRequest({
+  collections = {},
   dynamicDefaults,
+  maxSourceBytes = 64 * 1024 * 1024,
   sharpDependency,
 }: {
+  collections?: Partial<Record<string, SharpCollectionConfig>>
   dynamicDefaults: Required<SharpDynamicDefaults>
+  maxSourceBytes?: number
   sharpDependency: SharpDependency
 }): (args: HandleTransformRequestArgs) => Promise<HandleTransformRequestResult> {
-  return async ({ getSourceFile, mimeType, req }) => {
+  return async ({ collectionSlug: argumentsCollectionSlug, doc, getSourceFile, purpose, req }) => {
+    if (purpose === 'persisted-default') {
+      const source = await getSourceFile()
+      let file = await transformState({
+        buffer: Buffer.from(
+          await createFileSource({
+            filename: doc.original?.filename ?? doc.filename,
+            mimeType: doc.original?.mimeType ?? doc.mimeType,
+            retrieve: () => Promise.resolve(source),
+          }).arrayBuffer({ maxBytes: maxSourceBytes }),
+        ),
+        filename: doc.original?.filename ?? doc.filename,
+        mimeType:
+          source.headers.get('Content-Type')?.split(';')[0]?.trim() ??
+          doc.original?.mimeType ??
+          doc.mimeType,
+        sharpDependency,
+        state: doc._transforms,
+      })
+      const variantKey = Object.keys(doc.variants ?? {}).find(
+        (key) => doc.variants[key]?.filename === req.routeParams?.filename,
+      )
+      const variant =
+        variantKey &&
+        (
+          collections[argumentsCollectionSlug]?.variants ??
+          req.payload?.collections?.[argumentsCollectionSlug]?.config.upload.variants
+        )?.find(({ name }) => name === variantKey)
+
+      if (variant && (variant.width || variant.height)) {
+        const original = doc.original ?? doc
+        const focalPoint =
+          original.width && original.height
+            ? resolveFocalPoint({
+                height: original.height,
+                state: doc._transforms,
+                width: original.width,
+              })
+            : undefined
+
+        file = await transformState({
+          buffer: Buffer.from(await file.arrayBuffer()),
+          filename: file.name,
+          mimeType: file.type,
+          sharpDependency,
+          state: {
+            encoding: doc._transforms.encoding,
+            focalPoint,
+            metadataPolicy: doc._transforms.metadataPolicy,
+            resize: {
+              ...(variant.width
+                ? { height: variant.height, width: variant.width }
+                : { height: variant.height! }),
+              fit: variant.fit,
+              withoutEnlargement: variant.withoutEnlargement,
+            },
+          },
+        })
+        if (variant.formatOptions) {
+          let image = sharpDependency(Buffer.from(await file.arrayBuffer()))
+
+          if (doc._transforms.metadataPolicy?.mode === 'preserve') {
+            image = image.withMetadata({ orientation: 1 })
+          }
+          const { data, info } = await image
+            .toFormat(variant.formatOptions.format, {
+              ...variant.formatOptions.options,
+              ...doc._transforms.encoding,
+            })
+            .toBuffer({ resolveWithObject: true })
+
+          file = new File([data], file.name, { type: `image/${info.format}` })
+        }
+      }
+      const buffer = Buffer.from(await file.arrayBuffer())
+
+      return {
+        response: new Response(buffer, {
+          headers: { 'Content-Length': String(buffer.length), 'Content-Type': file.type },
+        }),
+        status: 'continue',
+      }
+    }
     const parseResult = parseDynamicResize({
       limits: dynamicDefaults,
       searchParams: req.searchParams ?? new URLSearchParams(),
@@ -49,7 +139,14 @@ export function createHandleRequest({
       return { response: source, status: 'complete' }
     }
 
-    const sourceBuffer = Buffer.from(await source.arrayBuffer())
+    const mimeType = source.headers.get('Content-Type')?.split(';')[0]?.trim() ?? ''
+    const sourceBuffer = Buffer.from(
+      await createFileSource({
+        filename: doc.filename,
+        mimeType,
+        retrieve: () => Promise.resolve(source),
+      }).arrayBuffer({ maxBytes: maxSourceBytes }),
+    )
 
     const isAnimated = ANIMATED_MIME_TYPES.includes(mimeType)
     const sharpOptions: SharpOptions = isAnimated ? { animated: true } : {}
@@ -105,7 +202,7 @@ export function createHandleRequest({
     }
 
     // Sharp drops the EXIF orientation tag on output, so apply it to the pixels first.
-    const resizedBuffer = await sharpDependency(sourceBuffer, sharpOptions)
+    let resizedBuffer = await sharpDependency(sourceBuffer, sharpOptions)
       .rotate()
       .resize({
         fit: dynamicDefaults.fit,
@@ -116,6 +213,35 @@ export function createHandleRequest({
       })
       .toBuffer()
 
+    const original = doc.original ?? doc
+    const focalPoint =
+      doc._transforms && original.width && original.height
+        ? resolveFocalPoint({
+            height: original.height,
+            state: doc._transforms,
+            width: original.width,
+          })
+        : undefined
+
+    if (focalPoint && dynamicDefaults.fit === 'cover' && parseResult.width && parseResult.height) {
+      const file = await transformState({
+        buffer: sourceBuffer,
+        filename: doc.filename,
+        mimeType,
+        sharpDependency,
+        state: {
+          focalPoint,
+          resize: {
+            fit: 'cover',
+            height: parseResult.height,
+            width: parseResult.width,
+            withoutEnlargement,
+          },
+        },
+      })
+
+      resizedBuffer = Buffer.from(await file.arrayBuffer())
+    }
     const headers = new Headers()
     headers.set('Content-Type', mimeType)
     headers.set('Content-Length', String(resizedBuffer.length))

@@ -138,14 +138,7 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
     const { doc: created } = await createResponse.json<{ doc: { id: string; url: string } }>()
 
     const cropResponse = await restClient.PATCH(`/${mediaSlug}/${created.id}`, {
-      body: JSON.stringify({}),
-      query: {
-        uploadEdits: {
-          crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
-          heightInPixels: 800,
-          widthInPixels: 800,
-        },
-      },
+      body: JSON.stringify({ _transforms: { crop: { height: 800, width: 800, x: 0, y: 0 } } }),
     })
     expect(cropResponse.status).toBe(200)
     const { doc: cropped } = await cropResponse.json<{ doc: { id: string; url: string } }>()

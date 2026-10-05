@@ -9,6 +9,7 @@ import { canResizeImage } from './canResizeImage.js'
 import { createSharpFromFile } from './createSharpFromFile.js'
 import { getImageResizeAction } from './getImageResizeAction.js'
 import { mapWithBoundedConcurrency } from './mapWithBoundedConcurrency.js'
+import { resolveFocalPoint } from './resolveFocalPoint.js'
 import { sanitizeResizeConfig } from './sanitizeResizeConfig.js'
 
 /**
@@ -39,7 +40,7 @@ export function createPrepareLegacyUpload({
   collections: Partial<Record<string, SharpCollectionConfig>>
   sharpDependency: SharpDependency
 }): NonNullable<UploadTransformerInternal['prepareUpload']> {
-  return async ({ collectionSlug, file, req, transform, uploadEdits }) => {
+  return async ({ collectionSlug, doc, file, req, transform, uploadEdits }) => {
     const collectionUpload = collections[collectionSlug] ?? {}
 
     const fileSupportsResize = canResizeImage(file.type)
@@ -54,7 +55,9 @@ export function createPrepareLegacyUpload({
     if (fileSupportsResize) {
       const originalMeta = await tryProbe(file, sharpDependency)
       if (originalMeta) {
-        originalDimensions = { height: originalMeta.height, width: originalMeta.width }
+        originalDimensions = [5, 6, 7, 8].includes(originalMeta.orientation!)
+          ? { height: originalMeta.width, width: originalMeta.height }
+          : { height: originalMeta.height, width: originalMeta.width }
       }
     }
 
@@ -90,23 +93,40 @@ export function createPrepareLegacyUpload({
       collectionUpload.focalPoint ??
       req.payload.collections[collectionSlug]?.config.upload?.focalPoint
     const focalPointEnabled = effectiveFocalPoint !== false
-    const variants = collectionUpload.variants
+    const configuredVariants = req.payload.collections?.[collectionSlug]?.config.upload?.variants
+    const variants = configuredVariants
+      ? collectionUpload.variants?.filter(({ name }) =>
+          configuredVariants.some((variant) => variant.name === name),
+        )
+      : collectionUpload.variants
 
     if (canProcessAsImage && Array.isArray(variants) && originalDimensions) {
+      const savedFocalPoint =
+        doc?._transforms &&
+        resolveFocalPoint({
+          height: originalDimensions.height,
+          state: doc._transforms,
+          width: originalDimensions.width,
+        })
       const focalPoint: FocalPoint | undefined =
-        focalPointEnabled && uploadEdits?.focalPoint
+        savedFocalPoint ??
+        (focalPointEnabled && uploadEdits?.focalPoint
           ? {
               x: isNumber(uploadEdits.focalPoint.x) ? Math.round(uploadEdits.focalPoint.x) : 50,
               y: isNumber(uploadEdits.focalPoint.y) ? Math.round(uploadEdits.focalPoint.y) : 50,
             }
-          : undefined
+          : undefined)
+      const effectiveDimensions = {
+        height: mainResult.height ?? originalDimensions.height,
+        width: mainResult.width ?? originalDimensions.width,
+      }
 
       const sizeResults = await mapWithBoundedConcurrency(variants, async (rawConfig) => {
         const imageResizeConfig = sanitizeResizeConfig(rawConfig)
         const fieldPath = `variants.${imageResizeConfig.name}` as const
 
         const resizeAction = getImageResizeAction({
-          dimensions: originalDimensions,
+          dimensions: effectiveDimensions,
           hasFocalPoint: Boolean(focalPoint),
           imageResizeConfig,
         })
@@ -117,12 +137,13 @@ export function createPrepareLegacyUpload({
 
         const sizeResultFile = await transform({
           fieldPath,
+          file: mainResultFile,
           options: {
             collectionUpload,
             focalPoint: resizeAction === 'resizeWithFocalPoint' ? focalPoint : undefined,
             imageResizeConfig,
             kind: 'size',
-            originalDimensions,
+            originalDimensions: effectiveDimensions,
           } satisfies SharpUploadTaskOptions,
         })
 
@@ -167,8 +188,8 @@ async function describeResult({
   return {
     fieldPath,
     file: resultFile,
-    height: meta.height,
+    height: [5, 6, 7, 8].includes(meta.orientation!) ? meta.width : meta.height,
     mimeType: resultFile.type,
-    width: meta.width,
+    width: [5, 6, 7, 8].includes(meta.orientation!) ? meta.height : meta.width,
   }
 }

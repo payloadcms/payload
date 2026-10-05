@@ -1,3 +1,4 @@
+import { createFileSource } from '../../payload/src/uploads/transformers/createFileSource.js'
 import type { PayloadRequest } from 'payload'
 
 import sharp from 'sharp'
@@ -74,6 +75,42 @@ const sampleRawPixel = ({
 }
 
 describe('createTransformFile', () => {
+  it.each(['main', 'size'] as const)(
+    'should retain saved metadata and encoding through configured %s processing',
+    async (kind) => {
+      const buffer = await sharp({
+        create: { width: 20, height: 10, channels: 3, background: 'red' },
+      })
+        .withMetadata({ density: 300 })
+        .jpeg()
+        .toBuffer()
+      const file = new File([buffer], 'metadata.jpg', { type: 'image/jpeg' })
+      const options: SharpUploadTaskOptions =
+        kind === 'main'
+          ? { kind, collectionUpload: { resizeOptions: { width: 10 } } }
+          : {
+              kind,
+              collectionUpload: {},
+              originalDimensions: { width: 20, height: 10 },
+              imageResizeConfig: { name: 'small', width: 10 },
+            }
+      const result = await createTransformFile({ sharpDependency: sharp })({
+        source: createFileSource({ file }),
+        doc: {
+          _transforms: { metadataPolicy: { mode: 'preserve' }, encoding: { progressive: true } },
+        },
+        originalDoc: {},
+        options,
+        req: makeReq(),
+      })
+      const metadata = await sharp(Buffer.from(await result.file!.arrayBuffer())).metadata()
+
+      expect(metadata.exif).toBeDefined()
+      expect(metadata.density).toBe(300)
+      expect(metadata.isProgressive).toBe(true)
+    },
+  )
+
   describe('main (transformMain)', () => {
     it('should trim uniform-colour padding from the main file', async () => {
       const square = await makeImageBuffer({
@@ -91,7 +128,9 @@ describe('createTransformFile', () => {
       const transformFile = createTransformFile({ sharpDependency: sharp })
 
       const result = await transformFile({
-        file,
+        source: createFileSource({ file }),
+        doc: {},
+        originalDoc: {},
         options: {
           collectionUpload: { trimOptions: {} },
           kind: 'main',
@@ -116,7 +155,9 @@ describe('createTransformFile', () => {
         const transformFile = createTransformFile({ sharpDependency: sharp })
 
         const result = await transformFile({
-          file,
+          source: createFileSource({ file }),
+          doc: {},
+          originalDoc: {},
           options: {
             collectionUpload: { resizeOptions },
             crop: {
@@ -165,7 +206,9 @@ describe('createTransformFile', () => {
         const transformFile = createTransformFile({ sharpDependency: sharp })
 
         const result = await transformFile({
-          file,
+          source: createFileSource({ file }),
+          doc: {},
+          originalDoc: {},
           options: {
             collectionUpload: {},
             focalPoint,

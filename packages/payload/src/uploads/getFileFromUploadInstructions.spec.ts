@@ -310,6 +310,61 @@ describe('getFileFromUploadInstructions', () => {
     expect(handler).not.toHaveBeenCalled()
   })
 
+  it('should keep a custom transformer source lazy while probing image metadata', async () => {
+    const handler = vi.fn(async (handlerReq: PayloadRequest) => {
+      expect(handlerReq.headers.get('range')).toBe(`bytes=0-${HEADER_PROBE_BYTE_LENGTH - 1}`)
+      return new Response(MINIMAL_PNG, {
+        headers: { 'Content-Type': 'image/png', 'Content-Length': String(MINIMAL_PNG.length) },
+      })
+    })
+
+    const req = createReq([handler], {})
+    req.payload.config.upload.transformers = [
+      { slug: 'custom', mimeTypes: ['image/*'], transformFile: vi.fn() },
+    ]
+
+    const file = await getFileFromUploadInstructions({
+      collectionSlug: 'media',
+      file: createUploadReferenceFile({
+        filename: 'photo.png',
+        mimeType: 'image/png',
+        size: MINIMAL_PNG.length,
+      }),
+      req,
+    })
+
+    expect(handler).toHaveBeenCalledTimes(1)
+    expect(file.tempFilePath).toBeUndefined()
+  })
+
+  it('uses a bounded existence probe when a transformer declines the upload', async () => {
+    const handler = vi.fn((handlerReq: PayloadRequest) => {
+      expect(handlerReq.headers.get('range')).toBe('bytes=0-0')
+      return new Response('x', {
+        headers: { 'Content-Range': 'bytes 0-0/18' },
+        status: 206,
+      })
+    })
+
+    const req = createReq([handler], {})
+    req.payload.config.upload.transformers = [
+      {
+        slug: 'custom',
+        canTransform: () => false,
+        mimeTypes: ['*/*'],
+        transformFile: vi.fn(),
+      },
+    ]
+
+    await getFileFromUploadInstructions({
+      collectionSlug: 'media',
+      file: createUploadReferenceFile(),
+      req,
+    })
+
+    expect(handler).toHaveBeenCalledOnce()
+  })
+
   it('fetches only a bounded header for an image with no configured adjustments', async () => {
     const handler = vi.fn(async (handlerReq: PayloadRequest) => {
       expect(handlerReq.headers.get('range')).toBe(`bytes=0-${HEADER_PROBE_BYTE_LENGTH - 1}`)

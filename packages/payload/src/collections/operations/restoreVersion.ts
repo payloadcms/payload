@@ -19,13 +19,20 @@ import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
+import { runLocalFileUpdate } from '../../uploads/fileVersioning/archive.js'
+import { runCloudFileUpdate } from '../../uploads/fileVersioning/cloudStorage.js'
 import {
   abortFileOperationScope,
   beginFileOperationScope,
   completeFileOperationScope,
 } from '../../uploads/fileVersioning/fileOperationManager.js'
 import { runStoredFileRestore } from '../../uploads/fileVersioning/restore.js'
+import { generateFileData } from '../../uploads/generateFileData.js'
 import { restoreUploadDataFromDocument } from '../../uploads/sanitizeUploadData.js'
+import { createDocumentSnapshot } from '../../uploads/transformers/createDocumentSnapshot.js'
+import { planTransformerPipeline } from '../../uploads/transformers/planTransformerPipeline.js'
+import { assertTransformCoverage } from '../../uploads/transformState/assertTransformCoverage.js'
+import { validateTransformState } from '../../uploads/transformState/validateTransformState.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import { hasDraftValidationEnabled } from '../../utilities/getVersionsConfig.js'
@@ -333,6 +340,7 @@ export const restoreVersionOperation = async <
     const writeRestoredVersion = async (restored: JsonObject) => {
       if (collectionConfig.upload) {
         result = restoreUploadDataFromDocument(result, restored, { clearMissing: true })
+        result._transforms = restored._transforms
       }
       if (!draftArg) {
         result = await req.payload.db.updateOne({
@@ -358,12 +366,90 @@ export const restoreVersionOperation = async <
       return savedVersion
     }
 
+    const shouldReplayTransforms = Boolean(
+      collectionConfig.upload &&
+        result.original?.filename &&
+        Object.prototype.hasOwnProperty.call(result, '_transforms'),
+    )
+
+    if (shouldReplayTransforms) {
+      validateTransformState({
+        collectionSlug: collectionConfig.slug,
+        doc: result,
+        req,
+        value: result._transforms,
+      })
+      if (result._transforms && Object.keys(result._transforms).length) {
+        const transformerArgs = {
+          collectionSlug: collectionConfig.slug,
+          doc: result,
+          originalDoc: createDocumentSnapshot({ doc: result }),
+          req,
+        }
+        let pipeline = await planTransformerPipeline({
+          args: { ...transformerArgs, operation: 'upload' },
+          capability: 'transformFile',
+          mimeType: result.original.mimeType,
+          transformers: payload.config.upload.transformers,
+        })
+
+        if (!pipeline.length) {
+          pipeline = await planTransformerPipeline({
+            args: { ...transformerArgs, operation: 'request', purpose: 'persisted-default' },
+            capability: 'handleRequest',
+            mimeType: result.original.mimeType,
+            transformers: payload.config.upload.transformers,
+          })
+        }
+        assertTransformCoverage({ pipeline, state: result._transforms })
+      }
+    }
+
     result = collectionConfig.upload
       ? await runStoredFileRestore({
           id: parentDocID,
           collection: collectionConfig,
           current: prevDocWithLocales,
           req,
+          resolve: shouldReplayTransforms
+            ? async (restored) => {
+                const { data: transformed, files } = await generateFileData({
+                  collection: args.collection,
+                  config: payload.config,
+                  data: restoreUploadDataFromDocument(result, restored),
+                  isReplayRequired: true,
+                  operation: 'update',
+                  originalDoc: restored,
+                  overrideAccess,
+                  req,
+                  throwOnMissingFile: false,
+                })
+                const write = () => Promise.resolve(transformed)
+                // The outer restore owns historical outputs; this nested plan owns only
+                // the copied original and newly generated representations.
+                const stagedSource = { ...restored, filename: null, url: null, variants: {} }
+
+                return collectionConfig.upload.fileOperations
+                  ? runCloudFileUpdate({
+                      id: parentDocID,
+                      collection: collectionConfig,
+                      current: stagedSource,
+                      data: transformed,
+                      files,
+                      req,
+                      write,
+                    })
+                  : runLocalFileUpdate({
+                      id: parentDocID,
+                      collection: collectionConfig,
+                      current: stagedSource,
+                      files,
+                      next: transformed,
+                      req,
+                      write,
+                    })
+              }
+            : undefined,
           selected: versionToRestoreWithLocales,
           write: writeRestoredVersion,
         })
