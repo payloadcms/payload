@@ -15,6 +15,15 @@ describe('file transform state generated types', () => {
     expect<null>().type.toBeAssignableTo<TransformStateMedia['_transforms']>()
   })
 
+  test('should generate stronger optional custom-key types', () => {
+    expect<{ undeclared: number; watermark: { text: string } }>().type.toBeAssignableTo<
+      NonNullable<TransformStateMedia['_transforms']>
+    >()
+    expect<{ watermark: { text: number } }>().type.not.toBeAssignableTo<
+      NonNullable<TransformStateMedia['_transforms']>
+    >()
+  })
+
   test('should support custom keys without a registration type', () => {
     expect<{
       vendor: { nested: [string, number, boolean, null] }

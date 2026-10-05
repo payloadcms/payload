@@ -1,3 +1,5 @@
+import type { JSONSchema4 } from 'json-schema'
+
 import type { Config } from '../../config/types.js'
 import type { Document, PayloadRequest } from '../../types/index.js'
 
@@ -10,6 +12,9 @@ export type FileSource = {
   size?: number
   stream: () => Promise<ReadableStream<Uint8Array>>
 }
+
+/** Optional custom-key schema used for generated types and JSDoc, not runtime validation. */
+export type TransformDefinition = JSONSchema4
 
 export type UploadDocument = Document
 
@@ -105,6 +110,11 @@ export type UploadTransformer = {
    * Must be unique across `upload.transformers`.
    */
   slug: string
+  /**
+   * Optional custom-key definitions for generated types and JSDoc. Built-in keys
+   * cannot be redefined. These neither claim keys nor replace adapter validation.
+   */
+  transformDefinitions?: Record<string, TransformDefinition>
   /**
    * One-file-in, one-file-out upload processing primitive. Never writes to storage.
    */

@@ -130,7 +130,7 @@ Coordinates use orientation-normalized original space, with clockwise rotation. 
 - [ ] Write failing field tests for all upload collections with zero transformers, reserved-field collisions, arbitrary custom keys and nested values; reject alternative values under built-in names.
 - [ ] Test omitted preservation, null clearing, complete replacement with key removal, empty-object normalization, and replacement-source default clearing.
 - [ ] Reject non-JSON values, invalid top-level containers, and invalid built-in shapes/bounds before source retrieval or storage writes. Test adapter rejection without partial effects separately from container validation.
-- [ ] Inject a real JSON field with defaultValue null and admin.hidden true; use named built-in properties with additionalProperties enabled and built-in semantic validators. No mandatory custom-definition registry.
+- [ ] Inject a real JSON field with defaultValue null and admin.hidden true; use named built-in properties with additionalProperties enabled and built-in semantic validators. No mandatory custom-definition registry. Optional adapter `transformDefinitions` enrich generated types and JSDoc without adding core custom-value runtime validation.
 - [ ] Verify REST/GraphQL/Local API round trips and normal access behavior; no physical or provider identity is added by core.
 - [ ] Commit open state and write semantics.
 

@@ -24,7 +24,34 @@ await payload.update({
 })
 ```
 
-Built-in keys use standard shapes. Additional keys accept arbitrary JSON values without a registration step or database migration. Adapters can import the individual shape types and validate their custom values in `canTransform` before processing. Functions, non-finite numbers, cycles, and other values that cannot round-trip as JSON are rejected.
+Built-in keys retain their standard shapes and validation and cannot be redefined. An adapter needing a different shape must use a different custom key. Additional keys accept arbitrary JSON values without a registration step or database migration. Adapters can import the individual shape types and validate their custom values in `canTransform` before processing. Functions, non-finite numbers, cycles, and other values that cannot round-trip as JSON are rejected.
+
+## Optional adapter definitions
+
+Adapters may provide `transformDefinitions` to give custom keys stronger generated types and JSDoc. Each entry is a JSON schema for one custom value; `description` becomes generated documentation. Definitions are optional: undeclared keys remain accepted, and adding them requires no database migration.
+
+```ts
+import type { UploadTransformer } from 'payload'
+
+const transformer: UploadTransformer = {
+  slug: 'watermark',
+  mimeTypes: ['image/*'],
+  transformDefinitions: {
+    watermark: {
+      type: 'object',
+      description: 'Watermark intent interpreted by this adapter.',
+      properties: {
+        text: { type: 'string', description: 'Visible watermark text.' },
+      },
+      required: ['text'],
+      additionalProperties: false,
+    },
+  },
+  // Add canTransform and transformFile or handleRequest for execution.
+}
+```
+
+These definitions enrich the collection's `_transforms` generated type; the exported general `TransformState` remains open. Definitions do not schedule execution or add core runtime validation for custom values. Each adapter validates its custom values before effects, claims the keys it handles, and defines its operation order. Core still validates JSON compatibility and built-in shapes. Redefining a built-in or providing conflicting schemas for the same custom key fails during configuration; identical custom definitions may be shared by adapters.
 
 ## Replacing state
 

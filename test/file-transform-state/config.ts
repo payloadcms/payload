@@ -26,7 +26,18 @@ export default buildConfigWithDefaults({
     upload: {
       transformers: [
         transformer,
-        recordingTransformer({ slug: 'video-recorder', mimeType: 'video/mp4' }),
+        {
+          ...recordingTransformer({ slug: 'video-recorder', mimeType: 'video/mp4' }),
+          transformDefinitions: {
+            watermark: {
+              type: 'object',
+              additionalProperties: false,
+              description: 'Watermark intent interpreted by the video adapter.',
+              properties: { text: { type: 'string', description: 'Visible watermark text.' } },
+              required: ['text'],
+            },
+          },
+        },
         recordingTransformer({ slug: 'pdf-recorder', mimeType: 'application/pdf' }),
       ],
     },

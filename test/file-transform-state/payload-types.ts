@@ -224,6 +224,15 @@ export interface TransformStateMedia {
     rotate?: {
       angle: number;
     };
+    /**
+     * Watermark intent interpreted by the video adapter.
+     */
+    watermark?: {
+      /**
+       * Visible watermark text.
+       */
+      text: string;
+    };
     [k: string]: unknown;
   } | null;
   original?: {
@@ -386,6 +395,15 @@ export interface DynamicTransformStateMedia {
      */
     rotate?: {
       angle: number;
+    };
+    /**
+     * Watermark intent interpreted by the video adapter.
+     */
+    watermark?: {
+      /**
+       * Visible watermark text.
+       */
+      text: string;
     };
     [k: string]: unknown;
   } | null;

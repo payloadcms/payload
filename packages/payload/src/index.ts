@@ -2024,6 +2024,7 @@ export type {
   HandleTransformRequestArgs,
   HandleTransformRequestResult,
   PlannedTransformer,
+  TransformDefinition,
   TransformFileArgs,
   TransformFileResult,
   UploadDocument,

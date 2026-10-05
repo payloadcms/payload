@@ -5,8 +5,8 @@ import type { SanitizedUploadConfig } from './types.js'
 
 import { generateFilePathOrURL } from './generateFilePathOrURL.js'
 import { mimeTypeValidator } from './mimeTypeValidator.js'
+import { buildTransformStateJSONSchema } from './transformState/buildTransformStateJSONSchema.js'
 import { migrateLegacyFocalPoint } from './transformState/migrateLegacyFocalPoint.js'
-import { transformStateJSONSchema } from './transformState/transformStateSchema.js'
 import { validateTransformState } from './transformState/validateTransformState.js'
 import { validateUploadFilename } from './validateUploadFilename.js'
 
@@ -185,7 +185,9 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
             migrateLegacyFocalPoint({ doc: { ...data, _transforms: value } })._transforms,
         ],
       },
-      jsonSchema: transformStateJSONSchema,
+      jsonSchema: buildTransformStateJSONSchema({
+        transformers: config.upload?.transformers ?? [],
+      }),
       validate: (value, { collectionSlug, data, req }) => {
         validateTransformState({ collectionSlug, doc: data, req, value })
 
