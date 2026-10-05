@@ -221,19 +221,21 @@ export const getInstructionsCollection = ({
           delete syncReq.transactionID
           syncReq.payloadDataLoader = getDataLoader(syncReq)
 
+          const { docs } = await req.payload.find({
+            collection: instructionsCollectionSlug,
+            depth: 0,
+            limit: 0,
+            overrideAccess: false,
+            pagination: false,
+            req: syncReq,
+            select: { id: true },
+          })
+          const existingIDs = new Set(docs.map(({ id }) => id))
+
           for (const target of targets) {
             const id = `${target.type}-${target.slug}`
-            const existing = await req.payload.findByID({
-              id,
-              collection: instructionsCollectionSlug,
-              depth: 0,
-              disableErrors: true,
-              overrideAccess: false,
-              req: syncReq,
-              select: { id: true },
-            })
 
-            if (existing) {
+            if (existingIDs.has(id)) {
               continue
             }
 
