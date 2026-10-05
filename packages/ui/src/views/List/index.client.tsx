@@ -196,6 +196,13 @@ export function DefaultListView(props: ListViewClientProps) {
   ])
 
   const collectionLabel = getTranslation(labels?.plural, i18n)
+  const hierarchyParentFieldName =
+    !isInDrawer &&
+    viewType === 'list' &&
+    collectionConfig.hierarchy &&
+    typeof collectionConfig.hierarchy === 'object'
+      ? (collectionConfig.hierarchy.parentFieldName ?? 'parent')
+      : undefined
 
   const { setStepNav } = useStepNav()
 
@@ -396,15 +403,22 @@ export function DefaultListView(props: ListViewClientProps) {
               </DocumentSelectionProvider>
             ) : docs?.length > 0 ? (
               layout === 'grid' && isDataGrouped ? (
-                <GroupedDocumentGrid collectionSlug={collectionSlug} groups={groupedData} />
+                <GroupedDocumentGrid
+                  collectionSlug={collectionSlug}
+                  groups={groupedData}
+                  hierarchyParentFieldName={hierarchyParentFieldName}
+                  viewType={viewType}
+                />
               ) : layout === 'grid' ? (
                 <DocumentGrid
                   adminRoute={adminRoute}
                   collectionLabel={collectionLabel}
                   collectionSlug={collectionSlug}
                   docs={docs}
+                  hierarchyParentFieldName={hierarchyParentFieldName}
                   useAsThumbnail={collectionConfig.admin.useAsThumbnail}
                   useAsTitle={collectionConfig.admin.useAsTitle}
+                  viewType={viewType}
                 />
               ) : (
                 <RelationshipProvider>{Table}</RelationshipProvider>

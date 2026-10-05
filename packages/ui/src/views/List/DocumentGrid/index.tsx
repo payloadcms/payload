@@ -1,20 +1,25 @@
 'use client'
 
-import { formatAdminURL, getBestFitFromSizes, isImage } from 'payload/shared'
+import type { ViewTypes } from 'payload'
+
+import { getBestFitFromSizes, isImage } from 'payload/shared'
 import React from 'react'
 
 import { CardGrid } from '../../../elements/CardGrid/index.js'
 import { DocumentCard } from '../../../elements/DocumentCard/index.js'
 import { DocumentIcon } from '../../../icons/Document/index.js'
 import { useSelection } from '../../../providers/Selection/index.js'
+import { getDocumentListItemURL } from '../getDocumentListItemURL.js'
 
 type DocumentGridProps = {
   readonly adminRoute: string
   readonly collectionLabel: string
   readonly collectionSlug: string
   readonly docs: Record<string, unknown>[]
+  readonly hierarchyParentFieldName?: string
   readonly useAsThumbnail?: string
   readonly useAsTitle?: string
+  readonly viewType?: ViewTypes
 }
 
 const getDocumentID = (doc: Record<string, unknown>): string => {
@@ -84,8 +89,10 @@ export const DocumentGrid: React.FC<DocumentGridProps> = ({
   collectionLabel,
   collectionSlug,
   docs,
+  hierarchyParentFieldName,
   useAsThumbnail,
   useAsTitle,
+  viewType,
 }) => {
   const { selected, setSelection } = useSelection()
 
@@ -109,9 +116,12 @@ export const DocumentGrid: React.FC<DocumentGridProps> = ({
 
         return (
           <DocumentCard
-            href={formatAdminURL({
+            href={getDocumentListItemURL({
               adminRoute,
-              path: `/collections/${collectionSlug}/${encodeURIComponent(documentID)}`,
+              collectionSlug,
+              documentID,
+              hierarchyParentFieldName,
+              viewType,
             })}
             isSelected={
               (typeof id === 'string' || typeof id === 'number') && Boolean(selected.get(id))

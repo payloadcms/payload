@@ -374,6 +374,10 @@ export const renderListView = async (
         drawerSlug,
         enableRowSelections,
         fieldPermissions: permissions?.collections?.[collectionSlug]?.fields,
+        hierarchyParentFieldName:
+          isHierarchyCollection && !drawerSlug && viewType === 'list'
+            ? hierarchyParentFieldName
+            : undefined,
         query,
         req,
         select,
@@ -426,6 +430,10 @@ export const renderListView = async (
         drawerSlug,
         enableRowSelections,
         fieldPermissions: permissions?.collections?.[collectionSlug]?.fields,
+        hierarchyParentFieldName:
+          isHierarchyCollection && !drawerSlug && viewType === 'list'
+            ? hierarchyParentFieldName
+            : undefined,
         i18n: req.i18n,
         orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
         payload: req.payload,

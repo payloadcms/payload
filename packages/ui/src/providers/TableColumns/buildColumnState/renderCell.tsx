@@ -11,7 +11,6 @@ import type {
 } from 'payload'
 
 import { MissingEditorProp } from 'payload'
-import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
@@ -24,6 +23,7 @@ import {
   // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 } from '../../../exports/client/index.js'
 import { hasOptionLabelJSXElement } from '../../../utilities/hasOptionLabelJSXElement.js'
+import { getDocumentListItemURL } from '../../../views/List/getDocumentListItemURL.js'
 import { findValueFromPath } from './findValueFromPath.js'
 
 type RenderCellArgs = {
@@ -33,6 +33,7 @@ type RenderCellArgs = {
   readonly customCellProps: DefaultCellComponentProps['customCellProps']
   readonly doc: Document
   readonly enableRowSelections: boolean
+  readonly hierarchyParentFieldName?: string
   readonly i18n: I18nClient
   readonly isLinkedColumn: boolean
   readonly payload: Payload
@@ -48,6 +49,7 @@ export function renderCell({
   customCellProps,
   doc,
   enableRowSelections,
+  hierarchyParentFieldName,
   i18n,
   isLinkedColumn,
   payload,
@@ -76,15 +78,19 @@ export function renderCell({
   if (isLinkedColumn && req) {
     const collectionConfig = payload.collections[collectionSlug]?.config
     const formatDocURL = collectionConfig?.admin?.formatDocURL
+    const defaultURL = getDocumentListItemURL({
+      adminRoute: req.payload.config.routes?.admin || '/admin',
+      collectionSlug,
+      documentID: doc.id,
+      hierarchyParentFieldName,
+      viewType,
+    })
+
+    if (viewType === 'list' && hierarchyParentFieldName) {
+      customLinkURL = defaultURL
+    }
 
     if (typeof formatDocURL === 'function') {
-      // Generate the default URL that would normally be used
-      const adminRoute = req.payload.config.routes?.admin || '/admin'
-      const defaultURL = formatAdminURL({
-        adminRoute,
-        path: `/collections/${collectionSlug}${viewType === 'trash' ? '/trash' : ''}/${encodeURIComponent(String(doc.id))}`,
-      })
-
       const customURL = formatDocURL({
         collectionSlug,
         defaultURL,
