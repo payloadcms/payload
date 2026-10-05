@@ -7,7 +7,7 @@ import { NotFoundClient } from '@payloadcms/ui/views/NotFound/client'
 import { notFound, redirect, useLoaderData } from '@tanstack/react-router'
 import { Fragment, type ReactNode, useDeferredValue, useEffect } from 'react'
 
-import { getAdminMeta } from '../utilities/meta.js'
+import { getAdminMeta } from '../adapters/metadata.js'
 
 /**
  * Loader supplied by the app — a TanStack Start `createServerFn` that delegates

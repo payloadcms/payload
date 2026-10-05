@@ -5,9 +5,15 @@ import type { ReactNode } from 'react'
 import { NestProviders } from '@payloadcms/ui/layouts/NestProviders'
 import { getRootLayoutData } from '@payloadcms/ui/layouts/Root/getRootLayoutData'
 import { Outlet } from '@tanstack/react-router'
+import { renderServerComponent } from '@tanstack/react-start/rsc'
 import { createElement } from 'react'
 
-import { initAdminContext } from '../../utilities/initAdminContext.server.js'
+import type { SerializableRecord } from '../utilities/toSerializable.js'
+
+import { initAdminContext } from '../utilities/initAdminContext.server.js'
+import { toSerializable } from '../utilities/toSerializable.js'
+
+export type LoadLayoutDataResult = SerializableRecord
 
 export type RootLayoutData = {
   /** Custom admin providers wrapping the Outlet, rendered to an RSC payload before serialization. */
@@ -58,4 +64,27 @@ export async function getLayoutData({
   }
 
   return { ...data, providers }
+}
+
+/**
+ * Resolves the admin layout data for TanStack Start and returns a serializable
+ * payload for the `/_payload` route loader. The framework adapter wraps this in
+ * a `createServerFn` that supplies the app's `config` and generated `importMap`.
+ *
+ * `toSerializable` strips React elements, so the custom-providers element tree
+ * (`config.admin.components.providers`) is rendered to an RSC payload separately
+ * and re-attached.
+ */
+export async function loadLayoutData({
+  config,
+  importMap,
+}: {
+  config: SanitizedConfig
+  importMap: ImportMap
+}): Promise<LoadLayoutDataResult> {
+  const { providers, ...data } = await getLayoutData({ configPromise: config, importMap })
+
+  return toSerializable(data, {
+    providers: providers ? await renderServerComponent(providers as any) : undefined,
+  })
 }

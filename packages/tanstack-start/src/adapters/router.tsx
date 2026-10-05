@@ -9,7 +9,7 @@ import { useLocation, useParams, useRouter, useRouterState } from '@tanstack/rea
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo } from 'react'
 
-import { TanStackLink } from './Link/index.js'
+import { TanStackLink } from '../elements/RouterAdapter/Link/index.js'
 
 const normalizeNavigationTarget = ({
   path,

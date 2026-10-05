@@ -5,9 +5,9 @@ import type { ComponentProps } from 'react'
 import { RootProviders } from '@payloadcms/ui/layouts/RootProviders'
 import { Outlet, useLoaderData } from '@tanstack/react-router'
 
-import type { LoadLayoutDataResult } from '../utilities/loadLayoutData.js'
+import type { LoadLayoutDataResult } from '../adapters/layout.server.js'
 
-import { TanStackRouterAdapter } from '../elements/RouterAdapter/index.js'
+import { TanStackRouterAdapter } from '../adapters/router.js'
 
 /**
  * Loader supplied by the app — a TanStack Start `createServerFn` that delegates

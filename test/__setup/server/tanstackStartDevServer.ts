@@ -1,39 +1,10 @@
 import { spawn } from 'child_process'
-import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { fileURLToPath } from 'node:url'
 
 import type { DevServerResult } from './nextDevServer.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-
-/**
- * Resolve `@payloadcms/tanstack-start/node/cssLoader.mjs` from the dev-server
- * root. We resolve it manually rather than importing the module here so the
- * file path can be passed straight to Node's `--import` flag in the spawned
- * Vite process.
- *
- * The loader is what allows CSS/SCSS/LESS statements that survive into the
- * SSR/RSC bundle (e.g. from a prod-packed `@payloadcms/ui/dist/...` tarball
- * that Vite ends up externalizing) to be silently swallowed instead of
- * crashing every admin route with `ERR_UNKNOWN_FILE_EXTENSION`.
- */
-function resolveCssLoaderUrl(rootDir: string): null | string {
-  const candidates = [
-    path.resolve(
-      rootDir,
-      'node_modules/@payloadcms/tanstack-start/dist/node/registerCssLoader.mjs',
-    ),
-    path.resolve(__dirname, '../../packages/tanstack-start/dist/node/registerCssLoader.mjs'),
-    path.resolve(__dirname, '../../packages/tanstack-start/src/node/registerCssLoader.mjs'),
-  ]
-  for (const candidate of candidates) {
-    if (fs.existsSync(candidate)) {
-      return pathToFileURL(candidate).href
-    }
-  }
-  return null
-}
 
 export async function startTanStackStartDevServer({
   port,
@@ -48,15 +19,13 @@ export async function startTanStackStartDevServer({
   // apps): its vite binary, deps, and config all live under `test/`, and Vite
   // runs with `cwd: test/` so it resolves them from `test/node_modules`. The app
   // itself is located via `srcDirectory` in the config.
-  const testDir = path.resolve(__dirname, '..')
+  const testDir = path.resolve(__dirname, '../..')
   const viteBin = path.resolve(testDir, 'node_modules/.bin/vite')
   const configPath = path.resolve(testDir, 'vite.tanstack.config.ts')
 
-  const cssLoaderUrl = resolveCssLoaderUrl(testDir)
+  const cssLoaderUrl = new URL('./registerCssLoader.mjs', import.meta.url).href
   const previousNodeOptions = process.env.NODE_OPTIONS ?? ''
-  const nodeOptions = cssLoaderUrl
-    ? `${previousNodeOptions} --import ${cssLoaderUrl}`.trim()
-    : previousNodeOptions
+  const nodeOptions = `${previousNodeOptions} --import ${cssLoaderUrl}`.trim()
 
   return new Promise<DevServerResult>((resolve, reject) => {
     const child = spawn(
@@ -78,12 +47,12 @@ export async function startTanStackStartDevServer({
         cwd: testDir,
         env: {
           ...process.env,
-          NODE_OPTIONS: nodeOptions,
-          PORT: String(port),
           NODE_ENV: 'development',
+          NODE_OPTIONS: nodeOptions,
           PAYLOAD_CORE_DEV: 'true',
           PAYLOAD_DROP_DATABASE: process.env.PAYLOAD_DROP_DATABASE ?? 'true',
           PAYLOAD_TEST_SUITE: testSuiteArg,
+          PORT: String(port),
           ROOT_DIR: testDir,
         },
         stdio: ['pipe', 'pipe', 'pipe'],

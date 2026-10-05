@@ -1,12 +1,12 @@
 'use client'
 
-export { TanStackRouterAdapter } from '../elements/RouterAdapter/index.js'
 export {
   PayloadAdminShell,
   type PayloadAdminShellProps,
   withPayloadRoot,
   type WithPayloadRootOptions,
-} from '../layouts/Root/withPayloadRoot.js'
+} from '../adapters/layout.js'
+export { TanStackRouterAdapter } from '../adapters/router.js'
 export {
   type AdminLoad,
   payloadAdminIndexRoute,

@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url'
 import open from 'open'
 import { loadEnv } from 'payload/node'
 
-import type { DevServerResult } from './adapters/nextDevServer.js'
+import type { DevServerResult } from './__setup/server/nextDevServer.js'
 
 import { assertDbReachable } from './__helpers/shared/assertDbReachable.js'
 import { getCurrentDatabaseAdapter } from './dbAdapters.js'
@@ -120,13 +120,13 @@ let serverResult: DevServerResult
 switch (framework) {
   case 'next': {
     if (prodServer) {
-      const { startNextProdServer } = await import('./adapters/nextProdServer.js')
+      const { startNextProdServer } = await import('./__setup/server/nextProdServer.js')
       serverResult = await startNextProdServer({
         port: availablePort,
         testSuiteArg,
       })
     } else {
-      const { startNextDevServer } = await import('./adapters/nextDevServer.js')
+      const { startNextDevServer } = await import('./__setup/server/nextDevServer.js')
       serverResult = await startNextDevServer({
         enableTurbo,
         port: availablePort,
@@ -137,13 +137,17 @@ switch (framework) {
   }
   case 'tanstack-start': {
     if (prodServer) {
-      const { startTanStackStartProdServer } = await import('./adapters/tanstackStartProdServer.js')
+      const { startTanStackStartProdServer } = await import(
+        './__setup/server/tanstackStartProdServer.js'
+      )
       serverResult = await startTanStackStartProdServer({
         port: availablePort,
         testSuiteArg,
       })
     } else {
-      const { startTanStackStartDevServer } = await import('./adapters/tanstackStartDevServer.js')
+      const { startTanStackStartDevServer } = await import(
+        './__setup/server/tanstackStartDevServer.js'
+      )
       serverResult = await startTanStackStartDevServer({
         port: availablePort,
         testSuiteArg,

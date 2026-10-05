@@ -30,7 +30,7 @@ export async function startTanStackStartProdServer({
 }): Promise<DevServerResult> {
   const adminRoute = '/admin'
 
-  const testDir = path.resolve(__dirname, '..')
+  const testDir = path.resolve(__dirname, '../..')
   const repoRoot = path.resolve(testDir, '..')
   const viteBin = path.resolve(testDir, 'node_modules/.bin/vite')
   const configPath = path.resolve(testDir, 'vite.tanstack.prod.config.ts')
