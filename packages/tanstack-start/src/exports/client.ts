@@ -1,8 +1,10 @@
 'use client'
 
 export {
+  type LayoutLoad,
   PayloadAdminShell,
   type PayloadAdminShellProps,
+  payloadLayoutRoute,
   withPayloadRoot,
   type WithPayloadRootOptions,
 } from '../adapters/layout.js'
@@ -11,8 +13,7 @@ export {
   type AdminLoad,
   payloadAdminIndexRoute,
   payloadAdminSplatRoute,
-} from '../routes/adminRoutes.js'
-export { type LayoutLoad, payloadLayoutRoute } from '../routes/layoutRoute.js'
+} from '../adapters/views.js'
 export {
   createServerFunctionClient,
   stripUnserializable,
