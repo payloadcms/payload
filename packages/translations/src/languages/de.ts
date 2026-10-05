@@ -396,6 +396,7 @@ export const deTranslations: DefaultTranslationsObject = {
     globals: 'Globale Dokumente',
     goBack: 'Zurück',
     goToPage: 'Zur Tabellenseite wechseln',
+    gridLayout: 'Raster',
     groupByLabel: 'Nach {{label}} gruppieren',
     hideSidebar: 'Seitenleiste ausblenden',
     import: 'Importieren',
@@ -445,6 +446,8 @@ export const deTranslations: DefaultTranslationsObject = {
     notFound: 'Nicht gefunden',
     nothingFound: 'Keine Ergebnisse',
     noTrashResults: 'Kein {{label}} im Papierkorb.',
+    notSelectedDocument:
+      'Nicht ausgewählt. Drücken Sie die Eingabetaste oder die Leertaste, um die Auswahl zu ändern.',
     notShownInTable: 'Nicht in der Tabelle angezeigt',
     noUpcomingEventsScheduled: 'Keine bevorstehenden Ereignisse geplant.',
     noValue: 'Kein Wert',
@@ -524,6 +527,7 @@ export const deTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} wurde erfolgreich dupliziert.',
     successfullyReindexed:
       '{{count}} von insgesamt {{total}} Dokumenten aus {{collections}} wurden erfolgreich neu indexiert, {{skips}} Entwürfe wurden übersprungen.',
+    tableLayout: 'Tabelle',
     takeOver: 'Übernehmen',
     theme: 'Thema',
     thisLanguage: 'Deutsch',
@@ -583,6 +587,8 @@ export const deTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopieren nach',
     copyToLocale: 'In Sprachvariante kopieren',
     localeToPublish: 'Zu veröffentlichende Sprache',
+    selectedDocument:
+      'Ausgewählt. Drücken Sie die Eingabetaste oder die Leertaste, um die Auswahl zu ändern.',
     selectedLocales: 'Ausgewählte Sprachen',
     selectLocaleToCopy: 'Sprache zum Kopieren auswählen',
     selectLocaleToDuplicate: 'Sprachen zum Duplizieren auswählen',

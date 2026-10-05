@@ -3,6 +3,7 @@
 import React from 'react'
 
 import { useRouter } from '../../providers/RouterAdapter/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { Link } from '../Link/index.js'
 import './index.css'
 
@@ -30,6 +31,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
   title,
 }) => {
   const router = useRouter()
+  const { t } = useTranslation()
   const selectionStatusID = React.useId()
 
   const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
@@ -127,7 +129,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
       </div>
       {onSelect ? (
         <span className="document-card__selection-status sr-only" id={selectionStatusID}>
-          {isSelected ? 'Selected.' : 'Not selected.'} Press Enter or Space to change selection.
+          {t(isSelected ? 'general:selectedDocument' : 'general:notSelectedDocument')}
         </span>
       ) : null}
     </div>

@@ -391,6 +391,7 @@ export const huTranslations: DefaultTranslationsObject = {
     globals: 'Globálisok',
     goBack: 'Vissza',
     goToPage: 'Ugrás a táblázat oldalára',
+    gridLayout: 'Rács',
     groupByLabel: 'Csoportosítás {{label}} szerint',
     hideSidebar: 'Oldalsáv elrejtése',
     import: 'Behozatal',
@@ -439,6 +440,8 @@ export const huTranslations: DefaultTranslationsObject = {
     notFound: 'Nem található',
     nothingFound: 'Nincs találat',
     noTrashResults: 'Nincs {{label}} a szemetesben.',
+    notSelectedDocument:
+      'Nincs kiválasztva. A kijelölés módosításához nyomja meg az Enter vagy a szóköz billentyűt.',
     notShownInTable: 'Nem jelenik meg a táblázatban',
     noUpcomingEventsScheduled: 'Nincsenek közelgő események.',
     noValue: 'Nincs érték',
@@ -519,6 +522,7 @@ export const huTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} sikeresen duplikálódott.',
     successfullyReindexed:
       'Sikeresen újraindexelésre került {{count}} a {{total}} dokumentumból a {{collections}} gyűjteményből, és {{skips}} vázlat kerül átugrásra.',
+    tableLayout: 'Táblázat',
     takeOver: 'Átvétel',
     theme: 'Téma',
     thisLanguage: 'Magyar',
@@ -576,6 +580,8 @@ export const huTranslations: DefaultTranslationsObject = {
     copyTo: 'Másolja ide',
     copyToLocale: 'Másolás a helyi verzióba',
     localeToPublish: 'Közzététel helye',
+    selectedDocument:
+      'Kiválasztva. A kijelölés módosításához nyomja meg az Enter vagy a szóköz billentyűt.',
     selectedLocales: 'Kiválasztott helyi beállítások',
     selectLocaleToCopy: 'Válassza ki a másolni kívánt területet.',
     selectLocaleToDuplicate: 'Válassza ki a másolandó helyszínekent.',

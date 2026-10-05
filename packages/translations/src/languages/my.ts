@@ -390,6 +390,7 @@ export const myTranslations: DefaultTranslationsObject = {
     globals: 'Globals',
     goBack: 'နောက်သို့',
     goToPage: 'ဇယားစာမျက်နှာသို့ သွားရန်',
+    gridLayout: 'ဂရစ်',
     groupByLabel: '{{label}} ဖြင့် အုပ်စုဖွဲ့ပါ',
     hideSidebar: 'ဘေး栏ကိုလှမ်းဖွင့်ပါ',
     import: 'သွင်းကုန်',
@@ -439,6 +440,8 @@ export const myTranslations: DefaultTranslationsObject = {
     notFound: 'ဘာမှ မရှိတော့ဘူး။',
     nothingFound: 'ဘာမှလည်း မတွေ့ဘူး။',
     noTrashResults: 'အမှိုက်ပုံးတွင် {{label}} မရှိပါ။',
+    notSelectedDocument:
+      'ရွေးချယ်ထားခြင်းမရှိပါ။ ရွေးချယ်မှုကို ပြောင်းရန် Enter သို့မဟုတ် Space ကို နှိပ်ပါ။',
     notShownInTable: 'ဇယားတွင် ပြသထားခြင်း မရှိပါ',
     noUpcomingEventsScheduled: 'လာမည့် အစီအစဉ်များ မရှိပါ။',
     noValue: 'တန်ဖိုး မရှိပါ။',
@@ -519,6 +522,7 @@ export const myTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} အောင်မြင်စွာ ပုံတူပွားခဲ့သည်။',
     successfullyReindexed:
       '{{collections}} မှ စုစုပေါင်း {{total}} စာတမ်းထဲမှ {{count}} စာတမ်းကိုအောင်မြင်စွာပြန်လည်ညွှန်းကောက်ခဲ့ပြီး {{skips}} အကြမ်းဖျဉ်ချုပ်ကိုလွဲချခဲ့သည်။',
+    tableLayout: 'ဇယား',
     takeOver: 'တာဝန်ယူပါ',
     theme: 'အကြောင်းအရာ',
     thisLanguage: 'မြန်မာစာ',
@@ -578,6 +582,8 @@ export const myTranslations: DefaultTranslationsObject = {
     copyTo: 'သို့ ကူးယူပါ',
     copyToLocale: 'ဒေသသို့ ကူးယူပါ',
     localeToPublish: 'ထုတ်ဝေရန် ဒေသ',
+    selectedDocument:
+      'ရွေးချယ်ထားသည်။ ရွေးချယ်မှုကို ပြောင်းရန် Enter သို့မဟုတ် Space ကို နှိပ်ပါ။',
     selectedLocales: 'ရွေးချယ်ထားသော ဒေသများ',
     selectLocaleToCopy: 'ကူးယူရန် ဒေသ ရွေးချယ်ပါ',
     selectLocaleToDuplicate: 'ပုံတူပွားရန် ဒေသများ ရွေးချယ်ပါ',
