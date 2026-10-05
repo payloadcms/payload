@@ -48,6 +48,7 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
   const { collectionConfig, Model } = getCollection({
     adapter: this,
     collectionSlug: args.collection,
+    versions: args.versions,
   })
 
   const { where = {} } = args
@@ -247,7 +248,15 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
     }
   }
 
+  const versionPipeline: PipelineStage[] = args.versions
+    ? [
+        { $match: { latest: true } },
+        { $replaceRoot: { newRoot: { $mergeObjects: ['$version', { _id: '$parent' }] } } },
+      ]
+    : []
+
   const pipeline: PipelineStage[] = [
+    ...versionPipeline,
     {
       $match: query,
     },
@@ -292,6 +301,7 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
     // Build count pipeline with the same structure as the main pipeline
     // to ensure relationship lookups are included
     const countPipeline: PipelineStage[] = [
+      ...versionPipeline,
       {
         $match: query,
       },

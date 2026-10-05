@@ -87,6 +87,7 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
       {
         locale,
         select: {},
+        version: 'published',
         where: combineWhereConstraints(whereConstraints),
       },
       { addQueryPrefix: true },

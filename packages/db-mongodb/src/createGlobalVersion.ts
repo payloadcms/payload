@@ -12,6 +12,7 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     autosave,
     createdAt,
     globalSlug,
+    latest = true,
     publishedLocale,
     req,
     returning,
@@ -25,7 +26,7 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
   const data = {
     autosave,
     createdAt,
-    latest: true,
+    latest,
     publishedLocale,
     snapshot,
     updatedAt,
@@ -52,24 +53,26 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
 
   let [doc] = await Model.create([data], options)
 
-  await Model.updateMany(
-    {
-      $and: [
-        {
-          _id: {
-            $ne: doc._id,
+  if (latest) {
+    await Model.updateMany(
+      {
+        $and: [
+          {
+            _id: {
+              $ne: doc._id,
+            },
           },
-        },
-        {
-          latest: {
-            $eq: true,
+          {
+            latest: {
+              $eq: true,
+            },
           },
-        },
-      ],
-    },
-    { $unset: { latest: 1 } },
-    options,
-  )
+        ],
+      },
+      { $unset: { latest: 1 } },
+      options,
+    )
+  }
 
   if (returning === false) {
     return null

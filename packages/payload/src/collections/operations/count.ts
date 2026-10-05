@@ -1,6 +1,7 @@
 import type { AccessResult } from '../../config/types.js'
 import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
+import type { DocumentVersion } from '../../types/operations.js'
 import type { Collection } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
@@ -8,6 +9,9 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
+import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
+import { getVersionStatusQuery } from '../../versions/getVersionStatusQuery.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
@@ -17,6 +21,7 @@ export type Arguments = {
   overrideAccess?: boolean
   req?: PayloadRequest
   trash?: boolean
+  version?: DocumentVersion
   where?: Where
 }
 
@@ -43,6 +48,7 @@ export const countOperation = async <TSlug extends CollectionSlug>(
     overrideAccess,
     req,
     trash = false,
+    version = 'published',
     where,
   } = args
 
@@ -87,12 +93,38 @@ export const countOperation = async <TSlug extends CollectionSlug>(
     where: where!,
   })
 
-  result = await payload.db.count({
-    collection: collectionConfig.slug,
-    locale: req?.locale || undefined,
-    req,
-    where: fullWhere,
-  })
+  if (hasDraftsEnabled(collectionConfig) && version !== 'latest') {
+    fullWhere = combineQueries(
+      fullWhere,
+      getVersionStatusQuery({
+        entity: collectionConfig,
+        locale: req?.locale,
+        localization: payload.config.localization,
+        status: version,
+      }),
+    )
+  }
+
+  if (hasDraftsEnabled(collectionConfig) && version !== 'published') {
+    const { totalDocs } = await payload.db.queryDrafts({
+      collection: collectionConfig.slug,
+      limit: 1,
+      locale: req?.locale || undefined,
+      pagination: true,
+      req,
+      select: { parent: true },
+      where: appendVersionToQueryKey(fullWhere),
+    })
+
+    result = { totalDocs }
+  } else {
+    result = await payload.db.count({
+      collection: collectionConfig.slug,
+      locale: req?.locale || undefined,
+      req,
+      where: fullWhere,
+    })
+  }
 
   // /////////////////////////////////////
   // afterOperation - Collection

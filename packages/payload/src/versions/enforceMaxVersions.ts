@@ -3,6 +3,8 @@ import type { DeleteVersionsArgs } from '../database/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Payload, PayloadRequest, Where } from '../types/index.js'
 
+import { hasDraftsEnabled } from '../utilities/getVersionsConfig.js'
+
 type Args = {
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig
@@ -62,6 +64,10 @@ export const enforceMaxVersions = async ({
         updatedAt: {
           less_than_equal: oldestAllowedDoc.updatedAt,
         },
+      }
+
+      if (hasDraftsEnabled(collection || globalConfig!)) {
+        deleteQuery.latest = { not_equals: true }
       }
 
       if (collection) {

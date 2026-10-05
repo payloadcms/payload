@@ -8,6 +8,7 @@ import type {
   SelectType,
   TransformCollectionWithSelect,
 } from '../../types/index.js'
+import type { DocumentVersion } from '../../types/operations.js'
 import type {
   Collection,
   DataFromCollectionSlug,
@@ -25,13 +26,15 @@ import { validateQueryPaths } from '../../index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
-import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
+import { hasDraftsEnabled, hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
+import { getVersionStatusQuery } from '../../versions/getVersionStatusQuery.js'
+import { resolveVersionDocument } from '../../versions/resolveVersionDocument.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
@@ -45,7 +48,6 @@ export type FindByIDArgs = {
   data?: Record<string, unknown>
   depth?: number
   disableErrors?: boolean
-  draft?: boolean
   id: number | string
   includeLockStatus?: boolean
   joins?: JoinQuery
@@ -54,6 +56,7 @@ export type FindByIDArgs = {
   req: PayloadRequest
   showHiddenFields?: boolean
   trash?: boolean
+  version?: DocumentVersion
 } & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'> &
   Pick<FindOptions<string, SelectType>, 'select'>
 
@@ -83,7 +86,6 @@ export const findByIDOperation = async <
     currentDepth,
     depth,
     disableErrors,
-    draft: replaceWithVersion = false,
     flattenLocales,
     includeLockStatus: includeLockStatusFromArgs,
     joins,
@@ -94,7 +96,10 @@ export const findByIDOperation = async <
     select: incomingSelect,
     showHiddenFields,
     trash = false,
+    version = 'published',
   } = args
+
+  const replaceWithVersion = version !== 'published'
 
   const includeLockStatus =
     includeLockStatusFromArgs && req.payload.collections?.[lockedDocumentsCollectionSlug]
@@ -143,6 +148,18 @@ export const findByIDOperation = async <
     where: fullWhere,
   })
 
+  if (hasDraftsEnabled(collectionConfig) && version !== 'latest') {
+    fullWhere = combineQueries(
+      fullWhere,
+      getVersionStatusQuery({
+        entity: collectionConfig,
+        locale: req.locale,
+        localization: req.payload.config.localization,
+        status: version,
+      }),
+    )
+  }
+
   sanitizeWhereQuery({
     fields: collectionConfig.flattenedFields,
     payload: args.req.payload,
@@ -174,7 +191,15 @@ export const findByIDOperation = async <
   let docWithLocales: DataFromCollectionSlug<TSlug> | null | undefined
   let query = fullWhere
 
-  let dbSelect = select
+  let dbSelect =
+    select && hasDraftsEnabled(collectionConfig) ? { ...select, _status: true as const } : select
+
+  if (select && getSelectMode(select) === 'exclude' && dbSelect) {
+    delete dbSelect._status
+    if (Object.keys(dbSelect).length === 0) {
+      dbSelect = undefined
+    }
+  }
 
   if (
     collectionConfig.versions?.drafts &&
@@ -182,7 +207,7 @@ export const findByIDOperation = async <
     select &&
     getSelectMode(select) === 'include'
   ) {
-    dbSelect = { ...select, createdAt: true, updatedAt: true }
+    dbSelect = { ...dbSelect, createdAt: true, updatedAt: true }
   }
 
   const findOneArgs: FindOneArgs = {
@@ -215,13 +240,13 @@ export const findByIDOperation = async <
       locale: locale!,
       pagination: false,
       req,
-      select: getQueryDraftsSelect({ select }),
+      select: getQueryDraftsSelect({ select: dbSelect }),
       where: query,
     })
 
     docWithLocales = docs[0]
 
-    if (!docWithLocales) {
+    if (!docWithLocales && version === 'latest') {
       const { docs: existingVersions } = await req.payload.db.queryDrafts({
         collection: collectionConfig.slug,
         limit: 1,
@@ -330,6 +355,25 @@ export const findByIDOperation = async <
     })
   }
 
+  result = resolveVersionDocument({
+    doc: result,
+    entity: collectionConfig,
+    publishedDoc:
+      version === 'latest' &&
+      req.payload.config.localization &&
+      hasLocalizeStatusEnabled(collectionConfig)
+        ? await req.payload.db.findOne({
+            collection: collectionConfig.slug,
+            locale: 'all',
+            req,
+            select: dbSelect,
+            where: { id: { equals: id } },
+          })
+        : undefined,
+    req,
+    version,
+  })
+
   // /////////////////////////////////////
   // beforeRead - Collection
   // /////////////////////////////////////
@@ -368,6 +412,7 @@ export const findByIDOperation = async <
     req,
     select,
     showHiddenFields: showHiddenFields!,
+    version,
   })
 
   // /////////////////////////////////////

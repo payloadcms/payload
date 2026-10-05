@@ -30,23 +30,23 @@ const ErrorOnUnpublish: CollectionConfig = {
       ],
     },
   ],
-  versions: {
-    drafts: true,
-  },
   hooks: {
     beforeValidate: [
       ({ data, originalDoc, req }) => {
-        const unpublishAllLocales = req.url?.includes('unpublishAllLocales=true')
+        const isUnpublishingAllLocales = req.payloadAPI === 'REST' && req.locale === 'all'
 
         if (
           data?._status === 'draft' &&
           originalDoc?._status === 'published' &&
-          unpublishAllLocales
+          isUnpublishingAllLocales
         ) {
           throw new APIError('Custom error on unpublish', 400, {}, true)
         }
       },
     ],
+  },
+  versions: {
+    drafts: true,
   },
 }
 

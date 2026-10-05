@@ -89,7 +89,6 @@ export async function getFilePrefix({
   const files = await req.payload.find({
     collection: collection.slug,
     depth: 0,
-    draft: true,
     limit: 1,
     overrideAccess: false,
     pagination: false,
@@ -99,6 +98,7 @@ export async function getFilePrefix({
       prefix: true,
     },
     showHiddenFields: true,
+    version: 'latest',
     where,
   })
 

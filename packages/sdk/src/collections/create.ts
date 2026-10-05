@@ -1,10 +1,12 @@
 import type {
   CollectionSlug,
+  LocaleDataOptions,
   PayloadTypesShape,
   SelectType,
   TypedLocale,
   UploadCollectionSlug,
 } from 'payload'
+import type { DeepPartial } from 'ts-essentials'
 
 import type { PayloadSDK } from '../index.js'
 import type {
@@ -15,7 +17,7 @@ import type {
 
 import { resolveFileFromOptions } from '../utilities/resolveFileFromOptions.js'
 
-export type CreateOptions<
+type BaseCreateOptions<
   T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectType,
@@ -25,27 +27,15 @@ export type CreateOptions<
    */
   collection: TSlug
   /**
-   * The data for the document to create.
-   */
-  data: RequiredDataFromCollectionSlug<T, TSlug>
-  /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
   depth?: number
-  /**
-   * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-   */
-  draft?: boolean
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
   fallbackLocale?: false | TypedLocale<T>
   /** File Blob object or URL to the file. Only for upload collections */
   file?: TSlug extends UploadCollectionSlug<T> ? Blob | string : never
-  /**
-   * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
-   */
-  locale?: 'all' | TypedLocale<T>
   /**
    * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
    */
@@ -55,6 +45,26 @@ export type CreateOptions<
    */
   select?: TSelect
 }
+
+export type CreateOptions<
+  T extends PayloadTypesShape,
+  TSlug extends CollectionSlug<T>,
+  TSelect extends SelectType,
+> = ('_status' extends keyof T['collections'][TSlug]
+  ?
+      | ({ version: 'published' } & LocaleDataOptions<
+          RequiredDataFromCollectionSlug<T, TSlug>,
+          TypedLocale<T>
+        >)
+      | ({ version?: 'draft' } & LocaleDataOptions<
+          DeepPartial<RequiredDataFromCollectionSlug<T, TSlug>>,
+          TypedLocale<T>
+        >)
+  : { version?: 'published' } & LocaleDataOptions<
+      RequiredDataFromCollectionSlug<T, TSlug>,
+      TypedLocale<T>
+    >) &
+  BaseCreateOptions<T, TSlug, TSelect>
 
 export async function create<
   T extends PayloadTypesShape,

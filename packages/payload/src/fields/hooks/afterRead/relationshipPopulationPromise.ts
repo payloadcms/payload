@@ -1,5 +1,6 @@
 import type { TypedFallbackLocale } from '../../../index.js'
 import type { PayloadRequest, PopulateType } from '../../../types/index.js'
+import type { DocumentVersion } from '../../../types/operations.js'
 import type { JoinField, RelationshipField, UploadField } from '../../config/types.js'
 
 import { createDataloaderCacheKey } from '../../../collections/dataloader.js'
@@ -20,6 +21,7 @@ type PopulateArgs = {
   populateArg?: PopulateType
   req: PayloadRequest
   showHiddenFields: boolean
+  version?: DocumentVersion
 }
 
 // TODO: this function is mess, refactor logic
@@ -38,6 +40,7 @@ const populate = async ({
   populateArg,
   req,
   showHiddenFields,
+  version,
 }: PopulateArgs) => {
   const dataToUpdate = dataReference
   let relation
@@ -90,6 +93,7 @@ const populate = async ({
             relatedCollection.config.defaultPopulate,
           showHiddenFields,
           transactionID: req.transactionID!,
+          version,
         }),
       )
     }
@@ -149,6 +153,7 @@ type PromiseArgs = {
   req: PayloadRequest
   showHiddenFields: boolean
   siblingDoc: Record<string, any>
+  version?: DocumentVersion
 }
 
 export const relationshipPopulationPromise = async ({
@@ -164,6 +169,7 @@ export const relationshipPopulationPromise = async ({
   req,
   showHiddenFields,
   siblingDoc,
+  version,
 }: PromiseArgs): Promise<void> => {
   const resultingDoc = siblingDoc
   const populateDepth = fieldHasMaxDepth(field) && field.maxDepth! < depth ? field.maxDepth : depth
@@ -195,6 +201,7 @@ export const relationshipPopulationPromise = async ({
                 populateArg,
                 req,
                 showHiddenFields,
+                version,
               })
             }
             rowPromises.push(rowPromise())
@@ -228,6 +235,7 @@ export const relationshipPopulationPromise = async ({
               populateArg,
               req,
               showHiddenFields,
+              version,
             })
           }
         }
@@ -257,6 +265,7 @@ export const relationshipPopulationPromise = async ({
           populateArg,
           req,
           showHiddenFields,
+          version,
         })
       }
       rowPromises.push(rowPromise())
@@ -277,6 +286,7 @@ export const relationshipPopulationPromise = async ({
       populateArg,
       req,
       showHiddenFields,
+      version,
     })
   }
   await Promise.all(rowPromises)

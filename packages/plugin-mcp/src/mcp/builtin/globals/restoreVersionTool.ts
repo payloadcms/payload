@@ -21,7 +21,7 @@ export const restoreGlobalVersionTool = defineGlobalTool({
 }).handler(async ({ slug, authorizedMCP, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
-  const { id, depth, fallbackLocale, locale, populate, select } = input
+  const { id, depth, fallbackLocale, locale, populate, select, version } = input
 
   logger.info(`Restoring version for global: ${slug} with ID: ${id}`)
 
@@ -32,6 +32,7 @@ export const restoreGlobalVersionTool = defineGlobalTool({
       depth,
       overrideAccess: authorizedMCP.overrideAccess,
       req,
+      version,
       ...(fallbackLocale !== undefined ? { fallbackLocale } : {}),
       ...(locale ? { locale } : {}),
       ...(populate ? { populate } : {}),

@@ -167,6 +167,7 @@ export const createExport = async (args: CreateExportArgs) => {
       collection: collectionSlug,
       user,
       locale,
+      version: draft ? 'latest' : 'published',
       overrideAccess: false,
     })
     totalDocs = countResult.totalDocs
@@ -189,7 +190,7 @@ export const createExport = async (args: CreateExportArgs) => {
   const findArgs = {
     collection: collectionSlug,
     depth: 1,
-    draft,
+    version: draft ? ('latest' as const) : ('published' as const),
     limit: batchSize,
     locale,
     overrideAccess: false,

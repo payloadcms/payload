@@ -5,22 +5,15 @@ import type { PayloadHandler } from '../../config/types.js'
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { parseParams } from '../../utilities/parseParams/index.js'
+import { parseDocumentVersion } from '../../versions/parseDocumentVersion.js'
 import { updateByIDOperation } from '../operations/updateByID.js'
 
 export const updateByIDHandler: PayloadHandler = async (req) => {
   const { id, collection } = getRequestCollectionWithID(req)
 
-  const {
-    autosave,
-    depth,
-    draft,
-    overrideLock,
-    populate,
-    publishAllLocales,
-    select,
-    trash,
-    unpublishAllLocales,
-  } = parseParams(req.query)
+  const { autosave, depth, overrideLock, populate, select, trash } = parseParams(req.query)
+
+  const version = parseDocumentVersion({ params: req.query })
 
   const doc = await updateByIDOperation({
     id,
@@ -28,19 +21,17 @@ export const updateByIDHandler: PayloadHandler = async (req) => {
     collection,
     data: req.data!,
     depth,
-    draft,
     overrideLock: overrideLock ?? false,
     populate,
-    publishAllLocales,
     req,
     select,
     trash,
-    unpublishAllLocales,
+    version,
   })
 
   let message = req.t('general:updatedSuccessfully')
 
-  if (draft) {
+  if (version === 'draft' || (version === undefined && collection.config.versions?.drafts)) {
     message = req.t('version:draftSavedSuccessfully')
   }
   if (autosave) {

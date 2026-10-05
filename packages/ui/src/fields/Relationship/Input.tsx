@@ -254,7 +254,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                 where: Where
               } = {
                 depth: 0,
-                draft: true,
                 limit: maxResultsPerRequest,
                 locale,
                 page: lastLoadedPageToUse,
@@ -262,6 +261,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                   [fieldToSearch]: true,
                 },
                 sort: fieldToSort,
+                version: 'latest',
                 where: {
                   and: [
                     {
@@ -437,12 +437,12 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
         const query = {
           depth: 0,
-          draft: true,
           limit: idsToLoad.length,
           locale,
           select: {
             [fieldToSelect]: true,
           },
+          version: 'latest',
           where: {
             id: {
               in: idsToLoad,

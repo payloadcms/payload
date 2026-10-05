@@ -35,6 +35,7 @@ import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { UploadControlsProvider } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
+import { formatLocalizedFormData } from '../../utilities/formatLocalizedFormData.js'
 import { handleBackToDashboard } from '../../utilities/handleBackToDashboard.js'
 import { handleGoBack } from '../../utilities/handleGoBack.js'
 import { handleTakeOver } from '../../utilities/handleTakeOver.js'
@@ -49,6 +50,7 @@ const PENDING_SUCCESS_TOAST_KEY = 'payload-pending-success-toast'
 export type OnSaveContext = {
   getDocPermissions?: boolean
   incrementVersionCount?: boolean
+  responseLocale?: 'all'
 }
 
 // This component receives props only on _pages_
@@ -303,7 +305,21 @@ export function DefaultEditView({
 
       const controller = handleAbortRef(abortOnSaveRef)
 
-      const document = json?.doc || json?.result
+      const responseDocument = json?.doc || json?.result
+      const document =
+        context?.responseLocale === 'all' && locale
+          ? formatLocalizedFormData({
+              blocks: config.blocks,
+              data: responseDocument,
+              fields: (collectionConfig || globalConfig).fields,
+              locale,
+              mode: 'unwrap',
+            })
+          : responseDocument
+
+      if (context?.responseLocale === 'all') {
+        json = { ...json, ...(json?.doc ? { doc: document } : { result: document }) }
+      }
 
       const updatedAt = document?.updatedAt || new Date().toISOString()
 
@@ -431,6 +447,9 @@ export function DefaultEditView({
     [
       user,
       collectionSlug,
+      collectionConfig,
+      globalConfig,
+      config.blocks,
       userSlug,
       id,
       setLastUpdateTime,

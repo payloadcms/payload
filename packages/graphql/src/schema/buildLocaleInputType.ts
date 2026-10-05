@@ -17,7 +17,7 @@ export const buildLocaleInputType = (
           value: locale,
         },
       }),
-      {},
+      { all: { value: 'all' } },
     ),
   })
 }

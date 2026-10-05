@@ -2,6 +2,7 @@ import type { asc, desc, SQL } from 'drizzle-orm'
 
 import { max, sql } from 'drizzle-orm'
 import { type FindDistinct, getFieldByPath, type SanitizedCollectionConfig } from 'payload'
+import { appendVersionToQueryKey, buildVersionCollectionFields, combineQueries } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { BuildQueryJoinAliases, DrizzleAdapter, GenericColumn } from './types.js'
@@ -36,19 +37,35 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
     this.payload.collections[args.collection].config
   const page = args.page || 1
   const offset = args.limit ? (page - 1) * args.limit : undefined
-  const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
+  const tableName = this.tableNameMap.get(
+    args.versions
+      ? `_${toSnakeCase(collectionConfig.slug)}${this.versionsSuffix}`
+      : toSnakeCase(collectionConfig.slug),
+  )
+  const fields = args.versions
+    ? buildVersionCollectionFields(this.payload.config, collectionConfig, true)
+    : collectionConfig.flattenedFields
+  const fieldPath = args.versions ? `version.${args.field}` : args.field
+  const sort = args.versions
+    ? (Array.isArray(args.sort) ? args.sort : [args.sort ?? args.field]).map((field) =>
+        field.startsWith('-') ? `-version.${field.slice(1)}` : `version.${field}`,
+      )
+    : (args.sort ?? args.field)
+  const query = args.versions
+    ? combineQueries({ latest: { equals: true } }, appendVersionToQueryKey(args.where ?? {}))
+    : (args.where ?? {})
 
   const { joins, orderBy, selectFields, where } = buildQuery({
     adapter: this,
-    fields: collectionConfig.flattenedFields,
+    fields,
     locale: args.locale,
-    sort: args.sort ?? args.field,
+    sort,
     tableName,
     where: {
       and: [
-        args.where ?? {},
+        query,
         {
-          [args.field]: {
+          [fieldPath]: {
             equals: DistinctSymbol,
           },
         },

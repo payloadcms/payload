@@ -112,9 +112,9 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
             {
               autosave: true,
               depth: 0,
-              draft: true,
               'fallback-locale': 'null',
               locale,
+              version: 'draft',
             },
             {
               addQueryPrefix: true,

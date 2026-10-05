@@ -62,7 +62,7 @@ export const APIViewClient: React.FC = () => {
   }
 
   const [data, setData] = React.useState<any>(initialData)
-  const [draft, setDraft] = React.useState<boolean>(searchParams.get('draft') === 'true')
+  const [draft, setDraft] = React.useState<boolean>(searchParams.get('version') === 'latest')
   const [locale, setLocale] = React.useState<string>(searchParams?.get('locale') || code)
   const [depth, setDepth] = React.useState<string>(
     searchParams.get('depth') || defaultDepth.toString(),
@@ -93,9 +93,9 @@ export const APIViewClient: React.FC = () => {
 
   const params = new URLSearchParams({
     depth,
-    draft: String(draft),
     locale,
     trash: trashParam ? 'true' : 'false',
+    version: draft ? 'latest' : 'published',
   }).toString()
 
   const fetchURL = formatAdminURL({

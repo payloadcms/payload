@@ -17,6 +17,7 @@ export async function createVersion<T extends JsonObject = JsonObject>(
     autosave,
     collectionSlug,
     createdAt,
+    latest = true,
     parent,
     publishedLocale,
     req,
@@ -45,7 +46,7 @@ export async function createVersion<T extends JsonObject = JsonObject>(
   const data: Record<string, unknown> = {
     autosave,
     createdAt,
-    latest: true,
+    latest,
     parent,
     publishedLocale,
     snapshot,
@@ -70,7 +71,7 @@ export async function createVersion<T extends JsonObject = JsonObject>(
 
   const table = this.tables[tableName]
 
-  if (hasDraftsEnabled(collection)) {
+  if (latest && hasDraftsEnabled(collection)) {
     await this.execute({
       db,
       sql: sql`
@@ -78,7 +79,7 @@ export async function createVersion<T extends JsonObject = JsonObject>(
         SET latest = false
         WHERE ${table.id} != ${result.id}
           AND ${table.parent} = ${parent}
-          AND ${table.updatedAt} < ${result.updatedAt || updatedAt}
+          AND ${table.updatedAt} <= ${result.updatedAt || updatedAt}
       `,
     })
   }

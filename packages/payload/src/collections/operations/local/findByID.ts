@@ -17,10 +17,11 @@ import type {
 } from '../../../types/index.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
-import type { DraftFlagFromCollectionSlug, SelectFromCollectionSlug } from '../../config/types.js'
+import type { SelectFromCollectionSlug, VersionFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
+import { parseDocumentVersion } from '../../../versions/parseDocumentVersion.js'
 import { type FindByIDArgs, findByIDOperation } from '../findByID.js'
 
 type BaseFindByIDOptions<
@@ -114,7 +115,7 @@ export type Options<
   TSlug extends CollectionSlug,
   TDisableErrors extends boolean,
   TSelect extends SelectType,
-> = BaseFindByIDOptions<TSlug, TDisableErrors, TSelect> & DraftFlagFromCollectionSlug<TSlug>
+> = BaseFindByIDOptions<TSlug, TDisableErrors, TSelect> & VersionFromCollectionSlug<TSlug>
 
 export async function findByIDLocal<
   TSlug extends CollectionSlug,
@@ -124,6 +125,8 @@ export async function findByIDLocal<
   payload: Payload,
   options: Options<TSlug, TDisableErrors, TSelect>,
 ): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> {
+  parseDocumentVersion({ params: { ...options } })
+
   const {
     id,
     collection: collectionSlug,
@@ -131,7 +134,6 @@ export async function findByIDLocal<
     data,
     depth,
     disableErrors = false,
-    draft = false,
     flattenLocales,
     includeLockStatus,
     joins,
@@ -140,6 +142,7 @@ export async function findByIDLocal<
     select,
     showHiddenFields,
     trash = false,
+    version,
   } = options
 
   const collection = payload.collections[collectionSlug]
@@ -157,7 +160,6 @@ export async function findByIDLocal<
     data,
     depth,
     disableErrors,
-    draft,
     flattenLocales,
     includeLockStatus,
     joins,
@@ -170,5 +172,6 @@ export async function findByIDLocal<
     select,
     showHiddenFields,
     trash,
+    version,
   })
 }

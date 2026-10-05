@@ -6,23 +6,24 @@ import type { PayloadHandler } from '../../config/types.js'
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { parseParams } from '../../utilities/parseParams/index.js'
+import { parseDocumentVersion } from '../../versions/parseDocumentVersion.js'
 import { duplicateOperation } from '../operations/duplicate.js'
 
 export const duplicateHandler: PayloadHandler = async (req) => {
   const { id, collection } = getRequestCollectionWithID(req)
 
-  const { depth, draft = true, populate, select, selectedLocales } = parseParams(req.query)
+  const { depth, populate, select, selectedLocales } = parseParams(req.query)
 
   const doc = await duplicateOperation({
     id,
     collection,
     data: req.data,
     depth,
-    draft,
     populate,
     req,
     select,
     selectedLocales,
+    version: parseDocumentVersion({ isCreate: true, params: req.query }),
   })
 
   const message = req.t('general:successfullyDuplicated', {

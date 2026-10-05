@@ -1,4 +1,4 @@
-import type { Collection, PayloadRequest, Where } from 'payload'
+import type { Collection, DocumentVersion, PayloadRequest, Where } from 'payload'
 
 import { countOperation, isolateObjectProperty } from 'payload'
 
@@ -10,6 +10,7 @@ export type Resolver = (
     data: Record<string, unknown>
     locale?: string
     trash?: boolean
+    version?: DocumentVersion
     where?: Where
   },
   context: {
@@ -32,6 +33,7 @@ export function countResolver(collection: Collection): Resolver {
       collection,
       req: isolateObjectProperty(req, 'transactionID'),
       trash: args.trash,
+      version: args.version,
       where: args.where,
     }
 

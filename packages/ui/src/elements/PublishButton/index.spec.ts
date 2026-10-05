@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
 
+import type { SubmitOptions } from '../../forms/Form/types.js'
+
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -7,6 +9,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { PublishButton } from './index.js'
 
 const mocks = vi.hoisted(() => ({
+  allLocalesAction: undefined as (() => Promise<void>) | undefined,
   primaryAction: undefined as (() => Promise<void>) | undefined,
   submit: vi.fn(),
 }))
@@ -23,13 +26,20 @@ vi.mock('../../forms/Submit/index.js', async () => {
     FormSubmit: ({
       children,
       onClick,
+      SubMenuPopupContent,
     }: {
       children?: ReactNode
       onClick?: () => Promise<void>
+      SubMenuPopupContent?: () => ReactNode
     }) => {
       mocks.primaryAction = onClick
 
-      return createElement('button', null, children)
+      return createElement(
+        'div',
+        null,
+        createElement('button', null, children),
+        SubMenuPopupContent ? createElement(SubMenuPopupContent) : null,
+      )
     },
   }
 })
@@ -106,14 +116,21 @@ vi.mock('../../providers/Translation/index.js', () => ({
 
 vi.mock('../Popup/index.js', () => ({
   PopupList: {
-    Button: () => null,
-    ButtonGroup: () => null,
+    Button: ({ id, onClick }: { id: string; onClick: () => Promise<void> }) => {
+      if (id === 'publish-all-locales') {
+        mocks.allLocalesAction = onClick
+      }
+
+      return null
+    },
+    ButtonGroup: ({ children }: { children: ReactNode }) => children,
   },
 }))
 
 describe('PublishButton', () => {
   beforeEach(() => {
     mocks.primaryAction = undefined
+    mocks.allLocalesAction = undefined
     mocks.submit.mockReset()
     mocks.submit.mockResolvedValue(true)
   })
@@ -129,5 +146,27 @@ describe('PublishButton', () => {
       '/api/localized/document-id?depth=0&locale=en',
     )
     expect(markup).toContain('Publish in English')
+  })
+
+  it('should submit locale-keyed form data when publishing all locales', async () => {
+    renderToStaticMarkup(createElement(PublishButton))
+
+    await mocks.allLocalesAction!()
+
+    const options: SubmitOptions = mocks.submit.mock.calls[0]?.[0]
+    const overrides = options.overrides
+
+    expect(options.action).toBe('/api/localized/document-id?depth=0&locale=all')
+    expect(options.context).toEqual({ responseLocale: 'all' })
+    expect(typeof overrides).toBe('function')
+
+    if (typeof overrides !== 'function') {
+      throw new Error('All-locales publication must replace the submitted form data.')
+    }
+
+    expect(overrides({ title: { value: 'Current English title' } })).toEqual({
+      _status: 'published',
+      title: { en: 'Current English title' },
+    })
   })
 })

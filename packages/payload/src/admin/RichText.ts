@@ -1,3 +1,5 @@
+import type { DocumentVersion } from '../types/operations.js'
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { I18n } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
@@ -31,10 +33,9 @@ export type AfterReadRichTextHookArgs<
   depth?: number
 
   draft?: boolean
-
   fallbackLocale?: TypedFallbackLocale
-  fieldPromises?: Promise<void>[]
 
+  fieldPromises?: Promise<void>[]
   /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */
   findMany?: boolean
 
@@ -50,9 +51,11 @@ export type AfterReadRichTextHookArgs<
   populate?: PopulateType
 
   populationPromises?: Promise<void>[]
+
   showHiddenFields?: boolean
   triggerAccessControl?: boolean
   triggerHooks?: boolean
+  version?: DocumentVersion
 }
 
 export type AfterChangeRichTextHookArgs<
@@ -243,6 +246,7 @@ type RichTextAdapterBase<
     req: PayloadRequest
     showHiddenFields: boolean
     siblingDoc: JsonObject
+    version?: DocumentVersion
   }) => void
   hooks?: RichTextHooks
   /**

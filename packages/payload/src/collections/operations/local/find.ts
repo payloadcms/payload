@@ -18,12 +18,13 @@ import type {
   TransformCollectionWithSelect,
   Where,
 } from '../../../types/index.js'
-import type { SharedLocalAPIOptions } from '../../../types/operations.js'
+import type { DocumentVersion, SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
-import type { DraftFlagFromCollectionSlug, SelectFromCollectionSlug } from '../../config/types.js'
+import type { SelectFromCollectionSlug, VersionFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
+import { parseDocumentVersion } from '../../../versions/parseDocumentVersion.js'
 import { findOperation } from '../find.js'
 
 type BaseFindOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
@@ -174,7 +175,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   TSlug,
   TSelect
 > &
-  DraftFlagFromCollectionSlug<TSlug>
+  VersionFromCollectionSlug<TSlug>
 
 // Backward compatibility export
 export type FindOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = Options<
@@ -185,25 +186,26 @@ export type FindOptions<TSlug extends CollectionSlug, TSelect extends SelectType
 export async function findLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-  TDraft extends boolean = false,
+  TVersion extends DocumentVersion = 'published',
 >(
   payload: Payload,
-  options: { draft?: TDraft } & FindOptions<TSlug, TSelect>,
+  options: { version?: TVersion } & FindOptions<TSlug, TSelect>,
 ): Promise<
   PaginatedDocs<
-    TDraft extends true
+    TVersion extends 'draft' | 'latest'
       ? PayloadTypes extends { strictDraftTypes: true }
         ? DraftTransformCollectionWithSelect<TSlug, TSelect>
         : TransformCollectionWithSelect<TSlug, TSelect>
       : TransformCollectionWithSelect<TSlug, TSelect>
   >
 > {
+  parseDocumentVersion({ params: { ...options } })
+
   const {
     collection: collectionSlug,
     currentDepth,
     depth,
     disableErrors,
-    draft = false,
     includeLockStatus,
     joins,
     limit,
@@ -215,6 +217,7 @@ export async function findLocal<
     showHiddenFields,
     sort,
     trash = false,
+    version,
     where,
   } = options
 
@@ -231,7 +234,6 @@ export async function findLocal<
     currentDepth,
     depth,
     disableErrors,
-    draft,
     includeLockStatus,
     joins,
     limit,
@@ -247,6 +249,7 @@ export async function findLocal<
     showHiddenFields,
     sort,
     trash,
+    version,
     where,
   })
 }

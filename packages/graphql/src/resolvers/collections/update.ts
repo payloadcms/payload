@@ -1,19 +1,27 @@
-import type { Collection, CollectionSlug, DataFromCollectionSlug, PayloadRequest } from 'payload'
+import type {
+  Collection,
+  CollectionSlug,
+  DataFromCollectionSlug,
+  DocumentVersion,
+  PayloadRequest,
+} from 'payload'
 
 import { isolateObjectProperty, updateByIDOperation } from 'payload'
 
 import type { Context } from '../types.js'
+
+import { rememberDocumentVersion } from '../../utilities/documentVersion.js'
 
 export type Resolver<TSlug extends CollectionSlug> = (
   _: unknown,
   args: {
     autosave: boolean
     data: DataFromCollectionSlug<TSlug>
-    draft: boolean
     fallbackLocale?: string
     id: number | string
     locale?: string
     trash?: boolean
+    version?: DocumentVersion
   },
   context: {
     req: PayloadRequest
@@ -35,14 +43,10 @@ export function updateResolver<TSlug extends CollectionSlug>(
       req.query = {}
     }
 
-    const draft: boolean =
-      (args.draft ?? req.query?.draft === 'false')
-        ? false
-        : req.query?.draft === 'true'
-          ? true
-          : undefined
-    if (typeof draft === 'boolean') {
-      req.query.draft = String(draft)
+    const version = args.version ?? (collection.config.versions?.drafts ? 'draft' : 'published')
+
+    if (version !== undefined) {
+      req.query.version = version
     }
 
     context.req = req
@@ -53,13 +57,16 @@ export function updateResolver<TSlug extends CollectionSlug>(
       collection,
       data: args.data as any,
       depth: 0,
-      draft: args.draft,
       req: isolateObjectProperty(req, 'transactionID'),
       trash: args.trash,
+      version: args.version,
     }
 
     const result = await updateByIDOperation<TSlug>(options)
 
-    return result
+    return rememberDocumentVersion({
+      data: result,
+      version: args.version ?? (collection.config.versions?.drafts ? 'draft' : 'published'),
+    })
   }
 }

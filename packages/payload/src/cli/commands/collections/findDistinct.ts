@@ -25,6 +25,7 @@ export const createFindDistinctCommand = defineCLICommand({
       showHiddenFields: args.showHiddenFields,
       sort: args.sort,
       trash: args.trash,
+      version: args.version,
       where: args.where,
     })
 

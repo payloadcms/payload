@@ -1,5 +1,6 @@
 import type {
   CollectionSlug,
+  DocumentVersion,
   PaginatedDocs,
   PayloadTypesShape,
   SelectType,
@@ -21,10 +22,6 @@ export type FindVersionsOptions<T extends PayloadTypesShape, TSlug extends Colle
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
   depth?: number
-  /**
-   * Whether the documents should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-   */
-  draft?: boolean
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
@@ -72,6 +69,8 @@ export type FindVersionsOptions<T extends PayloadTypesShape, TSlug extends Colle
    * @default false
    */
   trash?: boolean
+  /** The document snapshot to read or update. */
+  version?: DocumentVersion
   /**
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */

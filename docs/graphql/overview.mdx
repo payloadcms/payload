@@ -12,6 +12,32 @@ By default, the GraphQL API is exposed via `/api/graphql`, but you can customize
 
 The labels you provide for your Collections and Globals are used to name the GraphQL types that are created to correspond to your config. Special characters and spaces are removed.
 
+## Document versions and locales
+
+Queries accept `version: published`, `version: draft`, or `version: latest`. Omitted selectors read published documents. `draft` reads only a working draft; `latest` reads a working draft when present and otherwise reads the published document. Related documents use the same selector.
+
+Create mutations accept `version: published` or `version: draft`. Update mutations also accept `version: latest`. When drafts are enabled, omitted selectors save drafts and draft create inputs may omit required fields. Publishing validates required fields. The previous `draft`, `publishAllLocales`, and `unpublishAllLocales` arguments are no longer supported.
+
+With localization enabled, `locale: all` allows mutations to provide locale maps for localized fields. Nonlocalized fields retain their ordinary input shape. For example, a localized `title` and a localized `rows` array can be written together:
+
+```graphql
+mutation {
+  createPost(
+    locale: all
+    data: {
+      title: { en: "Hello", fr: "Bonjour" }
+      rows: { en: [{ label: "English row" }], fr: [{ label: "French row" }] }
+    }
+  ) {
+    id
+    title
+    rows_locales
+  }
+}
+```
+
+When reading with `locale: all`, localized scalar fields return locale maps. Localized structured fields, including groups, arrays, blocks, and relationships, expose a companion `<field>_locales` JSON field containing the complete locale map. Select that companion field to read every locale. The original structured field retains its existing nested selection shape for queries using a single locale.
+
 ## GraphQL Clients
 
 You can use any GraphQL client with Payload's GraphQL endpoint. Here are a few popular packages:

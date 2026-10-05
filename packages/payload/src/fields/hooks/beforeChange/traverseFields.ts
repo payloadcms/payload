@@ -23,6 +23,7 @@ type Args = {
    * The original data with locales (not modified by any hooks)
    */
   docWithLocales: JsonObject
+  draftValidationActions?: (() => Promise<void>)[]
   errors: ValidationFieldError[]
   /**
    * Built up labels of parent fields
@@ -73,6 +74,7 @@ export const traverseFields = async ({
   data,
   doc,
   docWithLocales,
+  draftValidationActions,
   errors,
   fieldLabelPath,
   fields,
@@ -103,6 +105,7 @@ export const traverseFields = async ({
         data,
         doc,
         docWithLocales,
+        draftValidationActions,
         errors,
         field,
         fieldIndex,

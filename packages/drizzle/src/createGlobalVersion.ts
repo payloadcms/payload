@@ -17,6 +17,7 @@ export async function createGlobalVersion<T extends JsonObject = JsonObject>(
     autosave,
     createdAt,
     globalSlug,
+    latest = true,
     publishedLocale,
     req,
     returning,
@@ -37,7 +38,7 @@ export async function createGlobalVersion<T extends JsonObject = JsonObject>(
     data: {
       autosave,
       createdAt,
-      latest: true,
+      latest,
       publishedLocale,
       snapshot,
       updatedAt,
@@ -54,7 +55,7 @@ export async function createGlobalVersion<T extends JsonObject = JsonObject>(
   })
 
   const table = this.tables[tableName]
-  if (hasDraftsEnabled(global)) {
+  if (latest && hasDraftsEnabled(global)) {
     await this.execute({
       db,
       sql: sql`

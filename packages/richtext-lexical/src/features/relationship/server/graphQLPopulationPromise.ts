@@ -16,6 +16,7 @@ export const relationshipPopulationPromiseHOC = (
     populationPromises,
     req,
     showHiddenFields,
+    version,
   }) => {
     if (node?.value && props.enabledCollectionSlugs.includes(node.relationTo)) {
       // @ts-expect-error
@@ -39,6 +40,7 @@ export const relationshipPopulationPromiseHOC = (
             overrideAccess,
             req,
             showHiddenFields,
+            version,
           }),
         )
       }

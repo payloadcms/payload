@@ -87,6 +87,7 @@ export const RelationshipFeature = createServerFeature<
                 populationPromises,
                 req,
                 showHiddenFields,
+                version,
               }) => {
                 if (!node?.value || !props.enabledCollectionSlugs.includes(node.relationTo)) {
                   return node
@@ -116,6 +117,7 @@ export const RelationshipFeature = createServerFeature<
                     select:
                       populateArg?.[collection.config.slug] ?? collection.config.defaultPopulate,
                     showHiddenFields,
+                    version,
                   }),
                 )
 

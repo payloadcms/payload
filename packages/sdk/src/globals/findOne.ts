@@ -1,4 +1,10 @@
-import type { GlobalSlug, PayloadTypesShape, SelectType, TypedLocale } from 'payload'
+import type {
+  DocumentVersion,
+  GlobalSlug,
+  PayloadTypesShape,
+  SelectType,
+  TypedLocale,
+} from 'payload'
 
 import type { PayloadSDK } from '../index.js'
 import type { PopulateType, SelectFromGlobalSlug, TransformGlobalWithSelect } from '../types.js'
@@ -12,10 +18,6 @@ export type FindGlobalOptions<
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
   depth?: number
-  /**
-   * Whether the document should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-   */
-  draft?: boolean
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
@@ -36,6 +38,8 @@ export type FindGlobalOptions<
    * the Global slug to operate against.
    */
   slug: TSlug
+  /** The document snapshot to read or update. */
+  version?: DocumentVersion
 }
 
 export async function findGlobal<

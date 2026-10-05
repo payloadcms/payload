@@ -344,7 +344,6 @@ export const renderListView = async (
       data = await req.payload.find({
         collection: collectionSlug,
         depth: 0,
-        draft: true,
         fallbackLocale: false,
         includeLockStatus: true,
         limit: query?.limit ? Number(query.limit) : undefined,
@@ -356,6 +355,7 @@ export const renderListView = async (
         sort: query?.sort,
         trash,
         user,
+        version: 'latest',
         where: whereWithMergedSearch,
       })
 

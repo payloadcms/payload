@@ -31,7 +31,7 @@ import {
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
-import { hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
+import { hasDraftsEnabled, hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
@@ -40,11 +40,11 @@ import {
   getAllLocalesPublicationStatus,
   normalizeAllLocalesPublicationStatus,
   reconcileAllLocalesPublicationStatus,
-  validateAllLocalesPublicationFlags,
 } from '../../versions/allLocalesPublicationStatus.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
+import { isDraftVersion, validateWriteVersion } from './utilities/resolveVersion.js'
 import { updateDocument } from './utilities/update.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
@@ -54,17 +54,15 @@ export type Arguments<TSlug extends CollectionSlug> = {
   depth?: number
   disableTransaction?: boolean
   disableVerificationEmail?: boolean
-  draft?: boolean
   id: number | string
   overrideAccess?: boolean
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
-  publishAllLocales?: boolean
   req: PayloadRequest
   showHiddenFields?: boolean
   trash?: boolean
-  unpublishAllLocales?: boolean
+  version?: 'draft' | 'latest' | 'published'
 } & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
 export const updateByIDOperation = async <
@@ -95,23 +93,15 @@ export const updateByIDOperation = async <
       }
     }
 
-    validateAllLocalesPublicationFlags({
-      publishAllLocales: args.publishAllLocales,
-      unpublishAllLocales: args.unpublishAllLocales,
-    })
-
     const initialCollectionConfig = args.collection.config
+    validateWriteVersion({ collectionConfig: initialCollectionConfig, version: args.version })
     const initialAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
       hasLocalizedStatus: Boolean(
         args.req.payload.config.localization && hasLocalizeStatusEnabled(initialCollectionConfig),
       ),
-      publishAllLocales:
-        !args.draft &&
-        (args.publishAllLocales ??
-          (hasLocalizeStatusEnabled(initialCollectionConfig) && args.req.locale !== 'all'
-            ? false
-            : true)),
-      unpublishAllLocales: Boolean(args.unpublishAllLocales),
+      publishAllLocales: args.req.locale === 'all' && args.data._status === 'published',
+      unpublishAllLocales:
+        args.req.locale === 'all' && args.version === 'published' && args.data._status === 'draft',
     })
 
     const initialAllLocalesPublicationIntent = normalizeAllLocalesPublicationStatus({
@@ -135,12 +125,10 @@ export const updateByIDOperation = async <
       collection: { config: collectionConfig },
       collection,
       depth,
-      draft: draftArg = false,
       overrideAccess,
       overrideLock,
       overwriteExistingFiles = false,
       populate,
-      publishAllLocales: publishAllLocalesArg,
       req: {
         fallbackLocale,
         locale,
@@ -151,7 +139,7 @@ export const updateByIDOperation = async <
       select: incomingSelect,
       showHiddenFields,
       trash = false,
-      unpublishAllLocales: unpublishAllLocalesArg,
+      version = 'draft',
     } = args
 
     if (!id) {
@@ -160,33 +148,22 @@ export const updateByIDOperation = async <
 
     let { data } = args
 
-    validateAllLocalesPublicationFlags({
-      publishAllLocales: publishAllLocalesArg,
-      unpublishAllLocales: unpublishAllLocalesArg,
-    })
+    validateWriteVersion({ collectionConfig, version: args.version })
 
     const requestedAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
       hasLocalizedStatus: Boolean(
         config.localization && hasLocalizeStatusEnabled(collectionConfig),
       ),
-      publishAllLocales:
-        !draftArg &&
-        (publishAllLocalesArg ?? !(hasLocalizeStatusEnabled(collectionConfig) && locale !== 'all')),
-      unpublishAllLocales: Boolean(unpublishAllLocalesArg),
+      publishAllLocales: locale === 'all' && data._status === 'published',
+      unpublishAllLocales: locale === 'all' && version === 'published' && data._status === 'draft',
     })
     const allLocalesPublicationStatus = reconcileAllLocalesPublicationStatus({
       data,
       intent: initialAllLocalesPublicationIntent,
       status: requestedAllLocalesPublicationStatus,
     })
-    const publicationIntentSurvivedBeforeOperation =
-      !requestedAllLocalesPublicationStatus || Boolean(allLocalesPublicationStatus)
-    const publishAllLocales = publicationIntentSurvivedBeforeOperation
-      ? publishAllLocalesArg
-      : false
-    const unpublishAllLocales = publicationIntentSurvivedBeforeOperation
-      ? unpublishAllLocalesArg
-      : false
+    const publishAllLocales = allLocalesPublicationStatus === 'published'
+    const unpublishAllLocales = allLocalesPublicationStatus === 'draft'
 
     // /////////////////////////////////////
     // Access
@@ -246,6 +223,7 @@ export const updateByIDOperation = async <
       payload,
       query: findOneArgs,
       req,
+      version: hasDraftsEnabled(collectionConfig) ? version : 'latest',
     })
 
     if (!docWithLocales && !hasWherePolicy) {
@@ -307,7 +285,10 @@ export const updateByIDOperation = async <
       data: deepCopyObjectSimple(newFileData),
       depth: depth!,
       docWithLocales,
-      draftArg,
+      draftArg:
+        hasDraftsEnabled(collectionConfig) &&
+        (version === 'draft' ||
+          (version === 'latest' && isDraftVersion({ doc: docWithLocales, locale }))),
       fallbackLocale: fallbackLocale!,
       filesToUpload,
       locale: locale!,
@@ -315,11 +296,15 @@ export const updateByIDOperation = async <
       overrideLock: overrideLock!,
       payload,
       populate,
+      preserveDraft:
+        version === 'published' ||
+        (version === 'latest' && !isDraftVersion({ doc: docWithLocales, locale })),
       publishAllLocales,
       req,
       select: select!,
       showHiddenFields: showHiddenFields!,
       unpublishAllLocales,
+      version,
     })
 
     // /////////////////////////////////////

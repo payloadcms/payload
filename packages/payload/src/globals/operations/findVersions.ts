@@ -1,6 +1,7 @@
 import type { FindOptions } from '../../collections/operations/local/find.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
+import type { DocumentVersion } from '../../types/operations.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
@@ -26,6 +27,7 @@ export type Arguments = {
   req?: PayloadRequest
   showHiddenFields?: boolean
   sort?: Sort
+  version?: DocumentVersion
   where?: Where
 } & Pick<FindOptions<string, SelectType>, 'select'>
 
@@ -43,6 +45,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     select: incomingSelect,
     showHiddenFields,
     sort,
+    version = 'published',
     where,
   } = args
   const req = args.req!
@@ -132,7 +135,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
               // Patch globalType onto version doc
               globalType: globalConfig.slug,
             },
-            draft: undefined!,
+            draft: version !== 'published',
             fallbackLocale: fallbackLocale!,
             findMany: true,
             global: globalConfig,
@@ -142,6 +145,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
             req,
             select,
             showHiddenFields: showHiddenFields!,
+            version,
           }),
         }
       }),

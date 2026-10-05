@@ -333,6 +333,49 @@ Run `migrate-versions-default` if you want zero schema changes — it adds `vers
 
 Run `remove-versions-true` to clean up any bare `versions: true` that is now the default.
 
+### Draft operations use a `version` selector
+
+The public `draft` boolean is replaced by `version: 'published' | 'latest' | 'draft'` across the Local API, REST, GraphQL, SDK, and CLI. The retired `draft`, `publishAllLocales`, and `unpublishAllLocales` arguments are rejected.
+
+| Operation                  | Omitted selector                            | Explicit selectors                                                                                                                                     |
+| -------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Read                       | Published content                           | `latest` chooses an active draft per locale, falling back to published content; `draft` returns active drafts only                                     |
+| Create with drafts enabled | Draft, unless `data._status` is `published` | `draft` or `published` overrides `_status`; `latest` is invalid                                                                                        |
+| Update with drafts enabled | Edit or create the active draft             | `published` edits the published copy and preserves pending drafts; `latest` edits the active draft or the published copy when there is no active draft |
+
+Use `_status` to publish or unpublish the selected copy. A published update fails if the document has never been published. Historical draft versions do not count as active drafts. Collections and globals with drafts disabled retain ordinary writes.
+
+```diff
+-const preview = await payload.find({ collection: 'posts', draft: true })
++const preview = await payload.find({ collection: 'posts', version: 'latest' })
+
+-await payload.update({ collection: 'posts', id, data: changes })
++await payload.update({ collection: 'posts', id, data: changes, version: 'latest' })
+```
+
+The update example retains the old behavior of editing the latest available copy. To save work in a draft, omit `version` or use `version: 'draft'`. To create published content, set `version: 'published'` or `data._status: 'published'` explicitly.
+
+For publication across locales, pass `locale: 'all'` and `_status` instead of the removed publication flags. Localized input fields use locale-keyed maps:
+
+```ts
+await payload.update({
+  collection: 'posts',
+  id,
+  locale: 'all',
+  data: { _status: 'published', title: { en: 'Hello', fr: 'Bonjour' } },
+})
+
+await payload.update({
+  collection: 'posts',
+  id,
+  locale: 'all',
+  version: 'published',
+  data: { _status: 'draft' },
+})
+```
+
+See [Drafts](../versions/drafts) for selection and publication examples and [GraphQL](../graphql/overview) for locale-map inputs and structured localized output.
+
 ### Version read access inherits collection and global read access
 
 When `readVersions` is not configured, version access now inherits the Collection or Global `read` Access Control instead of requiring an authenticated user by default.
@@ -1994,7 +2037,7 @@ defineCollectionTool({
 })
 ```
 
-**Built-in collection tools are now generic.** Per-collection names like `createPosts` / `updatePosts` were replaced by `createDocuments` / `updateDocument`. Pass the target collection as `slug`. For creates, pass a `documents` array whose items contain `data` and an optional `file`; for updates, pass `data` with an `id` or `where` at the top level. Options such as `depth`, `draft`, and `locale` also remain at the top level. `_status`, `id`, `createdAt`, and `updatedAt` are no longer accepted inside `data`; set publish state with a custom tool if you need to.
+**Built-in collection tools are now generic.** Per-collection names like `createPosts` / `updatePosts` were replaced by `createDocuments` / `updateDocument`. Pass the target collection as `slug`. For creates, pass a `documents` array whose items contain `data` and an optional `file`; for updates, pass `data` with an `id` or `where` at the top level. Options such as `depth`, `version`, and `locale` also remain at the top level. `_status`, `id`, `createdAt`, and `updatedAt` are no longer accepted inside `data`; set publish state with a custom tool if you need to.
 
 ```ts
 // arguments to a `createDocuments` tool call
@@ -2006,7 +2049,7 @@ defineCollectionTool({
 {
   slug: 'posts',
   documents: [{ data: { title: 'Hello' } }],
-  draft: true,
+  version: 'draft',
   depth: 2,
 }
 ```

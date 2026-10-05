@@ -19,11 +19,11 @@ export const resaveChildren =
     const initialDraftChildren = await req.payload.find({
       collection: collection.slug,
       depth: 0,
-      draft: true,
       limit: 0,
       locale: req.locale,
       overrideAccess: true,
       req,
+      version: 'latest',
       where: {
         [parentSlug]: {
           equals: doc.id,
@@ -36,11 +36,11 @@ export const resaveChildren =
     const publishedChildren = await req.payload.find({
       collection: collection.slug,
       depth: 0,
-      draft: false,
       limit: 0,
       locale: req.locale,
       overrideAccess: true,
       req,
+      version: 'published',
       where: {
         [parentSlug]: {
           equals: doc.id,
@@ -82,10 +82,10 @@ export const resaveChildren =
               req,
             }),
             depth: 0,
-            draft: isDraft,
             locale: req.locale,
             overrideAccess: true,
             req,
+            version: isDraft ? 'draft' : 'published',
           })
         }
       } catch (err: unknown) {

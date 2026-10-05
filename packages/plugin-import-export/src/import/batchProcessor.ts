@@ -1,6 +1,7 @@
 import type { PayloadRequest, User } from 'payload'
 
 import { getDataLoader, isolateObjectProperty } from 'payload'
+import { hasDraftsEnabled } from 'payload/shared'
 
 import type { ImportAfterHook, ImportBeforeHook, ImportDoc, ImportResult } from '../types.js'
 import type { ImportMode } from './createImport.js'
@@ -178,7 +179,7 @@ async function processImportBatch({
   const collectionEntry = req.payload.collections[collectionSlug]
 
   const collectionConfig = collectionEntry?.config
-  const collectionHasVersions = Boolean(collectionConfig?.versions)
+  const collectionHasDrafts = Boolean(collectionConfig && hasDraftsEnabled(collectionConfig))
   const hasCustomIdField = Boolean(collectionEntry?.customIDType)
 
   const configuredLocales = req.payload.config.localization
@@ -209,7 +210,7 @@ async function processImportBatch({
         }
 
         let draftOption: boolean | undefined
-        if (collectionHasVersions) {
+        if (collectionHasDrafts) {
           const statusValue = createData._status || options.defaultVersionStatus
           const isPublished = statusValue !== 'draft'
           draftOption = !isPublished
@@ -247,7 +248,7 @@ async function processImportBatch({
           savedDocument = await req.payload.create({
             collection: collectionSlug,
             data: flatData,
-            draft: draftOption,
+            ...(draftOption ? { version: 'draft' as const } : { version: 'published' as const }),
             overrideAccess: false,
             req: defaultLocaleReq,
             user,
@@ -259,17 +260,26 @@ async function processImportBatch({
                 await req.payload.update({
                   id: savedDocument.id as number | string,
                   collection: collectionSlug,
-                  data: localeData,
-                  draft: collectionHasVersions ? false : undefined,
+                  data: {
+                    ...localeData,
+                    ...(collectionHasDrafts
+                      ? { _status: draftOption ? 'draft' : 'published' }
+                      : {}),
+                  },
                   overrideAccess: false,
                   req: { ...req, locale },
                   user,
+                  version: draftOption ? 'draft' : 'latest',
                 })
               } catch (error) {
                 req.payload.logger.error({
                   err: error,
                   msg: `Failed to update locale ${locale} for document ${String(savedDocument.id)}`,
                 })
+                throw new Error(
+                  `Failed to update locale ${locale}: ${extractErrorMessage(error)}`,
+                  { cause: error },
+                )
               }
             }
           }
@@ -278,7 +288,7 @@ async function processImportBatch({
           savedDocument = await req.payload.create({
             collection: collectionSlug,
             data: createData,
-            draft: draftOption,
+            ...(draftOption ? { version: 'draft' as const } : { version: 'published' as const }),
             overrideAccess: false,
             req,
             user,
@@ -317,6 +327,7 @@ async function processImportBatch({
             overrideAccess: false,
             req,
             user,
+            version: 'latest',
             where: {
               [matchField || 'id']: {
                 equals: matchValue,
@@ -404,7 +415,13 @@ async function processImportBatch({
                   await req.payload.update({
                     id: existingDoc.id as number | string,
                     collection: collectionSlug,
-                    data: localeData,
+                    data: {
+                      ...localeData,
+                      ...(collectionHasDrafts &&
+                      (updateData._status === 'draft' || updateData._status === 'published')
+                        ? { _status: updateData._status }
+                        : {}),
+                    },
                     depth: 0,
                     overrideAccess: false,
                     req: { ...req, locale },
@@ -415,6 +432,10 @@ async function processImportBatch({
                     err: error,
                     msg: `Failed to update locale ${locale} for document ${String(existingDoc.id)}`,
                   })
+                  throw new Error(
+                    `Failed to update locale ${locale}: ${extractErrorMessage(error)}`,
+                    { cause: error },
+                  )
                 }
               }
             }
@@ -479,7 +500,7 @@ async function processImportBatch({
 
           // Only handle _status for versioned collections
           let draftOption: boolean | undefined
-          if (collectionHasVersions) {
+          if (collectionHasDrafts) {
             // Use defaultVersionStatus from config if _status not provided
             const statusValue = createData._status || options.defaultVersionStatus
             const isPublished = statusValue !== 'draft'
@@ -500,7 +521,7 @@ async function processImportBatch({
             savedDocument = await req.payload.create({
               collection: collectionSlug,
               data: flatData,
-              draft: draftOption,
+              ...(draftOption ? { version: 'draft' as const } : { version: 'published' as const }),
               overrideAccess: false,
               req: defaultLocaleReq,
               user,
@@ -512,17 +533,26 @@ async function processImportBatch({
                   await req.payload.update({
                     id: savedDocument.id as number | string,
                     collection: collectionSlug,
-                    data: localeData,
-                    draft: collectionHasVersions ? false : undefined,
+                    data: {
+                      ...localeData,
+                      ...(collectionHasDrafts
+                        ? { _status: draftOption ? 'draft' : 'published' }
+                        : {}),
+                    },
                     overrideAccess: false,
                     req: { ...req, locale },
                     user,
+                    version: draftOption ? 'draft' : 'latest',
                   })
                 } catch (error) {
                   req.payload.logger.error({
                     err: error,
                     msg: `Failed to update locale ${locale} for document ${String(savedDocument.id)}`,
                   })
+                  throw new Error(
+                    `Failed to update locale ${locale}: ${extractErrorMessage(error)}`,
+                    { cause: error },
+                  )
                 }
               }
             }
@@ -531,7 +561,7 @@ async function processImportBatch({
             savedDocument = await req.payload.create({
               collection: collectionSlug,
               data: createData,
-              draft: draftOption,
+              ...(draftOption ? { version: 'draft' as const } : { version: 'published' as const }),
               overrideAccess: false,
               req,
               user,

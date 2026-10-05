@@ -2,6 +2,8 @@
 
 Package to allow querying Payload REST API in a fully type safe way. Has support for all necessary operations, including auth, type safe `select`, `populate`, `joins` properties and simplified file uploading. Its interface is _very_ similar to the Local API.
 
+Use `version: 'published'`, `'draft'`, or `'latest'` to select a snapshot. Reads default to published content. Creates and updates default to drafts when drafts are enabled; create only accepts published or draft. Use `locale: 'all'` to write all locales.
+
 ```ts
 import { PayloadSDK } from '@payloadcms/sdk'
 import type { Config } from './payload-types'
@@ -14,7 +16,7 @@ const sdk = new PayloadSDK<Config>({
 // Find operation
 const posts = await sdk.find({
   collection: 'posts',
-  draft: true,
+  version: 'draft',
   limit: 10,
   locale: 'en',
   page: 1,
@@ -25,7 +27,7 @@ const posts = await sdk.find({
 const posts = await sdk.findByID({
   id,
   collection: 'posts',
-  draft: true,
+  version: 'draft',
   locale: 'en',
 })
 

@@ -1,6 +1,7 @@
 import type { FindOptions } from '../../collections/operations/local/find.js'
 import type { FindGlobalVersionsArgs } from '../../database/types.js'
 import type { PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
+import type { DocumentVersion } from '../../types/operations.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
@@ -24,6 +25,7 @@ export type Arguments = {
   populate?: PopulateType
   req: PayloadRequest
   showHiddenFields?: boolean
+  version?: DocumentVersion
 } & Pick<FindOptions<string, SelectType>, 'select'>
 
 export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = any>(
@@ -41,6 +43,7 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     req,
     select: incomingSelect,
     showHiddenFields,
+    version = 'published',
   } = args
 
   // /////////////////////////////////////
@@ -148,7 +151,7 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     currentDepth,
     depth: depth!,
     doc: result.version,
-    draft: undefined!,
+    draft: version !== 'published',
     fallbackLocale: fallbackLocale!,
     global: globalConfig,
     locale: locale!,
@@ -157,6 +160,7 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     req,
     select: typeof select?.version === 'object' ? select.version : undefined,
     showHiddenFields: showHiddenFields!,
+    version,
   })
 
   // /////////////////////////////////////

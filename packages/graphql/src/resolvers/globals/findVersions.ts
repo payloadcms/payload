@@ -1,10 +1,11 @@
 import type { GraphQLResolveInfo } from 'graphql'
-import type { Document, SanitizedGlobalConfig, Where } from 'payload'
+import type { Document, DocumentVersion, SanitizedGlobalConfig, Where } from 'payload'
 
 import { findVersionsOperationGlobal, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 
+import { rememberDocumentVersion } from '../../utilities/documentVersion.js'
 import { buildSelectForCollectionMany } from '../../utilities/select.js'
 
 export type Resolver = (
@@ -17,6 +18,7 @@ export type Resolver = (
     pagination?: boolean
     select?: boolean
     sort?: string
+    version?: DocumentVersion
     where: Where
   },
   context: Context,
@@ -30,7 +32,9 @@ export function findVersions(globalConfig: SanitizedGlobalConfig): Resolver {
       'fallbackLocale',
       'transactionID',
     ]))
-    const select = (context.select = args.select ? buildSelectForCollectionMany(info, context) : undefined)
+    const select = (context.select = args.select
+      ? buildSelectForCollectionMany(info, context)
+      : undefined)
 
     req.locale = args.locale || req.locale
     req.fallbackLocale = args.fallbackLocale || req.fallbackLocale
@@ -47,10 +51,11 @@ export function findVersions(globalConfig: SanitizedGlobalConfig): Resolver {
       req,
       select,
       sort: sort && typeof sort === 'string' ? sort.split(',') : undefined,
+      version: args.version,
       where: args.where,
     }
 
     const result = await findVersionsOperationGlobal(options)
-    return result
+    return rememberDocumentVersion({ data: result, version: args.version ?? 'published' })
   }
 }

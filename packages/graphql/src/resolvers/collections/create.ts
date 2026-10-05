@@ -2,6 +2,7 @@ import type {
   Collection,
   CollectionSlug,
   DataFromCollectionSlug,
+  DocumentVersion,
   PayloadRequest,
   RequiredDataFromCollectionSlug,
 } from 'payload'
@@ -14,8 +15,8 @@ export type Resolver<TSlug extends CollectionSlug> = (
   _: unknown,
   args: {
     data: RequiredDataFromCollectionSlug<TSlug>
-    draft: boolean
     locale?: string
+    version?: Exclude<DocumentVersion, 'latest'>
   },
   context: {
     req: PayloadRequest
@@ -26,16 +27,23 @@ export function createResolver<TSlug extends CollectionSlug>(
   collection: Collection,
 ): Resolver<TSlug> {
   return async function resolver(_, args, context: Context) {
+    const req = isolateObjectProperty(context.req, ['locale', 'query', 'transactionID'])
+
     if (args.locale) {
-      context.req.locale = args.locale
+      req.locale = args.locale
+    }
+
+    req.query = {
+      ...req.query,
+      version: args.version,
     }
 
     const result = await createOperation({
       collection,
       data: args.data,
       depth: 0,
-      draft: args.draft,
-      req: isolateObjectProperty(context.req, 'transactionID'),
+      req,
+      version: args.version,
     })
 
     return result

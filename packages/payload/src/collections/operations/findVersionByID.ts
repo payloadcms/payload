@@ -2,6 +2,7 @@ import { status as httpStatus } from 'http-status'
 
 import type { FindOptions } from '../../index.js'
 import type { PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
+import type { DocumentVersion } from '../../types/operations.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { Collection, TypeWithID } from '../config/types.js'
 
@@ -33,6 +34,7 @@ export type Arguments = {
   req: PayloadRequest
   showHiddenFields?: boolean
   trash?: boolean
+  version?: DocumentVersion
 } & Pick<FindOptions<string, SelectType>, 'select'>
 
 export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
@@ -51,6 +53,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     select: incomingSelect,
     showHiddenFields,
     trash = false,
+    version = 'published',
   } = args
 
   if (!id) {
@@ -199,8 +202,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     currentDepth,
     depth: depth!,
     doc: result.version,
-    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    draft: undefined,
+    draft: version !== 'published',
     fallbackLocale: fallbackLocale!,
     global: null,
     locale: locale!,
@@ -209,6 +211,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     req,
     select: typeof select?.version === 'object' ? select.version : undefined,
     showHiddenFields: showHiddenFields!,
+    version,
   })
 
   // /////////////////////////////////////

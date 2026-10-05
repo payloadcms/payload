@@ -20,13 +20,13 @@ export const VariantOptionsSelector: React.FC<Props> = async (props) => {
     id: data.product,
     collection: productsSlug,
     depth: 0,
-    draft: true,
     overrideAccess: true,
     select: {
       variants: true,
       variantTypes: true,
     },
     user,
+    version: 'latest',
   })
 
   // @ts-expect-error - TODO: Fix types

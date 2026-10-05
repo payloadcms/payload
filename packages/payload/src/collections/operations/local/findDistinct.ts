@@ -13,8 +13,10 @@ import type {
 } from '../../../index.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
+import type { VersionFromCollectionSlug } from '../../config/types.js'
 
 import { APIError, createPayloadRequest } from '../../../index.js'
+import { parseDocumentVersion } from '../../../versions/parseDocumentVersion.js'
 import { findDistinctOperation } from '../findDistinct.js'
 
 export type Options<
@@ -95,7 +97,8 @@ export type Options<
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: Where
-} & Pick<SharedLocalAPIOptions, 'overrideAccess'>
+} & Pick<SharedLocalAPIOptions, 'overrideAccess'> &
+  VersionFromCollectionSlug<TSlug>
 
 export async function findDistinct<
   TSlug extends CollectionSlug,
@@ -104,6 +107,8 @@ export async function findDistinct<
   payload: Payload,
   options: Options<TSlug, TField>,
 ): Promise<PaginatedDistinctDocs<Record<TField, DataFromCollectionSlug<TSlug>[TField]>>> {
+  parseDocumentVersion({ params: { ...options } })
+
   const {
     collection: collectionSlug,
     depth = 0,
@@ -116,6 +121,7 @@ export async function findDistinct<
     showHiddenFields,
     sort,
     trash = false,
+    version,
     where,
   } = options
   const collection = payload.collections[collectionSlug]
@@ -142,6 +148,7 @@ export async function findDistinct<
     showHiddenFields,
     sort,
     trash,
+    version,
     where,
   }) as Promise<PaginatedDistinctDocs<Record<TField, DataFromCollectionSlug<TSlug>[TField]>>>
 }

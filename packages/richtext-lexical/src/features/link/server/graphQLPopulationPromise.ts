@@ -23,6 +23,7 @@ export const linkPopulationPromiseHOC = (
     populationPromises,
     req,
     showHiddenFields,
+    version,
   }) => {
     if (!props.fields?.length) {
       return
@@ -49,6 +50,7 @@ export const linkPopulationPromiseHOC = (
         req,
         showHiddenFields,
         siblingDoc: node.fields,
+        version,
       })
     }
   }

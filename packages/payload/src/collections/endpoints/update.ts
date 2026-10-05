@@ -6,39 +6,30 @@ import type { PayloadHandler } from '../../config/types.js'
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { parseParams } from '../../utilities/parseParams/index.js'
+import { parseDocumentVersion } from '../../versions/parseDocumentVersion.js'
 import { updateOperation } from '../operations/update.js'
 
 export const updateHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
 
-  const {
-    depth,
-    draft,
-    limit,
-    overrideLock,
-    populate,
-    publishAllLocales,
-    select,
-    sort,
-    trash,
-    unpublishAllLocales,
-    where,
-  } = parseParams(req.query)
+  const { depth, limit, overrideLock, populate, select, sort, trash, where } = parseParams(
+    req.query,
+  )
+
+  const version = parseDocumentVersion({ params: req.query })
 
   const result = await updateOperation({
     collection,
     data: req.data!,
     depth,
-    draft,
     limit,
     overrideLock: overrideLock ?? false,
     populate,
-    publishAllLocales,
     req,
     select,
     sort,
     trash,
-    unpublishAllLocales,
+    version,
     where: where!,
   })
 

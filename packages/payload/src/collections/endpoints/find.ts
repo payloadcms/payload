@@ -5,18 +5,20 @@ import type { PayloadHandler } from '../../config/types.js'
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { parseParams } from '../../utilities/parseParams/index.js'
+import { parseDocumentVersion } from '../../versions/parseDocumentVersion.js'
 import { findOperation } from '../operations/find.js'
 
 export const findHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
 
-  const { depth, draft, joins, limit, page, pagination, populate, select, sort, trash, where } =
+  const { depth, joins, limit, page, pagination, populate, select, sort, trash, where } =
     parseParams(req.query)
+
+  const version = parseDocumentVersion({ params: req.query })
 
   const result = await findOperation({
     collection,
     depth,
-    draft,
     joins,
     limit,
     page,
@@ -26,6 +28,7 @@ export const findHandler: PayloadHandler = async (req) => {
     select,
     sort,
     trash,
+    version,
     where,
   })
 

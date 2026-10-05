@@ -834,7 +834,7 @@ const published = await payload.findByID({
   overrideAccess: true,
   id: 'page-id',
   context: { computeHierarchyPaths: true },
-  // draft: false (default)
+  version: 'published', // default
 })
 // published._h_slugPath: 'products/clothing' (uses published parent title)
 
@@ -843,7 +843,7 @@ const draft = await payload.findByID({
   collection: 'pages',
   overrideAccess: true,
   id: 'page-id',
-  draft: true,
+  version: 'latest',
   context: { computeHierarchyPaths: true },
 })
 // draft._h_slugPath: 'products/apparel' (uses draft title if changed)
@@ -851,7 +851,7 @@ const draft = await payload.findByID({
 
 **How it works:**
 
-1. When computing paths, hierarchy fetches ancestors using the same `draft` context
+1. When computing paths, hierarchy fetches ancestors using the same `version` selector
 2. If reading a draft, ancestor titles come from draft versions (if they exist)
 3. If reading published, ancestor titles come from published versions
 4. This ensures paths always reflect the correct version's hierarchy state
@@ -892,7 +892,7 @@ await payload.update({
   overrideAccess: true,
   id: 'doc-id',
   data: { parent: 'parent-2' },
-  draft: true,
+  version: 'draft',
 })
 
 // Publish only French
@@ -902,22 +902,20 @@ await payload.update({
   id: 'doc-id',
   locale: 'fr',
   data: { _status: 'published' },
-  draft: false,
 })
 // Result: parent changed to 'parent-2' for ALL locales
 // Paths computed on next read will reflect new parent for all locales
 ```
 
-**Recommendation:** When moving documents in the hierarchy (changing parent), prefer `publishAllLocales` (default) to make the intent clear:
+**Recommendation:** When moving documents in the hierarchy (changing parent), explicitly publish the change to make the intent clear. Since the parent field is shared, it applies to every locale:
 
 ```ts
-// ✅ Clear: publishes parent change for all locales
+// ✅ Clear: publishes the shared parent change
 await payload.update({
   collection: 'pages',
   overrideAccess: true,
   id: 'doc-id',
-  data: { parent: 'new-parent' },
-  // publishAllLocales is default
+  data: { parent: 'new-parent', _status: 'published' },
 })
 ```
 

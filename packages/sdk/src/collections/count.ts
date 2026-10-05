@@ -1,4 +1,10 @@
-import type { CollectionSlug, PayloadTypesShape, TypedLocale, Where } from 'payload'
+import type {
+  CollectionSlug,
+  DocumentVersion,
+  PayloadTypesShape,
+  TypedLocale,
+  Where,
+} from 'payload'
 
 import type { PayloadSDK } from '../index.js'
 
@@ -16,6 +22,8 @@ export type CountOptions<T extends PayloadTypesShape, TSlug extends CollectionSl
    * @default false
    */
   trash?: boolean
+  /** The document snapshot to count. */
+  version?: DocumentVersion
   /**
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */

@@ -18,12 +18,12 @@ export const createFindVersionsCommand = defineCLICommand({
     const result = await payload.findVersions({
       collection: args.slug,
       ...getReadOptions(args),
-      draft: args.draft,
       limit: args.limit,
       page: args.page,
       pagination: args.pagination,
       sort: args.sort,
       trash: args.trash,
+      version: args.version,
       where: args.where,
     })
 

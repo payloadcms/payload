@@ -2,9 +2,11 @@ import type { CollectionSlug, Payload, RequestContext, TypedLocale, User } from 
 import type { PayloadRequest, Where } from '../../../types/index.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
+import type { VersionFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
+import { parseDocumentVersion } from '../../../versions/parseDocumentVersion.js'
 import { countOperation } from '../count.js'
 
 export type CountOptions<TSlug extends CollectionSlug> = {
@@ -49,17 +51,21 @@ export type CountOptions<TSlug extends CollectionSlug> = {
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: Where
-} & Pick<SharedLocalAPIOptions, 'overrideAccess'>
+} & Pick<SharedLocalAPIOptions, 'overrideAccess'> &
+  VersionFromCollectionSlug<TSlug>
 
 export async function countLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: CountOptions<TSlug>,
 ): Promise<{ totalDocs: number }> {
+  parseDocumentVersion({ params: { ...options } })
+
   const {
     collection: collectionSlug,
     disableErrors,
     overrideAccess = false,
     trash = false,
+    version,
     where,
   } = options
 
@@ -80,6 +86,7 @@ export async function countLocal<TSlug extends CollectionSlug>(
       payload,
     }),
     trash,
+    version,
     where,
   })
 }

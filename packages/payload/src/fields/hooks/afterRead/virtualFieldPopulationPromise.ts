@@ -1,5 +1,6 @@
 import type { TypedFallbackLocale } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
+import type { DocumentVersion } from '../../../types/operations.js'
 import type { FlattenedField } from '../../config/types.js'
 
 import { createDataloaderCacheKey } from '../../../collections/dataloader.js'
@@ -17,6 +18,7 @@ export const virtualFieldPopulationPromise = async ({
   segments,
   showHiddenFields,
   siblingDoc,
+  version,
 }: {
   draft: boolean
   fallbackLocale: TypedFallbackLocale
@@ -31,6 +33,7 @@ export const virtualFieldPopulationPromise = async ({
   shift?: boolean
   showHiddenFields: boolean
   siblingDoc: Record<string, unknown>
+  version?: DocumentVersion
 }): Promise<void> => {
   const currentSegment = segments.shift()
 
@@ -80,6 +83,7 @@ export const virtualFieldPopulationPromise = async ({
       segments,
       showHiddenFields,
       siblingDoc,
+      version: version ?? (draft ? 'latest' : 'published'),
     })
   }
 
@@ -144,6 +148,7 @@ export const virtualFieldPopulationPromise = async ({
               select,
               showHiddenFields,
               transactionID: req.transactionID as number,
+              version,
             }),
           )
         }),
@@ -167,6 +172,7 @@ export const virtualFieldPopulationPromise = async ({
           segments: [...segments],
           showHiddenFields,
           siblingDoc,
+          version,
         })
       }
 
@@ -203,6 +209,7 @@ export const virtualFieldPopulationPromise = async ({
         select,
         showHiddenFields,
         transactionID: req.transactionID as number,
+        version,
       }),
     )
 
@@ -223,6 +230,7 @@ export const virtualFieldPopulationPromise = async ({
       segments,
       showHiddenFields,
       siblingDoc,
+      version: version ?? (draft ? 'latest' : 'published'),
     })
   }
 }

@@ -43,14 +43,16 @@ import {
   getAllLocalesPublicationStatus,
   normalizeAllLocalesPublicationStatus,
   reconcileAllLocalesPublicationStatus,
-  validateAllLocalesPublicationFlags,
 } from '../../versions/allLocalesPublicationStatus.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
+import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
+import { getVersionStatusQuery } from '../../versions/getVersionStatusQuery.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 import { copyDataWithFreshRowIDs } from './utilities/copyDataWithFreshRowIDs.js'
+import { isDraftVersion, validateWriteVersion } from './utilities/resolveVersion.js'
 import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
 import { updateDocument } from './utilities/update.js'
 
@@ -61,13 +63,11 @@ export type Arguments<TSlug extends CollectionSlug> = {
   depth?: number
   disableTransaction?: boolean
   disableVerificationEmail?: boolean
-  draft?: boolean
   limit?: number
   overrideAccess?: boolean
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
-  publishAllLocales?: boolean
   req: PayloadRequest
   showHiddenFields?: boolean
   /**
@@ -77,7 +77,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
    */
   sort?: Sort
   trash?: boolean
-  unpublishAllLocales?: boolean
+  version?: 'draft' | 'latest' | 'published'
   where: Where
 } & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
@@ -113,21 +113,15 @@ export const updateOperation = async <
       }
     }
 
-    validateAllLocalesPublicationFlags({
-      publishAllLocales: args.publishAllLocales,
-      unpublishAllLocales: args.unpublishAllLocales,
-    })
-
     const initialCollectionConfig = args.collection.config
+    validateWriteVersion({ collectionConfig: initialCollectionConfig, version: args.version })
     const initialAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
       hasLocalizedStatus: Boolean(
         args.req.payload.config.localization && hasLocalizeStatusEnabled(initialCollectionConfig),
       ),
-      publishAllLocales:
-        !args.draft &&
-        (args.publishAllLocales ??
-          !(hasLocalizeStatusEnabled(initialCollectionConfig) && args.req.locale !== 'all')),
-      unpublishAllLocales: Boolean(args.unpublishAllLocales),
+      publishAllLocales: args.req.locale === 'all' && args.data._status === 'published',
+      unpublishAllLocales:
+        args.req.locale === 'all' && args.version === 'published' && args.data._status === 'draft',
     })
 
     const initialAllLocalesPublicationIntent = normalizeAllLocalesPublicationStatus({
@@ -150,13 +144,11 @@ export const updateOperation = async <
       collection: { config: collectionConfig },
       collection,
       depth,
-      draft: draftArg = false,
       limit = 0,
       overrideAccess,
       overrideLock,
       overwriteExistingFiles = false,
       populate,
-      publishAllLocales: publishAllLocalesArg,
       req: {
         fallbackLocale,
         locale,
@@ -168,7 +160,7 @@ export const updateOperation = async <
       showHiddenFields,
       sort: incomingSort,
       trash = false,
-      unpublishAllLocales: unpublishAllLocalesArg,
+      version = 'draft',
       where,
     } = args
 
@@ -178,35 +170,23 @@ export const updateOperation = async <
 
     const { data: bulkUpdateData } = args
 
-    validateAllLocalesPublicationFlags({
-      publishAllLocales: publishAllLocalesArg,
-      unpublishAllLocales: unpublishAllLocalesArg,
-    })
+    validateWriteVersion({ collectionConfig, version: args.version })
 
     const requestedAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
       hasLocalizedStatus: Boolean(
         config.localization && hasLocalizeStatusEnabled(collectionConfig),
       ),
-      publishAllLocales:
-        !draftArg &&
-        (publishAllLocalesArg ?? !(hasLocalizeStatusEnabled(collectionConfig) && locale !== 'all')),
-      unpublishAllLocales: Boolean(unpublishAllLocalesArg),
+      publishAllLocales: locale === 'all' && bulkUpdateData._status === 'published',
+      unpublishAllLocales:
+        locale === 'all' && version === 'published' && bulkUpdateData._status === 'draft',
     })
     const allLocalesPublicationStatus = reconcileAllLocalesPublicationStatus({
       data: bulkUpdateData,
       intent: initialAllLocalesPublicationIntent,
       status: requestedAllLocalesPublicationStatus,
     })
-    const publicationIntentSurvivedBeforeOperation =
-      !requestedAllLocalesPublicationStatus || Boolean(allLocalesPublicationStatus)
-    const publishAllLocales = publicationIntentSurvivedBeforeOperation
-      ? publishAllLocalesArg
-      : false
-    const unpublishAllLocales = publicationIntentSurvivedBeforeOperation
-      ? unpublishAllLocalesArg
-      : false
-
-    const shouldSaveDraft = Boolean(draftArg && hasDraftsEnabled(collectionConfig))
+    const publishAllLocales = allLocalesPublicationStatus === 'published'
+    const unpublishAllLocales = allLocalesPublicationStatus === 'draft'
 
     // /////////////////////////////////////
     // Access
@@ -257,6 +237,18 @@ export const updateOperation = async <
       where: fullWhere,
     })
 
+    if (hasDraftsEnabled(collectionConfig) && version === 'published') {
+      fullWhere = combineQueries(
+        fullWhere,
+        getVersionStatusQuery({
+          entity: collectionConfig,
+          locale,
+          localization: config.localization,
+          status: 'published',
+        }),
+      )
+    }
+
     sanitizeWhereQuery({ fields: collectionConfig.flattenedFields, payload, where: fullWhere })
 
     const sort = sanitizeSortQuery({
@@ -273,7 +265,7 @@ export const updateOperation = async <
 
     let docs
 
-    if (hasDraftsEnabled(collectionConfig) && (shouldSaveDraft || isTrashAttempt)) {
+    if (hasDraftsEnabled(collectionConfig) && version !== 'published') {
       const versionsWhere = appendVersionToQueryKey(fullWhere)
 
       await validateQueryPaths({
@@ -324,8 +316,8 @@ export const updateOperation = async <
 
     const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
 
-    const processDocument = async (docWithLocales: (typeof docs)[number]) => {
-      const { id } = docWithLocales
+    const processDocument = async (candidateDoc: (typeof docs)[number]) => {
+      const { id } = candidateDoc
       let documentTempFilePath: string | undefined
 
       try {
@@ -333,6 +325,27 @@ export const updateOperation = async <
         let docShouldCommit = false
         if (req.payload.db.bulkOperationsSingleTransaction) {
           docShouldCommit = await initTransaction(req)
+        }
+
+        const docWithLocales =
+          hasDraftsEnabled(collectionConfig) && version !== 'published'
+            ? await getLatestCollectionVersion({
+                id,
+                config: collectionConfig,
+                payload,
+                query: {
+                  collection: collectionConfig.slug,
+                  locale: locale || undefined,
+                  req,
+                  where: combineQueries(fullWhere, { id: { equals: id } }),
+                },
+                req,
+                version,
+              })
+            : candidateDoc
+
+        if (!docWithLocales) {
+          throw new APIError(`Document with ID ${String(id)} is no longer available.`, 404)
         }
 
         const documentFile = req.file ? { ...req.file } : undefined
@@ -399,7 +412,10 @@ export const updateOperation = async <
           }),
           depth: depth!,
           docWithLocales,
-          draftArg,
+          draftArg:
+            hasDraftsEnabled(collectionConfig) &&
+            (version === 'draft' ||
+              (version === 'latest' && isDraftVersion({ doc: docWithLocales, locale }))),
           fallbackLocale: fallbackLocale!,
           filesToUpload: generatedFileData.files,
           locale: locale!,
@@ -407,11 +423,15 @@ export const updateOperation = async <
           overrideLock: overrideLock!,
           payload,
           populate,
+          preserveDraft:
+            version === 'published' ||
+            (version === 'latest' && !isDraftVersion({ doc: docWithLocales, locale })),
           publishAllLocales,
           req: documentReq,
           select: select!,
           showHiddenFields: showHiddenFields!,
           unpublishAllLocales,
+          version,
         })
 
         // /////////////////////////////////////

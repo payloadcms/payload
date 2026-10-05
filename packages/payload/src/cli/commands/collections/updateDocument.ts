@@ -55,19 +55,17 @@ export const createUpdateDocumentCommand = defineCLICommand({
           collection,
           data,
           depth: args.depth,
-          draft: args.draft,
           fallbackLocale: args.fallbackLocale,
+          version: args.version,
           ...resolvedFile,
           locale: args.locale,
           overrideAccess: args.overrideAccess,
           overrideLock: args.overrideLock,
           overwriteExistingFiles: args.overwriteExistingFiles,
           populate: args.populate,
-          publishAllLocales: args.publishAllLocales,
           select: args.returning ? args.select : { id: true },
           showHiddenFields: args.showHiddenFields,
           trash: args.trash,
-          unpublishAllLocales: args.unpublishAllLocales,
         })
 
         const result = args.returning ? doc : { id: doc.id }
@@ -84,8 +82,8 @@ export const createUpdateDocumentCommand = defineCLICommand({
           collection,
           data,
           depth: args.depth,
-          draft: args.draft,
           fallbackLocale: args.fallbackLocale,
+          version: args.version,
           ...resolvedFile,
           limit: args.limit,
           locale: args.locale,
@@ -93,12 +91,10 @@ export const createUpdateDocumentCommand = defineCLICommand({
           overrideLock: args.overrideLock,
           overwriteExistingFiles: args.overwriteExistingFiles,
           populate: args.populate,
-          publishAllLocales: args.publishAllLocales,
           select: args.returning ? args.select : { id: true },
           showHiddenFields: args.showHiddenFields,
           sort: args.sort,
           trash: args.trash,
-          unpublishAllLocales: args.unpublishAllLocales,
           where: args.where,
         })
 

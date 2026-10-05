@@ -5,15 +5,17 @@ import path from 'path'
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
-import type { FileData, FileToSave } from './types.js'
+import type { FileToSave } from './types.js'
 
 import { APIError, ErrorDeletingFile } from '../errors/index.js'
 import { fileExists } from './fileExists.js'
+import { getReferencedUploadFilenames } from './getReferencedUploadFilenames.js'
 
 type Args = {
   collectionConfig: SanitizedCollectionConfig
   config: SanitizedConfig
   doc: Record<string, unknown>
+  filenamesToPreserve?: ReadonlySet<string>
   files?: FileToSave[]
   overrideDelete: boolean
   req: PayloadRequest
@@ -22,6 +24,7 @@ type Args = {
 export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
   collectionConfig,
   doc,
+  filenamesToPreserve,
   files = [],
   overrideDelete,
   req,
@@ -32,30 +35,19 @@ export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
   if (overrideDelete || files.length > 0) {
     const { staticDir: staticPath } = collectionConfig.upload
 
-    const fileToDelete = resolveFilePath({
-      filename: doc.filename as string,
-      staticPath,
-    })
+    const filenames = getReferencedUploadFilenames({ collectionConfig, doc })
 
-    try {
-      await deleteFile({ filePath: fileToDelete, staticPath })
-    } catch (ignore) {
-      throw new ErrorDeletingFile(req.t)
-    }
+    for (const filename of filenames) {
+      if (filenamesToPreserve?.has(filename)) {
+        continue
+      }
 
-    if (doc.sizes) {
-      const sizes: FileData[] = Object.values(doc.sizes)
-      // Since forEach will not wait until unlink is finished it could
-      // happen that two operations will try to delete the same file.
-      // To avoid this it is recommended to use "sync" instead
+      const filePath = resolveFilePath({ filename, staticPath })
 
-      for (const size of sizes) {
-        const sizeToDelete = resolveFilePath({ filename: size.filename, staticPath })
-        try {
-          await deleteFile({ filePath: sizeToDelete, staticPath })
-        } catch (ignore) {
-          throw new ErrorDeletingFile(req.t)
-        }
+      try {
+        await deleteFile({ filePath, staticPath })
+      } catch (ignore) {
+        throw new ErrorDeletingFile(req.t)
       }
     }
   }

@@ -24,6 +24,7 @@ export const uploadPopulationPromiseHOC = (
     populationPromises,
     req,
     showHiddenFields,
+    version,
   }) => {
     if (node?.value && props.enabledCollectionSlugs.includes(node.relationTo)) {
       const collection = req.payload.collections[node?.relationTo]
@@ -47,6 +48,7 @@ export const uploadPopulationPromiseHOC = (
             overrideAccess,
             req,
             showHiddenFields,
+            version,
           }),
         )
 
@@ -64,6 +66,7 @@ export const uploadPopulationPromiseHOC = (
             parentIsLocalized: parentIsLocalized || field.localized || false,
 
             draft,
+
             editorPopulationPromises,
             fieldPromises,
             fields: collectionFieldSchema,
@@ -74,6 +77,7 @@ export const uploadPopulationPromiseHOC = (
             req,
             showHiddenFields,
             siblingDoc: node.fields || {},
+            version,
           })
         }
       }

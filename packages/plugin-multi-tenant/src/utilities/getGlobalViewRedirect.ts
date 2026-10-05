@@ -171,11 +171,11 @@ async function generateCreateRedirect({
           tenant: tenantID,
         },
         depth: 0,
-        draft: true,
         overrideAccess: true,
         select: {
           id: true,
         },
+        version: 'draft',
       })
       return `/collections/${collectionSlug}/${doc.id}`
     } catch (error) {

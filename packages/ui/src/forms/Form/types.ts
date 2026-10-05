@@ -104,7 +104,11 @@ export type SubmitOptions<C = Record<string, unknown>> = {
    */
   disableSuccessStatus?: boolean
   method?: string
-  overrides?: ((formState) => FormData) | Record<string, unknown>
+  /**
+   * Objects merge into the submitted data. A function receives the current form state
+   * and returns the complete data object to serialize instead of the form values.
+   */
+  overrides?: ((formState: FormState) => Record<string, unknown>) | Record<string, unknown>
   /**
    * When true, will skip validation before submitting the form.
    * @default false

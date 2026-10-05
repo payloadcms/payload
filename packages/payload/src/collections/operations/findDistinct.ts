@@ -4,6 +4,7 @@ import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDistinctDocs } from '../../database/types.js'
 import type { FlattenedField } from '../../fields/config/types.js'
 import type { PayloadRequest, PopulateType, Sort, Where } from '../../types/index.js'
+import type { DocumentVersion } from '../../types/operations.js'
 import type { Collection } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
@@ -19,6 +20,8 @@ import { QueryError } from '../../errors/QueryError.js'
 import { relationshipPopulationPromise } from '../../fields/hooks/afterRead/relationshipPopulationPromise.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { getFieldByPath } from '../../utilities/getFieldByPath.js'
+import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
+import { getVersionStatusQuery } from '../../versions/getVersionStatusQuery.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
@@ -36,6 +39,7 @@ export type Arguments = {
   showHiddenFields?: boolean
   sort?: Sort
   trash?: boolean
+  version?: DocumentVersion
   where?: Where
 }
 
@@ -79,6 +83,7 @@ export const findDistinctOperation = async (
     populate,
     showHiddenFields = false,
     trash = false,
+    version = 'published',
     where,
   } = args
 
@@ -116,6 +121,18 @@ export const findDistinctOperation = async (
     trash,
     where: fullWhere,
   })
+
+  if (hasDraftsEnabled(collectionConfig) && version !== 'latest') {
+    fullWhere = combineQueries(
+      fullWhere,
+      getVersionStatusQuery({
+        entity: collectionConfig,
+        locale,
+        localization: payload.config.localization,
+        status: version,
+      }),
+    )
+  }
 
   const relatedAccessByPath: Record<string, Where> = {}
 
@@ -287,6 +304,7 @@ export const findDistinctOperation = async (
       showHiddenFields,
       sort: args.sort,
       trash,
+      version,
       where,
     })
 
@@ -307,6 +325,7 @@ export const findDistinctOperation = async (
     relatedAccess: relatedAccessByPath,
     req,
     sort: args.sort,
+    versions: hasDraftsEnabled(collectionConfig) && version !== 'published',
     where: fullWhere,
   })
 
@@ -324,7 +343,7 @@ export const findDistinctOperation = async (
         relationshipPopulationPromise({
           currentDepth: 0,
           depth: args.depth,
-          draft: false,
+          draft: version !== 'published',
           fallbackLocale: req.fallbackLocale || null,
           field: sanitizedField,
           locale: req.locale || null,
@@ -334,6 +353,7 @@ export const findDistinctOperation = async (
           req,
           showHiddenFields: false,
           siblingDoc: doc,
+          version,
         }),
       )
     }

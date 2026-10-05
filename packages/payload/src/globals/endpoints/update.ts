@@ -7,34 +7,31 @@ import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { isNumber } from '../../utilities/isNumber.js'
 import { sanitizePopulateParam } from '../../utilities/sanitizePopulateParam.js'
 import { sanitizeSelectParam } from '../../utilities/sanitizeSelectParam.js'
+import { parseDocumentVersion } from '../../versions/parseDocumentVersion.js'
 import { updateOperation } from '../operations/update.js'
 
 export const updateHandler: PayloadHandler = async (req) => {
   const globalConfig = getRequestGlobal(req)
   const { searchParams } = req
   const depth = searchParams.get('depth')
-  const draft = searchParams.get('draft') === 'true'
+  const version = parseDocumentVersion({ params: req.query })
   const autosave = searchParams.get('autosave') === 'true'
-  const publishAllLocales = searchParams.get('publishAllLocales') === 'true'
-  const unpublishAllLocales = searchParams.get('unpublishAllLocales') === 'true'
 
   const result = await updateOperation({
     slug: globalConfig.slug,
     autosave,
     data: req.data!,
     depth: isNumber(depth) ? Number(depth) : undefined,
-    draft,
     globalConfig,
     populate: sanitizePopulateParam(req.query.populate),
-    publishAllLocales,
     req,
     select: sanitizeSelectParam(req.query.select),
-    unpublishAllLocales,
+    version,
   })
 
   let message = req.t('general:updatedSuccessfully')
 
-  if (draft) {
+  if (version === 'draft' || (version === undefined && globalConfig.versions?.drafts)) {
     message = req.t('version:draftSavedSuccessfully')
   }
   if (autosave) {

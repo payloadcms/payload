@@ -1,7 +1,8 @@
 import type {
   CollectionSlug,
+  DocumentVersion,
+  LocaleDataOptions,
   PayloadTypesShape,
-  SelectType,
   TypedLocale,
   UploadCollectionSlug,
   Where,
@@ -34,27 +35,15 @@ export type UpdateBaseOptions<
    */
   collection: TSlug
   /**
-   * The document / documents data to update.
-   */
-  data: DeepPartial<RequiredDataFromCollectionSlug<T, TSlug>>
-  /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
   depth?: number
-  /**
-   * Update documents to a draft.
-   */
-  draft?: boolean
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
   fallbackLocale?: false | TypedLocale<T>
   /** File Blob object or URL to the file. Only for upload collections */
   file?: TSlug extends UploadCollectionSlug<T> ? Blob | string : never
-  /**
-   * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
-   */
-  locale?: TypedLocale<T>
   /**
    * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
    */
@@ -68,7 +57,9 @@ export type UpdateBaseOptions<
    * @default false
    */
   trash?: boolean
-}
+  /** The document snapshot to read or update. */
+  version?: DocumentVersion
+} & LocaleDataOptions<DeepPartial<RequiredDataFromCollectionSlug<T, TSlug>>, TypedLocale<T>>
 
 export type UpdateByIDOptions<
   T extends PayloadTypesShape,

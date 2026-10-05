@@ -7,6 +7,7 @@ import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { isNumber } from '../../utilities/isNumber.js'
 import { sanitizePopulateParam } from '../../utilities/sanitizePopulateParam.js'
 import { sanitizeSelectParam } from '../../utilities/sanitizeSelectParam.js'
+import { parseDocumentVersion } from '../../versions/parseDocumentVersion.js'
 import { findVersionByIDOperation } from '../operations/findVersionByID.js'
 
 export const findVersionByIDHandler: PayloadHandler = async (req) => {
@@ -21,6 +22,7 @@ export const findVersionByIDHandler: PayloadHandler = async (req) => {
     populate: sanitizePopulateParam(req.query.populate),
     req,
     select: sanitizeSelectParam(req.query.select),
+    version: parseDocumentVersion({ params: req.query }),
   })
 
   return Response.json(result, {

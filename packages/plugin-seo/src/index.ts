@@ -123,11 +123,11 @@ export const seoPlugin = definePlugin<SEOPluginConfig>({
             collection: collectionConfig.slug,
             depth: 0,
             disableErrors: true,
-            draft: true,
             overrideAccess: false,
             req,
             trash: true,
             user: req.user,
+            version: 'latest',
           })
 
           if (!accessibleDoc) {
@@ -170,10 +170,10 @@ export const seoPlugin = definePlugin<SEOPluginConfig>({
           slug: globalConfig.slug,
           depth: 0,
           disableErrors: true,
-          draft: true,
           overrideAccess: false,
           req,
           user: req.user,
+          version: 'latest',
         })
 
         if (!doc) {

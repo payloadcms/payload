@@ -7,11 +7,12 @@
 import * as z from 'zod/mini'
 
 import {
+  createDocumentVersionSchema,
   dataSchema,
   defaultLimitSchema,
   defaultPageSchema,
   depthSchema,
-  draftSchema,
+  documentVersionSchema,
   fallbackLocaleSchema,
   fieldSchema,
   idSchema,
@@ -24,7 +25,6 @@ import {
   pageSchema,
   paginationSchema,
   populateSchema,
-  publishAllLocalesSchema,
   requireIDOrWhere,
   requireReturningForSelect,
   returningSchema,
@@ -34,9 +34,7 @@ import {
   slugSchema,
   sortSchema,
   trashSchema,
-  unpublishAllLocalesSchema,
   whereSchema,
-  writeDraftSchema,
 } from '../../utilities/sharedInputSchemas.js'
 import { strictObject } from '../../utilities/zod.js'
 
@@ -44,6 +42,7 @@ const countDocumentsInputShape = {
   slug: slugSchema,
   locale: localeSchema,
   trash: trashSchema,
+  version: documentVersionSchema,
   where: whereSchema,
 }
 
@@ -84,13 +83,12 @@ const getCreateDocumentsInputShape = <TFile extends z.core.$ZodType>({
       }),
     )
     .check(z.minLength(1), z.describe('A JSON array of {"data": {...}, "file"?: ...} objects.')),
-  draft: writeDraftSchema,
   fallbackLocale: fallbackLocaleSchema,
   locale: localeSchema,
   populate: populateSchema,
-  publishAllLocales: publishAllLocalesSchema,
   returning: returningSchema,
   select: selectSchema,
+  version: createDocumentVersionSchema,
 })
 
 /** Safe for remote interfaces. Excludes trusted Local API options. */
@@ -144,12 +142,12 @@ const duplicateDocumentInputShape = {
   slug: slugSchema,
   data: z.optional(dataSchema),
   depth: depthSchema,
-  draft: writeDraftSchema,
   fallbackLocale: fallbackLocaleSchema,
   locale: localeSchema,
   populate: populateSchema,
   select: selectSchema,
   selectedLocales: selectedLocalesSchema,
+  version: createDocumentVersionSchema,
 }
 
 export const duplicateDocumentInputSchema = strictObject(duplicateDocumentInputShape)
@@ -171,6 +169,7 @@ const findDistinctInputShape = {
   populate: populateSchema,
   sort: sortSchema,
   trash: trashSchema,
+  version: documentVersionSchema,
   where: whereSchema,
 }
 
@@ -187,7 +186,6 @@ const findDocumentsInputShape = {
   id: z.optional(idSchema),
   slug: slugSchema,
   depth: depthSchema,
-  draft: draftSchema,
   fallbackLocale: fallbackLocaleSchema,
   joins: joinsSchema,
   limit: defaultLimitSchema,
@@ -198,6 +196,7 @@ const findDocumentsInputShape = {
   select: selectSchema,
   sort: sortSchema,
   trash: trashSchema,
+  version: documentVersionSchema,
   where: whereSchema,
 }
 
@@ -214,12 +213,12 @@ const findVersionByIDInputShape = {
   id: idSchema,
   slug: slugSchema,
   depth: depthSchema,
-  draft: draftSchema,
   fallbackLocale: fallbackLocaleSchema,
   locale: localeSchema,
   populate: populateSchema,
   select: selectSchema,
   trash: trashSchema,
+  version: documentVersionSchema,
 }
 
 export const findVersionByIDInputSchema = strictObject(findVersionByIDInputShape)
@@ -234,7 +233,6 @@ export const findVersionByIDLocalInputSchema = strictObject({
 const findVersionsInputShape = {
   slug: slugSchema,
   depth: depthSchema,
-  draft: draftSchema,
   fallbackLocale: fallbackLocaleSchema,
   limit: defaultLimitSchema,
   locale: localeSchema,
@@ -244,6 +242,7 @@ const findVersionsInputShape = {
   select: selectSchema,
   sort: sortSchema,
   trash: trashSchema,
+  version: documentVersionSchema,
   where: whereSchema,
 }
 
@@ -264,11 +263,11 @@ const restoreVersionInputShape = {
   id: idSchema,
   slug: slugSchema,
   depth: depthSchema,
-  draft: writeDraftSchema,
   fallbackLocale: fallbackLocaleSchema,
   locale: localeSchema,
   populate: populateSchema,
   select: selectSchema,
+  version: documentVersionSchema,
 }
 
 export const restoreVersionInputSchema = strictObject(restoreVersionInputShape)
@@ -285,19 +284,17 @@ const getUpdateDocumentInputShape = <TFile extends z.core.$ZodType>({ file }: { 
   slug: slugSchema,
   data: dataSchema,
   depth: depthSchema,
-  draft: writeDraftSchema,
   fallbackLocale: fallbackLocaleSchema,
   file: z.optional(file),
   limit: limitSchema,
   locale: localeSchema,
   overrideLock: overrideLockSchema,
   populate: populateSchema,
-  publishAllLocales: publishAllLocalesSchema,
   returning: returningSchema,
   select: selectSchema,
   sort: sortSchema,
   trash: trashSchema,
-  unpublishAllLocales: unpublishAllLocalesSchema,
+  version: documentVersionSchema,
   where: whereSchema,
 })
 

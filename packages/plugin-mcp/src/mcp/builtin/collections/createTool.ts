@@ -32,19 +32,12 @@ export const createDocumentsTool = defineCollectionTool({
   const payload = req.payload
   const collectionConfig = payload.collections[slug]?.config
   const logger = getLogger({ payload })
-  const {
-    depth,
-    documents,
-    draft,
-    fallbackLocale,
-    locale,
-    populate,
-    publishAllLocales,
-    returning,
-    select,
-  } = input
+  const { depth, documents, fallbackLocale, locale, populate, returning, select, version } = input
   const shouldUsePartialSchema =
-    draft === true && collectionConfig !== undefined && !hasDraftValidationEnabled(collectionConfig)
+    (version === 'draft' ||
+      (version === undefined && Boolean(collectionConfig?.versions?.drafts))) &&
+    collectionConfig !== undefined &&
+    !hasDraftValidationEnabled(collectionConfig)
 
   logger.info(`Creating ${documents.length} documents in collection: ${slug}`)
 
@@ -72,11 +65,10 @@ export const createDocumentsTool = defineCollectionTool({
           collection: slug,
           data: parsedData,
           depth,
-          draft,
           overrideAccess: authorizedMCP.overrideAccess,
           populate,
-          publishAllLocales,
           req,
+          version,
           ...(file ? { file } : {}),
           ...(locale ? { locale } : {}),
           ...(fallbackLocale !== undefined ? { fallbackLocale } : {}),

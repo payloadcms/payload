@@ -9,10 +9,11 @@ import type {
 import type { PayloadRequest, PopulateType, SelectType } from '../../../types/index.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
-import type { DataFromCollectionSlug, DraftFlagFromCollectionSlug } from '../../config/types.js'
+import type { DataFromCollectionSlug, VersionFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
+import { parseDocumentVersion } from '../../../versions/parseDocumentVersion.js'
 import { restoreVersionOperation } from '../restoreVersion.js'
 
 type BaseOptions<TSlug extends CollectionSlug> = {
@@ -42,7 +43,7 @@ type BaseOptions<TSlug extends CollectionSlug> = {
   /**
    * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
    */
-  locale?: TypedLocale
+  locale?: 'all' | TypedLocale
   /**
    * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
    */
@@ -65,12 +66,14 @@ type BaseOptions<TSlug extends CollectionSlug> = {
   Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 export type Options<TSlug extends CollectionSlug> = BaseOptions<TSlug> &
-  DraftFlagFromCollectionSlug<TSlug>
+  VersionFromCollectionSlug<TSlug>
 
 export async function restoreVersionLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<DataFromCollectionSlug<TSlug>> {
+  parseDocumentVersion({ params: { ...options } })
+
   const {
     id,
     collection: collectionSlug,
@@ -79,6 +82,7 @@ export async function restoreVersionLocal<TSlug extends CollectionSlug>(
     populate,
     select,
     showHiddenFields,
+    version,
   } = options
 
   const collection = payload.collections[collectionSlug]
@@ -104,6 +108,7 @@ export async function restoreVersionLocal<TSlug extends CollectionSlug>(
     }),
     select,
     showHiddenFields,
+    version,
   }
 
   return restoreVersionOperation(args)

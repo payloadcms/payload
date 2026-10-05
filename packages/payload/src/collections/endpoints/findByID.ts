@@ -5,29 +5,32 @@ import type { PayloadHandler } from '../../config/types.js'
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { parseParams } from '../../utilities/parseParams/index.js'
+import { parseDocumentVersion } from '../../versions/parseDocumentVersion.js'
 import { findByIDOperation } from '../operations/findByID.js'
 
 export const findByIDHandler: PayloadHandler = async (req) => {
   const { data: dataArg } = req
   const { id, collection } = getRequestCollectionWithID(req)
 
-  const { data, depth, draft, flattenLocales, joins, populate, select, trash } = parseParams({
+  const { data, depth, flattenLocales, joins, populate, select, trash } = parseParams({
     ...req.query,
     ...dataArg,
   })
+
+  const version = parseDocumentVersion({ params: { ...req.query, ...dataArg } })
 
   const result = await findByIDOperation({
     id,
     collection,
     data,
     depth,
-    draft,
     flattenLocales,
     joins,
     populate,
     req,
     select,
     trash,
+    version,
   })
 
   return Response.json(result, {

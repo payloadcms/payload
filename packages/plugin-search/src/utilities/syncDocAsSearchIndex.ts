@@ -219,12 +219,12 @@ export const syncDocAsSearchIndex = async ({
               } = await payload.find({
                 collection,
                 depth: 0,
-                draft: false,
                 limit: 1,
                 locale: syncLocale,
                 overrideAccess: true,
                 pagination: false,
                 req,
+                version: 'published',
                 where: {
                   and: [
                     {

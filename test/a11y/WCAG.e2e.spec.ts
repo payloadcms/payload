@@ -2,6 +2,7 @@ import type { Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { formatAdminURL } from 'payload/shared'
+import * as qs from 'qs-esm'
 
 import type { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 
@@ -9,6 +10,7 @@ import { addGroupBy, clearGroupBy, openGroupBy } from '../__helpers/e2e/groupBy/
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { getSelectMenu, selectInput } from '../__helpers/e2e/selectInput.js'
 import { initPage } from '../__setup/e2e/initPage.js'
+import { localizedPlainPostsSlug } from './collections/LocalizedPlainPosts/index.js'
 import {
   addCollectionQueryWidget,
   addTextBlock,
@@ -1225,6 +1227,57 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(activeOption).toHaveClass(/rs__option--is-focused/)
       await combobox.press('Enter')
       await expect(drawer.locator('#field-toLocale .rs__single-value')).not.toBeEmpty()
+    })
+
+    test('should copy locale data without drafts using the keyboard', async () => {
+      const collectionURL = formatAdminURL({
+        apiRoute: '/api',
+        path: `/${localizedPlainPostsSlug}`,
+        serverURL,
+      })
+      const response = await page.request.post(collectionURL, { data: { title: 'English source' } })
+
+      expect(response.ok()).toBe(true)
+      const { doc } = await response.json()
+
+      try {
+        await page.goto(
+          formatAdminURL({
+            adminRoute: '/admin',
+            path: `/collections/${localizedPlainPostsSlug}/${doc.id}?locale=en`,
+            serverURL,
+          }),
+        )
+        const popup = page.locator('.doc-controls__popup .popup__trigger-wrap button')
+
+        await popup.focus()
+        await popup.press('Enter')
+        const copyTrigger = page.locator('#copy-locale-data__button')
+
+        await copyTrigger.focus()
+        await copyTrigger.press('Enter')
+        const drawer = page.locator('#copy-locale')
+        const combobox = drawer.locator('#field-toLocale input[role="combobox"]')
+
+        await combobox.focus()
+        await combobox.press('ArrowDown')
+        await combobox.press('Enter')
+        const copy = drawer.getByRole('button', { name: 'Copy', exact: true })
+
+        await expect(copy).toBeEnabled()
+        await copy.focus()
+        await copy.press('Enter')
+        await expect(drawer).toBeHidden()
+        await expect(page.locator('#field-title')).toHaveValue('English source')
+        await expect(page).toHaveURL(/locale=es/)
+        const copied = await page.request.get(
+          `${collectionURL}/${doc.id}${qs.stringify({ fallbackLocale: false, locale: 'es' }, { addQueryPrefix: true })}`,
+        )
+
+        expect((await copied.json()).title).toBe('English source')
+      } finally {
+        await page.request.delete(`${collectionURL}/${doc.id}`)
+      }
     })
 
     test('should not activate or close disabled row-menu actions', async () => {
@@ -3350,6 +3403,65 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
   test.describe('4.1.3 Status Messages (AA)', () => {
+    test('should expose a denied locale copy through the live error notification', async () => {
+      const collectionURL = formatAdminURL({
+        apiRoute: '/api',
+        path: `/${localizedPlainPostsSlug}`,
+        serverURL,
+      })
+      const response = await page.request.post(collectionURL, {
+        data: { title: 'Denied copy source' },
+      })
+
+      expect(response.ok()).toBe(true)
+      const { doc } = await response.json()
+
+      try {
+        await page.goto(
+          formatAdminURL({
+            adminRoute: '/admin',
+            path: `/collections/${localizedPlainPostsSlug}/${doc.id}?locale=en`,
+            serverURL,
+          }),
+        )
+        const popup = page.locator('.doc-controls__popup .popup__trigger-wrap button')
+
+        await popup.focus()
+        await popup.press('Enter')
+        const trigger = page.locator('#copy-locale-data__button')
+
+        await trigger.focus()
+        await trigger.press('Enter')
+        const drawer = page.locator('#copy-locale')
+        const combobox = drawer.locator('#field-toLocale input[role="combobox"]')
+
+        await combobox.focus()
+        await combobox.press('ArrowDown')
+        await combobox.press('Enter')
+        const copy = drawer.getByRole('button', { name: 'Copy', exact: true })
+
+        await copy.focus()
+        await copy.press('Enter')
+        const notification = page.locator('[data-sonner-toast][data-type="error"]')
+
+        await expect(notification).toBeVisible()
+        await expect(notification.locator('xpath=ancestor::section')).toHaveAttribute(
+          'aria-live',
+          'polite',
+        )
+        await expect(drawer).toBeVisible()
+        await expect(copy).toBeEnabled()
+        await expect(copy).toBeFocused()
+        const destination = await page.request.get(
+          `${collectionURL}/${doc.id}${qs.stringify({ fallbackLocale: false, locale: 'es' }, { addQueryPrefix: true })}`,
+        )
+
+        expect((await destination.json()).title).toBeFalsy()
+      } finally {
+        await page.request.delete(`${collectionURL}/${doc.id}`)
+      }
+    })
+
     test('should announce completed collection searches', async () => {
       await page.clock.install()
       await page.goto(`${postsURL.list}?groupBy=&search=`)

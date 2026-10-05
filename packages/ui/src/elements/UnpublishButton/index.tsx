@@ -70,8 +70,8 @@ export function UnpublishButton({
           {
             depth: 0,
             'fallback-locale': 'null',
-            locale: unpublishAll ? undefined : localeCode,
-            unpublishAllLocales: unpublishAll,
+            locale: unpublishAll ? 'all' : localeCode,
+            version: 'published',
           },
           { addQueryPrefix: true },
         )

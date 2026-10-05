@@ -10,10 +10,11 @@ import type { PayloadRequest, PopulateType, SelectType } from '../../../types/in
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
-import type { DataFromGlobalSlug } from '../../config/types.js'
+import type { DataFromGlobalSlug, VersionFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
+import { parseDocumentVersion } from '../../../versions/parseDocumentVersion.js'
 import { findVersionByIDOperation } from '../findVersionByID.js'
 
 export type Options<TSlug extends GlobalSlug> = {
@@ -69,12 +70,15 @@ export type Options<TSlug extends GlobalSlug> = {
    */
   user?: null | User
 } & Pick<FindOptions<string, SelectType>, 'select'> &
-  Pick<SharedLocalAPIOptions, 'overrideAccess'>
+  Pick<SharedLocalAPIOptions, 'overrideAccess'> &
+  VersionFromGlobalSlug<TSlug>
 
 export async function findGlobalVersionByIDLocal<TSlug extends GlobalSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<TypeWithVersion<DataFromGlobalSlug<TSlug>>> {
+  parseDocumentVersion({ params: { ...options } })
+
   const {
     id,
     slug: globalSlug,
@@ -84,6 +88,7 @@ export async function findGlobalVersionByIDLocal<TSlug extends GlobalSlug>(
     populate,
     select,
     showHiddenFields,
+    version,
   } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
@@ -105,5 +110,6 @@ export async function findGlobalVersionByIDLocal<TSlug extends GlobalSlug>(
     }),
     select,
     showHiddenFields,
+    version,
   })
 }

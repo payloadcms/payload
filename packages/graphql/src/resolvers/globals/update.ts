@@ -1,5 +1,6 @@
 import type {
   DataFromGlobalSlug,
+  DocumentVersion,
   GlobalSlug,
   PayloadRequest,
   SanitizedGlobalConfig,
@@ -11,13 +12,15 @@ import { isolateObjectProperty, updateOperationGlobal } from 'payload'
 
 import type { Context } from '../types.js'
 
+import { rememberDocumentVersion } from '../../utilities/documentVersion.js'
+
 type Resolver<TSlug extends GlobalSlug> = (
   _: unknown,
   args: {
     data?: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
-    draft?: boolean
     fallbackLocale?: string
     locale?: string
+    version?: DocumentVersion
   },
   context: {
     req: PayloadRequest
@@ -37,16 +40,24 @@ export function update<TSlug extends GlobalSlug>(
 
     const { slug } = globalConfig
 
+    context.req.query = {
+      ...context.req.query,
+      version: args.version ?? (globalConfig.versions?.drafts ? 'draft' : 'published'),
+    }
+
     const options = {
       slug,
       data: args.data,
       depth: 0,
-      draft: args.draft,
       globalConfig,
       req: isolateObjectProperty(context.req, 'transactionID'),
+      version: args.version,
     }
 
     const result = await updateOperationGlobal<TSlug, SelectType>(options)
-    return result
+    return rememberDocumentVersion({
+      data: result,
+      version: args.version ?? (globalConfig.versions?.drafts ? 'draft' : 'published'),
+    })
   }
 }

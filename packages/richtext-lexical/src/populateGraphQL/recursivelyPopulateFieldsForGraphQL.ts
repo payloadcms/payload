@@ -1,4 +1,4 @@
-import type { Field, JsonObject, PayloadRequest, RequestContext } from 'payload'
+import type { DocumentVersion, Field, JsonObject, PayloadRequest, RequestContext } from 'payload'
 
 import { afterReadTraverseFields } from 'payload'
 
@@ -27,6 +27,7 @@ type NestedRichTextFieldsArgs = {
   req: PayloadRequest
   showHiddenFields: boolean
   siblingDoc: JsonObject
+  version?: DocumentVersion
 }
 
 export const recursivelyPopulateFieldsForGraphQL = ({
@@ -45,6 +46,7 @@ export const recursivelyPopulateFieldsForGraphQL = ({
   req,
   showHiddenFields,
   siblingDoc,
+  version,
 }: NestedRichTextFieldsArgs): void => {
   afterReadTraverseFields({
     collection: null, // Pass from core? This is only needed for hooks, so we can leave this null for now
@@ -70,5 +72,6 @@ export const recursivelyPopulateFieldsForGraphQL = ({
     showHiddenFields,
     siblingDoc,
     triggerHooks: false,
+    version,
   })
 }

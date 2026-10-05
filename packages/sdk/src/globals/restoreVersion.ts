@@ -1,4 +1,10 @@
-import type { GlobalSlug, PayloadTypesShape, TypedLocale, TypeWithVersion } from 'payload'
+import type {
+  DocumentVersion,
+  GlobalSlug,
+  PayloadTypesShape,
+  TypedLocale,
+  TypeWithVersion,
+} from 'payload'
 
 import type { PayloadSDK } from '../index.js'
 import type { DataFromGlobalSlug, PopulateType } from '../types.js'
@@ -11,7 +17,6 @@ export type RestoreGlobalVersionByIDOptions<
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
   depth?: number
-  draft?: boolean
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
@@ -32,6 +37,7 @@ export type RestoreGlobalVersionByIDOptions<
    * the Global slug to operate against.
    */
   slug: TSlug
+  version?: DocumentVersion
 }
 
 export async function restoreGlobalVersion<
