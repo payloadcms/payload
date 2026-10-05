@@ -51,11 +51,11 @@ describe('deleteUploadFilesExclusiveToDocument', () => {
       } as unknown as PayloadRequest,
       retainedDoc: {
         filename: retainedFilename,
-        sizes: { thumbnail: { filename: sourceSizeFilename } },
+        variants: { thumbnail: { filename: sourceSizeFilename } },
       },
       sourceDoc: {
         filename: sourceFilename,
-        sizes: { thumbnail: { filename: sourceSizeFilename } },
+        variants: { thumbnail: { filename: sourceSizeFilename } },
       },
     })
 
@@ -66,11 +66,11 @@ describe('deleteUploadFilesExclusiveToDocument', () => {
       req: expect.any(Object),
       retainedDoc: {
         filename: retainedFilename,
-        sizes: { thumbnail: { filename: sourceSizeFilename } },
+        variants: { thumbnail: { filename: sourceSizeFilename } },
       },
       sourceDoc: {
         filename: sourceFilename,
-        sizes: { thumbnail: { filename: sourceSizeFilename } },
+        variants: { thumbnail: { filename: sourceSizeFilename } },
       },
     })
   })

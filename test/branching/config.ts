@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { defaultBranchMergeValidation } from 'payload'
 
+import { mediaSharpTransformer } from '../__helpers/shared/mediaSharpTransformer.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { hookSpy } from './hookSpy.js'
@@ -643,6 +644,9 @@ export default buildConfigWithDefaults({
     onInit: seedBranchingTestData,
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
+    upload: {
+      transformers: [mediaSharpTransformer({ mediaSlug })],
     },
   },
   seed: seedBranchingTestData,

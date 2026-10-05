@@ -458,15 +458,15 @@ const readBranchVersionDocuments = async ({
 }
 
 const getUploadIdentity = (doc: Record<string, unknown>): string => {
-  const sizeFilenames =
-    doc.sizes && typeof doc.sizes === 'object' && !Array.isArray(doc.sizes)
-      ? Object.entries(doc.sizes)
-          .flatMap(([name, size]) => {
-            if (!size || typeof size !== 'object' || Array.isArray(size)) {
+  const variantFilenames =
+    doc.variants && typeof doc.variants === 'object' && !Array.isArray(doc.variants)
+      ? Object.entries(doc.variants)
+          .flatMap(([name, variant]) => {
+            if (!variant || typeof variant !== 'object' || Array.isArray(variant)) {
               return []
             }
 
-            const filename = (size as Record<string, unknown>).filename
+            const filename = (variant as Record<string, unknown>).filename
 
             return typeof filename === 'string' ? [[name, filename] as [string, string]] : []
           })
@@ -477,6 +477,6 @@ const getUploadIdentity = (doc: Record<string, unknown>): string => {
     filename: doc.filename,
     objectKey: doc._objectKey,
     prefix: doc.prefix,
-    sizes: sizeFilenames,
+    variants: variantFilenames,
   })
 }

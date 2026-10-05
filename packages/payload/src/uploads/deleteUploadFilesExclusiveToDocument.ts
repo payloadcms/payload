@@ -55,21 +55,21 @@ const filterDocumentFiles = ({
     typeof sourceDoc.filename === 'string' && !retainedFilenames.has(sourceDoc.filename)
       ? sourceDoc.filename
       : undefined
-  const sourceSizes = isRecord(sourceDoc.sizes) ? sourceDoc.sizes : {}
-  const sizes = Object.fromEntries(
-    Object.entries(sourceSizes).filter(([, size]) => {
-      if (!isRecord(size) || typeof size.filename !== 'string') {
+  const sourceVariants = isRecord(sourceDoc.variants) ? sourceDoc.variants : {}
+  const variants = Object.fromEntries(
+    Object.entries(sourceVariants).filter(([, variant]) => {
+      if (!isRecord(variant) || typeof variant.filename !== 'string') {
         return false
       }
 
-      return !retainedFilenames.has(size.filename)
+      return !retainedFilenames.has(variant.filename)
     }),
   )
 
   return {
     ...sourceDoc,
     filename: sourceFilename,
-    sizes,
+    variants,
   }
 }
 
@@ -84,10 +84,10 @@ const getUploadFilenames = (doc?: null | Record<string, unknown>): Set<string> =
     filenames.add(doc.filename)
   }
 
-  if (isRecord(doc.sizes)) {
-    for (const size of Object.values(doc.sizes)) {
-      if (isRecord(size) && typeof size.filename === 'string') {
-        filenames.add(size.filename)
+  if (isRecord(doc.variants)) {
+    for (const variant of Object.values(doc.variants)) {
+      if (isRecord(variant) && typeof variant.filename === 'string') {
+        filenames.add(variant.filename)
       }
     }
   }

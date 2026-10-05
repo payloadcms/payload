@@ -4645,12 +4645,81 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       const replacementFilePath = path.resolve(dirname, 'media', replaced.filename)
       const onMain = await payload.findByID({ id: media.id, collection: mediaSlug })
 
-      expect(replaced.filename).toBe('branch-replacement.txt')
+      expect(replaced.filename).toBe('branch-replacement-uploadwork.txt')
       expect(fs.existsSync(mainFilePath)).toBe(true)
       expect(fs.existsSync(replacementFilePath)).toBe(true)
       expect(fs.readFileSync(mainFilePath, 'utf8')).toBe('bytes for keep-original-on-replace.txt')
       expect(fs.readFileSync(replacementFilePath, 'utf8')).toBe('branch replacement bytes')
       expect(onMain.filename).toBe(media.filename)
+    })
+
+    test('should isolate an explicit same-name branch upload from the main file', async () => {
+      const fs = await import('fs')
+      const media = await createOnMain('same-name-branch-replacement.txt')
+      const mainFilePath = path.resolve(dirname, 'media', media.filename)
+      const mainFileData = fs.readFileSync(mainFilePath)
+      const replacementData = Buffer.from('same-name branch replacement bytes')
+
+      const replaced = await payload.update({
+        id: media.id,
+        branch: 'uploadwork',
+        collection: mediaSlug,
+        data: { alt: 'same-name branch replacement' },
+        file: {
+          name: media.filename,
+          data: replacementData,
+          mimetype: 'text/plain',
+          size: replacementData.length,
+        },
+        overwriteExistingFiles: true,
+      })
+      const replacementFilePath = path.resolve(dirname, 'media', replaced.filename)
+
+      expect(replaced.filename).not.toBe(media.filename)
+      expect(replaced.filename).toContain('uploadwork')
+      expect(fs.readFileSync(mainFilePath)).toEqual(mainFileData)
+      expect(fs.readFileSync(replacementFilePath)).toEqual(replacementData)
+    })
+
+    test('should isolate branch image reprocessing from the main file', async () => {
+      const fs = await import('fs')
+      const sourceData = fs.readFileSync(path.resolve(process.cwd(), 'test/uploads/image.png'))
+      const media = await payload.create({
+        collection: mediaSlug,
+        data: { alt: 'main image before branch crop' },
+        file: {
+          name: 'branch-crop-source.png',
+          data: sourceData,
+          mimetype: 'image/png',
+          size: sourceData.length,
+        },
+      })
+      const mainFilePath = path.resolve(dirname, 'media', media.filename)
+      const mainFileData = fs.readFileSync(mainFilePath)
+      const req = await createPayloadRequest({ payload })
+
+      cleanup.push(media.id)
+      req.query = {
+        uploadEdits: {
+          crop: { height: 50, unit: '%' as const, width: 50, x: 0, y: 0 },
+          heightInPixels: 20,
+          widthInPixels: 20,
+        },
+      }
+
+      const cropped = await payload.update({
+        id: media.id,
+        branch: 'uploadwork',
+        collection: mediaSlug,
+        data: { alt: 'branch crop' },
+        req,
+      })
+      const croppedFilePath = path.resolve(dirname, 'media', cropped.filename)
+
+      expect(cropped.filename).not.toBe(media.filename)
+      expect(cropped.filename).toContain('uploadwork')
+      expect(fs.readFileSync(mainFilePath)).toEqual(mainFileData)
+      expect(fs.existsSync(croppedFilePath)).toBe(true)
     })
 
     test.options(
@@ -4719,7 +4788,11 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         const fs = await import('fs/promises')
         const media = await createOnMain('upload-rollback-main.txt')
         const originalFilePath = path.resolve(dirname, 'media', media.filename)
-        const replacementFilePath = path.resolve(dirname, 'media', 'upload-rollback-failed.txt')
+        const replacementFilePath = path.resolve(
+          dirname,
+          'media',
+          'upload-rollback-failed-uploadwork.txt',
+        )
         const replacementData = Buffer.from('upload that must be rolled back')
         const commitError = new Error('Simulated final commit failure')
         let commitAttempts = 0
@@ -4774,7 +4847,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
       const replacementFilePath = path.resolve(dirname, 'media', replaced.filename)
 
-      expect(replaced.filename).toBe('discarded-branch-replacement.txt')
+      expect(replaced.filename).toBe('discarded-branch-replacement-uploadwork.txt')
 
       await payload.branches.discard({ branch: 'uploadwork' })
 
@@ -4804,7 +4877,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
       const replacementFilePath = path.resolve(dirname, 'media', replaced.filename)
 
-      expect(replaced.filename).toBe('merged-branch-replacement.txt')
+      expect(replaced.filename).toBe('merged-branch-replacement-uploadwork.txt')
 
       await payload.branches.merge({ branch: 'uploadwork' })
 

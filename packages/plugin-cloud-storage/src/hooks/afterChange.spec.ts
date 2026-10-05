@@ -1,8 +1,4 @@
-import {
-  beginDeferredCleanupScope,
-  commitTransaction,
-  flushDeferredCleanupScope,
-} from 'payload'
+import { beginDeferredCleanupScope, commitTransaction, flushDeferredCleanupScope } from 'payload'
 import { describe, expect, it, vi } from 'vitest'
 
 import { getAfterChangeHook } from './afterChange.js'
@@ -82,7 +78,7 @@ describe('upload replacement cleanup', () => {
             filename: 'main.png',
             id: 1,
             prefix: 'media',
-            sizes: {},
+            variants: { thumbnail: { filename: 'main-thumbnail.png' } },
           }),
         },
         logger: { error: vi.fn() },
@@ -98,7 +94,7 @@ describe('upload replacement cleanup', () => {
         id: 2,
         mimeType: 'image/png',
         prefix: 'media',
-        sizes: {},
+        variants: { thumbnail: { filename: 'replacement-thumbnail.png' } },
       },
       doc: {
         _branch: 'campaign',
@@ -107,7 +103,7 @@ describe('upload replacement cleanup', () => {
         id: 2,
         mimeType: 'image/png',
         prefix: 'media',
-        sizes: {},
+        variants: { thumbnail: { filename: 'replacement-thumbnail.png' } },
       },
       operation: 'update',
       previousDoc: {
@@ -117,7 +113,7 @@ describe('upload replacement cleanup', () => {
         id: 2,
         mimeType: 'image/png',
         prefix: 'media',
-        sizes: {},
+        variants: { thumbnail: { filename: 'main-thumbnail.png' } },
       },
       req,
     } as never)
@@ -150,14 +146,14 @@ describe('upload replacement cleanup', () => {
         id: 1,
         mimeType: 'image/png',
         prefix: 'media',
-        sizes: {},
+        variants: {},
       },
       doc: {
         filename: 'new.png',
         id: 1,
         mimeType: 'image/png',
         prefix: 'media',
-        sizes: {},
+        variants: {},
       },
       operation: 'update',
       previousDoc: {
@@ -165,7 +161,7 @@ describe('upload replacement cleanup', () => {
         id: 1,
         mimeType: 'image/png',
         prefix: 'media',
-        sizes: {},
+        variants: {},
       },
       req,
     } as never)

@@ -1,10 +1,6 @@
 import type { CollectionAfterChangeHook, CollectionConfig, FileData, TypeWithID } from 'payload'
 
-import {
-  deepMergeWithSourceArrays,
-  MAIN_BRANCH,
-  scheduleAfterTransactionCommit,
-} from 'payload'
+import { deepMergeWithSourceArrays, MAIN_BRANCH, scheduleAfterTransactionCommit } from 'payload'
 
 import type { GeneratedAdapter } from '../types.js'
 
@@ -263,16 +259,16 @@ const getBranchDocumentID = (doc: unknown): number | string | undefined => {
 const getDocumentFilenames = (doc: Record<string, unknown>): string[] => {
   const filenames = typeof doc.filename === 'string' ? [doc.filename] : []
 
-  if (doc.sizes && typeof doc.sizes === 'object' && !Array.isArray(doc.sizes)) {
-    for (const size of Object.values(doc.sizes)) {
+  if (doc.variants && typeof doc.variants === 'object' && !Array.isArray(doc.variants)) {
+    for (const variant of Object.values(doc.variants)) {
       if (
-        size &&
-        typeof size === 'object' &&
-        !Array.isArray(size) &&
-        'filename' in size &&
-        typeof size.filename === 'string'
+        variant &&
+        typeof variant === 'object' &&
+        !Array.isArray(variant) &&
+        'filename' in variant &&
+        typeof variant.filename === 'string'
       ) {
-        filenames.push(size.filename)
+        filenames.push(variant.filename)
       }
     }
   }

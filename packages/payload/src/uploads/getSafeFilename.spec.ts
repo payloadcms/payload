@@ -51,15 +51,15 @@ describe('incrementName', () => {
   })
 
   it('should handle filename with no extension', () => {
-    expect(incrementName('filename')).toBe('filename-1.filename')
+    expect(incrementName('filename')).toBe('filename-1')
   })
 
   it('should handle filename that is just an extension', () => {
-    expect(incrementName('.gitignore')).toBe('.gitignore-1.gitignore')
+    expect(incrementName('.gitignore')).toBe('.gitignore-1')
   })
 
   it('should handle empty string', () => {
-    expect(incrementName('')).toBe('-1.')
+    expect(incrementName('')).toBe('-1')
   })
 
   it('should handle filename ending with hyphen and non-numeric', () => {
@@ -177,6 +177,22 @@ describe('getSafeFileName', () => {
     })
 
     expect(result).toBe('photo-1.jpg')
+  })
+
+  it('should increment a near-limit extensionless branch filename without duplicating it', async () => {
+    mockDocWithFilenameExists.mockResolvedValueOnce(true).mockResolvedValueOnce(false)
+    mockFileExists.mockResolvedValue(false)
+    const desiredFilename = `${'a'.repeat(234)}-campaign`
+
+    const result = await getSafeFileName({
+      collectionSlug: 'media',
+      desiredFilename,
+      req: mockReq,
+      staticPath: '/uploads',
+    })
+
+    expect(result).toBe(`${desiredFilename}-1`)
+    expect(Buffer.byteLength(result)).toBeLessThanOrEqual(255)
   })
 
   it('should increment filename when file exists on filesystem', async () => {
