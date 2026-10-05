@@ -1,8 +1,9 @@
-import type { CollectionConfig, FileData, ImageSize, UploadConfig } from 'payload'
+import type { CollectionConfig, FileData, ImageSize, JsonObject, UploadConfig } from 'payload'
 
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { generatePayloadFileURL } from 'payload'
+import { isDeepStrictEqual } from 'node:util'
+import { deepCopyObjectSimple, generatePayloadFileURL } from 'payload'
 import { createManagedFileManifest } from 'payload/internal'
 
 import type { GeneratedAdapter, GenerateFileURL } from '../types.js'
@@ -163,7 +164,7 @@ export const createFileOperations = ({
       })
       const dataForUpload = { ...data, prefix: docPrefix }
       const keyByFilename = new Map<string, string>()
-      let metadata: Record<string, unknown> = {}
+      const metadata: Record<string, unknown> = {}
       const verifiedOriginal = req.context?._payloadVerifiedProviderOriginal as
         | { filename: string; key: string }
         | undefined
@@ -212,6 +213,7 @@ export const createFileOperations = ({
           storageBackendId,
         })
 
+        const dataBeforeUpload = deepCopyObjectSimple(dataForUpload as JsonObject)
         const result = await adapter.handleUpload({
           collection,
           data: dataForUpload,
@@ -221,7 +223,12 @@ export const createFileOperations = ({
         })
 
         if (result && typeof result === 'object') {
-          metadata = { ...metadata, ...result }
+          // Adapters may return the entire input document, including fields made stale by this upload.
+          for (const [key, value] of Object.entries(result)) {
+            if (!isDeepStrictEqual(value, dataBeforeUpload[key])) {
+              metadata[key] = value
+            }
+          }
         }
       }
 

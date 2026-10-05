@@ -582,7 +582,7 @@ export interface MediaWithThrowingHook {
   id: string;
   alt?: string | null;
   /**
-   * When enabled, the afterChange hook throws during the cloud-storage plugin internal update. Used to reproduce the swallowed-error bug in the admin panel and integration tests.
+   * When enabled, the afterChange hook throws during updates. Used to test upload cleanup after a hook failure.
    */
   shouldThrow?: boolean | null;
   prefix?: string | null;
@@ -688,10 +688,17 @@ export interface RestrictedMedia {
  */
 export interface TestMetadatum {
   id: string;
+  bucketName?: string | null;
+  customStorageId?: string | null;
+  objectKey?: string | null;
+  processingStatus?: string | null;
+  storageProvider?: string | null;
   /**
    * Test note to identify this upload
    */
   testNote?: string | null;
+  uploadTimestamp?: string | null;
+  uploadVersion?: string | null;
   prefix?: string | null;
   _objectKey?: string | null;
   createdBy?: {
@@ -952,7 +959,7 @@ export interface VersionedS3Media {
   _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     small?: {
       url?: string | null;
       width?: number | null;
@@ -1444,7 +1451,14 @@ export interface RestrictedMediaSelect<T extends boolean = true> {
  * via the `definition` "test-metadata_select".
  */
 export interface TestMetadataSelect<T extends boolean = true> {
+  bucketName?: T;
+  customStorageId?: T;
+  objectKey?: T;
+  processingStatus?: T;
+  storageProvider?: T;
   testNote?: T;
+  uploadTimestamp?: T;
+  uploadVersion?: T;
   prefix?: T;
   _objectKey?: T;
   createdBy?: T;
@@ -1645,7 +1659,7 @@ export interface VersionedS3MediaSelect<T extends boolean = true> {
   _fileRevision?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         small?:

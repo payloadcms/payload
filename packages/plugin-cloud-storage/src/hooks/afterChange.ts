@@ -96,7 +96,7 @@ export const getAfterChangeHook =
           select,
         })
 
-        return withProxyPrefix(select ? { ...doc, ...updatedDoc } : { ...doc, ...metadata })
+        return withProxyPrefix({ ...doc, ...updatedDoc })
       } finally {
         req.query = originalQuery
         delete req.context.skipCloudStorage

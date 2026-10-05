@@ -206,11 +206,12 @@ export function buildPluginCloudStorageIntConfig({
           },
           handleUpload: ({ data, file, storageFilePath }) => {
             uploadedTestFiles.set(storageFilePath, { ...file, prefix: data.prefix })
+            const uploadData = data as Record<string, unknown>
+            uploadData.customStorageId = `storage-${Date.now()}`
 
             const metadata = {
               ...data,
               bucketName: 'test-bucket',
-              customStorageId: `storage-${Date.now()}`,
               objectKey: data.filename || file.filename,
               processingStatus: 'completed',
               storageProvider: 'test-adapter',

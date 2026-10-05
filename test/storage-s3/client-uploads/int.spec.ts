@@ -106,6 +106,58 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
     expect(res.ContentType).toBe('image/png')
   })
 
+  test('should return the new image URL immediately after cropping a client upload', async ({
+    payload,
+    restClient,
+  }) => {
+    await restClient.login({ slug: 'users' })
+
+    const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
+    const instructions = await restClient
+      .POST(signedURLEndpoint, {
+        body: signedURLBody(mediaSlug, 'image.png', file.length, 'image/png'),
+      })
+      .then((res) => res.json<UploadInstructions>())
+
+    if (instructions.type !== 'http') {
+      throw new Error('Expected HTTP upload instructions')
+    }
+
+    const upload = await fetch(instructions.request.url, {
+      body: file,
+      headers: { 'Content-Type': 'image/png' },
+      method: 'PUT',
+    })
+    expect(upload.ok).toBe(true)
+
+    const formData = new FormData()
+    formData.append('file', JSON.stringify(instructions.file))
+    const createResponse = await restClient.POST(`/${mediaSlug}`, { body: formData })
+    expect(createResponse.status).toBe(201)
+    const { doc: created } = await createResponse.json<{ doc: { id: string; url: string } }>()
+
+    const cropResponse = await restClient.PATCH(`/${mediaSlug}/${created.id}`, {
+      body: JSON.stringify({}),
+      query: {
+        uploadEdits: {
+          crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
+          heightInPixels: 800,
+          widthInPixels: 800,
+        },
+      },
+    })
+    expect(cropResponse.status).toBe(200)
+    const { doc: cropped } = await cropResponse.json<{ doc: { id: string; url: string } }>()
+    const reloaded = await payload.findByID({
+      id: created.id,
+      collection: mediaSlug,
+      overrideAccess: true,
+    })
+
+    expect(cropped.url).not.toBe(created.url)
+    expect(cropped.url).toBe(reloaded.url)
+  })
+
   test('does not overwrite an existing object through client uploads', async ({ restClient }) => {
     const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
     const replacement = Buffer.alloc(file.length, 1)

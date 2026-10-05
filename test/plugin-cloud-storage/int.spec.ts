@@ -542,7 +542,17 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
             TEST_BUCKET,
             uploadId: upload.id,
           })
-          expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}`)
+          expect(upload.url).toEqual(
+            `/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}?prefix=test-prefix`,
+          )
+
+          const reloaded = await payload.findByID({
+            id: upload.id,
+            collection: mediaWithPrefixSlug,
+            overrideAccess: true,
+          })
+
+          expect(upload.url).toBe(reloaded.url)
         })
 
         test('should not upload to S3 when mimeType validation fails', async ({ payload }) => {
@@ -646,7 +656,9 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
           })
 
           expect(upload.filename).toBeTruthy()
-          expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${upload.filename}`)
+          expect(upload.url).toEqual(
+            `/api/${mediaWithPrefixSlug}/file/${upload.filename}?prefix=test-prefix`,
+          )
           expect((upload as any).variants).toBeFalsy()
 
           const rawDbData = await payload.db.findOne({
@@ -1031,15 +1043,15 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
         expect(upload.processingStatus).toBe('completed')
         expect(upload.uploadVersion).toBe('1.0.0')
 
-        console.log('Test adapter metadata automatically persisted:', {
-          bucketName: upload.bucketName,
-          customStorageId: upload.customStorageId,
-          objectKey: upload.objectKey,
-          processingStatus: upload.processingStatus,
-          storageProvider: upload.storageProvider,
-          uploadTimestamp: upload.uploadTimestamp,
-          uploadVersion: upload.uploadVersion,
+        const reloaded = await payload.findByID({
+          id: upload.id,
+          collection: testMetadataSlug,
+          overrideAccess: true,
         })
+
+        expect(reloaded.customStorageId).toBe(upload.customStorageId)
+        expect(reloaded.uploadTimestamp).toBe(upload.uploadTimestamp)
+        expect(reloaded.storageProvider).toBe(upload.storageProvider)
       })
 
       test('supports upload instructions when the adapter does not', async ({
@@ -1133,6 +1145,17 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
         expect(updatedUpload.processingStatus).toBe('completed')
         expect(updatedUpload.uploadVersion).toBe('1.0.0')
 
+        const reloadedUpload = await payload.findByID({
+          id: upload.id,
+          collection: testMetadataSlug,
+          overrideAccess: true,
+        })
+
+        expect(updatedUpload.url).toBe(reloadedUpload.url)
+        expect(updatedUpload.thumbnailURL).toBe(reloadedUpload.thumbnailURL)
+        expect(updatedUpload.customStorageId).toBe(reloadedUpload.customStorageId)
+        expect(updatedUpload.uploadTimestamp).toBe(reloadedUpload.uploadTimestamp)
+
         const filenamesAreDifferent = upload.filename !== updatedUpload.filename
         const storageIdsAreDifferent = updatedUpload.customStorageId !== initialStorageId
         const timestampsAreDifferent = updatedUpload.uploadTimestamp !== initialTimestamp
@@ -1140,13 +1163,6 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
         // If filename changed, storage ID and timestamp should also change (new upload)
         expect(filenamesAreDifferent).toBe(storageIdsAreDifferent)
         expect(filenamesAreDifferent).toBe(timestampsAreDifferent)
-
-        console.log('Update test adapter metadata persistence:', {
-          filenameChanged: filenamesAreDifferent,
-          newStorageId: updatedUpload.customStorageId,
-          storageIdChanged: storageIdsAreDifferent,
-          timestampChanged: timestampsAreDifferent,
-        })
       })
     })
 
@@ -1168,17 +1184,18 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
         createdIDs.length = 0
       })
 
-      test('should surface user afterChange errors that throw during the plugin internal update on create', async ({
+      test('should skip a second update when an adapter only echoes upload data', async ({
         payload,
       }) => {
-        await expect(
-          payload.create({
-            collection: mediaWithThrowingHookSlug,
-            data: { shouldThrow: true },
-            filePath: path.resolve(dirname, '../uploads/image.png'),
-            overrideAccess: true,
-          }),
-        ).rejects.toThrow('User afterChange hook throws error')
+        const upload = await payload.create({
+          collection: mediaWithThrowingHookSlug,
+          data: { shouldThrow: true },
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+          overrideAccess: true,
+        })
+
+        createdIDs.push(upload.id)
+        expect(upload.id).toBeTruthy()
       })
 
       test('should surface user afterChange errors during reupload and preserve the previous file in S3', async ({
