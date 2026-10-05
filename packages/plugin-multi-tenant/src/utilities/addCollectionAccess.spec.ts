@@ -114,13 +114,12 @@ describe('addCollectionAccess', () => {
     expect(explicitValidateCalls).toBe(1)
   })
 
-  it('keeps callback wrapping when an access result override is configured', async () => {
-    const documentResult = { published: { equals: true } }
-    const documentRead = vi.fn(() => documentResult)
+  it('uses update access for validate when an access result override is configured', async () => {
+    const documentUpdate = vi.fn(({ req }: AccessArgs) => req.context.allowUpdate === true)
     const accessResultCallback = vi.fn(({ accessResult }) => accessResult)
     const collection: CollectionConfig = {
       slug: 'posts',
-      access: { read: documentRead },
+      access: { update: documentUpdate },
       fields: [],
     }
     const config = {} as Config
@@ -131,11 +130,23 @@ describe('addCollectionAccess', () => {
     })
 
     expect(config.baseAccess).toBeUndefined()
-    await expect(collection.access?.read?.(createArgs())).resolves.toEqual({
-      and: [documentResult, { tenant: { in: ['tenant-1'] } }],
-    })
-    expect(accessResultCallback).toHaveBeenCalledWith(
-      expect.objectContaining({ accessKey: 'read' }),
+    const deniedArgs = createArgs()
+    deniedArgs.req.context = { allowUpdate: false }
+
+    await expect(collection.access?.validate?.(deniedArgs)).resolves.toBe(false)
+
+    const allowedArgs = createArgs()
+    allowedArgs.req.context = { allowUpdate: true }
+    allowedArgs.req.user!.collection = 'other-users'
+
+    await expect(collection.access?.validate?.(allowedArgs)).resolves.toBe(true)
+    expect(accessResultCallback).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ accessKey: 'validate', accessResult: false }),
+    )
+    expect(accessResultCallback).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ accessKey: 'validate', accessResult: true }),
     )
   })
 })

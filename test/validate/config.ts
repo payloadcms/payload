@@ -1,8 +1,4 @@
-import path from 'path'
-import { fileURLToPath } from 'url'
-
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
 import { validationCollections } from './collections.js'
 import { localeFilterOperationEvents } from './events.js'
 import { validationGlobals } from './globals.js'
@@ -12,20 +8,8 @@ import {
   validationGlobalSlug,
 } from './shared.js'
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
 export default buildConfigWithDefaults({
   config: {
-    admin: {
-      autoLogin: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-      importMap: {
-        baseDir: path.resolve(dirname),
-      },
-    },
     collections: validationCollections,
     globals: validationGlobals,
     jobs: {
@@ -71,17 +55,6 @@ export default buildConfigWithDefaults({
     },
   },
   seed: async (payload) => {
-    if (process.env.NODE_ENV !== 'test') {
-      await payload.create({
-        collection: 'users',
-        data: {
-          email: devUser.email,
-          password: devUser.password,
-        },
-        overrideAccess: true,
-      })
-    }
-
     await payload.updateGlobal({
       slug: validationGlobalSlug,
       data: {

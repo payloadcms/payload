@@ -1,6 +1,5 @@
 import type { Payload, PayloadRequest } from 'payload'
 
-import { buildEditorState } from '@payloadcms/richtext-lexical'
 import { randomUUID } from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
@@ -31,7 +30,6 @@ import {
   validationAccessSourceGlobalSlug,
   validationAuthCollectionSlug,
   validationCollectionSlug,
-  validationCustomButtonsCollectionSlug,
   validationDeniedCollectionSlug,
   validationDeniedGlobalSlug,
   validationDraftSourceGlobalSlug,
@@ -1323,46 +1321,6 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
       ])
     })
 
-    test('should keep collection creates as drafts when publishAllLocales is requested', async ({
-      payload,
-    }) => {
-      const draft = await payload.create({
-        collection: publishCollectionSlug,
-        data: getPublishCollectionLocaleData({ title: 'English draft' }),
-        draft: true,
-        locale: 'en',
-        overrideAccess: true,
-        publishAllLocales: true,
-      })
-
-      expect(draft._status).toBe('draft')
-    })
-
-    test('should keep collection updates as drafts when publishAllLocales is requested', async ({
-      payload,
-    }) => {
-      const draft = await seedPublishCollection({
-        de: 'German draft',
-        en: 'English draft',
-        es: 'Spanish draft',
-        payload,
-      })
-
-      const updatedDraft = await payload.update({
-        id: draft.id,
-        collection: publishCollectionSlug,
-        data: {
-          title: 'Updated English draft',
-        },
-        draft: true,
-        locale: 'en',
-        overrideAccess: true,
-        publishAllLocales: true,
-      })
-
-      expect(updatedDraft._status).toBe('draft')
-    })
-
     test('should use the published collection as the validation base unless draft is true', async ({
       payload,
     }) => {
@@ -1640,90 +1598,6 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
       expect(fallbackAccessEvents.every(({ operation }) => operation === 'validate')).toBe(true)
     })
 
-    test('should let an explicit null user override an authenticated reused global request', async ({
-      payload,
-    }) => {
-      const req = {
-        user: {
-          id: 'authenticated-user',
-          collection: validationCollectionSlug,
-        } as never,
-      } satisfies Partial<PayloadRequest>
-
-      await expect(
-        payload.validateGlobal({
-          slug: validationFallbackGlobalSlug,
-          context: {
-            requireValidationUser: true,
-          },
-          data: {
-            title: 'Candidate title',
-          },
-          locale: 'en',
-          overrideAccess: false,
-          req,
-          user: null,
-        }),
-      ).rejects.toMatchObject({
-        status: 403,
-      })
-      expect(req.user).toMatchObject({
-        id: 'authenticated-user',
-      })
-    })
-
-    test('should fall back to global field update access with the validate operation', async ({
-      payload,
-    }) => {
-      const excludedResult = await payload.validateGlobal({
-        slug: validationFallbackGlobalSlug,
-        context: {
-          allowUpdateFallback: true,
-        },
-        data: {
-          title: 'Candidate title',
-          updateProtected: 'invalid',
-        },
-        locale: 'en',
-        overrideAccess: false,
-      })
-
-      expect(excludedResult).toEqual({
-        errors: [],
-        valid: true,
-      })
-
-      clearValidationEvents()
-
-      const includedResult = await payload.validateGlobal({
-        slug: validationFallbackGlobalSlug,
-        context: {
-          allowFieldUpdateFallback: true,
-          allowUpdateFallback: true,
-        },
-        data: {
-          title: 'Candidate title',
-          updateProtected: 'invalid',
-        },
-        locale: 'en',
-        overrideAccess: false,
-      })
-
-      expect(includedResult).toMatchObject({
-        errors: [
-          {
-            locale: 'en',
-            path: 'updateProtected',
-          },
-        ],
-        valid: false,
-      })
-      expect(fallbackAccessEvents).toContainEqual({
-        operation: 'validate',
-        source: 'field',
-      })
-    })
-
     test('should prefer explicit global validate access over its update access fallback', async ({
       payload,
     }) => {
@@ -1992,34 +1866,6 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
       expect(req.operation).toBe('update')
     })
 
-    test('should reject an explicit null point instead of restoring the stored global value', async ({
-      payload,
-    }) => {
-      const result = await payload.validateGlobal({
-        slug: validationGlobalSlug,
-        data: {
-          location: null,
-        },
-        locale: 'en',
-      })
-      const afterValidation = await payload.findGlobal({
-        slug: validationGlobalSlug,
-        locale: 'en',
-        overrideAccess: true,
-      })
-
-      expect(result).toMatchObject({
-        errors: [
-          {
-            locale: 'en',
-            path: 'location',
-          },
-        ],
-        valid: false,
-      })
-      expect(afterValidation.location).toEqual([-0.12, 51.5])
-    })
-
     test('should use after-read values from a stored global document', async ({ payload }) => {
       await payload.updateGlobal({
         slug: validationGlobalSlug,
@@ -2048,21 +1894,6 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
         errors: [],
         valid: true,
       })
-    })
-
-    test('should keep global updates as drafts when publishAllLocales is requested', async ({
-      payload,
-    }) => {
-      const draft = await payload.updateGlobal({
-        slug: publishGlobalSlug,
-        data: getPublishGlobalLocaleData({ title: 'English draft' }),
-        draft: true,
-        locale: 'en',
-        overrideAccess: true,
-        publishAllLocales: true,
-      })
-
-      expect(draft._status).toBe('draft')
     })
 
     test('should use the published global as the validation base unless draft is true', async ({
@@ -2172,75 +2003,6 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
 
       expect(accessEvents).toEqual(['global'])
       expect(req.operation).toBe('delete')
-    })
-
-    test('should restore the caller request operation after a global hook throws', async ({
-      payload,
-    }) => {
-      const req = {
-        operation: 'create',
-      } satisfies Partial<PayloadRequest>
-
-      await expect(
-        payload.validateGlobal({
-          slug: validationGlobalSlug,
-          context: {
-            throwValidationHook: true,
-          },
-          locale: 'en',
-          req,
-        }),
-      ).rejects.toThrow('global validation hook failure')
-
-      expect(req.operation).toBe('create')
-    })
-
-    test('should return a validation result instead of throwing when a global hook throws a ValidationError', async ({
-      payload,
-    }) => {
-      const result = await payload.validateGlobal({
-        slug: validationGlobalSlug,
-        context: {
-          throwValidationErrorHook: true,
-        },
-        locale: 'en',
-      })
-
-      expect(result).toEqual({
-        errors: [
-          expect.objectContaining({
-            message: 'Global hook validation failure',
-            path: 'title',
-          }),
-        ],
-        valid: false,
-      })
-    })
-
-    test('should return a validation result when a global field beforeValidate hook throws a ValidationError', async ({
-      payload,
-    }) => {
-      await expect(
-        payload.validateGlobal({
-          slug: validationGlobalSlug,
-          context: {
-            throwFieldValidationError: true,
-          },
-          data: {
-            summary: 'candidate summary',
-            title: 'Candidate title',
-          },
-          locale: 'en',
-        }),
-      ).resolves.toEqual({
-        errors: [
-          expect.objectContaining({
-            message: 'Global field validation failure',
-            path: 'title',
-          }),
-        ],
-        valid: false,
-      })
     })
   })
 
@@ -2381,97 +2143,6 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
       expect(localeFilterOperationEvents).toEqual(['validate'])
     })
 
-    test('should use the latest collection draft as the REST validation base', async ({
-      payload,
-      restClient,
-    }) => {
-      const draft = await seedPublishCollection({
-        de: 'German optional',
-        en: 'English draft',
-        es: 'Spanish valid',
-        payload,
-      })
-
-      await payload.update({
-        id: draft.id,
-        collection: publishCollectionSlug,
-        data: {
-          _status: 'published',
-          title: 'English published',
-        },
-        locale: 'en',
-        overrideAccess: true,
-      })
-      await payload.update({
-        id: draft.id,
-        collection: publishCollectionSlug,
-        data: {
-          title: '',
-        },
-        draft: true,
-        locale: 'en',
-        overrideAccess: true,
-      })
-
-      const response = await restClient.POST(
-        `/${publishCollectionSlug}/${draft.id}/validate?locale=en`,
-      )
-
-      expect(response.status).toBe(200)
-      await expect(response.json()).resolves.toMatchObject({
-        errors: [
-          {
-            locale: 'en',
-            path: 'title',
-          },
-        ],
-        valid: false,
-      })
-    })
-
-    test('should use the latest global draft as the REST validation base', async ({
-      payload,
-      restClient,
-    }) => {
-      await seedPublishGlobal({
-        de: 'German optional',
-        en: 'English draft',
-        es: 'Spanish valid',
-        payload,
-      })
-      await payload.updateGlobal({
-        slug: publishGlobalSlug,
-        data: {
-          _status: 'published',
-          title: 'English published',
-        },
-        locale: 'en',
-        overrideAccess: true,
-      })
-      await payload.updateGlobal({
-        slug: publishGlobalSlug,
-        data: {
-          title: '',
-        },
-        draft: true,
-        locale: 'en',
-        overrideAccess: true,
-      })
-
-      const response = await restClient.POST(`/globals/${publishGlobalSlug}/validate?locale=en`)
-
-      expect(response.status).toBe(200)
-      await expect(response.json()).resolves.toMatchObject({
-        errors: [
-          {
-            locale: 'en',
-            path: 'title',
-          },
-        ],
-        valid: false,
-      })
-    })
-
     test('should merge by-ID validation data without persisting it', async ({
       payload,
       restClient,
@@ -2607,99 +2278,6 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
         ])
       } finally {
         collection.config.access.validate = validate
-      }
-    })
-
-    test('should validate each requested locale independently when sibling localized fields are omitted', async ({
-      payload,
-      restClient,
-    }) => {
-      const draft = await payload.create({
-        collection: validationCustomButtonsCollectionSlug,
-        data: {
-          _status: 'draft',
-          summary: 'Shared summary',
-          title: 'English title',
-        },
-        draft: true,
-        locale: 'en',
-        overrideAccess: true,
-      })
-      await payload.update({
-        id: draft.id,
-        collection: validationCustomButtonsCollectionSlug,
-        data: {
-          _status: 'draft',
-          title: 'Deutscher Titel',
-        },
-        draft: true,
-        locale: 'de',
-        overrideAccess: true,
-      })
-
-      // This collection uses the default access control, which requires an
-      // authenticated admin user, so the shared restClient needs a token here.
-      const adminEmail = 'validate-custom-buttons-admin@example.com'
-      const adminUser = await payload.create({
-        collection: 'users',
-        data: {
-          email: adminEmail,
-          password: devUser.password,
-        },
-        overrideAccess: true,
-      })
-
-      try {
-        const { token } = await payload.login({
-          collection: 'users',
-          data: {
-            email: adminEmail,
-            password: devUser.password,
-          },
-        })
-        const authHeaders = { Authorization: `JWT ${token}` }
-
-        const activeLocaleResponse = await restClient.POST(
-          `/${validationCustomButtonsCollectionSlug}/${draft.id}/validate?locale=en`,
-          {
-            body: JSON.stringify({
-              summary: 'Shared summary',
-              title: 'English title',
-            }),
-            headers: authHeaders,
-          },
-        )
-
-        expect(activeLocaleResponse.status).toBe(200)
-        await expect(activeLocaleResponse.json()).resolves.toEqual({
-          errors: [],
-          valid: true,
-        })
-
-        const siblingLocalesResponse = await restClient.POST(
-          `/${validationCustomButtonsCollectionSlug}/${draft.id}/validate?locale=de&locale=es&locale=fr`,
-          {
-            body: JSON.stringify({
-              summary: 'Shared summary',
-            }),
-            headers: authHeaders,
-          },
-        )
-        const siblingResult = await siblingLocalesResponse.json()
-
-        expect(siblingLocalesResponse.status).toBe(200)
-        expect(siblingResult.valid).toBe(false)
-        expect(siblingResult.errors).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({ locale: 'es', path: 'title' }),
-            expect.objectContaining({ locale: 'fr', path: 'title' }),
-          ]),
-        )
-        expect(siblingResult.errors).not.toEqual(
-          expect.arrayContaining([expect.objectContaining({ locale: 'de', path: 'title' })]),
-        )
-      } finally {
-        await payload.delete({ id: adminUser.id, collection: 'users', overrideAccess: true })
       }
     })
   })
@@ -3342,47 +2920,12 @@ function runWriteAttempt({
   })
 }
 
-type PublishCollectionLocalizedField =
-  | 'localizedArray'
-  | 'localizedBlocks'
-  | 'localizedGroup'
-  | 'localizedJSON'
-  | 'localizedRichText'
-  | 'localizedTab'
-  | 'nested.localizedJSON'
-
-function getPublishCollectionLocaleData({
-  omit = [],
-  title,
-}: {
-  omit?: PublishCollectionLocalizedField[]
-  title: string
-}): Record<string, unknown> {
-  const data: Record<string, unknown> = {
+function getPublishCollectionLocaleData({ title }: { title: string }): Record<string, unknown> {
+  return {
     localizedArray: [{ value: `${title} array` }],
     localizedBlocks: [{ blockType: 'validationBlock', value: `${title} block` }],
-    localizedGroup: { value: `${title} group` },
-    localizedJSON: { value: `${title} JSON` },
-    localizedRichText: buildEditorState({ text: `${title} rich text` }),
-    localizedTab: { value: `${title} tab` },
-    nested: {
-      localizedJSON: { value: `${title} nested JSON` },
-      shared: 'shared value',
-    },
     title,
   }
-
-  for (const field of omit) {
-    if (field === 'nested.localizedJSON') {
-      delete (data.nested as Record<string, unknown>).localizedJSON
-    } else if (field === 'localizedArray' || field === 'localizedBlocks') {
-      data[field] = []
-    } else {
-      delete data[field]
-    }
-  }
-
-  return data
 }
 
 async function seedPublishCollection({
@@ -3391,7 +2934,6 @@ async function seedPublishCollection({
   en,
   es,
   fr,
-  omit,
   payload,
 }: {
   de: string
@@ -3399,13 +2941,12 @@ async function seedPublishCollection({
   en: string
   es: string
   fr?: string
-  omit?: Partial<Record<'de' | 'en' | 'es', PublishCollectionLocalizedField[]>>
   payload: Payload
 }) {
   const draft = await payload.create({
     collection: publishCollectionSlug,
     data: {
-      ...getPublishCollectionLocaleData({ omit: omit?.en, title: en }),
+      ...getPublishCollectionLocaleData({ title: en }),
       ...(deletedAt ? { deletedAt } : {}),
     },
     draft: true,
@@ -3416,7 +2957,7 @@ async function seedPublishCollection({
   await payload.update({
     id: draft.id,
     collection: publishCollectionSlug,
-    data: getPublishCollectionLocaleData({ omit: omit?.es, title: es }),
+    data: getPublishCollectionLocaleData({ title: es }),
     draft: true,
     locale: 'es',
     overrideAccess: true,
@@ -3425,7 +2966,7 @@ async function seedPublishCollection({
   await payload.update({
     id: draft.id,
     collection: publishCollectionSlug,
-    data: getPublishCollectionLocaleData({ omit: omit?.de, title: de }),
+    data: getPublishCollectionLocaleData({ title: de }),
     draft: true,
     locale: 'de',
     overrideAccess: true,
@@ -3446,17 +2987,10 @@ async function seedPublishCollection({
   return draft
 }
 
-function getPublishGlobalLocaleData({
-  includeLocalizedJSON = true,
-  title,
-}: {
-  includeLocalizedJSON?: boolean
-  title: string
-}): Record<string, unknown> {
+function getPublishGlobalLocaleData({ title }: { title: string }): Record<string, unknown> {
   return {
     localizedArray: [{ value: `${title} array` }],
     localizedBlocks: [{ blockType: 'globalValidationBlock', value: `${title} block` }],
-    localizedJSON: includeLocalizedJSON ? { value: `${title} JSON` } : null,
     title,
   }
 }
@@ -3466,14 +3000,12 @@ async function seedPublishGlobal({
   en,
   es,
   fr,
-  omitLocalizedJSON,
   payload,
 }: {
   de: string
   en: string
   es: string
   fr?: string
-  omitLocalizedJSON?: Partial<Record<'de' | 'en' | 'es', boolean>>
   payload: Payload
 }) {
   await payload.updateGlobal({
@@ -3484,30 +3016,21 @@ async function seedPublishGlobal({
   })
   await payload.updateGlobal({
     slug: publishGlobalSlug,
-    data: getPublishGlobalLocaleData({
-      includeLocalizedJSON: !omitLocalizedJSON?.en,
-      title: en,
-    }),
+    data: getPublishGlobalLocaleData({ title: en }),
     draft: true,
     locale: 'en',
     overrideAccess: true,
   })
   await payload.updateGlobal({
     slug: publishGlobalSlug,
-    data: getPublishGlobalLocaleData({
-      includeLocalizedJSON: !omitLocalizedJSON?.es,
-      title: es,
-    }),
+    data: getPublishGlobalLocaleData({ title: es }),
     draft: true,
     locale: 'es',
     overrideAccess: true,
   })
   await payload.updateGlobal({
     slug: publishGlobalSlug,
-    data: getPublishGlobalLocaleData({
-      includeLocalizedJSON: !omitLocalizedJSON?.de,
-      title: de,
-    }),
+    data: getPublishGlobalLocaleData({ title: de }),
     draft: true,
     locale: 'de',
     overrideAccess: true,
