@@ -36,15 +36,13 @@ test.suite('Local API playground', { config: './config.ts' }, () => {
   test('should publish the saved draft', async ({ payload }) => {
     const post = await payload.create({
       collection: draftPostsSlug,
-      data: { title: 'Ready to publish' },
-      version: 'published',
+      data: { _status: 'draft', title: 'Ready to publish' },
     })
 
     await payload.update({
       id: post.id,
       collection: draftPostsSlug,
       data: { _status: 'published' },
-      version: 'draft',
     })
 
     const published = await payload.findByID({
