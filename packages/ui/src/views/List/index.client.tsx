@@ -34,6 +34,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
 import { ListSelection } from '../../views/List/ListSelection/index.js'
 import { DocumentListSelection } from '../HierarchyList/DocumentListSelection/index.js'
+import { getHierarchyListURL } from '../HierarchyList/getHierarchyListURL.js'
 import { HierarchyTable } from '../HierarchyList/HierarchyTable/index.js'
 import { DocumentGrid } from './DocumentGrid/index.js'
 import { GroupedDocumentGrid } from './GroupedDocumentGrid/index.js'
@@ -219,8 +220,12 @@ export function DefaultListView(props: ListViewClientProps) {
     if (!isInDrawer) {
       const baseLabel = {
         label: collectionLabel,
-        url:
-          hierarchyData || (isTrashEnabled && viewType === 'trash')
+        url: hierarchyData
+          ? getHierarchyListURL({
+              adminRoute,
+              collectionSlug,
+            })
+          : isTrashEnabled && viewType === 'trash'
             ? formatAdminURL({
                 adminRoute,
                 path: `/collections/${collectionSlug}`,
@@ -236,16 +241,17 @@ export function DefaultListView(props: ListViewClientProps) {
 
       // Add hierarchy breadcrumbs
       if (hierarchyData?.breadcrumbs) {
-        const queryParam = hierarchyData.parentFieldName || 'parent'
         const hierarchyBreadcrumbs = hierarchyData.breadcrumbs.map((crumb, index) => {
           const isLast = index === hierarchyData.breadcrumbs.length - 1
           return {
             label: crumb.title,
             url: isLast
               ? undefined
-              : formatAdminURL({
+              : getHierarchyListURL({
                   adminRoute,
-                  path: `/collections/${collectionSlug}?${queryParam}=${crumb.id}`,
+                  collectionSlug,
+                  parentFieldName: hierarchyData.parentFieldName,
+                  parentID: crumb.id,
                 }),
           }
         })

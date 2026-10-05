@@ -154,6 +154,55 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(page.getByRole('heading', { name: 'Acme Corp' })).toBeVisible()
       await expect(page.getByRole('list', { name: 'Organizations' })).toBeVisible()
     })
+
+    test('should preserve the hierarchy view while navigating through hierarchy items', async () => {
+      await page.goto(organizationsURL.hierarchy)
+
+      const tableView = page.getByRole('radio', { name: 'Table view' })
+
+      if (!(await tableView.isChecked())) {
+        const tablePreferenceSaved = page.waitForResponse(
+          (response) =>
+            response.url().includes('/api/payload-preferences/collection-organizations') &&
+            response.request().method() === 'POST' &&
+            response.ok(),
+        )
+
+        await tableView.click()
+        await tablePreferenceSaved
+      }
+
+      const acmeLink = page.getByRole('link', { name: 'Acme Corp', exact: true })
+
+      await expect(acmeLink).toHaveAttribute('href', /[?&]view=hierarchy(?:&|$)/)
+      await acmeLink.click()
+      await expect(page).toHaveURL(/[?&]view=hierarchy(?:&|$)/)
+      await expect(page.getByRole('heading', { name: 'Acme Corp' })).toBeVisible()
+
+      const gridView = page.getByRole('radio', { name: 'Grid view' })
+
+      if (!(await gridView.isChecked())) {
+        const gridPreferenceSaved = page.waitForResponse(
+          (response) =>
+            response.url().includes('/api/payload-preferences/collection-organizations') &&
+            response.request().method() === 'POST' &&
+            response.ok(),
+        )
+
+        await gridView.click()
+        await gridPreferenceSaved
+      }
+
+      const engineeringLink = page.getByRole('link', {
+        name: 'Engineering Division',
+        exact: true,
+      })
+
+      await expect(engineeringLink).toHaveAttribute('href', /[?&]view=hierarchy(?:&|$)/)
+      await engineeringLink.press('Enter')
+      await expect(page).toHaveURL(/[?&]view=hierarchy(?:&|$)/)
+      await expect(page.getByRole('heading', { name: 'Engineering Division' })).toBeVisible()
+    })
   })
 
   test.describe('Tree Display', () => {

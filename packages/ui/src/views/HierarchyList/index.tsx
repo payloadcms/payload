@@ -3,7 +3,6 @@
 import type { CollectionPreferences, ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -27,6 +26,7 @@ import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouter, useSearchParams } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { getHierarchyListURL } from './getHierarchyListURL.js'
 import { HierarchyListHeader } from './HierarchyListHeader/index.js'
 import { HierarchyTable } from './HierarchyTable/index.js'
 import { TypeFilter } from './TypeFilter/index.js'
@@ -142,21 +142,22 @@ export function HierarchyListView(props: ListViewClientProps) {
 
       const baseLabel: StepNavItem = {
         label: collectionLabel,
-        url: formatAdminURL({
+        url: getHierarchyListURL({
           adminRoute,
-          path: `/collections/${collectionSlug}`,
+          collectionSlug,
         }),
       }
 
       let navItems = [baseLabel]
 
       if (ancestorBreadcrumbs.length > 0) {
-        const queryParam = parentFieldName || 'parent'
         const hierarchyBreadcrumbs: StepNavItem[] = ancestorBreadcrumbs.map((crumb) => ({
           label: crumb.title,
-          url: formatAdminURL({
+          url: getHierarchyListURL({
             adminRoute,
-            path: `/collections/${collectionSlug}?${queryParam}=${crumb.id}`,
+            collectionSlug,
+            parentFieldName,
+            parentID: crumb.id,
           }),
         }))
         navItems = [...navItems, ...hierarchyBreadcrumbs]

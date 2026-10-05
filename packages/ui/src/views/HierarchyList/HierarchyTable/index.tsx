@@ -33,6 +33,7 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentSelection } from '../../../providers/DocumentSelection/index.js'
 import { useRouteCache } from '../../../providers/RouteCache/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { getHierarchyListURL } from '../getHierarchyListURL.js'
 import { ChildNameCell } from './ChildNameCell.js'
 import { DateCell } from './DateCell.js'
 import { RelatedNameCell } from './RelatedNameCell.js'
@@ -566,12 +567,11 @@ export function HierarchyTable({
                     adminRoute,
                     path: `/collections/${group.slug}/${encodeURIComponent(String(row.id))}`,
                   })
-                  const hierarchyURL = formatAdminURL({
+                  const hierarchyURL = getHierarchyListURL({
                     adminRoute,
-                    path: `/collections/${group.slug}${qs.stringify(
-                      { [hierarchyParentFieldName]: row.id },
-                      { addQueryPrefix: true },
-                    )}`,
+                    collectionSlug: group.slug,
+                    parentFieldName: hierarchyParentFieldName,
+                    parentID: row.id,
                   })
                   const mimeType = typeof row.mimeType === 'string' ? row.mimeType : undefined
                   const thumbnailSrc =
