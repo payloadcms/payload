@@ -1019,6 +1019,7 @@ test.suite('Lexical', { config: './config.ts' }, () => {
           title: 'Nested beforeValidate hook',
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       const lexicalBlock = lexicalDocument.lexicalWithBlocks.root.children[0] as SerializedBlockNode
