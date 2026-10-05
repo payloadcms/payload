@@ -36,6 +36,6 @@ export function restoreVersion(globalConfig: SanitizedGlobalConfig): Resolver {
     }
 
     const result = await restoreVersionOperationGlobal(options)
-    return result
+    return result.version
   }
 }
