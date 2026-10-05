@@ -32,7 +32,6 @@ type FileState = {
 }
 
 type RunFileOperationPlanArgs<T> = {
-  cleanup?: () => Promise<void>
   collection: CollectionSlug
   id: number | string
   req: PayloadRequest
@@ -104,25 +103,16 @@ export const deferFileCleanup = async ({
  */
 export const runFileOperationPlan = async <T>({
   id,
-  cleanup,
   collection,
   req,
   stage,
   write,
 }: RunFileOperationPlanArgs<T>): Promise<T> => {
   const requestState = getRequestState({ req })
-  const attempt: Attempt = { cleanup, staged: new Map() }
+  const attempt: Attempt = { staged: new Map() }
   let hasStartedWrite = false
   let hasSucceeded = false
-  const trackStagedObject = (object: StagedObject) => {
-    const identity = `${object.storageBackendId}\0${object.key}`
-
-    if (attempt.staged.has(identity)) {
-      throw new Error(`Storage object was staged twice: ${object.key}`)
-    }
-
-    attempt.staged.set(identity, object)
-  }
+  const trackStagedObject = createStagedObjectTracker({ attempt })
 
   requestState.depth += 1
 
@@ -177,15 +167,7 @@ export const runFileOperationPlan = async <T>({
 
     throw err
   } finally {
-    requestState.depth -= 1
-
-    if (requestState.depth === 0) {
-      if (hasSucceeded && (!req.transactionID || requestState.isCommitted)) {
-        await flushCleanup({ req, state: requestState })
-      } else if (!req.transactionID) {
-        requests.delete(req)
-      }
-    }
+    await finishFileOperation({ hasSucceeded, req, state: requestState })
   }
 }
 
@@ -203,19 +185,12 @@ export const runFileCreationPlan = async <T>({
   const attempt: Attempt = { staged: new Map() }
   let hasStartedWrite = false
   let hasSucceeded = false
+  const trackStagedObject = createStagedObjectTracker({ attempt })
 
   requestState.depth += 1
 
   try {
-    await stage({
-      trackStagedObject: (object) => {
-        const identity = `${object.storageBackendId}\0${object.key}`
-        if (attempt.staged.has(identity)) {
-          throw new Error(`Storage object was staged twice: ${object.key}`)
-        }
-        attempt.staged.set(identity, object)
-      },
-    })
+    await stage({ trackStagedObject })
 
     hasStartedWrite = true
     const result = await write()
@@ -231,14 +206,7 @@ export const runFileCreationPlan = async <T>({
     }
     throw err
   } finally {
-    requestState.depth -= 1
-    if (requestState.depth === 0) {
-      if (hasSucceeded && (!req.transactionID || requestState.isCommitted)) {
-        await flushCleanup({ req, state: requestState })
-      } else if (!req.transactionID) {
-        requests.delete(req)
-      }
-    }
+    await finishFileOperation({ hasSucceeded, req, state: requestState })
   }
 }
 
@@ -326,6 +294,38 @@ const getRequestState = ({ req }: { req: PayloadRequest }): RequestState => {
   }
 
   return state
+}
+
+const createStagedObjectTracker =
+  ({ attempt }: { attempt: Attempt }) =>
+  (object: StagedObject): void => {
+    const identity = `${object.storageBackendId}\0${object.key}`
+
+    if (attempt.staged.has(identity)) {
+      throw new Error(`Storage object was staged twice: ${object.key}`)
+    }
+
+    attempt.staged.set(identity, object)
+  }
+
+const finishFileOperation = async ({
+  hasSucceeded,
+  req,
+  state,
+}: {
+  hasSucceeded: boolean
+  req: PayloadRequest
+  state: RequestState
+}): Promise<void> => {
+  state.depth -= 1
+
+  if (state.depth === 0) {
+    if (hasSucceeded && (!req.transactionID || state.isCommitted)) {
+      await flushCleanup({ req, state })
+    } else if (!req.transactionID) {
+      requests.delete(req)
+    }
+  }
 }
 
 const readFileState = async ({

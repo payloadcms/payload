@@ -3,8 +3,12 @@
 import { createPayloadRequest } from 'payload'
 import { expect } from 'vitest'
 
-// eslint-disable-next-line payload/no-relative-monorepo-imports -- The file operation manager is internal until upload writers use it.
-import { runFileOperationPlan } from '../../packages/payload/src/uploads/fileVersioning/fileOperationManager.js'
+/* eslint-disable payload/no-relative-monorepo-imports -- The file operation manager is internal until upload writers use it. */
+import {
+  deferFileCleanup,
+  runFileOperationPlan,
+} from '../../packages/payload/src/uploads/fileVersioning/fileOperationManager.js'
+/* eslint-enable payload/no-relative-monorepo-imports */
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Transaction helpers are internal.
 import { commitTransaction } from '../../packages/payload/src/utilities/commitTransaction.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Transaction helpers are internal.
@@ -28,9 +32,6 @@ test.suite('File operation manager', { config: './config.ts' }, () => {
       async ({ data, req }) => {
         await runFileOperationPlan({
           id: doc.id,
-          cleanup: async () => {
-            events.push('cleanup')
-          },
           collection: mediaSlug,
           req,
           stage: async () => {
@@ -38,6 +39,12 @@ test.suite('File operation manager', { config: './config.ts' }, () => {
           },
           write: async () => {
             events.push('plan write')
+            await deferFileCleanup({
+              cleanup: async () => {
+                events.push('cleanup')
+              },
+              req,
+            })
           },
         })
 
