@@ -1,0 +1,45 @@
+---
+title: Versioning and Breaking Changes Policy
+label: Versioning Policy
+order: 20
+desc: How Payload applies semantic versioning, what counts as a breaking change, and what can change in a minor release.
+keywords: versioning, semver, semantic versioning, breaking changes, upgrade, documentation, Content Management System, cms, headless, javascript, node, react
+---
+
+# Versioning and Breaking Changes Policy
+
+Payload follows [Semantic Versioning](https://semver.org/). This document explains what that means in practice: which parts of Payload are covered, what counts as a breaking change, and what is excluded from our breaking changes policy.
+
+## Summary
+
+| Release                       | May contain                           | Upgrade expectation                                                              |
+| ----------------------------- | ------------------------------------- | -------------------------------------------------------------------------------- |
+| **Major** (`3.x` → `4.0`)     | Breaking changes                      | Follow the [migration guide](/docs/migration-guide/overview) and run the codemod |
+| **Minor** (`4.1` → `4.2`)     | New features, deprecations, bug fixes | Usually safe to upgrade without code changes (see exceptions below)              |
+| **Patch** (`4.2.0` → `4.2.1`) | Bug fixes                             | Guaranteed safe to upgrade without code changes                                  |
+
+Minor releases can still change anything listed under [Exceptions](#exceptions).
+
+## What counts as breaking
+
+A change is breaking if it makes working code fail or behave differently, as long as that code only relies on documented behavior. This includes changing a default (e.g. 4.0 lowered the default `depth` to `1`), requiring a database migration for an existing config, or changing types so correct code no longer compiles.
+
+Adding things isn't breaking, unless you have to implement them, like a new required method on an adapter interface.
+
+## Exceptions
+
+These can change in a minor release:
+
+- **Internals.** `payload/internal`, anything marked `@internal`, undocumented exports, imports from `dist/`, and undocumented subpaths like `@payloadcms/ui/utilities/*`. These exist so our own packages can share code.
+- **Experimental and beta APIs.** Anything marked `@experimental` in its types, or labeled experimental or beta in the docs. Once the label is removed, the usual rules apply.
+- **Prereleases.** Canary and beta builds make no promises to each other. Migration guides only cover changes between stable versions.
+- **Admin UI markup and styling.** DOM structure, class names, layout and colors. You can target class names in your CSS, but expect to touch it up after upgrades.
+- **Wording.** Error messages, logs and translation strings.
+- **Bugs.** If something contradicts the docs, fixing it isn't a breaking change, even if you relied on it. The same goes for small type fixes where the old type didn't match runtime behavior. We'll call out fixes that are likely to affect a lot of projects.
+- **Lexical.** Lexical hasn't reached 1.0, so any of its releases can break things, and we may upgrade it in a Payload minor. If you use Lexical's APIs directly, for example through `@payloadcms/richtext-lexical/lexical/*`, check [Lexical's release notes](https://github.com/facebook/lexical/releases) when you upgrade. Payload's own rich text APIs are still covered.
+- **End-of-life Node.js versions.** Once a Node.js version reaches [end of life](https://github.com/nodejs/release#release-schedule), we may raise the minimum Node.js version in a minor, but only to the oldest version that's still supported.
+- **Security fixes.** If we can't fix a vulnerability without changing behavior, the fix ships anyway. The same goes for raising the minimum Next.js or React version to pick up an upstream security fix. Where we can, we'll give you a way to keep the old behavior, but this may not always be possible. To report a vulnerability, see our [security policy](https://github.com/payloadcms/payload/blob/main/SECURITY.md).
+
+## How breaking changes are announced
+
+Breaking commits and PR titles use the `!` marker (`feat!:`, `fix(storage-azure)!:`), and release notes list them under **⚠️ BREAKING CHANGES**.
