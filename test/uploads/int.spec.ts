@@ -4127,6 +4127,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
    * on disk when something after the fetch (e.g. a `beforeChange` hook) makes the operation fail.
    */
   test.describe('client upload temp file cleanup', () => {
+    const clientUploadImageSize = fs.statSync(path.resolve(dirname, './image.png')).size
     const createdIds: (number | string)[] = []
 
     test.afterEach(async ({ payload }) => {
@@ -4151,7 +4152,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         JSON.stringify({
           filename: 'client-upload-temp-file.png',
           mimeType: 'image/png',
-          size: 1,
+          size: clientUploadImageSize,
           uploadReference: { key: 'unused' },
         }),
       )
