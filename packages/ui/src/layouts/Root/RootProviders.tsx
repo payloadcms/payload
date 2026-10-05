@@ -100,7 +100,7 @@ export const RootProviders: React.FC<RootProviderProps> = ({
                             <DrawerStackProvider>
                               <ModalAccessibility />
                               <CloseModalOnRouteChange />
-                              <AuthProvider permissions={user ? permissions : null} user={user}>
+                              <AuthProvider permissions={permissions} user={user}>
                                 <PreferencesProvider>
                                   <HierarchyProvider>
                                     <ThemeProvider

@@ -32,7 +32,7 @@ export type RootLayoutData = {
   languageCode: string
   languageOptions: LanguageOptions
   locale?: string
-  permissions: SanitizedPermissions
+  permissions: null | SanitizedPermissions
   suppressHydrationWarning: boolean
   theme: Theme
   /** The request input used to resolve the theme. */
@@ -85,7 +85,7 @@ export async function getRootLayoutData({
     languageCode,
     languageOptions,
     locale: req.locale ?? undefined,
-    permissions,
+    permissions: user ? permissions : null,
     suppressHydrationWarning:
       config.admin.theme === 'all' || Boolean(config.admin.suppressHydrationWarning),
     theme,
