@@ -74,6 +74,10 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
     clearValidationEvents()
   })
 
+  test.afterEach(async () => {
+    await fs.rm(validationUploadsDir, { force: true, recursive: true })
+  })
+
   test.describe('collections', () => {
     test('should use collection update access as the validate fallback', async ({ payload }) => {
       await expect(

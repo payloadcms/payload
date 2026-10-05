@@ -21,9 +21,6 @@ import {
   validationDeniedCollectionSlug,
   validationEmptyCollectionSlug,
   validationFallbackCollectionSlug,
-  validationNonLocalizedCollectionSlug,
-  validationPublishUploadsDir,
-  validationPublishUploadsSlug,
   validationUploadsDir,
   validationUploadsSlug,
   validationWhereCollectionSlug,
@@ -598,16 +595,6 @@ const validationDeniedCollection: CollectionConfig = {
   },
 }
 
-const validationNonLocalizedCollection: CollectionConfig = {
-  slug: validationNonLocalizedCollectionSlug,
-  fields: [
-    {
-      name: 'title',
-      type: 'text',
-    },
-  ],
-}
-
 const validationAuthCollection: CollectionConfig = {
   slug: validationAuthCollectionSlug,
   auth: {
@@ -662,7 +649,6 @@ export const validationCollections: CollectionConfig[] = [
   validationWhereCollection,
   publishCollection,
   validationDeniedCollection,
-  validationNonLocalizedCollection,
   defaultUserCollection,
   validationAuthCollection,
   validationCustomIDCollection,
@@ -685,34 +671,5 @@ export const validationCollections: CollectionConfig[] = [
       staticDir: validationUploadsDir,
     },
     versions: false,
-  },
-  {
-    slug: validationPublishUploadsSlug,
-    access: {
-      validate: () => true,
-    },
-    fields: [
-      {
-        name: 'title',
-        type: 'text',
-        localized: true,
-        required: true,
-      },
-    ],
-    upload: {
-      imageSizes: [
-        {
-          name: 'thumbnail',
-          height: 64,
-          width: 64,
-        },
-      ],
-      staticDir: validationPublishUploadsDir,
-    },
-    versions: {
-      drafts: {
-        validate: false,
-      },
-    },
   },
 ]
