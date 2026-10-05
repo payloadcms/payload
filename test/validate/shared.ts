@@ -28,6 +28,7 @@ export const validationCustomIDCollectionSlug = 'validation-custom-id-items'
 export const validationEmptyCollectionSlug = 'validation-empty-items'
 export const validationUniqueCollectionSlug = 'validation-unique-items'
 export const validationUploadsDir = path.resolve(dirname, 'validation-uploads')
+export const validationTempFilesDir = path.resolve(dirname, 'validation-temp-files')
 export const validationPublishUploadsDir = path.resolve(dirname, 'validation-publish-uploads')
 
 export const validateAfterReadPreviousValue: TextFieldSingleValidation = (

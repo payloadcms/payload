@@ -10,6 +10,7 @@ import {
   validationAccessSourceGlobalSlug,
   validationDraftSourceGlobalSlug,
   validationGlobalSlug,
+  validationTempFilesDir,
 } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -68,6 +69,10 @@ export default buildConfigWithDefaults({
           label: 'French',
         },
       ],
+    },
+    upload: {
+      tempFileDir: validationTempFilesDir,
+      useTempFiles: true,
     },
   },
   seed: async (payload) => {

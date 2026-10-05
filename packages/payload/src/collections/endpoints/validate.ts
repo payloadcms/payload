@@ -2,6 +2,7 @@ import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
 
+import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import {
   getRequestCollection,
   getRequestCollectionWithID,
@@ -22,26 +23,36 @@ import { validateLocal } from '../operations/local/validate.js'
  */
 export const validateHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
-  const locale =
-    req.query.locale === undefined ? undefined : parseValidationLocaleSelector(req.query.locale)
+  try {
+    const locale =
+      req.query.locale === undefined ? undefined : parseValidationLocaleSelector(req.query.locale)
 
-  assertValidationData(req.data)
+    assertValidationData(req.data)
 
-  const result = await validateLocal(req.payload, {
-    collection: collection.config.slug,
-    data: req.data,
-    locale,
-    overrideAccess: false,
-    req,
-  })
-
-  return Response.json(result, {
-    headers: headersWithCors({
-      headers: new Headers(),
+    const result = await validateLocal(req.payload, {
+      collection: collection.config.slug,
+      data: req.data,
+      locale,
+      overrideAccess: false,
       req,
-    }),
-    status: httpStatus.OK,
-  })
+    })
+
+    return Response.json(result, {
+      headers: headersWithCors({
+        headers: new Headers(),
+        req,
+      }),
+      status: httpStatus.OK,
+    })
+  } finally {
+    await unlinkTempFiles({
+      collectionConfig: collection.config,
+      config: req.payload.config,
+      req,
+    }).catch((err) => {
+      req.payload.logger.error({ err, msg: 'Failed to remove temp file' })
+    })
+  }
 }
 
 /**
@@ -54,28 +65,38 @@ export const validateHandler: PayloadHandler = async (req) => {
  */
 export const validateByIDHandler: PayloadHandler = async (req) => {
   const { id, collection } = getRequestCollectionWithID(req)
-  const locale =
-    req.query.locale === undefined ? undefined : parseValidationLocaleSelector(req.query.locale)
+  try {
+    const locale =
+      req.query.locale === undefined ? undefined : parseValidationLocaleSelector(req.query.locale)
 
-  if (req.data !== undefined) {
-    assertValidationData(req.data)
-  }
+    if (req.data !== undefined) {
+      assertValidationData(req.data)
+    }
 
-  const result = await validateLocal(req.payload, {
-    id,
-    collection: collection.config.slug,
-    data: req.data,
-    draft: true,
-    locale,
-    overrideAccess: false,
-    req,
-  })
-
-  return Response.json(result, {
-    headers: headersWithCors({
-      headers: new Headers(),
+    const result = await validateLocal(req.payload, {
+      id,
+      collection: collection.config.slug,
+      data: req.data,
+      draft: true,
+      locale,
+      overrideAccess: false,
       req,
-    }),
-    status: httpStatus.OK,
-  })
+    })
+
+    return Response.json(result, {
+      headers: headersWithCors({
+        headers: new Headers(),
+        req,
+      }),
+      status: httpStatus.OK,
+    })
+  } finally {
+    await unlinkTempFiles({
+      collectionConfig: collection.config,
+      config: req.payload.config,
+      req,
+    }).catch((err) => {
+      req.payload.logger.error({ err, msg: 'Failed to remove temp file' })
+    })
+  }
 }

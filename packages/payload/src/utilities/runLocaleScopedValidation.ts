@@ -22,6 +22,7 @@ import {
 type ClassifiedValidationError = {
   error: ValidationFieldError
   isLocalized: boolean
+  validationLocale: null | string
 }
 
 /**
@@ -95,6 +96,7 @@ export async function runLocaleScopedValidation<TData>({
           fields,
           path: error.path,
         }),
+        validationLocale,
       }))
     },
   })
@@ -107,6 +109,7 @@ export async function runLocaleScopedValidation<TData>({
     locales.length > 1
       ? dedupeNonLocalizedFieldErrors({
           errors: classifiedErrors,
+          localeCount: locales.length,
         })
       : rawErrors
 
@@ -118,11 +121,24 @@ export async function runLocaleScopedValidation<TData>({
 
 function dedupeNonLocalizedFieldErrors({
   errors,
+  localeCount,
 }: {
   errors: ClassifiedValidationError[]
+  localeCount: number
 }): ValidationFieldError[] {
+  const localesByErrorIdentity = new Map<string, Set<null | string>>()
   const seenNonLocalizedErrors = new Set<string>()
   const deduped: ValidationFieldError[] = []
+
+  for (const { error, isLocalized, validationLocale } of errors) {
+    if (!isLocalized) {
+      const errorIdentity = JSON.stringify([error.path, error.message])
+      const validationLocales = localesByErrorIdentity.get(errorIdentity) ?? new Set()
+
+      validationLocales.add(validationLocale)
+      localesByErrorIdentity.set(errorIdentity, validationLocales)
+    }
+  }
 
   for (const { error, isLocalized } of errors) {
     if (isLocalized) {
@@ -131,6 +147,12 @@ function dedupeNonLocalizedFieldErrors({
     }
 
     const errorIdentity = JSON.stringify([error.path, error.message])
+    const hasFailedForEveryLocale = localesByErrorIdentity.get(errorIdentity)?.size === localeCount
+
+    if (!hasFailedForEveryLocale) {
+      deduped.push(error)
+      continue
+    }
 
     if (seenNonLocalizedErrors.has(errorIdentity)) {
       continue

@@ -32,6 +32,7 @@ export const documentMatchingWhereExists = async ({
   const queryReq = isolateObjectProperty(req, ['query', 'transactionID'])
   queryReq.query = { ...req.query }
   delete queryReq.transactionID
+  const includeTrashed = Boolean(req.payload.collections[collection]?.config.trash)
 
   const { docs } = await req.payload.find({
     collection,
@@ -43,6 +44,7 @@ export const documentMatchingWhereExists = async ({
     overrideAccess,
     pagination: false,
     req: queryReq,
+    trash: includeTrashed,
     where,
   })
 

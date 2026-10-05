@@ -3,6 +3,7 @@ import type { Block, CollectionBeforeChangeHook, CollectionConfig } from 'payloa
 import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import {
+  createCreatedByField,
   defaultUserCollection,
   logoutOperation,
   refreshOperation,
@@ -359,6 +360,14 @@ const validationCollection: CollectionConfig = {
       name: 'summary',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'localeSensitiveValue',
+      type: 'text',
+      validate: (value, { req }) =>
+        value && req.context.failNonLocalizedFieldForLocale === req.locale
+          ? 'The shared value is invalid for this locale'
+          : true,
     },
     {
       name: 'status',
@@ -896,6 +905,11 @@ const validationNonLocalizedCollection: CollectionConfig = {
       name: 'title',
       type: 'text',
     },
+    createCreatedByField({
+      overrides: {
+        required: true,
+      },
+    }),
   ],
 }
 
@@ -907,6 +921,7 @@ const validationAuthCollection: CollectionConfig = {
       requireEmail: false,
       requireUsername: false,
     },
+    useAPIKey: true,
   },
   fields: [],
 }
@@ -973,7 +988,7 @@ const validationUniqueCollection: CollectionConfig = {
       unique: true,
     },
   ],
-  timestamps: false,
+  trash: true,
   versions: false,
 }
 

@@ -2,6 +2,7 @@ import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
 
+import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { getRequestGlobal } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import {
@@ -20,27 +21,36 @@ import { validateGlobalLocal } from '../operations/local/validate.js'
  */
 export const validateHandler: PayloadHandler = async (req) => {
   const globalConfig = getRequestGlobal(req)
-  const locale =
-    req.query.locale === undefined ? undefined : parseValidationLocaleSelector(req.query.locale)
+  try {
+    const locale =
+      req.query.locale === undefined ? undefined : parseValidationLocaleSelector(req.query.locale)
 
-  if (req.data !== undefined) {
-    assertValidationData(req.data)
-  }
+    if (req.data !== undefined) {
+      assertValidationData(req.data)
+    }
 
-  const result = await validateGlobalLocal(req.payload, {
-    slug: globalConfig.slug,
-    data: req.data,
-    draft: true,
-    locale,
-    overrideAccess: false,
-    req,
-  })
-
-  return Response.json(result, {
-    headers: headersWithCors({
-      headers: new Headers(),
+    const result = await validateGlobalLocal(req.payload, {
+      slug: globalConfig.slug,
+      data: req.data,
+      draft: true,
+      locale,
+      overrideAccess: false,
       req,
-    }),
-    status: httpStatus.OK,
-  })
+    })
+
+    return Response.json(result, {
+      headers: headersWithCors({
+        headers: new Headers(),
+        req,
+      }),
+      status: httpStatus.OK,
+    })
+  } finally {
+    await unlinkTempFiles({
+      config: req.payload.config,
+      req,
+    }).catch((err) => {
+      req.payload.logger.error({ err, msg: 'Failed to remove temp file' })
+    })
+  }
 }
