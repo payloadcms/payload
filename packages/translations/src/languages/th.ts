@@ -489,6 +489,7 @@ export const thTranslations: DefaultTranslationsObject = {
     showAllLabel: 'แสดง {{label}} ทั้งหมด',
     shownInTable: 'แสดงในตาราง',
     showSidebar: 'แสดงแถบด้านข้าง',
+    skipToContent: 'ข้ามไปยังเนื้อหา',
     sorryNotFound: 'ขออภัย ไม่สามารถทำตามคำขอของคุณได้',
     sort: 'เรียง',
     sortByLabelDirection: 'เรียงลำดับตาม {{label}} {{direction}}',
@@ -550,6 +551,7 @@ export const thTranslations: DefaultTranslationsObject = {
     noParent: 'ไม่มีผู้ปกครอง',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'ค้นหา {{label}}',
+    searchResults: 'พบ {{count}} รายการ',
   },
   localization: {
     cannotCopySameLocale: 'ไม่สามารถคัดลอกไปยังตำแหน่งที่ตั้งเดียวกัน',

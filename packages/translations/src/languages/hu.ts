@@ -504,6 +504,7 @@ export const huTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Mutasd az összes {{címke}}',
     shownInTable: 'Táblázatban megjelenítve',
     showSidebar: 'Oldalsáv megjelenítése',
+    skipToContent: 'Ugrás a tartalomhoz',
     sorryNotFound: 'Sajnáljuk – nincs semmi, ami megfelelne a kérésének.',
     sort: 'Rendezés',
     sortByLabelDirection: 'Rendezés {{label}} {{direction}} szerint',
@@ -566,6 +567,7 @@ export const huTranslations: DefaultTranslationsObject = {
     noParent: 'Nincs Szülő',
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Keresés {{label}}',
+    searchResults: 'Találatok száma: {{count}}',
   },
   localization: {
     cannotCopySameLocale: 'Nem lehet ugyanarra a helyre másolni',
