@@ -49,9 +49,9 @@ test.suite('File rename', { config: './config.ts' }, () => {
       req: await createPayloadRequest({ payload }),
     })
 
-    expect(renamed.filename).toBe('after.png')
-    expect(renamed.original?.filename).toBe('after.png')
-    expect(await readFile(path.join(mediaDir, 'after.png'))).toEqual(bytes)
+    expect(renamed.filename).toBe('after-original.png')
+    expect(renamed.original?.filename).toBe('after-original.png')
+    expect(await readFile(path.join(mediaDir, 'after-original.png'))).toEqual(bytes)
     expect(await readFile(path.join(mediaDir, created.filename!))).toEqual(bytes)
 
     const { docs } = await payload.db.findVersions({
@@ -60,6 +60,88 @@ test.suite('File rename', { config: './config.ts' }, () => {
     })
 
     expect(docs.some(({ version }) => version.filename === created.filename)).toBe(true)
+  })
+
+  test('should rename shared original, variant, and custom thumbnail without key collisions', async ({
+    payload,
+  }) => {
+    const bytes = await readFile(imageFixture)
+    const thumbnailBytes = Buffer.from('thumbnail bytes')
+    await mkdir(transformedMediaDir, { recursive: true })
+    await writeFile(path.join(transformedMediaDir, 'before-original.png'), bytes)
+    await writeFile(path.join(transformedMediaDir, 'before-preview'), bytes)
+    await writeFile(path.join(transformedMediaDir, 'preview'), thumbnailBytes)
+    const created = await payload.db.create({
+      collection: transformedMediaSlug,
+      data: {
+        _managedFiles: [
+          {
+            key: 'before-original.png',
+            roles: [{ type: 'original' }, { type: 'default' }],
+            storageBackendId: `local:${transformedMediaSlug}`,
+          },
+          {
+            key: 'before-preview',
+            roles: [{ type: 'size', sizeKey: 'small' }],
+            storageBackendId: `local:${transformedMediaSlug}`,
+          },
+          {
+            key: 'preview',
+            roles: [{ type: 'thumbnail' }],
+            storageBackendId: `local:${transformedMediaSlug}`,
+          },
+        ],
+        alt: 'thumbnail',
+        filename: 'before-original.png',
+        filesize: bytes.length,
+        mimeType: 'image/png',
+        original: {
+          filename: 'before-original.png',
+          filesize: bytes.length,
+          mimeType: 'image/png',
+          url: `/api/${transformedMediaSlug}/file/before-original.png`,
+        },
+        thumbnailURL: `/api/${transformedMediaSlug}/file/preview`,
+        url: `/api/${transformedMediaSlug}/file/before-original.png`,
+        variants: {
+          small: {
+            filename: 'before-preview',
+            filesize: bytes.length,
+            mimeType: 'image/png',
+            url: `/api/${transformedMediaSlug}/file/before-preview`,
+          },
+        },
+      },
+    })
+
+    const renamed = await payload.renameFile({
+      id: created.id,
+      collection: transformedMediaSlug,
+      filename: 'after.png',
+      overrideAccess: true,
+    })
+
+    expect(renamed.filename).toBe('after-original.png')
+    expect(renamed.original?.filename).toBe('after-original.png')
+    expect(renamed.variants?.small?.filename).toBe('after-preview')
+    expect(renamed.variants?.small?.url).toContain('/after-preview')
+    const stored = await payload.db.findOne<{ _managedFiles: { key: string }[] }>({
+      collection: transformedMediaSlug,
+      where: { id: { equals: created.id } },
+    })
+    expect(stored?._managedFiles.map(({ key }) => key)).toEqual([
+      'after-original.png',
+      'after-preview',
+      'after-preview-1',
+    ])
+    expect(await readFile(path.join(transformedMediaDir, 'after-original.png'))).toEqual(bytes)
+    expect(await readFile(path.join(transformedMediaDir, 'after-preview'))).toEqual(bytes)
+    expect(await readFile(path.join(transformedMediaDir, 'after-preview-1'))).toEqual(
+      thumbnailBytes,
+    )
+    expect(await readFile(path.join(transformedMediaDir, 'before-original.png'))).toEqual(bytes)
+    expect(await readFile(path.join(transformedMediaDir, 'before-preview'))).toEqual(bytes)
+    expect(await readFile(path.join(transformedMediaDir, 'preview'))).toEqual(thumbnailBytes)
   })
 
   test('should rename every transformed representation without changing bytes', async ({
@@ -90,8 +172,8 @@ test.suite('File rename', { config: './config.ts' }, () => {
       req: await createPayloadRequest({ payload }),
     })
 
-    expect(renamed.filename).toBe('renamed.png')
-    expect(renamed.original?.filename).toBe('renamed.png')
+    expect(renamed.filename).toBe('renamed-original.png')
+    expect(renamed.original?.filename).toBe('renamed-original.png')
     expect(await readFile(path.join(transformedMediaDir, renamed.original.filename))).toEqual(
       originalBytes,
     )
@@ -129,10 +211,10 @@ test.suite('File rename', { config: './config.ts' }, () => {
       where: { id: { equals: created.id } },
     })
 
-    expect(renamed.filename).toBe('draft.png')
+    expect(renamed.filename).toBe('draft-original.png')
     expect((published as { filename?: string } | null)?.filename).toBe(created.filename)
     expect(await readFile(path.join(draftMediaDir, created.filename!))).toEqual(bytes)
-    expect(await readFile(path.join(draftMediaDir, 'draft.png'))).toEqual(bytes)
+    expect(await readFile(path.join(draftMediaDir, 'draft-original.png'))).toEqual(bytes)
   })
 
   test('should reject unsafe names, extension changes, and destination collisions', async ({
@@ -158,7 +240,7 @@ test.suite('File rename', { config: './config.ts' }, () => {
       ).rejects.toThrow()
     }
 
-    const collision = await payload.create({
+    await payload.create({
       collection: mediaSlug,
       data: { alt: 'collision' },
       file: { name: 'taken.png', data: bytes, mimetype: 'image/png', size: bytes.length },
@@ -168,7 +250,7 @@ test.suite('File rename', { config: './config.ts' }, () => {
       renameFileOperation({
         id: created.id,
         collection: payload.collections[mediaSlug],
-        filename: collision.filename!,
+        filename: 'taken.png',
         overrideAccess: true,
         req: await createPayloadRequest({ payload }),
       }),
@@ -196,13 +278,13 @@ test.suite('File rename', { config: './config.ts' }, () => {
       req: await createPayloadRequest({ payload }),
     })
 
-    expect(await readFile(path.join(plainMediaDir, 'new.png'))).toEqual(bytes)
+    expect(await readFile(path.join(plainMediaDir, 'new-original.png'))).toEqual(bytes)
     const saved = await payload.db.findOne({
       collection: plainMediaSlug,
       where: { id: { equals: created.id } },
     })
     expect((saved as { _managedFiles?: { key: string }[] } | null)?._managedFiles?.[0]?.key).toBe(
-      'new.png',
+      'new-original.png',
     )
     await expect(readFile(path.join(plainMediaDir, created.filename!))).rejects.toMatchObject({
       code: 'ENOENT',
@@ -227,7 +309,7 @@ test.suite('File rename', { config: './config.ts' }, () => {
       where: { id: { equals: created.id } },
     })
     const secondKey = stored!._managedFiles[1]!.key
-    const oldStem = path.parse(stored!.filename).name
+    const oldStem = path.parse(stored!.filename).name.replace(/-original$/, '')
     const target = path.join(
       transformedMediaDir,
       path.basename(secondKey).replace(oldStem, 'blocked'),
@@ -271,7 +353,7 @@ test.suite('File rename', { config: './config.ts' }, () => {
       collection: mediaSlug,
       filename: 'rest.png',
     })
-    expect(local.url).toContain('/rest.png')
+    expect(local.url).toContain('/rest-original.png')
 
     const rest = await restClient.POST(`/${mediaSlug}/${created.id}/rename`, {
       body: JSON.stringify({ filename: 'graphql.png' }),
@@ -279,8 +361,8 @@ test.suite('File rename', { config: './config.ts' }, () => {
     })
     const restBody = (await rest.json()) as { doc: { filename: string; url: string } }
     expect(rest.status).toBe(200)
-    expect(restBody.doc.filename).toBe('graphql.png')
-    expect(restBody.doc.url).toContain('/graphql.png')
+    expect(restBody.doc.filename).toBe('graphql-original.png')
+    expect(restBody.doc.url).toContain('/graphql-original.png')
 
     const gql = await restClient.GRAPHQL_POST({
       body: JSON.stringify({
@@ -292,8 +374,8 @@ test.suite('File rename', { config: './config.ts' }, () => {
       errors?: { message: string }[]
     }
     expect(gqlBody.errors).toBeUndefined()
-    expect(gqlBody.data?.renameFileFileVersionedMedia.filename).toBe('final.png')
-    expect(gqlBody.data?.renameFileFileVersionedMedia.url).toContain('/final.png')
+    expect(gqlBody.data?.renameFileFileVersionedMedia.filename).toBe('final-original.png')
+    expect(gqlBody.data?.renameFileFileVersionedMedia.url).toContain('/final-original.png')
   })
 
   test('should preserve an earlier name when first renaming a legacy upload', async ({
@@ -324,8 +406,8 @@ test.suite('File rename', { config: './config.ts' }, () => {
       where: { parent: { equals: legacy.id } },
     })
 
-    expect(renamed.filename).toBe('modern.png')
-    expect(await readFile(path.join(mediaDir, 'modern.png'))).toEqual(bytes)
+    expect(renamed.filename).toBe('modern-original.png')
+    expect(await readFile(path.join(mediaDir, 'modern-original.png'))).toEqual(bytes)
     expect(await readFile(path.join(mediaDir, 'legacy.png'))).toEqual(bytes)
     expect(docs.some(({ version }) => version.filename === 'legacy.png')).toBe(true)
   })
@@ -363,7 +445,9 @@ test.suite('File rename', { config: './config.ts' }, () => {
     })
 
     expect(gqlBody.errors).toBeUndefined()
-    expect(gqlBody.data?.renameFileFileVersionedDraftMedia.filename).toBe('graphql-draft.png')
+    expect(gqlBody.data?.renameFileFileVersionedDraftMedia.filename).toBe(
+      'graphql-draft-original.png',
+    )
     expect((published as { filename?: string } | null)?.filename).toBe(created.filename)
   })
 

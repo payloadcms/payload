@@ -23,7 +23,7 @@ import {
   getManagedFileIdentity,
   withLegacyCloudUploadFileData,
 } from '../../uploads/fileVersioning/manifest.js'
-import { normalizeStorageKey } from '../../uploads/fileVersioning/naming.js'
+import { getOriginalFilename, normalizeStorageKey } from '../../uploads/fileVersioning/naming.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -103,23 +103,55 @@ export const renameFileOperation = async (
     }
 
     const { newStem } = validateRename({ filename, oldFilename })
-    const currentFilename = stored.filename as string
-    const oldStem = path.posix.parse(currentFilename).name
-    if (filename === oldFilename) {
+    const originalStem = path.posix.parse(oldFilename).name
+    const originalMarkerIndex = originalStem.lastIndexOf('-original')
+    const oldStem =
+      originalMarkerIndex > 0
+        ? originalStem.slice(0, originalMarkerIndex)
+        : path.posix.parse(stored.filename as string).name
+    if (filename === `${oldStem}${path.posix.extname(oldFilename)}`) {
       throw new APIError('The upload already has this filename.', 400)
     }
 
+    const originalFilename = getOriginalFilename({ filename })
+    const plannedKeys = new Set(
+      manifest
+        .filter(({ roles }) => roles.some(({ type }) => type === 'original'))
+        .map(({ key, storageBackendId }) =>
+          getManagedFileIdentity({
+            key: path.posix.join(path.posix.dirname(key), originalFilename),
+            storageBackendId,
+          }),
+        ),
+    )
     const replacements = new Map<string, string>()
     for (const file of manifest) {
       const previousFilename = path.posix.basename(file.key)
-      if (!previousFilename.startsWith(oldStem)) {
-        throw new APIError(`Cannot rename managed file ${previousFilename}.`, 400)
-      }
-      const nextFilename = `${newStem}${previousFilename.slice(oldStem.length)}`
+      const hasOriginalRole = file.roles.some(({ type }) => type === 'original')
+      const suffix = previousFilename.startsWith(oldStem)
+        ? previousFilename.slice(oldStem.length)
+        : `-${previousFilename}`
+      let nextFilename = hasOriginalRole ? originalFilename : `${newStem}${suffix}`
       const directory = path.posix.dirname(file.key)
-      const key = normalizeStorageKey({
-        key: directory === '.' ? nextFilename : `${directory}/${nextFilename}`,
+      let nextKey = path.posix.join(directory, nextFilename)
+      let nextIdentity = getManagedFileIdentity({
+        key: nextKey,
+        storageBackendId: file.storageBackendId,
       })
+      const extension = path.posix.extname(nextFilename)
+      const stem = nextFilename.slice(0, -extension.length || undefined)
+      let collisionNumber = 1
+      while (!hasOriginalRole && plannedKeys.has(nextIdentity)) {
+        nextFilename = `${stem}-${collisionNumber}${extension}`
+        nextKey = path.posix.join(directory, nextFilename)
+        nextIdentity = getManagedFileIdentity({
+          key: nextKey,
+          storageBackendId: file.storageBackendId,
+        })
+        collisionNumber++
+      }
+      plannedKeys.add(nextIdentity)
+      const key = normalizeStorageKey({ key: nextKey })
       replacements.set(getManagedFileIdentity(file), key)
     }
 
