@@ -15,6 +15,7 @@ import { Users } from './collections/Users'
 import { sendgridAdapter } from './email/sendgrid'
 import { healthEndpoint } from './endpoints/health'
 import { s3StorageAdapter } from './storage/s3'
+import { timezones } from './timezones'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -53,6 +54,8 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    // Default list plus cities such as Hong Kong and Paris, for event dates
+    timezones,
     user: Users.slug,
   },
   collections: [Users, Media, Posts, Pages, Profiles, Clients, Events],

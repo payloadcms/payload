@@ -48,6 +48,13 @@ export const Events: CollectionConfig = {
       ],
     },
     {
+      name: 'description',
+      type: 'textarea',
+      admin: {
+        description: 'What the event is about, e.g. "B2B wholesale jewellery trade show"',
+      },
+    },
+    {
       type: 'row',
       fields: [
         {

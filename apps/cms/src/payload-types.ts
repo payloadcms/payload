@@ -25,6 +25,7 @@ export type SupportedTimezones =
   | 'America/Phoenix'
   | 'America/Chicago'
   | 'America/Guatemala'
+  | 'America/Mexico_City'
   | 'America/New_York'
   | 'America/Bogota'
   | 'America/Caracas'
@@ -37,21 +38,32 @@ export type SupportedTimezones =
   | 'Europe/London'
   | 'Europe/Berlin'
   | 'Africa/Lagos'
+  | 'Europe/Paris'
+  | 'Europe/Rome'
+  | 'Europe/Warsaw'
+  | 'Europe/Zurich'
   | 'Europe/Athens'
   | 'Africa/Cairo'
   | 'Europe/Moscow'
   | 'Asia/Riyadh'
+  | 'Europe/Istanbul'
+  | 'Asia/Bahrain'
+  | 'Asia/Qatar'
   | 'Asia/Dubai'
   | 'Asia/Baku'
   | 'Asia/Karachi'
   | 'Asia/Tashkent'
   | 'Asia/Calcutta'
+  | 'Asia/Colombo'
   | 'Asia/Dhaka'
   | 'Asia/Almaty'
   | 'Asia/Jakarta'
   | 'Asia/Bangkok'
   | 'Asia/Shanghai'
   | 'Asia/Singapore'
+  | 'Asia/Hong_Kong'
+  | 'Asia/Kuala_Lumpur'
+  | 'Asia/Taipei'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
   | 'Australia/Brisbane'
@@ -498,6 +510,10 @@ export interface Event {
   id: string;
   name: string;
   type: 'exhibition' | 'tradeShow' | 'salesEvent' | 'conference' | 'meeting' | 'other';
+  /**
+   * What the event is about, e.g. "B2B wholesale jewellery trade show"
+   */
+  description?: string | null;
   startDate: string;
   startDate_tz: SupportedTimezones;
   /**
@@ -829,6 +845,7 @@ export interface ClientsSelect<T extends boolean = true> {
 export interface EventsSelect<T extends boolean = true> {
   name?: T;
   type?: T;
+  description?: T;
   startDate?: T;
   startDate_tz?: T;
   endDate?: T;
