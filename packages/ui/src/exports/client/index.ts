@@ -41,6 +41,8 @@ export { QueryPresetsWhereField } from '../../elements/QueryPresets/fields/Where
 export { QueryPresetsGroupByField } from '../../elements/QueryPresets/fields/GroupByField/index.js'
 export { CollectionQuerySortField } from '../../widgets/CollectionQuery/SortField/index.js'
 export { RecentlyViewedCollectionsField } from '../../widgets/RecentlyViewed/CollectionsField/index.js'
+export { UploadDropzoneCollectionsField } from '../../widgets/UploadDropzone/CollectionsField/index.js'
+export { UploadDropzoneWidgetClient } from '../../widgets/UploadDropzone/index.client.js'
 export { QueryPresetsHeading } from '../../elements/QueryPresets/fields/Heading/index.js'
 
 // elements
@@ -462,7 +464,8 @@ export { ListQueryProvider, useListQuery } from '../../providers/ListQuery/index
 export { LocaleProvider, useLocale } from '../../providers/Locale/index.js'
 export { OperationProvider, useOperation } from '../../providers/Operation/index.js'
 export { PreferencesProvider, usePreferences } from '../../providers/Preferences/index.js'
-export { RootProvider } from '../../providers/Root/index.js'
+export { RootProviders } from '../../layouts/Root/RootProviders.js'
+export type { RootProviderProps } from '../../layouts/Root/RootProviders.js'
 export {
   PayloadLink,
   RouterAdapterContext,
@@ -565,3 +568,6 @@ export type {
 
 export { useLivePreviewContext } from '../../providers/LivePreview/context.js'
 export { LivePreviewWindow } from '../../elements/LivePreview/Window/index.js'
+
+export { DocumentRoot } from '../../layouts/Root/DocumentRoot.js'
+export type { DocumentRootProps, RootLayoutFont } from '../../layouts/Root/DocumentRoot.js'

@@ -1,3 +1,5 @@
+import { Node } from 'ts-morph'
+
 import type { Transform } from '../../types.js'
 
 const PACKAGE_NAME = '@payloadcms/richtext-lexical'
@@ -36,7 +38,14 @@ export const renameExperimentalTableFeature: Transform = {
         } else {
           // No alias: the imported name is also the local binding, so rename it to update
           // every call site (e.g. `EXPERIMENTAL_TableFeature()`) in the same pass.
-          spec.getNameNode().rename(NEW_NAME)
+          const nameNode = spec.getNameNode()
+
+          // Always an Identifier in valid code: a string-literal import name requires an alias.
+          if (!Node.isIdentifier(nameNode)) {
+            continue
+          }
+
+          nameNode.rename(NEW_NAME)
         }
 
         filesChanged.add(file.getFilePath())

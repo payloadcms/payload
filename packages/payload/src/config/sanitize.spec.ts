@@ -27,6 +27,7 @@ describe('sanitizeConfig', () => {
       custom: {},
       dashboard: {
         defaultLayout: [
+          { widgetSlug: 'welcome', width: 'full' },
           { widgetSlug: 'activity', width: 'full' },
           { widgetSlug: 'collections', width: 'full' },
         ],
