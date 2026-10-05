@@ -321,6 +321,7 @@ test.describe('Hierarchy Sidebar', () => {
         collection: 'organizations',
         data: { title: 'Selection Test Org' },
         overrideAccess: true,
+        version: 'published',
       })
       createdOrgIds.push(testOrg.id)
     })
@@ -780,6 +781,7 @@ test.describe('Hierarchy Sidebar', () => {
           parentFolder: childFolder.id as number,
         },
         overrideAccess: true,
+        version: 'published',
       })
     })
 

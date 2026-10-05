@@ -53,48 +53,56 @@ export async function seed(payload: Payload): Promise<void> {
     collection: organizationsSlug,
     data: { title: 'Acme Corp' },
     overrideAccess: true,
+    version: 'published',
   })
 
   await payload.create({
     collection: organizationsSlug,
     data: { title: 'Beta Corp' },
     overrideAccess: true,
+    version: 'published',
   })
 
   await payload.create({
     collection: organizationsSlug,
     data: { title: 'Gamma Corp' },
     overrideAccess: true,
+    version: 'published',
   })
 
   const engineeringDiv = await payload.create({
     collection: organizationsSlug,
     data: { parent: acmeCorp.id, title: 'Engineering Division' },
     overrideAccess: true,
+    version: 'published',
   })
 
   await payload.create({
     collection: organizationsSlug,
     data: { parent: engineeringDiv.id, title: 'Frontend Team' },
     overrideAccess: true,
+    version: 'published',
   })
 
   await payload.create({
     collection: organizationsSlug,
     data: { parent: engineeringDiv.id, title: 'Backend Team' },
     overrideAccess: true,
+    version: 'published',
   })
 
   await payload.create({
     collection: organizationsSlug,
     data: { parent: acmeCorp.id, title: 'Marketing Division' },
     overrideAccess: true,
+    version: 'published',
   })
 
   await payload.create({
     collection: organizationsSlug,
     data: { parent: acmeCorp.id, title: 'Zeta Division' },
     overrideAccess: true,
+    version: 'published',
   })
 
   // Create department hierarchy (tests custom field names)
@@ -130,33 +138,49 @@ export async function seed(payload: Payload): Promise<void> {
 
   // Create product hierarchy (tests localization)
   const electronicsCategory = await payload.create({
+    locale: 'all',
     collection: productsSlug,
-    data: { name: 'Electronics' },
+    data: { name: { en: 'Electronics', es: 'Electronics', de: 'Electronics' } },
     overrideAccess: true,
+    version: 'published',
   })
 
   const computersCategory = await payload.create({
+    locale: 'all',
     collection: productsSlug,
-    data: { name: 'Computers', parent: electronicsCategory.id },
+    data: {
+      name: { en: 'Computers', es: 'Computers', de: 'Computers' },
+      parent: electronicsCategory.id,
+    },
     overrideAccess: true,
+    version: 'published',
   })
 
   await payload.create({
+    locale: 'all',
     collection: productsSlug,
-    data: { name: 'Laptops', parent: computersCategory.id },
+    data: { name: { en: 'Laptops', es: 'Laptops', de: 'Laptops' }, parent: computersCategory.id },
     overrideAccess: true,
+    version: 'published',
   })
 
   await payload.create({
+    locale: 'all',
     collection: productsSlug,
-    data: { name: 'Desktops', parent: computersCategory.id },
+    data: {
+      name: { en: 'Desktops', es: 'Desktops', de: 'Desktops' },
+      parent: computersCategory.id,
+    },
     overrideAccess: true,
+    version: 'published',
   })
 
   await payload.create({
+    locale: 'all',
     collection: productsSlug,
-    data: { name: 'Phones', parent: electronicsCategory.id },
+    data: { name: { en: 'Phones', es: 'Phones', de: 'Phones' }, parent: electronicsCategory.id },
     overrideAccess: true,
+    version: 'published',
   })
 
   // Create folder hierarchy (tests collectionSpecific filter)

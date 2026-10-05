@@ -30,6 +30,7 @@ export const seed = async (_payload: Payload) => {
       relationToCustomID: 1,
       title: 'has custom ID relation',
     },
+    version: 'published',
   })
 
   await _payload.create({
@@ -38,6 +39,7 @@ export const seed = async (_payload: Payload) => {
     data: {
       title: 'post1',
     },
+    version: 'published',
   })
 
   await _payload.create({
@@ -46,6 +48,7 @@ export const seed = async (_payload: Payload) => {
     data: {
       title: 'post2',
     },
+    version: 'published',
   })
 
   await _payload.create({
@@ -55,6 +58,7 @@ export const seed = async (_payload: Payload) => {
       description: 'description',
       title: 'with-description',
     },
+    version: 'published',
   })
 
   await _payload.create({
@@ -64,6 +68,7 @@ export const seed = async (_payload: Payload) => {
       number: 1,
       title: 'numPost1',
     },
+    version: 'published',
   })
 
   await _payload.create({
@@ -73,6 +78,7 @@ export const seed = async (_payload: Payload) => {
       number: 2,
       title: 'numPost2',
     },
+    version: 'published',
   })
 
   const rel1 = await _payload.create({
@@ -81,6 +87,7 @@ export const seed = async (_payload: Payload) => {
     data: {
       name: 'name',
     },
+    version: 'published',
   })
 
   const rel2 = await _payload.create({
@@ -89,6 +96,7 @@ export const seed = async (_payload: Payload) => {
     data: {
       name: 'name2',
     },
+    version: 'published',
   })
 
   await _payload.create({
@@ -98,6 +106,7 @@ export const seed = async (_payload: Payload) => {
       relationHasManyField: rel1.id,
       title: 'rel to hasMany',
     },
+    version: 'published',
   })
 
   await _payload.create({
@@ -107,6 +116,7 @@ export const seed = async (_payload: Payload) => {
       relationHasManyField: rel2.id,
       title: 'rel to hasMany 2',
     },
+    version: 'published',
   })
 
   await _payload.create({
@@ -119,6 +129,7 @@ export const seed = async (_payload: Payload) => {
       },
       title: 'rel to multi',
     },
+    version: 'published',
   })
 
   await _payload.create({
@@ -137,6 +148,7 @@ export const seed = async (_payload: Payload) => {
       ],
       title: 'rel to multi hasMany',
     },
+    version: 'published',
   })
 
   const payloadAPITest1 = await _payload.create({
