@@ -4,9 +4,6 @@ import { multiTenantPostsSlug } from '../shared.js'
 
 export const MultiTenantPosts: CollectionConfig = {
   slug: multiTenantPostsSlug,
-  access: {
-    update: ({ req }) => req.context.allowMultiTenantPostUpdate === true,
-  },
   admin: {
     useAsTitle: 'title',
   },

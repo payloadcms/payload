@@ -1,14 +1,11 @@
 import type { GlobalConfig } from 'payload'
 
-import { ValidationError } from 'payload'
-
 import {
   accessEvents,
   fallbackAccessEvents,
   globalValidationSourceEvents,
   recordAndMutateIsolationState,
   recordGraphQLValidationTransaction,
-  recordHook,
   recordPermissionOperation,
   scheduledValidationEvents,
 } from './events.js'
@@ -47,24 +44,6 @@ const validationGlobal: GlobalConfig = {
     {
       name: 'title',
       type: 'text',
-      hooks: {
-        beforeValidate: [
-          ({ context, req, value }) => {
-            if (context.throwFieldValidationError === true) {
-              throw new ValidationError(
-                {
-                  errors: [{ message: 'Global field validation failure', path: 'title' }],
-                  global: validationGlobalSlug,
-                  req,
-                },
-                req.t,
-              )
-            }
-
-            return value
-          },
-        ],
-      },
       localized: true,
       required: true,
     },
@@ -111,42 +90,9 @@ const validationGlobal: GlobalConfig = {
     },
   ],
   hooks: {
-    beforeChange: [
-      ({ context, data, operation, req }) => {
-        recordHook({
-          context,
-          hook: 'globalBeforeChange',
-          operation,
-          requestOperation: req.operation,
-        })
-
-        if (req.context.throwValidationHook === true) {
-          throw new Error('global validation hook failure')
-        }
-
-        if (req.context.throwValidationErrorHook === true) {
-          throw new ValidationError(
-            {
-              errors: [{ message: 'Global hook validation failure', path: 'title' }],
-              global: validationGlobalSlug,
-              req,
-            },
-            req.t,
-          )
-        }
-
-        return data
-      },
-    ],
     beforeValidate: [
-      ({ context, data, operation, req }) => {
+      ({ data, req }) => {
         recordGraphQLValidationTransaction({ data, req, source: 'global' })
-        recordHook({
-          context,
-          hook: 'globalBeforeValidate',
-          operation,
-          requestOperation: req.operation,
-        })
         return data
       },
     ],
@@ -163,10 +109,6 @@ const validationFallbackGlobal: GlobalConfig = {
         source: 'global',
       })
 
-      if (req.operation === 'validate' && req.context.requireValidationUser === true) {
-        return Boolean(req.user)
-      }
-
       return req.operation !== 'validate'
         ? true
         : req.payloadAPI === 'REST' || req.context.allowUpdateFallback === true
@@ -177,24 +119,6 @@ const validationFallbackGlobal: GlobalConfig = {
       name: 'title',
       type: 'text',
       required: true,
-    },
-    {
-      name: 'updateProtected',
-      type: 'text',
-      access: {
-        update: ({ req }) => {
-          fallbackAccessEvents.push({
-            operation: req.operation,
-            source: 'field',
-          })
-
-          return req.context.allowFieldUpdateFallback === true
-        },
-      },
-      validate: (value) =>
-        value === undefined || value === 'valid'
-          ? true
-          : 'Global update-protected field is invalid',
     },
   ],
 }
@@ -326,12 +250,6 @@ const publishGlobal: GlobalConfig = {
     {
       name: 'title',
       type: 'text',
-      localized: true,
-      required: true,
-    },
-    {
-      name: 'localizedJSON',
-      type: 'json',
       localized: true,
       required: true,
     },
