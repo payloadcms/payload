@@ -224,6 +224,7 @@ export interface Config {
   };
   locale: 'xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu';
   widgets: {
+    welcome: WelcomeWidget;
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
     activity: ActivityWidget;
@@ -2299,6 +2300,7 @@ export interface GlobalArray {
 export interface GlobalText {
   id: string;
   text?: string | null;
+  localizedTextWithLength?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -2447,6 +2449,7 @@ export interface GlobalArraySelect<T extends boolean = true> {
  */
 export interface GlobalTextSelect<T extends boolean = true> {
   text?: T;
+  localizedTextWithLength?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -2530,6 +2533,16 @@ export interface PublicationHookGlobalSelect<T extends boolean = true> {
   createdAt?: T;
   _status?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "welcome_widget".
+ */
+export interface WelcomeWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
