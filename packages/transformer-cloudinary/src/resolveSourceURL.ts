@@ -10,7 +10,7 @@ type FileRecord = {
 /**
  * Default source-URL resolution: looks the document up under the requesting user's
  * own access, matches the requested filename against the main file or one of its
- * `sizes`, and resolves that entry's `url` against the config's `serverURL`.
+ * `variants`, and resolves that entry's `url` against the config's `serverURL`.
  *
  * Cloudinary fetches this URL itself, so it must be publicly reachable. When a
  * collection serves files through Payload's access-controlled route, that route has
@@ -28,12 +28,12 @@ export function createResolveSourceURL(): ResolveSourceURL {
       overrideAccess: false,
       req,
       user: req.user,
-    })) as { sizes?: Record<string, FileRecord> } & FileRecord
+    })) as { variants?: Record<string, FileRecord> } & FileRecord
 
     const match =
       doc?.filename === filename
         ? doc
-        : Object.values(doc?.sizes ?? {}).find((size) => size?.filename === filename)
+        : Object.values(doc?.variants ?? {}).find((size) => size?.filename === filename)
 
     if (!match?.url) {
       throw new Error(

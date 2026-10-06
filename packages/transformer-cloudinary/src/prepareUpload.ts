@@ -25,7 +25,7 @@ const percentToPixel = (value: number, dimension: number) => Math.floor((value /
 
 type PlannedTask = {
   chain: CloudinaryTransformation[]
-  fieldPath: 'filename' | `sizes.${string}`
+  fieldPath: 'filename' | `variants.${string}`
 }
 
 /**
@@ -100,7 +100,7 @@ export function createPrepareUpload({
 
       for (const size of collectionUpload.variants ?? []) {
         const sizeOptions = size as { name: string } & CloudinaryImageSizeOptions
-        const fieldPath = `sizes.${sizeOptions.name}` as const
+        const fieldPath = `variants.${sizeOptions.name}` as const
 
         if (getImageSizeAction({ dimensions: original, size: sizeOptions }) === 'omit') {
           omittedSizes.push({ fieldPath })

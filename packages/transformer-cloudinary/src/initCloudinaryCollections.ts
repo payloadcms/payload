@@ -10,7 +10,7 @@ const RESERVED_IMAGE_SIZE_NAMES = [
   'height',
   'url',
   'thumbnailURL',
-  'sizes',
+  'variants',
   'focalX',
   'focalY',
 ]
@@ -18,7 +18,7 @@ const RESERVED_IMAGE_SIZE_NAMES = [
 /**
  * Validates `cloudinaryTransformer({ collections })` against the config's real
  * collections, then writes a narrowed, Cloudinary-agnostic projection of
- * `variants` (as `imageSizes`)/`crop`/`focalPoint`/`hasImageAdjustments` back onto each targeted
+ * `variants`/`crop`/`focalPoint`/`hasImageAdjustments` back onto each targeted
  * collection's sanitized `upload` config, so core's own field generation and
  * Admin UI keep working without knowing about Cloudinary.
  */
@@ -84,7 +84,7 @@ export function initCloudinaryCollections({
   }
 
   // Write onto copies, never the authored collection objects: a rebuilt config (e.g. on a dev
-  // reload) would otherwise see `upload.imageSizes` on the collection and reject it as legacy.
+  // reload) would otherwise see `upload.variants` on the collection and reject it as authored.
   config.collections = config.collections!.map((collection) => {
     const cloudinaryConfig = collections[collection.slug]
 
@@ -103,7 +103,7 @@ export function initCloudinaryCollections({
       hasImageAdjustments: Boolean(
         cloudinaryConfig.resizeOptions || cloudinaryConfig.formatOptions,
       ),
-      imageSizes: cloudinaryConfig.variants?.map(({ name, admin, generateImageName }) => ({
+      variants: cloudinaryConfig.variants?.map(({ name, admin, generateImageName }) => ({
         name,
         admin,
         generateImageName,

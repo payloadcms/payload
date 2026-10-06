@@ -525,7 +525,7 @@ cloudinaryTransformer({
 })
 ```
 
-As with `sharpTransformer`, this writes a provider-agnostic projection of `variants`, `crop`, and `focalPoint` back onto the collection's sanitized `upload` config at startup (as `upload.imageSizes`/`.crop`/`.focalPoint`), so the Admin Panel, generated types, and the rest of core see the same sizes as before. The `sizes` shape on your documents is unchanged, including the behavior where a size larger than the source in both dimensions is recorded with null metadata. A `crop` or `focalPoint` set on `cloudinaryTransformer` replaces the collection's own value; when it isn't set there, the collection's value is kept.
+As with `sharpTransformer`, this writes a provider-agnostic projection of `variants`, `crop`, and `focalPoint` back onto the collection's sanitized `upload` config at startup (as `upload.variants`/`.crop`/`.focalPoint`), so the Admin Panel, generated types, and the rest of core see the same sizes as before. Each generated size is stored on your documents under `variants.<name>`, and a size larger than the source in both dimensions is still recorded with null metadata. A `crop` or `focalPoint` set on `cloudinaryTransformer` replaces the collection's own value; when it isn't set there, the collection's value is kept.
 
 An Admin-selected crop becomes a `c_crop` step; a focal point becomes `g_xy_center` with the focus translated into source pixels.
 

@@ -88,7 +88,7 @@ export async function uploadOriginal({
 /**
  * Generates every requested transformation of an already-staged original in one call,
  * returning each derived asset's URL alongside the dimensions Cloudinary actually
- * produced - so the resulting `sizes` metadata is reported, never predicted.
+ * produced - so the resulting `variants` metadata is reported, never predicted.
  */
 export async function generateDerivedAssets({
   chains,

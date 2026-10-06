@@ -5,7 +5,7 @@ import type { CloudinaryImageSizeOptions } from './types.js'
  *
  * `withoutEnlargement`:
  * - `undefined` [default]: a source smaller than the target is recorded with null
- *   metadata rather than upscaled - the long-standing Payload `sizes` behavior
+ *   metadata rather than upscaled - the long-standing Payload image-size behavior
  * - `false`: always enlarge to the target size
  * - `true`: deliver the source at its own size instead of enlarging
  */

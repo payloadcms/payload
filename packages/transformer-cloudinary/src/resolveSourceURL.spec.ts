@@ -41,7 +41,7 @@ describe('createResolveSourceURL', () => {
         req: createReq({
           doc: {
             filename: 'photo.png',
-            sizes: {
+            variants: {
               square: { filename: 'photo-400x300.png', url: 'https://cdn.example.com/square.png' },
             },
             url: 'https://cdn.example.com/main.png',

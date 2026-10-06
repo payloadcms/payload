@@ -52,7 +52,7 @@ describe('initCloudinaryCollections', () => {
     expect(media.upload).toMatchObject({
       crop: true,
       focalPoint: true,
-      imageSizes: [{ name: 'square', admin: undefined, generateImageName: undefined }],
+      variants: [{ name: 'square', admin: undefined, generateImageName: undefined }],
     })
   })
 
@@ -68,7 +68,7 @@ describe('initCloudinaryCollections', () => {
 
     expect(config.collections![0]).not.toBe(authoredMedia)
     expect(authoredMedia.upload).toBe(authoredUpload)
-    expect(authoredUpload).not.toHaveProperty('imageSizes')
+    expect(authoredUpload).not.toHaveProperty('variants')
   })
 
   it('should flag configured adjustments for the Admin Panel', () => {

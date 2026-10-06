@@ -103,7 +103,7 @@ declare module 'payload' {
 /**
  * A collection's Cloudinary-owned upload-time settings, authored via
  * `cloudinaryTransformer({ collections: { <slug>: {...} } })`. `init()` writes a
- * narrowed, Cloudinary-agnostic projection of `variants` (as `imageSizes`)/`crop`/`focalPoint`
+ * narrowed, Cloudinary-agnostic projection of `variants`/`crop`/`focalPoint`
  * back onto the sanitized collection's `upload` config for core's own use
  * (Admin UI, field generation); this richer shape is what the transformer reads.
  */
@@ -116,7 +116,7 @@ export type CloudinaryCollectionConfig = {
   formatOptions?: { format: CloudinaryFormat; quality?: CloudinaryQuality }
   /** Transformation applied to the main uploaded file. */
   resizeOptions?: Omit<CloudinaryTransformation, 'x' | 'y'>
-  /** Image sizes generated for each upload, stored under the document's `sizes`. */
+  /** Image sizes generated for each upload, stored under the document's `variants`. */
   variants?: ImageSize[]
 }
 
@@ -268,7 +268,7 @@ export type CloudinaryUploadTaskOptions = {
 
 /** Per-task plan built from a single Cloudinary upload's eager transformations. */
 export type CloudinaryUploadTask = {
-  fieldPath: 'filename' | `sizes.${string}`
+  fieldPath: 'filename' | `variants.${string}`
   height?: number
   options?: CloudinaryUploadTaskOptions
   width?: number
