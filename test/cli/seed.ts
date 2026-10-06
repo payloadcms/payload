@@ -5,6 +5,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: 'pages',
     data: { title: 'Seeded page' },
     overrideAccess: true,
+    version: 'published',
   } as never)
 
   const fileData = Buffer.from('Seeded media')

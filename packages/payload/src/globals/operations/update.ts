@@ -569,8 +569,9 @@ export const updateOperation = async <
         operation: 'update',
         payload,
         preserveDraft: version === 'published' || (version === 'latest' && !selectedIsDraft),
+        publishedUpdatedAt: global?.updatedAt as string | undefined,
         req,
-        unpublish: isUnpublishing,
+        unpublish: allLocalesPublicationStatus === 'draft',
       })
 
       resultWithLocales = {

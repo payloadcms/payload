@@ -244,14 +244,17 @@ query {
         collection: 'posts',
         data: { title: 'Aliased array post' },
         overrideAccess: true,
+        version: 'published',
       })
 
       await payload.updateGlobal({
         slug: 'home',
         data: {
+          _status: 'published',
           topPosts: [{ caption: 'Featured', post: post.id }],
         },
         overrideAccess: true,
+        version: 'draft',
       })
 
       const query = `query {
@@ -282,11 +285,13 @@ query {
           title: 'Post 1',
         },
         overrideAccess: true,
+        version: 'published',
       })
 
       await payload.updateGlobal({
         slug: 'home',
         data: {
+          _status: 'published',
           topPosts: [
             {
               post: post1.id,
@@ -295,6 +300,7 @@ query {
           ],
         },
         overrideAccess: true,
+        version: 'draft',
       })
 
       const query = `query {

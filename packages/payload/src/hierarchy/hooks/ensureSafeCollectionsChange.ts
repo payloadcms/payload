@@ -52,6 +52,7 @@ export const ensureSafeCollectionsChange =
               limit: 1,
               overrideAccess: true,
               req,
+              version: 'latest',
               where: {
                 [folderFieldName]: { equals: currentParentDocID },
               },
@@ -70,6 +71,7 @@ export const ensureSafeCollectionsChange =
               limit: 1,
               overrideAccess: true,
               req,
+              version: 'latest',
               where: {
                 and: [
                   { [typeFieldName]: { in: newCollections } },
@@ -123,6 +125,7 @@ export const ensureSafeCollectionsChange =
               [typeFieldName]: true,
             },
             user: req.user,
+            version: 'latest',
           })
         } catch (_) {
           // parent folder does not exist

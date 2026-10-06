@@ -175,6 +175,7 @@ const buildTableState: ServerFunction<
         overrideAccess: false,
         select,
         user: req.user,
+        version: 'latest',
       })
 
       for (let i = 0; i < segments.length; i++) {

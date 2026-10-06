@@ -494,10 +494,10 @@ test.suite('CLI', { config: './config.ts' }, () => {
   })
 
   test(
-    `createDocuments --slug pages --documents '[{"data":{"title":"one","location":{"longitude":1,"latitude":2}}},{"data":{"title":"two"}}]' --json`,
+    `createDocuments --slug pages --documents '[{"data":{"title":"one","location":{"longitude":1,"latitude":2}}},{"data":{"title":"two"}}]' --version published --json`,
     async ({ cli, payload }) => {
       const output = await cli(
-        'createDocuments --slug pages --documents \'[{"data":{"title":"one","location":{"longitude":1,"latitude":2}}},{"data":{"title":"two"}}]\' --json',
+        'createDocuments --slug pages --documents \'[{"data":{"title":"one","location":{"longitude":1,"latitude":2}}},{"data":{"title":"two"}}]\' --version published --json',
       )
       const pages = await payload.find({
         collection: 'pages',
@@ -530,7 +530,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     CLI_COMMAND_TEST_TIMEOUT,
   )
 
-  test('createDocuments --slug pages --documents @documents.json --json', async ({
+  test('createDocuments --slug pages --documents @documents.json --version published --json', async ({
     cli,
     payload,
   }) => {
@@ -539,7 +539,9 @@ test.suite('CLI', { config: './config.ts' }, () => {
       JSON.stringify([{ data: { title: 'file one' } }, { data: { title: 'file two' } }]),
     )
 
-    const output = await cli(`createDocuments --slug pages --documents @${documentsFile} --json`)
+    const output = await cli(
+      `createDocuments --slug pages --documents @${documentsFile} --version published --json`,
+    )
     const pages = await payload.find({
       collection: 'pages',
       overrideAccess: true,
@@ -568,6 +570,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
         slug: 'pages',
         documents: [{ data: { title: 'Merged input' } }],
         returning: false,
+        version: 'published',
       }),
     )
 
@@ -628,11 +631,11 @@ test.suite('CLI', { config: './config.ts' }, () => {
     })
   })
 
-  test(`createDocuments --slug pages --documents '[{"data":{}}]' --draft --returning --json`, async ({
+  test(`createDocuments --slug pages --documents '[{"data":{}}]' --version draft --returning --json`, async ({
     cli,
   }) => {
     const output = await cli({
-      command: `createDocuments --slug pages --documents '[{"data":{}}]' --draft --returning --json`,
+      command: `createDocuments --slug pages --documents '[{"data":{}}]' --version draft --returning --json`,
       reject: false,
     })
     const response = JSON.parse(output.stdout)
@@ -648,12 +651,12 @@ test.suite('CLI', { config: './config.ts' }, () => {
     })
   })
 
-  test(`createDocuments --slug pages --documents '[{"data":{"title":"created"}},{"data":{"title":null}}]' --json`, async ({
+  test(`createDocuments --slug pages --documents '[{"data":{"title":"created"}},{"data":{"title":null}}]' --version published --json`, async ({
     cli,
     payload,
   }) => {
     const output = await cli({
-      command: `createDocuments --slug pages --documents '[{"data":{"title":"created"}},{"data":{"title":null}}]' --json`,
+      command: `createDocuments --slug pages --documents '[{"data":{"title":"created"}},{"data":{"title":null}}]' --version published --json`,
       reject: false,
     })
     const response = JSON.parse(output.stdout)
@@ -734,6 +737,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
         title: 'Nested update',
       },
       overrideAccess: true,
+      version: 'published',
     })
     const output = await cli({
       command: `updateDocument --slug pages --id ${page.id} --data '{"metadata":{"title":"Updated"}}' --returning --json`,
@@ -760,6 +764,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
         collection: 'pages',
         data: { title: 'Numeric ID' },
         overrideAccess: true,
+        version: 'published',
       })
       const output = await cli(
         `updateDocument --slug pages --id ${page.id} --data '{"title":"Updated"}' --override-access false --json`,
@@ -1019,8 +1024,12 @@ test.suite('CLI', { config: './config.ts' }, () => {
     })
   })
 
-  test('findDocuments --slug pages --draft --trash --no-pagination --json', async ({ cli }) => {
-    const output = await cli('findDocuments --slug pages --draft --trash --no-pagination --json')
+  test('findDocuments --slug pages --version latest --trash --no-pagination --json', async ({
+    cli,
+  }) => {
+    const output = await cli(
+      'findDocuments --slug pages --version latest --trash --no-pagination --json',
+    )
 
     expect(JSON.parse(output.stdout)).toMatchObject({
       command: 'findDocuments',

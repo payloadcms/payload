@@ -131,7 +131,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
       const whereWithBaseFilter = combineWhereConstraints([where, baseFilter])
 
       const queryString = qs.stringify(
-        { limit: treeLimit, page, sort: useAsTitle, where: whereWithBaseFilter },
+        { limit: treeLimit, page, sort: useAsTitle, version: 'latest', where: whereWithBaseFilter },
         { addQueryPrefix: true },
       )
 

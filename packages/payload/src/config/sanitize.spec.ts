@@ -2,7 +2,6 @@ import type { Config } from './types.js'
 
 import { describe, expect, it } from 'vitest'
 
-import { configToJSONSchema } from '../utilities/configToJSONSchema.js'
 import { sanitizeConfig } from './sanitize.js'
 
 const configDefaults: Config = {
@@ -69,7 +68,6 @@ describe('sanitizeConfig', () => {
     expect(sanitizedConfig.typescript).toEqual({
       autoGenerate: true,
       outputFile: `${process.cwd()}/payload-types.ts`,
-      strictDraftTypes: true,
     })
     expect(sanitizedConfig.routes).toEqual({
       admin: '/admin',
@@ -90,29 +88,6 @@ describe('sanitizeConfig', () => {
     const sanitizedConfig = sanitizeConfig(config)
 
     expect(sanitizedConfig.admin.avatar).toBe('gravatar')
-  })
-
-  it.each([undefined, { autoGenerate: false }, { strictDraftTypes: undefined }])(
-    'should generate strict draft types by default with TypeScript options %j',
-    (typescript) => {
-      const config = sanitizeConfig({ ...configDefaults, typescript })
-      const { jsonSchema } = configToJSONSchema(config, 'text')
-
-      expect(jsonSchema.properties?.strictDraftTypes).toEqual({ type: 'boolean', const: true })
-      expect(jsonSchema.required).toContain('strictDraftTypes')
-    },
-  )
-
-  it('should preserve an explicit opt-out of strict draft types in generated types', () => {
-    const config = sanitizeConfig({
-      ...configDefaults,
-      typescript: { strictDraftTypes: false },
-    })
-    const { jsonSchema } = configToJSONSchema(config, 'text')
-
-    expect(config.typescript.strictDraftTypes).toBe(false)
-    expect(jsonSchema.properties).not.toHaveProperty('strictDraftTypes')
-    expect(jsonSchema.required).not.toContain('strictDraftTypes')
   })
 
   it('should populate sanitized localization defaults with no locales', () => {

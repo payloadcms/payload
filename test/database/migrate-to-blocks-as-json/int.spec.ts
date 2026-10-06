@@ -42,6 +42,7 @@ test.suite('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
       },
       depth: 0,
       overrideAccess: true,
+      version: 'published',
     })
 
     // Seed many documents to test batching (250 documents to ensure multiple batches with default size of 100)
@@ -61,6 +62,7 @@ test.suite('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
           ],
         },
         overrideAccess: true,
+        version: 'published',
       })
       batchPosts.push(batchPost.id)
     }
@@ -82,6 +84,7 @@ test.suite('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
         ],
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     const versionedPost = await payload.create({
@@ -99,6 +102,7 @@ test.suite('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
         ],
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     // create another version of post
@@ -153,6 +157,7 @@ test.suite('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
         ],
       },
       overrideAccess: true,
+      version: 'draft',
     })
 
     await payload.updateGlobal({
@@ -166,6 +171,7 @@ test.suite('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
         ],
       },
       overrideAccess: true,
+      version: 'draft',
     })
 
     const currentConfig = readFileSync(path.resolve(dirname, 'config.ts'), 'utf-8')
@@ -314,6 +320,7 @@ test.suite('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
       slug: 'global-versioned',
       depth: 0,
       overrideAccess: true,
+      version: 'latest',
     })
 
     expect(updatedVersionedGlobal.content).toEqual([

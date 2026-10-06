@@ -25,6 +25,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
       },
       req,
       overrideAccess: true,
+      version: 'published',
     })
 
     const sizeVariantType = await payload.create({
@@ -34,6 +35,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         label: 'Size',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     const [small, medium, large, xlarge] = await Promise.all(
@@ -45,6 +47,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
             variantType: sizeVariantType.id,
           },
           overrideAccess: true,
+          version: 'published',
         })
       }),
     )
@@ -56,6 +59,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         label: 'Color',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     const [black, white] = await Promise.all(
@@ -67,6 +71,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
             variantType: colorVariantType.id,
           },
           overrideAccess: true,
+          version: 'published',
         })
       }),
     )
@@ -79,6 +84,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         enableVariants: true,
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     const hoodieSmallWhite = await payload.create({
@@ -91,6 +97,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         priceInUSD: 1999,
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     const hoodieMediumWhite = await payload.create({
@@ -103,6 +110,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         priceInUSD: 1999,
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     const hatProduct = await payload.create({
@@ -115,6 +123,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         priceInEUR: 2599,
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     const pendingPaymentRecord = await payload.create({
@@ -130,6 +139,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         status: 'pending',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     const succeededPaymentRecord = await payload.create({
@@ -145,6 +155,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         status: 'succeeded',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     return true

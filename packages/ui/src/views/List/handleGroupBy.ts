@@ -99,6 +99,7 @@ export const handleGroupBy = async ({
     req,
     sort: query?.groupBy,
     trash,
+    version: 'latest',
     where: whereWithMergedSearch,
   })
 

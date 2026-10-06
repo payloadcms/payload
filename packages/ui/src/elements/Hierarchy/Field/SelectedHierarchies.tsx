@@ -68,6 +68,7 @@ export const SelectedHierarchies: React.FC<SelectedHierarchiesProps> = ({
         select: {
           [useAsTitle]: true,
         },
+        version: 'latest',
         where: {
           id: {
             in: selectedIds,

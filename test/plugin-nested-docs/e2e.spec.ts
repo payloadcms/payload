@@ -109,11 +109,8 @@ describe('Nested Docs Plugin', () => {
     })
 
     test('Draft parent slug does not update child', async () => {
-      await page.goto(url.edit(draftChildID))
-
       // TODO: remove when error states are fixed
-      const apiTabButton = page.getByRole('link', { name: 'API', exact: true })
-      await apiTabButton.click()
+      await page.goto(`${url.edit(draftChildID)}/api?version=latest`)
       const breadcrumbs = page.locator('text=/parent-slug-draft').first()
       await expect(breadcrumbs).toBeVisible()
 
@@ -126,9 +123,7 @@ describe('Nested Docs Plugin', () => {
       await page.locator(slugClass).nth(0).fill('parent-updated-draft')
       await page.locator(draftButtonClass).nth(0).click()
       await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-      await page.goto(url.edit(draftChildID))
-
-      await apiTabButton.click()
+      await page.goto(`${url.edit(draftChildID)}/api?version=latest`)
       const updatedBreadcrumbs = page.locator('text=/parent-slug-draft').first()
       await expect(updatedBreadcrumbs).toBeVisible()
 

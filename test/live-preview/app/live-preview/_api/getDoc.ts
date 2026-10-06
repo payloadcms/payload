@@ -25,7 +25,7 @@ export const getDoc = async <T>(args: {
       collection,
       depth,
       where,
-      draft,
+      version: draft ? 'latest' : 'published',
       trash: true, // Include trashed documents
       overrideAccess: true,
     })

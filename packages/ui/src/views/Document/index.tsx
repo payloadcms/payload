@@ -362,7 +362,7 @@ export const renderDocument = async ({
       fallbackLocale: false,
       locale: locale?.code,
       overrideAccess: false,
-      req,
+      req: req.transactionID ? req : isolateObjectProperty(req, 'transactionID'),
       user,
       version: 'draft',
     })

@@ -185,6 +185,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
       operation: 'restoreVersion',
       payload,
       preserveDraft: version === 'published',
+      publishedUpdatedAt: global?.updatedAt as string | undefined,
       req,
     })
 

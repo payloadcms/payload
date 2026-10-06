@@ -272,6 +272,7 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
                 ...(slugFieldName ? { [slugFieldName]: true } : {}),
               },
               user: req.user,
+              version: draft ? 'latest' : 'published',
             })
           } catch (_error) {
             // Published version not found, must be a draft

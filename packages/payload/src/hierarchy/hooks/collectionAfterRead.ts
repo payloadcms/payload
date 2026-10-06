@@ -80,7 +80,11 @@ export const hierarchyCollectionAfterRead =
       const { slugPath, titlePath } = await computePaths({
         collection,
         doc,
-        draft: doc._status === 'draft',
+        draft:
+          doc._status === 'draft' ||
+          (typeof doc._status === 'object' &&
+            doc._status !== null &&
+            Object.values(doc._status).includes('draft')),
         locale:
           isTitleLocalized && req.locale === 'all'
             ? 'all'

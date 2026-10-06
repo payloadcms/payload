@@ -392,6 +392,7 @@ test.suite('Lexical', { config: './config.ts' }, () => {
           password: 'test-password',
         },
         overrideAccess: true,
+        version: 'published',
       })
 
       const originalReadAccess = payload.collections[usersSlug].config.access.read
@@ -412,7 +413,7 @@ test.suite('Lexical', { config: './config.ts' }, () => {
         expect(readResponse.status).toBe(403)
 
         // The referenced collection is not enabled for this field.
-        const response = await restClient.POST(`/${lexicalRelationshipFieldsSlug}?depth=2`, {
+        const response = await restClient.POST(`/${lexicalRelationshipFieldsSlug}?depth=2&version=published`, {
           body: JSON.stringify({ richText }),
         })
 
@@ -422,6 +423,7 @@ test.suite('Lexical', { config: './config.ts' }, () => {
           collection: lexicalRelationshipFieldsSlug,
           data: {},
           overrideAccess: true,
+          version: 'published',
         })
 
         // Simulate existing content referencing a collection outside enabledCollections.
@@ -474,7 +476,7 @@ test.suite('Lexical', { config: './config.ts' }, () => {
           version: 2,
         }
         const richText = buildEditorState<SerializedLexicalNode>({ nodes: [node] })
-        const response = await restClient.POST(`/${lexicalRelationshipFieldsSlug}`, {
+        const response = await restClient.POST(`/${lexicalRelationshipFieldsSlug}?version=published`, {
           body: JSON.stringify({ [fieldName]: richText }),
         })
 
@@ -484,6 +486,7 @@ test.suite('Lexical', { config: './config.ts' }, () => {
           collection: lexicalRelationshipFieldsSlug,
           data: {},
           overrideAccess: true,
+          version: 'published',
         })
 
         // Simulate existing content referencing a collection not enabled for this field.

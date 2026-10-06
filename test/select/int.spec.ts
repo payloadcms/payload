@@ -1544,7 +1544,7 @@ test.suite('Select', { config: './config.ts', resetBetweenTests: false }, () => 
       const res = await payload.findByID({
         id: postId,
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {},
         overrideAccess: true,
       })
@@ -1558,7 +1558,7 @@ test.suite('Select', { config: './config.ts', resetBetweenTests: false }, () => 
       const res = await payload.findByID({
         id: postId,
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {
           number: true,
         },
@@ -1575,7 +1575,7 @@ test.suite('Select', { config: './config.ts', resetBetweenTests: false }, () => 
       const res = await payload.findByID({
         id: postId,
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {
           number: false,
         },
@@ -1592,7 +1592,7 @@ test.suite('Select', { config: './config.ts', resetBetweenTests: false }, () => 
       const res = await payload.findByID({
         id: postId,
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {
           number: true,
           text: true,
@@ -1610,7 +1610,7 @@ test.suite('Select', { config: './config.ts', resetBetweenTests: false }, () => 
     test('payload.find should select number and text', async ({ payload }) => {
       const res = await payload.find({
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {
           number: true,
           text: true,
@@ -1633,7 +1633,7 @@ test.suite('Select', { config: './config.ts', resetBetweenTests: false }, () => 
     test('should select base id field inside of array', async ({ payload }) => {
       const res = await payload.find({
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {
           array: {},
         },
@@ -1654,7 +1654,7 @@ test.suite('Select', { config: './config.ts', resetBetweenTests: false }, () => 
     test('should select base id field inside of blocks', async ({ payload }) => {
       const res = await payload.find({
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {
           blocks: {},
         },
@@ -1704,14 +1704,14 @@ test.suite('Select', { config: './config.ts', resetBetweenTests: false }, () => 
       const doc = await payload.create({
         collection: 'versioned-posts',
         data: { _status: 'draft', text: 'draft-post' },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
       const res = await payload.findByID({
         id: doc.id,
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: { text: true },
         overrideAccess: true,
       })
@@ -1721,12 +1721,13 @@ test.suite('Select', { config: './config.ts', resetBetweenTests: false }, () => 
         collection: 'versioned-posts',
         data: { _status: 'published', text: 'published' },
         overrideAccess: true,
+        version: 'draft',
       })
 
       const res_2 = await payload.findByID({
         id: doc.id,
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: { text: true },
         overrideAccess: true,
       })

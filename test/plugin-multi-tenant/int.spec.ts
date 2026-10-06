@@ -476,7 +476,7 @@ test.suite('@payloadcms/plugin-multi-tenant', suiteOptions, () => {
     }) => {
       const tenantMemberToken = await loginAsTenantMember(restClient)
 
-      const response = await restClient.POST('/autosave-global?draft=true', {
+      const response = await restClient.POST('/autosave-global?version=draft', {
         auth: false,
         body: JSON.stringify({ tenant: tenantB.id, title: 'Tenant B REST draft' }),
         headers: { Authorization: `JWT ${tenantMemberToken}` },
@@ -498,7 +498,7 @@ test.suite('@payloadcms/plugin-multi-tenant', suiteOptions, () => {
         payload.create({
           collection: autosaveGlobalSlug,
           data: { tenant: tenantB.id, title: 'Tenant B draft' },
-          draft: true,
+          version: 'draft',
           overrideAccess: false,
           user: tenantMemberUser,
         }),
@@ -520,7 +520,7 @@ test.suite('@payloadcms/plugin-multi-tenant', suiteOptions, () => {
           id: ownDocument.id,
           collection: autosaveGlobalSlug,
           data: { tenant: tenantB.id },
-          draft: true,
+          version: 'draft',
           overrideAccess: false,
           user: tenantMemberUser,
         }),
@@ -531,7 +531,7 @@ test.suite('@payloadcms/plugin-multi-tenant', suiteOptions, () => {
       const ownDraft = await payload.create({
         collection: autosaveGlobalSlug,
         data: { tenant: tenantA.id, title: 'Tenant A draft' },
-        draft: true,
+        version: 'draft',
         overrideAccess: false,
         user: tenantMemberUser,
       })
@@ -542,7 +542,7 @@ test.suite('@payloadcms/plugin-multi-tenant', suiteOptions, () => {
         id: ownDraft.id,
         collection: autosaveGlobalSlug,
         data: { title: 'Updated Tenant A draft' },
-        draft: true,
+        version: 'draft',
         overrideAccess: false,
         user: tenantMemberUser,
       })
@@ -588,7 +588,7 @@ test.suite('@payloadcms/plugin-multi-tenant', suiteOptions, () => {
           id: ownDraft.id,
           collection: autosaveGlobalSlug,
           data: { tenant: null },
-          draft: true,
+          version: 'draft',
           overrideAccess: false,
           user: tenantMemberUser,
         }),

@@ -374,6 +374,7 @@ export const restoreVersionOperation = async <
       operation: 'restoreVersion',
       payload,
       preserveDraft: version === 'published',
+      publishedUpdatedAt: doc?.updatedAt as string | undefined,
       req: reqWithValidationLocale,
       select,
     })

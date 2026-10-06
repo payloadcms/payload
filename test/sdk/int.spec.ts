@@ -27,16 +27,19 @@ test.suite('@payloadcms/sdk', { config: './config.ts', resetBetweenTests: false 
       collection: 'posts',
       data: { number: 1, number2: 3 },
       overrideAccess: true,
+      version: 'published',
     })
     postTrash = await payload.create({
       collection: 'posts',
       data: { deletedAt: new Date().toISOString(), text: 'fixture-trash' },
       overrideAccess: true,
+      version: 'published',
     })
     await payload.create({
       collection: 'users',
       data: { ...testUserCredentials },
       overrideAccess: true,
+      version: 'published',
     })
     await payload.updateGlobal({
       slug: 'global',
@@ -401,7 +404,7 @@ test.suite('@payloadcms/sdk', { config: './config.ts', resetBetweenTests: false 
 
     await payload.updateGlobal({ slug: 'global', data: { text: 'new' }, overrideAccess: true })
 
-    const { version: result } = await sdk.restoreGlobalVersion({
+    const result = await sdk.restoreGlobalVersion({
       id: currentVersion.id,
       slug: 'global',
     })

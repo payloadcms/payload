@@ -299,7 +299,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
             : { [parentFieldName]: { equals: parentId } }
 
         const queryString = qs.stringify(
-          { limit: treeLimit, page: nextPage, sort: useAsTitle ?? 'id', where },
+          { limit: treeLimit, page: nextPage, sort: useAsTitle ?? 'id', version: 'latest', where },
           { addQueryPrefix: true },
         )
         const url = formatAdminURL({

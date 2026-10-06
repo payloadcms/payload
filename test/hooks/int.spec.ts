@@ -828,6 +828,7 @@ test.suite('Hooks', { config: './config.ts', resetBetweenTests: false }, () => {
         collection: beforeOperationSlug,
         data: {},
         overrideAccess: true,
+        version: 'published',
       })
 
       await payload.findByID({

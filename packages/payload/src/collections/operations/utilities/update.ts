@@ -561,8 +561,9 @@ export const updateDocument = async <
       operation: 'update',
       payload,
       preserveDraft,
+      publishedUpdatedAt: docWithLocales.updatedAt as string | undefined,
       req,
-      unpublish: unpublishAllLocales || (!isSavingDraft && data._status === 'draft'),
+      unpublish: unpublishAllLocales,
     })
   }
 

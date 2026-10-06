@@ -43,6 +43,7 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
         password: 'test',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     post = await payload.create({
@@ -51,6 +52,7 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
         text: 'some post',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     await payload.create({
@@ -59,6 +61,7 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
         text: 'some page',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     await payload.updateGlobal({
@@ -262,6 +265,7 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
         text: 'some post',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     // Give locking ownership to another user
@@ -279,6 +283,7 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
         },
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     try {
@@ -352,6 +357,7 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
         text: 'new post 3',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     // Give locking ownership to another user
@@ -369,6 +375,7 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
         },
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     try {

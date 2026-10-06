@@ -218,7 +218,7 @@ test.suite(
           overrideAccess: true,
           collection: 'posts',
           data: { title: 'versioned-doc', _status: 'draft' },
-          draft: true,
+          version: 'draft',
         })
 
         expect(doc).toBeDefined()
@@ -238,7 +238,7 @@ test.suite(
           overrideAccess: true,
           collection: 'posts',
           data: { title: 'draft-original', _status: 'draft' },
-          draft: true,
+          version: 'draft',
         })
 
         // This triggers updateOne (has getPrimaryDb) + createVersion (now fixed)
@@ -247,7 +247,7 @@ test.suite(
           collection: 'posts',
           id: doc.id,
           data: { title: 'draft-updated' },
-          draft: true,
+          version: 'draft',
         })
 
         expect(updated.title).toBe('draft-updated')
@@ -266,7 +266,7 @@ test.suite(
           overrideAccess: true,
           collection: 'posts',
           data: { title: 'restore-v1', _status: 'draft' },
-          draft: true,
+          version: 'draft',
         })
 
         await (payload as any).update({
@@ -274,7 +274,7 @@ test.suite(
           collection: 'posts',
           id: doc.id,
           data: { title: 'restore-v2' },
-          draft: true,
+          version: 'draft',
         })
 
         const versions = await (payload as any).findVersions({

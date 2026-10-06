@@ -17,6 +17,7 @@ test.suite('Locked documents - bulk delete', { config: './config.ts' }, () => {
         password: 'test',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     const otherUser = await payload.create({
@@ -26,6 +27,7 @@ test.suite('Locked documents - bulk delete', { config: './config.ts' }, () => {
         password: 'test',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     const lockedPost = await payload.create({
@@ -34,6 +36,7 @@ test.suite('Locked documents - bulk delete', { config: './config.ts' }, () => {
         text: 'bulk delete locked post',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     const unlockedPost = await payload.create({
@@ -42,6 +45,7 @@ test.suite('Locked documents - bulk delete', { config: './config.ts' }, () => {
         text: 'bulk delete unlocked post',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     // Give locking ownership of one of the two documents to another user
@@ -59,6 +63,7 @@ test.suite('Locked documents - bulk delete', { config: './config.ts' }, () => {
         },
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     // The other document is locked by the user performing the delete, so it is not blocked. It
@@ -77,6 +82,7 @@ test.suite('Locked documents - bulk delete', { config: './config.ts' }, () => {
         },
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     const { docs, errors } = await payload.delete({

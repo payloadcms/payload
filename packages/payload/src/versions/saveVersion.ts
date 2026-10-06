@@ -27,6 +27,11 @@ type Args<T extends JsonObject = JsonObject> = {
   operation?: 'create' | 'restoreVersion' | 'update'
   payload: Payload
   preserveDraft?: boolean
+  /**
+   * `updatedAt` of the published document before this write. A latest version with the same
+   * inner `updatedAt` is the published snapshot itself, not a pending draft.
+   */
+  publishedUpdatedAt?: string
   req?: PayloadRequest
   returning?: boolean
   select?: SelectType
@@ -52,6 +57,7 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
   operation,
   payload,
   preserveDraft,
+  publishedUpdatedAt,
   req,
   returning,
   select,
@@ -121,13 +127,21 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
           where,
         })
 
-    hasActiveDraft = versions.docs.length > 0
+    const [latestDraftVersion] = versions.docs
+    const isPublishedSnapshot = Boolean(
+      publishedUpdatedAt &&
+        latestDraftVersion?.version?.updatedAt &&
+        new Date(latestDraftVersion.version.updatedAt).getTime() ===
+          new Date(publishedUpdatedAt).getTime(),
+    )
+
+    hasActiveDraft = Boolean(latestDraftVersion) && !isPublishedSnapshot
 
     if (hasActiveDraft) {
       await syncPublishedLocalesToDraft({
         collection,
         docWithLocales: versionData,
-        draftVersion: versions.docs[0]!,
+        draftVersion: latestDraftVersion!,
         global,
         payload,
         req,

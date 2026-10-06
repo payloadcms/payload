@@ -31,7 +31,7 @@ export const updateHandler: PayloadHandler = async (req) => {
 
   let message = req.t('general:updatedSuccessfully')
 
-  if (version === 'draft') {
+  if (version === 'draft' && req.data?._status !== 'published') {
     message = req.t('version:draftSavedSuccessfully')
   }
   if (autosave) {

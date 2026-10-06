@@ -72,7 +72,7 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
           const response = await fetch(
             formatAdminURL({
               apiRoute: config.routes.api,
-              path: `/${hierarchyCollectionSlug}/${currentId}`,
+              path: `/${hierarchyCollectionSlug}/${currentId}?version=latest`,
               serverURL: config.serverURL,
             }),
             { credentials: 'include' },

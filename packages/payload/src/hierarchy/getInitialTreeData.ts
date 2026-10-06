@@ -127,6 +127,7 @@ export const getInitialTreeData = async ({
         page: currentPage,
         sort: useAsTitle,
         user,
+        version: 'latest',
         where: whereClause,
       })
 

@@ -54,6 +54,7 @@ test.suite('@payloadcms/plugin-seo', { config: './config.ts' }, () => {
       data: {},
       file,
       overrideAccess: true,
+      version: 'published',
     })
 
     page = await payload.create({
@@ -68,6 +69,7 @@ test.suite('@payloadcms/plugin-seo', { config: './config.ts' }, () => {
       },
       depth: 0,
       overrideAccess: true,
+      version: 'published',
     })
 
     readablePage = await payload.create({
@@ -81,6 +83,7 @@ test.suite('@payloadcms/plugin-seo', { config: './config.ts' }, () => {
       },
       depth: 0,
       overrideAccess: true,
+      version: 'published',
     })
 
     trashedPage = await payload.create({
@@ -95,6 +98,7 @@ test.suite('@payloadcms/plugin-seo', { config: './config.ts' }, () => {
       },
       depth: 0,
       overrideAccess: true,
+      version: 'published',
     })
 
     mediaDoc2 = await payload.create({
@@ -102,6 +106,7 @@ test.suite('@payloadcms/plugin-seo', { config: './config.ts' }, () => {
       data: {},
       file,
       overrideAccess: true,
+      version: 'published',
     })
   })
 

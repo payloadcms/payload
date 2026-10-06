@@ -60,6 +60,7 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
         group: {},
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     otherCategory = await payload.create({
@@ -69,6 +70,7 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
         group: {},
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     // create an upload
@@ -80,6 +82,7 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
       data: {},
       file: imageFile,
       overrideAccess: true,
+      version: 'published',
     })
 
     categoryID = idToString(category.id, payload)
@@ -853,17 +856,18 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
         collection: 'categories-versions',
         data: {},
         overrideAccess: true,
+        version: 'published',
       })
 
       const version = await payload.create({
         collection: 'versions',
         data: { categoryVersion: category.id, title: 'version' },
         overrideAccess: true,
+        version: 'published',
       })
 
       const res = await payload.find({
         collection: 'categories-versions',
-        draft: false,
         overrideAccess: true,
       })
 
@@ -877,17 +881,18 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
         collection: 'categories-versions',
         data: {},
         overrideAccess: true,
+        version: 'published',
       })
 
       const version = await payload.create({
         collection: 'versions',
         data: { categoryVersions: [category.id], title: 'version' },
         overrideAccess: true,
+        version: 'published',
       })
 
       const res = await payload.find({
         collection: 'categories-versions',
-        draft: false,
         overrideAccess: true,
       })
 
@@ -911,7 +916,7 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
 
       const res = await payload.find({
         collection: 'categories-versions',
-        draft: true,
+        version: 'latest',
         overrideAccess: true,
       })
 
@@ -924,14 +929,14 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
       const category = await payload.create({
         collection: 'categories-versions',
         data: { _status: 'draft' },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
       const version = await payload.create({
         collection: 'versions',
         data: { _status: 'draft', categoryVersion: category.id, title: 'original-title' },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
@@ -939,13 +944,13 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
         id: version.id,
         collection: 'versions',
         data: { title: 'updated-title' },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
       const res = await payload.find({
         collection: 'categories-versions',
-        draft: true,
+        version: 'latest',
         overrideAccess: true,
       })
 
@@ -970,7 +975,7 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
 
       const res = await payload.find({
         collection: 'categories-versions',
-        draft: true,
+        version: 'latest',
         overrideAccess: true,
       })
 
@@ -1398,14 +1403,14 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
       const category = await payload.create({
         collection: 'categories-versions',
         data: { _status: 'draft' },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
       const version = await payload.create({
         collection: 'versions',
         data: { _status: 'draft', categoryVersion: category.id, title: 'original-title' },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
@@ -1413,12 +1418,12 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
         id: version.id,
         collection: 'versions',
         data: { title: 'updated-title' },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
       const query = `query {
-        CategoriesVersions(draft: true) {
+        CategoriesVersions(version: latest) {
               docs {
                   relatedVersions(
                     limit: 1

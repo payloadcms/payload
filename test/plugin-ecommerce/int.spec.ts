@@ -927,6 +927,7 @@ test.suite('ecommerce', { config: './config.ts', resetBetweenTests: false }, () 
           password: 'test123',
         },
         overrideAccess: true,
+        version: 'published',
       })
 
       await restClient.login({
@@ -1013,6 +1014,7 @@ test.suite('ecommerce', { config: './config.ts', resetBetweenTests: false }, () 
           password: 'test123',
         },
         overrideAccess: true,
+        version: 'published',
       })
 
       await restClient.login({
@@ -1255,6 +1257,7 @@ test.suite('ecommerce', { config: './config.ts', resetBetweenTests: false }, () 
           password: 'test123',
         },
         overrideAccess: true,
+        version: 'published',
       })
 
       await restClient.login({
@@ -1356,6 +1359,7 @@ test.suite('ecommerce', { config: './config.ts', resetBetweenTests: false }, () 
           password: 'test123',
         },
         overrideAccess: true,
+        version: 'published',
       })
 
       // Login as the user

@@ -28,7 +28,6 @@ type Config = {
   }
   globalsSelect: { settings: { title?: boolean } }
   locale: 'en' | 'fr'
-  strictDraftTypes: true
 } & Omit<
   UntypedPayloadTypes,
   'collections' | 'collectionsSelect' | 'globals' | 'globalsSelect' | 'locale'

@@ -280,7 +280,6 @@ export interface Config {
     menu: MenuInput;
     settings: SettingInput;
   };
-  strictDraftTypes: true;
   user: FallbackUser | User;
   jobs: {
     tasks: unknown;

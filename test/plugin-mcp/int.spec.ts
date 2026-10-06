@@ -525,7 +525,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         expect(createDocuments.inputSchema.properties.documents.items.required).toContain('data')
         expect(createDocuments.inputSchema.properties.documents.items.properties.file).toBeDefined()
         expect(createDocuments.inputSchema.properties.depth).toBeDefined()
-        expect(createDocuments.inputSchema.properties.draft).toBeDefined()
+        expect(createDocuments.inputSchema.properties.version).toBeDefined()
         expect(createDocuments.inputSchema.properties.fallbackLocale).toBeDefined()
         expect(createDocuments.inputSchema.properties.locale).toBeDefined()
         expect(createDocuments.inputSchema.properties.returning).toMatchObject({
@@ -725,8 +725,8 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         expect(updateToolSchema.inputSchema.properties.select.description).toContain(
           "Optional: define exactly which fields you'd like to return in the response",
         )
-        expect(updateToolSchema.inputSchema.properties.publishAllLocales).toBeDefined()
-        expect(updateToolSchema.inputSchema.properties.publishAllLocales.type).toBe('boolean')
+        expect(updateToolSchema.inputSchema.properties.version).toBeDefined()
+        expect(updateToolSchema.inputSchema.properties.publishAllLocales).toBeUndefined()
         expect(updateToolSchema.inputSchema.properties.file).toBeDefined()
         expect(updateToolSchema.inputSchema.properties.filePath).toBeUndefined()
         expect(updateToolSchema.inputSchema.properties.overwriteExistingFiles).toBeUndefined()
@@ -962,7 +962,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           arguments: {
             slug: 'posts',
             documents: [{ data: { content: 'Incomplete draft' } }],
-            draft: true,
+            version: 'draft',
             returning: true,
           },
           name: 'createDocuments',
@@ -998,6 +998,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
               { data: { content: 'Missing the required title' } },
               { data: { content: 'Third bulk content', title: 'Third bulk post' } },
             ],
+            version: 'published',
           },
           name: 'createDocuments',
         })
@@ -1274,7 +1275,6 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
               _status: 'published',
               title: 'Published through MCP',
             },
-            draft: false,
             locale: 'en',
           },
         })
@@ -1286,7 +1286,6 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         const storedPost = await payload.findByID({
           id: createdPost.id,
           collection: 'posts',
-          draft: false,
           locale: 'all',
           overrideAccess: true,
         })
@@ -1386,6 +1385,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             title: 'Test Post for Finding',
           },
           overrideAccess: true,
+          version: 'published',
         })
         createdPostIDs.push(post.id)
 
@@ -1423,6 +1423,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             title: 'Select Test Post',
           },
           overrideAccess: true,
+          version: 'published',
         })
         const apiKey = await getApiKey()
         const client = await mcp.connect(apiKey)
@@ -1816,7 +1817,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           await payload.delete({ id: page.id, collection: 'pages', overrideAccess: true })
         }
       })
-      it('should forward publishAllLocales when updating a document', async ({
+      it('should publish only the requested locale when updating a document', async ({
         mcp,
         getApiKey,
         payload,
@@ -1826,7 +1827,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           data: {
             title: 'English draft title',
           },
-          draft: true,
+          version: 'draft',
           locale: 'en',
           overrideAccess: true,
         })
@@ -1835,7 +1836,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             id: post.id,
             collection: 'posts',
             data: { title: 'Spanish draft title' },
-            draft: true,
+            version: 'draft',
             locale: 'es',
             overrideAccess: true,
           })
@@ -1849,23 +1850,21 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
                 _status: 'published',
                 title: 'Published English title',
               },
-              draft: false,
               locale: 'en',
-              publishAllLocales: false,
+              version: 'draft',
             },
             name: 'updateDocument',
           })
           const publishedPost = await payload.findByID({
             id: post.id,
             collection: 'posts',
-            draft: false,
             locale: 'all',
             overrideAccess: true,
           })
           const spanishDraft = await payload.findByID({
             id: post.id,
             collection: 'posts',
-            draft: true,
+            version: 'latest',
             locale: 'es',
             overrideAccess: true,
           })
@@ -2042,6 +2041,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             title: 'Where Object Update Match',
           },
           overrideAccess: true,
+          version: 'published',
         })
         const excluded = await payload.create({
           collection: 'posts',
@@ -2050,6 +2050,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             title: 'Where Object Update Excluded',
           },
           overrideAccess: true,
+          version: 'published',
         })
         const apiKey = await getApiKey()
         const client = await mcp.connect(apiKey)
@@ -2451,6 +2452,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             title: 'Test Post for Finding',
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         onTestFinished(async () => {
@@ -3007,6 +3009,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             content: 'Content for minified test.',
           },
           overrideAccess: true,
+          version: 'published',
         })
         createdIDs.push(doc.id)
 
@@ -3060,6 +3063,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             content: 'Content for findByID minified test.',
           },
           overrideAccess: true,
+          version: 'published',
         })
         createdIDs.push(doc.id)
 
@@ -3172,6 +3176,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             title: 'English Post',
           },
           overrideAccess: true,
+          version: 'published',
         })
         await payload.update({
           id: post.id,
@@ -3209,6 +3214,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             title: 'English Title',
           },
           overrideAccess: true,
+          version: 'published',
         })
         await payload.update({
           id: post.id,
@@ -3264,6 +3270,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           },
           locale: 'en',
           overrideAccess: true,
+          version: 'published',
         })
         // Try to find in French (which doesn't exist)
         const apiKey = await getApiKey()

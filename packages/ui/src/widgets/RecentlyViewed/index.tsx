@@ -117,6 +117,7 @@ async function getEnrichedItems({
           overrideAccess: false,
           pagination: false,
           user,
+          version: 'latest',
           where: { id: { in: ids } },
         })
 

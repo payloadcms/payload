@@ -1419,17 +1419,6 @@ type RootTypeScriptConfig = {
       jsonSchema: JSONSchema4
     }) => JSONSchema4
   >
-
-  /**
-   * Enable strict type safety for draft operations. When enabled, draft selectors are forbidden
-   * on collections without drafts, and `find` results with `version: 'draft'` or `version: 'latest'` type user fields as optional.
-   * These checks use the generated types.
-   *
-   * Set to false to opt out. Regenerate types after changing this option.
-   *
-   * @default true
-   */
-  strictDraftTypes?: boolean
 }
 
 /**
@@ -1824,9 +1813,9 @@ type SanitizedGraphQLConfig = Omit<
 
 type SanitizedTypeScriptConfig = Omit<
   RootTypeScriptConfig,
-  'autoGenerate' | 'outputFile' | 'strictDraftTypes'
+  'autoGenerate' | 'outputFile'
 > &
-  Required<Pick<RootTypeScriptConfig, 'autoGenerate' | 'outputFile' | 'strictDraftTypes'>>
+  Required<Pick<RootTypeScriptConfig, 'autoGenerate' | 'outputFile'>>
 
 export interface SanitizedConfig
   extends Omit<

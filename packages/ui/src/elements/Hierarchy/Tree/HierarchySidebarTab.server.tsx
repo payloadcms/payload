@@ -132,6 +132,7 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
             depth: 0,
             overrideAccess: false,
             user,
+            version: 'latest',
           })
 
           const parentId = node?.[parentFieldName]

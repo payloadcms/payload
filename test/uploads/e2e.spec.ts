@@ -242,6 +242,7 @@ describe('Uploads', () => {
         limit: 1,
         pagination: false,
         overrideAccess: true,
+        version: 'latest',
       })
     ).docs[0]
 

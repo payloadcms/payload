@@ -17,6 +17,7 @@ export const seed = async (_payload: Payload) => {
             roles: ['is_admin', 'is_user'],
           },
           overrideAccess: true,
+          version: 'published',
         }),
       () =>
         _payload.create({
@@ -28,6 +29,7 @@ export const seed = async (_payload: Payload) => {
             roles: ['is_user'],
           },
           overrideAccess: true,
+          version: 'published',
         }),
       () =>
         _payload.create({
@@ -36,6 +38,7 @@ export const seed = async (_payload: Payload) => {
             text: 'example page',
           },
           overrideAccess: true,
+          version: 'published',
         }),
       () =>
         _payload.create({
@@ -44,6 +47,7 @@ export const seed = async (_payload: Payload) => {
             text: 'example post',
           },
           overrideAccess: true,
+          version: 'published',
         }),
       () =>
         _payload.create({
@@ -53,6 +57,7 @@ export const seed = async (_payload: Payload) => {
             fieldB: 'Initial value B',
           },
           overrideAccess: true,
+          version: 'published',
         }),
       () =>
         _payload.create({
@@ -62,6 +67,7 @@ export const seed = async (_payload: Payload) => {
             fieldB: 'Initial value B',
           },
           overrideAccess: true,
+          version: 'published',
         }),
     ],
     false,

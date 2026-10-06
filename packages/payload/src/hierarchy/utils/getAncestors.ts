@@ -91,6 +91,7 @@ export async function getAncestors({
             [titleFieldName]: true,
           },
           user,
+          version: 'latest',
         })
         cache[cacheKey] = doc
       } catch {

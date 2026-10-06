@@ -238,6 +238,7 @@ function injectCollectionSpecificValidation({
           overrideAccess: overrideAccess ?? false,
           req,
           select: { [typeFieldName]: true },
+          version: 'latest',
         })
       } catch {
         return `Hierarchy item with ID ${newID} not found`

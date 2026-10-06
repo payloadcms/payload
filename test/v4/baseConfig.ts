@@ -598,7 +598,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       content: 'Initial content',
       title: 'Document With Many Versions',
     },
-    draft: true,
+    version: 'draft',
     overrideAccess: true,
   })
 
@@ -800,7 +800,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       title: 'Designing Database Indexes for Search',
       track: 'backend',
     },
-    draft: true,
+    version: 'draft',
     overrideAccess: true,
   })
 

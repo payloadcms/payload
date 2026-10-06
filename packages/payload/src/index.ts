@@ -601,9 +601,7 @@ export class BasePayload {
   ): Promise<
     PaginatedDocs<
       TVersion extends 'draft' | 'latest'
-        ? PayloadTypes extends { strictDraftTypes: true }
-          ? DraftTransformCollectionWithSelect<TSlug, TSelect>
-          : TransformCollectionWithSelect<TSlug, TSelect>
+        ? DraftTransformCollectionWithSelect<TSlug, TSelect>
         : TransformCollectionWithSelect<TSlug, TSelect>
     >
   > => {

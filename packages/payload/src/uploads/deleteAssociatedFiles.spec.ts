@@ -26,6 +26,7 @@ describe('deleteAssociatedFiles', () => {
 
   const getArgs = (doc: Record<string, unknown>) => ({
     collectionConfig: {
+      flattenedFields: [],
       upload: {
         staticDir,
       },

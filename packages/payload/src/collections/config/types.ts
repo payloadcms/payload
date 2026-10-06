@@ -96,13 +96,8 @@ export type CollectionsWithoutDrafts = {
 }[CollectionSlug]
 
 /** Selects the document snapshot when drafts are enabled. */
-export type VersionFromCollectionSlug<TSlug extends CollectionSlug> = GeneratedTypes extends {
-  strictDraftTypes: true
-}
-  ? TSlug extends CollectionsWithoutDrafts
-    ? { version?: 'published' }
-    : { version?: DocumentVersion }
-  : { version?: DocumentVersion }
+export type VersionFromCollectionSlug<TSlug extends CollectionSlug> =
+  TSlug extends CollectionsWithoutDrafts ? { version?: 'published' } : { version?: DocumentVersion }
 
 export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
   TypedAuthOperations[TSlug]

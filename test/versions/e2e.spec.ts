@@ -298,7 +298,20 @@ describe('Versions', () => {
       await page.locator('.restore-version__restore-as-draft-button').click()
       await page.locator('button:has-text("Confirm")').click()
       await page.waitForURL(savedDocURL)
-      await expect(page.locator('#field-title')).toHaveValue('v1')
+      await expect(page.locator('#field-title')).toHaveValue('v2')
+
+      const docID = new URL(savedDocURL).pathname.split('/').pop()!
+
+      await expect(async () => {
+        const { docs: publishedDocs } = await payload.find({
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+          version: 'published',
+          where: { id: { equals: docID } },
+        })
+
+        expect(publishedDocs[0]?.title).toBe('v1')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
 
     test('should restore version as draft', async () => {
@@ -542,7 +555,7 @@ describe('Versions', () => {
         // Important: assert that depth is 0 in this request
         formatAdminURL({
           apiRoute: '/api',
-          path: `/autosave-posts/${docID}?autosave=true&depth=0&version=draft&fallback-locale=null&locale=en`,
+          path: `/autosave-posts/${docID}?autosave=true&depth=0&fallback-locale=null&locale=en&version=draft`,
           serverURL,
         }),
         async () => {
@@ -1045,7 +1058,7 @@ describe('Versions', () => {
     })
 
     describe.skip('A11y', () => {
-      test('Versions list view should have no accessibility violations', async (_fixtures, testInfo) => {
+      test('Versions list view should have no accessibility violations', async ({}, testInfo) => {
         await page.goto(url.list)
         const firstRowLink = page.locator('tbody tr .cell-title a').first()
         const docHref = await firstRowLink.getAttribute('href')
@@ -1063,7 +1076,7 @@ describe('Versions', () => {
         expect(scanResults.violations.length).toBe(0)
       })
 
-      test('Versions list view elements have focus indicators', async (_fixtures, testInfo) => {
+      test('Versions list view elements have focus indicators', async ({}, testInfo) => {
         await page.goto(url.list)
         const firstRowLink = page.locator('tbody tr .cell-title a').first()
         const docHref = await firstRowLink.getAttribute('href')
@@ -1082,34 +1095,31 @@ describe('Versions', () => {
         expect(scanResults.elementsWithoutIndicators).toBe(0)
       })
 
-      test.fixme(
-        'Version view should have no accessibility violations',
-        async (_fixtures, testInfo) => {
-          await page.goto(url.list)
-          const firstRowLink = page.locator('tbody tr .cell-title a').first()
-          const docHref = await firstRowLink.getAttribute('href')
-          await page.goto(`${serverURL}${docHref}/versions`)
-          await expect(() => {
-            expect(page.url()).toMatch(/\/versions/)
-          }).toPass({ intervals: [100], timeout: 10000 })
+      test.fixme('Version view should have no accessibility violations', async ({}, testInfo) => {
+        await page.goto(url.list)
+        const firstRowLink = page.locator('tbody tr .cell-title a').first()
+        const docHref = await firstRowLink.getAttribute('href')
+        await page.goto(`${serverURL}${docHref}/versions`)
+        await expect(() => {
+          expect(page.url()).toMatch(/\/versions/)
+        }).toPass({ intervals: [100], timeout: 10000 })
 
-          const versionLink = page.locator('.cell-updatedAt a').first()
-          const versionHref = await versionLink.getAttribute('href')
-          await page.goto(`${serverURL}${versionHref}`)
+        const versionLink = page.locator('.cell-updatedAt a').first()
+        const versionHref = await versionLink.getAttribute('href')
+        await page.goto(`${serverURL}${versionHref}`)
 
-          await page.locator('.view-version').waitFor()
+        await page.locator('.view-version').waitFor()
 
-          const scanResults = await runAxeScan({
-            include: ['.view-version'],
-            page,
-            testInfo,
-          })
+        const scanResults = await runAxeScan({
+          include: ['.view-version'],
+          page,
+          testInfo,
+        })
 
-          expect(scanResults.violations.length).toBe(0)
-        },
-      )
+        expect(scanResults.violations.length).toBe(0)
+      })
 
-      test('Version view elements have focus indicators', async (_fixtures, testInfo) => {
+      test('Version view elements have focus indicators', async ({}, testInfo) => {
         await page.goto(url.list)
         const firstRowLink = page.locator('tbody tr .cell-title a').first()
         const docHref = await firstRowLink.getAttribute('href')
@@ -1306,12 +1316,12 @@ describe('Versions', () => {
         })
         expect(draftDocs[0]!._status).toStrictEqual('draft')
 
-        const { docs: mainDocs } = await payload.find({
+        const { docs: publishedDocs } = await payload.find({
           collection: draftWithUploadCollectionSlug,
           overrideAccess: true,
           where: { id: { equals: duplicatedDocID } },
         })
-        expect(mainDocs[0]!._status).toStrictEqual('draft')
+        expect(publishedDocs).toHaveLength(0)
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
   })
@@ -2801,6 +2811,7 @@ describe('Versions', () => {
         limit: 3,
         overrideAccess: true,
         sort: 'createdAt',
+        version: 'latest',
       })
 
       await expect(

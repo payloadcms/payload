@@ -111,6 +111,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
           select: {
             [fieldToSearch]: true,
           },
+          version: 'latest',
           where,
         }
 
@@ -269,7 +270,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
     async (id, relation) => {
       if (!errorLoading && id !== 'null' && id && relation) {
         const response = await fetch(
-          formatAdminURL({ apiRoute: api, path: `/${relation}/${id}?depth=0` }),
+          formatAdminURL({ apiRoute: api, path: `/${relation}/${id}?depth=0&version=latest` }),
           {
             credentials: 'include',
             headers: {

@@ -71,6 +71,7 @@ export const seed = async (_payload: Payload) => {
           },
           depth: 0,
           overrideAccess: true,
+          version: 'draft',
         })
       }),
       () =>

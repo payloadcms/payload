@@ -66,6 +66,7 @@ export const generateLabelFromValue = async ({
         select: {
           [useAsTitle]: true,
         },
+        version: 'latest',
       })
 
       if (fetchedDoc?.[useAsTitle]) {

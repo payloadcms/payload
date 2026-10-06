@@ -60,6 +60,7 @@ export async function getHierarchyAncestry({
         depth: 0,
         overrideAccess: false,
         user,
+        version: 'latest',
       })
 
       if (item) {

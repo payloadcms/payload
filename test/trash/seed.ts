@@ -14,6 +14,7 @@ export const seed = async (payload: Payload) => {
       roles: ['is_admin', 'is_user'],
     },
     overrideAccess: true,
+    version: 'published',
   })
 
   await payload.create({
@@ -27,6 +28,7 @@ export const seed = async (payload: Payload) => {
       roles: ['is_user'],
     },
     overrideAccess: true,
+    version: 'published',
   })
 
   await payload.create({
@@ -37,5 +39,6 @@ export const seed = async (payload: Payload) => {
       title: 'Page',
     },
     overrideAccess: true,
+    version: 'published',
   })
 }

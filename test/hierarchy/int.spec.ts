@@ -65,12 +65,12 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
   test.describe('Tree Data Generation', () => {
     test.beforeEach(async ({ payload }) => {
       // Clear existing data before each test
-      await payload.delete({ collection: 'organizations', where: {}, overrideAccess: true })
+      await payload.delete({ collection: 'organizations', overrideAccess: true, where: {} })
     })
 
     test.afterEach(async ({ payload }) => {
       // Clean up data after each test
-      await payload.delete({ collection: 'organizations', where: {}, overrideAccess: true })
+      await payload.delete({ collection: 'organizations', overrideAccess: true, where: {} })
     })
 
     test('should compute correct paths for root document', async ({ payload }) => {
@@ -134,24 +134,28 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         collection: 'organizations',
         data: { parent: null, title: 'Root' },
         overrideAccess: true,
+        version: 'published',
       })
 
       const anotherRoot = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Another Root' },
         overrideAccess: true,
+        version: 'published',
       })
 
       const childPage = await payload.create({
         collection: 'organizations',
         data: { parent: rootPage.id, title: 'Child' },
         overrideAccess: true,
+        version: 'published',
       })
 
       const grandchildPage = await payload.create({
         collection: 'organizations',
         data: { parent: childPage.id, title: 'Grandchild' },
         overrideAccess: true,
+        version: 'published',
       })
 
       // Move child to another root
@@ -185,12 +189,14 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         collection: 'organizations',
         data: { parent: null, title: 'Root' },
         overrideAccess: true,
+        version: 'published',
       })
 
       const childPage = await payload.create({
         collection: 'organizations',
         data: { parent: rootPage.id, title: 'Child' },
         overrideAccess: true,
+        version: 'published',
       })
 
       // Update root title
@@ -229,12 +235,12 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
 
       // Move child to root
       const updatedChild = await payload.update({
-        version: 'draft',
         id: childPage.id,
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
         data: { parent: null },
         overrideAccess: true,
+        version: 'draft',
       })
 
       expect(updatedChild._h_slugPath).toBe('child')
@@ -244,11 +250,11 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
 
   test.describe('Circular Reference Prevention', () => {
     test.beforeEach(async ({ payload }) => {
-      await payload.delete({ collection: 'organizations', where: {}, overrideAccess: true })
+      await payload.delete({ collection: 'organizations', overrideAccess: true, where: {} })
     })
 
     test.afterEach(async ({ payload }) => {
-      await payload.delete({ collection: 'organizations', where: {}, overrideAccess: true })
+      await payload.delete({ collection: 'organizations', overrideAccess: true, where: {} })
     })
 
     test('should prevent self-referential parent', async ({ payload }) => {
@@ -260,11 +266,11 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
 
       await expect(
         payload.update({
-          version: 'draft',
           id: page.id,
           collection: 'organizations',
           data: { parent: page.id },
           overrideAccess: true,
+          version: 'draft',
         }),
       ).rejects.toThrow('Document cannot be its own parent')
     })
@@ -274,12 +280,14 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         collection: 'organizations',
         data: { parent: null, title: 'Parent' },
         overrideAccess: true,
+        version: 'published',
       })
 
       const childPage = await payload.create({
         collection: 'organizations',
         data: { parent: parentPage.id, title: 'Child' },
         overrideAccess: true,
+        version: 'published',
       })
 
       await expect(
@@ -297,18 +305,21 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         collection: 'organizations',
         data: { parent: null, title: 'Grandparent' },
         overrideAccess: true,
+        version: 'published',
       })
 
       const parent = await payload.create({
         collection: 'organizations',
         data: { parent: grandparent.id, title: 'Parent' },
         overrideAccess: true,
+        version: 'published',
       })
 
       const child = await payload.create({
         collection: 'organizations',
         data: { parent: parent.id, title: 'Child' },
         overrideAccess: true,
+        version: 'published',
       })
 
       await expect(
@@ -342,13 +353,13 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
 
       // Moving child from page1 to page2 should work
       const updated = await payload.update({
-        version: 'draft',
         id: child.id,
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
         data: { parent: page2.id },
         depth: 0,
         overrideAccess: true,
+        version: 'draft',
       })
 
       expect(updated.parent).toBe(page2.id)
@@ -359,12 +370,12 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
   test.describe('Query Patterns', () => {
     test.beforeEach(async ({ payload }) => {
       // Clear existing data before each test
-      await payload.delete({ collection: 'organizations', where: {}, overrideAccess: true })
+      await payload.delete({ collection: 'organizations', overrideAccess: true, where: {} })
     })
 
     test.afterEach(async ({ payload }) => {
       // Clean up data after each test
-      await payload.delete({ collection: 'organizations', where: {}, overrideAccess: true })
+      await payload.delete({ collection: 'organizations', overrideAccess: true, where: {} })
     })
 
     test('should find root documents by querying parent field', async ({ payload }) => {
@@ -372,20 +383,22 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         collection: 'organizations',
         data: { parent: null, title: 'Root' },
         overrideAccess: true,
+        version: 'published',
       })
 
       await payload.create({
         collection: 'organizations',
         data: { parent: root.id, title: 'Child 1' },
         overrideAccess: true,
+        version: 'published',
       })
 
       const roots = await payload.find({
         collection: 'organizations',
+        overrideAccess: true,
         where: {
           parent: { equals: null },
         },
-        overrideAccess: true,
       })
 
       expect(roots.docs).toHaveLength(1)
@@ -397,32 +410,36 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         collection: 'organizations',
         data: { parent: null, title: 'Root' },
         overrideAccess: true,
+        version: 'published',
       })
 
       const child1 = await payload.create({
         collection: 'organizations',
         data: { parent: root.id, title: 'Child 1' },
         overrideAccess: true,
+        version: 'published',
       })
 
       const child2 = await payload.create({
         collection: 'organizations',
         data: { parent: root.id, title: 'Child 2' },
         overrideAccess: true,
+        version: 'published',
       })
 
       await payload.create({
         collection: 'organizations',
         data: { parent: child1.id, title: 'Grandchild 1' },
         overrideAccess: true,
+        version: 'published',
       })
 
       const directChildren = await payload.find({
         collection: 'organizations',
+        overrideAccess: true,
         where: {
           parent: { equals: root.id },
         },
-        overrideAccess: true,
       })
 
       expect(directChildren.docs).toHaveLength(2)
@@ -434,11 +451,11 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
 
   test.describe('Custom Field Names', () => {
     test.beforeEach(async ({ payload }) => {
-      await payload.delete({ collection: 'departments', where: {}, overrideAccess: true })
+      await payload.delete({ collection: 'departments', overrideAccess: true, where: {} })
     })
 
     test.afterEach(async ({ payload }) => {
-      await payload.delete({ collection: 'departments', where: {}, overrideAccess: true })
+      await payload.delete({ collection: 'departments', overrideAccess: true, where: {} })
     })
 
     test('should use custom field names for path fields', async ({ payload }) => {
@@ -470,12 +487,12 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
   test.describe('Deep Nesting', () => {
     test.beforeEach(async ({ payload }) => {
       // Clear existing data before each test
-      await payload.delete({ collection: 'organizations', where: {}, overrideAccess: true })
+      await payload.delete({ collection: 'organizations', overrideAccess: true, where: {} })
     })
 
     test.afterEach(async ({ payload }) => {
       // Clean up data after each test
-      await payload.delete({ collection: 'organizations', where: {}, overrideAccess: true })
+      await payload.delete({ collection: 'organizations', overrideAccess: true, where: {} })
     })
 
     test('should handle deeply nested structures', async ({ payload }) => {
@@ -491,6 +508,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
             title: `Level ${i}`,
           },
           overrideAccess: true,
+          version: 'published',
         })
       }
 
@@ -515,6 +533,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         collection: 'organizations',
         data: { parent: null, title: 'Products' },
         overrideAccess: true,
+        version: 'published',
       })
 
       // Publish child
@@ -529,8 +548,8 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         id: child.id,
         collection: 'organizations',
         data: { title: 'Apparel' },
-        draft: true,
         overrideAccess: true,
+        version: 'draft',
       })
 
       // Move parent
@@ -552,7 +571,6 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         id: child.id,
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
-        draft: false,
         overrideAccess: true,
       })
 
@@ -563,8 +581,8 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         id: child.id,
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
-        draft: true,
         overrideAccess: true,
+        version: 'latest',
       })
 
       expect(draftChild._h_slugPath).toBe('categories/products/apparel')
@@ -587,6 +605,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         collection: 'organizations',
         data: { parent: null, title: 'Offerings' },
         overrideAccess: true,
+        version: 'published',
       })
 
       await payload.update({
@@ -612,8 +631,8 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         id: child.id,
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
-        draft: true,
         overrideAccess: true,
+        version: 'latest',
       })
 
       expect(draftChild._h_slugPath).toBe('offerings/services/consulting')
@@ -624,30 +643,30 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
       const parent1 = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Future' },
-        draft: true,
         overrideAccess: true,
+        version: 'draft',
       })
 
       const child = await payload.create({
         collection: 'organizations',
         data: { parent: parent1.id, title: 'Plans' },
-        draft: true,
         overrideAccess: true,
+        version: 'draft',
       })
 
       const newParent = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Roadmap' },
-        draft: true,
         overrideAccess: true,
+        version: 'draft',
       })
 
       await payload.update({
         id: parent1.id,
         collection: 'organizations',
         data: { parent: newParent.id },
-        draft: true,
         overrideAccess: true,
+        version: 'draft',
       })
 
       // Path is computed from current draft parent chain
@@ -655,8 +674,8 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         id: child.id,
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
-        draft: true,
         overrideAccess: true,
+        version: 'latest',
       })
 
       expect(draftChild._h_slugPath).toBe('roadmap/future/plans')
@@ -668,18 +687,21 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         collection: 'organizations',
         data: { parent: null, title: 'Electronics' },
         overrideAccess: true,
+        version: 'published',
       })
 
       const child = await payload.create({
         collection: 'organizations',
         data: { parent: parent.id, title: 'Phones' },
         overrideAccess: true,
+        version: 'published',
       })
 
       const newParent = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Tech' },
         overrideAccess: true,
+        version: 'published',
       })
 
       await payload.update({
@@ -711,6 +733,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
           parent: null,
         },
         overrideAccess: true,
+        version: 'published',
       })
 
       // Update parent for Spanish
@@ -720,6 +743,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         data: { name: 'Ropa' },
         locale: 'es',
         overrideAccess: true,
+        version: 'draft',
       })
 
       // Update parent for German
@@ -729,6 +753,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         data: { name: 'Kleidung' },
         locale: 'de',
         overrideAccess: true,
+        version: 'draft',
       })
 
       // Create child with default locale (en)
@@ -748,6 +773,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         data: { name: 'Camisas' },
         locale: 'es',
         overrideAccess: true,
+        version: 'draft',
       })
 
       // Update child for German
@@ -757,6 +783,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         data: { name: 'Hemden' },
         locale: 'de',
         overrideAccess: true,
+        version: 'draft',
       })
 
       // Fetch with locale: 'all' to get all locales
@@ -766,6 +793,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         context: { computeHierarchyPaths: true },
         locale: 'all',
         overrideAccess: true,
+        version: 'latest',
       })
 
       // Verify paths are localized
@@ -791,6 +819,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
           parent: null,
         },
         overrideAccess: true,
+        version: 'published',
       })
 
       await payload.update({
@@ -799,6 +828,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         data: { name: 'Ropa' },
         locale: 'es',
         overrideAccess: true,
+        version: 'draft',
       })
 
       await payload.update({
@@ -807,6 +837,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         data: { name: 'Kleidung' },
         locale: 'de',
         overrideAccess: true,
+        version: 'draft',
       })
 
       // Create child with default locale (en)
@@ -825,6 +856,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         data: { name: 'Camisas' },
         locale: 'es',
         overrideAccess: true,
+        version: 'draft',
       })
 
       await payload.update({
@@ -833,6 +865,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         data: { name: 'Hemden' },
         locale: 'de',
         overrideAccess: true,
+        version: 'draft',
       })
 
       // Create new parent with default locale (en)
@@ -851,6 +884,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         data: { name: 'Indumentaria' },
         locale: 'es',
         overrideAccess: true,
+        version: 'draft',
       })
 
       await payload.update({
@@ -859,6 +893,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         data: { name: 'Bekleidung' },
         locale: 'de',
         overrideAccess: true,
+        version: 'draft',
       })
 
       // Move parent under newParent
@@ -867,6 +902,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         collection: 'products',
         data: { parent: newParent.id },
         overrideAccess: true,
+        version: 'draft',
       })
 
       // Fetch child with all locales
@@ -876,6 +912,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         context: { computeHierarchyPaths: true },
         locale: 'all',
         overrideAccess: true,
+        version: 'latest',
       })
 
       expect(updatedChild._h_slugPath).toEqual({
@@ -900,6 +937,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
           parent: null,
         },
         overrideAccess: true,
+        version: 'published',
       })
 
       await payload.update({
@@ -908,6 +946,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         data: { name: 'Ropa' },
         locale: 'es',
         overrideAccess: true,
+        version: 'draft',
       })
 
       await payload.update({
@@ -916,6 +955,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         data: { name: 'Kleidung' },
         locale: 'de',
         overrideAccess: true,
+        version: 'draft',
       })
 
       // Create child with default locale (en)
@@ -934,6 +974,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         data: { name: 'Camisas' },
         locale: 'es',
         overrideAccess: true,
+        version: 'draft',
       })
 
       await payload.update({
@@ -942,6 +983,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         data: { name: 'Hemden' },
         locale: 'de',
         overrideAccess: true,
+        version: 'draft',
       })
 
       // Update parent title for all locales
@@ -951,6 +993,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         data: { name: 'Apparel' },
         locale: 'en',
         overrideAccess: true,
+        version: 'draft',
       })
 
       await payload.update({
@@ -959,6 +1002,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         data: { name: 'Indumentaria' },
         locale: 'es',
         overrideAccess: true,
+        version: 'draft',
       })
 
       await payload.update({
@@ -967,6 +1011,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         data: { name: 'Bekleidung' },
         locale: 'de',
         overrideAccess: true,
+        version: 'draft',
       })
 
       // Fetch child with all locales
@@ -976,6 +1021,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         context: { computeHierarchyPaths: true },
         locale: 'all',
         overrideAccess: true,
+        version: 'latest',
       })
 
       expect(updatedChild._h_slugPath).toEqual({
@@ -1000,22 +1046,25 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
           parent: null,
         },
         overrideAccess: true,
+        version: 'published',
       })
 
       await payload.update({
         id: parent.id,
         collection: 'products',
-        data: { name: 'Ropa' },
+        data: { name: 'Ropa', _status: 'published' },
         locale: 'es',
         overrideAccess: true,
+        version: 'draft',
       })
 
       await payload.update({
         id: parent.id,
         collection: 'products',
-        data: { name: 'Kleidung' },
+        data: { name: 'Kleidung', _status: 'published' },
         locale: 'de',
         overrideAccess: true,
+        version: 'draft',
       })
 
       // Create child with default locale (en)
@@ -1034,6 +1083,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         data: { name: 'Camisas' },
         locale: 'es',
         overrideAccess: true,
+        version: 'draft',
       })
 
       await payload.update({
@@ -1042,6 +1092,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         data: { name: 'Hemden' },
         locale: 'de',
         overrideAccess: true,
+        version: 'draft',
       })
 
       // Publish
@@ -1049,9 +1100,9 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         id: child.id,
         collection: 'products',
         data: { _status: 'published' },
-        draft: false,
-        publishAllLocales: true,
+        locale: 'all',
         overrideAccess: true,
+        version: 'draft',
       })
 
       // Create draft with different title for each locale
@@ -1067,9 +1118,9 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
           data: {
             name: titleMap[locale],
           },
-          draft: true,
           locale,
           overrideAccess: true,
+          version: 'draft',
         })
       }
 
@@ -1081,22 +1132,25 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
           parent: null,
         },
         overrideAccess: true,
+        version: 'published',
       })
 
       await payload.update({
         id: newParent.id,
         collection: 'products',
-        data: { name: 'Indumentaria' },
+        data: { name: 'Indumentaria', _status: 'published' },
         locale: 'es',
         overrideAccess: true,
+        version: 'draft',
       })
 
       await payload.update({
         id: newParent.id,
         collection: 'products',
-        data: { name: 'Bekleidung' },
+        data: { name: 'Bekleidung', _status: 'published' },
         locale: 'de',
         overrideAccess: true,
+        version: 'draft',
       })
 
       // Move parent under newParent
@@ -1127,9 +1181,9 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         id: child.id,
         collection: 'products',
         context: { computeHierarchyPaths: true },
-        draft: true,
         locale: 'all',
         overrideAccess: true,
+        version: 'latest',
       })
 
       expect(draftChild._h_slugPath).toEqual({
@@ -1147,9 +1201,9 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
           name: 'Future',
           parent: null,
         },
-        draft: true,
         locale: 'en',
         overrideAccess: true,
+        version: 'draft',
       })
 
       // Update other locales for parent
@@ -1157,17 +1211,17 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         id: parent.id,
         collection: 'products',
         data: { name: 'Futuro' },
-        draft: true,
         locale: 'es',
         overrideAccess: true,
+        version: 'draft',
       })
       await payload.update({
         id: parent.id,
         collection: 'products',
         data: { name: 'Zukunft' },
-        draft: true,
         locale: 'de',
         overrideAccess: true,
+        version: 'draft',
       })
 
       // Create child as draft
@@ -1177,9 +1231,9 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
           name: 'Plans',
           parent: parent.id,
         },
-        draft: true,
         locale: 'en',
         overrideAccess: true,
+        version: 'draft',
       })
 
       // Update other locales for child
@@ -1187,17 +1241,17 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         id: child.id,
         collection: 'products',
         data: { name: 'Planes' },
-        draft: true,
         locale: 'es',
         overrideAccess: true,
+        version: 'draft',
       })
       await payload.update({
         id: child.id,
         collection: 'products',
         data: { name: 'Pläne' },
-        draft: true,
         locale: 'de',
         overrideAccess: true,
+        version: 'draft',
       })
 
       // Create new parent (published) with default locale
@@ -1208,6 +1262,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
           parent: null,
         },
         overrideAccess: true,
+        version: 'published',
       })
 
       await payload.update({
@@ -1216,6 +1271,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         data: { name: 'Hoja de Ruta' },
         locale: 'es',
         overrideAccess: true,
+        version: 'draft',
       })
 
       await payload.update({
@@ -1224,6 +1280,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         data: { name: 'Fahrplan' },
         locale: 'de',
         overrideAccess: true,
+        version: 'draft',
       })
 
       // Move parent
@@ -1231,18 +1288,18 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         id: parent.id,
         collection: 'products',
         data: { parent: newParent.id },
-        draft: true,
         locale: 'en',
         overrideAccess: true,
+        version: 'draft',
       })
 
       const draftChild = await payload.findByID({
         id: child.id,
         collection: 'products',
         context: { computeHierarchyPaths: true },
-        draft: true,
         locale: 'all',
         overrideAccess: true,
+        version: 'latest',
       })
 
       expect(draftChild._h_slugPath).toEqual({
@@ -1261,11 +1318,11 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
 
   test.describe('Ancestor Cache Performance', () => {
     test.beforeEach(async ({ payload }) => {
-      await payload.delete({ collection: 'organizations', where: {}, overrideAccess: true })
+      await payload.delete({ collection: 'organizations', overrideAccess: true, where: {} })
     })
 
     test.afterEach(async ({ payload }) => {
-      await payload.delete({ collection: 'organizations', where: {}, overrideAccess: true })
+      await payload.delete({ collection: 'organizations', overrideAccess: true, where: {} })
     })
 
     test('should cache ancestors when computing paths for multiple documents', async ({
@@ -1276,12 +1333,14 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         collection: 'organizations',
         data: { parent: null, title: 'Root' },
         overrideAccess: true,
+        version: 'published',
       })
 
       const category = await payload.create({
         collection: 'organizations',
         data: { parent: root.id, title: 'Category' },
         overrideAccess: true,
+        version: 'published',
       })
 
       const childIds: Array<number | string> = []
@@ -1291,6 +1350,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
           collection: 'organizations',
           data: { parent: category.id, title: `Child ${i}` },
           overrideAccess: true,
+          version: 'published',
         })
         childIds.push(child.id)
       }
@@ -1309,10 +1369,10 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
           computeHierarchyPaths: true,
           hierarchyCacheStats: cacheStats,
         },
+        overrideAccess: true,
         where: {
           id: { in: childIds },
         },
-        overrideAccess: true,
       })
 
       expect(results.docs.length).toBe(5)
@@ -1342,18 +1402,21 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         collection: 'organizations',
         data: { parent: null, title: 'Products' },
         overrideAccess: true,
+        version: 'published',
       })
 
       const cat1 = await payload.create({
         collection: 'organizations',
         data: { parent: root.id, title: 'Electronics' },
         overrideAccess: true,
+        version: 'published',
       })
 
       const cat2 = await payload.create({
         collection: 'organizations',
         data: { parent: root.id, title: 'Clothing' },
         overrideAccess: true,
+        version: 'published',
       })
 
       const childIds: Array<number | string> = []
@@ -1364,6 +1427,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
           collection: 'organizations',
           data: { parent: cat1.id, title: `Product E${i}` },
           overrideAccess: true,
+          version: 'published',
         })
         childIds.push(child.id)
       }
@@ -1374,6 +1438,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
           collection: 'organizations',
           data: { parent: cat2.id, title: `Product C${i}` },
           overrideAccess: true,
+          version: 'published',
         })
         childIds.push(child.id)
       }
@@ -1390,10 +1455,10 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
           computeHierarchyPaths: true,
           hierarchyCacheStats: cacheStats,
         },
+        overrideAccess: true,
         where: {
           id: { in: childIds },
         },
-        overrideAccess: true,
       })
 
       const stats = cacheStats
@@ -1414,7 +1479,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
 
     test.afterEach(async ({ payload }) => {
       for (const id of createdPageIds) {
-        await payload.delete({ collection: 'pages', id, overrideAccess: true }).catch(() => {})
+        await payload.delete({ id, collection: 'pages', overrideAccess: true }).catch(() => {})
       }
       createdPageIds.length = 0
     })
@@ -1425,8 +1490,8 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         collection: 'pages',
         context: { computeHierarchyPaths: true },
         data: {
-          parent: null,
           slug: 'about-us', // Different from title
+          parent: null,
           title: 'About Our Company', // Would slugify to 'about-our-company'
         },
         overrideAccess: true,
@@ -1443,8 +1508,8 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
       const rootPage = await payload.create({
         collection: 'pages',
         data: {
-          parent: null,
           slug: 'home',
+          parent: null,
           title: 'Home Page',
         },
         overrideAccess: true,
@@ -1456,8 +1521,8 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         collection: 'pages',
         context: { computeHierarchyPaths: true },
         data: {
-          parent: rootPage.id,
           slug: 'services',
+          parent: rootPage.id,
           title: 'Our Services',
         },
         overrideAccess: true,
@@ -1474,8 +1539,8 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         collection: 'pages',
         context: { computeHierarchyPaths: true },
         data: {
-          parent: null,
           slug: '', // Empty slug
+          parent: null,
           title: 'Contact Us',
         },
         overrideAccess: true,
@@ -1495,7 +1560,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
       // Delete in reverse order (children before parents)
       for (const id of [...createdOrgIds].reverse()) {
         try {
-          await payload.delete({ collection: 'organizations', id, overrideAccess: true })
+          await payload.delete({ id, collection: 'organizations', overrideAccess: true })
         } catch {
           // Ignore if already deleted
         }
@@ -1509,6 +1574,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         collection: 'organizations',
         data: { parent: null, title: 'Parent Org' },
         overrideAccess: true,
+        version: 'published',
       })
       createdOrgIds.push(parent.id)
 
@@ -1517,6 +1583,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         collection: 'organizations',
         data: { parent: parent.id, title: 'Child Org' },
         overrideAccess: true,
+        version: 'published',
       })
       createdOrgIds.push(child.id)
 
@@ -1524,11 +1591,11 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
       const result = await payload.findByID({
         id: child.id,
         collection: 'organizations',
+        overrideAccess: true,
         select: {
           _h_slugPath: true,
           _h_titlePath: true,
         },
-        overrideAccess: true,
       })
 
       // Should have full paths (not flat paths)
@@ -1542,6 +1609,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         collection: 'organizations',
         data: { parent: null, title: 'Hidden Parent' },
         overrideAccess: true,
+        version: 'published',
       })
       createdOrgIds.push(parent.id)
 
@@ -1550,6 +1618,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         collection: 'organizations',
         data: { parent: parent.id, title: 'Hidden Child' },
         overrideAccess: true,
+        version: 'published',
       })
       createdOrgIds.push(child.id)
 
@@ -1557,11 +1626,11 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
       const result = await payload.findByID({
         id: child.id,
         collection: 'organizations',
+        overrideAccess: true,
         select: {
           _h_slugPath: true,
           _h_titlePath: true,
         },
-        overrideAccess: true,
       })
 
       // Paths should be computed correctly
@@ -1578,6 +1647,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         collection: 'organizations',
         data: { parent: null, title: 'Explicit Parent' },
         overrideAccess: true,
+        version: 'published',
       })
       createdOrgIds.push(parent.id)
 
@@ -1586,6 +1656,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         collection: 'organizations',
         data: { parent: parent.id, title: 'Explicit Child' },
         overrideAccess: true,
+        version: 'published',
       })
       createdOrgIds.push(child.id)
 
@@ -1593,11 +1664,11 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
       const result = await payload.findByID({
         id: child.id,
         collection: 'organizations',
+        overrideAccess: true,
         select: {
           _h_slugPath: true,
           title: true,
         },
-        overrideAccess: true,
       })
 
       // Paths should be computed correctly
@@ -1616,6 +1687,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         collection: 'organizations',
         data: { parent: null, title: 'Level 1' },
         overrideAccess: true,
+        version: 'published',
       })
       createdOrgIds.push(level1.id)
 
@@ -1623,6 +1695,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         collection: 'organizations',
         data: { parent: level1.id, title: 'Level 2' },
         overrideAccess: true,
+        version: 'published',
       })
       createdOrgIds.push(level2.id)
 
@@ -1630,6 +1703,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         collection: 'organizations',
         data: { parent: level2.id, title: 'Level 3' },
         overrideAccess: true,
+        version: 'published',
       })
       createdOrgIds.push(level3.id)
 
@@ -1637,11 +1711,11 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
       const result = await payload.findByID({
         id: level3.id,
         collection: 'organizations',
+        overrideAccess: true,
         select: {
           _h_slugPath: true,
           _h_titlePath: true,
         },
-        overrideAccess: true,
       })
 
       // Should have full 3-level path

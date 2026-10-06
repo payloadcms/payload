@@ -98,7 +98,7 @@ test.describe('Bulk Edit', () => {
 
     await Promise.all([
       createPost({ title: titleOfPostToDelete1 }),
-      createPost({ title: titleOfPostToDelete2 }, { draft: true }),
+      createPost({ title: titleOfPostToDelete2 }, { version: 'draft' }),
     ])
 
     await page.goto(postsUrl.list)
@@ -130,7 +130,7 @@ test.describe('Bulk Edit', () => {
 
     await Promise.all([
       createPost({ title: titleOfPostToPublish1 }),
-      createPost({ title: titleOfPostToPublish2 }, { draft: true }),
+      createPost({ title: titleOfPostToPublish2 }, { version: 'draft' }),
     ])
 
     await page.goto(postsUrl.list)
@@ -166,7 +166,7 @@ test.describe('Bulk Edit', () => {
 
     await Promise.all([
       createPost({ title: titleOfPostToUnpublish1 }),
-      createPost({ title: titleOfPostToUnpublish2 }, { draft: true }),
+      createPost({ title: titleOfPostToUnpublish2 }, { version: 'draft' }),
     ])
 
     await page.goto(postsUrl.list)
@@ -241,7 +241,7 @@ test.describe('Bulk Edit', () => {
 
     await Promise.all([
       createPost({ title: titleOfPostToPublish1 }),
-      createPost({ title: titleOfPostToPublish2 }, { draft: true }),
+      createPost({ title: titleOfPostToPublish2 }, { version: 'draft' }),
     ])
 
     const description = 'published document'
@@ -288,7 +288,7 @@ test.describe('Bulk Edit', () => {
 
     await Promise.all([
       createPost({ title: titleOfPostToDraft1 }),
-      createPost({ title: titleOfPostToDraft2 }, { draft: true }),
+      createPost({ title: titleOfPostToDraft2 }, { version: 'draft' }),
     ])
 
     const description = 'draft document'
@@ -575,7 +575,7 @@ test.describe('Bulk Edit', () => {
 
     const postCount = 3
     for (let i = 1; i <= postCount; i++) {
-      await createPost({ title: `Post ${i}` }, { draft: true })
+      await createPost({ title: `Post ${i}` }, { version: 'draft' })
       // Wait 50ms to ensure the createdAt date is different enough to ensure posts are in the correct order
       await wait(50)
     }

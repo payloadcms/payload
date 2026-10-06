@@ -337,10 +337,10 @@ Run `remove-versions-true` to clean up any bare `versions: true` that is now the
 
 The public `draft` boolean is replaced by `version: 'published' | 'latest' | 'draft'` across the Local API, REST, GraphQL, SDK, and CLI. The retired `draft`, `publishAllLocales`, and `unpublishAllLocales` arguments are rejected.
 
-| Operation                  | Omitted selector                            | Explicit selectors                                                                                                                                     |
-| -------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Read                       | Published content                           | `latest` chooses an active draft per locale, falling back to published content; `draft` returns active drafts only                                     |
-| Create with drafts enabled | Draft, unless `data._status` is `published` | `draft` or `published` overrides `_status`; `latest` is invalid                                                                                        |
+| Operation                  | Omitted selector                                    | Explicit selectors                                                                                                             |
+| -------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Read                       | Published content                                   | `latest` chooses an active draft per locale, falling back to published content; `draft` returns active drafts only             |
+| Create with drafts enabled | Draft, unless `data._status` is `published`         | `draft` or `published` overrides `_status`; `latest` is invalid                                                                |
 | Update with drafts enabled | Edit the published copy and preserve pending drafts | `draft` edits or creates the active draft; `latest` edits the active draft or the published copy when there is no active draft |
 
 Use `_status` to publish or unpublish the selected copy. A published update, including one that omits `version`, fails if the document has never been published. Historical draft versions do not count as active drafts. Collections and globals with drafts disabled retain ordinary writes.
@@ -377,11 +377,9 @@ await payload.update({
 
 See [Drafts](../versions/drafts) for selection and publication examples and [GraphQL](../graphql/overview) for locale-map inputs and structured localized output.
 
-### Strict draft types are enabled by default
+### Strict draft types are always enabled
 
-`typescript.strictDraftTypes` now defaults to `true`. Regenerate your types with `payload generate:types` to apply the default to the Local API. Draft and latest `find` results type user fields as optional, and TypeScript rejects draft or latest operations on collections and globals without drafts.
-
-You can retain the previous opt-in typing behavior by setting `typescript.strictDraftTypes: false` and regenerating types. This option affects TypeScript checks, not runtime draft behavior.
+The `typescript.strictDraftTypes` option has been removed, and its strict behavior now always applies. Remove the option from your config and regenerate your types with `payload generate:types`. Draft and latest `find` results type user fields as optional, since drafts may be incomplete, and TypeScript rejects draft or latest operations on collections and globals without drafts. These checks affect TypeScript only, not runtime draft behavior.
 
 ### Version read access inherits collection and global read access
 

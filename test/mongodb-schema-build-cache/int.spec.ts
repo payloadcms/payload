@@ -128,7 +128,7 @@ test.suite('MongoDB schema build cache', { config: './config.ts', db: 'mongo' },
         title: 'Versioned nested blocks',
       },
       depth: 0,
-      draft: true,
+      version: 'draft',
       locale: 'en',
       overrideAccess: true,
     })

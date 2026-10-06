@@ -27,6 +27,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         name: 'name value',
       },
       overrideAccess: true,
+      version: 'published',
     })
     const restricted = await payload.create({
       collection: 'users',
@@ -36,6 +37,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         name: 'restricted user',
       },
       overrideAccess: true,
+      version: 'published',
     })
     // Seed posts
     const posts = []
@@ -63,6 +65,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           title: `Doc ${i}`,
         },
         overrideAccess: true,
+        version: 'published',
       })
     }
 
@@ -76,6 +79,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           },
         },
         overrideAccess: true,
+        version: 'published',
       })
     }
     for (let i = 0; i < 5; i++) {
@@ -87,6 +91,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         },
         locale: 'en',
         overrideAccess: true,
+        version: 'published',
       })
       await payload.update({
         collection: 'pages',
@@ -118,6 +123,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         },
         locale: 'he',
         overrideAccess: true,
+        version: 'published',
       })
     }
     for (let i = 0; i < 5; i++) {
@@ -137,6 +143,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           ],
         },
         overrideAccess: true,
+        version: 'published',
       })
     }
     for (let i = 0; i < 5; i++) {
@@ -156,6 +163,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           ],
         },
         overrideAccess: true,
+        version: 'published',
       })
     }
 
@@ -167,6 +175,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           title: `Virtual ${i}`,
         },
         overrideAccess: true,
+        version: 'published',
       })
     }
 
@@ -178,6 +187,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           title: `Custom ${i}`,
         },
         overrideAccess: true,
+        version: 'published',
       })
     }
 
@@ -189,6 +199,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           hasManyNumber: [0, 1, 1, 2, 3, 5, 8, 13, 21],
         },
         overrideAccess: true,
+        version: 'published',
       })
     }
 
@@ -210,6 +221,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           ],
         },
         overrideAccess: true,
+        version: 'published',
       })
     }
 
@@ -220,6 +232,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           title: `JSON ${i}`,
         },
         overrideAccess: true,
+        version: 'published',
       })
     }
 
@@ -230,6 +243,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           title: `Jobs ${i}`,
         },
         overrideAccess: true,
+        version: 'published',
       })
     }
 
@@ -242,6 +256,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           checkbox: i % 2 === 0,
         },
         overrideAccess: true,
+        version: 'published',
       })
     }
 
@@ -255,6 +270,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           select: options[i % 3],
         },
         overrideAccess: true,
+        version: 'published',
       })
     }
 
@@ -272,6 +288,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           selectHasMany: tagSets[i],
         },
         overrideAccess: true,
+        version: 'published',
       })
     }
 
@@ -285,6 +302,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           radio: radios[i % 3],
         },
         overrideAccess: true,
+        version: 'published',
       })
     }
 
@@ -297,6 +315,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           email: `test${i}@example.com`,
         },
         overrideAccess: true,
+        version: 'published',
       })
     }
 
@@ -309,6 +328,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           textarea: `Line 1 for textarea ${i}\nLine 2\nLine 3`,
         },
         overrideAccess: true,
+        version: 'published',
       })
     }
 
@@ -321,6 +341,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           code: `function test${i}() {\n  return ${i};\n}`,
         },
         overrideAccess: true,
+        version: 'published',
       })
     }
 
@@ -333,6 +354,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           point: [-122.4194 + i * 0.01, 37.7749 + i * 0.01],
         },
         overrideAccess: true,
+        version: 'published',
       })
     }
 
@@ -345,6 +367,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           textHasMany: [`tag${i}a`, `tag${i}b`, `tag${i}c`],
         },
         overrideAccess: true,
+        version: 'published',
       })
     }
 
@@ -364,6 +387,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           name: `test-media-${i}.png`,
         } as File,
         overrideAccess: true,
+        version: 'published',
       })
       mediaIds.push(media.id)
     }
@@ -377,6 +401,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           upload: mediaIds[i % mediaIds.length],
         },
         overrideAccess: true,
+        version: 'published',
       })
     }
 
@@ -390,6 +415,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
             hasManyMonomorphic: [posts[1].id],
           },
           overrideAccess: true,
+          version: 'published',
         })
       }
     }
@@ -417,6 +443,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
             ],
           },
           overrideAccess: true,
+          version: 'published',
         })
       }
     }
@@ -429,6 +456,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           title: `Export Only Post ${i}`,
         },
         overrideAccess: true,
+        version: 'published',
       })
     }
 
@@ -440,6 +468,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           title: `Import Only Post ${i}`,
         },
         overrideAccess: true,
+        version: 'published',
       })
     }
 
@@ -450,6 +479,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           title: `Post with no jobs queue active ${i}`,
         },
         overrideAccess: true,
+        version: 'published',
       })
     }
 
@@ -460,6 +490,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           title: `Post with limit ${i}`,
         },
         overrideAccess: true,
+        version: 'published',
       })
     }
 

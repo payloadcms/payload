@@ -141,6 +141,7 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
           items: [],
         },
         overrideAccess: true,
+        version: 'published',
       })
       createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
 
@@ -209,7 +210,7 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
       })
       createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
 
-      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?draft=true`, {
+      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?version=draft`, {
         body: JSON.stringify({
           content: {
             blockType: 'update-shape-block',
@@ -222,7 +223,7 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
         id: doc.id,
         collection: updateShapesSlug as any,
         depth: 0,
-        draft: true,
+        version: 'latest',
         overrideAccess: true,
       })
 
@@ -241,7 +242,7 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
       })
       createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
 
-      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?draft=true`, {
+      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?version=draft`, {
         body: JSON.stringify({
           content: [
             {
@@ -281,7 +282,7 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
       })
       createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
 
-      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?draft=true`, {
+      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?version=draft`, {
         body: JSON.stringify({
           numbers: [1, 2],
           polymorphicRelations: {
@@ -351,7 +352,7 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
             },
           }
         }
-        const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?draft=true`, {
+        const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?version=draft`, {
           body: JSON.stringify(data),
         })
 
@@ -529,6 +530,7 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
             restrictedField: 'restricted',
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         const description = 'description'

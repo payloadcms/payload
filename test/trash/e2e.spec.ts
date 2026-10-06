@@ -375,6 +375,7 @@ describe('Trash', () => {
           .poll(async () => {
             const { docs } = await payload.find({
               collection: postsSlug,
+              version: 'latest',
               where: {
                 title: { equals: 'Ready for restore' },
               },
@@ -388,6 +389,7 @@ describe('Trash', () => {
           .poll(async () => {
             const { docs } = await payload.find({
               collection: postsSlug,
+              version: 'latest',
               where: {
                 title: { equals: 'Ready for restore' },
               },
@@ -823,6 +825,7 @@ describe('Trash', () => {
           .poll(async () => {
             const { docs } = await payload.find({
               collection: postsSlug,
+              version: 'latest',
               where: {
                 id: { equals: trashedPostDocOne.id },
               },
@@ -836,6 +839,7 @@ describe('Trash', () => {
           .poll(async () => {
             const { docs } = await payload.find({
               collection: postsSlug,
+              version: 'latest',
               where: {
                 id: { equals: trashedPostDocOne.id },
               },
@@ -1293,7 +1297,7 @@ describe('Trash', () => {
         _status: 'draft',
         localizedField: localizedFieldValueEN,
       },
-      draft: true,
+      version: 'draft',
       locale: 'en',
       overrideAccess: true,
     })
@@ -1305,7 +1309,7 @@ describe('Trash', () => {
         _status: 'draft',
         localizedField: localizedFieldValueES,
       },
-      draft: true,
+      version: 'draft',
       locale: 'es',
       overrideAccess: true,
     })
@@ -1361,7 +1365,7 @@ describe('Trash', () => {
         _status: 'draft',
         localizedField: localizedFieldValueEN,
       },
-      draft: true,
+      version: 'draft',
       locale: 'en',
       overrideAccess: true,
     })
@@ -1374,7 +1378,7 @@ describe('Trash', () => {
         _status: 'draft',
         localizedField: localizedFieldValueES,
       },
-      draft: true,
+      version: 'draft',
       locale: 'es',
       overrideAccess: true,
     })

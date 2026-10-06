@@ -2151,6 +2151,7 @@ describe('List View', () => {
           deletedAt: new Date().toISOString(),
         },
         overrideAccess: true,
+        version: 'draft',
       })
 
       // Go to trash view

@@ -65,6 +65,7 @@ export const handleHierarchy = async ({
           overrideAccess: false,
           req,
           user,
+          version: 'latest',
         }),
         getAncestors({
           id: parentId,

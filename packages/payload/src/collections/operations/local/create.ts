@@ -114,13 +114,11 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   TSlug,
   TSelect
 > &
-  (GeneratedTypes extends { strictDraftTypes: true }
-    ? TSlug extends CollectionsWithoutDrafts
-      ? { version?: 'published' } & LocaleDataOptions<
-          RequiredDataFromCollectionSlug<TSlug>,
-          TypedLocale
-        >
-      : VersionedCreateData<TSlug>
+  (TSlug extends CollectionsWithoutDrafts
+    ? { version?: 'published' } & LocaleDataOptions<
+        RequiredDataFromCollectionSlug<TSlug>,
+        TypedLocale
+      >
     : VersionedCreateData<TSlug>)
 
 export async function createLocal<

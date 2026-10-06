@@ -74,6 +74,7 @@ export const useHierarchySearch = ({
               [titleField]: true,
               [titlePathField]: true,
             },
+            version: 'latest',
             where: {
               [titleField]: { contains: query },
             },

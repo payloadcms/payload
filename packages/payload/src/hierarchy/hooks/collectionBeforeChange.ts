@@ -114,6 +114,7 @@ async function validateNoCircularReference({
         select: {
           [fieldName]: true,
         },
+        version: 'latest',
       })) as JsonObject
 
       const nextParent = ancestor?.[fieldName]

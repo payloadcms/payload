@@ -89,6 +89,7 @@ export async function CollectionQueryWidget({
       overrideAccess: false,
       sort,
       user,
+      version: 'latest',
       where,
     })
 

@@ -31,7 +31,7 @@ const runBeforeValidate = async ({
     },
     operation: 'create',
     overrideAccess,
-    req: { context: {}, payload: {} } as PayloadRequest,
+    req: { context: {}, payload: { config: {} } } as PayloadRequest,
   })
 
   return fieldAccessResults

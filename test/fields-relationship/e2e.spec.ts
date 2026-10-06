@@ -798,7 +798,7 @@ describe('Relationship Field', () => {
       data: {
         title: '',
       },
-      draft: true,
+      version: 'draft',
       overrideAccess: true,
     })
 
@@ -808,7 +808,7 @@ describe('Relationship Field', () => {
       data: {
         title: 'Draft Only Title',
       },
-      draft: true,
+      version: 'draft',
       overrideAccess: true,
     })
 

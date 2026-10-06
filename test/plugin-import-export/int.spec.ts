@@ -139,6 +139,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         },
         overrideAccess: true,
         user,
+        version: 'published',
       })
 
       await payload.jobs.run({ overrideAccess: true })
@@ -172,6 +173,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         },
         overrideAccess: true,
         user,
+        version: 'published',
       })
 
       await payload.jobs.run({ overrideAccess: true })
@@ -205,6 +207,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         },
         overrideAccess: true,
         user,
+        version: 'published',
       })
 
       await payload.jobs.run({ overrideAccess: true })
@@ -243,6 +246,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         },
         overrideAccess: true,
         user,
+        version: 'published',
       })
 
       await payload.jobs.run({ overrideAccess: true })
@@ -323,6 +327,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         },
         overrideAccess: true,
         user,
+        version: 'published',
       })
 
       await payload.jobs.run({ overrideAccess: true })
@@ -471,6 +476,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         },
         overrideAccess: true,
         user,
+        version: 'published',
       })
 
       await payload.jobs.run({ overrideAccess: true })
@@ -503,6 +509,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         },
         overrideAccess: true,
         user,
+        version: 'published',
       })
 
       await payload.jobs.run({ overrideAccess: true })
@@ -575,6 +582,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         },
         overrideAccess: true,
         user,
+        version: 'published',
       })
 
       await payload.jobs.run({ overrideAccess: true })
@@ -606,6 +614,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         },
         overrideAccess: true,
         user,
+        version: 'published',
       })
 
       await payload.jobs.run({ overrideAccess: true })
@@ -639,6 +648,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         },
         overrideAccess: true,
         user,
+        version: 'published',
       })
 
       await payload.jobs.run({ overrideAccess: true })
@@ -673,6 +683,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         },
         overrideAccess: true,
         user,
+        version: 'published',
       })
 
       await payload.jobs.run({ overrideAccess: true })
@@ -745,6 +756,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         },
         overrideAccess: true,
         user,
+        version: 'published',
       })
 
       await payload.jobs.run({ overrideAccess: true })
@@ -783,6 +795,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         },
         overrideAccess: true,
         user,
+        version: 'published',
       })
 
       await payload.jobs.run({ overrideAccess: true })
@@ -873,6 +886,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         },
         overrideAccess: true,
         user,
+        version: 'published',
       })
 
       const {
@@ -1022,6 +1036,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         },
         overrideAccess: true,
         user,
+        version: 'published',
       })
 
       await payload.jobs.run({ overrideAccess: true })
@@ -1099,6 +1114,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         },
         overrideAccess: true,
         user,
+        version: 'published',
       })
 
       await payload.jobs.run({ overrideAccess: true })
@@ -2256,6 +2272,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
             title: 'JSON Update Mode Test',
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         expect(existingPage.jsonField).toEqual(initialJson)
@@ -2281,6 +2298,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           },
           overrideAccess: true,
           user,
+          version: 'published',
         })
 
         await payload.jobs.run({ overrideAccess: true })
@@ -2325,6 +2343,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
             title: `JSON Upsert Existing ${timestamp}`,
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         const csvContent =
@@ -2349,6 +2368,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           },
           overrideAccess: true,
           user,
+          version: 'published',
         })
 
         await payload.jobs.run({ overrideAccess: true })
@@ -2470,6 +2490,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
             title: 'Sequential Import Test',
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         let csvContent =
@@ -2493,6 +2514,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           },
           overrideAccess: true,
           user,
+          version: 'published',
         })
 
         await payload.jobs.run({ overrideAccess: true })
@@ -2844,6 +2866,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           },
           overrideAccess: true,
           user,
+          version: 'published',
         })
 
         await payload.jobs.run({ overrideAccess: true })
@@ -2870,6 +2893,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           },
           overrideAccess: true,
           user,
+          version: 'published',
         })
 
         await payload.jobs.run({ overrideAccess: true })
@@ -2894,6 +2918,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           },
           overrideAccess: true,
           user,
+          version: 'published',
         })
 
         await payload.jobs.run({ overrideAccess: true })
@@ -2917,6 +2942,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           },
           overrideAccess: true,
           user,
+          version: 'published',
         })
 
         await payload.jobs.run({ overrideAccess: true })
@@ -2941,6 +2967,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           },
           overrideAccess: true,
           user,
+          version: 'published',
         })
 
         await payload.jobs.run({ overrideAccess: true })
@@ -2964,6 +2991,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           },
           overrideAccess: true,
           user,
+          version: 'published',
         })
 
         await payload.jobs.run({ overrideAccess: true })
@@ -2988,6 +3016,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           },
           overrideAccess: true,
           user,
+          version: 'published',
         })
 
         await payload.jobs.run({ overrideAccess: true })
@@ -3010,6 +3039,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           },
           overrideAccess: true,
           user,
+          version: 'published',
         })
 
         await payload.jobs.run({ overrideAccess: true })
@@ -3032,6 +3062,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           },
           overrideAccess: true,
           user,
+          version: 'published',
         })
 
         await payload.jobs.run({ overrideAccess: true })
@@ -3054,6 +3085,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           },
           overrideAccess: true,
           user,
+          version: 'published',
         })
 
         await payload.jobs.run({ overrideAccess: true })
@@ -3393,6 +3425,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           title: 'Update Test 1',
         },
         overrideAccess: true,
+        version: 'published',
       })
 
       const page2 = await payload.create({
@@ -3404,6 +3437,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           title: 'Update Test 2',
         },
         overrideAccess: true,
+        version: 'published',
       })
 
       const updateData = [
@@ -3440,6 +3474,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         },
         overrideAccess: true,
         user,
+        version: 'published',
       })
 
       await payload.jobs.run({ overrideAccess: true })
@@ -3474,7 +3509,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           excerpt: 'existing',
           title: `Upsert Test ${timestamp}`,
         },
-        draft: false,
+        version: 'published',
         overrideAccess: true,
       })
 
@@ -3531,7 +3566,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         id: existingPage.id,
         collection: 'pages',
         depth: 0,
-        draft: false, // Get published version
+        // Get published version
         overrideAccess: true,
       })
 
@@ -3539,7 +3574,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         id: existingPage.id,
         collection: 'pages',
         depth: 0,
-        draft: true, // Get draft version
+        version: 'latest', // Get draft version
         overrideAccess: true,
       })
 
@@ -4050,6 +4085,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           title: 'Original Title',
         },
         overrideAccess: true,
+        version: 'published',
       })
 
       const csvUpdate = [
@@ -4072,6 +4108,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         },
         overrideAccess: true,
         user,
+        version: 'published',
       })
 
       await payload.jobs.run({ overrideAccess: true })
@@ -4267,7 +4304,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
       const draftPages = await payload.find({
         collection: 'pages',
-        draft: true,
+        version: 'latest',
         overrideAccess: true,
         where: {
           title: { contains: 'Draft Import ' },
@@ -4279,7 +4316,6 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
       const publishedPages = await payload.find({
         collection: 'pages',
-        draft: false,
         overrideAccess: true, // Query for published documents only
         where: {
           title: { contains: 'Published Import ' },
@@ -4331,7 +4367,6 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
       const pages = await payload.find({
         collection: 'pages',
-        draft: false,
         overrideAccess: true, // Query for published documents
         where: {
           title: { contains: 'Default Status Test ' },
@@ -4483,7 +4518,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
       const validPage1 = await payload.find({
         collection: 'pages',
-        draft: true,
+        version: 'latest',
         overrideAccess: true,
         where: {
           title: { equals: `Partial Valid ${timestamp}-1` },
@@ -4491,7 +4526,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
       })
       const validPage2 = await payload.find({
         collection: 'pages',
-        draft: true,
+        version: 'latest',
         overrideAccess: true,
         where: {
           title: { equals: `Partial Valid ${timestamp}-2` },
@@ -4508,7 +4543,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
         const allPages = await payload.find({
           collection: 'pages',
-          draft: true,
+          version: 'latest',
           limit: 100,
           overrideAccess: true,
         })
@@ -5705,7 +5740,6 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
         const publishedPages = await payload.find({
           collection: 'pages',
-          draft: false,
           overrideAccess: true,
           where: {
             title: { contains: 'Default Status Test ' },
@@ -5763,7 +5797,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
         const draftPages = await payload.find({
           collection: 'pages',
-          draft: true,
+          version: 'latest',
           overrideAccess: true,
           where: {
             title: { contains: 'Explicit Draft Test ' },
@@ -5822,7 +5856,6 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
         const publishedPages = await payload.find({
           collection: 'pages',
-          draft: false,
           overrideAccess: true,
           where: {
             title: { contains: 'Upsert New Published Test ' },
@@ -6877,6 +6910,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           },
           overrideAccess: true,
           user,
+          version: 'published',
         })
 
         await payload.jobs.run({ overrideAccess: true })
@@ -6956,6 +6990,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           },
           overrideAccess: true,
           user,
+          version: 'published',
         })
 
         await payload.jobs.run({ overrideAccess: true })
@@ -7071,7 +7106,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
         const draftDocs = await payload.find({
           collection: 'posts-imports-only',
-          draft: true,
+          version: 'latest',
           overrideAccess: true,
           where: {
             title: { contains: 'Default Draft Config Test' },
@@ -7085,7 +7120,6 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
         const publishedDocs = await payload.find({
           collection: 'posts-imports-only',
-          draft: false,
           overrideAccess: true,
           where: {
             title: { equals: 'Default Draft Config Override Test' },
@@ -7371,6 +7405,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           title: 'Preview field validation',
         },
         overrideAccess: true,
+        version: 'published',
       })
       const objectPrototypeBefore = Object.getOwnPropertyDescriptors(Object.prototype)
 
@@ -8340,6 +8375,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         },
         overrideAccess: true,
         user,
+        version: 'published',
       })
 
       await payload.jobs.run({ overrideAccess: true })
@@ -9114,6 +9150,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           collection: 'posts-with-limits',
           data: { title: `Limit Test Post ${i}` },
           overrideAccess: true,
+          version: 'published',
         })
         createdPostIds.push(doc.id)
       }
@@ -9323,6 +9360,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           },
           overrideAccess: true,
           user,
+          version: 'published',
         })
 
         expect(importDoc.status).toBe('failed')
@@ -9477,6 +9515,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           },
           overrideAccess: true,
           user,
+          version: 'published',
         })
 
         expect(failedImport.status).toBe('failed')
@@ -9559,6 +9598,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
             collection: 'posts-with-limits',
             data: { title: `Dynamic Limit Post ${i}` },
             overrideAccess: true,
+            version: 'published',
           })
 
           createdPostIds.push(doc.id)
@@ -9799,6 +9839,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
             },
             overrideAccess: true,
             user: userWithDynamicLimit,
+            version: 'published',
           })
 
           expect(importDoc.status).toBe('failed')

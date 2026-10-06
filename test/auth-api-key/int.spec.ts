@@ -175,6 +175,7 @@ test.suite('API key reveal access', { config: './config.ts' }, () => {
       collection: restrictedRevealableKeysSlug,
       data: { apiKey: uuid(), denyAPIKeyUpdateAccess: true },
       overrideAccess: true,
+      version: 'published',
     })
     const response = await restClient.POST(
       `/${restrictedRevealableKeysSlug}/${revealableKey.id}/api-key/reveal`,
@@ -193,6 +194,7 @@ test.suite('API key reveal access', { config: './config.ts' }, () => {
       collection: restrictedRevealableKeysSlug,
       data: { apiKey },
       overrideAccess: true,
+      version: 'published',
     })
     const response = await restClient.POST(
       `/${restrictedRevealableKeysSlug}/${revealableKey.id}/api-key/reveal`,
@@ -241,6 +243,7 @@ test.suite('API key reveal access', { config: './config.ts' }, () => {
       collection: restrictedRevealableKeysSlug,
       data: { apiKey: uuid(), denyCollectionUpdateAccess: true },
       overrideAccess: true,
+      version: 'published',
     })
     const response = await restClient.POST(
       `/${restrictedRevealableKeysSlug}/${revealableKey.id}/api-key/reveal`,

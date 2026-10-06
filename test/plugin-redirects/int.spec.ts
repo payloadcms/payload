@@ -16,6 +16,7 @@ test.suite('@payloadcms/plugin-redirects', { config: './config.ts' }, () => {
         title: 'Test',
       },
       overrideAccess: true,
+      version: 'published',
     })
   })
 
@@ -45,6 +46,7 @@ test.suite('@payloadcms/plugin-redirects', { config: './config.ts' }, () => {
         type: '301',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     expect(redirect).toBeTruthy()

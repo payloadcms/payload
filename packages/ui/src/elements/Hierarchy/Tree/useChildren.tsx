@@ -144,6 +144,7 @@ export const useChildren = ({
           limit,
           page: pageToFetch,
           sort: useAsTitle ?? 'id',
+          version: 'latest',
           where,
         }
 

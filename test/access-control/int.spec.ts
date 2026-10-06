@@ -68,12 +68,14 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
       collection: slug,
       data: {},
       overrideAccess: true,
+      version: 'published',
     })
 
     restricted = await payload.create({
       collection: fullyRestrictedSlug,
       data: { name: 'restricted' },
       overrideAccess: true,
+      version: 'published',
     })
   })
 
@@ -507,6 +509,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
           roles: ['admin'],
         },
         overrideAccess: true,
+        version: 'published',
       })
       const duplicateEmail = 'duplicate-request@payloadcms.com'
 
@@ -943,6 +946,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
           collection: postReferencesSlug,
           data: {},
           overrideAccess: true,
+          version: 'published',
         })
 
         createdPostReferenceIDs.push(postReference.id)
@@ -954,6 +958,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             title: 'archived',
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         createdPostIDs.push(archivedPost.id)
@@ -1228,7 +1233,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
           }),
           payload.find({
             collection: 'fields-and-top-access',
-            draft: true,
+            version: 'latest',
             overrideAccess: false,
             sort: 'secret',
           }),
@@ -1868,16 +1873,19 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
         overrideAccess: true,
+        version: 'published',
       })
       const { id: hitID } = await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-success-access-read' },
         overrideAccess: true,
+        version: 'published',
       })
       await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
         overrideAccess: true,
+        version: 'published',
       })
 
       // assert find, only will-success should be in the result
@@ -1891,7 +1899,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
       // assert find draft: true
       const resFindDraft = await payload.find({
         collection: 'fields-and-top-access',
-        draft: true,
+        version: 'latest',
         overrideAccess: false,
       })
 
@@ -2415,11 +2423,13 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         collection: inheritedReadVersionsVirtualRelatedSlug,
         data: { label: 'allowed' },
         overrideAccess: true,
+        version: 'published',
       })
       const { id: deniedID } = await payload.create({
         collection: inheritedReadVersionsVirtualRelatedSlug,
         data: { label: 'denied' },
         overrideAccess: true,
+        version: 'published',
       })
 
       try {
@@ -2475,7 +2485,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             slug: inheritedReadVersionsVirtualGlobalSlug,
             overrideAccess: false,
           }),
-        ).resolves.toMatchObject({ version: { related: allowedID } })
+        ).resolves.toMatchObject({ related: { id: allowedID } })
       } finally {
         await payload.db.deleteVersions({
           globalSlug: inheritedReadVersionsVirtualGlobalSlug,

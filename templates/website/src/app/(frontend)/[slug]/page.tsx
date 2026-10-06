@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
 import { getPayload, type RequiredDataFromCollectionSlug } from 'payload'
+import type { Page } from '@/payload-types'
 import { draftMode } from 'next/headers'
 import React, { cache } from 'react'
 import { homeStatic } from '@/endpoints/seed/home-static'
@@ -110,5 +111,5 @@ const queryPageBySlug = cache(async ({ slug }: { slug: string }) => {
     },
   })
 
-  return result.docs?.[0] || null
+  return (result.docs?.[0] as Page | undefined) ?? null
 })

@@ -99,6 +99,7 @@ export const generateReindexHandler =
         ...defaultLocalApiProps,
         locale: defaultLocale,
         req: undefined,
+        version: drafts ? 'latest' : 'published',
         where: drafts ? undefined : whereStatusPublished,
       })
       return totalDocs
@@ -136,6 +137,7 @@ export const generateReindexHandler =
           limit: batchSize,
           locale: defaultLocale,
           page: i + 1,
+          version: syncDrafts || !draftsEnabled ? 'latest' : 'published',
           where: syncDrafts || !draftsEnabled ? undefined : whereStatusPublished,
           ...defaultLocalApiProps,
         })

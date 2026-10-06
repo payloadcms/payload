@@ -3,7 +3,6 @@ import type {
   GlobalSlug,
   PayloadTypesShape,
   TypedLocale,
-  TypeWithVersion,
 } from 'payload'
 
 import type { PayloadSDK } from '../index.js'
@@ -47,7 +46,7 @@ export async function restoreGlobalVersion<
   sdk: PayloadSDK<T>,
   options: RestoreGlobalVersionByIDOptions<T, TSlug>,
   init?: RequestInit,
-): Promise<TypeWithVersion<DataFromGlobalSlug<T, TSlug>>> {
+): Promise<DataFromGlobalSlug<T, TSlug>> {
   const response = await sdk.request({
     args: options,
     init,

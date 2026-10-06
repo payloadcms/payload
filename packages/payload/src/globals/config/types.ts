@@ -49,12 +49,8 @@ export type GlobalsWithoutDrafts = {
 }[GlobalSlug]
 
 /** Selects the document snapshot when drafts are enabled. */
-export type VersionFromGlobalSlug<TSlug extends GlobalSlug> = GeneratedTypes extends {
-  strictDraftTypes: true
-}
-  ? TSlug extends GlobalsWithoutDrafts
-    ? { version?: 'published' }
-    : { version?: DocumentVersion }
+export type VersionFromGlobalSlug<TSlug extends GlobalSlug> = TSlug extends GlobalsWithoutDrafts
+  ? { version?: 'published' }
   : { version?: DocumentVersion }
 
 export type BeforeValidateHook = (args: {

@@ -173,7 +173,6 @@ export interface Config {
     activity: ActivityWidget;
     'upload-dropzone': UploadDropzoneWidget;
   };
-  strictDraftTypes: true;
   user: User;
   jobs: {
     tasks: unknown;

@@ -28,6 +28,7 @@ export async function fetchAncestorPath({
       depth: MAX_HIERARCHY_DEPTH,
       limit: 1,
       select: { [parentFieldName]: true },
+      version: 'latest',
       where: { id: { equals: itemId } },
     },
     { addQueryPrefix: true },

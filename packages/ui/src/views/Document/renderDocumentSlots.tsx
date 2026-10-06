@@ -308,6 +308,7 @@ export const renderDocumentSlotsHandler: ServerFunction<{
         url: true,
         width: true,
       },
+      version: 'latest',
     })
     doc = result as Record<string, unknown>
   }
