@@ -3,9 +3,9 @@ import type { ClientCollectionConfig, TypeWithID } from 'payload'
 
 import React from 'react'
 
+import { formatDocTitle } from '../../../shared/utilities/formatDocTitle/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { formatDocTitle } from '../../../shared/utilities/formatDocTitle/index.js'
 import './index.css'
 
 export type ThumbnailCardProps = {

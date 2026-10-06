@@ -12,6 +12,7 @@ import React, { useEffect } from 'react'
 import type { FormProps } from '../../forms/Form/index.js'
 import type { UserWithToken } from '../../providers/Auth/index.js'
 
+import { abortAndIgnore, handleAbortRef } from '../../../shared/utilities/abortAndIgnore.js'
 import { EmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
 import { ConfirmPasswordField } from '../../fields/ConfirmPassword/index.js'
 import { PasswordField } from '../../fields/Password/index.js'
@@ -22,7 +23,6 @@ import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { abortAndIgnore, handleAbortRef } from '../../../shared/utilities/abortAndIgnore.js'
 
 const baseClass = 'create-first-user__form'
 

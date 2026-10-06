@@ -9,11 +9,11 @@ import type {
 import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useMemo, useState } from 'react'
 
+import { formatDocTitle } from '../../../../../../shared/utilities/formatDocTitle/index.js'
 import { useIntersect } from '../../../../../hooks/useIntersect.js'
 import { useConfig } from '../../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../../providers/Translation/index.js'
 import { canUseDOM } from '../../../../../utilities/canUseDOM.js'
-import { formatDocTitle } from '../../../../../../shared/utilities/formatDocTitle/index.js'
 import { useListRelationships } from '../../../RelationshipProvider/index.js'
 import { FileCell } from '../File/index.js'
 

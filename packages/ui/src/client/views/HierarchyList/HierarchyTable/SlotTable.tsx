@@ -4,9 +4,9 @@ import type { User } from 'payload'
 
 import React from 'react'
 
+import { AlignJustifiedIcon } from '../../../../shared/icons/AlignJustified/index.js'
 import { Locked } from '../../../elements/Locked/index.js'
 import { CheckboxInput } from '../../../fields/Checkbox/Input.js'
-import { AlignJustifiedIcon } from '../../../../shared/icons/AlignJustified/index.js'
 import '../../../elements/Table/index.css'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import './SlotTable.css'

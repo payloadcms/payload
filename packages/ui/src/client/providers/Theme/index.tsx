@@ -1,9 +1,9 @@
 'use client'
 import React, { createContext, use, useCallback, useEffect, useState } from 'react'
 
+import { defaultTheme, type Theme } from '../../../shared/providers/Theme/shared.js'
 import { useConfig } from '../Config/index.js'
 import { useSearchParams } from '../RouterAdapter/index.js'
-import { defaultTheme, type Theme } from '../../../shared/providers/Theme/shared.js'
 
 export { defaultTheme, type Theme }
 

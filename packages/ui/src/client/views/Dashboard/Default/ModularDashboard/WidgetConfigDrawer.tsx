@@ -5,6 +5,8 @@ import type { ClientWidget, FormState } from 'payload'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
+import { abortAndIgnore } from '../../../../../shared/utilities/abortAndIgnore.js'
+import { extractLocaleData, mergeLocaleData } from '../../../../../shared/views/Dashboard/Default/ModularDashboard/utils/localeUtils.js'
 import { Drawer } from '../../../../elements/Drawer/index.js'
 import { Gutter } from '../../../../elements/Gutter/index.js'
 import { useModal } from '../../../../elements/Modal/index.js'
@@ -16,8 +18,6 @@ import { useLocale } from '../../../../providers/Locale/index.js'
 import { OperationProvider } from '../../../../providers/Operation/index.js'
 import { useServerFunctions } from '../../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
-import { abortAndIgnore } from '../../../../../shared/utilities/abortAndIgnore.js'
-import { extractLocaleData, mergeLocaleData } from '../../../../../shared/views/Dashboard/Default/ModularDashboard/utils/localeUtils.js'
 
 type WidgetConfigDrawerProps = {
   drawerSlug: string

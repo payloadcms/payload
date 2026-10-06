@@ -3,9 +3,9 @@ import type { JsonObject } from 'payload'
 
 import React from 'react'
 
+import { AlignJustifiedIcon } from '../../../../shared/icons/AlignJustified/index.js'
 import { DraggableSortableItem } from '../../../elements/DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../../../elements/DraggableSortable/index.js'
-import { AlignJustifiedIcon } from '../../../../shared/icons/AlignJustified/index.js'
 import { RelationshipContent } from '../RelationshipContent/index.js'
 import { UploadCard } from '../UploadCard/index.js'
 

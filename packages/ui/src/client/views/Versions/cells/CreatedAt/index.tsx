@@ -2,10 +2,10 @@
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
+import { formatDate } from '../../../../../shared/utilities/formatDocTitle/formatDateTitle.js'
 import { Link } from '../../../../elements/Link/index.js'
 import { useConfig } from '../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
-import { formatDate } from '../../../../../shared/utilities/formatDocTitle/formatDateTitle.js'
 
 export type CreatedAtCellProps = {
   collectionSlug?: string

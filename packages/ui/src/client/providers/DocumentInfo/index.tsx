@@ -7,9 +7,9 @@ import React, { createContext, use, useCallback, useEffect, useMemo, useRef, use
 
 import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
+import { requests } from '../../../shared/utilities/api.js'
 import { useControllableState } from '../../hooks/useControllableState.js'
 import { useAuth } from '../Auth/index.js'
-import { requests } from '../../../shared/utilities/api.js'
 import { useConfig } from '../Config/index.js'
 import { DocumentTitleProvider } from '../DocumentTitle/index.js'
 import { useLocale, useLocaleLoading } from '../Locale/index.js'

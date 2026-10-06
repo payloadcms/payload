@@ -4,6 +4,7 @@ import React from 'react'
 
 import type { CreatedAtCellProps } from '../../../Versions/cells/CreatedAt/index.js'
 
+import { formatDate } from '../../../../../shared/utilities/formatDocTitle/formatDateTitle.js'
 import { useModal } from '../../../../elements/Modal/index.js'
 import { useConfig } from '../../../../providers/Config/index.js'
 import {
@@ -13,7 +14,6 @@ import {
 } from '../../../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
-import { formatDate } from '../../../../../shared/utilities/formatDocTitle/formatDateTitle.js'
 
 export const VersionDrawerCreatedAtCell: React.FC<CreatedAtCellProps> = ({
   rowData: { id, updatedAt } = {},

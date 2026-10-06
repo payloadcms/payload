@@ -4,10 +4,10 @@ import type { User } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import React, { useEffect } from 'react'
 
+import { isClientUserObject } from '../../../shared/utilities/isClientUserObject.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { isClientUserObject } from '../../../shared/utilities/isClientUserObject.js'
 import { Button } from '../Button/index.js'
 import {
   DialogBody,

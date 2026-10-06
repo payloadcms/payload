@@ -5,7 +5,6 @@ import React, { Fragment, useEffect, useRef, useState } from 'react'
 
 import type { ListControlsProps } from './types.js'
 
-import { Popup, PopupList } from '../Popup/index.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { Dots } from '../../icons/Dots/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
@@ -15,6 +14,7 @@ import { ListColumnSelectionButton } from '../ListColumnSelectionButton/index.js
 import { ListGroupByButton } from '../ListGroupByButton/index.js'
 import { ListEmptyTrashButton } from '../ListHeader/TitleActions/index.js'
 import { ListWhereBuilder } from '../ListWhereBuilder/index.js'
+import { Popup, PopupList } from '../Popup/index.js'
 import { QueryPresetBar } from '../QueryPresets/QueryPresetBar/index.js'
 import { ListSearchFilter } from '../Search/ListSearchFilter/index.js'
 import './index.css'

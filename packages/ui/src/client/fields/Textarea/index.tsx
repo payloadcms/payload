@@ -6,12 +6,12 @@ import React, { useCallback, useMemo } from 'react'
 
 import type { TextAreaInputProps } from './types.js'
 
+import { mergeFieldStyles } from '../../../shared/fields/mergeFieldStyles.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { mergeFieldStyles } from '../../../shared/fields/mergeFieldStyles.js'
 import './index.css'
 import { isFieldRTL } from '../shared/index.js'
 import { TextareaInput } from './Input.js'

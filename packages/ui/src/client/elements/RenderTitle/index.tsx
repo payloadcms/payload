@@ -2,11 +2,11 @@
 import { formatAdminURL } from 'payload/shared'
 import React, { Fragment } from 'react'
 
-import { Link } from '../Link/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
 import { IDLabel } from '../IDLabel/index.js'
+import { Link } from '../Link/index.js'
 import './index.css'
 
 const baseClass = 'render-title'

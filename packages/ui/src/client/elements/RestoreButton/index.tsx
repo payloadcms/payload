@@ -11,16 +11,16 @@ import { toast } from 'sonner'
 
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
+import { Translation } from '../../../shared/elements/Translation/index.js'
+import { requests } from '../../../shared/utilities/api.js'
 import { CheckboxInput } from '../../fields/Checkbox/Input.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { requests } from '../../../shared/utilities/api.js'
 import { Button } from '../Button/index.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
-import { Translation } from '../../../shared/elements/Translation/index.js'
 
 export type Props = {
   readonly buttonId?: string

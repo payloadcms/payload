@@ -9,6 +9,8 @@ import { toast } from 'sonner'
 
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
+import { Translation } from '../../../shared/elements/Translation/index.js'
+import { requests } from '../../../shared/utilities/api.js'
 import { CheckboxInput } from '../../fields/Checkbox/Input.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -18,11 +20,9 @@ import { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { requests } from '../../../shared/utilities/api.js'
 import { shouldPermanentlyDelete } from '../../utilities/shouldPermanentlyDelete.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { PopupList } from '../Popup/index.js'
-import { Translation } from '../../../shared/elements/Translation/index.js'
 
 const baseClass = 'delete-document'
 

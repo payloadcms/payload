@@ -22,12 +22,6 @@ import React from 'react'
 
 import type { BuildColumnStateArgs } from '../providers/TableColumns/buildColumnState/index.js'
 
-import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
-import {
-  TableSectionContent,
-  TableSectionHeader,
-  TableSectionRoot,
-} from '../../shared/elements/TableSection/index.js'
 import {
   GroupByHeader,
   GroupByPageControls,
@@ -41,7 +35,13 @@ import {
   Table,
   // eslint-disable-next-line payload/no-imports-from-exports-dir -- these MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 } from '../../exports/client/index.js'
+import {
+  TableSectionContent,
+  TableSectionHeader,
+  TableSectionRoot,
+} from '../../shared/elements/TableSection/index.js'
 import { filterFieldsWithPermissions } from '../../shared/providers/TableColumns/buildColumnState/filterFieldsWithPermissions.js'
+import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import { buildColumnState } from '../providers/TableColumns/buildColumnState/index.js'
 
 export const renderFilters = (

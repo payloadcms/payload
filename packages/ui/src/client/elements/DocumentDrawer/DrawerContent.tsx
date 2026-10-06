@@ -6,11 +6,11 @@ import { toast } from 'sonner'
 
 import type { DocumentDrawerProps } from './types.js'
 
-import { LoadingOverlay } from '../Loading/index.js'
+import { abortAndIgnore, handleAbortRef } from '../../../shared/utilities/abortAndIgnore.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { abortAndIgnore, handleAbortRef } from '../../../shared/utilities/abortAndIgnore.js'
+import { LoadingOverlay } from '../Loading/index.js'
 import { DocumentDrawerContextProvider } from './Provider.js'
 
 export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({

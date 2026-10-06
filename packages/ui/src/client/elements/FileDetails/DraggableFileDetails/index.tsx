@@ -9,10 +9,10 @@ const baseClass = 'file-details-draggable'
 
 import type { Data, FileSizes, SanitizedCollectionConfig } from 'payload'
 
-import { DraggableSortableItem } from '../../DraggableSortable/DraggableSortableItem/index.js'
 import { AlignJustifiedIcon } from '../../../../shared/icons/AlignJustified/index.js'
 import { EditIcon } from '../../../icons/Edit/index.js'
 import { useDocumentDrawer } from '../../DocumentDrawer/index.js'
+import { DraggableSortableItem } from '../../DraggableSortable/DraggableSortableItem/index.js'
 
 export type DraggableFileDetailsProps = {
   collectionSlug: string

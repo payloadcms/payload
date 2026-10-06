@@ -7,6 +7,7 @@ import { formatAdminURL, hasAutosaveEnabled, hasLocalizeStatusEnabled } from 'pa
 import * as qs from 'qs-esm'
 import React, { useCallback } from 'react'
 
+import { traverseForLocalizedFields } from '../../../shared/utilities/traverseForLocalizedFields.js'
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { useHotkey } from '../../hooks/useHotkey.js'
@@ -16,7 +17,6 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { traverseForLocalizedFields } from '../../../shared/utilities/traverseForLocalizedFields.js'
 import { PopupList } from '../Popup/index.js'
 import './index.css'
 

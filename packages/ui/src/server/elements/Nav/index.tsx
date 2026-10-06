@@ -3,8 +3,8 @@ import type { PayloadRequest, ServerProps } from 'payload'
 import { EntityType } from 'payload'
 import React from 'react'
 
-import type { EntityToGroup } from '../../../shared/utilities/groupNavItems.js'
 import type { UserMenuSettingsGroup } from '../../../client/elements/UserMenu/SettingsMenu/index.js'
+import type { EntityToGroup } from '../../../shared/utilities/groupNavItems.js'
 
 /* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary */
 import {

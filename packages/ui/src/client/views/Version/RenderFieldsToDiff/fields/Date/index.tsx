@@ -9,9 +9,9 @@ import {
   getHTMLDiffComponents,
   unescapeDiffHTML,
 } from '../../../../../../shared/elements/HTMLDiff/index.js'
+import { formatDate } from '../../../../../../shared/utilities/formatDocTitle/formatDateTitle.js'
 import { useConfig } from '../../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../../providers/Translation/index.js'
-import { formatDate } from '../../../../../../shared/utilities/formatDocTitle/formatDateTitle.js'
 import './index.css'
 
 const baseClass = 'date-diff'

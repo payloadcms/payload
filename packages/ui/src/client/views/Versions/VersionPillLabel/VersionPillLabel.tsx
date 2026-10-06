@@ -4,13 +4,13 @@ import type { TypeWithVersion } from 'payload'
 
 import React from 'react'
 
+import { formatDate } from '../../../../shared/utilities/formatDocTitle/formatDateTitle.js'
+import { getVersionLabel } from '../../../../shared/views/Versions/VersionPillLabel/getVersionLabel.js'
 import { Pill } from '../../../elements/Pill/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
-import { useTranslation } from '../../../providers/Translation/index.js'
-import { formatDate } from '../../../../shared/utilities/formatDocTitle/formatDateTitle.js'
 import './index.css'
-import { getVersionLabel } from '../../../../shared/views/Versions/VersionPillLabel/getVersionLabel.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
 
 const baseClass = 'version-pill-label'
 

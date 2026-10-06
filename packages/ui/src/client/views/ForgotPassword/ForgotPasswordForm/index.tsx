@@ -7,8 +7,8 @@ import React, { useEffect, useRef, useState } from 'react'
 
 import type { FormProps } from '../../../forms/Form/index.js'
 
-import { Button } from '../../../elements/Button/index.js'
 import { FormHeader } from '../../../../shared/elements/FormHeader/index.js'
+import { Button } from '../../../elements/Button/index.js'
 import { Link } from '../../../elements/Link/index.js'
 import { EmailField } from '../../../fields/Email/index.js'
 import { TextField } from '../../../fields/Text/index.js'

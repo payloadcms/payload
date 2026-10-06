@@ -5,8 +5,8 @@ import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
-import type { WidgetInstanceClient, WidgetItem } from './index.client.js'
 import type { GetDefaultLayoutServerFnReturnType } from '../../../../../server/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.js'
+import type { WidgetInstanceClient, WidgetItem } from './index.client.js'
 
 import { ConfirmationModal } from '../../../../elements/ConfirmationModal/index.js'
 import { useModal } from '../../../../elements/Modal/index.js'

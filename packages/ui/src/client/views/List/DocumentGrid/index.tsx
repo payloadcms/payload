@@ -5,11 +5,11 @@ import type { ViewTypes } from 'payload'
 import { getBestFitFromSizes, isImage } from 'payload/shared'
 import React from 'react'
 
+import { getDocumentListItemURL } from '../../../../shared/views/List/getDocumentListItemURL.js'
 import { CardGrid } from '../../../elements/CardGrid/index.js'
 import { DocumentCard } from '../../../elements/DocumentCard/index.js'
 import { DocumentIcon } from '../../../icons/Document/index.js'
 import { useSelection } from '../../../providers/Selection/index.js'
-import { getDocumentListItemURL } from '../../../../shared/views/List/getDocumentListItemURL.js'
 
 type DocumentGridProps = {
   readonly adminRoute: string

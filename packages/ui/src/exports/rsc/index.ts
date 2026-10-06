@@ -1,16 +1,8 @@
 export { DocumentHeader } from '../../server/elements/DocumentHeader/index.js'
-export { FieldDiffContainer } from '../../shared/elements/FieldDiffContainer/index.js'
-export { FieldDiffLabel } from '../../shared/elements/FieldDiffLabel/index.js'
-export { FormHeader } from '../../shared/elements/FormHeader/index.js'
 export { HierarchyButton } from '../../server/elements/Hierarchy/DocHeaderButton/index.server.js'
 export { HierarchyField } from '../../server/elements/Hierarchy/Field/index.server.js'
 export { HierarchySidebarTabServer } from '../../server/elements/Hierarchy/Tree/HierarchySidebarTab.server.js'
 export { HierarchyTypeFieldServer } from '../../server/elements/HierarchyTypeField/index.server.js'
-export {
-  escapeDiffHTML,
-  getHTMLDiffComponents,
-  unescapeDiffHTML,
-} from '../../shared/elements/HTMLDiff/index.js'
 export { LLMInstructionsCell } from '../../server/elements/LLMInstructionsCell/index.js'
 export { Logo } from '../../server/elements/Logo/index.js'
 export { getNavPrefs } from '../../server/elements/Nav/getNavPrefs.js'
@@ -21,12 +13,9 @@ export type {
   RenderTabServerFnReturnType,
 } from '../../server/elements/Nav/SidebarTabs/renderTabServerFn.js'
 export { _internal_renderFieldHandler } from '../../server/forms/fieldSchemasToFormState/serverFunctions/renderFieldServerFn.js'
-export { File } from '../../shared/graphics/File/index.js'
-export { CheckIcon } from '../../shared/icons/Check/index.js'
 export { DefaultTemplate, type DefaultTemplateProps } from '../../server/templates/Default/index.js'
 export { MinimalTemplate, type MinimalTemplateProps } from '../../server/templates/Minimal/index.js'
 export { copyDataFromLocaleHandler } from '../../server/utilities/copyDataFromLocale.js'
-export { getColumns } from '../../shared/utilities/getColumns.js'
 export { getPreferences } from '../../server/utilities/getPreferences.js'
 export { handleLivePreview } from '../../server/utilities/handleLivePreview.js'
 export { handlePreview } from '../../server/utilities/handlePreview.js'
@@ -39,3 +28,14 @@ export { CollectionQueryWidget } from '../../server/widgets/CollectionQuery/inde
 export { RecentlyViewedWidget } from '../../server/widgets/RecentlyViewed/index.js'
 export { UploadDropzoneWidget } from '../../server/widgets/UploadDropzone/index.js'
 export { WelcomeWidget } from '../../server/widgets/Welcome/index.js'
+export { FieldDiffContainer } from '../../shared/elements/FieldDiffContainer/index.js'
+export { FieldDiffLabel } from '../../shared/elements/FieldDiffLabel/index.js'
+export { FormHeader } from '../../shared/elements/FormHeader/index.js'
+export {
+  escapeDiffHTML,
+  getHTMLDiffComponents,
+  unescapeDiffHTML,
+} from '../../shared/elements/HTMLDiff/index.js'
+export { File } from '../../shared/graphics/File/index.js'
+export { CheckIcon } from '../../shared/icons/Check/index.js'
+export { getColumns } from '../../shared/utilities/getColumns.js'

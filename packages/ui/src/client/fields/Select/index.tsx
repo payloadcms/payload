@@ -6,9 +6,9 @@ import React, { useCallback, useMemo } from 'react'
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 import type { SelectInputProps } from './Input.js'
 
+import { mergeFieldStyles } from '../../../shared/fields/mergeFieldStyles.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { mergeFieldStyles } from '../../../shared/fields/mergeFieldStyles.js'
 import { SelectInput } from './Input.js'
 
 export const formatOptions = (options: Option[]): OptionObject[] =>

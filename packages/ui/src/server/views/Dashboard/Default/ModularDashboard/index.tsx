@@ -3,15 +3,15 @@ import type { ClientWidget, Field, WidgetServerProps } from 'payload'
 
 import React from 'react'
 
-import type { DashboardViewServerProps } from '../index.js'
 import type { WidgetInstanceClient } from '../../../../../client/views/Dashboard/Default/ModularDashboard/index.client.js'
+import type { DashboardViewServerProps } from '../index.js'
 
 import { RenderServerComponent } from '../../../../elements/RenderServerComponent/index.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
 import { ModularDashboardClient } from '../../../../../exports/client/index.js'
+import { extractLocaleData } from '../../../../../shared/views/Dashboard/Default/ModularDashboard/utils/localeUtils.js'
 import { getItemsFromConfig } from './utils/getItemsFromConfig.js'
 import { getItemsFromPreferences } from './utils/getItemsFromPreferences.js'
-import { extractLocaleData } from '../../../../../shared/views/Dashboard/Default/ModularDashboard/utils/localeUtils.js'
 import './index.css'
 
 type ServerLayout = WidgetInstanceClient[]

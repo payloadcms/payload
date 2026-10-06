@@ -4,11 +4,11 @@ import type { UploadFieldClientProps, ValueWithRelation } from 'payload'
 
 import React, { useMemo } from 'react'
 
+import { mergeFieldStyles } from '../../../shared/fields/mergeFieldStyles.js'
 import { BulkUploadProvider } from '../../elements/BulkUpload/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { mergeFieldStyles } from '../../../shared/fields/mergeFieldStyles.js'
 import { UploadInput } from './Input.js'
 import './index.css'
 

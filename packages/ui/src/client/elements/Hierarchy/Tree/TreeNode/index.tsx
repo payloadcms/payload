@@ -4,9 +4,9 @@ import React, { useCallback, useId, useRef } from 'react'
 
 import type { TreeNodeProps } from '../types.js'
 
-import { Spinner } from '../../../Spinner/index.js'
 import { ChevronIcon } from '../../../../icons/Chevron/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
+import { Spinner } from '../../../Spinner/index.js'
 import { LoadMore } from '../LoadMore/index.js'
 import { useFocusableItem, useTreeFocus } from '../TreeFocusContext.js'
 import { useChildren } from '../useChildren.js'

@@ -9,12 +9,12 @@ import * as qs from 'qs-esm'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
+import { requests } from '../../../shared/utilities/api.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { requests } from '../../../shared/utilities/api.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { PopupList } from '../Popup/index.js'
 export function UnpublishButton({

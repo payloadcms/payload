@@ -6,12 +6,12 @@ import React from 'react'
 
 import type { IListQueryContext } from '../../providers/ListQuery/types.js'
 
-import { Pagination } from '../Pagination/index.js'
-import { PerPage } from '../PerPage/index.js'
-import { useTableID } from '../Table/TableIdentity.js'
 import { useEmbed } from '../../providers/Embed/index.js'
 import { useListQuery } from '../../providers/ListQuery/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { Pagination } from '../Pagination/index.js'
+import { PerPage } from '../PerPage/index.js'
+import { useTableID } from '../Table/TableIdentity.js'
 import './index.css'
 
 const baseClass = 'page-controls'

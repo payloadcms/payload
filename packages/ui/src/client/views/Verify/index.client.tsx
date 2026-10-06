@@ -2,8 +2,8 @@
 import React, { useEffect } from 'react'
 import { toast } from 'sonner'
 
-import { Link } from '../../elements/Link/index.js'
 import { Translation } from '../../../shared/elements/Translation/index.js'
+import { Link } from '../../elements/Link/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'

@@ -3,9 +3,9 @@ import type { User } from 'payload'
 
 import React, { useState } from 'react'
 
+import { isClientUserObject } from '../../../shared/utilities/isClientUserObject.js'
 import { LockIcon } from '../../icons/Lock/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { isClientUserObject } from '../../../shared/utilities/isClientUserObject.js'
 import { Tooltip } from '../Tooltip/index.js'
 import './index.css'
 

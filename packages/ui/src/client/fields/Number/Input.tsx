@@ -7,9 +7,9 @@ import React from 'react'
 
 import type { NumberInputProps } from './types.js'
 
+import { RenderCustomComponent } from '../../../shared/elements/RenderCustomComponent/index.js'
 import { InputStepper } from '../../elements/InputStepper/index.js'
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
-import { RenderCustomComponent } from '../../../shared/elements/RenderCustomComponent/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
