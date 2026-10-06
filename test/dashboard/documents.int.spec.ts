@@ -54,6 +54,9 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
       )
 
       expect(hydrated).toHaveLength(1)
+      expect(
+        find.mock.calls.filter(([args]) => args.collection === 'payload-pinned-documents'),
+      ).toHaveLength(0)
       expect(hydrated[0][0].where).toEqual({
         id: { in: documents.slice(0, 4).map((doc) => doc.id) },
       })
@@ -162,6 +165,59 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
           ([args]) => args.overrideAccess === false && args.user.id === owner.id,
         ),
       ).toBe(true)
+    } finally {
+      find.mockRestore()
+    }
+  })
+
+  test('should reserve a placeholder page without loading target documents when pins fill a page', async ({
+    payload,
+  }) => {
+    const owner = await payload.create({
+      collection: 'users',
+      data: { email: 'pin-placeholder@payloadcms.com', password: 'test' },
+      overrideAccess: true,
+    })
+    const user = { ...owner, collection: 'users' as const }
+
+    for (let index = 0; index < 4; index++) {
+      const document = await payload.create({
+        collection: 'tickets',
+        data: { title: `Pin ${index}` },
+        overrideAccess: false,
+        user,
+      })
+
+      await payload.create({
+        collection: 'payload-pinned-documents',
+        data: { document: { relationTo: 'tickets', value: document.id }, key: '' },
+        overrideAccess: false,
+        user,
+      })
+    }
+    const req = await createPayloadRequest({ payload, req: { user } })
+    const find = vi.spyOn(payload, 'find')
+
+    try {
+      const result = await getDashboardDocuments({
+        limit: 4,
+        page: 2,
+        req,
+        shouldIncludePinPlaceholder: true,
+        tab: 'pinned',
+      })
+
+      expect(result).toEqual({ items: [], page: 2, totalDocs: 4 })
+      expect(find.mock.calls.filter(([args]) => args.collection === 'tickets')).toHaveLength(0)
+      const clamped = await getDashboardDocuments({
+        limit: 4,
+        page: 99,
+        req,
+        shouldIncludePinPlaceholder: true,
+        tab: 'pinned',
+      })
+
+      expect(clamped).toEqual(result)
     } finally {
       find.mockRestore()
     }

@@ -1,12 +1,19 @@
 'use client'
 
-import React, { useEffect, useId, useRef, useState } from 'react'
+import * as qs from 'qs-esm'
+import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import type { DocumentsPage, DocumentsTab } from './getDocuments.js'
 import type { PinnedItem } from './recents.js'
 
+import { ChevronIcon } from '../../icons/Chevron/index.js'
+import { DocumentIcon } from '../../icons/Document/index.js'
+import { useAuth } from '../../providers/Auth/index.js'
+import { useConfig } from '../../providers/Config/index.js'
+import { useEntityVisibility } from '../../providers/EntityVisibility/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { WidgetCard } from '../WidgetCard/index.js'
+import { PinDocumentPicker } from './PinDocumentPicker/index.js'
 import { documentKey } from './recents.js'
 import './index.css'
 
@@ -52,7 +59,25 @@ export function RecentsAndPinnedClient({
   labels: Labels
   pinsURL: string
 }) {
+  const { permissions } = useAuth()
+  const { config } = useConfig()
+  const { isEntityVisible } = useEntityVisibility()
   const { serverFunction } = useServerFunctions()
+  const pinnableCollections = useMemo(
+    () =>
+      config.collections
+        .filter(
+          ({ slug }) =>
+            !slug.startsWith('payload-') &&
+            isEntityVisible({ collectionSlug: slug }) &&
+            permissions?.collections?.[slug]?.read,
+        )
+        .map(({ slug }) => slug),
+    [config.collections, isEntityVisible, permissions],
+  )
+  const canAddPin =
+    Boolean(permissions?.collections?.['payload-pinned-documents']?.create) &&
+    pinnableCollections.length > 0
   const contentRef = useRef<HTMLDivElement>(null)
   const listID = useId()
   const [page, setPage] = useState(1)
@@ -68,9 +93,15 @@ export function RecentsAndPinnedClient({
   const [saveError, setSaveError] = useState('')
   const [loadError, setLoadError] = useState('')
   const [refresh, setRefresh] = useState(0)
-  const totalPages = Math.max(1, Math.ceil(pageResult.totalDocs / (pageSize || 1)))
+  const shouldIncludePinPlaceholder = activeTab === 'pinned' && canAddPin
+  const totalPages = Math.max(
+    1,
+    Math.ceil((pageResult.totalDocs + Number(shouldIncludePinPlaceholder)) / (pageSize || 1)),
+  )
   const currentPage = pageResult.page
   const items = pageResult.items
+  const hasAddPinCard =
+    shouldIncludePinPlaceholder && pageResult.page === totalPages && items.length < pageSize
 
   useEffect(() => {
     if (!pageSize) {
@@ -86,6 +117,7 @@ export function RecentsAndPinnedClient({
           excludedCollections,
           limit: pageSize,
           page,
+          shouldIncludePinPlaceholder,
           tab: activeTab,
         },
       }) as Promise<DocumentsPage>
@@ -99,7 +131,10 @@ export function RecentsAndPinnedClient({
         setIsLoading(false)
         if (paginationFocusRef.current) {
           paginationFocusRef.current = false
-          const lastPage = Math.max(1, Math.ceil(result.totalDocs / pageSize))
+          const lastPage = Math.max(
+            1,
+            Math.ceil((result.totalDocs + Number(shouldIncludePinPlaceholder)) / pageSize),
+          )
           requestAnimationFrame(() => {
             if (result.page === 1 && lastPage > 1) {
               nextPageRef.current?.focus()
@@ -119,7 +154,16 @@ export function RecentsAndPinnedClient({
     return () => {
       isCurrent = false
     }
-  }, [activeTab, excludedCollections, labels.loadError, page, pageSize, refresh, serverFunction])
+  }, [
+    activeTab,
+    excludedCollections,
+    shouldIncludePinPlaceholder,
+    labels.loadError,
+    page,
+    pageSize,
+    refresh,
+    serverFunction,
+  ])
 
   useEffect(() => {
     const element = contentRef.current
@@ -148,51 +192,30 @@ export function RecentsAndPinnedClient({
   const emptyDescription =
     activeTab === 'recents' ? labels.recentsEmptyDescription : labels.pinnedEmptyDescription
 
-  const togglePin = async (item: RecentDocument) => {
-    if (isSaving) {
+  const removePinnedDocument = async ({ item }: { item: RecentDocument }) => {
+    if (isSaving || activeTab !== 'pinned' || item.pinID === undefined) {
       return
     }
 
     const previous = pageResult
-    const wasPinned = item.pinID !== undefined
+
     setPageResult((current) => ({
       ...current,
-      items:
-        activeTab === 'pinned' && wasPinned
-          ? current.items.filter((entry) => documentKey(entry) !== documentKey(item))
-          : current.items.map((entry) =>
-              documentKey(entry) === documentKey(item)
-                ? { ...entry, pinID: wasPinned ? undefined : 'pending' }
-                : entry,
-            ),
+      items: current.items.filter((entry) => documentKey(entry) !== documentKey(item)),
     }))
-    if (activeTab === 'pinned' && wasPinned) {
-      requestAnimationFrame(() => pinnedTabRef.current?.focus())
-    }
+    requestAnimationFrame(() => pinnedTabRef.current?.focus())
     setIsSaving(true)
     setSaveError('')
 
     try {
-      const response = await fetch(
-        wasPinned ? `${pinsURL}/${encodeURIComponent(String(item.pinID))}` : pinsURL,
-        {
-          credentials: 'include',
-          method: wasPinned ? 'DELETE' : 'POST',
-          ...(wasPinned
-            ? {}
-            : {
-                body: JSON.stringify({
-                  document: { relationTo: item.collectionSlug, value: item.id },
-                }),
-                headers: { 'Content-Type': 'application/json' },
-              }),
-        },
-      )
+      const response = await fetch(`${pinsURL}/${encodeURIComponent(String(item.pinID))}`, {
+        credentials: 'include',
+        method: 'DELETE',
+      })
 
       if (!response.ok) {
-        throw new Error('Unable to save pin')
+        throw new Error('Unable to remove pin')
       }
-
       setRefresh((value) => value + 1)
     } catch {
       setPageResult(previous)
@@ -201,6 +224,70 @@ export function RecentsAndPinnedClient({
       setIsSaving(false)
     }
   }
+
+  const addSelectedPin = async ({ document }: { document: PinnedItem }) => {
+    if (isSaving) {
+      return
+    }
+    setIsSaving(true)
+    setSaveError('')
+
+    try {
+      const query = qs.stringify(
+        {
+          depth: 0,
+          limit: 1,
+          where: {
+            and: [
+              { 'document.relationTo': { equals: document.collectionSlug } },
+              { 'document.value': { equals: document.id } },
+            ],
+          },
+        },
+        { addQueryPrefix: true },
+      )
+      const existingResponse = await fetch(`${pinsURL}${query}`, { credentials: 'include' })
+
+      if (!existingResponse.ok) {
+        throw new Error('Unable to read pins')
+      }
+      const existing = await existingResponse.json()
+
+      if (!existing.totalDocs) {
+        const response = await fetch(pinsURL, {
+          body: JSON.stringify({
+            document: { relationTo: document.collectionSlug, value: document.id },
+          }),
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          method: 'POST',
+        })
+
+        if (!response.ok) {
+          throw new Error('Unable to save pin')
+        }
+      }
+      setPage(1)
+      setRefresh((value) => value + 1)
+    } catch {
+      setSaveError(labels.pinnedSaveError)
+    } finally {
+      setIsSaving(false)
+      requestAnimationFrame(() => pinnedTabRef.current?.focus())
+    }
+  }
+
+  const pinDocumentPicker = canAddPin ? (
+    <PinDocumentPicker
+      collectionSlugs={pinnableCollections}
+      isDisabled={isLoading || isSaving}
+      isEmpty={pageResult.totalDocs === 0}
+      labels={labels}
+      onError={() => setSaveError(labels.pinnedSaveError)}
+      onSelect={(args) => void addSelectedPin(args)}
+      pinsURL={pinsURL}
+    />
+  ) : null
 
   return (
     <WidgetCard className="recently-viewed-widget recents-widget" title={labels.title}>
@@ -233,9 +320,56 @@ export function RecentsAndPinnedClient({
             </button>
           ))}
         </div>
+        {totalPages > 1 ? (
+          <div aria-label={labels.title} className="recents-widget__pagination" role="group">
+            <button
+              aria-controls={listID}
+              aria-disabled={isLoading || isSaving}
+              aria-label={labels.previous}
+              className="recents-widget__previous"
+              disabled={currentPage === 1}
+              onClick={() => {
+                if (isLoading || isSaving) {
+                  return
+                }
+                paginationFocusRef.current = true
+                setPage(currentPage - 1)
+              }}
+              ref={previousPageRef}
+              type="button"
+            >
+              <span aria-hidden="true">
+                <ChevronIcon direction="left" />
+              </span>
+            </button>
+            <span aria-atomic="true" aria-live="polite" className="recents-widget__page-status">
+              {currentPage} {labels.of} {totalPages}
+            </span>
+            <button
+              aria-controls={listID}
+              aria-disabled={isLoading || isSaving}
+              aria-label={labels.next}
+              className="recents-widget__next"
+              disabled={currentPage === totalPages}
+              onClick={() => {
+                if (isLoading || isSaving) {
+                  return
+                }
+                paginationFocusRef.current = true
+                setPage(currentPage + 1)
+              }}
+              ref={nextPageRef}
+              type="button"
+            >
+              <span aria-hidden="true">
+                <ChevronIcon direction="right" />
+              </span>
+            </button>
+          </div>
+        ) : null}
       </div>
-      <div aria-busy={isLoading} ref={contentRef}>
-        {items.length ? (
+      <div aria-busy={isLoading} className="recents-widget__viewport" ref={contentRef}>
+        {items.length || (hasAddPinCard && !isLoading && !loadError) ? (
           <div className="recents-widget__content">
             <ul className="recents-widget__items recents-widget__items--grid" id={listID}>
               {items.map((item) => {
@@ -255,7 +389,9 @@ export function RecentsAndPinnedClient({
                           <span
                             aria-hidden="true"
                             className="recents-widget__thumbnail recents-widget__thumbnail--empty"
-                          />
+                          >
+                            <DocumentIcon />
+                          </span>
                         )}
                         {item.statusLabel ? (
                           <span
@@ -280,19 +416,29 @@ export function RecentsAndPinnedClient({
                         </span>
                       </span>
                     </a>
-                    <button
-                      aria-label={`${isPinned ? labels.removePin : labels.addPin}: ${item.title}`}
-                      aria-pressed={isPinned}
-                      className="recents-widget__pin"
-                      disabled={isSaving || isLoading}
-                      onClick={() => void togglePin(item)}
-                      type="button"
-                    >
-                      <span aria-hidden="true" className="recents-widget__pin-icon" />
-                    </button>
+                    {activeTab === 'pinned' && isPinned ? (
+                      <button
+                        aria-label={`${labels.removePin}: ${item.title}`}
+                        aria-pressed={isPinned}
+                        className="recents-widget__pin"
+                        disabled={isSaving || isLoading}
+                        onClick={() => void removePinnedDocument({ item })}
+                        type="button"
+                      >
+                        <span aria-hidden="true" className="recents-widget__pin-icon" />
+                      </button>
+                    ) : null}
                   </li>
                 )
               })}
+              {hasAddPinCard ? (
+                <li
+                  className={`recents-widget__item recents-widget__item--add-pin${pageResult.totalDocs === 0 ? ' recents-widget__item--empty' : ''}`}
+                  key="add-pin"
+                >
+                  {pinDocumentPicker}
+                </li>
+              ) : null}
             </ul>
           </div>
         ) : isLoading ? (
@@ -310,45 +456,6 @@ export function RecentsAndPinnedClient({
           </div>
         )}
       </div>
-      {pageResult.totalDocs > 0 ? (
-        <div aria-label={labels.title} className="recents-widget__pagination" role="group">
-          <button
-            aria-controls={listID}
-            aria-disabled={isLoading || isSaving}
-            disabled={currentPage === 1}
-            onClick={() => {
-              if (isLoading || isSaving) {
-                return
-              }
-              paginationFocusRef.current = true
-              setPage(currentPage - 1)
-            }}
-            ref={previousPageRef}
-            type="button"
-          >
-            {labels.previous}
-          </button>
-          <span aria-atomic="true" aria-live="polite">
-            {currentPage} {labels.of} {totalPages}
-          </span>
-          <button
-            aria-controls={listID}
-            aria-disabled={isLoading || isSaving}
-            disabled={currentPage === totalPages}
-            onClick={() => {
-              if (isLoading || isSaving) {
-                return
-              }
-              paginationFocusRef.current = true
-              setPage(currentPage + 1)
-            }}
-            ref={nextPageRef}
-            type="button"
-          >
-            {labels.next}
-          </button>
-        </div>
-      ) : null}
       <span aria-live="polite" className="recents-widget__status">
         {saveError || loadError || (isLoading ? labels.loading : '')}
       </span>

@@ -918,7 +918,98 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(recents).toHaveAttribute('aria-pressed', 'true')
     })
 
-    test('should paginate and pin dashboard documents with the keyboard while retaining focus', async () => {
+    test('should open the dashboard pin picker by keyboard and restore focus after cancel or selection', async () => {
+      test.slow()
+      const testInfo = test.info()
+
+      await page.goto(`${serverURL}/admin`)
+      const widget = page.locator('.recents-widget')
+      const opener = widget.getByRole('button', {
+        name: 'Pin document',
+        exact: true,
+        includeHidden: true,
+      })
+      const drawer = page.locator('.list-drawer.drawer--is-open')
+      const document = (await (await page.request.get(`${serverURL}/api/posts?limit=1`)).json())
+        .docs[0]
+      let pinID: number | string | undefined
+
+      try {
+        await widget.locator('.recents-widget__empty-icon--pinned').click()
+        await expect(drawer).toHaveCount(0)
+        await expect(opener).toHaveAttribute('aria-expanded', 'false')
+        await expect(opener).toHaveAccessibleDescription(
+          'No pinned documents Documents you pin will appear here',
+        )
+        const openerBox = await opener.boundingBox()
+
+        expect(openerBox!.height).toBeGreaterThanOrEqual(24)
+        expect(openerBox!.width).toBeGreaterThanOrEqual(24)
+        await opener.focus()
+        await expectPaintedFocus({ page })
+        await opener.press('Enter')
+        await expect(drawer).toBeVisible()
+        await expect(opener).toHaveAttribute('aria-expanded', 'true')
+        await expectFocusInside({ container: drawer, page })
+        await page.keyboard.press('Shift+Tab')
+        await expectFocusInside({ container: drawer, page })
+        await page.keyboard.press('Tab')
+        await expectFocusInside({ container: drawer, page })
+        await page.keyboard.press('Escape')
+        await expect(drawer).toBeHidden()
+        await expect(opener).toBeFocused()
+        await expect(opener).toHaveAttribute('aria-expanded', 'false')
+        await opener.press('Space')
+        const collectionInput = drawer.locator('.list-header__select-collection input[type="text"]')
+
+        await collectionInput.focus()
+        await expect(collectionInput).toHaveAccessibleName('Select a Collection to Browse')
+        await collectionInput.press('ArrowDown')
+        await expect(
+          getSelectMenu({ page }).getByText(
+            /folder|pinned documents|preferences|locked documents/i,
+          ),
+        ).toHaveCount(0)
+        await collectionInput.fill('Post')
+        await collectionInput.press('ArrowDown')
+        await collectionInput.press('Enter')
+        await expect(
+          drawer.getByRole('button', { name: document.title, exact: true }),
+        ).toBeVisible()
+        const results = await runAxeScan({
+          include: ['.list-drawer.drawer--is-open'],
+          page,
+          testInfo,
+        })
+
+        expect(results.violations).toEqual([])
+        const selectDocument = drawer.getByRole('button', { name: document.title, exact: true })
+
+        await selectDocument.focus()
+        await expectPaintedFocus({ page })
+        await selectDocument.press('Enter')
+        await expect(drawer).toBeHidden()
+        await expect(widget.getByRole('button', { name: 'Pinned', exact: true })).toBeFocused()
+        await expect(widget.locator('.recents-widget__name')).toContainText(document.title)
+        const pins = await (
+          await page.request.get(`${serverURL}/api/payload-pinned-documents?depth=0`)
+        ).json()
+
+        pinID = pins.docs.find(
+          (pin) => pin.document.relationTo === 'posts' && pin.document.value === document.id,
+        )?.id
+        expect(pinID).toBeDefined()
+        const widgetResults = await runAxeScan({ include: ['.recents-widget'], page, testInfo })
+
+        expect(widgetResults.violations).toEqual([])
+      } finally {
+        if (pinID !== undefined) {
+          await page.request.delete(`${serverURL}/api/payload-pinned-documents/${pinID}`)
+        }
+      }
+    })
+
+    test('should paginate and unpin dashboard documents with the keyboard while retaining focus', async () => {
       const previousViewport = page.viewportSize()
       const preference = await (
         await page.request.get(`${serverURL}/api/payload-preferences/recently-viewed`)
@@ -928,6 +1019,12 @@ test.describe('WCAG 2.2 Level AA', () => {
       let pinID: number | string | undefined
 
       try {
+        const pinResponse = await page.request.post(`${serverURL}/api/payload-pinned-documents`, {
+          data: { document: { relationTo: 'posts', value: documents[0].id } },
+        })
+
+        expect(pinResponse.ok()).toBe(true)
+        pinID = (await pinResponse.json()).doc.id
         await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
           data: {
             value: {
@@ -967,30 +1064,8 @@ test.describe('WCAG 2.2 Level AA', () => {
         await previous.focus()
         await previous.press('Enter')
         await expect(next).toBeFocused()
-        const pin = widget.getByRole('button', {
-          name: `Pin document: ${documents[0].title}`,
-          exact: true,
-        })
-
-        await pin.focus()
-        await expect(pin).toBeVisible()
-        await expect
-          .poll(() => pin.evaluate((element) => getComputedStyle(element).opacity))
-          .toBe('1')
-        await pin.press('Enter')
-        await expect(
-          widget.getByRole('button', {
-            name: `Unpin document: ${documents[0].title}`,
-            exact: true,
-          }),
-        ).toBeEnabled()
-        const savedPins = (
-          await (await page.request.get(`${serverURL}/api/payload-pinned-documents?depth=0`)).json()
-        ).docs
-
-        pinID = savedPins.find(
-          (entry) => String(entry.document.value) === String(documents[0].id),
-        )?.id
+        await widget.locator('.recents-widget__link').focus()
+        await expect(widget.locator('.recents-widget__pin')).toHaveCount(0)
         const pinned = widget.getByRole('button', { name: 'Pinned', exact: true })
 
         await pinned.focus()
@@ -1001,6 +1076,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         })
 
         await unpin.focus()
+        await expect(unpin).toHaveCSS('opacity', '1')
         await unpin.press('Space')
         await expect(pinned).toBeFocused()
         await expect(widget.locator('.recents-widget__empty-title')).toHaveText(

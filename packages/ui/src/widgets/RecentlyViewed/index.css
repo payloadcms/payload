@@ -85,6 +85,16 @@
     background: var(--color-bg);
   }
 
+  .recents-widget__items--grid .recents-widget__item--add-pin {
+    overflow: visible;
+    border: 0;
+    background: transparent;
+  }
+
+  .recents-widget__item--empty {
+    grid-column: 1 / -1;
+  }
+
   .recents-widget__link {
     min-width: 0;
     color: var(--color-text);
@@ -115,7 +125,11 @@
   }
 
   .recents-widget__thumbnail--empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: var(--color-bg-secondary);
+    color: var(--color-icon-tertiary);
   }
 
   .recents-widget__status-pill {
@@ -275,18 +289,32 @@
   .recents-widget__pagination {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    gap: var(--spacer-2);
+    gap: var(--spacer-1);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
   }
 
   .recents-widget__pagination button {
-    min-height: var(--spacer-5);
-    padding: var(--spacer-1) var(--spacer-2);
-    border: var(--stroke-width-small) solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--spacer-4);
+    height: var(--spacer-4);
+    padding: 0;
+    border: 0;
     border-radius: var(--radius-medium);
-    background: var(--color-bg);
+    background: transparent;
     color: var(--color-text);
     cursor: pointer;
+  }
+
+  .recents-widget__pagination button:hover:not(:disabled) {
+    background: var(--color-bg-secondary);
+  }
+
+  [dir='rtl'] .recents-widget__pagination button > span {
+    transform: scaleX(-1);
   }
 
   .recents-widget__pagination button:disabled {

@@ -14,6 +14,7 @@ export type DocumentsPageArgs = {
   excludedCollections?: string[]
   limit: number
   page: number
+  shouldIncludePinPlaceholder?: boolean
   tab: DocumentsTab
 }
 export type DocumentsPage = {
@@ -35,6 +36,7 @@ export async function getDashboardDocuments({
   limit,
   page,
   req,
+  shouldIncludePinPlaceholder = false,
   tab,
 }: { req: PayloadRequest } & DocumentsPageArgs): Promise<DocumentsPage> {
   if (!req.user) {
@@ -60,13 +62,29 @@ export async function getDashboardDocuments({
       where: ownerWhere({ req }),
     })
     totalDocs = pins.totalDocs
-    const lastPage = Math.max(1, Math.ceil(totalDocs / limit))
+    if (!pins.docs.length && page > 1) {
+      // Drizzle reports zero totals for empty pages. Count pins without loading target documents.
+      totalDocs = (
+        await req.payload.count({
+          collection: 'payload-pinned-documents',
+          overrideAccess: false,
+          req,
+          user: req.user,
+          where: ownerWhere({ req }),
+        })
+      ).totalDocs
+    }
+    const lastPage = Math.max(
+      1,
+      Math.ceil((totalDocs + Number(shouldIncludePinPlaceholder)) / limit),
+    )
     if (page > lastPage) {
       return getDashboardDocuments({
         excludedCollections,
         limit,
         page: lastPage,
         req,
+        shouldIncludePinPlaceholder,
         tab,
       })
     }
@@ -103,37 +121,6 @@ export async function getDashboardDocuments({
       return document ? { ...document, pinID: reference.pinID } : undefined
     })
     .filter((item): item is RecentDocument => Boolean(item))
-
-  if (tab !== 'pinned' && items.length) {
-    const pins = await req.payload.find({
-      collection: 'payload-pinned-documents',
-      depth: 0,
-      limit,
-      overrideAccess: false,
-      req,
-      user: req.user,
-      where: {
-        and: [
-          ownerWhere({ req }),
-          {
-            or: items.map((item) => ({
-              and: [
-                { 'document.relationTo': { equals: item.collectionSlug } },
-                { 'document.value': { equals: item.id } },
-              ],
-            })),
-          },
-        ],
-      },
-    })
-    for (const item of items) {
-      item.pinID = pins.docs.find(
-        (pin) =>
-          pin.document.relationTo === item.collectionSlug &&
-          String(pin.document.value) === String(item.id),
-      )?.id
-    }
-  }
 
   return { items, page, totalDocs }
 }
