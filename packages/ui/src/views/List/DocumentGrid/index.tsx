@@ -16,6 +16,8 @@ type DocumentGridProps = {
   readonly collectionLabel: string
   readonly collectionSlug: string
   readonly docs: Record<string, unknown>[]
+  readonly documentURLs?: Record<string, null | string>
+  readonly enableRowSelections?: boolean
   readonly hierarchyParentFieldName?: string
   readonly useAsThumbnail?: string
   readonly useAsTitle?: string
@@ -70,6 +72,11 @@ const getThumbnail = ({
   useAsThumbnail?: string
 }) => {
   const thumbnailDoc = getThumbnailDoc({ doc, useAsThumbnail })
+
+  if (!thumbnailDoc) {
+    return undefined
+  }
+
   const mimeType = typeof thumbnailDoc.mimeType === 'string' ? thumbnailDoc.mimeType : undefined
 
   if (mimeType && isImage(mimeType)) {
@@ -89,6 +96,8 @@ export const DocumentGrid: React.FC<DocumentGridProps> = ({
   collectionLabel,
   collectionSlug,
   docs,
+  documentURLs,
+  enableRowSelections = true,
   hierarchyParentFieldName,
   useAsThumbnail,
   useAsTitle,
@@ -116,18 +125,24 @@ export const DocumentGrid: React.FC<DocumentGridProps> = ({
 
         return (
           <DocumentCard
-            href={getDocumentListItemURL({
-              adminRoute,
-              collectionSlug,
-              documentID,
-              hierarchyParentFieldName,
-              viewType,
-            })}
+            href={
+              documentURLs && documentID in documentURLs
+                ? documentURLs[documentID]
+                : getDocumentListItemURL({
+                    adminRoute,
+                    collectionSlug,
+                    documentID,
+                    hierarchyParentFieldName,
+                    viewType,
+                  })
+            }
             isSelected={
               (typeof id === 'string' || typeof id === 'number') && Boolean(selected.get(id))
             }
             onSelect={
-              typeof id === 'string' || typeof id === 'number' ? () => setSelection(id) : undefined
+              enableRowSelections && (typeof id === 'string' || typeof id === 'number')
+                ? () => setSelection(id)
+                : undefined
             }
             placeholder={<DocumentIcon />}
             thumbnail={thumbnailSrc ? { alt: title, src: thumbnailSrc } : undefined}
