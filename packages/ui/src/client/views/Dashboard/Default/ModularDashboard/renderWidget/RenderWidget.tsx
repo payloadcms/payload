@@ -5,7 +5,7 @@ import React, { useCallback, useEffect, useRef } from 'react'
 import type {
   RenderWidgetServerFnArgs,
   RenderWidgetServerFnReturnType,
-} from './renderWidgetServerFn.js'
+} from '../../../../../../server/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.js'
 
 import { ShimmerEffect } from '../../../../../elements/ShimmerEffect/index.js'
 import { useServerFunctions } from '../../../../../providers/ServerFunctions/index.js'

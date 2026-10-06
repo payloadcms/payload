@@ -7,7 +7,7 @@ const baseClass = 'thumbnail'
 
 import type { SanitizedCollectionConfig } from 'payload'
 
-import { File } from '../../graphics/File/index.js'
+import { File } from '../../../shared/graphics/File/index.js'
 import { appendCacheTag } from '../../utilities/appendCacheTag.js'
 import { ShimmerEffect } from '../ShimmerEffect/index.js'
 

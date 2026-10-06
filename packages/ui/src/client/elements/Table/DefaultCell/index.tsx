@@ -8,7 +8,7 @@ import React from 'react' // TODO: abstract this out to support all routers
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { getDisplayedFieldValue } from '../../../utilities/getDisplayedFieldValue.js'
-import { isValidReactElement } from '../../../utilities/isValidReactElement.js'
+import { isValidReactElement } from '../../../../shared/utilities/isValidReactElement.js'
 import { IDLabel } from '../../IDLabel/index.js'
 import { Link } from '../../Link/index.js'
 import { HierarchyCell } from './fields/Hierarchy/index.js'

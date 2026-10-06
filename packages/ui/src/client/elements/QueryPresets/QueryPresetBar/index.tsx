@@ -10,7 +10,7 @@ import {
 import * as qs from 'qs-esm'
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 
-import { CheckIcon } from '../../../icons/Check/index.js'
+import { CheckIcon } from '../../../../shared/icons/Check/index.js'
 import { EditIcon } from '../../../icons/Edit/index.js'
 import { GearIcon } from '../../../icons/Gear/index.js'
 import { PlusIcon } from '../../../icons/Plus/index.js'
@@ -26,7 +26,7 @@ import { FilterTrigger } from '../../FilterTrigger/index.js'
 import { useListDrawer } from '../../ListDrawer/index.js'
 import { useModal } from '../../Modal/index.js'
 import { Popup, PopupList } from '../../Popup/index.js'
-import { Translation } from '../../Translation/index.js'
+import { Translation } from '../../../../shared/elements/Translation/index.js'
 import './index.css'
 
 const deletePresetModalSlug = 'delete-preset-confirmation'

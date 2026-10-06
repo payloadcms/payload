@@ -13,7 +13,7 @@ import type {
 import { MissingEditorProp } from 'payload'
 import React from 'react'
 
-import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
+import { RenderCustomComponent } from '../../../../shared/elements/RenderCustomComponent/index.js'
 import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
 import {
   DefaultCell,
@@ -21,7 +21,7 @@ import {
   RenderDefaultCell,
   TagIcon,
   // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
-} from '../../../exports/client/index.js'
+} from '../../../../exports/client/index.js'
 import { hasOptionLabelJSXElement } from '../../../utilities/hasOptionLabelJSXElement.js'
 import { resolveDocumentListItemURL } from '../../../views/List/resolveDocumentListItemURL.js'
 import { findValueFromPath } from './findValueFromPath.js'

@@ -13,7 +13,7 @@ import { getFieldPaths, toKebabCase } from 'payload/shared'
 import React, { useCallback, useEffect, useId, useState } from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { RenderCustomComponent } from '../../../shared/elements/RenderCustomComponent/index.js'
 import { TabsList } from '../../elements/Tabs/index.js'
 import { useFormFields } from '../../forms/Form/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'

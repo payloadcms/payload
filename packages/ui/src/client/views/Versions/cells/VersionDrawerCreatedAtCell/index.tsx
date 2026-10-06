@@ -12,7 +12,7 @@ import {
 } from '../../../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
-import { formatDate } from '../../../../utilities/formatDocTitle/formatDateTitle.js'
+import { formatDate } from '../../../../../shared/utilities/formatDocTitle/formatDateTitle.js'
 
 export const VersionDrawerCreatedAtCell: React.FC<CreatedAtCellProps> = ({
   rowData: { id, updatedAt } = {},

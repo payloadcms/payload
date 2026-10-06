@@ -2,7 +2,7 @@ import type { BasePayload, User } from 'payload'
 
 import { PREFERENCE_KEYS } from 'payload/shared'
 
-import type { WidgetItem } from '../index.client.js'
+import type { WidgetItem } from '../../../../../../client/views/Dashboard/Default/ModularDashboard/index.client.js'
 
 import { getPreferences } from '../../../../../utilities/upsertPreferences.js'
 

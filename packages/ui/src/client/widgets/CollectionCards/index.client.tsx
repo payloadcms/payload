@@ -5,9 +5,9 @@ import { getTranslation } from '@payloadcms/translations'
 import { EntityType, formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-import type { CollectionCardsData } from './getCollectionCardsData.js'
+import type { CollectionCardsData } from '../../../server/widgets/CollectionCards/getCollectionCardsData.js'
 
-import './index.css'
+import '../../../shared/widgets/CollectionCards/index.css'
 import { Button } from '../../elements/Button/index.js'
 import { Card } from '../../elements/Card/index.js'
 import { Locked } from '../../elements/Locked/index.js'

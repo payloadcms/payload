@@ -5,8 +5,8 @@ import React, { createContext, use, useCallback, useEffect, useRef } from 'react
 
 import type { Preferences } from '../../forms/Form/types.js'
 
-import { useTranslation } from '../../providers/Translation/index.js'
-import { requests } from '../../utilities/api.js'
+import { useTranslation } from '../Translation/index.js'
+import { requests } from '../../../shared/utilities/api.js'
 import { deepMergeSimple } from '../../utilities/deepMerge.js'
 import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'

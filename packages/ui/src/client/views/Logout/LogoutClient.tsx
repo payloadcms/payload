@@ -9,7 +9,7 @@ import { useAuth } from '../../providers/Auth/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import './index.css'
+import '../../../shared/views/Logout/index.css'
 
 const baseClass = 'logout'
 

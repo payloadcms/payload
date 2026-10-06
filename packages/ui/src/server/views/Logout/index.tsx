@@ -4,8 +4,8 @@ import { getSafeRedirect } from 'payload/shared'
 import React from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
-import { LogoutClient } from '../../exports/client/index.js'
-import './index.css'
+import { LogoutClient } from '../../../exports/client/index.js'
+import '../../../shared/views/Logout/index.css'
 
 const baseClass = 'logout'
 

@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { buildColumnState } from './index.js'
 
-vi.mock('../../../exports/client/index.js', () => ({
+vi.mock('../../../../exports/client/index.js', () => ({
   SortColumn: () => null,
 }))
 

@@ -9,8 +9,8 @@ import type {
 import { combineQueries, extractAccessFromPermission } from 'payload'
 import { hasAutosaveEnabled, hasDraftsEnabled } from 'payload/shared'
 
-import { sanitizeID } from './sanitizeID.js'
-import { traverseForLocalizedFields } from './traverseForLocalizedFields.js'
+import { sanitizeID } from '../../shared/utilities/sanitizeID.js'
+import { traverseForLocalizedFields } from '../../shared/utilities/traverseForLocalizedFields.js'
 
 type Args = {
   collectionConfig?: SanitizedCollectionConfig

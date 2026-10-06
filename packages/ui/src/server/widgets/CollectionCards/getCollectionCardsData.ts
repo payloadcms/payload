@@ -2,11 +2,11 @@ import type { PayloadRequest, SanitizedPermissions, User } from 'payload'
 
 import { getAccessResults } from 'payload'
 
-import type { NavGroupType } from '../../utilities/groupNavItems.js'
+import type { NavGroupType } from '../../../shared/utilities/groupNavItems.js'
 
-import { getGlobalData } from '../../utilities/getGlobalData.js'
-import { getNavGroups } from '../../utilities/getNavGroups.js'
-import { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
+import { getGlobalData } from '../../../shared/utilities/getGlobalData.js'
+import { getNavGroups } from '../../../shared/utilities/getNavGroups.js'
+import { getVisibleEntities } from '../../../shared/utilities/getVisibleEntities.js'
 
 export type GlobalLockData = {
   data: {

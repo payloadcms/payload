@@ -4,7 +4,7 @@ import type { EditViewProps } from 'payload'
 import { useDraggable } from '@dnd-kit/core'
 import React from 'react'
 
-import { AlignJustifiedIcon } from '../../../icons/AlignJustified/index.js'
+import { AlignJustifiedIcon } from '../../../../shared/icons/AlignJustified/index.js'
 import { useLivePreviewContext } from '../../../providers/LivePreview/context.js'
 import { ToolbarControls } from './Controls/index.js'
 import './index.css'

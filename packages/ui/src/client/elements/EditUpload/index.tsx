@@ -6,7 +6,7 @@ import { useModal } from '@faceless-ui/modal'
 import React, { useRef, useState } from 'react'
 import ReactCrop from 'react-image-crop'
 
-import { editDrawerSlug } from '../../elements/Upload/index.js'
+import { editDrawerSlug } from '../Upload/index.js'
 import { NumberInput } from '../../fields/Number/index.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
 import { ResetIcon } from '../../icons/Reset/index.js'

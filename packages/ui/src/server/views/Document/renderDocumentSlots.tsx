@@ -25,7 +25,7 @@ import { hasDraftsEnabled, matchMimeType } from 'payload/shared'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
-import { ViewDescription } from '../../exports/client/index.js'
+import { ViewDescription } from '../../../exports/client/index.js'
 import { filterLLMInstructionsMenuItems } from '../../utilities/filterLLMInstructionsMenuItems.js'
 import { getDocumentPermissions } from '../../utilities/getDocumentPermissions.js'
 

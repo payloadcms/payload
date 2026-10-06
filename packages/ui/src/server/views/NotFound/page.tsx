@@ -9,12 +9,12 @@ import React from 'react'
 import type { InitAdminContextFn } from '../Root/index.js'
 
 /* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds */
-import { NotFoundClient, PageConfigProvider } from '../../exports/client/index.js'
+import { NotFoundClient, PageConfigProvider } from '../../../exports/client/index.js'
 
 /* eslint-enable payload/no-imports-from-exports-dir */
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'
-import { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
+import { getVisibleEntities } from '../../../shared/utilities/getVisibleEntities.js'
 
 export type RenderNotFoundPageArgs = {
   config: Promise<SanitizedConfig>

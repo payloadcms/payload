@@ -6,9 +6,9 @@ import React from 'react'
 
 import type { IListQueryContext } from '../../providers/ListQuery/types.js'
 
-import { Pagination } from '../../elements/Pagination/index.js'
-import { PerPage } from '../../elements/PerPage/index.js'
-import { useTableID } from '../../elements/Table/TableIdentity.js'
+import { Pagination } from '../Pagination/index.js'
+import { PerPage } from '../PerPage/index.js'
+import { useTableID } from '../Table/TableIdentity.js'
 import { useEmbed } from '../../providers/Embed/index.js'
 import { useListQuery } from '../../providers/ListQuery/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'

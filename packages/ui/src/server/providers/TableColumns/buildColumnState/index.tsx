@@ -26,17 +26,17 @@ import {
 } from 'payload/shared'
 import React from 'react'
 
-import type { SortColumnProps } from '../../../elements/SortColumn/index.js'
+import type { SortColumnProps } from '../../../../client/elements/SortColumn/index.js'
 
 import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
 import {
   SortColumn,
   // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
-} from '../../../exports/client/index.js'
-import { filterFieldsWithPermissions } from './filterFieldsWithPermissions.js'
-import { isColumnActive } from './isColumnActive.js'
+} from '../../../../exports/client/index.js'
+import { filterFieldsWithPermissions } from '../../../../shared/providers/TableColumns/buildColumnState/filterFieldsWithPermissions.js'
+import { isColumnActive } from '../../../../shared/providers/TableColumns/buildColumnState/isColumnActive.js'
 import { renderCell } from './renderCell.js'
-import { sortFieldMap } from './sortFieldMap.js'
+import { sortFieldMap } from '../../../../shared/providers/TableColumns/buildColumnState/sortFieldMap.js'
 
 export type BuildColumnStateArgs = {
   beforeRows?: Column[]

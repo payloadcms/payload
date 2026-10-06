@@ -6,7 +6,7 @@ import type {
   WidgetServerProps,
 } from 'payload'
 
-import type { WidgetInstanceClient, WidgetItem } from '../index.client.js'
+import type { WidgetInstanceClient, WidgetItem } from '../../../../../../client/views/Dashboard/Default/ModularDashboard/index.client.js'
 
 import { RenderServerComponent } from '../../../../../elements/RenderServerComponent/index.js'
 

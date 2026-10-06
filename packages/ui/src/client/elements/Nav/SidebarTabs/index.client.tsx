@@ -3,7 +3,7 @@
 import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { useCallback, useRef, useState } from 'react'
 
-import type { RenderTabServerFnArgs, RenderTabServerFnReturnType } from './renderTabServerFn.js'
+import type { RenderTabServerFnArgs, RenderTabServerFnReturnType } from '../../../../server/elements/Nav/SidebarTabs/renderTabServerFn.js'
 
 import { usePreferences } from '../../../providers/Preferences/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'

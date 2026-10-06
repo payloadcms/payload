@@ -17,7 +17,7 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useSearchParams } from '../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { SetDocumentStepNav } from '../../views/Edit/SetDocumentStepNav/index.js'
+import { SetDocumentStepNav } from '../Edit/SetDocumentStepNav/index.js'
 import './index.css'
 import { LocaleSelector } from './LocaleSelector/index.js'
 

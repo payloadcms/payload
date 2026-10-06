@@ -18,7 +18,7 @@ import type { DefaultTypedEditorState } from '../../types/nodeTypes.js'
  * Utility to render a lexical editor on the client.
  *
  * @experimental - may break in minor releases
- * @todo - replace this with a general utility that works for all fields. Maybe merge with packages/ui/src/forms/RenderFields/RenderField.tsx
+ * @todo - replace this with a general utility that works for all fields. Maybe merge with packages/ui/src/client/forms/RenderFields/RenderField.tsx
  */
 export const RenderLexical: React.FC<
   /**

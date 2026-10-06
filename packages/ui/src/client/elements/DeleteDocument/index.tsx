@@ -18,11 +18,11 @@ import { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { requests } from '../../utilities/api.js'
+import { requests } from '../../../shared/utilities/api.js'
 import { shouldPermanentlyDelete } from '../../utilities/shouldPermanentlyDelete.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { PopupList } from '../Popup/index.js'
-import { Translation } from '../Translation/index.js'
+import { Translation } from '../../../shared/elements/Translation/index.js'
 
 const baseClass = 'delete-document'
 

@@ -37,9 +37,9 @@ import {
   HydrateHierarchyProvider,
   HydratePreferences,
   ListQueryProvider,
-} from '../../exports/client/index.js'
+} from '../../../exports/client/index.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
-import { getColumns } from '../../utilities/getColumns.js'
+import { getColumns } from '../../../shared/utilities/getColumns.js'
 import { getDocumentPermissions } from '../../utilities/getDocumentPermissions.js'
 import { renderFilters, renderTable } from '../../utilities/renderTable.js'
 import { upsertPreferences } from '../../utilities/upsertPreferences.js'
@@ -50,7 +50,7 @@ import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 import { resolveDocumentListItemURL } from './resolveDocumentListItemURL.js'
 import { transformColumnsToSelect } from './transformColumnsToSelect.js'
-import './index.css'
+import '../../../shared/views/List/index.css'
 
 /**
  * @internal

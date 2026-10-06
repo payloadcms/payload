@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { getViewportMeta, isIPhoneUserAgent } from './viewport.js'
+import { getViewportMeta, isIPhoneUserAgent } from '../../../shared/layouts/Root/viewport.js'
 
 describe('RootLayout', () => {
   it('should apply the focus zoom viewport workaround to iPhone user agents only', () => {

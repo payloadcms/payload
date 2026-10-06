@@ -5,7 +5,7 @@ import React, { useCallback, useMemo } from 'react'
 
 import type { ReactSelectAdapterProps } from '../ReactSelect/types.js'
 
-import { mergeFieldStyles } from '../../fields/mergeFieldStyles.js'
+import { mergeFieldStyles } from '../../../shared/fields/mergeFieldStyles.js'
 import { formatOptions, SelectInput } from '../../fields/Select/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { useHierarchy } from '../../providers/Hierarchy/index.js'

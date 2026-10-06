@@ -6,7 +6,7 @@ import { applyLocaleFiltering } from 'payload/shared'
 import type {
   RenderListServerFnArgs,
   RenderListServerFnReturnType,
-} from '../../elements/ListDrawer/types.js'
+} from '../../../client/elements/ListDrawer/types.js'
 
 import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { renderListView } from './index.js'

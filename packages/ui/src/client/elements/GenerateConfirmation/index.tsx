@@ -7,7 +7,7 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
-import { Translation } from '../Translation/index.js'
+import { Translation } from '../../../shared/elements/Translation/index.js'
 
 export type GenerateConfirmationProps = {
   highlightField: (Boolean) => void

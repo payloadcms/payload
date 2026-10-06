@@ -27,7 +27,7 @@ import {
   TableSectionContent,
   TableSectionHeader,
   TableSectionRoot,
-} from '../elements/TableSection/index.js'
+} from '../../shared/elements/TableSection/index.js'
 import {
   GroupByHeader,
   GroupByPageControls,
@@ -40,8 +40,8 @@ import {
   SortRow,
   Table,
   // eslint-disable-next-line payload/no-imports-from-exports-dir -- these MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
-} from '../exports/client/index.js'
-import { filterFieldsWithPermissions } from '../providers/TableColumns/buildColumnState/filterFieldsWithPermissions.js'
+} from '../../exports/client/index.js'
+import { filterFieldsWithPermissions } from '../../shared/providers/TableColumns/buildColumnState/filterFieldsWithPermissions.js'
 import { buildColumnState } from '../providers/TableColumns/buildColumnState/index.js'
 
 export const renderFilters = (

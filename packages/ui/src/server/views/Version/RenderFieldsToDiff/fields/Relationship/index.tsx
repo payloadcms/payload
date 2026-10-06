@@ -8,8 +8,8 @@ import type {
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import React from 'react'
 
-import { FieldDiffContainer } from '../../../../../elements/FieldDiffContainer/index.js'
-import { getHTMLDiffComponents } from '../../../../../elements/HTMLDiff/index.js'
+import { FieldDiffContainer } from '../../../../../../shared/elements/FieldDiffContainer/index.js'
+import { getHTMLDiffComponents } from '../../../../../../shared/elements/HTMLDiff/index.js'
 import { generateLabelFromValue } from './generateLabelFromValue.js'
 import './index.css'
 

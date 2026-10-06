@@ -4,7 +4,7 @@ import type { CollectionSlug } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import React from 'react'
 
-import { useBulkUpload } from '../../../elements/BulkUpload/index.js'
+import { useBulkUpload } from '../../BulkUpload/index.js'
 import { useHierarchy } from '../../../providers/Hierarchy/index.js'
 import { useRouter } from '../../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'

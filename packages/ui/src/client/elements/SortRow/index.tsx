@@ -2,7 +2,7 @@
 
 import React from 'react'
 
-import { AlignJustifiedIcon } from '../../icons/AlignJustified/index.js'
+import { AlignJustifiedIcon } from '../../../shared/icons/AlignJustified/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import './index.css'
 

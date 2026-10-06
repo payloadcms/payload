@@ -4,8 +4,8 @@ import { isEntityHidden } from 'payload'
 import React from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
-import { UploadDropzoneWidgetClient } from '../../exports/client/index.js'
-import '../../elements/Card/index.css'
+import { UploadDropzoneWidgetClient } from '../../../exports/client/index.js'
+import '../../../shared/elements/Card/index.css'
 import './index.css'
 
 type UploadDropzoneWidgetData = {

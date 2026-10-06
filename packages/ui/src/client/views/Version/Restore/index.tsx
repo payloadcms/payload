@@ -15,7 +15,7 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { useRouter } from '../../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { requests } from '../../../utilities/api.js'
+import { requests } from '../../../../shared/utilities/api.js'
 import './index.css'
 
 const baseClass = 'restore-version'

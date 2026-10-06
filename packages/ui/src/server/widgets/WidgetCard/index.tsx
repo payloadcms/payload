@@ -1,6 +1,6 @@
 import React from 'react'
 
-import '../../elements/Card/index.css'
+import '../../../shared/elements/Card/index.css'
 import './index.css'
 
 export type WidgetListItem = {

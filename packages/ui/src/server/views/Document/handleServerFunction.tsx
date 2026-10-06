@@ -3,7 +3,7 @@ import type { DocumentPreferences, VisibleEntities } from 'payload'
 import { canAccessAdmin, isEntityHidden } from 'payload'
 import { applyLocaleFiltering } from 'payload/shared'
 
-import type { RenderDocumentServerFunction } from '../../providers/ServerFunctions/index.js'
+import type { RenderDocumentServerFunction } from '../../../client/providers/ServerFunctions/index.js'
 
 import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { renderDocument } from './index.js'

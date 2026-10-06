@@ -2,10 +2,10 @@
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-import { Link } from '../../elements/Link/index.js'
+import { Link } from '../Link/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { sanitizeID } from '../../utilities/sanitizeID.js'
+import { sanitizeID } from '../../../shared/utilities/sanitizeID.js'
 import { useDrawerDepth } from '../Drawer/index.js'
 import './index.css'
 

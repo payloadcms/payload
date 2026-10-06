@@ -10,7 +10,7 @@ import type {
 import { hasDraftsEnabled } from 'payload/shared'
 import React from 'react'
 
-import type { CreatedAtCellProps } from './cells/CreatedAt/index.js'
+import type { CreatedAtCellProps } from '../../../client/views/Versions/cells/CreatedAt/index.js'
 
 /* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds */
 import {
@@ -18,7 +18,7 @@ import {
   VersionsCreatedAtCell as CreatedAtCell,
   VersionsIDCell as IDCell,
   SortColumn,
-} from '../../exports/client/index.js'
+} from '../../../exports/client/index.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
 
 export const buildVersionColumns = ({

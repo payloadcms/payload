@@ -10,7 +10,7 @@ import type {
 
 import { applyLocaleFiltering } from 'payload/shared'
 
-import type { Theme } from '../../providers/Theme/shared.js'
+import type { Theme } from '../../../shared/providers/Theme/shared.js'
 import type { RequestThemeSource } from '../../utilities/getRequestTheme.js'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'

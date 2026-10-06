@@ -16,7 +16,7 @@ import { components as rsComponents } from 'react-select'
 import type { Option as OptionType } from '../ReactSelect/types.js'
 import type { Props } from './types.js'
 
-import { CheckIcon } from '../../icons/Check/index.js'
+import { CheckIcon } from '../../../shared/icons/Check/index.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { CircledXIcon } from '../../icons/CircledX/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'

@@ -3,7 +3,7 @@ import type { DefaultServerCellComponentProps } from 'payload'
 import React from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component needs the client boundary for Link.
-import { Link } from '../../exports/client/index.js'
+import { Link } from '../../../exports/client/index.js'
 import './index.css'
 
 export const LLMInstructionsCell = ({

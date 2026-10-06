@@ -1,6 +1,6 @@
 import type { TFunction } from '@payloadcms/translations'
 
-import type { Pill } from '../../../elements/Pill/index.js'
+import type { Pill } from '../../../../client/elements/Pill/index.js'
 
 type Args = {
   currentLocale?: string

@@ -9,7 +9,7 @@ import { useAuth } from '../../../providers/Auth/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { reduceFieldsToOptions } from '../../../utilities/reduceFieldsToOptions.js'
-import { getCollectionFieldPaths } from '../getCollectionFieldPaths.js'
+import { getCollectionFieldPaths } from '../../../../shared/widgets/CollectionQuery/getCollectionFieldPaths.js'
 
 const baseFieldValues = new Set(['createdAt', 'id', 'updatedAt'])
 

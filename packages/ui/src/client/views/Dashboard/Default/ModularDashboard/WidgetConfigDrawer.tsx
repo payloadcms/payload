@@ -16,8 +16,8 @@ import { useLocale } from '../../../../providers/Locale/index.js'
 import { OperationProvider } from '../../../../providers/Operation/index.js'
 import { useServerFunctions } from '../../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
-import { abortAndIgnore } from '../../../../utilities/abortAndIgnore.js'
-import { extractLocaleData, mergeLocaleData } from './utils/localeUtils.js'
+import { abortAndIgnore } from '../../../../../shared/utilities/abortAndIgnore.js'
+import { extractLocaleData, mergeLocaleData } from '../../../../../shared/views/Dashboard/Default/ModularDashboard/utils/localeUtils.js'
 
 type WidgetConfigDrawerProps = {
   drawerSlug: string

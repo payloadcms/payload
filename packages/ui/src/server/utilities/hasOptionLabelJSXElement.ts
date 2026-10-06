@@ -1,6 +1,6 @@
 import type { DefaultCellComponentProps } from 'payload'
 
-import { isValidReactElement } from './isValidReactElement.js'
+import { isValidReactElement } from '../../shared/utilities/isValidReactElement.js'
 
 export const hasOptionLabelJSXElement = (cellClientProps: DefaultCellComponentProps) => {
   const { cellData, field } = cellClientProps

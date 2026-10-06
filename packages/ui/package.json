@@ -37,154 +37,254 @@
       "default": "./src/exports/layouts.ts"
     },
     "./layouts/NestProviders": {
-      "import": "./src/layouts/Root/NestProviders.tsx",
-      "types": "./src/layouts/Root/NestProviders.tsx",
-      "default": "./src/layouts/Root/NestProviders.tsx"
+      "import": "./src/server/layouts/Root/NestProviders.tsx",
+      "types": "./src/server/layouts/Root/NestProviders.tsx",
+      "default": "./src/server/layouts/Root/NestProviders.tsx"
     },
     "./layouts/RootProviders": {
-      "import": "./src/layouts/Root/RootProviders.tsx",
-      "types": "./src/layouts/Root/RootProviders.tsx",
-      "default": "./src/layouts/Root/RootProviders.tsx"
+      "import": "./src/client/layouts/Root/RootProviders.tsx",
+      "types": "./src/client/layouts/Root/RootProviders.tsx",
+      "default": "./src/client/layouts/Root/RootProviders.tsx"
     },
     "./layouts/DocumentRoot": {
-      "import": "./src/layouts/Root/DocumentRoot.tsx",
-      "types": "./src/layouts/Root/DocumentRoot.tsx",
-      "default": "./src/layouts/Root/DocumentRoot.tsx"
+      "import": "./src/shared/layouts/Root/DocumentRoot.tsx",
+      "types": "./src/shared/layouts/Root/DocumentRoot.tsx",
+      "default": "./src/shared/layouts/Root/DocumentRoot.tsx"
     },
     "./layouts/Root/ResolveThemeOnClient": {
-      "import": "./src/layouts/Root/ResolveThemeOnClient.tsx",
-      "types": "./src/layouts/Root/ResolveThemeOnClient.tsx",
-      "default": "./src/layouts/Root/ResolveThemeOnClient.tsx"
+      "import": "./src/shared/layouts/Root/ResolveThemeOnClient.tsx",
+      "types": "./src/shared/layouts/Root/ResolveThemeOnClient.tsx",
+      "default": "./src/shared/layouts/Root/ResolveThemeOnClient.tsx"
     },
     "./layouts/Root/getRootLayoutData": {
-      "import": "./src/layouts/Root/getRootLayoutData.ts",
-      "types": "./src/layouts/Root/getRootLayoutData.ts",
-      "default": "./src/layouts/Root/getRootLayoutData.ts"
+      "import": "./src/server/layouts/Root/getRootLayoutData.ts",
+      "types": "./src/server/layouts/Root/getRootLayoutData.ts",
+      "default": "./src/server/layouts/Root/getRootLayoutData.ts"
+    },
+    "./icons/AlignJustified": {
+      "import": "./src/shared/icons/AlignJustified/index.tsx",
+      "types": "./src/shared/icons/AlignJustified/index.tsx",
+      "default": "./src/shared/icons/AlignJustified/index.tsx"
+    },
+    "./icons/Check": {
+      "import": "./src/shared/icons/Check/index.tsx",
+      "types": "./src/shared/icons/Check/index.tsx",
+      "default": "./src/shared/icons/Check/index.tsx"
+    },
+    "./icons/Folder": {
+      "import": "./src/shared/icons/Folder/index.tsx",
+      "types": "./src/shared/icons/Folder/index.tsx",
+      "default": "./src/shared/icons/Folder/index.tsx"
+    },
+    "./icons/Tag": {
+      "import": "./src/shared/icons/Tag/index.tsx",
+      "types": "./src/shared/icons/Tag/index.tsx",
+      "default": "./src/shared/icons/Tag/index.tsx"
     },
     "./icons/*": {
-      "import": "./src/icons/*/index.tsx",
-      "types": "./src/icons/*/index.tsx",
-      "default": "./src/icons/*/index.tsx"
+      "import": "./src/client/icons/*/index.tsx",
+      "types": "./src/client/icons/*/index.tsx",
+      "default": "./src/client/icons/*/index.tsx"
     },
     "./utilities/formatMetadata": {
-      "import": "./src/utilities/formatMetadata.ts",
-      "types": "./src/utilities/formatMetadata.ts",
-      "default": "./src/utilities/formatMetadata.ts"
+      "import": "./src/server/utilities/formatMetadata.ts",
+      "types": "./src/server/utilities/formatMetadata.ts",
+      "default": "./src/server/utilities/formatMetadata.ts"
     },
     "./views/API/generateAPIViewMetadata": {
-      "import": "./src/views/API/generateAPIViewMetadata.ts",
-      "types": "./src/views/API/generateAPIViewMetadata.ts",
-      "default": "./src/views/API/generateAPIViewMetadata.ts"
+      "import": "./src/server/views/API/generateAPIViewMetadata.ts",
+      "types": "./src/server/views/API/generateAPIViewMetadata.ts",
+      "default": "./src/server/views/API/generateAPIViewMetadata.ts"
     },
     "./views/CollectionTrash/generateCollectionTrashMetadata": {
-      "import": "./src/views/CollectionTrash/generateCollectionTrashMetadata.ts",
-      "types": "./src/views/CollectionTrash/generateCollectionTrashMetadata.ts",
-      "default": "./src/views/CollectionTrash/generateCollectionTrashMetadata.ts"
+      "import": "./src/server/views/CollectionTrash/generateCollectionTrashMetadata.ts",
+      "types": "./src/server/views/CollectionTrash/generateCollectionTrashMetadata.ts",
+      "default": "./src/server/views/CollectionTrash/generateCollectionTrashMetadata.ts"
     },
     "./views/Document/generateEditViewMetadata": {
-      "import": "./src/views/Document/generateEditViewMetadata.ts",
-      "types": "./src/views/Document/generateEditViewMetadata.ts",
-      "default": "./src/views/Document/generateEditViewMetadata.ts"
+      "import": "./src/server/views/Document/generateEditViewMetadata.ts",
+      "types": "./src/server/views/Document/generateEditViewMetadata.ts",
+      "default": "./src/server/views/Document/generateEditViewMetadata.ts"
     },
     "./views/List/generateListViewMetadata": {
-      "import": "./src/views/List/generateListViewMetadata.ts",
-      "types": "./src/views/List/generateListViewMetadata.ts",
-      "default": "./src/views/List/generateListViewMetadata.ts"
+      "import": "./src/server/views/List/generateListViewMetadata.ts",
+      "types": "./src/server/views/List/generateListViewMetadata.ts",
+      "default": "./src/server/views/List/generateListViewMetadata.ts"
     },
     "./views/Root/generateCustomViewMetadata": {
-      "import": "./src/views/Root/generateCustomViewMetadata.ts",
-      "types": "./src/views/Root/generateCustomViewMetadata.ts",
-      "default": "./src/views/Root/generateCustomViewMetadata.ts"
+      "import": "./src/server/views/Root/generateCustomViewMetadata.ts",
+      "types": "./src/server/views/Root/generateCustomViewMetadata.ts",
+      "default": "./src/server/views/Root/generateCustomViewMetadata.ts"
     },
     "./views/Version/generateVersionViewMetadata": {
-      "import": "./src/views/Version/generateVersionViewMetadata.ts",
-      "types": "./src/views/Version/generateVersionViewMetadata.ts",
-      "default": "./src/views/Version/generateVersionViewMetadata.ts"
+      "import": "./src/server/views/Version/generateVersionViewMetadata.ts",
+      "types": "./src/server/views/Version/generateVersionViewMetadata.ts",
+      "default": "./src/server/views/Version/generateVersionViewMetadata.ts"
     },
     "./views/Versions/generateVersionsViewMetadata": {
-      "import": "./src/views/Versions/generateVersionsViewMetadata.ts",
-      "types": "./src/views/Versions/generateVersionsViewMetadata.ts",
-      "default": "./src/views/Versions/generateVersionsViewMetadata.ts"
+      "import": "./src/server/views/Versions/generateVersionsViewMetadata.ts",
+      "types": "./src/server/views/Versions/generateVersionsViewMetadata.ts",
+      "default": "./src/server/views/Versions/generateVersionsViewMetadata.ts"
     },
     "./views/Dashboard/serverFunctions": {
-      "import": "./src/views/Dashboard/serverFunctions.ts",
-      "types": "./src/views/Dashboard/serverFunctions.ts",
-      "default": "./src/views/Dashboard/serverFunctions.ts"
+      "import": "./src/server/views/Dashboard/serverFunctions.ts",
+      "types": "./src/server/views/Dashboard/serverFunctions.ts",
+      "default": "./src/server/views/Dashboard/serverFunctions.ts"
     },
     "./views/Document/handleServerFunction": {
-      "import": "./src/views/Document/handleServerFunction.tsx",
-      "types": "./src/views/Document/handleServerFunction.tsx",
-      "default": "./src/views/Document/handleServerFunction.tsx"
+      "import": "./src/server/views/Document/handleServerFunction.tsx",
+      "types": "./src/server/views/Document/handleServerFunction.tsx",
+      "default": "./src/server/views/Document/handleServerFunction.tsx"
     },
     "./views/Document/renderDocumentSlots": {
-      "import": "./src/views/Document/renderDocumentSlots.tsx",
-      "types": "./src/views/Document/renderDocumentSlots.tsx",
-      "default": "./src/views/Document/renderDocumentSlots.tsx"
+      "import": "./src/server/views/Document/renderDocumentSlots.tsx",
+      "types": "./src/server/views/Document/renderDocumentSlots.tsx",
+      "default": "./src/server/views/Document/renderDocumentSlots.tsx"
     },
     "./views/List/handleServerFunction": {
-      "import": "./src/views/List/handleServerFunction.tsx",
-      "types": "./src/views/List/handleServerFunction.tsx",
-      "default": "./src/views/List/handleServerFunction.tsx"
+      "import": "./src/server/views/List/handleServerFunction.tsx",
+      "types": "./src/server/views/List/handleServerFunction.tsx",
+      "default": "./src/server/views/List/handleServerFunction.tsx"
     },
     "./views/Versions/fetchVersions": {
-      "import": "./src/views/Versions/fetchVersions.ts",
-      "types": "./src/views/Versions/fetchVersions.ts",
-      "default": "./src/views/Versions/fetchVersions.ts"
+      "import": "./src/server/views/Versions/fetchVersions.ts",
+      "types": "./src/server/views/Versions/fetchVersions.ts",
+      "default": "./src/server/views/Versions/fetchVersions.ts"
     },
     "./views/NotFound/page": {
-      "import": "./src/views/NotFound/page.tsx",
-      "types": "./src/views/NotFound/page.tsx",
-      "default": "./src/views/NotFound/page.tsx"
+      "import": "./src/server/views/NotFound/page.tsx",
+      "types": "./src/server/views/NotFound/page.tsx",
+      "default": "./src/server/views/NotFound/page.tsx"
     },
     "./views/NotFound/client": {
-      "import": "./src/views/NotFound/client.tsx",
-      "types": "./src/views/NotFound/client.tsx",
-      "default": "./src/views/NotFound/client.tsx"
+      "import": "./src/client/views/NotFound/client.tsx",
+      "types": "./src/client/views/NotFound/client.tsx",
+      "default": "./src/client/views/NotFound/client.tsx"
     },
     "./views/Root/getCustomViewByRoute": {
-      "import": "./src/views/Root/getCustomViewByRoute.ts",
-      "types": "./src/views/Root/getCustomViewByRoute.ts",
-      "default": "./src/views/Root/getCustomViewByRoute.ts"
+      "import": "./src/server/views/Root/getCustomViewByRoute.ts",
+      "types": "./src/server/views/Root/getCustomViewByRoute.ts",
+      "default": "./src/server/views/Root/getCustomViewByRoute.ts"
     },
     "./views/Root/adminViews": {
-      "import": "./src/views/Root/adminViews.tsx",
-      "types": "./src/views/Root/adminViews.tsx",
-      "default": "./src/views/Root/adminViews.tsx"
+      "import": "./src/server/views/Root/adminViews.tsx",
+      "types": "./src/server/views/Root/adminViews.tsx",
+      "default": "./src/server/views/Root/adminViews.tsx"
     },
     "./views/Root/generatePageMetadata": {
-      "import": "./src/views/Root/generatePageMetadata.ts",
-      "types": "./src/views/Root/generatePageMetadata.ts",
-      "default": "./src/views/Root/generatePageMetadata.ts"
+      "import": "./src/server/views/Root/generatePageMetadata.ts",
+      "types": "./src/server/views/Root/generatePageMetadata.ts",
+      "default": "./src/server/views/Root/generatePageMetadata.ts"
     },
     "./views/Document/getMetaBySegment": {
-      "import": "./src/views/Document/getMetaBySegment.ts",
-      "types": "./src/views/Document/getMetaBySegment.ts",
-      "default": "./src/views/Document/getMetaBySegment.ts"
+      "import": "./src/server/views/Document/getMetaBySegment.ts",
+      "types": "./src/server/views/Document/getMetaBySegment.ts",
+      "default": "./src/server/views/Document/getMetaBySegment.ts"
     },
     "./views/*/metadata": {
-      "import": "./src/views/*/metadata.ts",
-      "types": "./src/views/*/metadata.ts",
-      "default": "./src/views/*/metadata.ts"
+      "import": "./src/server/views/*/metadata.ts",
+      "types": "./src/server/views/*/metadata.ts",
+      "default": "./src/server/views/*/metadata.ts"
+    },
+    "./views/Edit": {
+      "import": "./src/client/views/Edit/index.tsx",
+      "types": "./src/client/views/Edit/index.tsx",
+      "default": "./src/client/views/Edit/index.tsx"
+    },
+    "./views/HierarchyList": {
+      "import": "./src/client/views/HierarchyList/index.tsx",
+      "types": "./src/client/views/HierarchyList/index.tsx",
+      "default": "./src/client/views/HierarchyList/index.tsx"
     },
     "./views/*": {
-      "import": "./src/views/*/index.tsx",
-      "types": "./src/views/*/index.tsx",
-      "default": "./src/views/*/index.tsx"
+      "import": "./src/server/views/*/index.tsx",
+      "types": "./src/server/views/*/index.tsx",
+      "default": "./src/server/views/*/index.tsx"
     },
     "./providers/*": {
-      "import": "./src/providers/*/index.tsx",
-      "types": "./src/providers/*/index.tsx",
-      "default": "./src/providers/*/index.tsx"
+      "import": "./src/client/providers/*/index.tsx",
+      "types": "./src/client/providers/*/index.tsx",
+      "default": "./src/client/providers/*/index.tsx"
+    },
+    "./elements/DocumentHeader": {
+      "import": "./src/server/elements/DocumentHeader/index.tsx",
+      "types": "./src/server/elements/DocumentHeader/index.tsx",
+      "default": "./src/server/elements/DocumentHeader/index.tsx"
+    },
+    "./elements/FieldDiffContainer": {
+      "import": "./src/shared/elements/FieldDiffContainer/index.tsx",
+      "types": "./src/shared/elements/FieldDiffContainer/index.tsx",
+      "default": "./src/shared/elements/FieldDiffContainer/index.tsx"
+    },
+    "./elements/FieldDiffLabel": {
+      "import": "./src/shared/elements/FieldDiffLabel/index.tsx",
+      "types": "./src/shared/elements/FieldDiffLabel/index.tsx",
+      "default": "./src/shared/elements/FieldDiffLabel/index.tsx"
+    },
+    "./elements/FormHeader": {
+      "import": "./src/shared/elements/FormHeader/index.tsx",
+      "types": "./src/shared/elements/FormHeader/index.tsx",
+      "default": "./src/shared/elements/FormHeader/index.tsx"
+    },
+    "./elements/HTMLDiff": {
+      "import": "./src/shared/elements/HTMLDiff/index.tsx",
+      "types": "./src/shared/elements/HTMLDiff/index.tsx",
+      "default": "./src/shared/elements/HTMLDiff/index.tsx"
+    },
+    "./elements/LLMInstructionsCell": {
+      "import": "./src/server/elements/LLMInstructionsCell/index.tsx",
+      "types": "./src/server/elements/LLMInstructionsCell/index.tsx",
+      "default": "./src/server/elements/LLMInstructionsCell/index.tsx"
+    },
+    "./elements/Logo": {
+      "import": "./src/server/elements/Logo/index.tsx",
+      "types": "./src/server/elements/Logo/index.tsx",
+      "default": "./src/server/elements/Logo/index.tsx"
+    },
+    "./elements/Nav": {
+      "import": "./src/server/elements/Nav/index.tsx",
+      "types": "./src/server/elements/Nav/index.tsx",
+      "default": "./src/server/elements/Nav/index.tsx"
+    },
+    "./elements/RenderComponent": {
+      "import": "./src/shared/elements/RenderComponent/index.tsx",
+      "types": "./src/shared/elements/RenderComponent/index.tsx",
+      "default": "./src/shared/elements/RenderComponent/index.tsx"
+    },
+    "./elements/RenderCustomComponent": {
+      "import": "./src/shared/elements/RenderCustomComponent/index.tsx",
+      "types": "./src/shared/elements/RenderCustomComponent/index.tsx",
+      "default": "./src/shared/elements/RenderCustomComponent/index.tsx"
+    },
+    "./elements/TableSection": {
+      "import": "./src/shared/elements/TableSection/index.tsx",
+      "types": "./src/shared/elements/TableSection/index.tsx",
+      "default": "./src/shared/elements/TableSection/index.tsx"
+    },
+    "./elements/Translation": {
+      "import": "./src/shared/elements/Translation/index.tsx",
+      "types": "./src/shared/elements/Translation/index.tsx",
+      "default": "./src/shared/elements/Translation/index.tsx"
+    },
+    "./elements/withMergedProps": {
+      "import": "./src/shared/elements/withMergedProps/index.tsx",
+      "types": "./src/shared/elements/withMergedProps/index.tsx",
+      "default": "./src/shared/elements/withMergedProps/index.tsx"
+    },
+    "./elements/WithServerSideProps": {
+      "import": "./src/shared/elements/WithServerSideProps/index.tsx",
+      "types": "./src/shared/elements/WithServerSideProps/index.tsx",
+      "default": "./src/shared/elements/WithServerSideProps/index.tsx"
     },
     "./elements/*": {
-      "import": "./src/elements/*/index.tsx",
-      "types": "./src/elements/*/index.tsx",
-      "default": "./src/elements/*/index.tsx"
+      "import": "./src/client/elements/*/index.tsx",
+      "types": "./src/client/elements/*/index.tsx",
+      "default": "./src/client/elements/*/index.tsx"
     },
     "./elements/RenderServerComponent": {
-      "import": "./src/elements/RenderServerComponent/index.tsx",
-      "types": "./src/elements/RenderServerComponent/index.tsx",
-      "default": "./src/elements/RenderServerComponent/index.tsx"
+      "import": "./src/server/elements/RenderServerComponent/index.tsx",
+      "types": "./src/server/elements/RenderServerComponent/index.tsx",
+      "default": "./src/server/elements/RenderServerComponent/index.tsx"
     },
     "./rsc": {
       "import": "./src/exports/rsc/index.ts",
@@ -192,129 +292,129 @@
       "default": "./src/exports/rsc/index.ts"
     },
     "./utilities/getDocumentPermissions": {
-      "import": "./src/utilities/getDocumentPermissions.ts",
-      "types": "./src/utilities/getDocumentPermissions.ts",
-      "default": "./src/utilities/getDocumentPermissions.ts"
+      "import": "./src/server/utilities/getDocumentPermissions.ts",
+      "types": "./src/server/utilities/getDocumentPermissions.ts",
+      "default": "./src/server/utilities/getDocumentPermissions.ts"
     },
     "./utilities/getIsLocked": {
-      "import": "./src/utilities/getIsLocked.ts",
-      "types": "./src/utilities/getIsLocked.ts",
-      "default": "./src/utilities/getIsLocked.ts"
+      "import": "./src/server/utilities/getIsLocked.ts",
+      "types": "./src/server/utilities/getIsLocked.ts",
+      "default": "./src/server/utilities/getIsLocked.ts"
     },
     "./utilities/getVersions": {
-      "import": "./src/utilities/getVersions.ts",
-      "types": "./src/utilities/getVersions.ts",
-      "default": "./src/utilities/getVersions.ts"
+      "import": "./src/server/utilities/getVersions.ts",
+      "types": "./src/server/utilities/getVersions.ts",
+      "default": "./src/server/utilities/getVersions.ts"
     },
     "./utilities/getDocPreferences": {
-      "import": "./src/utilities/getDocPreferences.ts",
-      "types": "./src/utilities/getDocPreferences.ts",
-      "default": "./src/utilities/getDocPreferences.ts"
+      "import": "./src/server/utilities/getDocPreferences.ts",
+      "types": "./src/server/utilities/getDocPreferences.ts",
+      "default": "./src/server/utilities/getDocPreferences.ts"
     },
     "./utilities/getDocumentData": {
-      "import": "./src/utilities/getDocumentData.ts",
-      "types": "./src/utilities/getDocumentData.ts",
-      "default": "./src/utilities/getDocumentData.ts"
+      "import": "./src/server/utilities/getDocumentData.ts",
+      "types": "./src/server/utilities/getDocumentData.ts",
+      "default": "./src/server/utilities/getDocumentData.ts"
     },
     "./utilities/buildFormState": {
-      "import": "./src/utilities/buildFormState.ts",
-      "types": "./src/utilities/buildFormState.ts",
-      "default": "./src/utilities/buildFormState.ts"
+      "import": "./src/server/utilities/buildFormState.ts",
+      "types": "./src/server/utilities/buildFormState.ts",
+      "default": "./src/server/utilities/buildFormState.ts"
     },
     "./utilities/buildTableState": {
-      "import": "./src/utilities/buildTableState.ts",
-      "types": "./src/utilities/buildTableState.ts",
-      "default": "./src/utilities/buildTableState.ts"
+      "import": "./src/server/utilities/buildTableState.ts",
+      "types": "./src/server/utilities/buildTableState.ts",
+      "default": "./src/server/utilities/buildTableState.ts"
     },
     "./utilities/getClientSchemaMap": {
-      "import": "./src/utilities/getClientSchemaMap.ts",
-      "types": "./src/utilities/getClientSchemaMap.ts",
-      "default": "./src/utilities/getClientSchemaMap.ts"
+      "import": "./src/server/utilities/getClientSchemaMap.ts",
+      "types": "./src/server/utilities/getClientSchemaMap.ts",
+      "default": "./src/server/utilities/getClientSchemaMap.ts"
     },
     "./utilities/getSchemaMap": {
-      "import": "./src/utilities/getSchemaMap.ts",
-      "types": "./src/utilities/getSchemaMap.ts",
-      "default": "./src/utilities/getSchemaMap.ts"
+      "import": "./src/server/utilities/getSchemaMap.ts",
+      "types": "./src/server/utilities/getSchemaMap.ts",
+      "default": "./src/server/utilities/getSchemaMap.ts"
     },
     "./utilities/handleServerFunctions": {
-      "import": "./src/utilities/handleServerFunctions.ts",
-      "types": "./src/utilities/handleServerFunctions.ts",
-      "default": "./src/utilities/handleServerFunctions.ts"
+      "import": "./src/server/utilities/handleServerFunctions.ts",
+      "types": "./src/server/utilities/handleServerFunctions.ts",
+      "default": "./src/server/utilities/handleServerFunctions.ts"
     },
     "./utilities/schedulePublishHandler": {
-      "import": "./src/utilities/schedulePublishHandler.ts",
-      "types": "./src/utilities/schedulePublishHandler.ts",
-      "default": "./src/utilities/schedulePublishHandler.ts"
+      "import": "./src/server/utilities/schedulePublishHandler.ts",
+      "types": "./src/server/utilities/schedulePublishHandler.ts",
+      "default": "./src/server/utilities/schedulePublishHandler.ts"
     },
     "./utilities/slugify": {
-      "import": "./src/utilities/slugify.ts",
-      "types": "./src/utilities/slugify.ts",
-      "default": "./src/utilities/slugify.ts"
+      "import": "./src/server/utilities/slugify.ts",
+      "types": "./src/server/utilities/slugify.ts",
+      "default": "./src/server/utilities/slugify.ts"
     },
     "./utilities/getHierarchyAncestry": {
-      "import": "./src/utilities/getHierarchyAncestry.ts",
-      "types": "./src/utilities/getHierarchyAncestry.ts",
-      "default": "./src/utilities/getHierarchyAncestry.ts"
+      "import": "./src/server/utilities/getHierarchyAncestry.ts",
+      "types": "./src/server/utilities/getHierarchyAncestry.ts",
+      "default": "./src/server/utilities/getHierarchyAncestry.ts"
     },
     "./utilities/getClientConfig": {
-      "import": "./src/utilities/getClientConfig.ts",
-      "types": "./src/utilities/getClientConfig.ts",
-      "default": "./src/utilities/getClientConfig.ts"
+      "import": "./src/server/utilities/getClientConfig.ts",
+      "types": "./src/server/utilities/getClientConfig.ts",
+      "default": "./src/server/utilities/getClientConfig.ts"
     },
     "./utilities/getLanguageDir": {
-      "import": "./src/utilities/getLanguageDir.ts",
-      "types": "./src/utilities/getLanguageDir.ts",
-      "default": "./src/utilities/getLanguageDir.ts"
+      "import": "./src/server/utilities/getLanguageDir.ts",
+      "types": "./src/server/utilities/getLanguageDir.ts",
+      "default": "./src/server/utilities/getLanguageDir.ts"
     },
     "./utilities/getRequestEmbed": {
-      "import": "./src/utilities/getRequestEmbed.ts",
-      "types": "./src/utilities/getRequestEmbed.ts",
-      "default": "./src/utilities/getRequestEmbed.ts"
+      "import": "./src/server/utilities/getRequestEmbed.ts",
+      "types": "./src/server/utilities/getRequestEmbed.ts",
+      "default": "./src/server/utilities/getRequestEmbed.ts"
     },
     "./utilities/getRequestTheme": {
-      "import": "./src/utilities/getRequestTheme.ts",
-      "types": "./src/utilities/getRequestTheme.ts",
-      "default": "./src/utilities/getRequestTheme.ts"
+      "import": "./src/server/utilities/getRequestTheme.ts",
+      "types": "./src/server/utilities/getRequestTheme.ts",
+      "default": "./src/server/utilities/getRequestTheme.ts"
     },
     "./utilities/getRouteWithoutAdmin": {
-      "import": "./src/utilities/getRouteWithoutAdmin.ts",
-      "types": "./src/utilities/getRouteWithoutAdmin.ts",
-      "default": "./src/utilities/getRouteWithoutAdmin.ts"
+      "import": "./src/server/utilities/getRouteWithoutAdmin.ts",
+      "types": "./src/server/utilities/getRouteWithoutAdmin.ts",
+      "default": "./src/server/utilities/getRouteWithoutAdmin.ts"
     },
     "./utilities/isCustomAdminView": {
-      "import": "./src/utilities/isCustomAdminView.ts",
-      "types": "./src/utilities/isCustomAdminView.ts",
-      "default": "./src/utilities/isCustomAdminView.ts"
+      "import": "./src/server/utilities/isCustomAdminView.ts",
+      "types": "./src/server/utilities/isCustomAdminView.ts",
+      "default": "./src/server/utilities/isCustomAdminView.ts"
     },
     "./utilities/isPublicAdminRoute": {
-      "import": "./src/utilities/isPublicAdminRoute.ts",
-      "types": "./src/utilities/isPublicAdminRoute.ts",
-      "default": "./src/utilities/isPublicAdminRoute.ts"
+      "import": "./src/server/utilities/isPublicAdminRoute.ts",
+      "types": "./src/server/utilities/isPublicAdminRoute.ts",
+      "default": "./src/server/utilities/isPublicAdminRoute.ts"
     },
     "./utilities/handleAuthRedirect": {
-      "import": "./src/utilities/handleAuthRedirect.ts",
-      "types": "./src/utilities/handleAuthRedirect.ts",
-      "default": "./src/utilities/handleAuthRedirect.ts"
+      "import": "./src/server/utilities/handleAuthRedirect.ts",
+      "types": "./src/server/utilities/handleAuthRedirect.ts",
+      "default": "./src/server/utilities/handleAuthRedirect.ts"
     },
     "./utilities/getPreferences": {
-      "import": "./src/utilities/getPreferences.ts",
-      "types": "./src/utilities/getPreferences.ts",
-      "default": "./src/utilities/getPreferences.ts"
+      "import": "./src/server/utilities/getPreferences.ts",
+      "types": "./src/server/utilities/getPreferences.ts",
+      "default": "./src/server/utilities/getPreferences.ts"
     },
     "./utilities/buildFieldSchemaMap/traverseFields": {
-      "import": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
-      "types": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
-      "default": "./src/utilities/buildFieldSchemaMap/traverseFields.ts"
+      "import": "./src/server/utilities/buildFieldSchemaMap/traverseFields.ts",
+      "types": "./src/server/utilities/buildFieldSchemaMap/traverseFields.ts",
+      "default": "./src/server/utilities/buildFieldSchemaMap/traverseFields.ts"
     },
     "./forms/fieldSchemasToFormState": {
-      "import": "./src/forms/fieldSchemasToFormState/index.tsx",
-      "types": "./src/forms/fieldSchemasToFormState/index.tsx",
-      "default": "./src/forms/fieldSchemasToFormState/index.tsx"
+      "import": "./src/server/forms/fieldSchemasToFormState/index.tsx",
+      "types": "./src/server/forms/fieldSchemasToFormState/index.tsx",
+      "default": "./src/server/forms/fieldSchemasToFormState/index.tsx"
     },
     "./forms/renderField": {
-      "import": "./src/forms/fieldSchemasToFormState/renderField.tsx",
-      "types": "./src/forms/fieldSchemasToFormState/renderField.tsx",
-      "default": "./src/forms/fieldSchemasToFormState/renderField.tsx"
+      "import": "./src/server/forms/fieldSchemasToFormState/renderField.tsx",
+      "types": "./src/server/forms/fieldSchemasToFormState/renderField.tsx",
+      "default": "./src/server/forms/fieldSchemasToFormState/renderField.tsx"
     },
     "./css/app.css": "./src/css/app.css",
     "./assets": {
@@ -328,49 +428,49 @@
       "default": "./src/exports/server.ts"
     },
     "./views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn": {
-      "import": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.ts",
-      "types": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.ts",
-      "default": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.ts"
+      "import": "./src/server/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.ts",
+      "types": "./src/server/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.ts",
+      "default": "./src/server/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.ts"
     },
     "./views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn": {
-      "import": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.ts",
-      "types": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.ts",
-      "default": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.ts"
+      "import": "./src/server/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.ts",
+      "types": "./src/server/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.ts",
+      "default": "./src/server/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.ts"
     },
     "./elements/Nav/SidebarTabs/renderTabServerFn": {
-      "import": "./src/elements/Nav/SidebarTabs/renderTabServerFn.ts",
-      "types": "./src/elements/Nav/SidebarTabs/renderTabServerFn.ts",
-      "default": "./src/elements/Nav/SidebarTabs/renderTabServerFn.ts"
+      "import": "./src/server/elements/Nav/SidebarTabs/renderTabServerFn.ts",
+      "types": "./src/server/elements/Nav/SidebarTabs/renderTabServerFn.ts",
+      "default": "./src/server/elements/Nav/SidebarTabs/renderTabServerFn.ts"
     },
     "./elements/RenderServerComponent/clientOnly": {
-      "import": "./src/elements/RenderServerComponent/clientOnly.tsx",
-      "types": "./src/elements/RenderServerComponent/clientOnly.tsx",
-      "default": "./src/elements/RenderServerComponent/clientOnly.tsx"
+      "import": "./src/server/elements/RenderServerComponent/clientOnly.tsx",
+      "types": "./src/server/elements/RenderServerComponent/clientOnly.tsx",
+      "default": "./src/server/elements/RenderServerComponent/clientOnly.tsx"
     },
     "./elements/Nav/getNavPrefs": {
-      "import": "./src/elements/Nav/getNavPrefs.ts",
-      "types": "./src/elements/Nav/getNavPrefs.ts",
-      "default": "./src/elements/Nav/getNavPrefs.ts"
+      "import": "./src/server/elements/Nav/getNavPrefs.ts",
+      "types": "./src/server/elements/Nav/getNavPrefs.ts",
+      "default": "./src/server/elements/Nav/getNavPrefs.ts"
     },
     "./elements/DocumentHeader/Tabs/Tab/TabLink": {
-      "import": "./src/elements/DocumentHeader/Tabs/Tab/TabLink.tsx",
-      "types": "./src/elements/DocumentHeader/Tabs/Tab/TabLink.tsx",
-      "default": "./src/elements/DocumentHeader/Tabs/Tab/TabLink.tsx"
+      "import": "./src/client/elements/DocumentHeader/Tabs/Tab/TabLink.tsx",
+      "types": "./src/client/elements/DocumentHeader/Tabs/Tab/TabLink.tsx",
+      "default": "./src/client/elements/DocumentHeader/Tabs/Tab/TabLink.tsx"
     },
     "./elements/DocumentHeader/Tabs/ShouldRenderTabs": {
-      "import": "./src/elements/DocumentHeader/Tabs/ShouldRenderTabs.tsx",
-      "types": "./src/elements/DocumentHeader/Tabs/ShouldRenderTabs.tsx",
-      "default": "./src/elements/DocumentHeader/Tabs/ShouldRenderTabs.tsx"
+      "import": "./src/client/elements/DocumentHeader/Tabs/ShouldRenderTabs.tsx",
+      "types": "./src/client/elements/DocumentHeader/Tabs/ShouldRenderTabs.tsx",
+      "default": "./src/client/elements/DocumentHeader/Tabs/ShouldRenderTabs.tsx"
     },
     "./widgets/CollectionCards/index.client": {
-      "import": "./src/widgets/CollectionCards/index.client.tsx",
-      "types": "./src/widgets/CollectionCards/index.client.tsx",
-      "default": "./src/widgets/CollectionCards/index.client.tsx"
+      "import": "./src/client/widgets/CollectionCards/index.client.tsx",
+      "types": "./src/client/widgets/CollectionCards/index.client.tsx",
+      "default": "./src/client/widgets/CollectionCards/index.client.tsx"
     },
     "./utilities/serverFunctionRegistry": {
-      "import": "./src/utilities/serverFunctionRegistry.ts",
-      "types": "./src/utilities/serverFunctionRegistry.ts",
-      "default": "./src/utilities/serverFunctionRegistry.ts"
+      "import": "./src/server/utilities/serverFunctionRegistry.ts",
+      "types": "./src/server/utilities/serverFunctionRegistry.ts",
+      "default": "./src/server/utilities/serverFunctionRegistry.ts"
     }
   },
   "main": "./src/exports/client/index.ts",
@@ -466,29 +566,29 @@
         "default": "./dist/exports/layouts.js"
       },
       "./layouts/NestProviders": {
-        "import": "./dist/layouts/Root/NestProviders.js",
-        "types": "./dist/layouts/Root/NestProviders.d.ts",
-        "default": "./dist/layouts/Root/NestProviders.js"
+        "import": "./dist/server/layouts/Root/NestProviders.js",
+        "types": "./dist/server/layouts/Root/NestProviders.d.ts",
+        "default": "./dist/server/layouts/Root/NestProviders.js"
       },
       "./layouts/RootProviders": {
-        "import": "./dist/layouts/Root/RootProviders.js",
-        "types": "./dist/layouts/Root/RootProviders.d.ts",
-        "default": "./dist/layouts/Root/RootProviders.js"
+        "import": "./dist/client/layouts/Root/RootProviders.js",
+        "types": "./dist/client/layouts/Root/RootProviders.d.ts",
+        "default": "./dist/client/layouts/Root/RootProviders.js"
       },
       "./layouts/DocumentRoot": {
-        "import": "./dist/layouts/Root/DocumentRoot.js",
-        "types": "./dist/layouts/Root/DocumentRoot.d.ts",
-        "default": "./dist/layouts/Root/DocumentRoot.js"
+        "import": "./dist/shared/layouts/Root/DocumentRoot.js",
+        "types": "./dist/shared/layouts/Root/DocumentRoot.d.ts",
+        "default": "./dist/shared/layouts/Root/DocumentRoot.js"
       },
       "./layouts/Root/ResolveThemeOnClient": {
-        "import": "./dist/layouts/Root/ResolveThemeOnClient.js",
-        "types": "./dist/layouts/Root/ResolveThemeOnClient.d.ts",
-        "default": "./dist/layouts/Root/ResolveThemeOnClient.js"
+        "import": "./dist/shared/layouts/Root/ResolveThemeOnClient.js",
+        "types": "./dist/shared/layouts/Root/ResolveThemeOnClient.d.ts",
+        "default": "./dist/shared/layouts/Root/ResolveThemeOnClient.js"
       },
       "./layouts/Root/getRootLayoutData": {
-        "import": "./dist/layouts/Root/getRootLayoutData.js",
-        "types": "./dist/layouts/Root/getRootLayoutData.d.ts",
-        "default": "./dist/layouts/Root/getRootLayoutData.js"
+        "import": "./dist/server/layouts/Root/getRootLayoutData.js",
+        "types": "./dist/server/layouts/Root/getRootLayoutData.d.ts",
+        "default": "./dist/server/layouts/Root/getRootLayoutData.js"
       },
       "./css": {
         "import": "./dist/styles.css",
@@ -507,164 +607,469 @@
         "default": "./dist/assets/index.js"
       },
       "./elements/RenderServerComponent": {
-        "import": "./dist/elements/RenderServerComponent/index.js",
-        "types": "./dist/elements/RenderServerComponent/index.d.ts",
-        "default": "./dist/elements/RenderServerComponent/index.js"
+        "import": "./dist/server/elements/RenderServerComponent/index.js",
+        "types": "./dist/server/elements/RenderServerComponent/index.d.ts",
+        "default": "./dist/server/elements/RenderServerComponent/index.js"
+      },
+      "./elements/DocumentHeader": {
+        "import": "./dist/server/elements/DocumentHeader/index.js",
+        "types": "./dist/server/elements/DocumentHeader/index.d.ts",
+        "default": "./dist/server/elements/DocumentHeader/index.js"
+      },
+      "./elements/FieldDiffContainer": {
+        "import": "./dist/shared/elements/FieldDiffContainer/index.js",
+        "types": "./dist/shared/elements/FieldDiffContainer/index.d.ts",
+        "default": "./dist/shared/elements/FieldDiffContainer/index.js"
+      },
+      "./elements/FieldDiffLabel": {
+        "import": "./dist/shared/elements/FieldDiffLabel/index.js",
+        "types": "./dist/shared/elements/FieldDiffLabel/index.d.ts",
+        "default": "./dist/shared/elements/FieldDiffLabel/index.js"
+      },
+      "./elements/FormHeader": {
+        "import": "./dist/shared/elements/FormHeader/index.js",
+        "types": "./dist/shared/elements/FormHeader/index.d.ts",
+        "default": "./dist/shared/elements/FormHeader/index.js"
+      },
+      "./elements/HTMLDiff": {
+        "import": "./dist/shared/elements/HTMLDiff/index.js",
+        "types": "./dist/shared/elements/HTMLDiff/index.d.ts",
+        "default": "./dist/shared/elements/HTMLDiff/index.js"
+      },
+      "./elements/LLMInstructionsCell": {
+        "import": "./dist/server/elements/LLMInstructionsCell/index.js",
+        "types": "./dist/server/elements/LLMInstructionsCell/index.d.ts",
+        "default": "./dist/server/elements/LLMInstructionsCell/index.js"
+      },
+      "./elements/Logo": {
+        "import": "./dist/server/elements/Logo/index.js",
+        "types": "./dist/server/elements/Logo/index.d.ts",
+        "default": "./dist/server/elements/Logo/index.js"
+      },
+      "./elements/Nav": {
+        "import": "./dist/server/elements/Nav/index.js",
+        "types": "./dist/server/elements/Nav/index.d.ts",
+        "default": "./dist/server/elements/Nav/index.js"
+      },
+      "./elements/RenderComponent": {
+        "import": "./dist/shared/elements/RenderComponent/index.js",
+        "types": "./dist/shared/elements/RenderComponent/index.d.ts",
+        "default": "./dist/shared/elements/RenderComponent/index.js"
+      },
+      "./elements/RenderCustomComponent": {
+        "import": "./dist/shared/elements/RenderCustomComponent/index.js",
+        "types": "./dist/shared/elements/RenderCustomComponent/index.d.ts",
+        "default": "./dist/shared/elements/RenderCustomComponent/index.js"
+      },
+      "./elements/TableSection": {
+        "import": "./dist/shared/elements/TableSection/index.js",
+        "types": "./dist/shared/elements/TableSection/index.d.ts",
+        "default": "./dist/shared/elements/TableSection/index.js"
+      },
+      "./elements/Translation": {
+        "import": "./dist/shared/elements/Translation/index.js",
+        "types": "./dist/shared/elements/Translation/index.d.ts",
+        "default": "./dist/shared/elements/Translation/index.js"
+      },
+      "./elements/withMergedProps": {
+        "import": "./dist/shared/elements/withMergedProps/index.js",
+        "types": "./dist/shared/elements/withMergedProps/index.d.ts",
+        "default": "./dist/shared/elements/withMergedProps/index.js"
+      },
+      "./elements/WithServerSideProps": {
+        "import": "./dist/shared/elements/WithServerSideProps/index.js",
+        "types": "./dist/shared/elements/WithServerSideProps/index.d.ts",
+        "default": "./dist/shared/elements/WithServerSideProps/index.js"
       },
       "./elements/*": {
-        "import": "./dist/elements/*/index.js",
-        "types": "./dist/elements/*/index.d.ts",
-        "default": "./dist/elements/*/index.js"
+        "import": "./dist/client/elements/*/index.js",
+        "types": "./dist/client/elements/*/index.d.ts",
+        "default": "./dist/client/elements/*/index.js"
       },
       "./fields/*": {
-        "import": "./dist/fields/*/index.js",
-        "types": "./dist/fields/*/index.d.ts",
-        "default": "./dist/fields/*/index.js"
+        "import": "./dist/client/fields/*/index.js",
+        "types": "./dist/client/fields/*/index.d.ts",
+        "default": "./dist/client/fields/*/index.js"
       },
       "./forms/fieldSchemasToFormState": {
-        "import": "./dist/forms/fieldSchemasToFormState/index.js",
-        "types": "./dist/forms/fieldSchemasToFormState/index.d.ts",
-        "default": "./dist/forms/fieldSchemasToFormState/index.js"
+        "import": "./dist/server/forms/fieldSchemasToFormState/index.js",
+        "types": "./dist/server/forms/fieldSchemasToFormState/index.d.ts",
+        "default": "./dist/server/forms/fieldSchemasToFormState/index.js"
       },
       "./forms/renderField": {
-        "import": "./dist/forms/fieldSchemasToFormState/renderField.js",
-        "types": "./dist/forms/fieldSchemasToFormState/renderField.d.ts",
-        "default": "./dist/forms/fieldSchemasToFormState/renderField.js"
+        "import": "./dist/server/forms/fieldSchemasToFormState/renderField.js",
+        "types": "./dist/server/forms/fieldSchemasToFormState/renderField.d.ts",
+        "default": "./dist/server/forms/fieldSchemasToFormState/renderField.js"
       },
       "./forms/*": {
-        "import": "./dist/forms/*/index.js",
-        "types": "./dist/forms/*/index.d.ts",
-        "default": "./dist/forms/*/index.js"
+        "import": "./dist/client/forms/*/index.js",
+        "types": "./dist/client/forms/*/index.d.ts",
+        "default": "./dist/client/forms/*/index.js"
+      },
+      "./graphics/Account": {
+        "import": "./dist/client/graphics/Account/index.js",
+        "types": "./dist/client/graphics/Account/index.d.ts",
+        "default": "./dist/client/graphics/Account/index.js"
+      },
+      "./graphics/DefaultBlockImage": {
+        "import": "./dist/client/graphics/DefaultBlockImage/index.js",
+        "types": "./dist/client/graphics/DefaultBlockImage/index.d.ts",
+        "default": "./dist/client/graphics/DefaultBlockImage/index.js"
       },
       "./graphics/*": {
-        "import": "./dist/graphics/*/index.js",
-        "types": "./dist/graphics/*/index.d.ts",
-        "default": "./dist/graphics/*/index.js"
+        "import": "./dist/shared/graphics/*/index.js",
+        "types": "./dist/shared/graphics/*/index.d.ts",
+        "default": "./dist/shared/graphics/*/index.js"
       },
       "./hooks/*": {
-        "import": "./dist/hooks/*.js",
-        "types": "./dist/hooks/*.d.ts",
-        "default": "./dist/hooks/*.js"
+        "import": "./dist/client/hooks/*.js",
+        "types": "./dist/client/hooks/*.d.ts",
+        "default": "./dist/client/hooks/*.js"
+      },
+      "./icons/AlignJustified": {
+        "import": "./dist/shared/icons/AlignJustified/index.js",
+        "types": "./dist/shared/icons/AlignJustified/index.d.ts",
+        "default": "./dist/shared/icons/AlignJustified/index.js"
+      },
+      "./icons/Check": {
+        "import": "./dist/shared/icons/Check/index.js",
+        "types": "./dist/shared/icons/Check/index.d.ts",
+        "default": "./dist/shared/icons/Check/index.js"
+      },
+      "./icons/Folder": {
+        "import": "./dist/shared/icons/Folder/index.js",
+        "types": "./dist/shared/icons/Folder/index.d.ts",
+        "default": "./dist/shared/icons/Folder/index.js"
+      },
+      "./icons/Tag": {
+        "import": "./dist/shared/icons/Tag/index.js",
+        "types": "./dist/shared/icons/Tag/index.d.ts",
+        "default": "./dist/shared/icons/Tag/index.js"
       },
       "./icons/*": {
-        "import": "./dist/icons/*/index.js",
-        "types": "./dist/icons/*/index.d.ts",
-        "default": "./dist/icons/*/index.js"
+        "import": "./dist/client/icons/*/index.js",
+        "types": "./dist/client/icons/*/index.d.ts",
+        "default": "./dist/client/icons/*/index.js"
       },
       "./utilities/formatMetadata": {
-        "import": "./dist/utilities/formatMetadata.js",
-        "types": "./dist/utilities/formatMetadata.d.ts",
-        "default": "./dist/utilities/formatMetadata.js"
+        "import": "./dist/server/utilities/formatMetadata.js",
+        "types": "./dist/server/utilities/formatMetadata.d.ts",
+        "default": "./dist/server/utilities/formatMetadata.js"
       },
       "./views/API/generateAPIViewMetadata": {
-        "import": "./dist/views/API/generateAPIViewMetadata.js",
-        "types": "./dist/views/API/generateAPIViewMetadata.d.ts",
-        "default": "./dist/views/API/generateAPIViewMetadata.js"
+        "import": "./dist/server/views/API/generateAPIViewMetadata.js",
+        "types": "./dist/server/views/API/generateAPIViewMetadata.d.ts",
+        "default": "./dist/server/views/API/generateAPIViewMetadata.js"
       },
       "./views/CollectionTrash/generateCollectionTrashMetadata": {
-        "import": "./dist/views/CollectionTrash/generateCollectionTrashMetadata.js",
-        "types": "./dist/views/CollectionTrash/generateCollectionTrashMetadata.d.ts",
-        "default": "./dist/views/CollectionTrash/generateCollectionTrashMetadata.js"
+        "import": "./dist/server/views/CollectionTrash/generateCollectionTrashMetadata.js",
+        "types": "./dist/server/views/CollectionTrash/generateCollectionTrashMetadata.d.ts",
+        "default": "./dist/server/views/CollectionTrash/generateCollectionTrashMetadata.js"
       },
       "./views/Document/generateEditViewMetadata": {
-        "import": "./dist/views/Document/generateEditViewMetadata.js",
-        "types": "./dist/views/Document/generateEditViewMetadata.d.ts",
-        "default": "./dist/views/Document/generateEditViewMetadata.js"
+        "import": "./dist/server/views/Document/generateEditViewMetadata.js",
+        "types": "./dist/server/views/Document/generateEditViewMetadata.d.ts",
+        "default": "./dist/server/views/Document/generateEditViewMetadata.js"
       },
       "./views/List/generateListViewMetadata": {
-        "import": "./dist/views/List/generateListViewMetadata.js",
-        "types": "./dist/views/List/generateListViewMetadata.d.ts",
-        "default": "./dist/views/List/generateListViewMetadata.js"
+        "import": "./dist/server/views/List/generateListViewMetadata.js",
+        "types": "./dist/server/views/List/generateListViewMetadata.d.ts",
+        "default": "./dist/server/views/List/generateListViewMetadata.js"
       },
       "./views/Root/generateCustomViewMetadata": {
-        "import": "./dist/views/Root/generateCustomViewMetadata.js",
-        "types": "./dist/views/Root/generateCustomViewMetadata.d.ts",
-        "default": "./dist/views/Root/generateCustomViewMetadata.js"
+        "import": "./dist/server/views/Root/generateCustomViewMetadata.js",
+        "types": "./dist/server/views/Root/generateCustomViewMetadata.d.ts",
+        "default": "./dist/server/views/Root/generateCustomViewMetadata.js"
       },
       "./views/Version/generateVersionViewMetadata": {
-        "import": "./dist/views/Version/generateVersionViewMetadata.js",
-        "types": "./dist/views/Version/generateVersionViewMetadata.d.ts",
-        "default": "./dist/views/Version/generateVersionViewMetadata.js"
+        "import": "./dist/server/views/Version/generateVersionViewMetadata.js",
+        "types": "./dist/server/views/Version/generateVersionViewMetadata.d.ts",
+        "default": "./dist/server/views/Version/generateVersionViewMetadata.js"
       },
       "./views/Versions/generateVersionsViewMetadata": {
-        "import": "./dist/views/Versions/generateVersionsViewMetadata.js",
-        "types": "./dist/views/Versions/generateVersionsViewMetadata.d.ts",
-        "default": "./dist/views/Versions/generateVersionsViewMetadata.js"
+        "import": "./dist/server/views/Versions/generateVersionsViewMetadata.js",
+        "types": "./dist/server/views/Versions/generateVersionsViewMetadata.d.ts",
+        "default": "./dist/server/views/Versions/generateVersionsViewMetadata.js"
       },
       "./views/Dashboard/serverFunctions": {
-        "import": "./dist/views/Dashboard/serverFunctions.js",
-        "types": "./dist/views/Dashboard/serverFunctions.d.ts",
-        "default": "./dist/views/Dashboard/serverFunctions.js"
+        "import": "./dist/server/views/Dashboard/serverFunctions.js",
+        "types": "./dist/server/views/Dashboard/serverFunctions.d.ts",
+        "default": "./dist/server/views/Dashboard/serverFunctions.js"
       },
       "./views/Document/handleServerFunction": {
-        "import": "./dist/views/Document/handleServerFunction.js",
-        "types": "./dist/views/Document/handleServerFunction.d.ts",
-        "default": "./dist/views/Document/handleServerFunction.js"
+        "import": "./dist/server/views/Document/handleServerFunction.js",
+        "types": "./dist/server/views/Document/handleServerFunction.d.ts",
+        "default": "./dist/server/views/Document/handleServerFunction.js"
       },
       "./views/Document/renderDocumentSlots": {
-        "import": "./dist/views/Document/renderDocumentSlots.js",
-        "types": "./dist/views/Document/renderDocumentSlots.d.ts",
-        "default": "./dist/views/Document/renderDocumentSlots.js"
+        "import": "./dist/server/views/Document/renderDocumentSlots.js",
+        "types": "./dist/server/views/Document/renderDocumentSlots.d.ts",
+        "default": "./dist/server/views/Document/renderDocumentSlots.js"
       },
       "./views/List/handleServerFunction": {
-        "import": "./dist/views/List/handleServerFunction.js",
-        "types": "./dist/views/List/handleServerFunction.d.ts",
-        "default": "./dist/views/List/handleServerFunction.js"
+        "import": "./dist/server/views/List/handleServerFunction.js",
+        "types": "./dist/server/views/List/handleServerFunction.d.ts",
+        "default": "./dist/server/views/List/handleServerFunction.js"
       },
       "./views/Versions/fetchVersions": {
-        "import": "./dist/views/Versions/fetchVersions.js",
-        "types": "./dist/views/Versions/fetchVersions.d.ts",
-        "default": "./dist/views/Versions/fetchVersions.js"
+        "import": "./dist/server/views/Versions/fetchVersions.js",
+        "types": "./dist/server/views/Versions/fetchVersions.d.ts",
+        "default": "./dist/server/views/Versions/fetchVersions.js"
       },
       "./views/NotFound/page": {
-        "import": "./dist/views/NotFound/page.js",
-        "types": "./dist/views/NotFound/page.d.ts",
-        "default": "./dist/views/NotFound/page.js"
+        "import": "./dist/server/views/NotFound/page.js",
+        "types": "./dist/server/views/NotFound/page.d.ts",
+        "default": "./dist/server/views/NotFound/page.js"
       },
       "./views/NotFound/client": {
-        "import": "./dist/views/NotFound/client.js",
-        "types": "./dist/views/NotFound/client.d.ts",
-        "default": "./dist/views/NotFound/client.js"
+        "import": "./dist/client/views/NotFound/client.js",
+        "types": "./dist/client/views/NotFound/client.d.ts",
+        "default": "./dist/client/views/NotFound/client.js"
       },
       "./views/Root/getCustomViewByRoute": {
-        "import": "./dist/views/Root/getCustomViewByRoute.js",
-        "types": "./dist/views/Root/getCustomViewByRoute.d.ts",
-        "default": "./dist/views/Root/getCustomViewByRoute.js"
+        "import": "./dist/server/views/Root/getCustomViewByRoute.js",
+        "types": "./dist/server/views/Root/getCustomViewByRoute.d.ts",
+        "default": "./dist/server/views/Root/getCustomViewByRoute.js"
       },
       "./views/Root/adminViews": {
-        "import": "./dist/views/Root/adminViews.js",
-        "types": "./dist/views/Root/adminViews.d.ts",
-        "default": "./dist/views/Root/adminViews.js"
+        "import": "./dist/server/views/Root/adminViews.js",
+        "types": "./dist/server/views/Root/adminViews.d.ts",
+        "default": "./dist/server/views/Root/adminViews.js"
       },
       "./views/Root/generatePageMetadata": {
-        "import": "./dist/views/Root/generatePageMetadata.js",
-        "types": "./dist/views/Root/generatePageMetadata.d.ts",
-        "default": "./dist/views/Root/generatePageMetadata.js"
+        "import": "./dist/server/views/Root/generatePageMetadata.js",
+        "types": "./dist/server/views/Root/generatePageMetadata.d.ts",
+        "default": "./dist/server/views/Root/generatePageMetadata.js"
       },
       "./views/Document/getMetaBySegment": {
-        "import": "./dist/views/Document/getMetaBySegment.js",
-        "types": "./dist/views/Document/getMetaBySegment.d.ts",
-        "default": "./dist/views/Document/getMetaBySegment.js"
+        "import": "./dist/server/views/Document/getMetaBySegment.js",
+        "types": "./dist/server/views/Document/getMetaBySegment.d.ts",
+        "default": "./dist/server/views/Document/getMetaBySegment.js"
       },
       "./views/*/metadata": {
-        "import": "./dist/views/*/metadata.js",
-        "types": "./dist/views/*/metadata.d.ts",
-        "default": "./dist/views/*/metadata.js"
+        "import": "./dist/server/views/*/metadata.js",
+        "types": "./dist/server/views/*/metadata.d.ts",
+        "default": "./dist/server/views/*/metadata.js"
+      },
+      "./views/Edit": {
+        "import": "./dist/client/views/Edit/index.js",
+        "types": "./dist/client/views/Edit/index.d.ts",
+        "default": "./dist/client/views/Edit/index.js"
+      },
+      "./views/HierarchyList": {
+        "import": "./dist/client/views/HierarchyList/index.js",
+        "types": "./dist/client/views/HierarchyList/index.d.ts",
+        "default": "./dist/client/views/HierarchyList/index.js"
       },
       "./views/*": {
-        "import": "./dist/views/*/index.js",
-        "types": "./dist/views/*/index.d.ts",
-        "default": "./dist/views/*/index.js"
+        "import": "./dist/server/views/*/index.js",
+        "types": "./dist/server/views/*/index.d.ts",
+        "default": "./dist/server/views/*/index.js"
       },
       "./providers/*": {
-        "import": "./dist/providers/*/index.js",
-        "types": "./dist/providers/*/index.d.ts",
-        "default": "./dist/providers/*/index.js"
+        "import": "./dist/client/providers/*/index.js",
+        "types": "./dist/client/providers/*/index.d.ts",
+        "default": "./dist/client/providers/*/index.js"
+      },
+      "./utilities/abortAndIgnore": {
+        "import": "./dist/shared/utilities/abortAndIgnore.js",
+        "types": "./dist/shared/utilities/abortAndIgnore.d.ts",
+        "default": "./dist/shared/utilities/abortAndIgnore.js"
+      },
+      "./utilities/api": {
+        "import": "./dist/shared/utilities/api.js",
+        "types": "./dist/shared/utilities/api.d.ts",
+        "default": "./dist/shared/utilities/api.js"
+      },
+      "./utilities/appendCacheTag": {
+        "import": "./dist/client/utilities/appendCacheTag.js",
+        "types": "./dist/client/utilities/appendCacheTag.d.ts",
+        "default": "./dist/client/utilities/appendCacheTag.js"
+      },
+      "./utilities/canUseDOM": {
+        "import": "./dist/client/utilities/canUseDOM.js",
+        "types": "./dist/client/utilities/canUseDOM.d.ts",
+        "default": "./dist/client/utilities/canUseDOM.js"
+      },
+      "./utilities/combineFieldLabel": {
+        "import": "./dist/client/utilities/combineFieldLabel.js",
+        "types": "./dist/client/utilities/combineFieldLabel.d.ts",
+        "default": "./dist/client/utilities/combineFieldLabel.js"
+      },
+      "./utilities/deepMerge": {
+        "import": "./dist/client/utilities/deepMerge.js",
+        "types": "./dist/client/utilities/deepMerge.d.ts",
+        "default": "./dist/client/utilities/deepMerge.js"
+      },
+      "./utilities/filterOutUploadFields": {
+        "import": "./dist/client/utilities/filterOutUploadFields.js",
+        "types": "./dist/client/utilities/filterOutUploadFields.d.ts",
+        "default": "./dist/client/utilities/filterOutUploadFields.js"
+      },
+      "./utilities/findLocaleFromCode": {
+        "import": "./dist/shared/utilities/findLocaleFromCode.js",
+        "types": "./dist/shared/utilities/findLocaleFromCode.d.ts",
+        "default": "./dist/shared/utilities/findLocaleFromCode.js"
+      },
+      "./utilities/formatAbsoluteURL": {
+        "import": "./dist/client/utilities/formatAbsoluteURL.js",
+        "types": "./dist/client/utilities/formatAbsoluteURL.d.ts",
+        "default": "./dist/client/utilities/formatAbsoluteURL.js"
+      },
+      "./utilities/fuzzyMatch": {
+        "import": "./dist/client/utilities/fuzzyMatch.js",
+        "types": "./dist/client/utilities/fuzzyMatch.d.ts",
+        "default": "./dist/client/utilities/fuzzyMatch.js"
+      },
+      "./utilities/generateFieldID": {
+        "import": "./dist/client/utilities/generateFieldID.js",
+        "types": "./dist/client/utilities/generateFieldID.d.ts",
+        "default": "./dist/client/utilities/generateFieldID.js"
+      },
+      "./utilities/getActiveModal": {
+        "import": "./dist/client/utilities/getActiveModal.js",
+        "types": "./dist/client/utilities/getActiveModal.d.ts",
+        "default": "./dist/client/utilities/getActiveModal.js"
+      },
+      "./utilities/getColumns": {
+        "import": "./dist/shared/utilities/getColumns.js",
+        "types": "./dist/shared/utilities/getColumns.d.ts",
+        "default": "./dist/shared/utilities/getColumns.js"
+      },
+      "./utilities/getDisplayedFieldValue": {
+        "import": "./dist/client/utilities/getDisplayedFieldValue.js",
+        "types": "./dist/client/utilities/getDisplayedFieldValue.d.ts",
+        "default": "./dist/client/utilities/getDisplayedFieldValue.js"
+      },
+      "./utilities/getFilesFromClipboard": {
+        "import": "./dist/client/utilities/getFilesFromClipboard.js",
+        "types": "./dist/client/utilities/getFilesFromClipboard.d.ts",
+        "default": "./dist/client/utilities/getFilesFromClipboard.js"
+      },
+      "./utilities/getGlobalData": {
+        "import": "./dist/shared/utilities/getGlobalData.js",
+        "types": "./dist/shared/utilities/getGlobalData.d.ts",
+        "default": "./dist/shared/utilities/getGlobalData.js"
+      },
+      "./utilities/getNavGroups": {
+        "import": "./dist/shared/utilities/getNavGroups.js",
+        "types": "./dist/shared/utilities/getNavGroups.d.ts",
+        "default": "./dist/shared/utilities/getNavGroups.js"
+      },
+      "./utilities/getVisibleEntities": {
+        "import": "./dist/shared/utilities/getVisibleEntities.js",
+        "types": "./dist/shared/utilities/getVisibleEntities.d.ts",
+        "default": "./dist/shared/utilities/getVisibleEntities.js"
+      },
+      "./utilities/groupNavItems": {
+        "import": "./dist/shared/utilities/groupNavItems.js",
+        "types": "./dist/shared/utilities/groupNavItems.d.ts",
+        "default": "./dist/shared/utilities/groupNavItems.js"
+      },
+      "./utilities/handleBackToDashboard": {
+        "import": "./dist/shared/utilities/handleBackToDashboard.js",
+        "types": "./dist/shared/utilities/handleBackToDashboard.d.ts",
+        "default": "./dist/shared/utilities/handleBackToDashboard.js"
+      },
+      "./utilities/handleGoBack": {
+        "import": "./dist/shared/utilities/handleGoBack.js",
+        "types": "./dist/shared/utilities/handleGoBack.d.ts",
+        "default": "./dist/shared/utilities/handleGoBack.js"
+      },
+      "./utilities/handleTakeOver": {
+        "import": "./dist/shared/utilities/handleTakeOver.js",
+        "types": "./dist/shared/utilities/handleTakeOver.d.ts",
+        "default": "./dist/shared/utilities/handleTakeOver.js"
+      },
+      "./utilities/hasSavePermission": {
+        "import": "./dist/shared/utilities/hasSavePermission.js",
+        "types": "./dist/shared/utilities/hasSavePermission.d.ts",
+        "default": "./dist/shared/utilities/hasSavePermission.js"
+      },
+      "./utilities/isClientUserObject": {
+        "import": "./dist/shared/utilities/isClientUserObject.js",
+        "types": "./dist/shared/utilities/isClientUserObject.d.ts",
+        "default": "./dist/shared/utilities/isClientUserObject.js"
+      },
+      "./utilities/isEditing": {
+        "import": "./dist/shared/utilities/isEditing.js",
+        "types": "./dist/shared/utilities/isEditing.d.ts",
+        "default": "./dist/shared/utilities/isEditing.js"
+      },
+      "./utilities/isHttpURL": {
+        "import": "./dist/client/utilities/isHttpURL.js",
+        "types": "./dist/client/utilities/isHttpURL.d.ts",
+        "default": "./dist/client/utilities/isHttpURL.js"
+      },
+      "./utilities/isNavEntityVisible": {
+        "import": "./dist/shared/utilities/isNavEntityVisible.js",
+        "types": "./dist/shared/utilities/isNavEntityVisible.d.ts",
+        "default": "./dist/shared/utilities/isNavEntityVisible.js"
+      },
+      "./utilities/isSuperset": {
+        "import": "./dist/client/utilities/isSuperset.js",
+        "types": "./dist/client/utilities/isSuperset.d.ts",
+        "default": "./dist/client/utilities/isSuperset.js"
+      },
+      "./utilities/isValidReactElement": {
+        "import": "./dist/shared/utilities/isValidReactElement.js",
+        "types": "./dist/shared/utilities/isValidReactElement.d.ts",
+        "default": "./dist/shared/utilities/isValidReactElement.js"
+      },
+      "./utilities/normalizeRelationshipValue": {
+        "import": "./dist/client/utilities/normalizeRelationshipValue.js",
+        "types": "./dist/client/utilities/normalizeRelationshipValue.d.ts",
+        "default": "./dist/client/utilities/normalizeRelationshipValue.js"
+      },
+      "./utilities/parseSearchParams": {
+        "import": "./dist/client/utilities/parseSearchParams.js",
+        "types": "./dist/client/utilities/parseSearchParams.d.ts",
+        "default": "./dist/client/utilities/parseSearchParams.js"
+      },
+      "./utilities/reduceFieldsToOptions": {
+        "import": "./dist/client/utilities/reduceFieldsToOptions.js",
+        "types": "./dist/client/utilities/reduceFieldsToOptions.d.ts",
+        "default": "./dist/client/utilities/reduceFieldsToOptions.js"
+      },
+      "./utilities/reduceFieldsToValuesWithValidation": {
+        "import": "./dist/client/utilities/reduceFieldsToValuesWithValidation.js",
+        "types": "./dist/client/utilities/reduceFieldsToValuesWithValidation.d.ts",
+        "default": "./dist/client/utilities/reduceFieldsToValuesWithValidation.js"
+      },
+      "./utilities/sanitizeFilterOptionsQuery": {
+        "import": "./dist/client/utilities/sanitizeFilterOptionsQuery.js",
+        "types": "./dist/client/utilities/sanitizeFilterOptionsQuery.d.ts",
+        "default": "./dist/client/utilities/sanitizeFilterOptionsQuery.js"
+      },
+      "./utilities/sanitizeID": {
+        "import": "./dist/shared/utilities/sanitizeID.js",
+        "types": "./dist/shared/utilities/sanitizeID.d.ts",
+        "default": "./dist/shared/utilities/sanitizeID.js"
+      },
+      "./utilities/scrollToID": {
+        "import": "./dist/client/utilities/scrollToID.js",
+        "types": "./dist/client/utilities/scrollToID.d.ts",
+        "default": "./dist/client/utilities/scrollToID.js"
+      },
+      "./utilities/shouldPermanentlyDelete": {
+        "import": "./dist/client/utilities/shouldPermanentlyDelete.js",
+        "types": "./dist/client/utilities/shouldPermanentlyDelete.d.ts",
+        "default": "./dist/client/utilities/shouldPermanentlyDelete.js"
+      },
+      "./utilities/stringifyTruncated": {
+        "import": "./dist/client/utilities/stringifyTruncated.js",
+        "types": "./dist/client/utilities/stringifyTruncated.d.ts",
+        "default": "./dist/client/utilities/stringifyTruncated.js"
+      },
+      "./utilities/traverseForLocalizedFields": {
+        "import": "./dist/shared/utilities/traverseForLocalizedFields.js",
+        "types": "./dist/shared/utilities/traverseForLocalizedFields.d.ts",
+        "default": "./dist/shared/utilities/traverseForLocalizedFields.js"
       },
       "./utilities/*": {
-        "import": "./dist/utilities/*.js",
-        "types": "./dist/utilities/*.d.ts",
-        "default": "./dist/utilities/*.js"
+        "import": "./dist/server/utilities/*.js",
+        "types": "./dist/server/utilities/*.d.ts",
+        "default": "./dist/server/utilities/*.js"
       },
       "./server": {
         "import": "./dist/exports/server.js",
@@ -672,49 +1077,49 @@
         "default": "./dist/exports/server.js"
       },
       "./views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn": {
-        "import": "./dist/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.js",
-        "types": "./dist/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.d.ts",
-        "default": "./dist/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.js"
+        "import": "./dist/server/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.js",
+        "types": "./dist/server/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.d.ts",
+        "default": "./dist/server/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.js"
       },
       "./views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn": {
-        "import": "./dist/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.js",
-        "types": "./dist/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.d.ts",
-        "default": "./dist/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.js"
+        "import": "./dist/server/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.js",
+        "types": "./dist/server/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.d.ts",
+        "default": "./dist/server/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.js"
       },
       "./elements/Nav/SidebarTabs/renderTabServerFn": {
-        "import": "./dist/elements/Nav/SidebarTabs/renderTabServerFn.js",
-        "types": "./dist/elements/Nav/SidebarTabs/renderTabServerFn.d.ts",
-        "default": "./dist/elements/Nav/SidebarTabs/renderTabServerFn.js"
+        "import": "./dist/server/elements/Nav/SidebarTabs/renderTabServerFn.js",
+        "types": "./dist/server/elements/Nav/SidebarTabs/renderTabServerFn.d.ts",
+        "default": "./dist/server/elements/Nav/SidebarTabs/renderTabServerFn.js"
       },
       "./elements/RenderServerComponent/clientOnly": {
-        "import": "./dist/elements/RenderServerComponent/clientOnly.js",
-        "types": "./dist/elements/RenderServerComponent/clientOnly.d.ts",
-        "default": "./dist/elements/RenderServerComponent/clientOnly.js"
+        "import": "./dist/server/elements/RenderServerComponent/clientOnly.js",
+        "types": "./dist/server/elements/RenderServerComponent/clientOnly.d.ts",
+        "default": "./dist/server/elements/RenderServerComponent/clientOnly.js"
       },
       "./elements/Nav/getNavPrefs": {
-        "import": "./dist/elements/Nav/getNavPrefs.js",
-        "types": "./dist/elements/Nav/getNavPrefs.d.ts",
-        "default": "./dist/elements/Nav/getNavPrefs.js"
+        "import": "./dist/server/elements/Nav/getNavPrefs.js",
+        "types": "./dist/server/elements/Nav/getNavPrefs.d.ts",
+        "default": "./dist/server/elements/Nav/getNavPrefs.js"
       },
       "./elements/DocumentHeader/Tabs/Tab/TabLink": {
-        "import": "./dist/elements/DocumentHeader/Tabs/Tab/TabLink.js",
-        "types": "./dist/elements/DocumentHeader/Tabs/Tab/TabLink.d.ts",
-        "default": "./dist/elements/DocumentHeader/Tabs/Tab/TabLink.js"
+        "import": "./dist/client/elements/DocumentHeader/Tabs/Tab/TabLink.js",
+        "types": "./dist/client/elements/DocumentHeader/Tabs/Tab/TabLink.d.ts",
+        "default": "./dist/client/elements/DocumentHeader/Tabs/Tab/TabLink.js"
       },
       "./elements/DocumentHeader/Tabs/ShouldRenderTabs": {
-        "import": "./dist/elements/DocumentHeader/Tabs/ShouldRenderTabs.js",
-        "types": "./dist/elements/DocumentHeader/Tabs/ShouldRenderTabs.d.ts",
-        "default": "./dist/elements/DocumentHeader/Tabs/ShouldRenderTabs.js"
+        "import": "./dist/client/elements/DocumentHeader/Tabs/ShouldRenderTabs.js",
+        "types": "./dist/client/elements/DocumentHeader/Tabs/ShouldRenderTabs.d.ts",
+        "default": "./dist/client/elements/DocumentHeader/Tabs/ShouldRenderTabs.js"
       },
       "./widgets/CollectionCards/index.client": {
-        "import": "./dist/widgets/CollectionCards/index.client.js",
-        "types": "./dist/widgets/CollectionCards/index.client.d.ts",
-        "default": "./dist/widgets/CollectionCards/index.client.js"
+        "import": "./dist/client/widgets/CollectionCards/index.client.js",
+        "types": "./dist/client/widgets/CollectionCards/index.client.d.ts",
+        "default": "./dist/client/widgets/CollectionCards/index.client.js"
       },
       "./utilities/serverFunctionRegistry": {
-        "import": "./dist/utilities/serverFunctionRegistry.js",
-        "types": "./dist/utilities/serverFunctionRegistry.d.ts",
-        "default": "./dist/utilities/serverFunctionRegistry.js"
+        "import": "./dist/server/utilities/serverFunctionRegistry.js",
+        "types": "./dist/server/utilities/serverFunctionRegistry.d.ts",
+        "default": "./dist/server/utilities/serverFunctionRegistry.js"
       }
     },
     "main": "./dist/exports/client/index.js",

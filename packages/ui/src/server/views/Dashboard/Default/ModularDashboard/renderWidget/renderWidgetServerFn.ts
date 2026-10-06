@@ -3,7 +3,7 @@ import type { Field, ServerFunction, WidgetServerProps } from 'payload'
 import React from 'react'
 
 import { RenderServerComponent } from '../../../../../elements/RenderServerComponent/index.js'
-import { extractLocaleData } from '../utils/localeUtils.js'
+import { extractLocaleData } from '../../../../../../shared/views/Dashboard/Default/ModularDashboard/utils/localeUtils.js'
 
 export type RenderWidgetServerFnArgs = {
   /**

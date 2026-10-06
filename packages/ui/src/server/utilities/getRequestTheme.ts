@@ -1,6 +1,6 @@
 import type { SanitizedConfig } from 'payload'
 
-import { defaultTheme, type Theme } from '../providers/Theme/shared.js'
+import { defaultTheme, type Theme } from '../../shared/providers/Theme/shared.js'
 
 type GetRequestThemeArgs = {
   config: SanitizedConfig

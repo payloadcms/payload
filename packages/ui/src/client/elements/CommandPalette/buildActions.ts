@@ -11,7 +11,7 @@ import { formatAdminURL } from 'payload/shared'
 
 import type { CommandPaletteAction, CommandPaletteGroup } from './types.js'
 
-import { isNavEntityVisible } from '../../utilities/isNavEntityVisible.js'
+import { isNavEntityVisible } from '../../../shared/utilities/isNavEntityVisible.js'
 
 type BuildActionsArgs = {
   adminRoute: string

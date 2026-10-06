@@ -3,7 +3,7 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
-import { buildFieldSchemaMap } from '../../packages/ui/src/utilities/buildFieldSchemaMap/index.js'
+import { buildFieldSchemaMap } from '../../packages/ui/src/server/utilities/buildFieldSchemaMap/index.js'
 import { test } from '../__helpers/int/vitest.js'
 import { fieldPathsSlug } from './shared.js'
 import { testDoc } from './testDoc.js'

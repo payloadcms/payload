@@ -2,10 +2,10 @@
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { LoadingOverlayTypes } from '../../elements/LoadingOverlay/types.js'
+import type { LoadingOverlayTypes } from '../LoadingOverlay/types.js'
 
-import { useLoadingOverlay } from '../../elements/LoadingOverlay/index.js'
-import { Spinner } from '../../elements/Spinner/index.js'
+import { useLoadingOverlay } from '../LoadingOverlay/index.js'
+import { Spinner } from '../Spinner/index.js'
 import { useFormProcessing } from '../../forms/Form/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.css'

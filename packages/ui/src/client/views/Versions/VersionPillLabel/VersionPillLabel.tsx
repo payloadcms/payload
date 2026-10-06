@@ -8,9 +8,9 @@ import { Pill } from '../../../elements/Pill/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { formatDate } from '../../../utilities/formatDocTitle/formatDateTitle.js'
+import { formatDate } from '../../../../shared/utilities/formatDocTitle/formatDateTitle.js'
 import './index.css'
-import { getVersionLabel } from './getVersionLabel.js'
+import { getVersionLabel } from '../../../../shared/views/Versions/VersionPillLabel/getVersionLabel.js'
 
 const baseClass = 'version-pill-label'
 

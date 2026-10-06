@@ -3,7 +3,7 @@ import React, { createContext } from 'react'
 
 import type { LoadingOverlayContext, ToggleLoadingOverlay } from './types.js'
 
-import { LoadingOverlay } from '../../elements/Loading/index.js'
+import { LoadingOverlay } from '../Loading/index.js'
 import { useDelayedRender } from '../../hooks/useDelayedRender.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { defaultLoadingOverlayState, reducer } from './reducer.js'

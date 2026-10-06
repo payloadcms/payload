@@ -4,7 +4,7 @@ import { type FormState } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-import { FormHeader } from '../../../elements/FormHeader/index.js'
+import { FormHeader } from '../../../../shared/elements/FormHeader/index.js'
 import { ConfirmPasswordField } from '../../../fields/ConfirmPassword/index.js'
 import { HiddenField } from '../../../fields/Hidden/index.js'
 import { PasswordField } from '../../../fields/Password/index.js'

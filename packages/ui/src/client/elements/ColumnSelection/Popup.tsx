@@ -6,7 +6,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { fieldIsHiddenOrDisabled, fieldIsID, isFieldDisabled } from 'payload/shared'
 import React, { useCallback, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
-import { AlignJustifiedIcon } from '../../icons/AlignJustified/index.js'
+import { AlignJustifiedIcon } from '../../../shared/icons/AlignJustified/index.js'
 import { SearchIcon } from '../../icons/Search/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'

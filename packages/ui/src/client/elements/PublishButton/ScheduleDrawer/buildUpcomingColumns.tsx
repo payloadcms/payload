@@ -5,7 +5,7 @@ import React from 'react'
 
 import type { UpcomingEvent } from './types.js'
 
-import { formatDate } from '../../../utilities/formatDocTitle/formatDateTitle.js'
+import { formatDate } from '../../../../shared/utilities/formatDocTitle/formatDateTitle.js'
 import { Button } from '../../Button/index.js'
 import { Pill } from '../../Pill/index.js'
 

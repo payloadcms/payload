@@ -4,9 +4,9 @@ import type { ClientCollectionConfig, SanitizedPermissions } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 
-import type { Props as ButtonProps } from '../../elements/Button/types.js'
+import type { Props as ButtonProps } from '../Button/types.js'
 
-import { Button } from '../../elements/Button/index.js'
+import { Button } from '../Button/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 
 export const AddNewButton = ({

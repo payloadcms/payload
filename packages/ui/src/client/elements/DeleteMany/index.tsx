@@ -12,11 +12,11 @@ import { CheckboxInput } from '../../fields/Checkbox/Input.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { requests } from '../../utilities/api.js'
+import { requests } from '../../../shared/utilities/api.js'
 import { shouldPermanentlyDelete } from '../../utilities/shouldPermanentlyDelete.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { ListSelectionButton } from '../ListSelection/index.js'
-import { Translation } from '../Translation/index.js'
+import { Translation } from '../../../shared/elements/Translation/index.js'
 
 type AfterDeleteResult = {
   [relationTo: string]: {

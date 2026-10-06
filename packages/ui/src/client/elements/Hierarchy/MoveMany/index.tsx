@@ -14,14 +14,14 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentSelection } from '../../../providers/DocumentSelection/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { requests } from '../../../utilities/api.js'
+import { requests } from '../../../../shared/utilities/api.js'
 import {
   getEffectiveHierarchyCollections,
   getHierarchyCollectionRestrictions,
 } from '../../../utilities/hierarchyCollectionRestrictions.js'
 import { ConfirmationModal } from '../../ConfirmationModal/index.js'
 import { ListSelectionButton } from '../../ListSelection/index.js'
-import { Translation } from '../../Translation/index.js'
+import { Translation } from '../../../../shared/elements/Translation/index.js'
 import { useHierarchyModal } from '../Modal/useHierarchyModal.js'
 
 export const baseClass = 'move-many'

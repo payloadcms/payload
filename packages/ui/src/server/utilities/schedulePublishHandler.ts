@@ -3,7 +3,7 @@ import type { SchedulePublishTaskInput, ServerFunction } from 'payload'
 import { canAccessAdmin, Forbidden } from 'payload'
 import { hasScheduledPublishEnabled } from 'payload/shared'
 
-import type { UpcomingEvent } from '../elements/PublishButton/ScheduleDrawer/types.js'
+import type { UpcomingEvent } from '../../client/elements/PublishButton/ScheduleDrawer/types.js'
 
 import { buildUpcomingScheduleWhere } from '../elements/PublishButton/ScheduleDrawer/buildUpcomingScheduleWhere.js'
 import { getDocumentPermissions } from './getDocumentPermissions.js'

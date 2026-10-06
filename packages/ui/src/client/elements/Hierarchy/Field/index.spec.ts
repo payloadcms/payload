@@ -21,7 +21,7 @@ const state = vi.hoisted(() => ({
 }))
 
 vi.mock('@payloadcms/translations', () => ({ getTranslation: (label: string) => label }))
-vi.mock('../../../fields/mergeFieldStyles.js', () => ({ mergeFieldStyles: () => ({}) }))
+vi.mock('../../../../shared/fields/mergeFieldStyles.js', () => ({ mergeFieldStyles: () => ({}) }))
 vi.mock('../../../fields/Relationship/Input.js', () => ({
   RelationshipInput: (props: {
     AddNewRelationButton: React.ReactNode
@@ -40,7 +40,7 @@ vi.mock('../../../forms/useField/index.js', () => ({
     value: [1],
   }),
 }))
-vi.mock('../../../icons/Tag/index.js', () => ({ TagIcon: () => null }))
+vi.mock('../../../../shared/icons/Tag/index.js', () => ({ TagIcon: () => null }))
 vi.mock('../../../providers/Config/index.js', () => ({
   useConfig: () => ({
     getEntityConfig: () => ({

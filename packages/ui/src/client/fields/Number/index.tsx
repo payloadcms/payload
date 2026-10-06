@@ -7,7 +7,7 @@ import type { NumberInputProps } from './types.js'
 
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { mergeFieldStyles } from '../mergeFieldStyles.js'
+import { mergeFieldStyles } from '../../../shared/fields/mergeFieldStyles.js'
 import { NumberInput } from './Input.js'
 import './index.css'
 

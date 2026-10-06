@@ -1,4 +1,4 @@
-@import '../../../elements/SidebarRow/index.css';
+@import '../../SidebarRow/index.css';
 @layer payload-default {
   .hierarchy-sidebar-tab {
     display: flex;

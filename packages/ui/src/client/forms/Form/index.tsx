@@ -39,8 +39,8 @@ import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadHandlers } from '../../providers/UploadHandlers/index.js'
-import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
-import { requests } from '../../utilities/api.js'
+import { abortAndIgnore, handleAbortRef } from '../../../shared/utilities/abortAndIgnore.js'
+import { requests } from '../../../shared/utilities/api.js'
 import {
   BackgroundProcessingContext,
   DocumentFormContext,
@@ -845,7 +845,7 @@ export const Form: React.FC<FormProps> = (props) => {
         let serverState: FormState
 
         for (const onChangeFn of onChange) {
-          // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
+          // Edit view default onChange is in packages/ui/src/client/views/Edit/index.tsx. This onChange usually sends a form state request
           serverState = await onChangeFn({
             formState: deepCopyObjectSimpleWithoutReactComponents(formState, {
               excludeFiles: true,

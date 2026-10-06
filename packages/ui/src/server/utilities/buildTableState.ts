@@ -15,7 +15,7 @@ import { APIError, canAccessAdmin, formatErrors } from 'payload'
 import { applyLocaleFiltering, isNumber } from 'payload/shared'
 
 import { getClientConfig } from './getClientConfig.js'
-import { getColumns } from './getColumns.js'
+import { getColumns } from '../../shared/utilities/getColumns.js'
 import { renderFilters, renderTable } from './renderTable.js'
 import { upsertPreferences } from './upsertPreferences.js'
 

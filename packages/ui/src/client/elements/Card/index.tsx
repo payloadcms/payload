@@ -3,7 +3,7 @@
 import React from 'react'
 
 import { Button } from '../Button/index.js'
-import './index.css'
+import '../../../shared/elements/Card/index.css'
 
 export type Props = {
   actions?: React.ReactNode

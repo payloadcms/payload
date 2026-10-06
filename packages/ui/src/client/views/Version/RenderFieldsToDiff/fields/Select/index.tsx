@@ -5,12 +5,12 @@ import type { Option, SelectField, SelectFieldDiffClientProps } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import { FieldDiffContainer } from '../../../../../elements/FieldDiffContainer/index.js'
+import { FieldDiffContainer } from '../../../../../../shared/elements/FieldDiffContainer/index.js'
 import {
   escapeDiffHTML,
   getHTMLDiffComponents,
   unescapeDiffHTML,
-} from '../../../../../elements/HTMLDiff/index.js'
+} from '../../../../../../shared/elements/HTMLDiff/index.js'
 import { useTranslation } from '../../../../../providers/Translation/index.js'
 import './index.css'
 

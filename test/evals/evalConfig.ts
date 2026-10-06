@@ -9,7 +9,7 @@ import type {
 import { initI18n } from '@payloadcms/translations'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
-import { buildFieldSchemaMap } from '../../packages/ui/src/utilities/buildFieldSchemaMap/index.js'
+import { buildFieldSchemaMap } from '../../packages/ui/src/server/utilities/buildFieldSchemaMap/index.js'
 
 const missingValue = Symbol('missing eval config value')
 

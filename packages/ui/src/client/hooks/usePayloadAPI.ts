@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { useLocale } from '../providers/Locale/index.js'
 import { useTranslation } from '../providers/Translation/index.js'
-import { requests } from '../utilities/api.js'
+import { requests } from '../../shared/utilities/api.js'
 
 type Result = [
   {

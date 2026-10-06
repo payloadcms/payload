@@ -7,12 +7,12 @@ import { toast } from 'sonner'
 import type { SelectionWithPath } from '../../../../Hierarchy/Modal/types.js'
 
 import { useIntersect } from '../../../../../hooks/useIntersect.js'
-import { FolderIcon } from '../../../../../icons/Folder/index.js'
-import { TagIcon } from '../../../../../icons/Tag/index.js'
+import { FolderIcon } from '../../../../../../shared/icons/Folder/index.js'
+import { TagIcon } from '../../../../../../shared/icons/Tag/index.js'
 import { useConfig } from '../../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../../providers/Translation/index.js'
 import { canUseDOM } from '../../../../../utilities/canUseDOM.js'
-import { formatDocTitle } from '../../../../../utilities/formatDocTitle/index.js'
+import { formatDocTitle } from '../../../../../../shared/utilities/formatDocTitle/index.js'
 import {
   getEffectiveHierarchyCollections,
   getHierarchyCollectionRestrictions,

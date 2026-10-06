@@ -4,7 +4,7 @@ import { getTranslation } from '@payloadcms/translations'
 
 import type { GenerateEditViewMetadata } from '../API/generateAPIViewMetadata.js'
 
-import { formatDate } from '../../utilities/formatDocTitle/formatDateTitle.js'
+import { formatDate } from '../../../shared/utilities/formatDocTitle/formatDateTitle.js'
 import { formatMetadata } from '../../utilities/formatMetadata.js'
 
 /**

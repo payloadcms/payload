@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 
 import { Button } from '../../../elements/Button/index.js'
 import { ConfirmationModal } from '../../../elements/ConfirmationModal/index.js'
-import { Translation } from '../../../elements/Translation/index.js'
+import { Translation } from '../../../../shared/elements/Translation/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 

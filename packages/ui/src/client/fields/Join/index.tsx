@@ -15,7 +15,7 @@ import React, { useMemo } from 'react'
 
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { RelationshipTable } from '../../elements/RelationshipTable/index.js'
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { RenderCustomComponent } from '../../../shared/elements/RenderCustomComponent/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'

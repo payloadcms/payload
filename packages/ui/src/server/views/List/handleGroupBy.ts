@@ -17,7 +17,7 @@ import type {
 import { getTranslation } from '@payloadcms/translations'
 import { flattenAllFields } from 'payload'
 
-import { formatDate } from '../../utilities/formatDocTitle/formatDateTitle.js'
+import { formatDate } from '../../../shared/utilities/formatDocTitle/formatDateTitle.js'
 import { renderTable } from '../../utilities/renderTable.js'
 import { createSerializableValue } from './createSerializableValue.js'
 import { extractRelationshipDisplayValue } from './extractRelationshipDisplayValue.js'

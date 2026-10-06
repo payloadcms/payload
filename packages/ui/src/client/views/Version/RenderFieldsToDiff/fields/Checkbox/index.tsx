@@ -3,8 +3,8 @@ import type { CheckboxFieldDiffClientProps } from 'payload'
 
 import React from 'react'
 
-import { FieldDiffContainer } from '../../../../../elements/FieldDiffContainer/index.js'
-import { CheckIcon } from '../../../../../icons/Check/index.js'
+import { FieldDiffContainer } from '../../../../../../shared/elements/FieldDiffContainer/index.js'
+import { CheckIcon } from '../../../../../../shared/icons/Check/index.js'
 import { useTranslation } from '../../../../../providers/Translation/index.js'
 import './index.css'
 

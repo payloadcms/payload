@@ -8,7 +8,7 @@ import type { SelectInputProps } from './Input.js'
 
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { mergeFieldStyles } from '../mergeFieldStyles.js'
+import { mergeFieldStyles } from '../../../shared/fields/mergeFieldStyles.js'
 import { SelectInput } from './Input.js'
 
 export const formatOptions = (options: Option[]): OptionObject[] =>

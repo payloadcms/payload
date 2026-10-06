@@ -5,7 +5,7 @@ import React from 'react'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
+import { formatDocTitle } from '../../../shared/utilities/formatDocTitle/index.js'
 import './index.css'
 
 export type ThumbnailCardProps = {

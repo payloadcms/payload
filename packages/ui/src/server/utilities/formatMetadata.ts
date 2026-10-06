@@ -2,7 +2,7 @@ import type { MetaConfig } from 'payload'
 
 import * as qs from 'qs-esm'
 
-import { payloadFaviconDark, payloadFaviconLight, staticOGImage } from '../assets/index.js'
+import { payloadFaviconDark, payloadFaviconLight, staticOGImage } from '../../assets/index.js'
 
 // Replicates the Icon type structure from next/dist/lib/metadata/types/metadata-types
 type Icon = {

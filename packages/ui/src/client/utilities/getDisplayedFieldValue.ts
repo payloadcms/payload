@@ -3,7 +3,7 @@ import type { ClientField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 
-import { isValidReactElement } from './isValidReactElement.js'
+import { isValidReactElement } from '../../shared/utilities/isValidReactElement.js'
 
 /**
  * Returns the appropriate display value for a field.

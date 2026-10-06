@@ -5,7 +5,7 @@ import type { ListViewGroup, ViewTypes } from 'payload'
 import React from 'react'
 
 import { GroupByPageControls } from '../../../elements/PageControls/GroupByPageControls.js'
-import { TableSection } from '../../../elements/TableSection/index.js'
+import { TableSection } from '../../../../shared/elements/TableSection/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useListQuery } from '../../../providers/ListQuery/index.js'
 import { SelectionProvider } from '../../../providers/Selection/index.js'

@@ -5,7 +5,7 @@ import type { Locale } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import React, { createContext, use, useEffect, useRef, useState } from 'react'
 
-import { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
+import { findLocaleFromCode } from '../../../shared/utilities/findLocaleFromCode.js'
 import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
 import { useSearchParams } from '../RouterAdapter/index.js'

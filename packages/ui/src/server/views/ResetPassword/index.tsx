@@ -3,10 +3,10 @@ import type { AdminViewServerProps } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-import { FormHeader } from '../../elements/FormHeader/index.js'
-import { Translation } from '../../elements/Translation/index.js'
+import { FormHeader } from '../../../shared/elements/FormHeader/index.js'
+import { Translation } from '../../../shared/elements/Translation/index.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
-import { Button, Link, ResetPasswordForm } from '../../exports/client/index.js'
+import { Button, Link, ResetPasswordForm } from '../../../exports/client/index.js'
 import './index.css'
 
 export const resetPasswordBaseClass = 'reset-password'

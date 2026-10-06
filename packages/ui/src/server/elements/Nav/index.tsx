@@ -3,8 +3,8 @@ import type { PayloadRequest, ServerProps } from 'payload'
 import { EntityType } from 'payload'
 import React from 'react'
 
-import type { EntityToGroup } from '../../utilities/groupNavItems.js'
-import type { UserMenuSettingsGroup } from '../UserMenu/SettingsMenu/index.js'
+import type { EntityToGroup } from '../../../shared/utilities/groupNavItems.js'
+import type { UserMenuSettingsGroup } from '../../../client/elements/UserMenu/SettingsMenu/index.js'
 
 /* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary */
 import {
@@ -13,10 +13,10 @@ import {
   NavWrapper,
   SettingsMenuButton,
   UserMenu,
-} from '../../exports/client/index.js'
+} from '../../../exports/client/index.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
-import { AlignJustifiedIcon } from '../../icons/AlignJustified/index.js'
-import { groupNavItems } from '../../utilities/groupNavItems.js'
+import { AlignJustifiedIcon } from '../../../shared/icons/AlignJustified/index.js'
+import { groupNavItems } from '../../../shared/utilities/groupNavItems.js'
 import { RenderServerComponent } from '../RenderServerComponent/index.js'
 import { SidebarTabs } from './SidebarTabs/index.js'
 import './index.css'

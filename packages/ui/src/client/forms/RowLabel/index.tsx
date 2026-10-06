@@ -3,7 +3,7 @@ import React from 'react'
 
 import type { RowLabelProps } from './types.js'
 
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { RenderCustomComponent } from '../../../shared/elements/RenderCustomComponent/index.js'
 import { RowLabelProvider } from './Context/index.js'
 export type { RowLabelProps }
 

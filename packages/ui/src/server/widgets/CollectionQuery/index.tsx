@@ -6,12 +6,12 @@ import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import type { WidgetListItem } from '../WidgetCard/index.js'
-import type { CollectionFieldPaths } from './getCollectionFieldPaths.js'
+import type { CollectionFieldPaths } from '../../../shared/widgets/CollectionQuery/getCollectionFieldPaths.js'
 
 import { formatRelativeDate, getRelativeTimeFormat } from '../../utilities/formatRelativeDate.js'
 import { WidgetCard, WidgetList } from '../WidgetCard/index.js'
 import './index.css'
-import { getCollectionFieldPaths } from './getCollectionFieldPaths.js'
+import { getCollectionFieldPaths } from '../../../shared/widgets/CollectionQuery/getCollectionFieldPaths.js'
 
 type CollectionQueryWidgetData = {
   limit?: number

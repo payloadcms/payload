@@ -4,7 +4,7 @@ import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
-import { HierarchyTypeField } from '../../exports/client/index.js'
+import { HierarchyTypeField } from '../../../exports/client/index.js'
 
 type HierarchyTypeFieldServerProps = {
   collectionOptions: Option[]

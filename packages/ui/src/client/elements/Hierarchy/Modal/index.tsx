@@ -13,7 +13,7 @@ import type { HierarchyColumnBrowserRef } from '../ColumnBrowser/index.js'
 import type { HierarchyModalInternalProps, SelectionWithPath } from './types.js'
 
 import { useEffectEvent } from '../../../hooks/useEffectEvent.js'
-import { TagIcon } from '../../../icons/Tag/index.js'
+import { TagIcon } from '../../../../shared/icons/Tag/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useHierarchy } from '../../../providers/Hierarchy/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'

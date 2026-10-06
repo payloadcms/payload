@@ -5,8 +5,8 @@ import React, { startTransition, useCallback, useEffect, useRef } from 'react'
 
 import type { ITableColumns, TableColumnsProviderProps } from './types.js'
 
-import { useConfig } from '../../providers/Config/index.js'
-import { useListQuery } from '../../providers/ListQuery/index.js'
+import { useConfig } from '../Config/index.js'
+import { useListQuery } from '../ListQuery/index.js'
 import { TableColumnContext } from './context.js'
 
 export { useTableColumns } from './context.js'

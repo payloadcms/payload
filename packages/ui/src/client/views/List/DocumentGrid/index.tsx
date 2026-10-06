@@ -9,7 +9,7 @@ import { CardGrid } from '../../../elements/CardGrid/index.js'
 import { DocumentCard } from '../../../elements/DocumentCard/index.js'
 import { DocumentIcon } from '../../../icons/Document/index.js'
 import { useSelection } from '../../../providers/Selection/index.js'
-import { getDocumentListItemURL } from '../getDocumentListItemURL.js'
+import { getDocumentListItemURL } from '../../../../shared/views/List/getDocumentListItemURL.js'
 
 type DocumentGridProps = {
   readonly adminRoute: string

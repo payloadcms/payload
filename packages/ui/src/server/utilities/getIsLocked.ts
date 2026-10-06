@@ -8,7 +8,7 @@ import type {
 
 import { extractID } from 'payload/shared'
 
-import { sanitizeID } from './sanitizeID.js'
+import { sanitizeID } from '../../shared/utilities/sanitizeID.js'
 
 type Args = {
   collectionConfig?: SanitizedCollectionConfig

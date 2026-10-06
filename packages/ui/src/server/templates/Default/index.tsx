@@ -22,9 +22,9 @@ import {
   CommandPalette,
   EntityVisibilityProvider,
   DefaultTemplateWrapper as Wrapper,
-} from '../../exports/client/index.js'
+} from '../../../exports/client/index.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
-import type { UserMenuSettingsGroup } from '../../elements/UserMenu/SettingsMenu/index.js'
+import type { UserMenuSettingsGroup } from '../../../client/elements/UserMenu/SettingsMenu/index.js'
 
 import { DefaultNav } from '../../elements/Nav/index.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'

@@ -10,7 +10,7 @@ import {
   AccountResetPreferences as ResetPreferences,
   AccountToggleHighContrast as ToggleHighContrast,
   AccountToggleTheme as ToggleTheme,
-} from '../../../exports/client/index.js'
+} from '../../../../exports/client/index.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
 import './index.css'
 

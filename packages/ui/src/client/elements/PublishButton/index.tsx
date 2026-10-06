@@ -16,7 +16,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
+import { traverseForLocalizedFields } from '../../../shared/utilities/traverseForLocalizedFields.js'
 import { PopupList } from '../Popup/index.js'
 import './index.css'
 

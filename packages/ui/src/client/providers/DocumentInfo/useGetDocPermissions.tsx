@@ -4,8 +4,8 @@ import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
-import { hasSavePermission as getHasSavePermission } from '../../utilities/hasSavePermission.js'
-import { isEditing as getIsEditing } from '../../utilities/isEditing.js'
+import { hasSavePermission as getHasSavePermission } from '../../../shared/utilities/hasSavePermission.js'
+import { isEditing as getIsEditing } from '../../../shared/utilities/isEditing.js'
 
 export type GetDocPermissions = (data?: Data) => Promise<void>
 

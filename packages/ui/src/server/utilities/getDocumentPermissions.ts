@@ -9,8 +9,8 @@ import type {
 import { docAccessOperation, docAccessOperationGlobal, logError } from 'payload'
 import { hasDraftsEnabled } from 'payload/shared'
 
-import { hasSavePermission as getHasSavePermission } from './hasSavePermission.js'
-import { isEditing as getIsEditing } from './isEditing.js'
+import { hasSavePermission as getHasSavePermission } from '../../shared/utilities/hasSavePermission.js'
+import { isEditing as getIsEditing } from '../../shared/utilities/isEditing.js'
 
 export const getDocumentPermissions = async (args: {
   collectionConfig?: SanitizedCollectionConfig

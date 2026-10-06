@@ -22,7 +22,7 @@ import {
   EditDepthProvider,
   HydrateAuthProvider,
   LivePreviewProvider,
-} from '../../exports/client/index.js'
+} from '../../../exports/client/index.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
 import { buildFormState } from '../../utilities/buildFormState.js'
 import { getDocPreferences } from '../../utilities/getDocPreferences.js'
@@ -33,7 +33,7 @@ import { getIsLocked } from '../../utilities/getIsLocked.js'
 import { getVersions } from '../../utilities/getVersions.js'
 import { handleLivePreview } from '../../utilities/handleLivePreview.js'
 import { handlePreview } from '../../utilities/handlePreview.js'
-import { isEditing as getIsEditing } from '../../utilities/isEditing.js'
+import { isEditing as getIsEditing } from '../../../shared/utilities/isEditing.js'
 import { getPreferences } from '../../utilities/upsertPreferences.js'
 import { NotFoundView } from '../NotFound/index.js'
 import { UnauthorizedViewWithGutter } from '../Unauthorized/index.js'

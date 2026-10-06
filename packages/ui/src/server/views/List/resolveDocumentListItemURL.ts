@@ -1,6 +1,6 @@
 import type { CollectionAdminOptions, Document, PayloadRequest, ViewTypes } from 'payload'
 
-import { getDocumentListItemURL } from './getDocumentListItemURL.js'
+import { getDocumentListItemURL } from '../../../shared/views/List/getDocumentListItemURL.js'
 
 /** Resolve navigation on the server so table cells and grid cards honor the same hook. */
 export const resolveDocumentListItemURL = ({

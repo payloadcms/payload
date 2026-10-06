@@ -3,7 +3,7 @@ import type { ClientField } from 'payload'
 import { toWords } from 'payload/shared'
 import { Fragment } from 'react'
 
-import { RenderCustomComponent } from '../elements/RenderCustomComponent/index.js'
+import { RenderCustomComponent } from '../../shared/elements/RenderCustomComponent/index.js'
 import { FieldLabel } from '../fields/FieldLabel/index.js'
 
 export const combineFieldLabel = ({

@@ -6,7 +6,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { EntityType, formatAdminURL } from 'payload/shared'
 import React, { Fragment } from 'react'
 
-import type { groupNavItems } from '../../utilities/groupNavItems.js'
+import type { groupNavItems } from '../../../shared/utilities/groupNavItems.js'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { usePathname } from '../../providers/RouterAdapter/index.js'

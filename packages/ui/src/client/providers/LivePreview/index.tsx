@@ -7,8 +7,8 @@ import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 
 import type { LivePreviewContextType } from './context.js'
 
 import { usePopupWindow } from '../../hooks/usePopupWindow.js'
-import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { usePreferences } from '../../providers/Preferences/index.js'
+import { useDocumentInfo } from '../DocumentInfo/index.js'
+import { usePreferences } from '../Preferences/index.js'
 import { formatAbsoluteURL } from '../../utilities/formatAbsoluteURL.js'
 import { isHttpURL } from '../../utilities/isHttpURL.js'
 import { customCollisionDetection } from './collisionDetection.js'

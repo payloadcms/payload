@@ -1,7 +1,7 @@
 import type { ServerProps } from 'payload'
 import type React from 'react'
 
-import { PayloadLogo } from '../../graphics/Logo/index.js'
+import { PayloadLogo } from '../../../shared/graphics/Logo/index.js'
 import { RenderServerComponent } from '../RenderServerComponent/index.js'
 
 export const Logo: React.FC<ServerProps> = (props) => {

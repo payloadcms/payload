@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { handleAuthRedirect } from '../../../ui/src/utilities/handleAuthRedirect.js'
+import { handleAuthRedirect } from '../../../ui/src/server/utilities/handleAuthRedirect.js'
 
 describe('handleAuthRedirect', () => {
   const config = {

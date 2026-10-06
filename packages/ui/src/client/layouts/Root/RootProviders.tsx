@@ -6,7 +6,7 @@ import { ModalContainer, ModalProvider } from '@faceless-ui/modal'
 import { ScrollInfoProvider } from '@faceless-ui/scroll-info'
 import React from 'react'
 
-import type { RootLayoutData } from './getRootLayoutData.js'
+import type { RootLayoutData } from '../../../server/layouts/Root/getRootLayoutData.js'
 
 import { CloseModalOnRouteChange } from '../../elements/CloseModalOnRouteChange/index.js'
 import { DrawerStackProvider } from '../../elements/Drawer/index.js'

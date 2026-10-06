@@ -6,7 +6,7 @@ import React, { useCallback, useLayoutEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Toaster } from 'sonner'
 
-import { CheckIcon } from '../../icons/Check/index.js'
+import { CheckIcon } from '../../../shared/icons/Check/index.js'
 import { InfoIcon } from '../../icons/Info/index.js'
 import { WarningIcon } from '../../icons/Warning/index.js'
 import { XIcon } from '../../icons/X/index.js'

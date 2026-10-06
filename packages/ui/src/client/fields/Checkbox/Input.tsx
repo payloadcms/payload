@@ -3,9 +3,9 @@ import type { StaticLabel } from 'payload'
 
 import React, { useCallback, useEffect, useId, useRef, useState } from 'react'
 
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { RenderCustomComponent } from '../../../shared/elements/RenderCustomComponent/index.js'
 import { Tooltip } from '../../elements/Tooltip/index.js'
-import { FieldLabel } from '../../fields/FieldLabel/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
 
 export type CheckboxInputProps = {
   readonly AfterInput?: React.ReactNode

@@ -33,7 +33,7 @@ import { TextField } from '../../fields/Text/index.js'
 import { TextareaField } from '../../fields/Textarea/index.js'
 import { UIField } from '../../fields/UI/index.js'
 import { UploadField } from '../../fields/Upload/index.js'
-import { useFormFields } from '../../forms/Form/index.js'
+import { useFormFields } from '../Form/index.js'
 
 type RenderFieldProps = {
   clientFieldConfig: ClientField

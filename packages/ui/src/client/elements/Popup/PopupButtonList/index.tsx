@@ -3,7 +3,7 @@ import type { LinkAdapterProps } from 'payload'
 
 import * as React from 'react'
 
-import { CheckIcon } from '../../../icons/Check/index.js'
+import { CheckIcon } from '../../../../shared/icons/Check/index.js'
 import { Link } from '../../Link/index.js'
 import './index.css'
 

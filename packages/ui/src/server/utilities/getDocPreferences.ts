@@ -1,6 +1,6 @@
 import type { DocumentPreferences, Payload, User } from 'payload'
 
-import { sanitizeID } from '../utilities/sanitizeID.js'
+import { sanitizeID } from '../../shared/utilities/sanitizeID.js'
 
 type Args = {
   collectionSlug?: string

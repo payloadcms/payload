@@ -3,7 +3,7 @@ import React, { useId, useState } from 'react'
 
 import type { DragHandleProps } from '../DraggableSortable/DraggableSortableItem/types.js'
 
-import { AlignJustifiedIcon } from '../../icons/AlignJustified/index.js'
+import { AlignJustifiedIcon } from '../../../shared/icons/AlignJustified/index.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.css'

@@ -2,7 +2,7 @@
 
 import React, { createContext, use } from 'react'
 
-import type { RenderTabServerFnArgs } from '../../elements/Nav/SidebarTabs/renderTabServerFn.js'
+import type { RenderTabServerFnArgs } from '../../../server/elements/Nav/SidebarTabs/renderTabServerFn.js'
 
 export type SidebarTabsContextType = {
   activeTabSlug: null | string

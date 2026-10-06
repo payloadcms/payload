@@ -2,7 +2,7 @@ import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 
 import { createContext, use, useEffect, useState } from 'react'
 
-import { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
+import { formatDocTitle } from '../../../shared/utilities/formatDocTitle/index.js'
 import { useConfig } from '../Config/index.js'
 import { useDocumentInfo } from '../DocumentInfo/index.js'
 import { useTranslation } from '../Translation/index.js'

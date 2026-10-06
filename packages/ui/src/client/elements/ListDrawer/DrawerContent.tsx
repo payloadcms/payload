@@ -5,18 +5,18 @@ import { useModal } from '@faceless-ui/modal'
 import { hoistQueryParamsToAnd } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { ListDrawerContextProps, ListDrawerContextType } from '../ListDrawer/Provider.js'
+import type { ListDrawerContextProps, ListDrawerContextType } from './Provider.js'
 import type {
   ListDrawerProps,
   RenderListServerFnArgs,
   RenderListServerFnReturnType,
 } from './types.js'
 
-import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
+import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
-import { ListDrawerContextProvider } from '../ListDrawer/Provider.js'
+import { ListDrawerContextProvider } from './Provider.js'
 import { LoadingOverlay } from '../Loading/index.js'
 import { type Option } from '../ReactSelect/index.js'
 

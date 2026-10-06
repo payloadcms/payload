@@ -6,11 +6,11 @@ import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
-import { Button, Card, Locked } from '../../exports/client/index.js'
-import { getGlobalData } from '../../utilities/getGlobalData.js'
-import { getNavGroups } from '../../utilities/getNavGroups.js'
-import { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
-import './index.css'
+import { Button, Card, Locked } from '../../../exports/client/index.js'
+import { getGlobalData } from '../../../shared/utilities/getGlobalData.js'
+import { getNavGroups } from '../../../shared/utilities/getNavGroups.js'
+import { getVisibleEntities } from '../../../shared/utilities/getVisibleEntities.js'
+import '../../../shared/widgets/CollectionCards/index.css'
 
 const baseClass = 'collections'
 
