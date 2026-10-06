@@ -9,6 +9,10 @@
     bottom: 0;
   }
 
+  .page-controls--embedded {
+    padding-inline-end: calc(var(--spacer-6) + var(--spacer-3));
+  }
+
   .page-controls__inner {
     display: flex;
     align-items: center;
