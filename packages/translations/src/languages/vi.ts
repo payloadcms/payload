@@ -281,6 +281,7 @@ export const viTranslations: DefaultTranslationsObject = {
     all: 'Tất cả',
     allCollections: 'Tất cả Bộ sưu tập',
     allLocales: 'Tất cả ngôn ngữ',
+    allowedTypes: 'Các loại được phép',
     and: 'Và',
     anotherUser: 'Người dùng khác',
     anotherUserTakenOver: 'Người dùng khác đã tiếp quản việc chỉnh sửa tài liệu này.',

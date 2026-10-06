@@ -279,6 +279,7 @@ export const svTranslations: DefaultTranslationsObject = {
     all: 'Alla',
     allCollections: 'Alla samlingar',
     allLocales: 'Alla språk',
+    allowedTypes: 'Tillåtna typer',
     and: 'Och',
     anotherUser: 'En annan användare',
     anotherUserTakenOver: 'En annan användare har tagit över redigeringen av detta dokument.',

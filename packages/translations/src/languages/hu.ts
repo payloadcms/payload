@@ -284,6 +284,7 @@ export const huTranslations: DefaultTranslationsObject = {
     all: 'Mind',
     allCollections: 'Minden gyűjtemény',
     allLocales: 'Minden helyszín',
+    allowedTypes: 'Engedélyezett típusok',
     and: 'És',
     anotherUser: 'Egy másik felhasználó',
     anotherUserTakenOver: 'Egy másik felhasználó átvette ennek a dokumentumnak a szerkesztését.',

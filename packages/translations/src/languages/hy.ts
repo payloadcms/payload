@@ -278,6 +278,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     all: 'Բոլորը',
     allCollections: 'Բոլոր հավաքածուները',
     allLocales: 'Բոլոր տեղայինությունները',
+    allowedTypes: 'Թույլատրված տեսակներ',
     and: 'Եվ',
     anotherUser: 'Այլ օգտատեր',
     anotherUserTakenOver: 'Այլ օգտատեր ստանձել է այս փաստաթղթի խմբագրումը։',

@@ -278,6 +278,7 @@ export const daTranslations: DefaultTranslationsObject = {
     all: 'Alle',
     allCollections: 'Alle samlinger',
     allLocales: 'Alle lokaliteter',
+    allowedTypes: 'Tilladte typer',
     and: 'Og',
     anotherUser: 'En anden bruger',
     anotherUserTakenOver: 'En anden bruger har overtaget denne ressource.',

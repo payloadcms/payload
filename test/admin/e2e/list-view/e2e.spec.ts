@@ -46,6 +46,7 @@ import {
   reorderColumns,
   sortColumn,
   toggleColumn,
+  toggleColumns,
   waitForColumnInURL,
 } from '../../../__helpers/e2e/columns/index.js'
 import { addListFilter, openListFilters } from '../../../__helpers/e2e/filters/index.js'
@@ -1130,12 +1131,17 @@ describe('List View', () => {
           )
           .toBeTruthy()
 
-        await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
-
-        await toggleColumn(page, {
-          columnLabel: 'Description',
-          columnName: 'description',
-          targetState: 'off',
+        await toggleColumns({
+          columns: [
+            { columnLabel: 'ID', columnName: 'id', targetState: 'off' },
+            {
+              columnLabel: 'Description',
+              columnName: 'description',
+              targetState: 'off',
+            },
+          ],
+          page,
+          shouldCloseListColumns: true,
         })
 
         // Poll until the "description" field is removed from the response BUT `id` is still present
@@ -1797,13 +1803,11 @@ describe('List View', () => {
       const { columnContainer } = await toggleColumn(page, {
         columnLabel: 'ID',
         columnName: 'id',
+        shouldCloseListColumns: true,
         targetState: 'off',
       })
 
       await page.locator('#heading-id').waitFor({ state: 'detached' })
-      await page.locator('.columns-button__button').click()
-      await expect(columnContainer).toBeHidden()
-
       await page.locator('#heading-title button.sort-column__asc').click()
       await page.waitForURL(/sort=title/)
 
@@ -1861,17 +1865,13 @@ describe('List View', () => {
       await expect(page.locator('#heading-_status')).toBeVisible()
       await expect(page.locator('.cell-_status').first()).toBeVisible()
 
-      await toggleColumn(page, {
-        columnLabel: 'Wavelengths',
-        columnName: 'wavelengths',
-        targetState: 'on',
-      })
-      await wait(500)
-
-      await toggleColumn(page, {
-        columnLabel: 'Select Field',
-        columnName: 'selectField',
-        targetState: 'on',
+      await toggleColumns({
+        columns: [
+          { columnLabel: 'Wavelengths', columnName: 'wavelengths', targetState: 'on' },
+          { columnLabel: 'Select Field', columnName: 'selectField', targetState: 'on' },
+        ],
+        page,
+        shouldCloseListColumns: true,
       })
       await wait(500)
 
@@ -1906,9 +1906,14 @@ describe('List View', () => {
 
       await page.goto(virtualsUrl.list)
 
-      await openListColumns(page, {})
-      await toggleColumn(page, { columnLabel: 'Virtual Text', targetState: 'on' })
-      await toggleColumn(page, { columnLabel: 'Text Field', targetState: 'on' })
+      await toggleColumns({
+        columns: [
+          { columnLabel: 'Virtual Text', targetState: 'on' },
+          { columnLabel: 'Text Field', targetState: 'on' },
+        ],
+        page,
+        shouldCloseListColumns: true,
+      })
 
       // Check that virtualText (virtual: true) does NOT have sort buttons
       const virtualTextHeading = page.locator('#heading-virtualText')

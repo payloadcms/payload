@@ -71,6 +71,7 @@ export interface Config {
     departments: Department;
     divisions: Division;
     folders: Folder;
+    'folder-tag-documents': FolderTagDocument;
     organizations: Organization;
     pages: Page;
     products: Product;
@@ -87,6 +88,7 @@ export interface Config {
     departments: DepartmentsSelect<false> | DepartmentsSelect<true>;
     divisions: DivisionsSelect<false> | DivisionsSelect<true>;
     folders: FoldersSelect<false> | FoldersSelect<true>;
+    'folder-tag-documents': FolderTagDocumentsSelect<false> | FolderTagDocumentsSelect<true>;
     organizations: OrganizationsSelect<false> | OrganizationsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
@@ -251,7 +253,26 @@ export interface Folder {
   createdAt: string;
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
-  allowedTypes?: ('organizations' | 'products')[] | null;
+  allowedTypes?: ('folder-tag-documents' | 'organizations' | 'products')[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folder-tag-documents".
+ */
+export interface FolderTagDocument {
+  id: string;
+  title: string;
+  parentFolder?: (string | Folder)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -386,6 +407,10 @@ export interface PayloadLockedDocument {
         value: string | Folder;
       } | null)
     | ({
+        relationTo: 'folder-tag-documents';
+        value: string | FolderTagDocument;
+      } | null)
+    | ({
         relationTo: 'organizations';
         value: string | Organization;
       } | null)
@@ -503,6 +528,18 @@ export interface FoldersSelect<T extends boolean = true> {
   _h_slugPath?: T;
   _h_titlePath?: T;
   allowedTypes?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folder-tag-documents_select".
+ */
+export interface FolderTagDocumentsSelect<T extends boolean = true> {
+  title?: T;
+  parentFolder?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -665,6 +702,7 @@ export interface CollectionQueryWidget {
       | 'departments'
       | 'divisions'
       | 'folders'
+      | 'folder-tag-documents'
       | 'organizations'
       | 'pages'
       | 'products'
@@ -697,6 +735,7 @@ export interface ActivityWidget {
           | 'departments'
           | 'divisions'
           | 'folders'
+          | 'folder-tag-documents'
           | 'organizations'
           | 'pages'
           | 'products'

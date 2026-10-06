@@ -278,6 +278,7 @@ export const isTranslations: DefaultTranslationsObject = {
     all: 'Allt',
     allCollections: 'Öll söfn',
     allLocales: 'Allar staðfærslur',
+    allowedTypes: 'Leyfðar gerðir',
     and: 'Og',
     anotherUser: 'Annar notandi',
     anotherUserTakenOver: 'Annar notandi hefur tekið yfir skráningu þessarar færslu.',

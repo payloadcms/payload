@@ -282,6 +282,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     all: 'Visi',
     allCollections: 'Visos kolekcijos',
     allLocales: 'Visi lokalai',
+    allowedTypes: 'Leidžiami tipai',
     and: 'Ir',
     anotherUser: 'Kitas vartotojas',
     anotherUserTakenOver: 'Kitas naudotojas perėmė šio dokumento redagavimą.',
