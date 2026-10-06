@@ -359,6 +359,7 @@ export const enTranslations = {
     all: 'All',
     allCollections: 'All Collections',
     allLocales: 'All locales',
+    allowedTypes: 'Allowed types',
     and: 'And',
     anotherUser: 'Another user',
     anotherUserTakenOver: 'Another user has taken over editing this document.',

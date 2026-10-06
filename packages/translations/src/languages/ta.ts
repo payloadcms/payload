@@ -362,6 +362,7 @@ export const taTranslations: DefaultTranslationsObject = {
     all: 'அனைத்தும்',
     allCollections: 'அனைத்து தொகுப்புகள்',
     allLocales: 'அனைத்து மொழிகள்',
+    allowedTypes: 'அனுமதிக்கப்பட்ட வகைகள்',
     and: 'மற்றும்',
     anotherUser: 'மற்றொரு பயனர்',
     anotherUserTakenOver: 'இந்த ஆவணத்தை மற்றொரு பயனர் திருத்திக் கொண்டிருக்கிறார்.',

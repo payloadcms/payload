@@ -358,6 +358,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     all: 'Visi',
     allCollections: 'Visas kolekcijas',
     allLocales: 'Visi lokalizācijas variants',
+    allowedTypes: 'Atļautie tipi',
     and: 'Un',
     anotherUser: 'Cits lietotājs',
     anotherUserTakenOver: 'Cits lietotājs ir pārņēmis šī dokumenta rediģēšanu.',

@@ -344,6 +344,7 @@ export const heTranslations: DefaultTranslationsObject = {
     all: 'כל',
     allCollections: 'כל האוספים',
     allLocales: 'כל המקומות',
+    allowedTypes: 'סוגים מותרים',
     and: 'וגם',
     anotherUser: 'משתמש אחר',
     anotherUserTakenOver: 'משתמש אחר השתלט על עריכת מסמך זה.',

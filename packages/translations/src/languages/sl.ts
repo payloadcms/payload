@@ -357,6 +357,7 @@ export const slTranslations: DefaultTranslationsObject = {
     all: 'Vse',
     allCollections: 'Vse Zbirke',
     allLocales: 'Vse lokacije',
+    allowedTypes: 'Dovoljene vrste',
     and: 'In',
     anotherUser: 'Drug uporabnik',
     anotherUserTakenOver: 'Drug uporabnik je prevzel urejanje tega dokumenta.',

@@ -2,6 +2,7 @@
 import type { DefaultCellComponentProps, RelationshipFieldClient } from 'payload'
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 import type { SelectionWithPath } from '../../../../Hierarchy/Modal/types.js'
 
@@ -13,6 +14,10 @@ import { useConfig } from '../../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../../providers/Translation/index.js'
 import { canUseDOM } from '../../../../../utilities/canUseDOM.js'
 import { formatDocTitle } from '../../../../../utilities/formatDocTitle/index.js'
+import {
+  getEffectiveHierarchyCollections,
+  getHierarchyCollectionRestrictions,
+} from '../../../../../utilities/hierarchyCollectionRestrictions.js'
 import { Button } from '../../../../Button/index.js'
 import { useHierarchyModal } from '../../../../Hierarchy/Modal/useHierarchyModal.js'
 import { useListRelationships } from '../../../RelationshipProvider/index.js'
@@ -52,10 +57,38 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
     : undefined
 
   // Use pre-rendered icon from server if available, otherwise determine on client
-  const hierarchyConfig =
-    hierarchyCollectionConfig?.hierarchy && typeof hierarchyCollectionConfig.hierarchy === 'object'
-      ? hierarchyCollectionConfig.hierarchy
-      : undefined
+  const { hierarchyConfig, relatedCollectionSlugs, typeFieldName } = useMemo(
+    () => getHierarchyCollectionRestrictions({ collectionConfig: hierarchyCollectionConfig }),
+    [hierarchyCollectionConfig],
+  )
+
+  const filterByCollection = useMemo(() => {
+    if (!hierarchyCollectionSlug) {
+      return undefined
+    }
+    if (collectionSlug !== hierarchyCollectionSlug) {
+      return [collectionSlug]
+    }
+    if (!typeFieldName) {
+      return undefined
+    }
+    const allowedCollections = rowData[typeFieldName]
+
+    return getEffectiveHierarchyCollections({
+      allowedCollections: Array.isArray(allowedCollections)
+        ? (allowedCollections as string[])
+        : undefined,
+      relatedCollectionSlugs,
+    })
+  }, [collectionSlug, hierarchyCollectionSlug, relatedCollectionSlugs, rowData, typeFieldName])
+
+  const disabledIds = useMemo(
+    () =>
+      collectionSlug === hierarchyCollectionSlug && rowData.id !== undefined
+        ? new Set([rowData.id])
+        : undefined,
+    [collectionSlug, hierarchyCollectionSlug, rowData.id],
+  )
 
   // Pre-rendered icons from server (supports custom icons)
   const preRenderedIcon = customCellProps?.hierarchyIcon as React.ReactNode | undefined
@@ -78,6 +111,8 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
 
   // Set up the hierarchy modal
   const [HierarchyModal, , { openModal }] = useHierarchyModal({
+    disabledIds,
+    filterByCollection,
     hierarchyCollectionSlug: hierarchyCollectionSlug || '',
     Icon: drawerIcon,
   })
@@ -190,7 +225,19 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
           },
         )
 
-        if (response.ok && typeof relationTo === 'string') {
+        if (!response.ok) {
+          const responseData = await response.json().catch(() => null)
+          const errorMessage =
+            responseData?.errors?.[0]?.message ||
+            responseData?.error ||
+            responseData?.message ||
+            t('error:unknown')
+
+          toast.error(errorMessage)
+          return
+        }
+
+        if (typeof relationTo === 'string') {
           // Update local state with new selection to avoid page reload
           const newValues: Value[] = selectedIds.map((id) => ({
             relationTo,
@@ -203,13 +250,14 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
             getRelationships(newValues)
           }
         }
-      } catch (_error) {
-        // swallow error and close modal anyway, user can try again
+      } catch {
+        toast.error(t('error:unknown'))
+        return
       }
 
       closeModal()
     },
-    [branch, collectionSlug, config, field.name, hasMany, rowData, relationTo, getRelationships],
+    [branch, collectionSlug, config, field.name, getRelationships, hasMany, relationTo, rowData, t],
   )
 
   // Build display labels

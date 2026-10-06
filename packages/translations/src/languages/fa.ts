@@ -352,6 +352,7 @@ export const faTranslations: DefaultTranslationsObject = {
     all: 'همه',
     allCollections: 'همه مجموعه‌ها',
     allLocales: 'همه زبان‌ها',
+    allowedTypes: 'انواع مجاز',
     and: 'و',
     anotherUser: 'کاربر دیگر',
     anotherUserTakenOver: 'کاربر دیگری ویرایش این صفحه را در دست گرفته است.',

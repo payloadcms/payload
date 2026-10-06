@@ -24,6 +24,7 @@ import { useDocumentDrawer } from '../../DocumentDrawer/index.js'
 import { DrawerDepthProvider } from '../../Drawer/index.js'
 import { HierarchyColumnBrowser } from '../ColumnBrowser/index.js'
 import { fetchAncestorPath } from './fetchAncestorPath.js'
+import { createHierarchySelections, selectHierarchyItem } from './selection.js'
 import './index.css'
 
 export const baseClass = 'hierarchy-modal'
@@ -41,6 +42,7 @@ export const HierarchyModalContent = function HierarchyModalContent({
   baseFilter,
   closeModal,
   columnBrowserRef,
+  confirmLabel,
   disabledIds,
   filterByCollection,
   hasMany = false,
@@ -53,6 +55,7 @@ export const HierarchyModalContent = function HierarchyModalContent({
   parentFieldName,
   ref,
   showMoveToRoot,
+  title,
   useAsTitle,
 }: { ref?: React.RefObject<HierarchyModalContentRef | null> } & HierarchyModalContentProps) {
   const { i18n, t } = useTranslation()
@@ -83,20 +86,8 @@ export const HierarchyModalContent = function HierarchyModalContent({
   const hasLoadedPathRef = React.useRef(false)
   const firstSelection = initialSelections?.[0]
 
-  const mapSelections = useCallback((ids?: (number | string)[]) => {
-    const map = new Map<number | string, SelectionWithPath>()
-
-    if (ids) {
-      for (const id of ids) {
-        map.set(id, { id, path: [] })
-      }
-    }
-
-    return map
-  }, [])
-
   const loadAncestorPath = useEffectEvent(async (itemId?: number | string) => {
-    if (!itemId) {
+    if (itemId === undefined || itemId === null) {
       setIsLoadingPath(false)
       return
     }
@@ -128,7 +119,7 @@ export const HierarchyModalContent = function HierarchyModalContent({
   }, [firstSelection])
 
   const [selections, setSelections] = useState<Map<number | string, SelectionWithPath>>(() =>
-    mapSelections(initialSelections),
+    createHierarchySelections({ hasMany, initialSelections }),
   )
 
   const selectedIds = useMemo(() => new Set(selections.keys()), [selections])
@@ -149,19 +140,7 @@ export const HierarchyModalContent = function HierarchyModalContent({
       path: Array<{ id: number | string; title: string }>
     }) => {
       setSelections((prev) => {
-        const next = new Map(prev)
-
-        if (next.has(id)) {
-          next.delete(id)
-        } else {
-          if (!hasMany) {
-            // Single select: clear previous selections
-            next.clear()
-          }
-          next.set(id, { id, path })
-        }
-
-        return next
+        return selectHierarchyItem({ id, current: prev, hasMany, path })
       })
     },
     [hasMany],
@@ -172,9 +151,9 @@ export const HierarchyModalContent = function HierarchyModalContent({
   }, [])
 
   const handleCancel = useCallback(() => {
-    setSelections(mapSelections(initialSelections))
+    setSelections(createHierarchySelections({ hasMany, initialSelections }))
     closeModal()
-  }, [closeModal, initialSelections, mapSelections])
+  }, [closeModal, hasMany, initialSelections])
 
   // Expose selectItem for programmatic selection (e.g., after creating a new item)
   useImperativeHandle(
@@ -199,13 +178,13 @@ export const HierarchyModalContent = function HierarchyModalContent({
 
   return (
     <div className={`${baseClass}__content`}>
-      <DialogHeader title={t('general:selectValue', { label: collectionLabel })}>
+      <DialogHeader title={title || t('general:selectValue', { label: collectionLabel })}>
         <div className={`${baseClass}__header-actions`}>
           <Button buttonStyle="secondary" margin={false} onClick={handleCancel} size="medium">
             {t('general:cancel')}
           </Button>
           <Button margin={false} onClick={handleSave} size="medium">
-            {t('general:select')}
+            {confirmLabel || t('general:select')}
           </Button>
         </div>
       </DialogHeader>

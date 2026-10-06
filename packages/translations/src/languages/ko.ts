@@ -356,6 +356,7 @@ export const koTranslations: DefaultTranslationsObject = {
     all: '모두',
     allCollections: '모든 컬렉션',
     allLocales: '모든 지역 설정',
+    allowedTypes: '허용된 유형',
     and: '및',
     anotherUser: '다른 사용자',
     anotherUserTakenOver: '다른 사용자가 이 문서의 편집을 인수했습니다.',

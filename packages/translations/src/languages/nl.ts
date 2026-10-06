@@ -367,6 +367,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     all: 'Alle',
     allCollections: 'Alle collecties',
     allLocales: 'Alle talen',
+    allowedTypes: 'Toegestane typen',
     and: 'En',
     anotherUser: 'Een andere gebruiker',
     anotherUserTakenOver: 'Een andere gebruiker heeft de bewerking van dit document overgenomen.',

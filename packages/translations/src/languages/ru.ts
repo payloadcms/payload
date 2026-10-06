@@ -362,6 +362,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     all: 'Все',
     allCollections: 'Все Коллекции',
     allLocales: 'Все локали',
+    allowedTypes: 'Разрешенные типы',
     and: 'А также',
     anotherUser: 'Другой пользователь',
     anotherUserTakenOver: 'Другой пользователь взял на себя редактирование этого документа.',

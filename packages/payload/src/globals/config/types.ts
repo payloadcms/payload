@@ -241,6 +241,8 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
     | false
   hooks?: GlobalHooks
   label?: LabelFunction | StaticLabel
+  /** Read-only Markdown instructions included in this global's MCP and CLI schema responses. */
+  llmInstructions?: string
   /**
    * Enables / Disables the ability to lock documents while editing
    * @default true

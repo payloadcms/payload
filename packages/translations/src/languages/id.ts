@@ -361,6 +361,7 @@ export const idTranslations: DefaultTranslationsObject = {
     all: 'Semua',
     allCollections: 'Semua Koleksi',
     allLocales: 'Semua lokal',
+    allowedTypes: 'Jenis yang diizinkan',
     and: 'Dan',
     anotherUser: 'Pengguna lain',
     anotherUserTakenOver: 'Pengguna lain telah mengambil alih pengeditan dokumen ini.',

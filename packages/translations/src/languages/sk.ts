@@ -360,6 +360,7 @@ export const skTranslations: DefaultTranslationsObject = {
     all: 'Všetko',
     allCollections: 'Všetky Kolekcie',
     allLocales: 'Všetky lokality',
+    allowedTypes: 'Povolené typy',
     and: 'a',
     anotherUser: 'Iný používateľ',
     anotherUserTakenOver: 'Iný používateľ prevzal úpravy tohto dokumentu.',

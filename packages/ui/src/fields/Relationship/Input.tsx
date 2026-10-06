@@ -48,6 +48,7 @@ const baseClass = 'relationship'
 
 export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   const {
+    AddNewRelationButton,
     AfterInput,
     allowCreate = true,
     allowEdit = true,
@@ -59,6 +60,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     Error,
     filterOptions,
     formatDisplayedOptions,
+    formatOptionLabel,
     hasMany,
     initialValue,
     isSortable = true,
@@ -72,6 +74,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     readOnly,
     relationTo,
     required,
+    selectOptionFields,
     showError,
     size = 'large',
     sortOptions,
@@ -262,6 +265,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                 locale,
                 page: lastLoadedPageToUse,
                 select: {
+                  ...selectOptionFields,
                   [fieldToSearch]: true,
                 },
                 sort: fieldToSort,
@@ -362,6 +366,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       errorLoading,
       search,
       getEntityConfig,
+      selectOptionFields,
       sortOptions,
       maxResultsPerRequest,
       branch,
@@ -446,6 +451,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
           limit: idsToLoad.length,
           locale,
           select: {
+            ...selectOptionFields,
             [fieldToSelect]: true,
           },
           where: {
@@ -774,6 +780,19 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
   const valueToRender = findOptionsByValue({ allowEdit, options, value })
 
+  const formatSelectOptionLabel = useMemo<ReactSelectAdapterProps['formatOptionLabel']>(() => {
+    if (typeof formatOptionLabel !== 'function') {
+      return undefined
+    }
+
+    return (option, { context }) =>
+      formatOptionLabel({
+        context,
+        defaultLabel: option.label as string,
+        doc: option.doc as Record<string, unknown> | undefined,
+      })
+  }, [formatOptionLabel])
+
   if (!Array.isArray(valueToRender) && valueToRender?.value === 'null') {
     valueToRender.value = null
   }
@@ -827,6 +846,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                 }}
                 disabled={readOnly || isDrawerOpen || isListDrawerOpen}
                 filterOption={enableWordBoundarySearch ? filterOption : undefined}
+                formatOptionLabel={formatSelectOptionLabel}
                 getOptionValue={(option: ValueWithRelation) => {
                   if (!option) {
                     return undefined
@@ -939,23 +959,8 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                 value={valueToRender ?? null}
               />
             </div>
-            {!readOnly && allowCreate && (
-              <AddNewRelation
-                path={path}
-                relationTo={relationTo}
-                {...(hasMany === true
-                  ? {
-                      hasMany,
-                      onChange,
-                      value,
-                    }
-                  : {
-                      hasMany,
-                      onChange,
-                      value,
-                    })}
-              />
-            )}
+            {AddNewRelationButton ??
+              (!readOnly && allowCreate ? <AddNewRelation {...props} /> : null)}
           </div>
         )}
         {AfterInput}

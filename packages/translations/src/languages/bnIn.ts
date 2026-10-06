@@ -363,6 +363,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     all: 'সমস্ত',
     allCollections: 'সমস্ত সংগ্রহ',
     allLocales: 'সমস্ত লোকেল',
+    allowedTypes: 'অনুমোদিত ধরনসমূহ',
     and: 'এবং',
     anotherUser: 'অন্য ব্যবহারকারী',
     anotherUserTakenOver: 'অন্য একজন ব্যবহারকারী এই ডকুমেন্ট সম্পাদনার দায়িত্ব নিয়েছেন।',

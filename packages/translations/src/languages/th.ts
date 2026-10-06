@@ -349,6 +349,7 @@ export const thTranslations: DefaultTranslationsObject = {
     all: 'ทั้งหมด',
     allCollections: 'คอลเลกชันทั้งหมด',
     allLocales: 'ทุกสถานที่',
+    allowedTypes: 'ประเภทที่อนุญาต',
     and: 'และ',
     anotherUser: 'ผู้ใช้อื่น',
     anotherUserTakenOver: 'ผู้ใช้อื่นเข้าครอบครองการแก้ไขเอกสารนี้แล้ว',

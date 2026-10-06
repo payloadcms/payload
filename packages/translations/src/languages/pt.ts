@@ -361,6 +361,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     all: 'Todos',
     allCollections: 'Todas as Coleções',
     allLocales: 'Todos os locais',
+    allowedTypes: 'Tipos permitidos',
     and: 'E',
     anotherUser: 'Outro usuário',
     anotherUserTakenOver: 'Outro usuário assumiu a edição deste documento.',

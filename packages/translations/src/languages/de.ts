@@ -372,6 +372,7 @@ export const deTranslations: DefaultTranslationsObject = {
     all: 'Alle',
     allCollections: 'Alle Sammlungen',
     allLocales: 'Alle Sprachen',
+    allowedTypes: 'Zulässige Typen',
     and: 'Und',
     anotherUser: 'Ein anderer Benutzer',
     anotherUserTakenOver: 'Ein anderer Benutzer hat die Bearbeitung dieses Dokuments übernommen.',

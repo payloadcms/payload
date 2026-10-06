@@ -364,6 +364,7 @@ export const itTranslations: DefaultTranslationsObject = {
     all: 'Tutto',
     allCollections: 'Tutte le collezioni',
     allLocales: 'Tutte le località',
+    allowedTypes: 'Tipi consentiti',
     and: 'E',
     anotherUser: 'Un altro utente',
     anotherUserTakenOver:

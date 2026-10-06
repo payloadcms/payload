@@ -360,6 +360,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     all: 'Alle',
     allCollections: 'Alle samlinger',
     allLocales: 'Alle språk',
+    allowedTypes: 'Tillatte typer',
     and: 'Og',
     anotherUser: 'En annen bruker',
     anotherUserTakenOver: 'En annen bruker har tatt over redigeringen av dette dokumentet.',

@@ -337,6 +337,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     all: '全部',
     allCollections: '所有集合',
     allLocales: '所有語言地區',
+    allowedTypes: '允許的類型',
     and: '與',
     anotherUser: '其他使用者',
     anotherUserTakenOver: '其他使用者已接手編輯此文件。',

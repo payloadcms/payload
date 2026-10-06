@@ -359,6 +359,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     all: 'Svi',
     allCollections: 'Sve kolekcije',
     allLocales: 'Sve lokalne postavke',
+    allowedTypes: 'Dopuštene vrste',
     and: 'i',
     anotherUser: 'Drugi korisnik',
     anotherUserTakenOver: 'Drugi korisnik je preuzeo uređivanje ovog dokumenta.',

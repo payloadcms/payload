@@ -363,6 +363,7 @@ export const trTranslations: DefaultTranslationsObject = {
     all: 'Tüm',
     allCollections: 'Tüm Koleksiyonlar',
     allLocales: 'Tüm yerler',
+    allowedTypes: 'İzin verilen türler',
     and: 've',
     anotherUser: 'Başka bir kullanıcı',
     anotherUserTakenOver: 'Başka bir kullanıcı bu belgenin düzenlemesini devraldı.',

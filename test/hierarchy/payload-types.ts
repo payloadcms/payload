@@ -71,6 +71,7 @@ export interface Config {
     departments: Department;
     divisions: Division;
     folders: Folder;
+    'folder-tag-documents': FolderTagDocument;
     organizations: Organization;
     pages: Page;
     products: Product;
@@ -87,6 +88,7 @@ export interface Config {
     departments: DepartmentsSelect<false> | DepartmentsSelect<true>;
     divisions: DivisionsSelect<false> | DivisionsSelect<true>;
     folders: FoldersSelect<false> | FoldersSelect<true>;
+    'folder-tag-documents': FolderTagDocumentsSelect<false> | FolderTagDocumentsSelect<true>;
     organizations: OrganizationsSelect<false> | OrganizationsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
@@ -105,6 +107,7 @@ export interface Config {
   globalsSelect: {};
   locale: 'en' | 'es' | 'de';
   widgets: {
+    welcome: WelcomeWidget;
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
     activity: ActivityWidget;
@@ -250,7 +253,26 @@ export interface Folder {
   createdAt: string;
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
-  allowedTypes?: ('organizations' | 'products')[] | null;
+  allowedTypes?: ('folder-tag-documents' | 'organizations' | 'products')[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folder-tag-documents".
+ */
+export interface FolderTagDocument {
+  id: string;
+  title: string;
+  parentFolder?: (string | Folder)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -262,6 +284,7 @@ export interface Organization {
   title: string;
   content?: string | null;
   parentFolder?: (string | null) | Folder;
+  restrictedFolder?: (string | null) | Folder;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -384,6 +407,10 @@ export interface PayloadLockedDocument {
         value: string | Folder;
       } | null)
     | ({
+        relationTo: 'folder-tag-documents';
+        value: string | FolderTagDocument;
+      } | null)
+    | ({
         relationTo: 'organizations';
         value: string | Organization;
       } | null)
@@ -504,6 +531,18 @@ export interface FoldersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folder-tag-documents_select".
+ */
+export interface FolderTagDocumentsSelect<T extends boolean = true> {
+  title?: T;
+  parentFolder?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "organizations_select".
  */
 export interface OrganizationsSelect<T extends boolean = true> {
@@ -511,6 +550,7 @@ export interface OrganizationsSelect<T extends boolean = true> {
   title?: T;
   content?: T;
   parentFolder?: T;
+  restrictedFolder?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -632,6 +672,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "welcome_widget".
+ */
+export interface WelcomeWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -652,6 +702,7 @@ export interface CollectionQueryWidget {
       | 'departments'
       | 'divisions'
       | 'folders'
+      | 'folder-tag-documents'
       | 'organizations'
       | 'pages'
       | 'products'
@@ -684,6 +735,7 @@ export interface ActivityWidget {
           | 'departments'
           | 'divisions'
           | 'folders'
+          | 'folder-tag-documents'
           | 'organizations'
           | 'pages'
           | 'products'

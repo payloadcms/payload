@@ -349,6 +349,7 @@ export const arTranslations: DefaultTranslationsObject = {
     all: 'الكل',
     allCollections: 'جميع المجموعات',
     allLocales: 'جميع المواقع',
+    allowedTypes: 'الأنواع المسموح بها',
     and: 'و',
     anotherUser: 'مستخدم آخر',
     anotherUserTakenOver: 'قام مستخدم آخر بالاستيلاء على تحرير هذا المستند.',
