@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
+import { runTransformReadsRealSourceTest } from '../__helpers/shared/transformSourceTests.js'
 import {
   mediaSlug,
   mediaWithAlwaysInsertFieldsSlug,
@@ -130,9 +131,9 @@ test.suite('@payloadcms/storage-azure', { config: './config.ts', resetBetweenTes
       collection: collectionSlug,
       id: uploadId,
       overrideAccess: true,
-    })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
+    })) as unknown as { filename: string; variants: Record<string, { filename: string }> }
 
-    const fileKeys = Object.values(uploadData.sizes || {}).map(({ filename: rawFilename }) =>
+    const fileKeys = Object.values(uploadData.variants || {}).map(({ filename: rawFilename }) =>
       prefix ? `${prefix}/${rawFilename}` : rawFilename,
     )
 
@@ -150,4 +151,6 @@ test.suite('@payloadcms/storage-azure', { config: './config.ts', resetBetweenTes
       }
     }
   }
+
+  runTransformReadsRealSourceTest({ collection: mediaWithPrefixSlug })
 })

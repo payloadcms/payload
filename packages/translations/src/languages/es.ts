@@ -392,6 +392,7 @@ export const esTranslations: DefaultTranslationsObject = {
     globals: 'Globales',
     goBack: 'Volver',
     goToPage: 'Ir a una página de la tabla',
+    gridLayout: 'Cuadrícula',
     groupByLabel: 'Agrupar por {{label}}',
     hideSidebar: 'Ocultar barra lateral',
     import: 'Importar',
@@ -441,6 +442,8 @@ export const esTranslations: DefaultTranslationsObject = {
     notFound: 'No encontrado',
     nothingFound: 'No se encontró nada',
     noTrashResults: 'No hay {{label}} en la papelera.',
+    notSelectedDocument:
+      'No seleccionado. Pulsa Intro o la barra espaciadora para cambiar la selección.',
     notShownInTable: 'No se muestra en la tabla',
     noUpcomingEventsScheduled: 'No hay eventos próximos programados.',
     noValue: 'Sin valor',
@@ -500,6 +503,7 @@ export const esTranslations: DefaultTranslationsObject = {
     selectAll: 'Seleccionar {{count}} {{label}}',
     selectAllRows: 'Seleccionar todas las filas',
     selectedCount: '{{count}} {{label}} seleccionados',
+    selectedDocument: 'Seleccionado. Pulsa Intro o la barra espaciadora para cambiar la selección.',
     selectLabel: 'Seleccionar {{label}}',
     selectValue: 'Seleccionar un valor',
     settings: 'Configuraciones',
@@ -521,6 +525,7 @@ export const esTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} se duplicó correctamente.',
     successfullyReindexed:
       'Se reindexaron correctamente {{count}} de {{total}} documentos de {{collections}} y se omitieron {{skips}} borradores.',
+    tableLayout: 'Tabla',
     takeOver: 'Tomar el control',
     theme: 'Tema',
     thisLanguage: 'Español',

@@ -1,3 +1,5 @@
+import semver from 'semver'
+
 import type { ResolvedVersions } from './types.js'
 
 type RewriteArgs = {
@@ -121,30 +123,69 @@ function pruneOverrideBlock(
 
 function writeFloors(data: Record<string, unknown>, resolved: ResolvedVersions): string[] {
   const written: string[] = []
-  pinDep(data, 'typescript', resolved.typescript)
-  pinDep(data, '@types/node', resolved.typesNode)
-  written.push('typescript', '@types/node')
+  if (writeDepFloor({ name: 'typescript', data, floor: resolved.typescript })) {
+    written.push('typescript')
+  }
+  if (writeDepFloor({ name: '@types/node', data, floor: resolved.typesNode })) {
+    written.push('@types/node')
+  }
 
   const engines = isRecord(data.engines) ? data.engines : {}
-  engines.node = resolved.enginesNode
-  data.engines = engines
-  written.push('engines.node')
+  if (
+    engines.node === undefined ||
+    isBelowFloor({ floor: resolved.enginesNode, spec: engines.node })
+  ) {
+    engines.node = resolved.enginesNode
+    data.engines = engines
+    written.push('engines.node')
+  }
 
   return written
 }
 
-/** Update a dep wherever it already lives, else add it to devDependencies. */
-function pinDep(data: Record<string, unknown>, name: string, version: string): void {
+/**
+ * Raise a dep to `floor` wherever it already lives, else add it to devDependencies.
+ * Placeholder specs, non-semver specs (e.g. `latest`), and ranges already at or
+ * above the floor are left as-is. Returns whether the dep was written.
+ */
+function writeDepFloor({
+  name,
+  data,
+  floor,
+}: {
+  data: Record<string, unknown>
+  floor: string
+  name: string
+}): boolean {
   for (const field of DEP_FIELDS) {
     const deps = data[field]
-    if (isRecord(deps) && name in deps) {
-      deps[name] = version
-      return
+    if (!isRecord(deps) || !(name in deps)) {
+      continue
     }
+    const spec = deps[name]
+    if (isPlaceholderSpec(spec) || !isBelowFloor({ floor, spec })) {
+      return false
+    }
+    deps[name] = floor
+    return true
   }
   const devDeps = isRecord(data.devDependencies) ? data.devDependencies : {}
-  devDeps[name] = version
+  devDeps[name] = floor
   data.devDependencies = devDeps
+  return true
+}
+
+/** True only when `spec` is a semver range whose lowest version is below the floor's. */
+function isBelowFloor({ floor, spec }: { floor: string; spec: unknown }): boolean {
+  if (typeof spec !== 'string' || !semver.validRange(spec)) {
+    return false
+  }
+  const specMin = semver.minVersion(spec)
+  const floorMin = semver.minVersion(floor)
+  if (!specMin || !floorMin) {
+    return false
+  }
+  return semver.lt(specMin, floorMin)
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

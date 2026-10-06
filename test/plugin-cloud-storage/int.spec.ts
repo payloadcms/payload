@@ -54,9 +54,9 @@ async function verifyUploads({
     id: uploadId,
     collection: collectionSlug,
     overrideAccess: true,
-  })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
+  })) as unknown as { filename: string; variants: Record<string, { filename: string }> }
 
-  const sizes = uploadData.sizes ?? {}
+  const sizes = uploadData.variants ?? {}
   const fileKeys = Object.keys(sizes).map((key) => {
     const entry = sizes[key]
     if (!entry) {
@@ -174,7 +174,7 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
         expect(result).toBe('relative/path')
       })
 
-      test('should normalize backslash separators', async () => {
+      test('should normalize backslash separators in prefixes', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
           filename: 'test.png',
@@ -242,7 +242,7 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
       expect(sanitizeFilename('a/b/../../c/d/../file.txt')).toBe('file.txt')
     })
 
-    test('should normalize backslash separators', () => {
+    test('should normalize backslash separators in filenames', () => {
       expect(sanitizeFilename('..\\..\\windows\\system32\\config')).toBe('config')
     })
 
@@ -407,11 +407,11 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
             collection: mediaSlug,
             overrideAccess: true,
           })
-          expect(apiResponse.sizes).toBeTruthy()
+          expect(apiResponse.variants).toBeTruthy()
 
-          const apiSizeKeys = Object.keys(apiResponse.sizes || {})
+          const apiSizeKeys = Object.keys(apiResponse.variants || {})
           for (const sizeKey of apiSizeKeys) {
-            const size = apiResponse.sizes?.[sizeKey as keyof typeof apiResponse.sizes]
+            const size = apiResponse.variants?.[sizeKey as keyof typeof apiResponse.variants]
             if (!size) {
               continue
             }
@@ -427,16 +427,16 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
 
           const dbRecord = rawDbData as unknown as {
             filename: string
-            sizes: Record<string, { filename: string; url: string }>
             url: string
+            variants: Record<string, { filename: string; url: string }>
           }
           type SizeData = { filename: string; url: string }
 
-          const sizeKeys = Object.keys(dbRecord.sizes)
+          const sizeKeys = Object.keys(dbRecord.variants)
           expect(sizeKeys.length).toBeGreaterThan(0)
 
           for (const sizeKey of sizeKeys) {
-            const size: SizeData = dbRecord.sizes[sizeKey] as SizeData
+            const size: SizeData = dbRecord.variants[sizeKey] as SizeData
             expect(size.url).not.toEqual(`/api/${mediaSlug}/file/${dbRecord.filename}`)
             expect(size.url).toEqual(`/api/${mediaSlug}/file/${size.filename}`)
           }
@@ -454,7 +454,7 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
           expect(upload.url).toEqual(
             `/api/${mediaWithPrefixSlug}/file/${upload.filename}?prefix=${prefix}`,
           )
-          expect((upload as any).sizes).toBeFalsy()
+          expect((upload as any).variants).toBeFalsy()
 
           const rawDbData = await payload.db.findOne({
             collection: mediaWithPrefixSlug,
@@ -470,7 +470,7 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
 
           expect(dbRecord.filename).toEqual(upload.filename)
           expect(dbRecord.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${upload.filename}`)
-          expect((rawDbData as any)?.sizes).toBeFalsy()
+          expect((rawDbData as any)?.variants).toBeFalsy()
         })
 
         test('should use custom generateFileURL in beforeChange when disablePayloadAccessControl is true', async ({
@@ -594,14 +594,14 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
 
         const originalFilenames = [
           upload.filename,
-          ...Object.values(upload.sizes || {}).map((size) => size?.filename),
+          ...Object.values(upload.variants || {}).map((size) => size?.filename),
         ].filter((value): value is string => typeof value === 'string')
 
         const updateResponse = await restClient.PATCH(`/${testMetadataSlug}/${upload.id}`, {
           body: JSON.stringify({
             filename: 'submitted.png',
             prefix: 'submitted-prefix',
-            sizes: {
+            variants: {
               thumbnail: {
                 filename: 'submitted-thumbnail.png',
               },
@@ -638,14 +638,14 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
 
         const originalFilenames = [
           upload.filename,
-          ...Object.values(upload.sizes || {}).map((size) => size?.filename),
+          ...Object.values(upload.variants || {}).map((size) => size?.filename),
         ].filter((value): value is string => typeof value === 'string')
 
         const metadataUpdateResponse = await restClient.PATCH(`/${testMetadataSlug}/${upload.id}`, {
           body: JSON.stringify({
             filename: 'submitted.png',
             prefix: 'submitted-prefix',
-            sizes: {
+            variants: {
               thumbnail: {
                 filename: 'submitted-thumbnail.png',
               },
@@ -663,7 +663,7 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
 
         expect(preservedUpload.filename).toBe(upload.filename)
         expect(preservedUpload.prefix).toBe('test-metadata')
-        expect(preservedUpload.sizes).toEqual(upload.sizes)
+        expect(preservedUpload.variants).toEqual(upload.variants)
 
         recordedCleanupTargets.length = 0
 
@@ -693,7 +693,7 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
         })
         const replacementFilenames = [
           replacement.filename,
-          ...Object.values(replacement.sizes || {}).map((size) => size?.filename),
+          ...Object.values(replacement.variants || {}).map((size) => size?.filename),
         ].filter((value): value is string => typeof value === 'string')
 
         expect(replacement.filename).not.toBe('submitted.png')
@@ -743,7 +743,7 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
         expect(saved.filename).toBeTruthy()
         expect(saved.filename).not.toBe(original.filename)
         expect(saved.mimeType).toBe('image/webp')
-        expect(saved.sizes?.thumbnail?.filename).toBeTruthy()
+        expect(saved.variants?.thumbnail?.filename).toBeTruthy()
         expect([...uploadedTestFiles.values()]).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
@@ -752,8 +752,8 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
               prefix: 'test-metadata',
             }),
             expect.objectContaining({
-              filename: saved.sizes?.thumbnail?.filename,
-              mimeType: saved.sizes?.thumbnail?.mimeType,
+              filename: saved.variants?.thumbnail?.filename,
+              mimeType: saved.variants?.thumbnail?.mimeType,
               prefix: 'test-metadata',
             }),
           ]),
@@ -878,8 +878,8 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
         const { doc } = await createResponse.json<{
           doc: {
             id: number | string
-            sizes: { thumbnail: { filename: string } }
             storageProvider: string
+            variants: { thumbnail: { filename: string } }
           }
         }>()
 
@@ -887,7 +887,7 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
 
         expect(createResponse.status).toBe(201)
         expect(doc.storageProvider).toBe('test-adapter')
-        expect(doc.sizes.thumbnail.filename).toBeTruthy()
+        expect(doc.variants.thumbnail.filename).toBeTruthy()
       })
 
       test('should persist metadata on update operations', async ({ payload }) => {
@@ -1051,12 +1051,12 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
         })) as unknown as {
           filename: string
           id: number | string
-          sizes: Record<string, { filename: string }>
+          variants: Record<string, { filename: string }>
         }
 
         createdIDs.push(initial.id)
 
-        const initialSizeKeys = Object.values(initial.sizes ?? {})
+        const initialSizeKeys = Object.values(initial.variants ?? {})
           .map((s) => s?.filename)
           .filter((f): f is string => typeof f === 'string')
 
@@ -1078,13 +1078,13 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
           overwriteExistingFiles: true,
         })) as unknown as {
           filename: string
-          sizes: Record<string, { filename: string }>
+          variants: Record<string, { filename: string }>
         }
 
         // Filenames should match because overwriteExistingFiles is enabled.
         expect(updated.filename).toBe(initial.filename)
 
-        const updatedSizeKeys = Object.values(updated.sizes ?? {})
+        const updatedSizeKeys = Object.values(updated.variants ?? {})
           .map((s) => s?.filename)
           .filter((f): f is string => typeof f === 'string')
 
@@ -1101,11 +1101,11 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
     })
 
     test.describe('Azure', () => {
-      test.todo('can upload')
+      test.todo('can upload to Azure')
     })
 
     test.describe('GCS', () => {
-      test.todo('can upload')
+      test.todo('can upload to GCS')
     })
 
     test.describe('R2', () => {
