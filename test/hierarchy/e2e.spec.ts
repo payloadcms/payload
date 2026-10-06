@@ -240,6 +240,97 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(page).toHaveURL(/[?&]view=hierarchy(?:&|$)/)
       await expect(page.getByRole('heading', { name: 'Engineering Division' })).toBeVisible()
     })
+
+    test('should update the full breadcrumb trail while browsing folders', async () => {
+      const findOrganization = async (title: string) => {
+        const result = await payload.find({
+          collection: 'organizations',
+          limit: 1,
+          overrideAccess: true,
+          where: { title: { equals: title } },
+        })
+
+        const organization = result.docs[0]
+
+        if (!organization) {
+          throw new Error(`Could not find seeded organization: ${title}`)
+        }
+
+        return organization
+      }
+
+      const [acmeCorp, engineeringDivision, frontendTeam] = await Promise.all([
+        findOrganization('Acme Corp'),
+        findOrganization('Engineering Division'),
+        findOrganization('Frontend Team'),
+      ])
+      const stepNav = page.locator('.step-nav')
+
+      await page.goto(organizationsURL.hierarchy)
+      await page.getByRole('button', { name: 'All Organizations' }).click()
+      await expect(page).toHaveURL(/[?&]view=all(?:&|$)/)
+
+      await page.getByRole('button', { name: 'By Organization' }).click()
+      await expect(page).toHaveURL(/[?&]view=hierarchy(?:&|$)/)
+      await expect(
+        stepNav.getByRole('link', { name: 'Organizations', exact: true }),
+      ).toHaveAttribute('href', '/admin/collections/organizations?view=hierarchy')
+
+      await page.getByRole('link', { name: 'Acme Corp', exact: true }).click()
+      await expect(page.getByRole('heading', { name: 'Acme Corp' })).toBeVisible()
+      await expect
+        .poll(() => new URL(page.url()).searchParams.get('parent'))
+        .toBe(String(acmeCorp.id))
+      await expect(stepNav.getByText('Acme Corp', { exact: true })).toBeVisible()
+      await expect(stepNav.getByRole('link', { name: 'Acme Corp', exact: true })).toHaveCount(0)
+
+      await page.getByRole('link', { name: 'Engineering Division', exact: true }).click()
+      await expect(page.getByRole('heading', { name: 'Engineering Division' })).toBeVisible()
+      await expect
+        .poll(() => new URL(page.url()).searchParams.get('parent'))
+        .toBe(String(engineeringDivision.id))
+      await expect(stepNav.getByRole('link', { name: 'Acme Corp', exact: true })).toHaveAttribute(
+        'href',
+        `/admin/collections/organizations?parent=${acmeCorp.id}&view=hierarchy`,
+      )
+      await expect(stepNav.getByText('Engineering Division', { exact: true })).toBeVisible()
+      await expect(
+        stepNav.getByRole('link', { name: 'Engineering Division', exact: true }),
+      ).toHaveCount(0)
+
+      await page.getByRole('link', { name: 'Frontend Team', exact: true }).click()
+      await expect(page.getByRole('heading', { name: 'Frontend Team' })).toBeVisible()
+      await expect
+        .poll(() => new URL(page.url()).searchParams.get('parent'))
+        .toBe(String(frontendTeam.id))
+      await expect(stepNav.getByRole('link', { name: 'Acme Corp', exact: true })).toHaveAttribute(
+        'href',
+        `/admin/collections/organizations?parent=${acmeCorp.id}&view=hierarchy`,
+      )
+      await expect(
+        stepNav.getByRole('link', { name: 'Engineering Division', exact: true }),
+      ).toHaveAttribute(
+        'href',
+        `/admin/collections/organizations?parent=${engineeringDivision.id}&view=hierarchy`,
+      )
+      await expect(stepNav.getByText('Frontend Team', { exact: true })).toBeVisible()
+      await expect(stepNav.getByRole('link', { name: 'Frontend Team', exact: true })).toHaveCount(0)
+
+      await stepNav.getByRole('link', { name: 'Engineering Division', exact: true }).press('Enter')
+      await expect(page.getByRole('heading', { name: 'Engineering Division' })).toBeVisible()
+      await expect(stepNav).not.toContainText('Frontend Team')
+
+      await stepNav.getByRole('link', { name: 'Acme Corp', exact: true }).press('Enter')
+      await expect(page.getByRole('heading', { name: 'Acme Corp' })).toBeVisible()
+      await expect(stepNav).not.toContainText('Engineering Division')
+      await expect(stepNav).not.toContainText('Frontend Team')
+
+      await stepNav.getByRole('link', { name: 'Organizations', exact: true }).press('Enter')
+      await expect(page).toHaveURL(/[?&]view=hierarchy(?:&|$)/)
+      await expect.poll(() => new URL(page.url()).searchParams.has('parent')).toBe(false)
+      await expect(page.getByRole('button', { name: 'By Organization' })).toBeDisabled()
+      await expect(stepNav).not.toContainText('Acme Corp')
+    })
   })
 
   test.describe('Tree Display', () => {
