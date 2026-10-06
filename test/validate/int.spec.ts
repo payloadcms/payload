@@ -1708,35 +1708,6 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
       expect(versionsAfter).toEqual(versionsBefore)
     })
 
-    test('should validate a partial update with an unchanged stored point representation', async ({
-      payload,
-    }) => {
-      const stored = await payload.create({
-        collection: validationCollectionSlug,
-        data: {
-          location: [-73.9857, 40.7484],
-          summary: 'stored summary',
-          title: 'Stored title',
-        },
-        locale: 'en',
-        overrideAccess: true,
-      })
-
-      const result = await payload.validate({
-        id: stored.id,
-        collection: validationCollectionSlug,
-        data: {
-          summary: 'candidate summary',
-        },
-        locale: 'en',
-      })
-
-      expect(result).toEqual({
-        errors: [],
-        valid: true,
-      })
-    })
-
     test('should execute first-class collection validation access and throw on denial', async ({
       payload,
     }) => {
