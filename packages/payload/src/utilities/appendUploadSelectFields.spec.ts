@@ -7,7 +7,7 @@ describe('appendUploadSelectFields', () => {
   it('should include fields required to render upload thumbnails', () => {
     const select = {}
     const collectionConfig = {
-      upload: { imageSizes: [{ name: 'small', width: 100 }] },
+      upload: { variants: [{ name: 'small', width: 100 }] },
     } as SanitizedCollectionConfig
 
     appendUploadSelectFields({ collectionConfig, select })
@@ -16,7 +16,7 @@ describe('appendUploadSelectFields', () => {
       filename: true,
       mimeType: true,
       thumbnailURL: true,
-      sizes: { small: { filename: true, url: true, width: true } },
+      variants: { small: { filename: true, url: true, width: true } },
     })
   })
 })
