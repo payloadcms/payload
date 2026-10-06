@@ -1,6 +1,8 @@
 'use client'
 import type { DefaultCellComponentProps, RelationshipFieldClient } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -19,6 +21,7 @@ import {
 } from '../../../../../utilities/hierarchyCollectionRestrictions.js'
 import { Button } from '../../../../Button/index.js'
 import { useHierarchyModal } from '../../../../Hierarchy/Modal/useHierarchyModal.js'
+import { Popup, PopupList } from '../../../../Popup/index.js'
 import { useListRelationships } from '../../../RelationshipProvider/index.js'
 import './index.css'
 
@@ -175,7 +178,7 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
 
   // Get current selection IDs for the modal
   const initialSelections = useMemo(() => {
-    if (!cellDataFromProps) {
+    if (cellDataFromProps === null || cellDataFromProps === undefined) {
       return []
     }
     const data = Array.isArray(cellDataFromProps) ? cellDataFromProps : [cellDataFromProps]
@@ -187,26 +190,14 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
     }) as (number | string)[]
   }, [cellDataFromProps])
 
-  // Handle save from modal
-  const handleSave = useCallback(
-    async ({
-      closeModal,
-      selections,
-    }: {
-      closeModal: () => void
-      selections: Map<number | string, SelectionWithPath>
-    }) => {
-      // Get selected IDs
-      const selectedIds = Array.from(selections.keys())
-      const newValue = hasMany ? selectedIds : (selectedIds[0] ?? null)
-
-      // Update the document via API
+  const saveIds = useCallback(
+    async (selectedIds: (number | string)[]) => {
       try {
         const response = await fetch(
           `${config.serverURL}${config.routes.api}/${collectionSlug}/${rowData.id}`,
           {
             body: JSON.stringify({
-              [field.name]: newValue,
+              [field.name]: hasMany ? selectedIds : (selectedIds[0] ?? null),
             }),
             credentials: 'include',
             headers: {
@@ -225,7 +216,7 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
             t('error:unknown')
 
           toast.error(errorMessage)
-          return
+          return false
         }
 
         if (typeof relationTo === 'string') {
@@ -243,12 +234,27 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
         }
       } catch {
         toast.error(t('error:unknown'))
-        return
+        return false
       }
 
-      closeModal()
+      return true
     },
     [collectionSlug, config, field.name, hasMany, rowData, relationTo, getRelationships, t],
+  )
+
+  const handleSave = useCallback(
+    async ({
+      closeModal,
+      selections,
+    }: {
+      closeModal: () => void
+      selections: Map<number | string, SelectionWithPath>
+    }) => {
+      if (await saveIds(Array.from(selections.keys()))) {
+        closeModal()
+      }
+    },
+    [saveIds],
   )
 
   // Build display labels
@@ -271,22 +277,125 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
   const isLoading =
     values.length > 0 &&
     values.some(({ relationTo: rel, value }) => documents[rel]?.[value] === null)
+  const currentId = !hasMany && values.length === 1 ? values[0].value : undefined
+  const hasSingleSelection = typeof currentId === 'number' || typeof currentId === 'string'
+  const hierarchyLabel =
+    getTranslation(
+      hierarchyCollectionConfig?.labels?.singular || hierarchyCollectionSlug || '',
+      i18n,
+    ) || hierarchyCollectionSlug
+  const controlRef = useRef<HTMLDivElement | null>(null)
+  const [shouldRefocus, setShouldRefocus] = useState(false)
+
+  useEffect(() => {
+    if (shouldRefocus) {
+      controlRef.current?.querySelector('button')?.focus()
+      setShouldRefocus(false)
+    }
+  }, [shouldRefocus])
+
+  const handleRemove = useCallback(async () => {
+    if (await saveIds([])) {
+      setShouldRefocus(true)
+    }
+  }, [saveIds])
+
+  const goToHref = useMemo(() => {
+    if (!hasSingleSelection) {
+      return undefined
+    }
+
+    const parentQueryParam = hierarchyConfig?.parentFieldName || 'parent'
+
+    return formatAdminURL({
+      adminRoute: config.routes.admin,
+      path: `/collections/${collectionSlug}/hierarchy?${parentQueryParam}=${currentId}`,
+    })
+  }, [
+    collectionSlug,
+    config.routes.admin,
+    currentId,
+    hasSingleSelection,
+    hierarchyConfig?.parentFieldName,
+  ])
 
   return (
     <div className={baseClass} ref={intersectionRef}>
-      <Button
-        buttonStyle="secondary"
-        className={`${baseClass}__button`}
-        icon={displayIcon}
-        iconPosition="left"
-        margin={false}
-        onClick={handleOpenModal}
-        size="medium"
-      >
-        {isLoading ? `${t('general:loading')}...` : displayText}
-      </Button>
+      <div className={`${baseClass}__control`} ref={controlRef}>
+        {hasSingleSelection ? (
+          <Popup
+            caret={false}
+            horizontalAlign="left"
+            portalClassName={`${baseClass}__popup-content`}
+            render={({ close }) => (
+              <PopupList.MenuItem>
+                <PopupList.Button
+                  onClick={() => {
+                    close()
+                    requestAnimationFrame(handleOpenModal)
+                  }}
+                >
+                  {t('general:move')}…
+                </PopupList.Button>
+                <PopupList.Button
+                  onClick={() => {
+                    close()
+                    void handleRemove()
+                  }}
+                >
+                  {t('general:remove')} {hierarchyLabel}
+                </PopupList.Button>
+                <PopupList.Divider />
+                <PopupList.Button href={goToHref} onClick={close}>
+                  <span className={`${baseClass}__truncate`} title={displayText}>
+                    {t('general:open')} “{displayText}”
+                  </span>
+                </PopupList.Button>
+              </PopupList.MenuItem>
+            )}
+            renderButton={({ active, onClick, onKeyDown }) => (
+              <Button
+                aria-label={displayText}
+                buttonStyle="secondary"
+                className={`${baseClass}__button`}
+                extraButtonProps={{
+                  'aria-expanded': active,
+                  'aria-haspopup': 'menu',
+                  onKeyDown,
+                }}
+                icon={displayIcon}
+                iconPosition="left"
+                margin={false}
+                onClick={onClick}
+                selected={active}
+                size="medium"
+                tooltip={displayText}
+              >
+                <span className={`${baseClass}__truncate`}>
+                  {isLoading ? `${t('general:loading')}...` : displayText}
+                </span>
+              </Button>
+            )}
+            size="fit-content"
+            verticalAlign="bottom"
+          />
+        ) : (
+          <Button
+            buttonStyle="secondary"
+            className={`${baseClass}__button`}
+            icon={displayIcon}
+            iconPosition="left"
+            margin={false}
+            onClick={handleOpenModal}
+            size="medium"
+          >
+            {isLoading ? `${t('general:loading')}...` : displayText}
+          </Button>
+        )}
+      </div>
       {hierarchyCollectionSlug && hasMountedModal && (
         <HierarchyModal
+          confirmLabel={t('general:confirm')}
           hasMany={hasMany}
           initialSelections={initialSelections}
           onSave={handleSave}

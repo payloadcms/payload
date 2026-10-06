@@ -6,10 +6,30 @@
     .btn__content {
       gap: 0;
     }
+
+    .btn__label {
+      min-inline-size: 0;
+    }
   }
 
   .hierarchy-button--read-only {
     cursor: default;
     color: var(--color-text-disabled);
+  }
+
+  .hierarchy-button__truncate {
+    display: block;
+    max-inline-size: calc(var(--spacer-6) * 4);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .hierarchy-button__popup-content .popup-divider {
+    margin-inline: calc(var(--spacer-2) * -1);
+  }
+
+  .hierarchy-button__control {
+    display: contents;
   }
 }

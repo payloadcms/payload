@@ -55,6 +55,21 @@ async function setHierarchyFilter({
   await page.keyboard.press('Escape')
 }
 
+async function openMoveModalFromAssignedHierarchy({
+  button,
+  page,
+}: {
+  button: ReturnType<Page['getByRole']>
+  page: Page
+}): Promise<void> {
+  await button.click()
+
+  const moveAction = page.getByRole('menuitem', { name: /^Move/ })
+
+  await expect(moveAction).toBeVisible()
+  await moveAction.click()
+}
+
 let payload: PayloadTestSDK<Config>
 let serverURL: string
 
@@ -1062,20 +1077,24 @@ test.describe('Hierarchy Sidebar', () => {
   })
 
   test.describe('Column Modal', () => {
+    let foldersURL: AdminUrlUtil
     let productsURL: AdminUrlUtil
     let parentFolder: { id: number | string }
     let childFolder: { id: number | string }
     let productWithFolder: { id: number | string }
+    let productWithFolderName: string
     let parentFolderName: string
     let childFolderName: string
 
     test.beforeAll(async () => {
+      foldersURL = new AdminUrlUtil(serverURL, 'folders')
       productsURL = new AdminUrlUtil(serverURL, 'products')
 
       // Use unique names to avoid collisions with leftover data from previous runs
       const uniqueSuffix = Date.now()
       parentFolderName = `Drawer Test Parent ${uniqueSuffix}`
       childFolderName = `Drawer Test Child ${uniqueSuffix}`
+      productWithFolderName = `Product In Child Folder ${uniqueSuffix}`
 
       // Create our own test data - don't rely on seed data
       parentFolder = await payload.create({
@@ -1095,7 +1114,7 @@ test.describe('Hierarchy Sidebar', () => {
       productWithFolder = await payload.create({
         collection: 'products',
         data: {
-          name: `Product In Child Folder ${uniqueSuffix}`,
+          name: productWithFolderName,
           parentFolder: childFolder.id as number,
         },
         overrideAccess: true,
@@ -1132,7 +1151,14 @@ test.describe('Hierarchy Sidebar', () => {
       // Wait for the button to be visible (it loads async after the document)
       const folderButton = page.getByRole('button', { name: childFolderName })
       await expect(folderButton).toBeVisible()
-      await folderButton.click()
+      await folderButton.focus()
+      await folderButton.press('Enter')
+
+      await expect(folderButton).toHaveAttribute('aria-expanded', 'true')
+      await expect(page.getByRole('menuitem', { name: /^Move/ })).toBeFocused()
+      await expect(page.getByRole('menuitem', { name: 'Remove Folder' })).toBeVisible()
+      await expect(page.getByRole('menuitem', { name: `Open “${childFolderName}”` })).toBeVisible()
+      await page.getByRole('menuitem', { name: /^Move/ }).click()
 
       // The modal should open and show columns expanded to the current selection:
       // Column 1 (root): Parent folder visible
@@ -1140,9 +1166,54 @@ test.describe('Hierarchy Sidebar', () => {
       const modal = page.locator('.hierarchy-modal')
       await expect(modal).toBeVisible()
 
+      const footer = modal.locator('.dialog__footer')
+
+      await expect(footer).toContainText(childFolderName)
+      await expect(footer).toContainText('Select Folder')
+      await expect(footer.getByRole('button', { name: 'Confirm' })).toBeDisabled()
+
       // Both folders should be visible in their respective columns
       await expect(modal.getByRole('button', { name: parentFolderName, exact: true })).toBeVisible()
       await expect(modal.getByRole('button', { name: childFolderName, exact: true })).toBeVisible()
+
+      await modal
+        .locator('.hierarchy-column-item', { hasText: parentFolderName })
+        .getByRole('checkbox')
+        .click()
+
+      await expect(footer).toContainText(parentFolderName)
+      await expect(footer.getByRole('button', { name: 'Confirm' })).toBeEnabled()
+
+      await page.keyboard.press('Escape')
+      await expect(modal).toBeHidden()
+      await expect(folderButton).toBeFocused()
+    })
+
+    test('should open the hierarchy modal directly when the document has no assigned folder', async () => {
+      await page.goto(productsURL.create)
+
+      const folderButton = page.locator('.hierarchy-button')
+
+      await expect(folderButton).toBeVisible()
+      await folderButton.click()
+
+      await expect(page.locator('.hierarchy-modal')).toBeVisible()
+      await expect(page.getByRole('menuitem', { name: /^Move/ })).toBeHidden()
+    })
+
+    test('should offer move and remove actions for a selection inside a folder', async () => {
+      await page.goto(`${foldersURL.hierarchy}&parentFolder=${parentFolder.id}`)
+
+      const childFolderRow = page.locator('tr', { hasText: childFolderName })
+
+      await childFolderRow.getByRole('checkbox').click()
+      await page.getByRole('button', { name: 'Move', exact: true }).click()
+
+      await expect(page.getByRole('menuitem', { name: /^Move/ })).toBeVisible()
+      await expect(page.getByRole('menuitem', { name: 'Remove Folder' })).toBeVisible()
+
+      await page.getByRole('menuitem', { name: /^Move/ }).click()
+      await expect(page.locator('.hierarchy-modal')).toBeVisible()
     })
 
     test('should reset transient selections after canceling and reopening the modal', async () => {
@@ -1151,7 +1222,7 @@ test.describe('Hierarchy Sidebar', () => {
       const folderButton = page.getByRole('button', { name: childFolderName })
       await expect(folderButton).toBeVisible()
 
-      await folderButton.click()
+      await openMoveModalFromAssignedHierarchy({ button: folderButton, page })
       const modal = page.locator('.hierarchy-modal')
       await expect(modal).toBeVisible()
 
@@ -1166,10 +1237,10 @@ test.describe('Hierarchy Sidebar', () => {
         }),
       ).toBeVisible()
 
-      await modal.getByRole('button', { name: 'Cancel' }).click()
+      await modal.getByRole('button', { name: 'Close' }).click()
       await expect(modal).toBeHidden()
 
-      await folderButton.click()
+      await openMoveModalFromAssignedHierarchy({ button: folderButton, page })
       await expect(modal).toBeVisible()
 
       await expect(
@@ -1190,7 +1261,7 @@ test.describe('Hierarchy Sidebar', () => {
       const folderButton = page.getByRole('button', { name: childFolderName })
       await expect(folderButton).toBeVisible()
 
-      await folderButton.click()
+      await openMoveModalFromAssignedHierarchy({ button: folderButton, page })
       const modal = page.locator('.hierarchy-modal')
       await expect(modal).toBeVisible()
 
@@ -1200,13 +1271,35 @@ test.describe('Hierarchy Sidebar', () => {
 
       await expect(modal.locator('.hierarchy-column')).toHaveCount(3)
 
-      await modal.getByRole('button', { name: 'Cancel' }).click()
+      await modal.getByRole('button', { name: 'Close' }).click()
       await expect(modal).toBeHidden()
 
-      await folderButton.click()
+      await openMoveModalFromAssignedHierarchy({ button: folderButton, page })
       await expect(modal).toBeVisible()
 
       await expect(modal.locator('.hierarchy-column')).toHaveCount(2)
+    })
+
+    test('should put multi-select status and actions in the modal footer', async () => {
+      const tagDocumentsURL = new AdminUrlUtil(serverURL, 'folder-tag-documents')
+
+      await page.goto(tagDocumentsURL.create)
+      await page.locator('.hierarchy-field__browse-button').click()
+
+      const modal = page.locator('.hierarchy-modal')
+      const firstEnabledOption = modal
+        .getByRole('checkbox')
+        .and(page.locator(':not(:disabled)'))
+        .first()
+
+      await expect(modal).toBeVisible()
+      await firstEnabledOption.click()
+
+      const footer = modal.locator('.dialog__footer')
+
+      await expect(footer).toContainText('1 Folder selected')
+      await expect(footer.getByRole('button', { name: 'Clear' })).toBeVisible()
+      await expect(footer.getByRole('button', { name: 'Confirm' })).toBeEnabled()
     })
   })
 
@@ -1379,7 +1472,7 @@ test.describe('Hierarchy Sidebar', () => {
       })
 
       await productsDestination.click()
-      await modal.getByRole('button', { name: 'Select' }).click()
+      await modal.getByRole('button', { name: 'Confirm' }).click()
 
       await expect(page.getByText('Move rejected')).toBeVisible()
       await expect(modal).toBeVisible()
