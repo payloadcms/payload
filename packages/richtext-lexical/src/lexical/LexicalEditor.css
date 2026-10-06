@@ -37,7 +37,7 @@
       position: absolute;
       top: var(--content-editable-padding-block-start);
       inset-inline-start: var(--content-editable-padding-inline-start);
-      color: var(--color-text-secondary);
+      color: var(--color-text);
       user-select: none;
       -webkit-user-select: none;
       -moz-user-select: none;

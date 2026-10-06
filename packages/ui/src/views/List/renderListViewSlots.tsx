@@ -12,6 +12,7 @@ import type {
   NoResultsClientProps,
   NoResultsServerPropsOnly,
   Payload,
+  PayloadRequest,
   SanitizedCollectionConfig,
   StaticDescription,
   ViewDescriptionClientProps,
@@ -22,6 +23,7 @@ import React from 'react'
 
 import { Banner } from '../../elements/Banner/index.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
+import { filterLLMInstructionsMenuItems } from '../../utilities/filterLLMInstructionsMenuItems.js'
 
 type Args = {
   clientProps: ListViewSlotSharedClientProps
@@ -29,17 +31,19 @@ type Args = {
   description?: StaticDescription
   notFoundDocId?: null | string
   payload: Payload
+  req: PayloadRequest
   serverProps: ListViewServerPropsOnly
 }
 
-export const renderListViewSlots = ({
+export const renderListViewSlots = async ({
   clientProps,
   collectionConfig,
   description,
   notFoundDocId,
   payload,
+  req,
   serverProps,
-}: Args): ListViewSlots => {
+}: Args): Promise<ListViewSlots> => {
   const result: ListViewSlots = {} as ListViewSlots
 
   if (collectionConfig.admin.components?.afterList) {
@@ -51,9 +55,14 @@ export const renderListViewSlots = ({
     })
   }
 
-  const listMenuItems = collectionConfig.admin.components?.listMenuItems
+  const listMenuItems = await filterLLMInstructionsMenuItems({
+    collectionSlug: collectionConfig.slug,
+    menuItems: collectionConfig.admin.components?.listMenuItems,
+    permissions: serverProps.permissions,
+    req,
+  })
 
-  if (Array.isArray(listMenuItems)) {
+  if (listMenuItems?.length) {
     result.listMenuItems = [
       RenderServerComponent({
         clientProps,

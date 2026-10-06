@@ -574,6 +574,23 @@ export const roTranslations: DefaultTranslationsObject = {
     searchLabel: 'Caută {{label}}',
     searchResults: 'Rezultate găsite: {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Instrucțiuni suplimentare',
+    collectionDescription:
+      'Adăugați instrucțiuni personalizate pentru colecția {{label}} pentru a ajuta modelele LLM să își adapteze mai bine răspunsurile la solicitări.',
+    collectionSystemDescription:
+      'Aceste instrucțiuni de sistem provin din fișierul de configurare al colecției și sunt incluse întotdeauna.',
+    editInstructions: 'Editați instrucțiunile LLM',
+    global: 'Global',
+    globalDescription:
+      'Adăugați instrucțiuni personalizate pentru globalul {{label}} pentru a ajuta modelele LLM să își adapteze mai bine răspunsurile la solicitări.',
+    globalSystemDescription:
+      'Aceste instrucțiuni de sistem provin din fișierul de configurare al globalului și sunt incluse întotdeauna.',
+    instructions: 'Instrucțiuni LLM',
+    systemInstructions: 'Instrucțiuni de sistem (doar citire)',
+    targetCannotBeChanged: 'Destinația instrucțiunilor nu poate fi schimbată.',
+    title: 'Titlu',
+  },
   localization: {
     cannotCopySameLocale: 'Nu se poate copia în aceeași localizare',
     copyFrom: 'Copiază de la',

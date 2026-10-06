@@ -567,6 +567,23 @@ export const plTranslations: DefaultTranslationsObject = {
     searchLabel: 'Szukaj {{label}}',
     searchResults: 'Znaleziono: {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Dodatkowe instrukcje',
+    collectionDescription:
+      'Dodaj własne instrukcje dla kolekcji {{label}}, aby pomóc modelom LLM lepiej dostosować odpowiedzi na polecenia.',
+    collectionSystemDescription:
+      'Te instrukcje systemowe pochodzą z pliku konfiguracji kolekcji i są zawsze uwzględniane.',
+    editInstructions: 'Edytuj instrukcje LLM',
+    global: 'Global',
+    globalDescription:
+      'Dodaj własne instrukcje dla dokumentu globalnego {{label}}, aby pomóc modelom LLM lepiej dostosować odpowiedzi na polecenia.',
+    globalSystemDescription:
+      'Te instrukcje systemowe pochodzą z pliku konfiguracji dokumentu globalnego i są zawsze uwzględniane.',
+    instructions: 'Instrukcje LLM',
+    systemInstructions: 'Instrukcje systemowe (tylko do odczytu)',
+    targetCannotBeChanged: 'Nie można zmienić celu instrukcji.',
+    title: 'Tytuł',
+  },
   localization: {
     cannotCopySameLocale: 'Nie można skopiować do tego samego miejsca.',
     copyFrom: 'Kopiuj z',

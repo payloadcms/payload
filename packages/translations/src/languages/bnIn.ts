@@ -576,6 +576,23 @@ export const bnInTranslations: DefaultTranslationsObject = {
     searchLabel: '{{label}} অনুসন্ধান করুন',
     searchResults: '{{count}}টি পাওয়া গেছে',
   },
+  llmInstructions: {
+    additionalInstructions: 'অতিরিক্ত নির্দেশনা',
+    collectionDescription:
+      'LLM-কে প্রম্পটের আরও উপযুক্ত উত্তর দিতে সাহায্য করার জন্য {{label}} সংগ্রহে কাস্টম নির্দেশনা যোগ করুন।',
+    collectionSystemDescription:
+      'এই সিস্টেম নির্দেশনাগুলি সংগ্রহের কনফিগারেশন ফাইল থেকে আসে এবং সর্বদা অন্তর্ভুক্ত থাকে।',
+    editInstructions: 'LLM নির্দেশনা সম্পাদনা করুন',
+    global: 'গ্লোবাল',
+    globalDescription:
+      'LLM-কে প্রম্পটের আরও উপযুক্ত উত্তর দিতে সাহায্য করার জন্য {{label}} গ্লোবালে কাস্টম নির্দেশনা যোগ করুন।',
+    globalSystemDescription:
+      'এই সিস্টেম নির্দেশনাগুলি গ্লোবালের কনফিগারেশন ফাইল থেকে আসে এবং সর্বদা অন্তর্ভুক্ত থাকে।',
+    instructions: 'LLM নির্দেশনা',
+    systemInstructions: 'সিস্টেম নির্দেশনা (শুধু পড়ার জন্য)',
+    targetCannotBeChanged: 'নির্দেশনার লক্ষ্য পরিবর্তন করা যাবে না।',
+    title: 'শিরোনাম',
+  },
   localization: {
     cannotCopySameLocale: 'একই লোকেলে কপি করা যাবে না',
     copyFrom: 'থেকে কপি করুন',

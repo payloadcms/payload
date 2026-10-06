@@ -576,6 +576,23 @@ export const itTranslations: DefaultTranslationsObject = {
     searchLabel: 'Cerca {{label}}',
     searchResults: 'Trovati: {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Istruzioni aggiuntive',
+    collectionDescription:
+      'Aggiungi istruzioni personalizzate per la raccolta {{label}} per aiutare gli LLM ad adattare meglio le risposte ai prompt.',
+    collectionSystemDescription:
+      'Queste istruzioni di sistema provengono dal file di configurazione della raccolta e sono sempre incluse.',
+    editInstructions: 'Modifica istruzioni LLM',
+    global: 'Globale',
+    globalDescription:
+      'Aggiungi istruzioni personalizzate per il globale {{label}} per aiutare gli LLM ad adattare meglio le risposte ai prompt.',
+    globalSystemDescription:
+      'Queste istruzioni di sistema provengono dal file di configurazione del globale e sono sempre incluse.',
+    instructions: 'Istruzioni LLM',
+    systemInstructions: 'Istruzioni di sistema (sola lettura)',
+    targetCannotBeChanged: 'La destinazione delle istruzioni non può essere modificata.',
+    title: 'Titolo',
+  },
   localization: {
     cannotCopySameLocale: 'Non è possibile copiare nella stessa posizione',
     copyFrom: 'Copia da',

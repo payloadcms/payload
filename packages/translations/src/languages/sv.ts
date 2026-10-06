@@ -570,6 +570,23 @@ export const svTranslations: DefaultTranslationsObject = {
     searchLabel: 'Sök {{label}}',
     searchResults: 'Hittade {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Ytterligare instruktioner',
+    collectionDescription:
+      'Lägg till anpassade instruktioner för samlingen {{label}} så att LLM:er bättre kan anpassa sina svar på promptar.',
+    collectionSystemDescription:
+      'Dessa systeminstruktioner kommer från samlingens konfigurationsfil och inkluderas alltid.',
+    editInstructions: 'Redigera LLM-instruktioner',
+    global: 'Global',
+    globalDescription:
+      'Lägg till anpassade instruktioner för globalen {{label}} så att LLM:er bättre kan anpassa sina svar på promptar.',
+    globalSystemDescription:
+      'Dessa systeminstruktioner kommer från globalens konfigurationsfil och inkluderas alltid.',
+    instructions: 'LLM-instruktioner',
+    systemInstructions: 'Systeminstruktioner (skrivskyddade)',
+    targetCannotBeChanged: 'Instruktionernas mål kan inte ändras.',
+    title: 'Titel',
+  },
   localization: {
     cannotCopySameLocale: 'Kan inte kopiera till samma språk',
     copyFrom: 'Kopiera från',

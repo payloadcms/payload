@@ -27,11 +27,25 @@ export default buildConfigWithDefaults({
         slug: 'pages',
         access: { read: () => true },
         fields: [{ name: 'title', type: 'text' }],
+        labels: {
+          plural: { de: 'Seiten', en: 'Pages' },
+          singular: { de: 'Seite', en: 'Page' },
+        },
         llmInstructions:
           '## System LLM instructions for the Pages Collection\n\n### What to Include\n\n- Use clear headings and concise page content.\n- Use the configured layout blocks.\n\n### What to Avoid\n\n- Do not publish a page without a title.',
       },
     ],
-    globals: [HiddenSettings, { slug: 'site-settings', fields: [{ name: 'title', type: 'text' }] }],
+    globals: [
+      HiddenSettings,
+      {
+        slug: 'site-settings',
+        fields: [{ name: 'title', type: 'text' }],
+        label: { de: 'Einstellungen', en: 'Site Settings' },
+      },
+    ],
+    llmInstructions: {
+      access: ({ req }) => req.user?.email === devUser.email,
+    },
     typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },
   },
 })

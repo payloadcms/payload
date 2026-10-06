@@ -66,6 +66,8 @@ export type {
   DialogSize,
 } from '../../elements/Dialog/index.js'
 export { Link } from '../../elements/Link/index.js'
+export { LLMInstructionsDescription } from '../../elements/LLMInstructionsDescription/index.js'
+export { LLMInstructionsMenuItem } from '../../elements/LLMInstructionsMenuItem/index.js'
 export { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
 export { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
 export { DocumentStaleData } from '../../elements/DocumentStaleData/index.js'

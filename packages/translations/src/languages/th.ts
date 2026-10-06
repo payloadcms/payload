@@ -558,6 +558,23 @@ export const thTranslations: DefaultTranslationsObject = {
     searchLabel: 'ค้นหา {{label}}',
     searchResults: 'พบ {{count}} รายการ',
   },
+  llmInstructions: {
+    additionalInstructions: 'คำแนะนำเพิ่มเติม',
+    collectionDescription:
+      'เพิ่มคำแนะนำที่กำหนดเองสำหรับคอลเลกชัน {{label}} เพื่อช่วยให้ LLM ปรับคำตอบให้เหมาะกับพรอมต์ได้ดียิ่งขึ้น',
+    collectionSystemDescription:
+      'คำแนะนำระบบเหล่านี้มาจากไฟล์การกำหนดค่าของคอลเลกชันและจะรวมไว้เสมอ',
+    editInstructions: 'แก้ไขคำแนะนำ LLM',
+    global: 'เอกสารส่วนกลาง',
+    globalDescription:
+      'เพิ่มคำแนะนำที่กำหนดเองสำหรับเอกสารส่วนกลาง {{label}} เพื่อช่วยให้ LLM ปรับคำตอบให้เหมาะกับพรอมต์ได้ดียิ่งขึ้น',
+    globalSystemDescription:
+      'คำแนะนำระบบเหล่านี้มาจากไฟล์การกำหนดค่าของเอกสารส่วนกลางและจะรวมไว้เสมอ',
+    instructions: 'คำแนะนำ LLM',
+    systemInstructions: 'คำแนะนำระบบ (อ่านอย่างเดียว)',
+    targetCannotBeChanged: 'ไม่สามารถเปลี่ยนเป้าหมายของคำแนะนำได้',
+    title: 'ชื่อเรื่อง',
+  },
   localization: {
     cannotCopySameLocale: 'ไม่สามารถคัดลอกไปยังตำแหน่งที่ตั้งเดียวกัน',
     copyFrom: 'คัดลอกจาก',

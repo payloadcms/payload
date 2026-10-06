@@ -572,6 +572,23 @@ export const caTranslations: DefaultTranslationsObject = {
     searchLabel: 'Cerca {{label}}',
     searchResults: 'S’han trobat {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Instruccions addicionals',
+    collectionDescription:
+      'Afegiu instruccions personalitzades per a la col·lecció {{label}} per ajudar els LLM a adaptar millor les respostes a les indicacions.',
+    collectionSystemDescription:
+      'Aquestes instruccions del sistema provenen del fitxer de configuració de la col·lecció i sempre s’inclouen.',
+    editInstructions: 'Edita les instruccions dels LLM',
+    global: 'Global',
+    globalDescription:
+      'Afegiu instruccions personalitzades per al global {{label}} per ajudar els LLM a adaptar millor les respostes a les indicacions.',
+    globalSystemDescription:
+      'Aquestes instruccions del sistema provenen del fitxer de configuració del global i sempre s’inclouen.',
+    instructions: 'Instruccions dels LLM',
+    systemInstructions: 'Instruccions del sistema (només lectura)',
+    targetCannotBeChanged: 'No es pot canviar la destinació de les instruccions.',
+    title: 'Títol',
+  },
   localization: {
     cannotCopySameLocale: 'No es pot copiar al mateix idioma',
     copyFrom: 'Copiar de',

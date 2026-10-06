@@ -564,6 +564,23 @@ export const ukTranslations: DefaultTranslationsObject = {
     searchLabel: 'Пошук {{label}}',
     searchResults: 'Знайдено: {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Додаткові інструкції',
+    collectionDescription:
+      'Додайте власні інструкції для колекції {{label}}, щоб допомогти LLM краще адаптувати відповіді на запити.',
+    collectionSystemDescription:
+      'Ці системні інструкції задано у файлі конфігурації колекції, і вони завжди включаються.',
+    editInstructions: 'Редагувати інструкції для LLM',
+    global: 'Глобальний документ',
+    globalDescription:
+      'Додайте власні інструкції для глобального документа {{label}}, щоб допомогти LLM краще адаптувати відповіді на запити.',
+    globalSystemDescription:
+      'Ці системні інструкції задано у файлі конфігурації глобального документа, і вони завжди включаються.',
+    instructions: 'Інструкції для LLM',
+    systemInstructions: 'Системні інструкції (лише для читання)',
+    targetCannotBeChanged: 'Неможливо змінити об’єкт, якого стосуються інструкції.',
+    title: 'Заголовок',
+  },
   localization: {
     cannotCopySameLocale: 'Не можна копіювати в ту ж саму локалізацію',
     copyFrom: 'Копіювати з',
