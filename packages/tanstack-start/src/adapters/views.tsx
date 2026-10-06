@@ -1,10 +1,6 @@
 'use client'
 
-import type { NotFoundRouteProps } from '@tanstack/react-router'
-
-import { NotFoundClient, useRouteTransition } from '@payloadcms/ui'
-import { notFound, redirect, useLoaderData } from '@tanstack/react-router'
-import { Fragment, type ReactNode, useDeferredValue, useEffect } from 'react'
+import { lazyRouteComponent, notFound, redirect } from '@tanstack/react-router'
 
 import { getAdminMeta } from './metadata.js'
 
@@ -29,41 +25,10 @@ const runLoader = async (load: AdminLoad, splat: string, searchStr: string) => {
   return data
 }
 
-function AdminPage() {
-  // Note: React key intentionally omitted here so the persistent template (nav, header) doesn't remount and flash on navigation.
-  // The per-route view key is attached server-side to the view subtree instead, via `renderRoot`'s `key` in `loadAdminPage`.
-  const data = useLoaderData({ strict: false })
-
-  // Route state comes from an external store, so a new RSC payload that suspends
-  // on code-split client references can reveal the router's null fallback.
-  // Keep the current payload painted until the next one is renderable.
-  const rscPayload = useDeferredValue(data?.rscPayload)
-  const { holdRouteTransition } = useRouteTransition()
-  const isRscPayloadDeferred = rscPayload !== data?.rscPayload
-
-  useEffect(() => {
-    if (!isRscPayloadDeferred) {
-      return
-    }
-
-    const releaseRouteTransition = holdRouteTransition()
-
-    return () => releaseRouteTransition()
-  }, [holdRouteTransition, isRscPayloadDeferred])
-
-  return <Fragment>{rscPayload}</Fragment>
-}
-
-type AdminNotFoundData = { routeKey?: string; rscPayload?: ReactNode }
-
-function AdminNotFound({ data }: NotFoundRouteProps) {
-  // TanStack exposes not-found data as unknown; this route only receives the shape thrown below.
-  const { routeKey, rscPayload } = (data ?? {}) as AdminNotFoundData
-  if (!rscPayload) {
-    return <NotFoundClient />
-  }
-  return <Fragment key={routeKey}>{rscPayload}</Fragment>
-}
+// The admin UI loads with the admin routes only, so front-end routes never download it. The
+// router preloads lazy route components before rendering, so admin pages don't flash.
+const AdminPage = lazyRouteComponent(() => import('./viewComponents.js'), 'AdminPage')
+const AdminNotFound = lazyRouteComponent(() => import('./viewComponents.js'), 'AdminNotFound')
 
 const adminRouteOptions = ({
   forwardNotFoundPayload,
