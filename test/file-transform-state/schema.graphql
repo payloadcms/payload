@@ -1,33 +1,134 @@
 type Query {
-  TransformStateMedia(id: String!, draft: Boolean, select: Boolean, trash: Boolean): TransformStateMedia
-  TransformStateMedias(draft: Boolean, where: TransformStateMedia_where, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): TransformStateMedias
-  countTransformStateMedias(draft: Boolean, trash: Boolean, where: TransformStateMedia_where): countTransformStateMedias
+  TransformStateMedia(
+    id: String!
+    draft: Boolean
+    select: Boolean
+    trash: Boolean
+  ): TransformStateMedia
+  TransformStateMedias(
+    draft: Boolean
+    where: TransformStateMedia_where
+    limit: Int
+    page: Int
+    pagination: Boolean
+    select: Boolean
+    sort: String
+    trash: Boolean
+  ): TransformStateMedias
+  countTransformStateMedias(
+    draft: Boolean
+    trash: Boolean
+    where: TransformStateMedia_where
+  ): countTransformStateMedias
   docAccessTransformStateMedia(id: String!): transform_state_mediaDocAccess
   versionTransformStateMedia(id: String, trash: Boolean): TransformStateMediaVersion
-  versionsTransformStateMedias(where: versionsTransformStateMedia_where, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): versionsTransformStateMedias
-  DynamicTransformStateMedia(id: String!, draft: Boolean, select: Boolean, trash: Boolean): DynamicTransformStateMedia
-  DynamicTransformStateMedias(draft: Boolean, where: DynamicTransformStateMedia_where, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): DynamicTransformStateMedias
-  countDynamicTransformStateMedias(draft: Boolean, trash: Boolean, where: DynamicTransformStateMedia_where): countDynamicTransformStateMedias
+  versionsTransformStateMedias(
+    where: versionsTransformStateMedia_where
+    limit: Int
+    page: Int
+    pagination: Boolean
+    select: Boolean
+    sort: String
+    trash: Boolean
+  ): versionsTransformStateMedias
+  DynamicTransformStateMedia(
+    id: String!
+    draft: Boolean
+    select: Boolean
+    trash: Boolean
+  ): DynamicTransformStateMedia
+  DynamicTransformStateMedias(
+    draft: Boolean
+    where: DynamicTransformStateMedia_where
+    limit: Int
+    page: Int
+    pagination: Boolean
+    select: Boolean
+    sort: String
+    trash: Boolean
+  ): DynamicTransformStateMedias
+  countDynamicTransformStateMedias(
+    draft: Boolean
+    trash: Boolean
+    where: DynamicTransformStateMedia_where
+  ): countDynamicTransformStateMedias
   docAccessDynamicTransformStateMedia(id: String!): dynamic_transform_state_mediaDocAccess
   versionDynamicTransformStateMedia(id: String, trash: Boolean): DynamicTransformStateMediaVersion
-  versionsDynamicTransformStateMedias(where: versionsDynamicTransformStateMedia_where, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): versionsDynamicTransformStateMedias
+  versionsDynamicTransformStateMedias(
+    where: versionsDynamicTransformStateMedia_where
+    limit: Int
+    page: Int
+    pagination: Boolean
+    select: Boolean
+    sort: String
+    trash: Boolean
+  ): versionsDynamicTransformStateMedias
   PayloadKv(id: String!, draft: Boolean, select: Boolean, trash: Boolean): PayloadKv
-  PayloadKvs(draft: Boolean, where: PayloadKv_where, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): PayloadKvs
+  PayloadKvs(
+    draft: Boolean
+    where: PayloadKv_where
+    limit: Int
+    page: Int
+    pagination: Boolean
+    select: Boolean
+    sort: String
+    trash: Boolean
+  ): PayloadKvs
   countPayloadKvs(draft: Boolean, trash: Boolean, where: PayloadKv_where): countPayloadKvs
   docAccessPayloadKv(id: String!): payload_kvDocAccess
   User(id: String!, draft: Boolean, select: Boolean, trash: Boolean): User
-  Users(draft: Boolean, where: User_where, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): Users
+  Users(
+    draft: Boolean
+    where: User_where
+    limit: Int
+    page: Int
+    pagination: Boolean
+    select: Boolean
+    sort: String
+    trash: Boolean
+  ): Users
   countUsers(draft: Boolean, trash: Boolean, where: User_where): countUsers
   docAccessUser(id: String!): usersDocAccess
   meUser: usersMe
   initializedUser: Boolean
-  PayloadLockedDocument(id: String!, draft: Boolean, select: Boolean, trash: Boolean): PayloadLockedDocument
-  PayloadLockedDocuments(draft: Boolean, where: PayloadLockedDocument_where, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): PayloadLockedDocuments
-  countPayloadLockedDocuments(draft: Boolean, trash: Boolean, where: PayloadLockedDocument_where): countPayloadLockedDocuments
+  PayloadLockedDocument(
+    id: String!
+    draft: Boolean
+    select: Boolean
+    trash: Boolean
+  ): PayloadLockedDocument
+  PayloadLockedDocuments(
+    draft: Boolean
+    where: PayloadLockedDocument_where
+    limit: Int
+    page: Int
+    pagination: Boolean
+    select: Boolean
+    sort: String
+    trash: Boolean
+  ): PayloadLockedDocuments
+  countPayloadLockedDocuments(
+    draft: Boolean
+    trash: Boolean
+    where: PayloadLockedDocument_where
+  ): countPayloadLockedDocuments
   docAccessPayloadLockedDocument(id: String!): payload_locked_documentsDocAccess
   PayloadPreference(id: String!, draft: Boolean, select: Boolean, trash: Boolean): PayloadPreference
-  PayloadPreferences(draft: Boolean, where: PayloadPreference_where, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): PayloadPreferences
-  countPayloadPreferences(draft: Boolean, trash: Boolean, where: PayloadPreference_where): countPayloadPreferences
+  PayloadPreferences(
+    draft: Boolean
+    where: PayloadPreference_where
+    limit: Int
+    page: Int
+    pagination: Boolean
+    select: Boolean
+    sort: String
+    trash: Boolean
+  ): PayloadPreferences
+  countPayloadPreferences(
+    draft: Boolean
+    trash: Boolean
+    where: PayloadPreference_where
+  ): countPayloadPreferences
   docAccessPayloadPreference(id: String!): payload_preferencesDocAccess
   Access: Access
 }
@@ -51,8 +152,6 @@ type TransformStateMedia {
   height: Float
   _transforms: JSON
   original: TransformStateMedia_Original
-  _managedFiles: JSON
-  _fileRevision: String
   focalX: Float
   focalY: Float
 }
@@ -60,7 +159,8 @@ type TransformStateMedia {
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
-scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
+scalar JSON
+  @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
 type TransformStateMedia_CreatedBy_Relationship {
   relationTo: TransformStateMedia_CreatedBy_RelationTo
@@ -121,7 +221,8 @@ scalar DateTime
 """
 A field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address.
 """
-scalar EmailAddress @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
+scalar EmailAddress
+  @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
 
 type User_Sessions {
   id: String
@@ -152,6 +253,8 @@ type TransformStateMedia_Original {
   filesize: Float
   width: Float
   height: Float
+  prefix: String
+  _objectKey: String
 }
 
 type TransformStateMedias {
@@ -191,6 +294,8 @@ input TransformStateMedia_where {
   original__filesize: TransformStateMedia_original__filesize_operator
   original__width: TransformStateMedia_original__width_operator
   original__height: TransformStateMedia_original__height_operator
+  original__prefix: TransformStateMedia_original__prefix_operator
+  original___objectKey: TransformStateMedia_original___objectKey_operator
   focalX: TransformStateMedia_focalX_operator
   focalY: TransformStateMedia_focalY_operator
   id: TransformStateMedia_id_operator
@@ -431,6 +536,28 @@ input TransformStateMedia_original__height_operator {
   exists: Boolean
 }
 
+input TransformStateMedia_original__prefix_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input TransformStateMedia_original___objectKey_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
 input TransformStateMedia_focalX_operator {
   equals: Float
   not_equals: Float
@@ -485,6 +612,8 @@ input TransformStateMedia_where_and {
   original__filesize: TransformStateMedia_original__filesize_operator
   original__width: TransformStateMedia_original__width_operator
   original__height: TransformStateMedia_original__height_operator
+  original__prefix: TransformStateMedia_original__prefix_operator
+  original___objectKey: TransformStateMedia_original___objectKey_operator
   focalX: TransformStateMedia_focalX_operator
   focalY: TransformStateMedia_focalY_operator
   id: TransformStateMedia_id_operator
@@ -515,6 +644,8 @@ input TransformStateMedia_where_or {
   original__filesize: TransformStateMedia_original__filesize_operator
   original__width: TransformStateMedia_original__width_operator
   original__height: TransformStateMedia_original__height_operator
+  original__prefix: TransformStateMedia_original__prefix_operator
+  original___objectKey: TransformStateMedia_original___objectKey_operator
   focalX: TransformStateMedia_focalX_operator
   focalY: TransformStateMedia_focalY_operator
   id: TransformStateMedia_id_operator
@@ -956,6 +1087,7 @@ type TransformStateMediaDocAccessFields_original_Fields {
   filesize: TransformStateMediaDocAccessFields_original_filesize
   width: TransformStateMediaDocAccessFields_original_width
   height: TransformStateMediaDocAccessFields_original_height
+  prefix: TransformStateMediaDocAccessFields_original_prefix
 }
 
 type TransformStateMediaDocAccessFields_original_filename {
@@ -1096,6 +1228,29 @@ type TransformStateMediaDocAccessFields_original_height_Delete {
   permission: Boolean!
 }
 
+type TransformStateMediaDocAccessFields_original_prefix {
+  create: TransformStateMediaDocAccessFields_original_prefix_Create
+  read: TransformStateMediaDocAccessFields_original_prefix_Read
+  update: TransformStateMediaDocAccessFields_original_prefix_Update
+  delete: TransformStateMediaDocAccessFields_original_prefix_Delete
+}
+
+type TransformStateMediaDocAccessFields_original_prefix_Create {
+  permission: Boolean!
+}
+
+type TransformStateMediaDocAccessFields_original_prefix_Read {
+  permission: Boolean!
+}
+
+type TransformStateMediaDocAccessFields_original_prefix_Update {
+  permission: Boolean!
+}
+
+type TransformStateMediaDocAccessFields_original_prefix_Delete {
+  permission: Boolean!
+}
+
 type TransformStateMediaDocAccessFields_focalX {
   create: TransformStateMediaDocAccessFields_focalX_Create
   read: TransformStateMediaDocAccessFields_focalX_Read
@@ -1150,7 +1305,8 @@ type TransformStateMediaCreateDocAccess {
 """
 The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
-scalar JSONObject @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
+scalar JSONObject
+  @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
 type TransformStateMediaReadDocAccess {
   permission: Boolean!
@@ -1199,8 +1355,6 @@ type TransformStateMediaVersion_Version {
   height: Float
   _transforms: JSON
   original: TransformStateMediaVersion_Version_Original
-  _managedFiles: JSON
-  _fileRevision: String
   focalX: Float
   focalY: Float
 }
@@ -1239,6 +1393,8 @@ type TransformStateMediaVersion_Version_Original {
   filesize: Float
   width: Float
   height: Float
+  prefix: String
+  _objectKey: String
 }
 
 type versionsTransformStateMedias {
@@ -1279,8 +1435,8 @@ input versionsTransformStateMedia_where {
   version__original__filesize: versionsTransformStateMedia_version__original__filesize_operator
   version__original__width: versionsTransformStateMedia_version__original__width_operator
   version__original__height: versionsTransformStateMedia_version__original__height_operator
-  version___managedFiles: versionsTransformStateMedia_version___managedFiles_operator
-  version___fileRevision: versionsTransformStateMedia_version___fileRevision_operator
+  version__original__prefix: versionsTransformStateMedia_version__original__prefix_operator
+  version__original___objectKey: versionsTransformStateMedia_version__original___objectKey_operator
   version__focalX: versionsTransformStateMedia_version__focalX_operator
   version__focalY: versionsTransformStateMedia_version__focalY_operator
   createdAt: versionsTransformStateMedia_createdAt_operator
@@ -1533,17 +1689,18 @@ input versionsTransformStateMedia_version__original__height_operator {
   exists: Boolean
 }
 
-input versionsTransformStateMedia_version___managedFiles_operator {
-  equals: JSON
-  not_equals: JSON
-  like: JSON
-  contains: JSON
-  within: JSON
-  intersects: JSON
+input versionsTransformStateMedia_version__original__prefix_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
   exists: Boolean
 }
 
-input versionsTransformStateMedia_version___fileRevision_operator {
+input versionsTransformStateMedia_version__original___objectKey_operator {
   equals: String
   not_equals: String
   like: String
@@ -1637,8 +1794,8 @@ input versionsTransformStateMedia_where_and {
   version__original__filesize: versionsTransformStateMedia_version__original__filesize_operator
   version__original__width: versionsTransformStateMedia_version__original__width_operator
   version__original__height: versionsTransformStateMedia_version__original__height_operator
-  version___managedFiles: versionsTransformStateMedia_version___managedFiles_operator
-  version___fileRevision: versionsTransformStateMedia_version___fileRevision_operator
+  version__original__prefix: versionsTransformStateMedia_version__original__prefix_operator
+  version__original___objectKey: versionsTransformStateMedia_version__original___objectKey_operator
   version__focalX: versionsTransformStateMedia_version__focalX_operator
   version__focalY: versionsTransformStateMedia_version__focalY_operator
   createdAt: versionsTransformStateMedia_createdAt_operator
@@ -1673,8 +1830,8 @@ input versionsTransformStateMedia_where_or {
   version__original__filesize: versionsTransformStateMedia_version__original__filesize_operator
   version__original__width: versionsTransformStateMedia_version__original__width_operator
   version__original__height: versionsTransformStateMedia_version__original__height_operator
-  version___managedFiles: versionsTransformStateMedia_version___managedFiles_operator
-  version___fileRevision: versionsTransformStateMedia_version___fileRevision_operator
+  version__original__prefix: versionsTransformStateMedia_version__original__prefix_operator
+  version__original___objectKey: versionsTransformStateMedia_version__original___objectKey_operator
   version__focalX: versionsTransformStateMedia_version__focalX_operator
   version__focalY: versionsTransformStateMedia_version__focalY_operator
   createdAt: versionsTransformStateMedia_createdAt_operator
@@ -1704,8 +1861,6 @@ type DynamicTransformStateMedia {
   height: Float
   _transforms: JSON
   original: DynamicTransformStateMedia_Original
-  _managedFiles: JSON
-  _fileRevision: String
   focalX: Float
   focalY: Float
   variants: DynamicTransformStateMedia_Variants
@@ -1745,6 +1900,8 @@ type DynamicTransformStateMedia_Original {
   filesize: Float
   width: Float
   height: Float
+  prefix: String
+  _objectKey: String
 }
 
 type DynamicTransformStateMedia_Variants {
@@ -1758,6 +1915,8 @@ type DynamicTransformStateMedia_Variants_Square {
   mimeType: String
   filesize: Float
   filename: String
+  prefix: String
+  _objectKey: String
 }
 
 type DynamicTransformStateMedias {
@@ -1797,6 +1956,8 @@ input DynamicTransformStateMedia_where {
   original__filesize: DynamicTransformStateMedia_original__filesize_operator
   original__width: DynamicTransformStateMedia_original__width_operator
   original__height: DynamicTransformStateMedia_original__height_operator
+  original__prefix: DynamicTransformStateMedia_original__prefix_operator
+  original___objectKey: DynamicTransformStateMedia_original___objectKey_operator
   focalX: DynamicTransformStateMedia_focalX_operator
   focalY: DynamicTransformStateMedia_focalY_operator
   variants__square__url: DynamicTransformStateMedia_variants__square__url_operator
@@ -1805,6 +1966,8 @@ input DynamicTransformStateMedia_where {
   variants__square__mimeType: DynamicTransformStateMedia_variants__square__mimeType_operator
   variants__square__filesize: DynamicTransformStateMedia_variants__square__filesize_operator
   variants__square__filename: DynamicTransformStateMedia_variants__square__filename_operator
+  variants__square__prefix: DynamicTransformStateMedia_variants__square__prefix_operator
+  variants__square___objectKey: DynamicTransformStateMedia_variants__square___objectKey_operator
   id: DynamicTransformStateMedia_id_operator
   AND: [DynamicTransformStateMedia_where_and]
   OR: [DynamicTransformStateMedia_where_or]
@@ -2043,6 +2206,28 @@ input DynamicTransformStateMedia_original__height_operator {
   exists: Boolean
 }
 
+input DynamicTransformStateMedia_original__prefix_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input DynamicTransformStateMedia_original___objectKey_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
 input DynamicTransformStateMedia_focalX_operator {
   equals: Float
   not_equals: Float
@@ -2126,6 +2311,28 @@ input DynamicTransformStateMedia_variants__square__filename_operator {
   exists: Boolean
 }
 
+input DynamicTransformStateMedia_variants__square__prefix_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input DynamicTransformStateMedia_variants__square___objectKey_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
 input DynamicTransformStateMedia_id_operator {
   equals: String
   not_equals: String
@@ -2160,6 +2367,8 @@ input DynamicTransformStateMedia_where_and {
   original__filesize: DynamicTransformStateMedia_original__filesize_operator
   original__width: DynamicTransformStateMedia_original__width_operator
   original__height: DynamicTransformStateMedia_original__height_operator
+  original__prefix: DynamicTransformStateMedia_original__prefix_operator
+  original___objectKey: DynamicTransformStateMedia_original___objectKey_operator
   focalX: DynamicTransformStateMedia_focalX_operator
   focalY: DynamicTransformStateMedia_focalY_operator
   variants__square__url: DynamicTransformStateMedia_variants__square__url_operator
@@ -2168,6 +2377,8 @@ input DynamicTransformStateMedia_where_and {
   variants__square__mimeType: DynamicTransformStateMedia_variants__square__mimeType_operator
   variants__square__filesize: DynamicTransformStateMedia_variants__square__filesize_operator
   variants__square__filename: DynamicTransformStateMedia_variants__square__filename_operator
+  variants__square__prefix: DynamicTransformStateMedia_variants__square__prefix_operator
+  variants__square___objectKey: DynamicTransformStateMedia_variants__square___objectKey_operator
   id: DynamicTransformStateMedia_id_operator
   AND: [DynamicTransformStateMedia_where_and]
   OR: [DynamicTransformStateMedia_where_or]
@@ -2196,6 +2407,8 @@ input DynamicTransformStateMedia_where_or {
   original__filesize: DynamicTransformStateMedia_original__filesize_operator
   original__width: DynamicTransformStateMedia_original__width_operator
   original__height: DynamicTransformStateMedia_original__height_operator
+  original__prefix: DynamicTransformStateMedia_original__prefix_operator
+  original___objectKey: DynamicTransformStateMedia_original___objectKey_operator
   focalX: DynamicTransformStateMedia_focalX_operator
   focalY: DynamicTransformStateMedia_focalY_operator
   variants__square__url: DynamicTransformStateMedia_variants__square__url_operator
@@ -2204,6 +2417,8 @@ input DynamicTransformStateMedia_where_or {
   variants__square__mimeType: DynamicTransformStateMedia_variants__square__mimeType_operator
   variants__square__filesize: DynamicTransformStateMedia_variants__square__filesize_operator
   variants__square__filename: DynamicTransformStateMedia_variants__square__filename_operator
+  variants__square__prefix: DynamicTransformStateMedia_variants__square__prefix_operator
+  variants__square___objectKey: DynamicTransformStateMedia_variants__square___objectKey_operator
   id: DynamicTransformStateMedia_id_operator
   AND: [DynamicTransformStateMedia_where_and]
   OR: [DynamicTransformStateMedia_where_or]
@@ -2644,6 +2859,7 @@ type DynamicTransformStateMediaDocAccessFields_original_Fields {
   filesize: DynamicTransformStateMediaDocAccessFields_original_filesize
   width: DynamicTransformStateMediaDocAccessFields_original_width
   height: DynamicTransformStateMediaDocAccessFields_original_height
+  prefix: DynamicTransformStateMediaDocAccessFields_original_prefix
 }
 
 type DynamicTransformStateMediaDocAccessFields_original_filename {
@@ -2784,6 +3000,29 @@ type DynamicTransformStateMediaDocAccessFields_original_height_Delete {
   permission: Boolean!
 }
 
+type DynamicTransformStateMediaDocAccessFields_original_prefix {
+  create: DynamicTransformStateMediaDocAccessFields_original_prefix_Create
+  read: DynamicTransformStateMediaDocAccessFields_original_prefix_Read
+  update: DynamicTransformStateMediaDocAccessFields_original_prefix_Update
+  delete: DynamicTransformStateMediaDocAccessFields_original_prefix_Delete
+}
+
+type DynamicTransformStateMediaDocAccessFields_original_prefix_Create {
+  permission: Boolean!
+}
+
+type DynamicTransformStateMediaDocAccessFields_original_prefix_Read {
+  permission: Boolean!
+}
+
+type DynamicTransformStateMediaDocAccessFields_original_prefix_Update {
+  permission: Boolean!
+}
+
+type DynamicTransformStateMediaDocAccessFields_original_prefix_Delete {
+  permission: Boolean!
+}
+
 type DynamicTransformStateMediaDocAccessFields_focalX {
   create: DynamicTransformStateMediaDocAccessFields_focalX_Create
   read: DynamicTransformStateMediaDocAccessFields_focalX_Read
@@ -2889,6 +3128,7 @@ type DynamicTransformStateMediaDocAccessFields_variants_square_Fields {
   mimeType: DynamicTransformStateMediaDocAccessFields_variants_square_mimeType
   filesize: DynamicTransformStateMediaDocAccessFields_variants_square_filesize
   filename: DynamicTransformStateMediaDocAccessFields_variants_square_filename
+  prefix: DynamicTransformStateMediaDocAccessFields_variants_square_prefix
 }
 
 type DynamicTransformStateMediaDocAccessFields_variants_square_url {
@@ -3029,6 +3269,29 @@ type DynamicTransformStateMediaDocAccessFields_variants_square_filename_Delete {
   permission: Boolean!
 }
 
+type DynamicTransformStateMediaDocAccessFields_variants_square_prefix {
+  create: DynamicTransformStateMediaDocAccessFields_variants_square_prefix_Create
+  read: DynamicTransformStateMediaDocAccessFields_variants_square_prefix_Read
+  update: DynamicTransformStateMediaDocAccessFields_variants_square_prefix_Update
+  delete: DynamicTransformStateMediaDocAccessFields_variants_square_prefix_Delete
+}
+
+type DynamicTransformStateMediaDocAccessFields_variants_square_prefix_Create {
+  permission: Boolean!
+}
+
+type DynamicTransformStateMediaDocAccessFields_variants_square_prefix_Read {
+  permission: Boolean!
+}
+
+type DynamicTransformStateMediaDocAccessFields_variants_square_prefix_Update {
+  permission: Boolean!
+}
+
+type DynamicTransformStateMediaDocAccessFields_variants_square_prefix_Delete {
+  permission: Boolean!
+}
+
 type DynamicTransformStateMediaCreateDocAccess {
   permission: Boolean!
   where: JSONObject
@@ -3081,8 +3344,6 @@ type DynamicTransformStateMediaVersion_Version {
   height: Float
   _transforms: JSON
   original: DynamicTransformStateMediaVersion_Version_Original
-  _managedFiles: JSON
-  _fileRevision: String
   focalX: Float
   focalY: Float
   variants: DynamicTransformStateMediaVersion_Version_Variants
@@ -3122,6 +3383,8 @@ type DynamicTransformStateMediaVersion_Version_Original {
   filesize: Float
   width: Float
   height: Float
+  prefix: String
+  _objectKey: String
 }
 
 type DynamicTransformStateMediaVersion_Version_Variants {
@@ -3135,6 +3398,8 @@ type DynamicTransformStateMediaVersion_Version_Variants_Square {
   mimeType: String
   filesize: Float
   filename: String
+  prefix: String
+  _objectKey: String
 }
 
 type versionsDynamicTransformStateMedias {
@@ -3175,8 +3440,8 @@ input versionsDynamicTransformStateMedia_where {
   version__original__filesize: versionsDynamicTransformStateMedia_version__original__filesize_operator
   version__original__width: versionsDynamicTransformStateMedia_version__original__width_operator
   version__original__height: versionsDynamicTransformStateMedia_version__original__height_operator
-  version___managedFiles: versionsDynamicTransformStateMedia_version___managedFiles_operator
-  version___fileRevision: versionsDynamicTransformStateMedia_version___fileRevision_operator
+  version__original__prefix: versionsDynamicTransformStateMedia_version__original__prefix_operator
+  version__original___objectKey: versionsDynamicTransformStateMedia_version__original___objectKey_operator
   version__focalX: versionsDynamicTransformStateMedia_version__focalX_operator
   version__focalY: versionsDynamicTransformStateMedia_version__focalY_operator
   version__variants__square__url: versionsDynamicTransformStateMedia_version__variants__square__url_operator
@@ -3185,6 +3450,8 @@ input versionsDynamicTransformStateMedia_where {
   version__variants__square__mimeType: versionsDynamicTransformStateMedia_version__variants__square__mimeType_operator
   version__variants__square__filesize: versionsDynamicTransformStateMedia_version__variants__square__filesize_operator
   version__variants__square__filename: versionsDynamicTransformStateMedia_version__variants__square__filename_operator
+  version__variants__square__prefix: versionsDynamicTransformStateMedia_version__variants__square__prefix_operator
+  version__variants__square___objectKey: versionsDynamicTransformStateMedia_version__variants__square___objectKey_operator
   createdAt: versionsDynamicTransformStateMedia_createdAt_operator
   updatedAt: versionsDynamicTransformStateMedia_updatedAt_operator
   latest: versionsDynamicTransformStateMedia_latest_operator
@@ -3435,17 +3702,18 @@ input versionsDynamicTransformStateMedia_version__original__height_operator {
   exists: Boolean
 }
 
-input versionsDynamicTransformStateMedia_version___managedFiles_operator {
-  equals: JSON
-  not_equals: JSON
-  like: JSON
-  contains: JSON
-  within: JSON
-  intersects: JSON
+input versionsDynamicTransformStateMedia_version__original__prefix_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
   exists: Boolean
 }
 
-input versionsDynamicTransformStateMedia_version___fileRevision_operator {
+input versionsDynamicTransformStateMedia_version__original___objectKey_operator {
   equals: String
   not_equals: String
   like: String
@@ -3539,6 +3807,28 @@ input versionsDynamicTransformStateMedia_version__variants__square__filename_ope
   exists: Boolean
 }
 
+input versionsDynamicTransformStateMedia_version__variants__square__prefix_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input versionsDynamicTransformStateMedia_version__variants__square___objectKey_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
 input versionsDynamicTransformStateMedia_createdAt_operator {
   equals: DateTime
   not_equals: DateTime
@@ -3602,8 +3892,8 @@ input versionsDynamicTransformStateMedia_where_and {
   version__original__filesize: versionsDynamicTransformStateMedia_version__original__filesize_operator
   version__original__width: versionsDynamicTransformStateMedia_version__original__width_operator
   version__original__height: versionsDynamicTransformStateMedia_version__original__height_operator
-  version___managedFiles: versionsDynamicTransformStateMedia_version___managedFiles_operator
-  version___fileRevision: versionsDynamicTransformStateMedia_version___fileRevision_operator
+  version__original__prefix: versionsDynamicTransformStateMedia_version__original__prefix_operator
+  version__original___objectKey: versionsDynamicTransformStateMedia_version__original___objectKey_operator
   version__focalX: versionsDynamicTransformStateMedia_version__focalX_operator
   version__focalY: versionsDynamicTransformStateMedia_version__focalY_operator
   version__variants__square__url: versionsDynamicTransformStateMedia_version__variants__square__url_operator
@@ -3612,6 +3902,8 @@ input versionsDynamicTransformStateMedia_where_and {
   version__variants__square__mimeType: versionsDynamicTransformStateMedia_version__variants__square__mimeType_operator
   version__variants__square__filesize: versionsDynamicTransformStateMedia_version__variants__square__filesize_operator
   version__variants__square__filename: versionsDynamicTransformStateMedia_version__variants__square__filename_operator
+  version__variants__square__prefix: versionsDynamicTransformStateMedia_version__variants__square__prefix_operator
+  version__variants__square___objectKey: versionsDynamicTransformStateMedia_version__variants__square___objectKey_operator
   createdAt: versionsDynamicTransformStateMedia_createdAt_operator
   updatedAt: versionsDynamicTransformStateMedia_updatedAt_operator
   latest: versionsDynamicTransformStateMedia_latest_operator
@@ -3644,8 +3936,8 @@ input versionsDynamicTransformStateMedia_where_or {
   version__original__filesize: versionsDynamicTransformStateMedia_version__original__filesize_operator
   version__original__width: versionsDynamicTransformStateMedia_version__original__width_operator
   version__original__height: versionsDynamicTransformStateMedia_version__original__height_operator
-  version___managedFiles: versionsDynamicTransformStateMedia_version___managedFiles_operator
-  version___fileRevision: versionsDynamicTransformStateMedia_version___fileRevision_operator
+  version__original__prefix: versionsDynamicTransformStateMedia_version__original__prefix_operator
+  version__original___objectKey: versionsDynamicTransformStateMedia_version__original___objectKey_operator
   version__focalX: versionsDynamicTransformStateMedia_version__focalX_operator
   version__focalY: versionsDynamicTransformStateMedia_version__focalY_operator
   version__variants__square__url: versionsDynamicTransformStateMedia_version__variants__square__url_operator
@@ -3654,6 +3946,8 @@ input versionsDynamicTransformStateMedia_where_or {
   version__variants__square__mimeType: versionsDynamicTransformStateMedia_version__variants__square__mimeType_operator
   version__variants__square__filesize: versionsDynamicTransformStateMedia_version__variants__square__filesize_operator
   version__variants__square__filename: versionsDynamicTransformStateMedia_version__variants__square__filename_operator
+  version__variants__square__prefix: versionsDynamicTransformStateMedia_version__variants__square__prefix_operator
+  version__variants__square___objectKey: versionsDynamicTransformStateMedia_version__variants__square___objectKey_operator
   createdAt: versionsDynamicTransformStateMedia_createdAt_operator
   updatedAt: versionsDynamicTransformStateMedia_updatedAt_operator
   latest: versionsDynamicTransformStateMedia_latest_operator
@@ -5259,6 +5553,7 @@ type TransformStateMediaFields_original_Fields {
   filesize: TransformStateMediaFields_original_filesize
   width: TransformStateMediaFields_original_width
   height: TransformStateMediaFields_original_height
+  prefix: TransformStateMediaFields_original_prefix
 }
 
 type TransformStateMediaFields_original_filename {
@@ -5396,6 +5691,29 @@ type TransformStateMediaFields_original_height_Update {
 }
 
 type TransformStateMediaFields_original_height_Delete {
+  permission: Boolean!
+}
+
+type TransformStateMediaFields_original_prefix {
+  create: TransformStateMediaFields_original_prefix_Create
+  read: TransformStateMediaFields_original_prefix_Read
+  update: TransformStateMediaFields_original_prefix_Update
+  delete: TransformStateMediaFields_original_prefix_Delete
+}
+
+type TransformStateMediaFields_original_prefix_Create {
+  permission: Boolean!
+}
+
+type TransformStateMediaFields_original_prefix_Read {
+  permission: Boolean!
+}
+
+type TransformStateMediaFields_original_prefix_Update {
+  permission: Boolean!
+}
+
+type TransformStateMediaFields_original_prefix_Delete {
   permission: Boolean!
 }
 
@@ -5901,6 +6219,7 @@ type DynamicTransformStateMediaFields_original_Fields {
   filesize: DynamicTransformStateMediaFields_original_filesize
   width: DynamicTransformStateMediaFields_original_width
   height: DynamicTransformStateMediaFields_original_height
+  prefix: DynamicTransformStateMediaFields_original_prefix
 }
 
 type DynamicTransformStateMediaFields_original_filename {
@@ -6041,6 +6360,29 @@ type DynamicTransformStateMediaFields_original_height_Delete {
   permission: Boolean!
 }
 
+type DynamicTransformStateMediaFields_original_prefix {
+  create: DynamicTransformStateMediaFields_original_prefix_Create
+  read: DynamicTransformStateMediaFields_original_prefix_Read
+  update: DynamicTransformStateMediaFields_original_prefix_Update
+  delete: DynamicTransformStateMediaFields_original_prefix_Delete
+}
+
+type DynamicTransformStateMediaFields_original_prefix_Create {
+  permission: Boolean!
+}
+
+type DynamicTransformStateMediaFields_original_prefix_Read {
+  permission: Boolean!
+}
+
+type DynamicTransformStateMediaFields_original_prefix_Update {
+  permission: Boolean!
+}
+
+type DynamicTransformStateMediaFields_original_prefix_Delete {
+  permission: Boolean!
+}
+
 type DynamicTransformStateMediaFields_focalX {
   create: DynamicTransformStateMediaFields_focalX_Create
   read: DynamicTransformStateMediaFields_focalX_Read
@@ -6146,6 +6488,7 @@ type DynamicTransformStateMediaFields_variants_square_Fields {
   mimeType: DynamicTransformStateMediaFields_variants_square_mimeType
   filesize: DynamicTransformStateMediaFields_variants_square_filesize
   filename: DynamicTransformStateMediaFields_variants_square_filename
+  prefix: DynamicTransformStateMediaFields_variants_square_prefix
 }
 
 type DynamicTransformStateMediaFields_variants_square_url {
@@ -6283,6 +6626,29 @@ type DynamicTransformStateMediaFields_variants_square_filename_Update {
 }
 
 type DynamicTransformStateMediaFields_variants_square_filename_Delete {
+  permission: Boolean!
+}
+
+type DynamicTransformStateMediaFields_variants_square_prefix {
+  create: DynamicTransformStateMediaFields_variants_square_prefix_Create
+  read: DynamicTransformStateMediaFields_variants_square_prefix_Read
+  update: DynamicTransformStateMediaFields_variants_square_prefix_Update
+  delete: DynamicTransformStateMediaFields_variants_square_prefix_Delete
+}
+
+type DynamicTransformStateMediaFields_variants_square_prefix_Create {
+  permission: Boolean!
+}
+
+type DynamicTransformStateMediaFields_variants_square_prefix_Read {
+  permission: Boolean!
+}
+
+type DynamicTransformStateMediaFields_variants_square_prefix_Update {
+  permission: Boolean!
+}
+
+type DynamicTransformStateMediaFields_variants_square_prefix_Delete {
   permission: Boolean!
 }
 
@@ -6950,24 +7316,64 @@ type PayloadPreferencesDeleteAccess {
 }
 
 type Mutation {
-  createTransformStateMedia(data: mutationTransformStateMediaInput!, draft: Boolean): TransformStateMedia
-  updateTransformStateMedia(id: String!, autosave: Boolean, data: mutationTransformStateMediaUpdateInput!, draft: Boolean, trash: Boolean): TransformStateMedia
+  createTransformStateMedia(
+    data: mutationTransformStateMediaInput!
+    draft: Boolean
+  ): TransformStateMedia
+  updateTransformStateMedia(
+    id: String!
+    autosave: Boolean
+    data: mutationTransformStateMediaUpdateInput!
+    draft: Boolean
+    trash: Boolean
+  ): TransformStateMedia
   deleteTransformStateMedia(id: String!, trash: Boolean): TransformStateMedia
-  duplicateTransformStateMedia(id: String!, data: mutationTransformStateMediaInput!): TransformStateMedia
+  duplicateTransformStateMedia(
+    id: String!
+    data: mutationTransformStateMediaInput!
+  ): TransformStateMedia
   restoreVersionTransformStateMedia(id: String, draft: Boolean): TransformStateMedia
   renameFileTransformStateMedia(id: String!, draft: Boolean, filename: String!): TransformStateMedia
-  createDynamicTransformStateMedia(data: mutationDynamicTransformStateMediaInput!, draft: Boolean): DynamicTransformStateMedia
-  updateDynamicTransformStateMedia(id: String!, autosave: Boolean, data: mutationDynamicTransformStateMediaUpdateInput!, draft: Boolean, trash: Boolean): DynamicTransformStateMedia
+  createDynamicTransformStateMedia(
+    data: mutationDynamicTransformStateMediaInput!
+    draft: Boolean
+  ): DynamicTransformStateMedia
+  updateDynamicTransformStateMedia(
+    id: String!
+    autosave: Boolean
+    data: mutationDynamicTransformStateMediaUpdateInput!
+    draft: Boolean
+    trash: Boolean
+  ): DynamicTransformStateMedia
   deleteDynamicTransformStateMedia(id: String!, trash: Boolean): DynamicTransformStateMedia
-  duplicateDynamicTransformStateMedia(id: String!, data: mutationDynamicTransformStateMediaInput!): DynamicTransformStateMedia
+  duplicateDynamicTransformStateMedia(
+    id: String!
+    data: mutationDynamicTransformStateMediaInput!
+  ): DynamicTransformStateMedia
   restoreVersionDynamicTransformStateMedia(id: String, draft: Boolean): DynamicTransformStateMedia
-  renameFileDynamicTransformStateMedia(id: String!, draft: Boolean, filename: String!): DynamicTransformStateMedia
+  renameFileDynamicTransformStateMedia(
+    id: String!
+    draft: Boolean
+    filename: String!
+  ): DynamicTransformStateMedia
   createPayloadKv(data: mutationPayloadKvInput!, draft: Boolean): PayloadKv
-  updatePayloadKv(id: String!, autosave: Boolean, data: mutationPayloadKvUpdateInput!, draft: Boolean, trash: Boolean): PayloadKv
+  updatePayloadKv(
+    id: String!
+    autosave: Boolean
+    data: mutationPayloadKvUpdateInput!
+    draft: Boolean
+    trash: Boolean
+  ): PayloadKv
   deletePayloadKv(id: String!, trash: Boolean): PayloadKv
   duplicatePayloadKv(id: String!, data: mutationPayloadKvInput!): PayloadKv
   createUser(data: mutationUserInput!, draft: Boolean): User
-  updateUser(id: String!, autosave: Boolean, data: mutationUserUpdateInput!, draft: Boolean, trash: Boolean): User
+  updateUser(
+    id: String!
+    autosave: Boolean
+    data: mutationUserUpdateInput!
+    draft: Boolean
+    trash: Boolean
+  ): User
   deleteUser(id: String!, trash: Boolean): User
   refreshTokenUser: usersRefreshedUser
   logoutUser(allSessions: Boolean): String
@@ -6976,12 +7382,30 @@ type Mutation {
   forgotPasswordUser(email: String!): Boolean!
   resetPasswordUser(password: String, token: String): usersResetPassword
   verifyEmailUser(token: String): Boolean
-  createPayloadLockedDocument(data: mutationPayloadLockedDocumentInput!, draft: Boolean): PayloadLockedDocument
-  updatePayloadLockedDocument(id: String!, autosave: Boolean, data: mutationPayloadLockedDocumentUpdateInput!, draft: Boolean, trash: Boolean): PayloadLockedDocument
+  createPayloadLockedDocument(
+    data: mutationPayloadLockedDocumentInput!
+    draft: Boolean
+  ): PayloadLockedDocument
+  updatePayloadLockedDocument(
+    id: String!
+    autosave: Boolean
+    data: mutationPayloadLockedDocumentUpdateInput!
+    draft: Boolean
+    trash: Boolean
+  ): PayloadLockedDocument
   deletePayloadLockedDocument(id: String!, trash: Boolean): PayloadLockedDocument
-  duplicatePayloadLockedDocument(id: String!, data: mutationPayloadLockedDocumentInput!): PayloadLockedDocument
+  duplicatePayloadLockedDocument(
+    id: String!
+    data: mutationPayloadLockedDocumentInput!
+  ): PayloadLockedDocument
   createPayloadPreference(data: mutationPayloadPreferenceInput!, draft: Boolean): PayloadPreference
-  updatePayloadPreference(id: String!, autosave: Boolean, data: mutationPayloadPreferenceUpdateInput!, draft: Boolean, trash: Boolean): PayloadPreference
+  updatePayloadPreference(
+    id: String!
+    autosave: Boolean
+    data: mutationPayloadPreferenceUpdateInput!
+    draft: Boolean
+    trash: Boolean
+  ): PayloadPreference
   deletePayloadPreference(id: String!, trash: Boolean): PayloadPreference
   duplicatePayloadPreference(id: String!, data: mutationPayloadPreferenceInput!): PayloadPreference
 }
@@ -7004,8 +7428,6 @@ input mutationTransformStateMediaInput {
   height: Float
   _transforms: JSON
   original: mutationTransformStateMedia_OriginalInput
-  _managedFiles: JSON
-  _fileRevision: String
   focalX: Float
   focalY: Float
 }
@@ -7040,6 +7462,8 @@ input mutationTransformStateMedia_OriginalInput {
   filesize: Float
   width: Float
   height: Float
+  prefix: String
+  _objectKey: String
 }
 
 input mutationTransformStateMediaUpdateInput {
@@ -7060,8 +7484,6 @@ input mutationTransformStateMediaUpdateInput {
   height: Float
   _transforms: JSON
   original: mutationTransformStateMediaUpdate_OriginalInput
-  _managedFiles: JSON
-  _fileRevision: String
   focalX: Float
   focalY: Float
 }
@@ -7096,6 +7518,8 @@ input mutationTransformStateMediaUpdate_OriginalInput {
   filesize: Float
   width: Float
   height: Float
+  prefix: String
+  _objectKey: String
 }
 
 input mutationDynamicTransformStateMediaInput {
@@ -7116,8 +7540,6 @@ input mutationDynamicTransformStateMediaInput {
   height: Float
   _transforms: JSON
   original: mutationDynamicTransformStateMedia_OriginalInput
-  _managedFiles: JSON
-  _fileRevision: String
   focalX: Float
   focalY: Float
   variants: mutationDynamicTransformStateMedia_VariantsInput
@@ -7153,6 +7575,8 @@ input mutationDynamicTransformStateMedia_OriginalInput {
   filesize: Float
   width: Float
   height: Float
+  prefix: String
+  _objectKey: String
 }
 
 input mutationDynamicTransformStateMedia_VariantsInput {
@@ -7166,6 +7590,8 @@ input mutationDynamicTransformStateMedia_Variants_SquareInput {
   mimeType: String
   filesize: Float
   filename: String
+  prefix: String
+  _objectKey: String
 }
 
 input mutationDynamicTransformStateMediaUpdateInput {
@@ -7186,8 +7612,6 @@ input mutationDynamicTransformStateMediaUpdateInput {
   height: Float
   _transforms: JSON
   original: mutationDynamicTransformStateMediaUpdate_OriginalInput
-  _managedFiles: JSON
-  _fileRevision: String
   focalX: Float
   focalY: Float
   variants: mutationDynamicTransformStateMediaUpdate_VariantsInput
@@ -7223,6 +7647,8 @@ input mutationDynamicTransformStateMediaUpdate_OriginalInput {
   filesize: Float
   width: Float
   height: Float
+  prefix: String
+  _objectKey: String
 }
 
 input mutationDynamicTransformStateMediaUpdate_VariantsInput {
@@ -7236,6 +7662,8 @@ input mutationDynamicTransformStateMediaUpdate_Variants_SquareInput {
   mimeType: String
   filesize: Float
   filename: String
+  prefix: String
+  _objectKey: String
 }
 
 input mutationPayloadKvInput {

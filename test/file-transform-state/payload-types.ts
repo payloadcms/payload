@@ -242,22 +242,9 @@ export interface TransformStateMedia {
     filesize?: number | null;
     width?: number | null;
     height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
   };
-  _managedFiles?: {
-    key: string;
-    roles: (
-      | {
-          type: 'size';
-          sizeKey: string;
-        }
-      | {
-          type: 'original' | 'default' | 'thumbnail';
-        }
-    )[];
-    storageBackendId: string;
-    [k: string]: unknown;
-  }[];
-  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -414,22 +401,9 @@ export interface DynamicTransformStateMedia {
     filesize?: number | null;
     width?: number | null;
     height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
   };
-  _managedFiles?: {
-    key: string;
-    roles: (
-      | {
-          type: 'size';
-          sizeKey: string;
-        }
-      | {
-          type: 'original' | 'default' | 'thumbnail';
-        }
-    )[];
-    storageBackendId: string;
-    [k: string]: unknown;
-  }[];
-  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
   variants?: {
@@ -440,6 +414,8 @@ export interface DynamicTransformStateMedia {
       mimeType?: string | null;
       filesize?: number | null;
       filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
     };
   };
 }
@@ -551,9 +527,9 @@ export interface TransformStateMediaSelect<T extends boolean = true> {
         filesize?: T;
         width?: T;
         height?: T;
+        prefix?: T;
+        _objectKey?: T;
       };
-  _managedFiles?: T;
-  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
 }
@@ -587,9 +563,9 @@ export interface DynamicTransformStateMediaSelect<T extends boolean = true> {
         filesize?: T;
         width?: T;
         height?: T;
+        prefix?: T;
+        _objectKey?: T;
       };
-  _managedFiles?: T;
-  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
   variants?:
@@ -604,6 +580,8 @@ export interface DynamicTransformStateMediaSelect<T extends boolean = true> {
               mimeType?: T;
               filesize?: T;
               filename?: T;
+              prefix?: T;
+              _objectKey?: T;
             };
       };
 }

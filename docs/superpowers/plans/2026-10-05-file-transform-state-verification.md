@@ -1,5 +1,7 @@
 # File Transform State — delivery and verification
 
+For the recreation on the newer `feat/file-versioning-core` foundation, see [the October 6 migration report](./2026-10-06-file-transform-state-core-migration.md). The results below describe the original delivery.
+
 Implemented on `feat/file-transform-state`, based on `feat/file-versioning` at `94d55c5ccd15f3de989ba3b2f83bca5644a0f693`.
 
 ## Delivered
