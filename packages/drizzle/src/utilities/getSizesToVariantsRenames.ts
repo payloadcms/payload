@@ -14,7 +14,7 @@ export type SizesToVariantsColumnRename = {
 export type SizesToVariantsIndexRename = {
   /** Columns the index covers, named as they are after the column renames. */
   columns: string[]
-  /** The index name to rename from on `up` (unknown up front — looked up by column at runtime). */
+  /** The index name to rename from on `down`. The generated legacy name is resolved on `up`. */
   from?: string
   /** Base used to verify a generated legacy index name, including a possible numeric suffix. */
   legacyNameBase?: string
@@ -49,11 +49,13 @@ export function findSizesToVariantsFieldCollision({
   }
 
   const hasSourceField = [...existingColumns].some((column) =>
-    column.startsWith(fromField.columnPrefix),
+    isSizesToVariantsFieldColumn({ column, field: fromField }),
   )
   const plannedDestinationColumns = new Set(columns.map(({ to }) => to))
   const hasUnexpectedDestinationField = [...existingColumns].some(
-    (column) => column.startsWith(toField.columnPrefix) && !plannedDestinationColumns.has(column),
+    (column) =>
+      isSizesToVariantsFieldColumn({ column, field: toField }) &&
+      !plannedDestinationColumns.has(column),
   )
 
   return hasSourceField && hasUnexpectedDestinationField
@@ -107,8 +109,8 @@ const generatedVariantMetadataFieldNames = [
  * re-deriving Payload's column naming.
  *
  * Index names come from the schema on `up`, and on `down` are rebuilt the way `buildIndexName`
- * named them before the rename. The runner still has to locate the existing index by column on
- * `up`, since a legacy name may have been de-duplicated with a numeric suffix.
+ * named them before the rename. The runner still has to locate the verified generated legacy name
+ * on `up`, since it may have a numeric suffix that keeps the name unique.
  */
 export function getSizesToVariantsRenames({
   adapter,
@@ -194,24 +196,42 @@ function getSizesToVariantsField({
   columnName,
 }: {
   columnName: string
-}): { columnPrefix: string; fieldPath: string } | undefined {
-  if (columnName.startsWith('version_sizes_')) {
-    return { columnPrefix: 'version_sizes_', fieldPath: 'version.sizes' }
+}): { columnName: string; columnPrefix: string; fieldPath: string } | undefined {
+  if (columnName === 'version_sizes' || columnName.startsWith('version_sizes_')) {
+    return {
+      columnName: 'version_sizes',
+      columnPrefix: 'version_sizes_',
+      fieldPath: 'version.sizes',
+    }
   }
 
-  if (columnName.startsWith('version_variants_')) {
-    return { columnPrefix: 'version_variants_', fieldPath: 'version.variants' }
+  if (columnName === 'version_variants' || columnName.startsWith('version_variants_')) {
+    return {
+      columnName: 'version_variants',
+      columnPrefix: 'version_variants_',
+      fieldPath: 'version.variants',
+    }
   }
 
-  if (columnName.startsWith('sizes_')) {
-    return { columnPrefix: 'sizes_', fieldPath: 'sizes' }
+  if (columnName === 'sizes' || columnName.startsWith('sizes_')) {
+    return { columnName: 'sizes', columnPrefix: 'sizes_', fieldPath: 'sizes' }
   }
 
-  if (columnName.startsWith('variants_')) {
-    return { columnPrefix: 'variants_', fieldPath: 'variants' }
+  if (columnName === 'variants' || columnName.startsWith('variants_')) {
+    return { columnName: 'variants', columnPrefix: 'variants_', fieldPath: 'variants' }
   }
 
   return undefined
+}
+
+function isSizesToVariantsFieldColumn({
+  column,
+  field,
+}: {
+  column: string
+  field: { columnName: string; columnPrefix: string }
+}): boolean {
+  return column === field.columnName || column.startsWith(field.columnPrefix)
 }
 
 function planIndexRename({
@@ -244,20 +264,71 @@ function planIndexRename({
 
     return {
       columns: currentColumns,
-      legacyNameBase: `${tableName}_${legacyColumns.join('_')}`,
+      legacyNameBase: getLegacyIndexNameBase({
+        currentColumns,
+        indexName: index.name,
+        legacyColumns,
+        tableName,
+      }),
       to: index.name,
       unique,
     }
   }
 
   const legacyColumns = currentColumns.map((column, i) => renamedColumns[i]?.to ?? column)
+  const legacyNameBase = getLegacyIndexNameBase({
+    currentColumns,
+    indexName: index.name,
+    legacyColumns,
+    tableName,
+  })
 
   return {
     columns: legacyColumns,
     from: index.name,
-    to: buildLegacyIndexName(`${tableName}_${legacyColumns.join('_')}`),
+    legacyNameBase,
+    to: buildGeneratedLegacyIndexName(legacyNameBase),
     unique,
   }
+}
+
+function getLegacyIndexNameBase({
+  currentColumns,
+  indexName,
+  legacyColumns,
+  tableName,
+}: {
+  currentColumns: string[]
+  indexName: string
+  legacyColumns: string[]
+  tableName: string
+}): string {
+  const currentColumn = currentColumns.length === 1 ? currentColumns[0] : undefined
+  const legacyColumn = legacyColumns.length === 1 ? legacyColumns[0] : undefined
+  const currentFieldPath = currentColumn ? getGeneratedVariantFieldPath(currentColumn) : undefined
+  const legacyFieldPath = legacyColumn ? getGeneratedVariantFieldPath(legacyColumn) : undefined
+
+  if (currentColumn && currentFieldPath && legacyColumn && legacyFieldPath) {
+    const currentFieldIndexNameBase = `${tableName}_${currentFieldPath}_${currentColumn}`
+
+    if (isGeneratedLegacyIndexName({ indexName, legacyNameBase: currentFieldIndexNameBase })) {
+      return `${tableName}_${legacyFieldPath}_${legacyColumn}`
+    }
+  }
+
+  return legacyColumns.join('_')
+}
+
+function getGeneratedVariantFieldPath(columnName: string): string | undefined {
+  for (const metadataFieldName of generatedVariantMetadataFieldNames) {
+    const metadataColumnSuffix = `_${toSnakeCase(metadataFieldName)}`
+
+    if (columnName.endsWith(metadataColumnSuffix)) {
+      return columnName.slice(0, -metadataColumnSuffix.length)
+    }
+  }
+
+  return undefined
 }
 
 /** Mirrors `buildIndexName` for an index that didn't collide, without registering the name. */
@@ -274,10 +345,10 @@ export function isGeneratedLegacyIndexName({
     return false
   }
 
-  return indexName === buildLegacyIndexName(legacyNameBase, Number(suffixMatch[1] ?? 0))
+  return indexName === buildGeneratedLegacyIndexName(legacyNameBase, Number(suffixMatch[1] ?? 0))
 }
 
-function buildLegacyIndexName(name: string, number = 0): string {
+export function buildGeneratedLegacyIndexName(name: string, number = 0): string {
   const suffix = `${number ? `_${number}` : ''}_idx`
   const indexName = `${name}${suffix}`
 

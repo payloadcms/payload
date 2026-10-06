@@ -25,7 +25,7 @@ export const getAfterDeleteHook = ({
       | undefined
     if (
       collection.versions ||
-      Boolean(doc.original) ||
+      (Boolean(doc.original) && typeof doc.original?.filename === 'string') ||
       managedDeletedUploads?.has(JSON.stringify([collection.slug, String(id)]))
     ) {
       return doc

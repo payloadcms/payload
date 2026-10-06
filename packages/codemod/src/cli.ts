@@ -7,6 +7,7 @@ import { resolve } from 'node:path'
 import type { TransformRunResult } from './runner.js'
 import type { Transform } from './types.js'
 
+import { renderHelp } from './cli.help.js'
 import { parseFlags } from './cli.parseFlags.js'
 import { transforms as registry } from './registry.js'
 import { runTransforms } from './runner.js'
@@ -19,6 +20,12 @@ import { loadProject } from './utils/project.js'
 
 export async function main(argv: string[] = process.argv.slice(2)): Promise<void> {
   const flags = parseFlags(argv)
+
+  // Checked first so `--help` on any command prints usage instead of running it.
+  if (flags.help) {
+    console.log(renderHelp({ command: resolveSelfCommand() }))
+    return
+  }
 
   if (flags.command === 'upgrade') {
     if (flags.upgrade === 'prompt') {

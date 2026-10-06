@@ -9,6 +9,20 @@ import type { UploadEdits } from '../types.js'
  * never documented for third-party use.
  */
 export const uploadTransformerInternal = Symbol.for('payload.uploadTransformerInternal')
+const uploadFilePath = Symbol.for('payload.uploadFilePath')
+
+type FileWithUploadPath = {
+  [uploadFilePath]?: string
+} & File
+
+export function getUploadFilePath(file: File): string | undefined {
+  return (file as FileWithUploadPath)[uploadFilePath]
+}
+
+export function setUploadFilePath(file: File, filePath: string): File {
+  Object.defineProperty(file, uploadFilePath, { value: filePath })
+  return file
+}
 
 export type UploadTransformTask<TOptions = unknown> = {
   fieldPath: 'filename' | `variants.${string}`
@@ -27,6 +41,12 @@ export type PreparedUploadTransformation = {
 }
 
 export type UploadTransformerInternal = {
+  /**
+   * Whether this bridge owns upload-time processing for the collection. When several
+   * transformers carry a bridge, core drives the upload through the one that owns the
+   * collection, falling back to the first bridge when none does.
+   */
+  handlesCollection?: (args: { collectionSlug: string }) => boolean
   prepareUpload?: (args: {
     collectionSlug: string
     file: File

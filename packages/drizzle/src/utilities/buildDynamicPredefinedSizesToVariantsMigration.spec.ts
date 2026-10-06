@@ -4,7 +4,10 @@ import path from 'path'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import { buildDynamicPredefinedSizesToVariantsMigration } from './buildDynamicPredefinedSizesToVariantsMigration.js'
-import { getSizesToVariantsRenames } from './getSizesToVariantsRenames.js'
+import {
+  findSizesToVariantsFieldCollision,
+  getSizesToVariantsRenames,
+} from './getSizesToVariantsRenames.js'
 
 const tempDirs: string[] = []
 
@@ -153,6 +156,32 @@ describe('buildDynamicPredefinedSizesToVariantsMigration', () => {
     )
   })
 
+  it('should plan the generated nested field index name in both directions', () => {
+    const payload = makePayload({ migrationDir: makeMigrationDir() })
+
+    expect(getSizesToVariantsRenames({ adapter: payload.db, direction: 'up' })[0]?.indexes).toEqual(
+      [
+        {
+          columns: ['variants_hero_large_filename'],
+          legacyNameBase: 'media_sizes_hero_large_sizes_hero_large_filename',
+          to: 'media_variants_hero_large_variants_hero_large_filename_idx',
+          unique: false,
+        },
+      ],
+    )
+    expect(
+      getSizesToVariantsRenames({ adapter: payload.db, direction: 'down' })[0]?.indexes,
+    ).toEqual([
+      {
+        columns: ['sizes_hero_large_filename'],
+        from: 'media_variants_hero_large_variants_hero_large_filename_idx',
+        legacyNameBase: 'media_sizes_hero_large_sizes_hero_large_filename',
+        to: 'media_sizes_hero_large_sizes_hero_large_filename_idx',
+        unique: false,
+      },
+    ])
+  })
+
   it('should reject a snapshot that contains both source and destination columns', async () => {
     const migrationDir = makeMigrationDir()
     const filePath = path.join(migrationDir, '20260102_000000_sizes_to_variants')
@@ -206,6 +235,29 @@ describe('buildDynamicPredefinedSizesToVariantsMigration', () => {
 
     expect(fs.existsSync(`${filePath}.json`)).toBe(false)
   })
+
+  it.each([
+    {
+      columns: [{ from: 'sizes_thumbnail_filename', to: 'variants_thumbnail_filename' }],
+      existingColumns: new Set(['sizes_thumbnail_filename', 'variants']),
+      expected: { from: 'sizes', to: 'variants' },
+    },
+    {
+      columns: [
+        {
+          from: 'version_sizes_thumbnail_filename',
+          to: 'version_variants_thumbnail_filename',
+        },
+      ],
+      existingColumns: new Set(['version_sizes_thumbnail_filename', 'version_variants']),
+      expected: { from: 'version.sizes', to: 'version.variants' },
+    },
+  ])(
+    'should detect an exact scalar destination column at the renamed field path',
+    ({ columns, existingColumns, expected }) => {
+      expect(findSizesToVariantsFieldCollision({ columns, existingColumns })).toEqual(expected)
+    },
+  )
 
   it('should reject a snapshot that contains both source and destination indexes', async () => {
     const migrationDir = makeMigrationDir()

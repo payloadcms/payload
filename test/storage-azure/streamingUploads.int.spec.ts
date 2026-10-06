@@ -79,7 +79,9 @@ test.suite('@payloadcms/storage-azure streamingUploads', { config: './config.ts'
         uploadId: upload.id,
       },
     )
-    expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}`)
+    expect(upload.url).toEqual(
+      `/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}?prefix=${prefix}`,
+    )
   })
 
   test('returns 404 for non-existing file', async ({ restClient }) => {

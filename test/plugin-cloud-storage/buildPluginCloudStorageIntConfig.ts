@@ -11,6 +11,7 @@ import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+import { storageMediaSharpOptions } from '../__helpers/shared/storageMediaSharpOptions.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
@@ -273,28 +274,8 @@ export function buildPluginCloudStorageIntConfig({
         transformers: [
           sharpTransformer({
             collections: {
-              [mediaSlug]: {
-                resizeOptions: {
-                  height: 200,
-                  position: 'center',
-                  width: 200,
-                },
-                variants: [
-                  { name: 'square', crop: 'center', height: 400, width: 400 },
-                  { name: 'sixteenByNineMedium', crop: 'center', height: 450, width: 900 },
-                ],
-              },
-              [mediaWithOverwriteSlug]: {
-                resizeOptions: {
-                  height: 200,
-                  position: 'center',
-                  width: 200,
-                },
-                variants: [
-                  { name: 'square', crop: 'center', height: 400, width: 400 },
-                  { name: 'sixteenByNineMedium', crop: 'center', height: 450, width: 900 },
-                ],
-              },
+              [mediaSlug]: storageMediaSharpOptions,
+              [mediaWithOverwriteSlug]: storageMediaSharpOptions,
               [testMetadataSlug]: {
                 formatOptions: { format: 'webp' },
                 variants: [{ name: 'thumbnail', width: 300 }],

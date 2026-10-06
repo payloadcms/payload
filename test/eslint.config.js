@@ -50,7 +50,7 @@ export const testEslintConfig = [
       'vitest/no-standalone-expect': [
         'error',
         {
-          additionalTestBlockFunctions: ['it.options', 'test.options', 'describe.options'],
+          additionalTestBlockFunctions: ['it.options', 'test.options', 'describe.options', 'it'],
         },
       ],
     },

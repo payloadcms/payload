@@ -43,6 +43,7 @@ import {
   createInheritedReadVersionsAccess,
 } from './defaults.js'
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
+import { validateUseAsThumbnail } from './useAsThumbnail.js'
 import { validateUseAsTitle } from './useAsTitle.js'
 
 /**
@@ -458,6 +459,7 @@ export const sanitizeCollection = (
   }
 
   validateUseAsTitle(sanitized)
+  validateUseAsThumbnail({ config: sanitized })
 
   const sanitizedConfig = sanitized as SanitizedCollectionConfig
 
@@ -465,6 +467,16 @@ export const sanitizeCollection = (
   sanitizedConfig.polymorphicJoins = polymorphicJoins
 
   sanitizedConfig.flattenedFields = flattenAllFields({ fields: sanitizedConfig.fields })
+
+  if (!sanitizedConfig.admin.useAsThumbnail) {
+    const uploadField = sanitizedConfig.flattenedFields.find(
+      (field) => fieldAffectsData(field) && field.type === 'upload',
+    )
+
+    if (uploadField && fieldAffectsData(uploadField)) {
+      sanitizedConfig.admin.useAsThumbnail = uploadField.name
+    }
+  }
 
   sanitizedConfig.sanitizedIndexes = sanitizeCompoundIndexes({
     fields: sanitizedConfig.flattenedFields,

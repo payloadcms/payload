@@ -200,6 +200,70 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
       })
       expect(response.status).toBe(200)
     })
+    it('should accept request bodies up to the configured maxRequestBodySize', async ({
+      getApiKey,
+      mcp,
+    }) => {
+      const apiKey = await getApiKey()
+      const client = await mcp.connect(apiKey)
+      const largeTitle = 'x'.repeat(4.5 * 1024 * 1024)
+
+      const callResponse = await client.callTool({
+        name: 'findDocuments',
+        arguments: { slug: 'posts', where: { title: { equals: largeTitle } } },
+      })
+
+      expect(callResponse.isError).toBeFalsy()
+      expect(getToolText(callResponse)).toContain('Total: 0 documents')
+    })
+    it('should reject request bodies over the configured maxRequestBodySize', async ({
+      getApiKey,
+      mcp,
+    }) => {
+      const apiKey = await getApiKey()
+
+      const response = await mcp.rawPost({
+        apiKey,
+        body: {
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'ping',
+          params: { padding: 'x'.repeat(5 * 1024 * 1024) },
+        },
+      })
+
+      expect(response.status).toBe(413)
+      await expect(response.json()).resolves.toEqual({
+        id: null,
+        error: {
+          code: -32000,
+          message: 'Payload Too Large: Request body must not exceed 5242880 bytes',
+        },
+        jsonrpc: '2.0',
+      })
+    })
+    it('should answer invalid JSON with a JSON-RPC parse error', async ({
+      getApiKey,
+      restClient,
+    }) => {
+      const apiKey = await getApiKey()
+
+      const response = await restClient.POST('/mcp', {
+        body: '{"jsonrpc":',
+        headers: {
+          Accept: 'application/json, text/event-stream',
+          Authorization: `users API-Key ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      expect(response.status).toBe(400)
+      await expect(response.json()).resolves.toEqual({
+        id: null,
+        error: { code: -32700, message: 'Parse error: Invalid JSON' },
+        jsonrpc: '2.0',
+      })
+    })
     /* eslint-disable vitest/no-standalone-expect -- testModern is a custom Vitest test registrar. */
     testModern(
       'should reject subscription streams without opening SSE',

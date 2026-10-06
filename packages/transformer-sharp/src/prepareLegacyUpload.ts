@@ -6,6 +6,7 @@ import { isNumber } from 'payload/shared'
 import type { SharpCollectionConfig, SharpDependency, SharpUploadTaskOptions } from './types.js'
 
 import { canResizeImage } from './canResizeImage.js'
+import { createSharpFromFile } from './createSharpFromFile.js'
 import { getImageResizeAction } from './getImageResizeAction.js'
 import { mapWithBoundedConcurrency } from './mapWithBoundedConcurrency.js'
 import { sanitizeResizeConfig } from './sanitizeResizeConfig.js'
@@ -14,16 +15,11 @@ import { sanitizeResizeConfig } from './sanitizeResizeConfig.js'
  * Sharp throws on truncated/header-only files. Returns `undefined` instead —
  * matching core's dependency-free probe — since unreadable dimensions shouldn't fail the upload.
  */
-async function tryProbe(
-  file: File,
-  sharpDependency: SharpDependency,
-): Promise<ProbedImageSize | undefined> {
+async function tryProbe(file: File, sharpDependency: SharpDependency) {
   try {
-    const buffer = Buffer.from(await file.arrayBuffer())
-    const metadata = await sharpDependency(buffer).metadata()
-    return metadata.width && metadata.height
-      ? { height: metadata.height, width: metadata.width }
-      : undefined
+    const sharpFile = await createSharpFromFile({ file, sharpDependency })
+    const metadata = await sharpFile.metadata()
+    return metadata.width && metadata.height ? metadata : undefined
   } catch {
     return undefined
   }

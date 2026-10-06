@@ -170,21 +170,31 @@ export const createFileOperations = ({
         if (!destinations.length) {
           throw new Error(`No stored representation describes ${filename}`)
         }
-        const location = destinations[0]!
+        const prefixLocation = destinations.find(
+          (destination) => typeof destination.prefix === 'string',
+        )
+        const objectKeyLocation = destinations.find(
+          (destination) => typeof destination._objectKey === 'string',
+        )
+        const prefix =
+          typeof prefixLocation?.prefix === 'string' ? prefixLocation.prefix : undefined
+        const objectKey =
+          typeof objectKeyLocation?._objectKey === 'string'
+            ? objectKeyLocation._objectKey
+            : undefined
         const prefixData = buildUploadPrefix({
           collectionPrefix,
-          docPrefix: typeof location.prefix === 'string' ? location.prefix : undefined,
+          docPrefix: typeof prefix === 'string' ? prefix : undefined,
           useCompositePrefixes,
         })
-        const prefix = useCompositePrefixes
+        const uploadPrefix = useCompositePrefixes
           ? prefixData.sanitizedDocPrefix
           : prefixData.uploadPrefix
-        const objectKey = typeof location._objectKey === 'string' ? location._objectKey : undefined
         for (const destination of destinations) {
-          destination.prefix = prefix
+          destination.prefix = uploadPrefix
           destination._objectKey = objectKey
         }
-        const docPrefix = buildPrefixWithObjectKey({ objectKey, prefix })
+        const docPrefix = buildPrefixWithObjectKey({ objectKey, prefix: uploadPrefix })
         const dataForUpload = { ...data, prefix: docPrefix }
         const storageFilePath = buildUploadStoragePathData({
           collectionPrefix,

@@ -4155,18 +4155,37 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       return formData
     }
 
-    test('removes the temp file after a successful create', async ({ restClient }) => {
-      const before = await listClientUploadTempFiles()
+    test.for([false, true])(
+      'streams client-uploaded files through Sharp and removes the temp file when useTempFiles is %s',
+      async (useTempFiles, { payload, restClient }) => {
+        const before = await listClientUploadTempFiles()
+        const originalUseTempFiles = payload.config.upload.useTempFiles
+        payload.config.upload.useTempFiles = useTempFiles
+        const readFileSpy = vitest.spyOn(fs.promises, 'readFile')
 
-      const response = await restClient.POST(`/${clientUploadTempFileSlug}`, {
-        body: clientUploadFormData(),
-      })
-      expect(response.status).toBe(201)
-      const { doc } = await response.json()
-      createdIds.push(doc.id)
+        try {
+          const response = await restClient.POST(`/${clientUploadTempFileSlug}`, {
+            body: clientUploadFormData(),
+          })
+          expect(response.status).toBe(201)
+          const { doc } = await response.json()
+          createdIds.push(doc.id)
 
-      expect(await listClientUploadTempFiles()).toEqual(before)
-    })
+          expect(doc.variants.thumbnail).toMatchObject({ height: 50, width: 50 })
+          expect(
+            readFileSpy.mock.calls.some(([filePath]) =>
+              typeof filePath === 'string'
+                ? path.basename(filePath).startsWith('payload-client-upload-')
+                : false,
+            ),
+          ).toBe(false)
+          expect(await listClientUploadTempFiles()).toEqual(before)
+        } finally {
+          readFileSpy.mockRestore()
+          payload.config.upload.useTempFiles = originalUseTempFiles
+        }
+      },
+    )
 
     test('removes the temp file even when a beforeChange hook throws after the file was fetched', async ({
       restClient,
@@ -4188,16 +4207,19 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
    * file into memory (see generateFileData.ts). `mediaSlug` has no restrictions on non-image
    * mime types, so an audio file uploaded there skips all sharp processing and exercises that
    * copy against real disk I/O.
-   */
+  */
   test.describe('temp file copy to local storage', () => {
-    const createdIds: (number | string)[] = []
+    const createdDocuments: {
+      collection: typeof fileAccessMediaSlug | typeof mediaSlug
+      id: number | string
+    }[] = []
     const tempFilesToClean: string[] = []
 
     test.afterEach(async ({ payload }) => {
-      for (const id of createdIds) {
-        await payload.delete({ id, collection: mediaSlug, overrideAccess: true })
+      for (const { id, collection } of createdDocuments) {
+        await payload.delete({ id, collection, overrideAccess: true })
       }
-      createdIds.length = 0
+      createdDocuments.length = 0
 
       for (const tempFilePath of tempFilesToClean) {
         await fs.promises.rm(tempFilePath, { force: true })
@@ -4231,7 +4253,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         overrideAccess: true,
       })
 
-      createdIds.push(doc.id)
+      createdDocuments.push({ id: doc.id, collection: mediaSlug })
 
       const savedFilePath = path.join(dirname, './media', doc.filename)
 
@@ -4252,6 +4274,42 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       // Copied, not moved - the original temp file must be untouched.
       expect(await fileExists(tempFilePath)).toBe(true)
       expect(await fs.promises.readFile(tempFilePath)).toEqual(fileContents)
+    })
+
+    test('streams a temp-file upload through Sharp to create image variants', async ({
+      payload,
+    }) => {
+      const sourcePath = path.resolve(dirname, './image.png')
+      const fileContents = await fs.promises.readFile(sourcePath)
+      const tempFilePath = path.join(os.tmpdir(), `payload-test-temp-image-${randomUUID()}.png`)
+      await fs.promises.writeFile(tempFilePath, fileContents)
+      tempFilesToClean.push(tempFilePath)
+
+      const originalUseTempFiles = payload.config.upload.useTempFiles
+      payload.config.upload.useTempFiles = true
+      const readFileSpy = vitest.spyOn(fs.promises, 'readFile')
+
+      try {
+        const doc = await payload.create({
+          collection: fileAccessMediaSlug,
+          data: { visibility: 'public' },
+          file: {
+            name: `temp-file-sharp-${randomUUID()}.png`,
+            data: Buffer.alloc(0),
+            mimetype: 'image/png',
+            size: fileContents.length,
+            tempFilePath,
+          },
+          overrideAccess: true,
+        })
+        createdDocuments.push({ id: doc.id, collection: fileAccessMediaSlug })
+
+        expect(doc.variants.thumbnail).toMatchObject({ height: 100, width: 100 })
+        expect(readFileSpy).not.toHaveBeenCalledWith(tempFilePath)
+      } finally {
+        readFileSpy.mockRestore()
+        payload.config.upload.useTempFiles = originalUseTempFiles
+      }
     })
   })
 })

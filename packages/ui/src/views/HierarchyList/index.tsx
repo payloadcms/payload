@@ -1,16 +1,17 @@
 'use client'
 
-import type { ListViewClientProps } from 'payload'
+import type { CollectionPreferences, ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { Fragment, useCallback, useEffect, useMemo } from 'react'
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { CollectionOption } from '../../elements/CreateDocumentButton/index.js'
+import type { DocumentLayout } from '../../elements/LayoutToggle/index.js'
 import type { StepNavItem } from '../../elements/StepNav/index.js'
 
 import { CreateDocumentButton } from '../../elements/CreateDocumentButton/index.js'
+import { LayoutToggle } from '../../elements/LayoutToggle/index.js'
 import { ListControlsBar } from '../../elements/ListControlsBar/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
@@ -20,10 +21,12 @@ import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useHierarchy } from '../../providers/Hierarchy/index.js'
+import { usePreferences } from '../../providers/Preferences/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouter, useSearchParams } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { getHierarchyListURL } from './getHierarchyListURL.js'
 import { HierarchyListHeader } from './HierarchyListHeader/index.js'
 import { HierarchyTable } from './HierarchyTable/index.js'
 import { TypeFilter } from './TypeFilter/index.js'
@@ -38,6 +41,7 @@ export function HierarchyListView(props: ListViewClientProps) {
     BeforeList,
     collectionSlug,
     Description,
+    documentLayout,
     hasCreatePermission: hasCreatePermissionFromProps,
     hierarchyData,
     HierarchyIcon,
@@ -46,6 +50,8 @@ export function HierarchyListView(props: ListViewClientProps) {
   } = props
 
   const router = useRouter()
+  const { setPreference } = usePreferences()
+  const [layout, setLayout] = useState<DocumentLayout>(documentLayout ?? 'table')
   const searchParams = useSearchParams()
   const { startRouteTransition } = useRouteTransition()
 
@@ -84,6 +90,15 @@ export function HierarchyListView(props: ListViewClientProps) {
     clearRouteCache()
     refreshTree(collectionSlug)
   }, [clearRouteCache, collectionSlug, refreshTree])
+
+  const handleLayoutChange = async (nextLayout: DocumentLayout) => {
+    setLayout(nextLayout)
+    await setPreference<CollectionPreferences>(`collection-${collectionSlug}`, (preferences) => ({
+      ...(preferences ?? {}),
+      documentLayout: nextLayout,
+    }))
+    router.refresh()
+  }
 
   // Get search from URL params
   const searchFromURL = searchParams.get('search') || ''
@@ -127,21 +142,22 @@ export function HierarchyListView(props: ListViewClientProps) {
 
       const baseLabel: StepNavItem = {
         label: collectionLabel,
-        url: formatAdminURL({
+        url: getHierarchyListURL({
           adminRoute,
-          path: `/collections/${collectionSlug}`,
+          collectionSlug,
         }),
       }
 
       let navItems = [baseLabel]
 
       if (ancestorBreadcrumbs.length > 0) {
-        const queryParam = parentFieldName || 'parent'
         const hierarchyBreadcrumbs: StepNavItem[] = ancestorBreadcrumbs.map((crumb) => ({
           label: crumb.title,
-          url: formatAdminURL({
+          url: getHierarchyListURL({
             adminRoute,
-            path: `/collections/${collectionSlug}?${queryParam}=${crumb.id}`,
+            collectionSlug,
+            parentFieldName,
+            parentID: crumb.id,
           }),
         }))
         navItems = [...navItems, ...hierarchyBreadcrumbs]
@@ -372,6 +388,7 @@ export function HierarchyListView(props: ListViewClientProps) {
                   onSave={handleSave}
                 />
               )}
+              {!isInDrawer && <LayoutToggle layout={layout} onChange={handleLayoutChange} />}
             </ListControlsBar>
 
             <HierarchyTable
@@ -387,6 +404,7 @@ export function HierarchyListView(props: ListViewClientProps) {
               )
                 .map(([slug, r]) => `${slug}:${r.result.totalDocs}`)
                 .join(',')}`}
+              layout={layout}
               parentFieldName={parentFieldName}
               parentId={parentId}
               relatedGroups={filteredRelatedGroups}
