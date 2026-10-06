@@ -96,7 +96,7 @@
     "vitest": "4.0.18"
   },
   "engines": {
-    "node": "^18.20.2 || >=20.9.0"
+    "node": ">=20.18.1"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
