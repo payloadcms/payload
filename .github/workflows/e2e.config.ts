@@ -23,6 +23,7 @@ const nextSuites: TestConfig[] = [
   { file: 'admin-root', shards: 1 },
   { file: 'auth', shards: 1 },
   { file: 'auth-basic', shards: 1 },
+  { file: 'branching', shards: 1 },
   { file: 'bulk-edit', shards: 2 },
   { file: 'dashboard', shards: 1 },
   { file: 'joins', shards: 1 },

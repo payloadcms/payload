@@ -35,26 +35,38 @@ export const resolveBranchReadState = ({
   globalSlug,
   req,
 }: Omit<Args, 'where'>): BranchReadState => {
-  const branch =
-    typeof branchOverride === 'string'
-      ? branchOverride
-      : req?.payload
-        ? resolveBranch(req as PayloadRequest)
-        : MAIN_BRANCH
   const branching = req?.payload?.config?.branching
   const isBranchable = collectionSlug
     ? Boolean(branching?.branchableCollections.has(collectionSlug))
     : globalSlug
       ? Boolean(branching?.branchableGlobals.has(globalSlug))
       : false
-  const isBypassed =
-    branchOverride === false ||
-    Boolean((req?.context as Record<string, unknown> | undefined)?._branchBypass)
+  const isRequestBypassed = Boolean(
+    (req?.context as Record<string, unknown> | undefined)?._branchBypass,
+  )
+  const isBypassed = branchOverride === false || isRequestBypassed
+
+  if (isRequestBypassed && req?.payload) {
+    resolveBranch(req as PayloadRequest)
+  }
+
+  if (!branching?.enabled || !isBranchable || isBypassed) {
+    return {
+      branch: typeof branchOverride === 'string' ? branchOverride : MAIN_BRANCH,
+      useBranching: false,
+    }
+  }
+
+  const branch =
+    typeof branchOverride === 'string'
+      ? branchOverride
+      : req?.payload
+        ? resolveBranch(req as PayloadRequest)
+        : MAIN_BRANCH
 
   return {
     branch,
-    useBranching:
-      Boolean(branching?.enabled) && isBranchable && branch !== MAIN_BRANCH && !isBypassed,
+    useBranching: branch !== MAIN_BRANCH,
   }
 }
 

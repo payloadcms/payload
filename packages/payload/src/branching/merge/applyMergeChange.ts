@@ -23,7 +23,7 @@ import {
   resolveGlobalMergeWrites,
 } from '../globalMergeWrites.js'
 import { readLocalizedBranchWrite } from '../readLocalizedBranchWrite.js'
-import { isolateBranchState } from '../resolveBranch.js'
+import { isolateBranchState, withoutBranch } from '../resolveBranch.js'
 import { stripBranchMergeData, stripBranchMergeGlobalData } from '../stripBranchMergeData.js'
 import { branchField, branchParentField, MAIN_BRANCH } from '../types.js'
 import { createMainBranchRequest } from '../validation.js'
@@ -476,6 +476,7 @@ export const applyChange = async ({
     }
 
     const applyCreateWrites = async () => {
+      const branchMergeStorageReq = withoutBranch(req)
       const createTargetReq = mainWriteReq
 
       // Updated in place rather than recreated. The row already holds the ID that
@@ -494,7 +495,7 @@ export const applyChange = async ({
 
           await updateByIDOperationForBranchMerge({
             id: shadowID,
-            branchMergeStorageReq: req,
+            branchMergeStorageReq,
             collection: payload.collections[collectionSlug]!,
             data: data as never,
             draft: rowWrite!.draft,
@@ -508,7 +509,7 @@ export const applyChange = async ({
 
         await updateByIDOperationForBranchMerge({
           id: shadowID,
-          branchMergeStorageReq: req,
+          branchMergeStorageReq,
           collection: payload.collections[collectionSlug]!,
           data: data as never,
           overrideAccess,

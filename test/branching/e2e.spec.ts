@@ -176,9 +176,42 @@ test.describe('Branching', () => {
       await switchBranch({ name: branchName, page })
 
       await page.goto(postsURL.edit(post.id))
+      await expect(page.locator('.branch-selector__trigger-name')).toHaveText(branchName)
       await page.locator('#field-title').fill('Halloween Sale')
+
+      const saveResponse = page.waitForResponse((response) => {
+        const requestURL = new URL(response.url())
+
+        return (
+          response.request().method() === 'PATCH' &&
+          requestURL.pathname === `/api/${postsSlug}/${post.id}`
+        )
+      })
+
       await page.locator('#action-save').click()
+      const response = await saveResponse
+
+      expect(response.ok()).toBe(true)
+      expect(new URL(response.url()).searchParams.get('branch')).toBe(branchSlug)
       await expect(page.locator('.payload-toast-item')).toContainText('Updated successfully')
+
+      const [mainPosts, branchPosts] = await Promise.all([
+        payload.find({
+          branch: false,
+          collection: postsSlug,
+          pagination: false,
+          where: { id: { equals: post.id } },
+        }),
+        payload.find({
+          branch: branchSlug,
+          collection: postsSlug,
+          pagination: false,
+          where: { id: { equals: post.id } },
+        }),
+      ])
+
+      expect(mainPosts.docs[0]?.title).toBe('Autumn Sale')
+      expect(branchPosts.docs[0]?.title).toBe('Halloween Sale')
 
       // The edit view stays on the canonical ID rather than hopping to the
       // shadow row's primary key.
@@ -214,6 +247,8 @@ test.describe('Branching', () => {
       await switchBranch({ name: branchName, page })
 
       await page.locator('.table .row-1 a').first().click()
+
+      await expect(page.locator('.branch-selector__trigger-name')).toHaveText(branchName)
 
       // A shadow-row ID in the list link used to send the edit view looking for a
       // document that no ID resolves to. That redirects back to the list with a
@@ -643,7 +678,7 @@ test.describe('Branching', () => {
         data: { title: 'Halloween Sale' },
       })
 
-      await payload.create({
+      const branchCreated = await payload.create({
         branch: branchSlug,
         collection: postsSlug,
         data: { title: 'Spooky Exclusive' },
@@ -663,6 +698,11 @@ test.describe('Branching', () => {
         pagination: false,
         where: { id: { equals: main.id } },
       })
+      const branchCreatedOnMain = await payload.find({
+        collection: postsSlug,
+        pagination: false,
+        where: { id: { equals: branchCreated.id } },
+      })
       const changes = await payload.find({
         collection: branchChangesSlug,
         overrideAccess: true,
@@ -670,6 +710,7 @@ test.describe('Branching', () => {
       })
 
       expect(onMain.docs[0]?.title).toBe('Halloween Sale')
+      expect(branchCreatedOnMain.docs[0]?.title).toBe('Spooky Exclusive')
       expect(changes.docs).toHaveLength(0)
     })
 
