@@ -201,9 +201,23 @@ const addDefaultDashboardWidgets = ({
     },
   ]
 
+  const uploadCollections = (config.collections ?? []).filter(
+    (collection) =>
+      collection.upload &&
+      collection.upload.bulkUpload !== false &&
+      collection.admin?.hidden !== true,
+  )
+
   const adminConfig: NonNullable<Config['admin']> = config.admin ?? { dashboard: { widgets: [] } }
   const dashboard: DashboardConfig = (adminConfig.dashboard ??= { widgets: [] })
 
+  dashboard.widgets.push({
+    slug: 'welcome',
+    Component: '@payloadcms/ui/rsc#WelcomeWidget',
+    label: ({ t }) => t('general:welcome'),
+    maxWidth: 'full',
+    minWidth: 'full',
+  })
   dashboard.widgets.push({
     slug: 'collections',
     Component: '@payloadcms/ui/rsc#CollectionCards',
@@ -236,14 +250,50 @@ const addDefaultDashboardWidgets = ({
     label: ({ t }) => t('dashboard:widgetRecentlyViewedTitle'),
     minWidth: 'x-small',
   })
+  if (uploadCollections.length > 0) {
+    dashboard.widgets.push({
+      slug: 'upload-dropzone',
+      Component: '@payloadcms/ui/rsc#UploadDropzoneWidget',
+      fields: sanitizeFields({
+        config: config as unknown as Config,
+        existingFieldNames: new Set(),
+        fields: [
+          {
+            name: 'excludedCollections',
+            type: 'select',
+            admin: {
+              components: {
+                Field: '@payloadcms/ui#UploadDropzoneCollectionsField',
+              },
+            },
+            hasMany: true,
+            label: ({ t }) => t('general:collections'),
+            options: uploadCollections.map((collection) => ({
+              label: collection.labels?.plural || collection.slug,
+              value: collection.slug,
+            })),
+          },
+        ],
+        parentIsLocalized: false,
+        richTextSanitizers,
+        validRelationships,
+      }),
+      label: ({ t }) => t('dashboard:widgetUploadFiles'),
+      minWidth: 'x-small',
+    })
+  }
   dashboard.defaultLayout ??= [
     {
-      widgetSlug: 'collections',
+      widgetSlug: 'welcome',
       width: 'full',
     } satisfies WidgetInstance,
     {
       widgetSlug: 'activity',
-      width: 'small',
+      width: 'full',
+    } satisfies WidgetInstance,
+    {
+      widgetSlug: 'collections',
+      width: 'full',
     } satisfies WidgetInstance,
   ]
 }
@@ -621,12 +671,13 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   }
 
   if (!config.upload) {
-    config.upload = { adapters: [] }
+    config.upload = { adapters: [], transformers: [] }
   }
 
   config.upload.adapters = Array.from(
     new Set(config.collections!.map((c) => c.upload?.adapter).filter(Boolean) as string[]),
   )
+  config.upload.transformers = config.upload.transformers ?? []
 
   // Pass through the email config as is so adapters don't break
   if (incomingConfig.email) {

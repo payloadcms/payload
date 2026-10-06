@@ -8,6 +8,8 @@ import {
 } from '@payloadcms/richtext-lexical'
 import { createFolderField } from 'payload'
 
+import { mediaSlug } from '../Media/index.js'
+
 export const postsSlug = 'posts'
 
 export const PostsCollection: CollectionConfig = {
@@ -24,11 +26,13 @@ export const PostsCollection: CollectionConfig = {
       name: 'title',
       type: 'text',
       localized: true,
+      required: true,
     },
     {
       name: 'subtitle',
       type: 'text',
       admin: {
+        components: { Cell: '/components/GridCell/index.js#GridCell' },
         description:
           'A subtitle field to test focus indicators in the admin UI, helps us detect exiting out of rich text editor properly.',
       },
@@ -41,6 +45,7 @@ export const PostsCollection: CollectionConfig = {
         { label: 'Value One', value: 'one' },
         { label: 'Value Two', value: 'two' },
       ],
+      required: true,
     },
     {
       name: 'accessibilitySortableSelect',
@@ -66,6 +71,22 @@ export const PostsCollection: CollectionConfig = {
         { label: 'Value One', value: 'one' },
         { label: 'Value Two', value: 'two' },
       ],
+    },
+    {
+      name: 'requiredTags',
+      type: 'text',
+      defaultValue: ['initial'],
+      hasMany: true,
+      required: true,
+    },
+    {
+      name: 'nonSearchableSelect',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/components/NonSearchableSelect/index.js#NonSearchableSelect',
+        },
+      },
     },
     {
       name: 'relatedPost',
@@ -148,6 +169,13 @@ export const PostsCollection: CollectionConfig = {
           slug: 'textBlock',
           fields: [
             {
+              name: 'body',
+              type: 'richText',
+              editor: lexicalEditor({
+                features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
+              }),
+            },
+            {
               name: 'text',
               type: 'text',
             },
@@ -176,7 +204,62 @@ export const PostsCollection: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'collapsible',
+      fields: [{ name: 'publishingNote', type: 'text' }],
+      label: 'Publishing details',
+    },
+    {
+      type: 'collapsible',
+      admin: {
+        components: { Label: '/components/CustomCollapsibleLabel/index.js#CustomCollapsibleLabel' },
+      },
+      fields: [{ name: 'customLabelNote', type: 'text' }],
+    },
     createFolderField({ relationTo: 'payload-folders' }),
+    {
+      name: 'readOnlyHierarchy',
+      type: 'relationship',
+      admin: {
+        components: { Field: '@payloadcms/ui/rsc#HierarchyField' },
+        readOnly: true,
+      },
+      hasMany: true,
+      relationTo: 'payload-folders',
+    },
+    {
+      name: 'featuredImage',
+      type: 'upload',
+      relationTo: mediaSlug,
+    },
+    {
+      name: 'location',
+      type: 'point',
+    },
+    {
+      name: 'settings',
+      type: 'json',
+    },
+    {
+      name: 'source',
+      type: 'code',
+    },
+    {
+      name: 'unlabelledSettings',
+      type: 'json',
+      admin: {
+        disabled: { bulkEdit: true, column: true, filter: true, groupBy: true },
+      },
+      label: false,
+    },
+    {
+      name: 'unlabelledSource',
+      type: 'code',
+      admin: {
+        disabled: { bulkEdit: true, column: true, filter: true, groupBy: true },
+      },
+      label: false,
+    },
   ],
   trash: true,
   versions: {

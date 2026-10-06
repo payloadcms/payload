@@ -116,7 +116,7 @@
     "pretest": "pnpm build"
   },
   "dependencies": {
-    "@next/env": "16.3.3",
+    "@next/env": "16.3.8",
     "@payloadcms/translations": "workspace:*",
     "@standard-schema/spec": "1.1.0",
     "@types/busboy": "1.5.4",
@@ -146,7 +146,7 @@
     "sanitize-filename": "1.6.4",
     "sax": "1.6.1",
     "ts-essentials": "10.0.3",
-    "tsx": "4.22.4",
+    "tsx": "4.23.15",
     "undici": "7.29.1",
     "uuid": "14.0.0",
     "ws": "^8.16.0",
@@ -166,11 +166,10 @@
     "cross-env": "catalog:",
     "esbuild": "0.27.1",
     "graphql-http": "1.22.4",
-    "react-datepicker": "7.6.0",
+    "react-datepicker": "9.1.0",
     "rimraf": "6.0.1",
     "rollup": "4.59.0",
-    "rollup-plugin-dts": "6.2.3",
-    "sharp": "0.32.6"
+    "rollup-plugin-dts": "6.2.3"
   },
   "peerDependencies": {
     "graphql": "^16.8.1"

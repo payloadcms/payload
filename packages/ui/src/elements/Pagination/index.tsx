@@ -1,6 +1,7 @@
 'use client'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useId, useState } from 'react'
 
+import { useTranslation } from '../../providers/Translation/index.js'
 import { ClickableArrow } from './ClickableArrow/index.js'
 import './index.css'
 
@@ -31,6 +32,8 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
     totalPages = 1,
   } = props
 
+  const pageDescriptionID = useId()
+  const { t } = useTranslation()
   const [inputValue, setInputValue] = useState(String(currentPage))
 
   // Sync input value when currentPage changes externally
@@ -107,7 +110,8 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
       <div className={`${baseClass}__page-input-wrapper`}>
         <input
           aria-controls={tableId}
-          aria-label="Go to page"
+          aria-describedby={pageDescriptionID}
+          aria-label={t('general:goToPage')}
           className={`${baseClass}__page-input`}
           disabled={isSinglePage}
           inputMode="numeric"
@@ -120,7 +124,12 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
           type="text"
           value={inputValue}
         />
-        <span className={`${baseClass}__page-total`}>of {isSinglePage ? 1 : totalPages}</span>
+        <span className="sr-only" id={pageDescriptionID}>
+          {t('general:pageNumberRange', { totalPages: isSinglePage ? 1 : totalPages })}
+        </span>
+        <span className={`${baseClass}__page-total`}>
+          {t('general:of')} {isSinglePage ? 1 : totalPages}
+        </span>
       </div>
     </div>
   )

@@ -40,6 +40,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { scrollToID } from '../../utilities/scrollToID.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
+import { useRowFocus } from '../shared/useRowFocus.js'
 import { ArrayRow } from './ArrayRow.js'
 import './index.css'
 
@@ -84,6 +85,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldClientProps> = (props) => {
   const submitted = useFormSubmitted()
   const currentLocale = useLocale()
   const locale = currentLocale?.code
+  const rowsID = useId()
   const { i18n, t } = useTranslation()
 
   const {
@@ -149,6 +151,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldClientProps> = (props) => {
 
   const componentId = useId()
   const scrollIdPrefix = useMemo(() => `scroll-${componentId}`, [componentId])
+  const { fieldRef, focusRow } = useRowFocus()
 
   const addRow = useCallback(
     (rowIndex: number) => {
@@ -158,11 +161,9 @@ export const ArrayFieldComponent: React.FC<ArrayFieldClientProps> = (props) => {
         schemaPath,
       })
 
-      setTimeout(() => {
-        scrollToID(`${scrollIdPrefix}-row-${rowIndex}`)
-      }, 0)
+      focusRow(`${path.split('.').join('-')}-row-${rowIndex}`)
     },
-    [addFieldRow, path, schemaPath, scrollIdPrefix],
+    [addFieldRow, focusRow, path, schemaPath],
   )
 
   const duplicateRow = useCallback(
@@ -378,6 +379,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldClientProps> = (props) => {
         .filter(Boolean)
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
+      ref={fieldRef}
       style={styles}
     >
       {shouldShowFieldError && (
@@ -408,7 +410,14 @@ export const ArrayFieldComponent: React.FC<ArrayFieldClientProps> = (props) => {
             )}
           </div>
           <ul className={`${baseClass}__header-actions`}>
-            {rows?.length > 0 && <CollapseAllToggle onClick={toggleCollapseAll} />}
+            {rows?.length > 0 && (
+              <CollapseAllToggle
+                controls={rowsID}
+                isExpanded={rows.some((row) => !row.collapsed)}
+                label={getTranslation(label || labels?.plural || name, i18n)}
+                onClick={toggleCollapseAll}
+              />
+            )}
             <li>
               <ClipboardAction
                 allowCopy={rows?.length > 0}
@@ -439,6 +448,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldClientProps> = (props) => {
       {(rows?.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable
           className={`${baseClass}__draggable-rows`}
+          id={rowsID}
           ids={rows.map((row) => row.id)}
           onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
           renderDragOverlay={isSortable && !readOnly && !disabled ? renderDragOverlay : undefined}

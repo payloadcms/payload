@@ -15,6 +15,7 @@ import { selectInput } from '../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/e2e/initPage.js'
+import { devUser } from '../credentials.js'
 import { DashboardHelper } from '../dashboard/utils.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
@@ -36,6 +37,12 @@ export async function openAccessibilityTestPage({
   const { serverURL } = await initPayloadE2ENoConfig({ dirname })
   const postsURL = new AdminUrlUtil(serverURL, 'posts')
   const context = await browser.newContext()
+  const loginResponse = await context.request.post(
+    formatAdminURL({ apiRoute: '/api', path: '/users/login', serverURL }),
+    { data: devUser },
+  )
+
+  expect(loginResponse.ok()).toBe(true)
   const { page } = await initPage({ context, serverURL })
   page.removeAllListeners('console')
 
@@ -158,6 +165,13 @@ function isPaintedColor(color: string) {
 export async function gotoCreatePost({ page, postsURL }: { page: Page; postsURL: AdminUrlUtil }) {
   await page.goto(postsURL.create)
   await waitForFormReady(page)
+}
+
+export async function gotoLabelTestLogin({ page, serverURL }: { page: Page; serverURL: string }) {
+  await page.context().clearCookies()
+  await page.setExtraHTTPHeaders({ DisableAutologin: 'true' })
+  await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/login', serverURL }))
+  await expect(page.locator('input[name="password"]')).toBeVisible()
 }
 
 export async function gotoPostsList({ page, postsURL }: { page: Page; postsURL: AdminUrlUtil }) {
@@ -319,16 +333,49 @@ export async function openVersionComparison({
   page,
   postsURL,
   serverURL,
+  versionIndex = 1,
 }: {
   page: Page
   postsURL: AdminUrlUtil
   serverURL: string
+  versionIndex?: number
 }) {
   await openVersionsList({ page, postsURL, serverURL })
-  const versionLink = page.locator('main.versions table tbody tr td a').nth(1)
+  const versionLink = page.locator('main.versions table tbody tr td a').nth(versionIndex)
   await expect(versionLink).toBeVisible()
   await versionLink.click()
   await expect(page.locator('.view-version')).toBeVisible()
+}
+
+export async function openTableColumns({ page, postsURL }: { page: Page; postsURL: AdminUrlUtil }) {
+  await gotoPostsList({ page, postsURL })
+  await page.getByRole('button', { name: 'Columns', exact: true }).click()
+  const columns = page.locator('.column-selector')
+
+  await expect(columns).toBeVisible()
+  return columns
+}
+
+export async function openTableVersionHistory({
+  kind,
+  page,
+  postsURL,
+  serverURL,
+}: {
+  kind: 'collection' | 'global'
+  page: Page
+  postsURL: AdminUrlUtil
+  serverURL: string
+}) {
+  if (kind === 'collection') {
+    await openVersionsList({ page, postsURL, serverURL })
+  } else {
+    await page.goto(
+      formatAdminURL({ adminRoute: '/admin', path: '/globals/menu/versions', serverURL }),
+    )
+    await expect(page.locator('main.versions table tbody tr').first()).toBeVisible()
+  }
+  return page.locator('main.versions')
 }
 
 export async function openLocaleOptions({
@@ -566,4 +613,112 @@ export async function openDrawerFilters({
   }
   await expect(comboboxes).toHaveCount(2)
   return comboboxes
+}
+
+export async function openDashboardEditor({ page, serverURL }: { page: Page; serverURL: string }) {
+  await page.goto(formatAdminURL({ adminRoute: '/admin', serverURL }))
+  const trigger = page.locator('.dashboard-breadcrumb-dropdown .popup__trigger-wrap button')
+
+  await trigger.focus()
+  await trigger.press('Enter')
+  await page.getByRole('menuitem', { name: 'Edit Dashboard', exact: true }).press('Enter')
+  await expect(page.locator('.modular-dashboard.editing')).toBeVisible()
+  return page.locator('.dashboard-breadcrumb-dropdown__editing')
+}
+
+export async function addCollectionQueryWidget({ page }: { page: Page }) {
+  const widgets = page.locator('.widget[data-slug^="collection-query-"]')
+  const previousCount = await widgets.count()
+  const add = page
+    .locator('.dashboard-breadcrumb-dropdown__actions')
+    .getByRole('button', { name: 'Add +', exact: true })
+
+  await add.press('Enter')
+  const drawer = page.locator('dialog[id^="widgets-drawer-"]')
+  await expect(drawer).toBeVisible()
+  await drawer.getByRole('button', { name: /collection query/i }).press('Enter')
+  await expect(drawer).toBeHidden()
+  await expect(widgets).toHaveCount(previousCount + 1)
+  await expect(widgets.last().locator('.collection-query-widget')).toBeVisible()
+  await expect(widgets.last().locator('.draggable')).toBeFocused()
+  return widgets.last()
+}
+
+export async function insertTextBlockWithKeyboard({ page }: { page: Page }) {
+  const trigger = page.locator('#field-layout > .blocks-field__drawer-toggler')
+
+  await trigger.press('Enter')
+  const drawer = page.locator('[id^="drawer_1_blocks-drawer-"]')
+  await expect(drawer).toBeVisible()
+  await drawer.getByRole('button', { name: 'Text block', exact: true }).press('Enter')
+  await drawer.getByRole('button', { name: 'Insert', exact: true }).press('Enter')
+  await expect(drawer).toBeHidden()
+  const row = page.locator('#field-layout .blocks-field__row').last()
+  await expect(row).toBeVisible()
+  return row
+}
+
+export async function expectPaintedFocus({ page }: { page: Page }) {
+  const focused = page.locator(':focus')
+
+  await expect(focused).toBeVisible()
+  await expect
+    .poll(() =>
+      focused.evaluate((element) => {
+        for (let node: Element | null = element; node; node = node.parentElement) {
+          const style = getComputedStyle(node)
+          if (Number(style.opacity) === 0 || style.visibility === 'hidden') {
+            return false
+          }
+        }
+        const rect = element.getBoundingClientRect()
+        return (
+          rect.width > 0 &&
+          rect.height > 0 &&
+          rect.bottom > 0 &&
+          rect.right > 0 &&
+          rect.top < innerHeight &&
+          rect.left < innerWidth
+        )
+      }),
+    )
+    .toBe(true)
+}
+
+export async function openGlobalAPI({ page, serverURL }: { page: Page; serverURL: string }) {
+  await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/globals/menu', serverURL }))
+  await page.getByRole('link', { name: 'API', exact: true }).click()
+  await expect(page.locator('.query-inspector .monaco-editor')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'toggle fullscreen', exact: true })).toBeVisible()
+}
+
+export async function openNavigation({ page }: { page: Page }) {
+  await expect(page.locator('aside.nav--nav-hydrated')).toBeVisible()
+  const openMenu = page.getByRole('button', { name: 'Open Menu', exact: true })
+
+  if (await openMenu.isVisible()) {
+    await openMenu.click()
+  }
+  await expect(page.locator('aside.nav')).toHaveClass(/nav--nav-open/)
+}
+
+export async function openNavigationFolders({
+  page,
+  serverURL,
+}: {
+  page: Page
+  serverURL: string
+}) {
+  await page.goto(formatAdminURL({ adminRoute: '/admin', serverURL }))
+  await openNavigation({ page })
+  const tab = page.getByRole('tab', { name: /folders/i })
+
+  await tab.click()
+  const sidebar = page.locator('.hierarchy-sidebar-tab:visible')
+
+  await expect(sidebar.getByRole('tree')).toBeVisible()
+  await expect(
+    sidebar.locator('.tree-node__title', { hasText: /^Accessibility folder$/ }),
+  ).toBeVisible()
+  return sidebar
 }

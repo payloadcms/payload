@@ -105,6 +105,7 @@ export interface Config {
   globalsSelect: {};
   locale: 'en' | 'es' | 'de';
   widgets: {
+    welcome: WelcomeWidget;
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
     activity: ActivityWidget;
@@ -262,6 +263,7 @@ export interface Organization {
   title: string;
   content?: string | null;
   parentFolder?: (string | null) | Folder;
+  restrictedFolder?: (string | null) | Folder;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -511,6 +513,7 @@ export interface OrganizationsSelect<T extends boolean = true> {
   title?: T;
   content?: T;
   parentFolder?: T;
+  restrictedFolder?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -629,6 +632,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "welcome_widget".
+ */
+export interface WelcomeWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

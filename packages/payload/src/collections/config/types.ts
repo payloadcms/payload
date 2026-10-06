@@ -129,9 +129,9 @@ export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
  * The id field is optional since it's auto-generated
  */
 export type DraftDataFromCollection<TData extends JsonObject> = Partial<
-  Omit<TData, 'collection' | 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>
+  Omit<TData, 'collection' | 'createdAt' | 'deletedAt' | 'id' | 'updatedAt' | 'variants'>
 > &
-  Partial<Pick<TData, 'collection' | 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>>
+  Partial<Pick<TData, 'collection' | 'createdAt' | 'deletedAt' | 'id' | 'updatedAt' | 'variants'>>
 
 export type DraftDataFromCollectionSlug<TSlug extends CollectionSlug> = DraftDataFromCollection<
   DataFromCollectionSlug<TSlug>
@@ -142,9 +142,9 @@ export type DraftDataFromCollectionSlug<TSlug extends CollectionSlug> = DraftDat
  * When querying drafts, required fields may be null/undefined as validation is skipped, but system fields like id are always present
  */
 export type QueryDraftDataFromCollection<TData extends JsonObject> = Partial<
-  Omit<TData, 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>
+  Omit<TData, 'createdAt' | 'deletedAt' | 'id' | 'updatedAt' | 'variants'>
 > &
-  Partial<Pick<TData, 'createdAt' | 'deletedAt' | 'sizes' | 'updatedAt'>> &
+  Partial<Pick<TData, 'createdAt' | 'deletedAt' | 'updatedAt' | 'variants'>> &
   Pick<TData, 'id'>
 
 export type QueryDraftDataFromCollectionSlug<TSlug extends CollectionSlug> =
@@ -520,6 +520,10 @@ export type CollectionAdminOptions = {
    * Function to generate custom preview URL
    */
   preview?: GeneratePreviewURL
+  /**
+   * Field to use as the thumbnail image in grid/card views. Defaults to the first field of type `upload`.
+   */
+  useAsThumbnail?: string
   /**
    * Field to use as title in Edit View and first column in List view
    */

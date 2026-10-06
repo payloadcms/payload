@@ -1033,16 +1033,6 @@ export class BasePayload {
       this.email = consoleEmailAdapter({ payload: this })
     }
 
-    // Warn if image resizing is enabled but sharp is not installed
-    if (
-      !this.config.sharp &&
-      this.config.collections.some((c) => c.upload.imageSizes || c.upload.formatOptions)
-    ) {
-      this.logger.warn(
-        `Image resizing is enabled for one or more collections, but sharp not installed. Please install 'sharp' and pass into the config.`,
-      )
-    }
-
     // Warn if user is deploying to Vercel, and any upload collection is missing a storage adapter
     if (process.env.VERCEL) {
       const uploadCollWithoutAdapter = this.config.collections.filter(
@@ -1602,9 +1592,15 @@ export { validateQueryPaths } from './database/queryValidation/validateQueryPath
 export { validateSearchParam } from './database/queryValidation/validateSearchParams.js'
 export type {
   BaseDatabaseAdapter,
+  BatchProcessing,
+  BatchProcessingArgs,
+  BatchProcessingOperation,
+  BatchProcessingResult,
   BeginTransaction,
   CommitTransaction,
   Connect,
+  Copy,
+  CopyArgs,
   Count,
   CountArgs,
   CountGlobalVersionArgs,
@@ -1694,6 +1690,7 @@ export {
   MissingFile,
   NotFound,
   QueryError,
+  TransformerContractError,
   UnauthorizedError,
   UnverifiedEmail,
   ValidationError,
@@ -2020,8 +2017,10 @@ export {
 } from './queues/utilities/getCurrentDate.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
+export { generatePayloadFileURL } from './uploads/generatePayloadFileURL.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
+export type * from './uploads/transformers/types.js'
 export type * from './uploads/types.js'
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'

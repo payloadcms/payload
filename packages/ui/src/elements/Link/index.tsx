@@ -58,6 +58,10 @@ export const Link: React.FC<Props> = ({
           onClick(e)
         }
 
+        if (e.defaultPrevented) {
+          return
+        }
+
         if (preventDefault) {
           e.preventDefault()
         }

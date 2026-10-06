@@ -11,6 +11,8 @@ export {
 export { applyUserReadAccess } from '../auth/applyUserReadAccess.js'
 export { createCLI } from '../cli/index.js'
 export { getCommandInput } from '../cli/runtime/getCommandInput.js'
+export { createSchemaBuildContext } from '../database/createSchemaBuildContext.js'
+export type { SchemaBuildContext } from '../database/createSchemaBuildContext.js'
 export { assertClientUploadAccess } from '../uploads/assertClientUploadAccess.js'
 export { assertClientUploadAllowed } from '../uploads/assertClientUploadAllowed.js'
 export {
@@ -26,7 +28,24 @@ export { getSafeFileName } from '../uploads/getSafeFilename.js'
 export { parseRangeHeader } from '../uploads/parseRangeHeader.js'
 export { externalURLInputSchema, resolveURLUploadInput } from '../uploads/resolveURLUploadInput.js'
 export type { ExternalURLInput } from '../uploads/resolveURLUploadInput.js'
+export {
+  getUploadFilePath,
+  getUploadTransformerInternal,
+  setUploadFilePath,
+  uploadTransformerInternal,
+} from '../uploads/transformers/uploadTransformerBridge.js'
+export type {
+  PreparedUploadTransformation,
+  TransformerWithInternalBridge,
+  UploadTransformerInternal,
+  UploadTransformTask,
+} from '../uploads/transformers/uploadTransformerBridge.js'
 export { uploadContentSecurityPolicy } from '../uploads/uploadContentSecurityPolicy.js'
+export {
+  batchProcessing,
+  type BatchProcessingOptions,
+  type BatchProcessorResult,
+} from '../utilities/batchProcessing.js'
 export { getEntityPermissions } from '../utilities/getEntityPermissions/getEntityPermissions.js'
 export { isURLAllowed } from '../utilities/isURLAllowed.js'
 export { sanitizePermissions } from '../utilities/sanitizePermissions.js'

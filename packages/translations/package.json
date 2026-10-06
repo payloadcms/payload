@@ -55,12 +55,12 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "date-fns": "4.1.0"
+    "date-fns": "4.4.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/react": "19.2.14",
-    "@types/react-dom": "19.2.3",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
     "dotenv": "catalog:",
     "prettier": "3.5.3",
     "typescript": "catalog:"

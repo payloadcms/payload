@@ -75,7 +75,7 @@
   }
 
   .query-inspector__label {
-    font-weight: var(--text-body-large-strong-font-weight);
+    font-weight: var(--text-body-large-bold-font-weight);
   }
 
   .query-inspector__form-fields {
@@ -90,7 +90,6 @@
 
     .checkbox-input label.field-label:not(.unstyled) {
       color: var(--color-text);
-      font-family: var(--text-body-medium-font-family);
       font-size: var(--text-body-medium-font-size);
       font-weight: var(--text-body-medium-font-weight);
       line-height: var(--text-body-medium-line-height);

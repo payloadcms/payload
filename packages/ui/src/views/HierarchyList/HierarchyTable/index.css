@@ -1,8 +1,25 @@
 @layer payload-default {
+  .hierarchy-tables {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  .hierarchy-tables > .table-section:last-child {
+    flex-grow: 1;
+  }
+
+  .hierarchy-tables > .table-section:last-child > .table-section__content {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
   .hierarchy-tables__name-cell {
     display: flex;
     align-items: center;
     gap: var(--spacer-1);
+    min-width: 0;
   }
 
   .hierarchy-tables__edit-button {
@@ -29,30 +46,8 @@
   .hierarchy-tables__name-link {
     display: flex;
     align-items: center;
-    gap: var(--spacer-2);
-    color: var(--color-text);
-    text-decoration: none;
-    background: none;
-    border: none;
-    padding: var(--spacer-2) 0;
-    padding-inline-start: var(--spacer-2);
-    font: inherit;
-    cursor: pointer;
-    text-align: left;
-    min-height: calc(var(--spacer-4) * 2);
-
-    &:hover {
-      color: var(--color-text);
-      text-decoration: underline;
-    }
-  }
-
-  .hierarchy-tables__thumbnail {
-    display: inline-block;
-    max-width: var(--spacer-3);
-    height: var(--spacer-3);
-    border-radius: var(--radius-small);
-    flex-shrink: 0;
+    gap: var(--spacer-1);
+    min-width: 0;
   }
 
   .hierarchy-tables__name-icon {
@@ -64,12 +59,13 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    line-height: var(--spacer-3);
+    min-width: 0;
+    line-height: var(--text-body-large-line-height);
   }
 
   .hierarchy-tables__chevron {
-    margin-inline-start: auto;
-    padding-inline-start: var(--spacer-2);
+    display: flex;
+    flex-shrink: 0;
 
     svg {
       width: var(--spacer-2-5);
@@ -81,11 +77,6 @@
   .hierarchy-tables__col-name {
     width: auto;
     min-width: 200px;
-
-    /* Move padding to link for full-cell clickability */
-    &:has(.hierarchy-tables__name-link) {
-      padding: 0;
-    }
   }
 
   .hierarchy-tables__col-collection {
@@ -101,24 +92,43 @@
   .hierarchy-tables__col-type {
     width: 120px;
     min-width: 100px;
-
-    &:not(.slot-table__th) {
-      color: var(--color-text-secondary);
-    }
   }
 
   .hierarchy-tables__section-title {
     margin: 0;
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-bold-font-weight);
     color: var(--color-text);
   }
 
   .hierarchy-tables__group-label {
     color: var(--color-text);
     letter-spacing: var(--text-body-large-letter-spacing);
-    font-family: var(--text-body-large-strong-font-family);
-    font-size: var(--text-body-large-strong-font-size);
-    font-weight: var(--text-body-large-strong-font-weight);
-    line-height: var(--text-body-large-strong-line-height);
+    font-size: var(--text-body-large-bold-font-size);
+    font-weight: var(--text-body-large-bold-font-weight);
+    line-height: var(--text-body-large-bold-line-height);
+  }
+
+  .hierarchy-tables__plane-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacer-3);
+    padding-inline: var(--gutter-h);
+    padding-block: var(--spacer-3);
+  }
+
+  .hierarchy-tables__plane-pagination-group {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+  }
+
+  .hierarchy-tables__plane-pagination-label {
+    color: var(--color-text);
+    white-space: nowrap;
+    font-size: var(--text-body-medium-bold-font-size);
+    font-weight: var(--text-body-medium-bold-font-weight);
+    line-height: var(--text-body-medium-bold-line-height);
+    letter-spacing: var(--text-body-medium-bold-letter-spacing);
   }
 }

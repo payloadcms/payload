@@ -36,8 +36,8 @@ const safelyCollect = (collect: () => FeatureInfo): FeatureInfo => {
   }
 }
 
-// sanitization adds 3 system widgets that we need to account for
-const SYSTEM_WIDGET_COUNT = 3
+// sanitization adds 4 system widgets that we need to account for
+const SYSTEM_WIDGET_COUNT = 4
 const SYSTEM_COLLECTION_SLUGS = [
   'payload-locked-documents',
   'payload-migrations',
@@ -247,7 +247,7 @@ const collectUploadAndMedia = (config: SanitizedConfig): FeatureInfo => {
         ({ upload }) => isObject(upload) && upload.focalPoint === false,
       ).length,
       imageSizesCollectionCount: collections.filter(
-        ({ upload }) => isObject(upload) && Boolean(upload.imageSizes?.length),
+        ({ upload }) => isObject(upload) && Boolean(upload.variants?.length),
       ).length,
       mimeRestrictedCollectionCount: collections.filter(
         ({ upload }) => isObject(upload) && Boolean(upload.mimeTypes?.length),

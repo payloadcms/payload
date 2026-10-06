@@ -1,4 +1,4 @@
-import type { CollectionConfig, Field, GroupField, TextField } from 'payload'
+import type { CollectionConfig, Field, GroupField, SanitizedUploadConfig, TextField } from 'payload'
 
 import path from 'path'
 
@@ -43,6 +43,12 @@ export const getFields = ({
     name: 'prefix',
     type: 'text',
     admin: {
+      disabled: {
+        bulkEdit: true,
+        column: true,
+        filter: true,
+        groupBy: true,
+      },
       hidden: true,
       readOnly: true,
     },
@@ -101,11 +107,18 @@ export const getFields = ({
     } as TextField)
   }
 
-  if (typeof collection.upload === 'object' && collection.upload.imageSizes) {
+  // Storage adapters add these fields during their `init`, after transformers (e.g. Sharp) have
+  // written each collection's image sizes onto its upload config.
+  const variants =
+    typeof collection.upload === 'object'
+      ? (collection.upload as SanitizedUploadConfig).variants
+      : undefined
+
+  if (variants) {
     let existingSizesFieldIndex = -1
 
     const existingSizesField = fields.find((existingField, i) => {
-      if ('name' in existingField && existingField.name === 'sizes') {
+      if ('name' in existingField && existingField.name === 'variants') {
         existingSizesFieldIndex = i
         return true
       }
@@ -119,12 +132,12 @@ export const getFields = ({
 
     const sizesField: Field = {
       ...(existingSizesField || {}),
-      name: 'sizes',
+      name: 'variants',
       type: 'group',
       admin: {
         hidden: true,
       },
-      fields: collection.upload.imageSizes.map((size) => {
+      fields: variants.map((size) => {
         const existingSizeField = existingSizesField?.fields.find(
           (existingField) => 'name' in existingField && existingField.name === size.name,
         ) as GroupField
