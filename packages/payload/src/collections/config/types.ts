@@ -107,7 +107,7 @@ export type DraftFlagFromCollectionSlug<TSlug extends CollectionSlug> =
         }
       : {
           /**
-           * Whether to query the draft version. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+           * Whether to read or write the draft version. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
            */
           draft?: boolean
         }

@@ -4,7 +4,9 @@ import type { Page, Product } from '../payload-types'
 
 import { mergeOpenGraph } from './mergeOpenGraph'
 
-export const generateMeta = async (args: { doc: Page | Product }): Promise<Metadata> => {
+export const generateMeta = async (args: {
+  doc: Partial<Page | Product> | null
+}): Promise<Metadata> => {
   const { doc } = args || {}
 
   const ogImage =

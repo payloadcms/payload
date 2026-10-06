@@ -15,11 +15,6 @@ declare const payload: Payload
 describe('Untyped Payload types', () => {
   test('should allow draft options without generated collection types', () => {
     expect(payload.find).type.toBeCallableWith({ collection: 'custom-collection', draft: true })
-    expect(payload.findByID).type.toBeCallableWith({
-      id: 'id',
-      collection: 'custom-collection',
-      draft: true,
-    })
     expect(payload.create).type.toBeCallableWith({
       collection: 'custom-collection',
       data: { title: 'Example' },
@@ -31,13 +26,39 @@ describe('Untyped Payload types', () => {
     })
   })
 
-  test('should allow draft options without generated global types', () => {
-    expect(payload.findGlobal).type.toBeCallableWith({ slug: 'custom-global', draft: true })
+  test('should allow draft updates without generated global types', () => {
     expect(payload.updateGlobal).type.toBeCallableWith({
       slug: 'custom-global',
       data: {},
       draft: true,
     })
+  })
+
+  test('should preserve the ID type and nullability of untyped draft collection results', async () => {
+    const doc = await payload.findByID({
+      id: 'id',
+      collection: 'custom-collection',
+      draft: true,
+      select: { id: true },
+    })
+
+    expect(doc).type.toBe<{ id: number | string }>()
+
+    const nullableDoc = await payload.findByID({
+      id: 'id',
+      collection: 'custom-collection',
+      disableErrors: true,
+      draft: true,
+      select: { id: true },
+    })
+
+    expect(nullableDoc).type.toBe<{ id: number | string } | null>()
+  })
+
+  test('should retain a required ID in an untyped draft global result', async () => {
+    const doc = await payload.findGlobal({ slug: 'custom-global', draft: true })
+
+    expect(doc).type.toBeAssignableTo<{ id: unknown }>()
   })
 
   test('should expose managed and generic collection fallbacks', () => {

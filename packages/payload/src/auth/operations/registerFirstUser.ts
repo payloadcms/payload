@@ -79,6 +79,7 @@ export const registerFirstUserOperation = async <TSlug extends AuthCollectionSlu
     // Register first user
     // /////////////////////////////////////
 
+    // Generic TSlug leaves the draft conditional unresolved; Arguments already requires published data.
     const result = await payload.create<TSlug, SelectType>({
       collection: slug as TSlug,
       data,

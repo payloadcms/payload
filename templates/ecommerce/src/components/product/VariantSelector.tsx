@@ -8,7 +8,7 @@ import clsx from 'clsx'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import React from 'react'
 
-export function VariantSelector({ product }: { product: Product }) {
+export function VariantSelector({ product }: { product: Partial<Product> & Pick<Product, 'id'> }) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
