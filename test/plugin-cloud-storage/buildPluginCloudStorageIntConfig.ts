@@ -6,10 +6,12 @@ import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { azureStorage } from '@payloadcms/storage-azure'
 import { gcsStorage } from '@payloadcms/storage-gcs'
 import { s3Storage } from '@payloadcms/storage-s3'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+import { storageMediaSharpOptions } from '../__helpers/shared/storageMediaSharpOptions.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
@@ -234,7 +236,21 @@ export function buildPluginCloudStorageIntConfig({
       typescript: {
         outputFile: path.resolve(dirname, 'payload-types.ts'),
       },
-      upload: uploadOptions,
+      upload: {
+        ...uploadOptions,
+        transformers: [
+          sharpTransformer({
+            collections: {
+              [mediaSlug]: storageMediaSharpOptions,
+              [mediaWithOverwriteSlug]: storageMediaSharpOptions,
+              [testMetadataSlug]: {
+                formatOptions: { format: 'webp' },
+                variants: [{ name: 'thumbnail', width: 300 }],
+              },
+            },
+          }),
+        ],
+      },
     },
     seed: async (payload) => {
       await payload.create({

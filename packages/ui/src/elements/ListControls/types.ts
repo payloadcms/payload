@@ -31,6 +31,7 @@ export type ListControlsProps = {
   readonly hasCreatePermission?: boolean
   readonly hasDeletePermission?: boolean
   readonly isWhereOpen?: boolean
+  readonly layoutToggle?: React.ReactNode
   readonly listMenuItems?: React.ReactNode[]
   readonly newDocumentURL?: string
   readonly onWhereToggle?: () => void
