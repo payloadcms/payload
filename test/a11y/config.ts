@@ -54,6 +54,10 @@ export default buildConfigWithDefaults({
             Component: '/components/ConfigComponentErrors/index.js#ConfigComponentErrorsRedirect',
             path: '/config-component-errors-redirect',
           },
+          StatusMessages: {
+            Component: '/components/StatusMessages/index.js#StatusMessages',
+            path: '/status-messages',
+          },
           CustomIDModals: {
             Component: '/components/CustomIDModals/index.js#CustomIDModals',
             path: '/custom-modal-ids',
