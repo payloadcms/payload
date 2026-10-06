@@ -916,6 +916,7 @@
     }
 
     .date-time-picker .react-datepicker__time-container {
+      align-self: stretch;
       width: auto;
       border-top: var(--stroke-width-small) solid var(--color-border);
     }
