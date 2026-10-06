@@ -185,7 +185,9 @@ export const promise = async ({
       const valueToValidate = siblingData[field.name]
 
       // With `locale: 'all'`, a localized scalar holds a locale-keyed object (`{ en, es }`); validate each
-      // locale's value, not the wrapper. Localized containers are left to normal child traversal.
+      // locale's value, not the wrapper. Localized `group`/`array`/`blocks` containers are excluded here -
+      // their children are validated through normal traversal, which is not locale-aware under `locale: 'all'`
+      // yet, so per-locale validation of container children is a known gap left for a follow-up.
       const isLocaleKeyedValue =
         operationLocale === 'all' &&
         localization &&
@@ -227,7 +229,9 @@ export const promise = async ({
       let failedLocale: string | undefined
 
       for (const { locale, value } of localizedValuesToValidate) {
-        // Scope `req.locale` to the locale being validated without mutating the shared request.
+        // Scope `req.locale` to the locale being validated without mutating the shared request. `data` and
+        // `siblingData` stay locale-keyed under `locale: 'all'`, so a custom validator comparing fields
+        // should read the active locale from `req.locale` (e.g. `siblingData.other?.[req.locale]`).
         const validationReq = locale ? isolateObjectProperty(req, 'locale') : req
         if (locale) {
           validationReq.locale = locale

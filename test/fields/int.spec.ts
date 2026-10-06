@@ -538,6 +538,55 @@ describe('Fields', () => {
       await payload.delete({ collection: 'text-fields', id: doc.id })
     })
 
+    it('should scope req.locale per locale for a custom validator with locale all', async () => {
+      // Same sentinel in both locales; the validator only rejects it for `es`. If `req.locale` leaked as
+      // `'all'` (or `'en'`), neither would reject - so a rejection attributed to `(es)` proves the scoping.
+      await expect(
+        payload.create({
+          collection: 'text-fields',
+          data: {
+            text: 'required',
+            // @ts-expect-error locale all
+            localizedRequiredText: { en: 'English text', es: 'Spanish text' },
+            // @ts-expect-error locale all
+            localizedCustomValidate: { en: 'reject-es', es: 'reject-es' },
+          },
+          locale: 'all',
+        }),
+      ).rejects.toThrow('Localized Custom Validate (es)')
+    })
+
+    it('should pass the locale previousValue to a custom validator on a locale all update', async () => {
+      const doc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          // @ts-expect-error locale all
+          localizedRequiredText: { en: 'English text', es: 'Spanish text' },
+          // @ts-expect-error locale all
+          localizedCustomValidate: { en: 'prev-en', es: 'prev-es' },
+        },
+        locale: 'all',
+      })
+
+      // The validator asserts the en previousValue is 'prev-en' (the locale's own prior value, not the
+      // whole `{ en, es }` object). A wrong previousValue returns an error naming the received value.
+      // @ts-expect-error locale all
+      const updated: any = await payload.update({
+        id: doc.id,
+        collection: 'text-fields',
+        data: {
+          localizedCustomValidate: { en: 'assert-previous', es: 'prev-es' },
+        },
+        locale: 'all',
+      })
+
+      expect(updated.localizedCustomValidate.en).toStrictEqual('assert-previous')
+      expect(updated.localizedCustomValidate.es).toStrictEqual('prev-es')
+
+      await payload.delete({ collection: 'text-fields', id: doc.id })
+    })
+
     it('should query hasMany in', async () => {
       const hit = await payload.create({
         collection: 'text-fields',
