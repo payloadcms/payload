@@ -6,6 +6,7 @@ import { isNumber } from 'payload/shared'
 import type { SharpCollectionConfig, SharpDependency, SharpUploadTaskOptions } from './types.js'
 
 import { canResizeImage } from './canResizeImage.js'
+import { createSharpFromFile } from './createSharpFromFile.js'
 import { getImageResizeAction } from './getImageResizeAction.js'
 import { mapWithBoundedConcurrency } from './mapWithBoundedConcurrency.js'
 import { sanitizeResizeConfig } from './sanitizeResizeConfig.js'
@@ -16,8 +17,8 @@ import { sanitizeResizeConfig } from './sanitizeResizeConfig.js'
  */
 async function tryProbe(file: File, sharpDependency: SharpDependency) {
   try {
-    const buffer = Buffer.from(await file.arrayBuffer())
-    const metadata = await sharpDependency(buffer).metadata()
+    const sharpFile = await createSharpFromFile({ file, sharpDependency })
+    const metadata = await sharpFile.metadata()
     return metadata.width && metadata.height ? metadata : undefined
   } catch {
     return undefined
@@ -38,7 +39,7 @@ export function createPrepareLegacyUpload({
   collections: Partial<Record<string, SharpCollectionConfig>>
   sharpDependency: SharpDependency
 }): NonNullable<UploadTransformerInternal['prepareUpload']> {
-  return async ({ collectionSlug, file, transform, uploadEdits }) => {
+  return async ({ collectionSlug, file, req, transform, uploadEdits }) => {
     const collectionUpload = collections[collectionSlug] ?? {}
 
     const fileSupportsResize = canResizeImage(file.type)
@@ -91,7 +92,11 @@ export function createPrepareLegacyUpload({
       ? { height: mainResult.height!, width: mainResult.width! }
       : originalDimensions
 
-    const focalPointEnabled = collectionUpload.focalPoint !== false
+    // Same precedence `init()` applies: Sharp's setting, else the collection's own `focalPoint`.
+    const effectiveFocalPoint =
+      collectionUpload.focalPoint ??
+      req.payload.collections[collectionSlug]?.config.upload?.focalPoint
+    const focalPointEnabled = effectiveFocalPoint !== false
     const variants = collectionUpload.variants
 
     if (canProcessAsImage && Array.isArray(variants) && sizeSourceDimensions) {
@@ -105,7 +110,7 @@ export function createPrepareLegacyUpload({
 
       const sizeResults = await mapWithBoundedConcurrency(variants, async (rawConfig) => {
         const imageResizeConfig = sanitizeResizeConfig(rawConfig)
-        const fieldPath = `sizes.${imageResizeConfig.name}` as const
+        const fieldPath = `variants.${imageResizeConfig.name}` as const
 
         const resizeAction = getImageResizeAction({
           dimensions: sizeSourceDimensions,

@@ -22,9 +22,10 @@ const MIGRATION_HINT =
  * this check an app upgrading from 3.x would boot with no indication that image
  * resizing had stopped.
  *
- * `upload.imageSizes` is included: image sizes are authored as
- * `sharpTransformer({ collections: { <slug>: { variants } } })`, and a size declared on
- * the collection itself would otherwise build without error while every upload skips it.
+ * `upload.imageSizes` is included, and `upload.variants` is rejected too: image sizes are
+ * authored as `sharpTransformer({ collections: { <slug>: { variants } } })`, which writes
+ * `upload.variants` onto the sanitized config. A size declared on the collection itself would
+ * otherwise build without error while every upload skips it.
  *
  * Every violation is collected and reported together, since a config can have
  * more than one and fixing them one at a time would take multiple build attempts.
@@ -46,6 +47,12 @@ export function assertNoLegacySharpConfig({ config }: { config: Config }): void 
       if (field in upload) {
         errors.push(`Collection "${collection.slug}" uses the removed \`upload.${field}\` option.`)
       }
+    }
+
+    if ('variants' in upload) {
+      errors.push(
+        `Collection "${collection.slug}" sets \`upload.variants\`, which only a file transformer writes. Declare variants on the transformer instead, e.g. \`sharpTransformer({ collections: { "${collection.slug}": { variants } } })\`.`,
+      )
     }
   }
 

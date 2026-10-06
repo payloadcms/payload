@@ -7,8 +7,8 @@ export type FileMetaProps = {
   filesize: number
   height?: number
   mimeType: string
-  sizes?: unknown
   url: string
+  variants?: unknown
   width?: number
 }
 

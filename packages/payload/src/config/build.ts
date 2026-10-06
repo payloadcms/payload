@@ -10,8 +10,6 @@ import { sanitizeConfig } from './sanitize.js'
  * @returns Built and sanitized Payload Config
  */
 export async function buildConfig(config: Config): Promise<SanitizedConfig> {
-  assertNoLegacySharpConfig({ config })
-
   if (Array.isArray(config.plugins)) {
     const sorted = [...config.plugins].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
 
@@ -19,6 +17,9 @@ export async function buildConfig(config: Config): Promise<SanitizedConfig> {
       config = await plugin(config)
     }
   }
+
+  // Runs after plugins so removed Sharp settings a plugin adds are caught too.
+  assertNoLegacySharpConfig({ config })
 
   if (Array.isArray(config.upload?.transformers) && config.upload.transformers.length > 0) {
     validateTransformers({ transformers: config.upload.transformers })

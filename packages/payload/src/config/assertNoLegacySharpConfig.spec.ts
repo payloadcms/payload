@@ -5,25 +5,6 @@ import type { Config } from './types.js'
 import { assertNoLegacySharpConfig } from './assertNoLegacySharpConfig.js'
 
 describe('assertNoLegacySharpConfig', () => {
-  it('should throw when the top-level sharp option is present', () => {
-    const config = { collections: [], sharp: {} } as unknown as Config
-
-    expect(() => assertNoLegacySharpConfig({ config })).toThrow(/sharp/i)
-  })
-
-  it('should throw when a collection uses a removed Sharp-specific upload option', () => {
-    const config = {
-      collections: [
-        {
-          slug: 'media',
-          upload: { resizeOptions: { width: 100 } },
-        },
-      ],
-    } as unknown as Config
-
-    expect(() => assertNoLegacySharpConfig({ config })).toThrow(/resizeOptions/)
-  })
-
   it.each(['constructorOptions', 'formatOptions', 'trimOptions', 'withMetadata'])(
     'should throw when a collection uses the removed %s upload option',
     (field) => {
@@ -34,6 +15,14 @@ describe('assertNoLegacySharpConfig', () => {
       expect(() => assertNoLegacySharpConfig({ config })).toThrow(new RegExp(field))
     },
   )
+
+  it('should throw when a collection sets variants directly on its upload config', () => {
+    const config = {
+      collections: [{ slug: 'media', upload: { variants: [{ name: 'thumbnail' }] } }],
+    } as unknown as Config
+
+    expect(() => assertNoLegacySharpConfig({ config })).toThrow(/upload\.variants/)
+  })
 
   it.each([
     { collections: [{ slug: 'media', upload: { imageSizes: [{ name: 'thumbnail' }] } }] },

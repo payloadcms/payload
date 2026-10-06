@@ -104,8 +104,13 @@ describe('createTransformFile', () => {
       expect(metadata.height).toBe(20)
     })
 
-    describe('crop', () => {
-      it('should re-apply resizeOptions to the crop output by default', async () => {
+    it.each([
+      // Re-applied by default, so the 40x40 crop is resized down to 20x20.
+      { expectedSize: 20, resizeOptions: { fit: 'cover' as const, height: 20, width: 20 } },
+      { expectedSize: 40, resizeOptions: { height: 20, width: 20, withoutEnlargement: true } },
+    ])(
+      'should re-apply resizeOptions to the crop output unless withoutEnlargement is set (%#)',
+      async ({ expectedSize, resizeOptions }) => {
         const buffer = await makeImageBuffer({ height: 100, width: 100 })
         const file = new File([buffer], 'photo.png', { type: 'image/png' })
         const transformFile = createTransformFile({ sharpDependency: sharp })
@@ -113,7 +118,7 @@ describe('createTransformFile', () => {
         const result = await transformFile({
           file,
           options: {
-            collectionUpload: { resizeOptions: { fit: 'cover', height: 20, width: 20 } },
+            collectionUpload: { resizeOptions },
             crop: {
               cropData: { height: 40, unit: '%', width: 40, x: 25, y: 25 },
               heightInPixels: 40,
@@ -126,96 +131,60 @@ describe('createTransformFile', () => {
         })
 
         const metadata = await sharp(await toBuffer(result.file!)).metadata()
-        expect(metadata.width).toBe(20)
-        expect(metadata.height).toBe(20)
-      })
-
-      it('should not re-apply resizeOptions to the crop output when withoutEnlargement is set', async () => {
-        const buffer = await makeImageBuffer({ height: 100, width: 100 })
-        const file = new File([buffer], 'photo.png', { type: 'image/png' })
-        const transformFile = createTransformFile({ sharpDependency: sharp })
-
-        const result = await transformFile({
-          file,
-          options: {
-            collectionUpload: {
-              resizeOptions: { height: 20, width: 20, withoutEnlargement: true },
-            },
-            crop: {
-              cropData: { height: 40, unit: '%', width: 40, x: 25, y: 25 },
-              heightInPixels: 40,
-              originalDimensions: { height: 100, width: 100 },
-              widthInPixels: 40,
-            },
-            kind: 'main',
-          } satisfies SharpUploadTaskOptions,
-          req: makeReq(),
-        })
-
-        const metadata = await sharp(await toBuffer(result.file!)).metadata()
-        expect(metadata.width).toBe(40)
-        expect(metadata.height).toBe(40)
-      })
-    })
+        expect(metadata.width).toBe(expectedSize)
+        expect(metadata.height).toBe(expectedSize)
+      },
+    )
   })
 
   describe('size (transformSize)', () => {
-    it('should extract the horizontally-correct focal-point region for a landscape original', async () => {
-      // 200x100 (2:1) forces `prioritizeHeight` (resize to 100x50); focal x:80
-      // pushes the 50px-wide extract window against the clamped right edge, so
-      // a correct crop is entirely blue.
-      const buffer = await makeTwoColorImage({ height: 100, splitAxis: 'x', width: 200 })
-      const file = new File([buffer], 'photo.png', { type: 'image/png' })
-      const transformFile = createTransformFile({ sharpDependency: sharp })
+    // Each original forces one resize-priority branch, and a focal point at 80% pushes the
+    // 50px extract window against the clamped far edge, so a correct crop is entirely blue.
+    it.each([
+      {
+        focalPoint: { x: 80, y: 50 },
+        original: { height: 100, splitAxis: 'x' as const, width: 200 },
+        samples: [
+          { x: 10, y: 25 },
+          { x: 40, y: 25 },
+        ],
+      },
+      {
+        focalPoint: { x: 50, y: 80 },
+        original: { height: 200, splitAxis: 'y' as const, width: 100 },
+        samples: [
+          { x: 25, y: 10 },
+          { x: 25, y: 40 },
+        ],
+      },
+    ])(
+      'should extract the focal-point region along the $original.splitAxis axis',
+      async ({ focalPoint, original, samples }) => {
+        const buffer = await makeTwoColorImage(original)
+        const file = new File([buffer], 'photo.png', { type: 'image/png' })
+        const transformFile = createTransformFile({ sharpDependency: sharp })
 
-      const result = await transformFile({
-        file,
-        options: {
-          collectionUpload: {},
-          focalPoint: { x: 80, y: 50 },
-          imageResizeConfig: { name: 'thumb', height: 50, width: 50 },
-          kind: 'size',
-          originalDimensions: { height: 100, width: 200 },
-        } satisfies SharpUploadTaskOptions,
-        req: makeReq(),
-      })
+        const result = await transformFile({
+          file,
+          options: {
+            collectionUpload: {},
+            focalPoint,
+            imageResizeConfig: { name: 'thumb', height: 50, width: 50 },
+            kind: 'size',
+            originalDimensions: { height: original.height, width: original.width },
+          } satisfies SharpUploadTaskOptions,
+          req: makeReq(),
+        })
 
-      const { data, info } = await sharp(await toBuffer(result.file!))
-        .raw()
-        .toBuffer({ resolveWithObject: true })
-      expect(info.width).toBe(50)
-      expect(info.height).toBe(50)
-      expect(sampleRawPixel({ data, info, x: 10, y: 25 })).toEqual({ b: 255, g: 0, r: 0 })
-      expect(sampleRawPixel({ data, info, x: 40, y: 25 })).toEqual({ b: 255, g: 0, r: 0 })
-    })
-
-    it('should extract the vertically-correct focal-point region for a portrait original', async () => {
-      // 100x200 (1:2) forces the width-priority branch (resize to 50x100); focal
-      // y:80 pushes the 50px-tall extract window against the clamped bottom edge,
-      // so a correct crop is entirely blue.
-      const buffer = await makeTwoColorImage({ height: 200, splitAxis: 'y', width: 100 })
-      const file = new File([buffer], 'photo.png', { type: 'image/png' })
-      const transformFile = createTransformFile({ sharpDependency: sharp })
-
-      const result = await transformFile({
-        file,
-        options: {
-          collectionUpload: {},
-          focalPoint: { x: 50, y: 80 },
-          imageResizeConfig: { name: 'thumb', height: 50, width: 50 },
-          kind: 'size',
-          originalDimensions: { height: 200, width: 100 },
-        } satisfies SharpUploadTaskOptions,
-        req: makeReq(),
-      })
-
-      const { data, info } = await sharp(await toBuffer(result.file!))
-        .raw()
-        .toBuffer({ resolveWithObject: true })
-      expect(info.width).toBe(50)
-      expect(info.height).toBe(50)
-      expect(sampleRawPixel({ data, info, x: 25, y: 10 })).toEqual({ b: 255, g: 0, r: 0 })
-      expect(sampleRawPixel({ data, info, x: 25, y: 40 })).toEqual({ b: 255, g: 0, r: 0 })
-    })
+        const { data, info } = await sharp(await toBuffer(result.file!))
+          .raw()
+          .toBuffer({ resolveWithObject: true })
+        expect(info.width).toBe(50)
+        expect(info.height).toBe(50)
+        for (const { x, y } of samples) {
+          expect(sampleRawPixel({ data, info, x, y })).toEqual({ b: 255, g: 0, r: 0 })
+        }
+      },
+    )
   })
 })

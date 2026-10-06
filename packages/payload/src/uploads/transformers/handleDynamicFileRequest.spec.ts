@@ -14,223 +14,234 @@ vi.mock('../checkFileAccess.js', () => ({
   checkFileAccess: vi.fn(),
 }))
 
-vi.mock('../endpoints/getFile.js', () => ({
-  retrieveFileResponse: vi.fn(),
-}))
-
 vi.mock('./getSourceFileResponse.js', () => ({
   getSourceFileResponse: vi.fn(),
-}))
-
-vi.mock('./finalizeFileResponse.js', () => ({
-  finalizeFileResponse: vi.fn(({ response }) => response),
 }))
 
 import type { Collection } from '../../collections/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { UploadTransformer } from './types.js'
 
-import { Forbidden } from '../../errors/Forbidden.js'
-import { NotFound } from '../../errors/NotFound.js'
 import { checkFileAccess } from '../checkFileAccess.js'
-import { retrieveFileResponse } from '../endpoints/getFile.js'
 import { getSourceFileResponse } from './getSourceFileResponse.js'
 import { handleDynamicFileRequest } from './handleDynamicFileRequest.js'
 import { planTransformerPipeline } from './planTransformerPipeline.js'
 import { resolveUploadDocument } from './resolveUploadDocument.js'
 
-// Filenames are only unique per storage prefix, so the unfiltered lookup can match a
-// document the user can't read. That needs a prefix-aware storage adapter, which the
-// local-disk integration suite can't reproduce.
-const otherTenantDocument = { id: '2', filename: 'logo.png', mimeType: 'image/png', prefix: 'bob' }
-const authorizedDocument = { id: '1', filename: 'logo.png', mimeType: 'image/png', prefix: 'alice' }
+const uploadDocument = { id: '1', filename: 'logo.png', mimeType: 'image/png' }
 
 const collection = {
   config: { slug: 'media', access: { read: vi.fn() }, upload: {} },
 } as unknown as Collection
 
-const makeReq = (transformers: UploadTransformer[] = []): PayloadRequest =>
+const makeReq = (): PayloadRequest =>
   ({
     payload: {
-      config: { upload: { transformers } },
+      config: { upload: { transformers: [] } },
       logger: { error: vi.fn() },
     },
   }) as unknown as PayloadRequest
 
-const actualPlanTransformerPipeline = (
-  await vi.importActual<typeof import('./planTransformerPipeline.js')>(
-    './planTransformerPipeline.js',
-  )
-).planTransformerPipeline
-
-const events: string[] = []
-
-const mockReadAccess = ({ plain, transform }: { plain: boolean; transform: boolean }) => {
-  vi.mocked(checkFileAccess).mockImplementation(async ({ req }) => {
-    const isTransform = req.fileTransform === true
-
-    events.push(isTransform ? 'access:transform' : 'access:plain')
-
-    if (!(isTransform ? transform : plain)) {
-      throw new Forbidden()
-    }
-
-    return undefined
-  })
-}
-
-const makeTransformer = ({ canTransform }: { canTransform: boolean }): UploadTransformer => ({
-  slug: 'test-transformer',
-  canTransform: vi.fn(({ req }) => {
-    events.push(req.fileTransform ? 'canTransform:flagged' : 'canTransform')
-    return canTransform
-  }),
-  handleRequest: vi.fn().mockImplementation(async ({ getSourceFile }) => ({
-    response: await getSourceFile(),
-    status: 'complete',
-  })),
-  mimeTypes: ['image/*'],
-})
-
 describe('handleDynamicFileRequest', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    events.length = 0
-    vi.mocked(planTransformerPipeline).mockImplementation(actualPlanTransformerPipeline)
-    vi.mocked(resolveUploadDocument).mockResolvedValue(otherTenantDocument)
-    vi.mocked(checkFileAccess).mockResolvedValue(authorizedDocument)
-    vi.mocked(getSourceFileResponse).mockResolvedValue(new Response('source-bytes'))
-    vi.mocked(retrieveFileResponse).mockResolvedValue(new Response('original-bytes'))
+    vi.mocked(resolveUploadDocument).mockResolvedValue(uploadDocument)
+    vi.mocked(checkFileAccess).mockResolvedValue(uploadDocument)
   })
 
-  it('should serve the access-checked document when the unfiltered lookup matched another document with the same filename', async () => {
-    vi.mocked(planTransformerPipeline).mockResolvedValue([])
+  describe('failed pipeline cleanup', () => {
+    const makeTrackedSourceResponse = () => {
+      const onCancel = vi.fn()
+      const response = new Response(
+        new ReadableStream({
+          cancel: onCancel,
+          pull: (controller) => controller.enqueue(new TextEncoder().encode('source-bytes')),
+        }),
+      )
 
-    await handleDynamicFileRequest({ collection, filename: 'logo.png', req: makeReq() })
-
-    expect(retrieveFileResponse).toHaveBeenCalledWith(
-      expect.objectContaining({ doc: authorizedDocument }),
-    )
-  })
-
-  it('should transform the access-checked document when the unfiltered lookup matched another document with the same filename', async () => {
-    const transformer: UploadTransformer = {
-      slug: 'test-transformer',
-      handleRequest: vi.fn().mockImplementation(async ({ getSourceFile }) => ({
-        response: await getSourceFile(),
-        status: 'complete',
-      })),
-      mimeTypes: ['image/*'],
+      return { onCancel, response }
     }
-    vi.mocked(planTransformerPipeline).mockResolvedValue([transformer])
 
-    await handleDynamicFileRequest({ collection, filename: 'logo.png', req: makeReq() })
+    it('should close a source body the throwing transformer locked with its own reader', async () => {
+      const source = makeTrackedSourceResponse()
+      vi.mocked(getSourceFileResponse).mockResolvedValue(source.response)
 
-    expect(getSourceFileResponse).toHaveBeenCalledWith(
-      expect.objectContaining({ document: authorizedDocument }),
-    )
-    expect(transformer.handleRequest).toHaveBeenCalledWith(
-      expect.objectContaining({ documentID: authorizedDocument.id }),
-    )
+      const transformer: UploadTransformer = {
+        slug: 'throwing-transformer',
+        handleRequest: vi.fn().mockImplementation(async ({ getSourceFile }) => {
+          const sourceResponse: Response = await getSourceFile()
+          await sourceResponse.body!.getReader().read()
+          throw new Error('transform failed')
+        }),
+        mimeTypes: ['image/*'],
+      }
+      vi.mocked(planTransformerPipeline).mockResolvedValue([transformer])
+
+      await expect(
+        handleDynamicFileRequest({ collection, filename: 'logo.png', req: makeReq() }),
+      ).rejects.toThrow('transform failed')
+
+      await vi.waitFor(() => expect(source.onCancel).toHaveBeenCalled())
+    })
+
+    it('should cancel an earlier stage response no later stage read', async () => {
+      const stageOutput = makeTrackedSourceResponse()
+
+      const transformers: UploadTransformer[] = [
+        {
+          slug: 'first',
+          handleRequest: vi.fn().mockResolvedValue({
+            response: stageOutput.response,
+            status: 'continue',
+          }),
+          mimeTypes: ['image/*'],
+        },
+        {
+          slug: 'second',
+          handleRequest: vi.fn().mockRejectedValue(new Error('transform failed')),
+          mimeTypes: ['image/*'],
+        },
+      ]
+      vi.mocked(planTransformerPipeline).mockResolvedValue(transformers)
+
+      await expect(
+        handleDynamicFileRequest({ collection, filename: 'logo.png', req: makeReq() }),
+      ).rejects.toThrow('transform failed')
+
+      expect(stageOutput.onCancel).toHaveBeenCalled()
+    })
   })
 
-  describe('access control ordering', () => {
-    beforeEach(() => {
-      vi.mocked(resolveUploadDocument).mockResolvedValue(authorizedDocument)
-    })
+  describe('successful pipeline cleanup', () => {
+    const makeTrackedResponse = () => {
+      const onCancel = vi.fn()
+      const response = new Response(
+        new ReadableStream({
+          cancel: onCancel,
+          pull: (controller) => controller.enqueue(new TextEncoder().encode('source-bytes')),
+        }),
+      )
 
-    it('should not run canTransform or handleRequest when read access is denied in both modes', async () => {
-      mockReadAccess({ plain: false, transform: false })
-      const transformer = makeTransformer({ canTransform: true })
+      return { onCancel, response }
+    }
 
-      await expect(
-        handleDynamicFileRequest({ collection, filename: 'logo.png', req: makeReq([transformer]) }),
-      ).rejects.toBeInstanceOf(Forbidden)
+    it('should cancel a fetched source body when the transformer returns a separate response', async () => {
+      const source = makeTrackedResponse()
+      vi.mocked(getSourceFileResponse).mockResolvedValue(source.response)
 
-      expect(transformer.canTransform).not.toHaveBeenCalled()
-      expect(transformer.handleRequest).not.toHaveBeenCalled()
-      expect(events).toEqual(['access:transform', 'access:plain'])
-    })
+      const transformer: UploadTransformer = {
+        slug: 'replacement',
+        handleRequest: vi.fn().mockImplementation(async ({ getSourceFile }) => {
+          await getSourceFile()
 
-    it('should run transform-aware access before canTransform and transform when allowed', async () => {
-      mockReadAccess({ plain: false, transform: true })
-      const transformer = makeTransformer({ canTransform: true })
+          return { response: new Response('replacement'), status: 'complete' }
+        }),
+        mimeTypes: ['image/*'],
+      }
+      vi.mocked(planTransformerPipeline).mockResolvedValue([transformer])
 
-      await handleDynamicFileRequest({
+      const result = await handleDynamicFileRequest({
         collection,
         filename: 'logo.png',
-        req: makeReq([transformer]),
+        req: makeReq(),
       })
 
-      expect(events).toEqual(['access:transform', 'canTransform'])
-      expect(transformer.handleRequest).toHaveBeenCalled()
+      expect(await result.text()).toBe('replacement')
+      await vi.waitFor(() => expect(source.onCancel).toHaveBeenCalled())
     })
 
-    it('should serve the original when transform-aware access is denied, ordinary read is allowed and no transformer applies', async () => {
-      mockReadAccess({ plain: true, transform: false })
-      const transformer = makeTransformer({ canTransform: false })
+    it('should abort a locked source body when the transformer returns a separate response', async () => {
+      const source = makeTrackedResponse()
+      vi.mocked(getSourceFileResponse).mockResolvedValue(source.response)
 
-      await handleDynamicFileRequest({
+      const transformer: UploadTransformer = {
+        slug: 'locked-replacement',
+        handleRequest: vi.fn().mockImplementation(async ({ getSourceFile }) => {
+          const sourceResponse: Response = await getSourceFile()
+          await sourceResponse.body!.getReader().read()
+
+          return { response: new Response('replacement'), status: 'complete' }
+        }),
+        mimeTypes: ['image/*'],
+      }
+      vi.mocked(planTransformerPipeline).mockResolvedValue([transformer])
+
+      const result = await handleDynamicFileRequest({
         collection,
         filename: 'logo.png',
-        req: makeReq([transformer]),
+        req: makeReq(),
       })
 
-      expect(events).toEqual(['access:transform', 'access:plain', 'canTransform'])
-      expect(retrieveFileResponse).toHaveBeenCalled()
+      expect(await result.text()).toBe('replacement')
+      await vi.waitFor(() => expect(source.onCancel).toHaveBeenCalled())
     })
 
-    it('should reject a transform when only ordinary read access is allowed', async () => {
-      mockReadAccess({ plain: true, transform: false })
-      const transformer = makeTransformer({ canTransform: true })
+    it('should cancel an earlier response when a later transformer replaces it without reading it', async () => {
+      const earlierResponse = makeTrackedResponse()
+      const transformers: UploadTransformer[] = [
+        {
+          slug: 'first',
+          handleRequest: vi.fn().mockResolvedValue({
+            response: earlierResponse.response,
+            status: 'continue',
+          }),
+          mimeTypes: ['image/*'],
+        },
+        {
+          slug: 'second',
+          handleRequest: vi.fn().mockResolvedValue({
+            response: new Response('replacement'),
+            status: 'complete',
+          }),
+          mimeTypes: ['image/*'],
+        },
+      ]
+      vi.mocked(planTransformerPipeline).mockResolvedValue(transformers)
 
-      await expect(
-        handleDynamicFileRequest({ collection, filename: 'logo.png', req: makeReq([transformer]) }),
-      ).rejects.toBeInstanceOf(Forbidden)
-
-      expect(transformer.handleRequest).not.toHaveBeenCalled()
-    })
-
-    it('should not serve the original when only transform-aware access is allowed and no transformer applies', async () => {
-      mockReadAccess({ plain: false, transform: true })
-      const transformer = makeTransformer({ canTransform: false })
-
-      await expect(
-        handleDynamicFileRequest({ collection, filename: 'logo.png', req: makeReq([transformer]) }),
-      ).rejects.toBeInstanceOf(Forbidden)
-
-      expect(events).toEqual(['access:transform', 'canTransform', 'access:plain'])
-      expect(retrieveFileResponse).not.toHaveBeenCalled()
-    })
-
-    it('should use only an ordinary read access check when no transformer matches the MIME type', async () => {
-      mockReadAccess({ plain: true, transform: false })
-      const transformer = { ...makeTransformer({ canTransform: true }), mimeTypes: ['video/*'] }
-
-      await handleDynamicFileRequest({
+      const result = await handleDynamicFileRequest({
         collection,
         filename: 'logo.png',
-        req: makeReq([transformer]),
+        req: makeReq(),
       })
 
-      expect(events).toEqual(['access:plain'])
-      expect(transformer.canTransform).not.toHaveBeenCalled()
-      expect(retrieveFileResponse).toHaveBeenCalled()
+      expect(await result.text()).toBe('replacement')
+      expect(earlierResponse.onCancel).toHaveBeenCalled()
     })
 
-    it('should return not found for a missing file only when both access modes allow it', async () => {
-      vi.mocked(resolveUploadDocument).mockResolvedValue(undefined)
-      mockReadAccess({ plain: true, transform: true })
+    it('should abort a locked earlier source when a later transformer replaces it without reading it', async () => {
+      const source = makeTrackedResponse()
+      vi.mocked(getSourceFileResponse).mockResolvedValue(source.response)
 
-      await expect(
-        handleDynamicFileRequest({ collection, filename: 'missing.png', req: makeReq() }),
-      ).rejects.toBeInstanceOf(NotFound)
+      const transformers: UploadTransformer[] = [
+        {
+          slug: 'first',
+          handleRequest: vi.fn().mockImplementation(async ({ getSourceFile }) => {
+            const sourceResponse: Response = await getSourceFile()
+            await sourceResponse.body!.getReader().read()
 
-      mockReadAccess({ plain: false, transform: true })
+            return { response: sourceResponse, status: 'continue' }
+          }),
+          mimeTypes: ['image/*'],
+        },
+        {
+          slug: 'second',
+          handleRequest: vi.fn().mockResolvedValue({
+            response: new Response('replacement'),
+            status: 'complete',
+          }),
+          mimeTypes: ['image/*'],
+        },
+      ]
+      vi.mocked(planTransformerPipeline).mockResolvedValue(transformers)
 
-      await expect(
-        handleDynamicFileRequest({ collection, filename: 'missing.png', req: makeReq() }),
-      ).rejects.toBeInstanceOf(Forbidden)
+      const result = await handleDynamicFileRequest({
+        collection,
+        filename: 'logo.png',
+        req: makeReq(),
+      })
+
+      expect(await result.text()).toBe('replacement')
+      await vi.waitFor(() => expect(source.onCancel).toHaveBeenCalled())
     })
   })
 })

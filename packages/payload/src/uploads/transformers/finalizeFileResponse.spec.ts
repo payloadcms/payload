@@ -50,21 +50,18 @@ describe('finalizeFileResponse', () => {
     expect(result.headers.get('Content-Security-Policy')).toBe(uploadContentSecurityPolicy)
   })
 
-  it.each([
-    'image/svg+xml; charset=utf-8',
-    'Image/SVG+XML',
-    'application/xhtml+xml',
-    'application/xml',
-    'text/xml',
-    'application/rss+xml',
-  ])('should apply the upload CSP header to a %s response', async (contentType) => {
-    const collection = makeCollection()
-    const response = new Response('<root />', { headers: { 'Content-Type': contentType } })
+  // XML classification itself is covered by getFileTypeIdentity.spec.ts.
+  it.each(['image/svg+xml; charset=utf-8', 'application/xml'])(
+    'should apply the upload CSP header to a %s response',
+    async (contentType) => {
+      const collection = makeCollection()
+      const response = new Response('<root />', { headers: { 'Content-Type': contentType } })
 
-    const result = await finalizeFileResponse({ collection, req: makeReq(), response })
+      const result = await finalizeFileResponse({ collection, req: makeReq(), response })
 
-    expect(result.headers.get('Content-Security-Policy')).toBe(uploadContentSecurityPolicy)
-  })
+      expect(result.headers.get('Content-Security-Policy')).toBe(uploadContentSecurityPolicy)
+    },
+  )
 
   it('should apply the upload CSP header when modifyResponseHeaders sets an XML content type', async () => {
     const modifyResponseHeaders = vi.fn(({ headers }: { headers: Headers }) => {
@@ -119,10 +116,17 @@ describe('finalizeFileResponse', () => {
 
   it('should return no body for a HEAD request while preserving status and headers', async () => {
     const collection = makeCollection()
-    const response = new Response('bytes', {
-      headers: { 'Content-Type': 'image/png' },
-      status: 200,
-    })
+    const onCancel = vi.fn()
+    const response = new Response(
+      new ReadableStream({
+        cancel: onCancel,
+        pull: (controller) => controller.enqueue(new TextEncoder().encode('bytes')),
+      }),
+      {
+        headers: { 'Content-Type': 'image/png' },
+        status: 200,
+      },
+    )
 
     const result = await finalizeFileResponse({
       collection,
@@ -133,5 +137,6 @@ describe('finalizeFileResponse', () => {
     expect(await result.text()).toBe('')
     expect(result.status).toBe(200)
     expect(result.headers.get('Content-Type')).toBe('image/png')
+    await vi.waitFor(() => expect(onCancel).toHaveBeenCalled())
   })
 })

@@ -106,6 +106,7 @@ const nextSuites: TestConfig[] = [
   { file: 'trash', shards: 2 },
   { file: 'versions', shards: 3 },
   { file: 'uploads', shards: 3 },
+  { file: 'upload-transformers', shards: 1 },
 ]
 
 const tanstackSuites: TestConfig[] = nextSuites.map((suite) => ({

@@ -37,7 +37,7 @@ export const checkFileAccess = async ({
   }
 
   if (constraints.length > 0) {
-    const filenameCondition = buildFilenameWhere({ filename, imageSizes: config.upload.imageSizes })
+    const filenameCondition = buildFilenameWhere({ filename, variants: config.upload.variants })
 
     const doc = await req.payload.db.findOne({
       collection: config.slug,

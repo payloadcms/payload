@@ -31,7 +31,7 @@ Configure per-collection Sharp settings through `sharpTransformer({ collections 
 sharpTransformer({
   collections: {
     media: {
-      imageSizes: [
+      variants: [
         { name: 'thumbnail', width: 400, height: 300 },
         { name: 'card', width: 768, height: 1024 },
       ],
@@ -47,7 +47,7 @@ sharpTransformer({
 })
 ```
 
-`imageSizes`, `crop`, and `focalPoint` are also written back onto the collection's own sanitized `upload` config at startup (name/`admin`/`generateImageName` only, for `imageSizes`), so the Admin Panel, generated types, and the `sizes` shape on your documents behave exactly as before.
+`variants`, `crop`, and `focalPoint` are also written back onto the collection's own sanitized `upload` config at startup (name/`admin`/`generateImageName` only, for `variants`), so the Admin Panel and generated types pick them up. Generated files are stored under each document's `variants` field.
 
 ### Dynamic (request-time) resizing
 

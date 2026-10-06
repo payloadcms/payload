@@ -1,5 +1,7 @@
 import type { UploadTransformer } from 'payload'
 
+import sharp from 'sharp'
+
 /**
  * Call counters for the fake transformers below, reset by each test that needs
  * them. Each transformer's `canTransform` recognizes its own dedicated query
@@ -10,6 +12,7 @@ import type { UploadTransformer } from 'payload'
 export const transformerCallCounts = {
   appendSuffix: 0,
   consumeWithoutResponse: 0,
+  dynamicOnlySharp: 0,
   noop: 0,
   redirect: 0,
   sourceConsumingError: 0,
@@ -17,10 +20,17 @@ export const transformerCallCounts = {
   uppercase: 0,
 }
 
+/**
+ * Read access checks and `canTransform` calls in the order they ran, so a test can prove
+ * access is decided before any transformer code runs.
+ */
+export const fileRequestEvents: string[] = []
+
 export function resetTransformerCallCounts(): void {
   for (const key of Object.keys(transformerCallCounts) as (keyof typeof transformerCallCounts)[]) {
     transformerCallCounts[key] = 0
   }
+  fileRequestEvents.length = 0
 }
 
 /**
@@ -41,12 +51,24 @@ export function resetTransformerMediaHookCallCounts(): void {
   }
 }
 
+/**
+ * Sharp for the dynamic-only `sharpTransformer`, counted so a test can prove an
+ * upload owned by another Sharp instance never runs through this one.
+ */
+export const countingDynamicOnlySharp = ((...args: Parameters<typeof sharp>) => {
+  transformerCallCounts.dynamicOnlySharp += 1
+  return sharp(...args)
+}) as typeof sharp
+
 const hasQueryParam = (paramName: string) => (args: { req: { searchParams?: URLSearchParams } }) =>
   args.req.searchParams?.has(paramName) ?? false
 
 export const appendSuffixTransformer: UploadTransformer = {
   slug: 'append-suffix',
-  canTransform: hasQueryParam('suffix'),
+  canTransform: (args) => {
+    fileRequestEvents.push('canTransform')
+    return hasQueryParam('suffix')(args)
+  },
   handleRequest: async ({ getSourceFile }) => {
     transformerCallCounts.appendSuffix += 1
     const source = await getSourceFile()
@@ -155,6 +177,18 @@ export const publicServerURL = process.env.PAYLOAD_PUBLIC_SERVER_URL
 
 export const isCloudinaryEnabled = Boolean(process.env.CLOUDINARY_URL && publicServerURL)
 
+/**
+ * Replaces a JSON upload with the `File` a test passes as `context.transformedFile`, so a test
+ * controls the name, type and bytes of the transformer's output.
+ */
+export const replaceFileTransformer: UploadTransformer = {
+  slug: 'replace-file',
+  canTransform: ({ req }) => req.context.transformedFile instanceof File,
+  mimeTypes: ['application/json'],
+  transformFile: ({ req }) =>
+    Promise.resolve({ file: req.context.transformedFile as File, status: 'complete' }),
+}
+
 export const testTransformers: UploadTransformer[] = [
   appendSuffixTransformer,
   uppercaseTransformer,
@@ -163,4 +197,5 @@ export const testTransformers: UploadTransformer[] = [
   throwingTransformer,
   sourceConsumingErrorTransformer,
   consumeWithoutResponseTransformer,
+  replaceFileTransformer,
 ]

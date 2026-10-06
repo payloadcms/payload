@@ -62,20 +62,21 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_B836F062".
+ * via the `definition` "LexicalNodes_D6CBC3A3".
  */
-export type LexicalNodes_B836F062 =
+export type LexicalNodes_D6CBC3A3 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_B836F062>
+  | SerializedParagraphNode<LexicalNodes_D6CBC3A3>
   | SerializedBlockNode<Callout | NoHandle>
-  | SerializedTableNode<LexicalNodes_B836F062>
-  | SerializedTableCellNode<LexicalNodes_B836F062>
-  | SerializedTableRowNode<LexicalNodes_B836F062>
+  | SerializedTableNode<LexicalNodes_D6CBC3A3>
+  | SerializedTableCellNode<LexicalNodes_D6CBC3A3>
+  | SerializedTableRowNode<LexicalNodes_D6CBC3A3>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_B836F062>
+  | SerializedUploadNode<'media-alt'>
+  | SerializedQuoteNode<LexicalNodes_D6CBC3A3>
   | SerializedRelationshipNode<
       | 'users'
       | 'payload-folders'
@@ -85,23 +86,24 @@ export type LexicalNodes_B836F062 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_B836F062, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_B836F062, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_B836F062>
-  | SerializedListItemNode<LexicalNodes_B836F062>
-  | SerializedHeadingNode<LexicalNodes_B836F062>;
+  | SerializedAutoLinkNode<LexicalNodes_D6CBC3A3, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_D6CBC3A3, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_D6CBC3A3>
+  | SerializedListItemNode<LexicalNodes_D6CBC3A3>
+  | SerializedHeadingNode<LexicalNodes_D6CBC3A3>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_404F6FF7".
+ * via the `definition` "LexicalNodes_0E5D99AF".
  */
-export type LexicalNodes_404F6FF7 =
+export type LexicalNodes_0E5D99AF =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_404F6FF7>
+  | SerializedParagraphNode<LexicalNodes_0E5D99AF>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_404F6FF7>
+  | SerializedUploadNode<'media-alt'>
+  | SerializedQuoteNode<LexicalNodes_0E5D99AF>
   | SerializedRelationshipNode<
       | 'users'
       | 'payload-folders'
@@ -111,11 +113,11 @@ export type LexicalNodes_404F6FF7 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_404F6FF7, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_404F6FF7, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_404F6FF7>
-  | SerializedListItemNode<LexicalNodes_404F6FF7>
-  | SerializedHeadingNode<LexicalNodes_404F6FF7>;
+  | SerializedAutoLinkNode<LexicalNodes_0E5D99AF, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_0E5D99AF, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_0E5D99AF>
+  | SerializedListItemNode<LexicalNodes_0E5D99AF>
+  | SerializedHeadingNode<LexicalNodes_0E5D99AF>;
 
 export interface Config {
   auth: {
@@ -127,6 +129,7 @@ export interface Config {
     'payload-folders': PayloadFolder;
     posts: Post;
     media: Media;
+    'media-alt': MediaAlt;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -142,6 +145,7 @@ export interface Config {
     'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'media-alt': MediaAltSelect<false> | MediaAltSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -162,6 +166,7 @@ export interface Config {
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
     activity: ActivityWidget;
+    'upload-dropzone': UploadDropzoneWidget;
   };
   user: User;
   jobs: {
@@ -265,17 +270,18 @@ export interface PayloadFolder {
  */
 export interface Post {
   id: string;
-  title?: string | null;
+  title: string;
   /**
    * A subtitle field to test focus indicators in the admin UI, helps us detect exiting out of rich text editor properly.
    */
   subtitle?: string | null;
-  accessibilitySelect?: ('one' | 'two') | null;
+  accessibilitySelect: 'one' | 'two';
   accessibilitySortableSelect?: ('one' | 'two')[] | null;
   accessibilityDisabledSelect?: ('one' | 'two') | null;
+  requiredTags: string[];
   relatedPost?: (string | null) | Post;
   publishedOn?: string | null;
-  content?: LexicalRichText<LexicalNodes_B836F062> | null;
+  content?: LexicalRichText<LexicalNodes_D6CBC3A3> | null;
   items?:
     | {
         label?: string | null;
@@ -284,6 +290,8 @@ export interface Post {
       }[]
     | null;
   layout?: (TextBlock | ImageBlock)[] | null;
+  publishingNote?: string | null;
+  customLabelNote?: string | null;
   '_h_payload-folders'?: (string | null) | PayloadFolder;
   featuredImage?: (string | null) | Media;
   createdBy?: {
@@ -294,6 +302,31 @@ export interface Post {
     relationTo: 'users';
     value: string | User;
   } | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  location?: [number, number] | null;
+  settings?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  source?: string | null;
+  unlabelledSettings?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  unlabelledSource?: string | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -304,7 +337,7 @@ export interface Post {
  * via the `definition` "TextBlock".
  */
 export interface TextBlock {
-  body?: LexicalRichText<LexicalNodes_404F6FF7> | null;
+  body?: LexicalRichText<LexicalNodes_0E5D99AF> | null;
   text?: string | null;
   date?: string | null;
   id?: string | null;
@@ -335,6 +368,7 @@ export interface Media {
     relationTo: 'users';
     value: string | User;
   } | null;
+  alt: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -346,7 +380,7 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     thumbnail?: {
       url?: string | null;
       width?: number | null;
@@ -372,6 +406,32 @@ export interface Media {
       filename?: string | null;
     };
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-alt".
+ */
+export interface MediaAlt {
+  id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -412,6 +472,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'media-alt';
+        value: string | MediaAlt;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -508,6 +572,7 @@ export interface PostsSelect<T extends boolean = true> {
   accessibilitySelect?: T;
   accessibilitySortableSelect?: T;
   accessibilityDisabledSelect?: T;
+  requiredTags?: T;
   relatedPost?: T;
   publishedOn?: T;
   content?: T;
@@ -538,10 +603,17 @@ export interface PostsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  publishingNote?: T;
+  customLabelNote?: T;
   '_h_payload-folders'?: T;
   featuredImage?: T;
   createdBy?: T;
   updatedBy?: T;
+  location?: T;
+  settings?: T;
+  source?: T;
+  unlabelledSettings?: T;
+  unlabelledSource?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -554,6 +626,7 @@ export interface PostsSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   createdBy?: T;
   updatedBy?: T;
+  alt?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -565,7 +638,7 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         thumbnail?:
@@ -599,6 +672,25 @@ export interface MediaSelect<T extends boolean = true> {
               filename?: T;
             };
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-alt_select".
+ */
+export interface MediaAltSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -687,7 +779,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'users' | 'payload-folders' | 'posts' | 'media';
+    relatedCollection: 'users' | 'payload-folders' | 'posts' | 'media' | 'media-alt';
     where?:
       | {
           [k: string]: unknown;
@@ -709,7 +801,17 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('users' | 'payload-folders' | 'posts' | 'media')[] | null;
+    excludedCollections?: ('users' | 'payload-folders' | 'posts' | 'media' | 'media-alt')[] | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "upload-dropzone_widget".
+ */
+export interface UploadDropzoneWidget {
+  data?: {
+    excludedCollections?: ('media' | 'media-alt')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
@@ -909,6 +1011,6 @@ export interface LexicalRichText<TNode> {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

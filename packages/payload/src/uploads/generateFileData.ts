@@ -1,5 +1,6 @@
 import { fileTypeFromBuffer } from 'file-type'
 import fs from 'fs/promises'
+import { openAsBlob } from 'node:fs'
 
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
@@ -10,6 +11,7 @@ import type { FileData, FileSizes, FileToSave, UploadEdits } from './types.js'
 
 import { FileRetrievalError, FileUploadError, Forbidden, MissingFile } from '../errors/index.js'
 import { isNumber } from '../utilities/isNumber.js'
+import { canResizeImage } from './canResizeImage.js'
 import { checkFileRestrictions } from './checkFileRestrictions.js'
 import { downloadFileToBuffer } from './downloadFileToBuffer.js'
 import { generateImageSizeFilename } from './generateImageSizeFilename.js'
@@ -23,7 +25,10 @@ import { isProcessableImage } from './isProcessableImage.js'
 import { parseFilename } from './parseFilename.js'
 import { planTransformerPipeline } from './transformers/planTransformerPipeline.js'
 import { transformUploadFile } from './transformers/transformUploadFile.js'
-import { getUploadTransformerInternal } from './transformers/uploadTransformerBridge.js'
+import {
+  getUploadTransformerInternal,
+  setUploadFilePath,
+} from './transformers/uploadTransformerBridge.js'
 type Args<T> = {
   collection: Collection
   config: SanitizedConfig
@@ -246,11 +251,24 @@ export const generateFileData = async <T>({
     // need the whole file, so leave such an upload untouched rather than buffering it.
     const canRunTransformers = pipeline.length > 0 && hasFullFileContents(file)
 
-    const bridgeTransformer = canRunTransformers
-      ? pipeline.find((transformer) =>
+    const bridgeTransformers = canRunTransformers
+      ? pipeline.filter((transformer) =>
           Boolean(getUploadTransformerInternal(transformer)?.prepareUpload),
         )
-      : undefined
+      : []
+
+    const bridgeTransformer =
+      bridgeTransformers.find((transformer) =>
+        getUploadTransformerInternal(transformer)!.handlesCollection?.({
+          collectionSlug: collectionConfig.slug,
+        }),
+      ) ?? bridgeTransformers[0]
+
+    // The chosen bridge's task options are private to it, so other bridges must not see them.
+    const bridgeTaskPipeline = pipeline.filter(
+      (transformer) =>
+        transformer === bridgeTransformer || !bridgeTransformers.includes(transformer),
+    )
 
     let originalWebFile: File | undefined
     let mainWebFile: File | undefined
@@ -258,11 +276,11 @@ export const generateFileData = async <T>({
     let sizeResults: PreparedUploadTransformation[] = []
 
     if (canRunTransformers) {
-      originalWebFile = new File(
-        [file.tempFilePath ? await fs.readFile(file.tempFilePath) : file.data],
-        file.name,
-        { type: file.mimetype },
-      )
+      const fileContents = file.tempFilePath ? await openAsBlob(file.tempFilePath) : file.data
+      originalWebFile = new File([fileContents], file.name, { type: file.mimetype })
+      if (file.tempFilePath) {
+        setUploadFilePath(originalWebFile, file.tempFilePath)
+      }
 
       if (bridgeTransformer) {
         const bridge = getUploadTransformerInternal(bridgeTransformer)!
@@ -276,7 +294,7 @@ export const generateFileData = async <T>({
               collectionSlug: collectionConfig.slug,
               file: task.file ?? originalWebFile!,
               options: task.options,
-              pipeline,
+              pipeline: bridgeTaskPipeline,
               req,
             }),
           uploadEdits,
@@ -289,15 +307,6 @@ export const generateFileData = async <T>({
         fileData.height = mainResult?.height
         hasDimensionsFromBridge = true
         sizeResults = results.filter((result) => result.fieldPath !== 'filename')
-
-        if (focalPointEnabled && uploadEdits?.focalPoint) {
-          fileData.focalX = isNumber(uploadEdits.focalPoint.x)
-            ? Math.round(uploadEdits.focalPoint.x)
-            : 50
-          fileData.focalY = isNumber(uploadEdits.focalPoint.y)
-            ? Math.round(uploadEdits.focalPoint.y)
-            : 50
-        }
       } else {
         mainWebFile = await transformUploadFile({
           collectionSlug: collectionConfig.slug,
@@ -307,6 +316,21 @@ export const generateFileData = async <T>({
           req,
         })
       }
+    }
+
+    // Saved for any resizable image, not just one a transformer processed, so it's kept with no
+    // transformer registered and on a header-only client upload.
+    if (
+      focalPointEnabled &&
+      uploadEdits?.focalPoint &&
+      (hasDimensionsFromBridge || canResizeImage(file.mimetype))
+    ) {
+      fileData.focalX = isNumber(uploadEdits.focalPoint.x)
+        ? Math.round(uploadEdits.focalPoint.x)
+        : 50
+      fileData.focalY = isNumber(uploadEdits.focalPoint.y)
+        ? Math.round(uploadEdits.focalPoint.y)
+        : 50
     }
 
     const fileWasTransformed = Boolean(mainWebFile && mainWebFile !== originalWebFile)
@@ -438,7 +462,7 @@ export const generateFileData = async <T>({
       const { name: baseName, ext: baseExt } = parseFilename(fsSafeName)
 
       for (const result of sizeResults) {
-        const sizeName = result.fieldPath.slice('sizes.'.length)
+        const sizeName = result.fieldPath.slice('variants.'.length)
 
         if (!result.file) {
           sizes[sizeName] = {
@@ -459,7 +483,7 @@ export const generateFileData = async <T>({
 
         req.payloadUploadSizes[sizeName] = sizeBuffer
 
-        const imageSizeConfig = collectionConfig.upload.imageSizes?.find(
+        const imageSizeConfig = collectionConfig.upload.variants?.find(
           (imageSize) => imageSize.name === sizeName,
         )
 
@@ -495,7 +519,7 @@ export const generateFileData = async <T>({
         })
       }
 
-      fileData.sizes = sizes
+      fileData.variants = sizes
     }
   } catch (err) {
     req.payload.logger.error(err)

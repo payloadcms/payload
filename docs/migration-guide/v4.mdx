@@ -1087,9 +1087,9 @@ The deprecated `isHTMLElement` utility has been removed from `@payloadcms/richte
 
 `lexical`'s built-in `isHTMLElement` is the canonical implementation and narrows against the node's owning-document `HTMLElement`, so it is also safe across iframes and other realms.
 
-### Lexical: vendored `@lexical/markdown` fork removed and lexical upgraded to `0.50.0`
+### Lexical: vendored `@lexical/markdown` fork removed and lexical upgraded to `0.52.0`
 
-`@payloadcms/richtext-lexical` no longer ships a vendored copy of `@lexical/markdown`. The package is now a direct dependency, every `@lexical/*` package was upgraded from `0.41.0` to `0.50.0`, and `@payloadcms/richtext-lexical/lexical/markdown` is a pure passthrough of `@lexical/markdown`.
+`@payloadcms/richtext-lexical` no longer ships a vendored copy of `@lexical/markdown`. The package is now a direct dependency, every `@lexical/*` package was upgraded from `0.41.0` to `0.52.0`, and `@payloadcms/richtext-lexical/lexical/markdown` is a pure passthrough of `@lexical/markdown`.
 
 Most projects use markdown through the editor or through `convertMarkdownToLexical` / `convertLexicalToMarkdown` and need no changes. You are only affected if you import from `@payloadcms/richtext-lexical/lexical/markdown` directly.
 
@@ -1113,7 +1113,16 @@ If you keep calling `$convertFromMarkdownString` directly, pass `editorConfig.fe
 
 **Whitespace-only markdown table cells now import as an empty paragraph** instead of a text node of padding spaces. This comes from the lexical upgrade, not Payload's own code. No action is required unless you assert on those padding spaces in stored content.
 
-If you import lexical APIs directly through `@payloadcms/richtext-lexical/lexical/*`, also review the [lexical breaking changes](https://github.com/facebook/lexical/releases) between `0.41.0` and `0.50.0`. None of them require action for typical Payload usage.
+If you import lexical APIs directly through `@payloadcms/richtext-lexical/lexical/*`, also review the [lexical breaking changes](https://github.com/facebook/lexical/releases) between `0.41.0` and `0.52.0`. None of them require action for typical Payload usage.
+
+If your app imports Lexical types or adds custom features, check these changes from `0.50.0`. They also apply to imports through `@payloadcms/richtext-lexical/lexical` and its subpaths:
+
+- Lexical packages are ESM only. Use ESM imports; CommonJS `require()` needs Node.js 20.19 or later.
+- `SELECTION_CHANGE_COMMAND` now runs before DOM reconciliation. Defer DOM lookups and floating UI positioning with `$onUpdate(() => editor.read('latest', callback))`, or use an update listener for work that should run after every commit.
+- Call `node.getLatest().exportJSON()` when serializing a node reference retained across an update. Payload continues to write the full JSON format; compact export is not enabled.
+- `SerializedEditorState<T>`, `SerializedElementNode<T>`, and `SerializedRootNode<T>` no longer accept a type argument. Remove `<T>` if you only need the base node type. For a document with your own node types, use Payload's `TypedEditorState<T>` instead. Without a type argument, Lexical's `children` are still typed as `SerializedLexicalNode[]`.
+- `ReturnType<Node['exportJSON']>` can now infer partial JSON, making fields such as `version` and `url` optional. If your code expects the full format, use the node's explicit serialized type, such as `SerializedLinkNode`. A normal `node.exportJSON()` call still returns the full format.
+- `LexicalNode.getCommonAncestor` was removed. Use `$getCommonAncestor(a, b)?.commonAncestor ?? null`; pass the parents of non-element nodes if you need the old method's behavior.
 
 ### Lexical: `EXPERIMENTAL_TableFeature` renamed to `TableFeature`
 
@@ -1854,7 +1863,7 @@ pnpm add @payloadcms/transformer-sharp
 
 Run `npx @payloadcms/codemod --transform migrate-sharp-to-transformer` to migrate automatically. The codemod moves a top-level `sharp` dependency and inline collection Sharp options — including `crop` and `focalPoint` — into `sharpTransformer({ collections })` (writing `imageSizes` as `variants`), appends to an existing `upload.transformers` array if you already have one, and leaves anything it can't safely rewrite in place with a note — for example, a `collections` array built by a function call, or a collection defined outside the `buildConfig` call. Review those manually. For a config that already registers `sharpTransformer`, it only renames `imageSizes` to `variants` inside the existing `sharpTransformer` call and flags a leftover top-level `sharp` property; it doesn't move any remaining collection options.
 
-Your `variants`, `crop`, and `focalPoint` are still readable at `collection.upload.imageSizes`/`.crop`/`.focalPoint` on the **sanitized** config (for example `req.payload.collections.media.config.upload.imageSizes`). `sharpTransformer` writes a projection of what you configure back onto the sanitized collection at startup, so the Admin Panel, generated types, and the stored `sizes` shape on your documents are unchanged. For a collection configured on `sharpTransformer`, a `crop` or `focalPoint` set on the transformer replaces the collection's own value; one left unset there keeps the collection's. `imageSizes` can't be set on the collection at all.
+Your `variants`, `crop`, and `focalPoint` are readable at `collection.upload.variants`/`.crop`/`.focalPoint` on the **sanitized** config (for example `req.payload.collections.media.config.upload.variants`). Code that read the sanitized `upload.imageSizes` in 3.x must read `upload.variants` instead. `sharpTransformer` writes a projection of what you configure back onto the sanitized collection at startup, so the Admin Panel and the rest of core see the same configuration. For a collection configured on `sharpTransformer`, a `crop` or `focalPoint` set on the transformer replaces the collection's own value; one left unset there keeps the collection's. Neither `imageSizes` nor `variants` can be set on the collection at all.
 
 If you inject a custom Sharp build or version, pass it the same way:
 
@@ -1864,6 +1873,56 @@ If you inject a custom Sharp build or version, pass it the same way:
 ```
 
 `sharpTransformer` can also resize images at request time (`/api/media/file/photo.png?width=400`). This is new in Payload 4 and **disabled by default**, so a migrated config keeps serving only the original file and your pre-generated `variants`. The codemod doesn't enable it. To opt in, pass `dynamic: true` or `dynamic: { collections: ['media'] }` — see [Dynamic (request-time) resizing](../upload/transformers#dynamic-request-time-resizing), and [Securing dynamic resizing](../upload/transformers#securing-dynamic-resizing) before enabling it on a publicly readable collection.
+
+#### The stored `sizes` field on upload documents is renamed to `variants`
+
+The group field that holds each generated image size on an upload document is now `variants` instead of `sizes`. Every place that reads or queries it changes:
+
+```diff
+- doc.sizes?.thumbnail?.url
++ doc.variants?.thumbnail?.url
+
+- where: { 'sizes.thumbnail.filename': { equals: 'photo-400x300.png' } }
++ where: { 'variants.thumbnail.filename': { equals: 'photo-400x300.png' } }
+
+- select: { sizes: { thumbnail: true } }
++ select: { variants: { thumbnail: true } }
+```
+
+GraphQL queries select `variants { thumbnail { url } }` instead of `sizes { thumbnail { url } }`, and regenerated types expose `variants?: { ... }` (and `variants?: T | { ... }` on the `*Select` types) in place of `sizes`. Update any frontend code that reads `media.sizes`, including values you pass to helpers such as `getBestFitFromSizes({ sizes: doc.variants })`.
+
+Existing documents must be migrated. Create the predefined migration for your database adapter and run it:
+
+<Banner type="warning">
+  Payload 4 uses `variants` as the top-level field for generated upload
+  variants. If an upload collection already defines a custom field named
+  `variants`, rename that field before you run the predefined migration. Choose
+  a new name, update your config, and write a custom migration that moves the
+  existing custom data from `variants` to the new field. Then run the predefined
+  `sizes-to-variants` migration. If legacy `sizes` data or columns and custom
+  `variants` data or columns are both present, the predefined migration stops
+  before it changes data or indexes. It cannot choose a new name or merge this
+  custom data for you.
+</Banner>
+
+```sh
+# MongoDB
+payload migrate:create --file @payloadcms/db-mongodb/sizes-to-variants
+# Postgres
+payload migrate:create --file @payloadcms/db-postgres/sizes-to-variants
+# Vercel Postgres
+payload migrate:create --file @payloadcms/db-vercel-postgres/sizes-to-variants
+# SQLite
+payload migrate:create --file @payloadcms/db-sqlite/sizes-to-variants
+# Cloudflare D1
+payload migrate:create --file @payloadcms/db-d1-sqlite/sizes-to-variants
+
+payload migrate
+```
+
+**Postgres and SQLite (including Vercel Postgres and D1):** the columns are renamed in place from `sizes_<name>_<property>` to `variants_<name>_<property>`, on each upload collection's table and its versions table, along with their indexes. Use the predefined migration above **instead of** a plain `payload migrate:create` for this change. A generated migration would drop the `sizes_*` columns and add new `variants_*` columns, losing the stored image size data. The predefined migration also writes the schema snapshot, so the next generated migration starts from the renamed columns.
+
+On MongoDB the migration renames `sizes` (and `version.sizes` on versions) with `$rename` and re-creates the indexes on those fields under the new path. Run the migration before the upgraded app writes to upload documents.
 
 #### The file endpoint changes once any transformer is registered
 

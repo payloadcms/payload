@@ -60,9 +60,9 @@ test.suite('@payloadcms/storage-gcs', { config: './config.ts', resetBetweenTests
       id: uploadId,
       collection: collectionSlug as 'media',
       overrideAccess: true,
-    })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
+    })) as unknown as { filename: string; variants: Record<string, { filename: string }> }
 
-    const fileKeys = Object.values(uploadData.sizes || {}).map(({ filename: rawFilename }) =>
+    const fileKeys = Object.values(uploadData.variants || {}).map(({ filename: rawFilename }) =>
       filePrefix ? `${filePrefix}/${rawFilename}` : rawFilename,
     )
 

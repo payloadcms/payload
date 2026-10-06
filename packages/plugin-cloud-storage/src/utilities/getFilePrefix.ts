@@ -64,15 +64,15 @@ export async function getFilePrefix({
   }
 
   // Reads without a query prefix or read-access constraints skip the endpoint's document lookup.
-  const imageSizes = (collection?.upload as SanitizedUploadConfig)?.imageSizes || []
+  const variants = (collection?.upload as SanitizedUploadConfig)?.variants || []
 
   const filenameClause = {
     or: [
       {
         filename: { equals: filename },
       },
-      ...imageSizes.map((imageSize) => ({
-        [`sizes.${imageSize.name}.filename`]: { equals: filename },
+      ...variants.map((imageSize) => ({
+        [`variants.${imageSize.name}.filename`]: { equals: filename },
       })),
     ],
   }

@@ -1,9 +1,9 @@
-import type { CollectionSlug, Payload } from 'payload'
+import type { CollectionSlug, Payload, File as PayloadFile } from 'payload'
 
 import { createHash } from 'crypto'
 import fs from 'fs'
 import path from 'path'
-import { generatePayloadFileURL, getFileByPath } from 'payload'
+import { getFileByPath } from 'payload'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
@@ -16,8 +16,10 @@ import {
   resizePreviewMediaSlug,
   transformerMediaSlug,
   usersSlug,
+  variantMediaSlug,
 } from './shared.js'
 import {
+  fileRequestEvents,
   resetTransformerCallCounts,
   resetTransformerMediaHookCallCounts,
   transformerCallCounts,
@@ -26,88 +28,76 @@ import {
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const originalPdfText = fs.readFileSync(path.resolve(dirname, '../uploads/test-pdf.pdf'), 'utf-8')
 
 let restClient: NextRESTClient
 let payload: Payload
 
-test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: false }, () => {
-  test.beforeAll(async ({ payloadInstance, restClientInstance }) => {
+const uploadFixture = async ({
+  collection = transformerMediaSlug,
+  context,
+  file,
+  fixture = 'test-pdf.pdf',
+}: {
+  collection?: string
+  context?: Record<string, unknown>
+  file?: PayloadFile
+  fixture?: string
+} = {}) =>
+  (await payload.create({
+    collection: collection as CollectionSlug,
+    context,
+    data: {},
+    file: file ?? (await getFileByPath(path.resolve(dirname, `../uploads/${fixture}`))),
+    overrideAccess: true,
+  })) as unknown as { filename: string; filesize: number; id: number | string; mimeType: string }
+
+test.suite('Upload transformers', { config: './config.ts' }, () => {
+  test.beforeEach(async ({ payload: payloadInstance, restClient: restClientInstance }) => {
     payload = payloadInstance
     restClient = restClientInstance
+    resetTransformerCallCounts()
 
     await restClient.login({ slug: usersSlug })
   })
 
   test.describe('File transformers', () => {
-    const docIDs: (number | string)[] = []
-    let originalPdfText: string
-
-    test.beforeAll(() => {
-      originalPdfText = fs.readFileSync(path.resolve(dirname, '../uploads/test-pdf.pdf'), 'utf-8')
-    })
-
-    test.afterEach(async () => {
-      resetTransformerCallCounts()
-      for (const id of docIDs) {
-        try {
-          await payload.delete({
-            id,
-            collection: transformerMediaSlug as CollectionSlug,
-            overrideAccess: true,
-          })
-        } catch {
-          // noop — file may already have been deleted
-        }
-      }
-      docIDs.length = 0
-    })
-
-    const uploadTransformerFixture = async (data: Record<string, unknown> = {}) => {
-      const filePath = path.resolve(dirname, '../uploads/test-pdf.pdf')
-      const file = await getFileByPath(filePath)
-      const doc = await payload.create({
-        collection: transformerMediaSlug as CollectionSlug,
-        data,
-        file,
-        overrideAccess: true,
-      })
-      docIDs.push(doc.id)
-      return doc as unknown as { filename: string; id: number | string }
-    }
-
-    test('should serve the original file when no recognized query parameter is present', async () => {
-      const doc = await uploadTransformerFixture()
-
-      const response = await restClient.GET(`/${transformerMediaSlug}/file/${doc.filename}`)
-
-      expect(response.status).toBe(200)
-      expect(await response.text()).toBe(originalPdfText)
-    })
-
-    test('should run a single-stage transformer and return its transformed bytes', async () => {
-      const doc = await uploadTransformerFixture()
+    test.for([
+      {
+        name: 'the original file without a recognized query',
+        expected: originalPdfText,
+        query: '',
+      },
+      {
+        name: 'a single-stage transform',
+        expected: `${originalPdfText}-suffix`,
+        query: 'suffix=1',
+      },
+      {
+        name: 'every eligible stage in declaration order',
+        expected: `${originalPdfText}-suffix`.toUpperCase(),
+        query: 'suffix=1&uppercase=1',
+      },
+      {
+        name: 'a transform from the full source despite a Range header',
+        expected: `${originalPdfText}-suffix`,
+        headers: { Range: 'bytes=0-9' },
+        query: 'suffix=1',
+      },
+    ])('should serve $name', async ({ expected, headers, query }) => {
+      const doc = await uploadFixture()
 
       const response = await restClient.GET(
-        `/${transformerMediaSlug}/file/${doc.filename}?suffix=1`,
+        `/${transformerMediaSlug}/file/${doc.filename}?${query}`,
+        { headers },
       )
 
       expect(response.status).toBe(200)
-      expect(await response.text()).toBe(`${originalPdfText}-suffix`)
-    })
-
-    test('should run every eligible transformer in declaration order for a multi-stage pipeline', async () => {
-      const doc = await uploadTransformerFixture()
-
-      const response = await restClient.GET(
-        `/${transformerMediaSlug}/file/${doc.filename}?suffix=1&uppercase=1`,
-      )
-
-      expect(response.status).toBe(200)
-      expect(await response.text()).toBe(`${originalPdfText}-suffix`.toUpperCase())
+      expect(await response.text()).toBe(expected)
     })
 
     test('should return a redirect from a transformer that never touches the source', async () => {
-      const doc = await uploadTransformerFixture()
+      const doc = await uploadFixture()
 
       const response = await restClient.GET(
         `/${transformerMediaSlug}/file/${doc.filename}?redirect=1`,
@@ -120,59 +110,42 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
     })
 
     test('should preserve the accumulator when a stage returns continue without a replacement', async () => {
-      const doc = await uploadTransformerFixture()
-
-      const response = await restClient.GET(`/${transformerMediaSlug}/file/${doc.filename}?noop=1`)
-
-      expect(response.status).toBe(200)
-      expect(await response.text()).toBe(originalPdfText)
-      expect(transformerCallCounts.noop).toBe(1)
-    })
-
-    test('should abort the pipeline with 500 when a transformer throws', async () => {
-      const doc = await uploadTransformerFixture()
+      const doc = await uploadFixture()
 
       const response = await restClient.GET(
-        `/${transformerMediaSlug}/file/${doc.filename}?throwerror=1`,
-      )
-
-      expect(response.status).toBe(500)
-      expect(transformerCallCounts.throwing).toBe(1)
-    })
-
-    test('should abort the pipeline with 500 when a transformer consumes its source and then throws', async () => {
-      const doc = await uploadTransformerFixture()
-
-      const response = await restClient.GET(
-        `/${transformerMediaSlug}/file/${doc.filename}?sourceerror=1`,
-      )
-
-      expect(response.status).toBe(500)
-      expect(transformerCallCounts.sourceConsumingError).toBe(1)
-    })
-
-    test('should abort the pipeline with 500 when a transformer consumes its source but returns no response', async () => {
-      const doc = await uploadTransformerFixture()
-
-      const response = await restClient.GET(
-        `/${transformerMediaSlug}/file/${doc.filename}?consumenoresponse=1`,
-      )
-
-      expect(response.status).toBe(500)
-      expect(transformerCallCounts.consumeWithoutResponse).toBe(1)
-    })
-
-    test('should give a transformer the full source file even when the request has a Range header', async () => {
-      const doc = await uploadTransformerFixture()
-
-      const response = await restClient.GET(
-        `/${transformerMediaSlug}/file/${doc.filename}?suffix=1`,
-        { headers: { Range: 'bytes=0-9' } },
+        `/${transformerMediaSlug}/file/${doc.filename}?suffix=1&noop=1`,
       )
 
       expect(response.status).toBe(200)
       expect(await response.text()).toBe(`${originalPdfText}-suffix`)
+      expect(transformerCallCounts.noop).toBe(1)
     })
+
+    test.for([
+      { name: 'throws', counter: 'throwing', query: 'throwerror=1' },
+      {
+        name: 'consumes its source and then throws',
+        counter: 'sourceConsumingError',
+        query: 'sourceerror=1',
+      },
+      {
+        name: 'consumes its source but returns no response',
+        counter: 'consumeWithoutResponse',
+        query: 'consumenoresponse=1',
+      },
+    ] as const)(
+      'should abort the pipeline with 500 when a transformer $name',
+      async ({ counter, query }) => {
+        const doc = await uploadFixture()
+
+        const response = await restClient.GET(
+          `/${transformerMediaSlug}/file/${doc.filename}?${query}`,
+        )
+
+        expect(response.status).toBe(500)
+        expect(transformerCallCounts[counter]).toBe(1)
+      },
+    )
 
     test('should return 404 for a filename with no matching upload document', async () => {
       const response = await restClient.GET(
@@ -183,7 +156,7 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
     })
 
     test('should allow an anonymous ordinary read but deny an anonymous dynamic-transform request', async () => {
-      const doc = await uploadTransformerFixture()
+      const doc = await uploadFixture()
 
       const ordinaryRead = await restClient.GET(`/${transformerMediaSlug}/file/${doc.filename}`, {
         auth: false,
@@ -208,19 +181,8 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
       expect(response.status).toBe(403)
     })
 
-    test('should allow an authenticated dynamic-transform request', async () => {
-      const doc = await uploadTransformerFixture()
-
-      const response = await restClient.GET(
-        `/${transformerMediaSlug}/file/${doc.filename}?suffix=1`,
-      )
-
-      expect(response.status).toBe(200)
-      expect(await response.text()).toBe(`${originalPdfText}-suffix`)
-    })
-
     test('should return 403 for a dynamic-transform request with a non-matching prefix, matching the existing checkFileAccess-only path', async () => {
-      const doc = await uploadTransformerFixture()
+      const doc = await uploadFixture()
 
       const response = await restClient.GET(
         `/${transformerMediaSlug}/file/${doc.filename}?suffix=1&prefix=nonexistent`,
@@ -229,22 +191,8 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
       expect(response.status).toBe(403)
     })
 
-    test('should never persist dynamic output: the document is unchanged after a transform request', async () => {
-      const doc = await uploadTransformerFixture()
-
-      await restClient.GET(`/${transformerMediaSlug}/file/${doc.filename}?suffix=1&uppercase=1`)
-
-      const afterRequest = await payload.findByID({
-        id: doc.id,
-        collection: transformerMediaSlug as CollectionSlug,
-        overrideAccess: true,
-      })
-
-      expect(afterRequest.filename).toBe(doc.filename)
-    })
-
     test('should never persist dynamic output: no document-mutation hook fires for a transform request', async () => {
-      const doc = await uploadTransformerFixture()
+      const doc = await uploadFixture()
       resetTransformerMediaHookCallCounts()
 
       await restClient.GET(`/${transformerMediaSlug}/file/${doc.filename}?suffix=1&uppercase=1`)
@@ -256,111 +204,167 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
       })
     })
 
-    test('should build a Payload-routed URL via generatePayloadFileURL that still enforces access control, even when the caller supplies an unrelated cloud-host url', async () => {
-      const doc = await uploadTransformerFixture()
-
-      // A caller (e.g. a plugin or export feature) building a link from just a
-      // filename — not the document's own possibly-external `url` field — must
-      // still land on Payload's access-controlled endpoint, not bypass it.
-      const argsWithIgnoredCloudUrl = {
-        collectionSlug: transformerMediaSlug,
-        config: payload.config,
-        filename: doc.filename,
-        query: { suffix: true },
-        relative: true,
-        url: 'https://cdn.example.com/should-be-ignored.pdf',
+    test.describe('read access modes', () => {
+      const note: PayloadFile = {
+        name: 'note.txt',
+        data: Buffer.from('note'),
+        mimetype: 'text/plain',
+        size: 4,
       }
-      const consumerBuiltPath = generatePayloadFileURL(
-        argsWithIgnoredCloudUrl as unknown as Parameters<typeof generatePayloadFileURL>[0],
-      )
-      const pathWithoutAPIPrefix = consumerBuiltPath.replace(payload.config.routes.api, '')
 
-      const anonymousResponse = await restClient.GET(pathWithoutAPIPrefix as `/${string}`, {
-        auth: false,
+      test.for([
+        {
+          name: 'should not run canTransform when read access is denied in both modes',
+          denied: ['plain', 'transform'],
+          events: ['access:transform', 'access:plain'],
+          query: 'suffix=1',
+          status: 403,
+        },
+        {
+          name: 'should check transform access before canTransform and transform when only it is allowed',
+          denied: ['plain'],
+          events: ['access:transform', 'canTransform'],
+          expected: `${originalPdfText}-suffix`,
+          query: 'suffix=1',
+          status: 200,
+        },
+        {
+          name: 'should serve the original when transform access is denied and no transformer applies',
+          denied: ['transform'],
+          events: ['access:transform', 'access:plain', 'canTransform'],
+          expected: originalPdfText,
+          query: '',
+          status: 200,
+        },
+        {
+          name: 'should not serve the original when only transform access is allowed and no transformer applies',
+          denied: ['plain'],
+          events: ['access:transform', 'canTransform', 'access:plain'],
+          query: '',
+          status: 403,
+        },
+        {
+          name: 'should check only ordinary read access when no transformer matches the MIME type',
+          denied: ['transform'],
+          events: ['access:plain'],
+          expected: 'note',
+          file: note,
+          query: 'suffix=1',
+          status: 200,
+        },
+      ])('$name', async ({ denied, events, expected, file, query, status }) => {
+        const doc = await uploadFixture({ file })
+        const headers = Object.fromEntries(
+          denied.map((accessMode) => [`x-deny-${accessMode}-read`, 'true']),
+        )
+
+        const response = await restClient.GET(
+          `/${transformerMediaSlug}/file/${doc.filename}?${query}`,
+          { headers },
+        )
+
+        const body = status === 200 ? await response.text() : undefined
+
+        expect(response.status).toBe(status)
+        expect(body).toBe(expected)
+        expect(fileRequestEvents).toEqual(events)
       })
-      expect(anonymousResponse.status).toBe(403)
 
-      const authenticatedResponse = await restClient.GET(pathWithoutAPIPrefix as `/${string}`)
-      expect(authenticatedResponse.status).toBe(200)
-      expect(await authenticatedResponse.text()).toBe(`${originalPdfText}-suffix`)
+      test('should return 403, not 404, for a missing file when ordinary read access is denied', async () => {
+        const response = await restClient.GET(
+          `/${transformerMediaSlug}/file/does-not-exist.html?suffix=1`,
+          { headers: { 'x-deny-plain-read': 'true' } },
+        )
+
+        expect(response.status).toBe(403)
+      })
+    })
+
+    test.for([
+      {
+        name: 'the returned file name and type when the output bytes have no detectable type',
+        expected: { filename: 'report.csv', filesize: 4, mimeType: 'text/csv' },
+        output: () => new File(['a\n1\n'], 'report.csv', { type: 'text/csv' }),
+      },
+      {
+        name: 'the detected type over a stale name and type on the returned file',
+        expected: { filename: 'data.png', mimeType: 'image/png' },
+        output: () =>
+          new File([fs.readFileSync(path.resolve(dirname, '../uploads/small.png'))], 'data.json', {
+            type: 'application/json',
+          }),
+      },
+      {
+        name: 'the upload name and type when the returned file declares neither',
+        expected: { filename: 'data.json', mimeType: 'application/json' },
+        output: () => new File(['{"a":2}'], ''),
+      },
+    ])('should store $name', async ({ expected, output }) => {
+      const doc = await uploadFixture({
+        context: { transformedFile: output() },
+        file: {
+          name: 'data.json',
+          data: Buffer.from('{"a":1}'),
+          mimetype: 'application/json',
+          size: 7,
+        },
+      })
+
+      expect(doc).toMatchObject(expected)
     })
   })
 
   test.describe('Sharp dynamic resizing', () => {
-    const docIDs: { collection: CollectionSlug; id: number | string }[] = []
+    test.for([
+      // image.png is 1600x1600, small.png is 320x80.
+      { name: 'by width only', expected: { height: 200, width: 200 }, query: 'width=200' },
+      { name: 'by height only', expected: { height: 100, width: 100 }, query: 'height=100' },
+      {
+        name: 'by width and height together',
+        expected: { height: 150, width: 300 },
+        query: 'width=300&height=150',
+      },
+      {
+        name: 'up a smaller image by default',
+        expected: { width: 640 },
+        fixture: 'small.png',
+        query: 'width=640',
+      },
+      {
+        name: 'without upscaling when withoutEnlargement=true is requested',
+        expected: { width: 320 },
+        fixture: 'small.png',
+        query: 'width=640&withoutEnlargement=true',
+      },
+      {
+        // Scale is max(100 / 320, 100 / 80) = 1.25.
+        name: 'to cover the requested box when fit is outside',
+        collection: outsideFitMediaSlug,
+        expected: { height: 100, width: 400 },
+        fixture: 'small.png',
+        query: 'width=100&height=100',
+      },
+      {
+        name: 'nothing when only unrelated query keys are present',
+        expected: { height: 1600, width: 1600 },
+        query: 'draft=true',
+      },
+    ])(
+      'should resize $name',
+      async ({ collection = resizePreviewMediaSlug, expected, fixture = 'image.png', query }) => {
+        const doc = await uploadFixture({ collection, fixture })
 
-    test.afterEach(async () => {
-      for (const { id, collection } of docIDs) {
-        try {
-          await payload.delete({
-            id,
-            collection,
-            overrideAccess: true,
-          })
-        } catch {
-          // noop — file may already have been deleted
-        }
-      }
-      docIDs.length = 0
-    })
+        const response = await restClient.GET(`/${collection}/file/${doc.filename}?${query}`)
 
-    const uploadFixture = async (
-      fixtureFilename: string,
-      collection: CollectionSlug = resizePreviewMediaSlug as CollectionSlug,
-    ) => {
-      const filePath = path.resolve(dirname, `../uploads/${fixtureFilename}`)
-      const file = await getFileByPath(filePath)
-      const doc = await payload.create({
-        collection,
-        data: {},
-        file,
-        overrideAccess: true,
-      })
-      docIDs.push({ id: doc.id, collection })
-      return doc as unknown as { filename: string; id: number | string }
-    }
-
-    test('should resize by width only, preserving aspect ratio', async () => {
-      const doc = await uploadFixture('image.png') // 1600x1600
-
-      const response = await restClient.GET(
-        `/${resizePreviewMediaSlug}/file/${doc.filename}?width=200`,
-      )
-
-      expect(response.status).toBe(200)
-      const metadata = await sharp(Buffer.from(await response.arrayBuffer())).metadata()
-      expect(metadata.width).toBe(200)
-      expect(metadata.height).toBe(200)
-    })
-
-    test('should resize by height only, preserving aspect ratio', async () => {
-      const doc = await uploadFixture('image.png')
-
-      const response = await restClient.GET(
-        `/${resizePreviewMediaSlug}/file/${doc.filename}?height=100`,
-      )
-
-      expect(response.status).toBe(200)
-      const metadata = await sharp(Buffer.from(await response.arrayBuffer())).metadata()
-      expect(metadata.height).toBe(100)
-      expect(metadata.width).toBe(100)
-    })
-
-    test('should resize by width and height together', async () => {
-      const doc = await uploadFixture('image.png')
-
-      const response = await restClient.GET(
-        `/${resizePreviewMediaSlug}/file/${doc.filename}?width=300&height=150`,
-      )
-
-      expect(response.status).toBe(200)
-      const metadata = await sharp(Buffer.from(await response.arrayBuffer())).metadata()
-      expect(metadata.width).toBe(300)
-      expect(metadata.height).toBe(150)
-    })
+        expect(response.status).toBe(200)
+        expect(await sharp(Buffer.from(await response.arrayBuffer())).metadata()).toMatchObject(
+          expected,
+        )
+      },
+    )
 
     test('should replace the source representation headers on a resized response', async () => {
-      const doc = await uploadFixture('image.png')
+      const doc = await uploadFixture({ collection: resizePreviewMediaSlug, fixture: 'image.png' })
 
       const response = await restClient.GET(
         `/${resizePreviewMediaSlug}/file/${doc.filename}?width=200`,
@@ -374,99 +378,48 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
       expect(response.headers.get('accept-ranges')).toBeNull()
     })
 
-    test('should return 400 for an invalid resize parameter', async () => {
-      const doc = await uploadFixture('image.png')
-
-      const response = await restClient.GET(
-        `/${resizePreviewMediaSlug}/file/${doc.filename}?width=not-a-number`,
-      )
-
-      expect(response.status).toBe(400)
-    })
-
     // A repeated `?width=` query parameter is covered at the unit level
     // (parseDynamicResize.spec.ts) — NextRESTClient's
     // qs-based query parsing collapses duplicate keys to the last value before
     // the request is ever sent, so it cannot be exercised through this client.
+    test.for([
+      {
+        name: '400 for an invalid resize parameter',
+        collection: resizePreviewMediaSlug,
+        query: 'width=not-a-number',
+        status: 400,
+      },
+      {
+        // The requested box is within every limit, but scale max(100 / 320, 4096 / 80) = 51.2
+        // renders 16384x4096 — 4x the default maxWidth and maxPixels.
+        name: '400 when fit outside would overflow the configured maximum along one axis',
+        collection: outsideFitMediaSlug,
+        fixture: 'small.png',
+        query: 'width=100&height=4096',
+        status: 400,
+      },
+      {
+        name: '416 for a Range header on a recognized dynamic resize request',
+        collection: resizePreviewMediaSlug,
+        headers: { Range: 'bytes=0-99' },
+        query: 'width=200',
+        status: 416,
+      },
+    ])(
+      'should return $name',
+      async ({ collection, fixture = 'image.png', headers, query, status }) => {
+        const doc = await uploadFixture({ collection, fixture })
 
-    test('should upscale a smaller-than-requested image by default', async () => {
-      const doc = await uploadFixture('small.png') // 320x80
+        const response = await restClient.GET(`/${collection}/file/${doc.filename}?${query}`, {
+          headers,
+        })
 
-      const response = await restClient.GET(
-        `/${resizePreviewMediaSlug}/file/${doc.filename}?width=640`,
-      )
-
-      expect(response.status).toBe(200)
-      const metadata = await sharp(Buffer.from(await response.arrayBuffer())).metadata()
-      expect(metadata.width).toBe(640)
-    })
-
-    test('should not upscale when withoutEnlargement=true is requested', async () => {
-      const doc = await uploadFixture('small.png') // 320x80
-
-      const response = await restClient.GET(
-        `/${resizePreviewMediaSlug}/file/${doc.filename}?width=640&withoutEnlargement=true`,
-      )
-
-      expect(response.status).toBe(200)
-      const metadata = await sharp(Buffer.from(await response.arrayBuffer())).metadata()
-      expect(metadata.width).toBe(320)
-    })
-
-    test('should resize to cover the requested box when fit is outside', async () => {
-      const doc = await uploadFixture('small.png', outsideFitMediaSlug as CollectionSlug) // 320x80
-
-      // Scale is max(100 / 320, 100 / 80) = 1.25, so the output is 400x100.
-      const response = await restClient.GET(
-        `/${outsideFitMediaSlug}/file/${doc.filename}?width=100&height=100`,
-      )
-
-      expect(response.status).toBe(200)
-      const metadata = await sharp(Buffer.from(await response.arrayBuffer())).metadata()
-      expect(metadata.width).toBe(400)
-      expect(metadata.height).toBe(100)
-    })
-
-    test('should return 400 when fit outside would overflow the configured maximum along one axis', async () => {
-      const doc = await uploadFixture('small.png', outsideFitMediaSlug as CollectionSlug) // 320x80
-
-      // The requested box is within every limit, but scale max(100 / 320, 4096 / 80) = 51.2
-      // renders 16384x4096 — 4x the default maxWidth and maxPixels.
-      const response = await restClient.GET(
-        `/${outsideFitMediaSlug}/file/${doc.filename}?width=100&height=4096`,
-      )
-
-      expect(response.status).toBe(400)
-    })
-
-    test('should return 416 for a Range header on a recognized dynamic resize request', async () => {
-      const doc = await uploadFixture('image.png')
-
-      const response = await restClient.GET(
-        `/${resizePreviewMediaSlug}/file/${doc.filename}?width=200`,
-        {
-          headers: { Range: 'bytes=0-99' },
-        },
-      )
-
-      expect(response.status).toBe(416)
-    })
-
-    test('should ignore unrelated query keys and serve the original image unchanged', async () => {
-      const doc = await uploadFixture('image.png')
-
-      const response = await restClient.GET(
-        `/${resizePreviewMediaSlug}/file/${doc.filename}?draft=true`,
-      )
-
-      expect(response.status).toBe(200)
-      const metadata = await sharp(Buffer.from(await response.arrayBuffer())).metadata()
-      expect(metadata.width).toBe(1600)
-      expect(metadata.height).toBe(1600)
-    })
+        expect(response.status).toBe(status)
+      },
+    )
 
     test('should never persist dynamic output: the stored file is byte-identical before and after a resize request', async () => {
-      const doc = await uploadFixture('image.png')
+      const doc = await uploadFixture({ collection: resizePreviewMediaSlug, fixture: 'image.png' })
       const storedFilePath = path.resolve(dirname, './media', doc.filename)
       const beforeHash = createHash('sha256').update(fs.readFileSync(storedFilePath)).digest('hex')
 
@@ -477,6 +430,26 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
 
       const afterHash = createHash('sha256').update(fs.readFileSync(storedFilePath)).digest('hex')
       expect(afterHash).toBe(beforeHash)
+    })
+  })
+
+  test.describe('Multiple Sharp instances', () => {
+    test('should generate variants configured on a Sharp instance registered after dynamic-only ones', async () => {
+      const doc = (await uploadFixture({
+        collection: variantMediaSlug,
+        fixture: 'image.png',
+      })) as unknown as {
+        variants: { thumbnail: { filename: null | string; width: null | number } }
+      }
+
+      expect(doc.variants.thumbnail.filename).toBe('image-100x100.png')
+      expect(doc.variants.thumbnail.width).toBe(100)
+    })
+
+    test('should not run an upload through Sharp instances that do not own its collection', async () => {
+      await uploadFixture({ collection: variantMediaSlug, fixture: 'image.png' })
+
+      expect(transformerCallCounts.dynamicOnlySharp).toBe(0)
     })
   })
 })

@@ -1,4 +1,4 @@
-import type { BrowserContext, CDPSession, Page, Request, Route } from '@playwright/test'
+import type { BrowserContext, Page, Request, Route } from '@playwright/test'
 import type { FormState } from 'payload'
 
 import { expect } from '@playwright/test'
@@ -594,7 +594,7 @@ test.describe('Form State', () => {
     const field = page.locator('#field-title')
     await expect(field).toBeEnabled()
 
-    const cdpSession = await throttleTest({
+    const stopThrottling = await throttleTest({
       context,
       delay: 'Slow 3G',
       page,
@@ -619,19 +619,12 @@ test.describe('Form State', () => {
       )
     } finally {
       // Ensure throttling is always cleaned up, even if the test fails
-      await cdpSession.send('Network.emulateNetworkConditions', {
-        downloadThroughput: -1,
-        latency: 0,
-        offline: false,
-        uploadThroughput: -1,
-      })
-
-      await cdpSession.detach()
+      await stopThrottling()
     }
   })
 
   describe('Throttled tests', () => {
-    let cdpSession: CDPSession
+    let stopThrottling: () => Promise<void>
 
     beforeEach(async () => {
       await page.goto(postsUrl.create)
@@ -644,7 +637,7 @@ test.describe('Form State', () => {
       // affect the request tracking of other tests depending on how fast they run
       await wait(1000)
 
-      cdpSession = await throttleTest({
+      stopThrottling = await throttleTest({
         context,
         delay: 'Slow 3G',
         page,
@@ -652,14 +645,7 @@ test.describe('Form State', () => {
     })
 
     afterEach(async () => {
-      await cdpSession.send('Network.emulateNetworkConditions', {
-        downloadThroughput: -1,
-        latency: 0,
-        offline: false,
-        uploadThroughput: -1,
-      })
-
-      await cdpSession.detach()
+      await stopThrottling()
     })
 
     test('optimistic rows should not disappear between pending network requests', async () => {

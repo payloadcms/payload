@@ -1,7 +1,7 @@
 import type { Config, TransformFileArgs, TransformFileResult, UploadTransformer } from 'payload'
 import type { TransformerWithInternalBridge } from 'payload/internal'
 
-import { uploadTransformerInternal } from 'payload/internal'
+import { getUploadTransformerInternal, uploadTransformerInternal } from 'payload/internal'
 import bundledSharp from 'sharp'
 
 import type { SharpDynamicDefaults, SharpDynamicOptions, SharpTransformerOptions } from './types.js'
@@ -59,8 +59,10 @@ export function sharpTransformer(
   const dynamicDefaults = resolveSharpDynamicDefaults(dynamicOptions || undefined)
   const sharpDependency = options.sharp ?? bundledSharp
   const collections = options.collections ?? {}
+  const handlesCollection = ({ collectionSlug }: { collectionSlug: string }) =>
+    Boolean(collections[collectionSlug])
 
-  return {
+  const transformer: TransformerWithInternalBridge & UploadTransformer = {
     slug: options.slug ?? 'sharp',
     canTransform: (args) => {
       // Upload-time eligibility is already decided by the MIME match that ran
@@ -86,11 +88,13 @@ export function sharpTransformer(
     handleRequest: createHandleRequest({ dynamicDefaults, sharpDependency }),
     init: (config) => {
       assertDynamicCollectionsExist({ config, dynamicOptions })
+      assertCollectionsOwnedOnce({ collections, config, transformer })
 
       return initSharpCollections({ collections, config })
     },
     mimeTypes: DEFAULT_MIME_TYPES,
     [uploadTransformerInternal]: {
+      handlesCollection,
       prepareUpload: createPrepareLegacyUpload({ collections, sharpDependency }),
     },
     // `options` here is always what this transformer computed via `prepareUpload`'s
@@ -98,6 +102,40 @@ export function sharpTransformer(
     transformFile: createTransformFile({ sharpDependency }) as (
       args: TransformFileArgs,
     ) => Promise<TransformFileResult>,
+  }
+
+  return transformer
+}
+
+/**
+ * Core drives each upload through a single Sharp instance, so a collection's upload settings
+ * split across instances would silently lose all but one of them.
+ */
+function assertCollectionsOwnedOnce({
+  collections,
+  config,
+  transformer,
+}: {
+  collections: NonNullable<SharpTransformerOptions['collections']>
+  config: Config
+  transformer: UploadTransformer
+}): void {
+  for (const [collectionSlug, collectionConfig] of Object.entries(collections)) {
+    if (!collectionConfig) {
+      continue
+    }
+
+    const owners = (config.upload?.transformers ?? []).filter(
+      (candidate) =>
+        candidate === transformer ||
+        getUploadTransformerInternal(candidate)?.handlesCollection?.({ collectionSlug }),
+    )
+
+    if (owners.length > 1) {
+      throw new Error(
+        `Invalid \`sharpTransformer({ collections })\` configuration: collection "${collectionSlug}" has upload settings on more than one Sharp transformer: ${owners.map((owner) => `"${owner.slug}"`).join(', ')}. Configure each collection on exactly one instance.`,
+      )
+    }
   }
 }
 

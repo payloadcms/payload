@@ -66,11 +66,31 @@ export async function handleDynamicFileRequest({
   })
 
   let currentResponse: Response | undefined
+  // Each stage has its own controller so a discarded body can be closed even when the
+  // transformer locked it with a reader. Every remaining controller is aborted on failure.
+  const handedOutBodyControllers = new Map<Response, AbortController>()
+
+  const discardResponse = async (response: Response): Promise<void> => {
+    await cancelUnusedBody(response)
+    handedOutBodyControllers.get(response)?.abort()
+    handedOutBodyControllers.delete(response)
+  }
 
   try {
     for (const transformer of pipeline) {
+      const previousResponse = currentResponse
+      let handedOutResponse: Response | undefined
+      const handedOutBodyController = new AbortController()
       const stageSource = createLazySourceGetter({
-        retrieve: async () => currentResponse ?? source.get(),
+        retrieve: async () => {
+          handedOutResponse = withAbortableBody({
+            response: currentResponse ?? (await source.get()),
+            signal: handedOutBodyController.signal,
+          })
+          handedOutBodyControllers.set(handedOutResponse, handedOutBodyController)
+
+          return handedOutResponse
+        },
       })
 
       const result = await transformer.handleRequest!({
@@ -83,6 +103,12 @@ export async function handleDynamicFileRequest({
       })
 
       if (result.response) {
+        if (handedOutResponse && result.response !== handedOutResponse) {
+          await discardResponse(handedOutResponse)
+        } else if (previousResponse && result.response !== previousResponse) {
+          await discardResponse(previousResponse)
+        }
+
         currentResponse = result.response
       } else if (stageSource.wasCalled()) {
         throw new TransformerContractError(
@@ -96,6 +122,10 @@ export async function handleDynamicFileRequest({
     }
   } catch (err) {
     req.payload.logger.error({ err, msg: 'Error running the file transformer pipeline' })
+    for (const handedOutBodyController of handedOutBodyControllers.values()) {
+      handedOutBodyController.abort(err)
+    }
+    await cancelUnusedBody(currentResponse)
     throw err
   }
 
@@ -106,6 +136,44 @@ export async function handleDynamicFileRequest({
   // No transformer produced a response — serve the original file through the
   // normal path (Range/ETag/redirect support, existing `modifyResponseHeaders` order).
   return retrieveFileResponse({ collection, doc: document, filename, prefix, req })
+}
+
+/**
+ * Re-wraps `response` so its body can be cancelled through `signal`, closing the underlying
+ * source stream (file handle, storage connection) regardless of who holds a reader on it.
+ */
+function withAbortableBody({
+  response,
+  signal,
+}: {
+  response: Response
+  signal: AbortSignal
+}): Response {
+  if (!response.body) {
+    return response
+  }
+
+  return new Response(response.body.pipeThrough(new TransformStream(), { signal }), {
+    headers: response.headers,
+    status: response.status,
+    statusText: response.statusText,
+  })
+}
+
+/**
+ * Cancels a response body nothing has started reading. A locked body was handed to a transformer
+ * through `withAbortableBody`, and is closed by aborting its signal instead.
+ */
+async function cancelUnusedBody(response: Response | undefined): Promise<void> {
+  if (!response?.body || response.body.locked) {
+    return
+  }
+
+  try {
+    await response.body.cancel()
+  } catch {
+    // A clean-up failure must not replace the pipeline result or error.
+  }
 }
 
 function planRequestPipeline({
