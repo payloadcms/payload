@@ -376,6 +376,28 @@ await payload.update({
 
 See [Drafts](../versions/drafts) for selection and publication examples and [GraphQL](../graphql/overview) for locale-map inputs and structured localized output.
 
+#### Codemod
+
+Preview the migration before applying it:
+
+```bash
+npx @payloadcms/codemod --transform migrate-draft-version-selectors --dry
+npx @payloadcms/codemod --transform migrate-draft-version-selectors
+```
+
+Run this transform before `remove-localize-status-config`; the full upgrade runs them in that order. It reads statically registered `buildConfig` collections and globals and identifies Local API or SDK receivers from Payload imports and type annotations, including named import aliases. It migrates ordinary read flags (`true` to `latest`, `false` to `published`), update flags (`true` to `draft`, `false` or omitted to `latest`), and explicit draft creates. Published creates retain their `_status`. It never inserts a published selector merely because a create used `draft: false`.
+
+Status-only `publishAllLocales: true` updates become `version: 'latest'`, `locale: 'all'`, and `data._status: 'published'`. Status-only unpublish updates use `version: 'published'`, `locale: 'all'`, and `data._status: 'draft'`. Automatic migration requires proven localized status support. Updates containing field values stay unchanged because changing `locale` also changes the shape of localized inputs.
+
+Review every file/line note. Dynamic, shared, spread, conflicting, or unresolved options and configs remain unchanged. Nonempty or unresolved plugin/storage lists require manual migration because their initializers can change target capabilities. Historical version, duplication, and restoration calls need operation-specific review. Draft-status creates without `draft: true` need validation review. Calls with `draft: true` on targets without drafts need hook and relationship-population review. The transform does not edit REST requests, GraphQL documents, CLI commands, or internal operation calls.
+
+For manual migration:
+
+- Replace REST query parameters, GraphQL arguments, and CLI flags with their `version` equivalents. Keep create selectors limited to `draft` or `published`.
+- Replace all-locale flags with `locale: 'all'` and the intended `_status`; use locale-keyed maps for localized field inputs. GraphQL all-locale writes require the structured input described in the GraphQL documentation.
+- Audit reads that formerly omitted `draft` or used `draft: false`: published reads now exclude draft-only documents. Use `latest` where previews or workflows must include them.
+- Regenerate Payload types and check draft/latest results for optional fields, then run your project's type checks and publication tests.
+
 ### Strict draft types are enabled by default
 
 `typescript.strictDraftTypes` now defaults to `true`. Regenerate your types with `payload generate:types` to apply the default to the Local API. Draft and latest `find` results type user fields as optional, and TypeScript rejects draft or latest operations on collections and globals without drafts.
