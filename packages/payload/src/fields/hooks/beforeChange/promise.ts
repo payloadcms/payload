@@ -35,7 +35,7 @@ type Args = {
   data: JsonObject
   doc: JsonObject
   docWithLocales: JsonObject
-  draftValidationActions?: (() => Promise<void>)[]
+  draftValidationActions?: ((validationData?: WeakMap<object, JsonObject>) => Promise<void>)[]
   errors: ValidationFieldError[]
   field: Field | TabAsField
   fieldIndex: number
@@ -192,13 +192,20 @@ export const promise = async ({
       'validate' in field &&
       field.validate
     ) {
-      const validate = async () => {
-        const valueToValidate = siblingData[field.name]
+      const validate = async (snapshots?: WeakMap<object, JsonObject>) => {
+        const validationData = snapshots?.get(data) ?? data
+        const validationSiblingData = snapshots?.get(siblingData) ?? siblingData
+        const validationBlockData = blockData ? (snapshots?.get(blockData) ?? blockData) : undefined
+        const currentValue = validationSiblingData[field.name]
+        const valueToValidate =
+          field.type === 'point' && currentValue?.type === 'Point'
+            ? currentValue.coordinates
+            : currentValue
         let jsonError: object
 
-        if (field.type === 'json' && typeof siblingData[field.name] === 'string') {
+        if (field.type === 'json' && typeof validationSiblingData[field.name] === 'string') {
           try {
-            JSON.parse(siblingData[field.name] as string)
+            JSON.parse(validationSiblingData[field.name] as string)
           } catch (e) {
             jsonError = e as object
           }
@@ -214,9 +221,9 @@ export const promise = async ({
         const validationResult = await validateFn(valueToValidate as never, {
           ...field,
           id,
-          blockData: blockData!,
+          blockData: validationBlockData!,
           collectionSlug: collection?.slug,
-          data: deepMergeWithSourceArrays(doc, data),
+          data: deepMergeWithSourceArrays(doc, validationData),
           event: 'submit',
           // @ts-expect-error - JSON validators accept the parser error in addition to standard options.
           jsonError,
@@ -226,7 +233,7 @@ export const promise = async ({
           preferences: { fields: {} },
           previousValue: siblingDoc[field.name],
           req,
-          siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
+          siblingData: deepMergeWithSourceArrays(siblingDoc, validationSiblingData),
         })
 
         if (typeof validationResult === 'string') {
@@ -237,16 +244,16 @@ export const promise = async ({
             // that are no longer valid
             const validationResult = await validateBlocksFilterOptions({
               id,
-              data,
+              data: validationData,
               filterOptions: field.filterOptions,
               req,
-              siblingData,
-              value: siblingData[field.name],
+              siblingData: validationSiblingData,
+              value: validationSiblingData[field.name],
             })
             if (validationResult?.invalidBlockSlugs?.length) {
               filterOptionsError = true
               let rowIndex = -1
-              for (const block of siblingData[field.name] as JsonObject[]) {
+              for (const block of validationSiblingData[field.name] as JsonObject[]) {
                 rowIndex++
                 if (validationResult.invalidBlockSlugs.includes(block.blockType as string)) {
                   const blockConfigOrSlug = field.blocks.find((blockFromField) =>

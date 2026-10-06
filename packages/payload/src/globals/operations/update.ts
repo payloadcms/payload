@@ -373,6 +373,7 @@ export const updateOperation = async <
               ),
           ]),
         ),
+      validateDraftOnPublish: true,
     }
 
     let statusFieldValue: unknown

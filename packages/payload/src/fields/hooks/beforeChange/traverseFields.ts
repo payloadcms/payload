@@ -23,7 +23,7 @@ type Args = {
    * The original data with locales (not modified by any hooks)
    */
   docWithLocales: JsonObject
-  draftValidationActions?: (() => Promise<void>)[]
+  draftValidationActions?: ((validationData?: WeakMap<object, JsonObject>) => Promise<void>)[]
   errors: ValidationFieldError[]
   /**
    * Built up labels of parent fields

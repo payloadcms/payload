@@ -6,6 +6,7 @@ import type { JsonObject, Operation, PayloadRequest } from '../../../types/index
 
 import { ValidationError } from '../../../errors/index.js'
 import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
+import { hasLocalizeStatusEnabled } from '../../../utilities/getVersionsConfig.js'
 import { mergeLocalizedData } from '../../../utilities/mergeLocalizedData.js'
 import { getLocaleData } from '../../../versions/getLocaleData.js'
 import { traverseFields } from './traverseFields.js'
@@ -24,6 +25,8 @@ export type Args<T extends JsonObject> = {
   global: null | SanitizedGlobalConfig
   id?: number | string
   onDataProcessed?: (data: T) => void
+  /** Retain locale validation until a document-wide publication status is final. */
+  onDraftValidation?: (validate: () => Promise<void>) => void
   operation: Operation
   overrideAccess?: boolean
   req: PayloadRequest
@@ -52,6 +55,7 @@ export const beforeChange = async <T extends JsonObject>({
   fieldsToValidate: submittedTopLevelFieldNames,
   global,
   onDataProcessed,
+  onDraftValidation,
   operation,
   overrideAccess,
   req,
@@ -70,6 +74,8 @@ export const beforeChange = async <T extends JsonObject>({
       locales = await localization.filterAvailableLocales({ locales, req })
     }
 
+    const draftValidationActions: (() => Promise<void>)[] = []
+    const shouldValidateLocalesTogether = !hasLocalizeStatusEnabled(collection || global!)
     const publicationStatus = incomingData._status
     let hasPublicationIntent =
       locales.length > 0 && (publicationStatus === 'published' || publicationStatus === 'draft')
@@ -93,11 +99,14 @@ export const beforeChange = async <T extends JsonObject>({
         onDataProcessed: (data) => {
           hasPublicationIntent &&= data._status === publicationStatus
         },
+        onDraftValidation: shouldValidateLocalesTogether
+          ? (validate) => draftValidationActions.push(validate)
+          : undefined,
         operation,
         overrideAccess,
         req: localeReq,
         skipValidation: skipValidationByLocale?.[locale] ?? skipValidation,
-        validateDraftOnPublish: Boolean(skipValidationByLocale),
+        validateDraftOnPublish: validateDraftOnPublish || Boolean(skipValidationByLocale),
       })
 
       result = mergeLocalizedData({
@@ -109,6 +118,10 @@ export const beforeChange = async <T extends JsonObject>({
       })
     }
 
+    if (shouldValidateLocalesTogether && result._status === 'published') {
+      await Promise.all(draftValidationActions.map((validate) => validate()))
+    }
+
     onDataProcessed?.(
       (hasPublicationIntent ? { ...result, _status: publicationStatus } : result) as T,
     )
@@ -118,8 +131,9 @@ export const beforeChange = async <T extends JsonObject>({
   const data = deepCopyObjectSimple(incomingData)
   const mergeLocaleActions: (() => Promise<void> | void)[] = []
   const errors: ValidationFieldError[] = []
-  const draftValidationActions: (() => Promise<void>)[] | undefined =
-    validateDraftOnPublish && skipValidation ? [] : undefined
+  const draftValidationActions:
+    | ((validationData?: WeakMap<object, JsonObject>) => Promise<void>)[]
+    | undefined = validateDraftOnPublish && skipValidation ? [] : undefined
 
   await traverseFields({
     id,
@@ -148,22 +162,33 @@ export const beforeChange = async <T extends JsonObject>({
     submittedTopLevelFieldNames,
   })
 
-  if (draftValidationActions && data._status === 'published') {
-    await Promise.all(draftValidationActions.map((validate) => validate()))
+  const throwValidationErrors = () => {
+    if (errors.length > 0) {
+      throw new ValidationError(
+        { id, collection: collection?.slug, errors, global: global?.slug, req },
+        req.t,
+      )
+    }
   }
 
-  if (errors.length > 0) {
-    throw new ValidationError(
-      {
-        id,
-        collection: collection?.slug,
-        errors,
-        global: global?.slug,
-        req,
-      },
-      req.t,
-    )
+  if (draftValidationActions) {
+    const validationData = onDraftValidation ? snapshotValidationData({ data }) : undefined
+    const validateDraft = async () => {
+      if (validationData) {
+        validationData.get(data)!._status = 'published'
+      }
+      await Promise.all(draftValidationActions.map((validate) => validate(validationData)))
+      throwValidationErrors()
+    }
+
+    if (onDraftValidation) {
+      onDraftValidation(validateDraft)
+    } else if (data._status === 'published') {
+      await validateDraft()
+    }
   }
+
+  throwValidationErrors()
 
   onDataProcessed?.(data)
 
@@ -172,4 +197,22 @@ export const beforeChange = async <T extends JsonObject>({
   }
 
   return data
+}
+
+/** Preserve final hook values and their object identities before locale storage merging. */
+function snapshotValidationData({ data }: { data: JsonObject }): WeakMap<object, JsonObject> {
+  const snapshots = new WeakMap<object, JsonObject>()
+  const snapshot = deepCopyObjectSimple(data)
+
+  const remember = (original: unknown, copy: unknown) => {
+    if (original && typeof original === 'object' && copy && typeof copy === 'object') {
+      snapshots.set(original, copy as JsonObject)
+      for (const key of Object.keys(original)) {
+        remember((original as JsonObject)[key], (copy as JsonObject)[key])
+      }
+    }
+  }
+
+  remember(data, snapshot)
+  return snapshots
 }

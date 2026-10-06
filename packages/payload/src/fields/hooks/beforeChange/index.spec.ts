@@ -5,6 +5,8 @@ import type { TextFieldValidation } from '../../validations.js'
 
 import { describe, expect, it } from 'vitest'
 
+import { point } from '../../validations.js'
+
 import { beforeChange } from './index.js'
 
 const validateRequiredText: TextFieldValidation = (value) =>
@@ -41,6 +43,168 @@ const runBeforeChange = ({
   })
 
 describe('beforeChange', () => {
+  it('should validate a hook-published point before its storage transformation', async () => {
+    const collection = {
+      slug: 'posts',
+      fields: [
+        { name: 'location', type: 'point', required: true, validate: point },
+        { name: '_status', type: 'select', hooks: { beforeChange: [() => 'published'] } },
+      ],
+    } as SanitizedCollectionConfig
+
+    await expect(
+      beforeChange({
+        collection,
+        context: {},
+        data: { location: [10, 20], _status: 'draft' },
+        doc: {},
+        docWithLocales: {},
+        global: null,
+        operation: 'update',
+        overrideAccess: true,
+        req: {
+          locale: 'en',
+          payload: { config: {} },
+          t: () => 'Invalid point',
+        } as unknown as PayloadRequest,
+        skipValidation: true,
+        validateDraftOnPublish: true,
+      }),
+    ).resolves.toMatchObject({
+      location: { type: 'Point', coordinates: [10, 20] },
+      _status: 'published',
+    })
+  })
+
+  it('should validate earlier locales when the final hook publishes a document-wide status', async () => {
+    const collection = {
+      slug: 'posts',
+      versions: { drafts: true },
+      fields: [
+        { name: 'title', type: 'text', localized: true, validate: validateRequiredText },
+        {
+          name: '_status',
+          type: 'select',
+          hooks: { beforeChange: [({ req }) => (req.locale === 'fr' ? 'published' : 'draft')] },
+        },
+      ],
+    } as SanitizedCollectionConfig
+
+    await expect(
+      beforeChange({
+        collection,
+        context: {},
+        data: { title: { en: '', fr: 'Valid' }, _status: 'draft' },
+        doc: {},
+        docWithLocales: {},
+        global: null,
+        operation: 'update',
+        overrideAccess: true,
+        req: {
+          locale: 'all',
+          payload: {
+            config: {
+              localization: {
+                locales: ['en', 'fr'],
+                localeCodes: ['en', 'fr'],
+                defaultLocale: 'en',
+              },
+            },
+          },
+          t: () => 'Invalid title',
+        } as unknown as PayloadRequest,
+        skipValidation: true,
+        validateDraftOnPublish: true,
+      }),
+    ).rejects.toMatchObject({ status: 400 })
+  })
+
+  it('should validate the final value changed by a publication hook', async () => {
+    const collection = {
+      slug: 'posts',
+      fields: [
+        { name: 'title', type: 'text', validate: validateRequiredText },
+        {
+          name: '_status',
+          type: 'select',
+          hooks: {
+            beforeChange: [
+              ({ data }) => {
+                data.title = ''
+                return 'published'
+              },
+            ],
+          },
+        },
+      ],
+    } as SanitizedCollectionConfig
+
+    await expect(
+      beforeChange({
+        collection,
+        context: {},
+        data: { title: 'Valid', _status: 'draft' },
+        doc: {},
+        docWithLocales: {},
+        global: null,
+        operation: 'update',
+        overrideAccess: true,
+        req: {
+          locale: 'en',
+          payload: { config: {} },
+          t: () => 'Invalid title',
+        } as unknown as PayloadRequest,
+        skipValidation: true,
+        validateDraftOnPublish: true,
+      }),
+    ).rejects.toMatchObject({ status: 400 })
+  })
+
+  it('should retain locale-shaped sibling data during deferred document-wide publication', async () => {
+    const collection = {
+      slug: 'posts',
+      versions: { drafts: true },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          localized: true,
+          validate: (value, { siblingData }) =>
+            value === siblingData.title ? true : 'Unexpected locale map',
+        },
+        { name: '_status', type: 'select', hooks: { beforeChange: [() => 'published'] } },
+      ],
+    } as SanitizedCollectionConfig
+
+    await expect(
+      beforeChange({
+        collection,
+        context: {},
+        data: { title: { en: 'English', fr: 'French' }, _status: 'draft' },
+        doc: {},
+        docWithLocales: {},
+        global: null,
+        operation: 'update',
+        overrideAccess: true,
+        req: {
+          locale: 'all',
+          payload: {
+            config: {
+              localization: {
+                locales: ['en', 'fr'],
+                localeCodes: ['en', 'fr'],
+                defaultLocale: 'en',
+              },
+            },
+          },
+          t: () => 'Invalid title',
+        } as unknown as PayloadRequest,
+        skipValidation: true,
+        validateDraftOnPublish: true,
+      }),
+    ).resolves.toMatchObject({ title: { en: 'English', fr: 'French' }, _status: 'published' })
+  })
+
   it('should skip editor validation for an omitted rich text field', async () => {
     const incompleteRichText = {
       root: {

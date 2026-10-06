@@ -7,6 +7,7 @@ import { draftPostsSlug, plainGlobalSlug } from './slugs.js'
 
 export default buildConfigWithDefaults({
   config: {
+    typescript: { autoGenerate: false },
     collections: [Posts, LocalizedPosts, PlainPosts, LocalizedPlainPosts],
     globals: [
       {

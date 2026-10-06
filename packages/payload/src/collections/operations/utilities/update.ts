@@ -357,6 +357,7 @@ export const updateDocument = async <
             ),
         ]),
       ),
+    validateDraftOnPublish: true,
   }
 
   // /////////////////////////////////////
