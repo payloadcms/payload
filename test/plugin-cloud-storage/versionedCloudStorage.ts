@@ -76,13 +76,12 @@ export const versionedCloudAdapter: Adapter = () => ({
     }
     versionedCloudFiles.set(to, Buffer.from(bytes))
   },
-  handleDelete: ({ storageFilePath }) => {
-    versionedCloudCalls.deletes.push(storageFilePath)
-    if (versionedCloudFailure.deleteKey === storageFilePath) {
-      throw new Error('Cloud test delete failed')
+  deleteFile: deleteStoredCloudFile,
+  handleDelete: ({ doc, storageFilePath }) => {
+    if (doc.id === undefined || !doc.filename) {
+      throw new Error('Cloud document deletion requires a saved file document')
     }
-    versionedCloudFiles.delete(storageFilePath)
-    return Promise.resolve()
+    return deleteStoredCloudFile({ storageFilePath })
   },
   handleUpload: async ({ file, storageFilePath }) => {
     versionedCloudCalls.uploads += 1
@@ -130,3 +129,12 @@ export const publicVersionedCloudAdapter: Adapter = (args) => ({
   generateURL: ({ filename, prefix }) =>
     `https://files.example.test/${prefix ? `${prefix}/` : ''}${encodeURIComponent(filename)}`,
 })
+
+function deleteStoredCloudFile({ storageFilePath }: { storageFilePath: string }): Promise<void> {
+  versionedCloudCalls.deletes.push(storageFilePath)
+  if (versionedCloudFailure.deleteKey === storageFilePath) {
+    throw new Error('Cloud test delete failed')
+  }
+  versionedCloudFiles.delete(storageFilePath)
+  return Promise.resolve()
+}

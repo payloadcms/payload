@@ -201,6 +201,13 @@ export function buildPluginCloudStorageIntConfig({
             uploadedTestFiles.set(to, { ...source, filename: path.posix.basename(to) })
             return Promise.resolve()
           },
+          deleteFile: ({ storageFilePath }) => {
+            recordedCleanupTargets.push({
+              filename: path.posix.basename(storageFilePath),
+              storageFilePath,
+            })
+            uploadedTestFiles.delete(storageFilePath)
+          },
           handleDelete: ({ filename, storageFilePath }) => {
             recordedCleanupTargets.push({ filename, storageFilePath })
             uploadedTestFiles.delete(storageFilePath)
