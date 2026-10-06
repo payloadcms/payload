@@ -151,22 +151,23 @@ export function createVercelBlobAdapter({
         token,
       }),
 
-    handleUpload: async ({ data, file: { buffer, mimeType }, storageFilePath }) => {
+    handleUpload: async ({
+      file: { buffer, clientUpload, mimeType, tempFilePath },
+      storageFilePath,
+    }) => {
       const result = await uploadFile({
         access,
-        addRandomSuffix,
+        // Processed client uploads must stay on their receipt-bound keys, including image sizes.
+        addRandomSuffix: clientUpload ? false : addRandomSuffix,
         buffer,
         cacheControlMaxAge,
         mimeType,
         storageFilePath,
+        tempFilePath,
         token,
       })
 
-      if (result.filename) {
-        data.filename = result.filename
-      }
-
-      return data
+      return result
     },
 
     staticHandler: (req, { doc, headers, params: { filename, uploadReference } }) =>

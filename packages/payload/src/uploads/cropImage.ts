@@ -1,5 +1,7 @@
 import type { SharpOptions } from 'sharp'
 
+import { readFile } from 'node:fs/promises'
+
 import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { WithMetadata } from './optionallyAppendMetadata.js'
@@ -61,11 +63,13 @@ export async function cropImage({
         adjustedHeight = animatedMetadata.pages ? animatedMetadata.height! : originalHeight
       }
 
+      const data = file.tempFilePath ? await readFile(file.tempFilePath) : file.data
+
       return {
-        data: file.data,
+        data,
         info: {
           height: adjustedHeight,
-          size: file.size,
+          size: data.length,
           width: originalWidth,
         },
       }

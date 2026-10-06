@@ -7,6 +7,8 @@ import os from 'node:os'
 import path from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { getStagedFile } from './stagedUpload.js'
+
 import { HEADER_PROBE_BYTE_LENGTH } from './getFileContentRequirement.js'
 import { getFileFromUploadInstructions } from './getFileFromUploadInstructions.js'
 
@@ -17,6 +19,15 @@ vi.mock('./clientUploadReceipt.js', () => ({
     }
     return JSON.parse(signedReceipt)
   }),
+}))
+
+vi.mock('./stagedUpload.js', () => ({
+  getStagedFile: vi.fn(async () => ({
+    data: Buffer.from('staged'),
+    mimetype: 'text/plain',
+    name: 'staged.txt',
+    size: 6,
+  })),
 }))
 
 // A minimal valid 1x1 transparent PNG, small enough that a header-only fetch gets all of it.
@@ -128,7 +139,52 @@ describe('getFileFromUploadInstructions', () => {
       signedReceipt: expect.any(String),
     })
     expect(file.mimetype).toBe('video/mp4')
+    expect(file.clientUpload).toEqual({
+      isProcessed: false,
+      originalStorageFilePath: 'media/video.mp4',
+    })
     expect(arrayBufferTripwire).not.toHaveBeenCalled()
+  })
+
+  it('should treat locally staged uploads as server files', async () => {
+    const req = createReq([], {})
+    const file = await getFileFromUploadInstructions({
+      collectionSlug: 'media',
+      file: {
+        filename: 'staged.txt',
+        mimeType: 'text/plain',
+        size: 6,
+        uploadReference: { uploadId: 'staged-id' },
+      },
+      req,
+    })
+
+    expect(getStagedFile).toHaveBeenCalledWith({
+      collectionSlug: 'media',
+      req,
+      uploadReference: { uploadId: 'staged-id' },
+    })
+    expect(file.clientUpload).toBeUndefined()
+    expect(file.data.toString()).toBe('staged')
+  })
+
+  it('should ignore client-upload state submitted outside the verified receipt', async () => {
+    const req = createReq([], {})
+    const submittedFile = {
+      ...createUploadReferenceFile(),
+      clientUpload: { isProcessed: true, originalStorageFilePath: 'another-users-file' },
+    }
+
+    const file = await getFileFromUploadInstructions({
+      collectionSlug: 'media',
+      file: submittedFile,
+      req,
+    })
+
+    expect(file.clientUpload).toEqual({
+      isProcessed: false,
+      originalStorageFilePath: 'media/video.mp4',
+    })
   })
 
   it('writes the temp file under the configured tempFileDir', async () => {
@@ -189,6 +245,7 @@ describe('getFileFromUploadInstructions', () => {
 
     tempFilesToClean.push(customFile.tempFilePath!)
     expect(customHandler).toHaveBeenCalled()
+    expect(customFile.clientUpload).toBeUndefined()
 
     const handler = vi.fn(async () => new Response('existing file', { status: 200 }))
     const req = createReq([handler], {
@@ -252,7 +309,10 @@ describe('getFileFromUploadInstructions', () => {
         file: overwriteFile,
         req: overwriteReq,
       }),
-    ).resolves.toMatchObject({ name: 'video.mp4' })
+    ).resolves.toMatchObject({
+      name: 'video.mp4',
+      clientUpload: { isProcessed: false, originalStorageFilePath: 'media/video.mp4' },
+    })
 
     expect(overwriteReq.payload.db.findOne).not.toHaveBeenCalled()
   })
@@ -300,6 +360,10 @@ describe('getFileFromUploadInstructions', () => {
     expect(file.data.length).toBe(0)
     expect(file.size).toBe(18)
     expect(file.mimetype).toBe('video/mp4')
+    expect(file.clientUpload).toEqual({
+      isProcessed: false,
+      originalStorageFilePath: 'media/video.mp4',
+    })
   })
 
   it('fetches only a bounded header for an image with no configured adjustments', async () => {
@@ -329,6 +393,10 @@ describe('getFileFromUploadInstructions', () => {
     expect(file.data.equals(MINIMAL_PNG)).toBe(true)
     expect(file.mimetype).toBe('image/png')
     expect(sharp).not.toHaveBeenCalled()
+    expect(file.clientUpload).toEqual({
+      isProcessed: false,
+      originalStorageFilePath: 'media/photo.png',
+    })
   })
 
   it('fetches the full file for an image with no configured adjustments when the request includes a crop edit', async () => {

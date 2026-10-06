@@ -24,6 +24,7 @@ export function getIncomingFiles({
   if (file && data.filename && data.mimeType) {
     const mainFile: File = {
       buffer: file.data,
+      clientUpload: file.clientUpload,
       filename: data.filename,
       filesize: file.size,
       mimeType: data.mimeType,
@@ -39,9 +40,13 @@ export function getIncomingFiles({
           files = files.concat([
             {
               buffer: payloadUploadSizes[key],
+              clientUpload: file.clientUpload
+                ? { ...file.clientUpload, isProcessed: true }
+                : undefined,
               filename: `${resizedFileData.filename}`,
               filesize: payloadUploadSizes[key].length,
               mimeType: resizedFileData.mimeType,
+              sizeName: key,
             },
           ])
         }

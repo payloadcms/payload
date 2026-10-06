@@ -9,7 +9,12 @@ import { Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
 
 import type { PayloadRequest } from '../types/index.js'
-import type { SanitizedUploadConfig, UploadEdits, UploadInstructions } from './types.js'
+import type {
+  ClientUploadState,
+  SanitizedUploadConfig,
+  UploadEdits,
+  UploadInstructions,
+} from './types.js'
 
 import { APIError } from '../errors/APIError.js'
 import { sanitizeFilename } from '../utilities/sanitizeFilename.js'
@@ -54,6 +59,7 @@ export const getFileFromUploadInstructions = async ({
 
   const uploadConfig = req.payload.collections[collectionSlug]!.config.upload
   let allowOverwrite = false
+  let clientUpload: ClientUploadState | undefined
 
   if (uploadConfig?.uploadInstructions?.requiresUploadReceipt) {
     const signedReceipt =
@@ -65,6 +71,10 @@ export const getFileFromUploadInstructions = async ({
       signedReceipt,
     })
     allowOverwrite = receipt.allowOverwrite === true
+    clientUpload = {
+      isProcessed: false,
+      originalStorageFilePath: receipt.storageFilePath,
+    }
     file = {
       ...file,
       uploadReference: {
@@ -128,6 +138,7 @@ export const getFileFromUploadInstructions = async ({
   if (contentRequirement === 'none') {
     return {
       name: file.filename,
+      clientUpload,
       data: Buffer.alloc(0),
       mimetype: file.mimeType,
       size: file.size,
@@ -138,7 +149,7 @@ export const getFileFromUploadInstructions = async ({
   if (contentRequirement === 'header') {
     const headerFile = await fetchHeaderOnly({ collectionSlug, file, req, uploadConfig })
     if (headerFile) {
-      return headerFile
+      return { ...headerFile, clientUpload }
     }
     // The header wasn't enough to determine the image's dimensions - fall through to a full fetch.
   }
@@ -147,10 +158,11 @@ export const getFileFromUploadInstructions = async ({
 
   const tempFilePath = await streamResponseToTempFile({ req, response })
   req.context ??= {}
-  req.context._payloadClientUploadTempFile = true
+  req.context._payloadClientUploadTempFile = tempFilePath
 
   return {
     name: file.filename,
+    clientUpload,
     data: Buffer.alloc(0),
     mimetype: response.headers.get('Content-Type') || file.mimeType,
     size: file.size,

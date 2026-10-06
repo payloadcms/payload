@@ -67,6 +67,7 @@ export function createGcsAdapter({
         client: getStorageClient(),
         mimeType: file.mimeType,
         storageFilePath,
+        tempFilePath: file.tempFilePath,
       })
 
       return data

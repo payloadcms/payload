@@ -9,7 +9,9 @@ import { Media } from '../collections/Media.js'
 import { MediaWithPrefix } from '../collections/MediaWithPrefix.js'
 import { Users } from '../collections/Users.js'
 import { mediaSlug, mediaWithPrefixSlug, prefix } from '../shared.js'
+import { ConvertedMedia } from './collections/ConvertedMedia.js'
 import { MediaContainer } from './collections/MediaContainer.js'
+import { convertedMediaSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -19,21 +21,34 @@ dotenv.config({
 })
 
 export default buildConfigWithDefaults({
-  suite: 'storage-vercel-blob-client-uploads',
   config: {
     admin: {
       importMap: {
         baseDir: path.resolve(dirname, '..'),
       },
     },
-    collections: [Media, MediaWithPrefix, MediaContainer, Users],
+    collections: [
+      {
+        ...Media,
+        upload: {
+          ...(typeof Media.upload === 'object' ? Media.upload : {}),
+          imageSizes: [{ name: 'square', height: 20, width: 30 }],
+        },
+      },
+      ConvertedMedia,
+      MediaWithPrefix,
+      MediaContainer,
+      Users,
+    ],
     storage: [
       vercelBlobStorage({
+        addRandomSuffix: true,
         clientUploads: {
           access: ({ req }) => (req.headers.get('x-disallow-access') ? false : true),
         },
         collections: {
           [mediaSlug]: true,
+          [convertedMediaSlug]: true,
           [mediaWithPrefixSlug]: {
             prefix,
           },
@@ -55,4 +70,5 @@ export default buildConfigWithDefaults({
       overrideAccess: true,
     })
   },
+  suite: 'storage-vercel-blob-client-uploads',
 })
