@@ -49,7 +49,12 @@ import type { Context } from '../resolvers/types.js'
 
 import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
 import { combineParentName } from '../utilities/combineParentName.js'
-import { getDocumentVersion, rememberDocumentVersion } from '../utilities/documentVersion.js'
+import {
+  getDocumentLocale,
+  getDocumentRequest,
+  rememberDocumentContext,
+} from '../utilities/documentLocale.js'
+import { getDocumentVersion } from '../utilities/documentVersion.js'
 import { formatName } from '../utilities/formatName.js'
 import { formatOptions } from '../utilities/formatOptions.js'
 import { resolveSelect } from '../utilities/select.js'
@@ -366,11 +371,12 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           type: graphqlResult.types.groupTypes[interfaceName],
           extensions: { field },
           resolve: (parent, args, context) => {
-            return rememberDocumentVersion({
+            return rememberDocumentContext({
               data: {
                 ...parent[field.name],
                 _id: parent._id ?? parent.id,
               },
+              locale: getDocumentLocale({ parent }),
               version: getDocumentVersion({ parent }),
             })
           },
@@ -440,7 +446,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       async resolve(parent, args, context, info) {
         const { collection } = field
         const { count = false, limit, page, sort, where } = args
-        const { req } = context
+        const req = getDocumentRequest({ parent, req: context.req })
 
         const version = getDocumentVersion({
           parent,
@@ -503,12 +509,13 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           shouldSlice = true
         }
 
-        return rememberDocumentVersion({
+        return rememberDocumentContext({
           data: {
             docs: shouldSlice ? docs.slice(0, -1) : docs,
             hasNextPage: limit === 0 ? false : limit < docs.length,
             ...(count ? { totalDocs } : {}),
           },
+          locale: req.locale,
           version,
         })
       },
@@ -690,7 +697,11 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       },
       async resolve(parent, args, context, info) {
         const value = parent[field.name]
-        const locale = args.locale || context.req.locale
+        const locale = getDocumentLocale({
+          fallbackLocale: context.req.locale,
+          locale: args.locale,
+          parent,
+        })
         const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
         let relatedCollectionSlug = field.relationTo
         const version = getDocumentVersion({
@@ -755,7 +766,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           }
 
           await Promise.all(resultPromises)
-          return rememberDocumentVersion({ data: results, version })
+          return rememberDocumentContext({ data: results, locale, version })
         }
 
         let id = value
@@ -784,16 +795,17 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
 
             if (relatedDocument) {
               if (isRelatedToManyCollections) {
-                return rememberDocumentVersion({
+                return rememberDocumentContext({
                   data: {
                     relationTo: relatedCollectionSlug,
                     value: { ...relatedDocument, collection: relatedCollectionSlug },
                   },
+                  locale,
                   version,
                 })
               }
 
-              return rememberDocumentVersion({ data: relatedDocument, version })
+              return rememberDocumentContext({ data: relatedDocument, locale, version })
             }
           }
 
@@ -856,8 +868,10 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           const populateDepth =
             field?.maxDepth !== undefined && field?.maxDepth < depth ? field?.maxDepth : depth
 
+          const req = getDocumentRequest({ parent, req: context.req })
+
           editor?.graphQLPopulationPromises({
-            context,
+            context: { ...context, req },
             depth: populateDepth,
             draft: version === 'draft' || version === 'latest',
             field,
@@ -867,7 +881,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
             overrideAccess: false,
             parentIsLocalized,
             populationPromises,
-            req: context.req,
+            req,
             showHiddenFields: false,
             siblingDoc: parent,
             version,
@@ -950,11 +964,12 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           [tab.name]: {
             type: graphqlResult.types.groupTypes[interfaceName],
             resolve(parent, args, context: Context) {
-              return rememberDocumentVersion({
+              return rememberDocumentContext({
                 data: {
                   ...parent[tab.name],
                   _id: parent._id ?? parent.id,
                 },
+                locale: getDocumentLocale({ parent }),
                 version: getDocumentVersion({ parent }),
               })
             },
@@ -1120,7 +1135,11 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       },
       async resolve(parent, args, context, info) {
         const value = parent[field.name]
-        const locale = args.locale || context.req.locale
+        const locale = getDocumentLocale({
+          fallbackLocale: context.req.locale,
+          locale: args.locale,
+          parent,
+        })
         const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
         let relatedCollectionSlug = field.relationTo
         const version = getDocumentVersion({
@@ -1185,7 +1204,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           }
 
           await Promise.all(resultPromises)
-          return rememberDocumentVersion({ data: results, version })
+          return rememberDocumentContext({ data: results, locale, version })
         }
 
         let id = value
@@ -1214,16 +1233,17 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
 
             if (relatedDocument) {
               if (isRelatedToManyCollections) {
-                return rememberDocumentVersion({
+                return rememberDocumentContext({
                   data: {
                     relationTo: relatedCollectionSlug,
                     value: { ...relatedDocument, collection: relatedCollectionSlug },
                   },
+                  locale,
                   version,
                 })
               }
 
-              return rememberDocumentVersion({ data: relatedDocument, version })
+              return rememberDocumentContext({ data: relatedDocument, locale, version })
             }
           }
 

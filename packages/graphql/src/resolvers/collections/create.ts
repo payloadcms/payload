@@ -11,6 +11,8 @@ import { createOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 
+import { rememberDocumentLocale } from '../../utilities/documentLocale.js'
+
 export type Resolver<TSlug extends CollectionSlug> = (
   _: unknown,
   args: {
@@ -46,6 +48,6 @@ export function createResolver<TSlug extends CollectionSlug>(
       version: args.version,
     })
 
-    return result
+    return rememberDocumentLocale({ data: result, locale: req.locale })
   }
 }
