@@ -390,6 +390,7 @@ export const myTranslations: DefaultTranslationsObject = {
     globals: 'Globals',
     goBack: 'နောက်သို့',
     goToPage: 'ဇယားစာမျက်နှာသို့ သွားရန်',
+    gridLayout: 'ဂရစ်',
     groupByLabel: '{{label}} ဖြင့် အုပ်စုဖွဲ့ပါ',
     hideSidebar: 'ဘေး栏ကိုလှမ်းဖွင့်ပါ',
     import: 'သွင်းကုန်',
@@ -439,6 +440,8 @@ export const myTranslations: DefaultTranslationsObject = {
     notFound: 'ဘာမှ မရှိတော့ဘူး။',
     nothingFound: 'ဘာမှလည်း မတွေ့ဘူး။',
     noTrashResults: 'အမှိုက်ပုံးတွင် {{label}} မရှိပါ။',
+    notSelectedDocument:
+      'ရွေးချယ်ထားခြင်းမရှိပါ။ ရွေးချယ်မှုကို ပြောင်းရန် Enter သို့မဟုတ် Space ကို နှိပ်ပါ။',
     notShownInTable: 'ဇယားတွင် ပြသထားခြင်း မရှိပါ',
     noUpcomingEventsScheduled: 'လာမည့် အစီအစဉ်များ မရှိပါ။',
     noValue: 'တန်ဖိုး မရှိပါ။',
@@ -498,6 +501,8 @@ export const myTranslations: DefaultTranslationsObject = {
     selectAll: '{{count}} {{label}} အားလုံးကို ရွေးပါ',
     selectAllRows: 'အားလုံးကိုရွေးချယ်ပါ',
     selectedCount: '{{count}} {{label}} ကို ရွေးထားသည်။',
+    selectedDocument:
+      'ရွေးချယ်ထားသည်။ ရွေးချယ်မှုကို ပြောင်းရန် Enter သို့မဟုတ် Space ကို နှိပ်ပါ။',
     selectLabel: '{{label}} ရွေးချယ်ပါ',
     selectValue: 'တစ်ခုခုကို ရွေးချယ်ပါ။',
     settings: 'ဆက်တင်များ',
@@ -519,6 +524,7 @@ export const myTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} အောင်မြင်စွာ ပုံတူပွားခဲ့သည်။',
     successfullyReindexed:
       '{{collections}} မှ စုစုပေါင်း {{total}} စာတမ်းထဲမှ {{count}} စာတမ်းကိုအောင်မြင်စွာပြန်လည်ညွှန်းကောက်ခဲ့ပြီး {{skips}} အကြမ်းဖျဉ်ချုပ်ကိုလွဲချခဲ့သည်။',
+    tableLayout: 'ဇယား',
     takeOver: 'တာဝန်ယူပါ',
     theme: 'အကြောင်းအရာ',
     thisLanguage: 'မြန်မာစာ',
