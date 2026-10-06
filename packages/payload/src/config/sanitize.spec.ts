@@ -14,6 +14,37 @@ const configDefaults: Config = {
 }
 
 describe('sanitizeConfig', () => {
+  it('should register the migration lock global without application configuration', () => {
+    const sanitizedConfig = sanitizeConfig({ ...configDefaults })
+    const migrationLock = sanitizedConfig.globals.find(
+      (global) => global.slug === 'payload-migrations-lock',
+    )
+
+    expect(migrationLock).toMatchObject({
+      admin: { hidden: true },
+      endpoints: false,
+      graphQL: false,
+      flattenedFields: expect.arrayContaining([
+        expect.objectContaining({ name: 'locked', type: 'checkbox', defaultValue: false }),
+        expect.objectContaining({ name: 'expires_at', type: 'date' }),
+      ]),
+    })
+  })
+
+  it('should create independent migration lock configs for separate Payload instances', () => {
+    const firstConfig = sanitizeConfig({ ...configDefaults })
+    const secondConfig = sanitizeConfig({ ...configDefaults })
+    const firstLock = firstConfig.globals.find(
+      (global) => global.slug === 'payload-migrations-lock',
+    )
+    const secondLock = secondConfig.globals.find(
+      (global) => global.slug === 'payload-migrations-lock',
+    )
+
+    expect(firstLock).not.toBe(secondLock)
+    expect(firstLock?.fields).not.toBe(secondLock?.fields)
+  })
+
   it('should populate sanitized root config defaults for a minimal config', () => {
     const config: Config = {
       ...configDefaults,

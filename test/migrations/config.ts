@@ -1,57 +1,30 @@
-import type { GlobalConfig } from 'payload'
+import { sqliteAdapter } from '@payloadcms/db-sqlite'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
-
-const migrationsLockGlobal: GlobalConfig = {
-  slug: 'payload-migrations-lock',
-  admin: {
-    hidden: true,
-  },
-  endpoints: false,
-  fields: [
-    {
-      name: 'locked',
-      type: 'checkbox',
-      defaultValue: false,
-    },
-    {
-      name: 'locked_by',
-      type: 'text',
-    },
-    {
-      name: 'locked_at',
-      type: 'date',
-    },
-    {
-      name: 'expires_at',
-      type: 'date',
-    },
-  ],
-  graphQL: false,
-}
 
 export default buildConfigWithDefaults({
-  collections: [
-    {
-      slug: 'posts',
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-    },
-  ],
-  globals: [migrationsLockGlobal],
-  onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
+  config: {
+    ...(process.env.PAYLOAD_DATABASE === 'sqlite'
+      ? {
+          db: sqliteAdapter({
+            client: {
+              url: process.env.SQLITE_URL || process.env.DATABASE_URL || 'file:./payload.db',
+            },
+            transactionOptions: {},
+          }),
+        }
+      : {}),
+    collections: [
+      {
+        slug: 'posts',
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+          },
+        ],
       },
-      overrideAccess: true,
-    })
+    ],
   },
+  suite: 'migrations',
 })
