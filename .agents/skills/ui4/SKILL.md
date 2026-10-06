@@ -18,10 +18,10 @@ description: 'Manually invoked skill for reskinning Payload UI components. Requi
 1. **Scan component files** for icon imports:
 
    ```
-   grep -E "from.*icons|import.*Icon" packages/ui/src/elements/ComponentName/
+   grep -E "from.*icons|import.*Icon" packages/ui/src/client/elements/ComponentName/
    ```
 
-2. **List existing icons** in `packages/ui/src/icons/`:
+2. **List existing icons** in `packages/ui/src/client/icons/` (a few shared ones live in `packages/ui/src/shared/icons/`):
 
    - Each icon has its own folder with `index.tsx` + `index.css`
 
@@ -86,7 +86,7 @@ To find the correct icon:
    - Use `fillRule` and `clipRule` (React camelCase) instead of kebab-case
    - Default size should match most common usage (typically 24)
 
-5. **Reference implementation:** See `packages/ui/src/icons/Chevron/index.tsx` for the pattern.
+5. **Reference implementation:** See `packages/ui/src/client/icons/Chevron/index.tsx` for the pattern.
 
 **If icons are missing from Figma source:** Ask user how to proceed before continuing.
 
@@ -96,7 +96,7 @@ To find the correct icon:
 
 **Goal:** Syntax conversion only. Component must look IDENTICAL after.
 
-1. Read component files: `packages/ui/src/elements/ComponentName/` or `packages/ui/src/fields/ComponentName/`
+1. Read component files: `packages/ui/src/client/elements/ComponentName/` or `packages/ui/src/client/fields/ComponentName/`
 2. Create `index.css` with converted styles:
    - `$var` → `var(--token)`
    - Keep CSS nesting with `&` (preferred)
@@ -630,7 +630,7 @@ This will:
 
 ## Reference
 
-- Example migrated component: `packages/ui/src/elements/Button/index.css`
+- Example migrated component: `packages/ui/src/client/elements/Button/index.css`
 - Token files: `packages/ui/src/css/*.css`
 - **Legacy token migration:** See Step 1 for `var(--base)` → `--spacer` conversion table
 - **v4 test suite:** `test/v4/` — dedicated collections per field type

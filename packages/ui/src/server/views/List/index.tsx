@@ -1,0 +1,684 @@
+import type {
+  AdminViewServerProps,
+  CollectionPreferences,
+  Column,
+  ColumnPreference,
+  HierarchyViewData,
+  ListQuery,
+  ListViewClientProps,
+  ListViewGroup,
+  ListViewServerPropsOnly,
+  PaginatedDocs,
+  PayloadComponent,
+  PopulateType,
+  QueryPreset,
+  SanitizedCollectionPermission,
+  SelectType,
+} from 'payload'
+
+import {
+  appendDateTimezoneSelectFields,
+  appendUploadSelectFields,
+  combineWhereConstraints,
+  formatAdminURL,
+  isNumber,
+  mergeListSearchAndWhere,
+  transformColumnsToPreferences,
+  transformColumnsToSearchParams,
+} from 'payload/shared'
+import React, { Fragment } from 'react'
+
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
+/* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds */
+import {
+  DefaultListView,
+  HierarchyListView,
+  HydrateAuthProvider,
+  HydrateHierarchyProvider,
+  HydratePreferences,
+  ListQueryProvider,
+} from '../../../exports/client/index.js'
+/* eslint-enable payload/no-imports-from-exports-dir */
+import { getColumns } from '../../../shared/utilities/getColumns.js'
+import { getDocumentPermissions } from '../../utilities/getDocumentPermissions.js'
+import { renderFilters, renderTable } from '../../utilities/renderTable.js'
+import { upsertPreferences } from '../../utilities/upsertPreferences.js'
+import { enrichDocsWithVersionStatus } from './enrichDocsWithVersionStatus.js'
+import { handleGroupBy } from './handleGroupBy.js'
+import { handleHierarchy } from './handleHierarchy.js'
+import { renderListViewSlots } from './renderListViewSlots.js'
+import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
+import { resolveDocumentListItemURL } from './resolveDocumentListItemURL.js'
+import { transformColumnsToSelect } from './transformColumnsToSelect.js'
+import '../../../shared/views/List/index.css'
+
+/**
+ * @internal
+ */
+export type RenderListViewArgs = {
+  /**
+   * Allows providing your own list view component. This will override the default list view component and
+   * the collection's configured list view component (if any).
+   */
+  ComponentOverride?:
+    | PayloadComponent
+    | React.ComponentType<ListViewClientProps | (ListViewClientProps & ListViewServerPropsOnly)>
+  customCellProps?: Record<string, any>
+  disableBulkDelete?: boolean
+  disableBulkEdit?: boolean
+  disableQueryPresets?: boolean
+  drawerSlug?: string
+  enableRowSelections: boolean
+  overrideEntityVisibility?: boolean
+  /**
+   * If not ListQuery is provided, `req.query` will be used.
+   */
+  query?: ListQuery
+  redirectAfterDelete?: boolean
+  redirectAfterDuplicate?: boolean
+  /**
+   * @experimental This prop is subject to change in future releases.
+   */
+  trash?: boolean
+} & AdminViewServerProps
+
+/**
+ * This function is responsible for rendering
+ * the list view on the server for both:
+ *  - default list view
+ *  - list view within drawers
+ *
+ * @internal
+ */
+export const renderListView = async (
+  args: RenderListViewArgs,
+): Promise<{
+  List: React.ReactNode
+}> => {
+  const {
+    clientConfig,
+    ComponentOverride,
+    customCellProps,
+    disableBulkDelete,
+    disableBulkEdit,
+    disableQueryPresets,
+    drawerSlug,
+    enableRowSelections,
+    initPageResult,
+    overrideEntityVisibility,
+    params,
+    query: queryFromArgs,
+    searchParams,
+    trash,
+    user: userWithReadAccess,
+    viewType,
+  } = args
+
+  const {
+    collectionConfig,
+    collectionConfig: { slug: collectionSlug },
+    locale: fullLocale,
+    permissions,
+    req,
+    req: {
+      i18n,
+      payload,
+      payload: { config },
+      query: queryFromReq,
+      user,
+    },
+    visibleEntities,
+  } = initPageResult
+  const {
+    routes: { admin: adminRoute },
+  } = config
+
+  if (
+    !collectionConfig ||
+    !permissions?.collections?.[collectionSlug]?.read ||
+    (!visibleEntities.collections.includes(collectionSlug) && !overrideEntityVisibility)
+  ) {
+    throw new Error('not-found')
+  }
+
+  const query: ListQuery = queryFromArgs || queryFromReq
+
+  const columnsFromQuery: ColumnPreference[] = transformColumnsToPreferences(query?.columns)
+
+  query.queryByGroup =
+    query?.queryByGroup && typeof query.queryByGroup === 'string'
+      ? JSON.parse(query.queryByGroup)
+      : query?.queryByGroup
+
+  const collectionPreferences = await upsertPreferences<CollectionPreferences>({
+    key: `collection-${collectionSlug}`,
+    req,
+    value: {
+      columns: columnsFromQuery,
+      groupBy: query?.groupBy,
+      limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
+      preset: query?.preset,
+      sort: query?.sort as string,
+    },
+  })
+
+  let queryPreset: QueryPreset | undefined
+  let queryPresetPermissions: SanitizedCollectionPermission | undefined =
+    permissions?.collections?.['payload-query-presets']
+
+  if (collectionPreferences?.preset) {
+    try {
+      queryPreset = (await payload.findByID({
+        id: collectionPreferences?.preset,
+        collection: 'payload-query-presets',
+        depth: 0,
+        overrideAccess: false,
+        user,
+      })) as QueryPreset
+
+      if (queryPreset) {
+        queryPresetPermissions = (
+          await getDocumentPermissions({
+            id: queryPreset.id,
+            collectionConfig: req.payload.collections['payload-query-presets'].config,
+            data: queryPreset,
+            req,
+          })
+        )?.docPermissions
+      }
+    } catch (err) {
+      req.payload.logger.error(`Error fetching query preset or preset permissions: ${err}`)
+    }
+  }
+
+  query.preset = queryPreset?.id
+  if (queryPreset?.where && !query.where) {
+    query.where = queryPreset.where
+  }
+  query.groupBy = query.groupBy ?? queryPreset?.groupBy ?? collectionPreferences?.groupBy
+
+  const columnPreference = query.columns
+    ? transformColumnsToPreferences(query.columns)
+    : (queryPreset?.columns ?? collectionPreferences?.columns)
+  query.columns = transformColumnsToSearchParams(columnPreference)
+
+  query.page = isNumber(query?.page) ? Number(query.page) : 0
+
+  query.limit = collectionPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
+
+  query.sort =
+    collectionPreferences?.sort ||
+    (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
+
+  const baseFilterConstraint = await (
+    collectionConfig.admin?.baseFilter ?? collectionConfig.admin?.baseListFilter
+  )?.({
+    limit: query.limit,
+    page: query.page,
+    req,
+    sort: query.sort,
+  })
+
+  let whereWithMergedSearch = mergeListSearchAndWhere({
+    collectionConfig,
+    search: typeof query?.search === 'string' ? query.search : undefined,
+    where: combineWhereConstraints([query?.where, baseFilterConstraint]),
+  })
+
+  if (trash === true) {
+    whereWithMergedSearch = {
+      and: [
+        whereWithMergedSearch,
+        {
+          deletedAt: {
+            exists: true,
+          },
+        },
+      ],
+    }
+  }
+
+  let Table: React.ReactNode | React.ReactNode[] = null
+  let groupedData: ListViewGroup[] | undefined
+  let columnState: Column[] = []
+  let data: PaginatedDocs = {
+    // no results default
+    docs: [],
+    hasNextPage: false,
+    hasPrevPage: false,
+    limit: query.limit,
+    nextPage: null,
+    page: 1,
+    pagingCounter: 0,
+    prevPage: null,
+    totalDocs: 0,
+    totalPages: 0,
+  }
+
+  const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
+
+  const columns = getColumns({
+    clientConfig,
+    collectionConfig: clientCollectionConfig,
+    collectionSlug,
+    columns: columnPreference,
+    i18n,
+    permissions,
+  })
+
+  /** Automatically force select active columns. */
+  const select = transformColumnsToSelect(columns)
+
+  /** Grid cards need their title, timestamp, and thumbnail regardless of visible table columns. */
+  if (collectionConfig.admin.useAsTitle) {
+    select[collectionConfig.admin.useAsTitle] = true
+  }
+  select.updatedAt = true
+
+  /** Force select `useAsTitle` for accessible row-selection labels, even if its column is hidden. */
+  if (enableRowSelections && collectionConfig.admin.useAsTitle) {
+    select[collectionConfig.admin.useAsTitle] = true
+  }
+
+  /** Force select hierarchy scope so parent cells can validate destinations independently of visible columns. */
+  if (
+    typeof collectionConfig.hierarchy === 'object' &&
+    collectionConfig.hierarchy.collectionSpecific
+  ) {
+    select[collectionConfig.hierarchy.collectionSpecific.fieldName] = true
+  }
+
+  /** Force select image fields for list view thumbnails */
+  appendUploadSelectFields({
+    collectionConfig,
+    select,
+  })
+
+  /** Populate only the configured thumbnail relationship for flat collection grids. */
+  const thumbnailFieldName =
+    collectionPreferences?.documentLayout === 'grid' && viewType !== 'hierarchy'
+      ? collectionConfig.admin.useAsThumbnail
+      : undefined
+  let thumbnailPopulate: PopulateType | undefined
+
+  if (thumbnailFieldName) {
+    select[thumbnailFieldName] = true
+
+    const thumbnailField = collectionConfig.flattenedFields.find(
+      (field) => field.name === thumbnailFieldName && field.type === 'upload',
+    )
+
+    if (thumbnailField && 'relationTo' in thumbnailField) {
+      const relatedSlugs = Array.isArray(thumbnailField.relationTo)
+        ? thumbnailField.relationTo
+        : [thumbnailField.relationTo]
+
+      thumbnailPopulate = {}
+
+      for (const relatedSlug of relatedSlugs) {
+        const relatedCollectionConfig = payload.collections[relatedSlug]?.config
+
+        if (relatedCollectionConfig) {
+          const relatedSelect: SelectType = {}
+
+          appendUploadSelectFields({
+            collectionConfig: relatedCollectionConfig,
+            select: relatedSelect,
+          })
+
+          thumbnailPopulate[relatedSlug] = relatedSelect
+        }
+      }
+    }
+  }
+
+  /** Force select `_tz` siblings for any timezone-enabled date fields in select */
+  appendDateTimezoneSelectFields({
+    fields: collectionConfig.flattenedFields,
+    select,
+  })
+
+  /** Force select `_order` for orderable collections — OrderableTable needs it to compute reorder targets */
+  if (collectionConfig.orderable === true) {
+    select._order = true
+  }
+
+  /** Force select `_status` for drafts-enabled collections — needed by `enrichDocsWithVersionStatus` and `formatDocURL` */
+  if (collectionConfig.versions?.drafts) {
+    select._status = true
+  }
+
+  // Check for hierarchy parent param
+  const isHierarchyCollection = Boolean(collectionConfig.hierarchy)
+  const hierarchyParentFieldName =
+    typeof collectionConfig.hierarchy === 'object'
+      ? (collectionConfig.hierarchy.parentFieldName ?? 'parent')
+      : 'parent'
+  let hierarchyParentId: null | number | string = null
+
+  if (isHierarchyCollection) {
+    const parentParam = searchParams?.[hierarchyParentFieldName]
+    if (parentParam === 'null' || parentParam === undefined) {
+      hierarchyParentId = null
+    } else if (typeof parentParam === 'string') {
+      hierarchyParentId =
+        payload.db.defaultIDType === 'number' && isNumber(parentParam)
+          ? Number(parentParam)
+          : parentParam
+    }
+  }
+
+  // Hierarchy data for client-side rendering
+  let hierarchyData: HierarchyViewData | undefined
+
+  try {
+    if (query.groupBy) {
+      ;({ columnState, data, groupedData, Table } = await handleGroupBy({
+        clientCollectionConfig,
+        clientConfig,
+        collectionConfig,
+        collectionSlug,
+        columns,
+        customCellProps,
+        drawerSlug,
+        enableRowSelections,
+        fieldPermissions: permissions?.collections?.[collectionSlug]?.fields,
+        hierarchyParentFieldName:
+          isHierarchyCollection && !drawerSlug && viewType === 'list'
+            ? hierarchyParentFieldName
+            : undefined,
+        query,
+        req,
+        select,
+        thumbnailFieldName,
+        thumbnailPopulate,
+        trash,
+        user,
+        viewType,
+        where: whereWithMergedSearch,
+      }))
+
+      // Enrich documents with correct display status for drafts
+      data = await enrichDocsWithVersionStatus({
+        collectionConfig,
+        data,
+        req,
+      })
+    } else {
+      data = await req.payload.find({
+        collection: collectionSlug,
+        depth: thumbnailFieldName ? 1 : 0,
+        draft: true,
+        fallbackLocale: false,
+        includeLockStatus: true,
+        limit: query?.limit ? Number(query.limit) : undefined,
+        locale: req.locale,
+        overrideAccess: false,
+        page: query?.page ? Number(query.page) : undefined,
+        populate: thumbnailPopulate,
+        req,
+        select,
+        sort: query?.sort,
+        trash,
+        user,
+        where: whereWithMergedSearch,
+      })
+
+      // Enrich documents with correct display status for drafts
+      data = await enrichDocsWithVersionStatus({
+        collectionConfig,
+        data,
+        req,
+      })
+      ;({ columnState, Table } = renderTable({
+        clientCollectionConfig,
+        collectionConfig,
+        columns,
+        customCellProps,
+        data,
+        drawerSlug,
+        enableRowSelections,
+        fieldPermissions: permissions?.collections?.[collectionSlug]?.fields,
+        hierarchyParentFieldName:
+          isHierarchyCollection && !drawerSlug && viewType === 'list'
+            ? hierarchyParentFieldName
+            : undefined,
+        i18n: req.i18n,
+        orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
+        payload: req.payload,
+        query,
+        req,
+        useAsTitle: collectionConfig.admin.useAsTitle,
+        viewType,
+      }))
+    }
+  } catch (err) {
+    if (err.name !== 'QueryError') {
+      // QueryErrors are expected when a user filters by a field they do not have access to
+      req.payload.logger.error({
+        err,
+        msg: `There was an error fetching the list view data for collection ${collectionSlug}`,
+      })
+      throw err
+    }
+  }
+
+  // Fetch hierarchy data only for hierarchy view
+  let HierarchyIcon: React.ReactNode | undefined
+  const isHierarchyView = viewType === 'hierarchy'
+
+  if (isHierarchyCollection && isHierarchyView) {
+    // Extract typeFilter from searchParams (comma-separated list of collection slugs)
+    const typeFilterParam = searchParams?.typeFilter
+    const typeFilter =
+      typeof typeFilterParam === 'string' && typeFilterParam.length > 0
+        ? typeFilterParam.split(',')
+        : undefined
+
+    hierarchyData = await handleHierarchy({
+      baseFilter: baseFilterConstraint,
+      collectionConfig,
+      collectionSlug,
+      parentId: hierarchyParentId,
+      permissions,
+      req,
+      search: typeof query?.search === 'string' ? query.search : undefined,
+      typeFilter,
+      user,
+    })
+
+    data = hierarchyData.childrenData
+
+    // Resolve hierarchy icon from collection config
+    const hierarchyConfig =
+      typeof collectionConfig.hierarchy === 'object' ? collectionConfig.hierarchy : undefined
+
+    HierarchyIcon = RenderServerComponent({
+      Component: hierarchyConfig?.admin?.components?.Icon,
+      importMap: payload.importMap,
+      key: `hierarchy-icon-${collectionSlug}`,
+    })
+  }
+
+  const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
+
+  const resolvedFilterOptions = await resolveAllFilterOptions({
+    fields: collectionConfig.fields,
+    req,
+  })
+
+  const staticDescription =
+    typeof collectionConfig.admin.description === 'function'
+      ? collectionConfig.admin.description({ t: i18n.t })
+      : collectionConfig.admin.description
+
+  const newDocumentURL = formatAdminURL({
+    adminRoute,
+    path: `/collections/${collectionSlug}/create`,
+  })
+
+  const hasCreatePermission = permissions?.collections?.[collectionSlug]?.create
+
+  const { hasDeletePermission, hasTrashPermission } = await getDocumentPermissions({
+    collectionConfig,
+    // Empty object serves as base for computing differentiated trash/delete permissions
+    data: {},
+    req,
+  })
+
+  // Check if there's a notFound query parameter (document ID that wasn't found)
+  const notFoundDocId = typeof searchParams?.notFound === 'string' ? searchParams.notFound : null
+
+  const serverProps: ListViewServerPropsOnly = {
+    collectionConfig,
+    data,
+    i18n,
+    limit: query.limit,
+    listPreferences: collectionPreferences,
+    listSearchableFields: collectionConfig.admin.listSearchableFields,
+    locale: fullLocale,
+    params,
+    payload,
+    permissions,
+    searchParams,
+    server: req.server,
+    user: userWithReadAccess,
+  }
+
+  const listViewSlots = await renderListViewSlots({
+    clientProps: {
+      collectionSlug,
+      hasCreatePermission,
+      hasDeletePermission,
+      hasTrashPermission,
+      newDocumentURL,
+      viewType,
+    },
+    collectionConfig,
+    description: staticDescription,
+    notFoundDocId,
+    payload,
+    req,
+    serverProps,
+  })
+
+  const isInDrawer = Boolean(drawerSlug)
+  const documentURLs =
+    !isInDrawer && !isHierarchyView && collectionConfig.admin.formatDocURL
+      ? Object.fromEntries(
+          (groupedData ? groupedData.flatMap((group) => group.data.docs) : data.docs).map((doc) => [
+            doc.id,
+            resolveDocumentListItemURL({
+              collectionSlug,
+              doc,
+              formatDocURL: collectionConfig.admin.formatDocURL,
+              hierarchyParentFieldName: isHierarchyCollection
+                ? hierarchyParentFieldName
+                : undefined,
+              req,
+              viewType,
+            }),
+          ]),
+        )
+      : undefined
+
+  // Needed to prevent: Only plain objects can be passed to Client Components from Server Components. Objects with toJSON methods are not supported. Convert it manually to a simple value before passing it to props.
+  // Is there a way to avoid this? The `where` object is already seemingly plain, but is not bc it originates from the params.
+  query.where = query?.where ? JSON.parse(JSON.stringify(query?.where || {})) : undefined
+
+  const RenderedListViewComponent = RenderServerComponent({
+    clientProps: {
+      ...listViewSlots,
+      baseFilter: baseFilterConstraint,
+      collectionSlug,
+      columnState,
+      disableBulkDelete: collectionConfig.disableBulkDelete ?? disableBulkDelete,
+      disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
+      disableQueryPresets,
+      documentLayout: collectionPreferences?.documentLayout,
+      documentURLs,
+      enableRowSelections,
+      groupedData,
+      hasCreatePermission,
+      hasDeletePermission,
+      hasTrashPermission,
+      hierarchyData,
+      HierarchyIcon,
+      listPreferences: collectionPreferences,
+      newDocumentURL,
+      queryPreset,
+      queryPresetPermissions,
+      renderedFilters,
+      resolvedFilterOptions,
+      Table,
+      viewType,
+    } satisfies ListViewClientProps,
+    Component: ComponentOverride ?? collectionConfig?.admin?.components?.views?.list?.Component,
+    Fallback: viewType === 'hierarchy' ? HierarchyListView : DefaultListView,
+    importMap: payload.importMap,
+    key: `list-view-${collectionSlug}-${viewType}`,
+    serverProps,
+  })
+
+  return {
+    List: (
+      <Fragment>
+        <HydrateAuthProvider permissions={permissions} />
+        <HydratePreferences collectionSlug={collectionSlug} preferences={collectionPreferences} />
+        {isHierarchyView ? (
+          <Fragment>
+            <HydrateHierarchyProvider
+              allowedCollections={hierarchyData?.allowedCollections}
+              baseFilter={baseFilterConstraint}
+              collectionSlug={collectionSlug}
+              expandedNodes={hierarchyData?.breadcrumbs?.slice(0, -1).map((b) => b.id)}
+              parent={hierarchyData?.parent}
+              parentFieldName={
+                typeof collectionConfig.hierarchy === 'object'
+                  ? collectionConfig.hierarchy?.parentFieldName
+                  : undefined
+              }
+              tableData={data}
+              treeLimit={
+                typeof collectionConfig.hierarchy === 'object'
+                  ? collectionConfig.hierarchy?.admin?.treeLimit
+                  : undefined
+              }
+              typeFieldName={
+                typeof collectionConfig.hierarchy === 'object' &&
+                collectionConfig.hierarchy?.collectionSpecific &&
+                typeof collectionConfig.hierarchy.collectionSpecific === 'object'
+                  ? collectionConfig.hierarchy.collectionSpecific.fieldName
+                  : undefined
+              }
+            />
+            {RenderedListViewComponent}
+          </Fragment>
+        ) : (
+          <ListQueryProvider
+            collectionSlug={collectionSlug}
+            data={data}
+            modifySearchParams={!isInDrawer}
+            orderableFieldName={collectionConfig.orderable === true ? '_order' : undefined}
+            query={query}
+          >
+            {RenderedListViewComponent}
+          </ListQueryProvider>
+        )}
+      </Fragment>
+    ),
+  }
+}
+
+export const ListView: React.FC<RenderListViewArgs> = async (args) => {
+  try {
+    const { List: RenderedList } = await renderListView({ ...args, enableRowSelections: true })
+    return RenderedList
+  } catch (error) {
+    if (error.message === 'not-found') {
+      args.initPageResult.req.server.notFound()
+    } else {
+      console.error(error) // eslint-disable-line no-console
+    }
+  }
+}

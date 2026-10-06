@@ -1,0 +1,203 @@
+'use client'
+import type { PointFieldClientProps, PointFieldValidation } from 'payload'
+
+import { getTranslation } from '@payloadcms/translations'
+import React, { useCallback, useMemo } from 'react'
+
+import { RenderCustomComponent } from '../../../shared/elements/RenderCustomComponent/index.js'
+import { mergeFieldStyles } from '../../../shared/fields/mergeFieldStyles.js'
+import { InputStepper } from '../../elements/InputStepper/index.js'
+import { useForm } from '../../forms/Form/context.js'
+import { useField } from '../../forms/useField/index.js'
+import { withCondition } from '../../forms/withCondition/index.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { generateFieldID } from '../../utilities/generateFieldID.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
+import { FieldLabel } from '../FieldLabel/index.js'
+import './index.css'
+import { fieldBaseClass } from '../shared/index.js'
+
+const baseClass = 'point'
+
+export const PointFieldComponent: React.FC<PointFieldClientProps> = (props) => {
+  const {
+    field,
+    field: {
+      admin: { className, description, placeholder, step } = {},
+      label,
+      localized,
+      required,
+    },
+    path: pathFromProps,
+    readOnly,
+    validate,
+  } = props
+
+  const { uuid } = useForm()
+  const editDepth = useEditDepth()
+  const { i18n, t } = useTranslation()
+
+  const memoizedValidate: PointFieldValidation = useCallback(
+    (value, options) => {
+      if (typeof validate === 'function') {
+        return validate(value, { ...options, required })
+      }
+    },
+    [validate, required],
+  )
+
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
+    path,
+    setValue,
+    showError,
+    value = [null, null],
+  } = useField<[number, number]>({
+    potentiallyStalePath: pathFromProps,
+    validate: memoizedValidate,
+  })
+
+  const handleChange = useCallback(
+    (e, index: 0 | 1) => {
+      let val = parseFloat(e.target.value)
+      if (Number.isNaN(val)) {
+        val = e.target.value
+      }
+      const coordinates = [...value]
+      coordinates[index] = val
+      setValue(coordinates)
+    },
+    [setValue, value],
+  )
+
+  const handleStep = useCallback(
+    (index: 0 | 1, direction: 'down' | 'up') => {
+      if (readOnly || disabled) {
+        return
+      }
+      const stepValue = step ?? 1
+      const currentValue = typeof value[index] === 'number' ? value[index] : 0
+      const newValue = direction === 'up' ? currentValue + stepValue : currentValue - stepValue
+      const coordinates = [...value]
+      coordinates[index] = newValue
+      setValue(coordinates)
+    },
+    [disabled, readOnly, setValue, step, value],
+  )
+
+  const getCoordinateFieldLabel = (type: 'latitude' | 'longitude') => {
+    const suffix = type === 'longitude' ? t('fields:longitude') : t('fields:latitude')
+    const fieldLabel = label ? getTranslation(label, i18n) : ''
+
+    return `${fieldLabel}${fieldLabel ? ' - ' : ''}${suffix}`
+  }
+
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
+  return (
+    <div
+      className={[
+        fieldBaseClass,
+        baseClass,
+        className,
+        showError && 'error',
+        (readOnly || disabled) && 'read-only',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      style={styles}
+    >
+      <ul className={`${baseClass}__wrap`}>
+        <li>
+          <RenderCustomComponent
+            CustomComponent={Label}
+            Fallback={
+              <FieldLabel
+                hasRequiredAccessibleState
+                htmlFor={generateFieldID(path, editDepth, uuid, 'field-longitude')}
+                label={getCoordinateFieldLabel('longitude')}
+                localized={localized}
+                path={path}
+                required={required}
+              />
+            }
+          />
+          {BeforeInput}
+          <div className="form-input-group">
+            {/* disable eslint rule because the label is dynamic */}
+            {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+            <input
+              aria-required={required || undefined}
+              className="form-input"
+              disabled={readOnly || disabled}
+              id={generateFieldID(path, editDepth, uuid, 'field-longitude')}
+              name={`${path}.longitude`}
+              onChange={(e) => handleChange(e, 0)}
+              placeholder={getTranslation(placeholder, i18n)}
+              step={step}
+              type="number"
+              value={value && typeof value[0] === 'number' ? value[0] : ''}
+            />
+            <InputStepper
+              disabled={readOnly || disabled}
+              onDecrement={() => handleStep(0, 'down')}
+              onIncrement={() => handleStep(0, 'up')}
+            />
+          </div>
+          {AfterInput}
+        </li>
+        <li>
+          <RenderCustomComponent
+            CustomComponent={Label}
+            Fallback={
+              <FieldLabel
+                hasRequiredAccessibleState
+                htmlFor={generateFieldID(path, editDepth, uuid, 'field-latitude')}
+                label={getCoordinateFieldLabel('latitude')}
+                localized={localized}
+                path={path}
+                required={required}
+              />
+            }
+          />
+          <div className="form-input-group">
+            <RenderCustomComponent
+              CustomComponent={Error}
+              Fallback={<FieldError path={path} showError={showError} />}
+            />
+            {BeforeInput}
+            {/* disable eslint rule because the label is dynamic */}
+            {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+            <input
+              aria-required={required || undefined}
+              className="form-input"
+              disabled={readOnly || disabled}
+              id={generateFieldID(path, editDepth, uuid, 'field-latitude')}
+              name={`${path}.latitude`}
+              onChange={(e) => handleChange(e, 1)}
+              placeholder={getTranslation(placeholder, i18n)}
+              step={step}
+              type="number"
+              value={value && typeof value[1] === 'number' ? value[1] : ''}
+            />
+            <InputStepper
+              disabled={readOnly || disabled}
+              onDecrement={() => handleStep(1, 'down')}
+              onIncrement={() => handleStep(1, 'up')}
+            />
+          </div>
+          {AfterInput}
+        </li>
+      </ul>
+      <RenderCustomComponent
+        CustomComponent={Description}
+        Fallback={<FieldDescription description={description} path={path} />}
+      />
+    </div>
+  )
+}
+
+export const PointField = withCondition(PointFieldComponent)

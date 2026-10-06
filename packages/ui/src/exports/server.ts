@@ -1,2 +1,2 @@
-export type { CollectionCardsData } from '../widgets/CollectionCards/getCollectionCardsData.js'
-export { getCollectionCardsData } from '../widgets/CollectionCards/getCollectionCardsData.js'
+export type { CollectionCardsData } from '../server/widgets/CollectionCards/getCollectionCardsData.js'
+export { getCollectionCardsData } from '../server/widgets/CollectionCards/getCollectionCardsData.js'

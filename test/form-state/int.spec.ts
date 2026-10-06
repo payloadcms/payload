@@ -12,9 +12,9 @@ import { conditionsSlug } from './collections/Conditions/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
-import { renderDocumentHandler } from '../../packages/ui/src/views/Document/handleServerFunction.js'
+import { renderDocumentHandler } from '../../packages/ui/src/server/views/Document/handleServerFunction.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
-import { mergeServerFormState } from '../../packages/ui/src/forms/Form/mergeServerFormState.js'
+import { mergeServerFormState } from '../../packages/ui/src/client/forms/Form/mergeServerFormState.js'
 import { test } from '../__helpers/int/vitest.js'
 
 let user: User

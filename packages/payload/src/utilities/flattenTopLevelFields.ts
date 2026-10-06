@@ -110,7 +110,7 @@ export function flattenTopLevelFields<TField extends ClientField | Field>(
           // Need to include the top-level group field when hoisting its subfields,
           // so that `buildColumnState` can detect and render a column if the group
           // has a custom admin Cell component defined in its configuration.
-          // See: packages/ui/src/providers/TableColumns/buildColumnState/index.tsx
+          // See: packages/ui/src/server/providers/TableColumns/buildColumnState/index.tsx
           field as FlattenedField<TField>,
           ...flattenTopLevelFields(field.fields as TField[], {
             i18n,

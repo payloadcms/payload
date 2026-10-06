@@ -50,7 +50,7 @@ const PAYLOAD_PKG_SRC_RE = /\/packages\/[^/]+\/src\//
  * RSC collection and a broad strip leaves them unstyled.
  */
 const DIFF_VIEW_COMPONENT_RE =
-  /@payloadcms\/ui\/(?:dist|src)\/(?:icons|graphics|views\/Version|elements\/(?:HTMLDiff|FieldDiffContainer|FieldDiffLabel))\/|@payloadcms\/richtext-lexical\/(?:dist|src)\/field\/Diff\//
+  /@payloadcms\/ui\/(?:dist|src)\/(?:(?:client|server|shared)\/)?(?:icons|graphics|views\/Version|elements\/(?:HTMLDiff|FieldDiffContainer|FieldDiffLabel))\/|@payloadcms\/richtext-lexical\/(?:dist|src)\/field\/Diff\//
 
 /**
  * Stops Vite (and the underlying Node ESM loader) from trying to load

@@ -8,9 +8,9 @@ import { expect, onTestFinished } from 'vitest'
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Rebuild access for this test's temporary config.
 import { getInstructionsCollection } from '../../packages/payload/src/llm-instructions/getInstructionsCollection.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercise the internal permission lookup without adding a public export for tests.
-import { filterLLMInstructionsMenuItems } from '../../packages/ui/src/utilities/filterLLMInstructionsMenuItems.js'
+import { filterLLMInstructionsMenuItems } from '../../packages/ui/src/server/utilities/filterLLMInstructionsMenuItems.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercise the internal slot builder without adding a public export for tests.
-import { renderListViewSlots } from '../../packages/ui/src/views/List/renderListViewSlots.js'
+import { renderListViewSlots } from '../../packages/ui/src/server/views/List/renderListViewSlots.js'
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 

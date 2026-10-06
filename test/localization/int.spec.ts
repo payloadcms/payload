@@ -17,7 +17,7 @@ import { isMongoose, mongooseList } from '../__helpers/shared/isMongoose.js'
 import { devUser } from '../credentials.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
-import { copyDataFromLocaleHandler } from '../../packages/ui/src/utilities/copyDataFromLocale.js'
+import { copyDataFromLocaleHandler } from '../../packages/ui/src/server/utilities/copyDataFromLocale.js'
 import { test } from '../__helpers/int/vitest.js'
 import { idToString } from '../__helpers/shared/idToString.js'
 import { arrayCollectionSlug } from './collections/Array/index.js'

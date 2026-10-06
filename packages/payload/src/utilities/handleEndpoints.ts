@@ -81,7 +81,7 @@ export const handleEndpoints = async ({
   // This can be used against GET request search params size limit.
   // Instead you can do POST request with a text body as search params.
   // We use this internally for relationships querying on the frontend
-  // packages/ui/src/fields/Relationship/index.tsx
+  // packages/ui/src/client/fields/Relationship/index.tsx
   if (
     request.method.toLowerCase() === 'post' &&
     (request.headers.get('X-Payload-HTTP-Method-Override') === 'GET' ||

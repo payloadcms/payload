@@ -1,0 +1,907 @@
+'use client'
+
+import type {
+  CollectionSlug,
+  Data,
+  DocumentSlots,
+  FormState,
+  JsonObject,
+  SanitizedDocumentPermissions,
+  UploadEdits,
+} from 'payload'
+
+import { useModal } from '@faceless-ui/modal'
+import { formatAdminURL, validateMimeType } from 'payload/shared'
+import * as qs from 'qs-esm'
+import React from 'react'
+import { toast } from 'sonner'
+
+import type { State } from './reducer.js'
+
+import { hasSavePermission as getHasSavePermission } from '../../../../shared/utilities/hasSavePermission.js'
+import { fieldReducer } from '../../../forms/Form/fieldReducer.js'
+import { useEffectEvent } from '../../../hooks/useEffectEvent.js'
+import { useConfig } from '../../../providers/Config/index.js'
+import { useLocale } from '../../../providers/Locale/index.js'
+import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
+import { useUploadHandlers } from '../../../providers/UploadHandlers/index.js'
+import { LoadingOverlay } from '../../Loading/index.js'
+import { useLoadingOverlay } from '../../LoadingOverlay/index.js'
+import { FieldErrorsToast } from '../../Toasts/fieldErrors.js'
+import { useBulkUpload } from '../index.js'
+import { createFormData } from './createFormData.js'
+import { formsManagementReducer } from './reducer.js'
+
+type FormsManagerContext = {
+  readonly activeIndex: State['activeIndex']
+  readonly addFiles: (filelist: FileList) => Promise<boolean>
+  readonly bulkUpdateForm: (
+    updatedFields: Record<string, unknown>,
+    afterStateUpdate?: () => void,
+  ) => Promise<void>
+  readonly changeCollectionSlug: (slug: string) => void
+  readonly collectionSlug: string
+  readonly docPermissions?: SanitizedDocumentPermissions
+  readonly documentSlots: DocumentSlots
+  readonly forms: State['forms']
+  getFormDataRef: React.RefObject<() => Data>
+  readonly hasPublishPermission: boolean
+  readonly hasSavePermission: boolean
+  readonly hasSubmitted: boolean
+  readonly isInitializing: boolean
+  readonly removeFile: (index: number) => void
+  readonly resetUploadEdits?: () => void
+  readonly saveAllDocs: ({ overrides }?: { overrides?: Record<string, unknown> }) => Promise<void>
+  readonly setActiveIndex: (index: number) => void
+  readonly setFormTotalErrorCount: ({
+    errorCount,
+    index,
+  }: {
+    errorCount: number
+    index: number
+  }) => void
+  readonly totalErrorCount?: number
+  readonly updateUploadEdits: (args: UploadEdits) => void
+}
+
+const Context = React.createContext<FormsManagerContext>({
+  activeIndex: 0,
+  addFiles: () => Promise.resolve(false),
+  bulkUpdateForm: () => null,
+  changeCollectionSlug: () => null,
+  collectionSlug: '',
+  docPermissions: undefined,
+  documentSlots: {},
+  forms: [],
+  getFormDataRef: { current: () => ({}) },
+  hasPublishPermission: false,
+  hasSavePermission: false,
+  hasSubmitted: false,
+  isInitializing: false,
+  removeFile: () => {},
+  saveAllDocs: () => Promise.resolve(),
+  setActiveIndex: () => 0,
+  setFormTotalErrorCount: () => {},
+  totalErrorCount: 0,
+  updateUploadEdits: () => {},
+})
+
+const initialState: State = {
+  activeIndex: 0,
+  forms: [],
+  totalErrorCount: 0,
+}
+
+export type InitialForms = Array<{
+  file: File
+  formID?: string
+  initialState?: FormState | null
+}>
+
+type FormsManagerProps = {
+  readonly children: React.ReactNode
+}
+
+export function FormsManagerProvider({ children }: FormsManagerProps) {
+  const { config, getEntityConfig } = useConfig()
+  const {
+    routes: { api },
+  } = config
+  const locale = useLocale()
+  const code = locale?.code
+  const { i18n, t } = useTranslation()
+
+  const { getDocumentSlots, getFormState } = useServerFunctions()
+  const { getUploadHandler } = useUploadHandlers()
+
+  const [documentSlots, setDocumentSlots] = React.useState<DocumentSlots>({})
+  const [hasSubmitted, setHasSubmitted] = React.useState(false)
+  const [docPermissions, setDocPermissions] = React.useState<SanitizedDocumentPermissions>()
+  const [hasSavePermission, setHasSavePermission] = React.useState(false)
+  const [hasPublishPermission, setHasPublishPermission] = React.useState(false)
+  const [hasInitializedState, setHasInitializedState] = React.useState(false)
+  const [hasInitializedDocPermissions, setHasInitializedDocPermissions] = React.useState(false)
+  const [isInitializing, setIsInitializing] = React.useState(false)
+  const [state, dispatch] = React.useReducer(formsManagementReducer, initialState)
+  const { activeIndex, forms, totalErrorCount } = state
+
+  const formsRef = React.useRef(forms)
+  formsRef.current = forms
+
+  const { toggleLoadingOverlay } = useLoadingOverlay()
+  const { closeModal } = useModal()
+  const {
+    collectionSlug,
+    initialFiles,
+    initialForms,
+    modalSlug: drawerSlug,
+    onSuccess,
+    parentID,
+    selectableCollections,
+    setCollectionSlug,
+    setInitialFiles,
+    setInitialForms,
+    setSuccessfullyUploaded,
+  } = useBulkUpload()
+
+  const collectionConfig = getEntityConfig({ collectionSlug })
+  const folderFieldName = collectionConfig?.hierarchy
+    ? collectionConfig.hierarchy.parentFieldName
+    : undefined
+
+  const [isUploading, setIsUploading] = React.useState(false)
+  const [loadingText, setLoadingText] = React.useState('')
+
+  const hasInitializedWithFiles = React.useRef(false)
+  const initialStateRef = React.useRef<FormState>(null)
+  const initializedStateCollectionSlugRef = React.useRef<string | undefined>(undefined)
+  const initializedPermissionsCollectionSlugRef = React.useRef<string | undefined>(undefined)
+  const currentCollectionSlugRef = React.useRef(collectionSlug)
+  currentCollectionSlugRef.current = collectionSlug
+  const getFormDataRef = React.useRef<() => Data>(() => ({}))
+  const pendingCollectionChangeRef = React.useRef<{
+    forms: State['forms']
+    slug: string
+  }>(null)
+  const collectionFormsCacheRef = React.useRef<Record<string, State['forms']>>({})
+
+  const changeCollectionSlug = React.useCallback<FormsManagerContext['changeCollectionSlug']>(
+    (slug) => {
+      if (slug === collectionSlug || isInitializing || !selectableCollections?.includes(slug)) {
+        return
+      }
+
+      const mimeTypes = getEntityConfig({ collectionSlug: slug })?.upload?.mimeTypes
+      if (
+        mimeTypes?.length &&
+        forms.some(({ formState }) => {
+          const file = formState?.file?.value
+          return file instanceof File && !validateMimeType(file.type, mimeTypes)
+        })
+      ) {
+        toast.error(t('error:invalidFileType'))
+        return
+      }
+
+      const activeFormState = getFormDataRef.current()
+      const currentForms = forms.map((form, index) =>
+        index === activeIndex ? { ...form, formState: activeFormState } : form,
+      )
+      collectionFormsCacheRef.current[collectionSlug] = currentForms
+      pendingCollectionChangeRef.current = {
+        slug,
+        forms: currentForms,
+      }
+      setIsInitializing(true)
+      setHasInitializedState(false)
+      setHasInitializedDocPermissions(false)
+      setHasSavePermission(false)
+      setHasPublishPermission(false)
+      setCollectionSlug(slug)
+    },
+    [
+      activeIndex,
+      collectionSlug,
+      forms,
+      getEntityConfig,
+      isInitializing,
+      selectableCollections,
+      setCollectionSlug,
+      t,
+    ],
+  )
+
+  const actionURL = formatAdminURL({
+    apiRoute: api,
+    path: `/${collectionSlug}`,
+  })
+
+  const initializeSharedDocPermissions = React.useCallback(async () => {
+    const params = {
+      locale: code || undefined,
+    }
+
+    const docAccessPath: `/${string}/access?${string}` = `/${collectionSlug}/access?${qs.stringify(params)}`
+    const res = await fetch(formatAdminURL({ apiRoute: api, path: docAccessPath }), {
+      credentials: 'include',
+      headers: {
+        'Accept-Language': i18n.language,
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+    })
+
+    const json: SanitizedDocumentPermissions = await res.json()
+    const publishedAccessJSON = await fetch(
+      formatAdminURL({ apiRoute: api, path: docAccessPath }),
+      {
+        body: JSON.stringify({
+          _status: 'published',
+        }),
+        credentials: 'include',
+        headers: {
+          'Accept-Language': i18n.language,
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+      },
+    ).then((res) => res.json())
+
+    if (currentCollectionSlugRef.current !== collectionSlug) {
+      return
+    }
+
+    setDocPermissions(json)
+
+    setHasSavePermission(
+      getHasSavePermission({
+        collectionSlug,
+        docPermissions: json,
+        isEditing: false,
+      }),
+    )
+
+    setHasPublishPermission(publishedAccessJSON?.update)
+    initializedPermissionsCollectionSlugRef.current = collectionSlug
+    setHasInitializedDocPermissions(true)
+  }, [api, code, collectionSlug, i18n.language])
+
+  const initializeSharedFormState = React.useCallback(
+    async (abortController?: AbortController) => {
+      if (abortController?.signal) {
+        abortController.abort('aborting previous fetch for initial form state without files')
+      }
+
+      // FETCH AND SET THE DOCUMENT SLOTS HERE!
+      const documentSlots = await getDocumentSlots({ collectionSlug })
+
+      try {
+        const { state: formStateWithoutFiles } = await getFormState({
+          collectionSlug,
+          docPermissions:
+            initializedPermissionsCollectionSlugRef.current === collectionSlug
+              ? docPermissions
+              : undefined,
+          docPreferences: { fields: {} },
+          locale: code,
+          operation: 'create',
+          renderAllFields: true,
+          schemaPath: collectionSlug,
+          skipValidation: true,
+        })
+
+        if (folderFieldName && formStateWithoutFiles?.[folderFieldName]) {
+          formStateWithoutFiles[folderFieldName] = {
+            ...formStateWithoutFiles[folderFieldName],
+            customComponents: {
+              ...formStateWithoutFiles[folderFieldName].customComponents,
+              Field: undefined,
+            },
+          }
+        }
+
+        if (currentCollectionSlugRef.current !== collectionSlug) {
+          return null
+        }
+
+        setDocumentSlots(documentSlots)
+        initialStateRef.current = formStateWithoutFiles
+        initializedStateCollectionSlugRef.current = collectionSlug
+        setHasInitializedState(true)
+        return formStateWithoutFiles
+      } catch (_err) {
+        // swallow error
+        return null
+      }
+    },
+    [getDocumentSlots, collectionSlug, getFormState, docPermissions, code, folderFieldName],
+  )
+
+  const setActiveIndex: FormsManagerContext['setActiveIndex'] = React.useCallback(
+    (index: number) => {
+      const currentFormsData = getFormDataRef.current()
+
+      dispatch({
+        type: 'REPLACE',
+        state: {
+          activeIndex: index,
+          forms: forms.map((form, i) => {
+            if (i === activeIndex) {
+              return {
+                errorCount: form.errorCount,
+                formID: form.formID,
+                formState: currentFormsData,
+                uploadEdits: form.uploadEdits,
+              }
+            }
+            return form
+          }),
+        },
+      })
+    },
+    [forms, activeIndex],
+  )
+
+  const applyFolderToState = React.useCallback(
+    (baseState: FormState | null): FormState | null => {
+      if (parentID && folderFieldName && baseState?.[folderFieldName]) {
+        return {
+          ...baseState,
+          [folderFieldName]: {
+            ...baseState[folderFieldName],
+            initialValue: parentID,
+            value: parentID,
+          },
+        }
+      }
+      return baseState
+    },
+    [parentID, folderFieldName],
+  )
+
+  const addFiles = React.useCallback(
+    async (files: FileList) => {
+      const mimeTypes = getEntityConfig({ collectionSlug })?.upload?.mimeTypes
+      const acceptedFiles = Array.from(files).filter(
+        (file) => !mimeTypes?.length || validateMimeType(file.type, mimeTypes),
+      )
+      if (acceptedFiles.length !== files.length) {
+        toast.error(t('error:invalidFileType'))
+      }
+      if (!acceptedFiles.length) {
+        return false
+      }
+
+      if (forms.length) {
+        // save the state of the current form before adding new files
+        dispatch({
+          type: 'UPDATE_FORM',
+          errorCount: forms[activeIndex].errorCount,
+          formState: getFormDataRef.current(),
+          index: activeIndex,
+        })
+      }
+
+      toggleLoadingOverlay({ isLoading: true, key: 'addingDocs' })
+      let initialFormState = initialStateRef.current
+      if (initializedStateCollectionSlugRef.current !== collectionSlug) {
+        initialFormState = await initializeSharedFormState()
+      }
+      if (currentCollectionSlugRef.current !== collectionSlug || !initialFormState) {
+        toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })
+        return false
+      }
+      dispatch({
+        type: 'ADD_FORMS',
+        forms: acceptedFiles.map((file) => ({
+          file,
+          initialState: applyFolderToState(initialFormState),
+        })),
+      })
+      toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })
+      return true
+    },
+    [
+      initializeSharedFormState,
+      collectionSlug,
+      toggleLoadingOverlay,
+      activeIndex,
+      forms,
+      applyFolderToState,
+      getEntityConfig,
+      t,
+    ],
+  )
+
+  const addFilesEffectEvent = useEffectEvent(addFiles)
+
+  const addInitialForms = useEffectEvent(async (initialForms: InitialForms) => {
+    toggleLoadingOverlay({ isLoading: true, key: 'addingDocs' })
+
+    let initialFormState = initialStateRef.current
+    if (initializedStateCollectionSlugRef.current !== collectionSlug) {
+      initialFormState = await initializeSharedFormState()
+    }
+    if (currentCollectionSlugRef.current !== collectionSlug || !initialFormState) {
+      toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })
+      return
+    }
+
+    dispatch({
+      type: 'ADD_FORMS',
+      forms: initialForms.map((form) => ({
+        ...form,
+        initialState: applyFolderToState(form?.initialState || initialFormState),
+      })),
+    })
+
+    toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })
+  })
+
+  const removeFile: FormsManagerContext['removeFile'] = React.useCallback((index) => {
+    dispatch({ type: 'REMOVE_FORM', index })
+  }, [])
+
+  const setFormTotalErrorCount: FormsManagerContext['setFormTotalErrorCount'] = React.useCallback(
+    ({ errorCount, index }) => {
+      dispatch({
+        type: 'UPDATE_ERROR_COUNT',
+        count: errorCount,
+        index,
+      })
+    },
+    [],
+  )
+
+  const saveAllDocs: FormsManagerContext['saveAllDocs'] = React.useCallback(
+    async ({ overrides } = {}) => {
+      const currentFormsData = getFormDataRef.current()
+      const currentForms = [...forms]
+      currentForms[activeIndex] = {
+        errorCount: currentForms[activeIndex].errorCount,
+        formID: currentForms[activeIndex].formID,
+        formState: currentFormsData,
+        uploadEdits: currentForms[activeIndex].uploadEdits,
+      }
+      const activeFormID = currentForms[activeIndex]?.formID
+      const newDocs: Array<{
+        collectionSlug: CollectionSlug
+        doc: JsonObject
+        /**
+         * ID of the form that created this document
+         */
+        formID: string
+      }> = []
+
+      setIsUploading(true)
+
+      for (let i = 0; i < currentForms.length; i++) {
+        try {
+          const form = currentForms[i]
+          const fileValue = form.formState?.file?.value
+
+          setLoadingText(t('general:uploadingBulk', { current: i + 1, total: currentForms.length }))
+
+          const actionURLWithParams = `${actionURL}${qs.stringify(
+            {
+              locale: code,
+              uploadEdits: form?.uploadEdits || undefined,
+            },
+            {
+              addQueryPrefix: true,
+            },
+          )}`
+
+          const req = await fetch(actionURLWithParams, {
+            body: await createFormData(
+              form.formState,
+              overrides,
+              getUploadHandler({ collectionSlug }),
+              config.collections.find(({ slug }) => slug === collectionSlug)?.upload
+                ?.allowRestrictedFileTypes,
+            ),
+            credentials: 'include',
+            method: 'POST',
+          })
+
+          const json = await req.json()
+
+          const wasSuccessful = req.status === 201 && json?.doc
+
+          if (wasSuccessful) {
+            newDocs.push({
+              collectionSlug,
+              doc: json.doc,
+              formID: form.formID,
+            })
+          }
+
+          // should expose some sort of helper for this
+          const [fieldErrors, nonFieldErrors] = (json?.errors || []).reduce(
+            ([fieldErrs, nonFieldErrs], err) => {
+              const newFieldErrs: any[] = []
+              const newNonFieldErrs: any[] = []
+
+              if (err?.message) {
+                newNonFieldErrs.push(err)
+              }
+
+              if (Array.isArray(err?.data?.errors)) {
+                err.data?.errors.forEach((dataError) => {
+                  if (dataError?.path) {
+                    newFieldErrs.push(dataError)
+                  } else {
+                    newNonFieldErrs.push(dataError)
+                  }
+                })
+              }
+
+              return [
+                [...fieldErrs, ...newFieldErrs],
+                [...nonFieldErrs, ...newNonFieldErrs],
+              ]
+            },
+            [[], []],
+          )
+
+          const missingFile = !fileValue && req.status === 400
+          const exceedsLimit = fileValue && req.status === 413
+          const missingFilename =
+            fileValue &&
+            typeof fileValue === 'object' &&
+            'name' in fileValue &&
+            (!fileValue.name || fileValue.name === '')
+
+          if (missingFile || exceedsLimit || missingFilename) {
+            currentForms[i].formState.file.valid = false
+
+            // File/Blob objects cannot be serialized via the RSC flight protocol,
+            // so replace with a plain object before calling the server function.
+            const originalFileValue = currentForms[i].formState.file?.value
+            const formStateForServer = { ...currentForms[i].formState }
+            if (originalFileValue instanceof File) {
+              formStateForServer.file = {
+                ...formStateForServer.file,
+                value: { name: originalFileValue.name },
+              }
+            }
+
+            // Need to get the field state to extract count since field errors
+            // are not returned when file is missing or exceeds limit
+            const { state: newState } = await getFormState({
+              collectionSlug,
+              docPermissions,
+              docPreferences: null,
+              formState: formStateForServer,
+              operation: 'update',
+              schemaPath: collectionSlug,
+            })
+
+            if (newState) {
+              if (originalFileValue instanceof File && newState.file) {
+                newState.file = { ...newState.file, value: originalFileValue }
+              }
+
+              currentForms[i] = {
+                errorCount: Object.values(newState).reduce(
+                  (acc, value) => (value?.valid === false ? acc + 1 : acc),
+                  0,
+                ),
+                formID: currentForms[i].formID,
+                formState: newState,
+              }
+            }
+
+            toast.error(nonFieldErrors[0]?.message)
+          } else {
+            let errorCount = fieldErrors.length
+
+            // Fall back to non-field errors when no field errors are present
+            // (e.g., APIError thrown from a hook).
+            if (!wasSuccessful && errorCount === 0) {
+              errorCount = nonFieldErrors.length || 1
+            }
+
+            currentForms[i] = {
+              errorCount,
+              formID: currentForms[i].formID,
+              formState: fieldReducer(currentForms[i].formState, {
+                type: 'ADD_SERVER_ERRORS',
+                errors: fieldErrors,
+              }),
+            }
+
+            // Mimic forms/Form/index.tsx.
+            if (!wasSuccessful) {
+              nonFieldErrors.forEach((err) => {
+                toast.error(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
+              })
+            }
+          }
+        } catch (_) {
+          // swallow
+        }
+      }
+
+      setHasSubmitted(true)
+      setLoadingText('')
+      setIsUploading(false)
+
+      const remainingForms = []
+
+      currentForms.forEach(({ errorCount }, i) => {
+        if (errorCount) {
+          remainingForms.push(currentForms[i])
+        }
+      })
+
+      const successCount = Math.max(0, currentForms.length - remainingForms.length)
+      const errorCount = currentForms.length - successCount
+
+      if (successCount) {
+        toast.success(`Successfully saved ${successCount} files`)
+        setSuccessfullyUploaded(true)
+
+        if (typeof onSuccess === 'function') {
+          onSuccess(newDocs, errorCount)
+        }
+      }
+
+      if (errorCount) {
+        toast.error(`Failed to save ${errorCount} files`)
+      } else {
+        closeModal(drawerSlug)
+      }
+
+      dispatch({
+        type: 'REPLACE',
+        state: {
+          activeIndex: remainingForms.reduce((acc, { formID }, i) => {
+            if (formID === activeFormID) {
+              return i
+            }
+            return acc
+          }, 0),
+          forms: remainingForms,
+          totalErrorCount: remainingForms.reduce((acc, { errorCount }) => acc + errorCount, 0),
+        },
+      })
+
+      if (remainingForms.length === 0) {
+        setInitialFiles(undefined)
+        setInitialForms(undefined)
+      }
+    },
+    [
+      forms,
+      activeIndex,
+      t,
+      actionURL,
+      code,
+      collectionSlug,
+      config.collections,
+      getUploadHandler,
+      getFormState,
+      docPermissions,
+      setSuccessfullyUploaded,
+      onSuccess,
+      closeModal,
+      drawerSlug,
+      setInitialFiles,
+      setInitialForms,
+    ],
+  )
+
+  const bulkUpdateForm = React.useCallback(
+    async (updatedFields: Record<string, unknown>, afterStateUpdate?: () => void) => {
+      for (let i = 0; i < forms.length; i++) {
+        Object.entries(updatedFields).forEach(([path, value]) => {
+          if (forms[i].formState[path]) {
+            forms[i].formState[path].value = value
+
+            dispatch({
+              type: 'UPDATE_FORM',
+              errorCount: forms[i].errorCount,
+              formState: forms[i].formState,
+              index: i,
+            })
+          }
+        })
+
+        if (typeof afterStateUpdate === 'function') {
+          afterStateUpdate()
+        }
+
+        if (hasSubmitted) {
+          // File/Blob objects cannot be serialized across the server-function
+          // boundary (RSC flight / TanStack seroval), so the `file` value is
+          // dropped during the `getFormState` round-trip. Capture it first and
+          // re-attach it afterwards so the file survives — mirroring the
+          // save-retry path below; without this the next save omits the file
+          // entirely and the server responds "No files were uploaded".
+          const originalFileValue = forms[i].formState.file?.value
+
+          const { state } = await getFormState({
+            collectionSlug,
+            docPermissions,
+            docPreferences: null,
+            formState: forms[i].formState,
+            operation: 'create',
+            schemaPath: collectionSlug,
+          })
+
+          if (originalFileValue instanceof File && state.file) {
+            state.file = { ...state.file, value: originalFileValue }
+          }
+
+          const newFormErrorCount = Object.values(state).reduce(
+            (acc, value) => (value?.valid === false ? acc + 1 : acc),
+            0,
+          )
+
+          dispatch({
+            type: 'UPDATE_FORM',
+            errorCount: newFormErrorCount,
+            formState: state,
+            index: i,
+          })
+        }
+      }
+    },
+    [collectionSlug, docPermissions, forms, getFormState, hasSubmitted],
+  )
+
+  const updateUploadEdits = React.useCallback<FormsManagerContext['updateUploadEdits']>(
+    (uploadEdits) => {
+      dispatch({
+        type: 'UPDATE_FORM',
+        errorCount: forms[activeIndex].errorCount,
+        formState: forms[activeIndex].formState,
+        index: activeIndex,
+        uploadEdits,
+      })
+    },
+    [activeIndex, forms],
+  )
+
+  const resetUploadEdits = React.useCallback<FormsManagerContext['resetUploadEdits']>(() => {
+    dispatch({
+      type: 'REPLACE',
+      state: {
+        forms: forms.map((form) => ({
+          ...form,
+          uploadEdits: {},
+        })),
+      },
+    })
+  }, [forms])
+
+  React.useEffect(() => {
+    if (!collectionSlug) {
+      return
+    }
+    if (initializedStateCollectionSlugRef.current !== collectionSlug) {
+      void initializeSharedFormState()
+    }
+
+    if (initializedPermissionsCollectionSlugRef.current !== collectionSlug) {
+      void initializeSharedDocPermissions()
+    }
+
+    if (initialFiles || initialForms) {
+      if (
+        initializedStateCollectionSlugRef.current !== collectionSlug ||
+        initializedPermissionsCollectionSlugRef.current !== collectionSlug
+      ) {
+        setIsInitializing(true)
+      } else {
+        setIsInitializing(false)
+      }
+    }
+
+    if (
+      hasInitializedState &&
+      hasInitializedDocPermissions &&
+      initializedStateCollectionSlugRef.current === collectionSlug &&
+      initializedPermissionsCollectionSlugRef.current === collectionSlug &&
+      pendingCollectionChangeRef.current?.slug === collectionSlug
+    ) {
+      const previousForms = pendingCollectionChangeRef.current.forms
+      const nextTemplate = applyFolderToState(initialStateRef.current)
+      const cachedForms = collectionFormsCacheRef.current[collectionSlug]
+      dispatch({
+        type: 'REPLACE',
+        state: {
+          forms: previousForms.map((form) => {
+            const formState: FormState = {}
+            const cachedForm = cachedForms?.find(({ formID }) => formID === form.formID)
+            for (const [path, field] of Object.entries(nextTemplate)) {
+              const previousField =
+                path === folderFieldName && parentID
+                  ? undefined
+                  : (cachedForm?.formState[path] ?? form.formState[path])
+              formState[path] = previousField
+                ? { ...field, initialValue: previousField.value, value: previousField.value }
+                : field
+            }
+            formState.file = form.formState.file
+            return { ...form, errorCount: 0, formState, uploadEdits: {} }
+          }),
+          totalErrorCount: 0,
+        },
+      })
+      pendingCollectionChangeRef.current = null
+      setHasSubmitted(false)
+      setIsInitializing(false)
+    }
+
+    if (
+      hasInitializedState &&
+      hasInitializedDocPermissions &&
+      initializedStateCollectionSlugRef.current === collectionSlug &&
+      initializedPermissionsCollectionSlugRef.current === collectionSlug &&
+      (initialForms?.length || initialFiles?.length) &&
+      !hasInitializedWithFiles.current
+    ) {
+      if (initialForms?.length) {
+        void addInitialForms(initialForms)
+      }
+      if (initialFiles?.length) {
+        void addFilesEffectEvent(initialFiles)
+      }
+      hasInitializedWithFiles.current = true
+    }
+    return
+  }, [
+    initialFiles,
+    initializeSharedFormState,
+    initializeSharedDocPermissions,
+    collectionSlug,
+    hasInitializedState,
+    hasInitializedDocPermissions,
+    initialForms,
+    applyFolderToState,
+  ])
+
+  return (
+    <Context
+      value={{
+        activeIndex: state.activeIndex,
+        addFiles,
+        bulkUpdateForm,
+        changeCollectionSlug,
+        collectionSlug,
+        docPermissions,
+        documentSlots,
+        forms,
+        getFormDataRef,
+        hasPublishPermission,
+        hasSavePermission,
+        hasSubmitted,
+        isInitializing,
+        removeFile,
+        resetUploadEdits,
+        saveAllDocs,
+        setActiveIndex,
+        setFormTotalErrorCount,
+        totalErrorCount,
+        updateUploadEdits,
+      }}
+    >
+      {isUploading && (
+        <LoadingOverlay
+          animationDuration="250ms"
+          loadingText={loadingText}
+          overlayType="fullscreen"
+          show
+        />
+      )}
+      {children}
+    </Context>
+  )
+}
+
+export function useFormsManager() {
+  return React.use(Context)
+}
