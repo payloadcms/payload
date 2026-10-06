@@ -8,10 +8,10 @@ import { Outlet } from '@tanstack/react-router'
 import { renderServerComponent } from '@tanstack/react-start/rsc'
 import { createElement } from 'react'
 
-import type { SerializableRecord } from '../utilities/toSerializable.js'
+import type { SerializableRecord } from '../../utilities/toSerializable.js'
 
-import { initAdminContext } from '../utilities/initAdminContext.server.js'
-import { toSerializable } from '../utilities/toSerializable.js'
+import { initAdminContext } from '../../utilities/initAdminContext.server.js'
+import { toSerializable } from '../../utilities/toSerializable.js'
 
 export type LoadLayoutDataResult = SerializableRecord
 
