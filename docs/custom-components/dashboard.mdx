@@ -187,25 +187,7 @@ The `collection-query` widget displays documents from a selected collection.
 If you don't define a `defaultLayout`, `welcome`, `activity`, and `collections` appear in that order, each at full width.
 The `collection-query` widget is available through the **Add +** menu.
 
-Pins are stored per user in the hidden `payload-pinned-documents` collection. Each record relates a `user` to a `document`; both relationships include the collection slug and document ID. The internal `key` field prevents duplicate pins. Users can read, update, and delete their own pins, and can only pin documents they can read.
-
-Use `pinnedDocuments.collectionOverrides` to customize the collection, including access control. Preserve the default fields and hooks when changing access:
-
-```ts
-export default buildConfig({
-  pinnedDocuments: {
-    collectionOverrides: ({ defaultCollection }) => ({
-      ...defaultCollection,
-      access: {
-        ...defaultCollection.access,
-        create: ({ req }) => Boolean(req.user?.canPinDocuments),
-      },
-    }),
-  },
-})
-```
-
-The `payload-pinned-documents` slug is reserved and cannot be changed by overrides. The dashboard always displays the current user's pins and respects access control for the referenced documents.
+Pins are stored per user under the `pinned-documents` key in `payload-preferences`. The preference value contains an `items` array of document references, each with `collectionSlug` and `id`. The widget loads only the documents on the visible page and respects their read access. Pinning and unpinning update the current user's preference; dashboard layout and collection filters are stored separately.
 
 ### User Customization
 

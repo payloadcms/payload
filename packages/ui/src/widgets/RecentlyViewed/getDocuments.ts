@@ -7,6 +7,7 @@ import type { RecentDocument } from './index.client.js'
 import type { PinnedItem } from './recents.js'
 
 import { formatRelativeDate, getRelativeTimeFormat } from '../../utilities/formatRelativeDate.js'
+import { getPinnedItems } from './pinnedPreferences.js'
 import { documentKey, getThumbnailURL, getValueByPath } from './recents.js'
 
 export type DocumentsTab = 'pinned' | 'recents'
@@ -23,7 +24,7 @@ export type DocumentsPage = {
   totalDocs: number
 }
 
-type Reference = { pinID?: number | string } & PinnedItem
+type Reference = PinnedItem
 type QueryDoc = { id: number | string; updatedAt?: string } & Record<string, unknown>
 
 export const getDashboardDocumentsHandler: ServerFunction<
@@ -50,49 +51,27 @@ export async function getDashboardDocuments({
   let totalDocs: number
 
   if (tab === 'pinned') {
-    const pins = await req.payload.find({
-      collection: 'payload-pinned-documents',
+    const preference = await req.payload.find({
+      collection: 'payload-preferences',
       depth: 0,
-      limit,
+      limit: 1,
       overrideAccess: false,
-      page,
       req,
-      sort: ['-createdAt', '-id'],
       user: req.user,
-      where: ownerWhere({ req }),
+      where: { and: [ownerWhere({ req }), { key: { equals: PREFERENCE_KEYS.PINNED_DOCUMENTS } }] },
     })
-    totalDocs = pins.totalDocs
-    if (!pins.docs.length && page > 1) {
-      // Drizzle reports zero totals for empty pages. Count pins without loading target documents.
-      totalDocs = (
-        await req.payload.count({
-          collection: 'payload-pinned-documents',
-          overrideAccess: false,
-          req,
-          user: req.user,
-          where: ownerWhere({ req }),
-        })
-      ).totalDocs
-    }
+    const pinnedReferences = getPinnedItems({ value: preference.docs[0]?.value }).filter(
+      (item) => req.payload.collections[item.collectionSlug],
+    )
+
+    totalDocs = pinnedReferences.length
     const lastPage = Math.max(
       1,
       Math.ceil((totalDocs + Number(shouldIncludePinPlaceholder)) / limit),
     )
-    if (page > lastPage) {
-      return getDashboardDocuments({
-        excludedCollections,
-        limit,
-        page: lastPage,
-        req,
-        shouldIncludePinPlaceholder,
-        tab,
-      })
-    }
-    references = pins.docs.map((pin) => ({
-      id: pin.document.value,
-      collectionSlug: pin.document.relationTo,
-      pinID: pin.id,
-    }))
+
+    page = Math.min(page, lastPage)
+    references = pinnedReferences.slice((page - 1) * limit, page * limit)
   } else if (tab === 'recents') {
     const preference = await req.payload.find({
       collection: 'payload-preferences',
@@ -118,7 +97,7 @@ export async function getDashboardDocuments({
   const items = references
     .map((reference): RecentDocument | undefined => {
       const document = documents.get(documentKey(reference))
-      return document ? { ...document, pinID: reference.pinID } : undefined
+      return document
     })
     .filter((item): item is RecentDocument => Boolean(item))
 
@@ -147,6 +126,7 @@ async function loadDocuments({
       const result = await req.payload.find({
         collection: collectionSlug,
         depth: 1,
+        disableErrors: true,
         draft: true,
         limit: ids.length,
         overrideAccess: false,

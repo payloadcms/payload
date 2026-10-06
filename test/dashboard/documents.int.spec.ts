@@ -1,5 +1,6 @@
 /* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test"] }] -- Tests use the shared fixture wrapper. */
 import { createPayloadRequest } from 'payload'
+import { PREFERENCE_KEYS } from 'payload/shared'
 import { expect, vi } from 'vitest'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercise the internal server handler against the real database.
@@ -55,7 +56,11 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
 
       expect(hydrated).toHaveLength(1)
       expect(
-        find.mock.calls.filter(([args]) => args.collection === 'payload-pinned-documents'),
+        find.mock.calls.filter(
+          ([args]) =>
+            args.collection === 'payload-preferences' &&
+            JSON.stringify(args.where).includes(PREFERENCE_KEYS.PINNED_DOCUMENTS),
+        ),
       ).toHaveLength(0)
       expect(hydrated[0][0].where).toEqual({
         id: { in: documents.slice(0, 4).map((doc) => doc.id) },
@@ -85,7 +90,7 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
     }
   })
 
-  test('should query only a page of pins belonging to the authenticated user', async ({
+  test('should load only the visible documents from the authenticated user pin preference', async ({
     payload,
   }) => {
     const owner = await payload.create({
@@ -102,33 +107,28 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
     const documents = []
 
     for (let index = 0; index < 6; index++) {
-      const doc = await payload.create({
-        collection: 'tickets',
-        data: { title: `Pin ${index}` },
-        overrideAccess: true,
-      })
-      documents.push(doc)
+      documents.push(
+        await payload.create({
+          collection: 'tickets',
+          data: { title: `Pin ${index}` },
+          overrideAccess: true,
+        }),
+      )
+    }
+    for (const [identity, items] of [
+      [user, documents.map((doc) => ({ id: doc.id, collectionSlug: 'tickets' }))],
+      [
+        { ...other, collection: 'users' as const },
+        [{ id: documents[0].id, collectionSlug: 'tickets' }],
+      ],
+    ] as const) {
       await payload.create({
-        collection: 'payload-pinned-documents',
-        data: {
-          document: { relationTo: 'tickets', value: doc.id },
-          key: '',
-          user: { relationTo: 'users', value: owner.id },
-        },
+        collection: 'payload-preferences',
+        data: { key: PREFERENCE_KEYS.PINNED_DOCUMENTS, value: { items } },
         overrideAccess: false,
-        user,
+        user: identity,
       })
     }
-    await payload.create({
-      collection: 'payload-pinned-documents',
-      data: {
-        document: { relationTo: 'tickets', value: documents[0].id },
-        key: '',
-        user: { relationTo: 'users', value: other.id },
-      },
-      overrideAccess: false,
-      user: { ...other, collection: 'users' },
-    })
     const req = await createPayloadRequest({ payload, req: { user } })
     const find = vi.spyOn(payload, 'find')
 
@@ -149,17 +149,11 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
       })
 
       expect(first.totalDocs).toBe(6)
-      expect(first.items).toHaveLength(4)
-      expect(second.items).toHaveLength(2)
-      expect(new Set([...first.items, ...second.items].map((item) => item.id)).size).toBe(6)
-      const pinQueries = find.mock.calls.filter(
-        ([args]) => args.collection === 'payload-pinned-documents',
-      )
+      expect(first.items.map((item) => item.id)).toEqual(documents.slice(0, 4).map((doc) => doc.id))
+      expect(second.items.map((item) => item.id)).toEqual(documents.slice(4).map((doc) => doc.id))
+      const documentQueries = find.mock.calls.filter(([args]) => args.collection === 'tickets')
 
-      expect(pinQueries.map(([args]) => [args.limit, args.page])).toEqual([
-        [4, 1],
-        [4, 2],
-      ])
+      expect(documentQueries.map(([args]) => args.limit)).toEqual([4, 2])
       expect(
         find.mock.calls.every(
           ([args]) => args.overrideAccess === false && args.user.id === owner.id,
@@ -180,6 +174,8 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
     })
     const user = { ...owner, collection: 'users' as const }
 
+    const items = []
+
     for (let index = 0; index < 4; index++) {
       const document = await payload.create({
         collection: 'tickets',
@@ -188,13 +184,14 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
         user,
       })
 
-      await payload.create({
-        collection: 'payload-pinned-documents',
-        data: { document: { relationTo: 'tickets', value: document.id }, key: '' },
-        overrideAccess: false,
-        user,
-      })
+      items.push({ id: document.id, collectionSlug: 'tickets' })
     }
+    await payload.create({
+      collection: 'payload-preferences',
+      data: { key: PREFERENCE_KEYS.PINNED_DOCUMENTS, value: { items } },
+      overrideAccess: false,
+      user,
+    })
     const req = await createPayloadRequest({ payload, req: { user } })
     const find = vi.spyOn(payload, 'find')
 
@@ -239,11 +236,10 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
     })
 
     await payload.create({
-      collection: 'payload-pinned-documents',
+      collection: 'payload-preferences',
       data: {
-        document: { relationTo: 'draft-posts', value: document.id },
-        key: '',
-        user: { relationTo: 'users', value: owner.id },
+        key: PREFERENCE_KEYS.PINNED_DOCUMENTS,
+        value: { items: [{ id: document.id, collectionSlug: 'draft-posts' }] },
       },
       overrideAccess: false,
       user,

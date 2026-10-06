@@ -75,7 +75,6 @@ export interface Config {
     'media-alt': MediaAlt;
     'payload-kv': PayloadKv;
     users: User;
-    'payload-pinned-documents': PayloadPinnedDocument;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -90,7 +89,6 @@ export interface Config {
     'media-alt': MediaAltSelect<false> | MediaAltSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
-    'payload-pinned-documents': PayloadPinnedDocumentsSelect<false> | PayloadPinnedDocumentsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -336,53 +334,6 @@ export interface PayloadKv {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-pinned-documents".
- */
-export interface PayloadPinnedDocument {
-  id: number;
-  key: string;
-  document:
-    | {
-        relationTo: 'draft-posts';
-        value: number | DraftPost;
-      }
-    | {
-        relationTo: 'tickets';
-        value: number | Ticket;
-      }
-    | {
-        relationTo: 'revenue';
-        value: number | Revenue;
-      }
-    | {
-        relationTo: 'events';
-        value: number | Event;
-      }
-    | {
-        relationTo: 'media';
-        value: number | Media;
-      }
-    | {
-        relationTo: 'media-alt';
-        value: number | MediaAlt;
-      }
-    | {
-        relationTo: 'payload-kv';
-        value: number | PayloadKv;
-      }
-    | {
-        relationTo: 'users';
-        value: number | User;
-      };
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -598,17 +549,6 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-pinned-documents_select".
- */
-export interface PayloadPinnedDocumentsSelect<T extends boolean = true> {
-  key?: T;
-  document?: T;
-  user?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
@@ -744,6 +684,9 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
+    /**
+     * Filter Recently viewed only.
+     */
     excludedCollections?: ('draft-posts' | 'tickets' | 'revenue' | 'events' | 'media' | 'media-alt' | 'users')[] | null;
   };
   width: 'small' | 'medium' | 'large' | 'x-large' | 'full';

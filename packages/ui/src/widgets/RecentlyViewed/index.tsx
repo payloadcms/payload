@@ -1,6 +1,6 @@
 import type { WidgetServerProps } from 'payload'
 
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, PREFERENCE_KEYS } from 'payload/shared'
 import React from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
@@ -41,7 +41,7 @@ export function RecentlyViewedWidget({
       }}
       pinsURL={formatAdminURL({
         apiRoute: payload.config.routes.api,
-        path: '/payload-pinned-documents',
+        path: `/payload-preferences/${PREFERENCE_KEYS.PINNED_DOCUMENTS}`,
         serverURL: payload.config.serverURL,
       })}
     />

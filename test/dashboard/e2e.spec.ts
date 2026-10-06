@@ -375,9 +375,7 @@ describe('Dashboard', () => {
     )
   })
 
-  test('activity widget persists pin and unpin actions in the hidden collection', async ({
-    page,
-  }) => {
+  test('activity widget persists pin and unpin actions in preferences', async ({ page }) => {
     const ticket = (await (await page.request.get(`${serverURL}/api/tickets?limit=1`)).json())
       .docs[0]
     const preferenceResponse = await page.request.post(
@@ -427,11 +425,11 @@ describe('Dashboard', () => {
     ).toBeEnabled()
 
     const pins = await (
-      await page.request.get(`${serverURL}/api/payload-pinned-documents?depth=0`)
+      await page.request.get(`${serverURL}/api/payload-preferences/pinned-documents`)
     ).json()
 
-    expect(pins.docs).toHaveLength(1)
-    expect(pins.docs[0].document).toEqual({ relationTo: 'tickets', value: ticket.id })
+    expect(pins.value.items).toHaveLength(1)
+    expect(pins.value.items[0]).toEqual({ id: ticket.id, collectionSlug: 'tickets' })
 
     await widget.getByRole('button', { name: 'Recently viewed' }).click()
     await expect(widget.locator('.recents-widget__name')).toHaveText(ticket.title)
@@ -506,20 +504,20 @@ describe('Dashboard', () => {
       await expect(widget.getByRole('link', { name: new RegExp(document.title) })).toBeVisible()
       await expect(widget.getByRole('button', { name: 'Pinned', exact: true })).toBeFocused()
       const pins = await (
-        await page.request.get(`${serverURL}/api/payload-pinned-documents?depth=0`)
+        await page.request.get(`${serverURL}/api/payload-preferences/pinned-documents`)
       ).json()
 
       expect(
-        pins.docs.filter(
-          (pin) => pin.document.relationTo === collectionSlug && pin.document.value === document.id,
+        pins.value.items.filter(
+          (pin) => pin.collectionSlug === collectionSlug && pin.id === document.id,
         ),
       ).toHaveLength(1)
     }
     const pins = await (
-      await page.request.get(`${serverURL}/api/payload-pinned-documents?depth=0`)
+      await page.request.get(`${serverURL}/api/payload-preferences/pinned-documents`)
     ).json()
 
-    expect(pins.totalDocs).toBe(2)
+    expect(pins.value.items).toHaveLength(2)
     for (const { collectionLabel, document } of [
       { collectionLabel: 'Ticket', document: ticket },
       { collectionLabel: 'Event', document: event },
@@ -547,13 +545,20 @@ describe('Dashboard', () => {
   }) => {
     const tickets = (await (await page.request.get(`${serverURL}/api/tickets?limit=5`)).json()).docs
 
-    for (const ticket of tickets.slice(0, 4)) {
-      const response = await page.request.post(`${serverURL}/api/payload-pinned-documents`, {
-        data: { document: { relationTo: 'tickets', value: ticket.id } },
-      })
+    const response = await page.request.post(
+      `${serverURL}/api/payload-preferences/pinned-documents`,
+      {
+        data: {
+          value: {
+            items: tickets
+              .slice(0, 4)
+              .map((ticket) => ({ id: ticket.id, collectionSlug: 'tickets' })),
+          },
+        },
+      },
+    )
 
-      expect(response.ok()).toBe(true)
-    }
+    expect(response.ok()).toBe(true)
     await page.setViewportSize({ height: 900, width: 1920 })
     await page.reload()
     const widget = page.locator('.recents-widget')
@@ -600,7 +605,7 @@ describe('Dashboard', () => {
     await expect(widget.locator('.recents-widget__pagination')).toContainText('2 of 2')
     await expect(widget.locator('.recents-widget__item--add-pin')).toHaveCount(1)
     await expect(widget.locator('.recents-widget__item--empty')).toHaveCount(0)
-    await page.route('**/api/payload-pinned-documents', async (route) => {
+    await page.route('**/api/payload-preferences/pinned-documents', async (route) => {
       if (route.request().method() === 'POST') {
         await route.fulfill({ body: '{}', contentType: 'application/json', status: 403 })
       } else {
@@ -623,7 +628,7 @@ describe('Dashboard', () => {
       'Could not save pinned documents.',
     )
     await expect(widget.locator('.recents-widget__name')).toHaveCount(0)
-    await page.unroute('**/api/payload-pinned-documents')
+    await page.unroute('**/api/payload-preferences/pinned-documents')
     await addPin.click()
     await selectInput({
       multiSelect: false,
@@ -690,8 +695,8 @@ describe('Dashboard', () => {
     })
     expect(response.ok()).toBe(true)
     const { doc } = await response.json()
-    const pin = await page.request.post(`${serverURL}/api/payload-pinned-documents`, {
-      data: { document: { relationTo: 'draft-posts', value: doc.id } },
+    const pin = await page.request.post(`${serverURL}/api/payload-preferences/pinned-documents`, {
+      data: { value: { items: [{ id: doc.id, collectionSlug: 'draft-posts' }] } },
     })
     expect(pin.ok()).toBe(true)
     await page.reload()
@@ -719,8 +724,8 @@ describe('Dashboard', () => {
     const ticket = (await (await page.request.get(`${serverURL}/api/tickets?limit=1`)).json())
       .docs[0]
     const event = (await (await page.request.get(`${serverURL}/api/events?limit=1`)).json()).docs[0]
-    const pin = await page.request.post(`${serverURL}/api/payload-pinned-documents`, {
-      data: { document: { relationTo: 'tickets', value: ticket.id } },
+    const pin = await page.request.post(`${serverURL}/api/payload-preferences/pinned-documents`, {
+      data: { value: { items: [{ id: ticket.id, collectionSlug: 'tickets' }] } },
     })
 
     expect(pin.ok()).toBe(true)

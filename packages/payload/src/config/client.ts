@@ -36,7 +36,6 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'kv'
   | 'logger'
   | 'onInit'
-  | 'pinnedDocuments'
   | 'plugins'
   | 'queryPresets'
   | 'secret'
@@ -87,7 +86,6 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'db',
   'editor',
   'plugins',
-  'pinnedDocuments',
   'sharp',
   'onInit',
   'secret',

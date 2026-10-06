@@ -30,10 +30,6 @@ import {
   getLockedDocumentsCollection,
   lockedDocumentsCollectionSlug,
 } from '../locked-documents/config.js'
-import {
-  getPinnedDocumentsCollection,
-  pinnedDocumentsCollectionSlug,
-} from '../pinned-documents/config.js'
 import { getPreferencesCollection, preferencesCollectionSlug } from '../preferences/config.js'
 import { getQueryPresetsConfig, queryPresetsCollectionSlug } from '../query-presets/config.js'
 import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/collection.js'
@@ -399,7 +395,6 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     jobsCollectionSlug,
     lockedDocumentsCollectionSlug,
     preferencesCollectionSlug,
-    pinnedDocumentsCollectionSlug,
   ]
 
   const dashboardWidgets = config.admin?.dashboard?.widgets ?? ([] as Widget[])
@@ -570,20 +565,6 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   config.jobs.hasConcurrency = Boolean(
     config.jobs.tasks?.some((task) => task.concurrency) ||
       config.jobs.workflows?.some((workflow) => workflow.concurrency),
-  )
-
-  // Need to add default jobs collection before locked documents collections
-  if (collectionSlugs.has(pinnedDocumentsCollectionSlug)) {
-    throw new DuplicateCollection('slug', pinnedDocumentsCollectionSlug)
-  }
-
-  configWithDefaults.collections!.push(
-    sanitizeCollection(
-      config as unknown as Config,
-      getPinnedDocumentsCollection({ config: config as unknown as Config }),
-      richTextSanitizers,
-      validRelationships,
-    ),
   )
 
   // Need to add default jobs collection before locked documents collections

@@ -2,7 +2,6 @@
 
 import type { FilterOptionsResult } from 'payload'
 
-import * as qs from 'qs-esm'
 import React, { useId, useMemo, useState } from 'react'
 
 import type { ListDrawerProps } from '../../../elements/ListDrawer/types.js'
@@ -10,6 +9,7 @@ import type { PinnedItem } from '../recents.js'
 
 import { useListDrawer } from '../../../elements/ListDrawer/index.js'
 import { PlusIcon } from '../../../icons/Plus/index.js'
+import { readPinnedPreferences } from '../pinnedPreferences.js'
 import './index.css'
 
 export function PinDocumentPicker({
@@ -49,24 +49,14 @@ export function PinDocumentPicker({
     setIsPreparing(true)
 
     try {
-      const query = qs.stringify(
-        { depth: 0, limit: 0, pagination: false, select: { document: true } },
-        { addQueryPrefix: true },
-      )
-      const response = await fetch(`${pinsURL}${query}`, { credentials: 'include' })
-
-      if (!response.ok) {
-        throw new Error('Unable to read pins')
-      }
-      const pins: { docs: { document: { relationTo: string; value: number | string } }[] } =
-        await response.json()
+      const pins = await readPinnedPreferences({ url: pinsURL })
       const idsByCollection = new Map<string, (number | string)[]>()
 
-      for (const { document } of pins.docs) {
-        const ids = idsByCollection.get(document.relationTo) ?? []
+      for (const document of pins) {
+        const ids = idsByCollection.get(document.collectionSlug) ?? []
 
-        ids.push(document.value)
-        idsByCollection.set(document.relationTo, ids)
+        ids.push(document.id)
+        idsByCollection.set(document.collectionSlug, ids)
       }
       setFilterOptions(
         Object.fromEntries(

@@ -932,7 +932,9 @@ test.describe('WCAG 2.2 Level AA', () => {
       const drawer = page.locator('.list-drawer.drawer--is-open')
       const document = (await (await page.request.get(`${serverURL}/api/posts?limit=1`)).json())
         .docs[0]
-      let pinID: number | string | undefined
+      const previousPins = await (
+        await page.request.get(`${serverURL}/api/payload-preferences/pinned-documents`)
+      ).json()
 
       try {
         await widget.locator('.recents-widget__empty-icon--pinned').click()
@@ -992,20 +994,17 @@ test.describe('WCAG 2.2 Level AA', () => {
         await expect(widget.getByRole('button', { name: 'Pinned', exact: true })).toBeFocused()
         await expect(widget.locator('.recents-widget__name')).toContainText(document.title)
         const pins = await (
-          await page.request.get(`${serverURL}/api/payload-pinned-documents?depth=0`)
+          await page.request.get(`${serverURL}/api/payload-preferences/pinned-documents`)
         ).json()
 
-        pinID = pins.docs.find(
-          (pin) => pin.document.relationTo === 'posts' && pin.document.value === document.id,
-        )?.id
-        expect(pinID).toBeDefined()
+        expect(pins.value.items).toContainEqual({ id: document.id, collectionSlug: 'posts' })
         const widgetResults = await runAxeScan({ include: ['.recents-widget'], page, testInfo })
 
         expect(widgetResults.violations).toEqual([])
       } finally {
-        if (pinID !== undefined) {
-          await page.request.delete(`${serverURL}/api/payload-pinned-documents/${pinID}`)
-        }
+        await page.request.post(`${serverURL}/api/payload-preferences/pinned-documents`, {
+          data: { value: previousPins.value ?? { items: [] } },
+        })
       }
     })
 
@@ -1016,15 +1015,19 @@ test.describe('WCAG 2.2 Level AA', () => {
       ).json()
       const documents = (await (await page.request.get(`${serverURL}/api/posts?limit=3`)).json())
         .docs
-      let pinID: number | string | undefined
+      const previousPins = await (
+        await page.request.get(`${serverURL}/api/payload-preferences/pinned-documents`)
+      ).json()
 
       try {
-        const pinResponse = await page.request.post(`${serverURL}/api/payload-pinned-documents`, {
-          data: { document: { relationTo: 'posts', value: documents[0].id } },
-        })
+        const pinResponse = await page.request.post(
+          `${serverURL}/api/payload-preferences/pinned-documents`,
+          {
+            data: { value: { items: [{ id: documents[0].id, collectionSlug: 'posts' }] } },
+          },
+        )
 
         expect(pinResponse.ok()).toBe(true)
-        pinID = (await pinResponse.json()).doc.id
         await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
           data: {
             value: {
@@ -1082,14 +1085,13 @@ test.describe('WCAG 2.2 Level AA', () => {
         await expect(widget.locator('.recents-widget__empty-title')).toHaveText(
           'No pinned documents',
         )
-        pinID = undefined
         await expect
           .poll(() => widget.evaluate((element) => element.scrollWidth <= element.clientWidth))
           .toBe(true)
       } finally {
-        if (pinID !== undefined) {
-          await page.request.delete(`${serverURL}/api/payload-pinned-documents/${pinID}`)
-        }
+        await page.request.post(`${serverURL}/api/payload-preferences/pinned-documents`, {
+          data: { value: previousPins.value ?? { items: [] } },
+        })
         await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
           data: { value: preference?.value ?? { items: [] } },
         })

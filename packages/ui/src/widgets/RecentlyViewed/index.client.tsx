@@ -1,6 +1,5 @@
 'use client'
 
-import * as qs from 'qs-esm'
 import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import type { DocumentsPage, DocumentsTab } from './getDocuments.js'
@@ -14,6 +13,7 @@ import { useEntityVisibility } from '../../providers/EntityVisibility/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { WidgetCard } from '../WidgetCard/index.js'
 import { PinDocumentPicker } from './PinDocumentPicker/index.js'
+import { readPinnedPreferences, savePinnedPreferences } from './pinnedPreferences.js'
 import { documentKey } from './recents.js'
 import './index.css'
 
@@ -22,7 +22,6 @@ export type RecentDocument = {
   dateTime?: string
   href: string
   isDraft?: boolean
-  pinID?: number | string
   statusLabel?: string
   thumbnailURL?: string
   title: string
@@ -59,7 +58,7 @@ export function RecentsAndPinnedClient({
   labels: Labels
   pinsURL: string
 }) {
-  const { permissions } = useAuth()
+  const { permissions, user } = useAuth()
   const { config } = useConfig()
   const { isEntityVisible } = useEntityVisibility()
   const { serverFunction } = useServerFunctions()
@@ -75,9 +74,7 @@ export function RecentsAndPinnedClient({
         .map(({ slug }) => slug),
     [config.collections, isEntityVisible, permissions],
   )
-  const canAddPin =
-    Boolean(permissions?.collections?.['payload-pinned-documents']?.create) &&
-    pinnableCollections.length > 0
+  const canAddPin = Boolean(user) && pinnableCollections.length > 0
   const contentRef = useRef<HTMLDivElement>(null)
   const listID = useId()
   const [page, setPage] = useState(1)
@@ -193,7 +190,7 @@ export function RecentsAndPinnedClient({
     activeTab === 'recents' ? labels.recentsEmptyDescription : labels.pinnedEmptyDescription
 
   const removePinnedDocument = async ({ item }: { item: RecentDocument }) => {
-    if (isSaving || activeTab !== 'pinned' || item.pinID === undefined) {
+    if (isSaving || activeTab !== 'pinned') {
       return
     }
 
@@ -208,14 +205,12 @@ export function RecentsAndPinnedClient({
     setSaveError('')
 
     try {
-      const response = await fetch(`${pinsURL}/${encodeURIComponent(String(item.pinID))}`, {
-        credentials: 'include',
-        method: 'DELETE',
-      })
+      const existing = await readPinnedPreferences({ url: pinsURL })
 
-      if (!response.ok) {
-        throw new Error('Unable to remove pin')
-      }
+      await savePinnedPreferences({
+        items: existing.filter((entry) => documentKey(entry) !== documentKey(item)),
+        url: pinsURL,
+      })
       setRefresh((value) => value + 1)
     } catch {
       setPageResult(previous)
@@ -233,39 +228,10 @@ export function RecentsAndPinnedClient({
     setSaveError('')
 
     try {
-      const query = qs.stringify(
-        {
-          depth: 0,
-          limit: 1,
-          where: {
-            and: [
-              { 'document.relationTo': { equals: document.collectionSlug } },
-              { 'document.value': { equals: document.id } },
-            ],
-          },
-        },
-        { addQueryPrefix: true },
-      )
-      const existingResponse = await fetch(`${pinsURL}${query}`, { credentials: 'include' })
+      const existing = await readPinnedPreferences({ url: pinsURL })
 
-      if (!existingResponse.ok) {
-        throw new Error('Unable to read pins')
-      }
-      const existing = await existingResponse.json()
-
-      if (!existing.totalDocs) {
-        const response = await fetch(pinsURL, {
-          body: JSON.stringify({
-            document: { relationTo: document.collectionSlug, value: document.id },
-          }),
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          method: 'POST',
-        })
-
-        if (!response.ok) {
-          throw new Error('Unable to save pin')
-        }
+      if (!existing.some((entry) => documentKey(entry) === documentKey(document))) {
+        await savePinnedPreferences({ items: [document, ...existing], url: pinsURL })
       }
       setPage(1)
       setRefresh((value) => value + 1)
@@ -373,8 +339,6 @@ export function RecentsAndPinnedClient({
           <div className="recents-widget__content">
             <ul className="recents-widget__items recents-widget__items--grid" id={listID}>
               {items.map((item) => {
-                const isPinned = item.pinID !== undefined
-
                 return (
                   <li className="recents-widget__item" key={documentKey(item)}>
                     <a className="recents-widget__link" href={item.href}>
@@ -416,10 +380,10 @@ export function RecentsAndPinnedClient({
                         </span>
                       </span>
                     </a>
-                    {activeTab === 'pinned' && isPinned ? (
+                    {activeTab === 'pinned' ? (
                       <button
                         aria-label={`${labels.removePin}: ${item.title}`}
-                        aria-pressed={isPinned}
+                        aria-pressed={true}
                         className="recents-widget__pin"
                         disabled={isSaving || isLoading}
                         onClick={() => void removePinnedDocument({ item })}

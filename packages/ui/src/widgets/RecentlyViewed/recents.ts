@@ -1,6 +1,6 @@
-import type { Field, RecentlyViewedItem } from 'payload'
+import type { Field, PinnedDocument } from 'payload'
 
-export type PinnedItem = Pick<RecentlyViewedItem, 'collectionSlug' | 'id'>
+export type PinnedItem = PinnedDocument
 export const documentKey = ({ id, collectionSlug }: PinnedItem): string =>
   `${collectionSlug}:${String(id)}`
 

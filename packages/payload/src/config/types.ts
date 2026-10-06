@@ -1620,11 +1620,6 @@ export type Config = {
 
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
   onInit?: (payload: Payload) => Promise<void> | void
-  /** Configure the internal collection used to store each user's pinned documents. */
-  pinnedDocuments?: {
-    /** Override the collection configuration, including access control. The slug is reserved. */
-    collectionOverrides?: (args: { defaultCollection: CollectionConfig }) => CollectionConfig
-  }
   /**
    * An array of Payload plugins.
    *

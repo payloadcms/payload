@@ -60,3 +60,11 @@ export type RecentlyViewedItem = {
 export type RecentlyViewedPreferences = {
   items: RecentlyViewedItem[]
 }
+
+/** A document identity stored in the user's pinned documents preference. */
+export type PinnedDocument = Pick<RecentlyViewedItem, 'collectionSlug' | 'id'>
+
+/** The `pinned-documents` preference value, with the newest pins first. */
+export type PinnedDocumentsPreferences = {
+  items: PinnedDocument[]
+}
