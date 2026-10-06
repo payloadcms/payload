@@ -3,6 +3,7 @@ import type { JoinQuery, PayloadRequest } from '../types/index.js'
 
 import { executeAccess } from '../auth/executeAccess.js'
 import { QueryError } from '../errors/QueryError.js'
+import { deepCopyObjectSimple } from '../utilities/deepCopyObject.js'
 import { combineQueries } from './combineQueries.js'
 import { validateQueryPaths } from './queryValidation/validateQueryPaths.js'
 import { validateSortQuery } from './queryValidation/validateSortQuery.js'
@@ -65,7 +66,7 @@ const sanitizeJoinFieldQuery = async ({
   }
 
   if (join.field.where) {
-    joinQuery.where = combineQueries(joinQuery.where, join.field.where)
+    joinQuery.where = combineQueries(joinQuery.where, deepCopyObjectSimple(join.field.where))
   }
 
   promises.push(

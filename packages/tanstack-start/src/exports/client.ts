@@ -1,18 +1,19 @@
 'use client'
 
-export { TanStackRouterAdapter } from '../elements/RouterAdapter/index.js'
 export {
+  type LayoutLoad,
   PayloadAdminShell,
   type PayloadAdminShellProps,
+  payloadLayoutRoute,
   withPayloadRoot,
   type WithPayloadRootOptions,
-} from '../layouts/Root/withPayloadRoot.js'
+} from '../adapters/layout.js'
+export { TanStackRouterAdapter } from '../adapters/router.js'
 export {
   type AdminLoad,
   payloadAdminIndexRoute,
   payloadAdminSplatRoute,
-} from '../routes/adminRoutes.js'
-export { type LayoutLoad, payloadLayoutRoute } from '../routes/layoutRoute.js'
+} from '../adapters/views.js'
 export {
   createServerFunctionClient,
   stripUnserializable,

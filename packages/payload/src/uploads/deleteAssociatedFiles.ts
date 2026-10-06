@@ -43,8 +43,8 @@ export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
       throw new ErrorDeletingFile(req.t)
     }
 
-    if (doc.sizes) {
-      const sizes: FileData[] = Object.values(doc.sizes)
+    if (doc.variants) {
+      const sizes: FileData[] = Object.values(doc.variants)
       // Since forEach will not wait until unlink is finished it could
       // happen that two operations will try to delete the same file.
       // To avoid this it is recommended to use "sync" instead
