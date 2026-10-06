@@ -89,22 +89,10 @@ export const rootEslintConfig = [
     },
   },
   {
-    files: [
-      'packages/tanstack-start/src/elements/RouterAdapter/**/*.{ts,tsx}',
-      'packages/tanstack-start/src/routes/**/*.{ts,tsx}',
-    ],
+    files: ['packages/**/src/**/*.{ts,tsx}'],
+    ignores: ['packages/ui/**'],
     rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          paths: [
-            {
-              message: 'Import from a targeted @payloadcms/ui subpath in the TanStack route graph.',
-              name: '@payloadcms/ui',
-            },
-          ],
-        },
-      ],
+      'payload/no-ui-client-subpaths': 'error',
     },
   },
   {
