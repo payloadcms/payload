@@ -294,6 +294,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     clear:
       'Հիմնական տեքստի իմաստը պետք է պահպանվի Payload կոնտեքստի մեջ: Այս այս այստեղ են հաճախակի',
     clearAll: 'Մաքրել բոլորը',
+    clearSearch: 'Մաքրել որոնումը',
     close: 'Փակել',
     collapse: 'Փակել',
     collection: 'Հավաքածու',

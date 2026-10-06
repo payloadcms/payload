@@ -294,6 +294,7 @@ export const taTranslations: DefaultTranslationsObject = {
     checked: 'சரிபாரிக்கப்பட்டது',
     clear: 'அழிக்கவும்',
     clearAll: 'அனைத்தையும் அழிக்கவும்',
+    clearSearch: 'தேடலை அழி',
     close: 'மூடவும்',
     collapse: 'சுருக்கவும்',
     collection: 'தொகுப்பு',

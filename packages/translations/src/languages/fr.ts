@@ -304,6 +304,7 @@ export const frTranslations: DefaultTranslationsObject = {
     checked: 'Vérifié',
     clear: 'Clair',
     clearAll: 'Tout effacer',
+    clearSearch: 'Effacer la recherche',
     close: 'Fermer',
     collapse: 'Réduire',
     collection: 'Collection',

@@ -294,6 +294,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     checked: 'Provereno',
     clear: 'Jasno',
     clearAll: 'Očisti sve',
+    clearSearch: 'Obriši pretragu',
     close: 'Zatvori',
     collapse: 'Skupi',
     collection: 'Kolekcija',

@@ -299,6 +299,7 @@ export const roTranslations: DefaultTranslationsObject = {
     checked: 'Verificat',
     clear: 'Clar',
     clearAll: 'Șterge tot',
+    clearSearch: 'Șterge căutarea',
     close: 'Închide',
     collapse: 'Colaps',
     collection: 'Colectie',

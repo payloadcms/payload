@@ -297,6 +297,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     checked: 'Patikrinta',
     clear: 'Aišku',
     clearAll: 'Išvalyti viską',
+    clearSearch: 'Išvalyti paiešką',
     close: 'Uždaryti',
     collapse: 'Susikolimas',
     collection: 'Kolekcija',

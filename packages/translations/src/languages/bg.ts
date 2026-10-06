@@ -293,6 +293,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     checked: 'Проверено',
     clear: 'Ясно',
     clearAll: 'Изчисти всичко',
+    clearSearch: 'Изчистване на търсенето',
     close: 'Затвори',
     collapse: 'Свий',
     collection: 'Колекция',

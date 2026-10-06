@@ -294,6 +294,7 @@ export const svTranslations: DefaultTranslationsObject = {
     checked: 'Kontrollerad',
     clear: 'Rensa',
     clearAll: 'Rensa alla',
+    clearSearch: 'Rensa sökning',
     close: 'Stäng',
     collapse: 'Fäll ihop',
     collection: 'Samling',

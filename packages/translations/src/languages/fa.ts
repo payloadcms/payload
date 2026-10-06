@@ -287,6 +287,7 @@ export const faTranslations: DefaultTranslationsObject = {
     checked: 'بررسی شد',
     clear: 'پاک کردن',
     clearAll: 'پاک کردن همه',
+    clearSearch: 'پاک کردن جستجو',
     close: 'بستن',
     collapse: 'بستن',
     collection: 'مجموعه',

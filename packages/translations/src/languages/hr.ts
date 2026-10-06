@@ -293,6 +293,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     checked: 'Provjereno',
     clear: 'Jasan',
     clearAll: 'Očisti sve',
+    clearSearch: 'Očisti pretragu',
     close: 'Zatvori',
     collapse: 'Sažmi',
     collection: 'Kolekcija',

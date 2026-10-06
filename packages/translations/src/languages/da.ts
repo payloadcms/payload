@@ -293,6 +293,7 @@ export const daTranslations: DefaultTranslationsObject = {
     checked: 'Kontrolleret',
     clear: 'Klar',
     clearAll: 'Ryd alt',
+    clearSearch: 'Ryd søgning',
     close: 'Luk',
     collapse: 'Skjul',
     collection: 'Samling',

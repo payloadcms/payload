@@ -294,6 +294,7 @@ export const skTranslations: DefaultTranslationsObject = {
     checked: 'Skontrolované',
     clear: 'Jasný',
     clearAll: 'Vymazať všetko',
+    clearSearch: 'Vymazať vyhľadávanie',
     close: 'Zavrieť',
     collapse: 'Zbaliť',
     collection: 'Kolekcia',

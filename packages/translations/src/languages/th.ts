@@ -286,6 +286,7 @@ export const thTranslations: DefaultTranslationsObject = {
     clear:
       'ให้เคารพความหมายของข้อความต้นฉบับภายในบริบทของ Payload นี่คือรายการของคำที่มักใช้ใน Payload ที่มีความหมายที่เฉพาะเจาะจงมาก:\n    - Collection: Collection คือกลุ่มของเอกสารที่มีโครงสร้างและจุดประสงค์ท',
     clearAll: 'ล้างทั้งหมด',
+    clearSearch: 'ล้างการค้นหา',
     close: 'ปิด',
     collapse: 'ยุบ',
     collection: 'คอลเลกชัน',

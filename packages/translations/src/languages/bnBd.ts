@@ -299,6 +299,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     clear:
       'মূল পাঠের অর্থ সম্মান করুন পেলোড প্রসঙ্গে। এখানে পেলোড নির্দিষ্ট বিশেষ অর্থ বহন করে এরকম একটি সাধারণ টার্মের তালিকা:\n    - সংগ্রহ',
     clearAll: 'সমস্ত সাফ করুন',
+    clearSearch: 'অনুসন্ধান মুছুন',
     close: 'বন্ধ করুন',
     collapse: 'সংকুচিত করুন',
     collection: 'সংগ্রহ',

@@ -298,6 +298,7 @@ export const trTranslations: DefaultTranslationsObject = {
     checked: 'Kontrol edildi',
     clear: 'Temiz',
     clearAll: 'Hepsini Temizle',
+    clearSearch: 'Aramayı temizle',
     close: 'Kapat',
     collapse: 'Daralt',
     collection: 'Koleksiyon',

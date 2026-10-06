@@ -297,6 +297,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     checked: 'Проверено',
     clear: 'Четкий',
     clearAll: 'Очистить все',
+    clearSearch: 'Очистить поиск',
     close: 'Закрыть',
     collapse: 'Свернуть',
     collection: 'Коллекция',

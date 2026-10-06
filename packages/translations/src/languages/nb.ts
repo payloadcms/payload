@@ -295,6 +295,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     checked: 'Kontrollert',
     clear: 'Tydelig',
     clearAll: 'Tøm alt',
+    clearSearch: 'Tøm søk',
     close: 'Lukk',
     collapse: 'Skjul',
     collection: 'Samling',

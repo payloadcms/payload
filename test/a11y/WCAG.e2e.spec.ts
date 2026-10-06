@@ -2645,6 +2645,22 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.6 Headings and Labels (AA)', () => {
+    test('should identify the folder search clear action explicitly', async () => {
+      // PYLD-3583
+      const sidebar = await openNavigationFolders({ page, serverURL })
+      const search = sidebar.getByRole('textbox')
+
+      await search.fill('Accessibility folder')
+      await search.press('Tab')
+      const clear = sidebar.locator('.search-input__clear')
+
+      await expect(clear).toBeFocused()
+      await expect(clear).toHaveAccessibleName('Clear search')
+      await clear.press('Enter')
+      await expect(search).toHaveValue('')
+      await expect(sidebar.getByRole('tree')).toBeVisible()
+    })
+
     test('should include the visible version count in the table history link name', async () => {
       // PYLD-3707
       test.setTimeout(60000)
@@ -2901,6 +2917,23 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('3.2.2 On Input (A)', () => {
+    test('should describe automatic search before input in rich text add panels', async () => {
+      // PYLD-3663
+      for (const openDrawer of [openRichTextUploadDrawer, openRichTextRelationshipDrawer]) {
+        const drawer = await openDrawer({ page, postsURL })
+        const search = drawer.locator('#search-filter-input')
+
+        await search.focus()
+        await expect(search).toHaveAccessibleDescription(/automatically as you type/i)
+        await search.fill('no-matching-accessibility-result')
+        await expect(drawer.locator('.collection-list__search-status')).toHaveText(
+          'Results found for “no-matching-accessibility-result”: 0.',
+        )
+        await expect(drawer.locator('.no-results__title')).toHaveText('No Results.')
+        await expect(search).toBeFocused()
+      }
+    })
+
     test('should retain focus during automatic search', async () => {
       // Additional coverage for PYLD-3773.
       for (const isColumnSearch of [false, true]) {
@@ -3574,7 +3607,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       )
       await expect(search).toBeFocused()
       await expect(page).toHaveURL(originalURL)
-      await sidebar.getByRole('button', { name: 'Clear', exact: true }).click()
+      await sidebar.getByRole('button', { name: 'Clear search', exact: true }).click()
       await expect(status).toBeEmpty()
       await expect(sidebar.getByRole('tree')).toBeVisible()
     })

@@ -299,6 +299,7 @@ export const itTranslations: DefaultTranslationsObject = {
     checked: 'Verificato',
     clear: 'Chiara',
     clearAll: 'Cancella Tutto',
+    clearSearch: 'Cancella ricerca',
     close: 'Chiudere',
     collapse: 'Comprimi',
     collection: 'Collezione',

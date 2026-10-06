@@ -292,6 +292,7 @@ export const etTranslations: DefaultTranslationsObject = {
     checked: 'Kontrollitud',
     clear: 'Selge',
     clearAll: 'Tühjenda kõik',
+    clearSearch: 'Tühjenda otsing',
     close: 'Sulge',
     collapse: 'Ahenda',
     collection: 'Kogumik',

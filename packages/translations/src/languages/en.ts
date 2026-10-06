@@ -294,6 +294,7 @@ export const enTranslations = {
     checked: 'Checked',
     clear: 'Clear',
     clearAll: 'Clear All',
+    clearSearch: 'Clear search',
     close: 'Close',
     collapse: 'Collapse',
     collection: 'Collection',

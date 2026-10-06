@@ -247,6 +247,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:copied',
   'general:clear',
   'general:clearAll',
+  'general:clearSearch',
   'general:copy',
   'general:copyField',
   'general:copyRow',
