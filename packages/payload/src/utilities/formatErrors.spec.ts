@@ -66,8 +66,9 @@ describe('formatErrors', () => {
     expect(result.errors[0]!.message).toBe('Unexpected failure')
   })
 
-  it('should format a Payload APIError with no data', () => {
+  it('should format a Payload APIError without data or a runtime class name', () => {
     const err = new APIError('Server error')
+    err.name = ''
 
     const result = formatErrors(err)
 
