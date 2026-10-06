@@ -39,6 +39,7 @@ export { QueryPresetsGroupByCell } from '../../elements/QueryPresets/cells/Group
 export { QueryPresetsColumnField } from '../../elements/QueryPresets/fields/ColumnsField/index.js'
 export { QueryPresetsWhereField } from '../../elements/QueryPresets/fields/WhereField/index.js'
 export { QueryPresetsGroupByField } from '../../elements/QueryPresets/fields/GroupByField/index.js'
+export { CollectionCardsClient } from '../../widgets/CollectionCards/index.client.js'
 export { CollectionQuerySortField } from '../../widgets/CollectionQuery/SortField/index.js'
 export { RecentlyViewedCollectionsField } from '../../widgets/RecentlyViewed/CollectionsField/index.js'
 export { UploadDropzoneCollectionsField } from '../../widgets/UploadDropzone/CollectionsField/index.js'
@@ -78,6 +79,7 @@ export {
   useCellProps,
 } from '../../providers/TableColumns/RenderDefaultCell/index.js'
 export { DateCell } from '../../elements/Table/DefaultCell/fields/Date/index.js'
+export { StatusCell } from '../../elements/Table/DefaultCell/fields/Status/index.js'
 export { TableSection } from '../../elements/TableSection/index.js'
 export type {
   TableSectionContentProps,
@@ -417,7 +419,8 @@ export { LockOpenIcon } from '../../icons/LockOpen/index.js'
 export { PeopleIcon } from '../../icons/People/index.js'
 export { RefreshIcon } from '../../icons/Refresh/index.js'
 export { ReplaceIcon } from '../../icons/Replace/index.js'
-export { SortDownIcon } from '../../icons/Sort/index.js'
+export { SortDownIcon, SortUpIcon } from '../../icons/Sort/index.js'
+export { SpinnerIcon } from '../../icons/Spinner/index.js'
 export { ThreeDotsIcon } from '../../icons/ThreeDots/index.js'
 export { TrashIcon } from '../../icons/Trash/index.js'
 export { ErrorIcon } from '../../icons/Error/index.js'
