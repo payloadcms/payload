@@ -14,9 +14,11 @@ import { useField } from '../../../forms/useField/index.js'
 import { TagIcon } from '../../../icons/Tag/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
+import { useHierarchy } from '../../../providers/Hierarchy/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { useHierarchyModal } from '../Modal/useHierarchyModal.js'
+import { getHierarchyFilterOptions } from './getHierarchyFilterOptions.js'
 import './index.css'
 
 const baseClass = 'hierarchy-field'
@@ -46,6 +48,7 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
   const hierarchySlug = Array.isArray(relationToProp) ? relationToProp[0] : relationToProp
   const { getEntityConfig } = useConfig()
   const { collectionSlug: documentCollectionSlug } = useDocumentInfo()
+  const { baseFilter } = useHierarchy()
   const { i18n, t } = useTranslation()
   const collectionConfig = getEntityConfig({ collectionSlug: hierarchySlug })
   const hierarchyConfig =
@@ -70,6 +73,18 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
     showError,
     value,
   } = useField<Value>({ potentiallyStalePath: pathFromProps, validate: memoizedValidate })
+  const isReadOnly = readOnly || disabled
+  const hierarchyFilterOptions = useMemo(
+    () =>
+      getHierarchyFilterOptions({
+        baseFilter,
+        documentCollectionSlug,
+        filterOptions,
+        hierarchyConfig,
+        hierarchySlug,
+      }),
+    [baseFilter, documentCollectionSlug, filterOptions, hierarchyConfig, hierarchySlug],
+  )
   const [relationTo] = React.useState(() => [hierarchySlug])
   const styles = useMemo(() => mergeFieldStyles(field), [field])
   const toRelationValues = useCallback(
@@ -112,11 +127,15 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
       closeModal: () => void
       selections: Map<number | string, SelectionWithPath>
     }) => {
+      if (isReadOnly) {
+        closeModal()
+        return
+      }
       const ids = Array.from(selections.keys())
       setValue(hasMany ? ids : (ids[0] ?? null))
       closeModal()
     },
-    [hasMany, setValue],
+    [hasMany, isReadOnly, setValue],
   )
   const handleChangeHasMany = useCallback(
     (newValue: ValueWithRelation[]) => {
@@ -172,14 +191,14 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
         aria-label={t('general:selectLabel', { label: hierarchyLabel })}
         buttonStyle="secondary"
         className={`${baseClass}__browse-button`}
-        disabled={disabled}
+        disabled={isReadOnly}
         icon={Icon ?? <TagIcon />}
         margin={false}
         onClick={openModal}
         size="large"
       />
     ),
-    [Icon, disabled, hierarchyLabel, openModal, t],
+    [Icon, hierarchyLabel, isReadOnly, openModal, t],
   )
 
   return (
@@ -201,7 +220,7 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
       Description={Description}
       description={description}
       Error={Error}
-      filterOptions={filterOptions}
+      filterOptions={hierarchyFilterOptions}
       formatDisplayedOptions={flattenOptionGroups}
       formatOptionLabel={formatOptionLabel}
       isSortable={isSortable}
@@ -211,7 +230,7 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
       maxResultsPerRequest={10}
       path={path}
       placeholder={placeholder}
-      readOnly={readOnly || disabled}
+      readOnly={isReadOnly}
       relationTo={relationTo}
       required={required}
       selectOptionFields={selectOptionFields}

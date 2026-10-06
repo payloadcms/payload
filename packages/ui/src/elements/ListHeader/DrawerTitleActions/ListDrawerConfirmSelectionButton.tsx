@@ -8,7 +8,11 @@ import { Button } from '../../Button/index.js'
 import { useListDrawerContext } from '../../ListDrawer/Provider.js'
 
 /** Applies the current picker selection and stays disabled until a document is selected. */
-export function ListDrawerConfirmSelectionButton() {
+export function ListDrawerConfirmSelectionButton({
+  enableRowSelections,
+}: {
+  enableRowSelections?: boolean
+}) {
   const { count, selected } = useSelection()
   const { onBulkSelect } = useListDrawerContext()
   const { t } = useTranslation()
@@ -17,7 +21,7 @@ export function ListDrawerConfirmSelectionButton() {
     onBulkSelect?.(selected)
   }, [onBulkSelect, selected])
 
-  if (typeof onBulkSelect !== 'function') {
+  if (!enableRowSelections || typeof onBulkSelect !== 'function') {
     return null
   }
 

@@ -28,6 +28,7 @@ export type ListHeaderProps = {
   Description?: React.ReactNode
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
+  enableRowSelections?: boolean
   hasCreatePermission: boolean
   hasDeletePermission?: boolean
   hasTrashPermission?: boolean
@@ -46,6 +47,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
   Description,
   disableBulkDelete,
   disableBulkEdit,
+  enableRowSelections,
   hasCreatePermission,
   hasDeletePermission,
   hasTrashPermission,
@@ -83,7 +85,10 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
             hasCreatePermission={hasCreatePermission}
             key="list-drawer-create-new-doc"
           />,
-          <ListDrawerConfirmSelectionButton key="list-drawer-confirm-selection" />,
+          <ListDrawerConfirmSelectionButton
+            enableRowSelections={enableRowSelections}
+            key="list-drawer-confirm-selection"
+          />,
         ].filter(Boolean)}
       />
     )
