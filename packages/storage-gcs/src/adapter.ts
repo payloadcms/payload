@@ -34,7 +34,8 @@ export function createGcsAdapter({
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'gcs',
 
-    copyFile: ({ from, to }) => copyGcsFile({ acl, bucket, client: getStorageClient(), from, to }),
+    copyFile: ({ from, req, to }) =>
+      copyGcsFile({ acl, bucket, client: getStorageClient(), from, req, to }),
     deleteFile: deleteStoredFile,
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>

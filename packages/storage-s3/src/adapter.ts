@@ -39,9 +39,9 @@ export function createS3Adapter({
     name: 's3',
     supportsTempFiles: true,
 
-    copyFile: async ({ from, to }) => {
+    copyFile: async ({ from, req, to }) => {
       const { copyS3File } = await import('./copyFile.js')
-      await copyS3File({ acl, bucket, client: getStorageClient(), from, to })
+      await copyS3File({ acl, bucket, client: getStorageClient(), from, req, to })
     },
     deleteFile: deleteStoredFile,
 

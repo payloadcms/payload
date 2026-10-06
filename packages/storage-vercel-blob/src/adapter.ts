@@ -50,7 +50,8 @@ export function createVercelBlobAdapter({
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'vercel-blob',
 
-    copyFile: ({ from, to }) => copyVercelBlobFile({ access, cacheControlMaxAge, from, to, token }),
+    copyFile: ({ from, req, to }) =>
+      copyVercelBlobFile({ access, cacheControlMaxAge, from, req, to, token }),
     deleteFile: deleteStoredFile,
 
     uploadInstructions: {

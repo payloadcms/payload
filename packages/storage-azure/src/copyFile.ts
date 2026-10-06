@@ -1,9 +1,10 @@
 import type { ContainerClient } from '@azure/storage-blob'
 import type { Readable } from 'node:stream'
+import type { PayloadRequest } from 'payload'
 
-type Args = { client: ContainerClient; from: string; to: string }
+type Args = { client: ContainerClient; from: string; req?: PayloadRequest; to: string }
 
-export const copyAzureFile = async ({ client, from, to }: Args): Promise<void> => {
+export const copyAzureFile = async ({ client, from, req, to }: Args): Promise<void> => {
   if (from === to) {
     throw new Error('Storage copy requires different source and destination keys')
   }
@@ -18,22 +19,42 @@ export const copyAzureFile = async ({ client, from, to }: Args): Promise<void> =
     throw new Error(`Azure storage source is not readable: ${from}`)
   }
 
-  await destination.uploadStream(download.readableStreamBody as Readable, 4 * 1024 * 1024, 4, {
-    blobHTTPHeaders: {
-      blobCacheControl: properties.cacheControl,
-      blobContentDisposition: properties.contentDisposition,
-      blobContentEncoding: properties.contentEncoding,
-      blobContentLanguage: properties.contentLanguage,
-      blobContentType: properties.contentType,
+  const uploaded = await destination.uploadStream(
+    download.readableStreamBody as Readable,
+    4 * 1024 * 1024,
+    4,
+    {
+      blobHTTPHeaders: {
+        blobCacheControl: properties.cacheControl,
+        blobContentDisposition: properties.contentDisposition,
+        blobContentEncoding: properties.contentEncoding,
+        blobContentLanguage: properties.contentLanguage,
+        blobContentType: properties.contentType,
+      },
+      conditions: { ifNoneMatch: '*' },
+      metadata: properties.metadata,
+      tags,
     },
-    conditions: { ifNoneMatch: '*' },
-    metadata: properties.metadata,
-    tags,
-  })
+  )
 
-  const copied = await destination.getProperties()
+  try {
+    const copied = await destination.getProperties()
 
-  if (copied.contentLength !== properties.contentLength) {
-    throw new Error(`Copied Azure object is not readable at its expected length: ${to}`)
+    if (copied.contentLength !== properties.contentLength) {
+      throw new Error(`Copied Azure object is not readable at its expected length: ${to}`)
+    }
+  } catch (err) {
+    try {
+      if (!uploaded.etag) {
+        throw new Error('Azure copy did not return an ETag for safe cleanup')
+      }
+      await destination.deleteIfExists({ conditions: { ifMatch: uploaded.etag } })
+    } catch (cleanupError) {
+      req?.payload.logger.error({
+        err: cleanupError,
+        msg: `Failed to remove unsuccessful Azure copy at ${client.containerName}/${to}`,
+      })
+    }
+    throw err
   }
 }

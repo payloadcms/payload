@@ -64,7 +64,7 @@ export function createR2Adapter({
     name: 'r2',
     uploadInstructions,
 
-    copyFile: async ({ from, to }) => {
+    copyFile: async ({ from, req, to }) => {
       if (!copyCredentials) {
         throw new Error('R2 file copy requires S3 API credentials')
       }
@@ -83,7 +83,7 @@ export function createR2Adapter({
       })
 
       try {
-        await copyS3File({ bucket: copyCredentials.bucket, client, from, to })
+        await copyS3File({ bucket: copyCredentials.bucket, client, from, req, to })
       } finally {
         client.destroy()
       }

@@ -40,7 +40,7 @@ export function createAzureAdapter({
     name: 'azure',
     supportsTempFiles: true,
 
-    copyFile: ({ from, to }) => copyAzureFile({ client: getStorageClient(), from, to }),
+    copyFile: ({ from, req, to }) => copyAzureFile({ client: getStorageClient(), from, req, to }),
     deleteFile: deleteStoredFile,
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
