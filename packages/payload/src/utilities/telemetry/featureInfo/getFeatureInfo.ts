@@ -44,7 +44,7 @@ const SYSTEM_COLLECTION_SLUGS = [
   'payload-preferences',
   'payload-query-presets',
 ]
-const SYSTEM_GLOBAL_SLUGS = new Set(['payload-jobs-stats'])
+const SYSTEM_GLOBAL_SLUGS = new Set(['payload-jobs-stats', 'payload-migrations-lock'])
 
 /**
  * Payload adds internal collections, globals and tasks during config sanitization.
