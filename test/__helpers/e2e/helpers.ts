@@ -1,10 +1,4 @@
-import type {
-  BrowserContext,
-  CDPSession,
-  ChromiumBrowserContext,
-  Locator,
-  Page,
-} from '@playwright/test'
+import type { BrowserContext, Locator, Page, Route } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 import { addDefaultsToConfig, type Config, type SanitizedConfig } from 'payload'
@@ -46,7 +40,10 @@ const networkConditions = {
 }
 
 /**
- * CPU throttling & 2 different kinds of network throttling
+ * CPU throttling & 2 different kinds of network throttling.
+ *
+ * Returns a function that removes all throttling again. Call it once the throttled steps are done,
+ * otherwise every later test that shares the page runs throttled as well.
  */
 export async function throttleTest({
   context,
@@ -56,7 +53,7 @@ export async function throttleTest({
   context: BrowserContext
   delay: keyof typeof networkConditions
   page: Page
-}): Promise<CDPSession> {
+}): Promise<() => Promise<void>> {
   const cdpSession = await context.newCDPSession(page)
 
   await cdpSession.send('Network.emulateNetworkConditions', {
@@ -66,15 +63,31 @@ export async function throttleTest({
     uploadThroughput: networkConditions[delay].upload,
   })
 
-  await page.route('**/*', async (route) => {
+  const delayRequest = async (route: Route) => {
     await setTimeout(random(500, 1000))
-    await route.continue()
-  })
+    // Not `route.continue()`: requests still being delayed when throttling stops are continued by
+    // Playwright itself once the route is removed, and continuing them again would throw.
+    await route.fallback()
+  }
 
-  const client = await (page.context() as ChromiumBrowserContext).newCDPSession(page)
-  await client.send('Emulation.setCPUThrottlingRate', { rate: 8 }) // 8x slowdown
+  await page.route('**/*', delayRequest)
 
-  return client
+  await cdpSession.send('Emulation.setCPUThrottlingRate', { rate: 8 }) // 8x slowdown
+
+  return async () => {
+    await page.unroute('**/*', delayRequest)
+
+    await cdpSession.send('Network.emulateNetworkConditions', {
+      downloadThroughput: -1,
+      latency: 0,
+      offline: false,
+      uploadThroughput: -1,
+    })
+
+    await cdpSession.send('Emulation.setCPUThrottlingRate', { rate: 1 })
+
+    await cdpSession.detach()
+  }
 }
 
 export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {

@@ -34,12 +34,22 @@ const FolderCollection = {
   },
 } satisfies CollectionConfig
 
+const MediaAltCollection = {
+  slug: 'media-alt',
+  fields: [],
+  upload: true,
+} satisfies CollectionConfig
+
 export default buildConfigWithDefaults({
   config: {
     // ...extend config here
     admin: {
       components: {
         views: {
+          StatusMessages: {
+            Component: '/components/StatusMessages/index.js#StatusMessages',
+            path: '/status-messages',
+          },
           CustomIDModals: {
             Component: '/components/CustomIDModals/index.js#CustomIDModals',
             path: '/custom-modal-ids',
@@ -63,6 +73,7 @@ export default buildConfigWithDefaults({
             widgetSlug: 'collection-query',
             width: 'medium',
           },
+          { widgetSlug: 'upload-dropzone', width: 'small' },
         ],
         widgets: [],
       },
@@ -70,7 +81,13 @@ export default buildConfigWithDefaults({
         baseDir: path.resolve(dirname),
       },
     },
-    collections: [UsersCollection, FolderCollection, PostsCollection, MediaCollection],
+    collections: [
+      UsersCollection,
+      FolderCollection,
+      PostsCollection,
+      MediaCollection,
+      MediaAltCollection,
+    ],
     editor: lexicalEditor({}),
     globals: [
       // ...add more globals here
@@ -128,6 +145,23 @@ export default buildConfigWithDefaults({
       data: {
         deletedAt: '2026-01-01T00:00:00.000Z',
         title: 'Contrast trashed post',
+      },
+      overrideAccess: true,
+    })
+
+    for (const globalText of ['Original menu text', 'Updated menu text', 'Current menu text']) {
+      await payload.updateGlobal({
+        slug: 'menu',
+        data: { globalText },
+        overrideAccess: true,
+      })
+    }
+
+    await payload.create({
+      collection: 'payload-folders',
+      data: {
+        name: 'Accessibility final child folder',
+        '_h_payload-folders': parentFolder.id,
       },
       overrideAccess: true,
     })

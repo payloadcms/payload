@@ -1087,9 +1087,9 @@ The deprecated `isHTMLElement` utility has been removed from `@payloadcms/richte
 
 `lexical`'s built-in `isHTMLElement` is the canonical implementation and narrows against the node's owning-document `HTMLElement`, so it is also safe across iframes and other realms.
 
-### Lexical: vendored `@lexical/markdown` fork removed and lexical upgraded to `0.50.0`
+### Lexical: vendored `@lexical/markdown` fork removed and lexical upgraded to `0.52.0`
 
-`@payloadcms/richtext-lexical` no longer ships a vendored copy of `@lexical/markdown`. The package is now a direct dependency, every `@lexical/*` package was upgraded from `0.41.0` to `0.50.0`, and `@payloadcms/richtext-lexical/lexical/markdown` is a pure passthrough of `@lexical/markdown`.
+`@payloadcms/richtext-lexical` no longer ships a vendored copy of `@lexical/markdown`. The package is now a direct dependency, every `@lexical/*` package was upgraded from `0.41.0` to `0.52.0`, and `@payloadcms/richtext-lexical/lexical/markdown` is a pure passthrough of `@lexical/markdown`.
 
 Most projects use markdown through the editor or through `convertMarkdownToLexical` / `convertLexicalToMarkdown` and need no changes. You are only affected if you import from `@payloadcms/richtext-lexical/lexical/markdown` directly.
 
@@ -1113,7 +1113,16 @@ If you keep calling `$convertFromMarkdownString` directly, pass `editorConfig.fe
 
 **Whitespace-only markdown table cells now import as an empty paragraph** instead of a text node of padding spaces. This comes from the lexical upgrade, not Payload's own code. No action is required unless you assert on those padding spaces in stored content.
 
-If you import lexical APIs directly through `@payloadcms/richtext-lexical/lexical/*`, also review the [lexical breaking changes](https://github.com/facebook/lexical/releases) between `0.41.0` and `0.50.0`. None of them require action for typical Payload usage.
+If you import lexical APIs directly through `@payloadcms/richtext-lexical/lexical/*`, also review the [lexical breaking changes](https://github.com/facebook/lexical/releases) between `0.41.0` and `0.52.0`. None of them require action for typical Payload usage.
+
+If your app imports Lexical types or adds custom features, check these changes from `0.50.0`. They also apply to imports through `@payloadcms/richtext-lexical/lexical` and its subpaths:
+
+- Lexical packages are ESM only. Use ESM imports; CommonJS `require()` needs Node.js 20.19 or later.
+- `SELECTION_CHANGE_COMMAND` now runs before DOM reconciliation. Defer DOM lookups and floating UI positioning with `$onUpdate(() => editor.read('latest', callback))`, or use an update listener for work that should run after every commit.
+- Call `node.getLatest().exportJSON()` when serializing a node reference retained across an update. Payload continues to write the full JSON format; compact export is not enabled.
+- `SerializedEditorState<T>`, `SerializedElementNode<T>`, and `SerializedRootNode<T>` no longer accept a type argument. Remove `<T>` if you only need the base node type. For a document with your own node types, use Payload's `TypedEditorState<T>` instead. Without a type argument, Lexical's `children` are still typed as `SerializedLexicalNode[]`.
+- `ReturnType<Node['exportJSON']>` can now infer partial JSON, making fields such as `version` and `url` optional. If your code expects the full format, use the node's explicit serialized type, such as `SerializedLinkNode`. A normal `node.exportJSON()` call still returns the full format.
+- `LexicalNode.getCommonAncestor` was removed. Use `$getCommonAncestor(a, b)?.commonAncestor ?? null`; pass the parents of non-element nodes if you need the old method's behavior.
 
 ### Lexical: `EXPERIMENTAL_TableFeature` renamed to `TableFeature`
 
@@ -2073,6 +2082,8 @@ Because the `payload-mcp-api-keys` collection config was removed, run your norma
 By default, MCP items require an authenticated user. Built-in collection and global tools also include Payload permission checks in their default `access` callbacks. If you provide an `access` callback for a built-in tool, it replaces the default callback.
 
 **Dependencies.** The plugin now builds on `@modelcontextprotocol/server` instead of `@modelcontextprotocol/sdk` + `mcp-handler`. It no longer depends on Zod directly; its built-in tools use the Zod Mini export from `payload`. If your custom tools use regular Zod, install Zod v4 in your project and import it directly.
+
+**HTTP requests have a size limit.** `POST /api/mcp` now answers request bodies over 4 MiB with `413`. Base64 file uploads count toward this limit. Raise it with `mcp.maxRequestBodySize`.
 
 ### `@payloadcms/ui/scss` export removed and legacy `--theme-*` tokens retired
 
