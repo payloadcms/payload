@@ -2,7 +2,7 @@
 
 import type React from 'react'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 type Intersect = [
   setNode: React.Dispatch<HTMLElement>,
@@ -11,35 +11,34 @@ type Intersect = [
 ]
 
 export const useIntersect = (
-  { root = null, rootMargin = '0px', threshold = 0 } = {},
+  { root = null, rootMargin = '0px', threshold = 0 }: IntersectionObserverInit = {},
   disable?: boolean,
 ): Intersect => {
   const [entry, updateEntry] = useState<IntersectionObserverEntry>()
   const [node, setNode] = useState(null)
 
-  const observer = useRef(
-    typeof window !== 'undefined' && 'IntersectionObserver' in window && !disable
-      ? new window.IntersectionObserver(([ent]) => updateEntry(ent), {
-          root,
-          rootMargin,
-          threshold,
-        })
-      : null,
-  )
-
   useEffect(() => {
-    if (disable) {
+    if (disable || !node || !('IntersectionObserver' in window)) {
       return
     }
-    const { current: currentObserver } = observer
-    currentObserver.disconnect()
+    let scrollRoot = node.parentElement
 
-    if (node) {
-      currentObserver.observe(node)
+    while (scrollRoot && !['auto', 'scroll'].includes(getComputedStyle(scrollRoot).overflowY)) {
+      scrollRoot = scrollRoot.parentElement
     }
 
-    return () => currentObserver.disconnect()
-  }, [node, disable])
+    // Apply the preload margin to the scrolling panel rather than the window,
+    // where clipping by an intermediate scroll container would discard it.
+    const observer = new window.IntersectionObserver(([ent]) => updateEntry(ent), {
+      root: root ?? scrollRoot,
+      rootMargin,
+      threshold,
+    })
+
+    observer.observe(node)
+
+    return () => observer.disconnect()
+  }, [node, disable, root, rootMargin, threshold])
 
   return [setNode, entry, node]
 }

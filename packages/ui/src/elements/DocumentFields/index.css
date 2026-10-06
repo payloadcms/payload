@@ -67,7 +67,12 @@
     position: var(--sidebar-wrap-position, sticky);
     top: var(--sidebar-wrap-top, var(--doc-controls-height));
     width: var(--sidebar-wrap-width, 33.33%);
-    height: var(--sidebar-wrap-height, calc(100dvh - var(--doc-controls-height)));
+    height: var(
+      --sidebar-wrap-height,
+      calc(
+        100dvh - var(--app-header-height) - var(--doc-header-height) - var(--doc-controls-height)
+      )
+    );
     min-width: var(--sidebar-wrap-min-width, var(--doc-sidebar-width));
     flex-shrink: var(--sidebar-wrap-flex-shrink, 0);
   }
@@ -85,6 +90,7 @@
   .document-fields__sidebar {
     width: 100%;
     height: 100%;
+    overflow-x: hidden;
     overflow-y: auto;
     display: flex;
     flex-direction: column;

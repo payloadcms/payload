@@ -5,6 +5,8 @@ import React from 'react'
 
 import { useIntersect } from '../../hooks/useIntersect.js'
 
+const intersectionOptions: IntersectionObserverInit = { rootMargin: '1000px' }
+
 export const RenderIfInViewport: React.FC<
   {
     children: React.ReactNode
@@ -12,12 +14,7 @@ export const RenderIfInViewport: React.FC<
   } & Pick<ClientComponentProps, 'forceRender'>
 > = ({ children, className, forceRender }) => {
   const [hasRendered, setHasRendered] = React.useState(Boolean(forceRender))
-  const [intersectionRef, entry] = useIntersect(
-    {
-      rootMargin: '1000px',
-    },
-    Boolean(forceRender),
-  )
+  const [intersectionRef, entry] = useIntersect(intersectionOptions, Boolean(forceRender))
 
   const isIntersecting = Boolean(entry?.isIntersecting)
   const isAboveViewport = entry?.boundingClientRect?.top < 0

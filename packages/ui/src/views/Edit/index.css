@@ -59,11 +59,6 @@
     }
   }
 
-  .template-default__wrap:has(.collection-edit__main-wrapper--scroll-fields-only) {
-    height: auto;
-    overflow: visible;
-  }
-
   .collection-edit__main {
     width: 100%;
   }
@@ -121,22 +116,24 @@
       }
 
       .document-fields--force-sidebar-wrap {
+        overflow-x: hidden;
         overflow-y: auto;
-        overscroll-behavior: contain;
+        overscroll-behavior: auto contain;
         scrollbar-width: thin;
         scrollbar-color: var(--scrollbar-color) transparent;
       }
 
       .document-fields:not(.document-fields--force-sidebar-wrap) .document-fields__main {
         min-height: 0;
+        overflow-x: hidden;
         overflow-y: auto;
-        overscroll-behavior: contain;
+        overscroll-behavior: auto contain;
         scrollbar-width: thin;
         scrollbar-color: var(--scrollbar-color) transparent;
       }
 
       .document-fields__sidebar {
-        overscroll-behavior: contain;
+        overscroll-behavior: auto contain;
         scrollbar-width: thin;
         scrollbar-color: var(--scrollbar-color) transparent;
       }

@@ -10,8 +10,8 @@ import type { Page } from '@playwright/test'
  * @returns Promise<void>
  */
 export const waitForPageStability = async ({
-  page,
   interval = 1000,
+  page,
   stableChecksRequired = 3,
 }: {
   interval?: number
@@ -23,11 +23,12 @@ export const waitForPageStability = async ({
   await page.waitForFunction(
     async ({ interval, stableChecksRequired }) => {
       return new Promise((resolve) => {
-        let previousHeight = document.body.scrollHeight
+        const scrollContainer = document.querySelector('.template-default__wrap') ?? document.body
+        let previousHeight = scrollContainer.scrollHeight
         let stableChecks = 0
 
         const checkStability = () => {
-          const currentHeight = document.body.scrollHeight
+          const currentHeight = scrollContainer.scrollHeight
           const loadingShimmers = document.querySelectorAll('.shimmer-effect')
           const pageSizeChanged = currentHeight !== previousHeight
 
