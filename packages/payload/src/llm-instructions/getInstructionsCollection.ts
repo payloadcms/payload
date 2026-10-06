@@ -193,7 +193,7 @@ export const getInstructionsCollection = ({
                     },
                   ],
                 },
-                label: false,
+                label: ({ t }) => t('llmInstructions:systemInstructions'),
                 virtual: true,
               },
             ],
