@@ -305,9 +305,13 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
       expect(upload.url).toContain(getTestBucketName())
       expect(upload.url).toContain('image-original.png')
 
-      // Verify the file can be fetched
-      const response = await fetch(upload.url)
+      const [response, originalResponse] = await Promise.all([
+        fetch(upload.url),
+        fetch(upload.original!.url),
+      ])
+
       expect(response.status).toBe(200)
+      expect(originalResponse.status).toBe(200)
     })
   })
 
