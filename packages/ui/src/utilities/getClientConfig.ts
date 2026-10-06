@@ -34,7 +34,8 @@ export const getClientConfig = cache(
       config,
       i18n,
       importMap,
-      user: user ?? true,
+      // Always cache the full config, then return its redacted version for unauthenticated users.
+      user: true,
     })
 
     cachedClientConfigs[currentLanguage] = cachedClientConfig
