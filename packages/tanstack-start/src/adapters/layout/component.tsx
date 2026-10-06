@@ -5,7 +5,7 @@ import { RootProviders } from '@payloadcms/ui'
 import { Outlet, useLoaderData } from '@tanstack/react-router'
 import React from 'react'
 
-import { TanStackRouterAdapter } from './router.js'
+import { TanStackRouterAdapter } from '../router.js'
 
 /**
  * The admin layout route's component. Maps the layout loader data onto `RootProviders` and

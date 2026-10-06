@@ -7,7 +7,7 @@ import { DocumentRoot } from '@payloadcms/ui/layouts/DocumentRoot'
 import { HeadContent, lazyRouteComponent, Scripts, useRouterState } from '@tanstack/react-router'
 import React from 'react'
 
-import type { LoadLayoutDataResult } from './layout.server.js'
+import type { LoadLayoutDataResult } from './server.js'
 
 export type PayloadAdminShellProps = {
   readonly children: React.ReactNode
@@ -107,7 +107,7 @@ export type LayoutLoad = () => Promise<LoadLayoutDataResult>
 
 // The admin UI loads with the admin routes only, so front-end routes never download it. The
 // router preloads lazy route components before rendering, so admin pages don't flash.
-const PayloadLayout = lazyRouteComponent(() => import('./layoutComponent.js'), 'PayloadLayout')
+const PayloadLayout = lazyRouteComponent(() => import('./component.js'), 'PayloadLayout')
 
 /**
  * Route options for the Payload admin layout (`/_payload`). The app supplies
