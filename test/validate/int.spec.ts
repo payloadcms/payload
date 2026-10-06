@@ -190,6 +190,37 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
       })
     })
 
+    test('should report a localized unique field conflict', async ({ payload }) => {
+      await payload.create({
+        collection: validationUniqueCollectionSlug,
+        data: {
+          localizedUniqueValue: 'already-used-localized-value',
+          uniqueValue: 'localized-unique-owner',
+        },
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      const result = await payload.validate({
+        collection: validationUniqueCollectionSlug,
+        data: {
+          localizedUniqueValue: 'already-used-localized-value',
+          uniqueValue: 'localized-unique-candidate',
+        },
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      expect(result).toMatchObject({
+        errors: [
+          {
+            path: 'localizedUniqueValue',
+          },
+        ],
+        valid: false,
+      })
+    })
+
     test('should report a unique field conflict with a trashed document', async ({ payload }) => {
       const storedDocument = await payload.create({
         collection: validationUniqueCollectionSlug,

@@ -681,6 +681,12 @@ const validationUniqueCollection: CollectionConfig = {
       unique: true,
     },
     {
+      name: 'localizedUniqueValue',
+      type: 'text',
+      localized: true,
+      unique: true,
+    },
+    {
       name: 'compoundScope',
       type: 'text',
     },

@@ -136,7 +136,7 @@ export async function runValidationLifecycle(
       docWithLocales,
       global,
       onDataProcessed: (result) => {
-        processedData = result
+        processedData = deepCopyObjectSimple(result)
       },
       operation: 'validate',
       overrideAccess,
