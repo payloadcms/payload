@@ -1231,8 +1231,8 @@ importers:
   packages/plugin-import-export:
     dependencies:
       '@faceless-ui/modal':
-        specifier: 3.0.1
-        version: 3.0.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        specifier: 3.0.2
+        version: 3.0.2(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../translations
@@ -1436,8 +1436,8 @@ importers:
   packages/richtext-lexical:
     dependencies:
       '@faceless-ui/modal':
-        specifier: 3.0.1
-        version: 3.0.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        specifier: 3.0.2
+        version: 3.0.2(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@faceless-ui/scroll-info':
         specifier: 2.0.0
         version: 2.0.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -1772,8 +1772,8 @@ importers:
         specifier: 3.2.2
         version: 3.2.2(react@19.3.0)
       '@faceless-ui/modal':
-        specifier: 3.0.1
-        version: 3.0.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        specifier: 3.0.2
+        version: 3.0.2(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@faceless-ui/scroll-info':
         specifier: 2.0.0
         version: 2.0.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -5148,8 +5148,8 @@ packages:
       '@noble/hashes':
         optional: true
 
-  '@faceless-ui/modal@3.0.1':
-    resolution: {integrity: sha512-fRPQPXZlND6nw4ubwOmHns9kwemcrrebh2PioJ1w8T/XuRO9s0QvYSzj7y0GI/ZwD8Zl0VKSMgcQSAigw6ekrg==}
+  '@faceless-ui/modal@3.0.2':
+    resolution: {integrity: sha512-2BK5ipSTIejnpAH4MsZ8aX9g7HxQrFybPpTAPVq8/RDRXxxShfwOuuhuxOx7KyZ1nWHtMGTWFpB0wkCAtg037w==}
     peerDependencies:
       react: 19.3.0
       react-dom: 19.3.0
@@ -18434,7 +18434,7 @@ snapshots:
     optionalDependencies:
       '@noble/hashes': 1.8.0
 
-  '@faceless-ui/modal@3.0.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
+  '@faceless-ui/modal@3.0.2(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
     dependencies:
       body-scroll-lock: 4.0.0-beta.0
       focus-trap: 7.5.4
