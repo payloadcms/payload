@@ -31,7 +31,7 @@ Do not upload previews, rejected takes, raw WebM recordings, or files the user h
    ```
 
 7. Stop and ask the user to approve, reject, or request another take. Do not call `gh`, open an upload UI, or otherwise upload the file yet.
-8. Only after explicit approval of that recording, read [publishing.md](references/publishing.md), verify the reviewed manifest, and attach it to the requested PR location.
+8. Only after explicit approval of that recording, read [publishing.md](references/publishing.md) and verify the reviewed manifest. Preserve the complete existing PR description and append a final `## Preview` section with the approved video in its own paragraph. Use a PR comment only when the user explicitly asks for one.
 9. Verify the PR renders the uploaded video, then remove temporary scenarios, plans, raw recordings, and temporary fixture changes. Preserve the approved MP4 until the upload is confirmed.
 
 ## Completion criteria
@@ -41,6 +41,7 @@ Do not upload previews, rejected takes, raw WebM recordings, or files the user h
 - The approved artifact is an H.264 `.mp4`, within GitHub's applicable upload limit.
 - The candidate command produced a contact sheet and manifest, and the manifest still matches before upload.
 - The user reviewed the exact bytes that were uploaded.
+- The existing PR description is preserved and ends with `## Preview` and the approved inline player, unless the user explicitly requested a comment.
 - GitHub contains no rejected or superseded takes.
 - No media or recording-only fixture remains in the working tree.
 
