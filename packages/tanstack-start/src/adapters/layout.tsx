@@ -3,8 +3,7 @@ import type { DocumentRootProps } from '@payloadcms/ui/layouts/DocumentRoot'
 import type { RootLayoutData } from '@payloadcms/ui/layouts/Root/getRootLayoutData'
 import type { ComponentProps } from 'react'
 
-import { DocumentRoot } from '@payloadcms/ui/layouts/DocumentRoot'
-import { RootProviders } from '@payloadcms/ui/layouts/RootProviders'
+import { DocumentRoot, RootProviders } from '@payloadcms/ui'
 import { HeadContent, Outlet, Scripts, useLoaderData, useRouterState } from '@tanstack/react-router'
 import React from 'react'
 
