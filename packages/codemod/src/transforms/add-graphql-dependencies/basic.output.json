@@ -1,0 +1,15 @@
+{
+  "name": "my-app",
+  "dependencies": {
+    "@payloadcms/db-mongodb": "3.84.0",
+    "@payloadcms/graphql": "3.84.0",
+    "@payloadcms/next": "3.84.0",
+    "@payloadcms/richtext-lexical": "3.84.0",
+    "graphql": "^16.8.1",
+    "graphql-http": "^1.22.4",
+    "graphql-playground-html": "^1.6.30",
+    "next": "16.3.8",
+    "payload": "3.84.0",
+    "react": "19.3.0"
+  }
+}

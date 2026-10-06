@@ -23,10 +23,13 @@
   },
   "dependencies": {
     "@payloadcms/db-mongodb": "latest",
+    "@payloadcms/graphql": "latest",
     "@payloadcms/next": "latest",
     "@payloadcms/richtext-lexical": "latest",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
+    "graphql-http": "1.22.4",
+    "graphql-playground-html": "1.6.30",
     "next": "^15.4.10",
     "payload": "latest",
     "react": "^19.2.1",

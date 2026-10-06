@@ -1,0 +1,6 @@
+{
+  "name": "my-script",
+  "dependencies": {
+    "payload": "3.84.0"
+  }
+}

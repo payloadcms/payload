@@ -828,9 +828,6 @@ importers:
       '@dnd-kit/sortable':
         specifier: 10.0.0
         version: 10.0.0(@dnd-kit/core@6.3.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)
-      '@payloadcms/graphql':
-        specifier: workspace:*
-        version: link:../graphql
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../translations
@@ -849,12 +846,6 @@ importers:
       graphql:
         specifier: 16.8.1
         version: 16.8.1
-      graphql-http:
-        specifier: 1.22.4
-        version: 1.22.4(graphql@16.8.1)
-      graphql-playground-html:
-        specifier: 1.6.30
-        version: 1.6.30
       http-status:
         specifier: 2.1.0
         version: 2.1.0
@@ -895,6 +886,9 @@ importers:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@payloadcms/graphql':
+        specifier: workspace:*
+        version: link:../graphql
       '@types/busboy':
         specifier: 1.5.4
         version: 1.5.4
@@ -913,6 +907,12 @@ importers:
       esbuild-sass-plugin:
         specifier: 3.3.1
         version: 3.3.1(esbuild@0.27.1)(sass-embedded@1.105.1)
+      graphql-http:
+        specifier: 1.22.4
+        version: 1.22.4(graphql@16.8.1)
+      graphql-playground-html:
+        specifier: 1.6.30
+        version: 1.6.30
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -1889,6 +1889,9 @@ importers:
       '@payloadcms/db-mongodb':
         specifier: workspace:*
         version: link:../../packages/db-mongodb
+      '@payloadcms/graphql':
+        specifier: workspace:*
+        version: link:../../packages/graphql
       '@payloadcms/next':
         specifier: workspace:*
         version: link:../../packages/next
@@ -1910,6 +1913,12 @@ importers:
       graphql:
         specifier: 16.8.1
         version: 16.8.1
+      graphql-http:
+        specifier: 1.22.4
+        version: 1.22.4(graphql@16.8.1)
+      graphql-playground-html:
+        specifier: 1.6.30
+        version: 1.6.30
       next:
         specifier: 16.3.8
         version: 16.3.8(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@24.12.3)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.105.1)
@@ -2083,6 +2092,9 @@ importers:
       '@payloadcms/email-nodemailer':
         specifier: workspace:*
         version: link:../../packages/email-nodemailer
+      '@payloadcms/graphql':
+        specifier: workspace:*
+        version: link:../../packages/graphql
       '@payloadcms/live-preview-react':
         specifier: workspace:*
         version: link:../../packages/live-preview-react
@@ -2158,6 +2170,12 @@ importers:
       graphql:
         specifier: 16.8.1
         version: 16.8.1
+      graphql-http:
+        specifier: 1.22.4
+        version: 1.22.4(graphql@16.8.1)
+      graphql-playground-html:
+        specifier: 1.6.30
+        version: 1.6.30
       jsonwebtoken:
         specifier: 9.0.1
         version: 9.0.1
@@ -2294,6 +2312,9 @@ importers:
       '@payloadcms/db-mongodb':
         specifier: workspace:*
         version: link:../../packages/db-mongodb
+      '@payloadcms/graphql':
+        specifier: workspace:*
+        version: link:../../packages/graphql
       '@payloadcms/live-preview-react':
         specifier: workspace:*
         version: link:../../packages/live-preview-react
@@ -2351,6 +2372,12 @@ importers:
       graphql:
         specifier: 16.8.1
         version: 16.8.1
+      graphql-http:
+        specifier: 1.22.4
+        version: 1.22.4(graphql@16.8.1)
+      graphql-playground-html:
+        specifier: 1.6.30
+        version: 1.6.30
       lucide-react:
         specifier: 0.563.0
         version: 0.563.0(react@19.3.0)
@@ -2686,6 +2713,12 @@ importers:
       file-type:
         specifier: 22.0.1
         version: 22.0.1
+      graphql-http:
+        specifier: 1.22.4
+        version: 1.22.4(graphql@16.8.1)
+      graphql-playground-html:
+        specifier: 1.6.30
+        version: 1.6.30
       http-status:
         specifier: 2.1.0
         version: 2.1.0

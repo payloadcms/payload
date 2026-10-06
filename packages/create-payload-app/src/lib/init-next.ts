@@ -203,14 +203,18 @@ async function installDeps(args: {
 
   const version = await resolvePackageVersion({ packageName: 'payload', versionOrTag })
 
-  const packagesToInstall = ['payload', '@payloadcms/next', '@payloadcms/richtext-lexical'].map(
-    (pkg) => `${pkg}@${version}`,
-  )
+  const packagesToInstall = [
+    'payload',
+    '@payloadcms/next',
+    '@payloadcms/richtext-lexical',
+    // GraphQL is an optional peer of @payloadcms/next, so the scaffolded
+    // /api/graphql routes need it installed explicitly.
+    '@payloadcms/graphql',
+  ].map((pkg) => `${pkg}@${version}`)
 
   packagesToInstall.push(`${getDbPackageName(dbType)}@${version}`)
 
-  // Match graphql version of @payloadcms/next
-  packagesToInstall.push('graphql@^16.8.1')
+  packagesToInstall.push('graphql@^16.8.1', 'graphql-http@1.22.4', 'graphql-playground-html@1.6.30')
 
   await ensurePnpmBuildApprovals({ packageManager, projectDir })
 

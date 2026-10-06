@@ -1025,6 +1025,28 @@ If you use a `declare module` augmentation to extend `GeneratedDatabaseSchema` (
 
 Run `npx @payloadcms/codemod --transform migrate-db-types-subpath` to migrate automatically. The codemod handles import declarations, re-export declarations, and `declare module` augmentations.
 
+### GraphQL is opt-in ([#18206](https://github.com/payloadcms/payload/pull/18206))
+
+`@payloadcms/graphql`, `graphql-http` and `graphql-playground-html` are now optional peer dependencies of `@payloadcms/next`, and `graphql` is an optional peer of `payload`. They are no longer installed automatically.
+
+If your project serves GraphQL (it has `app/(payload)/api/graphql/route.ts`), install them:
+
+```bash
+pnpm add @payloadcms/graphql graphql graphql-http graphql-playground-html
+```
+
+If you do not use GraphQL, delete `app/(payload)/api/graphql/route.ts` and `app/(payload)/api/graphql-playground/route.ts`, then uninstall the packages above. If a GraphQL route file stays, the build fails with `Module not found: Can't resolve '@payloadcms/graphql'`.
+
+`payload.schema`, `payload.extensions` and `payload.validationRules` are removed. They were never assigned by Payload, and there is no replacement.
+
+#### Codemod
+
+```bash
+npx @payloadcms/codemod --transform add-graphql-dependencies
+```
+
+The codemod cannot tell whether a project really uses GraphQL, so it adds the packages to every `package.json` that depends on `@payloadcms/next`. If your Payload config sets a literal `graphQL: { disable: true }`, it adds nothing and deletes the GraphQL route files that still match Payload's scaffold instead. Customized route files are left in place and reported, so delete those yourself.
+
 ### Minimum supported Node.js version is now 24.15.0 ([#16540](https://github.com/payloadcms/payload/pull/16540))
 
 The minimum supported Node.js version is now **24.15.0** (previously 18.20.2). Upgrade your runtime — along with any CI, Docker images, and deployment targets — to the latest node LTS version or newer before upgrading to 4.0.

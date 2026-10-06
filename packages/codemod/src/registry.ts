@@ -1,5 +1,6 @@
 import type { Transform } from './types.js'
 
+import { addGraphQLDependencies } from './transforms/add-graphql-dependencies/index.js'
 import { addOverrideAccessTrue } from './transforms/add-override-access-true/index.js'
 import { exampleNoop } from './transforms/example-noop/index.js'
 import { globalsComponentsEdit } from './transforms/globals-components-edit/index.js'
@@ -66,4 +67,5 @@ export const transforms: Transform[] = [
   removeStorageAlwaysInsertFields,
   renameTypescriptSchemaToJsonSchema,
   renameExperimentalTableFeature,
+  addGraphQLDependencies,
 ]
