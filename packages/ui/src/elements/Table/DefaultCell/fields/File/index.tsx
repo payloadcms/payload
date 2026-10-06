@@ -36,7 +36,7 @@ export const FileCell: React.FC<FileCellProps> = ({
 
     if (isFileImage) {
       fileSrc = getBestFitFromSizes({
-        sizes: rowData?.sizes,
+        sizes: rowData?.variants,
         thumbnailURL: rowData?.thumbnailURL,
         url: rowData?.url,
         width: rowData?.width,
