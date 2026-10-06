@@ -128,6 +128,8 @@ export const enTranslations = {
     widgetLimitLabel: 'Limit',
     widgetNonSortableSortField:
       'Sort field "{{field}}" is not sortable on collection "{{collection}}".',
+    widgetPageCount: '{{currentPage}} of {{totalPages}}',
+    widgetPagination: 'Document pagination',
     widgetPinned: 'Pinned',
     widgetPinnedEmpty: 'No pinned documents',
     widgetPinnedEmptyDescription: 'Documents you pin will appear here',

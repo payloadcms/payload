@@ -129,6 +129,8 @@ export const bnInTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'সীমা',
     widgetNonSortableSortField:
       'সংগ্রহ "{{collection}}"-এ শ্রেণীবিন্যাস ক্ষেত্র "{{field}}" শ্রেণীবিন্যাসযোগ্য নয়।',
+    widgetPageCount: '{{totalPages}} এর মধ্যে {{currentPage}}',
+    widgetPagination: 'নথির পৃষ্ঠাবিন্যাস',
     widgetPinned: 'পিন করা',
     widgetPinnedEmpty: 'কোনো পিন করা ডকুমেন্ট নেই',
     widgetPinnedEmptyDescription: 'আপনি যে ডকুমেন্ট পিন করবেন, তা এখানে দেখা যাবে',

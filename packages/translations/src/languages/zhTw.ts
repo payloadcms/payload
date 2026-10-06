@@ -119,6 +119,8 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     widgetInvalidSortField: '排序欄位「{{field}}」在集合「{{collection}}」中不存在。',
     widgetLimitLabel: '限制',
     widgetNonSortableSortField: '排序欄位「{{field}}」在 Collection「{{collection}}」上不可排序。',
+    widgetPageCount: '第 {{currentPage}} 頁，共 {{totalPages}} 頁',
+    widgetPagination: '文件分頁',
     widgetPinned: '已釘選',
     widgetPinnedEmpty: '沒有已釘選的文件',
     widgetPinnedEmptyDescription: '您釘選的文件將顯示在此處',

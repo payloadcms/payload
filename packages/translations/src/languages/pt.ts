@@ -129,6 +129,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Limite',
     widgetNonSortableSortField:
       'O campo de ordenação "{{field}}" não pode ser ordenado na Collection "{{collection}}".',
+    widgetPageCount: '{{currentPage}} de {{totalPages}}',
+    widgetPagination: 'Paginação de documentos',
     widgetPinned: 'Fixados',
     widgetPinnedEmpty: 'Nenhum documento fixado',
     widgetPinnedEmptyDescription: 'Os documentos que você fixar aparecerão aqui',

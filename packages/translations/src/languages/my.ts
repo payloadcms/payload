@@ -129,6 +129,8 @@ export const myTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'ကန့်သတ်ချက်',
     widgetNonSortableSortField:
       'အမျိုးအစား "{{collection}}" တွင် Sort field "{{field}}" ကို စီခန့်နိုင်မှုမရှိပါ။',
+    widgetPageCount: '{{totalPages}} အနက် {{currentPage}}',
+    widgetPagination: 'စာရွက်စာတမ်း စာမျက်နှာများ',
     widgetPinned: 'ပင်ထည့်ပြီး',
     widgetPinnedEmpty: 'ပင်ထည့်ထားသော စာရွက်စာတမ်း မရှိပါ',
     widgetPinnedEmptyDescription: 'သင်ပင်ထည့်သော စာရွက်စာတမ်းများသည် ဤနေရာတွင် ပြသပါမည်',

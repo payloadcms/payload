@@ -1,6 +1,7 @@
-import type { PayloadRequest, RecentlyViewedPreferences, ServerFunction, Where } from 'payload'
+import type { PayloadRequest, SelectType, ServerFunction, Where } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { UnauthorizedError } from 'payload'
 import { formatAdminURL, PREFERENCE_KEYS } from 'payload/shared'
 
 import type { RecentDocument } from './index.client.js'
@@ -42,57 +43,39 @@ export async function getDashboardDocuments({
   tab,
 }: { req: PayloadRequest } & DocumentsPageArgs): Promise<DocumentsPage> {
   if (!req.user) {
-    throw new Error('Unauthorized')
+    throw new UnauthorizedError(req.t)
   }
   if (![1, 2, 4].includes(limit) || !Number.isSafeInteger(page) || page < 1) {
     throw new Error('Invalid dashboard page')
   }
-  const excluded = new Set(excludedCollections)
-  let references: Reference[]
-  let totalDocs: number
-
-  if (tab === 'pinned') {
-    const preference = await req.payload.find({
-      collection: 'payload-preferences',
-      depth: 0,
-      limit: 1,
-      overrideAccess: false,
-      req,
-      user: req.user,
-      where: { and: [ownerWhere({ req }), { key: { equals: PREFERENCE_KEYS.PINNED_DOCUMENTS } }] },
-    })
-    const pinnedReferences = getPinnedItems({ value: preference.docs[0]?.value }).filter(
-      (item) => req.payload.collections[item.collectionSlug],
-    )
-
-    totalDocs = pinnedReferences.length
-    const lastPage = Math.max(
-      1,
-      Math.ceil((totalDocs + Number(shouldIncludePinPlaceholder)) / limit),
-    )
-
-    page = Math.min(page, lastPage)
-    references = pinnedReferences.slice((page - 1) * limit, page * limit)
-  } else if (tab === 'recents') {
-    const preference = await req.payload.find({
-      collection: 'payload-preferences',
-      depth: 0,
-      limit: 1,
-      overrideAccess: false,
-      req,
-      user: req.user,
-      where: { and: [ownerWhere({ req }), { key: { equals: PREFERENCE_KEYS.RECENTLY_VIEWED } }] },
-    })
-    const value = preference.docs[0]?.value as RecentlyViewedPreferences | undefined
-    const recentReferences = (value?.items ?? []).filter(
-      (item) => !excluded.has(item.collectionSlug) && req.payload.collections[item.collectionSlug],
-    )
-    totalDocs = recentReferences.length
-    page = Math.min(page, Math.max(1, Math.ceil(totalDocs / limit)))
-    references = recentReferences.slice((page - 1) * limit, page * limit)
-  } else {
+  if (tab !== 'pinned' && tab !== 'recents') {
     throw new Error('Invalid dashboard tab')
   }
+
+  const key = tab === 'pinned' ? PREFERENCE_KEYS.PINNED_DOCUMENTS : PREFERENCE_KEYS.RECENTLY_VIEWED
+  const preference = await req.payload.find({
+    collection: 'payload-preferences',
+    depth: 0,
+    limit: 1,
+    overrideAccess: false,
+    req,
+    user: req.user,
+    where: { and: [ownerWhere({ req }), { key: { equals: key } }] },
+  })
+  const excluded = new Set(tab === 'recents' ? excludedCollections : [])
+  const storedReferences = getPinnedItems({ value: preference.docs[0]?.value }).filter(
+    ({ collectionSlug }) =>
+      !excluded.has(collectionSlug) && req.payload.collections[collectionSlug],
+  )
+  const availableReferences = await getAvailableReferences({ references: storedReferences, req })
+  const totalDocs = availableReferences.length
+  const lastPage = Math.max(
+    1,
+    Math.ceil((totalDocs + Number(tab === 'pinned' && shouldIncludePinPlaceholder)) / limit),
+  )
+
+  page = Math.min(page, lastPage)
+  const references = availableReferences.slice((page - 1) * limit, page * limit)
 
   const documents = await loadDocuments({ references, req })
   const items = references
@@ -105,6 +88,58 @@ export async function getDashboardDocuments({
   return { items, page, totalDocs }
 }
 
+/** Check identities without populating documents, so deleted or forbidden references do not create empty pages. */
+async function getAvailableReferences({
+  references,
+  req,
+}: {
+  references: Reference[]
+  req: PayloadRequest
+}): Promise<Reference[]> {
+  const available = new Set<string>()
+
+  await Promise.all(
+    [...groupReferenceIDs({ references }).entries()].map(async ([collectionSlug, ids]) => {
+      const result = await req.payload.find({
+        collection: collectionSlug,
+        depth: 0,
+        disableErrors: true,
+        draft: true,
+        limit: ids.length,
+        overrideAccess: false,
+        pagination: false,
+        req,
+        select: { id: true },
+        user: req.user,
+        where: { id: { in: ids } },
+      })
+
+      for (const doc of result.docs) {
+        available.add(documentKey({ id: doc.id, collectionSlug }))
+      }
+    }),
+  )
+
+  return references.filter((reference) => available.has(documentKey(reference)))
+}
+
+function groupReferenceIDs({
+  references,
+}: {
+  references: Reference[]
+}): Map<string, Array<number | string>> {
+  const idsByCollection = new Map<string, Array<number | string>>()
+
+  for (const reference of references) {
+    const ids = idsByCollection.get(reference.collectionSlug) ?? []
+
+    ids.push(reference.id)
+    idsByCollection.set(reference.collectionSlug, ids)
+  }
+
+  return idsByCollection
+}
+
 async function loadDocuments({
   references,
   req,
@@ -112,18 +147,20 @@ async function loadDocuments({
   references: Reference[]
   req: PayloadRequest
 }): Promise<Map<string, RecentDocument>> {
-  const idsByCollection = new Map<string, Array<number | string>>()
-  for (const reference of references) {
-    if (!req.payload.collections[reference.collectionSlug]) {
-      continue
-    }
-    const ids = idsByCollection.get(reference.collectionSlug) ?? []
-    ids.push(reference.id)
-    idsByCollection.set(reference.collectionSlug, ids)
-  }
   const documents = new Map<string, RecentDocument>()
   await Promise.all(
-    [...idsByCollection.entries()].map(async ([collectionSlug, ids]) => {
+    [...groupReferenceIDs({ references }).entries()].map(async ([collectionSlug, ids]) => {
+      const config = req.payload.collections[collectionSlug].config
+      const select: SelectType = {
+        id: true,
+        [(config.admin.useAsTitle || 'id').split('.')[0]]: true,
+        _status: true,
+        updatedAt: true,
+        ...(config.admin.useAsThumbnail ? { [config.admin.useAsThumbnail]: true } : {}),
+        ...(config.upload
+          ? { mimeType: true, thumbnailURL: true, url: true, variants: true, width: true }
+          : {}),
+      }
       const result = await req.payload.find({
         collection: collectionSlug,
         depth: 1,
@@ -132,6 +169,7 @@ async function loadDocuments({
         limit: ids.length,
         overrideAccess: false,
         req,
+        select,
         user: req.user,
         where: { id: { in: ids } },
       })

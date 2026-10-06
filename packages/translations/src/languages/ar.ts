@@ -127,6 +127,8 @@ export const arTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'حد',
     widgetNonSortableSortField:
       'حقل الفرز "{{field}}" غير قابل للفرز في Collection "{{collection}}".',
+    widgetPageCount: '{{currentPage}} من {{totalPages}}',
+    widgetPagination: 'التنقل بين صفحات المستندات',
     widgetPinned: 'مثبت',
     widgetPinnedEmpty: 'لا توجد مستندات مثبتة',
     widgetPinnedEmptyDescription: 'ستظهر المستندات التي تقوم بتثبيتها هنا',

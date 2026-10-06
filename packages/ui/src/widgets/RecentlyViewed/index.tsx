@@ -26,7 +26,7 @@ export function RecentlyViewedWidget({
         loadError: i18n.t('error:unknown'),
         loading: i18n.t('general:loading'),
         next: i18n.t('general:next'),
-        of: i18n.t('general:of'),
+        pagination: i18n.t('dashboard:widgetPagination'),
         pinned: i18n.t('dashboard:widgetPinned'),
         pinnedEmpty: i18n.t('dashboard:widgetPinnedEmpty'),
         pinnedEmptyDescription: i18n.t('dashboard:widgetPinnedEmptyDescription'),

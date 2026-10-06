@@ -126,6 +126,8 @@ export const etTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Piirang',
     widgetNonSortableSortField:
       'Sortimisväli "{{field}}" ei ole kogu "{{collection}}" puhul sorditav.',
+    widgetPageCount: '{{currentPage}} / {{totalPages}}',
+    widgetPagination: 'Dokumentide leheküljed',
     widgetPinned: 'Kinnitatud',
     widgetPinnedEmpty: 'Kinnitatud dokumente pole',
     widgetPinnedEmptyDescription: 'Siia ilmuvad dokumendid, mille kinnitate',

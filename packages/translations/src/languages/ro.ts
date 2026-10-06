@@ -130,6 +130,8 @@ export const roTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Limită',
     widgetNonSortableSortField:
       'Câmpul de sortare "{{field}}" nu poate fi sortat în colecția "{{collection}}".',
+    widgetPageCount: '{{currentPage}} din {{totalPages}}',
+    widgetPagination: 'Paginarea documentelor',
     widgetPinned: 'Fixate',
     widgetPinnedEmpty: 'Niciun document fixat',
     widgetPinnedEmptyDescription: 'Documentele fixate vor apărea aici',

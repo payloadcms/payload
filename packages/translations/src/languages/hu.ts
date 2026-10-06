@@ -131,6 +131,8 @@ export const huTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Korlátozás',
     widgetNonSortableSortField:
       'A(z) "{{field}}" mező nem rendezhető a(z) "{{collection}}" Collection-ben.',
+    widgetPageCount: '{{currentPage}} / {{totalPages}}',
+    widgetPagination: 'Dokumentumok lapozása',
     widgetPinned: 'Rögzítve',
     widgetPinnedEmpty: 'Nincs rögzített dokumentum',
     widgetPinnedEmptyDescription: 'A rögzített dokumentumok itt jelennek meg',

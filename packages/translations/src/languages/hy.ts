@@ -127,6 +127,8 @@ export const hyTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Սահմանաչափ',
     widgetNonSortableSortField:
       'Դասակարգման դաշտը "{{field}}" հնարավոր չէ դասակարգել հավաքածուում "{{collection}}":',
+    widgetPageCount: '{{currentPage}} / {{totalPages}}',
+    widgetPagination: 'Փաստաթղթերի էջավորում',
     widgetPinned: 'Ամրագրված',
     widgetPinnedEmpty: 'Ամրագրված փաստաթղթեր չկան',
     widgetPinnedEmptyDescription: 'Այստեղ կհայտնվեն ձեր ամրագրված փաստաթղթերը',

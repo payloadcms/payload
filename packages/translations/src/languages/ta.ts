@@ -128,6 +128,8 @@ export const taTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'வரம்பு',
     widgetNonSortableSortField:
       'வரிசைப்படுத்தும் களம் "{{field}}" என்பது தொகுப்பு "{{collection}}" இல் வரிசைப்படுத்த முடியாததாகும்.',
+    widgetPageCount: '{{totalPages}} இல் {{currentPage}}',
+    widgetPagination: 'ஆவணப் பக்க வழிசெலுத்தல்',
     widgetPinned: 'பின் செய்யப்பட்டவை',
     widgetPinnedEmpty: 'பின் செய்யப்பட்ட ஆவணங்கள் இல்லை',
     widgetPinnedEmptyDescription: 'நீங்கள் பின் செய்யும் ஆவணங்கள் இங்கே தோன்றும்',

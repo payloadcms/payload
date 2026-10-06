@@ -15,9 +15,10 @@ import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEntityVisibility } from '../../providers/EntityVisibility/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { WidgetCard } from '../WidgetCard/index.js'
 import { PinDocumentPicker } from './PinDocumentPicker/index.js'
-import { readPinnedPreferences, savePinnedPreferences } from './pinnedPreferences.js'
+import { updatePinnedPreferences } from './pinnedPreferences.js'
 import { documentKey } from './recents.js'
 import './index.css'
 
@@ -39,7 +40,7 @@ type Labels = {
   loadError: string
   loading: string
   next: string
-  of: string
+  pagination: string
   pinned: string
   pinnedEmpty: string
   pinnedEmptyDescription: string
@@ -63,6 +64,7 @@ export function RecentsAndPinnedClient({
   pinsURL: string
 }) {
   const { permissions, user } = useAuth()
+  const { t } = useTranslation()
   const { config } = useConfig()
   const { isEntityVisible } = useEntityVisibility()
   const { serverFunction } = useServerFunctions()
@@ -71,9 +73,7 @@ export function RecentsAndPinnedClient({
       config.collections
         .filter(
           ({ slug }) =>
-            !slug.startsWith('payload-') &&
-            isEntityVisible({ collectionSlug: slug }) &&
-            permissions?.collections?.[slug]?.read,
+            isEntityVisible({ collectionSlug: slug }) && permissions?.collections?.[slug]?.read,
         )
         .map(({ slug }) => slug),
     [config.collections, isEntityVisible, permissions],
@@ -209,12 +209,7 @@ export function RecentsAndPinnedClient({
     setSaveError('')
 
     try {
-      const existing = await readPinnedPreferences({ url: pinsURL })
-
-      await savePinnedPreferences({
-        items: existing.filter((entry) => documentKey(entry) !== documentKey(item)),
-        url: pinsURL,
-      })
+      await updatePinnedPreferences({ document: item, shouldPin: false, url: pinsURL })
       setRefresh((value) => value + 1)
     } catch {
       setPageResult(previous)
@@ -232,11 +227,7 @@ export function RecentsAndPinnedClient({
     setSaveError('')
 
     try {
-      const existing = await readPinnedPreferences({ url: pinsURL })
-
-      if (!existing.some((entry) => documentKey(entry) === documentKey(document))) {
-        await savePinnedPreferences({ items: [document, ...existing], url: pinsURL })
-      }
+      await updatePinnedPreferences({ document, shouldPin: true, url: pinsURL })
       setPage(1)
       setRefresh((value) => value + 1)
     } catch {
@@ -291,7 +282,7 @@ export function RecentsAndPinnedClient({
           ))}
         </div>
         {totalPages > 1 ? (
-          <div aria-label={labels.title} className="recents-widget__pagination" role="group">
+          <div aria-label={labels.pagination} className="recents-widget__pagination" role="group">
             <button
               aria-controls={listID}
               aria-disabled={isLoading || isSaving}
@@ -313,7 +304,7 @@ export function RecentsAndPinnedClient({
               </span>
             </button>
             <span aria-atomic="true" aria-live="polite" className="recents-widget__page-status">
-              {currentPage} {labels.of} {totalPages}
+              {t('dashboard:widgetPageCount', { currentPage, totalPages })}
             </span>
             <button
               aria-controls={listID}

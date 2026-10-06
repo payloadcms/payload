@@ -129,6 +129,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'সীমা',
     widgetNonSortableSortField:
       'Collection "{{collection}}"-এ "{{field}}" fieldটি সাজানো (sortable) নয়।',
+    widgetPageCount: '{{totalPages}} এর মধ্যে {{currentPage}}',
+    widgetPagination: 'নথির পৃষ্ঠাবিন্যাস',
     widgetPinned: 'পিন করা',
     widgetPinnedEmpty: 'কোনো পিন করা ডকুমেন্ট নেই',
     widgetPinnedEmptyDescription: 'আপনি যে ডকুমেন্টগুলো পিন করবেন, সেগুলো এখানে দেখাবে',

@@ -128,6 +128,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Limiet',
     widgetNonSortableSortField:
       'Sorteerveld "{{field}}" kan niet worden gesorteerd in collectie "{{collection}}".',
+    widgetPageCount: '{{currentPage}} van {{totalPages}}',
+    widgetPagination: 'Documentpaginering',
     widgetPinned: 'Vastgemaakt',
     widgetPinnedEmpty: 'Geen vastgemaakte documenten',
     widgetPinnedEmptyDescription: 'Documenten die u vastmaakt, verschijnen hier',

@@ -123,6 +123,8 @@ export const heTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'הגבלה',
     widgetNonSortableSortField:
       'שדה המיון "{{field}}" אינו ניתן למיון ב-Collection "{{collection}}".',
+    widgetPageCount: '{{currentPage}} מתוך {{totalPages}}',
+    widgetPagination: 'דפדוף בין עמודי מסמכים',
     widgetPinned: 'מוצמדים',
     widgetPinnedEmpty: 'אין מסמכים מוצמדים',
     widgetPinnedEmptyDescription: 'מסמכים שתצמיד יופיעו כאן',

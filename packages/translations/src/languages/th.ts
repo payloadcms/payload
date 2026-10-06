@@ -125,6 +125,8 @@ export const thTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'จำกัด',
     widgetNonSortableSortField:
       'ไม่สามารถจัดเรียง field "{{field}}" ใน Collection "{{collection}}" ได้',
+    widgetPageCount: '{{currentPage}} จาก {{totalPages}}',
+    widgetPagination: 'การแบ่งหน้าเอกสาร',
     widgetPinned: 'ปักหมุดแล้ว',
     widgetPinnedEmpty: 'ไม่มีเอกสารที่ปักหมุด',
     widgetPinnedEmptyDescription: 'เอกสารที่คุณปักหมุดจะแสดงที่นี่',

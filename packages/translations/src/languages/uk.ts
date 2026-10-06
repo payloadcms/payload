@@ -127,6 +127,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Обмеження',
     widgetNonSortableSortField:
       'Поле сортування «{{field}}» не можна сортувати в колекції «{{collection}}».',
+    widgetPageCount: '{{currentPage}} з {{totalPages}}',
+    widgetPagination: 'Пагінація документів',
     widgetPinned: 'Закріплено',
     widgetPinnedEmpty: 'Немає закріплених документів',
     widgetPinnedEmptyDescription: 'Документи, які ви закріпите, з’являться тут',

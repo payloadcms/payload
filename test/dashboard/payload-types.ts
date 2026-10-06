@@ -94,7 +94,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globals: {};
@@ -141,15 +141,15 @@ export interface UserAuthOperations {
  * via the `definition` "draft-posts".
  */
 export interface DraftPost {
-  id: number;
+  id: string;
   title: string;
   createdBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -160,14 +160,14 @@ export interface DraftPost {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   createdBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -194,19 +194,19 @@ export interface User {
  * via the `definition` "tickets".
  */
 export interface Ticket {
-  id: number;
+  id: string;
   title: string;
   description?: string | null;
   status: 'open' | 'in-progress' | 'closed';
   priority: 'low' | 'medium' | 'high' | 'critical';
-  assignee?: (number | null) | User;
+  assignee?: (string | null) | User;
   createdBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -216,7 +216,7 @@ export interface Ticket {
  * via the `definition` "revenue".
  */
 export interface Revenue {
-  id: number;
+  id: string;
   amount: number;
   description: string;
   date: string;
@@ -224,11 +224,11 @@ export interface Revenue {
   source?: string | null;
   createdBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -238,14 +238,14 @@ export interface Revenue {
  * via the `definition` "events".
  */
 export interface Event {
-  id: number;
+  id: string;
   title: string;
   description?: string | null;
   startDate: string;
   endDate?: string | null;
   location?: string | null;
   type: 'meeting' | 'conference' | 'workshop' | 'webinar' | 'other';
-  organizer?: (number | null) | User;
+  organizer?: (string | null) | User;
   status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
   details?: {
     priority?: number | null;
@@ -253,11 +253,11 @@ export interface Event {
   };
   createdBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -267,14 +267,14 @@ export interface Event {
  * via the `definition` "media".
  */
 export interface Media {
-  id: number;
+  id: string;
   createdBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -293,15 +293,15 @@ export interface Media {
  * via the `definition` "media-alt".
  */
 export interface MediaAlt {
-  id: number;
+  id: string;
   description: string;
   createdBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -320,7 +320,7 @@ export interface MediaAlt {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: number;
+  id: string;
   key: string;
   data:
     | {
@@ -337,40 +337,40 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'draft-posts';
-        value: number | DraftPost;
+        value: string | DraftPost;
       } | null)
     | ({
         relationTo: 'tickets';
-        value: number | Ticket;
+        value: string | Ticket;
       } | null)
     | ({
         relationTo: 'revenue';
-        value: number | Revenue;
+        value: string | Revenue;
       } | null)
     | ({
         relationTo: 'events';
-        value: number | Event;
+        value: string | Event;
       } | null)
     | ({
         relationTo: 'media';
-        value: number | Media;
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'media-alt';
-        value: number | MediaAlt;
+        value: string | MediaAlt;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -380,10 +380,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -403,7 +403,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -628,7 +628,7 @@ export interface ConfigurableWidget {
   data?: {
     title: string;
     description?: string | null;
-    relatedTicket?: (number | null) | Ticket;
+    relatedTicket?: (string | null) | Ticket;
     nestedGroup?: {
       nestedText?: string | null;
     };

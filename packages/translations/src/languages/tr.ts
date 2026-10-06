@@ -130,6 +130,8 @@ export const trTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Sınırla',
     widgetNonSortableSortField:
       '"{{field}}" sıralama alanı, "{{collection}}" koleksiyonu üzerinde sıralanabilir değildir.',
+    widgetPageCount: '{{currentPage}} / {{totalPages}}',
+    widgetPagination: 'Belge sayfalama',
     widgetPinned: 'Sabitlendi',
     widgetPinnedEmpty: 'Sabitlenmiş belge yok',
     widgetPinnedEmptyDescription: 'Sabitlediğiniz belgeler burada görünecek',

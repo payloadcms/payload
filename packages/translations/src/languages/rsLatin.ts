@@ -128,6 +128,8 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Ograničenje',
     widgetNonSortableSortField:
       'Polje za sortiranje "{{field}}" nije moguće sortirati u kolekciji "{{collection}}".',
+    widgetPageCount: '{{currentPage}} od {{totalPages}}',
+    widgetPagination: 'Paginacija dokumenata',
     widgetPinned: 'Prikvačeno',
     widgetPinnedEmpty: 'Nema prikvačenih dokumenata',
     widgetPinnedEmptyDescription: 'Dokumenti koje prikvačite će se pojaviti ovde',

@@ -130,6 +130,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Ограничение',
     widgetNonSortableSortField:
       'Поле сортировки "{{field}}" не может быть отсортировано в коллекции "{{collection}}".',
+    widgetPageCount: '{{currentPage}} из {{totalPages}}',
+    widgetPagination: 'Пагинация документов',
     widgetPinned: 'Закреплено',
     widgetPinnedEmpty: 'Нет закреплённых документов',
     widgetPinnedEmptyDescription: 'Закреплённые вами документы будут отображаться здесь',

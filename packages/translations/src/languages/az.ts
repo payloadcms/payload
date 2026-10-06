@@ -128,6 +128,8 @@ export const azTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Limit',
     widgetNonSortableSortField:
       'Sıralama sahəsi "{{field}}" "{{collection}}" kolleksiyasında sıralana bilmir.',
+    widgetPageCount: '{{currentPage}} / {{totalPages}}',
+    widgetPagination: 'Sənədlərin səhifələnməsi',
     widgetPinned: 'Sabitlənmiş',
     widgetPinnedEmpty: 'Sabitlənmiş sənəd yoxdur',
     widgetPinnedEmptyDescription: 'Sabitlədiyiniz sənədlər burada görünəcək',

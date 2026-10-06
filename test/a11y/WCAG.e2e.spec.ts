@@ -18,6 +18,7 @@ import {
   expectOptionsToHaveAccessibleNames,
   expectPaintedFocus,
   getFocusIndicatorStyle,
+  getTextContrastRatios,
   gotoCreatePost,
   gotoFirstPost,
   gotoPostsList,
@@ -65,6 +66,7 @@ test.describe('WCAG 2.2 Level AA', () => {
   let page: Page
   let postsURL: AdminUrlUtil
   let serverURL: string
+  const dashboardCleanup: Array<() => Promise<void>> = []
 
   test.beforeAll(async ({ browser }, testInfo) => {
     ;({ page, postsURL, serverURL } = await openAccessibilityTestPage({
@@ -74,6 +76,11 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.afterEach(async () => {
+    const restore = dashboardCleanup.splice(0).reverse()
+
+    for (const cleanup of restore) {
+      await cleanup()
+    }
     await cleanupModalMedia({ page })
   })
 
@@ -648,102 +655,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         .docs
       const originalTheme = await page.locator('html').getAttribute('data-theme')
 
-      try {
-        await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
-          data: {
-            value: {
-              items: documents.map((doc) => ({
-                id: doc.id,
-                collectionSlug: 'posts',
-                viewedAt: new Date().toISOString(),
-              })),
-            },
-          },
-        })
-        await page.goto(`${serverURL}/admin`)
-        const widget = page.locator('.recents-widget')
-
-        for (const theme of ['light', 'dark']) {
-          await page
-            .locator('html')
-            .evaluate((element, value) => element.setAttribute('data-theme', value), theme)
-          await widget.getByRole('button', { name: 'Recently viewed' }).click()
-          await expect(widget.locator('.recents-widget__meta').first()).toBeVisible()
-          const ratios = await widget.evaluate((element) => {
-            const rgba = ({ value }: { value: string }) => {
-              const values = value.match(/[\d.]+/g)!.map(Number)
-              const divisor = value.startsWith('color(srgb') ? 1 : 255
-
-              return [values[0] / divisor, values[1] / divisor, values[2] / divisor, values[3] ?? 1]
-            }
-            const composite = ({
-              background,
-              foreground,
-            }: {
-              background: number[]
-              foreground: number[]
-            }) =>
-              foreground
-                .slice(0, 3)
-                .map(
-                  (channel, index) =>
-                    channel * foreground[3] + background[index] * (1 - foreground[3]),
-                )
-            const luminance = ({ color }: { color: number[] }) =>
-              color.reduce((sum, channel, index) => {
-                const linear =
-                  channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
-
-                return sum + linear * [0.2126, 0.7152, 0.0722][index]
-              }, 0)
-
-            return [
-              '.recents-widget__tab',
-              '.recents-widget__meta',
-              '.recents-widget__status-pill',
-              '.recents-widget__pagination button:not(:disabled)',
-              '.recents-widget__pagination span',
-            ].flatMap((selector) =>
-              Array.from(element.querySelectorAll(selector)).map((text) => {
-                const ancestors: Element[] = []
-                let ancestor: Element | null = text
-
-                while (ancestor) {
-                  ancestors.unshift(ancestor)
-                  ancestor = ancestor.parentElement
-                }
-                const background = ancestors.reduce(
-                  (color, node) =>
-                    composite({
-                      background: color,
-                      foreground: rgba({ value: getComputedStyle(node).backgroundColor }),
-                    }),
-                  [1, 1, 1],
-                )
-                const foreground = composite({
-                  background,
-                  foreground: rgba({ value: getComputedStyle(text).color }),
-                })
-                const lighter = Math.max(
-                  luminance({ color: foreground }),
-                  luminance({ color: background }),
-                )
-                const darker = Math.min(
-                  luminance({ color: foreground }),
-                  luminance({ color: background }),
-                )
-
-                return { ratio: (lighter + 0.05) / (darker + 0.05), selector }
-              }),
-            )
-          })
-
-          expect(ratios.length).toBeGreaterThan(3)
-          for (const { ratio, selector } of ratios) {
-            expect(ratio, `${theme}: ${selector}`).toBeGreaterThanOrEqual(4.5)
-          }
-        }
-      } finally {
+      dashboardCleanup.push(async () => {
         await page.locator('html').evaluate((element, value) => {
           if (value) {
             element.setAttribute('data-theme', value)
@@ -752,6 +664,43 @@ test.describe('WCAG 2.2 Level AA', () => {
         await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
           data: { value: preference?.value ?? { items: [] } },
         })
+      })
+
+      await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
+        data: {
+          value: {
+            items: documents.map((doc) => ({
+              id: doc.id,
+              collectionSlug: 'posts',
+              viewedAt: new Date().toISOString(),
+            })),
+          },
+        },
+      })
+      await page.goto(`${serverURL}/admin`)
+      const widget = page.locator('.recents-widget')
+
+      for (const theme of ['light', 'dark']) {
+        await page
+          .locator('html')
+          .evaluate((element, value) => element.setAttribute('data-theme', value), theme)
+        await widget.getByRole('button', { name: 'Recently viewed' }).click()
+        await expect(widget.locator('.recents-widget__meta').first()).toBeVisible()
+        const ratios = await getTextContrastRatios({
+          container: widget,
+          selectors: [
+            '.recents-widget__tab',
+            '.recents-widget__meta',
+            '.recents-widget__status-pill',
+            '.recents-widget__pagination button:not(:disabled)',
+            '.recents-widget__pagination span',
+          ],
+        })
+
+        expect(ratios.length).toBeGreaterThan(3)
+        for (const { ratio, selector } of ratios) {
+          expect(ratio, `${theme}: ${selector}`).toBeGreaterThanOrEqual(4.5)
+        }
       }
     })
   })
@@ -937,76 +886,73 @@ test.describe('WCAG 2.2 Level AA', () => {
         await page.request.get(`${serverURL}/api/payload-preferences/pinned-documents`)
       ).json()
 
-      try {
-        await widget.locator('.recents-widget__empty-icon--pinned').click()
-        await expect(drawer).toHaveCount(0)
-        await expect(opener).toHaveAttribute('aria-expanded', 'false')
-        await expect(opener).toHaveAccessibleDescription(
-          'No pinned documents Documents you pin will appear here',
-        )
-        const openerBox = await opener.boundingBox()
-
-        expect(openerBox!.height).toBeGreaterThanOrEqual(24)
-        expect(openerBox!.width).toBeGreaterThanOrEqual(24)
-        await opener.focus()
-        await expectPaintedFocus({ page })
-        await opener.press('Enter')
-        await expect(drawer).toBeVisible()
-        await expect(opener).toHaveAttribute('aria-expanded', 'true')
-        await expectFocusInside({ container: drawer, page })
-        await page.keyboard.press('Shift+Tab')
-        await expectFocusInside({ container: drawer, page })
-        await page.keyboard.press('Tab')
-        await expectFocusInside({ container: drawer, page })
-        await page.keyboard.press('Escape')
-        await expect(drawer).toBeHidden()
-        await expect(opener).toBeFocused()
-        await expect(opener).toHaveAttribute('aria-expanded', 'false')
-        await opener.press('Space')
-        const collectionInput = drawer.locator('.list-header__select-collection input[type="text"]')
-
-        await collectionInput.focus()
-        await expect(collectionInput).toHaveAccessibleName('Select a Collection to Browse')
-        await collectionInput.press('ArrowDown')
-        await expect(
-          getSelectMenu({ page }).getByText(
-            /folder|pinned documents|preferences|locked documents/i,
-          ),
-        ).toHaveCount(0)
-        await collectionInput.fill('Post')
-        await collectionInput.press('ArrowDown')
-        await collectionInput.press('Enter')
-        await expect(
-          drawer.getByRole('button', { name: document.title, exact: true }),
-        ).toBeVisible()
-        const results = await runAxeScan({
-          include: ['.list-drawer.drawer--is-open'],
-          page,
-          testInfo,
-        })
-
-        expect(results.violations).toEqual([])
-        const selectDocument = drawer.getByRole('button', { name: document.title, exact: true })
-
-        await selectDocument.focus()
-        await expectPaintedFocus({ page })
-        await selectDocument.press('Enter')
-        await expect(drawer).toBeHidden()
-        await expect(widget.getByRole('button', { name: 'Pinned', exact: true })).toBeFocused()
-        await expect(widget.locator('.document-card__title')).toContainText(document.title)
-        const pins = await (
-          await page.request.get(`${serverURL}/api/payload-preferences/pinned-documents`)
-        ).json()
-
-        expect(pins.value.items).toContainEqual({ id: document.id, collectionSlug: 'posts' })
-        const widgetResults = await runAxeScan({ include: ['.recents-widget'], page, testInfo })
-
-        expect(widgetResults.violations).toEqual([])
-      } finally {
+      dashboardCleanup.push(async () => {
         await page.request.post(`${serverURL}/api/payload-preferences/pinned-documents`, {
           data: { value: previousPins.value ?? { items: [] } },
         })
-      }
+      })
+
+      await widget.locator('.recents-widget__empty-icon--pinned').click()
+      await expect(drawer).toHaveCount(0)
+      await expect(opener).toHaveAttribute('aria-expanded', 'false')
+      await expect(opener).toHaveAccessibleDescription(
+        'No pinned documents Documents you pin will appear here',
+      )
+      const openerBox = await opener.boundingBox()
+
+      expect(openerBox!.height).toBeGreaterThanOrEqual(24)
+      expect(openerBox!.width).toBeGreaterThanOrEqual(24)
+      await opener.focus()
+      await expectPaintedFocus({ page })
+      await opener.press('Enter')
+      await expect(drawer).toBeVisible()
+      await expect(opener).toHaveAttribute('aria-expanded', 'true')
+      await expectFocusInside({ container: drawer, page })
+      await page.keyboard.press('Shift+Tab')
+      await expectFocusInside({ container: drawer, page })
+      await page.keyboard.press('Tab')
+      await expectFocusInside({ container: drawer, page })
+      await page.keyboard.press('Escape')
+      await expect(drawer).toBeHidden()
+      await expect(opener).toBeFocused()
+      await expect(opener).toHaveAttribute('aria-expanded', 'false')
+      await opener.press('Space')
+      const collectionInput = drawer.locator('.list-header__select-collection input[type="text"]')
+
+      await collectionInput.focus()
+      await expect(collectionInput).toHaveAccessibleName('Select a Collection to Browse')
+      await collectionInput.press('ArrowDown')
+      await expect(
+        getSelectMenu({ page }).getByText(/pinned documents|preferences|locked documents/i),
+      ).toHaveCount(0)
+      await expect(getSelectMenu({ page }).getByRole('option', { name: /folder/i })).toHaveCount(1)
+      await collectionInput.fill('Post')
+      await collectionInput.press('ArrowDown')
+      await collectionInput.press('Enter')
+      await expect(drawer.getByRole('button', { name: document.title, exact: true })).toBeVisible()
+      const results = await runAxeScan({
+        include: ['.list-drawer.drawer--is-open'],
+        page,
+        testInfo,
+      })
+
+      expect(results.violations).toEqual([])
+      const selectDocument = drawer.getByRole('button', { name: document.title, exact: true })
+
+      await selectDocument.focus()
+      await expectPaintedFocus({ page })
+      await selectDocument.press('Enter')
+      await expect(drawer).toBeHidden()
+      await expect(widget.getByRole('button', { name: 'Pinned', exact: true })).toBeFocused()
+      await expect(widget.locator('.document-card__title')).toContainText(document.title)
+      const pins = await (
+        await page.request.get(`${serverURL}/api/payload-preferences/pinned-documents`)
+      ).json()
+
+      expect(pins.value.items).toContainEqual({ id: document.id, collectionSlug: 'posts' })
+      const widgetResults = await runAxeScan({ include: ['.recents-widget'], page, testInfo })
+
+      expect(widgetResults.violations).toEqual([])
     })
 
     test('should paginate and unpin dashboard documents with the keyboard while retaining focus', async () => {
@@ -1020,77 +966,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         await page.request.get(`${serverURL}/api/payload-preferences/pinned-documents`)
       ).json()
 
-      try {
-        const pinResponse = await page.request.post(
-          `${serverURL}/api/payload-preferences/pinned-documents`,
-          {
-            data: { value: { items: [{ id: documents[0].id, collectionSlug: 'posts' }] } },
-          },
-        )
-
-        expect(pinResponse.ok()).toBe(true)
-        await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
-          data: {
-            value: {
-              items: documents.map((doc) => ({
-                id: doc.id,
-                collectionSlug: 'posts',
-                viewedAt: new Date().toISOString(),
-              })),
-            },
-          },
-        })
-        await page.setViewportSize({ height: 900, width: 375 })
-        await page.goto(`${serverURL}/admin`)
-        const widget = page.locator('.recents-widget')
-        const recents = widget.getByRole('button', { name: 'Recently viewed' })
-        const next = widget.getByRole('button', { name: 'Next', exact: true })
-        const previous = widget.getByRole('button', { name: 'Previous', exact: true })
-
-        await recents.focus()
-        await recents.press('Enter')
-        await expect(widget.locator('.document-card__title')).toHaveCount(1)
-        await expect(previous).toBeDisabled()
-        await next.focus()
-        await next.press('Space')
-        await expect(widget.locator('.document-card__title')).toHaveText(documents[1].title)
-        await expect(next).toBeFocused()
-        await expect(widget.locator('.recents-widget__pagination [aria-live]')).toContainText(
-          '2 of 3',
-        )
-        await next.press('Enter')
-        await expect(widget.locator('.document-card__title')).toHaveText(documents[2].title)
-        await expect(previous).toBeFocused()
-        await previous.press('Space')
-        await expect(widget.locator('.recents-widget__pagination [aria-live]')).toContainText(
-          '2 of 3',
-        )
-        await previous.focus()
-        await previous.press('Enter')
-        await expect(next).toBeFocused()
-        await widget.locator('.document-card__title').focus()
-        await expectPaintedFocus({ page })
-        await expect(widget.locator('.recents-widget__pin')).toHaveCount(0)
-        const pinned = widget.getByRole('button', { name: 'Pinned', exact: true })
-
-        await pinned.focus()
-        await pinned.press('Enter')
-        const unpin = widget.getByRole('button', {
-          name: `Unpin document: ${documents[0].title}`,
-          exact: true,
-        })
-
-        await unpin.focus()
-        await expect(unpin).toHaveCSS('opacity', '1')
-        await unpin.press('Space')
-        await expect(pinned).toBeFocused()
-        await expect(widget.locator('.recents-widget__empty-title')).toHaveText(
-          'No pinned documents',
-        )
-        await expect
-          .poll(() => widget.evaluate((element) => element.scrollWidth <= element.clientWidth))
-          .toBe(true)
-      } finally {
+      dashboardCleanup.push(async () => {
         await page.request.post(`${serverURL}/api/payload-preferences/pinned-documents`, {
           data: { value: previousPins.value ?? { items: [] } },
         })
@@ -1100,7 +976,79 @@ test.describe('WCAG 2.2 Level AA', () => {
         if (previousViewport) {
           await page.setViewportSize(previousViewport)
         }
-      }
+      })
+
+      const pinResponse = await page.request.post(
+        `${serverURL}/api/payload-preferences/pinned-documents`,
+        {
+          data: { value: { items: [{ id: documents[0].id, collectionSlug: 'posts' }] } },
+        },
+      )
+
+      expect(pinResponse.ok()).toBe(true)
+      await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
+        data: {
+          value: {
+            items: documents.map((doc) => ({
+              id: doc.id,
+              collectionSlug: 'posts',
+              viewedAt: new Date().toISOString(),
+            })),
+          },
+        },
+      })
+      await page.setViewportSize({ height: 900, width: 375 })
+      await page.goto(`${serverURL}/admin`)
+      const widget = page.locator('.recents-widget')
+      const recents = widget.getByRole('button', { name: 'Recently viewed' })
+      const next = widget.getByRole('button', { name: 'Next', exact: true })
+      const previous = widget.getByRole('button', { name: 'Previous', exact: true })
+
+      await expect(
+        widget.getByRole('group', { name: 'Document pagination', exact: true }),
+      ).toBeVisible()
+
+      await recents.focus()
+      await recents.press('Enter')
+      await expect(widget.locator('.document-card__title')).toHaveCount(1)
+      await expect(previous).toBeDisabled()
+      await next.focus()
+      await next.press('Space')
+      await expect(widget.locator('.document-card__title')).toHaveText(documents[1].title)
+      await expect(next).toBeFocused()
+      await expect(widget.locator('.recents-widget__pagination [aria-live]')).toContainText(
+        '2 of 3',
+      )
+      await next.press('Enter')
+      await expect(widget.locator('.document-card__title')).toHaveText(documents[2].title)
+      await expect(previous).toBeFocused()
+      await previous.press('Space')
+      await expect(widget.locator('.recents-widget__pagination [aria-live]')).toContainText(
+        '2 of 3',
+      )
+      await previous.focus()
+      await previous.press('Enter')
+      await expect(next).toBeFocused()
+      await widget.locator('.document-card__title').focus()
+      await expectPaintedFocus({ page })
+      await expect(widget.locator('.recents-widget__pin')).toHaveCount(0)
+      const pinned = widget.getByRole('button', { name: 'Pinned', exact: true })
+
+      await pinned.focus()
+      await pinned.press('Enter')
+      const unpin = widget.getByRole('button', {
+        name: `Unpin document: ${documents[0].title}`,
+        exact: true,
+      })
+
+      await unpin.focus()
+      await expect(unpin).toHaveCSS('opacity', '1')
+      await unpin.press('Space')
+      await expect(pinned).toBeFocused()
+      await expect(widget.locator('.recents-widget__empty-title')).toHaveText('No pinned documents')
+      await expect
+        .poll(() => widget.evaluate((element) => element.scrollWidth <= element.clientWidth))
+        .toBe(true)
     })
 
     test('should choose a related document with the keyboard after saving grid layout', async () => {

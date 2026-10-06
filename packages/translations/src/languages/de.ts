@@ -131,6 +131,8 @@ export const deTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Begrenzung',
     widgetNonSortableSortField:
       'Das Sortierfeld "{{field}}" ist in der Collection "{{collection}}" nicht sortierbar.',
+    widgetPageCount: '{{currentPage}} von {{totalPages}}',
+    widgetPagination: 'Dokumentseiten',
     widgetPinned: 'Angeheftet',
     widgetPinnedEmpty: 'Keine angehefteten Dokumente',
     widgetPinnedEmptyDescription: 'Dokumente, die Sie anheften, erscheinen hier',

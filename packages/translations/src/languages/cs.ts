@@ -125,6 +125,8 @@ export const csTranslations: DefaultTranslationsObject = {
     widgetInvalidSortField: 'Třídicí field "{{field}}" neexistuje v kolekci "{{collection}}".',
     widgetLimitLabel: 'Limit',
     widgetNonSortableSortField: 'Pole "{{field}}" nelze řadit v kolekci "{{collection}}".',
+    widgetPageCount: '{{currentPage}} z {{totalPages}}',
+    widgetPagination: 'Stránkování dokumentů',
     widgetPinned: 'Připnuté',
     widgetPinnedEmpty: 'Žádné připnuté dokumenty',
     widgetPinnedEmptyDescription: 'Zde se zobrazí dokumenty, které připnete',

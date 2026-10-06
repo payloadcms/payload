@@ -1,5 +1,5 @@
 /* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test"] }] -- Tests use the shared fixture wrapper. */
-import { createPayloadRequest } from 'payload'
+import { createPayloadRequest, UnauthorizedError } from 'payload'
 import { PREFERENCE_KEYS } from 'payload/shared'
 import { expect, vi } from 'vitest'
 
@@ -55,6 +55,17 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
       )
 
       expect(hydrated).toHaveLength(1)
+      expect(hydrated[0][0].select).toEqual({
+        _status: true,
+        id: true,
+        title: true,
+        updatedAt: true,
+      })
+      const identities = find.mock.calls.filter(
+        ([args]) => args.collection === 'tickets' && args.depth === 0,
+      )
+      expect(identities).toHaveLength(1)
+      expect(identities[0][0].select).toEqual({ id: true })
       expect(
         find.mock.calls.filter(
           ([args]) =>
@@ -151,7 +162,9 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
       expect(first.totalDocs).toBe(6)
       expect(first.items.map((item) => item.id)).toEqual(documents.slice(0, 4).map((doc) => doc.id))
       expect(second.items.map((item) => item.id)).toEqual(documents.slice(4).map((doc) => doc.id))
-      const documentQueries = find.mock.calls.filter(([args]) => args.collection === 'tickets')
+      const documentQueries = find.mock.calls.filter(
+        ([args]) => args.collection === 'tickets' && args.depth === 1,
+      )
 
       expect(documentQueries.map(([args]) => args.limit)).toEqual([4, 2])
       expect(
@@ -205,7 +218,9 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
       })
 
       expect(result).toEqual({ items: [], page: 2, totalDocs: 4 })
-      expect(find.mock.calls.filter(([args]) => args.collection === 'tickets')).toHaveLength(0)
+      expect(
+        find.mock.calls.filter(([args]) => args.collection === 'tickets' && args.depth === 1),
+      ).toHaveLength(0)
       const clamped = await getDashboardDocuments({
         limit: 4,
         page: 99,
@@ -217,6 +232,57 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
       expect(clamped).toEqual(result)
     } finally {
       find.mockRestore()
+    }
+  })
+
+  test('should discard deleted references before counting and slicing either tab', async ({
+    payload,
+  }) => {
+    const owner = await payload.create({
+      collection: 'users',
+      data: { email: 'deleted-pins@payloadcms.com', password: 'test' },
+      overrideAccess: true,
+    })
+    const user = { ...owner, collection: 'users' as const }
+    const documents = []
+
+    for (let index = 0; index < 5; index++) {
+      documents.push(
+        await payload.create({
+          collection: 'tickets',
+          data: { title: `Deleted pin ${index}` },
+          overrideAccess: false,
+          user,
+        }),
+      )
+    }
+    const items = documents.map(({ id }) => ({ id, collectionSlug: 'tickets' }))
+
+    for (const key of [PREFERENCE_KEYS.PINNED_DOCUMENTS, PREFERENCE_KEYS.RECENTLY_VIEWED]) {
+      await payload.create({
+        collection: 'payload-preferences',
+        data: { key, user: { relationTo: 'users', value: owner.id }, value: { items } },
+        overrideAccess: false,
+        user,
+      })
+    }
+    for (const document of documents.slice(0, 4)) {
+      await payload.delete({ collection: 'tickets', id: document.id, overrideAccess: false, user })
+    }
+    const req = await createPayloadRequest({ payload, req: { user } })
+
+    for (const tab of ['pinned', 'recents'] as const) {
+      const result = await getDashboardDocuments({
+        limit: 4,
+        page: 99,
+        req,
+        shouldIncludePinPlaceholder: true,
+        tab,
+      })
+
+      expect(result.totalDocs).toBe(1)
+      expect(result.page).toBe(1)
+      expect(result.items.map(({ id }) => id)).toEqual([documents[4].id])
     }
   })
 
@@ -277,7 +343,7 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
     const req = await createPayloadRequest({ payload })
 
     await expect(getDashboardDocuments({ limit: 4, page: 1, req, tab: 'recents' })).rejects.toThrow(
-      'Unauthorized',
+      UnauthorizedError,
     )
     const owner = await payload.create({
       collection: 'users',

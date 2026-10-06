@@ -128,6 +128,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Begrens',
     widgetNonSortableSortField:
       'Sorteringsfeltet "{{field}}" kan ikke sorteres i Collection "{{collection}}".',
+    widgetPageCount: '{{currentPage}} av {{totalPages}}',
+    widgetPagination: 'Sideinndeling av dokumenter',
     widgetPinned: 'Festet',
     widgetPinnedEmpty: 'Ingen festede dokumenter',
     widgetPinnedEmptyDescription: 'Dokumenter du fester vil vises her',

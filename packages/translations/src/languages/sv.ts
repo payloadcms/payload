@@ -127,6 +127,8 @@ export const svTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Begränsning',
     widgetNonSortableSortField:
       'Sorteringsfältet "{{field}}" kan inte sorteras i Collection "{{collection}}".',
+    widgetPageCount: '{{currentPage}} av {{totalPages}}',
+    widgetPagination: 'Sidindelning av dokument',
     widgetPinned: 'Fästa',
     widgetPinnedEmpty: 'Inga fästa dokument',
     widgetPinnedEmptyDescription: 'Dokument du fäster visas här',

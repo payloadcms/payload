@@ -129,6 +129,8 @@ export const caTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Límit',
     widgetNonSortableSortField:
       'El camp d’ordenació "{{field}}" no es pot ordenar a la col·lecció "{{collection}}".',
+    widgetPageCount: '{{currentPage}} de {{totalPages}}',
+    widgetPagination: 'Paginació de documents',
     widgetPinned: 'Fixat',
     widgetPinnedEmpty: 'No hi ha documents fixats',
     widgetPinnedEmptyDescription: 'Els documents que fixis apareixeran aquí',

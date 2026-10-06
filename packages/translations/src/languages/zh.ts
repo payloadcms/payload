@@ -120,6 +120,8 @@ export const zhTranslations: DefaultTranslationsObject = {
     widgetInvalidSortField: '集合“{{collection}}”中不存在排序字段“{{field}}”。',
     widgetLimitLabel: '限制',
     widgetNonSortableSortField: '集合“{{collection}}”中的排序字段“{{field}}”不可排序。',
+    widgetPageCount: '第 {{currentPage}} 页，共 {{totalPages}} 页',
+    widgetPagination: '文档分页',
     widgetPinned: '已固定',
     widgetPinnedEmpty: '暂无已固定文档',
     widgetPinnedEmptyDescription: '您固定的文档将显示在此处',

@@ -62,7 +62,7 @@
   .recents-widget__pin-picker .sort-column__label,
   .recents-widget__pin-picker .page-controls__page-info,
   .recents-widget__pin-picker .per-page__label {
-    color: color-mix(in srgb, var(--color-text-secondary) 75%, var(--color-text));
+    color: var(--recents-text-secondary);
   }
 
   .recents-widget__pin-picker .sort-column__button {

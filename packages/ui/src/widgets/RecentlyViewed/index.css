@@ -1,4 +1,13 @@
 @layer payload-default {
+  .recents-widget,
+  .recents-widget__pin-picker {
+    --recents-text-secondary: color-mix(
+      in srgb,
+      var(--color-text-secondary) 75%,
+      var(--color-text)
+    );
+  }
+
   .card.recents-widget {
     container-type: inline-size;
     gap: var(--spacer-3);
@@ -12,8 +21,8 @@
 
   .recents-widget .widget-card__header {
     position: absolute;
-    width: 1px;
-    height: 1px;
+    width: calc(var(--spacer-1) / 4);
+    height: calc(var(--spacer-1) / 4);
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
@@ -40,7 +49,7 @@
   .recents-widget__pin {
     border: 0;
     background: transparent;
-    color: color-mix(in srgb, var(--color-text-secondary) 75%, var(--color-text));
+    color: var(--recents-text-secondary);
     cursor: pointer;
   }
 
@@ -97,7 +106,7 @@
 
   .recents-widget__meta,
   .recents-widget__empty-description {
-    color: color-mix(in srgb, var(--color-text-secondary) 75%, var(--color-text));
+    color: var(--recents-text-secondary);
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     line-height: var(--text-body-medium-line-height);

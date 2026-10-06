@@ -129,6 +129,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: '制限',
     widgetNonSortableSortField:
       'コレクション「{{collection}}」でソートフィールド「{{field}}」はソートできません。',
+    widgetPageCount: '{{totalPages}} ページ中 {{currentPage}} ページ',
+    widgetPagination: 'ドキュメントのページ切り替え',
     widgetPinned: 'ピン留め済み',
     widgetPinnedEmpty: 'ピン留めされたドキュメントはありません',
     widgetPinnedEmptyDescription: 'ここにピン留めしたドキュメントが表示されます',

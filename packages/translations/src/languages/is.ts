@@ -128,6 +128,8 @@ export const isTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Takmörk',
     widgetNonSortableSortField:
       'Sortureiturinn "{{field}}" er ekki raðhæfur á Collection "{{collection}}".',
+    widgetPageCount: '{{currentPage}} af {{totalPages}}',
+    widgetPagination: 'Síðuskipting skjala',
     widgetPinned: 'Fest',
     widgetPinnedEmpty: 'Engin fest skjöl',
     widgetPinnedEmptyDescription: 'Skjöl sem þú festir munu birtast hér',

@@ -128,6 +128,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Ограничение',
     widgetNonSortableSortField:
       'Полето за сортиране "{{field}}" не може да бъде сортирано в Collection "{{collection}}".',
+    widgetPageCount: '{{currentPage}} от {{totalPages}}',
+    widgetPagination: 'Странициране на документи',
     widgetPinned: 'Закачени',
     widgetPinnedEmpty: 'Няма закачени документи',
     widgetPinnedEmptyDescription: 'Документите, които закачите, ще се появят тук',

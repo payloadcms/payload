@@ -128,6 +128,8 @@ export const plTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Limit',
     widgetNonSortableSortField:
       'Pole sortujące "{{field}}" nie jest sortowalne w kolekcji "{{collection}}".',
+    widgetPageCount: '{{currentPage}} z {{totalPages}}',
+    widgetPagination: 'Paginacja dokumentów',
     widgetPinned: 'Przypięte',
     widgetPinnedEmpty: 'Brak przypiętych dokumentów',
     widgetPinnedEmptyDescription: 'Przypięte dokumenty pojawią się tutaj',

@@ -129,6 +129,8 @@ export const viTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Giới hạn',
     widgetNonSortableSortField:
       'Trường sắp xếp "{{field}}" không thể sắp xếp được trên Collection "{{collection}}".',
+    widgetPageCount: '{{currentPage}} trên {{totalPages}}',
+    widgetPagination: 'Phân trang tài liệu',
     widgetPinned: 'Đã ghim',
     widgetPinnedEmpty: 'Không có tài liệu đã ghim',
     widgetPinnedEmptyDescription: 'Các tài liệu bạn ghim sẽ xuất hiện tại đây',

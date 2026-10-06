@@ -125,6 +125,8 @@ export const faTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'محدودیت',
     widgetNonSortableSortField:
       'فیلد مرتب‌سازی "{{field}}" در Collection "{{collection}}" قابل مرتب‌سازی نیست.',
+    widgetPageCount: '{{currentPage}} از {{totalPages}}',
+    widgetPagination: 'صفحه‌بندی اسناد',
     widgetPinned: 'سنجاق شده',
     widgetPinnedEmpty: 'سندی سنجاق نشده است',
     widgetPinnedEmptyDescription: 'اسنادی که سنجاق کنید اینجا نمایش داده می‌شوند',

@@ -97,6 +97,8 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'dashboard:widgetNonSortableSortField',
   'dashboard:widgetQueryError',
   'dashboard:widgetAddPin',
+  'dashboard:widgetPageCount',
+  'dashboard:widgetPagination',
   'dashboard:widgetPinned',
   'dashboard:widgetPinnedEmpty',
   'dashboard:widgetPinnedEmptyDescription',

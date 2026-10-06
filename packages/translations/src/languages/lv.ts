@@ -126,6 +126,8 @@ export const lvTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Ierobežot',
     widgetNonSortableSortField:
       'Kārtot lauku "{{field}}" kolekcijā "{{collection}}" nav iespējams.',
+    widgetPageCount: '{{currentPage}} no {{totalPages}}',
+    widgetPagination: 'Dokumentu lapošana',
     widgetPinned: 'Piespraustie',
     widgetPinnedEmpty: 'Nav piespraustu dokumentu',
     widgetPinnedEmptyDescription: 'Šeit parādīsies jūsu piespraustie dokumenti',

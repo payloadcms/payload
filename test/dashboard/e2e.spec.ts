@@ -107,7 +107,7 @@ describe('Dashboard', () => {
       '.count-widget.card',
       '.revenue-widget.card',
       '.private-widget.card',
-      '.widget-card.card',
+      '.widget-card.card:not(.recents-widget)',
     ]) {
       const widgetCard = page.locator(selector).first()
 
@@ -456,6 +456,59 @@ describe('Dashboard', () => {
     )
   })
 
+  test('should preserve concurrent unpin changes from two dashboard tabs', async ({
+    page,
+    context,
+  }) => {
+    const documents = (await (await page.request.get(`${serverURL}/api/tickets?limit=2`)).json())
+      .docs
+    const saved = await page.request.post(`${serverURL}/api/payload-preferences/pinned-documents`, {
+      data: { value: { items: documents.map(({ id }) => ({ id, collectionSlug: 'tickets' })) } },
+    })
+
+    expect(saved.ok()).toBe(true)
+    await page.setViewportSize({ height: 900, width: 1920 })
+    await page.reload()
+    const otherPage = await context.newPage()
+
+    await otherPage.goto(url.admin)
+    for (const tab of [page, otherPage]) {
+      await expect(tab.locator('.recents-widget .document-card__title')).toHaveCount(2)
+      await tab.route('**/api/payload-preferences/pinned-documents', async (route) => {
+        if (route.request().method() === 'GET') {
+          const response = await route.fetch()
+
+          // Make the read overlap with the other tab's update if writes are not serialized.
+          await new Promise((resolve) => setTimeout(resolve, 100))
+          await route.fulfill({ response })
+        } else {
+          await route.continue()
+        }
+      })
+    }
+    await Promise.all([
+      page
+        .getByRole('button', { name: `Unpin document: ${documents[0].title}`, exact: true })
+        .click(),
+      otherPage
+        .getByRole('button', { name: `Unpin document: ${documents[1].title}`, exact: true })
+        .click(),
+    ])
+    await expect
+      .poll(async () => {
+        const preference = await (
+          await page.request.get(`${serverURL}/api/payload-preferences/pinned-documents`)
+        ).json()
+
+        return preference.value.items
+      })
+      .toEqual([])
+    await Promise.all([page.reload(), otherPage.reload()])
+    for (const tab of [page, otherPage]) {
+      await expect(tab.locator('.recents-widget__empty-title')).toHaveText('No pinned documents')
+    }
+  })
+
   test('should select documents from different collections through the activity widget pin placeholder', async ({
     page,
   }) => {
@@ -796,7 +849,7 @@ describe('Dashboard', () => {
     const d = new DashboardHelper(page)
     await d.setEditing()
     await d.assertWidthRange({ max: 'full', min: 'full', position: 1 })
-    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 2 })
+    await d.assertWidthRange({ max: 'full', min: 'small', position: 2 })
     await d.assertWidthRange({ max: 'full', min: 'full', position: 3 })
     await d.assertWidthRange({ max: 'medium', min: 'x-small', position: 4 })
     await d.assertWidthRange({ max: 'medium', min: 'x-small', position: 5 })

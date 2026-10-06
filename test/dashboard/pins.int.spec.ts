@@ -92,6 +92,7 @@ test.suite('Pinned document preferences', { config: './config.ts' }, () => {
     const result = await getDashboardDocuments({ limit: 4, page: 1, req, tab: 'pinned' })
 
     expect(result.items).toEqual([])
+    expect(result.totalDocs).toBe(0)
   })
 
   test('should deduplicate references and tolerate stale or malformed preference items', async ({

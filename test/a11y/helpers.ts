@@ -722,3 +722,65 @@ export async function openNavigationFolders({
   ).toBeVisible()
   return sidebar
 }
+
+/** Measure text against the composited backgrounds of its rendered ancestors. */
+export async function getTextContrastRatios({
+  container,
+  selectors,
+}: {
+  container: Locator
+  selectors: string[]
+}) {
+  return container.evaluate((element, selectors) => {
+    const rgba = ({ value }: { value: string }) => {
+      const values = value.match(/[\d.]+/g)!.map(Number)
+      const divisor = value.startsWith('color(srgb') ? 1 : 255
+
+      return [values[0] / divisor, values[1] / divisor, values[2] / divisor, values[3] ?? 1]
+    }
+    const composite = ({
+      background,
+      foreground,
+    }: {
+      background: number[]
+      foreground: number[]
+    }) =>
+      foreground
+        .slice(0, 3)
+        .map((channel, index) => channel * foreground[3] + background[index] * (1 - foreground[3]))
+    const luminance = ({ color }: { color: number[] }) =>
+      color.reduce((sum, channel, index) => {
+        const linear = channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
+
+        return sum + linear * [0.2126, 0.7152, 0.0722][index]
+      }, 0)
+
+    return selectors.flatMap((selector) =>
+      Array.from(element.querySelectorAll(selector)).map((text) => {
+        const ancestors: Element[] = []
+        let ancestor: Element | null = text
+
+        while (ancestor) {
+          ancestors.unshift(ancestor)
+          ancestor = ancestor.parentElement
+        }
+        const background = ancestors.reduce(
+          (color, node) =>
+            composite({
+              background: color,
+              foreground: rgba({ value: getComputedStyle(node).backgroundColor }),
+            }),
+          [1, 1, 1],
+        )
+        const foreground = composite({
+          background,
+          foreground: rgba({ value: getComputedStyle(text).color }),
+        })
+        const lighter = Math.max(luminance({ color: foreground }), luminance({ color: background }))
+        const darker = Math.min(luminance({ color: foreground }), luminance({ color: background }))
+
+        return { ratio: (lighter + 0.05) / (darker + 0.05), selector }
+      }),
+    )
+  }, selectors)
+}

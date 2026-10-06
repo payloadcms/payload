@@ -126,6 +126,8 @@ export const daTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Begrænsning',
     widgetNonSortableSortField:
       'Sorteringsfeltet "{{field}}" kan ikke sorteres i Collection "{{collection}}".',
+    widgetPageCount: '{{currentPage}} af {{totalPages}}',
+    widgetPagination: 'Sideinddeling af dokumenter',
     widgetPinned: 'Fastgjort',
     widgetPinnedEmpty: 'Ingen fastgjorte dokumenter',
     widgetPinnedEmptyDescription: 'Dokumenter, du fastgør, vises her',

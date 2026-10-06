@@ -126,6 +126,8 @@ export const koTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: '제한',
     widgetNonSortableSortField:
       '정렬 필드 "{{field}}"는 컬렉션 "{{collection}}"에서 정렬할 수 없습니다.',
+    widgetPageCount: '{{totalPages}}페이지 중 {{currentPage}}페이지',
+    widgetPagination: '문서 페이지 이동',
     widgetPinned: '고정됨',
     widgetPinnedEmpty: '고정된 문서 없음',
     widgetPinnedEmptyDescription: '여기에 고정한 문서가 표시됩니다',

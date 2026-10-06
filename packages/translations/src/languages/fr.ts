@@ -130,6 +130,8 @@ export const frTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Limiter',
     widgetNonSortableSortField:
       'Le champ de tri "{{field}}" n\'est pas triable dans la Collection "{{collection}}".',
+    widgetPageCount: '{{currentPage}} sur {{totalPages}}',
+    widgetPagination: 'Pagination des documents',
     widgetPinned: 'Épinglé',
     widgetPinnedEmpty: 'Aucun document épinglé',
     widgetPinnedEmptyDescription: 'Les documents que vous épinglez apparaîtront ici',

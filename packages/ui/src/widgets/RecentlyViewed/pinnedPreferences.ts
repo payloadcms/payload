@@ -40,6 +40,35 @@ export async function readPinnedPreferences({ url }: { url: string }): Promise<P
   return getPinnedItems({ value: preference.value })
 }
 
+/** Serialize the read/modify/write operation across same-origin admin tabs. */
+export async function updatePinnedPreferences({
+  document,
+  shouldPin,
+  url,
+}: {
+  document: PinnedItem
+  shouldPin: boolean
+  url: string
+}): Promise<void> {
+  const update = async () => {
+    const existing = await readPinnedPreferences({ url })
+
+    if (shouldPin && existing.some((item) => documentKey(item) === documentKey(document))) {
+      return
+    }
+    const remaining = existing.filter((item) => documentKey(item) !== documentKey(document))
+    const items = shouldPin ? [document, ...remaining] : remaining
+
+    await savePinnedPreferences({ items, url })
+  }
+
+  if (typeof navigator !== 'undefined' && navigator.locks) {
+    await navigator.locks.request(`payload:pinned-documents:${url}`, update)
+  } else {
+    await update()
+  }
+}
+
 export async function savePinnedPreferences({
   items,
   url,

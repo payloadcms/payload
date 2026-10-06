@@ -128,6 +128,8 @@ export const idTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Batas',
     widgetNonSortableSortField:
       'Field pengurutan "{{field}}" tidak dapat diurutkan pada Collection "{{collection}}".',
+    widgetPageCount: '{{currentPage}} dari {{totalPages}}',
+    widgetPagination: 'Paginasi dokumen',
     widgetPinned: 'Disematkan',
     widgetPinnedEmpty: 'Tidak ada dokumen yang disematkan',
     widgetPinnedEmptyDescription: 'Dokumen yang Anda sematkan akan muncul di sini',

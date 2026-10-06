@@ -80,7 +80,10 @@ export const RecentlyViewedCollectionsField: React.FC<SelectFieldClientProps> = 
           )
         })}
       </ul>
-      <div id={descriptionID} lang="en">
+      <div
+        id={descriptionID}
+        lang={description === 'Filter Recently viewed only.' ? 'en' : undefined}
+      >
         <FieldDescription description={description} path={path} />
       </div>
     </div>

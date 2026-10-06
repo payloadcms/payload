@@ -128,6 +128,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Ograničenje',
     widgetNonSortableSortField:
       'Polje sortiranja "{{field}}" nije moguće sortirati u kolekciji "{{collection}}".',
+    widgetPageCount: '{{currentPage}} od {{totalPages}}',
+    widgetPagination: 'Paginacija dokumenata',
     widgetPinned: 'Prikvačeno',
     widgetPinnedEmpty: 'Nema prikvačenih dokumenata',
     widgetPinnedEmptyDescription: 'Dokumenti koje prikvačite pojavit će se ovdje',

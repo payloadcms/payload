@@ -126,6 +126,8 @@ export const slTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Omejitev',
     widgetNonSortableSortField:
       'Polje za razvrščanje "{{field}}" ni mogoče razvrstiti v zbirki "{{collection}}".',
+    widgetPageCount: '{{currentPage}} od {{totalPages}}',
+    widgetPagination: 'Ostranjevanje dokumentov',
     widgetPinned: 'Pripeto',
     widgetPinnedEmpty: 'Ni pripetih dokumentov',
     widgetPinnedEmptyDescription: 'Tukaj bodo prikazani dokumenti, ki jih pripnete',

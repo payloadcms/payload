@@ -127,6 +127,8 @@ export const skTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Obmedzenie',
     widgetNonSortableSortField:
       'Triediace pole "{{field}}" nie je možné triediť v kolekcii "{{collection}}".',
+    widgetPageCount: '{{currentPage}} z {{totalPages}}',
+    widgetPagination: 'Stránkovanie dokumentov',
     widgetPinned: 'Pripnuté',
     widgetPinnedEmpty: 'Žiadne pripnuté dokumenty',
     widgetPinnedEmptyDescription: 'Dokumenty, ktoré pripnete, sa zobrazia tu',

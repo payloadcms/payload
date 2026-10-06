@@ -129,6 +129,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Ribojimas',
     widgetNonSortableSortField:
       'Rūšiavimo laukas "{{field}}" negali būti rūšiuojamas kolekcijoje "{{collection}}".',
+    widgetPageCount: '{{currentPage}} iš {{totalPages}}',
+    widgetPagination: 'Dokumentų puslapiavimas',
     widgetPinned: 'Prisegta',
     widgetPinnedEmpty: 'Nėra prisegtų dokumentų',
     widgetPinnedEmptyDescription: 'Čia bus rodomi jūsų prisegti dokumentai',
