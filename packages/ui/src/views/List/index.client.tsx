@@ -57,6 +57,7 @@ export function DefaultListView(props: ListViewClientProps) {
     disableBulkEdit,
     disableQueryPresets,
     documentLayout,
+    documentURLs,
     enableRowSelections,
     groupedData,
     hasCreatePermission: hasCreatePermissionFromProps,
@@ -107,6 +108,7 @@ export function DefaultListView(props: ListViewClientProps) {
   const previousSearch = useRef(resolvedSearch || '')
   const searchChangeResults = useRef<unknown>(null)
   const isDataGrouped = groupedData !== undefined
+  const shouldRenderGrid = layout === 'grid' && !isInDrawer
 
   const hasWhereParam = useRef(Boolean(query?.where))
   const [isWhereOpen, setIsWhereOpen] = useState(hasActiveFilters)
@@ -196,6 +198,13 @@ export function DefaultListView(props: ListViewClientProps) {
   ])
 
   const collectionLabel = getTranslation(labels?.plural, i18n)
+  const hierarchyParentFieldName =
+    !isInDrawer &&
+    viewType === 'list' &&
+    collectionConfig.hierarchy &&
+    typeof collectionConfig.hierarchy === 'object'
+      ? (collectionConfig.hierarchy.parentFieldName ?? 'parent')
+      : undefined
 
   const { setStepNav } = useStepNav()
 
@@ -395,16 +404,27 @@ export function DefaultListView(props: ListViewClientProps) {
                 />
               </DocumentSelectionProvider>
             ) : docs?.length > 0 ? (
-              layout === 'grid' && isDataGrouped ? (
-                <GroupedDocumentGrid collectionSlug={collectionSlug} groups={groupedData} />
-              ) : layout === 'grid' ? (
+              shouldRenderGrid && isDataGrouped ? (
+                <GroupedDocumentGrid
+                  collectionSlug={collectionSlug}
+                  documentURLs={documentURLs}
+                  enableRowSelections={enableRowSelections}
+                  groups={groupedData}
+                  hierarchyParentFieldName={hierarchyParentFieldName}
+                  viewType={viewType}
+                />
+              ) : shouldRenderGrid ? (
                 <DocumentGrid
                   adminRoute={adminRoute}
                   collectionLabel={collectionLabel}
                   collectionSlug={collectionSlug}
                   docs={docs}
+                  documentURLs={documentURLs}
+                  enableRowSelections={enableRowSelections}
+                  hierarchyParentFieldName={hierarchyParentFieldName}
                   useAsThumbnail={collectionConfig.admin.useAsThumbnail}
                   useAsTitle={collectionConfig.admin.useAsTitle}
+                  viewType={viewType}
                 />
               ) : (
                 <RelationshipProvider>{Table}</RelationshipProvider>

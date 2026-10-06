@@ -1,6 +1,6 @@
 'use client'
 
-import type { ListViewGroup } from 'payload'
+import type { ListViewGroup, ViewTypes } from 'payload'
 
 import React from 'react'
 
@@ -15,12 +15,20 @@ import './index.css'
 
 type GroupedDocumentGridProps = {
   readonly collectionSlug: string
+  readonly documentURLs?: Record<string, null | string>
+  readonly enableRowSelections?: boolean
   readonly groups: ListViewGroup[]
+  readonly hierarchyParentFieldName?: string
+  readonly viewType?: ViewTypes
 }
 
 export const GroupedDocumentGrid: React.FC<GroupedDocumentGridProps> = ({
   collectionSlug,
+  documentURLs,
+  enableRowSelections,
   groups,
+  hierarchyParentFieldName,
+  viewType,
 }) => {
   const {
     config: {
@@ -58,8 +66,12 @@ export const GroupedDocumentGrid: React.FC<GroupedDocumentGridProps> = ({
             collectionLabel={heading}
             collectionSlug={collectionSlug}
             docs={data.docs}
+            documentURLs={documentURLs}
+            enableRowSelections={enableRowSelections}
+            hierarchyParentFieldName={hierarchyParentFieldName}
             useAsThumbnail={collectionConfig.admin.useAsThumbnail}
             useAsTitle={collectionConfig.admin.useAsTitle}
+            viewType={viewType}
           />
         </TableSection.Content>
       </SelectionProvider>

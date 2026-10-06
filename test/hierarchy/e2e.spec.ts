@@ -143,7 +143,8 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(page).toHaveURL(/\/admin\/collections\/organizations\?view=hierarchy/)
 
       await page.goto(organizationsURL.list)
-      await expect(page).toHaveURL(/\/admin\/collections\/organizations\?view=hierarchy/)
+      await expect(page).toHaveURL(organizationsURL.list)
+      await expect(page.getByRole('button', { name: 'By Organization' })).toBeDisabled()
 
       const acmeCard = page.locator('.document-card', { hasText: 'Acme Corp' })
 
@@ -153,6 +154,41 @@ test.describe('Hierarchy Sidebar', () => {
       await acmeCard.getByRole('link', { name: 'Acme Corp', exact: true }).press('Enter')
       await expect(page.getByRole('heading', { name: 'Acme Corp' })).toBeVisible()
       await expect(page.getByRole('list', { name: 'Organizations' })).toBeVisible()
+    })
+
+    test('should open a hierarchy item from the All view in table layout', async () => {
+      await page.goto(`${organizationsURL.list}?view=all`)
+
+      const acmeLink = page.getByRole('link', { name: 'Acme Corp', exact: true })
+
+      await acmeLink.click()
+      await expect(page).toHaveURL(/[?&]view=hierarchy(?:&|$)/)
+      await expect(page).toHaveURL(/[?&]parent=[^&]+/)
+      await expect(page.getByRole('heading', { name: 'Acme Corp' })).toBeVisible()
+    })
+
+    test('should open a hierarchy item from the All view in grid layout', async () => {
+      await page.goto(`${organizationsURL.list}?view=all`)
+
+      const gridPreferenceSaved = page.waitForResponse(
+        (response) =>
+          response.url().includes('/api/payload-preferences/collection-organizations') &&
+          response.request().method() === 'POST' &&
+          response.ok(),
+      )
+
+      await page.getByRole('radio', { name: 'Grid' }).click()
+      await gridPreferenceSaved
+
+      const acmeCard = page.locator('.document-card', { hasText: 'Acme Corp' })
+      const acmeLink = acmeCard.getByRole('link', { name: 'Acme Corp', exact: true })
+
+      await expect(acmeLink).toHaveAttribute('href', /[?&]view=hierarchy(?:&|$)/)
+      await expect(acmeLink).toHaveAttribute('href', /[?&]parent=[^&]+/)
+      await acmeCard.dblclick()
+      await expect(page).toHaveURL(/[?&]view=hierarchy(?:&|$)/)
+      await expect(page).toHaveURL(/[?&]parent=[^&]+/)
+      await expect(page.getByRole('heading', { name: 'Acme Corp' })).toBeVisible()
     })
 
     test('should preserve the hierarchy view while navigating through hierarchy items', async () => {
@@ -612,7 +648,10 @@ test.describe('Hierarchy Sidebar', () => {
         await page.goto(`${foldersURL.hierarchy}&parentFolder=${multiTypeFolder.id}`)
 
         const listControls = page.locator('.hierarchy-list__controls')
-        await listControls.getByRole('button', { name: 'Create New' }).first().click()
+        const createButton = listControls.getByRole('button', { name: 'Create New' }).first()
+
+        await createButton.click()
+        await expect(createButton).toHaveClass(/btn--selected/)
 
         await expect(
           page.getByRole('menuitem', { name: 'Organization', exact: true }),

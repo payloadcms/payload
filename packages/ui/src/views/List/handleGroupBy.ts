@@ -33,6 +33,7 @@ export const handleGroupBy = async ({
   drawerSlug,
   enableRowSelections,
   fieldPermissions,
+  hierarchyParentFieldName,
   query,
   req,
   select,
@@ -52,6 +53,7 @@ export const handleGroupBy = async ({
   drawerSlug?: string
   enableRowSelections?: boolean
   fieldPermissions?: SanitizedFieldsPermissions
+  hierarchyParentFieldName?: string
   query?: ListQuery
   req: PayloadRequest
   select?: SelectType
@@ -209,6 +211,7 @@ export const handleGroupBy = async ({
           groupByFieldPath,
           groupByValue: serializableValue,
           heading: heading || req.i18n.t('general:noValue'),
+          hierarchyParentFieldName,
           i18n: req.i18n,
           key: `table-${serializableValue}`,
           orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,

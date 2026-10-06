@@ -12,7 +12,7 @@ const baseClass = 'document-card'
 export type DocumentCardThumbnail = { alt?: string; src: string }
 export type DocumentCardProps = {
   readonly children?: React.ReactNode
-  readonly href: string
+  readonly href?: null | string
   readonly isSelected?: boolean
   readonly onSelect?: () => void
   readonly placeholder?: React.ReactNode
@@ -44,7 +44,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
   }
 
   const handleDoubleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    if (!onSelect) {
+    if (!onSelect || !href) {
       return
     }
 
@@ -61,7 +61,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
   }
 
   const handleCardDoubleClick = (event: React.MouseEvent<HTMLElement>) => {
-    if (!onSelect || (event.target as HTMLElement).closest('a')) {
+    if (!onSelect || !href || (event.target as HTMLElement).closest('a')) {
       return
     }
 
@@ -100,7 +100,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
       {...cardInteractionProps}
       className={[
         baseClass,
-        !onSelect && `${baseClass}--link`,
+        !onSelect && href && `${baseClass}--link`,
         isSelected && `${baseClass}--selected`,
       ]
         .filter(Boolean)
@@ -117,14 +117,18 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
         </div>
       )}
       <div className={`${baseClass}__content`}>
-        <Link
-          className={`${baseClass}__title`}
-          href={href}
-          onClick={onSelect ? handleClick : undefined}
-          onDoubleClick={onSelect ? handleDoubleClick : undefined}
-        >
-          {title}
-        </Link>
+        {href ? (
+          <Link
+            className={`${baseClass}__title`}
+            href={href}
+            onClick={onSelect ? handleClick : undefined}
+            onDoubleClick={onSelect ? handleDoubleClick : undefined}
+          >
+            {title}
+          </Link>
+        ) : (
+          <span className={`${baseClass}__title`}>{title}</span>
+        )}
         {children ? <div className={`${baseClass}__metadata`}>{children}</div> : null}
       </div>
       {onSelect ? (
