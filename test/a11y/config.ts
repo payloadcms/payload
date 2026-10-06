@@ -46,6 +46,10 @@ export default buildConfigWithDefaults({
     admin: {
       components: {
         views: {
+          StatusMessages: {
+            Component: '/components/StatusMessages/index.js#StatusMessages',
+            path: '/status-messages',
+          },
           CustomIDModals: {
             Component: '/components/CustomIDModals/index.js#CustomIDModals',
             path: '/custom-modal-ids',

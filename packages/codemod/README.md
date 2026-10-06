@@ -18,6 +18,7 @@ With no arguments, runs every registered transform against the current directory
 - `--list`: print registered transforms.
 - `--dry`: analyze only; write nothing.
 - `--print`: print transformed sources to stdout instead of writing.
+- `-h`, `--help`: print usage for all commands and exit. Works on any command, e.g. `upgrade run --help`.
 
 ## `upgrade` command
 

@@ -1,14 +1,15 @@
 import type { RenderableServerComponent } from '@tanstack/react-start/rsc'
-import type { ImportMap, MetaConfig, SanitizedConfig } from 'payload'
+import type { ImportMap, SanitizedConfig } from 'payload'
 
 import { getViewportContent } from '@payloadcms/ui/shared'
 import { renderServerComponent } from '@tanstack/react-start/rsc'
 
-import type { AdminPageMetadata } from './meta.js'
+import type { AdminPageMetadata } from './metadata.js'
 
-import { getRequestI18n } from './getRequestI18n.server.js'
-import { initAdminContext } from './initAdminContext.server.js'
-import { createPageRenderServerAdapter } from './serverAdapter.server.js'
+import { getRequestI18n } from '../utilities/getRequestI18n.server.js'
+import { initAdminContext } from '../utilities/initAdminContext.server.js'
+import { toAdminPageMetadata } from './metadata.js'
+import { createPageRenderServerAdapter } from './server.js'
 
 export type LoadAdminPageArgs = {
   config: SanitizedConfig
@@ -38,94 +39,6 @@ export type LoadAdminPageResult =
       routeKey: string
       rscPayload: RSCPayload
     }
-
-const resolveTitle = (title: MetaConfig['title']): string | undefined => {
-  if (!title) {
-    return undefined
-  }
-  if (typeof title === 'string') {
-    return title
-  }
-  if ('absolute' in title) {
-    return title.absolute
-  }
-  return title.default
-}
-
-/**
- * Flattens the framework-agnostic `MetaConfig` (Next.js `Metadata` shape) into
- * the plain, serializable `AdminPageMetadata` the route loader ships to the
- * client. The full `MetaConfig` carries a `URL` `metadataBase`, functions and
- * other non-serializable values that seroval cannot cross the wire, so only the
- * fields `getAdminMeta` renders are extracted.
- */
-const toAdminPageMetadata = (meta: MetaConfig): AdminPageMetadata => {
-  const og = meta.openGraph as
-    | {
-        description?: unknown
-        images?: unknown
-        siteName?: unknown
-        title?: unknown
-      }
-    | undefined
-
-  const rawImages = og?.images
-  const imagesArray = rawImages ? (Array.isArray(rawImages) ? rawImages : [rawImages]) : []
-  const images = imagesArray
-    .map((image: any) =>
-      typeof image === 'string'
-        ? { url: image }
-        : image?.url
-          ? { alt: image.alt, height: image.height, url: String(image.url), width: image.width }
-          : undefined,
-    )
-    .filter(Boolean) as NonNullable<AdminPageMetadata['openGraph']>['images']
-
-  const rawIcons = meta.icons as any
-  const iconList = Array.isArray(rawIcons)
-    ? rawIcons
-    : rawIcons && typeof rawIcons === 'object' && Array.isArray(rawIcons.icon)
-      ? rawIcons.icon
-      : []
-  const icons = iconList
-    .map((icon: any) =>
-      typeof icon === 'string'
-        ? { rel: 'icon', url: icon }
-        : icon?.url
-          ? {
-              type: icon.type,
-              media: icon.media,
-              rel: icon.rel ?? 'icon',
-              sizes: icon.sizes,
-              url: String(icon.url),
-            }
-          : undefined,
-    )
-    .filter(Boolean) as AdminPageMetadata['icons']
-
-  const keywords = meta.keywords
-
-  return {
-    description: typeof meta.description === 'string' ? meta.description : undefined,
-    icons: icons?.length ? icons : undefined,
-    keywords:
-      typeof keywords === 'string'
-        ? keywords
-        : Array.isArray(keywords)
-          ? keywords.join(', ')
-          : undefined,
-    openGraph: og
-      ? {
-          description: typeof og.description === 'string' ? og.description : undefined,
-          images: images?.length ? images : undefined,
-          siteName: typeof og.siteName === 'string' ? og.siteName : undefined,
-          title: typeof og.title === 'string' ? og.title : undefined,
-        }
-      : undefined,
-    robots: typeof meta.robots === 'string' ? meta.robots : undefined,
-    title: resolveTitle(meta.title),
-  }
-}
 
 /**
  * Renders an admin page for TanStack Start and returns a serializable loader

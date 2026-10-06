@@ -3,7 +3,7 @@ import { createServer } from 'http'
 import nextImport from 'next'
 import { parse } from 'url'
 
-import { getNextRootDir } from '../__helpers/shared/getNextRootDir.js'
+import { getNextRootDir } from '../../__helpers/shared/getNextRootDir.js'
 
 export type DevServerResult = {
   adminRoute: string

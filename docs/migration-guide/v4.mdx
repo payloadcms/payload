@@ -2154,6 +2154,8 @@ By default, MCP items require an authenticated user. Built-in collection and glo
 
 **Dependencies.** The plugin now builds on `@modelcontextprotocol/server` instead of `@modelcontextprotocol/sdk` + `mcp-handler`. It no longer depends on Zod directly; its built-in tools use the Zod Mini export from `payload`. If your custom tools use regular Zod, install Zod v4 in your project and import it directly.
 
+**HTTP requests have a size limit.** `POST /api/mcp` now answers request bodies over 4 MiB with `413`. Base64 file uploads count toward this limit. Raise it with `mcp.maxRequestBodySize`.
+
 ### `@payloadcms/ui/scss` export removed and legacy `--theme-*` tokens retired
 
 The Admin UI styles were migrated from SCSS to plain CSS. The `@payloadcms/ui/scss` package export and its SCSS source files have been removed, and the legacy `--theme-*` CSS variables were retired in favor of semantic `--color-*` tokens and the raw `--ramp-*` color palette.
