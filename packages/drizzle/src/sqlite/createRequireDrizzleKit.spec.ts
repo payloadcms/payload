@@ -5,7 +5,8 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { createRequireDrizzleKit } from './createRequireDrizzleKit.js'
+import { createRequireDrizzleKit as createPostgresRequireDrizzleKit } from '../postgres/requireDrizzleKit.js'
+import { createRequireDrizzleKit as createSQLiteRequireDrizzleKit } from './createRequireDrizzleKit.js'
 
 const directories: string[] = []
 
@@ -22,29 +23,33 @@ afterEach(() => {
   }
 })
 
-describe('createRequireDrizzleKit', () => {
-  it('should defer resolving tooling until the adapter requests it', () => {
+describe.each([
+  { createRequireDrizzleKit: createSQLiteRequireDrizzleKit, dialect: 'sqlite' },
+  { createRequireDrizzleKit: createPostgresRequireDrizzleKit, dialect: 'postgres' },
+])('createRequireDrizzleKit ($dialect)', ({ createRequireDrizzleKit, dialect }) => {
+  it('should defer resolving tooling until the adapter requests it', async () => {
     const directory = createDirectory()
     const load = createRequireDrizzleKit({
       from: pathToFileURL(path.join(directory, 'adapter.js')).href,
     })
 
-    expect(() => load()).toThrow(/drizzle-kit/)
-    installTooling({ directory })
-    expect(load().generateDrizzleJson({})).toEqual({ dialect: 'sqlite', source: directory })
+    await expect(load()).rejects.toThrow(/drizzle-kit/)
+    installTooling({ dialect, directory })
+
+    expect((await load()).generateDrizzleJson({})).toEqual({ dialect, source: directory })
   })
 
-  it('should resolve tooling from each owning adapter instead of the shared package', () => {
+  it('should resolve tooling from each owning adapter instead of the shared package', async () => {
     for (let index = 0; index < 2; index++) {
       const directory = createDirectory()
 
-      installTooling({ directory })
+      installTooling({ dialect, directory })
 
       const load = createRequireDrizzleKit({
         from: pathToFileURL(path.join(directory, 'adapter.js')).href,
       })
 
-      expect(load().generateDrizzleJson({})).toEqual({ dialect: 'sqlite', source: directory })
+      expect((await load()).generateDrizzleJson({})).toEqual({ dialect, source: directory })
     }
   })
 })
@@ -56,7 +61,7 @@ function createDirectory() {
   return directory
 }
 
-function installTooling({ directory }: { directory: string }) {
+function installTooling({ dialect, directory }: { dialect: string; directory: string }) {
   const packageDirectory = path.join(directory, 'node_modules', 'drizzle-kit')
 
   mkdirSync(packageDirectory, { recursive: true })
@@ -66,6 +71,6 @@ function installTooling({ directory }: { directory: string }) {
   )
   writeFileSync(
     path.join(packageDirectory, 'api.cjs'),
-    `exports.generateSQLiteDrizzleJson = () => ({ dialect: 'sqlite', source: ${JSON.stringify(directory)} })`,
+    `exports.${dialect === 'sqlite' ? 'generateSQLiteDrizzleJson' : 'generateDrizzleJson'} = () => ({ dialect: ${JSON.stringify(dialect)}, source: ${JSON.stringify(directory)} })`,
   )
 }

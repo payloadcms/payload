@@ -121,7 +121,7 @@ export type Insert = (args: {
   values: Record<string, unknown> | Record<string, unknown>[]
 }) => Promise<Record<string, unknown>[]>
 
-export type RequireDrizzleKit = () => {
+export type RequireDrizzleKit = () => Promise<{
   generateDrizzleJson: (
     args: Record<string, unknown>,
   ) => DrizzleSnapshotJSON | Promise<DrizzleSnapshotJSON>
@@ -134,7 +134,7 @@ export type RequireDrizzleKit = () => {
     extensionsFilter?: string[],
   ) => Promise<{ apply; hasDataLoss; warnings }>
   upSnapshot?: (snapshot: Record<string, unknown>) => DrizzleSnapshotJSON
-}
+}>
 
 export type Migration = {
   down: ({

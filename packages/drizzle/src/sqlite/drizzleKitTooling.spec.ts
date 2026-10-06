@@ -15,18 +15,28 @@ afterEach(() => {
   }
 })
 
-describe('SQLite Drizzle Kit tooling in Node', () => {
-  it.each(['db-sqlite', 'db-d1-sqlite'])(
-    'should resolve real tooling from %s outside Vitest and generate and apply schema changes',
+describe('Drizzle Kit tooling in Node', () => {
+  it.each(['db-sqlite', 'db-d1-sqlite', 'db-postgres', 'db-vercel-postgres'])(
+    'should resolve real tooling from %s outside Vitest and generate schema changes',
     async (adapter) => {
       const directory = mkdtempSync(path.join(tmpdir(), 'payload-drizzle-tooling-'))
       temporaryDirectories.push(directory)
 
+      const isSQLite = adapter === 'db-sqlite' || adapter === 'db-d1-sqlite'
+
       // Exercise the real loader outside Vitest.
       await build({
+        alias: {
+          payload: path.join(workspaceDirectory, 'packages/payload/src/utilities/dynamicImport.ts'),
+        },
         bundle: true,
         entryPoints: [
-          path.join(workspaceDirectory, 'packages/drizzle/src/sqlite/createRequireDrizzleKit.ts'),
+          path.join(
+            workspaceDirectory,
+            isSQLite
+              ? 'packages/drizzle/src/sqlite/createRequireDrizzleKit.ts'
+              : 'packages/drizzle/src/postgres/requireDrizzleKit.ts',
+          ),
         ],
         format: 'esm',
         logLevel: 'silent',
@@ -53,12 +63,18 @@ const { createClient } = require('@libsql/client')
 const { drizzle } = require('drizzle-orm/libsql')
 const { sqliteTable, integer } = require('drizzle-orm/sqlite-core')
 assert.equal(process.env.VITEST, undefined)
-const tooling = createRequireDrizzleKit({ from: ${JSON.stringify(from)} })()
-const schema = { probe: sqliteTable('probe', { id: integer('id').primaryKey() }) }
+const tooling = await createRequireDrizzleKit({ from: ${JSON.stringify(from)} })()
+const { pgTable, integer: pgInteger } = require('drizzle-orm/pg-core')
+const schema = ${
+          isSQLite
+            ? "{ probe: sqliteTable('probe', { id: integer('id').primaryKey() }) }"
+            : "{ probe: pgTable('probe', { id: pgInteger('id').primaryKey() }) }"
+        }
 const before = await tooling.generateDrizzleJson({})
 const after = await tooling.generateDrizzleJson(schema)
 const statements = await tooling.generateMigration(before, after)
 assert.ok(statements.some(sql => sql.includes('CREATE TABLE')))
+if (${isSQLite}) {
 const client = createClient({ url: 'file::memory:' })
 try {
   const pushed = await tooling.pushSchema(schema, drizzle(client))
@@ -68,10 +84,11 @@ try {
   assert.equal(result.rows[0].id, 42)
   await client.execute('DELETE FROM probe')
   await client.execute('DROP TABLE probe')
-  console.log('schema tooling passed')
 } finally {
   client.close()
 }
+}
+console.log('schema tooling passed')
 `,
       )
 
