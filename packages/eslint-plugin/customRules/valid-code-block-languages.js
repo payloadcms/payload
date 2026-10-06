@@ -11,6 +11,7 @@
 const SUPPORTED_LANGUAGES = [
   'bash',
   'css',
+  'diff',
   'dockerfile',
   'env',
   'graphql',
@@ -19,6 +20,7 @@ const SUPPORTED_LANGUAGES = [
   'js',
   'json',
   'jsx',
+  'markdown',
   'plaintext',
   'scss',
   'sh',
