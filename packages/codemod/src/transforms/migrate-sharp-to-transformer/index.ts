@@ -1,9 +1,13 @@
 import type {
   ArrayLiteralExpression,
+  Expression,
+  Identifier,
+  Symbol as MorphSymbol,
   ObjectLiteralExpression,
   PropertyAssignment,
   ShorthandPropertyAssignment,
   SourceFile,
+  StringLiteral,
 } from 'ts-morph'
 
 import { Node, SyntaxKind } from 'ts-morph'
@@ -157,13 +161,16 @@ type CollectionSharpEntry = {
  */
 function extractCollectionSharpEntry({
   collectionObj,
-  filePath,
+  configFile,
   notes,
 }: {
   collectionObj: ObjectLiteralExpression
-  filePath: string
+  /** The file the `sharpTransformer` call is written to; a collection declared elsewhere is moved across files. */
+  configFile: SourceFile
   notes: string[]
 }): CollectionSharpEntry | undefined {
+  const filePath = collectionObj.getSourceFile().getFilePath()
+  const isExternal = collectionObj.getSourceFile() !== configFile
   const slugProp = collectionObj.getProperty('slug')
   const slugAssignment = slugProp?.asKind(SyntaxKind.PropertyAssignment)
   const slugInitializer = slugAssignment?.getInitializer()
@@ -205,6 +212,16 @@ function extractCollectionSharpEntry({
     // A shorthand `imageSizes` reads the same binding from `buildConfig`'s argument,
     // where the `sharpTransformer` call is inserted, so it moves verbatim.
     if (Node.isPropertyAssignment(prop) || Node.isShorthandPropertyAssignment(prop)) {
+      const localReference = isExternal ? findLocalReference({ node: prop }) : undefined
+
+      // Moving the text into the config file would leave this reference unresolved there.
+      if (localReference) {
+        notes.push(
+          `${filePath}: collection ${slugInitializer.getText()}'s \`upload.${name}\` refers to \`${localReference.getText()}\`, which isn't available in ${configFile.getFilePath()} — move this collection's Sharp-specific \`upload\` fields into \`sharpTransformer({ collections })\` manually.`,
+        )
+        return undefined
+      }
+
       movedTexts.push(name === 'imageSizes' ? printAsVariants(prop) : prop.print())
       movedProps.push(prop)
       continue
@@ -219,15 +236,124 @@ function extractCollectionSharpEntry({
     return undefined
   }
 
-  const slugLiteralValue = Node.isStringLiteral(slugInitializer)
-    ? slugInitializer.getLiteralValue()
-    : undefined
+  const slugLiteralValue = getSlugLiteralValue({ isExternal, slugInitializer })
+
+  if (isExternal && slugLiteralValue === undefined) {
+    notes.push(
+      `${filePath}: collection ${slugInitializer.getText()}'s slug isn't a string constant — move its Sharp-specific \`upload\` fields into \`sharpTransformer({ collections })\` manually.`,
+    )
+    return undefined
+  }
+
+  // A slug constant from another file isn't in scope in the config file, so it's keyed by value.
   const keyText =
     slugLiteralValue !== undefined && isSafePlainObjectKey(slugLiteralValue)
       ? slugLiteralValue
-      : `[${slugInitializer.getText()}]`
+      : isExternal && !isStringLiteralNode(slugInitializer)
+        ? `'${slugLiteralValue!.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`
+        : `[${slugInitializer.getText()}]`
 
   return { entryText: `${keyText}: { ${movedTexts.join(', ')} }`, movedProps, uploadObj }
+}
+
+function isStringLiteralNode(node: Node): boolean {
+  return Node.isStringLiteral(node) || Node.isNoSubstitutionTemplateLiteral(node)
+}
+
+/**
+ * A slug written as a string literal or, for a collection in another file, a constant whose
+ * type is a string literal (e.g. `slug: mediaSlug` with `const mediaSlug = 'media'`).
+ */
+function getSlugLiteralValue({
+  isExternal,
+  slugInitializer,
+}: {
+  isExternal: boolean
+  slugInitializer: Expression
+}): string | undefined {
+  if (isStringLiteralNode(slugInitializer)) {
+    return (slugInitializer as StringLiteral).getLiteralValue()
+  }
+
+  if (!isExternal) {
+    return undefined
+  }
+
+  const slugType = slugInitializer.getType()
+
+  return slugType.isStringLiteral() ? (slugType.getLiteralValue() as string) : undefined
+}
+
+/**
+ * The first identifier inside `node` bound to a declaration elsewhere in the project, such as an
+ * import or a local variable. Declarations inside `node` itself (parameters, its own property
+ * names) and ambient/library ones (`undefined`, `Math`) don't count.
+ */
+function findLocalReference({ node }: { node: Node }): Identifier | undefined {
+  const sourceFile = node.getSourceFile()
+
+  return node.getDescendantsOfKind(SyntaxKind.Identifier).find((identifier) =>
+    (identifier.getSymbol()?.getDeclarations() ?? []).some((declaration) => {
+      const declarationFile = declaration.getSourceFile()
+
+      if (declarationFile.isDeclarationFile() || declarationFile.isFromExternalLibrary()) {
+        return false
+      }
+
+      return (
+        declarationFile !== sourceFile ||
+        declaration.getPos() < node.getPos() ||
+        declaration.getEnd() > node.getEnd()
+      )
+    }),
+  )
+}
+
+/**
+ * Follows a `collections` array element written as an identifier (usually an imported
+ * collection, e.g. `import { Media } from './collections/Media'`) to the object literal it's
+ * declared as, unwrapping `satisfies`/`as`/parentheses. Returns `undefined` for anything else,
+ * such as a factory call.
+ */
+function resolveCollectionObject({
+  expression,
+}: {
+  expression: Node
+}): ObjectLiteralExpression | undefined {
+  let current: Node | undefined = expression
+
+  for (let depth = 0; current && depth < 5; depth++) {
+    while (
+      Node.isSatisfiesExpression(current) ||
+      Node.isAsExpression(current) ||
+      Node.isParenthesizedExpression(current)
+    ) {
+      current = current.getExpression()
+    }
+
+    if (Node.isObjectLiteralExpression(current)) {
+      return current
+    }
+
+    if (!Node.isIdentifier(current)) {
+      return undefined
+    }
+
+    const symbol: MorphSymbol | undefined = current.getSymbol()
+    const declaration: Node | undefined = (
+      symbol?.isAlias() ? symbol.getAliasedSymbol() : symbol
+    )?.getDeclarations()[0]
+
+    if (Node.isVariableDeclaration(declaration)) {
+      current = declaration.getInitializer()
+    } else if (Node.isExportAssignment(declaration)) {
+      current = declaration.getExpression()
+    } else {
+      return undefined
+    }
+  }
+
+  return undefined
 }
 
 function removeMovedCollectionProps({ movedProps, uploadObj }: CollectionSharpEntry): void {
@@ -248,13 +374,13 @@ function removeMovedCollectionProps({ movedProps, uploadObj }: CollectionSharpEn
  */
 function extractSharpCollectionEntries({
   configObj,
-  filePath,
   notes,
 }: {
   configObj: ObjectLiteralExpression
-  filePath: string
   notes: string[]
 }): CollectionSharpEntry[] {
+  const configFile = configObj.getSourceFile()
+  const filePath = configFile.getFilePath()
   const collectionsProp = configObj.getProperty('collections')
   if (!collectionsProp || !Node.isPropertyAssignment(collectionsProp)) {
     return []
@@ -271,14 +397,16 @@ function extractSharpCollectionEntries({
   const entries: CollectionSharpEntry[] = []
 
   for (const el of arrayLiteral.getElements()) {
-    if (!Node.isObjectLiteralExpression(el)) {
+    const collectionObj = resolveCollectionObject({ expression: el })
+
+    if (!collectionObj) {
       notes.push(
-        `${filePath}: a collection in \`collections\` is defined externally — check it for Sharp-specific \`upload\` fields and move them into \`sharpTransformer({ collections })\` manually.`,
+        `${filePath}: a collection in \`collections\` (\`${el.getText()}\`) is defined externally — check it for Sharp-specific \`upload\` fields and move them into \`sharpTransformer({ collections })\` manually.`,
       )
       continue
     }
 
-    const entry = extractCollectionSharpEntry({ collectionObj: el, filePath, notes })
+    const entry = extractCollectionSharpEntry({ collectionObj, configFile, notes })
     if (entry) {
       entries.push(entry)
     }
@@ -439,11 +567,7 @@ export const migrateSharpToTransformer: Transform = {
           sharpExpressionText = sharpProp.getName()
         }
 
-        const collectionEntries = extractSharpCollectionEntries({
-          configObj,
-          filePath: sourceFile.getFilePath(),
-          notes,
-        })
+        const collectionEntries = extractSharpCollectionEntries({ configObj, notes })
 
         if (!sharpExpressionText && collectionEntries.length === 0) {
           continue
@@ -510,6 +634,7 @@ export const migrateSharpToTransformer: Transform = {
         sharpProp?.remove()
         for (const entry of collectionEntries) {
           removeMovedCollectionProps(entry)
+          filesChanged.add(entry.uploadObj.getSourceFile().getFilePath())
         }
 
         ensureSharpTransformerImport({ localName: transformerLocalName, sourceFile })

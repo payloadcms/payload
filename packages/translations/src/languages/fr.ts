@@ -478,6 +478,7 @@ export const frTranslations: DefaultTranslationsObject = {
     globals: 'Globals(es)',
     goBack: 'Retourner',
     goToPage: 'Aller à une page du tableau',
+    gridLayout: 'Grille',
     groupByLabel: 'Regrouper par {{label}}',
     hideSidebar: 'Masquer la barre latérale',
     import: 'Importation',
@@ -527,6 +528,8 @@ export const frTranslations: DefaultTranslationsObject = {
     notFound: 'Pas trouvé',
     nothingFound: 'Rien n’a été trouvé',
     noTrashResults: 'Aucun {{label}} dans la corbeille.',
+    notSelectedDocument:
+      'Non sélectionné. Appuyez sur Entrée ou Espace pour modifier la sélection.',
     notShownInTable: 'Non affiché dans le tableau',
     noUpcomingEventsScheduled: 'Aucun événement à venir prévu.',
     noValue: 'Aucune valeur',
@@ -585,6 +588,7 @@ export const frTranslations: DefaultTranslationsObject = {
     selectAll: 'Tout sélectionner {{count}} {{label}}',
     selectAllRows: 'Sélectionnez toutes les lignes',
     selectedCount: '{{count}} {{label}} sélectionné',
+    selectedDocument: 'Sélectionné. Appuyez sur Entrée ou Espace pour modifier la sélection.',
     selectLabel: 'Sélectionnez {{label}}',
     selectValue: 'Sélectionnez une valeur',
     settings: 'Paramètres',
@@ -606,6 +610,7 @@ export const frTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} dupliqué(e) avec succès.',
     successfullyReindexed:
       '{{count}} des {{total}} documents de {{collections}} ont été réindexés avec succès, et {{skips}} brouillons ont été ignorés.',
+    tableLayout: 'Tableau',
     takeOver: 'Prendre en charge',
     theme: 'Thème',
     thisLanguage: 'Français',

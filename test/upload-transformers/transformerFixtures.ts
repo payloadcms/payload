@@ -1,5 +1,7 @@
 import type { UploadTransformer } from 'payload'
 
+import sharp from 'sharp'
+
 /**
  * Call counters for the fake transformers below, reset by each test that needs
  * them. Each transformer's `canTransform` recognizes its own dedicated query
@@ -10,6 +12,7 @@ import type { UploadTransformer } from 'payload'
 export const transformerCallCounts = {
   appendSuffix: 0,
   consumeWithoutResponse: 0,
+  dynamicOnlySharp: 0,
   noop: 0,
   redirect: 0,
   sourceConsumingError: 0,
@@ -47,6 +50,15 @@ export function resetTransformerMediaHookCallCounts(): void {
     transformerMediaHookCallCounts[key] = 0
   }
 }
+
+/**
+ * Sharp for the dynamic-only `sharpTransformer`, counted so a test can prove an
+ * upload owned by another Sharp instance never runs through this one.
+ */
+export const countingDynamicOnlySharp = ((...args: Parameters<typeof sharp>) => {
+  transformerCallCounts.dynamicOnlySharp += 1
+  return sharp(...args)
+}) as typeof sharp
 
 const hasQueryParam = (paramName: string) => (args: { req: { searchParams?: URLSearchParams } }) =>
   args.req.searchParams?.has(paramName) ?? false

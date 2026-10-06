@@ -4191,14 +4191,17 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
    * copy against real disk I/O.
    */
   test.describe('temp file copy to local storage', () => {
-    const createdIds: (number | string)[] = []
+    const createdDocuments: {
+      collection: typeof fileAccessMediaSlug | typeof mediaSlug
+      id: number | string
+    }[] = []
     const tempFilesToClean: string[] = []
 
     test.afterEach(async ({ payload }) => {
-      for (const id of createdIds) {
-        await payload.delete({ id, collection: mediaSlug, overrideAccess: true })
+      for (const { id, collection } of createdDocuments) {
+        await payload.delete({ id, collection, overrideAccess: true })
       }
-      createdIds.length = 0
+      createdDocuments.length = 0
 
       for (const tempFilePath of tempFilesToClean) {
         await fs.promises.rm(tempFilePath, { force: true })
@@ -4232,7 +4235,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         overrideAccess: true,
       })
 
-      createdIds.push(doc.id)
+      createdDocuments.push({ id: doc.id, collection: mediaSlug })
 
       const savedFilePath = path.join(dirname, './media', doc.filename)
 
@@ -4277,7 +4280,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           },
           overrideAccess: true,
         })
-        createdIds.push(doc.id)
+        createdDocuments.push({ id: doc.id, collection: fileAccessMediaSlug })
 
         expect(doc.variants.thumbnail).toMatchObject({ height: 100, width: 100 })
         expect(readFileSpy).not.toHaveBeenCalledWith(tempFilePath)

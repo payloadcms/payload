@@ -18,6 +18,38 @@ const runTransformWithNotes = async ({ input }: { input: string }) => {
   return { notes: result.notes ?? [], source: file.getFullText() }
 }
 
+const runTransformOnFiles = async ({ files }: { files: Record<string, string> }) => {
+  const project = new Project({ useInMemoryFileSystem: true })
+
+  for (const [path, source] of Object.entries(files)) {
+    project.createSourceFile(path, source)
+  }
+
+  const result = await migrateSharpToTransformer.apply({ packageJsons: [], project })
+  const sources = Object.fromEntries(
+    Object.keys(files).map((path) => [path, project.getSourceFileOrThrow(path).getFullText()]),
+  )
+
+  return { filesChanged: result.filesChanged, notes: result.notes ?? [], sources }
+}
+
+const splitConfig = ({
+  importPath = './collections/Media',
+  importStatement,
+}: {
+  importPath?: string
+  importStatement?: string
+} = {}) => `import { buildConfig } from 'payload'
+import sharp from 'sharp'
+
+${importStatement ?? `import { Media } from '${importPath}'`}
+
+export default buildConfig({
+  collections: [Media],
+  sharp,
+})
+`
+
 describe('migrate-sharp-to-transformer', () => {
   it('moves a top-level sharp dependency and per-collection Sharp options into sharpTransformer', async () => {
     const input = await fixture('basic.input.ts')
@@ -275,5 +307,207 @@ export default buildConfig({
 
     expect(result).toContain('sharpTransformer({ sharp: myCustomSharp })')
     expect(result).not.toContain('sharp: myCustomSharp,\n})')
+  })
+
+  describe('collections defined in other files', () => {
+    it('should move Sharp options out of an imported collection file into sharpTransformer', async () => {
+      const { filesChanged, sources } = await runTransformOnFiles({
+        files: {
+          '/collections/Media.ts': `import type { CollectionConfig } from 'payload'
+
+export const Media: CollectionConfig = {
+  slug: 'media',
+  fields: [],
+  upload: {
+    focalPoint: true,
+    imageSizes: [{ name: 'thumbnail', width: 300 }],
+    staticDir: 'media',
+  },
+}
+`,
+          '/payload.config.ts': splitConfig(),
+        },
+      })
+
+      expect(sources['/collections/Media.ts']).toBe(`import type { CollectionConfig } from 'payload'
+
+export const Media: CollectionConfig = {
+  slug: 'media',
+  fields: [],
+  upload: {
+    staticDir: 'media',
+  },
+}
+`)
+      expect(sources['/payload.config.ts']).toContain(
+        "sharpTransformer({ sharp, collections: { media: { variants: [{ name: 'thumbnail', width: 300 }], focalPoint: true } } })",
+      )
+      expect(sources['/payload.config.ts']).not.toContain('  sharp,\n')
+      expect(filesChanged).toEqual(
+        expect.arrayContaining(['/collections/Media.ts', '/payload.config.ts']),
+      )
+    })
+
+    it.for([
+      {
+        name: 'a .js import of a satisfies-typed collection',
+        collectionSource: `import type { CollectionConfig } from 'payload'
+
+export const Media = {
+  slug: 'media',
+  fields: [],
+  upload: { imageSizes: [{ name: 'thumbnail', width: 300 }] },
+} satisfies CollectionConfig
+`,
+        config: splitConfig({ importPath: './collections/Media.js' }),
+      },
+      {
+        name: 'a default-exported collection',
+        collectionSource: `const Media = {
+  slug: 'media',
+  fields: [],
+  upload: { imageSizes: [{ name: 'thumbnail', width: 300 }] },
+}
+
+export default Media
+`,
+        config: splitConfig({ importStatement: "import Media from './collections/Media'" }),
+      },
+    ])('should resolve $name', async ({ collectionSource, config }) => {
+      const { sources } = await runTransformOnFiles({
+        files: { '/collections/Media.ts': collectionSource, '/payload.config.ts': config },
+      })
+
+      expect(sources['/collections/Media.ts']).not.toContain('imageSizes')
+      expect(sources['/payload.config.ts']).toContain(
+        "collections: { media: { variants: [{ name: 'thumbnail', width: 300 }] } }",
+      )
+    })
+
+    it('should key the entry by the resolved slug when the collection file uses a slug constant', async () => {
+      const { sources } = await runTransformOnFiles({
+        files: {
+          '/collections/Media.ts': `import { mediaSlug } from '../slugs'
+
+export const Media = {
+  slug: mediaSlug,
+  fields: [],
+  upload: { crop: false },
+}
+`,
+          '/payload.config.ts': splitConfig(),
+          '/slugs.ts': "export const mediaSlug = 'media'\n",
+        },
+      })
+
+      expect(sources['/payload.config.ts']).toContain('collections: { media: { crop: false } }')
+      expect(sources['/payload.config.ts']).not.toContain('mediaSlug')
+    })
+
+    it("should leave an imported collection unchanged and name its file when a moved value uses that file's bindings", async () => {
+      const collectionSource = `const sizes = [{ name: 'thumbnail', width: 300 }]
+
+export const Media = {
+  slug: 'media',
+  fields: [],
+  upload: { imageSizes: sizes },
+}
+`
+      const { notes, sources } = await runTransformOnFiles({
+        files: { '/collections/Media.ts': collectionSource, '/payload.config.ts': splitConfig() },
+      })
+
+      expect(sources['/collections/Media.ts']).toBe(collectionSource)
+      expect(sources['/payload.config.ts']).toContain('sharpTransformer({ sharp })')
+      expect(notes).toContainEqual(
+        expect.stringContaining(
+          "/collections/Media.ts: collection 'media''s `upload.imageSizes` refers to `sizes`",
+        ),
+      )
+    })
+
+    it('should move Sharp options out of a collection declared as a variable in the config file', async () => {
+      const { sources } = await runTransformOnFiles({
+        files: {
+          '/payload.config.ts': `import { buildConfig } from 'payload'
+
+const Media = {
+  slug: 'media',
+  fields: [],
+  upload: { crop: false },
+}
+
+export default buildConfig({
+  collections: [Media],
+})
+`,
+        },
+      })
+
+      expect(sources['/payload.config.ts']).toContain('upload: {}')
+      expect(sources['/payload.config.ts']).toContain(
+        'sharpTransformer({ collections: { media: { crop: false } } })',
+      )
+    })
+
+    it('should keep a quoted key for an imported collection whose slug constant is not a plain identifier', async () => {
+      const { sources } = await runTransformOnFiles({
+        files: {
+          '/collections/Media.ts': `const mediaSlug = 'site-media'
+
+export const Media = {
+  slug: mediaSlug,
+  fields: [],
+  upload: { crop: false },
+}
+`,
+          '/payload.config.ts': splitConfig(),
+        },
+      })
+
+      expect(sources['/payload.config.ts']).toContain(
+        "collections: { 'site-media': { crop: false } }",
+      )
+    })
+
+    it('should still report a collection it cannot resolve to an object literal', async () => {
+      const { notes } = await runTransformOnFiles({
+        files: {
+          '/payload.config.ts': `import { buildConfig } from 'payload'
+import sharp from 'sharp'
+
+import { createMedia } from './collections/createMedia'
+
+export default buildConfig({
+  collections: [createMedia()],
+  sharp,
+})
+`,
+        },
+      })
+
+      expect(notes).toContainEqual(
+        expect.stringContaining(
+          'a collection in `collections` (`createMedia()`) is defined externally',
+        ),
+      )
+    })
+
+    it('should be idempotent on a migrated split project', async () => {
+      const files = {
+        '/collections/Media.ts': `export const Media = {
+  slug: 'media',
+  fields: [],
+  upload: { imageSizes: [{ name: 'thumbnail', width: 300 }] },
+}
+`,
+        '/payload.config.ts': splitConfig(),
+      }
+      const { sources: migrated } = await runTransformOnFiles({ files })
+      const { filesChanged, sources: rerun } = await runTransformOnFiles({ files: migrated })
+
+      expect(rerun).toEqual(migrated)
+      expect(filesChanged).toEqual([])
+    })
   })
 })

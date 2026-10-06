@@ -11,6 +11,13 @@ import { deepMergeSimple } from '../../utilities/deepMerge.js'
 import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
 
+type PreferenceUpdater<T> = (current: null | T) => T
+
+type SetPreference = {
+  <T = Preferences>(key: string, updater: PreferenceUpdater<T>): Promise<void>
+  <T = Preferences>(key: string, value: T, merge?: boolean): Promise<void>
+}
+
 type PreferencesContext = {
   getPreference: <T = Preferences>(key: string) => Promise<T>
   /**
@@ -20,7 +27,8 @@ type PreferencesContext = {
    * and batches concurrent changes to that key into one request, default = false. Awaiting the
    * returned promise waits for the write to land either way.
    */
-  setPreference: <T = Preferences>(key: string, value: T, merge?: boolean) => Promise<void>
+  setPreference: SetPreference
+  syncPreference: <T = Preferences>(key: string, value: T) => void
 }
 
 const Context = createContext({} as PreferencesContext)
@@ -37,6 +45,8 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
   const contextRef = useRef({} as PreferencesContext)
   const preferencesRef = useRef({})
   const pendingUpdate = useRef({})
+  const pendingWrites = useRef<Record<string, number>>({})
+  const updateQueues = useRef<Record<string, Promise<void>>>({})
   const { config } = useConfig()
   const { user } = useAuth()
   const { i18n } = useTranslation()
@@ -49,6 +59,9 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
     if (!user) {
       // clear preferences between users
       preferencesRef.current = {}
+      pendingUpdate.current = {}
+      pendingWrites.current = {}
+      updateQueues.current = {}
     }
   }, [user])
 
@@ -82,9 +95,12 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
             value = preference.value
           }
 
-          preferencesRef.current[key] = value
-
-          resolve(value)
+          if (prefs[key] === promise) {
+            prefs[key] = value
+            resolve(value)
+          } else {
+            resolve(await prefs[key])
+          }
         })()
       })
 
@@ -95,18 +111,63 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
     [i18n.language, api, preferencesRef],
   )
 
+  const syncPreference = useCallback(<T = Preferences,>(key: string, value: T): void => {
+    if (pendingWrites.current[key] || typeof pendingUpdate.current[key] !== 'undefined') {
+      return
+    }
+
+    preferencesRef.current[key] = value
+  }, [])
+
   const setPreference = useCallback(
-    async (key: string, value: unknown, merge = false): Promise<void> => {
+    async <T = Preferences,>(
+      key: string,
+      value: PreferenceUpdater<T> | T,
+      merge = false,
+    ): Promise<void> => {
+      if (typeof value === 'function') {
+        const updater = value as PreferenceUpdater<T>
+        const previousUpdate = updateQueues.current[key] ?? Promise.resolve()
+        pendingWrites.current[key] = (pendingWrites.current[key] ?? 0) + 1
+        const update = previousUpdate.then(async () => {
+          const current = await getPreference<T>(key)
+          const nextValue = updater(current ?? null)
+
+          preferencesRef.current[key] = nextValue
+
+          await requests.post(
+            formatAdminURL({
+              apiRoute: api,
+              path: `/payload-preferences/${key}`,
+            }),
+            requestOptions(nextValue, i18n.language),
+          )
+        })
+
+        updateQueues.current[key] = update.catch(() => undefined)
+        try {
+          await update
+        } finally {
+          pendingWrites.current[key] -= 1
+        }
+        return
+      }
+
       if (merge === false) {
         preferencesRef.current[key] = value
+        pendingWrites.current[key] = (pendingWrites.current[key] ?? 0) + 1
 
-        await requests.post(
-          formatAdminURL({
-            apiRoute: api,
-            path: `/payload-preferences/${key}`,
-          }),
-          requestOptions(value, i18n.language),
-        )
+        try {
+          await requests.post(
+            formatAdminURL({
+              apiRoute: api,
+              path: `/payload-preferences/${key}`,
+            }),
+            requestOptions(value, i18n.language),
+          )
+        } finally {
+          pendingWrites.current[key] -= 1
+        }
 
         return
       }
@@ -174,11 +235,12 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         })
       })
     },
-    [api, getPreference, i18n.language, pendingUpdate],
+    [api, getPreference, i18n.language, pendingUpdate, updateQueues],
   )
 
   contextRef.current.getPreference = getPreference
   contextRef.current.setPreference = setPreference
+  contextRef.current.syncPreference = syncPreference
   return <Context value={contextRef.current}>{children}</Context>
 }
 

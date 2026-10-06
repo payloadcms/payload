@@ -7,24 +7,34 @@ import {
   combineWhereConstraints,
   DEFAULT_HIERARCHY_LIST_LIMIT,
   formatAdminURL,
+  getBestFitFromSizes,
+  isImage,
 } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useMemo, useState } from 'react'
 
 import type { CollectionOption } from '../../../elements/CreateDocumentButton/index.js'
 import type { HierarchyDocument } from '../../../elements/Hierarchy/Tree/types.js'
+import type { DocumentLayout } from '../../../elements/LayoutToggle/index.js'
 import type { SlotColumn } from './SlotTable.js'
 import type { RelatedGroup, TableRow } from './types.js'
 
+import { CardGrid } from '../../../elements/CardGrid/index.js'
 import { CreateDocumentButton } from '../../../elements/CreateDocumentButton/index.js'
+import { DocumentCard } from '../../../elements/DocumentCard/index.js'
+import { Link } from '../../../elements/Link/index.js'
 import { NoListResults } from '../../../elements/NoListResults/index.js'
 import { SimplePagination } from '../../../elements/Pagination/SimplePagination/index.js'
 import { TableSection } from '../../../elements/TableSection/index.js'
+import { DocumentIcon } from '../../../icons/Document/index.js'
+import { FolderIcon } from '../../../icons/Folder/index.js'
+import { TagIcon } from '../../../icons/Tag/index.js'
 import { useBranchParam } from '../../../providers/Branch/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentSelection } from '../../../providers/DocumentSelection/index.js'
 import { useRouteCache } from '../../../providers/RouteCache/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { getHierarchyListURL } from '../getHierarchyListURL.js'
 import { ChildNameCell } from './ChildNameCell.js'
 import { DateCell } from './DateCell.js'
 import { RelatedNameCell } from './RelatedNameCell.js'
@@ -55,6 +65,7 @@ export type HierarchyTableProps = {
   /** Resolved hierarchy icon component */
   HierarchyIcon?: React.ReactNode
   hierarchyLabel: string
+  layout?: DocumentLayout
   parentFieldName?: string
   parentId: null | number | string
   /** Base filters for related collections (keyed by collection slug) */
@@ -72,6 +83,7 @@ export function HierarchyTable({
   hasCreatePermission,
   HierarchyIcon,
   hierarchyLabel,
+  layout = 'table',
   parentFieldName,
   parentId,
   relatedBaseFilters,
@@ -83,7 +95,7 @@ export function HierarchyTable({
   const { clearRouteCache } = useRouteCache()
   const {
     config: {
-      routes: { api: apiRoute },
+      routes: { admin: adminRoute, api: apiRoute },
       serverURL,
     },
     getEntityConfig,
@@ -472,6 +484,14 @@ export function HierarchyTable({
     toggleSelection,
   ])
 
+  const hierarchyConfig = getEntityConfig({ collectionSlug })?.hierarchy
+  const isFolder =
+    hierarchyConfig && typeof hierarchyConfig === 'object' && hierarchyConfig.allowHasMany === false
+  const hierarchyParentFieldName =
+    hierarchyConfig && typeof hierarchyConfig === 'object'
+      ? hierarchyConfig.parentFieldName || 'parent'
+      : 'parent'
+
   // Column definitions
   const columns: SlotColumn<TableRow>[] = useMemo(
     () => [
@@ -507,6 +527,7 @@ export function HierarchyTable({
           canShowCreateButton
             ? [
                 <CreateDocumentButton
+                  buttonStyle="primary"
                   collections={collections}
                   drawerSlug={`hierarchy-create-empty-${collectionSlug}`}
                   key="create"
@@ -530,27 +551,97 @@ export function HierarchyTable({
             <SimplePagination data={group.paginationData} onChange={group.onPageChange} />
           </TableSection.Header>
           <TableSection.Content>
-            <SlotTable
-              collectionSlug={group.slug}
-              columns={columns}
-              data={group.docs}
-              enableCheckbox={true}
-              enableDragHandle={false}
-              enableHeader={true}
-              enableSelectAll={true}
-              getRowLockedUser={getRowLockedUser}
-              mergeCheckboxHeader={false}
-              onCheckboxChange={group.onCheckboxChange}
-              onSelectAllChange={group.onSelectAllChange}
-              parentId={parentId}
-              selectedIds={
-                new Set(
-                  group.docs
-                    .filter((row) => isSelected({ id: row.id, collectionSlug: group.slug }))
-                    .map((row) => row.id),
-                )
-              }
-            />
+            {layout === 'grid' ? (
+              <CardGrid
+                ariaLabel={group.label}
+                getItemClassName={(row) =>
+                  isSelected({ id: row.id, collectionSlug: group.slug })
+                    ? 'card-grid__item--selected'
+                    : undefined
+                }
+                getKey={(row) => row.id}
+                items={group.docs}
+                renderItem={(row) => {
+                  const config = getEntityConfig({ collectionSlug: group.slug })
+                  const titleField = config?.admin?.useAsTitle || 'id'
+                  const rawTitle = row[titleField]
+                  const title =
+                    typeof rawTitle === 'string' || typeof rawTitle === 'number'
+                      ? String(rawTitle)
+                      : String(row.id)
+                  const editURL = formatAdminURL({
+                    adminRoute,
+                    path: `/collections/${group.slug}/${encodeURIComponent(String(row.id))}`,
+                  })
+                  const hierarchyURL = getHierarchyListURL({
+                    adminRoute,
+                    collectionSlug: group.slug,
+                    parentFieldName: hierarchyParentFieldName,
+                    parentID: row.id,
+                  })
+                  const mimeType = typeof row.mimeType === 'string' ? row.mimeType : undefined
+                  const thumbnailSrc =
+                    !group.isChildren && mimeType && isImage(mimeType)
+                      ? getBestFitFromSizes({
+                          sizes: row.sizes as Record<string, { url?: string; width?: number }>,
+                          thumbnailURL: row.thumbnailURL as string,
+                          url: row.url as string,
+                          width: row.width as number,
+                        })
+                      : !group.isChildren && typeof row.thumbnailURL === 'string'
+                        ? row.thumbnailURL
+                        : undefined
+                  const isRowLocked = isLocked({ id: row.id, collectionSlug: group.slug })
+
+                  return (
+                    <DocumentCard
+                      href={group.isChildren ? hierarchyURL : editURL}
+                      isSelected={isSelected({ id: row.id, collectionSlug: group.slug })}
+                      onSelect={isRowLocked ? undefined : () => group.onCheckboxChange(row)}
+                      placeholder={
+                        group.isChildren ? (
+                          (row._hierarchyIcon ?? (isFolder ? <FolderIcon /> : <TagIcon />))
+                        ) : (
+                          <DocumentIcon />
+                        )
+                      }
+                      thumbnail={thumbnailSrc ? { alt: '', src: thumbnailSrc } : undefined}
+                      title={title}
+                    >
+                      {group.isChildren ? (
+                        <Link aria-label={t('general:editLabel', { label: title })} href={editURL}>
+                          {t('general:edit')}
+                        </Link>
+                      ) : (
+                        group.label
+                      )}
+                    </DocumentCard>
+                  )
+                }}
+              />
+            ) : (
+              <SlotTable
+                collectionSlug={group.slug}
+                columns={columns}
+                data={group.docs}
+                enableCheckbox={true}
+                enableDragHandle={false}
+                enableHeader={true}
+                enableSelectAll={true}
+                getRowLockedUser={getRowLockedUser}
+                mergeCheckboxHeader={false}
+                onCheckboxChange={group.onCheckboxChange}
+                onSelectAllChange={group.onSelectAllChange}
+                parentId={parentId}
+                selectedIds={
+                  new Set(
+                    group.docs
+                      .filter((row) => isSelected({ id: row.id, collectionSlug: group.slug }))
+                      .map((row) => row.id),
+                  )
+                }
+              />
+            )}
           </TableSection.Content>
         </TableSection>
       ))}

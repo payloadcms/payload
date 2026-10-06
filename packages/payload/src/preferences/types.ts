@@ -56,6 +56,8 @@ export type ColumnPreference = {
 
 export type CollectionPreferences = {
   columns?: ColumnPreference[]
+  /** Controls whether a collection renders documents as a table or a grid of cards */
+  documentLayout?: 'grid' | 'table'
   editViewType?: 'default' | 'live-preview'
   groupBy?: string
   limit?: number

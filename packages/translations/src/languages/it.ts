@@ -471,6 +471,7 @@ export const itTranslations: DefaultTranslationsObject = {
     globals: 'Globali',
     goBack: 'Torna indietro',
     goToPage: 'Vai a una pagina della tabella',
+    gridLayout: 'Griglia',
     groupByLabel: 'Raggruppa per {{label}}',
     hideSidebar: 'Nascondi barra laterale',
     import: 'Importare',
@@ -519,6 +520,8 @@ export const itTranslations: DefaultTranslationsObject = {
     notFound: 'Non Trovato',
     nothingFound: 'Non è stato trovato nulla',
     noTrashResults: 'Nessun {{label}} nel cestino.',
+    notSelectedDocument:
+      'Non selezionato. Premi Invio o la barra spaziatrice per modificare la selezione.',
     notShownInTable: 'Non visualizzato nella tabella',
     noUpcomingEventsScheduled: 'Nessun evento in programma.',
     noValue: 'Nessun valore',
@@ -579,6 +582,8 @@ export const itTranslations: DefaultTranslationsObject = {
     selectAll: 'Seleziona tutto {{count}} {{label}}',
     selectAllRows: 'Seleziona tutte le righe',
     selectedCount: '{{count}} {{label}} selezionato',
+    selectedDocument:
+      'Selezionato. Premi Invio o la barra spaziatrice per modificare la selezione.',
     selectLabel: 'Seleziona {{label}}',
     selectValue: 'Seleziona un valore',
     settings: 'Impostazioni',
@@ -600,6 +605,7 @@ export const itTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} duplicato con successo.',
     successfullyReindexed:
       'Sono stati reindicizzati con successo {{count}} dei {{total}} documenti da {{collections}}, e {{skips}} bozze sono state saltate.',
+    tableLayout: 'Tabella',
     takeOver: 'Prendi il controllo',
     theme: 'Tema',
     thisLanguage: 'Italiano',

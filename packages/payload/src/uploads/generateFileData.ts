@@ -254,11 +254,24 @@ export const generateFileData = async <T>({
     // need the whole file, so leave such an upload untouched rather than buffering it.
     const canRunTransformers = pipeline.length > 0 && hasFullFileContents(file)
 
-    const bridgeTransformer = canRunTransformers
-      ? pipeline.find((transformer) =>
+    const bridgeTransformers = canRunTransformers
+      ? pipeline.filter((transformer) =>
           Boolean(getUploadTransformerInternal(transformer)?.prepareUpload),
         )
-      : undefined
+      : []
+
+    const bridgeTransformer =
+      bridgeTransformers.find((transformer) =>
+        getUploadTransformerInternal(transformer)!.handlesCollection?.({
+          collectionSlug: collectionConfig.slug,
+        }),
+      ) ?? bridgeTransformers[0]
+
+    // The chosen bridge's task options are private to it, so other bridges must not see them.
+    const bridgeTaskPipeline = pipeline.filter(
+      (transformer) =>
+        transformer === bridgeTransformer || !bridgeTransformers.includes(transformer),
+    )
 
     let originalWebFile: File | undefined
     let mainWebFile: File | undefined
@@ -284,7 +297,7 @@ export const generateFileData = async <T>({
               collectionSlug: collectionConfig.slug,
               file: task.file ?? originalWebFile!,
               options: task.options,
-              pipeline,
+              pipeline: bridgeTaskPipeline,
               req,
             }),
           uploadEdits,

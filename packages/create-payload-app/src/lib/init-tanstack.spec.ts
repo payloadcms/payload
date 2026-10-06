@@ -198,7 +198,7 @@ describe('initTanStack', () => {
         '@payloadcms/db-mongodb@4.2.0',
         'graphql@^16.8.1',
         'payload@4.2.0',
-        '@tanstack/react-start@^1.168.26',
+        '@tanstack/react-start@^1.168.60',
       ],
       projectDir,
     })
@@ -268,7 +268,7 @@ describe('initTanStack', () => {
         '@payloadcms/tanstack-start': '4.2.0',
         '@payloadcms/ui': '4.2.0',
         '@tanstack/react-router': '^1.200.0',
-        '@tanstack/react-start': '^1.168.26',
+        '@tanstack/react-start': '^1.168.60',
         '@vitejs/plugin-rsc': '^0.5.21',
         graphql: '^16.8.1',
         payload: '4.2.0',

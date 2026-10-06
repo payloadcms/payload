@@ -113,20 +113,21 @@ export function CreateDocumentButton({
   return (
     <>
       <Popup
-        button={
+        className={`${baseClass}__popup`}
+        horizontalAlign="right"
+        popupType="menu"
+        renderButton={({ active, ...buttonProps }) => (
           <Button
+            {...buttonProps}
             buttonStyle={buttonStyle}
             className={`${baseClass}__popup-button`}
             icon="chevron"
+            selected={active}
             size={size}
           >
             {buttonLabel}
           </Button>
-        }
-        buttonType="custom"
-        className={`${baseClass}__popup`}
-        horizontalAlign="right"
-        popupType="menu"
+        )}
       >
         <PopupList.ButtonGroup>
           {collections.map((collection) => (

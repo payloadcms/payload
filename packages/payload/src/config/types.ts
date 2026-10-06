@@ -1261,7 +1261,7 @@ type RootAdminConfig = {
   toast?: {
     /**
      * Time in milliseconds until the toast automatically closes.
-     * @default 4000
+     * @default 6000
      */
     duration?: number
     /**

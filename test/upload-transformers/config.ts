@@ -7,8 +7,9 @@ import { devUser } from '../credentials.js'
 import { OutsideFitMedia } from './collections/OutsideFitMedia/index.js'
 import { ResizePreviewMedia } from './collections/ResizePreviewMedia/index.js'
 import { TransformerMedia } from './collections/TransformerMedia/index.js'
-import { outsideFitMediaSlug, resizePreviewMediaSlug } from './shared.js'
-import { testTransformers } from './transformerFixtures.js'
+import { VariantMedia } from './collections/VariantMedia/index.js'
+import { outsideFitMediaSlug, resizePreviewMediaSlug, variantMediaSlug } from './shared.js'
+import { countingDynamicOnlySharp, testTransformers } from './transformerFixtures.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -21,16 +22,25 @@ export default buildConfigWithDefaults({
         baseDir: path.resolve(dirname),
       },
     },
-    collections: [TransformerMedia, ResizePreviewMedia, OutsideFitMedia],
+    collections: [TransformerMedia, ResizePreviewMedia, OutsideFitMedia, VariantMedia],
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
     upload: {
       transformers: [
-        sharpTransformer({ dynamic: { collections: [resizePreviewMediaSlug] } }),
+        sharpTransformer({
+          dynamic: { collections: [resizePreviewMediaSlug] },
+          sharp: countingDynamicOnlySharp,
+        }),
         sharpTransformer({
           slug: 'sharp-outside',
           dynamic: { collections: [outsideFitMediaSlug], fit: 'outside' },
+        }),
+        sharpTransformer({
+          slug: 'sharp-variants',
+          collections: {
+            [variantMediaSlug]: { variants: [{ name: 'thumbnail', height: 100, width: 100 }] },
+          },
         }),
         ...testTransformers,
       ],
