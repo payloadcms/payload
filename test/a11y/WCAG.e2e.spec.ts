@@ -493,10 +493,9 @@ test.describe('WCAG 2.2 Level AA', () => {
         const comparison = await compareHeadingWithOriginalSpan({
           heading,
           originalStyle: `
-            font-family: var(--text-body-medium-strong-font-family);
-            font-size: var(--text-body-medium-strong-font-size);
-            font-weight: var(--text-body-medium-strong-font-weight);
-            line-height: var(--text-body-medium-strong-line-height);
+            font-size: var(--text-body-medium-bold-font-size);
+            font-weight: var(--text-body-medium-bold-font-weight);
+            line-height: var(--text-body-medium-bold-line-height);
             color: var(--color-text);
           `,
         })
@@ -1783,9 +1782,8 @@ test.describe('WCAG 2.2 Level AA', () => {
       await drag.focus()
       await page.keyboard.press('Space')
       await expect(page.locator('.drag-overlay')).toBeVisible()
-      await expect(
-        page.getByRole('status').filter({ hasText: 'Picked up draggable item' }),
-      ).toHaveCount(1)
+      await expect(drag).toHaveAttribute('aria-pressed', 'true')
+      await expect(page.getByRole('status').filter({ hasText: lastID! })).toHaveCount(1)
       await page.keyboard.press('ArrowLeft')
       const overFirstWidget = page.getByRole('status').filter({ hasText: firstID! })
 
@@ -3203,6 +3201,36 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    test('should expose read-only hierarchy controls as disabled', async () => {
+      await gotoCreatePost({ page, postsURL })
+
+      const field = page.locator('#field-readOnlyHierarchy')
+      const browse = field.locator('.hierarchy-field__browse-button')
+      const combobox = field.locator('input[role="combobox"]')
+
+      await expect(field.locator('.rs--is-disabled')).toBeVisible({ timeout: 15000 })
+      await expect(combobox).toBeDisabled()
+      await expect(browse).toHaveAccessibleName(/select/i)
+      await expect(browse).toBeDisabled()
+      await expect(page.locator('.hierarchy-modal:visible')).toHaveCount(0)
+    })
+
+    test('should omit bulk confirmation from a single-value upload picker', async () => {
+      await gotoCreatePost({ page, postsURL })
+      await page
+        .locator('#field-featuredImage')
+        .getByRole('button', { name: 'Choose from existing' })
+        .press('Enter')
+
+      const drawer = page.locator('.list-drawer:visible')
+
+      await expect(drawer).toBeVisible()
+      await expect(drawer.getByRole('button', { name: 'Confirm', exact: true })).toHaveCount(0)
+      await expect(drawer.locator('.select-row__checkbox')).toHaveCount(0)
+      await drawer.locator('.list-drawer__header-close').press('Enter')
+      await expect(drawer).toBeHidden()
+    })
+
     test('should expose Media Filters as collapsed and expanded', async () => {
       // PYLD-3605
       await page.goto(

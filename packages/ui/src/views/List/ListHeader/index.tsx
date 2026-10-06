@@ -8,7 +8,10 @@ import { CloseModalButton } from '../../../elements/CloseModalButton/index.js'
 import { DefaultListViewTabs } from '../../../elements/DefaultListViewTabs/index.js'
 import { useListDrawerContext } from '../../../elements/ListDrawer/Provider.js'
 import { DrawerRelationshipSelect } from '../../../elements/ListHeader/DrawerRelationshipSelect/index.js'
-import { ListDrawerCreateNewDocButton } from '../../../elements/ListHeader/DrawerTitleActions/index.js'
+import {
+  ListDrawerConfirmSelectionButton,
+  ListDrawerCreateNewDocButton,
+} from '../../../elements/ListHeader/DrawerTitleActions/index.js'
 import { ListHeader } from '../../../elements/ListHeader/index.js'
 import { ListBulkUploadButton } from '../../../elements/ListHeader/TitleActions/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
@@ -25,6 +28,7 @@ export type ListHeaderProps = {
   Description?: React.ReactNode
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
+  enableRowSelections?: boolean
   hasCreatePermission: boolean
   hasDeletePermission?: boolean
   hasTrashPermission?: boolean
@@ -43,6 +47,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
   Description,
   disableBulkDelete,
   disableBulkEdit,
+  enableRowSelections,
   hasCreatePermission,
   hasDeletePermission,
   hasTrashPermission,
@@ -79,6 +84,10 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
           <ListDrawerCreateNewDocButton
             hasCreatePermission={hasCreatePermission}
             key="list-drawer-create-new-doc"
+          />,
+          <ListDrawerConfirmSelectionButton
+            enableRowSelections={enableRowSelections}
+            key="list-drawer-confirm-selection"
           />,
         ].filter(Boolean)}
       />
