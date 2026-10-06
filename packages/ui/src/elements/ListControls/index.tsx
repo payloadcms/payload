@@ -38,6 +38,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     hasCreatePermission,
     hasDeletePermission,
     isWhereOpen: isWhereOpenFromProps,
+    layoutToggle,
     listMenuItems,
     newDocumentURL,
     onWhereToggle,
@@ -140,6 +141,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               {t('general:sort')}
             </Button>
           )}
+          {layoutToggle}
           {hasCreatePermission && newDocumentURL && (
             <Button
               buttonStyle="primary"

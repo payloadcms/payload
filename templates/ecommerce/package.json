@@ -44,7 +44,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "cross-env": "10.1.0",
-    "date-fns": "^4.1.0",
+    "date-fns": "4.4.0",
     "dotenv": "^8.2.0",
     "embla-carousel-auto-scroll": "^8.1.5",
     "embla-carousel-react": "^8.5.2",

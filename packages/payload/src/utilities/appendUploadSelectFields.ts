@@ -16,6 +16,8 @@ export const appendUploadSelectFields = ({
     return
   }
 
+  /** `filename` identifies a populated upload and supplies useful thumbnail alt text. */
+  select.filename = true
   select.mimeType = true
   select.thumbnailURL = true
 
