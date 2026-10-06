@@ -27,6 +27,7 @@ import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLivePreviewContext, usePreviewURL } from '../../providers/LivePreview/context.js'
+import { useLocale } from '../../providers/Locale/index.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouter, useSearchParams } from '../../providers/RouterAdapter/index.js'
@@ -161,6 +162,7 @@ export function DefaultEditView({
   const abortOnSaveRef = useRef<AbortController>(null)
 
   const locale = params.get('locale')
+  const activeLocale = useLocale()?.code
 
   const entitySlug = collectionConfig?.slug || globalConfig?.slug
 
@@ -307,12 +309,12 @@ export function DefaultEditView({
 
       const responseDocument = json?.doc || json?.result
       const document =
-        context?.responseLocale === 'all' && locale
+        context?.responseLocale === 'all' && activeLocale
           ? formatLocalizedFormData({
               blocks: config.blocks,
               data: responseDocument,
               fields: (collectionConfig || globalConfig).fields,
-              locale,
+              locale: activeLocale,
               mode: 'unwrap',
             })
           : responseDocument
@@ -450,6 +452,7 @@ export function DefaultEditView({
       collectionConfig,
       globalConfig,
       config.blocks,
+      activeLocale,
       userSlug,
       id,
       setLastUpdateTime,

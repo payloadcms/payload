@@ -1204,6 +1204,7 @@ export const reload = async (
 type CachedPayload = {
   devReloadCleanup: (() => void) | null
   devReloadStrategy: DevReloadStrategy | null
+  hasPendingReload: boolean
   initializedCrons: boolean
   payload: null | Payload
   promise: null | Promise<Payload>
@@ -1271,6 +1272,7 @@ function connectDevReload({
   try {
     cached.devReloadCleanup = strategy.connect(() => {
       if (cached.reload instanceof Promise) {
+        cached.hasPendingReload = true
         return
       }
       cached.reload = true
@@ -1320,6 +1322,7 @@ export const getPayload = async (
     cached = {
       devReloadCleanup: null,
       devReloadStrategy: null,
+      hasPendingReload: false,
       initializedCrons: Boolean(options.cron),
       payload: null,
       promise: null,
@@ -1367,7 +1370,8 @@ export const getPayload = async (
       await reload(config, cached.payload, false, options)
 
       resolve()
-      cached.reload = false
+      cached.reload = Boolean(cached.hasPendingReload)
+      cached.hasPendingReload = false
     }
 
     if (cached.reload instanceof Promise) {
@@ -1495,6 +1499,8 @@ export type {
   HookOperationType,
   IDTypeForCollectionSlug,
   MeHook as CollectionMeHook,
+  QueryDraftDataFromCollection,
+  QueryDraftDataFromCollectionSlug,
   RefreshHook as CollectionRefreshHook,
   RequiredDataFromCollection,
   RequiredDataFromCollectionSlug,

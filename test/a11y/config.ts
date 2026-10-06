@@ -171,7 +171,7 @@ export default buildConfigWithDefaults({
         title: 'Example post one, third version',
       },
       overrideAccess: true,
-      version: 'draft',
+      version: 'latest',
     })
 
     await payload.create({

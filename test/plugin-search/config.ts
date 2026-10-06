@@ -63,11 +63,18 @@ export default buildConfigWithDefaults({
           return {
             ...searchDoc,
             slug: originalDoc.slug,
+            localizedGroup: {
+              rows: originalDoc.slug ? [{ text: originalDoc.slug }] : [],
+              tags: originalDoc.slug ? [originalDoc.slug] : [],
+              text: originalDoc.slug,
+            },
+            metadata: { shared: 'Shared metadata', text: originalDoc.slug },
             excerpt: originalDoc?.excerpt || 'This is a fallback excerpt',
           }
         },
         collections: ['pages', 'posts', 'custom-ids-1', 'custom-ids-2', 'filtered-locales'],
         defaultPriorities: {
+          'filtered-locales': ({ title }) => (title === 'Priority title' ? 40 : 5),
           pages: 10,
           posts: ({ title }) => (title === 'Hello, world!' ? 30 : 20),
         },
@@ -107,9 +114,40 @@ export default buildConfigWithDefaults({
               localized: true,
               required: false,
             },
+            {
+              name: 'localizedGroup',
+              type: 'group',
+              localized: true,
+              fields: [
+                { name: 'tags', type: 'text', hasMany: true },
+                {
+                  name: 'rows',
+                  type: 'array',
+                  fields: [{ name: 'text', type: 'text' }],
+                },
+                {
+                  name: 'text',
+                  type: 'text',
+                  hooks: {
+                    afterRead: [({ value }) => (value ? `${value} read` : value)],
+                  },
+                },
+              ],
+            },
+            {
+              name: 'metadata',
+              type: 'group',
+              fields: [
+                { name: 'shared', type: 'text' },
+                { name: 'text', type: 'text', localized: true },
+              ],
+            },
           ],
         },
         skipSync: ({ collectionSlug, doc, locale }) => {
+          if (collectionSlug === 'filtered-locales' && doc.title === 'Skip this locale') {
+            return true
+          }
           if (collectionSlug === 'filtered-locales' && doc.syncEnglishOnly) {
             return locale !== 'en'
           }

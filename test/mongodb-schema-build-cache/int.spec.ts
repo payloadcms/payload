@@ -38,6 +38,7 @@ test.suite('MongoDB schema build cache', { config: './config.ts', db: 'mongo' },
       depth: 0,
       locale: 'en',
       overrideAccess: true,
+      version: 'latest',
     })
     const leaf = getFirstLeaf(result.layout)
 
@@ -109,6 +110,7 @@ test.suite('MongoDB schema build cache', { config: './config.ts', db: 'mongo' },
       depth: 0,
       locale: 'all',
       overrideAccess: true,
+      version: 'latest',
     })
     const localizedLayout = result.localizedLayout as unknown as {
       de: NestedLayout

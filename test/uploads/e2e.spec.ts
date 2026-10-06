@@ -242,8 +242,11 @@ describe('Uploads', () => {
         limit: 1,
         pagination: false,
         overrideAccess: true,
+        version: 'latest',
       })
     ).docs[0]
+
+    expect(relationDoc?._status).toBe('draft')
 
     await page.goto(relationURL.edit(relationDoc!.id))
 

@@ -142,6 +142,29 @@ describe('defaultNextJsDevReloadStrategy', () => {
     expect(onReload).toHaveBeenCalledTimes(1)
   })
 
+  it('should catch up with changes missed while the socket was connecting', () => {
+    const onReload = vi.fn()
+
+    connect(onReload)
+    expect(onReload).not.toHaveBeenCalled()
+
+    MockWebSocket.instances[0]!.onopen?.()
+
+    expect(onReload).toHaveBeenCalledOnce()
+  })
+
+  it('should ignore an obsolete socket after cleanup', () => {
+    const onReload = vi.fn()
+    const cleanup = defaultNextJsDevReloadStrategy()!.connect(onReload)
+    const socket = MockWebSocket.instances[0]!
+
+    cleanup()
+    socket.onopen?.()
+    socket.sendServerComponentChanges()
+
+    expect(onReload).not.toHaveBeenCalled()
+  })
+
   it('should close the socket on cleanup', () => {
     const strategy = defaultNextJsDevReloadStrategy()
     const cleanup = strategy!.connect(() => {})

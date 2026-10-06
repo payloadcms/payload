@@ -70,6 +70,10 @@ export const beforeChange = async <T extends JsonObject>({
       locales = await localization.filterAvailableLocales({ locales, req })
     }
 
+    const publicationStatus = incomingData._status
+    let hasPublicationIntent =
+      locales.length > 0 && (publicationStatus === 'published' || publicationStatus === 'draft')
+
     for (const localeDefinition of locales) {
       const locale = typeof localeDefinition === 'string' ? localeDefinition : localeDefinition.code
       const localeReq = Object.assign(Object.create(Object.getPrototypeOf(req)), req, {
@@ -86,6 +90,9 @@ export const beforeChange = async <T extends JsonObject>({
         docWithLocales: result,
         fieldsToValidate: submittedTopLevelFieldNames,
         global,
+        onDataProcessed: (data) => {
+          hasPublicationIntent &&= data._status === publicationStatus
+        },
         operation,
         overrideAccess,
         req: localeReq,
@@ -102,7 +109,9 @@ export const beforeChange = async <T extends JsonObject>({
       })
     }
 
-    onDataProcessed?.(result as T)
+    onDataProcessed?.(
+      (hasPublicationIntent ? { ...result, _status: publicationStatus } : result) as T,
+    )
     return result as T
   }
 

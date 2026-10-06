@@ -7,6 +7,7 @@ import * as qs from 'qs-esm'
 import type { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 
 import { addGroupBy, clearGroupBy, openGroupBy } from '../__helpers/e2e/groupBy/index.js'
+import { saveDocAndAssert } from '../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { getSelectMenu, selectInput } from '../__helpers/e2e/selectInput.js'
 import { initPage } from '../__setup/e2e/initPage.js'
@@ -428,11 +429,17 @@ test.describe('WCAG 2.2 Level AA', () => {
         await expect(ascending).toBeFocused()
         await page.keyboard.press('Enter')
         await expect(header).toHaveAttribute('aria-sort', 'ascending')
+        await expect(
+          page.getByRole('grid').locator('tbody tr').first().locator('.cell-title'),
+        ).toHaveText('Example post one, third version')
         await expect(ascending).toBeFocused()
         await page.keyboard.press('ArrowLeft')
         await expect(descending).toBeFocused()
         await page.keyboard.press('Enter')
         await expect(header).toHaveAttribute('aria-sort', 'descending')
+        await expect(
+          page.getByRole('grid').locator('tbody tr').first().locator('.cell-title'),
+        ).toHaveText('Example post two')
         await expect(descending).toBeFocused()
         await page.keyboard.press('Escape')
         await expect(descending).toBeFocused()
@@ -824,7 +831,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       )
     })
 
-    test('should keep incompatible upload destinations visible and skip them with the keyboard', async () => {
+    test('should keep incompatible upload destinations visible and prevent keyboard selection', async () => {
       await page.goto(`${serverURL}/admin`)
       await page
         .locator('.upload-dropzone-widget')
@@ -840,15 +847,17 @@ test.describe('WCAG 2.2 Level AA', () => {
         selectLocator: modal.locator('.bulk-upload--add-files__collectionSelect'),
       })
       await modal.locator('.dropzone input[type="file"]').setInputFiles({
-        name: 'keyboard.pdf',
-        buffer: Buffer.from('pdf'),
-        mimeType: 'application/pdf',
+        name: 'keyboard.txt',
+        buffer: Buffer.from('Keyboard upload destination test'),
+        mimeType: 'text/plain',
       })
 
       const destination = modal.locator('.file-selections__collectionSelect')
       const input = destination.getByRole('combobox', { name: 'Collection', exact: true })
 
+      await expect(modal.locator('[data-form-ready="true"]').first()).toBeVisible()
       await expect(input).toBeVisible()
+      await expect(input).toBeEnabled()
       await input.focus()
       await input.press('ArrowDown')
       await expect(
@@ -860,6 +869,11 @@ test.describe('WCAG 2.2 Level AA', () => {
       await input.press('Home')
       await input.press('Enter')
       await expect(destination.locator('.react-select--single-value')).toHaveText('Media Alt')
+      await expect(input).toHaveAttribute('aria-expanded', 'true')
+      await input.press('End')
+      await input.press('Enter')
+      await expect(destination.locator('.react-select--single-value')).toHaveText('Media Alt')
+      await expect(input).toHaveAttribute('aria-expanded', 'false')
       await expect(input).toBeFocused()
 
       await modal.locator('.file-selections__remove--overlay').click()
@@ -1080,9 +1094,10 @@ test.describe('WCAG 2.2 Level AA', () => {
       await dragHandle.focus()
       await expect(dragHandle).toBeFocused()
       await expect(dragHandle).toHaveCSS('opacity', '1')
-      await page.keyboard.press('Space')
+      await page.keyboard.press('Space', { delay: 100 })
       await expect(page.locator('body')).toHaveClass(/is-dragging/)
       await expect(dragHandle).toHaveAttribute('aria-pressed', 'true')
+      await expect(page.getByRole('status').filter({ hasText: /draggable item/i })).toHaveCount(1)
       await page.keyboard.press('Space')
       await expect(page.locator('body')).not.toHaveClass(/is-dragging/)
       await expect(dragHandle).toBeFocused()
@@ -1340,6 +1355,13 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
 
     test('should copy locale data without drafts using the keyboard', async () => {
+      const preferenceURL = formatAdminURL({
+        apiRoute: '/api',
+        path: '/payload-preferences/locale',
+        serverURL,
+      })
+      const previousPreference = await page.request.get(preferenceURL).then((res) => res.json())
+
       const collectionURL = formatAdminURL({
         apiRoute: '/api',
         path: `/${localizedPlainPostsSlug}`,
@@ -1387,6 +1409,12 @@ test.describe('WCAG 2.2 Level AA', () => {
         expect((await copied.json()).title).toBe('English source')
       } finally {
         await page.request.delete(`${collectionURL}/${doc.id}`)
+        const restoredPreference = previousPreference.value
+          ? await page.request.post(preferenceURL, { data: { value: previousPreference.value } })
+          : await page.request.delete(preferenceURL)
+
+        expect(restoredPreference.ok()).toBe(true)
+        await page.goto(postsURL.list)
       }
     })
 
@@ -1758,7 +1786,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       const linkedDrag = linkedWidget.getByRole('button', { name: 'Drag to reorder', exact: true })
 
       await linkedDrag.focus()
-      await page.keyboard.press('Space')
+      await page.keyboard.press('Space', { delay: 100 })
       const overlay = page.locator('.drag-overlay')
 
       await expect(overlay).toBeVisible()
@@ -1779,11 +1807,9 @@ test.describe('WCAG 2.2 Level AA', () => {
       const drag = widgets.last().getByRole('button', { name: 'Drag to reorder', exact: true })
 
       await drag.focus()
-      await page.keyboard.press('Space')
+      await page.keyboard.press('Space', { delay: 100 })
       await expect(page.locator('.drag-overlay')).toBeVisible()
-      await expect(
-        page.getByRole('status').filter({ hasText: 'Picked up draggable item' }),
-      ).toHaveCount(1)
+      await expect(page.getByRole('status').filter({ hasText: /draggable item/i })).toHaveCount(1)
       await page.keyboard.press('ArrowLeft')
       const overFirstWidget = page.getByRole('status').filter({ hasText: firstID! })
 
@@ -1860,7 +1886,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(widget.locator('.draggable')).toBeFocused()
       await page.keyboard.press('Tab')
       await expect(drag).toBeFocused()
-      await page.keyboard.press('Space')
+      await page.keyboard.press('Space', { delay: 100 })
       await expect(page.locator('.drag-overlay')).toBeVisible()
       await expect(drag).toHaveAttribute('aria-pressed', 'true')
       await expect(
@@ -2146,17 +2172,24 @@ test.describe('WCAG 2.2 Level AA', () => {
         const paragraphCount = await paragraphs.count()
 
         await trigger.press(key)
-        await page.getByRole('menuitem', { name: 'Move Up', exact: true }).press(key)
+        const moveUp = page.getByRole('menuitem', { name: 'Move Up', exact: true })
+
+        await expect(moveUp).toBeFocused()
+        await page.keyboard.press(key)
         await expect(block.locator('.LexicalEditorTheme__block__block-number')).toHaveText('02')
         await expect(trigger).toBeFocused()
         await header.getByRole('button', { name: 'Collapse', exact: true }).click()
         await expect(nestedHandle).toBeHidden()
         await trigger.press(key)
-        await page.getByRole('menuitem', { name: 'Move Down', exact: true }).press(key)
+        await expect(moveUp).toBeFocused()
+        await page.keyboard.press('ArrowDown')
+        await expect(page.getByRole('menuitem', { name: 'Move Down', exact: true })).toBeFocused()
+        await page.keyboard.press(key)
         await expect(block.locator('.LexicalEditorTheme__block__block-number')).toHaveText('03')
         await expect(trigger).toBeFocused()
         await expect(paragraphs).toHaveCount(paragraphCount)
         await page.keyboard.press(key)
+        await expect(moveUp).toBeFocused()
         await page.getByRole('menuitem', { name: 'Remove', exact: true }).press(key)
         await expect(block).toHaveCount(0)
         await expect(paragraphs).toHaveCount(paragraphCount)
@@ -2743,6 +2776,93 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.6 Headings and Labels (AA)', () => {
+    test('should identify the document heading by ID when its title is cleared', async () => {
+      const collectionURL = formatAdminURL({ apiRoute: '/api', path: '/posts', serverURL })
+      const response = await page.request.post(`${collectionURL}?version=draft`, {
+        data: { title: 'Temporary document heading' },
+      })
+
+      expect(response.ok()).toBe(true)
+      const { doc } = await response.json()
+
+      try {
+        await page.goto(
+          formatAdminURL({
+            adminRoute: '/admin',
+            path: `/collections/posts/${doc.id}`,
+            serverURL,
+          }),
+        )
+        await page.locator('#field-title').fill('')
+        const heading = page.getByRole('heading', { level: 1 })
+
+        await expect(heading).toContainText('ID')
+        await expect(heading).toContainText(String(doc.id))
+        await expect(heading.locator('.id-label__prefix')).toHaveText('ID')
+      } finally {
+        await page.request.delete(`${collectionURL}/${doc.id}?trash=true`)
+      }
+    })
+
+    test('should retain the active locale heading after publishing all locales without a URL locale', async () => {
+      const preferenceURL = formatAdminURL({
+        apiRoute: '/api',
+        path: '/payload-preferences/locale',
+        serverURL,
+      })
+      const previousPreference = await page.request.get(preferenceURL).then((res) => res.json())
+
+      const collectionURL = formatAdminURL({
+        apiRoute: '/api',
+        path: '/posts',
+        serverURL,
+      })
+      const response = await page.request.post(`${collectionURL}?locale=en&version=draft`, {
+        data: { title: 'English publication heading' },
+      })
+
+      expect(response.ok()).toBe(true)
+      const { doc } = await response.json()
+
+      try {
+        const spanishResponse = await page.request.patch(
+          `${collectionURL}/${doc.id}?locale=es&version=draft`,
+          { data: { title: 'Spanish publication heading' } },
+        )
+
+        expect(spanishResponse.ok()).toBe(true)
+        const editURL = formatAdminURL({
+          adminRoute: '/admin',
+          path: `/collections/posts/${doc.id}`,
+          serverURL,
+        })
+
+        for (const { code, label, title } of [
+          { code: 'en', label: 'English', title: 'English publication heading' },
+          { code: 'es', label: 'Spanish', title: 'Spanish publication heading' },
+        ]) {
+          await page.goto(`${editURL}?locale=${code}`)
+          await expect(page.locator('#field-title')).toHaveValue(title)
+          await page.goto(editURL)
+          await expect(page.locator('#action-save')).toHaveText(`Publish in ${label}`)
+          await page.locator('#field-subtitle').fill(`Publication in ${code}`)
+          await saveDocAndAssert(page, '#publish-all-locales')
+          await expect(
+            page.getByRole('heading', { name: title, exact: true, level: 1 }),
+          ).toBeVisible()
+          await expect(page.locator('#field-title')).toHaveValue(title)
+        }
+      } finally {
+        await page.request.delete(`${collectionURL}/${doc.id}?trash=true`)
+        const restoredPreference = previousPreference.value
+          ? await page.request.post(preferenceURL, { data: { value: previousPreference.value } })
+          : await page.request.delete(preferenceURL)
+
+        expect(restoredPreference.ok()).toBe(true)
+        await page.goto(postsURL.list)
+      }
+    })
+
     test('should include the visible version count in the table history link name', async () => {
       // PYLD-3707
       test.setTimeout(60000)

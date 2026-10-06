@@ -2319,6 +2319,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
           id,
           collection: 'blocks-fields',
           overrideAccess: true,
+          version: 'latest',
         })
 
         await payload.update({
@@ -2358,6 +2359,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
           collection: 'blocks-fields',
           locale: 'all',
           overrideAccess: true,
+          version: 'latest',
         })
 
         expect(retrieved.content.en[0].content).toHaveLength(1)
@@ -2495,6 +2497,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
           depth: 0,
           locale: 'en',
           overrideAccess: true,
+          version: 'latest',
         })
         removeId(enDoc2.arrayWithBlocks[0].blocksWithinArray)
         expect(enDoc2.arrayWithBlocks[0].blocksWithinArray).toEqual(blocksWithinArrayEN)
@@ -2559,6 +2562,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
           depth: 0,
           locale: 'en',
           overrideAccess: true,
+          version: 'latest',
         })
         expect(enDoc2.arrayWithLocalizedRelation).toHaveLength(1)
         expect(enDoc2.arrayWithLocalizedRelation[0].localizedRelation).toBe(randomTextDoc.id)
@@ -3530,6 +3534,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
           },
           locale: 'en',
           overrideAccess: true,
+          version: 'published',
         })
 
         // Add content to Spanish locale separately
@@ -3663,6 +3668,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
           },
           locale: 'en',
           overrideAccess: true,
+          version: 'published',
         })
 
         // Create draft with different content
@@ -4152,6 +4158,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
           fallbackLocale: 'en',
           locale: 'es',
           overrideAccess: true,
+          version: 'latest',
         })
 
         expect(spanishPostWithEnglishFallback.text).toBe('Post EN')
@@ -4162,6 +4169,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
           fallbackLocale: false,
           locale: 'es',
           overrideAccess: true,
+          version: 'latest',
         })
 
         expect(spanishPostWithNoFallback?.selfRelation?.text).toBeUndefined()
@@ -4234,6 +4242,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
         collection: allFieldsLocalizedSlug,
         locale: 'all',
         overrideAccess: true,
+        version: 'latest',
       })
 
       // Verify simple localized fields have locale keys at top level
@@ -4305,6 +4314,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
           text: 'title',
         },
         overrideAccess: true,
+        version: 'published',
       })
 
       const queriedDoc = await payload.find({
@@ -4705,6 +4715,41 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
         })
         expect(unchanged._status[defaultLocale]).toBe('published')
         expect(unchanged._status[spanishLocale]).toBe('published')
+      })
+
+      test('should not publish all locales when an earlier status access check is denied', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationFieldAccessSlug as any,
+          data: { _status: 'published', title: 'published' },
+          locale: defaultLocale,
+          overrideAccess: true,
+          version: 'published',
+        })
+
+        createdDocuments.push({ id: doc.id, collection: publicationFieldAccessSlug })
+        await payload.update({
+          id: doc.id,
+          collection: publicationFieldAccessSlug as any,
+          context: { deniedPublicationLocale: defaultLocale },
+          data: { _status: 'published', title: { [spanishLocale]: 'pending' } },
+          locale: 'all',
+          overrideAccess: false,
+          version: 'draft',
+        })
+
+        const published = await payload.findByID({
+          id: doc.id,
+          collection: publicationFieldAccessSlug as any,
+          locale: 'all',
+          overrideAccess: true,
+          version: 'published',
+        })
+
+        expect(published._status[defaultLocale]).toBe('published')
+        expect(published._status[spanishLocale]).not.toBe('published')
+        expect(published.title[spanishLocale]).not.toBe('pending')
       })
 
       test('should not infer field access from an already-published active locale', async ({
@@ -5108,6 +5153,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
             id: doc.id,
             collection: allFieldsLocalizedSlug,
             locale: spanishLocale,
+            version: 'latest',
             overrideAccess: true,
           })
 
@@ -5709,6 +5755,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
           collection: allFieldsLocalizedSlug,
           locale: 'all',
           overrideAccess: true,
+          version: 'latest',
         })
 
         expect(localizedFallback.text.en).toEqual(englishTitle)
@@ -5719,6 +5766,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
           collection: allFieldsLocalizedSlug,
           locale: spanishLocale,
           overrideAccess: true,
+          version: 'latest',
         })
 
         expect(retrievedInSpanish.text).toEqual(englishTitle)
@@ -5731,6 +5779,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
           fallbackLocale: 'none',
           locale: portugueseLocale,
           overrideAccess: true,
+          version: 'latest',
         })
 
         expect(localizedFallback.text).not.toBeDefined()

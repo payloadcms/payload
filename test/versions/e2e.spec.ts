@@ -295,7 +295,8 @@ describe('Versions', () => {
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
-      await page.locator('.restore-version__restore-as-draft-button').click()
+      await page.locator('.restore-version .popup__trigger-wrap button').click()
+      await page.getByRole('menuitem', { name: 'Restore as draft' }).click()
       await page.locator('button:has-text("Confirm")').click()
       await page.waitForURL(savedDocURL)
       await expect(page.locator('#field-title')).toHaveValue('v1')
@@ -356,6 +357,14 @@ describe('Versions', () => {
           description: 'description',
           title: 'title',
         },
+        overrideAccess: true,
+        version: 'published',
+      })
+
+      await payload.update({
+        id: publishedDoc.id,
+        collection: draftCollectionSlug,
+        data: { title: 'updated published title' },
         overrideAccess: true,
         version: 'published',
       })
@@ -488,7 +497,26 @@ describe('Versions', () => {
 
       const drawer = page.locator('[id^=doc-drawer_autosave-posts_1_]')
       await expect(drawer).toBeVisible()
-      await expect(drawer.locator('.id-label')).toBeVisible()
+      await drawer.locator('#field-title').fill('drawer autosave title')
+      await waitForAutoSaveToRunAndComplete(drawer)
+      const savedDocLink = drawer.getByRole('link', { name: 'drawer autosave title', exact: true })
+
+      await expect(savedDocLink).toBeVisible()
+
+      const savedDocPath = await savedDocLink.getAttribute('href')
+
+      expect(savedDocPath).toMatch(new RegExp(`/collections/${autosaveCollectionSlug}/[^/]+$`))
+
+      const {
+        docs: [savedDoc],
+      } = await payload.find({
+        collection: autosaveCollectionSlug,
+        overrideAccess: true,
+        version: 'latest',
+        where: { id: { equals: savedDocPath!.split('/').pop()! } },
+      })
+
+      expect(savedDoc.title).toBe('drawer autosave title')
     })
 
     test('collection - autosave - should redirect from create to edit URL after first save', async () => {
@@ -537,12 +565,12 @@ describe('Versions', () => {
         `Value in DocumentInfoContext: ${postID}`,
       )
 
-      await assertNetworkRequests(
+      const requests = await assertNetworkRequests(
         page,
         // Important: assert that depth is 0 in this request
         formatAdminURL({
           apiRoute: '/api',
-          path: `/autosave-posts/${docID}?autosave=true&depth=0&version=draft&fallback-locale=null&locale=en`,
+          path: `/autosave-posts/${docID}`,
           serverURL,
         }),
         async () => {
@@ -550,8 +578,17 @@ describe('Versions', () => {
         },
         {
           allowedNumberOfRequests: 1,
+          requestFilter: (request) => request.method() === 'PATCH',
         },
       )
+
+      const params = new URL(requests[0]!.url()).searchParams
+
+      expect(params.get('autosave')).toBe('true')
+      expect(params.get('depth')).toBe('0')
+      expect(params.get('version')).toBe('draft')
+      expect(params.get('fallback-locale')).toBe('null')
+      expect(params.get('locale')).toBe('en')
 
       // Ensure that the value in context remains consistent across saves
       await expect(page.locator('#custom-field-label')).toHaveText(
@@ -1295,8 +1332,8 @@ describe('Versions', () => {
       await page.locator('#action-duplicate').click()
       await expect(page.locator('.payload-toast-container')).toContainText('successfully')
       await expect
-        .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
-        .not.toContain(publishedDoc.id)
+        .poll(() => new URL(page.url()).pathname, { timeout: POLL_TOPASS_TIMEOUT })
+        .not.toBe(new URL(uploadURL.edit(publishedDoc.id)).pathname)
 
       await expect(page.locator('.doc-controls__status .status__value')).toContainText('Draft')
       await waitForFormReady(page)
@@ -1317,7 +1354,7 @@ describe('Versions', () => {
           overrideAccess: true,
           where: { id: { equals: duplicatedDocID } },
         })
-        expect(mainDocs[0]!._status).toStrictEqual('draft')
+        expect(mainDocs).toHaveLength(0)
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
   })
@@ -1816,19 +1853,11 @@ describe('Versions', () => {
 
       const publishButton = page.locator('#action-save')
       await expect(publishButton).toContainText('English')
-      await publishButton.click()
+      await saveDocAndAssert(page)
 
-      await wait(500)
+      const id = new URL(page.url()).pathname.split('/').pop()
 
-      await expect(async () => {
-        await expect(
-          page.locator('.payload-toast-item:has-text("Updated successfully.")'),
-        ).toBeVisible()
-      }).toPass({
-        timeout: POLL_TOPASS_TIMEOUT,
-      })
-
-      const id = await page.locator('.id-label').getAttribute('title')
+      expect(id).toBeTruthy()
 
       const data = await payload.find({
         collection: localizedCollectionSlug,
@@ -1859,7 +1888,9 @@ describe('Versions', () => {
       await textField.fill('english text')
       await saveDocAndAssert(page, '#action-save-draft')
 
-      const id = await page.locator('.id-label').getAttribute('title')
+      const id = new URL(page.url()).pathname.split('/').pop()
+
+      expect(id).toBeTruthy()
 
       // Step 2: Add a block via API (simpler and more reliable than UI interaction)
       await payload.update({
@@ -2581,11 +2612,20 @@ describe('Versions', () => {
     })
 
     test('should render a replaced block when both block schemas contain unnamed layouts', async () => {
+      const {
+        docs: [latestDoc],
+      } = await payload.find({
+        collection: diffCollectionSlug,
+        overrideAccess: true,
+        version: 'latest',
+        where: { id: { equals: diffID } },
+      })
+
       await payload.update({
         id: diffID,
         collection: diffCollectionSlug,
         data: {
-          blocks: diffDoc.blocks?.map((block, i) => {
+          blocks: latestDoc.blocks?.map((block, i) => {
             if (i === 1) {
               return {
                 blockType: 'TabsBlock',
@@ -2807,6 +2847,7 @@ describe('Versions', () => {
         limit: 3,
         overrideAccess: true,
         sort: 'createdAt',
+        version: 'latest',
       })
 
       await expect(

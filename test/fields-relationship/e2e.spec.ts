@@ -651,7 +651,7 @@ describe('Relationship Field', () => {
     await expect(documentDrawer).toBeVisible()
   })
 
-  test('should open document from drawer by clicking on ID Label', async () => {
+  test('should open document from drawer by clicking on its heading', async () => {
     const relatedDoc = await payload.create({
       collection: relationOneSlug,
       data: {
@@ -696,15 +696,15 @@ describe('Relationship Field', () => {
     const drawer2 = page.locator('[id^=doc-drawer_relation-one_2_]')
     await expect(drawer2).toBeVisible()
 
-    const idLabel = drawer2.locator('.id-label')
-    await expect(idLabel).toBeVisible()
-    await idLabel.locator('a').click()
+    const relatedURL = new AdminUrlUtil(serverURL, relationOneSlug)
+    const documentLink = drawer2.getByRole('heading', { level: 3 }).getByRole('link')
 
-    const closedModalLocator = page.locator(
-      '.payload__modal-container.payload__modal-container--exitDone',
-    )
+    await expect(documentLink).toHaveAttribute('href', new URL(relatedURL.edit(relatedDoc.id)).pathname)
+    await documentLink.click()
 
-    await expect(closedModalLocator).toHaveCount(1)
+    await expect(page).toHaveURL(relatedURL.edit(relatedDoc.id))
+    await expect(drawer1).toBeHidden()
+    await expect(drawer2).toBeHidden()
 
     await Promise.all([
       payload.delete({

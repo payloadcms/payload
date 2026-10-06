@@ -25,6 +25,9 @@ export const defaultNextJsDevReloadStrategy = (): DevReloadStrategy | null => {
       connect(onReload) {
         const ws = new WebSocket(url)
 
+        // Catch changes broadcast before the asynchronous subscription was ready.
+        ws.onopen = () => onReload()
+
         ws.onmessage = (event) => {
           if (typeof event.data === 'string') {
             const data = JSON.parse(event.data)
@@ -42,6 +45,8 @@ export const defaultNextJsDevReloadStrategy = (): DevReloadStrategy | null => {
         }
 
         return () => {
+          ws.onopen = null
+          ws.onmessage = null
           ws.close()
         }
       },

@@ -220,6 +220,7 @@ test.suite('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
 
     const updatedVersionedPost = await migratedPayload.findByID({
       collection: 'posts-versioned',
+      version: 'latest',
       id: versionedPost.id,
       depth: 0,
       overrideAccess: true,
@@ -312,6 +313,7 @@ test.suite('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
 
     const updatedVersionedGlobal = await migratedPayload.findGlobal({
       slug: 'global-versioned',
+      version: 'latest',
       depth: 0,
       overrideAccess: true,
     })

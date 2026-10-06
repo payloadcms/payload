@@ -225,7 +225,13 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         incomingState: serverState,
       })
 
-      if (prevStateRef) {
+      // A stale response can omit an optimistic row. Keep it eligible for the
+      // next onChange request until the server has supplied its field metadata.
+      const hasPendingRows = Object.values(newState).some((field) =>
+        field.rows?.some((row) => row.isLoading),
+      )
+
+      if (prevStateRef && !hasPendingRows) {
         prevStateRef.current = newState
       }
 

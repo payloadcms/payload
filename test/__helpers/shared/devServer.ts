@@ -19,12 +19,14 @@ export type TestServerProcess = {
 }
 
 export async function startDevServer({
+  env,
   framework,
   readyPath,
   suite,
   timeout = 270000,
   warmupPaths = [],
 }: {
+  env?: NodeJS.ProcessEnv
   framework: 'next' | 'tanstack-start'
   /** Endpoint that returns a successful response once the app is ready. */
   readyPath: string
@@ -39,7 +41,7 @@ export async function startDevServer({
   const server = spawnTestServer({
     args: ['dev', suite, `--framework-${framework}`, '--no-seed'],
     captureOutput: true,
-    env: getDevServerEnv({ port }),
+    env: { ...getDevServerEnv({ port }), ...env },
   })
   const signal = AbortSignal.timeout(timeout)
 

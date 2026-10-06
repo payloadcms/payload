@@ -2,7 +2,9 @@ import type { Metadata } from 'next'
 
 import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
-import { getPayload, type RequiredDataFromCollectionSlug } from 'payload'
+import type { QueryDraftDataFromCollectionSlug, RequiredDataFromCollectionSlug } from 'payload'
+
+import { getPayload } from 'payload'
 import { draftMode } from 'next/headers'
 import React, { cache } from 'react'
 import { homeStatic } from '@/endpoints/seed/home-static'
@@ -49,7 +51,10 @@ export default async function Page({ params: paramsPromise }: Args) {
   // Decode to support slugs with special characters
   const decodedSlug = decodeURIComponent(slug)
   const url = '/' + decodedSlug
-  let page: RequiredDataFromCollectionSlug<'pages'> | null
+  let page:
+    | RequiredDataFromCollectionSlug<'pages'>
+    | QueryDraftDataFromCollectionSlug<'pages'>
+    | null
 
   page = await queryPageBySlug({
     slug: decodedSlug,
@@ -74,8 +79,8 @@ export default async function Page({ params: paramsPromise }: Args) {
 
       {draft && <LivePreviewListener />}
 
-      <RenderHero {...hero} />
-      <RenderBlocks blocks={layout} />
+      {hero && <RenderHero {...hero} />}
+      <RenderBlocks blocks={layout ?? []} />
     </article>
   )
 }

@@ -482,7 +482,9 @@ export default buildConfigWithDefaults({
             access: {
               create: () => false,
               update: ({ data, doc, req }) =>
-                Boolean(req.context.comparePublicationStatus && data?._status === doc?._status),
+                req.context.deniedPublicationLocale
+                  ? req.locale !== req.context.deniedPublicationLocale
+                  : Boolean(req.context.comparePublicationStatus && data?._status === doc?._status),
             },
             hooks: {
               beforeValidate: [

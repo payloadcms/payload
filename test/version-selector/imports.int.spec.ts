@@ -230,7 +230,7 @@ test.suite('Version selector import consumers', { config: './config.ts' }, () =>
         const documents = await payload.find({
           collection,
           locale: 'all',
-          sort: 'id',
+          sort: 'summary',
           version: 'latest',
         })
 

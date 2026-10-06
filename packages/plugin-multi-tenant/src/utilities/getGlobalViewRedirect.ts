@@ -1,6 +1,6 @@
 import type { Payload, ServerAdapter, User, ViewTypes } from 'payload'
 
-import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
+import { formatAdminURL, hasAutosaveEnabled, hasDraftsEnabled } from 'payload/shared'
 
 import type { MultiTenantPluginConfig } from '../types.js'
 
@@ -71,15 +71,19 @@ export async function getGlobalViewRedirect({
 
   if (tenant) {
     try {
+      const collectionConfig = payload.collections[collectionSlug]?.config
+
       const globalTenantDocQuery = await payload.find({
         collection: collectionSlug,
         depth: 0,
         limit: 1,
-        overrideAccess: true,
+        overrideAccess: false,
         pagination: false,
         select: {
           id: true,
         },
+        user,
+        version: collectionConfig && hasDraftsEnabled(collectionConfig) ? 'latest' : 'published',
         where: {
           [tenantFieldName]: {
             in: [tenant],
@@ -102,6 +106,7 @@ export async function getGlobalViewRedirect({
             collectionSlug,
             payload,
             tenantID: tenant,
+            user,
           })
         }
       } else if (view === 'list') {
@@ -116,12 +121,13 @@ export async function getGlobalViewRedirect({
             collectionSlug,
             payload,
             tenantID: tenant,
+            user,
           })
         }
       }
     } catch (e: unknown) {
       const prefix = `${e && typeof e === 'object' && 'message' in e && typeof e.message === 'string' ? `${e.message} - ` : ''}`
-      payload.logger.error(e, `${prefix}Multi Tenant Redirect Error`)
+      payload.logger.error({ err: e, msg: `${prefix}Multi Tenant Redirect Error` })
     }
   } else {
     // no tenants were found, redirect to the admin view
@@ -149,6 +155,7 @@ type GenerateCreateArgs = {
   collectionSlug: string
   payload: Payload
   tenantID: number | string
+  user: User
 }
 /**
  * Generate a redirect URL for creating a new document in a multi-tenant collection.
@@ -160,6 +167,7 @@ async function generateCreateRedirect({
   collectionSlug,
   payload,
   tenantID,
+  user,
 }: GenerateCreateArgs): Promise<`/${string}` | undefined> {
   const collectionConfig = payload.collections[collectionSlug]?.config
   if (hasAutosaveEnabled(collectionConfig!)) {
@@ -171,18 +179,19 @@ async function generateCreateRedirect({
           tenant: tenantID,
         },
         depth: 0,
-        overrideAccess: true,
+        overrideAccess: false,
         select: {
           id: true,
         },
+        user,
         version: 'draft',
       })
       return `/collections/${collectionSlug}/${doc.id}`
     } catch (error) {
-      payload.logger.error(
-        error,
-        `Error creating autosave global multi tenant document for ${collectionSlug}`,
-      )
+      payload.logger.error({
+        err: error,
+        msg: `Error creating autosave global multi tenant document for ${collectionSlug}`,
+      })
     }
 
     return '/'

@@ -871,10 +871,12 @@ test.describe('Import Export Plugin', () => {
           },
         },
         overrideAccess: true,
+        version: 'latest',
       })
 
       expect(updatedDoc?.title).toBe('E2E Update Test Modified')
       expect(updatedDoc?.excerpt).toBe('Modified excerpt')
+      expect(updatedDoc?._status).toBe('draft')
     })
 
     test('should import documents as published by default', async () => {

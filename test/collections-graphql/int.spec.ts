@@ -1286,7 +1286,10 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
     })
   })
 
-  test('should query correctly with draft argument', async ({ payload, restClient }) => {
+  test('should query explicit published and latest relationship versions', async ({
+    payload,
+    restClient,
+  }) => {
     const publishValue = '1'
     const draftValue = '2'
 
@@ -1300,15 +1303,16 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
       overrideAccess: true,
     })
 
-    // create cyclical relationship
+    // Publish the relationship from the draft so the subsequent draft edit retains it.
     await payload.update({
       id: newDoc.id,
       collection: 'cyclical-relationship',
       data: {
+        _status: 'published',
         relationToSelf: newDoc.id,
       },
       overrideAccess: true,
-      version: 'published',
+      version: 'draft',
     })
 
     // save new version

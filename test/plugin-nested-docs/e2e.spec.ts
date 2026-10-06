@@ -114,6 +114,7 @@ describe('Nested Docs Plugin', () => {
       // TODO: remove when error states are fixed
       const apiTabButton = page.getByRole('link', { name: 'API', exact: true })
       await apiTabButton.click()
+      await page.locator('#field-draft').check()
       const breadcrumbs = page.locator('text=/parent-slug-draft').first()
       await expect(breadcrumbs).toBeVisible()
 
@@ -129,6 +130,7 @@ describe('Nested Docs Plugin', () => {
       await page.goto(url.edit(draftChildID))
 
       await apiTabButton.click()
+      await page.locator('#field-draft').check()
       const updatedBreadcrumbs = page.locator('text=/parent-slug-draft').first()
       await expect(updatedBreadcrumbs).toBeVisible()
 

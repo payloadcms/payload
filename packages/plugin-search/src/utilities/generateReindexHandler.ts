@@ -1,9 +1,10 @@
-import type { PayloadHandler, Where } from 'payload'
+import type { PayloadHandler } from 'payload'
 
 import {
   addLocalesToRequestFromData,
   commitTransaction,
   getAccessResults,
+  hasDraftsEnabled,
   headersWithCors,
   initTransaction,
   killTransaction,
@@ -88,18 +89,16 @@ export const generateReindexHandler =
       req,
       user: req.user,
     }
-    const whereStatusPublished: Where = {
-      _status: {
-        equals: 'published',
-      },
-    }
     async function countDocuments(collection: string, drafts?: boolean): Promise<number> {
       const { totalDocs } = await payload.count({
         collection,
         ...defaultLocalApiProps,
-        locale: defaultLocale,
+        locale: payload.config.localization ? 'all' : defaultLocale,
         req: undefined,
-        where: drafts ? undefined : whereStatusPublished,
+        version:
+          drafts && hasDraftsEnabled(payload.collections[collection]!.config)
+            ? 'latest'
+            : 'published',
       })
       return totalDocs
     }
@@ -134,9 +133,9 @@ export const generateReindexHandler =
           collection,
           depth: 0,
           limit: batchSize,
-          locale: defaultLocale,
+          locale: payload.config.localization ? 'all' : defaultLocale,
           page: i + 1,
-          where: syncDrafts || !draftsEnabled ? undefined : whereStatusPublished,
+          version: syncDrafts && draftsEnabled ? 'latest' : 'published',
           ...defaultLocalApiProps,
         })
 
@@ -150,13 +149,27 @@ export const generateReindexHandler =
           // Loop through all locales and check each one
           let firstAllowedLocale = true
           for (const localeToSync of allLocales) {
+            const localizedDoc = await payload.findByID({
+              id: doc.id,
+              collection,
+              depth: 0,
+              disableErrors: true,
+              locale: localeToSync,
+              version: syncDrafts && draftsEnabled ? 'latest' : 'published',
+              ...defaultLocalApiProps,
+            })
+
+            if (!localizedDoc) {
+              continue
+            }
+
             // Check if we should skip this locale for this document
             let shouldSkip = false
             if (typeof pluginConfig.skipSync === 'function') {
               try {
                 shouldSkip = await pluginConfig.skipSync({
                   collectionSlug: collection,
-                  doc,
+                  doc: localizedDoc,
                   locale: localeToSync,
                   req,
                 })
@@ -178,8 +191,8 @@ export const generateReindexHandler =
 
             await syncDocAsSearchIndex({
               collection,
-              data: doc,
-              doc,
+              data: localizedDoc,
+              doc: localizedDoc,
               locale: localeToSync,
               onSyncError: () => operation === 'create' && localErrors++,
               operation,
