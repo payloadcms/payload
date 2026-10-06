@@ -387,6 +387,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     globals: 'Globais',
     goBack: 'Voltar',
     goToPage: 'Ir para a página da tabela',
+    gridLayout: 'Grelha',
     groupByLabel: 'Agrupar por {{label}}',
     hideSidebar: 'Ocultar barra lateral',
     import: 'Importar',
@@ -436,6 +437,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     notFound: 'Não Encontrado',
     nothingFound: 'Nada encontrado',
     noTrashResults: 'Não há {{label}} no lixo.',
+    notSelectedDocument:
+      'Não selecionado. Prima Enter ou a barra de espaço para alterar a seleção.',
     notShownInTable: 'Não exibido na tabela',
     noUpcomingEventsScheduled: 'Não há eventos futuros agendados.',
     noValue: 'Nenhum valor',
@@ -495,6 +498,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     selectAll: 'Selecione tudo {{count}} {{label}}',
     selectAllRows: 'Selecione todas as linhas',
     selectedCount: '{{count}} {{label}} selecionado',
+    selectedDocument: 'Selecionado. Prima Enter ou a barra de espaço para alterar a seleção.',
     selectLabel: 'Selecione {{label}}',
     selectValue: 'Selecione um valor',
     settings: 'Configurações',
@@ -516,6 +520,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} duplicado com sucesso.',
     successfullyReindexed:
       'Reindexação bem‑sucedida de {{count}} de {{total}} documentos de {{collections}}, e {{skips}} rascunhos foram ignorados.',
+    tableLayout: 'Tabela',
     takeOver: 'Assumir',
     theme: 'Tema',
     thisLanguage: 'Português',
