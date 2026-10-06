@@ -113,6 +113,52 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
   })
 
   test.describe('1.3.1 Info and Relationships (A)', () => {
+    test('should encounter the duplicate locale checkbox and label as one screen-reader item', async ({
+      // PYLD-3671
+      page,
+      screenReader,
+    }) => {
+      await gotoFirstPost({ page, postsURL, serverURL })
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+      await page.getByRole('menuitem', { name: /duplicate selected locales/i }).click()
+      await expect(page.locator('.select-locales-drawer')).toBeVisible()
+      await navigateScreenReaderTo({
+        matches: /English.*check\s?box|check\s?box.*English/i,
+        screenReader,
+      })
+
+      expect(await screenReader.itemText()).toMatch(/English.*check\s?box|check\s?box.*English/i)
+      await screenReader.next()
+      const next = await screenReader.itemText()
+
+      expect(next).not.toMatch(/English/i)
+      expect(next).toMatch(/Spanish.*check\s?box|check\s?box.*Spanish/i)
+    })
+
+    test('should encounter the deletion checkbox label as one screen-reader item', async ({
+      // PYLD-3678
+      page,
+      screenReader,
+    }) => {
+      await gotoFirstPost({ page, postsURL, serverURL })
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+      await page.getByRole('menuitem', { name: 'Delete', exact: true }).click()
+      await expect(page.getByRole('dialog', { name: /confirm deletion/i })).toBeVisible()
+      await navigateScreenReaderTo({
+        matches: /delete permanently.*check\s?box|check\s?box.*delete permanently/i,
+        screenReader,
+      })
+
+      expect(await screenReader.itemText()).toMatch(
+        /delete permanently.*check\s?box|check\s?box.*delete permanently/i,
+      )
+      await screenReader.next()
+      const next = await screenReader.itemText()
+
+      expect(next).not.toMatch(/delete permanently/i)
+      expect(next).toMatch(/Cancel.*button|button.*Cancel/i)
+    })
+
     test.describe('Safari and VoiceOver report', () => {
       test.skip(process.platform !== 'darwin', 'Safari and VoiceOver report')
 
