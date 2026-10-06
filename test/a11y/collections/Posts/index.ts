@@ -218,6 +218,16 @@ export const PostsCollection: CollectionConfig = {
     },
     createFolderField({ relationTo: 'payload-folders' }),
     {
+      name: 'readOnlyHierarchy',
+      type: 'relationship',
+      admin: {
+        components: { Field: '@payloadcms/ui/rsc#HierarchyField' },
+        readOnly: true,
+      },
+      hasMany: true,
+      relationTo: 'payload-folders',
+    },
+    {
       name: 'featuredImage',
       type: 'upload',
       relationTo: mediaSlug,

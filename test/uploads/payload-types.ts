@@ -404,7 +404,7 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     maintainedAspectRatio?: {
       url?: string | null;
       width?: number | null;
@@ -708,7 +708,7 @@ export interface AdminThumbnailSize {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     small?: {
       url?: string | null;
       width?: number | null;
@@ -781,7 +781,7 @@ export interface GifResize {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     small?: {
       url?: string | null;
       width?: number | null;
@@ -829,7 +829,7 @@ export interface FilenameCompoundIndex {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     small?: {
       url?: string | null;
       width?: number | null;
@@ -899,7 +899,7 @@ export interface ObjectFit {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     fitContain?: {
       url?: string | null;
       width?: number | null;
@@ -959,7 +959,7 @@ export interface WithMetaDatum {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     sizeOne?: {
       url?: string | null;
       width?: number | null;
@@ -995,7 +995,7 @@ export interface WithoutMetaDatum {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     sizeTwo?: {
       url?: string | null;
       width?: number | null;
@@ -1031,7 +1031,7 @@ export interface WithOnlyJpegMetaDatum {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     sizeThree?: {
       url?: string | null;
       width?: number | null;
@@ -1067,7 +1067,7 @@ export interface CropOnly {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     focalTest?: {
       url?: string | null;
       width?: number | null;
@@ -1119,7 +1119,7 @@ export interface FocalOnly {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     focalTest?: {
       url?: string | null;
       width?: number | null;
@@ -1171,7 +1171,7 @@ export interface ImageSizesOnly {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     sizeOne?: {
       url?: string | null;
       width?: number | null;
@@ -1475,7 +1475,7 @@ export interface AnimatedTypeMedia {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     squareSmall?: {
       url?: string | null;
       width?: number | null;
@@ -1501,6 +1501,14 @@ export interface AnimatedTypeMedia {
       filename?: string | null;
     };
     undefinedAll?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalCrop?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -1535,7 +1543,7 @@ export interface Enlarge {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     accidentalSameSize?: {
       url?: string | null;
       width?: number | null;
@@ -1637,7 +1645,7 @@ export interface Reduce {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     accidentalSameSize?: {
       url?: string | null;
       width?: number | null;
@@ -1697,7 +1705,7 @@ export interface MediaTrim {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     trimNumber?: {
       url?: string | null;
       width?: number | null;
@@ -1749,7 +1757,7 @@ export interface CustomFileNameMedia {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     custom?: {
       url?: string | null;
       width?: number | null;
@@ -2549,7 +2557,7 @@ export interface MediaWithImageSizeAdminProp {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     one?: {
       url?: string | null;
       width?: number | null;
@@ -2639,7 +2647,7 @@ export interface FileAccessMedia {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     thumbnail?: {
       url?: string | null;
       width?: number | null;
@@ -2708,7 +2716,7 @@ export interface MediaWithField {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     thumbnail?: {
       url?: string | null;
       width?: number | null;
@@ -3294,7 +3302,7 @@ export interface GifResizeSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         small?:
@@ -3338,7 +3346,7 @@ export interface FilenameCompoundIndexSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         small?:
@@ -3400,7 +3408,7 @@ export interface ObjectFitSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         fitContain?:
@@ -3463,7 +3471,7 @@ export interface WithMetaDataSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         sizeOne?:
@@ -3496,7 +3504,7 @@ export interface WithoutMetaDataSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         sizeTwo?:
@@ -3529,7 +3537,7 @@ export interface WithOnlyJpegMetaDataSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         sizeThree?:
@@ -3562,7 +3570,7 @@ export interface CropOnlySelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         focalTest?:
@@ -3615,7 +3623,7 @@ export interface FocalOnlySelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         focalTest?:
@@ -3668,7 +3676,7 @@ export interface ImageSizesOnlySelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         sizeOne?:
@@ -3732,7 +3740,7 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         maintainedAspectRatio?:
@@ -4086,7 +4094,7 @@ export interface AnimatedTypeMediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         squareSmall?:
@@ -4129,6 +4137,16 @@ export interface AnimatedTypeMediaSelect<T extends boolean = true> {
               filesize?: T;
               filename?: T;
             };
+        focalCrop?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
       };
 }
 /**
@@ -4149,7 +4167,7 @@ export interface EnlargeSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         accidentalSameSize?:
@@ -4251,7 +4269,7 @@ export interface ReduceSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         accidentalSameSize?:
@@ -4314,7 +4332,7 @@ export interface MediaTrimSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         trimNumber?:
@@ -4367,7 +4385,7 @@ export interface CustomFileNameMediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         custom?:
@@ -4540,7 +4558,7 @@ export interface AdminThumbnailSizeSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         small?:
@@ -5080,7 +5098,7 @@ export interface MediaWithImageSizeAdminPropsSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         one?:
@@ -5166,7 +5184,7 @@ export interface FileAccessMediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         thumbnail?:
@@ -5238,7 +5256,7 @@ export interface MediaWithFieldsSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         thumbnail?:

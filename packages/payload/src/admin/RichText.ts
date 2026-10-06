@@ -203,6 +203,11 @@ type RichTextAdapterBase<
   AdapterProps = any,
   ExtraFieldProperties = {},
 > = {
+  /** Convert between stored editor data and Markdown using the editor's configured features. */
+  converters?: {
+    fromMarkdown?: (args: { markdown: string }) => Value
+    toMarkdown?: (args: { data: Value }) => string
+  }
   /**
    * Provide a function that can be used to add items to the import map. This is useful for
    * making modules available to the client.

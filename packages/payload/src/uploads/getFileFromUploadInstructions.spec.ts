@@ -171,7 +171,7 @@ describe('getFileFromUploadInstructions', () => {
         }),
     )
     const customReq = createReq([customHandler], {
-      imageSizes: [{ height: 100, name: 'preview', width: 100 }],
+      variants: [{ height: 100, name: 'preview', width: 100 }],
       mimeTypes: ['image/*'],
       uploadInstructions: undefined,
     })
@@ -192,7 +192,7 @@ describe('getFileFromUploadInstructions', () => {
 
     const handler = vi.fn(async () => new Response('existing file', { status: 200 }))
     const req = createReq([handler], {
-      imageSizes: [{ height: 100, name: 'preview', width: 100 }],
+      variants: [{ height: 100, name: 'preview', width: 100 }],
       mimeTypes: ['image/*'],
     })
 
@@ -232,7 +232,7 @@ describe('getFileFromUploadInstructions', () => {
         where: {
           or: [
             { filename: { equals: 'preview.png' } },
-            { 'sizes.preview.filename': { equals: 'preview.png' } },
+            { 'variants.preview.filename': { equals: 'preview.png' } },
           ],
         },
       }),
@@ -309,10 +309,6 @@ describe('getFileFromUploadInstructions', () => {
     })
 
     const req = createReq([handler], {})
-    const sharp = vi.fn(() => {
-      throw new Error('Unexpected image processing')
-    })
-    req.payload.config.sharp = sharp
 
     const file = await getFileFromUploadInstructions({
       collectionSlug: 'media',
@@ -328,7 +324,6 @@ describe('getFileFromUploadInstructions', () => {
     expect(file.tempFilePath).toBeUndefined()
     expect(file.data.equals(MINIMAL_PNG)).toBe(true)
     expect(file.mimetype).toBe('image/png')
-    expect(sharp).not.toHaveBeenCalled()
   })
 
   it('fetches the full file for an image with no configured adjustments when the request includes a crop edit', async () => {

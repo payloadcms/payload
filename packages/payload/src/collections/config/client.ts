@@ -42,7 +42,6 @@ export type ServerOnlyUploadProperties = keyof Pick<
   | 'handlers'
   | 'modifyResponseHeaders'
   | 'uploadInstructions'
-  | 'withMetadata'
 >
 
 type ClientUploadConfig = {
@@ -103,7 +102,6 @@ const serverOnlyUploadProperties: Partial<ServerOnlyUploadProperties>[] = [
   'handlers',
   'modifyResponseHeaders',
   'uploadInstructions',
-  'withMetadata',
 ]
 
 const serverOnlyCollectionAdminProperties: Partial<ServerOnlyCollectionAdminProperties>[] = [
@@ -298,8 +296,8 @@ export const createClientCollectionConfig = ({
             continue
           }
 
-          if (uploadKey === 'imageSizes') {
-            clientCollection.upload.imageSizes = collection.upload.imageSizes?.map((size) => {
+          if (uploadKey === 'variants') {
+            clientCollection.upload.variants = collection.upload.variants?.map((size) => {
               const sanitizedSize = { ...size }
               if ('generateImageName' in sanitizedSize) {
                 delete sanitizedSize.generateImageName

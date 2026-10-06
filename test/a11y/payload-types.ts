@@ -293,6 +293,7 @@ export interface Post {
   publishingNote?: string | null;
   customLabelNote?: string | null;
   '_h_payload-folders'?: (string | null) | PayloadFolder;
+  readOnlyHierarchy?: (string | PayloadFolder)[] | null;
   featuredImage?: (string | null) | Media;
   createdBy?: {
     relationTo: 'users';
@@ -380,7 +381,7 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     thumbnail?: {
       url?: string | null;
       width?: number | null;
@@ -606,6 +607,7 @@ export interface PostsSelect<T extends boolean = true> {
   publishingNote?: T;
   customLabelNote?: T;
   '_h_payload-folders'?: T;
+  readOnlyHierarchy?: T;
   featuredImage?: T;
   createdBy?: T;
   updatedBy?: T;
@@ -638,7 +640,7 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         thumbnail?:

@@ -12,6 +12,8 @@
     background-color: var(--color-bg-secondary);
     border-radius: var(--button-radius);
     margin: var(--spacer-2-5) var(--spacer-2-5) 0;
+    overflow-x: auto;
+    overflow-y: hidden;
   }
 
   .sidebar-tabs__tab {
@@ -22,7 +24,6 @@
     align-items: center;
     justify-content: center;
     height: var(--button-height);
-    padding: 0 var(--spacer-1);
     cursor: pointer;
     border-radius: var(--button-radius);
     border: var(--stroke-width-small) solid transparent;

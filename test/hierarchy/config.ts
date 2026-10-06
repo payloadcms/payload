@@ -168,6 +168,16 @@ export const Organizations: CollectionConfig = {
       type: 'text',
     },
     createFolderField({ relationTo: 'folders' }),
+    {
+      name: 'restrictedFolder',
+      type: 'relationship',
+      admin: {
+        components: { Field: '@payloadcms/ui/rsc#HierarchyField' },
+        position: 'sidebar',
+      },
+      label: 'Restricted folder',
+      relationTo: 'folders',
+    },
   ],
   hierarchy: {
     admin: {
@@ -254,7 +264,6 @@ export const Products: CollectionConfig = {
 }
 
 export default buildConfigWithDefaults({
-  suite: 'hierarchy',
   config: {
     admin: {
       importMap: {
@@ -292,4 +301,5 @@ export default buildConfigWithDefaults({
     })
     await seed(payload)
   },
+  suite: 'hierarchy',
 })

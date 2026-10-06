@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
+import { runTransformReadsRealSourceTest } from '../__helpers/shared/transformSourceTests.js'
 import {
   mediaSlug,
   mediaWithAlwaysInsertFieldsSlug,
@@ -59,9 +60,9 @@ test.suite('@payloadcms/storage-gcs', { config: './config.ts', resetBetweenTests
       id: uploadId,
       collection: collectionSlug as 'media',
       overrideAccess: true,
-    })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
+    })) as unknown as { filename: string; variants: Record<string, { filename: string }> }
 
-    const fileKeys = Object.values(uploadData.sizes || {}).map(({ filename: rawFilename }) =>
+    const fileKeys = Object.values(uploadData.variants || {}).map(({ filename: rawFilename }) =>
       filePrefix ? `${filePrefix}/${rawFilename}` : rawFilename,
     )
 
@@ -126,4 +127,6 @@ test.suite('@payloadcms/storage-gcs', { config: './config.ts', resetBetweenTests
     expect(upload.id).toBeTruthy()
     expect(upload.prefix).toBe('test')
   })
+
+  runTransformReadsRealSourceTest({ collection: mediaWithPrefixSlug })
 })
