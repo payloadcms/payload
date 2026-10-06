@@ -8,7 +8,6 @@ export {
   withPayloadRoot,
   type WithPayloadRootOptions,
 } from '../adapters/layout.js'
-export { TanStackRouterAdapter } from '../adapters/router.js'
 export {
   type AdminLoad,
   payloadAdminIndexRoute,
