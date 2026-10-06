@@ -28,6 +28,7 @@ import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { postsSlug, usersSlug } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -279,15 +280,66 @@ describe('Locked Documents', () => {
         })
       })
 
-      await page.goto(postsUrl.list)
+      await payload.update({
+        id: postDoc.id,
+        collection: postsSlug,
+        data: { _status: 'published', text: 'Locked published post' },
+        overrideAccess: true,
+        overrideLock: true,
+        version: 'latest',
+      })
 
-      await page.locator('input#select-all').check()
+      lockedDoc = await payload.create({
+        collection: lockedDocumentCollection,
+        data: {
+          document: { relationTo: postsSlug, value: postDoc.id },
+          user: { relationTo: usersSlug, value: user2.id },
+        },
+        overrideAccess: true,
+      })
+
+      await page.goto(`${postsUrl.list}?sort=text`)
+
+      const lockedRow = page
+        .getByRole('grid')
+        .getByRole('row')
+        .filter({ has: page.locator('.locked') })
+
+      await expect(lockedRow).toHaveCount(1)
+      await lockedRow.locator('.locked').hover()
+      await expect(
+        page.locator('.tooltip--show', { hasText: exactText(`${user2.email} is editing`) }),
+      ).toBeVisible()
+
+      await page.locator('input#select-all').click()
+      await expect(page.locator('input#select-all')).toHaveJSProperty('indeterminate', true)
       await page.locator('.list-selection .list-selection__button#select-all-across-pages').click()
       await page.locator('.list-selection__button[aria-label="Unpublish"]').click()
       await page.locator('#unpublish-posts [data-dialog-action="confirm"]').click()
       await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
-        'Updated 10 Posts successfully.',
+        'Updated 11 Posts successfully.',
       )
+
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        overrideAccess: true,
+        pagination: false,
+        version: 'latest',
+      })
+
+      expect(docs).toHaveLength(13)
+      expect(docs.filter(({ _status }) => _status === 'published').map(({ id }) => id)).toEqual([
+        postDoc.id,
+      ])
+
+      const { docs: publishedDocs } = await payload.find({
+        collection: postsSlug,
+        overrideAccess: true,
+        pagination: false,
+        version: 'published',
+      })
+
+      expect(publishedDocs.map(({ id }) => id)).toEqual([postDoc.id])
     })
 
     test('should only allow bulk edit on unlocked documents on all pages', async () => {
