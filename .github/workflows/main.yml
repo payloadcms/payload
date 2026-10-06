@@ -665,6 +665,9 @@ jobs:
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
 
       - name: Runs Template E2E Tests
+        # Temporarily skipped for blank-tanstack: until its admin routes load lazily (#18554), a cold
+        # `vite dev` crawls the whole bundled ui barrel and never serves a page.
+        if: matrix.template != 'blank-tanstack'
         run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.template }}.json pnpm --filter ${{ matrix.template }} test:e2e
         env:
           NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
