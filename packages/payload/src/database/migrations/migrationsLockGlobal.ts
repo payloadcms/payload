@@ -10,6 +10,7 @@ export const migrationsLockGlobal: GlobalConfig = {
     {
       name: 'locked',
       type: 'checkbox',
+      defaultValue: false,
     },
     {
       name: 'locked_by',

@@ -21,6 +21,7 @@ import { defaultUserCollection } from '../auth/defaultUser.js'
 import { authRootEndpoints } from '../auth/endpoints/index.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
+import { migrationsLockGlobal } from '../database/migrations/migrationsLockGlobal.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
 import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
@@ -38,6 +39,7 @@ import {
   stagedUploadEndpoints,
   uploadInstructionsEndpoint,
 } from '../uploads/endpoints/uploadInstructions.js'
+import { deepCopyObject } from '../utilities/deepCopyObject.js'
 import { flattenAllFields, flattenBlock } from '../utilities/flattenAllFields.js'
 import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
 import { validateTimezones } from '../utilities/validateTimezones.js'
@@ -525,6 +527,8 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   if (fieldsToAdd.size > 0) {
     addOrderableEndpoint(config as SanitizedConfig, joinFieldPathsByCollection)
   }
+
+  config.globals!.push(deepCopyObject(migrationsLockGlobal))
 
   if (config.globals!.length > 0) {
     for (let i = 0; i < config.globals!.length; i++) {
