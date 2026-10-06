@@ -57,7 +57,7 @@ import { createRequire } from 'node:module'
 import { createRequireDrizzleKit } from './tooling.mjs'
 const require = createRequire(${JSON.stringify(from)})
 assert.equal(process.env.VITEST, undefined)
-const tooling = await createRequireDrizzleKit({ from: ${JSON.stringify(from)} })()
+const tooling = createRequireDrizzleKit({ from: ${JSON.stringify(from)} })()
 ${
   isSQLite
     ? "const { sqliteTable, integer } = require('drizzle-orm/sqlite-core')"
@@ -68,7 +68,13 @@ const schema = ${
             ? "{ probe: sqliteTable('probe', { id: integer('id').primaryKey() }) }"
             : "{ probe: pgTable('probe', { id: pgInteger('id').primaryKey() }) }"
         }
-const before = await tooling.generateDrizzleJson({})
+const beforeResult = tooling.generateDrizzleJson({})
+if (!${isSQLite}) {
+  assert.equal(beforeResult instanceof Promise, false)
+  const upgraded = tooling.upSnapshot({ ...beforeResult, version: '6' })
+  assert.equal(upgraded.version, '7')
+}
+const before = await beforeResult
 const after = await tooling.generateDrizzleJson(schema)
 const statements = await tooling.generateMigration(before, after)
 assert.ok(statements.some(sql => sql.includes('CREATE TABLE')))

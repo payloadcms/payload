@@ -50,7 +50,7 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
   const dir = payload.db.migrationDir
 
   // get the drizzle migrateUpSQL from drizzle using the last schema
-  const { generateDrizzleJson, generateMigration, upSnapshot } = await adapter.requireDrizzleKit()
+  const { generateDrizzleJson, generateMigration, upSnapshot } = adapter.requireDrizzleKit()
   const drizzleJsonAfter = generateDrizzleJson(adapter.schema) as DrizzleSnapshotJSON
 
   // Get the previous migration snapshot

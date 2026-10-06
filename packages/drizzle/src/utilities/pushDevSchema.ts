@@ -40,7 +40,7 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
     }
   }
 
-  const { pushSchema } = await adapter.requireDrizzleKit()
+  const { pushSchema } = adapter.requireDrizzleKit()
 
   const { extensions = {}, tablesFilter } = adapter as BasePostgresAdapter
 
