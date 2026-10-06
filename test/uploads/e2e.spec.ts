@@ -13,7 +13,7 @@ import type { Config } from './payload-types.js'
 import {
   getColumnSelectorItem,
   openListColumns,
-  toggleColumn,
+  toggleColumns,
 } from '../__helpers/e2e/columns/index.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
 import {
@@ -299,7 +299,7 @@ describe('Uploads', () => {
       .locator('tr', { hasText: 'Polymorphic upload two' })
       .locator('.select-row__checkbox')
       .click()
-    await listDrawer.getByRole('button', { name: 'Select 1' }).click()
+    await listDrawer.getByRole('button', { name: 'Confirm' }).click()
 
     await saveDocAndAssert(page)
 
@@ -2488,9 +2488,15 @@ describe('Uploads', () => {
     await page.goto(relationPreviewURL.list)
 
     // Show all columns with relations
-    await toggleColumn(page, { columnLabel: 'Image Without Preview2', targetState: 'on' })
-    await toggleColumn(page, { columnLabel: 'Image With Preview3', targetState: 'on' })
-    await toggleColumn(page, { columnLabel: 'Image Without Preview3', targetState: 'on' })
+    await toggleColumns({
+      columns: [
+        { columnLabel: 'Image Without Preview2', targetState: 'on' },
+        { columnLabel: 'Image With Preview3', targetState: 'on' },
+        { columnLabel: 'Image Without Preview3', targetState: 'on' },
+      ],
+      page,
+      shouldCloseListColumns: true,
+    })
 
     // Wait for the columns to be displayed
     await expect(page.locator('.cell-imageWithoutPreview3')).toBeVisible()

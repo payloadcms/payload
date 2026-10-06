@@ -17,7 +17,6 @@ import { useModal } from '../../elements/Modal/index.js'
 import { NoListResults } from '../../elements/NoListResults/index.js'
 import { PageControls } from '../../elements/PageControls/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
-import { SelectMany } from '../../elements/SelectMany/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { TableIdentityProvider } from '../../elements/Table/TableIdentity.js'
@@ -78,7 +77,7 @@ export function DefaultListView(props: ListViewClientProps) {
   const [Table] = useControllableState(InitialTable)
   const [layout, setLayout] = useState<DocumentLayout>(documentLayout ?? 'table')
 
-  const { allowCreate, createNewDrawerSlug, isInDrawer, onBulkSelect } = useListDrawerContext()
+  const { allowCreate, createNewDrawerSlug, isInDrawer } = useListDrawerContext()
   const { setPreference } = usePreferences()
   const router = useRouter()
 
@@ -315,6 +314,7 @@ export function DefaultListView(props: ListViewClientProps) {
               }
               disableBulkDelete={disableBulkDelete}
               disableBulkEdit={disableBulkEdit}
+              enableRowSelections={enableRowSelections}
               hasCreatePermission={hasCreatePermission}
               hasDeletePermission={hasDeletePermission}
               hasTrashPermission={hasTrashPermission}
@@ -325,13 +325,7 @@ export function DefaultListView(props: ListViewClientProps) {
               viewType={viewType}
             />
             <ListControls
-              beforeActions={
-                enableRowSelections && typeof onBulkSelect === 'function'
-                  ? beforeActions
-                    ? [...beforeActions, <SelectMany key="select-many" onClick={onBulkSelect} />]
-                    : [<SelectMany key="select-many" onClick={onBulkSelect} />]
-                  : beforeActions
-              }
+              beforeActions={beforeActions}
               collectionConfig={collectionConfig}
               collectionSlug={collectionSlug}
               disableQueryPresets={
@@ -482,16 +476,7 @@ export function DefaultListView(props: ListViewClientProps) {
                         label={collectionLabel}
                         showSelectAllAcrossPages={!isGroupingBy}
                       />
-                      <div className={`${baseClass}__list-selection-actions`}>
-                        {enableRowSelections && typeof onBulkSelect === 'function'
-                          ? beforeActions
-                            ? [
-                                ...beforeActions,
-                                <SelectMany key="select-many" onClick={onBulkSelect} />,
-                              ]
-                            : [<SelectMany key="select-many" onClick={onBulkSelect} />]
-                          : beforeActions}
-                      </div>
+                      <div className={`${baseClass}__list-selection-actions`}>{beforeActions}</div>
                     </div>
                   ) : null
                 }
