@@ -9,6 +9,7 @@ import type { IListQueryContext } from '../../providers/ListQuery/types.js'
 import { Pagination } from '../../elements/Pagination/index.js'
 import { PerPage } from '../../elements/PerPage/index.js'
 import { useTableID } from '../../elements/Table/TableIdentity.js'
+import { useEmbed } from '../../providers/Embed/index.js'
 import { useListQuery } from '../../providers/ListQuery/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.css'
@@ -37,12 +38,13 @@ export const PageControlsComponent: React.FC<{
   limits,
   tableId,
 }) => {
+  const { isEmbedded } = useEmbed()
   const { i18n } = useTranslation()
   const resolvedTableID = useTableID(tableId)
   const label = countLabel ?? i18n.t(data.totalDocs === 1 ? 'general:item' : 'general:items')
 
   return (
-    <div className={baseClass}>
+    <div className={[baseClass, isEmbedded && `${baseClass}--embedded`].filter(Boolean).join(' ')}>
       {AfterPageControls}
       <div className={`${baseClass}__inner`}>
         <Pagination
