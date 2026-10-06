@@ -27,27 +27,15 @@ describe.each([
   { createRequireDrizzleKit: createSQLiteRequireDrizzleKit, dialect: 'sqlite' },
   { createRequireDrizzleKit: createPostgresRequireDrizzleKit, dialect: 'postgres' },
 ])('createRequireDrizzleKit ($dialect)', ({ createRequireDrizzleKit, dialect }) => {
-  it('should defer resolving tooling until the adapter requests it', async () => {
-    const directory = createDirectory()
-    const load = createRequireDrizzleKit({
-      from: pathToFileURL(path.join(directory, 'adapter.js')).href,
-    })
-
-    await expect(load()).rejects.toThrow(/drizzle-kit/)
-    installTooling({ dialect, directory })
-
-    expect((await load()).generateDrizzleJson({})).toEqual({ dialect, source: directory })
-  })
-
-  it('should resolve tooling from each owning adapter instead of the shared package', async () => {
+  it('should lazily resolve tooling from each owning adapter', async () => {
     for (let index = 0; index < 2; index++) {
       const directory = createDirectory()
-
-      installTooling({ dialect, directory })
-
       const load = createRequireDrizzleKit({
         from: pathToFileURL(path.join(directory, 'adapter.js')).href,
       })
+
+      await expect(load()).rejects.toThrow(/drizzle-kit/)
+      installTooling({ dialect, directory })
 
       expect((await load()).generateDrizzleJson({})).toEqual({ dialect, source: directory })
     }
