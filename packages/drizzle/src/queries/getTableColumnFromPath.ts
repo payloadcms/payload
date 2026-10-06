@@ -225,7 +225,6 @@ export const getTableColumnFromPath = ({
   if (!field && fieldPath === 'id') {
     const idTable = aliasTable ?? adapter.tables[newTableName]
 
-    selectFields.id = idTable.id
     return {
       columnName: 'id',
       constraints,

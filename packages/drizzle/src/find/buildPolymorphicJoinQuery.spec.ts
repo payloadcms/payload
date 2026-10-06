@@ -6,7 +6,7 @@ import { createClient } from '@libsql/client'
 import { getTableName, like, notLike } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/libsql'
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
-import { flattenAllFields, resolveBranch } from 'payload'
+import { branchChangesCollectionSlug, flattenAllFields, resolveBranch } from 'payload'
 import toSnakeCase from 'to-snake-case'
 import { afterAll, describe, expect, it } from 'vitest'
 
@@ -47,9 +47,25 @@ const tableWithoutParent = sqliteTable('join_without_parent', {
   id: integer('id').primaryKey(),
 })
 
+const branchChangesTable = sqliteTable('payload_branch_changes', {
+  baseVersionID: text('base_version_i_d'),
+  baseVersionUpdatedAt: text('base_version_updated_at'),
+  branch: text('branch'),
+  collectionSlug: text('collection_slug'),
+  documentID: text('document_i_d'),
+  operation: text('operation'),
+})
+
 const client: Client = createClient({ url: 'file::memory:' })
 const db = drizzle(client, {
-  schema: { articlesTable, notesTable, parentsTable, tableWithoutID, tableWithoutParent },
+  schema: {
+    articlesTable,
+    branchChangesTable,
+    notesTable,
+    parentsTable,
+    tableWithoutID,
+    tableWithoutParent,
+  },
 })
 
 type CollectionFixture = {
@@ -64,6 +80,10 @@ const createAdapter = (fixtures: Record<string, CollectionFixture>): DrizzleAdap
   > = {}
   const tableNameMap = new Map<string, string>()
   const tables: Record<string, GenericTable> = {}
+  const branchChangesTableName = getTableName(branchChangesTable)
+
+  tableNameMap.set(toSnakeCase(branchChangesCollectionSlug), branchChangesTableName)
+  tables[branchChangesTableName] = branchChangesTable
 
   for (const [slug, fixture] of Object.entries(fixtures)) {
     const tableName = getTableName(fixture.table)
@@ -287,7 +307,7 @@ describe('buildPolymorphicJoinQuery', () => {
     expect(query.sql.match(/"_branch" = \?/g)).toHaveLength(4)
     expect(query.sql).not.toContain('_branch_op')
     expect(query.sql.match(/COALESCE\("_branch_doc_id", "id"\) as "id"/g)).toHaveLength(2)
-    expect(query.params.filter((value) => value === 'campaign')).toHaveLength(2)
+    expect(query.params.filter((value) => value === 'campaign')).toHaveLength(6)
   })
 
   it('adds a correlated count only when requested', () => {

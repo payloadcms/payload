@@ -55,7 +55,7 @@ export const buildQuery = function buildQuery({
   where: incomingWhere,
 }: BuildQueryArgs): BuildQueryResult {
   const selectFields: Record<string, GenericColumn> = {
-    id: adapter.tables[tableName].id,
+    id: (aliasTable ?? adapter.tables[tableName])['id'],
   }
 
   let where: SQL

@@ -29,7 +29,9 @@ export const buildBranchVisibility = ({
       ? sql`COALESCE(${table['_branchParent']}, ${table['parent']})`
       : sql`COALESCE(${table['_branchDocID']}, ${table['id']})`)
   const documentIDAsText = sql`CAST(${canonicalDocumentID} AS TEXT)`
-  const branchChangesTableIdentifier = sql.identifier(branchChangesTableName)
+  const branchChangesTableIdentifier = adapter.schemaName
+    ? sql`${sql.identifier(adapter.schemaName)}.${sql.identifier(branchChangesTableName)}`
+    : sql.identifier(branchChangesTableName)
   const branchColumn = sql`${branchChangesTableIdentifier}.${sql.identifier(branchChangesTable.branch.name)}`
   const collectionSlugColumn = sql`${branchChangesTableIdentifier}.${sql.identifier(branchChangesTable.collectionSlug.name)}`
   const documentIDColumn = sql`${branchChangesTableIdentifier}.${sql.identifier(branchChangesTable.documentID.name)}`
