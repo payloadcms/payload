@@ -4,7 +4,6 @@ import type { PayloadRequest } from '../../types/index.js'
 export async function releaseMigrationLock({
   instanceId,
   payload,
-  req,
 }: {
   instanceId: string
   payload: Payload
@@ -15,11 +14,9 @@ export async function releaseMigrationLock({
     return
   }
 
-  // Release lock (no transaction needed for simple update)
-  await payload.updateGlobal({
-    slug: 'payload-migrations-lock',
-    data: { locked: false },
-    overrideAccess: true,
-    req,
-  })
+  if (!payload.db.releaseMigrationLock) {
+    throw new Error('This database adapter does not support atomic migration locking.')
+  }
+
+  await payload.db.releaseMigrationLock({ instanceId })
 }

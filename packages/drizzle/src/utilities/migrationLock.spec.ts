@@ -1,180 +1,109 @@
-import type { Payload } from 'payload'
-
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import type { Payload, PayloadRequest } from 'payload'
 
 import { acquireMigrationLock, releaseMigrationLock } from 'payload'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-describe('acquireMigrationLock', () => {
-  let mockPayload: Partial<Payload>
-  let mockReq: any
+import { migrationLockRetry } from './migrationLockRetry.js'
+
+describe('migration locking', () => {
+  let payload: Payload
+  const req = {} as PayloadRequest
 
   beforeEach(() => {
-    mockPayload = {
+    payload = {
       db: {
-        beginTransaction: vi.fn().mockResolvedValue('mock-transaction-id'),
-        commitTransaction: vi.fn().mockResolvedValue(undefined),
-        rollbackTransaction: vi.fn().mockResolvedValue(undefined),
+        tryAcquireMigrationLock: vi.fn().mockResolvedValue({ acquired: true }),
+        releaseMigrationLock: vi.fn().mockResolvedValue(undefined),
       },
-      findGlobal: vi.fn(),
-      updateGlobal: vi.fn(),
-      logger: {
-        warn: vi.fn(),
-        info: vi.fn(),
-      },
-    }
-    mockReq = {
-      payload: mockPayload,
-      transactionID: Promise.resolve('mock-transaction-id'),
-    }
+      logger: { warn: vi.fn() },
+    } as unknown as Payload
   })
 
-  it('should acquire lock when not locked', async () => {
-    const mockFindGlobal = mockPayload.findGlobal as any
-    mockFindGlobal.mockResolvedValue({
-      locked: false,
-      locked_by: null,
-      locked_at: null,
-      expires_at: null,
-    })
-
-    const result = await acquireMigrationLock({
-      payload: mockPayload as Payload,
-      req: mockReq,
-      timeout: 300000,
-    })
+  it('should delegate acquisition without requiring a transaction', async () => {
+    const result = await acquireMigrationLock({ payload, req, timeout: 5000 })
 
     expect(result.acquired).toBe(true)
-    expect(result.instanceId).toMatch(/^[0-9a-f-]{36}$/) // UUID format
-    expect(mockPayload.updateGlobal).toHaveBeenCalledWith(
-      expect.objectContaining({
-        slug: 'payload-migrations-lock',
-        data: expect.objectContaining({
-          locked: true,
-          locked_by: result.instanceId,
-        }),
-      }),
-    )
+    expect(result.instanceId).toMatch(/^[0-9a-f-]{36}$/)
+    expect(payload.db.tryAcquireMigrationLock).toHaveBeenCalledWith({
+      instanceId: result.instanceId,
+      timeout: 5000,
+    })
   })
 
-  it('should fail to acquire lock when already locked and not expired', async () => {
-    const futureDate = new Date(Date.now() + 100000).toISOString()
-    const mockFindGlobal = mockPayload.findGlobal as any
-    mockFindGlobal.mockResolvedValue({
-      locked: true,
-      locked_by: 'another-instance',
-      locked_at: new Date(),
-      expires_at: futureDate,
-    })
+  it('should return false when the adapter rejects acquisition', async () => {
+    vi.mocked(payload.db.tryAcquireMigrationLock!).mockResolvedValue({ acquired: false })
 
-    const result = await acquireMigrationLock({
-      payload: mockPayload as Payload,
-      req: mockReq,
-      timeout: 300000,
-    })
-
-    expect(result.acquired).toBe(false)
-    expect(mockPayload.updateGlobal).not.toHaveBeenCalled()
+    expect((await acquireMigrationLock({ payload, req })).acquired).toBe(false)
   })
 
-  it('should acquire lock when existing lock is stale', async () => {
-    const pastDate = new Date(Date.now() - 100000).toISOString()
-    const mockFindGlobal = mockPayload.findGlobal as any
-    mockFindGlobal.mockResolvedValue({
-      locked: true,
-      locked_by: 'crashed-instance',
-      locked_at: new Date(Date.now() - 400000),
-      expires_at: pastDate,
-    })
+  it('should propagate database failures', async () => {
+    const error = new Error('lock table missing')
 
-    const result = await acquireMigrationLock({
-      payload: mockPayload as Payload,
-      req: mockReq,
-      timeout: 300000,
-    })
+    vi.mocked(payload.db.tryAcquireMigrationLock!).mockRejectedValue(error)
 
-    expect(result.acquired).toBe(true)
-    expect(mockPayload.logger.warn).toHaveBeenCalledWith(
-      expect.objectContaining({
-        msg: expect.stringContaining('Stale migration lock detected'),
-      }),
-    )
+    await expect(acquireMigrationLock({ payload, req })).rejects.toBe(error)
   })
 
-  it('should return no-lock when transactions unavailable', async () => {
-    mockReq.transactionID = Promise.resolve(null)
+  it('should reject adapters without atomic locking', async () => {
+    payload.db.tryAcquireMigrationLock = undefined
 
-    const result = await acquireMigrationLock({
-      payload: mockPayload as Payload,
-      req: mockReq,
-      timeout: 300000,
-    })
-
-    expect(result.acquired).toBe(true)
-    expect(result.instanceId).toBe('no-lock')
-    expect(mockPayload.logger.warn).toHaveBeenCalledWith(
-      expect.objectContaining({
-        msg: expect.stringContaining('transactions'),
-      }),
-    )
+    await expect(acquireMigrationLock({ payload, req })).rejects.toThrow('does not support')
   })
 
-  it('should return no-lock when global does not exist (upgrade scenario)', async () => {
-    const mockFindGlobal = mockPayload.findGlobal as any
-    mockFindGlobal.mockRejectedValue(new Error('Global not found'))
+  it.each([0, -1, NaN, Infinity])('should reject invalid timeout %s', async (timeout) => {
+    await expect(acquireMigrationLock({ payload, req, timeout })).rejects.toThrow('timeout')
+    expect(payload.db.tryAcquireMigrationLock).not.toHaveBeenCalled()
+  })
 
-    const result = await acquireMigrationLock({
-      payload: mockPayload as Payload,
-      req: mockReq,
-      timeout: 300000,
-    })
+  it('should bypass locking only with an explicit bootstrap opt-out', async () => {
+    const result = await acquireMigrationLock({ payload, req, skipLock: true })
 
-    expect(result.acquired).toBe(true)
-    expect(result.instanceId).toBe('no-lock')
-    expect(mockPayload.logger.warn).toHaveBeenCalledWith(
-      expect.objectContaining({
-        msg: expect.stringContaining('Migration lock global not initialized'),
-      }),
-    )
-    expect(mockPayload.updateGlobal).not.toHaveBeenCalled()
+    expect(result).toEqual({ acquired: true, instanceId: 'no-lock' })
+    expect(payload.db.tryAcquireMigrationLock).not.toHaveBeenCalled()
+    expect(payload.logger.warn).toHaveBeenCalled()
+    await releaseMigrationLock({ payload, req, instanceId: result.instanceId })
+    expect(payload.db.releaseMigrationLock).not.toHaveBeenCalled()
+  })
+
+  it('should delegate release with the owner ID', async () => {
+    await releaseMigrationLock({ payload, req, instanceId: 'owner' })
+
+    expect(payload.db.releaseMigrationLock).toHaveBeenCalledWith({ instanceId: 'owner' })
+  })
+
+  it('should propagate release failures', async () => {
+    const error = new Error('connection lost')
+
+    vi.mocked(payload.db.releaseMigrationLock!).mockRejectedValue(error)
+
+    await expect(releaseMigrationLock({ payload, req, instanceId: 'owner' })).rejects.toBe(error)
   })
 })
 
-describe('releaseMigrationLock', () => {
-  let mockPayload: Partial<Payload>
-  let mockReq: any
+describe('SQLite lock contention', () => {
+  it('should retry wrapped writer contention', async () => {
+    const operation = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('query failed', { cause: { code: 'SQLITE_BUSY' } }))
+      .mockResolvedValue('acquired')
 
-  beforeEach(() => {
-    mockReq = {}
-    mockPayload = {
-      updateGlobal: vi.fn(),
-      logger: {
-        info: vi.fn(),
-      },
-    }
+    await expect(migrationLockRetry({ isSQLite: true, operation })).resolves.toBe('acquired')
+    expect(operation).toHaveBeenCalledTimes(2)
   })
 
-  it('should release lock', async () => {
-    await releaseMigrationLock({
-      instanceId: 'test-instance-id',
-      payload: mockPayload as Payload,
-      req: mockReq,
-    })
+  it('should stop retrying after bounded contention', async () => {
+    const error = { code: 'SQLITE_LOCKED' }
+    const operation = vi.fn().mockRejectedValue(error)
 
-    expect(mockPayload.updateGlobal).toHaveBeenCalledWith({
-      slug: 'payload-migrations-lock',
-      data: { locked: false },
-      overrideAccess: true,
-      req: mockReq,
-    })
+    await expect(migrationLockRetry({ isSQLite: true, operation })).rejects.toBe(error)
+    expect(operation).toHaveBeenCalledTimes(6)
   })
 
-  it('should skip release when instanceId is no-lock', async () => {
-    await releaseMigrationLock({
-      instanceId: 'no-lock',
-      payload: mockPayload as Payload,
-      req: mockReq,
-    })
+  it.each([true, false])('should propagate unrelated failures (SQLite: %s)', async (isSQLite) => {
+    const error = new Error('schema missing')
+    const operation = vi.fn().mockRejectedValue(error)
 
-    expect(mockPayload.updateGlobal).not.toHaveBeenCalled()
+    await expect(migrationLockRetry({ isSQLite, operation })).rejects.toBe(error)
+    expect(operation).toHaveBeenCalledTimes(1)
   })
 })

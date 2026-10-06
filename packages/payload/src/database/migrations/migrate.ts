@@ -24,6 +24,7 @@ export const migrate: BaseDatabaseAdapter['migrate'] = async function migrate(
   const { acquired, instanceId } = await acquireMigrationLock({
     payload,
     req: lockReq,
+    skipLock: args?.skipLock,
     timeout: 300000,
   })
 

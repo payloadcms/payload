@@ -5,8 +5,16 @@ export const migrationsLockGlobal: GlobalConfig = {
   admin: {
     hidden: true,
   },
+  authorship: false,
   endpoints: false,
   fields: [
+    {
+      name: 'lock_key',
+      type: 'text',
+      defaultValue: 'payload-migrations-lock',
+      required: true,
+      unique: true,
+    },
     {
       name: 'locked',
       type: 'checkbox',
@@ -26,4 +34,6 @@ export const migrationsLockGlobal: GlobalConfig = {
     },
   ],
   graphQL: false,
+  lockDocuments: false,
+  versions: false,
 }

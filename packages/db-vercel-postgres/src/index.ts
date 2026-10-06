@@ -33,7 +33,9 @@ import {
   migrateStatus,
   operatorMap,
   queryDrafts,
+  releaseMigrationLock,
   rollbackTransaction,
+  tryAcquireMigrationLock,
   updateGlobal,
   updateGlobalVersion,
   updateJobs,
@@ -211,10 +213,12 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       readReplicasAfterWriteInterval: args.readReplicasAfterWriteInterval ?? 2000,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       rejectInitializing,
+      releaseMigrationLock,
       requireDrizzleKit,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       resolveInitializing,
       rollbackTransaction,
+      tryAcquireMigrationLock,
       updateGlobal,
       updateGlobalVersion,
       updateMany,

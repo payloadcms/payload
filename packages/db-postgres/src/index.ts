@@ -32,7 +32,9 @@ import {
   migrateStatus,
   operatorMap,
   queryDrafts,
+  releaseMigrationLock,
   rollbackTransaction,
+  tryAcquireMigrationLock,
   updateGlobal,
   updateGlobalVersion,
   updateJobs,
@@ -219,10 +221,12 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       updateJobs,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       rejectInitializing,
+      releaseMigrationLock,
       requireDrizzleKit,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       resolveInitializing,
       rollbackTransaction,
+      tryAcquireMigrationLock,
       updateGlobal,
       updateGlobalVersion,
       updateMany,

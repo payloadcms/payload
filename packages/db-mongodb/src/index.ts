@@ -52,6 +52,7 @@ import { findOne } from './findOne.js'
 import { findVersions } from './findVersions.js'
 import { init } from './init.js'
 import { migrateFresh } from './migrateFresh.js'
+import { releaseMigrationLock, tryAcquireMigrationLock } from './migrationLock.js'
 import { queryDrafts } from './queryDrafts.js'
 import { beginTransaction } from './transactions/beginTransaction.js'
 import { commitTransaction } from './transactions/commitTransaction.js'
@@ -329,7 +330,9 @@ export function mongooseAdapter({
       payload,
       prodMigrations,
       queryDrafts,
+      releaseMigrationLock,
       rollbackTransaction,
+      tryAcquireMigrationLock,
       updateGlobal,
       updateGlobalVersion,
       updateOne,
