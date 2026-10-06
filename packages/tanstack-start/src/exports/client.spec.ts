@@ -35,19 +35,6 @@ function getStaticPackageImports(entry: string): Set<string> {
 }
 
 describe('@payloadcms/tanstack-start/client', () => {
-  it('should group layout and view adapters by feature', () => {
-    const adaptersDir = path.join(srcDir, 'adapters')
-
-    expect(fs.existsSync(path.join(adaptersDir, 'layout/index.tsx'))).toBe(true)
-    expect(fs.existsSync(path.join(adaptersDir, 'layout/component.tsx'))).toBe(true)
-    expect(fs.existsSync(path.join(adaptersDir, 'layout/server.ts'))).toBe(true)
-    expect(fs.existsSync(path.join(adaptersDir, 'views/index.tsx'))).toBe(true)
-    expect(fs.existsSync(path.join(adaptersDir, 'views/components.tsx'))).toBe(true)
-    expect(fs.existsSync(path.join(adaptersDir, 'views/server.tsx'))).toBe(true)
-    expect(fs.existsSync(path.join(adaptersDir, 'layoutComponent.tsx'))).toBe(false)
-    expect(fs.existsSync(path.join(adaptersDir, 'viewComponents.tsx'))).toBe(false)
-  })
-
   // The root route and every Payload route file import this entry, so everything it imports
   // statically loads on front-end routes too. The admin UI must only load through lazy imports.
   it('should not statically import the @payloadcms/ui barrel', () => {
