@@ -36,6 +36,7 @@ export const defaultESLintIgnores = [
   'packages/payload/rollup.dts.config.mjs',
   'scripts/**/*.js',
   'packages/plugin-mcp/bin.js',
+  'packages/translations/bundleDateFNSLocales.js',
 ]
 
 /** @typedef {import('eslint').Linter.Config} Config */
