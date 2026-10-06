@@ -180,11 +180,13 @@ const DateTimeFieldComponent: React.FC<DateFieldClientProps> = (props) => {
         Fallback={
           <FieldLabel label={label} localized={localized} path={path} required={required} />
         }
+        shouldUseFallbackOnError
       />
       <div className={`${fieldBaseClass}__wrap`} id={`field-${path.replace(/\./g, '__')}`}>
         <RenderCustomComponent
           CustomComponent={Error}
           Fallback={<FieldError path={path} showError={showError} />}
+          shouldUseFallbackOnError
         />
         {BeforeInput}
         <DatePickerField
@@ -212,6 +214,7 @@ const DateTimeFieldComponent: React.FC<DateFieldClientProps> = (props) => {
       <RenderCustomComponent
         CustomComponent={Description}
         Fallback={<FieldDescription description={description} path={path} />}
+        shouldUseFallbackOnError
       />
     </div>
   )

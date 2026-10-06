@@ -267,6 +267,7 @@ function TabContent({
         Fallback={
           <FieldDescription description={description} marginPlacement="bottom" path={parentPath} />
         }
+        shouldUseFallbackOnError
       />
       {BeforeInput}
       <RenderFields

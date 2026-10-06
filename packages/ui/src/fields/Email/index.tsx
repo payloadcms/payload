@@ -90,11 +90,13 @@ const EmailFieldComponent: React.FC<EmailFieldClientProps> = (props) => {
             required={required}
           />
         }
+        shouldUseFallbackOnError
       />
       <div className={`${fieldBaseClass}__wrap`}>
         <RenderCustomComponent
           CustomComponent={Error}
           Fallback={<FieldError path={path} showError={showError} />}
+          shouldUseFallbackOnError
         />
         {BeforeInput}
         {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
@@ -117,6 +119,7 @@ const EmailFieldComponent: React.FC<EmailFieldClientProps> = (props) => {
       <RenderCustomComponent
         CustomComponent={Description}
         Fallback={<FieldDescription description={description} path={path} />}
+        shouldUseFallbackOnError
       />
     </div>
   )

@@ -30,6 +30,7 @@ export const RowLabel: React.FC<RowLabelProps> = (props) => {
             label
           )
         }
+        shouldUseFallbackOnError
       />
     </RowLabelProvider>
   )

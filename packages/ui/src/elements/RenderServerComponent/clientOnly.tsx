@@ -1,9 +1,11 @@
 import type { ComponentRenderer } from 'payload'
 
-import { getFromImportMap, isPlainObject } from 'payload/shared'
+import { getFromImportMap, isPlainObject, parsePayloadComponent } from 'payload/shared'
 import React from 'react'
 
 import { removeUndefined } from '../../utilities/removeUndefined.js'
+import { ConfigComponentErrorBoundary } from '../ConfigComponentErrorBoundary/index.js'
+import { getComponentInstanceKey } from './getComponentInstanceKey.js'
 
 /**
  * Client-only component renderer for non-RSC frameworks.
@@ -23,14 +25,22 @@ export const RenderClientComponent: ComponentRenderer = ({
         clientProps,
         Component: c,
         importMap,
-        key: index,
+        key: String(index),
       }),
     )
   }
 
   if (typeof Component === 'function') {
     const sanitizedProps = removeUndefined({ ...clientProps })
-    return <Component key={key} {...sanitizedProps} />
+    return (
+      <ConfigComponentErrorBoundary
+        componentName={Component.displayName || Component.name || 'configured component'}
+        instanceKey={getComponentInstanceKey({ key, props: sanitizedProps })}
+        key={key}
+      >
+        <Component {...sanitizedProps} />
+      </ConfigComponentErrorBoundary>
+    )
   }
 
   if (typeof Component === 'string' || isPlainObject(Component)) {
@@ -46,16 +56,27 @@ export const RenderClientComponent: ComponentRenderer = ({
         ...(typeof Component === 'object' && Component?.clientProps ? Component.clientProps : {}),
       })
 
-      return <ResolvedComponent key={key} {...sanitizedProps} />
+      const { exportName, path } = parsePayloadComponent(Component)
+
+      return (
+        <ConfigComponentErrorBoundary
+          componentName={`${path}#${exportName}`}
+          instanceKey={getComponentInstanceKey({ key, props: sanitizedProps })}
+          key={key}
+        >
+          <ResolvedComponent {...sanitizedProps} />
+        </ConfigComponentErrorBoundary>
+      )
     }
   }
 
-  return Fallback
-    ? RenderClientComponent({
-        clientProps,
-        Component: Fallback,
-        importMap,
-        key,
-      })
-    : null
+  if (!Fallback) {
+    return null
+  }
+
+  const sanitizedProps = removeUndefined({
+    ...clientProps,
+  })
+
+  return <Fallback key={key} {...sanitizedProps} />
 }

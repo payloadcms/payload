@@ -417,6 +417,7 @@
     "path-to-regexp": "6.3.0",
     "qs-esm": "8.0.1",
     "react-datepicker": "7.6.0",
+    "react-error-boundary": "6.1.1",
     "react-image-crop": "10.1.8",
     "react-select": "5.9.0",
     "scheduler": "0.25.0",

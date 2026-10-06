@@ -62,23 +62,24 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_D6CBC3A3".
+ * via the `definition` "LexicalNodes_D8EC8EAF".
  */
-export type LexicalNodes_D6CBC3A3 =
+export type LexicalNodes_D8EC8EAF =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_D6CBC3A3>
+  | SerializedParagraphNode<LexicalNodes_D8EC8EAF>
   | SerializedBlockNode<Callout | NoHandle>
-  | SerializedTableNode<LexicalNodes_D6CBC3A3>
-  | SerializedTableCellNode<LexicalNodes_D6CBC3A3>
-  | SerializedTableRowNode<LexicalNodes_D6CBC3A3>
+  | SerializedTableNode<LexicalNodes_D8EC8EAF>
+  | SerializedTableCellNode<LexicalNodes_D8EC8EAF>
+  | SerializedTableRowNode<LexicalNodes_D8EC8EAF>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
   | SerializedUploadNode<'media-alt'>
-  | SerializedQuoteNode<LexicalNodes_D6CBC3A3>
+  | SerializedQuoteNode<LexicalNodes_D8EC8EAF>
   | SerializedRelationshipNode<
       | 'users'
+      | 'config-error-fields'
       | 'payload-folders'
       | 'posts'
       | 'payload-kv'
@@ -86,26 +87,27 @@ export type LexicalNodes_D6CBC3A3 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_D6CBC3A3, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_D6CBC3A3, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_D6CBC3A3>
-  | SerializedListItemNode<LexicalNodes_D6CBC3A3>
-  | SerializedHeadingNode<LexicalNodes_D6CBC3A3>;
+  | SerializedAutoLinkNode<LexicalNodes_D8EC8EAF, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_D8EC8EAF, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_D8EC8EAF>
+  | SerializedListItemNode<LexicalNodes_D8EC8EAF>
+  | SerializedHeadingNode<LexicalNodes_D8EC8EAF>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_0E5D99AF".
+ * via the `definition` "LexicalNodes_0DCCD648".
  */
-export type LexicalNodes_0E5D99AF =
+export type LexicalNodes_0DCCD648 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_0E5D99AF>
+  | SerializedParagraphNode<LexicalNodes_0DCCD648>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
   | SerializedUploadNode<'media-alt'>
-  | SerializedQuoteNode<LexicalNodes_0E5D99AF>
+  | SerializedQuoteNode<LexicalNodes_0DCCD648>
   | SerializedRelationshipNode<
       | 'users'
+      | 'config-error-fields'
       | 'payload-folders'
       | 'posts'
       | 'payload-kv'
@@ -113,11 +115,11 @@ export type LexicalNodes_0E5D99AF =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_0E5D99AF, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_0E5D99AF, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_0E5D99AF>
-  | SerializedListItemNode<LexicalNodes_0E5D99AF>
-  | SerializedHeadingNode<LexicalNodes_0E5D99AF>;
+  | SerializedAutoLinkNode<LexicalNodes_0DCCD648, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_0DCCD648, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_0DCCD648>
+  | SerializedListItemNode<LexicalNodes_0DCCD648>
+  | SerializedHeadingNode<LexicalNodes_0DCCD648>;
 
 export interface Config {
   auth: {
@@ -126,6 +128,7 @@ export interface Config {
   blocks: {};
   collections: {
     users: User;
+    'config-error-fields': ConfigErrorField;
     'payload-folders': PayloadFolder;
     posts: Post;
     media: Media;
@@ -142,6 +145,7 @@ export interface Config {
   };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
+    'config-error-fields': ConfigErrorFieldsSelect<false> | ConfigErrorFieldsSelect<true>;
     'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -163,6 +167,7 @@ export interface Config {
   };
   locale: 'en' | 'es';
   widgets: {
+    welcome: WelcomeWidget;
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
     activity: ActivityWidget;
@@ -231,6 +236,25 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "config-error-fields".
+ */
+export interface ConfigErrorField {
+  id: string;
+  title: string;
+  customField?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-folders".
  */
 export interface PayloadFolder {
@@ -281,7 +305,7 @@ export interface Post {
   requiredTags: string[];
   relatedPost?: (string | null) | Post;
   publishedOn?: string | null;
-  content?: LexicalRichText<LexicalNodes_D6CBC3A3> | null;
+  content?: LexicalRichText<LexicalNodes_D8EC8EAF> | null;
   items?:
     | {
         label?: string | null;
@@ -294,14 +318,6 @@ export interface Post {
   customLabelNote?: string | null;
   '_h_payload-folders'?: (string | null) | PayloadFolder;
   featuredImage?: (string | null) | Media;
-  createdBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
   /**
    * @minItems 2
    * @maxItems 2
@@ -327,6 +343,14 @@ export interface Post {
     | boolean
     | null;
   unlabelledSource?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -337,7 +361,7 @@ export interface Post {
  * via the `definition` "TextBlock".
  */
 export interface TextBlock {
-  body?: LexicalRichText<LexicalNodes_0E5D99AF> | null;
+  body?: LexicalRichText<LexicalNodes_0DCCD648> | null;
   text?: string | null;
   date?: string | null;
   id?: string | null;
@@ -360,6 +384,7 @@ export interface ImageBlock {
  */
 export interface Media {
   id: string;
+  alt: string;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -368,7 +393,6 @@ export interface Media {
     relationTo: 'users';
     value: string | User;
   } | null;
-  alt: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -462,6 +486,10 @@ export interface PayloadLockedDocument {
         value: string | User;
       } | null)
     | ({
+        relationTo: 'config-error-fields';
+        value: string | ConfigErrorField;
+      } | null)
+    | ({
         relationTo: 'payload-folders';
         value: string | PayloadFolder;
       } | null)
@@ -549,6 +577,18 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "config-error-fields_select".
+ */
+export interface ConfigErrorFieldsSelect<T extends boolean = true> {
+  title?: T;
+  customField?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-folders_select".
  */
 export interface PayloadFoldersSelect<T extends boolean = true> {
@@ -607,13 +647,13 @@ export interface PostsSelect<T extends boolean = true> {
   customLabelNote?: T;
   '_h_payload-folders'?: T;
   featuredImage?: T;
-  createdBy?: T;
-  updatedBy?: T;
   location?: T;
   settings?: T;
   source?: T;
   unlabelledSettings?: T;
   unlabelledSource?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -624,9 +664,9 @@ export interface PostsSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
   createdBy?: T;
   updatedBy?: T;
-  alt?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -764,6 +804,16 @@ export interface MenuSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "welcome_widget".
+ */
+export interface WelcomeWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -779,7 +829,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'users' | 'payload-folders' | 'posts' | 'media' | 'media-alt';
+    relatedCollection: 'users' | 'config-error-fields' | 'payload-folders' | 'posts' | 'media' | 'media-alt';
     where?:
       | {
           [k: string]: unknown;
@@ -801,7 +851,8 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('users' | 'payload-folders' | 'posts' | 'media' | 'media-alt')[] | null;
+    excludedCollections?:
+      ('users' | 'config-error-fields' | 'payload-folders' | 'posts' | 'media' | 'media-alt')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

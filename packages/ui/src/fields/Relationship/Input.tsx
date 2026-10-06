@@ -795,6 +795,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
         Fallback={
           <FieldLabel label={label} localized={localized} path={path} required={required} />
         }
+        shouldUseFallbackOnError
       />
       <div className={`${fieldBaseClass}__wrap`}>
         {BeforeInput}
@@ -806,6 +807,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
               <RenderCustomComponent
                 CustomComponent={Error}
                 Fallback={<FieldError path={path} showError={showError} />}
+                shouldUseFallbackOnError
               />
               <ReactSelect
                 aria-label={getTranslation(label, i18n)}
@@ -957,6 +959,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
         <RenderCustomComponent
           CustomComponent={Description}
           Fallback={<FieldDescription description={description} path={path} />}
+          shouldUseFallbackOnError
         />
       </div>
       {currentlyOpenRelationship.collectionSlug && currentlyOpenRelationship.hasReadPermission && (

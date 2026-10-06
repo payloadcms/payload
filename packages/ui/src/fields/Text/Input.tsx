@@ -134,11 +134,13 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
             required={required}
           />
         }
+        shouldUseFallbackOnError
       />
       <div className={`${fieldBaseClass}__wrap`}>
         <RenderCustomComponent
           CustomComponent={Error}
           Fallback={<FieldError path={path} showError={showError} />}
+          shouldUseFallbackOnError
         />
         {BeforeInput}
         {hasMany ? (
@@ -198,6 +200,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
         <RenderCustomComponent
           CustomComponent={Description}
           Fallback={<FieldDescription description={description} path={path} />}
+          shouldUseFallbackOnError
         />
       </div>
     </div>

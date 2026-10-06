@@ -151,6 +151,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
           Fallback={
             <FieldLabel htmlFor={id} label={label} localized={localized} required={required} />
           }
+          shouldUseFallbackOnError
         />
         {Error}
       </div>

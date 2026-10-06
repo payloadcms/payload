@@ -173,11 +173,13 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
         Fallback={
           <FieldLabel label={label} localized={localized} path={path} required={required} />
         }
+        shouldUseFallbackOnError
       />
       <div className={`${fieldBaseClass}__wrap`}>
         <RenderCustomComponent
           CustomComponent={Error}
           Fallback={<FieldError path={path} showError={showError} />}
+          shouldUseFallbackOnError
         />
         {BeforeInput}
         <div className={`${baseClass}__content`}>
@@ -208,6 +210,7 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
         <RenderCustomComponent
           CustomComponent={Description}
           Fallback={<FieldDescription description={description} path={path} />}
+          shouldUseFallbackOnError
         />
       </div>
       <HierarchyModal

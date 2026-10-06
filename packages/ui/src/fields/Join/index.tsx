@@ -213,6 +213,7 @@ const JoinFieldComponent: React.FC<JoinFieldClientProps> = (props) => {
               <RenderCustomComponent
                 CustomComponent={Description}
                 Fallback={<FieldDescription description={description} path={path} />}
+                shouldUseFallbackOnError
               />
             </div>
           ) : undefined

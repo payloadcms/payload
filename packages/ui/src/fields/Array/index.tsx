@@ -386,6 +386,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldClientProps> = (props) => {
         <RenderCustomComponent
           CustomComponent={Error}
           Fallback={<FieldError path={path} showError={showError} />}
+          shouldUseFallbackOnError
         />
       )}
       <header className={`${baseClass}__header`}>
@@ -403,6 +404,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldClientProps> = (props) => {
                     required={required}
                   />
                 }
+                shouldUseFallbackOnError
               />
             </h3>
             {displayedErrorCount > 0 && (
@@ -436,6 +438,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldClientProps> = (props) => {
         <RenderCustomComponent
           CustomComponent={Description}
           Fallback={<FieldDescription description={description} path={path} />}
+          shouldUseFallbackOnError
         />
       </header>
       <NullifyLocaleField

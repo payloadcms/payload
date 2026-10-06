@@ -112,6 +112,7 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldClientProps> = (props) => {
             Fallback={
               <FieldError alignCaret={isRTL ? 'right' : 'left'} path={path} showError={showError} />
             }
+            shouldUseFallbackOnError
           />
         }
         id={fieldID}
@@ -127,6 +128,7 @@ const CheckboxFieldComponent: React.FC<CheckboxFieldClientProps> = (props) => {
       <RenderCustomComponent
         CustomComponent={Description}
         Fallback={<FieldDescription description={description} path={path} />}
+        shouldUseFallbackOnError
       />
     </div>
   )
