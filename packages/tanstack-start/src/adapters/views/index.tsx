@@ -2,7 +2,7 @@
 
 import { lazyRouteComponent, notFound, redirect } from '@tanstack/react-router'
 
-import { getAdminMeta } from './metadata.js'
+import { getAdminMeta } from '../metadata.js'
 
 /**
  * Loader supplied by the app — a TanStack Start `createServerFn` that delegates
@@ -27,8 +27,8 @@ const runLoader = async (load: AdminLoad, splat: string, searchStr: string) => {
 
 // The admin UI loads with the admin routes only, so front-end routes never download it. The
 // router preloads lazy route components before rendering, so admin pages don't flash.
-const AdminPage = lazyRouteComponent(() => import('./viewComponents.js'), 'AdminPage')
-const AdminNotFound = lazyRouteComponent(() => import('./viewComponents.js'), 'AdminNotFound')
+const AdminPage = lazyRouteComponent(() => import('./components.js'), 'AdminPage')
+const AdminNotFound = lazyRouteComponent(() => import('./components.js'), 'AdminNotFound')
 
 const adminRouteOptions = ({
   forwardNotFoundPayload,

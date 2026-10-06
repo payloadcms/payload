@@ -7,12 +7,12 @@ export {
   payloadLayoutRoute,
   withPayloadRoot,
   type WithPayloadRootOptions,
-} from '../adapters/layout.js'
+} from '../adapters/layout/index.js'
 export {
   type AdminLoad,
   payloadAdminIndexRoute,
   payloadAdminSplatRoute,
-} from '../adapters/views.js'
+} from '../adapters/views/index.js'
 export {
   createServerFunctionClient,
   stripUnserializable,
