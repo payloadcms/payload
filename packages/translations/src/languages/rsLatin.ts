@@ -280,6 +280,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     all: 'Svi',
     allCollections: 'Sve Kolekcije',
     allLocales: 'Sve lokacije',
+    allowedTypes: 'Dozvoljeni tipovi',
     and: 'I',
     anotherUser: 'Drugi korisnik',
     anotherUserTakenOver: 'Drugi korisnik je preuzeo uređivanje ovog dokumenta.',

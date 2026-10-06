@@ -283,6 +283,7 @@ export const myTranslations: DefaultTranslationsObject = {
     all: 'အားလုံး',
     allCollections: 'အားလုံးစုစည်းမှုများ',
     allLocales: 'ဒေသအားလုံး',
+    allowedTypes: 'ခွင့်ပြုထားသော အမျိုးအစားများ',
     and: 'နှင့်',
     anotherUser: 'တစ်ခြားအသုံးပြုသူ',
     anotherUserTakenOver: 'တစ်ခြားအသုံးပြုသူသည်ဤစာရွက်စာတမ်းကိုပြင်ဆင်မှုကိုရယူလိုက်သည်။',

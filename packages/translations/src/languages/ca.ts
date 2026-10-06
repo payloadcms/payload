@@ -282,6 +282,7 @@ export const caTranslations: DefaultTranslationsObject = {
     all: 'Tots',
     allCollections: 'Totes les col·leccions',
     allLocales: 'Totes les localitats',
+    allowedTypes: 'Tipus permesos',
     and: 'i',
     anotherUser: 'Altre usuari',
     anotherUserTakenOver: "Un altre usuari ha pres la edició d'aquest document.",

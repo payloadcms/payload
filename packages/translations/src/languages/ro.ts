@@ -284,6 +284,7 @@ export const roTranslations: DefaultTranslationsObject = {
     all: 'Toate',
     allCollections: 'Toate Colecțiile',
     allLocales: 'Toate localizările',
+    allowedTypes: 'Tipuri permise',
     and: 'Şi',
     anotherUser: 'Un alt utilizator',
     anotherUserTakenOver: 'Un alt utilizator a preluat editarea acestui document.',
