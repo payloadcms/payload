@@ -420,9 +420,12 @@ describe('Dashboard', () => {
     })
     await drawer.getByRole('button', { name: ticket.title, exact: true }).click()
     await expect(widget.locator('.recents-widget__name')).toHaveText(ticket.title)
-    await expect(
-      widget.getByRole('button', { name: `Unpin document: ${ticket.title}` }),
-    ).toBeEnabled()
+    const unpinButton = widget.getByRole('button', { name: `Unpin document: ${ticket.title}` })
+    await expect(unpinButton).toBeEnabled()
+    await page.mouse.move(0, 0)
+    await expect(unpinButton).toHaveCSS('opacity', '0')
+    await widget.locator('.recents-widget__item').first().hover()
+    await expect(unpinButton).toHaveCSS('opacity', '1')
 
     const pins = await (
       await page.request.get(`${serverURL}/api/payload-preferences/pinned-documents`)
