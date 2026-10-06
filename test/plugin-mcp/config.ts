@@ -179,6 +179,8 @@ export default buildConfigWithDefaults({
           },
         },
         mcp: {
+          // Above the SDK's 4 MiB default, so tests can tell the custom limit is applied.
+          maxRequestBodySize: 5 * 1024 * 1024,
           serverOptions: {
             serverInfo: {
               name: 'My Custom MCP Server',

@@ -389,6 +389,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     globals: 'Globalai',
     goBack: 'Grįžkite',
     goToPage: 'Eiti į lentelės puslapį',
+    gridLayout: 'Tinklelis',
     groupByLabel: 'Grupuoti pagal {{label}}',
     hideSidebar: 'Slėpti šoninę juostą',
     import: 'Importas',
@@ -437,6 +438,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     notFound: 'Nerasta',
     nothingFound: 'Nieko nerasta',
     noTrashResults: 'Nėra {{label}} šiukšliadėžėje.',
+    notSelectedDocument:
+      'Nepasirinkta. Norėdami pakeisti pasirinkimą, paspauskite Enter arba tarpo klavišą.',
     notShownInTable: 'Nerodoma lentelėje',
     noUpcomingEventsScheduled: 'Nėra suplanuotų būsimų renginių.',
     noValue: 'Nėra vertės',
@@ -494,6 +497,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     selectAll: 'Pasirinkite visus {{count}} {{label}}',
     selectAllRows: 'Pasirinkite visas eilutes',
     selectedCount: '{{count}} {{label}} pasirinkta',
+    selectedDocument:
+      'Pasirinkta. Norėdami pakeisti pasirinkimą, paspauskite Enter arba tarpo klavišą.',
     selectLabel: 'Pasirinkite {{label}}',
     selectValue: 'Pasirinkite reikšmę',
     settings: 'Nustatymai',
@@ -515,6 +520,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} sėkmingai dubliuotas.',
     successfullyReindexed:
       'Sėkmingai perindeksuota {{count}} iš {{total}} dokumentų iš {{collections}}, praleista {{skips}} juodraščių.',
+    tableLayout: 'Lentelė',
     takeOver: 'Perimti',
     theme: 'Tema',
     thisLanguage: 'Lietuvių',
