@@ -37,6 +37,11 @@ export const removeStorageAlwaysInsertFields: Transform = {
         const localStorageFactoryName =
           storageFactoryImport.getAliasNode() ?? storageFactoryImport.getNameNode()
 
+        // Always an Identifier in valid code: a string-literal import name requires an alias.
+        if (!Node.isIdentifier(localStorageFactoryName)) {
+          continue
+        }
+
         for (const reference of localStorageFactoryName.findReferencesAsNodes()) {
           const call = reference.getParentIfKind(SyntaxKind.CallExpression)
 
