@@ -302,6 +302,8 @@ const addDefaultDashboardWidgets = ({
 
 export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   const configWithDefaults = addDefaultsToConfig(incomingConfig)
+  configWithDefaults.globals!.push(deepCopyObject(migrationsLockGlobal))
+
   const { duration, safetyBuffer } = configWithDefaults.jobs!.processingLease!
   if (!(safetyBuffer! >= 0 && safetyBuffer! < duration!)) {
     throw new InvalidConfiguration(
@@ -527,8 +529,6 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   if (fieldsToAdd.size > 0) {
     addOrderableEndpoint(config as SanitizedConfig, joinFieldPathsByCollection)
   }
-
-  config.globals!.push(deepCopyObject(migrationsLockGlobal))
 
   if (config.globals!.length > 0) {
     for (let i = 0; i < config.globals!.length; i++) {
