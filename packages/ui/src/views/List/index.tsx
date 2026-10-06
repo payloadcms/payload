@@ -280,6 +280,14 @@ export const renderListView = async (
     select[collectionConfig.admin.useAsTitle] = true
   }
 
+  /** Force select hierarchy scope so parent cells can validate destinations independently of visible columns. */
+  if (
+    typeof collectionConfig.hierarchy === 'object' &&
+    collectionConfig.hierarchy.collectionSpecific
+  ) {
+    select[collectionConfig.hierarchy.collectionSpecific.fieldName] = true
+  }
+
   /** Force select image fields for list view thumbnails */
   appendUploadSelectFields({
     collectionConfig,
