@@ -30,9 +30,9 @@ const getObjectFolder = (data: unknown, originalDoc: unknown): string => {
 export const getBeforeChangeHook =
   ({ adapter, collection, disablePayloadAccessControl, generateFileURL, size }: Args): FieldHook =>
   async ({ data, originalDoc, value }) => {
-    const newFilename = size ? data?.sizes?.[size.name]?.filename : data?.filename
+    const newFilename = size ? data?.variants?.[size.name]?.filename : data?.filename
     const originalFilename = size
-      ? originalDoc?.sizes?.[size.name]?.filename
+      ? originalDoc?.variants?.[size.name]?.filename
       : originalDoc?.filename
     const filename = newFilename || originalFilename
     const prefix = getObjectFolder(data, originalDoc)

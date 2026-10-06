@@ -36,10 +36,30 @@
       "types": "./src/exports/layouts.ts",
       "default": "./src/exports/layouts.ts"
     },
+    "./layouts/NestProviders": {
+      "import": "./src/layouts/Root/NestProviders.tsx",
+      "types": "./src/layouts/Root/NestProviders.tsx",
+      "default": "./src/layouts/Root/NestProviders.tsx"
+    },
+    "./layouts/RootProviders": {
+      "import": "./src/layouts/Root/RootProviders.tsx",
+      "types": "./src/layouts/Root/RootProviders.tsx",
+      "default": "./src/layouts/Root/RootProviders.tsx"
+    },
+    "./layouts/DocumentRoot": {
+      "import": "./src/layouts/Root/DocumentRoot.tsx",
+      "types": "./src/layouts/Root/DocumentRoot.tsx",
+      "default": "./src/layouts/Root/DocumentRoot.tsx"
+    },
     "./layouts/Root/ResolveThemeOnClient": {
       "import": "./src/layouts/Root/ResolveThemeOnClient.tsx",
       "types": "./src/layouts/Root/ResolveThemeOnClient.tsx",
       "default": "./src/layouts/Root/ResolveThemeOnClient.tsx"
+    },
+    "./layouts/Root/getRootLayoutData": {
+      "import": "./src/layouts/Root/getRootLayoutData.ts",
+      "types": "./src/layouts/Root/getRootLayoutData.ts",
+      "default": "./src/layouts/Root/getRootLayoutData.ts"
     },
     "./icons/*": {
       "import": "./src/icons/*/index.tsx",
@@ -382,7 +402,7 @@
     "@dnd-kit/modifiers": "9.0.0",
     "@dnd-kit/sortable": "10.0.0",
     "@dnd-kit/utilities": "3.2.2",
-    "@faceless-ui/modal": "3.0.1",
+    "@faceless-ui/modal": "3.0.2",
     "@faceless-ui/scroll-info": "2.0.0",
     "@faceless-ui/window-info": "3.0.1",
     "@floating-ui/dom": "1.7.6",
@@ -445,10 +465,30 @@
         "types": "./dist/exports/layouts.d.ts",
         "default": "./dist/exports/layouts.js"
       },
+      "./layouts/NestProviders": {
+        "import": "./dist/layouts/Root/NestProviders.js",
+        "types": "./dist/layouts/Root/NestProviders.d.ts",
+        "default": "./dist/layouts/Root/NestProviders.js"
+      },
+      "./layouts/RootProviders": {
+        "import": "./dist/layouts/Root/RootProviders.js",
+        "types": "./dist/layouts/Root/RootProviders.d.ts",
+        "default": "./dist/layouts/Root/RootProviders.js"
+      },
+      "./layouts/DocumentRoot": {
+        "import": "./dist/layouts/Root/DocumentRoot.js",
+        "types": "./dist/layouts/Root/DocumentRoot.d.ts",
+        "default": "./dist/layouts/Root/DocumentRoot.js"
+      },
       "./layouts/Root/ResolveThemeOnClient": {
         "import": "./dist/layouts/Root/ResolveThemeOnClient.js",
         "types": "./dist/layouts/Root/ResolveThemeOnClient.d.ts",
         "default": "./dist/layouts/Root/ResolveThemeOnClient.js"
+      },
+      "./layouts/Root/getRootLayoutData": {
+        "import": "./dist/layouts/Root/getRootLayoutData.js",
+        "types": "./dist/layouts/Root/getRootLayoutData.d.ts",
+        "default": "./dist/layouts/Root/getRootLayoutData.js"
       },
       "./css": {
         "import": "./dist/styles.css",

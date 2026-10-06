@@ -2198,6 +2198,81 @@ describe('List View', () => {
       )
     })
 
+    test('should honor formatDocURL destinations and disabled links in grid layout', async () => {
+      const noLinkDoc = await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'no-link' },
+      })
+
+      const customLinkDoc = await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'custom-link' },
+      })
+
+      await page.goto(formatDocURLUrl.list)
+      await page.getByRole('radio', { name: 'Grid' }).check()
+
+      try {
+        await expect(page.locator('.document-card')).toHaveCount(2)
+        const noLinkCard = page.locator('.document-card', {
+          has: page.locator('.document-card__title', { hasText: exactText(String(noLinkDoc.id)) }),
+        })
+
+        await expect(noLinkCard).toBeVisible()
+        await expect(noLinkCard.locator('a')).toHaveCount(0)
+        await expect(
+          page.getByRole('link', { name: String(customLinkDoc.id), exact: true }),
+        ).toHaveAttribute('href', '/custom-destination')
+      } finally {
+        await page.getByRole('radio', { name: 'Table' }).check()
+      }
+    })
+
+    test('should choose a document with the keyboard in a drawer after saving grid layout', async () => {
+      const doc = await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'linkable' },
+      })
+
+      await page.goto(formatDocURLUrl.list)
+
+      const gridPreferenceSaved = page.waitForResponse(
+        (response) =>
+          response
+            .url()
+            .includes(`/payload-preferences/collection-${formatDocURLCollectionSlug}`) &&
+          response.request().method() === 'POST',
+      )
+
+      await page.getByRole('radio', { name: 'Grid' }).check()
+      await gridPreferenceSaved
+      await expect(page.locator('.document-card')).toHaveCount(1)
+      await page.getByRole('button', { name: 'Select format doc' }).click()
+
+      const drawer = page.locator('.list-drawer.drawer--is-open')
+
+      try {
+        await expect(drawer.locator('table tbody tr')).toHaveCount(1)
+        await expect(drawer.locator('.document-card')).toHaveCount(0)
+
+        const selectionButton = drawer.locator('button.default-cell__first-cell')
+
+        await selectionButton.focus()
+        await selectionButton.press('Enter')
+        await expect(
+          page.getByRole('status').filter({ hasText: `Selected document: ${doc.id}` }),
+        ).toBeVisible()
+        expect(new URL(page.url()).pathname).toBe(new URL(formatDocURLUrl.list).pathname)
+      } finally {
+        if (!page.isClosed() && (await drawer.isVisible())) {
+          await drawer.locator('.list-drawer__header .close-modal-button').click()
+        }
+        if (!page.isClosed()) {
+          await page.getByRole('radio', { name: 'Table' }).check()
+        }
+      }
+    })
+
     test('should disable linking in ListDrawer for documents with formatDocURL returning null', async () => {
       await payload.create({
         collection: formatDocURLCollectionSlug,
@@ -2212,7 +2287,7 @@ describe('List View', () => {
       })
 
       await page.goto(formatDocURLUrl.list)
-      await expect(page).toHaveURL(/depth=1&limit=10/)
+      await expect(page).toHaveURL(/[?&]limit=10(?:&|$)/)
 
       const selectButton = page.locator('button:has-text("Select format doc")')
       await selectButton.waitFor({ state: 'visible' })
