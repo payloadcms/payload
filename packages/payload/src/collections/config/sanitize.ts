@@ -450,15 +450,15 @@ export const sanitizeCollection = (
       : readVersionsWithBaseAccess
   }
 
-  validateUseAsTitle(sanitized)
-  validateUseAsThumbnail({ config: sanitized })
-
   const sanitizedConfig = sanitized as SanitizedCollectionConfig
 
   sanitizedConfig.joins = joins
   sanitizedConfig.polymorphicJoins = polymorphicJoins
 
   sanitizedConfig.flattenedFields = flattenAllFields({ fields: sanitizedConfig.fields })
+
+  validateUseAsTitle(sanitized)
+  validateUseAsThumbnail({ config: sanitizedConfig })
 
   if (!sanitizedConfig.admin.useAsThumbnail) {
     const uploadField = sanitizedConfig.flattenedFields.find(
