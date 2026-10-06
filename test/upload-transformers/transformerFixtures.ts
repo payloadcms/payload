@@ -152,6 +152,32 @@ export const consumeWithoutResponseTransformer: UploadTransformer = {
 }
 
 /**
+ * Opt-in: replaces Sharp with Cloudinary for image uploads and for dynamic resizing on
+ * `resize-preview-media` (see `config.ts`). Cloudinary fetches the source itself, so it also needs a publicly reachable
+ * server URL (e.g. a tunnel) - `CLOUDINARY_URL` alone is not enough, and gating on it
+ * would silently switch every local run that loads the repo root `.env`.
+ *
+ * To run the dev server with Cloudinary (`CLOUDINARY_URL` set in the repo root `.env`):
+ *
+ *   1. Start a tunnel to the port the dev server will use, and copy the printed
+ *      `https://<random>.trycloudflare.com` URL:
+ *        npx cloudflared tunnel --url http://localhost:3100
+ *   2. Start the dev server on that port with the tunnel URL:
+ *        PORT=3100 PAYLOAD_PUBLIC_SERVER_URL=https://<random>.trycloudflare.com pnpm run dev upload-transformers
+ *      If the port is taken, the dev server silently moves to the next free one - check the
+ *      port it logs matches the tunnel.
+ *   3. Upload an image to "Resize Preview Media" and use "Preview resize".
+ *
+ * The same env runs the e2e suite against Cloudinary:
+ *   PORT=3100 PAYLOAD_PUBLIC_SERVER_URL=https://<random>.trycloudflare.com pnpm test:e2e upload-transformers
+ *
+ * If your Cloudinary account restricts fetched URLs, allow-list the tunnel host.
+ */
+export const publicServerURL = process.env.PAYLOAD_PUBLIC_SERVER_URL
+
+export const isCloudinaryEnabled = Boolean(process.env.CLOUDINARY_URL && publicServerURL)
+
+/**
  * Replaces a JSON upload with the `File` a test passes as `context.transformedFile`, so a test
  * controls the name, type and bytes of the transformer's output.
  */
