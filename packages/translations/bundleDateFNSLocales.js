@@ -8,8 +8,15 @@
 // bundled copy would load it twice.
 import * as esbuild from 'esbuild'
 import fs from 'node:fs'
+import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+
+import { verifyDateFNSLocales } from './verifyDateFNSLocales.js'
+
+const require = createRequire(import.meta.url)
+const dateFNSDir = path.dirname(require.resolve('date-fns/package.json'))
+const dateFNSExports = require('date-fns/package.json').exports
 
 const dist = path.join(path.dirname(fileURLToPath(import.meta.url)), 'dist')
 const importerFile = path.join(dist, 'importDateFNSLocale.js')
@@ -23,15 +30,42 @@ if (locales.length === 0) {
   throw new Error(`No date-fns locale imports found in ${importerFile}`)
 }
 
-await esbuild.build({
+// A few locales use date-fns functions, like `isSameWeek`. Those stay imports from date-fns, so
+// apps share one copy of them. That copy also holds the options set with `setDefaultOptions`.
+const importFunctionsFromDateFNS = {
+  name: 'import-functions-from-date-fns',
+  setup(build) {
+    build.onResolve({ filter: /^\.\.?\// }, (args) => {
+      const subpath = path
+        .relative(dateFNSDir, path.resolve(args.resolveDir, args.path))
+        .replaceAll(path.sep, '/')
+        .replace(/\.js$/, '')
+      if (subpath.startsWith('..') || subpath.startsWith('locale/')) {
+        return
+      }
+      if (!dateFNSExports[`./${subpath}`]) {
+        throw new Error(`A date-fns locale imports ${subpath}, which date-fns doesn't export`)
+      }
+      return { external: true, path: `date-fns/${subpath}` }
+    })
+  },
+}
+
+const { metafile } = await esbuild.build({
   bundle: true,
+  // Every locale uses the same helpers from `date-fns/locale/_lib`. Splitting moves them into one
+  // shared chunk instead of a copy in each locale.
+  chunkNames: 'dateFNS/[name]-[hash]',
   entryPoints: Object.fromEntries(
     locales.map((locale) => [`dateFNS/${locale}`, `date-fns/locale/${locale}`]),
   ),
   format: 'esm',
+  metafile: true,
   minify: true,
   outdir: dist,
   platform: 'browser',
+  plugins: [importFunctionsFromDateFNS],
+  splitting: true,
 })
 
 fs.writeFileSync(
@@ -41,5 +75,7 @@ fs.writeFileSync(
     (_match, quote, locale) => `import(${quote}./dateFNS/${locale}.js${quote})`,
   ),
 )
+
+verifyDateFNSLocales({ dist, metafile })
 
 console.log(`Bundled ${locales.length} date-fns locales into dist/dateFNS`)

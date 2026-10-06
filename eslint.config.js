@@ -37,6 +37,7 @@ export const defaultESLintIgnores = [
   'scripts/**/*.js',
   'packages/plugin-mcp/bin.js',
   'packages/translations/bundleDateFNSLocales.js',
+  'packages/translations/verifyDateFNSLocales.js',
 ]
 
 /** @typedef {import('eslint').Linter.Config} Config */
