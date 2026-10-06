@@ -490,6 +490,8 @@
   /* Enhanced contrast preserves the standard palette when disabled. */
   html[data-enhanced-contrast],
   html[data-enhanced-contrast] [data-theme] {
+    --color-border: var(--color-border-control);
+    --contrast-menu-border: var(--ramp-white-500);
     --contrast-chip-border: var(--color-border-control);
     --contrast-button-border: var(--color-border-control);
     --contrast-nav-border: var(--color-border-control);

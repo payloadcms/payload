@@ -364,7 +364,7 @@
   }
 
   .btn--withPopup.btn--style-secondary {
-    --separator-color: var(--special-border-translucent);
+    --separator-color: var(--color-border-control, var(--special-border-translucent));
     .btn,
     .popup-button {
       color: var(--color-text);

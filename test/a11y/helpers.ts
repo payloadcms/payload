@@ -528,7 +528,14 @@ export async function expectPaintContrast({
   againstParent?: boolean
   minimum: number
   placeholder?: boolean
-  property: 'backgroundColor' | 'borderTopColor' | 'color' | 'fill' | 'outlineColor' | 'stroke'
+  property:
+    | 'backgroundColor'
+    | 'borderBottomColor'
+    | 'borderTopColor'
+    | 'color'
+    | 'fill'
+    | 'outlineColor'
+    | 'stroke'
   pseudo?: '::after'
   targets: Locator
 }) {
@@ -634,8 +641,15 @@ export async function expectPaintContrast({
             unsupported.push('placeholder is not rendered on an empty input or textarea')
           }
           if (
-            paintProperty === 'borderTopColor' &&
-            (style.borderTopStyle === 'none' || parseFloat(style.borderTopWidth) === 0)
+            paintProperty.startsWith('border') &&
+            (style[
+              paintProperty === 'borderBottomColor' ? 'borderBottomStyle' : 'borderTopStyle'
+            ] === 'none' ||
+              parseFloat(
+                style[
+                  paintProperty === 'borderBottomColor' ? 'borderBottomWidth' : 'borderTopWidth'
+                ],
+              ) === 0)
           ) {
             unsupported.push('border is not painted')
           }
@@ -659,7 +673,7 @@ export async function expectPaintContrast({
             // A component's own fill is compared to its adjacent parent surface.
             if (ancestor === element && againstParent) {
               // Borders are painted over the element background; outlines are outside it.
-              if (paintProperty === 'borderTopColor') {
+              if (paintProperty.startsWith('border')) {
                 foreground = over(foreground, paint)
               }
             } else {
@@ -992,4 +1006,38 @@ export async function openNavigationFolders({
     sidebar.locator('.tree-node__title', { hasText: /^Accessibility folder$/ }),
   ).toBeVisible()
   return sidebar
+}
+
+/** Checks the rendered divider in enhanced mode and exact restoration when disabled. */
+export async function expectEnhancedDividerContrast({
+  page,
+  property,
+  pseudo,
+  targets,
+}: {
+  page: Page
+  property: 'backgroundColor' | 'borderBottomColor' | 'borderTopColor'
+  pseudo?: '::after'
+  targets: Locator
+}) {
+  await expect(targets.first()).toBeVisible()
+  const readPaint = () =>
+    targets.evaluateAll(
+      (elements, { property, pseudo }) =>
+        elements.map((element) => getComputedStyle(element, pseudo)[property]),
+      { property, pseudo },
+    )
+  const defaultPaint = await readPaint()
+
+  await page
+    .locator('html')
+    .evaluate((element) => element.setAttribute('data-enhanced-contrast', ''))
+  try {
+    await expectPaintContrast({ againstParent: true, minimum: 3, property, pseudo, targets })
+  } finally {
+    await page
+      .locator('html')
+      .evaluate((element) => element.removeAttribute('data-enhanced-contrast'))
+  }
+  expect(await readPaint()).toEqual(defaultPaint)
 }

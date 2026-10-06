@@ -17,6 +17,7 @@ import {
   addCollectionQueryWidget,
   addTextBlock,
   cleanupModalMedia,
+  expectEnhancedDividerContrast,
   expectFocusInside,
   expectOptionsToHaveAccessibleNames,
   expectPaintContrast,
@@ -1445,6 +1446,75 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('1.4.11 Non-text Contrast (AA)', () => {
+    for (const theme of ['light', 'dark'] as const) {
+      test(`should strengthen UI dividers only in enhanced ${theme} mode`, async () => {
+        test.setTimeout(90_000)
+        await page.context().addCookies([
+          { name: 'payload-theme', url: serverURL, value: theme },
+          { name: 'payload-high-contrast-mode', url: serverURL, value: 'false' },
+        ])
+        await gotoPostsList({ page, postsURL })
+        await expect(page.locator('html')).not.toHaveAttribute('data-enhanced-contrast')
+        await expectEnhancedDividerContrast({
+          page,
+          property: 'borderBottomColor',
+          targets: page.locator('.list-controls'),
+        })
+        await expectEnhancedDividerContrast({
+          page,
+          property: 'borderTopColor',
+          targets: page.locator('.table tbody tr'),
+        })
+        await openListColumns(page)
+        await expectEnhancedDividerContrast({
+          page,
+          property: 'borderBottomColor',
+          targets: page.locator('.column-selector__header, .column-selector__search'),
+        })
+        await gotoCreatePost({ page, postsURL })
+        await expectEnhancedDividerContrast({
+          page,
+          property: 'borderBottomColor',
+          targets: page.locator('.doc-controls'),
+        })
+        await expectEnhancedDividerContrast({
+          page,
+          property: 'backgroundColor',
+          targets: page.locator('.fixed-toolbar .divider'),
+        })
+        const editor = page.locator('.rich-text-lexical').first()
+
+        await editor.locator('[contenteditable="true"] p').last().click()
+        await editor.locator('.toolbar-popup__dropdown-add').click()
+        await page.locator('.toolbar-popup__dropdown-item[data-item-key="table"]').click()
+        await page.getByRole('button', { name: '2 columns, 2 rows', exact: true }).click()
+        await editor.locator('[contenteditable="true"] table').locator('th, td').first().click()
+        await page.locator('.table-cell-action-button').click()
+        await expectEnhancedDividerContrast({
+          page,
+          property: 'backgroundColor',
+          targets: page.locator('.table-action-menu-dropdown hr'),
+        })
+        await page.goto(postsURL.account)
+        await expectEnhancedDividerContrast({
+          page,
+          property: 'backgroundColor',
+          pseudo: '::after',
+          targets: page.locator('.payload-settings'),
+        })
+        const modifier = await page.evaluate(() =>
+          navigator.userAgent.includes('Mac OS X') ? 'Meta' : 'Control',
+        )
+
+        await page.keyboard.press(`${modifier}+k`)
+        await expectEnhancedDividerContrast({
+          page,
+          property: 'borderBottomColor',
+          targets: page.locator('.cmd-palette__input'),
+        })
+      })
+    }
+
     for (const theme of ['light', 'dark'] as const) {
       test(`should strengthen chips, dropdowns and sidebar borders only in enhanced ${theme} mode`, async () => {
         test.setTimeout(90_000)
