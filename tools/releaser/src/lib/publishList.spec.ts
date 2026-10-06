@@ -1,5 +1,6 @@
-import { PROJECT_ROOT } from '@tools/constants'
+import { PACKAGES_DIR, PROJECT_ROOT } from '@tools/constants'
 import { execSync } from 'child_process'
+import fs from 'fs'
 import path from 'path'
 import { describe, expect, it } from 'vitest'
 
@@ -14,6 +15,34 @@ type TurboTask = {
 
 const shortNameFromTaskId = (taskId: string, byPackage: Map<string, string>): string | undefined =>
   byPackage.get(taskId.replace(/#.*$/, ''))
+
+/** Public packages released on their own version line, outside the monorepo release. */
+const independentlyReleasedPackages = new Set(['eslint-config', 'eslint-plugin'])
+
+describe('packagePublishList completeness', () => {
+  it('should list every public package in packages/', () => {
+    const publicPackages = fs
+      .readdirSync(PACKAGES_DIR)
+      .filter((directory) => {
+        const packageJsonPath = path.join(PACKAGES_DIR, directory, 'package.json')
+
+        if (!fs.existsSync(packageJsonPath)) {
+          return false
+        }
+
+        const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8')) as {
+          private?: boolean
+        }
+
+        return !packageJson.private
+      })
+      .filter((directory) => !independentlyReleasedPackages.has(directory))
+
+    const publishSet = new Set(packagePublishList)
+
+    expect(publicPackages.filter((directory) => !publishSet.has(directory))).toEqual([])
+  })
+})
 
 describe('packagePublishList topological order (turbo-derived)', () => {
   it('should list every build dependency before its dependents', async () => {
