@@ -902,6 +902,57 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     ).toBe(true)
   })
 
+  test('should delete a cloud object after its last version is pruned', async ({ payload }) => {
+    const collection = payload.collections[versionedCloudMediaSlug].config
+    const previousVersions = collection.versions
+    collection.versions = { ...previousVersions, maxPerDoc: 3 }
+
+    try {
+      const first = await payload.create({
+        collection: versionedCloudMediaSlug,
+        data: { storageMarker: 'first' },
+        filePath: firstFile,
+        overrideAccess: true,
+      })
+      const firstKey = (await getStoredFiles({ id: first.id, payload }))[0]!.key
+
+      await payload.update({
+        id: first.id,
+        collection: versionedCloudMediaSlug,
+        data: { storageMarker: 'second' },
+        filePath: secondFile,
+        overrideAccess: true,
+      })
+
+      for (let revision = 3; revision <= 5; revision++) {
+        await payload.update({
+          id: first.id,
+          collection: versionedCloudMediaSlug,
+          data: { storageMarker: `revision-${revision}` },
+          overrideAccess: true,
+        })
+      }
+
+      const { docs: retained } = await payload.db.findVersions({
+        collection: versionedCloudMediaSlug,
+        pagination: false,
+        where: { parent: { equals: first.id } },
+      })
+
+      expect(retained).toHaveLength(3)
+      expect(
+        retained.some(({ version }) =>
+          getStoredCloudFiles(version).some(({ key }) => key === firstKey),
+        ),
+      ).toBe(false)
+      expect(versionedCloudCalls.deletes).toContain(firstKey)
+      expect(versionedCloudFiles.has(firstKey)).toBe(false)
+      expect((await getStoredFiles({ id: first.id, payload }))[0]?.key).toBeTruthy()
+    } finally {
+      collection.versions = previousVersions
+    }
+  })
+
   test('should restore a prior cloud object into a new current key', async ({
     payload,
     restClient,
