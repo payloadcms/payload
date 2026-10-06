@@ -738,6 +738,76 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.1.1 Keyboard (A)', () => {
+    test('should increase and decrease Number and Point values with arrow keys', async () => {
+      // PYLD-3574
+      await gotoCreatePost({ page, postsURL })
+      for (const name of ['Quantity', 'Location - Longitude', 'Location - Latitude']) {
+        const input = page.getByRole('spinbutton', { name, exact: true })
+
+        await input.fill('10')
+        await input.press('ArrowUp')
+        await expect(input).toHaveValue('11')
+        await input.press('ArrowDown')
+        await expect(input).toHaveValue('10')
+        await expect(input).toBeFocused()
+        await input.press('Tab')
+        await expect(input).not.toBeFocused()
+      }
+    })
+    test('should navigate the whole rich-text toolbar with arrow keys and one Tab stop', async () => {
+      // PYLD-3829
+      await gotoCreatePost({ page, postsURL })
+      const field = page.locator('[data-field-path="content"]')
+      const editor = field.locator('[contenteditable="true"]')
+
+      await editor.fill('Toolbar navigation')
+      for (const selector of ['.fixed-toolbar', '.inline-toolbar-popup']) {
+        if (selector === '.inline-toolbar-popup') {
+          await editor.fill('Toolbar navigation')
+          await editor.press('ControlOrMeta+a')
+        }
+
+        const toolbar = field.locator(selector)
+        const buttons = toolbar.locator('button:enabled')
+
+        await expect(buttons.first()).toBeVisible()
+        await expect(toolbar.locator('[data-button-key="indentDecrease"]')).toBeDisabled()
+        const link = toolbar.locator('[data-button-key="link"]')
+
+        if (selector === '.fixed-toolbar') {
+          await expect(link).toBeDisabled()
+        } else {
+          await expect(link).toBeEnabled()
+        }
+        const count = await buttons.count()
+
+        expect(count).toBeGreaterThan(2)
+        await buttons.first().focus()
+        for (let index = 1; index < count; index++) {
+          await page.keyboard.press('ArrowRight')
+          await expect(buttons.nth(index)).toBeFocused()
+        }
+        await page.keyboard.press('ArrowRight')
+        await expect(buttons.first()).toBeFocused()
+        await page.keyboard.press('ArrowLeft')
+        await expect(buttons.last()).toBeFocused()
+        await page.keyboard.press('Home')
+        await expect(buttons.first()).toBeFocused()
+        await page.keyboard.press('End')
+        await expect(buttons.last()).toBeFocused()
+        await expect(toolbar.locator('button[tabindex="0"]')).toHaveCount(1)
+        await page.keyboard.press('Tab')
+        await expect(toolbar.locator(':focus')).toHaveCount(0)
+        if (selector === '.fixed-toolbar') {
+          await page.keyboard.press('Escape')
+          await page.keyboard.press('Shift+Tab')
+          await expect(toolbar.locator(':focus')).toHaveCount(0)
+          await page.keyboard.press('Tab')
+          await expect(buttons.last()).toBeFocused()
+        }
+      }
+    })
+
     test('should open the upload dropzone modal from its button with the keyboard', async () => {
       // PYLD-4166
       await page.goto(`${serverURL}/admin`)
@@ -1497,6 +1567,24 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.1.2 No Keyboard Trap (A)', () => {
+    test('should leave JSON and Code editors using normal Tab and Shift+Tab navigation', async () => {
+      // PYLD-3823
+      test.setTimeout(60000)
+      await gotoCreatePost({ page, postsURL })
+      for (const field of ['settings', 'source']) {
+        const wrapper = page.locator(`#field-${field}`)
+        const input = wrapper.getByRole('textbox')
+
+        await wrapper.scrollIntoViewIfNeeded()
+        await expect(input).toBeVisible()
+        for (const key of ['Tab', 'Shift+Tab']) {
+          await input.focus()
+          await expect(input).toBeFocused()
+          await page.keyboard.press(key)
+          await expect(wrapper.locator(':focus')).toHaveCount(0)
+        }
+      }
+    })
     test('should only intercept Escape while a non-dismissible dialog is open', async () => {
       await page.goto(
         formatAdminURL({ adminRoute: '/admin', path: '/custom-modal-ids', serverURL }),
@@ -1530,6 +1618,7 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
 
     test('should exit Lexical editors with Escape then Tab or Shift+Tab', async () => {
+      // PYLD-3775
       await gotoCreatePost({ page, postsURL })
       await insertTextBlockWithKeyboard({ page })
       for (const field of ['content', 'layout.0.body']) {
@@ -2720,6 +2809,57 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.7 Focus Visible (AA)', () => {
+    test('should paint keyboard focus on image crop and focal-point controls', async () => {
+      // PYLD-3602
+      const dialog = await openEditImageDialog({ page, serverURL })
+      const controls = dialog.locator(
+        '.ReactCrop__crop-selection, .ReactCrop__drag-handle, .edit-upload__focalPoint',
+      )
+
+      await expect(controls).toHaveCount(10)
+      await page.mouse.move(0, 0)
+      for (const control of await controls.all()) {
+        await dialog.getByRole('button', { name: /apply changes/i }).focus()
+        const unfocusedStyle = await getFocusIndicatorStyle(control)
+
+        await control.focus()
+        await page.keyboard.press('Shift+Tab')
+        await page.keyboard.press('Tab')
+        await expect(control).toBeFocused()
+        if (!(await control.getAttribute('class'))?.includes('ReactCrop__drag-handle')) {
+          await expectPaintedFocus({ page })
+        }
+        await expect
+          .poll(
+            async () => {
+              if ((await control.getAttribute('class'))?.includes('ReactCrop__drag-handle')) {
+                return control.evaluate((element) => {
+                  const style = getComputedStyle(element, '::after')
+
+                  return (
+                    Number.parseFloat(style.width) > 0 &&
+                    Number.parseFloat(style.height) > 0 &&
+                    style.outlineStyle !== 'none' &&
+                    Number.parseFloat(style.outlineWidth) > 0 &&
+                    style.outlineColor !== 'transparent' &&
+                    !/rgba\([^)]*,\s*0\)$/.test(style.outlineColor)
+                  )
+                })
+              }
+
+              const focusedStyle = await getFocusIndicatorStyle(control)
+
+              return (
+                hasRenderedFocusIndicator({ focusedStyle, unfocusedStyle }) ||
+                (Number.parseFloat(focusedStyle.borderTopWidth) > 0 &&
+                  focusedStyle.borderTopWidth !== unfocusedStyle.borderTopWidth)
+              )
+            },
+            { message: await control.getAttribute('class') },
+          )
+          .toBe(true)
+      }
+    })
     test('should reveal the collection card create action and its focus indicator by keyboard', async ({
       browser: _browser,
     }, testInfo) => {

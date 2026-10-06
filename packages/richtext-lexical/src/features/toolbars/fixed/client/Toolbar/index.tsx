@@ -3,6 +3,7 @@ import type { LexicalEditor } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
+import { getTranslation } from '@payloadcms/translations'
 import { useScrollInfo, useThrottledEffect, useTranslation } from '@payloadcms/ui'
 import * as React from 'react'
 import { useMemo } from 'react'
@@ -17,6 +18,7 @@ import type { FixedToolbarFeatureProps } from '../../server/index.js'
 import { useEditorConfigContext } from '../../../../../lexical/config/client/EditorConfigProvider.js'
 import { ToolbarButton } from '../../../shared/ToolbarButton/index.js'
 import { ToolbarDropdown } from '../../../shared/ToolbarDropdown/index.js'
+import { useToolbarKeyboardNavigation } from '../../../shared/useToolbarKeyboardNavigation.js'
 import { useToolbarStates } from '../../../shared/useToolbarStates.js'
 import { useRedirectVerticalWheelToHorizontalScroll } from './horizontalWheelScroll.js'
 import './index.css'
@@ -162,6 +164,12 @@ function FixedToolbar({
   parentWithFixedToolbar: EditorConfigContextType | false
 }): React.ReactNode {
   const currentToolbarRef = React.useRef<HTMLDivElement>(null)
+  const keyboardNavigationOptions = useMemo(() => ({ toolbarRef: currentToolbarRef }), [])
+  const { fieldProps } = useEditorConfigContext()
+  const { i18n } = useTranslation()
+
+  useToolbarKeyboardNavigation(keyboardNavigationOptions)
+
   const isEditable = useLexicalEditable()
 
   const { y } = useScrollInfo()
@@ -227,6 +235,9 @@ function FixedToolbar({
 
   return (
     <div
+      aria-label={
+        getTranslation(fieldProps.field.label || fieldProps.path, i18n) || fieldProps.path
+      }
       className="fixed-toolbar"
       onFocus={(event) => {
         // Prevent other focus events being triggered. Otherwise, if this was to be clicked while in a child editor,
@@ -234,6 +245,7 @@ function FixedToolbar({
         event.stopPropagation()
       }}
       ref={currentToolbarRef}
+      role="toolbar"
     >
       {isEditable && (
         <div className="fixed-toolbar__scroll">

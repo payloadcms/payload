@@ -211,6 +211,11 @@ export const PostsCollection: CollectionConfig = {
       relationTo: mediaSlug,
     },
     {
+      name: 'quantity',
+      type: 'number',
+      defaultValue: 10,
+    },
+    {
       name: 'location',
       type: 'point',
     },

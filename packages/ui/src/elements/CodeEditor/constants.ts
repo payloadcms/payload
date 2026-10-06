@@ -27,5 +27,6 @@ export const defaultGlobalEditorOptions: Omit<
     alwaysConsumeMouseWheel: false,
   },
   scrollBeyondLastLine: false,
+  tabFocusMode: true,
   wordWrap: 'on',
 }
