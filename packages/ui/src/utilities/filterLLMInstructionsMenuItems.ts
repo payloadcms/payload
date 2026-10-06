@@ -1,6 +1,6 @@
 import type { PayloadComponent, PayloadRequest, SanitizedPermissions } from 'payload'
 
-import { docAccessOperation, logError } from 'payload'
+import { docAccessOperation, isolateObjectProperty, logError } from 'payload'
 import { instructionsCollectionSlug } from 'payload/shared'
 
 export const filterLLMInstructionsMenuItems = async ({
@@ -30,10 +30,14 @@ export const filterLLMInstructionsMenuItems = async ({
 
   if (collection && targetPermissions?.read && targetPermissions.update) {
     try {
+      const accessReq = isolateObjectProperty(req, ['fallbackLocale', 'locale', 'query'])
+
+      accessReq.query = { ...req.query }
+
       const docPermissions = await docAccessOperation({
         id: collectionSlug ? `collection-${collectionSlug}` : `global-${globalSlug}`,
         collection,
-        req,
+        req: accessReq,
       })
 
       canEdit = Boolean(docPermissions.read && docPermissions.update)

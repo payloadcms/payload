@@ -7,6 +7,8 @@ import { expect, onTestFinished } from 'vitest'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Rebuild access for this test's temporary config.
 import { getInstructionsCollection } from '../../packages/payload/src/llm-instructions/getInstructionsCollection.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercise the internal permission lookup without adding a public export for tests.
+import { filterLLMInstructionsMenuItems } from '../../packages/ui/src/utilities/filterLLMInstructionsMenuItems.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercise the internal slot builder without adding a public export for tests.
 import { renderListViewSlots } from '../../packages/ui/src/views/List/renderListViewSlots.js'
 import { test } from '../__helpers/int/vitest.js'
@@ -61,6 +63,26 @@ test.suite('LLM instructions menu slots', { config: './config.ts' }, () => {
 
     expect(slots.list.listMenuItems).toHaveLength(1)
     expect(slots.document.EditMenuItems).toBeUndefined()
+  })
+
+  test('should preserve the request query when checking instruction menu access', async ({
+    payload,
+  }) => {
+    const { user } = await payload.login({ collection: 'users', data: devUser })
+    const req = await createPayloadRequest({
+      payload,
+      req: { query: { depth: 1, limit: 10 } },
+      user,
+    })
+    const menuItems = await filterLLMInstructionsMenuItems({
+      collectionSlug: 'pages',
+      menuItems: ['@payloadcms/ui#LLMInstructionsMenuItem'],
+      permissions: await getAccessResults({ req }),
+      req,
+    })
+
+    expect(menuItems).toEqual(['@payloadcms/ui#LLMInstructionsMenuItem'])
+    expect(req.query).toEqual({ depth: 1, limit: 10 })
   })
 
   test('should preserve custom menu items when the instructions item is denied', async ({

@@ -639,6 +639,28 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
 
+  test.describe('1.4.3 Contrast (Minimum) (AA)', () => {
+    test('should give an empty rich-text editor placeholder sufficient contrast', async ({
+      browser: _browser,
+    }, testInfo) => {
+      await gotoCreatePost({ page, postsURL })
+      const field = page.locator('[data-field-path="content"]')
+      const editor = field.locator('[contenteditable="true"]')
+
+      await editor.press('ControlOrMeta+a')
+      await editor.press('Backspace')
+      await expect(field.locator('.LexicalEditorTheme__placeholder')).toBeVisible()
+
+      const scan = await runAxeScan({
+        include: ['[data-field-path="content"] .LexicalEditorTheme__placeholder'],
+        page,
+        testInfo,
+      })
+
+      expect(scan.violations).toEqual([])
+    })
+  })
+
   test.describe('1.4.10 Reflow (AA)', () => {
     test('should keep instruction tabs visible and clear of the required-fields help at 320px', async () => {
       const viewport = page.viewportSize()!
