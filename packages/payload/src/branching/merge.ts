@@ -7,7 +7,7 @@ import type { BranchMergeValidationError } from './validation.js'
 import { assertBranchUpdateAccess } from './assertBranchUpdateAccess.js'
 import { discardBranchChanges } from './discard.js'
 import { beginBranchMerge, restoreBranchAfterMerge } from './merge/branchMergeStatus.js'
-import { executeMerge } from './merge/executeMerge.js'
+import { executeMerge, unknownMergeCommitResultContextKey } from './merge/executeMerge.js'
 import { prepareMerge, revalidatePreparedMerge } from './merge/prepareMerge.js'
 import { retryFailedCleanups } from './merge/retryFailedCleanups.js'
 import { refreshBranchState } from './resolveBranch.js'
@@ -206,13 +206,20 @@ export const mergeBranch = async (
       result,
     })
   } catch (error) {
-    try {
-      await restoreBranchAfterMerge({ branchDocID: branchDoc.id, payload, req })
-    } catch (restoreError) {
-      payload.logger.error({
-        err: restoreError,
-        msg: `Failed to restore branch "${branch}" after a merge error`,
-      })
+    const isCommitResultUnknown =
+      (req.context as Record<PropertyKey, unknown>)[unknownMergeCommitResultContextKey] === true
+
+    delete (req.context as Record<PropertyKey, unknown>)[unknownMergeCommitResultContextKey]
+
+    if (!isCommitResultUnknown) {
+      try {
+        await restoreBranchAfterMerge({ branchDocID: branchDoc.id, payload, req })
+      } catch (restoreError) {
+        payload.logger.error({
+          err: restoreError,
+          msg: `Failed to restore branch "${branch}" after a merge error`,
+        })
+      }
     }
 
     throw error

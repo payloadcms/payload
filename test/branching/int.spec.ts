@@ -8638,6 +8638,93 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       },
     )
 
+    test.options(
+      'should keep a branch merging when its transaction commit result is unknown',
+      { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
+      async () => {
+        branchSlug = 'unknown-commit-merge'
+
+        await createBranchRecord({ name: 'Unknown commit merge', slug: branchSlug })
+        const mainDocument = await payload.create({
+          collection: postsSlug,
+          data: { title: 'Unknown commit original' },
+        })
+
+        await payload.update({
+          id: mainDocument.id,
+          branch: branchSlug,
+          collection: postsSlug,
+          data: { title: 'Unknown commit edited' },
+        })
+
+        const beginTransaction = payload.db.beginTransaction.bind(payload.db)
+        const commitTransaction = payload.db.commitTransaction.bind(payload.db)
+        const commitError = Object.assign(new Error('Simulated unknown merge commit result'), {
+          errorLabels: ['UnknownTransactionCommitResult'],
+        })
+        let mergeTransactionID: number | string | undefined
+        let transactionStarts = 0
+        const beginSpy = vi.spyOn(payload.db, 'beginTransaction').mockImplementation(async () => {
+          const transactionID = await beginTransaction()
+
+          transactionStarts += 1
+
+          if (transactionStarts === 2) {
+            mergeTransactionID = transactionID ?? undefined
+          }
+
+          return transactionID
+        })
+        const commitSpy = vi
+          .spyOn(payload.db, 'commitTransaction')
+          .mockImplementation(async (transactionID) => {
+            await commitTransaction(transactionID)
+
+            if ((await transactionID) === mergeTransactionID) {
+              throw commitError
+            }
+          })
+
+        try {
+          await expect(
+            payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+          ).rejects.toBe(commitError)
+
+          const branch = (
+            await payload.find({
+              collection: branchesSlug,
+              pagination: false,
+              where: { slug: { equals: branchSlug } },
+            })
+          ).docs[0]
+          const remainingChanges = await findBranchChanges({ branch: branchSlug })
+          const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+
+          expect(remainingChanges.docs).toHaveLength(1)
+          expect({
+            applicationOutcome: mergeEvent.changes[0]?.applicationOutcome,
+            branchStatus: branch?.status,
+            cleanupOutcome: mergeEvent.changes[0]?.cleanupOutcome,
+            error: mergeEvent.error,
+            mergeStatus: mergeEvent.status,
+          }).toEqual({
+            applicationOutcome: 'unknown',
+            branchStatus: 'merging',
+            cleanupOutcome: 'unknown',
+            error: 'Simulated unknown merge commit result',
+            mergeStatus: 'failed',
+          })
+
+          await expect(
+            payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+          ).rejects.toMatchObject({ status: 409 })
+        } finally {
+          commitSpy.mockRestore()
+          beginSpy.mockRestore()
+        }
+      },
+    )
+
     test('should retain source state when a later non-transactional merge write fails', async () => {
       branchSlug = 'non-transactional-merge'
 

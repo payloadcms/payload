@@ -56,6 +56,7 @@ export const recoverMergeFailure = async ({
   didRollbackTransaction,
   error,
   hasTransaction,
+  isTransactionOutcomeUnknown,
   ledger,
   overrideAccess,
   payload,
@@ -66,13 +67,21 @@ export const recoverMergeFailure = async ({
   didRollbackTransaction: boolean
   error: unknown
   hasTransaction: boolean
+  isTransactionOutcomeUnknown: boolean
   ledger: MergeLedger
   overrideAccess: boolean
   payload: Payload
   req: PayloadRequest
   sourceCleanupPlans: SourceCleanupPlan[]
 }): Promise<void> => {
-  if (didRollbackTransaction) {
+  if (isTransactionOutcomeUnknown) {
+    ledger.mapChanges({
+      update: (change) =>
+        change.applicationOutcome === 'applied'
+          ? { ...change, applicationOutcome: 'unknown', cleanupOutcome: 'unknown' }
+          : change,
+    })
+  } else if (didRollbackTransaction) {
     ledger.mapChanges({
       update: (change) =>
         change.applicationOutcome === 'applied'

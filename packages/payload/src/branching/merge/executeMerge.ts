@@ -7,7 +7,10 @@ import type { AppliedChangeResult } from './utilities.js'
 
 import { APIError, Forbidden } from '../../errors/index.js'
 import { throwOnFieldAccessDeniedContextKey } from '../../fields/hooks/beforeValidate/throwOnAccessDenied.js'
-import { commitTransaction } from '../../utilities/commitTransaction.js'
+import {
+  commitTransaction,
+  isUnknownTransactionCommitResult,
+} from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import {
@@ -41,6 +44,7 @@ import { recoverMergeFailure } from './recoverMerge.js'
 import { changeDocID } from './utilities.js'
 
 const mergeEventCheckpointBatchSize = 1_000
+export const unknownMergeCommitResultContextKey = Symbol('unknownMergeCommitResult')
 
 const findLatestTargetCollectionVersionID = async ({
   collectionSlug,
@@ -225,6 +229,7 @@ export const executeMerge = async ({
   }
 
   let activeChangeID: number | string | undefined
+  let isFinalCommitInProgress = false
   let mergedAt: string | undefined
 
   const finalizeAfterCommit = (): Promise<void> =>
@@ -586,22 +591,31 @@ export const executeMerge = async ({
     }
 
     if (shouldCommit) {
+      isFinalCommitInProgress = true
       await commitTransaction(req)
+      isFinalCommitInProgress = false
     }
   } catch (error) {
+    const isCommitResultUnknown = isFinalCommitInProgress && isUnknownTransactionCommitResult(error)
+
+    if (isCommitResultUnknown) {
+      reqContext[unknownMergeCommitResultContextKey] = true
+    }
+
     if (cleanupScope) {
       clearDeferredCleanupScope({ req, scope: cleanupScope })
     }
 
-    if (shouldCommit) {
+    if (shouldCommit && !isCommitResultUnknown) {
       await killTransaction(req)
     }
 
     await recoverMergeFailure({
       activeChangeID,
-      didRollbackTransaction: shouldCommit,
+      didRollbackTransaction: shouldCommit && !isCommitResultUnknown,
       error,
       hasTransaction,
+      isTransactionOutcomeUnknown: isCommitResultUnknown,
       ledger,
       overrideAccess,
       payload,
