@@ -800,6 +800,51 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     expect(versionedCloudCalls.moves).toBe(0)
   })
 
+  test('should pass the saved document when deleting a legacy cloud upload', async ({
+    payload,
+  }) => {
+    const created = await payload.create({
+      collection: unversionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      overrideAccess: true,
+    })
+    const uploadedKey = [...versionedCloudFiles.keys()][0]!
+    const legacyKey = 'legacy.png'
+
+    versionedCloudFiles.set(legacyKey, versionedCloudFiles.get(uploadedKey)!)
+    versionedCloudFiles.delete(uploadedKey)
+
+    await payload.db.updateOne({
+      collection: unversionedCloudMediaSlug,
+      data: {
+        _objectKey: null,
+        filename: legacyKey,
+        original: {
+          _objectKey: null,
+          filename: null,
+          filesize: null,
+          height: null,
+          mimeType: null,
+          prefix: null,
+          url: null,
+          width: null,
+        },
+        url: 'https://external.example.test/legacy.png',
+      },
+      where: { id: { equals: created.id } },
+    })
+
+    await payload.delete({
+      id: created.id,
+      collection: unversionedCloudMediaSlug,
+      overrideAccess: true,
+    })
+
+    expect(versionedCloudFiles.has(legacyKey)).toBe(false)
+    expect(versionedCloudCalls.deletes).toEqual([legacyKey])
+  })
+
   test('should reject rename when the configured adapter lacks safe copy', async ({ payload }) => {
     const created = await payload.create({
       collection: versionedCloudMediaSlug,

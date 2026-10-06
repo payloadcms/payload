@@ -456,6 +456,11 @@ type FileOperationArgs = {
 
 export interface GeneratedAdapter {
   copyFile: (args: FileOperationArgs) => Promise<void>
+  deleteFile: (args: {
+    collection: CollectionConfig
+    req: PayloadRequest
+    storageFilePath: string
+  }) => Promise<void> | void
   /**
    * Additional fields to be injected into the base
    * collection and image sizes
@@ -476,6 +481,10 @@ export interface GeneratedAdapter {
 ```
 
 `from` and `to` are complete storage keys, including prefixes. `copyFile` must leave the source in place, reject an occupied destination, and resolve only after the destination can be read. If you implement `moveFile`, preserve the source until the copy has succeeded and the destination is readable. The core file versioning path can perform copy, verify, then delete when `moveFile` is absent. The key-based contract applies to path-addressed storage; an adapter using provider-assigned IDs needs a compatible mapping before it can support file versioning.
+
+Custom adapters must implement `deleteFile` for upload rollback and cleanup of unreferenced objects. Its `storageFilePath` is the complete object path, including prefixes and `_objectKey`; delete that exact object without requiring a saved document. Failed uploads may need cleanup before a document exists, and version pruning may remove the last document reference before cleanup runs. The plugin rejects enabled adapters without `deleteFile` during configuration.
+
+`handleDelete` retains its document-based contract: when it is used for legacy document deletion, it receives the saved file document along with the filename and resolved storage path. An adapter that only needs the storage path can share its deletion implementation between `deleteFile` and `handleDelete`, as the first-party adapters do.
 
 An explicit file rename copies managed objects to new current keys when versions are enabled, leaving retained versions intact. Without versions, it uses native `moveFile` when the database transaction can roll back; otherwise it copies first and deletes the source after the update succeeds.
 

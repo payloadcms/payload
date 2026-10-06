@@ -1,6 +1,8 @@
 import type { AddressInfo } from 'node:net'
 import type { Config, PayloadRequest, UploadConfig } from 'payload'
 
+import type { Adapter } from './types.js'
+
 import { createServer } from 'node:http'
 import { downloadFileToBuffer } from 'payload/internal'
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
@@ -93,6 +95,7 @@ function buildUploadConfig(skipSafeFetch?: UploadConfig['skipSafeFetch']): Uploa
       [collectionSlug]: {
         adapter: () => ({
           copyFile: async () => undefined,
+          deleteFile: async () => undefined,
           handleDelete: async () => undefined,
           handleUpload: async () => undefined,
           name: 'test-adapter',
@@ -145,6 +148,7 @@ async function fetchExternalFile({
 
 const adapter = () => ({
   copyFile: async () => undefined,
+  deleteFile: async () => undefined,
   handleDelete: () => undefined,
   handleUpload: () => undefined,
   name: 'test-adapter',
@@ -152,6 +156,18 @@ const adapter = () => ({
 })
 
 describe('cloudStoragePlugin', () => {
+  it('should reject an adapter without key deletion during configuration', () => {
+    const legacyAdapter = (() => ({ ...adapter(), deleteFile: undefined })) as unknown as Adapter
+
+    expect(() =>
+      cloudStoragePlugin({
+        collections: { media: { adapter: legacyAdapter } },
+      })({
+        collections: [{ fields: [], slug: 'media', upload: true }],
+      } as Config),
+    ).toThrow('deleteFile')
+  })
+
   it('should normalize a stored prefix during a server-mediated upload', async () => {
     const config = cloudStoragePlugin({
       collections: {
