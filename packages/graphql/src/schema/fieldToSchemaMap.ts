@@ -366,10 +366,13 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           type: graphqlResult.types.groupTypes[interfaceName],
           extensions: { field },
           resolve: (parent, args, context) => {
-            return {
-              ...parent[field.name],
-              _id: parent._id ?? parent.id,
-            }
+            return rememberDocumentVersion({
+              data: {
+                ...parent[field.name],
+                _id: parent._id ?? parent.id,
+              },
+              version: getDocumentVersion({ parent }),
+            })
           },
         } satisfies GraphQLFieldConfig<any, Context, any>,
       }
@@ -947,10 +950,13 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           [tab.name]: {
             type: graphqlResult.types.groupTypes[interfaceName],
             resolve(parent, args, context: Context) {
-              return {
-                ...parent[tab.name],
-                _id: parent._id ?? parent.id,
-              }
+              return rememberDocumentVersion({
+                data: {
+                  ...parent[tab.name],
+                  _id: parent._id ?? parent.id,
+                },
+                version: getDocumentVersion({ parent }),
+              })
             },
           },
         }
