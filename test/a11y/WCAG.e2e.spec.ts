@@ -235,11 +235,18 @@ test.describe('WCAG 2.2 Level AA', () => {
 
         await expect(items.first()).toBeVisible()
         for (const item of await items.all()) {
-          const label = (await item.locator('.column-selector__item-label').innerText()).trim()
+          const label = await item.locator('.column-selector__item-label').evaluate((element) =>
+            Array.from(element.childNodes)
+              .map((node) =>
+                node instanceof HTMLElement && node.classList.contains('column-selector__separator')
+                  ? ' > '
+                  : node.textContent,
+              )
+              .join('')
+              .trim(),
+          )
 
-          const snapshot = await item.getByRole('checkbox').ariaSnapshot()
-
-          expect.soft(snapshot.match(/^- checkbox "(.*?)"/)?.[1]).toBe(label)
+          await expect.soft(item.getByRole('checkbox')).toHaveAccessibleName(label)
         }
       })
     })
@@ -4124,7 +4131,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         await expect(input).not.toHaveAccessibleName(/\*/)
         await expectRequiredState({ input })
         if (localized) {
-          await expect(page.locator('label').filter({ hasText: /^Title/ })).toContainText('English')
+          await expect(page.locator(`label[for="field-${field}"]`)).toContainText('English')
         }
       }
     })
@@ -4264,6 +4271,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       const input = field.getByRole('textbox', { name: 'Publishing Note', exact: true })
       const region = field.getByRole('region', { name: /publishing details/i })
 
+      await field.scrollIntoViewIfNeeded()
       await expect(input).toBeVisible()
       await expect(region).toBeVisible()
       await expect(
@@ -4288,6 +4296,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       const region = field.getByRole('region', { name: 'Editorial details', exact: true })
       const toggle = field.locator('.collapsible__toggle')
 
+      await field.scrollIntoViewIfNeeded()
       await expect(field.getByText('Editorial details', { exact: true })).toBeVisible()
       await expect(region).toBeVisible()
       await expect(
