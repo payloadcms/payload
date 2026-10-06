@@ -107,7 +107,7 @@ export type LayoutLoad = () => Promise<LoadLayoutDataResult>
 
 // The admin UI loads with the admin routes only, so front-end routes never download it. The
 // router preloads lazy route components before rendering, so admin pages don't flash.
-const PayloadLayout = lazyRouteComponent(() => import('./component.js'), 'PayloadLayout')
+const PayloadLayout = lazyRouteComponent(() => import('./lazy.js'), 'PayloadLayout')
 
 /**
  * Route options for the Payload admin layout (`/_payload`). The app supplies
