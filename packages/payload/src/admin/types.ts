@@ -644,6 +644,7 @@ export type {
   BeforeListTableClientProps,
   BeforeListTableServerProps,
   BeforeListTableServerPropsOnly,
+  CurrentHierarchyItem,
   HierarchyViewData,
   ListViewClientProps,
   ListViewGroup,

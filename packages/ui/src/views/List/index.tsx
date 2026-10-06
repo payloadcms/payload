@@ -3,6 +3,7 @@ import type {
   CollectionPreferences,
   Column,
   ColumnPreference,
+  CurrentHierarchyItem,
   HierarchyViewData,
   ListQuery,
   ListViewClientProps,
@@ -16,6 +17,7 @@ import type {
   SelectType,
 } from 'payload'
 
+import { getAncestors } from 'payload'
 import {
   appendDateTimezoneSelectFields,
   appendUploadSelectFields,
@@ -354,6 +356,7 @@ export const renderListView = async (
     typeof collectionConfig.hierarchy === 'object'
       ? (collectionConfig.hierarchy.parentFieldName ?? 'parent')
       : 'parent'
+  const isHierarchyView = viewType === 'hierarchy'
   let hierarchyParentId: null | number | string = null
 
   if (isHierarchyCollection) {
@@ -366,6 +369,25 @@ export const renderListView = async (
           ? Number(parentParam)
           : parentParam
     }
+  }
+
+  let currentHierarchyItem: CurrentHierarchyItem | undefined
+
+  if (isHierarchyCollection && hierarchyParentId !== null) {
+    const hierarchyAncestors = await getAncestors({
+      id: hierarchyParentId,
+      collectionSlug,
+      req,
+    })
+
+    currentHierarchyItem = hierarchyAncestors.at(-1)
+  }
+
+  if (isHierarchyCollection && !isHierarchyView && hierarchyParentId !== null) {
+    whereWithMergedSearch = combineWhereConstraints([
+      whereWithMergedSearch,
+      { [hierarchyParentFieldName]: { equals: hierarchyParentId } },
+    ])
   }
 
   // Hierarchy data for client-side rendering
@@ -463,11 +485,10 @@ export const renderListView = async (
     }
   }
 
-  // Resolve the selected hierarchy document in either list mode.
+  // Resolve hierarchy data for the hierarchy list view.
   let HierarchyIcon: React.ReactNode | undefined
-  const isHierarchyView = viewType === 'hierarchy'
 
-  if (isHierarchyCollection && (isHierarchyView || hierarchyParentId !== null)) {
+  if (isHierarchyCollection && isHierarchyView) {
     // Extract typeFilter from searchParams (comma-separated list of collection slugs)
     const typeFilterParam = searchParams?.typeFilter
     const typeFilter =
@@ -591,6 +612,7 @@ export const renderListView = async (
       baseFilter: baseFilterConstraint,
       collectionSlug,
       columnState,
+      currentHierarchyItem,
       disableBulkDelete: collectionConfig.disableBulkDelete ?? disableBulkDelete,
       disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
       disableQueryPresets,

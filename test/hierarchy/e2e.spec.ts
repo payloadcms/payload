@@ -464,6 +464,44 @@ test.describe('Hierarchy Sidebar', () => {
   })
 
   test.describe('Folder title edit action', () => {
+    test('should keep the default list table when viewing a selected folder from All Folders', async () => {
+      const folder = await payload.create({
+        collection: 'folders',
+        data: { name: 'Default list parent' },
+        overrideAccess: true,
+      })
+      const child = await payload.create({
+        collection: 'folders',
+        data: { name: 'Default list child', parentFolder: folder.id },
+        overrideAccess: true,
+      })
+      const unrelatedFolder = await payload.create({
+        collection: 'folders',
+        data: { name: 'Unrelated folder' },
+        overrideAccess: true,
+      })
+      const foldersURL = new AdminUrlUtil(serverURL, 'folders')
+
+      try {
+        await page.goto(`${foldersURL.list}?parentFolder=${folder.id}`)
+
+        await expect(page.getByRole('heading', { name: folder.name, level: 1 })).toBeVisible()
+        await expect(page.getByRole('columnheader', { name: 'Parent' })).toBeVisible()
+        await expect(page.getByText(child.name, { exact: true })).toBeVisible()
+        await expect(
+          page.getByRole('grid').getByText(unrelatedFolder.name, { exact: true }),
+        ).toBeHidden()
+      } finally {
+        await payload.delete({ id: child.id, collection: 'folders', overrideAccess: true })
+        await payload.delete({
+          id: unrelatedFolder.id,
+          collection: 'folders',
+          overrideAccess: true,
+        })
+        await payload.delete({ id: folder.id, collection: 'folders', overrideAccess: true })
+      }
+    })
+
     for (const mode of ['list', 'hierarchy'] as const) {
       test(`should edit the current folder from the ${mode} title`, async () => {
         const folder = await payload.create({
