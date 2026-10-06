@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Organization } from './payload-types.js'
 
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -610,6 +611,23 @@ test.describe('Hierarchy Sidebar', () => {
           overrideAccess: true,
         })
       }
+    })
+
+    test('should restrict hierarchy field dropdown options by document collection', async () => {
+      await page.goto(organizationsURL.create)
+
+      const field = page.locator('#field-restrictedFolder')
+
+      await field.locator('.rs__control').click()
+
+      const menu = getSelectMenu({ page })
+
+      await expect(menu.getByRole('option', { name: 'General', exact: true })).toBeVisible()
+      await expect(menu.getByRole('option', { name: 'Orgs Only', exact: true })).toBeVisible()
+      await expect(
+        menu.getByRole('option', { name: 'Orgs and Products', exact: true }),
+      ).toBeVisible()
+      await expect(menu.getByRole('option', { name: 'Products Only', exact: true })).toHaveCount(0)
     })
 
     test.describe('Autosave create drawer', () => {
