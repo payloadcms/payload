@@ -214,6 +214,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:addFilter',
   'general:adminTheme',
   'general:allCollections',
+  'general:allowedTypes',
   'general:and',
   'general:anotherUser',
   'general:anotherUserTakenOver',

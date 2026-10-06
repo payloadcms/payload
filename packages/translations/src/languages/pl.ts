@@ -278,6 +278,7 @@ export const plTranslations: DefaultTranslationsObject = {
     all: 'Wszystko',
     allCollections: 'Wszystkie kolekcje',
     allLocales: 'Wszystkie lokalizacje',
+    allowedTypes: 'Dozwolone typy',
     and: 'i',
     anotherUser: 'Inny użytkownik',
     anotherUserTakenOver: 'Inny użytkownik przejął edycję tego dokumentu.',

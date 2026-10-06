@@ -281,6 +281,7 @@ export const azTranslations: DefaultTranslationsObject = {
     all: 'Hamısı',
     allCollections: 'Bütün kolleksiyalar',
     allLocales: 'Bütün lokal məkanlar',
+    allowedTypes: 'İcazə verilən növlər',
     and: 'Və',
     anotherUser: 'Başqa bir istifadəçi',
     anotherUserTakenOver: 'Başqa bir istifadəçi bu sənədin redaktəsini ələ keçirdi.',

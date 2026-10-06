@@ -329,7 +329,7 @@ function injectTypeField({
       position: 'sidebar',
     },
     hasMany: true,
-    label: 'Allowed types',
+    label: ({ t }) => t('general:allowedTypes'),
     options: collectionOptions,
   }
 

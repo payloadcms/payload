@@ -278,6 +278,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     all: 'Все',
     allCollections: 'Усі Колекції',
     allLocales: 'Всі локалізації',
+    allowedTypes: 'Дозволені типи',
     and: 'і',
     anotherUser: 'Інший користувач',
     anotherUserTakenOver: 'Інший користувач взяв на себе редагування цього документа.',

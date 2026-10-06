@@ -735,6 +735,29 @@ test.describe('Hierarchy Sidebar', () => {
       ).toBeVisible()
     })
 
+    test('should translate the allowed types field label', async () => {
+      await page.goto(`${serverURL}/admin/account`)
+
+      const languageField = page.locator('.payload-settings__language .react-select')
+
+      await languageField.click()
+      await page.locator('.rs__option', { hasText: 'Español' }).click()
+      await page.waitForTimeout(500)
+
+      try {
+        await page.goto(foldersURL.create)
+
+        await expect(
+          page.getByRole('combobox', { name: 'Tipos permitidos', exact: true }),
+        ).toBeVisible()
+      } finally {
+        await page.goto(`${serverURL}/admin/account`)
+        await languageField.click()
+        await page.locator('.rs__option', { hasText: 'English' }).click()
+        await page.waitForTimeout(500)
+      }
+    })
+
     test('should filter tree by selected collection type', async () => {
       await page.goto(foldersURL.list)
       await openNav(page)

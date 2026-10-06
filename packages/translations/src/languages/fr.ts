@@ -289,6 +289,7 @@ export const frTranslations: DefaultTranslationsObject = {
     all: 'Tout',
     allCollections: 'Toutes les collections',
     allLocales: 'Tous les paramètres régionaux',
+    allowedTypes: 'Types autorisés',
     and: 'Et',
     anotherUser: 'Un autre utilisateur',
     anotherUserTakenOver: 'Un autre utilisateur a pris en charge la modification de ce document.',

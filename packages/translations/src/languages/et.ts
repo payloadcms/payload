@@ -278,6 +278,7 @@ export const etTranslations: DefaultTranslationsObject = {
     all: 'Kõik',
     allCollections: 'Kõik kollektsioonid',
     allLocales: 'Kõik kohalikud seaded',
+    allowedTypes: 'Lubatud tüübid',
     and: 'Ja',
     anotherUser: 'Teine kasutaja',
     anotherUserTakenOver: 'Teine kasutaja on võtnud selle dokumendi muutmise üle.',

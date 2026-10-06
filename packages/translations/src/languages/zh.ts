@@ -263,6 +263,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     all: '所有',
     allCollections: '所有集合',
     allLocales: '所有语言环境',
+    allowedTypes: '允许的类型',
     and: '和',
     anotherUser: '另一位用户',
     anotherUserTakenOver: '另一位用户接管了此文档的编辑。',
