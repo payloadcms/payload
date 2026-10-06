@@ -53,7 +53,8 @@ export async function acquireMigrationLock({
     }
 
     const now = new Date()
-    const isLocked = lock.locked && lock.expires_at && lock.expires_at > now
+    const expiresAt = lock.expires_at ? new Date(lock.expires_at).getTime() : undefined
+    const isLocked = lock.locked && expiresAt !== undefined && expiresAt > now.getTime()
 
     // Check if already locked by another instance
     if (isLocked) {
@@ -62,7 +63,7 @@ export async function acquireMigrationLock({
     }
 
     // Detect stale lock
-    if (lock.locked && lock.expires_at && lock.expires_at <= now) {
+    if (lock.locked && expiresAt !== undefined && expiresAt <= now.getTime()) {
       payload.logger.warn({
         expired_at: lock.expires_at,
         msg: `Stale migration lock detected from instance ${lock.locked_by}. Lock expired at ${lock.expires_at}. Proceeding with lock acquisition.`,

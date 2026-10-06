@@ -57,7 +57,7 @@ describe('acquireMigrationLock', () => {
   })
 
   it('should fail to acquire lock when already locked and not expired', async () => {
-    const futureDate = new Date(Date.now() + 100000)
+    const futureDate = new Date(Date.now() + 100000).toISOString()
     const mockFindGlobal = mockPayload.findGlobal as any
     mockFindGlobal.mockResolvedValue({
       locked: true,
@@ -77,7 +77,7 @@ describe('acquireMigrationLock', () => {
   })
 
   it('should acquire lock when existing lock is stale', async () => {
-    const pastDate = new Date(Date.now() - 100000)
+    const pastDate = new Date(Date.now() - 100000).toISOString()
     const mockFindGlobal = mockPayload.findGlobal as any
     mockFindGlobal.mockResolvedValue({
       locked: true,
