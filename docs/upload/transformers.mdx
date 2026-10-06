@@ -15,8 +15,8 @@ Payload core owns transformer configuration, ordering, access control, and stora
 
 <Banner type="info">
   **Note:** If you only need Sharp-based image resizing at upload time — the
-  same behavior Payload has always provided — see [Image
-  Sizes](./overview#image-sizes) and [`@payloadcms/transformer-sharp`
+  same behavior Payload has always provided — see
+  [Variants](./overview#variants) and [`@payloadcms/transformer-sharp`
   configuration](#payloadcmstransformer-sharp) below. You do not need to write a
   custom transformer for that.
 </Banner>
@@ -284,7 +284,7 @@ At startup, `sharpTransformer` writes a Sharp-agnostic projection of `variants` 
 
 You can register more than one `sharpTransformer` (each with its own `slug`), for example to give different collections different dynamic-resize defaults. Each upload is processed by the instance whose `collections` lists that collection. A collection listed in the `collections` of more than one instance throws at startup.
 
-See [Image Sizes](./overview#image-sizes) for what each Sharp-specific image size option does, and [Crop and Focal Point Selector](./overview#crop-and-focal-point-selector) for the Admin Panel behavior these settings control.
+See [Variants](./overview#variants) for what each Sharp-specific image size option does, and [Crop and Focal Point Selector](./overview#crop-and-focal-point-selector) for the Admin Panel behavior these settings control.
 
 ### Dynamic (request-time) resizing
 
