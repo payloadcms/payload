@@ -7,7 +7,9 @@ import type {
 import type * as Runtime from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import type { JSXConverters, JSXConvertersFunction } from '@payloadcms/richtext-lexical/react'
+import type { RichTextAdapter, RichTextAdapterProvider, SanitizedConfig } from 'payload'
 
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import { describe, expect, test } from 'tstyche'
 
@@ -27,6 +29,55 @@ type Nodes = WithDefaultNodes<SerializedBlockNode<BannerBlock>>
 
 // A serialized editor state to satisfy the required `data` argument; the converters are what's under test.
 declare const data: SerializedEditorState
+
+declare const adapter: Omit<RichTextAdapter<SerializedEditorState>, 'converters'>
+declare const config: SanitizedConfig
+
+describe('LLM instructions editor preset', () => {
+  type Preset = NonNullable<
+    NonNullable<RichTextAdapter<SerializedEditorState>['presets']>['llmInstructions']
+  >
+
+  test('should require converters for the preset but not ordinary editors', () => {
+    const provider = () => adapter
+
+    expect(provider).type.toBeAssignableTo<RichTextAdapterProvider<SerializedEditorState>>()
+    expect(provider).type.not.toBeAssignableTo<Preset>()
+  })
+
+  test('should reject incomplete Markdown converters', () => {
+    const empty = () => ({ ...adapter, converters: {} })
+    const fromMarkdownOnly = () => ({ ...adapter, converters: { fromMarkdown: () => data } })
+    const toMarkdownOnly = () => ({ ...adapter, converters: { toMarkdown: () => '' } })
+
+    expect(empty).type.not.toBeAssignableTo<Preset>()
+    expect(fromMarkdownOnly).type.not.toBeAssignableTo<Preset>()
+    expect(toMarkdownOnly).type.not.toBeAssignableTo<Preset>()
+  })
+
+  test('should accept a custom editor with both Markdown converters', () => {
+    const provider = () => ({
+      ...adapter,
+      converters: {
+        fromMarkdown: () => data,
+        toMarkdown: () => '',
+      },
+    })
+
+    expect(provider).type.toBeAssignableTo<Preset>()
+  })
+
+  test('should expose both Markdown converters on Lexical without optional checks', () => {
+    const provider = lexicalEditor()
+    const editor = provider({ config, parentIsLocalized: false })
+
+    expect(provider).type.toBeAssignableTo<Preset>()
+    expect(
+      editor.converters.fromMarkdown({ markdown: 'Instructions' }),
+    ).type.toBe<SerializedEditorState>()
+    expect(editor.converters.toMarkdown({ data })).type.toBe<string>()
+  })
+})
 
 describe('strongly-typed block converters', () => {
   test('RichText accepts JSXConvertersFunction<Nodes>', () => {

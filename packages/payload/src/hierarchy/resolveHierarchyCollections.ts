@@ -214,20 +214,48 @@ function injectCollectionSpecificValidation({
       }
     }
 
-    // No hierarchy selected, no validation needed
-    if (!value) {
-      return true
+    return validateCollectionSpecificHierarchy({
+      hierarchySlug,
+      options,
+      typeFieldName,
+      value,
+    })
+  }
+
+  hierarchyField.validate = validate
+}
+
+type HierarchyValidationOptions = Parameters<Validate<unknown>>[1]
+
+const validateCollectionSpecificHierarchy = async ({
+  hierarchySlug,
+  options,
+  typeFieldName,
+  value,
+}: {
+  hierarchySlug: string
+  options: HierarchyValidationOptions
+  typeFieldName: string
+  value: unknown
+}): Promise<string | true> => {
+  if (!value || (Array.isArray(value) && value.length === 0)) {
+    return true
+  }
+
+  const { collectionSlug, overrideAccess, previousValue, req } = options
+  const newIDs = (Array.isArray(value) ? value : [value]).map((item) => extractID<Document>(item))
+
+  const previousIDs = new Set(
+    (Array.isArray(previousValue) ? previousValue : previousValue ? [previousValue] : []).map(
+      (item) => extractID<Document>(item),
+    ),
+  )
+
+  for (const newID of newIDs) {
+    if (previousIDs.has(newID)) {
+      continue
     }
 
-    const { collectionSlug, overrideAccess, previousValue, req } = options
-    const newID = extractID<Document>(value)
-
-    // Value didn't change, no validation needed
-    if (previousValue && extractID<Document>(previousValue) === newID) {
-      return true
-    }
-
-    // Fetch the hierarchy item to check its type field
     let parentItem: Document | null = null
     if (typeof newID === 'string' || typeof newID === 'number') {
       try {
@@ -250,20 +278,14 @@ function injectCollectionSpecificValidation({
 
     const allowedTypes: string[] = (parentItem[typeFieldName] as string[]) || []
 
-    // If hierarchy has no types, it accepts all collections
-    if (allowedTypes.length === 0) {
-      return true
-    }
-
-    // Check if this collection is allowed
-    if (collectionSlug && allowedTypes.includes(collectionSlug)) {
-      return true
+    if (allowedTypes.length === 0 || (collectionSlug && allowedTypes.includes(collectionSlug))) {
+      continue
     }
 
     return `Hierarchy item "${newID}" does not allow documents of type "${collectionSlug}"`
   }
 
-  hierarchyField.validate = validate
+  return true
 }
 
 /**
@@ -284,6 +306,7 @@ function injectTypeField({
 }): void {
   const collectionOptions: Option[] = Object.keys(sanitizedRelatedCollections).map((slug) => {
     const relatedCollection = config.collections?.find((c) => c.slug === slug)
+
     return {
       label: relatedCollection?.labels?.plural || slug,
       value: slug,
@@ -306,6 +329,7 @@ function injectTypeField({
       position: 'sidebar',
     },
     hasMany: true,
+    label: 'Allowed types',
     options: collectionOptions,
   }
 

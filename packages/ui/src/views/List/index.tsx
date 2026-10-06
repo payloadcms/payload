@@ -6,11 +6,14 @@ import type {
   HierarchyViewData,
   ListQuery,
   ListViewClientProps,
+  ListViewGroup,
   ListViewServerPropsOnly,
   PaginatedDocs,
   PayloadComponent,
+  PopulateType,
   QueryPreset,
   SanitizedCollectionPermission,
+  SelectType,
 } from 'payload'
 
 import {
@@ -32,6 +35,7 @@ import {
   HierarchyListView,
   HydrateAuthProvider,
   HydrateHierarchyProvider,
+  HydratePreferences,
   ListQueryProvider,
 } from '../../exports/client/index.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
@@ -44,6 +48,7 @@ import { handleGroupBy } from './handleGroupBy.js'
 import { handleHierarchy } from './handleHierarchy.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
+import { resolveDocumentListItemURL } from './resolveDocumentListItemURL.js'
 import { transformColumnsToSelect } from './transformColumnsToSelect.js'
 import './index.css'
 
@@ -234,6 +239,7 @@ export const renderListView = async (
   }
 
   let Table: React.ReactNode | React.ReactNode[] = null
+  let groupedData: ListViewGroup[] | undefined
   let columnState: Column[] = []
   let data: PaginatedDocs = {
     // no results default
@@ -263,9 +269,23 @@ export const renderListView = async (
   /** Automatically force select active columns. */
   const select = transformColumnsToSelect(columns)
 
+  /** Grid cards need their title, timestamp, and thumbnail regardless of visible table columns. */
+  if (collectionConfig.admin.useAsTitle) {
+    select[collectionConfig.admin.useAsTitle] = true
+  }
+  select.updatedAt = true
+
   /** Force select `useAsTitle` for accessible row-selection labels, even if its column is hidden. */
   if (enableRowSelections && collectionConfig.admin.useAsTitle) {
     select[collectionConfig.admin.useAsTitle] = true
+  }
+
+  /** Force select hierarchy scope so parent cells can validate destinations independently of visible columns. */
+  if (
+    typeof collectionConfig.hierarchy === 'object' &&
+    collectionConfig.hierarchy.collectionSpecific
+  ) {
+    select[collectionConfig.hierarchy.collectionSpecific.fieldName] = true
   }
 
   /** Force select image fields for list view thumbnails */
@@ -273,6 +293,44 @@ export const renderListView = async (
     collectionConfig,
     select,
   })
+
+  /** Populate only the configured thumbnail relationship for flat collection grids. */
+  const thumbnailFieldName =
+    collectionPreferences?.documentLayout === 'grid' && viewType !== 'hierarchy'
+      ? collectionConfig.admin.useAsThumbnail
+      : undefined
+  let thumbnailPopulate: PopulateType | undefined
+
+  if (thumbnailFieldName) {
+    select[thumbnailFieldName] = true
+
+    const thumbnailField = collectionConfig.flattenedFields.find(
+      (field) => field.name === thumbnailFieldName && field.type === 'upload',
+    )
+
+    if (thumbnailField && 'relationTo' in thumbnailField) {
+      const relatedSlugs = Array.isArray(thumbnailField.relationTo)
+        ? thumbnailField.relationTo
+        : [thumbnailField.relationTo]
+
+      thumbnailPopulate = {}
+
+      for (const relatedSlug of relatedSlugs) {
+        const relatedCollectionConfig = payload.collections[relatedSlug]?.config
+
+        if (relatedCollectionConfig) {
+          const relatedSelect: SelectType = {}
+
+          appendUploadSelectFields({
+            collectionConfig: relatedCollectionConfig,
+            select: relatedSelect,
+          })
+
+          thumbnailPopulate[relatedSlug] = relatedSelect
+        }
+      }
+    }
+  }
 
   /** Force select `_tz` siblings for any timezone-enabled date fields in select */
   appendDateTimezoneSelectFields({
@@ -315,7 +373,7 @@ export const renderListView = async (
 
   try {
     if (query.groupBy) {
-      ;({ columnState, data, Table } = await handleGroupBy({
+      ;({ columnState, data, groupedData, Table } = await handleGroupBy({
         clientCollectionConfig,
         clientConfig,
         collectionConfig,
@@ -325,9 +383,15 @@ export const renderListView = async (
         drawerSlug,
         enableRowSelections,
         fieldPermissions: permissions?.collections?.[collectionSlug]?.fields,
+        hierarchyParentFieldName:
+          isHierarchyCollection && !drawerSlug && viewType === 'list'
+            ? hierarchyParentFieldName
+            : undefined,
         query,
         req,
         select,
+        thumbnailFieldName,
+        thumbnailPopulate,
         trash,
         user,
         viewType,
@@ -343,7 +407,7 @@ export const renderListView = async (
     } else {
       data = await req.payload.find({
         collection: collectionSlug,
-        depth: 0,
+        depth: thumbnailFieldName ? 1 : 0,
         draft: true,
         fallbackLocale: false,
         includeLockStatus: true,
@@ -351,6 +415,7 @@ export const renderListView = async (
         locale: req.locale,
         overrideAccess: false,
         page: query?.page ? Number(query.page) : undefined,
+        populate: thumbnailPopulate,
         req,
         select,
         sort: query?.sort,
@@ -374,6 +439,10 @@ export const renderListView = async (
         drawerSlug,
         enableRowSelections,
         fieldPermissions: permissions?.collections?.[collectionSlug]?.fields,
+        hierarchyParentFieldName:
+          isHierarchyCollection && !drawerSlug && viewType === 'list'
+            ? hierarchyParentFieldName
+            : undefined,
         i18n: req.i18n,
         orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
         payload: req.payload,
@@ -493,6 +562,24 @@ export const renderListView = async (
   })
 
   const isInDrawer = Boolean(drawerSlug)
+  const documentURLs =
+    !isInDrawer && !isHierarchyView && collectionConfig.admin.formatDocURL
+      ? Object.fromEntries(
+          (groupedData ? groupedData.flatMap((group) => group.data.docs) : data.docs).map((doc) => [
+            doc.id,
+            resolveDocumentListItemURL({
+              collectionSlug,
+              doc,
+              formatDocURL: collectionConfig.admin.formatDocURL,
+              hierarchyParentFieldName: isHierarchyCollection
+                ? hierarchyParentFieldName
+                : undefined,
+              req,
+              viewType,
+            }),
+          ]),
+        )
+      : undefined
 
   // Needed to prevent: Only plain objects can be passed to Client Components from Server Components. Objects with toJSON methods are not supported. Convert it manually to a simple value before passing it to props.
   // Is there a way to avoid this? The `where` object is already seemingly plain, but is not bc it originates from the params.
@@ -507,7 +594,10 @@ export const renderListView = async (
       disableBulkDelete: collectionConfig.disableBulkDelete ?? disableBulkDelete,
       disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
       disableQueryPresets,
+      documentLayout: collectionPreferences?.documentLayout,
+      documentURLs,
       enableRowSelections,
+      groupedData,
       hasCreatePermission,
       hasDeletePermission,
       hasTrashPermission,
@@ -533,6 +623,7 @@ export const renderListView = async (
     List: (
       <Fragment>
         <HydrateAuthProvider permissions={permissions} />
+        <HydratePreferences collectionSlug={collectionSlug} preferences={collectionPreferences} />
         {isHierarchyView ? (
           <Fragment>
             <HydrateHierarchyProvider

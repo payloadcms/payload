@@ -1839,6 +1839,126 @@ azureStorage({
 
 Run `npx @payloadcms/codemod --transform migrate-azure-chunk-large-files` to remove the flag automatically (it collapses `clientUploads: { chunkLargeFiles: true }` to `clientUploads: true` and keeps any other `clientUploads` options).
 
+### Sharp moved out of core into `@payloadcms/transformer-sharp`
+
+Image resizing is no longer built into `payload` itself. It now ships as an official [file transformer](../upload/transformers), `@payloadcms/transformer-sharp`, that you register under `upload.transformers`.
+
+This affects four things:
+
+1. The top-level `sharp` config property has been removed. Passing a Sharp instance now happens through `sharpTransformer({ sharp })` instead.
+2. Per-collection Sharp options — `constructorOptions`, `formatOptions`, `resizeOptions`, `trimOptions`, and `withMetadata` — have been removed from `CollectionConfig['upload']`. They're now authored through `sharpTransformer({ collections })`.
+   - `imageSizes` has also been removed from `CollectionConfig['upload']`. Image sizes are now declared as `variants` on `sharpTransformer({ collections: { <slug>: { variants } } })`. The entries themselves (`name`, `width`, `height`, `generateImageName`, and so on) are unchanged. A collection that still sets `upload.imageSizes` fails the build.
+3. `sharp` is no longer a dependency of `payload` at all (previously a `devDependency`, not a runtime `dependency`). Install `@payloadcms/transformer-sharp` explicitly.
+4. The Sharp-specific types `SharpDependency`, `ImageUploadFormatOptions`, `ImageUploadTrimOptions`, and `SharpImageSizeOptions` are no longer exported from `payload`. Import `SharpDependency` from `@payloadcms/transformer-sharp`. For the option types, use `SharpCollectionConfig['formatOptions']`, `SharpCollectionConfig['trimOptions']`, and `NonNullable<SharpCollectionConfig['variants']>[number]` from the same package.
+
+```sh
+pnpm add @payloadcms/transformer-sharp
+```
+
+```diff
++ import { sharpTransformer } from '@payloadcms/transformer-sharp'
+  import { buildConfig } from 'payload'
+
+  export default buildConfig({
+    collections: [
+      {
+        slug: 'media',
+        upload: {
+-         resizeOptions: { width: 2048, height: 2048 },
+-         imageSizes: [{ name: 'thumbnail', width: 400, height: 300 }],
+        },
+      },
+    ],
+-   sharp,
+    upload: {
++     transformers: [
++       sharpTransformer({
++         sharp,
++         collections: {
++           media: {
++             resizeOptions: { width: 2048, height: 2048 },
++             variants: [{ name: 'thumbnail', width: 400, height: 300 }],
++           },
++         },
++       }),
++     ],
+    },
+  })
+```
+
+Run `npx @payloadcms/codemod --transform migrate-sharp-to-transformer` to migrate automatically. The codemod moves a top-level `sharp` dependency and inline collection Sharp options — including `crop` and `focalPoint` — into `sharpTransformer({ collections })` (writing `imageSizes` as `variants`), appends to an existing `upload.transformers` array if you already have one, and leaves anything it can't safely rewrite in place with a note — for example, a `collections` array built by a function call, or a collection defined outside the `buildConfig` call. Review those manually. For a config that already registers `sharpTransformer`, it only renames `imageSizes` to `variants` inside the existing `sharpTransformer` call and flags a leftover top-level `sharp` property; it doesn't move any remaining collection options.
+
+Your `variants`, `crop`, and `focalPoint` are readable at `collection.upload.variants`/`.crop`/`.focalPoint` on the **sanitized** config (for example `req.payload.collections.media.config.upload.variants`). Code that read the sanitized `upload.imageSizes` in 3.x must read `upload.variants` instead. `sharpTransformer` writes a projection of what you configure back onto the sanitized collection at startup, so the Admin Panel and the rest of core see the same configuration. For a collection configured on `sharpTransformer`, a `crop` or `focalPoint` set on the transformer replaces the collection's own value; one left unset there keeps the collection's. Neither `imageSizes` nor `variants` can be set on the collection at all.
+
+If you inject a custom Sharp build or version, pass it the same way:
+
+```diff
+- buildConfig({ sharp: myCustomSharp })
++ sharpTransformer({ sharp: myCustomSharp })
+```
+
+`sharpTransformer` can also resize images at request time (`/api/media/file/photo.png?width=400`). This is new in Payload 4 and **disabled by default**, so a migrated config keeps serving only the original file and your pre-generated `variants`. The codemod doesn't enable it. To opt in, pass `dynamic: true` or `dynamic: { collections: ['media'] }` — see [Dynamic (request-time) resizing](../upload/transformers#dynamic-request-time-resizing), and [Securing dynamic resizing](../upload/transformers#securing-dynamic-resizing) before enabling it on a publicly readable collection.
+
+#### The stored `sizes` field on upload documents is renamed to `variants`
+
+The group field that holds each generated image size on an upload document is now `variants` instead of `sizes`. Every place that reads or queries it changes:
+
+```diff
+- doc.sizes?.thumbnail?.url
++ doc.variants?.thumbnail?.url
+
+- where: { 'sizes.thumbnail.filename': { equals: 'photo-400x300.png' } }
++ where: { 'variants.thumbnail.filename': { equals: 'photo-400x300.png' } }
+
+- select: { sizes: { thumbnail: true } }
++ select: { variants: { thumbnail: true } }
+```
+
+GraphQL queries select `variants { thumbnail { url } }` instead of `sizes { thumbnail { url } }`, and regenerated types expose `variants?: { ... }` (and `variants?: T | { ... }` on the `*Select` types) in place of `sizes`. Update any frontend code that reads `media.sizes`, including values you pass to helpers such as `getBestFitFromSizes({ sizes: doc.variants })`.
+
+Existing documents must be migrated. Create the predefined migration for your database adapter and run it:
+
+<Banner type="warning">
+  Payload 4 uses `variants` as the top-level field for generated upload
+  variants. If an upload collection already defines a custom field named
+  `variants`, rename that field before you run the predefined migration. Choose
+  a new name, update your config, and write a custom migration that moves the
+  existing custom data from `variants` to the new field. Then run the predefined
+  `sizes-to-variants` migration. If legacy `sizes` data or columns and custom
+  `variants` data or columns are both present, the predefined migration stops
+  before it changes data or indexes. It cannot choose a new name or merge this
+  custom data for you.
+</Banner>
+
+```sh
+# MongoDB
+payload migrate:create --file @payloadcms/db-mongodb/sizes-to-variants
+# Postgres
+payload migrate:create --file @payloadcms/db-postgres/sizes-to-variants
+# Vercel Postgres
+payload migrate:create --file @payloadcms/db-vercel-postgres/sizes-to-variants
+# SQLite
+payload migrate:create --file @payloadcms/db-sqlite/sizes-to-variants
+# Cloudflare D1
+payload migrate:create --file @payloadcms/db-d1-sqlite/sizes-to-variants
+
+payload migrate
+```
+
+**Postgres and SQLite (including Vercel Postgres and D1):** the columns are renamed in place from `sizes_<name>_<property>` to `variants_<name>_<property>`, on each upload collection's table and its versions table, along with their indexes. Use the predefined migration above **instead of** a plain `payload migrate:create` for this change. A generated migration would drop the `sizes_*` columns and add new `variants_*` columns, losing the stored image size data. The predefined migration also writes the schema snapshot, so the next generated migration starts from the renamed columns.
+
+On MongoDB the migration renames `sizes` (and `version.sizes` on versions) with `$rename` and re-creates the indexes on those fields under the new path. Run the migration before the upgraded app writes to upload documents.
+
+#### The file endpoint changes once any transformer is registered
+
+Registering any transformer under `upload.transformers` — including `sharpTransformer()` with dynamic resizing off — routes every file request through the transformer-aware handler:
+
+- A file must belong to an upload document to be served. A file that exists in storage without a matching document now returns `404`.
+- For files whose MIME type a transformer declares (every image, with `sharpTransformer()`), `access.read` can run twice per request: once with `req.fileTransform` set to `true` to decide a possible transform, and once without it for an ordinary read. Keep `access.read` cheap, and use `req.fileTransform` to restrict transformed reads — see [Access control](../upload/transformers#access-control).
+- Responses produced by a transformer always carry Payload's CORS headers, which `modifyResponseHeaders` can't override.
+
+To link to a file from your own code, including with transformer query parameters, use the new `generatePayloadFileURL` helper (exported from `payload` and `payload/shared`). It always builds the access-controlled Payload file endpoint, so links never bypass `access.read` by pointing straight at storage.
+
 ### Storage adapters always insert the `prefix` field now — `alwaysInsertFields` removed
 
 The `alwaysInsertFields` option (on `cloudStoragePlugin` and every `storage-*` adapter: `-s3`, `-azure`, `-gcs`, `-r2`, `-vercel-blob`) has been removed. The behavior it used to opt into — always inserting the hidden `prefix` field into the collection schema — is now unconditional, so the schema stays consistent whether or not a collection configures a `prefix` and whether or not the plugin is `enabled`.
@@ -2107,6 +2227,8 @@ Because the `payload-mcp-api-keys` collection config was removed, run your norma
 By default, MCP items require an authenticated user. Built-in collection and global tools also include Payload permission checks in their default `access` callbacks. If you provide an `access` callback for a built-in tool, it replaces the default callback.
 
 **Dependencies.** The plugin now builds on `@modelcontextprotocol/server` instead of `@modelcontextprotocol/sdk` + `mcp-handler`. It no longer depends on Zod directly; its built-in tools use the Zod Mini export from `payload`. If your custom tools use regular Zod, install Zod v4 in your project and import it directly.
+
+**HTTP requests have a size limit.** `POST /api/mcp` now answers request bodies over 4 MiB with `413`. Base64 file uploads count toward this limit. Raise it with `mcp.maxRequestBodySize`.
 
 ### `@payloadcms/ui/scss` export removed and legacy `--theme-*` tokens retired
 

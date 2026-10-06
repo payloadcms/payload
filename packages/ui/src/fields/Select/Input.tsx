@@ -112,6 +112,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
       className={[
         fieldBaseClass,
         'select',
+        hasMany && 'select--has-many',
         className,
         showError && 'error',
         readOnly && 'read-only',
