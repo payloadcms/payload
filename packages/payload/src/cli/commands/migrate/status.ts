@@ -24,7 +24,7 @@ export const createMigrateStatusCommand = defineCLICommand({
           payload.logger.info({ msg: `  Locked by: ${lock.locked_by}` })
           payload.logger.info({ msg: `  Locked at: ${lock.locked_at}` })
           payload.logger.info({ msg: `  Expires at: ${lock.expires_at}` })
-          const isStale = lock.expires_at && lock.expires_at < new Date()
+          const isStale = lock.expires_at && new Date(lock.expires_at).getTime() <= Date.now()
           payload.logger.info({ msg: `  Status: ${isStale ? 'STALE' : 'Active'}` })
         }
       } catch {

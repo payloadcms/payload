@@ -1,10 +1,35 @@
-/* eslint-disable vitest/no-standalone-expect -- test is the shared integration fixture registrar. */
 import { createPayloadRequest } from 'payload'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 
 test.suite('Migration Locking', { config: './config.ts' }, () => {
+  test('should reject a second instance while an unexpired lock is held', async ({ payload }) => {
+    const { acquireMigrationLock, releaseMigrationLock } = await import('payload')
+    const firstReq = await createPayloadRequest({ payload })
+    const firstLock = await acquireMigrationLock({ payload, req: firstReq })
+
+    expect(firstLock.acquired).toBe(true)
+
+    try {
+      const secondReq = await createPayloadRequest({ payload })
+      const secondLock = await acquireMigrationLock({ payload, req: secondReq })
+      const lockState = await payload.findGlobal({
+        slug: 'payload-migrations-lock',
+        overrideAccess: true,
+      })
+
+      expect(secondLock.acquired).toBe(false)
+      expect(lockState.locked_by).toBe(firstLock.instanceId)
+    } finally {
+      await releaseMigrationLock({
+        instanceId: firstLock.instanceId,
+        payload,
+        req: firstReq,
+      })
+    }
+  })
+
   test('should acquire and release lock', async ({ payload }) => {
     const { acquireMigrationLock, releaseMigrationLock } = await import('payload')
 
