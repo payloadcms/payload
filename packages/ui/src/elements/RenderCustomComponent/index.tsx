@@ -1,6 +1,14 @@
+'use client'
+
+import React from 'react'
+
+import { ConfigComponentErrorBoundary } from '../ConfigComponentErrorBoundary/index.js'
+
 type Args = {
   CustomComponent?: React.ReactNode
   Fallback: React.ReactNode
+  /** Use only for passive slots with a compatible built-in replacement. */
+  shouldUseFallbackOnError?: boolean
 }
 
 /**
@@ -14,6 +22,25 @@ type Args = {
  * @param {React.ReactNode} args.Fallback - Fallback component to render if CustomComponent is undefined.
  * @returns {React.ReactNode} Rendered component.
  */
-export function RenderCustomComponent({ CustomComponent, Fallback }: Args): React.ReactNode {
-  return CustomComponent !== undefined ? CustomComponent : Fallback
+export function RenderCustomComponent({
+  CustomComponent,
+  Fallback,
+  shouldUseFallbackOnError = false,
+}: Args): React.ReactNode {
+  if (CustomComponent === undefined) {
+    return Fallback
+  }
+
+  if (CustomComponent === null) {
+    return null
+  }
+
+  return (
+    <ConfigComponentErrorBoundary
+      componentName="custom component slot"
+      errorFallback={shouldUseFallbackOnError ? Fallback : undefined}
+    >
+      {CustomComponent}
+    </ConfigComponentErrorBoundary>
+  )
 }

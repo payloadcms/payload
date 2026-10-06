@@ -124,6 +124,7 @@ export const PointFieldComponent: React.FC<PointFieldClientProps> = (props) => {
                 required={required}
               />
             }
+            shouldUseFallbackOnError
           />
           {BeforeInput}
           <div className="form-input-group">
@@ -162,11 +163,13 @@ export const PointFieldComponent: React.FC<PointFieldClientProps> = (props) => {
                 required={required}
               />
             }
+            shouldUseFallbackOnError
           />
           <div className="form-input-group">
             <RenderCustomComponent
               CustomComponent={Error}
               Fallback={<FieldError path={path} showError={showError} />}
+              shouldUseFallbackOnError
             />
             {BeforeInput}
             {/* disable eslint rule because the label is dynamic */}
@@ -195,6 +198,7 @@ export const PointFieldComponent: React.FC<PointFieldClientProps> = (props) => {
       <RenderCustomComponent
         CustomComponent={Description}
         Fallback={<FieldDescription description={description} path={path} />}
+        shouldUseFallbackOnError
       />
     </div>
   )

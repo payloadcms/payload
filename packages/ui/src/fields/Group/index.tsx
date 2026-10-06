@@ -96,6 +96,7 @@ export const GroupFieldComponent: React.FC<GroupFieldClientProps> = (props) => {
                         />
                       </h3>
                     }
+                    shouldUseFallbackOnError
                   />
                 )}
                 {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
@@ -103,6 +104,7 @@ export const GroupFieldComponent: React.FC<GroupFieldClientProps> = (props) => {
               <RenderCustomComponent
                 CustomComponent={Description}
                 Fallback={<FieldDescription description={description} path={path} />}
+                shouldUseFallbackOnError
               />
             </div>
           )}

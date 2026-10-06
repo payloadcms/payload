@@ -153,6 +153,7 @@ const CollapsibleFieldComponent: React.FC<CollapsibleFieldClientProps> = (props)
         <RenderCustomComponent
           CustomComponent={Description}
           Fallback={<FieldDescription description={description} path={path} />}
+          shouldUseFallbackOnError
         />
       </div>
     </Fragment>

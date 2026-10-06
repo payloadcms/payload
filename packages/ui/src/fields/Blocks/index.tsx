@@ -425,6 +425,7 @@ const BlocksFieldComponent: React.FC<BlocksFieldClientProps> = (props) => {
         <RenderCustomComponent
           CustomComponent={Error}
           Fallback={<FieldError path={path} showError={showError} />}
+          shouldUseFallbackOnError
         />
       )}
       <header className={`${baseClass}__header`}>
@@ -442,6 +443,7 @@ const BlocksFieldComponent: React.FC<BlocksFieldClientProps> = (props) => {
                     required={required}
                   />
                 }
+                shouldUseFallbackOnError
               />
             </h3>
             {displayedErrorCount > 0 && (
@@ -480,6 +482,7 @@ const BlocksFieldComponent: React.FC<BlocksFieldClientProps> = (props) => {
         <RenderCustomComponent
           CustomComponent={Description}
           Fallback={<FieldDescription description={description} path={path} />}
+          shouldUseFallbackOnError
         />
       </header>
       {BeforeInput}

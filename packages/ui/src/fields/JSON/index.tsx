@@ -174,11 +174,13 @@ const JSONFieldComponent: React.FC<JSONFieldClientProps> = (props) => {
             required={required}
           />
         }
+        shouldUseFallbackOnError
       />
       <div className={`${fieldBaseClass}__wrap`}>
         <RenderCustomComponent
           CustomComponent={Error}
           Fallback={<FieldError message={jsonError} path={path} showError={showError} />}
+          shouldUseFallbackOnError
         />
         {BeforeInput}
         <CodeEditor
@@ -203,6 +205,7 @@ const JSONFieldComponent: React.FC<JSONFieldClientProps> = (props) => {
       <RenderCustomComponent
         CustomComponent={Description}
         Fallback={<FieldDescription description={description} path={path} />}
+        shouldUseFallbackOnError
       />
     </div>
   )

@@ -6,6 +6,7 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { ConfigErrorFieldsCollection } from './collections/ConfigErrorFields/index.js'
 import { MediaCollection } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { UsersCollection, usersSlug } from './collections/Users/index.js'
@@ -45,6 +46,14 @@ export default buildConfigWithDefaults({
     admin: {
       components: {
         views: {
+          ConfigComponentErrors: {
+            Component: '/components/ConfigComponentErrors/index.js#ConfigComponentErrors',
+            path: '/config-component-errors',
+          },
+          ConfigComponentErrorsRedirect: {
+            Component: '/components/ConfigComponentErrors/index.js#ConfigComponentErrorsRedirect',
+            path: '/config-component-errors-redirect',
+          },
           StatusMessages: {
             Component: '/components/StatusMessages/index.js#StatusMessages',
             path: '/status-messages',
@@ -72,6 +81,7 @@ export default buildConfigWithDefaults({
     },
     collections: [
       UsersCollection,
+      ConfigErrorFieldsCollection,
       FolderCollection,
       PostsCollection,
       MediaCollection,

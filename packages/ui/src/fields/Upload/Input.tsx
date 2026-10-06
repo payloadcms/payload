@@ -686,12 +686,14 @@ export function UploadInput(props: UploadInputProps) {
         Fallback={
           <FieldLabel label={label} localized={localized} path={path} required={required} />
         }
+        shouldUseFallbackOnError
       />
       {BeforeInput}
       <div className={`${fieldBaseClass}__wrap`}>
         <RenderCustomComponent
           CustomComponent={Error}
           Fallback={<FieldError path={path} showError={showError} />}
+          shouldUseFallbackOnError
         />
         <div className={`${baseClass}__dropzoneAndUpload`}>
           {hasMany && Array.isArray(value) && value.length > 0 ? (
@@ -827,6 +829,7 @@ export function UploadInput(props: UploadInputProps) {
       <RenderCustomComponent
         CustomComponent={Description}
         Fallback={<FieldDescription description={description} path={path} />}
+        shouldUseFallbackOnError
       />
     </div>
   )

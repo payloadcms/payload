@@ -14,11 +14,11 @@ import { MissingEditorProp } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
 import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
 import {
   DefaultCell,
   FolderIcon,
+  RenderCustomComponent,
   RenderDefaultCell,
   TagIcon,
   // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
@@ -282,6 +282,7 @@ export function renderCell({
         />
       }
       key={`${rowIndex}-${columnIndex}`}
+      shouldUseFallbackOnError
     />
   )
 }

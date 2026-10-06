@@ -85,12 +85,14 @@ const RadioGroupFieldComponent: React.FC<RadioFieldClientProps> = (props) => {
         <RenderCustomComponent
           CustomComponent={Error}
           Fallback={<FieldError alignCaret="left" path={path} showError={showError} />}
+          shouldUseFallbackOnError
         />
         <RenderCustomComponent
           CustomComponent={Label}
           Fallback={
             <FieldLabel label={label} localized={localized} path={path} required={required} />
           }
+          shouldUseFallbackOnError
         />
       </div>
       <div className={`${fieldBaseClass}__wrap`}>
@@ -136,6 +138,7 @@ const RadioGroupFieldComponent: React.FC<RadioFieldClientProps> = (props) => {
         <RenderCustomComponent
           CustomComponent={Description}
           Fallback={<FieldDescription description={description} path={path} />}
+          shouldUseFallbackOnError
         />
       </div>
     </div>

@@ -9,6 +9,7 @@ import type {
 
 import React from 'react'
 
+import { ConfigComponentErrorBoundary } from '../../elements/ConfigComponentErrorBoundary/index.js'
 import { ArrayField } from '../../fields/Array/index.js'
 import { BlocksField } from '../../fields/Blocks/index.js'
 import { CheckboxField } from '../../fields/Checkbox/index.js'
@@ -69,7 +70,11 @@ export function RenderField({
   }
 
   if (CustomField !== undefined) {
-    return CustomField || null
+    return CustomField ? (
+      <ConfigComponentErrorBoundary componentName={`field:${schemaPath}`} instanceKey={path}>
+        {CustomField}
+      </ConfigComponentErrorBoundary>
+    ) : null
   }
 
   const iterableFieldProps = {

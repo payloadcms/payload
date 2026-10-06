@@ -10,6 +10,7 @@ import { waitForFormReady } from '../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { getSelectMenu, selectInput } from '../__helpers/e2e/selectInput.js'
 import { initPage } from '../__setup/e2e/initPage.js'
+import { configErrorFieldsSlug } from './collections/ConfigErrorFields/index.js'
 import {
   addCollectionQueryWidget,
   addTextBlock,
@@ -3857,6 +3858,108 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
   })
   test.describe('4.1.3 Status Messages (AA)', () => {
+    test('should announce isolated config component errors while preserving keyboard operation and sibling state', async ({
+      browser: _browser,
+    }, testInfo) => {
+      // Also assesses 2.1.1 Keyboard, 2.4.3 Focus Order, and 4.1.2 Name, Role, Value.
+      await page.goto(
+        formatAdminURL({
+          adminRoute: '/admin',
+          path: '/config-component-errors-redirect',
+          serverURL,
+        }),
+      )
+      await expect(page).toHaveURL(`${serverURL}/admin/config-component-errors`)
+      const serverErrors = page.getByRole('region', { name: 'Server component errors' })
+      const clientErrors = page.getByRole('region', { name: 'Client component errors' })
+      const siblingInput = page.getByRole('textbox', { name: 'Sibling input' })
+      const trigger = page.getByRole('button', { name: 'Trigger component error' })
+      const reset = page.getByRole('button', { name: 'Reset component instance' })
+
+      await expect(serverErrors.getByRole('alert')).toHaveCount(3)
+      await expect(serverErrors).toContainText('Healthy server sibling')
+      await expect(clientErrors).toContainText('Healthy client component')
+      await siblingInput.fill('Unsaved sibling value')
+      await trigger.focus()
+      await trigger.press('Enter')
+      await expect(clientErrors.getByRole('alert')).toHaveText('An error has occurred.')
+      await expect(trigger).toBeFocused()
+      await expect(siblingInput).toHaveValue('Unsaved sibling value')
+      await expect(page.getByRole('button', { name: 'Must not substitute action' })).toHaveCount(0)
+      await trigger.press('Tab')
+      await expect(reset).toBeFocused()
+      await reset.press('Enter')
+      await expect(clientErrors).toContainText('Healthy client component')
+      await expect(reset).toBeFocused()
+      await expect(siblingInput).toHaveValue('Unsaved sibling value')
+      const results = await runAxeScan({ page, testInfo })
+
+      expect(results.violations).toHaveLength(0)
+    })
+
+    test('should preserve editable sibling fields and save data when a configured server field fails', async ({
+      browser,
+    }) => {
+      const context = await browser.newContext({
+        storageState: await page.context().storageState(),
+      })
+      const fieldPage = await context.newPage()
+      let docID: number | string | undefined
+
+      // Streaming SSR reports its handled RSC recovery through window.reportError.
+      // This fixture deliberately throws; keep all other page errors fatal.
+      fieldPage.on('pageerror', (error) => {
+        if (
+          !error.message.includes('Minified React error #441') &&
+          !error.message.includes('Synchronous server component failed')
+        ) {
+          throw error
+        }
+      })
+
+      try {
+        await fieldPage.goto(
+          formatAdminURL({
+            adminRoute: '/admin',
+            path: `/collections/${configErrorFieldsSlug}/create`,
+            serverURL,
+          }),
+        )
+        await expect(
+          fieldPage.getByRole('alert').filter({ hasText: 'An error has occurred.' }),
+        ).toHaveCount(1)
+        await fieldPage.getByRole('textbox', { name: 'Title' }).fill('Sibling field survives')
+        const saved = fieldPage.waitForResponse(
+          (response) =>
+            response.request().method() === 'POST' &&
+            new URL(response.url()).pathname === `/api/${configErrorFieldsSlug}`,
+        )
+
+        await fieldPage.getByRole('button', { name: 'Save', exact: true }).click()
+        const response = await saved
+        const { doc } = await response.json()
+
+        docID = doc.id
+        expect(response.ok()).toBe(true)
+        expect(doc.title).toBe('Sibling field survives')
+        expect(doc.customField).toBe('Preserved custom field value')
+        await expect(fieldPage).toHaveURL(
+          new RegExp(`/admin/collections/${configErrorFieldsSlug}/${docID}`),
+        )
+        await expect(fieldPage.getByRole('textbox', { name: 'Title' })).toHaveValue(
+          'Sibling field survives',
+        )
+      } finally {
+        try {
+          if (docID) {
+            await context.request.delete(`${serverURL}/api/${configErrorFieldsSlug}/${docID}`)
+          }
+        } finally {
+          await context.close()
+        }
+      }
+    })
+
     test('should keep the toast close button accessible with its live announcements off', async () => {
       await page.goto(`${postsURL.admin}/status-messages`)
       await page.getByRole('button', { name: 'Show action toast' }).click()

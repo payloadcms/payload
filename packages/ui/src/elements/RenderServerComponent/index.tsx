@@ -1,9 +1,17 @@
 import type { ImportMap, PayloadComponent } from 'payload'
 
-import { getFromImportMap, isPlainObject, isReactServerComponentOrFunction } from 'payload/shared'
+import {
+  getFromImportMap,
+  isPlainObject,
+  isReactServerComponentOrFunction,
+  parsePayloadComponent,
+} from 'payload/shared'
 import React from 'react'
 
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Preserve the client boundary during RSC rendering
+import { ConfigComponentErrorBoundary } from '../../exports/client/index.js'
 import { removeUndefined } from '../../utilities/removeUndefined.js'
+import { getComponentInstanceKey } from './getComponentInstanceKey.js'
 
 type RenderServerComponentFn = (args: {
   readonly clientProps?: object
@@ -35,7 +43,7 @@ export const RenderServerComponent: RenderServerComponentFn = ({
         clientProps,
         Component: c,
         importMap,
-        key: index,
+        key: String(index),
         serverProps,
       }),
     )
@@ -50,7 +58,17 @@ export const RenderServerComponent: RenderServerComponentFn = ({
       ...(isRSC ? serverProps : {}),
     })
 
-    return <Component key={key} {...sanitizedProps} />
+    return (
+      <ConfigComponentErrorBoundary
+        componentName={
+          isRSC ? Component.name || 'configured server component' : 'configured client component'
+        }
+        instanceKey={getComponentInstanceKey({ key, props: sanitizedProps })}
+        key={key}
+      >
+        <Component {...sanitizedProps} />
+      </ConfigComponentErrorBoundary>
+    )
   }
 
   if (typeof Component === 'string' || isPlainObject(Component)) {
@@ -73,17 +91,28 @@ export const RenderServerComponent: RenderServerComponentFn = ({
         ...(typeof Component === 'object' && Component?.clientProps ? Component.clientProps : {}),
       })
 
-      return <ResolvedComponent key={key} {...sanitizedProps} />
+      const { exportName, path } = parsePayloadComponent(Component)
+
+      return (
+        <ConfigComponentErrorBoundary
+          componentName={`${path}#${exportName}`}
+          instanceKey={getComponentInstanceKey({ key, props: sanitizedProps })}
+          key={key}
+        >
+          <ResolvedComponent {...sanitizedProps} />
+        </ConfigComponentErrorBoundary>
+      )
     }
   }
 
-  return Fallback
-    ? RenderServerComponent({
-        clientProps,
-        Component: Fallback,
-        importMap,
-        key,
-        serverProps,
-      })
-    : null
+  if (!Fallback) {
+    return null
+  }
+
+  const sanitizedProps = removeUndefined({
+    ...clientProps,
+    ...(isReactServerComponentOrFunction(Fallback) ? serverProps : {}),
+  })
+
+  return <Fallback key={key} {...sanitizedProps} />
 }

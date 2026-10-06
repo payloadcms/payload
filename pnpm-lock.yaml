@@ -1822,6 +1822,9 @@ importers:
       react-dom:
         specifier: 19.3.0
         version: 19.3.0(react@19.3.0)
+      react-error-boundary:
+        specifier: 6.1.1
+        version: 6.1.1(react@19.3.0)
       react-image-crop:
         specifier: 10.1.8
         version: 10.1.8(react@19.3.0)

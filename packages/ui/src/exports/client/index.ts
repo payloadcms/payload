@@ -31,6 +31,8 @@ export { SortHeader } from '../../elements/SortHeader/index.js'
 export { SortRow } from '../../elements/SortRow/index.js'
 export { OrderableTable } from '../../elements/Table/OrderableTable.js'
 
+export { ConfigComponentErrorBoundary } from '../../elements/ConfigComponentErrorBoundary/index.js'
+
 // query preset elements
 export { QueryPresetsColumnsCell } from '../../elements/QueryPresets/cells/ColumnsCell/index.js'
 export { QueryPresetsWhereCell } from '../../elements/QueryPresets/cells/WhereCell/index.js'

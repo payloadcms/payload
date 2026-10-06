@@ -82,11 +82,13 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
             required={required}
           />
         }
+        shouldUseFallbackOnError
       />
       <div className={`${fieldBaseClass}__wrap`}>
         <RenderCustomComponent
           CustomComponent={Error}
           Fallback={<FieldError path={path} showError={showError} />}
+          shouldUseFallbackOnError
         />
         <div className="password__input-wrap">
           {BeforeInput}
@@ -122,6 +124,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
         <RenderCustomComponent
           CustomComponent={Description}
           Fallback={<FieldDescription description={description} path={path} />}
+          shouldUseFallbackOnError
         />
       </div>
     </div>
