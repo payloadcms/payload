@@ -14,13 +14,14 @@ type DatePickerComponent = typeof ReactDatePicker extends { default: infer Compo
 export const useDatePickerKeyboard = ({ overrides }: Props) => {
   const datePickerRef = React.useRef<React.ComponentRef<DatePickerComponent>>(null)
   const calendarRef = React.useRef<HTMLDivElement>(null)
+  const hasTypedInput = React.useRef(false)
   const shouldFocusCalendar = React.useRef(false)
   const calendarFocusFrame = React.useRef<null | number>(null)
   const onEscape = React.useCallback((event: React.KeyboardEvent) => {
     event.stopPropagation()
     if (!event.defaultPrevented) {
       event.preventDefault()
-      datePickerRef.current?.setOpen(false)
+      datePickerRef.current?.setOpen(false, true)
       datePickerRef.current?.sendFocusBackToInput()
     }
   }, [])
@@ -51,7 +52,19 @@ export const useDatePickerKeyboard = ({ overrides }: Props) => {
     [],
   )
 
+  const onBlur: NonNullable<DatePickerProps['onBlur']> = (event) => {
+    hasTypedInput.current = false
+    overrides?.onBlur?.(event)
+  }
+  const onChangeRaw: NonNullable<DatePickerProps['onChangeRaw']> = (event, selectionMeta) => {
+    overrides?.onChangeRaw?.(event, selectionMeta)
+
+    if (event && !event.defaultPrevented && event.target === datePickerRef.current?.input) {
+      hasTypedInput.current = true
+    }
+  }
   const onCalendarClose = () => {
+    hasTypedInput.current = false
     shouldFocusCalendar.current = false
     if (calendarFocusFrame.current !== null) {
       cancelAnimationFrame(calendarFocusFrame.current)
@@ -92,7 +105,8 @@ export const useDatePickerKeyboard = ({ overrides }: Props) => {
     ) {
       event.preventDefault()
       // Enter confirms typed input instead of opening the calendar over nearby controls.
-      if (event.key === 'Enter' && datePickerRef.current.state.inputValue !== null) {
+      if (event.key === 'Enter' && hasTypedInput.current) {
+        hasTypedInput.current = false
         datePickerRef.current.setOpen(false)
         return
       }
@@ -102,15 +116,17 @@ export const useDatePickerKeyboard = ({ overrides }: Props) => {
   }
 
   const onKeyDownCapture: React.KeyboardEventHandler<HTMLDivElement> = (event) => {
-    // Month/year cells prevent every non-Tab key before invoking onKeyDown.
+    // Cells handle Escape themselves, which can blur the input after we restore focus.
     // Intercept only the cell itself so nested controls can consume Escape.
-    const isMonthOrYearCell =
+    const isCalendarCell =
       event.target instanceof HTMLElement &&
-      event.target.matches('.react-datepicker__month-text, .react-datepicker__year-text')
+      event.target.matches(
+        '.react-datepicker__day, .react-datepicker__week-number, .react-datepicker__month-text, .react-datepicker__year-text',
+      )
 
     if (
       event.key === 'Escape' &&
-      (event.target === datePickerRef.current?.input || isMonthOrYearCell) &&
+      (event.target === datePickerRef.current?.input || isCalendarCell) &&
       datePickerRef.current?.isCalendarOpen()
     ) {
       overrides?.onKeyDown?.(event)
@@ -121,9 +137,11 @@ export const useDatePickerKeyboard = ({ overrides }: Props) => {
   return {
     calendarRef,
     datePickerRef,
+    onBlur,
     onCalendarClose,
     onCalendarKeyDown,
     onCalendarOpen,
+    onChangeRaw,
     onKeyDown,
     onKeyDownCapture,
   }

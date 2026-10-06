@@ -92,9 +92,11 @@ const DatePicker: React.FC<Props> = (props) => {
   const {
     calendarRef,
     datePickerRef,
+    onBlur,
     onCalendarClose,
     onCalendarKeyDown,
     onCalendarOpen,
+    onChangeRaw,
     onKeyDown,
     onKeyDownCapture,
   } = useDatePickerKeyboard(props)
@@ -203,9 +205,6 @@ const DatePicker: React.FC<Props> = (props) => {
     DatePickerProps,
     { selectsMultiple?: false; selectsRange?: false }
   > = {
-    // The library uses this ref to move DOM focus when its preselected day changes.
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- react-datepicker 7 expects React 18 ref nullability under strictNullChecks.
-    containerRef: calendarRef as React.RefObject<HTMLDivElement>,
     customInputRef: 'ref',
     dateFormat,
     disabled: readOnly,
@@ -237,8 +236,10 @@ const DatePicker: React.FC<Props> = (props) => {
       { selectsMultiple?: false; selectsRange?: false } // to satisfy TypeScript. Overrides can enable selectsMultiple or selectsRange but then it's up to the user to ensure they pass in the correct onChange
     >),
     calendarContainer,
+    onBlur,
     onCalendarClose,
     onCalendarOpen,
+    onChangeRaw,
     onKeyDown,
   }
 
