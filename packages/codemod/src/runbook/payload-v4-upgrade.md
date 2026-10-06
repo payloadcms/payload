@@ -43,6 +43,9 @@ blocks generation, set dummy env values and re-run.
 - Jobs: run DB migrations for the new lease/stats fields.
 - Review per-transform notes printed in the upgrade report for spots needing manual review.
 
+- Review `migrate-draft-version-selectors` file/line notes. Resolve shared or dynamic Local API/SDK options, historical operations, and create validation differences manually. Update REST, GraphQL, and CLI consumers too.
+- Check publication workflows: omitted update selectors now write the published version and return 404 for documents that were never published; `latest` preserves the old update default. Published reads exclude draft-only documents. All-locale field writes need locale-keyed inputs and deliberate status/selector choices.
+
 ## 4. Verify
 
 - `tsc --noEmit` (delete `tsconfig.tsbuildinfo` first; set `checkJs: true` so `importMap.js` is covered).
