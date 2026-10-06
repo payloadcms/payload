@@ -282,6 +282,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     all: 'すべて',
     allCollections: 'すべてのコレクション',
     allLocales: 'すべてのロケール',
+    allowedTypes: '許可されているタイプ',
     and: 'かつ',
     anotherUser: '別のユーザー',
     anotherUserTakenOver: '別のユーザーがこのドキュメントの編集を引き継ぎました。',

@@ -279,6 +279,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     all: 'Всички',
     allCollections: 'Всички колекции',
     allLocales: 'Всички локации',
+    allowedTypes: 'Разрешени типове',
     and: 'И',
     anotherUser: 'Друг потребител',
     anotherUserTakenOver: 'Друг потребител пое редактирането на този документ.',

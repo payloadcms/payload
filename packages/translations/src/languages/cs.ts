@@ -276,6 +276,7 @@ export const csTranslations: DefaultTranslationsObject = {
     all: 'Všechny',
     allCollections: 'Všechny kolekce',
     allLocales: 'Všechny lokalizace',
+    allowedTypes: 'Povolené typy',
     and: 'a',
     anotherUser: 'Jiný uživatel',
     anotherUserTakenOver: 'Jiný uživatel převzal úpravy tohoto dokumentu.',
