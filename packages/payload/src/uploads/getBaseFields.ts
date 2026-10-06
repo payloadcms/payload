@@ -217,11 +217,6 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
         { name: '_objectKey', type: 'text', hidden: true },
       ],
     },
-    {
-      name: '_fileRevision',
-      type: 'text',
-      hidden: true,
-    },
   ]
 
   // Add focal point fields if not disabled

@@ -183,7 +183,6 @@ export interface Media {
     prefix?: string | null;
     _objectKey?: string | null;
   };
-  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
   variants?: {
@@ -278,7 +277,6 @@ export interface MediaWithCompositePrefix {
     prefix?: string | null;
     _objectKey?: string | null;
   };
-  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -317,7 +315,6 @@ export interface MediaWithCustomUrl {
     prefix?: string | null;
     _objectKey?: string | null;
   };
-  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -356,7 +353,6 @@ export interface MediaWithDisabledPlugin {
     prefix?: string | null;
     _objectKey?: string | null;
   };
-  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -395,7 +391,6 @@ export interface MediaWithGenerateFileUrl {
     prefix?: string | null;
     _objectKey?: string | null;
   };
-  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -435,7 +430,6 @@ export interface MediaWithOverwrite {
     prefix?: string | null;
     _objectKey?: string | null;
   };
-  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
   variants?: {
@@ -496,7 +490,6 @@ export interface MediaWithPrefix {
     prefix?: string | null;
     _objectKey?: string | null;
   };
-  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -540,7 +533,6 @@ export interface MediaWithThrowingHook {
     prefix?: string | null;
     _objectKey?: string | null;
   };
-  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -580,7 +572,6 @@ export interface RestrictedMedia {
     prefix?: string | null;
     _objectKey?: string | null;
   };
-  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -630,7 +621,6 @@ export interface TestMetadatum {
     prefix?: string | null;
     _objectKey?: string | null;
   };
-  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
   variants?: {
@@ -681,7 +671,6 @@ export interface UnversionedCloudMedia {
     prefix?: string | null;
     _objectKey?: string | null;
   };
-  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -722,7 +711,6 @@ export interface VersionedCloudMedia {
     prefix?: string | null;
     _objectKey?: string | null;
   };
-  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -761,7 +749,6 @@ export interface VersionedPublicCloudMedia {
     prefix?: string | null;
     _objectKey?: string | null;
   };
-  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -800,7 +787,6 @@ export interface VersionedS3Media {
     prefix?: string | null;
     _objectKey?: string | null;
   };
-  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
   variants?: {
@@ -973,7 +959,6 @@ export interface MediaSelect<T extends boolean = true> {
         prefix?: T;
         _objectKey?: T;
       };
-  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
   variants?:
@@ -1035,7 +1020,6 @@ export interface MediaWithCompositePrefixesSelect<T extends boolean = true> {
         prefix?: T;
         _objectKey?: T;
       };
-  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
 }
@@ -1069,7 +1053,6 @@ export interface MediaWithCustomUrlSelect<T extends boolean = true> {
         prefix?: T;
         _objectKey?: T;
       };
-  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
 }
@@ -1103,7 +1086,6 @@ export interface MediaWithDisabledPluginSelect<T extends boolean = true> {
         prefix?: T;
         _objectKey?: T;
       };
-  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
 }
@@ -1137,7 +1119,6 @@ export interface MediaWithGenerateFileUrlSelect<T extends boolean = true> {
         prefix?: T;
         _objectKey?: T;
       };
-  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
 }
@@ -1172,7 +1153,6 @@ export interface MediaWithOverwriteSelect<T extends boolean = true> {
         prefix?: T;
         _objectKey?: T;
       };
-  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
   variants?:
@@ -1234,7 +1214,6 @@ export interface MediaWithPrefixSelect<T extends boolean = true> {
         prefix?: T;
         _objectKey?: T;
       };
-  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
 }
@@ -1270,7 +1249,6 @@ export interface MediaWithThrowingHookSelect<T extends boolean = true> {
         prefix?: T;
         _objectKey?: T;
       };
-  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
 }
@@ -1305,7 +1283,6 @@ export interface RestrictedMediaSelect<T extends boolean = true> {
         prefix?: T;
         _objectKey?: T;
       };
-  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
 }
@@ -1347,7 +1324,6 @@ export interface TestMetadataSelect<T extends boolean = true> {
         prefix?: T;
         _objectKey?: T;
       };
-  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
   variants?:
@@ -1397,7 +1373,6 @@ export interface UnversionedCloudMediaSelect<T extends boolean = true> {
         prefix?: T;
         _objectKey?: T;
       };
-  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
 }
@@ -1458,7 +1433,6 @@ export interface VersionedCloudMediaSelect<T extends boolean = true> {
         prefix?: T;
         _objectKey?: T;
       };
-  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
 }
@@ -1492,7 +1466,6 @@ export interface VersionedPublicCloudMediaSelect<T extends boolean = true> {
         prefix?: T;
         _objectKey?: T;
       };
-  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
 }
@@ -1526,7 +1499,6 @@ export interface VersionedS3MediaSelect<T extends boolean = true> {
         prefix?: T;
         _objectKey?: T;
       };
-  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
   variants?:

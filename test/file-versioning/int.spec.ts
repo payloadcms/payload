@@ -60,11 +60,10 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     await rm(trashMediaDir, { force: true, recursive: true })
   })
 
-  test('should ignore client supplied file identity fields', async ({ payload }) => {
+  test('should ignore client supplied original data', async ({ payload }) => {
     const created = await payload.create({
       collection: mediaSlug,
       data: {
-        _fileRevision: 'forged',
         alt: 'client data',
         original,
       } as never,
@@ -80,7 +79,6 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     expect(internal.original?.url).toBeFalsy()
     expect(internal.original?.mimeType).toBeFalsy()
     expect(internal.original?.filesize).toBeFalsy()
-    expect(internal._fileRevision).toBeFalsy()
   })
 
   test('should retain an untouched server upload as one original and default object', async ({
@@ -764,8 +762,6 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     })
 
     expect(current.alt).toBe('A')
-    expect(current._fileRevision).toBeTruthy()
-    expect(current._fileRevision).not.toBe(selected.version._fileRevision)
     expect(
       (await readFile(path.join(mediaDir, current.original!.filename!))).equals(firstBytes),
     ).toBe(true)
@@ -1179,7 +1175,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     expect(await readFile(path.join(mediaDir, result.docs[0]!.filename!))).toEqual(secondBytes)
   })
 
-  test('should preserve file revisions through draft, autosave, publish, and unpublish', async ({
+  test('should preserve stored files through draft, autosave, publish, and unpublish', async ({
     payload,
   }) => {
     const publishedBytes = await readFile(imageFixture)

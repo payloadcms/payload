@@ -1,13 +1,8 @@
-import { randomUUID } from 'node:crypto'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
-import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { FileToSave } from '../types.js'
-
-import { APIError } from '../../errors/APIError.js'
-import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 
 export type StagedObject = {
   key: string
@@ -25,19 +20,9 @@ type RequestState = {
   pending: Attempt[]
 }
 
-type FileState = {
-  latestVersion: null | string
-  revision: null | string
-}
-
 type RunFileOperationPlanArgs<T> = {
-  collection: CollectionSlug
-  id: number | string
   req: PayloadRequest
-  stage: (args: {
-    state: FileState
-    trackStagedObject: (object: StagedObject) => void
-  }) => Promise<void>
+  stage: (args: { trackStagedObject: (object: StagedObject) => void }) => Promise<void>
   write: (args: { trackStagedObject: (object: StagedObject) => void }) => Promise<T>
 }
 
@@ -96,13 +81,8 @@ export const deferFileCleanup = async ({
   }
 }
 
-/**
- * Stages owned objects, then claims the parent upload row before writing document or version data.
- * Every file-changing writer must use this claim, including drafts that leave the published row alone.
- */
+/** Stages owned objects before writing document or version data. */
 export const runFileOperationPlan = async <T>({
-  id,
-  collection,
   req,
   stage,
   write,
@@ -116,39 +96,7 @@ export const runFileOperationPlan = async <T>({
   requestState.depth += 1
 
   try {
-    const state = await readFileState({ id, collection, req })
-
-    await stage({ state, trackStagedObject })
-
-    let claimed
-
-    try {
-      claimed = await req.payload.db.updateOne({
-        collection,
-        data: { _fileRevision: randomUUID() },
-        options: { atomic: true },
-        req,
-        where: {
-          and: [{ id: { equals: id } }, { _fileRevision: { equals: state.revision } }],
-        },
-      })
-    } catch (err) {
-      if (isWriteConflict(err)) {
-        throw new APIError('The upload changed while its files were being prepared.', 409)
-      }
-
-      throw err
-    }
-
-    if (!claimed) {
-      throw new APIError('The upload changed while its files were being prepared.', 409)
-    }
-
-    const latestVersion = await readLatestVersion({ id, collection, req })
-
-    if (latestVersion !== state.latestVersion) {
-      throw new APIError('The upload version changed while its files were being prepared.', 409)
-    }
+    await stage({ trackStagedObject })
 
     hasStartedWrite = true
     const result = await write({ trackStagedObject })
@@ -170,7 +118,7 @@ export const runFileOperationPlan = async <T>({
   }
 }
 
-/** Creates have no parent row to claim, but still need rollback and outer-scope compensation. */
+/** Creates use the same rollback and outer-scope compensation without an existing document. */
 export const runFileCreationPlan = async <T>({
   req,
   stage,
@@ -321,62 +269,6 @@ const finishFileOperation = async ({
   }
 }
 
-const readFileState = async ({
-  id,
-  collection,
-  req,
-}: {
-  collection: CollectionSlug
-  id: number | string
-  req: PayloadRequest
-}): Promise<FileState> => {
-  const document = await req.payload.db.findOne({
-    collection,
-    req,
-    where: { id: { equals: id } },
-  })
-
-  if (!document) {
-    throw new APIError('The upload no longer exists.', 409)
-  }
-
-  const revision = (document as { _fileRevision?: unknown })._fileRevision
-
-  return {
-    latestVersion: await readLatestVersion({ id, collection, req }),
-    revision: typeof revision === 'string' ? revision : null,
-  }
-}
-
-const readLatestVersion = async ({
-  id,
-  collection,
-  req,
-}: {
-  collection: CollectionSlug
-  id: number | string
-  req: PayloadRequest
-}): Promise<null | string> => {
-  const config = req.payload.collections[collection]?.config
-
-  if (!config?.versions) {
-    return null
-  }
-
-  const { docs } = await req.payload.db.findVersions({
-    collection,
-    limit: 1,
-    req,
-    sort: '-updatedAt',
-    where: hasDraftsEnabled(config)
-      ? { and: [{ parent: { equals: id } }, { latest: { equals: true } }] }
-      : { parent: { equals: id } },
-  })
-  const latest = docs[0]
-
-  return latest ? JSON.stringify([latest.id, latest.updatedAt, latest.version]) : null
-}
-
 const flushCleanup = async ({
   req,
   state,
@@ -420,22 +312,4 @@ const compensate = async ({
       })
     }
   }
-}
-
-const isWriteConflict = (err: unknown): boolean => {
-  if (err === null || typeof err !== 'object') {
-    return false
-  }
-
-  const { code, codeName } = err as { code?: number | string; codeName?: string }
-
-  return (
-    code === 112 ||
-    codeName === 'WriteConflict' ||
-    code === '40001' ||
-    code === '40P01' ||
-    code === 'SQLITE_BUSY' ||
-    code === 'SQLITE_BUSY_SNAPSHOT' ||
-    code === 'SQLITE_LOCKED'
-  )
 }

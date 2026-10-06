@@ -192,8 +192,6 @@ export const renameFileOperation = async (
       }
     }
     const result = await runFileOperationPlan({
-      id,
-      collection: collection.config.slug,
       req,
       stage: async ({ trackStagedObject }) => {
         if (hasNativeMove) {

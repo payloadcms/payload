@@ -60,8 +60,6 @@ export const runLocalFileUpdate = async <T>({
   }
 
   return runFileOperationPlan({
-    id,
-    collection: collection.slug,
     req,
     stage: ({ trackStagedObject }) =>
       stageLocalUploadFiles({

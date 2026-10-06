@@ -165,7 +165,6 @@ export interface FileVersionedMedia {
     prefix?: string | null;
     _objectKey?: string | null;
   };
-  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -238,7 +237,6 @@ export interface FileVersionedDraftMedia {
     prefix?: string | null;
     _objectKey?: string | null;
   };
-  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -276,7 +274,6 @@ export interface FileVersionedTransformedMedia {
     prefix?: string | null;
     _objectKey?: string | null;
   };
-  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
   variants?: {
@@ -326,7 +323,6 @@ export interface FileVersionedConvertedMedia {
     prefix?: string | null;
     _objectKey?: string | null;
   };
-  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -365,7 +361,6 @@ export interface FileVersionedTrashMedia {
     prefix?: string | null;
     _objectKey?: string | null;
   };
-  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -403,7 +398,6 @@ export interface FileVersionedPlainMedia {
     prefix?: string | null;
     _objectKey?: string | null;
   };
-  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -530,7 +524,6 @@ export interface FileVersionedMediaSelect<T extends boolean = true> {
         prefix?: T;
         _objectKey?: T;
       };
-  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
 }
@@ -564,7 +557,6 @@ export interface FileVersionedDraftMediaSelect<T extends boolean = true> {
         prefix?: T;
         _objectKey?: T;
       };
-  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
 }
@@ -597,7 +589,6 @@ export interface FileVersionedTransformedMediaSelect<T extends boolean = true> {
         prefix?: T;
         _objectKey?: T;
       };
-  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
   variants?:
@@ -646,7 +637,6 @@ export interface FileVersionedConvertedMediaSelect<T extends boolean = true> {
         prefix?: T;
         _objectKey?: T;
       };
-  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
 }
@@ -680,7 +670,6 @@ export interface FileVersionedTrashMediaSelect<T extends boolean = true> {
         prefix?: T;
         _objectKey?: T;
       };
-  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
 }
@@ -713,7 +702,6 @@ export interface FileVersionedPlainMediaSelect<T extends boolean = true> {
         prefix?: T;
         _objectKey?: T;
       };
-  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
 }
@@ -878,8 +866,6 @@ export interface UploadDropzoneWidget {
 export interface Auth {
   [k: string]: unknown;
 }
-
-
 declare module 'payload' {
   // @ts-ignore
   export interface GeneratedTypes extends Config {}

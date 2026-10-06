@@ -106,8 +106,6 @@ export const runCloudFileUpdate = async <T>({
   let metadata: Record<string, unknown> = {}
 
   return runFileOperationPlan({
-    id,
-    collection: collection.slug,
     req,
     stage: async ({ trackStagedObject }) => {
       if (files.length === 0 && !req.context?._payloadVerifiedProviderOriginal) {

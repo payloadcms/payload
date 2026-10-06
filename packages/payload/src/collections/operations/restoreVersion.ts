@@ -333,7 +333,6 @@ export const restoreVersionOperation = async <
     const writeRestoredVersion = async (restored: JsonObject) => {
       if (collectionConfig.upload) {
         result = restoreUploadDataFromDocument(result, restored, { clearMissing: true })
-        delete result._fileRevision
       }
       if (!draftArg) {
         result = await req.payload.db.updateOne({

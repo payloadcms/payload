@@ -104,8 +104,6 @@ export const runStoredFileRestore = async <T>({
   let restored: JsonObject = selectedForCurrent
 
   return runFileOperationPlan({
-    id,
-    collection: collection.slug,
     req,
     stage: async ({ trackStagedObject }) => {
       for (const file of storedFiles) {

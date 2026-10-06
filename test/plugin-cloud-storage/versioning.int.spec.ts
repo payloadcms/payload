@@ -465,7 +465,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     expect(versionedCloudCalls.deletes).toContain(firstKey)
   })
 
-  test('should compensate a staged unversioned upload when the document claim fails', async ({
+  test('should compensate a staged unversioned upload when the document write fails', async ({
     payload,
   }) => {
     const created = await payload.create({
@@ -483,8 +483,8 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
 
     const updateOne = payload.db.updateOne.bind(payload.db)
     const spy = vi.spyOn(payload.db, 'updateOne').mockImplementation(async (args) => {
-      if (args.collection === unversionedCloudMediaSlug && '_fileRevision' in args.data) {
-        throw new Error('Cloud test document claim failed')
+      if (args.collection === unversionedCloudMediaSlug) {
+        throw new Error('Cloud test document write failed')
       }
       return updateOne(args as never)
     })
@@ -498,7 +498,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
           filePath: secondFile,
           overrideAccess: true,
         }),
-      ).rejects.toThrow('Cloud test document claim failed')
+      ).rejects.toThrow('Cloud test document write failed')
     } finally {
       spy.mockRestore()
     }
