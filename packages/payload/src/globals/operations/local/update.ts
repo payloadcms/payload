@@ -6,12 +6,13 @@ import type {
   SelectType,
   TransformGlobalWithSelect,
 } from '../../../types/index.js'
+import type { LocaleDataOptions } from '../../../types/locale.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
 import type {
   DataFromGlobalSlug,
-  DraftFlagFromGlobalSlug,
   SelectFromGlobalSlug,
+  VersionFromGlobalSlug,
 } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -25,6 +26,7 @@ import {
   type User,
 } from '../../../index.js'
 import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
+import { parseDocumentVersion } from '../../../versions/parseDocumentVersion.js'
 import { updateOperation } from '../update.js'
 
 type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
@@ -36,10 +38,6 @@ type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    */
   context?: RequestContext
   /**
-   * The global data to update.
-   */
-  data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
-  /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
   depth?: number
@@ -47,10 +45,6 @@ type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
   fallbackLocale?: false | TypedLocale
-  /**
-   * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
-   */
-  locale?: 'all' | TypedLocale
   /**
    * If you are uploading a file and would like to replace
    * the existing file instead of generating a new filename,
@@ -61,13 +55,6 @@ type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
    */
   populate?: PopulateType
-  /**
-   * Publish the document / documents in all locales. Only applies when localization is enabled
-   * and the global has localized fields.
-   *
-   * @default undefined
-   */
-  publishAllLocales?: boolean
   /**
    * The `PayloadRequest` object. You can pass it to thread the current [transaction](https://payloadcms.com/docs/database/transactions), user and locale to the operation.
    * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
@@ -83,22 +70,18 @@ type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    */
   slug: TSlug
   /**
-   * Unpublish the document / documents in all locales. Only applies when localization is enabled
-   * and the global has localized fields.
-   */
-  unpublishAllLocales?: boolean
-  /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: null | User
-} & Pick<FindOptions<string, SelectType>, 'select'> &
+} & LocaleDataOptions<DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>, TypedLocale> &
+  Pick<FindOptions<string, TSelect>, 'select'> &
   Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = BaseOptions<
   TSlug,
   TSelect
 > &
-  DraftFlagFromGlobalSlug<TSlug>
+  VersionFromGlobalSlug<TSlug>
 
 export async function updateGlobalLocal<
   TSlug extends GlobalSlug,
@@ -107,18 +90,18 @@ export async function updateGlobalLocal<
   payload: Payload,
   options: Options<TSlug, TSelect>,
 ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> {
+  parseDocumentVersion({ params: { ...options } })
+
   const {
     slug: globalSlug,
     data,
     depth,
-    draft,
     overrideAccess = false,
     overrideLock,
     populate,
-    publishAllLocales,
     select,
     showHiddenFields,
-    unpublishAllLocales,
+    version,
   } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
@@ -131,18 +114,16 @@ export async function updateGlobalLocal<
     slug: globalSlug as string,
     data: deepCopyObjectSimple(data), // Ensure mutation of data in create operation hooks doesn't affect the original data
     depth,
-    draft,
     globalConfig,
     overrideAccess,
     overrideLock,
     populate,
-    publishAllLocales,
     req: await createPayloadRequest({
       ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
       payload,
     }),
     select,
     showHiddenFields,
-    unpublishAllLocales,
+    version,
   })
 }

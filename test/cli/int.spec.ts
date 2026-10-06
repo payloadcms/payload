@@ -339,12 +339,12 @@ test.suite('CLI', { config: './config.ts' }, () => {
     })
   })
 
-  test(`createDocuments --slug pages --documents '[{"data":{"title":"not created"}}]' --select '{"title":true}' --json`, async ({
+  test(`createDocuments --slug pages --version published --documents '[{"data":{"title":"not created"}}]' --select '{"title":true}' --json`, async ({
     cli,
     payload,
   }) => {
     const output = await cli({
-      command: `createDocuments --slug pages --documents '[{"data":{"title":"not created"}}]' --select '{"title":true}' --json`,
+      command: `createDocuments --slug pages --version published --documents '[{"data":{"title":"not created"}}]' --select '{"title":true}' --json`,
       reject: false,
     })
     const pages = await payload.count({
@@ -401,12 +401,12 @@ test.suite('CLI', { config: './config.ts' }, () => {
     })
   })
 
-  test(`updateDocument --slug pages --where '{"title":{"equals":"Seeded page"}}' --data '{"title":"not updated"}' --select '{"title":true}' --json`, async ({
+  test(`updateDocument --slug pages --version published --where '{"title":{"equals":"Seeded page"}}' --data '{"title":"not updated"}' --select '{"title":true}' --json`, async ({
     cli,
     payload,
   }) => {
     const output = await cli({
-      command: `updateDocument --slug pages --where '{"title":{"equals":"Seeded page"}}' --data '{"title":"not updated"}' --select '{"title":true}' --json`,
+      command: `updateDocument --slug pages --version published --where '{"title":{"equals":"Seeded page"}}' --data '{"title":"not updated"}' --select '{"title":true}' --json`,
       reject: false,
     })
     const seededPages = await payload.count({
@@ -494,10 +494,10 @@ test.suite('CLI', { config: './config.ts' }, () => {
   })
 
   test(
-    `createDocuments --slug pages --documents '[{"data":{"title":"one","location":{"longitude":1,"latitude":2}}},{"data":{"title":"two"}}]' --json`,
+    `createDocuments --slug pages --version published --documents '[{"data":{"title":"one","location":{"longitude":1,"latitude":2}}},{"data":{"title":"two"}}]' --json`,
     async ({ cli, payload }) => {
       const output = await cli(
-        'createDocuments --slug pages --documents \'[{"data":{"title":"one","location":{"longitude":1,"latitude":2}}},{"data":{"title":"two"}}]\' --json',
+        'createDocuments --slug pages --version published --documents \'[{"data":{"title":"one","location":{"longitude":1,"latitude":2}}},{"data":{"title":"two"}}]\' --json',
       )
       const pages = await payload.find({
         collection: 'pages',
@@ -530,7 +530,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     CLI_COMMAND_TEST_TIMEOUT,
   )
 
-  test('createDocuments --slug pages --documents @documents.json --json', async ({
+  test('createDocuments --slug pages --version published --documents @documents.json --json', async ({
     cli,
     payload,
   }) => {
@@ -539,7 +539,9 @@ test.suite('CLI', { config: './config.ts' }, () => {
       JSON.stringify([{ data: { title: 'file one' } }, { data: { title: 'file two' } }]),
     )
 
-    const output = await cli(`createDocuments --slug pages --documents @${documentsFile} --json`)
+    const output = await cli(
+      `createDocuments --slug pages --version published --documents @${documentsFile} --json`,
+    )
     const pages = await payload.find({
       collection: 'pages',
       overrideAccess: true,
@@ -568,6 +570,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
         slug: 'pages',
         documents: [{ data: { title: 'Merged input' } }],
         returning: false,
+        version: 'published',
       }),
     )
 
@@ -628,11 +631,11 @@ test.suite('CLI', { config: './config.ts' }, () => {
     })
   })
 
-  test(`createDocuments --slug pages --documents '[{"data":{}}]' --draft --returning --json`, async ({
+  test(`createDocuments --slug pages --documents '[{"data":{}}]' --version draft --returning --json`, async ({
     cli,
   }) => {
     const output = await cli({
-      command: `createDocuments --slug pages --documents '[{"data":{}}]' --draft --returning --json`,
+      command: `createDocuments --slug pages --documents '[{"data":{}}]' --version draft --returning --json`,
       reject: false,
     })
     const response = JSON.parse(output.stdout)
@@ -648,12 +651,12 @@ test.suite('CLI', { config: './config.ts' }, () => {
     })
   })
 
-  test(`createDocuments --slug pages --documents '[{"data":{"title":"created"}},{"data":{"title":null}}]' --json`, async ({
+  test(`createDocuments --slug pages --version published --documents '[{"data":{"title":"created"}},{"data":{"title":null}}]' --json`, async ({
     cli,
     payload,
   }) => {
     const output = await cli({
-      command: `createDocuments --slug pages --documents '[{"data":{"title":"created"}},{"data":{"title":null}}]' --json`,
+      command: `createDocuments --slug pages --version published --documents '[{"data":{"title":"created"}},{"data":{"title":null}}]' --json`,
       reject: false,
     })
     const response = JSON.parse(output.stdout)
@@ -687,12 +690,12 @@ test.suite('CLI', { config: './config.ts' }, () => {
     })
   })
 
-  test(`updateDocument --slug pages --where '{"title":{"equals":"Seeded page"}}' --data '{"title":null}' --json`, async ({
+  test(`updateDocument --slug pages --version published --where '{"title":{"equals":"Seeded page"}}' --data '{"title":null}' --json`, async ({
     cli,
     payload,
   }) => {
     const output = await cli({
-      command: `updateDocument --slug pages --where '{"title":{"equals":"Seeded page"}}' --data '{"title":null}' --json`,
+      command: `updateDocument --slug pages --version published --where '{"title":{"equals":"Seeded page"}}' --data '{"title":null}' --json`,
       reject: false,
     })
     const response = JSON.parse(output.stdout)
@@ -719,7 +722,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     })
   })
 
-  test(`updateDocument --slug pages --id <page-id> --data '{"metadata":{"title":"Updated"}}' --json`, async ({
+  test(`updateDocument --slug pages --version published --id <page-id> --data '{"metadata":{"title":"Updated"}}' --json`, async ({
     cli,
     payload,
   }) => {
@@ -734,9 +737,10 @@ test.suite('CLI', { config: './config.ts' }, () => {
         title: 'Nested update',
       },
       overrideAccess: true,
+      version: 'published',
     })
     const output = await cli({
-      command: `updateDocument --slug pages --id ${page.id} --data '{"metadata":{"title":"Updated"}}' --returning --json`,
+      command: `updateDocument --slug pages --version published --id ${page.id} --data '{"metadata":{"title":"Updated"}}' --returning --json`,
       reject: false,
     })
     const updatedPage = await payload.findByID({
@@ -753,16 +757,17 @@ test.suite('CLI', { config: './config.ts' }, () => {
   })
 
   test.options(
-    `updateDocument --slug pages --id <page-id> --data '{"title":"Updated"}' --override-access false --json`,
+    `updateDocument --slug pages --version published --id <page-id> --data '{"title":"Updated"}' --override-access false --json`,
     { db: 'drizzle' },
     async ({ cli, payload }) => {
       const page = await payload.create({
         collection: 'pages',
         data: { title: 'Numeric ID' },
         overrideAccess: true,
+        version: 'published',
       })
       const output = await cli(
-        `updateDocument --slug pages --id ${page.id} --data '{"title":"Updated"}' --override-access false --json`,
+        `updateDocument --slug pages --version published --id ${page.id} --data '{"title":"Updated"}' --override-access false --json`,
       )
       const updatedPage = await payload.findByID({
         id: page.id,
@@ -865,7 +870,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     expect(roundedIDDocument.title).toBe('Rounded ID')
   })
 
-  test(`duplicateDocument --slug pages --id <seeded-page-id> --data '{"title":null}' --json`, async ({
+  test(`duplicateDocument --slug pages --version published --id <seeded-page-id> --data '{"title":null}' --json`, async ({
     cli,
     payload,
   }) => {
@@ -876,7 +881,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
       where: { title: { equals: 'Seeded page' } },
     })
     const output = await cli({
-      command: `duplicateDocument --slug pages --id ${seededPage.docs[0]!.id} --data '{"title":null}' --json`,
+      command: `duplicateDocument --slug pages --version published --id ${seededPage.docs[0]!.id} --data '{"title":null}' --json`,
       reject: false,
     })
     const response = JSON.parse(output.stdout)
@@ -925,10 +930,10 @@ test.suite('CLI', { config: './config.ts' }, () => {
   })
 
   test(
-    `updateDocument --slug pages --where '{"title":{"equals":"Seeded page"}}' --data '{"title":"Updated page"}' --no-override-lock --json`,
+    `updateDocument --slug pages --version published --where '{"title":{"equals":"Seeded page"}}' --data '{"title":"Updated page"}' --no-override-lock --json`,
     async ({ cli, payload }) => {
       const output = await cli(
-        'updateDocument --slug pages --where \'{"title":{"equals":"Seeded page"}}\' --data \'{"title":"Updated page"}\' --no-override-lock --json',
+        'updateDocument --slug pages --version published --where \'{"title":{"equals":"Seeded page"}}\' --data \'{"title":"Updated page"}\' --no-override-lock --json',
       )
       const updated = await payload.find({
         collection: 'pages',
@@ -1019,8 +1024,12 @@ test.suite('CLI', { config: './config.ts' }, () => {
     })
   })
 
-  test('findDocuments --slug pages --draft --trash --no-pagination --json', async ({ cli }) => {
-    const output = await cli('findDocuments --slug pages --draft --trash --no-pagination --json')
+  test('findDocuments --slug pages --version latest --trash --no-pagination --json', async ({
+    cli,
+  }) => {
+    const output = await cli(
+      'findDocuments --slug pages --version latest --trash --no-pagination --json',
+    )
 
     expect(JSON.parse(output.stdout)).toMatchObject({
       command: 'findDocuments',

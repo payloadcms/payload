@@ -21,6 +21,7 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
     },
     data: examplePage as any, // eslint-disable-line
     overrideAccess: true,
+    version: 'published',
   })
 
   await payload.update({
@@ -30,7 +31,7 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
       skipRevalidate: true,
     },
     data: examplePageDraft as any, // eslint-disable-line
-    draft: true,
+    version: 'draft',
     overrideAccess: true,
   })
 
@@ -43,6 +44,7 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
     },
     data: homepageJSON,
     overrideAccess: true,
+    version: 'published',
   })
 
   await payload.updateGlobal({

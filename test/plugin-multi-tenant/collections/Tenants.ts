@@ -11,10 +11,15 @@ const tenantAccess: Access = ({ req }) => {
   if (req.user) {
     // Filter tenants where user has 'admin' tenantRole
     const adminTenants = (
-      (req.user.tenants as Array<{ tenant: { id: string } | string; tenantRole?: string }>) || []
+      (req.user.tenants as Array<{
+        tenant: { id: number | string } | number | string
+        tenantRole?: string
+      }>) || []
     )
       .filter((t) => t.tenantRole === 'admin')
-      .map((t) => (typeof t.tenant === 'string' ? t.tenant : t.tenant?.id))
+      .map((t) =>
+        typeof t.tenant === 'string' || typeof t.tenant === 'number' ? t.tenant : t.tenant?.id,
+      )
       .filter(Boolean)
 
     // User can access tenants where they have 'admin' tenantRole OR public tenants

@@ -1,3 +1,5 @@
+import type { DocumentVersion } from '../../types/operations.js'
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { EditorProps } from '@monaco-editor/react'
@@ -241,6 +243,7 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   siblingFields: (Field | TabAsField)[]
   /** The value of the field. */
   value?: TValue
+  version?: DocumentVersion
 }
 
 export type FieldHook<TData extends TypeWithID = any, TValue = any, TSiblingData = any> = (

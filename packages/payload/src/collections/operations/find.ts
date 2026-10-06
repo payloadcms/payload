@@ -9,6 +9,7 @@ import type {
   TransformCollectionWithSelect,
   Where,
 } from '../../types/index.js'
+import type { DocumentVersion } from '../../types/operations.js'
 import type {
   Collection,
   DataFromCollectionSlug,
@@ -24,13 +25,16 @@ import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
-import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
+import { getSelectMode } from '../../utilities/getSelectMode.js'
+import { hasDraftsEnabled, hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
+import { getVersionStatusQuery } from '../../versions/getVersionStatusQuery.js'
+import { resolveVersionDocument } from '../../versions/resolveVersionDocument.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
@@ -40,7 +44,6 @@ export type Arguments = {
   currentDepth?: number
   depth?: number
   disableErrors?: boolean
-  draft?: boolean
   includeLockStatus?: boolean
   joins?: JoinQuery
   limit?: number
@@ -52,6 +55,7 @@ export type Arguments = {
   showHiddenFields?: boolean
   sort?: Sort
   trash?: boolean
+  version?: DocumentVersion
   where?: Where
 } & Pick<FindOptions<string, SelectType>, 'select'>
 
@@ -82,7 +86,6 @@ export const findOperation = async <
     currentDepth,
     depth,
     disableErrors,
-    draft: draftsEnabled,
     includeLockStatus: includeLockStatusFromArgs,
     joins,
     limit,
@@ -94,8 +97,11 @@ export const findOperation = async <
     showHiddenFields,
     sort: incomingSort,
     trash = false,
+    version = 'published',
     where,
   } = args
+
+  const draftsEnabled = version !== 'published'
 
   const req = args.req!
 
@@ -154,6 +160,18 @@ export const findOperation = async <
   let result: PaginatedDocs<DataFromCollectionSlug<TSlug>>
 
   let fullWhere = combineQueries(where!, accessResult!)
+  if (hasDraftsEnabled(collectionConfig) && version !== 'latest') {
+    fullWhere = combineQueries(
+      fullWhere,
+      getVersionStatusQuery({
+        entity: collectionConfig,
+        locale: req.locale,
+        localization: req.payload.config.localization,
+        status: version,
+      }),
+    )
+  }
+
   sanitizeWhereQuery({ fields: collectionConfig.flattenedFields, payload, where: fullWhere })
 
   // Exclude trashed documents when trash: false
@@ -162,6 +180,16 @@ export const findOperation = async <
     trash,
     where: fullWhere,
   })
+
+  let dbSelect =
+    select && hasDraftsEnabled(collectionConfig) ? { ...select, _status: true as const } : select
+
+  if (select && getSelectMode(select) === 'exclude' && dbSelect) {
+    delete dbSelect._status
+    if (Object.keys(dbSelect).length === 0) {
+      dbSelect = undefined
+    }
+  }
 
   const sort = sanitizeSortQuery({
     fields: collection.config.flattenedFields,
@@ -201,7 +229,7 @@ export const findOperation = async <
       page: sanitizedPage,
       pagination: usePagination,
       req,
-      select: getQueryDraftsSelect({ select }),
+      select: getQueryDraftsSelect({ select: dbSelect }),
       sort: getQueryDraftsSort({
         collectionConfig,
         sort,
@@ -225,11 +253,34 @@ export const findOperation = async <
       page: sanitizedPage,
       pagination,
       req,
-      select,
+      select: dbSelect,
       sort,
       where: fullWhere,
     })
   }
+
+  result.docs = await Promise.all(
+    result.docs.map(async (doc) =>
+      resolveVersionDocument({
+        doc,
+        entity: collectionConfig,
+        publishedDoc:
+          version === 'latest' &&
+          req.payload.config.localization &&
+          hasLocalizeStatusEnabled(collectionConfig)
+            ? await req.payload.db.findOne({
+                collection: collectionConfig.slug,
+                locale: 'all',
+                req,
+                select: dbSelect,
+                where: { id: { equals: doc.id } },
+              })
+            : undefined,
+        req,
+        version,
+      }),
+    ),
+  )
 
   // /////////////////////////////////////
   // Add collection property for auth collections
@@ -337,7 +388,7 @@ export const findOperation = async <
         currentDepth,
         depth: depth!,
         doc,
-        draft: draftsEnabled!,
+        draft: draftsEnabled,
         fallbackLocale: fallbackLocale!,
         findMany: true,
         global: null,
@@ -347,6 +398,7 @@ export const findOperation = async <
         req,
         select,
         showHiddenFields: showHiddenFields!,
+        version,
       }),
     ),
   )

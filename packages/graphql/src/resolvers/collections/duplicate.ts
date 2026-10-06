@@ -1,17 +1,25 @@
-import type { Collection, CollectionSlug, DataFromCollectionSlug, PayloadRequest } from 'payload'
+import type {
+  Collection,
+  CollectionSlug,
+  DataFromCollectionSlug,
+  DocumentVersion,
+  PayloadRequest,
+} from 'payload'
 
 import { duplicateOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 
+import { rememberDocumentVersion } from '../../utilities/documentVersion.js'
+
 export type Resolver<TData> = (
   _: unknown,
   args: {
     data: TData
-    draft: boolean
     fallbackLocale?: string
     id: string
     locale?: string
+    version?: Exclude<DocumentVersion, 'latest'>
   },
   context: {
     req: PayloadRequest
@@ -29,15 +37,23 @@ export function duplicateResolver<TSlug extends CollectionSlug>(
     req.fallbackLocale = args.fallbackLocale || fallbackLocale
     context.req = req
 
+    context.req.query = {
+      ...context.req.query,
+      version: args.version ?? (collection.config.versions?.drafts ? 'draft' : 'published'),
+    }
+
     const result = await duplicateOperation({
       id: args.id,
       collection,
       data: args.data,
       depth: 0,
-      draft: args.draft,
       req: isolateObjectProperty(req, 'transactionID'),
+      version: args.version,
     })
 
-    return result
+    return rememberDocumentVersion({
+      data: result,
+      version: args.version ?? (collection.config.versions?.drafts ? 'draft' : 'published'),
+    })
   }
 }

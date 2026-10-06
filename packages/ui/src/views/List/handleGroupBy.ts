@@ -118,7 +118,6 @@ export const handleGroupBy = async ({
       const groupData = await req.payload.find({
         collection: collectionSlug,
         depth: 0,
-        draft: true,
         fallbackLocale: false,
         includeLockStatus: true,
         limit: query?.queryByGroup?.[valueOrRelationshipID]?.limit
@@ -130,6 +129,7 @@ export const handleGroupBy = async ({
           ? Number(query.queryByGroup[valueOrRelationshipID].page)
           : undefined,
         req,
+        version: 'latest',
         // Note: if we wanted to enable table-by-table sorting, we could use this:
         // sort: query?.queryByGroup?.[valueOrRelationshipID]?.sort,
         select,

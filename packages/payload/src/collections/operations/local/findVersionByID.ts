@@ -10,10 +10,11 @@ import type { PayloadRequest, PopulateType, SelectType } from '../../../types/in
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
-import type { DataFromCollectionSlug, DraftFlagFromCollectionSlug } from '../../config/types.js'
+import type { DataFromCollectionSlug, VersionFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
+import { parseDocumentVersion } from '../../../versions/parseDocumentVersion.js'
 import { findVersionByIDOperation } from '../findVersionByID.js'
 
 type BaseOptions<TSlug extends CollectionSlug> = {
@@ -80,12 +81,14 @@ type BaseOptions<TSlug extends CollectionSlug> = {
   Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 export type Options<TSlug extends CollectionSlug> = BaseOptions<TSlug> &
-  DraftFlagFromCollectionSlug<TSlug>
+  VersionFromCollectionSlug<TSlug>
 
 export async function findVersionByIDLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<TypeWithVersion<DataFromCollectionSlug<TSlug>>> {
+  parseDocumentVersion({ params: { ...options } })
+
   const {
     id,
     collection: collectionSlug,
@@ -96,6 +99,7 @@ export async function findVersionByIDLocal<TSlug extends CollectionSlug>(
     select,
     showHiddenFields,
     trash = false,
+    version,
   } = options
 
   const collection = payload.collections[collectionSlug]
@@ -122,5 +126,6 @@ export async function findVersionByIDLocal<TSlug extends CollectionSlug>(
     select,
     showHiddenFields,
     trash,
+    version,
   })
 }

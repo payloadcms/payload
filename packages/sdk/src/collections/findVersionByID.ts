@@ -1,6 +1,7 @@
 import type {
   ApplyDisableErrors,
   CollectionSlug,
+  DocumentVersion,
   PayloadTypesShape,
   SelectType,
   TypedLocale,
@@ -28,10 +29,6 @@ export type FindVersionByIDOptions<
    * `null` will be returned instead, if the document on this ID was not found.
    */
   disableErrors?: TDisableErrors
-  /**
-   * Whether the document should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-   */
-  draft?: boolean
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
@@ -61,6 +58,8 @@ export type FindVersionByIDOptions<
    * @default false
    */
   trash?: boolean
+  /** The document snapshot to read or update. */
+  version?: DocumentVersion
 }
 
 export async function findVersionByID<

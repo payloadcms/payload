@@ -84,7 +84,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
 
     const { docs } = await payload.find({
       collection: autosavePostsSlug,
-      draft: true,
+      version: 'latest',
       overrideAccess: true,
       where: {
         title: {

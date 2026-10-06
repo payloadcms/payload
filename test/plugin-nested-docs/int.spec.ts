@@ -7,6 +7,133 @@ import { expect } from 'vitest'
 import { test } from '../__helpers/int/vitest.js'
 
 test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
+  test.describe('draft ancestors', () => {
+    test('should include a draft-only parent in draft child breadcrumbs', async ({ payload }) => {
+      const parent = await payload.create({
+        collection: 'pages',
+        data: { title: 'Draft ancestor', slug: 'draft-ancestor' },
+        overrideAccess: true,
+        version: 'draft',
+      })
+
+      const child = await payload.create({
+        collection: 'pages',
+        data: { title: 'Draft child', slug: 'draft-child', parent: parent.id },
+        overrideAccess: true,
+        version: 'draft',
+      })
+
+      expect(child.breadcrumbs?.map(({ url }) => url)).toEqual([
+        '/draft-ancestor',
+        '/draft-ancestor/draft-child',
+      ])
+    })
+
+    test('should retain draft ancestors when updating all locales', async ({ payload }) => {
+      const parent = await payload.create({
+        collection: 'pages',
+        data: { title: 'Draft ancestor', slug: 'draft-ancestor' },
+        overrideAccess: true,
+        version: 'draft',
+      })
+
+      const child = await payload.create({
+        collection: 'pages',
+        data: { title: 'Draft child', slug: 'draft-child', parent: parent.id },
+        overrideAccess: true,
+        version: 'draft',
+      })
+
+      await payload.update({
+        id: child.id,
+        collection: 'pages',
+        data: { title: 'Updated draft child' },
+        locale: 'all',
+        overrideAccess: true,
+        version: 'latest',
+      })
+
+      const updatedChild = await payload.findByID({
+        id: child.id,
+        collection: 'pages',
+        locale: 'en',
+        overrideAccess: true,
+        version: 'latest',
+      })
+
+      expect(updatedChild.breadcrumbs?.map(({ url }) => url)).toEqual([
+        '/draft-ancestor',
+        '/draft-ancestor/draft-child',
+      ])
+    })
+
+    test('should use latest ancestors throughout a draft child hierarchy', async ({ payload }) => {
+      const grandparent = await payload.create({
+        collection: 'pages',
+        data: { title: 'Grandparent', slug: 'grandparent' },
+        overrideAccess: true,
+        version: 'published',
+      })
+
+      const parent = await payload.create({
+        collection: 'pages',
+        data: { title: 'Parent', slug: 'parent', parent: grandparent.id },
+        overrideAccess: true,
+        version: 'published',
+      })
+
+      await payload.update({
+        id: grandparent.id,
+        collection: 'pages',
+        data: { slug: 'grandparent-draft' },
+        overrideAccess: true,
+        version: 'draft',
+      })
+
+      const child = await payload.create({
+        collection: 'pages',
+        data: { title: 'Child', slug: 'child', parent: parent.id },
+        overrideAccess: true,
+        version: 'draft',
+      })
+
+      expect(child.breadcrumbs?.map(({ url }) => url)).toEqual([
+        '/grandparent-draft',
+        '/grandparent-draft/parent',
+        '/grandparent-draft/parent/child',
+      ])
+    })
+
+    test('should use published parent data when publishing a child', async ({ payload }) => {
+      const parent = await payload.create({
+        collection: 'pages',
+        data: { title: 'Parent', slug: 'published-parent' },
+        overrideAccess: true,
+        version: 'published',
+      })
+
+      await payload.update({
+        id: parent.id,
+        collection: 'pages',
+        data: { slug: 'draft-parent' },
+        overrideAccess: true,
+        version: 'draft',
+      })
+
+      const child = await payload.create({
+        collection: 'pages',
+        data: { title: 'Child', slug: 'child', parent: parent.id },
+        overrideAccess: true,
+        version: 'published',
+      })
+
+      expect(child.breadcrumbs?.map(({ url }) => url)).toEqual([
+        '/published-parent',
+        '/published-parent/child',
+      ])
+    })
+  })
+
   test.describe('seed', () => {
     test('should populate two levels of breadcrumbs', async ({ payload }) => {
       const query = await payload.find({
@@ -50,6 +177,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
           slug: '11-children',
         },
         overrideAccess: true,
+        version: 'published',
       })
 
       // create 11 children docs
@@ -143,6 +271,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
           slug: 'parent',
         },
         overrideAccess: true,
+        version: 'published',
       })
 
       const childDoc = await payload.create({
@@ -234,7 +363,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
       const initialPublished = await payload.findByID({
         id: childDoc.id,
         collection: 'pages',
-        draft: false,
+        version: 'published',
         overrideAccess: true,
       })
       expect(initialPublished._status).toBe('published')
@@ -247,7 +376,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
         data: {
           title: 'Version Child Draft Edit',
         },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
@@ -267,7 +396,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
       const publishedChild = await payload.findByID({
         id: childDoc.id,
         collection: 'pages',
-        draft: false,
+        version: 'published',
         overrideAccess: true,
       })
 
@@ -280,7 +409,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
       const draftChild = await payload.findByID({
         id: childDoc.id,
         collection: 'pages',
-        draft: true,
+        version: 'latest',
         overrideAccess: true,
       })
 
@@ -333,7 +462,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
       const updatedDraftChild = await payload.findByID({
         id: draftChild.id,
         collection: 'pages',
-        draft: true,
+        version: 'latest',
         overrideAccess: true,
       })
 
@@ -374,7 +503,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
         data: {
           title: 'Breadcrumb Child Draft',
         },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
@@ -393,7 +522,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
       const published = await payload.findByID({
         id: child.id,
         collection: 'pages',
-        draft: false,
+        version: 'published',
         overrideAccess: true,
       })
 
@@ -404,7 +533,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
       const draft = await payload.findByID({
         id: child.id,
         collection: 'pages',
-        draft: true,
+        version: 'latest',
         overrideAccess: true,
       })
 
@@ -424,7 +553,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
           title: 'Scheduled Page',
           slug: 'scheduled-page',
         },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
@@ -456,7 +585,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
       const retrieved = await payload.findByID({
         id: draft.id,
         collection: 'pages',
-        draft: false,
+        version: 'published',
         overrideAccess: true,
       })
 

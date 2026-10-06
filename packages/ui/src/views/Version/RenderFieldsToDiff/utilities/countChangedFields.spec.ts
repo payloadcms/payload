@@ -591,4 +591,36 @@ describe('countChangedFieldsInRows', () => {
 
     expect(result).toBe(4)
   })
+
+  it('should not count empty metadata when replacing a block', () => {
+    const field: ClientField = {
+      name: 'blocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'source',
+          fields: [
+            { name: 'sourceText', type: 'text' },
+            { name: 'blockName', type: 'text' },
+          ],
+        },
+        {
+          slug: 'replacement',
+          fields: [
+            { name: 'replacementText', type: 'text' },
+            { name: 'blockName', type: 'text' },
+          ],
+        },
+      ],
+    }
+
+    const result = countChangedFieldsInRows({
+      field,
+      locales: undefined,
+      valueFromRows: [{ blockType: 'source', sourceText: 'old', blockName: null }],
+      valueToRows: [{ blockType: 'replacement', replacementText: 'new', blockName: null }],
+    })
+
+    expect(result).toBe(2)
+  })
 })

@@ -29,6 +29,7 @@ export async function resolvePendingTargetKey(args: {
     overrideAccess: true,
     req,
     select: { [orderableFieldName]: true },
+    version: 'latest',
   })
 
   return beforeDoc?.[orderableFieldName] || null

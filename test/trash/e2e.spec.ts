@@ -374,6 +374,7 @@ describe('Trash', () => {
         await expect
           .poll(async () => {
             const { docs } = await payload.find({
+              version: 'latest',
               collection: postsSlug,
               where: {
                 title: { equals: 'Ready for restore' },
@@ -387,6 +388,7 @@ describe('Trash', () => {
         await expect
           .poll(async () => {
             const { docs } = await payload.find({
+              version: 'latest',
               collection: postsSlug,
               where: {
                 title: { equals: 'Ready for restore' },
@@ -822,6 +824,7 @@ describe('Trash', () => {
         await expect
           .poll(async () => {
             const { docs } = await payload.find({
+              version: 'latest',
               collection: postsSlug,
               where: {
                 id: { equals: trashedPostDocOne.id },
@@ -835,6 +838,7 @@ describe('Trash', () => {
         await expect
           .poll(async () => {
             const { docs } = await payload.find({
+              version: 'latest',
               collection: postsSlug,
               where: {
                 id: { equals: trashedPostDocOne.id },
@@ -1293,7 +1297,7 @@ describe('Trash', () => {
         _status: 'draft',
         localizedField: localizedFieldValueEN,
       },
-      draft: true,
+      version: 'draft',
       locale: 'en',
       overrideAccess: true,
     })
@@ -1305,7 +1309,7 @@ describe('Trash', () => {
         _status: 'draft',
         localizedField: localizedFieldValueES,
       },
-      draft: true,
+      version: 'draft',
       locale: 'es',
       overrideAccess: true,
     })
@@ -1361,7 +1365,7 @@ describe('Trash', () => {
         _status: 'draft',
         localizedField: localizedFieldValueEN,
       },
-      draft: true,
+      version: 'draft',
       locale: 'en',
       overrideAccess: true,
     })
@@ -1374,7 +1378,7 @@ describe('Trash', () => {
         _status: 'draft',
         localizedField: localizedFieldValueES,
       },
-      draft: true,
+      version: 'draft',
       locale: 'es',
       overrideAccess: true,
     })
@@ -1431,6 +1435,7 @@ async function createPostDoc(data: RequiredDataFromCollectionSlug<'posts'>): Pro
     collection: postsSlug,
     data,
     overrideAccess: true,
+    version: 'published',
   }) as unknown as Promise<Post>
 }
 

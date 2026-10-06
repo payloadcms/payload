@@ -36,6 +36,7 @@ import {
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { rememberDocumentVersion } from '../../utilities/documentVersion.js'
 import {
   hasDraftsEnabled,
   hasDraftValidationEnabled,
@@ -55,6 +56,7 @@ import {
 } from '../../versions/allLocalesPublicationStatus.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
+import { resolveCreateVersion } from './utilities/resolveVersion.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
   autosave?: boolean
@@ -63,15 +65,14 @@ export type Arguments<TSlug extends CollectionSlug> = {
   depth?: number
   disableTransaction?: boolean
   disableVerificationEmail?: boolean
-  draft?: boolean
   duplicateFromID?: DataFromCollectionSlug<TSlug>['id']
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
-  publishAllLocales?: boolean
   req: PayloadRequest
   selectedLocales?: string[]
   showHiddenFields?: boolean
+  version?: 'draft' | 'published'
 } & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
 export const createOperation = async <
@@ -108,8 +109,16 @@ export const createOperation = async <
     }
 
     const initialCollectionConfig = args.collection.config
-    const initialPublishAllLocales =
-      !args.draft && (args.publishAllLocales ?? !hasLocalizeStatusEnabled(initialCollectionConfig))
+    const initialVersion = resolveCreateVersion({
+      collectionConfig: initialCollectionConfig,
+      data: args.data,
+      version: args.version,
+    })
+
+    if (hasDraftsEnabled(initialCollectionConfig)) {
+      args.data._status = initialVersion
+    }
+    const initialPublishAllLocales = initialVersion === 'published' && args.req.locale === 'all'
     const initialAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
       hasLocalizedStatus: Boolean(
         args.req.payload.config.localization && hasLocalizeStatusEnabled(initialCollectionConfig),
@@ -147,12 +156,10 @@ export const createOperation = async <
       collection,
       depth,
       disableVerificationEmail,
-      draft = false,
       duplicateFromID,
       overrideAccess,
       overwriteExistingFiles = false,
       populate,
-      publishAllLocales: publishAllLocalesArg,
       req: {
         fallbackLocale,
         locale,
@@ -163,13 +170,19 @@ export const createOperation = async <
       select: incomingSelect,
       selectedLocales,
       showHiddenFields,
+      version,
     } = args
 
     let { data } = args
 
-    // For creates there is no existing doc — always publish all locales when not a draft.
-    let publishAllLocales =
-      !draft && (publishAllLocalesArg ?? !hasLocalizeStatusEnabled(collectionConfig))
+    const resolvedVersion = resolveCreateVersion({ collectionConfig, data, version })
+
+    if (hasDraftsEnabled(collectionConfig)) {
+      data._status = resolvedVersion
+    }
+
+    const draft = resolvedVersion === 'draft'
+    let publishAllLocales = !draft && locale === 'all'
     const requestedAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
       hasLocalizedStatus: Boolean(
         config.localization && hasLocalizeStatusEnabled(collectionConfig),
@@ -541,6 +554,7 @@ export const createOperation = async <
       req,
       select,
       showHiddenFields: showHiddenFields!,
+      version: resolvedVersion,
     })
 
     // /////////////////////////////////////
@@ -620,7 +634,7 @@ export const createOperation = async <
       await commitTransaction(req)
     }
 
-    return result
+    return rememberDocumentVersion({ data: result, version: resolvedVersion })
   } catch (error: unknown) {
     await unlinkTempFiles({
       collectionConfig: args.collection.config,

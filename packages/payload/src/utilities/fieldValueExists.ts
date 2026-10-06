@@ -46,12 +46,12 @@ export const fieldValueExists = async ({
     collection,
     depth: 0,
     disableErrors: true,
-    draft: Boolean(draftsEnabled),
     limit: 2,
     locale: locale as Parameters<typeof req.payload.find>[0]['locale'],
     overrideAccess,
     pagination: false,
     req: queryReq,
+    version: draftsEnabled ? 'latest' : 'published',
     where: { [field]: { equals: value } },
   })
 

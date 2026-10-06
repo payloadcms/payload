@@ -1,6 +1,7 @@
 import type {
   ApplyDisableErrors,
   CollectionSlug,
+  DocumentVersion,
   FindOptions,
   PayloadTypesShape,
   SelectType,
@@ -35,10 +36,6 @@ export type FindByIDOptions<
    */
   disableErrors?: TDisableErrors
   /**
-   * Whether the document should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-   */
-  draft?: boolean
-  /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
   fallbackLocale?: false | TypedLocale<T>
@@ -64,6 +61,8 @@ export type FindByIDOptions<
    * @default false
    */
   trash?: boolean
+  /** The document snapshot to read or update. */
+  version?: DocumentVersion
 } & Pick<FindOptions<TSlug, SelectType & TSelect>, 'select'>
 
 export async function findByID<

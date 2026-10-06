@@ -141,6 +141,7 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
           items: [],
         },
         overrideAccess: true,
+        version: 'published',
       })
       createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
 
@@ -172,6 +173,7 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
           items: [],
         },
         overrideAccess: true,
+        version: 'published',
       })
       createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
 
@@ -206,10 +208,11 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
           content: [initialBlock],
         },
         overrideAccess: true,
+        version: 'published',
       })
       createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
 
-      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?draft=true`, {
+      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?version=draft`, {
         body: JSON.stringify({
           content: {
             blockType: 'update-shape-block',
@@ -222,7 +225,7 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
         id: doc.id,
         collection: updateShapesSlug as any,
         depth: 0,
-        draft: true,
+        version: 'latest',
         overrideAccess: true,
       })
 
@@ -238,10 +241,11 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
           content: [],
         },
         overrideAccess: true,
+        version: 'published',
       })
       createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
 
-      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?draft=true`, {
+      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?version=draft`, {
         body: JSON.stringify({
           content: [
             {
@@ -278,10 +282,11 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
         collection: updateShapesSlug as any,
         data: {},
         overrideAccess: true,
+        version: 'published',
       })
       createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
 
-      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?draft=true`, {
+      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?version=draft`, {
         body: JSON.stringify({
           numbers: [1, 2],
           polymorphicRelations: {
@@ -320,6 +325,7 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
             relations: [relation.id],
           },
           overrideAccess: true,
+          version: 'published',
         })
         createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
         let data
@@ -351,7 +357,7 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
             },
           }
         }
-        const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?draft=true`, {
+        const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?version=draft`, {
           body: JSON.stringify(data),
         })
 

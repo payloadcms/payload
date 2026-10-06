@@ -27,6 +27,7 @@ import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLivePreviewContext, usePreviewURL } from '../../providers/LivePreview/context.js'
+import { useLocale } from '../../providers/Locale/index.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouter, useSearchParams } from '../../providers/RouterAdapter/index.js'
@@ -35,6 +36,7 @@ import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { UploadControlsProvider } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
+import { formatLocalizedFormData } from '../../utilities/formatLocalizedFormData.js'
 import { handleBackToDashboard } from '../../utilities/handleBackToDashboard.js'
 import { handleGoBack } from '../../utilities/handleGoBack.js'
 import { handleTakeOver } from '../../utilities/handleTakeOver.js'
@@ -49,6 +51,7 @@ const PENDING_SUCCESS_TOAST_KEY = 'payload-pending-success-toast'
 export type OnSaveContext = {
   getDocPermissions?: boolean
   incrementVersionCount?: boolean
+  responseLocale?: 'all'
 }
 
 // This component receives props only on _pages_
@@ -159,6 +162,7 @@ export function DefaultEditView({
   const abortOnSaveRef = useRef<AbortController>(null)
 
   const locale = params.get('locale')
+  const activeLocale = useLocale()?.code
 
   const entitySlug = collectionConfig?.slug || globalConfig?.slug
 
@@ -303,7 +307,21 @@ export function DefaultEditView({
 
       const controller = handleAbortRef(abortOnSaveRef)
 
-      const document = json?.doc || json?.result
+      const responseDocument = json?.doc || json?.result
+      const document =
+        context?.responseLocale === 'all' && activeLocale
+          ? formatLocalizedFormData({
+              blocks: config.blocks,
+              data: responseDocument,
+              fields: (collectionConfig || globalConfig).fields,
+              locale: activeLocale,
+              mode: 'unwrap',
+            })
+          : responseDocument
+
+      if (context?.responseLocale === 'all') {
+        json = { ...json, ...(json?.doc ? { doc: document } : { result: document }) }
+      }
 
       const updatedAt = document?.updatedAt || new Date().toISOString()
 
@@ -431,6 +449,10 @@ export function DefaultEditView({
     [
       user,
       collectionSlug,
+      collectionConfig,
+      globalConfig,
+      config.blocks,
+      activeLocale,
       userSlug,
       id,
       setLastUpdateTime,

@@ -18,7 +18,7 @@ export const createRestoreVersionCommand = defineCLICommand({
       id: String(args.id),
       collection: args.slug,
       ...getReadOptions(args),
-      draft: args.draft,
+      version: args.version,
     })
 
     if (!isJSON) {

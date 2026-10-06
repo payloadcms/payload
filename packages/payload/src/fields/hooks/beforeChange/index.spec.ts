@@ -223,3 +223,76 @@ describe('beforeChange', () => {
     })
   })
 })
+
+describe('beforeChange all-locale publication', () => {
+  const runPublication = async ({
+    shouldRemoveStatus = false,
+  }: { shouldRemoveStatus?: boolean } = {}) => {
+    let processedStatus: unknown
+    const document = { _status: { en: 'draft', es: 'draft', xx: 'draft' } }
+    const result = await beforeChange({
+      collection: {
+        fields: [
+          {
+            name: '_status',
+            type: 'select',
+            localized: true,
+            options: [],
+            hooks: {
+              beforeChange: [
+                ({ siblingData, req, value }) => {
+                  if (shouldRemoveStatus && req.locale === 'en') {
+                    delete siblingData._status
+                    return undefined
+                  }
+                  return value
+                },
+              ],
+            },
+          },
+        ],
+      } as SanitizedCollectionConfig,
+      context: {},
+      data: { _status: 'published' },
+      doc: document,
+      docWithLocales: document,
+      global: null,
+      onDataProcessed: (data) => {
+        processedStatus = data._status
+      },
+      operation: 'update',
+      overrideAccess: true,
+      skipValidation: true,
+      req: {
+        context: {},
+        locale: 'all',
+        payload: {
+          config: {
+            blocks: [],
+            localization: {
+              locales: [{ code: 'en' }, { code: 'es' }, { code: 'xx' }],
+              localeCodes: ['en', 'es', 'xx'],
+              filterAvailableLocales: ({ locales }) =>
+                locales.filter((locale) => locale.code !== 'xx'),
+            },
+          },
+        },
+      } as PayloadRequest,
+    })
+
+    return { processedStatus, result }
+  }
+
+  it('should report scalar intent while retaining inaccessible locale storage status', async () => {
+    const { processedStatus, result } = await runPublication()
+
+    expect(processedStatus).toBe('published')
+    expect(result._status).toEqual({ en: 'published', es: 'published', xx: 'draft' })
+  })
+
+  it('should not report scalar intent removed by a field hook', async () => {
+    const { processedStatus } = await runPublication({ shouldRemoveStatus: true })
+
+    expect(processedStatus).not.toBe('published')
+  })
+})

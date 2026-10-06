@@ -56,6 +56,7 @@ export const lexicalHTMLField: (args: Args) => Field = (args) => {
           req,
           showHiddenFields,
           siblingData,
+          version,
         }) => {
           const lexicalFieldData: SerializedEditorState = siblingData[lexicalFieldName]
 
@@ -66,10 +67,10 @@ export const lexicalHTMLField: (args: Args) => Field = (args) => {
           const htmlPopulateFn = await getPayloadPopulateFn({
             currentDepth: currentDepth ?? 0,
             depth: depth ?? req.payload.config.defaultDepth,
-            draft: draft ?? false,
             overrideAccess: overrideAccess ?? false,
             req,
             showHiddenFields: showHiddenFields ?? false,
+            version: version ?? (draft ? 'latest' : 'published'),
           })
 
           return await convertLexicalToHTMLAsync({

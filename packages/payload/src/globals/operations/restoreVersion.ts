@@ -1,4 +1,5 @@
 import type { PayloadRequest, PopulateType, Where } from '../../types/index.js'
+import type { DocumentVersion } from '../../types/operations.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
@@ -10,28 +11,35 @@ import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { hasDraftsEnabled, hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
 import { getRestoredStatusesToAuthorize } from '../../versions/getRestoredStatusesToAuthorize.js'
+import { parseDocumentVersion } from '../../versions/parseDocumentVersion.js'
+import { saveVersion } from '../../versions/saveVersion.js'
 
 export type Arguments = {
   depth?: number
-  draft?: boolean
   globalConfig: SanitizedGlobalConfig
   id: number | string
   overrideAccess?: boolean
   populate?: PopulateType
   req?: PayloadRequest
   showHiddenFields?: boolean
+  version?: DocumentVersion
 }
 
 export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any>(
   args: Arguments,
 ): Promise<T> => {
-  const { id, depth, draft, globalConfig, overrideAccess, populate, showHiddenFields } = args
+  const { id, depth, globalConfig, overrideAccess, populate, showHiddenFields } = args
   const req = args.req!
   const { fallbackLocale, locale, payload } = req
+  const version =
+    parseDocumentVersion({ params: { ...args } }) ??
+    (hasDraftsEnabled(globalConfig) ? 'draft' : 'published')
+  const isSavingDraft = hasDraftsEnabled(globalConfig) && version === 'draft'
 
   try {
     const shouldCommit = await initTransaction(req)
@@ -87,9 +95,13 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     // Patch globalType onto version doc
     rawVersion.version.globalType = globalConfig.slug
 
-    // Overwrite draft status if draft is true
-    if (draft) {
-      rawVersion.version._status = 'draft'
+    if (hasDraftsEnabled(globalConfig) && version !== 'latest') {
+      rawVersion.version._status =
+        hasLocalizeStatusEnabled(globalConfig) && payload.config.localization
+          ? Object.fromEntries(
+              payload.config.localization.localeCodes.map((code) => [code, version]),
+            )
+          : version
     }
 
     // A localized `_status` can publish and unpublish locales in one restore, so authorize every
@@ -157,32 +169,24 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
 
     let result = rawVersion.version
 
-    if (global) {
-      // Ensure updatedAt date is always updated
-      result.updatedAt = new Date().toISOString()
-      result = await payload.db.updateGlobal({
-        slug: globalConfig.slug,
-        data: result,
-        req,
-      })
+    result.updatedAt = new Date().toISOString()
 
-      const now = new Date().toISOString()
-
-      result = await payload.db.createGlobalVersion({
-        autosave: false,
-        createdAt: result.createdAt ? new Date(result.createdAt).toISOString() : now,
-        globalSlug: globalConfig.slug,
-        req,
-        updatedAt: draft ? now : new Date(result.updatedAt).toISOString(),
-        versionData: result,
-      })
-    } else {
-      result = await payload.db.createGlobal({
-        slug: globalConfig.slug,
-        data: result,
-        req,
-      })
+    if (!isSavingDraft) {
+      result = global
+        ? await payload.db.updateGlobal({ slug: globalConfig.slug, data: result, req })
+        : await payload.db.createGlobal({ slug: globalConfig.slug, data: result, req })
     }
+
+    result = await saveVersion({
+      autosave: false,
+      docWithLocales: result,
+      draft: isSavingDraft,
+      global: globalConfig,
+      operation: 'restoreVersion',
+      payload,
+      preserveDraft: version === 'published',
+      req,
+    })
 
     // /////////////////////////////////////
     // afterRead - Fields
@@ -193,7 +197,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
       context: req.context,
       depth: depth!,
       doc: result,
-      draft: undefined!,
+      draft: version !== 'published',
       fallbackLocale: fallbackLocale!,
       global: globalConfig,
       locale: locale!,
@@ -201,6 +205,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
       populate,
       req,
       showHiddenFields: showHiddenFields!,
+      version,
     })
 
     // /////////////////////////////////////

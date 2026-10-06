@@ -18,8 +18,8 @@ export const createFindVersionByIDCommand = defineCLICommand({
       id: String(args.id),
       collection: args.slug,
       ...getReadOptions(args),
-      draft: args.draft,
       trash: args.trash,
+      version: args.version,
     })
 
     if (!isJSON) {

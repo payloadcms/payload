@@ -44,6 +44,7 @@ import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
 import { combineParentName } from '../utilities/combineParentName.js'
 import { formatName } from '../utilities/formatName.js'
 import { groupOrTabHasRequiredSubfield } from '../utilities/groupOrTabHasRequiredSubfield.js'
+import { buildLocalizedMutationInputType } from './buildLocalizedMutationInputType.js'
 import { withNullableType } from './withNullableType.js'
 
 const idFieldTypes = {
@@ -102,6 +103,7 @@ export function buildMutationInputType({
         name: fullName,
         config,
         fields: field.fields,
+        forceNullable,
         graphqlResult,
         parentIsLocalized: parentIsLocalized || field.localized,
         parentName: fullName,
@@ -159,6 +161,7 @@ export function buildMutationInputType({
           name: fullName,
           config,
           fields: field.fields,
+          forceNullable,
           graphqlResult,
           parentIsLocalized: parentIsLocalized || field.localized,
           parentName: fullName,
@@ -168,7 +171,7 @@ export function buildMutationInputType({
           return inputObjectTypeConfig
         }
 
-        if (requiresAtLeastOneField) {
+        if (!forceNullable && requiresAtLeastOneField) {
           type = new GraphQLNonNull(type)
         }
         return {
@@ -321,6 +324,7 @@ export function buildMutationInputType({
             name: fullName,
             config,
             fields: tab.fields,
+            forceNullable,
             graphqlResult,
             parentIsLocalized: parentIsLocalized || tab.localized,
             parentName: fullName,
@@ -330,7 +334,7 @@ export function buildMutationInputType({
             return acc
           }
 
-          if (requiresAtLeastOneField) {
+          if (!forceNullable && requiresAtLeastOneField) {
             type = new GraphQLNonNull(type)
           }
           return {
@@ -434,6 +438,25 @@ export function buildMutationInputType({
       ...fieldSchema(inputObjectTypeConfig, field),
     }
   }, {})
+
+  if (config.localization && !parentIsLocalized) {
+    for (const field of flattenTopLevelFields(fields)) {
+      if (!fieldAffectsData(field) || !field.localized) {
+        continue
+      }
+
+      const fieldName = formatName(field.name)
+      const fieldSchema = fieldSchemas[fieldName]
+
+      if (fieldSchema) {
+        fieldSchema.type = buildLocalizedMutationInputType({
+          name: `mutation${formatName(name)}${toWords(field.name, true)}LocalizedInput`,
+          type: fieldSchema.type,
+          localeCodes: config.localization.localeCodes,
+        })
+      }
+    }
+  }
 
   if (Object.keys(fieldSchemas).length === 0) {
     return null

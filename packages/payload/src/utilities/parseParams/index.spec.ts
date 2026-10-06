@@ -4,15 +4,12 @@ import { parseParams, booleanParams, numberParams } from './index.js'
 
 describe('parseParams', () => {
   describe('boolean parameters', () => {
-    it('should parse disabled all-locale publication flags as false', () => {
-      const result = parseParams({
-        publishAllLocales: 'false',
-        unpublishAllLocales: 'false',
-      })
-
-      expect(result.publishAllLocales).toBe(false)
-      expect(result.unpublishAllLocales).toBe(false)
-    })
+    it.each(['draft', 'publishAllLocales', 'unpublishAllLocales'])(
+      'should reject retired %s flags even when false',
+      (key) => {
+        expect(() => parseParams({ [key]: 'false' })).toThrow('has been removed')
+      },
+    )
 
     booleanParams.forEach((param) => {
       describe(param, () => {
@@ -51,6 +48,16 @@ describe('parseParams', () => {
           expect(result[param]).toBeUndefined()
         })
       })
+    })
+  })
+
+  describe('version selector', () => {
+    it.each(['published', 'draft', 'latest'])('should accept %s', (version) => {
+      expect(parseParams({ version }).version).toBe(version)
+    })
+
+    it('should reject invalid version strings', () => {
+      expect(() => parseParams({ version: 'invalid' })).toThrow('Invalid version')
     })
   })
 
@@ -266,14 +273,14 @@ describe('parseParams', () => {
 
     it('should handle mixed parameter types', () => {
       const result = parseParams({
-        draft: 'true',
+        version: 'draft',
         depth: '5',
         sort: 'name,createdAt',
         data: '{"test": true}',
         customParam: 'custom',
       })
 
-      expect(result.draft).toBe(true)
+      expect(result.version).toBe('draft')
       expect(result.depth).toBe(5)
       expect(result.sort).toEqual(['name', 'createdAt'])
       expect(result.data).toEqual({ test: true })
@@ -296,9 +303,9 @@ describe('parseParams', () => {
     })
 
     it('should only process parameters that exist in the input', () => {
-      const result = parseParams({ draft: 'true' })
+      const result = parseParams({ version: 'draft' })
 
-      expect(result.draft).toBe(true)
+      expect(result.version).toBe('draft')
       expect(result).not.toHaveProperty('autosave')
       expect(result).not.toHaveProperty('depth')
       expect(result).not.toHaveProperty('sort')

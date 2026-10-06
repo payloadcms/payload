@@ -106,7 +106,7 @@ export default async function Page() {
 
   const page = await payload.find({
     collection: 'pages',
-    draft: true,
+    version: 'latest',
   })
 
   return (

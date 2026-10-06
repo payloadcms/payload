@@ -9,6 +9,7 @@ import type {
   SerializedLexicalNode,
 } from 'lexical'
 import type {
+  DocumentVersion,
   Field,
   FieldSchemaMap,
   FieldsToJSONSchemaArgs,
@@ -55,6 +56,7 @@ export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexica
   req: PayloadRequest
   showHiddenFields: boolean
   siblingDoc: JsonObject
+  version?: DocumentVersion
 }) => void
 
 export type NodeValidation<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
@@ -154,6 +156,7 @@ export type AfterReadNodeHookArgs<T extends SerializedLexicalNode> = {
    * Only available in `afterRead` hooks.
    */
   triggerHooks: boolean
+  version?: DocumentVersion
 }
 
 export type AfterChangeNodeHookArgs<T extends SerializedLexicalNode> = {

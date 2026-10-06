@@ -1,10 +1,11 @@
-import type { AuthCollectionSlug, PayloadTypesShape } from 'payload'
+import type { AuthCollectionSlug, DocumentVersion, PayloadTypesShape } from 'payload'
 
 import type { PayloadSDK } from '../index.js'
 import type { DataFromAuthSlug } from '../types.js'
 
 export type MeOptions<T extends PayloadTypesShape, TSlug extends AuthCollectionSlug<T>> = {
   collection: TSlug
+  version?: DocumentVersion
 }
 
 export type MeResult<T extends PayloadTypesShape, TSlug extends AuthCollectionSlug<T>> = {
@@ -21,6 +22,7 @@ export async function me<T extends PayloadTypesShape, TSlug extends AuthCollecti
   init?: RequestInit,
 ): Promise<MeResult<T, TSlug>> {
   const response = await sdk.request({
+    args: options,
     init,
     method: 'GET',
     path: `/${options.collection}/me`,

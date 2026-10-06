@@ -1,6 +1,8 @@
 import type { JoinQuery, PopulateType, SelectType, Where } from '../../types/index.js'
+import type { DocumentVersion } from '../../types/operations.js'
 import type { JoinParams } from '../sanitizeJoinParams.js'
 
+import { parseDocumentVersion } from '../../versions/parseDocumentVersion.js'
 import { isNumber } from '../isNumber.js'
 import { parseBooleanString } from '../parseBooleanString.js'
 import { sanitizeJoinParams } from '../sanitizeJoinParams.js'
@@ -13,7 +15,6 @@ export type RawParams = {
   autosave?: string
   data?: string
   depth?: string
-  draft?: string
   field?: string
   flattenLocales?: string
   joins?: JoinParams
@@ -22,12 +23,11 @@ export type RawParams = {
   page?: string
   pagination?: string
   populate?: unknown
-  publishAllLocales?: string
   select?: unknown
   selectedLocales?: string
   sort?: string | string[]
   trash?: string
-  unpublishAllLocales?: string
+  version?: string
   where?: string | Where
 }
 
@@ -35,7 +35,6 @@ export type ParsedParams = {
   autosave?: boolean
   data?: Record<string, unknown>
   depth?: number
-  draft?: boolean
   field?: string
   flattenLocales?: boolean
   joins?: JoinQuery
@@ -44,37 +43,29 @@ export type ParsedParams = {
   page?: number
   pagination?: boolean
   populate?: PopulateType
-  publishAllLocales?: boolean
   select?: SelectType
   selectedLocales?: string[]
   sort?: string[]
   trash?: boolean
-  unpublishAllLocales?: boolean
+  version?: DocumentVersion
   where?: Where
 } & Record<string, unknown>
 
-export const booleanParams = [
-  'autosave',
-  'draft',
-  'trash',
-  'overrideLock',
-  'pagination',
-  'flattenLocales',
-  'publishAllLocales',
-  'unpublishAllLocales',
-]
+export const booleanParams = ['autosave', 'trash', 'overrideLock', 'pagination', 'flattenLocales']
 
 export const numberParams = ['depth', 'limit', 'page']
 
 /**
  * Takes raw query parameters and parses them into the correct types that Payload expects.
  * Examples:
- *   a. `draft` provided as a string of "true" is converted to a boolean
+ *   a. `autosave` provided as a string of "true" is converted to a boolean
  *   b. `depth` provided as a string of "0" is converted to a number
  *   c. `sort` provided as a comma-separated string or array is converted to an array of strings
  */
 export const parseParams = (params: RawParams): ParsedParams => {
-  const parsedParams = (params || {}) as ParsedParams
+  const parsedParams = (params || {}) as unknown as ParsedParams
+
+  parsedParams.version = parseDocumentVersion({ params: params || {} })
 
   // iterate through known params to make this very fast
   for (const key of booleanParams) {

@@ -266,7 +266,10 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
     createdPosts.push(created)
   }
 
-  const richTextCount = await payload.count({ collection: richTextFieldsSlug, overrideAccess: true })
+  const richTextCount = await payload.count({
+    collection: richTextFieldsSlug,
+    overrideAccess: true,
+  })
   if (richTextCount.totalDocs === 0) {
     const uploadDoc = await payload.create({
       collection: uploadsSlug,
@@ -598,7 +601,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       content: 'Initial content',
       title: 'Document With Many Versions',
     },
-    draft: true,
+    version: 'draft',
     overrideAccess: true,
   })
 
@@ -800,7 +803,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       title: 'Designing Database Indexes for Search',
       track: 'backend',
     },
-    draft: true,
+    version: 'draft',
     overrideAccess: true,
   })
 

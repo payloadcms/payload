@@ -31,6 +31,7 @@ export const countDocumentsTool = defineCollectionTool({
       collection: slug,
       overrideAccess: authorizedMCP.overrideAccess,
       req,
+      version: input.version,
       ...(locale ? { locale } : {}),
       ...(trash !== undefined ? { trash } : {}),
       ...(where ? { where } : {}),

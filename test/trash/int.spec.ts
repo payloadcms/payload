@@ -44,6 +44,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
         title: 'With Access Control one',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     postsDocOne = await payload.create({
@@ -52,6 +53,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
         title: 'Doc one',
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     postsDocTwo = await payload.create({
@@ -61,6 +63,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
         title: 'Doc two',
       },
       overrideAccess: true,
+      version: 'published',
     })
   })
 
@@ -173,6 +176,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: { title: 'Regular user trash test' },
           overrideAccess: true,
+          version: 'published',
         })
 
         createdDocIds.push(doc.id)
@@ -197,6 +201,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: { title: 'Admin trash test' },
           overrideAccess: true,
+          version: 'published',
         })
 
         createdDocIds.push(doc.id)
@@ -228,6 +233,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
             title: 'Regular user perm delete test',
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         createdDocIds.push(doc.id)
@@ -257,6 +263,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
             title: 'Admin perm delete test',
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         // Admin should be able to permanently delete
@@ -289,12 +296,14 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: { title: 'Bulk trash test 1' },
           overrideAccess: true,
+          version: 'published',
         })
 
         const doc2 = await payload.create({
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: { title: 'Bulk trash test 2' },
           overrideAccess: true,
+          version: 'published',
         })
 
         createdDocIds.push(doc1.id, doc2.id)
@@ -329,6 +338,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
             title: 'Bulk perm delete test 1',
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         const doc2 = await payload.create({
@@ -338,6 +348,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
             title: 'Bulk perm delete test 2',
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         createdDocIds.push(doc1.id, doc2.id)
@@ -387,6 +398,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
             title: 'Admin bulk perm delete 1',
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         const doc2 = await payload.create({
@@ -396,6 +408,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
             title: 'Admin bulk perm delete 2',
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         // Admin should be able to bulk permanently delete
@@ -490,6 +503,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
         })
 
         const result = await payload.find({
+          version: 'latest',
           collection: postsSlug,
           overrideAccess: true, // Normal query should return it now
           trash: false,
@@ -513,6 +527,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
           collection: postsSlug,
           data: { title: 'Doc one' },
           overrideAccess: true,
+          version: 'published',
         })
 
         const result = await payload.findDistinct({
@@ -835,6 +850,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
 
         // Should now show up in trash: false queries
         const result = await payload.find({
+          version: 'latest',
           collection: postsSlug,
           overrideAccess: true,
           trash: false,
@@ -912,6 +928,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
             title: 'Doc three',
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         const result = await payload.update({
@@ -1000,11 +1017,13 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
             title: 'Validate trash update',
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         try {
           await expect(
             payload.update({
+              version: 'published',
               id: doc.id,
               collection: postsSlug,
               data: {
@@ -1034,11 +1053,13 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
             title: 'Validate trashed update',
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         try {
           await expect(
             payload.update({
+              version: 'published',
               id: doc.id,
               collection: postsSlug,
               data: {
@@ -1089,7 +1110,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
             },
             title: 'Incomplete rich text draft',
           },
-          draft: true,
+          version: 'draft',
           overrideAccess: true,
         })
 
@@ -1124,7 +1145,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
             _status: 'draft',
             title: '', // Empty required field
           },
-          draft: true,
+          version: 'draft',
           overrideAccess: true,
         })
 
@@ -1164,7 +1185,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
             _status: 'draft',
             title: '', // Empty required field
           },
-          draft: true,
+          version: 'draft',
           overrideAccess: true,
         })
 
@@ -1213,7 +1234,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
             _status: 'draft',
             title: '', // Empty required field
           },
-          draft: true,
+          version: 'draft',
           overrideAccess: true,
         })
 
@@ -1386,7 +1407,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
           _status: 'draft',
           localizedField: localizedFieldValueEN,
         },
-        draft: true,
+        version: 'draft',
         locale: 'en',
         overrideAccess: true,
       })
@@ -1398,7 +1419,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
           _status: 'draft',
           localizedField: localizedFieldValueES,
         },
-        draft: true,
+        version: 'draft',
         locale: 'es',
         overrideAccess: true,
       })
@@ -1425,7 +1446,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
       const trashedDocEN = await payload.findByID({
         id: post.id,
         collection: postsSlug,
-        draft: true,
+        version: 'latest',
         locale: 'en',
         overrideAccess: true,
         trash: true,
@@ -1434,7 +1455,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
       const trashedDocES = await payload.findByID({
         id: post.id,
         collection: postsSlug,
-        draft: true,
+        version: 'latest',
         locale: 'es',
         overrideAccess: true,
         trash: true,
@@ -1483,7 +1504,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
           }),
         })
 
-        const res = await restClient.GET(`/${postsSlug}?trash=false`)
+        const res = await restClient.GET(`/${postsSlug}?trash=false&version=latest`)
         const data = await res.json()
 
         const restored = data.docs.find((doc: Post) => doc.id === postsDocTwo.id)
@@ -1646,7 +1667,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
         const result = await res.json()
         expect(result.doc.deletedAt).toBeNull()
 
-        const check = await restClient.GET(`/${postsSlug}?trash=false`)
+        const check = await restClient.GET(`/${postsSlug}?trash=false&version=latest`)
         const data = await check.json()
         const restored = data.docs.find((doc: Post) => doc.id === postsDocTwo.id)
 
@@ -1697,6 +1718,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
             title: 'Doc three',
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         const res = await restClient.PATCH(`/${postsSlug}${query}`, {
@@ -1920,7 +1942,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
 
         const query = `
           query {
-            Posts(trash: false) {
+            Posts(version: latest, trash: false) {
               docs {
                 id
                 deletedAt
@@ -2295,7 +2317,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
 
         const query = `
           query {
-            Posts(trash: false) {
+            Posts(version: latest, trash: false) {
               docs {
                 id
                 deletedAt
@@ -2504,6 +2526,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
           title: 'Page with related posts',
         },
         overrideAccess: true,
+        version: 'published',
       })
       createdPageIDs.push(page.id)
 
@@ -2531,6 +2554,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
           title: 'Page with featured post',
         },
         overrideAccess: true,
+        version: 'published',
       })
       createdPageIDs.push(page.id)
 
@@ -2552,6 +2576,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
           title: 'Page with featured post',
         },
         overrideAccess: true,
+        version: 'published',
       })
       createdPageIDs.push(page.id)
 
@@ -2574,6 +2599,7 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
           title: 'Page with related posts depth 0',
         },
         overrideAccess: true,
+        version: 'published',
       })
       createdPageIDs.push(page.id)
 

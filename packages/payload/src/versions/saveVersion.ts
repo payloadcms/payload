@@ -4,10 +4,17 @@ import type { CreateGlobalVersionArgs, CreateVersionArgs, Payload } from '../ind
 import type { JsonObject, PayloadRequest, SelectType } from '../types/index.js'
 
 import { deepCopyObjectSimple } from '../index.js'
-import { getVersionsMax, hasLocalizeStatusEnabled } from '../utilities/getVersionsConfig.js'
+import {
+  getVersionsMax,
+  hasDraftsEnabled,
+  hasLocalizeStatusEnabled,
+} from '../utilities/getVersionsConfig.js'
 import { sanitizeInternalFields } from '../utilities/sanitizeInternalFields.js'
+import { appendVersionToQueryKey } from './drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSelect } from './drafts/getQueryDraftsSelect.js'
 import { enforceMaxVersions } from './enforceMaxVersions.js'
+import { getVersionStatusQuery } from './getVersionStatusQuery.js'
+import { syncPublishedLocalesToDraft } from './syncPublishedLocalesToDraft.js'
 import { updateLatestVersion } from './updateLatestVersion.js'
 
 type Args<T extends JsonObject = JsonObject> = {
@@ -19,6 +26,7 @@ type Args<T extends JsonObject = JsonObject> = {
   id?: number | string
   operation?: 'create' | 'restoreVersion' | 'update'
   payload: Payload
+  preserveDraft?: boolean
   req?: PayloadRequest
   returning?: boolean
   select?: SelectType
@@ -43,6 +51,7 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
   global,
   operation,
   payload,
+  preserveDraft,
   req,
   returning,
   select,
@@ -79,8 +88,59 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
     )
   }
 
+  let hasActiveDraft = false
+
+  if (preserveDraft && entity && hasDraftsEnabled(entity)) {
+    const where = {
+      and: [
+        { latest: { equals: true } },
+        appendVersionToQueryKey(
+          getVersionStatusQuery({
+            entity,
+            locale: 'all',
+            localization: payload.config.localization,
+            status: 'draft',
+          }),
+        ),
+        ...(collection ? [{ parent: { equals: id } }] : []),
+      ],
+    }
+    const versions = collection
+      ? await payload.db.findVersions({
+          collection: collection.slug,
+          limit: 1,
+          pagination: false,
+          req,
+          where,
+        })
+      : await payload.db.findGlobalVersions({
+          global: global!.slug,
+          limit: 1,
+          pagination: false,
+          req,
+          where,
+        })
+
+    hasActiveDraft = versions.docs.length > 0
+
+    if (hasActiveDraft) {
+      await syncPublishedLocalesToDraft({
+        collection,
+        docWithLocales: versionData,
+        draftVersion: versions.docs[0]!,
+        global,
+        payload,
+        req,
+      })
+    }
+  }
+
   try {
-    if (unpublish || autosave) {
+    if (unpublish && hasActiveDraft) {
+      // The active snapshot was synchronized above. Keep its pending content and avoid adding
+      // a history entry for the status change, while returning the updated main document.
+      result = { parent: id, version: versionData }
+    } else if (!hasActiveDraft && (unpublish || autosave)) {
       result = await updateLatestVersion({
         id,
         collection,
@@ -101,6 +161,7 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
         collectionSlug: undefined as string | undefined,
         createdAt: operation === 'restoreVersion' ? versionData.createdAt : now,
         globalSlug: undefined as string | undefined,
+        latest: !hasActiveDraft,
         parent: collection ? id : undefined,
         req,
         returning,

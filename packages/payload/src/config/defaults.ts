@@ -143,6 +143,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
     outputFile:
       typescript?.outputFile ??
       `${typeof process?.cwd === 'function' ? process.cwd() : ''}/payload-types.ts`,
+    strictDraftTypes: typescript?.strictDraftTypes ?? true,
   }
   config.upload = config.upload ?? {}
 

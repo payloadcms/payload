@@ -199,9 +199,11 @@ function mergeSelectTrees(firstTree: SelectTree, secondTree: SelectTree): Select
     const existingFieldSelect = mergedTree[fieldName]
 
     mergedTree[fieldName] =
-      isSelectTree(existingFieldSelect) && isSelectTree(fieldSelect)
-        ? mergeSelectTrees(existingFieldSelect, fieldSelect)
-        : fieldSelect
+      existingFieldSelect === true || fieldSelect === true
+        ? true
+        : isSelectTree(existingFieldSelect) && isSelectTree(fieldSelect)
+          ? mergeSelectTrees(existingFieldSelect, fieldSelect)
+          : fieldSelect
   }
 
   return mergedTree

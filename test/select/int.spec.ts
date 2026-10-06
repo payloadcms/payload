@@ -1544,7 +1544,7 @@ test.suite('Select', { config: './config.ts', resetBetweenTests: false }, () => 
       const res = await payload.findByID({
         id: postId,
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {},
         overrideAccess: true,
       })
@@ -1558,7 +1558,7 @@ test.suite('Select', { config: './config.ts', resetBetweenTests: false }, () => 
       const res = await payload.findByID({
         id: postId,
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {
           number: true,
         },
@@ -1575,7 +1575,7 @@ test.suite('Select', { config: './config.ts', resetBetweenTests: false }, () => 
       const res = await payload.findByID({
         id: postId,
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {
           number: false,
         },
@@ -1592,7 +1592,7 @@ test.suite('Select', { config: './config.ts', resetBetweenTests: false }, () => 
       const res = await payload.findByID({
         id: postId,
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {
           number: true,
           text: true,
@@ -1610,7 +1610,7 @@ test.suite('Select', { config: './config.ts', resetBetweenTests: false }, () => 
     test('payload.find should select number and text', async ({ payload }) => {
       const res = await payload.find({
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {
           number: true,
           text: true,
@@ -1633,7 +1633,7 @@ test.suite('Select', { config: './config.ts', resetBetweenTests: false }, () => 
     test('should select base id field inside of array', async ({ payload }) => {
       const res = await payload.find({
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {
           array: {},
         },
@@ -1654,7 +1654,7 @@ test.suite('Select', { config: './config.ts', resetBetweenTests: false }, () => 
     test('should select base id field inside of blocks', async ({ payload }) => {
       const res = await payload.find({
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {
           blocks: {},
         },
@@ -1704,14 +1704,14 @@ test.suite('Select', { config: './config.ts', resetBetweenTests: false }, () => 
       const doc = await payload.create({
         collection: 'versioned-posts',
         data: { _status: 'draft', text: 'draft-post' },
-        draft: true,
+        version: 'draft',
         overrideAccess: true,
       })
 
       const res = await payload.findByID({
         id: doc.id,
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: { text: true },
         overrideAccess: true,
       })
@@ -1726,7 +1726,7 @@ test.suite('Select', { config: './config.ts', resetBetweenTests: false }, () => 
       const res_2 = await payload.findByID({
         id: doc.id,
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: { text: true },
         overrideAccess: true,
       })
@@ -2279,7 +2279,12 @@ test.suite('Select', { config: './config.ts', resetBetweenTests: false }, () => 
     test('local API - should populate with the defaultPopulate select shape', async ({
       payload,
     }) => {
-      const result = await payload.findByID({ id: aboutPage.id, collection: 'pages', depth: 1, overrideAccess: true })
+      const result = await payload.findByID({
+        id: aboutPage.id,
+        collection: 'pages',
+        depth: 1,
+        overrideAccess: true,
+      })
 
       const block = result.content![0]!
 
@@ -2395,7 +2400,11 @@ test.suite('Select', { config: './config.ts', resetBetweenTests: false }, () => 
       restClient,
     }) => {
       // Create a related document first
-      const rel = await payload.create({ collection: 'rels', data: { text: 'graphql-rel-test' }, overrideAccess: true })
+      const rel = await payload.create({
+        collection: 'rels',
+        data: { text: 'graphql-rel-test' },
+        overrideAccess: true,
+      })
 
       // Create a post with the relationship
       const testPost = await payload.create({
@@ -2462,7 +2471,11 @@ test.suite('Select', { config: './config.ts', resetBetweenTests: false }, () => 
       restClient,
     }) => {
       // Create a related document
-      const rel = await payload.create({ collection: 'rels', data: { text: 'graphql-poly-test' }, overrideAccess: true })
+      const rel = await payload.create({
+        collection: 'rels',
+        data: { text: 'graphql-poly-test' },
+        overrideAccess: true,
+      })
 
       // Create a post with polymorphic relationships
       const testPost = await payload.create({
@@ -2778,7 +2791,11 @@ test.suite('Select', { config: './config.ts', resetBetweenTests: false }, () => 
   test('should properly return relationships when using select on block with depth 0', async ({
     payload,
   }) => {
-    const rel_1 = await payload.create({ collection: 'rels', data: { text: 'rel-1' }, overrideAccess: true })
+    const rel_1 = await payload.create({
+      collection: 'rels',
+      data: { text: 'rel-1' },
+      overrideAccess: true,
+    })
     const doc = await payload.create({
       collection: 'relationships-blocks',
       data: {
@@ -2805,7 +2822,11 @@ test.suite('Select', { config: './config.ts', resetBetweenTests: false }, () => 
   })
 
   test('should populate relationships when using select on block', async ({ payload }) => {
-    const rel_1 = await payload.create({ collection: 'rels', data: { text: 'rel-1' }, overrideAccess: true })
+    const rel_1 = await payload.create({
+      collection: 'rels',
+      data: { text: 'rel-1' },
+      overrideAccess: true,
+    })
     const doc = await payload.create({
       collection: 'relationships-blocks',
       data: {
@@ -2980,11 +3001,19 @@ function createVersionedPost({ payload }: { payload: Payload }) {
 }
 
 function createPoint({ payload }: { payload: Payload }) {
-  return payload.create({ collection: 'points', data: { point: [10, 20], text: 'some' }, overrideAccess: true })
+  return payload.create({
+    collection: 'points',
+    data: { point: [10, 20], text: 'some' },
+    overrideAccess: true,
+  })
 }
 
 let id = 1
 
 function createCustomID({ payload }: { payload: Payload }) {
-  return payload.create({ collection: 'custom-ids', data: { id: id++, text: randomUUID() }, overrideAccess: true })
+  return payload.create({
+    collection: 'custom-ids',
+    data: { id: id++, text: randomUUID() },
+    overrideAccess: true,
+  })
 }

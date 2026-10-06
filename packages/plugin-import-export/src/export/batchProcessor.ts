@@ -2,7 +2,7 @@
  * Export-specific batch processor for processing documents in batches during export.
  * Uses the generic batch processing utilities from useBatchProcessor.
  */
-import type { PayloadRequest, SelectType, Sort, User, Where } from 'payload'
+import type { DocumentVersion, PayloadRequest, SelectType, Sort, User, Where } from 'payload'
 
 import type { ExportAfterHook, ExportBeforeHook, ExportDoc } from '../types.js'
 
@@ -21,7 +21,6 @@ export interface ExportBatchProcessorOptions extends BatchProcessorOptions {
 export interface ExportFindArgs {
   collection: string
   depth: number
-  draft: boolean
   limit: number
   locale?: string
   overrideAccess: boolean
@@ -29,6 +28,7 @@ export interface ExportFindArgs {
   select?: SelectType
   sort?: Sort
   user?: User
+  version: DocumentVersion
   where?: Where
 }
 
@@ -104,7 +104,7 @@ export interface ExportResult {
  *
  * const result = await processor.processExport({
  *   collectionSlug: 'posts',
- *   findArgs: { collection: 'posts', depth: 1, draft: false, limit: 100, overrideAccess: false },
+ *   findArgs: { collection: 'posts', depth: 1, version: 'published', limit: 100, overrideAccess: false },
  *   format: 'csv',
  *   maxDocs: 1000,
  *   req,

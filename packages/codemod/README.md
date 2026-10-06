@@ -82,6 +82,8 @@ The tool loads your project via [ts-morph](https://ts-morph.com/), using your `t
 
 ## Transforms
 
+- `migrate-draft-version-selectors`: migrates proven Local API and SDK draft options to `version` selectors. Preserves the old update default with `version: 'latest'`, respects create publication status, and migrates unambiguous status-only all-locale updates. Requires static registered target configs and identifiable Payload receivers; ambiguous calls or configs (including nonempty plugin/storage lists), historical operations, and locale-keyed field updates remain unchanged with file/line notes. Run before `remove-localize-status-config`. See the migration guide for REST, GraphQL, CLI, and changed read defaults.
+
 - `migrate-list-view-select-api`: Removes `admin.enableListViewSelectAPI` from Collection Configs. The List View's Select API is the default in v4.
 - `migrate-disabled-fields`: migrates `field.admin.disableListColumn`, `disableListFilter`, `disableGroupBy`, `disableBulkEdit` and their equivalents on `imageSize.admin` into the consolidated `disabled` object form.
 - `globals-components-edit`: Globals: rename `admin.components.elements` to `admin.components.edit` and hoist `Description` to top-level `admin.components.Description` to match Collection conventions.

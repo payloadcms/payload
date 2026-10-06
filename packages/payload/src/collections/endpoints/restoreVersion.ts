@@ -5,20 +5,21 @@ import type { PayloadHandler } from '../../config/types.js'
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { parseParams } from '../../utilities/parseParams/index.js'
+import { parseDocumentVersion } from '../../versions/parseDocumentVersion.js'
 import { restoreVersionOperation } from '../operations/restoreVersion.js'
 
 export const restoreVersionHandler: PayloadHandler = async (req) => {
   const { id, collection } = getRequestCollectionWithID(req)
 
-  const { depth, draft, populate } = parseParams(req.query)
+  const { depth, populate } = parseParams(req.query)
 
   const result = await restoreVersionOperation({
     id,
     collection,
     depth,
-    draft,
     populate,
     req,
+    version: parseDocumentVersion({ params: req.query }),
   })
 
   return Response.json(

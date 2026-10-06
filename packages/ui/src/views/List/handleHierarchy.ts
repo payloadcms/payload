@@ -133,7 +133,6 @@ export const handleHierarchy = async ({
   const childrenData = await req.payload.find({
     collection: collectionSlug,
     depth: 0,
-    draft: true,
     fallbackLocale: false,
     includeLockStatus: true,
     limit: DEFAULT_HIERARCHY_LIST_LIMIT,
@@ -142,6 +141,7 @@ export const handleHierarchy = async ({
     page: 1,
     req,
     user,
+    version: 'latest',
     where: combineWhereConstraints([childrenWhere, baseFilter]),
   })
 
@@ -220,7 +220,6 @@ export const handleHierarchy = async ({
       const data = await req.payload.find({
         collection: relatedSlug,
         depth: 0,
-        draft: true,
         fallbackLocale: false,
         includeLockStatus: true,
         limit: DEFAULT_HIERARCHY_LIST_LIMIT,
@@ -229,6 +228,7 @@ export const handleHierarchy = async ({
         page: 1,
         req,
         user,
+        version: 'latest',
         where,
       })
 

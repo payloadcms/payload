@@ -57,6 +57,7 @@ export const getSchedulePublishTask = ({
           locale: input.locale,
           overrideAccess: user === null,
           user,
+          version: input.type === 'unpublish' ? 'published' : 'draft',
         })
       }
 
@@ -70,6 +71,7 @@ export const getSchedulePublishTask = ({
           locale: input.locale,
           overrideAccess: user === null,
           user,
+          version: input.type === 'unpublish' ? 'published' : 'draft',
         })
       }
 

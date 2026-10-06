@@ -1,3 +1,5 @@
+import type { DocumentVersion } from '../../types/operations.js'
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { IsAny } from 'ts-essentials'
@@ -46,32 +48,14 @@ export type GlobalsWithoutDrafts = {
   [TSlug in GlobalSlug]: DataFromGlobalSlug<TSlug> extends { _status?: any } ? never : TSlug
 }[GlobalSlug]
 
-/**
- * Conditionally allows or forbids the `draft` property based on global configuration.
- * When `strictDraftTypes` is enabled, the `draft` property is forbidden on globals without drafts.
- */
-export type DraftFlagFromGlobalSlug<TSlug extends GlobalSlug> = GeneratedTypes extends {
+/** Selects the document snapshot when drafts are enabled. */
+export type VersionFromGlobalSlug<TSlug extends GlobalSlug> = GeneratedTypes extends {
   strictDraftTypes: true
 }
   ? TSlug extends GlobalsWithoutDrafts
-    ? {
-        /**
-         * The `draft` property is not allowed because this global does not have `versions.drafts` enabled.
-         */
-        draft?: never
-      }
-    : {
-        /**
-         * Whether the global should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-         */
-        draft?: boolean
-      }
-  : {
-      /**
-       * Whether the global should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-       */
-      draft?: boolean
-    }
+    ? { version?: 'published' }
+    : { version?: DocumentVersion }
+  : { version?: DocumentVersion }
 
 export type BeforeValidateHook = (args: {
   context: RequestContext

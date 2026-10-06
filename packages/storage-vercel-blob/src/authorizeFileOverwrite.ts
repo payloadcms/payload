@@ -75,10 +75,10 @@ async function findMatchingDocs({
   const result = await req.payload.find({
     collection: collectionSlug,
     depth: 0,
-    draft: true,
     overrideAccess: true,
     pagination: false,
     req,
+    version: 'latest',
     where: { or: filenameQueries },
   })
 
@@ -116,11 +116,11 @@ async function canUpdateDoc({
   const result = await req.payload.find({
     collection: collectionSlug,
     depth: 0,
-    draft: true,
     limit: 1,
     overrideAccess: true,
     pagination: false,
     req,
+    version: 'latest',
     where: combineQueries({ id: { equals: doc.id } }, accessResult),
   })
 

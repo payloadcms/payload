@@ -15,10 +15,11 @@ import type {
 } from '../../../types/index.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
-import type { DraftFlagFromGlobalSlug, SelectFromGlobalSlug } from '../../config/types.js'
+import type { SelectFromGlobalSlug, VersionFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
+import { parseDocumentVersion } from '../../../versions/parseDocumentVersion.js'
 import { findOneOperation, type GlobalFindOneArgs } from '../findOne.js'
 
 type BaseFindOneOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
@@ -42,10 +43,6 @@ type BaseFindOneOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = 
    * When set to `true`, errors will not be thrown.
    */
   disableErrors?: boolean
-  /**
-   * Whether the document should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-   */
-  draft?: boolean
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
@@ -88,7 +85,7 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = Base
   TSlug,
   TSelect
 > &
-  DraftFlagFromGlobalSlug<TSlug>
+  VersionFromGlobalSlug<TSlug>
 
 export async function findOneGlobalLocal<
   TSlug extends GlobalSlug,
@@ -97,18 +94,20 @@ export async function findOneGlobalLocal<
   payload: Payload,
   options: Options<TSlug, TSelect>,
 ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> {
+  parseDocumentVersion({ params: { ...options } })
+
   const {
     slug: globalSlug,
     data,
     depth,
     disableErrors,
-    draft = false,
     flattenLocales,
     includeLockStatus,
     overrideAccess = false,
     populate,
     select,
     showHiddenFields,
+    version,
   } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
@@ -122,7 +121,6 @@ export async function findOneGlobalLocal<
     data,
     depth,
     disableErrors,
-    draft,
     flattenLocales,
     globalConfig,
     includeLockStatus,
@@ -134,5 +132,6 @@ export async function findOneGlobalLocal<
     }),
     select,
     showHiddenFields,
+    version,
   })
 }

@@ -482,7 +482,9 @@ export default buildConfigWithDefaults({
             access: {
               create: () => false,
               update: ({ data, doc, req }) =>
-                Boolean(req.context.comparePublicationStatus && data?._status === doc?._status),
+                req.context.deniedPublicationLocale
+                  ? req.locale !== req.context.deniedPublicationLocale
+                  : Boolean(req.context.comparePublicationStatus && data?._status === doc?._status),
             },
             hooks: {
               beforeValidate: [
@@ -546,8 +548,9 @@ export default buildConfigWithDefaults({
           beforeOperation: [
             ({ args, context }) => {
               if (context.saveAsDraft) {
-                args.draft = true
-                args.publishAllLocales = false
+                args.version = 'draft'
+                args.data._status = 'draft'
+                args.req.locale = defaultLocale
               }
 
               return args
@@ -667,7 +670,8 @@ export default buildConfigWithDefaults({
             ({ args, context }) => {
               if (context.sanitizePublicationIntent && args.data?._status === 'published') {
                 delete args.data._status
-                args.publishAllLocales = false
+                args.version = 'latest'
+                args.req.locale = defaultLocale
               }
 
               return args

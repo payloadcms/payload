@@ -770,7 +770,7 @@ describe('Document View', () => {
         data: {
           title: 'English draft',
         },
-        draft: true,
+        version: 'draft',
         locale: 'en',
       })
 
@@ -780,16 +780,18 @@ describe('Document View', () => {
         data: {
           title: 'Spanish draft',
         },
-        draft: true,
+        version: 'draft',
         locale: 'es',
       })
 
       await page.goto(localizedURL.edit(localizedDocument.id))
       await saveDocAndAssert(page, '#publish-all-locales')
+      await expect(page.getByRole('heading', { name: 'English draft', exact: true })).toBeVisible()
+      await expect(page.locator('#field-title')).toHaveValue('English draft')
 
       const publishedDocuments = await payload.find({
         collection: localizedCollectionSlug,
-        draft: true,
+        version: 'latest',
         locale: 'all',
         where: {
           id: {
@@ -798,6 +800,10 @@ describe('Document View', () => {
         },
       })
 
+      expect(publishedDocuments.docs[0]?.title).toEqual({
+        en: 'English draft',
+        es: 'Spanish draft',
+      })
       expect(publishedDocuments.docs[0]?._status).toEqual({
         en: 'published',
         es: 'published',

@@ -1228,7 +1228,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
           }),
           payload.find({
             collection: 'fields-and-top-access',
-            draft: true,
+            version: 'latest',
             overrideAccess: false,
             sort: 'secret',
           }),
@@ -1868,16 +1868,19 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
         overrideAccess: true,
+        version: 'published',
       })
       const { id: hitID } = await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-success-access-read' },
         overrideAccess: true,
+        version: 'published',
       })
       await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
         overrideAccess: true,
+        version: 'published',
       })
 
       // assert find, only will-success should be in the result
@@ -1891,7 +1894,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
       // assert find draft: true
       const resFindDraft = await payload.find({
         collection: 'fields-and-top-access',
-        draft: true,
+        version: 'latest',
         overrideAccess: false,
       })
 
@@ -1918,16 +1921,19 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
         overrideAccess: true,
+        version: 'published',
       })
       const { id: hitID } = await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-success-access-read' },
         overrideAccess: true,
+        version: 'published',
       })
       await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
         overrideAccess: true,
+        version: 'published',
       })
 
       // Assert findVersions only will-success should be in the result
@@ -2475,7 +2481,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             slug: inheritedReadVersionsVirtualGlobalSlug,
             overrideAccess: false,
           }),
-        ).resolves.toMatchObject({ version: { related: allowedID } })
+        ).resolves.toMatchObject({ related: { id: allowedID } })
       } finally {
         await payload.db.deleteVersions({
           globalSlug: inheritedReadVersionsVirtualGlobalSlug,

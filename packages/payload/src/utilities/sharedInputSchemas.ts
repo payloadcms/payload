@@ -25,9 +25,14 @@ export const defaultPageSchema = z
 export const depthSchema = z
   ._default(z.int().check(z.minimum(0), z.maximum(10)), 0)
   .check(z.describe('How many levels deep to populate relationships.'))
-export const draftSchema = z
-  .optional(z.boolean())
-  .check(z.describe('Include or read draft content.'))
+export const documentVersionSchema = z
+  .optional(z.enum(['published', 'draft', 'latest']))
+  .check(z.describe('The document snapshot to read or update.'))
+export const createDocumentVersionSchema = z
+  .optional(z.enum(['published', 'draft']))
+  .check(
+    z.describe('Create a published document or draft. Defaults to draft when drafts are enabled.'),
+  )
 export const fallbackLocaleSchema = z
   .optional(z.union([z.string(), z.literal(false)]))
   .check(z.describe('Optional fallback locale code, or false to disable fallback.'))
@@ -73,9 +78,6 @@ export const populateSchema = z
       'Optional: control which fields to include from populated relationship or upload documents.',
     ),
   )
-export const publishAllLocalesSchema = z
-  .optional(z.boolean())
-  .check(z.describe('Publish all locales.'))
 export const returningSchema = z
   ._default(z.boolean(), false)
   .check(z.describe('Return complete documents instead of only their IDs.'))
@@ -98,12 +100,6 @@ export const sortSchema = z
 export const trashSchema = z
   .optional(z.boolean())
   .check(z.describe('Read from or include the trash.'))
-export const unpublishAllLocalesSchema = z
-  .optional(z.boolean())
-  .check(z.describe('Unpublish all locales.'))
-export const writeDraftSchema = z
-  ._default(z.boolean(), false)
-  .check(z.describe('Write draft content.'))
 export const slugSchema = z.string().check(z.minLength(1), z.describe('The target slug.'))
 
 const whereFieldSchema = z.partialRecord(z.enum(validOperators), z.unknown())

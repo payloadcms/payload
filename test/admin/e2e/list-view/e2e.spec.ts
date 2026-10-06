@@ -126,6 +126,8 @@ describe('List View', () => {
   })
 
   beforeEach(async () => {
+    await page.goto('about:blank')
+
     await reInitializeDB({
       serverURL,
     })
@@ -426,6 +428,9 @@ describe('List View', () => {
         '&' + encodeURIComponent('where[or][0][and][0][relationship][equals]') + '='
 
       await page.waitForURL(new RegExp(encodedQueryString + '[^&]*'))
+
+      await page.reload()
+      await expect(page.locator('.condition__value')).toContainText('post1')
 
       await page.locator('.condition__actions .btn.condition__actions-remove').click()
 
@@ -990,17 +995,13 @@ describe('List View', () => {
 
       await expect(options).toHaveCount(10)
 
-      for (const option of await options.all()) {
-        expect(await option.innerText()).toContain('4')
-      }
+      await expect(options).toHaveText(Array.from({ length: 10 }, () => /4/))
 
       await page.keyboard.press('Backspace')
       await page.keyboard.type('5')
       await expect(options).toHaveCount(10)
 
-      for (const option of await options.all()) {
-        expect(await option.innerText()).toContain('5')
-      }
+      await expect(options).toHaveText(Array.from({ length: 10 }, () => /5/))
 
       await options.first().hover()
 

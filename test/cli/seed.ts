@@ -3,6 +3,7 @@ import type { Payload } from 'payload'
 export const seed = async (payload: Payload): Promise<void> => {
   await payload.create({
     collection: 'pages',
+    version: 'published',
     data: { title: 'Seeded page' },
     overrideAccess: true,
   } as never)

@@ -1,4 +1,11 @@
-import type { CollectionSlug, PayloadTypesShape, SelectType, TypedLocale, Where } from 'payload'
+import type {
+  CollectionSlug,
+  DocumentVersion,
+  PayloadTypesShape,
+  SelectType,
+  TypedLocale,
+  Where,
+} from 'payload'
 
 import type { PayloadSDK } from '../index.js'
 import type {
@@ -21,7 +28,6 @@ export type DeleteBaseOptions<
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
   depth?: number
-  draft?: boolean
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
@@ -29,7 +35,7 @@ export type DeleteBaseOptions<
   /**
    * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
    */
-  locale?: TypedLocale<T>
+  locale?: 'all' | TypedLocale<T>
   /**
    * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
    */
@@ -43,6 +49,7 @@ export type DeleteBaseOptions<
    * @default false
    */
   trash?: boolean
+  version?: DocumentVersion
 }
 
 export type DeleteByIDOptions<

@@ -1,3 +1,5 @@
+import type { DocumentVersion } from '../../types/operations.js'
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { IsAny, MarkOptional } from 'ts-essentials'
@@ -93,32 +95,14 @@ export type CollectionsWithoutDrafts = {
   [TSlug in CollectionSlug]: DataFromCollectionSlug<TSlug> extends { _status?: any } ? never : TSlug
 }[CollectionSlug]
 
-/**
- * Conditionally allows or forbids the `draft` property based on collection configuration.
- * When `strictDraftTypes` is enabled, the `draft` property is forbidden on collections without drafts.
- */
-export type DraftFlagFromCollectionSlug<TSlug extends CollectionSlug> = GeneratedTypes extends {
+/** Selects the document snapshot when drafts are enabled. */
+export type VersionFromCollectionSlug<TSlug extends CollectionSlug> = GeneratedTypes extends {
   strictDraftTypes: true
 }
   ? TSlug extends CollectionsWithoutDrafts
-    ? {
-        /**
-         * The `draft` property is not allowed because this collection does not have `versions.drafts` enabled.
-         */
-        draft?: never
-      }
-    : {
-        /**
-         * Whether the document(s) should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-         */
-        draft?: boolean
-      }
-  : {
-      /**
-       * Whether the document(s) should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-       */
-      draft?: boolean
-    }
+    ? { version?: 'published' }
+    : { version?: DocumentVersion }
+  : { version?: DocumentVersion }
 
 export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
   TypedAuthOperations[TSlug]

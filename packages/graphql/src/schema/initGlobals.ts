@@ -19,6 +19,7 @@ import { buildObjectType } from './buildObjectType.js'
 import { buildPaginatedListType } from './buildPaginatedListType.js'
 import { buildPolicyType } from './buildPoliciesType.js'
 import { buildWhereInputType } from './buildWhereInputType.js'
+import { documentVersionType } from './documentVersionType.js'
 
 type InitGlobalsGraphQLArgs = {
   config: SanitizedConfig
@@ -45,6 +46,7 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
       name: formattedName,
       config,
       fields,
+      forceNullable: hasDraftsEnabled(global),
       graphqlResult,
       parentIsLocalized: false,
       parentName: formattedName,
@@ -70,7 +72,7 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
       graphqlResult.Query.fields[formattedName] = {
         type: graphqlResult.globals.graphQL[slug].type,
         args: {
-          draft: { type: GraphQLBoolean },
+          version: { type: documentVersionType },
           ...(config.localization
             ? {
                 fallbackLocale: { type: graphqlResult.types.fallbackLocaleInputType },
@@ -100,7 +102,7 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
           ...(updateMutationInputType
             ? { data: { type: graphqlResult.globals.graphQL[slug].mutationInputType } }
             : {}),
-          draft: { type: GraphQLBoolean },
+          version: { type: documentVersionType },
           ...(config.localization
             ? {
                 locale: { type: graphqlResult.types.localeInputType },
@@ -146,7 +148,7 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
           type: graphqlResult.globals.graphQL[slug].versionType,
           args: {
             id: { type: idType },
-            draft: { type: GraphQLBoolean },
+            version: { type: documentVersionType },
             ...(config.localization
               ? {
                   fallbackLocale: { type: graphqlResult.types.fallbackLocaleInputType },
@@ -191,7 +193,7 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
           type: graphqlResult.globals.graphQL[slug].type,
           args: {
             id: { type: idType },
-            draft: { type: GraphQLBoolean },
+            version: { type: documentVersionType },
           },
           resolve: restoreVersion(global),
         }

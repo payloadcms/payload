@@ -506,6 +506,8 @@ export type CreateVersionArgs<T extends JsonObject = JsonObject> = {
   autosave: boolean
   collectionSlug: CollectionSlug
   createdAt: string
+  /** Whether this version becomes the active copy. Defaults to true. */
+  latest?: boolean
   /** ID of the parent document for which the version should be created for */
   parent: number | string
   publishedLocale?: string
@@ -534,6 +536,8 @@ export type CreateGlobalVersionArgs<T extends JsonObject = JsonObject> = {
   autosave: boolean
   createdAt: string
   globalSlug: GlobalSlug
+  /** Whether this version becomes the active copy. Defaults to true. */
+  latest?: boolean
   publishedLocale?: string
   req?: Partial<PayloadRequest>
   /**
@@ -628,6 +632,8 @@ export type FindDistinctArgs = {
   relatedAccess?: Record<string, Where>
   req?: Partial<PayloadRequest>
   sort?: Sort
+  /** Read distinct values from active version snapshots. */
+  versions?: boolean
   where?: Where
 }
 

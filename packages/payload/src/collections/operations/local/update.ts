@@ -16,19 +16,21 @@ import type {
   TransformCollectionWithSelect,
   Where,
 } from '../../../types/index.js'
+import type { LocaleDataOptions } from '../../../types/locale.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { File } from '../../../uploads/types.js'
 import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
 import type {
   BulkOperationResult,
-  DraftFlagFromCollectionSlug,
   RequiredDataFromCollectionSlug,
   SelectFromCollectionSlug,
+  VersionFromCollectionSlug,
 } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { getFileByPath } from '../../../uploads/getFileByPath.js'
 import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
+import { parseDocumentVersion } from '../../../versions/parseDocumentVersion.js'
 import { updateOperation } from '../update.js'
 import { updateByIDOperation } from '../updateByID.js'
 
@@ -49,10 +51,6 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    * to determine if it should run or not.
    */
   context?: RequestContext
-  /**
-   * The document / documents data to update.
-   */
-  data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
   /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
@@ -75,10 +73,6 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    */
   filePath?: string
   /**
-   * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
-   */
-  locale?: TypedLocale
-  /**
    * By default, document locks are ignored (`true`). Set to `false` to enforce locks and prevent operations when a document is locked by another user. [More details](https://payloadcms.com/docs/admin/locked-documents).
    * @default true
    */
@@ -93,13 +87,6 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
    */
   populate?: PopulateType
-  /**
-   * Publish the document / documents in all locales. Only applies when localization is enabled
-   * and the collection has localized fields.
-   *
-   * @default undefined
-   */
-  publishAllLocales?: boolean
   /**
    * The `PayloadRequest` object. You can pass it to thread the current [transaction](https://payloadcms.com/docs/database/transactions), user and locale to the operation.
    * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
@@ -119,15 +106,11 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    */
   trash?: boolean
   /**
-   * Unpublish the document / documents in all locales. Only applies when localization is enabled
-   * and the collection has localized fields.
-   */
-  unpublishAllLocales?: boolean
-  /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: null | User
-} & Pick<FindOptions<TSlug, TSelect>, 'select'> &
+} & LocaleDataOptions<DeepPartial<RequiredDataFromCollectionSlug<TSlug>>, TypedLocale> &
+  Pick<FindOptions<TSlug, TSelect>, 'select'> &
   Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 export type ByIDOptions<
@@ -153,7 +136,7 @@ export type ByIDOptions<
    */
   where?: never
 } & BaseOptions<TSlug, TSelect> &
-  DraftFlagFromCollectionSlug<TSlug>
+  VersionFromCollectionSlug<TSlug>
 
 export type ManyOptions<
   TSlug extends CollectionSlug,
@@ -178,7 +161,7 @@ export type ManyOptions<
    */
   where: Where
 } & BaseOptions<TSlug, TSelect> &
-  DraftFlagFromCollectionSlug<TSlug>
+  VersionFromCollectionSlug<TSlug>
 
 export type Options<
   TSlug extends CollectionSlug,
@@ -213,6 +196,8 @@ async function updateLocal<
   payload: Payload,
   options: Options<TSlug, TSelect>,
 ): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>> {
+  parseDocumentVersion({ params: { ...options } })
+
   const {
     id,
     autosave,
@@ -220,7 +205,6 @@ async function updateLocal<
     data,
     depth,
     disableTransaction,
-    draft,
     file,
     filePath,
     limit,
@@ -228,12 +212,11 @@ async function updateLocal<
     overrideLock,
     overwriteExistingFiles = false,
     populate,
-    publishAllLocales,
     select,
     showHiddenFields,
     sort,
     trash = false,
-    unpublishAllLocales,
+    version,
     where,
   } = options
 
@@ -258,20 +241,18 @@ async function updateLocal<
     data,
     depth,
     disableTransaction,
-    draft,
     limit,
     overrideAccess,
     overrideLock,
     overwriteExistingFiles,
     payload,
     populate,
-    publishAllLocales,
     req,
     select,
     showHiddenFields,
     sort,
     trash,
-    unpublishAllLocales,
+    version,
     where,
   }
 

@@ -709,7 +709,7 @@ describe('Types testing', () => {
 
   test('payload.update many', () => {
     expect(
-      payload.update({ collection: 'users', data: {}, where: {}, overrideAccess: true }),
+      payload.update({ collection: 'users', data: {}, overrideAccess: true, where: {} }),
     ).type.toBe<Promise<BulkOperationResult<'users', SelectType>>>()
   })
 
@@ -720,7 +720,7 @@ describe('Types testing', () => {
   })
 
   test('payload.delete many', () => {
-    expect(payload.delete({ collection: 'users', where: {}, overrideAccess: true })).type.toBe<
+    expect(payload.delete({ collection: 'users', overrideAccess: true, where: {} })).type.toBe<
       Promise<BulkOperationResult<'users', SelectType>>
     >()
   })
@@ -762,7 +762,7 @@ describe('Types testing', () => {
   describe('select', () => {
     test('should include only ID if select is an empty object', () => {
       expect(
-        payload.findByID({ id: 'id', collection: 'posts', select: {}, overrideAccess: true }),
+        payload.findByID({ id: 'id', collection: 'posts', overrideAccess: true, select: {} }),
       ).type.toBe<Promise<{ id: Post['id'] }>>()
     })
 
@@ -771,8 +771,8 @@ describe('Types testing', () => {
         payload.findByID({
           id: 'id',
           collection: 'posts',
-          select: { title: true },
           overrideAccess: true,
+          select: { title: true },
         }),
       ).type.toBe<Promise<{ id: Post['id']; title?: Post['title'] }>>()
     })
@@ -782,8 +782,8 @@ describe('Types testing', () => {
         payload.findByID({
           id: 'id',
           collection: 'posts',
-          select: { title: false },
           overrideAccess: true,
+          select: { title: false },
         }),
       ).type.toBe<Promise<Omit<Post, 'title'>>>()
     })
@@ -2092,12 +2092,16 @@ describe('Types testing', () => {
   })
 
   describe('strictDraftTypes flag', () => {
+    test('should expose the normalized strict draft option as a boolean', () => {
+      expect(payload.config.typescript.strictDraftTypes).type.toBe<boolean>()
+    })
+
     describe('query operations', () => {
       test('draft find query returns optional required fields when flag is enabled', async () => {
         const result = await payload.find({
           collection: 'draft-posts',
-          draft: true,
           overrideAccess: true,
+          version: 'draft',
         })
 
         const doc = result.docs[0]!
@@ -2131,41 +2135,77 @@ describe('Types testing', () => {
       })
     })
 
+    test('latest find query returns optional required fields', async () => {
+      const result = await payload.find({ collection: 'draft-posts', version: 'latest' })
+      const doc = result.docs[0]!
+
+      expect(doc.title).type.toBe<string | undefined>()
+      expect(doc.description).type.toBe<string | undefined>()
+    })
+
+    test('should reject create latest and retired draft flags', () => {
+      expect(payload.create).type.not.toBeCallableWith({
+        collection: 'draft-posts',
+        data: { title: 'Test' },
+        version: 'latest',
+      })
+      expect(payload.find).type.not.toBeCallableWith({ collection: 'draft-posts', draft: true })
+    })
+
+    test('should accept all locales for collection and global writes', () => {
+      expect(payload.create).type.toBeCallableWith({
+        collection: 'draft-posts',
+        data: {},
+        locale: 'all',
+      })
+      expect(payload.update).type.toBeCallableWith({
+        id: 1,
+        collection: 'draft-posts',
+        data: {},
+        locale: 'all',
+      })
+      expect(payload.updateGlobal).type.toBeCallableWith({
+        slug: 'settings',
+        data: {},
+        locale: 'all',
+      })
+    })
+
     describe('create operations', () => {
-      test('create with draft:true on draft-enabled collection allows partial data', () => {
+      test('create with version:draft on draft-enabled collection allows partial data', () => {
         expect(payload.create).type.toBeCallableWith({
           collection: 'draft-posts',
           data: {
             title: 'Test', // Only one required field
           },
-          draft: true,
+          version: 'draft',
         })
       })
 
-      test('create with draft:false on draft-enabled collection requires all required fields', () => {
+      test('create with version:published on draft-enabled collection requires all required fields', () => {
         // Missing description - should error
         expect(payload.create).type.not.toBeCallableWith({
           collection: 'draft-posts',
           data: {
             title: 'Test',
           },
-          draft: false,
+          version: 'published',
         })
 
         // All required fields present - should not error
         expect(payload.create).type.toBeCallableWith({
           collection: 'draft-posts',
           data: {
-            title: 'Test',
             description: 'Description',
+            title: 'Test',
           },
-          draft: false,
+          version: 'published',
         })
       })
 
-      test('create without draft property on draft-enabled collection requires all required fields', () => {
-        // Missing description - should error
-        expect(payload.create).type.not.toBeCallableWith({
+      test('create without version on draft-enabled collection allows partial data', () => {
+        // Omitted version defaults to a draft.
+        expect(payload.create).type.toBeCallableWith({
           collection: 'draft-posts',
           data: {
             title: 'Test',
@@ -2176,30 +2216,30 @@ describe('Types testing', () => {
         expect(payload.create).type.toBeCallableWith({
           collection: 'draft-posts',
           data: {
-            title: 'Test',
             description: 'Description',
+            title: 'Test',
           },
         })
       })
 
-      test('create on non-draft collection forbids draft property', () => {
+      test('create on non-draft collection rejects draft and accepts published', () => {
         expect(payload.create).type.not.toBeCallableWith({
           collection: 'pages',
           data: {
             title: 'Test',
           },
-          draft: true,
+          version: 'draft',
         })
 
-        expect(payload.create).type.not.toBeCallableWith({
+        expect(payload.create).type.toBeCallableWith({
           collection: 'pages',
           data: {
             title: 'Test',
           },
-          draft: false,
+          version: 'published',
         })
 
-        // Without draft property - should not error
+        // Without version - should not error
         expect(payload.create).type.toBeCallableWith({
           collection: 'pages',
           data: {
@@ -2212,20 +2252,20 @@ describe('Types testing', () => {
         expect(payload.create).type.not.toBeCallableWith({
           collection: 'draft-posts',
           data: {
-            title: 'Test',
             description: 'Description',
             invalidProperty: 'should error',
+            title: 'Test',
           },
-          draft: false,
+          version: 'published',
         })
 
         expect(payload.create).type.not.toBeCallableWith({
           collection: 'draft-posts',
           data: {
-            title: 'Test',
             invalidProperty: 'should error',
+            title: 'Test',
           },
-          draft: true,
+          version: 'draft',
         })
       })
 
@@ -2249,130 +2289,133 @@ describe('Types testing', () => {
       })
 
       // Additional operations tests
-      test('find with draft:true on non-draft collection should error', () => {
-        expect(payload.find).type.not.toBeCallableWith({ collection: 'pages', draft: true })
+      test('find with version:draft on non-draft collection should error', () => {
+        expect(payload.find).type.not.toBeCallableWith({ collection: 'pages', version: 'draft' })
       })
 
-      test('find with draft:false on non-draft collection should error', () => {
-        expect(payload.find).type.not.toBeCallableWith({ collection: 'pages', draft: false })
+      test('find with version:published on non-draft collection should work', () => {
+        expect(payload.find).type.toBeCallableWith({ collection: 'pages', version: 'published' })
       })
 
-      test('find with draft:true on draft-enabled collection should work', () => {
-        expect(payload.find).type.toBeCallableWith({ collection: 'draft-posts', draft: true })
+      test('find with version:draft on draft-enabled collection should work', () => {
+        expect(payload.find).type.toBeCallableWith({ collection: 'draft-posts', version: 'draft' })
       })
 
-      test('find with draft:false on draft-enabled collection should work', () => {
-        expect(payload.find).type.toBeCallableWith({ collection: 'draft-posts', draft: false })
-      })
-
-      test('findByID with draft:true on non-draft collection should error', () => {
-        expect(payload.findByID).type.not.toBeCallableWith({
-          collection: 'pages',
-          id: 1,
-          draft: true,
+      test('find with version:published on draft-enabled collection should work', () => {
+        expect(payload.find).type.toBeCallableWith({
+          collection: 'draft-posts',
+          version: 'published',
         })
       })
 
-      test('findByID with draft:false on non-draft collection should error', () => {
+      test('findByID with version:draft on non-draft collection should error', () => {
         expect(payload.findByID).type.not.toBeCallableWith({
-          collection: 'pages',
           id: 1,
-          draft: false,
+          collection: 'pages',
+          version: 'draft',
         })
       })
 
-      test('findByID with draft:true on draft-enabled collection should work', () => {
+      test('findByID with version:published on non-draft collection should work', () => {
         expect(payload.findByID).type.toBeCallableWith({
+          id: 1,
+          collection: 'pages',
+          version: 'published',
+        })
+      })
+
+      test('findByID with version:draft on draft-enabled collection should work', () => {
+        expect(payload.findByID).type.toBeCallableWith({
+          id: 1,
           collection: 'draft-posts',
-          id: 1,
-          draft: true,
+          version: 'draft',
         })
       })
 
-      test('update with draft:true on non-draft collection should error', () => {
+      test('update with version:draft on non-draft collection should error', () => {
         expect(payload.update).type.not.toBeCallableWith({
-          collection: 'pages',
           id: 1,
+          collection: 'pages',
           data: { title: 'Test' },
-          draft: true,
+          version: 'draft',
         })
       })
 
-      test('update with draft:false on non-draft collection should error', () => {
-        expect(payload.update).type.not.toBeCallableWith({
-          collection: 'pages',
-          id: 1,
-          data: { title: 'Test' },
-          draft: false,
-        })
-      })
-
-      test('update with draft:true on draft-enabled collection should work', () => {
+      test('update with version:published on non-draft collection should work', () => {
         expect(payload.update).type.toBeCallableWith({
-          collection: 'draft-posts',
           id: 1,
+          collection: 'pages',
           data: { title: 'Test' },
-          draft: true,
+          version: 'published',
         })
       })
 
-      test('duplicate with draft:true on non-draft collection should error', () => {
-        expect(payload.duplicate).type.not.toBeCallableWith({
-          collection: 'pages',
+      test('update with version:draft on draft-enabled collection should work', () => {
+        expect(payload.update).type.toBeCallableWith({
           id: 1,
-          draft: true,
-        })
-      })
-
-      test('duplicate with draft:false on non-draft collection should error', () => {
-        expect(payload.duplicate).type.not.toBeCallableWith({
-          collection: 'pages',
-          id: 1,
-          draft: false,
-        })
-      })
-
-      test('duplicate with draft:true on draft-enabled collection should work', () => {
-        expect(payload.duplicate).type.toBeCallableWith({
           collection: 'draft-posts',
+          data: { title: 'Test' },
+          version: 'draft',
+        })
+      })
+
+      test('duplicate with version:draft on non-draft collection should error', () => {
+        expect(payload.duplicate).type.not.toBeCallableWith({
           id: 1,
-          draft: true,
+          collection: 'pages',
+          version: 'draft',
         })
       })
 
-      test('global findOne with draft:true on non-draft global should error', () => {
-        expect(payload.findGlobal).type.not.toBeCallableWith({ slug: 'menu', draft: true })
+      test('duplicate with version:published on non-draft collection should work', () => {
+        expect(payload.duplicate).type.toBeCallableWith({
+          id: 1,
+          collection: 'pages',
+          version: 'published',
+        })
       })
 
-      test('global findOne with draft:false on non-draft global should error', () => {
-        expect(payload.findGlobal).type.not.toBeCallableWith({ slug: 'menu', draft: false })
+      test('duplicate with version:draft on draft-enabled collection should work', () => {
+        expect(payload.duplicate).type.toBeCallableWith({
+          id: 1,
+          collection: 'draft-posts',
+          version: 'draft',
+        })
       })
 
-      test('global findOne with draft:true on draft-enabled global should work', () => {
-        expect(payload.findGlobal).type.toBeCallableWith({ slug: 'settings', draft: true })
+      test('global findOne with version:draft on non-draft global should error', () => {
+        expect(payload.findGlobal).type.not.toBeCallableWith({ slug: 'menu', version: 'draft' })
       })
 
-      test('global update with draft:true on non-draft global should error', () => {
+      test('global findOne with version:published on non-draft global should work', () => {
+        expect(payload.findGlobal).type.toBeCallableWith({ slug: 'menu', version: 'published' })
+      })
+
+      test('global findOne with version:draft on draft-enabled global should work', () => {
+        expect(payload.findGlobal).type.toBeCallableWith({ slug: 'settings', version: 'draft' })
+      })
+
+      test('global update with version:draft on non-draft global should error', () => {
         expect(payload.updateGlobal).type.not.toBeCallableWith({
           slug: 'menu',
           data: {},
-          draft: true,
+          version: 'draft',
         })
       })
 
-      test('global update with draft:false on non-draft global should error', () => {
-        expect(payload.updateGlobal).type.not.toBeCallableWith({
+      test('global update with version:published on non-draft global should work', () => {
+        expect(payload.updateGlobal).type.toBeCallableWith({
           slug: 'menu',
           data: {},
-          draft: false,
+          version: 'published',
         })
       })
 
-      test('global update with draft:true on draft-enabled global should work', () => {
+      test('global update with version:draft on draft-enabled global should work', () => {
         expect(payload.updateGlobal).type.toBeCallableWith({
           slug: 'settings',
           data: {},
-          draft: true,
+          version: 'draft',
         })
       })
     })

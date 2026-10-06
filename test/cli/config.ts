@@ -168,6 +168,7 @@ export default buildConfigWithDefaults({
               collection: 'pages',
               data: { title: 'CLI job ran' },
               overrideAccess: true,
+              version: 'published',
             } as never)
 
             return { output: {} }

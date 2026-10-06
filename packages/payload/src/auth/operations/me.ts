@@ -15,15 +15,15 @@ export type Arguments = {
   collection: Collection
   currentToken?: string
   depth?: number
-  draft?: boolean
   joins?: JoinQuery
   populate?: PopulateType
   req: PayloadRequest
   select?: SelectType
+  version?: 'draft' | 'latest' | 'published'
 }
 
 export const meOperation = async (args: Arguments): Promise<MeOperationResult> => {
-  const { collection, currentToken, depth, draft, joins, populate, req, select } = args
+  const { collection, currentToken, depth, joins, populate, req, select, version } = args
 
   let result: MeOperationResult = {
     user: null!,
@@ -43,13 +43,13 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
       id: req.user.id,
       collection: collection.config.slug,
       depth: isGraphQL ? 0 : (depth ?? collection.config.auth.depth),
-      draft,
       joins,
       overrideAccess: false,
       populate,
       req,
       select,
       showHiddenFields: false,
+      version,
     })) as AuthenticatedUser
 
     if (user) {

@@ -4,6 +4,8 @@ import { extractJWT, isolateObjectProperty, meOperation } from 'payload'
 
 import type { Context } from '../types.js'
 
+import { rememberDocumentVersion } from '../../utilities/documentVersion.js'
+
 export function me(collection: Collection): any {
   async function resolver(_, args, context: Context) {
     const currentToken = extractJWT(context.req)
@@ -13,6 +15,7 @@ export function me(collection: Collection): any {
       currentToken,
       depth: 0,
       req: isolateObjectProperty(context.req, 'transactionID'),
+      version: args.version,
     }
 
     const result = await meOperation(options)
@@ -21,7 +24,7 @@ export function me(collection: Collection): any {
       delete result.token
     }
 
-    return result
+    return rememberDocumentVersion({ data: result, version: args.version ?? 'published' })
   }
 
   return resolver

@@ -7,6 +7,7 @@ import type { DevServer } from '../__helpers/shared/devServer.js'
 
 import { test } from '../__helpers/int/vitest.js'
 import { startDevServer } from '../__helpers/shared/devServer.js'
+import { createHeldWebSocket } from './heldWebSocket.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(dirname, '../..')
@@ -112,6 +113,56 @@ test.suite('Dev config reload', { db: (adapter) => adapter === 'mongodb' }, () =
       CONFIG_RELOAD_TIMEOUT * 2,
     )
   })
+
+  test(
+    'should catch up with config changes made before the reload socket opens',
+    async () => {
+      const heldSocket = await createHeldWebSocket()
+      let devServer: DevServer | undefined
+
+      try {
+        devServer = await startDevServer({
+          env: { PAYLOAD_HMR_URL_OVERRIDE: heldSocket.url },
+          framework: 'next',
+          readyPath: '/api/config-marker',
+          suite: suiteName,
+          timeout: DEV_SERVER_START_TIMEOUT - 30000,
+          warmupPaths: ['/admin'],
+        })
+        const { serverURL } = devServer
+        const marker = `before-open-${Date.now()}`
+
+        await expect.poll(() => heldSocket.getConnectionCount()).toBeGreaterThan(0)
+        writeConfigMarker(marker)
+        await new Promise((resolve) => setTimeout(resolve, FILE_WATCHER_DELAY))
+        const response = await fetch(`${serverURL}/admin`)
+
+        await response.text()
+        expect(await fetchConfigMarker({ serverURL })).toBe('initial')
+        heldSocket.release()
+
+        await expect
+          .poll(() => fetchConfigMarker({ serverURL }), {
+            interval: 500,
+            timeout: CONFIG_RELOAD_TIMEOUT,
+          })
+          .toBe(marker)
+      } finally {
+        try {
+          await devServer?.stop()
+        } finally {
+          try {
+            await heldSocket.stop()
+          } finally {
+            for (const [filePath, source] of originalSources) {
+              fs.writeFileSync(filePath, source)
+            }
+          }
+        }
+      }
+    },
+    DEV_SERVER_START_TIMEOUT + CONFIG_RELOAD_TIMEOUT,
+  )
 })
 
 async function fetchConfigMarker({ serverURL }: { serverURL: string }): Promise<null | string> {

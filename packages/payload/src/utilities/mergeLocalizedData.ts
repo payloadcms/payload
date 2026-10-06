@@ -65,11 +65,12 @@ type MergeLocalizedDataArgs = {
    * Pass an explicit list (e.g. the currently-published locales) to discard locales
    * that should not be carried forward — for example, when publishing a single locale
    * you want to avoid leaking draft data that was written to the main doc by an earlier
-   * create/update with `draft: true`.
+   * create/update with `version: 'draft'`.
    */
   localesToPreserve?: string[]
   localesToUpdate: string[]
   parentIsLocalized?: boolean
+  preserveNonLocalized?: boolean
 }
 
 /**
@@ -87,6 +88,7 @@ export function mergeLocalizedData({
   localesToPreserve,
   localesToUpdate,
   parentIsLocalized = false,
+  preserveNonLocalized = false,
 }: MergeLocalizedDataArgs): JsonObject {
   if (!docWithLocales || typeof docWithLocales !== 'object') {
     return dataWithLocales || docWithLocales
@@ -128,17 +130,22 @@ export function mergeLocalizedData({
               }
             } else if (Array.isArray(newValue)) {
               // Non-localized array - still process children for any localized fields
-              result[field.name] = newValue.map((newItem: JsonObject, index: number) => {
+              result[field.name] = (
+                preserveNonLocalized && Array.isArray(existingValue) ? existingValue : newValue
+              ).map((newItem: JsonObject, index: number) => {
                 const existingItem = existingValue?.[index] || {}
 
                 return mergeLocalizedData({
                   configBlockReferences,
-                  dataWithLocales: newItem,
+                  dataWithLocales: preserveNonLocalized
+                    ? getSourceRow({ index, row: newItem, rows: newValue })
+                    : newItem,
                   docWithLocales: existingItem,
                   fields: field.fields,
                   localesToPreserve,
                   localesToUpdate,
                   parentIsLocalized,
+                  preserveNonLocalized,
                 })
               })
             }
@@ -169,7 +176,9 @@ export function mergeLocalizedData({
               }
             } else if (Array.isArray(newValue)) {
               // Non-localized blocks - still process children for any localized fields
-              result[field.name] = newValue.map((newBlockData: JsonObject, index: number) => {
+              result[field.name] = (
+                preserveNonLocalized && Array.isArray(existingValue) ? existingValue : newValue
+              ).map((newBlockData: JsonObject, index: number) => {
                 const blockOrSlug = field.blocks.find((b) => {
                   const slug = typeof b === 'string' ? b : b.slug
                   return slug === newBlockData.blockType
@@ -187,12 +196,15 @@ export function mergeLocalizedData({
 
                   const merged = mergeLocalizedData({
                     configBlockReferences,
-                    dataWithLocales: newBlockData,
+                    dataWithLocales: preserveNonLocalized
+                      ? getSourceRow({ index, row: newBlockData, rows: newValue })
+                      : newBlockData,
                     docWithLocales: blockData,
                     fields: block?.fields || [],
                     localesToPreserve,
                     localesToUpdate,
                     parentIsLocalized,
+                    preserveNonLocalized,
                   })
 
                   // blockType, id, blockName are set by Payload internally
@@ -243,6 +255,7 @@ export function mergeLocalizedData({
                   localesToPreserve,
                   localesToUpdate,
                   parentIsLocalized,
+                  preserveNonLocalized,
                 })
               }
             }
@@ -280,7 +293,7 @@ export function mergeLocalizedData({
             result[field.name] = dataWithLocales[field.name]
           } else {
             result[field.name] =
-              field.name in dataWithLocales
+              !preserveNonLocalized && field.name in dataWithLocales
                 ? dataWithLocales[field.name]
                 : docWithLocales[field.name]
           }
@@ -302,6 +315,7 @@ export function mergeLocalizedData({
             localesToPreserve,
             localesToUpdate,
             parentIsLocalized,
+            preserveNonLocalized,
           })
           // Only copy fields that belong to this layout field to avoid overwriting already-processed fields
           const fieldNames = collectFlattenedFieldNames(field.fields)
@@ -348,6 +362,7 @@ export function mergeLocalizedData({
                     localesToPreserve,
                     localesToUpdate,
                     parentIsLocalized,
+                    preserveNonLocalized,
                   })
                 }
               }
@@ -361,6 +376,7 @@ export function mergeLocalizedData({
                 localesToPreserve,
                 localesToUpdate,
                 parentIsLocalized,
+                preserveNonLocalized,
               })
               // Only copy fields that belong to this tab to avoid overwriting already-processed fields
               const tabFieldNames = collectFlattenedFieldNames(tab.fields)
@@ -378,4 +394,17 @@ export function mergeLocalizedData({
   }
 
   return result
+}
+
+/** Match rows by identity when overlaying published locales onto a pending draft. */
+function getSourceRow({
+  index,
+  row,
+  rows,
+}: {
+  index: number
+  row: JsonObject
+  rows: JsonObject[]
+}): JsonObject {
+  return (row.id ? rows.find((candidate) => candidate.id === row.id) : rows[index]) || {}
 }

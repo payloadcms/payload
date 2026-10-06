@@ -234,7 +234,7 @@ test.describe('revealable keys', () => {
     const revealableKey = await payload.create({
       collection: restrictedRevealableKeysSlug,
       data: {},
-      draft: true,
+      version: 'draft',
       overrideAccess: true,
     })
 
@@ -247,7 +247,7 @@ test.describe('revealable keys', () => {
 
     const draft = await payload.find({
       collection: restrictedRevealableKeysSlug,
-      draft: true,
+      version: 'latest',
       overrideAccess: true,
       where: { id: { equals: revealableKey.id } },
     })

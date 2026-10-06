@@ -9,6 +9,7 @@ import { isNumber } from '../../utilities/isNumber.js'
 import { sanitizePopulateParam } from '../../utilities/sanitizePopulateParam.js'
 import { sanitizeSelectParam } from '../../utilities/sanitizeSelectParam.js'
 import { sanitizeSortParams } from '../../utilities/sanitizeSortParams.js'
+import { parseDocumentVersion } from '../../versions/parseDocumentVersion.js'
 import { findVersionsOperation } from '../operations/findVersions.js'
 
 export const findVersionsHandler: PayloadHandler = async (req) => {
@@ -34,6 +35,7 @@ export const findVersionsHandler: PayloadHandler = async (req) => {
     req,
     select: sanitizeSelectParam(select),
     sort: sanitizeSortParams(sort),
+    version: parseDocumentVersion({ params: req.query }),
     where,
   })
 

@@ -43,6 +43,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     data: {},
     file: imageFile,
     overrideAccess: true,
+    version: 'published',
   })
 
   const { id: uploadedImageMedia2 } = await _payload.create({
@@ -50,6 +51,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     data: {},
     file: imageFile,
     overrideAccess: true,
+    version: 'published',
   })
 
   const imageFilePath2 = path.resolve(seedDir, './image.png')
@@ -60,6 +62,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     data: {},
     file: imageFile2,
     overrideAccess: true,
+    version: 'published',
   })
 
   const { id: uploadedImage2Media2 } = await _payload.create({
@@ -67,6 +70,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     data: {},
     file: imageFile2,
     overrideAccess: true,
+    version: 'published',
   })
 
   const { id: devUserID } = await _payload.create({
@@ -77,6 +81,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     },
     depth: 0,
     overrideAccess: true,
+    version: 'published',
   })
 
   const { id: otherUserID } = await _payload.create({
@@ -87,6 +92,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     },
     depth: 0,
     overrideAccess: true,
+    version: 'published',
   })
 
   await executePromises(
@@ -101,8 +107,8 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
             title: 'Draft Title',
           },
           depth: 0,
-          draft: true,
           overrideAccess: true,
+          version: 'draft',
         }),
     ],
     parallel,
@@ -117,8 +123,8 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       title: 'Title With Many Versions',
     },
     depth: 0,
-    draft: true,
     overrideAccess: true,
+    version: 'draft',
   })
 
   for (let i = 0; i < 10; i++) {
@@ -130,6 +136,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       },
       depth: 0,
       overrideAccess: true,
+      version: 'latest',
     })
   }
 
@@ -143,8 +150,8 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       title: 'Published Title',
     },
     depth: 0,
-    draft: false,
     overrideAccess: true,
+    version: 'published',
   })
 
   const draft3 = await _payload.create({
@@ -157,8 +164,8 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       title: 'Another Published Title',
     },
     depth: 0,
-    draft: false,
     overrideAccess: true,
+    version: 'published',
   })
 
   await _payload.create({
@@ -167,6 +174,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       title: 'Initial seeded title',
     },
     overrideAccess: true,
+    version: 'published',
   })
 
   const { id: doc1ID } = await _payload.create({
@@ -176,6 +184,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       text: 'Document 1',
     },
     overrideAccess: true,
+    version: 'published',
   })
 
   const { id: doc2ID } = await _payload.create({
@@ -185,6 +194,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       text: 'Document 2',
     },
     overrideAccess: true,
+    version: 'published',
   })
 
   const { id: otherUserDocID } = await _payload.create({
@@ -194,6 +204,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       text: 'Document 3',
     },
     overrideAccess: true,
+    version: 'published',
   })
 
   const diffDocDraft = await _payload.create({
@@ -205,6 +216,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     depth: 0,
     locale: 'en',
     overrideAccess: true,
+    version: 'draft',
   })
 
   await _payload.update({
@@ -217,6 +229,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     depth: 0,
     locale: 'en',
     overrideAccess: true,
+    version: 'draft',
   })
 
   await _payload.update({
@@ -229,6 +242,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     depth: 0,
     locale: 'en',
     overrideAccess: true,
+    version: 'draft',
   })
   await _payload.update({
     id: diffDocDraft.id,
@@ -240,6 +254,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     depth: 0,
     locale: 'en',
     overrideAccess: true,
+    version: 'draft',
   })
 
   const diffDoc = await _payload.update({
@@ -351,6 +366,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     depth: 0,
     locale: 'en',
     overrideAccess: true,
+    version: 'draft',
   })
 
   const pointGeoJSON: any = {
@@ -506,5 +522,6 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     depth: 0,
     locale: 'en',
     overrideAccess: true,
+    version: 'draft',
   })
 }

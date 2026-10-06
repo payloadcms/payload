@@ -6,6 +6,7 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { LocalizedPlainPosts } from './collections/LocalizedPlainPosts/index.js'
 import { MediaCollection } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { UsersCollection, usersSlug } from './collections/Users/index.js'
@@ -74,6 +75,7 @@ export default buildConfigWithDefaults({
       UsersCollection,
       FolderCollection,
       PostsCollection,
+      LocalizedPlainPosts,
       MediaCollection,
       MediaAltCollection,
     ],
@@ -151,8 +153,8 @@ export default buildConfigWithDefaults({
         accessibilitySelect: 'one',
         title: 'Example post one',
       },
-      draft: true,
       overrideAccess: true,
+      version: 'draft',
     })
 
     await payload.update({
@@ -161,8 +163,8 @@ export default buildConfigWithDefaults({
       data: {
         title: 'Example post one, second version',
       },
-      draft: true,
       overrideAccess: true,
+      version: 'draft',
     })
 
     await payload.update({
@@ -172,8 +174,8 @@ export default buildConfigWithDefaults({
         _status: 'published',
         title: 'Example post one, third version',
       },
-      draft: false,
       overrideAccess: true,
+      version: 'latest',
     })
 
     await payload.create({
@@ -183,8 +185,8 @@ export default buildConfigWithDefaults({
         relatedPost: firstPost.id,
         title: 'Example post two',
       },
-      draft: false,
       overrideAccess: true,
+      version: 'published',
     })
 
     await payload.create({
@@ -194,8 +196,8 @@ export default buildConfigWithDefaults({
         relatedPost: firstPost.id,
         title: 'Example post three',
       },
-      draft: false,
       overrideAccess: true,
+      version: 'published',
     })
   },
   suite: 'a11y',

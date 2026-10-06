@@ -166,7 +166,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
     await payload.update({
       collection: 'pages',
       id: publishedPage.id,
-      draft: true,
+      version: 'draft',
       data: {
         _status: 'draft',
         title: 'Draft title!',
@@ -190,6 +190,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
 
     await payload.update({
       collection: 'pages',
+      version: 'published',
       id: publishedPage.id,
       data: {
         _status: 'draft',
@@ -242,6 +243,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
 
     await payload.update({
       id: pageToReceiveUpdates.id,
+      version: 'published',
       collection: 'pages',
       data: {
         excerpt: 'This is a test page (updated)',
@@ -618,6 +620,239 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
     )
   })
 
+  test('should not index an unpublished locale when reindexing a published document', async ({
+    payload,
+    restClient,
+  }) => {
+    const post = await payload.create({
+      collection: postsSlug,
+      data: { slug: 'published-en', title: 'Published post' },
+      locale: 'en',
+      overrideAccess: true,
+      version: 'published',
+    })
+
+    await payload.update({
+      id: post.id,
+      collection: postsSlug,
+      data: { slug: 'unpublished-es' },
+      locale: 'es',
+      overrideAccess: true,
+      version: 'draft',
+    })
+
+    const response = await restClient.POST('/search/reindex', {
+      body: JSON.stringify({ collections: [postsSlug] }),
+      headers: { Authorization: `JWT ${token}` },
+    })
+
+    const { docs } = await payload.find({
+      collection: 'search',
+      locale: 'all',
+      overrideAccess: true,
+      where: { 'doc.value': { equals: post.id } },
+    })
+
+    expect(response.status).toBe(200)
+    expect(docs).toHaveLength(1)
+    expect(docs[0]?.slug).toHaveProperty('en', 'published-en')
+    expect(docs[0]?.slug).not.toHaveProperty('es')
+  })
+
+  test('should remove unpublished locale search data while preserving published locales', async ({
+    payload,
+  }) => {
+    const post = await payload.create({
+      collection: postsSlug,
+      overrideAccess: true,
+      data: { slug: 'published-en', title: 'Published post' },
+      locale: 'en',
+      version: 'published',
+    })
+
+    await payload.update({
+      id: post.id,
+      collection: postsSlug,
+      overrideAccess: true,
+      data: { _status: 'published', slug: 'published-es' },
+      locale: 'es',
+      version: 'latest',
+    })
+
+    await payload.update({
+      id: post.id,
+      collection: postsSlug,
+      overrideAccess: true,
+      data: { _status: 'draft' },
+      locale: 'es',
+      version: 'published',
+    })
+
+    const { docs } = await payload.find({
+      collection: 'search',
+      overrideAccess: true,
+      fallbackLocale: false,
+      locale: 'all',
+      where: { 'doc.value': { equals: post.id } },
+    })
+
+    expect(docs).toHaveLength(1)
+    expect(docs[0]?.slug).toHaveProperty('en', 'published-en')
+    expect(docs[0]?.slug?.es).toBeFalsy()
+    expect(docs[0]?.title?.es).toBeFalsy()
+    expect(docs[0]?.localizedGroup?.en?.text).toBe('published-en read')
+    expect(docs[0]?.localizedGroup?.es?.text).toBeFalsy()
+    expect(docs[0]?.localizedGroup?.en?.rows?.[0]?.text).toBe('published-en')
+    expect(docs[0]?.localizedGroup?.es?.rows || []).toHaveLength(0)
+    expect(docs[0]?.localizedGroup?.en?.tags).toEqual(['published-en'])
+    expect(docs[0]?.localizedGroup?.es?.tags || []).toHaveLength(0)
+    expect(docs[0]?.metadata?.text?.en).toBe('published-en')
+    expect(docs[0]?.metadata?.text?.es).toBeFalsy()
+    expect(docs[0]?.metadata?.shared).toBe('Shared metadata')
+
+    const storedSearchDoc = await payload.db.findOne({
+      collection: 'search',
+      where: { id: { equals: docs[0]?.id } },
+    })
+
+    expect(storedSearchDoc?.localizedGroup?.en?.text).toBe('published-en')
+  })
+
+  test('should delete search data when unpublishing all locales', async ({ payload }) => {
+    const post = await payload.create({
+      collection: postsSlug,
+      data: { slug: 'published-en', title: 'Published post' },
+      locale: 'en',
+      overrideAccess: true,
+      version: 'published',
+    })
+
+    await payload.update({
+      id: post.id,
+      collection: postsSlug,
+      data: { _status: 'published', slug: 'published-es' },
+      locale: 'es',
+      overrideAccess: true,
+      version: 'latest',
+    })
+
+    await payload.update({
+      id: post.id,
+      collection: postsSlug,
+      data: { _status: 'draft' },
+      locale: 'all',
+      overrideAccess: true,
+      version: 'published',
+    })
+
+    const { docs } = await payload.find({
+      collection: 'search',
+      locale: 'all',
+      overrideAccess: true,
+      where: { 'doc.value': { equals: post.id } },
+    })
+
+    expect(docs).toHaveLength(0)
+  })
+
+  test('should resolve localized callback inputs for all-locale writes', async ({ payload }) => {
+    const doc = await payload.create({
+      collection: 'filtered-locales',
+      data: {
+        title: { en: 'Priority title', es: 'Skip this locale', de: 'Skip this locale' },
+      },
+      locale: 'all',
+      overrideAccess: true,
+    })
+
+    const { docs } = await payload.find({
+      collection: 'search',
+      locale: 'all',
+      overrideAccess: true,
+      where: {
+        'doc.relationTo': { equals: 'filtered-locales' },
+        'doc.value': { equals: doc.id },
+      },
+    })
+
+    expect(docs).toHaveLength(1)
+    expect(docs[0]?.title).toHaveProperty('en', 'Priority title')
+    expect(docs[0]?.title).not.toHaveProperty('es')
+    expect(docs[0]?.title).not.toHaveProperty('de')
+    expect(docs[0]?.priority).toBe(40)
+  })
+
+  test('should resolve localized callback inputs when reindexing', async ({
+    payload,
+    restClient,
+  }) => {
+    const doc = await payload.create({
+      collection: 'filtered-locales',
+      overrideAccess: true,
+      data: { title: 'Priority title' },
+      locale: 'en',
+    })
+
+    await payload.update({
+      id: doc.id,
+      collection: 'filtered-locales',
+      overrideAccess: true,
+      data: { title: 'Skip this locale' },
+      locale: 'es',
+    })
+
+    const response = await restClient.POST('/search/reindex', {
+      body: JSON.stringify({ collections: ['filtered-locales'] }),
+      headers: { Authorization: `JWT ${token}` },
+    })
+
+    const { docs } = await payload.find({
+      collection: 'search',
+      overrideAccess: true,
+      locale: 'all',
+      where: {
+        'doc.relationTo': { equals: 'filtered-locales' },
+        'doc.value': { equals: doc.id },
+      },
+    })
+
+    expect(response.status).toBe(200)
+    expect(docs).toHaveLength(1)
+    expect(docs[0]?.priority).toBe(40)
+    expect(docs[0]?.title).toHaveProperty('en', 'Priority title')
+    expect(docs[0]?.title).not.toHaveProperty('es')
+  })
+
+  test('should reindex a document published only outside the default locale', async ({
+    payload,
+    restClient,
+  }) => {
+    const post = await payload.create({
+      collection: postsSlug,
+      data: { slug: 'published-es', title: 'Spanish post' },
+      locale: 'es',
+      overrideAccess: true,
+      version: 'published',
+    })
+
+    const response = await restClient.POST('/search/reindex', {
+      body: JSON.stringify({ collections: [postsSlug] }),
+      headers: { Authorization: `JWT ${token}` },
+    })
+
+    const { docs } = await payload.find({
+      collection: 'search',
+      locale: 'all',
+      overrideAccess: true,
+      where: { 'doc.value': { equals: post.id } },
+    })
+
+    expect(response.status).toBe(200)
+    expect(docs).toHaveLength(1)
+    expect(docs[0]?.slug).toHaveProperty('es', 'published-es')
+    expect(docs[0]?.slug).not.toHaveProperty('en')
+  })
+
   test('should index locale-specific data for all locales when reindexing multiple collections', async ({
     payload,
     restClient,
@@ -633,14 +868,16 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
     await payload.update({
       collection: postsSlug,
       id: postId,
-      data: { slug: 'post-slug-es' },
+      version: 'latest',
+      data: { _status: 'published', slug: 'post-slug-es' },
       locale: 'es',
       overrideAccess: true,
     })
     await payload.update({
       collection: postsSlug,
       id: postId,
-      data: { slug: 'post-slug-de' },
+      version: 'latest',
+      data: { _status: 'published', slug: 'post-slug-de' },
       locale: 'de',
       overrideAccess: true,
     })

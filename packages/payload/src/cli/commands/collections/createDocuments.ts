@@ -42,7 +42,8 @@ export const createCreateDocumentsCommand = defineCLICommand({
     let schema: EntityInputSchema | undefined
     const req = await createPayloadRequest({ payload })
     const shouldUsePartialSchema =
-      args.draft === true &&
+      (args.version === 'draft' ||
+        (args.version === undefined && Boolean(collectionConfig?.versions?.drafts))) &&
       collectionConfig !== undefined &&
       !hasDraftValidationEnabled(collectionConfig)
 
@@ -63,14 +64,13 @@ export const createCreateDocumentsCommand = defineCLICommand({
           collection,
           data: prepareCollectionData({ collection, data: inputData, payload }),
           depth: args.depth,
-          draft: args.draft,
           fallbackLocale: args.fallbackLocale,
+          version: args.version,
           ...resolvedFile,
           locale: args.locale,
           overrideAccess: args.overrideAccess,
           overwriteExistingFiles: args.overwriteExistingFiles,
           populate: args.populate,
-          publishAllLocales: args.publishAllLocales,
           select: args.returning ? args.select : { id: true },
           showHiddenFields: args.showHiddenFields,
         })

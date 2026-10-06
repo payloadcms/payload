@@ -14,31 +14,34 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  suite: 'types',
   config: {
     // ...extend config here
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+      user: 'users',
+    },
     collections: [
       {
         slug: 'posts',
-        versions: true,
         fields: [
           {
-            type: 'text',
             name: 'text',
+            type: 'text',
           },
           {
-            type: 'richText',
             name: 'richText',
+            type: 'richText',
             required: true,
           },
           {
-            type: 'text',
             name: 'title',
+            type: 'text',
           },
           {
             name: 'selectField',
             type: 'select',
-            required: true,
             interfaceName: 'MySelectOptions',
             options: [
               {
@@ -50,31 +53,31 @@ export default buildConfigWithDefaults({
                 value: 'option-2',
               },
             ],
+            required: true,
           },
           {
             type: 'group',
-            label: 'Unnamed Group',
             fields: [
               {
-                type: 'text',
                 name: 'insideUnnamedGroup',
+                type: 'text',
               },
             ],
+            label: 'Unnamed Group',
           },
           {
-            type: 'group',
             name: 'namedGroup',
+            type: 'group',
             fields: [
               {
-                type: 'text',
                 name: 'insideNamedGroup',
+                type: 'text',
               },
             ],
           },
           {
             name: 'radioField',
             type: 'radio',
-            required: true,
             interfaceName: 'MyRadioOptions',
             options: [
               {
@@ -86,6 +89,7 @@ export default buildConfigWithDefaults({
                 value: 'option-2',
               },
             ],
+            required: true,
           },
           {
             name: 'externalType',
@@ -97,18 +101,19 @@ export default buildConfigWithDefaults({
             ],
           },
         ],
+        versions: true,
       },
       {
         slug: 'pages',
         fields: [
           {
-            type: 'text',
             name: 'title',
+            type: 'text',
           },
           {
+            name: 'category',
             type: 'relationship',
             relationTo: 'pages-categories',
-            name: 'category',
           },
         ],
         versions: false,
@@ -117,12 +122,12 @@ export default buildConfigWithDefaults({
         slug: 'pages-categories',
         fields: [
           {
-            type: 'text',
             name: 'title',
+            type: 'text',
           },
           {
-            type: 'join',
             name: 'relatedPages',
+            type: 'join',
             collection: 'pages',
             on: 'category',
           },
@@ -131,41 +136,41 @@ export default buildConfigWithDefaults({
       },
       {
         slug: 'draft-posts',
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+            required: true,
+          },
+          {
+            name: 'description',
+            type: 'text',
+            required: true,
+          },
+        ],
         versions: {
           drafts: true,
         },
-        fields: [
-          {
-            type: 'text',
-            name: 'title',
-            required: true,
-          },
-          {
-            type: 'text',
-            name: 'description',
-            required: true,
-          },
-        ],
       },
       {
         slug: 'media',
-        upload: true,
         fields: [
           {
-            type: 'text',
             name: 'alt',
+            type: 'text',
           },
         ],
+        upload: true,
       },
       {
         slug: 'gallery',
-        upload: true,
         fields: [
           {
-            type: 'text',
             name: 'title',
+            type: 'text',
           },
         ],
+        upload: true,
       },
       {
         slug: 'fallback-users',
@@ -235,22 +240,16 @@ export default buildConfigWithDefaults({
       },
       defaultUserCollection,
     ],
-    admin: {
-      importMap: {
-        baseDir: path.resolve(dirname),
-      },
-      user: 'users',
-    },
     editor: lexicalEditor({
       features: ({ defaultFeatures }) => [
         ...defaultFeatures.filter((f) => f.key !== 'upload'),
         UploadFeature({
           collections: {
-            media: {
-              fields: [{ name: 'caption', type: 'text' }],
-            },
             gallery: {
               fields: [{ name: 'altText', type: 'text', required: true }],
+            },
+            media: {
+              fields: [{ name: 'caption', type: 'text' }],
             },
           },
         }),
@@ -259,35 +258,34 @@ export default buildConfigWithDefaults({
     globals: [
       {
         slug: 'menu',
-        versions: true,
         fields: [
           {
-            type: 'text',
             name: 'text',
+            type: 'text',
           },
           {
-            type: 'richText',
             name: 'richText',
+            type: 'richText',
           },
         ],
+        versions: true,
       },
       {
         slug: 'settings',
+        fields: [
+          {
+            name: 'siteName',
+            type: 'text',
+          },
+        ],
         versions: {
           drafts: true,
         },
-        fields: [
-          {
-            type: 'text',
-            name: 'siteName',
-          },
-        ],
       },
     ],
     typescript: {
       generateInputTypes: true,
       outputFile: path.resolve(dirname, 'payload-types.ts'),
-      strictDraftTypes: true,
       postProcess: [
         ({ compiledTypes }) => {
           const genericType = `export type TestPluginGeneric<T> = { value: T };`
@@ -304,4 +302,5 @@ export default buildConfigWithDefaults({
       ],
     },
   },
+  suite: 'types',
 })

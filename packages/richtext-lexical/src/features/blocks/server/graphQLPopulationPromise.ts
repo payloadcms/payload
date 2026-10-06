@@ -26,6 +26,7 @@ export const blockPopulationPromiseHOC = (
     populationPromises,
     req,
     showHiddenFields,
+    version,
   }) => {
     const blockFieldData = node.fields
 
@@ -52,6 +53,7 @@ export const blockPopulationPromiseHOC = (
       req,
       showHiddenFields,
       siblingDoc: blockFieldData,
+      version,
     })
   }
 

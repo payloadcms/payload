@@ -248,7 +248,9 @@ query {
 
       await payload.updateGlobal({
         slug: 'home',
+        version: 'latest',
         data: {
+          _status: 'published',
           topPosts: [{ caption: 'Featured', post: post.id }],
         },
         overrideAccess: true,
@@ -286,7 +288,9 @@ query {
 
       await payload.updateGlobal({
         slug: 'home',
+        version: 'latest',
         data: {
+          _status: 'published',
           topPosts: [
             {
               post: post1.id,

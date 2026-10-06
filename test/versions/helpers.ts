@@ -62,8 +62,8 @@ export async function createDraftDocument({
       ...additionalData,
     },
     depth: 0,
-    draft: true,
     overrideAccess: true,
+    version: 'draft',
   })
 }
 
@@ -101,8 +101,8 @@ export async function createDocumentWithManyVersions({
     collection,
     data: initialData,
     depth: 0,
-    draft,
     overrideAccess: true,
+    version: draft ? 'draft' : 'published',
   })
 
   const versions = [doc]
@@ -116,6 +116,7 @@ export async function createDocumentWithManyVersions({
       },
       depth: 0,
       overrideAccess: true,
+      version: 'latest',
     })
     versions.push(updated)
   }
@@ -124,8 +125,8 @@ export async function createDocumentWithManyVersions({
 }
 
 export async function cleanupDocuments({
-  payload,
   collectionSlugs,
+  payload,
 }: {
   collectionSlugs: CollectionSlug[]
   payload: Payload
@@ -133,19 +134,19 @@ export async function cleanupDocuments({
   for (const collectionSlug of collectionSlugs) {
     await payload.delete({
       collection: collectionSlug,
+      overrideAccess: true,
       where: {
         id: {
           exists: true,
         },
       },
-      overrideAccess: true,
     })
   }
 }
 
 export async function cleanupGlobal({
-  payload,
   globalSlug,
+  payload,
 }: {
   globalSlug: GlobalSlug
   payload: Payload
@@ -154,8 +155,8 @@ export async function cleanupGlobal({
     await payload.db.updateGlobal({
       slug: globalSlug,
       data: {
-        title: {},
         content: {},
+        title: {},
       },
     })
   } else {

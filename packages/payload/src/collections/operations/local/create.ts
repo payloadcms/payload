@@ -4,6 +4,7 @@ import type {
   SelectType,
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
+import type { LocaleDataOptions } from '../../../types/locale.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { File } from '../../../uploads/types.js'
 import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
@@ -28,6 +29,7 @@ import {
 } from '../../../index.js'
 import { getFileByPath } from '../../../uploads/getFileByPath.js'
 import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
+import { parseDocumentVersion } from '../../../versions/parseDocumentVersion.js'
 import { createOperation } from '../create.js'
 
 type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
@@ -73,10 +75,6 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
    */
   filePath?: string
   /**
-   * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
-   */
-  locale?: TypedLocale
-  /**
    * If you are uploading a file and would like to replace
    * the existing file instead of generating a new filename,
    * you can set the following property to `true`
@@ -86,10 +84,6 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
    * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
    */
   populate?: PopulateType
-  /**
-   * Publish to all locales
-   */
-  publishAllLocales?: boolean
   /**
    * The `PayloadRequest` object. You can pass it to thread the current [transaction](https://payloadcms.com/docs/database/transactions), user and locale to the operation.
    * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
@@ -107,76 +101,27 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
 } & Pick<FindOptions<TSlug, TSelect>, 'select'> &
   Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
-export type Options<
-  TSlug extends CollectionSlug,
-  TSelect extends SelectType,
-> = GeneratedTypes extends { strictDraftTypes: true }
-  ? CollectionsWithoutDrafts extends TSlug
-    ? {
-        /**
-         * The data for the document to create.
-         */
-        data: DataFromCollectionSlug<TSlug>
-        /**
-         * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-         */
-        draft?: boolean
-      } & BaseOptions<TSlug, TSelect>
-    : TSlug extends CollectionsWithoutDrafts
-      ? {
-          data: RequiredDataFromCollectionSlug<TSlug>
-          /**
-           * The `draft` property is not allowed because this collection does not have `versions.drafts` enabled.
-           */
-          draft?: never
-        } & BaseOptions<TSlug, TSelect>
-      : (
-          | {
-              /**
-               * The data for the document to create.
-               */
-              data: RequiredDataFromCollectionSlug<TSlug>
-              /**
-               * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-               * Omit this property or set to `false` to create a published document.
-               */
-              draft?: false
-            }
-          | {
-              /**
-               * The data for the document to create.
-               * When creating a draft, required fields are optional as validation is skipped by default.
-               */
-              data: DraftDataFromCollectionSlug<TSlug>
-              /**
-               * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-               */
-              draft: true
-            }
-        ) &
-          BaseOptions<TSlug, TSelect>
-  :
-      | ({
-          /**
-           * The data for the document to create.
-           */
-          data: RequiredDataFromCollectionSlug<TSlug>
-          /**
-           * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-           */
-          draft?: false
-        } & BaseOptions<TSlug, TSelect>)
-      | ({
-          /**
-           * The data for the document to create.
-           * When creating a draft, required fields are optional as validation is skipped by default.
-           */
-          data: DraftDataFromCollectionSlug<TSlug>
-          /**
-           * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-           */
-          draft: true
-        } & BaseOptions<TSlug, TSelect>)
+type VersionedCreateData<TSlug extends CollectionSlug> =
+  | ({
+      /** Required fields are optional when creating a draft. */
+      version?: 'draft'
+    } & LocaleDataOptions<DraftDataFromCollectionSlug<TSlug>, TypedLocale>)
+  | ({
+      version: 'published'
+    } & LocaleDataOptions<RequiredDataFromCollectionSlug<TSlug>, TypedLocale>)
+
+export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = BaseOptions<
+  TSlug,
+  TSelect
+> &
+  (GeneratedTypes extends { strictDraftTypes: true }
+    ? TSlug extends CollectionsWithoutDrafts
+      ? { version?: 'published' } & LocaleDataOptions<
+          RequiredDataFromCollectionSlug<TSlug>,
+          TypedLocale
+        >
+      : VersionedCreateData<TSlug>
+    : VersionedCreateData<TSlug>)
 
 export async function createLocal<
   TSlug extends CollectionSlug,
@@ -185,22 +130,23 @@ export async function createLocal<
   payload: Payload,
   options: Options<TSlug, TSelect>,
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> {
+  parseDocumentVersion({ isCreate: true, params: { ...options } })
+
   const {
     collection: collectionSlug,
     data,
     depth,
     disableTransaction,
     disableVerificationEmail,
-    draft,
     duplicateFromID,
     file,
     filePath,
     overrideAccess = false,
     overwriteExistingFiles = false,
     populate,
-    publishAllLocales,
     select,
     showHiddenFields,
+    version,
   } = options
 
   const collection = payload.collections[collectionSlug]
@@ -224,14 +170,13 @@ export async function createLocal<
     depth,
     disableTransaction,
     disableVerificationEmail,
-    draft,
     duplicateFromID,
     overrideAccess,
     overwriteExistingFiles,
     populate,
-    publishAllLocales,
     req,
     select,
     showHiddenFields,
+    version,
   })
 }

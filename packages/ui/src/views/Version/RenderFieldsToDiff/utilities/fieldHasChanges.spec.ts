@@ -37,4 +37,18 @@ describe('hasChanges', () => {
     const b = null
     expect(fieldHasChanges(a, b)).toBe(true)
   })
+
+  it('should treat null and undefined as the same empty field value', () => {
+    expect(fieldHasChanges(null, undefined)).toBe(false)
+    expect(fieldHasChanges(undefined, null)).toBe(false)
+  })
+
+  it.each([false, 0, ''])('should distinguish empty fields from the value %s', (value) => {
+    expect(fieldHasChanges(null, value)).toBe(true)
+    expect(fieldHasChanges(undefined, value)).toBe(true)
+  })
+
+  it('should preserve explicit null changes inside JSON objects', () => {
+    expect(fieldHasChanges({ value: null }, {})).toBe(true)
+  })
 })

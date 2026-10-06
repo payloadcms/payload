@@ -1,4 +1,5 @@
 import type {
+  DocumentVersion,
   GlobalSlug,
   PaginatedDocs,
   PayloadTypesShape,
@@ -17,7 +18,6 @@ export type FindGlobalVersionsOptions<T extends PayloadTypesShape, TSlug extends
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
   depth?: number
-  draft?: boolean
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
@@ -60,6 +60,7 @@ export type FindGlobalVersionsOptions<T extends PayloadTypesShape, TSlug extends
    * @example ['version.group', '-version.createdAt'] // sort by 2 fields, ASC group and DESC createdAt
    */
   sort?: Sort
+  version?: DocumentVersion
   /**
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */

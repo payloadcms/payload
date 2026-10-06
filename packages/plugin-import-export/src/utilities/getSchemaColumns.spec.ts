@@ -17,6 +17,36 @@ function createCollectionConfig(
 }
 
 describe('getSchemaColumns', () => {
+  it('should include sanitized block metadata columns only once', () => {
+    const collectionConfig = createCollectionConfig([
+      {
+        name: 'blocks',
+        type: 'blocks',
+        blocks: [
+          {
+            slug: 'hero',
+            fields: [{ name: 'title', type: 'text' }],
+            flattenedFields: [
+              { name: 'title', type: 'text' },
+              { name: 'id', type: 'text' },
+              { name: 'blockName', type: 'text' },
+            ],
+          },
+        ],
+      },
+    ])
+
+    const columns = getSchemaColumns({ collectionConfig })
+
+    expect(columns).toEqual([
+      'id',
+      'blocks_0_hero_blockType',
+      'blocks_0_hero_id',
+      'blocks_0_hero_title',
+      'blocks_0_hero_blockName',
+    ])
+  })
+
   describe('fields from flattenedFields', () => {
     it('should include all fields present in flattenedFields in their natural order', () => {
       const flattenedFields: FlattenedField[] = [

@@ -2,6 +2,7 @@ import type { SanitizedCollectionConfig } from '../../../collections/config/type
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext, TypedFallbackLocale } from '../../../index.js'
 import type { JsonObject, PayloadRequest, PopulateType, SelectType } from '../../../types/index.js'
+import type { DocumentVersion } from '../../../types/operations.js'
 
 import { getSelectMode } from '../../../utilities/getSelectMode.js'
 import { traverseFields } from './traverseFields.js'
@@ -29,6 +30,7 @@ export type AfterReadArgs<T extends JsonObject> = {
   req: PayloadRequest
   select?: SelectType
   showHiddenFields: boolean
+  version?: DocumentVersion
 }
 
 /**
@@ -59,6 +61,7 @@ export async function afterRead<T extends JsonObject>(args: AfterReadArgs<T>): P
     req,
     select,
     showHiddenFields,
+    version,
   } = args
 
   const fieldPromises: Promise<void>[] = []
@@ -101,6 +104,7 @@ export async function afterRead<T extends JsonObject>(args: AfterReadArgs<T>): P
     selectMode: select ? getSelectMode(select) : undefined,
     showHiddenFields,
     siblingDoc: incomingDoc,
+    version,
   })
 
   /**

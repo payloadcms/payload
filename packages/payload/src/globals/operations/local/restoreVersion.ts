@@ -2,10 +2,11 @@ import type { GlobalSlug, Payload, RequestContext, TypedLocale, User } from '../
 import type { PayloadRequest, PopulateType } from '../../../types/index.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
-import type { DataFromGlobalSlug } from '../../config/types.js'
+import type { DataFromGlobalSlug, VersionFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
+import { parseDocumentVersion } from '../../../versions/parseDocumentVersion.js'
 import { restoreVersionOperation } from '../restoreVersion.js'
 
 export type Options<TSlug extends GlobalSlug> = {
@@ -31,7 +32,7 @@ export type Options<TSlug extends GlobalSlug> = {
   /**
    * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
    */
-  locale?: TypedLocale
+  locale?: 'all' | TypedLocale
   /**
    * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
    */
@@ -54,12 +55,15 @@ export type Options<TSlug extends GlobalSlug> = {
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: null | User
-} & Pick<SharedLocalAPIOptions, 'overrideAccess'>
+} & Pick<SharedLocalAPIOptions, 'overrideAccess'> &
+  VersionFromGlobalSlug<TSlug>
 
 export async function restoreGlobalVersionLocal<TSlug extends GlobalSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<DataFromGlobalSlug<TSlug>> {
+  parseDocumentVersion({ params: { ...options } })
+
   const {
     id,
     slug: globalSlug,
@@ -67,6 +71,7 @@ export async function restoreGlobalVersionLocal<TSlug extends GlobalSlug>(
     overrideAccess = false,
     populate,
     showHiddenFields,
+    version,
   } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
@@ -86,5 +91,6 @@ export async function restoreGlobalVersionLocal<TSlug extends GlobalSlug>(
       payload,
     }),
     showHiddenFields,
+    version,
   })
 }

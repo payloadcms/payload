@@ -321,6 +321,7 @@ test.describe('Hierarchy Sidebar', () => {
         collection: 'organizations',
         data: { title: 'Selection Test Org' },
         overrideAccess: true,
+        version: 'published',
       })
       createdOrgIds.push(testOrg.id)
     })
@@ -468,7 +469,7 @@ test.describe('Hierarchy Sidebar', () => {
       test.afterEach(async () => {
         const createdOrganizations = await payload.find({
           collection: 'organizations',
-          draft: true,
+          version: 'latest',
           overrideAccess: true,
           where: { title: { equals: organizationTitle } },
         })
@@ -517,7 +518,7 @@ test.describe('Hierarchy Sidebar', () => {
             const autosavedOrganizations = await payload.find({
               collection: 'organizations',
               depth: 0,
-              draft: true,
+              version: 'latest',
               overrideAccess: true,
               where: { title: { equals: organizationTitle } },
             })
@@ -780,6 +781,7 @@ test.describe('Hierarchy Sidebar', () => {
           parentFolder: childFolder.id as number,
         },
         overrideAccess: true,
+        version: 'published',
       })
     })
 

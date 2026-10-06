@@ -1,4 +1,8 @@
+import { hasDraftsEnabled } from 'payload'
+
 import type { DocToSync, SyncDocArgs } from '../types.js'
+
+import { clearLocalizedSearchData } from './clearLocalizedSearchData.js'
 
 export const syncDocAsSearchIndex = async ({
   collection,
@@ -10,7 +14,7 @@ export const syncDocAsSearchIndex = async ({
   req: { payload },
   req,
 }: SyncDocArgs) => {
-  const { id, _status: status, title } = doc || {}
+  const { id, _status, title } = doc || {}
 
   const { beforeSync, defaultPriorities, deleteDrafts, searchOverrides, syncDrafts } = pluginConfig
 
@@ -19,25 +23,24 @@ export const syncDocAsSearchIndex = async ({
   // Determine sync locale
   const syncLocale = locale || req.locale || undefined
 
-  if (typeof pluginConfig.skipSync === 'function') {
-    try {
-      const skipSync = await pluginConfig.skipSync({
-        collectionSlug: collection,
+  if (payload.config.localization && (syncLocale === 'all' || syncLocale === '*')) {
+    for (const localeCode of payload.config.localization.localeCodes) {
+      await syncDocAsSearchIndex({
+        collection,
+        data: doc,
         doc,
-        locale: syncLocale,
+        locale: localeCode,
+        onSyncError,
+        operation: 'update',
+        pluginConfig,
         req,
       })
-
-      if (skipSync) {
-        return doc
-      }
-    } catch (err) {
-      req.payload.logger.error({
-        err,
-        msg: 'Search plugin: Error executing skipSync. Proceeding with sync.',
-      })
     }
+
+    return doc
   }
+
+  const status = _status && typeof _status === 'object' ? _status[syncLocale!] : _status
 
   let dataToSave: DocToSync = {
     doc: {
@@ -63,22 +66,56 @@ export const syncDocAsSearchIndex = async ({
 
   req.context.syncedDocsSet = syncedDocsSet
 
-  if (typeof beforeSync === 'function') {
-    let docToSyncWith = doc
-    if (payload.config?.localization) {
-      // Check if document is trashed (has deletedAt field)
-      const isTrashDocument = doc && 'deletedAt' in doc && doc.deletedAt
+  const doSync = syncDrafts || status !== 'draft'
+  let docToSyncWith = doc
 
-      docToSyncWith = await payload.findByID({
-        id,
-        collection,
+  if (doSync && payload.config.localization) {
+    // Check if document is trashed (has deletedAt field)
+    const isTrashDocument = doc && 'deletedAt' in doc && doc.deletedAt
+
+    docToSyncWith = await payload.findByID({
+      id,
+      collection,
+      disableErrors: true,
+      locale: syncLocale,
+      overrideAccess: true,
+      req,
+      // Include trashed documents when the document being synced is trashed
+      trash: isTrashDocument,
+      version:
+        syncDrafts && hasDraftsEnabled(payload.collections[collection]!.config)
+          ? 'latest'
+          : 'published',
+    })
+
+    if (!docToSyncWith) {
+      return doc
+    }
+
+    dataToSave.title = docToSyncWith.title
+  }
+
+  if (typeof pluginConfig.skipSync === 'function') {
+    try {
+      const skipSync = await pluginConfig.skipSync({
+        collectionSlug: collection,
+        doc: docToSyncWith,
         locale: syncLocale,
-        overrideAccess: true,
         req,
-        // Include trashed documents when the document being synced is trashed
-        trash: isTrashDocument,
+      })
+
+      if (skipSync) {
+        return doc
+      }
+    } catch (err) {
+      req.payload.logger.error({
+        err,
+        msg: 'Search plugin: Error executing skipSync. Proceeding with sync.',
       })
     }
+  }
+
+  if (doSync && typeof beforeSync === 'function') {
     dataToSave = await beforeSync({
       collectionSlug: collection,
       originalDoc: docToSyncWith,
@@ -94,7 +131,7 @@ export const syncDocAsSearchIndex = async ({
 
     if (typeof priority === 'function') {
       try {
-        defaultPriority = await priority(doc)
+        defaultPriority = await priority(docToSyncWith)
       } catch (err: unknown) {
         payload.logger.error(err)
         payload.logger.error(
@@ -105,8 +142,6 @@ export const syncDocAsSearchIndex = async ({
       defaultPriority = priority
     }
   }
-
-  const doSync = syncDrafts || (!syncDrafts && status !== 'draft')
 
   try {
     if (operation === 'create' && doSync) {
@@ -219,25 +254,14 @@ export const syncDocAsSearchIndex = async ({
               } = await payload.find({
                 collection,
                 depth: 0,
-                draft: false,
                 limit: 1,
-                locale: syncLocale,
+                locale: payload.config.localization ? 'all' : syncLocale,
                 overrideAccess: true,
                 pagination: false,
                 req,
+                version: 'published',
                 where: {
-                  and: [
-                    {
-                      _status: {
-                        equals: 'published',
-                      },
-                    },
-                    {
-                      id: {
-                        equals: id,
-                      },
-                    },
-                  ],
+                  id: { equals: id },
                 },
               })
 
@@ -254,6 +278,35 @@ export const syncDocAsSearchIndex = async ({
                 } catch (err: unknown) {
                   payload.logger.error({ err, msg: `Error deleting ${searchSlug} document.` })
                 }
+              } else if (
+                payload.config.localization &&
+                syncLocale &&
+                typeof docWithPublish._status === 'object' &&
+                docWithPublish._status[syncLocale] !== 'published'
+              ) {
+                const searchDoc = await payload.db.findOne({
+                  collection: searchSlug,
+                  locale: 'all',
+                  req,
+                  where: { id: { equals: searchDocID } },
+                })
+
+                if (!searchDoc) {
+                  return doc
+                }
+
+                // Unpublishing must also clear required index fields without validating empty content.
+                await payload.db.updateOne({
+                  id: searchDocID,
+                  collection: searchSlug,
+                  data: clearLocalizedSearchData({
+                    blocks: payload.config.blocks,
+                    data: searchDoc,
+                    fields: payload.collections[searchSlug]!.config.flattenedFields,
+                    locale: syncLocale,
+                  }),
+                  req,
+                })
               }
             }
           }

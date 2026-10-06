@@ -1,5 +1,7 @@
 import type { CollectionConfig, Document, PayloadRequest } from 'payload'
 
+import { hasDraftsEnabled } from 'payload/shared'
+
 import type { NestedDocsPluginConfig } from '../types.js'
 
 export const getParents = async (
@@ -8,7 +10,12 @@ export const getParents = async (
   collection: CollectionConfig,
   doc: Record<string, unknown>,
   docs: Array<Record<string, unknown>> = [],
+  version?: 'latest' | 'published',
 ): Promise<Document[]> => {
+  const parentVersion = hasDraftsEnabled(collection)
+    ? (version ?? (doc._status === 'draft' ? 'latest' : 'published'))
+    : 'published'
+
   const parentSlug = pluginConfig?.parentFieldSlug || 'parent'
   const parent = doc[parentSlug]
   let retrievedParent: null | Record<string, unknown> = null
@@ -23,6 +30,7 @@ export const getParents = async (
         disableErrors: true,
         overrideAccess: true,
         req,
+        version: parentVersion,
       })
     }
 
@@ -33,10 +41,14 @@ export const getParents = async (
 
     if (retrievedParent) {
       if (retrievedParent[parentSlug]) {
-        return getParents(req, pluginConfig, collection, retrievedParent, [
+        return getParents(
+          req,
+          pluginConfig,
+          collection,
           retrievedParent,
-          ...docs,
-        ])
+          [retrievedParent, ...docs],
+          parentVersion,
+        )
       }
 
       return [retrievedParent, ...docs]

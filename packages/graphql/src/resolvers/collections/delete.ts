@@ -1,17 +1,25 @@
-import type { Collection, CollectionSlug, DataFromCollectionSlug, PayloadRequest } from 'payload'
+import type {
+  Collection,
+  CollectionSlug,
+  DataFromCollectionSlug,
+  DocumentVersion,
+  PayloadRequest,
+} from 'payload'
 
 import { deleteByIDOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 
+import { rememberDocumentVersion } from '../../utilities/documentVersion.js'
+
 export type Resolver<TSlug extends CollectionSlug> = (
   _: unknown,
   args: {
-    draft: boolean
     fallbackLocale?: string
     id: number | string
     locale?: string
     trash?: boolean
+    version?: DocumentVersion
   },
   context: {
     req: PayloadRequest
@@ -33,14 +41,10 @@ export function getDeleteResolver<TSlug extends CollectionSlug>(
       req.query = {}
     }
 
-    const draft: boolean =
-      (args.draft ?? req.query?.draft === 'false')
-        ? false
-        : req.query?.draft === 'true'
-          ? true
-          : undefined
-    if (typeof draft === 'boolean') {
-      req.query.draft = String(draft)
+    const version = args.version ?? req.query?.version
+
+    if (version !== undefined) {
+      req.query.version = version
     }
 
     context.req = req
@@ -55,6 +59,6 @@ export function getDeleteResolver<TSlug extends CollectionSlug>(
 
     const result = await deleteByIDOperation(options)
 
-    return result
+    return rememberDocumentVersion({ data: result, version: args.version ?? 'published' })
   }
 }

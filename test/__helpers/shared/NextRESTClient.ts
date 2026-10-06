@@ -243,9 +243,10 @@ export class NextRESTClient {
     options: FileArg & RequestInit & RequestOptions = {},
   ): Promise<Response> {
     const { slug, params, url } = this.generateRequestParts(path)
-    const queryParams = generateQueryString({}, params)
+    const { query, ...rest } = options
+    const queryParams = generateQueryString(query, params)
     const request = new Request(`${url}${queryParams}`, {
-      ...options,
+      ...rest,
       headers: this.buildHeaders(options),
       method: 'POST',
     })

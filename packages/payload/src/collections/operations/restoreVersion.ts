@@ -8,6 +8,7 @@ import type {
   SelectType,
   Where,
 } from '../../types/index.js'
+import type { DocumentVersion } from '../../types/operations.js'
 import type { Collection, TypeWithID } from '../config/types.js'
 import type { FindOptions } from './local/find.js'
 
@@ -26,7 +27,11 @@ import {
 } from '../../uploads/sanitizeUploadData.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
-import { hasDraftValidationEnabled } from '../../utilities/getVersionsConfig.js'
+import {
+  hasDraftsEnabled,
+  hasDraftValidationEnabled,
+  hasLocalizeStatusEnabled,
+} from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -34,6 +39,7 @@ import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { getRestoredStatusesToAuthorize } from '../../versions/getRestoredStatusesToAuthorize.js'
+import { parseDocumentVersion } from '../../versions/parseDocumentVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
@@ -43,12 +49,12 @@ export type Arguments = {
   depth?: number
   disableErrors?: boolean
   disableTransaction?: boolean
-  draft?: boolean
   id: number | string
   overrideAccess?: boolean
   populate?: PopulateType
   req: PayloadRequest
   showHiddenFields?: boolean
+  version?: DocumentVersion
 } & Pick<FindOptions<string, SelectType>, 'select'>
 
 export const restoreVersionOperation = async <
@@ -60,7 +66,6 @@ export const restoreVersionOperation = async <
     id,
     collection: { config: collectionConfig },
     depth,
-    draft: draftArg = false,
     overrideAccess = false,
     populate,
     req,
@@ -68,6 +73,11 @@ export const restoreVersionOperation = async <
     select: incomingSelect,
     showHiddenFields,
   } = args
+
+  const version =
+    parseDocumentVersion({ params: { ...args } }) ??
+    (hasDraftsEnabled(collectionConfig) ? 'draft' : 'published')
+  const draftArg = hasDraftsEnabled(collectionConfig) && version === 'draft'
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
@@ -109,13 +119,20 @@ export const restoreVersionOperation = async <
     const { parent: parentDocID } = rawVersionToRestore
     let versionToRestoreWithLocales = rawVersionToRestore.version
 
+    if (hasDraftsEnabled(collectionConfig) && version !== 'latest') {
+      versionToRestoreWithLocales._status =
+        hasLocalizeStatusEnabled(collectionConfig) && payload.config.localization
+          ? Object.fromEntries(
+              payload.config.localization.localeCodes.map((code) => [code, version]),
+            )
+          : version
+    }
+
     // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
 
-    const restoredStatuses = draftArg
-      ? ['draft']
-      : getRestoredStatusesToAuthorize(versionToRestoreWithLocales?._status)
+    const restoredStatuses = getRestoredStatusesToAuthorize(versionToRestoreWithLocales?._status)
 
     // A localized `_status` can publish and unpublish locales in one restore, so authorize every
     // status it writes. executeAccess throws Forbidden on the first denial; Where constraints are
@@ -202,6 +219,7 @@ export const restoreVersionOperation = async <
       overrideAccess: true,
       req,
       showHiddenFields: true,
+      version,
     })
 
     if (collectionConfig.upload && !overrideAccess) {
@@ -224,6 +242,7 @@ export const restoreVersionOperation = async <
       overrideAccess: true,
       req,
       showHiddenFields: true,
+      version,
     })
 
     if (collectionConfig.upload && !overrideAccess) {
@@ -329,8 +348,9 @@ export const restoreVersionOperation = async <
 
     // Ensure updatedAt date is always updated
     result.updatedAt = new Date().toISOString()
-    // Ensure status respects restoreAsDraft arg
-    result._status = draftArg ? 'draft' : result._status
+    if (hasDraftsEnabled(collectionConfig) && version !== 'latest') {
+      result._status = versionToRestoreWithLocales._status
+    }
     if (!draftArg) {
       result = await req.payload.db.updateOne({
         id: parentDocID,
@@ -353,6 +373,7 @@ export const restoreVersionOperation = async <
       draft: draftArg,
       operation: 'restoreVersion',
       payload,
+      preserveDraft: version === 'published',
       req: reqWithValidationLocale,
       select,
     })
@@ -366,8 +387,7 @@ export const restoreVersionOperation = async <
       context: req.context,
       depth: depth!,
       doc: result,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-      draft: undefined,
+      draft: version !== 'published',
       fallbackLocale: fallbackLocale!,
       global: null,
       locale: locale!,
@@ -376,6 +396,7 @@ export const restoreVersionOperation = async <
       req,
       select,
       showHiddenFields: showHiddenFields!,
+      version,
     })
 
     // /////////////////////////////////////

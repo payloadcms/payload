@@ -23,7 +23,7 @@ export async function enrichDocsWithVersionStatus({
   }
 
   // Find all draft documents
-  // When querying with draft:true, we get the latest draft if it exists
+  // When querying with version:latest, we get the latest draft if it exists
   // We need to check if these drafts have a published version
   const draftDocs = data.docs.filter((doc) => doc._status === 'draft')
 

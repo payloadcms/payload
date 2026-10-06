@@ -287,6 +287,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
             name: 'Pulp Fiction',
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         await payload.create({
@@ -295,6 +296,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
             name: 'Pulp Fiction',
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         await payload.create({
@@ -303,6 +305,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
             name: 'Harry Potter',
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         await payload.create({
@@ -312,6 +315,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
             director: someDirector.id,
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         // This causes the following error:
@@ -356,6 +360,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
           data: { director: director.id },
           depth: 0,
           overrideAccess: true,
+          version: 'published',
         })
 
         const { docs: trueRes } = await payload.find({
@@ -416,7 +421,12 @@ test.suite('Relationships', { config: './config.ts' }, () => {
       })
 
       test('should allow querying within tabs-blocks-tabs', async ({ payload }) => {
-        const movie = await payload.create({ collection: 'movies', data: { name: 'Pulp Fiction' }, overrideAccess: true })
+        const movie = await payload.create({
+          collection: 'movies',
+          data: { name: 'Pulp Fiction' },
+          overrideAccess: true,
+          version: 'published',
+        })
 
         const { id } = await payload.create({
           collection: 'deep-nested',
@@ -450,7 +460,12 @@ test.suite('Relationships', { config: './config.ts' }, () => {
       })
 
       test('should allow query hasMany select in relationship', async ({ payload }) => {
-        const movie = await payload.create({ collection: 'movies', data: { select: ['a', 'b'] }, overrideAccess: true })
+        const movie = await payload.create({
+          collection: 'movies',
+          data: { select: ['a', 'b'] },
+          overrideAccess: true,
+          version: 'published',
+        })
         const doc = await payload.create({
           collection: 'directors',
           data: { name: 'Mega Director', movie },
@@ -502,6 +517,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
           collection: 'movies',
           data: { name: 'random_movie_1' },
           overrideAccess: true,
+          version: 'published',
         })
         const director_1 = await payload.create({
           collection: 'directors',
@@ -512,6 +528,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
           collection: 'movies',
           data: { name: 'random_movie_2', director: director_1.id },
           overrideAccess: true,
+          version: 'published',
         })
         const director_2 = await payload.create({
           collection: 'directors',
@@ -539,6 +556,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
             collection: 'movies',
             data: { name: 'dup_test_movie' },
             overrideAccess: true,
+            version: 'published',
           })
 
           const Model = (payload.db as any).collections.directors
@@ -579,12 +597,14 @@ test.suite('Relationships', { config: './config.ts' }, () => {
               collection: 'movies',
               data: { name: 'recalls', select: ['a'] },
               overrideAccess: true,
+              version: 'published',
             })
 
             const electricCarsMovie = await payload.create({
               collection: 'movies',
               data: { name: 'electric-cars', select: ['a', 'b'] },
               overrideAccess: true,
+              version: 'published',
             })
 
             recallsMovieID = recallsMovie.id
@@ -811,6 +831,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
                 collection: 'movies',
                 data: { name: 'nearby', location: [10, 20] },
                 overrideAccess: true,
+                version: 'published',
               })
 
               const nearbyDirector = await payload.create({
@@ -840,12 +861,14 @@ test.suite('Relationships', { config: './config.ts' }, () => {
             collection: 'movies',
             data: { name: 'Alpha' },
             overrideAccess: true,
+            version: 'published',
           })
 
           const beta = await payload.create({
             collection: 'movies',
             data: { name: 'Beta' },
             overrideAccess: true,
+            version: 'published',
           })
 
           const child = await payload.create({
@@ -877,23 +900,27 @@ test.suite('Relationships', { config: './config.ts' }, () => {
             collection: 'movies',
             data: {},
             overrideAccess: true,
+            version: 'published',
           })
           const movie2 = await payload.create({
             collection: 'movies',
             data: {},
             overrideAccess: true,
+            version: 'published',
           })
 
           const movie3 = await payload.create({
             collection: 'movies',
             data: { name: 'some-name' },
             overrideAccess: true,
+            version: 'published',
           })
 
           const movie4 = await payload.create({
             collection: 'movies',
             data: { name: 'some-name' },
             overrideAccess: true,
+            version: 'published',
           })
 
           await payload.create({
@@ -949,8 +976,16 @@ test.suite('Relationships', { config: './config.ts' }, () => {
 
           expect(res_2.totalDocs).toBe(1)
 
-          const dir_1 = await payload.create({ collection: 'directors', data: { name: 'dir' }, overrideAccess: true })
-          const dir_2 = await payload.create({ collection: 'directors', data: { name: 'dir' }, overrideAccess: true })
+          const dir_1 = await payload.create({
+            collection: 'directors',
+            data: { name: 'dir' },
+            overrideAccess: true,
+          })
+          const dir_2 = await payload.create({
+            collection: 'directors',
+            data: { name: 'dir' },
+            overrideAccess: true,
+          })
 
           const dir_3 = await payload.create({
             collection: 'directors',
@@ -976,11 +1011,13 @@ test.suite('Relationships', { config: './config.ts' }, () => {
             collection: 'movies',
             data: {},
             overrideAccess: true,
+            version: 'published',
           })
           const movie2 = await payload.create({
             collection: 'movies',
             data: {},
             overrideAccess: true,
+            version: 'published',
           })
 
           await payload.create({
@@ -1030,7 +1067,12 @@ test.suite('Relationships', { config: './config.ts' }, () => {
           'should treat an ObjectId as a relationship ID',
           { db: 'mongo' },
           async ({ payload }) => {
-            const movie = await payload.create({ collection: 'movies', data: {}, overrideAccess: true })
+            const movie = await payload.create({
+              collection: 'movies',
+              data: {},
+              overrideAccess: true,
+              version: 'published',
+            })
 
             const director = await payload.create({
               collection: 'directors',
@@ -1065,11 +1107,13 @@ test.suite('Relationships', { config: './config.ts' }, () => {
               collection: 'movies',
               data: {},
               overrideAccess: true,
+              version: 'published',
             })
             const movie2 = await payload.create({
               collection: 'movies',
               data: {},
               overrideAccess: true,
+              version: 'published',
             })
 
             await payload.create({
@@ -1200,6 +1244,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
             depth: 0,
             data: { director: director_1.id, name: 'Some Movie 1', select: [] },
             overrideAccess: true,
+            version: 'published',
           })
 
           const movie_2 = await payload.create({
@@ -1207,6 +1252,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
             depth: 0,
             data: { director: director_2.id, name: 'Some Movie 2' },
             overrideAccess: true,
+            version: 'published',
           })
 
           expect(movie_1.select).toStrictEqual([])
@@ -1233,14 +1279,14 @@ test.suite('Relationships', { config: './config.ts' }, () => {
             collection: 'movies',
             sort: '-director.name',
             depth: 0,
-            draft: true,
+            version: 'latest',
             overrideAccess: true,
           })
           const draft_res_2 = await payload.find({
             collection: 'movies',
             sort: 'director.name',
             depth: 0,
-            draft: true,
+            version: 'latest',
             overrideAccess: true,
           })
 
@@ -1269,12 +1315,17 @@ test.suite('Relationships', { config: './config.ts' }, () => {
           await payload.delete({ collection: 'directors', where: {}, overrideAccess: true })
           await payload.delete({ collection: 'movies', where: {}, overrideAccess: true })
 
-          const director = await payload.create({ collection: 'directors', data: {}, overrideAccess: true })
+          const director = await payload.create({
+            collection: 'directors',
+            data: {},
+            overrideAccess: true,
+          })
 
           const movie = await payload.create({
             collection: 'movies',
             data: { director: director.id, name: 'movie 1' },
             overrideAccess: true,
+            version: 'published',
           })
 
           await payload.update({
@@ -1284,12 +1335,17 @@ test.suite('Relationships', { config: './config.ts' }, () => {
             overrideAccess: true,
           })
 
-          const director_2 = await payload.create({ collection: 'directors', data: {}, overrideAccess: true })
+          const director_2 = await payload.create({
+            collection: 'directors',
+            data: {},
+            overrideAccess: true,
+          })
 
           const movie_2 = await payload.create({
             collection: 'movies',
             data: { director: director_2.id, name: 'movie 2' },
             overrideAccess: true,
+            version: 'published',
           })
 
           await payload.update({
@@ -1299,11 +1355,19 @@ test.suite('Relationships', { config: './config.ts' }, () => {
             overrideAccess: true,
           })
 
-          const res = await payload.find({ collection: 'movies', sort: 'director.movie.name', overrideAccess: true })
+          const res = await payload.find({
+            collection: 'movies',
+            sort: 'director.movie.name',
+            overrideAccess: true,
+          })
           expect(res.docs[0].id).toBe(movie.id)
           expect(res.docs[1].id).toBe(movie_2.id)
 
-          const res_2 = await payload.find({ collection: 'movies', sort: '-director.movie.name', overrideAccess: true })
+          const res_2 = await payload.find({
+            collection: 'movies',
+            sort: '-director.movie.name',
+            overrideAccess: true,
+          })
           expect(res_2.docs[0].id).toBe(movie_2.id)
           expect(res_2.docs[1].id).toBe(movie.id)
         })
@@ -1320,14 +1384,21 @@ test.suite('Relationships', { config: './config.ts' }, () => {
             },
           } as const
 
-          const director_1 = await payload.create(createDirector)
-          const director_2 = await payload.create(createDirector)
+          const director_1 = await payload.create({
+            ...createDirector,
+            data: { ...createDirector.data, createdAt: '2024-01-01T00:00:00.000Z' },
+          })
+          const director_2 = await payload.create({
+            ...createDirector,
+            data: { ...createDirector.data, createdAt: '2024-01-02T00:00:00.000Z' },
+          })
 
           const movie_1 = await payload.create({
             collection: 'movies',
             depth: 0,
             data: { director: director_1.id, name: 'Some Movie 1' },
             overrideAccess: true,
+            version: 'published',
           })
 
           const movie_2 = await payload.create({
@@ -1335,6 +1406,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
             depth: 0,
             data: { director: director_2.id, name: 'Some Movie 2' },
             overrideAccess: true,
+            version: 'published',
           })
 
           const res_1 = await payload.find({
@@ -1361,6 +1433,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
               name: 'Pulp Fiction',
             },
             overrideAccess: true,
+            version: 'published',
           })
 
           const movie2 = await payload.create({
@@ -1369,6 +1442,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
               name: 'Inception',
             },
             overrideAccess: true,
+            version: 'published',
           })
 
           await payload.delete({ collection: 'directors', where: {}, overrideAccess: true })
@@ -1653,6 +1727,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
             collection: 'movies',
             data: { name: 'Jackie Brown' },
             overrideAccess: true,
+            version: 'published',
           })
 
           const director = await payload.create({
@@ -1820,7 +1895,11 @@ test.suite('Relationships', { config: './config.ts' }, () => {
           overrideAccess: true,
         })
 
-        const rel = await payload.create({ collection: 'rels-to-pages', data: { page: page.id }, overrideAccess: true })
+        const rel = await payload.create({
+          collection: 'rels-to-pages',
+          data: { page: page.id },
+          overrideAccess: true,
+        })
 
         const resEquals = await payload.find({
           collection: 'rels-to-pages',
@@ -1887,6 +1966,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
         collection: 'movies',
         data: { array: [{ polymorphic: { relationTo: 'directors', value: director.id } }] },
         overrideAccess: true,
+        version: 'published',
       })
 
       const res = await payload.find({
@@ -1908,6 +1988,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
         collection: 'movies',
         data: { array: [{ director: [director.id] }] },
         overrideAccess: true,
+        version: 'published',
       })
       const res = await payload.find({
         collection: 'movies',
@@ -1946,6 +2027,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
             director: director.id,
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         // 3. create a screening
@@ -2001,6 +2083,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
                 name: movie,
               },
               overrideAccess: true,
+              version: 'published',
             })
           }),
         )
@@ -2168,7 +2251,12 @@ test.suite('Relationships', { config: './config.ts' }, () => {
 
     test.describe('With passing an object', () => {
       test('should create with passing an object', async ({ payload }) => {
-        const movie = await payload.create({ collection: 'movies', data: {}, overrideAccess: true })
+        const movie = await payload.create({
+          collection: 'movies',
+          data: {},
+          overrideAccess: true,
+          version: 'published',
+        })
         const result = await payload.create({
           collection: 'object-writes',
           data: {
@@ -2190,11 +2278,21 @@ test.suite('Relationships', { config: './config.ts' }, () => {
       })
 
       test('should update with passing an object', async ({ payload }) => {
-        const movie = await payload.create({ collection: 'movies', data: {}, overrideAccess: true })
-        const { id } = await payload.create({ collection: 'object-writes', data: {}, overrideAccess: true })
+        const movie = await payload.create({
+          collection: 'movies',
+          data: {},
+          overrideAccess: true,
+          version: 'published',
+        })
+        const { id } = await payload.create({
+          collection: 'object-writes',
+          data: {},
+          overrideAccess: true,
+        })
         const result = await payload.update({
           collection: 'object-writes',
           id,
+          version: 'published',
           data: {
             many: [movie],
             manyPoly: [{ relationTo: 'movies', value: movie }],
@@ -2254,6 +2352,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
           name: 'Pulp Fiction 2',
         },
         overrideAccess: true,
+        version: 'published',
       })
       await payload.create({
         collection: polymorphicRelationshipsSlug,
@@ -2323,6 +2422,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
             name: 'Pulp Fiction 2',
           },
           overrideAccess: true,
+          version: 'published',
         })
         await payload.create({
           collection: polymorphicRelationshipsSlug,
@@ -2360,6 +2460,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
           name: 'Pulp Fiction 2',
         },
         overrideAccess: true,
+        version: 'published',
       })
       await payload.create({
         collection: polymorphicRelationshipsSlug,
@@ -2412,6 +2513,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
           name: 'Pulp Fiction 2',
         },
         overrideAccess: true,
+        version: 'published',
       })
 
       const { id } = await payload.create({
@@ -2453,6 +2555,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
           name: 'Pulp Fiction 2',
         },
         overrideAccess: true,
+        version: 'published',
       })
 
       const { id } = await payload.create({
@@ -2492,6 +2595,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
           name: 'Pulp Fiction 2',
         },
         overrideAccess: true,
+        version: 'published',
       })
 
       const { id } = await payload.create({
@@ -2527,7 +2631,11 @@ test.suite('Relationships', { config: './config.ts' }, () => {
     test('should update document that polymorphicaly joined to another collection', async ({
       payload,
     }) => {
-      const item = await payload.create({ collection: 'items', data: { status: 'pending' }, overrideAccess: true })
+      const item = await payload.create({
+        collection: 'items',
+        data: { status: 'pending' },
+        overrideAccess: true,
+      })
 
       await payload.create({
         collection: 'relations',
@@ -2736,5 +2844,9 @@ test.suite('Relationships', { config: './config.ts' }, () => {
 })
 
 async function createPost({ payload }: { payload: Payload }, overrides?: Partial<Post>) {
-  return payload.create({ collection: slug, data: { title: 'title', ...overrides }, overrideAccess: true })
+  return payload.create({
+    collection: slug,
+    data: { title: 'title', ...overrides },
+    overrideAccess: true,
+  })
 }

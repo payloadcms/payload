@@ -53,7 +53,6 @@ export const createDuplicateDocumentCommand = defineCLICommand({
           ? prepareCollectionData({ collection, data: inputData, payload })
           : undefined,
         depth: args.depth,
-        draft: args.draft,
         fallbackLocale: args.fallbackLocale,
         locale: args.locale,
         overrideAccess: args.overrideAccess,
@@ -61,6 +60,7 @@ export const createDuplicateDocumentCommand = defineCLICommand({
         select: args.select,
         selectedLocales: args.selectedLocales,
         showHiddenFields: args.showHiddenFields,
+        version: args.version,
       })
     } catch (error) {
       const validation = getCollectionValidationResult({ slug: collection, error, req })

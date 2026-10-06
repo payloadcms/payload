@@ -135,6 +135,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
         req,
         showHiddenFields,
         siblingDoc,
+        version,
       }) {
         // check if there are any features with nodes which have populationPromises for this field
         if (finalSanitizedEditorConfig?.features?.graphQLPopulationPromises?.size) {
@@ -154,6 +155,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
             req,
             showHiddenFields,
             siblingDoc,
+            version,
           })
         }
       },

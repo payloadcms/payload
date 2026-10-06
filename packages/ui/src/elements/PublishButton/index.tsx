@@ -3,7 +3,12 @@
 import type { PublishButtonClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL, hasAutosaveEnabled, hasLocalizeStatusEnabled } from 'payload/shared'
+import {
+  formatAdminURL,
+  hasAutosaveEnabled,
+  hasLocalizeStatusEnabled,
+  reduceFieldsToValues,
+} from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback } from 'react'
 
@@ -16,6 +21,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { formatLocalizedFormData } from '../../utilities/formatLocalizedFormData.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { PopupList } from '../Popup/index.js'
 import './index.css'
@@ -90,9 +96,9 @@ export function PublishButton({
     const params = qs.stringify(
       {
         depth: 0,
-        draft: true,
         'fallback-locale': 'null',
         locale: localeCode,
+        version: 'draft',
       },
       { addQueryPrefix: true },
     )
@@ -146,8 +152,7 @@ export function PublishButton({
     const params = qs.stringify(
       {
         depth: 0,
-        locale: localeCode,
-        ...(localizeStatusEnabled && { publishAllLocales: true }),
+        locale: localizeStatusEnabled ? 'all' : localeCode,
       },
       { addQueryPrefix: true },
     )
@@ -161,9 +166,19 @@ export function PublishButton({
 
     const result = await submit({
       action,
-      overrides: {
-        _status: 'published',
-      },
+      context: localizeStatusEnabled ? { responseLocale: 'all' } : undefined,
+      overrides: localizeStatusEnabled
+        ? (fields) => ({
+            ...formatLocalizedFormData({
+              blocks: config.blocks,
+              data: reduceFieldsToValues(fields, true),
+              fields: entityConfig.fields,
+              locale: localeCode,
+              mode: 'wrap',
+            }),
+            _status: 'published',
+          })
+        : { _status: 'published' },
     })
 
     if (result) {
@@ -174,6 +189,8 @@ export function PublishButton({
   }, [
     localeCode,
     localizeStatusEnabled,
+    config.blocks,
+    entityConfig?.fields,
     api,
     collectionSlug,
     globalSlug,

@@ -31,7 +31,7 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
 
     test('should create', async ({ restClient }) => {
       const query = `mutation {
-          createPost(data: {title: "${title}"}) {
+          createPost(version: published, data: {title: "${title}"}) {
           id
           title
         }
@@ -48,7 +48,7 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
 
     test('should create using graphql variables', async ({ restClient }) => {
       const query = `mutation Create($title: String!) {
-          createPost(data: {title: $title}) {
+          createPost(version: published, data: {title: $title}) {
           id
           title
         }
@@ -101,10 +101,26 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
     })
 
     test('should sort by multiple fields', async ({ payload, restClient }) => {
-      const doc1 = await payload.create({ collection: 'sort', data: { title: 'a', number: 1 }, overrideAccess: true })
-      const doc2 = await payload.create({ collection: 'sort', data: { title: 'b', number: 1 }, overrideAccess: true })
-      const doc3 = await payload.create({ collection: 'sort', data: { title: 'a', number: 2 }, overrideAccess: true })
-      const doc4 = await payload.create({ collection: 'sort', data: { title: 'b', number: 3 }, overrideAccess: true })
+      const doc1 = await payload.create({
+        collection: 'sort',
+        data: { title: 'a', number: 1 },
+        overrideAccess: true,
+      })
+      const doc2 = await payload.create({
+        collection: 'sort',
+        data: { title: 'b', number: 1 },
+        overrideAccess: true,
+      })
+      const doc3 = await payload.create({
+        collection: 'sort',
+        data: { title: 'a', number: 2 },
+        overrideAccess: true,
+      })
+      const doc4 = await payload.create({
+        collection: 'sort',
+        data: { title: 'b', number: 3 },
+        overrideAccess: true,
+      })
 
       const query = `query {
         Sorts(sort: "title, number") {
@@ -210,7 +226,7 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
       const updated = 'updated title'
 
       const query = `mutation {
-          createPost(data: {title: "${title}"}) {
+          createPost(version: published, data: {title: "${title}"}) {
               id
               title
             }
@@ -341,12 +357,14 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
           collection: relationSlug,
           data: { name: 'recalls' },
           overrideAccess: true,
+          version: 'published',
         })
 
         const electricCars = await payload.create({
           collection: relationSlug,
           data: { name: 'electric-cars' },
           overrideAccess: true,
+          version: 'published',
         })
 
         const mixedPost = await createPost(
@@ -1023,6 +1041,7 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
             name: 'test',
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         await payload.create({
@@ -1032,6 +1051,7 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
             title: 'has deleted relation',
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         await payload.delete({
@@ -1071,6 +1091,7 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
             name: 'test',
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         await payload.create({
@@ -1080,6 +1101,7 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
             title: 'has deleted relation hasMany',
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         await payload.delete({
@@ -1120,6 +1142,7 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
           },
           locale: '*',
           overrideAccess: true,
+          version: 'published',
         })
 
         await payload.update({
@@ -1129,6 +1152,7 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
             relationToSelf: newDoc.id,
           },
           overrideAccess: true,
+          version: 'published',
         })
 
         const query = `query {
@@ -1156,7 +1180,7 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
         const relation_1_draft = await payload.create({
           collection: 'relation',
           data: { _status: 'draft', name: 'relation_1_draft' },
-          draft: true,
+          version: 'draft',
           overrideAccess: true,
         })
 
@@ -1168,7 +1192,7 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
 
         await payload.create({
           collection: 'posts',
-          draft: true,
+          version: 'draft',
           data: {
             _status: 'draft',
             title: 'post with relations in draft',
@@ -1177,10 +1201,14 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
           overrideAccess: true,
         })
 
-        await payload.delete({ collection: 'relation', id: relation_1_draft.id, overrideAccess: true })
+        await payload.delete({
+          collection: 'relation',
+          id: relation_1_draft.id,
+          overrideAccess: true,
+        })
 
         const query = `query {
-          Posts(draft:true,where: { title: { equals: "post with relations in draft" }}) {
+          Posts(version: latest,where: { title: { equals: "post with relations in draft" }}) {
             docs {
               id
               title
@@ -1211,17 +1239,19 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
           collection: 'relation',
           data: { name: 'restricted' },
           overrideAccess: true,
+          version: 'published',
         })
 
         const relation_2 = await payload.create({
           collection: 'relation',
           data: { name: 'relation_2' },
           overrideAccess: true,
+          version: 'published',
         })
 
         await payload.create({
           collection: 'posts',
-          draft: true,
+          version: 'draft',
           data: {
             _status: 'draft',
             title: 'post with relation restricted',
@@ -1231,7 +1261,7 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
         })
 
         const query = `query {
-          Posts(draft:true,where: { title: { equals: "post with relation restricted" }}) {
+          Posts(version: latest,where: { title: { equals: "post with relation restricted" }}) {
             docs {
               id
               title
@@ -1256,7 +1286,10 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
     })
   })
 
-  test('should query correctly with draft argument', async ({ payload, restClient }) => {
+  test('should query explicit published and latest relationship versions', async ({
+    payload,
+    restClient,
+  }) => {
     const publishValue = '1'
     const draftValue = '2'
 
@@ -1266,18 +1299,20 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
       data: {
         title: publishValue,
       },
-      draft: false,
+      version: 'published',
       overrideAccess: true,
     })
 
-    // create cyclical relationship
+    // Publish the relationship from the draft so the subsequent draft edit retains it.
     await payload.update({
       id: newDoc.id,
       collection: 'cyclical-relationship',
       data: {
+        _status: 'published',
         relationToSelf: newDoc.id,
       },
       overrideAccess: true,
+      version: 'draft',
     })
 
     // save new version
@@ -1287,15 +1322,15 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
       data: {
         title: draftValue,
       },
-      draft: true,
+      version: 'draft',
       overrideAccess: true,
     })
 
     const draftParentPublishedChild = `{
-      CyclicalRelationships(draft: true) {
+      CyclicalRelationships(version: latest) {
         docs {
           title
-          relationToSelf(draft: false) {
+          relationToSelf(version: published) {
             title
           }
         }
@@ -1312,10 +1347,10 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
     expect(queriedDoc.relationToSelf.title).toEqual(publishValue)
 
     const publishedParentDraftChild = `{
-      CyclicalRelationships(draft: false) {
+      CyclicalRelationships(version: published) {
         docs {
           title
-          relationToSelf(draft: true) {
+          relationToSelf(version: latest) {
             title
           }
         }
@@ -1351,6 +1386,7 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
         media: mediaDoc.id,
       },
       overrideAccess: true,
+      version: 'published',
     })
 
     const query = `{
@@ -1395,7 +1431,7 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
       restClient,
     }) => {
       const query = `mutation {
-          createPost(data: {min: 1}) {
+          createPost(version: published, data: {min: 1}) {
               id
               min
               createdAt
@@ -1503,11 +1539,13 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
         collection: relationSlug,
         data: { name: 'aliased' },
         overrideAccess: true,
+        version: 'published',
       })
       const post = await payload.create({
         collection: slug,
         data: { relationField: relation.id, title: 'post' },
         overrideAccess: true,
+        version: 'published',
       })
 
       const query = `query {
@@ -1532,11 +1570,13 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
         collection: relationSlug,
         data: { name: 'concurrent' },
         overrideAccess: true,
+        version: 'published',
       })
       const post = await payload.create({
         collection: slug,
         data: { relationField: relation.id, title: 'post' },
         overrideAccess: true,
+        version: 'published',
       })
 
       const query = `query {
@@ -1564,6 +1604,7 @@ async function createPost({ payload }: { payload: Payload }, overrides?: Partial
     collection: slug,
     data: { title: 'title', ...overrides },
     overrideAccess: true,
+    version: 'published',
   })
   return doc
 }

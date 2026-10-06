@@ -623,6 +623,11 @@ export async function openDashboardEditor({ page, serverURL }: { page: Page; ser
   await trigger.press('Enter')
   await page.getByRole('menuitem', { name: 'Edit Dashboard', exact: true }).press('Enter')
   await expect(page.locator('.modular-dashboard.editing')).toBeVisible()
+  await expect(
+    page
+      .locator('.dashboard-breadcrumb-dropdown__actions')
+      .getByRole('button', { name: 'Add +', exact: true }),
+  ).toBeFocused()
   return page.locator('.dashboard-breadcrumb-dropdown__editing')
 }
 

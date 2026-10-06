@@ -6,6 +6,8 @@ import type { JsonObject, Operation, PayloadRequest } from '../../../types/index
 
 import { ValidationError } from '../../../errors/index.js'
 import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
+import { mergeLocalizedData } from '../../../utilities/mergeLocalizedData.js'
+import { getLocaleData } from '../../../versions/getLocaleData.js'
 import { traverseFields } from './traverseFields.js'
 
 export type Args<T extends JsonObject> = {
@@ -26,6 +28,9 @@ export type Args<T extends JsonObject> = {
   overrideAccess?: boolean
   req: PayloadRequest
   skipValidation?: boolean
+  skipValidationByLocale?: Record<string, boolean>
+  /** Validate an exempt draft if field hooks transition it to published. */
+  validateDraftOnPublish?: boolean
 }
 
 /**
@@ -51,10 +56,70 @@ export const beforeChange = async <T extends JsonObject>({
   overrideAccess,
   req,
   skipValidation,
+  skipValidationByLocale,
+  validateDraftOnPublish,
 }: Args<T>): Promise<T> => {
+  const { localization } = req.payload.config
+
+  if (req.locale === 'all' && localization) {
+    const fields = (collection?.fields || global?.fields)!
+    let result: JsonObject = { ...docWithLocales }
+    let locales = localization.locales
+
+    if (localization.filterAvailableLocales) {
+      locales = await localization.filterAvailableLocales({ locales, req })
+    }
+
+    const publicationStatus = incomingData._status
+    let hasPublicationIntent =
+      locales.length > 0 && (publicationStatus === 'published' || publicationStatus === 'draft')
+
+    for (const localeDefinition of locales) {
+      const locale = typeof localeDefinition === 'string' ? localeDefinition : localeDefinition.code
+      const localeReq = Object.assign(Object.create(Object.getPrototypeOf(req)), req, {
+        locale,
+      }) as PayloadRequest
+      const localeData = getLocaleData({ data: incomingData, fields, locale, req: localeReq })
+      const localeDoc = getLocaleData({ data: doc || {}, fields, locale, req: localeReq })
+      const processed = await beforeChange({
+        id,
+        collection,
+        context,
+        data: localeData as T,
+        doc: localeDoc as T,
+        docWithLocales: result,
+        fieldsToValidate: submittedTopLevelFieldNames,
+        global,
+        onDataProcessed: (data) => {
+          hasPublicationIntent &&= data._status === publicationStatus
+        },
+        operation,
+        overrideAccess,
+        req: localeReq,
+        skipValidation: skipValidationByLocale?.[locale] ?? skipValidation,
+        validateDraftOnPublish: Boolean(skipValidationByLocale),
+      })
+
+      result = mergeLocalizedData({
+        configBlockReferences: req.payload.config.blocks,
+        dataWithLocales: processed,
+        docWithLocales: result,
+        fields,
+        localesToUpdate: [locale],
+      })
+    }
+
+    onDataProcessed?.(
+      (hasPublicationIntent ? { ...result, _status: publicationStatus } : result) as T,
+    )
+    return result as T
+  }
+
   const data = deepCopyObjectSimple(incomingData)
   const mergeLocaleActions: (() => Promise<void> | void)[] = []
   const errors: ValidationFieldError[] = []
+  const draftValidationActions: (() => Promise<void>)[] | undefined =
+    validateDraftOnPublish && skipValidation ? [] : undefined
 
   await traverseFields({
     id,
@@ -63,6 +128,7 @@ export const beforeChange = async <T extends JsonObject>({
     data,
     doc,
     docWithLocales,
+    draftValidationActions,
     errors,
     fieldLabelPath: '',
     fields: (collection?.fields || global?.fields)!,
@@ -81,6 +147,10 @@ export const beforeChange = async <T extends JsonObject>({
     skipValidation,
     submittedTopLevelFieldNames,
   })
+
+  if (draftValidationActions && data._status === 'published') {
+    await Promise.all(draftValidationActions.map((validate) => validate()))
+  }
 
   if (errors.length > 0) {
     throw new ValidationError(

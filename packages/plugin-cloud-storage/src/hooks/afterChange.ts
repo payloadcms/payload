@@ -101,10 +101,10 @@ export const getAfterChangeHook =
               collection: collection.slug,
               data: uploadMetadata,
               depth: 0,
-              draft: isDraftSave,
               overrideAccess: true,
               req,
               select,
+              version: isDraftSave ? 'draft' : 'published',
             })
 
             // Persist all adapter metadata, but do not add unselected fields to the response.

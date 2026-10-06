@@ -94,6 +94,7 @@ export const addOrderableFieldsAndHook = (
           req,
           select: { [orderableFieldName]: true },
           sort: `-${orderableFieldName}`,
+          version: 'latest',
           where: combineWhereConstraints([
             {
               [orderableFieldName]: {
@@ -238,6 +239,7 @@ export const addOrderableEndpoint = (
         overrideAccess: true,
         req,
         select: { [orderableFieldName]: true },
+        version: 'latest',
         where: combineWhereConstraints([
           {
             [orderableFieldName]: {
@@ -266,6 +268,7 @@ export const addOrderableEndpoint = (
             depth: 0,
             overrideAccess: false,
             req,
+            version: 'latest',
           })
         }
         if (shouldCommit || !hasTransaction) {
@@ -319,6 +322,7 @@ export const addOrderableEndpoint = (
       pagination: false,
       select: { [orderableFieldName]: true },
       sort: newKeyWillBe === 'greater' ? orderableFieldName : `-${orderableFieldName}`,
+      version: 'latest',
       where: combineWhereConstraints([
         {
           [orderableFieldName]: {
@@ -371,9 +375,9 @@ export const addOrderableEndpoint = (
           [orderableFieldName]: orderValues[index],
         },
         depth: 0,
-        draft,
         overrideAccess: false,
         req,
+        version: draft ? 'draft' : 'published',
       })
     }
 

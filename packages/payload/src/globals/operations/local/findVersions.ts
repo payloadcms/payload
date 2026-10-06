@@ -11,10 +11,11 @@ import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../.
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
-import type { DataFromGlobalSlug } from '../../config/types.js'
+import type { DataFromGlobalSlug, VersionFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
+import { parseDocumentVersion } from '../../../versions/parseDocumentVersion.js'
 import { findVersionsOperation } from '../findVersions.js'
 
 export type Options<TSlug extends GlobalSlug> = {
@@ -86,12 +87,15 @@ export type Options<TSlug extends GlobalSlug> = {
    */
   where?: Where
 } & Pick<FindOptions<string, SelectType>, 'select'> &
-  Pick<SharedLocalAPIOptions, 'overrideAccess'>
+  Pick<SharedLocalAPIOptions, 'overrideAccess'> &
+  VersionFromGlobalSlug<TSlug>
 
 export async function findGlobalVersionsLocal<TSlug extends GlobalSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<PaginatedDocs<TypeWithVersion<DataFromGlobalSlug<TSlug>>>> {
+  parseDocumentVersion({ params: { ...options } })
+
   const {
     slug: globalSlug,
     depth,
@@ -103,6 +107,7 @@ export async function findGlobalVersionsLocal<TSlug extends GlobalSlug>(
     select,
     showHiddenFields,
     sort,
+    version,
     where,
   } = options
 
@@ -127,6 +132,7 @@ export async function findGlobalVersionsLocal<TSlug extends GlobalSlug>(
     select,
     showHiddenFields,
     sort,
+    version,
     where,
   })
 }

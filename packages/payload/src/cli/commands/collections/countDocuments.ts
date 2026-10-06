@@ -16,6 +16,7 @@ export const createCountDocumentsCommand = defineCLICommand({
       locale: args.locale,
       overrideAccess: args.overrideAccess,
       trash: args.trash,
+      version: args.version,
       where: args.where,
     })
 

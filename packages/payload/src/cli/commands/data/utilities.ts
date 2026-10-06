@@ -1,3 +1,5 @@
+import type { DocumentVersion } from '../../../types/operations.js'
+
 /* eslint-disable no-console */
 import type {
   CollectionSlug,
@@ -61,13 +63,8 @@ export const getGlobalValidationResult = ({
   return { slug, errors: error.data.errors, ...(schema ? { schema } : {}) }
 }
 
-export const getCollectionSchema = ({
-  slug,
-  req,
-}: {
-  req: PayloadRequest
-  slug: CollectionSlug
-}) => getCollectionInputSchema({ collectionSlug: slug, req })
+export const getCollectionSchema = ({ slug, req }: { req: PayloadRequest; slug: CollectionSlug }) =>
+  getCollectionInputSchema({ collectionSlug: slug, req })
 
 export const getReadOptions = (options: {
   depth: number
@@ -77,6 +74,7 @@ export const getReadOptions = (options: {
   populate?: PopulateType
   select?: SelectType
   showHiddenFields?: boolean
+  version?: DocumentVersion
 }) => ({
   depth: options.depth,
   fallbackLocale: options.fallbackLocale,
@@ -85,6 +83,7 @@ export const getReadOptions = (options: {
   populate: options.populate,
   select: options.select,
   showHiddenFields: options.showHiddenFields,
+  version: options.version,
 })
 
 export const prepareCollectionData = ({

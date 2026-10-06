@@ -16,7 +16,7 @@ import type {
   SelectType,
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
-import type { SharedLocalAPIOptions } from '../../../types/operations.js'
+import type { DocumentVersion, SharedLocalAPIOptions } from '../../../types/operations.js'
 import type {
   DataFromCollectionSlug,
   SanitizedCollectionConfig,
@@ -33,6 +33,7 @@ import { beforeChange } from '../../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple, saveVersion } from '../../../index.js'
 import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js'
+import { getReferencedUploadFilenames } from '../../../uploads/getReferencedUploadFilenames.js'
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
 import { getTopLevelFieldNames } from '../../../utilities/getTopLevelFieldNames.js'
@@ -47,7 +48,10 @@ import {
   hasAuthorizedAllLocalesPublicationStatus,
   validateAllLocalesPublicationFlags,
 } from '../../../versions/allLocalesPublicationStatus.js'
+import { buildLocalizedVersionWrite } from '../../../versions/buildLocalizedVersionWrite.js'
 import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePublishData.js'
+import { appendVersionToQueryKey } from '../../../versions/drafts/appendVersionToQueryKey.js'
+import { getVersionStatusQuery } from '../../../versions/getVersionStatusQuery.js'
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
   collectionConfig: SanitizedCollectionConfig
@@ -63,11 +67,13 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   overrideLock: boolean
   payload: Payload
   populate?: PopulateType
+  preserveDraft?: boolean
   publishAllLocales?: boolean
   req: PayloadRequest
   select: SelectType
   showHiddenFields: boolean
   unpublishAllLocales?: boolean
+  version?: DocumentVersion
 } & Pick<Required<SharedLocalAPIOptions>, 'overrideAccess'>
 
 /**
@@ -102,20 +108,20 @@ export const updateDocument = async <
   overrideLock,
   payload,
   populate,
+  preserveDraft = false,
   publishAllLocales: publishAllLocalesArg,
   req,
   select,
   showHiddenFields,
   unpublishAllLocales: unpublishAllLocalesArg,
+  version,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   validateAllLocalesPublicationFlags({
     publishAllLocales: publishAllLocalesArg,
     unpublishAllLocales: unpublishAllLocalesArg,
   })
 
-  const publishAllLocales =
-    !draftArg &&
-    (publishAllLocalesArg ?? !(hasLocalizeStatusEnabled(collectionConfig) && locale !== 'all'))
+  const publishAllLocales = Boolean(publishAllLocalesArg)
   const unpublishAllLocales =
     typeof unpublishAllLocalesArg === 'string'
       ? unpublishAllLocalesArg === 'true'
@@ -125,11 +131,27 @@ export const updateDocument = async <
     publishAllLocales,
     unpublishAllLocales,
   })
-  const isSavingDraft =
+  let isSavingDraft =
     Boolean(draftArg && hasDraftsEnabled(collectionConfig)) &&
     data._status !== 'published' &&
     !publishAllLocales
-  if (allLocalesPublicationStatus || isSavingDraft) {
+  const isLocalizedLatestWrite =
+    version === 'latest' &&
+    locale === 'all' &&
+    Boolean(config.localization && hasLocalizeStatusEnabled(collectionConfig))
+  const targetsByLocale =
+    isLocalizedLatestWrite && config.localization
+      ? Object.fromEntries(
+          config.localization.localeCodes.map((code) => [
+            code,
+            docWithLocales._status?.[code] === 'published'
+              ? ('published' as const)
+              : ('draft' as const),
+          ]),
+        )
+      : undefined
+
+  if (allLocalesPublicationStatus || (isSavingDraft && !isLocalizedLatestWrite)) {
     data._status = allLocalesPublicationStatus ?? 'draft'
   }
 
@@ -157,12 +179,14 @@ export const updateDocument = async <
     overrideAccess: true,
     req,
     showHiddenFields: true,
+    version,
   })
 
   const isRestoringDraftFromTrash = Boolean(originalDoc?.deletedAt) && data?._status !== 'published'
   const shouldLimitValidationToSubmittedFields =
     (collectionConfig.trash && (Boolean(data?.deletedAt) || isRestoringDraftFromTrash)) ||
-    unpublishAllLocales
+    unpublishAllLocales ||
+    (preserveDraft && data._status === 'draft')
   const submittedTopLevelFieldNames = shouldLimitValidationToSubmittedFields
     ? getTopLevelFieldNames(data)
     : undefined
@@ -174,28 +198,6 @@ export const updateDocument = async <
       data,
       operation: 'update',
       originalDoc,
-      req,
-    })
-  }
-
-  // /////////////////////////////////////
-  // Delete any associated files
-  // /////////////////////////////////////
-
-  // When saving a draft on a document whose latest version is published, the file
-  // referenced by docWithLocales is still actively used by the published main document.
-  // Deleting it here would break the published document's file even though no publish
-  // is happening. Only skip deletion in this case; when the latest version is already a
-  // draft, it is safe to delete the old draft file as it is being replaced.
-  const isDraftOverPublished = isSavingDraft && docWithLocales._status === 'published'
-
-  if (!isDraftOverPublished) {
-    await deleteAssociatedFiles({
-      collectionConfig,
-      config,
-      doc: docWithLocales,
-      files: filesToUpload,
-      overrideDelete: false,
       req,
     })
   }
@@ -228,6 +230,34 @@ export const updateDocument = async <
     overrideAccess,
     req,
   })
+
+  const getIsSavingDraft = ({ status }: { status: unknown }): boolean => {
+    const isPublishedStatus =
+      status === 'published' ||
+      (status !== null &&
+        typeof status === 'object' &&
+        (locale === 'all'
+          ? Object.values(status).length > 0 &&
+            Object.values(status).every((value) => value === 'published')
+          : (status as Record<string, unknown>)[locale] === 'published'))
+
+    return (
+      Boolean(draftArg && hasDraftsEnabled(collectionConfig)) &&
+      (!statusFieldAccess || !isPublishedStatus)
+    )
+  }
+
+  if (
+    draftArg &&
+    hasDraftsEnabled(collectionConfig) &&
+    !statusFieldAccess &&
+    !isLocalizedLatestWrite &&
+    !(locale === 'all' && allLocalesPublicationStatus)
+  ) {
+    data._status = 'draft'
+  }
+
+  isSavingDraft = getIsSavingDraft({ status: data._status })
 
   const password = data?.password
   const shouldSavePassword = Boolean(
@@ -292,6 +322,8 @@ export const updateDocument = async <
     }
   }
 
+  isSavingDraft = getIsSavingDraft({ status: data._status })
+
   const publicationData = { ...data }
 
   // /////////////////////////////////////
@@ -312,6 +344,19 @@ export const updateDocument = async <
     req,
     // only skip validation for drafts when draft validation is false
     skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
+    skipValidationByLocale:
+      targetsByLocale &&
+      Object.fromEntries(
+        Object.entries(targetsByLocale).map(([code, target]) => [
+          code,
+          target === 'draft' &&
+            !hasDraftValidationEnabled(collectionConfig) &&
+            !(
+              statusFieldAccess &&
+              (data._status === 'published' || data._status?.[code] === 'published')
+            ),
+        ]),
+      ),
   }
 
   // /////////////////////////////////////
@@ -333,6 +378,12 @@ export const updateDocument = async <
     fieldValue: statusFieldValue,
     status: allLocalesPublicationStatus,
   })
+
+  const effectiveStatus = hasAuthorizedPublicationStatus
+    ? allLocalesPublicationStatus
+    : result._status
+
+  isSavingDraft = getIsSavingDraft({ status: effectiveStatus })
 
   if (
     allLocalesPublicationStatus &&
@@ -417,7 +468,28 @@ export const updateDocument = async <
     }
   }
 
-  const dataToUpdate: JsonObject = { ...(localizedPublishData ?? result) }
+  const localizedWrite = targetsByLocale
+    ? buildLocalizedVersionWrite({
+        config,
+        currentDoc: await payload.db.findOne({
+          collection: collectionConfig.slug,
+          locale: 'all',
+          req,
+          where: { id: { equals: id } },
+        }),
+        fields: collectionConfig.fields,
+        result,
+        targetsByLocale,
+      })
+    : undefined
+
+  if (localizedWrite) {
+    isSavingDraft = localizedWrite.hasDraftLocales
+  }
+
+  const dataToUpdate: JsonObject = {
+    ...(localizedWrite?.mainData ?? localizedPublishData ?? result),
+  }
 
   // /////////////////////////////////////
   // Handle potential password update
@@ -455,10 +527,10 @@ export const updateDocument = async <
 
   let resultWithLocales: JsonObject = result
 
-  if (!isSavingDraft) {
+  if (localizedWrite?.mainData || !isSavingDraft) {
     // Ensure updatedAt date is always updated
     dataToUpdate.updatedAt = new Date().toISOString()
-    if (localizedPublishData) {
+    if (localizedPublishData || localizedWrite) {
       // Single-locale publish: save filtered data to main doc but keep full locale data for
       // the version so draft fetches (replaceWithDraftIfAvailable) return complete data.
       await req.payload.db.updateOne({
@@ -493,8 +565,9 @@ export const updateDocument = async <
       draft: isSavingDraft,
       operation: 'update',
       payload,
+      preserveDraft,
       req,
-      unpublish: unpublishAllLocales,
+      unpublish: unpublishAllLocales || (!isSavingDraft && data._status === 'draft'),
     })
   }
 
@@ -516,6 +589,7 @@ export const updateDocument = async <
     req,
     select,
     showHiddenFields,
+    version,
   })
 
   // /////////////////////////////////////
@@ -569,6 +643,85 @@ export const updateDocument = async <
           select,
         })) || result
     }
+  }
+
+  // /////////////////////////////////////
+  // Delete any associated files
+  // /////////////////////////////////////
+
+  if (collectionConfig.upload && filesToUpload.length > 0) {
+    const filenamesToPreserve = new Set<string>()
+
+    if (hasDraftsEnabled(collectionConfig)) {
+      const mainDoc = await payload.db.findOne<JsonObject & TypeWithID>({
+        collection: collectionConfig.slug,
+        locale: 'all',
+        req,
+        where: { id: { equals: id } },
+      })
+      const publishedLocales =
+        mainDoc?._status && typeof mainDoc._status === 'object'
+          ? Object.keys(mainDoc._status).filter((code) => mainDoc._status[code] === 'published')
+          : undefined
+
+      if (mainDoc && (mainDoc._status === 'published' || publishedLocales?.length)) {
+        for (const filename of getReferencedUploadFilenames({
+          collectionConfig,
+          doc: mainDoc,
+          localeCodes: publishedLocales,
+        })) {
+          filenamesToPreserve.add(filename)
+        }
+      }
+
+      const pending = await payload.db.findVersions({
+        collection: collectionConfig.slug,
+        limit: 1,
+        locale: 'all',
+        pagination: false,
+        req,
+        where: {
+          and: [
+            { parent: { equals: id } },
+            { latest: { equals: true } },
+            appendVersionToQueryKey(
+              getVersionStatusQuery({
+                entity: collectionConfig,
+                locale: 'all',
+                localization: config.localization,
+                status: 'draft',
+              }),
+            ),
+          ],
+        },
+      })
+
+      if (pending.docs[0]) {
+        for (const filename of getReferencedUploadFilenames({
+          collectionConfig,
+          doc: pending.docs[0].version,
+        })) {
+          filenamesToPreserve.add(filename)
+        }
+      }
+    }
+
+    for (const filename of getReferencedUploadFilenames({
+      collectionConfig,
+      doc: resultWithLocales,
+    })) {
+      filenamesToPreserve.add(filename)
+    }
+
+    await deleteAssociatedFiles({
+      collectionConfig,
+      config,
+      doc: docWithLocales,
+      filenamesToPreserve,
+      files: filesToUpload,
+      overrideDelete: false,
+      req,
+    })
   }
 
   return result as TransformCollectionWithSelect<TSlug, TSelect>

@@ -40,6 +40,7 @@ export async function getJoinScopeContext(args: {
           ...(joinOnFieldPath ? { [joinOnFieldPath]: true } : {}),
           [orderableFieldName]: true,
         },
+        version: 'latest',
       })
     }
   }

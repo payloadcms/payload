@@ -4,6 +4,7 @@ import type { PayloadHandler } from '../../config/types.js'
 
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
 import { parseParams } from '../../utilities/parseParams/index.js'
+import { parseDocumentVersion } from '../../versions/parseDocumentVersion.js'
 import { countOperation } from '../operations/count.js'
 
 export const countHandler: PayloadHandler = async (req) => {
@@ -15,6 +16,7 @@ export const countHandler: PayloadHandler = async (req) => {
     collection,
     req,
     trash,
+    version: parseDocumentVersion({ params: req.query }),
     where,
   })
 

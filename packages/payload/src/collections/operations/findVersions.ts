@@ -1,6 +1,7 @@
 import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
+import type { DocumentVersion } from '../../types/operations.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { Collection } from '../config/types.js'
 import type { FindOptions } from './local/find.js'
@@ -31,6 +32,7 @@ export type Arguments = {
   showHiddenFields?: boolean
   sort?: Sort
   trash?: boolean
+  version?: DocumentVersion
   where?: Where
 } & Pick<FindOptions<string, SelectType>, 'select'>
 
@@ -60,6 +62,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
     showHiddenFields,
     sort,
     trash = false,
+    version = 'published',
     where,
   } = args
 
@@ -180,8 +183,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
         context: req.context,
         depth: depth!,
         doc: data.version,
-        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-        draft: undefined,
+        draft: version !== 'published',
         fallbackLocale: fallbackLocale!,
         findMany: true,
         global: null,
@@ -191,6 +193,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
         req,
         select: typeof select?.version === 'object' ? select.version : undefined,
         showHiddenFields: showHiddenFields!,
+        version,
       })
       return data
     }),

@@ -6,6 +6,7 @@ import type {
   CodeField,
   CollapsibleField,
   DateField,
+  DocumentVersion,
   EmailField,
   Field,
   FlattenedJoinField,
@@ -48,10 +49,12 @@ import type { Context } from '../resolvers/types.js'
 
 import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
 import { combineParentName } from '../utilities/combineParentName.js'
+import { getDocumentVersion, rememberDocumentVersion } from '../utilities/documentVersion.js'
 import { formatName } from '../utilities/formatName.js'
 import { formatOptions } from '../utilities/formatOptions.js'
 import { resolveSelect } from '../utilities/select.js'
 import { buildObjectType, type ObjectTypeConfig } from './buildObjectType.js'
+import { documentVersionType } from './documentVersionType.js'
 import { isFieldNullable } from './isFieldNullable.js'
 import { withNullableType } from './withNullableType.js'
 
@@ -436,7 +439,10 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         const { count = false, limit, page, sort, where } = args
         const { req } = context
 
-        const draft = Boolean(args.draft ?? context.req.query?.draft)
+        const version = getDocumentVersion({
+          parent,
+          version: args.version as DocumentVersion | undefined,
+        })
         const select = resolveSelect(info, context.select, context)
 
         const targetField = (field as FlattenedJoinField).targetField
@@ -466,6 +472,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
             collection,
             overrideAccess: false,
             req,
+            version,
             where: fullWhere,
           })
         }
@@ -473,8 +480,8 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         const { docs, totalDocs } = await req.payload.find({
           collection,
           depth: 0,
-          draft,
           fallbackLocale: req.fallbackLocale,
+          version,
           // Fetch one extra document to determine if there are more documents beyond the requested limit (used for hasNextPage calculation).
           limit: typeof limit === 'number' && limit > 0 ? limit + 1 : 0,
           locale: req.locale,
@@ -493,11 +500,14 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           shouldSlice = true
         }
 
-        return {
-          docs: shouldSlice ? docs.slice(0, -1) : docs,
-          hasNextPage: limit === 0 ? false : limit < docs.length,
-          ...(count ? { totalDocs } : {}),
-        }
+        return rememberDocumentVersion({
+          data: {
+            docs: shouldSlice ? docs.slice(0, -1) : docs,
+            hasNextPage: limit === 0 ? false : limit < docs.length,
+            ...(count ? { totalDocs } : {}),
+          },
+          version,
+        })
       },
     }
 
@@ -634,11 +644,11 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
     type = type || newlyCreatedBlockType
 
     const relationshipArgs: {
-      draft: GraphQLArgumentConfig
       fallbackLocale: GraphQLArgumentConfig
       limit: GraphQLArgumentConfig
       locale: GraphQLArgumentConfig
       page: GraphQLArgumentConfig
+      version: GraphQLArgumentConfig
       where: GraphQLArgumentConfig
     } = {} as any
 
@@ -647,8 +657,8 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       .some((relation) => graphqlResult.collections[relation].config.versions?.drafts)
 
     if (relationsUseDrafts) {
-      relationshipArgs.draft = {
-        type: GraphQLBoolean,
+      relationshipArgs.version = {
+        type: documentVersionType,
       }
     }
 
@@ -680,7 +690,10 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         const locale = args.locale || context.req.locale
         const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
         let relatedCollectionSlug = field.relationTo
-        const draft = Boolean(args.draft ?? context.req.query?.draft)
+        const version = getDocumentVersion({
+          parent,
+          version: args.version as DocumentVersion | undefined,
+        })
         const select = resolveSelect(info, context.select, context)
 
         if (hasManyValues) {
@@ -706,13 +719,13 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
                   currentDepth: 0,
                   depth: 0,
                   docID: id,
-                  draft,
                   fallbackLocale,
                   locale,
                   overrideAccess: false,
                   select,
                   showHiddenFields: false,
                   transactionID: context.req.transactionID,
+                  version,
                 }),
               )
 
@@ -739,7 +752,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           }
 
           await Promise.all(resultPromises)
-          return results
+          return rememberDocumentVersion({ data: results, version })
         }
 
         let id = value
@@ -756,28 +769,28 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
                 currentDepth: 0,
                 depth: 0,
                 docID: id,
-                draft,
                 fallbackLocale,
                 locale,
                 overrideAccess: false,
                 select,
                 showHiddenFields: false,
                 transactionID: context.req.transactionID,
+                version,
               }),
             )
 
             if (relatedDocument) {
               if (isRelatedToManyCollections) {
-                return {
-                  relationTo: relatedCollectionSlug,
-                  value: {
-                    ...relatedDocument,
-                    collection: relatedCollectionSlug,
+                return rememberDocumentVersion({
+                  data: {
+                    relationTo: relatedCollectionSlug,
+                    value: { ...relatedDocument, collection: relatedCollectionSlug },
                   },
-                }
+                  version,
+                })
               }
 
-              return relatedDocument
+              return rememberDocumentVersion({ data: relatedDocument, version })
             }
           }
 
@@ -811,6 +824,10 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         field,
       },
       async resolve(parent, args, context: Context) {
+        const version = getDocumentVersion({
+          parent,
+          version: args.version as DocumentVersion | undefined,
+        })
         let depth = config.defaultDepth
         if (typeof args.depth !== 'undefined') {
           depth = args.depth
@@ -839,7 +856,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           editor?.graphQLPopulationPromises({
             context,
             depth: populateDepth,
-            draft: args.draft,
+            draft: version === 'draft' || version === 'latest',
             field,
             fieldPromises,
             findMany: false,
@@ -850,6 +867,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
             req: context.req,
             showHiddenFields: false,
             siblingDoc: parent,
+            version,
           })
           await Promise.all(fieldPromises)
           await Promise.all(populationPromises)
@@ -1053,11 +1071,11 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
     type = type || newlyCreatedBlockType
 
     const relationshipArgs: {
-      draft?: GraphQLArgumentConfig
       fallbackLocale?: GraphQLArgumentConfig
       limit?: GraphQLArgumentConfig
       locale?: GraphQLArgumentConfig
       page?: GraphQLArgumentConfig
+      version?: GraphQLArgumentConfig
       where?: GraphQLArgumentConfig
     } = {} as any
 
@@ -1066,8 +1084,8 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
     )
 
     if (relationsUseDrafts) {
-      relationshipArgs.draft = {
-        type: GraphQLBoolean,
+      relationshipArgs.version = {
+        type: documentVersionType,
       }
     }
 
@@ -1099,7 +1117,10 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         const locale = args.locale || context.req.locale
         const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
         let relatedCollectionSlug = field.relationTo
-        const draft = Boolean(args.draft ?? context.req.query?.draft)
+        const version = getDocumentVersion({
+          parent,
+          version: args.version as DocumentVersion | undefined,
+        })
         const select = resolveSelect(info, context.select, context)
 
         if (hasManyValues) {
@@ -1125,13 +1146,13 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
                   currentDepth: 0,
                   depth: 0,
                   docID: id,
-                  draft,
                   fallbackLocale,
                   locale,
                   overrideAccess: false,
                   select,
                   showHiddenFields: false,
                   transactionID: context.req.transactionID,
+                  version,
                 }),
               )
 
@@ -1158,7 +1179,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           }
 
           await Promise.all(resultPromises)
-          return results
+          return rememberDocumentVersion({ data: results, version })
         }
 
         let id = value
@@ -1175,28 +1196,28 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
                 currentDepth: 0,
                 depth: 0,
                 docID: id,
-                draft,
                 fallbackLocale,
                 locale,
                 overrideAccess: false,
                 select,
                 showHiddenFields: false,
                 transactionID: context.req.transactionID,
+                version,
               }),
             )
 
             if (relatedDocument) {
               if (isRelatedToManyCollections) {
-                return {
-                  relationTo: relatedCollectionSlug,
-                  value: {
-                    ...relatedDocument,
-                    collection: relatedCollectionSlug,
+                return rememberDocumentVersion({
+                  data: {
+                    relationTo: relatedCollectionSlug,
+                    value: { ...relatedDocument, collection: relatedCollectionSlug },
                   },
-                }
+                  version,
+                })
               }
 
-              return relatedDocument
+              return rememberDocumentVersion({ data: relatedDocument, version })
             }
           }
 

@@ -9,7 +9,12 @@ import {
   type ServerFunction,
   traverseFields,
 } from 'payload'
-import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from 'payload/shared'
+import {
+  fieldAffectsData,
+  fieldShouldBeLocalized,
+  hasDraftsEnabled,
+  tabHasName,
+} from 'payload/shared'
 
 const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
@@ -250,42 +255,42 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
       ? payload.findGlobal({
           slug: globalSlug,
           depth: 0,
-          draft: true,
           locale: fromLocale,
           overrideAccess: false,
           user,
+          version: 'latest',
           // `select` would allow us to select only the fields we need in the future
         })
       : payload.findByID({
           id: docID,
           collection: collectionSlug,
           depth: 0,
-          draft: true,
           joins: false,
           locale: fromLocale,
           overrideAccess: false,
           user,
+          version: 'latest',
           // `select` would allow us to select only the fields we need in the future
         }),
     globalSlug
       ? payload.findGlobal({
           slug: globalSlug,
           depth: 0,
-          draft: true,
           locale: toLocale,
           overrideAccess: false,
           user,
+          version: 'latest',
           // `select` would allow us to select only the fields we need in the future
         })
       : payload.findByID({
           id: docID,
           collection: collectionSlug,
           depth: 0,
-          draft: true,
           joins: false,
           locale: toLocale,
           overrideAccess: false,
           user,
+          version: 'latest',
           // `select` would allow us to select only the fields we need in the future
         }),
   ])
@@ -298,9 +303,16 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
     throw new Error(`Error fetching data from locale "${toLocale}"`)
   }
 
-  const fields = globalSlug
-    ? globals[globalSlug].config.fields
-    : collections[collectionSlug].config.fields
+  const entityConfig = globalSlug
+    ? globals.config.find((global) => global.slug === globalSlug)
+    : collections[collectionSlug].config
+
+  if (!entityConfig) {
+    throw new Error('The locale copy target is not configured.')
+  }
+
+  const { fields } = entityConfig
+  const version = hasDraftsEnabled(entityConfig) ? 'draft' : undefined
 
   const fromLocaleDataWithoutID = fromLocaleData.value
   const toLocaleDataWithoutID = toLocaleData.value
@@ -311,24 +323,26 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
 
   const data = removeIdIfParentIsLocalized(dataWithID, fields)
 
+  delete data._status
+
   return globalSlug
     ? await payload.updateGlobal({
         slug: globalSlug,
         data,
-        draft: true,
         locale: toLocale,
         overrideAccess: false,
         req,
         user,
+        version,
       })
     : await payload.update({
         id: docID,
         collection: collectionSlug,
         data,
-        draft: true,
         locale: toLocale,
         overrideAccess: false,
         req,
         user,
+        version,
       })
 }

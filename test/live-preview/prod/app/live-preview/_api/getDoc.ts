@@ -6,11 +6,11 @@ import { getPayload } from 'payload'
 export const getDoc = async <T>(args: {
   collection: CollectionSlug
   depth?: number
-  draft?: boolean
+  version?: 'latest' | 'published'
   slug?: string
 }): Promise<T> => {
   const payload = await getPayload({ config })
-  const { slug, collection, depth = 2, draft } = args || {}
+  const { slug, collection, depth = 2, version } = args || {}
 
   const where: Where = {}
 
@@ -25,7 +25,7 @@ export const getDoc = async <T>(args: {
       collection,
       depth,
       where,
-      draft,
+      version,
       trash: true, // Include trashed documents
       overrideAccess: true,
     })
