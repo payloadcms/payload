@@ -43,7 +43,9 @@
     "next-env.d.ts",
     "next.config.js",
     "next-sitemap.config.cjs",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
+    "src/**/*", 
+    "src/types/**/*"
   ],
   "exclude": [
     "node_modules"
