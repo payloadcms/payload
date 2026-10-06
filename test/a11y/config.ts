@@ -5,9 +5,10 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+import { mediaSharpTransformer } from '../__helpers/shared/mediaSharpTransformer.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { MediaCollection } from './collections/Media/index.js'
+import { MediaCollection, mediaSlug } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { UsersCollection, usersSlug } from './collections/Users/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
@@ -42,6 +43,9 @@ const MediaAltCollection = {
 
 export default buildConfigWithDefaults({
   config: {
+    upload: {
+      transformers: [mediaSharpTransformer({ mediaSlug })],
+    },
     // ...extend config here
     admin: {
       components: {

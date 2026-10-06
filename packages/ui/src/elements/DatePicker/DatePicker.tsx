@@ -1,9 +1,9 @@
 'use client'
-import type { DatePickerProps } from 'react-datepicker'
+import type { DatePickerProps, DatePicker as ReactDatePickerInstance } from 'react-datepicker'
 
 import React from 'react'
 import ReactDatePickerDefaultImport, { registerLocale, setDefaultLocale } from 'react-datepicker'
-import { createPortal } from 'react-dom'
+import { createPortal, flushSync } from 'react-dom'
 const ReactDatePicker =
   'default' in ReactDatePickerDefaultImport
     ? ReactDatePickerDefaultImport.default
@@ -15,6 +15,7 @@ import { CalendarIcon } from '../../icons/Calendar/index.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { getFormattedLocale } from './getFormattedLocale.js'
+import { hasAmbiguousYearInput } from './hasAmbiguousYearInput.js'
 import './index.css'
 
 const baseClass = 'date-time-picker'
@@ -78,6 +79,8 @@ const DatePicker: React.FC<Props> = (props) => {
     value,
   } = props
 
+  const datePickerRef = React.useRef<ReactDatePickerInstance>(null)
+  const rejectedInputValueRef = React.useRef<string | undefined>(undefined)
   const [modalContainer, setModalContainer] = React.useState<Element | null>(null)
   const setContainerRef = React.useCallback((element: HTMLDivElement | null) => {
     setModalContainer(element?.closest('dialog, [role="dialog"]') ?? null)
@@ -124,9 +127,33 @@ const DatePicker: React.FC<Props> = (props) => {
 
   const onChange: Extract<
     DatePickerProps,
-    { selectsMultiple?: never; selectsRange?: never }
-  >['onChange'] = (incomingDate) => {
+    { selectsMultiple?: false; selectsRange?: false }
+  >['onChange'] = (incomingDate, event) => {
     const newDate = incomingDate
+
+    const inputValue =
+      event?.target instanceof HTMLInputElement
+        ? event.target.value
+        : !event
+          ? rejectedInputValueRef.current
+          : undefined
+
+    if (
+      hasAmbiguousYearInput({
+        date: newDate,
+        dateFormat: overrides?.dateFormat ?? dateFormat,
+        inputValue,
+        locale: overrides?.locale,
+      })
+    ) {
+      const picker = datePickerRef.current
+
+      rejectedInputValueRef.current = inputValue
+      picker?.setPreSelection(picker.calcInitialState().preSelection)
+      return
+    }
+    rejectedInputValueRef.current = undefined
+
     if (newDate instanceof Date && ['dayOnly', 'default', 'monthOnly'].includes(pickerAppearance)) {
       const tzOffset = incomingDate.getTimezoneOffset() / 60
       newDate.setHours(12 - tzOffset, 0)
@@ -145,7 +172,7 @@ const DatePicker: React.FC<Props> = (props) => {
 
   const dateTimePickerProps: Extract<
     DatePickerProps,
-    { selectsMultiple?: never; selectsRange?: never }
+    { selectsMultiple?: false; selectsRange?: false }
   > = {
     calendarContainer,
     customInputRef: 'ref',
@@ -175,8 +202,25 @@ const DatePicker: React.FC<Props> = (props) => {
     timeIntervals,
     ...(overrides as Extract<
       DatePickerProps,
-      { selectsMultiple?: never; selectsRange?: never } // to satisfy TypeScript. Overrides can enable selectsMultiple or selectsRange but then it's up to the user to ensure they pass in the correct onChange
+      { selectsMultiple?: false; selectsRange?: false } // to satisfy TypeScript. Overrides can enable selectsMultiple or selectsRange but then it's up to the user to ensure they pass in the correct onChange
     >),
+  }
+
+  const onBlurCapture = (event: React.FocusEvent<HTMLDivElement>) => {
+    const input = event.target
+
+    if (input !== datePickerRef.current?.input || !(input instanceof HTMLInputElement)) {
+      return
+    }
+
+    if (/[a-z0-9]/i.test(input.value) || !/[\p{L}\p{N}]/u.test(input.value)) {
+      return
+    }
+
+    // react-datepicker 9.1 treats non-Latin input as an empty mask.
+    // Reset raw text synchronously before its blur handler can clear the selected date.
+    // eslint-disable-next-line @eslint-react/dom/no-flush-sync -- Programmatic blur also requires the reset before the upstream handler runs.
+    flushSync(() => datePickerRef.current?.resetInputValue())
   }
 
   const classes = [baseClass, `${baseClass}__appearance--${pickerAppearance}`]
@@ -197,11 +241,12 @@ const DatePicker: React.FC<Props> = (props) => {
   }, [i18n.language, i18n.dateFNS])
 
   return (
-    <div className={classes} id={id} ref={setContainerRef}>
+    <div className={classes} id={id} onBlurCapture={onBlurCapture} ref={setContainerRef}>
       <div className={`${baseClass}__input-wrapper`}>
         <ReactDatePicker
           {...dateTimePickerProps}
           dropdownMode="select"
+          ref={datePickerRef}
           showMonthDropdown={pickerAppearance !== 'monthOnly'}
           showYearDropdown={pickerAppearance !== 'monthOnly'}
         />

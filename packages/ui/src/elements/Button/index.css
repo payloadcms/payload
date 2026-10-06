@@ -140,6 +140,13 @@
     }
   }
 
+  /* Selected state - primary buttons */
+  .btn.btn--style-primary.btn--selected,
+  .btn.btn--style-primary.btn--selected:hover,
+  .btn.btn--style-primary.btn--selected:active {
+    background-color: var(--color-bg-brand-pressed);
+  }
+
   /* Selected state - ghost buttons */
   .btn.btn--style-ghost.btn--selected,
   .btn.btn--style-ghost.btn--selected:hover,
