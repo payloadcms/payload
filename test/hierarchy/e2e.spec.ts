@@ -784,6 +784,131 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(tree.getByText('Products Only', { exact: true })).toBeVisible()
     })
 
+    test('should show incompatible move destinations as disabled', async () => {
+      await page.goto(foldersURL.hierarchy)
+
+      const selectedFolderRow = page.locator('tr', { hasText: 'Orgs and Products' })
+
+      await selectedFolderRow.getByRole('checkbox').click()
+      await page.getByRole('button', { name: 'Move', exact: true }).click()
+
+      const modal = page.locator('.hierarchy-modal')
+      const generalFolder = modal.locator('.hierarchy-column-item', { hasText: 'General' })
+      const organizationsFolder = modal.locator('.hierarchy-column-item', {
+        hasText: 'Orgs Only',
+      })
+      const productsFolder = modal.locator('.hierarchy-column-item', {
+        hasText: 'Products Only',
+      })
+      const selectedFolder = modal.locator('.hierarchy-column-item', {
+        hasText: 'Orgs and Products',
+      })
+
+      await expect(modal).toBeVisible()
+      await expect(generalFolder).toBeVisible()
+      await expect(organizationsFolder).toBeVisible()
+      await expect(productsFolder).toBeVisible()
+      await expect(selectedFolder).toBeVisible()
+      await expect(generalFolder.getByRole('checkbox')).toBeEnabled()
+      await expect(organizationsFolder.getByRole('checkbox')).toBeDisabled()
+      await expect(productsFolder.getByRole('checkbox')).toBeDisabled()
+      await expect(selectedFolder.getByRole('checkbox')).toBeDisabled()
+      await expect(generalFolder).not.toHaveAttribute('aria-disabled')
+      await expect(organizationsFolder).toHaveAttribute('aria-disabled', 'true')
+      await expect(productsFolder).toHaveAttribute('aria-disabled', 'true')
+      await expect(selectedFolder).toHaveAttribute('aria-disabled', 'true')
+
+      await organizationsFolder.press('Enter')
+      await expect(modal.locator('.hierarchy-column')).toHaveCount(1)
+    })
+
+    test('should disable scoped destinations when moving an unrestricted folder', async () => {
+      await page.goto(foldersURL.hierarchy)
+
+      const selectedFolderRow = page.locator('tr', { hasText: 'General' })
+
+      await selectedFolderRow.getByRole('checkbox').click()
+      await page.getByRole('button', { name: 'Move', exact: true }).click()
+
+      const modal = page.locator('.hierarchy-modal')
+      const generalFolder = modal.locator('.hierarchy-column-item', { hasText: 'General' })
+      const organizationsFolder = modal.locator('.hierarchy-column-item', {
+        hasText: 'Orgs Only',
+      })
+      const organizationsAndProductsFolder = modal.locator('.hierarchy-column-item', {
+        hasText: 'Orgs and Products',
+      })
+      const productsFolder = modal.locator('.hierarchy-column-item', {
+        hasText: 'Products Only',
+      })
+
+      await expect(modal).toBeVisible()
+      await expect(generalFolder.getByRole('checkbox')).toBeDisabled()
+      await expect(organizationsFolder.getByRole('checkbox')).toBeDisabled()
+      await expect(organizationsAndProductsFolder.getByRole('checkbox')).toBeDisabled()
+      await expect(productsFolder.getByRole('checkbox')).toBeDisabled()
+      await expect(generalFolder).toHaveAttribute('aria-disabled', 'true')
+      await expect(organizationsFolder).toHaveAttribute('aria-disabled', 'true')
+      await expect(organizationsAndProductsFolder).toHaveAttribute('aria-disabled', 'true')
+      await expect(productsFolder).toHaveAttribute('aria-disabled', 'true')
+
+      await organizationsFolder.press('Enter')
+      await expect(modal.locator('.hierarchy-column')).toHaveCount(1)
+    })
+
+    test('should allow an unrestricted folder beneath a destination that allows every collection type', async () => {
+      const allTypesFolder = await payload.create({
+        collection: 'folders',
+        data: {
+          name: 'All Types',
+          allowedTypes: ['folder-tag-documents', 'organizations', 'products'],
+        },
+        overrideAccess: true,
+      })
+
+      try {
+        await page.goto(foldersURL.hierarchy)
+
+        await page.locator('tr', { hasText: 'General' }).getByRole('checkbox').click()
+        await page.getByRole('button', { name: 'Move', exact: true }).click()
+
+        const modal = page.locator('.hierarchy-modal')
+        const allTypesDestination = modal.locator('.hierarchy-column-item', {
+          hasText: 'All Types',
+        })
+
+        await expect(modal).toBeVisible()
+        await expect(allTypesDestination.getByRole('checkbox')).toBeEnabled()
+        await expect(allTypesDestination).not.toHaveAttribute('aria-disabled')
+      } finally {
+        await payload.delete({
+          id: allTypesFolder.id,
+          collection: 'folders',
+          overrideAccess: true,
+        })
+      }
+    })
+
+    test('should require an unrestricted destination when any moved folder is unrestricted', async () => {
+      await page.goto(foldersURL.hierarchy)
+
+      await page.locator('tr', { hasText: 'General' }).getByRole('checkbox').click()
+      await page.locator('tr', { hasText: 'Orgs Only' }).getByRole('checkbox').click()
+      await page.getByRole('button', { name: 'Move', exact: true }).click()
+
+      const modal = page.locator('.hierarchy-modal')
+      const organizationsAndProductsFolder = modal.locator('.hierarchy-column-item', {
+        hasText: 'Orgs and Products',
+      })
+      const productsFolder = modal.locator('.hierarchy-column-item', {
+        hasText: 'Products Only',
+      })
+
+      await expect(modal).toBeVisible()
+      await expect(organizationsAndProductsFolder.getByRole('checkbox')).toBeDisabled()
+      await expect(productsFolder.getByRole('checkbox')).toBeDisabled()
+    })
+
     test('should show newly created folder in filtered tree when it matches filter', async () => {
       await page.goto(foldersURL.hierarchy)
       await openNav(page)
@@ -1059,6 +1184,183 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(modal).toBeVisible()
 
       await expect(modal.locator('.hierarchy-column')).toHaveCount(2)
+    })
+  })
+
+  test.describe('Move destination restrictions', () => {
+    let allTypesFolder: { id: number | string }
+    let foldersURL: AdminUrlUtil
+    let product: { id: number | string }
+    let productsOnlyFolder: { id: number | string }
+    let productsOnlyFolderName: string
+    let productsURL: AdminUrlUtil
+    let unrestrictedFolder: { id: number | string }
+
+    test.beforeAll(async () => {
+      foldersURL = new AdminUrlUtil(serverURL, 'folders')
+      productsURL = new AdminUrlUtil(serverURL, 'products')
+
+      const uniqueSuffix = Date.now()
+
+      allTypesFolder = await payload.create({
+        collection: 'folders',
+        data: {
+          name: `All Types Destination ${uniqueSuffix}`,
+          allowedTypes: ['folder-tag-documents', 'organizations', 'products'],
+        },
+        overrideAccess: true,
+      })
+
+      unrestrictedFolder = await payload.create({
+        collection: 'folders',
+        data: { name: `Unrestricted Folder ${uniqueSuffix}` },
+        overrideAccess: true,
+      })
+
+      productsOnlyFolderName = `Products Only Folder ${uniqueSuffix}`
+
+      productsOnlyFolder = await payload.create({
+        collection: 'folders',
+        data: { name: productsOnlyFolderName, allowedTypes: ['products'] },
+        overrideAccess: true,
+      })
+
+      product = await payload.create({
+        collection: 'products',
+        data: { name: `List Cell Product ${uniqueSuffix}` },
+        overrideAccess: true,
+      })
+    })
+
+    test.afterAll(async () => {
+      await payload
+        .delete({ id: product.id, collection: 'products', overrideAccess: true })
+        .catch(() => {})
+
+      await payload
+        .delete({ id: unrestrictedFolder.id, collection: 'folders', overrideAccess: true })
+        .catch(() => {})
+
+      await payload
+        .delete({ id: productsOnlyFolder.id, collection: 'folders', overrideAccess: true })
+        .catch(() => {})
+
+      await payload
+        .delete({ id: allTypesFolder.id, collection: 'folders', overrideAccess: true })
+        .catch(() => {})
+    })
+
+    test('should restrict folder destinations from the document header', async () => {
+      await page.goto(foldersURL.edit(String(productsOnlyFolder.id)))
+
+      const hierarchyButton = page.locator('.hierarchy-button')
+
+      await expect(hierarchyButton).toBeVisible()
+      await hierarchyButton.click()
+
+      const modal = page.locator('.hierarchy-modal')
+      const allTypesDestination = modal.locator('.hierarchy-column-item', {
+        hasText: 'All Types Destination',
+      })
+      const organizationsDestination = modal.locator('.hierarchy-column-item', {
+        hasText: 'Orgs Only',
+      })
+      const organizationsAndProductsDestination = modal.locator('.hierarchy-column-item', {
+        hasText: 'Orgs and Products',
+      })
+      const selfDestination = modal.locator('.hierarchy-column-item', {
+        hasText: productsOnlyFolderName,
+      })
+
+      await expect(modal).toBeVisible()
+      await expect(allTypesDestination.getByRole('checkbox')).toBeEnabled()
+      await expect(organizationsDestination.getByRole('checkbox')).toBeDisabled()
+      await expect(organizationsAndProductsDestination.getByRole('checkbox')).toBeEnabled()
+      await expect(selfDestination.getByRole('checkbox')).toBeDisabled()
+      await expect(selfDestination).toHaveAttribute('aria-disabled', 'true')
+    })
+
+    test('should restrict folder destinations from the hierarchy list cell', async () => {
+      await page.goto(foldersURL.list)
+
+      const folderRow = page.locator('tr', { hasText: productsOnlyFolderName })
+
+      await folderRow.locator('.hierarchy-cell__button').click()
+
+      const modal = page.locator('.hierarchy-modal')
+      const organizationsDestination = modal.locator('.hierarchy-column-item', {
+        hasText: 'Orgs Only',
+      })
+      const organizationsAndProductsDestination = modal.locator('.hierarchy-column-item', {
+        hasText: 'Orgs and Products',
+      })
+      const selfDestination = modal.locator('.hierarchy-column-item', {
+        hasText: productsOnlyFolderName,
+      })
+
+      await expect(modal).toBeVisible()
+      await expect(organizationsDestination.getByRole('checkbox')).toBeDisabled()
+      await expect(organizationsAndProductsDestination.getByRole('checkbox')).toBeEnabled()
+      await expect(selfDestination.getByRole('checkbox')).toBeDisabled()
+      await expect(selfDestination).toHaveAttribute('aria-disabled', 'true')
+    })
+
+    test('should restrict folder destinations from the list cell', async () => {
+      await page.goto(productsURL.list)
+
+      const productRow = page.locator('tr', { hasText: 'List Cell Product' })
+      const hierarchyButton = productRow.locator('.hierarchy-cell__button')
+
+      await expect(hierarchyButton).toBeVisible()
+      await hierarchyButton.click()
+
+      const modal = page.locator('.hierarchy-modal')
+      const organizationsDestination = modal.locator('.hierarchy-column-item', {
+        hasText: 'Orgs Only',
+      })
+      const productsDestination = modal.getByRole('checkbox', {
+        name: 'Products Only',
+        exact: true,
+      })
+
+      await expect(modal).toBeVisible()
+      await expect(organizationsDestination.getByRole('checkbox')).toBeDisabled()
+      await expect(productsDestination).toBeEnabled()
+    })
+
+    test('should show list-cell move errors without closing the destination picker', async () => {
+      await page.route(`**/api/products/${product.id}`, async (route) => {
+        if (route.request().method() === 'PATCH') {
+          await route.fulfill({
+            body: JSON.stringify({ errors: [{ message: 'Move rejected' }] }),
+            contentType: 'application/json',
+            status: 400,
+          })
+
+          return
+        }
+
+        await route.fallback()
+      })
+
+      await page.goto(productsURL.list)
+
+      const productRow = page.locator('tr', { hasText: 'List Cell Product' })
+
+      await productRow.locator('.hierarchy-cell__button').click()
+
+      const modal = page.locator('.hierarchy-modal')
+      const productsDestination = modal.getByRole('checkbox', {
+        name: 'Products Only',
+        exact: true,
+      })
+
+      await productsDestination.click()
+      await modal.getByRole('button', { name: 'Select' }).click()
+
+      await expect(page.getByText('Move rejected')).toBeVisible()
+      await expect(modal).toBeVisible()
+      await page.unroute(`**/api/products/${product.id}`)
     })
   })
 })
