@@ -8,7 +8,8 @@ export async function GET() {
   }
 
   const adapter = sqliteAdapter({ client: { url: 'file::memory:' } }).init({ payload: {} })
-  const snapshot = await adapter.requireDrizzleKit().generateDrizzleJson({})
+  const tooling = await adapter.requireDrizzleKit()
+  const snapshot = await tooling.generateDrizzleJson({})
 
   return Response.json({ dialect: snapshot.dialect })
 }

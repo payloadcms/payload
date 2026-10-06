@@ -550,7 +550,7 @@ class BlocksToJsonMigratorImpl implements BlocksToJsonMigrator {
     statements: string
     writeDrizzleSnapshot(filePath: string): void
   }> {
-    const { generateDrizzleJson, generateMigration } = this.adapter.requireDrizzleKit()
+    const { generateDrizzleJson, generateMigration } = await this.adapter.requireDrizzleKit()
 
     const drizzleJsonBefore = await generateDrizzleJson(this.adapter.schema)
     this.adapter.blocksAsJSON = true
