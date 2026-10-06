@@ -267,11 +267,29 @@ test.describe('Hierarchy Sidebar', () => {
       const stepNav = page.locator('.step-nav')
 
       await page.goto(organizationsURL.hierarchy)
+      const listPreferenceSaved = page.waitForResponse(
+        (response) =>
+          response.url().includes('/api/payload-preferences/collection-organizations') &&
+          response.request().method() === 'POST' &&
+          response.ok(),
+      )
+
       await page.getByRole('button', { name: 'All Organizations' }).click()
+      await listPreferenceSaved
       await expect(page).toHaveURL(/[?&]view=all(?:&|$)/)
 
-      await page.getByRole('button', { name: 'By Organization' }).click()
+      await page.goto(organizationsURL.hierarchy)
       await expect(page).toHaveURL(/[?&]view=hierarchy(?:&|$)/)
+      const collectionPreferences = await payload.find({
+        collection: 'payload-preferences',
+        limit: 1,
+        overrideAccess: true,
+        where: { key: { equals: 'collection-organizations' } },
+      })
+
+      expect(collectionPreferences.docs[0]?.value).toEqual(
+        expect.objectContaining({ listViewType: 'list' }),
+      )
       await expect(
         stepNav.getByRole('link', { name: 'Organizations', exact: true }),
       ).toHaveAttribute('href', '/admin/collections/organizations?view=hierarchy')

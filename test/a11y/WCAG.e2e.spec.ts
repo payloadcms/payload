@@ -3514,11 +3514,15 @@ test.describe('WCAG 2.2 Level AA', () => {
 
         await expect(moreOptions).toBeVisible()
         await moreOptions.press('Enter')
+        const collapsedItems = page.getByRole('menuitem')
         const ancestor = page.getByRole('menuitem', {
           name: 'Accessibility folder',
           exact: true,
         })
 
+        await expect(collapsedItems.first()).toBeFocused()
+        await page.keyboard.press('ArrowDown')
+        await expect(ancestor).toBeFocused()
         await expect(ancestor).toHaveAccessibleName('Accessibility folder')
         await expect(ancestor).toHaveAttribute('href')
         const ancestorHref = await ancestor.getAttribute('href')
@@ -3532,7 +3536,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         expect(ancestorURL.searchParams.get('view')).toBe('hierarchy')
         expect(ancestorURL.searchParams.get('_h_payload-folders')).toBeTruthy()
 
-        await ancestor.press('Enter')
+        await page.keyboard.press('Enter')
         await expect(
           page.getByRole('heading', { name: 'Accessibility folder', exact: true }),
         ).toBeVisible()
