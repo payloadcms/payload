@@ -25,7 +25,7 @@
     "@payloadcms/tanstack-start": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "@tanstack/react-router": "^1.120.0",
-    "@tanstack/react-start": "^1.168.26",
+    "@tanstack/react-start": "^1.168.60",
     "cross-env": "10.1.0",
     "dotenv": "16.4.7",
     "graphql": "^16.8.1",
