@@ -1,12 +1,15 @@
 'use client'
 
-import type { ListViewClientProps } from 'payload'
+import type { CollectionPreferences, ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL, formatFilesize } from 'payload/shared'
 import React, { useEffect, useRef, useState } from 'react'
 
+import type { DocumentLayout } from '../../elements/LayoutToggle/index.js'
+
 import { Button } from '../../elements/Button/index.js'
+import { LayoutToggle } from '../../elements/LayoutToggle/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { ListWhereBuilder } from '../../elements/ListWhereBuilder/index.js'
@@ -23,13 +26,18 @@ import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
+import { usePreferences } from '../../providers/Preferences/index.js'
+import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
 import { ListSelection } from '../../views/List/ListSelection/index.js'
 import { DocumentListSelection } from '../HierarchyList/DocumentListSelection/index.js'
+import { getHierarchyListURL } from '../HierarchyList/getHierarchyListURL.js'
 import { HierarchyTable } from '../HierarchyList/HierarchyTable/index.js'
+import { DocumentGrid } from './DocumentGrid/index.js'
+import { GroupedDocumentGrid } from './GroupedDocumentGrid/index.js'
 import { CollectionListHeader } from './ListHeader/index.js'
 import './index.css'
 
@@ -48,7 +56,10 @@ export function DefaultListView(props: ListViewClientProps) {
     disableBulkDelete,
     disableBulkEdit,
     disableQueryPresets,
+    documentLayout,
+    documentURLs,
     enableRowSelections,
+    groupedData,
     hasCreatePermission: hasCreatePermissionFromProps,
     hasDeletePermission,
     hasTrashPermission,
@@ -65,8 +76,11 @@ export function DefaultListView(props: ListViewClientProps) {
   } = props
 
   const [Table] = useControllableState(InitialTable)
+  const [layout, setLayout] = useState<DocumentLayout>(documentLayout ?? 'table')
 
   const { allowCreate, createNewDrawerSlug, isInDrawer, onBulkSelect } = useListDrawerContext()
+  const { setPreference } = usePreferences()
+  const router = useRouter()
 
   const hasCreatePermission =
     allowCreate !== undefined
@@ -93,6 +107,8 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const previousSearch = useRef(resolvedSearch || '')
   const searchChangeResults = useRef<unknown>(null)
+  const isDataGrouped = groupedData !== undefined
+  const shouldRenderGrid = layout === 'grid' && !isInDrawer
 
   const hasWhereParam = useRef(Boolean(query?.where))
   const [isWhereOpen, setIsWhereOpen] = useState(hasActiveFilters)
@@ -109,6 +125,17 @@ export function DefaultListView(props: ListViewClientProps) {
   const { openModal } = useModal()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
+
+  const handleLayoutChange = async (nextLayout: DocumentLayout) => {
+    const preferencesKey = `collection-${collectionSlug}`
+
+    setLayout(nextLayout)
+    await setPreference<CollectionPreferences>(preferencesKey, (preferences) => ({
+      ...(preferences ?? {}),
+      documentLayout: nextLayout,
+    }))
+    router.refresh()
+  }
 
   const { labels, upload } = collectionConfig
 
@@ -171,6 +198,13 @@ export function DefaultListView(props: ListViewClientProps) {
   ])
 
   const collectionLabel = getTranslation(labels?.plural, i18n)
+  const hierarchyParentFieldName =
+    !isInDrawer &&
+    viewType === 'list' &&
+    collectionConfig.hierarchy &&
+    typeof collectionConfig.hierarchy === 'object'
+      ? (collectionConfig.hierarchy.parentFieldName ?? 'parent')
+      : undefined
 
   const { setStepNav } = useStepNav()
 
@@ -195,8 +229,12 @@ export function DefaultListView(props: ListViewClientProps) {
     if (!isInDrawer) {
       const baseLabel = {
         label: collectionLabel,
-        url:
-          hierarchyData || (isTrashEnabled && viewType === 'trash')
+        url: hierarchyData
+          ? getHierarchyListURL({
+              adminRoute,
+              collectionSlug,
+            })
+          : isTrashEnabled && viewType === 'trash'
             ? formatAdminURL({
                 adminRoute,
                 path: `/collections/${collectionSlug}`,
@@ -212,16 +250,17 @@ export function DefaultListView(props: ListViewClientProps) {
 
       // Add hierarchy breadcrumbs
       if (hierarchyData?.breadcrumbs) {
-        const queryParam = hierarchyData.parentFieldName || 'parent'
         const hierarchyBreadcrumbs = hierarchyData.breadcrumbs.map((crumb, index) => {
           const isLast = index === hierarchyData.breadcrumbs.length - 1
           return {
             label: crumb.title,
             url: isLast
               ? undefined
-              : formatAdminURL({
+              : getHierarchyListURL({
                   adminRoute,
-                  path: `/collections/${collectionSlug}?${queryParam}=${crumb.id}`,
+                  collectionSlug,
+                  parentFieldName: hierarchyData.parentFieldName,
+                  parentID: crumb.id,
                 }),
           }
         })
@@ -301,6 +340,11 @@ export function DefaultListView(props: ListViewClientProps) {
               hasCreatePermission={hasCreatePermission && viewType !== 'trash' && !isInDrawer}
               hasDeletePermission={hasDeletePermission}
               isWhereOpen={isWhereOpen}
+              layoutToggle={
+                !hierarchyData && !isInDrawer ? (
+                  <LayoutToggle layout={layout} onChange={handleLayoutChange} />
+                ) : undefined
+              }
               listMenuItems={listMenuItems}
               newDocumentURL={newDocumentURL}
               onWhereToggle={() => setIsWhereOpen((prev) => !prev)}
@@ -360,7 +404,31 @@ export function DefaultListView(props: ListViewClientProps) {
                 />
               </DocumentSelectionProvider>
             ) : docs?.length > 0 ? (
-              <RelationshipProvider>{Table}</RelationshipProvider>
+              shouldRenderGrid && isDataGrouped ? (
+                <GroupedDocumentGrid
+                  collectionSlug={collectionSlug}
+                  documentURLs={documentURLs}
+                  enableRowSelections={enableRowSelections}
+                  groups={groupedData}
+                  hierarchyParentFieldName={hierarchyParentFieldName}
+                  viewType={viewType}
+                />
+              ) : shouldRenderGrid ? (
+                <DocumentGrid
+                  adminRoute={adminRoute}
+                  collectionLabel={collectionLabel}
+                  collectionSlug={collectionSlug}
+                  docs={docs}
+                  documentURLs={documentURLs}
+                  enableRowSelections={enableRowSelections}
+                  hierarchyParentFieldName={hierarchyParentFieldName}
+                  useAsThumbnail={collectionConfig.admin.useAsThumbnail}
+                  useAsTitle={collectionConfig.admin.useAsTitle}
+                  viewType={viewType}
+                />
+              ) : (
+                <RelationshipProvider>{Table}</RelationshipProvider>
+              )
             ) : null}
             {/* HierarchyTable handles its own empty state, skip for hierarchy views */}
             {docs?.length === 0 &&

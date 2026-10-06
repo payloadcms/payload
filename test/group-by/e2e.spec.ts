@@ -179,6 +179,85 @@ test.describe('Group By', () => {
     await expect(table2CategoryCells.first()).toHaveText(/Category 2/)
   })
 
+  test('should render grouped document cards and preserve group pagination in grid layout', async () => {
+    await page.goto(url.list)
+
+    await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+    await page.getByRole('radio', { name: 'Grid' }).click()
+
+    const category1 = page.locator('.table-wrap--group-by', {
+      has: page.getByRole('heading', { name: 'Category 1' }),
+    })
+    const category2 = page.locator('.table-wrap--group-by', {
+      has: page.getByRole('heading', { name: 'Category 2' }),
+    })
+
+    await expect(category1.locator('.document-card')).toHaveCount(10)
+    await expect(category1.getByRole('link', { name: /^Post \d+$/ }).first()).toBeVisible()
+    await expect(category2.locator('.document-card')).toHaveCount(10)
+    await expect(category2.getByRole('link', { name: /^Post \d+$/ }).first()).toBeVisible()
+    await expect(category1.locator('.simple-pagination')).toBeVisible()
+
+    await category1.locator('.simple-pagination .clickable-arrow--right').click()
+
+    await expect(page).toHaveURL(/queryByGroup=/)
+    await expect(category1.locator('.document-card')).toHaveCount(6)
+    await expect(category2.locator('.document-card')).toHaveCount(10)
+
+    await page.getByRole('radio', { name: 'Table' }).click()
+    await expect(category1.locator('tbody tr')).toHaveCount(6)
+  })
+
+  test('should apply group header spacing only in grid layout', async () => {
+    await page.goto(url.list)
+
+    await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+    await page.getByRole('radio', { name: 'Grid' }).click()
+
+    const groups = page.locator('.table-wrap--group-by')
+    const firstHeader = groups.first().locator('.table-section__header-inner')
+    const secondHeader = groups.nth(1).locator('.table-section__header-inner')
+
+    await expect(groups).toHaveCount(2)
+    await expect(firstHeader).toHaveCSS('min-height', '48px')
+    await expect(firstHeader).toHaveCSS('border-bottom-width', '1px')
+    await expect(firstHeader).toHaveCSS('border-bottom-color', 'rgba(0, 0, 0, 0)')
+    await expect(secondHeader).toHaveCSS('border-bottom-width', '1px')
+    await expect(secondHeader).toHaveCSS('border-bottom-color', 'rgba(0, 0, 0, 0)')
+    await expect(firstHeader).toHaveCSS('padding-top', '0px')
+    await expect(secondHeader).toHaveCSS('padding-top', '0px')
+    await expect(groups.first().locator('.card-grid')).toHaveCSS('padding-top', '0px')
+    await expect(groups.first().locator('.card-grid')).toHaveCSS('padding-bottom', '0px')
+    await expect(groups.nth(1).locator('.table-section__divider')).toBeHidden()
+
+    const hasPrimaryHeadingColor = await groups
+      .first()
+      .locator('.table-section__heading')
+      .evaluate((heading) => {
+        const expected = document.createElement('span')
+        expected.style.color = 'var(--color-text-primary, var(--color-text))'
+        heading.append(expected)
+        const matches = getComputedStyle(heading).color === getComputedStyle(expected).color
+        expected.remove()
+
+        return matches
+      })
+
+    expect(hasPrimaryHeadingColor).toBe(true)
+
+    await page.getByRole('radio', { name: 'Table' }).click()
+
+    await expect(groups.first().locator('.table-section__header-inner')).toHaveCSS(
+      'min-height',
+      '48px',
+    )
+    await expect(groups.first().locator('.table-section__header-inner')).toHaveCSS(
+      'border-bottom-width',
+      '1px',
+    )
+    await expect(groups.nth(1).locator('.table-section__divider')).toBeVisible()
+  })
+
   test('should load group-by from user preferences', async () => {
     await deletePreferences({
       key: `${postsSlug}.list`,
@@ -258,6 +337,18 @@ test.describe('Group By', () => {
     // Sort trigger should be disabled when no field is selected
     const sortTrigger = reopenedContent.locator('.group-by-control__select-trigger').nth(1)
     await expect(sortTrigger).toBeDisabled()
+  })
+
+  test('should preserve unrelated URL parameters when changing group-by', async () => {
+    await page.goto(`${url.list}?custom=keep`)
+
+    await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+    await expect(page).toHaveURL(/groupBy=category/)
+    await expect.poll(() => new URL(page.url()).searchParams.get('custom')).toBe('keep')
+
+    await clearGroupBy(page)
+    await expect(page).not.toHaveURL(/groupBy=category/)
+    await expect.poll(() => new URL(page.url()).searchParams.get('custom')).toBe('keep')
   })
 
   test('should group by relationships even when their values are null', async () => {

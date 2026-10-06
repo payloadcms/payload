@@ -1083,6 +1083,135 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
     })
   })
   test.describe('4.1.3 Status Messages (AA)', () => {
+    test('should announce both rapid toast messages', async ({ page, screenReader }) => {
+      await page.goto(`${postsURL.admin}/status-messages`)
+      await screenReader.navigateToWebContent()
+      const capture = await captureScreenReader({
+        action: async () => {
+          await page.getByRole('button', { name: 'Show rapid toasts' }).click()
+          await expect(
+            page.locator('[data-sonner-toast]').filter({ hasText: 'Second rapid notification' }),
+          ).toHaveText('Second rapid notification')
+        },
+        screenReader,
+      })
+
+      expect(capture.spokenPhrase).toMatch(/First rapid notification/i)
+      expect(capture.spokenPhrase).toMatch(/Second rapid notification/i)
+      expect(capture.spokenPhrase).not.toMatch(/close toast/i)
+    })
+
+    test('should announce accessible names in custom toast content', async ({
+      page,
+      screenReader,
+    }) => {
+      await page.goto(`${postsURL.admin}/status-messages`)
+      await screenReader.navigateToWebContent()
+      const capture = await captureScreenReader({
+        action: () => page.getByRole('button', { name: 'Show custom toast' }).click(),
+        screenReader,
+      })
+
+      expect(capture.spokenPhrase).toMatch(/Custom notification/i)
+      expect(capture.spokenPhrase).toMatch(/Upload complete/i)
+      expect(capture.spokenPhrase).toMatch(/Retry upload/i)
+      expect(capture.spokenPhrase).toMatch(/View details/i)
+    })
+
+    test('should announce the unsaved Copy to locale toast without its close button', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3669
+      await gotoFirstPost({ page, postsURL, serverURL })
+      await screenReader.navigateToWebContent()
+      await page.locator('#field-title').fill('Unsaved toast announcement regression')
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+      const capture = await captureScreenReader({
+        action: async () => {
+          await page.locator('#copy-locale-data__button').click()
+          await expect(
+            page.locator('[data-sonner-toast]').filter({ hasText: /unsaved/i }),
+          ).toBeVisible()
+        },
+        screenReader,
+      })
+
+      expect(capture.spokenPhrase).toMatch(/unsaved/i)
+      expect(capture.spokenPhrase).not.toMatch(/close toast/i)
+    })
+
+    test('should announce the trash toast and dismiss it after the default timeout', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3580: six seconds is extra reading time, not virtual-cursor persistence.
+      const apiURL = formatAdminURL({ apiRoute: '/api', path: '/posts', serverURL })
+      const response = await page.request.post(apiURL, {
+        data: { title: 'Toast cursor persistence regression' },
+      })
+      expect(response.ok()).toBe(true)
+      const { doc } = await response.json()
+
+      try {
+        await gotoPostsList({ page, postsURL })
+        const row = page
+          .locator('tbody tr')
+          .filter({ hasText: 'Toast cursor persistence regression' })
+        await row.locator('.cell-_select input').check()
+        await page.locator('.list-selection__button[aria-label="Delete"]').click()
+        await screenReader.navigateToWebContent()
+        const capture = await captureScreenReader({
+          action: () =>
+            page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click(),
+          screenReader,
+        })
+        expect(capture.spokenPhrase).toMatch(/moved to trash/i)
+        await page.mouse.move(0, 0)
+        // Real elapsed time must exceed the configured timeout; browse focus does not pause it.
+        await page.waitForTimeout(7000)
+        await expect(
+          page.locator('[data-sonner-toast]').filter({ hasText: /moved to trash/i }),
+        ).toHaveCount(0)
+        await expect(page.getByRole('status').filter({ hasText: /moved to trash/i })).toHaveCount(0)
+      } finally {
+        const cleanup = await page.request.delete(`${apiURL}/${doc.id}?trash=true`)
+        expect(cleanup.ok()).toBe(true)
+      }
+    })
+
+    test('should announce global API depth changes while focus stays on the stepper', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3618
+      await page.goto(
+        formatAdminURL({ adminRoute: '/admin', path: '/globals/menu/api', serverURL }),
+      )
+      const depth = page.getByRole('spinbutton', { name: 'Depth', exact: true })
+      await expect(depth).toBeVisible()
+      await screenReader.navigateToWebContent()
+      const initialDepth = Number(await depth.inputValue())
+      const field = page.locator('.field-type.number').filter({ has: depth })
+
+      for (const { name, value } of [
+        { name: 'Increment', value: initialDepth + 1 },
+        { name: 'Decrement', value: initialDepth },
+      ]) {
+        const stepper = field.getByRole('button', { name, exact: true })
+        await stepper.focus()
+        const capture = await captureScreenReader({
+          action: async () => {
+            await stepper.press('Enter')
+            await expect(depth).toHaveValue(String(value))
+          },
+          screenReader,
+        })
+        await expect(stepper).toBeFocused()
+        expect.soft(capture.spokenPhrase).toMatch(new RegExp(`\\b${value}\\b`))
+      }
+    })
+
     test('should announce table search result changes without moving focus', async ({
       page,
       screenReader,
