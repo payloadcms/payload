@@ -9,7 +9,7 @@ import type { StagedObject } from './fileOperationManager.js'
 import type { StoredFileList } from './types.js'
 
 import { saveVersion } from '../../versions/saveVersion.js'
-import { scheduleUnreferencedFileCleanup } from './cleanup.js'
+import { removeUnreferencedStagedObjects, scheduleUnreferencedFileCleanup } from './cleanup.js'
 import { runFileOperationPlan, stageLocalUploadFiles } from './fileOperationManager.js'
 import { copyLocalFile } from './localStorage.js'
 import { getArchivedFilename } from './naming.js'
@@ -44,7 +44,7 @@ export const runLocalFileUpdate = async <T>({
   id: number | string
   next: JsonObject
   req: PayloadRequest
-  write: (args?: { onDocumentPersisted?: () => void }) => Promise<T>
+  write: () => Promise<T>
 }): Promise<T> => {
   if (
     !hasLocalFileChange({
@@ -60,6 +60,8 @@ export const runLocalFileUpdate = async <T>({
   }
 
   return runFileOperationPlan({
+    cleanupStagedAfterWriteFailure: (objects) =>
+      removeUnreferencedStagedObjects({ collection, objects, req }),
     req,
     stage: ({ trackStagedObject }) =>
       stageLocalUploadFiles({
@@ -67,8 +69,7 @@ export const runLocalFileUpdate = async <T>({
         staticDir: collection.upload.staticDir!,
         trackStagedObject,
       }),
-    tracksDocumentPersistence: true,
-    write: async ({ onDocumentPersisted, trackStagedObject }) => {
+    write: async ({ trackStagedObject }) => {
       await archiveOutgoingLocalFiles({
         id,
         collection,
@@ -78,7 +79,7 @@ export const runLocalFileUpdate = async <T>({
         trackStagedObject,
       })
 
-      const result = await write({ onDocumentPersisted })
+      const result = await write()
 
       await scheduleUnreferencedFileCleanup({
         candidates: getOutgoingLocalFiles({

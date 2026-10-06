@@ -21,13 +21,10 @@ type RequestState = {
 }
 
 type RunFileOperationPlanArgs<T> = {
+  cleanupStagedAfterWriteFailure?: (objects: StagedObject[]) => Promise<void>
   req: PayloadRequest
   stage: (args: { trackStagedObject: (object: StagedObject) => void }) => Promise<void>
-  tracksDocumentPersistence?: boolean
-  write: (args: {
-    onDocumentPersisted: () => void
-    trackStagedObject: (object: StagedObject) => void
-  }) => Promise<T>
+  write: (args: { trackStagedObject: (object: StagedObject) => void }) => Promise<T>
 }
 
 const requests = new WeakMap<PayloadRequest, RequestState>()
@@ -87,14 +84,13 @@ export const deferFileCleanup = async ({
 
 /** Stages owned objects before writing document or version data. */
 export const runFileOperationPlan = async <T>({
+  cleanupStagedAfterWriteFailure,
   req,
   stage,
-  tracksDocumentPersistence,
   write,
 }: RunFileOperationPlanArgs<T>): Promise<T> => {
   const requestState = getRequestState({ req })
   const attempt: Attempt = { staged: new Map() }
-  let hasDocumentPersisted = false
   let hasStartedWrite = false
   let hasSucceeded = false
   const trackStagedObject = createStagedObjectTracker({ attempt })
@@ -105,25 +101,26 @@ export const runFileOperationPlan = async <T>({
     await stage({ trackStagedObject })
 
     hasStartedWrite = true
-    const result = await write({
-      onDocumentPersisted: () => {
-        hasDocumentPersisted = true
-      },
-      trackStagedObject,
-    })
+    const result = await write({ trackStagedObject })
 
     requestState.pending.push(attempt)
     hasSucceeded = true
 
     return result
   } catch (err) {
-    if (
-      !hasStartedWrite ||
-      (!req.transactionID && tracksDocumentPersistence && !hasDocumentPersisted)
-    ) {
+    if (!hasStartedWrite) {
       await compensate({ attempt, req })
     } else if (req.transactionID) {
       requestState.pending.push({ staged: attempt.staged })
+    } else if (cleanupStagedAfterWriteFailure && attempt.staged.size) {
+      try {
+        await cleanupStagedAfterWriteFailure([...attempt.staged.values()].reverse())
+      } catch (cleanupError) {
+        req.payload.logger.error({
+          err: cleanupError,
+          msg: 'Failed to clean up staged upload files after a document write failure',
+        })
+      }
     }
 
     throw err

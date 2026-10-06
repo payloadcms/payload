@@ -3,6 +3,7 @@ import path from 'node:path'
 
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { JsonObject, PayloadRequest, Where } from '../../types/index.js'
+import type { StagedObject } from './fileOperationManager.js'
 import type { StoredFile, StoredFileList } from './types.js'
 
 import { deferFileCleanup } from './fileOperationManager.js'
@@ -113,6 +114,39 @@ export const scheduleUnreferencedFileCleanup = async ({
     },
     req,
   })
+}
+
+/** Removes objects staged by a failed write unless a persisted document or version references them. */
+export const removeUnreferencedStagedObjects = async ({
+  collection,
+  objects,
+  req,
+}: {
+  collection: SanitizedCollectionConfig
+  objects: StagedObject[]
+  req: PayloadRequest
+}): Promise<void> => {
+  const unreferenced = await findUnreferenced({
+    candidates: objects.map(({ key }) => ({ key, roles: [] })),
+    collection,
+    req,
+  })
+  const identities = new Set(unreferenced.map(getStoredFileIdentity))
+
+  for (const object of objects) {
+    if (!identities.has(getStoredFileIdentity(object))) {
+      continue
+    }
+
+    try {
+      await object.remove()
+    } catch (err) {
+      req.payload.logger.error({
+        err,
+        msg: `Failed to remove staged upload file ${object.key}`,
+      })
+    }
+  }
 }
 
 const findUnreferenced = async ({

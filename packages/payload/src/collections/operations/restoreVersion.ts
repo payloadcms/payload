@@ -330,7 +330,7 @@ export const restoreVersionOperation = async <
     result.updatedAt = new Date().toISOString()
     // Ensure status respects restoreAsDraft arg
     result._status = draftArg ? 'draft' : result._status
-    const writeRestoredVersion = async (restored: JsonObject, onDocumentPersisted?: () => void) => {
+    const writeRestoredVersion = async (restored: JsonObject) => {
       if (collectionConfig.upload) {
         result = restoreUploadDataFromDocument(result, restored, { clearMissing: true })
       }
@@ -342,7 +342,6 @@ export const restoreVersionOperation = async <
           req: reqWithValidationLocale,
           select,
         })
-        onDocumentPersisted?.()
       }
 
       const savedVersion = await saveVersion({
@@ -356,11 +355,6 @@ export const restoreVersionOperation = async <
         req: reqWithValidationLocale,
         select,
       })
-
-      if (draftArg) {
-        onDocumentPersisted?.()
-      }
-
       return savedVersion
     }
 

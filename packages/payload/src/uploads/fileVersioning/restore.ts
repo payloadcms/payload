@@ -8,7 +8,7 @@ import type { StoredFileList } from './types.js'
 
 import { APIError } from '../../errors/APIError.js'
 import { archiveOutgoingLocalFiles, replaceStoredFileReferences } from './archive.js'
-import { scheduleUnreferencedFileCleanup } from './cleanup.js'
+import { removeUnreferencedStagedObjects, scheduleUnreferencedFileCleanup } from './cleanup.js'
 import { runFileOperationPlan } from './fileOperationManager.js'
 import { copyLocalFile } from './localStorage.js'
 import { getArchivedFilename } from './naming.js'
@@ -32,7 +32,7 @@ export const runStoredFileRestore = async <T>({
   id: number | string
   req: PayloadRequest
   selected: JsonObject
-  write: (restored: JsonObject, onDocumentPersisted?: () => void) => Promise<T>
+  write: (restored: JsonObject) => Promise<T>
 }): Promise<T> => {
   const stored = withLegacyUploadFileData({
     collection,
@@ -104,6 +104,8 @@ export const runStoredFileRestore = async <T>({
   let restored: JsonObject = selectedForCurrent
 
   return runFileOperationPlan({
+    cleanupStagedAfterWriteFailure: (objects) =>
+      removeUnreferencedStagedObjects({ collection, objects, req }),
     req,
     stage: async ({ trackStagedObject }) => {
       for (const file of storedFiles) {
@@ -139,8 +141,7 @@ export const runStoredFileRestore = async <T>({
           version: selectedForCurrent,
         }) ?? selectedForCurrent
     },
-    tracksDocumentPersistence: true,
-    write: async ({ onDocumentPersisted, trackStagedObject }) => {
+    write: async ({ trackStagedObject }) => {
       if (staticDir && !collection.upload.disableLocalStorage) {
         await archiveOutgoingLocalFiles({
           id,
@@ -152,7 +153,7 @@ export const runStoredFileRestore = async <T>({
         })
       }
 
-      const result = await write(restored, onDocumentPersisted)
+      const result = await write(restored)
 
       await scheduleUnreferencedFileCleanup({
         candidates: currentFiles,

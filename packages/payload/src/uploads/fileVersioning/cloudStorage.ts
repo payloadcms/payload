@@ -5,6 +5,7 @@ import type { FileToSave } from '../types.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 import {
   collectStoredFiles as collectSavedFiles,
+  removeUnreferencedStagedObjects,
   scheduleUnreferencedFileCleanup,
 } from './cleanup.js'
 import { runFileCreationPlan, runFileOperationPlan } from './fileOperationManager.js'
@@ -77,7 +78,7 @@ export const runCloudFileUpdate = async <T>({
   files: FileToSave[]
   id: number | string
   req: PayloadRequest
-  write: (args?: { onDocumentPersisted?: () => void }) => Promise<T>
+  write: () => Promise<T>
 }): Promise<T> => {
   const operations = collection.upload.fileOperations
   const storedCurrent = operations
@@ -106,6 +107,8 @@ export const runCloudFileUpdate = async <T>({
   let metadata: Record<string, unknown> = {}
 
   return runFileOperationPlan({
+    cleanupStagedAfterWriteFailure: (objects) =>
+      removeUnreferencedStagedObjects({ collection, objects, req }),
     req,
     stage: async ({ trackStagedObject }) => {
       if (files.length === 0 && !req.context?._payloadVerifiedProviderOriginal) {
@@ -120,8 +123,7 @@ export const runCloudFileUpdate = async <T>({
       metadata = staged.metadata
       Object.assign(data, metadata)
     },
-    tracksDocumentPersistence: true,
-    write: async ({ onDocumentPersisted }) => {
+    write: async () => {
       if (
         collection.versions &&
         !hasStoredOriginal({ doc: current }) &&
@@ -133,7 +135,7 @@ export const runCloudFileUpdate = async <T>({
       const result = await withCloudHookGuard({
         metadata,
         req,
-        write: () => write({ onDocumentPersisted }),
+        write,
       })
 
       await scheduleUnreferencedFileCleanup({

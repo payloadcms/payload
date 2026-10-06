@@ -344,8 +344,7 @@ export const updateByIDOperation = async <
       unpublishAllLocales,
     } as const
 
-    const write = ({ onDocumentPersisted }: { onDocumentPersisted?: () => void } = {}) =>
-      updateDocument<TSlug, TSelect>({ ...updateArgs, onDocumentPersisted })
+    const write = () => updateDocument<TSlug, TSelect>(updateArgs)
     let result = collectionConfig.upload.fileOperations
       ? await runCloudFileUpdate({
           id,

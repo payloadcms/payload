@@ -10,7 +10,10 @@ import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { replaceStoredFileReferences } from '../../uploads/fileVersioning/archive.js'
-import { scheduleUnreferencedFileCleanup } from '../../uploads/fileVersioning/cleanup.js'
+import {
+  removeUnreferencedStagedObjects,
+  scheduleUnreferencedFileCleanup,
+} from '../../uploads/fileVersioning/cleanup.js'
 import {
   abortFileOperationScope,
   beginFileOperationScope,
@@ -192,6 +195,8 @@ export const renameFileOperation = async (
       }
     }
     const result = await runFileOperationPlan({
+      cleanupStagedAfterWriteFailure: (objects) =>
+        removeUnreferencedStagedObjects({ collection: collection.config, objects, req }),
       req,
       stage: async ({ trackStagedObject }) => {
         if (hasNativeMove) {
@@ -227,8 +232,7 @@ export const renameFileOperation = async (
           }
         }
       },
-      tracksDocumentPersistence: true,
-      write: async ({ onDocumentPersisted, trackStagedObject }) => {
+      write: async ({ trackStagedObject }) => {
         if (hasNativeMove) {
           await moveFiles({ trackStagedObject })
         }
@@ -272,7 +276,6 @@ export const renameFileOperation = async (
           fallbackLocale: req.fallbackLocale!,
           filesToUpload: [],
           locale: req.locale!,
-          onDocumentPersisted,
           overrideAccess,
           overrideLock: false,
           payload: req.payload,
