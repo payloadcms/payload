@@ -35,7 +35,6 @@ export async function getLayoutData({
   const { permissions, req, user } = context
 
   const data = await getRootLayoutData({
-    clientConfigUser: user ?? true,
     context,
     importMap,
   })
