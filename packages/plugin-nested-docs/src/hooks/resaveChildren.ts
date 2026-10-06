@@ -16,10 +16,15 @@ export const resaveChildren =
 
     const parentSlug = pluginConfig?.parentFieldSlug || 'parent'
 
+    // Read the children in this locale only. With the locale fallback, a child that has no
+    // breadcrumbs in this locale yet would come back with another locale's rows, row ids
+    // included, and writing them back here duplicates those ids (and copies that locale's
+    // other values into this one). See #16054.
     const initialDraftChildren = await req.payload.find({
       collection: collection.slug,
       depth: 0,
       draft: true,
+      fallbackLocale: false,
       limit: 0,
       locale: req.locale,
       req,
@@ -36,6 +41,7 @@ export const resaveChildren =
       collection: collection.slug,
       depth: 0,
       draft: false,
+      fallbackLocale: false,
       limit: 0,
       locale: req.locale,
       req,
