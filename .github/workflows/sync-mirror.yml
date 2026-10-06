@@ -12,13 +12,14 @@ jobs:
   dispatch-sync:
     if: ${{ github.repository == 'payloadcms/payload' }}
     runs-on: ubuntu-latest
+    environment: mirror-dispatch
     steps:
       - name: Require mirror target
         env:
           MIRROR_REPO: ${{ secrets.MIRROR_REPO }}
         run: |
           if [[ ! "$MIRROR_REPO" =~ ^[A-Za-z0-9-]+/[A-Za-z0-9._-]+$ ]]; then
-            echo 'MIRROR_REPO secret must be set to owner/repo' >&2
+            echo 'MIRROR_REPO secret in the mirror-dispatch environment must be set to owner/repo' >&2
             exit 1
           fi
 
