@@ -314,6 +314,7 @@ export function DefaultListView(props: ListViewClientProps) {
               }
               disableBulkDelete={disableBulkDelete}
               disableBulkEdit={disableBulkEdit}
+              enableRowSelections={enableRowSelections}
               hasCreatePermission={hasCreatePermission}
               hasDeletePermission={hasDeletePermission}
               hasTrashPermission={hasTrashPermission}
