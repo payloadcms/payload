@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
+import { runTransformReadsRealSourceTest } from '../__helpers/shared/transformSourceTests.js'
 import {
   mediaSlug,
   mediaWithAlwaysInsertFieldsSlug,
@@ -165,16 +166,16 @@ test.suite('@payloadcms/storage-vercel-blob', { config: './config.ts' }, () => {
         overrideAccess: true,
       })
 
-      expect(upload.sizes?.thumbnail?.url).toContain(process.env.STORAGE_VERCEL_BLOB_BASE_URL)
-      expect(upload.sizes?.thumbnail?.url).not.toMatch(/^\/api\//)
+      expect(upload.variants?.thumbnail?.url).toContain(process.env.STORAGE_VERCEL_BLOB_BASE_URL)
+      expect(upload.variants?.thumbnail?.url).not.toMatch(/^\/api\//)
 
       const dbDoc = await payload.db.findOne({
         collection: mediaWithDirectAccessSlug,
         where: { id: { equals: upload.id } },
       })
 
-      expect(dbDoc?.sizes?.thumbnail?.url).toContain(process.env.STORAGE_VERCEL_BLOB_BASE_URL)
-      expect(dbDoc?.sizes?.thumbnail?.url).not.toMatch(/^\/api\//)
+      expect(dbDoc?.variants?.thumbnail?.url).toContain(process.env.STORAGE_VERCEL_BLOB_BASE_URL)
+      expect(dbDoc?.variants?.thumbnail?.url).not.toMatch(/^\/api\//)
     })
 
     test('should return direct blob URL with encoded filename for file with spaces', async ({
@@ -310,4 +311,6 @@ test.suite('@payloadcms/storage-vercel-blob', { config: './config.ts' }, () => {
       expect(tenantBUpload.prefix).toBe('tenant-b')
     })
   })
+
+  runTransformReadsRealSourceTest({ collection: mediaWithPrefixSlug })
 })
