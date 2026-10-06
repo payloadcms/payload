@@ -416,7 +416,7 @@ export const updateByIDOperation = async <
     })
     await killTransaction(args.req)
     if (hasFileOperationScope) {
-      abortFileOperationScope({ req: args.req })
+      await abortFileOperationScope({ req: args.req })
     }
     throw error
   }

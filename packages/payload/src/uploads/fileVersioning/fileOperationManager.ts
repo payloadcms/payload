@@ -4,6 +4,8 @@ import path from 'node:path'
 import type { PayloadRequest } from '../../types/index.js'
 import type { FileToSave } from '../types.js'
 
+import { hasActiveTransaction } from '../../utilities/initTransaction.js'
+
 export type StagedObject = {
   key: string
   remove: () => Promise<void>
@@ -11,6 +13,7 @@ export type StagedObject = {
 
 type Attempt = {
   cleanup?: () => Promise<void>
+  cleanupStagedAfterWriteFailure?: (objects: StagedObject[]) => Promise<void>
   staged: Map<string, StagedObject>
 }
 
@@ -46,13 +49,12 @@ export const completeFileOperationScope = async ({
   }
 
   state.depth -= 1
-
-  if (state.depth === 0 && (!req.transactionID || state.isCommitted)) {
+  if (state.depth === 0 && (!(await hasActiveTransaction({ req })) || state.isCommitted)) {
     await flushCleanup({ req, state })
   }
 }
 
-export const abortFileOperationScope = ({ req }: { req: PayloadRequest }): void => {
+export const abortFileOperationScope = async ({ req }: { req: PayloadRequest }): Promise<void> => {
   const state = requests.get(req)
 
   if (!state) {
@@ -61,8 +63,8 @@ export const abortFileOperationScope = ({ req }: { req: PayloadRequest }): void 
 
   state.depth -= 1
 
-  if (state.depth === 0 && !req.transactionID) {
-    requests.delete(req)
+  if (state.depth === 0 && !(await hasActiveTransaction({ req }))) {
+    await reconcileFailedAttempts({ req, state })
   }
 }
 
@@ -76,8 +78,7 @@ export const deferFileCleanup = async ({
 }): Promise<void> => {
   const state = getRequestState({ req })
   state.pending.push({ cleanup, staged: new Map() })
-
-  if (state.depth === 0 && (!req.transactionID || state.isCommitted)) {
+  if (state.depth === 0 && (!(await hasActiveTransaction({ req })) || state.isCommitted)) {
     await flushCleanup({ req, state })
   }
 }
@@ -90,7 +91,7 @@ export const runFileOperationPlan = async <T>({
   write,
 }: RunFileOperationPlanArgs<T>): Promise<T> => {
   const requestState = getRequestState({ req })
-  const attempt: Attempt = { staged: new Map() }
+  const attempt: Attempt = { cleanupStagedAfterWriteFailure, staged: new Map() }
   let hasStartedWrite = false
   let hasSucceeded = false
   const trackStagedObject = createStagedObjectTracker({ attempt })
@@ -110,17 +111,10 @@ export const runFileOperationPlan = async <T>({
   } catch (err) {
     if (!hasStartedWrite) {
       await compensate({ attempt, req })
-    } else if (req.transactionID) {
+    } else if (await hasActiveTransaction({ req })) {
       requestState.pending.push({ staged: attempt.staged })
-    } else if (cleanupStagedAfterWriteFailure && attempt.staged.size) {
-      try {
-        await cleanupStagedAfterWriteFailure([...attempt.staged.values()].reverse())
-      } catch (cleanupError) {
-        req.payload.logger.error({
-          err: cleanupError,
-          msg: 'Failed to clean up staged upload files after a document write failure',
-        })
-      }
+    } else {
+      await cleanupStagedObjectsAfterWriteFailure({ attempt, req })
     }
 
     throw err
@@ -131,16 +125,18 @@ export const runFileOperationPlan = async <T>({
 
 /** Creates use the same rollback and outer-scope compensation without an existing document. */
 export const runFileCreationPlan = async <T>({
+  cleanupStagedAfterWriteFailure,
   req,
   stage,
   write,
 }: {
+  cleanupStagedAfterWriteFailure?: (objects: StagedObject[]) => Promise<void>
   req: PayloadRequest
   stage: (args: { trackStagedObject: (object: StagedObject) => void }) => Promise<void>
   write: () => Promise<T>
 }): Promise<T> => {
   const requestState = getRequestState({ req })
-  const attempt: Attempt = { staged: new Map() }
+  const attempt: Attempt = { cleanupStagedAfterWriteFailure, staged: new Map() }
   let hasStartedWrite = false
   let hasSucceeded = false
   const trackStagedObject = createStagedObjectTracker({ attempt })
@@ -157,10 +153,12 @@ export const runFileCreationPlan = async <T>({
     hasSucceeded = true
     return result
   } catch (err) {
-    if (!hasStartedWrite || !req.transactionID) {
+    if (!hasStartedWrite) {
       await compensate({ attempt, req })
-    } else if (req.transactionID) {
+    } else if (await hasActiveTransaction({ req })) {
       requestState.pending.push(attempt)
+    } else {
+      await cleanupStagedObjectsAfterWriteFailure({ attempt, req })
     }
     throw err
   } finally {
@@ -233,7 +231,6 @@ export const rollbackFileOperations = async ({ req }: { req: PayloadRequest }): 
   }
 
   requests.delete(req)
-
   for (const attempt of state.pending.reverse()) {
     await compensate({ attempt, req })
   }
@@ -272,9 +269,9 @@ const finishFileOperation = async ({
   state.depth -= 1
 
   if (state.depth === 0) {
-    if (hasSucceeded && (!req.transactionID || state.isCommitted)) {
+    if (hasSucceeded && (!(await hasActiveTransaction({ req })) || state.isCommitted)) {
       await flushCleanup({ req, state })
-    } else if (!req.transactionID) {
+    } else if (!(await hasActiveTransaction({ req }))) {
       requests.delete(req)
     }
   }
@@ -287,7 +284,7 @@ const flushCleanup = async ({
   req: PayloadRequest
   state: RequestState
 }): Promise<void> => {
-  if (req.transactionID && !state.isCommitted) {
+  if ((await hasActiveTransaction({ req })) && !state.isCommitted) {
     return
   }
 
@@ -303,6 +300,41 @@ const flushCleanup = async ({
     } catch (err) {
       req.payload.logger.error({ err, msg: 'Failed to clean up an unreferenced upload file' })
     }
+  }
+}
+
+const reconcileFailedAttempts = async ({
+  req,
+  state,
+}: {
+  req: PayloadRequest
+  state: RequestState
+}): Promise<void> => {
+  requests.delete(req)
+
+  for (const attempt of state.pending) {
+    await cleanupStagedObjectsAfterWriteFailure({ attempt, req })
+  }
+}
+
+const cleanupStagedObjectsAfterWriteFailure = async ({
+  attempt,
+  req,
+}: {
+  attempt: Attempt
+  req: PayloadRequest
+}): Promise<void> => {
+  if (!attempt.cleanupStagedAfterWriteFailure || !attempt.staged.size) {
+    return
+  }
+
+  try {
+    await attempt.cleanupStagedAfterWriteFailure([...attempt.staged.values()].reverse())
+  } catch (err) {
+    req.payload.logger.error({
+      err,
+      msg: 'Failed to reconcile staged upload files after an operation failure',
+    })
   }
 }
 

@@ -41,6 +41,8 @@ export const runCloudFileCreation = async <T>({
   let metadata: Record<string, unknown> = {}
 
   return runFileCreationPlan({
+    cleanupStagedAfterWriteFailure: (objects) =>
+      removeUnreferencedStagedObjects({ collection, objects, req }),
     req,
     stage: async ({ trackStagedObject }) => {
       const staged = await operations.stage({

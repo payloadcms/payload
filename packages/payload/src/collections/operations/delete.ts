@@ -363,7 +363,7 @@ export const deleteOperation = async <
       } catch (error) {
         await killTransaction(req)
         if (hasIndividualFileScope) {
-          abortFileOperationScope({ req })
+          await abortFileOperationScope({ req })
         }
         pushError(doc.id, error)
 
@@ -572,7 +572,7 @@ export const deleteOperation = async <
   } catch (error: unknown) {
     await killTransaction(args.req)
     if (hasFileOperationScope) {
-      abortFileOperationScope({ req: args.req })
+      await abortFileOperationScope({ req: args.req })
     }
     throw error
   } finally {

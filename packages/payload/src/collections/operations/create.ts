@@ -27,6 +27,7 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { saveVersion } from '../../index.js'
+import { removeUnreferencedStagedObjects } from '../../uploads/fileVersioning/cleanup.js'
 import { runCloudFileCreation } from '../../uploads/fileVersioning/cloudStorage.js'
 import {
   abortFileOperationScope,
@@ -507,6 +508,8 @@ export const createOperation = async <
       })
     } else if (hasManagedLocalUpload) {
       doc = await runFileCreationPlan({
+        cleanupStagedAfterWriteFailure: (objects) =>
+          removeUnreferencedStagedObjects({ collection: collectionConfig, objects, req }),
         req,
         stage: ({ trackStagedObject }) =>
           stageLocalUploadFiles({
@@ -679,7 +682,7 @@ export const createOperation = async <
     })
     await killTransaction(args.req)
     if (hasFileOperationScope) {
-      abortFileOperationScope({ req: args.req })
+      await abortFileOperationScope({ req: args.req })
     }
     throw error
   } finally {

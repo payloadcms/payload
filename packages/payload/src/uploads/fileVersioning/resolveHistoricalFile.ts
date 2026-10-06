@@ -99,8 +99,26 @@ const resolveVersionFile = async ({
     (file) =>
       path.posix.basename(file.key) === filename &&
       (!prefix ||
-        file.key === `${prefix}/${filename}` ||
-        file.key.endsWith(`/${prefix}/${filename}`)),
+        file.roles.some((role) => {
+          let representation: unknown
+
+          if (role.type === 'size') {
+            const variants =
+              saved.variants && typeof saved.variants === 'object' && !Array.isArray(saved.variants)
+                ? (saved.variants as Record<string, unknown>)
+                : undefined
+            representation = variants?.[role.sizeKey]
+          } else {
+            representation = role.type === 'original' ? saved.original : saved
+          }
+
+          return (
+            representation &&
+            typeof representation === 'object' &&
+            !Array.isArray(representation) &&
+            ((representation as Record<string, unknown>).prefix ?? saved.prefix) === prefix
+          )
+        })),
   )
 
   if (!hasFile) {

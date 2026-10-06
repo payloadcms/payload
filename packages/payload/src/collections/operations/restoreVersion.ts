@@ -466,7 +466,7 @@ export const restoreVersionOperation = async <
   } catch (error: unknown) {
     await killTransaction(req)
     if (hasFileOperationScope) {
-      abortFileOperationScope({ req })
+      await abortFileOperationScope({ req })
     }
     throw error
   }

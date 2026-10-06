@@ -28,7 +28,7 @@ import {
   withLegacyCloudUploadFileData,
 } from '../../uploads/fileVersioning/storedFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
-import { initTransaction } from '../../utilities/initTransaction.js'
+import { hasActiveTransaction, initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
@@ -165,9 +165,10 @@ export const renameFileOperation = async (
     }
 
     const staticDir = collection.config.upload.staticDir
+    const hasTransaction = await hasActiveTransaction({ req })
     const hasNativeMove =
       !collection.config.versions &&
-      Boolean(req.transactionID) &&
+      hasTransaction &&
       (operations ? Boolean(operations.move) : Boolean(staticDir))
     const moveFiles = async ({
       trackStagedObject,
@@ -310,7 +311,7 @@ export const renameFileOperation = async (
     return finalResult as JsonObject
   } catch (err) {
     await killTransaction(req)
-    abortFileOperationScope({ req })
+    await abortFileOperationScope({ req })
     throw err
   }
 }
