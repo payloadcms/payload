@@ -2,7 +2,6 @@ import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
 import type {
   AdminContext,
   ClientConfig,
-  CreateClientConfigArgs,
   ImportMap,
   LanguageOptions,
   SanitizedPermissions,
@@ -42,16 +41,23 @@ export type RootLayoutData = {
 }
 
 type Args = {
-  /** Overrides client-config visibility without changing the authenticated user. */
-  clientConfigUser?: CreateClientConfigArgs['user']
-  context: AdminContext
+  cookies: AdminContext['cookies']
+  headers: AdminContext['headers']
   importMap: ImportMap
+  languageCode: AdminContext['languageCode']
+  permissions: AdminContext['permissions']
+  req: AdminContext['req']
+  user: AdminContext['user']
 }
 
 export async function getRootLayoutData({
-  clientConfigUser,
-  context: { cookies, headers, languageCode, permissions, req, user },
+  cookies,
+  headers,
   importMap,
+  languageCode,
+  permissions,
+  req,
+  user,
 }: Args): Promise<RootLayoutData> {
   const { config } = req.payload
   const { theme, themeSource } = getRequestTheme({ config, cookies, headers })
@@ -69,7 +75,7 @@ export async function getRootLayoutData({
     config,
     i18n: req.i18n,
     importMap,
-    user: clientConfigUser === undefined ? user : clientConfigUser,
+    user,
   })
 
   await applyLocaleFiltering({ clientConfig, config, req })
