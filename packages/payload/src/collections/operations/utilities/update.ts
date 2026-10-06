@@ -60,6 +60,7 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   filesToUpload: FileToSave[]
   id: number | string
   locale: string
+  onDocumentPersisted?: () => void
   overrideLock: boolean
   payload: Payload
   populate?: PopulateType
@@ -98,6 +99,7 @@ export const updateDocument = async <
   fallbackLocale,
   filesToUpload,
   locale,
+  onDocumentPersisted,
   overrideAccess,
   overrideLock,
   payload,
@@ -483,6 +485,8 @@ export const updateDocument = async <
         req,
       })
     }
+
+    onDocumentPersisted?.()
   }
 
   // /////////////////////////////////////
@@ -501,6 +505,10 @@ export const updateDocument = async <
       req,
       unpublish: unpublishAllLocales,
     })
+
+    if (isSavingDraft) {
+      onDocumentPersisted?.()
+    }
   }
 
   // /////////////////////////////////////

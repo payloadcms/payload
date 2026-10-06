@@ -32,7 +32,7 @@ export const runStoredFileRestore = async <T>({
   id: number | string
   req: PayloadRequest
   selected: JsonObject
-  write: (restored: JsonObject) => Promise<T>
+  write: (restored: JsonObject, onDocumentPersisted?: () => void) => Promise<T>
 }): Promise<T> => {
   const stored = withLegacyUploadFileData({
     collection,
@@ -139,7 +139,8 @@ export const runStoredFileRestore = async <T>({
           version: selectedForCurrent,
         }) ?? selectedForCurrent
     },
-    write: async ({ trackStagedObject }) => {
+    tracksDocumentPersistence: true,
+    write: async ({ onDocumentPersisted, trackStagedObject }) => {
       if (staticDir && !collection.upload.disableLocalStorage) {
         await archiveOutgoingLocalFiles({
           id,
@@ -151,7 +152,7 @@ export const runStoredFileRestore = async <T>({
         })
       }
 
-      const result = await write(restored)
+      const result = await write(restored, onDocumentPersisted)
 
       await scheduleUnreferencedFileCleanup({
         candidates: currentFiles,

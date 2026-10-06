@@ -27,7 +27,7 @@ export function generateFilePathOrURL({
   urlOrPath: string | undefined
 }): null | string {
   if (urlOrPath) {
-    if (!urlOrPath.startsWith('/') && !urlOrPath.startsWith(serverURL || '')) {
+    if (!urlOrPath.startsWith('/') && (!serverURL || !urlOrPath.startsWith(serverURL))) {
       // external url
       return urlOrPath
     }

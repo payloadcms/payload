@@ -9,6 +9,7 @@ interface Args {
   collection: CollectionConfig
   disablePayloadAccessControl?: boolean
   generateFileURL?: GenerateFileURL
+  isOriginal?: boolean
   size?: ImageSize
 }
 
@@ -28,10 +29,17 @@ const getObjectFolder = (data: unknown): string => {
 }
 
 export const getAfterReadHook =
-  ({ adapter, collection, disablePayloadAccessControl, generateFileURL, size }: Args): FieldHook =>
+  ({
+    adapter,
+    collection,
+    disablePayloadAccessControl,
+    generateFileURL,
+    isOriginal,
+    size,
+  }: Args): FieldHook =>
   async ({ data, value }) => {
-    const filename = size ? data?.variants?.[size.name]?.filename : data?.filename
-    const representation = size ? data?.variants?.[size.name] : data
+    const representation = isOriginal ? data?.original : size ? data?.variants?.[size.name] : data
+    const filename = representation?.filename
     const prefix = representation?.prefix ?? data?.prefix
     // Direct-serve URLs encode the full location; the proxy resolves `_objectKey` server-side.
     const objectFolder = getObjectFolder({
@@ -42,19 +50,23 @@ export const getAfterReadHook =
 
     if (filename) {
       if (generateFileURL) {
-        url = await generateFileURL({
-          collection,
-          filename,
-          prefix: objectFolder,
-          size,
-        })
+        if (!url) {
+          url = await generateFileURL({
+            collection,
+            filename,
+            prefix: objectFolder,
+            size,
+          })
+        }
       } else if (disablePayloadAccessControl && adapter.generateURL) {
-        url = await adapter.generateURL({
-          collection,
-          data,
-          filename,
-          prefix: objectFolder,
-        })
+        if (!url) {
+          url = await adapter.generateURL({
+            collection,
+            data,
+            filename,
+            prefix: objectFolder,
+          })
+        }
       } else if (url && prefix) {
         url = appendProxyPrefix({ prefix, url })
       }

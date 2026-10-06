@@ -23,7 +23,11 @@ type RequestState = {
 type RunFileOperationPlanArgs<T> = {
   req: PayloadRequest
   stage: (args: { trackStagedObject: (object: StagedObject) => void }) => Promise<void>
-  write: (args: { trackStagedObject: (object: StagedObject) => void }) => Promise<T>
+  tracksDocumentPersistence?: boolean
+  write: (args: {
+    onDocumentPersisted: () => void
+    trackStagedObject: (object: StagedObject) => void
+  }) => Promise<T>
 }
 
 const requests = new WeakMap<PayloadRequest, RequestState>()
@@ -85,10 +89,12 @@ export const deferFileCleanup = async ({
 export const runFileOperationPlan = async <T>({
   req,
   stage,
+  tracksDocumentPersistence,
   write,
 }: RunFileOperationPlanArgs<T>): Promise<T> => {
   const requestState = getRequestState({ req })
   const attempt: Attempt = { staged: new Map() }
+  let hasDocumentPersisted = false
   let hasStartedWrite = false
   let hasSucceeded = false
   const trackStagedObject = createStagedObjectTracker({ attempt })
@@ -99,14 +105,22 @@ export const runFileOperationPlan = async <T>({
     await stage({ trackStagedObject })
 
     hasStartedWrite = true
-    const result = await write({ trackStagedObject })
+    const result = await write({
+      onDocumentPersisted: () => {
+        hasDocumentPersisted = true
+      },
+      trackStagedObject,
+    })
 
     requestState.pending.push(attempt)
     hasSucceeded = true
 
     return result
   } catch (err) {
-    if (!hasStartedWrite) {
+    if (
+      !hasStartedWrite ||
+      (!req.transactionID && tracksDocumentPersistence && !hasDocumentPersisted)
+    ) {
       await compensate({ attempt, req })
     } else if (req.transactionID) {
       requestState.pending.push({ staged: attempt.staged })
@@ -146,7 +160,7 @@ export const runFileCreationPlan = async <T>({
     hasSucceeded = true
     return result
   } catch (err) {
-    if (!hasStartedWrite) {
+    if (!hasStartedWrite || !req.transactionID) {
       await compensate({ attempt, req })
     } else if (req.transactionID) {
       requestState.pending.push(attempt)

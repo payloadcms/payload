@@ -77,7 +77,7 @@ export const runCloudFileUpdate = async <T>({
   files: FileToSave[]
   id: number | string
   req: PayloadRequest
-  write: () => Promise<T>
+  write: (args?: { onDocumentPersisted?: () => void }) => Promise<T>
 }): Promise<T> => {
   const operations = collection.upload.fileOperations
   const storedCurrent = operations
@@ -120,7 +120,8 @@ export const runCloudFileUpdate = async <T>({
       metadata = staged.metadata
       Object.assign(data, metadata)
     },
-    write: async () => {
+    tracksDocumentPersistence: true,
+    write: async ({ onDocumentPersisted }) => {
       if (
         collection.versions &&
         !hasStoredOriginal({ doc: current }) &&
@@ -129,7 +130,11 @@ export const runCloudFileUpdate = async <T>({
         await persistLegacyCloudVersions({ id, collection, current: storedCurrent, req })
       }
 
-      const result = await withCloudHookGuard({ metadata, req, write })
+      const result = await withCloudHookGuard({
+        metadata,
+        req,
+        write: () => write({ onDocumentPersisted }),
+      })
 
       await scheduleUnreferencedFileCleanup({
         candidates: collectSavedFiles({ collection, doc: storedCurrent, req }),

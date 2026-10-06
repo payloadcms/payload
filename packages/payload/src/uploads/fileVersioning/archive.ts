@@ -44,7 +44,7 @@ export const runLocalFileUpdate = async <T>({
   id: number | string
   next: JsonObject
   req: PayloadRequest
-  write: () => Promise<T>
+  write: (args?: { onDocumentPersisted?: () => void }) => Promise<T>
 }): Promise<T> => {
   if (
     !hasLocalFileChange({
@@ -67,7 +67,8 @@ export const runLocalFileUpdate = async <T>({
         staticDir: collection.upload.staticDir!,
         trackStagedObject,
       }),
-    write: async ({ trackStagedObject }) => {
+    tracksDocumentPersistence: true,
+    write: async ({ onDocumentPersisted, trackStagedObject }) => {
       await archiveOutgoingLocalFiles({
         id,
         collection,
@@ -77,7 +78,7 @@ export const runLocalFileUpdate = async <T>({
         trackStagedObject,
       })
 
-      const result = await write()
+      const result = await write({ onDocumentPersisted })
 
       await scheduleUnreferencedFileCleanup({
         candidates: getOutgoingLocalFiles({

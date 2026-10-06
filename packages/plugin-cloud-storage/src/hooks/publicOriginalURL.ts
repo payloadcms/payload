@@ -22,6 +22,10 @@ export const getPublicOriginalURLHook =
       return doc
     }
 
+    if (upload.original?.url && !upload.original.url.startsWith('/')) {
+      return doc
+    }
+
     const prefix = buildPrefixWithObjectKey({
       objectKey: upload.original?._objectKey ?? upload._objectKey,
       prefix: upload.original?.prefix ?? upload.prefix,

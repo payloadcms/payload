@@ -434,7 +434,8 @@ export const updateOperation = async <
           showHiddenFields: showHiddenFields!,
           unpublishAllLocales,
         } as const
-        const write = () => updateDocument(updateArgs)
+        const write = ({ onDocumentPersisted }: { onDocumentPersisted?: () => void } = {}) =>
+          updateDocument({ ...updateArgs, onDocumentPersisted })
         let updatedDoc = collectionConfig.upload.fileOperations
           ? await runCloudFileUpdate({
               id,

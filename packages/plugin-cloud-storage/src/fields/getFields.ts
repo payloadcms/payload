@@ -61,6 +61,14 @@ export const getFields = ({
     hidden: true,
   }
 
+  const storedPrefixField: TextField = {
+    ...basePrefixField,
+    admin: {
+      ...basePrefixField.admin,
+      disabled: true,
+    },
+  }
+
   const fields = [...collection.fields, ...(adapter?.fields || [])]
 
   // Inject a hook into all URL fields to generate URLs
@@ -105,6 +113,60 @@ export const getFields = ({
       ...baseURLField,
       ...(existingURLField || {}),
     } as TextField)
+  }
+
+  let originalField = fields.find(
+    (field): field is GroupField =>
+      field.type === 'group' && 'name' in field && field.name === 'original',
+  )
+
+  if (adapter && !originalField) {
+    originalField = {
+      name: 'original',
+      type: 'group',
+      fields: [baseURLField],
+    }
+    fields.push(originalField)
+  }
+
+  const originalURLFieldIndex = originalField?.fields.findIndex(
+    (field) => 'name' in field && field.name === 'url',
+  )
+
+  if (
+    adapter &&
+    originalField &&
+    originalURLFieldIndex !== undefined &&
+    originalURLFieldIndex >= 0
+  ) {
+    const originalURLField = originalField.fields[originalURLFieldIndex] as TextField
+
+    originalField.fields[originalURLFieldIndex] = {
+      ...baseURLField,
+      ...originalURLField,
+      hooks: {
+        afterRead: [
+          getAfterReadHook({
+            adapter,
+            collection,
+            disablePayloadAccessControl,
+            generateFileURL,
+            isOriginal: true,
+          }),
+          ...(originalURLField.hooks?.afterRead || []),
+        ],
+        beforeChange: [
+          getBeforeChangeHook({
+            adapter,
+            collection,
+            disablePayloadAccessControl,
+            generateFileURL,
+            isOriginal: true,
+          }),
+          ...(originalURLField.hooks?.beforeChange || []),
+        ],
+      },
+    } as TextField
   }
 
   // Storage adapters add these fields during their `init`, after transformers (e.g. Sharp) have
@@ -194,7 +256,7 @@ export const getFields = ({
               (field) => !('name' in field && ['_objectKey', 'prefix'].includes(field.name)),
             ),
             sizeURLField,
-            basePrefixField,
+            storedPrefixField,
             baseObjectKeyField,
           ],
         } as Field

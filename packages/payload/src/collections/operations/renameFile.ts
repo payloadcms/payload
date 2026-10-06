@@ -227,7 +227,8 @@ export const renameFileOperation = async (
           }
         }
       },
-      write: async ({ trackStagedObject }) => {
+      tracksDocumentPersistence: true,
+      write: async ({ onDocumentPersisted, trackStagedObject }) => {
         if (hasNativeMove) {
           await moveFiles({ trackStagedObject })
         }
@@ -271,6 +272,7 @@ export const renameFileOperation = async (
           fallbackLocale: req.fallbackLocale!,
           filesToUpload: [],
           locale: req.locale!,
+          onDocumentPersisted,
           overrideAccess,
           overrideLock: false,
           payload: req.payload,
