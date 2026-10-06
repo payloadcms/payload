@@ -85,6 +85,7 @@ export const rootEslintConfig = [
     files: ['packages/ui/**/*.{ts,tsx}'],
     rules: {
       'no-console': 'error',
+      'payload/ui-folder-boundaries': 'error',
     },
   },
   {
