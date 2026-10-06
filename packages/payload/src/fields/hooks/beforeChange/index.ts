@@ -24,12 +24,15 @@ export type Args<T extends JsonObject> = {
   fieldsToValidate?: ReadonlySet<string>
   global: null | SanitizedGlobalConfig
   id?: number | string
+  /** Process every configured locale when restoring a snapshot that publishes them all. */
+  includeAllLocales?: boolean
   onDataProcessed?: (data: T) => void
   /** Retain locale validation until a document-wide publication status is final. */
   onDraftValidation?: (validate: () => Promise<void>) => void
   operation: Operation
   overrideAccess?: boolean
   req: PayloadRequest
+  skipFieldHooks?: boolean
   skipValidation?: boolean
   skipValidationByLocale?: Record<string, boolean>
   /** Validate an exempt draft if field hooks transition it to published. */
@@ -54,11 +57,13 @@ export const beforeChange = async <T extends JsonObject>({
   docWithLocales,
   fieldsToValidate: submittedTopLevelFieldNames,
   global,
+  includeAllLocales,
   onDataProcessed,
   onDraftValidation,
   operation,
   overrideAccess,
   req,
+  skipFieldHooks,
   skipValidation,
   skipValidationByLocale,
   validateDraftOnPublish,
@@ -70,7 +75,7 @@ export const beforeChange = async <T extends JsonObject>({
     let result: JsonObject = { ...docWithLocales }
     let locales = localization.locales
 
-    if (localization.filterAvailableLocales) {
+    if (!includeAllLocales && localization.filterAvailableLocales) {
       locales = await localization.filterAvailableLocales({ locales, req })
     }
 
@@ -105,6 +110,7 @@ export const beforeChange = async <T extends JsonObject>({
         operation,
         overrideAccess,
         req: localeReq,
+        skipFieldHooks,
         skipValidation: skipValidationByLocale?.[locale] ?? skipValidation,
         validateDraftOnPublish: validateDraftOnPublish || Boolean(skipValidationByLocale),
       })
@@ -158,6 +164,7 @@ export const beforeChange = async <T extends JsonObject>({
     siblingData: data,
     siblingDoc: doc,
     siblingDocWithLocales: docWithLocales,
+    skipFieldHooks,
     skipValidation,
     submittedTopLevelFieldNames,
   })

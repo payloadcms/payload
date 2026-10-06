@@ -16,6 +16,8 @@ type Args<T extends JsonObject> = {
   duplicate?: boolean
   global: null | SanitizedGlobalConfig
   id?: number | string
+  /** Process every configured locale when restoring a snapshot that publishes them all. */
+  includeAllLocales?: boolean
   onFieldAccess?: (args: { accessResult: boolean; path: string }) => void
   operation: 'create' | 'update'
   overrideAccess: boolean
@@ -38,6 +40,7 @@ export const beforeValidate = async <T extends JsonObject>({
   doc,
   docForHooks,
   global,
+  includeAllLocales,
   onFieldAccess,
   operation,
   overrideAccess,
@@ -50,7 +53,7 @@ export const beforeValidate = async <T extends JsonObject>({
     let result: JsonObject = doc ? { ...doc } : {}
     let locales = localization.locales
 
-    if (localization.filterAvailableLocales) {
+    if (!includeAllLocales && localization.filterAvailableLocales) {
       locales = await localization.filterAvailableLocales({ locales, req })
     }
 

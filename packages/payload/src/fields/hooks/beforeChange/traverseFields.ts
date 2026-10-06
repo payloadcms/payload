@@ -54,6 +54,7 @@ type Args = {
    * The original siblingData with locales (not modified by any hooks)
    */
   siblingDocWithLocales: JsonObject
+  skipFieldHooks?: boolean
   skipValidation?: boolean
   submittedTopLevelFieldNames?: ReadonlySet<string>
 }
@@ -90,6 +91,7 @@ export const traverseFields = async ({
   siblingData,
   siblingDoc,
   siblingDocWithLocales,
+  skipFieldHooks,
   skipValidation,
   submittedTopLevelFieldNames,
 }: Args): Promise<void> => {
@@ -123,6 +125,7 @@ export const traverseFields = async ({
         siblingDoc,
         siblingDocWithLocales,
         siblingFields: fields,
+        skipFieldHooks,
         skipValidation: skipValidation!,
         submittedTopLevelFieldNames,
       }),

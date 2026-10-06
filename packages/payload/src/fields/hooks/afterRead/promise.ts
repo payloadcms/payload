@@ -68,6 +68,7 @@ type Args = {
   showHiddenFields: boolean
   siblingDoc: JsonObject
   siblingFields?: (Field | TabAsField)[]
+  skipEditorHooks?: boolean
   triggerAccessControl?: boolean
   triggerHooks?: boolean
   version?: DocumentVersion
@@ -111,6 +112,7 @@ export const promise = async ({
   showHiddenFields,
   siblingDoc,
   siblingFields,
+  skipEditorHooks,
   triggerAccessControl = true,
   triggerHooks = true,
   version,
@@ -490,6 +492,7 @@ export const promise = async ({
             selectMode,
             showHiddenFields,
             siblingDoc: row || {},
+            skipEditorHooks,
             triggerAccessControl,
             triggerHooks,
             version,
@@ -525,6 +528,7 @@ export const promise = async ({
                 req,
                 showHiddenFields,
                 siblingDoc: (row as JsonObject) || {},
+                skipEditorHooks,
                 triggerAccessControl,
                 triggerHooks,
                 version,
@@ -590,6 +594,7 @@ export const promise = async ({
               selectMode: blockSelectMode,
               showHiddenFields,
               siblingDoc: (row as JsonObject) || {},
+              skipEditorHooks,
               triggerAccessControl,
               triggerHooks,
               version,
@@ -635,6 +640,7 @@ export const promise = async ({
                   req,
                   showHiddenFields,
                   siblingDoc: (row as JsonObject) || {},
+                  skipEditorHooks,
                   triggerAccessControl,
                   triggerHooks,
                   version,
@@ -682,6 +688,7 @@ export const promise = async ({
         selectMode,
         showHiddenFields,
         siblingDoc,
+        skipEditorHooks,
         triggerAccessControl,
         triggerHooks,
         version,
@@ -727,6 +734,7 @@ export const promise = async ({
               selectMode,
               showHiddenFields,
               siblingDoc: localizedData || {},
+              skipEditorHooks,
               triggerAccessControl,
               triggerHooks,
               version,
@@ -761,6 +769,7 @@ export const promise = async ({
             selectMode,
             showHiddenFields,
             siblingDoc: typeof siblingDoc[field.name] !== 'object' ? {} : siblingDoc[field.name],
+            skipEditorHooks,
             triggerAccessControl,
             triggerHooks,
             version,
@@ -795,6 +804,7 @@ export const promise = async ({
           selectMode,
           showHiddenFields,
           siblingDoc,
+          skipEditorHooks,
           triggerAccessControl,
           triggerHooks,
           version,
@@ -815,7 +825,7 @@ export const promise = async ({
 
       const editor: RichTextAdapter = field?.editor
 
-      if (editor?.hooks?.afterRead?.length) {
+      if (!skipEditorHooks && editor?.hooks?.afterRead?.length) {
         for (const hook of editor.hooks.afterRead) {
           if (shouldRunHookOnAllLocales) {
             const localesAndValues = Object.entries(siblingDoc[field.name])
@@ -941,6 +951,7 @@ export const promise = async ({
               selectMode,
               showHiddenFields,
               siblingDoc: localizedData || {},
+              skipEditorHooks,
               triggerAccessControl,
               triggerHooks,
               version,
@@ -975,6 +986,7 @@ export const promise = async ({
             selectMode,
             showHiddenFields,
             siblingDoc: typeof siblingDoc[field.name] !== 'object' ? {} : siblingDoc[field.name],
+            skipEditorHooks,
             triggerAccessControl,
             triggerHooks,
             version,
@@ -1009,6 +1021,7 @@ export const promise = async ({
           selectMode,
           showHiddenFields,
           siblingDoc: tabDoc,
+          skipEditorHooks,
           triggerAccessControl,
           triggerHooks,
           version,
@@ -1047,6 +1060,7 @@ export const promise = async ({
         selectMode,
         showHiddenFields,
         siblingDoc,
+        skipEditorHooks,
         triggerAccessControl,
         triggerHooks,
         version,

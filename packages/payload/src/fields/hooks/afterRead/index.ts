@@ -30,6 +30,10 @@ export type AfterReadArgs<T extends JsonObject> = {
   req: PayloadRequest
   select?: SelectType
   showHiddenFields: boolean
+  /** Skip editor read transformations when preparing raw snapshot validation. */
+  skipEditorHooks?: boolean
+  /** Control custom field read hooks. */
+  triggerHooks?: boolean
   version?: DocumentVersion
 }
 
@@ -61,6 +65,8 @@ export async function afterRead<T extends JsonObject>(args: AfterReadArgs<T>): P
     req,
     select,
     showHiddenFields,
+    skipEditorHooks,
+    triggerHooks,
     version,
   } = args
 
@@ -104,6 +110,8 @@ export async function afterRead<T extends JsonObject>(args: AfterReadArgs<T>): P
     selectMode: select ? getSelectMode(select) : undefined,
     showHiddenFields,
     siblingDoc: incomingDoc,
+    skipEditorHooks,
+    triggerHooks,
     version,
   })
 

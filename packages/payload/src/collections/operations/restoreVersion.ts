@@ -204,7 +204,9 @@ export const restoreVersionOperation = async <
 
     // originalDoc with hoisted localized data
     const validationLocale = payload.config.localization
-      ? payload.config.localization.defaultLocale
+      ? version === 'published'
+        ? 'all'
+        : payload.config.localization.defaultLocale
       : locale!
 
     const originalDoc = await afterRead({
@@ -273,6 +275,7 @@ export const restoreVersionOperation = async <
       data: deepCopyObjectSimple(prevVersionDoc),
       doc: originalDoc,
       global: null,
+      includeAllLocales: version === 'published',
       operation: 'update',
       overrideAccess,
       req: reqWithValidationLocale,
@@ -326,6 +329,7 @@ export const restoreVersionOperation = async <
       doc: originalDoc,
       docWithLocales: versionToRestoreWithLocales,
       global: null,
+      includeAllLocales: version === 'published',
       operation: 'update',
       overrideAccess,
       req: reqWithValidationLocale,

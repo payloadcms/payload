@@ -10,9 +10,12 @@ import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import { hasDraftsEnabled, hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
+import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
 import { getRestoredStatusesToAuthorize } from '../../versions/getRestoredStatusesToAuthorize.js'
@@ -168,6 +171,59 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     })
 
     let result = rawVersion.version
+
+    if (version === 'published') {
+      const validationReq = isolateObjectProperty(req, ['fallbackLocale', 'locale'])
+      validationReq.fallbackLocale = null
+      validationReq.locale = payload.config.localization ? 'all' : locale
+      const validationDoc = await afterRead({
+        collection: null,
+        context: req.context,
+        depth: 0,
+        doc: deepCopyObjectSimple(result),
+        draft: false,
+        fallbackLocale: null,
+        global: globalConfig,
+        locale: validationReq.locale!,
+        overrideAccess: true,
+        req: validationReq,
+        showHiddenFields: true,
+        skipEditorHooks: true,
+        triggerHooks: false,
+        version,
+      })
+
+      const validationPreviousDoc = await afterRead({
+        collection: null,
+        context: req.context,
+        depth: 0,
+        doc: deepCopyObjectSimple(global || {}),
+        draft: false,
+        fallbackLocale: null,
+        global: globalConfig,
+        locale: validationReq.locale!,
+        overrideAccess: true,
+        req: validationReq,
+        showHiddenFields: true,
+        skipEditorHooks: true,
+        triggerHooks: false,
+        version,
+      })
+
+      await beforeChange({
+        collection: null,
+        context: req.context,
+        data: validationDoc,
+        doc: validationPreviousDoc,
+        docWithLocales: result,
+        global: globalConfig,
+        includeAllLocales: true,
+        operation: 'update',
+        overrideAccess,
+        req: validationReq,
+        skipFieldHooks: true,
+      })
+    }
 
     result.updatedAt = new Date().toISOString()
 

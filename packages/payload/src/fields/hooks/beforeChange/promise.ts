@@ -59,6 +59,7 @@ type Args = {
   siblingDoc: JsonObject
   siblingDocWithLocales?: JsonObject
   siblingFields?: (Field | TabAsField)[]
+  skipFieldHooks?: boolean
   skipValidation: boolean
   submittedTopLevelFieldNames?: ReadonlySet<string>
 }
@@ -97,6 +98,7 @@ export const promise = async ({
   siblingDoc,
   siblingDocWithLocales,
   siblingFields,
+  skipFieldHooks,
   skipValidation,
   submittedTopLevelFieldNames,
 }: Args): Promise<void> => {
@@ -144,7 +146,7 @@ export const promise = async ({
     }
 
     // Execute hooks
-    if ('hooks' in field && field.hooks?.beforeChange) {
+    if (!skipFieldHooks && 'hooks' in field && field.hooks?.beforeChange) {
       for (const hook of field.hooks.beforeChange) {
         const hookedValue = await hook({
           blockData,
@@ -375,6 +377,7 @@ export const promise = async ({
                 row as JsonObject,
                 siblingDocWithLocales?.[field.name],
               ),
+              skipFieldHooks,
               skipValidation: skipValidationFromHere,
               submittedTopLevelFieldNames,
             }),
@@ -443,6 +446,7 @@ export const promise = async ({
                 siblingData: row as JsonObject,
                 siblingDoc: rowSiblingDoc,
                 siblingDocWithLocales: rowSiblingDocWithLocales,
+                skipFieldHooks,
                 skipValidation: skipValidationFromHere,
                 submittedTopLevelFieldNames,
               }),
@@ -488,6 +492,7 @@ export const promise = async ({
         siblingData,
         siblingDoc,
         siblingDocWithLocales: siblingDocWithLocales!,
+        skipFieldHooks,
         skipValidation: skipValidationFromHere,
         submittedTopLevelFieldNames,
       })
@@ -560,6 +565,7 @@ export const promise = async ({
         siblingData: groupSiblingData,
         siblingDoc: groupSiblingDoc,
         siblingDocWithLocales: groupSiblingDocWithLocales!,
+        skipFieldHooks,
         skipValidation: skipValidationFromHere,
         submittedTopLevelFieldNames,
       })
@@ -597,7 +603,7 @@ export const promise = async ({
 
       const editor: RichTextAdapter = field?.editor
 
-      if (editor?.hooks?.beforeChange?.length) {
+      if (!skipFieldHooks && editor?.hooks?.beforeChange?.length) {
         for (const hook of editor.hooks.beforeChange) {
           const hookedValue = await hook({
             collection,
@@ -695,6 +701,7 @@ export const promise = async ({
         siblingData: tabSiblingData,
         siblingDoc: tabSiblingDoc,
         siblingDocWithLocales: tabSiblingDocWithLocales!,
+        skipFieldHooks,
         skipValidation: skipValidationFromHere,
         submittedTopLevelFieldNames,
       })
@@ -730,6 +737,7 @@ export const promise = async ({
         siblingData,
         siblingDoc,
         siblingDocWithLocales: siblingDocWithLocales!,
+        skipFieldHooks,
         skipValidation: skipValidationFromHere,
         submittedTopLevelFieldNames,
       })

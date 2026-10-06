@@ -57,6 +57,7 @@ type Args = {
   selectMode?: SelectMode
   showHiddenFields: boolean
   siblingDoc: JsonObject
+  skipEditorHooks?: boolean
   triggerAccessControl?: boolean
   triggerHooks?: boolean
   version?: DocumentVersion
@@ -90,6 +91,7 @@ export const traverseFields = ({
   selectMode,
   showHiddenFields,
   siblingDoc,
+  skipEditorHooks,
   triggerAccessControl = true,
   triggerHooks = true,
   version,
@@ -126,6 +128,7 @@ export const traverseFields = ({
         showHiddenFields,
         siblingDoc,
         siblingFields: fields,
+        skipEditorHooks,
         triggerAccessControl,
         triggerHooks,
         version,
