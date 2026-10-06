@@ -1,15 +1,13 @@
 'use client'
 import type { DocumentRootProps } from '@payloadcms/ui/layouts/DocumentRoot'
 import type { RootLayoutData } from '@payloadcms/ui/layouts/Root/getRootLayoutData'
-import type { ComponentProps } from 'react'
+import type { ServerFunctionClient } from 'payload'
 
-import { DocumentRoot, RootProviders } from '@payloadcms/ui'
-import { HeadContent, Outlet, Scripts, useLoaderData, useRouterState } from '@tanstack/react-router'
+import { DocumentRoot } from '@payloadcms/ui/layouts/DocumentRoot'
+import { HeadContent, lazyRouteComponent, Scripts, useRouterState } from '@tanstack/react-router'
 import React from 'react'
 
 import type { LoadLayoutDataResult } from './layout.server.js'
-
-import { TanStackRouterAdapter } from './router.js'
 
 export type PayloadAdminShellProps = {
   readonly children: React.ReactNode
@@ -107,10 +105,12 @@ export function withPayloadRoot(
  */
 export type LayoutLoad = () => Promise<LoadLayoutDataResult>
 
+// The admin UI loads with the admin routes only, so front-end routes never download it. The
+// router preloads lazy route components before rendering, so admin pages don't flash.
+const PayloadLayout = lazyRouteComponent(() => import('./layoutComponent.js'), 'PayloadLayout')
+
 /**
- * Route options for the Payload admin layout (`/_payload`). Maps the layout
- * loader data onto `RootProviders` and renders the admin chrome (progress bar,
- * custom-provider tree or router `<Outlet />`, portal mount). The app supplies
+ * Route options for the Payload admin layout (`/_payload`). The app supplies
  * `load` (the layout-data server fn) and `serverFunction` (the server-function
  * client wired into `RootProviders`); everything else is adapter-owned.
  */
@@ -119,27 +119,18 @@ export function payloadLayoutRoute({
   serverFunction,
 }: {
   load: LayoutLoad
-  serverFunction: ComponentProps<typeof RootProviders>['serverFunction']
+  serverFunction: ServerFunctionClient
 }) {
-  function PayloadLayout() {
-    const data = useLoaderData({ strict: false })
-
-    return (
-      <RootProviders
-        data={data}
-        RouterAdapter={TanStackRouterAdapter}
-        serverFunction={serverFunction}
-      >
-        {data.providers ?? <Outlet />}
-      </RootProviders>
-    )
+  function PayloadLayoutRoute() {
+    return <PayloadLayout serverFunction={serverFunction} />
   }
+  PayloadLayoutRoute.preload = PayloadLayout.preload
 
   // `staleReloadMode` lives on the loader *object* — router-core only reads it
   // off a non-function loader — so stale-match revalidation blocks on the fresh
   // loader instead of flashing stale layout data via the default background SWR.
   return {
-    component: PayloadLayout,
+    component: PayloadLayoutRoute,
     loader: { handler: () => load(), staleReloadMode: 'blocking' as const },
   }
 }
