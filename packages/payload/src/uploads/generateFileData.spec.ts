@@ -398,7 +398,7 @@ describe('generateFileData', () => {
 
     expect(files).toEqual([
       {
-        path: `${os.tmpdir()}/document.pdf`,
+        path: `${os.tmpdir()}/document-original.pdf`,
         sourcePath: tempFilePath,
       },
     ])

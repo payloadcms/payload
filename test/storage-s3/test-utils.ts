@@ -4,6 +4,8 @@ import * as AWS from '@aws-sdk/client-s3'
 import path from 'node:path'
 import { expect } from 'vitest'
 
+import { getStoredUploadKeys } from '../__helpers/int/storedUploadKeys.js'
+
 export const getAWSClient = () =>
   new AWS.S3({
     credentials: {
@@ -67,15 +69,14 @@ export async function verifyUploads({
   uploadId: number | string
 }) {
   const uploadData = await payload.db.findOne<{
-    _managedFiles?: Array<{ key: string }>
     filename?: string
-    original?: { filename?: string }
-    variants?: Record<string, { filename?: string }>
+    original?: { _objectKey?: string; filename?: string; prefix?: string }
+    variants?: Record<string, { _objectKey?: string; filename?: string; prefix?: string }>
   }>({
     collection: collectionSlug as CollectionSlug,
     where: { id: { equals: uploadId } },
   })
-  const fileKeys = uploadData?._managedFiles?.map(({ key }) => key) ?? []
+  const fileKeys = getStoredUploadKeys({ collectionSlug, doc: uploadData, payload })
   const filenames = [
     uploadData?.filename,
     uploadData?.original?.filename,

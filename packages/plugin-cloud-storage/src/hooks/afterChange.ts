@@ -183,7 +183,7 @@ export const getAfterChangeHook =
           operation === 'update' &&
           !isDraftOverPublished &&
           !collection.versions &&
-          !Array.isArray(previousDoc._managedFiles)
+          !previousDoc.original
         ) {
           let filesToDelete: string[] = []
 

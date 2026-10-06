@@ -1,12 +1,18 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { JsonObject, PayloadRequest } from '../../types/index.js'
 import type { FileToSave } from '../types.js'
-import type { ManagedFileManifest } from './types.js'
 
 import { saveVersion } from '../../versions/saveVersion.js'
-import { collectManagedFiles, scheduleUnreferencedFileCleanup } from './cleanup.js'
+import {
+  collectStoredFiles as collectSavedFiles,
+  scheduleUnreferencedFileCleanup,
+} from './cleanup.js'
 import { runFileCreationPlan, runFileOperationPlan } from './fileOperationManager.js'
-import { getManagedFileIdentity, withLegacyCloudUploadFileData } from './manifest.js'
+import {
+  collectStoredFiles,
+  getStoredFileIdentity,
+  withLegacyCloudUploadFileData,
+} from './storedFiles.js'
 
 export const runCloudFileCreation = async <T>({
   collection,
@@ -43,7 +49,7 @@ export const runCloudFileCreation = async <T>({
         trackStagedObject,
       })
       metadata = staged.metadata
-      Object.assign(data, metadata, { _managedFiles: staged.managedFiles })
+      Object.assign(data, metadata)
     },
     // Create's version and afterChange hooks run after the database insert. The
     // outer create operation clears this guard once those hooks have completed.
@@ -77,22 +83,22 @@ export const runCloudFileUpdate = async <T>({
   const storedCurrent = operations
     ? await withLegacyCloudUploadFileData({ collection, doc: current, req })
     : current
-  const nextManifest = Array.isArray(data._managedFiles)
-    ? (data._managedFiles as ManagedFileManifest)
-    : undefined
-  const currentManifest = Array.isArray(storedCurrent._managedFiles)
-    ? (storedCurrent._managedFiles as ManagedFileManifest)
-    : []
-  const nextIdentities = new Set(nextManifest?.map(getManagedFileIdentity))
-  const hasManagedFileChange =
-    nextManifest !== undefined &&
-    (nextIdentities.size !== currentManifest.length ||
-      currentManifest.some((file) => !nextIdentities.has(getManagedFileIdentity(file))))
+  const nextFiles = collectStoredFiles({
+    collection,
+    doc: { ...storedCurrent, ...data },
+    req,
+    trustGenerated: true,
+  })
+  const currentFiles = collectStoredFiles({ collection, doc: storedCurrent, req })
+  const nextIdentities = new Set(nextFiles.map(getStoredFileIdentity))
+  const hasStoredFileChange =
+    nextIdentities.size !== currentFiles.length ||
+    currentFiles.some((file) => !nextIdentities.has(getStoredFileIdentity(file)))
 
   if (
     !operations ||
     req.context?.skipCloudStorage ||
-    (files.length === 0 && !req.context?._payloadVerifiedProviderOriginal && !hasManagedFileChange)
+    (files.length === 0 && !req.context?._payloadVerifiedProviderOriginal && !hasStoredFileChange)
   ) {
     return write()
   }
@@ -108,19 +114,19 @@ export const runCloudFileUpdate = async <T>({
         return
       }
       const staged = await operations.stage({
-        data: { ...storedCurrent, ...data },
+        data,
         files,
         req,
         trackStagedObject,
       })
       metadata = staged.metadata
-      Object.assign(data, metadata, { _managedFiles: staged.managedFiles })
+      Object.assign(data, metadata)
     },
     write: async () => {
       if (
         collection.versions &&
-        !Array.isArray(current._managedFiles) &&
-        Array.isArray(storedCurrent._managedFiles)
+        !hasStoredOriginal({ doc: current }) &&
+        hasStoredOriginal({ doc: storedCurrent })
       ) {
         await persistLegacyCloudVersions({ id, collection, current: storedCurrent, req })
       }
@@ -128,7 +134,7 @@ export const runCloudFileUpdate = async <T>({
       const result = await withCloudHookGuard({ metadata, req, write })
 
       await scheduleUnreferencedFileCleanup({
-        candidates: collectManagedFiles({ collection, doc: storedCurrent, req }),
+        candidates: collectSavedFiles({ collection, doc: storedCurrent, req }),
         collection,
         req,
       })
@@ -163,7 +169,7 @@ const persistLegacyCloudVersions = async ({
 
     for (const row of versions.docs) {
       hasVersions = true
-      if (Array.isArray(row.version._managedFiles)) {
+      if (hasStoredOriginal({ doc: row.version })) {
         continue
       }
 
@@ -172,7 +178,7 @@ const persistLegacyCloudVersions = async ({
         doc: row.version,
         req,
       })
-      if (!Array.isArray(version._managedFiles)) {
+      if (!hasStoredOriginal({ doc: version })) {
         continue
       }
 
@@ -197,7 +203,7 @@ const persistLegacyCloudVersions = async ({
     page += 1
   }
 
-  if (!hasVersions && Array.isArray(current._managedFiles)) {
+  if (!hasVersions && hasStoredOriginal({ doc: current })) {
     await saveVersion({
       id,
       collection,
@@ -209,6 +215,13 @@ const persistLegacyCloudVersions = async ({
     })
   }
 }
+
+const hasStoredOriginal = ({ doc }: { doc: JsonObject }): boolean =>
+  Boolean(
+    doc.original &&
+      typeof doc.original === 'object' &&
+      typeof (doc.original as Record<string, unknown>).filename === 'string',
+  )
 
 const withCloudHookGuard = async <T>({
   metadata,

@@ -3,15 +3,19 @@ import path from 'node:path'
 
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { JsonObject, PayloadRequest, Where } from '../../types/index.js'
-import type { ManagedFile, ManagedFileManifest } from './types.js'
+import type { StoredFile, StoredFileList } from './types.js'
 
 import { deferFileCleanup } from './fileOperationManager.js'
-import { getManagedFileIdentity, withLegacyUploadFileData } from './manifest.js'
 import { normalizeStorageKey } from './naming.js'
+import {
+  collectStoredFiles as collectStoredFileLocations,
+  getStoredFileIdentity,
+  withLegacyUploadFileData,
+} from './storedFiles.js'
 
 const pageSize = 100
 
-export const collectManagedFiles = ({
+export const collectStoredFiles = ({
   collection,
   doc,
   req,
@@ -19,14 +23,14 @@ export const collectManagedFiles = ({
   collection: SanitizedCollectionConfig
   doc: JsonObject
   req: PayloadRequest
-}): ManagedFileManifest => {
+}): StoredFileList => {
   const stored = withLegacyUploadFileData({
     collection,
     config: req.payload.config,
     doc,
   })
 
-  return Array.isArray(stored._managedFiles) ? (stored._managedFiles as ManagedFileManifest) : []
+  return collectStoredFileLocations({ collection, doc: stored, req })
 }
 
 /** Reads all saved versions in batches before a parent or its history is deleted. */
@@ -40,8 +44,8 @@ export const collectVersionFiles = async ({
   parentID: number | string
   req: PayloadRequest
   where?: Where
-}): Promise<ManagedFileManifest> => {
-  const files: ManagedFileManifest = []
+}): Promise<StoredFileList> => {
+  const files: StoredFileList = []
   let page = 1
 
   while (true) {
@@ -56,7 +60,7 @@ export const collectVersionFiles = async ({
     })
 
     for (const row of versions.docs) {
-      files.push(...collectManagedFiles({ collection, doc: row.version, req }))
+      files.push(...collectStoredFiles({ collection, doc: row.version, req }))
     }
 
     if (versions.docs.length < pageSize) {
@@ -72,11 +76,11 @@ export const scheduleUnreferencedFileCleanup = async ({
   collection,
   req,
 }: {
-  candidates: ManagedFileManifest
+  candidates: StoredFileList
   collection: SanitizedCollectionConfig
   req: PayloadRequest
 }): Promise<void> => {
-  const unique = new Map(candidates.map((file) => [getManagedFileIdentity(file), file]))
+  const unique = new Map(candidates.map((file) => [getStoredFileIdentity(file), file]))
 
   if (!unique.size) {
     return
@@ -98,11 +102,11 @@ export const scheduleUnreferencedFileCleanup = async ({
 
       for (const file of stillUnreferenced) {
         try {
-          await deleteManagedFile({ collection, file, req })
+          await deleteStoredFile({ collection, file, req })
         } catch (err) {
           req.payload.logger.error({
             err,
-            msg: `Failed to delete unreferenced upload file ${file.storageBackendId}:${file.key}. Verify the object is unreferenced and remove it manually.`,
+            msg: `Failed to delete unreferenced upload file ${file.key}. Verify the object is unreferenced and remove it manually.`,
           })
         }
       }
@@ -116,11 +120,11 @@ const findUnreferenced = async ({
   collection,
   req,
 }: {
-  candidates: ManagedFileManifest
+  candidates: StoredFileList
   collection: SanitizedCollectionConfig
   req: PayloadRequest
-}): Promise<ManagedFileManifest> => {
-  const remaining = new Map(candidates.map((file) => [getManagedFileIdentity(file), file]))
+}): Promise<StoredFileList> => {
+  const remaining = new Map(candidates.map((file) => [getStoredFileIdentity(file), file]))
   let page = 1
 
   while (remaining.size) {
@@ -174,24 +178,25 @@ const removeReferenced = ({
 }: {
   collection: SanitizedCollectionConfig
   doc: JsonObject
-  remaining: Map<string, ManagedFile>
+  remaining: Map<string, StoredFile>
   req: PayloadRequest
 }): void => {
-  for (const file of collectManagedFiles({ collection, doc, req })) {
-    remaining.delete(getManagedFileIdentity(file))
+  for (const file of collectStoredFiles({ collection, doc, req })) {
+    remaining.delete(getStoredFileIdentity(file))
   }
 }
 
-const deleteManagedFile = async ({
+const deleteStoredFile = async ({
   collection,
   file,
   req,
 }: {
   collection: SanitizedCollectionConfig
-  file: ManagedFile
+  file: StoredFile
   req: PayloadRequest
 }): Promise<void> => {
-  if (file.storageBackendId === `local:${collection.slug}`) {
+  const operations = collection.upload.fileOperations
+  if (!operations) {
     const staticDir = collection.upload.staticDir
 
     if (!staticDir) {
@@ -223,12 +228,6 @@ const deleteManagedFile = async ({
     }
 
     return
-  }
-
-  const operations = collection.upload.fileOperations
-
-  if (operations?.storageBackendId !== file.storageBackendId) {
-    throw new Error(`No storage adapter is configured for ${file.storageBackendId}`)
   }
 
   await operations.delete({ key: file.key, req })

@@ -191,7 +191,7 @@ export const updateDocument = async <
 
   const hasManagedLocalUpload =
     filesToUpload.length > 0 &&
-    Array.isArray(data._managedFiles) &&
+    Boolean(data.original) &&
     !collectionConfig.upload.disableLocalStorage
 
   if (!isDraftOverPublished && !hasManagedLocalUpload) {

@@ -491,7 +491,7 @@ export const createOperation = async <
     const hasManagedLocalUpload =
       !collectionConfig.upload.disableLocalStorage &&
       filesToUpload.length > 0 &&
-      Array.isArray(dataWithLocales._managedFiles)
+      Boolean(dataWithLocales.original)
     let doc
 
     if (
@@ -512,7 +512,6 @@ export const createOperation = async <
           stageLocalUploadFiles({
             files: filesToUpload,
             staticDir: collectionConfig.upload.staticDir!,
-            storageBackendId: `local:${collectionConfig.slug}`,
             trackStagedObject,
           }),
         write: writeDocument,

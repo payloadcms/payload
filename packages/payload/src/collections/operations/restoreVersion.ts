@@ -24,7 +24,7 @@ import {
   beginFileOperationScope,
   completeFileOperationScope,
 } from '../../uploads/fileVersioning/fileOperationManager.js'
-import { runManagedFileRestore } from '../../uploads/fileVersioning/restore.js'
+import { runStoredFileRestore } from '../../uploads/fileVersioning/restore.js'
 import { restoreUploadDataFromDocument } from '../../uploads/sanitizeUploadData.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
@@ -359,7 +359,7 @@ export const restoreVersionOperation = async <
     }
 
     result = collectionConfig.upload
-      ? await runManagedFileRestore({
+      ? await runStoredFileRestore({
           id: parentDocID,
           collection: collectionConfig,
           current: prevDocWithLocales,

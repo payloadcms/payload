@@ -31,9 +31,13 @@ export const getAfterReadHook =
   ({ adapter, collection, disablePayloadAccessControl, generateFileURL, size }: Args): FieldHook =>
   async ({ data, value }) => {
     const filename = size ? data?.variants?.[size.name]?.filename : data?.filename
-    const prefix = data?.prefix
+    const representation = size ? data?.variants?.[size.name] : data
+    const prefix = representation?.prefix ?? data?.prefix
     // Direct-serve URLs encode the full location; the proxy resolves `_objectKey` server-side.
-    const objectFolder = getObjectFolder(data)
+    const objectFolder = getObjectFolder({
+      _objectKey: representation?._objectKey ?? data?._objectKey,
+      prefix,
+    })
     let url = value
 
     if (filename) {

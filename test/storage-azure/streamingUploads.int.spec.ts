@@ -8,6 +8,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
+import { getStoredUploadKeys } from '../__helpers/int/storedUploadKeys.js'
 import { test } from '../__helpers/int/vitest.js'
 import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
 
@@ -108,12 +109,11 @@ test.suite('@payloadcms/storage-azure streamingUploads', { config: './config.ts'
       collection: collectionSlug,
       where: { id: { equals: uploadId } },
     })) as unknown as {
-      _managedFiles: { key: string }[]
       filename: string
       original?: { filename?: string }
       variants: Record<string, { filename: string }>
     }
-    const fileKeys = uploadData._managedFiles.map(({ key }) => key)
+    const fileKeys = getStoredUploadKeys({ collectionSlug, doc: uploadData, payload })
     const filenames = [
       uploadData.filename,
       uploadData.original?.filename,

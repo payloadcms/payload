@@ -12,6 +12,7 @@ import {
   versionedPublicCloudMediaSlug,
 } from './shared.js'
 import {
+  getStoredCloudFiles,
   versionedCloudCalls,
   versionedCloudFailure,
   versionedCloudFiles,
@@ -20,7 +21,7 @@ import {
 const firstFile = path.resolve(import.meta.dirname, '../uploads/image.png')
 const secondFile = path.resolve(import.meta.dirname, '../uploads/small.png')
 
-const getManagedFiles = async ({
+const getStoredFiles = async ({
   id,
   collection = versionedCloudMediaSlug,
   payload,
@@ -33,10 +34,7 @@ const getManagedFiles = async ({
     collection,
     where: { id: { equals: id } },
   })
-  return ((doc as { _managedFiles?: unknown } | null)?._managedFiles ?? []) as Array<{
-    key: string
-    roles: Array<{ type: string }>
-  }>
+  return getStoredCloudFiles(doc)
 }
 
 test.suite('versioned cloud storage', { config: './config.ts' }, () => {
@@ -63,7 +61,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       filePath: firstFile,
       overrideAccess: true,
     })
-    const before = await getManagedFiles({ id: created.id, payload })
+    const before = await getStoredFiles({ id: created.id, payload })
     const oldKey = before[0]!.key
     const bytes = Buffer.from(versionedCloudFiles.get(oldKey)!)
     const renamed = await payload.renameFile({
@@ -72,7 +70,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       filename: 'renamed.png',
       overrideAccess: true,
     })
-    const after = await getManagedFiles({ id: created.id, payload })
+    const after = await getStoredFiles({ id: created.id, payload })
 
     expect(renamed.filename).toBe('renamed-original.png')
     expect(renamed.url).toContain('/renamed-original.png')
@@ -95,7 +93,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       filePath: firstFile,
       overrideAccess: true,
     })
-    const manifest = await getManagedFiles({
+    const files = await getStoredFiles({
       id: created.id,
       collection: unversionedCloudMediaSlug,
       payload,
@@ -104,16 +102,26 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     expect(created.filename).toBe('image-original.png')
     expect(created.original?.filename).toBe(created.filename)
     expect(created.original?.url).toBe(created.url)
-    expect(manifest).toEqual([
+    expect(created._objectKey).toBeUndefined()
+    expect(created.original?._objectKey).toBeUndefined()
+    expect(files).toEqual([
       {
         key: expect.stringMatching(/image-original\.png$/),
         roles: [{ type: 'original' }, { type: 'default' }],
-        storageBackendId: `test-cloud:${unversionedCloudMediaSlug}`,
       },
     ])
-    expect([...versionedCloudFiles.keys()]).toEqual([manifest[0]!.key])
-    expect(versionedCloudFiles.get(manifest[0]!.key)).toEqual(await readFile(firstFile))
+    expect([...versionedCloudFiles.keys()]).toEqual([files[0]!.key])
+    expect(versionedCloudFiles.get(files[0]!.key)).toEqual(await readFile(firstFile))
     expect(versionedCloudCalls.uploads).toBe(1)
+    const stored = await payload.findByID({
+      id: created.id,
+      collection: unversionedCloudMediaSlug,
+      overrideAccess: true,
+      showHiddenFields: true,
+    })
+
+    expect(stored._objectKey).toBeTruthy()
+    expect(stored.original?._objectKey).toBe(stored._objectKey)
   })
 
   test('should reset a cloud crop to the retained original without another upload', async ({
@@ -153,8 +161,8 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     })
     expect(reset.status).toBe(200)
     const resetDoc = (await reset.json()).doc as typeof created
-    const manifest = await getManagedFiles({ id: created.id, payload })
-    const original = manifest.find((file) => file.roles.some((role) => role.type === 'original'))
+    const files = await getStoredFiles({ id: created.id, payload })
+    const original = files.find((file) => file.roles.some((role) => role.type === 'original'))
 
     expect(resetDoc.filename).toBe(created.original!.filename)
     expect(resetDoc.url).toBe(created.original!.url)
@@ -203,8 +211,8 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     })
     expect(reset.status).toBe(200)
     const resetDoc = (await reset.json()).doc as typeof created
-    const manifest = await getManagedFiles({ id: created.id, payload })
-    const original = manifest.find((file) => file.roles.some((role) => role.type === 'original'))
+    const files = await getStoredFiles({ id: created.id, payload })
+    const original = files.find((file) => file.roles.some((role) => role.type === 'original'))
 
     expect(resetDoc.filename).toBe(created.original!.filename)
     expect(resetDoc.focalX).toBe(75)
@@ -233,12 +241,12 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       },
     })
     expect(crop.status).toBe(200)
-    const croppedManifest = await getManagedFiles({
+    const croppedFiles = await getStoredFiles({
       id: created.id,
       collection: unversionedCloudMediaSlug,
       payload,
     })
-    const croppedKey = croppedManifest.find((file) =>
+    const croppedKey = croppedFiles.find((file) =>
       file.roles.some((role) => role.type === 'default'),
     )!.key
 
@@ -316,7 +324,6 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     await payload.db.updateOne({
       collection: unversionedCloudMediaSlug,
       data: {
-        _managedFiles: null,
         _objectKey: null,
         filename: legacyKey,
         original: { filename: null, filesize: null, mimeType: null, url: null },
@@ -338,14 +345,6 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
 
     expect(read.original?.filename).toBe(legacyKey)
     expect(read.original?.url).toBe(read.url)
-    expect(read._managedFiles).toEqual([
-      {
-        key: legacyKey,
-        roles: [{ type: 'default' }, { type: 'original' }],
-        storageBackendId: `test-cloud:${unversionedCloudMediaSlug}`,
-      },
-    ])
-    expect(stored?._managedFiles).toBeNull()
     expect(stored?.original?.filename).toBeNull()
     expect(versionedCloudFiles.get(legacyKey)).toEqual(await readFile(firstFile))
     expect(versionedCloudCalls.uploads).toBe(1)
@@ -364,11 +363,11 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     })
 
     expect(replaced.original?.filename).toBe(replaced.filename)
-    expect(persisted?._managedFiles).toHaveLength(1)
+    expect(persisted?.original?.filename).toBe(persisted?.filename)
     expect(versionedCloudFiles.has(legacyKey)).toBe(false)
-    expect(
-      versionedCloudFiles.get((persisted?._managedFiles as Array<{ key: string }>)[0]!.key),
-    ).toEqual(await readFile(secondFile))
+    expect(versionedCloudFiles.get(getStoredCloudFiles(persisted)[0]!.key)).toEqual(
+      await readFile(secondFile),
+    )
     expect(versionedCloudCalls.deletes).toContain(legacyKey)
   })
 
@@ -387,7 +386,6 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     versionedCloudFiles.delete(newKey)
     versionedCloudFiles.set(legacyKey, bytes)
     const legacyData = {
-      _managedFiles: null,
       _objectKey: null,
       filename: legacyKey,
       original: { filename: null, filesize: null, mimeType: null, url: null },
@@ -431,13 +429,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
 
     expect(versionedCloudFiles.get(legacyKey)?.equals(bytes)).toBe(true)
     expect(legacyVersion?.original?.filename).toBe(legacyKey)
-    expect(legacyVersion?._managedFiles).toEqual([
-      {
-        key: legacyKey,
-        roles: [{ type: 'default' }, { type: 'original' }],
-        storageBackendId: `test-cloud:${versionedCloudMediaSlug}`,
-      },
-    ])
+    expect(getStoredCloudFiles(legacyVersion)[0]?.key).toBe(legacyKey)
   })
 
   test('should clean up the outgoing unversioned file after replacement', async ({ payload }) => {
@@ -447,12 +439,12 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       filePath: firstFile,
       overrideAccess: true,
     })
-    const firstManifest = await getManagedFiles({
+    const firstFiles = await getStoredFiles({
       id: created.id,
       collection: unversionedCloudMediaSlug,
       payload,
     })
-    const firstKey = firstManifest[0]!.key
+    const firstKey = firstFiles[0]!.key
     const replaced = await payload.update({
       id: created.id,
       collection: unversionedCloudMediaSlug,
@@ -460,15 +452,15 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       filePath: secondFile,
       overrideAccess: true,
     })
-    const secondManifest = await getManagedFiles({
+    const secondFiles = await getStoredFiles({
       id: created.id,
       collection: unversionedCloudMediaSlug,
       payload,
     })
 
-    expect(secondManifest[0]!.key).not.toBe(firstKey)
+    expect(secondFiles[0]!.key).not.toBe(firstKey)
     expect(replaced.original?.filename).toBe(replaced.filename)
-    expect(versionedCloudFiles.get(secondManifest[0]!.key)).toEqual(await readFile(secondFile))
+    expect(versionedCloudFiles.get(secondFiles[0]!.key)).toEqual(await readFile(secondFile))
     expect(versionedCloudFiles.has(firstKey)).toBe(false)
     expect(versionedCloudCalls.deletes).toContain(firstKey)
   })
@@ -482,12 +474,12 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       filePath: firstFile,
       overrideAccess: true,
     })
-    const firstManifest = await getManagedFiles({
+    const firstFiles = await getStoredFiles({
       id: created.id,
       collection: unversionedCloudMediaSlug,
       payload,
     })
-    const firstKey = firstManifest[0]!.key
+    const firstKey = firstFiles[0]!.key
 
     const updateOne = payload.db.updateOne.bind(payload.db)
     const spy = vi.spyOn(payload.db, 'updateOne').mockImplementation(async (args) => {
@@ -512,8 +504,8 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     }
 
     expect(
-      await getManagedFiles({ id: created.id, collection: unversionedCloudMediaSlug, payload }),
-    ).toEqual(firstManifest)
+      await getStoredFiles({ id: created.id, collection: unversionedCloudMediaSlug, payload }),
+    ).toEqual(firstFiles)
     expect([...versionedCloudFiles.keys()]).toEqual([firstKey])
     expect(versionedCloudFiles.get(firstKey)).toEqual(await readFile(firstFile))
     expect(versionedCloudCalls.deletes).toEqual([expect.stringMatching(/small-original\.png$/)])
@@ -529,7 +521,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       overrideAccess: true,
     })
     const key = (
-      await getManagedFiles({
+      await getStoredFiles({
         id: created.id,
         collection: unversionedCloudMediaSlug,
         payload,
@@ -540,7 +532,6 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       id: created.id,
       collection: unversionedCloudMediaSlug,
       data: {
-        _managedFiles: [],
         filename: null,
         original: { filename: null, filesize: null, mimeType: null, url: null },
       },
@@ -548,7 +539,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     })
 
     expect(
-      await getManagedFiles({ id: created.id, collection: unversionedCloudMediaSlug, payload }),
+      await getStoredFiles({ id: created.id, collection: unversionedCloudMediaSlug, payload }),
     ).toEqual([])
     expect(versionedCloudFiles.has(key)).toBe(false)
     expect(versionedCloudCalls.deletes).toContain(key)
@@ -579,11 +570,11 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       expect(renamed.filename).toBe('moved-original.png')
       expect(versionedCloudCalls.moves).toBe(1)
       expect(versionedCloudFiles.has(oldKey)).toBe(false)
-      const current = await payload.db.findOne<{ _managedFiles: { key: string }[] }>({
+      const current = await payload.db.findOne({
         collection: unversionedCloudMediaSlug,
         where: { id: { equals: created.id } },
       })
-      expect(versionedCloudFiles.has(current!._managedFiles[0]!.key)).toBe(true)
+      expect(versionedCloudFiles.has(getStoredCloudFiles(current)[0]!.key)).toBe(true)
     },
   )
 
@@ -598,7 +589,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
         overrideAccess: true,
       })
       const oldKey = (
-        await getManagedFiles({ id: created.id, collection: unversionedCloudMediaSlug, payload })
+        await getStoredFiles({ id: created.id, collection: unversionedCloudMediaSlug, payload })
       )[0]!.key
 
       const renamed = await payload.renameFile({
@@ -608,7 +599,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
         overrideAccess: true,
       })
       const newKey = (
-        await getManagedFiles({ id: created.id, collection: unversionedCloudMediaSlug, payload })
+        await getStoredFiles({ id: created.id, collection: unversionedCloudMediaSlug, payload })
       )[0]!.key
 
       expect(renamed.filename).toBe('moved-original.png')
@@ -629,23 +620,13 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
         overrideAccess: true,
       })
       const originalKey = [...versionedCloudFiles.keys()][0]!
-      const thumbnailKey = originalKey.replace(/\.png$/, '-thumbnail.png')
-      versionedCloudFiles.set(thumbnailKey, Buffer.from('thumbnail'))
+      const processedKey = originalKey.replace(/\.png$/, '-cropped.png')
+      versionedCloudFiles.set(processedKey, Buffer.from('cropped'))
       await payload.db.updateOne({
         collection: unversionedCloudMediaSlug,
         data: {
-          _managedFiles: [
-            {
-              key: originalKey,
-              roles: [{ type: 'default' }, { type: 'original' }],
-              storageBackendId: `test-cloud:${unversionedCloudMediaSlug}`,
-            },
-            {
-              key: thumbnailKey,
-              roles: [{ type: 'thumbnail' }],
-              storageBackendId: `test-cloud:${unversionedCloudMediaSlug}`,
-            },
-          ],
+          filename: path.posix.basename(processedKey),
+          url: `/api/${unversionedCloudMediaSlug}/file/${path.posix.basename(processedKey)}`,
         },
         where: { id: { equals: created.id } },
       })
@@ -661,7 +642,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       ).rejects.toThrow('Cloud test move failed')
 
       expect(versionedCloudFiles.has(originalKey)).toBe(true)
-      expect(versionedCloudFiles.has(thumbnailKey)).toBe(true)
+      expect(versionedCloudFiles.has(processedKey)).toBe(true)
       expect(
         [...versionedCloudFiles.keys()].some((key) => key.endsWith('/later-original.png')),
       ).toBe(false)
@@ -669,7 +650,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
         collection: unversionedCloudMediaSlug,
         where: { id: { equals: created.id } },
       })
-      expect(saved?.filename).toBe(created.filename)
+      expect(saved?.filename).toBe(path.posix.basename(processedKey))
     },
   )
 
@@ -734,7 +715,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
         filename: 'copied.png',
         overrideAccess: true,
       })
-      const after = await payload.db.findOne<{ _managedFiles: { key: string }[] }>({
+      const after = await payload.db.findOne({
         collection: unversionedCloudMediaSlug,
         where: { id: { equals: created.id } },
       })
@@ -742,7 +723,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       expect(renamed.filename).toBe('copied-original.png')
       expect(versionedCloudCalls.moves).toBe(0)
       expect(versionedCloudFiles.has(oldKey)).toBe(false)
-      expect(versionedCloudFiles.get(after!._managedFiles[0]!.key)).toEqual(bytes)
+      expect(versionedCloudFiles.get(getStoredCloudFiles(after)[0]!.key)).toEqual(bytes)
     } finally {
       operations.move = move
     }
@@ -789,7 +770,6 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     await payload.db.updateOne({
       collection: unversionedCloudMediaSlug,
       data: {
-        _managedFiles: null,
         original: { filename: null, filesize: null, mimeType: null, url: null },
         url: 'https://external.example.test/image.png',
       },
@@ -804,7 +784,6 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     })
 
     expect(read.original?.filename).toBeNull()
-    expect(read._managedFiles).toBeFalsy()
 
     await expect(
       payload.renameFile({
@@ -853,7 +832,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       filePath: firstFile,
       overrideAccess: true,
     })
-    const current = (await getManagedFiles({ id: created.id, payload }))[0]!.key
+    const current = (await getStoredFiles({ id: created.id, payload }))[0]!.key
     const destination = current.replace(/[^/]+$/, 'occupied-original.png')
     const occupiedBytes = Buffer.from('another file')
     versionedCloudFiles.set(destination, occupiedBytes)
@@ -868,7 +847,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     ).rejects.toMatchObject({ status: 409 })
 
     expect(versionedCloudFiles.get(destination)).toEqual(occupiedBytes)
-    expect((await getManagedFiles({ id: created.id, payload }))[0]?.key).toBe(current)
+    expect((await getStoredFiles({ id: created.id, payload }))[0]?.key).toBe(current)
   })
 
   test('should reject a concurrent rename and remove its staged copy', async ({ payload }) => {
@@ -907,7 +886,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     ])
     const successes = results.filter((result) => result.status === 'fulfilled')
     const failures = results.filter((result) => result.status === 'rejected')
-    const current = await getManagedFiles({ id: created.id, payload })
+    const current = await getStoredFiles({ id: created.id, payload })
 
     expect(successes).toHaveLength(1)
     expect(failures).toHaveLength(1)
@@ -928,11 +907,11 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       filePath: firstFile,
       overrideAccess: true,
     })
-    const firstManifest = await getManagedFiles({ id: first.id, payload })
-    const firstKey = firstManifest[0]!.key
+    const firstFiles = await getStoredFiles({ id: first.id, payload })
+    const firstKey = firstFiles[0]!.key
     const firstBytes = Buffer.from(versionedCloudFiles.get(firstKey)!)
 
-    expect(firstManifest[0]?.roles).toEqual(
+    expect(firstFiles[0]?.roles).toEqual(
       expect.arrayContaining([{ type: 'original' }, { type: 'default' }]),
     )
     expect(versionedCloudCalls.uploads).toBe(1)
@@ -946,20 +925,20 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       overrideAccess: true,
     })
 
-    const secondManifest = await getManagedFiles({ id: second.id, payload })
+    const secondFiles = await getStoredFiles({ id: second.id, payload })
 
-    expect(secondManifest[0]?.key).not.toBe(firstKey)
+    expect(secondFiles[0]?.key).not.toBe(firstKey)
     expect(versionedCloudFiles.get(firstKey)).toEqual(firstBytes)
-    expect(versionedCloudFiles.get(secondManifest[0]!.key)).toBeTruthy()
+    expect(versionedCloudFiles.get(secondFiles[0]!.key)).toBeTruthy()
     expect(versionedCloudCalls.deletes).toEqual([])
     expect(versionedCloudCalls.uploads).toBe(2)
     expect(versionedCloudCalls.afterChanges).toBe(4)
-    expect(second.storageMarker).toBe(secondManifest[0]!.key)
+    expect(second.storageMarker).toBe(secondFiles[0]!.key)
     const saved = await payload.db.findOne({
       collection: versionedCloudMediaSlug,
       where: { id: { equals: first.id } },
     })
-    expect(saved?.storageMarker).toBe(secondManifest[0]!.key)
+    expect(saved?.storageMarker).toBe(secondFiles[0]!.key)
 
     const { docs } = await payload.db.findVersions({
       collection: versionedCloudMediaSlug,
@@ -967,11 +946,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       where: { parent: { equals: first.id } },
     })
     expect(
-      docs.some(({ version }) =>
-        ((version as { _managedFiles?: Array<{ key: string }> })._managedFiles ?? []).some(
-          ({ key }) => key === firstKey,
-        ),
-      ),
+      docs.some(({ version }) => getStoredCloudFiles(version).some(({ key }) => key === firstKey)),
     ).toBe(true)
   })
 
@@ -984,8 +959,8 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       data: {},
       filePath: firstFile,
     })
-    const firstManifest = await getManagedFiles({ id: first.id, payload })
-    const firstBytes = Buffer.from(versionedCloudFiles.get(firstManifest[0]!.key)!)
+    const firstFiles = await getStoredFiles({ id: first.id, payload })
+    const firstBytes = Buffer.from(versionedCloudFiles.get(firstFiles[0]!.key)!)
 
     await payload.update({
       id: first.id,
@@ -999,7 +974,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       where: { parent: { equals: first.id } },
     })
     const selected = before.find(({ version }) =>
-      (version._managedFiles ?? []).some(({ key }) => key === firstManifest[0]!.key),
+      getStoredCloudFiles(version).some(({ key }) => key === firstFiles[0]!.key),
     )!
     const selectedRead = await payload.findVersionByID({
       id: selected.id,
@@ -1021,97 +996,19 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       overrideAccess: false,
     })
 
-    const currentManifest = await getManagedFiles({ id: first.id, payload })
+    const currentFiles = await getStoredFiles({ id: first.id, payload })
     const { docs: after } = await payload.db.findVersions({
       collection: versionedCloudMediaSlug,
       pagination: false,
       where: { parent: { equals: first.id } },
     })
 
-    expect(currentManifest[0]!.key).not.toBe(firstManifest[0]!.key)
-    expect(versionedCloudFiles.get(currentManifest[0]!.key)).toEqual(firstBytes)
+    expect(currentFiles[0]!.key).not.toBe(firstFiles[0]!.key)
+    expect(versionedCloudFiles.get(currentFiles[0]!.key)).toEqual(firstBytes)
     expect(after.find(({ id }) => id === selected.id)?.version).toEqual(selected.version)
   })
 
-  test('should reject restore from a different cloud backend before changing files or documents', async ({
-    payload,
-  }) => {
-    const first = await payload.create({
-      collection: versionedCloudMediaSlug,
-      data: {},
-      filePath: firstFile,
-      overrideAccess: true,
-    })
-    const firstKey = (await getManagedFiles({ id: first.id, payload }))[0]!.key
-
-    await payload.update({
-      id: first.id,
-      collection: versionedCloudMediaSlug,
-      data: {},
-      filePath: secondFile,
-      overrideAccess: true,
-    })
-    const currentBefore = await payload.db.findOne({
-      collection: versionedCloudMediaSlug,
-      where: { id: { equals: first.id } },
-    })
-    const { docs: versions } = await payload.db.findVersions({
-      collection: versionedCloudMediaSlug,
-      where: { parent: { equals: first.id } },
-    })
-    const selected = versions.find(({ version }) =>
-      version._managedFiles?.some(({ key }) => key === firstKey),
-    )!
-    const selectedVersion = {
-      ...selected.version,
-      _managedFiles: [
-        ...selected.version._managedFiles!,
-        { ...selected.version._managedFiles![0]!, storageBackendId: 'other-cloud:media' },
-      ],
-    }
-    await payload.db.updateVersion({
-      id: selected.id,
-      collection: versionedCloudMediaSlug,
-      versionData: {
-        createdAt: selected.createdAt,
-        latest: selected.latest,
-        parent: selected.parent,
-        updatedAt: selected.updatedAt,
-        version: selectedVersion,
-      },
-    })
-    const keysBefore = [...versionedCloudFiles.keys()]
-    const operations = payload.collections[versionedCloudMediaSlug].config.upload.fileOperations!
-    const copy = vi.spyOn(operations, 'copy')
-
-    try {
-      await expect(
-        payload.restoreVersion({
-          id: selected.id,
-          collection: versionedCloudMediaSlug,
-          overrideAccess: true,
-        }),
-      ).rejects.toThrow(/backend/i)
-      expect(copy).not.toHaveBeenCalled()
-    } finally {
-      copy.mockRestore()
-    }
-
-    expect(
-      await payload.db.findOne({
-        collection: versionedCloudMediaSlug,
-        where: { id: { equals: first.id } },
-      }),
-    ).toEqual(currentBefore)
-    expect([...versionedCloudFiles.keys()]).toEqual(keysBefore)
-    const { docs: after } = await payload.db.findVersions({
-      collection: versionedCloudMediaSlug,
-      where: { id: { equals: selected.id } },
-    })
-    expect(after[0]?.version).toEqual(selectedVersion)
-  })
-
-  test('should retain a failed cloud deletion and log its exact storage identity', async ({
+  test('should retain a failed cloud deletion and log its exact storage key', async ({
     payload,
   }) => {
     const first = await payload.create({
@@ -1119,7 +1016,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       data: {},
       filePath: firstFile,
     })
-    const firstKey = (await getManagedFiles({ id: first.id, payload }))[0]!.key
+    const firstKey = (await getStoredFiles({ id: first.id, payload }))[0]!.key
 
     await payload.update({
       id: first.id,
@@ -1127,7 +1024,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       data: {},
       filePath: secondFile,
     })
-    const currentKey = (await getManagedFiles({ id: first.id, payload }))[0]!.key
+    const currentKey = (await getStoredFiles({ id: first.id, payload }))[0]!.key
     const logged = vi.spyOn(payload.logger, 'error')
     versionedCloudFailure.deleteKey = firstKey
 
@@ -1139,7 +1036,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       expect(versionedCloudCalls.deletes).toContain(firstKey)
       expect(logged).toHaveBeenCalledWith(
         expect.objectContaining({
-          msg: expect.stringContaining(`test-cloud:${versionedCloudMediaSlug}:${firstKey}`),
+          msg: expect.stringContaining(firstKey),
         }),
       )
     } finally {
@@ -1159,7 +1056,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       collection: versionedPublicCloudMediaSlug,
       where: { id: { equals: first.id } },
     })
-    const firstKey = firstStored?._managedFiles?.[0]?.key
+    const firstKey = getStoredCloudFiles(firstStored)[0]?.key
 
     await payload.update({
       id: first.id,
@@ -1173,7 +1070,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       where: { parent: { equals: first.id } },
     })
     const selected = docs.find(({ version }) =>
-      version._managedFiles?.some(({ key }) => key === firstKey),
+      getStoredCloudFiles(version).some(({ key }) => key === firstKey),
     )!
     const historical = await payload.findVersionByID({
       id: selected.id,
@@ -1204,7 +1101,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       filePath: firstFile,
       overrideAccess: true,
     })
-    const firstKey = (await getManagedFiles({ id: first.id, payload }))[0]!.key
+    const firstKey = (await getStoredFiles({ id: first.id, payload }))[0]!.key
     const originalKeys = [...versionedCloudFiles.keys()]
 
     versionedCloudFailure.uploadNumber = versionedCloudCalls.uploads + 1
@@ -1218,7 +1115,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       }),
     ).rejects.toThrow('Cloud test upload failed')
 
-    expect((await getManagedFiles({ id: first.id, payload }))[0]?.key).toBe(firstKey)
+    expect((await getStoredFiles({ id: first.id, payload }))[0]?.key).toBe(firstKey)
     expect([...versionedCloudFiles.keys()]).toEqual(originalKeys)
   })
 
@@ -1232,7 +1129,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
         filePath: firstFile,
         overrideAccess: true,
       })
-      const firstKey = (await getManagedFiles({ id: first.id, payload }))[0]!.key
+      const firstKey = (await getStoredFiles({ id: first.id, payload }))[0]!.key
       const originalKeys = [...versionedCloudFiles.keys()]
 
       versionedCloudFailure.afterChange = true
@@ -1251,7 +1148,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
         collection: versionedCloudMediaSlug,
         overrideAccess: true,
       })
-      expect((await getManagedFiles({ id: current.id, payload }))[0]?.key).toBe(firstKey)
+      expect((await getStoredFiles({ id: current.id, payload }))[0]?.key).toBe(firstKey)
       expect([...versionedCloudFiles.keys()]).toEqual(originalKeys)
       expect(versionedCloudCalls.deletes).not.toContain(firstKey)
     },
@@ -1267,7 +1164,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
         filePath: firstFile,
         overrideAccess: true,
       })
-      const firstKey = (await getManagedFiles({ id: first.id, payload }))[0]!.key
+      const firstKey = (await getStoredFiles({ id: first.id, payload }))[0]!.key
       versionedCloudFailure.afterChange = true
 
       await expect(
@@ -1280,7 +1177,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
         }),
       ).rejects.toThrow('Cloud test afterChange failed')
 
-      const currentKey = (await getManagedFiles({ id: first.id, payload }))[0]!.key
+      const currentKey = (await getStoredFiles({ id: first.id, payload }))[0]!.key
 
       expect(currentKey).not.toBe(firstKey)
       expect(versionedCloudFiles.get(currentKey)).toEqual(await readFile(secondFile))
@@ -1295,7 +1192,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       filePath: firstFile,
       overrideAccess: true,
     })
-    const publishedKey = (await getManagedFiles({ id: published.id, payload }))[0]!.key
+    const publishedKey = (await getStoredFiles({ id: published.id, payload }))[0]!.key
 
     const draft = await payload.update({
       id: published.id,
@@ -1313,7 +1210,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       overrideAccess: true,
       showHiddenFields: true,
     })
-    expect(draftWithHidden._managedFiles?.[0]?.key).not.toBe(publishedKey)
+    expect(getStoredCloudFiles(draftWithHidden)[0]?.key).not.toBe(publishedKey)
     expect(versionedCloudFiles.has(publishedKey)).toBe(true)
     expect(versionedCloudCalls.deletes).toEqual([])
 
@@ -1322,7 +1219,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       collection: versionedCloudMediaSlug,
       overrideAccess: true,
     })
-    expect((await getManagedFiles({ id: current.id, payload }))[0]?.key).toBe(publishedKey)
+    expect((await getStoredFiles({ id: current.id, payload }))[0]?.key).toBe(publishedKey)
   })
 
   test.options(
@@ -1335,7 +1232,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
         filePath: firstFile,
         overrideAccess: true,
       })
-      const firstKey = (await getManagedFiles({ id: first.id, payload }))[0]!.key
+      const firstKey = (await getStoredFiles({ id: first.id, payload }))[0]!.key
       const originalKeys = [...versionedCloudFiles.keys()]
       const updateOne = payload.db.updateOne.bind(payload.db)
       const spy = vi.spyOn(payload.db, 'updateOne').mockImplementation(async (args) => {
@@ -1359,7 +1256,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
         spy.mockRestore()
       }
 
-      expect((await getManagedFiles({ id: first.id, payload }))[0]?.key).toBe(firstKey)
+      expect((await getStoredFiles({ id: first.id, payload }))[0]?.key).toBe(firstKey)
       expect([...versionedCloudFiles.keys()]).toEqual(originalKeys)
       expect(versionedCloudCalls.deletes).not.toContain(firstKey)
     },
@@ -1375,7 +1272,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
         filePath: firstFile,
         overrideAccess: true,
       })
-      const firstKey = (await getManagedFiles({ id: first.id, payload }))[0]!.key
+      const firstKey = (await getStoredFiles({ id: first.id, payload }))[0]!.key
       const updateOne = payload.db.updateOne.bind(payload.db)
       const spy = vi.spyOn(payload.db, 'updateOne').mockImplementation(async (args) => {
         if (args.collection === versionedCloudMediaSlug && 'filename' in args.data) {
@@ -1398,7 +1295,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
         spy.mockRestore()
       }
 
-      expect((await getManagedFiles({ id: first.id, payload }))[0]?.key).toBe(firstKey)
+      expect((await getStoredFiles({ id: first.id, payload }))[0]?.key).toBe(firstKey)
       expect(versionedCloudFiles.get(firstKey)).toEqual(await readFile(firstFile))
       expect(versionedCloudCalls.deletes).not.toContain(firstKey)
     },
@@ -1413,7 +1310,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       filePath: firstFile,
       overrideAccess: true,
     })
-    const firstKey = (await getManagedFiles({ id: first.id, payload }))[0]!.key
+    const firstKey = (await getStoredFiles({ id: first.id, payload }))[0]!.key
 
     await payload.update({
       id: first.id,
@@ -1423,7 +1320,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       overrideAccess: true,
       overwriteExistingFiles: true,
     })
-    const secondKey = (await getManagedFiles({ id: first.id, payload }))[0]!.key
+    const secondKey = (await getStoredFiles({ id: first.id, payload }))[0]!.key
 
     await payload.update({
       id: first.id,
@@ -1433,7 +1330,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       overrideAccess: true,
       overwriteExistingFiles: true,
     })
-    const thirdKey = (await getManagedFiles({ id: first.id, payload }))[0]!.key
+    const thirdKey = (await getStoredFiles({ id: first.id, payload }))[0]!.key
 
     expect(new Set([firstKey, secondKey, thirdKey]).size).toBe(3)
     expect([firstKey, secondKey, thirdKey].every((key) => versionedCloudFiles.has(key))).toBe(true)
@@ -1477,7 +1374,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
 
     expect(results.filter(({ status }) => status === 'fulfilled')).toHaveLength(1)
     expect(results.filter(({ status }) => status === 'rejected')).toHaveLength(1)
-    const winningKey = (await getManagedFiles({ id: first.id, payload }))[0]!.key
+    const winningKey = (await getStoredFiles({ id: first.id, payload }))[0]!.key
     expect(versionedCloudFiles.has(winningKey)).toBe(true)
     expect(versionedCloudCalls.deletes).not.toContain(winningKey)
     expect(versionedCloudFiles.size).toBe(2)

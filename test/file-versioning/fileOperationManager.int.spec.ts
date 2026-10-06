@@ -142,7 +142,6 @@ test.suite('File operation manager', { config: './config.ts' }, () => {
               stored.delete(key)
               removed.push(key)
             },
-            storageBackendId: `local:${draftMediaSlug}`,
           })
           staged += 1
           if (staged === 2) {
@@ -219,7 +218,6 @@ test.suite('File operation manager', { config: './config.ts' }, () => {
                 remove: async () => {
                   stored.delete(key)
                 },
-                storageBackendId: `local:${draftMediaSlug}`,
               })
               staged += 1
               if (staged === 2) {

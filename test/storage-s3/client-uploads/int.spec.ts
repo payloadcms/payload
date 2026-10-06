@@ -7,6 +7,7 @@ import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
+import { getStoredUploadKeys } from '../../__helpers/int/storedUploadKeys.js'
 import { test } from '../../__helpers/int/vitest.js'
 import { mediaHeaderOnlySlug, mediaHeaderOnlyWithSizesSlug, mediaSlug } from '../shared.js'
 import {
@@ -261,16 +262,13 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
 
     expect(safeResponse.status).toBe(201)
     expect(doc.filename).toBe('reference-original.svg')
-    const stored = await payload.db.findOne<{
-      _managedFiles: { key: string }[]
-      id: number | string
-    }>({
+    const stored = await payload.db.findOne({
       collection: 'media',
       where: { id: { equals: doc.id } },
     })
-    const currentKey = stored!._managedFiles.find(({ key }) =>
-      key.endsWith(`/${doc.filename}`),
-    )?.key
+    const currentKey = getStoredUploadKeys({ collectionSlug: 'media', doc: stored, payload }).find(
+      (key) => key.endsWith(`/${doc.filename}`),
+    )
 
     expect(currentKey).toBeTruthy()
     await expect(
@@ -587,14 +585,12 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
         overrideAccess: true,
         showHiddenFields: true,
       })
-      expect(stored._managedFiles).toEqual([
-        {
-          key: decodeURIComponent(
-            new URL(instructions.request.url).pathname.split('/').slice(2).join('/'),
-          ),
-          roles: [{ type: 'original' }, { type: 'default' }],
-          storageBackendId: `s3:${mediaHeaderOnlySlug}`,
-        },
+      expect(
+        getStoredUploadKeys({ collectionSlug: mediaHeaderOnlySlug, doc: stored, payload }),
+      ).toEqual([
+        decodeURIComponent(
+          new URL(instructions.request.url).pathname.split('/').slice(2).join('/'),
+        ),
       ])
       const originalResponse = await restClient.GET(
         `/${mediaHeaderOnlySlug}/file/${doc.original.filename}`,
@@ -691,12 +687,9 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
         overrideAccess: true,
         showHiddenFields: true,
       })
-      expect(stored._managedFiles).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ roles: [{ type: 'original' }, { type: 'default' }] }),
-          expect.objectContaining({ roles: [{ type: 'size', sizeKey: 'thumbnail' }] }),
-        ]),
-      )
+      expect(
+        getStoredUploadKeys({ collectionSlug: mediaHeaderOnlyWithSizesSlug, doc: stored, payload }),
+      ).toHaveLength(2)
     }, 60000)
   })
 

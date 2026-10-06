@@ -39,7 +39,9 @@ const createReq = (tempFilePath: string, size: number): PayloadRequest =>
       tempFilePath,
     },
     payload: {
-      config: {},
+      collections: { media: { config: { fields: [], upload: {} } } },
+      config: { routes: { api: '/api' } },
+      db: { findOne: vi.fn(async () => null) },
       logger: { error: vi.fn() },
     },
   }) as unknown as PayloadRequest
@@ -83,7 +85,7 @@ describe('generateFileData - non-image temp file buffering', () => {
     expect(readFileMock).not.toHaveBeenCalled()
     expect(writeFileMock).not.toHaveBeenCalled()
     expect(result.files).toEqual([
-      { path: '/tmp/media/big-video.mp4', sourcePath: '/tmp/payload-client-upload-def' },
+      { path: '/tmp/media/big-video-original.mp4', sourcePath: '/tmp/payload-client-upload-def' },
     ])
   })
 })

@@ -7,10 +7,7 @@ import sharp from 'sharp'
 import { expect } from 'vitest'
 
 /* eslint-disable payload/no-relative-monorepo-imports -- These lifecycle helpers are internal. */
-import {
-  collectVersionFiles,
-  scheduleUnreferencedFileCleanup,
-} from '../../packages/payload/src/uploads/fileVersioning/cleanup.js'
+import { collectVersionFiles } from '../../packages/payload/src/uploads/fileVersioning/cleanup.js'
 import { initTransaction } from '../../packages/payload/src/utilities/initTransaction.js'
 import { killTransaction } from '../../packages/payload/src/utilities/killTransaction.js'
 /* eslint-enable payload/no-relative-monorepo-imports */
@@ -43,13 +40,16 @@ const original = {
   width: 100,
 }
 
-const managedFiles = [
-  {
-    key: 'photo-original.jpg',
-    roles: [{ type: 'original' }, { type: 'default' }],
-    storageBackendId: 'local:file-versioned-media',
-  },
-]
+const storedFilenames = (doc: {
+  filename?: null | string
+  original?: { filename?: null | string } | null
+  variants?: null | Record<string, { filename?: null | string } | null>
+}): string[] =>
+  [
+    doc.filename,
+    doc.original?.filename,
+    ...Object.values(doc.variants ?? {}).map((size) => size?.filename),
+  ].filter((filename): filename is string => typeof filename === 'string')
 
 test.suite('File versioning fields', { config: './config.ts' }, () => {
   test.afterEach(async () => {
@@ -60,12 +60,11 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     await rm(trashMediaDir, { force: true, recursive: true })
   })
 
-  test('should ignore a client supplied original and manifest', async ({ payload }) => {
+  test('should ignore client supplied file identity fields', async ({ payload }) => {
     const created = await payload.create({
       collection: mediaSlug,
       data: {
         _fileRevision: 'forged',
-        _managedFiles: managedFiles,
         alt: 'client data',
         original,
       } as never,
@@ -81,7 +80,6 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     expect(internal.original?.url).toBeFalsy()
     expect(internal.original?.mimeType).toBeFalsy()
     expect(internal.original?.filesize).toBeFalsy()
-    expect(internal._managedFiles).toBeFalsy()
     expect(internal._fileRevision).toBeFalsy()
   })
 
@@ -114,27 +112,20 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     expect(new URL(created.original!.url!, 'http://localhost').searchParams.has('original')).toBe(
       false,
     )
-    expect(stored._managedFiles).toEqual([
-      {
-        key: created.filename,
-        roles: [{ type: 'original' }, { type: 'default' }],
-        storageBackendId: `local:${mediaSlug}`,
-      },
-    ])
+    expect(stored.filename).toBe(stored.original?.filename)
     expect(persisted?.original).toMatchObject(stored.original!)
-    expect(persisted?._managedFiles).toEqual(stored._managedFiles)
     const { docs: versions } = await payload.db.findVersions({
       collection: mediaSlug,
       where: { parent: { equals: created.id } },
     })
 
     expect(versions[0]?.version.original).toMatchObject(persisted?.original)
-    expect(versions[0]?.version._managedFiles).toEqual(persisted?._managedFiles)
+    expect(versions[0]?.version.filename).toBe(persisted?.filename)
     expect(await readdir(mediaDir)).toEqual(['photo-1-original.png'])
     expect(await readFile(path.join(mediaDir, created.filename!))).toEqual(bytes)
   })
 
-  test('should expose the original but not the managed manifest in read APIs', async ({
+  test('should expose the original without a separate file inventory in read APIs', async ({
     payload,
     restClient,
   }) => {
@@ -166,8 +157,8 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       filename: local.original?.filename,
       url: local.original?.url,
     })
-    expect(local._managedFiles).toBeUndefined()
-    expect(rest._managedFiles).toBeUndefined()
+    expect('_managedFiles' in local).toBe(false)
+    expect('_managedFiles' in rest).toBe(false)
   })
 
   test('should retain PDFs and videos without duplicating their source object', async ({
@@ -190,13 +181,6 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
 
       expect(stored?.filename).toBe(expectedFilename)
       expect(stored?.original?.filename).toBe(stored?.filename)
-      expect(stored?._managedFiles).toEqual([
-        {
-          key: stored?.filename,
-          roles: [{ type: 'original' }, { type: 'default' }],
-          storageBackendId: `local:${mediaSlug}`,
-        },
-      ])
       expect(await readFile(path.join(mediaDir, stored!.filename))).toEqual(bytes)
     }
   })
@@ -227,7 +211,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     expect((await stat(filePath)).mtimeMs).toBe(modifiedBefore)
     expect(await readFile(filePath)).toEqual(bytes)
     expect(after?.original).toEqual(before?.original)
-    expect(after?._managedFiles).toEqual(before?._managedFiles)
+    expect(after?.filename).toBe(before?.filename)
   })
 
   test('should give a duplicated upload independent managed objects', async ({ payload }) => {
@@ -247,7 +231,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       where: { id: { equals: duplicate.id } },
     })
 
-    expect(copied?._managedFiles?.[0]?.key).not.toBe(created.filename)
+    expect(copied?.filename).not.toBe(created.filename)
     expect(await readFile(path.join(mediaDir, duplicate.filename!))).toEqual(bytes)
     expect(await readFile(path.join(mediaDir, created.filename!))).toEqual(bytes)
   })
@@ -301,7 +285,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     })
 
     expect(stored?.original?.filename).toBe(stored?.filename)
-    expect(stored?._managedFiles?.[0]?.roles).toEqual([{ type: 'original' }, { type: 'default' }])
+    expect(stored?.filename).toBe(stored?.original?.filename)
     expect(await readFile(path.join(mediaDir, stored!.filename))).toEqual(bytes)
   })
 
@@ -403,7 +387,10 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       width: 1600,
     })
     expect(stored?.original?.filename).not.toBe(stored?.filename)
-    expect(stored?._managedFiles).toHaveLength(3)
+    expect(
+      new Set([stored?.filename, stored?.original?.filename, stored?.variants?.small?.filename])
+        .size,
+    ).toBe(3)
     expect(await readFile(path.join(transformedMediaDir, stored!.original!.filename))).toEqual(
       bytes,
     )
@@ -464,9 +451,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
 
     expect(resetDoc.filename).toBe(created.original!.filename)
     expect(resetDoc.url).toBe(created.original!.url)
-    expect(
-      current._managedFiles?.find((file) => file.key === created.original!.filename)?.roles,
-    ).toEqual([{ type: 'original' }, { type: 'default' }])
+    expect(current.filename).toBe(current.original?.filename)
     expect(await readFile(path.join(transformedMediaDir, resetDoc.filename!))).toEqual(bytes)
     expect(current.variants?.small?.filename).toBe(cropped.variants?.small?.filename)
 
@@ -476,9 +461,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     })
     const savedCrop = versions.find(({ version }) => version.alt === 'cropped')
     expect(savedCrop).toBeDefined()
-    const savedCropKey = savedCrop?.version._managedFiles?.find((file) =>
-      file.roles.some((role) => role.type === 'default'),
-    )?.key
+    const savedCropKey = savedCrop?.version.filename
     expect(savedCropKey).toBeTruthy()
     await expect(
       sharp(path.join(transformedMediaDir, savedCropKey)).metadata(),
@@ -534,9 +517,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     expect(current.focalX).toBe(75)
     expect(current.focalY).toBe(25)
     expect(current.variants?.small?.filename).not.toBe(cropped.variants?.small?.filename)
-    expect(
-      current._managedFiles?.find((file) => file.key === created.original!.filename)?.roles,
-    ).toEqual([{ type: 'original' }, { type: 'default' }])
+    expect(current.filename).toBe(current.original?.filename)
     expect(await readFile(path.join(transformedMediaDir, resetDoc.filename!))).toEqual(bytes)
   })
 
@@ -594,13 +575,10 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     expect(Buffer.from(await originalResponse.arrayBuffer())).toEqual(bytes)
   })
 
-  test('should retain trusted original and manifest data in a version snapshot', async ({
-    payload,
-  }) => {
+  test('should retain trusted original data in a version snapshot', async ({ payload }) => {
     const created = await payload.db.create({
       collection: mediaSlug,
       data: {
-        _managedFiles: managedFiles,
         alt: 'stored data',
         original: structuredClone(original),
       },
@@ -610,16 +588,12 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       id: created.id,
       collection: mediaSlug,
       data: {
-        _managedFiles: [
-          { key: 'forged.jpg', roles: [{ type: 'original' }], storageBackendId: 'other' },
-        ],
         alt: 'changed metadata',
         original: { ...original, filename: 'forged.jpg' },
       } as never,
     })
 
     expect(updated.original).toMatchObject(original)
-    expect(updated._managedFiles).toBeUndefined()
 
     const internal = await payload.findByID({
       id: created.id,
@@ -627,7 +601,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       showHiddenFields: true,
     })
 
-    expect(internal._managedFiles).toEqual(managedFiles)
+    expect(internal.original).toMatchObject(original)
 
     const { docs: versions } = await payload.db.findVersions({
       collection: mediaSlug,
@@ -635,7 +609,6 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     })
 
     expect(versions[0]?.version.original).toMatchObject(original)
-    expect(versions[0]?.version._managedFiles).toEqual(managedFiles)
   })
 
   test('should archive an outgoing original for every version that shares it', async ({
@@ -689,13 +662,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       expect(updatedAt).toBe(before?.updatedAt)
       expect(version.filename).toBe(archivedName)
       expect(version.original?.url).toContain(encodeURIComponent(archivedName))
-      expect(version._managedFiles).toEqual([
-        {
-          key: archivedName,
-          roles: [{ type: 'original' }, { type: 'default' }],
-          storageBackendId: `local:${mediaSlug}`,
-        },
-      ])
+      expect(version.original?.filename).toBe(version.filename)
       expect(await readFile(path.join(mediaDir, archivedName))).toEqual(firstBytes)
     }
   })
@@ -735,7 +702,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
 
     expect(baseline).toBeDefined()
     expect(baseline?.version.original?.filename).toBeTruthy()
-    expect(baseline?.version._managedFiles).toHaveLength(1)
+    expect(baseline?.version.filename).toBe(baseline?.version.original?.filename)
     expect(await readFile(path.join(mediaDir, baseline!.version.original!.filename))).toEqual(
       firstBytes,
     )
@@ -803,13 +770,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       (await readFile(path.join(mediaDir, current.original!.filename!))).equals(firstBytes),
     ).toBe(true)
     expect((await readFile(path.join(mediaDir, current.filename!))).equals(firstBytes)).toBe(true)
-    expect(current._managedFiles).toEqual([
-      {
-        key: current.filename,
-        roles: [{ type: 'original' }, { type: 'default' }],
-        storageBackendId: `local:${mediaSlug}`,
-      },
-    ])
+    expect(current.filename).toBe(current.original?.filename)
     expect(after.find(({ id }) => id === selected.id)?.version).toEqual(selected.version)
     expect(after.some(({ version }) => version.alt === 'B')).toBe(true)
 
@@ -960,7 +921,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
         firstBytes,
       ),
     ).toBe(true)
-    expect(current._managedFiles).toHaveLength(2)
+    expect(current.filename).not.toBe(current.original?.filename)
   })
 
   test('should retain a removed variant in history without restoring it to the current file', async ({
@@ -1019,11 +980,6 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
         collection: transformedMediaSlug,
         showHiddenFields: true,
       })
-      const restoredSize = current._managedFiles?.find(({ roles }) =>
-        roles.some((role) => role.type === 'size' && role.sizeKey === 'small'),
-      )
-
-      expect(restoredSize).toBeUndefined()
       expect(current.variants?.small?.filename).toBeFalsy()
       const historicalAfterRestore = await restClient.GET(
         `/${transformedMediaSlug}/file/${selected.version.variants!.small!.filename}`,
@@ -1370,7 +1326,6 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       id: created.id,
       collection: mediaSlug,
       data: {
-        _managedFiles: [],
         alt: 'without file',
         filename: null,
         original: { filename: null, filesize: null, mimeType: null, url: null },
@@ -1415,9 +1370,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
         where: { parent: { equals: first.id } },
       })
       const firstVersion = initialVersions.find(({ version }) => version.alt === 'first')!
-      const archivedOriginal = firstVersion.version._managedFiles!.find(({ roles }) =>
-        roles.some(({ type }) => type === 'original'),
-      )!.key
+      const archivedOriginal = firstVersion.version.original!.filename!
 
       expect(await readFile(path.join(mediaDir, archivedOriginal))).toBeTruthy()
 
@@ -1501,13 +1454,13 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
         where: { id: { equals: first.id } },
       })
       const storedKeys = new Set([
-        ...current!._managedFiles!.map(({ key }) => key),
-        ...versions.flatMap(({ version }) => version._managedFiles?.map(({ key }) => key) ?? []),
+        ...storedFilenames(current!),
+        ...versions.flatMap(({ version }) => storedFilenames(version)),
       ])
 
       expect(versions).toHaveLength(105)
-      const oldestKey = versions.find(({ version }) => version.alt === 'first')!.version
-        ._managedFiles![0]!.key
+      const oldestKey = versions.find(({ version }) => version.alt === 'first')!.version.original!
+        .filename!
       const historicalResponse = await restClient.GET(`/${mediaSlug}/file/${oldestKey}`)
 
       expect(historicalResponse.status).toBe(200)
@@ -1546,7 +1499,6 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
         id: created.id,
         collection: mediaSlug,
         data: {
-          _managedFiles: [],
           alt: 'without file',
           filename: null,
           original: { filename: null, filesize: null, mimeType: null, url: null },
@@ -1584,34 +1536,6 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     for (const filename of filenames) {
       await expect(stat(path.join(mediaDir, filename))).rejects.toMatchObject({ code: 'ENOENT' })
     }
-  })
-
-  test('should distinguish the same storage key in different backends', async ({ payload }) => {
-    const key = 'shared-key.png'
-    await mkdir(mediaDir, { recursive: true })
-    await writeFile(path.join(mediaDir, key), await readFile(imageFixture))
-    await payload.db.create({
-      collection: mediaSlug,
-      data: {
-        _managedFiles: [
-          {
-            key,
-            roles: [{ type: 'original' }],
-            storageBackendId: `other:${mediaSlug}`,
-          },
-        ],
-        alt: 'other backend reference',
-      },
-    })
-    const req = await createPayloadRequest({ payload })
-
-    await scheduleUnreferencedFileCleanup({
-      candidates: [{ key, roles: [{ type: 'original' }], storageBackendId: `local:${mediaSlug}` }],
-      collection: payload.collections[mediaSlug].config,
-      req,
-    })
-
-    await expect(stat(path.join(mediaDir, key))).rejects.toMatchObject({ code: 'ENOENT' })
   })
 
   test('should keep a trashed upload through restore and remove it on permanent delete', async ({
@@ -1708,90 +1632,6 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     expect(hasExpectedRollback).toBe(true)
   })
 
-  test('should archive a separately managed thumbnail with its historical version', async ({
-    payload,
-  }) => {
-    const originalBytes = await readFile(imageFixture)
-    const thumbnailBytes = await sharp(originalBytes).resize(80, 80).png().toBuffer()
-    const replacementBytes = await sharp(originalBytes).flop().png().toBuffer()
-    await mkdir(mediaDir, { recursive: true })
-    await writeFile(path.join(mediaDir, 'photo.png'), originalBytes)
-    await writeFile(path.join(mediaDir, 'photo-thumb.png'), thumbnailBytes)
-    const created = await payload.db.create({
-      collection: mediaSlug,
-      data: {
-        _managedFiles: [
-          {
-            key: 'photo.png',
-            roles: [{ type: 'original' }, { type: 'default' }],
-            storageBackendId: `local:${mediaSlug}`,
-          },
-          {
-            key: 'photo-thumb.png',
-            roles: [{ type: 'thumbnail' }],
-            storageBackendId: `local:${mediaSlug}`,
-          },
-        ],
-        alt: 'with thumbnail',
-        filename: 'photo.png',
-        filesize: originalBytes.length,
-        mimeType: 'image/png',
-        original: {
-          filename: 'photo.png',
-          filesize: originalBytes.length,
-          mimeType: 'image/png',
-          url: `/api/${mediaSlug}/file/photo.png`,
-        },
-        thumbnailURL: `/api/${mediaSlug}/file/photo-thumb.png`,
-        url: `/api/${mediaSlug}/file/photo.png`,
-      },
-    })
-
-    await payload.update({
-      id: created.id,
-      collection: mediaSlug,
-      data: { alt: 'replaced' },
-      file: {
-        name: 'replacement.png',
-        data: replacementBytes,
-        mimetype: 'image/png',
-        size: replacementBytes.length,
-      },
-    })
-
-    const { docs: versions } = await payload.db.findVersions({
-      collection: mediaSlug,
-      where: { parent: { equals: created.id } },
-    })
-    const previous = versions.find(({ version }) => version.alt === 'with thumbnail')?.version
-    const archivedThumbnail = (
-      previous?._managedFiles as Array<{ key: string; roles: Array<{ type: string }> }> | undefined
-    )?.find((file) => file.roles.some((role) => role.type === 'thumbnail'))
-
-    expect(archivedThumbnail?.key).not.toBe('photo-thumb.png')
-    expect(previous?.thumbnailURL).toContain(path.basename(archivedThumbnail!.key))
-    expect(await readFile(path.join(mediaDir, archivedThumbnail!.key))).toEqual(thumbnailBytes)
-
-    const selected = versions.find(({ version }) => version.alt === 'with thumbnail')!
-    await payload.restoreVersion({ id: selected.id, collection: mediaSlug })
-    const restored = await payload.db.findOne({
-      collection: mediaSlug,
-      where: { id: { equals: created.id } },
-    })
-    const restoredThumbnail = restored!._managedFiles!.find(({ roles }) =>
-      roles.some(({ type }) => type === 'thumbnail'),
-    )!
-
-    expect(await readFile(path.join(mediaDir, restoredThumbnail.key))).toEqual(thumbnailBytes)
-    expect(await readFile(path.join(mediaDir, archivedThumbnail!.key))).toEqual(thumbnailBytes)
-
-    await payload.delete({ id: created.id, collection: mediaSlug, overrideAccess: true })
-
-    for (const key of [restoredThumbnail.key, archivedThumbnail!.key]) {
-      await expect(stat(path.join(mediaDir, key))).rejects.toMatchObject({ code: 'ENOENT' })
-    }
-  })
-
   test('should read an untouched legacy local file without changing stored data or files', async ({
     payload,
   }) => {
@@ -1822,13 +1662,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       mimeType: 'image/png',
       url: `/api/${mediaSlug}/file/legacy.png`,
     })
-    expect(read._managedFiles).toEqual([
-      {
-        key: 'legacy.png',
-        roles: [{ type: 'original' }, { type: 'default' }],
-        storageBackendId: `local:${mediaSlug}`,
-      },
-    ])
+    expect(read.original?.filename).toBe(read.filename)
     expect(await readdir(mediaDir)).toEqual(filesBeforeRead)
 
     const stored = await payload.db.findOne({
@@ -1837,7 +1671,6 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     })
 
     expect(stored?.original?.filename).toBeFalsy()
-    expect(stored?._managedFiles).toBeFalsy()
   })
 
   test('should use a previously cropped stored file as the best available original', async ({
@@ -1875,7 +1708,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       height: 20,
       width: 40,
     })
-    expect(read._managedFiles?.[0]?.key).toBe('cropped.png')
+    expect(read.filename).toBe('cropped.png')
   })
 
   test('should synthesize each legacy version from its own saved file fields', async ({
@@ -1916,12 +1749,12 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       where: { parent: { equals: parent.id } },
     })
     const filesByAlt = Object.fromEntries(
-      docs.map(({ version }) => [version.alt, version._managedFiles]),
+      docs.map(({ version }) => [version.alt, version.original?.filename]),
     )
 
     expect(filesByAlt['first A']).toEqual(filesByAlt['second A'])
-    expect(filesByAlt['first A']?.[0]?.key).toBe('a.png')
-    expect(filesByAlt['first B']?.[0]?.key).toBe('b.png')
+    expect(filesByAlt['first A']).toBe('a.png')
+    expect(filesByAlt['first B']).toBe('b.png')
     expect(await readdir(mediaDir)).toEqual(filesBeforeRead)
 
     const storedVersions = await payload.db.findVersions({
@@ -1929,11 +1762,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       where: { parent: { equals: parent.id } },
     })
 
-    expect(
-      storedVersions.docs.every(
-        ({ version }) => !version.original?.filename && !version._managedFiles,
-      ),
-    ).toBe(true)
+    expect(storedVersions.docs.every(({ version }) => !version.original?.filename)).toBe(true)
   })
 
   test('should not claim a custom URL as a Payload-managed file', async ({ payload }) => {
@@ -1955,6 +1784,5 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     })
 
     expect(read.original?.filename).toBeFalsy()
-    expect(read._managedFiles).toBeFalsy()
   })
 })

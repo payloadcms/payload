@@ -16,6 +16,7 @@ import { expect } from 'vitest'
 
 import type { Config } from './payload-types.js'
 
+import { getStoredUploadKey, getStoredUploadKeys } from '../__helpers/int/storedUploadKeys.js'
 import { test } from '../__helpers/int/vitest.js'
 import { recordedCleanupTargets, uploadedTestFiles } from './buildPluginCloudStorageIntConfig.js'
 import { r2TestStorage } from './r2.js'
@@ -46,12 +47,12 @@ async function getManagedKeys({
   payload: Payload
   uploadId: number | string
 }): Promise<string[]> {
-  const uploadData = await payload.db.findOne<{ _managedFiles?: Array<{ key: string }> }>({
+  const uploadData = await payload.db.findOne({
     collection: collectionSlug,
     where: { id: { equals: uploadId } },
   })
 
-  return uploadData?._managedFiles?.map(({ key }) => key) ?? []
+  return getStoredUploadKeys({ collectionSlug, doc: uploadData, payload })
 }
 
 async function verifyUploads({
@@ -70,7 +71,6 @@ async function verifyUploads({
   uploadId: number | string
 }) {
   const uploadData = await payload.db.findOne<{
-    _managedFiles?: Array<{ key: string }>
     filename?: string
     original?: { filename?: string }
     variants?: Record<string, { filename?: string }>
@@ -78,7 +78,7 @@ async function verifyUploads({
     collection: collectionSlug,
     where: { id: { equals: uploadId } },
   })
-  const fileKeys = uploadData?._managedFiles?.map(({ key }) => key) ?? []
+  const fileKeys = getStoredUploadKeys({ collectionSlug, doc: uploadData, payload })
   const filenames = [
     uploadData?.filename,
     uploadData?.original?.filename,
@@ -357,14 +357,18 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
             collection: versionedS3MediaSlug,
             where: { id: { equals: first.id } },
           })
-          const firstFiles = (
-            firstRow as { _managedFiles: Array<{ key: string; roles: Array<{ type: string }> }> }
-          )._managedFiles
-          const firstKey = firstFiles[0]!.key
+          const firstFiles = getStoredUploadKeys({
+            collectionSlug: versionedS3MediaSlug,
+            doc: firstRow,
+            payload,
+          })
+          const firstKey = getStoredUploadKey({
+            collectionSlug: versionedS3MediaSlug,
+            payload,
+            representation: firstRow!,
+          })!
 
-          expect(firstFiles.some(({ roles }) => roles.some(({ type }) => type === 'size'))).toBe(
-            true,
-          )
+          expect(firstRow?.variants?.small?.filename).toBeTruthy()
 
           await payload.update({
             id: first.id,
@@ -377,11 +381,19 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
             collection: versionedS3MediaSlug,
             where: { id: { equals: first.id } },
           })
-          const secondFiles = (secondRow as { _managedFiles: Array<{ key: string }> })._managedFiles
-          const secondKey = secondFiles[0]!.key
+          const secondFiles = getStoredUploadKeys({
+            collectionSlug: versionedS3MediaSlug,
+            doc: secondRow,
+            payload,
+          })
+          const secondKey = getStoredUploadKey({
+            collectionSlug: versionedS3MediaSlug,
+            payload,
+            representation: secondRow!,
+          })!
 
           expect(secondKey).not.toBe(firstKey)
-          for (const key of [...firstFiles, ...secondFiles].map(({ key }) => key)) {
+          for (const key of [...firstFiles, ...secondFiles]) {
             const response = await client.send(
               new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: key }),
             )
@@ -405,9 +417,11 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
             collection: versionedS3MediaSlug,
             where: { id: { equals: created.id } },
           })
-          const initialOriginalKey = (
-            initialRow as { _managedFiles: Array<{ key: string; roles: Array<{ type: string }> }> }
-          )._managedFiles.find(({ roles }) => roles.some(({ type }) => type === 'original'))!.key
+          const initialOriginalKey = getStoredUploadKey({
+            collectionSlug: versionedS3MediaSlug,
+            payload,
+            representation: initialRow!.original!,
+          })!
 
           for (const [x, alt] of [
             [0, 'first crop'],
@@ -442,9 +456,11 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
             width: initialOriginal?.width,
           })
           expect(
-            current._managedFiles?.find(({ roles }) =>
-              roles.some(({ type }) => type === 'original'),
-            )?.key,
+            getStoredUploadKey({
+              collectionSlug: versionedS3MediaSlug,
+              payload,
+              representation: current.original!,
+            }),
           ).toBe(initialOriginalKey)
 
           const originalResponse = await restClient.GET(
@@ -467,9 +483,11 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
             collection: versionedS3MediaSlug,
             where: { id: { equals: first.id } },
           })
-          const firstKey = firstStored!._managedFiles!.find(({ roles }) =>
-            roles.some(({ type }) => type === 'original'),
-          )!.key
+          const firstKey = getStoredUploadKey({
+            collectionSlug: versionedS3MediaSlug,
+            payload,
+            representation: firstStored!.original!,
+          })!
 
           await payload.update({
             id: first.id,
@@ -483,8 +501,13 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
             pagination: false,
             where: { parent: { equals: first.id } },
           })
-          const selected = docs.find(({ version }) =>
-            version._managedFiles?.some(({ key }) => key === firstKey),
+          const selected = docs.find(
+            ({ version }) =>
+              getStoredUploadKey({
+                collectionSlug: versionedS3MediaSlug,
+                payload,
+                representation: version.original!,
+              }) === firstKey,
           )!
           const historical = await payload.findVersionByID({
             id: selected.id,
@@ -511,9 +534,11 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
             overrideAccess: false,
             showHiddenFields: true,
           })
-          const restoredOriginalKey = restored._managedFiles!.find(({ roles }) =>
-            roles.some(({ type }) => type === 'original'),
-          )!.key
+          const restoredOriginalKey = getStoredUploadKey({
+            collectionSlug: versionedS3MediaSlug,
+            payload,
+            representation: restored.original!,
+          })!
           const restoredURL = new URL(restored.original!.url!, 'http://localhost')
           const restoredResponse = await restClient.GET(
             `${restoredURL.pathname.replace(/^\/api/, '')}${restoredURL.search}`,

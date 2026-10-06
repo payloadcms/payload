@@ -4,6 +4,8 @@ import { del, list } from '@vercel/blob'
 import path from 'node:path'
 import { expect } from 'vitest'
 
+import { getStoredUploadKeys } from '../__helpers/int/storedUploadKeys.js'
+
 export async function clearTestBlobs(): Promise<void> {
   const { blobs } = await list()
 
@@ -27,7 +29,6 @@ export async function verifyUploads({
     collection: collectionSlug as CollectionSlug,
     where: { id: { equals: uploadId } },
   })) as unknown as {
-    _managedFiles: { key: string }[]
     filename: string
     original?: { filename?: string }
     variants: Record<string, { filename: string }>
@@ -35,7 +36,7 @@ export async function verifyUploads({
 
   const { blobs } = await list()
 
-  const fileKeys = uploadData._managedFiles.map(({ key }) => key)
+  const fileKeys = getStoredUploadKeys({ collectionSlug, doc: uploadData, payload })
   const filenames = [
     uploadData.filename,
     uploadData.original?.filename,

@@ -12,7 +12,6 @@ import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 export type StagedObject = {
   key: string
   remove: () => Promise<void>
-  storageBackendId: string
 }
 
 type Attempt = {
@@ -214,12 +213,10 @@ export const runFileCreationPlan = async <T>({
 export const stageLocalUploadFiles = async ({
   files,
   staticDir,
-  storageBackendId,
   trackStagedObject,
 }: {
   files: FileToSave[]
   staticDir: string
-  storageBackendId: string
   trackStagedObject: (object: StagedObject) => void
 }): Promise<void> => {
   const directory = path.resolve(staticDir)
@@ -237,14 +234,12 @@ export const stageLocalUploadFiles = async ({
       trackStagedObject({
         key,
         remove: () => fs.rm(destination, { force: true }),
-        storageBackendId,
       })
     } else {
       const handle = await fs.open(destination, 'wx')
       trackStagedObject({
         key,
         remove: () => fs.rm(destination, { force: true }),
-        storageBackendId,
       })
       try {
         await handle.writeFile(file.buffer)
@@ -299,13 +294,11 @@ const getRequestState = ({ req }: { req: PayloadRequest }): RequestState => {
 const createStagedObjectTracker =
   ({ attempt }: { attempt: Attempt }) =>
   (object: StagedObject): void => {
-    const identity = `${object.storageBackendId}\0${object.key}`
-
-    if (attempt.staged.has(identity)) {
+    if (attempt.staged.has(object.key)) {
       throw new Error(`Storage object was staged twice: ${object.key}`)
     }
 
-    attempt.staged.set(identity, object)
+    attempt.staged.set(object.key, object)
   }
 
 const finishFileOperation = async ({
@@ -423,7 +416,7 @@ const compensate = async ({
     } catch (err) {
       req.payload.logger.error({
         err,
-        msg: `Failed to remove staged upload file ${object.storageBackendId}:${object.key}`,
+        msg: `Failed to remove staged upload file ${object.key}`,
       })
     }
   }

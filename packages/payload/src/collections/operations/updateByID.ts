@@ -28,7 +28,7 @@ import {
   beginFileOperationScope,
   completeFileOperationScope,
 } from '../../uploads/fileVersioning/fileOperationManager.js'
-import { withLegacyCloudUploadFileData } from '../../uploads/fileVersioning/manifest.js'
+import { withLegacyCloudUploadFileData } from '../../uploads/fileVersioning/storedFiles.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import {
   getLocalizedUploadProperties,
@@ -360,7 +360,7 @@ export const updateByIDOperation = async <
           collection: collectionConfig,
           current: docWithLocales,
           files: filesToUpload,
-          nextManifest: (newFileData as Record<string, unknown>)._managedFiles,
+          next: newFileData as Record<string, unknown>,
           req,
           write,
         })

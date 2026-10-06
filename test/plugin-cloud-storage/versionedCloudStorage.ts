@@ -1,5 +1,50 @@
 import type { Adapter } from '@payloadcms/plugin-cloud-storage/types'
 
+import path from 'node:path'
+
+type StoredRepresentation = {
+  _objectKey?: null | string
+  filename?: null | string
+  prefix?: null | string
+}
+
+type StoredUpload = {
+  original?: null | StoredRepresentation
+  variants?: null | Record<string, null | StoredRepresentation>
+} & StoredRepresentation
+
+export const getStoredCloudFiles = (doc: null | StoredUpload | undefined) => {
+  if (!doc) {
+    return []
+  }
+  const files: Array<{ key: string; roles: Array<{ sizeKey?: string; type: string }> }> = []
+  const add = (
+    representation: null | StoredRepresentation | undefined,
+    role: { sizeKey?: string; type: string },
+  ) => {
+    if (!representation?.filename) {
+      return
+    }
+    const key = path.posix.join(
+      representation.prefix ?? '',
+      representation._objectKey ?? '',
+      representation.filename,
+    )
+    const existing = files.find((file) => file.key === key)
+    if (existing) {
+      existing.roles.push(role)
+    } else {
+      files.push({ key, roles: [role] })
+    }
+  }
+  add(doc.original, { type: 'original' })
+  add(doc, { type: 'default' })
+  for (const [sizeKey, variant] of Object.entries(doc.variants ?? {})) {
+    add(variant, { type: 'size', sizeKey })
+  }
+  return files
+}
+
 export const versionedCloudFiles = new Map<string, Buffer>()
 export const versionedCloudFailure: {
   afterChange: boolean
@@ -70,8 +115,9 @@ export const versionedCloudAdapter: Adapter = () => ({
     return Promise.resolve()
   },
   staticHandler: (_req, { doc, params: { filename } }) => {
-    const manifest = (doc as { _managedFiles?: Array<{ key: string }> } | undefined)?._managedFiles
-    const key = manifest?.find((file) => file.key.split('/').at(-1) === filename)?.key
+    const key = getStoredCloudFiles(doc as StoredUpload).find(
+      (file) => path.posix.basename(file.key) === filename,
+    )?.key
     const bytes = key ? versionedCloudFiles.get(key) : undefined
 
     return bytes ? new Response(new Uint8Array(bytes)) : new Response('Not found', { status: 404 })

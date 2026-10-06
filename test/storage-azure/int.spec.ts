@@ -9,6 +9,7 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { copyAzureFile } from '../../packages/storage-azure/src/copyFile.js'
+import { getStoredUploadKeys } from '../__helpers/int/storedUploadKeys.js'
 import { test } from '../__helpers/int/vitest.js'
 import { runTransformReadsRealSourceTest } from '../__helpers/shared/transformSourceTests.js'
 import {
@@ -152,12 +153,11 @@ test.suite('@payloadcms/storage-azure', { config: './config.ts', resetBetweenTes
       collection: collectionSlug,
       where: { id: { equals: uploadId } },
     })) as unknown as {
-      _managedFiles: { key: string }[]
       filename: string
       original?: { filename?: string }
       variants: Record<string, { filename: string }>
     }
-    const fileKeys = uploadData._managedFiles.map(({ key }) => key)
+    const fileKeys = getStoredUploadKeys({ collectionSlug, doc: uploadData, payload })
     const filenames = [
       uploadData.filename,
       uploadData.original?.filename,

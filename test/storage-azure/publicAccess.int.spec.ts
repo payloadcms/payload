@@ -7,6 +7,7 @@ import { expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
+import { getStoredUploadKeys } from '../__helpers/int/storedUploadKeys.js'
 import { test } from '../__helpers/int/vitest.js'
 import {
   azureBaseURL,
@@ -47,11 +48,11 @@ test.suite('storage-azure container access', { config: './publicAccess.config.ts
     restClient,
   }) => {
     const doc = await uploadImage(restClient, privateMediaSlug)
-    const stored = await payload.db.findOne<{ _managedFiles?: Array<{ key: string }> }>({
+    const stored = await payload.db.findOne({
       collection: privateMediaSlug,
       where: { id: { equals: doc.id } },
     })
-    const key = stored?._managedFiles?.[0]?.key
+    const key = getStoredUploadKeys({ collectionSlug: privateMediaSlug, doc: stored, payload })[0]
 
     expect(key).toBeTruthy()
     const blobServiceClient = BlobServiceClient.fromConnectionString(azureConnectionString)
@@ -79,11 +80,11 @@ test.suite('storage-azure container access', { config: './publicAccess.config.ts
     restClient,
   }) => {
     const doc = await uploadImage(restClient, publicMediaSlug)
-    const stored = await payload.db.findOne<{ _managedFiles?: Array<{ key: string }> }>({
+    const stored = await payload.db.findOne({
       collection: publicMediaSlug,
       where: { id: { equals: doc.id } },
     })
-    const key = stored?._managedFiles?.[0]?.key
+    const key = getStoredUploadKeys({ collectionSlug: publicMediaSlug, doc: stored, payload })[0]
 
     expect(key).toBeTruthy()
     const directResponse = await fetch(`${azureBaseURL}/${publicContainerName}/${key}`)

@@ -6,14 +6,18 @@ import type { Config } from '../../config/types.js'
 import type { JsonObject, PayloadRequest } from '../../types/index.js'
 import type { FileToSave } from '../types.js'
 import type { StagedObject } from './fileOperationManager.js'
-import type { ManagedFileManifest } from './types.js'
+import type { StoredFileList } from './types.js'
 
 import { saveVersion } from '../../versions/saveVersion.js'
 import { scheduleUnreferencedFileCleanup } from './cleanup.js'
 import { runFileOperationPlan, stageLocalUploadFiles } from './fileOperationManager.js'
 import { copyLocalFile } from './localStorage.js'
-import { getManagedFileIdentity, withLegacyUploadFileData } from './manifest.js'
 import { getArchivedFilename } from './naming.js'
+import {
+  collectStoredFiles,
+  getStoredFileIdentity,
+  withLegacyUploadFileData,
+} from './storedFiles.js'
 
 type VersionRow = {
   createdAt: string
@@ -30,7 +34,7 @@ export const runLocalFileUpdate = async <T>({
   collection,
   current,
   files,
-  nextManifest,
+  next,
   req,
   write,
 }: {
@@ -38,7 +42,7 @@ export const runLocalFileUpdate = async <T>({
   current: JsonObject
   files: FileToSave[]
   id: number | string
-  nextManifest: unknown
+  next: JsonObject
   req: PayloadRequest
   write: () => Promise<T>
 }): Promise<T> => {
@@ -48,7 +52,8 @@ export const runLocalFileUpdate = async <T>({
       config: req.payload.config,
       current,
       hasNewFiles: files.length > 0,
-      nextManifest,
+      next,
+      req,
     })
   ) {
     return write()
@@ -62,7 +67,6 @@ export const runLocalFileUpdate = async <T>({
       stageLocalUploadFiles({
         files,
         staticDir: collection.upload.staticDir!,
-        storageBackendId: `local:${collection.slug}`,
         trackStagedObject,
       }),
     write: async ({ trackStagedObject }) => {
@@ -70,7 +74,7 @@ export const runLocalFileUpdate = async <T>({
         id,
         collection,
         current,
-        nextManifest: nextManifest as ManagedFileManifest,
+        next,
         req,
         trackStagedObject,
       })
@@ -82,7 +86,8 @@ export const runLocalFileUpdate = async <T>({
           collection,
           config: req.payload.config,
           current,
-          nextManifest: nextManifest as ManagedFileManifest,
+          next,
+          req,
         }),
         collection,
         req,
@@ -99,22 +104,24 @@ const hasLocalFileChange = ({
   config,
   current,
   hasNewFiles,
-  nextManifest,
+  next,
+  req,
 }: {
   collection: SanitizedCollectionConfig
   config: Pick<Config, 'routes' | 'serverURL'>
   current: JsonObject
   hasNewFiles: boolean
-  nextManifest: unknown
+  next: JsonObject
+  req: PayloadRequest
 }): boolean =>
   !collection.upload.disableLocalStorage &&
-  Array.isArray(nextManifest) &&
   (hasNewFiles ||
     getOutgoingLocalFiles({
       collection,
       config,
       current,
-      nextManifest: nextManifest as ManagedFileManifest,
+      next,
+      req,
     }).length > 0)
 
 /** Preserves outgoing local objects and repairs every retained version that referenced them. */
@@ -122,14 +129,14 @@ export const archiveOutgoingLocalFiles = async ({
   id,
   collection,
   current,
-  nextManifest,
+  next,
   req,
   trackStagedObject,
 }: {
   collection: SanitizedCollectionConfig
   current: JsonObject
   id: number | string
-  nextManifest: ManagedFileManifest
+  next: JsonObject
   req: PayloadRequest
   trackStagedObject: (object: StagedObject) => void
 }): Promise<void> => {
@@ -137,7 +144,8 @@ export const archiveOutgoingLocalFiles = async ({
     collection,
     config: req.payload.config,
     current,
-    nextManifest,
+    next,
+    req,
   })
 
   if (!outgoing.length || !collection.versions) {
@@ -165,10 +173,8 @@ export const archiveOutgoingLocalFiles = async ({
   }
 
   const replacements = new Map<string, string>()
-  const storageBackendId = `local:${collection.slug}`
-
   for (const file of outgoing) {
-    const identity = getManagedFileIdentity(file)
+    const identity = getStoredFileIdentity(file)
     const newestVersion = versions.find(({ version }) => {
       const stored = withLegacyUploadFileData({
         collection,
@@ -176,11 +182,9 @@ export const archiveOutgoingLocalFiles = async ({
         doc: version,
       })
 
-      return Array.isArray(stored._managedFiles)
-        ? (stored._managedFiles as ManagedFileManifest).some(
-            (candidate) => getManagedFileIdentity(candidate) === identity,
-          )
-        : false
+      return collectStoredFiles({ collection, doc: stored, req }).some(
+        (candidate) => getStoredFileIdentity(candidate) === identity,
+      )
     })
 
     if (!newestVersion) {
@@ -215,7 +219,6 @@ export const archiveOutgoingLocalFiles = async ({
     trackStagedObject({
       key: archivedKey,
       remove: () => fs.rm(path.join(collection.upload.staticDir!, archivedKey), { force: true }),
-      storageBackendId,
     })
     replacements.set(identity, archivedKey)
   }
@@ -226,7 +229,11 @@ export const archiveOutgoingLocalFiles = async ({
       config: req.payload.config,
       doc: row.version,
     })
-    const version = replaceManagedFileReferences({ replacements, version: stored })
+    const version = replaceStoredFileReferences({
+      files: collectStoredFiles({ collection, doc: stored, req }),
+      replacements,
+      version: stored,
+    })
 
     if (!version) {
       continue
@@ -252,25 +259,20 @@ const getOutgoingLocalFiles = ({
   collection,
   config,
   current,
-  nextManifest,
+  next,
+  req,
 }: {
   collection: SanitizedCollectionConfig
   config: Pick<Config, 'routes' | 'serverURL'>
   current: JsonObject
-  nextManifest: ManagedFileManifest
-}): ManagedFileManifest => {
+  next: JsonObject
+  req: PayloadRequest
+}): StoredFileList => {
   const currentWithState = withLegacyUploadFileData({ collection, config, doc: current })
-  const currentManifest = Array.isArray(currentWithState._managedFiles)
-    ? (currentWithState._managedFiles as ManagedFileManifest)
-    : []
-  const nextIdentities = new Set(nextManifest.map(getManagedFileIdentity))
-  const storageBackendId = `local:${collection.slug}`
-
-  return currentManifest.filter(
-    (file) =>
-      file.storageBackendId === storageBackendId &&
-      !nextIdentities.has(getManagedFileIdentity(file)),
-  )
+  const currentFiles = collectStoredFiles({ collection, doc: currentWithState, req })
+  const nextFiles = collectStoredFiles({ collection, doc: next, req, trustGenerated: true })
+  const nextIdentities = new Set(nextFiles.map(getStoredFileIdentity))
+  return currentFiles.filter((file) => !nextIdentities.has(getStoredFileIdentity(file)))
 }
 
 const getVersions = async ({
@@ -294,23 +296,24 @@ const getVersions = async ({
   return docs as VersionRow[]
 }
 
-export const replaceManagedFileReferences = ({
+export const replaceStoredFileReferences = ({
+  files,
   replacements,
   version,
 }: {
+  files: StoredFileList
   replacements: Map<string, string>
   version: JsonObject
 }): JsonObject | undefined => {
-  if (!Array.isArray(version._managedFiles)) {
+  if (!files.length) {
     return
   }
 
   const archived = structuredClone(version)
-  const manifest = archived._managedFiles as ManagedFileManifest
   let hasChanged = false
 
-  for (const file of manifest) {
-    const archivedKey = replacements.get(getManagedFileIdentity(file))
+  for (const file of files) {
+    const archivedKey = replacements.get(getStoredFileIdentity(file))
 
     if (!archivedKey) {
       continue
@@ -320,15 +323,6 @@ export const replaceManagedFileReferences = ({
     const archivedFilename = path.posix.basename(archivedKey)
 
     for (const role of file.roles) {
-      if (role.type === 'thumbnail') {
-        archived.thumbnailURL = replaceURLFilename({
-          filename: archivedFilename,
-          previousFilename,
-          url: archived.thumbnailURL,
-        })
-        continue
-      }
-
       let stored: JsonObject | undefined
       switch (role.type) {
         case 'default':
@@ -352,7 +346,6 @@ export const replaceManagedFileReferences = ({
       }
     }
 
-    file.key = archivedKey
     hasChanged = true
   }
 

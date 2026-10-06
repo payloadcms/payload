@@ -3,22 +3,25 @@ import type { PayloadComponent } from '../config/types.js'
 import type { UploadCollectionSlug } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { StagedObject } from './fileVersioning/fileOperationManager.js'
-import type { ManagedFileManifest } from './fileVersioning/types.js'
 
 export type OriginalFileData = {
+  _objectKey?: string
   filename: string
   filesize: number
   height?: null | number
   mimeType: string
+  prefix?: string
   url: string
   width?: null | number
 }
 
 export type FileSize = {
+  _objectKey?: string
   filename: null | string
   filesize: null | number
   height: null | number
   mimeType: null | string
+  prefix?: string
   url: null | string
   width: null | number
 }
@@ -28,7 +31,6 @@ export type FileSizes = {
 }
 
 export type FileData = {
-  _managedFiles?: ManagedFileManifest | null
   _objectKey?: string
   filename: string
   filesize: number
@@ -37,6 +39,7 @@ export type FileData = {
   height: number
   mimeType: string
   original?: null | OriginalFileData
+  prefix?: string
   tempFilePath?: string
   url?: string
   variants: FileSizes
@@ -246,23 +249,23 @@ export type UploadConfig = {
       trackStagedObject: (object: StagedObject) => void
     }) => Promise<void>
     delete: (args: { key: string; req: PayloadRequest }) => Promise<void>
-    getLegacyManifest?: (args: {
+    hasLegacyFile?: (args: {
       doc: Record<string, unknown>
       req: PayloadRequest
-    }) => Promise<ManagedFileManifest>
+    }) => Promise<boolean>
     move?: (args: {
       from: string
       req: PayloadRequest
       to: string
       trackStagedObject: (object: StagedObject) => void
     }) => Promise<void>
+    resolveStorageKey: (args: { _objectKey?: string; filename: string; prefix?: string }) => string
     stage: (args: {
       data: Record<string, unknown>
       files: FileToSave[]
       req: PayloadRequest
       trackStagedObject: (object: StagedObject) => void
-    }) => Promise<{ managedFiles: ManagedFileManifest; metadata: Record<string, unknown> }>
-    storageBackendId: string
+    }) => Promise<{ metadata: Record<string, unknown> }>
   }
   /**
    * Require files to be uploaded when creating a document.

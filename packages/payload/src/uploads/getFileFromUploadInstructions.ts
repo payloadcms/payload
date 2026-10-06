@@ -62,7 +62,15 @@ export const getFileFromUploadInstructions = async ({
   const uploadConfig = req.payload.collections[collectionSlug]!.config.upload
   let allowOverwrite = false
   let providerFilename = file.filename
-  let verifiedOriginal: { filename: string; key: string; signedReceipt: string } | undefined
+  let verifiedOriginal:
+    | {
+        _objectKey?: string
+        filename: string
+        key: string
+        prefix?: string
+        signedReceipt: string
+      }
+    | undefined
 
   if (uploadConfig?.uploadInstructions?.requiresUploadReceipt) {
     const signedReceipt =
@@ -103,8 +111,10 @@ export const getFileFromUploadInstructions = async ({
     providerFilename = allowOverwrite ? file.filename : originalFilename
     if (!allowOverwrite) {
       verifiedOriginal = {
+        _objectKey: receipt._objectKey,
         filename: originalFilename,
         key: storageFilePath,
+        prefix: receipt.filePrefix,
         signedReceipt: signedReceipt as string,
       }
     }

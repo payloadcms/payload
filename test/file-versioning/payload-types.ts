@@ -94,16 +94,18 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   fallbackLocale: null;
   globals: {};
   globalsSelect: {};
   locale: null;
   widgets: {
+    welcome: WelcomeWidget;
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
     activity: ActivityWidget;
+    'upload-dropzone': UploadDropzoneWidget;
   };
   user: User;
   jobs: {
@@ -134,15 +136,15 @@ export interface UserAuthOperations {
  * via the `definition` "file-versioned-media".
  */
 export interface FileVersionedMedia {
-  id: number;
+  id: string;
   alt?: string | null;
   createdBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -160,21 +162,9 @@ export interface FileVersionedMedia {
     filesize?: number | null;
     width?: number | null;
     height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
   };
-  _managedFiles?: {
-    key: string;
-    roles: (
-      | {
-          type: 'size';
-          sizeKey: string;
-        }
-      | {
-          type: 'original' | 'default' | 'thumbnail';
-        }
-    )[];
-    storageBackendId: string;
-    [k: string]: unknown;
-  }[];
   _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
@@ -184,14 +174,14 @@ export interface FileVersionedMedia {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   createdBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -218,15 +208,15 @@ export interface User {
  * via the `definition` "file-versioned-draft-media".
  */
 export interface FileVersionedDraftMedia {
-  id: number;
+  id: string;
   alt?: string | null;
   createdBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -245,21 +235,9 @@ export interface FileVersionedDraftMedia {
     filesize?: number | null;
     width?: number | null;
     height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
   };
-  _managedFiles?: {
-    key: string;
-    roles: (
-      | {
-          type: 'size';
-          sizeKey: string;
-        }
-      | {
-          type: 'original' | 'default' | 'thumbnail';
-        }
-    )[];
-    storageBackendId: string;
-    [k: string]: unknown;
-  }[];
   _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
@@ -269,15 +247,15 @@ export interface FileVersionedDraftMedia {
  * via the `definition` "file-versioned-transformed-media".
  */
 export interface FileVersionedTransformedMedia {
-  id: number;
+  id: string;
   alt?: string | null;
   createdBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -295,21 +273,9 @@ export interface FileVersionedTransformedMedia {
     filesize?: number | null;
     width?: number | null;
     height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
   };
-  _managedFiles?: {
-    key: string;
-    roles: (
-      | {
-          type: 'size';
-          sizeKey: string;
-        }
-      | {
-          type: 'original' | 'default' | 'thumbnail';
-        }
-    )[];
-    storageBackendId: string;
-    [k: string]: unknown;
-  }[];
   _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
@@ -321,6 +287,8 @@ export interface FileVersionedTransformedMedia {
       mimeType?: string | null;
       filesize?: number | null;
       filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
     };
   };
 }
@@ -329,15 +297,15 @@ export interface FileVersionedTransformedMedia {
  * via the `definition` "file-versioned-converted-media".
  */
 export interface FileVersionedConvertedMedia {
-  id: number;
+  id: string;
   alt?: string | null;
   createdBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -355,21 +323,9 @@ export interface FileVersionedConvertedMedia {
     filesize?: number | null;
     width?: number | null;
     height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
   };
-  _managedFiles?: {
-    key: string;
-    roles: (
-      | {
-          type: 'size';
-          sizeKey: string;
-        }
-      | {
-          type: 'original' | 'default' | 'thumbnail';
-        }
-    )[];
-    storageBackendId: string;
-    [k: string]: unknown;
-  }[];
   _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
@@ -379,15 +335,15 @@ export interface FileVersionedConvertedMedia {
  * via the `definition` "file-versioned-trash-media".
  */
 export interface FileVersionedTrashMedia {
-  id: number;
+  id: string;
   alt?: string | null;
   createdBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -406,21 +362,9 @@ export interface FileVersionedTrashMedia {
     filesize?: number | null;
     width?: number | null;
     height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
   };
-  _managedFiles?: {
-    key: string;
-    roles: (
-      | {
-          type: 'size';
-          sizeKey: string;
-        }
-      | {
-          type: 'original' | 'default' | 'thumbnail';
-        }
-    )[];
-    storageBackendId: string;
-    [k: string]: unknown;
-  }[];
   _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
@@ -430,15 +374,15 @@ export interface FileVersionedTrashMedia {
  * via the `definition` "file-versioned-plain-media".
  */
 export interface FileVersionedPlainMedia {
-  id: number;
+  id: string;
   alt?: string | null;
   createdBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedBy?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -456,21 +400,9 @@ export interface FileVersionedPlainMedia {
     filesize?: number | null;
     width?: number | null;
     height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
   };
-  _managedFiles?: {
-    key: string;
-    roles: (
-      | {
-          type: 'size';
-          sizeKey: string;
-        }
-      | {
-          type: 'original' | 'default' | 'thumbnail';
-        }
-    )[];
-    storageBackendId: string;
-    [k: string]: unknown;
-  }[];
   _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
@@ -480,7 +412,7 @@ export interface FileVersionedPlainMedia {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: number;
+  id: string;
   key: string;
   data:
     | {
@@ -497,40 +429,40 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'file-versioned-media';
-        value: number | FileVersionedMedia;
+        value: string | FileVersionedMedia;
       } | null)
     | ({
         relationTo: 'file-versioned-draft-media';
-        value: number | FileVersionedDraftMedia;
+        value: string | FileVersionedDraftMedia;
       } | null)
     | ({
         relationTo: 'file-versioned-transformed-media';
-        value: number | FileVersionedTransformedMedia;
+        value: string | FileVersionedTransformedMedia;
       } | null)
     | ({
         relationTo: 'file-versioned-converted-media';
-        value: number | FileVersionedConvertedMedia;
+        value: string | FileVersionedConvertedMedia;
       } | null)
     | ({
         relationTo: 'file-versioned-trash-media';
-        value: number | FileVersionedTrashMedia;
+        value: string | FileVersionedTrashMedia;
       } | null)
     | ({
         relationTo: 'file-versioned-plain-media';
-        value: number | FileVersionedPlainMedia;
+        value: string | FileVersionedPlainMedia;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -540,10 +472,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -563,7 +495,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -595,8 +527,9 @@ export interface FileVersionedMediaSelect<T extends boolean = true> {
         filesize?: T;
         width?: T;
         height?: T;
+        prefix?: T;
+        _objectKey?: T;
       };
-  _managedFiles?: T;
   _fileRevision?: T;
   focalX?: T;
   focalY?: T;
@@ -628,8 +561,9 @@ export interface FileVersionedDraftMediaSelect<T extends boolean = true> {
         filesize?: T;
         width?: T;
         height?: T;
+        prefix?: T;
+        _objectKey?: T;
       };
-  _managedFiles?: T;
   _fileRevision?: T;
   focalX?: T;
   focalY?: T;
@@ -660,8 +594,9 @@ export interface FileVersionedTransformedMediaSelect<T extends boolean = true> {
         filesize?: T;
         width?: T;
         height?: T;
+        prefix?: T;
+        _objectKey?: T;
       };
-  _managedFiles?: T;
   _fileRevision?: T;
   focalX?: T;
   focalY?: T;
@@ -677,6 +612,8 @@ export interface FileVersionedTransformedMediaSelect<T extends boolean = true> {
               mimeType?: T;
               filesize?: T;
               filename?: T;
+              prefix?: T;
+              _objectKey?: T;
             };
       };
 }
@@ -706,8 +643,9 @@ export interface FileVersionedConvertedMediaSelect<T extends boolean = true> {
         filesize?: T;
         width?: T;
         height?: T;
+        prefix?: T;
+        _objectKey?: T;
       };
-  _managedFiles?: T;
   _fileRevision?: T;
   focalX?: T;
   focalY?: T;
@@ -739,8 +677,9 @@ export interface FileVersionedTrashMediaSelect<T extends boolean = true> {
         filesize?: T;
         width?: T;
         height?: T;
+        prefix?: T;
+        _objectKey?: T;
       };
-  _managedFiles?: T;
   _fileRevision?: T;
   focalX?: T;
   focalY?: T;
@@ -771,8 +710,9 @@ export interface FileVersionedPlainMediaSelect<T extends boolean = true> {
         filesize?: T;
         width?: T;
         height?: T;
+        prefix?: T;
+        _objectKey?: T;
       };
-  _managedFiles?: T;
   _fileRevision?: T;
   focalX?: T;
   focalY?: T;
@@ -844,6 +784,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "welcome_widget".
+ */
+export interface WelcomeWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -897,6 +847,25 @@ export interface ActivityWidget {
           | 'file-versioned-trash-media'
           | 'file-versioned-plain-media'
           | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "upload-dropzone_widget".
+ */
+export interface UploadDropzoneWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'file-versioned-media'
+          | 'file-versioned-draft-media'
+          | 'file-versioned-transformed-media'
+          | 'file-versioned-converted-media'
+          | 'file-versioned-trash-media'
+          | 'file-versioned-plain-media'
         )[]
       | null;
   };

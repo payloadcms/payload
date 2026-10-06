@@ -129,7 +129,6 @@ export const sanitizeUploadData = <T>(data: T, operation: Operation): T => {
   delete sanitizedData.url
   // Server-owned; never accepted from the caller.
   delete sanitizedData._objectKey
-  delete sanitizedData._managedFiles
   delete sanitizedData._fileRevision
   delete sanitizedData.original
 
@@ -158,7 +157,7 @@ export const mergeUploadDataWithDocument = <T>(
 
   const mergedData: Record<string, unknown> = { ...data }
 
-  for (const property of ['_managedFiles', '_objectKey', 'filename', 'original', 'prefix', 'url']) {
+  for (const property of ['_objectKey', 'filename', 'original', 'prefix', 'url']) {
     if (!hasOwnProperty(data, property) && hasOwnProperty(document, property)) {
       mergedData[property] = getDocumentProperty(document, property, options)
     }
@@ -184,7 +183,6 @@ export const mergeUploadDataWithDocument = <T>(
 }
 
 const uploadDerivedProperties = [
-  '_managedFiles',
   '_objectKey',
   'filename',
   'filesize',

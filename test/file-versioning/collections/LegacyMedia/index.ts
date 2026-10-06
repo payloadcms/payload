@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { mediaSlug } from '../../shared.js'
 
-// Mirrors the base upload columns before original and _managedFiles were added.
+// Mirrors the base upload columns before the original location was added.
 export const LegacyMedia: CollectionConfig = {
   slug: mediaSlug,
   fields: [

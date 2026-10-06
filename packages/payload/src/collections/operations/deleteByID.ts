@@ -15,7 +15,7 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
 import {
-  collectManagedFiles,
+  collectStoredFiles,
   collectVersionFiles,
   scheduleUnreferencedFileCleanup,
 } from '../../uploads/fileVersioning/cleanup.js'
@@ -162,14 +162,14 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
 
     const deletedFiles = collectionConfig.upload
       ? [
-          ...collectManagedFiles({ collection: collectionConfig, doc: docToDelete!, req }),
+          ...collectStoredFiles({ collection: collectionConfig, doc: docToDelete!, req }),
           ...(collectionConfig.versions
             ? await collectVersionFiles({ collection: collectionConfig, parentID: id, req })
             : []),
         ]
       : []
 
-    if (Array.isArray((docToDelete as Record<string, unknown>)._managedFiles)) {
+    if (deletedFiles.length) {
       managedDeleteIdentity = JSON.stringify([collectionConfig.slug, String(id)])
       req.context ??= {}
       const managedDeletedUploads = (req.context._payloadManagedDeletedUploads ??=

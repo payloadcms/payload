@@ -5,7 +5,6 @@ import { randomUUID } from 'node:crypto'
 import type { Collection, TypeWithID } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { Document, PayloadRequest } from '../types/index.js'
-import type { ManagedFileReference } from './fileVersioning/types.js'
 import type { ExternalUploadSource } from './sanitizeUploadData.js'
 import type { PreparedUploadTransformation } from './transformers/uploadTransformerBridge.js'
 import type { FileData, FileSizes, FileToSave, UploadEdits } from './types.js'
@@ -16,7 +15,6 @@ import { isNumber } from '../utilities/isNumber.js'
 import { canResizeImage } from './canResizeImage.js'
 import { checkFileRestrictions } from './checkFileRestrictions.js'
 import { downloadFileToBuffer } from './downloadFileToBuffer.js'
-import { createManagedFileManifest } from './fileVersioning/manifest.js'
 import { getOriginalFilename } from './fileVersioning/naming.js'
 import { generateImageSizeFilename } from './generateImageSizeFilename.js'
 import { getFileByPath } from './getFileByPath.js'
@@ -157,7 +155,13 @@ export const generateFileData = async <T>({
   const hasProviderDirectReference =
     uploadReference && typeof uploadReference === 'object' && !('uploadId' in uploadReference)
   const verifiedOriginal = req.context?._payloadVerifiedProviderOriginal as
-    | { filename: string; key: string; signedReceipt: string }
+    | {
+        _objectKey?: string
+        filename: string
+        key: string
+        prefix?: string
+        signedReceipt: string
+      }
     | undefined
   const providerOriginal =
     hasProviderDirectReference &&
@@ -166,8 +170,10 @@ export const generateFileData = async <T>({
     verifiedOriginal &&
     typeof collectionConfig.upload.adapter === 'string'
       ? {
+          _objectKey: verifiedOriginal._objectKey,
           filename: verifiedOriginal.filename,
           key: verifiedOriginal.key,
+          prefix: verifiedOriginal.prefix,
         }
       : undefined
   const shouldStageCloudFiles = hasManagedCloudStorage && !hasProviderDirectReference
@@ -392,36 +398,20 @@ export const generateFileData = async <T>({
     }
 
     const fileWasTransformed = Boolean(mainWebFile && mainWebFile !== originalWebFile)
-    const originalFile = currentFileData?._managedFiles?.find((managedFile) =>
-      managedFile.roles.some((role) => role.type === 'original'),
+    const hasReusableOriginalMain = Boolean(
+      isResettingCrop && !fileWasTransformed && retainedOriginal,
     )
-    const hasReusableOriginalMain = Boolean(isResettingCrop && !fileWasTransformed && originalFile)
-    if (hasReusableOriginalMain && !hasFocalPointChange && originalFile && retainedOriginal) {
-      const references: ManagedFileReference[] = (currentFileData?._managedFiles ?? []).flatMap(
-        (managedFile) =>
-          managedFile.roles
-            .filter((role) => role.type !== 'default')
-            .map((role) => ({
-              key: managedFile.key,
-              role,
-              storageBackendId: managedFile.storageBackendId,
-            })),
-      )
-      references.push({
-        key: originalFile.key,
-        role: { type: 'default' },
-        storageBackendId: originalFile.storageBackendId,
-      })
-
+    if (hasReusableOriginalMain && !hasFocalPointChange && retainedOriginal) {
       return {
         data: {
           ...incomingFileData,
-          _managedFiles: createManagedFileManifest({ references }),
+          _objectKey: retainedOriginal._objectKey,
           filename: retainedOriginal.filename,
           filesize: retainedOriginal.filesize,
           height: retainedOriginal.height,
           mimeType: retainedOriginal.mimeType,
           original: retainedOriginal,
+          prefix: retainedOriginal.prefix,
           url: retainedOriginal.url,
           variants: currentFileData?.variants,
           width: retainedOriginal.width,
@@ -507,8 +497,24 @@ export const generateFileData = async <T>({
       fileData.url = retainedOriginal!.url
     }
 
-    if (shouldStageCloudFiles) {
-      fileData._objectKey = randomUUID()
+    const hasGeneratedProviderRepresentations = Boolean(
+      providerOriginal &&
+        (fileWasTransformed || sizeResults.some((result) => Boolean(result.file))),
+    )
+    const newObjectKey =
+      hasManagedCloudStorage && (shouldStageCloudFiles || hasGeneratedProviderRepresentations)
+        ? randomUUID()
+        : undefined
+    if (newObjectKey) {
+      fileData._objectKey = newObjectKey
+    }
+    if (providerOriginal && !fileWasTransformed) {
+      fileData._objectKey = providerOriginal._objectKey
+      fileData.prefix = providerOriginal.prefix
+    }
+    if (hasReusableOriginalMain && retainedOriginal) {
+      fileData._objectKey = retainedOriginal._objectKey
+      fileData.prefix = retainedOriginal.prefix
     }
 
     if (!disableLocalStorage || shouldStageCloudFiles || providerOriginal) {
@@ -528,9 +534,11 @@ export const generateFileData = async <T>({
       const original =
         retainedOriginal ??
         ({
+          _objectKey: providerOriginal ? providerOriginal._objectKey : newObjectKey,
           filename: originalFilename,
           filesize: file.size,
           mimeType: file.mimetype,
+          prefix: providerOriginal?.prefix ?? currentFileData?.prefix,
           url: formatAdminURL({
             apiRoute: req.payload.config.routes.api,
             path: `/${collectionConfig.slug}/file/${encodeURIComponent(originalFilename)}`,
@@ -552,26 +560,6 @@ export const generateFileData = async <T>({
       fileData.original = original
 
       if (providerOriginal) {
-        const storageBackendId = `${collectionConfig.upload.adapter}:${collectionConfig.slug}`
-        fileData._managedFiles = createManagedFileManifest({
-          references: [
-            {
-              key: providerOriginal.key,
-              role: { type: 'original' },
-              storageBackendId,
-            },
-            ...(!fileWasTransformed
-              ? [
-                  {
-                    key: providerOriginal.key,
-                    role: { type: 'default' as const },
-                    storageBackendId,
-                  },
-                ]
-              : []),
-          ],
-        })
-
         if (!fileWasTransformed) {
           fileData.filename = originalFilename
         }
@@ -582,22 +570,6 @@ export const generateFileData = async <T>({
           buffer: Buffer.from(await originalWebFile!.arrayBuffer()),
           path: `${staticPath}/${originalFilename}`,
         })
-      }
-
-      if (retainedOriginal && shouldStageCloudFiles) {
-        const originalFile = currentFileData?._managedFiles?.find((managedFile) =>
-          managedFile.roles.some((role) => role.type === 'original'),
-        )
-        if (originalFile) {
-          fileData._managedFiles = [
-            {
-              ...originalFile,
-              roles: hasReusableOriginalMain
-                ? [{ type: 'original' }, { type: 'default' }]
-                : [{ type: 'original' }],
-            },
-          ]
-        }
       }
     }
 
@@ -738,10 +710,12 @@ export const generateFileData = async <T>({
         const imagePath = `${staticPath}/${imageName}`
 
         sizes[sizeName] = {
+          _objectKey: newObjectKey,
           filename: imageName,
           filesize: sizeBuffer.length,
           height: result.height!,
           mimeType: sizeMimeType,
+          prefix: providerOriginal?.prefix ?? currentFileData?.prefix,
           url: null,
           width: result.width!,
         }
@@ -756,30 +730,6 @@ export const generateFileData = async <T>({
       }
 
       fileData.variants = sizes
-    }
-
-    if (!disableLocalStorage && fileData.original) {
-      const storageBackendId = `local:${collectionConfig.slug}`
-      const references: ManagedFileReference[] = [
-        {
-          key: fileData.original.filename,
-          role: { type: 'original' as const },
-          storageBackendId,
-        },
-        { key: fsSafeName, role: { type: 'default' as const }, storageBackendId },
-      ]
-
-      for (const [sizeKey, size] of Object.entries(fileData.variants ?? {})) {
-        if (size.filename) {
-          references.push({
-            key: size.filename,
-            role: { type: 'size' as const, sizeKey },
-            storageBackendId,
-          })
-        }
-      }
-
-      fileData._managedFiles = createManagedFileManifest({ references })
     }
   } catch (err) {
     req.payload.logger.error(err)

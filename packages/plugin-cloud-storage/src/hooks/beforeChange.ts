@@ -35,7 +35,10 @@ export const getBeforeChangeHook =
       ? originalDoc?.variants?.[size.name]?.filename
       : originalDoc?.filename
     const filename = newFilename || originalFilename
-    const prefix = getObjectFolder(data, originalDoc)
+    const representation = size
+      ? (data?.variants?.[size.name] ?? originalDoc?.variants?.[size.name])
+      : (data ?? originalDoc)
+    const prefix = getObjectFolder(representation, data ?? originalDoc)
     let url = value
 
     if (generateFileURL && filename) {

@@ -1,15 +1,18 @@
-import type { CollectionConfig, FileData, ImageSize, JsonObject, UploadConfig } from 'payload'
+import type { CollectionConfig, ImageSize, JsonObject, UploadConfig } from 'payload'
 
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { isDeepStrictEqual } from 'node:util'
 import { deepCopyObjectSimple, generatePayloadFileURL } from 'payload'
-import { createManagedFileManifest } from 'payload/internal'
 
 import type { GeneratedAdapter, GenerateFileURL } from '../types.js'
 
 import { buildPrefixWithObjectKey } from './buildPrefixWithObjectKey.js'
-import { buildStoragePathData, buildUploadStoragePathData } from './buildStoragePathData.js'
+import {
+  buildStoragePathData,
+  buildUploadPrefix,
+  buildUploadStoragePathData,
+} from './buildStoragePathData.js'
 
 type Args = {
   adapter: GeneratedAdapter
@@ -28,8 +31,6 @@ export const createFileOperations = ({
   generateFileURL,
   useCompositePrefixes,
 }: Args): NonNullable<UploadConfig['fileOperations']> => {
-  const storageBackendId = `${adapter.name}:${collection.slug}`
-
   return {
     copy: async ({ from, req, to, trackStagedObject }) => {
       await adapter.copyFile({
@@ -49,7 +50,6 @@ export const createFileOperations = ({
             storageFilePath: to,
           })
         },
-        storageBackendId,
       })
     },
     delete: async ({ key, req }) => {
@@ -61,9 +61,9 @@ export const createFileOperations = ({
         storageFilePath: key,
       })
     },
-    getLegacyManifest: async ({ doc, req }) => {
+    hasLegacyFile: async ({ doc, req }) => {
       if (typeof doc.filename !== 'string' || typeof doc.url !== 'string') {
-        return []
+        return false
       }
 
       const docPrefix = typeof doc.prefix === 'string' ? doc.prefix : undefined
@@ -88,30 +88,8 @@ export const createFileOperations = ({
         })
       }
       if (doc.url !== (await expectedURL({ filename: doc.filename }))) {
-        return []
+        return false
       }
-      const references: Parameters<typeof createManagedFileManifest>[0]['references'] = []
-      const add = ({
-        filename,
-        role,
-      }: {
-        filename: string
-        role: (typeof references)[number]['role']
-      }) => {
-        references.push({
-          key: buildStoragePathData({
-            collectionPrefix,
-            docPrefix,
-            filename,
-            useCompositePrefixes,
-          }).storageFilePath,
-          role,
-          storageBackendId,
-        })
-      }
-
-      add({ filename: doc.filename, role: { type: 'default' } })
-      add({ filename: doc.filename, role: { type: 'original' } })
       if (doc.variants && typeof doc.variants === 'object' && !Array.isArray(doc.variants)) {
         for (const [sizeKey, size] of Object.entries(doc.variants)) {
           if (
@@ -128,14 +106,20 @@ export const createFileOperations = ({
               typeof size.url !== 'string' ||
               size.url !== (await expectedURL({ filename: size.filename, size: imageSize }))
             ) {
-              return []
+              return false
             }
-            add({ filename: size.filename, role: { type: 'size', sizeKey } })
           }
         }
       }
-      return createManagedFileManifest({ references })
+      return true
     },
+    resolveStorageKey: ({ _objectKey, filename, prefix }) =>
+      buildStoragePathData({
+        collectionPrefix,
+        docPrefix: buildPrefixWithObjectKey({ objectKey: _objectKey, prefix }),
+        filename,
+        useCompositePrefixes,
+      }).storageFilePath,
     ...(adapter.moveFile && {
       move: async ({ from, req, to, trackStagedObject }) => {
         await adapter.moveFile!({
@@ -153,24 +137,55 @@ export const createFileOperations = ({
               req,
               to: from,
             }),
-          storageBackendId,
         })
       },
     }),
     stage: async ({ data, files, req, trackStagedObject }) => {
-      const docPrefix = buildPrefixWithObjectKey({
-        objectKey: typeof data._objectKey === 'string' ? data._objectKey : undefined,
-        prefix: typeof data.prefix === 'string' ? data.prefix : undefined,
-      })
-      const dataForUpload = { ...data, prefix: docPrefix }
-      const keyByFilename = new Map<string, string>()
+      const uploadedNames = new Set<string>()
       const metadata: Record<string, unknown> = {}
       const verifiedOriginal = req.context?._payloadVerifiedProviderOriginal as
-        | { filename: string; key: string }
+        | { filename: string }
         | undefined
-
       for (const file of files) {
         const filename = path.basename(file.path)
+        const representations: Record<string, unknown>[] = [data]
+        if (data.original && typeof data.original === 'object') {
+          representations.push(data.original as Record<string, unknown>)
+        }
+        if (data.variants && typeof data.variants === 'object') {
+          representations.push(
+            ...Object.values(data.variants).filter(
+              (value): value is Record<string, unknown> =>
+                Boolean(value) && typeof value === 'object',
+            ),
+          )
+        }
+        const destinations = representations.filter((value) => value.filename === filename)
+        // Provider-direct uploads already placed the source object at its verified location.
+        // A bounded content probe can still appear in files, but it is not a representation
+        // Payload should upload again.
+        if (!destinations.length && verifiedOriginal) {
+          continue
+        }
+        if (!destinations.length) {
+          throw new Error(`No stored representation describes ${filename}`)
+        }
+        const location = destinations[0]!
+        const prefixData = buildUploadPrefix({
+          collectionPrefix,
+          docPrefix: typeof location.prefix === 'string' ? location.prefix : undefined,
+          useCompositePrefixes,
+        })
+        const prefix = useCompositePrefixes
+          ? prefixData.sanitizedDocPrefix
+          : prefixData.uploadPrefix
+        const objectKey = typeof location._objectKey === 'string' ? location._objectKey : undefined
+        for (const destination of destinations) {
+          destination.prefix = prefix
+          destination._objectKey = objectKey
+        }
+        const docPrefix = buildPrefixWithObjectKey({ objectKey, prefix })
+        const dataForUpload = { ...data, prefix: docPrefix }
         const storageFilePath = buildUploadStoragePathData({
           collectionPrefix,
           docPrefix,
@@ -178,11 +193,11 @@ export const createFileOperations = ({
           useCompositePrefixes,
         }).storageFilePath
 
-        if (keyByFilename.has(filename)) {
+        if (uploadedNames.has(filename)) {
           throw new Error(`Duplicate managed cloud filename: ${filename}`)
         }
 
-        keyByFilename.set(filename, storageFilePath)
+        uploadedNames.add(filename)
         const buffer =
           'buffer' in file
             ? file.buffer
@@ -210,7 +225,6 @@ export const createFileOperations = ({
               storageFilePath,
             })
           },
-          storageBackendId,
         })
 
         const dataBeforeUpload = deepCopyObjectSimple(dataForUpload as JsonObject)
@@ -234,74 +248,8 @@ export const createFileOperations = ({
 
       delete metadata.prefix
       delete metadata._objectKey
-      delete metadata._managedFiles
-
-      const references: Parameters<typeof createManagedFileManifest>[0]['references'] = []
-      const original = data.original as { filename?: string } | undefined
-
-      if (original?.filename && keyByFilename.has(original.filename)) {
-        references.push({
-          key: keyByFilename.get(original.filename)!,
-          role: { type: 'original' },
-          storageBackendId,
-        })
-      } else if (verifiedOriginal) {
-        references.push({
-          key: verifiedOriginal.key,
-          role: { type: 'original' },
-          storageBackendId,
-        })
-        if (data.filename === verifiedOriginal.filename) {
-          references.push({
-            key: verifiedOriginal.key,
-            role: { type: 'default' },
-            storageBackendId,
-          })
-        }
-      } else {
-        const retainedOriginal = (data._managedFiles as FileData['_managedFiles'])?.find(
-          (file) =>
-            file.storageBackendId === storageBackendId &&
-            file.roles.some((role) => role.type === 'original'),
-        )
-        if (retainedOriginal) {
-          references.push({
-            key: retainedOriginal.key,
-            role: { type: 'original' },
-            storageBackendId,
-          })
-          if (data.filename === original?.filename) {
-            references.push({
-              key: retainedOriginal.key,
-              role: { type: 'default' },
-              storageBackendId,
-            })
-          }
-        }
-      }
-      if (typeof data.filename === 'string' && keyByFilename.has(data.filename)) {
-        references.push({
-          key: keyByFilename.get(data.filename)!,
-          role: { type: 'default' },
-          storageBackendId,
-        })
-      }
-      if (data.variants && typeof data.variants === 'object') {
-        for (const [sizeKey, size] of Object.entries(data.variants)) {
-          const filename = (size as { filename?: string } | null)?.filename
-          if (filename && keyByFilename.has(filename)) {
-            references.push({
-              key: keyByFilename.get(filename)!,
-              role: { type: 'size', sizeKey },
-              storageBackendId,
-            })
-          }
-        }
-      }
-
-      return { managedFiles: createManagedFileManifest({ references }), metadata }
+      return { metadata }
     },
-    storageBackendId,
   }
 }
 

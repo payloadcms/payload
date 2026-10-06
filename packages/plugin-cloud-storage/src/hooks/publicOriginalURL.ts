@@ -23,8 +23,8 @@ export const getPublicOriginalURLHook =
     }
 
     const prefix = buildPrefixWithObjectKey({
-      objectKey: upload._objectKey,
-      prefix: upload.prefix,
+      objectKey: upload.original?._objectKey ?? upload._objectKey,
+      prefix: upload.original?.prefix ?? upload.prefix,
     })
     const url = generateFileURL
       ? await generateFileURL({ collection, filename, prefix })

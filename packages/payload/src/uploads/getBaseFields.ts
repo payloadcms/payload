@@ -3,7 +3,6 @@ import type { Config } from '../config/types.js'
 import type { Field } from '../fields/config/types.js'
 import type { SanitizedUploadConfig } from './types.js'
 
-import { managedFileManifestJSONSchema } from './fileVersioning/manifestJSONSchema.js'
 import { generateFilePathOrURL } from './generateFilePathOrURL.js'
 import { mimeTypeValidator } from './mimeTypeValidator.js'
 import { validateUploadFilename } from './validateUploadFilename.js'
@@ -214,13 +213,9 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
         filesize,
         width,
         height,
+        { name: 'prefix', type: 'text', admin: { hidden: true, readOnly: true } },
+        { name: '_objectKey', type: 'text', hidden: true },
       ],
-    },
-    {
-      name: '_managedFiles',
-      type: 'json',
-      hidden: true,
-      jsonSchema: managedFileManifestJSONSchema,
     },
     {
       name: '_fileRevision',
@@ -340,6 +335,8 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               },
               unique: false,
             },
+            { name: 'prefix', type: 'text', admin: { hidden: true, readOnly: true } },
+            { name: '_objectKey', type: 'text', hidden: true },
           ],
           label: size.name,
         })),

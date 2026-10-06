@@ -3,14 +3,13 @@ import path from 'node:path'
 
 import type { JsonObject, PayloadRequest } from '../../types/index.js'
 import type { StagedObject } from '../../uploads/fileVersioning/fileOperationManager.js'
-import type { ManagedFileManifest } from '../../uploads/fileVersioning/types.js'
 import type { Collection } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
-import { replaceManagedFileReferences } from '../../uploads/fileVersioning/archive.js'
+import { replaceStoredFileReferences } from '../../uploads/fileVersioning/archive.js'
 import { scheduleUnreferencedFileCleanup } from '../../uploads/fileVersioning/cleanup.js'
 import {
   abortFileOperationScope,
@@ -19,11 +18,12 @@ import {
   runFileOperationPlan,
 } from '../../uploads/fileVersioning/fileOperationManager.js'
 import { copyLocalFile, moveLocalFile } from '../../uploads/fileVersioning/localStorage.js'
-import {
-  getManagedFileIdentity,
-  withLegacyCloudUploadFileData,
-} from '../../uploads/fileVersioning/manifest.js'
 import { getOriginalFilename, normalizeStorageKey } from '../../uploads/fileVersioning/naming.js'
+import {
+  collectStoredFiles,
+  getStoredFileIdentity,
+  withLegacyCloudUploadFileData,
+} from '../../uploads/fileVersioning/storedFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -94,11 +94,11 @@ export const renameFileOperation = async (
       req,
     })
     const operations = collection.config.upload.fileOperations
-    const manifest = (stored._managedFiles as ManagedFileManifest | undefined) ?? []
+    const storedFiles = collectStoredFiles({ collection: collection.config, doc: stored, req })
     const oldOriginal = (stored.original as { filename?: string } | undefined)?.filename
     const oldFilename = oldOriginal ?? (stored.filename as string | undefined)
 
-    if (!oldFilename || !manifest.length) {
+    if (!oldFilename || !storedFiles.length) {
       throw new APIError('This upload has no managed files to rename.', 400)
     }
 
@@ -115,17 +115,16 @@ export const renameFileOperation = async (
 
     const originalFilename = getOriginalFilename({ filename })
     const plannedKeys = new Set(
-      manifest
+      storedFiles
         .filter(({ roles }) => roles.some(({ type }) => type === 'original'))
-        .map(({ key, storageBackendId }) =>
-          getManagedFileIdentity({
+        .map(({ key }) =>
+          getStoredFileIdentity({
             key: path.posix.join(path.posix.dirname(key), originalFilename),
-            storageBackendId,
           }),
         ),
     )
     const replacements = new Map<string, string>()
-    for (const file of manifest) {
+    for (const file of storedFiles) {
       const previousFilename = path.posix.basename(file.key)
       const hasOriginalRole = file.roles.some(({ type }) => type === 'original')
       const suffix = previousFilename.startsWith(oldStem)
@@ -134,9 +133,8 @@ export const renameFileOperation = async (
       let nextFilename = hasOriginalRole ? originalFilename : `${newStem}${suffix}`
       const directory = path.posix.dirname(file.key)
       let nextKey = path.posix.join(directory, nextFilename)
-      let nextIdentity = getManagedFileIdentity({
+      let nextIdentity = getStoredFileIdentity({
         key: nextKey,
-        storageBackendId: file.storageBackendId,
       })
       const extension = path.posix.extname(nextFilename)
       const stem = nextFilename.slice(0, -extension.length || undefined)
@@ -144,48 +142,45 @@ export const renameFileOperation = async (
       while (!hasOriginalRole && plannedKeys.has(nextIdentity)) {
         nextFilename = `${stem}-${collisionNumber}${extension}`
         nextKey = path.posix.join(directory, nextFilename)
-        nextIdentity = getManagedFileIdentity({
+        nextIdentity = getStoredFileIdentity({
           key: nextKey,
-          storageBackendId: file.storageBackendId,
         })
         collisionNumber++
       }
       plannedKeys.add(nextIdentity)
       const key = normalizeStorageKey({ key: nextKey })
-      replacements.set(getManagedFileIdentity(file), key)
+      replacements.set(getStoredFileIdentity(file), key)
     }
 
-    const renamed = replaceManagedFileReferences({ replacements, version: stored })
+    const renamed = replaceStoredFileReferences({
+      files: storedFiles,
+      replacements,
+      version: stored,
+    })
     if (!renamed) {
       throw new APIError('The upload has no files to rename.', 400)
     }
 
     const staticDir = collection.config.upload.staticDir
-    const localBackendId = `local:${collection.config.slug}`
     const hasNativeMove =
       !collection.config.versions &&
       Boolean(req.transactionID) &&
-      manifest.every(
-        (file) =>
-          (file.storageBackendId === localBackendId && Boolean(staticDir)) ||
-          (file.storageBackendId === operations?.storageBackendId && Boolean(operations.move)),
-      )
+      (operations ? Boolean(operations.move) : Boolean(staticDir))
     const moveFiles = async ({
       trackStagedObject,
     }: {
       trackStagedObject: (object: StagedObject) => void
     }) => {
-      for (const file of manifest) {
-        const to = replacements.get(getManagedFileIdentity(file))!
+      for (const file of storedFiles) {
+        const to = replacements.get(getStoredFileIdentity(file))!
         try {
-          if (file.storageBackendId === localBackendId && staticDir) {
+          if (!operations && staticDir) {
             await moveLocalFile({ from: file.key, staticDir, to })
             trackStagedObject({
               key: to,
               remove: () => moveLocalFile({ from: to, staticDir, to: file.key }),
-              storageBackendId: localBackendId,
             })
-          } else if (operations?.move && file.storageBackendId === operations.storageBackendId) {
+          } else if (operations?.move) {
             await operations.move({ from: file.key, req, to, trackStagedObject })
           }
         } catch (err) {
@@ -204,9 +199,9 @@ export const renameFileOperation = async (
         if (hasNativeMove) {
           return
         }
-        for (const file of manifest) {
-          const to = replacements.get(getManagedFileIdentity(file))!
-          if (file.storageBackendId === localBackendId && staticDir) {
+        for (const file of storedFiles) {
+          const to = replacements.get(getStoredFileIdentity(file))!
+          if (!operations && staticDir) {
             try {
               await copyLocalFile({ from: file.key, staticDir, to })
             } catch (err) {
@@ -218,9 +213,8 @@ export const renameFileOperation = async (
             trackStagedObject({
               key: to,
               remove: () => fs.rm(path.join(staticDir, to), { force: true }),
-              storageBackendId: localBackendId,
             })
-          } else if (operations?.copy && file.storageBackendId === operations.storageBackendId) {
+          } else if (operations?.copy) {
             // The old key may still belong to a version, so even an adapter with move uses copy here.
             try {
               await operations.copy({ from: file.key, req, to, trackStagedObject })
@@ -231,10 +225,7 @@ export const renameFileOperation = async (
               throw err
             }
           } else {
-            throw new APIError(
-              `No safe copy operation is available for ${file.storageBackendId}.`,
-              400,
-            )
+            throw new APIError('No safe copy operation is available for this upload.', 400)
           }
         }
       },
@@ -292,7 +283,7 @@ export const renameFileOperation = async (
 
         if (!hasNativeMove) {
           await scheduleUnreferencedFileCleanup({
-            candidates: manifest,
+            candidates: storedFiles,
             collection: collection.config,
             req,
           })

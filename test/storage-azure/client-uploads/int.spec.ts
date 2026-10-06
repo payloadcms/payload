@@ -12,6 +12,7 @@ import { expect, vi } from 'vitest'
 
 import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
 
+import { getStoredUploadKeys } from '../../__helpers/int/storedUploadKeys.js'
 import { test } from '../../__helpers/int/vitest.js'
 import { mediaSlug } from '../shared.js'
 import { mediaHeaderOnlySlug } from './collections/MediaHeaderOnly.js'
@@ -291,16 +292,15 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
     })
 
     expect(updated.prefix).toBe('docprefix-collection/legacy-invoices')
-    const stored = await payload.db.findOne<{
-      _managedFiles: { key: string }[]
-      id: number | string
-    }>({
+    const stored = await payload.db.findOne({
       collection: mediaWithDocPrefixSlug,
       where: { id: { equals: doc.id } },
     })
-    const currentKey = stored!._managedFiles.find(({ key }) =>
-      key.endsWith(`/${updated.filename}`),
-    )?.key
+    const currentKey = getStoredUploadKeys({
+      collectionSlug: mediaWithDocPrefixSlug,
+      doc: stored,
+      payload,
+    }).find((key) => key.endsWith(`/${updated.filename}`))
 
     expect(currentKey?.startsWith(`${updated.prefix}/`)).toBe(true)
     expect(await containerClient.getBlockBlobClient(currentKey!).exists()).toBe(true)
@@ -390,16 +390,15 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
     })
 
     expect(upload.prefix).toMatch(/^docprefix-collection\/doc-[a-z0-9]{1,8}$/)
-    const stored = await payload.db.findOne<{
-      _managedFiles: { key: string }[]
-      id: number | string
-    }>({
+    const stored = await payload.db.findOne({
       collection: mediaWithDocPrefixSlug,
       where: { id: { equals: upload.id } },
     })
-    const currentKey = stored!._managedFiles.find(({ key }) =>
-      key.endsWith(`/${upload.filename}`),
-    )?.key
+    const currentKey = getStoredUploadKeys({
+      collectionSlug: mediaWithDocPrefixSlug,
+      doc: stored,
+      payload,
+    }).find((key) => key.endsWith(`/${upload.filename}`))
 
     expect(currentKey?.startsWith(`${upload.prefix}/`)).toBe(true)
     const props = await containerClient.getBlobClient(currentKey!).getProperties()

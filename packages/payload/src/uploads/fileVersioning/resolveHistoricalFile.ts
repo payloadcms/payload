@@ -2,12 +2,11 @@ import path from 'node:path'
 
 import type { Collection, TypeWithID } from '../../collections/config/types.js'
 import type { JsonObject, PayloadRequest } from '../../types/index.js'
-import type { ManagedFileManifest } from './types.js'
 
 import { Forbidden } from '../../errors/Forbidden.js'
 import { NotFound } from '../../errors/NotFound.js'
 import { checkFileAccess } from '../checkFileAccess.js'
-import { withLegacyUploadFileData } from './manifest.js'
+import { collectStoredFiles, withLegacyUploadFileData } from './storedFiles.js'
 
 type StoredVersion = {
   id: number | string
@@ -96,8 +95,7 @@ const resolveVersionFile = async ({
     config: req.payload.config,
     doc: row.version,
   })
-  const manifest = saved._managedFiles as ManagedFileManifest | undefined
-  const hasFile = manifest?.some(
+  const hasFile = collectStoredFiles({ collection: collection.config, doc: saved, req }).some(
     (file) =>
       path.posix.basename(file.key) === filename &&
       (!prefix ||

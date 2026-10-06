@@ -964,13 +964,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           })
 
           expect(stored?.original?.filename).toBe(doc.filename)
-          expect(stored?._managedFiles).toEqual([
-            {
-              key: doc.filename,
-              roles: [{ type: 'original' }, { type: 'default' }],
-              storageBackendId: `local:${skipSafeFetchMediaSlug}`,
-            },
-          ])
+          expect(stored?.filename).toBe(stored?.original?.filename)
           await expect(
             fs.promises.readFile(path.resolve(dirname, './media', doc.filename)),
           ).resolves.toEqual(remoteBytes)

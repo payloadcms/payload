@@ -3,7 +3,7 @@ import { status as httpStatus } from 'http-status'
 import type { AccessResult } from '../../config/types.js'
 import type { CollectionSlug, FindOptions } from '../../index.js'
 import type { PayloadRequest, PopulateType, SelectType, Where } from '../../types/index.js'
-import type { ManagedFileManifest } from '../../uploads/fileVersioning/types.js'
+import type { StoredFileList } from '../../uploads/fileVersioning/types.js'
 import type {
   BulkOperationResult,
   Collection,
@@ -20,7 +20,7 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
 import {
-  collectManagedFiles,
+  collectStoredFiles,
   collectVersionFiles,
   scheduleUnreferencedFileCleanup,
 } from '../../uploads/fileVersioning/cleanup.js'
@@ -168,7 +168,7 @@ export const deleteOperation = async <
       collection: collectionConfig.slug,
       locale: locale!,
       req,
-      // File cleanup needs the stored manifest even when the response selects only an ID.
+      // File cleanup needs every stored representation even when the response selects only an ID.
       select: collectionConfig.upload ? undefined : select,
       where: fullWhere,
     })
@@ -176,7 +176,7 @@ export const deleteOperation = async <
     const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
     let didBatchDeleteFail = false
     let hasAfterDeleteFailure = false
-    const deletedFilesByID = new Map<number | string, ManagedFileManifest>()
+    const deletedFilesByID = new Map<number | string, StoredFileList>()
     req.context ??= {}
     const managedDeletedUploads = (req.context._payloadManagedDeletedUploads ??=
       new Set()) as Set<string>
@@ -210,12 +210,12 @@ export const deleteOperation = async <
 
       if (collectionConfig.upload) {
         deletedFilesByID.set(doc.id, [
-          ...collectManagedFiles({ collection: collectionConfig, doc, req }),
+          ...collectStoredFiles({ collection: collectionConfig, doc, req }),
           ...(collectionConfig.versions
             ? await collectVersionFiles({ collection: collectionConfig, parentID: doc.id, req })
             : []),
         ])
-        if (Array.isArray((doc as Record<string, unknown>)._managedFiles)) {
+        if (deletedFilesByID.get(doc.id)?.length) {
           const identity = JSON.stringify([collectionConfig.slug, String(doc.id)])
           managedDeletedUploads.add(identity)
           markedManagedDeletes.add(identity)

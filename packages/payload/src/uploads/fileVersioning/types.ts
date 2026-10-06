@@ -1,20 +1,16 @@
-export type ManagedFileRole =
-  | { sizeKey: string; type: 'size' }
-  | { type: 'default' | 'original' | 'thumbnail' }
+export type StoredFileRole = { sizeKey: string; type: 'size' } | { type: 'default' | 'original' }
 
 /** One stored file. It can be both the original upload and the default file. */
-export type ManagedFile = {
+export type StoredFile = {
   key: string
-  roles: ManagedFileRole[]
-  storageBackendId: string
+  roles: StoredFileRole[]
 }
 
-export type ManagedFileManifest = ManagedFile[]
+export type StoredFileList = StoredFile[]
 
-export type ManagedFileReference = {
+export type StoredFileReference = {
   key: string
-  role: ManagedFileRole
-  storageBackendId: string
+  role: StoredFileRole
 }
 
-export type ManagedFileIdentity = Pick<ManagedFile, 'key' | 'storageBackendId'>
+export type StoredFileIdentity = Pick<StoredFile, 'key'>

@@ -4,18 +4,22 @@ import path from 'node:path'
 
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { JsonObject, PayloadRequest } from '../../types/index.js'
-import type { ManagedFileManifest } from './types.js'
+import type { StoredFileList } from './types.js'
 
 import { APIError } from '../../errors/APIError.js'
-import { archiveOutgoingLocalFiles, replaceManagedFileReferences } from './archive.js'
+import { archiveOutgoingLocalFiles, replaceStoredFileReferences } from './archive.js'
 import { scheduleUnreferencedFileCleanup } from './cleanup.js'
 import { runFileOperationPlan } from './fileOperationManager.js'
 import { copyLocalFile } from './localStorage.js'
-import { getManagedFileIdentity, withLegacyUploadFileData } from './manifest.js'
 import { getArchivedFilename } from './naming.js'
+import {
+  collectStoredFiles,
+  getStoredFileIdentity,
+  withLegacyUploadFileData,
+} from './storedFiles.js'
 
 /** Copies the selected stored files before making that version current. */
-export const runManagedFileRestore = async <T>({
+export const runStoredFileRestore = async <T>({
   id,
   collection,
   current,
@@ -36,14 +40,14 @@ export const runManagedFileRestore = async <T>({
     doc: selected,
   }) as JsonObject
   const configuredSizeKeys = new Set(collection.upload.variants?.map(({ name }) => name) ?? [])
-  const manifest: ManagedFileManifest = Array.isArray(stored._managedFiles)
-    ? (stored._managedFiles as ManagedFileManifest).flatMap((file) => {
-        const roles = file.roles.filter(
-          (role) => role.type !== 'size' || configuredSizeKeys.has(role.sizeKey),
-        )
-        return roles.length ? [{ ...file, roles }] : []
-      })
-    : []
+  const storedFiles: StoredFileList = collectStoredFiles({ collection, doc: stored, req }).flatMap(
+    (file) => {
+      const roles = file.roles.filter(
+        (role) => role.type !== 'size' || configuredSizeKeys.has(role.sizeKey),
+      )
+      return roles.length ? [{ ...file, roles }] : []
+    },
+  )
   const selectedVariants =
     stored.variants && typeof stored.variants === 'object' && !Array.isArray(stored.variants)
       ? stored.variants
@@ -60,32 +64,28 @@ export const runManagedFileRestore = async <T>({
         configuredSizeKeys.has(sizeKey) && selectedVariants[sizeKey]
           ? selectedVariants[sizeKey]
           : {
+              _objectKey: null,
               filename: null,
               filesize: null,
               height: null,
               mimeType: null,
+              prefix: null,
               url: null,
               width: null,
             },
       ],
     ),
   )
-  const selectedForCurrent = { ...stored, _managedFiles: manifest, variants: restoredVariants }
+  const selectedForCurrent = { ...stored, variants: restoredVariants }
 
   const staticDir = collection.upload.staticDir
-  const storageBackendId = `local:${collection.slug}`
   const cloudOperations = collection.upload.fileOperations
-  for (const file of manifest) {
-    const hasLocalBackend =
-      !collection.upload.disableLocalStorage &&
-      Boolean(staticDir) &&
-      file.storageBackendId === storageBackendId
-    const hasCloudBackend =
-      Boolean(cloudOperations) && file.storageBackendId === cloudOperations?.storageBackendId
-
-    if (!hasLocalBackend && !hasCloudBackend) {
-      throw new APIError(`No configured storage backend can restore ${file.storageBackendId}.`, 400)
-    }
+  if (
+    storedFiles.length &&
+    !cloudOperations &&
+    (collection.upload.disableLocalStorage || !staticDir)
+  ) {
+    throw new APIError('No configured storage adapter can restore this file.', 400)
   }
 
   const currentStored = withLegacyUploadFileData({
@@ -93,15 +93,13 @@ export const runManagedFileRestore = async <T>({
     config: req.payload.config,
     doc: current,
   })
-  const currentManifest = Array.isArray(currentStored._managedFiles)
-    ? (currentStored._managedFiles as ManagedFileManifest)
-    : []
+  const currentFiles = collectStoredFiles({ collection, doc: currentStored, req })
 
-  if (!manifest.length && !currentManifest.length) {
+  if (!storedFiles.length && !currentFiles.length) {
     return write(selectedForCurrent)
   }
 
-  const currentIdentities = new Set(currentManifest.map(getManagedFileIdentity))
+  const currentIdentities = new Set(currentFiles.map(getStoredFileIdentity))
   const replacements = new Map<string, string>()
   let restored: JsonObject = selectedForCurrent
 
@@ -110,8 +108,8 @@ export const runManagedFileRestore = async <T>({
     collection: collection.slug,
     req,
     stage: async ({ trackStagedObject }) => {
-      for (const file of manifest) {
-        if (currentIdentities.has(getManagedFileIdentity(file))) {
+      for (const file of storedFiles) {
+        if (currentIdentities.has(getStoredFileIdentity(file))) {
           continue
         }
 
@@ -122,24 +120,26 @@ export const runManagedFileRestore = async <T>({
         })
         const key = directory === '.' ? filename : `${directory}/${filename}`
 
-        if (file.storageBackendId === storageBackendId && staticDir) {
+        if (!cloudOperations && staticDir) {
           await copyLocalFile({ from: file.key, staticDir, to: key })
           trackStagedObject({
             key,
             remove: () => fs.rm(path.join(staticDir, key), { force: true }),
-            storageBackendId,
           })
         } else if (cloudOperations) {
           await cloudOperations.copy({ from: file.key, req, to: key, trackStagedObject })
         } else {
-          throw new Error(`No storage operation can restore ${file.storageBackendId}`)
+          throw new Error('No storage operation can restore this file')
         }
-        replacements.set(getManagedFileIdentity(file), key)
+        replacements.set(getStoredFileIdentity(file), key)
       }
 
       restored =
-        replaceManagedFileReferences({ replacements, version: selectedForCurrent }) ??
-        selectedForCurrent
+        replaceStoredFileReferences({
+          files: storedFiles,
+          replacements,
+          version: selectedForCurrent,
+        }) ?? selectedForCurrent
     },
     write: async ({ trackStagedObject }) => {
       if (staticDir && !collection.upload.disableLocalStorage) {
@@ -147,7 +147,7 @@ export const runManagedFileRestore = async <T>({
           id,
           collection,
           current,
-          nextManifest: (restored._managedFiles as ManagedFileManifest | undefined) ?? [],
+          next: restored,
           req,
           trackStagedObject,
         })
@@ -156,7 +156,7 @@ export const runManagedFileRestore = async <T>({
       const result = await write(restored)
 
       await scheduleUnreferencedFileCleanup({
-        candidates: currentManifest,
+        candidates: currentFiles,
         collection,
         req,
       })

@@ -7,6 +7,7 @@ import shelljs from 'shelljs'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
+import { getStoredUploadKey } from '../__helpers/int/storedUploadKeys.js'
 import { test } from '../__helpers/int/vitest.js'
 import { collectionPrefix, mediaWithCompositePrefixesSlug } from './shared.js'
 import { clearTestBucket, createTestBucket } from './utils.js'
@@ -81,9 +82,13 @@ test.suite('@payloadcms/plugin-cloud-storage (composite prefixes)', { config: co
           collection: mediaWithCompositePrefixesSlug,
           where: { id: { equals: upload.id } },
         })
-        const expectedKey = stored?._managedFiles?.find((file) =>
-          file.roles.some((role) => role.type === 'default'),
-        )?.key
+        const expectedKey =
+          stored &&
+          getStoredUploadKey({
+            collectionSlug: mediaWithCompositePrefixesSlug,
+            payload,
+            representation: stored,
+          })
 
         expect(expectedKey?.split('/')).toEqual([
           collectionPrefix,
@@ -118,9 +123,13 @@ test.suite('@payloadcms/plugin-cloud-storage (composite prefixes)', { config: co
           collection: mediaWithCompositePrefixesSlug,
           where: { id: { equals: upload.id } },
         })
-        const expectedKey = stored?._managedFiles?.find((file) =>
-          file.roles.some((role) => role.type === 'default'),
-        )?.key
+        const expectedKey =
+          stored &&
+          getStoredUploadKey({
+            collectionSlug: mediaWithCompositePrefixesSlug,
+            payload,
+            representation: stored,
+          })
 
         expect(expectedKey?.split('/')).toEqual([
           collectionPrefix,
