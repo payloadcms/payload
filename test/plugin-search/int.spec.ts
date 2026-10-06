@@ -634,14 +634,16 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
     await payload.update({
       collection: postsSlug,
       id: postId,
-      data: { slug: 'post-slug-es' },
+      version: 'latest',
+      data: { _status: 'published', slug: 'post-slug-es' },
       locale: 'es',
       overrideAccess: true,
     })
     await payload.update({
       collection: postsSlug,
       id: postId,
-      data: { slug: 'post-slug-de' },
+      version: 'latest',
+      data: { _status: 'published', slug: 'post-slug-de' },
       locale: 'de',
       overrideAccess: true,
     })

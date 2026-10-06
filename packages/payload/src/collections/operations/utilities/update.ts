@@ -251,7 +251,8 @@ export const updateDocument = async <
     draftArg &&
     hasDraftsEnabled(collectionConfig) &&
     !statusFieldAccess &&
-    !isLocalizedLatestWrite
+    !isLocalizedLatestWrite &&
+    !(locale === 'all' && allLocalesPublicationStatus)
   ) {
     data._status = 'draft'
   }
@@ -371,14 +372,18 @@ export const updateDocument = async <
     },
   })
 
-  isSavingDraft = getIsSavingDraft({ status: result._status })
-
   const hasAuthorizedPublicationStatus = hasAuthorizedAllLocalesPublicationStatus({
     data: publicationData,
     fieldAccessDenied: !statusFieldAccess,
     fieldValue: statusFieldValue,
     status: allLocalesPublicationStatus,
   })
+
+  const effectiveStatus = hasAuthorizedPublicationStatus
+    ? allLocalesPublicationStatus
+    : result._status
+
+  isSavingDraft = getIsSavingDraft({ status: effectiveStatus })
 
   if (
     allLocalesPublicationStatus &&

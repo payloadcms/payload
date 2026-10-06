@@ -270,7 +270,10 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
     async (id, relation) => {
       if (!errorLoading && id !== 'null' && id && relation) {
         const response = await fetch(
-          formatAdminURL({ apiRoute: api, path: `/${relation}/${id}?depth=0&version=latest` }),
+          formatAdminURL({
+            apiRoute: api,
+            path: `/${relation}/${id}${qs.stringify({ depth: 0, version: 'latest' }, { addQueryPrefix: true })}`,
+          }),
           {
             credentials: 'include',
             headers: {

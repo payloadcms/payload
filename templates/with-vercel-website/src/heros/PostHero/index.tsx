@@ -1,13 +1,13 @@
 import { formatDateTime } from '@/utilities/formatDateTime'
 import React from 'react'
 
-import type { Post } from '@/payload-types'
+import type { QueryDraftDataFromCollectionSlug } from 'payload'
 
 import { Media } from '@/components/Media'
 import { formatAuthors } from '@/utilities/formatAuthors'
 
 export const PostHero: React.FC<{
-  post: Post
+  post: QueryDraftDataFromCollectionSlug<'posts'>
 }> = ({ post }) => {
   const { categories, heroImage, populatedAuthors, publishedAt, title } = post
 
@@ -39,7 +39,7 @@ export const PostHero: React.FC<{
           </div>
 
           <div className="">
-            <h1 className="mb-6 text-3xl md:text-5xl lg:text-6xl">{title}</h1>
+            <h1 className="mb-6 text-3xl md:text-5xl lg:text-6xl">{title || 'Untitled post'}</h1>
           </div>
 
           <div className="flex flex-col md:flex-row gap-4 md:gap-16">

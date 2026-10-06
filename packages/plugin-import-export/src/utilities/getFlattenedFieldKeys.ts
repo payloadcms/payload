@@ -130,5 +130,5 @@ export const getFlattenedFieldKeys = (
     }
   })
 
-  return keys
+  return [...new Set(keys)]
 }

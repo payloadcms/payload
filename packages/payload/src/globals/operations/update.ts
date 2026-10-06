@@ -279,7 +279,12 @@ export const updateOperation = async <
       req,
     })
 
-    if (isDraftTarget && !statusFieldAccess && !isLocalizedLatestWrite) {
+    if (
+      isDraftTarget &&
+      !statusFieldAccess &&
+      !isLocalizedLatestWrite &&
+      !(locale === 'all' && allLocalesPublicationStatus)
+    ) {
       data._status = 'draft'
     }
 
