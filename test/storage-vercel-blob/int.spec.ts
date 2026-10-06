@@ -109,7 +109,9 @@ test.suite('@payloadcms/storage-vercel-blob', { config: './config.ts' }, () => {
       uploadId: upload.id,
     })
 
-    expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}`)
+    expect(upload.url).toEqual(
+      `/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}?prefix=${encodeURIComponent(prefix)}`,
+    )
   })
 
   test('has prefix field by default even when plugin is disabled', async ({ payload }) => {

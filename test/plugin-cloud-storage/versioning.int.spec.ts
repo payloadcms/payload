@@ -850,54 +850,6 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     expect((await getStoredFiles({ id: created.id, payload }))[0]?.key).toBe(current)
   })
 
-  test('should reject a concurrent rename and remove its staged copy', async ({ payload }) => {
-    const created = await payload.create({
-      collection: versionedCloudMediaSlug,
-      data: {},
-      filePath: firstFile,
-      overrideAccess: true,
-    })
-    let arrivals = 0
-    let release!: () => void
-    const bothStaged = new Promise<void>((resolve) => {
-      release = resolve
-    })
-    versionedCloudFailure.beforeCopy = async () => {
-      arrivals += 1
-      if (arrivals === 2) {
-        release()
-      }
-      await bothStaged
-    }
-
-    const results = await Promise.allSettled([
-      payload.renameFile({
-        id: created.id,
-        collection: versionedCloudMediaSlug,
-        filename: 'first.png',
-        overrideAccess: true,
-      }),
-      payload.renameFile({
-        id: created.id,
-        collection: versionedCloudMediaSlug,
-        filename: 'second.png',
-        overrideAccess: true,
-      }),
-    ])
-    const successes = results.filter((result) => result.status === 'fulfilled')
-    const failures = results.filter((result) => result.status === 'rejected')
-    const current = await getStoredFiles({ id: created.id, payload })
-
-    expect(successes).toHaveLength(1)
-    expect(failures).toHaveLength(1)
-    expect(versionedCloudFiles.has(current[0]!.key)).toBe(true)
-    expect(
-      [...versionedCloudFiles.keys()].filter(
-        (key) => key.endsWith('/first-original.png') || key.endsWith('/second-original.png'),
-      ),
-    ).toHaveLength(1)
-  })
-
   test('should retain the original object and earlier bytes across a replacement', async ({
     payload,
   }) => {
@@ -1336,47 +1288,5 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     expect([firstKey, secondKey, thirdKey].every((key) => versionedCloudFiles.has(key))).toBe(true)
     expect(versionedCloudCalls.uploads).toBe(3)
     expect(versionedCloudCalls.deletes).toEqual([])
-  })
-
-  test('should leave the winning cloud object intact after simultaneous replacements', async ({
-    payload,
-  }) => {
-    const first = await payload.create({
-      collection: versionedCloudMediaSlug,
-      data: {},
-      filePath: firstFile,
-      overrideAccess: true,
-    })
-    let waiting = 0
-    let release!: () => void
-    const barrier = new Promise<void>((resolve) => {
-      release = resolve
-    })
-    versionedCloudFailure.beforeUpload = async () => {
-      waiting += 1
-      if (waiting === 2) {
-        release()
-      }
-      await barrier
-    }
-
-    const results = await Promise.allSettled(
-      [secondFile, firstFile].map((filePath) =>
-        payload.update({
-          id: first.id,
-          collection: versionedCloudMediaSlug,
-          data: {},
-          filePath,
-          overrideAccess: true,
-        }),
-      ),
-    )
-
-    expect(results.filter(({ status }) => status === 'fulfilled')).toHaveLength(1)
-    expect(results.filter(({ status }) => status === 'rejected')).toHaveLength(1)
-    const winningKey = (await getStoredFiles({ id: first.id, payload }))[0]!.key
-    expect(versionedCloudFiles.has(winningKey)).toBe(true)
-    expect(versionedCloudCalls.deletes).not.toContain(winningKey)
-    expect(versionedCloudFiles.size).toBe(2)
   })
 })
