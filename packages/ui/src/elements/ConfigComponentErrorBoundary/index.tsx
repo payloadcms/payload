@@ -7,6 +7,7 @@ import { ErrorBoundary } from 'react-error-boundary'
 
 import { useTranslation } from '../../providers/Translation/index.js'
 import { isControlFlowError } from './isControlFlowError.js'
+import './index.css'
 
 const ErrorFallbackContext = createContext<ReactNode | undefined>(undefined)
 
@@ -78,5 +79,9 @@ function ConfigComponentErrorFallback() {
   const { t } = useTranslation()
 
   // Inline markup remains valid in labels, table cells, and icon/action slots.
-  return <span role="alert">{t('error:unspecific')}</span>
+  return (
+    <span className="config-component-error" role="alert">
+      {t('error:unspecific')}
+    </span>
+  )
 }
