@@ -31,6 +31,12 @@ export const createFileOperations = ({
   generateFileURL,
   useCompositePrefixes,
 }: Args): NonNullable<UploadConfig['fileOperations']> => {
+  if (typeof adapter.deleteFile !== 'function') {
+    throw new Error(
+      `Storage adapter "${adapter.name}" must implement deleteFile for collection "${collection.slug}".`,
+    )
+  }
+
   return {
     copy: async ({ from, req, to, trackStagedObject }) => {
       await adapter.copyFile({
@@ -42,10 +48,8 @@ export const createFileOperations = ({
       trackStagedObject({
         key: to,
         remove: async () => {
-          await adapter.handleDelete({
+          await adapter.deleteFile({
             collection,
-            doc: {} as never,
-            filename: path.posix.basename(to),
             req,
             storageFilePath: to,
           })
@@ -53,10 +57,8 @@ export const createFileOperations = ({
       })
     },
     delete: async ({ key, req }) => {
-      await adapter.handleDelete({
+      await adapter.deleteFile({
         collection,
-        doc: {} as never,
-        filename: path.posix.basename(key),
         req,
         storageFilePath: key,
       })
@@ -227,10 +229,8 @@ export const createFileOperations = ({
         trackStagedObject({
           key: storageFilePath,
           remove: async () => {
-            await adapter.handleDelete({
+            await adapter.deleteFile({
               collection,
-              doc: data as never,
-              filename,
               req,
               storageFilePath,
             })

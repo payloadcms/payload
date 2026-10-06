@@ -1,6 +1,7 @@
 import type {
   Adapter,
   ClientUploadsConfig,
+  DeleteFile,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 
@@ -56,6 +57,9 @@ export function createR2Adapter({
     useInAdmin: true,
   }
 
+  const deleteStoredFile: DeleteFile = ({ storageFilePath }) =>
+    deleteFile({ bucket, storageFilePath })
+
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'r2',
     uploadInstructions,
@@ -85,11 +89,8 @@ export function createR2Adapter({
       }
     },
 
-    handleDelete: ({ storageFilePath }) =>
-      deleteFile({
-        bucket,
-        storageFilePath,
-      }),
+    deleteFile: deleteStoredFile,
+    handleDelete: deleteStoredFile,
 
     handleUpload: ({ file, storageFilePath }) =>
       uploadFile({

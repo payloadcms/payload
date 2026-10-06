@@ -2,6 +2,7 @@ import type { ContainerClient } from '@azure/storage-blob'
 import type {
   Adapter,
   ClientUploadsConfig,
+  DeleteFile,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 
@@ -32,11 +33,15 @@ export function createAzureAdapter({
   getStorageClient,
   useCompositePrefixes = false,
 }: CreateAzureAdapterArgs): Adapter {
+  const deleteStoredFile: DeleteFile = ({ storageFilePath }) =>
+    deleteFile({ client: getStorageClient(), storageFilePath })
+
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'azure',
     supportsTempFiles: true,
 
     copyFile: ({ from, to }) => copyAzureFile({ client: getStorageClient(), from, to }),
+    deleteFile: deleteStoredFile,
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({
@@ -64,11 +69,7 @@ export function createAzureAdapter({
       useInAdmin: true,
     },
 
-    handleDelete: ({ storageFilePath }) =>
-      deleteFile({
-        client: getStorageClient(),
-        storageFilePath,
-      }),
+    handleDelete: deleteStoredFile,
 
     handleUpload: async ({ data, file, storageFilePath }) => {
       await uploadFile({

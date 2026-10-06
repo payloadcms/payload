@@ -67,6 +67,14 @@ export type HandleDelete = (args: {
   storageFilePath: string
 }) => Promise<void> | void
 
+/** Deletes a stored object without requiring a saved document. */
+export type DeleteFile = (args: {
+  collection: CollectionConfig
+  req: PayloadRequest
+  /** Complete storage path, with prefixes and `_objectKey` already resolved. */
+  storageFilePath: string
+}) => Promise<void> | void
+
 /** Complete storage keys are resolved before invoking a provider operation. */
 export type FileOperationArgs = {
   collection: SanitizedCollectionConfig
@@ -104,6 +112,7 @@ export type StaticHandler = (
 export interface GeneratedAdapter {
   /** Preserve object metadata and fail if `to` already exists. Rename retains `from` for history. */
   copyFile: CopyFile
+  deleteFile: DeleteFile
   /**
    * Additional fields to be injected into the base collection and image sizes
    */

@@ -1,6 +1,7 @@
 import type {
   Adapter,
   ClientUploadsConfig,
+  DeleteFile,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 
@@ -43,11 +44,14 @@ export function createVercelBlobAdapter({
   useCompositePrefixes = false,
 }: CreateVercelBlobAdapterArgs): Adapter {
   const clientUploadsAccess = typeof clientUploads === 'object' ? clientUploads.access : undefined
+  const deleteStoredFile: DeleteFile = ({ storageFilePath }) =>
+    deleteFile({ baseUrl, storageFilePath, token })
 
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'vercel-blob',
 
     copyFile: ({ from, to }) => copyVercelBlobFile({ access, cacheControlMaxAge, from, to, token }),
+    deleteFile: deleteStoredFile,
 
     uploadInstructions: {
       adminHandler: {
@@ -149,12 +153,7 @@ export function createVercelBlobAdapter({
         useCompositePrefixes,
       }),
 
-    handleDelete: ({ storageFilePath }) =>
-      deleteFile({
-        baseUrl,
-        storageFilePath,
-        token,
-      }),
+    handleDelete: deleteStoredFile,
 
     handleUpload: async ({ data, file: { buffer, mimeType }, storageFilePath }) => {
       const result = await uploadFile({
