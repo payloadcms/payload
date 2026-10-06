@@ -7,6 +7,8 @@ import noImportsFromSelf from './customRules/no-imports-from-self.js'
 import noConflictingLexicalMarkdownImports from './customRules/no-conflicting-lexical-markdown-imports.js'
 import properPinoLoggerErrorUsage from './customRules/proper-payload-logger-usage.js'
 import validCodeBlockLanguages from './customRules/valid-code-block-languages.js'
+import uiFolderBoundaries from './customRules/ui-folder-boundaries.js'
+import noUIClientSubpaths from './customRules/no-ui-client-subpaths.js'
 
 /**
  * @type {import('eslint').ESLint.Plugin}
@@ -20,6 +22,8 @@ const index = {
     'no-conflicting-lexical-markdown-imports': noConflictingLexicalMarkdownImports,
     'proper-payload-logger-usage': properPinoLoggerErrorUsage,
     'valid-code-block-languages': validCodeBlockLanguages,
+    'ui-folder-boundaries': uiFolderBoundaries,
+    'no-ui-client-subpaths': noUIClientSubpaths,
 
     // Testing-related
     'no-non-retryable-assertions': noNonRetryableAssertions,

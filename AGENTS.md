@@ -457,6 +457,15 @@ export { AnotherComponent } from '../../elements/AnotherComponent/index.js'
 
 When a `.server.tsx` file needs to render a client component, it must import from the client exports bundle, not via relative path. Relative imports don't respect `'use client'` boundaries in production builds.
 
+In `packages/ui/src`, code is split by where it runs, and the `payload/ui-folder-boundaries` ESLint rule enforces it (type-only imports are always allowed):
+
+- `client/`: client components, hooks, providers and contexts. Must not import `server/`.
+- `server/`: server components, views and server-only utilities. Reaches `client/` only through `exports/client/index.js`.
+- `shared/`: pure code used by both sides (no hooks, no client or server imports).
+- `exports/`, `assets/`, `css/` and `@types/` stay at the top level.
+
+Outside `packages/ui`, admin code (adapters, plugins, custom components) imports client components from `@payloadcms/ui` only. Client subpaths like `@payloadcms/ui/elements/Link` are for apps outside the admin panel: next to the bundled barrel, they load a second copy of the code. The `payload/no-ui-client-subpaths` ESLint rule enforces this.
+
 ```typescript
 // BAD - relative import doesn't work in prod
 import { MyClientComponent } from './MyComponent.js'
