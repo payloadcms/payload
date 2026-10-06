@@ -2,6 +2,8 @@ import type { DocumentVersion, Sort, Where } from 'payload'
 
 import { stringify } from 'qs-esm'
 
+import { RemovedArgumentError } from '../errors/RemovedArgumentError.js'
+
 export type OperationArgs = {
   depth?: number
   fallbackLocale?: unknown
@@ -19,6 +21,12 @@ export type OperationArgs = {
 }
 
 export const buildSearchParams = (args: OperationArgs): string => {
+  for (const key of ['draft', 'publishAllLocales', 'unpublishAllLocales']) {
+    if (Object.hasOwn(args, key)) {
+      throw new RemovedArgumentError({ key })
+    }
+  }
+
   const search: Record<string, unknown> = {}
 
   if (typeof args.depth === 'number') {

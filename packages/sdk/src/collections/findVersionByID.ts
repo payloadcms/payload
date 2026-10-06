@@ -11,6 +11,8 @@ import type {
 import type { PayloadSDK } from '../index.js'
 import type { DataFromCollectionSlug, PopulateType } from '../types.js'
 
+import { RemovedArgumentError } from '../errors/RemovedArgumentError.js'
+
 export type FindVersionByIDOptions<
   T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
@@ -81,7 +83,7 @@ export async function findVersionByID<
 
     return response.json()
   } catch (err) {
-    if (options.disableErrors) {
+    if (options.disableErrors && !(err instanceof RemovedArgumentError)) {
       // @ts-expect-error generic nullable
       return null
     }

@@ -297,6 +297,7 @@ export class PayloadSDK<T extends PayloadTypesShape = PayloadTypes> {
     method: 'DELETE' | 'GET' | 'PATCH' | 'POST' | 'PUT'
     path: string
   }): Promise<Response> {
+    const searchParams = buildSearchParams(args)
     const headers = new Headers({ ...this.baseInit.headers, ...incomingInit?.headers })
 
     const init: RequestInit = {
@@ -318,7 +319,7 @@ export class PayloadSDK<T extends PayloadTypesShape = PayloadTypes> {
       }
     }
 
-    const response = await this.fetch(`${this.baseURL}${path}${buildSearchParams(args)}`, init)
+    const response = await this.fetch(`${this.baseURL}${path}${searchParams}`, init)
 
     if (!response.ok) {
       let errorData: {

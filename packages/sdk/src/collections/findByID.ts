@@ -16,6 +16,8 @@ import type {
   TransformCollectionWithSelect,
 } from '../types.js'
 
+import { RemovedArgumentError } from '../errors/RemovedArgumentError.js'
+
 export type FindByIDOptions<
   T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
@@ -85,7 +87,7 @@ export async function findByID<
 
     return response.json()
   } catch (err) {
-    if (options.disableErrors) {
+    if (options.disableErrors && !(err instanceof RemovedArgumentError)) {
       // @ts-expect-error generic nullable
       return null
     }

@@ -7,6 +7,17 @@ describe('buildSearchParams', () => {
     expect(buildSearchParams({ version })).toBe(`?version=${version}`)
   })
 
+  it.each(['draft', 'publishAllLocales', 'unpublishAllLocales'])(
+    'should reject retired %s even when false or undefined',
+    (key) => {
+      for (const value of [true, false, undefined]) {
+        expect(() => buildSearchParams({ [key]: value, version: 'published' })).toThrow(
+          `The \"${key}\" parameter has been removed. Use \"version\" and \"locale\" instead.`,
+        )
+      }
+    },
+  )
+
   it('should omit an unspecified version', () => {
     expect(buildSearchParams({})).toBe('')
   })

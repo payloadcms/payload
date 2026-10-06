@@ -11,6 +11,8 @@ import type {
 import type { PayloadSDK } from '../index.js'
 import type { DataFromGlobalSlug, PopulateType } from '../types.js'
 
+import { RemovedArgumentError } from '../errors/RemovedArgumentError.js'
+
 export type FindGlobalVersionByIDOptions<
   T extends PayloadTypesShape,
   TSlug extends GlobalSlug<T>,
@@ -71,7 +73,7 @@ export async function findGlobalVersionByID<
 
     return response.json()
   } catch (err) {
-    if (options.disableErrors) {
+    if (options.disableErrors && !(err instanceof RemovedArgumentError)) {
       // @ts-expect-error generic nullable
       return null
     }
