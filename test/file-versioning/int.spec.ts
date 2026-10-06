@@ -30,6 +30,8 @@ const dirname = path.dirname(fileURLToPath(import.meta.url))
 const imageFixture = path.resolve(dirname, '../uploads/image.png')
 const pdfFixture = path.resolve(dirname, '../uploads/image-as-pdf.pdf')
 const videoFixture = path.resolve(dirname, '../uploads/christmas-mariachi-in-guadalajara.mp4')
+const isTransactionalMongoAdapter = (adapter: string) =>
+  adapter === 'mongodb' || adapter === 'mongodb-atlas'
 
 const original = {
   filename: 'photo-original.jpg',
@@ -289,7 +291,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
 
   test.options(
     'should compensate staged objects when a later hook rejects the upload',
-    { db: 'mongo' },
+    { db: isTransactionalMongoAdapter },
     async ({ payload }) => {
       const bytes = await readFile(imageFixture)
       const filesBefore = await readdir(mediaDir).catch(() => [] as string[])
@@ -1248,7 +1250,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
 
   test.options(
     'should roll back an archived revision when a later hook rejects replacement',
-    { db: 'mongo' },
+    { db: isTransactionalMongoAdapter },
     async ({ payload }) => {
       const firstBytes = await readFile(imageFixture)
       const secondBytes = await sharp(firstBytes).flop().png().toBuffer()
@@ -1546,8 +1548,9 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     await expect(stat(path.join(trashMediaDir, filename))).rejects.toMatchObject({ code: 'ENOENT' })
   })
 
-  test.skipIf(process.env.PAYLOAD_DATABASE === 'sqlite')(
+  test.options(
     'should keep files when an outer transaction rolls back a nested delete',
+    { db: isTransactionalMongoAdapter },
     async ({ payload }) => {
       const created = await payload.create({
         collection: mediaSlug,
@@ -1575,38 +1578,38 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     },
   )
 
-  test('should keep files when an afterDelete hook rejects the operation', async ({ payload }) => {
-    const created = await payload.create({
-      collection: mediaSlug,
-      data: { alt: 'before delete' },
-      filePath: imageFixture,
-    })
-    const hooks = payload.collections[mediaSlug].config.hooks
-    const originalHooks = hooks.afterDelete
-    hooks.afterDelete = [
-      ...(originalHooks ?? []),
-      () => {
-        throw new Error('Rejected delete after the database write')
-      },
-    ]
+  test.options(
+    'should keep files when an afterDelete hook rejects the operation',
+    { db: isTransactionalMongoAdapter },
+    async ({ payload }) => {
+      const created = await payload.create({
+        collection: mediaSlug,
+        data: { alt: 'before delete' },
+        filePath: imageFixture,
+      })
+      const hooks = payload.collections[mediaSlug].config.hooks
+      const originalHooks = hooks.afterDelete
+      hooks.afterDelete = [
+        ...(originalHooks ?? []),
+        () => {
+          throw new Error('Rejected delete after the database write')
+        },
+      ]
 
-    try {
-      await expect(
-        payload.delete({ id: created.id, collection: mediaSlug, overrideAccess: true }),
-      ).rejects.toThrow('Rejected delete after the database write')
-    } finally {
-      hooks.afterDelete = originalHooks
-    }
+      try {
+        await expect(
+          payload.delete({ id: created.id, collection: mediaSlug, overrideAccess: true }),
+        ).rejects.toThrow('Rejected delete after the database write')
+      } finally {
+        hooks.afterDelete = originalHooks
+      }
 
-    expect(await readFile(path.join(mediaDir, created.original!.filename!))).toBeTruthy()
-    const hasExpectedRollback =
-      process.env.PAYLOAD_DATABASE === 'sqlite' ||
-      Boolean(
+      expect(await readFile(path.join(mediaDir, created.original!.filename!))).toBeTruthy()
+      expect(
         await payload.db.findOne({ collection: mediaSlug, where: { id: { equals: created.id } } }),
-      )
-
-    expect(hasExpectedRollback).toBe(true)
-  })
+      ).toBeTruthy()
+    },
+  )
 
   test('should read an untouched legacy local file without changing stored data or files', async ({
     payload,

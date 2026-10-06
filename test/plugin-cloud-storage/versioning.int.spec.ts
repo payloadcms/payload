@@ -20,6 +20,8 @@ import {
 
 const firstFile = path.resolve(import.meta.dirname, '../uploads/image.png')
 const secondFile = path.resolve(import.meta.dirname, '../uploads/small.png')
+const isTransactionalMongoAdapter = (adapter: string) =>
+  adapter === 'mongodb' || adapter === 'mongodb-atlas'
 
 const getStoredFiles = async ({
   id,
@@ -547,7 +549,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
 
   test.options(
     'should use native move for an unversioned rename',
-    { db: 'mongo' },
+    { db: isTransactionalMongoAdapter },
     async ({ payload }) => {
       const created = await payload.create({
         collection: unversionedCloudMediaSlug,
@@ -611,7 +613,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
 
   test.options(
     'should restore earlier objects when a later native move fails',
-    { db: 'mongo' },
+    { db: isTransactionalMongoAdapter },
     async ({ payload }) => {
       const created = await payload.create({
         collection: unversionedCloudMediaSlug,
@@ -656,7 +658,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
 
   test.options(
     'should restore a native move when the database commit fails',
-    { db: 'mongo' },
+    { db: isTransactionalMongoAdapter },
     async ({ payload }) => {
       const created = await payload.create({
         collection: unversionedCloudMediaSlug,
@@ -1124,7 +1126,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
 
   test.options(
     'should remove staged cloud bytes when a later hook fails with a transaction',
-    { db: 'mongo' },
+    { db: isTransactionalMongoAdapter },
     async ({ payload }) => {
       const first = await payload.create({
         collection: versionedCloudMediaSlug,
@@ -1227,7 +1229,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
 
   test.options(
     'should remove staged cloud bytes when the document write fails',
-    { db: 'mongo' },
+    { db: isTransactionalMongoAdapter },
     async ({ payload }) => {
       const first = await payload.create({
         collection: versionedCloudMediaSlug,
