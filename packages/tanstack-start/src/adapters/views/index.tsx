@@ -27,8 +27,8 @@ const runLoader = async (load: AdminLoad, splat: string, searchStr: string) => {
 
 // The admin UI loads with the admin routes only, so front-end routes never download it. The
 // router preloads lazy route components before rendering, so admin pages don't flash.
-const AdminPage = lazyRouteComponent(() => import('./components.js'), 'AdminPage')
-const AdminNotFound = lazyRouteComponent(() => import('./components.js'), 'AdminNotFound')
+const AdminPage = lazyRouteComponent(() => import('./lazy.js'), 'AdminPage')
+const AdminNotFound = lazyRouteComponent(() => import('./lazy.js'), 'AdminNotFound')
 
 const adminRouteOptions = ({
   forwardNotFoundPayload,
