@@ -6,10 +6,6 @@ import { cache } from 'react'
 
 type CachedClientConfigs = Record<keyof SupportedLanguages, ClientConfig>
 
-type GetClientConfigArgs = {
-  user: CreateClientConfigArgs['user'] | null
-} & Omit<CreateClientConfigArgs, 'user'>
-
 let cachedClientConfigs = global._payload_clientConfigs as CachedClientConfigs
 
 if (!cachedClientConfigs) {
@@ -17,7 +13,7 @@ if (!cachedClientConfigs) {
 }
 
 export const getClientConfig = cache(
-  ({ config, i18n, importMap, user }: GetClientConfigArgs): ClientConfig => {
+  ({ config, i18n, importMap, user }: CreateClientConfigArgs): ClientConfig => {
     const currentLanguage = i18n.language
 
     if (cachedClientConfigs[currentLanguage] && !global._payload_doNotCacheClientConfig) {

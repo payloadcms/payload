@@ -41,14 +41,8 @@ export type RootLayoutData = {
 }
 
 type Args = {
-  cookies: AdminContext['cookies']
-  headers: AdminContext['headers']
   importMap: ImportMap
-  languageCode: AdminContext['languageCode']
-  permissions: AdminContext['permissions']
-  req: AdminContext['req']
-  user: AdminContext['user']
-}
+} & Pick<AdminContext, 'cookies' | 'headers' | 'languageCode' | 'permissions' | 'req' | 'user'>
 
 export async function getRootLayoutData({
   cookies,
@@ -60,6 +54,7 @@ export async function getRootLayoutData({
   user,
 }: Args): Promise<RootLayoutData> {
   const { config } = req.payload
+
   const { theme, themeSource } = getRequestTheme({ config, cookies, headers })
 
   const languageOptions: LanguageOptions = Object.entries(config.i18n.supportedLanguages || {}).map(

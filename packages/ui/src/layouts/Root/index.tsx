@@ -90,8 +90,11 @@ const RootLayoutContent = async ({
   serverFunction,
 }: RootLayoutProps) => {
   const context = await initAdminContext({ configPromise, importMap, key: 'RootLayout' })
+
   const { cookies, headers, languageCode, permissions, req, user } = context
+
   const { config } = req.payload
+
   const data = await getRootLayoutData({
     cookies,
     headers,
