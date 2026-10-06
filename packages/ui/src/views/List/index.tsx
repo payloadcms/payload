@@ -48,6 +48,7 @@ import { handleGroupBy } from './handleGroupBy.js'
 import { handleHierarchy } from './handleHierarchy.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
+import { resolveDocumentListItemURL } from './resolveDocumentListItemURL.js'
 import { transformColumnsToSelect } from './transformColumnsToSelect.js'
 import './index.css'
 
@@ -553,6 +554,24 @@ export const renderListView = async (
   })
 
   const isInDrawer = Boolean(drawerSlug)
+  const documentURLs =
+    !isInDrawer && !isHierarchyView && collectionConfig.admin.formatDocURL
+      ? Object.fromEntries(
+          (groupedData ? groupedData.flatMap((group) => group.data.docs) : data.docs).map((doc) => [
+            doc.id,
+            resolveDocumentListItemURL({
+              collectionSlug,
+              doc,
+              formatDocURL: collectionConfig.admin.formatDocURL,
+              hierarchyParentFieldName: isHierarchyCollection
+                ? hierarchyParentFieldName
+                : undefined,
+              req,
+              viewType,
+            }),
+          ]),
+        )
+      : undefined
 
   // Needed to prevent: Only plain objects can be passed to Client Components from Server Components. Objects with toJSON methods are not supported. Convert it manually to a simple value before passing it to props.
   // Is there a way to avoid this? The `where` object is already seemingly plain, but is not bc it originates from the params.
@@ -568,6 +587,7 @@ export const renderListView = async (
       disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
       disableQueryPresets,
       documentLayout: collectionPreferences?.documentLayout,
+      documentURLs,
       enableRowSelections,
       groupedData,
       hasCreatePermission,

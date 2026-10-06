@@ -80,6 +80,8 @@ export type ListViewClientProps = {
   disableBulkEdit?: boolean
   disableQueryPresets?: boolean
   documentLayout?: CollectionPreferences['documentLayout']
+  /** Server-resolved grid destinations. A null value disables document navigation. */
+  documentURLs?: Record<string, null | string>
   enableRowSelections?: boolean
   groupedData?: ListViewGroup[]
   hasCreatePermission: boolean

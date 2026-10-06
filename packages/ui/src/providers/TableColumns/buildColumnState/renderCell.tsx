@@ -23,7 +23,7 @@ import {
   // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 } from '../../../exports/client/index.js'
 import { hasOptionLabelJSXElement } from '../../../utilities/hasOptionLabelJSXElement.js'
-import { getDocumentListItemURL } from '../../../views/List/getDocumentListItemURL.js'
+import { resolveDocumentListItemURL } from '../../../views/List/resolveDocumentListItemURL.js'
 import { findValueFromPath } from './findValueFromPath.js'
 
 type RenderCellArgs = {
@@ -77,40 +77,17 @@ export function renderCell({
 
   if (isLinkedColumn && req) {
     const collectionConfig = payload.collections[collectionSlug]?.config
-    const formatDocURL = collectionConfig?.admin?.formatDocURL
-    const defaultURL = getDocumentListItemURL({
-      adminRoute: req.payload.config.routes?.admin || '/admin',
+    const resolvedURL = resolveDocumentListItemURL({
       collectionSlug,
-      documentID: doc.id,
+      doc,
+      formatDocURL: collectionConfig?.admin?.formatDocURL,
       hierarchyParentFieldName,
+      req,
       viewType,
     })
 
-    if (viewType === 'list' && hierarchyParentFieldName) {
-      customLinkURL = defaultURL
-    }
-
-    if (typeof formatDocURL === 'function') {
-      const customURL = formatDocURL({
-        collectionSlug,
-        defaultURL,
-        doc,
-        req,
-        viewType,
-      })
-
-      if (customURL === null) {
-        // formatDocURL returned null = disable linking entirely
-        shouldLink = false
-      } else if (typeof customURL === 'string') {
-        // formatDocURL returned a string = use custom URL
-        shouldLink = true
-        customLinkURL = customURL
-      } else {
-        // formatDocURL returned unexpected type = disable linking for safety
-        shouldLink = false
-      }
-    }
+    shouldLink = resolvedURL !== null
+    customLinkURL = resolvedURL ?? undefined
   }
 
   // For _status field, use _displayStatus if available (for showing "changed" status in list view)
