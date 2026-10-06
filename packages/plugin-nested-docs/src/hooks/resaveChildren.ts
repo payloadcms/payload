@@ -1,6 +1,7 @@
 import type { CollectionAfterChangeHook, JsonObject } from 'payload'
 
-import { APIError, ValidationError } from 'payload'
+import { APIError, isolateObjectProperty, ValidationError } from 'payload'
+import { getLocaleData } from 'payload/internal'
 
 import type { NestedDocsPluginConfig } from '../types.js'
 
@@ -8,7 +9,25 @@ import { populateBreadcrumbs } from '../utilities/populateBreadcrumbs.js'
 
 export const resaveChildren =
   (pluginConfig: NestedDocsPluginConfig): CollectionAfterChangeHook =>
-  async ({ collection, doc, req }) => {
+  async (args) => {
+    const { collection, doc, req } = args
+    const { localization } = req.payload.config
+    if (req.locale === 'all' && localization) {
+      let locales = localization.locales
+      if (localization.filterAvailableLocales) {
+        locales = await localization.filterAvailableLocales({ locales, req })
+      }
+      for (const { code: locale } of locales) {
+        const localeReq = isolateObjectProperty(req, 'locale')
+        localeReq.locale = locale
+        await resaveChildren(pluginConfig)({
+          ...args,
+          doc: getLocaleData({ data: doc, fields: collection.fields, locale, req: localeReq }),
+          req: localeReq,
+        })
+      }
+      return
+    }
     if (collection?.versions?.drafts && doc._status !== 'published') {
       // If the parent is a draft, don't resave children
       return

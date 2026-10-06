@@ -1,5 +1,8 @@
 import type { Data, Document, PayloadRequest, SanitizedCollectionConfig } from 'payload'
 
+import { isolateObjectProperty } from 'payload'
+import { getLocaleData } from 'payload/internal'
+
 import type { GenerateLabel, GenerateURL } from '../types.js'
 
 import { formatBreadcrumb } from './formatBreadcrumb.js'
@@ -26,6 +29,50 @@ export const populateBreadcrumbs = async ({
   req,
 }: Args): Promise<Data> => {
   const newData = data
+  const { localization } = req.payload.config
+  const breadcrumbsField = collection.flattenedFields.find(
+    (field) => field.name === breadcrumbsFieldName,
+  )
+
+  if (req.locale === 'all' && localization && breadcrumbsField?.localized) {
+    let locales = localization.locales
+    if (localization.filterAvailableLocales) {
+      locales = await localization.filterAvailableLocales({ locales, req })
+    }
+    const breadcrumbsByLocale = {
+      ...(originalDoc?.[breadcrumbsFieldName] || {}),
+      ...(data[breadcrumbsFieldName] || {}),
+    }
+    for (const { code: locale } of locales) {
+      const localeReq = isolateObjectProperty(req, 'locale')
+      localeReq.locale = locale
+      const incomingLocaleData = getLocaleData({
+        data,
+        fields: collection.fields,
+        locale,
+        req: localeReq,
+      })
+      // Locale extraction includes missing schema fields; keep omitted update values out of the merge.
+      const localeUpdateData = Object.fromEntries(
+        Object.entries(incomingLocaleData).filter(([, value]) => value !== undefined),
+      )
+      const localeData = await populateBreadcrumbs({
+        breadcrumbsFieldName,
+        collection,
+        data: localeUpdateData,
+        generateLabel,
+        generateURL,
+        originalDoc: originalDoc
+          ? getLocaleData({ data: originalDoc, fields: collection.fields, locale, req: localeReq })
+          : undefined,
+        parentFieldName,
+        req: localeReq,
+      })
+      breadcrumbsByLocale[locale] = localeData[breadcrumbsFieldName]
+    }
+    newData[breadcrumbsFieldName] = breadcrumbsByLocale
+    return newData
+  }
 
   const currentDocument = {
     ...originalDoc,
