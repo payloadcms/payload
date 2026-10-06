@@ -5,6 +5,8 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
+import { createScrollInteraction } from './scroll-demo.mjs'
+
 const DEFAULT_BASE_URL = 'http://localhost:3000'
 const DEFAULT_INTERACTION_PAUSE_MS = 300
 const DEFAULT_LABEL = 'feature-demo'
@@ -251,6 +253,7 @@ async function executeDemo({
       moveCursor: pointerInteractions.moveCursor,
       page,
       pause: (milliseconds = 700) => page.waitForTimeout(milliseconds * pauseScale),
+      scroll: createScrollInteraction({ moveCursor: pointerInteractions.moveCursor, page }),
     })
     if (trailingPauseMs > 0) {
       await page.waitForTimeout(trailingPauseMs)

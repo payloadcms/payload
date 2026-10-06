@@ -228,3 +228,30 @@ test('validateDemo executes a scenario without retaining video and forwards fixt
     await rm(directory, { force: true, recursive: true })
   }
 })
+
+test('should expose scrolling through the real recorder cursor helper during validation', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'record-pr-demo-scroll-test-'))
+  const scenario = path.join(directory, 'scenario.mjs')
+
+  try {
+    await writeFile(
+      scenario,
+      `export default async function scenario({ expect, page, scroll }) {
+        await page.goto('data:text/html,<div id="scroller" style="width:200px;height:24px;overflow:auto"><div style="width:264px;height:24px">Tabs</div></div>')
+        const result = await scroll(page.locator('#scroller'), { axis: 'x', duration: 100, settle: 0 })
+        expect(result).toEqual({ position: 64, target: 64 })
+        await expect(page.locator('[data-pr-demo-scroll-anchor]')).toHaveCount(0)
+        await expect(page.locator('[data-pr-demo-cursor]')).toHaveCSS('opacity', '1')
+      }`,
+    )
+
+    await recorder.validateDemo({
+      baseURL: 'http://localhost:3000',
+      label: 'scroll-test',
+      scenario,
+      viewport: { height: 480, width: 640 },
+    })
+  } finally {
+    await rm(directory, { force: true, recursive: true })
+  }
+})
