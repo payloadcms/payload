@@ -464,7 +464,7 @@ test.describe('Hierarchy Sidebar', () => {
   })
 
   test.describe('Folder title edit action', () => {
-    test('should keep the default list table when viewing a selected folder from All Folders', async () => {
+    test('should keep the unfiltered default list when viewing a selected folder from All Folders', async () => {
       const folder = await payload.create({
         collection: 'folders',
         data: { name: 'Default list parent' },
@@ -490,7 +490,7 @@ test.describe('Hierarchy Sidebar', () => {
         await expect(page.getByText(child.name, { exact: true })).toBeVisible()
         await expect(
           page.getByRole('grid').getByText(unrelatedFolder.name, { exact: true }),
-        ).toBeHidden()
+        ).toBeVisible()
       } finally {
         await payload.delete({ id: child.id, collection: 'folders', overrideAccess: true })
         await payload.delete({
@@ -527,7 +527,10 @@ test.describe('Hierarchy Sidebar', () => {
           await expect(page.locator('.list-header .hierarchy-edit-button')).toHaveCount(0)
           await expect(page.locator('.hierarchy-tables__edit-button')).toHaveCount(0)
 
-          await page.goto(`${rootURL}?parentFolder=${folder.id}`)
+          const folderURL = new URL(rootURL)
+          folderURL.searchParams.set('parentFolder', String(folder.id))
+
+          await page.goto(folderURL.toString())
           await expect(page.getByRole('heading', { name: folder.name, level: 1 })).toBeVisible()
           const edit = page.locator('.list-header').getByRole('button', {
             name: `Edit ${folder.name}`,

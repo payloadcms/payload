@@ -383,13 +383,6 @@ export const renderListView = async (
     currentHierarchyItem = hierarchyAncestors.at(-1)
   }
 
-  if (isHierarchyCollection && !isHierarchyView && hierarchyParentId !== null) {
-    whereWithMergedSearch = combineWhereConstraints([
-      whereWithMergedSearch,
-      { [hierarchyParentFieldName]: { equals: hierarchyParentId } },
-    ])
-  }
-
   // Hierarchy data for client-side rendering
   let hierarchyData: HierarchyViewData | undefined
 
