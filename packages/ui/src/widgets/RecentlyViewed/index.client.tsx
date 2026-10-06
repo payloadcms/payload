@@ -5,8 +5,12 @@ import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { DocumentsPage, DocumentsTab } from './getDocuments.js'
 import type { PinnedItem } from './recents.js'
 
+import { CardGrid } from '../../elements/CardGrid/index.js'
+import { DocumentCard } from '../../elements/DocumentCard/index.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
+import { ClockIcon } from '../../icons/Clock/index.js'
 import { DocumentIcon } from '../../icons/Document/index.js'
+import { PinIcon } from '../../icons/Pin/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEntityVisibility } from '../../providers/EntityVisibility/index.js'
@@ -336,50 +340,41 @@ export function RecentsAndPinnedClient({
       </div>
       <div aria-busy={isLoading} className="recents-widget__viewport" ref={contentRef}>
         {items.length || (hasAddPinCard && !isLoading && !loadError) ? (
-          <div className="recents-widget__content">
-            <ul className="recents-widget__items recents-widget__items--grid" id={listID}>
-              {items.map((item) => {
-                return (
-                  <li className="recents-widget__item" key={documentKey(item)}>
-                    <a className="recents-widget__link" href={item.href}>
-                      <span className="recents-widget__thumbnail-container">
-                        {item.thumbnailURL ? (
-                          <img
-                            alt=""
-                            className="recents-widget__thumbnail"
-                            src={item.thumbnailURL}
-                          />
-                        ) : (
-                          <span
-                            aria-hidden="true"
-                            className="recents-widget__thumbnail recents-widget__thumbnail--empty"
-                          >
-                            <DocumentIcon />
-                          </span>
-                        )}
-                        {item.statusLabel ? (
-                          <span
-                            className={`recents-widget__status-pill${item.isDraft ? ' recents-widget__status-pill--draft' : ''}`}
-                          >
-                            {item.statusLabel}
-                          </span>
-                        ) : null}
+          <div className="recents-widget__content" id={listID}>
+            <CardGrid<null | RecentDocument>
+              ariaLabel={activeTab === 'pinned' ? labels.pinned : labels.recents}
+              className="recents-widget__items recents-widget__items--grid"
+              getItemClassName={(item) =>
+                item
+                  ? 'recents-widget__item'
+                  : `recents-widget__item recents-widget__item--add-pin${pageResult.totalDocs === 0 ? ' recents-widget__item--empty' : ''}`
+              }
+              getKey={(item) => (item ? documentKey(item) : 'add-pin')}
+              items={hasAddPinCard ? [...items, null] : items}
+              renderItem={(item) =>
+                item ? (
+                  <DocumentCard
+                    href={item.href}
+                    placeholder={<DocumentIcon />}
+                    thumbnail={item.thumbnailURL ? { alt: '', src: item.thumbnailURL } : undefined}
+                    title={item.title}
+                  >
+                    <div className="recents-widget__meta">
+                      {item.typeLabel}
+                      {item.dateTime && item.dateLabel ? (
+                        <>
+                          {' · '}
+                          <time dateTime={item.dateTime}>{item.dateLabel}</time>
+                        </>
+                      ) : null}
+                    </div>
+                    {item.statusLabel ? (
+                      <span
+                        className={`recents-widget__status-pill${item.isDraft ? ' recents-widget__status-pill--draft' : ''}`}
+                      >
+                        {item.statusLabel}
                       </span>
-                      <span className="recents-widget__details">
-                        <span className="recents-widget__name-row">
-                          <span className="recents-widget__name">{item.title}</span>
-                        </span>
-                        <span className="recents-widget__meta">
-                          {item.typeLabel}
-                          {item.dateTime && item.dateLabel ? (
-                            <>
-                              {' · '}
-                              <time dateTime={item.dateTime}>{item.dateLabel}</time>
-                            </>
-                          ) : null}
-                        </span>
-                      </span>
-                    </a>
+                    ) : null}
                     {activeTab === 'pinned' ? (
                       <button
                         aria-label={`${labels.removePin}: ${item.title}`}
@@ -389,21 +384,17 @@ export function RecentsAndPinnedClient({
                         onClick={() => void removePinnedDocument({ item })}
                         type="button"
                       >
-                        <span aria-hidden="true" className="recents-widget__pin-icon" />
+                        <span aria-hidden="true" className="recents-widget__pin-icon">
+                          <PinIcon isFilled />
+                        </span>
                       </button>
                     ) : null}
-                  </li>
+                  </DocumentCard>
+                ) : (
+                  pinDocumentPicker
                 )
-              })}
-              {hasAddPinCard ? (
-                <li
-                  className={`recents-widget__item recents-widget__item--add-pin${pageResult.totalDocs === 0 ? ' recents-widget__item--empty' : ''}`}
-                  key="add-pin"
-                >
-                  {pinDocumentPicker}
-                </li>
-              ) : null}
-            </ul>
+              }
+            />
           </div>
         ) : isLoading ? (
           <div className="recents-widget__empty" />
@@ -412,7 +403,9 @@ export function RecentsAndPinnedClient({
             <span
               aria-hidden="true"
               className={`recents-widget__empty-icon recents-widget__empty-icon--${activeTab}`}
-            />
+            >
+              {activeTab === 'pinned' ? <PinIcon /> : <ClockIcon />}
+            </span>
             <span className="recents-widget__empty-text">
               <span className="recents-widget__empty-title">{emptyMessage}</span>
               <span className="recents-widget__empty-description">{emptyDescription}</span>

@@ -993,7 +993,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         await selectDocument.press('Enter')
         await expect(drawer).toBeHidden()
         await expect(widget.getByRole('button', { name: 'Pinned', exact: true })).toBeFocused()
-        await expect(widget.locator('.recents-widget__name')).toContainText(document.title)
+        await expect(widget.locator('.document-card__title')).toContainText(document.title)
         const pins = await (
           await page.request.get(`${serverURL}/api/payload-preferences/pinned-documents`)
         ).json()
@@ -1049,17 +1049,17 @@ test.describe('WCAG 2.2 Level AA', () => {
 
         await recents.focus()
         await recents.press('Enter')
-        await expect(widget.locator('.recents-widget__name')).toHaveCount(1)
+        await expect(widget.locator('.document-card__title')).toHaveCount(1)
         await expect(previous).toBeDisabled()
         await next.focus()
         await next.press('Space')
-        await expect(widget.locator('.recents-widget__name')).toHaveText(documents[1].title)
+        await expect(widget.locator('.document-card__title')).toHaveText(documents[1].title)
         await expect(next).toBeFocused()
         await expect(widget.locator('.recents-widget__pagination [aria-live]')).toContainText(
           '2 of 3',
         )
         await next.press('Enter')
-        await expect(widget.locator('.recents-widget__name')).toHaveText(documents[2].title)
+        await expect(widget.locator('.document-card__title')).toHaveText(documents[2].title)
         await expect(previous).toBeFocused()
         await previous.press('Space')
         await expect(widget.locator('.recents-widget__pagination [aria-live]')).toContainText(
@@ -1068,7 +1068,8 @@ test.describe('WCAG 2.2 Level AA', () => {
         await previous.focus()
         await previous.press('Enter')
         await expect(next).toBeFocused()
-        await widget.locator('.recents-widget__link').focus()
+        await widget.locator('.document-card__title').focus()
+        await expectPaintedFocus({ page })
         await expect(widget.locator('.recents-widget__pin')).toHaveCount(0)
         const pinned = widget.getByRole('button', { name: 'Pinned', exact: true })
 

@@ -363,7 +363,7 @@ describe('Dashboard', () => {
     await expect(activityCard.locator('.widget-card__title')).toHaveText('Recents and pinned')
     await activityCard.getByRole('button', { name: 'Recently viewed' }).click()
 
-    const rowTitles = activityCard.locator('.recents-widget__name')
+    const rowTitles = activityCard.locator('.document-card__title')
     await expect(rowTitles).toHaveCount(2)
     // The most recently viewed document is listed first.
     await expect(rowTitles.nth(0)).toHaveText(secondDoc.title)
@@ -403,7 +403,7 @@ describe('Dashboard', () => {
 
     const widget = page.locator('.recents-widget')
     await widget.getByRole('button', { name: 'Recently viewed' }).click()
-    await expect(widget.locator('.recents-widget__name')).toHaveText(ticket.title)
+    await expect(widget.locator('.document-card__title')).toHaveText(ticket.title)
     const pinnedButton = widget.getByRole('button', { name: 'Pinned', exact: true })
 
     await expect(widget.getByRole('button', { name: 'List view' })).toHaveCount(0)
@@ -419,7 +419,7 @@ describe('Dashboard', () => {
       selectLocator: drawer.locator('.list-header__select-collection'),
     })
     await drawer.getByRole('button', { name: ticket.title, exact: true }).click()
-    await expect(widget.locator('.recents-widget__name')).toHaveText(ticket.title)
+    await expect(widget.locator('.document-card__title')).toHaveText(ticket.title)
     const unpinButton = widget.getByRole('button', { name: `Unpin document: ${ticket.title}` })
     await expect(unpinButton).toBeEnabled()
     await page.mouse.move(0, 0)
@@ -435,8 +435,8 @@ describe('Dashboard', () => {
     expect(pins.value.items[0]).toEqual({ id: ticket.id, collectionSlug: 'tickets' })
 
     await widget.getByRole('button', { name: 'Recently viewed' }).click()
-    await expect(widget.locator('.recents-widget__name')).toHaveText(ticket.title)
-    await widget.locator('.recents-widget__link').hover()
+    await expect(widget.locator('.document-card__title')).toHaveText(ticket.title)
+    await widget.locator('.document-card__title').hover()
     await expect(widget.locator('.recents-widget__pin')).toHaveCount(0)
 
     await page.reload()
@@ -444,7 +444,7 @@ describe('Dashboard', () => {
       .locator('.recents-widget')
       .getByRole('button', { name: 'Pinned', exact: true })
       .click()
-    await expect(page.locator('.recents-widget__name')).toHaveText(ticket.title)
+    await expect(page.locator('.document-card__title')).toHaveText(ticket.title)
 
     await page
       .locator('.recents-widget')
@@ -537,10 +537,10 @@ describe('Dashboard', () => {
       await page.keyboard.press('Escape')
       await expect(drawer).toBeHidden()
     }
-    await expect(widget.locator('.recents-widget__name')).toHaveCount(2)
+    await expect(widget.locator('.document-card__title')).toHaveCount(2)
     await expect(widget.locator('.recents-widget__item--add-pin')).toHaveCount(1)
     await page.reload()
-    await expect(widget.locator('.recents-widget__name')).toHaveCount(2)
+    await expect(widget.locator('.document-card__title')).toHaveCount(2)
   })
 
   test('should reserve a placeholder page for four pins and report failed pin saves', async ({
@@ -568,7 +568,7 @@ describe('Dashboard', () => {
     const addPin = widget.getByRole('button', { name: 'Pin document', exact: true })
     const drawer = page.locator('.list-drawer.drawer--is-open')
 
-    await expect(widget.locator('.recents-widget__name')).toHaveCount(4)
+    await expect(widget.locator('.document-card__title')).toHaveCount(4)
     await expect(widget.locator('.recents-widget__item--add-pin')).toHaveCount(0)
     await expect(addPin).toHaveCount(0)
     await expect(widget.locator('.recents-widget__pagination')).toContainText('1 of 2')
@@ -591,20 +591,20 @@ describe('Dashboard', () => {
       pageStatusBox!.y + pageStatusBox!.height / 2,
       1,
     )
-    await expect(widget.locator('.recents-widget__thumbnail--empty .icon--document')).toHaveCount(4)
+    await expect(widget.locator('.document-card__thumbnail--empty .icon--document')).toHaveCount(4)
     const pins = widget.locator('.recents-widget__pin')
 
     await page.mouse.move(0, 0)
     await expect(pins.nth(0)).toHaveCSS('opacity', '0')
-    await widget.locator('.recents-widget__link').first().hover()
+    await widget.locator('.document-card__title').first().hover()
     await expect(pins.nth(0)).toHaveCSS('opacity', '1')
     await expect(pins.nth(1)).toHaveCSS('opacity', '0')
-    await widget.locator('.recents-widget__link').first().focus()
+    await widget.locator('.document-card__title').first().focus()
     await page.mouse.move(0, 0)
     await expect(pins.nth(0)).toHaveCSS('opacity', '1')
     await expect(pins.nth(1)).toHaveCSS('opacity', '0')
     await widget.getByRole('button', { name: 'Next', exact: true }).click()
-    await expect(widget.locator('.recents-widget__name')).toHaveCount(0)
+    await expect(widget.locator('.document-card__title')).toHaveCount(0)
     await expect(widget.locator('.recents-widget__pagination')).toContainText('2 of 2')
     await expect(widget.locator('.recents-widget__item--add-pin')).toHaveCount(1)
     await expect(widget.locator('.recents-widget__item--empty')).toHaveCount(0)
@@ -630,7 +630,7 @@ describe('Dashboard', () => {
     await expect(widget.locator('.recents-widget__status')).toContainText(
       'Could not save pinned documents.',
     )
-    await expect(widget.locator('.recents-widget__name')).toHaveCount(0)
+    await expect(widget.locator('.document-card__title')).toHaveCount(0)
     await page.unroute('**/api/payload-preferences/pinned-documents')
     await addPin.click()
     await selectInput({
@@ -641,9 +641,9 @@ describe('Dashboard', () => {
     })
     await drawer.getByRole('button', { name: tickets[4].title, exact: true }).click()
     await expect(widget.locator('.recents-widget__pagination')).toContainText('1 of 2')
-    await expect(widget.locator('.recents-widget__name').first()).toHaveText(tickets[4].title)
+    await expect(widget.locator('.document-card__title').first()).toHaveText(tickets[4].title)
     await widget.getByRole('button', { name: 'Next', exact: true }).click()
-    await expect(widget.locator('.recents-widget__name')).toHaveCount(1)
+    await expect(widget.locator('.document-card__title')).toHaveCount(1)
     await expect(widget.locator('.recents-widget__item--add-pin')).toHaveCount(1)
   })
 
@@ -674,19 +674,19 @@ describe('Dashboard', () => {
     const widget = page.locator('.recents-widget')
 
     await widget.getByRole('button', { name: 'Recently viewed' }).click()
-    await expect(widget.locator('.recents-widget__name')).toHaveCount(4)
+    await expect(widget.locator('.document-card__title')).toHaveCount(4)
     await expect(widget.locator('.recents-widget__pagination')).toContainText('1 of 2')
     await widget.getByRole('button', { name: 'Next', exact: true }).click()
-    await expect(widget.locator('.recents-widget__name')).toHaveCount(3)
-    await expect(widget.locator('.recents-widget__name').first()).toHaveText(tickets[4].title)
+    await expect(widget.locator('.document-card__title')).toHaveCount(3)
+    await expect(widget.locator('.document-card__title').first()).toHaveText(tickets[4].title)
     await expect(widget.getByRole('button', { name: 'Next', exact: true })).toBeDisabled()
     await widget.getByRole('button', { name: 'Pinned', exact: true }).click()
     await widget.getByRole('button', { name: 'Recently viewed' }).click()
     await expect(widget.locator('.recents-widget__pagination')).toContainText('1 of 2')
-    await expect(widget.locator('.recents-widget__name').first()).toHaveText(tickets[0].title)
+    await expect(widget.locator('.document-card__title').first()).toHaveText(tickets[0].title)
 
     await page.setViewportSize({ height: 900, width: 375 })
-    await expect(widget.locator('.recents-widget__name')).toHaveCount(1)
+    await expect(widget.locator('.document-card__title')).toHaveCount(1)
     await expect(widget.locator('.recents-widget__pagination')).toContainText('1 of 7')
   })
 
@@ -712,7 +712,7 @@ describe('Dashboard', () => {
         .getByRole('button'),
     ).toHaveCount(2)
     await expect(widget.getByRole('button', { name: 'Recent drafts', exact: true })).toHaveCount(0)
-    await expect(widget.locator('.recents-widget__name')).toHaveText('Widget draft')
+    await expect(widget.locator('.document-card__title')).toHaveText('Widget draft')
     await expect(widget.locator('.recents-widget__status-pill')).toHaveText('Draft')
     await widget.getByRole('link', { name: /Widget draft/ }).click()
     await expect(page.locator('#field-title')).toHaveValue('Widget draft')
@@ -744,7 +744,7 @@ describe('Dashboard', () => {
     const d = new DashboardHelper(page)
     const activityCard = d.widgetByPos(2).locator('.recently-viewed-widget')
     await activityCard.getByRole('button', { name: 'Recently viewed' }).click()
-    await expect(activityCard.locator('.recents-widget__name')).toHaveCount(2)
+    await expect(activityCard.locator('.document-card__title')).toHaveCount(2)
 
     // Open the activity widget configuration.
     await d.setEditing()
@@ -785,7 +785,7 @@ describe('Dashboard', () => {
 
     // The excluded collection's document drops out; the remaining document still renders.
     await activityCard.getByRole('button', { name: 'Recently viewed' }).click()
-    const rowTitles = activityCard.locator('.recents-widget__name')
+    const rowTitles = activityCard.locator('.document-card__title')
     await expect(rowTitles).toHaveCount(1)
     await expect(rowTitles.nth(0)).toHaveText(event.title)
     await activityCard.getByRole('button', { name: 'Pinned', exact: true }).click()

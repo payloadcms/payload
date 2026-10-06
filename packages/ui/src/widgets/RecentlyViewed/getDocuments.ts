@@ -7,8 +7,9 @@ import type { RecentDocument } from './index.client.js'
 import type { PinnedItem } from './recents.js'
 
 import { formatRelativeDate, getRelativeTimeFormat } from '../../utilities/formatRelativeDate.js'
+import { getDocumentThumbnail } from '../../utilities/getDocumentThumbnail.js'
 import { getPinnedItems } from './pinnedPreferences.js'
-import { documentKey, getThumbnailURL, getValueByPath } from './recents.js'
+import { documentKey, getValueByPath } from './recents.js'
 
 export type DocumentsTab = 'pinned' | 'recents'
 export type DocumentsPageArgs = {
@@ -185,10 +186,8 @@ function enrichDocument({
         : doc._status === 'published'
           ? i18n.t('version:published')
           : undefined,
-    thumbnailURL: getThumbnailURL({
+    thumbnailURL: getDocumentThumbnail({
       doc,
-      fields: config.fields,
-      isUploadCollection: Boolean(config.upload),
       useAsThumbnail: config.admin?.useAsThumbnail,
     }),
     title: typeof rawTitle === 'string' && rawTitle ? rawTitle : String(doc.id),

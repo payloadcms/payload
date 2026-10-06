@@ -8,6 +8,7 @@ import type { ListDrawerProps } from '../../../elements/ListDrawer/types.js'
 import type { PinnedItem } from '../recents.js'
 
 import { useListDrawer } from '../../../elements/ListDrawer/index.js'
+import { PinIcon } from '../../../icons/Pin/index.js'
 import { PlusIcon } from '../../../icons/Plus/index.js'
 import { readPinnedPreferences } from '../pinnedPreferences.js'
 import './index.css'
@@ -103,7 +104,9 @@ export function PinDocumentPicker({
           <span
             aria-hidden="true"
             className="recents-widget__empty-icon recents-widget__empty-icon--pinned"
-          />
+          >
+            <PinIcon />
+          </span>
           <span className="recents-widget__empty-text" id={emptyStateID}>
             <span className="recents-widget__empty-title">{labels.pinnedEmpty}</span>
             <span className="recents-widget__empty-description">
