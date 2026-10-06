@@ -171,6 +171,52 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     filesize,
     width,
     height,
+    {
+      name: 'original',
+      type: 'group',
+      admin: {
+        hidden: true,
+        readOnly: true,
+      },
+      fields: [
+        { ...filename, index: false, unique: false },
+        {
+          ...url,
+          hooks: {
+            afterRead: [
+              ({ data, originalDoc, req, value }) => {
+                return generateFilePathOrURL({
+                  collectionSlug: collection.slug,
+                  config,
+                  filename: data?.original?.filename || originalDoc?.original?.filename,
+                  relative: false,
+                  serverURL: req.payload.config.serverURL,
+                  urlOrPath: value,
+                })
+              },
+            ],
+            beforeChange: [
+              ({ data, originalDoc, req, value }) => {
+                return generateFilePathOrURL({
+                  collectionSlug: collection.slug,
+                  config,
+                  filename: data?.original?.filename || originalDoc?.original?.filename,
+                  relative: true,
+                  serverURL: req.payload.config.serverURL,
+                  urlOrPath: value,
+                })
+              },
+            ],
+          },
+        },
+        mimeType,
+        filesize,
+        width,
+        height,
+        { name: 'prefix', type: 'text', admin: { hidden: true, readOnly: true } },
+        { name: '_objectKey', type: 'text', hidden: true },
+      ],
+    },
   ]
 
   // Add focal point fields if not disabled
@@ -284,6 +330,8 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               },
               unique: false,
             },
+            { name: 'prefix', type: 'text', admin: { hidden: true, readOnly: true } },
+            { name: '_objectKey', type: 'text', hidden: true },
           ],
           label: size.name,
         })),

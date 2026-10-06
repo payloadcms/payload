@@ -1146,7 +1146,7 @@ export type JSONField = {
   }
   type: 'json'
   validate?: JSONFieldValidation
-} & Omit<FieldBase, 'admin' | 'validate'>
+} & Omit<FieldBase, 'admin' | 'jsonSchema' | 'validate'>
 
 export type JSONFieldClient = {
   // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve

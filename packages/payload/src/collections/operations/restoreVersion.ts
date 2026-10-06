@@ -20,10 +20,12 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import {
-  getLocalizedUploadProperties,
-  restoreUploadDataFromDocument,
-  sanitizeUploadData,
-} from '../../uploads/sanitizeUploadData.js'
+  abortFileOperationScope,
+  beginFileOperationScope,
+  completeFileOperationScope,
+} from '../../uploads/fileVersioning/fileOperationManager.js'
+import { runStoredFileRestore } from '../../uploads/fileVersioning/restore.js'
+import { restoreUploadDataFromDocument } from '../../uploads/sanitizeUploadData.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import { hasDraftValidationEnabled } from '../../utilities/getVersionsConfig.js'
@@ -68,6 +70,11 @@ export const restoreVersionOperation = async <
     select: incomingSelect,
     showHiddenFields,
   } = args
+  const hasFileOperationScope = Boolean(collectionConfig.upload)
+
+  if (hasFileOperationScope) {
+    beginFileOperationScope({ req })
+  }
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
@@ -107,7 +114,7 @@ export const restoreVersionOperation = async <
     }
 
     const { parent: parentDocID } = rawVersionToRestore
-    let versionToRestoreWithLocales = rawVersionToRestore.version
+    const versionToRestoreWithLocales = rawVersionToRestore.version
 
     // /////////////////////////////////////
     // Access
@@ -174,6 +181,16 @@ export const restoreVersionOperation = async <
       )
     }
 
+    if (collectionConfig.upload && !overrideAccess) {
+      await req.payload.findVersionByID({
+        id: String(id),
+        collection: collectionConfig.slug,
+        depth: 0,
+        overrideAccess: false,
+        req,
+      })
+    }
+
     // /////////////////////////////////////
     // fetch previousDoc
     // /////////////////////////////////////
@@ -204,15 +221,8 @@ export const restoreVersionOperation = async <
       showHiddenFields: true,
     })
 
-    if (collectionConfig.upload && !overrideAccess) {
-      versionToRestoreWithLocales = restoreUploadDataFromDocument(
-        sanitizeUploadData(versionToRestoreWithLocales, 'update'),
-        prevDocWithLocales,
-      )
-    }
-
     // Use locale-hoisted version data for validation while preserving all locales in docWithLocales.
-    let prevVersionDoc = await afterRead({
+    const prevVersionDoc = await afterRead({
       collection: collectionConfig,
       context: req.context,
       depth: 0,
@@ -225,17 +235,6 @@ export const restoreVersionOperation = async <
       req,
       showHiddenFields: true,
     })
-
-    if (collectionConfig.upload && !overrideAccess) {
-      prevVersionDoc = restoreUploadDataFromDocument(
-        sanitizeUploadData(prevVersionDoc, 'update'),
-        prevDocWithLocales,
-        {
-          locale: validationLocale,
-          localizedProperties: getLocalizedUploadProperties(collectionConfig.flattenedFields),
-        },
-      )
-    }
 
     // /////////////////////////////////////
     // beforeValidate - Fields
@@ -331,31 +330,43 @@ export const restoreVersionOperation = async <
     result.updatedAt = new Date().toISOString()
     // Ensure status respects restoreAsDraft arg
     result._status = draftArg ? 'draft' : result._status
-    if (!draftArg) {
-      result = await req.payload.db.updateOne({
+    const writeRestoredVersion = async (restored: JsonObject) => {
+      if (collectionConfig.upload) {
+        result = restoreUploadDataFromDocument(result, restored, { clearMissing: true })
+      }
+      if (!draftArg) {
+        result = await req.payload.db.updateOne({
+          id: parentDocID,
+          collection: collectionConfig.slug,
+          data: result,
+          req: reqWithValidationLocale,
+          select,
+        })
+      }
+
+      return saveVersion({
         id: parentDocID,
-        collection: collectionConfig.slug,
-        data: result,
+        autosave: false,
+        collection: collectionConfig,
+        docWithLocales: result,
+        draft: draftArg,
+        operation: 'restoreVersion',
+        payload,
         req: reqWithValidationLocale,
         select,
       })
     }
 
-    // /////////////////////////////////////
-    // Save restored doc as a new version
-    // /////////////////////////////////////
-
-    result = await saveVersion({
-      id: parentDocID,
-      autosave: false,
-      collection: collectionConfig,
-      docWithLocales: result,
-      draft: draftArg,
-      operation: 'restoreVersion',
-      payload,
-      req: reqWithValidationLocale,
-      select,
-    })
+    result = collectionConfig.upload
+      ? await runStoredFileRestore({
+          id: parentDocID,
+          collection: collectionConfig,
+          current: prevDocWithLocales,
+          req,
+          selected: versionToRestoreWithLocales,
+          write: writeRestoredVersion,
+        })
+      : await writeRestoredVersion(versionToRestoreWithLocales)
 
     // /////////////////////////////////////
     // afterRead - Fields
@@ -446,9 +457,16 @@ export const restoreVersionOperation = async <
       await commitTransaction(req)
     }
 
+    if (hasFileOperationScope) {
+      await completeFileOperationScope({ req })
+    }
+
     return result
   } catch (error: unknown) {
     await killTransaction(req)
+    if (hasFileOperationScope) {
+      abortFileOperationScope({ req })
+    }
     throw error
   }
 }

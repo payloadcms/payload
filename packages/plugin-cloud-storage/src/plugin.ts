@@ -7,6 +7,8 @@ import { getAfterChangeHook } from './hooks/afterChange.js'
 import { getAfterDeleteHook } from './hooks/afterDelete.js'
 import { getNormalizeUploadPrefixHook } from './hooks/normalizeUploadPrefix.js'
 import { getPreserveFileDataHook } from './hooks/preserveFileData.js'
+import { getPublicOriginalURLHook } from './hooks/publicOriginalURL.js'
+import { createFileOperations } from './utilities/createFileOperations.js'
 
 // This plugin extends all targeted collections by offloading uploaded files
 // to cloud storage instead of solely storing files locally.
@@ -142,11 +144,10 @@ export const cloudStoragePlugin =
 
         if (!options.disablePayloadAccessControl) {
           handlers.push(adapter.staticHandler)
-          // Else if disablePayloadAccessControl: true and upload instructions are used
-          // Build the "proxied" handler that responds only when addDataAndFileToRequest fetches the uploaded file
-        } else if (uploadInstructions) {
+          // Public files still need a server path when Payload reads them for a transform.
+        } else {
           handlers.push((req, args) => {
-            if ('uploadReference' in args.params) {
+            if ('uploadReference' in args.params || args.params.operation === 'transform') {
               return adapter.staticHandler(req, args)
             }
           })
@@ -201,6 +202,8 @@ export const cloudStoragePlugin =
                 adapter,
                 collection: existingCollection,
                 collectionPrefix: options.prefix,
+                disablePayloadAccessControl: options.disablePayloadAccessControl,
+                hasCustomFileURL: Boolean(options.generateFileURL),
                 useCompositePrefixes,
               }),
             ],
@@ -212,6 +215,19 @@ export const cloudStoragePlugin =
                 collectionPrefix: options.prefix,
                 useCompositePrefixes,
               }),
+            ],
+            afterRead: [
+              ...(existingCollection.hooks?.afterRead || []),
+              ...(options.disablePayloadAccessControl &&
+              (options.generateFileURL || adapter.generateURL)
+                ? [
+                    getPublicOriginalURLHook({
+                      adapter,
+                      collection: existingCollection,
+                      generateFileURL: options.generateFileURL,
+                    }),
+                  ]
+                : []),
             ],
             beforeChange: [
               ...(existingCollection.hooks?.beforeChange || []),
@@ -225,6 +241,14 @@ export const cloudStoragePlugin =
           upload: {
             ...(typeof existingCollection.upload === 'object' ? existingCollection.upload : {}),
             adapter: adapter.name,
+            fileOperations: createFileOperations({
+              adapter,
+              collection: existingCollection,
+              collectionPrefix: options.prefix,
+              disablePayloadAccessControl: options.disablePayloadAccessControl,
+              generateFileURL: options.generateFileURL,
+              useCompositePrefixes,
+            }),
             ...(uploadInstructions && {
               uploadInstructions,
             }),

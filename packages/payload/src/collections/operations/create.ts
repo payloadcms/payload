@@ -27,6 +27,14 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { saveVersion } from '../../index.js'
+import { runCloudFileCreation } from '../../uploads/fileVersioning/cloudStorage.js'
+import {
+  abortFileOperationScope,
+  beginFileOperationScope,
+  completeFileOperationScope,
+  runFileCreationPlan,
+  stageLocalUploadFiles,
+} from '../../uploads/fileVersioning/fileOperationManager.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import {
   getExternalUploadSource,
@@ -82,6 +90,11 @@ export const createOperation = async <
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
   let externalUploadSource: ReturnType<typeof getExternalUploadSource>
+  const hasFileOperationScope = Boolean(args.collection.config.upload)
+
+  if (hasFileOperationScope) {
+    beginFileOperationScope({ req: args.req })
+  }
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
@@ -438,15 +451,9 @@ export const createOperation = async <
     // Write files to local storage
     // /////////////////////////////////////
 
-    if (!collectionConfig.upload.disableLocalStorage) {
-      await uploadFiles(payload, filesToUpload, req)
-    }
-
     // /////////////////////////////////////
     // Create
     // /////////////////////////////////////
-
-    let doc
 
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
@@ -458,25 +465,62 @@ export const createOperation = async <
       }),
     })
 
-    if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
-      if (collectionConfig.auth.verify) {
-        dataWithLocales._verified = Boolean(dataWithLocales._verified) || false
-        dataWithLocales._verificationToken = crypto.randomBytes(20).toString('hex')
+    const writeDocument = async () => {
+      if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
+        if (collectionConfig.auth.verify) {
+          dataWithLocales._verified = Boolean(dataWithLocales._verified) || false
+          dataWithLocales._verificationToken = crypto.randomBytes(20).toString('hex')
+        }
+
+        return registerLocalStrategy({
+          collection: collectionConfig,
+          doc: dataWithLocales,
+          password: data.password as string,
+          payload: req.payload,
+          req,
+        })
       }
 
-      doc = await registerLocalStrategy({
-        collection: collectionConfig,
-        doc: dataWithLocales,
-        password: data.password as string,
-        payload: req.payload,
-        req,
-      })
-    } else {
-      doc = await payload.db.create({
+      return payload.db.create({
         collection: collectionConfig.slug,
         data: dataWithLocales,
         req,
       })
+    }
+
+    const hasManagedLocalUpload =
+      !collectionConfig.upload.disableLocalStorage &&
+      filesToUpload.length > 0 &&
+      Boolean(dataWithLocales.original)
+    let doc
+
+    if (
+      collectionConfig.upload.fileOperations &&
+      (filesToUpload.length > 0 || req.context?._payloadVerifiedProviderOriginal)
+    ) {
+      doc = await runCloudFileCreation({
+        collection: collectionConfig,
+        data: dataWithLocales,
+        files: filesToUpload,
+        req,
+        write: writeDocument,
+      })
+    } else if (hasManagedLocalUpload) {
+      doc = await runFileCreationPlan({
+        req,
+        stage: ({ trackStagedObject }) =>
+          stageLocalUploadFiles({
+            files: filesToUpload,
+            staticDir: collectionConfig.upload.staticDir!,
+            trackStagedObject,
+          }),
+        write: writeDocument,
+      })
+    } else {
+      if (!collectionConfig.upload.disableLocalStorage) {
+        await uploadFiles(payload, filesToUpload, req)
+      }
+      doc = await writeDocument()
     }
 
     const verificationToken = doc._verificationToken
@@ -620,6 +664,10 @@ export const createOperation = async <
       await commitTransaction(req)
     }
 
+    if (hasFileOperationScope) {
+      await completeFileOperationScope({ req })
+    }
+
     return result
   } catch (error: unknown) {
     await unlinkTempFiles({
@@ -630,6 +678,14 @@ export const createOperation = async <
       args.req.payload.logger.error({ err: unlinkError, msg: 'Failed to remove temp file' })
     })
     await killTransaction(args.req)
+    if (hasFileOperationScope) {
+      abortFileOperationScope({ req: args.req })
+    }
     throw error
+  } finally {
+    if (hasFileOperationScope && args.req.context) {
+      delete args.req.context._payloadManagedCloudStorage
+      delete args.req.context._payloadManagedCloudMetadata
+    }
   }
 }

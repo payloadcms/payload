@@ -15,6 +15,7 @@ import { assertClientUploadAllowed, createClientUploadReceipt } from 'payload/in
 import type { VercelBlobCollectionSource } from './authorizeFileOverwrite.js'
 
 import { authorizeClientOverwrite } from './authorizeFileOverwrite.js'
+import { copyVercelBlobFile } from './copyFile.js'
 import { deleteFile } from './deleteFile.js'
 import { generateURL } from './generateURL.js'
 import { getFile } from './getFile.js'
@@ -46,6 +47,8 @@ export function createVercelBlobAdapter({
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'vercel-blob',
 
+    copyFile: ({ from, to }) => copyVercelBlobFile({ access, cacheControlMaxAge, from, to, token }),
+
     uploadInstructions: {
       adminHandler: {
         path: '@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler',
@@ -75,15 +78,17 @@ export function createVercelBlobAdapter({
           filename,
           useCompositePrefixes,
         })
-        const allowOverwrite = await authorizeClientOverwrite({
-          collectionPrefix: prefix,
-          collectionSources,
-          overrideAccess,
-          req,
-          requestedCollectionSlug: collectionSlug,
-          requestedFilename: requested.sanitizedFilename,
-          requestedStorageFilePath: requested.storageFilePath,
-        })
+        const allowOverwrite = collection.versions
+          ? false
+          : await authorizeClientOverwrite({
+              collectionPrefix: prefix,
+              collectionSources,
+              overrideAccess,
+              req,
+              requestedCollectionSlug: collectionSlug,
+              requestedFilename: requested.sanitizedFilename,
+              requestedStorageFilePath: requested.storageFilePath,
+            })
         const resolved = allowOverwrite
           ? {
               ...requested,

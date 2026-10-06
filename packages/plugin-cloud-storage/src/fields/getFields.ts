@@ -189,7 +189,14 @@ export const getFields = ({
           ...existingSizeField,
           name: size.name,
           type: 'group',
-          fields: [...(adapter?.fields || []), sizeURLField],
+          fields: [
+            ...(adapter?.fields || []).filter(
+              (field) => !('name' in field && ['_objectKey', 'prefix'].includes(field.name)),
+            ),
+            sizeURLField,
+            basePrefixField,
+            baseObjectKeyField,
+          ],
         } as Field
       }),
     }

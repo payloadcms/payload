@@ -25,6 +25,8 @@ export async function initTransaction(
     req.transactionID = payload.db.beginTransaction().then((transactionID) => {
       if (transactionID) {
         req.transactionID = transactionID
+      } else {
+        delete req.transactionID
       }
 
       return transactionID!

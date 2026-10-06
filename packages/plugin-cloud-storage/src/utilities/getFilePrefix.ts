@@ -1,4 +1,10 @@
-import type { CollectionConfig, PayloadRequest, SanitizedUploadConfig, TypeWithID } from 'payload'
+import type {
+  CollectionConfig,
+  FileData,
+  PayloadRequest,
+  SanitizedUploadConfig,
+  TypeWithID,
+} from 'payload'
 
 import { buildPrefixWithObjectKey } from './buildPrefixWithObjectKey.js'
 import { buildUploadStoragePathData } from './buildStoragePathData.js'
@@ -25,7 +31,7 @@ export async function getFilePrefix({
 }: {
   collection: CollectionConfig
   collectionPrefix?: string
-  doc?: { _objectKey?: string; prefix?: string } & TypeWithID
+  doc?: Partial<FileData> & TypeWithID
   filename: string
   /**
    * Only narrows the access-controlled fallback lookup below; never trusted or
@@ -39,7 +45,7 @@ export async function getFilePrefix({
   // The serve path already loaded and authorized this document — trust it over any
   // client-supplied upload reference or query prefix.
   if (doc) {
-    return buildPrefixWithObjectKey({ objectKey: doc._objectKey, prefix: doc.prefix })
+    return getRepresentationPrefix({ doc, filename })
   }
 
   // Upload instructions call handlers without a document yet. Re-contain the claimed
@@ -71,6 +77,7 @@ export async function getFilePrefix({
       {
         filename: { equals: filename },
       },
+      { 'original.filename': { equals: filename } },
       ...variants.map((imageSize) => ({
         [`variants.${imageSize.name}.filename`]: { equals: filename },
       })),
@@ -96,12 +103,34 @@ export async function getFilePrefix({
     req,
     select: {
       _objectKey: true,
+      filename: true,
+      original: true,
       prefix: true,
+      variants: true,
     },
     showHiddenFields: true,
     where,
   })
 
-  const found = files?.docs?.[0] as { _objectKey?: string; prefix?: string } | undefined
-  return buildPrefixWithObjectKey({ objectKey: found?._objectKey, prefix: found?.prefix })
+  const found = files?.docs?.[0] as
+    | ({ _objectKey?: string; prefix?: string } & Partial<FileData>)
+    | undefined
+  return found ? getRepresentationPrefix({ doc: found, filename }) : ''
+}
+
+const getRepresentationPrefix = ({
+  doc,
+  filename,
+}: {
+  doc: Partial<FileData>
+  filename: string
+}): string => {
+  const representation =
+    doc.original?.filename === filename
+      ? doc.original
+      : (Object.values(doc.variants ?? {}).find((variant) => variant?.filename === filename) ?? doc)
+  return buildPrefixWithObjectKey({
+    objectKey: representation._objectKey ?? doc._objectKey,
+    prefix: representation.prefix ?? doc.prefix,
+  })
 }

@@ -9,6 +9,7 @@ import type { FileData, FileToSave } from './types.js'
 
 import { APIError, ErrorDeletingFile } from '../errors/index.js'
 import { fileExists } from './fileExists.js'
+import { withLegacyUploadFileData } from './fileVersioning/storedFiles.js'
 
 type Args = {
   collectionConfig: SanitizedCollectionConfig
@@ -21,12 +22,18 @@ type Args = {
 
 export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
   collectionConfig,
+  config,
   doc,
   files = [],
   overrideDelete,
   req,
 }) => {
   if (!collectionConfig.upload) {
+    return
+  }
+  const stored = withLegacyUploadFileData({ collection: collectionConfig, config, doc })
+
+  if (collectionConfig.versions || stored.original) {
     return
   }
   if (overrideDelete || files.length > 0) {

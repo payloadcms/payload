@@ -15,10 +15,12 @@ import { getRequestCollection } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { checkFileAccess } from '../checkFileAccess.js'
 import { streamFile } from '../fetchAPI-stream-file/index.js'
+import { resolveHistoricalFile } from '../fileVersioning/resolveHistoricalFile.js'
 import { getFileTypeFallback } from '../getFileTypeFallback.js'
 import { getFileExtension, isXmlMimeType } from '../getFileTypeIdentity.js'
 import { parseRangeHeader } from '../parseRangeHeader.js'
 import { handleDynamicFileRequest } from '../transformers/handleDynamicFileRequest.js'
+import { resolveUploadDocument } from '../transformers/resolveUploadDocument.js'
 import { uploadContentSecurityPolicy } from '../uploadContentSecurityPolicy.js'
 
 export const getFileHandler: PayloadHandler = async (req) => {
@@ -34,8 +36,33 @@ export const getFileHandler: PayloadHandler = async (req) => {
     )
   }
 
+  const versionID = req.searchParams?.get('version')
+
+  if (collection.config.versions && versionID) {
+    const historical = await resolveHistoricalFile({
+      collection,
+      filename,
+      prefix,
+      req,
+      versionID,
+    })
+
+    return retrieveFileResponse({ collection, doc: historical, filename, prefix, req })
+  }
+
   if (req.payload.config.upload.transformers.length > 0) {
     return handleDynamicFileRequest({ collection, filename, prefix, req })
+  }
+
+  const current = collection.config.versions
+    ? await resolveUploadDocument({ collection, filename, prefix, req })
+    : undefined
+
+  if (collection.config.versions) {
+    if (!current) {
+      const historical = await resolveHistoricalFile({ collection, filename, prefix, req })
+      return retrieveFileResponse({ collection, doc: historical, filename, prefix, req })
+    }
   }
 
   const accessResult = (await checkFileAccess({
@@ -49,7 +76,7 @@ export const getFileHandler: PayloadHandler = async (req) => {
     return accessResult
   }
 
-  return retrieveFileResponse({ collection, doc: accessResult, filename, prefix, req })
+  return retrieveFileResponse({ collection, doc: accessResult ?? current, filename, prefix, req })
 }
 
 /**

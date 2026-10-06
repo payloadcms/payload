@@ -21,6 +21,14 @@ import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { type CollectionSlug, deepCopyObjectSimple, type FindOptions } from '../../index.js'
+import { runLocalFileUpdate } from '../../uploads/fileVersioning/archive.js'
+import { runCloudFileUpdate } from '../../uploads/fileVersioning/cloudStorage.js'
+import {
+  abortFileOperationScope,
+  beginFileOperationScope,
+  completeFileOperationScope,
+} from '../../uploads/fileVersioning/fileOperationManager.js'
+import { withLegacyCloudUploadFileData } from '../../uploads/fileVersioning/storedFiles.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import {
   getLocalizedUploadProperties,
@@ -74,6 +82,11 @@ export const updateByIDOperation = async <
   incomingArgs: Arguments<TSlug>,
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
+  const hasFileOperationScope = Boolean(args.collection.config.upload)
+
+  if (hasFileOperationScope) {
+    beginFileOperationScope({ req: args.req })
+  }
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
@@ -238,7 +251,7 @@ export const updateByIDOperation = async <
       where: fullWhere,
     }
 
-    const docWithLocales = await getLatestCollectionVersion<
+    let docWithLocales = await getLatestCollectionVersion<
       RequiredDataFromCollectionSlug<TSlug> & TypeWithID
     >({
       id,
@@ -256,6 +269,15 @@ export const updateByIDOperation = async <
     }
     if (!docWithLocales) {
       throw new NotFound(req.t)
+    }
+
+    const storedDocWithLocales = docWithLocales
+    if (collectionConfig.upload.fileOperations) {
+      docWithLocales = await withLegacyCloudUploadFileData({
+        collection: collectionConfig,
+        doc: docWithLocales,
+        req,
+      })
     }
 
     if (collectionConfig.upload && !overrideAccess) {
@@ -299,7 +321,7 @@ export const updateByIDOperation = async <
     // Update document, runs all document level hooks
     // ///////////////////////////////////////////////
 
-    let result = await updateDocument<TSlug, TSelect>({
+    const updateArgs = {
       id,
       autosave,
       collectionConfig,
@@ -320,7 +342,28 @@ export const updateByIDOperation = async <
       select: select!,
       showHiddenFields: showHiddenFields!,
       unpublishAllLocales,
-    })
+    } as const
+
+    const write = () => updateDocument<TSlug, TSelect>(updateArgs)
+    let result = collectionConfig.upload.fileOperations
+      ? await runCloudFileUpdate({
+          id,
+          collection: collectionConfig,
+          current: storedDocWithLocales,
+          data: updateArgs.data,
+          files: filesToUpload,
+          req,
+          write,
+        })
+      : await runLocalFileUpdate({
+          id,
+          collection: collectionConfig,
+          current: docWithLocales,
+          files: filesToUpload,
+          next: newFileData as Record<string, unknown>,
+          req,
+          write,
+        })
 
     // /////////////////////////////////////
     // Add collection property for auth collections
@@ -358,6 +401,10 @@ export const updateByIDOperation = async <
       await commitTransaction(req)
     }
 
+    if (hasFileOperationScope) {
+      await completeFileOperationScope({ req })
+    }
+
     return result
   } catch (error: unknown) {
     await unlinkTempFiles({
@@ -368,6 +415,9 @@ export const updateByIDOperation = async <
       args.req.payload.logger.error({ err: unlinkError, msg: 'Failed to remove temp file' })
     })
     await killTransaction(args.req)
+    if (hasFileOperationScope) {
+      abortFileOperationScope({ req: args.req })
+    }
     throw error
   }
 }

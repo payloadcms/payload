@@ -14,6 +14,16 @@ import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
+import {
+  collectStoredFiles,
+  collectVersionFiles,
+  scheduleUnreferencedFileCleanup,
+} from '../../uploads/fileVersioning/cleanup.js'
+import {
+  abortFileOperationScope,
+  beginFileOperationScope,
+  completeFileOperationScope,
+} from '../../uploads/fileVersioning/fileOperationManager.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -44,6 +54,12 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
   incomingArgs: Arguments<TSlug, TSelect>,
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
+  const hasFileOperationScope = Boolean(args.collection.config.upload)
+  let managedDeleteIdentity: string | undefined
+
+  if (hasFileOperationScope) {
+    beginFileOperationScope({ req: args.req })
+  }
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
@@ -143,6 +159,23 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       overrideLock,
       req,
     })
+
+    const deletedFiles = collectionConfig.upload
+      ? [
+          ...collectStoredFiles({ collection: collectionConfig, doc: docToDelete!, req }),
+          ...(collectionConfig.versions
+            ? await collectVersionFiles({ collection: collectionConfig, parentID: id, req })
+            : []),
+        ]
+      : []
+
+    if (deletedFiles.length) {
+      managedDeleteIdentity = JSON.stringify([collectionConfig.slug, String(id)])
+      req.context ??= {}
+      const managedDeletedUploads = (req.context._payloadManagedDeletedUploads ??=
+        new Set()) as Set<string>
+      managedDeletedUploads.add(managedDeleteIdentity)
+    }
 
     await deleteAssociatedFiles({
       collectionConfig,
@@ -283,6 +316,14 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       result,
     })
 
+    if (collectionConfig.upload) {
+      await scheduleUnreferencedFileCleanup({
+        candidates: deletedFiles,
+        collection: collectionConfig,
+        req,
+      })
+    }
+
     // /////////////////////////////////////
     // 8. Return results
     // /////////////////////////////////////
@@ -291,9 +332,26 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       await commitTransaction(req)
     }
 
+    if (hasFileOperationScope) {
+      await completeFileOperationScope({ req })
+    }
+
     return result as TransformCollectionWithSelect<TSlug, TSelect>
   } catch (error: unknown) {
     await killTransaction(args.req)
+    if (hasFileOperationScope) {
+      abortFileOperationScope({ req: args.req })
+    }
     throw error
+  } finally {
+    if (managedDeleteIdentity) {
+      const managedDeletedUploads = args.req.context?._payloadManagedDeletedUploads as
+        | Set<string>
+        | undefined
+      managedDeletedUploads?.delete(managedDeleteIdentity)
+      if (managedDeletedUploads?.size === 0) {
+        delete args.req.context._payloadManagedDeletedUploads
+      }
+    }
   }
 }

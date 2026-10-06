@@ -6,11 +6,12 @@ import { Forbidden } from '../../errors/Forbidden.js'
 export type ResolvedUploadDocument = {
   filename: string
   mimeType: string
+  original?: { filename?: null | string; mimeType?: null | string } | null
   variants?: Record<string, { filename?: null | string; mimeType?: null | string } | null>
 } & TypeWithID
 
 /**
- * The primary filename, or a configured legacy image size's filename, both match.
+ * The primary filename, original filename, or a configured legacy image size's filename match.
  * Shared with `checkFileAccess.ts` so the two lookups can't drift apart.
  */
 export function buildFilenameWhere({
@@ -21,7 +22,7 @@ export function buildFilenameWhere({
   variants?: { name: string }[]
 }): Where {
   const filenameCondition: Where = {
-    or: [{ filename: { equals: filename } }],
+    or: [{ filename: { equals: filename } }, { 'original.filename': { equals: filename } }],
   }
 
   variants?.forEach(({ name }) => {
@@ -46,6 +47,10 @@ export function getRequestedFile({
   filename: string
 }): { filename: string; mimeType: string } {
   if (document.filename !== filename) {
+    if (document.original?.filename === filename && document.original.mimeType) {
+      return { filename, mimeType: document.original.mimeType }
+    }
+
     const size = Object.values(document.variants ?? {}).find((size) => size?.filename === filename)
 
     if (size?.filename && size.mimeType) {

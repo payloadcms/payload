@@ -31,9 +31,13 @@ export const getAfterReadHook =
   ({ adapter, collection, disablePayloadAccessControl, generateFileURL, size }: Args): FieldHook =>
   async ({ data, value }) => {
     const filename = size ? data?.variants?.[size.name]?.filename : data?.filename
-    const prefix = data?.prefix
+    const representation = size ? data?.variants?.[size.name] : data
+    const prefix = representation?.prefix ?? data?.prefix
     // Direct-serve URLs encode the full location; the proxy resolves `_objectKey` server-side.
-    const objectFolder = getObjectFolder(data)
+    const objectFolder = getObjectFolder({
+      _objectKey: representation?._objectKey ?? data?._objectKey,
+      prefix,
+    })
     let url = value
 
     if (filename) {
@@ -52,10 +56,17 @@ export const getAfterReadHook =
           prefix: objectFolder,
         })
       } else if (url && prefix) {
-        const separator = url.includes('?') ? '&' : '?'
-        url = `${url}${separator}prefix=${encodeURIComponent(prefix)}`
+        url = appendProxyPrefix({ prefix, url })
       }
     }
 
     return url
   }
+
+export const appendProxyPrefix = ({ prefix, url }: { prefix: string; url: string }): string => {
+  if (new URL(url, 'http://payload.local').searchParams.has('prefix')) {
+    return url
+  }
+  const separator = url.includes('?') ? '&' : '?'
+  return `${url}${separator}prefix=${encodeURIComponent(prefix)}`
+}
