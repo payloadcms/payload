@@ -955,23 +955,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
               />
             </div>
             {AddNewRelationButton ??
-              (!readOnly && allowCreate ? (
-                <AddNewRelation
-                  path={path}
-                  relationTo={relationTo}
-                  {...(hasMany === true
-                    ? {
-                        hasMany,
-                        onChange,
-                        value,
-                      }
-                    : {
-                        hasMany,
-                        onChange,
-                        value,
-                      })}
-                />
-              ) : null)}
+              (!readOnly && allowCreate ? <AddNewRelation {...props} /> : null)}
           </div>
         )}
         {AfterInput}

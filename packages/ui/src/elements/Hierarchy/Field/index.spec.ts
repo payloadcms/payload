@@ -96,8 +96,10 @@ describe('hierarchy field modal writes', () => {
     (mode) => {
       state.disabled = mode === 'disabled'
 
+      const fieldConfig = mode === 'readOnly' ? { ...field, admin: { readOnly: true } } : field
+
       const markup = renderToStaticMarkup(
-        React.createElement(HierarchyFieldClient, { field, readOnly: mode === 'readOnly' }),
+        React.createElement(HierarchyFieldClient, { field: fieldConfig }),
       )
       const closeModal = vi.fn()
 

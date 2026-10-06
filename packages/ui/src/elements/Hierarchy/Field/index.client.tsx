@@ -73,7 +73,7 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
     showError,
     value,
   } = useField<Value>({ potentiallyStalePath: pathFromProps, validate: memoizedValidate })
-  const isReadOnly = readOnly || disabled
+  const isReadOnly = readOnly || field.admin?.readOnly || disabled
   const hierarchyFilterOptions = useMemo(
     () =>
       getHierarchyFilterOptions({

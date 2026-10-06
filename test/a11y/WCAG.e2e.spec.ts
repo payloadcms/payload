@@ -3208,8 +3208,10 @@ test.describe('WCAG 2.2 Level AA', () => {
 
       const field = page.locator('#field-readOnlyHierarchy')
       const browse = field.locator('.hierarchy-field__browse-button')
+      const combobox = field.locator('input[role="combobox"]')
 
-      await expect(field.getByRole('combobox')).toBeDisabled()
+      await expect(field.locator('.rs--is-disabled')).toBeVisible({ timeout: 15000 })
+      await expect(combobox).toBeDisabled()
       await expect(browse).toHaveAccessibleName(/select/i)
       await expect(browse).toBeDisabled()
       await expect(page.locator('.hierarchy-modal:visible')).toHaveCount(0)

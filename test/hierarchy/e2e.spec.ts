@@ -616,16 +616,18 @@ test.describe('Hierarchy Sidebar', () => {
     test('should restrict hierarchy field dropdown options by document collection', async () => {
       await page.goto(organizationsURL.create)
 
-      const field = page.locator('#field-parentFolder')
+      const field = page.locator('#field-restrictedFolder')
 
       await field.locator('.rs__control').click()
 
-      const options = getSelectMenu({ page }).locator('.rs__option')
+      const menu = getSelectMenu({ page })
 
-      await expect(options.filter({ hasText: 'General' })).toBeVisible()
-      await expect(options.filter({ hasText: 'Orgs Only' })).toBeVisible()
-      await expect(options.filter({ hasText: 'Orgs and Products' })).toBeVisible()
-      await expect(options.filter({ hasText: 'Products Only' })).toHaveCount(0)
+      await expect(menu.getByRole('option', { name: 'General', exact: true })).toBeVisible()
+      await expect(menu.getByRole('option', { name: 'Orgs Only', exact: true })).toBeVisible()
+      await expect(
+        menu.getByRole('option', { name: 'Orgs and Products', exact: true }),
+      ).toBeVisible()
+      await expect(menu.getByRole('option', { name: 'Products Only', exact: true })).toHaveCount(0)
     })
 
     test.describe('Autosave create drawer', () => {
