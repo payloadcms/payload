@@ -489,6 +489,13 @@
   }
   /* Enhanced contrast preserves the standard palette when disabled. */
   html[data-enhanced-contrast],
+  html[data-enhanced-contrast] [data-theme] {
+    --contrast-chip-border: var(--color-border-control);
+    --contrast-button-border: var(--color-border-control);
+    --contrast-nav-border: var(--color-border-control);
+  }
+
+  html[data-enhanced-contrast],
   html[data-enhanced-contrast] [data-theme='light'] {
     --color-bg-brand: var(--ramp-blue-700);
     --color-bg-brand-hover: var(--ramp-blue-800);

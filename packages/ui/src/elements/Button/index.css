@@ -53,7 +53,8 @@
   .btn.btn--style-secondary {
     color: var(--color-text);
     background-color: var(--color-bg);
-    border: var(--stroke-width-small) solid var(--special-border-translucent);
+    border: var(--stroke-width-small) solid
+      var(--contrast-button-border, var(--special-border-translucent));
 
     &:hover:not(.btn--disabled) {
       background-color: var(--color-bg-secondary-hover);

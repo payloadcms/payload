@@ -76,6 +76,12 @@ export const PostsCollection: CollectionConfig = {
       relationTo: postsSlug,
     },
     {
+      name: 'contrastRelationships',
+      type: 'relationship',
+      relationTo: postsSlug,
+      hasMany: true,
+    },
+    {
       name: 'contrastDisabledSelect',
       type: 'select',
       admin: { readOnly: true },

@@ -47,6 +47,7 @@ import {
   openRichTextUploadDrawer,
   openVersionComparison,
   openWidgetDrawer,
+  readBorderStyles,
   waitForDashboardDragReady,
 } from './helpers.js'
 
@@ -977,6 +978,85 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('1.4.11 Non-text Contrast (AA)', () => {
+    for (const theme of ['light', 'dark'] as const) {
+      test(`should strengthen chips, dropdowns and sidebar borders only in enhanced ${theme} mode`, async () => {
+        test.setTimeout(90_000)
+        await page.context().addCookies([
+          { name: 'payload-theme', url: serverURL, value: theme },
+          { name: 'payload-high-contrast-mode', url: serverURL, value: 'false' },
+        ])
+        await gotoCreatePost({ page, postsURL })
+        await selectInput({
+          multiSelect: true,
+          options: ['Example post one, third version'],
+          page,
+          selectLocator: page.locator('#field-contrastRelationships'),
+          selectType: 'relationship',
+        })
+        const chips = page.locator(
+          '#field-contrastRelationships .rs__multi-value, #field-accessibilitySortableSelect .rs__multi-value',
+        )
+        await expect(chips).toHaveCount(3)
+        const normalChips = await readBorderStyles({ targets: chips })
+        await page
+          .locator('html')
+          .evaluate((element) => element.setAttribute('data-enhanced-contrast', ''))
+        await expectPaintContrast({ minimum: 3, property: 'borderTopColor', targets: chips })
+        await page
+          .locator('html')
+          .evaluate((element) => element.removeAttribute('data-enhanced-contrast'))
+        expect(await readBorderStyles({ targets: chips })).toEqual(normalChips)
+
+        await gotoPostsList({ page, postsURL })
+        await openNav(page)
+        await page.getByRole('tab', { name: 'Collections', exact: true }).click()
+        const buttons = page.locator('.list-controls .btn--style-secondary')
+        await expect(buttons).toHaveCount(3)
+        const separators = page.locator('.nav-group + .nav-group')
+        const selected = page.locator('.nav__link--selected').first()
+        await selected.scrollIntoViewIfNeeded()
+        await page.mouse.move(0, 0)
+        const targets = page.locator(
+          '.list-controls .btn--style-secondary, .nav, .nav-group + .nav-group, .nav__link--selected',
+        )
+        const normalControls = await readBorderStyles({ targets })
+        await page
+          .locator('html')
+          .evaluate((element) => element.setAttribute('data-enhanced-contrast', ''))
+        await expectPaintContrast({
+          againstParent: true,
+          minimum: 3,
+          property: 'borderTopColor',
+          targets: buttons,
+        })
+        await buttons.first().hover()
+        await expectPaintContrast({
+          againstParent: true,
+          minimum: 3,
+          property: 'borderTopColor',
+          targets: buttons.first(),
+        })
+        await page.mouse.move(0, 0)
+        await expectPaintContrast({
+          againstParent: true,
+          minimum: 3,
+          property: 'borderTopColor',
+          targets: separators,
+        })
+        await expect(selected).toHaveCSS('outline-style', 'solid')
+        await expectPaintContrast({
+          againstParent: true,
+          minimum: 3,
+          property: 'outlineColor',
+          targets: selected,
+        })
+        await page
+          .locator('html')
+          .evaluate((element) => element.removeAttribute('data-enhanced-contrast'))
+        expect(await readBorderStyles({ targets })).toEqual(normalControls)
+      })
+    }
+
     test('should preserve contrast for the calendar today indicator when brand colors change', async () => {
       // Additional coverage for PYLD-3674.
       await inContrastThemes({

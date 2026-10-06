@@ -488,7 +488,7 @@ export async function expectPaintContrast({
   againstParent?: boolean
   minimum: number
   placeholder?: boolean
-  property: 'backgroundColor' | 'borderTopColor' | 'color' | 'fill' | 'stroke'
+  property: 'backgroundColor' | 'borderTopColor' | 'color' | 'fill' | 'outlineColor' | 'stroke'
   pseudo?: '::after'
   targets: Locator
 }) {
@@ -896,5 +896,22 @@ export async function waitForDashboardDragReady({ page }: { page: Page }) {
       new Promise<void>((resolve) =>
         requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
       ),
+  )
+}
+
+export async function readBorderStyles({ targets }: { targets: Locator }) {
+  await expect(targets.first()).toBeVisible()
+  return targets.evaluateAll((elements) =>
+    elements.map((element) => {
+      const style = getComputedStyle(element)
+      return {
+        borderTop: style.borderTop,
+        borderRight: style.borderRight,
+        borderBottom: style.borderBottom,
+        borderLeft: style.borderLeft,
+        outline: style.outline,
+        outlineOffset: style.outlineOffset,
+      }
+    }),
   )
 }

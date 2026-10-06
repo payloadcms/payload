@@ -274,6 +274,7 @@ export interface Post {
   accessibilitySortableSelect?: ('one' | 'two')[] | null;
   accessibilityDisabledSelect?: ('one' | 'two') | null;
   relatedPost?: (string | null) | Post;
+  contrastRelationships?: (string | Post)[] | null;
   contrastDisabledSelect?: ('one' | 'two')[] | null;
   contrastDate?: string | null;
   contrastDate_tz?: SupportedTimezones;
@@ -528,6 +529,7 @@ export interface PostsSelect<T extends boolean = true> {
   accessibilitySortableSelect?: T;
   accessibilityDisabledSelect?: T;
   relatedPost?: T;
+  contrastRelationships?: T;
   contrastDisabledSelect?: T;
   contrastDate?: T;
   contrastDate_tz?: T;
