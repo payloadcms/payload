@@ -1,11 +1,10 @@
-import type { CollectionConfig } from '../../index.js'
+import type { SanitizedCollectionConfig } from './types.js'
 
 import { InvalidConfiguration } from '../../errors/InvalidConfiguration.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
-import { flattenTopLevelFields } from '../../utilities/flattenTopLevelFields.js'
 
 /** Validate useAsThumbnail for collections. */
-export const validateUseAsThumbnail = ({ config }: { config: CollectionConfig }) => {
+export const validateUseAsThumbnail = ({ config }: { config: SanitizedCollectionConfig }) => {
   if (!config.admin?.useAsThumbnail) {
     return
   }
@@ -16,8 +15,7 @@ export const validateUseAsThumbnail = ({ config }: { config: CollectionConfig })
     )
   }
 
-  const fields = flattenTopLevelFields(config.fields)
-  const useAsThumbnailField = fields.find((field) => {
+  const useAsThumbnailField = config.flattenedFields.find((field) => {
     return fieldAffectsData(field) && field.name === config.admin?.useAsThumbnail
   })
 
