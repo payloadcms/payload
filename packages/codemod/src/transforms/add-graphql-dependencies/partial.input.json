@@ -1,0 +1,8 @@
+{
+  "name": "my-app",
+  "dependencies": {
+    "@payloadcms/next": "^3.84.0",
+    "payload": "^3.84.0",
+    "graphql": "^16.11.0"
+  }
+}

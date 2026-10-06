@@ -1,0 +1,11 @@
+{
+  "name": "my-app",
+  "dependencies": {
+    "@payloadcms/db-mongodb": "3.84.0",
+    "@payloadcms/next": "3.84.0",
+    "@payloadcms/richtext-lexical": "3.84.0",
+    "next": "16.3.8",
+    "payload": "3.84.0",
+    "react": "19.3.0"
+  }
+}

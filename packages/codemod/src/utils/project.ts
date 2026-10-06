@@ -1,5 +1,5 @@
-import { existsSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { existsSync, readdirSync, rmdirSync, rmSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
 import { IndentationText, Project, QuoteKind } from 'ts-morph'
 
 const manipulationSettings = {
@@ -31,6 +31,32 @@ export function loadProject(path: string): Project {
   }
 
   return loadProjectFromGlob(path)
+}
+
+/**
+ * Paths that were in the project when `snapshot` was taken but were removed by a transform
+ * (via `sourceFile.delete()`). The CLI owns deleting them from disk.
+ */
+export function getDeletedFilePaths({
+  project,
+  snapshot,
+}: {
+  project: Project
+  snapshot: Map<string, string>
+}): string[] {
+  return [...snapshot.keys()].filter((path) => !project.getSourceFile(path))
+}
+
+/** Delete files a transform removed, along with their directory when it is left empty. */
+export function deleteFiles({ paths }: { paths: string[] }): void {
+  for (const path of paths) {
+    rmSync(path, { force: true })
+
+    const dir = dirname(path)
+    if (readdirSync(dir).length === 0) {
+      rmdirSync(dir)
+    }
+  }
 }
 
 function loadProjectFromGlob(path: string): Project {
