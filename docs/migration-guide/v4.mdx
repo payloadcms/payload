@@ -1140,6 +1140,29 @@ The table feature is no longer experimental, so it drops its prefix.
 
 Stored content is unaffected.
 
+### Lexical: the `version` of nodes is ignored
+
+Lexical deprecated the `version` property of serialized nodes, and now ignores it when it loads a document. Payload no longer reads it either.
+
+**Rich text written by the Payload 3.0 betas is no longer upgraded when it's loaded.** Payload used `version: 1` to detect two older shapes:
+
+- Block nodes whose fields were wrapped in an extra `data` object (`fields.data`)
+- Relationship and upload nodes that stored the whole related document in `value`, instead of its ID
+
+If your database may still contain rich text from the 3.0 betas, run `upgradeLexicalData` on the latest 3.x release before you upgrade to 4.0. It re-saves every document, which converts these shapes:
+
+```ts
+import { upgradeLexicalData } from '@payloadcms/richtext-lexical'
+
+await upgradeLexicalData({ payload })
+```
+
+**The JSON schema of Lexical nodes no longer contains `version`.** The schema the CLI and MCP use to validate input no longer asks for it, and Lexical nodes accept properties the schema doesn't list. Existing documents, which still contain `version`, therefore stay valid input. Objects inside a node, like a block's `fields`, still reject unknown properties.
+
+Payload still writes `version` when it saves rich text, and the generated types still include it.
+
+When you regenerate `payload-types.ts`, the generated `LexicalNodes_<hash>` types get new names, because each name is a hash of the node schema. The types themselves are unchanged. If your code refers to one of these names, use `RichTextNodes<Post['richText']>` instead, which doesn't depend on the name.
+
 ### Field `typescriptSchema` renamed to `jsonSchema`
 
 `typescriptSchema` accepted JSON Schema, not TypeScript, so the name lied. Renamed to `jsonSchema`. Same shape, same array of transforms. The underlying schema is now also consumed by the MCP plugin for runtime validation, not just type generation.

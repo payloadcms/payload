@@ -3,12 +3,13 @@ import type {
   SerializedLexicalNode,
   SerializedParagraphNode,
 } from '@payloadcms/richtext-lexical/lexical'
-import type { Block, BlocksField, BlockSlug, Config, PaginatedDocs } from 'payload'
+import type { Block, BlocksField, BlockSlug, Config, PaginatedDocs, Payload } from 'payload'
 
 import {
   BlocksFeature,
   buildEditorState,
   type DefaultNodeTypes,
+  getEnabledNodes,
   lexicalEditor,
   type LexicalRichTextAdapter,
   LinkFeature,
@@ -20,7 +21,14 @@ import {
   type SerializedUploadNode,
   UploadFeature,
 } from '@payloadcms/richtext-lexical'
-import { configToJSONSchema, sanitizeConfig } from 'payload'
+import { createHeadlessEditor } from '@payloadcms/richtext-lexical/lexical/headless'
+import {
+  configToJSONSchema,
+  createPayloadRequest,
+  getCollectionInputSchema,
+  sanitizeConfig,
+  validateCollectionData,
+} from 'payload'
 import { generateTypes } from 'payload/node'
 import { sanitizeUrl } from 'payload/shared'
 import { expect } from 'vitest'
@@ -915,6 +923,126 @@ test.suite('Lexical', { config: './config.ts' }, () => {
       expect(populatedDocEditorRelationshipNode.value.id).toStrictEqual(createdTextDocID)
       // Should now be populated (length 12)
       expect(populatedDocEditorRelationshipNode.value.text).toStrictEqual(textDoc.text)
+    })
+  })
+
+  test.describe('Node version', () => {
+    test('should not include version in the CLI and MCP input schema', async ({ payload }) => {
+      const req = await createPayloadRequest({ payload })
+      const schema = getCollectionInputSchema({ collectionSlug: lexicalFieldsSlug, req })
+
+      expect(schema).not.toBeNull()
+      expect(findSchemasWithVersion({ schema })).toEqual([])
+    })
+
+    test('should accept existing rich text that still contains version', async ({ payload }) => {
+      const req = await createPayloadRequest({ payload })
+      const lexicalDoc = await findSeededLexicalDoc({ payload })
+
+      expect(JSON.stringify(lexicalDoc.lexicalWithBlocks)).toContain('"version"')
+      expect(() =>
+        validateCollectionData({
+          slug: lexicalFieldsSlug,
+          data: { lexicalWithBlocks: lexicalDoc.lexicalWithBlocks },
+          partial: true,
+          req,
+        }),
+      ).not.toThrow()
+    })
+
+    test('should accept rich text without version', async ({ payload }) => {
+      const req = await createPayloadRequest({ payload })
+
+      expect(() =>
+        validateCollectionData({
+          slug: lexicalFieldsSlug,
+          data: {
+            title: 'Rich text without version',
+            lexicalWithBlocks: {
+              root: {
+                type: 'root',
+                children: [
+                  {
+                    type: 'paragraph',
+                    children: [
+                      {
+                        type: 'text',
+                        detail: 0,
+                        format: 0,
+                        mode: 'normal',
+                        style: '',
+                        text: 'Hello',
+                      },
+                    ],
+                    direction: null,
+                    format: '',
+                    indent: 0,
+                    textFormat: 0,
+                    textStyle: '',
+                  },
+                ],
+                direction: null,
+                format: '',
+                indent: 0,
+              },
+            },
+          },
+          req,
+        }),
+      ).not.toThrow()
+    })
+
+    test('should still reject unknown properties inside block fields', async ({ payload }) => {
+      const req = await createPayloadRequest({ payload })
+      const lexicalDoc = await findSeededLexicalDoc({ payload })
+      const root = lexicalDoc.lexicalWithBlocks.root
+      const blockNode = structuredClone(
+        root.children.find((node) => node.type === 'block'),
+      ) as SerializedBlockNode
+
+      blockNode.fields = { ...blockNode.fields, notAField: true } as typeof blockNode.fields
+
+      expect(() =>
+        validateCollectionData({
+          slug: lexicalFieldsSlug,
+          data: { lexicalWithBlocks: { root: { ...root, children: [blockNode] } } },
+          partial: true,
+          req,
+        }),
+      ).toThrow()
+    })
+
+    test('should ignore the version of a node when loading it', async ({ payload }) => {
+      const lexicalDoc = await findSeededLexicalDoc({ payload })
+      const root = lexicalDoc.lexicalWithBlocks.root
+      const blockNode = structuredClone(
+        root.children.find((node) => node.type === 'block'),
+      ) as SerializedBlockNode
+
+      // Payload used to upgrade blocks with version 1 by unwrapping `fields.data`
+      blockNode.version = 1
+
+      const lexicalWithBlocksField = payload.collections[lexicalFieldsSlug].config.fields.find(
+        (field) => 'name' in field && field.name === 'lexicalWithBlocks',
+      ) as { editor: LexicalRichTextAdapter }
+      const headlessEditor = createHeadlessEditor({
+        nodes: getEnabledNodes({ editorConfig: lexicalWithBlocksField.editor.editorConfig }),
+      })
+
+      headlessEditor.update(
+        () => {
+          headlessEditor.setEditorState(
+            headlessEditor.parseEditorState({ root: { ...root, children: [blockNode] } }),
+          )
+        },
+        { discrete: true },
+      )
+
+      const [loadedBlockNode] = headlessEditor.getEditorState().toJSON().root.children as [
+        SerializedBlockNode,
+      ]
+
+      expect(loadedBlockNode.fields).toEqual(blockNode.fields)
     })
   })
 
@@ -1859,3 +1987,47 @@ test.describe('Lexical inline block node type generation', () => {
     expect(generatedTypes).not.toMatch(/SerializedInlineBlockNode<\s*\{\s*blockType:/)
   })
 })
+
+async function findSeededLexicalDoc({ payload }: { payload: Payload }): Promise<LexicalField> {
+  const { docs } = await payload.find({
+    collection: lexicalFieldsSlug,
+    depth: 0,
+    overrideAccess: true,
+    where: {
+      title: {
+        equals: lexicalDocData.title,
+      },
+    },
+  })
+
+  return docs[0] as LexicalField
+}
+
+/**
+ * Returns the path of every subschema that has a `version` property or requires one.
+ */
+function findSchemasWithVersion({
+  path = '#',
+  schema,
+}: {
+  path?: string
+  schema: unknown
+}): string[] {
+  if (!schema || typeof schema !== 'object') {
+    return []
+  }
+
+  const schemaRecord = schema as Record<string, unknown>
+  const properties = schemaRecord.properties as Record<string, unknown> | undefined
+  const required = schemaRecord.required
+  const hasVersion =
+    (properties && 'version' in properties) ||
+    (Array.isArray(required) && required.includes('version'))
+
+  return [
+    ...(hasVersion ? [path] : []),
+    ...Object.entries(schemaRecord).flatMap(([key, value]) =>
+      findSchemasWithVersion({ path: `${path}/${key}`, schema: value }),
+    ),
+  ]
+}

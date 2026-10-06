@@ -32,21 +32,7 @@ export class AutoLinkNode extends LinkNode {
   static override importJSON(
     serializedNode: Record<string, unknown> & SerializedAutoLinkNode,
   ): AutoLinkNode {
-    const node = $createAutoLinkNode({}).updateFromJSON(serializedNode)
-
-    /**
-     * @todo remove in 4.0
-     */
-    if (
-      serializedNode.version === 1 &&
-      typeof serializedNode.fields?.doc?.value === 'object' &&
-      serializedNode.fields?.doc?.value?.id
-    ) {
-      serializedNode.fields.doc.value = serializedNode.fields.doc.value.id
-      serializedNode.version = 2
-    }
-
-    return node
+    return $createAutoLinkNode({}).updateFromJSON(serializedNode)
   }
 
   // @ts-expect-error

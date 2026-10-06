@@ -55,14 +55,6 @@ export class UploadServerNode extends DecoratorBlockNode {
   }
 
   static override importJSON(serializedNode: SerializedUploadNode): UploadServerNode {
-    if (serializedNode.version === 1 && (serializedNode?.value as unknown as { id: string })?.id) {
-      serializedNode.value = (serializedNode.value as unknown as { id: string }).id
-    }
-    if (serializedNode.version === 2 && !serializedNode?.id) {
-      serializedNode.id = new ObjectID.default().toHexString()
-      serializedNode.version = 3
-    }
-
     const importedData: Internal_UploadData = {
       id: serializedNode.id,
       fields: serializedNode.fields,

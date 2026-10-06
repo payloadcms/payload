@@ -143,14 +143,12 @@ export const createBlockNodeJSONSchema =
 
     return {
       type: 'object',
-      additionalProperties: false,
       properties: {
         type: { type: 'string', const: 'block' },
         fields: fieldsSchema,
         format: formatSchema,
-        version: { type: 'integer' },
       },
-      required: ['fields', 'format', 'type', 'version'],
+      required: ['fields', 'format', 'type'],
       tsType,
     }
   }
@@ -177,13 +175,11 @@ export const createInlineBlockNodeJSONSchema =
 
     return {
       type: 'object',
-      additionalProperties: false,
       properties: {
         type: { type: 'string', const: 'inlineBlock' },
         fields: fieldsSchema,
-        version: { type: 'integer' },
       },
-      required: ['fields', 'type', 'version'],
+      required: ['fields', 'type'],
       tsType,
     }
   }

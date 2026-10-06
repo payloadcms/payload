@@ -14,7 +14,7 @@ import type { LexicalElementFormat } from '../../../types/nodeTypes.js'
 import type { JSONSchemaFn } from '../../typesServer.js'
 import type { UploadFeatureServerProps } from './index.js'
 
-import { formatSchema, versionSchema } from '../../../types/jsonSchemaHelpers.js'
+import { formatSchema } from '../../../types/jsonSchemaHelpers.js'
 
 export type UploadData<TFields extends JsonObject = JsonObject> = {
   [TCollectionSlug in UploadCollectionSlug]: {
@@ -159,7 +159,6 @@ export const createUploadNodeJSONSchema =
 
       return {
         type: 'object',
-        additionalProperties: false,
         properties: {
           id: { type: 'string' },
           type: { type: 'string', const: 'upload' },
@@ -173,9 +172,8 @@ export const createUploadNodeJSONSchema =
                   'The uploaded file by ID (string or number). Populated to the full upload document when read at depth > 0.',
                 oneOf: [{ type: idType }, { $ref: `#/$defs/${slug}` }],
               },
-          version: versionSchema,
         },
-        required: ['fields', 'format', 'id', 'relationTo', 'type', 'value', 'version'],
+        required: ['fields', 'format', 'id', 'relationTo', 'type', 'value'],
       }
     })
 
@@ -187,9 +185,8 @@ export const createUploadNodeJSONSchema =
         additionalProperties: true,
         properties: {
           type: { type: 'string', const: 'upload' },
-          version: versionSchema,
         },
-        required: ['type', 'version'],
+        required: ['type'],
       }
     } else {
       const baseSchema: JSONSchema4 =

@@ -15,12 +15,10 @@ export const horizontalRuleNodeJSONSchema: JSONSchemaFn = ({ typeStringDefinitio
   typeStringDefinitions.add(SERIALIZED_HORIZONTAL_RULE_NODE_TS)
   return {
     type: 'object',
-    additionalProperties: false,
     properties: {
       type: { type: 'string', const: 'horizontalrule' },
-      version: { type: 'integer' },
     },
-    required: ['type', 'version'],
+    required: ['type'],
     tsType: 'SerializedHorizontalRuleNode',
   }
 }
