@@ -3,8 +3,8 @@ import React from 'react'
 
 import type { PathSegment } from '../../ColumnBrowser/types.js'
 
-import { ChevronIcon } from '../../../../icons/Chevron/index.js'
 import { FolderIcon } from '../../../../icons/Folder/index.js'
+import { ReplaceIcon } from '../../../../icons/Replace/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { Button } from '../../../Button/index.js'
 import { Chip } from '../../../Chip/index.js'
@@ -77,7 +77,7 @@ export const HierarchyModalFooter: React.FC<HierarchyModalFooterProps> = ({
               <React.Fragment>
                 <HierarchyPath Icon={Icon} path={previousPath} />
                 <span aria-hidden className={`${baseClass}__arrow`}>
-                  <ChevronIcon direction="right" />
+                  <ReplaceIcon />
                 </span>
               </React.Fragment>
             ) : null}

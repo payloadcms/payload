@@ -9,7 +9,7 @@ import { toast } from 'sonner'
 
 import type { SelectionWithPath } from '../Modal/types.js'
 
-import { ChevronIcon } from '../../../icons/Chevron/index.js'
+import { ArrowIcon } from '../../../icons/Arrow/index.js'
 import { XIcon } from '../../../icons/X/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentSelection } from '../../../providers/DocumentSelection/index.js'
@@ -281,7 +281,7 @@ export function MoveMany({
           render={({ close }) => (
             <PopupList.MenuItem>
               <PopupList.Button
-                icon={<ChevronIcon direction="right" />}
+                icon={<ArrowIcon direction="right" />}
                 onClick={() => {
                   close()
                   requestAnimationFrame(openHierarchyModal)
