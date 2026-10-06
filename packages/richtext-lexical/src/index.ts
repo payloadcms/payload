@@ -10,6 +10,8 @@ import type {
   LexicalRichTextAdapterProvider,
 } from './types/index.js'
 
+import { convertLexicalToMarkdown } from './features/converters/lexicalToMarkdown/index.js'
+import { convertMarkdownToLexical } from './features/converters/markdownToLexical/index.js'
 import { getLexicalHooks } from './hooks.js'
 import { i18n } from './i18n.js'
 import { defaultEditorFeatures } from './lexical/config/server/default.js'
@@ -103,6 +105,12 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
 
     return {
       CellComponent: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell',
+      converters: {
+        fromMarkdown: ({ markdown }) =>
+          convertMarkdownToLexical({ editorConfig: finalSanitizedEditorConfig, markdown }),
+        toMarkdown: ({ data }) =>
+          convertLexicalToMarkdown({ data, editorConfig: finalSanitizedEditorConfig }),
+      },
       DiffComponent: '@payloadcms/richtext-lexical/rsc#LexicalDiffComponent',
       editorConfig: finalSanitizedEditorConfig,
       features,
