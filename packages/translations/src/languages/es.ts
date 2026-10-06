@@ -293,6 +293,7 @@ export const esTranslations: DefaultTranslationsObject = {
     auto: 'Automático',
     automatic: 'Automático',
     backToDashboard: 'Volver al Panel de Control',
+    breadcrumb: 'Ruta de navegación',
     by: 'Por',
     cancel: 'Cancelar',
     changesNotSaved: 'Tus cambios no han sido guardados. Si sales ahora, se perderán tus cambios.',

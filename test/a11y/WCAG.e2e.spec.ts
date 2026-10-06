@@ -45,6 +45,7 @@ import {
   openTableColumns,
   openTableVersionHistory,
   openVersionComparison,
+  openVersionsList,
   openWidgetDrawer,
 } from './helpers.js'
 
@@ -99,6 +100,135 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('1.3.1 Info and Relationships (A)', () => {
+    test('should name field collection breadcrumb navigation', async () => {
+      // PYLD-3728
+      await gotoPostsList({ page, postsURL })
+      const breadcrumb = page.locator('nav.step-nav')
+
+      await expect(breadcrumb).toHaveAccessibleName(/breadcrumb/i)
+      await gotoCreatePost({ page, postsURL })
+      await expect(breadcrumb).toHaveAccessibleName(/breadcrumb/i)
+      await expect(breadcrumb.getByRole('link', { name: 'Dashboard', exact: true })).toBeVisible()
+    })
+
+    test('should name versioned collection breadcrumb navigation', async () => {
+      // PYLD-3729
+      await openVersionsList({ page, postsURL, serverURL })
+      const breadcrumb = page.locator('nav.step-nav')
+      const viewport = page.viewportSize()!
+
+      try {
+        await expect(breadcrumb).toHaveAccessibleName(/breadcrumb/i)
+        await page.setViewportSize({ height: 800, width: 400 })
+        await expect(breadcrumb.getByRole('button', { name: 'More options' })).toBeVisible()
+        await expect(breadcrumb).toHaveAccessibleName(/breadcrumb/i)
+      } finally {
+        await page.setViewportSize(viewport)
+      }
+    })
+
+    test('should expose the field collection current breadcrumb page', async () => {
+      // PYLD-3702
+      await gotoPostsList({ page, postsURL })
+      const breadcrumb = page.locator('nav.step-nav')
+      const currentPage = breadcrumb.locator('[aria-current="page"]')
+
+      await expect(currentPage).toHaveCount(1)
+      await expect(currentPage).toHaveText('Posts')
+      await gotoCreatePost({ page, postsURL })
+      await expect(currentPage).toHaveCount(1)
+      await expect(currentPage).toHaveText('Create New')
+      await expect(
+        breadcrumb.getByRole('link', { name: 'Posts', exact: true }),
+      ).not.toHaveAttribute('aria-current', 'page')
+
+      await page.goto(
+        formatAdminURL({
+          adminRoute: '/admin',
+          path: '/collections/payload-folders/hierarchy',
+          serverURL,
+        }),
+      )
+      const hierarchy = page.locator('.hierarchy-list')
+
+      await expect(hierarchy).toBeVisible()
+      await expect(currentPage).toHaveCount(1)
+      for (const name of ['Accessibility folder', 'Accessibility child folder']) {
+        const link = hierarchy.getByRole('link', { name, exact: true })
+
+        await expect(link).toHaveAttribute('href')
+        const { search } = new URL((await link.getAttribute('href'))!, serverURL)
+
+        await page.goto(
+          formatAdminURL({
+            adminRoute: '/admin',
+            path: `/collections/payload-folders/hierarchy${search}`,
+            serverURL,
+          }),
+        )
+        await expect(hierarchy.getByRole('heading', { name, exact: true })).toBeVisible()
+        await expect(currentPage).toHaveCount(0)
+      }
+      await expect(
+        breadcrumb.getByRole('link', { name: 'Accessibility folder', exact: true }),
+      ).toBeVisible()
+      await expect(currentPage).toHaveCount(0)
+    })
+
+    test('should expose the versioned collection current breadcrumb page', async () => {
+      // PYLD-3703
+      await openVersionsList({ page, postsURL, serverURL })
+      const breadcrumb = page.locator('nav.step-nav')
+      const currentPage = breadcrumb.locator('[aria-current="page"]')
+      const viewport = page.viewportSize()!
+
+      try {
+        await expect(currentPage).toHaveCount(1)
+        await expect(currentPage).toHaveText('Versions')
+        await page.setViewportSize({ height: 800, width: 400 })
+        const moreOptions = breadcrumb.getByRole('button', { name: 'More options' })
+
+        await expect(moreOptions).toBeVisible()
+        await expect(currentPage).toHaveCount(1)
+        await expect(currentPage).toHaveText('Versions')
+        await moreOptions.press('Enter')
+        const posts = page.getByRole('menuitem', { name: 'Posts', exact: true })
+
+        await expect(posts).toBeVisible()
+        await expect(posts).not.toHaveAttribute('aria-current', 'page')
+        await page.keyboard.press('Escape')
+        await expect(moreOptions).toBeFocused()
+        await expect(currentPage).toHaveText('Versions')
+
+        await page.setViewportSize(viewport)
+        await page.goto(
+          formatAdminURL({ adminRoute: '/admin', path: '/breadcrumb-current-page', serverURL }),
+        )
+        await expect(currentPage).toHaveCount(1)
+        await expect(currentPage).toHaveText('Current breadcrumb example')
+        await expect(moreOptions).toBeHidden()
+        await page.setViewportSize({ height: 800, width: 400 })
+        await moreOptions.press('Enter')
+        const currentMenuItem = page.getByRole('menuitem', {
+          name: 'Current breadcrumb example',
+          exact: true,
+        })
+
+        await expect(currentMenuItem).toBeVisible()
+        await expect(currentMenuItem).toHaveAttribute('aria-current', 'page')
+        await expect(
+          page.getByRole('menuitem', { name: 'Parent section of breadcrumb example' }),
+        ).not.toHaveAttribute('aria-current', 'page')
+        await page.keyboard.press('Escape')
+        await expect(moreOptions).toBeFocused()
+        await page.setViewportSize(viewport)
+        await expect(currentPage).toHaveCount(1)
+        await expect(currentPage).toHaveText('Current breadcrumb example')
+      } finally {
+        await page.setViewportSize(viewport)
+      }
+    })
+
     test('should identify the navigation create-folder action before opening it', async () => {
       const sidebar = await openNavigationFolders({ page, serverURL })
       const create = sidebar.locator('.tree__create-button')

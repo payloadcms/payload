@@ -291,6 +291,7 @@ export const myTranslations: DefaultTranslationsObject = {
     auto: 'အော်တို',
     automatic: 'အော်တို',
     backToDashboard: 'ပင်မစာမျက်နှာသို့ ပြန်သွားမည်။',
+    breadcrumb: 'လမ်းညွှန်လမ်းကြောင်း',
     by: 'ဖြင့်',
     cancel: 'မလုပ်တော့ပါ။',
     changesNotSaved:

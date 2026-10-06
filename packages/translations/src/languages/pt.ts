@@ -288,6 +288,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     auto: 'Automático',
     automatic: 'Automático',
     backToDashboard: 'Voltar para Painel de Controle',
+    breadcrumb: 'Caminho de navegação',
     by: 'Por',
     cancel: 'Cancelar',
     changesNotSaved:

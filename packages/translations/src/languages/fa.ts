@@ -280,6 +280,7 @@ export const faTranslations: DefaultTranslationsObject = {
     auto: 'خودکار',
     automatic: 'خودکار',
     backToDashboard: 'بازگشت به داشبورد',
+    breadcrumb: 'مسیر راهنما',
     by: 'توسط',
     cancel: 'انصراف',
     changesNotSaved:

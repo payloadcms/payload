@@ -286,6 +286,7 @@ export const etTranslations: DefaultTranslationsObject = {
     auto: 'Auto',
     automatic: 'Automaatne',
     backToDashboard: 'Tagasi töölaua juurde',
+    breadcrumb: 'Asukohatee',
     by: 'Autor:',
     cancel: 'Tühista',
     changesNotSaved: 'Teie muudatusi pole salvestatud. Kui lahkute praegu, kaotate oma muudatused.',

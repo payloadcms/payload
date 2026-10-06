@@ -290,6 +290,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     auto: '自動',
     automatic: '自動設定',
     backToDashboard: 'ダッシュボードに戻る',
+    breadcrumb: 'パンくずリスト',
     by: '〜によって',
     cancel: 'キャンセル',
     changesNotSaved: '未保存の変更があります。このまま画面を離れると内容が失われます。',

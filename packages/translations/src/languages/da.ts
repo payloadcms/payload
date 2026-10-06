@@ -286,6 +286,7 @@ export const daTranslations: DefaultTranslationsObject = {
     auto: 'Automatisk',
     automatic: 'Automatisk',
     backToDashboard: 'Tilbage til dashboard',
+    breadcrumb: 'Brødkrummesti',
     by: 'Af',
     cancel: 'Anuller',
     changesNotSaved:

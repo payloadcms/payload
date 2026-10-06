@@ -289,6 +289,7 @@ export const azTranslations: DefaultTranslationsObject = {
     auto: 'Avtomatik',
     automatic: 'Avtomatik',
     backToDashboard: 'Panelə qayıdın',
+    breadcrumb: 'Naviqasiya yolu',
     by: 'Tərəfindən',
     cancel: 'Ləğv et',
     changesNotSaved:

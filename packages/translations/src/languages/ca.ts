@@ -290,6 +290,7 @@ export const caTranslations: DefaultTranslationsObject = {
     auto: 'Automàtic',
     automatic: 'Automàtic',
     backToDashboard: 'Torna al tauler',
+    breadcrumb: 'Fil d’Ariadna',
     by: 'Per',
     cancel: 'Cancel·la',
     changesNotSaved: 'El teu document té canvis no desats. Si continues, els canvis es perdran.',

@@ -290,6 +290,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     auto: 'Автоматически',
     automatic: 'Автоматически',
     backToDashboard: 'Назад к Панели',
+    breadcrumb: 'Навигационная цепочка',
     by: 'По',
     cancel: 'Отмена',
     changesNotSaved:

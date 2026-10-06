@@ -290,6 +290,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     auto: 'Automatinis',
     automatic: 'Automatinis',
     backToDashboard: 'Atgal į informacinę skydelį',
+    breadcrumb: 'Naršymo kelias',
     by: 'Iki',
     cancel: 'Atšaukti',
     changesNotSaved:

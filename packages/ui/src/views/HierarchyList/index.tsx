@@ -126,6 +126,7 @@ export function HierarchyListView(props: ListViewClientProps) {
       const ancestorBreadcrumbs = hierarchyData?.breadcrumbs?.slice(0, -1) || []
 
       const baseLabel: StepNavItem = {
+        isCurrent: !hierarchyData?.breadcrumbs?.length,
         label: collectionLabel,
         url: formatAdminURL({
           adminRoute,
@@ -138,6 +139,7 @@ export function HierarchyListView(props: ListViewClientProps) {
       if (ancestorBreadcrumbs.length > 0) {
         const queryParam = parentFieldName || 'parent'
         const hierarchyBreadcrumbs: StepNavItem[] = ancestorBreadcrumbs.map((crumb) => ({
+          isCurrent: false,
           label: crumb.title,
           url: formatAdminURL({
             adminRoute,

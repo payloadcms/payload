@@ -287,6 +287,7 @@ export const enTranslations = {
     auto: 'Auto',
     automatic: 'Automatic',
     backToDashboard: 'Back to Dashboard',
+    breadcrumb: 'Breadcrumb',
     by: 'By',
     cancel: 'Cancel',
     changesNotSaved:

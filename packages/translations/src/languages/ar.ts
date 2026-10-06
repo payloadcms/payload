@@ -280,6 +280,7 @@ export const arTranslations: DefaultTranslationsObject = {
     auto: 'تلقائي',
     automatic: 'تلقائي',
     backToDashboard: 'العودة للوحة التّحكّم',
+    breadcrumb: 'مسار التنقل',
     by: 'بواسطة',
     cancel: 'إلغاء',
     changesNotSaved: 'لم يتمّ حفظ التّغييرات. إن غادرت الآن ، ستفقد تغييراتك.',

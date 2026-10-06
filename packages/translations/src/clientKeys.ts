@@ -222,6 +222,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:automatic',
   'general:auto',
   'general:backToDashboard',
+  'general:breadcrumb',
   'general:by',
   'general:cancel',
   'general:changesNotSaved',

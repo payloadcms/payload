@@ -297,6 +297,7 @@ export const frTranslations: DefaultTranslationsObject = {
     auto: 'Automatique',
     automatic: 'Automatique',
     backToDashboard: 'Retour au tableau de bord',
+    breadcrumb: 'Fil d’Ariane',
     by: 'Par',
     cancel: 'Annuler',
     changesNotSaved:

@@ -286,6 +286,7 @@ export const plTranslations: DefaultTranslationsObject = {
     auto: 'Automatyczny',
     automatic: 'Automatyczny',
     backToDashboard: 'Powrót do panelu',
+    breadcrumb: 'Ścieżka nawigacji',
     by: 'Przez',
     cancel: 'Anuluj',
     changesNotSaved:

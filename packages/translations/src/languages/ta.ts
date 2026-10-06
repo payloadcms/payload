@@ -288,6 +288,7 @@ export const taTranslations: DefaultTranslationsObject = {
     auto: 'ஆட்டோ',
     automatic: 'தானியங்கி',
     backToDashboard: 'கட்டுப்பாட்டு பலகைக்கு திரும்பவும்',
+    breadcrumb: 'வழிசெலுத்தல் பாதை',
     by: 'மூலம்',
     cancel: 'ரத்து செய்',
     changesNotSaved: 'உங்கள் மாற்றங்கள் சேமிக்கப்படவில்லை. இப்போது வெளியேறினால், அவை இழக்கப்படும்.',

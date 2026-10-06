@@ -276,6 +276,7 @@ export const heTranslations: DefaultTranslationsObject = {
     auto: 'אוטו',
     automatic: 'אוטומטי',
     backToDashboard: 'חזרה ללוח המחוונים',
+    breadcrumb: 'נתיב ניווט',
     by: 'על ידי',
     cancel: 'ביטול',
     changesNotSaved: 'השינויים שלך לא נשמרו. אם תצא כעת, תאבד את השינויים שלך.',

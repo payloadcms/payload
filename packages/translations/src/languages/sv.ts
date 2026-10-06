@@ -287,6 +287,7 @@ export const svTranslations: DefaultTranslationsObject = {
     auto: 'Automatiskt',
     automatic: 'Automatiskt',
     backToDashboard: 'Tillbaka till översikten',
+    breadcrumb: 'Brödsmulenavigering',
     by: 'Av',
     cancel: 'Avbryt',
     changesNotSaved:

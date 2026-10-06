@@ -293,6 +293,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     auto: 'Automatisch',
     automatic: 'Automatisch',
     backToDashboard: 'Terug naar dashboard',
+    breadcrumb: 'Kruimelpad',
     by: 'Door',
     cancel: 'Annuleren',
     changesNotSaved:

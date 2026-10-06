@@ -286,6 +286,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     auto: 'Automātiska',
     automatic: 'Automātiski',
     backToDashboard: 'Atpakaļ uz paneli',
+    breadcrumb: 'Navigācijas ceļš',
     by: 'Autors',
     cancel: 'Atcelt',
     changesNotSaved: 'Jūsu izmaiņas nav saglabātas. Ja tagad pametīsiet, izmaiņas tiks zaudētas.',

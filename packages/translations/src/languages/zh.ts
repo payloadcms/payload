@@ -271,6 +271,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     auto: '自动',
     automatic: '自动',
     backToDashboard: '返回到仪表板',
+    breadcrumb: '面包屑导航',
     by: '由',
     cancel: '取消',
     changesNotSaved: '您的更改尚未保存。您确定要离开吗？',

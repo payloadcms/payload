@@ -288,6 +288,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     auto: 'Automatski',
     automatic: 'Automatsko',
     backToDashboard: 'Nazad na kontrolni panel',
+    breadcrumb: 'Navigaciona putanja',
     by: 'Od strane',
     cancel: 'Otkaži',
     changesNotSaved: 'Vaše promene nisu sačuvane. Ako izađete sada, izgubićete promene.',

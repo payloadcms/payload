@@ -292,6 +292,7 @@ export const huTranslations: DefaultTranslationsObject = {
     auto: 'Automatikus',
     automatic: 'Automatikus',
     backToDashboard: 'Vissza az irányítópultra',
+    breadcrumb: 'Morzsanavigáció',
     by: 'Által',
     cancel: 'Mégsem',
     changesNotSaved:

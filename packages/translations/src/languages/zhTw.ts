@@ -269,6 +269,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     auto: '自動',
     automatic: '自動',
     backToDashboard: '返回儀表板',
+    breadcrumb: '麵包屑導覽',
     by: '由',
     cancel: '取消',
     changesNotSaved: '變更尚未儲存。若您現在離開，將會遺失所有變更。',

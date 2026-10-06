@@ -45,6 +45,10 @@ export default buildConfigWithDefaults({
     admin: {
       components: {
         views: {
+          BreadcrumbCurrentPage: {
+            Component: '/components/BreadcrumbCurrentPage/index.js#BreadcrumbCurrentPage',
+            path: '/breadcrumb-current-page',
+          },
           CustomIDModals: {
             Component: '/components/CustomIDModals/index.js#CustomIDModals',
             path: '/custom-modal-ids',

@@ -288,6 +288,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     auto: 'Automatisk',
     automatic: 'Automatisk',
     backToDashboard: 'Tilbake til kontrollpanel',
+    breadcrumb: 'Brødsmulesti',
     by: 'Av',
     cancel: 'Avbryt',
     changesNotSaved:

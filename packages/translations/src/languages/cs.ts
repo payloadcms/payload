@@ -284,6 +284,7 @@ export const csTranslations: DefaultTranslationsObject = {
     auto: 'Automaticky',
     automatic: 'Automatický',
     backToDashboard: 'Zpět na nástěnku',
+    breadcrumb: 'Drobečková navigace',
     by: 'Od',
     cancel: 'Zrušit',
     changesNotSaved: 'Vaše změny nebyly uloženy. Pokud teď odejdete, ztratíte své změny.',
