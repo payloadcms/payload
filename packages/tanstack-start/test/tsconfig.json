@@ -9,12 +9,12 @@
     "paths": {
       "@payloadcms/translations": ["../../translations/dist/index.d.ts"],
       "@payloadcms/ui": ["../../ui/dist/exports/client/index.d.ts"],
-      "@payloadcms/ui/providers/*": ["../../ui/dist/providers/*/index.d.ts"],
-      "@payloadcms/ui/views/NotFound/client": ["../../ui/dist/views/NotFound/client.d.ts"],
-      "@payloadcms/ui/layouts/*": ["../../ui/dist/layouts/Root/*.d.ts"],
-      "@payloadcms/ui/layouts/Root/*": ["../../ui/dist/layouts/Root/*.d.ts"],
-      "@payloadcms/ui/layouts/NestProviders": ["../../ui/dist/layouts/Root/NestProviders.d.ts"],
-      "@payloadcms/ui/utilities/*": ["../../ui/dist/utilities/*.d.ts"],
+      "@payloadcms/ui/providers/*": ["../../ui/dist/client/providers/*/index.d.ts"],
+      "@payloadcms/ui/views/NotFound/client": ["../../ui/dist/client/views/NotFound/client.d.ts"],
+      "@payloadcms/ui/layouts/*": ["../../ui/dist/client/layouts/Root/*.d.ts", "../../ui/dist/server/layouts/Root/*.d.ts", "../../ui/dist/shared/layouts/Root/*.d.ts"],
+      "@payloadcms/ui/layouts/Root/*": ["../../ui/dist/client/layouts/Root/*.d.ts", "../../ui/dist/server/layouts/Root/*.d.ts", "../../ui/dist/shared/layouts/Root/*.d.ts"],
+      "@payloadcms/ui/layouts/NestProviders": ["../../ui/dist/server/layouts/Root/NestProviders.d.ts"],
+      "@payloadcms/ui/utilities/*": ["../../ui/dist/client/utilities/*.d.ts", "../../ui/dist/server/utilities/*.d.ts", "../../ui/dist/shared/utilities/*.d.ts"],
       "@payloadcms/ui/*": ["../../ui/dist/exports/*"],
       "payload": ["../../payload/dist/index.bundled.d.ts"],
       "payload/*": ["../../payload/dist/exports/*.d.ts"]

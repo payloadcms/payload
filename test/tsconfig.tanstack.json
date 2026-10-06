@@ -13,7 +13,12 @@
       "@payloadcms/tanstack-start/*": ["../packages/tanstack-start/dist/exports/*.d.ts"],
       "@payloadcms/translations": ["../packages/translations/dist/index.d.ts"],
       "@payloadcms/ui": ["../packages/ui/dist/exports/client/index.d.ts"],
-      "@payloadcms/ui/*": ["../packages/ui/dist/*"],
+      "@payloadcms/ui/*": [
+        "../packages/ui/dist/client/*",
+        "../packages/ui/dist/server/*",
+        "../packages/ui/dist/shared/*",
+        "../packages/ui/dist/*"
+      ],
       "payload": ["../packages/payload/dist/index.d.ts"],
       "payload/*": ["../packages/payload/dist/exports/*.d.ts"]
     },
