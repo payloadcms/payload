@@ -1791,14 +1791,23 @@ describe('List View', () => {
     test('should sort with existing filters', async () => {
       await page.goto(postsUrl.list)
 
-      await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
+      const { columnContainer } = await toggleColumn(page, {
+        columnLabel: 'ID',
+        columnName: 'id',
+        targetState: 'off',
+      })
 
       await page.locator('#heading-id').waitFor({ state: 'detached' })
+      await page.locator('.columns-button__button').click()
+      await expect(columnContainer).toBeHidden()
+
       await page.locator('#heading-title button.sort-column__asc').click()
       await page.waitForURL(/sort=title/)
 
+      await openListColumns(page)
+
       const columnAfterSort = getColumnSelectorItem({
-        container: page.locator('.column-selector'),
+        container: columnContainer,
         label: 'ID',
       })
 
