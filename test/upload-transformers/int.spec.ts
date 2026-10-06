@@ -16,6 +16,7 @@ import {
   resizePreviewMediaSlug,
   transformerMediaSlug,
   usersSlug,
+  variantMediaSlug,
 } from './shared.js'
 import {
   fileRequestEvents,
@@ -429,6 +430,26 @@ test.suite('Upload transformers', { config: './config.ts' }, () => {
 
       const afterHash = createHash('sha256').update(fs.readFileSync(storedFilePath)).digest('hex')
       expect(afterHash).toBe(beforeHash)
+    })
+  })
+
+  test.describe('Multiple Sharp instances', () => {
+    test('should generate variants configured on a Sharp instance registered after dynamic-only ones', async () => {
+      const doc = (await uploadFixture({
+        collection: variantMediaSlug,
+        fixture: 'image.png',
+      })) as unknown as {
+        variants: { thumbnail: { filename: null | string; width: null | number } }
+      }
+
+      expect(doc.variants.thumbnail.filename).toBe('image-100x100.png')
+      expect(doc.variants.thumbnail.width).toBe(100)
+    })
+
+    test('should not run an upload through Sharp instances that do not own its collection', async () => {
+      await uploadFixture({ collection: variantMediaSlug, fixture: 'image.png' })
+
+      expect(transformerCallCounts.dynamicOnlySharp).toBe(0)
     })
   })
 })

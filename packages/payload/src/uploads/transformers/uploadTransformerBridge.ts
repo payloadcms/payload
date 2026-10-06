@@ -41,6 +41,12 @@ export type PreparedUploadTransformation = {
 }
 
 export type UploadTransformerInternal = {
+  /**
+   * Whether this bridge owns upload-time processing for the collection. When several
+   * transformers carry a bridge, core drives the upload through the one that owns the
+   * collection, falling back to the first bridge when none does.
+   */
+  handlesCollection?: (args: { collectionSlug: string }) => boolean
   prepareUpload?: (args: {
     collectionSlug: string
     file: File

@@ -31,6 +31,33 @@ describe('sharpTransformer', () => {
       /not an upload-enabled collection: "posts", "missing"/,
     )
   })
+
+  it('should reject a collection whose upload settings are configured on more than one instance on init', () => {
+    const first = sharpTransformer({ collections: { media: { variants: [] } } })
+    const second = sharpTransformer({ slug: 'sharp-second', collections: { media: {} } })
+    const config = {
+      collections: [{ slug: 'media', fields: [], upload: true }],
+      upload: { transformers: [first, second] },
+    } as unknown as Config
+
+    expect(() => second.init!(config)).toThrow(
+      /"media" has upload settings on more than one Sharp transformer: "sharp", "sharp-second"/,
+    )
+  })
+
+  it('should allow different collections configured on different instances', () => {
+    const first = sharpTransformer({ collections: { media: {} } })
+    const second = sharpTransformer({ slug: 'sharp-second', collections: { photos: {} } })
+    const config = {
+      collections: [
+        { slug: 'media', fields: [], upload: true },
+        { slug: 'photos', fields: [], upload: true },
+      ],
+      upload: { transformers: [first, second] },
+    } as unknown as Config
+
+    expect(() => second.init!(config)).not.toThrow()
+  })
 })
 
 describe('resolveSharpDynamicDefaults', () => {
