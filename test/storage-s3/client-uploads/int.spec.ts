@@ -1,3 +1,4 @@
+/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options", "test.for", "test.each"] }] -- Tests use the shared fixture wrapper. */
 import type { UploadInstructions } from 'payload'
 
 import { readFileSync } from 'fs'
@@ -6,6 +7,7 @@ import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
+import { getStoredUploadKeys } from '../../__helpers/int/storedUploadKeys.js'
 import { test } from '../../__helpers/int/vitest.js'
 import { mediaHeaderOnlySlug, mediaHeaderOnlyWithSizesSlug, mediaSlug } from '../shared.js'
 import {
@@ -105,6 +107,58 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
     expect(res.ContentType).toBe('image/png')
   })
 
+  test('should return the new image URL immediately after cropping a client upload', async ({
+    payload,
+    restClient,
+  }) => {
+    await restClient.login({ slug: 'users' })
+
+    const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
+    const instructions = await restClient
+      .POST(signedURLEndpoint, {
+        body: signedURLBody(mediaSlug, 'image.png', file.length, 'image/png'),
+      })
+      .then((res) => res.json<UploadInstructions>())
+
+    if (instructions.type !== 'http') {
+      throw new Error('Expected HTTP upload instructions')
+    }
+
+    const upload = await fetch(instructions.request.url, {
+      body: file,
+      headers: { 'Content-Type': 'image/png' },
+      method: 'PUT',
+    })
+    expect(upload.ok).toBe(true)
+
+    const formData = new FormData()
+    formData.append('file', JSON.stringify(instructions.file))
+    const createResponse = await restClient.POST(`/${mediaSlug}`, { body: formData })
+    expect(createResponse.status).toBe(201)
+    const { doc: created } = await createResponse.json<{ doc: { id: string; url: string } }>()
+
+    const cropResponse = await restClient.PATCH(`/${mediaSlug}/${created.id}`, {
+      body: JSON.stringify({}),
+      query: {
+        uploadEdits: {
+          crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
+          heightInPixels: 800,
+          widthInPixels: 800,
+        },
+      },
+    })
+    expect(cropResponse.status).toBe(200)
+    const { doc: cropped } = await cropResponse.json<{ doc: { id: string; url: string } }>()
+    const reloaded = await payload.findByID({
+      id: created.id,
+      collection: mediaSlug,
+      overrideAccess: true,
+    })
+
+    expect(cropped.url).not.toBe(created.url)
+    expect(cropped.url).toBe(reloaded.url)
+  })
+
   test('does not overwrite an existing object through client uploads', async ({ restClient }) => {
     const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
     const replacement = Buffer.alloc(file.length, 1)
@@ -142,6 +196,39 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
     expect(Buffer.from(await stored.Body!.transformToByteArray())).toEqual(file)
   })
 
+  test('should reject a provider object shorter than its declared upload size', async ({
+    payload,
+    restClient,
+  }) => {
+    const instructions = await restClient
+      .POST(signedURLEndpoint, {
+        body: signedURLBody(mediaSlug, 'incomplete.txt', 100, 'text/plain'),
+      })
+      .then((response) => response.json<UploadInstructions>())
+
+    if (instructions.type !== 'http') {
+      throw new Error('Expected HTTP upload instructions')
+    }
+
+    const key = decodeURIComponent(
+      new URL(instructions.request.url).pathname.split('/').slice(2).join('/'),
+    )
+    await getAWSClient().putObject({
+      Body: Buffer.from('incomplete'),
+      Bucket: getTestBucketName(),
+      ContentType: 'text/plain',
+      Key: key,
+    })
+
+    const formData = new FormData()
+    formData.append('file', JSON.stringify(instructions.file))
+    const response = await restClient.POST(`/${mediaSlug}`, { body: formData })
+
+    expect(response.status).toBe(400)
+    const docs = await payload.find({ collection: mediaSlug, overrideAccess: true })
+    expect(docs.totalDocs).toBe(0)
+  })
+
   for (const [uploadFilename, mimeType] of [
     ['reference.svg', 'image/svg+xml'],
     ['reference.xml', 'application/xml'],
@@ -161,6 +248,7 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
   }
 
   test('should persist adapter-backed SVG only after document validation', async ({
+    payload,
     restClient,
   }) => {
     const safeSVG =
@@ -173,9 +261,18 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
     const { doc } = await safeResponse.json()
 
     expect(safeResponse.status).toBe(201)
-    expect(doc.filename).toBe('reference.svg')
+    expect(doc.filename).toBe('reference-original.svg')
+    const stored = await payload.db.findOne({
+      collection: 'media',
+      where: { id: { equals: doc.id } },
+    })
+    const currentKey = getStoredUploadKeys({ collectionSlug: 'media', doc: stored, payload }).find(
+      (key) => key.endsWith(`/${doc.filename}`),
+    )
+
+    expect(currentKey).toBeTruthy()
     await expect(
-      getAWSClient().headObject({ Bucket: getTestBucketName(), Key: 'reference.svg' }),
+      getAWSClient().headObject({ Bucket: getTestBucketName(), Key: currentKey! }),
     ).resolves.toMatchObject({ ContentType: 'image/svg+xml' })
 
     await clearTestBucket()
@@ -247,7 +344,7 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
     } = await response.json()
     expect(url).toBeDefined()
     expect(url).toContain(getTestBucketName())
-    expect(url).toContain('small-file.png')
+    expect(url).toContain('small-file-original.png')
   })
 
   test('should reject file exceeding size limit', async ({ restClient }) => {
@@ -340,7 +437,7 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
 
       expect(url).toBeDefined()
       expect(url).toContain('test-prefix')
-      expect(url).toContain('photo.png')
+      expect(url).toContain('photo-original.png')
       expect(url).not.toContain('..')
     })
 
@@ -362,7 +459,7 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
 
       expect(url).toBeDefined()
       expect(url).toContain('test-prefix')
-      expect(url).toContain('document.png')
+      expect(url).toContain('document-original.png')
       expect(url).not.toContain('..')
       expect(url).not.toContain('other-prefix')
     })
@@ -380,7 +477,7 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
 
       expect(url).toBeDefined()
       expect(url).toContain('test-prefix')
-      expect(url).toContain('photo.png')
+      expect(url).toContain('photo-original.png')
       expect(url).not.toContain('..')
     })
 
@@ -397,7 +494,7 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
 
       expect(url).toBeDefined()
       expect(url).toContain('test-prefix')
-      expect(url).toContain('safe-image.png')
+      expect(url).toContain('safe-image-original.png')
     })
 
     // Regression for #16694: trailing dots are stripped from the storage key the same way they
@@ -417,7 +514,7 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
 
       expect(url).toBeDefined()
       expect(url).toContain('test-prefix')
-      expect(url).toContain('report.png')
+      expect(url).toContain('report-original.png')
       expect(url).not.toContain('report...png')
     })
   })
@@ -441,7 +538,8 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
       createdIds.length = 0
     })
 
-    test('creates a document from a client-uploaded image via the real S3 handler', async ({
+    test('creates a versioned document with a retained provider original', async ({
+      payload,
       restClient,
     }) => {
       const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
@@ -478,6 +576,46 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
       expect(doc.height).toBe(1600)
       expect(doc.filesize).toBe(file.length)
       expect(doc.mimeType).toBe('image/png')
+      expect(doc.original.filename).toBe('header-only-original.png')
+      expect(doc.filename).toBe(doc.original.filename)
+
+      const stored = await payload.findByID({
+        id: doc.id,
+        collection: mediaHeaderOnlySlug,
+        overrideAccess: true,
+        showHiddenFields: true,
+      })
+      expect(
+        getStoredUploadKeys({ collectionSlug: mediaHeaderOnlySlug, doc: stored, payload }),
+      ).toEqual([
+        decodeURIComponent(
+          new URL(instructions.request.url).pathname.split('/').slice(2).join('/'),
+        ),
+      ])
+      const originalResponse = await restClient.GET(
+        `/${mediaHeaderOnlySlug}/file/${doc.original.filename}`,
+      )
+      expect(originalResponse.status).toBe(200)
+      expect(Buffer.from(await originalResponse.arrayBuffer())).toEqual(file)
+    })
+
+    test('does not create a document when the provider upload never completes', async ({
+      payload,
+      restClient,
+    }) => {
+      const instructions = await restClient
+        .POST(signedURLEndpoint, {
+          body: signedURLBody(mediaHeaderOnlySlug, 'missing.png', 100, 'image/png'),
+        })
+        .then((res) => res.json<UploadInstructions>())
+
+      const formData = new FormData()
+      formData.append('file', JSON.stringify(instructions.file))
+      const response = await restClient.POST(`/${mediaHeaderOnlySlug}`, { body: formData })
+
+      expect(response.status).toBeGreaterThanOrEqual(400)
+      const docs = await payload.find({ collection: mediaHeaderOnlySlug, overrideAccess: true })
+      expect(docs.totalDocs).toBe(0)
     })
   })
 
@@ -498,7 +636,8 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
       createdIds.length = 0
     })
 
-    test('creates a document and generates image sizes from a large client-uploaded image via the real S3 handler', async ({
+    test('retains the direct original while generating a stored image size', async ({
+      payload,
       restClient,
     }) => {
       const file = readFileSync(path.resolve(dirname, '../../uploads/2mb.jpg'))
@@ -542,6 +681,15 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
       expect(doc.variants.thumbnail.width).toBe(400)
       expect(doc.variants.thumbnail.height).toBe(300)
       expect(doc.variants.thumbnail.filename).toBeTruthy()
+      const stored = await payload.findByID({
+        id: doc.id,
+        collection: mediaHeaderOnlyWithSizesSlug,
+        overrideAccess: true,
+        showHiddenFields: true,
+      })
+      expect(
+        getStoredUploadKeys({ collectionSlug: mediaHeaderOnlyWithSizesSlug, doc: stored, payload }),
+      ).toHaveLength(2)
     }, 60000)
   })
 

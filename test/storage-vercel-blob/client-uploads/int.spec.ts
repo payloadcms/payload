@@ -65,7 +65,7 @@ test.suite('@payloadcms/storage-vercel-blob clientUploads', { config: './config.
     })
     expect(instructions.file.filename).toBe('image.png')
     expect(instructions.data.pathname).toBe(
-      `${(instructions.file.uploadReference as { _objectKey: string })._objectKey}/${instructions.file.filename}`,
+      `${(instructions.file.uploadReference as { _objectKey: string })._objectKey}/image-original.png`,
     )
 
     const result = await put(instructions.data.pathname, new Blob([file], { type: 'image/png' }), {
@@ -75,7 +75,7 @@ test.suite('@payloadcms/storage-vercel-blob clientUploads', { config: './config.
     })
 
     expect(result.url).toBeDefined()
-    expect(result.url).toContain(instructions.file.filename)
+    expect(result.url).toContain('image-original.png')
 
     const { blobs } = await list()
     const uploaded = blobs.find((b) => b.pathname === instructions.data.pathname)
@@ -122,7 +122,7 @@ test.suite('@payloadcms/storage-vercel-blob clientUploads', { config: './config.
 
     expect(result.url).toBeDefined()
     expect(result.url).toContain(prefix)
-    expect(result.url).toContain(instructions.file.filename)
+    expect(result.url).toContain('image-original.png')
 
     const { blobs } = await list()
     const uploaded = blobs.find((b) => b.pathname === instructions.data.pathname)
