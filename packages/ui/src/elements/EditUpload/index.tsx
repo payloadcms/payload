@@ -155,6 +155,17 @@ export const EditUpload: React.FC<EditUploadProps> = ({
             >
               {showCrop ? (
                 <ReactCrop
+                  ariaLabels={{
+                    cropArea: t('upload:setCropArea'),
+                    eDragHandle: t('upload:cropRight'),
+                    nDragHandle: t('upload:cropTop'),
+                    neDragHandle: t('upload:cropTopRight'),
+                    nwDragHandle: t('upload:cropTopLeft'),
+                    sDragHandle: t('upload:cropBottom'),
+                    seDragHandle: t('upload:cropBottomRight'),
+                    swDragHandle: t('upload:cropBottomLeft'),
+                    wDragHandle: t('upload:cropLeft'),
+                  }}
                   className={`${baseClass}__reactCrop`}
                   crop={crop}
                   onChange={(_, c) => setCrop(c)}

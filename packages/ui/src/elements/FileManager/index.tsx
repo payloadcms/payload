@@ -375,6 +375,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
             <div className={`${baseClass}__upload`}>
               {!value && removedFile && data?.filename && (
                 <Button
+                  aria-label={t('general:cancel')}
                   buttonStyle="secondary"
                   className={`${baseClass}__remove`}
                   icon="x"

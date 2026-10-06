@@ -3228,6 +3228,50 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    test('should translate crop handle names into Spanish', async () => {
+      const originalCookies = (await page.context().cookies()).filter(
+        ({ name }) => name === 'payload-lng',
+      )
+      const doc = await createMediaFixture({ page, serverURL })
+      try {
+        await page.context().addCookies([{ name: 'payload-lng', url: serverURL, value: 'es' }])
+        await page.goto(
+          formatAdminURL({ adminRoute: '/admin', path: `/collections/media/${doc.id}`, serverURL }),
+        )
+        await waitForFormReady(page)
+        await page.getByRole('button', { name: /editar imagen/i }).click()
+        const dialog = page.locator('.edit-upload__dialog')
+        await expect(dialog.locator('.ReactCrop__drag-handle.ord-e')).toHaveAccessibleName(
+          'Controlador de recorte derecho',
+        )
+        await expect(dialog.locator('.ReactCrop__drag-handle.ord-w')).toHaveAccessibleName(
+          'Controlador de recorte izquierdo',
+        )
+        await expect(dialog.locator('.ReactCrop__crop-selection')).toHaveAccessibleName(
+          'Establecer área de recorte',
+        )
+      } finally {
+        await page.context().clearCookies({ name: 'payload-lng' })
+        await page.context().addCookies(originalCookies)
+      }
+    })
+
+    test('should name and operate cancel before selecting a replacement file', async () => {
+      const doc = await createMediaFixture({ page, serverURL })
+      await page.goto(
+        formatAdminURL({ adminRoute: '/admin', path: `/collections/media/${doc.id}`, serverURL }),
+      )
+      await waitForFormReady(page)
+      await page.locator('.file-toolbar__filename-btn').click()
+      await page.getByRole('menuitem', { name: 'Replace file', exact: true }).click()
+      await page.mouse.move(0, 0)
+      const cancel = page.locator('.file-manager__remove')
+      await expect(cancel).toHaveAccessibleName('Cancel')
+      await cancel.press('Enter')
+      await expect(page.locator('.file-toolbar')).toBeVisible()
+      await expect(page.locator('.file-manager__remove')).toHaveCount(0)
+    })
+
     test('should name the API-key copy control before its tooltip appears', async () => {
       // PYLD-3615
       const me = await page.request.get(
@@ -3822,8 +3866,61 @@ test.describe('WCAG 2.2 Level AA', () => {
       const handles = dialog.locator('.ReactCrop__drag-handle')
 
       await expect(handles).toHaveCount(8)
-      for (const handle of await handles.all()) {
-        await expect.soft(handle).toHaveAccessibleName(/crop/i)
+      const directions = [
+        {
+          direction: 'nw',
+          keys: ['ArrowRight', 'ArrowDown'],
+          label: 'Top-left',
+        },
+        {
+          direction: 'n',
+          keys: ['ArrowDown'],
+          label: 'Top',
+        },
+        {
+          direction: 'ne',
+          keys: ['ArrowLeft', 'ArrowDown'],
+          label: 'Top-right',
+        },
+        {
+          direction: 'e',
+          keys: ['ArrowLeft'],
+          label: 'Right',
+        },
+        {
+          direction: 'se',
+          keys: ['ArrowLeft', 'ArrowUp'],
+          label: 'Bottom-right',
+        },
+        {
+          direction: 's',
+          keys: ['ArrowUp'],
+          label: 'Bottom',
+        },
+        {
+          direction: 'sw',
+          keys: ['ArrowRight', 'ArrowUp'],
+          label: 'Bottom-left',
+        },
+        {
+          direction: 'w',
+          keys: ['ArrowRight'],
+          label: 'Left',
+        },
+      ]
+      const selection = dialog.locator('.ReactCrop__crop-selection')
+      for (const { direction, keys, label } of directions) {
+        const handle = dialog.locator(`.ReactCrop__drag-handle.ord-${direction}`)
+        await expect.soft(handle).toHaveAccessibleName(`${label} crop handle`)
+        for (const key of keys) {
+          await dialog.getByRole('button', { name: 'Reset: Crop', exact: true }).click()
+          const before = await selection.boundingBox()
+          const dimension = key === 'ArrowLeft' || key === 'ArrowRight' ? 'width' : 'height'
+          await handle.press(key)
+          await expect
+            .poll(async () => (await selection.boundingBox())![dimension])
+            .toBeLessThan(before![dimension])
+        }
       }
       await expect
         .soft(dialog.locator('.edit-upload__focalPoint'))
