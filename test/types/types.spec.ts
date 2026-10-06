@@ -1,9 +1,11 @@
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import type { useAuth } from '@payloadcms/ui'
+import type { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToFormState'
 import type {
   Access,
   ArrayField,
   AuthenticatedUser,
+  BeforeValidateOperation,
   Block,
   BlockRowLabelClientProps,
   BlockRowLabelServerProps,
@@ -24,6 +26,7 @@ import type {
   FieldClientProps,
   FieldErrorServerProps,
   FieldHookArgs,
+  FieldOperation,
   FieldPermissions,
   FieldServerProps,
   GeneratedTypes,
@@ -40,6 +43,7 @@ import type {
   MeOperationResult,
   NamedGroupField,
   NamedTab,
+  Operation,
   PaginatedDocs,
   PayloadClientComponentProps,
   PayloadRequest,
@@ -49,6 +53,7 @@ import type {
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   SelectType,
+  ServerComponentProps,
   TabsField,
   TextField,
   TextFieldClientProps,
@@ -129,6 +134,20 @@ import type {
 
 describe('Types testing', () => {
   describe('validate operation types', () => {
+    test('should expose beforeValidate operations', () => {
+      expect<BeforeValidateOperation>().type.toBe<'create' | 'update' | 'validate'>()
+      expect<FieldOperation>().type.toBe<'create' | 'read' | 'update' | 'validate'>()
+      expect<Operation>().type.toBe<'create' | 'delete' | 'read' | 'update' | 'validate'>()
+      expect<PayloadRequest['operation']>().type.toBe<Operation | undefined>()
+    })
+
+    test('should limit form state operations to field operations', () => {
+      expect<Parameters<typeof fieldSchemasToFormState>[0]['operation']>().type.toBe<
+        FieldOperation | undefined
+      >()
+      expect<ServerComponentProps['operation']>().type.toBe<FieldOperation>()
+    })
+
     test('should expose validate only to validation lifecycle types', () => {
       expect<{
         locale?: string
@@ -176,13 +195,13 @@ describe('Types testing', () => {
       expect<FieldPermissions>().type.toHaveProperty('validate')
     })
 
-    test('should require collection create data and a locale', () => {
+    test('should require collection create data and allow the locale to be omitted', () => {
       expect(payload.validate).type.toBeCallableWith({
         collection: 'pages',
         data: {},
         locale: null,
       })
-      expect(payload.validate).type.not.toBeCallableWith({
+      expect(payload.validate).type.toBeCallableWith({
         collection: 'pages',
         data: {},
       })
@@ -202,7 +221,14 @@ describe('Types testing', () => {
       expect(payload.validate).type.toBeCallableWith({
         id: 'document-id',
         collection: 'pages',
+      })
+      expect(payload.validate).type.toBeCallableWith({
+        id: 'document-id',
+        collection: 'pages',
         locale: null,
+      })
+      expect(payload.validateGlobal).type.toBeCallableWith({
+        slug: 'menu',
       })
       expect(payload.validateGlobal).type.toBeCallableWith({
         slug: 'menu',

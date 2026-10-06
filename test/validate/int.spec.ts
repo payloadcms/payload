@@ -3,7 +3,7 @@ import type { Payload, PayloadRequest } from 'payload'
 import { randomUUID } from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
-import { createPayloadRequest } from 'payload'
+import { createPayloadRequest, ValidationError } from 'payload'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
@@ -36,6 +36,9 @@ import {
   validationFallbackCollectionSlug,
   validationFallbackGlobalSlug,
   validationGlobalSlug,
+  validationNonLocalizedCollectionSlug,
+  validationTempFilesDir,
+  validationUniqueCollectionSlug,
   validationUploadsDir,
   validationUploadsSlug,
   validationWhereCollectionSlug,
@@ -70,8 +73,13 @@ function buildNestedFieldValidateBlockRichText(value: string) {
 }
 
 test.suite('validate Local API', { config: './config.ts' }, () => {
-  test.beforeEach(() => {
+  test.beforeEach(async () => {
     clearValidationEvents()
+    await fs.rm(validationTempFilesDir, { force: true, recursive: true })
+  })
+
+  test.afterEach(async () => {
+    await fs.rm(validationTempFilesDir, { force: true, recursive: true })
   })
 
   test.afterEach(async () => {
@@ -79,6 +87,264 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
   })
 
   test.describe('collections', () => {
+    test('should not add locale metadata to normal create validation errors', async ({
+      payload,
+    }) => {
+      let validationError: unknown
+
+      try {
+        await payload.create({
+          collection: publishCollectionSlug,
+          data: {
+            ...getPublishCollectionLocaleData({ title: '' }),
+            localizedArray: 'invalid',
+          } as never,
+          locale: 'en',
+          overrideAccess: true,
+        })
+      } catch (error) {
+        validationError = error
+      }
+
+      expect(validationError).toBeInstanceOf(ValidationError)
+      expect((validationError as ValidationError).data.errors).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ path: 'localizedArray' }),
+          expect.objectContaining({ path: 'title' }),
+        ]),
+      )
+      expect(
+        (validationError as ValidationError).data.errors.every(
+          (fieldError) => fieldError.locale === undefined,
+        ),
+      ).toBe(true)
+      expect((validationError as ValidationError).message).not.toContain('[en]')
+    })
+
+    test('should not add locale metadata to normal update validation errors', async ({
+      payload,
+    }) => {
+      const stored = await payload.create({
+        collection: publishCollectionSlug,
+        data: getPublishCollectionLocaleData({ title: 'Stored title' }),
+        locale: 'en',
+        overrideAccess: true,
+      })
+      let validationError: unknown
+
+      try {
+        await payload.update({
+          id: stored.id,
+          collection: publishCollectionSlug,
+          data: {
+            localizedArray: 'invalid',
+            title: '',
+          } as never,
+          locale: 'en',
+          overrideAccess: true,
+        })
+      } catch (error) {
+        validationError = error
+      }
+
+      expect(validationError).toBeInstanceOf(ValidationError)
+      expect((validationError as ValidationError).data.errors).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ path: 'localizedArray' }),
+          expect.objectContaining({ path: 'title' }),
+        ]),
+      )
+      expect(
+        (validationError as ValidationError).data.errors.every(
+          (fieldError) => fieldError.locale === undefined,
+        ),
+      ).toBe(true)
+      expect((validationError as ValidationError).message).not.toContain('[en]')
+    })
+
+    test('should report a configured unique field conflict', async ({ payload }) => {
+      await payload.create({
+        collection: validationUniqueCollectionSlug,
+        data: {
+          uniqueValue: 'already-used',
+        },
+        overrideAccess: true,
+      })
+
+      const result = await payload.validate({
+        collection: validationUniqueCollectionSlug,
+        data: {
+          uniqueValue: ' already-used ',
+        },
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      expect(result).toMatchObject({
+        errors: [
+          {
+            path: 'uniqueValue',
+          },
+        ],
+        valid: false,
+      })
+    })
+
+    test('should report a unique field conflict with a trashed document', async ({ payload }) => {
+      const storedDocument = await payload.create({
+        collection: validationUniqueCollectionSlug,
+        data: {
+          uniqueValue: 'trashed-unique-value',
+        },
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        id: storedDocument.id,
+        collection: validationUniqueCollectionSlug,
+        data: {
+          deletedAt: new Date().toISOString(),
+        } as never,
+        overrideAccess: true,
+      })
+
+      const result = await payload.validate({
+        collection: validationUniqueCollectionSlug,
+        data: {
+          uniqueValue: 'trashed-unique-value',
+        },
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      expect(result).toMatchObject({
+        errors: [
+          {
+            path: 'uniqueValue',
+          },
+        ],
+        valid: false,
+      })
+    })
+
+    test('should report a configured compound unique index conflict for a partial update', async ({
+      payload,
+    }) => {
+      await payload.create({
+        collection: validationUniqueCollectionSlug,
+        data: {
+          compoundScope: 'scope-a',
+          compoundValue: 'shared-value',
+          uniqueValue: 'first-unique-value',
+        },
+        overrideAccess: true,
+      })
+      const storedDocument = await payload.create({
+        collection: validationUniqueCollectionSlug,
+        data: {
+          compoundScope: 'scope-b',
+          compoundValue: 'shared-value',
+          uniqueValue: 'second-unique-value',
+        },
+        overrideAccess: true,
+      })
+
+      const result = await payload.validate({
+        id: storedDocument.id,
+        collection: validationUniqueCollectionSlug,
+        data: {
+          compoundScope: 'scope-a',
+        },
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      expect(result).toMatchObject({
+        errors: [
+          {
+            path: 'compoundScope',
+          },
+          {
+            path: 'compoundValue',
+          },
+        ],
+        valid: false,
+      })
+    })
+
+    test('should report a compound unique index conflict with a trashed document', async ({
+      payload,
+    }) => {
+      const storedDocument = await payload.create({
+        collection: validationUniqueCollectionSlug,
+        data: {
+          compoundScope: 'trashed-scope',
+          compoundValue: 'trashed-compound-value',
+          uniqueValue: 'trashed-compound-owner',
+        },
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        id: storedDocument.id,
+        collection: validationUniqueCollectionSlug,
+        data: {
+          deletedAt: new Date().toISOString(),
+        } as never,
+        overrideAccess: true,
+      })
+
+      const result = await payload.validate({
+        collection: validationUniqueCollectionSlug,
+        data: {
+          compoundScope: 'trashed-scope',
+          compoundValue: 'trashed-compound-value',
+          uniqueValue: 'new-unique-value',
+        },
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      expect(result).toMatchObject({
+        errors: [
+          {
+            path: 'compoundScope',
+          },
+          {
+            path: 'compoundValue',
+          },
+        ],
+        valid: false,
+      })
+    })
+
+    test('should exclude the stored document from configured uniqueness checks', async ({
+      payload,
+    }) => {
+      const storedDocument = await payload.create({
+        collection: validationUniqueCollectionSlug,
+        data: {
+          compoundScope: 'stored-scope',
+          compoundValue: 'stored-compound-value',
+          uniqueValue: 'stored-unique-value',
+        },
+        overrideAccess: true,
+      })
+
+      const result = await payload.validate({
+        id: storedDocument.id,
+        collection: validationUniqueCollectionSlug,
+        data: {},
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      expect(result).toEqual({
+        errors: [],
+        valid: true,
+      })
+    })
+
     test('should use collection update access as the validate fallback', async ({ payload }) => {
       await expect(
         payload.validate({
@@ -529,57 +795,6 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
       ).resolves.toBeDefined()
     })
 
-    test('should ignore internal projection flags passed to the public collection validate API', async ({
-      payload,
-    }) => {
-      const stored = await payload.create({
-        collection: validationCollectionSlug,
-        data: {
-          summary: 'stored summary',
-          title: 'Stored title',
-        },
-        locale: 'en',
-        overrideAccess: true,
-      })
-
-      const result = await payload.validate({
-        id: stored.id,
-        collection: validationCollectionSlug,
-        data: {
-          summary: 'candidate summary',
-          title: 'Candidate title',
-        },
-        locale: ['en', 'es'],
-        validationDataLocale: 'en',
-      } as never)
-
-      expect(result).toEqual({
-        errors: [],
-        valid: true,
-      })
-    })
-
-    test('should ignore internal trash-source flags passed to the public collection validate API', async ({
-      payload,
-    }) => {
-      const stored = await seedPublishCollection({
-        de: 'German optional',
-        deletedAt: new Date().toISOString(),
-        en: 'English draft',
-        es: 'Spanish valid',
-        payload,
-      })
-
-      await expect(
-        payload.validate({
-          id: stored.id,
-          collection: publishCollectionSlug,
-          locale: 'en',
-          validationTrash: true,
-        } as never),
-      ).rejects.toThrow(/not found/i)
-    })
-
     test('should resolve all to every available locale through locale filtering', async ({
       payload,
     }) => {
@@ -620,6 +835,34 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
 
       expect(result.valid).toBe(false)
       expect(result.errors.filter((error) => error.path === 'summary')).toHaveLength(1)
+    })
+
+    test('should preserve the locale when a non-localized field fails for one locale', async ({
+      payload,
+    }) => {
+      const result = await payload.validate({
+        collection: validationCollectionSlug,
+        context: {
+          failNonLocalizedFieldForLocale: 'de',
+        },
+        data: {
+          localeSensitiveValue: 'candidate value',
+          summary: 'candidate summary',
+          title: 'Candidate title',
+        } as never,
+        locale: ['en', 'de'],
+      })
+
+      expect(result).toMatchObject({
+        errors: [
+          {
+            locale: 'de',
+            message: 'The shared value is invalid for this locale',
+            path: 'localeSensitiveValue',
+          },
+        ],
+        valid: false,
+      })
     })
 
     test('should preserve locale information for a stored localized field inside an omitted array', async ({
@@ -771,6 +1014,26 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
 
       expect(result.valid).toBe(true)
       expect(localePassEvents.map(({ localeAtStart }) => localeAtStart)).toEqual(['es', 'en'])
+    })
+
+    test('should use the default locale when locale is omitted', async ({ payload }) => {
+      const result = await payload.validate({
+        collection: validationCollectionSlug,
+        data: {
+          summary: 'candidate summary',
+          title: '',
+        },
+      })
+
+      expect(result).toMatchObject({
+        errors: [
+          {
+            locale: 'en',
+            path: 'title',
+          },
+        ],
+        valid: false,
+      })
     })
 
     test('should reject empty, unknown, and unavailable locale selectors', async ({ payload }) => {
@@ -1122,6 +1385,34 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
       expect(hookEvents.find(({ hook }) => hook === 'fieldValidate')).toBeDefined()
     })
 
+    test('should apply required createdBy authorship during create validation', async ({
+      payload,
+    }) => {
+      const userDocument = await payload.create({
+        collection: 'users',
+        data: {
+          email: 'validation-authorship@example.com',
+          password: devUser.password,
+        },
+        overrideAccess: true,
+      })
+      const user = { ...userDocument, collection: 'users' as const }
+
+      const result = await payload.validate({
+        collection: validationNonLocalizedCollectionSlug,
+        data: {
+          title: 'Candidate title',
+        },
+        overrideAccess: false,
+        user,
+      })
+
+      expect(result).toEqual({
+        errors: [],
+        valid: true,
+      })
+    })
+
     test('should reject missing required runtime arguments', async ({ payload }) => {
       const invalidArguments = [
         {
@@ -1130,16 +1421,6 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
             locale: 'en',
           },
           errorMessage: 'Validation create simulation requires data',
-        },
-        {
-          args: {
-            collection: validationCollectionSlug,
-            data: {
-              summary: 'candidate summary',
-              title: 'Candidate title',
-            },
-          },
-          errorMessage: 'Validation requires a locale',
         },
       ]
 
@@ -1787,25 +2068,6 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
       expect(globalValidationSourceEvents).toEqual([])
     })
 
-    test('should ignore internal projection flags passed to the public global validate API', async ({
-      payload,
-    }) => {
-      const result = await payload.validateGlobal({
-        slug: validationGlobalSlug,
-        data: {
-          summary: 'candidate summary',
-          title: 'Candidate title',
-        },
-        locale: ['en', 'es'],
-        validationDataLocale: 'en',
-      } as never)
-
-      expect(result).toEqual({
-        errors: [],
-        valid: true,
-      })
-    })
-
     test('should validate valid partial global data without persisting it', async ({ payload }) => {
       const req = {
         operation: 'read',
@@ -1835,6 +2097,27 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
       })
       expect(localeFilterOperationEvents).toEqual(['validate'])
       expect(req.operation).toBe('read')
+    })
+
+    test('should use the default locale for global validation when locale is omitted', async ({
+      payload,
+    }) => {
+      const result = await payload.validateGlobal({
+        slug: validationGlobalSlug,
+        data: {
+          title: '',
+        },
+      })
+
+      expect(result).toMatchObject({
+        errors: [
+          {
+            locale: 'en',
+            path: 'title',
+          },
+        ],
+        valid: false,
+      })
     })
 
     test('should return errors for invalid partial global data without persisting it', async ({
@@ -2011,6 +2294,170 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
   })
 
   test.describe('REST API', () => {
+    test('should not backfill API key metadata during REST validation', async ({
+      payload,
+      restClient,
+    }) => {
+      const apiKey = randomUUID()
+      const apiKeyUser = await payload.create({
+        collection: validationAuthCollectionSlug,
+        data: {
+          apiKey,
+          password: devUser.password,
+          username: 'rest-validation-api-key-user',
+        } as never,
+        overrideAccess: true,
+      })
+
+      await payload.db.updateOne({
+        id: apiKeyUser.id,
+        collection: validationAuthCollectionSlug,
+        data: { apiKeyLast4: null },
+        req: {} as never,
+      })
+
+      const response = await restClient.POST(`/${validationCollectionSlug}/validate?locale=en`, {
+        body: JSON.stringify({
+          summary: 'candidate summary',
+          title: 'Candidate title',
+        }),
+        headers: {
+          Authorization: `${validationAuthCollectionSlug} API-Key ${apiKey}`,
+        },
+      })
+      const storedUser = await payload.db.findOne({
+        collection: validationAuthCollectionSlug,
+        req: {} as never,
+        where: { id: { equals: apiKeyUser.id } },
+      })
+
+      expect(response.status).toBe(200)
+      expect(storedUser?.apiKeyLast4).toBeNull()
+    })
+
+    test('should not backfill API key metadata during REST validation with a trailing slash', async ({
+      payload,
+      restClient,
+    }) => {
+      const apiKey = randomUUID()
+      const apiKeyUser = await payload.create({
+        collection: validationAuthCollectionSlug,
+        data: {
+          apiKey,
+          password: devUser.password,
+          username: 'rest-trailing-slash-validation-api-key-user',
+        } as never,
+        overrideAccess: true,
+      })
+
+      await payload.db.updateOne({
+        id: apiKeyUser.id,
+        collection: validationAuthCollectionSlug,
+        data: { apiKeyLast4: null },
+        req: {} as never,
+      })
+
+      const response = await restClient.POST(`/${validationCollectionSlug}/validate/?locale=en`, {
+        body: JSON.stringify({
+          summary: 'candidate summary',
+          title: 'Candidate title',
+        }),
+        headers: {
+          Authorization: `${validationAuthCollectionSlug} API-Key ${apiKey}`,
+        },
+      })
+      const storedUser = await payload.db.findOne({
+        collection: validationAuthCollectionSlug,
+        req: {} as never,
+        where: { id: { equals: apiKeyUser.id } },
+      })
+
+      expect(response.status).toBe(200)
+      expect(storedUser?.apiKeyLast4).toBeNull()
+    })
+
+    test('should remove multipart temp files when REST validation access is denied', async ({
+      payload,
+      restClient,
+    }) => {
+      const storedDocument = await payload.create({
+        collection: validationDeniedCollectionSlug,
+        data: { title: 'Stored title' },
+        overrideAccess: true,
+      })
+      const endpoints: `/${string}`[] = [
+        `/globals/${validationDeniedGlobalSlug}/validate?locale=en`,
+        `/${validationDeniedCollectionSlug}/validate?locale=en`,
+        `/${validationDeniedCollectionSlug}/${storedDocument.id}/validate?locale=en`,
+      ]
+
+      for (const endpoint of endpoints) {
+        const formData = new FormData()
+        formData.append('_payload', JSON.stringify({ title: 'Candidate title' }))
+        formData.append('file', new Blob(['must be removed']), 'temporary.txt')
+        formData.append('secondary', new Blob(['must also be removed']), 'secondary.txt')
+
+        const response = await restClient.POST(endpoint, { body: formData })
+
+        expect(response.status).toBe(403)
+        await expect(fs.readdir(validationTempFilesDir)).resolves.toEqual([])
+      }
+    })
+
+    test('should remove multipart temp files when the validation locale is invalid', async ({
+      payload,
+      restClient,
+    }) => {
+      const storedDocument = await payload.create({
+        collection: validationDeniedCollectionSlug,
+        data: { title: 'Stored title' },
+        overrideAccess: true,
+      })
+      const endpoints: `/${string}`[] = [
+        `/globals/${validationDeniedGlobalSlug}/validate?locale=`,
+        `/${validationDeniedCollectionSlug}/validate?locale=`,
+        `/${validationDeniedCollectionSlug}/${storedDocument.id}/validate?locale=`,
+      ]
+
+      for (const endpoint of endpoints) {
+        const formData = new FormData()
+        formData.append('_payload', JSON.stringify({ title: 'Candidate title' }))
+        formData.append('file', new Blob(['must be removed']), 'temporary.txt')
+
+        const response = await restClient.POST(endpoint, { body: formData })
+
+        expect(response.status).toBe(400)
+        await expect(fs.readdir(validationTempFilesDir)).resolves.toEqual([])
+      }
+    })
+
+    test('should remove multipart temp files when validation data is malformed', async ({
+      payload,
+      restClient,
+    }) => {
+      const storedDocument = await payload.create({
+        collection: validationDeniedCollectionSlug,
+        data: { title: 'Stored title' },
+        overrideAccess: true,
+      })
+      const endpoints: `/${string}`[] = [
+        `/globals/${validationDeniedGlobalSlug}/validate?locale=en`,
+        `/${validationDeniedCollectionSlug}/validate?locale=en`,
+        `/${validationDeniedCollectionSlug}/${storedDocument.id}/validate?locale=en`,
+      ]
+
+      for (const endpoint of endpoints) {
+        const formData = new FormData()
+        formData.append('_payload', JSON.stringify([]))
+        formData.append('file', new Blob(['must be removed']), 'temporary.txt')
+
+        const response = await restClient.POST(endpoint, { body: formData })
+
+        expect(response.status).toBe(400)
+        await expect(fs.readdir(validationTempFilesDir)).resolves.toEqual([])
+      }
+    })
+
     test('should deny REST validation when explicit validate access denies it', async ({
       restClient,
     }) => {
@@ -2055,7 +2502,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
       payload,
       restClient,
     }) => {
-      const response = await restClient.POST(`/${validationCollectionSlug}/validate?locale=en`, {
+      const response = await restClient.POST(`/${validationCollectionSlug}/validate`, {
         body: JSON.stringify({
           summary: 'candidate summary',
           title: '',
@@ -2086,11 +2533,6 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
         endpoint: `/${string}`
         expectedMessage: string
       }> = [
-        {
-          body: { summary: 'candidate summary', title: 'Candidate title' },
-          endpoint: `/${validationCollectionSlug}/validate`,
-          expectedMessage: 'Validation requires a locale.',
-        },
         {
           body: { summary: 'candidate summary', title: 'Candidate title' },
           endpoint: `/${validationCollectionSlug}/validate?locale=`,
@@ -2189,14 +2631,11 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
     })
 
     test('should validate global data without persisting it', async ({ payload, restClient }) => {
-      const response = await restClient.POST(
-        `/globals/${validationGlobalSlug}/validate?locale=en`,
-        {
-          body: JSON.stringify({
-            title: '',
-          }),
-        },
-      )
+      const response = await restClient.POST(`/globals/${validationGlobalSlug}/validate`, {
+        body: JSON.stringify({
+          title: '',
+        }),
+      })
       const afterValidation = await payload.findGlobal({
         slug: validationGlobalSlug,
         locale: 'en',
@@ -2304,6 +2743,53 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
           password: devUser.password,
         },
       })
+    })
+
+    test('should not backfill API key metadata during GraphQL validation', async ({
+      payload,
+      restClient,
+    }) => {
+      const apiKey = randomUUID()
+      const apiKeyUser = await payload.create({
+        collection: validationAuthCollectionSlug,
+        data: {
+          apiKey,
+          password: devUser.password,
+          username: 'graphql-validation-api-key-user',
+        } as never,
+        overrideAccess: true,
+      })
+
+      await payload.db.updateOne({
+        id: apiKeyUser.id,
+        collection: validationAuthCollectionSlug,
+        data: { apiKeyLast4: null },
+        req: {} as never,
+      })
+
+      const query = `mutation {
+        validateValidationItem(data: {
+          summary: "Candidate summary"
+          title: "Candidate title"
+        }) {
+          valid
+        }
+      }`
+      const response = await restClient.GRAPHQL_POST({
+        auth: false,
+        body: JSON.stringify({ query }),
+        headers: {
+          Authorization: `${validationAuthCollectionSlug} API-Key ${apiKey}`,
+        },
+      })
+      const storedUser = await payload.db.findOne({
+        collection: validationAuthCollectionSlug,
+        req: {} as never,
+        where: { id: { equals: apiKeyUser.id } },
+      })
+
+      expect(response.status).toBe(200)
+      expect(storedUser?.apiKeyLast4).toBeNull()
     })
 
     test('should enforce explicit global validate access before running validation hooks', async ({

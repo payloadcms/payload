@@ -6,6 +6,7 @@ import {
   validationAccessSourceGlobalSlug,
   validationDraftSourceGlobalSlug,
   validationGlobalSlug,
+  validationTempFilesDir,
 } from './shared.js'
 
 export default buildConfigWithDefaults({
@@ -52,6 +53,10 @@ export default buildConfigWithDefaults({
           label: 'French',
         },
       ],
+    },
+    upload: {
+      tempFileDir: validationTempFilesDir,
+      useTempFiles: true,
     },
   },
   seed: async (payload) => {

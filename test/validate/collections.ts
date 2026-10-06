@@ -1,7 +1,7 @@
 import type { Block, CollectionConfig } from 'payload'
 
 import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
-import { defaultUserCollection, ValidationError } from 'payload'
+import { createCreatedByField, defaultUserCollection, ValidationError } from 'payload'
 
 import {
   accessEvents,
@@ -21,6 +21,8 @@ import {
   validationDeniedCollectionSlug,
   validationEmptyCollectionSlug,
   validationFallbackCollectionSlug,
+  validationNonLocalizedCollectionSlug,
+  validationUniqueCollectionSlug,
   validationUploadsDir,
   validationUploadsSlug,
   validationWhereCollectionSlug,
@@ -155,6 +157,14 @@ const validationCollection: CollectionConfig = {
       name: 'summary',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'localeSensitiveValue',
+      type: 'text',
+      validate: (value, { req }) =>
+        value && req.context.failNonLocalizedFieldForLocale === req.locale
+          ? 'The shared value is invalid for this locale'
+          : true,
     },
     {
       name: 'status',
@@ -595,6 +605,21 @@ const validationDeniedCollection: CollectionConfig = {
   },
 }
 
+const validationNonLocalizedCollection: CollectionConfig = {
+  slug: validationNonLocalizedCollectionSlug,
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+    },
+    createCreatedByField({
+      overrides: {
+        required: true,
+      },
+    }),
+  ],
+}
+
 const validationAuthCollection: CollectionConfig = {
   slug: validationAuthCollectionSlug,
   auth: {
@@ -603,6 +628,7 @@ const validationAuthCollection: CollectionConfig = {
       requireEmail: false,
       requireUsername: false,
     },
+    useAPIKey: true,
   },
   fields: [],
 }
@@ -643,16 +669,48 @@ const validationEmptyCollection: CollectionConfig = {
   versions: false,
 }
 
+const validationUniqueCollection: CollectionConfig = {
+  slug: validationUniqueCollectionSlug,
+  fields: [
+    {
+      name: 'uniqueValue',
+      type: 'text',
+      hooks: {
+        beforeChange: [({ value }) => (typeof value === 'string' ? value.trim() : value)],
+      },
+      unique: true,
+    },
+    {
+      name: 'compoundScope',
+      type: 'text',
+    },
+    {
+      name: 'compoundValue',
+      type: 'text',
+    },
+  ],
+  indexes: [
+    {
+      fields: ['compoundScope', 'compoundValue'],
+      unique: true,
+    },
+  ],
+  trash: true,
+  versions: false,
+}
+
 export const validationCollections: CollectionConfig[] = [
   validationCollection,
   validationFallbackCollection,
   validationWhereCollection,
   publishCollection,
   validationDeniedCollection,
+  validationNonLocalizedCollection,
   defaultUserCollection,
   validationAuthCollection,
   validationCustomIDCollection,
   validationEmptyCollection,
+  validationUniqueCollection,
   {
     slug: writeTargetsSlug,
     fields: [
