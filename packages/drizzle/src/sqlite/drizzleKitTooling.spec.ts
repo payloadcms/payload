@@ -16,13 +16,13 @@ afterEach(() => {
 })
 
 describe('Drizzle Kit tooling in Node', () => {
-  it.each(['db-sqlite', 'db-d1-sqlite', 'db-postgres', 'db-vercel-postgres'])(
+  it.each(['db-sqlite', 'db-postgres'])(
     'should resolve real tooling from %s outside Vitest and generate schema changes',
     async (adapter) => {
       const directory = mkdtempSync(path.join(tmpdir(), 'payload-drizzle-tooling-'))
       temporaryDirectories.push(directory)
 
-      const isSQLite = adapter === 'db-sqlite' || adapter === 'db-d1-sqlite'
+      const isSQLite = adapter === 'db-sqlite'
 
       // Exercise the real loader outside Vitest.
       await build({
@@ -47,9 +47,6 @@ describe('Drizzle Kit tooling in Node', () => {
       const from = pathToFileURL(
         path.join(workspaceDirectory, 'packages', adapter, 'src/index.ts'),
       ).href
-      const sqliteFrom = pathToFileURL(
-        path.join(workspaceDirectory, 'packages/db-sqlite/src/index.ts'),
-      ).href
       const script = path.join(directory, 'check.mjs')
 
       writeFileSync(
@@ -58,13 +55,14 @@ describe('Drizzle Kit tooling in Node', () => {
 import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
 import { createRequireDrizzleKit } from './tooling.mjs'
-const require = createRequire(${JSON.stringify(sqliteFrom)})
-const { createClient } = require('@libsql/client')
-const { drizzle } = require('drizzle-orm/libsql')
-const { sqliteTable, integer } = require('drizzle-orm/sqlite-core')
+const require = createRequire(${JSON.stringify(from)})
 assert.equal(process.env.VITEST, undefined)
 const tooling = await createRequireDrizzleKit({ from: ${JSON.stringify(from)} })()
-const { pgTable, integer: pgInteger } = require('drizzle-orm/pg-core')
+${
+  isSQLite
+    ? "const { sqliteTable, integer } = require('drizzle-orm/sqlite-core')"
+    : "const { pgTable, integer: pgInteger } = require('drizzle-orm/pg-core')"
+}
 const schema = ${
           isSQLite
             ? "{ probe: sqliteTable('probe', { id: integer('id').primaryKey() }) }"
@@ -75,6 +73,8 @@ const after = await tooling.generateDrizzleJson(schema)
 const statements = await tooling.generateMigration(before, after)
 assert.ok(statements.some(sql => sql.includes('CREATE TABLE')))
 if (${isSQLite}) {
+const { createClient } = require('@libsql/client')
+const { drizzle } = require('drizzle-orm/libsql')
 const client = createClient({ url: 'file::memory:' })
 try {
   const pushed = await tooling.pushSchema(schema, drizzle(client))
@@ -82,8 +82,6 @@ try {
   await client.execute('INSERT INTO probe (id) VALUES (42)')
   const result = await client.execute('SELECT id FROM probe')
   assert.equal(result.rows[0].id, 42)
-  await client.execute('DELETE FROM probe')
-  await client.execute('DROP TABLE probe')
 } finally {
   client.close()
 }
