@@ -5,6 +5,7 @@ import { BlobServiceClient, BlockBlobClient } from '@azure/storage-blob'
 import { readFileSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import path from 'path'
+import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 import { expect, vi } from 'vitest'
 
@@ -134,7 +135,7 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
         filename: 'legacy-original.png',
         mimeType: 'image/png',
         prefix,
-        sizes: { thumbnail: { filename: sizeFilename, mimeType: 'image/png' } },
+        variants: { thumbnail: { filename: sizeFilename, mimeType: 'image/png' } },
       },
     })
     const collection = payload.collections[mediaHeaderOnlyWithSizesSlug].config
@@ -154,6 +155,55 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
     } finally {
       collection.access.read = originalRead
       findSpy.mockRestore()
+    }
+  })
+
+  test('should serve and transform only the access-checked document when another prefix has the same filename', async ({
+    payload,
+    restClient,
+  }) => {
+    const sharedFilename = 'shared.png'
+    const seeded = await Promise.all(
+      [
+        { fixture: 'image.png', prefix: 'tenant-a', resizedHeight: 32 },
+        { fixture: 'small.png', prefix: 'tenant-b', resizedHeight: 8 },
+      ].map(async ({ fixture, prefix, resizedHeight }) => {
+        const file = await readFile(path.resolve(dirname, `../../uploads/${fixture}`))
+
+        await containerClient.getBlockBlobClient(`${prefix}/${sharedFilename}`).uploadData(file, {
+          blobHTTPHeaders: { blobContentType: 'image/png' },
+        })
+
+        const doc = await payload.db.create({
+          collection: mediaWithDocPrefixSlug,
+          data: { filename: sharedFilename, filesize: file.length, mimeType: 'image/png', prefix },
+        })
+
+        return { doc, file, resizedHeight }
+      }),
+    )
+    const collection = payload.collections[mediaWithDocPrefixSlug].config
+    const originalRead = collection.access.read
+
+    try {
+      // The unfiltered filename lookup can only match one of the two documents, so allowing
+      // each in turn makes one iteration hit a lookup that matched the unreadable document.
+      for (const { doc, file, resizedHeight } of seeded) {
+        collection.access.read = () => ({ id: { equals: doc.id } })
+
+        const original = await restClient.GET(`/${mediaWithDocPrefixSlug}/file/${sharedFilename}`)
+
+        expect(Buffer.from(await original.arrayBuffer())).toEqual(file)
+
+        const resized = await restClient.GET(
+          `/${mediaWithDocPrefixSlug}/file/${sharedFilename}?width=32`,
+        )
+        const metadata = await sharp(Buffer.from(await resized.arrayBuffer())).metadata()
+
+        expect(metadata.height).toBe(resizedHeight)
+      }
+    } finally {
+      collection.access.read = originalRead
     }
   })
 
@@ -332,7 +382,8 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
    *
    * The same collection also covers the `'none'` content requirement: content requirement
    * depends on the uploaded MIME type as well as collection configuration, so `audio/mpeg`
-   * selects `'none'` while `image/jpeg` selects `'header'`.
+   * selects `'none'` (its only transformer declines it) while `image/jpeg` selects `'header'`
+   * and `text/plain`, which a transformer handles, needs the whole file.
    */
   test.describe('header-only and no-content requirements (real Azure handler)', () => {
     const createdIds: (number | string)[] = []
@@ -378,6 +429,37 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
       }
     })
 
+    test('fetches the whole client-uploaded file for a transformer that handles its type', async ({
+      restClient,
+    }) => {
+      const form = await stageAzureClientUpload({
+        collectionSlug: mediaHeaderOnlySlug,
+        file: Buffer.from('client text'),
+        filename: 'note.txt',
+        mimeType: 'text/plain',
+        restClient,
+      })
+
+      const downloadSpy = vi.spyOn(BlockBlobClient.prototype, 'download')
+
+      try {
+        const createRes = await restClient.POST(`/${mediaHeaderOnlySlug}`, { body: form })
+        expect(createRes.status).toBe(201)
+
+        const { doc } = await createRes.json()
+        createdIds.push(doc.id)
+
+        expect(downloadSpy).toHaveBeenCalledTimes(1)
+        expect(downloadSpy.mock.calls[0]![1]).toBeUndefined()
+      } finally {
+        downloadSpy.mockRestore()
+      }
+
+      const stored = await restClient.GET(`/${mediaHeaderOnlySlug}/file/note.txt`)
+
+      expect(await stored.text()).toBe('CLIENT TEXT')
+    })
+
     test('creates a document from a client-uploaded image via the real Azure handler', async ({
       restClient,
     }) => {
@@ -421,13 +503,13 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
   })
 
   /**
-   * `media-header-only-with-sizes` has `imageSizes` configured but no `resizeOptions`, so a
+   * `media-header-only-with-sizes` has `variants` configured but no `resizeOptions`, so a
    * client upload larger than `HEADER_PROBE_BYTE_LENGTH` (1MB) is a regression test for a bug
-   * where `getFileContentRequirement` ignored `imageSizes` and chose the `'header'` content
+   * where `getFileContentRequirement` ignored `variants` and chose the `'header'` content
    * requirement anyway - handing `createImageSizes` a truncated buffer and crashing instead of
    * fetching the full file through the real Azure handler.
    */
-  test.describe('imageSizes with a large upload (real Azure handler)', () => {
+  test.describe('variants with a large upload (real Azure handler)', () => {
     const createdIds: (number | string)[] = []
 
     test.afterEach(async ({ payload }) => {
@@ -464,9 +546,9 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
 
         expect(doc.filesize).toBe(file.length)
         expect(doc.mimeType).toBe('image/jpeg')
-        expect(doc.sizes.thumbnail.width).toBe(400)
-        expect(doc.sizes.thumbnail.height).toBe(300)
-        expect(doc.sizes.thumbnail.filename).toBeTruthy()
+        expect(doc.variants.thumbnail.width).toBe(400)
+        expect(doc.variants.thumbnail.height).toBe(300)
+        expect(doc.variants.thumbnail.filename).toBeTruthy()
 
         expect(downloadSpy).toHaveBeenCalledTimes(1)
 

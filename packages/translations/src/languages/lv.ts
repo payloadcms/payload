@@ -385,6 +385,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     globals: 'Globālie',
     goBack: 'Doties atpakaļ',
     goToPage: 'Doties uz tabulas lapu',
+    gridLayout: 'Režģis',
     groupByLabel: 'Grupēt pēc {{label}}',
     hideSidebar: 'Paslēpt sānjoslu',
     import: 'Imports',
@@ -434,6 +435,8 @@ export const lvTranslations: DefaultTranslationsObject = {
     notFound: 'Nav atrasts',
     nothingFound: 'Nekas nav atrasts',
     noTrashResults: 'Nav {{label}} miskastē.',
+    notSelectedDocument:
+      'Nav atlasīts. Lai mainītu atlasi, nospiediet Enter vai atstarpes taustiņu.',
     notShownInTable: 'Nav parādīts tabulā',
     noUpcomingEventsScheduled: 'Nav ieplānotu notikumu.',
     noValue: 'Nav vērtības',
@@ -491,6 +494,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     selectAll: 'Atlasīt visus {{count}} {{label}}',
     selectAllRows: 'Atlasīt visas rindas',
     selectedCount: 'Atlasīti {{count}} {{label}}',
+    selectedDocument: 'Atlasīts. Lai mainītu atlasi, nospiediet Enter vai atstarpes taustiņu.',
     selectLabel: 'Atlasīt {{label}}',
     selectValue: 'Atlasīt vērtību',
     settings: 'Iestatījumi',
@@ -511,6 +515,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} veiksmīgi dublēts.',
     successfullyReindexed:
       'Veiksmīgi pārindeksēti {{count}} no {{total}} dokumentiem no {{collections}}, izlaisti {{skips}} melnraksti.',
+    tableLayout: 'Tabula',
     takeOver: 'Pārņemt',
     theme: 'Tēma',
     thisLanguage: 'Latviešu',

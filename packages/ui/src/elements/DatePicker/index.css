@@ -9,10 +9,22 @@
     border: 0;
   }
 
+  /* Visually hidden labels, e.g. full weekday names read instead of "Su", "Mo", ...
+     (copied from react-datepicker's stylesheet) */
+  .react-datepicker__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
   .react-datepicker {
     --time-column-width: 120px;
-
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
@@ -22,6 +34,10 @@
     border: none;
     border-radius: var(--radius-large);
     display: inline-flex;
+    /* Don't stretch the calendar and time columns to the same height. react-datepicker sizes the
+       time list from the calendar's height and re-measures it on resize, so stretching would make
+       both grow forever. The library's own float layout doesn't stretch either. */
+    align-items: flex-start;
     position: relative;
     /* stylelint-disable-next-line plugin/no-subpixel-values -- TODO: pre-existing; revisit this sub-pixel value */
     box-shadow:
@@ -55,7 +71,6 @@
 
   .react-datepicker__header {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
     text-align: center;
     text-transform: none;
@@ -64,7 +79,8 @@
     border-radius: 0;
     padding: 0;
     position: relative;
-    width: min-content;
+    /* Fill the calendar's width, but don't let the dropdowns make the calendar wider */
+    contain: inline-size;
 
     & h2 {
       display: none;
@@ -82,7 +98,7 @@
     padding: var(--spacer-2);
     border-top-left-radius: 0;
     border-top-right-radius: var(--radius-large);
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-bold-font-weight);
     min-height: calc(var(--spacer-4) + var(--spacer-2) * 2);
     width: 100%;
   }
@@ -94,10 +110,9 @@
   .react-datepicker-time__header {
     margin-top: 0;
     color: var(--color-text);
-    font-family: var(--text-body-medium-strong-font-family);
-    font-size: var(--text-body-medium-strong-font-size);
-    font-weight: var(--text-body-medium-strong-font-weight);
-    line-height: var(--text-body-medium-strong-line-height);
+    font-size: var(--text-body-medium-bold-font-size);
+    font-weight: var(--text-body-medium-bold-font-weight);
+    line-height: var(--text-body-medium-bold-line-height);
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
@@ -109,14 +124,13 @@
     min-width: min-content;
     gap: var(--spacer-2);
     align-items: center;
-    order: 1;
     padding: var(--spacer-2);
     margin: 0 var(--spacer-5);
   }
 
   .react-datepicker-year-header {
     padding: var(--spacer-2-5) 0;
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-bold-font-weight);
     color: var(--color-text);
     width: 100%;
     display: flex;
@@ -135,7 +149,6 @@
     cursor: pointer;
     padding: 0 var(--spacer-2);
     color: var(--color-text);
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     -webkit-appearance: none;
@@ -421,7 +434,6 @@
     padding-bottom: 0;
     border-top: var(--stroke-width-small) solid var(--color-border);
     width: 100%;
-    order: 3;
   }
 
   .react-datepicker__week {
@@ -440,7 +452,6 @@
     line-height: var(--text-body-medium-line-height);
     text-align: center;
     margin: 0;
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     position: relative;
@@ -657,7 +668,6 @@
             height: auto;
             padding: var(--spacer-1) var(--spacer-2);
             white-space: nowrap;
-            font-family: var(--text-body-medium-font-family);
             font-size: var(--text-body-medium-font-size);
             font-weight: var(--text-body-medium-font-weight);
             line-height: var(--text-body-medium-line-height);
@@ -731,7 +741,7 @@
     border-top: var(--stroke-width-small) solid var(--color-border);
     cursor: pointer;
     text-align: center;
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-bold-font-weight);
     padding: var(--spacer-1) 0;
     clear: left;
     border-bottom-left-radius: var(--radius-large);
@@ -828,7 +838,6 @@
 
   /* ——— Input field ——— */
   .date-time-picker .react-datepicker__input-container input {
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
@@ -900,6 +909,7 @@
     }
 
     .date-time-picker .react-datepicker__time-container {
+      align-self: stretch;
       width: auto;
       border-top: var(--stroke-width-small) solid var(--color-border);
     }
