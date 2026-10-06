@@ -1,11 +1,12 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { ClientCollectionConfig, ViewTypes } from 'payload'
+import type { ClientCollectionConfig, HierarchyViewData, ViewTypes } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import { CloseModalButton } from '../../../elements/CloseModalButton/index.js'
 import { DefaultListViewTabs } from '../../../elements/DefaultListViewTabs/index.js'
+import { HierarchyEditButton } from '../../../elements/Hierarchy/EditButton/index.js'
 import { useListDrawerContext } from '../../../elements/ListDrawer/Provider.js'
 import { DrawerRelationshipSelect } from '../../../elements/ListHeader/DrawerRelationshipSelect/index.js'
 import {
@@ -32,6 +33,7 @@ export type ListHeaderProps = {
   hasCreatePermission: boolean
   hasDeletePermission?: boolean
   hasTrashPermission?: boolean
+  hierarchyData?: HierarchyViewData
   i18n: I18nClient
   isBulkUploadEnabled: boolean
   newDocumentURL: string
@@ -51,6 +53,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
   hasCreatePermission,
   hasDeletePermission,
   hasTrashPermission,
+  hierarchyData,
   i18n,
   isBulkUploadEnabled,
   onBulkUploadSuccess,
@@ -61,6 +64,8 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
   const { drawerSlug, isInDrawer, selectedOption } = useListDrawerContext()
   const isTrashRoute = viewType === 'trash'
   const { isGroupingBy } = useListQuery()
+  const currentItem = hierarchyData?.breadcrumbs?.at(-1)
+  const title = currentItem?.title ?? getTranslation(collectionConfig?.labels?.plural, i18n)
 
   if (isInDrawer) {
     return (
@@ -119,8 +124,16 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
       ].filter(Boolean)}
       AfterListHeaderContent={Description}
       className={className}
-      title={getTranslation(collectionConfig?.labels?.plural, i18n)}
+      title={title}
       TitleActions={[
+        currentItem && (
+          <HierarchyEditButton
+            collectionSlug={collectionConfig.slug}
+            id={currentItem.id}
+            key="edit-hierarchy-document"
+            title={title}
+          />
+        ),
         hasCreatePermission && isBulkUploadEnabled && !isTrashRoute && (
           <ListBulkUploadButton
             collectionSlug={collectionConfig.slug}

@@ -318,6 +318,7 @@ export function DefaultListView(props: ListViewClientProps) {
               hasCreatePermission={hasCreatePermission}
               hasDeletePermission={hasDeletePermission}
               hasTrashPermission={hasTrashPermission}
+              hierarchyData={hierarchyData}
               i18n={i18n}
               isBulkUploadEnabled={isBulkUploadEnabled && !upload.hideFileInputOnCreate}
               newDocumentURL={newDocumentURL}

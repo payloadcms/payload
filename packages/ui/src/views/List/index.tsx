@@ -463,11 +463,11 @@ export const renderListView = async (
     }
   }
 
-  // Fetch hierarchy data only for hierarchy view
+  // Resolve the selected hierarchy document in either list mode.
   let HierarchyIcon: React.ReactNode | undefined
   const isHierarchyView = viewType === 'hierarchy'
 
-  if (isHierarchyCollection && isHierarchyView) {
+  if (isHierarchyCollection && (isHierarchyView || hierarchyParentId !== null)) {
     // Extract typeFilter from searchParams (comma-separated list of collection slugs)
     const typeFilterParam = searchParams?.typeFilter
     const typeFilter =

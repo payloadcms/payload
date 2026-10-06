@@ -7,6 +7,7 @@ import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import { DefaultListViewTabs } from '../../../elements/DefaultListViewTabs/index.js'
+import { HierarchyEditButton } from '../../../elements/Hierarchy/EditButton/index.js'
 import { ListHeader } from '../../../elements/ListHeader/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { DocumentListSelection } from '../DocumentListSelection/index.js'
@@ -16,6 +17,7 @@ const baseClass = 'hierarchy-list-header'
 
 export type HierarchyListHeaderProps = {
   collectionConfig: ClientCollectionConfig
+  currentItemId?: null | number | string
   /** Title to display - defaults to collection label if not provided */
   currentItemTitle?: string
   Description?: React.ReactNode
@@ -29,6 +31,7 @@ export type HierarchyListHeaderProps = {
 
 export function HierarchyListHeader({
   collectionConfig,
+  currentItemId,
   currentItemTitle,
   Description,
   disableBulkDelete,
@@ -61,6 +64,16 @@ export function HierarchyListHeader({
       AfterListHeaderContent={Description}
       className={baseClass}
       title={title}
+      TitleActions={[
+        currentItemId !== null && currentItemId !== undefined && (
+          <HierarchyEditButton
+            collectionSlug={collectionConfig.slug}
+            id={currentItemId}
+            key="edit-hierarchy-document"
+            title={title}
+          />
+        ),
+      ].filter(Boolean)}
     />
   )
 }

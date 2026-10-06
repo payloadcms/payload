@@ -333,6 +333,7 @@ export function HierarchyListView(props: ListViewClientProps) {
           <div className={`${baseClass}__wrap`}>
             <HierarchyListHeader
               collectionConfig={collectionConfig}
+              currentItemId={parentId}
               currentItemTitle={currentItemTitle}
               Description={
                 <React.Fragment>
