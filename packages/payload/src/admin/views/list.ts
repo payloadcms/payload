@@ -14,6 +14,10 @@ import type { Data, ViewTypes } from '../types.js'
 import type { RelatedDocumentsGrouped } from './hierarchyList.js'
 
 export type CurrentHierarchyItem = {
+  /**
+   * Whether the current user can update this specific document, including row-level access.
+   */
+  hasUpdatePermission: boolean
   id: number | string
   title: string
 }

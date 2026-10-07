@@ -129,6 +129,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
         currentHierarchyItem && (
           <HierarchyEditButton
             collectionSlug={collectionConfig.slug}
+            hasUpdatePermission={currentHierarchyItem.hasUpdatePermission}
             id={currentHierarchyItem.id}
             key="edit-hierarchy-document"
             title={title}

@@ -548,15 +548,68 @@ test.describe('Hierarchy Sidebar', () => {
           await drawer.locator('#action-save').click()
           await expect(drawer).toBeHidden()
           await expect(page.getByRole('heading', { name: updatedName, level: 1 })).toBeVisible()
-          await expect(
-            page.locator('.list-header').getByRole('button', {
-              name: `Edit ${updatedName}`,
-              exact: true,
-            }),
-          ).toBeVisible()
+          const updatedEdit = page.locator('.list-header').getByRole('button', {
+            name: `Edit ${updatedName}`,
+            exact: true,
+          })
+
+          await expect(updatedEdit).toBeVisible()
+          await expect(updatedEdit).toBeFocused()
           await expect(page.locator('.hierarchy-tables__edit-button')).toHaveCount(0)
         } finally {
           await payload.delete({ id: child.id, collection: 'folders', overrideAccess: true })
+          await payload.delete({ id: folder.id, collection: 'folders', overrideAccess: true })
+        }
+      })
+
+      test(`should return focus to the ${mode} title edit action when the drawer is closed with Escape`, async () => {
+        const folder = await payload.create({
+          collection: 'folders',
+          data: { name: `Escape edit ${mode}` },
+          overrideAccess: true,
+        })
+        const foldersURL = new AdminUrlUtil(serverURL, 'folders')
+        const folderURL = new URL(mode === 'hierarchy' ? foldersURL.hierarchy : foldersURL.list)
+
+        folderURL.searchParams.set('parentFolder', String(folder.id))
+
+        try {
+          await page.goto(folderURL.toString())
+          const edit = page.locator('.list-header').getByRole('button', {
+            name: `Edit ${folder.name}`,
+            exact: true,
+          })
+
+          await edit.focus()
+          await page.keyboard.press('Enter')
+
+          const drawer = page.locator('.doc-drawer:visible')
+
+          await expect(drawer.locator('#field-name')).toHaveValue(folder.name)
+          await page.keyboard.press('Escape')
+          await expect(drawer).toBeHidden()
+          await expect(edit).toBeFocused()
+        } finally {
+          await payload.delete({ id: folder.id, collection: 'folders', overrideAccess: true })
+        }
+      })
+
+      test(`should hide the ${mode} title edit action when the folder cannot be updated`, async () => {
+        const folder = await payload.create({
+          collection: 'folders',
+          data: { name: `Locked folder ${mode}`, isLocked: true },
+          overrideAccess: true,
+        })
+        const foldersURL = new AdminUrlUtil(serverURL, 'folders')
+        const folderURL = new URL(mode === 'hierarchy' ? foldersURL.hierarchy : foldersURL.list)
+
+        folderURL.searchParams.set('parentFolder', String(folder.id))
+
+        try {
+          await page.goto(folderURL.toString())
+          await expect(page.getByRole('heading', { name: folder.name, level: 1 })).toBeVisible()
+          await expect(page.locator('.list-header .hierarchy-edit-button')).toHaveCount(0)
+        } finally {
           await payload.delete({ id: folder.id, collection: 'folders', overrideAccess: true })
         }
       })

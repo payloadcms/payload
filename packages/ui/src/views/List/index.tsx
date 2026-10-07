@@ -380,7 +380,22 @@ export const renderListView = async (
       req,
     })
 
-    currentHierarchyItem = hierarchyAncestors.at(-1)
+    const currentAncestor = hierarchyAncestors.at(-1)
+
+    if (currentAncestor) {
+      // Collection-level `update` is true when access returns a query, so resolve it per document
+      const { docPermissions } = await getDocumentPermissions({
+        id: currentAncestor.id,
+        collectionConfig,
+        data: {},
+        req,
+      })
+
+      currentHierarchyItem = {
+        ...currentAncestor,
+        hasUpdatePermission: Boolean(docPermissions?.update),
+      }
+    }
   }
 
   // Hierarchy data for client-side rendering

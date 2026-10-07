@@ -40,6 +40,7 @@ export function HierarchyListView(props: ListViewClientProps) {
     baseFilter,
     BeforeList,
     collectionSlug,
+    currentHierarchyItem,
     Description,
     documentLayout,
     hasCreatePermission: hasCreatePermissionFromProps,
@@ -359,6 +360,7 @@ export function HierarchyListView(props: ListViewClientProps) {
                   ) : null}
                 </React.Fragment>
               }
+              hasUpdatePermission={currentHierarchyItem?.hasUpdatePermission}
               HierarchyIcon={HierarchyIcon}
               i18n={i18n}
               viewType={viewType}

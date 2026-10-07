@@ -3,7 +3,6 @@
 import React, { useCallback, useMemo } from 'react'
 
 import { GearIcon } from '../../../icons/Gear/index.js'
-import { useAuth } from '../../../providers/Auth/index.js'
 import { useHierarchy } from '../../../providers/Hierarchy/index.js'
 import { useRouteCache } from '../../../providers/RouteCache/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -13,13 +12,14 @@ import { useDocumentDrawer } from '../../DocumentDrawer/index.js'
 export function HierarchyEditButton({
   id,
   collectionSlug,
+  hasUpdatePermission,
   title,
 }: {
   collectionSlug: string
+  hasUpdatePermission: boolean
   id: number | string
   title: string
 }) {
-  const { permissions } = useAuth()
   const { refreshTree } = useHierarchy()
   const { clearRouteCache } = useRouteCache()
   const { t } = useTranslation()
@@ -32,7 +32,7 @@ export function HierarchyEditButton({
     refreshTree(collectionSlug)
   }, [clearRouteCache, closeDrawer, collectionSlug, refreshTree])
 
-  if (!permissions?.collections?.[collectionSlug]?.update) {
+  if (!hasUpdatePermission) {
     return null
   }
 
