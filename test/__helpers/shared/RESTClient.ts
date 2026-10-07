@@ -1,17 +1,10 @@
 import type { JoinQuery, PopulateType, SanitizedConfig, SelectType, Where } from 'payload'
 import type { ParsedQs } from 'qs-esm'
 
-import {
-  REST_DELETE as createDELETE,
-  REST_GET as createGET,
-  GRAPHQL_POST as createGraphqlPOST,
-  REST_PATCH as createPATCH,
-  REST_POST as createPOST,
-  REST_PUT as createPUT,
-} from '@payloadcms/next/routes'
 import * as qs from 'qs-esm'
 
 import { devUser } from '../../credentials.js'
+import { createTestRequestHandler } from './createTestRequestHandler.js'
 
 type ValidPath = `/${string}`
 type RequestOptions = {
@@ -46,35 +39,10 @@ function generateQueryString(query: RequestOptions['query'], params: ParsedQs): 
   )
 }
 
-export class NextRESTClient {
-  private _DELETE: (
-    request: Request,
-    args: { params: Promise<{ slug: string[] }> },
-  ) => Promise<Response>
-
-  private _GET: (
-    request: Request,
-    args: { params: Promise<{ slug: string[] }> },
-  ) => Promise<Response>
-
-  private _GRAPHQL_POST: (request: Request) => Promise<Response>
-
-  private _PATCH: (
-    request: Request,
-    args: { params: Promise<{ slug: string[] }> },
-  ) => Promise<Response>
-
-  private _POST: (
-    request: Request,
-    args: { params: Promise<{ slug: string[] }> },
-  ) => Promise<Response>
-
-  private _PUT: (
-    request: Request,
-    args: { params: Promise<{ slug: string[] }> },
-  ) => Promise<Response>
-
+export class RESTClient {
   private readonly config: SanitizedConfig
+
+  private readonly handleRequest: ReturnType<typeof createTestRequestHandler>
 
   private token: string
 
@@ -85,12 +53,7 @@ export class NextRESTClient {
     if (config?.serverURL) {
       this.serverURL = config.serverURL
     }
-    this._GET = createGET(config)
-    this._POST = createPOST(config)
-    this._DELETE = createDELETE(config)
-    this._PATCH = createPATCH(config)
-    this._PUT = createPUT(config)
-    this._GRAPHQL_POST = createGraphqlPOST(config)
+    this.handleRequest = createTestRequestHandler({ config })
   }
 
   private buildHeaders(options: FileArg & RequestInit & RequestOptions): Headers {
@@ -146,7 +109,7 @@ export class NextRESTClient {
       headers: this.buildHeaders(options),
       method: 'DELETE',
     })
-    return this._DELETE(request, { params: Promise.resolve({ slug }) })
+    return this.handleRequest({ request, slug })
   }
 
   async GET(
@@ -162,7 +125,7 @@ export class NextRESTClient {
       headers: this.buildHeaders(options),
       method: 'GET',
     })
-    return this._GET(request, { params: Promise.resolve({ slug }) })
+    return this.handleRequest({ request, slug })
   }
 
   async GRAPHQL_POST(options: RequestInit & RequestOptions): Promise<Response> {
@@ -176,7 +139,7 @@ export class NextRESTClient {
         method: 'POST',
       },
     )
-    return this._GRAPHQL_POST(request)
+    return this.handleRequest({ isGraphQL: true, request })
   }
 
   async login({
@@ -221,7 +184,7 @@ export class NextRESTClient {
       headers: this.buildHeaders(options),
       method: 'OPTIONS',
     })
-    return this._GET(request, { params: Promise.resolve({ slug }) })
+    return this.handleRequest({ request, slug })
   }
 
   async PATCH(path: ValidPath, options: FileArg & RequestInit & RequestOptions): Promise<Response> {
@@ -235,7 +198,7 @@ export class NextRESTClient {
       method: 'PATCH',
     })
 
-    return this._PATCH(request, { params: Promise.resolve({ slug }) })
+    return this.handleRequest({ request, slug })
   }
 
   async POST(
@@ -249,7 +212,7 @@ export class NextRESTClient {
       headers: this.buildHeaders(options),
       method: 'POST',
     })
-    return this._POST(request, { params: Promise.resolve({ slug }) })
+    return this.handleRequest({ request, slug })
   }
 
   async PUT(path: ValidPath, options: FileArg & RequestInit & RequestOptions): Promise<Response> {
@@ -262,6 +225,6 @@ export class NextRESTClient {
       headers: this.buildHeaders(options),
       method: 'PUT',
     })
-    return this._PUT(request, { params: Promise.resolve({ slug }) })
+    return this.handleRequest({ request, slug })
   }
 }

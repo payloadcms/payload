@@ -4,7 +4,7 @@ import { ValidationError } from 'payload'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import type { RESTClient } from '../__helpers/shared/RESTClient.js'
 import type { Relationship } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
@@ -372,7 +372,7 @@ test.suite('@payloadcms/plugin-multi-tenant', suiteOptions, () => {
       await payload.delete({ id: tenantB.id, collection: tenantsSlug, overrideAccess: true })
     })
 
-    const loginAsTenantMember = async (restClient: NextRESTClient): Promise<string> => {
+    const loginAsTenantMember = async (restClient: RESTClient): Promise<string> => {
       const result = await restClient
         .POST('/users/login', {
           auth: false,
