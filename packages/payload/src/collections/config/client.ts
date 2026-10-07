@@ -24,6 +24,7 @@ export type ServerOnlyCollectionProperties = keyof Pick<
   | 'hooks'
   | 'indexes'
   | 'joins'
+  | 'llmInstructions'
   | 'polymorphicJoins'
   | 'sanitizedIndexes'
   | 'select'
@@ -85,6 +86,7 @@ const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] 
   'endpoints',
   'custom',
   'joins',
+  'llmInstructions',
   'polymorphicJoins',
   'flattenedFields',
   'indexes',

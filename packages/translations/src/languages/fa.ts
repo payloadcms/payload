@@ -272,6 +272,7 @@ export const faTranslations: DefaultTranslationsObject = {
     all: 'همه',
     allCollections: 'همه مجموعه‌ها',
     allLocales: 'همه زبان‌ها',
+    allowedTypes: 'انواع مجاز',
     and: 'و',
     anotherUser: 'کاربر دیگر',
     anotherUserTakenOver: 'کاربر دیگری ویرایش این صفحه را در دست گرفته است.',
@@ -287,6 +288,7 @@ export const faTranslations: DefaultTranslationsObject = {
     checked: 'بررسی شد',
     clear: 'پاک کردن',
     clearAll: 'پاک کردن همه',
+    clearSearch: 'پاک کردن جستجو',
     close: 'بستن',
     collapse: 'بستن',
     collection: 'مجموعه',
@@ -559,6 +561,23 @@ export const faTranslations: DefaultTranslationsObject = {
     searchLabel: 'جستجو {{label}}',
     searchResults: '{{count}} مورد یافت شد',
   },
+  llmInstructions: {
+    additionalInstructions: 'دستورالعمل‌های تکمیلی',
+    collectionDescription:
+      'برای مجموعهٔ {{label}} دستورالعمل‌های سفارشی اضافه کنید تا مدل‌های LLM پاسخ‌های متناسب‌تری به درخواست‌ها ارائه دهند.',
+    collectionSystemDescription:
+      'این دستورالعمل‌های سیستم از فایل پیکربندی مجموعه گرفته می‌شوند و همیشه گنجانده می‌شوند.',
+    editInstructions: 'ویرایش دستورالعمل‌های LLM',
+    global: 'سند سراسری',
+    globalDescription:
+      'برای سند سراسری {{label}} دستورالعمل‌های سفارشی اضافه کنید تا مدل‌های LLM پاسخ‌های متناسب‌تری به درخواست‌ها ارائه دهند.',
+    globalSystemDescription:
+      'این دستورالعمل‌های سیستم از فایل پیکربندی سند سراسری گرفته می‌شوند و همیشه گنجانده می‌شوند.',
+    instructions: 'دستورالعمل‌های LLM',
+    systemInstructions: 'دستورالعمل‌های سیستم (فقط خواندنی)',
+    targetCannotBeChanged: 'هدف دستورالعمل‌ها قابل تغییر نیست.',
+    title: 'عنوان',
+  },
   localization: {
     cannotCopySameLocale: 'امکان کپی کردن اطلاعات به همان زبان وجود ندارد.',
     copyFrom: 'کپی از',
@@ -592,9 +611,18 @@ export const faTranslations: DefaultTranslationsObject = {
     addFiles: 'افزودن فایل‌ها',
     bulkUpload: 'آپلود گروهی',
     copyLinkToFile: 'کپی پیوند به فایل',
+    copyURL: 'کپی URL',
     crop: 'برش',
+    cropBottom: 'دستگیرهٔ پایین برش',
+    cropBottomLeft: 'دستگیرهٔ پایین چپ برش',
+    cropBottomRight: 'دستگیرهٔ پایین راست برش',
+    cropLeft: 'دستگیرهٔ چپ برش',
+    cropRight: 'دستگیرهٔ راست برش',
     cropToolDescription:
       'گوشه‌های ناحیه انتخاب شده را بکشید، یک ناحیه جدید رسم کنید یا مقادیر زیر را تنظیم نمایید.',
+    cropTop: 'دستگیرهٔ بالای برش',
+    cropTopLeft: 'دستگیرهٔ بالا چپ برش',
+    cropTopRight: 'دستگیرهٔ بالا راست برش',
     download: 'دانلود',
     dragAndDrop: 'یک فایل را اینجا بکشید و رها کنید',
     dragAndDropHere: 'یا یک فایل را اینجا بکشید و رها کنید',

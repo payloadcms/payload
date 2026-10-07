@@ -280,6 +280,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     all: 'Svi',
     allCollections: 'Sve Kolekcije',
     allLocales: 'Sve lokacije',
+    allowedTypes: 'Dozvoljeni tipovi',
     and: 'I',
     anotherUser: 'Drugi korisnik',
     anotherUserTakenOver: 'Drugi korisnik je preuzeo uređivanje ovog dokumenta.',
@@ -294,6 +295,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     checked: 'Provereno',
     clear: 'Jasno',
     clearAll: 'Očisti sve',
+    clearSearch: 'Obriši pretragu',
     close: 'Zatvori',
     collapse: 'Skupi',
     collection: 'Kolekcija',
@@ -567,6 +569,23 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     searchLabel: 'Pretraga {{label}}',
     searchResults: 'Pronađeno: {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Dodatna uputstva',
+    collectionDescription:
+      'Dodajte prilagođena uputstva za kolekciju {{label}} da biste pomogli LLM modelima da bolje prilagode odgovore na upite.',
+    collectionSystemDescription:
+      'Ova sistemska uputstva potiču iz konfiguracione datoteke kolekcije i uvek su uključena.',
+    editInstructions: 'Uredi uputstva za LLM',
+    global: 'Globalni dokument',
+    globalDescription:
+      'Dodajte prilagođena uputstva za globalni dokument {{label}} da biste pomogli LLM modelima da bolje prilagode odgovore na upite.',
+    globalSystemDescription:
+      'Ova sistemska uputstva potiču iz konfiguracione datoteke globalnog dokumenta i uvek su uključena.',
+    instructions: 'Uputstva za LLM',
+    systemInstructions: 'Sistemska uputstva (samo za čitanje)',
+    targetCannotBeChanged: 'Cilj uputstava nije moguće promeniti.',
+    title: 'Naslov',
+  },
   localization: {
     cannotCopySameLocale: 'Ne može se kopirati na istu lokaciju',
     copyFrom: 'Kopiraj iz',
@@ -600,9 +619,18 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     addFiles: 'Dodaj Datoteke',
     bulkUpload: 'Masovno otpremanje',
     copyLinkToFile: 'Kopiraj link ka fajlu',
+    copyURL: 'Kopiraj URL',
     crop: 'Isecite sliku',
+    cropBottom: 'Donja ručica za isecanje',
+    cropBottomLeft: 'Donja leva ručica za isecanje',
+    cropBottomRight: 'Donja desna ručica za isecanje',
+    cropLeft: 'Leva ručica za isecanje',
+    cropRight: 'Desna ručica za isecanje',
     cropToolDescription:
       'Prevucite uglove izabranog područja, nacrtajte novo područje ili prilagodite vrednosti ispod.',
+    cropTop: 'Gornja ručica za isecanje',
+    cropTopLeft: 'Gornja leva ručica za isecanje',
+    cropTopRight: 'Gornja desna ručica za isecanje',
     download: 'Preuzmi',
     dragAndDrop: 'Prevucite i ispustite datoteku',
     dragAndDropHere: 'ili povucite i ispustite datoteku ovde',

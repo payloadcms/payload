@@ -279,6 +279,7 @@ export const enTranslations = {
     all: 'All',
     allCollections: 'All Collections',
     allLocales: 'All locales',
+    allowedTypes: 'Allowed types',
     and: 'And',
     anotherUser: 'Another user',
     anotherUserTakenOver: 'Another user has taken over editing this document.',
@@ -294,6 +295,7 @@ export const enTranslations = {
     checked: 'Checked',
     clear: 'Clear',
     clearAll: 'Clear All',
+    clearSearch: 'Clear search',
     close: 'Close',
     collapse: 'Collapse',
     collection: 'Collection',
@@ -566,6 +568,23 @@ export const enTranslations = {
     searchLabel: 'Search {{label}}',
     searchResults: 'Found {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Additional instructions',
+    collectionDescription:
+      'Add custom instructions for the {{label}} collection to help LLMs tailor better prompt responses.',
+    collectionSystemDescription:
+      'These system instructions are provided by the collection’s config file and are always included.',
+    editInstructions: 'Edit LLM instructions',
+    global: 'Global',
+    globalDescription:
+      'Add custom instructions for the {{label}} global to help LLMs tailor better prompt responses.',
+    globalSystemDescription:
+      'These system instructions are provided by the global’s config file and are always included.',
+    instructions: 'LLM Instructions',
+    systemInstructions: 'System instructions (read-only)',
+    targetCannotBeChanged: 'The instruction target cannot be changed.',
+    title: 'Title',
+  },
   localization: {
     cannotCopySameLocale: 'Cannot copy to the same locale',
     copyFrom: 'Copy from',
@@ -599,9 +618,18 @@ export const enTranslations = {
     addFiles: 'Add files',
     bulkUpload: 'Bulk Upload',
     copyLinkToFile: 'Copy link to file',
+    copyURL: 'Copy URL',
     crop: 'Crop',
+    cropBottom: 'Bottom crop handle',
+    cropBottomLeft: 'Bottom-left crop handle',
+    cropBottomRight: 'Bottom-right crop handle',
+    cropLeft: 'Left crop handle',
+    cropRight: 'Right crop handle',
     cropToolDescription:
       'Drag the corners of the selected area, draw a new area or adjust the values below.',
+    cropTop: 'Top crop handle',
+    cropTopLeft: 'Top-left crop handle',
+    cropTopRight: 'Top-right crop handle',
     download: 'Download',
     dragAndDrop: 'Drag and drop a file',
     dragAndDropHere: 'or drag and drop a file here',

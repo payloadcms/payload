@@ -283,6 +283,7 @@ export const trTranslations: DefaultTranslationsObject = {
     all: 'Tüm',
     allCollections: 'Tüm Koleksiyonlar',
     allLocales: 'Tüm yerler',
+    allowedTypes: 'İzin verilen türler',
     and: 've',
     anotherUser: 'Başka bir kullanıcı',
     anotherUserTakenOver: 'Başka bir kullanıcı bu belgenin düzenlemesini devraldı.',
@@ -298,6 +299,7 @@ export const trTranslations: DefaultTranslationsObject = {
     checked: 'Kontrol edildi',
     clear: 'Temiz',
     clearAll: 'Hepsini Temizle',
+    clearSearch: 'Aramayı temizle',
     close: 'Kapat',
     collapse: 'Daralt',
     collection: 'Koleksiyon',
@@ -574,6 +576,23 @@ export const trTranslations: DefaultTranslationsObject = {
     searchLabel: '{{label}} Ara',
     searchResults: '{{count}} bulundu',
   },
+  llmInstructions: {
+    additionalInstructions: 'Ek talimatlar',
+    collectionDescription:
+      "LLM'lerin istemlere daha uygun yanıtlar vermesine yardımcı olmak için {{label}} koleksiyonuna özel talimatlar ekleyin.",
+    collectionSystemDescription:
+      'Bu sistem talimatları koleksiyonun yapılandırma dosyasından gelir ve her zaman dahil edilir.',
+    editInstructions: 'LLM talimatlarını düzenle',
+    global: 'Global',
+    globalDescription:
+      "LLM'lerin istemlere daha uygun yanıtlar vermesine yardımcı olmak için {{label}} globaline özel talimatlar ekleyin.",
+    globalSystemDescription:
+      'Bu sistem talimatları globalin yapılandırma dosyasından gelir ve her zaman dahil edilir.',
+    instructions: 'LLM Talimatları',
+    systemInstructions: 'Sistem talimatları (salt okunur)',
+    targetCannotBeChanged: 'Talimatların hedefi değiştirilemez.',
+    title: 'Başlık',
+  },
   localization: {
     cannotCopySameLocale: 'Aynı yerel ayara kopyalanamaz.',
     copyFrom: 'Kopyala',
@@ -607,9 +626,18 @@ export const trTranslations: DefaultTranslationsObject = {
     addFiles: 'Dosya Ekle',
     bulkUpload: 'Toplu Yükleme',
     copyLinkToFile: 'Dosyanın bağlantısını kopyala',
+    copyURL: 'URL’yi kopyala',
     crop: 'Mahsulat',
+    cropBottom: 'Alt kırpma tutamacı',
+    cropBottomLeft: 'Sol alt kırpma tutamacı',
+    cropBottomRight: 'Sağ alt kırpma tutamacı',
+    cropLeft: 'Sol kırpma tutamacı',
+    cropRight: 'Sağ kırpma tutamacı',
     cropToolDescription:
       'Seçilen alanın köşelerini sürükleyin, yeni bir alan çizin ya da aşağıdaki değerleri ayarlayın.',
+    cropTop: 'Üst kırpma tutamacı',
+    cropTopLeft: 'Sol üst kırpma tutamacı',
+    cropTopRight: 'Sağ üst kırpma tutamacı',
     download: 'İndir',
     dragAndDrop: 'Bir dosya sürükleyip bırakabilirsiniz',
     dragAndDropHere: 'veya buraya bir dosya sürükleyip bırakabilirsiniz',

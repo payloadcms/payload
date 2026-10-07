@@ -280,6 +280,7 @@ export const skTranslations: DefaultTranslationsObject = {
     all: 'Všetko',
     allCollections: 'Všetky Kolekcie',
     allLocales: 'Všetky lokality',
+    allowedTypes: 'Povolené typy',
     and: 'a',
     anotherUser: 'Iný používateľ',
     anotherUserTakenOver: 'Iný používateľ prevzal úpravy tohto dokumentu.',
@@ -294,6 +295,7 @@ export const skTranslations: DefaultTranslationsObject = {
     checked: 'Skontrolované',
     clear: 'Jasný',
     clearAll: 'Vymazať všetko',
+    clearSearch: 'Vymazať vyhľadávanie',
     close: 'Zavrieť',
     collapse: 'Zbaliť',
     collection: 'Kolekcia',
@@ -564,6 +566,23 @@ export const skTranslations: DefaultTranslationsObject = {
     searchLabel: 'Vyhľadávanie {{label}}',
     searchResults: 'Nájdené: {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Ďalšie pokyny',
+    collectionDescription:
+      'Pridajte vlastné pokyny pre kolekciu {{label}}, ktoré pomôžu modelom LLM lepšie prispôsobiť odpovede na zadania.',
+    collectionSystemDescription:
+      'Tieto systémové pokyny pochádzajú z konfiguračného súboru kolekcie a sú vždy zahrnuté.',
+    editInstructions: 'Upraviť pokyny LLM',
+    global: 'Globálny dokument',
+    globalDescription:
+      'Pridajte vlastné pokyny pre globálny dokument {{label}}, ktoré pomôžu modelom LLM lepšie prispôsobiť odpovede na zadania.',
+    globalSystemDescription:
+      'Tieto systémové pokyny pochádzajú z konfiguračného súboru globálneho dokumentu a sú vždy zahrnuté.',
+    instructions: 'Pokyny LLM',
+    systemInstructions: 'Systémové pokyny (iba na čítanie)',
+    targetCannotBeChanged: 'Cieľ pokynov nemožno zmeniť.',
+    title: 'Názov',
+  },
   localization: {
     cannotCopySameLocale: 'Nemožno kopírovať do rovnakej lokalizácie.',
     copyFrom: 'Kopírovať z',
@@ -597,9 +616,18 @@ export const skTranslations: DefaultTranslationsObject = {
     addFiles: 'Pridať súbory',
     bulkUpload: 'Hromadné nahranie',
     copyLinkToFile: 'Kopírovať odkaz na súbor',
+    copyURL: 'Kopírovať URL',
     crop: 'Orezať',
+    cropBottom: 'Dolná rukoväť orezania',
+    cropBottomLeft: 'Ľavá dolná rukoväť orezania',
+    cropBottomRight: 'Pravá dolná rukoväť orezania',
+    cropLeft: 'Ľavá rukoväť orezania',
+    cropRight: 'Pravá rukoväť orezania',
     cropToolDescription:
       'Potiahnite rohy vybranej oblasti, nakreslite novú oblasť alebo upravte hodnoty nižšie.',
+    cropTop: 'Horná rukoväť orezania',
+    cropTopLeft: 'Ľavá horná rukoväť orezania',
+    cropTopRight: 'Pravá horná rukoväť orezania',
     download: 'Stiahnuť',
     dragAndDrop: 'Potiahnite a pusťte súbor',
     dragAndDropHere: 'alebo sem potiahnite a pusťte súbor',

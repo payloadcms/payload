@@ -94,6 +94,16 @@ export const PostsCollection: CollectionConfig = {
       relationTo: postsSlug,
     },
     {
+      name: 'status',
+      type: 'select',
+      admin: { position: 'sidebar' },
+      defaultValue: 'draft',
+      options: [
+        { label: 'Draft', value: 'draft' },
+        { label: 'Published', value: 'published' },
+      ],
+    },
+    {
       name: 'publishedOn',
       type: 'date',
     },
@@ -182,6 +192,13 @@ export const PostsCollection: CollectionConfig = {
             {
               name: 'date',
               type: 'date',
+              admin: {
+                date: {
+                  overrides: {
+                    excludeDates: [new Date('2026-09-14T12:00:00.000Z')],
+                  },
+                },
+              },
             },
           ],
           labels: {
@@ -217,6 +234,16 @@ export const PostsCollection: CollectionConfig = {
       fields: [{ name: 'customLabelNote', type: 'text' }],
     },
     createFolderField({ relationTo: 'payload-folders' }),
+    {
+      name: 'readOnlyHierarchy',
+      type: 'relationship',
+      admin: {
+        components: { Field: '@payloadcms/ui/rsc#HierarchyField' },
+        readOnly: true,
+      },
+      hasMany: true,
+      relationTo: 'payload-folders',
+    },
     {
       name: 'featuredImage',
       type: 'upload',
@@ -256,6 +283,7 @@ export const PostsCollection: CollectionConfig = {
       label: false,
     },
   ],
+  llmInstructions: 'Use descriptive post titles.',
   trash: true,
   versions: {
     drafts: true,

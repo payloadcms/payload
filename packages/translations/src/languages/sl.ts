@@ -277,6 +277,7 @@ export const slTranslations: DefaultTranslationsObject = {
     all: 'Vse',
     allCollections: 'Vse Zbirke',
     allLocales: 'Vse lokacije',
+    allowedTypes: 'Dovoljene vrste',
     and: 'In',
     anotherUser: 'Drug uporabnik',
     anotherUserTakenOver: 'Drug uporabnik je prevzel urejanje tega dokumenta.',
@@ -292,6 +293,7 @@ export const slTranslations: DefaultTranslationsObject = {
     checked: 'Preverjeno',
     clear: 'Čisto',
     clearAll: 'Počisti vse',
+    clearSearch: 'Počisti iskanje',
     close: 'Zapri',
     collapse: 'Strni',
     collection: 'Zbirka',
@@ -565,6 +567,23 @@ export const slTranslations: DefaultTranslationsObject = {
     searchLabel: 'Iskanje {{label}}',
     searchResults: 'Najdeno: {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Dodatna navodila',
+    collectionDescription:
+      'Dodajte navodila po meri za zbirko {{label}}, da bodo modeli LLM bolje prilagodili odgovore na pozive.',
+    collectionSystemDescription:
+      'Ta sistemska navodila izvirajo iz konfiguracijske datoteke zbirke in so vedno vključena.',
+    editInstructions: 'Uredi navodila za LLM',
+    global: 'Globalni dokument',
+    globalDescription:
+      'Dodajte navodila po meri za globalni dokument {{label}}, da bodo modeli LLM bolje prilagodili odgovore na pozive.',
+    globalSystemDescription:
+      'Ta sistemska navodila izvirajo iz konfiguracijske datoteke globalnega dokumenta in so vedno vključena.',
+    instructions: 'Navodila za LLM',
+    systemInstructions: 'Sistemska navodila (samo za branje)',
+    targetCannotBeChanged: 'Cilja navodil ni mogoče spremeniti.',
+    title: 'Naslov',
+  },
   localization: {
     cannotCopySameLocale: 'Ni mogoče kopirati v isti jezik',
     copyFrom: 'Kopiraj iz',
@@ -598,9 +617,18 @@ export const slTranslations: DefaultTranslationsObject = {
     addFiles: 'Dodaj datoteke',
     bulkUpload: 'Množično nalaganje',
     copyLinkToFile: 'Kopiraj povezavo do datoteke',
+    copyURL: 'Kopiraj URL',
     crop: 'Obreži',
+    cropBottom: 'Spodnja ročica za obrezovanje',
+    cropBottomLeft: 'Spodnja leva ročica za obrezovanje',
+    cropBottomRight: 'Spodnja desna ročica za obrezovanje',
+    cropLeft: 'Leva ročica za obrezovanje',
+    cropRight: 'Desna ročica za obrezovanje',
     cropToolDescription:
       'Povlecite kote izbranega območja, narišite novo območje ali prilagodite vrednosti spodaj.',
+    cropTop: 'Zgornja ročica za obrezovanje',
+    cropTopLeft: 'Zgornja leva ročica za obrezovanje',
+    cropTopRight: 'Zgornja desna ročica za obrezovanje',
     download: 'Prenos',
     dragAndDrop: 'Povlecite in spustite datoteko',
     dragAndDropHere: 'ali povlecite in spustite datoteko sem',

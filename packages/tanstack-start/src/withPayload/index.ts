@@ -80,8 +80,6 @@ function applyDependencyWarningSuppression(config: UserConfig, enabled: boolean)
 export type WithPayloadOptions = {
   /** Extra import-protection `ignoreImporters` patterns for the TanStack Start plugin. */
   additionalIgnoreImporters?: RegExp[]
-  /** Route id of Payload's admin layout, eager-loaded instead of code-split. Defaults to `'/_payload'`. */
-  adminRouteId?: string
   /** Extra globs exempted from the `.client.*` SSR denial (beyond the default node_modules exemption). */
   clientDenialExcludeFiles?: string[]
   /**
@@ -163,7 +161,6 @@ export function withPayload(
 ): UserConfigFnObject {
   const {
     additionalIgnoreImporters = [],
-    adminRouteId,
     clientDenialExcludeFiles = [],
     devServerExternalPackages = [],
     payloadConfigPath,
@@ -263,7 +260,6 @@ export function withPayload(
       rsc: payloadRscOptions(),
       tanstackStart: payloadTanstackStartOptions({
         additionalIgnoreImporters,
-        adminRouteId,
         clientDenialExcludeFiles,
         routesDirectory,
         srcDirectory,
@@ -314,12 +310,6 @@ export type PayloadTanstackStartOptionsArgs = {
   /** Additional import-protection `ignoreImporters` patterns. */
   additionalIgnoreImporters?: RegExp[]
   /**
-   * Route id of Payload's admin layout route, eager-loaded (not code-split) so it
-   * hydrates on first paint. It and its children skip splitting; host routes keep
-   * TanStack's default. Defaults to `'/_payload'` (the `_payload.tsx` convention).
-   */
-  adminRouteId?: string
-  /**
    * Extra globs exempted from TanStack's `.client.*` SSR denial, on top of the
    * default node_modules exemption. Needed only when Payload's own `.client.*`
    * files resolve outside node_modules (e.g. the monorepo's `packages` sources).
@@ -332,8 +322,8 @@ export type PayloadTanstackStartOptionsArgs = {
 }
 
 /**
- * The `tanstackStart` options Payload's admin requires (import-protection and
- * code-splitting). TanStack Start is one-per-app, so a host that already runs it
+ * The `tanstackStart` options Payload's admin requires (import protection and
+ * route discovery). TanStack Start is one-per-app, so a host that already runs it
  * should merge these into its single `tanstackStart` call.
  */
 export function payloadTanstackStartOptions(
@@ -341,7 +331,6 @@ export function payloadTanstackStartOptions(
 ): NonNullable<Parameters<typeof tanstackStart>[0]> {
   const {
     additionalIgnoreImporters = [],
-    adminRouteId = '/_payload',
     clientDenialExcludeFiles = [],
     routesDirectory = 'app',
     srcDirectory = 'src',
@@ -362,14 +351,6 @@ export function payloadTanstackStartOptions(
       server: { excludeFiles: ['**/node_modules/**', ...clientDenialExcludeFiles] },
     },
     router: {
-      codeSplittingOptions: {
-        // Eager-load only Payload's admin routes so they hydrate on first paint —
-        // a split admin renders but isn't interactive until its lazy `?tsr-split=`
-        // chunk lands. Returning `[]` disables splitting for a route; `undefined`
-        // lets host routes keep TanStack's default per-route splitting.
-        splitBehavior: ({ routeId }: { routeId: string }) =>
-          routeId === adminRouteId || routeId.startsWith(`${adminRouteId}/`) ? [] : undefined,
-      },
       // Ignore generated importMap files and colocated `*.functions.ts` modules
       // (they define `createServerFn`s, not routes).
       routeFileIgnorePattern: 'importMap\\.(?:d\\.ts|js|server\\.ts)$|\\.functions\\.',

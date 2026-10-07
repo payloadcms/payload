@@ -271,6 +271,7 @@ export const thTranslations: DefaultTranslationsObject = {
     all: 'ทั้งหมด',
     allCollections: 'คอลเลกชันทั้งหมด',
     allLocales: 'ทุกสถานที่',
+    allowedTypes: 'ประเภทที่อนุญาต',
     and: 'และ',
     anotherUser: 'ผู้ใช้อื่น',
     anotherUserTakenOver: 'ผู้ใช้อื่นเข้าครอบครองการแก้ไขเอกสารนี้แล้ว',
@@ -286,6 +287,7 @@ export const thTranslations: DefaultTranslationsObject = {
     clear:
       'ให้เคารพความหมายของข้อความต้นฉบับภายในบริบทของ Payload นี่คือรายการของคำที่มักใช้ใน Payload ที่มีความหมายที่เฉพาะเจาะจงมาก:\n    - Collection: Collection คือกลุ่มของเอกสารที่มีโครงสร้างและจุดประสงค์ท',
     clearAll: 'ล้างทั้งหมด',
+    clearSearch: 'ล้างการค้นหา',
     close: 'ปิด',
     collapse: 'ยุบ',
     collection: 'คอลเลกชัน',
@@ -557,6 +559,23 @@ export const thTranslations: DefaultTranslationsObject = {
     searchLabel: 'ค้นหา {{label}}',
     searchResults: 'พบ {{count}} รายการ',
   },
+  llmInstructions: {
+    additionalInstructions: 'คำแนะนำเพิ่มเติม',
+    collectionDescription:
+      'เพิ่มคำแนะนำที่กำหนดเองสำหรับคอลเลกชัน {{label}} เพื่อช่วยให้ LLM ปรับคำตอบให้เหมาะกับพรอมต์ได้ดียิ่งขึ้น',
+    collectionSystemDescription:
+      'คำแนะนำระบบเหล่านี้มาจากไฟล์การกำหนดค่าของคอลเลกชันและจะรวมไว้เสมอ',
+    editInstructions: 'แก้ไขคำแนะนำ LLM',
+    global: 'เอกสารส่วนกลาง',
+    globalDescription:
+      'เพิ่มคำแนะนำที่กำหนดเองสำหรับเอกสารส่วนกลาง {{label}} เพื่อช่วยให้ LLM ปรับคำตอบให้เหมาะกับพรอมต์ได้ดียิ่งขึ้น',
+    globalSystemDescription:
+      'คำแนะนำระบบเหล่านี้มาจากไฟล์การกำหนดค่าของเอกสารส่วนกลางและจะรวมไว้เสมอ',
+    instructions: 'คำแนะนำ LLM',
+    systemInstructions: 'คำแนะนำระบบ (อ่านอย่างเดียว)',
+    targetCannotBeChanged: 'ไม่สามารถเปลี่ยนเป้าหมายของคำแนะนำได้',
+    title: 'ชื่อเรื่อง',
+  },
   localization: {
     cannotCopySameLocale: 'ไม่สามารถคัดลอกไปยังตำแหน่งที่ตั้งเดียวกัน',
     copyFrom: 'คัดลอกจาก',
@@ -590,8 +609,17 @@ export const thTranslations: DefaultTranslationsObject = {
     addFiles: 'เพิ่มไฟล์',
     bulkUpload: 'อัปโหลดจำนวนมาก',
     copyLinkToFile: 'คัดลอกลิงก์ไปยังไฟล์',
+    copyURL: 'คัดลอก URL',
     crop: 'พืชผล',
+    cropBottom: 'จุดปรับการครอบตัดด้านล่าง',
+    cropBottomLeft: 'จุดปรับการครอบตัดมุมซ้ายล่าง',
+    cropBottomRight: 'จุดปรับการครอบตัดมุมขวาล่าง',
+    cropLeft: 'จุดปรับการครอบตัดด้านซ้าย',
+    cropRight: 'จุดปรับการครอบตัดด้านขวา',
     cropToolDescription: 'ลากมุมของพื้นที่ที่เลือก, วาดพื้นที่ใหม่หรือปรับค่าด้านล่าง',
+    cropTop: 'จุดปรับการครอบตัดด้านบน',
+    cropTopLeft: 'จุดปรับการครอบตัดมุมซ้ายบน',
+    cropTopRight: 'จุดปรับการครอบตัดมุมขวาบน',
     download: 'ดาวน์โหลด',
     dragAndDrop: 'ลากและวางไฟล์',
     dragAndDropHere: 'หรือลากและวางไฟล์ที่นี่',

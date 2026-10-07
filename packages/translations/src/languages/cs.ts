@@ -276,6 +276,7 @@ export const csTranslations: DefaultTranslationsObject = {
     all: 'Všechny',
     allCollections: 'Všechny kolekce',
     allLocales: 'Všechny lokalizace',
+    allowedTypes: 'Povolené typy',
     and: 'a',
     anotherUser: 'Jiný uživatel',
     anotherUserTakenOver: 'Jiný uživatel převzal úpravy tohoto dokumentu.',
@@ -290,6 +291,7 @@ export const csTranslations: DefaultTranslationsObject = {
     checked: 'Zkontrolováno',
     clear: 'Jasný',
     clearAll: 'Vymazat vše',
+    clearSearch: 'Vymazat hledání',
     close: 'Zavřít',
     collapse: 'Sbalit',
     collection: 'Kolekce',
@@ -563,6 +565,23 @@ export const csTranslations: DefaultTranslationsObject = {
     searchLabel: 'Hledat {{label}}',
     searchResults: 'Nalezeno: {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Další pokyny',
+    collectionDescription:
+      'Přidejte vlastní pokyny pro kolekci {{label}}, které pomohou modelům LLM lépe přizpůsobit odpovědi na zadání.',
+    collectionSystemDescription:
+      'Tyto systémové pokyny pocházejí z konfiguračního souboru kolekce a jsou vždy zahrnuty.',
+    editInstructions: 'Upravit pokyny LLM',
+    global: 'Globální dokument',
+    globalDescription:
+      'Přidejte vlastní pokyny pro globální dokument {{label}}, které pomohou modelům LLM lépe přizpůsobit odpovědi na zadání.',
+    globalSystemDescription:
+      'Tyto systémové pokyny pocházejí z konfiguračního souboru globálního dokumentu a jsou vždy zahrnuty.',
+    instructions: 'Pokyny LLM',
+    systemInstructions: 'Systémové pokyny (pouze pro čtení)',
+    targetCannotBeChanged: 'Cíl pokynů nelze změnit.',
+    title: 'Název',
+  },
   localization: {
     cannotCopySameLocale: 'Nelze kopírovat do stejného umístění',
     copyFrom: 'Kopírovat z',
@@ -596,9 +615,18 @@ export const csTranslations: DefaultTranslationsObject = {
     addFiles: 'Přidat soubory',
     bulkUpload: 'Hromadné nahrání',
     copyLinkToFile: 'Zkopírovat odkaz na soubor',
+    copyURL: 'Zkopírovat URL',
     crop: 'Ořez',
+    cropBottom: 'Dolní úchyt ořezu',
+    cropBottomLeft: 'Levý dolní úchyt ořezu',
+    cropBottomRight: 'Pravý dolní úchyt ořezu',
+    cropLeft: 'Levý úchyt ořezu',
+    cropRight: 'Pravý úchyt ořezu',
     cropToolDescription:
       'Přetáhněte rohy vybrané oblasti, nakreslete novou oblast nebo upravte níže uvedené hodnoty.',
+    cropTop: 'Horní úchyt ořezu',
+    cropTopLeft: 'Levý horní úchyt ořezu',
+    cropTopRight: 'Pravý horní úchyt ořezu',
     download: 'Stáhnout',
     dragAndDrop: 'Přetáhněte soubor',
     dragAndDropHere: 'nebo sem přetáhněte soubor',

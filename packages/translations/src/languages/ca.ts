@@ -282,6 +282,7 @@ export const caTranslations: DefaultTranslationsObject = {
     all: 'Tots',
     allCollections: 'Totes les col·leccions',
     allLocales: 'Totes les localitats',
+    allowedTypes: 'Tipus permesos',
     and: 'i',
     anotherUser: 'Altre usuari',
     anotherUserTakenOver: "Un altre usuari ha pres la edició d'aquest document.",
@@ -296,6 +297,7 @@ export const caTranslations: DefaultTranslationsObject = {
     checked: 'Comprovat',
     clear: 'Clar',
     clearAll: 'Esborra-ho tot',
+    clearSearch: 'Esborra la cerca',
     close: 'Tanca',
     collapse: 'Replegar',
     collection: 'Col·lecció',
@@ -571,6 +573,23 @@ export const caTranslations: DefaultTranslationsObject = {
     searchLabel: 'Cerca {{label}}',
     searchResults: 'S’han trobat {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Instruccions addicionals',
+    collectionDescription:
+      'Afegiu instruccions personalitzades per a la col·lecció {{label}} per ajudar els LLM a adaptar millor les respostes a les indicacions.',
+    collectionSystemDescription:
+      'Aquestes instruccions del sistema provenen del fitxer de configuració de la col·lecció i sempre s’inclouen.',
+    editInstructions: 'Edita les instruccions dels LLM',
+    global: 'Global',
+    globalDescription:
+      'Afegiu instruccions personalitzades per al global {{label}} per ajudar els LLM a adaptar millor les respostes a les indicacions.',
+    globalSystemDescription:
+      'Aquestes instruccions del sistema provenen del fitxer de configuració del global i sempre s’inclouen.',
+    instructions: 'Instruccions dels LLM',
+    systemInstructions: 'Instruccions del sistema (només lectura)',
+    targetCannotBeChanged: 'No es pot canviar la destinació de les instruccions.',
+    title: 'Títol',
+  },
   localization: {
     cannotCopySameLocale: 'No es pot copiar al mateix idioma',
     copyFrom: 'Copiar de',
@@ -604,9 +623,18 @@ export const caTranslations: DefaultTranslationsObject = {
     addFiles: 'Afegir fitxers',
     bulkUpload: 'Carregar arxius massius',
     copyLinkToFile: "Copia l'enllaç al fitxer",
+    copyURL: 'Copia l’URL',
     crop: 'Retallar',
+    cropBottom: 'Tirador inferior de retall',
+    cropBottomLeft: 'Tirador inferior esquerre de retall',
+    cropBottomRight: 'Tirador inferior dret de retall',
+    cropLeft: 'Tirador esquerre de retall',
+    cropRight: 'Tirador dret de retall',
     cropToolDescription:
       'Arrossega les cantonades de l’àrea seleccionada, dibuixa una nova àrea o ajusta els valors a continuació.',
+    cropTop: 'Tirador superior de retall',
+    cropTopLeft: 'Tirador superior esquerre de retall',
+    cropTopRight: 'Tirador superior dret de retall',
     download: 'Descarrega',
     dragAndDrop: 'Arrossega i deixa anar un fitxer',
     dragAndDropHere: 'o arrossega i deixa anar un fitxer aquí',

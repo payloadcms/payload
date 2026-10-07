@@ -279,6 +279,7 @@ export const svTranslations: DefaultTranslationsObject = {
     all: 'Alla',
     allCollections: 'Alla samlingar',
     allLocales: 'Alla språk',
+    allowedTypes: 'Tillåtna typer',
     and: 'Och',
     anotherUser: 'En annan användare',
     anotherUserTakenOver: 'En annan användare har tagit över redigeringen av detta dokument.',
@@ -294,6 +295,7 @@ export const svTranslations: DefaultTranslationsObject = {
     checked: 'Kontrollerad',
     clear: 'Rensa',
     clearAll: 'Rensa alla',
+    clearSearch: 'Rensa sökning',
     close: 'Stäng',
     collapse: 'Fäll ihop',
     collection: 'Samling',
@@ -569,6 +571,23 @@ export const svTranslations: DefaultTranslationsObject = {
     searchLabel: 'Sök {{label}}',
     searchResults: 'Hittade {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Ytterligare instruktioner',
+    collectionDescription:
+      'Lägg till anpassade instruktioner för samlingen {{label}} så att LLM:er bättre kan anpassa sina svar på promptar.',
+    collectionSystemDescription:
+      'Dessa systeminstruktioner kommer från samlingens konfigurationsfil och inkluderas alltid.',
+    editInstructions: 'Redigera LLM-instruktioner',
+    global: 'Global',
+    globalDescription:
+      'Lägg till anpassade instruktioner för globalen {{label}} så att LLM:er bättre kan anpassa sina svar på promptar.',
+    globalSystemDescription:
+      'Dessa systeminstruktioner kommer från globalens konfigurationsfil och inkluderas alltid.',
+    instructions: 'LLM-instruktioner',
+    systemInstructions: 'Systeminstruktioner (skrivskyddade)',
+    targetCannotBeChanged: 'Instruktionernas mål kan inte ändras.',
+    title: 'Titel',
+  },
   localization: {
     cannotCopySameLocale: 'Kan inte kopiera till samma språk',
     copyFrom: 'Kopiera från',
@@ -602,9 +621,18 @@ export const svTranslations: DefaultTranslationsObject = {
     addFiles: 'Lägg till filer',
     bulkUpload: 'Massuppladdning',
     copyLinkToFile: 'Kopiera länk till fil',
+    copyURL: 'Kopiera URL',
     crop: 'Beskär',
+    cropBottom: 'Nedre beskärningshandtag',
+    cropBottomLeft: 'Nedre vänstra beskärningshandtag',
+    cropBottomRight: 'Nedre högra beskärningshandtag',
+    cropLeft: 'Vänstra beskärningshandtag',
+    cropRight: 'Högra beskärningshandtag',
     cropToolDescription:
       'Dra i hörnen på det valda området, rita ett nytt område eller justera värdena nedan.',
+    cropTop: 'Övre beskärningshandtag',
+    cropTopLeft: 'Övre vänstra beskärningshandtag',
+    cropTopRight: 'Övre högra beskärningshandtag',
     download: 'Ladda ner',
     dragAndDrop: 'Dra och släpp en fil',
     dragAndDropHere: 'eller dra och släpp en fil här',
