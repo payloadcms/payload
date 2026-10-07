@@ -144,6 +144,11 @@ To further investigate the issue:
 
 ## Using --experimental-https
 
+<Banner type="info">
+  This section applies to Next.js. If you're running the Admin Panel on TanStack
+  Start, configure HTTPS through Vite's dev server options instead.
+</Banner>
+
 If you are using the `--experimental-https` flag when starting your Payload server, you may run into issues with your WebSocket connection for HMR (Hot Module Reloading) in development mode.
 
 To resolve this, you can set the `USE_HTTPS` environment variable to `true` in your `.env` file:

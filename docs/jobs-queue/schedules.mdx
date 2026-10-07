@@ -101,7 +101,7 @@ Something needs to actually trigger the scheduling of jobs (execute the scheduli
 
 ### Bin Scripts (Recommended for Dedicated Servers)
 
-For dedicated servers, the recommended approach is to use Payload's bin scripts. This runs the scheduling logic in a separate process from your Next.js server.
+For dedicated servers, the recommended approach is to use Payload's bin scripts. This runs the scheduling logic in a separate process from your Next.js or TanStack Start server.
 
 **Combined scheduling and running (recommended):**
 
@@ -121,10 +121,10 @@ pnpm payload jobs:handle-schedules --cron "*/5 * * * *" --all-queues
 
 **Benefits of bin scripts:**
 
-- Separate process from Next.js server
+- Separate process from your Next.js or TanStack Start server
 - Easy to deploy as independent workers
 - Simple to scale by running multiple instances
-- No impact on Next.js server performance
+- No impact on your app server's performance
 
 ### autoRun (Alternative for Dedicated Servers)
 
