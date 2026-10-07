@@ -401,6 +401,7 @@ export type GraphQLInfo = {
     groupTypes: Record<string, GraphQL.GraphQLObjectType>
     localeInputType?: GraphQL.GraphQLEnumType | GraphQL.GraphQLScalarType
     tabTypes: Record<string, GraphQL.GraphQLObjectType>
+    validationResultType?: GraphQL.GraphQLObjectType
   }
 }
 export type GraphQLExtension = (
@@ -728,7 +729,8 @@ export type SanitizedLocalizationConfig = Prettify<
      * @example `["en", "es", "fr", "nl", "de", "jp"]`
      */
     localeCodes: string[]
-  } & Omit<LocalizationConfigWithLabels, 'fallback'> &
+    locales: Locale[]
+  } & Omit<LocalizationConfigWithLabels, 'fallback' | 'locales'> &
     Required<Pick<LocalizationConfigWithLabels, 'fallback'>>
 >
 
@@ -1567,6 +1569,15 @@ export type Config = {
    * ```
    */
   kv?: KVAdapterResult
+  /** Manage instructions shared by MCP and CLI consumers. Set to false to disable the management UI and collection. */
+  llmInstructions?:
+    | {
+        /** Who may edit saved instructions, in addition to the target's read and update access. Defaults to users of the admin auth collection. */
+        access?: Access
+        /** Editor for instructions. Defaults to the root editor's llmInstructions preset, or plain text if unavailable. */
+        editor?: Config['editor']
+      }
+    | false
   /**
    * Translate your content to different languages/locales.
    *

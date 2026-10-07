@@ -46,6 +46,7 @@ import {
   rollbackUploadFiles,
 } from '../../uploads/uploadFileRollback.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import {
   commitTransaction,
   shouldRollbackTransactionArtifacts,
@@ -147,6 +148,8 @@ const updateByIDOperationWithLifecycle = async <
   lifecycleOperation: 'create' | 'update'
   trustedUploadData?: unknown
 }): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
+  assertNoValidationWrite(incomingArgs.req)
+
   const reqContext = incomingArgs.req.context as Record<PropertyKey, unknown> | undefined
   const pendingBranchMergeUploadData = reqContext?.[branchMergeUploadDataContextKey] as
     | BranchMergeUploadDataContext

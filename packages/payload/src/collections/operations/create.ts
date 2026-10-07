@@ -39,6 +39,7 @@ import {
 } from '../../uploads/sanitizeUploadData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import {
   hasDraftsEnabled,
@@ -47,6 +48,7 @@ import {
 } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolvePublishAllLocales } from '../../utilities/resolvePublishAllLocales.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
@@ -89,6 +91,7 @@ export const createOperation = async <
   let externalUploadSource: ReturnType<typeof getExternalUploadSource>
 
   assertBranchMergeValidationWriteAllowed({ req: args.req })
+  assertNoValidationWrite(args.req)
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
@@ -115,8 +118,11 @@ export const createOperation = async <
     }
 
     const initialCollectionConfig = args.collection.config
-    const initialPublishAllLocales =
-      !args.draft && (args.publishAllLocales ?? !hasLocalizeStatusEnabled(initialCollectionConfig))
+    const initialPublishAllLocales = resolvePublishAllLocales({
+      draft: args.draft,
+      hasLocalizeStatusEnabled: hasLocalizeStatusEnabled(initialCollectionConfig),
+      publishAllLocalesArg: args.publishAllLocales,
+    })
     const initialAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
       hasLocalizedStatus: Boolean(
         args.req.payload.config.localization && hasLocalizeStatusEnabled(initialCollectionConfig),
@@ -175,8 +181,11 @@ export const createOperation = async <
     let { data } = args
 
     // For creates there is no existing doc — always publish all locales when not a draft.
-    let publishAllLocales =
-      !draft && (publishAllLocalesArg ?? !hasLocalizeStatusEnabled(collectionConfig))
+    let publishAllLocales = resolvePublishAllLocales({
+      draft,
+      hasLocalizeStatusEnabled: hasLocalizeStatusEnabled(collectionConfig),
+      publishAllLocalesArg,
+    })
     const requestedAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
       hasLocalizedStatus: Boolean(
         config.localization && hasLocalizeStatusEnabled(collectionConfig),

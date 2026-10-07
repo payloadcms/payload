@@ -45,6 +45,7 @@ import {
   rollbackUploadFiles,
 } from '../../uploads/uploadFileRollback.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import {
   commitTransaction,
   shouldRollbackTransactionArtifacts,
@@ -122,6 +123,8 @@ export const updateOperation = async <
   const uploadFileRollbacks: UploadFileRollbacks = new Map()
 
   assertBranchMergeValidationWriteAllowed({ req: args.req })
+
+  assertNoValidationWrite(args.req)
 
   if (args.collection.config.disableBulkEdit && !args.overrideAccess) {
     throw new APIError(`Collection ${args.collection.config.slug} has disabled bulk edit`, 403)

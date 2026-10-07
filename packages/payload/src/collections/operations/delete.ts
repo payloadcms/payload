@@ -35,6 +35,7 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import {
   deleteDocumentLocks,
   getDocumentLockState,
@@ -83,6 +84,8 @@ export const deleteOperation = async <
   let shouldCommit = false
 
   assertBranchMergeValidationWriteAllowed({ req: args.req })
+
+  assertNoValidationWrite(args.req)
 
   if (args.collection.config.disableBulkDelete && !args.overrideAccess) {
     throw new APIError(`Collection ${args.collection.config.slug} has disabled bulk delete`, 403)

@@ -1,9 +1,11 @@
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import type { useAuth } from '@payloadcms/ui'
+import type { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToFormState'
 import type {
   Access,
   ArrayField,
   AuthenticatedUser,
+  BeforeValidateOperation,
   Block,
   BlockRowLabelClientProps,
   BlockRowLabelServerProps,
@@ -15,13 +17,27 @@ import type {
   branchOperations,
   BulkOperationResult,
   CollapsibleField,
+  CollectionAfterChangeHook,
+  CollectionBeforeChangeHook,
+  CollectionBeforeValidateHook,
+  CollectionConfig,
+  CollectionPermission,
   CollectionSlug,
   CustomDocumentViewConfig,
   DefaultDocumentViewConfig,
+  Field,
   FieldClientProps,
   FieldErrorServerProps,
+  FieldHookArgs,
+  FieldOperation,
+  FieldPermissions,
   FieldServerProps,
   GeneratedTypes,
+  GlobalAfterChangeHook,
+  GlobalBeforeChangeHook,
+  GlobalBeforeValidateHook,
+  GlobalConfig,
+  GlobalPermission,
   Job,
   JobTaskStatus,
   JoinFieldLabelServerProps,
@@ -34,6 +50,7 @@ import type {
   MergeWarning,
   NamedGroupField,
   NamedTab,
+  Operation,
   PaginatedDocs,
   PayloadClientComponentProps,
   PayloadRequest,
@@ -43,6 +60,7 @@ import type {
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   SelectType,
+  ServerComponentProps,
   TabsField,
   TextField,
   TextFieldClientProps,
@@ -54,6 +72,9 @@ import type {
   UnnamedTab,
   UntypedPayloadTypes,
   UploadFieldErrorServerProps,
+  Validate,
+  ValidationFieldError,
+  ValidationResult,
   Where,
 } from 'payload'
 import type { FC } from 'react'
@@ -143,6 +164,164 @@ describe('Types testing', () => {
       type ProgressEvent = Extract<MergeStreamEvent, { type: 'progress' }>
 
       expect<Omit<ProgressEvent, 'type'>>().type.toBe<MergeProgress>()
+    })
+  })
+
+  describe('validate operation types', () => {
+    test('should expose beforeValidate operations', () => {
+      expect<BeforeValidateOperation>().type.toBe<'create' | 'update' | 'validate'>()
+      expect<FieldOperation>().type.toBe<'create' | 'read' | 'update' | 'validate'>()
+      expect<Operation>().type.toBe<'create' | 'delete' | 'read' | 'update' | 'validate'>()
+      expect<PayloadRequest['operation']>().type.toBe<Operation | undefined>()
+    })
+
+    test('should limit form state operations to field operations', () => {
+      expect<Parameters<typeof fieldSchemasToFormState>[0]['operation']>().type.toBe<
+        FieldOperation | undefined
+      >()
+      expect<ServerComponentProps['operation']>().type.toBe<FieldOperation>()
+    })
+
+    test('should expose validate only to validation lifecycle types', () => {
+      expect<{
+        locale?: string
+        message: string
+        path: string
+      }>().type.toBeAssignableTo<ValidationFieldError>()
+      expect<'validate'>().type.toBeAssignableTo<PayloadRequest['operation']>()
+      expect<'validate'>().type.toBeAssignableTo<FieldHookArgs['operation']>()
+      expect<'validate'>().type.toBeAssignableTo<Parameters<Validate>[1]['operation']>()
+      expect<'validate'>().type.toBeAssignableTo<
+        Parameters<CollectionBeforeValidateHook>[0]['operation']
+      >()
+      expect<'validate'>().type.toBeAssignableTo<
+        Parameters<CollectionBeforeChangeHook>[0]['operation']
+      >()
+      expect<'validate'>().type.not.toBeAssignableTo<
+        Parameters<CollectionAfterChangeHook>[0]['operation']
+      >()
+      expect<'validate'>().type.toBeAssignableTo<
+        Parameters<GlobalBeforeValidateHook>[0]['operation']
+      >()
+      expect<'validate'>().type.toBeAssignableTo<
+        Parameters<GlobalBeforeChangeHook>[0]['operation']
+      >()
+      expect<'validate'>().type.not.toBeAssignableTo<
+        Parameters<GlobalAfterChangeHook>[0]['operation']
+      >()
+      expect<CollectionConfig>().type.toBeAssignableFrom<{
+        access: { validate: () => true }
+        fields: []
+        slug: 'posts'
+      }>()
+      expect<GlobalConfig>().type.toBeAssignableFrom<{
+        access: { validate: () => true }
+        fields: []
+        slug: 'settings'
+      }>()
+      expect<Field>().type.toBeAssignableFrom<{
+        access: { validate: () => true }
+        name: 'title'
+        type: 'text'
+      }>()
+      expect<CollectionPermission>().type.toHaveProperty('validate')
+      expect<GlobalPermission>().type.toHaveProperty('validate')
+      expect<FieldPermissions>().type.toHaveProperty('validate')
+    })
+
+    test('should require collection create data and allow the locale to be omitted', () => {
+      expect(payload.validate).type.toBeCallableWith({
+        collection: 'pages',
+        data: {},
+        locale: null,
+      })
+      expect(payload.validate).type.toBeCallableWith({
+        collection: 'pages',
+        data: {},
+      })
+      expect(payload.validate).type.not.toBeCallableWith({
+        collection: 'pages',
+        locale: null,
+      })
+      expect(payload.validate).type.not.toBeCallableWith({
+        collection: 'pages',
+        data: {},
+        fallbackLocale: null,
+        locale: null,
+      })
+    })
+
+    test('should allow collection update and global validation data to be omitted', () => {
+      expect(payload.validate).type.toBeCallableWith({
+        id: 'document-id',
+        collection: 'pages',
+      })
+      expect(payload.validate).type.toBeCallableWith({
+        id: 'document-id',
+        collection: 'pages',
+        locale: null,
+      })
+      expect(payload.validateGlobal).type.toBeCallableWith({
+        slug: 'menu',
+      })
+      expect(payload.validateGlobal).type.toBeCallableWith({
+        slug: 'menu',
+        locale: null,
+      })
+      expect(payload.validateGlobal).type.not.toBeCallableWith({
+        slug: 'menu',
+        fallbackLocale: null,
+        locale: null,
+      })
+      expect(
+        payload.validate({
+          collection: 'pages',
+          data: {},
+          locale: null,
+        }),
+      ).type.toBe<Promise<ValidationResult>>()
+      expect(
+        payload.validateGlobal({
+          slug: 'menu',
+          locale: null,
+        }),
+      ).type.toBe<Promise<ValidationResult>>()
+    })
+
+    test('should accept multi-locale selectors without exposing concurrency controls', () => {
+      const mutableLocales: [null, ...null[]] = [null]
+      const readonlyLocales = [null] as const
+
+      expect(payload.validate).type.toBeCallableWith({
+        collection: 'pages',
+        data: {},
+        locale: mutableLocales,
+      })
+      expect(payload.validate).type.toBeCallableWith({
+        collection: 'pages',
+        data: {},
+        locale: readonlyLocales,
+      })
+      expect(payload.validate).type.toBeCallableWith({
+        collection: 'pages',
+        data: {},
+        locale: 'all',
+      })
+      expect(payload.validateGlobal).type.toBeCallableWith({
+        slug: 'menu',
+        locale: 'all',
+      })
+      expect(payload.validate).type.not.toBeCallableWith({
+        collection: 'pages',
+        concurrency: 4,
+        data: {},
+        locale: 'all',
+      })
+      expect(payload.validate).type.not.toBeCallableWith({
+        collection: 'pages',
+        data: {},
+        locale: [],
+      })
     })
   })
 

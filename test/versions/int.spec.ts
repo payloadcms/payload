@@ -5596,6 +5596,68 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         })
       })
 
+      test('should not queue a new job when deleting a scheduled publish event', async ({
+        payload,
+      }) => {
+        const req = await createPayloadRequest({ payload, user })
+
+        await schedulePublishHandler({
+          type: 'publish',
+          date: new Date(Date.now() + 60_000),
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: draftDoc.id,
+          },
+          locale: 'all',
+          req,
+          user,
+        })
+
+        const { docs: jobsBeforeDelete } = await payload.find({
+          collection: 'payload-jobs',
+          overrideAccess: true,
+          where: {
+            taskSlug: {
+              equals: 'schedulePublish',
+            },
+          },
+        })
+
+        const scheduledJob = jobsBeforeDelete.find(
+          (job) => (job.input as JsonObject)?.doc?.value === draftDoc.id,
+        )
+
+        expect(scheduledJob).toBeDefined()
+
+        const result = await schedulePublishHandler({
+          deleteID: scheduledJob!.id,
+          req,
+          user,
+        })
+
+        const { docs: newJobs } = await payload.find({
+          collection: 'payload-jobs',
+          overrideAccess: true,
+          where: {
+            and: [
+              {
+                taskSlug: {
+                  equals: 'schedulePublish',
+                },
+              },
+              {
+                id: {
+                  not_in: jobsBeforeDelete.map((job) => job.id),
+                },
+              },
+            ],
+          },
+        })
+
+        expect(result).not.toHaveProperty('error')
+        expect(newJobs).toEqual([])
+      })
+
       test('should not delete a job that is not a scheduled publish', async ({ payload }) => {
         const req = await createPayloadRequest({ payload, user })
         const unrelatedJob = await payload.db.create({

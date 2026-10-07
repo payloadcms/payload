@@ -66,9 +66,10 @@ export const getCollectionSchemaTool = defineCollectionTool({
       }
     : { enabled: false }
 
-  const instructions = getLLMInstructions({
+  const instructions = await getLLMInstructions({
     slug,
     type: 'collection',
+    overrideAccess: authorizedMCP.overrideAccess,
     req,
   })
 

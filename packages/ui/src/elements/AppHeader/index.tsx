@@ -1,4 +1,5 @@
 'use client'
+import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useRef, useState } from 'react'
 
 import { useElementHeightVariable } from '../../hooks/useElementHeightVariable.js'
@@ -19,8 +20,9 @@ import './index.css'
 const baseClass = 'app-header'
 
 export function AppHeader() {
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
   const locale = useLocale()
+  const localeLabel = locale && getTranslation(locale.label, i18n)
   const { Actions } = useActions()
 
   const { navOpen, setNavOpen } = useNav()
@@ -111,7 +113,7 @@ export function AppHeader() {
                     {...ariaProps}
                   >
                     <div className="localizer__button-content">
-                      {locale?.code}
+                      {localeLabel}
                       <ChevronIcon direction={active ? 'up' : 'down'} size={16} />
                     </div>
                   </Button>

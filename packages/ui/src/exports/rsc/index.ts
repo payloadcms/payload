@@ -11,6 +11,7 @@ export {
   getHTMLDiffComponents,
   unescapeDiffHTML,
 } from '../../elements/HTMLDiff/index.js'
+export { LLMInstructionsCell } from '../../elements/LLMInstructionsCell/index.js'
 export { Logo } from '../../elements/Logo/index.js'
 export { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 export { DefaultNav, type NavProps } from '../../elements/Nav/index.js'

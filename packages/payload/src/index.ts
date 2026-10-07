@@ -59,6 +59,7 @@ import type {
   TransformCollectionWithSelect,
   TransformGlobalWithSelect,
 } from './types/index.js'
+import type { ValidationResult } from './types/validation.js'
 import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 
 import { countLocal, type CountOptions } from './collections/operations/local/count.js'
@@ -128,6 +129,10 @@ import {
   type ManyOptions as UpdateManyOptions,
   type Options as UpdateOptions,
 } from './collections/operations/local/update.js'
+import {
+  type ValidateCollectionOptions,
+  validateLocal,
+} from './collections/operations/local/validate.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
 import {
@@ -154,6 +159,10 @@ import {
   updateGlobalLocal,
   type Options as UpdateGlobalOptions,
 } from './globals/operations/local/update.js'
+import {
+  validateGlobalLocal,
+  type ValidateGlobalOptions,
+} from './globals/operations/local/validate.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
 import { _internal_jobSystemGlobals } from './queues/utilities/getCurrentDate.js'
 import { formatAdminURL } from './utilities/formatAdminURL.js'
@@ -790,6 +799,40 @@ export class BasePayload {
     options: UpdateGlobalOptions<TSlug, TSelect>,
   ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
     return updateGlobalLocal<TSlug, TSelect>(this, options)
+  }
+
+  /**
+   * Validates a collection document candidate for selected locales without persisting data,
+   * versions, or files.
+   *
+   * Omit `id` to validate create data. With `id`, the stored main document is the default base;
+   * `draft: true` selects the newest available draft version and falls back to the main document.
+   * Partial candidate data is merged over that base. Field validation failures resolve to
+   * `{ valid: false, errors }`; access, argument, lookup, and other lifecycle errors throw.
+   *
+   * @see https://payloadcms.com/docs/validation/overview#local-api
+   */
+  validate = async <TSlug extends CollectionSlug>(
+    options: ValidateCollectionOptions<TSlug>,
+  ): Promise<ValidationResult> => {
+    return validateLocal<TSlug>(this, options)
+  }
+
+  /**
+   * Validates a global document candidate for selected locales without persisting data or
+   * versions.
+   *
+   * The stored main global is the default base; `draft: true` selects the newest available draft
+   * version and falls back to the main global. Partial candidate data is merged over that base.
+   * Field validation failures resolve to `{ valid: false, errors }`; access, argument, and other
+   * lifecycle errors throw.
+   *
+   * @see https://payloadcms.com/docs/validation/overview#local-api
+   */
+  validateGlobal = async <TSlug extends GlobalSlug>(
+    options: ValidateGlobalOptions<TSlug>,
+  ): Promise<ValidationResult> => {
+    return validateGlobalLocal<TSlug>(this, options)
   }
 
   validationRules!: (args: OperationArgs<any>) => ValidationRule[]
@@ -1630,6 +1673,7 @@ export {
   updateDocumentInputSchema,
   updateDocumentLocalInputSchema,
 } from './collections/operations/inputSchemas.js'
+export type { ValidateCollectionOptions } from './collections/operations/local/validate.js'
 export { restoreVersionOperation } from './collections/operations/restoreVersion.js'
 export { updateOperation } from './collections/operations/update.js'
 
@@ -2011,6 +2055,7 @@ export {
   updateGlobalInputSchema,
   updateGlobalLocalInputSchema,
 } from './globals/operations/inputSchemas.js'
+export type { ValidateGlobalOptions } from './globals/operations/local/validate.js'
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
 export {
@@ -2054,6 +2099,8 @@ export type {
   DocumentPreferences,
   FieldsPreferences,
   InsideFieldsPreferences,
+  PinnedDocument,
+  PinnedDocumentsPreferences,
   PreferenceRequest,
   PreferenceUpdateRequest,
   RecentlyViewedItem,
@@ -2098,6 +2145,7 @@ export {
 } from './queues/utilities/getCurrentDate.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
+export type { ValidationResult } from './types/validation.js'
 export { generatePayloadFileURL } from './uploads/generatePayloadFileURL.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'

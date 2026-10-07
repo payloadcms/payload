@@ -6,6 +6,7 @@ import type { FileToSave } from './types.js'
 import type { UploadFileRollbacks } from './uploadFileRollback.js'
 
 import { FileUploadError } from '../errors/index.js'
+import { assertNoValidationWrite } from '../utilities/assertNoValidationWrite.js'
 import { saveBufferToFile } from './saveBufferToFile.js'
 import { publishUploadedFile, stageUploadFileRollback } from './uploadFileRollback.js'
 
@@ -19,6 +20,8 @@ export const uploadFiles = async (
     uploadFileRollbacks?: UploadFileRollbacks
   } = {},
 ): Promise<void> => {
+  assertNoValidationWrite(req)
+
   try {
     const filesToUpload: Array<{ file: FileToSave; stagedFile: FileToSave }> = []
 

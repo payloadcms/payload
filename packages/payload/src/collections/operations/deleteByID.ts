@@ -37,6 +37,7 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasScheduledPublishEnabled } from '../../utilities/getVersionsConfig.js'
@@ -178,6 +179,8 @@ const deleteByIDOperationAttempt = async <
   let shouldCommit = false
 
   assertBranchMergeValidationWriteAllowed({ req: args.req })
+
+  assertNoValidationWrite(args.req)
 
   try {
     shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
