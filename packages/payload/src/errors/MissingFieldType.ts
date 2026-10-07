@@ -10,5 +10,6 @@ export class MissingFieldType extends APIError {
         fieldAffectsData(field) ? ` "${field.name}"` : ''
       } is either missing a field type or it does not match an available field type`,
     )
+    this.name = 'MissingFieldType'
   }
 }

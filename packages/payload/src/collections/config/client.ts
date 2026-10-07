@@ -24,6 +24,7 @@ export type ServerOnlyCollectionProperties = keyof Pick<
   | 'hooks'
   | 'indexes'
   | 'joins'
+  | 'llmInstructions'
   | 'polymorphicJoins'
   | 'sanitizedIndexes'
   | 'select'
@@ -39,6 +40,7 @@ export type ServerOnlyUploadProperties = keyof Pick<
   | 'admin'
   | 'adminThumbnail'
   | 'externalFileHeaderFilter'
+  | 'fileOperations'
   | 'handlers'
   | 'modifyResponseHeaders'
   | 'uploadInstructions'
@@ -46,7 +48,7 @@ export type ServerOnlyUploadProperties = keyof Pick<
 
 type ClientUploadConfig = {
   uploadInstructions: Pick<UploadInstructionsCapability, 'useInAdmin'>
-} & Omit<SanitizedUploadConfig, 'uploadInstructions'>
+} & Omit<SanitizedUploadConfig, 'fileOperations' | 'uploadInstructions'>
 
 export type ClientCollectionConfig = {
   admin: {
@@ -85,6 +87,7 @@ const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] 
   'endpoints',
   'custom',
   'joins',
+  'llmInstructions',
   'polymorphicJoins',
   'flattenedFields',
   'indexes',
@@ -99,6 +102,7 @@ const serverOnlyUploadProperties: Partial<ServerOnlyUploadProperties>[] = [
   'admin',
   'adminThumbnail',
   'externalFileHeaderFilter',
+  'fileOperations',
   'handlers',
   'modifyResponseHeaders',
   'uploadInstructions',

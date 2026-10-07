@@ -1,10 +1,9 @@
-import { status as httpStatus } from 'http-status'
-
 import type { PayloadHandler } from '../../config/types.js'
 import type { JoinParams } from '../../utilities/sanitizeJoinParams.js'
 
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { isNumber } from '../../utilities/isNumber.js'
 import { sanitizeJoinParams } from '../../utilities/sanitizeJoinParams.js'
 import { sanitizePopulateParam } from '../../utilities/sanitizePopulateParam.js'

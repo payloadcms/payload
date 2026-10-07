@@ -26,6 +26,7 @@ import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
 import { resolveHierarchyCollections } from '../hierarchy/resolveHierarchyCollections.js'
 import { baseBlockFields, formatLabels, sanitizeFields } from '../index.js'
+import { addLLMInstructions } from '../llm-instructions/addLLMInstructions.js'
 import {
   getLockedDocumentsCollection,
   lockedDocumentsCollectionSlug,
@@ -187,6 +188,7 @@ const addDefaultDashboardWidgets = ({
           // inverse as an exclusion list, so collections added later stay visible by default.
           Field: '@payloadcms/ui#RecentlyViewedCollectionsField',
         },
+        description: ({ t }) => t('dashboard:widgetRecentlyViewedFilterDescription'),
       },
       hasMany: true,
       label: ({ t }) => t('general:collections'),
@@ -247,8 +249,8 @@ const addDefaultDashboardWidgets = ({
       richTextSanitizers,
       validRelationships,
     }),
-    label: ({ t }) => t('dashboard:widgetRecentlyViewedTitle'),
-    minWidth: 'x-small',
+    label: ({ t }) => t('dashboard:widgetRecentsAndPinned'),
+    minWidth: 'small',
   })
   if (uploadCollections.length > 0) {
     dashboard.widgets.push({
@@ -690,6 +692,19 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
       isRoot: true,
       parentIsLocalized: false,
     })
+  }
+
+  if (config.llmInstructions !== false) {
+    const instructionsCollection = addLLMInstructions({ config: config as SanitizedConfig })
+
+    config.collections!.push(
+      sanitizeCollection(
+        config as unknown as Config,
+        instructionsCollection,
+        richTextSanitizers,
+        validRelationships,
+      ),
+    )
   }
 
   for (const sanitizeRichText of richTextSanitizers) {

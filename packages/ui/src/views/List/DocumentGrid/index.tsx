@@ -2,13 +2,13 @@
 
 import type { ViewTypes } from 'payload'
 
-import { getBestFitFromSizes, isImage } from 'payload/shared'
 import React from 'react'
 
 import { CardGrid } from '../../../elements/CardGrid/index.js'
 import { DocumentCard } from '../../../elements/DocumentCard/index.js'
 import { DocumentIcon } from '../../../icons/Document/index.js'
 import { useSelection } from '../../../providers/Selection/index.js'
+import { getDocumentThumbnail } from '../../../utilities/getDocumentThumbnail.js'
 import { getDocumentListItemURL } from '../getDocumentListItemURL.js'
 
 type DocumentGridProps = {
@@ -42,55 +42,6 @@ const getDocumentTitle = ({
   return typeof value === 'string' || typeof value === 'number' ? String(value) : getDocumentID(doc)
 }
 
-const getThumbnailDoc = ({
-  doc,
-  useAsThumbnail,
-}: {
-  doc: Record<string, unknown>
-  useAsThumbnail?: string
-}) => {
-  const thumbnailValue = useAsThumbnail ? doc[useAsThumbnail] : undefined
-
-  if (Array.isArray(thumbnailValue)) {
-    return thumbnailValue[0] && typeof thumbnailValue[0] === 'object'
-      ? (thumbnailValue[0] as Record<string, unknown>)
-      : undefined
-  }
-
-  if (thumbnailValue && typeof thumbnailValue === 'object') {
-    return thumbnailValue as Record<string, unknown>
-  }
-
-  return doc
-}
-
-const getThumbnail = ({
-  doc,
-  useAsThumbnail,
-}: {
-  doc: Record<string, unknown>
-  useAsThumbnail?: string
-}) => {
-  const thumbnailDoc = getThumbnailDoc({ doc, useAsThumbnail })
-
-  if (!thumbnailDoc) {
-    return undefined
-  }
-
-  const mimeType = typeof thumbnailDoc.mimeType === 'string' ? thumbnailDoc.mimeType : undefined
-
-  if (mimeType && isImage(mimeType)) {
-    return getBestFitFromSizes({
-      sizes: thumbnailDoc.sizes as Record<string, { url?: string; width?: number }>,
-      thumbnailURL: thumbnailDoc.thumbnailURL as string,
-      url: thumbnailDoc.url as string,
-      width: thumbnailDoc.width as number,
-    })
-  }
-
-  return typeof thumbnailDoc.thumbnailURL === 'string' ? thumbnailDoc.thumbnailURL : undefined
-}
-
 export const DocumentGrid: React.FC<DocumentGridProps> = ({
   adminRoute,
   collectionLabel,
@@ -120,7 +71,7 @@ export const DocumentGrid: React.FC<DocumentGridProps> = ({
       renderItem={(doc) => {
         const id = doc.id
         const documentID = getDocumentID(doc)
-        const thumbnailSrc = getThumbnail({ doc, useAsThumbnail })
+        const thumbnailSrc = getDocumentThumbnail({ doc, useAsThumbnail })
         const title = getDocumentTitle({ doc, useAsTitle })
 
         return (

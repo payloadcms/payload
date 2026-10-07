@@ -3,6 +3,7 @@ import type {
   CollectionPreferences,
   Column,
   ColumnPreference,
+  CurrentHierarchyItem,
   HierarchyViewData,
   ListQuery,
   ListViewClientProps,
@@ -10,15 +11,13 @@ import type {
   ListViewServerPropsOnly,
   PaginatedDocs,
   PayloadComponent,
-  PopulateType,
   QueryPreset,
   SanitizedCollectionPermission,
-  SelectType,
 } from 'payload'
 
+import { docAccessOperation } from 'payload'
 import {
   appendDateTimezoneSelectFields,
-  appendUploadSelectFields,
   combineWhereConstraints,
   formatAdminURL,
   isNumber,
@@ -41,6 +40,8 @@ import {
 /* eslint-enable payload/no-imports-from-exports-dir */
 import { getColumns } from '../../utilities/getColumns.js'
 import { getDocumentPermissions } from '../../utilities/getDocumentPermissions.js'
+import { getDocumentThumbnailPopulate } from '../../utilities/getDocumentThumbnailPopulate.js'
+import { getDocumentThumbnailSelect } from '../../utilities/getDocumentThumbnailSelect.js'
 import { renderFilters, renderTable } from '../../utilities/renderTable.js'
 import { upsertPreferences } from '../../utilities/upsertPreferences.js'
 import { enrichDocsWithVersionStatus } from './enrichDocsWithVersionStatus.js'
@@ -267,7 +268,10 @@ export const renderListView = async (
   })
 
   /** Automatically force select active columns. */
-  const select = transformColumnsToSelect(columns)
+  const select = getDocumentThumbnailSelect({
+    collectionConfig,
+    select: transformColumnsToSelect(columns),
+  })
 
   /** Grid cards need their title, timestamp, and thumbnail regardless of visible table columns. */
   if (collectionConfig.admin.useAsTitle) {
@@ -280,48 +284,25 @@ export const renderListView = async (
     select[collectionConfig.admin.useAsTitle] = true
   }
 
-  /** Force select image fields for list view thumbnails */
-  appendUploadSelectFields({
-    collectionConfig,
-    select,
-  })
+  /** Force select hierarchy scope so parent cells can validate destinations independently of visible columns. */
+  if (
+    typeof collectionConfig.hierarchy === 'object' &&
+    collectionConfig.hierarchy.collectionSpecific
+  ) {
+    select[collectionConfig.hierarchy.collectionSpecific.fieldName] = true
+  }
 
   /** Populate only the configured thumbnail relationship for flat collection grids. */
   const thumbnailFieldName =
     collectionPreferences?.documentLayout === 'grid' && viewType !== 'hierarchy'
       ? collectionConfig.admin.useAsThumbnail
       : undefined
-  let thumbnailPopulate: PopulateType | undefined
+  const thumbnailPopulate = thumbnailFieldName
+    ? getDocumentThumbnailPopulate({ collectionConfig, collections: payload.config.collections })
+    : undefined
 
   if (thumbnailFieldName) {
     select[thumbnailFieldName] = true
-
-    const thumbnailField = collectionConfig.flattenedFields.find(
-      (field) => field.name === thumbnailFieldName && field.type === 'upload',
-    )
-
-    if (thumbnailField && 'relationTo' in thumbnailField) {
-      const relatedSlugs = Array.isArray(thumbnailField.relationTo)
-        ? thumbnailField.relationTo
-        : [thumbnailField.relationTo]
-
-      thumbnailPopulate = {}
-
-      for (const relatedSlug of relatedSlugs) {
-        const relatedCollectionConfig = payload.collections[relatedSlug]?.config
-
-        if (relatedCollectionConfig) {
-          const relatedSelect: SelectType = {}
-
-          appendUploadSelectFields({
-            collectionConfig: relatedCollectionConfig,
-            select: relatedSelect,
-          })
-
-          thumbnailPopulate[relatedSlug] = relatedSelect
-        }
-      }
-    }
   }
 
   /** Force select `_tz` siblings for any timezone-enabled date fields in select */
@@ -346,6 +327,7 @@ export const renderListView = async (
     typeof collectionConfig.hierarchy === 'object'
       ? (collectionConfig.hierarchy.parentFieldName ?? 'parent')
       : 'parent'
+  const isHierarchyView = viewType === 'hierarchy'
   let hierarchyParentId: null | number | string = null
 
   if (isHierarchyCollection) {
@@ -357,6 +339,40 @@ export const renderListView = async (
         payload.db.defaultIDType === 'number' && isNumber(parentParam)
           ? Number(parentParam)
           : parentParam
+    }
+  }
+
+  let currentHierarchyItem: CurrentHierarchyItem | undefined
+
+  if (isHierarchyCollection && hierarchyParentId !== null) {
+    try {
+      const currentHierarchyDoc = await payload.findByID({
+        id: hierarchyParentId,
+        collection: collectionSlug,
+        depth: 0,
+        disableErrors: true,
+        overrideAccess: false,
+        req,
+        user,
+      })
+
+      if (currentHierarchyDoc) {
+        const { update: hasUpdatePermission } = await docAccessOperation({
+          id: currentHierarchyDoc.id,
+          collection: { config: collectionConfig },
+          data: currentHierarchyDoc,
+          req,
+        })
+        const titleFieldName = collectionConfig.admin?.useAsTitle || 'id'
+
+        currentHierarchyItem = {
+          id: currentHierarchyDoc.id,
+          hasUpdatePermission: Boolean(hasUpdatePermission),
+          title: String(currentHierarchyDoc[titleFieldName] || currentHierarchyDoc.id),
+        }
+      }
+    } catch (err) {
+      payload.logger.warn({ err, msg: `Could not resolve hierarchy item: ${hierarchyParentId}` })
     }
   }
 
@@ -455,9 +471,8 @@ export const renderListView = async (
     }
   }
 
-  // Fetch hierarchy data only for hierarchy view
+  // Resolve hierarchy data for the hierarchy list view.
   let HierarchyIcon: React.ReactNode | undefined
-  const isHierarchyView = viewType === 'hierarchy'
 
   if (isHierarchyCollection && isHierarchyView) {
     // Extract typeFilter from searchParams (comma-separated list of collection slugs)
@@ -537,7 +552,7 @@ export const renderListView = async (
     user: userWithReadAccess,
   }
 
-  const listViewSlots = renderListViewSlots({
+  const listViewSlots = await renderListViewSlots({
     clientProps: {
       collectionSlug,
       hasCreatePermission,
@@ -550,6 +565,7 @@ export const renderListView = async (
     description: staticDescription,
     notFoundDocId,
     payload,
+    req,
     serverProps,
   })
 
@@ -583,6 +599,7 @@ export const renderListView = async (
       baseFilter: baseFilterConstraint,
       collectionSlug,
       columnState,
+      currentHierarchyItem,
       disableBulkDelete: collectionConfig.disableBulkDelete ?? disableBulkDelete,
       disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
       disableQueryPresets,

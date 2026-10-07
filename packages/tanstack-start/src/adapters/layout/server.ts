@@ -8,10 +8,10 @@ import { Outlet } from '@tanstack/react-router'
 import { renderServerComponent } from '@tanstack/react-start/rsc'
 import { createElement } from 'react'
 
-import type { SerializableRecord } from '../utilities/toSerializable.js'
+import type { SerializableRecord } from '../../utilities/toSerializable.js'
 
-import { initAdminContext } from '../utilities/initAdminContext.server.js'
-import { toSerializable } from '../utilities/toSerializable.js'
+import { initAdminContext } from '../../utilities/initAdminContext.server.js'
+import { toSerializable } from '../../utilities/toSerializable.js'
 
 export type LoadLayoutDataResult = SerializableRecord
 
@@ -32,12 +32,16 @@ export async function getLayoutData({
 }: GetLayoutDataArgs): Promise<RootLayoutData> {
   const context = await initAdminContext({ configPromise, importMap })
 
-  const { permissions, req, user } = context
+  const { cookies, headers, languageCode, permissions, req, user } = context
 
   const data = await getRootLayoutData({
-    clientConfigUser: user ?? true,
-    context,
+    cookies,
+    headers,
     importMap,
+    languageCode,
+    permissions,
+    req,
+    user,
   })
 
   const providerPaths = req.payload.config.admin?.components?.providers

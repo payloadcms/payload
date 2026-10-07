@@ -190,6 +190,8 @@ export const Tooltip: React.FC<Props> = (props) => {
 
     const hidden = isTriggerHidden(trigger) || Boolean(middlewareData.hide?.referenceHidden)
 
+    floatingElement.style.setProperty('--tooltip-x', `${x}px`)
+
     Object.assign(floatingElement.style, {
       left: `${x}px`,
       top: `${y}px`,
