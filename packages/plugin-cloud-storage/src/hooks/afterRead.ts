@@ -51,23 +51,19 @@ export const getAfterReadHook =
 
     if (filename) {
       if (generateFileURL) {
-        if (!url) {
-          url = await generateFileURL({
-            collection,
-            filename,
-            prefix: objectFolder,
-            size,
-          })
-        }
+        url = await generateFileURL({
+          collection,
+          filename,
+          prefix: objectFolder,
+          size,
+        })
       } else if (disablePayloadAccessControl && adapter.generateURL) {
-        if (!url) {
-          url = await adapter.generateURL({
-            collection,
-            data,
-            filename,
-            prefix: objectFolder,
-          })
-        }
+        url = await adapter.generateURL({
+          collection,
+          data,
+          filename,
+          prefix: objectFolder,
+        })
       } else if (url && prefix) {
         url = appendProxyPrefix({ prefix, url })
       }

@@ -341,6 +341,7 @@ export const updateOperation = async <
       let docWithLocales = incomingDoc
       const { id } = docWithLocales
       let documentTempFilePath: string | undefined
+      let documentReq = req
 
       try {
         // Each document gets its own transaction when singleTransaction is enabled
@@ -360,10 +361,13 @@ export const updateOperation = async <
           documentFile.tempFilePath = documentTempFilePath
         }
 
-        let documentReq = req
         if (collectionConfig.upload && sharedGeneratedFileData === null) {
           documentReq = isolateObjectProperty(req, ['file', 'payloadUploadSizes'])
-          shareFileOperationScope({ owner: req, req: documentReq })
+          // A document that commits its own transaction must not roll back files committed by
+          // earlier documents, so it only shares the operation's file scope inside one transaction.
+          if (!docShouldCommit) {
+            shareFileOperationScope({ owner: req, req: documentReq })
+          }
           documentReq.file = documentFile
           documentReq.payloadUploadSizes = {}
         }
@@ -444,7 +448,7 @@ export const updateOperation = async <
               current: incomingDoc,
               data: updateArgs.data,
               files: generatedFileData.files,
-              req,
+              req: documentReq,
               write,
             })
           : await runLocalFileUpdate({
@@ -453,7 +457,7 @@ export const updateOperation = async <
               current: docWithLocales,
               files: generatedFileData.files,
               next: generatedFileData.data as Record<string, unknown>,
-              req,
+              req: documentReq,
               write,
             })
 
@@ -466,7 +470,7 @@ export const updateOperation = async <
         }
 
         if (docShouldCommit) {
-          await commitTransaction(req)
+          await commitTransaction(documentReq)
         }
 
         return updatedDoc
@@ -474,7 +478,7 @@ export const updateOperation = async <
         const isPublic = error instanceof Error ? isErrorPublic(error, config) : false
 
         if (req.payload.db.bulkOperationsSingleTransaction) {
-          await killTransaction(req)
+          await killTransaction(documentReq)
         }
         errors.push({
           id,
