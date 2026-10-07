@@ -151,6 +151,16 @@ describe('createPayloadRequest - URL construction', () => {
     expect(secondBranchRequest.branch).toBe('second')
   })
 
+  it('should not add a bypass marker for a named branch', async () => {
+    const request = await createPayloadRequest({
+      branch: 'preview',
+      context: { caller: 'test' },
+      payload: mockPayload,
+    })
+
+    expect(request.context).toEqual({ caller: 'test' })
+  })
+
   it('should isolate branch overrides from a request whose branch comes from the query', async () => {
     const queryBranchRequest = await createPayloadRequest({
       payload: mockPayload,

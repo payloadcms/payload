@@ -27,7 +27,7 @@ type Args<T extends JsonObject = JsonObject> = {
   unpublish?: boolean
 }
 
-export const captureSavedVersionIDContextKey = Symbol('captureSavedVersionID')
+export const captureSavedVersionIDContextKey = Symbol.for('payload.versions.captureSavedVersionID')
 
 export type CaptureSavedVersionID = (args: {
   collectionSlug?: string

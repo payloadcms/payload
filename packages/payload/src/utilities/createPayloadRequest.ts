@@ -174,7 +174,12 @@ export const createPayloadRequest: CreatePayloadRequest = async ({
     }
 
     req.branch = branch === false ? undefined : branch
-    ;(req.context as Record<string, unknown>)._branchBypass = branch === false
+
+    if (branch === false) {
+      ;(req.context as Record<string, unknown>)._branchBypass = true
+    } else {
+      delete (req.context as Record<string, unknown>)._branchBypass
+    }
   }
 
   req.payloadAPI = req?.payloadAPI || 'local'

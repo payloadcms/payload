@@ -47,8 +47,8 @@ type BranchDeleteOperation = {
   useAmbientTransaction: boolean
 }
 
-const concurrentBranchDeleteContextKey = Symbol('concurrentBranchDelete')
-const branchDeleteOperationContextKey = Symbol('branchDeleteOperation')
+const concurrentBranchDeleteContextKey = Symbol.for('payload.branching.concurrentBranchDelete')
+const branchDeleteOperationContextKey = Symbol.for('payload.branching.branchDeleteOperation')
 
 type Result = {
   /** Narrows the caller's delete to this row's primary key. */
