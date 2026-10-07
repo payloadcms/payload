@@ -60,6 +60,18 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_4EE6A29F".
+ */
+export type LexicalNodes_4EE6A29F =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_4EE6A29F>
+  | SerializedListNode<LexicalNodes_4EE6A29F>
+  | SerializedListItemNode<LexicalNodes_4EE6A29F>
+  | SerializedHeadingNode<LexicalNodes_4EE6A29F, 'h2' | 'h3' | 'h4'>;
 
 export interface Config {
   auth: {
@@ -80,12 +92,14 @@ export interface Config {
     'unversioned-cloud-media': UnversionedCloudMedia;
     users: User;
     'versioned-cloud-media': VersionedCloudMedia;
+    'versioned-converted-cloud-media': VersionedConvertedCloudMedia;
     'versioned-public-cloud-media': VersionedPublicCloudMedia;
     'versioned-s3-media': VersionedS3Media;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+    'payload-llm-instructions': PayloadLlmInstruction;
   };
   collectionsJoins: {};
   collectionsSelect: {
@@ -102,12 +116,14 @@ export interface Config {
     'unversioned-cloud-media': UnversionedCloudMediaSelect<false> | UnversionedCloudMediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'versioned-cloud-media': VersionedCloudMediaSelect<false> | VersionedCloudMediaSelect<true>;
+    'versioned-converted-cloud-media': VersionedConvertedCloudMediaSelect<false> | VersionedConvertedCloudMediaSelect<true>;
     'versioned-public-cloud-media': VersionedPublicCloudMediaSelect<false> | VersionedPublicCloudMediaSelect<true>;
     'versioned-s3-media': VersionedS3MediaSelect<false> | VersionedS3MediaSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+    'payload-llm-instructions': PayloadLlmInstructionsSelect<false> | PayloadLlmInstructionsSelect<true>;
   };
   db: {
     defaultIDType: string;
@@ -716,6 +732,44 @@ export interface VersionedCloudMedia {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versioned-converted-cloud-media".
+ */
+export interface VersionedConvertedCloudMedia {
+  id: string;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "versioned-public-cloud-media".
  */
 export interface VersionedPublicCloudMedia {
@@ -879,6 +933,10 @@ export interface PayloadLockedDocument {
         value: string | VersionedCloudMedia;
       } | null)
     | ({
+        relationTo: 'versioned-converted-cloud-media';
+        value: string | VersionedConvertedCloudMedia;
+      } | null)
+    | ({
         relationTo: 'versioned-public-cloud-media';
         value: string | VersionedPublicCloudMedia;
       } | null)
@@ -925,6 +983,28 @@ export interface PayloadMigration {
   id: string;
   name?: string | null;
   batch?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-llm-instructions".
+ */
+export interface PayloadLlmInstruction {
+  id: string;
+  entitySlug: string;
+  title?: string | null;
+  entityType: 'collection' | 'global';
+  additionalInstructions?: LexicalRichText<LexicalNodes_4EE6A29F> | null;
+  systemInstructions?: LexicalRichText<LexicalNodes_4EE6A29F> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1438,6 +1518,39 @@ export interface VersionedCloudMediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versioned-converted-cloud-media_select".
+ */
+export interface VersionedConvertedCloudMediaSelect<T extends boolean = true> {
+  prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+      };
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "versioned-public-cloud-media_select".
  */
 export interface VersionedPublicCloudMediaSelect<T extends boolean = true> {
@@ -1560,6 +1673,22 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-llm-instructions_select".
+ */
+export interface PayloadLlmInstructionsSelect<T extends boolean = true> {
+  id?: T;
+  entitySlug?: T;
+  title?: T;
+  entityType?: T;
+  additionalInstructions?: T;
+  systemInstructions?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "welcome_widget".
  */
 export interface WelcomeWidget {
@@ -1599,6 +1728,7 @@ export interface CollectionQueryWidget {
       | 'unversioned-cloud-media'
       | 'users'
       | 'versioned-cloud-media'
+      | 'versioned-converted-cloud-media'
       | 'versioned-public-cloud-media'
       | 'versioned-s3-media';
     where?:
@@ -1637,6 +1767,7 @@ export interface ActivityWidget {
           | 'unversioned-cloud-media'
           | 'users'
           | 'versioned-cloud-media'
+          | 'versioned-converted-cloud-media'
           | 'versioned-public-cloud-media'
           | 'versioned-s3-media'
         )[]
@@ -1664,6 +1795,7 @@ export interface UploadDropzoneWidget {
           | 'test-metadata'
           | 'unversioned-cloud-media'
           | 'versioned-cloud-media'
+          | 'versioned-converted-cloud-media'
           | 'versioned-public-cloud-media'
           | 'versioned-s3-media'
         )[]
@@ -1677,6 +1809,87 @@ export interface UploadDropzoneWidget {
  */
 export interface Auth {
   [k: string]: unknown;
+}
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'list';
+  checked?: boolean;
+  listType: 'number' | 'bullet' | 'check';
+  start: number;
+  tag: 'ul' | 'ol';
+}
+
+export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'listitem';
+  checked?: boolean;
+  value: number;
+}
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
+}
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
 }
 
 
