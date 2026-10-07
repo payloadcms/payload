@@ -2,8 +2,10 @@ import { expect, test, vi } from 'vitest'
 
 import { BranchChangesView } from './index.js'
 
-vi.mock('../../exports/client/index.js', () => ({ BranchChanges: () => null }))
-vi.mock('../Edit/SetDocumentStepNav/index.js', () => ({ SetDocumentStepNav: () => null }))
+vi.mock('../../exports/client/index.js', () => ({
+  BranchChanges: () => null,
+  SetDocumentStepNav: () => null,
+}))
 
 test('should read internal branch state only after the branch access check', async () => {
   const find = vi.fn(async ({ collection }: { collection: string }) => ({
