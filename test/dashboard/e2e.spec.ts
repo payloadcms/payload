@@ -39,6 +39,106 @@ describe('Dashboard', () => {
     await page.goto(url.admin)
   })
 
+  test('should keep dashboard height stable and delay loading feedback', async ({ page }) => {
+    test.setTimeout(TEST_TIMEOUT_LONG)
+    const documents = (await (await page.request.get(`${serverURL}/api/tickets?limit=5`)).json())
+      .docs
+
+    for (const key of ['pinned-documents', 'recently-viewed']) {
+      const response = await page.request.post(`${serverURL}/api/payload-preferences/${key}`, {
+        data: {
+          value: {
+            items: documents.map(({ id }) => ({
+              id,
+              collectionSlug: 'tickets',
+              viewedAt: new Date().toISOString(),
+            })),
+          },
+        },
+      })
+
+      expect(response.ok()).toBe(true)
+    }
+    await page.clock.install()
+    let release = () => {}
+    let gate = Promise.resolve()
+
+    await page.route('**/admin**', async (route) => {
+      if (
+        route.request().method() === 'POST' &&
+        route.request().postData()?.includes('get-dashboard-documents')
+      ) {
+        await gate
+      }
+      await route.continue()
+    })
+    for (const width of [320, 700, 1110, 1600]) {
+      await page.setViewportSize({ width, height: 900 })
+      await page.goto(url.admin)
+      const widget = page.locator('.recents-widget')
+      const viewport = widget.locator('.recents-widget__viewport')
+      const loading = widget.locator('.recents-widget__loading')
+      const collections = page.locator('.collections__wrap')
+
+      await expect(viewport).toHaveAttribute('aria-busy', 'false')
+      await page.clock.pauseAt((await page.evaluate(() => Date.now())) + 100)
+      for (const action of ['tab', 'page'] as const) {
+        const before = await collections.boundingBox()
+
+        gate = new Promise<void>((resolve) => {
+          release = resolve
+        })
+        const button =
+          action === 'tab'
+            ? widget.getByRole('button', { name: 'Recently viewed', exact: true })
+            : widget.getByRole('button', { name: 'Next', exact: true })
+
+        await button.focus()
+        await button.press('Enter')
+        await expect(viewport).toHaveAttribute('aria-busy', 'true')
+        await expect(loading).toBeHidden()
+        await page.clock.runFor(179)
+        await expect(loading).toBeHidden()
+        await page.clock.runFor(1)
+        await expect(loading).toHaveText('Loading')
+        await expect(loading).toBeVisible()
+        await expect(widget.locator('.recents-widget__status')).toHaveAttribute(
+          'aria-live',
+          'polite',
+        )
+        await expect(widget.locator('.recents-widget__status')).toHaveText('Loading')
+        await expect(loading).toHaveAttribute('aria-hidden', 'true')
+        const loadingBox = await viewport.boundingBox()
+        const during = await collections.boundingBox()
+
+        release()
+        await expect(viewport).toHaveAttribute('aria-busy', 'false')
+        await expect(loading).toBeHidden()
+        await page.clock.runFor(20)
+        const loadedBox = await viewport.boundingBox()
+        const after = await collections.boundingBox()
+
+        expect(Math.abs(loadingBox!.height - loadedBox!.height)).toBeLessThanOrEqual(1)
+        expect(Math.abs(before!.y - during!.y)).toBeLessThanOrEqual(1)
+        expect(Math.abs(during!.y - after!.y)).toBeLessThanOrEqual(1)
+      }
+      // A response that completes before the delay must never flash the indicator.
+      gate = new Promise<void>((resolve) => {
+        release = resolve
+      })
+      const pinned = widget.getByRole('button', { name: 'Pinned', exact: true })
+
+      await pinned.focus()
+      await pinned.press('Enter')
+      await expect(viewport).toHaveAttribute('aria-busy', 'true')
+      release()
+      await expect(viewport).toHaveAttribute('aria-busy', 'false')
+      await page.clock.runFor(200)
+      await expect(loading).toBeHidden()
+      await page.clock.resume()
+    }
+  })
+
   test('initial dashboard', async ({ page }) => {
     const d = new DashboardHelper(page)
     await expect(d.widgets).toHaveCount(TOTAL_WIDGETS)

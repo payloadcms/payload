@@ -91,6 +91,7 @@ export function RecentsAndPinnedClient({
   const [activeTab, setActiveTab] = useState<DocumentsTab>('pinned')
   const [pageResult, setPageResult] = useState<DocumentsPage>({ items: [], page: 1, totalDocs: 0 })
   const [isLoading, setIsLoading] = useState(true)
+  const [shouldShowLoading, setShouldShowLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
   const [loadError, setLoadError] = useState('')
@@ -111,7 +112,9 @@ export function RecentsAndPinnedClient({
     }
     let isCurrent = true
     setIsLoading(true)
+    setShouldShowLoading(false)
     setLoadError('')
+    const loadingTimeout = setTimeout(() => setShouldShowLoading(true), 180)
     void (
       serverFunction({
         name: 'get-dashboard-documents',
@@ -157,8 +160,10 @@ export function RecentsAndPinnedClient({
           setLoadError(labels.loadError)
         }
       })
+      .finally(() => clearTimeout(loadingTimeout))
     return () => {
       isCurrent = false
+      clearTimeout(loadingTimeout)
     }
   }, [
     activeTab,
@@ -392,9 +397,7 @@ export function RecentsAndPinnedClient({
               }
             />
           </div>
-        ) : isLoading ? (
-          <div className="recents-widget__empty" />
-        ) : loadError ? null : (
+        ) : isLoading || loadError ? null : (
           <div aria-live="polite" className="recents-widget__empty">
             <span
               aria-hidden="true"
@@ -408,9 +411,15 @@ export function RecentsAndPinnedClient({
             </span>
           </div>
         )}
+        <span aria-hidden="true" className="recents-widget__loading">
+          {isLoading && shouldShowLoading ? <span>{labels.loading}</span> : null}
+        </span>
       </div>
-      <span aria-live="polite" className="recents-widget__status">
-        {saveError || loadError || (isLoading ? labels.loading : '')}
+      <span
+        aria-live="polite"
+        className={`recents-widget__status${saveError || loadError ? '' : ' sr-only'}`}
+      >
+        {saveError || loadError || (isLoading && shouldShowLoading ? labels.loading : '')}
       </span>
       {loadError ? (
         <button onClick={() => setRefresh((value) => value + 1)} type="button">

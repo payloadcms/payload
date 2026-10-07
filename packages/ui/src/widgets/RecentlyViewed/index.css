@@ -38,6 +38,9 @@
     justify-content: space-between;
     gap: var(--spacer-2);
     flex-wrap: wrap;
+    align-content: flex-start;
+    /* Reserve the second toolbar row when pagination wraps on narrow widgets. */
+    min-block-size: calc(var(--spacer-4) * 2 + var(--spacer-2));
   }
 
   .recents-widget__tabs {
@@ -80,6 +83,42 @@
 
   .card-grid.recents-widget__items--grid {
     grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+
+  .recents-widget__viewport {
+    --recents-columns: 1;
+    --recents-card-width: calc(
+      (100cqw - var(--spacer-3) * (var(--recents-columns) - 1)) / var(--recents-columns)
+    );
+
+    /* Match the thumbnail, two text lines, padding, metadata gap, and card border. */
+    min-block-size: max(
+      calc(var(--spacer-6) * 5),
+      calc(
+        (var(--recents-card-width) - var(--stroke-width-small) * 2) * 3 / 4 +
+          (var(--text-body-medium-line-height) + var(--spacer-2-5)) * 2 + var(--spacer-1) +
+          var(--stroke-width-small) * 2
+      )
+    );
+    position: relative;
+  }
+
+  .recents-widget__loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .recents-widget__loading > span {
+    padding: var(--spacer-2);
+    background: var(--color-bg);
+  }
+
+  .recents-widget__loading:empty {
+    display: none;
   }
 
   .recents-widget__item--empty {
@@ -189,7 +228,7 @@
     line-height: var(--text-body-large-strong-line-height);
   }
 
-  .recents-widget__status:empty {
+  .recents-widget__status:empty:not(.sr-only) {
     display: none;
   }
 
@@ -237,12 +276,24 @@
   }
 
   @container (min-width: 400px) {
+    .recents-widget__toolbar {
+      min-block-size: var(--spacer-4);
+    }
+
+    .recents-widget__viewport {
+      --recents-columns: 2;
+    }
+
     .card-grid.recents-widget__items--grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 
   @container (min-width: 768px) {
+    .recents-widget__viewport {
+      --recents-columns: 4;
+    }
+
     .card-grid.recents-widget__items--grid {
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
