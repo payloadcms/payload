@@ -283,6 +283,7 @@ export const myTranslations: DefaultTranslationsObject = {
     all: 'အားလုံး',
     allCollections: 'အားလုံးစုစည်းမှုများ',
     allLocales: 'ဒေသအားလုံး',
+    allowedTypes: 'ခွင့်ပြုထားသော အမျိုးအစားများ',
     and: 'နှင့်',
     anotherUser: 'တစ်ခြားအသုံးပြုသူ',
     anotherUserTakenOver: 'တစ်ခြားအသုံးပြုသူသည်ဤစာရွက်စာတမ်းကိုပြင်ဆင်မှုကိုရယူလိုက်သည်။',
@@ -291,6 +292,7 @@ export const myTranslations: DefaultTranslationsObject = {
     auto: 'အော်တို',
     automatic: 'အော်တို',
     backToDashboard: 'ပင်မစာမျက်နှာသို့ ပြန်သွားမည်။',
+    breadcrumb: 'လမ်းညွှန်လမ်းကြောင်း',
     by: 'ဖြင့်',
     cancel: 'မလုပ်တော့ပါ။',
     changesNotSaved:
@@ -298,6 +300,7 @@ export const myTranslations: DefaultTranslationsObject = {
     checked: 'စစ်ဆေးပြီး',
     clear: 'ရှင်းလင်းပါ',
     clearAll: 'အားလုံးကိုရှင်းလင်းပါ',
+    clearSearch: 'ရှာဖွေမှုကို ရှင်းလင်းရန်',
     close: 'ပိတ်',
     collapse: 'ခေါက်သိမ်းပါ။',
     collection: 'စုဆည်းမှု',
@@ -577,6 +580,23 @@ export const myTranslations: DefaultTranslationsObject = {
     searchLabel: '{{label}} ရှာဖွေပါ',
     searchResults: '{{count}} ခု တွေ့ရှိသည်',
   },
+  llmInstructions: {
+    additionalInstructions: 'ထပ်ဆောင်းညွှန်ကြားချက်များ',
+    collectionDescription:
+      'LLM များက မေးခွန်းများနှင့် ပိုမိုသင့်လျော်သော တုံ့ပြန်ချက်များ ပေးနိုင်ရန် {{label}} စုစည်းမှုအတွက် စိတ်ကြိုက်ညွှန်ကြားချက်များ ထည့်ပါ။',
+    collectionSystemDescription:
+      'ဤစနစ်ညွှန်ကြားချက်များကို စုစည်းမှု၏ ဖွဲ့စည်းမှုဖိုင်မှ ပံ့ပိုးထားပြီး အမြဲထည့်သွင်းထားပါသည်။',
+    editInstructions: 'LLM ညွှန်ကြားချက်များကို ပြင်ဆင်ရန်',
+    global: 'ဂလိုဘယ်စာတမ်း',
+    globalDescription:
+      'LLM များက မေးခွန်းများနှင့် ပိုမိုသင့်လျော်သော တုံ့ပြန်ချက်များ ပေးနိုင်ရန် {{label}} ဂလိုဘယ်စာတမ်းအတွက် စိတ်ကြိုက်ညွှန်ကြားချက်များ ထည့်ပါ။',
+    globalSystemDescription:
+      'ဤစနစ်ညွှန်ကြားချက်များကို ဂလိုဘယ်စာတမ်း၏ ဖွဲ့စည်းမှုဖိုင်မှ ပံ့ပိုးထားပြီး အမြဲထည့်သွင်းထားပါသည်။',
+    instructions: 'LLM ညွှန်ကြားချက်များ',
+    systemInstructions: 'စနစ်ညွှန်ကြားချက်များ (ဖတ်ရန်သာ)',
+    targetCannotBeChanged: 'ညွှန်ကြားချက်များ၏ ပစ်မှတ်ကို ပြောင်းလဲ၍မရပါ။',
+    title: 'ခေါင်းစဉ်',
+  },
   localization: {
     cannotCopySameLocale: 'တူညီသော ဒေသသို့ ကူးယူ၍မရပါ',
     copyFrom: 'မှ ကူးယူပါ',
@@ -610,9 +630,18 @@ export const myTranslations: DefaultTranslationsObject = {
     addFiles: 'ဖိုင်များ ထည့်ပါ',
     bulkUpload: 'အစုလိုက် အပ်လုဒ်',
     copyLinkToFile: 'ဖိုင်အတွက်လင့်ခ်ကို ကူးယူပါ',
+    copyURL: 'URL ကို ကူးယူပါ',
     crop: 'သုန်း',
+    cropBottom: 'ဖြတ်တောက်မှု အောက်လက်ကိုင်',
+    cropBottomLeft: 'ဖြတ်တောက်မှု အောက်ဘယ်လက်ကိုင်',
+    cropBottomRight: 'ဖြတ်တောက်မှု အောက်ညာလက်ကိုင်',
+    cropLeft: 'ဖြတ်တောက်မှု ဘယ်လက်ကိုင်',
+    cropRight: 'ဖြတ်တောက်မှု ညာလက်ကိုင်',
     cropToolDescription:
       'ရွေးထားသည့်ဧရိယာတွင်မွေးလျှက်မှုများကိုဆွဲပြီး, အသစ်တည်ပြီးသို့မဟုတ်အောက်ပါတ',
+    cropTop: 'ဖြတ်တောက်မှု အပေါ်လက်ကိုင်',
+    cropTopLeft: 'ဖြတ်တောက်မှု အပေါ်ဘယ်လက်ကိုင်',
+    cropTopRight: 'ဖြတ်တောက်မှု အပေါ်ညာလက်ကိုင်',
     download: 'ဒေါင်းလုဒ်ဆွဲပါ',
     dragAndDrop: 'ဖိုင်တစ်ဖိုင်ကို ဆွဲချလိုက်ပါ။',
     dragAndDropHere: 'သို့မဟုတ် ဖိုင်တစ်ခုကို ဤနေရာတွင် ဆွဲချပါ။',

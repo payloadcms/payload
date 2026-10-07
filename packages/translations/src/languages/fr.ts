@@ -289,6 +289,7 @@ export const frTranslations: DefaultTranslationsObject = {
     all: 'Tout',
     allCollections: 'Toutes les collections',
     allLocales: 'Tous les paramètres régionaux',
+    allowedTypes: 'Types autorisés',
     and: 'Et',
     anotherUser: 'Un autre utilisateur',
     anotherUserTakenOver: 'Un autre utilisateur a pris en charge la modification de ce document.',
@@ -297,6 +298,7 @@ export const frTranslations: DefaultTranslationsObject = {
     auto: 'Automatique',
     automatic: 'Automatique',
     backToDashboard: 'Retour au tableau de bord',
+    breadcrumb: 'Fil d’Ariane',
     by: 'Par',
     cancel: 'Annuler',
     changesNotSaved:
@@ -304,6 +306,7 @@ export const frTranslations: DefaultTranslationsObject = {
     checked: 'Vérifié',
     clear: 'Clair',
     clearAll: 'Tout effacer',
+    clearSearch: 'Effacer la recherche',
     close: 'Fermer',
     collapse: 'Réduire',
     collection: 'Collection',
@@ -581,6 +584,23 @@ export const frTranslations: DefaultTranslationsObject = {
     searchLabel: 'Recherche {{label}}',
     searchResults: '{{count}} trouvés',
   },
+  llmInstructions: {
+    additionalInstructions: 'Instructions supplémentaires',
+    collectionDescription:
+      'Ajoutez des instructions personnalisées pour la collection {{label}} afin d’aider les LLM à mieux adapter leurs réponses aux requêtes.',
+    collectionSystemDescription:
+      'Ces instructions système proviennent du fichier de configuration de la collection et sont toujours incluses.',
+    editInstructions: 'Modifier les instructions LLM',
+    global: 'Global',
+    globalDescription:
+      'Ajoutez des instructions personnalisées pour le global {{label}} afin d’aider les LLM à mieux adapter leurs réponses aux requêtes.',
+    globalSystemDescription:
+      'Ces instructions système proviennent du fichier de configuration du global et sont toujours incluses.',
+    instructions: 'Instructions LLM',
+    systemInstructions: 'Instructions système (lecture seule)',
+    targetCannotBeChanged: 'La cible des instructions ne peut pas être modifiée.',
+    title: 'Titre',
+  },
   localization: {
     cannotCopySameLocale: 'Impossible de copier dans le même endroit',
     copyFrom: 'Copier de',
@@ -614,9 +634,18 @@ export const frTranslations: DefaultTranslationsObject = {
     addFiles: 'Ajouter des fichiers',
     bulkUpload: 'Téléchargement en masse',
     copyLinkToFile: 'Copier le lien vers le fichier',
+    copyURL: 'Copier l’URL',
     crop: 'Recadrer',
+    cropBottom: 'Poignée de recadrage inférieure',
+    cropBottomLeft: 'Poignée de recadrage inférieure gauche',
+    cropBottomRight: 'Poignée de recadrage inférieure droite',
+    cropLeft: 'Poignée de recadrage gauche',
+    cropRight: 'Poignée de recadrage droite',
     cropToolDescription:
       'Faites glisser les coins de la zone sélectionnée, dessinez une nouvelle zone ou ajustez les valeurs ci-dessous.',
+    cropTop: 'Poignée de recadrage supérieure',
+    cropTopLeft: 'Poignée de recadrage supérieure gauche',
+    cropTopRight: 'Poignée de recadrage supérieure droite',
     download: 'Télécharger',
     dragAndDrop: 'Glisser-déposer un fichier',
     dragAndDropHere: 'ou glissez-déposez un fichier ici',

@@ -49,9 +49,10 @@ export const getGlobalSchemaTool = defineGlobalTool({
     }
   }
 
-  const instructions = getLLMInstructions({
+  const instructions = await getLLMInstructions({
     slug,
     type: 'global',
+    overrideAccess: authorizedMCP.overrideAccess,
     req,
   })
 

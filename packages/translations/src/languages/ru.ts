@@ -282,6 +282,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     all: 'Все',
     allCollections: 'Все Коллекции',
     allLocales: 'Все локали',
+    allowedTypes: 'Разрешенные типы',
     and: 'А также',
     anotherUser: 'Другой пользователь',
     anotherUserTakenOver: 'Другой пользователь взял на себя редактирование этого документа.',
@@ -290,6 +291,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     auto: 'Автоматически',
     automatic: 'Автоматически',
     backToDashboard: 'Назад к Панели',
+    breadcrumb: 'Навигационная цепочка',
     by: 'По',
     cancel: 'Отмена',
     changesNotSaved:
@@ -297,6 +299,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     checked: 'Проверено',
     clear: 'Четкий',
     clearAll: 'Очистить все',
+    clearSearch: 'Очистить поиск',
     close: 'Закрыть',
     collapse: 'Свернуть',
     collection: 'Коллекция',
@@ -572,6 +575,23 @@ export const ruTranslations: DefaultTranslationsObject = {
     searchLabel: 'Поиск {{label}}',
     searchResults: 'Найдено: {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Дополнительные инструкции',
+    collectionDescription:
+      'Добавьте пользовательские инструкции для коллекции {{label}}, чтобы помочь LLM лучше адаптировать ответы на запросы.',
+    collectionSystemDescription:
+      'Эти системные инструкции заданы в файле конфигурации коллекции и включаются всегда.',
+    editInstructions: 'Редактировать инструкции для LLM',
+    global: 'Глобальный документ',
+    globalDescription:
+      'Добавьте пользовательские инструкции для глобального документа {{label}}, чтобы помочь LLM лучше адаптировать ответы на запросы.',
+    globalSystemDescription:
+      'Эти системные инструкции заданы в файле конфигурации глобального документа и включаются всегда.',
+    instructions: 'Инструкции для LLM',
+    systemInstructions: 'Системные инструкции (только для чтения)',
+    targetCannotBeChanged: 'Нельзя изменить объект, к которому относятся инструкции.',
+    title: 'Заголовок',
+  },
   localization: {
     cannotCopySameLocale: 'Невозможно скопировать в ту же локаль',
     copyFrom: 'Скопировать из',
@@ -605,9 +625,18 @@ export const ruTranslations: DefaultTranslationsObject = {
     addFiles: 'Добавить файлы',
     bulkUpload: 'Массовая загрузка',
     copyLinkToFile: 'Скопировать ссылку на файл',
+    copyURL: 'Скопировать URL',
     crop: 'Обрезать',
+    cropBottom: 'Нижний маркер обрезки',
+    cropBottomLeft: 'Нижний левый маркер обрезки',
+    cropBottomRight: 'Нижний правый маркер обрезки',
+    cropLeft: 'Левый маркер обрезки',
+    cropRight: 'Правый маркер обрезки',
     cropToolDescription:
       'Перетащите углы выбранной области, нарисуйте новую область или отрегулируйте значения ниже.',
+    cropTop: 'Верхний маркер обрезки',
+    cropTopLeft: 'Верхний левый маркер обрезки',
+    cropTopRight: 'Верхний правый маркер обрезки',
     download: 'Скачать',
     dragAndDrop: 'Перетащите файл',
     dragAndDropHere: 'или перетащите файл сюда',

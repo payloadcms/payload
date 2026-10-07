@@ -92,13 +92,26 @@ export const TranslationProvider: React.FC<Props> = ({
   )
 
   useEffect(() => {
+    // en-US is date-fns' default locale, so it's already part of the bundle
+    if (dateFNSKey === 'en-US') {
+      setDateFNS(enUS)
+      return
+    }
+
+    let isCancelled = false
     const loadDateFNS = async () => {
       const imported = await importDateFNSLocale(dateFNSKey)
 
-      setDateFNS(imported)
+      if (!isCancelled) {
+        setDateFNS(imported)
+      }
     }
 
     void loadDateFNS()
+
+    return () => {
+      isCancelled = true
+    }
   }, [dateFNSKey])
 
   return (

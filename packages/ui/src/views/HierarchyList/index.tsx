@@ -138,8 +138,8 @@ export function HierarchyListView(props: ListViewClientProps) {
 
   useEffect(() => {
     if (!isInDrawer) {
-      // Breadcrumbs exclude the last item (current item) since it's shown in the header
-      const ancestorBreadcrumbs = hierarchyData?.breadcrumbs?.slice(0, -1) || []
+      // The trail ends with the current item as plain text rather than a link back to itself.
+      const breadcrumbs = hierarchyData?.breadcrumbs || []
 
       const baseLabel: StepNavItem = {
         label: collectionLabel,
@@ -151,15 +151,19 @@ export function HierarchyListView(props: ListViewClientProps) {
 
       let navItems = [baseLabel]
 
-      if (ancestorBreadcrumbs.length > 0) {
-        const hierarchyBreadcrumbs: StepNavItem[] = ancestorBreadcrumbs.map((crumb) => ({
+      if (breadcrumbs.length > 0) {
+        const lastIndex = breadcrumbs.length - 1
+        const hierarchyBreadcrumbs: StepNavItem[] = breadcrumbs.map((crumb, index) => ({
           label: crumb.title,
-          url: getHierarchyListURL({
-            adminRoute,
-            collectionSlug,
-            parentFieldName,
-            parentID: crumb.id,
-          }),
+          url:
+            index === lastIndex
+              ? undefined
+              : getHierarchyListURL({
+                  adminRoute,
+                  collectionSlug,
+                  parentFieldName,
+                  parentID: crumb.id,
+                }),
         }))
         navItems = [...navItems, ...hierarchyBreadcrumbs]
       }

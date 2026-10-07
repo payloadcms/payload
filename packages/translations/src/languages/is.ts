@@ -278,6 +278,7 @@ export const isTranslations: DefaultTranslationsObject = {
     all: 'Allt',
     allCollections: 'Öll söfn',
     allLocales: 'Allar staðfærslur',
+    allowedTypes: 'Leyfðar gerðir',
     and: 'Og',
     anotherUser: 'Annar notandi',
     anotherUserTakenOver: 'Annar notandi hefur tekið yfir skráningu þessarar færslu.',
@@ -286,6 +287,7 @@ export const isTranslations: DefaultTranslationsObject = {
     auto: 'Sjálfvirkt',
     automatic: 'Sjálfvirkt',
     backToDashboard: 'Aftur í stjórnborð',
+    breadcrumb: 'Brauðmolaslóð',
     by: 'Eftir',
     cancel: 'Hætta við',
     changesNotSaved:
@@ -293,6 +295,7 @@ export const isTranslations: DefaultTranslationsObject = {
     checked: 'Staðfest',
     clear: 'Hreinsa',
     clearAll: 'Hreinsa allt',
+    clearSearch: 'Hreinsa leit',
     close: 'Loka',
     collapse: 'Fella saman',
     collection: 'Safn',
@@ -565,6 +568,23 @@ export const isTranslations: DefaultTranslationsObject = {
     searchLabel: 'Leita {{label}}',
     searchResults: 'Fann {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Viðbótarleiðbeiningar',
+    collectionDescription:
+      'Bættu við sérsniðnum leiðbeiningum fyrir safnið {{label}} til að hjálpa LLM að laga svör sín betur að fyrirmælum.',
+    collectionSystemDescription:
+      'Þessar kerfisleiðbeiningar koma úr stillingaskrá safnsins og eru alltaf teknar með.',
+    editInstructions: 'Breyta LLM-leiðbeiningum',
+    global: 'Altækt skjal',
+    globalDescription:
+      'Bættu við sérsniðnum leiðbeiningum fyrir altæka skjalið {{label}} til að hjálpa LLM að laga svör sín betur að fyrirmælum.',
+    globalSystemDescription:
+      'Þessar kerfisleiðbeiningar koma úr stillingaskrá altæka skjalsins og eru alltaf teknar með.',
+    instructions: 'LLM-leiðbeiningar',
+    systemInstructions: 'Kerfisleiðbeiningar (skrifvarið)',
+    targetCannotBeChanged: 'Ekki er hægt að breyta markmiði leiðbeininganna.',
+    title: 'Titill',
+  },
   localization: {
     cannotCopySameLocale: 'Ekki hægt að afrita í sömu staðfærslu',
     copyFrom: 'Afrita frá',
@@ -598,9 +618,18 @@ export const isTranslations: DefaultTranslationsObject = {
     addFiles: 'Bæta við skrám',
     bulkUpload: 'Magn upphal',
     copyLinkToFile: 'Afrita hlekk á skrá',
+    copyURL: 'Afrita URL',
     crop: 'Skera',
+    cropBottom: 'Neðra skurðarhandfang',
+    cropBottomLeft: 'Neðra vinstra skurðarhandfang',
+    cropBottomRight: 'Neðra hægra skurðarhandfang',
+    cropLeft: 'Vinstra skurðarhandfang',
+    cropRight: 'Hægra skurðarhandfang',
     cropToolDescription:
       'Dragðu horn valda svæðisins, teiknaðu nýtt svæði eða stilltu gildin hér að neðan.',
+    cropTop: 'Efra skurðarhandfang',
+    cropTopLeft: 'Efra vinstra skurðarhandfang',
+    cropTopRight: 'Efra hægra skurðarhandfang',
     download: 'Sækja',
     dragAndDrop: 'Dragðu og slepptu skrá',
     dragAndDropHere: 'eða dragðu og slepptu skrá hér',
