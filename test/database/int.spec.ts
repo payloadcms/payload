@@ -3027,6 +3027,51 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
       }
     })
 
+    test('should keep earlier updates when a later document fails with bulkOperationsSingleTransaction: true', async ({
+      payload,
+    }) => {
+      const originalValue = payload.db.bulkOperationsSingleTransaction
+      const hooks = payload.collections[collection].config.hooks
+      const originalBeforeChange = hooks.beforeChange
+      payload.db.bulkOperationsSingleTransaction = true
+      hooks.beforeChange = [
+        ...(originalBeforeChange ?? []),
+        ({ data, originalDoc }) => {
+          if (originalDoc?.title === 'b') {
+            throw new Error('Cannot update b')
+          }
+          return data
+        },
+      ]
+
+      try {
+        const posts = await Promise.all(
+          ['a', 'b', 'c'].map((title) =>
+            payload.create({ collection, data: { title }, overrideAccess: true }),
+          ),
+        )
+
+        const where = { id: { in: posts.map((p) => p.id) } }
+
+        const result = await payload.update({
+          collection,
+          data: { title: 'updated' },
+          overrideAccess: true,
+          sort: 'title',
+          where,
+        })
+
+        const { docs } = await payload.find({ collection, overrideAccess: true, where })
+
+        expect(result.docs).toHaveLength(2)
+        expect(result.errors).toHaveLength(1)
+        expect(docs.map((doc) => doc.title).sort()).toStrictEqual(['b', 'updated', 'updated'])
+      } finally {
+        hooks.beforeChange = originalBeforeChange
+        payload.db.bulkOperationsSingleTransaction = originalValue
+      }
+    })
+
     test('should bulk delete with bulkOperationsSingleTransaction: true', async ({ payload }) => {
       const originalValue = payload.db.bulkOperationsSingleTransaction
       payload.db.bulkOperationsSingleTransaction = true
