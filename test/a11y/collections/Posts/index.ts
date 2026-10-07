@@ -192,6 +192,13 @@ export const PostsCollection: CollectionConfig = {
             {
               name: 'date',
               type: 'date',
+              admin: {
+                date: {
+                  overrides: {
+                    excludeDates: [new Date('2026-09-14T12:00:00.000Z')],
+                  },
+                },
+              },
             },
           ],
           labels: {
