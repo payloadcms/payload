@@ -13,6 +13,7 @@ export { createCLI } from '../cli/index.js'
 export { getCommandInput } from '../cli/runtime/getCommandInput.js'
 export { createSchemaBuildContext } from '../database/createSchemaBuildContext.js'
 export type { SchemaBuildContext } from '../database/createSchemaBuildContext.js'
+export { getLLMInstructions } from '../llm-instructions/getInstructions.js'
 export { assertClientUploadAccess } from '../uploads/assertClientUploadAccess.js'
 export { assertClientUploadAllowed } from '../uploads/assertClientUploadAllowed.js'
 export {
@@ -41,6 +42,11 @@ export type {
   UploadTransformTask,
 } from '../uploads/transformers/uploadTransformerBridge.js'
 export { uploadContentSecurityPolicy } from '../uploads/uploadContentSecurityPolicy.js'
+export {
+  batchProcessing,
+  type BatchProcessingOptions,
+  type BatchProcessorResult,
+} from '../utilities/batchProcessing.js'
 export { getEntityPermissions } from '../utilities/getEntityPermissions/getEntityPermissions.js'
 export { isURLAllowed } from '../utilities/isURLAllowed.js'
 export { sanitizePermissions } from '../utilities/sanitizePermissions.js'

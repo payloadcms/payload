@@ -288,6 +288,7 @@ export const plTranslations: DefaultTranslationsObject = {
     all: 'Wszystko',
     allCollections: 'Wszystkie kolekcje',
     allLocales: 'Wszystkie lokalizacje',
+    allowedTypes: 'Dozwolone typy',
     and: 'i',
     anotherUser: 'Inny użytkownik',
     anotherUserTakenOver: 'Inny użytkownik przejął edycję tego dokumentu.',
@@ -395,6 +396,7 @@ export const plTranslations: DefaultTranslationsObject = {
     globals: 'Globalne',
     goBack: 'Wróć',
     goToPage: 'Przejdź do strony tabeli',
+    gridLayout: 'Siatka',
     groupByLabel: 'Grupuj według {{label}}',
     hideSidebar: 'Ukryj panel boczny',
     import: 'Import',
@@ -444,6 +446,7 @@ export const plTranslations: DefaultTranslationsObject = {
     notFound: 'Nie znaleziono',
     nothingFound: 'Nic nie znaleziono',
     noTrashResults: 'Brak {{label}} w koszu.',
+    notSelectedDocument: 'Nie wybrano. Naciśnij Enter lub spację, aby zmienić wybór.',
     notShownInTable: 'Nie wyświetlono w tabeli',
     noUpcomingEventsScheduled: 'Nie zaplanowano żadnych nadchodzących wydarzeń.',
     noValue: 'Brak wartości',
@@ -501,6 +504,7 @@ export const plTranslations: DefaultTranslationsObject = {
     selectAll: 'Wybierz wszystkie {{count}} {{label}}',
     selectAllRows: 'Wybierz wszystkie wiersze',
     selectedCount: 'Wybrano {{count}} {{label}}',
+    selectedDocument: 'Wybrano. Naciśnij Enter lub spację, aby zmienić wybór.',
     selectLabel: 'Wybierz {{label}}',
     selectValue: 'Wybierz wartość',
     settings: 'Ustawienia',
@@ -522,6 +526,7 @@ export const plTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: 'Pomyślnie zduplikowano {{label}}',
     successfullyReindexed:
       'Pomyślnie ponownie zindeksowano {{count}} z {{total}} dokumentów z {{collections}}, pomijając {{skips}} szkice.',
+    tableLayout: 'Tabela',
     takeOver: 'Przejąć',
     theme: 'Motyw',
     thisLanguage: 'Polski',
@@ -571,6 +576,23 @@ export const plTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Szukaj {{label}}',
     searchResults: 'Znaleziono: {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Dodatkowe instrukcje',
+    collectionDescription:
+      'Dodaj własne instrukcje dla kolekcji {{label}}, aby pomóc modelom LLM lepiej dostosować odpowiedzi na polecenia.',
+    collectionSystemDescription:
+      'Te instrukcje systemowe pochodzą z pliku konfiguracji kolekcji i są zawsze uwzględniane.',
+    editInstructions: 'Edytuj instrukcje LLM',
+    global: 'Global',
+    globalDescription:
+      'Dodaj własne instrukcje dla dokumentu globalnego {{label}}, aby pomóc modelom LLM lepiej dostosować odpowiedzi na polecenia.',
+    globalSystemDescription:
+      'Te instrukcje systemowe pochodzą z pliku konfiguracji dokumentu globalnego i są zawsze uwzględniane.',
+    instructions: 'Instrukcje LLM',
+    systemInstructions: 'Instrukcje systemowe (tylko do odczytu)',
+    targetCannotBeChanged: 'Nie można zmienić celu instrukcji.',
+    title: 'Tytuł',
   },
   localization: {
     cannotCopySameLocale: 'Nie można skopiować do tego samego miejsca.',

@@ -287,6 +287,7 @@ export const koTranslations: DefaultTranslationsObject = {
     all: '모두',
     allCollections: '모든 컬렉션',
     allLocales: '모든 지역 설정',
+    allowedTypes: '허용된 유형',
     and: '및',
     anotherUser: '다른 사용자',
     anotherUserTakenOver: '다른 사용자가 이 문서의 편집을 인수했습니다.',
@@ -393,6 +394,7 @@ export const koTranslations: DefaultTranslationsObject = {
     globals: '글로벌',
     goBack: '돌아가기',
     goToPage: '표 페이지로 이동',
+    gridLayout: '그리드',
     groupByLabel: '{{label}}로 그룹화',
     hideSidebar: '사이드바 숨기기',
     import: '수입',
@@ -441,6 +443,7 @@ export const koTranslations: DefaultTranslationsObject = {
     notFound: '찾을 수 없음',
     nothingFound: '찾을 수 없습니다',
     noTrashResults: '휴지통에 {{label}}이 없습니다.',
+    notSelectedDocument: '선택되지 않음. 선택을 변경하려면 Enter 또는 스페이스 키를 누르세요.',
     notShownInTable: '표에 표시되지 않음',
     noUpcomingEventsScheduled: '예정된 행사가 없습니다.',
     noValue: '값 없음',
@@ -500,6 +503,7 @@ export const koTranslations: DefaultTranslationsObject = {
     selectAll: '{{count}}개 {{label}} 모두 선택',
     selectAllRows: '모든 행 선택',
     selectedCount: '{{count}}개의 {{label}} 선택됨',
+    selectedDocument: '선택됨. 선택을 변경하려면 Enter 또는 스페이스 키를 누르세요.',
     selectLabel: '{{label}}을 선택하십시오.',
     selectValue: '값 선택',
     settings: '설정',
@@ -520,6 +524,7 @@ export const koTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}}이(가) 복제되었습니다.',
     successfullyReindexed:
       '{{collections}} 의 문서 총 **{{total}}**건 중 **{{count}}**건이 성공적으로 재인덱싱되었으며, **{{skips}}**건의 초안이 건너뛰어졌습니다.',
+    tableLayout: '테이블',
     takeOver: '인수하기',
     theme: '테마',
     thisLanguage: '한국어',
@@ -569,6 +574,22 @@ export const koTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: '{{label}} 검색',
     searchResults: '{{count}}개 찾음',
+  },
+  llmInstructions: {
+    additionalInstructions: '추가 지침',
+    collectionDescription:
+      'LLM이 프롬프트에 더 적합한 답변을 제공할 수 있도록 {{label}} 컬렉션에 사용자 지정 지침을 추가하세요.',
+    collectionSystemDescription:
+      '이 시스템 지침은 컬렉션의 구성 파일에서 제공되며 항상 포함됩니다.',
+    editInstructions: 'LLM 지침 편집',
+    global: '글로벌',
+    globalDescription:
+      'LLM이 프롬프트에 더 적합한 답변을 제공할 수 있도록 {{label}} 글로벌에 사용자 지정 지침을 추가하세요.',
+    globalSystemDescription: '이 시스템 지침은 글로벌의 구성 파일에서 제공되며 항상 포함됩니다.',
+    instructions: 'LLM 지침',
+    systemInstructions: '시스템 지침 (읽기 전용)',
+    targetCannotBeChanged: '지침의 대상을 변경할 수 없습니다.',
+    title: '제목',
   },
   localization: {
     cannotCopySameLocale: '동일한 로캘에 복사할 수 없습니다.',

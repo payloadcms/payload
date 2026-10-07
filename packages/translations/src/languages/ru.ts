@@ -293,6 +293,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     all: 'Все',
     allCollections: 'Все Коллекции',
     allLocales: 'Все локали',
+    allowedTypes: 'Разрешенные типы',
     and: 'А также',
     anotherUser: 'Другой пользователь',
     anotherUserTakenOver: 'Другой пользователь взял на себя редактирование этого документа.',
@@ -400,6 +401,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     globals: 'Глобальные',
     goBack: 'Назад',
     goToPage: 'Перейти к странице таблицы',
+    gridLayout: 'Сетка',
     groupByLabel: 'Группировать по {{label}}',
     hideSidebar: 'Скрыть боковую панель',
     import: 'Импорт',
@@ -449,6 +451,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     notFound: 'Не найдено',
     nothingFound: 'Ничего не найдено',
     noTrashResults: 'Нет {{label}} в корзине.',
+    notSelectedDocument: 'Не выбрано. Нажмите Enter или пробел, чтобы изменить выбор.',
     notShownInTable: 'Не отображается в таблице',
     noUpcomingEventsScheduled: 'Нет запланированных предстоящих событий.',
     noValue: 'Нет значения',
@@ -506,6 +509,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     selectAll: 'Выбрать все {{count}} {{label}}',
     selectAllRows: 'Выбрать все строки',
     selectedCount: '{{count}} {{label}} выбрано',
+    selectedDocument: 'Выбрано. Нажмите Enter или пробел, чтобы изменить выбор.',
     selectLabel: 'Выберите {{label}}',
     selectValue: 'Выбрать значение',
     settings: 'Настройки',
@@ -527,6 +531,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} успешно продублирован.',
     successfullyReindexed:
       'Успешно переиндексировано {{count}} из {{total}} документов из {{collections}}, пропущено {{skips}} черновиков.',
+    tableLayout: 'Таблица',
     takeOver: 'Взять на себя',
     theme: 'Тема',
     thisLanguage: 'Русский',
@@ -578,6 +583,23 @@ export const ruTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Поиск {{label}}',
     searchResults: 'Найдено: {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Дополнительные инструкции',
+    collectionDescription:
+      'Добавьте пользовательские инструкции для коллекции {{label}}, чтобы помочь LLM лучше адаптировать ответы на запросы.',
+    collectionSystemDescription:
+      'Эти системные инструкции заданы в файле конфигурации коллекции и включаются всегда.',
+    editInstructions: 'Редактировать инструкции для LLM',
+    global: 'Глобальный документ',
+    globalDescription:
+      'Добавьте пользовательские инструкции для глобального документа {{label}}, чтобы помочь LLM лучше адаптировать ответы на запросы.',
+    globalSystemDescription:
+      'Эти системные инструкции заданы в файле конфигурации глобального документа и включаются всегда.',
+    instructions: 'Инструкции для LLM',
+    systemInstructions: 'Системные инструкции (только для чтения)',
+    targetCannotBeChanged: 'Нельзя изменить объект, к которому относятся инструкции.',
+    title: 'Заголовок',
   },
   localization: {
     cannotCopySameLocale: 'Невозможно скопировать в ту же локаль',

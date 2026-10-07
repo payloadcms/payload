@@ -288,6 +288,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     all: 'Բոլորը',
     allCollections: 'Բոլոր հավաքածուները',
     allLocales: 'Բոլոր տեղայինությունները',
+    allowedTypes: 'Թույլատրված տեսակներ',
     and: 'Եվ',
     anotherUser: 'Այլ օգտատեր',
     anotherUserTakenOver: 'Այլ օգտատեր ստանձել է այս փաստաթղթի խմբագրումը։',
@@ -396,6 +397,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     globals: 'Համընդհանուրներ',
     goBack: 'Հետ գնալ',
     goToPage: 'Անցնել աղյուսակի էջին',
+    gridLayout: 'Ցանց',
     groupByLabel: 'Խմբավորել {{label}}-ով',
     hideSidebar: 'Թաքցնել կողային վահանակը',
     import: 'Ներմուծում',
@@ -445,6 +447,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     notFound: 'Չի գտնվել',
     nothingFound: 'Ոչինչ չի գտնվել',
     noTrashResults: 'Ոչ մի {{label}} աղբարկղում:',
+    notSelectedDocument: 'Ընտրված չէ։ Ընտրությունը փոխելու համար սեղմեք Enter կամ բացատ։',
     notShownInTable: 'Չի ցուցադրվում աղյուսակում',
     noUpcomingEventsScheduled: 'Իրադարձություններ նախատեսված չեն։',
     noValue: 'Արժեք չկա',
@@ -504,6 +507,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     selectAll: 'Ընտրել բոլոր {{count}} {{label}}',
     selectAllRows: 'Ընտրել բոլոր տողերը',
     selectedCount: '{{count}} {{label}} ընտրված է',
+    selectedDocument: 'Ընտրված է։ Ընտրությունը փոխելու համար սեղմեք Enter կամ բացատ։',
     selectLabel: 'ընտրել {{label}}',
     selectValue: 'Ընտրեք արժեք',
     settings: 'Կարգավորումներ',
@@ -525,6 +529,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} հաջողությամբ կրկնօրինակվել է։',
     successfullyReindexed:
       '{{collections}}-ից {{total}} փաստաթղթից {{count}}-ը հաջողությամբ վերաինդեքսավորվեց, և {{skips}} նախագիծ թռիչք դարձան։',
+    tableLayout: 'Աղյուսակ',
     takeOver: 'Վերցնել վերահսկողությունը',
     theme: 'Թեմա',
     thisLanguage: 'Հայերեն',
@@ -576,6 +581,23 @@ export const hyTranslations: DefaultTranslationsObject = {
     noResults: '«{{query}}»-ի համար արդյունքներ չկան',
     searchLabel: 'Որոնել {{label}}',
     searchResults: 'Գտնվել է {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Լրացուցիչ հրահանգներ',
+    collectionDescription:
+      'Ավելացրեք հատուկ հրահանգներ {{label}} հավաքածուի համար՝ օգնելու LLM-ներին ավելի լավ հարմարեցնել հարցումներին տրվող պատասխանները։',
+    collectionSystemDescription:
+      'Այս համակարգային հրահանգները տրամադրվում են հավաքածուի կազմաձևման ֆայլով և միշտ ներառվում են։',
+    editInstructions: 'Խմբագրել LLM-ի հրահանգները',
+    global: 'Գլոբալ փաստաթուղթ',
+    globalDescription:
+      'Ավելացրեք հատուկ հրահանգներ {{label}} գլոբալ փաստաթղթի համար՝ օգնելու LLM-ներին ավելի լավ հարմարեցնել հարցումներին տրվող պատասխանները։',
+    globalSystemDescription:
+      'Այս համակարգային հրահանգները տրամադրվում են գլոբալ փաստաթղթի կազմաձևման ֆայլով և միշտ ներառվում են։',
+    instructions: 'LLM-ի հրահանգներ',
+    systemInstructions: 'Համակարգային հրահանգներ (միայն ընթերցման համար)',
+    targetCannotBeChanged: 'Հրահանգների թիրախը հնարավոր չէ փոխել։',
+    title: 'Վերնագիր',
   },
   localization: {
     cannotCopySameLocale: 'Հնարավոր չէ պատճենել նույն լոկալին',

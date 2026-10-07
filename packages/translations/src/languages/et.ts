@@ -288,6 +288,7 @@ export const etTranslations: DefaultTranslationsObject = {
     all: 'Kõik',
     allCollections: 'Kõik kollektsioonid',
     allLocales: 'Kõik kohalikud seaded',
+    allowedTypes: 'Lubatud tüübid',
     and: 'Ja',
     anotherUser: 'Teine kasutaja',
     anotherUserTakenOver: 'Teine kasutaja on võtnud selle dokumendi muutmise üle.',
@@ -393,6 +394,7 @@ export const etTranslations: DefaultTranslationsObject = {
     globals: 'Globaalsed',
     goBack: 'Mine tagasi',
     goToPage: 'Mine tabeli leheküljele',
+    gridLayout: 'Ruudustik',
     groupByLabel: 'Rühmita {{label}} järgi',
     hideSidebar: 'Peida külgriba',
     import: 'Importimine',
@@ -441,6 +443,7 @@ export const etTranslations: DefaultTranslationsObject = {
     notFound: 'Ei leitud',
     nothingFound: 'Midagi ei leitud',
     noTrashResults: 'Pole {{label}} prügikastis.',
+    notSelectedDocument: 'Valimata. Valiku muutmiseks vajutage sisestus- või tühikuklahvi.',
     notShownInTable: 'Tabelis ei ole kuvatud',
     noUpcomingEventsScheduled: 'Eelseisvaid sündmusi ei ole plaanitud.',
     noValue: 'Väärtus puudub',
@@ -498,6 +501,7 @@ export const etTranslations: DefaultTranslationsObject = {
     selectAll: 'Vali kõik {{count}} {{label}}',
     selectAllRows: 'Vali kõik read',
     selectedCount: '{{count}} {{label}} valitud',
+    selectedDocument: 'Valitud. Valiku muutmiseks vajutage sisestus- või tühikuklahvi.',
     selectLabel: 'Valige {{label}}',
     selectValue: 'Vali väärtus',
     settings: 'Seaded',
@@ -519,6 +523,7 @@ export const etTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} edukalt dubleeritud.',
     successfullyReindexed:
       'Õnnestus ümberindekseerida {{count}} dokumenti {{total}}-st kollektsioonist {{collections}} ja {{skips}} mustandeid jäeti vahele.',
+    tableLayout: 'Tabel',
     takeOver: 'Võta üle',
     theme: 'Teema',
     thisLanguage: 'Eesti',
@@ -568,6 +573,23 @@ export const etTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Otsi {{label}}',
     searchResults: 'Leitud: {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Lisajuhised',
+    collectionDescription:
+      'Lisage kogumile {{label}} kohandatud juhised, et aidata LLM-idel päringutele paremini kohandatud vastuseid anda.',
+    collectionSystemDescription:
+      'Need süsteemijuhised pärinevad kogumi konfiguratsioonifailist ja kaasatakse alati.',
+    editInstructions: 'Muuda LLM-i juhiseid',
+    global: 'Globaalne dokument',
+    globalDescription:
+      'Lisage globaalsele dokumendile {{label}} kohandatud juhised, et aidata LLM-idel päringutele paremini kohandatud vastuseid anda.',
+    globalSystemDescription:
+      'Need süsteemijuhised pärinevad globaalse dokumendi konfiguratsioonifailist ja kaasatakse alati.',
+    instructions: 'LLM-i juhised',
+    systemInstructions: 'Süsteemijuhised (kirjutuskaitstud)',
+    targetCannotBeChanged: 'Juhiste sihtmärki ei saa muuta.',
+    title: 'Pealkiri',
   },
   localization: {
     cannotCopySameLocale: 'Ei saa kopeerida samasse keelde',

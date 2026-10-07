@@ -295,6 +295,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     all: 'Alle',
     allCollections: 'Alle collecties',
     allLocales: 'Alle talen',
+    allowedTypes: 'Toegestane typen',
     and: 'En',
     anotherUser: 'Een andere gebruiker',
     anotherUserTakenOver: 'Een andere gebruiker heeft de bewerking van dit document overgenomen.',
@@ -402,6 +403,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     globals: 'Globalen',
     goBack: 'Ga terug',
     goToPage: 'Ga naar tabelpagina',
+    gridLayout: 'Raster',
     groupByLabel: 'Groepeer op {{label}}',
     hideSidebar: 'Zijbalk verbergen',
     import: 'Importeren',
@@ -451,6 +453,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     notFound: 'Niet gevonden',
     nothingFound: 'Niets gevonden',
     noTrashResults: 'Geen {{label}} in prullenbak.',
+    notSelectedDocument: 'Niet geselecteerd. Druk op Enter of Spatie om de selectie te wijzigen.',
     notShownInTable: 'Niet weergegeven in tabel',
     noUpcomingEventsScheduled: 'Geen aankomende evenementen gepland.',
     noValue: 'Geen waarde',
@@ -510,6 +513,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     selectAll: 'Alles selecteren {{count}} {{label}}',
     selectAllRows: 'Selecteer alle rijen',
     selectedCount: '{{count}} {{label}} geselecteerd',
+    selectedDocument: 'Geselecteerd. Druk op Enter of Spatie om de selectie te wijzigen.',
     selectLabel: 'Selecteer {{label}}',
     selectValue: 'Selecteer een waarde',
     settings: 'Instellingen',
@@ -531,6 +535,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} succesvol gedupliceerd.',
     successfullyReindexed:
       'Succesvol {{count}} van {{total}} documenten uit {{collections}} opnieuw geïndexeerd, en {{skips}} concepten werden overgeslagen.',
+    tableLayout: 'Tabel',
     takeOver: 'Overnemen',
     theme: 'Thema',
     thisLanguage: 'Nederlands',
@@ -580,6 +585,23 @@ export const nlTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Zoek {{label}}',
     searchResults: '{{count}} gevonden',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Aanvullende instructies',
+    collectionDescription:
+      "Voeg aangepaste instructies toe voor de collectie {{label}} zodat LLM's hun antwoorden op prompts beter kunnen afstemmen.",
+    collectionSystemDescription:
+      'Deze systeeminstructies komen uit het configuratiebestand van de collectie en worden altijd opgenomen.',
+    editInstructions: 'LLM-instructies bewerken',
+    global: 'Global',
+    globalDescription:
+      "Voeg aangepaste instructies toe voor de global {{label}} zodat LLM's hun antwoorden op prompts beter kunnen afstemmen.",
+    globalSystemDescription:
+      'Deze systeeminstructies komen uit het configuratiebestand van de global en worden altijd opgenomen.',
+    instructions: 'LLM-instructies',
+    systemInstructions: 'Systeeminstructies (alleen-lezen)',
+    targetCannotBeChanged: 'Het doel van de instructies kan niet worden gewijzigd.',
+    title: 'Titel',
   },
   localization: {
     cannotCopySameLocale: 'Kan niet naar dezelfde taal kopiëren',

@@ -7,13 +7,12 @@ export {
   payloadLayoutRoute,
   withPayloadRoot,
   type WithPayloadRootOptions,
-} from '../adapters/layout.js'
-export { TanStackRouterAdapter } from '../adapters/router.js'
+} from '../adapters/layout/index.js'
 export {
   type AdminLoad,
   payloadAdminIndexRoute,
   payloadAdminSplatRoute,
-} from '../adapters/views.js'
+} from '../adapters/views/index.js'
 export {
   createServerFunctionClient,
   stripUnserializable,

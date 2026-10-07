@@ -294,6 +294,7 @@ export const roTranslations: DefaultTranslationsObject = {
     all: 'Toate',
     allCollections: 'Toate Colecțiile',
     allLocales: 'Toate localizările',
+    allowedTypes: 'Tipuri permise',
     and: 'Şi',
     anotherUser: 'Un alt utilizator',
     anotherUserTakenOver: 'Un alt utilizator a preluat editarea acestui document.',
@@ -401,6 +402,7 @@ export const roTranslations: DefaultTranslationsObject = {
     globals: 'Globale',
     goBack: 'Înapoi',
     goToPage: 'Mergi la pagina tabelului',
+    gridLayout: 'Grilă',
     groupByLabel: 'Grupare după {{label}}',
     hideSidebar: 'Ascunde bara laterală',
     import: 'Import',
@@ -450,6 +452,7 @@ export const roTranslations: DefaultTranslationsObject = {
     notFound: 'Nu a fost găsit',
     nothingFound: 'Nimic găsit',
     noTrashResults: 'Niciun {{label}} în coșul de gunoi.',
+    notSelectedDocument: 'Neselectat. Apăsați Enter sau Spațiu pentru a schimba selecția.',
     notShownInTable: 'Nu este afișat în tabel',
     noUpcomingEventsScheduled: 'Nu sunt evenimente programate în viitor.',
     noValue: 'Nici o valoare',
@@ -508,6 +511,7 @@ export const roTranslations: DefaultTranslationsObject = {
     selectAll: 'Selectați toate {{count}} {{label}}',
     selectAllRows: 'Selectează toate rândurile',
     selectedCount: '{{count}} {{label}} selectate',
+    selectedDocument: 'Selectat. Apăsați Enter sau Spațiu pentru a schimba selecția.',
     selectLabel: 'Selectați {{label}}',
     selectValue: 'Selectați o valoare',
     settings: 'Setări',
@@ -529,6 +533,7 @@ export const roTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} duplicat(ă) cu succes.',
     successfullyReindexed:
       'Au fost reindexate cu succes {{count}} din {{total}} documente din {{collections}}, iar {{skips}} proiecte au fost omise.',
+    tableLayout: 'Tabel',
     takeOver: 'Preia controlul',
     theme: 'Temă',
     thisLanguage: 'Română',
@@ -578,6 +583,23 @@ export const roTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Caută {{label}}',
     searchResults: 'Rezultate găsite: {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Instrucțiuni suplimentare',
+    collectionDescription:
+      'Adăugați instrucțiuni personalizate pentru colecția {{label}} pentru a ajuta modelele LLM să își adapteze mai bine răspunsurile la solicitări.',
+    collectionSystemDescription:
+      'Aceste instrucțiuni de sistem provin din fișierul de configurare al colecției și sunt incluse întotdeauna.',
+    editInstructions: 'Editați instrucțiunile LLM',
+    global: 'Global',
+    globalDescription:
+      'Adăugați instrucțiuni personalizate pentru globalul {{label}} pentru a ajuta modelele LLM să își adapteze mai bine răspunsurile la solicitări.',
+    globalSystemDescription:
+      'Aceste instrucțiuni de sistem provin din fișierul de configurare al globalului și sunt incluse întotdeauna.',
+    instructions: 'Instrucțiuni LLM',
+    systemInstructions: 'Instrucțiuni de sistem (doar citire)',
+    targetCannotBeChanged: 'Destinația instrucțiunilor nu poate fi schimbată.',
+    title: 'Titlu',
   },
   localization: {
     cannotCopySameLocale: 'Nu se poate copia în aceeași localizare',

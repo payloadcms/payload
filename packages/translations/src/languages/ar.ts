@@ -282,6 +282,7 @@ export const arTranslations: DefaultTranslationsObject = {
     all: 'الكل',
     allCollections: 'جميع المجموعات',
     allLocales: 'جميع المواقع',
+    allowedTypes: 'الأنواع المسموح بها',
     and: 'و',
     anotherUser: 'مستخدم آخر',
     anotherUserTakenOver: 'قام مستخدم آخر بالاستيلاء على تحرير هذا المستند.',
@@ -386,6 +387,7 @@ export const arTranslations: DefaultTranslationsObject = {
     globals: 'عامة',
     goBack: 'العودة',
     goToPage: 'الانتقال إلى صفحة الجدول',
+    gridLayout: 'شبكة',
     groupByLabel: 'التجميع حسب {{label}}',
     hideSidebar: 'إخفاء الشريط الجانبي',
     import: 'استيراد',
@@ -433,6 +435,7 @@ export const arTranslations: DefaultTranslationsObject = {
     notFound: 'غير موجود',
     nothingFound: 'لم يتم العثور على شيء',
     noTrashResults: 'لا {{label}} في المهملات.',
+    notSelectedDocument: 'غير محدد. اضغط على Enter أو مفتاح المسافة لتغيير التحديد.',
     notShownInTable: 'غير معروض في الجدول',
     noUpcomingEventsScheduled: 'لا يوجد أحداث مقبلة مجدولة.',
     noValue: 'لا يوجد قيمة',
@@ -492,6 +495,7 @@ export const arTranslations: DefaultTranslationsObject = {
     selectAll: 'تحديد كل {{count}} {{label}}',
     selectAllRows: 'حدد جميع الصفوف',
     selectedCount: 'تم تحديد {{count}} {{label}}',
+    selectedDocument: 'محدد. اضغط على Enter أو مفتاح المسافة لتغيير التحديد.',
     selectLabel: 'حدد {{label}}',
     selectValue: 'اختيار قيمة',
     settings: 'الإعدادات',
@@ -512,6 +516,7 @@ export const arTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} تم استنساخها بنجاح.',
     successfullyReindexed:
       'تمت إعادة فهرسة {{count}} من أصل {{total}} مستند من {{collections}} وتخطي {{skips}} مسودة.',
+    tableLayout: 'جدول',
     takeOver: 'تولي',
     theme: 'سمة',
     thisLanguage: 'العربية',
@@ -561,6 +566,23 @@ export const arTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'البحث {{label}}',
     searchResults: 'تم العثور على {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'تعليمات إضافية',
+    collectionDescription:
+      'أضف تعليمات مخصصة للمجموعة {{label}} لمساعدة نماذج LLM على تقديم استجابات أكثر ملاءمة للمطالبات.',
+    collectionSystemDescription:
+      'تأتي تعليمات النظام هذه من ملف إعدادات المجموعة ويتم تضمينها دائمًا.',
+    editInstructions: 'تعديل تعليمات LLM',
+    global: 'مستند عام',
+    globalDescription:
+      'أضف تعليمات مخصصة للمستند العام {{label}} لمساعدة نماذج LLM على تقديم استجابات أكثر ملاءمة للمطالبات.',
+    globalSystemDescription:
+      'تأتي تعليمات النظام هذه من ملف إعدادات المستند العام ويتم تضمينها دائمًا.',
+    instructions: 'تعليمات LLM',
+    systemInstructions: 'تعليمات النظام (للقراءة فقط)',
+    targetCannotBeChanged: 'لا يمكن تغيير هدف التعليمات.',
+    title: 'العنوان',
   },
   localization: {
     cannotCopySameLocale: 'لا يمكن النسخ إلى نفس الموقع',

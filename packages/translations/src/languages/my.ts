@@ -293,6 +293,7 @@ export const myTranslations: DefaultTranslationsObject = {
     all: 'အားလုံး',
     allCollections: 'အားလုံးစုစည်းမှုများ',
     allLocales: 'ဒေသအားလုံး',
+    allowedTypes: 'ခွင့်ပြုထားသော အမျိုးအစားများ',
     and: 'နှင့်',
     anotherUser: 'တစ်ခြားအသုံးပြုသူ',
     anotherUserTakenOver: 'တစ်ခြားအသုံးပြုသူသည်ဤစာရွက်စာတမ်းကိုပြင်ဆင်မှုကိုရယူလိုက်သည်။',
@@ -400,6 +401,7 @@ export const myTranslations: DefaultTranslationsObject = {
     globals: 'Globals',
     goBack: 'နောက်သို့',
     goToPage: 'ဇယားစာမျက်နှာသို့ သွားရန်',
+    gridLayout: 'ဂရစ်',
     groupByLabel: '{{label}} ဖြင့် အုပ်စုဖွဲ့ပါ',
     hideSidebar: 'ဘေး栏ကိုလှမ်းဖွင့်ပါ',
     import: 'သွင်းကုန်',
@@ -449,6 +451,8 @@ export const myTranslations: DefaultTranslationsObject = {
     notFound: 'ဘာမှ မရှိတော့ဘူး။',
     nothingFound: 'ဘာမှလည်း မတွေ့ဘူး။',
     noTrashResults: 'အမှိုက်ပုံးတွင် {{label}} မရှိပါ။',
+    notSelectedDocument:
+      'ရွေးချယ်ထားခြင်းမရှိပါ။ ရွေးချယ်မှုကို ပြောင်းရန် Enter သို့မဟုတ် Space ကို နှိပ်ပါ။',
     notShownInTable: 'ဇယားတွင် ပြသထားခြင်း မရှိပါ',
     noUpcomingEventsScheduled: 'လာမည့် အစီအစဉ်များ မရှိပါ။',
     noValue: 'တန်ဖိုး မရှိပါ။',
@@ -508,6 +512,8 @@ export const myTranslations: DefaultTranslationsObject = {
     selectAll: '{{count}} {{label}} အားလုံးကို ရွေးပါ',
     selectAllRows: 'အားလုံးကိုရွေးချယ်ပါ',
     selectedCount: '{{count}} {{label}} ကို ရွေးထားသည်။',
+    selectedDocument:
+      'ရွေးချယ်ထားသည်။ ရွေးချယ်မှုကို ပြောင်းရန် Enter သို့မဟုတ် Space ကို နှိပ်ပါ။',
     selectLabel: '{{label}} ရွေးချယ်ပါ',
     selectValue: 'တစ်ခုခုကို ရွေးချယ်ပါ။',
     settings: 'ဆက်တင်များ',
@@ -529,6 +535,7 @@ export const myTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} အောင်မြင်စွာ ပုံတူပွားခဲ့သည်။',
     successfullyReindexed:
       '{{collections}} မှ စုစုပေါင်း {{total}} စာတမ်းထဲမှ {{count}} စာတမ်းကိုအောင်မြင်စွာပြန်လည်ညွှန်းကောက်ခဲ့ပြီး {{skips}} အကြမ်းဖျဉ်ချုပ်ကိုလွဲချခဲ့သည်။',
+    tableLayout: 'ဇယား',
     takeOver: 'တာဝန်ယူပါ',
     theme: 'အကြောင်းအရာ',
     thisLanguage: 'မြန်မာစာ',
@@ -580,6 +587,23 @@ export const myTranslations: DefaultTranslationsObject = {
     noResults: '"{{query}}" အတွက် ရလဒ်မရှိပါ',
     searchLabel: '{{label}} ရှာဖွေပါ',
     searchResults: '{{count}} ခု တွေ့ရှိသည်',
+  },
+  llmInstructions: {
+    additionalInstructions: 'ထပ်ဆောင်းညွှန်ကြားချက်များ',
+    collectionDescription:
+      'LLM များက မေးခွန်းများနှင့် ပိုမိုသင့်လျော်သော တုံ့ပြန်ချက်များ ပေးနိုင်ရန် {{label}} စုစည်းမှုအတွက် စိတ်ကြိုက်ညွှန်ကြားချက်များ ထည့်ပါ။',
+    collectionSystemDescription:
+      'ဤစနစ်ညွှန်ကြားချက်များကို စုစည်းမှု၏ ဖွဲ့စည်းမှုဖိုင်မှ ပံ့ပိုးထားပြီး အမြဲထည့်သွင်းထားပါသည်။',
+    editInstructions: 'LLM ညွှန်ကြားချက်များကို ပြင်ဆင်ရန်',
+    global: 'ဂလိုဘယ်စာတမ်း',
+    globalDescription:
+      'LLM များက မေးခွန်းများနှင့် ပိုမိုသင့်လျော်သော တုံ့ပြန်ချက်များ ပေးနိုင်ရန် {{label}} ဂလိုဘယ်စာတမ်းအတွက် စိတ်ကြိုက်ညွှန်ကြားချက်များ ထည့်ပါ။',
+    globalSystemDescription:
+      'ဤစနစ်ညွှန်ကြားချက်များကို ဂလိုဘယ်စာတမ်း၏ ဖွဲ့စည်းမှုဖိုင်မှ ပံ့ပိုးထားပြီး အမြဲထည့်သွင်းထားပါသည်။',
+    instructions: 'LLM ညွှန်ကြားချက်များ',
+    systemInstructions: 'စနစ်ညွှန်ကြားချက်များ (ဖတ်ရန်သာ)',
+    targetCannotBeChanged: 'ညွှန်ကြားချက်များ၏ ပစ်မှတ်ကို ပြောင်းလဲ၍မရပါ။',
+    title: 'ခေါင်းစဉ်',
   },
   localization: {
     cannotCopySameLocale: 'တူညီသော ဒေသသို့ ကူးယူ၍မရပါ',

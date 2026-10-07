@@ -288,6 +288,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     all: 'Все',
     allCollections: 'Усі Колекції',
     allLocales: 'Всі локалізації',
+    allowedTypes: 'Дозволені типи',
     and: 'і',
     anotherUser: 'Інший користувач',
     anotherUserTakenOver: 'Інший користувач взяв на себе редагування цього документа.',
@@ -392,6 +393,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     globals: 'Глобальні',
     goBack: 'Повернутися',
     goToPage: 'Перейти до сторінки таблиці',
+    gridLayout: 'Сітка',
     groupByLabel: 'Групувати за {{label}}',
     hideSidebar: 'Сховати бічну панель',
     import: 'Імпорт',
@@ -441,6 +443,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     notFound: 'Не знайдено',
     nothingFound: 'Нічого не знайдено',
     noTrashResults: 'Немає {{label}} у смітнику.',
+    notSelectedDocument: 'Не вибрано. Натисніть Enter або пробіл, щоб змінити вибір.',
     notShownInTable: 'Не відображається в таблиці',
     noUpcomingEventsScheduled: 'Не заплановано жодних майбутніх подій.',
     noValue: 'Немає значення',
@@ -498,6 +501,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     selectAll: 'Вибрати всі {{count}} {{label}}',
     selectAllRows: 'Обрати всі рядки',
     selectedCount: 'Обрано {{count}} {{label}}',
+    selectedDocument: 'Вибрано. Натисніть Enter або пробіл, щоб змінити вибір.',
     selectLabel: 'Виберіть {{label}}',
     selectValue: 'Обрати значення',
     settings: 'Налаштування',
@@ -519,6 +523,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} успішно продубльовано.',
     successfullyReindexed:
       'Успішно переіндексовано {{count}} із {{total}} документів із {{collections}}, пропущено {{skips}} чернеток.',
+    tableLayout: 'Таблиця',
     takeOver: 'Перехопити',
     theme: 'Тема',
     thisLanguage: 'Українська',
@@ -568,6 +573,23 @@ export const ukTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Пошук {{label}}',
     searchResults: 'Знайдено: {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Додаткові інструкції',
+    collectionDescription:
+      'Додайте власні інструкції для колекції {{label}}, щоб допомогти LLM краще адаптувати відповіді на запити.',
+    collectionSystemDescription:
+      'Ці системні інструкції задано у файлі конфігурації колекції, і вони завжди включаються.',
+    editInstructions: 'Редагувати інструкції для LLM',
+    global: 'Глобальний документ',
+    globalDescription:
+      'Додайте власні інструкції для глобального документа {{label}}, щоб допомогти LLM краще адаптувати відповіді на запити.',
+    globalSystemDescription:
+      'Ці системні інструкції задано у файлі конфігурації глобального документа, і вони завжди включаються.',
+    instructions: 'Інструкції для LLM',
+    systemInstructions: 'Системні інструкції (лише для читання)',
+    targetCannotBeChanged: 'Неможливо змінити об’єкт, якого стосуються інструкції.',
+    title: 'Заголовок',
   },
   localization: {
     cannotCopySameLocale: 'Не можна копіювати в ту ж саму локалізацію',

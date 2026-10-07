@@ -299,6 +299,7 @@ export const deTranslations: DefaultTranslationsObject = {
     all: 'Alle',
     allCollections: 'Alle Sammlungen',
     allLocales: 'Alle Sprachen',
+    allowedTypes: 'Zulässige Typen',
     and: 'Und',
     anotherUser: 'Ein anderer Benutzer',
     anotherUserTakenOver: 'Ein anderer Benutzer hat die Bearbeitung dieses Dokuments übernommen.',
@@ -406,6 +407,7 @@ export const deTranslations: DefaultTranslationsObject = {
     globals: 'Globale Dokumente',
     goBack: 'Zurück',
     goToPage: 'Zur Tabellenseite wechseln',
+    gridLayout: 'Raster',
     groupByLabel: 'Nach {{label}} gruppieren',
     hideSidebar: 'Seitenleiste ausblenden',
     import: 'Importieren',
@@ -455,6 +457,8 @@ export const deTranslations: DefaultTranslationsObject = {
     notFound: 'Nicht gefunden',
     nothingFound: 'Keine Ergebnisse',
     noTrashResults: 'Kein {{label}} im Papierkorb.',
+    notSelectedDocument:
+      'Nicht ausgewählt. Drücken Sie die Eingabetaste oder die Leertaste, um die Auswahl zu ändern.',
     notShownInTable: 'Nicht in der Tabelle angezeigt',
     noUpcomingEventsScheduled: 'Keine bevorstehenden Ereignisse geplant.',
     noValue: 'Kein Wert',
@@ -512,6 +516,8 @@ export const deTranslations: DefaultTranslationsObject = {
     selectAll: 'Alle {{count}} {{label}} auswählen',
     selectAllRows: 'Alle Zeilen auswählen',
     selectedCount: '{{count}} {{label}} ausgewählt',
+    selectedDocument:
+      'Ausgewählt. Drücken Sie die Eingabetaste oder die Leertaste, um die Auswahl zu ändern.',
     selectLabel: '{{label}} auswählen',
     selectValue: 'Wert auswählen',
     settings: 'Einstellungen',
@@ -534,6 +540,7 @@ export const deTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} wurde erfolgreich dupliziert.',
     successfullyReindexed:
       '{{count}} von insgesamt {{total}} Dokumenten aus {{collections}} wurden erfolgreich neu indexiert, {{skips}} Entwürfe wurden übersprungen.',
+    tableLayout: 'Tabelle',
     takeOver: 'Übernehmen',
     theme: 'Thema',
     thisLanguage: 'Deutsch',
@@ -585,6 +592,23 @@ export const deTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Suche {{label}}',
     searchResults: '{{count}} gefunden',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Zusätzliche Anweisungen',
+    collectionDescription:
+      'Fügen Sie eigene Anweisungen für die Sammlung {{label}} hinzu, damit LLMs passendere Antworten auf Prompts geben können.',
+    collectionSystemDescription:
+      'Diese Systemanweisungen stammen aus der Konfigurationsdatei der Sammlung und werden immer berücksichtigt.',
+    editInstructions: 'LLM-Anweisungen bearbeiten',
+    global: 'Global',
+    globalDescription:
+      'Fügen Sie eigene Anweisungen für das Global {{label}} hinzu, damit LLMs passendere Antworten auf Prompts geben können.',
+    globalSystemDescription:
+      'Diese Systemanweisungen stammen aus der Konfigurationsdatei des Globals und werden immer berücksichtigt.',
+    instructions: 'LLM-Anweisungen',
+    systemInstructions: 'Systemanweisungen (schreibgeschützt)',
+    targetCannotBeChanged: 'Das Ziel der Anweisungen kann nicht geändert werden.',
+    title: 'Titel',
   },
   localization: {
     cannotCopySameLocale: 'Kann nicht in dieselbe Sprache kopiert werden',

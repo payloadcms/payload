@@ -289,6 +289,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     all: 'Всички',
     allCollections: 'Всички колекции',
     allLocales: 'Всички локации',
+    allowedTypes: 'Разрешени типове',
     and: 'И',
     anotherUser: 'Друг потребител',
     anotherUserTakenOver: 'Друг потребител пое редактирането на този документ.',
@@ -395,6 +396,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     globals: 'Глобални',
     goBack: 'Върни се',
     goToPage: 'Към страница на таблицата',
+    gridLayout: 'Мрежа',
     groupByLabel: 'Групирай по {{label}}',
     hideSidebar: 'Скрийте страничната лента',
     import: 'Внос',
@@ -444,6 +446,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     notFound: 'Няма открит',
     nothingFound: 'Нищо не беше открито',
     noTrashResults: 'Няма {{label}} в кошчето.',
+    notSelectedDocument: 'Не е избрано. Натиснете Enter или интервал, за да промените избора.',
     notShownInTable: 'Не е показано в таблицата',
     noUpcomingEventsScheduled: 'Няма предстоящи събития.',
     noValue: 'Няма стойност',
@@ -502,6 +505,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     selectAll: 'Избери всички {{count}} {{label}}',
     selectAllRows: 'Избери всички редове',
     selectedCount: '{{count}} {{label}} избрани',
+    selectedDocument: 'Избрано. Натиснете Enter или интервал, за да промените избора.',
     selectLabel: 'Изберете {{label}}',
     selectValue: 'Избери стойност',
     settings: 'Настройки',
@@ -523,6 +527,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} успешно дупликиран.',
     successfullyReindexed:
       'Успешно преиндексирани {{count}} от общо {{total}} документа от {{collections}} и пропуснати {{skips}} чернови.',
+    tableLayout: 'Таблица',
     takeOver: 'Поемане',
     theme: 'Тема',
     thisLanguage: 'Български',
@@ -572,6 +577,23 @@ export const bgTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Търсене {{label}}',
     searchResults: 'Намерени: {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Допълнителни инструкции',
+    collectionDescription:
+      'Добавете персонализирани инструкции за колекцията {{label}}, за да помогнете на LLM моделите да адаптират по-добре отговорите си на заявки.',
+    collectionSystemDescription:
+      'Тези системни инструкции идват от конфигурационния файл на колекцията и винаги се включват.',
+    editInstructions: 'Редактиране на инструкции за LLM',
+    global: 'Глобален документ',
+    globalDescription:
+      'Добавете персонализирани инструкции за глобалния документ {{label}}, за да помогнете на LLM моделите да адаптират по-добре отговорите си на заявки.',
+    globalSystemDescription:
+      'Тези системни инструкции идват от конфигурационния файл на глобалния документ и винаги се включват.',
+    instructions: 'Инструкции за LLM',
+    systemInstructions: 'Системни инструкции (само за четене)',
+    targetCannotBeChanged: 'Целта на инструкциите не може да бъде променена.',
+    title: 'Заглавие',
   },
   localization: {
     cannotCopySameLocale: 'Не може да се копира в същата локация',

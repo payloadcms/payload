@@ -290,6 +290,7 @@ export const taTranslations: DefaultTranslationsObject = {
     all: 'அனைத்தும்',
     allCollections: 'அனைத்து தொகுப்புகள்',
     allLocales: 'அனைத்து மொழிகள்',
+    allowedTypes: 'அனுமதிக்கப்பட்ட வகைகள்',
     and: 'மற்றும்',
     anotherUser: 'மற்றொரு பயனர்',
     anotherUserTakenOver: 'இந்த ஆவணத்தை மற்றொரு பயனர் திருத்திக் கொண்டிருக்கிறார்.',
@@ -396,6 +397,7 @@ export const taTranslations: DefaultTranslationsObject = {
     globals: 'பொதுவானவை',
     goBack: 'மீண்டும் செல்',
     goToPage: 'அட்டவணைப் பக்கத்திற்குச் செல்',
+    gridLayout: 'கட்டம்',
     groupByLabel: '{{label}}-ஆல் குழுபடுத்து',
     hideSidebar: 'பக்கப்பட்டியை மறைக்கவும்',
     import: 'இறக்குமதி',
@@ -445,6 +447,7 @@ export const taTranslations: DefaultTranslationsObject = {
     notFound: 'கிடைக்கவில்லை',
     nothingFound: 'எதுவும் கிடைக்கவில்லை',
     noTrashResults: 'குப்பையில் {{label}} எதுவும் இல்லை.',
+    notSelectedDocument: 'தேர்ந்தெடுக்கப்படவில்லை. தேர்வை மாற்ற Enter அல்லது Space ஐ அழுத்தவும்.',
     notShownInTable: 'அட்டவணையில் காட்டப்படவில்லை',
     noUpcomingEventsScheduled: 'எந்த வரவிருக்கும் நிகழ்ச்சிகளும் இல்லை.',
     noValue: 'மதிப்பு இல்லை',
@@ -503,6 +506,7 @@ export const taTranslations: DefaultTranslationsObject = {
     selectAll: 'அனைத்து {{count}} {{label}}-ஐத் தேர்ந்தெடு',
     selectAllRows: 'அனைத்து வரிசைகளையும் தேர்ந்தெடு',
     selectedCount: '{{count}} {{label}} தேர்ந்தெடுக்கப்பட்டது',
+    selectedDocument: 'தேர்ந்தெடுக்கப்பட்டது. தேர்வை மாற்ற Enter அல்லது Space ஐ அழுத்தவும்.',
     selectLabel: '{{label}}-ஐத் தேர்ந்தெடு',
     selectValue: 'ஒரு மதிப்பைத் தேர்ந்தெடு',
     settings: 'அமைப்புகள்',
@@ -524,6 +528,7 @@ export const taTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} வெற்றிகரமாக நகலெடுக்கப்பட்டது.',
     successfullyReindexed:
       '{{collections}} இலிருந்து மொத்த {{total}} ஆவணங்களில் {{count}} ஆவணங்கள் வெற்றிகரமாக மறுஇன்டெக்ஸ் செய்யப்பட்டன, மேலும் {{skips}} வரைவு எடுக்க முடியவில்லை.',
+    tableLayout: 'அட்டவணை',
     takeOver: 'கையகப்படுத்து',
     theme: 'தீம்',
     thisLanguage: 'தமிழ்',
@@ -574,6 +579,23 @@ export const taTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: '{{label}} ஐ தேடு',
     searchResults: '{{count}} கிடைத்தன',
+  },
+  llmInstructions: {
+    additionalInstructions: 'கூடுதல் வழிமுறைகள்',
+    collectionDescription:
+      'LLM-கள் கோரிக்கைகளுக்கு மேலும் பொருத்தமான பதில்களை வழங்க உதவ, {{label}} தொகுப்பிற்குத் தனிப்பயன் வழிமுறைகளைச் சேர்க்கவும்.',
+    collectionSystemDescription:
+      'இந்த அமைப்பு வழிமுறைகள் தொகுப்பின் உள்ளமைவுக் கோப்பிலிருந்து வழங்கப்படுகின்றன; அவை எப்போதும் சேர்க்கப்படும்.',
+    editInstructions: 'LLM வழிமுறைகளைத் திருத்து',
+    global: 'உலகளாவிய ஆவணம்',
+    globalDescription:
+      'LLM-கள் கோரிக்கைகளுக்கு மேலும் பொருத்தமான பதில்களை வழங்க உதவ, {{label}} உலகளாவிய ஆவணத்திற்குத் தனிப்பயன் வழிமுறைகளைச் சேர்க்கவும்.',
+    globalSystemDescription:
+      'இந்த அமைப்பு வழிமுறைகள் உலகளாவிய ஆவணத்தின் உள்ளமைவுக் கோப்பிலிருந்து வழங்கப்படுகின்றன; அவை எப்போதும் சேர்க்கப்படும்.',
+    instructions: 'LLM வழிமுறைகள்',
+    systemInstructions: 'அமைப்பு வழிமுறைகள் (படிக்க மட்டும்)',
+    targetCannotBeChanged: 'வழிமுறைகளின் இலக்கை மாற்ற முடியாது.',
+    title: 'தலைப்பு',
   },
   localization: {
     cannotCopySameLocale: 'அதே மொழி அமைவுக்கு நகலெடுக்க முடியாது',

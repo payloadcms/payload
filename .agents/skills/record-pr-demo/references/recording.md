@@ -83,6 +83,7 @@ The recorder supplies:
 - `moveCursor(locator, options?)`: smoothly points at a locator and pauses without clicking;
 - `page`: the recorded Playwright page;
 - `pause(milliseconds = 700)`: a short presentation pause;
+- `scroll(locator, options?)`: scrolls the actual overflow range with frame-timed easing, or real wheel input when requested;
 - `label`: the normalized recording label.
 
 The recorder adds a visible cursor to the page. Keep the scenario on one page; popup stitching is outside this skill's current scope.
@@ -95,6 +96,41 @@ await moveCursor(disabledDestination, { duration: 900, pauseAfter: 1200 })
 ```
 
 Change the recording-wide defaults with `--mouse-move-ms` and `--interaction-pause-ms`. Keep a nonzero dwell for review recordings; faster values are mainly useful for recorder tests.
+
+## Scroll without hover churn
+
+Destructure `scroll` from the scenario argument and use it for overflow demonstrations:
+
+```js
+await scroll(tabsScroller, {
+  axis: 'x',
+  to: 'end',
+  duration: 950,
+  easing: 'easeInOutSine',
+  cursorPlacement: 'outside',
+})
+await moveCursor(revealedTab)
+await click(revealedTab)
+```
+
+Defaults are `axis: 'y'`, `to: 'end'`, `duration: 950`, `easing: 'easeInOutSine'`, `cursorPlacement: 'outside'`, `input: 'animation'`, and `settle: 150` (times are milliseconds). `to` accepts `'start'`, `'end'`, or a numeric pixel distance from the start, clamped to the real range and rounded to whole pixels. Horizontal RTL targets use distance from the right-hand start.
+
+The helper moves the cursor to a temporary invisible anchor just outside the scroller, animates `scrollLeft` or `scrollTop` using `requestAnimationFrame`, checks monotonic progress and the final position within half a CSS pixel, and removes the anchor in `finally`. It fails clearly if the selected axis does not overflow. Animation timing also runs during candidate validation so movement checks are exercised. About 750–1000 ms worked well for a short 64 px range at the recorder's 25 fps; choose timing for the actual story.
+
+Moving the cursor away avoids tooltips changing as tabs move beneath it. Do not hide tooltips with temporary CSS. An oversized wheel delta can exhaust a short range in one frame; splitting deltas improves motion but still causes hover churn when every point in a nested scroller belongs to a tab.
+
+Programmatic scrolling demonstrates overflow, reachability, and presentation. It does not prove wheel or trackpad input handling. When real input semantics are part of the claim, use wheel mode or separate browser assertions:
+
+```js
+await scroll(tabsScroller, {
+  axis: 'x',
+  to: 'end',
+  input: 'wheel',
+  cursorPlacement: 'inside',
+})
+```
+
+Wheel mode keeps the pointer over the target for actual hit testing, emits smaller timed wheel deltas, and verifies their resulting positions. Prevented wheel events or scroll snapping that prevents reaching the target fail validation; the helper never repairs wheel results by assigning a scroll position. Hover changes are expected in this mode.
 
 ## Fast path
 

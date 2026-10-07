@@ -282,6 +282,7 @@ export const faTranslations: DefaultTranslationsObject = {
     all: 'همه',
     allCollections: 'همه مجموعه‌ها',
     allLocales: 'همه زبان‌ها',
+    allowedTypes: 'انواع مجاز',
     and: 'و',
     anotherUser: 'کاربر دیگر',
     anotherUserTakenOver: 'کاربر دیگری ویرایش این صفحه را در دست گرفته است.',
@@ -388,6 +389,7 @@ export const faTranslations: DefaultTranslationsObject = {
     globals: 'سراسری‌ها (Globals)',
     goBack: 'بازگشت',
     goToPage: 'رفتن به صفحهٔ جدول',
+    gridLayout: 'شبکه',
     groupByLabel: 'گروه‌بندی بر اساس {{label}}',
     hideSidebar: 'پنهان کردن نوار کناری',
     import: 'ورود اطلاعات',
@@ -436,6 +438,7 @@ export const faTranslations: DefaultTranslationsObject = {
     notFound: 'یافت نشد',
     nothingFound: 'موردی یافت نشد',
     noTrashResults: 'هیچ {{label}} در سطل زباله وجود ندارد.',
+    notSelectedDocument: 'انتخاب نشده است. برای تغییر انتخاب، Enter یا فاصله را فشار دهید.',
     notShownInTable: 'در جدول نمایش داده نشده است',
     noUpcomingEventsScheduled: 'رویداد آینده‌ای برنامه‌ریزی نشده است.',
     noValue: 'بدون مقدار',
@@ -493,6 +496,7 @@ export const faTranslations: DefaultTranslationsObject = {
     selectAll: 'انتخاب همه {{count}} {{label}}',
     selectAllRows: 'انتخاب همه ردیف‌ها',
     selectedCount: '{{count}} {{label}} انتخاب شد',
+    selectedDocument: 'انتخاب شده است. برای تغییر انتخاب، Enter یا فاصله را فشار دهید.',
     selectLabel: 'انتخاب {{label}}',
     selectValue: 'یک مقدار انتخاب کنید',
     settings: 'تنظیمات',
@@ -514,6 +518,7 @@ export const faTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: 'کپی از {{label}} با موفقیت ایجاد شد.',
     successfullyReindexed:
       'با موفقیت {{count}} از {{total}} سند از {{collections}} بازشاخص‌گذاری شد و {{skips}} پیش‌نویس رد شد.',
+    tableLayout: 'جدول',
     takeOver: 'ادامه ویرایش',
     theme: 'قالب',
     thisLanguage: 'فارسی',
@@ -564,6 +569,23 @@ export const faTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'جستجو {{label}}',
     searchResults: '{{count}} مورد یافت شد',
+  },
+  llmInstructions: {
+    additionalInstructions: 'دستورالعمل‌های تکمیلی',
+    collectionDescription:
+      'برای مجموعهٔ {{label}} دستورالعمل‌های سفارشی اضافه کنید تا مدل‌های LLM پاسخ‌های متناسب‌تری به درخواست‌ها ارائه دهند.',
+    collectionSystemDescription:
+      'این دستورالعمل‌های سیستم از فایل پیکربندی مجموعه گرفته می‌شوند و همیشه گنجانده می‌شوند.',
+    editInstructions: 'ویرایش دستورالعمل‌های LLM',
+    global: 'سند سراسری',
+    globalDescription:
+      'برای سند سراسری {{label}} دستورالعمل‌های سفارشی اضافه کنید تا مدل‌های LLM پاسخ‌های متناسب‌تری به درخواست‌ها ارائه دهند.',
+    globalSystemDescription:
+      'این دستورالعمل‌های سیستم از فایل پیکربندی سند سراسری گرفته می‌شوند و همیشه گنجانده می‌شوند.',
+    instructions: 'دستورالعمل‌های LLM',
+    systemInstructions: 'دستورالعمل‌های سیستم (فقط خواندنی)',
+    targetCannotBeChanged: 'هدف دستورالعمل‌ها قابل تغییر نیست.',
+    title: 'عنوان',
   },
   localization: {
     cannotCopySameLocale: 'امکان کپی کردن اطلاعات به همان زبان وجود ندارد.',

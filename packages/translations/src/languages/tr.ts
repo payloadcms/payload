@@ -293,6 +293,7 @@ export const trTranslations: DefaultTranslationsObject = {
     all: 'Tüm',
     allCollections: 'Tüm Koleksiyonlar',
     allLocales: 'Tüm yerler',
+    allowedTypes: 'İzin verilen türler',
     and: 've',
     anotherUser: 'Başka bir kullanıcı',
     anotherUserTakenOver: 'Başka bir kullanıcı bu belgenin düzenlemesini devraldı.',
@@ -400,6 +401,7 @@ export const trTranslations: DefaultTranslationsObject = {
     globals: 'Globaller',
     goBack: 'Geri dön',
     goToPage: 'Tablo sayfasına git',
+    gridLayout: 'Izgara',
     groupByLabel: "{{label}}'ye göre grupla",
     hideSidebar: 'Kenar çubuğunu gizle',
     import: 'İthalat',
@@ -449,6 +451,7 @@ export const trTranslations: DefaultTranslationsObject = {
     notFound: 'Bulunamadı',
     nothingFound: 'Hiçbir şey bulunamadı',
     noTrashResults: 'Çöpte hiç {{label}} yok.',
+    notSelectedDocument: 'Seçilmedi. Seçimi değiştirmek için Enter veya Boşluk tuşuna basın.',
     notShownInTable: 'Tabloda gösterilmemektedir',
     noUpcomingEventsScheduled: 'Planlanan gelecek etkinlik yok.',
     noValue: 'Değer yok',
@@ -508,6 +511,7 @@ export const trTranslations: DefaultTranslationsObject = {
     selectAll: "Tüm {{count}} {{label}}'ı seçin",
     selectAllRows: 'Tüm satırları seçin',
     selectedCount: '{{count}} {{label}} seçildi',
+    selectedDocument: 'Seçildi. Seçimi değiştirmek için Enter veya Boşluk tuşuna basın.',
     selectLabel: '{{label}} seçin',
     selectValue: 'Bir değer seçin',
     settings: 'Ayarlar',
@@ -529,6 +533,7 @@ export const trTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} başarıyla kopyalandı.',
     successfullyReindexed:
       '{{collections}}’den toplam {{total}} belge arasından {{count}} belge başarıyla yeniden indekslendi ve {{skips}} taslak atlandı.',
+    tableLayout: 'Tablo',
     takeOver: 'Devralmak',
     theme: 'Tema',
     thisLanguage: 'Türkçe',
@@ -579,6 +584,23 @@ export const trTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: '{{label}} Ara',
     searchResults: '{{count}} bulundu',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Ek talimatlar',
+    collectionDescription:
+      "LLM'lerin istemlere daha uygun yanıtlar vermesine yardımcı olmak için {{label}} koleksiyonuna özel talimatlar ekleyin.",
+    collectionSystemDescription:
+      'Bu sistem talimatları koleksiyonun yapılandırma dosyasından gelir ve her zaman dahil edilir.',
+    editInstructions: 'LLM talimatlarını düzenle',
+    global: 'Global',
+    globalDescription:
+      "LLM'lerin istemlere daha uygun yanıtlar vermesine yardımcı olmak için {{label}} globaline özel talimatlar ekleyin.",
+    globalSystemDescription:
+      'Bu sistem talimatları globalin yapılandırma dosyasından gelir ve her zaman dahil edilir.',
+    instructions: 'LLM Talimatları',
+    systemInstructions: 'Sistem talimatları (salt okunur)',
+    targetCannotBeChanged: 'Talimatların hedefi değiştirilemez.',
+    title: 'Başlık',
   },
   localization: {
     cannotCopySameLocale: 'Aynı yerel ayara kopyalanamaz.',

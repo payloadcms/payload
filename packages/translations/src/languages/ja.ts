@@ -292,6 +292,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     all: 'すべて',
     allCollections: 'すべてのコレクション',
     allLocales: 'すべてのロケール',
+    allowedTypes: '許可されているタイプ',
     and: 'かつ',
     anotherUser: '別のユーザー',
     anotherUserTakenOver: '別のユーザーがこのドキュメントの編集を引き継ぎました。',
@@ -398,6 +399,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     globals: 'グローバル',
     goBack: '戻る',
     goToPage: '表のページに移動',
+    gridLayout: 'グリッド',
     groupByLabel: '{{label}}でグループ化する',
     hideSidebar: 'サイドバーを非表示にする',
     import: 'インポート',
@@ -446,6 +448,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     notFound: '見つかりません',
     nothingFound: '該当する項目がありません',
     noTrashResults: 'ゴミ箱に{{label}}はありません。',
+    notSelectedDocument: '未選択。選択を変更するには、Enter キーまたは Space キーを押します。',
     notShownInTable: '表には表示されていません',
     noUpcomingEventsScheduled: '予定されているイベントはありません。',
     noValue: '未設定',
@@ -503,6 +506,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     selectAll: 'すべての{{count}}つの{{label}}を選択',
     selectAllRows: 'すべての行を選択します',
     selectedCount: '{{count}}つの{{label}}を選択中',
+    selectedDocument: '選択済み。選択を変更するには、Enter キーまたは Space キーを押します。',
     selectLabel: '{{label}}を選択してください',
     selectValue: '値を選択',
     settings: '設定',
@@ -523,6 +527,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} が複製されました。',
     successfullyReindexed:
       '{{collections}} から {{total}} 件のうち {{count}} 件を正常に再インデックスし、{{skips}} 件の下書きをスキップしました。',
+    tableLayout: 'テーブル',
     takeOver: '引き継ぐ',
     theme: 'テーマ',
     thisLanguage: 'Japanese',
@@ -572,6 +577,23 @@ export const jaTranslations: DefaultTranslationsObject = {
     noResults: '「{{query}}」に一致する結果がありません',
     searchLabel: '{{label}}を検索する',
     searchResults: '{{count}}件見つかりました',
+  },
+  llmInstructions: {
+    additionalInstructions: '追加の指示',
+    collectionDescription:
+      '{{label}} コレクションにカスタム指示を追加して、LLM がプロンプトにより適した回答を生成できるようにします。',
+    collectionSystemDescription:
+      'これらのシステム指示はコレクションの設定ファイルから提供され、常に含まれます。',
+    editInstructions: 'LLM の指示を編集',
+    global: 'グローバル',
+    globalDescription:
+      '{{label}} グローバルにカスタム指示を追加して、LLM がプロンプトにより適した回答を生成できるようにします。',
+    globalSystemDescription:
+      'これらのシステム指示はグローバルの設定ファイルから提供され、常に含まれます。',
+    instructions: 'LLM の指示',
+    systemInstructions: 'システム指示（読み取り専用）',
+    targetCannotBeChanged: '指示の対象は変更できません。',
+    title: 'タイトル',
   },
   localization: {
     cannotCopySameLocale: '同じロケールにはコピーできません',

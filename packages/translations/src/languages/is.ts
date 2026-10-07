@@ -288,6 +288,7 @@ export const isTranslations: DefaultTranslationsObject = {
     all: 'Allt',
     allCollections: 'Öll söfn',
     allLocales: 'Allar staðfærslur',
+    allowedTypes: 'Leyfðar gerðir',
     and: 'Og',
     anotherUser: 'Annar notandi',
     anotherUserTakenOver: 'Annar notandi hefur tekið yfir skráningu þessarar færslu.',
@@ -393,6 +394,7 @@ export const isTranslations: DefaultTranslationsObject = {
     globals: 'Einstakir hlutir',
     goBack: 'Til baka',
     goToPage: 'Fara á síðu töflu',
+    gridLayout: 'Reik',
     groupByLabel: 'Flokka eftir {{label}}',
     hideSidebar: 'Felaðu hliðarstiku',
     import: 'Flytja inn',
@@ -441,6 +443,7 @@ export const isTranslations: DefaultTranslationsObject = {
     notFound: 'Fannst ekki',
     nothingFound: 'Ekkert fannst',
     noTrashResults: 'Ekkert {{label}} í rusli.',
+    notSelectedDocument: 'Ekki valið. Ýttu á Enter eða bil til að breyta valinu.',
     notShownInTable: 'Ekki sýnt í töflu',
     noUpcomingEventsScheduled: 'Engir komandi viðburðir áætlaðir.',
     noValue: 'Ekkert gildi',
@@ -499,6 +502,7 @@ export const isTranslations: DefaultTranslationsObject = {
     selectAll: 'Velja allar {{count}} {{label}}',
     selectAllRows: 'Velja allar raðir',
     selectedCount: '{{count}} {{label}} valið',
+    selectedDocument: 'Valið. Ýttu á Enter eða bil til að breyta valinu.',
     selectLabel: 'Velja {{label}}',
     selectValue: 'Veldu gildi',
     settings: 'Stillingar',
@@ -520,6 +524,7 @@ export const isTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} tvöfaldað.',
     successfullyReindexed:
       'Tókst að endurvísa {{count}} af {{total}} skjölum úr {{collections}} og {{skips}} drög voru sleppt.',
+    tableLayout: 'Tafla',
     takeOver: 'Taka yfir',
     theme: 'Þema',
     thisLanguage: 'Íslenska',
@@ -570,6 +575,23 @@ export const isTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Leita {{label}}',
     searchResults: 'Fann {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Viðbótarleiðbeiningar',
+    collectionDescription:
+      'Bættu við sérsniðnum leiðbeiningum fyrir safnið {{label}} til að hjálpa LLM að laga svör sín betur að fyrirmælum.',
+    collectionSystemDescription:
+      'Þessar kerfisleiðbeiningar koma úr stillingaskrá safnsins og eru alltaf teknar með.',
+    editInstructions: 'Breyta LLM-leiðbeiningum',
+    global: 'Altækt skjal',
+    globalDescription:
+      'Bættu við sérsniðnum leiðbeiningum fyrir altæka skjalið {{label}} til að hjálpa LLM að laga svör sín betur að fyrirmælum.',
+    globalSystemDescription:
+      'Þessar kerfisleiðbeiningar koma úr stillingaskrá altæka skjalsins og eru alltaf teknar með.',
+    instructions: 'LLM-leiðbeiningar',
+    systemInstructions: 'Kerfisleiðbeiningar (skrifvarið)',
+    targetCannotBeChanged: 'Ekki er hægt að breyta markmiði leiðbeininganna.',
+    title: 'Titill',
   },
   localization: {
     cannotCopySameLocale: 'Ekki hægt að afrita í sömu staðfærslu',

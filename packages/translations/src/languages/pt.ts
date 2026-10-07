@@ -290,6 +290,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     all: 'Todos',
     allCollections: 'Todas as Coleções',
     allLocales: 'Todos os locais',
+    allowedTypes: 'Tipos permitidos',
     and: 'E',
     anotherUser: 'Outro usuário',
     anotherUserTakenOver: 'Outro usuário assumiu a edição deste documento.',
@@ -397,6 +398,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     globals: 'Globais',
     goBack: 'Voltar',
     goToPage: 'Ir para a página da tabela',
+    gridLayout: 'Grelha',
     groupByLabel: 'Agrupar por {{label}}',
     hideSidebar: 'Ocultar barra lateral',
     import: 'Importar',
@@ -446,6 +448,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     notFound: 'Não Encontrado',
     nothingFound: 'Nada encontrado',
     noTrashResults: 'Não há {{label}} no lixo.',
+    notSelectedDocument:
+      'Não selecionado. Prima Enter ou a barra de espaço para alterar a seleção.',
     notShownInTable: 'Não exibido na tabela',
     noUpcomingEventsScheduled: 'Não há eventos futuros agendados.',
     noValue: 'Nenhum valor',
@@ -505,6 +509,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     selectAll: 'Selecione tudo {{count}} {{label}}',
     selectAllRows: 'Selecione todas as linhas',
     selectedCount: '{{count}} {{label}} selecionado',
+    selectedDocument: 'Selecionado. Prima Enter ou a barra de espaço para alterar a seleção.',
     selectLabel: 'Selecione {{label}}',
     selectValue: 'Selecione um valor',
     settings: 'Configurações',
@@ -526,6 +531,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} duplicado com sucesso.',
     successfullyReindexed:
       'Reindexação bem‑sucedida de {{count}} de {{total}} documentos de {{collections}}, e {{skips}} rascunhos foram ignorados.',
+    tableLayout: 'Tabela',
     takeOver: 'Assumir',
     theme: 'Tema',
     thisLanguage: 'Português',
@@ -575,6 +581,23 @@ export const ptTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Pesquisar {{label}}',
     searchResults: 'Encontrados: {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Instruções adicionais',
+    collectionDescription:
+      'Adicione instruções personalizadas para a coleção {{label}} para ajudar os LLMs a adaptar melhor as respostas aos prompts.',
+    collectionSystemDescription:
+      'Estas instruções do sistema vêm do arquivo de configuração da coleção e são sempre incluídas.',
+    editInstructions: 'Editar instruções de LLM',
+    global: 'Global',
+    globalDescription:
+      'Adicione instruções personalizadas para o global {{label}} para ajudar os LLMs a adaptar melhor as respostas aos prompts.',
+    globalSystemDescription:
+      'Estas instruções do sistema vêm do arquivo de configuração do global e são sempre incluídas.',
+    instructions: 'Instruções de LLM',
+    systemInstructions: 'Instruções do sistema (somente leitura)',
+    targetCannotBeChanged: 'O destino das instruções não pode ser alterado.',
+    title: 'Título',
   },
   localization: {
     cannotCopySameLocale: 'Não é possível copiar para o mesmo local',

@@ -1,7 +1,7 @@
 import type { Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, instructionsCollectionSlug } from 'payload/shared'
 
 import type { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 
@@ -37,6 +37,7 @@ import {
   openFolderCreationLocation,
   openGlobalAPI,
   openLivePreview,
+  openLLMInstructions,
   openLocaleOptions,
   openNavigation,
   openNavigationFolders,
@@ -500,10 +501,9 @@ test.describe('WCAG 2.2 Level AA', () => {
         const comparison = await compareHeadingWithOriginalSpan({
           heading,
           originalStyle: `
-            font-family: var(--text-body-medium-strong-font-family);
-            font-size: var(--text-body-medium-strong-font-size);
-            font-weight: var(--text-body-medium-strong-font-weight);
-            line-height: var(--text-body-medium-strong-line-height);
+            font-size: var(--text-body-medium-bold-font-size);
+            font-weight: var(--text-body-medium-bold-font-weight);
+            line-height: var(--text-body-medium-bold-line-height);
             color: var(--color-text);
           `,
         })
@@ -703,9 +703,73 @@ test.describe('WCAG 2.2 Level AA', () => {
         }
       }
     })
+
+    test('should give an empty rich-text editor placeholder sufficient contrast', async ({
+      browser: _browser,
+    }, testInfo) => {
+      await gotoCreatePost({ page, postsURL })
+      const field = page.locator('[data-field-path="content"]')
+      const editor = field.locator('[contenteditable="true"]')
+
+      await editor.press('ControlOrMeta+a')
+      await editor.press('Backspace')
+      await expect(field.locator('.LexicalEditorTheme__placeholder')).toBeVisible()
+
+      const scan = await runAxeScan({
+        include: ['[data-field-path="content"] .LexicalEditorTheme__placeholder'],
+        page,
+        testInfo,
+      })
+
+      expect(scan.violations).toEqual([])
+    })
   })
 
   test.describe('1.4.10 Reflow (AA)', () => {
+    test('should keep instruction tabs visible and clear of the required-fields help at 320px', async () => {
+      const viewport = page.viewportSize()!
+
+      try {
+        await page.setViewportSize({ height: 900, width: 320 })
+
+        const field = await openLLMInstructions({ page, serverURL })
+        const additionalTab = field.getByRole('tab', {
+          name: 'Additional instructions',
+          exact: true,
+        })
+        const systemTab = field.getByRole('tab', {
+          name: 'System instructions (read-only)',
+          exact: true,
+        })
+        const help = page.locator('.required-fields-info button')
+
+        for (const tab of [additionalTab, systemTab]) {
+          const bounds = await tab.boundingBox()
+          const helpBounds = await help.boundingBox()
+
+          expect(bounds).not.toBeNull()
+          expect(helpBounds).not.toBeNull()
+          expect(bounds!.x).toBeGreaterThanOrEqual(0)
+          expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(320)
+          expect(
+            bounds!.x + bounds!.width <= helpBounds!.x ||
+              bounds!.y >= helpBounds!.y + helpBounds!.height ||
+              bounds!.y + bounds!.height <= helpBounds!.y,
+          ).toBe(true)
+        }
+
+        await additionalTab.focus()
+        await page.keyboard.press('ArrowRight')
+        await expect(systemTab).toBeFocused()
+        await page.keyboard.press('Enter')
+        await expect(field.getByRole('textbox')).toHaveAccessibleName(
+          'System instructions (read-only)',
+        )
+      } finally {
+        await page.setViewportSize(viewport)
+      }
+    })
+
     test('should truncate a long account label without obscuring the menu icon', async () => {
       await page.goto(`${serverURL}/admin`)
       await openNavigationForUserMenu({ page })
@@ -1105,6 +1169,95 @@ test.describe('WCAG 2.2 Level AA', () => {
       }
     })
 
+    test('should open collection and global LLM instructions using the keyboard', async ({
+      browser: _browser,
+    }, testInfo) => {
+      for (const [path, id, title] of [
+        ['/collections/posts', 'collection-posts', 'posts'],
+        ['/globals/menu', 'global-menu', 'menu'],
+      ] as const) {
+        await page.goto(formatAdminURL({ adminRoute: '/admin', path, serverURL }))
+
+        const trigger = page.getByRole('button', { name: 'More options', exact: true })
+        const item = page.getByRole('menuitem', { name: 'Edit LLM instructions', exact: true })
+
+        await trigger.focus()
+        await page.keyboard.press('Enter')
+        await expect(page.getByRole('menuitem').first()).toBeFocused()
+        await page.keyboard.press('End')
+        await expect(item).toBeFocused()
+
+        const scan = await runAxeScan({ include: ['[role="menu"]'], page, testInfo })
+
+        expect(scan.violations).toEqual([])
+        await page.keyboard.press('Escape')
+        await expect(item).toBeHidden()
+        await expect(trigger).toBeFocused()
+        await page.keyboard.press('Space')
+        await expect(page.getByRole('menuitem').first()).toBeFocused()
+        await page.keyboard.press('End')
+        await expect(item).toBeFocused()
+        await page.keyboard.press('Enter')
+        await expect(page).toHaveURL(
+          formatAdminURL({
+            adminRoute: '/admin',
+            path: `/collections/${instructionsCollectionSlug}/${id}`,
+            serverURL,
+          }),
+        )
+        await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible()
+      }
+    })
+
+    test('should edit and save LLM instructions using the keyboard', async () => {
+      const field = await openLLMInstructions({ page, serverURL })
+      const editor = field.getByRole('textbox', { name: 'Additional instructions', exact: true })
+      const documentURL = formatAdminURL({
+        apiRoute: '/api',
+        path: `/${instructionsCollectionSlug}/collection-posts`,
+        serverURL,
+      })
+      const originalResponse = await page.request.get(documentURL)
+
+      await expect(originalResponse).toBeOK()
+
+      const originalDocument = await originalResponse.json()
+      const text = 'Write clear instructions using the keyboard.'
+
+      try {
+        await editor.focus()
+        await page.keyboard.press('ControlOrMeta+a')
+        await page.keyboard.press('Backspace')
+        await page.keyboard.type(text)
+        await expect(editor).toHaveText(text)
+
+        const save = page.getByRole('button', { name: 'Save', exact: true })
+
+        await expect(save).toBeEnabled()
+
+        const [saved] = await Promise.all([
+          page.waitForResponse(
+            (response) =>
+              response.request().method() === 'PATCH' &&
+              new URL(response.url()).pathname === new URL(documentURL).pathname,
+          ),
+          save.press('Enter'),
+        ])
+
+        expect(saved.ok()).toBe(true)
+        await saved.finished()
+        await expect(save).toBeDisabled()
+        await page.reload()
+        await expect(editor).toHaveText(text)
+      } finally {
+        const restored = await page.request.patch(documentURL, {
+          data: { additionalInstructions: originalDocument.additionalInstructions ?? null },
+        })
+
+        await expect(restored).toBeOK()
+      }
+    })
+
     test('should open the upload dropzone modal from its button with the keyboard', async () => {
       // PYLD-4166
       await page.goto(`${serverURL}/admin`)
@@ -1371,6 +1524,8 @@ test.describe('WCAG 2.2 Level AA', () => {
         await expect(firstCell).toHaveAttribute('tabindex', '0')
         await page.getByRole('link', { name: 'Create New', exact: true }).focus()
         await page.keyboard.press('Tab')
+        await expect(page.getByRole('button', { name: 'More options', exact: true })).toBeFocused()
+        await page.keyboard.press('Tab')
         await expect(firstCell).toBeFocused()
         const target = grid.locator('tbody tr').first().locator('.cell-updatedAt')
 
@@ -1383,6 +1538,8 @@ test.describe('WCAG 2.2 Level AA', () => {
         await expect(grid.locator('#heading-title')).toHaveCount(0)
         await page.keyboard.press('Escape')
         await page.getByRole('link', { name: 'Create New', exact: true }).focus()
+        await page.keyboard.press('Tab')
+        await expect(page.getByRole('button', { name: 'More options', exact: true })).toBeFocused()
         await page.keyboard.press('Tab')
         await expect(target).toBeFocused()
       } finally {
@@ -2000,6 +2157,96 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.3 Focus Order (A)', () => {
+    test('should navigate LLM instructions tabs and the editor in keyboard order', async () => {
+      const field = await openLLMInstructions({ page, serverURL })
+      const additionalTab = field.getByRole('tab', { name: 'Additional instructions', exact: true })
+      const systemTab = field.getByRole('tab', {
+        name: 'System instructions (read-only)',
+        exact: true,
+      })
+      const editor = field.getByRole('textbox', { name: 'Additional instructions', exact: true })
+      const toolbarButtons = field.locator('.fixed-toolbar').getByRole('button')
+
+      await expect(additionalTab).toHaveAttribute('tabindex', '0')
+      await expect(systemTab).toHaveAttribute('tabindex', '-1')
+      await additionalTab.focus()
+      await page.keyboard.press('ArrowRight')
+      await expect(systemTab).toBeFocused()
+      await expect(additionalTab).toHaveAttribute('aria-selected', 'true')
+      await page.keyboard.press('ArrowRight')
+      await expect(additionalTab).toBeFocused()
+      await page.keyboard.press('End')
+      await expect(systemTab).toBeFocused()
+      await page.keyboard.press('Home')
+      await expect(additionalTab).toBeFocused()
+      await page.keyboard.press('ArrowLeft')
+      await expect(systemTab).toBeFocused()
+      await page.keyboard.press('Space')
+      await expect(systemTab).toHaveAttribute('aria-selected', 'true')
+      await expect(additionalTab).toHaveAttribute('aria-selected', 'false')
+      await expect(systemTab).toHaveAttribute('tabindex', '0')
+      await expect(additionalTab).toHaveAttribute('tabindex', '-1')
+      await expect(editor).toHaveCount(0)
+      await expect(toolbarButtons).toHaveCount(0)
+
+      const systemPanel = field.getByRole('tabpanel', {
+        name: 'System instructions (read-only)',
+        exact: true,
+      })
+
+      await expect(systemTab).toHaveAttribute(
+        'aria-controls',
+        (await systemPanel.getAttribute('id'))!,
+      )
+      await page.keyboard.press('Tab')
+      await expect(systemPanel).toBeFocused()
+      await page.keyboard.press('Tab')
+      await expect
+        .poll(() => field.evaluate((element) => element.contains(document.activeElement)))
+        .toBe(false)
+      await page.keyboard.press('Shift+Tab')
+      await expect(systemPanel).toBeFocused()
+      await page.keyboard.press('Shift+Tab')
+      await expect(systemTab).toBeFocused()
+      await page.keyboard.press('ArrowLeft')
+      await expect(additionalTab).toBeFocused()
+      await page.keyboard.press('Enter')
+      await expect(additionalTab).toHaveAttribute('aria-selected', 'true')
+
+      const additionalPanel = field.getByRole('tabpanel', {
+        name: 'Additional instructions',
+        exact: true,
+      })
+
+      await expect(additionalTab).toHaveAttribute(
+        'aria-controls',
+        (await additionalPanel.getAttribute('id'))!,
+      )
+      await page.keyboard.press('Tab')
+      await expect(additionalPanel).toBeFocused()
+      await expect(toolbarButtons.first()).toBeVisible()
+
+      for (const button of await toolbarButtons.all()) {
+        await page.keyboard.press('Tab')
+        await expect(button).toBeFocused()
+      }
+
+      await page.keyboard.press('Tab')
+      await expect(editor).toBeFocused()
+      await page.keyboard.press('Shift+Tab')
+      await expect(toolbarButtons.last()).toBeFocused()
+      await page.keyboard.press('Tab')
+      await expect(editor).toBeFocused()
+      await page.keyboard.press('Tab')
+      await expect(
+        field.getByRole('button', { name: 'Insert Paragraph', exact: true }),
+      ).toBeFocused()
+      await page.keyboard.press('Tab')
+      await expect
+        .poll(() => field.evaluate((element) => element.contains(document.activeElement)))
+        .toBe(false)
+    })
+
     test('should return focus to each list-options trigger after its Close button', async () => {
       for (const [selector, name] of [
         ['#toggle-group-by', /group by/i],
@@ -2051,9 +2298,8 @@ test.describe('WCAG 2.2 Level AA', () => {
       await drag.focus()
       await page.keyboard.press('Space')
       await expect(page.locator('.drag-overlay')).toBeVisible()
-      await expect(
-        page.getByRole('status').filter({ hasText: 'Picked up draggable item' }),
-      ).toHaveCount(1)
+      await expect(drag).toHaveAttribute('aria-pressed', 'true')
+      await expect(page.getByRole('status').filter({ hasText: lastID! })).toHaveCount(1)
       await page.keyboard.press('ArrowLeft')
       const overFirstWidget = page.getByRole('status').filter({ hasText: firstID! })
 
@@ -3494,6 +3740,36 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    test('should expose read-only hierarchy controls as disabled', async () => {
+      await gotoCreatePost({ page, postsURL })
+
+      const field = page.locator('#field-readOnlyHierarchy')
+      const browse = field.locator('.hierarchy-field__browse-button')
+      const combobox = field.locator('input[role="combobox"]')
+
+      await expect(field.locator('.rs--is-disabled')).toBeVisible({ timeout: 15000 })
+      await expect(combobox).toBeDisabled()
+      await expect(browse).toHaveAccessibleName(/select/i)
+      await expect(browse).toBeDisabled()
+      await expect(page.locator('.hierarchy-modal:visible')).toHaveCount(0)
+    })
+
+    test('should omit bulk confirmation from a single-value upload picker', async () => {
+      await gotoCreatePost({ page, postsURL })
+      await page
+        .locator('#field-featuredImage')
+        .getByRole('button', { name: 'Choose from existing' })
+        .press('Enter')
+
+      const drawer = page.locator('.list-drawer:visible')
+
+      await expect(drawer).toBeVisible()
+      await expect(drawer.getByRole('button', { name: 'Confirm', exact: true })).toHaveCount(0)
+      await expect(drawer.locator('.select-row__checkbox')).toHaveCount(0)
+      await drawer.locator('.list-drawer__header-close').press('Enter')
+      await expect(drawer).toBeHidden()
+    })
+
     test('should expose Media Filters as collapsed and expanded', async () => {
       // PYLD-3605
       await page.goto(
@@ -3509,6 +3785,35 @@ test.describe('WCAG 2.2 Level AA', () => {
       await filters.press('Enter')
       await expect(page.locator('.where-builder')).toBeHidden()
       await expect(filters).toHaveAttribute('aria-expanded', 'false')
+    })
+
+    test('should name LLM instructions editors and expose the read-only state without accessibility violations', async ({
+      browser: _browser,
+    }, testInfo) => {
+      const field = await openLLMInstructions({ page, serverURL })
+      const editor = field.getByRole('textbox')
+
+      await expect(editor).toHaveAccessibleName('Additional instructions')
+      await expect(editor).toBeEditable()
+
+      const editableScan = await runAxeScan({ include: ['.llm-instructions'], page, testInfo })
+
+      expect.soft(editableScan.violations).toEqual([])
+      await field
+        .getByRole('tab', { name: 'System instructions (read-only)', exact: true })
+        .press('Enter')
+      await expect.soft(editor).toHaveAccessibleName('System instructions (read-only)')
+      await expect(editor).toHaveAttribute('aria-readonly', 'true')
+      await expect(editor).not.toBeEditable()
+      await expect(editor).toHaveText('Use descriptive post titles.')
+      await editor.focus()
+      await page.keyboard.type('This must not change the system instructions.')
+      await expect(editor).toHaveText('Use descriptive post titles.')
+      await expect(field.getByRole('button', { name: 'Bold', exact: true })).toHaveCount(0)
+
+      const readOnlyScan = await runAxeScan({ include: ['.llm-instructions'], page, testInfo })
+
+      expect(readOnlyScan.violations).toEqual([])
     })
 
     test('should expose a labelled region for expanded collapsible field content', async () => {
@@ -3728,6 +4033,94 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(page).toHaveURL(/\/admin\/collections\/payload-folders(?:\?|$)/)
       await expect(page).toHaveURL(/[?&]view=hierarchy(?:&|$)/)
       await expect(page.locator('.hierarchy-list')).toBeVisible()
+    })
+
+    test('should expose and operate hierarchy breadcrumbs by keyboard', async () => {
+      test.slow()
+      const originalViewport = page.viewportSize()
+
+      try {
+        await page.setViewportSize({ height: 900, width: 360 })
+        const sidebar = await openNavigationFolders({ page, serverURL })
+        const parent = sidebar.getByRole('treeitem', {
+          name: 'Accessibility folder',
+          exact: true,
+        })
+
+        await parent.focus()
+        await parent.press('ArrowRight')
+        const child = sidebar.getByRole('treeitem', {
+          name: 'Accessibility final child folder',
+          exact: true,
+        })
+
+        await child.focus()
+        await child.press('Enter')
+        await expect(
+          page.getByRole('heading', { name: 'Accessibility final child folder', exact: true }),
+        ).toBeVisible()
+
+        const closeNavigation = page.getByRole('button', { name: 'Hide sidebar', exact: true })
+
+        if (await closeNavigation.isVisible()) {
+          await closeNavigation.press('Enter')
+        }
+
+        const stepNav = page.locator('.step-nav')
+
+        await expect(
+          stepNav.getByText('Accessibility final child folder', { exact: true }),
+        ).toBeVisible()
+        await expect(
+          stepNav.getByRole('link', {
+            name: 'Accessibility final child folder',
+            exact: true,
+          }),
+        ).toHaveCount(0)
+
+        const moreOptions = stepNav.getByRole('button', { name: 'More options', exact: true })
+
+        await expect(moreOptions).toBeVisible()
+        await moreOptions.press('Enter')
+        const collapsedItems = page.getByRole('menuitem')
+        const ancestor = page.getByRole('menuitem', {
+          name: 'Accessibility folder',
+          exact: true,
+        })
+
+        await expect(collapsedItems.first()).toBeFocused()
+        await page.keyboard.press('ArrowDown')
+        await expect(ancestor).toBeFocused()
+        await expect(ancestor).toHaveAccessibleName('Accessibility folder')
+        await expect(ancestor).toHaveAttribute('href')
+        const ancestorHref = await ancestor.getAttribute('href')
+
+        if (!ancestorHref) {
+          throw new Error('Accessibility folder breadcrumb is missing its destination')
+        }
+
+        const ancestorURL = new URL(ancestorHref, serverURL)
+
+        expect(ancestorURL.searchParams.get('view')).toBe('hierarchy')
+        expect(ancestorURL.searchParams.get('_h_payload-folders')).toBeTruthy()
+
+        await page.keyboard.press('Enter')
+        await expect(
+          page.getByRole('heading', { name: 'Accessibility folder', exact: true }),
+        ).toBeVisible()
+        await expect
+          .poll(() => new URL(page.url()).searchParams.get('_h_payload-folders'))
+          .toBe(ancestorURL.searchParams.get('_h_payload-folders'))
+        await expect(stepNav.getByText('Accessibility folder', { exact: true })).toBeVisible()
+        await expect(
+          stepNav.getByRole('link', { name: 'Accessibility folder', exact: true }),
+        ).toHaveCount(0)
+        await expect(stepNav).not.toContainText('Accessibility final child folder')
+      } finally {
+        if (originalViewport) {
+          await page.setViewportSize(originalViewport)
+        }
+      }
     })
 
     test('should identify all navigation routes and preserve keyboard access', async () => {

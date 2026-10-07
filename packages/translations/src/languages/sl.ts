@@ -287,6 +287,7 @@ export const slTranslations: DefaultTranslationsObject = {
     all: 'Vse',
     allCollections: 'Vse Zbirke',
     allLocales: 'Vse lokacije',
+    allowedTypes: 'Dovoljene vrste',
     and: 'In',
     anotherUser: 'Drug uporabnik',
     anotherUserTakenOver: 'Drug uporabnik je prevzel urejanje tega dokumenta.',
@@ -393,6 +394,7 @@ export const slTranslations: DefaultTranslationsObject = {
     globals: 'Globalne nastavitve',
     goBack: 'Nazaj',
     goToPage: 'Pojdi na stran tabele',
+    gridLayout: 'Mreža',
     groupByLabel: 'Razvrsti po {{label}}',
     hideSidebar: 'Skrij stransko vrstico',
     import: 'Uvoz',
@@ -442,6 +444,7 @@ export const slTranslations: DefaultTranslationsObject = {
     notFound: 'Ni najdeno',
     nothingFound: 'Nič ni najdeno',
     noTrashResults: 'Ni {{label}} v smetnjaku.',
+    notSelectedDocument: 'Ni izbrano. Pritisnite Enter ali preslednico, da spremenite izbor.',
     notShownInTable: 'Ni prikazano v tabeli',
     noUpcomingEventsScheduled: 'Ni načrtovanih prihajajočih dogodkov.',
     noValue: 'Ni vrednosti',
@@ -500,6 +503,7 @@ export const slTranslations: DefaultTranslationsObject = {
     selectAll: 'Izberi vse {{count}} {{label}}',
     selectAllRows: 'Izberi vse vrstice',
     selectedCount: '{{count}} {{label}} izbranih',
+    selectedDocument: 'Izbrano. Pritisnite Enter ali preslednico, da spremenite izbor.',
     selectLabel: 'Izberite {{label}}',
     selectValue: 'Izberi vrednost',
     settings: 'Nastavitve',
@@ -521,6 +525,7 @@ export const slTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} uspešno podvojen.',
     successfullyReindexed:
       'Uspešno je bilo ponovo indeksiranih {{count}} od skupno {{total}} dokumentov iz {{collections}}, in {{skips}} osnutkov je bilo preskočenih.',
+    tableLayout: 'Tabela',
     takeOver: 'Prevzemi',
     theme: 'Tema',
     thisLanguage: 'Slovenščina',
@@ -570,6 +575,23 @@ export const slTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Iskanje {{label}}',
     searchResults: 'Najdeno: {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Dodatna navodila',
+    collectionDescription:
+      'Dodajte navodila po meri za zbirko {{label}}, da bodo modeli LLM bolje prilagodili odgovore na pozive.',
+    collectionSystemDescription:
+      'Ta sistemska navodila izvirajo iz konfiguracijske datoteke zbirke in so vedno vključena.',
+    editInstructions: 'Uredi navodila za LLM',
+    global: 'Globalni dokument',
+    globalDescription:
+      'Dodajte navodila po meri za globalni dokument {{label}}, da bodo modeli LLM bolje prilagodili odgovore na pozive.',
+    globalSystemDescription:
+      'Ta sistemska navodila izvirajo iz konfiguracijske datoteke globalnega dokumenta in so vedno vključena.',
+    instructions: 'Navodila za LLM',
+    systemInstructions: 'Sistemska navodila (samo za branje)',
+    targetCannotBeChanged: 'Cilja navodil ni mogoče spremeniti.',
+    title: 'Naslov',
   },
   localization: {
     cannotCopySameLocale: 'Ni mogoče kopirati v isti jezik',

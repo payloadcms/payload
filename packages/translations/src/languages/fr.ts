@@ -299,6 +299,7 @@ export const frTranslations: DefaultTranslationsObject = {
     all: 'Tout',
     allCollections: 'Toutes les collections',
     allLocales: 'Tous les paramètres régionaux',
+    allowedTypes: 'Types autorisés',
     and: 'Et',
     anotherUser: 'Un autre utilisateur',
     anotherUserTakenOver: 'Un autre utilisateur a pris en charge la modification de ce document.',
@@ -406,6 +407,7 @@ export const frTranslations: DefaultTranslationsObject = {
     globals: 'Globals(es)',
     goBack: 'Retourner',
     goToPage: 'Aller à une page du tableau',
+    gridLayout: 'Grille',
     groupByLabel: 'Regrouper par {{label}}',
     hideSidebar: 'Masquer la barre latérale',
     import: 'Importation',
@@ -455,6 +457,8 @@ export const frTranslations: DefaultTranslationsObject = {
     notFound: 'Pas trouvé',
     nothingFound: 'Rien n’a été trouvé',
     noTrashResults: 'Aucun {{label}} dans la corbeille.',
+    notSelectedDocument:
+      'Non sélectionné. Appuyez sur Entrée ou Espace pour modifier la sélection.',
     notShownInTable: 'Non affiché dans le tableau',
     noUpcomingEventsScheduled: 'Aucun événement à venir prévu.',
     noValue: 'Aucune valeur',
@@ -513,6 +517,7 @@ export const frTranslations: DefaultTranslationsObject = {
     selectAll: 'Tout sélectionner {{count}} {{label}}',
     selectAllRows: 'Sélectionnez toutes les lignes',
     selectedCount: '{{count}} {{label}} sélectionné',
+    selectedDocument: 'Sélectionné. Appuyez sur Entrée ou Espace pour modifier la sélection.',
     selectLabel: 'Sélectionnez {{label}}',
     selectValue: 'Sélectionnez une valeur',
     settings: 'Paramètres',
@@ -534,6 +539,7 @@ export const frTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} dupliqué(e) avec succès.',
     successfullyReindexed:
       '{{count}} des {{total}} documents de {{collections}} ont été réindexés avec succès, et {{skips}} brouillons ont été ignorés.',
+    tableLayout: 'Tableau',
     takeOver: 'Prendre en charge',
     theme: 'Thème',
     thisLanguage: 'Français',
@@ -585,6 +591,23 @@ export const frTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Recherche {{label}}',
     searchResults: '{{count}} trouvés',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Instructions supplémentaires',
+    collectionDescription:
+      'Ajoutez des instructions personnalisées pour la collection {{label}} afin d’aider les LLM à mieux adapter leurs réponses aux requêtes.',
+    collectionSystemDescription:
+      'Ces instructions système proviennent du fichier de configuration de la collection et sont toujours incluses.',
+    editInstructions: 'Modifier les instructions LLM',
+    global: 'Global',
+    globalDescription:
+      'Ajoutez des instructions personnalisées pour le global {{label}} afin d’aider les LLM à mieux adapter leurs réponses aux requêtes.',
+    globalSystemDescription:
+      'Ces instructions système proviennent du fichier de configuration du global et sont toujours incluses.',
+    instructions: 'Instructions LLM',
+    systemInstructions: 'Instructions système (lecture seule)',
+    targetCannotBeChanged: 'La cible des instructions ne peut pas être modifiée.',
+    title: 'Titre',
   },
   localization: {
     cannotCopySameLocale: 'Impossible de copier dans le même endroit',

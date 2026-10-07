@@ -292,6 +292,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     all: 'Visi',
     allCollections: 'Visos kolekcijos',
     allLocales: 'Visi lokalai',
+    allowedTypes: 'Leidžiami tipai',
     and: 'Ir',
     anotherUser: 'Kitas vartotojas',
     anotherUserTakenOver: 'Kitas naudotojas perėmė šio dokumento redagavimą.',
@@ -399,6 +400,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     globals: 'Globalai',
     goBack: 'Grįžkite',
     goToPage: 'Eiti į lentelės puslapį',
+    gridLayout: 'Tinklelis',
     groupByLabel: 'Grupuoti pagal {{label}}',
     hideSidebar: 'Slėpti šoninę juostą',
     import: 'Importas',
@@ -447,6 +449,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     notFound: 'Nerasta',
     nothingFound: 'Nieko nerasta',
     noTrashResults: 'Nėra {{label}} šiukšliadėžėje.',
+    notSelectedDocument:
+      'Nepasirinkta. Norėdami pakeisti pasirinkimą, paspauskite Enter arba tarpo klavišą.',
     notShownInTable: 'Nerodoma lentelėje',
     noUpcomingEventsScheduled: 'Nėra suplanuotų būsimų renginių.',
     noValue: 'Nėra vertės',
@@ -504,6 +508,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     selectAll: 'Pasirinkite visus {{count}} {{label}}',
     selectAllRows: 'Pasirinkite visas eilutes',
     selectedCount: '{{count}} {{label}} pasirinkta',
+    selectedDocument:
+      'Pasirinkta. Norėdami pakeisti pasirinkimą, paspauskite Enter arba tarpo klavišą.',
     selectLabel: 'Pasirinkite {{label}}',
     selectValue: 'Pasirinkite reikšmę',
     settings: 'Nustatymai',
@@ -525,6 +531,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} sėkmingai dubliuotas.',
     successfullyReindexed:
       'Sėkmingai perindeksuota {{count}} iš {{total}} dokumentų iš {{collections}}, praleista {{skips}} juodraščių.',
+    tableLayout: 'Lentelė',
     takeOver: 'Perimti',
     theme: 'Tema',
     thisLanguage: 'Lietuvių',
@@ -574,6 +581,23 @@ export const ltTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Ieškoti {{label}}',
     searchResults: 'Rasta: {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Papildomi nurodymai',
+    collectionDescription:
+      'Pridėkite pasirinktinius nurodymus rinkiniui {{label}}, kad LLM galėtų geriau pritaikyti atsakymus į užklausas.',
+    collectionSystemDescription:
+      'Šie sistemos nurodymai pateikiami rinkinio konfigūracijos faile ir visada įtraukiami.',
+    editInstructions: 'Redaguoti LLM nurodymus',
+    global: 'Globalus dokumentas',
+    globalDescription:
+      'Pridėkite pasirinktinius nurodymus globaliam dokumentui {{label}}, kad LLM galėtų geriau pritaikyti atsakymus į užklausas.',
+    globalSystemDescription:
+      'Šie sistemos nurodymai pateikiami globalaus dokumento konfigūracijos faile ir visada įtraukiami.',
+    instructions: 'LLM nurodymai',
+    systemInstructions: 'Sistemos nurodymai (tik skaitomi)',
+    targetCannotBeChanged: 'Nurodymų paskirties keisti negalima.',
+    title: 'Pavadinimas',
   },
   localization: {
     cannotCopySameLocale: 'Negalima kopijuoti į tą pačią vietovę',

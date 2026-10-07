@@ -288,6 +288,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     all: 'Visi',
     allCollections: 'Visas kolekcijas',
     allLocales: 'Visi lokalizācijas variants',
+    allowedTypes: 'Atļautie tipi',
     and: 'Un',
     anotherUser: 'Cits lietotājs',
     anotherUserTakenOver: 'Cits lietotājs ir pārņēmis šī dokumenta rediģēšanu.',
@@ -395,6 +396,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     globals: 'Globālie',
     goBack: 'Doties atpakaļ',
     goToPage: 'Doties uz tabulas lapu',
+    gridLayout: 'Režģis',
     groupByLabel: 'Grupēt pēc {{label}}',
     hideSidebar: 'Paslēpt sānjoslu',
     import: 'Imports',
@@ -444,6 +446,8 @@ export const lvTranslations: DefaultTranslationsObject = {
     notFound: 'Nav atrasts',
     nothingFound: 'Nekas nav atrasts',
     noTrashResults: 'Nav {{label}} miskastē.',
+    notSelectedDocument:
+      'Nav atlasīts. Lai mainītu atlasi, nospiediet Enter vai atstarpes taustiņu.',
     notShownInTable: 'Nav parādīts tabulā',
     noUpcomingEventsScheduled: 'Nav ieplānotu notikumu.',
     noValue: 'Nav vērtības',
@@ -501,6 +505,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     selectAll: 'Atlasīt visus {{count}} {{label}}',
     selectAllRows: 'Atlasīt visas rindas',
     selectedCount: 'Atlasīti {{count}} {{label}}',
+    selectedDocument: 'Atlasīts. Lai mainītu atlasi, nospiediet Enter vai atstarpes taustiņu.',
     selectLabel: 'Atlasīt {{label}}',
     selectValue: 'Atlasīt vērtību',
     settings: 'Iestatījumi',
@@ -521,6 +526,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} veiksmīgi dublēts.',
     successfullyReindexed:
       'Veiksmīgi pārindeksēti {{count}} no {{total}} dokumentiem no {{collections}}, izlaisti {{skips}} melnraksti.',
+    tableLayout: 'Tabula',
     takeOver: 'Pārņemt',
     theme: 'Tēma',
     thisLanguage: 'Latviešu',
@@ -570,6 +576,23 @@ export const lvTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Meklēt {{label}}',
     searchResults: 'Atrasts: {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Papildu norādījumi',
+    collectionDescription:
+      'Pievienojiet pielāgotus norādījumus kolekcijai {{label}}, lai palīdzētu LLM labāk pielāgot atbildes uz uzvednēm.',
+    collectionSystemDescription:
+      'Šie sistēmas norādījumi nāk no kolekcijas konfigurācijas faila un vienmēr tiek iekļauti.',
+    editInstructions: 'Rediģēt LLM norādījumus',
+    global: 'Globālais dokuments',
+    globalDescription:
+      'Pievienojiet pielāgotus norādījumus globālajam dokumentam {{label}}, lai palīdzētu LLM labāk pielāgot atbildes uz uzvednēm.',
+    globalSystemDescription:
+      'Šie sistēmas norādījumi nāk no globālā dokumenta konfigurācijas faila un vienmēr tiek iekļauti.',
+    instructions: 'LLM norādījumi',
+    systemInstructions: 'Sistēmas norādījumi (tikai lasāmi)',
+    targetCannotBeChanged: 'Norādījumu mērķi nevar mainīt.',
+    title: 'Virsraksts',
   },
   localization: {
     cannotCopySameLocale: 'Nevar kopēt uz to pašu lokalizāciju',

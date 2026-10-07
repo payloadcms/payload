@@ -293,6 +293,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     all: 'সমস্ত',
     allCollections: 'সমস্ত সংগ্রহ',
     allLocales: 'সমস্ত লোকেল',
+    allowedTypes: 'অনুমোদিত ধরনসমূহ',
     and: 'এবং',
     anotherUser: 'অন্য ব্যবহারকারী',
     anotherUserTakenOver: 'অন্য একজন ব্যবহারকারী এই ডকুমেন্ট সম্পাদনার দায়িত্ব নিয়েছেন।',
@@ -401,6 +402,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     globals: 'গ্লোবালগুলি',
     goBack: 'পিছনে যান',
     goToPage: 'সারণির পৃষ্ঠায় যান',
+    gridLayout: 'গ্রিড',
     groupByLabel: '{{label}} অনুযায়ী গ্রুপ করুন',
     hideSidebar: 'সাইডবার লুকান',
     import: 'ইম্পোর্ট করুন',
@@ -450,6 +452,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     notFound: 'পাওয়া যায়নি',
     nothingFound: 'কিছুই পাওয়া যায়নি',
     noTrashResults: 'ট্র্যাশে কোন {{label}} নেই।',
+    notSelectedDocument: 'নির্বাচিত নয়। নির্বাচন পরিবর্তন করতে Enter বা Space চাপুন।',
     notShownInTable: 'সারণিতে প্রদর্শিত নয়',
     noUpcomingEventsScheduled: 'কোনো আসন্ন ইভেন্ট নির্ধারিত নেই।',
     noValue: 'কোনো মান নেই',
@@ -509,6 +512,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     selectAll: 'সমস্ত {{count}} {{label}} নির্বাচন করুন',
     selectAllRows: 'সমস্ত সারি নির্বাচন করুন',
     selectedCount: '{{count}} {{label}} নির্বাচিত হয়েছে',
+    selectedDocument: 'নির্বাচিত। নির্বাচন পরিবর্তন করতে Enter বা Space চাপুন।',
     selectLabel: '{{label}} নির্বাচন করুন',
     selectValue: 'একটি মান নির্বাচন করুন',
     settings: 'সেটিংস',
@@ -530,6 +534,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} সফলভাবে ডুপ্লিকেট করা হয়েছে।',
     successfullyReindexed:
       '{{collections}} থেকে মোট {{total}}টি ডকুমেন্টের মধ্যে {{count}}টি সফলভাবে পুনরায় ইনডেক্স করা হয়েছে এবং {{skips}}টি খসড়া বাদ দেওয়া হয়েছে।',
+    tableLayout: 'টেবিল',
     takeOver: 'দায়িত্ব নিন',
     theme: 'থিম',
     thisLanguage: 'বাংলা (বাংলাদেশ)',
@@ -581,6 +586,23 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'অনুসন্ধান করুন {{label}}',
     searchResults: '{{count}}টি পাওয়া গেছে',
+  },
+  llmInstructions: {
+    additionalInstructions: 'অতিরিক্ত নির্দেশনা',
+    collectionDescription:
+      'LLM-কে প্রম্পটের আরও উপযুক্ত উত্তর দিতে সাহায্য করার জন্য {{label}} সংগ্রহে কাস্টম নির্দেশনা যোগ করুন।',
+    collectionSystemDescription:
+      'এই সিস্টেম নির্দেশনাগুলো সংগ্রহের কনফিগারেশন ফাইল থেকে আসে এবং সর্বদা অন্তর্ভুক্ত থাকে।',
+    editInstructions: 'LLM নির্দেশনা সম্পাদনা করুন',
+    global: 'গ্লোবাল',
+    globalDescription:
+      'LLM-কে প্রম্পটের আরও উপযুক্ত উত্তর দিতে সাহায্য করার জন্য {{label}} গ্লোবালে কাস্টম নির্দেশনা যোগ করুন।',
+    globalSystemDescription:
+      'এই সিস্টেম নির্দেশনাগুলো গ্লোবালের কনফিগারেশন ফাইল থেকে আসে এবং সর্বদা অন্তর্ভুক্ত থাকে।',
+    instructions: 'LLM নির্দেশনা',
+    systemInstructions: 'সিস্টেম নির্দেশনা (শুধু পড়ার জন্য)',
+    targetCannotBeChanged: 'নির্দেশনার লক্ষ্য পরিবর্তন করা যাবে না।',
+    title: 'শিরোনাম',
   },
   localization: {
     cannotCopySameLocale: 'একই লোকেলে কপি করা যাবে না',

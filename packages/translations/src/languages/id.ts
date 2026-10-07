@@ -290,6 +290,7 @@ export const idTranslations: DefaultTranslationsObject = {
     all: 'Semua',
     allCollections: 'Semua Koleksi',
     allLocales: 'Semua lokal',
+    allowedTypes: 'Jenis yang diizinkan',
     and: 'Dan',
     anotherUser: 'Pengguna lain',
     anotherUserTakenOver: 'Pengguna lain telah mengambil alih pengeditan dokumen ini.',
@@ -397,6 +398,7 @@ export const idTranslations: DefaultTranslationsObject = {
     globals: 'Global',
     goBack: 'Kembali',
     goToPage: 'Buka halaman tabel',
+    gridLayout: 'Kisi',
     groupByLabel: 'Kelompokkan berdasarkan {{label}}',
     hideSidebar: 'Sembunyikan bilah samping',
     import: 'Impor',
@@ -446,6 +448,7 @@ export const idTranslations: DefaultTranslationsObject = {
     notFound: 'Tidak Ditemukan',
     nothingFound: 'Tidak ada yang ditemukan',
     noTrashResults: 'Tidak ada {{label}} di tempat sampah.',
+    notSelectedDocument: 'Tidak dipilih. Tekan Enter atau Spasi untuk mengubah pilihan.',
     notShownInTable: 'Tidak ditampilkan dalam tabel',
     noUpcomingEventsScheduled: 'Tidak ada acara mendatang yang dijadwalkan.',
     noValue: 'Tidak ada nilai',
@@ -504,6 +507,7 @@ export const idTranslations: DefaultTranslationsObject = {
     selectAll: 'Pilih semua {{count}} {{label}}',
     selectAllRows: 'Pilih semua baris',
     selectedCount: '{{count}} {{label}} dipilih',
+    selectedDocument: 'Dipilih. Tekan Enter atau Spasi untuk mengubah pilihan.',
     selectLabel: 'Pilih {{label}}',
     selectValue: 'Pilih nilai',
     settings: 'Pengaturan',
@@ -525,6 +529,7 @@ export const idTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} berhasil diduplikasi.',
     successfullyReindexed:
       'Berhasil mengindeks ulang {{count}} dari {{total}} dokumen dari {{collections}}, dan melewatkan {{skips}} draf.',
+    tableLayout: 'Tabel',
     takeOver: 'Ambil alih',
     theme: 'Tema',
     thisLanguage: 'Bahasa Indonesia',
@@ -576,6 +581,23 @@ export const idTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Cari {{label}}',
     searchResults: 'Ditemukan {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Instruksi tambahan',
+    collectionDescription:
+      'Tambahkan instruksi khusus untuk koleksi {{label}} agar LLM dapat menyesuaikan respons terhadap prompt dengan lebih baik.',
+    collectionSystemDescription:
+      'Instruksi sistem ini berasal dari file konfigurasi koleksi dan selalu disertakan.',
+    editInstructions: 'Edit instruksi LLM',
+    global: 'Global',
+    globalDescription:
+      'Tambahkan instruksi khusus untuk global {{label}} agar LLM dapat menyesuaikan respons terhadap prompt dengan lebih baik.',
+    globalSystemDescription:
+      'Instruksi sistem ini berasal dari file konfigurasi global dan selalu disertakan.',
+    instructions: 'Instruksi LLM',
+    systemInstructions: 'Instruksi sistem (hanya baca)',
+    targetCannotBeChanged: 'Target instruksi tidak dapat diubah.',
+    title: 'Judul',
   },
   localization: {
     cannotCopySameLocale: 'Tidak dapat menyalin ke lokal yang sama',

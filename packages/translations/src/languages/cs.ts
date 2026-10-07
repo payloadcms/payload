@@ -286,6 +286,7 @@ export const csTranslations: DefaultTranslationsObject = {
     all: 'Všechny',
     allCollections: 'Všechny kolekce',
     allLocales: 'Všechny lokalizace',
+    allowedTypes: 'Povolené typy',
     and: 'a',
     anotherUser: 'Jiný uživatel',
     anotherUserTakenOver: 'Jiný uživatel převzal úpravy tohoto dokumentu.',
@@ -391,6 +392,7 @@ export const csTranslations: DefaultTranslationsObject = {
     globals: 'Globální',
     goBack: 'Vrátit se',
     goToPage: 'Přejít na stránku tabulky',
+    gridLayout: 'Mřížka',
     groupByLabel: 'Seskupit podle {{label}}',
     hideSidebar: 'Skrýt postranní panel',
     import: 'Import',
@@ -440,6 +442,7 @@ export const csTranslations: DefaultTranslationsObject = {
     notFound: 'Nenalezeno',
     nothingFound: 'Nic nenalezeno',
     noTrashResults: 'Žádný {{label}} v koši.',
+    notSelectedDocument: 'Nevybráno. Stisknutím klávesy Enter nebo mezerníku změníte výběr.',
     notShownInTable: 'Není zobrazeno v tabulce',
     noUpcomingEventsScheduled: 'Žádné nadcházející události nejsou naplánovány.',
     noValue: 'Žádná hodnota',
@@ -498,6 +501,7 @@ export const csTranslations: DefaultTranslationsObject = {
     selectAll: 'Vybrat vše {{count}} {{label}}',
     selectAllRows: 'Vyberte všechny řádky',
     selectedCount: 'Vybráno {{count}} {{label}}',
+    selectedDocument: 'Vybráno. Stisknutím klávesy Enter nebo mezerníku změníte výběr.',
     selectLabel: 'Vyberte {{label}}',
     selectValue: 'Vyberte hodnotu',
     settings: 'Nastavení',
@@ -519,6 +523,7 @@ export const csTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} úspěšně duplikováno.',
     successfullyReindexed:
       'Úspěšně reindexováno {{count}} z {{total}} dokumentů z {{collections}} a přeskočeno {{skips}} konceptů.',
+    tableLayout: 'Tabulka',
     takeOver: 'Převzít',
     theme: 'Téma',
     thisLanguage: 'Čeština',
@@ -568,6 +573,23 @@ export const csTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Hledat {{label}}',
     searchResults: 'Nalezeno: {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Další pokyny',
+    collectionDescription:
+      'Přidejte vlastní pokyny pro kolekci {{label}}, které pomohou modelům LLM lépe přizpůsobit odpovědi na zadání.',
+    collectionSystemDescription:
+      'Tyto systémové pokyny pocházejí z konfiguračního souboru kolekce a jsou vždy zahrnuty.',
+    editInstructions: 'Upravit pokyny LLM',
+    global: 'Globální dokument',
+    globalDescription:
+      'Přidejte vlastní pokyny pro globální dokument {{label}}, které pomohou modelům LLM lépe přizpůsobit odpovědi na zadání.',
+    globalSystemDescription:
+      'Tyto systémové pokyny pocházejí z konfiguračního souboru globálního dokumentu a jsou vždy zahrnuty.',
+    instructions: 'Pokyny LLM',
+    systemInstructions: 'Systémové pokyny (pouze pro čtení)',
+    targetCannotBeChanged: 'Cíl pokynů nelze změnit.',
+    title: 'Název',
   },
   localization: {
     cannotCopySameLocale: 'Nelze kopírovat do stejného umístění',

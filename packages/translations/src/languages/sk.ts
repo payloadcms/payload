@@ -290,6 +290,7 @@ export const skTranslations: DefaultTranslationsObject = {
     all: 'Všetko',
     allCollections: 'Všetky Kolekcie',
     allLocales: 'Všetky lokality',
+    allowedTypes: 'Povolené typy',
     and: 'a',
     anotherUser: 'Iný používateľ',
     anotherUserTakenOver: 'Iný používateľ prevzal úpravy tohto dokumentu.',
@@ -395,6 +396,7 @@ export const skTranslations: DefaultTranslationsObject = {
     globals: 'Globalné',
     goBack: 'Vrátiť sa',
     goToPage: 'Prejsť na stránku tabuľky',
+    gridLayout: 'Mriežka',
     groupByLabel: 'Zoskupiť podľa {{label}}',
     hideSidebar: 'Skryť bočný panel',
     import: 'Dovoz',
@@ -442,6 +444,7 @@ export const skTranslations: DefaultTranslationsObject = {
     notFound: 'Nenájdené',
     nothingFound: 'Nič nenájdené',
     noTrashResults: 'Žiadne {{label}} v koši.',
+    notSelectedDocument: 'Nevybrané. Stlačením klávesu Enter alebo medzerníka zmeníte výber.',
     notShownInTable: 'Nie je zobrazené v tabuľke',
     noUpcomingEventsScheduled: 'Nie sú naplánované žiadne nadchádzajúce udalosti.',
     noValue: 'Žiadna hodnota',
@@ -499,6 +502,7 @@ export const skTranslations: DefaultTranslationsObject = {
     selectAll: 'Vybrať všetko {{count}} {{label}}',
     selectAllRows: 'Vybrať všetky riadky',
     selectedCount: 'Vybrané {{count}} {{label}}',
+    selectedDocument: 'Vybrané. Stlačením klávesu Enter alebo medzerníka zmeníte výber.',
     selectLabel: 'Vyberte {{label}}',
     selectValue: 'Vybrať hodnotu',
     settings: 'Nastavenia',
@@ -520,6 +524,7 @@ export const skTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} úspešne duplikované.',
     successfullyReindexed:
       'Úspešne bolo preindexovaných {{count}} z {{total}} dokumentov z kolekcie {{collections}}, a {{skips}} konceptov bolo preskočených.',
+    tableLayout: 'Tabuľka',
     takeOver: 'Prevziať',
     theme: 'Téma',
     thisLanguage: 'Slovenčina',
@@ -569,6 +574,23 @@ export const skTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Vyhľadávanie {{label}}',
     searchResults: 'Nájdené: {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Ďalšie pokyny',
+    collectionDescription:
+      'Pridajte vlastné pokyny pre kolekciu {{label}}, ktoré pomôžu modelom LLM lepšie prispôsobiť odpovede na zadania.',
+    collectionSystemDescription:
+      'Tieto systémové pokyny pochádzajú z konfiguračného súboru kolekcie a sú vždy zahrnuté.',
+    editInstructions: 'Upraviť pokyny LLM',
+    global: 'Globálny dokument',
+    globalDescription:
+      'Pridajte vlastné pokyny pre globálny dokument {{label}}, ktoré pomôžu modelom LLM lepšie prispôsobiť odpovede na zadania.',
+    globalSystemDescription:
+      'Tieto systémové pokyny pochádzajú z konfiguračného súboru globálneho dokumentu a sú vždy zahrnuté.',
+    instructions: 'Pokyny LLM',
+    systemInstructions: 'Systémové pokyny (iba na čítanie)',
+    targetCannotBeChanged: 'Cieľ pokynov nemožno zmeniť.',
+    title: 'Názov',
   },
   localization: {
     cannotCopySameLocale: 'Nemožno kopírovať do rovnakej lokalizácie.',

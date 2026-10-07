@@ -56,7 +56,7 @@ describe('Dashboard', () => {
     expect(activityBox).not.toBeNull()
     expect(collectionsBox).not.toBeNull()
     expect(activityBox!.y - (welcomeBox!.y + welcomeBox!.height)).toBe(24)
-    expect(collectionsBox!.y - (activityBox!.y + activityBox!.height)).toBe(12)
+    expect(collectionsBox!.y - (activityBox!.y + activityBox!.height)).toBe(24)
     await d.assertWidget(4, 'count', 'x-small')
     await d.assertWidget(5, 'count', 'x-small')
     await d.assertWidget(6, 'count', 'x-small')
@@ -96,7 +96,7 @@ describe('Dashboard', () => {
           yOffset: cardBox.y - wrapBox.y,
         }
       })
-      .toEqual({ height: 64, xOffset: 0, yOffset: 37 })
+      .toEqual({ height: 64, xOffset: 0, yOffset: 34 })
     await expect(card).toHaveCSS('border-radius', '13px')
     await expect(actions).toHaveCSS('opacity', '0')
     const defaultBackground = await card.evaluate(
@@ -817,8 +817,10 @@ describe('Dashboard', () => {
 
     // Every collection is included (checked) by default - the stored exclusion list is empty.
     const checkboxes = collectionsField.locator('.checkbox-input')
+
+    await expect.poll(() => checkboxes.count()).toBeGreaterThanOrEqual(3)
     const checkboxCount = await checkboxes.count()
-    expect(checkboxCount).toBeGreaterThanOrEqual(3)
+
     await expect(collectionsField.locator('.checkbox-input--checked')).toHaveCount(checkboxCount)
 
     // Unchecking "Tickets" adds it to the stored exclusion list.

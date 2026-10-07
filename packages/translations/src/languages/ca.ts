@@ -292,6 +292,7 @@ export const caTranslations: DefaultTranslationsObject = {
     all: 'Tots',
     allCollections: 'Totes les col·leccions',
     allLocales: 'Totes les localitats',
+    allowedTypes: 'Tipus permesos',
     and: 'i',
     anotherUser: 'Altre usuari',
     anotherUserTakenOver: "Un altre usuari ha pres la edició d'aquest document.",
@@ -398,6 +399,7 @@ export const caTranslations: DefaultTranslationsObject = {
     globals: 'Globals',
     goBack: 'Torna enrere',
     goToPage: 'Ves a una pàgina de la taula',
+    gridLayout: 'Quadrícula',
     groupByLabel: 'Agrupa per {{label}}',
     hideSidebar: 'Amaga la barra lateral',
     import: 'Importar',
@@ -447,6 +449,7 @@ export const caTranslations: DefaultTranslationsObject = {
     notFound: 'No trobat',
     nothingFound: 'Res trobat',
     noTrashResults: 'No hi ha cap {{label}} a la paperera.',
+    notSelectedDocument: 'No seleccionat. Premeu Retorn o Espai per canviar la selecció.',
     notShownInTable: 'No es mostra a la taula',
     noUpcomingEventsScheduled: 'No hi ha esdeveniments programats.',
     noValue: 'No hi ha cap valor',
@@ -506,6 +509,7 @@ export const caTranslations: DefaultTranslationsObject = {
     selectAll: 'Selecciona totes les {{count}} {{label}}',
     selectAllRows: 'Selecciona totes les files',
     selectedCount: '{{count}} {{label}} seleccionats',
+    selectedDocument: 'Seleccionat. Premeu Retorn o Espai per canviar la selecció.',
     selectLabel: 'Selecciona {{label}}',
     selectValue: 'Selecciona un valor',
     settings: 'Configuració',
@@ -527,6 +531,7 @@ export const caTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} duplicada correctament.',
     successfullyReindexed:
       "S'han reindexat correctament {{count}} de {{total}} documents de {{collections}} i s'han omès {{skips}} esborranys.",
+    tableLayout: 'Taula',
     takeOver: 'Prendre el control',
     theme: 'Tema',
     thisLanguage: 'Catala',
@@ -576,6 +581,23 @@ export const caTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Cerca {{label}}',
     searchResults: 'S’han trobat {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Instruccions addicionals',
+    collectionDescription:
+      'Afegiu instruccions personalitzades per a la col·lecció {{label}} per ajudar els LLM a adaptar millor les respostes a les indicacions.',
+    collectionSystemDescription:
+      'Aquestes instruccions del sistema provenen del fitxer de configuració de la col·lecció i sempre s’inclouen.',
+    editInstructions: 'Edita les instruccions dels LLM',
+    global: 'Global',
+    globalDescription:
+      'Afegiu instruccions personalitzades per al global {{label}} per ajudar els LLM a adaptar millor les respostes a les indicacions.',
+    globalSystemDescription:
+      'Aquestes instruccions del sistema provenen del fitxer de configuració del global i sempre s’inclouen.',
+    instructions: 'Instruccions dels LLM',
+    systemInstructions: 'Instruccions del sistema (només lectura)',
+    targetCannotBeChanged: 'No es pot canviar la destinació de les instruccions.',
+    title: 'Títol',
   },
   localization: {
     cannotCopySameLocale: 'No es pot copiar al mateix idioma',

@@ -289,6 +289,7 @@ export const enTranslations = {
     all: 'All',
     allCollections: 'All Collections',
     allLocales: 'All locales',
+    allowedTypes: 'Allowed types',
     and: 'And',
     anotherUser: 'Another user',
     anotherUserTakenOver: 'Another user has taken over editing this document.',
@@ -396,6 +397,7 @@ export const enTranslations = {
     globals: 'Globals',
     goBack: 'Go back',
     goToPage: 'Go to table page',
+    gridLayout: 'Grid',
     groupByLabel: 'Group by {{label}}',
     hideSidebar: 'Hide sidebar',
     import: 'Import',
@@ -444,6 +446,7 @@ export const enTranslations = {
     notFound: 'Not Found',
     nothingFound: 'Nothing found',
     noTrashResults: 'No {{label}} in trash.',
+    notSelectedDocument: 'Not selected. Press Enter or Space to change selection.',
     notShownInTable: 'Not shown in table',
     noUpcomingEventsScheduled: 'No upcoming events scheduled.',
     noValue: 'No value',
@@ -502,6 +505,7 @@ export const enTranslations = {
     selectAll: 'Select all {{count}} {{label}}',
     selectAllRows: 'Select all rows',
     selectedCount: '{{count}} {{label}} selected',
+    selectedDocument: 'Selected. Press Enter or Space to change selection.',
     selectLabel: 'Select {{label}}',
     selectValue: 'Select a value',
     settings: 'Settings',
@@ -522,6 +526,7 @@ export const enTranslations = {
     successfullyDuplicated: '{{label}} successfully duplicated.',
     successfullyReindexed:
       'Successfully reindexed {{count}} of {{total}} documents from {{collections}} and skipped {{skips}} drafts.',
+    tableLayout: 'Table',
     takeOver: 'Take over',
     theme: 'Theme',
     thisLanguage: 'English',
@@ -571,6 +576,23 @@ export const enTranslations = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Search {{label}}',
     searchResults: 'Found {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Additional instructions',
+    collectionDescription:
+      'Add custom instructions for the {{label}} collection to help LLMs tailor better prompt responses.',
+    collectionSystemDescription:
+      'These system instructions are provided by the collection’s config file and are always included.',
+    editInstructions: 'Edit LLM instructions',
+    global: 'Global',
+    globalDescription:
+      'Add custom instructions for the {{label}} global to help LLMs tailor better prompt responses.',
+    globalSystemDescription:
+      'These system instructions are provided by the global’s config file and are always included.',
+    instructions: 'LLM Instructions',
+    systemInstructions: 'System instructions (read-only)',
+    targetCannotBeChanged: 'The instruction target cannot be changed.',
+    title: 'Title',
   },
   localization: {
     cannotCopySameLocale: 'Cannot copy to the same locale',

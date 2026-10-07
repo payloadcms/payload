@@ -291,6 +291,7 @@ export const azTranslations: DefaultTranslationsObject = {
     all: 'Hamısı',
     allCollections: 'Bütün kolleksiyalar',
     allLocales: 'Bütün lokal məkanlar',
+    allowedTypes: 'İcazə verilən növlər',
     and: 'Və',
     anotherUser: 'Başqa bir istifadəçi',
     anotherUserTakenOver: 'Başqa bir istifadəçi bu sənədin redaktəsini ələ keçirdi.',
@@ -399,6 +400,7 @@ export const azTranslations: DefaultTranslationsObject = {
     globals: 'Qloballar',
     goBack: 'Geri qayıt',
     goToPage: 'Cədvəlin səhifəsinə keç',
+    gridLayout: 'Tor',
     groupByLabel: '{{label}} ilə qruplaşdırın',
     hideSidebar: 'Yan paneli gizlət',
     import: 'İdxal',
@@ -448,6 +450,7 @@ export const azTranslations: DefaultTranslationsObject = {
     notFound: 'Tapılmadı',
     nothingFound: 'Heç nə tapılmadı',
     noTrashResults: 'Çöplükdə heç bir {{label}} yoxdur.',
+    notSelectedDocument: 'Seçilmədi. Seçimi dəyişmək üçün Enter və ya Boşluq düyməsinə basın.',
     notShownInTable: 'Cədvəldə göstərilmir',
     noUpcomingEventsScheduled: 'Heç bir gələcək tədbir cədvələ alınmayıb.',
     noValue: 'Dəyər yoxdur',
@@ -506,6 +509,7 @@ export const azTranslations: DefaultTranslationsObject = {
     selectAll: 'Bütün {{count}} {{label}} seç',
     selectAllRows: 'Bütün sıraları seçin',
     selectedCount: '{{count}} {{label}} seçildi',
+    selectedDocument: 'Seçildi. Seçimi dəyişmək üçün Enter və ya Boşluq düyməsinə basın.',
     selectLabel: '{{label}} seçin',
     selectValue: 'Dəyər seçin',
     settings: 'Ayarlar',
@@ -527,6 +531,7 @@ export const azTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} uğurla dublikatlandı.',
     successfullyReindexed:
       '"{{collections}}" kolleksiyalarından {{total}} sənəddən {{count}} sənəd uğurla yenidən indeksləndi və {{skips}} qaralama keçildi.',
+    tableLayout: 'Cədvəl',
     takeOver: 'Əvvəl',
     theme: 'Mövzu',
     thisLanguage: 'Azərbaycan dili',
@@ -578,6 +583,23 @@ export const azTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Axtar {{label}}',
     searchResults: '{{count}} tapıldı',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Əlavə təlimatlar',
+    collectionDescription:
+      'LLM-lərin sorğulara daha uyğun cavablar verməsinə kömək etmək üçün {{label}} kolleksiyasına xüsusi təlimatlar əlavə edin.',
+    collectionSystemDescription:
+      'Bu sistem təlimatları kolleksiyanın konfiqurasiya faylından götürülür və həmişə daxil edilir.',
+    editInstructions: 'LLM təlimatlarını redaktə et',
+    global: 'Qlobal',
+    globalDescription:
+      'LLM-lərin sorğulara daha uyğun cavablar verməsinə kömək etmək üçün {{label}} qlobal sənədinə xüsusi təlimatlar əlavə edin.',
+    globalSystemDescription:
+      'Bu sistem təlimatları qlobal sənədin konfiqurasiya faylından götürülür və həmişə daxil edilir.',
+    instructions: 'LLM təlimatları',
+    systemInstructions: 'Sistem təlimatları (yalnız oxumaq üçün)',
+    targetCannotBeChanged: 'Təlimatların hədəfi dəyişdirilə bilməz.',
+    title: 'Başlıq',
   },
   localization: {
     cannotCopySameLocale: 'Eyni dildə köçürmək mümkün deyil',

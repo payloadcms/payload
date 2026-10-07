@@ -29,12 +29,11 @@
 
   .view-version-controls-top h2 {
     color: var(--color-text);
-    font-family: var(--text-body-large-strong-font-family);
-    font-size: var(--text-body-large-strong-font-size);
+    font-size: var(--text-body-large-bold-font-size);
     font-style: normal;
-    font-weight: var(--text-body-large-strong-font-weight);
-    line-height: var(--text-body-large-strong-line-height);
-    letter-spacing: var(--text-body-large-strong-letter-spacing);
+    font-weight: var(--text-body-large-bold-font-weight);
+    line-height: var(--text-body-large-bold-line-height);
+    letter-spacing: var(--text-body-large-bold-letter-spacing);
   }
 
   .view-version-controls-bottom {
@@ -79,11 +78,10 @@
     flex-direction: row;
     justify-content: space-between;
     color: var(--color-text);
-    font-family: var(--text-body-medium-strong-font-family);
-    font-size: var(--text-body-medium-strong-font-size);
+    font-size: var(--text-body-medium-bold-font-size);
     font-style: normal;
-    font-weight: var(--text-body-medium-strong-font-weight);
-    line-height: var(--text-body-medium-strong-line-height);
+    font-weight: var(--text-body-medium-bold-font-weight);
+    line-height: var(--text-body-medium-bold-line-height);
     letter-spacing: var(--text-body-medium-letter-spacing);
   }
 
@@ -99,7 +97,6 @@
   }
 
   .view-version__version-to-version h2 {
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
@@ -121,7 +118,6 @@
     overflow: hidden;
     color: var(--color-text);
     text-overflow: ellipsis;
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-style: normal;
     font-weight: var(--text-body-medium-font-weight);

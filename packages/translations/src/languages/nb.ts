@@ -290,6 +290,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     all: 'Alle',
     allCollections: 'Alle samlinger',
     allLocales: 'Alle språk',
+    allowedTypes: 'Tillatte typer',
     and: 'Og',
     anotherUser: 'En annen bruker',
     anotherUserTakenOver: 'En annen bruker har tatt over redigeringen av dette dokumentet.',
@@ -397,6 +398,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     globals: 'Globalt innhold',
     goBack: 'Gå tilbake',
     goToPage: 'Gå til side i tabellen',
+    gridLayout: 'Rutenett',
     groupByLabel: 'Grupper etter {{label}}',
     hideSidebar: 'Skjul sidepanel',
     import: 'Import',
@@ -446,6 +448,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     notFound: 'Ikke funnet',
     nothingFound: 'Ingenting funnet',
     noTrashResults: 'Ingen {{label}} i søppelkassen.',
+    notSelectedDocument: 'Ikke valgt. Trykk Enter eller mellomromstasten for å endre valget.',
     notShownInTable: 'Ikke vist i tabellen',
     noUpcomingEventsScheduled: 'Ingen kommende hendelser planlagt.',
     noValue: 'Ingen verdi',
@@ -505,6 +508,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     selectAll: 'Velg alle {{count}} {{label}}',
     selectAllRows: 'Velg alle rader',
     selectedCount: '{{count}} {{label}} valgt',
+    selectedDocument: 'Valgt. Trykk Enter eller mellomromstasten for å endre valget.',
     selectLabel: 'Velg {{label}}',
     selectValue: 'Velg en verdi',
     settings: 'Innstillinger',
@@ -526,6 +530,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} ble duplisert.',
     successfullyReindexed:
       'Vellykket reindeksering av {{count}} av totalt {{total}} dokumenter fra {{collections}}, og {{skips}} utkast ble hoppet over.',
+    tableLayout: 'Tabell',
     takeOver: 'Ta over',
     theme: 'Tema',
     thisLanguage: 'Norsk',
@@ -575,6 +580,23 @@ export const nbTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Søk {{label}}',
     searchResults: 'Fant {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Tilleggsinstruksjoner',
+    collectionDescription:
+      'Legg til tilpassede instruksjoner for samlingen {{label}} slik at LLM-er kan tilpasse svarene på ledetekster bedre.',
+    collectionSystemDescription:
+      'Disse systeminstruksjonene kommer fra samlingens konfigurasjonsfil og inkluderes alltid.',
+    editInstructions: 'Rediger LLM-instruksjoner',
+    global: 'Global',
+    globalDescription:
+      'Legg til tilpassede instruksjoner for globalen {{label}} slik at LLM-er kan tilpasse svarene på ledetekster bedre.',
+    globalSystemDescription:
+      'Disse systeminstruksjonene kommer fra globalens konfigurasjonsfil og inkluderes alltid.',
+    instructions: 'LLM-instruksjoner',
+    systemInstructions: 'Systeminstruksjoner (skrivebeskyttet)',
+    targetCannotBeChanged: 'Målet for instruksjonene kan ikke endres.',
+    title: 'Tittel',
   },
   localization: {
     cannotCopySameLocale: 'Kan ikke kopiere til samme språk',
