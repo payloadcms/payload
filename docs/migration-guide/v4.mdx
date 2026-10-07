@@ -1165,6 +1165,27 @@ The table feature is no longer experimental, so it drops its prefix.
 
 Stored content is unaffected.
 
+### Lexical: the `version` of nodes is ignored
+
+Lexical deprecated the `version` property of serialized nodes, and now ignores it when it loads a document. Payload no longer reads it either.
+
+**Rich text written by the Payload 3.0 betas is no longer upgraded when it's loaded.** Payload used `version: 1` to detect two older shapes:
+
+- Block nodes whose fields were wrapped in an extra `data` object (`fields.data`)
+- Relationship and upload nodes that stored the whole related document in `value`, instead of its ID
+
+If your database may still contain rich text from the 3.0 betas, run `upgradeLexicalData` on the latest 3.x release before you upgrade to 4.0. It re-saves every document, which converts these shapes:
+
+```ts
+import { upgradeLexicalData } from '@payloadcms/richtext-lexical'
+
+await upgradeLexicalData({ payload })
+```
+
+**`version` is optional in the JSON schema of Lexical nodes.** The CLI and MCP no longer require it, and leave it out of the schema they show agents. They still accept it, so existing documents, which contain `version`, stay valid input.
+
+**Payload doesn't add or remove `version` when it saves rich text.** Rich text created by Lexical, like in the admin panel, still has `version: 1` on every node, because Lexical's JSON export writes it. Payload's own nodes used to write their own numbers instead (like `2` for blocks), and now write `1` as well. Rich text sent through the API, CLI or MCP is saved as sent, so it may not contain `version`. The generated types still include `version`, marked as deprecated, so don't rely on it being there.
+
 ### Field `typescriptSchema` renamed to `jsonSchema`
 
 `typescriptSchema` accepted JSON Schema, not TypeScript, so the name lied. Renamed to `jsonSchema`. Same shape, same array of transforms. The underlying schema is now also consumed by the MCP plugin for runtime validation, not just type generation.

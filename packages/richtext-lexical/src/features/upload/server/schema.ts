@@ -64,6 +64,7 @@ export type SerializedUploadNode<
   format: LexicalElementFormat
   id: string
   type: 'upload'
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number
 }
 
@@ -72,6 +73,7 @@ const SERIALIZED_UPLOAD_NODE_TS = `export type SerializedUploadNode<TSlugs exten
   type: 'upload';
   format: LexicalElementFormat;
   id: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
   fields: TFields;
 } & {
@@ -86,6 +88,7 @@ const SERIALIZED_UPLOAD_NODE_INPUT_TS = `export type SerializedUploadNodeInput<T
   type: 'upload';
   format: LexicalElementFormat;
   id: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
   fields: TFields;
 } & {
@@ -175,7 +178,7 @@ export const createUploadNodeJSONSchema =
               },
           version: versionSchema,
         },
-        required: ['fields', 'format', 'id', 'relationTo', 'type', 'value', 'version'],
+        required: ['fields', 'format', 'id', 'relationTo', 'type', 'value'],
       }
     })
 
@@ -189,7 +192,7 @@ export const createUploadNodeJSONSchema =
           type: { type: 'string', const: 'upload' },
           version: versionSchema,
         },
-        required: ['type', 'version'],
+        required: ['type'],
       }
     } else {
       const baseSchema: JSONSchema4 =
