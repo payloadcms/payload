@@ -227,47 +227,6 @@ describe('Payload project updates', () => {
     }
   })
 
-  it('should migrate legacy TanStack custom styles', async () => {
-    writeProjectPackage(projectDir)
-    writeFiles({
-      files: {
-        'routes/_payload.tsx': 'fresh payload layout\n',
-        'routes/_payload/admin.$.tsx': 'fresh admin splat\n',
-        'routes/_payload/admin.index.tsx': 'fresh admin index\n',
-        'routes/_payload/api.$.ts': 'fresh API route\n',
-        'routes/_payload/custom.css': '',
-        'routes/_payload/importMap.js': 'fresh import map\n',
-        'routes/_payload/server.functions.ts': 'fresh server functions\n',
-      },
-      root: templateRoot,
-    })
-    writeFiles({
-      files: {
-        'src/payload.css':
-          "@import '@payloadcms/ui/css/app.css';\n\n.custom { color: rebeccapurple; }\n",
-      },
-      root: projectDir,
-    })
-
-    const appDetails: TanStackAppDetails = {
-      isPayloadInstalled: true,
-      kind: 'start',
-      projectDir,
-      rootRoutePath: path.join(projectDir, 'src/routes/__root.tsx'),
-      routerPath: path.join(projectDir, 'src/router.tsx'),
-      routesDir: path.join(projectDir, 'src/routes'),
-      sourceDir: path.join(projectDir, 'src'),
-      viteConfigPath: path.join(projectDir, 'vite.config.ts'),
-    }
-
-    await updatePayloadInTanStackProject({ appDetails, templateRoot, versionOrTag: 'beta' })
-
-    expect(fse.readFileSync(path.join(appDetails.routesDir, '_payload/custom.css'), 'utf8')).toBe(
-      '.custom { color: rebeccapurple; }\n',
-    )
-    expect(fse.pathExistsSync(path.join(appDetails.sourceDir, 'payload.css'))).toBe(false)
-  })
-
   it('should refresh TanStack routes from the source template by default', async () => {
     writeProjectPackage(projectDir)
     const payloadLayoutPath = path.join(projectDir, 'src/routes/_payload.tsx')

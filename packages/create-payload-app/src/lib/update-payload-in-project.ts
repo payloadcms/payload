@@ -97,18 +97,6 @@ export async function updatePayloadInTanStackProject({
 
   info(`Updating Payload TanStack files...`)
   const hasPackedTemplateLayout = fse.existsSync(path.join(templateRoot, 'routes'))
-  const legacyCustomStylesPath = path.join(appDetails.sourceDir, 'payload.css')
-  const customStylesPath = path.join(appDetails.routesDir, '_payload/custom.css')
-
-  if (fse.existsSync(legacyCustomStylesPath) && !fse.existsSync(customStylesPath)) {
-    const customStyles = fse
-      .readFileSync(legacyCustomStylesPath, 'utf8')
-      .replace(/^@import\s+['"]@payloadcms\/ui\/css\/app\.css['"];\s*/m, '')
-
-    fse.outputFileSync(customStylesPath, customStyles)
-    fse.removeSync(legacyCustomStylesPath)
-    info('Moved custom styles from `src/payload.css` to the Payload routes directory.')
-  }
 
   for (const { destination, relativePath, sourcePath } of TANSTACK_TEMPLATE_FILES) {
     const isPayloadRoute = destination === 'routes' && relativePath.startsWith('_payload')
