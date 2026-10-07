@@ -711,6 +711,59 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     )
   })
 
+  test('should return 404 without reading unrelated history for an unmatched public filename', async ({
+    payload,
+    restClient,
+  }) => {
+    const created = await payload.create({
+      collection: transformedMediaSlug,
+      data: { alt: 'unrelated history' },
+      filePath: imageFixture,
+    })
+    const { docs } = await payload.db.findVersions({
+      collection: transformedMediaSlug,
+      where: { parent: { equals: created.id } },
+    })
+    const now = new Date().toISOString()
+
+    for (let batch = 0; batch < 5; batch++) {
+      await Promise.all(
+        Array.from({ length: 25 }, () =>
+          payload.db.createVersion({
+            autosave: false,
+            collectionSlug: transformedMediaSlug,
+            createdAt: now,
+            parent: created.id,
+            updatedAt: now,
+            versionData: docs[0]!.version,
+          }),
+        ),
+      )
+    }
+
+    const historySpy = vi.spyOn(payload.db, 'findVersions')
+    const transformers = payload.config.upload.transformers
+
+    try {
+      for (const hasTransformers of [true, false]) {
+        payload.config.upload.transformers = hasTransformers ? transformers : []
+        historySpy.mockClear()
+        const response = await restClient.GET(
+          `/${transformedMediaSlug}/file/not-a-saved-file.png`,
+          {
+            auth: false,
+          },
+        )
+
+        expect(response.status).toBe(404)
+        expect(historySpy).not.toHaveBeenCalled()
+      }
+    } finally {
+      payload.config.upload.transformers = transformers
+      historySpy.mockRestore()
+    }
+  })
+
   test('should restore saved original and output bytes without changing the selected version', async ({
     payload,
     restClient,
@@ -747,11 +800,33 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     })
     const selected = before.find(({ version }) => version.alt === 'A')!
     const historicalResponse = await restClient.GET(
-      `/${mediaSlug}/file/${selected.version.original!.filename}`,
+      `/${mediaSlug}/file/${selected.version.original!.filename}?version=${selected.id}`,
     )
 
     expect(historicalResponse.status).toBe(200)
     expect(Buffer.from(await historicalResponse.arrayBuffer()).equals(firstBytes)).toBe(true)
+
+    const bareResponse = await restClient.GET(
+      `/${mediaSlug}/file/${selected.version.original!.filename}`,
+    )
+    const other = await payload.create({
+      collection: mediaSlug,
+      data: { alt: 'another document' },
+      filePath: imageFixture,
+    })
+    const wrongFileResponse = await restClient.GET(
+      `/${mediaSlug}/file/${other.filename}?version=${selected.id}`,
+    )
+    const missingVersionID = isTransactionalMongoAdapter(payload.db.name)
+      ? 'ffffffffffffffffffffffff'
+      : '2147483647'
+    const missingVersionResponse = await restClient.GET(
+      `/${mediaSlug}/file/${selected.version.original!.filename}?version=${missingVersionID}`,
+    )
+
+    expect(bareResponse.status).toBe(404)
+    expect(wrongFileResponse.status).toBe(404)
+    expect(missingVersionResponse.status).toBe(404)
 
     await payload.restoreVersion({ id: selected.id, collection: mediaSlug, overrideAccess: false })
 
@@ -775,12 +850,22 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     expect(after.find(({ id }) => id === selected.id)?.version).toEqual(selected.version)
     expect(after.some(({ version }) => version.alt === 'B')).toBe(true)
 
+    const currentResponse = await restClient.GET(`/${mediaSlug}/file/${current.filename}`)
+    const historicalAfterRestore = await restClient.GET(
+      `/${mediaSlug}/file/${selected.version.original!.filename}?version=${selected.id}`,
+    )
+
+    expect(currentResponse.status).toBe(200)
+    expect(Buffer.from(await currentResponse.arrayBuffer())).toEqual(firstBytes)
+    expect(historicalAfterRestore.status).toBe(200)
+    expect(Buffer.from(await historicalAfterRestore.arrayBuffer())).toEqual(firstBytes)
+
     await payload.db.deleteVersions({
       collection: mediaSlug,
       where: { id: { equals: selected.id } },
     })
     const prunedResponse = await restClient.GET(
-      `/${mediaSlug}/file/${selected.version.original!.filename}`,
+      `/${mediaSlug}/file/${selected.version.original!.filename}?version=${selected.id}`,
     )
 
     expect(prunedResponse.status).toBe(404)
@@ -877,7 +962,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     })
     const selected = docs.find(({ version }) => version.alt === 'converted A')!
     const historical = await restClient.GET(
-      `/${convertedMediaSlug}/file/${selected.version.filename}`,
+      `/${convertedMediaSlug}/file/${selected.version.filename}?version=${selected.id}&width=40`,
     )
 
     expect(historical.status).toBe(200)
@@ -937,6 +1022,38 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       where: { parent: { equals: created.id } },
     })
     const selected = docs.find(({ version }) => version.alt === 'size A')!
+    const selectedRead = await payload.findVersionByID({
+      id: selected.id,
+      collection: transformedMediaSlug,
+      overrideAccess: false,
+    })
+    const selectedList = await payload.findVersions({
+      collection: transformedMediaSlug,
+      overrideAccess: false,
+      where: { id: { equals: selected.id } },
+    })
+
+    for (const { version } of [selectedRead, selectedList.docs[0]!]) {
+      for (const [url, bytes] of [
+        [version.url, firstBytes],
+        [version.original!.url, firstBytes],
+        [version.variants!.small!.url, firstSize],
+        [version.thumbnailURL, firstSize],
+      ] as const) {
+        expect(url).toBeTruthy()
+        const parsed = new URL(url!, 'http://localhost')
+
+        expect(parsed.searchParams.get('version')).toBe(String(selected.id))
+        expect(parsed.searchParams.has('original')).toBe(false)
+        const response = await restClient.GET(
+          `${parsed.pathname.replace(/^\/api/, '')}${parsed.search}`,
+        )
+
+        expect(response.status).toBe(200)
+        expect(Buffer.from(await response.arrayBuffer())).toEqual(bytes)
+      }
+    }
+
     const collection = payload.collections[transformedMediaSlug].config
     const variants = collection.upload.variants
     const maxPerDoc = collection.versions.maxPerDoc
@@ -945,7 +1062,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     collection.versions.maxPerDoc = 3
     try {
       const historical = await restClient.GET(
-        `/${transformedMediaSlug}/file/${selected.version.variants!.small!.filename}`,
+        `/${transformedMediaSlug}/file/${selected.version.variants!.small!.filename}?version=${selected.id}`,
       )
 
       expect(historical.status).toBe(200)
@@ -986,7 +1103,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
         collection.flattenedFields = flattenedFields
       }
       const historicalAfterRestore = await restClient.GET(
-        `/${transformedMediaSlug}/file/${selected.version.variants!.small!.filename}`,
+        `/${transformedMediaSlug}/file/${selected.version.variants!.small!.filename}?version=${selected.id}`,
       )
       expect(historicalAfterRestore.status).toBe(200)
       expect(Buffer.from(await historicalAfterRestore.arrayBuffer()).equals(firstSize)).toBe(true)
@@ -1076,7 +1193,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       auth: false,
     })
     const archivedResponse = await restClient.GET(
-      `/${mediaSlug}/file/${archived.version.original!.filename}`,
+      `/${mediaSlug}/file/${archived.version.original!.filename}?version=${archived.id}`,
       { auth: false },
     )
 
@@ -1093,7 +1210,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     await restClient.login({ slug: 'users', credentials: devUser })
 
     const authorizedResponse = await restClient.GET(
-      `/${mediaSlug}/file/${archived.version.original!.filename}`,
+      `/${mediaSlug}/file/${archived.version.original!.filename}?version=${archived.id}`,
     )
 
     expect(authorizedResponse.status).toBe(200)
@@ -1138,7 +1255,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       auth: false,
     })
     const archivedResponse = await restClient.GET(
-      `/${mediaSlug}/file/${archived.version.original!.filename}`,
+      `/${mediaSlug}/file/${archived.version.original!.filename}?version=${archived.id}`,
       { auth: false },
     )
 
@@ -1463,9 +1580,10 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       ])
 
       expect(versions).toHaveLength(105)
-      const oldestKey = versions.find(({ version }) => version.alt === 'first')!.version.original!
-        .filename!
-      const historicalResponse = await restClient.GET(`/${mediaSlug}/file/${oldestKey}`)
+      const oldest = versions.find(({ version }) => version.alt === 'first')!
+      const historicalResponse = await restClient.GET(
+        `/${mediaSlug}/file/${oldest.version.original!.filename}?version=${oldest.id}`,
+      )
 
       expect(historicalResponse.status).toBe(200)
       const req = await createPayloadRequest({ payload })
@@ -1619,9 +1737,9 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
           durationMS: Number((performance.now() - started).toFixed(2)),
           rows: queries.reduce((total, query) => total + query.rows, 0),
           rssDelta: process.memoryUsage().rss - rssBefore,
-          unrelated,
           unfiltered: queries.filter(({ where }) => !where || Object.keys(where).length === 0)
             .length,
+          unrelated,
         })
         findSpy.mockClear()
         versionsSpy.mockClear()
