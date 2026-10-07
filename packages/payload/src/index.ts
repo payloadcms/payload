@@ -1449,6 +1449,7 @@ export type {
   VerifyConfig,
 } from './auth/types.js'
 export { appendBranchFilter } from './branching/appendBranchFilter.js'
+export { assertBranchActionAccess } from './branching/assertBranchActionAccess.js'
 export { assertBranchReadable } from './branching/assertBranchReadable.js'
 export { assertBranchUpdateAccess } from './branching/assertBranchUpdateAccess.js'
 export {

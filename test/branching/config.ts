@@ -1,4 +1,4 @@
-import type { Block, Payload } from 'payload'
+import type { Access, Block, Payload } from 'payload'
 
 import { fileURLToPath } from 'node:url'
 import path from 'path'
@@ -33,6 +33,21 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const mergeRestrictedEditorEmail = 'editor@example.com'
 export const localizedCategoryBlockSlug = 'localized-category-block'
+
+const deleteBranchAccess: Access = ({ req }) =>
+  req.payloadAPI === 'local' && !req.user ? true : req.user?.email === devUser.email
+
+const readBranchAccess: Access = ({ req }) => {
+  if (req.payloadAPI === 'local' && !req.user) {
+    return true
+  }
+
+  if (!req.user) {
+    return false
+  }
+
+  return req.user.email === devUser.email ? true : { slug: { not_equals: 'private-visibility' } }
+}
 
 const localizedCategoryBlock: Block = {
   slug: localizedCategoryBlockSlug,
@@ -74,21 +89,10 @@ export default buildConfigWithDefaults({
     branching: {
       access: {
         createBranch: ({ req }) => req.payloadAPI === 'local' || Boolean(req.user),
-        deleteBranch: ({ req }) =>
-          req.payloadAPI === 'local' && !req.user ? true : req.user?.email === devUser.email,
-        readBranch: ({ req }) => {
-          if (req.payloadAPI === 'local' && !req.user) {
-            return true
-          }
-
-          if (!req.user) {
-            return false
-          }
-
-          return req.user.email === devUser.email
-            ? true
-            : { slug: { not_equals: 'private-visibility' } }
-        },
+        deleteBranch: deleteBranchAccess,
+        discardBranch: (args) => hookSpy.discardBranchAccess?.(args) ?? deleteBranchAccess(args),
+        mergeBranch: (args) => hookSpy.mergeBranchAccess?.(args) ?? readBranchAccess(args),
+        readBranch: readBranchAccess,
         updateBranch: ({ req }) => {
           if (req.payloadAPI === 'local' && !req.user) {
             return true

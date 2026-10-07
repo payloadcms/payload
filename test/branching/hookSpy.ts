@@ -1,4 +1,4 @@
-import type { BranchMergeValidate, PayloadRequest } from 'payload'
+import type { Access, BranchMergeValidate, PayloadRequest } from 'payload'
 
 /**
  * Mutable hook sink, so tests can observe which document hooks merge fires
@@ -12,6 +12,7 @@ export const hookSpy: {
   beforeChange?: (args: any) => Promise<void> | void
   beforeMerge?: (args: any) => Promise<void> | void
   branchValidation?: BranchMergeValidate
+  discardBranchAccess?: Access
   headerBeforeOperation?: () => void
   homepageGlobalAccessWrites?: {
     heroTitle?: unknown
@@ -24,6 +25,7 @@ export const hookSpy: {
   mainMergeGlobalOriginalHeroTitles?: unknown[]
   mainMergeLocalizedCollectionDependencyTargetID?: number | string
   mainMergeLocalizedGlobalDependencyTargetID?: number | string
+  mergeBranchAccess?: Access
   pageBeforeChange?: () => void
   pageBeforeOperation?: (args: { req: PayloadRequest }) => Promise<void> | void
   pageUpdateAccess?: () => void

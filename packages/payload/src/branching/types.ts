@@ -124,6 +124,10 @@ export type BranchingConfig = {
   access?: {
     createBranch?: Access
     deleteBranch?: Access
+    /** Controls whether a caller can discard pending changes from a readable branch. */
+    discardBranch?: Access
+    /** Controls whether a caller can merge pending changes from a readable branch. */
+    mergeBranch?: Access
     readBranch?: Access
     updateBranch?: Access
   }

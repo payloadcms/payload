@@ -22,4 +22,29 @@ describe('createClientConfig', () => {
 
     expect(clientConfig).not.toHaveProperty('baseAccess')
   })
+
+  it('should omit branch access functions from the client config', () => {
+    const clientConfig = createClientConfig({
+      config: {
+        branching: {
+          access: {
+            discardBranch: () => true,
+            mergeBranch: () => true,
+          },
+          branchableCollections: new Set(['pages']),
+          branchableGlobals: new Set(['header']),
+          enabled: true,
+        },
+      } as SanitizedConfig,
+      i18n: {} as I18nClient,
+      importMap: {},
+    })
+
+    expect(clientConfig.branching).toEqual({
+      branchableCollections: ['pages'],
+      branchableGlobals: ['header'],
+      enabled: true,
+    })
+    expect(clientConfig.branching).not.toHaveProperty('access')
+  })
 })

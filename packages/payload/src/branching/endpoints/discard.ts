@@ -2,11 +2,9 @@ import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
 
-import { executeAccess } from '../../auth/executeAccess.js'
-import { hasWhereAccessResult } from '../../auth/types.js'
-import { combineQueries } from '../../database/combineQueries.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { assertBranchActionAccess } from '../assertBranchActionAccess.js'
 import { discardBranchChanges } from '../discard.js'
 import { branchesCollectionSlug } from '../types.js'
 
@@ -20,8 +18,7 @@ import { branchesCollectionSlug } from '../types.js'
  * check on the collections those rows belong to. Reaching the branch still requires
  * being able to read it, a closed branch refuses outright, and — because discard
  * permanently destroys the branch's pending work, including documents that exist
- * only on this branch — it also requires delete access to the branch itself, not
- * merely read access.
+ * only on this branch — it also requires discard access, not merely read access.
  */
 export const discardBranchHandler: PayloadHandler = async (req) => {
   const { payload, routeParams } = req
@@ -43,26 +40,7 @@ export const discardBranchHandler: PayloadHandler = async (req) => {
     throw new NotFound(req.t)
   }
 
-  const deleteAccessResult = await executeAccess(
-    { id, slug: branchesCollectionSlug, disableErrors: true, req },
-    payload.collections[branchesCollectionSlug]!.config.access.delete,
-  )
-
-  if (!deleteAccessResult) {
-    throw new Forbidden(req.t)
-  }
-
-  if (hasWhereAccessResult(deleteAccessResult)) {
-    const matchesDeleteAccess = await payload.db.findOne({
-      collection: branchesCollectionSlug,
-      req,
-      where: combineQueries({ id: { equals: id } }, deleteAccessResult),
-    })
-
-    if (!matchesDeleteAccess) {
-      throw new Forbidden(req.t)
-    }
-  }
+  await assertBranchActionAccess({ action: 'discardBranch', branchDoc, req })
 
   const body = (req.data ?? {}) as { changes?: (number | string)[] }
 

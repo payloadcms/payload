@@ -5440,6 +5440,138 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
     })
   })
 
+  test.describe('Merge branch action access', () => {
+    const branchSlug = 'merge-action-access'
+    let mainDocID: number | string
+
+    const pendingChanges = () =>
+      payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: branchSlug } },
+      })
+
+    const asDevUser = async () =>
+      (
+        await payload.find({
+          collection: 'users',
+          pagination: false,
+          where: { email: { equals: devUser.email } },
+        })
+      ).docs[0]!
+
+    test.beforeEach(async () => {
+      await payload.create({
+        collection: branchesSlug,
+        data: { name: 'Merge action access', slug: branchSlug },
+      })
+      const mainDoc = await payload.create({
+        collection: postsSlug,
+        data: { title: 'original on main' },
+      })
+
+      mainDocID = mainDoc.id
+
+      await payload.update({
+        id: mainDocID,
+        branch: branchSlug,
+        collection: postsSlug,
+        data: { title: 'edited on branch' },
+      })
+    })
+
+    test.afterEach(async () => {
+      hookSpy.mergeBranchAccess = undefined
+
+      const branches = await payload.find({
+        collection: branchesSlug,
+        pagination: false,
+        where: { slug: { equals: branchSlug } },
+      })
+
+      for (const branch of branches.docs) {
+        await payload.delete({ id: branch.id, collection: branchesSlug })
+      }
+
+      const posts = await payload.find({
+        branch: false,
+        collection: postsSlug,
+        pagination: false,
+      })
+
+      for (const post of posts.docs) {
+        await payload.delete({ id: post.id, branch: false, collection: postsSlug })
+      }
+    })
+
+    test('should deny a Local API dry run when mergeBranch returns false', async () => {
+      const user = await asDevUser()
+
+      hookSpy.mergeBranchAccess = () => false
+
+      await expect(
+        payload.branches.merge({
+          branch: branchSlug,
+          dryRun: true,
+          overrideAccess: false,
+          user: { ...user, collection: 'users' },
+        }),
+      ).rejects.toThrow()
+
+      const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
+
+      expect(onMain.title).toBe('original on main')
+      expect((await pendingChanges()).docs).toHaveLength(1)
+    })
+
+    test('should deny a Local API merge when mergeBranch returns a non-matching query', async () => {
+      const user = await asDevUser()
+
+      hookSpy.mergeBranchAccess = () => ({ slug: { equals: 'another-branch' } })
+
+      await expect(
+        payload.branches.merge({
+          branch: branchSlug,
+          overrideAccess: false,
+          user: { ...user, collection: 'users' },
+        }),
+      ).rejects.toThrow()
+
+      const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
+
+      expect(onMain.title).toBe('original on main')
+      expect((await pendingChanges()).docs).toHaveLength(1)
+    })
+
+    test('should allow a dry run when mergeBranch returns a matching query', async () => {
+      const user = await asDevUser()
+
+      hookSpy.mergeBranchAccess = () => ({ slug: { equals: branchSlug } })
+
+      const result = await payload.branches.merge({
+        branch: branchSlug,
+        dryRun: true,
+        overrideAccess: false,
+        user: { ...user, collection: 'users' },
+      })
+
+      expect(result.canMerge).toBe(true)
+      expect(result.mergeable).toHaveLength(1)
+      expect((await pendingChanges()).docs).toHaveLength(1)
+    })
+
+    test('should bypass mergeBranch when overrideAccess is true', async () => {
+      hookSpy.mergeBranchAccess = () => false
+
+      await payload.branches.merge({ branch: branchSlug, overrideAccess: true })
+
+      const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
+
+      expect(onMain.title).toBe('edited on branch')
+      expect((await pendingChanges()).docs).toHaveLength(0)
+    })
+  })
+
   test.describe('Merge access preflight', () => {
     let editorID: number | string
     let restrictedID: number | string
@@ -8286,6 +8418,15 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         where: { branch: { equals: 'discardwork' } },
       })
 
+    const asDevUser = async () =>
+      (
+        await payload.find({
+          collection: 'users',
+          pagination: false,
+          where: { email: { equals: devUser.email } },
+        })
+      ).docs[0]!
+
     test.beforeEach(async () => {
       await payload.create({
         collection: branchesSlug,
@@ -8316,6 +8457,8 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
     })
 
     test.afterEach(async () => {
+      hookSpy.discardBranchAccess = undefined
+
       const rows = await payload.find({ branch: false, collection: postsSlug, pagination: false })
 
       for (const row of rows.docs) {
@@ -8513,6 +8656,131 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         }),
       ).rejects.toThrow()
 
+      expect((await pendingChanges()).docs).toHaveLength(2)
+    })
+
+    test('should deny a Local API discard when discardBranch returns false', async () => {
+      const user = await asDevUser()
+
+      hookSpy.discardBranchAccess = () => false
+
+      await expect(
+        payload.branches.discard({
+          branch: 'discardwork',
+          overrideAccess: false,
+          user: { ...user, collection: 'users' },
+        }),
+      ).rejects.toThrow()
+
+      expect((await pendingChanges()).docs).toHaveLength(2)
+    })
+
+    test('should deny a discard when discardBranch returns a non-matching query', async () => {
+      const user = await asDevUser()
+
+      hookSpy.discardBranchAccess = () => ({ slug: { equals: 'another-branch' } })
+
+      await expect(
+        payload.branches.discard({
+          branch: 'discardwork',
+          overrideAccess: false,
+          user: { ...user, collection: 'users' },
+        }),
+      ).rejects.toThrow()
+
+      expect((await pendingChanges()).docs).toHaveLength(2)
+    })
+
+    test('should allow a discard when discardBranch returns a matching query', async () => {
+      hookSpy.discardBranchAccess = () => ({ slug: { equals: 'discardwork' } })
+
+      const result = await payload.branches.discard({
+        branch: 'discardwork',
+        overrideAccess: false,
+        user: {
+          id: 'restricted-user',
+          collection: 'users',
+          email: 'restricted@example.com',
+        } as never,
+      })
+
+      expect(result.discarded).toHaveLength(2)
+      expect((await pendingChanges()).docs).toHaveLength(0)
+    })
+
+    test('should discard changes when the user cannot edit the underlying content', async () => {
+      const editor = await payload.create({
+        collection: 'users',
+        data: { email: 'editor@example.com', password: 'test' },
+      })
+      const restricted = await payload.create({
+        collection: restrictedSlug,
+        data: { title: 'restricted on main' },
+      })
+      const user = { ...editor, collection: 'users' as const }
+
+      await payload.update({
+        id: restricted.id,
+        branch: 'discardwork',
+        collection: restrictedSlug,
+        data: { title: 'edited on branch' },
+      })
+
+      await expect(
+        payload.update({
+          id: restricted.id,
+          collection: restrictedSlug,
+          data: { title: 'edited on branch' },
+          overrideAccess: false,
+          user,
+        }),
+      ).rejects.toThrow()
+
+      hookSpy.discardBranchAccess = () => true
+
+      await payload.branches.discard({
+        branch: 'discardwork',
+        overrideAccess: false,
+        user,
+      })
+
+      const onMain = await payload.findByID({ id: restricted.id, collection: restrictedSlug })
+
+      expect(onMain.title).toBe('restricted on main')
+      expect((await pendingChanges()).docs).toHaveLength(0)
+
+      await payload.delete({ id: restricted.id, collection: restrictedSlug })
+      await payload.delete({ id: editor.id, collection: 'users' })
+    })
+
+    test('should bypass discardBranch when overrideAccess is true', async () => {
+      hookSpy.discardBranchAccess = () => false
+
+      const result = await payload.branches.discard({
+        branch: 'discardwork',
+        overrideAccess: true,
+      })
+
+      expect(result.discarded).toHaveLength(2)
+      expect((await pendingChanges()).docs).toHaveLength(0)
+    })
+
+    test('should deny a REST discard when discardBranch returns false', async () => {
+      hookSpy.discardBranchAccess = () => false
+
+      const branchDoc = (
+        await payload.find({
+          collection: branchesSlug,
+          pagination: false,
+          where: { slug: { equals: 'discardwork' } },
+        })
+      ).docs[0]!
+      const res = await restClient.POST(`/${branchesSlug}/${branchDoc.id}/discard`, {
+        body: JSON.stringify({}),
+        headers: { Authorization: `JWT ${token}` },
+      })
+
+      expect(res.status).toBe(403)
       expect((await pendingChanges()).docs).toHaveLength(2)
     })
   })
@@ -11689,6 +11957,8 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
     })
 
     test.afterEach(async () => {
+      hookSpy.mergeBranchAccess = undefined
+
       const rows = await payload.find({ branch: false, collection: postsSlug, pagination: false })
 
       for (const row of rows.docs) {
@@ -11918,6 +12188,82 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(retainedJob).not.toBeNull()
     })
 
+    test('should deny scheduling when mergeBranch access fails', async () => {
+      const user = await asDevUser()
+      const req = await createPayloadRequest({ payload, user })
+
+      hookSpy.mergeBranchAccess = () => false
+
+      const result = await scheduleMergeHandler({
+        branchID,
+        date: new Date(Date.now() + 60_000),
+        req,
+      })
+      const jobs = await payload.find({
+        collection: 'payload-jobs',
+        pagination: false,
+        where: { 'input.branch': { equals: branchSlug } },
+      })
+
+      expect(result).toHaveProperty('error')
+      expect(jobs.docs).toHaveLength(0)
+    })
+
+    test('should deny cancellation when mergeBranch access fails', async () => {
+      const user = await asDevUser()
+      const job = await payload.jobs.queue({
+        input: { branch: branchSlug },
+        overrideAccess: true,
+        task: 'scheduleMerge',
+        waitUntil: new Date(Date.now() + 60_000),
+      })
+      const req = await createPayloadRequest({ payload, user })
+
+      hookSpy.mergeBranchAccess = () => false
+
+      const result = await scheduleMergeHandler({ deleteID: job.id, req })
+      const retainedJob = await payload.findByID({
+        id: job.id,
+        collection: 'payload-jobs',
+        disableErrors: true,
+      })
+
+      expect(result).toHaveProperty('error')
+      expect(retainedJob).not.toBeNull()
+    })
+
+    test('should recheck mergeBranch access when the scheduled job runs', async () => {
+      const user = await asDevUser()
+      const req = await createPayloadRequest({ payload, user })
+
+      const result = await scheduleMergeHandler({
+        branchID,
+        date: new Date(Date.now() - 60_000),
+        req,
+      })
+      const jobs = await payload.find({
+        collection: 'payload-jobs',
+        pagination: false,
+        where: { 'input.branch': { equals: branchSlug } },
+      })
+
+      expect(result).not.toHaveProperty('error')
+      expect(jobs.docs).toHaveLength(1)
+
+      hookSpy.mergeBranchAccess = () => false
+
+      await payload.jobs.runByID({ id: jobs.docs[0]!.id, overrideAccess: true })
+
+      const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
+
+      expect(onMain.title).toBe('original on main')
+      expect(await mergeOutcome()).toMatchObject({
+        jobsRun: [{ hasError: true, totalTried: 1 }],
+        pendingChanges: [{ collectionSlug: postsSlug, operation: 'update' }],
+        status: 'open',
+      })
+    })
+
     test('should refuse to merge when the queueing user no longer resolves', async () => {
       // Scheduled publish falls back to `overrideAccess` here. A merge writes across
       // production, so the same fallback would turn a deleted account into an
@@ -12055,6 +12401,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
     test.afterEach(async () => {
       hookSpy.beforeMerge = undefined
+      hookSpy.mergeBranchAccess = undefined
 
       const rows = await payload.find({ branch: false, collection: postsSlug, pagination: false })
 
@@ -12115,6 +12462,25 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       const onMain = await payload.findByID({ id: docID, collection: postsSlug })
 
       expect(onMain.title).toBe('original on main')
+    })
+
+    test('should deny a REST merge when mergeBranch returns false', async () => {
+      hookSpy.mergeBranchAccess = () => false
+
+      const res = await restClient.POST(`/${branchesSlug}/${branchID}/merge`, {
+        body: JSON.stringify({ dryRun: true }),
+        headers: { Authorization: `JWT ${token}` },
+      })
+      const pendingChanges = await payload.find({
+        collection: branchChangesSlug,
+        pagination: false,
+        where: { branch: { equals: 'restmerge' } },
+      })
+      const onMain = await payload.findByID({ id: docID, collection: postsSlug })
+
+      expect(res.status).toBe(403)
+      expect(onMain.title).toBe('original on main')
+      expect(pendingChanges.docs).toHaveLength(1)
     })
 
     test('should report the pending changes on a dryRun without mutating', async () => {
@@ -12247,6 +12613,27 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
 
         expect(onMain.title).toBe('edited on branch')
         expect(created.title).toBe('created on branch')
+      })
+
+      test('should report an error when mergeBranch denies a streamed merge', async () => {
+        hookSpy.mergeBranchAccess = () => false
+
+        const res = await restClient.POST(`/${branchesSlug}/${branchID}/merge`, {
+          body: JSON.stringify({ stream: true }),
+          headers: { Authorization: `JWT ${token}` },
+        })
+        const events = readEvents(await res.text())
+        const pendingChanges = await payload.find({
+          collection: branchChangesSlug,
+          pagination: false,
+          where: { branch: { equals: 'restmerge' } },
+        })
+        const onMain = await payload.findByID({ id: docID, collection: postsSlug })
+
+        expect(events.some((event) => event.type === 'error')).toBe(true)
+        expect(events.some((event) => event.type === 'complete')).toBe(false)
+        expect(onMain.title).toBe('original on main')
+        expect(pendingChanges.docs).toHaveLength(1)
       })
 
       test('should preserve REST request details for a streamed merge', async () => {

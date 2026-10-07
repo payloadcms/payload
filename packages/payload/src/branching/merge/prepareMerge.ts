@@ -4,6 +4,7 @@ import type { BranchOperation, MergeableChange, MergeWarning } from '../types.js
 import type { BranchMergeValidationError } from '../validation.js'
 
 import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
+import { assertBranchActionAccess } from '../assertBranchActionAccess.js'
 import { resolveEffectiveOperations } from '../effectiveOperations.js'
 import {
   runGlobalMergePreflight,
@@ -78,6 +79,10 @@ export const prepareMerge = async ({
 
   if (!branchDoc) {
     throw new Error(`Branch "${branch}" was not found.`)
+  }
+
+  if (!overrideAccess) {
+    await assertBranchActionAccess({ action: 'mergeBranch', branchDoc, req })
   }
 
   const cleanupRetry = dryRun

@@ -54,15 +54,19 @@ You can opt an eligible internal collection in with `branching: true`. The `payl
 The object form supports lifecycle access, merge hooks, validation, exclusions, and the branch-read threshold:
 
 ```ts
-import type { Config } from 'payload'
+import type { Access, Config } from 'payload'
+
+const canUseBranches: Access = ({ req }) => Boolean(req.user)
 
 export const config: Config = {
   branching: {
     access: {
-      createBranch: ({ req }) => Boolean(req.user),
-      deleteBranch: ({ req }) => Boolean(req.user),
-      readBranch: ({ req }) => Boolean(req.user),
-      updateBranch: ({ req }) => Boolean(req.user),
+      createBranch: canUseBranches,
+      deleteBranch: canUseBranches,
+      discardBranch: canUseBranches,
+      mergeBranch: canUseBranches,
+      readBranch: canUseBranches,
+      updateBranch: canUseBranches,
     },
     exclude: ['audit-events'],
     hooks: {
@@ -78,7 +82,39 @@ export const config: Config = {
 }
 ```
 
-Document and global access control still applies. Existing access functions can read `req.branch` when they need branch-specific rules.
+All six callbacks use the standard `Access` type:
+
+```ts
+type Access = (args: AccessArgs) => boolean | Where | Promise<boolean | Where>
+```
+
+For `mergeBranch` and `discardBranch`, Payload supplies the branch document ID as `id`, `payload-branches` as `slug`, and the current request as `req`. When an access function returns a query, the selected branch must match it.
+
+The action callbacks use these fallbacks when you do not configure them:
+
+| Action          | Fallback                                          |
+| --------------- | ------------------------------------------------- |
+| `createBranch`  | authenticated user from the Admin user collection |
+| `readBranch`    | authenticated user from the Admin user collection |
+| `updateBranch`  | authenticated user from the Admin user collection |
+| `deleteBranch`  | authenticated user from the Admin user collection |
+| `mergeBranch`   | `readBranch`, then the default above              |
+| `discardBranch` | `deleteBranch`, then the default above            |
+
+The default only checks that `req.user` belongs to the collection configured at `admin.user`. It does not run that collection's Admin Panel access function. Admin Panel server functions can add their own `canAccessAdmin` check.
+
+Branch access and content access are separate layers:
+
+| Workflow                                  | Required access                                                                                              |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Read or write content on a branch         | `readBranch`, then the normal collection or global operation and field access                                |
+| Preview or perform a merge                | `readBranch`, then `mergeBranch`, then access for each proposed write to `main`                              |
+| Merge and close the branch                | All merge checks above, plus `updateBranch` for the close                                                    |
+| Discard pending changes                   | `readBranch`, then `discardBranch`; document and global access is not checked because `main` does not change |
+| Schedule or cancel a merge in Admin Panel | Admin Panel access, `readBranch`, `updateBranch`, and `mergeBranch`                                          |
+| Run a scheduled merge                     | `readBranch`, `mergeBranch`, and content access are checked again as the user stored with the job            |
+
+Existing collection, global, and field access functions can read `req.branch` when they need branch-specific rules. Branch access can only restrict content access; it does not grant access to a document or global that its own access functions deny.
 
 ## Work with branches
 

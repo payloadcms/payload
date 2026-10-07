@@ -1,10 +1,6 @@
 import type { Payload, PayloadRequest } from '../types/index.js'
 import type { BranchOperation } from './types.js'
 
-import { executeAccess } from '../auth/executeAccess.js'
-import { hasWhereAccessResult } from '../auth/types.js'
-import { combineQueries } from '../database/combineQueries.js'
-import { Forbidden } from '../errors/index.js'
 import { deleteUploadFilesExclusiveToDocument } from '../uploads/deleteUploadFilesExclusiveToDocument.js'
 import { commitTransaction } from '../utilities/commitTransaction.js'
 import { createPayloadRequest } from '../utilities/createPayloadRequest.js'
@@ -15,6 +11,7 @@ import {
   clearDeferredCleanupScope,
   flushDeferredCleanupScope,
 } from '../utilities/transactionCallbacks.js'
+import { assertBranchActionAccess } from './assertBranchActionAccess.js'
 import { assertBranchCreatedDocumentsUnreferenced } from './assertBranchCreatedDocumentsUnreferenced.js'
 import { assertBranchWritable } from './assertBranchWritable.js'
 import { refreshBranchState, resetBranchState, withoutBranch } from './resolveBranch.js'
@@ -49,7 +46,7 @@ export type DiscardOptions = {
   /** Change IDs to discard. Omit to discard everything pending on the branch. */
   changes?: (number | string)[]
   /**
-   * Skip branch read and delete access checks.
+   * Skip branch read and discard access checks.
    *
    * @default false
    */
@@ -137,31 +134,7 @@ const discardBranchChangesInternal = async (
   const branchDoc = branchDocs.docs[0]
 
   if (!overrideAccess) {
-    const deleteAccessResult = await executeAccess(
-      {
-        id: branchDoc.id,
-        slug: branchesCollectionSlug,
-        disableErrors: true,
-        req,
-      },
-      payload.collections[branchesCollectionSlug]!.config.access.delete,
-    )
-
-    if (!deleteAccessResult) {
-      throw new Forbidden(req.t)
-    }
-
-    if (hasWhereAccessResult(deleteAccessResult)) {
-      const matchesDeleteAccess = await payload.db.findOne({
-        collection: branchesCollectionSlug,
-        req,
-        where: combineQueries({ id: { equals: branchDoc.id } }, deleteAccessResult),
-      })
-
-      if (!matchesDeleteAccess) {
-        throw new Forbidden(req.t)
-      }
-    }
+    await assertBranchActionAccess({ action: 'discardBranch', branchDoc, req })
   }
 
   // Discarding is a write, so a closed branch refuses it — its archive is a record,
