@@ -529,8 +529,7 @@ export async function cleanupModalMedia({ page }: { page: Page }) {
   mediaFixtures.delete(page)
 }
 
-export async function openEditImageDialog({ page, serverURL }: { page: Page; serverURL: string }) {
-  const mediaURL = new AdminUrlUtil(serverURL, 'media')
+export async function createMediaFixture({ page, serverURL }: { page: Page; serverURL: string }) {
   const apiURL = formatAdminURL({ apiRoute: '/api', path: '/media', serverURL })
   const response = await page.request.post(apiURL, {
     multipart: {
@@ -549,6 +548,13 @@ export async function openEditImageDialog({ page, serverURL }: { page: Page; ser
   const { doc } = await response.json()
 
   mediaFixtures.set(page, [...(mediaFixtures.get(page) || []), `${apiURL}/${doc.id}`])
+  return doc
+}
+
+export async function openEditImageDialog({ page, serverURL }: { page: Page; serverURL: string }) {
+  const doc = await createMediaFixture({ page, serverURL })
+  const mediaURL = new AdminUrlUtil(serverURL, 'media')
+
   await page.goto(mediaURL.edit(doc.id))
   await waitForFormReady(page)
   await page.getByRole('button', { name: /edit image/i }).click()
@@ -631,7 +637,7 @@ export async function addCollectionQueryWidget({ page }: { page: Page }) {
   const previousCount = await widgets.count()
   const add = page
     .locator('.dashboard-breadcrumb-dropdown__actions')
-    .getByRole('button', { name: 'Add +', exact: true })
+    .getByRole('button', { name: 'Add +: Add Widget', exact: true })
 
   await add.press('Enter')
   const drawer = page.locator('dialog[id^="widgets-drawer-"]')
