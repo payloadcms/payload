@@ -560,13 +560,14 @@ export const bgTranslations: DefaultTranslationsObject = {
     yes: 'Да',
   },
   hierarchy: {
+    goTo: 'Отидете на "{{name}}"',
     itemsMovedTo: '{{title}} беше преместен в {{destination}}',
     itemsMovedToRoot: '{{title}} преместен към корена',
-    moveItemsToRootConfirmation:
-      'Предстои да преместите <1>{{count}} {{label}}</1> към основната директория. Сигурен ли сте?',
+    moveTo: 'Преместване към...',
     moveToRoot: 'Преместване към Корена',
     noParent: 'Без родител',
     noResults: 'No results for "{{query}}"',
+    removeFrom: 'Премахване от {{label}}',
     searchLabel: 'Търсене {{label}}',
     searchResults: 'Намерени: {{count}}',
   },

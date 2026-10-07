@@ -568,13 +568,14 @@ export const itTranslations: DefaultTranslationsObject = {
     yes: 'Sì',
   },
   hierarchy: {
+    goTo: 'Vai a "{{name}}"',
     itemsMovedTo: '{{title}} è stato spostato a {{destination}}',
     itemsMovedToRoot: '{{title}} spostato alla radice',
-    moveItemsToRootConfirmation:
-      'Stai per spostare <1>{{count}} {{label}}</1> alla radice. Sei sicuro?',
+    moveTo: 'Sposta in...',
     moveToRoot: 'Sposta alla Root',
     noParent: 'Nessun Genitore',
     noResults: 'No results for "{{query}}"',
+    removeFrom: 'Rimuovi da {{label}}',
     searchLabel: 'Cerca {{label}}',
     searchResults: 'Trovati: {{count}}',
   },

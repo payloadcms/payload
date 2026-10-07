@@ -550,13 +550,14 @@ export const thTranslations: DefaultTranslationsObject = {
     yes: 'ใช่',
   },
   hierarchy: {
+    goTo: 'ไปที่ "{{name}}"',
     itemsMovedTo: '{{title}} ย้ายไปที่ {{destination}}',
     itemsMovedToRoot: '{{title}} ถูกย้ายไปยังราก',
-    moveItemsToRootConfirmation:
-      'คุณกำลังจะย้าย <1>{{count}} {{label}}</1> ไปยังรูท คุณแน่ใจหรือไม่?',
+    moveTo: 'ย้ายไปยัง...',
     moveToRoot: 'ย้ายไปที่ราก',
     noParent: 'ไม่มีผู้ปกครอง',
     noResults: 'No results for "{{query}}"',
+    removeFrom: 'ลบออกจาก {{label}}',
     searchLabel: 'ค้นหา {{label}}',
     searchResults: 'พบ {{count}} รายการ',
   },
