@@ -13,6 +13,11 @@ export const draftMediaDir = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   'draft-media',
 )
+export const localizedMediaSlug = 'file-versioned-localized-media'
+export const localizedMediaDir = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  'localized-media',
+)
 export const transformedMediaSlug = 'file-versioned-transformed-media'
 export const transformedMediaDir = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),

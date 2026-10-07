@@ -7,6 +7,7 @@ import { devUser } from '../credentials.js'
 import { ConvertedMedia } from './collections/ConvertedMedia/index.js'
 import { DraftMedia } from './collections/DraftMedia/index.js'
 import { LegacyMedia } from './collections/LegacyMedia/index.js'
+import { LocalizedMedia } from './collections/LocalizedMedia/index.js'
 import { Media } from './collections/Media/index.js'
 import { PlainMedia } from './collections/PlainMedia/index.js'
 import { TransformedMedia } from './collections/TransformedMedia/index.js'
@@ -39,7 +40,16 @@ export default buildConfigWithDefaults({
   config: {
     collections: hasLegacySchema
       ? [LegacyMedia]
-      : [Media, DraftMedia, TransformedMedia, ConvertedMedia, TrashMedia, PlainMedia],
+      : [
+          Media,
+          DraftMedia,
+          LocalizedMedia,
+          TransformedMedia,
+          ConvertedMedia,
+          TrashMedia,
+          PlainMedia,
+        ],
+    localization: { defaultLocale: 'en', locales: ['en', 'de'] },
     upload: {
       transformers: hasLegacySchema
         ? []

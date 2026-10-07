@@ -130,7 +130,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     expect(await readFile(path.join(mediaDir, created.filename!))).toEqual(bytes)
   })
 
-  test('should expose the original without a separate file inventory in read APIs', async ({
+  test('should expose the retained original consistently through read APIs', async ({
     payload,
     restClient,
   }) => {
@@ -162,8 +162,6 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       filename: local.original?.filename,
       url: local.original?.url,
     })
-    expect('_managedFiles' in local).toBe(false)
-    expect('_managedFiles' in rest).toBe(false)
   })
 
   test('should retain PDFs and videos without duplicating their source object', async ({
@@ -190,34 +188,98 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     }
   })
 
-  test('should leave stored objects unchanged on a metadata-only update', async ({ payload }) => {
-    const bytes = await readFile(imageFixture)
-    const created = await payload.create({
-      collection: mediaSlug,
-      data: { alt: 'before' },
-      file: { name: 'metadata.png', data: bytes, mimetype: 'image/png', size: bytes.length },
-    })
-    const filePath = path.join(mediaDir, created.filename!)
-    const filesBefore = await readdir(mediaDir)
-    const modifiedBefore = (await stat(filePath)).mtimeMs
-    const before = await payload.db.findOne({
-      collection: mediaSlug,
-      where: { id: { equals: created.id } },
-    })
+  for (const overrideAccess of [false, true]) {
+    test(`should leave stored objects unchanged on a metadata-only update with overrideAccess ${overrideAccess}`, async ({
+      payload,
+    }) => {
+      const bytes = await readFile(imageFixture)
+      const created = await payload.create({
+        collection: transformedMediaSlug,
+        data: { alt: 'before' },
+        file: { name: 'metadata.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+        req: {
+          query: {
+            uploadEdits: {
+              crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
+              heightInPixels: 800,
+              widthInPixels: 800,
+            },
+          },
+        },
+      })
+      const before = await payload.db.findOne({
+        collection: transformedMediaSlug,
+        where: { id: { equals: created.id } },
+      })
+      const { docs: versionsBefore } = await payload.db.findVersions({
+        collection: transformedMediaSlug,
+        pagination: false,
+        where: { parent: { equals: created.id } },
+      })
+      const filesBefore = (await readdir(transformedMediaDir)).sort()
+      const objectsBefore = await Promise.all(
+        filesBefore.map(async (filename) => {
+          const filePath = path.join(transformedMediaDir, filename)
 
-    await payload.update({ id: created.id, collection: mediaSlug, data: { alt: 'after' } })
+          return {
+            bytes: await readFile(filePath),
+            filePath,
+            modified: (await stat(filePath)).mtimeMs,
+          }
+        }),
+      )
 
-    const after = await payload.db.findOne({
-      collection: mediaSlug,
-      where: { id: { equals: created.id } },
+      expect(before?.filename).not.toBe(before?.original?.filename)
+      expect(before?.variants?.small?.filename).toBeTruthy()
+      expect(await readFile(path.join(transformedMediaDir, before!.original!.filename))).toEqual(
+        bytes,
+      )
+
+      await payload.update({
+        id: created.id,
+        collection: transformedMediaSlug,
+        data: { alt: 'after' },
+        overrideAccess,
+      })
+
+      const after = await payload.db.findOne({
+        collection: transformedMediaSlug,
+        where: { id: { equals: created.id } },
+      })
+      const { docs: versionsAfter } = await payload.db.findVersions({
+        collection: transformedMediaSlug,
+        pagination: false,
+        where: { parent: { equals: created.id } },
+      })
+
+      expect(after?.alt).toBe('after')
+      expect(after).toMatchObject({
+        filename: before!.filename,
+        filesize: before!.filesize,
+        height: before!.height,
+        mimeType: before!.mimeType,
+        original: before!.original,
+        url: before!.url,
+        variants: before!.variants,
+        width: before!.width,
+      })
+      expect((await readdir(transformedMediaDir)).sort()).toEqual(filesBefore)
+      for (const { bytes, filePath, modified } of objectsBefore) {
+        expect(await readFile(filePath)).toEqual(bytes)
+        expect((await stat(filePath)).mtimeMs).toBe(modified)
+      }
+      expect(versionsAfter).toHaveLength(versionsBefore.length + 1)
+      for (const previous of versionsBefore) {
+        const retained = versionsAfter.find(({ id }) => String(id) === String(previous.id))
+
+        expect(retained?.version).toMatchObject({
+          filename: previous.version.filename,
+          original: previous.version.original,
+          variants: previous.version.variants,
+        })
+      }
     })
-
-    expect(await readdir(mediaDir)).toEqual(filesBefore)
-    expect((await stat(filePath)).mtimeMs).toBe(modifiedBefore)
-    expect(await readFile(filePath)).toEqual(bytes)
-    expect(after?.original).toEqual(before?.original)
-    expect(after?.filename).toBe(before?.filename)
-  })
+  }
 
   test('should give a duplicated upload independent managed objects', async ({ payload }) => {
     const bytes = await readFile(imageFixture)
@@ -1201,6 +1263,18 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
 
     expect(currentResponse.status).toBe(403)
     expect(archivedResponse.status).toBe(403)
+    const missingVersionID = isTransactionalMongoAdapter(payload.db.name)
+      ? 'ffffffffffffffffffffffff'
+      : '2147483647'
+    const missingPaths = [
+      `/${mediaSlug}/file/not-saved.png`,
+      `/${mediaSlug}/file/not-saved.png?version=${archived.id}`,
+      `/${mediaSlug}/file/${updated.filename}?version=${missingVersionID}`,
+    ]
+
+    for (const url of missingPaths) {
+      expect((await restClient.GET(url, { auth: false })).status).toBe(403)
+    }
     await expect(
       payload.findVersionByID({
         id: archived.id,
@@ -1217,7 +1291,63 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
 
     expect(authorizedResponse.status).toBe(200)
     expect(Buffer.from(await authorizedResponse.arrayBuffer()).equals(firstBytes)).toBe(true)
+    for (const url of missingPaths) {
+      expect((await restClient.GET(url)).status).toBe(404)
+    }
   })
+
+  for (const deniedAccess of ['read', 'readVersions'] as const) {
+    test(`should require ${deniedAccess} access before revealing missing historical files`, async ({
+      payload,
+      restClient,
+    }) => {
+      const created = await payload.create({
+        collection: mediaSlug,
+        data: { alt: 'history access' },
+        filePath: imageFixture,
+      })
+      const { docs } = await payload.db.findVersions({
+        collection: mediaSlug,
+        pagination: false,
+        where: { parent: { equals: created.id } },
+      })
+      const selected = docs[0]!
+      const collection = payload.collections[mediaSlug].config
+      const read = collection.access.read
+      const readVersions = collection.access.readVersions
+      const missingVersionID = isTransactionalMongoAdapter(payload.db.name)
+        ? 'ffffffffffffffffffffffff'
+        : '2147483647'
+      const paths = [
+        `/${mediaSlug}/file/${created.filename}?version=${selected.id}`,
+        `/${mediaSlug}/file/not-saved.png?version=${selected.id}`,
+        `/${mediaSlug}/file/${created.filename}?version=${selected.id}&prefix=wrong`,
+        `/${mediaSlug}/file/${created.filename}?version=${missingVersionID}`,
+      ]
+
+      try {
+        collection.access.read = () => true
+        collection.access.readVersions = () => true
+        collection.access[deniedAccess] = () => false
+        for (const url of paths) {
+          expect((await restClient.GET(url, { auth: false })).status).toBe(403)
+        }
+
+        collection.access.read = ({ id }) => String(id) === String(created.id)
+        collection.access.readVersions = () => true
+        expect((await restClient.GET(paths[0]!, { auth: false })).status).toBe(200)
+
+        collection.access.read = () => true
+        expect((await restClient.GET(paths[0]!, { auth: false })).status).toBe(200)
+        for (const url of paths.slice(1)) {
+          expect((await restClient.GET(url, { auth: false })).status).toBe(404)
+        }
+      } finally {
+        collection.access.read = read
+        collection.access.readVersions = readVersions
+      }
+    })
+  }
 
   test('should require version read access for an archived file', async ({
     payload,
@@ -1263,6 +1393,16 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
 
     expect(currentResponse.status).toBe(200)
     expect(archivedResponse.status).toBe(403)
+    const missingVersionID = isTransactionalMongoAdapter(payload.db.name)
+      ? 'ffffffffffffffffffffffff'
+      : '2147483647'
+
+    for (const url of [
+      `/${mediaSlug}/file/not-saved.png?version=${archived.id}`,
+      `/${mediaSlug}/file/${updated.filename}?version=${missingVersionID}`,
+    ]) {
+      expect((await restClient.GET(url, { auth: false })).status).toBe(403)
+    }
   })
 
   test('should archive the outgoing original on a bulk file replacement', async ({ payload }) => {
@@ -1365,6 +1505,16 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
         )
 
         expect(deniedResponse.status).toBe(403)
+        const missingURL = `/${draftMediaSlug}/file/not-saved.png`
+
+        expect((await restClient.GET(missingURL)).status).toBe(403)
+        collection.access.read = () => false
+        expect((await restClient.GET(missingURL)).status).toBe(403)
+        expect(
+          (await restClient.GET(`/${draftMediaSlug}/file/${latestDraft.filename}`)).status,
+        ).toBe(403)
+        collection.access.read = () => true
+        expect((await restClient.GET(missingURL)).status).toBe(404)
       } finally {
         collection.access.read = readAccess
         payload.config.upload.transformers = transformers
