@@ -305,11 +305,13 @@ Cropping changes the main image. Configured image sizes are generated from the r
 
 The focal point selector is only displayed when the collection has image sizes (`variants`) or image adjustments (`resizeOptions`, `formatOptions`, `trimOptions`, `constructorOptions`, or `withMetadata`), or when `focalPoint` is explicitly `true`.
 
+## File Versioning
+
 Payload retains the source of each new upload as `original`, even when the main image is processed. With versions enabled, saved versions also retain the stored files they reference until those versions are removed. Keeping originals and file history uses additional storage, especially when an image has several generated sizes.
 
 Existing uploads are upgraded as they are edited; no bulk file migration is required. For an older image whose untouched source was already deleted, the existing stored file is the best available original. The upgrade cannot recover source bytes or historical files that were deleted before file versioning was enabled.
 
-SQL projects should generate and apply their schema migration. Original filenames have non-unique indexes on the current upload table and, when versions are enabled, its version table. Stored variant filenames are indexed as well.
+SQL projects need a schema migration; see the [v4 migration guide](../migration-guide/v4).
 
 To read a stored historical file through Payload's file endpoint, include `?version=<version-id>`. Version reads generate these URLs for the main file, original, stored variants, and thumbnail. The requested filename and storage prefix must belong to that version, and both parent-document read access and version read access are enforced. Without `version`, the endpoint resolves current published files and the latest draft, subject to collection read access; filenames found only in history return 404. Historical requests serve the saved bytes without rerunning transformations. Public URLs supplied directly by a storage provider remain direct.
 
