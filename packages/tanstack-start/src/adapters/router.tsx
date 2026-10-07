@@ -3,8 +3,7 @@
 import type { RouterAdapterContextValue } from '@payloadcms/ui/providers/RouterAdapter'
 import type { LinkAdapterProps, RouterAdapterComponent } from 'payload'
 
-import { RouterAdapterContext } from '@payloadcms/ui/providers/RouterAdapter'
-import { useRouteTransition } from '@payloadcms/ui/providers/RouteTransition'
+import { RouterAdapterContext, useRouteTransition } from '@payloadcms/ui'
 import {
   createLink,
   useLocation,

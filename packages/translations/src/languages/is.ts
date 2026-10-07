@@ -278,6 +278,7 @@ export const isTranslations: DefaultTranslationsObject = {
     all: 'Allt',
     allCollections: 'Öll söfn',
     allLocales: 'Allar staðfærslur',
+    allowedTypes: 'Leyfðar gerðir',
     and: 'Og',
     anotherUser: 'Annar notandi',
     anotherUserTakenOver: 'Annar notandi hefur tekið yfir skráningu þessarar færslu.',
@@ -293,6 +294,7 @@ export const isTranslations: DefaultTranslationsObject = {
     checked: 'Staðfest',
     clear: 'Hreinsa',
     clearAll: 'Hreinsa allt',
+    clearSearch: 'Hreinsa leit',
     close: 'Loka',
     collapse: 'Fella saman',
     collection: 'Safn',
@@ -564,6 +566,23 @@ export const isTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Leita {{label}}',
     searchResults: 'Fann {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Viðbótarleiðbeiningar',
+    collectionDescription:
+      'Bættu við sérsniðnum leiðbeiningum fyrir safnið {{label}} til að hjálpa LLM að laga svör sín betur að fyrirmælum.',
+    collectionSystemDescription:
+      'Þessar kerfisleiðbeiningar koma úr stillingaskrá safnsins og eru alltaf teknar með.',
+    editInstructions: 'Breyta LLM-leiðbeiningum',
+    global: 'Altækt skjal',
+    globalDescription:
+      'Bættu við sérsniðnum leiðbeiningum fyrir altæka skjalið {{label}} til að hjálpa LLM að laga svör sín betur að fyrirmælum.',
+    globalSystemDescription:
+      'Þessar kerfisleiðbeiningar koma úr stillingaskrá altæka skjalsins og eru alltaf teknar með.',
+    instructions: 'LLM-leiðbeiningar',
+    systemInstructions: 'Kerfisleiðbeiningar (skrifvarið)',
+    targetCannotBeChanged: 'Ekki er hægt að breyta markmiði leiðbeininganna.',
+    title: 'Titill',
   },
   localization: {
     cannotCopySameLocale: 'Ekki hægt að afrita í sömu staðfærslu',

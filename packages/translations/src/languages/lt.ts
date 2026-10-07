@@ -282,6 +282,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     all: 'Visi',
     allCollections: 'Visos kolekcijos',
     allLocales: 'Visi lokalai',
+    allowedTypes: 'Leidžiami tipai',
     and: 'Ir',
     anotherUser: 'Kitas vartotojas',
     anotherUserTakenOver: 'Kitas naudotojas perėmė šio dokumento redagavimą.',
@@ -297,6 +298,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     checked: 'Patikrinta',
     clear: 'Aišku',
     clearAll: 'Išvalyti viską',
+    clearSearch: 'Išvalyti paiešką',
     close: 'Uždaryti',
     collapse: 'Susikolimas',
     collection: 'Kolekcija',
@@ -570,6 +572,23 @@ export const ltTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Ieškoti {{label}}',
     searchResults: 'Rasta: {{count}}',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Papildomi nurodymai',
+    collectionDescription:
+      'Pridėkite pasirinktinius nurodymus rinkiniui {{label}}, kad LLM galėtų geriau pritaikyti atsakymus į užklausas.',
+    collectionSystemDescription:
+      'Šie sistemos nurodymai pateikiami rinkinio konfigūracijos faile ir visada įtraukiami.',
+    editInstructions: 'Redaguoti LLM nurodymus',
+    global: 'Globalus dokumentas',
+    globalDescription:
+      'Pridėkite pasirinktinius nurodymus globaliam dokumentui {{label}}, kad LLM galėtų geriau pritaikyti atsakymus į užklausas.',
+    globalSystemDescription:
+      'Šie sistemos nurodymai pateikiami globalaus dokumento konfigūracijos faile ir visada įtraukiami.',
+    instructions: 'LLM nurodymai',
+    systemInstructions: 'Sistemos nurodymai (tik skaitomi)',
+    targetCannotBeChanged: 'Nurodymų paskirties keisti negalima.',
+    title: 'Pavadinimas',
   },
   localization: {
     cannotCopySameLocale: 'Negalima kopijuoti į tą pačią vietovę',

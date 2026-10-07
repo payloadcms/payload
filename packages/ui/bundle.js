@@ -109,20 +109,10 @@ async function build() {
   }
 
   console.log('styles.css bundled successfully')
-  // Plugin to externalize all internal relative imports that point outside the
-  // exports/ directory. This prevents the barrel from inlining provider/context
-  // modules, ensuring that both the barrel export and subpath exports resolve to
-  // the same physical files (avoiding duplicate React context instances).
-  const externalizeInternalModules = {
-    name: 'externalize-internal-modules',
-    setup(build) {
-      build.onResolve({ filter: /^\.\.\/\.\.\//, namespace: 'file' }, (args) => {
-        return { external: true, path: args.path }
-      })
-    },
-  }
 
-  // Bundle `client.ts`
+  // Bundle `client.ts`. Admin code must import client code from this barrel only:
+  // subpaths like `@payloadcms/ui/elements/Link` stay unbundled for apps outside the
+  // admin panel, and hold their own copies of providers and contexts.
   const resultClient = await esbuild.build({
     entryPoints: ['dist/exports/client/index.js'],
     bundle: true,
@@ -165,11 +155,8 @@ function require(m) {
       'next',
       'crypto',
       // `sonner` owns a module-level toast event bus that the mounted `<Toaster>`
-      // (in the externalized ToastContainer provider) subscribes to. If the barrel
-      // inlines its own sonner copy, the `toast` it re-exports dispatches to a
-      // different bus than the one `<Toaster>` listens on, so toasts fired from
-      // consumer code imported via `@payloadcms/ui` never render. Keep it external
-      // so every consumer shares the single node_modules instance.
+      // subscribes to. Keep it external so code that imports `sonner` directly
+      // dispatches to the same bus as the barrel's `<Toaster>`.
       'sonner',
     ],
     //packages: 'external',
@@ -179,7 +166,6 @@ function require(m) {
 
     tsconfig: path.resolve(dirname, './tsconfig.json'),
     plugins: [
-      externalizeInternalModules,
       removeCSSImports,
       useClientPlugin, // required for banner to work
       /*commonjs({

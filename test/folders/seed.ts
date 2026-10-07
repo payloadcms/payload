@@ -87,14 +87,14 @@ export const seed = async (payload: Payload): Promise<void> => {
   // Documentation > Features > Retention
   const retention = await payload.create({
     collection: folderSlug,
-    data: { name: 'Retention', folder: features.id, folderType: ['posts', 'media'] },
+    data: { name: 'Retention', folder: features.id, folderType: ['posts'] },
     overrideAccess: true,
   })
 
   // Documentation > Features > Dashboards
   await payload.create({
     collection: folderSlug,
-    data: { name: 'Dashboards', folder: features.id, folderType: ['posts', 'media'] },
+    data: { name: 'Dashboards', folder: features.id, folderType: ['posts'] },
     overrideAccess: true,
   })
 

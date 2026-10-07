@@ -289,6 +289,7 @@ export const deTranslations: DefaultTranslationsObject = {
     all: 'Alle',
     allCollections: 'Alle Sammlungen',
     allLocales: 'Alle Sprachen',
+    allowedTypes: 'Zulässige Typen',
     and: 'Und',
     anotherUser: 'Ein anderer Benutzer',
     anotherUserTakenOver: 'Ein anderer Benutzer hat die Bearbeitung dieses Dokuments übernommen.',
@@ -304,6 +305,7 @@ export const deTranslations: DefaultTranslationsObject = {
     checked: 'Überprüft',
     clear: 'Leeren',
     clearAll: 'Alles leeren',
+    clearSearch: 'Suche löschen',
     close: 'Schließen',
     collapse: 'Einklappen',
     collection: 'Sammlung',
@@ -581,6 +583,23 @@ export const deTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Suche {{label}}',
     searchResults: '{{count}} gefunden',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Zusätzliche Anweisungen',
+    collectionDescription:
+      'Fügen Sie eigene Anweisungen für die Sammlung {{label}} hinzu, damit LLMs passendere Antworten auf Prompts geben können.',
+    collectionSystemDescription:
+      'Diese Systemanweisungen stammen aus der Konfigurationsdatei der Sammlung und werden immer berücksichtigt.',
+    editInstructions: 'LLM-Anweisungen bearbeiten',
+    global: 'Global',
+    globalDescription:
+      'Fügen Sie eigene Anweisungen für das Global {{label}} hinzu, damit LLMs passendere Antworten auf Prompts geben können.',
+    globalSystemDescription:
+      'Diese Systemanweisungen stammen aus der Konfigurationsdatei des Globals und werden immer berücksichtigt.',
+    instructions: 'LLM-Anweisungen',
+    systemInstructions: 'Systemanweisungen (schreibgeschützt)',
+    targetCannotBeChanged: 'Das Ziel der Anweisungen kann nicht geändert werden.',
+    title: 'Titel',
   },
   localization: {
     cannotCopySameLocale: 'Kann nicht in dieselbe Sprache kopiert werden',
