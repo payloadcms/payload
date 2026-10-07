@@ -1132,6 +1132,41 @@ test.describe('WCAG 2.2 Level AA', () => {
       await recents.focus()
       await recents.press('Space')
       await expect(recents).toHaveAttribute('aria-pressed', 'true')
+      const viewport = widget.locator('.recents-widget__viewport')
+
+      await expect(viewport).toHaveAttribute('aria-busy', 'false')
+      let shouldFail = true
+
+      await page.route('**/*', async (route) => {
+        if (
+          shouldFail &&
+          route.request().method() === 'POST' &&
+          route.request().postData()?.includes('get-dashboard-documents')
+        ) {
+          await route.abort('failed')
+          return
+        }
+        await route.continue()
+      })
+      try {
+        await pinned.press('Enter')
+        const retry = widget.getByRole('button', { name: 'Retry', exact: true })
+
+        await expect(retry).toBeVisible()
+        await expect(widget.locator('.recents-widget__status')).toHaveText(
+          'An unknown error has occurred.',
+        )
+        await retry.focus()
+        await expectPaintedFocus({ page })
+        shouldFail = false
+        await retry.press('Enter')
+        await expect(pinned).toBeFocused()
+        await expect(viewport).toHaveAttribute('aria-busy', 'false')
+        await expect(retry).toHaveCount(0)
+        await expectPaintedFocus({ page })
+      } finally {
+        await page.unrouteAll({ behavior: 'wait' })
+      }
     })
 
     test('should open the dashboard pin picker by keyboard and restore focus after cancel or selection', async () => {

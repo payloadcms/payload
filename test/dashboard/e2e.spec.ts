@@ -62,6 +62,7 @@ describe('Dashboard', () => {
     await page.clock.install()
     let release = () => {}
     let gate = Promise.resolve()
+    let shouldFail = false
 
     await page.route('**/admin**', async (route) => {
       if (
@@ -69,6 +70,10 @@ describe('Dashboard', () => {
         route.request().postData()?.includes('get-dashboard-documents')
       ) {
         await gate
+        if (shouldFail) {
+          await route.abort('failed')
+          return
+        }
       }
       await route.continue()
     })
@@ -135,6 +140,62 @@ describe('Dashboard', () => {
       await expect(viewport).toHaveAttribute('aria-busy', 'false')
       await page.clock.runFor(200)
       await expect(loading).toBeHidden()
+      const loadedPosition = await collections.boundingBox()
+      const loadedHeight = (await widget.boundingBox())!.height
+      const recents = widget.getByRole('button', { name: 'Recently viewed', exact: true })
+
+      shouldFail = true
+      await recents.focus()
+      await recents.press('Enter')
+      const retry = widget.getByRole('button', { name: 'Retry', exact: true })
+
+      await expect(retry).toBeVisible()
+      await expect(widget.locator('.recents-widget__error')).toContainText(
+        'An unknown error has occurred.',
+      )
+      expect(Math.abs((await widget.boundingBox())!.height - loadedHeight)).toBeLessThanOrEqual(1)
+      expect(
+        Math.abs((await collections.boundingBox())!.y - loadedPosition!.y),
+      ).toBeLessThanOrEqual(1)
+      shouldFail = false
+      gate = new Promise<void>((resolve) => {
+        release = resolve
+      })
+      await retry.focus()
+      await retry.press('Enter')
+      await expect(recents).toBeFocused()
+      await expect(viewport).toHaveAttribute('aria-busy', 'true')
+      await page.clock.runFor(180)
+      await expect(loading).toBeVisible()
+      expect(Math.abs((await widget.boundingBox())!.height - loadedHeight)).toBeLessThanOrEqual(1)
+      release()
+      await expect(viewport).toHaveAttribute('aria-busy', 'false')
+      await expect(retry).toHaveCount(0)
+      await expect(widget.locator('.document-card__title').first()).toBeVisible()
+      expect(Math.abs((await widget.boundingBox())!.height - loadedHeight)).toBeLessThanOrEqual(1)
+
+      await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
+        data: { value: { items: [] } },
+      })
+      await pinned.press('Enter')
+      await expect(viewport).toHaveAttribute('aria-busy', 'false')
+      await recents.press('Enter')
+      await expect(widget.locator('.recents-widget__empty-title')).toHaveText('No recent documents')
+      expect(Math.abs((await widget.boundingBox())!.height - loadedHeight)).toBeLessThanOrEqual(1)
+      expect(
+        Math.abs((await collections.boundingBox())!.y - loadedPosition!.y),
+      ).toBeLessThanOrEqual(1)
+      await page.request.post(`${serverURL}/api/payload-preferences/recently-viewed`, {
+        data: {
+          value: {
+            items: documents.map(({ id }) => ({
+              id,
+              collectionSlug: 'tickets',
+              viewedAt: new Date().toISOString(),
+            })),
+          },
+        },
+      })
       await page.clock.resume()
     }
   })
@@ -783,7 +844,13 @@ describe('Dashboard', () => {
     for (const ticket of tickets.slice(0, 4)) {
       await expect(drawer.getByRole('button', { name: ticket.title, exact: true })).toHaveCount(0)
     }
+    const beforeFailedSave = await widget.boundingBox()
+
     await drawer.getByRole('button', { name: tickets[4].title, exact: true }).click()
+    await expect(widget.locator('.recents-widget__save-error')).toBeVisible()
+    expect(
+      Math.abs((await widget.boundingBox())!.height - beforeFailedSave!.height),
+    ).toBeLessThanOrEqual(1)
     await expect(widget.locator('.recents-widget__status')).toContainText(
       'Could not save pinned documents.',
     )

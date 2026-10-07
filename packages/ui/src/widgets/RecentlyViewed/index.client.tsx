@@ -5,6 +5,7 @@ import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { DocumentsPage, DocumentsTab } from './getDocuments.js'
 import type { PinnedItem } from './recents.js'
 
+import { Button } from '../../elements/Button/index.js'
 import { CardGrid } from '../../elements/CardGrid/index.js'
 import { DocumentCard } from '../../elements/DocumentCard/index.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
@@ -340,7 +341,25 @@ export function RecentsAndPinnedClient({
         ) : null}
       </div>
       <div aria-busy={isLoading} className="recents-widget__viewport" ref={contentRef}>
-        {items.length || (hasAddPinCard && !isLoading && !loadError) ? (
+        {loadError ? (
+          <div className="recents-widget__error">
+            <span>{loadError}</span>
+            <Button
+              buttonStyle="secondary"
+              margin={false}
+              onClick={() => {
+                const activeTabRef = activeTab === 'pinned' ? pinnedTabRef : recentsTabRef
+
+                activeTabRef.current?.focus()
+                setRefresh((value) => value + 1)
+              }}
+              size="medium"
+              type="button"
+            >
+              {labels.retry}
+            </Button>
+          </div>
+        ) : items.length || (hasAddPinCard && !isLoading) ? (
           <div className="recents-widget__content" id={listID}>
             <CardGrid<null | RecentDocument>
               ariaLabel={activeTab === 'pinned' ? labels.pinned : labels.recents}
@@ -397,7 +416,7 @@ export function RecentsAndPinnedClient({
               }
             />
           </div>
-        ) : isLoading || loadError ? null : (
+        ) : isLoading ? null : (
           <div aria-live="polite" className="recents-widget__empty">
             <span
               aria-hidden="true"
@@ -411,21 +430,18 @@ export function RecentsAndPinnedClient({
             </span>
           </div>
         )}
+        {saveError && !loadError ? (
+          <span aria-hidden="true" className="recents-widget__save-error">
+            {saveError}
+          </span>
+        ) : null}
         <span aria-hidden="true" className="recents-widget__loading">
           {isLoading && shouldShowLoading ? <span>{labels.loading}</span> : null}
         </span>
       </div>
-      <span
-        aria-live="polite"
-        className={`recents-widget__status${saveError || loadError ? '' : ' sr-only'}`}
-      >
+      <span aria-live="polite" className="recents-widget__status sr-only">
         {saveError || loadError || (isLoading && shouldShowLoading ? labels.loading : '')}
       </span>
-      {loadError ? (
-        <button onClick={() => setRefresh((value) => value + 1)} type="button">
-          {labels.retry}
-        </button>
-      ) : null}
     </WidgetCard>
   )
 }
