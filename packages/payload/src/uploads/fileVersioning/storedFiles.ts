@@ -212,6 +212,18 @@ export const withLegacyCloudUploadFileData = async <T extends Record<string, unk
     return stored as T
   }
 
+  const variants =
+    stored.variants && typeof stored.variants === 'object'
+      ? Object.fromEntries(
+          Object.entries(stored.variants).map(([name, value]) => [
+            name,
+            value && typeof value === 'object'
+              ? { ...value, _objectKey: stored._objectKey, prefix: stored.prefix }
+              : value,
+          ]),
+        )
+      : stored.variants
+
   return Object.assign({}, doc, stored, {
     original: {
       _objectKey: stored._objectKey,
@@ -223,6 +235,7 @@ export const withLegacyCloudUploadFileData = async <T extends Record<string, unk
       url: stored.url,
       width: stored.width,
     },
+    variants,
   })
 }
 

@@ -28,6 +28,7 @@ import {
   abortFileOperationScope,
   beginFileOperationScope,
   completeFileOperationScope,
+  shareFileOperationScope,
 } from '../../uploads/fileVersioning/fileOperationManager.js'
 import { withLegacyCloudUploadFileData } from '../../uploads/fileVersioning/storedFiles.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
@@ -362,6 +363,7 @@ export const updateOperation = async <
         let documentReq = req
         if (collectionConfig.upload && sharedGeneratedFileData === null) {
           documentReq = isolateObjectProperty(req, ['file', 'payloadUploadSizes'])
+          shareFileOperationScope({ owner: req, req: documentReq })
           documentReq.file = documentFile
           documentReq.payloadUploadSizes = {}
         }

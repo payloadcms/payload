@@ -319,7 +319,6 @@ export const replaceStoredFileReferences = ({
       continue
     }
 
-    const previousFilename = path.posix.basename(file.key)
     const archivedFilename = path.posix.basename(archivedKey)
 
     for (const role of file.roles) {
@@ -336,17 +335,19 @@ export const replaceStoredFileReferences = ({
           break
       }
 
-      if (stored?.filename === previousFilename) {
-        stored.filename = archivedFilename
+      if (typeof stored?.filename === 'string') {
+        const previousFilename = stored.filename
+        const directory = path.posix.dirname(previousFilename)
+        const filename = directory === '.' ? archivedFilename : `${directory}/${archivedFilename}`
+        stored.filename = filename
         stored.url = replaceURLFilename({
-          filename: archivedFilename,
+          filename,
           previousFilename,
           url: stored.url,
         })
+        hasChanged = true
       }
     }
-
-    hasChanged = true
   }
 
   return hasChanged ? archived : undefined

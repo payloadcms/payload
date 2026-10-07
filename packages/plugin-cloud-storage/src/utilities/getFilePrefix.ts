@@ -130,7 +130,7 @@ const getRepresentationPrefix = ({
       ? doc.original
       : (Object.values(doc.variants ?? {}).find((variant) => variant?.filename === filename) ?? doc)
   return buildPrefixWithObjectKey({
-    objectKey: representation._objectKey ?? doc._objectKey,
-    prefix: representation.prefix ?? doc.prefix,
+    objectKey: representation._objectKey ?? (!doc.original?.filename ? doc._objectKey : undefined),
+    prefix: representation.prefix ?? (!doc.original?.filename ? doc.prefix : undefined),
   })
 }

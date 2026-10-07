@@ -40,10 +40,11 @@ export const getAfterReadHook =
   async ({ data, value }) => {
     const representation = isOriginal ? data?.original : size ? data?.variants?.[size.name] : data
     const filename = representation?.filename
-    const prefix = representation?.prefix ?? data?.prefix
+    const hasLegacyVariant = Boolean(size && !data?.original?.filename)
+    const prefix = representation?.prefix ?? (hasLegacyVariant ? data?.prefix : undefined)
     // Direct-serve URLs encode the full location; the proxy resolves `_objectKey` server-side.
     const objectFolder = getObjectFolder({
-      _objectKey: representation?._objectKey ?? data?._objectKey,
+      _objectKey: representation?._objectKey ?? (hasLegacyVariant ? data?._objectKey : undefined),
       prefix,
     })
     let url = value

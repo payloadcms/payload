@@ -11,12 +11,12 @@ import { normalizeStorageKey } from './naming.js'
 import {
   collectStoredFiles as collectStoredFileLocations,
   getStoredFileIdentity,
-  withLegacyUploadFileData,
+  withLegacyCloudUploadFileData,
 } from './storedFiles.js'
 
 const pageSize = 100
 
-export const collectStoredFiles = ({
+export const collectStoredFiles = async ({
   collection,
   doc,
   req,
@@ -24,11 +24,11 @@ export const collectStoredFiles = ({
   collection: SanitizedCollectionConfig
   doc: JsonObject
   req: PayloadRequest
-}): StoredFileList => {
-  const stored = withLegacyUploadFileData({
+}): Promise<StoredFileList> => {
+  const stored = await withLegacyCloudUploadFileData({
     collection,
-    config: req.payload.config,
     doc,
+    req,
   })
 
   return collectStoredFileLocations({ collection, doc: stored, req })
@@ -61,7 +61,7 @@ export const collectVersionFiles = async ({
     })
 
     for (const row of versions.docs) {
-      files.push(...collectStoredFiles({ collection, doc: row.version, req }))
+      files.push(...(await collectStoredFiles({ collection, doc: row.version, req })))
     }
 
     if (versions.docs.length < pageSize) {
@@ -228,7 +228,7 @@ const findUnreferenced = async ({
       })
 
       for (const doc of docs.docs) {
-        removeReferenced({ collection, doc, remaining, req })
+        await removeReferenced({ collection, doc, remaining, req })
       }
       if (docs.docs.length < pageSize) {
         break
@@ -255,7 +255,7 @@ const findUnreferenced = async ({
         })
 
         for (const row of versions.docs) {
-          removeReferenced({ collection, doc: row.version, remaining, req })
+          await removeReferenced({ collection, doc: row.version, remaining, req })
         }
         if (versions.docs.length < pageSize) {
           break
@@ -268,7 +268,7 @@ const findUnreferenced = async ({
   return [...remaining.values()]
 }
 
-const removeReferenced = ({
+const removeReferenced = async ({
   collection,
   doc,
   remaining,
@@ -278,8 +278,8 @@ const removeReferenced = ({
   doc: JsonObject
   remaining: Map<string, StoredFile>
   req: PayloadRequest
-}): void => {
-  for (const file of collectStoredFiles({ collection, doc, req })) {
+}): Promise<void> => {
+  for (const file of await collectStoredFiles({ collection, doc, req })) {
     remaining.delete(getStoredFileIdentity(file))
   }
 }

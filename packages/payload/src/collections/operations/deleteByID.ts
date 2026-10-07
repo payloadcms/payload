@@ -162,7 +162,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
 
     const deletedFiles = collectionConfig.upload
       ? [
-          ...collectStoredFiles({ collection: collectionConfig, doc: docToDelete!, req }),
+          ...(await collectStoredFiles({ collection: collectionConfig, doc: docToDelete!, req })),
           ...(collectionConfig.versions
             ? await collectVersionFiles({ collection: collectionConfig, parentID: id, req })
             : []),

@@ -32,6 +32,18 @@ type RunFileOperationPlanArgs<T> = {
 }
 
 const requests = new WeakMap<PayloadRequest, RequestState>()
+const requestOwners = new WeakMap<PayloadRequest, PayloadRequest>()
+
+/** Same-transaction request proxies must finish their files with the owning request. */
+export const shareFileOperationScope = ({
+  owner,
+  req,
+}: {
+  owner: PayloadRequest
+  req: PayloadRequest
+}): void => {
+  requestOwners.set(req, requestOwners.get(owner) ?? owner)
+}
 
 /** Keeps no-transaction cleanup pending until an outer upload operation finishes. */
 export const beginFileOperationScope = ({ req }: { req: PayloadRequest }): void => {
@@ -43,7 +55,7 @@ export const completeFileOperationScope = async ({
 }: {
   req: PayloadRequest
 }): Promise<void> => {
-  const state = requests.get(req)
+  const state = requests.get(requestOwners.get(req) ?? req)
 
   if (!state) {
     return
@@ -56,7 +68,7 @@ export const completeFileOperationScope = async ({
 }
 
 export const abortFileOperationScope = async ({ req }: { req: PayloadRequest }): Promise<void> => {
-  const state = requests.get(req)
+  const state = requests.get(requestOwners.get(req) ?? req)
 
   if (!state) {
     return
@@ -213,7 +225,7 @@ export const stageLocalUploadFiles = async ({
 
 /** Called only after the owning database transaction commits. */
 export const commitFileOperations = async ({ req }: { req: PayloadRequest }): Promise<void> => {
-  const state = requests.get(req)
+  const state = requests.get(requestOwners.get(req) ?? req)
 
   if (!state) {
     return
@@ -228,24 +240,24 @@ export const commitFileOperations = async ({ req }: { req: PayloadRequest }): Pr
 
 /** Called only after the owning database transaction rolls back. */
 export const rollbackFileOperations = async ({ req }: { req: PayloadRequest }): Promise<void> => {
-  const state = requests.get(req)
+  const state = requests.get(requestOwners.get(req) ?? req)
 
   if (!state) {
     return
   }
 
-  requests.delete(req)
+  requests.delete(requestOwners.get(req) ?? req)
   for (const attempt of state.pending.reverse()) {
     await compensate({ attempt, req })
   }
 }
 
 const getRequestState = ({ req }: { req: PayloadRequest }): RequestState => {
-  let state = requests.get(req)
+  let state = requests.get(requestOwners.get(req) ?? req)
 
   if (!state) {
     state = { depth: 0, isCommitted: false, pending: [] }
-    requests.set(req, state)
+    requests.set(requestOwners.get(req) ?? req, state)
   }
 
   return state
@@ -276,7 +288,7 @@ const finishFileOperation = async ({
     if (hasSucceeded && (!(await hasActiveTransaction({ req })) || state.isCommitted)) {
       await flushCleanup({ req, state })
     } else if (!(await hasActiveTransaction({ req }))) {
-      requests.delete(req)
+      requests.delete(requestOwners.get(req) ?? req)
     }
   }
 }
@@ -292,7 +304,7 @@ const flushCleanup = async ({
     return
   }
 
-  requests.delete(req)
+  requests.delete(requestOwners.get(req) ?? req)
 
   for (const attempt of state.pending) {
     await runDeferredCleanup({ attempt, req })
@@ -306,7 +318,7 @@ const reconcileFailedAttempts = async ({
   req: PayloadRequest
   state: RequestState
 }): Promise<void> => {
-  requests.delete(req)
+  requests.delete(requestOwners.get(req) ?? req)
 
   for (const attempt of state.pending) {
     await cleanupStagedObjectsAfterWriteFailure({ attempt, req })

@@ -1,12 +1,10 @@
-import path from 'node:path'
-
 import type { Collection, TypeWithID } from '../../collections/config/types.js'
 import type { JsonObject, PayloadRequest } from '../../types/index.js'
 
 import { Forbidden } from '../../errors/Forbidden.js'
 import { NotFound } from '../../errors/NotFound.js'
 import { checkFileAccess } from '../checkFileAccess.js'
-import { collectStoredFiles, withLegacyUploadFileData } from './storedFiles.js'
+import { collectStoredFiles, withLegacyCloudUploadFileData } from './storedFiles.js'
 
 type StoredVersion = {
   id: number | string
@@ -62,35 +60,24 @@ const resolveVersionFile = async ({
   req: PayloadRequest
   row: StoredVersion
 }): Promise<TypeWithID | undefined> => {
-  const saved = withLegacyUploadFileData({
+  const saved = await withLegacyCloudUploadFileData({
     collection: collection.config,
-    config: req.payload.config,
     doc: row.version,
+    req,
   })
   const hasFile = collectStoredFiles({ collection: collection.config, doc: saved, req }).some(
     (file) =>
-      path.posix.basename(file.key) === filename &&
-      (!prefix ||
-        file.roles.some((role) => {
-          let representation: unknown
-
-          if (role.type === 'size') {
-            const variants =
-              saved.variants && typeof saved.variants === 'object' && !Array.isArray(saved.variants)
-                ? (saved.variants as Record<string, unknown>)
-                : undefined
-            representation = variants?.[role.sizeKey]
-          } else {
-            representation = role.type === 'original' ? saved.original : saved
-          }
-
-          return (
-            representation &&
-            typeof representation === 'object' &&
-            !Array.isArray(representation) &&
-            ((representation as Record<string, unknown>).prefix ?? saved.prefix) === prefix
-          )
-        })),
+      file.roles.some((role) => {
+        const representation =
+          role.type === 'size'
+            ? (saved.variants as Record<string, JsonObject> | undefined)?.[role.sizeKey]
+            : role.type === 'original'
+              ? (saved.original as JsonObject | undefined)
+              : saved
+        return (
+          representation?.filename === filename && (!prefix || representation.prefix === prefix)
+        )
+      }),
   )
 
   if (!hasFile) {

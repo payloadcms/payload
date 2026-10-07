@@ -15,7 +15,7 @@ import { getArchivedFilename } from './naming.js'
 import {
   collectStoredFiles,
   getStoredFileIdentity,
-  withLegacyUploadFileData,
+  withLegacyCloudUploadFileData,
 } from './storedFiles.js'
 
 /** Copies the selected stored files before making that version current. */
@@ -34,11 +34,11 @@ export const runStoredFileRestore = async <T>({
   selected: JsonObject
   write: (restored: JsonObject) => Promise<T>
 }): Promise<T> => {
-  const stored = withLegacyUploadFileData({
+  const stored = await withLegacyCloudUploadFileData({
     collection,
-    config: req.payload.config,
     doc: selected,
-  }) as JsonObject
+    req,
+  })
   const configuredSizeKeys = new Set(collection.upload.variants?.map(({ name }) => name) ?? [])
   const storedFiles: StoredFileList = collectStoredFiles({ collection, doc: stored, req }).flatMap(
     (file) => {
@@ -88,10 +88,10 @@ export const runStoredFileRestore = async <T>({
     throw new APIError('No configured storage adapter can restore this file.', 400)
   }
 
-  const currentStored = withLegacyUploadFileData({
+  const currentStored = await withLegacyCloudUploadFileData({
     collection,
-    config: req.payload.config,
     doc: current,
+    req,
   })
   const currentFiles = collectStoredFiles({ collection, doc: currentStored, req })
 

@@ -166,7 +166,7 @@ export const runCloudFileUpdate = async <T>({
       })
 
       await scheduleUnreferencedFileCleanup({
-        candidates: collectSavedFiles({ collection, doc: storedCurrent, req }),
+        candidates: await collectSavedFiles({ collection, doc: storedCurrent, req }),
         collection,
         req,
       })

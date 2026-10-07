@@ -23,6 +23,7 @@ import {
   abortFileOperationScope,
   beginFileOperationScope,
   completeFileOperationScope,
+  shareFileOperationScope,
 } from '../../uploads/fileVersioning/fileOperationManager.js'
 import { runStoredFileRestore } from '../../uploads/fileVersioning/restore.js'
 import { restoreUploadDataFromDocument } from '../../uploads/sanitizeUploadData.js'
@@ -243,6 +244,7 @@ export const restoreVersionOperation = async <
     req.context.isRestoringVersion = true
 
     const reqWithValidationLocale = isolateObjectProperty(req, ['fallbackLocale', 'locale'])
+    shareFileOperationScope({ owner: req, req: reqWithValidationLocale })
     reqWithValidationLocale.fallbackLocale = null
     reqWithValidationLocale.locale = validationLocale
 

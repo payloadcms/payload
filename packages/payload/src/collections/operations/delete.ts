@@ -209,7 +209,7 @@ export const deleteOperation = async <
 
       if (collectionConfig.upload) {
         deletedFilesByID.set(doc.id, [
-          ...collectStoredFiles({ collection: collectionConfig, doc, req }),
+          ...(await collectStoredFiles({ collection: collectionConfig, doc, req })),
           ...(collectionConfig.versions
             ? await collectVersionFiles({ collection: collectionConfig, parentID: doc.id, req })
             : []),
