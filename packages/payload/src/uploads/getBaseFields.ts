@@ -218,7 +218,11 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
           type: 'text',
           admin: { disabled: true, hidden: true, readOnly: true },
         },
-        { name: '_objectKey', type: 'text', hidden: true },
+        {
+          name: '_objectKey',
+          type: 'text',
+          admin: { disabled: true, hidden: true, readOnly: true },
+        },
       ],
     },
   ]
@@ -339,7 +343,11 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               type: 'text',
               admin: { disabled: true, hidden: true, readOnly: true },
             },
-            { name: '_objectKey', type: 'text', hidden: true },
+            {
+              name: '_objectKey',
+              type: 'text',
+              admin: { disabled: true, hidden: true, readOnly: true },
+            },
           ],
           label: size.name,
         })),

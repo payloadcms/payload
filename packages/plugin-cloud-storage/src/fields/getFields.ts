@@ -54,11 +54,20 @@ export const getFields = ({
     },
   }
 
-  // Server-owned key segment; hidden from the API and admin, read internally via showHiddenFields.
+  // Server-owned key segment. Field-level `hidden` would remove it before the URL hooks can read it.
   const baseObjectKeyField: TextField = {
     name: '_objectKey',
     type: 'text',
-    hidden: true,
+    admin: {
+      disabled: {
+        bulkEdit: true,
+        column: true,
+        filter: true,
+        groupBy: true,
+      },
+      hidden: true,
+      readOnly: true,
+    },
   }
 
   const storedPrefixField: TextField = {
