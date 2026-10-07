@@ -27,6 +27,7 @@ import { TestMetadata } from './collections/TestMetadata.js'
 import { UnversionedCloudMedia } from './collections/UnversionedCloudMedia.js'
 import { Users } from './collections/Users.js'
 import { VersionedCloudMedia } from './collections/VersionedCloudMedia.js'
+import { VersionedConvertedCloudMedia } from './collections/VersionedConvertedCloudMedia.js'
 import { VersionedPublicCloudMedia } from './collections/VersionedPublicCloudMedia.js'
 import { VersionedS3Media } from './collections/VersionedS3Media.js'
 import { r2UploadEndpoints } from './r2.js'
@@ -45,6 +46,7 @@ import {
   testMetadataSlug,
   unversionedCloudMediaSlug,
   versionedCloudMediaSlug,
+  versionedConvertedCloudMediaSlug,
   versionedPublicCloudMediaSlug,
   versionedS3MediaSlug,
 } from './shared.js'
@@ -239,6 +241,7 @@ export function buildPluginCloudStorageIntConfig({
     collections: {
       [unversionedCloudMediaSlug]: { adapter: versionedCloudAdapter },
       [versionedCloudMediaSlug]: { adapter: versionedCloudAdapter },
+      [versionedConvertedCloudMediaSlug]: { adapter: versionedCloudAdapter },
       [versionedPublicCloudMediaSlug]: {
         adapter: publicVersionedCloudAdapter,
         disablePayloadAccessControl: true,
@@ -267,6 +270,7 @@ export function buildPluginCloudStorageIntConfig({
         UnversionedCloudMedia,
         Users,
         VersionedCloudMedia,
+        VersionedConvertedCloudMedia,
         VersionedPublicCloudMedia,
         VersionedS3Media,
       ],
@@ -286,6 +290,9 @@ export function buildPluginCloudStorageIntConfig({
               [testMetadataSlug]: {
                 formatOptions: { format: 'webp' },
                 variants: [{ name: 'thumbnail', width: 300 }],
+              },
+              [versionedConvertedCloudMediaSlug]: {
+                formatOptions: { format: 'jpeg' },
               },
               [versionedS3MediaSlug]: {
                 variants: [{ name: 'small', width: 100 }],
