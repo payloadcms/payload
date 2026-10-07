@@ -22,6 +22,7 @@ import { MediaWithGenerateFileURL } from './collections/MediaWithGenerateFileURL
 import { MediaWithOverwrite } from './collections/MediaWithOverwrite.js'
 import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
 import { MediaWithThrowingHook } from './collections/MediaWithThrowingHook.js'
+import { ReferencedCloudMedia } from './collections/ReferencedCloudMedia.js'
 import { RestrictedMedia } from './collections/RestrictedMedia.js'
 import { TestMetadata } from './collections/TestMetadata.js'
 import { UnversionedCloudMedia } from './collections/UnversionedCloudMedia.js'
@@ -29,6 +30,7 @@ import { Users } from './collections/Users.js'
 import { VersionedCloudMedia } from './collections/VersionedCloudMedia.js'
 import { VersionedConvertedCloudMedia } from './collections/VersionedConvertedCloudMedia.js'
 import { VersionedPublicCloudMedia } from './collections/VersionedPublicCloudMedia.js'
+import { VersionedPublicVariantCloudMedia } from './collections/VersionedPublicVariantCloudMedia.js'
 import { VersionedS3Media } from './collections/VersionedS3Media.js'
 import { r2UploadEndpoints } from './r2.js'
 import {
@@ -42,15 +44,21 @@ import {
   mediaWithPrefixSlug,
   mediaWithThrowingHookSlug,
   prefix,
+  referencedCloudMediaSlug,
   restrictedMediaSlug,
   testMetadataSlug,
   unversionedCloudMediaSlug,
   versionedCloudMediaSlug,
   versionedConvertedCloudMediaSlug,
   versionedPublicCloudMediaSlug,
+  versionedPublicVariantCloudMediaSlug,
   versionedS3MediaSlug,
 } from './shared.js'
-import { publicVersionedCloudAdapter, versionedCloudAdapter } from './versionedCloudStorage.js'
+import {
+  publicVersionedCloudAdapter,
+  referencedVersionedCloudAdapter,
+  versionedCloudAdapter,
+} from './versionedCloudStorage.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -239,10 +247,15 @@ export function buildPluginCloudStorageIntConfig({
 
   const versionedCloudPlugin = cloudStoragePlugin({
     collections: {
+      [referencedCloudMediaSlug]: { adapter: referencedVersionedCloudAdapter },
       [unversionedCloudMediaSlug]: { adapter: versionedCloudAdapter },
       [versionedCloudMediaSlug]: { adapter: versionedCloudAdapter },
       [versionedConvertedCloudMediaSlug]: { adapter: versionedCloudAdapter },
       [versionedPublicCloudMediaSlug]: {
+        adapter: publicVersionedCloudAdapter,
+        disablePayloadAccessControl: true,
+      },
+      [versionedPublicVariantCloudMediaSlug]: {
         adapter: publicVersionedCloudAdapter,
         disablePayloadAccessControl: true,
       },
@@ -265,6 +278,7 @@ export function buildPluginCloudStorageIntConfig({
         MediaWithOverwrite,
         MediaWithPrefix,
         MediaWithThrowingHook,
+        ReferencedCloudMedia,
         RestrictedMedia,
         TestMetadata,
         UnversionedCloudMedia,
@@ -272,6 +286,7 @@ export function buildPluginCloudStorageIntConfig({
         VersionedCloudMedia,
         VersionedConvertedCloudMedia,
         VersionedPublicCloudMedia,
+        VersionedPublicVariantCloudMedia,
         VersionedS3Media,
       ],
       endpoints: r2UploadEndpoints,
@@ -293,6 +308,9 @@ export function buildPluginCloudStorageIntConfig({
               },
               [versionedConvertedCloudMediaSlug]: {
                 formatOptions: { format: 'jpeg' },
+              },
+              [versionedPublicVariantCloudMediaSlug]: {
+                variants: [{ name: 'small', width: 100 }],
               },
               [versionedS3MediaSlug]: {
                 variants: [{ name: 'small', width: 100 }],
