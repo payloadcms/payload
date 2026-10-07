@@ -1702,6 +1702,8 @@ If you typed `clientUploads.access`, replace `ClientUploadsAccess` with `UploadI
 
 #### If you maintain a custom storage adapter
 
+File versioning adds a required `GeneratedAdapter.copyFile` method. Copy `from` to `to` (complete storage keys) without changing the source, reject an existing destination, and return only once the destination is readable. `moveFile` stays optional. See [Custom Storage Adapters](../upload/storage-adapters) for the full contract.
+
 Replace `clientUploadContext` with `uploadReference` in generated file metadata and static handler parameters. `handleUpload` no longer receives it because Payload skips uploading files that are already stored.
 
 Set `uploadInstructions.enabled`. When false, Payload adds `adminHandler` to the import map without rendering it. When true, Payload also renders it and exposes the instructions and supporting endpoint.
@@ -1973,6 +1975,12 @@ The `alwaysInsertFields` option (on `cloudStoragePlugin` and every `storage-*` a
 
 - Remove `alwaysInsertFields` from your storage adapter or `cloudStoragePlugin` config — it has no effect and no longer exists on the option types.
 - For Postgres, SQLite, or D1 projects, run `payload migrate:create` to generate the migration that adds the `prefix` column, then run `payload migrate` to apply it.
+
+### Upload collections retain originals and file history
+
+Upload collections now store `original` metadata and a `prefix` and `_objectKey` for each stored file (the main file, `original`, and each variant), so saved versions can find their files. New uploads keep their source under an `-original` filename. Update any code or infrastructure that relies on the old filename, URL, or object key.
+
+**Postgres and SQLite:** after updating, run `payload migrate:create`, check that it adds these columns to each upload collection table and its versions table, then run `payload migrate`. Existing rows keep `null` values until their next write.
 
 ### `FileSizeImproved` removed — use `FileSize` ([#16593](https://github.com/payloadcms/payload/pull/16593))
 

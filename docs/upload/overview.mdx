@@ -301,9 +301,19 @@ This feature is only available for image file types.
 
 Setting `crop: false` and `focalPoint: false` on `sharpTransformer({ collections })` for this collection will disable the respective selector in the [Admin Panel](../admin/overview).
 
-Image cropping occurs before any resizing, the resized images will therefore be generated from the cropped image (**not** the original image).
+Cropping changes the main image. Configured image sizes are generated from the retained original, so cropping the main image does not also crop those sizes. The focal point controls how configured sizes are framed.
 
 The focal point selector is only displayed when the collection has image sizes (`variants`) or image adjustments (`resizeOptions`, `formatOptions`, `trimOptions`, `constructorOptions`, or `withMetadata`), or when `focalPoint` is explicitly `true`.
+
+## File Versioning
+
+Payload retains the source of each new upload as `original`, even when the main image is processed. With versions enabled, saved versions also retain the stored files they reference until those versions are removed. Keeping originals and file history uses additional storage, especially when an image has several generated sizes.
+
+Existing uploads are upgraded as they are edited; no bulk file migration is required. For an older image whose untouched source was already deleted, the existing stored file is the best available original. The upgrade cannot recover source bytes or historical files that were deleted before file versioning was enabled.
+
+SQL projects need a schema migration; see the [v4 migration guide](../migration-guide/v4).
+
+To read a stored historical file through Payload's file endpoint, include `?version=<version-id>`. Version reads generate these URLs for the main file, original, stored variants, and thumbnail. The requested filename and storage prefix must belong to that version, and both parent-document read access and version read access are enforced. Without `version`, the endpoint resolves current published files and the latest draft, subject to collection read access; filenames found only in history return 404. Historical requests serve the saved bytes without rerunning transformations. Public URLs supplied directly by a storage provider remain direct.
 
 ## Disabling Local Upload Storage
 
