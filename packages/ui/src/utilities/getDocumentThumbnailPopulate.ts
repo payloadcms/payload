@@ -1,6 +1,6 @@
-import type { PopulateType, SanitizedCollectionConfig, SelectType } from 'payload'
+import type { PopulateType, SanitizedCollectionConfig } from 'payload'
 
-import { appendUploadSelectFields } from 'payload/shared'
+import { getDocumentThumbnailSelect } from './getDocumentThumbnailSelect.js'
 
 /** Select thumbnail metadata independently of the upload collection's defaultPopulate. */
 export function getDocumentThumbnailPopulate({
@@ -26,10 +26,7 @@ export function getDocumentThumbnailPopulate({
     const relatedCollectionConfig = collections.find((collection) => collection.slug === slug)
 
     if (relatedCollectionConfig) {
-      const select: SelectType = {}
-
-      appendUploadSelectFields({ collectionConfig: relatedCollectionConfig, select })
-      populate[slug] = select
+      populate[slug] = getDocumentThumbnailSelect({ collectionConfig: relatedCollectionConfig })
     }
   }
 

@@ -136,7 +136,9 @@ export const plTranslations: DefaultTranslationsObject = {
     widgetPinnedSaveError: 'Nie można zapisać przypiętych dokumentów.',
     widgetQueryError: 'Nie można załadować dokumentów dla tego widżetu.',
     widgetRecentlyViewedEmpty: 'Brak ostatnich dokumentów',
-    widgetRecentlyViewedEmptyDescription: 'Edytowane dokumenty pojawią się tutaj',
+    widgetRecentlyViewedEmptyDescription:
+      'Dokumenty, które ostatnio przeglądałeś, pojawią się tutaj',
+    widgetRecentlyViewedFilterDescription: 'Filtruj tylko ostatnio oglądane.',
     widgetRecentlyViewedTitle: 'Ostatnio przeglądane',
     widgetRecentsAndPinned: 'Ostatnie i przypięte',
     widgetRemovePin: 'Odepnij dokument',

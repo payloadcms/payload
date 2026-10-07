@@ -139,7 +139,9 @@ export const deTranslations: DefaultTranslationsObject = {
     widgetPinnedSaveError: 'Angeheftete Dokumente konnten nicht gespeichert werden.',
     widgetQueryError: 'Dokumente für dieses Widget konnten nicht geladen werden.',
     widgetRecentlyViewedEmpty: 'Keine aktuellen Dokumente',
-    widgetRecentlyViewedEmptyDescription: 'Dokumente, die Sie bearbeiten, erscheinen hier',
+    widgetRecentlyViewedEmptyDescription:
+      'Hier werden Dokumente angezeigt, die Sie kürzlich angesehen haben.',
+    widgetRecentlyViewedFilterDescription: 'Nur kürzlich angesehene filtern.',
     widgetRecentlyViewedTitle: 'Kürzlich angesehen',
     widgetRecentsAndPinned: 'Aktuelle und angeheftete',
     widgetRemovePin: 'Dokument lösen',

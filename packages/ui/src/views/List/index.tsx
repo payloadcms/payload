@@ -16,7 +16,6 @@ import type {
 
 import {
   appendDateTimezoneSelectFields,
-  appendUploadSelectFields,
   combineWhereConstraints,
   formatAdminURL,
   isNumber,
@@ -40,6 +39,7 @@ import {
 import { getColumns } from '../../utilities/getColumns.js'
 import { getDocumentPermissions } from '../../utilities/getDocumentPermissions.js'
 import { getDocumentThumbnailPopulate } from '../../utilities/getDocumentThumbnailPopulate.js'
+import { getDocumentThumbnailSelect } from '../../utilities/getDocumentThumbnailSelect.js'
 import { renderFilters, renderTable } from '../../utilities/renderTable.js'
 import { upsertPreferences } from '../../utilities/upsertPreferences.js'
 import { enrichDocsWithVersionStatus } from './enrichDocsWithVersionStatus.js'
@@ -266,7 +266,10 @@ export const renderListView = async (
   })
 
   /** Automatically force select active columns. */
-  const select = transformColumnsToSelect(columns)
+  const select = getDocumentThumbnailSelect({
+    collectionConfig,
+    select: transformColumnsToSelect(columns),
+  })
 
   /** Grid cards need their title, timestamp, and thumbnail regardless of visible table columns. */
   if (collectionConfig.admin.useAsTitle) {
@@ -286,12 +289,6 @@ export const renderListView = async (
   ) {
     select[collectionConfig.hierarchy.collectionSpecific.fieldName] = true
   }
-
-  /** Force select image fields for list view thumbnails */
-  appendUploadSelectFields({
-    collectionConfig,
-    select,
-  })
 
   /** Populate only the configured thumbnail relationship for flat collection grids. */
   const thumbnailFieldName =

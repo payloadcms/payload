@@ -139,7 +139,9 @@ export const huTranslations: DefaultTranslationsObject = {
     widgetPinnedSaveError: 'A rögzített dokumentumok mentése nem sikerült.',
     widgetQueryError: 'Nem sikerült betölteni a dokumentumokat ehhez a widgethez.',
     widgetRecentlyViewedEmpty: 'Nincs legutóbbi dokumentum',
-    widgetRecentlyViewedEmptyDescription: 'Az Ön által szerkesztett dokumentumok itt jelennek meg',
+    widgetRecentlyViewedEmptyDescription:
+      'Az Ön által nemrég megtekintett dokumentumok itt fognak megjelenni.',
+    widgetRecentlyViewedFilterDescription: 'Csak a legutóbb megtekintettek szűrése.',
     widgetRecentlyViewedTitle: 'Legutóbb megtekintett',
     widgetRecentsAndPinned: 'Legutóbbiak és rögzítettek',
     widgetRemovePin: 'Dokumentum rögzítésének feloldása',

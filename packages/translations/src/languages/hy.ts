@@ -135,7 +135,9 @@ export const hyTranslations: DefaultTranslationsObject = {
     widgetPinnedSaveError: 'Չհաջողվեց պահպանել ամրագրված փաստաթղթերը։',
     widgetQueryError: 'Չհաջողվեց բեռնել փաստաթղթերը այս վիդջեթի համար:',
     widgetRecentlyViewedEmpty: 'Վերջին փաստաթղթեր չկան',
-    widgetRecentlyViewedEmptyDescription: 'Այստեղ կհայտնվեն ձեր խմբագրած փաստաթղթերը',
+    widgetRecentlyViewedEmptyDescription:
+      'Այստեղ կցուցադրվեն Ձեր կողմից վերջերս դիտված փաստաթղթերը',
+    widgetRecentlyViewedFilterDescription: 'Ֆիլտրել միայն Վերջերս դիտվածները։',
     widgetRecentlyViewedTitle: 'Վերջերս դիտված',
     widgetRecentsAndPinned: 'Վերջիններն ու ամրագրվածները',
     widgetRemovePin: 'Հեռացնել ամրագրվածը',

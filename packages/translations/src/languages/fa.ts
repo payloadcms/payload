@@ -133,7 +133,9 @@ export const faTranslations: DefaultTranslationsObject = {
     widgetPinnedSaveError: 'امکان ذخیره اسناد سنجاق شده وجود ندارد.',
     widgetQueryError: 'امکان بارگذاری اسناد برای این ویجت وجود ندارد.',
     widgetRecentlyViewedEmpty: 'سند اخیر وجود ندارد',
-    widgetRecentlyViewedEmptyDescription: 'اسنادی که ویرایش می‌کنید اینجا نمایش داده می‌شوند',
+    widgetRecentlyViewedEmptyDescription:
+      'اسنادی که اخیراً مشاهده کرده‌اید در اینجا نمایش داده خواهند شد.',
+    widgetRecentlyViewedFilterDescription: 'فقط موارد مشاهده‌شده اخیر را فیلتر کنید.',
     widgetRecentlyViewedTitle: 'اخیراً مشاهده شده',
     widgetRecentsAndPinned: 'اخیرها و سنجاق شده‌ها',
     widgetRemovePin: 'برداشتن سنجاق سند',

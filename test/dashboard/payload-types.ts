@@ -176,6 +176,7 @@ export interface DraftPost {
  */
 export interface Media {
   id: string;
+  previewURL?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -518,6 +519,7 @@ export interface EventsSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  previewURL?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -738,9 +740,6 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    /**
-     * Filter Recently viewed only.
-     */
     excludedCollections?: ('draft-posts' | 'tickets' | 'revenue' | 'events' | 'media' | 'media-alt' | 'users')[] | null;
   };
   width: 'small' | 'medium' | 'large' | 'x-large' | 'full';

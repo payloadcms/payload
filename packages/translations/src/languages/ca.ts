@@ -137,7 +137,9 @@ export const caTranslations: DefaultTranslationsObject = {
     widgetPinnedSaveError: "No s'han pogut desar els documents fixats.",
     widgetQueryError: "No s'han pogut carregar els documents per a aquest widget.",
     widgetRecentlyViewedEmpty: 'No hi ha documents recents',
-    widgetRecentlyViewedEmptyDescription: 'Els documents que editis apareixeran aquí',
+    widgetRecentlyViewedEmptyDescription:
+      'Els documents que heu visualitzat recentment apareixeran aquí',
+    widgetRecentlyViewedFilterDescription: 'Filtrar només visualitzats recentment.',
     widgetRecentlyViewedTitle: 'Vist recentment',
     widgetRecentsAndPinned: 'Recents i fixats',
     widgetRemovePin: 'Desfixa el document',

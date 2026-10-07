@@ -3991,7 +3991,7 @@ test.describe('WCAG 2.2 Level AA', () => {
 
       await expect(collections).toHaveAccessibleDescription('Filter Recently viewed only.')
       await expect(collections.getByText('Filter Recently viewed only.')).toBeVisible()
-      await expect(collections.locator('[lang="en"]')).toContainText('Filter Recently viewed only.')
+      await expect(page.locator('html')).toHaveAttribute('lang', 'en')
       const checkbox = collections.getByRole('checkbox').first()
 
       await checkbox.focus()

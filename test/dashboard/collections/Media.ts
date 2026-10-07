@@ -6,8 +6,14 @@ export const Media: CollectionConfig = {
     group: 'Dashboard Data',
   },
   defaultPopulate: { filename: true },
-  fields: [],
+  fields: [
+    {
+      name: 'previewURL',
+      type: 'text',
+    },
+  ],
   upload: {
+    adminThumbnail: ({ doc }) => doc.previewURL,
     mimeTypes: ['image/*'],
   },
 }

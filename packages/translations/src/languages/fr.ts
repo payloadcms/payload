@@ -138,7 +138,9 @@ export const frTranslations: DefaultTranslationsObject = {
     widgetPinnedSaveError: 'Impossible d’enregistrer les documents épinglés.',
     widgetQueryError: 'Impossible de charger les documents pour ce widget.',
     widgetRecentlyViewedEmpty: 'Aucun document récent',
-    widgetRecentlyViewedEmptyDescription: 'Les documents que vous modifiez apparaîtront ici',
+    widgetRecentlyViewedEmptyDescription:
+      'Les documents que vous avez récemment consultés apparaîtront ici.',
+    widgetRecentlyViewedFilterDescription: 'Filtrer uniquement les éléments récemment consultés.',
     widgetRecentlyViewedTitle: 'Récemment consultés',
     widgetRecentsAndPinned: 'Récents et épinglés',
     widgetRemovePin: 'Désépingler le document',

@@ -137,7 +137,9 @@ export const ltTranslations: DefaultTranslationsObject = {
     widgetPinnedSaveError: 'Nepavyko išsaugoti prisegtų dokumentų.',
     widgetQueryError: 'Nepavyko įkelti dokumentų šiam valdikliui.',
     widgetRecentlyViewedEmpty: 'Nėra naujausių dokumentų',
-    widgetRecentlyViewedEmptyDescription: 'Čia bus rodomi jūsų redaguojami dokumentai',
+    widgetRecentlyViewedEmptyDescription:
+      'Dokumentai, kuriuos neseniai peržiūrėjote, bus rodomi čia',
+    widgetRecentlyViewedFilterDescription: 'Filtruoti tik neseniai peržiūrėtus.',
     widgetRecentlyViewedTitle: 'Neseniai peržiūrėti',
     widgetRecentsAndPinned: 'Naujausi ir prisegti',
     widgetRemovePin: 'Atsegti dokumentą',

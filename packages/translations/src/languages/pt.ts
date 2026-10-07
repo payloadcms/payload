@@ -137,7 +137,9 @@ export const ptTranslations: DefaultTranslationsObject = {
     widgetPinnedSaveError: 'Não foi possível salvar os documentos fixados.',
     widgetQueryError: 'Não foi possível carregar os documentos para este widget.',
     widgetRecentlyViewedEmpty: 'Nenhum documento recente',
-    widgetRecentlyViewedEmptyDescription: 'Os documentos que você editar aparecerão aqui',
+    widgetRecentlyViewedEmptyDescription:
+      'Os documentos visualizados recentemente aparecerão aqui.',
+    widgetRecentlyViewedFilterDescription: 'Filtrar apenas os recentemente visualizados.',
     widgetRecentlyViewedTitle: 'Visualizados recentemente',
     widgetRecentsAndPinned: 'Recentes e fixados',
     widgetRemovePin: 'Desafixar documento',

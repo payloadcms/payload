@@ -1,4 +1,4 @@
-import type { PayloadRequest, SelectType, ServerFunction, Where } from 'payload'
+import type { PayloadRequest, ServerFunction, Where } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { UnauthorizedError } from 'payload'
@@ -10,6 +10,8 @@ import type { PinnedItem } from './recents.js'
 import { formatRelativeDate, getRelativeTimeFormat } from '../../utilities/formatRelativeDate.js'
 import { getDocumentThumbnail } from '../../utilities/getDocumentThumbnail.js'
 import { getDocumentThumbnailPopulate } from '../../utilities/getDocumentThumbnailPopulate.js'
+import { getDocumentThumbnailSelect } from '../../utilities/getDocumentThumbnailSelect.js'
+import { enrichDocsWithVersionStatus } from '../../views/List/enrichDocsWithVersionStatus.js'
 import { getPinnedItems } from './pinnedPreferences.js'
 import { documentKey, getValueByPath } from './recents.js'
 
@@ -27,7 +29,7 @@ export type DocumentsPage = {
   totalDocs: number
 }
 
-type Reference = PinnedItem
+type Reference = { viewedAt?: string } & PinnedItem
 type QueryDoc = { id: number | string; updatedAt?: string } & Record<string, unknown>
 
 export const getDashboardDocumentsHandler: ServerFunction<
@@ -82,7 +84,23 @@ export async function getDashboardDocuments({
   const items = references
     .map((reference): RecentDocument | undefined => {
       const document = documents.get(documentKey(reference))
-      return document
+      if (!document || tab !== 'recents') {
+        return document
+      }
+
+      const viewedAt = reference.viewedAt
+
+      return {
+        ...document,
+        dateLabel: viewedAt
+          ? formatRelativeDate({
+              relativeTimeFormat: getRelativeTimeFormat(req.i18n.language),
+              value: viewedAt,
+            })
+          : undefined,
+        dateTime: viewedAt,
+        viewedAt,
+      }
     })
     .filter((item): item is RecentDocument => Boolean(item))
 
@@ -111,6 +129,7 @@ async function getAvailableReferences({
         pagination: false,
         req,
         select: { id: true },
+        sort: 'id',
         user: req.user,
         where: { id: { in: ids } },
       })
@@ -152,16 +171,17 @@ async function loadDocuments({
   await Promise.all(
     [...groupReferenceIDs({ references }).entries()].map(async ([collectionSlug, ids]) => {
       const config = req.payload.collections[collectionSlug].config
-      const select: SelectType = {
-        id: true,
-        [(config.admin.useAsTitle || 'id').split('.')[0]]: true,
-        _status: true,
-        updatedAt: true,
-        ...(config.admin.useAsThumbnail ? { [config.admin.useAsThumbnail]: true } : {}),
-        ...(config.upload
-          ? { mimeType: true, thumbnailURL: true, url: true, variants: true, width: true }
-          : {}),
-      }
+      const select = getDocumentThumbnailSelect({
+        collectionConfig: config,
+        select: {
+          id: true,
+          [(config.admin.useAsTitle || 'id').split('.')[0]]: true,
+          _status: true,
+          updatedAt: true,
+          ...(config.admin.useAsThumbnail ? { [config.admin.useAsThumbnail]: true } : {}),
+          ...(config.upload ? { width: true } : {}),
+        },
+      })
       const result = await req.payload.find({
         collection: collectionSlug,
         depth: 1,
@@ -175,10 +195,17 @@ async function loadDocuments({
         }),
         req,
         select,
+        sort: 'id',
         user: req.user,
         where: { id: { in: ids } },
       })
-      for (const doc of result.docs as QueryDoc[]) {
+      const enriched = await enrichDocsWithVersionStatus({
+        collectionConfig: config,
+        data: result,
+        req,
+      })
+
+      for (const doc of enriched.docs as QueryDoc[]) {
         const item = enrichDocument({ collectionSlug, doc, req })
         documents.set(documentKey(item), item)
       }
@@ -208,6 +235,7 @@ function enrichDocument({
   const { i18n, payload } = req
   const config = payload.collections[collectionSlug].config
   const rawTitle = getValueByPath({ object: doc, path: config.admin?.useAsTitle || 'id' })
+  const status = doc._displayStatus || doc._status
   return {
     id: doc.id,
     collectionSlug,
@@ -220,15 +248,17 @@ function enrichDocument({
     dateTime: doc.updatedAt,
     href: formatAdminURL({
       adminRoute: payload.config.routes.admin,
-      path: `/collections/${collectionSlug}/${doc.id}`,
+      path: `/collections/${collectionSlug}/${encodeURIComponent(String(doc.id))}`,
     }),
-    isDraft: doc._status === 'draft',
+    isDraft: status === 'draft',
     statusLabel:
-      doc._status === 'draft'
+      status === 'draft'
         ? i18n.t('version:draft')
-        : doc._status === 'published'
-          ? i18n.t('version:published')
-          : undefined,
+        : status === 'changed'
+          ? i18n.t('version:changed')
+          : status === 'published'
+            ? i18n.t('version:published')
+            : undefined,
     thumbnailURL: getDocumentThumbnail({
       doc,
       useAsThumbnail: config.admin?.useAsThumbnail,

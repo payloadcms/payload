@@ -139,7 +139,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     widgetQueryError: 'Не удалось загрузить документы для этого виджета.',
     widgetRecentlyViewedEmpty: 'Нет недавних документов',
     widgetRecentlyViewedEmptyDescription:
-      'Отредактированные вами документы будут отображаться здесь',
+      'Документы, которые вы недавно просматривали, будут отображаться здесь.',
+    widgetRecentlyViewedFilterDescription: 'Фильтровать только недавно просмотренные.',
     widgetRecentlyViewedTitle: 'Недавно просмотренные',
     widgetRecentsAndPinned: 'Недавние и закреплённые',
     widgetRemovePin: 'Открепить документ',

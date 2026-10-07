@@ -107,6 +107,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'dashboard:widgetRemovePin',
   'dashboard:widgetRecentlyViewedEmpty',
   'dashboard:widgetRecentlyViewedEmptyDescription',
+  'dashboard:widgetRecentlyViewedFilterDescription',
   'dashboard:widgetRecentlyViewedTitle',
   'dashboard:widgetSelectCollectionFirst',
   'dashboard:widgetSelectSortField',

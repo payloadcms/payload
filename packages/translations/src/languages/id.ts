@@ -136,7 +136,9 @@ export const idTranslations: DefaultTranslationsObject = {
     widgetPinnedSaveError: 'Tidak dapat menyimpan dokumen yang disematkan.',
     widgetQueryError: 'Tidak dapat memuat dokumen untuk widget ini.',
     widgetRecentlyViewedEmpty: 'Tidak ada dokumen terbaru',
-    widgetRecentlyViewedEmptyDescription: 'Dokumen yang Anda edit akan muncul di sini',
+    widgetRecentlyViewedEmptyDescription:
+      'Dokumen yang baru-baru ini Anda lihat akan muncul di sini.',
+    widgetRecentlyViewedFilterDescription: 'Saring Hanya yang Baru Saja Dilihat.',
     widgetRecentlyViewedTitle: 'Baru saja dilihat',
     widgetRecentsAndPinned: 'Terbaru dan disematkan',
     widgetRemovePin: 'Lepaskan sematan dokumen',

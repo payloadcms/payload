@@ -138,7 +138,9 @@ export const roTranslations: DefaultTranslationsObject = {
     widgetPinnedSaveError: 'Nu s-au putut salva documentele fixate.',
     widgetQueryError: 'Nu s-au putut încărca documentele pentru acest widget.',
     widgetRecentlyViewedEmpty: 'Niciun document recent',
-    widgetRecentlyViewedEmptyDescription: 'Documentele pe care le editați vor apărea aici',
+    widgetRecentlyViewedEmptyDescription:
+      'Documentele pe care le-ați vizualizat recent vor apărea aici',
+    widgetRecentlyViewedFilterDescription: 'Filtrați doar cele vizualizate recent.',
     widgetRecentlyViewedTitle: 'Vizualizate recent',
     widgetRecentsAndPinned: 'Recente și fixate',
     widgetRemovePin: 'Anulează fixarea documentului',

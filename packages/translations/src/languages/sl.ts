@@ -134,7 +134,9 @@ export const slTranslations: DefaultTranslationsObject = {
     widgetPinnedSaveError: 'Ni bilo mogoče shraniti pripetih dokumentov.',
     widgetQueryError: 'Dokumentov za to komponento ni bilo mogoče naložiti.',
     widgetRecentlyViewedEmpty: 'Ni nedavnih dokumentov',
-    widgetRecentlyViewedEmptyDescription: 'Tukaj bodo prikazani dokumenti, ki jih urejate',
+    widgetRecentlyViewedEmptyDescription:
+      'Dokumenti, ki ste jih nedavno pregledali, se bodo prikazali tukaj.',
+    widgetRecentlyViewedFilterDescription: 'Filtriraj samo nedavno ogledano.',
     widgetRecentlyViewedTitle: 'Nedavno ogledano',
     widgetRecentsAndPinned: 'Nedavni in pripeti',
     widgetRemovePin: 'Odpni dokument',

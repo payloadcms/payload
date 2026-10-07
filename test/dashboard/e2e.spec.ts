@@ -369,9 +369,13 @@ describe('Dashboard', () => {
     await expect(rowTitles.nth(0)).toHaveText(secondDoc.title)
     await expect(rowTitles.nth(1)).toHaveText(firstDoc.title)
     await expect(activityCard.locator('.recents-widget__meta').first()).toContainText('Tickets')
+    const recentlyViewed = await (
+      await page.request.get(`${serverURL}/api/payload-preferences/recently-viewed`)
+    ).json()
+
     await expect(activityCard.locator('.recents-widget__meta time').first()).toHaveAttribute(
       'datetime',
-      secondDoc.updatedAt,
+      recentlyViewed.value.items[0].viewedAt,
     )
   })
 

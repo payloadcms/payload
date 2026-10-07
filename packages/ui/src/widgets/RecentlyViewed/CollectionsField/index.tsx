@@ -4,6 +4,7 @@ import type { Option, OptionObject, SelectFieldClientProps } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useId, useMemo } from 'react'
 
+import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
 import { CheckboxInput } from '../../../fields/Checkbox/Input.js'
 import { FieldDescription } from '../../../fields/FieldDescription/index.js'
 import { FieldLabel } from '../../../fields/FieldLabel/index.js'
@@ -28,7 +29,13 @@ export const RecentlyViewedCollectionsField: React.FC<SelectFieldClientProps> = 
   readOnly,
 }) => {
   const { admin: { description } = {}, label } = field
-  const { path, setValue, value } = useField<string[]>({ potentiallyStalePath: pathFromProps })
+  const {
+    customComponents: { Description } = {},
+    path,
+    setValue,
+    value,
+  } = useField<string[]>({ potentiallyStalePath: pathFromProps })
+  const hasDescription = Boolean(Description || description)
   const { i18n } = useTranslation()
   const labelID = useId()
   const descriptionID = useId()
@@ -54,7 +61,7 @@ export const RecentlyViewedCollectionsField: React.FC<SelectFieldClientProps> = 
 
   return (
     <div
-      aria-describedby={description ? descriptionID : undefined}
+      aria-describedby={hasDescription ? descriptionID : undefined}
       aria-labelledby={labelID}
       className={baseClass}
       role="group"
@@ -80,11 +87,11 @@ export const RecentlyViewedCollectionsField: React.FC<SelectFieldClientProps> = 
           )
         })}
       </ul>
-      <div
-        id={descriptionID}
-        lang={description === 'Filter Recently viewed only.' ? 'en' : undefined}
-      >
-        <FieldDescription description={description} path={path} />
+      <div id={descriptionID}>
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
+        />
       </div>
     </div>
   )

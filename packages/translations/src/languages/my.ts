@@ -137,7 +137,9 @@ export const myTranslations: DefaultTranslationsObject = {
     widgetPinnedSaveError: 'ပင်ထည့်ထားသော စာရွက်စာတမ်းများကို သိမ်းဆည်း၍ မရနိုင်ပါ။',
     widgetQueryError: 'ဤ widget အတွက် Document များကို မဖော်ပြနိုင်ခဲ့ပါ။',
     widgetRecentlyViewedEmpty: 'မကြာသေးမီ စာရွက်စာတမ်း မရှိပါ',
-    widgetRecentlyViewedEmptyDescription: 'သင်တည်းဖြတ်သော စာရွက်စာတမ်းများသည် ဤနေရာတွင် ပြသပါမည်',
+    widgetRecentlyViewedEmptyDescription:
+      'သင် ယင်းခေတ်အနီးက ကြည့်ရှုခဲ့သော Document များသည် ဤနေရာတွင် ပြသပါမည်',
+    widgetRecentlyViewedFilterDescription: 'လတ်တလောကြည့်ရှုခဲ့သောအရာများကိုသာ စစ်ထုတ်ပါ။',
     widgetRecentlyViewedTitle: 'မကြာသေးမီ တွေ့မြင်ခဲ့သည်များ',
     widgetRecentsAndPinned: 'မကြာသေးမီနှင့် ပင်ထည့်ထားသော',
     widgetRemovePin: 'စာရွက်စာတမ်းမှ ပင်ဖြုတ်ပါ',

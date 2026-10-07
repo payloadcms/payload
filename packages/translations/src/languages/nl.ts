@@ -136,7 +136,9 @@ export const nlTranslations: DefaultTranslationsObject = {
     widgetPinnedSaveError: 'Vastgemaakte documenten konden niet worden opgeslagen.',
     widgetQueryError: 'Kan documenten voor deze widget niet laden.',
     widgetRecentlyViewedEmpty: 'Geen recente documenten',
-    widgetRecentlyViewedEmptyDescription: 'Documenten die u bewerkt, verschijnen hier',
+    widgetRecentlyViewedEmptyDescription:
+      'Documenten die u recentelijk heeft bekeken, zullen hier verschijnen.',
+    widgetRecentlyViewedFilterDescription: 'Filter alleen recent bekeken.',
     widgetRecentlyViewedTitle: 'Recent bekeken',
     widgetRecentsAndPinned: 'Recent en vastgemaakt',
     widgetRemovePin: 'Document losmaken',

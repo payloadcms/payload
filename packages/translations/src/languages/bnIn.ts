@@ -137,7 +137,9 @@ export const bnInTranslations: DefaultTranslationsObject = {
     widgetPinnedSaveError: 'পিন করা ডকুমেন্ট সংরক্ষণ করা যায়নি।',
     widgetQueryError: 'এই উইজেটের জন্য ডকুমেন্ট লোড করতে ব্যর্থ হয়েছে।',
     widgetRecentlyViewedEmpty: 'কোনো সাম্প্রতিক ডকুমেন্ট নেই',
-    widgetRecentlyViewedEmptyDescription: 'আপনি যে ডকুমেন্ট সম্পাদনা করবেন, তা এখানে দেখা যাবে',
+    widgetRecentlyViewedEmptyDescription:
+      'আপনি সম্প্রতি যে Document-গুলি দেখেছেন সেগুলি এখানে প্রদর্শিত হবে',
+    widgetRecentlyViewedFilterDescription: 'শুধুমাত্র সম্প্রতি দেখা হয়েছে এমনগুলি ফিল্টার করুন।',
     widgetRecentlyViewedTitle: 'সাম্প্রতিক দেখা',
     widgetRecentsAndPinned: 'সাম্প্রতিক ও পিন করা',
     widgetRemovePin: 'ডকুমেন্ট আনপিন করুন',

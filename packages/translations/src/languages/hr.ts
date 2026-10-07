@@ -136,7 +136,9 @@ export const hrTranslations: DefaultTranslationsObject = {
     widgetPinnedSaveError: 'Nije moguće spremiti prikvačene dokumente.',
     widgetQueryError: 'Nije bilo moguće učitati dokumente za ovaj widget.',
     widgetRecentlyViewedEmpty: 'Nema nedavnih dokumenata',
-    widgetRecentlyViewedEmptyDescription: 'Dokumenti koje uređujete pojavit će se ovdje',
+    widgetRecentlyViewedEmptyDescription:
+      'Dokumenti koje ste nedavno pregledali pojavit će se ovdje',
+    widgetRecentlyViewedFilterDescription: 'Filtriraj samo nedavno pregledano.',
     widgetRecentlyViewedTitle: 'Nedavno pregledano',
     widgetRecentsAndPinned: 'Nedavno i prikvačeno',
     widgetRemovePin: 'Otkvači dokument',

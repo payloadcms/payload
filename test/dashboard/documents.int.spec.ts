@@ -66,6 +66,8 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
       )
       expect(identities).toHaveLength(1)
       expect(identities[0][0].select).toEqual({ id: true })
+      expect(identities[0][0].sort).toBe('id')
+      expect(hydrated[0][0].sort).toBe('id')
       expect(
         find.mock.calls.filter(
           ([args]) =>
@@ -358,5 +360,151 @@ test.suite('Dashboard document pagination', { config: './config.ts' }, () => {
     await expect(
       getDashboardDocuments({ limit: 20, page: 1, req: authenticatedReq, tab: 'recents' }),
     ).rejects.toThrow('Invalid dashboard page')
+  })
+
+  test('should ignore a default sort on a field the reader cannot access', async ({ payload }) => {
+    const owner = await payload.create({
+      collection: 'users',
+      data: { email: 'default-sort@payloadcms.com', password: 'test' },
+      overrideAccess: true,
+    })
+    const user = { ...owner, collection: 'users' as const }
+    const documents = []
+
+    for (const title of ['First preferred', 'Second preferred']) {
+      documents.push(await payload.create({ collection: 'tickets', data: { title }, user }))
+    }
+    const items = documents.map(({ id }) => ({ id, collectionSlug: 'tickets' })).reverse()
+
+    for (const key of [PREFERENCE_KEYS.PINNED_DOCUMENTS, PREFERENCE_KEYS.RECENTLY_VIEWED]) {
+      await payload.create({
+        collection: 'payload-preferences',
+        data: { key, value: { items } },
+        overrideAccess: false,
+        user,
+      })
+    }
+    const config = payload.collections.tickets.config
+    const field = config.flattenedFields.find(({ name }) => name === 'description')!
+    const previousAccess = field.access
+    const previousSort = config.defaultSort
+
+    field.access = { ...field.access, read: () => false }
+    config.defaultSort = 'description'
+
+    try {
+      await expect(
+        payload.find({ collection: 'tickets', overrideAccess: false, user }),
+      ).rejects.toThrow()
+      const req = await createPayloadRequest({ payload, req: { user } })
+
+      for (const tab of ['pinned', 'recents'] as const) {
+        const result = await getDashboardDocuments({ limit: 4, page: 1, req, tab })
+
+        expect(result.items.map(({ id }) => id)).toEqual(items.map(({ id }) => id))
+      }
+    } finally {
+      field.access = previousAccess
+      config.defaultSort = previousSort
+    }
+  })
+
+  test('should show the authenticated user viewing timestamp independently of modification time', async ({
+    payload,
+  }) => {
+    const document = await payload.create({
+      collection: 'tickets',
+      data: { title: 'Viewed twice' },
+      overrideAccess: true,
+    })
+    const visits = ['2026-01-01T12:00:00.000Z', '2026-02-01T12:00:00.000Z']
+
+    for (const [index, viewedAt] of visits.entries()) {
+      const owner = await payload.create({
+        collection: 'users',
+        data: { email: `viewing-time-${index}@payloadcms.com`, password: 'test' },
+        overrideAccess: true,
+      })
+      const user = { ...owner, collection: 'users' as const }
+
+      await payload.create({
+        collection: 'payload-preferences',
+        data: {
+          key: PREFERENCE_KEYS.RECENTLY_VIEWED,
+          value: { items: [{ id: document.id, collectionSlug: 'tickets', viewedAt }] },
+        },
+        overrideAccess: false,
+        user,
+      })
+      const req = await createPayloadRequest({ payload, req: { user } })
+      const result = await getDashboardDocuments({ limit: 4, page: 1, req, tab: 'recents' })
+
+      expect(result.items[0]).toMatchObject({
+        dateTime: viewedAt,
+        updatedAt: document.updatedAt,
+        viewedAt,
+      })
+    }
+  })
+
+  test('should distinguish drafts, published documents and unpublished changes', async ({
+    payload,
+  }) => {
+    const owner = await payload.create({
+      collection: 'users',
+      data: { email: 'version-status@payloadcms.com', password: 'test' },
+      overrideAccess: true,
+    })
+    const user = { ...owner, collection: 'users' as const }
+    const draft = await payload.create({
+      collection: 'draft-posts',
+      data: { title: 'Never published' },
+      draft: true,
+      overrideAccess: false,
+      user,
+    })
+    const published = await payload.create({
+      collection: 'draft-posts',
+      data: { _status: 'published', title: 'Published' },
+      overrideAccess: false,
+      user,
+    })
+    const changed = await payload.create({
+      collection: 'draft-posts',
+      data: { _status: 'published', title: 'Published before changes' },
+      overrideAccess: false,
+      user,
+    })
+
+    await payload.update({
+      id: changed.id,
+      collection: 'draft-posts',
+      data: { title: 'Unpublished changes' },
+      draft: true,
+      overrideAccess: false,
+      user,
+    })
+    await payload.create({
+      collection: 'payload-preferences',
+      data: {
+        key: PREFERENCE_KEYS.PINNED_DOCUMENTS,
+        value: {
+          items: [draft, published, changed].map(({ id }) => ({
+            id,
+            collectionSlug: 'draft-posts',
+          })),
+        },
+      },
+      overrideAccess: false,
+      user,
+    })
+    const req = await createPayloadRequest({ payload, req: { user } })
+    const result = await getDashboardDocuments({ limit: 4, page: 1, req, tab: 'pinned' })
+
+    expect(result.items.map(({ isDraft, statusLabel }) => ({ isDraft, statusLabel }))).toEqual([
+      { isDraft: true, statusLabel: 'Draft' },
+      { isDraft: false, statusLabel: 'Published' },
+      { isDraft: false, statusLabel: 'Changed' },
+    ])
   })
 })

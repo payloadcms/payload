@@ -133,7 +133,9 @@ export const csTranslations: DefaultTranslationsObject = {
     widgetPinnedSaveError: 'Nepodařilo se uložit připnuté dokumenty.',
     widgetQueryError: 'Dokumenty pro tento widget se nepodařilo načíst.',
     widgetRecentlyViewedEmpty: 'Žádné nedávné dokumenty',
-    widgetRecentlyViewedEmptyDescription: 'Zde se zobrazí dokumenty, které upravujete',
+    widgetRecentlyViewedEmptyDescription:
+      'Dokumenty, které jste si nedávno prohlíželi, se zde zobrazí.',
+    widgetRecentlyViewedFilterDescription: 'Filtrovat pouze nedávno zobrazené.',
     widgetRecentlyViewedTitle: 'Nedávno zobrazené',
     widgetRecentsAndPinned: 'Nedávné a připnuté',
     widgetRemovePin: 'Odepnout dokument',

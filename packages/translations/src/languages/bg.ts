@@ -136,7 +136,9 @@ export const bgTranslations: DefaultTranslationsObject = {
     widgetPinnedSaveError: 'Неуспешно запазване на закачените документи.',
     widgetQueryError: 'Неуспешно зареждане на документи за този уиджет.',
     widgetRecentlyViewedEmpty: 'Няма последни документи',
-    widgetRecentlyViewedEmptyDescription: 'Документите, които редактирате, ще се появят тук',
+    widgetRecentlyViewedEmptyDescription:
+      'Документите, които сте разглеждали наскоро, ще се появят тук.',
+    widgetRecentlyViewedFilterDescription: 'Филтрирайте само наскоро прегледаните.',
     widgetRecentlyViewedTitle: 'Последно прегледани',
     widgetRecentsAndPinned: 'Последни и закачени',
     widgetRemovePin: 'Откачи документ',
