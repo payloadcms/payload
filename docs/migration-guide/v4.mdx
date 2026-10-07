@@ -156,6 +156,31 @@ Run a typecheck after the codemod. Three patterns it cannot resolve:
 
 `payload.jobs.queue`, `run`, `runByID`, `cancel`, and `cancelByID` now also default `overrideAccess` to `false`. The option remains optional, but omitting it runs the corresponding `jobs.access.queue`, `jobs.access.run`, or `jobs.access.cancel` function. The codemod adds `overrideAccess: true` to these calls—including zero-argument `payload.jobs.run()` calls—to preserve Payload 3 behavior for review.
 
+### On-demand validation adds a `validate` operation
+
+The `Operation` type now includes `validate`. The `operation` argument for collection, global, and field `beforeValidate` and `beforeChange` hooks also includes `validate`.
+
+On-demand validation runs these hooks without saving the candidate. Update exhaustive operation checks and skip external side effects that should only run during `create` or `update`:
+
+```ts
+import type { CollectionBeforeChangeHook } from 'payload'
+
+const syncCustomer: CollectionBeforeChangeHook = async ({
+  data,
+  operation,
+}) => {
+  if (operation === 'validate') {
+    return data
+  }
+
+  await syncCustomerWithStripe(data)
+
+  return data
+}
+```
+
+Sanitized collection and global access types now require a `validate` key. Payload supplies this key during configuration sanitization and uses `update` access by default. Code that constructs a sanitized access object directly must add the key.
+
 ### Collection and Global Access Control callbacks receive `slug`
 
 Collection and Global Access Control callback arguments now include the document's `slug`. This additive property is unlikely to affect most projects, but code that manually invokes access callbacks or `executeAccess` must now pass `slug`. Code that validates, enumerates, or compares the exact callback argument shape may also need updating.
