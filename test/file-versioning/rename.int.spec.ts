@@ -239,7 +239,7 @@ test.suite('File rename', { config: './config.ts' }, () => {
 
   test.options(
     'should retain local sources and remove new copies when the rename commit fails',
-    { db: 'mongo' },
+    { db: (adapter) => ['documentdb', 'mongodb', 'mongodb-atlas'].includes(adapter) },
     async ({ payload }) => {
       const bytes = await readFile(imageFixture)
       const created = await payload.create({

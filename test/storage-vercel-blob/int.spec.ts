@@ -94,7 +94,7 @@ test.suite('@payloadcms/storage-vercel-blob', { config: './config.ts' }, () => {
 
   test.options(
     'should remove the original and derived blobs when a server upload fails after writing',
-    { db: 'mongo' },
+    { db: (adapter) => ['documentdb', 'mongodb', 'mongodb-atlas'].includes(adapter) },
     async ({ payload }) => {
       const hooks = payload.collections[mediaSlug].config.hooks
       const afterChange = hooks.afterChange

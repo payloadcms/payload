@@ -9,6 +9,8 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
+import type { DatabaseAdapterType } from '../../dbAdapters.js'
+
 import { test } from '../../__helpers/int/vitest.js'
 import { prefix } from '../shared.js'
 
@@ -46,7 +48,10 @@ test.suite('@payloadcms/storage-vercel-blob clientUploads', { config: './config.
 
   for (const outcome of ['complete', 'rollback', 'retain shared source'] as const) {
     const shouldFail = outcome !== 'complete'
-    const options = shouldFail ? { db: 'mongo' as const } : {}
+    const options = {
+      db: (adapter: DatabaseAdapterType) =>
+        !shouldFail || ['documentdb', 'mongodb', 'mongodb-atlas'].includes(adapter),
+    }
 
     test.options(
       `should ${outcome} at the client-upload document write`,
