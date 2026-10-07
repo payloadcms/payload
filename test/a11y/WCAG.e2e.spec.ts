@@ -890,19 +890,6 @@ test.describe('WCAG 2.2 Level AA', () => {
         for (const { ratio, selector } of ratios) {
           expect(ratio, `${theme}: ${selector}`).toBeGreaterThanOrEqual(4.5)
         }
-        const card = widget.locator('.document-card').first()
-
-        await card.hover()
-        const hoveredRatios = await getTextContrastRatios({
-          container: card,
-          selectors: ['.document-card__title', '.recents-widget__meta'],
-        })
-
-        expect(hoveredRatios).toHaveLength(2)
-        for (const { ratio, selector } of hoveredRatios) {
-          expect(ratio, `${theme} hover: ${selector}`).toBeGreaterThanOrEqual(4.5)
-        }
-        await page.mouse.move(0, 0)
       }
     })
 

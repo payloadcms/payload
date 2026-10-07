@@ -34,9 +34,6 @@
   .document-card__content {
     padding: var(--spacer-2-5);
   }
-  .document-card:is(.document-card--link, [role='button']):hover .document-card__content {
-    background: var(--color-bg-secondary);
-  }
   .document-card__title {
     display: inline-block;
     overflow: hidden;
