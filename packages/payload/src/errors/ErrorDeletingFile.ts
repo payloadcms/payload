@@ -11,5 +11,6 @@ export class ErrorDeletingFile extends APIError {
       t ? t('error:deletingFile') : en.translations.error.deletingFile,
       httpStatus.INTERNAL_SERVER_ERROR,
     )
+    this.name = 'ErrorDeletingFile'
   }
 }

@@ -3,6 +3,7 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
+import { runTransformReadsRealSourceTest } from '../__helpers/shared/transformSourceTests.js'
 import {
   mediaSlug,
   mediaWithAlwaysInsertFieldsSlug,
@@ -120,6 +121,13 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
     expect(response.headers.get('Content-Type')).toBe('image/png')
   })
 
+  test.describe('transform source on a signed-downloads collection', () => {
+    runTransformReadsRealSourceTest({
+      collection: mediaWithSignedDownloadsSlug,
+      etagRequestHeaders: { 'X-Disable-Signed-URL': 'true' },
+    })
+  })
+
   test('should return 404 when the file is not found', async ({ restClient }) => {
     const response = await restClient.GET(`/${mediaSlug}/file/missing.png`)
     expect(response.status).toBe(404)
@@ -216,8 +224,8 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
       expect(upload.id).toBeTruthy()
 
       // Verify image sizes URLs are returned correctly
-      expect(upload.sizes?.thumbnail?.url).toContain(process.env.S3_ENDPOINT)
-      expect(upload.sizes?.thumbnail?.url).toContain(getTestBucketName())
+      expect(upload.variants?.thumbnail?.url).toContain(process.env.S3_ENDPOINT)
+      expect(upload.variants?.thumbnail?.url).toContain(getTestBucketName())
 
       // CRITICAL: Verify that image size URLs are also stored as full S3 URLs in the database
       const dbDoc = await payload.db.findOne({
@@ -230,9 +238,9 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
       })
 
       expect(dbDoc).toBeDefined()
-      expect(dbDoc.sizes.thumbnail.url).toContain(process.env.S3_ENDPOINT)
-      expect(dbDoc.sizes.thumbnail.url).toContain(getTestBucketName())
-      expect(dbDoc.sizes.thumbnail.url).not.toMatch(/^\/api\//)
+      expect(dbDoc.variants.thumbnail.url).toContain(process.env.S3_ENDPOINT)
+      expect(dbDoc.variants.thumbnail.url).toContain(getTestBucketName())
+      expect(dbDoc.variants.thumbnail.url).not.toMatch(/^\/api\//)
 
       await payload.delete({
         collection: mediaWithDirectAccessSlug,

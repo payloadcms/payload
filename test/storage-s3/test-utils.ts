@@ -69,10 +69,10 @@ export async function verifyUploads({
     collection: collectionSlug as CollectionSlug,
     id: uploadId,
     overrideAccess: true,
-  })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
+  })) as unknown as { filename: string; variants: Record<string, { filename: string }> }
 
-  const fileKeys = Object.keys(uploadData.sizes || {}).map((key) => {
-    const rawFilename = uploadData?.sizes?.[key]?.filename
+  const fileKeys = Object.keys(uploadData.variants || {}).map((key) => {
+    const rawFilename = uploadData?.variants?.[key]?.filename
     return prefix ? `${prefix}/${rawFilename}` : rawFilename
   })
 

@@ -9,6 +9,7 @@ import type { UserMenuSettingsGroup } from '../UserMenu/SettingsMenu/index.js'
 /* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary */
 import {
   DefaultNavClient,
+  NavSidebarToggle,
   NavWrapper,
   SettingsMenuButton,
   UserMenu,
@@ -17,7 +18,6 @@ import {
 import { AlignJustifiedIcon } from '../../icons/AlignJustified/index.js'
 import { groupNavItems } from '../../utilities/groupNavItems.js'
 import { RenderServerComponent } from '../RenderServerComponent/index.js'
-import { NavSidebarToggle } from './NavSidebarToggle/index.js'
 import { SidebarTabs } from './SidebarTabs/index.js'
 import './index.css'
 

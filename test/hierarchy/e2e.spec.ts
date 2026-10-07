@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Organization } from './payload-types.js'
 
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -89,6 +90,242 @@ test.describe('Hierarchy Sidebar', () => {
     for (const id of createdDeptIds) {
       await payload.delete({ id, collection: 'departments', overrideAccess: true }).catch(() => {})
     }
+  })
+
+  test.describe('Document layouts', () => {
+    test.afterEach(async () => {
+      await page.goto(organizationsURL.hierarchy)
+      const tableLayout = page.getByRole('radio', { name: 'Table' })
+
+      if (!(await tableLayout.isChecked())) {
+        const tablePreferenceSaved = page.waitForResponse(
+          (response) =>
+            response.url().includes('/api/payload-preferences/collection-organizations') &&
+            response.request().method() === 'POST' &&
+            response.ok(),
+        )
+
+        await tableLayout.click()
+        await tablePreferenceSaved
+      }
+
+      await page.getByRole('button', { name: 'All Organizations' }).click()
+    })
+
+    test('should keep the grid layout across All and By Organization views and navigate from a card link', async () => {
+      await page.goto(organizationsURL.hierarchy)
+
+      const gridPreferenceSaved = page.waitForResponse(
+        (response) =>
+          response.url().includes('/api/payload-preferences/collection-organizations') &&
+          response.request().method() === 'POST' &&
+          response.ok(),
+      )
+
+      await page.getByRole('radio', { name: 'Grid' }).click()
+      await gridPreferenceSaved
+      await expect(page.getByRole('list', { name: 'Organizations' })).toBeVisible()
+      await expect(page.locator('.table-section__header-inner .checkbox-input')).toHaveCount(0)
+
+      await page.getByRole('button', { name: 'All Organizations' }).click()
+      await expect(page).toHaveURL(/\/admin\/collections\/organizations\?view=all/)
+      await expect(page.getByRole('radio', { name: 'Grid' })).toBeChecked()
+      await expect(page.getByRole('list', { name: 'Organizations' })).toBeVisible()
+
+      await page.getByRole('button', { name: 'By Organization' }).click()
+      await expect(page).toHaveURL(/\/admin\/collections\/organizations\?view=hierarchy/)
+      await expect(page.getByRole('radio', { name: 'Grid' })).toBeChecked()
+
+      await page.goBack()
+      await expect(page).toHaveURL(/\/admin\/collections\/organizations\?view=all/)
+      await expect(page.getByRole('button', { name: 'All Organizations' })).toBeDisabled()
+
+      await page.goForward()
+      await expect(page).toHaveURL(/\/admin\/collections\/organizations\?view=hierarchy/)
+
+      await page.goto(organizationsURL.list)
+      await expect(page).toHaveURL(organizationsURL.list)
+      await expect(page.getByRole('button', { name: 'By Organization' })).toBeDisabled()
+
+      const acmeCard = page.locator('.document-card', { hasText: 'Acme Corp' })
+
+      await acmeCard.click()
+      await expect(acmeCard).toHaveAttribute('aria-pressed', 'true')
+
+      await acmeCard.getByRole('link', { name: 'Acme Corp', exact: true }).press('Enter')
+      await expect(page.getByRole('heading', { name: 'Acme Corp' })).toBeVisible()
+      await expect(page.getByRole('list', { name: 'Organizations' })).toBeVisible()
+    })
+
+    test('should open a hierarchy item from the All view in table layout', async () => {
+      await page.goto(`${organizationsURL.list}?view=all`)
+
+      const acmeLink = page.getByRole('link', { name: 'Acme Corp', exact: true })
+
+      await acmeLink.click()
+      await expect(page).toHaveURL(/[?&]view=hierarchy(?:&|$)/)
+      await expect(page).toHaveURL(/[?&]parent=[^&]+/)
+      await expect(page.getByRole('heading', { name: 'Acme Corp' })).toBeVisible()
+    })
+
+    test('should open a hierarchy item from the All view in grid layout', async () => {
+      await page.goto(`${organizationsURL.list}?view=all`)
+
+      const gridPreferenceSaved = page.waitForResponse(
+        (response) =>
+          response.url().includes('/api/payload-preferences/collection-organizations') &&
+          response.request().method() === 'POST' &&
+          response.ok(),
+      )
+
+      await page.getByRole('radio', { name: 'Grid' }).click()
+      await gridPreferenceSaved
+
+      const acmeCard = page.locator('.document-card', { hasText: 'Acme Corp' })
+      const acmeLink = acmeCard.getByRole('link', { name: 'Acme Corp', exact: true })
+
+      await expect(acmeLink).toHaveAttribute('href', /[?&]view=hierarchy(?:&|$)/)
+      await expect(acmeLink).toHaveAttribute('href', /[?&]parent=[^&]+/)
+      await acmeCard.dblclick()
+      await expect(page).toHaveURL(/[?&]view=hierarchy(?:&|$)/)
+      await expect(page).toHaveURL(/[?&]parent=[^&]+/)
+      await expect(page.getByRole('heading', { name: 'Acme Corp' })).toBeVisible()
+    })
+
+    test('should preserve the hierarchy view while navigating through hierarchy items', async () => {
+      await page.goto(organizationsURL.hierarchy)
+
+      const tableLayout = page.getByRole('radio', { name: 'Table' })
+
+      if (!(await tableLayout.isChecked())) {
+        const tablePreferenceSaved = page.waitForResponse(
+          (response) =>
+            response.url().includes('/api/payload-preferences/collection-organizations') &&
+            response.request().method() === 'POST' &&
+            response.ok(),
+        )
+
+        await tableLayout.click()
+        await tablePreferenceSaved
+      }
+
+      const acmeLink = page.getByRole('link', { name: 'Acme Corp', exact: true })
+
+      await expect(acmeLink).toHaveAttribute('href', /[?&]view=hierarchy(?:&|$)/)
+      await acmeLink.click()
+      await expect(page).toHaveURL(/[?&]view=hierarchy(?:&|$)/)
+      await expect(page.getByRole('heading', { name: 'Acme Corp' })).toBeVisible()
+
+      const gridLayout = page.getByRole('radio', { name: 'Grid' })
+
+      if (!(await gridLayout.isChecked())) {
+        const gridPreferenceSaved = page.waitForResponse(
+          (response) =>
+            response.url().includes('/api/payload-preferences/collection-organizations') &&
+            response.request().method() === 'POST' &&
+            response.ok(),
+        )
+
+        await gridLayout.click()
+        await gridPreferenceSaved
+      }
+
+      const engineeringLink = page.getByRole('link', {
+        name: 'Engineering Division',
+        exact: true,
+      })
+
+      await expect(engineeringLink).toHaveAttribute('href', /[?&]view=hierarchy(?:&|$)/)
+      await engineeringLink.press('Enter')
+      await expect(page).toHaveURL(/[?&]view=hierarchy(?:&|$)/)
+      await expect(page.getByRole('heading', { name: 'Engineering Division' })).toBeVisible()
+    })
+
+    test('should update the full breadcrumb trail while browsing folders', async () => {
+      const findOrganization = async (title: string) => {
+        const result = await payload.find({
+          collection: 'organizations',
+          limit: 1,
+          overrideAccess: true,
+          where: { title: { equals: title } },
+        })
+
+        const organization = result.docs[0]
+
+        if (!organization) {
+          throw new Error(`Could not find seeded organization: ${title}`)
+        }
+
+        return organization
+      }
+
+      const [acmeCorp, engineeringDivision, frontendTeam] = await Promise.all([
+        findOrganization('Acme Corp'),
+        findOrganization('Engineering Division'),
+        findOrganization('Frontend Team'),
+      ])
+      const stepNav = page.locator('.step-nav')
+
+      await page.goto(organizationsURL.hierarchy)
+      await expect(
+        stepNav.getByRole('link', { name: 'Organizations', exact: true }),
+      ).toHaveAttribute('href', '/admin/collections/organizations?view=hierarchy')
+
+      await page.getByRole('link', { name: 'Acme Corp', exact: true }).click()
+      await expect(page.getByRole('heading', { name: 'Acme Corp' })).toBeVisible()
+      await expect
+        .poll(() => new URL(page.url()).searchParams.get('parent'))
+        .toBe(String(acmeCorp.id))
+      await expect(stepNav.getByText('Acme Corp', { exact: true })).toBeVisible()
+      await expect(stepNav.getByRole('link', { name: 'Acme Corp', exact: true })).toHaveCount(0)
+
+      await page.getByRole('link', { name: 'Engineering Division', exact: true }).click()
+      await expect(page.getByRole('heading', { name: 'Engineering Division' })).toBeVisible()
+      await expect
+        .poll(() => new URL(page.url()).searchParams.get('parent'))
+        .toBe(String(engineeringDivision.id))
+      await expect(stepNav.getByRole('link', { name: 'Acme Corp', exact: true })).toHaveAttribute(
+        'href',
+        `/admin/collections/organizations?parent=${acmeCorp.id}&view=hierarchy`,
+      )
+      await expect(stepNav.getByText('Engineering Division', { exact: true })).toBeVisible()
+      await expect(
+        stepNav.getByRole('link', { name: 'Engineering Division', exact: true }),
+      ).toHaveCount(0)
+
+      await page.getByRole('link', { name: 'Frontend Team', exact: true }).click()
+      await expect(page.getByRole('heading', { name: 'Frontend Team' })).toBeVisible()
+      await expect
+        .poll(() => new URL(page.url()).searchParams.get('parent'))
+        .toBe(String(frontendTeam.id))
+      await expect(stepNav.getByRole('link', { name: 'Acme Corp', exact: true })).toHaveAttribute(
+        'href',
+        `/admin/collections/organizations?parent=${acmeCorp.id}&view=hierarchy`,
+      )
+      await expect(
+        stepNav.getByRole('link', { name: 'Engineering Division', exact: true }),
+      ).toHaveAttribute(
+        'href',
+        `/admin/collections/organizations?parent=${engineeringDivision.id}&view=hierarchy`,
+      )
+      await expect(stepNav.getByText('Frontend Team', { exact: true })).toBeVisible()
+      await expect(stepNav.getByRole('link', { name: 'Frontend Team', exact: true })).toHaveCount(0)
+
+      await stepNav.getByRole('link', { name: 'Engineering Division', exact: true }).press('Enter')
+      await expect(page.getByRole('heading', { name: 'Engineering Division' })).toBeVisible()
+      await expect(stepNav).not.toContainText('Frontend Team')
+
+      await stepNav.getByRole('link', { name: 'Acme Corp', exact: true }).press('Enter')
+      await expect(page.getByRole('heading', { name: 'Acme Corp' })).toBeVisible()
+      await expect(stepNav).not.toContainText('Engineering Division')
+      await expect(stepNav).not.toContainText('Frontend Team')
+
+      await stepNav.getByRole('link', { name: 'Organizations', exact: true }).press('Enter')
+      await expect(page).toHaveURL(/[?&]view=hierarchy(?:&|$)/)
+      await expect.poll(() => new URL(page.url()).searchParams.has('parent')).toBe(false)
+      await expect(page.getByRole('button', { name: 'By Organization' })).toBeDisabled()
+      await expect(stepNav).not.toContainText('Acme Corp')
+    })
   })
 
   test.describe('Tree Display', () => {
@@ -462,6 +699,23 @@ test.describe('Hierarchy Sidebar', () => {
       }
     })
 
+    test('should restrict hierarchy field dropdown options by document collection', async () => {
+      await page.goto(organizationsURL.create)
+
+      const field = page.locator('#field-restrictedFolder')
+
+      await field.locator('.rs__control').click()
+
+      const menu = getSelectMenu({ page })
+
+      await expect(menu.getByRole('option', { name: 'General', exact: true })).toBeVisible()
+      await expect(menu.getByRole('option', { name: 'Orgs Only', exact: true })).toBeVisible()
+      await expect(
+        menu.getByRole('option', { name: 'Orgs and Products', exact: true }),
+      ).toBeVisible()
+      await expect(menu.getByRole('option', { name: 'Products Only', exact: true })).toHaveCount(0)
+    })
+
     test.describe('Autosave create drawer', () => {
       let organizationTitle: string
 
@@ -495,10 +749,13 @@ test.describe('Hierarchy Sidebar', () => {
         const multiTypeFolder = multiTypeFolders.docs[0]
 
         await page.goto(organizationsURL.list)
-        await page.goto(`${foldersURL.hierarchy}?parentFolder=${multiTypeFolder.id}`)
+        await page.goto(`${foldersURL.hierarchy}&parentFolder=${multiTypeFolder.id}`)
 
         const listControls = page.locator('.hierarchy-list__controls')
-        await listControls.getByRole('button', { name: 'Create New' }).first().click()
+        const createButton = listControls.getByRole('button', { name: 'Create New' }).first()
+
+        await createButton.click()
+        await expect(createButton).toHaveClass(/btn--selected/)
 
         await expect(
           page.getByRole('menuitem', { name: 'Organization', exact: true }),
@@ -564,6 +821,29 @@ test.describe('Hierarchy Sidebar', () => {
       ).toBeVisible()
     })
 
+    test('should translate the allowed types field label', async () => {
+      await page.goto(`${serverURL}/admin/account`)
+
+      const languageField = page.locator('.payload-settings__language .react-select')
+
+      await languageField.click()
+      await page.locator('.rs__option', { hasText: 'Español' }).click()
+      await page.waitForTimeout(500)
+
+      try {
+        await page.goto(foldersURL.create)
+
+        await expect(
+          page.getByRole('combobox', { name: 'Tipos permitidos', exact: true }),
+        ).toBeVisible()
+      } finally {
+        await page.goto(`${serverURL}/admin/account`)
+        await languageField.click()
+        await page.locator('.rs__option', { hasText: 'English' }).click()
+        await page.waitForTimeout(500)
+      }
+    })
+
     test('should filter tree by selected collection type', async () => {
       await page.goto(foldersURL.list)
       await openNav(page)
@@ -611,6 +891,131 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(tree.getByText('General')).toBeVisible()
       await expect(tree.getByText('Orgs Only')).toBeVisible()
       await expect(tree.getByText('Products Only', { exact: true })).toBeVisible()
+    })
+
+    test('should show incompatible move destinations as disabled', async () => {
+      await page.goto(foldersURL.hierarchy)
+
+      const selectedFolderRow = page.locator('tr', { hasText: 'Orgs and Products' })
+
+      await selectedFolderRow.getByRole('checkbox').click()
+      await page.getByRole('button', { name: 'Move', exact: true }).click()
+
+      const modal = page.locator('.hierarchy-modal')
+      const generalFolder = modal.locator('.hierarchy-column-item', { hasText: 'General' })
+      const organizationsFolder = modal.locator('.hierarchy-column-item', {
+        hasText: 'Orgs Only',
+      })
+      const productsFolder = modal.locator('.hierarchy-column-item', {
+        hasText: 'Products Only',
+      })
+      const selectedFolder = modal.locator('.hierarchy-column-item', {
+        hasText: 'Orgs and Products',
+      })
+
+      await expect(modal).toBeVisible()
+      await expect(generalFolder).toBeVisible()
+      await expect(organizationsFolder).toBeVisible()
+      await expect(productsFolder).toBeVisible()
+      await expect(selectedFolder).toBeVisible()
+      await expect(generalFolder.getByRole('checkbox')).toBeEnabled()
+      await expect(organizationsFolder.getByRole('checkbox')).toBeDisabled()
+      await expect(productsFolder.getByRole('checkbox')).toBeDisabled()
+      await expect(selectedFolder.getByRole('checkbox')).toBeDisabled()
+      await expect(generalFolder).not.toHaveAttribute('aria-disabled')
+      await expect(organizationsFolder).toHaveAttribute('aria-disabled', 'true')
+      await expect(productsFolder).toHaveAttribute('aria-disabled', 'true')
+      await expect(selectedFolder).toHaveAttribute('aria-disabled', 'true')
+
+      await organizationsFolder.press('Enter')
+      await expect(modal.locator('.hierarchy-column')).toHaveCount(1)
+    })
+
+    test('should disable scoped destinations when moving an unrestricted folder', async () => {
+      await page.goto(foldersURL.hierarchy)
+
+      const selectedFolderRow = page.locator('tr', { hasText: 'General' })
+
+      await selectedFolderRow.getByRole('checkbox').click()
+      await page.getByRole('button', { name: 'Move', exact: true }).click()
+
+      const modal = page.locator('.hierarchy-modal')
+      const generalFolder = modal.locator('.hierarchy-column-item', { hasText: 'General' })
+      const organizationsFolder = modal.locator('.hierarchy-column-item', {
+        hasText: 'Orgs Only',
+      })
+      const organizationsAndProductsFolder = modal.locator('.hierarchy-column-item', {
+        hasText: 'Orgs and Products',
+      })
+      const productsFolder = modal.locator('.hierarchy-column-item', {
+        hasText: 'Products Only',
+      })
+
+      await expect(modal).toBeVisible()
+      await expect(generalFolder.getByRole('checkbox')).toBeDisabled()
+      await expect(organizationsFolder.getByRole('checkbox')).toBeDisabled()
+      await expect(organizationsAndProductsFolder.getByRole('checkbox')).toBeDisabled()
+      await expect(productsFolder.getByRole('checkbox')).toBeDisabled()
+      await expect(generalFolder).toHaveAttribute('aria-disabled', 'true')
+      await expect(organizationsFolder).toHaveAttribute('aria-disabled', 'true')
+      await expect(organizationsAndProductsFolder).toHaveAttribute('aria-disabled', 'true')
+      await expect(productsFolder).toHaveAttribute('aria-disabled', 'true')
+
+      await organizationsFolder.press('Enter')
+      await expect(modal.locator('.hierarchy-column')).toHaveCount(1)
+    })
+
+    test('should allow an unrestricted folder beneath a destination that allows every collection type', async () => {
+      const allTypesFolder = await payload.create({
+        collection: 'folders',
+        data: {
+          name: 'All Types',
+          allowedTypes: ['folder-tag-documents', 'organizations', 'products'],
+        },
+        overrideAccess: true,
+      })
+
+      try {
+        await page.goto(foldersURL.hierarchy)
+
+        await page.locator('tr', { hasText: 'General' }).getByRole('checkbox').click()
+        await page.getByRole('button', { name: 'Move', exact: true }).click()
+
+        const modal = page.locator('.hierarchy-modal')
+        const allTypesDestination = modal.locator('.hierarchy-column-item', {
+          hasText: 'All Types',
+        })
+
+        await expect(modal).toBeVisible()
+        await expect(allTypesDestination.getByRole('checkbox')).toBeEnabled()
+        await expect(allTypesDestination).not.toHaveAttribute('aria-disabled')
+      } finally {
+        await payload.delete({
+          id: allTypesFolder.id,
+          collection: 'folders',
+          overrideAccess: true,
+        })
+      }
+    })
+
+    test('should require an unrestricted destination when any moved folder is unrestricted', async () => {
+      await page.goto(foldersURL.hierarchy)
+
+      await page.locator('tr', { hasText: 'General' }).getByRole('checkbox').click()
+      await page.locator('tr', { hasText: 'Orgs Only' }).getByRole('checkbox').click()
+      await page.getByRole('button', { name: 'Move', exact: true }).click()
+
+      const modal = page.locator('.hierarchy-modal')
+      const organizationsAndProductsFolder = modal.locator('.hierarchy-column-item', {
+        hasText: 'Orgs and Products',
+      })
+      const productsFolder = modal.locator('.hierarchy-column-item', {
+        hasText: 'Products Only',
+      })
+
+      await expect(modal).toBeVisible()
+      await expect(organizationsAndProductsFolder.getByRole('checkbox')).toBeDisabled()
+      await expect(productsFolder.getByRole('checkbox')).toBeDisabled()
     })
 
     test('should show newly created folder in filtered tree when it matches filter', async () => {
@@ -888,6 +1293,183 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(modal).toBeVisible()
 
       await expect(modal.locator('.hierarchy-column')).toHaveCount(2)
+    })
+  })
+
+  test.describe('Move destination restrictions', () => {
+    let allTypesFolder: { id: number | string }
+    let foldersURL: AdminUrlUtil
+    let product: { id: number | string }
+    let productsOnlyFolder: { id: number | string }
+    let productsOnlyFolderName: string
+    let productsURL: AdminUrlUtil
+    let unrestrictedFolder: { id: number | string }
+
+    test.beforeAll(async () => {
+      foldersURL = new AdminUrlUtil(serverURL, 'folders')
+      productsURL = new AdminUrlUtil(serverURL, 'products')
+
+      const uniqueSuffix = Date.now()
+
+      allTypesFolder = await payload.create({
+        collection: 'folders',
+        data: {
+          name: `All Types Destination ${uniqueSuffix}`,
+          allowedTypes: ['folder-tag-documents', 'organizations', 'products'],
+        },
+        overrideAccess: true,
+      })
+
+      unrestrictedFolder = await payload.create({
+        collection: 'folders',
+        data: { name: `Unrestricted Folder ${uniqueSuffix}` },
+        overrideAccess: true,
+      })
+
+      productsOnlyFolderName = `Products Only Folder ${uniqueSuffix}`
+
+      productsOnlyFolder = await payload.create({
+        collection: 'folders',
+        data: { name: productsOnlyFolderName, allowedTypes: ['products'] },
+        overrideAccess: true,
+      })
+
+      product = await payload.create({
+        collection: 'products',
+        data: { name: `List Cell Product ${uniqueSuffix}` },
+        overrideAccess: true,
+      })
+    })
+
+    test.afterAll(async () => {
+      await payload
+        .delete({ id: product.id, collection: 'products', overrideAccess: true })
+        .catch(() => {})
+
+      await payload
+        .delete({ id: unrestrictedFolder.id, collection: 'folders', overrideAccess: true })
+        .catch(() => {})
+
+      await payload
+        .delete({ id: productsOnlyFolder.id, collection: 'folders', overrideAccess: true })
+        .catch(() => {})
+
+      await payload
+        .delete({ id: allTypesFolder.id, collection: 'folders', overrideAccess: true })
+        .catch(() => {})
+    })
+
+    test('should restrict folder destinations from the document header', async () => {
+      await page.goto(foldersURL.edit(String(productsOnlyFolder.id)))
+
+      const hierarchyButton = page.locator('.hierarchy-button')
+
+      await expect(hierarchyButton).toBeVisible()
+      await hierarchyButton.click()
+
+      const modal = page.locator('.hierarchy-modal')
+      const allTypesDestination = modal.locator('.hierarchy-column-item', {
+        hasText: 'All Types Destination',
+      })
+      const organizationsDestination = modal.locator('.hierarchy-column-item', {
+        hasText: 'Orgs Only',
+      })
+      const organizationsAndProductsDestination = modal.locator('.hierarchy-column-item', {
+        hasText: 'Orgs and Products',
+      })
+      const selfDestination = modal.locator('.hierarchy-column-item', {
+        hasText: productsOnlyFolderName,
+      })
+
+      await expect(modal).toBeVisible()
+      await expect(allTypesDestination.getByRole('checkbox')).toBeEnabled()
+      await expect(organizationsDestination.getByRole('checkbox')).toBeDisabled()
+      await expect(organizationsAndProductsDestination.getByRole('checkbox')).toBeEnabled()
+      await expect(selfDestination.getByRole('checkbox')).toBeDisabled()
+      await expect(selfDestination).toHaveAttribute('aria-disabled', 'true')
+    })
+
+    test('should restrict folder destinations from the hierarchy list cell', async () => {
+      await page.goto(foldersURL.list)
+
+      const folderRow = page.locator('tr', { hasText: productsOnlyFolderName })
+
+      await folderRow.locator('.hierarchy-cell__button').click()
+
+      const modal = page.locator('.hierarchy-modal')
+      const organizationsDestination = modal.locator('.hierarchy-column-item', {
+        hasText: 'Orgs Only',
+      })
+      const organizationsAndProductsDestination = modal.locator('.hierarchy-column-item', {
+        hasText: 'Orgs and Products',
+      })
+      const selfDestination = modal.locator('.hierarchy-column-item', {
+        hasText: productsOnlyFolderName,
+      })
+
+      await expect(modal).toBeVisible()
+      await expect(organizationsDestination.getByRole('checkbox')).toBeDisabled()
+      await expect(organizationsAndProductsDestination.getByRole('checkbox')).toBeEnabled()
+      await expect(selfDestination.getByRole('checkbox')).toBeDisabled()
+      await expect(selfDestination).toHaveAttribute('aria-disabled', 'true')
+    })
+
+    test('should restrict folder destinations from the list cell', async () => {
+      await page.goto(productsURL.list)
+
+      const productRow = page.locator('tr', { hasText: 'List Cell Product' })
+      const hierarchyButton = productRow.locator('.hierarchy-cell__button')
+
+      await expect(hierarchyButton).toBeVisible()
+      await hierarchyButton.click()
+
+      const modal = page.locator('.hierarchy-modal')
+      const organizationsDestination = modal.locator('.hierarchy-column-item', {
+        hasText: 'Orgs Only',
+      })
+      const productsDestination = modal.getByRole('checkbox', {
+        name: 'Products Only',
+        exact: true,
+      })
+
+      await expect(modal).toBeVisible()
+      await expect(organizationsDestination.getByRole('checkbox')).toBeDisabled()
+      await expect(productsDestination).toBeEnabled()
+    })
+
+    test('should show list-cell move errors without closing the destination picker', async () => {
+      await page.route(`**/api/products/${product.id}`, async (route) => {
+        if (route.request().method() === 'PATCH') {
+          await route.fulfill({
+            body: JSON.stringify({ errors: [{ message: 'Move rejected' }] }),
+            contentType: 'application/json',
+            status: 400,
+          })
+
+          return
+        }
+
+        await route.fallback()
+      })
+
+      await page.goto(productsURL.list)
+
+      const productRow = page.locator('tr', { hasText: 'List Cell Product' })
+
+      await productRow.locator('.hierarchy-cell__button').click()
+
+      const modal = page.locator('.hierarchy-modal')
+      const productsDestination = modal.getByRole('checkbox', {
+        name: 'Products Only',
+        exact: true,
+      })
+
+      await productsDestination.click()
+      await modal.getByRole('button', { name: 'Select' }).click()
+
+      await expect(page.getByText('Move rejected')).toBeVisible()
+      await expect(modal).toBeVisible()
+      await page.unroute(`**/api/products/${product.id}`)
     })
   })
 })

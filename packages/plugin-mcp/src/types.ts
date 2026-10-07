@@ -1,8 +1,9 @@
 import type {
   CallToolResult,
   ContentBlock,
+  Implementation,
   JsonSchemaType,
-  McpServer,
+  McpServerOptions,
   ResourceTemplate,
   ServerContext,
   StandardSchemaWithJSON,
@@ -279,6 +280,13 @@ export type MCPPluginConfig = {
     afterToolCall?: MCPAfterToolCallHook[]
   }
   mcp?: {
+    /**
+     * Largest HTTP request body, in bytes, that the MCP endpoint accepts. Larger requests
+     * are answered with `413`. Base64 file uploads count toward this limit.
+     *
+     * @default 4194304 (4 MiB, the MCP SDK default)
+     */
+    maxRequestBodySize?: number
     serverOptions?: MCPServerOptions
     verboseLogs?: boolean
   }
@@ -304,8 +312,8 @@ export type SanitizedMCPPluginConfig = {
 } & Pick<MCPPluginConfig, 'disabled' | 'hooks' | 'mcp' | 'overrideGetAuthorizedMCP'>
 
 export type MCPServerOptions = {
-  options?: ConstructorParameters<typeof McpServer>[1]
-  serverInfo?: Partial<ConstructorParameters<typeof McpServer>[0]>
+  options?: McpServerOptions
+  serverInfo?: Partial<Implementation>
 }
 
 /**

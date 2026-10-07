@@ -284,6 +284,7 @@ export const huTranslations: DefaultTranslationsObject = {
     all: 'Mind',
     allCollections: 'Minden gyűjtemény',
     allLocales: 'Minden helyszín',
+    allowedTypes: 'Engedélyezett típusok',
     and: 'És',
     anotherUser: 'Egy másik felhasználó',
     anotherUserTakenOver: 'Egy másik felhasználó átvette ennek a dokumentumnak a szerkesztését.',
@@ -292,6 +293,7 @@ export const huTranslations: DefaultTranslationsObject = {
     auto: 'Automatikus',
     automatic: 'Automatikus',
     backToDashboard: 'Vissza az irányítópultra',
+    breadcrumb: 'Morzsanavigáció',
     by: 'Által',
     cancel: 'Mégsem',
     changesNotSaved:
@@ -299,6 +301,7 @@ export const huTranslations: DefaultTranslationsObject = {
     checked: 'Ellenőrizve',
     clear: 'Tiszta',
     clearAll: 'Törölj mindent',
+    clearSearch: 'Keresés törlése',
     close: 'Bezárás',
     collapse: 'Összecsukás',
     collection: 'Gyűjtemény',
@@ -391,6 +394,7 @@ export const huTranslations: DefaultTranslationsObject = {
     globals: 'Globálisok',
     goBack: 'Vissza',
     goToPage: 'Ugrás a táblázat oldalára',
+    gridLayout: 'Rács',
     groupByLabel: 'Csoportosítás {{label}} szerint',
     hideSidebar: 'Oldalsáv elrejtése',
     import: 'Behozatal',
@@ -439,6 +443,8 @@ export const huTranslations: DefaultTranslationsObject = {
     notFound: 'Nem található',
     nothingFound: 'Nincs találat',
     noTrashResults: 'Nincs {{label}} a szemetesben.',
+    notSelectedDocument:
+      'Nincs kiválasztva. A kijelölés módosításához nyomja meg az Enter vagy a szóköz billentyűt.',
     notShownInTable: 'Nem jelenik meg a táblázatban',
     noUpcomingEventsScheduled: 'Nincsenek közelgő események.',
     noValue: 'Nincs érték',
@@ -498,6 +504,8 @@ export const huTranslations: DefaultTranslationsObject = {
     selectAll: 'Az összes kijelölése: {{count}} {{label}}',
     selectAllRows: 'Válassza ki az összes sort',
     selectedCount: '{{count}} {{label}} kiválasztva',
+    selectedDocument:
+      'Kiválasztva. A kijelölés módosításához nyomja meg az Enter vagy a szóköz billentyűt.',
     selectLabel: 'Válassza ki a(z) {{label}} opciót',
     selectValue: 'Válasszon ki egy értéket',
     settings: 'Beállítások',
@@ -519,6 +527,7 @@ export const huTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} sikeresen duplikálódott.',
     successfullyReindexed:
       'Sikeresen újraindexelésre került {{count}} a {{total}} dokumentumból a {{collections}} gyűjteményből, és {{skips}} vázlat kerül átugrásra.',
+    tableLayout: 'Táblázat',
     takeOver: 'Átvétel',
     theme: 'Téma',
     thisLanguage: 'Magyar',
@@ -569,6 +578,23 @@ export const huTranslations: DefaultTranslationsObject = {
     searchLabel: 'Keresés {{label}}',
     searchResults: 'Találatok száma: {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'További utasítások',
+    collectionDescription:
+      'Adjon egyéni utasításokat a(z) {{label}} gyűjteményhez, hogy az LLM-ek jobban a kérésekhez igazíthassák válaszaikat.',
+    collectionSystemDescription:
+      'Ezek a rendszerutasítások a gyűjtemény konfigurációs fájljából származnak, és mindig szerepelnek az utasítások között.',
+    editInstructions: 'LLM-utasítások szerkesztése',
+    global: 'Globális dokumentum',
+    globalDescription:
+      'Adjon egyéni utasításokat a(z) {{label}} globális dokumentumhoz, hogy az LLM-ek jobban a kérésekhez igazíthassák válaszaikat.',
+    globalSystemDescription:
+      'Ezek a rendszerutasítások a globális dokumentum konfigurációs fájljából származnak, és mindig szerepelnek az utasítások között.',
+    instructions: 'LLM-utasítások',
+    systemInstructions: 'Rendszerutasítások (csak olvasható)',
+    targetCannotBeChanged: 'Az utasítások célja nem módosítható.',
+    title: 'Cím',
+  },
   localization: {
     cannotCopySameLocale: 'Nem lehet ugyanarra a helyre másolni',
     copyFrom: 'Másolás innen',
@@ -602,9 +628,18 @@ export const huTranslations: DefaultTranslationsObject = {
     addFiles: 'Fájlok hozzáadása',
     bulkUpload: 'Tömeges feltöltés',
     copyLinkToFile: 'Hivatkozás másolása a fájlhoz',
+    copyURL: 'URL másolása',
     crop: 'Termés',
+    cropBottom: 'Alsó vágófogantyú',
+    cropBottomLeft: 'Bal alsó vágófogantyú',
+    cropBottomRight: 'Jobb alsó vágófogantyú',
+    cropLeft: 'Bal oldali vágófogantyú',
+    cropRight: 'Jobb oldali vágófogantyú',
     cropToolDescription:
       'Húzza a kijelölt terület sarkait, rajzoljon új területet, vagy igazítsa a lentebb található értékeket.',
+    cropTop: 'Felső vágófogantyú',
+    cropTopLeft: 'Bal felső vágófogantyú',
+    cropTopRight: 'Jobb felső vágófogantyú',
     download: 'Letöltés',
     dragAndDrop: 'Húzzon ide egy fájlt',
     dragAndDropHere: 'vagy húzzon ide egy fájlt',

@@ -281,6 +281,7 @@ export const azTranslations: DefaultTranslationsObject = {
     all: 'Hamısı',
     allCollections: 'Bütün kolleksiyalar',
     allLocales: 'Bütün lokal məkanlar',
+    allowedTypes: 'İcazə verilən növlər',
     and: 'Və',
     anotherUser: 'Başqa bir istifadəçi',
     anotherUserTakenOver: 'Başqa bir istifadəçi bu sənədin redaktəsini ələ keçirdi.',
@@ -289,6 +290,7 @@ export const azTranslations: DefaultTranslationsObject = {
     auto: 'Avtomatik',
     automatic: 'Avtomatik',
     backToDashboard: 'Panelə qayıdın',
+    breadcrumb: 'Naviqasiya yolu',
     by: 'Tərəfindən',
     cancel: 'Ləğv et',
     changesNotSaved:
@@ -297,6 +299,7 @@ export const azTranslations: DefaultTranslationsObject = {
     clear:
       'Payload kontekstində orijinal mətnin mənasını qoruya. İşte Payload terminləri siyahısıdır ki, onlar üzərində çox xüsusi mənalar gəlir:\n    - Kolleksiya: Kolleksiya sənədlərin hamıya ortaq struktur və məqsəd sərbəst olan bir qrupdur. Kolleksiyalar Payload-da məzmunu təşkil etmək və idarə etmək üçün istifadə edilir.\n    - Sahə: Sahə',
     clearAll: 'Hamısını təmizlə',
+    clearSearch: 'Axtarışı təmizlə',
     close: 'Bağla',
     collapse: 'Bağla',
     collection: 'Kolleksiya',
@@ -389,6 +392,7 @@ export const azTranslations: DefaultTranslationsObject = {
     globals: 'Qloballar',
     goBack: 'Geri qayıt',
     goToPage: 'Cədvəlin səhifəsinə keç',
+    gridLayout: 'Tor',
     groupByLabel: '{{label}} ilə qruplaşdırın',
     hideSidebar: 'Yan paneli gizlət',
     import: 'İdxal',
@@ -438,6 +442,7 @@ export const azTranslations: DefaultTranslationsObject = {
     notFound: 'Tapılmadı',
     nothingFound: 'Heç nə tapılmadı',
     noTrashResults: 'Çöplükdə heç bir {{label}} yoxdur.',
+    notSelectedDocument: 'Seçilmədi. Seçimi dəyişmək üçün Enter və ya Boşluq düyməsinə basın.',
     notShownInTable: 'Cədvəldə göstərilmir',
     noUpcomingEventsScheduled: 'Heç bir gələcək tədbir cədvələ alınmayıb.',
     noValue: 'Dəyər yoxdur',
@@ -496,6 +501,7 @@ export const azTranslations: DefaultTranslationsObject = {
     selectAll: 'Bütün {{count}} {{label}} seç',
     selectAllRows: 'Bütün sıraları seçin',
     selectedCount: '{{count}} {{label}} seçildi',
+    selectedDocument: 'Seçildi. Seçimi dəyişmək üçün Enter və ya Boşluq düyməsinə basın.',
     selectLabel: '{{label}} seçin',
     selectValue: 'Dəyər seçin',
     settings: 'Ayarlar',
@@ -517,6 +523,7 @@ export const azTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} uğurla dublikatlandı.',
     successfullyReindexed:
       '"{{collections}}" kolleksiyalarından {{total}} sənəddən {{count}} sənəd uğurla yenidən indeksləndi və {{skips}} qaralama keçildi.',
+    tableLayout: 'Cədvəl',
     takeOver: 'Əvvəl',
     theme: 'Mövzu',
     thisLanguage: 'Azərbaycan dili',
@@ -569,6 +576,23 @@ export const azTranslations: DefaultTranslationsObject = {
     searchLabel: 'Axtar {{label}}',
     searchResults: '{{count}} tapıldı',
   },
+  llmInstructions: {
+    additionalInstructions: 'Əlavə təlimatlar',
+    collectionDescription:
+      'LLM-lərin sorğulara daha uyğun cavablar verməsinə kömək etmək üçün {{label}} kolleksiyasına xüsusi təlimatlar əlavə edin.',
+    collectionSystemDescription:
+      'Bu sistem təlimatları kolleksiyanın konfiqurasiya faylından götürülür və həmişə daxil edilir.',
+    editInstructions: 'LLM təlimatlarını redaktə et',
+    global: 'Qlobal',
+    globalDescription:
+      'LLM-lərin sorğulara daha uyğun cavablar verməsinə kömək etmək üçün {{label}} qlobal sənədinə xüsusi təlimatlar əlavə edin.',
+    globalSystemDescription:
+      'Bu sistem təlimatları qlobal sənədin konfiqurasiya faylından götürülür və həmişə daxil edilir.',
+    instructions: 'LLM təlimatları',
+    systemInstructions: 'Sistem təlimatları (yalnız oxumaq üçün)',
+    targetCannotBeChanged: 'Təlimatların hədəfi dəyişdirilə bilməz.',
+    title: 'Başlıq',
+  },
   localization: {
     cannotCopySameLocale: 'Eyni dildə köçürmək mümkün deyil',
     copyFrom: 'Kopyalayın',
@@ -602,9 +626,18 @@ export const azTranslations: DefaultTranslationsObject = {
     addFiles: 'Faylları Əlavə Edin',
     bulkUpload: 'Kütləvi Yükləmə',
     copyLinkToFile: 'Fayla keçidi kopyalayın',
+    copyURL: 'URL-ni kopyalayın',
     crop: 'Məhsul',
+    cropBottom: 'Aşağı kəsmə tutacağı',
+    cropBottomLeft: 'Aşağı sol kəsmə tutacağı',
+    cropBottomRight: 'Aşağı sağ kəsmə tutacağı',
+    cropLeft: 'Sol kəsmə tutacağı',
+    cropRight: 'Sağ kəsmə tutacağı',
     cropToolDescription:
       'Seçilmiş sahənin köşələrini sürükləyin, yeni bir sahə çəkin və ya aşağıdakı dəyərləri düzəltin.',
+    cropTop: 'Yuxarı kəsmə tutacağı',
+    cropTopLeft: 'Yuxarı sol kəsmə tutacağı',
+    cropTopRight: 'Yuxarı sağ kəsmə tutacağı',
     download: 'Yükləyin',
     dragAndDrop: 'Faylı buraya sürükləyin və buraxın',
     dragAndDropHere: 'və ya faylı buraya sürükləyin və buraxın',

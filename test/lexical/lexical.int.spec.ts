@@ -1410,7 +1410,7 @@ test.suite('Lexical', { config: './config.ts' }, () => {
             filename: 'test.pdf',
             height: 100,
             mimeType: 'application/pdf',
-            sizes: {},
+            variants: {},
             url: '/uploads/test.pdf',
             width: 100,
           },
@@ -1474,7 +1474,7 @@ test.suite('Lexical', { config: './config.ts' }, () => {
                 filename: 'photo.jpg',
                 height: 600,
                 mimeType: 'image/jpeg',
-                sizes: {},
+                variants: {},
                 url: '/uploads/photo.jpg',
                 width: 800,
               },
@@ -1664,7 +1664,7 @@ test.suite('Lexical', { config: './config.ts' }, () => {
             filename: 'photo.jpg',
             height: 600,
             mimeType: 'image/jpeg',
-            sizes: {
+            variants: {
               thumbnail: {
                 filename: 'photo-thumb.jpg',
                 filesize: 1000,
