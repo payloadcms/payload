@@ -1280,7 +1280,7 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(modal.locator('.hierarchy-column')).toHaveCount(2)
     })
 
-    test('should put multi-select status and actions in the modal footer', async () => {
+    test('should put multi-select status and primary ghost action in the modal footer', async () => {
       const tagDocumentsURL = new AdminUrlUtil(serverURL, 'folder-tag-documents')
 
       await page.goto(tagDocumentsURL.create)
@@ -1298,7 +1298,44 @@ test.describe('Hierarchy Sidebar', () => {
       const footer = modal.locator('.dialog__footer')
 
       await expect(footer).toContainText('1 Folder selected')
-      await expect(footer.getByRole('button', { name: 'Clear' })).toBeVisible()
+
+      const clearButton = footer.getByRole('button', { name: 'Clear' })
+
+      await expect(clearButton).toBeVisible()
+
+      const restingColors = await clearButton.evaluate((button) => {
+        const brandColorProbe = document.createElement('span')
+        brandColorProbe.style.color = 'var(--color-text-brand)'
+        document.body.appendChild(brandColorProbe)
+
+        const colors = {
+          actual: getComputedStyle(button).color,
+          expected: getComputedStyle(brandColorProbe).color,
+        }
+
+        brandColorProbe.remove()
+        return colors
+      })
+
+      expect(restingColors.actual).toBe(restingColors.expected)
+
+      await clearButton.hover()
+
+      const hoverColors = await clearButton.evaluate((button) => {
+        const brandBackgroundProbe = document.createElement('span')
+        brandBackgroundProbe.style.backgroundColor = 'var(--color-bg-brand-tertiary)'
+        document.body.appendChild(brandBackgroundProbe)
+
+        const colors = {
+          actual: getComputedStyle(button).backgroundColor,
+          expected: getComputedStyle(brandBackgroundProbe).backgroundColor,
+        }
+
+        brandBackgroundProbe.remove()
+        return colors
+      })
+
+      expect(hoverColors.actual).toBe(hoverColors.expected)
       await expect(footer.getByRole('button', { name: 'Confirm' })).toBeEnabled()
     })
   })

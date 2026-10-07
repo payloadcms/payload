@@ -67,7 +67,7 @@ export const HierarchyModalFooter: React.FC<HierarchyModalFooterProps> = ({
             <span className={`${baseClass}__secondary`}>{selectionCountLabel}</span>
             {selectionCount > 0 ? (
               <Button
-                buttonStyle="link"
+                buttonStyle="primary-ghost"
                 className={`${baseClass}__clear`}
                 margin={false}
                 onClick={onClear}
