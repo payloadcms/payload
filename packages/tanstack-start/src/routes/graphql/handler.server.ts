@@ -108,12 +108,18 @@ export const handleGraphQL = async ({
     request,
   })
 
+  const { payload } = req
+
+  if (payload.config.graphQL?.disable) {
+    return new Response(null, {
+      status: 404,
+    })
+  }
+
   await addDataAndFileToRequest(req)
   addLocalesToRequestFromData(req)
 
   const { schema, validationRules } = await getGraphql(config)
-
-  const { payload } = req
 
   const graphqlHttpHandlerPath = 'graphql-http/lib/use/fetch'
   const { createHandler } = await import(/* @vite-ignore */ graphqlHttpHandlerPath)
