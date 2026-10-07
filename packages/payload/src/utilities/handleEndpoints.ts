@@ -1,6 +1,7 @@
 import { status as httpStatus } from 'http-status'
 import { match } from 'path-to-regexp'
 
+import type { ServerAdapter } from '../admin/adapters/server.js'
 import type { Collection } from '../collections/config/types.js'
 import type { Endpoint, PayloadHandler, SanitizedConfig } from '../config/types.js'
 import type { APIError } from '../errors/APIError.js'
@@ -66,6 +67,7 @@ export const handleEndpoints = async ({
   path,
   payloadInstanceCacheKey,
   request,
+  serverAdapter,
 }: {
   basePath?: string
   config: Promise<SanitizedConfig> | SanitizedConfig
@@ -73,6 +75,8 @@ export const handleEndpoints = async ({
   path?: string
   payloadInstanceCacheKey?: string
   request: Request
+  /** Framework adapter exposed to endpoint handlers through `req.server`. */
+  serverAdapter?: ServerAdapter
 }): Promise<Response> => {
   let handler!: PayloadHandler
   let req: PayloadRequest
@@ -129,6 +133,7 @@ export const handleEndpoints = async ({
       path,
       payloadInstanceCacheKey,
       request: req,
+      serverAdapter,
     })
 
     return response
@@ -141,6 +146,10 @@ export const handleEndpoints = async ({
       payloadInstanceCacheKey,
       request,
     })
+
+    if (serverAdapter) {
+      req.server = serverAdapter
+    }
 
     const { payload } = req
     const { config } = payload

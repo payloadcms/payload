@@ -534,8 +534,6 @@ describe('Auth', () => {
     })
 
     test('should preserve multiple cookies in a response', async () => {
-      test.skip(process.env.PAYLOAD_FRAMEWORK !== 'tanstack-start')
-
       const response = await page.request.get(`${serverURL}/api/set-two-cookies`)
       const setCookieHeaders = response
         .headersArray()

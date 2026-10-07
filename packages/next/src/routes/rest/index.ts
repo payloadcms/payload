@@ -1,6 +1,7 @@
 import { handleEndpoints, type SanitizedConfig } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 
+import { nextServerAdapter } from '../../adapters/server.js'
 import { generateOGImage } from './og/index.js'
 
 let initedOGEndpoint = false
@@ -42,6 +43,7 @@ const handlerBuilder =
           : undefined,
       }),
       request,
+      serverAdapter: nextServerAdapter,
     })
 
     return response

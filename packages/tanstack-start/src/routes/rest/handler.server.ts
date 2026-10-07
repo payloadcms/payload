@@ -2,6 +2,8 @@ import type { SanitizedConfig } from 'payload'
 
 import { handleEndpoints } from 'payload'
 
+import { tanstackServerAdapter } from '../../adapters/server.js'
+
 /**
  * Routes a TanStack Start API request (`/api/*`) to Payload's REST/GraphQL
  * endpoint handler. The framework adapter wires this into the `/api/$` route's
@@ -25,5 +27,6 @@ export async function handleAPIRoute({
     config,
     path,
     request,
+    serverAdapter: tanstackServerAdapter,
   })
 }
