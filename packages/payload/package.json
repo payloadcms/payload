@@ -185,13 +185,6 @@
     "node": ">=24.15.0"
   },
   "publishConfig": {
-    "imports": {
-      "#validateJSONSchema": {
-        "types": "./dist/fields/validateJSONSchema.d.ts",
-        "browser": "./dist/fields/validateJSONSchema.browser.js",
-        "default": "./dist/fields/validateJSONSchema.js"
-      }
-    },
     "exports": {
       ".": {
         "types": "./dist/index.d.ts",
@@ -242,6 +235,13 @@
       "./__testing__/predefinedMigration": {
         "import": "./dist/__testing__/predefinedMigration.js",
         "default": "./dist/__testing__/predefinedMigration.js"
+      }
+    },
+    "imports": {
+      "#validateJSONSchema": {
+        "types": "./dist/fields/validateJSONSchema.d.ts",
+        "browser": "./dist/fields/validateJSONSchema.browser.js",
+        "default": "./dist/fields/validateJSONSchema.js"
       }
     },
     "main": "./dist/index.js",
