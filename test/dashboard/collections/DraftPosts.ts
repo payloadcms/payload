@@ -4,6 +4,7 @@ export const DraftPosts: CollectionConfig = {
   slug: 'draft-posts',
   admin: {
     group: 'Dashboard Data',
+    useAsThumbnail: 'cover',
     useAsTitle: 'title',
   },
   fields: [
@@ -11,6 +12,11 @@ export const DraftPosts: CollectionConfig = {
       name: 'title',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'cover',
+      type: 'upload',
+      relationTo: 'media',
     },
   ],
   versions: {

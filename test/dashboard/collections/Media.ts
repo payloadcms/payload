@@ -5,6 +5,7 @@ export const Media: CollectionConfig = {
   admin: {
     group: 'Dashboard Data',
   },
+  defaultPopulate: { filename: true },
   fields: [],
   upload: {
     mimeTypes: ['image/*'],

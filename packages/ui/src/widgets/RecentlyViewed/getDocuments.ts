@@ -9,6 +9,7 @@ import type { PinnedItem } from './recents.js'
 
 import { formatRelativeDate, getRelativeTimeFormat } from '../../utilities/formatRelativeDate.js'
 import { getDocumentThumbnail } from '../../utilities/getDocumentThumbnail.js'
+import { getDocumentThumbnailPopulate } from '../../utilities/getDocumentThumbnailPopulate.js'
 import { getPinnedItems } from './pinnedPreferences.js'
 import { documentKey, getValueByPath } from './recents.js'
 
@@ -168,6 +169,10 @@ async function loadDocuments({
         draft: true,
         limit: ids.length,
         overrideAccess: false,
+        populate: getDocumentThumbnailPopulate({
+          collectionConfig: config,
+          collections: req.payload.config.collections,
+        }),
         req,
         select,
         user: req.user,

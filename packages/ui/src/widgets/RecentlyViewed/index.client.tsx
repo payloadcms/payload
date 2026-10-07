@@ -84,6 +84,7 @@ export function RecentsAndPinnedClient({
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(0)
   const pinnedTabRef = useRef<HTMLButtonElement>(null)
+  const recentsTabRef = useRef<HTMLButtonElement>(null)
   const previousPageRef = useRef<HTMLButtonElement>(null)
   const nextPageRef = useRef<HTMLButtonElement>(null)
   const paginationFocusRef = useRef(false)
@@ -137,9 +138,13 @@ export function RecentsAndPinnedClient({
             Math.ceil((result.totalDocs + Number(shouldIncludePinPlaceholder)) / pageSize),
           )
           requestAnimationFrame(() => {
-            if (result.page === 1 && lastPage > 1) {
+            if (lastPage === 1) {
+              const activeTabRef = activeTab === 'pinned' ? pinnedTabRef : recentsTabRef
+
+              activeTabRef.current?.focus()
+            } else if (result.page === 1) {
               nextPageRef.current?.focus()
-            } else if (result.page === lastPage && lastPage > 1) {
+            } else if (result.page === lastPage) {
               previousPageRef.current?.focus()
             }
           })
@@ -274,7 +279,7 @@ export function RecentsAndPinnedClient({
                 setActiveTab(tab)
                 setPage(1)
               }}
-              ref={tab === 'pinned' ? pinnedTabRef : undefined}
+              ref={tab === 'pinned' ? pinnedTabRef : recentsTabRef}
               type="button"
             >
               {tab === 'recents' ? labels.recents : labels.pinned}

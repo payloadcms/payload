@@ -10,10 +10,8 @@ import type {
   ListViewServerPropsOnly,
   PaginatedDocs,
   PayloadComponent,
-  PopulateType,
   QueryPreset,
   SanitizedCollectionPermission,
-  SelectType,
 } from 'payload'
 
 import {
@@ -41,6 +39,7 @@ import {
 /* eslint-enable payload/no-imports-from-exports-dir */
 import { getColumns } from '../../utilities/getColumns.js'
 import { getDocumentPermissions } from '../../utilities/getDocumentPermissions.js'
+import { getDocumentThumbnailPopulate } from '../../utilities/getDocumentThumbnailPopulate.js'
 import { renderFilters, renderTable } from '../../utilities/renderTable.js'
 import { upsertPreferences } from '../../utilities/upsertPreferences.js'
 import { enrichDocsWithVersionStatus } from './enrichDocsWithVersionStatus.js'
@@ -299,37 +298,12 @@ export const renderListView = async (
     collectionPreferences?.documentLayout === 'grid' && viewType !== 'hierarchy'
       ? collectionConfig.admin.useAsThumbnail
       : undefined
-  let thumbnailPopulate: PopulateType | undefined
+  const thumbnailPopulate = thumbnailFieldName
+    ? getDocumentThumbnailPopulate({ collectionConfig, collections: payload.config.collections })
+    : undefined
 
   if (thumbnailFieldName) {
     select[thumbnailFieldName] = true
-
-    const thumbnailField = collectionConfig.flattenedFields.find(
-      (field) => field.name === thumbnailFieldName && field.type === 'upload',
-    )
-
-    if (thumbnailField && 'relationTo' in thumbnailField) {
-      const relatedSlugs = Array.isArray(thumbnailField.relationTo)
-        ? thumbnailField.relationTo
-        : [thumbnailField.relationTo]
-
-      thumbnailPopulate = {}
-
-      for (const relatedSlug of relatedSlugs) {
-        const relatedCollectionConfig = payload.collections[relatedSlug]?.config
-
-        if (relatedCollectionConfig) {
-          const relatedSelect: SelectType = {}
-
-          appendUploadSelectFields({
-            collectionConfig: relatedCollectionConfig,
-            select: relatedSelect,
-          })
-
-          thumbnailPopulate[relatedSlug] = relatedSelect
-        }
-      }
-    }
   }
 
   /** Force select `_tz` siblings for any timezone-enabled date fields in select */
