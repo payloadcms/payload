@@ -144,31 +144,34 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
     docWithLocales = deepCopyObjectSimple(storedDocument)
   }
 
-  const originalDoc =
-    id === undefined
-      ? docWithLocales
-      : sourceData
-        ? req.locale === sourceData.originalLocale
-          ? deepCopyObjectSimple(sourceData.originalDoc)
-          : flattenDataByLocale({
-              configBlockReferences: req.payload.config.blocks,
-              docWithLocales,
-              fields: collectionConfig.fields,
-              locale: req.locale!,
-            })
-        : await afterRead({
-            collection: collectionConfig,
-            context: req.context,
-            depth: 0,
-            doc: deepCopyObjectSimple(docWithLocales),
-            draft,
-            fallbackLocale: null,
-            global: null,
-            locale: req.locale!,
-            overrideAccess: true,
-            req,
-            showHiddenFields: true,
-          })
+  let originalDoc: JsonObject
+
+  if (id === undefined) {
+    originalDoc = docWithLocales
+  } else if (!sourceData) {
+    originalDoc = await afterRead({
+      collection: collectionConfig,
+      context: req.context,
+      depth: 0,
+      doc: deepCopyObjectSimple(docWithLocales),
+      draft,
+      fallbackLocale: null,
+      global: null,
+      locale: req.locale!,
+      overrideAccess: true,
+      req,
+      showHiddenFields: true,
+    })
+  } else if (req.locale === sourceData.originalLocale) {
+    originalDoc = deepCopyObjectSimple(sourceData.originalDoc)
+  } else {
+    originalDoc = flattenDataByLocale({
+      configBlockReferences: req.payload.config.blocks,
+      docWithLocales,
+      fields: collectionConfig.fields,
+      locale: req.locale!,
+    })
+  }
 
   return runValidationLifecycle({
     id,
