@@ -1,4 +1,5 @@
 import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
+import type { Field, PayloadRequest, RichTextHooks } from 'payload'
 
 import {
   afterChangeTraverseFields,
@@ -6,7 +7,7 @@ import {
   beforeChangeTraverseFields,
   beforeValidateTraverseFields,
   deepCopyObjectSimple,
-  type RichTextHooks,
+  traverseFields,
 } from 'payload'
 
 import type { SanitizedServerEditorConfig } from './lexical/config/types.js'
@@ -597,8 +598,11 @@ export const getLexicalHooks: (args: {
               originalNodeForSubFields.type === node.type
                 ? originalSubFieldData
                 : deepCopyObjectSimple(nodeSiblingData)
+            const shouldTraverseSubFields =
+              Boolean(id && editorConfig.features.nodeHooks?.beforeValidate?.size) ||
+              hasBeforeValidateFieldHooks({ fields: subFields, req })
 
-            if (subFields?.length) {
+            if (subFields?.length && shouldTraverseSubFields) {
               await beforeValidateTraverseFields({
                 id,
                 blockData: nodeSiblingData,
@@ -626,4 +630,30 @@ export const getLexicalHooks: (args: {
       },
     ],
   }
+}
+
+const hasBeforeValidateFieldHooks = ({
+  fields,
+  req,
+}: {
+  fields: Field[] | null | undefined
+  req: PayloadRequest
+}): boolean => {
+  if (!fields?.length) {
+    return false
+  }
+
+  let hasBeforeValidateHooks = false
+
+  traverseFields({
+    callback: ({ field }) => {
+      if ('hooks' in field && field.hooks?.beforeValidate?.length) {
+        hasBeforeValidateHooks = true
+      }
+    },
+    config: req.payload.config,
+    fields,
+  })
+
+  return hasBeforeValidateHooks
 }
