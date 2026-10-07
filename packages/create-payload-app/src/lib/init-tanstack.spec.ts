@@ -126,7 +126,6 @@ describe('initTanStack', () => {
     expect(mocks.installPackages).toHaveBeenCalledWith({
       packageManager: 'npm',
       packagesToInstall: [
-        '@payloadcms/plugin-mcp@4.2.0',
         '@payloadcms/richtext-lexical@4.2.0',
         '@payloadcms/tanstack-start@4.2.0',
         '@payloadcms/ui@4.2.0',
@@ -190,7 +189,6 @@ describe('initTanStack', () => {
     expect(mocks.installPackages).toHaveBeenCalledWith({
       packageManager: 'yarn',
       packagesToInstall: [
-        '@payloadcms/plugin-mcp@4.2.0',
         '@payloadcms/richtext-lexical@4.2.0',
         '@payloadcms/tanstack-start@4.2.0',
         '@payloadcms/ui@4.2.0',
@@ -238,7 +236,6 @@ describe('initTanStack', () => {
       existingDevDependencies: { vite: '^7.0.0' },
       expectedDependencies: {
         '@payloadcms/db-postgres': '4.2.0',
-        '@payloadcms/plugin-mcp': '4.2.0',
         '@payloadcms/richtext-lexical': '4.2.0',
         '@payloadcms/tanstack-start': '4.2.0',
         '@payloadcms/ui': '4.2.0',
@@ -263,7 +260,6 @@ describe('initTanStack', () => {
       },
       expectedDependencies: {
         '@payloadcms/db-postgres': '4.2.0',
-        '@payloadcms/plugin-mcp': '4.2.0',
         '@payloadcms/richtext-lexical': '4.2.0',
         '@payloadcms/tanstack-start': '4.2.0',
         '@payloadcms/ui': '4.2.0',

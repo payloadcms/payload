@@ -295,6 +295,8 @@ export type MCPPluginConfig = {
    *
    * This hook replaces the default authentication flow. It must set `req.user` to the
    * authenticated Payload user, or to `null` for an anonymous caller, before returning.
+   * HTTP and stdio always supply `overrideAccess: false`. Never grant an access override
+   * based on client input.
    */
   overrideGetAuthorizedMCP?: (
     args: {

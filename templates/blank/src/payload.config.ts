@@ -1,5 +1,4 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
-import { mcpPlugin } from '@payloadcms/plugin-mcp'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import path from 'path'
@@ -35,7 +34,6 @@ export default buildConfig({
     fallback: true,
     defaultLocale: 'en',
   },
-  plugins: [mcpPlugin({})],
   upload: {
     transformers: [sharpTransformer()],
   },

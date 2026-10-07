@@ -114,6 +114,12 @@ ComponentName/
 
 `pnpm payload <directory_name> <command> [...args]` runs the real Payload CLI against a test suite config. The first argument selects the test folder (e.g. `pnpm payload fields generate:types` uses `test/fields/config.ts`); everything after it is forwarded to the CLI unchanged. Run `pnpm payload <directory_name>` with no command to list all commands.
 
+Use this CLI wrapper for local development and coding-agent operations. Add
+`--json` for structured output, for example `pnpm payload fields getConfigInfo --json`.
+MCP is intended for authenticated access to a stable running server and must use
+normal Payload access control in every environment. Configure that connection
+explicitly; the repository does not provide a default local Payload MCP server.
+
 ### Development Environment
 
 - Auto-login is enabled by default with credentials: `dev@payloadcms.com` / `test`

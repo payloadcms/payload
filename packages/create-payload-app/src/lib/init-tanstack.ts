@@ -149,7 +149,6 @@ function getRequiredDependencies({
   payloadVersion: string
 }): Record<string, string> {
   const dependencies: Record<string, string> = {
-    '@payloadcms/plugin-mcp': payloadVersion,
     '@payloadcms/richtext-lexical': payloadVersion,
     '@payloadcms/tanstack-start': payloadVersion,
     '@payloadcms/ui': payloadVersion,

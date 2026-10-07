@@ -2222,6 +2222,18 @@ The `userCollection` option was also removed. MCP now accepts any Payload user a
 
 Because the `payload-mcp-api-keys` collection config was removed, run your normal database migration workflow after upgrading so the old collection/table is removed where your database adapter requires schema migrations. Back up any existing MCP API key documents first if you need to reference them while recreating credentials as user API keys.
 
+**Development access overrides were removed.** HTTP MCP rejects the
+`overrideAccess` URL parameter in every environment. Remove it from client URLs
+and send normal Payload authorization. The stdio `PAYLOAD_MCP_OVERRIDE_ACCESS`
+environment variable no longer enables a bypass; remove it and use
+`PAYLOAD_MCP_AUTHORIZATION` for authenticated access. `NODE_ENV=development`
+does not change MCP authorization.
+
+Use the [CLI](../configuration/cli) for trusted local development work, and
+[authenticated MCP](../plugins/mcp) for a stable running server. The blank
+Next.js and TanStack templates no longer install or enable the MCP plugin by
+default; add it explicitly when your application needs MCP.
+
 **MCP tool access is configured in code.** The old per-key permissions UI was removed with the MCP API-key collection. Tools, prompts, and resources can now define an `access` callback; built-in collection/global tools accept `access` in their override object.
 
 By default, MCP items require an authenticated user. Built-in collection and global tools also include Payload permission checks in their default `access` callbacks. If you provide an `access` callback for a built-in tool, it replaces the default callback.

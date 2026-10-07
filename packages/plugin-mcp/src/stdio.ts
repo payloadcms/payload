@@ -17,8 +17,7 @@ import { resolveProjectRoot } from './utils/resolveProjectRoot.js'
 /**
  * Starts Payload's MCP server over stdin and stdout.
  *
- * Set `PAYLOAD_MCP_AUTHORIZATION` to authenticate. In development,
- * `PAYLOAD_MCP_OVERRIDE_ACCESS=true` skips access checks.
+ * Set `PAYLOAD_MCP_AUTHORIZATION` to authenticate. Access control applies in every environment.
  */
 export const runMcpStdio = async (): Promise<void> => {
   // MCP clients may start this command from another folder. Move to the Payload
@@ -73,19 +72,6 @@ export const runMcpStdio = async (): Promise<void> => {
     payload.config.plugins.push(fallbackPlugin)
   }
 
-  const overrideAccessEnv = process.env.PAYLOAD_MCP_OVERRIDE_ACCESS
-  let overrideAccess = false
-
-  if (overrideAccessEnv === 'true') {
-    overrideAccess = true
-  } else if (overrideAccessEnv && overrideAccessEnv !== 'false') {
-    throw new Error('PAYLOAD_MCP_OVERRIDE_ACCESS must be "true" or "false".')
-  }
-
-  if (overrideAccess && process.env.NODE_ENV !== 'development') {
-    throw new Error('PAYLOAD_MCP_OVERRIDE_ACCESS is only available in development.')
-  }
-
   const headers = new Headers()
   if (process.env.PAYLOAD_MCP_AUTHORIZATION) {
     headers.set('Authorization', process.env.PAYLOAD_MCP_AUTHORIZATION)
@@ -93,7 +79,7 @@ export const runMcpStdio = async (): Promise<void> => {
 
   const req = await createPayloadRequest({ payload, req: { headers } })
   req.payloadAPI = 'MCP' as const
-  const authorizedMCP = await getAuthorizedMCP({ overrideAccess, req })
+  const authorizedMCP = await getAuthorizedMCP({ overrideAccess: false, req })
 
   const stdioServer = serveStdio(() => buildMcpServer({ authorizedMCP, pluginConfig, req }), {
     onerror: (err) => {
