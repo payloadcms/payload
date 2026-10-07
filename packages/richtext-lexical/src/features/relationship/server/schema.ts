@@ -36,7 +36,7 @@ export type SerializedRelationshipNode<TSlugs extends CollectionSlug = NonUpload
 }[TSlugs] & {
   format: LexicalElementFormat
   type: 'relationship'
-  /** @deprecated Ignored when loading. May be missing from rich text saved through the API, CLI or MCP. */
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number
 }
 
@@ -44,7 +44,7 @@ export type SerializedRelationshipNode<TSlugs extends CollectionSlug = NonUpload
 const SERIALIZED_RELATIONSHIP_NODE_TS = `export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
   type: 'relationship';
   format: LexicalElementFormat;
-  /** @deprecated Ignored when loading. May be missing from rich text saved through the API, CLI or MCP. */
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 } & {
   [TSlug in TSlugs]: {
@@ -57,7 +57,7 @@ const SERIALIZED_RELATIONSHIP_NODE_TS = `export type SerializedRelationshipNode<
 const SERIALIZED_RELATIONSHIP_NODE_INPUT_TS = `export type SerializedRelationshipNodeInput<TSlugs extends keyof Config['collections']> = {
   type: 'relationship';
   format: LexicalElementFormat;
-  /** @deprecated Ignored when loading. May be missing from rich text saved through the API, CLI or MCP. */
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 } & {
   [TSlug in TSlugs]: {

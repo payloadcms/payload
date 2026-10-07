@@ -64,7 +64,7 @@ export type SerializedUploadNode<
   format: LexicalElementFormat
   id: string
   type: 'upload'
-  /** @deprecated Ignored when loading. May be missing from rich text saved through the API, CLI or MCP. */
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number
 }
 
@@ -73,7 +73,7 @@ const SERIALIZED_UPLOAD_NODE_TS = `export type SerializedUploadNode<TSlugs exten
   type: 'upload';
   format: LexicalElementFormat;
   id: string;
-  /** @deprecated Ignored when loading. May be missing from rich text saved through the API, CLI or MCP. */
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
   fields: TFields;
 } & {
@@ -88,7 +88,7 @@ const SERIALIZED_UPLOAD_NODE_INPUT_TS = `export type SerializedUploadNodeInput<T
   type: 'upload';
   format: LexicalElementFormat;
   id: string;
-  /** @deprecated Ignored when loading. May be missing from rich text saved through the API, CLI or MCP. */
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
   fields: TFields;
 } & {
