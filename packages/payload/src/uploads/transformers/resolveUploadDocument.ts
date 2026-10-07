@@ -2,6 +2,7 @@ import type { Collection, TypeWithID } from '../../collections/config/types.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 
 import { Forbidden } from '../../errors/Forbidden.js'
+import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 
 export type ResolvedUploadDocument = {
   filename: string
@@ -62,22 +63,24 @@ export function getRequestedFile({
 }
 
 /**
- * Finds the upload document matching a filename (or one of its configured legacy
- * image sizes) and an optional storage `prefix`, without applying any access-control
- * filtering. Runs unconditionally — no `constraints.length` fast path — because
- * it's only ever called when at least one transformer is configured, and pipeline
- * planning needs the document's authoritative `mimeType` before access is enforced.
+ * Finds a current upload or latest draft by filename and optional storage prefix.
+ * Always looks up the document when called: transformer planning needs its
+ * authoritative mimeType even when read access returns true. The transformer lookup
+ * is unfiltered; callers enforcing access can supply their read constraints.
+ * Older versions are resolved separately through an explicit version ID.
  */
 export async function resolveUploadDocument({
   collection,
   filename,
   prefix,
   req,
+  where,
 }: {
   collection: Collection
   filename: string
   prefix?: string
   req: PayloadRequest
+  where?: Where
 }): Promise<ResolvedUploadDocument | undefined> {
   if (filename.includes('../') || filename.includes('..\\')) {
     throw new Forbidden(req.t)
@@ -91,11 +94,29 @@ export async function resolveUploadDocument({
     constraints.push({ prefix: { equals: prefix } })
   }
 
+  if (where) {
+    constraints.push(where)
+  }
+
+  const query = constraints.length > 1 ? { and: constraints } : constraints[0]
+
   const doc = await req.payload.db.findOne({
     collection: config.slug,
     req,
-    where: constraints.length > 1 ? { and: constraints } : constraints[0],
+    where: query,
   })
+
+  if (!doc && config.versions && config.versions.drafts) {
+    const { docs } = await req.payload.db.queryDrafts({
+      collection: config.slug,
+      limit: 1,
+      pagination: true,
+      req,
+      where: appendVersionToQueryKey(query),
+    })
+
+    return docs[0] as ResolvedUploadDocument | undefined
+  }
 
   return (doc as null | ResolvedUploadDocument) ?? undefined
 }

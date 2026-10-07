@@ -3,7 +3,7 @@ import type { PayloadRequest, Where } from '../types/index.js'
 
 import { executeAccess } from '../auth/executeAccess.js'
 import { Forbidden } from '../errors/Forbidden.js'
-import { buildFilenameWhere } from './transformers/resolveUploadDocument.js'
+import { resolveUploadDocument } from './transformers/resolveUploadDocument.js'
 
 export const checkFileAccess = async ({
   collection,
@@ -39,16 +39,19 @@ export const checkFileAccess = async ({
   }
 
   if (constraints.length > 0 || documentID !== undefined) {
-    const filenameCondition =
+    const doc =
       documentID === undefined
-        ? buildFilenameWhere({ filename, variants: config.upload.variants })
-        : { id: { equals: documentID } }
-
-    const doc = await req.payload.db.findOne({
-      collection: config.slug,
-      req,
-      where: { and: [filenameCondition, ...constraints] },
-    })
+        ? await resolveUploadDocument({
+            collection,
+            filename,
+            req,
+            where: { and: constraints },
+          })
+        : await req.payload.db.findOne({
+            collection: config.slug,
+            req,
+            where: { and: [{ id: { equals: documentID } }, ...constraints] },
+          })
 
     if (!doc) {
       throw new Forbidden(req.t)
