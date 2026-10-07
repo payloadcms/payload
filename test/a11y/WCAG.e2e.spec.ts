@@ -1665,6 +1665,33 @@ test.describe('WCAG 2.2 Level AA', () => {
           await page.keyboard.press(key)
           await expect(wrapper.locator(':focus')).toHaveCount(0)
         }
+
+        const isMac = await page.evaluate(() => navigator.userAgent.includes('Macintosh'))
+        const toggleShortcut = isMac ? 'Control+Shift+m' : 'Control+m'
+
+        await input.focus()
+        await input.press(toggleShortcut)
+        await expect(page.locator('.monaco-aria-container')).toContainText(
+          'Pressing Tab will now insert the tab character',
+        )
+        await input.press(isMac ? 'Meta+a' : 'Control+a')
+        await input.press('Backspace')
+        await input.press('Tab')
+        await expect(input).toBeFocused()
+        await input.pressSequentially('{}')
+        await expect(wrapper.locator('.view-line').first()).toHaveText(/^\s+\{\}$/)
+        await input.press('Shift+Tab')
+        await expect(input).toBeFocused()
+        await expect(wrapper.locator('.view-line').first()).toHaveText('{}')
+        await input.press(toggleShortcut)
+        await expect(page.locator('.monaco-aria-container')).toContainText(
+          'Pressing Tab will now move focus to the next focusable element',
+        )
+        for (const key of ['Tab', 'Shift+Tab']) {
+          await input.focus()
+          await input.press(key)
+          await expect(wrapper.locator(':focus')).toHaveCount(0)
+        }
       }
     })
     test('should only intercept Escape while a non-dismissible dialog is open', async () => {
