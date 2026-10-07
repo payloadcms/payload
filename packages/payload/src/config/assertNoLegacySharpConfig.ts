@@ -12,7 +12,7 @@ const REMOVED_UPLOAD_FIELDS = [
 ]
 
 const MIGRATION_HINT =
-  'Run `npx @payloadcms/codemod --transform migrate-sharp-to-transformer` to migrate automatically, or see https://payloadcms.com/docs/upload/transformers.'
+  'Run `npx @payloadcms/codemod@canary --transform migrate-sharp-to-transformer` to migrate automatically, or see https://payloadcms.com/docs/upload/transformers.'
 
 /**
  * Payload 4.0 removed the top-level `sharp` config option and the Sharp-specific

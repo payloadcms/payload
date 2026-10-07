@@ -61,6 +61,16 @@ describe('assertNoLegacySharpConfig', () => {
     expect(thrownMessage).toContain('formatOptions')
   })
 
+  it('should recommend the canary codemod for legacy Sharp options', () => {
+    const config = {
+      collections: [{ slug: 'media', upload: { imageSizes: [{ name: 'thumbnail' }] } }],
+    } as unknown as Config
+
+    expect(() => assertNoLegacySharpConfig({ config })).toThrow(
+      /npx @payloadcms\/codemod@canary --transform migrate-sharp-to-transformer/,
+    )
+  })
+
   it.each([
     {
       collections: [{ slug: 'media', upload: { staticDir: 'media' } }],
