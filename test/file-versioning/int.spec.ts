@@ -23,6 +23,8 @@ import {
   draftMediaSlug,
   mediaDir,
   mediaSlug,
+  plainMediaDir,
+  plainMediaSlug,
   transformedMediaDir,
   transformedMediaSlug,
   trashMediaDir,
@@ -2236,4 +2238,131 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
 
     expect(read.original?.filename).toBeFalsy()
   })
+
+  for (const operation of ['bulk replacement', 'version restore'] as const) {
+    test(`should clean files pruned by a ${operation}`, async ({ payload }) => {
+      const collection = payload.collections[mediaSlug].config
+      const previousVersions = collection.versions
+      collection.versions = { ...previousVersions, maxPerDoc: 2 }
+
+      try {
+        const created = await payload.create({
+          collection: mediaSlug,
+          data: { alt: 'first' },
+          filePath: imageFixture,
+        })
+        await payload.update({
+          id: created.id,
+          collection: mediaSlug,
+          data: { alt: 'second' },
+          filePath: path.resolve(dirname, '../uploads/small.png'),
+        })
+        if (operation === 'bulk replacement') {
+          collection.versions.maxPerDoc = 1
+          await payload.update({
+            collection: mediaSlug,
+            data: { alt: 'third' },
+            filePath: imageFixture,
+            where: { id: { equals: created.id } },
+          })
+        } else {
+          const { docs } = await payload.db.findVersions({
+            collection: mediaSlug,
+            sort: '-updatedAt',
+            where: { parent: { equals: created.id } },
+          })
+          await payload.restoreVersion({
+            id: docs[0]!.id,
+            collection: mediaSlug,
+            overrideAccess: true,
+          })
+        }
+        const current = await payload.db.findOne({
+          collection: mediaSlug,
+          where: { id: { equals: created.id } },
+        })
+        const { docs } = await payload.db.findVersions({
+          collection: mediaSlug,
+          pagination: false,
+          where: { parent: { equals: created.id } },
+        })
+        const expected = [
+          ...new Set([current!, ...docs.map(({ version }) => version)].flatMap(storedFilenames)),
+        ].sort()
+
+        expect((await readdir(mediaDir)).sort()).toEqual(expected)
+      } finally {
+        collection.versions = previousVersions
+      }
+    })
+  }
+
+  for (const operation of ['bulk update', 'version restore'] as const) {
+    test.options(
+      `should compensate nested uploads when a ${operation} rolls back`,
+      { db: 'mongo' },
+      async ({ payload }) => {
+        const created = await payload.create({
+          collection: mediaSlug,
+          data: { alt: 'outer' },
+          filePath: imageFixture,
+        })
+        const { docs } = await payload.db.findVersions({
+          collection: mediaSlug,
+          where: { parent: { equals: created.id } },
+        })
+        const hooks = payload.collections[mediaSlug].config.hooks
+        const beforeChange = hooks.beforeChange
+        const afterChange = hooks.afterChange
+        const bulkOperationsSingleTransaction = payload.db.bulkOperationsSingleTransaction
+        payload.db.bulkOperationsSingleTransaction = true
+        hooks.beforeChange = [
+          ...beforeChange,
+          async ({ data, req }) => {
+            await payload.create({
+              collection: plainMediaSlug,
+              data: { alt: 'nested' },
+              filePath: imageFixture,
+              req,
+            })
+            expect((await readdir(plainMediaDir)).length).toBeGreaterThan(0)
+            return data
+          },
+        ]
+        hooks.afterChange = [
+          ...afterChange,
+          () => {
+            throw new Error('Outer proxy operation failed')
+          },
+        ]
+
+        try {
+          if (operation === 'bulk update') {
+            const result = await payload.update({
+              collection: mediaSlug,
+              data: { alt: 'failed' },
+              where: { id: { equals: created.id } },
+            })
+            expect(result.errors).toHaveLength(1)
+            expect(result.errors[0]?.message).toBe('Outer proxy operation failed')
+          } else {
+            await expect(
+              payload.restoreVersion({
+                id: docs[0]!.id,
+                collection: mediaSlug,
+                overrideAccess: true,
+              }),
+            ).rejects.toThrow('Outer proxy operation failed')
+          }
+          expect(await readdir(plainMediaDir)).toEqual([])
+          expect((await payload.count({ collection: plainMediaSlug })).totalDocs).toBe(0)
+        } finally {
+          hooks.beforeChange = beforeChange
+          hooks.afterChange = afterChange
+          payload.db.bulkOperationsSingleTransaction = bulkOperationsSingleTransaction
+          await rm(plainMediaDir, { force: true, recursive: true })
+        }
+      },
+    )
+  }
 })

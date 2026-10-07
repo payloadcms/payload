@@ -1,4 +1,5 @@
 /* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options"] }] -- Tests use the shared fixture wrapper. */
+import { REST_GET } from '@payloadcms/next/routes'
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -471,5 +472,46 @@ test.suite('File rename', { config: './config.ts' }, () => {
     } finally {
       collection.config.access.update = previousAccess
     }
+  })
+
+  test('should rename a folder-qualified legacy file and preserve its historical URL', async ({
+    payload,
+  }) => {
+    const bytes = await readFile(imageFixture)
+    const filename = 'legacy-folder/shared.png'
+    await mkdir(path.join(mediaDir, 'legacy-folder'), { recursive: true })
+    await writeFile(path.join(mediaDir, filename), bytes)
+    const data = {
+      alt: 'legacy',
+      filename,
+      filesize: bytes.length,
+      mimeType: 'image/png',
+      url: `/api/${mediaSlug}/file/${encodeURIComponent(filename)}`,
+    }
+    const created = await payload.db.create({ collection: mediaSlug, data })
+    const selected = await payload.db.createVersion({
+      collectionSlug: mediaSlug,
+      parent: created.id,
+      versionData: data,
+    })
+
+    const renamed = await payload.renameFile({
+      id: created.id,
+      collection: mediaSlug,
+      filename: 'renamed.png',
+      overrideAccess: true,
+    })
+
+    expect(renamed.filename).toBe('legacy-folder/renamed-original.png')
+    expect(renamed.original?.filename).toBe(renamed.filename)
+    expect(await readFile(path.join(mediaDir, renamed.filename!))).toEqual(bytes)
+    const historical = await REST_GET(payload.config)(
+      new Request(
+        `http://localhost/api/${mediaSlug}/file/${encodeURIComponent(filename)}?version=${selected.id}`,
+      ),
+      { params: Promise.resolve({ slug: [mediaSlug, 'file', filename] }) },
+    )
+    expect(historical.status).toBe(200)
+    expect(Buffer.from(await historical.arrayBuffer())).toEqual(bytes)
   })
 })

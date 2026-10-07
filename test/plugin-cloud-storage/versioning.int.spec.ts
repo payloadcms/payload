@@ -1751,4 +1751,107 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     expect(versionedCloudCalls.uploads).toBe(3)
     expect(versionedCloudCalls.deletes).toEqual([])
   })
+
+  for (const reference of ['current', 'version'] as const) {
+    test(`should retain a cloud object referenced by an untouched legacy ${reference}`, async ({
+      payload,
+    }) => {
+      const bytes = await readFile(firstFile)
+      const filename = 'legacy-shared.png'
+      versionedCloudFiles.set(filename, bytes)
+      const data = {
+        filename,
+        filesize: bytes.length,
+        mimeType: 'image/png',
+        url: `/api/${versionedCloudMediaSlug}/file/${filename}`,
+      }
+      const owner = await payload.db.create({ collection: versionedCloudMediaSlug, data })
+      if (reference === 'version') {
+        await payload.db.createVersion({
+          collectionSlug: versionedCloudMediaSlug,
+          parent: owner.id,
+          versionData: data,
+        })
+        await payload.db.updateOne({
+          collection: versionedCloudMediaSlug,
+          data: { filename: 'other.png', url: `/api/${versionedCloudMediaSlug}/file/other.png` },
+          where: { id: { equals: owner.id } },
+        })
+      }
+      const req = await createPayloadRequest({ payload })
+      const candidates = [{ key: filename, roles: [{ type: 'original' as const }] }]
+      const collection = payload.collections[versionedCloudMediaSlug].config
+
+      await scheduleUnreferencedFileCleanup({ candidates, collection, req })
+
+      expect(versionedCloudFiles.get(filename)).toEqual(bytes)
+      await payload.delete({
+        id: owner.id,
+        collection: versionedCloudMediaSlug,
+        overrideAccess: true,
+      })
+      expect(versionedCloudFiles.has(filename)).toBe(false)
+    })
+  }
+
+  test('should read and restore an untouched legacy cloud version', async ({
+    payload,
+    restClient,
+  }) => {
+    const bytes = await readFile(firstFile)
+    const filename = 'legacy-history.png'
+    versionedCloudFiles.set(filename, bytes)
+    const data = {
+      filename,
+      filesize: bytes.length,
+      mimeType: 'image/png',
+      url: `/api/${versionedCloudMediaSlug}/file/${filename}`,
+    }
+    const owner = await payload.db.create({ collection: versionedCloudMediaSlug, data })
+    const selected = await payload.db.createVersion({
+      collectionSlug: versionedCloudMediaSlug,
+      parent: owner.id,
+      versionData: data,
+    })
+    versionedCloudFiles.set('other.png', await readFile(secondFile))
+    await payload.db.updateOne({
+      collection: versionedCloudMediaSlug,
+      data: { filename: 'other.png', url: `/api/${versionedCloudMediaSlug}/file/other.png` },
+      where: { id: { equals: owner.id } },
+    })
+
+    await payload.db.updateVersion({
+      id: selected.id,
+      collection: versionedCloudMediaSlug,
+      versionData: { ...selected, latest: false },
+    })
+    await payload.db.createVersion({
+      collectionSlug: versionedCloudMediaSlug,
+      parent: owner.id,
+      versionData: {
+        ...data,
+        filename: 'other.png',
+        url: `/api/${versionedCloudMediaSlug}/file/other.png`,
+      },
+    })
+
+    const response = await restClient.GET(
+      `/${versionedCloudMediaSlug}/file/${filename}?version=${selected.id}`,
+    )
+
+    expect(response.status).toBe(200)
+    expect(Buffer.from(await response.arrayBuffer())).toEqual(bytes)
+    await payload.restoreVersion({
+      id: selected.id,
+      collection: versionedCloudMediaSlug,
+      overrideAccess: true,
+    })
+    const current = await payload.db.findOne({
+      collection: versionedCloudMediaSlug,
+      where: { id: { equals: owner.id } },
+    })
+    expect(current?.filename).not.toBe(filename)
+    expect(versionedCloudFiles.get(getStoredCloudFiles(current)[0]!.key)).toEqual(bytes)
+    expect(versionedCloudFiles.get(filename)).toEqual(bytes)
+  })
 })
