@@ -1257,6 +1257,14 @@ The table feature is no longer experimental, so it drops its prefix.
 
 Stored content is unaffected.
 
+### Lexical: `UploadDataImproved` replaced by `UploadData` ([#18606](https://github.com/payloadcms/payload/pull/18606))
+
+The internal `UploadDataImproved` type has been removed, and its definition is now used by the public `UploadData` type. Replace any `UploadDataImproved` imports and type references with `UploadData`:
+
+```ts
+import type { UploadData } from '@payloadcms/richtext-lexical'
+```
+
 ### Lexical: the `version` of nodes is ignored
 
 Lexical deprecated the `version` property of serialized nodes, and now ignores it when it loads a document. Payload no longer reads it either.

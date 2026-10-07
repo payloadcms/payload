@@ -1,13 +1,12 @@
 import type { FileData, FileSize, TypeWithID } from 'payload'
 
 import type { SerializedUploadNode } from '../../../../../types/nodeTypes.js'
-import type { UploadDataImproved } from '../../../../upload/server/schema.js'
+import type { UploadData } from '../../../../upload/server/schema.js'
 import type { JSXConverters } from '../types.js'
 
 export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
   upload: ({ node }) => {
-    // TO-DO (v4): SerializedUploadNode should use UploadData_P4
-    const uploadNode = node as UploadDataImproved
+    const uploadNode = node as UploadData
     if (typeof uploadNode.value !== 'object') {
       return null
     }

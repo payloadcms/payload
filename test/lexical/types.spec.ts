@@ -2,6 +2,7 @@ import type {
   RichTextNodes,
   SerializedBlockNode,
   SerializedParagraphNode,
+  UploadData,
   WithDefaultNodes,
 } from '@payloadcms/richtext-lexical'
 import type * as Runtime from '@payloadcms/richtext-lexical'
@@ -22,6 +23,8 @@ import type {
   LexicalFullyFeatured,
   LexicalViewsFrontend,
   MyBlock,
+  Upload,
+  Uploads2,
 } from './payload-types.js'
 
 // A user composes their node union from a generated block type (`BannerBlock` from `payload-types`).
@@ -32,6 +35,21 @@ declare const data: SerializedEditorState
 
 declare const adapter: Omit<RichTextAdapter<SerializedEditorState>, 'converters'>
 declare const config: SanitizedConfig
+declare const uploadData: UploadData<{ caption: string }>
+
+describe('UploadData', () => {
+  test('should narrow populated upload documents by collection slug', () => {
+    expect(uploadData.fields).type.toBe<{ caption: string }>()
+
+    if (uploadData.relationTo === 'uploads') {
+      expect(uploadData.value).type.toBe<string | Upload>()
+    } else if (uploadData.relationTo === 'uploads2') {
+      expect(uploadData.value).type.toBe<string | Uploads2>()
+    }
+
+    expect<UploadData['relationTo']>().type.not.toBeAssignableFrom<'lexical-fully-featured'>()
+  })
+})
 
 describe('LLM instructions editor preset', () => {
   type Preset = NonNullable<
