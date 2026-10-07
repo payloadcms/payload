@@ -374,31 +374,34 @@ export const renderListView = async (
   let currentHierarchyItem: CurrentHierarchyItem | undefined
 
   if (isHierarchyCollection && hierarchyParentId !== null) {
-    const currentHierarchyDoc = await payload.findByID({
-      id: hierarchyParentId,
-      collection: collectionSlug,
-      depth: 0,
-      disableErrors: true,
-      overrideAccess: false,
-      req,
-      user,
-    })
-
-    if (currentHierarchyDoc) {
-      // Pass the real document so access functions that read `data` get the right answer
-      const { update: hasUpdatePermission } = await docAccessOperation({
-        id: currentHierarchyDoc.id,
-        collection: { config: collectionConfig },
-        data: currentHierarchyDoc,
+    try {
+      const currentHierarchyDoc = await payload.findByID({
+        id: hierarchyParentId,
+        collection: collectionSlug,
+        depth: 0,
+        disableErrors: true,
+        overrideAccess: false,
         req,
+        user,
       })
-      const titleFieldName = collectionConfig.admin?.useAsTitle || 'id'
 
-      currentHierarchyItem = {
-        id: currentHierarchyDoc.id,
-        hasUpdatePermission: Boolean(hasUpdatePermission),
-        title: String(currentHierarchyDoc[titleFieldName] || currentHierarchyDoc.id),
+      if (currentHierarchyDoc) {
+        const { update: hasUpdatePermission } = await docAccessOperation({
+          id: currentHierarchyDoc.id,
+          collection: { config: collectionConfig },
+          data: currentHierarchyDoc,
+          req,
+        })
+        const titleFieldName = collectionConfig.admin?.useAsTitle || 'id'
+
+        currentHierarchyItem = {
+          id: currentHierarchyDoc.id,
+          hasUpdatePermission: Boolean(hasUpdatePermission),
+          title: String(currentHierarchyDoc[titleFieldName] || currentHierarchyDoc.id),
+        }
       }
+    } catch (err) {
+      payload.logger.warn({ err, msg: `Could not resolve hierarchy item: ${hierarchyParentId}` })
     }
   }
 
