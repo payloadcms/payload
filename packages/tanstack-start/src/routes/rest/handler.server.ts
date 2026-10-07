@@ -3,9 +3,8 @@ import type { SanitizedConfig } from 'payload'
 import { handleEndpoints } from 'payload'
 
 /**
- * Routes a TanStack Start API request (`/api/*`) to Payload's REST/GraphQL
- * endpoint handler. The framework adapter wires this into the `/api/$` route's
- * server handlers, supplying the app's resolved `config`.
+ * Routes a TanStack Start API request to Payload's endpoint handler. The framework adapter
+ * wires this into the app's API route and supplies the resolved `config`.
  */
 export async function handleAPIRoute({
   config,
@@ -14,16 +13,9 @@ export async function handleAPIRoute({
   config: SanitizedConfig
   request: Request
 }): Promise<Response> {
-  const url = new URL(request.url)
-  const slugParts = url.pathname
-    .replace(/^\/api\/?/, '')
-    .split('/')
-    .filter(Boolean)
-  const path = slugParts.length ? `/api/${slugParts.join('/')}` : '/api'
-
   return handleEndpoints({
     config,
-    path,
+    path: new URL(request.url).pathname,
     request,
   })
 }
