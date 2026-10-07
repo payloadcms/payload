@@ -2,6 +2,10 @@ import type { Payload, PayloadRequest } from '../types/index.js'
 import type { BranchOperation } from './types.js'
 
 import { deleteUploadFilesExclusiveToDocument } from '../uploads/deleteUploadFilesExclusiveToDocument.js'
+import {
+  collectStoredFiles,
+  scheduleUnreferencedFileCleanup,
+} from '../uploads/fileVersioning/cleanup.js'
 import { commitTransaction } from '../utilities/commitTransaction.js'
 import { createPayloadRequest } from '../utilities/createPayloadRequest.js'
 import { initTransaction } from '../utilities/initTransaction.js'
@@ -354,13 +358,28 @@ const discardBranchChangesInternal = async (
     }
 
     for (const { collectionSlug, retainedDoc, sourceDoc } of uploadCleanupPlans) {
-      await deleteUploadFilesExclusiveToDocument({
-        collectionConfig: payload.collections[collectionSlug]!.config,
-        config: payload.config,
+      const collectionConfig = payload.collections[collectionSlug]!.config
+      const candidates = await collectStoredFiles({
+        collection: collectionConfig,
+        doc: sourceDoc,
         req,
-        retainedDoc,
-        sourceDoc,
       })
+
+      if (candidates.length) {
+        await scheduleUnreferencedFileCleanup({ candidates, collection: collectionConfig, req })
+
+        if (!collectionConfig.upload.fileOperations) {
+          await collectionConfig.upload.deleteFiles?.({ req, retainedDoc, sourceDoc })
+        }
+      } else {
+        await deleteUploadFilesExclusiveToDocument({
+          collectionConfig,
+          config: payload.config,
+          req,
+          retainedDoc,
+          sourceDoc,
+        })
+      }
     }
 
     if (cleanupScope) {

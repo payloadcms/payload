@@ -5,6 +5,10 @@ import type { MergeLedger } from './mergeLedger.js'
 import type { SourceCleanupOutcome, SourceRecoveryOutcome } from './utilities.js'
 
 import { deleteUploadFilesExclusiveToDocument } from '../../uploads/deleteUploadFilesExclusiveToDocument.js'
+import {
+  collectStoredFiles,
+  scheduleUnreferencedFileCleanup,
+} from '../../uploads/fileVersioning/cleanup.js'
 import { refreshBranchState } from '../resolveBranch.js'
 import { branchChangesCollectionSlug, branchesCollectionSlug } from '../types.js'
 import { restoreBranchAfterMerge } from './branchMergeStatus.js'
@@ -20,7 +24,7 @@ export type UploadCleanupPlan = {
   changeID: number | string
   collectionSlug: string
   retainedDoc: null | Record<string, unknown>
-  sourceDoc: Record<string, unknown>
+  sourceDocs: Record<string, unknown>[]
 }
 
 export const finalizeMergeAfterCommit = async ({
@@ -152,13 +156,39 @@ export const finalizeMergeAfterCommit = async ({
 
         if (uploadCleanupPlan) {
           try {
-            await deleteUploadFilesExclusiveToDocument({
-              collectionConfig: payload.collections[uploadCleanupPlan.collectionSlug]!.config,
-              config: payload.config,
-              req,
-              retainedDoc: uploadCleanupPlan.retainedDoc,
-              sourceDoc: uploadCleanupPlan.sourceDoc,
-            })
+            const collectionConfig = payload.collections[uploadCleanupPlan.collectionSlug]!.config
+
+            for (const sourceDoc of uploadCleanupPlan.sourceDocs) {
+              const candidates = await collectStoredFiles({
+                collection: collectionConfig,
+                doc: sourceDoc,
+                req,
+              })
+
+              if (candidates.length) {
+                await scheduleUnreferencedFileCleanup({
+                  candidates,
+                  collection: collectionConfig,
+                  req,
+                })
+
+                if (!collectionConfig.upload.fileOperations) {
+                  await collectionConfig.upload.deleteFiles?.({
+                    req,
+                    retainedDoc: uploadCleanupPlan.retainedDoc,
+                    sourceDoc,
+                  })
+                }
+              } else {
+                await deleteUploadFilesExclusiveToDocument({
+                  collectionConfig,
+                  config: payload.config,
+                  req,
+                  retainedDoc: uploadCleanupPlan.retainedDoc,
+                  sourceDoc,
+                })
+              }
+            }
           } catch (error) {
             cleanupError = getMergeErrorMessage({ error })
           }

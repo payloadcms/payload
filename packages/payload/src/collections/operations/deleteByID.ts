@@ -30,7 +30,7 @@ import {
   setConcurrentBranchDelete,
   willBranchAbsorbDelete,
 } from '../../branching/tombstone.js'
-import { MAIN_BRANCH } from '../../branching/types.js'
+import { branchField, MAIN_BRANCH } from '../../branching/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
@@ -293,6 +293,8 @@ const deleteByIDOperationAttempt = async <
     const isBranchingDocument =
       branch !== MAIN_BRANCH &&
       req.payload.config.branching?.branchableCollections.has(collectionConfig.slug)
+    const isDeletingUntouchedBranchDocument =
+      isBranchingDocument && documentToDelete[branchField] !== branch
 
     if (hasCallerTransaction && isBranchingDocument) {
       await assertBranchDeleteCanUseCallerTransaction({
@@ -352,7 +354,7 @@ const deleteByIDOperationAttempt = async <
       req,
     })
 
-    const deletedFiles = collectionConfig.upload
+    let deletedFiles = collectionConfig.upload
       ? [
           ...(await collectStoredFiles({ collection: collectionConfig, doc: docToDelete!, req })),
           ...(collectionConfig.versions
@@ -455,6 +457,18 @@ const deleteByIDOperationAttempt = async <
     const finalBranchDeleteOutcome = isBranchingDocument
       ? requireBranchDeleteOutcome({ outcome: branchDeleteOutcome })
       : ({ doc: documentToDelete, tombstoned: false } as const)
+
+    if (
+      collectionConfig.upload &&
+      finalBranchDeleteOutcome.tombstoned &&
+      isDeletingUntouchedBranchDocument
+    ) {
+      deletedFiles = await collectStoredFiles({
+        collection: collectionConfig,
+        doc: finalBranchDeleteOutcome.doc,
+        req,
+      })
+    }
 
     if (isBranchingDocument && !finalBranchDeleteOutcome.tombstoned) {
       await deleteAssociatedFiles({

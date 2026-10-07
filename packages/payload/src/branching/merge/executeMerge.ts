@@ -35,7 +35,7 @@ import {
 } from '../preflight.js'
 import { readCollectionMergeSnapshot } from '../readMergeSnapshot.js'
 import { refreshBranchState } from '../resolveBranch.js'
-import { branchField, MAIN_BRANCH } from '../types.js'
+import { branchField, branchParentField, MAIN_BRANCH } from '../types.js'
 import { createMainBranchRequest } from '../validation.js'
 import { applyChange, applyGlobalChange } from './applyMergeChange.js'
 import { finalizeMergeAfterCommit, recordMergeRollback } from './finalizeMerge.js'
@@ -102,6 +102,45 @@ const findLatestTargetGlobalVersionID = async ({
   const versionID = docs[0]?.id
 
   return versionID === undefined ? undefined : String(versionID)
+}
+
+const readBranchUploadVersionDocuments = async ({
+  branch,
+  collectionSlug,
+  payload,
+  req,
+  rowID,
+}: {
+  branch: string
+  collectionSlug: string
+  payload: Payload
+  req: PayloadRequest
+  rowID: number | string
+}): Promise<Record<string, unknown>[]> => {
+  if (!payload.collections[collectionSlug]?.config.versions) {
+    return []
+  }
+
+  const { docs } = await payload.db.findVersions({
+    branch: false,
+    collection: collectionSlug,
+    limit: 0,
+    pagination: false,
+    req,
+    where: {
+      and: [
+        { parent: { equals: rowID } },
+        { [branchField]: { equals: branch } },
+        { [branchParentField]: { exists: true } },
+      ],
+    },
+  })
+
+  return docs.flatMap((version) =>
+    version.version && typeof version.version === 'object' && !Array.isArray(version.version)
+      ? [version.version as Record<string, unknown>]
+      : [],
+  )
 }
 
 const orderChangesByDependencies = <TChange extends { id: unknown }>({
@@ -352,13 +391,11 @@ export const executeMerge = async ({
             afterVersionID = String(capturedVersion.versionID)
           }
         }) satisfies CaptureSavedVersionID
-        let uploadSourceDoc: null | Record<string, unknown> = null
+        const uploadSourceDocs: Record<string, unknown>[] = []
 
         if (collectionConfig.upload) {
-          if (change.operation === 'create') {
-            uploadSourceDoc = resolvedChange.shadow
-          } else if (change.operation === 'update') {
-            uploadSourceDoc = (await payload.db.findOne({
+          if (change.operation === 'update') {
+            const mainDocument = (await payload.db.findOne({
               branch: false,
               collection: collectionSlug,
               req,
@@ -366,6 +403,23 @@ export const executeMerge = async ({
                 and: [{ [branchField]: { equals: MAIN_BRANCH } }, { id: { equals: docID } }],
               },
             })) as null | Record<string, unknown>
+
+            if (mainDocument) {
+              uploadSourceDocs.push(mainDocument)
+            }
+          }
+
+          if (resolvedChange.shadow) {
+            uploadSourceDocs.push(
+              resolvedChange.shadow,
+              ...(await readBranchUploadVersionDocuments({
+                branch,
+                collectionSlug,
+                payload,
+                req,
+                rowID: resolvedChange.shadow.id as number | string,
+              })),
+            )
           }
         }
 
@@ -415,7 +469,7 @@ export const executeMerge = async ({
           },
         })
 
-        if (uploadSourceDoc) {
+        if (uploadSourceDocs.length) {
           const retainedDoc = (await payload.db.findOne({
             branch: false,
             collection: collectionSlug,
@@ -429,7 +483,7 @@ export const executeMerge = async ({
             changeID: change.id,
             collectionSlug,
             retainedDoc,
-            sourceDoc: uploadSourceDoc,
+            sourceDocs: uploadSourceDocs,
           })
         }
 

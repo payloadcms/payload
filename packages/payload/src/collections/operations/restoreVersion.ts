@@ -86,9 +86,9 @@ export const restoreVersionOperation = async <
   } = args
   let shouldCommit = false
   const branch = resolveBranch(req)
-  const isBranchingDocument =
-    branch !== MAIN_BRANCH &&
-    payload.config.branching?.branchableCollections.has(collectionConfig.slug)
+  const isBranchableCollection =
+    payload.config.branching?.branchableCollections.has(collectionConfig.slug) ?? false
+  const isBranchingDocument = branch !== MAIN_BRANCH && isBranchableCollection
   const hasFileOperationScope = Boolean(collectionConfig.upload)
 
   if (hasFileOperationScope) {
@@ -116,8 +116,10 @@ export const restoreVersionOperation = async <
       overrideAccess,
       req,
     })
-    const { findOneArgs, parentDocID, rawVersionToRestore } = restoreTarget
-    const { versionToRestoreWithLocales } = restoreTarget
+    const { findOneArgs, parentDocID } = restoreTarget
+    const versionToRestoreWithLocales = stripBranchOwnershipFromVersion({
+      version: restoreTarget.versionToRestoreWithLocales,
+    })
 
     if (isBranchingDocument) {
       const hasCallerTransaction = !shouldCommit && Boolean(await req.transactionID)
@@ -183,7 +185,7 @@ export const restoreVersionOperation = async <
       collection: collectionConfig,
       context: req.context,
       depth: 0,
-      doc: deepCopyObjectSimple(rawVersionToRestore.version),
+      doc: deepCopyObjectSimple(versionToRestoreWithLocales),
       draft: draftArg,
       fallbackLocale: null,
       global: null,
@@ -252,11 +254,12 @@ export const restoreVersionOperation = async <
       }
     }
 
-    if (isBranchingDocument) {
-      const branchDocument = prevDocWithLocales as Record<string, unknown>
+    const branchOwnership = isBranchableCollection
+      ? getBranchOwnership({ branch, currentDocument: prevDocWithLocales })
+      : undefined
 
-      data[branchField] = branchDocument[branchField]
-      data[branchDocIDField] = branchDocument[branchDocIDField]
+    if (branchOwnership) {
+      data = applyBranchOwnership({ data, ownership: branchOwnership })
     }
 
     // /////////////////////////////////////
@@ -276,6 +279,10 @@ export const restoreVersionOperation = async <
       req: reqWithValidationLocale,
       skipValidation: draftArg && !hasDraftValidationEnabled(collectionConfig),
     })
+
+    if (branchOwnership) {
+      result = applyBranchOwnership({ data: result, ownership: branchOwnership })
+    }
 
     // /////////////////////////////////////
     // Update
@@ -544,5 +551,55 @@ const readAuthorizedRestoreTarget = async <
     parentDocID,
     rawVersionToRestore,
     versionToRestoreWithLocales,
+  }
+}
+
+/** Removes historical branch ownership before caller-controlled hooks and access checks run. */
+const stripBranchOwnershipFromVersion = <TVersion extends JsonObject>({
+  version,
+}: {
+  version: TVersion
+}): TVersion => {
+  const {
+    [branchDocIDField]: _historicalBranchDocumentID,
+    [branchField]: _historicalBranch,
+    ...versionContent
+  } = version
+
+  return versionContent as TVersion
+}
+
+type BranchOwnership = {
+  branch: string
+  documentID: unknown
+}
+
+const getBranchOwnership = ({
+  branch,
+  currentDocument,
+}: {
+  branch: string
+  currentDocument: JsonObject
+}): BranchOwnership => {
+  const currentBranch =
+    typeof currentDocument[branchField] === 'string' ? currentDocument[branchField] : branch
+
+  return {
+    branch: currentBranch,
+    documentID: currentBranch === MAIN_BRANCH ? null : (currentDocument[branchDocIDField] ?? null),
+  }
+}
+
+const applyBranchOwnership = <TData extends JsonObject>({
+  data,
+  ownership,
+}: {
+  data: TData
+  ownership: BranchOwnership
+}): TData => {
+  return {
+    ...data,
+    [branchDocIDField]: ownership.documentID,
+    [branchField]: ownership.branch,
   }
 }

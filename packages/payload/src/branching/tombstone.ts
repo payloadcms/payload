@@ -6,6 +6,7 @@ import { APIError } from '../errors/index.js'
 import { isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
 import { assertBranchCreatedDocumentsUnreferenced } from './assertBranchCreatedDocumentsUnreferenced.js'
 import { assertBranchWritable } from './assertBranchWritable.js'
+import { copyUploadFilesToBranch } from './copyUploadFilesToBranch.js'
 import { createShadowRow } from './createShadowRow.js'
 import {
   loadBranchOperation,
@@ -371,7 +372,10 @@ export const resolveBranchDelete = async ({
       : null
 
     if (matchingWinner && matchingWinnerChange) {
-      const outcome = { doc: concurrentDelete.doc, tombstoned: true }
+      const outcome = {
+        doc: { ...matchingWinner, id: concurrentDelete.docID },
+        tombstoned: true,
+      }
 
       if (matchingBranchDeleteOperation) {
         if (!matchingBranchDeleteOperation.isTombstoneExpected) {
@@ -429,13 +433,6 @@ export const resolveBranchDelete = async ({
     )
   }
 
-  if (matchingBranchDeleteOperation) {
-    matchingBranchDeleteOperation.onResolved({
-      doc: isTombstoneExpectedForTarget ? { ...target, id: canonicalID } : target,
-      tombstoned: isTombstoneExpectedForTarget,
-    })
-  }
-
   if (isOnThisBranch && !operation) {
     throw new APIError(
       `The ${collectionSlug} branch row for document ${String(canonicalID)} has no change record.`,
@@ -471,10 +468,14 @@ export const resolveBranchDelete = async ({
       where: { and: [{ branch: { equals: branch } }, { 'doc.value': { equals: targetID } }] },
     })
 
+    matchingBranchDeleteOperation?.onResolved({ doc: target, tombstoned: false })
+
     resetBranchState(req as PayloadRequest)
 
     return { deleteRowID: targetID, tombstoned: false }
   }
+
+  let deletedDocument = target
 
   if (isOnThisBranch) {
     const previousBranchChange = (await req.payload.db.findOne({
@@ -513,8 +514,9 @@ export const resolveBranchDelete = async ({
     })
   } else {
     const { id: _discardedID, ...data } = target
+    let copiedShadow: Record<string, unknown> | undefined
 
-    await createShadowRow({
+    const shadow = await createShadowRow({
       branch,
       collectionSlug,
       data: {
@@ -523,7 +525,18 @@ export const resolveBranchDelete = async ({
         [branchField]: branch,
       },
       docID: canonicalID,
-      onCreated: async (createReq) => {
+      onCreated: async (createReq, createdShadow) => {
+        const collection = createReq.payload.collections[collectionSlug]
+
+        copiedShadow = collection?.config.upload
+          ? await copyUploadFilesToBranch({
+              branch,
+              collection: collection.config,
+              doc: createdShadow,
+              req: createReq,
+            })
+          : createdShadow
+
         const versionBoundary = await findBranchVersionForkBoundary({
           collectionSlug,
           docID: canonicalID,
@@ -557,7 +570,14 @@ export const resolveBranchDelete = async ({
       req: req as PayloadRequest,
       useAmbientTransaction,
     })
+
+    deletedDocument = copiedShadow ?? shadow
   }
+
+  matchingBranchDeleteOperation?.onResolved({
+    doc: isTombstoneExpectedForTarget ? { ...deletedDocument, id: canonicalID } : deletedDocument,
+    tombstoned: isTombstoneExpectedForTarget,
+  })
 
   resetBranchState(req as PayloadRequest)
   ;(req as PayloadRequest).branch = branch

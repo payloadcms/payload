@@ -55,9 +55,11 @@ export const findVersions: FindVersions = async function findVersions(
     where: branchedWhere,
   })
 
-  // A branch version hangs off the shadow row, so its `parent` is that row rather
-  // than the document the history belongs to.
-  projectBranchVersionParents(result.docs as Record<string, unknown>[])
+  if (branchReadState.useBranching) {
+    // A branch version hangs off the shadow row, so its `parent` is that row rather
+    // than the document the history belongs to.
+    projectBranchVersionParents(result.docs as Record<string, unknown>[])
+  }
 
   return result
 }

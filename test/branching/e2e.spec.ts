@@ -21,6 +21,7 @@ import {
   nestedSlug,
   pagesSlug,
   postsSlug,
+  versionedMediaSlug,
 } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -70,6 +71,7 @@ test.describe('Branching', () => {
   let mediaURL: AdminUrlUtil
   let pagesURL: AdminUrlUtil
   let postsURL: AdminUrlUtil
+  let versionedMediaURL: AdminUrlUtil
 
   async function gotoBranchView() {
     const branch = await payload.find({
@@ -93,6 +95,7 @@ test.describe('Branching', () => {
     mediaURL = new AdminUrlUtil(serverURL, mediaSlug)
     pagesURL = new AdminUrlUtil(serverURL, pagesSlug)
     postsURL = new AdminUrlUtil(serverURL, postsSlug)
+    versionedMediaURL = new AdminUrlUtil(serverURL, versionedMediaSlug)
 
     const context = await browser.newContext()
     ;({ page } = await initPage({ context, serverURL }))
@@ -101,7 +104,13 @@ test.describe('Branching', () => {
   test.afterEach(async () => {
     // Shadow rows are addressed by their real primary key, so these deletes
     // bypass branch resolution rather than writing tombstones.
-    for (const collection of [mediaSlug, nestedSlug, pagesSlug, postsSlug] as const) {
+    for (const collection of [
+      mediaSlug,
+      nestedSlug,
+      pagesSlug,
+      postsSlug,
+      versionedMediaSlug,
+    ] as const) {
       const documents = await payload.find({ branch: false, collection, pagination: false })
 
       for (const doc of documents.docs) {
@@ -170,6 +179,23 @@ test.describe('Branching', () => {
   })
 
   test.describe('Media files', () => {
+    test.afterEach(async () => {
+      const branch = await payload.find({
+        collection: 'payload-branches',
+        pagination: false,
+        where: { slug: { equals: branchSlug } },
+      })
+
+      if (branch.docs[0]?.status !== 'open') {
+        await payload.update({
+          id: branch.docs[0]!.id,
+          collection: 'payload-branches',
+          data: { mergedAt: null, status: 'open' },
+          overrideAccess: true,
+        })
+      }
+    })
+
     const expectImagePreviewToLoad = async ({
       expectedFilename,
     }: {
@@ -248,6 +274,47 @@ test.describe('Branching', () => {
       await page.goto(mediaURL.list)
       await switchBranch({ name: branchName, page })
       await gotoAndWaitForForm(page, mediaURL.edit(documentID))
+      await page.locator('#field-alt').fill('Branch metadata edit')
+
+      const metadataSaveResponse = page.waitForResponse((response) => {
+        const requestURL = new URL(response.url())
+
+        return requestURL.pathname === `/api/${mediaSlug}/${documentID}`
+      })
+
+      await saveDocAndAssert(page)
+
+      const metadataResponse = await metadataSaveResponse
+      const metadataResponseBody = (await metadataResponse.json()) as {
+        doc: { updatedAt: string }
+      }
+
+      await expect.poll(() => metadataResponse.ok()).toBe(true)
+      await expect
+        .poll(() => new URL(metadataResponse.url()).searchParams.get('branch'))
+        .toBe(branchSlug)
+
+      const [metadataOnBranch, metadataOnMain] = await Promise.all([
+        payload.find({
+          branch: branchSlug,
+          collection: mediaSlug,
+          pagination: false,
+          where: { id: { equals: documentID } },
+        }),
+        payload.find({
+          collection: mediaSlug,
+          pagination: false,
+          where: { id: { equals: documentID } },
+        }),
+      ])
+      const branchCopy = metadataOnBranch.docs[0]!
+
+      await expect.poll(() => branchCopy.updatedAt).toBe(metadataResponseBody.doc.updatedAt)
+      await expect.poll(() => branchCopy.filename).not.toBe(original.filename)
+      await expect.poll(() => branchCopy.filename).toContain(branchSlug)
+      await expect.poll(() => metadataOnMain.docs[0]?.filename).toBe(original.filename)
+      await expectImagePreviewToLoad({ expectedFilename: branchCopy.filename! })
+
       await page.locator('.file-toolbar__filename-btn').click()
       await page.locator('.popup-button-list__button', { hasText: 'Replace file' }).click()
       await page.setInputFiles(
@@ -292,6 +359,69 @@ test.describe('Branching', () => {
 
       await switchBranch({ name: 'main', page })
       await expectImagePreviewToLoad({ expectedFilename: original.filename! })
+    })
+
+    test('should restore the previous media file after merging a branch replacement', async () => {
+      await gotoAndWaitForForm(page, versionedMediaURL.create)
+      await page.setInputFiles(
+        '.file-manager input[type="file"]',
+        path.resolve(dirname, '../uploads/image.png'),
+      )
+      await page.locator('#field-alt').fill('Original versioned image')
+      await saveDocAndAssert(page)
+
+      const documentID = page.url().split('/').pop()!
+      const originalVersions = (await payload.findVersions({
+        branch: false,
+        collection: versionedMediaSlug,
+        pagination: false,
+        where: { parent: { equals: documentID } },
+      })) as unknown as {
+        docs: Array<{ id: number | string; version: { alt?: string } }>
+      }
+      const originalVersion = originalVersions.docs.find(
+        ({ version }) => version.alt === 'Original versioned image',
+      )
+
+      expect(originalVersion).toBeDefined()
+
+      await page.goto(versionedMediaURL.list)
+      await switchBranch({ name: branchName, page })
+      await gotoAndWaitForForm(page, versionedMediaURL.edit(documentID))
+      await page.locator('.file-toolbar__filename-btn').click()
+      await page.locator('.popup-button-list__button', { hasText: 'Replace file' }).click()
+      await page.setInputFiles(
+        '.file-manager input[type="file"]',
+        path.resolve(dirname, '../uploads/image.jpg'),
+      )
+      await page.locator('#field-alt').fill('Branch replacement versioned image')
+      await saveDocAndAssert(page)
+
+      await gotoBranchView()
+      await page.locator('.branch-changes__actions .btn--style-primary').click()
+      await page.locator('.merge-branch-modal .btn--style-primary').click()
+      await expect(page.locator('.merge-branch-modal__progress-fill--complete')).toBeVisible()
+      await page.locator('.merge-branch-modal .btn--style-primary').click()
+
+      await switchBranch({ name: 'main', page })
+      const editURL = versionedMediaURL.edit(documentID)
+
+      await page.goto(`${editURL}/versions/${originalVersion!.id}`)
+      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+      await page.getByRole('button', { name: 'Restore this version' }).click()
+      await page.getByRole('button', { name: 'Confirm' }).click()
+      await page.waitForURL(editURL)
+
+      await expect(page.locator('#field-alt')).toHaveValue('Original versioned image')
+
+      const restored = await payload.find({
+        branch: false,
+        collection: versionedMediaSlug,
+        pagination: false,
+        where: { id: { equals: documentID } },
+      })
+
+      await expectImagePreviewToLoad({ expectedFilename: restored.docs[0]!.filename! })
     })
   })
 

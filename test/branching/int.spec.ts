@@ -88,6 +88,12 @@ type BranchMergeTestEvent = {
   status: string
 }
 
+type UploadFileDocument = {
+  filename?: null | string
+  original?: { filename?: null | string } | null
+  variants?: null | Record<string, { filename?: null | string } | null>
+}
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const expectedConcurrentOperationAttemptCounts = databaseAdapterSupportsTransactions({
@@ -107,6 +113,27 @@ const fieldNames = (collection: SanitizedCollectionConfig): string[] =>
 
 const collectionConfig = (slug: string): SanitizedCollectionConfig =>
   payload.collections[slug]!.config
+
+const getUploadRepresentationFilenames = (doc: unknown): Record<string, string> => {
+  const upload = doc as UploadFileDocument
+  const filenames: Record<string, string> = {}
+
+  if (typeof upload.filename === 'string') {
+    filenames.default = upload.filename
+  }
+  if (typeof upload.original?.filename === 'string') {
+    filenames.original = upload.original.filename
+  }
+  for (const [name, variant] of Object.entries(upload.variants ?? {}).sort(([left], [right]) =>
+    left.localeCompare(right),
+  )) {
+    if (typeof variant?.filename === 'string') {
+      filenames[`variant:${name}`] = variant.filename
+    }
+  }
+
+  return filenames
+}
 
 const createBranchRecord = ({ name, slug }: { name: string; slug: string }) =>
   payload.create({ collection: branchesSlug, data: { name, slug } })
@@ -4586,7 +4613,10 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
     // field injection runs — so it kept a global unique index and a branch's copy
     // of the row collided with main's, failing validation outright.
     test('should allow forking an upload onto a branch despite the unique filename', async () => {
+      const fs = await import('fs')
       const media = await createOnMain('fork-me.txt')
+      const mainFilePath = path.resolve(dirname, 'media', media.filename)
+      const mainFileData = fs.readFileSync(mainFilePath)
 
       await payload.update({
         id: media.id,
@@ -4601,9 +4631,100 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         collection: mediaSlug,
       })
       const onMain = await payload.findByID({ id: media.id, collection: mediaSlug })
+      const branchFilePath = path.resolve(dirname, 'media', onBranch.filename)
 
       expect(onBranch.alt).toBe('on branch')
+      expect(onBranch.filename).not.toBe(media.filename)
+      expect(onBranch.filename).toContain('uploadwork')
+      expect(fs.readFileSync(branchFilePath)).toEqual(mainFileData)
       expect(onMain.alt).toBe('on main')
+      expect(onMain.filename).toBe(media.filename)
+      expect(fs.readFileSync(mainFilePath)).toEqual(mainFileData)
+    })
+
+    test('should avoid filename collisions when copying an upload onto a branch', async () => {
+      const fs = await import('fs')
+      const media = await createOnMain('legacy-source.txt')
+      const legacyFilename = 'legacy-uploadwork.txt'
+      const generatedFilePath = path.resolve(dirname, 'media', media.filename)
+      const mainFilePath = path.resolve(dirname, 'media', legacyFilename)
+
+      fs.renameSync(generatedFilePath, mainFilePath)
+      await payload.db.updateOne({
+        branch: false,
+        collection: mediaSlug,
+        data: {
+          filename: legacyFilename,
+          original: { filename: null, filesize: null, mimeType: null, url: null },
+          url: media.url!.replace(encodeURIComponent(media.filename!), legacyFilename),
+          variants: {},
+        },
+        where: { id: { equals: media.id } },
+      })
+
+      const mainFileData = fs.readFileSync(mainFilePath)
+
+      await payload.update({
+        id: media.id,
+        branch: 'uploadwork',
+        collection: mediaSlug,
+        data: { alt: 'copied without a collision' },
+      })
+
+      const onBranch = await payload.findByID({
+        id: media.id,
+        branch: 'uploadwork',
+        collection: mediaSlug,
+      })
+      const branchFilePath = path.resolve(dirname, 'media', onBranch.filename)
+
+      expect(onBranch.filename).not.toBe(legacyFilename)
+      expect(onBranch.filename).toContain('uploadwork')
+      expect(fs.readFileSync(branchFilePath)).toEqual(mainFileData)
+      expect(fs.readFileSync(mainFilePath)).toEqual(mainFileData)
+    })
+
+    test('should copy every image file when metadata first changes on a branch', async () => {
+      const fs = await import('fs')
+      const sourceData = fs.readFileSync(path.resolve(process.cwd(), 'test/uploads/image.png'))
+      const media = await payload.create({
+        collection: mediaSlug,
+        data: { alt: 'main image' },
+        file: {
+          name: 'metadata-copy.png',
+          data: sourceData,
+          mimetype: 'image/png',
+          size: sourceData.length,
+        },
+      })
+
+      cleanup.push(media.id)
+
+      await payload.update({
+        id: media.id,
+        branch: 'uploadwork',
+        collection: mediaSlug,
+        data: { alt: 'branch metadata edit' },
+      })
+
+      const [onBranch, onMain] = await Promise.all([
+        payload.findByID({ id: media.id, branch: 'uploadwork', collection: mediaSlug }),
+        payload.findByID({ id: media.id, collection: mediaSlug }),
+      ])
+      const mainFiles = getUploadRepresentationFilenames(onMain)
+      const branchFiles = getUploadRepresentationFilenames(onBranch)
+
+      expect(Object.keys(branchFiles)).toEqual(Object.keys(mainFiles))
+
+      for (const [role, mainFilename] of Object.entries(mainFiles)) {
+        const branchFilename = branchFiles[role]!
+
+        expect(branchFilename).not.toBe(mainFilename)
+        expect(branchFilename).toContain('uploadwork')
+        expect(fs.readFileSync(path.resolve(dirname, 'media', branchFilename))).toEqual(
+          fs.readFileSync(path.resolve(dirname, 'media', mainFilename)),
+        )
+      }
     })
 
     // `deleteAssociatedFiles` ran before `db.deleteOne` decided the delete was a
@@ -4645,7 +4766,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       const replacementFilePath = path.resolve(dirname, 'media', replaced.filename)
       const onMain = await payload.findByID({ id: media.id, collection: mediaSlug })
 
-      expect(replaced.filename).toBe('branch-replacement-uploadwork.txt')
+      expect(replaced.filename).toContain('uploadwork')
       expect(fs.existsSync(mainFilePath)).toBe(true)
       expect(fs.existsSync(replacementFilePath)).toBe(true)
       expect(fs.readFileSync(mainFilePath, 'utf8')).toBe('bytes for keep-original-on-replace.txt')
@@ -4722,6 +4843,49 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       expect(fs.existsSync(croppedFilePath)).toBe(true)
     })
 
+    test('should store every image file when creating media on a branch', async () => {
+      const fs = await import('fs')
+      const sourceData = fs.readFileSync(path.resolve(process.cwd(), 'test/uploads/image.png'))
+      const created = await payload.create({
+        branch: 'uploadwork',
+        collection: mediaSlug,
+        data: { alt: 'branch image' },
+        file: {
+          name: 'branch-image.png',
+          data: sourceData,
+          mimetype: 'image/png',
+          size: sourceData.length,
+        },
+      })
+      const branchFiles = getUploadRepresentationFilenames(created)
+
+      expect(Object.keys(branchFiles)).toEqual([
+        'default',
+        'original',
+        'variant:large',
+        'variant:medium',
+        'variant:thumbnail',
+      ])
+      expect(new URL(created.url!, 'http://localhost').searchParams.get('branch')).toBe(
+        'uploadwork',
+      )
+
+      for (const branchFilename of Object.values(branchFiles)) {
+        expect(branchFilename).toContain('uploadwork')
+        expect(
+          fs.readFileSync(path.resolve(dirname, 'media', branchFilename)).length,
+        ).toBeGreaterThan(0)
+      }
+
+      const [branchFileResponse, mainFileResponse] = await Promise.all([
+        restClient.GET(`/${mediaSlug}/file/${created.filename}?branch=uploadwork`),
+        restClient.GET(`/${mediaSlug}/file/${created.filename}`),
+      ])
+
+      expect(branchFileResponse.status).toBe(200)
+      expect(mainFileResponse.status).toBe(404)
+    })
+
     test.options(
       'should preserve a temp-file upload across a transient final commit retry',
       { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
@@ -4791,7 +4955,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
         const replacementFilePath = path.resolve(
           dirname,
           'media',
-          'upload-rollback-failed-uploadwork.txt',
+          'upload-rollback-failed-uploadwork-original.txt',
         )
         const replacementData = Buffer.from('upload that must be rolled back')
         const commitError = new Error('Simulated final commit failure')
@@ -4809,7 +4973,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
               collection: mediaSlug,
               data: { alt: 'failed branch replacement' },
               file: {
-                name: path.basename(replacementFilePath),
+                name: 'upload-rollback-failed.txt',
                 data: replacementData,
                 mimetype: 'text/plain',
                 size: replacementData.length,
@@ -4847,7 +5011,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
       const replacementFilePath = path.resolve(dirname, 'media', replaced.filename)
 
-      expect(replaced.filename).toBe('discarded-branch-replacement-uploadwork.txt')
+      expect(replaced.filename).toContain('uploadwork')
 
       await payload.branches.discard({ branch: 'uploadwork' })
 
@@ -4877,7 +5041,7 @@ test.suite('Branching', { config: './config.ts', resetBetweenTests: false }, () 
       })
       const replacementFilePath = path.resolve(dirname, 'media', replaced.filename)
 
-      expect(replaced.filename).toBe('merged-branch-replacement-uploadwork.txt')
+      expect(replaced.filename).toContain('uploadwork')
 
       await payload.branches.merge({ branch: 'uploadwork' })
 

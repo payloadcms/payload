@@ -10,6 +10,7 @@ import type { PayloadHandler } from '../../config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { FileHandlerOperation } from '../types.js'
 
+import { assertBranchReadable } from '../../branching/assertBranchReadable.js'
 import { APIError } from '../../errors/APIError.js'
 import { NotFound } from '../../errors/NotFound.js'
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
@@ -36,6 +37,8 @@ export const getFileHandler: PayloadHandler = async (req) => {
       httpStatus.BAD_REQUEST,
     )
   }
+
+  await assertBranchReadable({ collectionSlug: collection.config.slug, req })
 
   const versionID = req.searchParams?.get('version')
 

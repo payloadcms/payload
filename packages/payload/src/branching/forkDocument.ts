@@ -1,6 +1,7 @@
 import type { PayloadRequest } from '../types/index.js'
 
 import { APIError } from '../errors/index.js'
+import { copyUploadFilesToBranch } from './copyUploadFilesToBranch.js'
 import { createShadowRow } from './createShadowRow.js'
 import {
   addToBranchManifest,
@@ -116,6 +117,17 @@ export const forkDocument = async ({
     },
     docID: id,
     onCreated: async (createReq, createdShadow) => {
+      const collection = createReq.payload.collections[collectionSlug]
+
+      if (collection?.config.upload) {
+        await copyUploadFilesToBranch({
+          branch,
+          collection: collection.config,
+          doc: createdShadow,
+          req: createReq,
+        })
+      }
+
       const versionBoundary = await findBranchVersionForkBoundary({
         collectionSlug,
         docID: id,

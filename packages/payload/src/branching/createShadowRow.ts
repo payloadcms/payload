@@ -3,6 +3,7 @@ import type { BranchOperation } from './types.js'
 
 import { APIError } from '../errors/index.js'
 import { ValidationError } from '../errors/ValidationError.js'
+import { shareFileOperationScope } from '../uploads/fileVersioning/fileOperationManager.js'
 import {
   commitTransaction,
   isUnknownTransactionCommitResult,
@@ -235,6 +236,8 @@ export const createShadowRow = async ({
       throw new Error('Ambient shadow creation requires an active transaction.')
     }
 
+    shareFileOperationScope({ owner: req, req: ambient })
+
     try {
       const shadow = await createShadowContent({
         branch,
@@ -264,6 +267,11 @@ export const createShadowRow = async ({
   delete isolated.transactionID
 
   const shouldCommit = await initTransaction(isolated)
+
+  if (!shouldCommit) {
+    shareFileOperationScope({ owner: req, req: isolated })
+  }
+
   let shadow: Record<string, unknown>
 
   try {
