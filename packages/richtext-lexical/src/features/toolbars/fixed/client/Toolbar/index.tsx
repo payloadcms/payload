@@ -248,7 +248,7 @@ function FixedToolbar({
       role="toolbar"
     >
       {isEditable && (
-        <div className="fixed-toolbar__scroll">
+        <div className="fixed-toolbar__scroll" tabIndex={-1}>
           {editorConfig?.features &&
             editorConfig.features?.toolbarFixed?.groups.map((group, i) => {
               return (

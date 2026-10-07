@@ -970,6 +970,7 @@ test.describe('WCAG 2.2 Level AA', () => {
           await page.keyboard.press('Escape')
           await page.keyboard.press('Shift+Tab')
           await expect(toolbar.locator(':focus')).toHaveCount(0)
+          await expect(buttons.last()).toHaveAttribute('tabindex', '0')
           await page.keyboard.press('Tab')
           await expect(buttons.last()).toBeFocused()
         }
@@ -2200,8 +2201,10 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(additionalPanel).toBeFocused()
       await expect(toolbarButtons.first()).toBeVisible()
 
-      for (const button of await toolbarButtons.all()) {
-        await page.keyboard.press('Tab')
+      await page.keyboard.press('Tab')
+      await expect(toolbarButtons.first()).toBeFocused()
+      for (const button of (await toolbarButtons.all()).slice(1)) {
+        await page.keyboard.press('ArrowRight')
         await expect(button).toBeFocused()
       }
 
