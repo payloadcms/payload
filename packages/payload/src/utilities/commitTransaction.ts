@@ -2,6 +2,7 @@ import type { MarkRequired } from 'ts-essentials'
 
 import type { PayloadRequest } from '../types/index.js'
 
+import { commitFileOperations } from '../uploads/fileVersioning/fileOperationManager.js'
 import {
   clearTransactionCommitCallbacks,
   clearTransactionRollbackCallbacks,
@@ -49,6 +50,7 @@ export async function commitTransaction(
   }
 
   delete req.transactionID
+  await commitFileOperations({ req: req as PayloadRequest })
   clearTransactionRollbackCallbacks({ req, transactionID: resolvedTransactionID })
 
   try {

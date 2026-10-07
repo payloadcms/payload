@@ -4,6 +4,10 @@ import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Payload, PayloadRequest, Where } from '../types/index.js'
 
 import { resolveBranchOwnVersions } from '../branching/versions.js'
+import {
+  collectVersionFiles,
+  scheduleUnreferencedFileCleanup,
+} from '../uploads/fileVersioning/cleanup.js'
 
 type Args = {
   collection?: SanitizedCollectionConfig
@@ -108,7 +112,20 @@ export const enforceMaxVersions = async ({
         deleteVersionsArgs.collection = slug
       }
 
+      const removedFiles =
+        collection?.upload && id !== undefined && req
+          ? await collectVersionFiles({ collection, parentID: id, req, where: deleteQuery })
+          : []
+
       await payload.db.deleteVersions(deleteVersionsArgs)
+
+      if (collection?.upload && req) {
+        await scheduleUnreferencedFileCleanup({
+          candidates: removedFiles,
+          collection,
+          req,
+        })
+      }
     }
   } catch (err) {
     payload.logger.error(err)

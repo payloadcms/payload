@@ -4,6 +4,7 @@ import type { BranchDeleteOutcome } from '../../branching/tombstone.js'
 import type { AccessResult } from '../../config/types.js'
 import type { CollectionSlug, FindOptions } from '../../index.js'
 import type { PayloadRequest, PopulateType, SelectType, Where } from '../../types/index.js'
+import type { StoredFileList } from '../../uploads/fileVersioning/types.js'
 import type { DeferredCleanupScope } from '../../utilities/transactionCallbacks.js'
 import type {
   BulkOperationResult,
@@ -34,6 +35,16 @@ import { APIError, Locked } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
+import {
+  collectStoredFiles,
+  collectVersionFiles,
+  scheduleUnreferencedFileCleanup,
+} from '../../uploads/fileVersioning/cleanup.js'
+import {
+  abortFileOperationScope,
+  beginFileOperationScope,
+  completeFileOperationScope,
+} from '../../uploads/fileVersioning/fileOperationManager.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import {
@@ -89,6 +100,14 @@ export const deleteOperation = async <
 
   if (args.collection.config.disableBulkDelete && !args.overrideAccess) {
     throw new APIError(`Collection ${args.collection.config.slug} has disabled bulk delete`, 403)
+  }
+
+  const hasFileOperationScope =
+    Boolean(args.collection.config.upload) && !args.req.payload.db.bulkOperationsSingleTransaction
+  const markedManagedDeletes = new Set<string>()
+
+  if (hasFileOperationScope) {
+    beginFileOperationScope({ req: args.req })
   }
 
   try {
@@ -182,12 +201,17 @@ export const deleteOperation = async <
       collection: collectionConfig.slug,
       locale: locale!,
       req,
-      select,
+      // File cleanup needs every stored representation even when the response selects only an ID.
+      select: collectionConfig.upload ? undefined : select,
       where: fullWhere,
     })
 
     const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
     let didBatchDeleteFail = false
+    const deletedFilesByID = new Map<number | string, StoredFileList>()
+    req.context ??= {}
+    const managedDeletedUploads = (req.context._payloadManagedDeletedUploads ??=
+      new Set()) as Set<string>
 
     type Doc = DataFromCollectionSlug<TSlug>
     type ResultDoc = BulkOperationResult<TSlug, TSelect>['docs'][number]
@@ -256,6 +280,30 @@ export const deleteOperation = async <
           doc: fullDocument,
           req,
         }))
+
+      if (collectionConfig.upload) {
+        deletedFilesByID.set(fullDocument.id, [
+          ...(await collectStoredFiles({
+            collection: collectionConfig,
+            doc: fullDocument,
+            req,
+          })),
+          ...(collectionConfig.versions
+            ? await collectVersionFiles({
+                collection: collectionConfig,
+                parentID: fullDocument.id,
+                req,
+              })
+            : []),
+        ])
+
+        if (deletedFilesByID.get(fullDocument.id)?.length) {
+          const identity = JSON.stringify([collectionConfig.slug, String(fullDocument.id)])
+
+          managedDeletedUploads.add(identity)
+          markedManagedDeletes.add(identity)
+        }
+      }
 
       if (!absorbedByBranch) {
         await deleteAssociatedFiles({
@@ -548,6 +596,11 @@ export const deleteOperation = async <
       let docCleanupScope: DeferredCleanupScope | null = null
       let docShouldCommit = false
       let hasReachedWriteCapableStage = hasCallerTransaction && hasWriteCapableBeforeDeleteHooks
+      const hasIndividualFileScope = Boolean(collectionConfig.upload)
+
+      if (hasIndividualFileScope) {
+        beginFileOperationScope({ req })
+      }
 
       try {
         docShouldCommit = await initTransaction(req)
@@ -649,6 +702,14 @@ export const deleteOperation = async <
           }
         }
 
+        if (collectionConfig.upload) {
+          await scheduleUnreferencedFileCleanup({
+            candidates: deletedFilesByID.get(doc.id) ?? [],
+            collection: collectionConfig,
+            req,
+          })
+        }
+
         await deleteDocumentLocks({
           collectionSlug: collectionConfig.slug,
           ids: [doc.id],
@@ -667,6 +728,10 @@ export const deleteOperation = async <
           await commitTransaction(req)
         }
 
+        if (hasIndividualFileScope) {
+          await completeFileOperationScope({ req })
+        }
+
         return result
       } catch (error) {
         if (docCleanupScope) {
@@ -679,10 +744,13 @@ export const deleteOperation = async <
           resetBranchState(req)
         }
 
+        if (hasIndividualFileScope) {
+          await abortFileOperationScope({ req })
+        }
+
         if (hasCallerTransaction && hasReachedWriteCapableStage) {
           throw error
         }
-
         pushError(doc.id, error)
 
         return null
@@ -917,6 +985,14 @@ export const deleteOperation = async <
         return results
       }
 
+      if (collectionConfig.upload) {
+        await scheduleUnreferencedFileCleanup({
+          candidates: deletable.flatMap(({ doc }) => deletedFilesByID.get(doc.id) ?? []),
+          collection: collectionConfig,
+          req,
+        })
+      }
+
       if (hasSharedTransaction) {
         for (const entry of deletable) {
           const resultDocument = isDeletingFromBranch
@@ -1046,6 +1122,10 @@ export const deleteOperation = async <
       await commitTransaction(req)
     }
 
+    if (hasFileOperationScope) {
+      await completeFileOperationScope({ req })
+    }
+
     if (isDeletingFromBranch) {
       refreshBranchState(req)
     }
@@ -1060,6 +1140,20 @@ export const deleteOperation = async <
       await killTransaction(args.req)
     }
     resetBranchState(args.req)
+
+    if (hasFileOperationScope) {
+      await abortFileOperationScope({ req: args.req })
+    }
     throw error
+  } finally {
+    const managedDeletedUploads = args.req.context?._payloadManagedDeletedUploads as
+      | Set<string>
+      | undefined
+    for (const identity of markedManagedDeletes) {
+      managedDeletedUploads?.delete(identity)
+    }
+    if (managedDeletedUploads?.size === 0) {
+      delete args.req.context._payloadManagedDeletedUploads
+    }
   }
 }

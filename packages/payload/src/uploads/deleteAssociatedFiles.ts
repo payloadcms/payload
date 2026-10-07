@@ -18,6 +18,7 @@ import {
 import { fileExists } from './fileExists.js'
 import { getFileIdentity, hasRenameStableFileIdentity } from './fileIdentity.js'
 import { discardQuarantinedFile, quarantineFile, restoreQuarantinedFile } from './fileQuarantine.js'
+import { withLegacyUploadFileData } from './fileVersioning/storedFiles.js'
 
 type Args = {
   collectionConfig: SanitizedCollectionConfig
@@ -30,6 +31,7 @@ type Args = {
 
 export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
   collectionConfig,
+  config,
   doc,
   files = [],
   overrideDelete,
@@ -38,6 +40,12 @@ export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
   if (!collectionConfig.upload) {
     return
   }
+  const stored = withLegacyUploadFileData({ collection: collectionConfig, config, doc })
+
+  if (collectionConfig.versions || stored.original) {
+    return
+  }
+
   const cleanupScope = await beginDeferredCleanupScopeIfNeeded({ req })
   const replacementFilePaths = new Set(files.map((file) => path.resolve(file.path)))
 

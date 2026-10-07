@@ -945,7 +945,7 @@ export function fieldsToJSONSchema({
           }
         }
 
-        if ('jsonSchema' in field && field?.jsonSchema?.length) {
+        if ('jsonSchema' in field && Array.isArray(field.jsonSchema)) {
           for (const schema of field.jsonSchema) {
             fieldSchema = schema({ jsonSchema: fieldSchema!, variant })
           }

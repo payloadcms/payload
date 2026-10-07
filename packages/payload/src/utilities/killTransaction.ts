@@ -3,6 +3,7 @@ import type { MarkRequired } from 'ts-essentials'
 import type { PayloadRequest } from '../types/index.js'
 
 import { resetBranchState } from '../branching/resolveBranch.js'
+import { rollbackFileOperations } from '../uploads/fileVersioning/fileOperationManager.js'
 import {
   clearTransactionCommitCallbacks,
   clearTransactionRollbackCallbacks,
@@ -29,6 +30,7 @@ export async function killTransaction(
     try {
       await payload.db.rollbackTransaction(req.transactionID!)
       didRollBack = true
+      await rollbackFileOperations({ req: req as PayloadRequest })
     } catch (ignore) {
       // swallow any errors while attempting to rollback
     }

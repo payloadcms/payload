@@ -403,7 +403,9 @@ describe('generateFileData', () => {
         tempFilePath,
       },
       payload: {
-        config: { sharp: undefined },
+        collections: { media: { config: { fields: [], upload: {} } } },
+        config: { routes: { api: '/api' }, sharp: undefined },
+        db: { findOne: vi.fn(async () => null) },
         logger: { error: vi.fn() },
       },
     } as unknown as PayloadRequest
@@ -419,7 +421,7 @@ describe('generateFileData', () => {
 
     expect(files).toEqual([
       {
-        path: `${os.tmpdir()}/document.pdf`,
+        path: `${os.tmpdir()}/document-original.pdf`,
         sourcePath: tempFilePath,
       },
     ])

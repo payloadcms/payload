@@ -16,6 +16,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 
 const baseClass = 'save-draft'
 
@@ -37,6 +38,7 @@ export function SaveDraftButton(props: SaveDraftButtonClientProps) {
   const editDepth = useEditDepth()
   const { t } = useTranslation()
   const { submit } = useForm()
+  const { uploadEdits } = useUploadEdits()
   const operation = useOperation()
 
   const disabled = (operation === 'update' && !modified) || uploadStatus === 'uploading'
@@ -55,6 +57,7 @@ export function SaveDraftButton(props: SaveDraftButtonClientProps) {
         draft: true,
         'fallback-locale': 'null',
         locale,
+        uploadEdits: uploadEdits || undefined,
       },
       { addQueryPrefix: true },
     )
@@ -99,6 +102,7 @@ export function SaveDraftButton(props: SaveDraftButtonClientProps) {
     id,
     disabled,
     setUnpublishedVersionCount,
+    uploadEdits,
   ])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {

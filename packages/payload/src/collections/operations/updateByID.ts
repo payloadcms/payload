@@ -33,6 +33,14 @@ import { branchField, MAIN_BRANCH } from '../../branching/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { type CollectionSlug, deepCopyObjectSimple, type FindOptions } from '../../index.js'
+import { runLocalFileUpdate } from '../../uploads/fileVersioning/archive.js'
+import { runCloudFileUpdate } from '../../uploads/fileVersioning/cloudStorage.js'
+import {
+  abortFileOperationScope,
+  beginFileOperationScope,
+  completeFileOperationScope,
+} from '../../uploads/fileVersioning/fileOperationManager.js'
+import { withLegacyCloudUploadFileData } from '../../uploads/fileVersioning/storedFiles.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import {
   getLocalizedUploadProperties,
@@ -274,8 +282,13 @@ const updateByIDOperationWithLifecycleAttempt = async <
   let didResolveBranchFork = false
   let shouldCommit = false
   const uploadFileRollbacks: UploadFileRollbacks = new Map()
+  const hasFileOperationScope = Boolean(args.collection.config.upload)
 
   assertBranchMergeValidationWriteAllowed({ req: args.req })
+
+  if (hasFileOperationScope) {
+    beginFileOperationScope({ req: args.req })
+  }
 
   try {
     shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
@@ -442,6 +455,15 @@ const updateByIDOperationWithLifecycleAttempt = async <
       }
     }
 
+    const storedDocWithLocales = docWithLocales
+    if (collectionConfig.upload.fileOperations) {
+      docWithLocales = await withLegacyCloudUploadFileData({
+        collection: collectionConfig,
+        doc: docWithLocales,
+        req,
+      })
+    }
+
     if (collectionConfig.upload && !overrideAccess) {
       const trustedUploadDataForDocument =
         branchMergeUploadDataToTrust?.collectionSlug === collectionConfig.slug &&
@@ -489,7 +511,7 @@ const updateByIDOperationWithLifecycleAttempt = async <
     // Update document, runs all document level hooks
     // ///////////////////////////////////////////////
 
-    let result = await updateDocument<TSlug, TSelect>({
+    const updateArgs = {
       id,
       autosave,
       collectionConfig,
@@ -516,7 +538,28 @@ const updateByIDOperationWithLifecycleAttempt = async <
         shouldCommit && collectionConfig.upload && !collectionConfig.upload.disableLocalStorage
           ? uploadFileRollbacks
           : undefined,
-    })
+    } as const
+
+    const write = () => updateDocument<TSlug, TSelect>(updateArgs)
+    let result = collectionConfig.upload.fileOperations
+      ? await runCloudFileUpdate({
+          id,
+          collection: collectionConfig,
+          current: storedDocWithLocales,
+          data: updateArgs.data,
+          files: filesToUpload,
+          req,
+          write,
+        })
+      : await runLocalFileUpdate({
+          id,
+          collection: collectionConfig,
+          current: docWithLocales,
+          files: filesToUpload,
+          next: newFileData as Record<string, unknown>,
+          req,
+          write,
+        })
 
     // /////////////////////////////////////
     // Add collection property for auth collections
@@ -569,6 +612,10 @@ const updateByIDOperationWithLifecycleAttempt = async <
       refreshRequestDataLoader(req)
     }
 
+    if (hasFileOperationScope) {
+      await completeFileOperationScope({ req })
+    }
+
     return result
   } catch (error: unknown) {
     const shouldRollbackArtifacts = shouldRollbackTransactionArtifacts({ error })
@@ -593,6 +640,10 @@ const updateByIDOperationWithLifecycleAttempt = async <
       if (shouldRollbackArtifacts) {
         await rollbackUploadFiles({ rollbacks: uploadFileRollbacks })
       }
+    }
+
+    if (hasFileOperationScope) {
+      await abortFileOperationScope({ req: args.req })
     }
     throw error
   }

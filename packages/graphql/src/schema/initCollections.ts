@@ -36,6 +36,7 @@ import { findResolver } from '../resolvers/collections/find.js'
 import { findByIDResolver } from '../resolvers/collections/findByID.js'
 import { findVersionByIDResolver } from '../resolvers/collections/findVersionByID.js'
 import { findVersionsResolver } from '../resolvers/collections/findVersions.js'
+import { renameFileResolver } from '../resolvers/collections/renameFile.js'
 import { restoreVersionResolver } from '../resolvers/collections/restoreVersion.js'
 import { updateResolver } from '../resolvers/collections/update.js'
 import { validateResolver } from '../resolvers/collections/validate.js'
@@ -450,6 +451,18 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           },
           resolve: restoreVersionResolver(collection),
         }
+      }
+    }
+
+    if (mutationsEnabled && collectionConfig.upload) {
+      graphqlResult.Mutation.fields[`renameFile${formatName(singularName)}`] = {
+        type: collection.graphQL.type,
+        args: {
+          id: { type: new GraphQLNonNull(idType) },
+          draft: { type: GraphQLBoolean },
+          filename: { type: new GraphQLNonNull(GraphQLString) },
+        },
+        resolve: renameFileResolver(collection),
       }
     }
 

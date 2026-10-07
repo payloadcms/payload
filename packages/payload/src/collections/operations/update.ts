@@ -32,6 +32,15 @@ import { validateSortQuery } from '../../database/queryValidation/validateSortQu
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/index.js'
 import { type CollectionSlug, type FindOptions } from '../../index.js'
+import { runLocalFileUpdate } from '../../uploads/fileVersioning/archive.js'
+import { runCloudFileUpdate } from '../../uploads/fileVersioning/cloudStorage.js'
+import {
+  abortFileOperationScope,
+  beginFileOperationScope,
+  completeFileOperationScope,
+  shareFileOperationScope,
+} from '../../uploads/fileVersioning/fileOperationManager.js'
+import { withLegacyCloudUploadFileData } from '../../uploads/fileVersioning/storedFiles.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import {
   getLocalizedUploadProperties,
@@ -121,6 +130,7 @@ export const updateOperation = async <
   let shouldUsePerDocumentBranchTransactions = false
   let shouldCommit = false
   const uploadFileRollbacks: UploadFileRollbacks = new Map()
+  const hasFileOperationScope = Boolean(args.collection.config.upload)
 
   assertBranchMergeValidationWriteAllowed({ req: args.req })
 
@@ -128,6 +138,10 @@ export const updateOperation = async <
 
   if (args.collection.config.disableBulkEdit && !args.overrideAccess) {
     throw new APIError(`Collection ${args.collection.config.slug} has disabled bulk edit`, 403)
+  }
+
+  if (hasFileOperationScope) {
+    beginFileOperationScope({ req: args.req })
   }
 
   try {
@@ -372,18 +386,17 @@ export const updateOperation = async <
 
     const docs = await runQuery()
 
-    const sharedGeneratedFileData =
-      !collectionConfig.upload || (overrideAccess && Boolean(req.file))
-        ? await generateFileData({
-            collection,
-            config,
-            data: bulkUpdateData,
-            operation: 'update',
-            overwriteExistingFiles,
-            req,
-            throwOnMissingFile: false,
-          })
-        : null
+    const sharedGeneratedFileData = !collectionConfig.upload
+      ? await generateFileData({
+          collection,
+          config,
+          data: bulkUpdateData,
+          operation: 'update',
+          overwriteExistingFiles,
+          req,
+          throwOnMissingFile: false,
+        })
+      : null
 
     const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
     // File replacement cleanup needs a per-document checkpoint. Process file uploads in order so
@@ -430,6 +443,9 @@ export const updateOperation = async <
             ) {
               docShouldCommit = await initTransaction(documentReq)
             }
+            if (collectionConfig.upload && !docShouldCommit) {
+              shareFileOperationScope({ owner: req, req: documentReq })
+            }
             if (collectionConfig.upload || shouldProcessDocumentsSequentially) {
               documentCleanupScope = await beginDeferredCleanupScope({ req: documentReq })
             }
@@ -469,6 +485,14 @@ export const updateOperation = async <
               }
 
               docWithLocales = branchDocument
+            }
+
+            if (collectionConfig.upload?.fileOperations) {
+              docWithLocales = await withLegacyCloudUploadFileData({
+                collection: collectionConfig,
+                doc: docWithLocales,
+                req: documentReq,
+              })
             }
 
             const documentFile = documentReq.file ? { ...documentReq.file } : undefined
@@ -530,17 +554,18 @@ export const updateOperation = async <
             hasEnteredUpdateDocument = true
             hasWrittenTransactionArtifact =
               shouldTrackUploadFileRollback && generatedFileData.files.length > 0
-            let updatedDoc = await updateDocument({
+            const documentData = copyDataWithFreshRowIDs({
+              config,
+              data: generatedFileData.data,
+              existingDoc: docWithLocales,
+              fields: collectionConfig.fields,
+            })
+            const updateArgs = {
               id,
               autosave,
               collectionConfig,
               config,
-              data: copyDataWithFreshRowIDs({
-                config,
-                data: generatedFileData.data,
-                existingDoc: docWithLocales,
-                fields: collectionConfig.fields,
-              }),
+              data: documentData,
               depth: depth!,
               docWithLocales,
               draftArg,
@@ -564,7 +589,29 @@ export const updateOperation = async <
                   ? documentUploadFileRollbacks
                   : uploadFileRollbacks
                 : undefined,
-            })
+            } as const
+            const write = () => updateDocument(updateArgs)
+            let updatedDoc = collectionConfig.upload
+              ? collectionConfig.upload.fileOperations
+                ? await runCloudFileUpdate({
+                    id,
+                    collection: collectionConfig,
+                    current: docWithLocales,
+                    data: updateArgs.data,
+                    files: generatedFileData.files,
+                    req: documentReq,
+                    write,
+                  })
+                : await runLocalFileUpdate({
+                    id,
+                    collection: collectionConfig,
+                    current: docWithLocales,
+                    files: generatedFileData.files,
+                    next: generatedFileData.data as Record<string, unknown>,
+                    req: documentReq,
+                    write,
+                  })
+              : await write()
 
             // /////////////////////////////////////
             // Add collection property for auth collections
@@ -714,6 +761,10 @@ export const updateOperation = async <
       refreshRequestDataLoader(req)
     }
 
+    if (hasFileOperationScope) {
+      await completeFileOperationScope({ req })
+    }
+
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     return result
   } catch (error: unknown) {
@@ -745,6 +796,10 @@ export const updateOperation = async <
           })
         })
       }
+    }
+
+    if (hasFileOperationScope) {
+      await abortFileOperationScope({ req: args.req })
     }
     throw error
   }
