@@ -23,7 +23,7 @@ export type UploadData<TFields extends JsonObject = JsonObject> = {
     id: string
     relationTo: TCollectionSlug
     /** Either the document ID or the full populated document. */
-    value: DataFromCollectionSlug<TCollectionSlug> | IDTypeForCollectionSlug<TCollectionSlug>
+    value: IDTypeForCollectionSlug<TCollectionSlug> | TypedUploadCollection[TCollectionSlug]
   }
 }[UploadCollectionSlug]
 
@@ -36,20 +36,6 @@ export type Internal_UploadData<TFields extends JsonObject = JsonObject> = {
     src: string
   }
 } & UploadData<TFields>
-
-/**
- * More precise variant of {@link UploadData}. Replaces `UploadData` in v4.
- * @internal
- * @todo Replace UploadData with UploadDataImproved in 4.0
- */
-export type UploadDataImproved<TFields extends JsonObject = JsonObject> = {
-  [TCollectionSlug in UploadCollectionSlug]: {
-    fields: TFields
-    id: string
-    relationTo: TCollectionSlug
-    value: IDTypeForCollectionSlug<TCollectionSlug> | TypedUploadCollection[TCollectionSlug]
-  }
-}[UploadCollectionSlug]
 
 export type SerializedUploadNode<
   TSlugs extends UploadCollectionSlug = UploadCollectionSlug,
