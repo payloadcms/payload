@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url'
 import open from 'open'
 import { loadEnv } from 'payload/node'
 
-import type { DevServerResult } from './adapters/nextDevServer.js'
+import type { DevServerResult } from './__setup/server/nextDevServer.js'
 
 import { assertDbReachable } from './__helpers/shared/assertDbReachable.js'
 import { getCurrentDatabaseAdapter } from './dbAdapters.js'
@@ -35,7 +35,10 @@ const {
 } = minimist(process.argv.slice(2), {
   // Treat framework flags as boolean so a trailing suite positional
   // (e.g. `--framework-tanstack-start admin`) isn't consumed as the flag's value.
-  boolean: ['framework-next', 'framework-tanstack-start'],
+  boolean: ['framework-next', 'framework-tanstack-start', 'seed'],
+  default: {
+    seed: true,
+  },
 })
 
 let testSuiteArg: string | undefined
@@ -117,13 +120,13 @@ let serverResult: DevServerResult
 switch (framework) {
   case 'next': {
     if (prodServer) {
-      const { startNextProdServer } = await import('./adapters/nextProdServer.js')
+      const { startNextProdServer } = await import('./__setup/server/nextProdServer.js')
       serverResult = await startNextProdServer({
         port: availablePort,
         testSuiteArg,
       })
     } else {
-      const { startNextDevServer } = await import('./adapters/nextDevServer.js')
+      const { startNextDevServer } = await import('./__setup/server/nextDevServer.js')
       serverResult = await startNextDevServer({
         enableTurbo,
         port: availablePort,
@@ -134,14 +137,14 @@ switch (framework) {
   }
   case 'tanstack-start': {
     if (prodServer) {
-      const { startTanStackStartProdServer } = await import('./adapters/tanstackStartProdServer.js')
-      serverResult = await startTanStackStartProdServer({
+      const { startTanstackProdServer } = await import('./__setup/server/tanstackProdServer.js')
+      serverResult = await startTanstackProdServer({
         port: availablePort,
         testSuiteArg,
       })
     } else {
-      const { startTanStackStartDevServer } = await import('./adapters/tanstackStartDevServer.js')
-      serverResult = await startTanStackStartDevServer({
+      const { startTanstackDevServer } = await import('./__setup/server/tanstackDevServer.js')
+      serverResult = await startTanstackDevServer({
         port: availablePort,
         testSuiteArg,
       })
@@ -162,6 +165,18 @@ if (args.o) {
 }
 
 process.env.PAYLOAD_DROP_DATABASE = process.env.PAYLOAD_DROP_DATABASE === 'false' ? 'false' : 'true'
+
+if (args.seed !== false) {
+  const response = await fetch(`http://localhost:${serverResult.port}/api/re-initialize`, {
+    method: 'POST',
+  })
+
+  if (response.ok) {
+    console.log(`✓ Seeded ${testSuiteArg}`)
+  } else if (response.status !== 404) {
+    throw new Error(`Failed to seed ${testSuiteArg}: ${response.status} ${await response.text()}`)
+  }
+}
 
 void fetch(`http://localhost:${serverResult.port}${serverResult.adminRoute}`).catch(() => {})
 void fetch(`http://localhost:${serverResult.port}/api/access`).catch(() => {})

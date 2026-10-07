@@ -23,7 +23,6 @@
   .rich-text-lexical__label-row {
     display: flex;
     align-items: center;
-    margin-bottom: var(--spacer-2);
     gap: var(--spacer-2);
 
     label.field-label:not(.unstyled) {

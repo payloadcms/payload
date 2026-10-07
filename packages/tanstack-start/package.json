@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/tanstack-start",
-  "version": "4.0.0-canary.14",
+  "version": "4.0.0-canary.37",
   "description": "TanStack Start framework adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -57,9 +57,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "pnpm build:types && pnpm test:types && pnpm build:swc && pnpm build:copy-mjs",
+    "build": "pnpm build:types && pnpm test:types && pnpm build:swc",
     "build:clean": "find . \\( -type d \\( -name build -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} + && pnpm build",
-    "build:copy-mjs": "node ./scripts/copyMjs.mjs",
     "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
@@ -75,19 +74,19 @@
   },
   "devDependencies": {
     "@tanstack/react-router": "^1.120.0",
-    "@tanstack/react-start": "^1.168.26",
+    "@tanstack/react-start": "^1.168.60",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^6.0.0",
     "@vitejs/plugin-rsc": "^0.5.21",
     "payload": "workspace:*",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "catalog:",
+    "react-dom": "catalog:",
     "vite": ">=8.0.0"
   },
   "peerDependencies": {
     "@tanstack/react-router": "^1.120.0",
-    "@tanstack/react-start": "^1.168.26",
+    "@tanstack/react-start": "^1.168.60",
     "@vitejs/plugin-react": "^6.0.0",
     "@vitejs/plugin-rsc": "^0.5.21",
     "payload": "workspace:*",

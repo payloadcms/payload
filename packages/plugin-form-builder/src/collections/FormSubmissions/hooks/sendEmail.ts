@@ -27,6 +27,7 @@ export const sendEmail = async (
         id: formID,
         collection: formOverrides?.slug || 'forms',
         locale,
+        overrideAccess: true,
         req,
       })
 

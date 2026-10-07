@@ -84,10 +84,10 @@
   }
 
   .group-field__header {
-    margin-bottom: var(--spacer-2-5);
+    margin-bottom: var(--spacer-4);
     display: flex;
     flex-direction: column;
-    gap: var(--spacer-1);
+    gap: var(--spacer-2);
   }
 
   .group-field__title-row {
@@ -98,7 +98,6 @@
 
   .group-field__title {
     margin-bottom: 0;
-    font-family: var(--text-heading-medium-font-family);
     font-size: var(--text-heading-medium-font-size);
     font-weight: var(--text-heading-medium-font-weight);
     line-height: var(--text-heading-medium-line-height);
@@ -123,6 +122,7 @@
     padding-top: 0;
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .group-field--top-level {
       &::before {

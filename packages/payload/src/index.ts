@@ -53,6 +53,7 @@ import type {
   TransformCollectionWithSelect,
   TransformGlobalWithSelect,
 } from './types/index.js'
+import type { ValidationResult } from './types/validation.js'
 import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 
 import { countLocal, type CountOptions } from './collections/operations/local/count.js'
@@ -99,6 +100,10 @@ import {
   type Options as UpdateOptions,
 } from './collections/operations/local/update.js'
 import {
+  type ValidateCollectionOptions,
+  validateLocal,
+} from './collections/operations/local/validate.js'
+import {
   countGlobalVersionsLocal,
   type CountGlobalVersionsOptions,
 } from './globals/operations/local/countVersions.js'
@@ -122,6 +127,10 @@ import {
   updateGlobalLocal,
   type Options as UpdateGlobalOptions,
 } from './globals/operations/local/update.js'
+import {
+  validateGlobalLocal,
+  type ValidateGlobalOptions,
+} from './globals/operations/local/validate.js'
 export type * from './admin/adapters/index.js'
 export type { FieldState } from './admin/forms/Form.js'
 export type * from './admin/types.js'
@@ -140,8 +149,11 @@ import { buildEncryptionKeyring, decrypt, encrypt, reencrypt } from './auth/cryp
 import { authLocal } from './auth/operations/local/auth.js'
 import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
-import { generateImportMap, type ImportMap } from './bin/generateImportMap/index.js'
 import { checkPayloadDependencies } from './checkPayloadDependencies.js'
+import {
+  generateImportMap,
+  type ImportMap,
+} from './cli/commands/generateImportMap/generateImportMap.js'
 import {
   countVersionsLocal,
   type CountVersionsOptions,
@@ -301,18 +313,18 @@ export interface UntypedPayloadTypes {
     _verificationToken?: null | string
     /** Whether the email is verified. Only with `auth.verify`. */
     _verified?: boolean | null
-    /** The user's API key. Only with `auth.useAPIKey`, once enabled for this user. */
+    /** The user's API key. Write-only: accepted on `create`/`update`, never returned on reads. */
     apiKey?: null | string
-    /** Internal lookup index for the API key. Hidden (needs `showHiddenFields`). Only with `auth.useAPIKey`. */
+    /** Internal lookup index for the API key. Never returned on reads. */
     apiKeyIndex?: null | string
+    /** The API key's final four characters. Only with `auth.useAPIKey`. */
+    apiKeyLast4?: null | string
     /** Slug of the auth collection this user belongs to. Always present; identifies the source collection. */
     collection: string
     /** When the user was created. Not present when timestamps are disabled. */
     createdAt?: string
     /** The user's email. Absent if email login is disabled via `auth.loginWithUsername`. */
     email?: null | string
-    /** Whether API key auth is enabled for this user. Only with `auth.useAPIKey`. */
-    enableAPIKey?: boolean | null
     /** Hashed password. Hidden (needs `showHiddenFields`). Only with the local strategy. */
     hash?: null | string
     /** The user's ID. Always present. */
@@ -325,6 +337,8 @@ export interface UntypedPayloadTypes {
     password?: null | string
     /** Reset-token expiry. Hidden (needs `showHiddenFields`). Only after `forgotPassword`, until reset. */
     resetPasswordExpiration?: null | string
+    /** Last password-reset email time. Hidden (needs `showHiddenFields`). */
+    resetPasswordRequestedAt?: null | string
     /** Active password-reset token. Hidden (needs `showHiddenFields`). Only after `forgotPassword`, until reset. */
     resetPasswordToken?: null | string
     /** Password salt. Hidden (needs `showHiddenFields`). Only with the local strategy. */
@@ -779,6 +793,40 @@ export class BasePayload {
     return updateGlobalLocal<TSlug, TSelect>(this, options)
   }
 
+  /**
+   * Validates a collection document candidate for selected locales without persisting data,
+   * versions, or files.
+   *
+   * Omit `id` to validate create data. With `id`, the stored main document is the default base;
+   * `draft: true` selects the newest available draft version and falls back to the main document.
+   * Partial candidate data is merged over that base. Field validation failures resolve to
+   * `{ valid: false, errors }`; access, argument, lookup, and other lifecycle errors throw.
+   *
+   * @see https://payloadcms.com/docs/validation/overview#local-api
+   */
+  validate = async <TSlug extends CollectionSlug>(
+    options: ValidateCollectionOptions<TSlug>,
+  ): Promise<ValidationResult> => {
+    return validateLocal<TSlug>(this, options)
+  }
+
+  /**
+   * Validates a global document candidate for selected locales without persisting data or
+   * versions.
+   *
+   * The stored main global is the default base; `draft: true` selects the newest available draft
+   * version and falls back to the main global. Partial candidate data is merged over that base.
+   * Field validation failures resolve to `{ valid: false, errors }`; access, argument, and other
+   * lifecycle errors throw.
+   *
+   * @see https://payloadcms.com/docs/validation/overview#local-api
+   */
+  validateGlobal = async <TSlug extends GlobalSlug>(
+    options: ValidateGlobalOptions<TSlug>,
+  ): Promise<ValidationResult> => {
+    return validateGlobalLocal<TSlug>(this, options)
+  }
+
   validationRules!: (args: OperationArgs<any>) => ValidationRule[]
 
   verifyEmail = async <TSlug extends CollectionSlug>(
@@ -825,7 +873,6 @@ export class BasePayload {
                 const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
 
                 if (!shouldAutoRun) {
-                  jobAutorunCron.stop()
                   return
                 }
               }
@@ -833,6 +880,7 @@ export class BasePayload {
               await this.jobs.run({
                 allQueues: cronConfig.allQueues,
                 limit: cronConfig.limit ?? DEFAULT_LIMIT,
+                overrideAccess: true,
                 queue: cronConfig.queue,
                 silent: cronConfig.silent,
               })
@@ -1011,16 +1059,6 @@ export class BasePayload {
       }
 
       this.email = consoleEmailAdapter({ payload: this })
-    }
-
-    // Warn if image resizing is enabled but sharp is not installed
-    if (
-      !this.config.sharp &&
-      this.config.collections.some((c) => c.upload.imageSizes || c.upload.formatOptions)
-    ) {
-      this.logger.warn(
-        `Image resizing is enabled for one or more collections, but sharp not installed. Please install 'sharp' and pass into the config.`,
-      )
     }
 
     // Warn if user is deploying to Vercel, and any upload collection is missing a storage adapter
@@ -1406,6 +1444,8 @@ export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
 export * from './auth/index.js'
 export { jwtSign } from './auth/jwt.js'
+export { JWT_AUTH_VERSION } from './auth/jwtAuth.js'
+export type { JWTAuthVersion } from './auth/jwtAuth.js'
 export { accessOperation } from './auth/operations/access.js'
 export { forgotPasswordOperation } from './auth/operations/forgotPassword.js'
 export { initOperation } from './auth/operations/init.js'
@@ -1443,11 +1483,10 @@ export type {
   SanitizedPermissions,
   VerifyConfig,
 } from './auth/types.js'
-export { generateImportMap } from './bin/generateImportMap/index.js'
-export type { ImportMap } from './bin/generateImportMap/index.js'
+export { generateImportMap } from './cli/commands/generateImportMap/generateImportMap.js'
+export type { ImportMap } from './cli/commands/generateImportMap/generateImportMap.js'
 
-export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
-export { migrate as migrateCLI } from './bin/migrate.js'
+export { genImportMapIterateFields } from './cli/commands/generateImportMap/iterateFields.js'
 export {
   type ClientCollectionConfig,
   createClientCollectionConfig,
@@ -1499,9 +1538,10 @@ export type {
 export type { CompoundIndex, FoldersConfig, TagsConfig } from './collections/config/types.js'
 
 export type { SanitizedCompoundIndex } from './collections/config/types.js'
-export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
 
+export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
 export { countOperation } from './collections/operations/count.js'
+
 export { createOperation } from './collections/operations/create.js'
 export { deleteOperation } from './collections/operations/delete.js'
 export { deleteByIDOperation } from './collections/operations/deleteByID.js'
@@ -1511,6 +1551,32 @@ export { findOperation } from './collections/operations/find.js'
 export { findByIDOperation } from './collections/operations/findByID.js'
 export { findVersionByIDOperation } from './collections/operations/findVersionByID.js'
 export { findVersionsOperation } from './collections/operations/findVersions.js'
+export {
+  countDocumentsInputSchema,
+  countDocumentsLocalInputSchema,
+  countVersionsInputSchema,
+  countVersionsLocalInputSchema,
+  createDocumentsInputSchema,
+  createDocumentsLocalInputSchema,
+  deleteDocumentsInputSchema,
+  deleteDocumentsLocalInputSchema,
+  duplicateDocumentInputSchema,
+  duplicateDocumentLocalInputSchema,
+  findDistinctInputSchema,
+  findDistinctLocalInputSchema,
+  findDocumentsInputSchema,
+  findDocumentsLocalInputSchema,
+  findVersionByIDInputSchema,
+  findVersionByIDLocalInputSchema,
+  findVersionsInputSchema,
+  findVersionsLocalInputSchema,
+  getCollectionSchemaInputSchema,
+  restoreVersionInputSchema,
+  restoreVersionLocalInputSchema,
+  updateDocumentInputSchema,
+  updateDocumentLocalInputSchema,
+} from './collections/operations/inputSchemas.js'
+export type { ValidateCollectionOptions } from './collections/operations/local/validate.js'
 export { restoreVersionOperation } from './collections/operations/restoreVersion.js'
 export { updateOperation } from './collections/operations/update.js'
 export { updateByIDOperation } from './collections/operations/updateByID.js'
@@ -1525,11 +1591,11 @@ export {
   type UnauthenticatedClientConfig,
 } from './config/client.js'
 export { addDefaultsToConfig } from './config/defaults.js'
+
 export { definePlugin } from './config/definePlugin.js'
-
 export { type OrderableEndpointBody } from './config/orderable/index.js'
-
 export { sanitizeConfig } from './config/sanitize.js'
+
 export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
 export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
@@ -1555,9 +1621,15 @@ export { validateQueryPaths } from './database/queryValidation/validateQueryPath
 export { validateSearchParam } from './database/queryValidation/validateSearchParams.js'
 export type {
   BaseDatabaseAdapter,
+  BatchProcessing,
+  BatchProcessingArgs,
+  BatchProcessingOperation,
+  BatchProcessingResult,
   BeginTransaction,
   CommitTransaction,
   Connect,
+  Copy,
+  CopyArgs,
   Count,
   CountArgs,
   CountGlobalVersionArgs,
@@ -1570,6 +1642,7 @@ export type {
   CreateGlobalVersion,
   CreateGlobalVersionArgs,
   CreateMigration,
+  CreateMigrationResult,
   CreateVersion,
   CreateVersionArgs,
   DatabaseAdapterResult as DatabaseAdapterObj,
@@ -1596,6 +1669,8 @@ export type {
   Init,
   Migration,
   MigrationData,
+  MigrationResult,
+  MigrationStatus,
   MigrationTemplateArgs,
   PaginatedDistinctDocs,
   PaginatedDocs,
@@ -1619,8 +1694,8 @@ export type {
   UpsertArgs,
 } from './database/types.js'
 export type { DynamicMigrationTemplate } from './database/types.js'
-export type { EmailAdapter as PayloadEmailAdapter, SendEmailOptions } from './email/types.js'
 
+export type { EmailAdapter as PayloadEmailAdapter, SendEmailOptions } from './email/types.js'
 export {
   APIError,
   APIErrorName,
@@ -1644,18 +1719,20 @@ export {
   MissingFile,
   NotFound,
   QueryError,
+  TransformerContractError,
   UnauthorizedError,
   UnverifiedEmail,
   ValidationError,
   ValidationErrorName,
 } from './errors/index.js'
-export type { ValidationFieldError } from './errors/index.js'
 
+export type { ValidationFieldError } from './errors/index.js'
+export type { Authorship, SanitizedAuthorship } from './fields/baseFields/authorship/index.js'
+export { createCreatedByField, createUpdatedByField } from './fields/baseFields/authorship/index.js'
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 export { baseIDField } from './fields/baseFields/baseIDField.js'
-export { getSlugFallbackValue } from './fields/baseFields/slug/getSlugFallbackValue.js'
 
-export type { SlugFieldClientProps } from './fields/baseFields/slug/types.js'
+export { getSlugFallbackValue } from './fields/baseFields/slug/getSlugFallbackValue.js'
 
 export interface FieldCustom extends Record<string, any> {}
 
@@ -1667,6 +1744,7 @@ export interface GlobalCustom extends Record<string, any> {}
 
 export interface GlobalAdminCustom extends Record<string, any> {}
 
+export type { SlugFieldClientProps } from './fields/baseFields/slug/types.js'
 export {
   createClientBlocks,
   createClientField,
@@ -1674,9 +1752,8 @@ export {
   type ServerOnlyFieldAdminProperties,
   type ServerOnlyFieldProperties,
 } from './fields/config/client.js'
-export { sanitizeField, sanitizeFields } from './fields/config/sanitize.js'
 
-export type { SanitizeFieldArgs } from './fields/config/sanitize.js'
+export { sanitizeField, sanitizeFields } from './fields/config/sanitize.js'
 
 export interface FieldCustom extends Record<string, any> {}
 
@@ -1688,6 +1765,7 @@ export interface GlobalCustom extends Record<string, any> {}
 
 export interface GlobalAdminCustom extends Record<string, any> {}
 
+export type { SanitizeFieldArgs } from './fields/config/sanitize.js'
 export type {
   AdminClient,
   ArrayField,
@@ -1800,18 +1878,18 @@ export type {
   ValidateOptions,
   ValueWithRelation,
 } from './fields/config/types.js'
+
 export { getDefaultValue } from './fields/getDefaultValue.js'
-
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
-export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
 
+export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
+
 export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
 
 export { validateBlocksFilterOptions, validations } from './fields/validations.js'
-
 export type {
   ArrayFieldValidation,
   BlocksFieldValidation,
@@ -1843,6 +1921,7 @@ export type {
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
+
 export {
   type ClientGlobalConfig,
   createClientGlobalConfig,
@@ -1850,7 +1929,6 @@ export {
   type ServerOnlyGlobalAdminProperties,
   type ServerOnlyGlobalProperties,
 } from './globals/config/client.js'
-
 export type {
   AfterChangeHook as GlobalAfterChangeHook,
   AfterReadHook as GlobalAfterReadHook,
@@ -1867,8 +1945,23 @@ export type {
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 export { findOneOperation } from './globals/operations/findOne.js'
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
-
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
+export {
+  countGlobalVersionsInputSchema,
+  countGlobalVersionsLocalInputSchema,
+  findGlobalInputSchema,
+  findGlobalLocalInputSchema,
+  findGlobalVersionByIDInputSchema,
+  findGlobalVersionByIDLocalInputSchema,
+  findGlobalVersionsInputSchema,
+  findGlobalVersionsLocalInputSchema,
+  getGlobalSchemaInputSchema,
+  restoreGlobalVersionInputSchema,
+  restoreGlobalVersionLocalInputSchema,
+  updateGlobalInputSchema,
+  updateGlobalLocalInputSchema,
+} from './globals/operations/inputSchemas.js'
+export type { ValidateGlobalOptions } from './globals/operations/local/validate.js'
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
 export {
@@ -1894,9 +1987,9 @@ export type {
 } from './hierarchy/types.js'
 export type { Ancestor } from './hierarchy/utils/getAncestors.js'
 export { getAncestors } from './hierarchy/utils/getAncestors.js'
+
 export * from './kv/adapters/DatabaseKVAdapter.js'
 export * from './kv/adapters/InMemoryKVAdapter.js'
-
 export * from './kv/index.js'
 export type {
   CollapsedPreferences,
@@ -1917,6 +2010,7 @@ export type {
 } from './preferences/types.js'
 export type { QueryPreset } from './query-presets/types.js'
 export { jobAfterRead } from './queues/config/collection.js'
+
 export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types/index.js'
 export type {
   RunInlineTaskFunction,
@@ -1931,7 +2025,6 @@ export type {
   TaskOutput,
   TaskSlug,
 } from './queues/config/types/taskTypes.js'
-
 export type {
   ConcurrencyConfig,
   JobLog,
@@ -1941,20 +2034,23 @@ export type {
   WorkflowHandler,
   WorkflowSlug,
 } from './queues/config/types/workflowTypes.js'
+
 export { JobCancelledError } from './queues/errors/index.js'
 export { countRunnableOrActiveJobsForQueue } from './queues/operations/handleSchedules/countRunnableOrActiveJobsForQueue.js'
-
 export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
+
 export {
   _internal_jobSystemGlobals,
   _internal_resetJobSystemGlobals,
   getCurrentDate,
 } from './queues/utilities/getCurrentDate.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
-
 export * from './types/index.js'
+export type { ValidationResult } from './types/validation.js'
+export { generatePayloadFileURL } from './uploads/generatePayloadFileURL.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
+export type * from './uploads/transformers/types.js'
 export type * from './uploads/types.js'
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
@@ -1971,8 +2067,11 @@ export {
   withNullableJSONSchemaType,
 } from './utilities/configToJSONSchema.js'
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
-export { createLocalReq } from './utilities/createLocalReq.js'
-export { createPayloadRequest } from './utilities/createPayloadRequest.js'
+export {
+  createPayloadRequest,
+  type CreatePayloadRequestArgs,
+} from './utilities/createPayloadRequest.js'
+export { createPayloadRequestFromWebRequest } from './utilities/createPayloadRequestFromWebRequest.js'
 export {
   deepCopyObject,
   deepCopyObjectComplex,
@@ -1990,6 +2089,15 @@ export {
 } from './utilities/dependencies/dependencyChecker.js'
 export { getDependencies } from './utilities/dependencies/getDependencies.js'
 export { dynamicImport } from './utilities/dynamicImport.js'
+export {
+  getCollectionInputSchema,
+  getGlobalInputSchema,
+} from './utilities/entityInputSchema/getEntityInputSchema.js'
+export type { EntityInputSchema } from './utilities/entityInputSchema/types.js'
+export {
+  validateCollectionData,
+  validateGlobalData,
+} from './utilities/entityInputSchema/validateEntityData.js'
 export { escapeRegExp } from './utilities/escapeRegExp.js'
 export {
   findUp,
@@ -2007,7 +2115,12 @@ export { getFieldByPath } from './utilities/getFieldByPath.js'
 export { getObjectDotNotation } from './utilities/getObjectDotNotation.js'
 export { getRequestLanguage } from './utilities/getRequestLanguage.js'
 export { getUniqueFieldValue } from './utilities/getUniqueFieldValue.js'
-export { hasDraftsEnabled } from './utilities/getVersionsConfig.js'
+export { hasDraftsEnabled, hasDraftValidationEnabled } from './utilities/getVersionsConfig.js'
+export {
+  getCollectionVirtualFieldNames,
+  getGlobalVirtualFieldNames,
+  stripVirtualFields,
+} from './utilities/getVirtualFieldNames.js'
 export { handleEndpoints } from './utilities/handleEndpoints.js'
 export { headersWithCors } from './utilities/headersWithCors.js'
 export { initTransaction } from './utilities/initTransaction.js'
@@ -2030,9 +2143,12 @@ export type { JoinParams } from './utilities/sanitizeJoinParams.js'
 export { sanitizePopulateParam } from './utilities/sanitizePopulateParam.js'
 export { sanitizeSelectParam } from './utilities/sanitizeSelectParam.js'
 export { sanitizeSortParams } from './utilities/sanitizeSortParams.js'
+export { getConfigInfoInputSchema } from './utilities/sharedInputSchemas.js'
 export { stripUnselectedFields } from './utilities/stripUnselectedFields.js'
+export { transformPointDataToPayload } from './utilities/transformPointDataToPayload.js'
 export { traverseFields } from './utilities/traverseFields.js'
 export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
+export { strictObject } from './utilities/zod.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
 export { buildVersionCompoundIndexes } from './versions/buildVersionCompoundIndexes.js'
@@ -2050,3 +2166,4 @@ export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
 
 export type { SchedulePublish, TypeWithVersion } from './versions/types.js'
 export { deepMergeSimple } from '@payloadcms/translations/utilities'
+export { z } from 'zod/mini'

@@ -22,6 +22,7 @@ export const hierarchyCollectionBeforeDelete =
     // Delete all child folders (cascade delete)
     await req.payload.delete({
       collection: collection.slug,
+      overrideAccess: true,
       req,
       where: {
         [parentFieldName]: {

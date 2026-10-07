@@ -2,7 +2,7 @@ import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
+import type { FieldOperation, JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { Block, Field, TabAsField, Validate } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
@@ -46,7 +46,7 @@ type Args = {
   global: null | SanitizedGlobalConfig
   id?: number | string
   mergeLocaleActions: (() => Promise<void> | void)[]
-  operation: Operation
+  operation: FieldOperation
   overrideAccess: boolean
   parentIndexPath: string
   parentIsLocalized: boolean
@@ -58,6 +58,7 @@ type Args = {
   siblingDocWithLocales?: JsonObject
   siblingFields?: (Field | TabAsField)[]
   skipValidation: boolean
+  submittedTopLevelFieldNames?: ReadonlySet<string>
 }
 
 // This function is responsible for the following actions, in order:
@@ -94,6 +95,7 @@ export const promise = async ({
   siblingDocWithLocales,
   siblingFields,
   skipValidation,
+  submittedTopLevelFieldNames,
 }: Args): Promise<void> => {
   const { indexPath, path, schemaPath } = getFieldPaths({
     field,
@@ -121,14 +123,22 @@ export const promise = async ({
         }),
       )
     : true
-  let skipValidationFromHere = skipValidation || !passesCondition
+  const isOutsideSubmittedFieldScope =
+    submittedTopLevelFieldNames !== undefined &&
+    fieldAffectsData(field) &&
+    !submittedTopLevelFieldNames.has(pathSegments[0]!)
+  let skipValidationFromHere = skipValidation || isOutsideSubmittedFieldScope || !passesCondition
 
   if (fieldAffectsData(field)) {
-    // skip validation if the field is localized and the incoming data is null
-    if (fieldShouldBeLocalized({ field, parentIsLocalized }) && operationLocale !== defaultLocale) {
-      if (['array', 'blocks'].includes(field.type) && siblingData[field.name!] === null) {
-        skipValidationFromHere = true
-      }
+    const shouldSkipValidationForLocalizedFallback =
+      operation !== 'validate' &&
+      fieldShouldBeLocalized({ field, parentIsLocalized }) &&
+      operationLocale !== defaultLocale &&
+      ['array', 'blocks'].includes(field.type) &&
+      siblingData[field.name!] === null
+
+    if (shouldSkipValidationForLocalizedFallback) {
+      skipValidationFromHere = true
     }
 
     // Execute hooks
@@ -160,6 +170,18 @@ export const promise = async ({
           siblingData[field.name] = hookedValue
         }
       }
+    }
+
+    if (hasInvalidFieldValueShape({ field, value: siblingData[field.name!] })) {
+      errors.push({
+        label: buildFieldLabel(
+          fieldLabelPath,
+          getTranslatedLabel(field?.label || field?.name, req.i18n),
+        ),
+        message: req.t('validation:invalidInput'),
+        path,
+      })
+      return
     }
 
     // Validate
@@ -332,6 +354,7 @@ export const promise = async ({
                 siblingDocWithLocales?.[field.name],
               ),
               skipValidation: skipValidationFromHere,
+              submittedTopLevelFieldNames,
             }),
           )
         })
@@ -398,6 +421,7 @@ export const promise = async ({
                 siblingDoc: rowSiblingDoc,
                 siblingDocWithLocales: rowSiblingDocWithLocales,
                 skipValidation: skipValidationFromHere,
+                submittedTopLevelFieldNames,
               }),
             )
           }
@@ -441,6 +465,7 @@ export const promise = async ({
         siblingDoc,
         siblingDocWithLocales: siblingDocWithLocales!,
         skipValidation: skipValidationFromHere,
+        submittedTopLevelFieldNames,
       })
 
       break
@@ -511,6 +536,7 @@ export const promise = async ({
         siblingDoc: groupSiblingDoc,
         siblingDocWithLocales: groupSiblingDocWithLocales!,
         skipValidation: skipValidationFromHere,
+        submittedTopLevelFieldNames,
       })
 
       break
@@ -576,7 +602,7 @@ export const promise = async ({
             schemaPath: schemaPathSegments,
             siblingData,
             siblingDocWithLocales,
-            skipValidation,
+            skipValidation: skipValidationFromHere,
             value: siblingData[field.name],
           })
 
@@ -644,6 +670,7 @@ export const promise = async ({
         siblingDoc: tabSiblingDoc,
         siblingDocWithLocales: tabSiblingDocWithLocales!,
         skipValidation: skipValidationFromHere,
+        submittedTopLevelFieldNames,
       })
 
       break
@@ -677,6 +704,7 @@ export const promise = async ({
         siblingDoc,
         siblingDocWithLocales: siblingDocWithLocales!,
         skipValidation: skipValidationFromHere,
+        submittedTopLevelFieldNames,
       })
 
       break
@@ -686,4 +714,49 @@ export const promise = async ({
       break
     }
   }
+}
+
+function hasInvalidFieldValueShape({
+  field,
+  value,
+}: {
+  field: Field | TabAsField
+  value: unknown
+}): boolean {
+  if (value === null || typeof value === 'undefined' || !fieldAffectsData(field)) {
+    return false
+  }
+
+  if (field.type === 'array' || field.type === 'blocks') {
+    // Form state may use a numeric row count, while submitted values use arrays.
+    return !(Array.isArray(value) || typeof value === 'number')
+  }
+
+  if (field.type === 'number') {
+    // Only hasMany number fields may receive arrays.
+    return typeof value === 'object' && !(field.hasMany && Array.isArray(value))
+  }
+
+  if ((field.type === 'relationship' || field.type === 'upload') && field.hasMany) {
+    // HasMany relationships/uploads may receive arrays or one valid polymorphic value.
+    if (typeof value !== 'object' || Array.isArray(value)) {
+      return false
+    }
+
+    const relationshipValue = value as Record<PropertyKey, unknown>
+    const valuePrototype = Object.getPrototypeOf(value)
+    const isSinglePolymorphicRelationshipValue =
+      Array.isArray(field.relationTo) &&
+      (valuePrototype === null || valuePrototype === Object.prototype) &&
+      Object.hasOwn(relationshipValue, 'relationTo') &&
+      Object.hasOwn(relationshipValue, 'value') &&
+      Reflect.ownKeys(relationshipValue).length === 2 &&
+      typeof relationshipValue.relationTo === 'string' &&
+      field.relationTo.includes(relationshipValue.relationTo) &&
+      (typeof relationshipValue.value === 'string' || typeof relationshipValue.value === 'number')
+
+    return !isSinglePolymorphicRelationshipValue
+  }
+
+  return false
 }

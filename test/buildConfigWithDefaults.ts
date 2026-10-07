@@ -25,13 +25,19 @@ import {
   UnorderedListFeature,
   UploadFeature,
 } from '@payloadcms/richtext-lexical'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import { buildConfig } from 'payload'
 import { de } from 'payload/i18n/de'
 import { en } from 'payload/i18n/en'
 import { es } from 'payload/i18n/es'
 import sharp from 'sharp'
 
-import { reInitEndpoint } from './__helpers/shared/clearAndSeed/reInitEndpoint.js'
+import { createReInitEndpoint } from './__helpers/shared/clearAndSeed/reInitEndpoint.js'
+import { createSeedCommand } from './__helpers/shared/clearAndSeed/seedCommand.js'
+import {
+  type SeedFunction,
+  testDataConfigSymbol,
+} from './__helpers/shared/clearAndSeed/testDataConfig.js'
 import { localAPIEndpoint } from './__helpers/shared/sdk/endpoint.js'
 import { databaseAdapter } from './databaseAdapter.js'
 import { testEmailAdapter } from './testEmailAdapter.js'
@@ -40,12 +46,22 @@ import { testEmailAdapter } from './testEmailAdapter.js'
 // process.env.PAYLOAD_DATABASE = 'postgres'
 // process.env.PAYLOAD_DATABASE = 'sqlite'
 
-export async function buildConfigWithDefaults(
-  testConfig?: Partial<Config>,
-  options?: {
-    disableAutoLogin?: boolean
-  },
-): Promise<SanitizedConfig> {
+type BuildConfigWithDefaultsArgs = {
+  config: Partial<Config>
+  disableAutoLogin?: boolean
+  disableMCP?: boolean
+  seed?: SeedFunction
+  suite: string
+}
+
+export async function buildConfigWithDefaults({
+  config: testConfig,
+  disableAutoLogin,
+  disableMCP,
+  seed,
+  suite,
+}: BuildConfigWithDefaultsArgs): Promise<SanitizedConfig> {
+  const testDataConfig = { seed, suite }
   const config: Config = {
     db: databaseAdapter,
     editor: lexicalEditor({
@@ -132,10 +148,13 @@ export async function buildConfigWithDefaults(
     }),
     email: testEmailAdapter,
     secret: 'TEST_SECRET',
-    sharp,
     telemetry: false,
     ...testConfig,
-    endpoints: [localAPIEndpoint, reInitEndpoint, ...(testConfig?.endpoints || [])],
+    endpoints: [
+      localAPIEndpoint,
+      createReInitEndpoint(testDataConfig),
+      ...(testConfig?.endpoints || []),
+    ],
     i18n: {
       supportedLanguages: {
         de,
@@ -160,7 +179,7 @@ export async function buildConfigWithDefaults(
 
   if (config.admin.autoLogin === undefined) {
     config.admin.autoLogin =
-      process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true' || options?.disableAutoLogin
+      process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true' || disableAutoLogin
         ? false
         : {
             email: 'dev@payloadcms.com',
@@ -177,9 +196,37 @@ export async function buildConfigWithDefaults(
   // Auto-add the MCP plugin so every test suite exercises it. Suites that need
   // to configure it explicitly add their own `mcpPlugin({...})` call.
   const hasMcpPlugin = (config.plugins ?? []).some((p) => p.slug === '@payloadcms/plugin-mcp')
-  if (!hasMcpPlugin) {
+  if (!disableMCP && !hasMcpPlugin) {
     config.plugins = [...(config.plugins ?? []), mcpPlugin({})]
   }
 
-  return await buildConfig(config)
+  // Auto-register the Sharp transformer so every test suite keeps its existing
+  // upload-time image processing (variants/resizeOptions/crop/focalPoint).
+  // Suites that need to configure `upload.transformers` themselves (e.g. to add
+  // a custom slug or fixture transformers) set their own array, which wins here.
+  if (!config.upload) {
+    config.upload = {}
+  }
+  if (!config.upload.transformers) {
+    config.upload.transformers = [sharpTransformer({ sharp })]
+  }
+
+  if (config.cli !== false) {
+    config.cli = {
+      ...config.cli,
+      commands: {
+        ...config.cli?.commands,
+        seed: createSeedCommand(testDataConfig),
+      },
+    }
+  }
+
+  const sanitizedConfig = await buildConfig(config)
+
+  Object.defineProperty(sanitizedConfig, testDataConfigSymbol, {
+    enumerable: false,
+    value: testDataConfig,
+  })
+
+  return sanitizedConfig
 }

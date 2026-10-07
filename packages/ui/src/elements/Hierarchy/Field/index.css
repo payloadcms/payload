@@ -7,7 +7,6 @@
 
   .hierarchy-field .field-label {
     display: flex;
-    font-family: var(--text-body-large-font-family);
     font-size: var(--text-body-large-font-size);
     font-weight: var(--text-body-large-font-weight);
     line-height: var(--text-body-large-line-height);

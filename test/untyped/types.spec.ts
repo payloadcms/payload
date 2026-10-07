@@ -41,6 +41,7 @@ describe('Untyped Payload types', () => {
         data: {
           title: 'Example',
         },
+        overrideAccess: true,
       }),
     ).type.toBe<Promise<JsonObject & TypeWithID>>()
   })

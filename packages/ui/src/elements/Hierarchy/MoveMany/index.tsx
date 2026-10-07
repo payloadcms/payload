@@ -15,6 +15,10 @@ import { useDocumentSelection } from '../../../providers/DocumentSelection/index
 import { useLocale } from '../../../providers/Locale/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { requests } from '../../../utilities/api.js'
+import {
+  getEffectiveHierarchyCollections,
+  getHierarchyCollectionRestrictions,
+} from '../../../utilities/hierarchyCollectionRestrictions.js'
 import { ConfirmationModal } from '../../ConfirmationModal/index.js'
 import { ListSelectionButton } from '../../ListSelection/index.js'
 import { Translation } from '../../Translation/index.js'
@@ -33,6 +37,8 @@ type MoveManyProps = {
   modalPrefix?: string
   /** Callback after successful move */
   onSuccess?: () => void
+  /** Collection slugs required by the selected documents at the destination. */
+  requiredCollections?: string[]
   /** Selections grouped by collection slug */
   selections: Record<string, { ids: (number | string)[] }>
 }
@@ -56,6 +62,7 @@ export function MoveMany({
   Icon,
   modalPrefix,
   onSuccess,
+  requiredCollections: requiredCollectionsProp,
   selections,
 }: MoveManyProps) {
   const { i18n, t } = useTranslation()
@@ -70,6 +77,12 @@ export function MoveMany({
   } = useConfig()
 
   const { getSelectionsWithMetadata } = useDocumentSelection()
+  const hierarchyCollectionConfig = collections.find((c) => c.slug === hierarchySlug)
+
+  const { relatedCollectionSlugs } = useMemo(
+    () => getHierarchyCollectionRestrictions({ collectionConfig: hierarchyCollectionConfig }),
+    [hierarchyCollectionConfig],
+  )
 
   const [destination, setDestination] = useState<{
     id: null | number | string
@@ -81,7 +94,7 @@ export function MoveMany({
   // Compute required collections from selection metadata
   // For related items: add their collection slug
   // For folders: add their allowedCollections values
-  const requiredCollections = useMemo(() => {
+  const inferredRequiredCollections = useMemo(() => {
     const selectionsWithMeta = getSelectionsWithMetadata()
     const required = new Set<string>()
 
@@ -89,10 +102,11 @@ export function MoveMany({
       if (collectionSlug === hierarchySlug) {
         // For folders, add their allowedCollections to required set
         for (const { metadata } of items) {
-          if (metadata.allowedCollections) {
-            for (const slug of metadata.allowedCollections) {
-              required.add(slug)
-            }
+          for (const slug of getEffectiveHierarchyCollections({
+            allowedCollections: metadata.allowedCollections,
+            relatedCollectionSlugs,
+          })) {
+            required.add(slug)
           }
         }
       } else {
@@ -102,7 +116,9 @@ export function MoveMany({
     }
 
     return required.size > 0 ? Array.from(required) : undefined
-  }, [getSelectionsWithMetadata, hierarchySlug])
+  }, [getSelectionsWithMetadata, hierarchySlug, relatedCollectionSlugs])
+
+  const requiredCollections = requiredCollectionsProp ?? inferredRequiredCollections
 
   // Folders being moved cannot be selected as destination (can't move into themselves)
   const disabledIds = useMemo(() => {
@@ -141,7 +157,6 @@ export function MoveMany({
     }
   }, [selections, collections, i18n])
 
-  const hierarchyCollectionConfig = collections.find((c) => c.slug === hierarchySlug)
   const parentFieldName = getParentFieldName(hierarchyCollectionConfig)
 
   // Check if hierarchy has a valid parentFieldName

@@ -68,10 +68,11 @@ export async function verifyUploads({
   const uploadData = (await payload.findByID({
     collection: collectionSlug as CollectionSlug,
     id: uploadId,
-  })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
+    overrideAccess: true,
+  })) as unknown as { filename: string; variants: Record<string, { filename: string }> }
 
-  const fileKeys = Object.keys(uploadData.sizes || {}).map((key) => {
-    const rawFilename = uploadData?.sizes?.[key]?.filename
+  const fileKeys = Object.keys(uploadData.variants || {}).map((key) => {
+    const rawFilename = uploadData?.variants?.[key]?.filename
     return prefix ? `${prefix}/${rawFilename}` : rawFilename
   })
 

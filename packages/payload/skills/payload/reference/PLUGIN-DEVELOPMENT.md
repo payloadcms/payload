@@ -54,7 +54,7 @@ plugin-<name>/
 ├── README.md                 # Plugin documentation
 ├── LICENSE.md                # License file
 ├── eslint.config.js          # ESLint configuration (optional)
-├── vitest.config.js          # Vitest test configuration (optional)
+├── vitest.config.ts          # Vitest test configuration (optional)
 ├── playwright.config.js      # Playwright e2e tests (optional)
 └── src/
     ├── index.ts              # Entry point, re-exports plugin and config types
@@ -87,7 +87,7 @@ plugin-<name>/
 - **src/exports/rsc.ts** for React Server Component exports
 - **src/components/** for organizing React components
 - **src/endpoints/** for custom API endpoint handlers
-- Test configuration files (vitest.config.js, playwright.config.js)
+- Test configuration files (vitest.config.ts, playwright.config.js)
 
 ## Package.json Configuration
 
@@ -136,29 +136,32 @@ plugin-<name>/
     "prepublishOnly": "npm run clean && npm run build"
   },
   "dependencies": {
-    "@payloadcms/translations": "^3.0.0",
-    "@payloadcms/ui": "^3.0.0"
+    "@payloadcms/translations": "^3.82.1",
+    "@payloadcms/ui": "^3.82.1"
   },
   "devDependencies": {
-    "@payloadcms/db-mongodb": "^3.0.0",
-    "@payloadcms/next": "^3.0.0",
-    "@payloadcms/richtext-lexical": "^3.0.0",
-    "@playwright/test": "^1.40.0",
-    "@swc/cli": "^0.1.62",
-    "@swc/core": "^1.3.0",
+    "@payloadcms/db-mongodb": "^3.82.1",
+    "@payloadcms/next": "^3.82.1",
+    "@payloadcms/richtext-lexical": "^3.82.1",
+    "@playwright/test": "^1.63.0",
+    "@swc/cli": "^0.7.9",
+    "@swc/core": "^1.15.3",
     "copyfiles": "^2.4.1",
     "cross-env": "10.1.0",
-    "eslint": "^9.0.0",
-    "next": "^15.4.10",
-    "payload": "^3.0.0",
-    "react": "^19.2.1",
-    "react-dom": "^19.2.1",
-    "rimraf": "^5.0.0",
-    "typescript": "^6.0.0",
-    "vitest": "4.1.6"
+    "eslint": "^9.39.2",
+    "next": "^16.4.0",
+    "payload": "^3.82.1",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^6.0.3",
+    "vitest": "5.0.1"
   },
   "peerDependencies": {
-    "payload": "^3.0.0"
+    "payload": "^3.82.1"
+  },
+  "engines": {
+    "node": ">=24.15.0"
   }
 }
 ```
@@ -246,12 +249,14 @@ const resaveChildrenHook: CollectionAfterChangeHook = async ({ doc, req, operati
     // Resave child documents
     const children = await req.payload.find({
       collection: 'pages',
+      overrideAccess: true,
       where: { parent: { equals: doc.id } },
     })
 
     for (const child of children.docs) {
       await req.payload.update({
         collection: 'pages',
+        overrideAccess: true,
         id: child.id,
         data: child,
       })
@@ -596,12 +601,14 @@ export const myPlugin =
       // Example: Seed data
       const { totalDocs } = await payload.count({
         collection: 'plugin-collection',
+        overrideAccess: true,
         where: { id: { equals: 'seeded-by-plugin' } },
       })
 
       if (totalDocs === 0) {
         await payload.create({
           collection: 'plugin-collection',
+          overrideAccess: true,
           data: { id: 'seeded-by-plugin' },
         })
       }
@@ -661,10 +668,11 @@ import type { MyPluginConfig } from '@payloadcms/plugin-example/types'
 ```tsx
 // src/fields/CustomField/Component.tsx
 'use client'
+import type React from 'react'
 import { useField } from '@payloadcms/ui'
-import type { TextFieldClientComponent } from 'payload'
+import type { TextFieldClientProps } from 'payload'
 
-export const CustomFieldComponent: TextFieldClientComponent = ({ field, path }) => {
+export const CustomFieldComponent: React.FC<TextFieldClientProps> = ({ field, path }) => {
   const { value, setValue } = useField<string>({ path })
 
   return (
@@ -1343,7 +1351,7 @@ Create `dev/int.spec.ts`:
 ```ts
 import type { Payload } from 'payload'
 import config from '@payload-config'
-import { createPayloadRequest, getPayload } from 'payload'
+import { createPayloadRequestFromWebRequest, getPayload } from 'payload'
 import { afterAll, beforeAll, describe, expect, test } from 'vitest'
 import { customEndpointHandler } from '../src/endpoints/handler.js'
 
@@ -1361,6 +1369,7 @@ describe('Plugin integration tests', () => {
   test('should add field to collection', async () => {
     const post = await payload.create({
       collection: 'posts',
+      overrideAccess: true,
       data: {
         title: 'Test',
         addedByPlugin: 'plugin value',
@@ -1371,13 +1380,13 @@ describe('Plugin integration tests', () => {
 
   test('should create plugin collection', async () => {
     expect(payload.collections['plugin-collection']).toBeDefined()
-    const { docs } = await payload.find({ collection: 'plugin-collection' })
+    const { docs } = await payload.find({ collection: 'plugin-collection', overrideAccess: true })
     expect(docs.length).toBeGreaterThan(0)
   })
 
   test('should query custom endpoint', async () => {
     const request = new Request('http://localhost:3000/api/my-endpoint')
-    const payloadRequest = await createPayloadRequest({ config, request })
+    const payloadRequest = await createPayloadRequestFromWebRequest({ config, request })
     const response = await customEndpointHandler(payloadRequest)
     const data = await response.json()
     expect(data).toMatchObject({ message: 'Hello' })

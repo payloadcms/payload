@@ -18,6 +18,7 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
     hidden: true,
     useAsTitle: 'title',
   },
+  authorship: false,
   fields: [
     {
       name: 'title',
@@ -180,7 +181,7 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
         // TODO: type this
         const typedData = data as any
 
-        if (operation === 'create' || operation === 'update') {
+        if (operation === 'create' || operation === 'update' || operation === 'validate') {
           // Ensure all operations have a constraint
           operations.forEach((operation) => {
             if (!typedData.access) {

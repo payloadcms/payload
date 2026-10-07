@@ -17,6 +17,10 @@ export type { TypeWithVersion }
 export interface BaseDatabaseAdapter {
   allowIDOnCreate?: boolean
   /**
+   * Process ordered create, update, and delete operations in bounded batches.
+   */
+  batchProcessing: BatchProcessing
+  /**
    * Start a transaction, requiring commitTransaction() to be called for any changes to be made.
    * @returns an identifier for the transaction or null if one cannot be established
    */
@@ -39,6 +43,10 @@ export interface BaseDatabaseAdapter {
    * Open the connection to the database
    */
   connect?: Connect
+  /**
+   * Copy one stored collection document without running Local API operations.
+   */
+  copy: Copy
   count: Count
   countGlobalVersions: CountGlobalVersions
   countVersions: CountVersions
@@ -92,28 +100,35 @@ export interface BaseDatabaseAdapter {
   /**
    * Run any migration up functions that have not yet been performed and update the status
    */
-  migrate: (args?: { migrations?: Migration[] }) => Promise<void>
+  migrate: (args?: {
+    forceAcceptWarning?: boolean
+    migrations?: Migration[]
+    shouldPrompt?: boolean
+  }) => Promise<MigrationResult | void>
   /**
    * Run any migration down functions that have been performed
    */
-  migrateDown: () => Promise<void>
+  migrateDown: () => Promise<MigrationResult | void>
 
   /**
    * Drop the current database and run all migrate up functions
    */
-  migrateFresh: (args: { forceAcceptWarning?: boolean }) => Promise<void>
+  migrateFresh: (args: {
+    forceAcceptWarning?: boolean
+    shouldPrompt?: boolean
+  }) => Promise<MigrationResult | void>
   /**
    * Run all migration down functions before running up
    */
-  migrateRefresh: () => Promise<void>
+  migrateRefresh: () => Promise<MigrationResult | void>
   /**
    * Run all migrate down functions
    */
-  migrateReset: () => Promise<void>
+  migrateReset: () => Promise<MigrationResult | void>
   /**
    * Read the current state of migrations and output the result to show which have been run
    */
-  migrateStatus: () => Promise<void>
+  migrateStatus: () => Promise<MigrationStatus[] | void>
 
   /**
    * Path to read and write migration files from
@@ -175,16 +190,99 @@ export type Connect = (args?: ConnectArgs) => Promise<void>
 
 export type Destroy = () => Promise<void>
 
+export type BatchProcessingOperation =
+  | {
+      args: WithoutRequest<CreateArgs>
+      operation: 'create'
+    }
+  | {
+      args: WithoutRequest<DeleteOneArgs>
+      operation: 'deleteOne'
+    }
+  | {
+      args: WithoutRequest<UpdateOneArgs>
+      operation: 'updateOne'
+    }
+
+type WithoutRequest<T> = T extends unknown ? Omit<T, 'req'> : never
+
+export type BatchProcessingResult = {
+  index: number
+  operation: BatchProcessingOperation['operation']
+} & (
+  | {
+      document?: Document
+      documentID: number | string
+      status: 'succeeded'
+    }
+  | {
+      error: unknown
+      status: 'failed'
+    }
+  | {
+      status: 'noMatch'
+    }
+  | {
+      status: 'unattempted'
+    }
+)
+
+export type BatchProcessingArgs = {
+  batchSize?: number
+  operations: BatchProcessingOperation[]
+  req?: Partial<PayloadRequest>
+  shouldContinueOnError?: boolean
+}
+
+export type BatchProcessing = (
+  this: BaseDatabaseAdapter,
+  args: BatchProcessingArgs,
+) => Promise<BatchProcessingResult[]>
+
+export type CopyArgs = {
+  collection: CollectionSlug
+  /**
+   * Top-level field values that replace values from the source document.
+   * Custom-ID collections require an `id` that matches the configured ID type.
+   */
+  data?: Record<string, unknown>
+  req?: Partial<PayloadRequest>
+  /** Selects the stored source document. */
+  where: Where
+}
+
+export type Copy = (this: BaseDatabaseAdapter, args: CopyArgs) => Promise<Document>
+
 export type CreateMigration = (args: {
   file?: string
   forceAcceptWarning?: boolean
   migrationName?: string
   payload: Payload
+  /** Set to false when the caller cannot answer interactive prompts. */
+  shouldPrompt?: boolean
   /**
    * Skips the prompt asking to create empty migrations
    */
   skipEmpty?: boolean
-}) => Promise<void> | void
+}) => CreateMigrationResult | Promise<CreateMigrationResult | void> | void
+
+export type CreateMigrationResult = {
+  created: boolean
+  path?: string
+}
+
+export type MigrationResult = {
+  batch?: number
+  cancelled?: true
+  migrated: string[]
+  rolledBack: string[]
+}
+
+export type MigrationStatus = {
+  batch?: number
+  name: string
+  ran: boolean
+}
 
 export type Transaction = (
   callback: () => Promise<void>,
@@ -523,6 +621,11 @@ export type FindDistinctArgs = {
   limit?: number
   locale?: string
   page?: number
+  /**
+   * Access constraints for relationship values traversed by the distinct field path.
+   * Keys are relationship paths relative to the queried collection.
+   */
+  relatedAccess?: Record<string, Where>
   req?: Partial<PayloadRequest>
   sort?: Sort
   where?: Where
@@ -747,4 +850,4 @@ export type GenerateSchemaArgs = {
   prettify?: boolean
 }
 
-export type GenerateSchema = (args?: GenerateSchemaArgs) => Promise<void>
+export type GenerateSchema = (args?: GenerateSchemaArgs) => Promise<{ outputFile: string }>

@@ -62,6 +62,7 @@ export const AddNewButton = ({
         }
         buttonType="custom"
         horizontalAlign="center"
+        popupType="menu"
         render={({ close: closePopup }) => (
           <PopupList.ButtonGroup>
             {relationTo.map((relatedCollection) => {

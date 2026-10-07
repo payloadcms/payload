@@ -21,7 +21,7 @@ export function ListDrawerCreateNewDocButton({
 
   return (
     <DocumentDrawerToggler
-      buttonStyle="primary"
+      buttonStyle="secondary"
       className={`${baseClass}__create-new-button`}
       key="create-new-button-toggler"
     >

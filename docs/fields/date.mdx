@@ -145,9 +145,9 @@ export const ExampleCollection: CollectionConfig = {
 ```tsx
 import type React from 'react'
 import { DateTimeField } from '@payloadcms/ui'
-import type { DateFieldServerComponent } from 'payload'
+import type { DateFieldServerProps } from 'payload'
 
-export const CustomDateFieldServer: DateFieldServerComponent = ({
+export const CustomDateFieldServer: React.FC<DateFieldServerProps> = ({
   clientField,
   path,
   schemaPath,
@@ -170,9 +170,11 @@ export const CustomDateFieldServer: DateFieldServerComponent = ({
 'use client'
 import React from 'react'
 import { DateTimeField } from '@payloadcms/ui'
-import type { DateFieldClientComponent } from 'payload'
+import type { DateFieldClientProps } from 'payload'
 
-export const CustomDateFieldClient: DateFieldClientComponent = (props) => {
+export const CustomDateFieldClient: React.FC<DateFieldClientProps> = (
+  props,
+) => {
   return <DateTimeField {...props} />
 }
 ```
@@ -184,12 +186,11 @@ export const CustomDateFieldClient: DateFieldClientComponent = (props) => {
 ```tsx
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { DateFieldLabelServerComponent } from 'payload'
+import type { DateFieldLabelServerProps } from 'payload'
 
-export const CustomDateFieldLabelServer: DateFieldLabelServerComponent = ({
-  clientField,
-  path,
-}) => {
+export const CustomDateFieldLabelServer: React.FC<
+  DateFieldLabelServerProps
+> = ({ clientField, path }) => {
   return (
     <FieldLabel
       label={clientField?.label || clientField?.name}
@@ -206,12 +207,11 @@ export const CustomDateFieldLabelServer: DateFieldLabelServerComponent = ({
 'use client'
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { DateFieldLabelClientComponent } from 'payload'
+import type { DateFieldLabelClientProps } from 'payload'
 
-export const CustomDateFieldLabelClient: DateFieldLabelClientComponent = ({
-  field,
-  path,
-}) => {
+export const CustomDateFieldLabelClient: React.FC<
+  DateFieldLabelClientProps
+> = ({ field, path }) => {
   return (
     <FieldLabel
       label={field?.label || field?.name}

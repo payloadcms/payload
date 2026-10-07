@@ -1,8 +1,10 @@
 /* eslint-disable playwright/expect-expect */
 import { expect, test } from '@playwright/test'
+import { rm, rmdir } from 'node:fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import { getSelectMenu, openSelectMenu, selectInput } from '../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -20,13 +22,12 @@ const { serverURL } = await initPayloadE2ENoConfig({
   dirname,
 })
 
-const TOTAL_WIDGETS = 15
+const TOTAL_WIDGETS = 16
 const url = new AdminUrlUtil(serverURL, 'users')
 
 describe('Dashboard', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     const page = await browser.newPage()
     await ensureCompilationIsDone({ page, serverURL })
     await page.close()
@@ -34,8 +35,6 @@ describe('Dashboard', () => {
   beforeEach(async ({ page }) => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'lexicalTest',
-      uploadsDir: [path.resolve(dirname, './collections/Upload/uploads')],
     })
     await page.goto(url.admin)
   })
@@ -45,22 +44,95 @@ describe('Dashboard', () => {
     await expect(d.widgets).toHaveCount(TOTAL_WIDGETS)
 
     await d.assertIsEditing(false)
-    await d.assertWidget(1, 'collections', 'full')
-    await d.assertWidget(2, 'count', 'x-small')
-    await d.assertWidget(3, 'count', 'x-small')
+    await d.assertWidget(1, 'welcome', 'full')
+    await expect(d.widgetByPos(1).getByRole('heading', { level: 1 })).toContainText('Welcome')
+    await d.assertWidget(2, 'activity', 'full')
+    await d.assertWidget(3, 'collections', 'full')
+    const welcomeBox = await d.widgetByPos(1).locator('.welcome-widget').boundingBox()
+    const activityBox = await d.widgetByPos(2).locator('.widget-content').boundingBox()
+    const collectionsBox = await d.widgetByPos(3).locator('.widget-content').boundingBox()
+
+    expect(welcomeBox).not.toBeNull()
+    expect(activityBox).not.toBeNull()
+    expect(collectionsBox).not.toBeNull()
+    expect(activityBox!.y - (welcomeBox!.y + welcomeBox!.height)).toBe(24)
+    expect(collectionsBox!.y - (activityBox!.y + activityBox!.height)).toBe(24)
     await d.assertWidget(4, 'count', 'x-small')
     await d.assertWidget(5, 'count', 'x-small')
-    await d.assertWidget(6, 'revenue', 'full')
-    await d.assertWidget(7, 'private', 'full')
-    await d.assertWidget(8, 'collection-query', 'medium')
-    await d.assertWidget(9, 'collection-query', 'medium')
-    await d.assertWidget(10, 'collection-query', 'x-small')
-    await d.assertWidget(11, 'collection-query', 'x-small')
+    await d.assertWidget(6, 'count', 'x-small')
+    await d.assertWidget(7, 'count', 'x-small')
+    await d.assertWidget(8, 'revenue', 'full')
+    await d.assertWidget(9, 'private', 'full')
+    await d.assertWidget(10, 'collection-query', 'medium')
+    await d.assertWidget(11, 'collection-query', 'medium')
     await d.assertWidget(12, 'collection-query', 'x-small')
     await d.assertWidget(13, 'collection-query', 'x-small')
-    await d.assertWidget(14, 'collection-query', 'medium')
-    await d.assertWidget(15, 'activity', 'medium')
+    await d.assertWidget(14, 'collection-query', 'x-small')
+    await d.assertWidget(15, 'collection-query', 'x-small')
+    await d.assertWidget(16, 'collection-query', 'medium')
     await d.validateLayout()
+  })
+
+  test('collection cards match the dashboard tile layout and reveal create on hover or focus', async ({
+    page,
+  }) => {
+    const wrap = page.locator('.collections__wrap')
+    const group = wrap.locator('.collections__group').first()
+    const card = group.locator('.card').first()
+    const actions = card.locator('.card__actions')
+    const createLink = card.getByRole('link', { name: 'Create new Users' })
+
+    await expect
+      .poll(async () => {
+        const [wrapBox, cardBox] = await Promise.all([wrap.boundingBox(), card.boundingBox()])
+
+        if (!wrapBox || !cardBox) {
+          return null
+        }
+
+        return {
+          height: cardBox.height,
+          xOffset: cardBox.x - wrapBox.x,
+          yOffset: cardBox.y - wrapBox.y,
+        }
+      })
+      .toEqual({ height: 64, xOffset: 0, yOffset: 34 })
+    await expect(card).toHaveCSS('border-radius', '13px')
+    await expect(actions).toHaveCSS('opacity', '0')
+    const defaultBackground = await card.evaluate(
+      (element) => getComputedStyle(element).backgroundColor,
+    )
+
+    for (const selector of [
+      '.count-widget.card',
+      '.revenue-widget.card',
+      '.private-widget.card',
+      '.widget-card.card',
+    ]) {
+      const widgetCard = page.locator(selector).first()
+
+      await expect(widgetCard).toHaveCSS('background-color', defaultBackground)
+      await expect(widgetCard).toHaveCSS('border-radius', '13px')
+      await expect(widgetCard).toHaveCSS('padding-top', '12px')
+    }
+
+    await expect(async () => {
+      await card.hover()
+      await expect(actions).toHaveCSS('opacity', '1')
+      await expect(card).not.toHaveCSS('background-color', defaultBackground)
+    }).toPass({ timeout: 5000 })
+
+    await expect(async () => {
+      await createLink.hover()
+      await expect(page.getByRole('tooltip')).toContainText('Create new Users')
+    }).toPass({ timeout: 5000 })
+
+    await page.mouse.move(0, 0)
+    await card.getByRole('link', { name: 'Show all Users' }).focus()
+    await page.keyboard.press('Tab')
+
+    await expect(createLink).toBeFocused()
+    await expect(actions).toHaveCSS('opacity', '1')
   })
 
   test('collection-query default layout includes valid and stale config examples', async ({
@@ -68,25 +140,25 @@ describe('Dashboard', () => {
   }) => {
     const d = new DashboardHelper(page)
 
-    await d.assertWidget(8, 'collection-query', 'medium')
-    await d.assertWidget(9, 'collection-query', 'medium')
-    await d.assertWidget(10, 'collection-query', 'x-small')
-    await d.assertWidget(11, 'collection-query', 'x-small')
+    await d.assertWidget(10, 'collection-query', 'medium')
+    await d.assertWidget(11, 'collection-query', 'medium')
     await d.assertWidget(12, 'collection-query', 'x-small')
     await d.assertWidget(13, 'collection-query', 'x-small')
+    await d.assertWidget(14, 'collection-query', 'x-small')
+    await d.assertWidget(15, 'collection-query', 'x-small')
     await expect(
-      d.widgetByPos(8).locator('.collection-query-widget .widget-card__title'),
+      d.widgetByPos(10).locator('.collection-query-widget .widget-card__title'),
     ).toHaveText('Top revenue entries')
     await expect(
-      d.widgetByPos(9).locator('.collection-query-widget .widget-card__title'),
+      d.widgetByPos(11).locator('.collection-query-widget .widget-card__title'),
     ).toHaveText('Event timeline')
   })
 
   test('collection-query short widget grows to its row height', async ({ page }) => {
     const d = new DashboardHelper(page)
 
-    const shortCard = d.widgetByPos(8).locator('.collection-query-widget')
-    const longCard = d.widgetByPos(9).locator('.collection-query-widget')
+    const shortCard = d.widgetByPos(10).locator('.collection-query-widget')
+    const longCard = d.widgetByPos(11).locator('.collection-query-widget')
     const shortRows = shortCard.locator('.widget-card__row')
 
     await expect(shortRows).toHaveCount(3)
@@ -108,8 +180,8 @@ describe('Dashboard', () => {
   test('collection-query row metadata shows configured sort values', async ({ page }) => {
     const d = new DashboardHelper(page)
 
-    const shortCard = d.widgetByPos(8).locator('.collection-query-widget')
-    const longCard = d.widgetByPos(9).locator('.collection-query-widget')
+    const shortCard = d.widgetByPos(10).locator('.collection-query-widget')
+    const longCard = d.widgetByPos(11).locator('.collection-query-widget')
 
     await expect(async () => {
       const amountLabels = await shortCard.locator('.widget-card__row-meta').allTextContents()
@@ -152,7 +224,7 @@ describe('Dashboard', () => {
     await page.goto(url.admin)
 
     const d = new DashboardHelper(page)
-    const timelineCard = d.widgetByPos(9).locator('.collection-query-widget')
+    const timelineCard = d.widgetByPos(11).locator('.collection-query-widget')
 
     // Spanish relative time via Intl.RelativeTimeFormat('es'): "hace ...", "dentro de ...",
     // "la semana pasada", "el próximo mes". None of these strings appear in the English output.
@@ -177,7 +249,7 @@ describe('Dashboard', () => {
   test('collection-query long widget shows five rows at a time and scrolls', async ({ page }) => {
     const d = new DashboardHelper(page)
 
-    const longCard = d.widgetByPos(9).locator('.collection-query-widget')
+    const longCard = d.widgetByPos(11).locator('.collection-query-widget')
     const longRows = longCard.locator('.widget-card__row')
     const maxVisibleRows = 5
 
@@ -250,11 +322,11 @@ describe('Dashboard', () => {
   test('collection-query sorts and renders a nested (dot-path) field', async ({ page }) => {
     const d = new DashboardHelper(page)
 
-    const nestedCard = d.widgetByPos(14).locator('.collection-query-widget')
+    const nestedCard = d.widgetByPos(16).locator('.collection-query-widget')
 
     await expect(nestedCard.locator('.widget-card__title')).toHaveText('Events by priority')
     // The nested sort field is valid, so the widget renders rows instead of a config error.
-    await expect(d.widgetByPos(14).locator('.collection-query-widget--error')).toHaveCount(0)
+    await expect(d.widgetByPos(16).locator('.collection-query-widget--error')).toHaveCount(0)
 
     const rows = nestedCard.locator('.widget-card__row')
     await expect(rows).toHaveCount(4)
@@ -286,7 +358,7 @@ describe('Dashboard', () => {
     await page.goto(url.admin)
 
     const d = new DashboardHelper(page)
-    const activityCard = d.widgetByPos(15).locator('.recently-viewed-widget')
+    const activityCard = d.widgetByPos(2).locator('.recently-viewed-widget')
 
     await expect(activityCard.locator('.widget-card__title')).toHaveText('You recently viewed')
 
@@ -316,25 +388,27 @@ describe('Dashboard', () => {
     await page.goto(url.admin)
 
     const d = new DashboardHelper(page)
-    const activityCard = d.widgetByPos(15).locator('.recently-viewed-widget')
+    const activityCard = d.widgetByPos(2).locator('.recently-viewed-widget')
     await expect(activityCard.locator('.widget-card__row-title')).toHaveCount(2)
 
     // Open the activity widget configuration.
     await d.setEditing()
-    const widget = d.widgetByPos(15)
+    const widget = d.widgetByPos(2)
     await widget.hover()
     await widget.locator('.widget-wrapper__edit-btn').click()
 
     const drawer = page.locator('.drawer__content:visible')
     await expect(drawer).toBeVisible()
 
-    const collectionsField = drawer.locator('.recently-viewed-collections-field')
+    const collectionsField = drawer
     await expect(collectionsField).toBeVisible()
 
     // Every collection is included (checked) by default - the stored exclusion list is empty.
     const checkboxes = collectionsField.locator('.checkbox-input')
+
+    await expect.poll(() => checkboxes.count()).toBeGreaterThanOrEqual(3)
     const checkboxCount = await checkboxes.count()
-    expect(checkboxCount).toBeGreaterThanOrEqual(3)
+
     await expect(collectionsField.locator('.checkbox-input--checked')).toHaveCount(checkboxCount)
 
     // Unchecking "Tickets" adds it to the stored exclusion list.
@@ -362,13 +436,13 @@ describe('Dashboard', () => {
     const d = new DashboardHelper(page)
     await d.setEditing()
     await d.assertWidthRange({ max: 'full', min: 'full', position: 1 })
-    await d.assertWidthRange({ max: 'medium', min: 'x-small', position: 2 })
-    await d.assertWidthRange({ max: 'medium', min: 'x-small', position: 3 })
+    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 2 })
+    await d.assertWidthRange({ max: 'full', min: 'full', position: 3 })
     await d.assertWidthRange({ max: 'medium', min: 'x-small', position: 4 })
     await d.assertWidthRange({ max: 'medium', min: 'x-small', position: 5 })
-    await d.assertWidthRange({ max: 'full', min: 'medium', position: 6 })
-    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 7 })
-    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 8 })
+    await d.assertWidthRange({ max: 'medium', min: 'x-small', position: 6 })
+    await d.assertWidthRange({ max: 'medium', min: 'x-small', position: 7 })
+    await d.assertWidthRange({ max: 'full', min: 'medium', position: 8 })
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 9 })
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 10 })
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 11 })
@@ -376,14 +450,15 @@ describe('Dashboard', () => {
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 13 })
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 14 })
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 15 })
+    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 16 })
   })
 
   test('resize widget', async ({ page }) => {
     const d = new DashboardHelper(page)
     await d.setEditing()
-    await d.assertWidget(2, 'count', 'x-small')
-    await d.resizeWidget(2, 'medium')
-    await d.assertWidget(2, 'count', 'medium')
+    await d.assertWidget(4, 'count', 'x-small')
+    await d.resizeWidget(4, 'medium')
+    await d.assertWidget(4, 'count', 'medium')
     await d.saveChangesAndValidate()
   })
 
@@ -395,12 +470,240 @@ describe('Dashboard', () => {
     await d.saveChangesAndValidate()
   })
 
+  test('should include every upload collection by default and use the selected destination', async ({
+    page,
+  }) => {
+    test.setTimeout(60000)
+    const d = new DashboardHelper(page)
+
+    await expect(page.locator('.upload-dropzone-widget')).toHaveCount(0)
+    await d.setEditing()
+    await d.addWidget('Upload files')
+
+    const widget = d.widgetByPos(TOTAL_WIDGETS + 1)
+    await widget.hover()
+    await widget.locator('.widget-wrapper__edit-btn').click()
+
+    const drawer = page.locator('.drawer__content:visible')
+    const collectionsField = drawer
+    await expect(
+      collectionsField.getByRole('checkbox', { name: 'Media', exact: true }),
+    ).toBeChecked()
+    await expect(
+      collectionsField.getByRole('checkbox', { name: 'Media Alts', exact: true }),
+    ).toBeChecked()
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await expect(drawer).toBeHidden()
+    await d.saveChangesAndValidate()
+
+    const dropzone = widget.locator('.upload-dropzone-widget__dropzone')
+    await expect(dropzone).toBeVisible()
+    const icon = widget.locator('.upload-dropzone-widget__icon')
+    await expect(icon).toHaveCSS('color', 'rgb(0, 123, 229)')
+    await page.evaluate(() => {
+      document.documentElement.dataset.theme = 'dark'
+    })
+    await expect(icon).toHaveCSS('color', 'rgb(128, 202, 255)')
+    await page.evaluate(() => {
+      document.documentElement.dataset.theme = 'light'
+    })
+    await widget.getByRole('button', { name: 'Upload files' }).click()
+
+    const modal = page.locator('#bulk-upload-modal-slug-1')
+    await expect(modal).toBeVisible()
+    await expect(modal.locator('.bulk-upload--add-files')).toBeVisible()
+    const destination = modal.locator('.bulk-upload--add-files__collectionSelect')
+    await expect(destination).toBeVisible()
+    await selectInput({
+      multiSelect: false,
+      option: 'Media Alt',
+      page,
+      selectLocator: destination,
+    })
+    await expect(destination).toContainText('Media Alt')
+    await modal
+      .locator('.dropzone input[type="file"]')
+      .setInputFiles(path.resolve(dirname, 'test/uploads/image.png'))
+    await expect(modal.getByText('image.png')).toBeVisible()
+    await expect(modal.locator('#field-description')).toBeVisible()
+    await modal.locator('#field-description').fill('Description before switching')
+    const fileDestination = modal.locator('.file-selections__collectionSelect')
+    await expect(fileDestination).toBeVisible()
+
+    await openSelectMenu({ page, selectLocator: fileDestination })
+    await getSelectMenu({ page }).getByText('Media', { exact: true }).click()
+    await expect(fileDestination.locator('.react-select--single-value')).toHaveText('Media')
+    await expect(modal.locator('#field-description')).toHaveCount(0)
+    await expect(modal.getByText('image.png')).toBeVisible()
+
+    const fileManager = modal.locator('.file-manager')
+    await fileManager.locator('.file-manager__remove').click()
+    const replacementInput = fileManager.locator('.upload-dropzone-content__hidden-input')
+    await replacementInput.setInputFiles({
+      name: 'incompatible.pdf',
+      buffer: Buffer.from('pdf'),
+      mimeType: 'application/pdf',
+    })
+    await expect(fileManager.locator('.file-manager__selected-preview')).toHaveCount(0)
+    await replacementInput.setInputFiles(path.resolve(dirname, 'test/uploads/image.png'))
+    await expect(fileManager.locator('#field-filemanager-filename')).toHaveValue('image.png')
+
+    await modal.getByRole('button', { name: 'Add Files' }).click()
+    const addMoreFiles = page.locator('#bulk-upload-modal--add-more-files')
+    const addMoreInput = addMoreFiles.locator('.upload-dropzone-content__hidden-input')
+    await expect(addMoreInput).toHaveAttribute('accept', 'image/*')
+    await addMoreInput.setInputFiles({
+      name: 'incompatible.pdf',
+      buffer: Buffer.from('pdf'),
+      mimeType: 'application/pdf',
+    })
+    await expect(addMoreFiles).toBeVisible()
+    await expect(modal.getByText('incompatible.pdf')).toHaveCount(0)
+    await addMoreFiles.getByRole('button', { name: 'Close', exact: true }).click()
+
+    await selectInput({
+      multiSelect: false,
+      option: 'Media Alt',
+      page,
+      selectLocator: fileDestination,
+    })
+    await expect(modal.locator('#field-description')).toBeVisible()
+    await expect(modal.locator('#field-description')).toHaveValue('Description before switching')
+
+    await modal.getByRole('button', { name: 'Add Files' }).click()
+    await expect(addMoreFiles.locator('.bulk-upload--add-files__collectionSelect')).toBeVisible()
+    await addMoreFiles.locator('.dropzone input[type="file"]').setInputFiles({
+      name: 'dashboard.pdf',
+      buffer: Buffer.from('pdf'),
+      mimeType: 'application/pdf',
+    })
+    await expect(modal.getByText('dashboard.pdf')).toBeVisible()
+    await expect(fileDestination).toBeVisible()
+    await openSelectMenu({ page, selectLocator: fileDestination })
+    const incompatibleDestination = getSelectMenu({ page }).getByRole('option', {
+      name: 'Media (Accepts: image/*)',
+      exact: true,
+    })
+    await expect(incompatibleDestination).toHaveAttribute('aria-disabled', 'true')
+    await incompatibleDestination.click({ force: true })
+    await expect(fileDestination.locator('.react-select--single-value')).toHaveText('Media Alt')
+    await modal.locator('.dialog-title').click()
+
+    await modal.getByRole('button', { name: 'Add Files' }).click()
+    const addMoreDestination = addMoreFiles.locator('.bulk-upload--add-files__collectionSelect')
+    await expect(addMoreDestination).toBeVisible()
+    await openSelectMenu({ page, selectLocator: addMoreDestination })
+    await expect(
+      getSelectMenu({ page }).getByRole('option', {
+        name: 'Media (Accepts: image/*)',
+        exact: true,
+      }),
+    ).toHaveAttribute('aria-disabled', 'true')
+    await addMoreFiles.locator('.dialog-title').click()
+    await addMoreFiles.getByRole('button', { name: 'Close', exact: true }).click()
+    await modal
+      .locator('.file-selections__fileRowContainer')
+      .filter({ hasText: 'dashboard.pdf' })
+      .locator('.file-selections__remove--overlay')
+      .click()
+    await expect(fileDestination).toBeVisible()
+    await openSelectMenu({ page, selectLocator: fileDestination })
+    await expect(
+      getSelectMenu({ page }).getByRole('option', { name: 'Media', exact: true }),
+    ).not.toHaveAttribute('aria-disabled', 'true')
+    await modal.locator('.dialog-title').click()
+
+    await modal.locator('#field-description').fill('Uploaded from the dashboard')
+    try {
+      await modal.locator('.bulk-upload--actions-bar__saveButtons button').click()
+      await expect(modal).toBeHidden()
+      const uploadedMedia = await page.request.get(`${serverURL}/api/media-alt?limit=10`)
+      expect(uploadedMedia.ok()).toBe(true)
+      expect((await uploadedMedia.json()).docs).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            description: 'Uploaded from the dashboard',
+            filename: 'image.png',
+          }),
+        ]),
+      )
+
+      await dropzone.dispatchEvent('dragenter')
+      await expect(dropzone).toHaveClass(/dragging/)
+      await expect(dropzone.getByText('Drop files to upload')).toBeVisible()
+
+      await dropzone.evaluate((element) => {
+        const transfer = new DataTransfer()
+        transfer.items.add(new File(['pdf'], 'dashboard.pdf', { type: 'application/pdf' }))
+        element.dispatchEvent(new DragEvent('drop', { bubbles: true, dataTransfer: transfer }))
+      })
+
+      await expect(modal).toBeVisible()
+      await expect(modal.getByText('dashboard.pdf')).toBeVisible()
+      await expect(fileDestination).toBeVisible()
+      await openSelectMenu({ page, selectLocator: fileDestination })
+      await expect(
+        getSelectMenu({ page }).getByRole('option', {
+          name: 'Media (Accepts: image/*)',
+          exact: true,
+        }),
+      ).toHaveAttribute('aria-disabled', 'true')
+    } finally {
+      const uploadDirectory = path.resolve(dirname, 'media-alt')
+      await rm(path.join(uploadDirectory, 'image.png'), { force: true })
+      await rmdir(uploadDirectory).catch((err: NodeJS.ErrnoException) => {
+        if (err.code !== 'ENOENT' && err.code !== 'ENOTEMPTY') {
+          throw err
+        }
+      })
+    }
+  })
+
+  test('should exclude an upload collection and preserve the choice after reload', async ({
+    page,
+  }) => {
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+    await d.addWidget('Upload files')
+    const widget = d.widgetByPos(TOTAL_WIDGETS + 1)
+    await widget.hover()
+    await widget.locator('.widget-wrapper__edit-btn').click()
+
+    const drawer = page.locator('.drawer__content:visible')
+    const collectionsField = drawer.locator('.recently-viewed-collections-field')
+    await collectionsField.getByRole('checkbox', { name: 'Media', exact: true }).uncheck()
+    await expect(
+      collectionsField.getByRole('checkbox', { name: 'Media Alts', exact: true }),
+    ).toBeChecked()
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await d.saveChangesAndValidate()
+    await page.reload()
+
+    const dropzoneWidget = page.locator('.upload-dropzone-widget')
+    await dropzoneWidget.getByRole('button', { name: 'Upload files' }).click()
+    const modal = page.locator('#bulk-upload-modal-slug-1')
+    await expect(modal.locator('.bulk-upload--add-files__collectionSelect')).toHaveCount(0)
+    await modal.getByRole('button', { name: 'Close' }).click()
+
+    await d.setEditing()
+    await d.widgetByPos(TOTAL_WIDGETS + 1).hover()
+    await d
+      .widgetByPos(TOTAL_WIDGETS + 1)
+      .locator('.widget-wrapper__edit-btn')
+      .click()
+    const savedField = page.locator('.drawer__content:visible')
+    await expect(savedField.getByRole('checkbox', { name: 'Media', exact: true })).not.toBeChecked()
+    await expect(
+      savedField.getByRole('checkbox', { name: 'Media Alts', exact: true }),
+    ).toBeChecked()
+  })
+
   test('delete widget', async ({ page }) => {
     const d = new DashboardHelper(page)
     await d.setEditing()
-    await d.deleteWidget(1)
-    await d.assertWidget(1, 'count', 'x-small')
-    await d.assertWidget(6, 'private', 'full')
+    await d.deleteWidget(3)
+    await d.assertWidget(3, 'count', 'x-small')
+    await d.assertWidget(8, 'private', 'full')
     await expect(d.widgets).toHaveCount(TOTAL_WIDGETS - 1)
     await d.saveChangesAndValidate()
   })
@@ -408,41 +711,41 @@ describe('Dashboard', () => {
   test('edit widget data is reverted when dashboard editing is canceled', async ({ page }) => {
     const d = new DashboardHelper(page)
     await d.setEditing()
-    let secondWidget = d.widgetByPos(2)
-    let secondWidgetTitle = secondWidget.locator('.count-widget h3')
-    await expect(secondWidgetTitle).toHaveText('Tickets')
+    let countWidget = d.widgetByPos(4)
+    let countWidgetTitle = countWidget.locator('.count-widget h3')
+    await expect(countWidgetTitle).toHaveText('Tickets')
 
-    await d.editWidget(2, 'Open Tickets')
-    await expect(secondWidgetTitle).toHaveText('Open Tickets')
+    await d.editWidget(4, 'Open Tickets')
+    await expect(countWidgetTitle).toHaveText('Open Tickets')
 
     await d.cancelEditing()
 
-    secondWidget = d.widgetByPos(2)
-    secondWidgetTitle = secondWidget.locator('.count-widget h3')
-    await expect(secondWidgetTitle).toHaveText('Tickets')
+    countWidget = d.widgetByPos(4)
+    countWidgetTitle = countWidget.locator('.count-widget h3')
+    await expect(countWidgetTitle).toHaveText('Tickets')
   })
 
   test('edit widget data persists after dashboard save and reload', async ({ page }) => {
     const d = new DashboardHelper(page)
     await d.setEditing()
-    const secondWidget = d.widgetByPos(2)
-    const secondWidgetTitle = secondWidget.locator('.count-widget h3')
-    await expect(secondWidgetTitle).toHaveText('Tickets')
+    const countWidget = d.widgetByPos(4)
+    const countWidgetTitle = countWidget.locator('.count-widget h3')
+    await expect(countWidgetTitle).toHaveText('Tickets')
 
-    await d.editWidget(2, 'Open Tickets')
-    await expect(secondWidgetTitle).toHaveText('Open Tickets')
+    await d.editWidget(4, 'Open Tickets')
+    await expect(countWidgetTitle).toHaveText('Open Tickets')
 
-    await d.stepNavLast.locator('button').nth(1).click()
-    await expect(secondWidgetTitle).toHaveText('Open Tickets')
+    await d.stepNavButtons.nth(1).click()
+    await expect(countWidgetTitle).toHaveText('Open Tickets')
 
     // Re-enter edit mode without page refresh and edit again.
     await d.setEditing()
-    await expect(secondWidgetTitle).toHaveText('Open Tickets')
-    await d.editWidget(2, 'Title changed again')
-    await expect(secondWidgetTitle).toHaveText('Title changed again')
+    await expect(countWidgetTitle).toHaveText('Open Tickets')
+    await d.editWidget(4, 'Title changed again')
+    await expect(countWidgetTitle).toHaveText('Title changed again')
 
     await d.saveChangesAndValidate()
-    await expect(secondWidgetTitle).toHaveText('Title changed again')
+    await expect(countWidgetTitle).toHaveText('Title changed again')
   })
 
   test('empty dashboard - delete all widgets', async ({ page }) => {
@@ -460,9 +763,9 @@ describe('Dashboard', () => {
     // For this test we need to put 2 widgets with different default heights in the same row
     const d = new DashboardHelper(page)
     await d.setEditing()
-    await d.deleteWidget(2)
-    await d.deleteWidget(2)
-    await d.resizeWidget(4, 'medium')
+    await d.deleteWidget(4)
+    await d.deleteWidget(4)
+    await d.resizeWidget(6, 'medium')
     // validateLayout already takes care of verifying that
     await d.saveChangesAndValidate()
   })
@@ -496,10 +799,10 @@ describe('Dashboard', () => {
     const contentHeight = await page.evaluate(() => document.body.scrollHeight)
     await page.setViewportSize({ height: Math.max(contentHeight + 100, 720), width })
     // moveWidget already contains validations
-    await d.moveWidget(2, 1) // to first position
-    await d.moveWidget(1, 2, 'after') // after last in row
+    await d.moveWidget(4, 1) // to first position
+    await d.moveWidget(1, 2, 'after') // after the Welcome widget
     await d.moveWidget(2, TOTAL_WIDGETS, 'after') // to last position
-    await d.moveWidget(TOTAL_WIDGETS, 5, 'before') // before first full-width row after counts
+    await d.moveWidget(TOTAL_WIDGETS, 7, 'before') // before first full-width row after counts
     await d.saveChangesAndValidate()
   })
 
@@ -508,17 +811,19 @@ describe('Dashboard', () => {
     await d.assertIsEditing(false)
 
     // Delete buttons should not be visible when not editing
-    const widget = d.widgetByPos(1)
+    const widget = d.widgetByPos(3)
+    const dragHandle = widget.getByRole('button', { name: 'Drag to reorder' })
+
     await widget.hover()
     await expect(d.getDeleteWidgetButton(widget)).toBeHidden()
 
-    // Widgets should not have draggable attributes when not editing
-    await expect(widget.locator('.draggable')).not.toHaveAttribute('aria-disabled')
+    await expect(dragHandle).toHaveCount(0)
 
     // verify the opposite:
     await d.setEditing()
     await expect(d.getDeleteWidgetButton(widget)).toBeVisible()
-    await expect(widget.locator('.draggable')).toHaveAttribute('aria-disabled', 'false')
+    await expect(dragHandle).toBeVisible()
+    await expect(dragHandle).toBeEnabled()
   })
 
   test('Responsiveness - all widgets have a 100% width on mobile', async ({ page }) => {
@@ -539,7 +844,7 @@ describe('Dashboard', () => {
     const d = new DashboardHelper(page)
     await d.setEditing()
 
-    const widget = d.widgetByPos(2)
+    const widget = d.widgetByPos(4)
     await widget.hover()
     await widget.locator('.widget-wrapper__edit-btn').click()
 

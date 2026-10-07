@@ -35,7 +35,6 @@ let url: AdminUrlUtil
 describe('JSON', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       // prebuild,
@@ -50,8 +49,6 @@ describe('JSON', () => {
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsTest',
-      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
     if (client) {
       await client.logout()
@@ -79,6 +76,7 @@ describe('JSON', () => {
     const longDoc = await payload.create({
       collection: jsonFieldsSlug,
       data: { json: longJsonData },
+      overrideAccess: true,
     })
 
     // Create a document with short JSON (<100 chars)
@@ -87,6 +85,7 @@ describe('JSON', () => {
     const shortDoc = await payload.create({
       collection: jsonFieldsSlug,
       data: { json: shortJsonData },
+      overrideAccess: true,
     })
 
     await page.goto(url.list)
@@ -125,6 +124,7 @@ describe('JSON', () => {
     const doc = await payload.create({
       collection: jsonFieldsSlug,
       data: { json: slightlyLongJsonData },
+      overrideAccess: true,
     })
 
     await page.goto(url.list)
@@ -190,6 +190,7 @@ describe('JSON', () => {
           default: 'value',
         },
       },
+      overrideAccess: true,
     })
 
     await page.goto(url.edit(createdDoc.id))

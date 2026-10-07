@@ -53,7 +53,6 @@ test.describe('Multi Tenant', () => {
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
 
     const { payload: payloadFromInit, serverURL: serverFromInit } =
       await initPayloadE2ENoConfig<Config>({ dirname })
@@ -74,7 +73,6 @@ test.describe('Multi Tenant', () => {
   test.beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'multiTenant',
     })
     await page.goto(usersURL.admin)
   })
@@ -668,6 +666,7 @@ test.describe('Multi Tenant', () => {
             equals: globalTenant,
           },
         },
+        overrideAccess: true,
       })
       await expect.poll(() => autosaveGlobal?.totalDocs).toBe(1)
       await expect.poll(() => autosaveGlobal?.docs?.[0]?.tenant).toBeDefined()
@@ -760,6 +759,27 @@ test.describe('Multi Tenant', () => {
   })
 
   test.describe('Tenant Selector', () => {
+    test('should let nav sections own their inline spacing', async () => {
+      await page.setViewportSize({ height: 900, width: 600 })
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+
+      await page.goto(tenantsURL.list)
+      await openNav(page)
+
+      const [navBox, navGroupBox] = await Promise.all([
+        page.locator('.nav').boundingBox(),
+        page.locator('.nav-group').first().boundingBox(),
+      ])
+
+      expect(navBox).not.toBeNull()
+      expect(navGroupBox).not.toBeNull()
+      expect(Math.abs(navGroupBox!.x - navBox!.x)).toBeLessThanOrEqual(1)
+    })
+
     test('should populate tenant selector on login', async () => {
       await loginClientSide({
         data: credentials.admin,
@@ -1416,7 +1436,9 @@ async function selectDocumentTenant({
   payload: PayloadTestSDK<Config>
   tenant: string
 }): Promise<void> {
-  await closeNav(page)
+  if (!(await page.locator('#assign-tenant-field-modal').isVisible())) {
+    await closeNav(page)
+  }
   await openAssignTenantModal({ page, payload })
   await selectInput({
     multiSelect: false,
@@ -1452,6 +1474,7 @@ async function getSelectedTenantFilterName({
           equals: tenantIDFromCookie,
         },
       },
+      overrideAccess: true,
     })
     return tenant?.docs?.[0]?.name || undefined
   }

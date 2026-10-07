@@ -13,6 +13,7 @@ import './index.css'
 const baseClass = 'search-input'
 
 type SearchInputProps = {
+  'aria-describedby'?: string
   'aria-label'?: string
   autoComplete?: BrowserAutoComplete
   className?: string
@@ -27,6 +28,7 @@ type SearchInputProps = {
 
 export const SearchInput: React.FC<SearchInputProps> = ({
   id,
+  'aria-describedby': ariaDescribedBy,
   'aria-label': ariaLabel,
   autoComplete,
   className,
@@ -52,6 +54,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
       <SearchIcon />
       <input
+        aria-describedby={ariaDescribedBy}
         aria-label={ariaLabel ?? placeholder}
         autoComplete={autoComplete}
         className={`${baseClass}__input`}
@@ -65,7 +68,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
       />
       {onClear && value.length > 0 && (
         <Button
-          aria-label={t('general:clear')}
+          aria-label={t('general:clearSearch')}
           buttonStyle="ghost"
           className={`${baseClass}__clear`}
           icon={<XIcon size={16} />}

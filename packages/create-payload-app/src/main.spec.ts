@@ -58,7 +58,7 @@ function createNextAppDetails({ isPayloadInstalled }: { isPayloadInstalled: bool
     isPayloadInstalled,
     isSupportedNextVersion: true,
     nextConfigPath: '/project/next.config.ts',
-    nextVersion: '15.0.0',
+    nextVersion: '16.4.0',
   } satisfies NextAppDetails
 }
 

@@ -11,7 +11,10 @@ import { RenderCustomComponent } from '../../elements/RenderCustomComponent/inde
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
+import { useForm } from '../../forms/Form/context.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.css'
 
@@ -76,7 +79,12 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
     value,
   } = props
 
+  const { uuid } = useForm()
+  const editDepth = useEditDepth()
   const { i18n } = useTranslation()
+
+  const inputID = generateFieldID(path, editDepth, uuid, 'input')
+  const errorID = showError ? generateFieldID(path, editDepth, uuid, 'field-error') : undefined
 
   let valueToRender
 
@@ -104,6 +112,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
       className={[
         fieldBaseClass,
         'select',
+        hasMany && 'select--has-many',
         className,
         showError && 'error',
         readOnly && 'read-only',
@@ -117,7 +126,14 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
       <RenderCustomComponent
         CustomComponent={Label}
         Fallback={
-          <FieldLabel label={label} localized={localized} path={path} required={required} />
+          <FieldLabel
+            hasRequiredAccessibleState
+            htmlFor={inputID}
+            label={label}
+            localized={localized}
+            path={path}
+            required={required}
+          />
         }
       />
       <div className={`${fieldBaseClass}__wrap`}>
@@ -127,10 +143,14 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
         />
         {BeforeInput}
         <ReactSelect
-          aria-label={getTranslation(label, i18n)}
+          aria-describedby={errorID}
+          aria-invalid={showError || undefined}
+          aria-label={getTranslation(label || '', i18n)}
+          aria-required={required || undefined}
           disabled={readOnly}
           filterOption={filterOption}
           id={id}
+          inputId={inputID}
           isClearable={isClearable}
           isMulti={hasMany}
           isSortable={isSortable}

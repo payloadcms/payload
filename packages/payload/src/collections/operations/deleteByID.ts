@@ -15,6 +15,7 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasScheduledPublishEnabled } from '../../utilities/getVersionsConfig.js'
@@ -44,6 +45,8 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
   incomingArgs: Arguments<TSlug, TSelect>,
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
+
+  assertNoValidationWrite(args.req)
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
@@ -91,21 +94,6 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     const hasWhereAccess = hasWhereAccessResult(accessResults)
 
     // /////////////////////////////////////
-    // beforeDelete - Collection
-    // /////////////////////////////////////
-
-    if (collectionConfig.hooks?.beforeDelete?.length) {
-      for (const hook of collectionConfig.hooks.beforeDelete) {
-        await hook({
-          id,
-          collection: collectionConfig,
-          context: req.context,
-          req,
-        })
-      }
-    }
-
-    // /////////////////////////////////////
     // Retrieve document
     // /////////////////////////////////////
 
@@ -130,6 +118,21 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     }
     if (!docToDelete && hasWhereAccess) {
       throw new Forbidden(req.t)
+    }
+
+    // /////////////////////////////////////
+    // beforeDelete - Collection
+    // /////////////////////////////////////
+
+    if (collectionConfig.hooks?.beforeDelete?.length) {
+      for (const hook of collectionConfig.hooks.beforeDelete) {
+        await hook({
+          id,
+          collection: collectionConfig,
+          context: req.context,
+          req,
+        })
+      }
     }
 
     // /////////////////////////////////////

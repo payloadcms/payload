@@ -1,32 +1,40 @@
-import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
-
 import { fileTypeFromBuffer } from 'file-type'
 import fs from 'fs/promises'
-import sanitize from 'sanitize-filename'
+import { openAsBlob } from 'node:fs'
 
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { Document, PayloadRequest } from '../types/index.js'
-import type { FileData, FileToSave, ProbedImageSize, UploadEdits } from './types.js'
+import type { ExternalUploadSource } from './sanitizeUploadData.js'
+import type { PreparedUploadTransformation } from './transformers/uploadTransformerBridge.js'
+import type { FileData, FileSizes, FileToSave, UploadEdits } from './types.js'
 
 import { FileRetrievalError, FileUploadError, Forbidden, MissingFile } from '../errors/index.js'
 import { isNumber } from '../utilities/isNumber.js'
 import { canResizeImage } from './canResizeImage.js'
 import { checkFileRestrictions } from './checkFileRestrictions.js'
-import { cropImage } from './cropImage.js'
-import { getExternalFile } from './getExternalFile.js'
+import { downloadFileToBuffer } from './downloadFileToBuffer.js'
+import { generateImageSizeFilename } from './generateImageSizeFilename.js'
 import { getFileByPath } from './getFileByPath.js'
+import { getFileExtension, getSanitizedUploadFilename } from './getFileTypeIdentity.js'
 import { getImageSize } from './getImageSize.js'
 import { getSafeFileName } from './getSafeFilename.js'
-import { createImageSizes } from './image-resizing/createImageSizes.js'
-import { isAnimatedImage } from './isAnimatedImage.js'
-import { isImage } from './isImage.js'
-import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
+import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
+import { hasFullFileContents } from './hasFullFileContents.js'
+import { isProcessableImage } from './isProcessableImage.js'
+import { parseFilename } from './parseFilename.js'
+import { planTransformerPipeline } from './transformers/planTransformerPipeline.js'
+import { transformUploadFile } from './transformers/transformUploadFile.js'
+import {
+  getUploadTransformerInternal,
+  setUploadFilePath,
+} from './transformers/uploadTransformerBridge.js'
 type Args<T> = {
   collection: Collection
   config: SanitizedConfig
   data: T
   draft?: boolean
+  externalUploadSource?: ExternalUploadSource
   isDuplicating?: boolean
   operation: 'create' | 'update'
   originalDoc?: T
@@ -41,14 +49,14 @@ type Result<T> = Promise<{
 }>
 
 const shouldReupload = (
-  uploadEdits: UploadEdits,
+  uploadEdits: undefined | UploadEdits,
   fileData: Record<string, unknown> | undefined,
 ) => {
-  if (!fileData) {
+  if (!fileData || !uploadEdits) {
     return false
   }
 
-  if (uploadEdits.crop || uploadEdits.heightInPixels || uploadEdits.widthInPixels) {
+  if (hasCropOrResizeEdit(uploadEdits)) {
     return true
   }
 
@@ -67,19 +75,49 @@ const shouldReupload = (
   return false
 }
 
+export type TempFileHandling =
+  | { sourcePath: string; type: 'copyFromTempFile' }
+  | { type: 'skip' }
+  | { type: 'useBuffer' }
+
+/**
+ * Decides how to get a file's bytes onto disk when no transformer rewrote it (a transformed
+ * file is already an in-memory buffer, so it always takes the `useBuffer` path). Copies straight
+ * from the temp file when possible, rather than reading a potentially large temp file into memory
+ * just to write it back out - see the `generateFileData` function doc for why.
+ */
+export const resolveTempFileHandling = ({
+  disableLocalStorage,
+  hasProcessedBuffer,
+  tempFilePath,
+}: {
+  disableLocalStorage: boolean
+  hasProcessedBuffer: boolean
+  tempFilePath: string | undefined
+}): TempFileHandling => {
+  if (hasProcessedBuffer || !tempFilePath) {
+    return { type: 'useBuffer' }
+  }
+
+  return disableLocalStorage
+    ? { type: 'skip' }
+    : { type: 'copyFromTempFile', sourcePath: tempFilePath }
+}
+
 /**
  * Builds the document's file metadata and the list of files to write to disk.
  *
  * A large client upload may arrive as a temp file instead of an in-memory buffer (see
  * getFileFromUploadInstructions.ts), and `file.data` can hold only a partial probe rather than
- * the full file. To avoid loading such files into memory unnecessarily, this skips reading a
- * temp file entirely when local storage is disabled, and copies it straight to its destination
- * when local storage is enabled.
+ * the full file. To avoid loading such files into memory unnecessarily, no transformer runs
+ * unless the full bytes are available, this skips reading a temp file entirely when local
+ * storage is disabled, and copies it straight to its destination when local storage is enabled.
  */
 export const generateFileData = async <T>({
   collection: { config: collectionConfig },
   data,
   draft,
+  externalUploadSource,
   isDuplicating,
   operation,
   originalDoc,
@@ -94,7 +132,7 @@ export const generateFileData = async <T>({
     }
   }
 
-  const { serverURL, sharp } = req.payload.config
+  const { serverURL } = req.payload.config
 
   let file = isDuplicating ? undefined : req.file
 
@@ -102,32 +140,35 @@ export const generateFileData = async <T>({
     data,
     isDuplicating,
     operation,
-    originalDoc,
+    // Only a duplication source informs edit parsing. Updates now also pass `originalDoc` so the
+    // stored file can be reprocessed, and that must not change which edits are applied.
+    originalDoc: isDuplicating ? originalDoc : undefined,
     req,
   })
 
   const {
-    constructorOptions,
     disableLocalStorage,
     focalPoint: focalPointEnabled = true,
-    formatOptions,
-    imageSizes,
-    resizeOptions,
     staticDir,
-    trimOptions,
-    withMetadata,
   } = collectionConfig.upload
 
   const staticPath = staticDir
 
   const incomingFileData: Document = isDuplicating ? originalDoc : data
+  const fileDataToReupload: Document | undefined =
+    operation === 'update' ? originalDoc : incomingFileData
+  const fileSourceData =
+    externalUploadSource ?? (fileDataToReupload as unknown as FileData | undefined)
   let isLocalFile = false
 
   if (
     !file &&
-    (isDuplicating || shouldReupload(uploadEdits, incomingFileData as Record<string, unknown>))
+    fileSourceData &&
+    (externalUploadSource ||
+      isDuplicating ||
+      shouldReupload(uploadEdits, incomingFileData as Record<string, unknown>))
   ) {
-    const { filename, url } = incomingFileData as unknown as FileData
+    const { filename, url } = fileSourceData
     if (filename && (filename.includes('../') || filename.includes('..\\'))) {
       throw new Forbidden(req.t)
     }
@@ -137,18 +178,20 @@ export const generateFileData = async <T>({
     }
 
     try {
-      if (!disableLocalStorage && isLocalFile) {
+      if (!externalUploadSource && !disableLocalStorage && isLocalFile) {
+        // File is stored locally
         const filePath = `${staticPath}/${filename}`
         const response = await getFileByPath(filePath)
         file = response
         overwriteExistingFiles = true
       } else if (filename && url) {
-        file = await getExternalFile({
-          data: incomingFileData as unknown as FileData,
+        // File is remote
+        file = await downloadFileToBuffer({
+          data: fileSourceData,
           req,
           uploadConfig: collectionConfig.upload,
         })
-        overwriteExistingFiles = true
+        overwriteExistingFiles = !externalUploadSource
       }
     } catch (err: unknown) {
       throw new FileRetrievalError(req.t, err instanceof Error ? err.message : undefined)
@@ -170,11 +213,19 @@ export const generateFileData = async <T>({
     }
   }
 
-  await checkFileRestrictions({
+  const detectedFileType = await checkFileRestrictions({
     collection: collectionConfig,
     file,
     req,
   })
+
+  const shouldUseDetectedFileType =
+    detectedFileType &&
+    (isProcessableImage(file.mimetype) || isProcessableImage(detectedFileType.mime))
+
+  if (shouldUseDetectedFileType && detectedFileType.mime !== file.mimetype) {
+    file = { ...file, mimetype: detectedFileType.mime }
+  }
 
   if (!disableLocalStorage) {
     await fs.mkdir(staticPath!, { recursive: true })
@@ -183,92 +234,151 @@ export const generateFileData = async <T>({
   let newData = incomingFileData as T
   const filesToSave: FileToSave[] = []
   const fileData: Partial<FileData> = {}
-  const fileIsAnimatedType = isAnimatedImage(file.mimetype)
-  const cropData =
-    typeof uploadEdits === 'object' && 'crop' in uploadEdits ? uploadEdits.crop : undefined
 
   try {
-    const fileSupportsResize = canResizeImage(file.mimetype)
-    let fsSafeName: string
-    let sharpFile: Sharp | undefined
-    let dimensions: ProbedImageSize | undefined
-    let fileBuffer!: { data: Buffer; info: OutputInfo }
-    let ext
-    let mime: string
-    // Depends only on configured resize/format/trim options, not on whether the bytes are on
-    // disk or in memory.
-    const fileHasAdjustments =
-      fileSupportsResize &&
-      Boolean(resizeOptions || formatOptions || trimOptions || constructorOptions)
-
-    const sharpOptions: SharpOptions = { ...constructorOptions }
-
-    if (fileIsAnimatedType) {
-      sharpOptions.animated = true
-    }
-
-    if (sharp && (fileIsAnimatedType || fileHasAdjustments)) {
-      // rotate() auto-rotates based on EXIF data - see #3081
-      sharpFile = file.tempFilePath
-        ? sharp(file.tempFilePath, sharpOptions).rotate()
-        : sharp(file.data, sharpOptions).rotate()
-
-      if (fileHasAdjustments) {
-        if (resizeOptions) {
-          sharpFile = sharpFile.resize(resizeOptions)
-        }
-        if (formatOptions) {
-          sharpFile = sharpFile.toFormat(formatOptions.format, formatOptions.options)
-        }
-        if (trimOptions) {
-          sharpFile = sharpFile.trim(trimOptions)
-        }
-      }
-    }
-
-    if (fileSupportsResize || isImage(file.mimetype)) {
-      dimensions = await getImageSize({ file, sharp })
-      fileData.width = dimensions.width
-      fileData.height = dimensions.height
-    }
-
-    if (sharpFile) {
-      const metadata = await sharpFile.metadata()
-      sharpFile = await optionallyAppendMetadata({
+    const pipeline = await planTransformerPipeline({
+      args: {
+        collectionSlug: collectionConfig.slug,
+        mimeType: file.mimetype,
+        operation: 'upload',
         req,
-        sharpFile,
-        withMetadata: withMetadata!,
-      })
-      fileBuffer = await sharpFile.toBuffer({ resolveWithObject: true })
-      ;({ ext, mime } = (await fileTypeFromBuffer(fileBuffer.data))!)
-      fileData.width = fileBuffer.info.width
-      fileData.height = fileBuffer.info.height
-      fileData.filesize = fileBuffer.info.size
+      },
+      capability: 'transformFile',
+      transformers: req.payload.config.upload?.transformers ?? [],
+    })
 
-      // Animated GIFs/WebP report height summed across all frames - divide by page count.
-      if (metadata.pages) {
-        fileData.height = fileBuffer.info.height / metadata.pages
-        fileData.filesize = fileBuffer.data.length
+    // A large client upload can arrive as a bounded probe alongside a temp file. Transformers
+    // need the whole file, so leave such an upload untouched rather than buffering it.
+    const canRunTransformers = pipeline.length > 0 && hasFullFileContents(file)
+
+    const bridgeTransformers = canRunTransformers
+      ? pipeline.filter((transformer) =>
+          Boolean(getUploadTransformerInternal(transformer)?.prepareUpload),
+        )
+      : []
+
+    const bridgeTransformer =
+      bridgeTransformers.find((transformer) =>
+        getUploadTransformerInternal(transformer)!.handlesCollection?.({
+          collectionSlug: collectionConfig.slug,
+        }),
+      ) ?? bridgeTransformers[0]
+
+    // The chosen bridge's task options are private to it, so other bridges must not see them.
+    const bridgeTaskPipeline = pipeline.filter(
+      (transformer) =>
+        transformer === bridgeTransformer || !bridgeTransformers.includes(transformer),
+    )
+
+    let originalWebFile: File | undefined
+    let mainWebFile: File | undefined
+    let hasDimensionsFromBridge = false
+    let sizeResults: PreparedUploadTransformation[] = []
+
+    if (canRunTransformers) {
+      const fileContents = file.tempFilePath ? await openAsBlob(file.tempFilePath) : file.data
+      originalWebFile = new File([fileContents], file.name, { type: file.mimetype })
+      if (file.tempFilePath) {
+        setUploadFilePath(originalWebFile, file.tempFilePath)
       }
-    } else {
-      mime = file.mimetype
-      fileData.filesize = file.size
 
-      if (file.name.includes('.')) {
-        ext = file.name.split('.').pop()?.split('?')[0]
+      if (bridgeTransformer) {
+        const bridge = getUploadTransformerInternal(bridgeTransformer)!
+
+        const results = await bridge.prepareUpload!({
+          collectionSlug: collectionConfig.slug,
+          file: originalWebFile,
+          req,
+          transform: (task) =>
+            transformUploadFile({
+              collectionSlug: collectionConfig.slug,
+              file: task.file ?? originalWebFile!,
+              options: task.options,
+              pipeline: bridgeTaskPipeline,
+              req,
+            }),
+          uploadEdits,
+        })
+
+        const mainResult = results.find((result) => result.fieldPath === 'filename')
+
+        mainWebFile = mainResult?.file ?? originalWebFile
+        fileData.width = mainResult?.width
+        fileData.height = mainResult?.height
+        hasDimensionsFromBridge = true
+        sizeResults = results.filter((result) => result.fieldPath !== 'filename')
       } else {
-        ext = ''
+        mainWebFile = await transformUploadFile({
+          collectionSlug: collectionConfig.slug,
+          file: originalWebFile,
+          options: undefined,
+          pipeline,
+          req,
+        })
       }
+    }
+
+    // Saved for any resizable image, not just one a transformer processed, so it's kept with no
+    // transformer registered and on a header-only client upload.
+    if (
+      focalPointEnabled &&
+      uploadEdits?.focalPoint &&
+      (hasDimensionsFromBridge || canResizeImage(file.mimetype))
+    ) {
+      fileData.focalX = isNumber(uploadEdits.focalPoint.x)
+        ? Math.round(uploadEdits.focalPoint.x)
+        : 50
+      fileData.focalY = isNumber(uploadEdits.focalPoint.y)
+        ? Math.round(uploadEdits.focalPoint.y)
+        : 50
+    }
+
+    const fileWasTransformed = Boolean(mainWebFile && mainWebFile !== originalWebFile)
+    const mainBuffer = fileWasTransformed
+      ? Buffer.from(await mainWebFile!.arrayBuffer())
+      : undefined
+
+    // A transformed file is named after what the transformer returned, not the upload.
+    const outputName = (fileWasTransformed && mainWebFile!.name) || file.name
+
+    let mimeType: string
+    let ext: string | undefined
+
+    if (mainBuffer) {
+      // Detected bytes win for binary formats (Sharp keeps the input's name and type on a
+      // converted output), but text-like output such as CSV has no signature to detect, so
+      // fall back to the type and extension the transformer declared on the returned File.
+      const typeResult = await fileTypeFromBuffer(mainBuffer)
+      ext =
+        typeResult?.ext ?? (getFileExtension(getSanitizedUploadFilename(outputName)) || undefined)
+      mimeType = typeResult?.mime ?? (mainWebFile!.type || file.mimetype)
+    } else {
+      mimeType = file.mimetype
+      ext = getFileExtension(getSanitizedUploadFilename(file.name))
     }
 
     // Adjust SVG mime type. fromBuffer modifies it.
-    if (mime === 'application/xml' && ext === 'svg') {
-      mime = 'image/svg+xml'
+    if (mimeType === 'application/xml' && ext === 'svg') {
+      mimeType = 'image/svg+xml'
     }
-    fileData.mimeType = mime
+    fileData.mimeType = mimeType
+    fileData.filesize = mainBuffer ? mainBuffer.length : file.size
 
-    const baseFilename = sanitize(file.name.substring(0, file.name.lastIndexOf('.')) || file.name)
-    fsSafeName = `${baseFilename}${ext ? `.${ext}` : ''}`
+    // Only probe formats that could carry dimensions - probing reads the file, and a large
+    // non-image upload may only exist as a temp file we deliberately never buffer.
+    if (!hasDimensionsFromBridge && isProcessableImage(mimeType)) {
+      try {
+        const probed = await getImageSize({
+          file: mainBuffer ? { ...file, data: mainBuffer, tempFilePath: undefined } : file,
+        })
+        fileData.width = probed.width
+        fileData.height = probed.height
+      } catch {
+        // Not a recognized image format — leave width/height unset.
+      }
+    }
+
+    let fsSafeName = getSanitizedUploadFilename(outputName, ext)
 
     if (!overwriteExistingFiles) {
       // Extract prefix if present (added by plugin-cloud-storage)
@@ -284,121 +394,61 @@ export const generateFileData = async <T>({
 
     fileData.filename = fsSafeName
 
-    let fileForResize = file
+    if (mainBuffer) {
+      // The stored bytes are no longer the ones the client uploaded, so the client's upload
+      // reference must not be reused for them.
+      delete file.uploadReference
 
-    if (cropData && sharp) {
-      const { data: croppedImage, info } = await cropImage({
-        cropData,
-        dimensions: dimensions!,
-        file,
-        heightInPixels: uploadEdits.heightInPixels!,
-        req,
-        sharp,
-        widthInPixels: uploadEdits.widthInPixels!,
-        withMetadata,
+      filesToSave.push({
+        buffer: mainBuffer,
+        path: `${staticPath}/${fsSafeName}`,
       })
 
-      // Apply resize after cropping to ensure it conforms to resizeOptions
-      if (resizeOptions && !resizeOptions.withoutEnlargement) {
-        const resizedAfterCrop = await sharp(croppedImage)
-          .resize({
-            fit: resizeOptions?.fit || 'cover',
-            height: resizeOptions?.height,
-            position: resizeOptions?.position || 'center',
-            width: resizeOptions?.width,
-          })
-          .toBuffer({ resolveWithObject: true })
-
-        filesToSave.push({
-          buffer: resizedAfterCrop.data,
-          path: `${staticPath}/${fsSafeName}`,
-        })
-
-        fileForResize = {
-          ...fileForResize,
-          data: resizedAfterCrop.data,
-          size: resizedAfterCrop.info.size,
-        }
-
-        fileData.width = resizedAfterCrop.info.width
-        fileData.height = resizedAfterCrop.info.height
-        if (fileIsAnimatedType) {
-          const metadata = await sharpFile!.metadata()
-          fileData.height = metadata.pages
-            ? resizedAfterCrop.info.height / metadata.pages
-            : resizedAfterCrop.info.height
-        }
-        fileData.filesize = resizedAfterCrop.info.size
-      } else {
-        filesToSave.push({
-          buffer: croppedImage,
-          path: `${staticPath}/${fsSafeName}`,
-        })
-
-        fileForResize = {
-          ...file,
-          data: croppedImage,
-          size: info.size,
-        }
-
-        fileData.width = info.width
-        fileData.height = info.height
-        if (fileIsAnimatedType) {
-          const metadata = await sharpFile!.metadata()
-          fileData.height = metadata.pages ? info.height / metadata.pages : info.height
-        }
-        fileData.filesize = info.size
-      }
-
       if (file.tempFilePath) {
-        await fs.writeFile(file.tempFilePath, croppedImage)
+        await fs.writeFile(file.tempFilePath, mainBuffer)
       } else {
-        req.file = fileForResize
+        req.file = {
+          ...file,
+          data: mainBuffer,
+          size: mainBuffer.length,
+        }
       }
     } else {
       // file.data is empty when useTempFiles is on, so the real content lives at
       // file.tempFilePath instead (see the function doc for why we avoid buffering it).
-      const skipTempFileBuffer =
-        disableLocalStorage && Boolean(file.tempFilePath) && !fileBuffer?.data
+      const tempFileHandling = resolveTempFileHandling({
+        disableLocalStorage: Boolean(disableLocalStorage),
+        hasProcessedBuffer: false,
+        tempFilePath: file.tempFilePath,
+      })
 
-      const shouldCopyFromTempFile =
-        !fileBuffer?.data && Boolean(file.tempFilePath) && !disableLocalStorage
-
-      if (shouldCopyFromTempFile) {
+      if (tempFileHandling.type === 'copyFromTempFile') {
         filesToSave.push({
           path: `${staticPath}/${fsSafeName}`,
-          sourcePath: file.tempFilePath!,
+          sourcePath: tempFileHandling.sourcePath,
         })
-      } else {
-        let bufferToSave: Buffer
-        if (fileBuffer?.data) {
-          bufferToSave = fileBuffer.data
-        } else if (file.tempFilePath) {
-          bufferToSave = skipTempFileBuffer ? Buffer.alloc(0) : await fs.readFile(file.tempFilePath)
-        } else {
-          bufferToSave = file.data
-        }
+      } else if (tempFileHandling.type === 'useBuffer') {
+        const bufferToSave = file.tempFilePath ? await fs.readFile(file.tempFilePath) : file.data
 
         // A 'header'/'none' content requirement (see getFileContentRequirement.ts) means
         // file.data is only a partial probe, not the real content - never save it as-is.
-        const fileDataIsPartialView =
-          !fileBuffer?.data && !file.tempFilePath && bufferToSave.length !== file.size
+        const fileDataIsPartialView = !file.tempFilePath && bufferToSave.length !== file.size
 
-        if (!skipTempFileBuffer && !fileDataIsPartialView) {
+        if (!fileDataIsPartialView) {
           filesToSave.push({
             buffer: bufferToSave,
             path: `${staticPath}/${fsSafeName}`,
           })
 
-          if (fileBuffer?.data || bufferToSave.length > 0) {
+          if (bufferToSave.length > 0) {
             if (file.tempFilePath) {
-              await fs.writeFile(file.tempFilePath, fileBuffer?.data || bufferToSave)
+              await fs.writeFile(file.tempFilePath, bufferToSave)
             } else {
               // Keep req.file in sync, since downstream hooks/plugins may read it.
               req.file = {
                 ...file,
-                data: fileBuffer?.data || bufferToSave,
-                size: fileBuffer?.info.size,
+                data: bufferToSave,
+                size: bufferToSave.length,
               }
             }
           }
@@ -406,39 +456,70 @@ export const generateFileData = async <T>({
       }
     }
 
-    if (fileSupportsResize && (Array.isArray(imageSizes) || focalPointEnabled !== false)) {
+    if (sizeResults.length > 0) {
       req.payloadUploadSizes = {}
-      const focalPoint =
-        focalPointEnabled && uploadEdits?.focalPoint
-          ? {
-              x: isNumber(uploadEdits.focalPoint.x) ? Math.round(uploadEdits.focalPoint.x) : 50,
-              y: isNumber(uploadEdits.focalPoint.y) ? Math.round(uploadEdits.focalPoint.y) : 50,
-            }
-          : undefined
+      const sizes: FileSizes = {}
+      const { name: baseName, ext: baseExt } = parseFilename(fsSafeName)
 
-      const { sizeData, sizesToSave } = await createImageSizes({
-        config: collectionConfig,
-        dimensions: !cropData
-          ? dimensions!
-          : {
-              ...dimensions,
-              height: fileData.height!,
-              width: fileData.width!,
-            },
-        file: fileForResize,
-        focalPoint,
-        mimeType: fileData.mimeType,
-        req,
-        savedFilename: fsSafeName || file.name,
-        sharp,
-        staticPath: staticPath!,
-        withMetadata,
-      })
+      for (const result of sizeResults) {
+        const sizeName = result.fieldPath.slice('variants.'.length)
 
-      fileData.sizes = sizeData
-      fileData.focalX = focalPoint?.x
-      fileData.focalY = focalPoint?.y
-      filesToSave.push(...sizesToSave)
+        if (!result.file) {
+          sizes[sizeName] = {
+            filename: null,
+            filesize: null,
+            height: null,
+            mimeType: null,
+            url: null,
+            width: null,
+          }
+          continue
+        }
+
+        const sizeBuffer = Buffer.from(await result.file.arrayBuffer())
+        const sizeTypeResult = await fileTypeFromBuffer(sizeBuffer)
+        const sizeExt = sizeTypeResult?.ext || baseExt
+        const sizeMimeType = sizeTypeResult?.mime || result.mimeType || fileData.mimeType
+
+        req.payloadUploadSizes[sizeName] = sizeBuffer
+
+        const imageSizeConfig = collectionConfig.upload.variants?.find(
+          (imageSize) => imageSize.name === sizeName,
+        )
+
+        const imageNameWithDimensions = imageSizeConfig?.generateImageName
+          ? imageSizeConfig.generateImageName({
+              extension: sizeExt,
+              height: result.height!,
+              originalName: baseName,
+              sizeName,
+              width: result.width!,
+            })
+          : generateImageSizeFilename({
+              extension: sizeExt,
+              height: result.height!,
+              outputImageName: baseName,
+              width: result.width!,
+            })
+
+        const imagePath = `${staticPath}/${imageNameWithDimensions}`
+
+        sizes[sizeName] = {
+          filename: imageNameWithDimensions,
+          filesize: sizeBuffer.length,
+          height: result.height!,
+          mimeType: sizeMimeType,
+          url: null,
+          width: result.width!,
+        }
+
+        filesToSave.push({
+          buffer: sizeBuffer,
+          path: imagePath,
+        })
+      }
+
+      fileData.variants = sizes
     }
   } catch (err) {
     req.payload.logger.error(err)
@@ -484,7 +565,7 @@ function parseUploadEditsFromReqOrIncomingData(args: {
 
   if (origDoc && 'focalX' in origDoc && 'focalY' in origDoc) {
     // Admin always resends the current focal point, so treat an unchanged value as no edit.
-    if (incomingData.focalX === origDoc.focalX && incomingData.focalY === origDoc.focalY) {
+    if (incomingData?.focalX === origDoc.focalX && incomingData?.focalY === origDoc.focalY) {
       return undefined!
     }
 

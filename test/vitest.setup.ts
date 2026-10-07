@@ -1,4 +1,5 @@
 import dotenv from 'dotenv'
+import path from 'node:path'
 dotenv.config()
 
 // import nodemailer from 'nodemailer'
@@ -33,6 +34,16 @@ if (!process.env.PAYLOAD_DATABASE) {
   // not pass on sqlite/postgres
   process.env.PAYLOAD_DATABASE = 'mongodb'
 }
+
+/** Use one absolute SQLite file so Vitest and CLI child processes, which have different cwd's, share the same test database. */
+if (
+  process.env.PAYLOAD_DATABASE.startsWith('sqlite') &&
+  !process.env.SQLITE_URL &&
+  !process.env.DATABASE_URL
+) {
+  process.env.SQLITE_URL = `file:${path.resolve(process.cwd(), 'payload.db')}`
+}
+
 process.env.REDIS_URL = process.env.REDIS_URL ?? 'redis://127.0.0.1:6379'
 
 await assertDbReachable(process.env.PAYLOAD_DATABASE as Parameters<typeof assertDbReachable>[0])

@@ -14,9 +14,10 @@ catalog:
   copyfiles: '2.4.1'
   cross-env: '10.1.0'
   dotenv: '16.4.7'
-  react: '19.2.6'
-  react-dom: '19.2.6'
+  react: '19.3.0'
+  react-dom: '19.3.0'
   typescript: 'npm:@typescript/typescript6@6.0.2'
+  zod: '^4.6.0'
 
 updateNotifier: false
 symlink: true
@@ -57,21 +58,20 @@ allowBuilds:
   workerd: true
 
 minimumReleaseAgeExclude:
-  - '@faceless-ui/modal@3.0.1'
-  - '@modelcontextprotocol/client@2.0.0'
-  - '@modelcontextprotocol/core@2.0.0'
-  - '@modelcontextprotocol/server@2.0.0'
-  - '@next/bundle-analyzer@16.3.3'
-  - '@next/env@16.3.3'
-  - '@next/eslint-plugin-next@16.3.3'
-  - '@next/swc-darwin-arm64@16.3.3'
-  - '@next/swc-darwin-x64@16.3.3'
-  - '@next/swc-linux-arm64-gnu@16.3.3'
-  - '@next/swc-linux-arm64-musl@16.3.3'
-  - '@next/swc-linux-x64-gnu@16.3.3'
-  - '@next/swc-linux-x64-musl@16.3.3'
-  - '@next/swc-win32-arm64-msvc@16.3.3'
-  - '@next/swc-win32-x64-msvc@16.3.3'
-  - next@16.3.3
-  - mongoose@9.9.2
-  - eslint-config-next@16.3.3
+  - '@faceless-ui/modal@3.0.2'
+  - '@modelcontextprotocol/client@2.3.1'
+  - '@modelcontextprotocol/core@2.3.1'
+  - '@modelcontextprotocol/server@2.3.1'
+  - '@next/bundle-analyzer@16.4.0'
+  - '@next/env@16.4.0'
+  - '@next/eslint-plugin-next@16.4.0'
+  - '@next/swc-darwin-arm64@16.4.0'
+  - '@next/swc-darwin-x64@16.4.0'
+  - '@next/swc-linux-arm64-gnu@16.4.0'
+  - '@next/swc-linux-arm64-musl@16.4.0'
+  - '@next/swc-linux-x64-gnu@16.4.0'
+  - '@next/swc-linux-x64-musl@16.4.0'
+  - '@next/swc-win32-arm64-msvc@16.4.0'
+  - '@next/swc-win32-x64-msvc@16.4.0'
+  - eslint-config-next@16.4.0
+  - next@16.4.0

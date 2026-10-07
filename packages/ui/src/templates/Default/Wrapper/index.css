@@ -6,6 +6,7 @@
     isolation: isolate;
   }
 
+  /* stylelint-disable-next-line plugin/no-non-standard-breakpoints -- TODO: pre-existing; align with a canonical breakpoint */
   @media (min-width: 1441px) {
     .template-default {
       grid-template-columns: 0 auto;
@@ -16,11 +17,8 @@
     }
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1440px) {
-    .template-default--nav-hydrated.template-default--nav-open {
-      grid-template-columns: var(--nav-width) auto;
-    }
-
     .template-default {
       grid-template-columns: 1fr auto;
 
@@ -33,7 +31,26 @@
       grid-template-columns: 0 auto;
 
       .nav {
-        display: unset;
+        display: flex;
+      }
+    }
+
+    .template-default--nav-open {
+      grid-template-columns: var(--nav-width) auto;
+
+      .nav {
+        display: flex;
+      }
+    }
+  }
+
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
+  @media (max-width: 768px) {
+    .template-default--nav-open:not(.template-default--nav-hydrated) {
+      grid-template-columns: 1fr auto;
+
+      .nav {
+        display: none;
       }
     }
   }
