@@ -23,8 +23,7 @@ import { getRequestLocale } from './getRequestLocale.js'
 
 export type PartialAdminContext = {
   i18n: I18nClient
-} & Pick<AdminContext, 'languageCode'> &
-  Pick<PayloadRequest, 'payload' | 'responseHeaders' | 'user'>
+} & Pick<PayloadRequest, 'payload' | 'responseHeaders' | 'user'>
 
 /** Framework-provided request-scoped caching hooks used to deduplicate admin context creation. */
 export type AdminContextCache = {
@@ -104,7 +103,6 @@ export async function initAdminContext({
 
     return {
       i18n,
-      languageCode,
       payload,
       responseHeaders,
       user,
@@ -116,7 +114,7 @@ export async function initAdminContext({
     : await createPartialContext()
 
   const createContext = async (): Promise<AdminContext> => {
-    const { i18n, languageCode, payload, responseHeaders, user } = partialContext
+    const { i18n, payload, responseHeaders, user } = partialContext
     const { req: reqOverrides, ...optionsOverrides } = overrides || {}
     const hasOptionsUserOverride = Object.hasOwn(optionsOverrides, 'user')
     const hasReqUserOverride = Object.hasOwn(reqOverrides ?? {}, 'user')
@@ -194,8 +192,6 @@ export async function initAdminContext({
 
     return {
       cookies,
-      headers,
-      languageCode,
       locale,
       permissions,
       req,

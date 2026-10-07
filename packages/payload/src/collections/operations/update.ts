@@ -1,6 +1,5 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import { status as httpStatus } from 'http-status'
 import { randomUUID } from 'node:crypto'
 import fs from 'node:fs/promises'
 import path from 'node:path'
@@ -32,7 +31,6 @@ import { validateSortQuery } from '../../database/queryValidation/validateSortQu
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/index.js'
 import { type CollectionSlug, type FindOptions } from '../../index.js'
-import { runLocalFileUpdate } from '../../uploads/fileVersioning/archive.js'
 import { runCloudFileUpdate } from '../../uploads/fileVersioning/cloudStorage.js'
 import {
   abortFileOperationScope,
@@ -60,6 +58,7 @@ import {
   shouldRollbackTransactionArtifacts,
 } from '../../utilities/commitTransaction.js'
 import { hasDraftsEnabled, hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { isErrorPublic } from '../../utilities/isErrorPublic.js'
 import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
@@ -582,6 +581,7 @@ export const updateOperation = async <
               publishAllLocales,
               req: documentReq,
               select: select!,
+              shouldManageLocalFiles: true,
               showHiddenFields: showHiddenFields!,
               unpublishAllLocales,
               uploadFileRollbacks: shouldTrackUploadFileRollback
@@ -591,26 +591,16 @@ export const updateOperation = async <
                 : undefined,
             } as const
             const write = () => updateDocument(updateArgs)
-            let updatedDoc = collectionConfig.upload
-              ? collectionConfig.upload.fileOperations
-                ? await runCloudFileUpdate({
-                    id,
-                    collection: collectionConfig,
-                    current: docWithLocales,
-                    data: updateArgs.data,
-                    files: generatedFileData.files,
-                    req: documentReq,
-                    write,
-                  })
-                : await runLocalFileUpdate({
-                    id,
-                    collection: collectionConfig,
-                    current: docWithLocales,
-                    files: generatedFileData.files,
-                    next: generatedFileData.data as Record<string, unknown>,
-                    req: documentReq,
-                    write,
-                  })
+            let updatedDoc = collectionConfig.upload?.fileOperations
+              ? await runCloudFileUpdate({
+                  id,
+                  collection: collectionConfig,
+                  current: docWithLocales,
+                  data: updateArgs.data,
+                  files: generatedFileData.files,
+                  req: documentReq,
+                  write,
+                })
               : await write()
 
             // /////////////////////////////////////

@@ -10,6 +10,7 @@ import type {
 import type { PayloadRequest } from '../../../types/index.js'
 import type { ValidationResult } from '../../../types/validation.js'
 import type { ValidationLocaleSelector } from '../../../utilities/resolveValidationLocales.js'
+import type { ValidationSourceData } from '../../../utilities/runValidationLifecycle.js'
 import type { DataFromGlobalSlug, DraftFlagFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -50,6 +51,48 @@ export async function validateGlobalLocal<TSlug extends GlobalSlug>(
   payload: Payload,
   options: ValidateGlobalOptions<TSlug>,
 ): Promise<ValidationResult> {
+  return validateGlobalLocalInternal({ options, payload })
+}
+
+export async function validateGlobalLocalWithLocaleKeyedData<TSlug extends GlobalSlug>({
+  operation,
+  options,
+  payload,
+  sourceData,
+}: {
+  operation: 'update'
+  options: ValidateGlobalOptions<TSlug>
+  payload: Payload
+  sourceData?: ValidationSourceData
+}): Promise<ValidationResult> {
+  return validateGlobalLocalInternal({
+    dataIsLocaleKeyed: true,
+    operation,
+    options,
+    payload,
+    skipAccessControl: true,
+    skipMutationHooks: true,
+    sourceData,
+  })
+}
+
+async function validateGlobalLocalInternal<TSlug extends GlobalSlug>({
+  dataIsLocaleKeyed = false,
+  operation = 'validate',
+  options,
+  payload,
+  skipAccessControl = false,
+  skipMutationHooks = false,
+  sourceData,
+}: {
+  dataIsLocaleKeyed?: boolean
+  operation?: 'update' | 'validate'
+  options: ValidateGlobalOptions<TSlug>
+  payload: Payload
+  skipAccessControl?: boolean
+  skipMutationHooks?: boolean
+  sourceData?: ValidationSourceData
+}): Promise<ValidationResult> {
   const { slug, data, locale, overrideAccess = false } = options
   const { draft = false } = options
 
@@ -62,8 +105,10 @@ export async function validateGlobalLocal<TSlug extends GlobalSlug>(
   return runLocaleScopedValidation({
     context: options.context,
     data,
+    dataIsLocaleKeyed,
     fields: globalConfig.fields,
     locale,
+    operation,
     payload,
     req: options.req,
     runPass: ({ data: validationData, onValidationData, req }) =>
@@ -75,6 +120,10 @@ export async function validateGlobalLocal<TSlug extends GlobalSlug>(
         onValidationData,
         overrideAccess,
         req,
+        skipAccessControl,
+        skipMutationHooks,
+        sourceData,
+        validationOperation: operation,
       }),
     user: options.user,
   })

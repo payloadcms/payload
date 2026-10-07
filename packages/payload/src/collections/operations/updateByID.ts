@@ -1,7 +1,5 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import { status as httpStatus } from 'http-status'
-
 import type { FindOneArgs } from '../../database/types.js'
 import type {
   PayloadRequest,
@@ -33,7 +31,6 @@ import { branchField, MAIN_BRANCH } from '../../branching/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { type CollectionSlug, deepCopyObjectSimple, type FindOptions } from '../../index.js'
-import { runLocalFileUpdate } from '../../uploads/fileVersioning/archive.js'
 import { runCloudFileUpdate } from '../../uploads/fileVersioning/cloudStorage.js'
 import {
   abortFileOperationScope,
@@ -60,6 +57,7 @@ import {
   shouldRollbackTransactionArtifacts,
 } from '../../utilities/commitTransaction.js'
 import { hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
@@ -532,6 +530,7 @@ const updateByIDOperationWithLifecycleAttempt = async <
       publishAllLocales,
       req,
       select: select!,
+      shouldManageLocalFiles: true,
       showHiddenFields: showHiddenFields!,
       unpublishAllLocales,
       uploadFileRollbacks:
@@ -551,15 +550,7 @@ const updateByIDOperationWithLifecycleAttempt = async <
           req,
           write,
         })
-      : await runLocalFileUpdate({
-          id,
-          collection: collectionConfig,
-          current: docWithLocales,
-          files: filesToUpload,
-          next: newFileData as Record<string, unknown>,
-          req,
-          write,
-        })
+      : await write()
 
     // /////////////////////////////////////
     // Add collection property for auth collections

@@ -6,7 +6,7 @@ import { APIError, NotFound } from 'payload'
 import { fileURLToPath } from 'url'
 import { expect, vi } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import type { RESTClient } from '../__helpers/shared/RESTClient.js'
 import type { Relation } from './config.js'
 import type { Post } from './payload-types.js'
 
@@ -2364,7 +2364,7 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
 })
 
 async function createPost(
-  { restClient }: { restClient: NextRESTClient },
+  { restClient }: { restClient: RESTClient },
   overrides?: Partial<Post>,
 ) {
   const { doc } = await restClient
@@ -2375,7 +2375,7 @@ async function createPost(
   return doc
 }
 
-async function createPosts({ restClient }: { restClient: NextRESTClient }, count: number) {
+async function createPosts({ restClient }: { restClient: RESTClient }, count: number) {
   for (let i = 0; i < count; i++) {
     await createPost({ restClient })
   }

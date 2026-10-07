@@ -583,6 +583,39 @@ To migrate automatically, there's a codemod for this change available by running
 npx @payloadcms/codemod --transform migrate-field-component-types
 ```
 
+### Diff component props `comparisonValue` and `versionValue` renamed to `valueFrom` and `valueTo`
+
+Custom Diff Components (`admin.components.Diff`) receive the two field values being compared as `valueFrom` and `valueTo`. The `comparisonValue` and `versionValue` props have been removed from `FieldDiffClientProps` and `FieldDiffServerProps`, including every field-specific variant such as `TextFieldDiffClientProps`.
+
+| Old prop          | New prop    | Description                                      |
+| ----------------- | ----------- | ------------------------------------------------ |
+| `comparisonValue` | `valueFrom` | Field value from the version being compared from |
+| `versionValue`    | `valueTo`   | Field value from the version being compared to   |
+
+```diff
+  import type { TextFieldDiffClientProps } from 'payload'
+  import type React from 'react'
+
+  export const MyTextDiff: React.FC<TextFieldDiffClientProps> = ({
+-   comparisonValue,
+-   versionValue,
++   valueFrom,
++   valueTo,
+  }) => {
+    // ...
+  }
+```
+
+#### Codemod
+
+To migrate automatically, there's a codemod for this change available by running:
+
+```bash
+npx @payloadcms/codemod --transform rename-diff-value-props
+```
+
+The codemod updates functions whose props are typed with a Diff props or component type imported from `payload` (e.g. `TextFieldDiffClientProps`), or with a type in the same file built from one. It renames destructured props and reads such as `props.comparisonValue`. Untyped components and props passed on to other components (e.g. `<OtherDiff comparisonValue={...} />`) aren't changed automatically; the codemod prints a note for each leftover in files that import a Diff type.
+
 ### `DefaultValue` function variant is now typed to allow returning a `Promise` ([#17522](https://github.com/payloadcms/payload/pull/17522))
 
 The exported `DefaultValue` type's function variant previously declared a synchronous-only return type (`SerializableValue`), even though Payload has always awaited the result of a `defaultValue` function at runtime. The type now correctly reflects this and allows `Promise<SerializableValue> | SerializableValue`.
@@ -880,6 +913,33 @@ When a missing locale is already valid for the receiving API, optional chaining 
 const locale = useLocale()?.code
 ```
 
+### Deprecated `TableColumnsProvider` props removed
+
+The following deprecated props have been removed from `TableColumnsProvider` and its `TableColumnsProviderProps` type:
+
+- `docs`
+- `enableRowSelections`
+- `listPreferences`
+- `preferenceKey`
+- `renderRowTypes`
+- `setTable`
+- `sortColumnProps`
+- `tableAppearance`
+
+`TableColumnsProvider` has ignored these props since 3.26.0, when column state moved to the URL. Remove them where you render the provider. It now only accepts `children`, `collectionSlug`, `columnState`, and `LinkedCellOverride`.
+
+```diff
+<TableColumnsProvider
+  collectionSlug={collectionSlug}
+  columnState={columnState}
+- enableRowSelections
+- preferenceKey={preferenceKey}
+- tableAppearance="condensed"
+>
+  {children}
+</TableColumnsProvider>
+```
+
 ### RichText adapter `i18n` property removed
 
 The `i18n` property on `RichTextAdapter` (and its return type from adapter provider functions) has been removed. It was deprecated in v3 in favour of merging translations directly into `config.i18n.translations` inside the adapter provider.
@@ -940,6 +1000,38 @@ If an affected adapter or feature performs asynchronous work, move that work to 
 ### `transactionIDPromise` removed from `PayloadRequest`
 
 The `transactionIDPromise` property on `PayloadRequest` has been removed. It was deprecated and unused — `transactionID` (which already supports `Promise<number | string>`) is the correct property to use for both resolved values and pending transactions.
+
+### `headers` and `languageCode` removed from `AdminContext`
+
+The `headers` and `languageCode` properties have been removed from `AdminContext`, the object returned by `initAdminContext`. Both duplicated values that are already available on `req`:
+
+```diff
+const context = await initAdminContext(args)
+
+-const userAgent = context.headers.get('user-agent')
++const userAgent = context.req.headers.get('user-agent')
+
+-const languageCode = context.languageCode
++const languageCode = context.req.i18n.language
+```
+
+`req.i18n.language` is typed as `string`. Cast it to `AcceptedLanguages` if you need the narrower type.
+
+`languageCode` has also been removed from `PartialAdminContext`. Use `i18n.language` instead. `getRootLayoutData` from `@payloadcms/ui` no longer accepts `headers` or `languageCode` and reads both from `req`.
+
+#### Codemod
+
+To migrate automatically, run:
+
+```bash
+npx @payloadcms/codemod --transform migrate-admin-context-properties
+```
+
+The codemod rewrites property reads and destructures on `initAdminContext()` results and on parameters or variables typed as `AdminContext` or `PartialAdminContext`. It also updates `Pick<AdminContext, ...>` and `AdminContext['...']` types and drops both arguments from `getRootLayoutData()` calls. Element access such as `context['headers']`, and contexts passed through your own wrapper functions, are left unchanged for manual migration.
+
+### `DiffMethod` type removed
+
+The deprecated `DiffMethod` type has been removed from `payload`. It mirrored an enum from `react-diff-viewer-continued`, which Payload no longer depends on. Remove any imports of `DiffMethod`.
 
 ### Collection `afterOperation` hook: `operation: 'read'` removed
 
@@ -1164,6 +1256,35 @@ The table feature is no longer experimental, so it drops its prefix.
 ```
 
 Stored content is unaffected.
+
+### Lexical: `UploadDataImproved` replaced by `UploadData` ([#18606](https://github.com/payloadcms/payload/pull/18606))
+
+The internal `UploadDataImproved` type has been removed, and its definition is now used by the public `UploadData` type. Replace any `UploadDataImproved` imports and type references with `UploadData`:
+
+```ts
+import type { UploadData } from '@payloadcms/richtext-lexical'
+```
+
+### Lexical: the `version` of nodes is ignored
+
+Lexical deprecated the `version` property of serialized nodes, and now ignores it when it loads a document. Payload no longer reads it either.
+
+**Rich text written by the Payload 3.0 betas is no longer upgraded when it's loaded.** Payload used `version: 1` to detect two older shapes:
+
+- Block nodes whose fields were wrapped in an extra `data` object (`fields.data`)
+- Relationship and upload nodes that stored the whole related document in `value`, instead of its ID
+
+If your database may still contain rich text from the 3.0 betas, run `upgradeLexicalData` on the latest 3.x release before you upgrade to 4.0. It re-saves every document, which converts these shapes:
+
+```ts
+import { upgradeLexicalData } from '@payloadcms/richtext-lexical'
+
+await upgradeLexicalData({ payload })
+```
+
+**`version` is optional in the JSON schema of Lexical nodes.** The CLI and MCP no longer require it, and leave it out of the schema they show agents. They still accept it, so existing documents, which contain `version`, stay valid input.
+
+**Payload doesn't add or remove `version` when it saves rich text.** Rich text created by Lexical, like in the admin panel, still has `version: 1` on every node, because Lexical's JSON export writes it. Payload's own nodes used to write their own numbers instead (like `2` for blocks), and now write `1` as well. Rich text sent through the API, CLI or MCP is saved as sent, so it may not contain `version`. The generated types still include `version`, marked as deprecated, so don't rely on it being there.
 
 ### Field `typescriptSchema` renamed to `jsonSchema`
 

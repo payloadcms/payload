@@ -1,12 +1,12 @@
 import type { Readable } from 'stream'
 
 import Busboy from 'busboy'
-import { status as httpStatus } from 'http-status'
 
 import type { FetchAPIFileUploadOptions } from '../../config/types.js'
 import type { FetchAPIFileUploadResponse } from './index.js'
 
 import { APIError } from '../../errors/APIError.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { fileFactory } from './fileFactory.js'
 import { memHandler, tempFileHandler } from './handlers.js'
 import { processNested } from './processNested.js'

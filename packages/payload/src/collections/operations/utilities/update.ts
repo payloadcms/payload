@@ -30,6 +30,7 @@ import { removeExpiredSessions } from '../../../auth/sessions.js'
 import { generatePasswordSaltHash } from '../../../auth/strategies/local/generatePasswordSaltHash.js'
 import { runBranchMergeWriteGuard } from '../../../branching/mergeWriteGuard.js'
 import { branchDocIDField, branchField, MAIN_BRANCH } from '../../../branching/types.js'
+import { ValidationError } from '../../../errors/index.js'
 import { afterChange } from '../../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../../fields/hooks/beforeChange/index.js'
@@ -37,6 +38,7 @@ import { beforeValidate } from '../../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple, saveVersion } from '../../../index.js'
 import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js'
 import { deleteUploadFilesExclusiveToDocument } from '../../../uploads/deleteUploadFilesExclusiveToDocument.js'
+import { runLocalFileUpdate } from '../../../uploads/fileVersioning/archive.js'
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
 import { getTopLevelFieldNames } from '../../../utilities/getTopLevelFieldNames.js'
@@ -54,6 +56,7 @@ import {
   validateAllLocalesPublicationFlags,
 } from '../../../versions/allLocalesPublicationStatus.js'
 import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePublishData.js'
+import { validateLocalWithLocaleKeyedData } from '../local/validate.js'
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
   collectionConfig: SanitizedCollectionConfig
@@ -83,6 +86,7 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   publishAllLocales?: boolean
   req: PayloadRequest
   select: SelectType
+  shouldManageLocalFiles: boolean
   showHiddenFields: boolean
   unpublishAllLocales?: boolean
   uploadFileRollbacks?: UploadFileRollbacks
@@ -126,11 +130,16 @@ export const updateDocument = async <
   publishAllLocales: publishAllLocalesArg,
   req,
   select,
+  shouldManageLocalFiles,
   showHiddenFields,
   unpublishAllLocales: unpublishAllLocalesArg,
   uploadFileRollbacks,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   const databaseRequest = databaseReq ?? req
+  const nextFileData =
+    collectionConfig.upload && shouldManageLocalFiles && !collectionConfig.upload.fileOperations
+      ? deepCopyObjectSimple(data)
+      : undefined
 
   validateAllLocalesPublicationFlags({
     publishAllLocales: publishAllLocalesArg,
@@ -199,8 +208,6 @@ export const updateDocument = async <
       authOptions: collectionConfig.auth,
       collectionSlug: collectionConfig.slug,
       data,
-      // Not a hook label — this discriminates validation mode, and the update
-      // path is always an update as far as auth field requirements go.
       operation: 'update',
       originalDoc,
       req,
@@ -355,60 +362,6 @@ export const updateDocument = async <
     result._status = { ...docWithLocales._status }
   }
 
-  // File deletion and writes must occur after beforeChange's field validation. Validation
-  // failures leave both the persisted upload and local files untouched.
-  if (!isDraftOverPublished && !hasManagedLocalUpload) {
-    const documentBranch = docWithLocales[branchField]
-    const isBranchUploadReplacement =
-      filesToUpload.length > 0 &&
-      typeof documentBranch === 'string' &&
-      documentBranch !== MAIN_BRANCH
-
-    if (isBranchUploadReplacement) {
-      const canonicalDocument = docWithLocales[branchDocIDField]
-      const canonicalDocumentID =
-        canonicalDocument && typeof canonicalDocument === 'object' && 'value' in canonicalDocument
-          ? canonicalDocument.value
-          : canonicalDocument
-      const retainedDoc =
-        typeof canonicalDocumentID === 'number' || typeof canonicalDocumentID === 'string'
-          ? ((await payload.db.findOne({
-              branch: false,
-              collection: collectionConfig.slug,
-              req,
-              where: {
-                and: [
-                  { [branchField]: { equals: MAIN_BRANCH } },
-                  { id: { equals: canonicalDocumentID } },
-                ],
-              },
-            })) as null | Record<string, unknown>)
-          : null
-
-      await deleteUploadFilesExclusiveToDocument({
-        collectionConfig,
-        config,
-        deleteFromAdapter: false,
-        req,
-        retainedDoc,
-        sourceDoc: docWithLocales,
-      })
-    } else {
-      await deleteAssociatedFiles({
-        collectionConfig,
-        config,
-        doc: docWithLocales,
-        files: filesToUpload,
-        overrideDelete: false,
-        req,
-      })
-    }
-  }
-
-  if (!collectionConfig.upload.disableLocalStorage && !hasManagedLocalUpload) {
-    await uploadFiles(payload, filesToUpload, req, { uploadFileRollbacks })
-  }
-
   if (
     config.localization &&
     hasLocalizeStatusEnabled(collectionConfig) &&
@@ -482,186 +435,296 @@ export const updateDocument = async <
     }
   }
 
-  const dataToUpdate: JsonObject = { ...(localizedPublishData ?? result) }
-
-  // /////////////////////////////////////
-  // Handle potential password update
-  // /////////////////////////////////////
-
-  if (shouldSavePassword && typeof password === 'string') {
-    const { hash, salt } = await generatePasswordSaltHash({
-      collection: collectionConfig,
-      password,
-      req,
+  if (
+    config.localization &&
+    hasDraftsEnabled(collectionConfig) &&
+    publishAllLocales &&
+    !unpublishAllLocales &&
+    (!hasLocalizeStatusEnabled(collectionConfig) || hasAuthorizedPublicationStatus)
+  ) {
+    const validationResult = await validateLocalWithLocaleKeyedData({
+      operation: 'update',
+      options: {
+        id,
+        collection: collectionConfig.slug,
+        data: result,
+        draft: true,
+        locale: 'all',
+        overrideAccess,
+        req,
+      },
+      payload,
+      sourceData: {
+        docWithLocales,
+        originalDoc: publicationHookDoc,
+        originalLocale: locale,
+      },
+      trash: Boolean(originalDoc?.deletedAt),
     })
-    dataToUpdate.salt = salt
-    dataToUpdate.hash = hash
-    delete dataToUpdate.password
-    delete data.password
 
-    if (collectionConfig.auth?.useSessions) {
-      const currentSid =
-        req.user?.collection === collectionConfig.slug && String(req.user.id) === String(id)
-          ? req.user._sid
-          : undefined
-      const existingSessions = removeExpiredSessions(
-        (docWithLocales.sessions as undefined | UserSession[]) ?? [],
+    if (!validationResult.valid) {
+      throw new ValidationError(
+        {
+          id,
+          collection: collectionConfig.slug,
+          errors: validationResult.errors,
+          req,
+        },
+        req.t,
       )
-
-      dataToUpdate.sessions = currentSid
-        ? existingSessions.filter((session) => session.id === currentSid)
-        : []
     }
   }
 
-  await runBranchMergeWriteGuard({
-    collectionSlug: collectionConfig.slug,
-    data: dataToUpdate,
-    req,
-  })
+  // File deletion and writes must occur after the final publish validation. Validation failures
+  // leave both the persisted upload and local files untouched.
+  if (!isDraftOverPublished && !hasManagedLocalUpload) {
+    const documentBranch = docWithLocales[branchField]
+    const isBranchUploadReplacement =
+      filesToUpload.length > 0 &&
+      typeof documentBranch === 'string' &&
+      documentBranch !== MAIN_BRANCH
 
-  if (localizedPublishData) {
+    if (isBranchUploadReplacement) {
+      const canonicalDocument = docWithLocales[branchDocIDField]
+      const canonicalDocumentID =
+        canonicalDocument && typeof canonicalDocument === 'object' && 'value' in canonicalDocument
+          ? canonicalDocument.value
+          : canonicalDocument
+      const retainedDoc =
+        typeof canonicalDocumentID === 'number' || typeof canonicalDocumentID === 'string'
+          ? ((await payload.db.findOne({
+              branch: false,
+              collection: collectionConfig.slug,
+              req,
+              where: {
+                and: [
+                  { [branchField]: { equals: MAIN_BRANCH } },
+                  { id: { equals: canonicalDocumentID } },
+                ],
+              },
+            })) as null | Record<string, unknown>)
+          : null
+
+      await deleteUploadFilesExclusiveToDocument({
+        collectionConfig,
+        config,
+        deleteFromAdapter: false,
+        req,
+        retainedDoc,
+        sourceDoc: docWithLocales,
+      })
+    } else {
+      await deleteAssociatedFiles({
+        collectionConfig,
+        config,
+        doc: docWithLocales,
+        files: filesToUpload,
+        overrideDelete: false,
+        req,
+      })
+    }
+  }
+
+  if (!collectionConfig.upload.disableLocalStorage && !hasManagedLocalUpload) {
+    await uploadFiles(payload, filesToUpload, req, { uploadFileRollbacks })
+  }
+
+  const writeDocument = async (): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
+    const dataToUpdate: JsonObject = { ...(localizedPublishData ?? result) }
+
+    // /////////////////////////////////////
+    // Handle potential password update
+    // /////////////////////////////////////
+
+    if (shouldSavePassword && typeof password === 'string') {
+      const { hash, salt } = await generatePasswordSaltHash({
+        collection: collectionConfig,
+        password,
+        req,
+      })
+      dataToUpdate.salt = salt
+      dataToUpdate.hash = hash
+      delete dataToUpdate.password
+      delete data.password
+
+      if (collectionConfig.auth?.useSessions) {
+        const currentSid =
+          req.user?.collection === collectionConfig.slug && String(req.user.id) === String(id)
+            ? req.user._sid
+            : undefined
+        const existingSessions = removeExpiredSessions(
+          (docWithLocales.sessions as undefined | UserSession[]) ?? [],
+        )
+
+        dataToUpdate.sessions = currentSid
+          ? existingSessions.filter((session) => session.id === currentSid)
+          : []
+      }
+    }
+
     await runBranchMergeWriteGuard({
       collectionSlug: collectionConfig.slug,
-      data: result,
+      data: dataToUpdate,
       req,
     })
-  }
 
-  await checkDocumentLockStatus({
-    id,
-    collectionSlug: collectionConfig.slug,
-    lockErrorMessage: `Document with ID ${id} is currently locked by another user and cannot be updated.`,
-    overrideLock,
-    req,
-  })
-
-  // /////////////////////////////////////
-  // Update
-  // /////////////////////////////////////
-
-  let resultWithLocales: JsonObject = result
-
-  if (!isSavingDraft) {
-    // Ensure updatedAt date is always updated
-    dataToUpdate.updatedAt = new Date().toISOString()
-    onBeforeDocumentWrite?.()
     if (localizedPublishData) {
-      // Single-locale publish: save filtered data to main doc but keep full locale data for
-      // the version so draft fetches (replaceWithDraftIfAvailable) return complete data.
-      await req.payload.db.updateOne({
-        id,
-        collection: collectionConfig.slug,
-        data: dataToUpdate,
-        locale,
-        req: databaseRequest,
+      await runBranchMergeWriteGuard({
+        collectionSlug: collectionConfig.slug,
+        data: result,
+        req,
       })
-      markTransactionWrite({ req })
-      resultWithLocales = { ...result, updatedAt: dataToUpdate.updatedAt }
-    } else {
-      resultWithLocales = await req.payload.db.updateOne({
-        id,
-        collection: collectionConfig.slug,
-        data: dataToUpdate,
-        locale,
-        req: databaseRequest,
-      })
-      markTransactionWrite({ req })
     }
-  }
 
-  // /////////////////////////////////////
-  // Create version
-  // /////////////////////////////////////
-
-  if (collectionConfig.versions) {
-    onBeforeDocumentWrite?.()
-    resultWithLocales = await saveVersion({
+    await checkDocumentLockStatus({
       id,
-      autosave,
-      collection: collectionConfig,
-      docWithLocales: resultWithLocales,
-      draft: isSavingDraft,
-      operation: 'update',
-      payload,
-      req: databaseRequest,
-      unpublish: unpublishAllLocales,
+      collectionSlug: collectionConfig.slug,
+      lockErrorMessage: `Document with ID ${id} is currently locked by another user and cannot be updated.`,
+      overrideLock,
+      req,
     })
-    markTransactionWrite({ req })
-  }
 
-  // /////////////////////////////////////
-  // afterRead - Fields
-  // /////////////////////////////////////
+    // /////////////////////////////////////
+    // Update
+    // /////////////////////////////////////
 
-  result = await afterRead({
-    collection: collectionConfig,
-    context: req.context,
-    depth,
-    doc: resultWithLocales,
-    draft: draftArg,
-    fallbackLocale,
-    global: null,
-    locale,
-    overrideAccess,
-    populate,
-    req,
-    select,
-    showHiddenFields,
-  })
+    let resultWithLocales: JsonObject = result
 
-  // /////////////////////////////////////
-  // afterRead - Collection
-  // /////////////////////////////////////
-
-  if (collectionConfig.hooks?.afterRead?.length) {
-    for (const hook of collectionConfig.hooks.afterRead) {
-      result =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          doc: result,
-          overrideAccess,
-          req,
-        })) || result
+    if (!isSavingDraft) {
+      // Ensure updatedAt date is always updated
+      dataToUpdate.updatedAt = new Date().toISOString()
+      onBeforeDocumentWrite?.()
+      if (localizedPublishData) {
+        // Single-locale publish: save filtered data to main doc but keep full locale data for
+        // the version so draft fetches (replaceWithDraftIfAvailable) return complete data.
+        await req.payload.db.updateOne({
+          id,
+          collection: collectionConfig.slug,
+          data: dataToUpdate,
+          locale,
+          req: databaseRequest,
+        })
+        markTransactionWrite({ req })
+        resultWithLocales = { ...result, updatedAt: dataToUpdate.updatedAt }
+      } else {
+        resultWithLocales = await req.payload.db.updateOne({
+          id,
+          collection: collectionConfig.slug,
+          data: dataToUpdate,
+          locale,
+          req: databaseRequest,
+        })
+        markTransactionWrite({ req })
+      }
     }
-  }
 
-  // /////////////////////////////////////
-  // afterChange - Fields
-  // /////////////////////////////////////
+    // /////////////////////////////////////
+    // Create version
+    // /////////////////////////////////////
 
-  result = await afterChange({
-    collection: collectionConfig,
-    context: req.context,
-    data,
-    doc: result,
-    global: null,
-    operation,
-    previousDoc: originalDoc,
-    req,
-  })
-
-  // /////////////////////////////////////
-  // afterChange - Collection
-  // /////////////////////////////////////
-
-  if (collectionConfig.hooks?.afterChange?.length) {
-    for (const hook of collectionConfig.hooks.afterChange) {
-      result =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          data,
-          doc: result,
-          operation,
-          overrideAccess,
-          previousDoc: originalDoc,
-          req,
-          select,
-        })) || result
+    if (collectionConfig.versions) {
+      onBeforeDocumentWrite?.()
+      resultWithLocales = await saveVersion({
+        id,
+        autosave,
+        collection: collectionConfig,
+        docWithLocales: resultWithLocales,
+        draft: isSavingDraft,
+        operation: 'update',
+        payload,
+        req: databaseRequest,
+        unpublish: unpublishAllLocales,
+      })
+      markTransactionWrite({ req })
     }
+
+    // /////////////////////////////////////
+    // afterRead - Fields
+    // /////////////////////////////////////
+
+    result = await afterRead({
+      collection: collectionConfig,
+      context: req.context,
+      depth,
+      doc: resultWithLocales,
+      draft: draftArg,
+      fallbackLocale,
+      global: null,
+      locale,
+      overrideAccess,
+      populate,
+      req,
+      select,
+      showHiddenFields,
+    })
+
+    // /////////////////////////////////////
+    // afterRead - Collection
+    // /////////////////////////////////////
+
+    if (collectionConfig.hooks?.afterRead?.length) {
+      for (const hook of collectionConfig.hooks.afterRead) {
+        result =
+          (await hook({
+            collection: collectionConfig,
+            context: req.context,
+            doc: result,
+            overrideAccess,
+            req,
+          })) || result
+      }
+    }
+
+    // /////////////////////////////////////
+    // afterChange - Fields
+    // /////////////////////////////////////
+
+    result = await afterChange({
+      collection: collectionConfig,
+      context: req.context,
+      data,
+      doc: result,
+      global: null,
+      operation,
+      previousDoc: originalDoc,
+      req,
+    })
+
+    // /////////////////////////////////////
+    // afterChange - Collection
+    // /////////////////////////////////////
+
+    if (collectionConfig.hooks?.afterChange?.length) {
+      for (const hook of collectionConfig.hooks.afterChange) {
+        result =
+          (await hook({
+            collection: collectionConfig,
+            context: req.context,
+            data,
+            doc: result,
+            operation,
+            overrideAccess,
+            previousDoc: originalDoc,
+            req,
+            select,
+          })) || result
+      }
+    }
+
+    return result as TransformCollectionWithSelect<TSlug, TSelect>
   }
 
-  return result as TransformCollectionWithSelect<TSlug, TSelect>
+  if (!nextFileData) {
+    return writeDocument()
+  }
+
+  return runLocalFileUpdate({
+    id,
+    collection: collectionConfig,
+    current: docWithLocales,
+    files: hasManagedLocalUpload ? filesToUpload : [],
+    next: nextFileData as JsonObject,
+    req,
+    write: writeDocument,
+  })
 }

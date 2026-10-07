@@ -5,7 +5,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import type { RESTClient } from '../__helpers/shared/RESTClient.js'
 
 import { getStoredUploadKeys } from '../__helpers/int/storedUploadKeys.js'
 import { test } from '../__helpers/int/vitest.js'
@@ -21,7 +21,7 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const uploadImage = async (restClient: NextRESTClient, slug: string) => {
+const uploadImage = async (restClient: RESTClient, slug: string) => {
   const fileBuffer = await readFile(`${dirname}/../uploads/image.png`)
 
   const data = new FormData()

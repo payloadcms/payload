@@ -1,5 +1,3 @@
-import httpStatus from 'http-status'
-
 import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDistinctDocs } from '../../database/types.js'
 import type { FlattenedField } from '../../fields/config/types.js'
@@ -19,6 +17,7 @@ import { QueryError } from '../../errors/QueryError.js'
 import { relationshipPopulationPromise } from '../../fields/hooks/afterRead/relationshipPopulationPromise.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { getFieldByPath } from '../../utilities/getFieldByPath.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 

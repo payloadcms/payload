@@ -28,7 +28,7 @@ import {
 } from '../../branching/mergeWriteGuard.js'
 import { branchField, MAIN_BRANCH } from '../../branching/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
-import { Forbidden } from '../../errors/index.js'
+import { Forbidden, ValidationError } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
@@ -61,6 +61,7 @@ import {
 import { buildLocalizedPublishData } from '../../versions/buildSingleLocalePublishData.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
+import { validateGlobalLocalWithLocaleKeyedData } from './local/validate.js'
 type Args<TSlug extends GlobalSlug> = {
   autosave?: boolean
   data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
@@ -484,6 +485,43 @@ export const updateOperation = async <
             result,
           })
         }
+      }
+    }
+
+    if (
+      config?.localization &&
+      hasDraftsEnabled(globalConfig) &&
+      publishAllLocales &&
+      !unpublishAllLocales &&
+      (!hasLocalizeStatusEnabled(globalConfig) || hasAuthorizedPublicationStatus)
+    ) {
+      const validationResult = await validateGlobalLocalWithLocaleKeyedData({
+        operation: 'update',
+        options: {
+          slug: globalConfig.slug,
+          data: result,
+          draft: true,
+          locale: 'all',
+          overrideAccess,
+          req,
+        },
+        payload,
+        sourceData: {
+          docWithLocales: globalJSON,
+          originalDoc: publicationHookDoc,
+          originalLocale: locale!,
+        },
+      })
+
+      if (!validationResult.valid) {
+        throw new ValidationError(
+          {
+            errors: validationResult.errors,
+            global: globalConfig.slug,
+            req,
+          },
+          req.t,
+        )
       }
     }
 

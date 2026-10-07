@@ -3,7 +3,6 @@ import type { APIError, Payload, PayloadRequest, SanitizedConfig } from 'payload
 
 import { configToSchema } from '@payloadcms/graphql'
 import { createHandler } from 'graphql-http/lib/use/fetch'
-import { status as httpStatus } from 'http-status'
 import {
   addDataAndFileToRequest,
   addLocalesToRequestFromData,
@@ -13,6 +12,7 @@ import {
   logError,
   mergeHeaders,
 } from 'payload'
+import { httpStatus } from 'payload/internal'
 
 const handleError = async ({
   err,

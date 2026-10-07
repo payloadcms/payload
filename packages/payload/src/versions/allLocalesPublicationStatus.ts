@@ -1,8 +1,7 @@
-import { status as httpStatus } from 'http-status'
-
 import type { JsonObject } from '../types/index.js'
 
 import { APIError } from '../errors/index.js'
+import { httpStatus } from '../utilities/httpStatus.js'
 
 export type AllLocalesPublicationStatus = 'draft' | 'published'
 

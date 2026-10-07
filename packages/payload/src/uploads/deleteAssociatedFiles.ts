@@ -1,5 +1,4 @@
 import fs from 'fs/promises'
-import { status as httpStatus } from 'http-status'
 import path from 'path'
 
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
@@ -9,6 +8,7 @@ import type { FileIdentity } from './fileIdentity.js'
 import type { FileData, FileToSave } from './types.js'
 
 import { APIError, ErrorDeletingFile } from '../errors/index.js'
+import { httpStatus } from '../utilities/httpStatus.js'
 import {
   beginDeferredCleanupScopeIfNeeded,
   clearDeferredCleanupScope,
