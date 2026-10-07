@@ -241,6 +241,7 @@ export interface Folder {
   id: string;
   parentFolder?: (string | null) | Folder;
   name: string;
+  isLocked?: boolean | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -521,6 +522,7 @@ export interface DivisionsSelect<T extends boolean = true> {
 export interface FoldersSelect<T extends boolean = true> {
   parentFolder?: T;
   name?: T;
+  isLocked?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
