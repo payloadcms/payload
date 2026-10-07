@@ -20,6 +20,7 @@ import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
 export type GlobalFindOneArgs = {
   /**
@@ -43,6 +44,17 @@ export type GlobalFindOneArgs = {
 export const findOneOperation = async <T extends Record<string, unknown>>(
   args: GlobalFindOneArgs,
 ): Promise<T> => {
+  // /////////////////////////////////////
+  // beforeOperation - Global
+  // /////////////////////////////////////
+
+  args = await buildBeforeOperation({
+    args,
+    global: args.globalConfig,
+    operation: 'read',
+    overrideAccess: args.overrideAccess,
+  })
+
   const {
     slug,
     depth,
@@ -61,24 +73,6 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
 
   const includeLockStatus =
     includeLockStatusFromArgs && req.payload.collections?.[lockedDocumentsCollectionSlug]
-
-  // /////////////////////////////////////
-  // beforeOperation - Global
-  // /////////////////////////////////////
-
-  if (globalConfig.hooks?.beforeOperation?.length) {
-    for (const hook of globalConfig.hooks.beforeOperation) {
-      args =
-        (await hook({
-          args,
-          context: args.req.context,
-          global: globalConfig,
-          operation: 'read',
-          overrideAccess,
-          req: args.req,
-        })) || args
-    }
-  }
 
   // /////////////////////////////////////
   // Retrieve and execute access
