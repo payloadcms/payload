@@ -3484,6 +3484,23 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    test('should use a native checkbox label without inferring an ARIA reference from its name', async () => {
+      // PYLD-3817
+      await gotoFirstPost({ page, postsURL, serverURL })
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+      await page.getByRole('menuitem', { name: 'Delete', exact: true }).click()
+      const dialog = page.getByRole('dialog', { name: /confirm deletion/i })
+      const checkbox = dialog.getByRole('checkbox')
+
+      await expect(checkbox).toBeVisible()
+      await expect(checkbox).toHaveAccessibleName('Skip trash and delete permanently')
+      await checkbox.focus()
+      await checkbox.press('Space')
+      await expect(checkbox).toBeChecked()
+      await checkbox.press('Space')
+      await expect(checkbox).not.toBeChecked()
+    })
+
     test('should expose read-only hierarchy controls as disabled', async () => {
       await gotoCreatePost({ page, postsURL })
 
