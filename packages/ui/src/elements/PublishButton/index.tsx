@@ -17,6 +17,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { PopupList } from '../Popup/index.js'
 import { FieldErrorsToast } from '../Toasts/fieldErrors.js'
@@ -41,6 +42,7 @@ export function PublishButton({
 
   const { config, getEntityConfig } = useConfig()
   const { getData, submit } = useForm()
+  const { uploadEdits } = useUploadEdits()
   const modified = useFormModified()
   const editDepth = useEditDepth()
   const locale = useLocale()
@@ -106,6 +108,7 @@ export function PublishButton({
         draft: true,
         'fallback-locale': 'null',
         locale: localeCode,
+        uploadEdits: uploadEdits || undefined,
       },
       { addQueryPrefix: true },
     )
@@ -138,7 +141,7 @@ export function PublishButton({
       },
       skipValidation: true,
     })
-  }, [disabled, localeCode, collectionSlug, globalSlug, submit, api, id])
+  }, [disabled, localeCode, collectionSlug, globalSlug, submit, api, id, uploadEdits])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
     e.preventDefault()
@@ -207,6 +210,7 @@ export function PublishButton({
       {
         depth: 0,
         locale: localeCode,
+        uploadEdits: uploadEdits || undefined,
         ...(localizeStatusEnabled && { publishAllLocales: true }),
       },
       { addQueryPrefix: true },
@@ -250,6 +254,7 @@ export function PublishButton({
     t,
     uploadStatus,
     setMostRecentVersionIsAutosaved,
+    uploadEdits,
   ])
 
   const publishLocale = useCallback(
@@ -262,6 +267,7 @@ export function PublishButton({
         {
           depth: 0,
           locale,
+          uploadEdits: uploadEdits || undefined,
         },
         { addQueryPrefix: true },
       )
@@ -297,6 +303,7 @@ export function PublishButton({
       setUnpublishedVersionCount,
       submit,
       uploadStatus,
+      uploadEdits,
     ],
   )
 
