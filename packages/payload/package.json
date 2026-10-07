@@ -39,6 +39,13 @@
   ],
   "sideEffects": false,
   "type": "module",
+  "imports": {
+    "#validateJSONSchema": {
+      "types": "./src/fields/validateJSONSchema.ts",
+      "browser": "./src/fields/validateJSONSchema.browser.ts",
+      "default": "./src/fields/validateJSONSchema.ts"
+    }
+  },
   "exports": {
     ".": {
       "types": "./src/index.ts",
@@ -116,7 +123,7 @@
     "pretest": "pnpm build"
   },
   "dependencies": {
-    "@next/env": "16.3.8",
+    "@next/env": "16.4.0",
     "@payloadcms/translations": "workspace:*",
     "@standard-schema/spec": "1.1.0",
     "@types/busboy": "1.5.4",
@@ -228,6 +235,13 @@
       "./__testing__/predefinedMigration": {
         "import": "./dist/__testing__/predefinedMigration.js",
         "default": "./dist/__testing__/predefinedMigration.js"
+      }
+    },
+    "imports": {
+      "#validateJSONSchema": {
+        "types": "./dist/fields/validateJSONSchema.d.ts",
+        "browser": "./dist/fields/validateJSONSchema.browser.js",
+        "default": "./dist/fields/validateJSONSchema.js"
       }
     },
     "main": "./dist/index.js",
