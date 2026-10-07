@@ -563,8 +563,6 @@ export const taTranslations: DefaultTranslationsObject = {
     goTo: '"{{name}}"க்கு செல்லுங்கள்',
     itemsMovedTo: '{{title}} ஐ {{destination}} க்கு நகர்த்தினோம்',
     itemsMovedToRoot: '{{title}} மூலத்திற்கு நகர்த்தப்பட்டது',
-    moveItemsToRootConfirmation:
-      'நீங்கள் மூலத்துக்கு <1>{{count}} {{label}}</1> பேரை நகர்த்த உள்ளீர்கள். உங்கள் சரிபார்வை உறுதிசெய்யப்பட்டதா?',
     moveTo: 'அடைப்பதற்கு...',
     moveToRoot: 'ரூட்டிற்கு நகருங்கள்',
     noParent: 'பெற்றோர் இல்லை',

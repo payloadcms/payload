@@ -570,8 +570,6 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     goTo: '"{{name}}" এ যান',
     itemsMovedTo: '{{title}} এখন {{destination}} এ স্থানান্তরিত হয়েছে',
     itemsMovedToRoot: '{{title}} মূলে সরানো হয়েছে',
-    moveItemsToRootConfirmation:
-      'আপনি চলে যাচ্ছেন <1>{{count}} {{label}}</1> রুটে। আপনি কি নিশ্চিত?',
     moveTo: 'সরান...',
     moveToRoot: 'রুটে যান',
     noParent: 'কোন অভিভাবক নেই',

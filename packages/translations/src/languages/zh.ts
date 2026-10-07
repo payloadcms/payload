@@ -536,7 +536,6 @@ export const zhTranslations: DefaultTranslationsObject = {
     goTo: '前往“{{name}}”',
     itemsMovedTo: '{{title}} 已移至 {{destination}}',
     itemsMovedToRoot: '{{title}}移至根目录',
-    moveItemsToRootConfirmation: '您即将将<1>{{count}} {{label}}</1>移动至根目录。您确定吗？',
     moveTo: '移动到……',
     moveToRoot: '移至根目录',
     noParent: '无父项',

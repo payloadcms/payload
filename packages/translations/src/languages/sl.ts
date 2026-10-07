@@ -559,8 +559,6 @@ export const slTranslations: DefaultTranslationsObject = {
     goTo: 'Pojdite na "{{name}}"',
     itemsMovedTo: '{{title}} preseljeno v {{destination}}',
     itemsMovedToRoot: '{{title}} premaknjeno v koren',
-    moveItemsToRootConfirmation:
-      'Pravkar boste prestavili <1>{{count}} {{label}}</1> v koren. Ste prepričani?',
     moveTo: 'Premakni v...',
     moveToRoot: 'Premakni v Root',
     noParent: 'Brez nadrejenega',

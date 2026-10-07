@@ -551,8 +551,6 @@ export const thTranslations: DefaultTranslationsObject = {
     goTo: 'ไปที่ "{{name}}"',
     itemsMovedTo: '{{title}} ย้ายไปที่ {{destination}}',
     itemsMovedToRoot: '{{title}} ถูกย้ายไปยังราก',
-    moveItemsToRootConfirmation:
-      'คุณกำลังจะย้าย <1>{{count}} {{label}}</1> ไปยังรูท คุณแน่ใจหรือไม่?',
     moveTo: 'ย้ายไปยัง...',
     moveToRoot: 'ย้ายไปที่ราก',
     noParent: 'ไม่มีผู้ปกครอง',

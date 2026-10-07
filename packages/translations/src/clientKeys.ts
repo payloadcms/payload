@@ -191,7 +191,6 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'hierarchy:goTo',
   'hierarchy:itemsMovedTo',
   'hierarchy:itemsMovedToRoot',
-  'hierarchy:moveItemsToRootConfirmation',
   'hierarchy:moveTo',
   'hierarchy:moveToRoot',
   'hierarchy:noParent',

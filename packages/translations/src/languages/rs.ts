@@ -560,8 +560,6 @@ export const rsTranslations: DefaultTranslationsObject = {
     goTo: 'Idite na "{{name}}"',
     itemsMovedTo: '{{title}} je premešten u {{destination}}',
     itemsMovedToRoot: '{{title}} premestio se u koren',
-    moveItemsToRootConfirmation:
-      'На путу сте да преместите <1>{{count}} {{label}}</1> у корен. Да ли сте сигурни?',
     moveTo: 'Premestiti u...',
     moveToRoot: 'Pomeri na koren',
     noParent: 'Без родитеља',

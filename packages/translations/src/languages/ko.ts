@@ -558,8 +558,6 @@ export const koTranslations: DefaultTranslationsObject = {
     goTo: '"{{name}}"로 이동하십시오.',
     itemsMovedTo: '{{title}}은 {{destination}}으로 이동되었습니다.',
     itemsMovedToRoot: '{{title}}가 루트로 이동되었습니다.',
-    moveItemsToRootConfirmation:
-      '<1>{{count}} {{label}}</1>을(를) 루트로 이동하려 합니다. 확실한가요?',
     moveTo: '이동하기...',
     moveToRoot: '루트로 이동',
     noParent: '부모 없음',

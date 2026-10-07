@@ -545,7 +545,6 @@ export const heTranslations: DefaultTranslationsObject = {
     goTo: 'עבור אל "{{name}}"',
     itemsMovedTo: '{{title}} הועבר ל-{{destination}}',
     itemsMovedToRoot: '{{title}} הועבר לשורש',
-    moveItemsToRootConfirmation: 'אתה עומד להעביר <1>{{count}} {{label}}</1> לשורש. האם אתה בטוח?',
     moveTo: 'העבר אל...',
     moveToRoot: 'העבר לשורש',
     noParent: 'אין הורה',

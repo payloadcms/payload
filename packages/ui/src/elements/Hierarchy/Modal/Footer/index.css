@@ -7,7 +7,7 @@
   }
 
   .hierarchy-modal-footer__info {
-    min-width: 0;
+    min-inline-size: 0;
     margin-inline-end: auto;
     overflow: hidden;
   }
@@ -23,11 +23,11 @@
   }
 
   .hierarchy-modal-footer__path {
-    min-width: 0;
-    max-width: calc(var(--spacer-6) * 7);
+    min-inline-size: 0;
+    max-inline-size: calc(var(--spacer-6) * 7);
   }
 
   .hierarchy-modal-footer__path .chip__label {
-    min-width: 0;
+    min-inline-size: 0;
   }
 }

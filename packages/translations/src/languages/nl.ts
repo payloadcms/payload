@@ -569,8 +569,6 @@ export const nlTranslations: DefaultTranslationsObject = {
     goTo: 'Ga naar "{{name}}"',
     itemsMovedTo: '{{title}} verplaatst naar {{destination}}',
     itemsMovedToRoot: '{{title}} verplaatst naar root',
-    moveItemsToRootConfirmation:
-      'U staat op het punt om <1>{{count}} {{label}}</1> naar de root te verplaatsen. Weet u het zeker?',
     moveTo: 'Verplaatsen naar...',
     moveToRoot: 'Verplaats naar Root',
     noParent: 'Geen Ouder',

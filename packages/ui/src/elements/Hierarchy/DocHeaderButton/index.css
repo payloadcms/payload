@@ -24,12 +24,4 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-
-  .hierarchy-button__popup-content .popup-divider {
-    margin-inline: calc(var(--spacer-2) * -1);
-  }
-
-  .hierarchy-button__control {
-    display: contents;
-  }
 }

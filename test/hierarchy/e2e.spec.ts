@@ -1356,6 +1356,281 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(footer.getByRole('button', { name: 'Clear' })).toBeVisible()
       await expect(footer.getByRole('button', { name: 'Confirm' })).toBeEnabled()
     })
+
+    test.describe('Hierarchy actions', () => {
+      const createdFolderIds: (number | string)[] = []
+      const createdProductIds: (number | string)[] = []
+
+      test.afterEach(async () => {
+        for (const id of createdProductIds.splice(0)) {
+          await payload.delete({ id, collection: 'products', overrideAccess: true }).catch(() => {})
+        }
+        for (const id of createdFolderIds.splice(0).reverse()) {
+          await payload.delete({ id, collection: 'folders', overrideAccess: true }).catch(() => {})
+        }
+      })
+
+      const createProductInChildFolder = async () => {
+        const product = await payload.create({
+          collection: 'products',
+          data: {
+            name: `Action Product ${Date.now()}`,
+            parentFolder: childFolder.id as number,
+          },
+          overrideAccess: true,
+        })
+
+        createdProductIds.push(product.id)
+
+        return product
+      }
+
+      const createFolder = async ({
+        name,
+        parentFolderID,
+      }: {
+        name: string
+        parentFolderID?: number | string
+      }) => {
+        const folder = await payload.create({
+          collection: 'folders',
+          data: { name, parentFolder: parentFolderID as number | undefined },
+          overrideAccess: true,
+        })
+
+        createdFolderIds.push(folder.id)
+
+        return folder
+      }
+
+      const findParentFolderID = async ({
+        id,
+        collection,
+      }: {
+        collection: 'folders' | 'products'
+        id: number | string
+      }) => {
+        const { docs } = await payload.find({
+          collection,
+          depth: 0,
+          overrideAccess: true,
+          where: { id: { equals: id } },
+        })
+
+        return docs[0]?.parentFolder ?? null
+      }
+
+      test('should open the assigned folder from the document header go to action', async () => {
+        await page.goto(productsURL.edit(String(productWithFolder.id)))
+
+        const folderButton = page.getByRole('button', { name: childFolderName })
+
+        await expect(folderButton).toBeVisible()
+        await folderButton.click()
+        await page.getByRole('menuitem', { name: `Go to "${childFolderName}"` }).click()
+
+        await expect(page).toHaveURL(
+          `${foldersURL.list}?parentFolder=${childFolder.id}&view=hierarchy`,
+        )
+      })
+
+      test('should open the assigned folder from the list cell go to action', async () => {
+        await page.goto(productsURL.list)
+
+        const productRow = page.locator('tr', { hasText: productWithFolderName })
+
+        await productRow.locator('.hierarchy-cell__button').click()
+        await page.getByRole('menuitem', { name: `Go to "${childFolderName}"` }).click()
+
+        await expect(page).toHaveURL(
+          `${foldersURL.list}?parentFolder=${childFolder.id}&view=hierarchy`,
+        )
+      })
+
+      test('should remove the assigned folder from the document header', async () => {
+        const product = await createProductInChildFolder()
+
+        await page.goto(productsURL.edit(String(product.id)))
+
+        const folderButton = page.getByRole('button', { name: childFolderName })
+
+        await expect(folderButton).toBeVisible()
+        await folderButton.click()
+        await page.getByRole('menuitem', { name: 'Remove from Folder' }).click()
+
+        await expect(page.locator('.hierarchy-button')).toHaveText('None')
+        await expect(page.locator('.hierarchy-button')).toBeFocused()
+
+        await page.locator('#action-save').click()
+        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+
+        await expect
+          .poll(() => findParentFolderID({ id: product.id, collection: 'products' }))
+          .toBeNull()
+      })
+
+      test('should remove the assigned folder from the list cell', async () => {
+        const product = await createProductInChildFolder()
+
+        await page.goto(productsURL.list)
+
+        const productRow = page.locator('tr', { hasText: product.name })
+        const cellButton = productRow.locator('.hierarchy-cell__button')
+
+        await expect(cellButton).toHaveText(childFolderName)
+        await cellButton.click()
+        await page.getByRole('menuitem', { name: 'Remove from Folder' }).click()
+
+        await expect(cellButton).toHaveText('None')
+        await expect(cellButton).toBeFocused()
+        await expect
+          .poll(() => findParentFolderID({ id: product.id, collection: 'products' }))
+          .toBeNull()
+      })
+
+      test('should not preselect a removed folder when reopening the list cell picker', async () => {
+        const product = await createProductInChildFolder()
+
+        await page.goto(productsURL.list)
+
+        const productRow = page.locator('tr', { hasText: product.name })
+        const cellButton = productRow.locator('.hierarchy-cell__button')
+
+        await cellButton.click()
+        await page.getByRole('menuitem', { name: 'Remove from Folder' }).click()
+        await expect(cellButton).toHaveText('None')
+
+        await cellButton.click()
+
+        const modal = page.locator('.hierarchy-modal')
+
+        await expect(modal).toBeVisible()
+        await expect(modal.locator('.hierarchy-column').first()).toBeVisible()
+        await expect(modal.locator('.hierarchy-column-item--selected')).toHaveCount(0)
+        await expect(modal.locator('.dialog__footer')).not.toContainText(childFolderName)
+      })
+
+      test('should remove selected folders from their parent with the bulk move menu', async () => {
+        const folderToMove = await createFolder({
+          name: `Bulk Remove Folder ${Date.now()}`,
+          parentFolderID: parentFolder.id,
+        })
+
+        await page.goto(`${foldersURL.hierarchy}&parentFolder=${parentFolder.id}`)
+
+        await page.locator('tr', { hasText: folderToMove.name }).getByRole('checkbox').click()
+        await page.getByRole('button', { name: 'Move', exact: true }).click()
+        await page.getByRole('menuitem', { name: 'Remove from Folder' }).click()
+
+        await expect(page.locator('.payload-toast-container')).toContainText('moved')
+        await expect
+          .poll(() => findParentFolderID({ id: folderToMove.id, collection: 'folders' }))
+          .toBeNull()
+      })
+
+      test('should send one bulk move request when confirm is double clicked', async () => {
+        const uniqueSuffix = Date.now()
+        const destinationFolder = await createFolder({
+          name: `Double Submit Destination ${uniqueSuffix}`,
+        })
+        const folderToMove = await createFolder({
+          name: `Double Submit Folder ${uniqueSuffix}`,
+          parentFolderID: parentFolder.id,
+        })
+
+        let moveRequestCount = 0
+
+        await page.route('**/api/folders?**', async (route) => {
+          if (route.request().method() !== 'PATCH') {
+            return route.fallback()
+          }
+
+          moveRequestCount++
+          await new Promise((resolve) => setTimeout(resolve, 1000))
+
+          return route.fallback()
+        })
+
+        try {
+          await page.goto(`${foldersURL.hierarchy}&parentFolder=${parentFolder.id}`)
+
+          await page.locator('tr', { hasText: folderToMove.name }).getByRole('checkbox').click()
+          await openMoveModalFromAssignedHierarchy({
+            button: page.getByRole('button', { name: 'Move', exact: true }),
+            page,
+          })
+
+          const modal = page.locator('.hierarchy-modal')
+
+          await modal
+            .locator('.hierarchy-column-item', { hasText: destinationFolder.name })
+            .first()
+            .locator('.hierarchy-column-item__checkbox')
+            .click()
+
+          await modal.locator('.dialog__footer').getByRole('button', { name: 'Confirm' }).dblclick()
+
+          await expect(modal).toBeHidden()
+          await expect.poll(() => moveRequestCount).toBe(1)
+        } finally {
+          await page.unroute('**/api/folders?**')
+        }
+      })
+
+      test('should show a folder created in the picker as the destination', async () => {
+        const newFolderName = `Picker Created Folder ${Date.now()}`
+
+        await page.goto(productsURL.create)
+        await page.locator('.hierarchy-button').click()
+
+        const modal = page.locator('.hierarchy-modal')
+
+        await expect(modal).toBeVisible()
+        await modal.locator('.hierarchy-column__add-button').first().click()
+
+        const drawer = page.locator('.drawer__content')
+
+        await expect(drawer).toBeVisible()
+        // The product form behind the drawer also has a `name` field, so the label is ambiguous
+        await drawer.locator('input[name="name"]').fill(newFolderName)
+        await drawer.getByRole('button', { name: 'Save' }).click()
+        await expect(drawer).toBeHidden()
+
+        const createdFolder = await payload.find({
+          collection: 'folders',
+          overrideAccess: true,
+          where: { name: { equals: newFolderName } },
+        })
+
+        createdFolderIds.push(...createdFolder.docs.map(({ id }) => id))
+
+        const footer = modal.locator('.dialog__footer')
+
+        await expect(footer).toContainText(newFolderName)
+        await expect(footer.getByRole('button', { name: 'Confirm' })).toBeEnabled()
+      })
+
+      test('should keep confirm disabled when the assigned folder is selected again', async () => {
+        await page.goto(productsURL.edit(String(productWithFolder.id)))
+
+        const folderButton = page.getByRole('button', { name: childFolderName })
+
+        await expect(folderButton).toBeVisible()
+        await openMoveModalFromAssignedHierarchy({ button: folderButton, page })
+
+        const modal = page.locator('.hierarchy-modal')
+
+        await modal
+          .locator('.hierarchy-column-item', { hasText: childFolderName })
+          .first()
+          .locator('.hierarchy-column-item__checkbox')
+          .click()
+
+        await expect(
+          modal.locator('.dialog__footer').getByRole('button', { name: 'Confirm' }),
+        ).toBeDisabled()
+      })
+    })
   })
 
   test.describe('Move destination restrictions', () => {

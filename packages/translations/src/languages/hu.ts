@@ -569,8 +569,6 @@ export const huTranslations: DefaultTranslationsObject = {
     goTo: 'Ugrás ide: "{{name}}"',
     itemsMovedTo: '{{title}} átkerült ide: {{destination}}',
     itemsMovedToRoot: '{{title}} áthelyezve a gyökérbe',
-    moveItemsToRootConfirmation:
-      'Ön éppen <1>{{count}} {{label}}</1> áthelyezésére készül a gyökérhez. Biztos benne?',
     moveTo: 'Áthelyezés ide...',
     moveToRoot: 'Áthelyezés a gyökérhez',
     noParent: 'Nincs Szülő',

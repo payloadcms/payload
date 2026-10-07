@@ -550,8 +550,6 @@ export const arTranslations: DefaultTranslationsObject = {
     goTo: 'اذهب إلى "{{name}}"',
     itemsMovedTo: '{{title}} تم نقله إلى {{destination}}',
     itemsMovedToRoot: '{{title}} تم نقله إلى الجذر',
-    moveItemsToRootConfirmation:
-      'أنت على وشك نقل <1>{{count}} {{label}}</1> إلى الجذر. هل أنت متأكد؟',
     moveTo: 'الانتقال إلى...',
     moveToRoot: 'الانتقال إلى الجذر',
     noParent: 'لا والدين',

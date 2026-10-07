@@ -17,6 +17,7 @@ export type HierarchyModalFooterProps = {
   confirmLabel: string
   destinationPath?: PathSegment[]
   Icon?: React.ReactNode
+  isBusy?: boolean
   isConfirmDisabled: boolean
   isMultiSelect: boolean
   onClear: () => void
@@ -46,6 +47,7 @@ export const HierarchyModalFooter: React.FC<HierarchyModalFooterProps> = ({
   confirmLabel,
   destinationPath,
   Icon,
+  isBusy = false,
   isConfirmDisabled,
   isMultiSelect,
   onClear,
@@ -97,11 +99,22 @@ export const HierarchyModalFooter: React.FC<HierarchyModalFooterProps> = ({
       </div>
       <div className={`${baseClass}__actions`}>
         {showMoveToRoot && onMoveToRoot ? (
-          <Button buttonStyle="secondary" margin={false} onClick={onMoveToRoot} size="medium">
+          <Button
+            buttonStyle="secondary"
+            disabled={isBusy}
+            margin={false}
+            onClick={onMoveToRoot}
+            size="medium"
+          >
             {t('hierarchy:moveToRoot')}
           </Button>
         ) : null}
-        <Button disabled={isConfirmDisabled} margin={false} onClick={onConfirm} size="medium">
+        <Button
+          disabled={isBusy || isConfirmDisabled}
+          margin={false}
+          onClick={onConfirm}
+          size="medium"
+        >
           {confirmLabel}
         </Button>
       </div>

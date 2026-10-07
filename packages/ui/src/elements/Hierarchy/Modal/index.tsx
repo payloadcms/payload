@@ -30,11 +30,11 @@ export const baseClass = 'hierarchy-modal'
 
 type HierarchyModalContentProps = {
   columnBrowserRef?: React.RefObject<HierarchyColumnBrowserRef | null>
-  onCreateNew?: (params: { parentId: null | number | string }) => void
+  onCreateNew?: (params: { parentId: null | number | string; path: PathSegment[] }) => void
 } & HierarchyModalInternalProps
 
 export type HierarchyModalContentRef = {
-  selectItem: (id: number | string) => void
+  selectItem: (selection: SelectionWithPath) => void
 }
 
 export const HierarchyModalContent = function HierarchyModalContent({
@@ -48,6 +48,7 @@ export const HierarchyModalContent = function HierarchyModalContent({
   hierarchyCollectionSlug,
   Icon,
   initialSelections,
+  isBusy,
   onCreateNew,
   onMoveToRoot,
   onSave,
@@ -164,15 +165,14 @@ export const HierarchyModalContent = function HierarchyModalContent({
   useImperativeHandle(
     ref,
     () => ({
-      selectItem: (id: number | string) => {
+      selectItem: ({ id, path }: SelectionWithPath) => {
         setHasSelectedDestination(true)
         setSelections((prev) => {
           const next = new Map(prev)
           if (!hasMany) {
             next.clear()
           }
-          // Path will be empty for newly created items - could be enhanced later
-          next.set(id, { id, path: [] })
+          next.set(id, { id, path })
           return next
         })
       },
@@ -181,8 +181,10 @@ export const HierarchyModalContent = function HierarchyModalContent({
   )
 
   const selectionCount = selections.size
-  const destinationPath =
-    hasMany || !hasSelectedDestination ? undefined : selections.values().next().value?.path
+  const destination =
+    hasMany || !hasSelectedDestination ? undefined : selections.values().next().value
+  const destinationPath = destination?.path
+  const isDestinationUnchanged = destination !== undefined && destination.id === firstSelection
 
   return (
     <div className={`${baseClass}__content`}>
@@ -214,7 +216,10 @@ export const HierarchyModalContent = function HierarchyModalContent({
         confirmLabel={confirmLabel || t('general:confirm')}
         destinationPath={destinationPath}
         Icon={Icon}
-        isConfirmDisabled={!hasMany && (!hasSelectedDestination || selectionCount === 0)}
+        isBusy={isBusy}
+        isConfirmDisabled={
+          !hasMany && (!hasSelectedDestination || selectionCount === 0 || isDestinationUnchanged)
+        }
         isMultiSelect={hasMany}
         onClear={handleClearAll}
         onConfirm={handleSave}
@@ -233,7 +238,7 @@ export const HierarchyModalContent = function HierarchyModalContent({
 }
 
 export const HierarchyModal: React.FC<HierarchyModalInternalProps> = (props) => {
-  const { hierarchyCollectionSlug, modalSlug, parentFieldName, reopenCount } = props
+  const { hierarchyCollectionSlug, modalSlug, parentFieldName, reopenCount, useAsTitle } = props
 
   const { refreshTree } = useHierarchy()
 
@@ -247,6 +252,7 @@ export const HierarchyModal: React.FC<HierarchyModalInternalProps> = (props) => 
 
   // Track which parentId is being used for the document drawer - use state to trigger re-render
   const [createParentId, setCreateParentId] = useState<null | number | string>(null)
+  const [createParentPath, setCreateParentPath] = useState<PathSegment[]>([])
 
   // Ref to access column browser's refresh function
   const columnBrowserRef = useRef<HierarchyColumnBrowserRef | null>(null)
@@ -268,10 +274,11 @@ export const HierarchyModal: React.FC<HierarchyModalInternalProps> = (props) => 
     })
 
   const handleCreateNew = useCallback(
-    ({ parentId }: { parentId: null | number | string }) => {
+    ({ parentId, path = [] }: { parentId: null | number | string; path?: PathSegment[] }) => {
       // Increment key to force DocumentDrawer remount with new initialData
       setDocumentDrawerKey((prev) => prev + 1)
       setCreateParentId(parentId)
+      setCreateParentPath(path)
       // Use setTimeout to ensure state update triggers re-render before opening drawer
       setTimeout(() => {
         openDocumentDrawer()
@@ -289,12 +296,33 @@ export const HierarchyModal: React.FC<HierarchyModalInternalProps> = (props) => 
         void columnBrowserRef.current.refreshColumn(createParentId)
       }
       if (modalContentRef.current && doc?.id) {
-        modalContentRef.current.selectItem(doc.id)
+        const title = useAsTitle ? doc[useAsTitle] : undefined
+
+        modalContentRef.current.selectItem({
+          id: doc.id,
+          path: [
+            ...createParentPath,
+            {
+              id: doc.id,
+              title:
+                typeof title === 'number' || typeof title === 'string'
+                  ? String(title)
+                  : String(doc.id),
+            },
+          ],
+        })
       }
       refreshTree(hierarchyCollectionSlug)
       closeDocumentDrawer()
     },
-    [closeDocumentDrawer, createParentId, hierarchyCollectionSlug, refreshTree],
+    [
+      closeDocumentDrawer,
+      createParentId,
+      createParentPath,
+      hierarchyCollectionSlug,
+      refreshTree,
+      useAsTitle,
+    ],
   )
 
   // Memoize the content - only depends on stable values

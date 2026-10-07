@@ -2,7 +2,6 @@
 import type { DefaultCellComponentProps, RelationshipFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -19,9 +18,10 @@ import {
   getEffectiveHierarchyCollections,
   getHierarchyCollectionRestrictions,
 } from '../../../../../utilities/hierarchyCollectionRestrictions.js'
+import { getHierarchyListURL } from '../../../../../views/HierarchyList/getHierarchyListURL.js'
 import { Button } from '../../../../Button/index.js'
+import { HierarchyActionsMenu } from '../../../../Hierarchy/ActionsMenu/index.js'
 import { useHierarchyModal } from '../../../../Hierarchy/Modal/useHierarchyModal.js'
-import { Popup, PopupList } from '../../../../Popup/index.js'
 import { useListRelationships } from '../../../RelationshipProvider/index.js'
 import './index.css'
 
@@ -176,19 +176,8 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
     }
   }, [cellDataFromProps, relationTo, isAboveViewport, getRelationships])
 
-  // Get current selection IDs for the modal
-  const initialSelections = useMemo(() => {
-    if (cellDataFromProps === null || cellDataFromProps === undefined) {
-      return []
-    }
-    const data = Array.isArray(cellDataFromProps) ? cellDataFromProps : [cellDataFromProps]
-    return data.map((item) => {
-      if (typeof item === 'object' && 'value' in item) {
-        return item.value
-      }
-      return item
-    }) as (number | string)[]
-  }, [cellDataFromProps])
+  // Read from local state so the picker reflects in-place moves and removes
+  const initialSelections = useMemo(() => values.map(({ value }) => value), [values])
 
   const saveIds = useCallback(
     async (selectedIds: (number | string)[]) => {
@@ -284,115 +273,60 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
       hierarchyCollectionConfig?.labels?.singular || hierarchyCollectionSlug || '',
       i18n,
     ) || hierarchyCollectionSlug
-  const controlRef = useRef<HTMLDivElement | null>(null)
-  const [shouldRefocus, setShouldRefocus] = useState(false)
 
-  useEffect(() => {
-    if (shouldRefocus) {
-      controlRef.current?.querySelector('button')?.focus()
-      setShouldRefocus(false)
-    }
-  }, [shouldRefocus])
+  const handleRemove = useCallback(() => saveIds([]), [saveIds])
 
-  const handleRemove = useCallback(async () => {
-    if (await saveIds([])) {
-      setShouldRefocus(true)
-    }
-  }, [saveIds])
+  const goTo = useMemo(
+    () =>
+      hasSingleSelection && hierarchyCollectionSlug
+        ? {
+            name: displayText,
+            href: getHierarchyListURL({
+              adminRoute: config.routes.admin,
+              collectionSlug: hierarchyCollectionSlug,
+              parentFieldName: hierarchyConfig?.parentFieldName,
+              parentID: currentId,
+            }),
+          }
+        : undefined,
+    [
+      config.routes.admin,
+      currentId,
+      displayText,
+      hasSingleSelection,
+      hierarchyCollectionSlug,
+      hierarchyConfig?.parentFieldName,
+    ],
+  )
 
-  const goToHref = useMemo(() => {
-    if (!hasSingleSelection) {
-      return undefined
-    }
-
-    const parentQueryParam = hierarchyConfig?.parentFieldName || 'parent'
-
-    return formatAdminURL({
-      adminRoute: config.routes.admin,
-      path: `/collections/${collectionSlug}/hierarchy?${parentQueryParam}=${currentId}`,
-    })
-  }, [
-    collectionSlug,
-    config.routes.admin,
-    currentId,
-    hasSingleSelection,
-    hierarchyConfig?.parentFieldName,
-  ])
+  const label = isLoading ? `${t('general:loading')}...` : displayText
 
   return (
     <div className={baseClass} ref={intersectionRef}>
-      <div className={`${baseClass}__control`} ref={controlRef}>
-        {hasSingleSelection ? (
-          <Popup
-            caret={false}
-            horizontalAlign="left"
-            portalClassName={`${baseClass}__popup-content`}
-            render={({ close }) => (
-              <PopupList.MenuItem>
-                <PopupList.Button
-                  onClick={() => {
-                    close()
-                    requestAnimationFrame(handleOpenModal)
-                  }}
-                >
-                  {t('hierarchy:moveTo')}
-                </PopupList.Button>
-                <PopupList.Button
-                  onClick={() => {
-                    close()
-                    void handleRemove()
-                  }}
-                >
-                  {t('hierarchy:removeFrom', { label: hierarchyLabel })}
-                </PopupList.Button>
-                <PopupList.Divider />
-                <PopupList.Button href={goToHref} onClick={close}>
-                  <span className={`${baseClass}__truncate`} title={displayText}>
-                    {t('hierarchy:goTo', { name: displayText })}
-                  </span>
-                </PopupList.Button>
-              </PopupList.MenuItem>
-            )}
-            renderButton={({ active, onClick, onKeyDown }) => (
-              <Button
-                aria-label={displayText}
-                buttonStyle="secondary"
-                className={`${baseClass}__button`}
-                extraButtonProps={{
-                  'aria-expanded': active,
-                  'aria-haspopup': 'menu',
-                  onKeyDown,
-                }}
-                icon={displayIcon}
-                iconPosition="left"
-                margin={false}
-                onClick={onClick}
-                selected={active}
-                size="medium"
-                tooltip={displayText}
-              >
-                <span className={`${baseClass}__truncate`}>
-                  {isLoading ? `${t('general:loading')}...` : displayText}
-                </span>
-              </Button>
-            )}
-            size="fit-content"
-            verticalAlign="bottom"
-          />
-        ) : (
+      <HierarchyActionsMenu
+        goTo={goTo}
+        hasActions={hasSingleSelection}
+        hierarchyLabel={hierarchyLabel}
+        onMove={handleOpenModal}
+        onRemove={handleRemove}
+        renderTrigger={(triggerProps) => (
           <Button
+            aria-label={triggerProps ? label : undefined}
             buttonStyle="secondary"
             className={`${baseClass}__button`}
+            extraButtonProps={triggerProps?.extraButtonProps}
             icon={displayIcon}
             iconPosition="left"
             margin={false}
-            onClick={handleOpenModal}
+            onClick={triggerProps?.onClick ?? handleOpenModal}
+            selected={triggerProps?.selected}
             size="medium"
+            tooltip={triggerProps ? displayText : undefined}
           >
-            {isLoading ? `${t('general:loading')}...` : displayText}
+            {triggerProps ? <span className={`${baseClass}__truncate`}>{label}</span> : label}
           </Button>
         )}
-      </div>
+      />
       {hierarchyCollectionSlug && hasMountedModal && (
         <HierarchyModal
           confirmLabel={t('general:confirm')}

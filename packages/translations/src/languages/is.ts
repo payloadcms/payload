@@ -559,8 +559,6 @@ export const isTranslations: DefaultTranslationsObject = {
     goTo: 'Farðu á "{{name}}"',
     itemsMovedTo: '{{title}} flutt til {{destination}}',
     itemsMovedToRoot: '{{title}} flutt til rót',
-    moveItemsToRootConfirmation:
-      'Þú ert um það bil að færa <1>{{count}} {{label}}</1> í rót. Ertu viss?',
     moveTo: 'Flytja í...',
     moveToRoot: 'Færa í rót',
     noParent: 'Engin foreldri',

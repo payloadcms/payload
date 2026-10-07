@@ -567,8 +567,6 @@ export const azTranslations: DefaultTranslationsObject = {
     goTo: '"{{name}}" -a keçin',
     itemsMovedTo: '{{title}} {{destination}}-ə köçürüldü',
     itemsMovedToRoot: '{{title}} kökə köçürüldü',
-    moveItemsToRootConfirmation:
-      'Siz <1>{{count}} {{label}}</1> kökə köçürməyə yaxınsınız. Eminsiniz?',
     moveTo: 'Köçür...',
     moveToRoot: 'Kökə köçün',
     noParent: 'Heç bir Valideyn',

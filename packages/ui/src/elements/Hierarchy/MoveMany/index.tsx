@@ -4,13 +4,11 @@ import type { ClientCollectionConfig } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { SelectionWithPath } from '../Modal/types.js'
 
-import { ArrowIcon } from '../../../icons/Arrow/index.js'
-import { XIcon } from '../../../icons/X/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentSelection } from '../../../providers/DocumentSelection/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
@@ -21,7 +19,7 @@ import {
   getHierarchyCollectionRestrictions,
 } from '../../../utilities/hierarchyCollectionRestrictions.js'
 import { ListSelectionButton } from '../../ListSelection/index.js'
-import { Popup, PopupList } from '../../Popup/index.js'
+import { HierarchyActionsMenu } from '../ActionsMenu/index.js'
 import { useHierarchyModal } from '../Modal/useHierarchyModal.js'
 
 export const baseClass = 'move-many'
@@ -155,10 +153,22 @@ export function MoveMany({
   // Check if hierarchy has a valid parentFieldName
   const canMove = parentFieldName !== undefined
 
-  const hierarchyLabel = getTranslation(hierarchyCollectionConfig?.labels?.singular, i18n)
+  const hierarchyLabel =
+    getTranslation(hierarchyCollectionConfig?.labels?.singular || hierarchySlug, i18n) ||
+    hierarchySlug
+  const isMovingRef = useRef(false)
+  const [isMoving, setIsMoving] = useState(false)
 
   const moveDocuments = useCallback(
     async (destination: { id: null | number | string; title: string }) => {
+      // A ref, not state, so a second click in the same frame still sees the first move
+      if (isMovingRef.current) {
+        return
+      }
+
+      isMovingRef.current = true
+      setIsMoving(true)
+
       let totalMoved = 0
       let hasErrors = false
 
@@ -239,6 +249,9 @@ export function MoveMany({
         }
       } catch (_err) {
         toast.error(t('error:unknown'))
+      } finally {
+        isMovingRef.current = false
+        setIsMoving(false)
       }
     },
     [closeModal, selections, parentFieldName, locale, api, i18n, t, label, onSuccess],
@@ -274,63 +287,29 @@ export function MoveMany({
 
   return (
     <React.Fragment>
-      {canRemoveFromHierarchy ? (
-        <Popup
-          caret={false}
-          horizontalAlign="left"
-          render={({ close }) => (
-            <PopupList.MenuItem>
-              <PopupList.Button
-                icon={<ArrowIcon direction="right" />}
-                onClick={() => {
-                  close()
-                  requestAnimationFrame(openHierarchyModal)
-                }}
-              >
-                {t('hierarchy:moveTo')}
-              </PopupList.Button>
-              <PopupList.Button
-                icon={<XIcon />}
-                onClick={() => {
-                  close()
-                  handleMoveToRoot()
-                }}
-              >
-                {t('hierarchy:removeFrom', { label: hierarchyLabel })}
-              </PopupList.Button>
-            </PopupList.MenuItem>
-          )}
-          renderButton={({ active, onClick, onKeyDown }) => (
-            <ListSelectionButton
-              aria-label={t('general:move')}
-              className={`${baseClass}__toggle`}
-              extraButtonProps={{
-                'aria-expanded': active,
-                'aria-haspopup': 'menu',
-                onKeyDown,
-              }}
-              onClick={onClick}
-              selected={active}
-            >
-              {t('general:move')}
-            </ListSelectionButton>
-          )}
-          size="fit-content"
-          verticalAlign="bottom"
-        />
-      ) : (
-        <ListSelectionButton
-          aria-label={t('general:move')}
-          className={`${baseClass}__toggle`}
-          onClick={openHierarchyModal}
-        >
-          {t('general:move')}
-        </ListSelectionButton>
-      )}
+      <HierarchyActionsMenu
+        hasActions={canRemoveFromHierarchy}
+        hierarchyLabel={hierarchyLabel}
+        onMove={openHierarchyModal}
+        onRemove={handleMoveToRoot}
+        renderTrigger={(triggerProps) => (
+          <ListSelectionButton
+            aria-label={t('general:move')}
+            className={`${baseClass}__toggle`}
+            extraButtonProps={triggerProps?.extraButtonProps}
+            onClick={triggerProps?.onClick ?? openHierarchyModal}
+            selected={triggerProps?.selected}
+          >
+            {t('general:move')}
+          </ListSelectionButton>
+        )}
+        showActionIcons
+      />
       <HierarchyModal
         confirmLabel={t('general:confirm')}
         hasMany={false}
         initialSelections={initialSelections}
+        isBusy={isMoving}
         onMoveToRoot={handleMoveToRoot}
         onSave={handleModalSave}
         showMoveToRoot

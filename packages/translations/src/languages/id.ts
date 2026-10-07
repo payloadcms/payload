@@ -565,8 +565,6 @@ export const idTranslations: DefaultTranslationsObject = {
     goTo: 'Buka "{{name}}"',
     itemsMovedTo: '{{title}} dipindahkan ke {{destination}}',
     itemsMovedToRoot: '{{title}} dipindahkan ke akar',
-    moveItemsToRootConfirmation:
-      'Anda akan memindahkan <1>{{count}} {{label}}</1> ke root. Apakah Anda yakin?',
     moveTo: 'Pindahkan ke...',
     moveToRoot: 'Pindah ke Root',
     noParent: 'Tanpa Orang Tua',

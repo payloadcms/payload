@@ -560,8 +560,6 @@ export const lvTranslations: DefaultTranslationsObject = {
     goTo: 'Dodieties uz "{{name}}"',
     itemsMovedTo: '{{title}} tika pārvietots uz {{destination}}',
     itemsMovedToRoot: '{{title}} pārvietots uz sakni',
-    moveItemsToRootConfirmation:
-      'Jūs gatavojaties pārvietot <1>{{count}} {{label}}</1> uz saknes. Vai esat pārliecināts?',
     moveTo: 'Pārvietot uz...',
     moveToRoot: 'Pāriet uz Sakni',
     noParent: 'Nav vecāku',

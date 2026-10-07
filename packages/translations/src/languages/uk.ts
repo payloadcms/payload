@@ -557,8 +557,6 @@ export const ukTranslations: DefaultTranslationsObject = {
     goTo: 'Перейти до "{{name}}"',
     itemsMovedTo: '{{title}} перейшов до {{destination}}',
     itemsMovedToRoot: '{{title}} переміщено в корінь',
-    moveItemsToRootConfirmation:
-      'Ви збираєтеся перемістити <1>{{count}} {{label}}</1> до кореня. Ви впевнені?',
     moveTo: 'Перемістити до...',
     moveToRoot: 'Перейти до кореня',
     noParent: 'Без батьківського елемента',

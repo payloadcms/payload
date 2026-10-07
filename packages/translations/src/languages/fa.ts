@@ -553,8 +553,6 @@ export const faTranslations: DefaultTranslationsObject = {
     goTo: 'به "{{name}}" بروید.',
     itemsMovedTo: '{{title}} به {{destination}} منتقل شد.',
     itemsMovedToRoot: '{{title}} به ریشه منتقل شد',
-    moveItemsToRootConfirmation:
-      'شما در حال حاضر در مرحله انتقال <1>{{count}} {{label}}</1> به ریشه هستید. آیا مطمئن هستید؟',
     moveTo: 'انتقال به...',
     moveToRoot: 'انتقال به ریشه',
     noParent: 'بدون والد',

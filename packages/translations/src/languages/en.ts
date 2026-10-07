@@ -560,8 +560,6 @@ export const enTranslations = {
     goTo: 'Go to "{{name}}"',
     itemsMovedTo: '{{title}} moved to {{destination}}',
     itemsMovedToRoot: '{{title}} moved to root',
-    moveItemsToRootConfirmation:
-      'You are about to move <1>{{count}} {{label}}</1> to root. Are you sure?',
     moveTo: 'Move to...',
     moveToRoot: 'Move to Root',
     noParent: 'No Parent',

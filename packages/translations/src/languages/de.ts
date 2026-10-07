@@ -576,8 +576,6 @@ export const deTranslations: DefaultTranslationsObject = {
     goTo: 'Gehen Sie zu "{{name}}"',
     itemsMovedTo: '{{title}} wurde nach {{destination}} verschoben.',
     itemsMovedToRoot: '{{title}} wurde zur Wurzel verschoben',
-    moveItemsToRootConfirmation:
-      'Sie sind dabei, <1>{{count}} {{label}}</1> zum Hauptverzeichnis zu verschieben. Sind Sie sicher?',
     moveTo: 'Verschieben nach...',
     moveToRoot: 'Zur Root verschieben',
     noParent: 'Kein Elternteil',

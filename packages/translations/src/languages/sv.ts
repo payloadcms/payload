@@ -563,8 +563,6 @@ export const svTranslations: DefaultTranslationsObject = {
     goTo: 'Gå till "{{name}}"',
     itemsMovedTo: '{{title}} flyttades till {{destination}}',
     itemsMovedToRoot: '{{title}} flyttad till rot',
-    moveItemsToRootConfirmation:
-      'Du håller på att flytta <1>{{count}} {{label}}</1> till roten. Är du säker?',
     moveTo: 'Flytta till...',
     moveToRoot: 'Flytta till Roten',
     noParent: 'Ingen förälder',

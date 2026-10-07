@@ -568,8 +568,6 @@ export const trTranslations: DefaultTranslationsObject = {
     goTo: '"{{name}}" öğesine gidin',
     itemsMovedTo: "{{title}} {{destination}}'ye taşındı",
     itemsMovedToRoot: '{{title}} kök bölüme taşındı.',
-    moveItemsToRootConfirmation:
-      '<1>{{count}} {{label}}</1> köküne taşımayı planlıyorsunuz. Emin misiniz?',
     moveTo: 'Taşı...',
     moveToRoot: 'Kök Dizinine Taşı',
     noParent: 'Üst Yok',

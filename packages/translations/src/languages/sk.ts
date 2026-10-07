@@ -558,8 +558,6 @@ export const skTranslations: DefaultTranslationsObject = {
     goTo: 'Prejdite na "{{name}}"',
     itemsMovedTo: '{{title}} presunuté do {{destination}}',
     itemsMovedToRoot: '{{title}} presunutý do koreňa',
-    moveItemsToRootConfirmation:
-      'Chystáte sa presunúť <1>{{count}} {{label}}</1> do koreňa. Ste si istí?',
     moveTo: 'Presunúť do...',
     moveToRoot: 'Presunúť do koreňa',
     noParent: 'Žiadny rodič',

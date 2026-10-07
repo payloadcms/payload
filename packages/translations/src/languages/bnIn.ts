@@ -569,8 +569,6 @@ export const bnInTranslations: DefaultTranslationsObject = {
     goTo: '"{{name}}" তে যান',
     itemsMovedTo: '{{title}} টি {{destination}} এ সরিয়ে নেওয়া হলো।',
     itemsMovedToRoot: '{{title}} মূলে সরিয়ে নেওয়া হয়েছে',
-    moveItemsToRootConfirmation:
-      'আপনি <1>{{count}} {{label}}</1> কে রুট এ সরিয়ে দিতে চলেছেন। আপনি কি নিশ্চিত?',
     moveTo: 'সরানো হোক...',
     moveToRoot: 'রুটে সরান',
     noParent: 'কোন মাতা-পিতা নেই',

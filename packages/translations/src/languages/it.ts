@@ -569,8 +569,6 @@ export const itTranslations: DefaultTranslationsObject = {
     goTo: 'Vai a "{{name}}"',
     itemsMovedTo: '{{title}} è stato spostato a {{destination}}',
     itemsMovedToRoot: '{{title}} spostato alla radice',
-    moveItemsToRootConfirmation:
-      'Stai per spostare <1>{{count}} {{label}}</1> alla radice. Sei sicuro?',
     moveTo: 'Sposta in...',
     moveToRoot: 'Sposta alla Root',
     noParent: 'Nessun Genitore',

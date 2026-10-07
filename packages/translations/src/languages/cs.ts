@@ -557,8 +557,6 @@ export const csTranslations: DefaultTranslationsObject = {
     goTo: 'Přejděte na "{{name}}"',
     itemsMovedTo: '{{title}} byl přesunut do {{destination}}',
     itemsMovedToRoot: '{{title}} přesunuto do kořenové složky',
-    moveItemsToRootConfirmation:
-      'Chystáte se přesunout <1>{{count}} {{label}}</1> do kořene. Jste si jistý?',
     moveTo: 'Přesunout do...',
     moveToRoot: 'Přesunout do kořene',
     noParent: 'Bez nadřazeného',

@@ -560,8 +560,6 @@ export const hrTranslations: DefaultTranslationsObject = {
     goTo: 'Idite na "{{name}}"',
     itemsMovedTo: '{{title}} premješten na {{destination}}',
     itemsMovedToRoot: '{{title}} premješten u korijen',
-    moveItemsToRootConfirmation:
-      'Uskoro ćete premjestiti <1>{{count}} {{label}}</1> u korijen. Jeste li sigurni?',
     moveTo: 'Premjesti u...',
     moveToRoot: 'Premjesti na korijen',
     noParent: 'Bez nadređenog',

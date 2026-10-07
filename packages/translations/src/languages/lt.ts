@@ -565,8 +565,6 @@ export const ltTranslations: DefaultTranslationsObject = {
     goTo: 'Eikite į "{{name}}"',
     itemsMovedTo: '{{title}} perkeltas į {{destination}}',
     itemsMovedToRoot: '{{title}} perkeltas į šaknį',
-    moveItemsToRootConfirmation:
-      'Jūs ketinate perkelti <1>{{count}} {{label}}</1> į šaknį. Ar esate įsitikinęs?',
     moveTo: 'Perkelti į...',
     moveToRoot: 'Perkelti į šaknį',
     noParent: 'Be tėvų',

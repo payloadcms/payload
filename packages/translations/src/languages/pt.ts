@@ -565,8 +565,6 @@ export const ptTranslations: DefaultTranslationsObject = {
     goTo: 'Ir para "{{name}}"',
     itemsMovedTo: '{{title}} foi movido para {{destination}}',
     itemsMovedToRoot: '{{title}} movido para a raiz',
-    moveItemsToRootConfirmation:
-      'Você está prestes a mover <1>{{count}} {{label}}</1> para a raiz. Tem certeza?',
     moveTo: 'Mover para...',
     moveToRoot: 'Mover para Raiz',
     noParent: 'Sem Parentesco',
