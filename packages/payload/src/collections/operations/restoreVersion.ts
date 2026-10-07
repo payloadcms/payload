@@ -1,5 +1,3 @@
-import { status as httpStatus } from 'http-status'
-
 import type { FindOneArgs } from '../../database/types.js'
 import type {
   JsonObject,
@@ -27,6 +25,7 @@ import {
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import { hasDraftValidationEnabled } from '../../utilities/getVersionsConfig.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { killTransaction } from '../../utilities/killTransaction.js'

@@ -1,11 +1,11 @@
 import type { TFunction } from '@payloadcms/translations'
 
 import { en } from '@payloadcms/translations/languages/en'
-import { status as httpStatus } from 'http-status'
 
 import type { LabelFunction, StaticLabel } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
+import { httpStatus } from '../utilities/httpStatus.js'
 import { APIError } from './APIError.js'
 
 /** @deprecated Use `instanceof ValidationError` instead of name comparison. */

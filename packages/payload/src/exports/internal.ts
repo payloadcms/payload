@@ -48,6 +48,7 @@ export {
   type BatchProcessorResult,
 } from '../utilities/batchProcessing.js'
 export { getEntityPermissions } from '../utilities/getEntityPermissions/getEntityPermissions.js'
+export { httpStatus } from '../utilities/httpStatus.js'
 export { isURLAllowed } from '../utilities/isURLAllowed.js'
 export { sanitizePermissions } from '../utilities/sanitizePermissions.js'
 export { sendTelemetryEvent } from '../utilities/telemetry/index.js'

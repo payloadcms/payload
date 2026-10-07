@@ -1,5 +1,3 @@
-import { status as httpStatus } from 'http-status'
-
 import type { Collection } from '../../collections/config/types.js'
 import type { AuthenticatedUser } from '../../index.js'
 import type { Document, PayloadRequest } from '../../types/index.js'
@@ -9,6 +7,7 @@ import { buildBeforeOperation } from '../../collections/operations/utilities/bui
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { applyUserReadAccess } from '../applyUserReadAccess.js'

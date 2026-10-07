@@ -1,5 +1,4 @@
 import crypto from 'crypto'
-import { status as httpStatus } from 'http-status'
 
 import type {
   AuthOperationsFromCollectionSlug,
@@ -16,6 +15,7 @@ import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.j
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { getRequestOrigin } from '../../utilities/getRequestOrigin.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
