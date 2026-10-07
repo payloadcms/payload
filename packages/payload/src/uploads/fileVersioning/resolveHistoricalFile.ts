@@ -34,6 +34,21 @@ export const resolveHistoricalFile = async ({
   })
   const matched = docs[0]
 
+  // Check both policies before exposing a missing version or a filename mismatch.
+  await checkFileAccess({ collection, documentID: matched?.parent, filename, req })
+  const authorized = await req.payload.findVersionByID({
+    id: versionID,
+    collection: collection.config.slug,
+    depth: 0,
+    overrideAccess: false,
+    req,
+    showHiddenFields: true,
+  })
+
+  if (!authorized) {
+    throw new Forbidden(req.t)
+  }
+
   if (!matched) {
     throw new NotFound(req.t)
   }
@@ -82,20 +97,6 @@ const resolveVersionFile = async ({
 
   if (!hasFile) {
     return
-  }
-
-  await checkFileAccess({ collection, documentID: row.parent, filename, req })
-  const authorized = await req.payload.findVersionByID({
-    id: String(row.id),
-    collection: collection.config.slug,
-    depth: 0,
-    overrideAccess: false,
-    req,
-    showHiddenFields: true,
-  })
-
-  if (!authorized) {
-    throw new Forbidden(req.t)
   }
 
   return { ...saved, id: row.parent } as TypeWithID

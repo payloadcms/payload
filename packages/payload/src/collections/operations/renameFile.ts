@@ -221,12 +221,12 @@ export const renameFileOperation = async (
           }
         }
 
-        const data = { ...renamed }
-        delete data.id
-        delete data.createdAt
-        delete data.updatedAt
-        if (draft) {
-          data._status = 'draft'
+        const data = {
+          filename: renamed.filename,
+          original: renamed.original,
+          url: renamed.url,
+          variants: renamed.variants,
+          ...(draft ? { _status: 'draft' } : {}),
         }
         const updated = await updateDocument({
           id,
@@ -306,9 +306,10 @@ const isStorageCollision = ({ err }: { err: unknown }): boolean => {
     return false
   }
 
-  const { code, message, statusCode } = err as {
+  const { name, code, message, statusCode } = err as {
     code?: number | string
     message?: string
+    name?: string
     statusCode?: number
   }
 
@@ -316,6 +317,7 @@ const isStorageCollision = ({ err }: { err: unknown }): boolean => {
     code === 'EEXIST' ||
     code === 'PreconditionFailed' ||
     code === 412 ||
+    name === 'PreconditionFailed' ||
     statusCode === 409 ||
     statusCode === 412 ||
     Boolean(message?.includes('Storage destination already exists'))

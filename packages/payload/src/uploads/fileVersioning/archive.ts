@@ -46,13 +46,15 @@ export const runLocalFileUpdate = async <T>({
   req: PayloadRequest
   write: () => Promise<T>
 }): Promise<T> => {
+  const nextDoc = { ...current, ...next }
+
   if (
     !hasLocalFileChange({
       collection,
       config: req.payload.config,
       current,
       hasNewFiles: files.length > 0,
-      next,
+      next: nextDoc,
       req,
     })
   ) {
@@ -74,7 +76,7 @@ export const runLocalFileUpdate = async <T>({
         id,
         collection,
         current,
-        next,
+        next: nextDoc,
         req,
         trackStagedObject,
       })
@@ -86,7 +88,7 @@ export const runLocalFileUpdate = async <T>({
           collection,
           config: req.payload.config,
           current,
-          next,
+          next: nextDoc,
           req,
         }),
         collection,

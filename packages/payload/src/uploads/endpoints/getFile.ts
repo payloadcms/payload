@@ -55,14 +55,6 @@ export const getFileHandler: PayloadHandler = async (req) => {
     return handleDynamicFileRequest({ collection, filename, prefix, req })
   }
 
-  const current = collection.config.versions
-    ? await resolveUploadDocument({ collection, filename, prefix, req })
-    : undefined
-
-  if (collection.config.versions && !current) {
-    throw new NotFound(req.t)
-  }
-
   const accessResult = (await checkFileAccess({
     collection,
     filename,
@@ -72,6 +64,14 @@ export const getFileHandler: PayloadHandler = async (req) => {
 
   if (accessResult instanceof Response) {
     return accessResult
+  }
+
+  const current = collection.config.versions
+    ? (accessResult ?? (await resolveUploadDocument({ collection, filename, prefix, req })))
+    : undefined
+
+  if (collection.config.versions && !current) {
+    throw new NotFound(req.t)
   }
 
   return retrieveFileResponse({ collection, doc: accessResult ?? current, filename, prefix, req })

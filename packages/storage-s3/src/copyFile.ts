@@ -31,14 +31,6 @@ export const copyS3File = async ({
   if (size === undefined) {
     throw new Error('Storage source has no known length')
   }
-  try {
-    await client.headObject({ Bucket: bucket, Key: to })
-    throw new Error(`Storage destination already exists: ${to}`)
-  } catch (err) {
-    if (!isNotFound(err)) {
-      throw err
-    }
-  }
 
   const copySource = `${encodeURIComponent(bucket)}/${from.split('/').map(encodeURIComponent).join('/')}`
 
@@ -166,13 +158,3 @@ export const copyS3File = async ({
     throw err
   }
 }
-
-const isNotFound = (err: unknown): boolean =>
-  err !== null &&
-  typeof err === 'object' &&
-  (('name' in err && (err.name === 'NotFound' || err.name === 'NoSuchKey')) ||
-    ('$metadata' in err &&
-      typeof err.$metadata === 'object' &&
-      err.$metadata !== null &&
-      'httpStatusCode' in err.$metadata &&
-      err.$metadata.httpStatusCode === 404))
