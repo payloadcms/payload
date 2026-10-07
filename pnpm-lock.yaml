@@ -1633,7 +1633,7 @@ importers:
     dependencies:
       '@aws-sdk/client-s3':
         specifier: ^3.614.0
-        version: 3.1144.0
+        version: 3.1146.0
       '@payloadcms/plugin-cloud-storage':
         specifier: workspace:*
         version: link:../plugin-cloud-storage
