@@ -1679,12 +1679,21 @@ importers:
 
   packages/tanstack-start:
     dependencies:
+      '@payloadcms/graphql':
+        specifier: workspace:*
+        version: link:../graphql
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../translations
       '@payloadcms/ui':
         specifier: workspace:*
         version: link:../ui
+      graphql:
+        specifier: 16.8.1
+        version: 16.8.1
+      graphql-http:
+        specifier: 1.22.4
+        version: 1.22.4(graphql@16.8.1)
       qs-esm:
         specifier: ^7.0.2
         version: 7.0.3
