@@ -4,10 +4,13 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createPayloadRequest } from 'payload'
 import sharp from 'sharp'
-import { expect } from 'vitest'
+import { expect, vi } from 'vitest'
 
 /* eslint-disable payload/no-relative-monorepo-imports -- These lifecycle helpers are internal. */
-import { collectVersionFiles } from '../../packages/payload/src/uploads/fileVersioning/cleanup.js'
+import {
+  collectVersionFiles,
+  scheduleUnreferencedFileCleanup,
+} from '../../packages/payload/src/uploads/fileVersioning/cleanup.js'
 import { initTransaction } from '../../packages/payload/src/utilities/initTransaction.js'
 import { killTransaction } from '../../packages/payload/src/utilities/killTransaction.js'
 /* eslint-enable payload/no-relative-monorepo-imports */
@@ -959,6 +962,29 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
         showHiddenFields: true,
       })
       expect(current.variants?.small?.filename).toBeFalsy()
+      const req = await createPayloadRequest({ payload })
+      const variantCandidate = {
+        key: selected.version.variants!.small!.filename!,
+        roles: [{ type: 'size' as const, sizeKey: 'small' }],
+      }
+      await scheduleUnreferencedFileCleanup({ candidates: [variantCandidate], collection, req })
+      expect(await readFile(path.join(transformedMediaDir, variantCandidate.key))).toEqual(
+        firstSize,
+      )
+      const flattenedFields = collection.flattenedFields
+      collection.flattenedFields = flattenedFields.map((field) =>
+        field.type === 'group' && field.name === 'variants'
+          ? { ...field, flattenedFields: [] }
+          : field,
+      )
+      try {
+        await scheduleUnreferencedFileCleanup({ candidates: [variantCandidate], collection, req })
+        expect(await readFile(path.join(transformedMediaDir, variantCandidate.key))).toEqual(
+          firstSize,
+        )
+      } finally {
+        collection.flattenedFields = flattenedFields
+      }
       const historicalAfterRestore = await restClient.GET(
         `/${transformedMediaSlug}/file/${selected.version.variants!.small!.filename}`,
       )
@@ -1490,6 +1516,130 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     }
   })
 
+  test('should retain a legacy file referenced by another document', async ({ payload }) => {
+    const bytes = await readFile(imageFixture)
+    const filename = 'legacy-folder/shared.png'
+    await mkdir(path.join(mediaDir, 'legacy-folder'), { recursive: true })
+    await writeFile(path.join(mediaDir, filename), bytes)
+    await payload.db.create({
+      collection: mediaSlug,
+      data: {
+        alt: 'legacy shared source',
+        filename,
+        filesize: bytes.length,
+        mimeType: 'image/png',
+        url: `/api/${mediaSlug}/file/${encodeURIComponent(filename)}`,
+      },
+    })
+    const req = await createPayloadRequest({ payload })
+
+    await scheduleUnreferencedFileCleanup({
+      candidates: [{ key: filename, roles: [{ type: 'original' }] }],
+      collection: payload.collections[mediaSlug].config,
+      req,
+    })
+
+    expect(await readFile(path.join(mediaDir, filename))).toEqual(bytes)
+  })
+
+  test('should limit cleanup reads as unrelated documents and history grow', async ({
+    payload,
+  }) => {
+    const collection = payload.collections[mediaSlug].config
+    const req = await createPayloadRequest({ payload })
+    const filename = 'cleanup-candidate.png'
+    const measurements: Array<{
+      calls: number
+      durationMS: number
+      rows: number
+      rssDelta: number
+      unfiltered: number
+      unrelated: number
+    }> = []
+    const queries: Array<{ rows: number; where: unknown }> = []
+    const find = payload.db.find.bind(payload.db)
+    const findVersions = payload.db.findVersions.bind(payload.db)
+    const findSpy = vi.spyOn(payload.db, 'find').mockImplementation(async (args) => {
+      if (queries.length > 100) {
+        throw new Error('Cleanup exceeded the expected baseline page count')
+      }
+      const result = await find(args)
+      if (args.collection === mediaSlug) {
+        queries.push({ rows: result.docs.length, where: args.where })
+      }
+      return result
+    })
+    const versionsSpy = vi.spyOn(payload.db, 'findVersions').mockImplementation(async (args) => {
+      if (queries.length > 100) {
+        throw new Error('Cleanup exceeded the expected baseline page count')
+      }
+      const result = await findVersions(args)
+      if (args.collection === mediaSlug) {
+        queries.push({ rows: result.docs.length, where: args.where })
+      }
+      return result
+    })
+    let seeded = 0
+
+    try {
+      for (const unrelated of [0, 100, 500]) {
+        while (seeded < unrelated) {
+          const count = Math.min(25, unrelated - seeded)
+          await Promise.all(
+            Array.from({ length: count }, async (_, offset) => {
+              const name = `unrelated-${seeded + offset}.png`
+              const doc = await payload.db.create({
+                collection: mediaSlug,
+                data: { alt: 'x'.repeat(4096), filename: name },
+              })
+              await payload.db.createVersion({
+                autosave: false,
+                collectionSlug: mediaSlug,
+                parent: doc.id,
+                versionData: { alt: 'x'.repeat(4096), filename: name },
+              })
+            }),
+          )
+          seeded += count
+        }
+        await mkdir(mediaDir, { recursive: true })
+        await writeFile(path.join(mediaDir, filename), 'owned cleanup candidate')
+        queries.length = 0
+        const rssBefore = process.memoryUsage().rss
+        const started = performance.now()
+
+        await scheduleUnreferencedFileCleanup({
+          candidates: [{ key: filename, roles: [{ type: 'original' }] }],
+          collection,
+          req,
+        })
+
+        measurements.push({
+          calls: queries.length,
+          durationMS: Number((performance.now() - started).toFixed(2)),
+          rows: queries.reduce((total, query) => total + query.rows, 0),
+          rssDelta: process.memoryUsage().rss - rssBefore,
+          unrelated,
+          unfiltered: queries.filter(({ where }) => !where || Object.keys(where).length === 0)
+            .length,
+        })
+        findSpy.mockClear()
+        versionsSpy.mockClear()
+        await expect(stat(path.join(mediaDir, filename))).rejects.toMatchObject({ code: 'ENOENT' })
+      }
+      console.info(
+        'File cleanup query measurements:',
+        JSON.stringify({ database: payload.db.name, measurements }),
+      )
+      expect(measurements.map(({ rows }) => rows)).toEqual([0, 0, 0])
+      expect(measurements.map(({ unfiltered }) => unfiltered)).toEqual([0, 0, 0])
+      expect(measurements.every(({ calls }) => calls <= 4)).toBe(true)
+    } finally {
+      findSpy.mockRestore()
+      versionsSpy.mockRestore()
+    }
+  })
+
   test('should remove managed files after a bulk permanent delete', async ({ payload }) => {
     const first = await payload.create({
       collection: mediaSlug,
@@ -1513,6 +1663,210 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     expect(deleted.docs).toHaveLength(2)
     for (const filename of filenames) {
       await expect(stat(path.join(mediaDir, filename))).rejects.toMatchObject({ code: 'ENOENT' })
+    }
+  })
+
+  for (const mode of ['bulk', 'individual'] as const) {
+    test.options(
+      `should clean persisted ${mode} deletes despite a failed afterDelete hook`,
+      { db: (adapter) => mode === 'bulk' || adapter === 'sqlite' },
+      async ({ payload }) => {
+        const first = await payload.create({
+          collection: mediaSlug,
+          data: { alt: 'first' },
+          filePath: imageFixture,
+        })
+        await payload.update({
+          id: first.id,
+          collection: mediaSlug,
+          data: {},
+          filePath: imageFixture,
+        })
+        const second = await payload.create({
+          collection: mediaSlug,
+          data: { alt: 'afterDelete failure' },
+          filePath: imageFixture,
+        })
+        const blocked = await payload.create({
+          collection: mediaSlug,
+          data: { alt: 'beforeDelete failure' },
+          filePath: imageFixture,
+        })
+        const collection = payload.collections[mediaSlug].config
+        const req = await createPayloadRequest({ payload })
+        const blockedFiles = new Set(
+          (await collectVersionFiles({ collection, parentID: blocked.id, req })).map(
+            ({ key }) => key,
+          ),
+        )
+        const filesBefore = await readdir(mediaDir)
+        const beforeDelete = collection.hooks.beforeDelete
+        const afterDelete = collection.hooks.afterDelete
+        const bulkOperationsSingleTransaction = payload.db.bulkOperationsSingleTransaction
+
+        payload.db.bulkOperationsSingleTransaction = mode === 'individual'
+        collection.hooks.beforeDelete = [
+          ...(beforeDelete ?? []),
+          ({ id }) => {
+            if (String(id) === String(blocked.id)) {
+              throw new Error('Rejected before deletion')
+            }
+          },
+        ]
+        collection.hooks.afterDelete = [
+          ...(afterDelete ?? []),
+          ({ id }) => {
+            if (String(id) === String(second.id)) {
+              throw new Error('Rejected after deletion')
+            }
+          },
+        ]
+
+        try {
+          const result = await payload.delete({
+            collection: mediaSlug,
+            overrideAccess: true,
+            select: { id: true },
+            where: { id: { in: [first.id, second.id, blocked.id] } },
+          })
+
+          expect(result.docs.map(({ id }) => id)).toEqual([first.id])
+          expect(result.errors).toEqual(
+            expect.arrayContaining([
+              expect.objectContaining({ id: second.id, message: 'Rejected after deletion' }),
+              expect.objectContaining({ id: blocked.id, message: 'Rejected before deletion' }),
+            ]),
+          )
+          expect(result.errors).toHaveLength(2)
+          const remaining = await payload.db.find({ collection: mediaSlug, pagination: false })
+          const versions = await payload.db.findVersions({
+            collection: mediaSlug,
+            pagination: false,
+          })
+
+          expect(remaining.docs.map(({ id }) => id)).toEqual([blocked.id])
+          expect(versions.docs.length).toBeGreaterThan(0)
+          expect(versions.docs.every(({ parent }) => String(parent) === String(blocked.id))).toBe(
+            true,
+          )
+          expect(
+            filesBefore.filter((filename) => !blockedFiles.has(filename)).length,
+          ).toBeGreaterThan(2)
+          expect(new Set(await readdir(mediaDir))).toEqual(blockedFiles)
+        } finally {
+          collection.hooks.beforeDelete = beforeDelete
+          collection.hooks.afterDelete = afterDelete
+          payload.db.bulkOperationsSingleTransaction = bulkOperationsSingleTransaction
+        }
+      },
+    )
+  }
+
+  test('should clean a nontransactional delete when its afterOperation hook fails', async ({
+    payload,
+  }) => {
+    const created = await payload.create({
+      collection: mediaSlug,
+      data: { alt: 'before delete' },
+      filePath: imageFixture,
+    })
+    const hooks = payload.collections[mediaSlug].config.hooks
+    const afterOperation = hooks.afterOperation
+
+    hooks.afterOperation = [
+      ...(afterOperation ?? []),
+      ({ operation, result }) => {
+        if (operation === 'deleteByID') {
+          throw new Error('Rejected delete response')
+        }
+        return result
+      },
+    ]
+
+    try {
+      await expect(
+        payload.delete({
+          id: created.id,
+          collection: mediaSlug,
+          disableTransaction: true,
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('Rejected delete response')
+
+      expect(
+        await payload.db.findOne({ collection: mediaSlug, where: { id: { equals: created.id } } }),
+      ).toBeNull()
+      const versions = await payload.db.findVersions({
+        collection: mediaSlug,
+        where: { parent: { equals: created.id } },
+      })
+
+      expect(versions.docs).toEqual([])
+      await expect(stat(path.join(mediaDir, created.original!.filename!))).rejects.toMatchObject({
+        code: 'ENOENT',
+      })
+    } finally {
+      hooks.afterOperation = afterOperation
+    }
+  })
+
+  test('should clean a persisted nested delete when a nontransactional outer update fails', async ({
+    payload,
+  }) => {
+    const child = await payload.create({
+      collection: mediaSlug,
+      data: { alt: 'child' },
+      filePath: imageFixture,
+    })
+    const outer = await payload.create({ collection: mediaSlug, data: { alt: 'outer' } })
+    const hooks = payload.collections[mediaSlug].config.hooks
+    const beforeChange = hooks.beforeChange
+    const filename = child.original!.filename!
+
+    hooks.beforeChange = [
+      ...(beforeChange ?? []),
+      async ({ data, req }) => {
+        if (data.alt !== 'reject-after-write') {
+          return data
+        }
+        await payload.delete({
+          id: child.id,
+          collection: mediaSlug,
+          disableTransaction: true,
+          overrideAccess: true,
+          req,
+        })
+        expect(await readFile(path.join(mediaDir, filename))).toEqual(await readFile(imageFixture))
+        return data
+      },
+    ]
+
+    try {
+      await expect(
+        payload.update({
+          id: outer.id,
+          collection: mediaSlug,
+          data: { alt: 'reject-after-write' },
+          disableTransaction: true,
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('Rejected after the file and document write')
+
+      expect(
+        await payload.db.findOne({ collection: mediaSlug, where: { id: { equals: child.id } } }),
+      ).toBeNull()
+      expect(
+        await payload.db.findOne({ collection: mediaSlug, where: { id: { equals: outer.id } } }),
+      ).toBeTruthy()
+      const versions = await payload.db.findVersions({
+        collection: mediaSlug,
+        where: { parent: { equals: child.id } },
+      })
+
+      expect(versions.docs).toEqual([])
+      await expect(stat(path.join(mediaDir, filename))).rejects.toMatchObject({ code: 'ENOENT' })
+    } finally {
+      hooks.beforeChange = beforeChange
     }
   })
 

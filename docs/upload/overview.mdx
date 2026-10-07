@@ -309,6 +309,8 @@ Payload retains the source of each new upload as `original`, even when the main 
 
 Existing uploads are upgraded as they are edited; no bulk file migration is required. For an older image whose untouched source was already deleted, the existing stored file is the best available original. The upgrade cannot recover source bytes or historical files that were deleted before file versioning was enabled.
 
+SQL projects should generate and apply their schema migration. Original filenames have non-unique indexes on the current upload table and, when versions are enabled, its version table. Stored variant filenames are indexed as well.
+
 ## Disabling Local Upload Storage
 
 If you are using a plugin to send your files off to a third-party file storage host or CDN, like Amazon S3 or similar, you may not want to store your files locally at all. You can prevent Payload from writing files to disk by specifying `disableLocalStorage: true` on your collection's upload config.

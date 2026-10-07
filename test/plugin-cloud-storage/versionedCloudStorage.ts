@@ -51,7 +51,6 @@ export const versionedCloudFailure: {
   beforeCopy?: () => Promise<void>
   beforeUpload?: () => Promise<void>
   deleteKey?: string
-  moveNumber?: number
   uploadNumber: number
 } = { afterChange: false, uploadNumber: 0 }
 export const versionedCloudCalls = {
@@ -97,9 +96,6 @@ export const versionedCloudAdapter: Adapter = () => ({
   },
   moveFile: ({ from, to }) => {
     versionedCloudCalls.moves += 1
-    if (versionedCloudCalls.moves === versionedCloudFailure.moveNumber) {
-      throw new Error('Cloud test move failed')
-    }
     const bytes = versionedCloudFiles.get(from)
     if (!bytes) {
       throw new Error('Cloud source does not exist')
