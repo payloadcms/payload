@@ -11,6 +11,7 @@ const dirname = path.dirname(filename)
 export const CustomUploadFieldCollection: CollectionConfig = {
   slug: customUploadFieldSlug,
   upload: {
+    focalPoint: true,
     staticDir: path.resolve(dirname, '../../media'),
   },
   admin: {
