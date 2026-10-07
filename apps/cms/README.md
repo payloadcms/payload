@@ -30,6 +30,8 @@ installs the app against them. This is the same approach Payload's CI uses to te
 | `src/collections/Clients.ts`               | Private client records: contacts, business type, importance (see "Clients and events") |
 | `src/collections/Events.ts`                | Private records of sales events and exhibitions worldwide                              |
 | `scripts/import-events.ts`                 | Imports events from a JSON file (see "Importing events")                               |
+| `src/vigor/`, `src/locales.ts`             | Content of the Vigor website in four languages (see "Vigor website")                   |
+| `scripts/import-vigor.ts`                  | Copies the Vigor website's current content into the CMS (see "Vigor website")          |
 | `src/timezones.ts`                         | Time zones offered for event dates                                                     |
 | `src/proxy.ts`, `src/twoFactor/`           | Two-factor authentication for every login (see "Two-factor authentication")            |
 | `src/email/sendgrid.ts`                    | Sends emails such as "forgot password" through SendGrid (see "Email (SendGrid)")       |
@@ -41,6 +43,7 @@ installs the app against them. This is the same approach Payload's CI uses to te
 | `deploy/check-db.sh`                       | Checks that the app EC2 can reach and write to MongoDB                                 |
 | `deploy/deploy.sh`                         | Build + (re)start + wait until healthy                                                 |
 | `deploy/import-events.sh`                  | Runs the events import on the server                                                   |
+| `deploy/import-vigor.sh`                   | Runs the Vigor website import on the server                                            |
 | `deploy/mongodb/create-payload-user.js`    | Creates the MongoDB user for Payload (run on the DB EC2)                               |
 | `scripts/pack-local-packages.mjs`          | Packs `packages/*` into tarballs for the app (used by the Dockerfile)                  |
 
@@ -130,6 +133,7 @@ nano .env
 | `SITE_ADDRESS`                                              | `:80` for plain HTTP on the IP, or `cms.example.com` for automatic HTTPS                                       |
 | `CORS_ORIGINS`                                              | optional, comma-separated frontend origins that call the API with cookies                                      |
 | `WEBSITE_URL`, `WEBSITE_REVALIDATE_SECRET`                  | optional, refresh the website as soon as a post is published (see "Blog posts")                                |
+| `VIGOR_WEBSITE_URL`, `VIGOR_WEBSITE_REVALIDATE_SECRET`      | optional, refresh the Vigor website as soon as its content changes (see "Vigor website")                       |
 | `SENDGRID_API_KEY`, `EMAIL_FROM_ADDRESS`, `EMAIL_FROM_NAME` | optional, send "forgot password" emails (see "Email (SendGrid)")                                               |
 
 URL-encode special characters in the MongoDB password: `@` → `%40`, `:` → `%3A`, `/` → `%2F`,
@@ -382,6 +386,92 @@ docker run --rm mongo:8 mongosh "$(grep '^DATABASE_URL=' .env | cut -d= -f2-)" -
   )'
 ```
 
+## Vigor website
+
+Everything under **Vigor website** in the admin panel is the content of the Vigor Gems and Jewelry website
+([atorpos/VigorNewWebsite](https://github.com/atorpos/VigorNewWebsite)), in English, Spanish, French and
+Traditional Chinese. The code is in `src/vigor/`, the languages in `src/locales.ts`.
+
+| In the admin panel | On the website                                                                          |
+| ------------------ | --------------------------------------------------------------------------------------- |
+| Products           | `/products` and a page per product. Products with a badge are featured on the home page |
+| Service pages      | `/topics/<slug>`, shown as tiles on the home page                                       |
+| News               | `/news` and a page per article                                                          |
+| Events             | Upcoming events on the home page (separate from the private events under Business)      |
+| Site settings      | Company name, contact details, opening hours, social links, main menu, key figures      |
+| Home page          | The hero slides at the top of the home page                                             |
+| About page         | `/about`                                                                                |
+
+**Languages.** Switch language with the menu at the top right; each text field shows its language, e.g.
+"Name — English". Categories, gemstones, metals, badges, units, slugs, SKUs, links and images are the same in
+every language. On the website, a text that isn't translated shows in English.
+
+**Publishing.** Products, service pages, news and events have drafts, and each language is published on its own:
+
+- **Publish in English** (or the language you're editing) publishes that language only. An item published only
+  in English doesn't appear on the Spanish, French or Chinese site.
+- For a new item, use the arrow next to it → **Publish all locales**. The item then appears in every language
+  straight away, in English until you translate it.
+- To translate, switch language, change the texts and press **Publish in Español** (or the other language).
+- **Save Draft** keeps changes private. The website keeps showing the published version.
+
+Site settings, Home page and About page have no drafts: **Save** puts the change live in the language you're
+editing. (With MongoDB, Payload gives every global with drafts an index with the same name, so all but one
+of them fail to build.)
+
+**Images** go to Media like any upload (to S3 when it's on). A product without a photo gets a drawn
+illustration on the website.
+
+**Catalog choices** (categories, gemstones, metals, units, badges, news categories) are in
+`src/vigor/options.ts`. The website translates them with the `glossary` in its `shared/i18n/*.json`: when
+you add one, add its translations there too, or it shows in English on the other languages' pages.
+
+### Connecting the website (once)
+
+1. **Deploy the website** with Payload support (VigorNewWebsite PR #5 or later) and without `PAYLOAD_URL`, so it
+   still shows its own content.
+2. **Deploy this CMS** (`./deploy/deploy.sh`).
+3. **Copy the website's content into the CMS**, on the app server:
+
+   ```bash
+   cd ~/payloadcms/apps/cms
+   ./deploy/import-vigor.sh https://www.example.com --dry-run   # preview, nothing is saved
+   ./deploy/import-vigor.sh https://www.example.com
+   ```
+
+   It reads every language from the website (`GET /api/content/<language>`), downloads the images into Media
+   and publishes everything in all languages. Items that already exist (same slug; events with the same title
+   and day) and pages that already have content are skipped, so running it again is safe and keeps your
+   edits. An image that can't be downloaded is reported and left empty; `--no-images` skips them all. If the
+   website runs on this server, its local address works too, e.g. `http://127.0.0.1:3002`.
+
+4. **Point the website at the CMS**, in the website's `server/.env`, then rebuild it
+   (`docker compose up -d --build`):
+
+   ```bash
+   PAYLOAD_URL=https://cms.example.com        # this CMS's SERVER_URL
+   REVALIDATE_SECRET=<openssl rand -hex 32>
+   ```
+
+   `GET https://www.example.com/api/health` then shows `"content":"payload"`.
+
+5. **Refresh the website on every change.** In this CMS's `.env`, then `./deploy/deploy.sh`:
+
+   ```bash
+   VIGOR_WEBSITE_URL=https://www.example.com
+   VIGOR_WEBSITE_REVALIDATE_SECRET=<the same secret as REVALIDATE_SECRET>
+   ```
+
+   After a change, `docker compose logs cms` shows `Revalidated Vigor website`, or `Could not revalidate` with
+   the reason. Without these settings, the website picks up changes within a minute.
+
+The website reads published content without logging in, e.g.
+`GET /api/vigor-products?locale=es&fallback-locale=en` and `GET /api/globals/vigor-settings?locale=es`, from
+its own server, so it doesn't need to be in `CORS_ORIGINS`. If the CMS can't be reached, the website keeps
+showing the last content it loaded.
+
+Locally, run `pnpm payload run scripts/import-vigor.ts <website-url> [--dry-run]` in this folder instead.
+
 ## Clients and events
 
 Both appear under **Business** in the admin panel and are private: every request, including reading,
@@ -540,6 +630,8 @@ shows whether an email was delivered.
 | Upload fails: `Could not load credentials` / `AccessDenied`              | S3 access. Check that the IAM role is attached with the policy above and that the metadata hop limit is 2, or set the key pair in `.env`.                                   |
 | Upload works but images are broken (403)                                 | The files aren't public. Add the bucket policy (and untick the bucket-policy public-access blocks), or check the CloudFront origin access settings.                         |
 | Website only shows a published post after a minute                       | `docker compose logs cms` shows `Could not revalidate`: `401` means the two secrets differ; `ECONNREFUSED` or a timeout means `WEBSITE_URL` is wrong.                       |
+| Vigor website only shows a change after a minute                         | The same, for `VIGOR_WEBSITE_URL` and `VIGOR_WEBSITE_REVALIDATE_SECRET` (the website's `REVALIDATE_SECRET`).                                                                |
+| A new Vigor product shows in English but not in the other languages      | It is published in English only. Open it and use the arrow next to **Publish in English** → **Publish all locales**.                                                        |
 
 ## Local development
 

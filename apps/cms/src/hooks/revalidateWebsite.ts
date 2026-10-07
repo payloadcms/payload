@@ -113,7 +113,7 @@ const notifyWebsite = ({ posts, req }: { posts: PostRef[]; req: PayloadRequest }
  * a MongoDB replica set; a standalone server has no transactions). While one is open,
  * `req.transactionID` holds its ID, which Payload deletes once it commits or rolls back.
  */
-const waitForCommit = async ({ req }: { req: PayloadRequest }) => {
+export const waitForCommit = async ({ req }: { req: PayloadRequest }) => {
   const deadline = Date.now() + 30_000
   const hasOpenTransaction = () =>
     typeof req.transactionID === 'string' || typeof req.transactionID === 'number'

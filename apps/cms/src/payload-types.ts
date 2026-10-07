@@ -92,16 +92,16 @@ export type LexicalNodes_EF84AAF3 =
   | SerializedListItemNode<LexicalNodes_EF84AAF3>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_48B06E2D".
+ * via the `definition` "LexicalNodes_A7F49216".
  */
-export type LexicalNodes_48B06E2D =
+export type LexicalNodes_A7F49216 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_48B06E2D>
+  | SerializedParagraphNode<LexicalNodes_A7F49216>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_48B06E2D>
+  | SerializedQuoteNode<LexicalNodes_A7F49216>
   | SerializedRelationshipNode<
       | 'users'
       | 'posts'
@@ -109,16 +109,20 @@ export type LexicalNodes_48B06E2D =
       | 'profiles'
       | 'clients'
       | 'events'
+      | 'vigor-products'
+      | 'vigor-services'
+      | 'vigor-news'
+      | 'vigor-events'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_48B06E2D, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_48B06E2D, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_48B06E2D>
-  | SerializedListItemNode<LexicalNodes_48B06E2D>
-  | SerializedHeadingNode<LexicalNodes_48B06E2D>;
+  | SerializedAutoLinkNode<LexicalNodes_A7F49216, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_A7F49216, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_A7F49216>
+  | SerializedListItemNode<LexicalNodes_A7F49216>
+  | SerializedHeadingNode<LexicalNodes_A7F49216>;
 
 export interface Config {
   auth: {
@@ -133,6 +137,10 @@ export interface Config {
     profiles: Profile;
     clients: Client;
     events: Event;
+    'vigor-products': VigorProduct;
+    'vigor-services': VigorService;
+    'vigor-news': VigorNewsArticle;
+    'vigor-events': VigorEvent;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -151,6 +159,10 @@ export interface Config {
     profiles: ProfilesSelect<false> | ProfilesSelect<true>;
     clients: ClientsSelect<false> | ClientsSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
+    'vigor-products': VigorProductsSelect<false> | VigorProductsSelect<true>;
+    'vigor-services': VigorServicesSelect<false> | VigorServicesSelect<true>;
+    'vigor-news': VigorNewsSelect<false> | VigorNewsSelect<true>;
+    'vigor-events': VigorEventsSelect<false> | VigorEventsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -159,10 +171,19 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
-  locale: null;
+  fallbackLocale:
+    ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'fr' | 'zh-Hant') | ('en' | 'es' | 'fr' | 'zh-Hant')[];
+  globals: {
+    'vigor-settings': VigorSettings;
+    'vigor-home': VigorHome;
+    'vigor-about': VigorAbout;
+  };
+  globalsSelect: {
+    'vigor-settings': VigorSettingsSelect<false> | VigorSettingsSelect<true>;
+    'vigor-home': VigorHomeSelect<false> | VigorHomeSelect<true>;
+    'vigor-about': VigorAboutSelect<false> | VigorAboutSelect<true>;
+  };
+  locale: 'en' | 'es' | 'fr' | 'zh-Hant';
   widgets: {
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
@@ -376,7 +397,7 @@ export interface Profile {
    */
   headline?: string | null;
   photo?: (string | null) | Media;
-  bio?: LexicalRichText<LexicalNodes_48B06E2D> | null;
+  bio?: LexicalRichText<LexicalNodes_A7F49216> | null;
   links?:
     | {
         platform: 'github' | 'linkedin' | 'youtube' | 'x' | 'website' | 'other';
@@ -562,6 +583,154 @@ export interface Event {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vigor-products".
+ */
+export interface VigorProduct {
+  id: string;
+  name: string;
+  category: 'Rings' | 'Necklaces' | 'Earrings' | 'Bracelets' | 'Loose gemstones' | 'Pearls';
+  /**
+   * Products with a badge are featured on the home page.
+   */
+  badge?: ('New' | 'Best seller') | null;
+  stone: 'Emerald' | 'Diamond' | 'Lab-grown diamond' | 'Sapphire' | 'Ruby' | 'Pearl' | 'Tanzanite';
+  metal:
+    | '18K yellow gold'
+    | '18K white gold'
+    | '18K rose gold'
+    | '14K yellow gold'
+    | '14K white gold'
+    | 'Platinum'
+    | 'Sterling silver'
+    | '18K yellow gold clasp'
+    | 'Sterling silver clasp'
+    | 'Loose (unset)';
+  /**
+   * e.g. 1.20 ct emerald, 0.45 ct diamonds, size 6.5
+   */
+  weight: string;
+  moq: number;
+  unit: 'piece' | 'pair' | 'parcel' | 'strand';
+  summary: string;
+  /**
+   * Separate paragraphs with a blank line.
+   */
+  body?: string | null;
+  /**
+   * Optional product photo. Without one, the website draws the piece from its gemstone and metal.
+   */
+  image?: (string | null) | Media;
+  /**
+   * Used in the address on the website, the same in every language. Filled in from the name when left empty; don't change it once the page is live.
+   */
+  slug: string;
+  sku: string;
+  /**
+   * Lower numbers are shown first.
+   */
+  sortOrder?: number | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vigor-services".
+ */
+export interface VigorService {
+  id: string;
+  title: string;
+  summary: string;
+  /**
+   * Separate paragraphs with a blank line.
+   */
+  body?: string | null;
+  image?: (string | null) | Media;
+  /**
+   * Used in the address on the website, the same in every language. Filled in from the title when left empty; don't change it once the page is live.
+   */
+  slug: string;
+  /**
+   * Lower numbers are shown first.
+   */
+  sortOrder?: number | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vigor-news".
+ */
+export interface VigorNewsArticle {
+  id: string;
+  title: string;
+  summary: string;
+  /**
+   * Separate paragraphs with a blank line.
+   */
+  body?: string | null;
+  image?: (string | null) | Media;
+  /**
+   * Used in the address on the website, the same in every language. Filled in from the title when left empty; don't change it once the page is live.
+   */
+  slug: string;
+  date: string;
+  category: 'Technology' | 'Collections' | 'Company' | 'Sustainability';
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vigor-events".
+ */
+export interface VigorEvent {
+  id: string;
+  title: string;
+  date: string;
+  /**
+   * e.g. Hong Kong
+   */
+  location: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -611,6 +780,22 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'events';
         value: string | Event;
+      } | null)
+    | ({
+        relationTo: 'vigor-products';
+        value: string | VigorProduct;
+      } | null)
+    | ({
+        relationTo: 'vigor-services';
+        value: string | VigorService;
+      } | null)
+    | ({
+        relationTo: 'vigor-news';
+        value: string | VigorNewsArticle;
+      } | null)
+    | ({
+        relationTo: 'vigor-events';
+        value: string | VigorEvent;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -872,6 +1057,80 @@ export interface EventsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vigor-products_select".
+ */
+export interface VigorProductsSelect<T extends boolean = true> {
+  name?: T;
+  category?: T;
+  badge?: T;
+  stone?: T;
+  metal?: T;
+  weight?: T;
+  moq?: T;
+  unit?: T;
+  summary?: T;
+  body?: T;
+  image?: T;
+  slug?: T;
+  sku?: T;
+  sortOrder?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vigor-services_select".
+ */
+export interface VigorServicesSelect<T extends boolean = true> {
+  title?: T;
+  summary?: T;
+  body?: T;
+  image?: T;
+  slug?: T;
+  sortOrder?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vigor-news_select".
+ */
+export interface VigorNewsSelect<T extends boolean = true> {
+  title?: T;
+  summary?: T;
+  body?: T;
+  image?: T;
+  slug?: T;
+  date?: T;
+  category?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vigor-events_select".
+ */
+export interface VigorEventsSelect<T extends boolean = true> {
+  title?: T;
+  date?: T;
+  location?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -912,6 +1171,260 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vigor-settings".
+ */
+export interface VigorSettings {
+  id: string;
+  company: {
+    name: string;
+    /**
+     * Used in "Ask Vigor AI".
+     */
+    shortName: string;
+    /**
+     * Shown under the logo, e.g. Online Wholesale Portal
+     */
+    portalName?: string | null;
+    /**
+     * Shown in the top bar and the footer.
+     */
+    tagline?: string | null;
+    email: string;
+    phone: string;
+    address?: string | null;
+    hours?: string | null;
+    social?: {
+      linkedin?: string | null;
+      instagram?: string | null;
+      facebook?: string | null;
+    };
+  };
+  /**
+   * "Home" is added automatically.
+   */
+  nav?:
+    | {
+        label: string;
+        /**
+         * A page on the website, e.g. /products
+         */
+        link: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Shown on the home and About pages.
+   */
+  stats?:
+    | {
+        /**
+         * e.g. 25+
+         */
+        value: string;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vigor-home".
+ */
+export interface VigorHome {
+  id: string;
+  hero?:
+    | {
+        /**
+         * Small line above the title.
+         */
+        kicker?: string | null;
+        title: string;
+        summary?: string | null;
+        /**
+         * Wide photo, at least 1600 × 800 pixels.
+         */
+        image?: (string | null) | Media;
+        ctaLabel: string;
+        /**
+         * A page on the website, e.g. /products
+         */
+        ctaLink: string;
+        id?: string | null;
+      }[]
+    | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vigor-about".
+ */
+export interface VigorAbout {
+  id: string;
+  title: string;
+  summary?: string | null;
+  /**
+   * Banner photo, at least 1600 × 600 pixels.
+   */
+  image?: (string | null) | Media;
+  /**
+   * Separate paragraphs with a blank line.
+   */
+  body?: string | null;
+  values?:
+    | {
+        title: string;
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  milestones?:
+    | {
+        year: string;
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  teams?:
+    | {
+        name: string;
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vigor-settings_select".
+ */
+export interface VigorSettingsSelect<T extends boolean = true> {
+  company?:
+    | T
+    | {
+        name?: T;
+        shortName?: T;
+        portalName?: T;
+        tagline?: T;
+        email?: T;
+        phone?: T;
+        address?: T;
+        hours?: T;
+        social?:
+          | T
+          | {
+              linkedin?: T;
+              instagram?: T;
+              facebook?: T;
+            };
+      };
+  nav?:
+    | T
+    | {
+        label?: T;
+        link?: T;
+        id?: T;
+      };
+  stats?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        id?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vigor-home_select".
+ */
+export interface VigorHomeSelect<T extends boolean = true> {
+  hero?:
+    | T
+    | {
+        kicker?: T;
+        title?: T;
+        summary?: T;
+        image?: T;
+        ctaLabel?: T;
+        ctaLink?: T;
+        id?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vigor-about_select".
+ */
+export interface VigorAboutSelect<T extends boolean = true> {
+  title?: T;
+  summary?: T;
+  image?: T;
+  body?: T;
+  values?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+        id?: T;
+      };
+  milestones?:
+    | T
+    | {
+        year?: T;
+        text?: T;
+        id?: T;
+      };
+  teams?:
+    | T
+    | {
+        name?: T;
+        text?: T;
+        id?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -927,7 +1440,18 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'users' | 'media' | 'posts' | 'pages' | 'profiles' | 'clients' | 'events';
+    relatedCollection:
+      | 'users'
+      | 'media'
+      | 'posts'
+      | 'pages'
+      | 'profiles'
+      | 'clients'
+      | 'events'
+      | 'vigor-products'
+      | 'vigor-services'
+      | 'vigor-news'
+      | 'vigor-events';
     where?:
       | {
           [k: string]: unknown;
@@ -949,7 +1473,21 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('users' | 'media' | 'posts' | 'pages' | 'profiles' | 'clients' | 'events')[] | null;
+    excludedCollections?:
+      | (
+          | 'users'
+          | 'media'
+          | 'posts'
+          | 'pages'
+          | 'profiles'
+          | 'clients'
+          | 'events'
+          | 'vigor-products'
+          | 'vigor-services'
+          | 'vigor-news'
+          | 'vigor-events'
+        )[]
+      | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
