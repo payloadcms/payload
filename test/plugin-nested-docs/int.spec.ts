@@ -415,13 +415,13 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
   })
 
   test.describe('localization', () => {
-    const createdPageIDs: (number | string)[] = []
+    const createdDocs: { collection: 'categories' | 'pages'; id: number | string }[] = []
 
     test.afterEach(async ({ payload }) => {
-      for (const id of [...createdPageIDs].reverse()) {
-        await payload.delete({ id, collection: 'pages', overrideAccess: true })
+      for (const { id, collection } of [...createdDocs].reverse()) {
+        await payload.delete({ id, collection, overrideAccess: true })
       }
-      createdPageIDs.length = 0
+      createdDocs.length = 0
     })
 
     // #16054: a child with no breadcrumbs in a locale used to be re-saved with the fallback
@@ -434,7 +434,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
         data: { slug: 'locale-parent', _status: 'published', title: 'Locale Parent' },
         overrideAccess: true,
       })
-      createdPageIDs.push(parentDoc.id)
+      createdDocs.push({ id: parentDoc.id, collection: 'pages' })
 
       const childDoc = await payload.create({
         collection: 'pages',
@@ -446,7 +446,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
         },
         overrideAccess: true,
       })
-      createdPageIDs.push(childDoc.id)
+      createdDocs.push({ id: childDoc.id, collection: 'pages' })
 
       await expect(
         payload.update({
@@ -489,6 +489,47 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
       for (const { id } of childDe.breadcrumbs ?? []) {
         expect(enIDs).not.toContain(id)
       }
+    })
+
+    // Without drafts, each child is validated in the locale being saved, and an invalid child
+    // fails the parent save (#7977). The locale fallback used to hide a required value missing
+    // in that locale by copying another locale's value into it.
+    test('should not copy fallback values into a child that is invalid in that locale', async ({
+      payload,
+    }) => {
+      const parentDoc = await payload.create({
+        collection: 'categories',
+        data: { name: 'locale-parent' },
+        overrideAccess: true,
+      })
+      createdDocs.push({ id: parentDoc.id, collection: 'categories' })
+
+      const childDoc = await payload.create({
+        collection: 'categories',
+        data: { name: 'locale-child', owner: parentDoc.id },
+        overrideAccess: true,
+      })
+      createdDocs.push({ id: childDoc.id, collection: 'categories' })
+
+      await expect(
+        payload.update({
+          id: parentDoc.id,
+          collection: 'categories',
+          data: { name: 'locale-parent-de' },
+          locale: 'de',
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('One or more children are invalid')
+
+      const childDe = await payload.findByID({
+        id: childDoc.id,
+        collection: 'categories',
+        fallbackLocale: false,
+        locale: 'de',
+        overrideAccess: true,
+      })
+
+      expect(childDe.name ?? null).toBeNull()
     })
   })
 
