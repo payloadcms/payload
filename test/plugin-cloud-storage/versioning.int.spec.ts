@@ -305,6 +305,45 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     expect(docs.some(({ version }) => version.filename === created.filename)).toBe(true)
   })
 
+  test('should preserve cloud files when an SDK precondition error rejects rename', async ({
+    payload,
+  }) => {
+    const created = await payload.create({
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      overrideAccess: true,
+    })
+    const source = (await getStoredFiles({ id: created.id, payload }))[0]!.key
+    const destination = path.posix.join(path.posix.dirname(source), 'occupied-original.png')
+    const sourceBytes = Buffer.from(versionedCloudFiles.get(source)!)
+    const occupiedBytes = Buffer.from('occupied bytes')
+
+    versionedCloudFiles.set(destination, occupiedBytes)
+    versionedCloudFailure.beforeCopy = () =>
+      Promise.reject(
+        Object.assign(new Error('precondition failed'), {
+          $metadata: { httpStatusCode: 412 },
+          name: 'PreconditionFailed',
+        }),
+      )
+
+    await expect(
+      payload.renameFile({
+        id: created.id,
+        collection: versionedCloudMediaSlug,
+        filename: 'occupied.png',
+        overrideAccess: true,
+      }),
+    ).rejects.toMatchObject({ status: 409 })
+
+    expect(versionedCloudFiles.get(destination)).toEqual(occupiedBytes)
+    expect(versionedCloudFiles.get(source)).toEqual(sourceBytes)
+    expect(await getStoredFiles({ id: created.id, payload })).toEqual([
+      { key: source, roles: [{ type: 'original' }, { type: 'default' }] },
+    ])
+  })
+
   test('should store an unversioned upload as one managed original', async ({ payload }) => {
     const created = await payload.create({
       collection: unversionedCloudMediaSlug,

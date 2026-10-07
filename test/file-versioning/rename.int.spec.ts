@@ -14,6 +14,8 @@ import { devUser } from '../credentials.js'
 import {
   draftMediaDir,
   draftMediaSlug,
+  localizedMediaDir,
+  localizedMediaSlug,
   mediaDir,
   mediaSlug,
   plainMediaDir,
@@ -31,6 +33,7 @@ test.suite('File rename', { config: './config.ts' }, () => {
   test.afterEach(async () => {
     await rm(mediaDir, { force: true, recursive: true })
     await rm(draftMediaDir, { force: true, recursive: true })
+    await rm(localizedMediaDir, { force: true, recursive: true })
     await rm(transformedMediaDir, { force: true, recursive: true })
     await rm(plainMediaDir, { force: true, recursive: true })
   })
@@ -138,6 +141,76 @@ test.suite('File rename', { config: './config.ts' }, () => {
     expect(await readFile(path.join(draftMediaDir, created.filename!))).toEqual(bytes)
     expect(await readFile(path.join(draftMediaDir, 'draft-original.png'))).toEqual(bytes)
   })
+
+  for (const draft of [false, true]) {
+    test(`should preserve every locale when renaming ${draft ? 'a draft' : 'a published upload'}`, async ({
+      payload,
+    }) => {
+      const bytes = await readFile(imageFixture)
+      const created = await payload.create({
+        collection: localizedMediaSlug,
+        data: { _status: 'published', alt: 'English caption' },
+        file: { name: 'source.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: created.id,
+        collection: localizedMediaSlug,
+        data: { _status: 'published', alt: 'German caption' },
+        locale: 'de',
+      })
+
+      const before = await payload.findByID({
+        id: created.id,
+        collection: localizedMediaSlug,
+        locale: 'all',
+      })
+
+      expect(before.alt).toEqual({ en: 'English caption', de: 'German caption' })
+
+      const renamed = await payload.renameFile({
+        id: created.id,
+        collection: localizedMediaSlug,
+        draft,
+        filename: 'renamed.png',
+        locale: 'en',
+        overrideAccess: true,
+      })
+      const reloaded = await payload.findByID({
+        id: created.id,
+        collection: localizedMediaSlug,
+        draft,
+        locale: 'all',
+      })
+      const published = await payload.findByID({
+        id: created.id,
+        collection: localizedMediaSlug,
+        draft: false,
+        locale: 'all',
+      })
+      const { docs } = await payload.db.findVersions({
+        collection: localizedMediaSlug,
+        pagination: false,
+        where: { parent: { equals: created.id } },
+      })
+      const previous = docs.find(
+        ({ version }) =>
+          version.filename === created.filename && version.alt?.de === 'German caption',
+      )
+
+      expect(renamed.filename).toBe('renamed-original.png')
+      expect(reloaded.filename).toBe('renamed-original.png')
+      expect(reloaded.original?.filename).toBe('renamed-original.png')
+      expect(reloaded.alt).toEqual({ en: 'English caption', de: 'German caption' })
+      expect(published.alt).toEqual({ en: 'English caption', de: 'German caption' })
+      expect(published.filename).toBe(draft ? created.filename : 'renamed-original.png')
+      expect(await readFile(path.join(localizedMediaDir, 'renamed-original.png'))).toEqual(bytes)
+      expect(await readFile(path.join(localizedMediaDir, created.filename))).toEqual(bytes)
+      expect(previous?.version.alt).toEqual({ en: 'English caption', de: 'German caption' })
+      expect(previous?.version.original?.filename).toBe(created.original?.filename)
+    })
+  }
 
   test('should reject unsafe names, extension changes, and destination collisions', async ({
     payload,
@@ -504,7 +577,7 @@ test.suite('File rename', { config: './config.ts' }, () => {
 
     expect(renamed.filename).toBe('legacy-folder/renamed-original.png')
     expect(renamed.original?.filename).toBe(renamed.filename)
-    expect(await readFile(path.join(mediaDir, renamed.filename!))).toEqual(bytes)
+    expect(await readFile(path.join(mediaDir, renamed.filename))).toEqual(bytes)
     const historical = await REST_GET(payload.config)(
       new Request(
         `http://localhost/api/${mediaSlug}/file/${encodeURIComponent(filename)}?version=${selected.id}`,

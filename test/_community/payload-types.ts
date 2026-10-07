@@ -228,22 +228,9 @@ export interface Media {
     filesize?: number | null;
     width?: number | null;
     height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
   };
-  _managedFiles?: {
-    key: string;
-    roles: (
-      | {
-          type: 'size';
-          sizeKey: string;
-        }
-      | {
-          type: 'original' | 'default' | 'thumbnail';
-        }
-    )[];
-    storageBackendId: string;
-    [k: string]: unknown;
-  }[];
-  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
   variants?: {
@@ -254,6 +241,8 @@ export interface Media {
       mimeType?: string | null;
       filesize?: number | null;
       filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
     };
     medium?: {
       url?: string | null;
@@ -262,6 +251,8 @@ export interface Media {
       mimeType?: string | null;
       filesize?: number | null;
       filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
     };
     large?: {
       url?: string | null;
@@ -270,6 +261,8 @@ export interface Media {
       mimeType?: string | null;
       filesize?: number | null;
       filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
     };
   };
 }
@@ -388,9 +381,9 @@ export interface MediaSelect<T extends boolean = true> {
         filesize?: T;
         width?: T;
         height?: T;
+        prefix?: T;
+        _objectKey?: T;
       };
-  _managedFiles?: T;
-  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
   variants?:
@@ -405,6 +398,8 @@ export interface MediaSelect<T extends boolean = true> {
               mimeType?: T;
               filesize?: T;
               filename?: T;
+              prefix?: T;
+              _objectKey?: T;
             };
         medium?:
           | T
@@ -415,6 +410,8 @@ export interface MediaSelect<T extends boolean = true> {
               mimeType?: T;
               filesize?: T;
               filename?: T;
+              prefix?: T;
+              _objectKey?: T;
             };
         large?:
           | T
@@ -425,6 +422,8 @@ export interface MediaSelect<T extends boolean = true> {
               mimeType?: T;
               filesize?: T;
               filename?: T;
+              prefix?: T;
+              _objectKey?: T;
             };
       };
 }
