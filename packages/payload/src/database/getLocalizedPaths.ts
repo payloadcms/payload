@@ -27,10 +27,7 @@ export function getLocalizedPaths({
   incomingPath: string
   locale?: string
   overrideAccess?: boolean
-  /**
-   * @todo make required in v4.0. Usually, you'd wanna pass this through
-   */
-  parentIsLocalized?: boolean
+  parentIsLocalized: boolean
   payload: Payload
   showHiddenFields?: boolean
 }): PathToQuery[] {
@@ -46,7 +43,7 @@ export function getLocalizedPaths({
       fields,
       globalSlug,
       invalid: false,
-      parentIsLocalized: parentIsLocalized!,
+      parentIsLocalized,
       path: '',
     },
   ]
@@ -92,7 +89,7 @@ export function getLocalizedPaths({
         } else {
           fieldsToSearch = lastIncompletePath.fields!
         }
-        _parentIsLocalized = parentIsLocalized || lastIncompletePath.field?.localized
+        _parentIsLocalized = parentIsLocalized || Boolean(lastIncompletePath.field?.localized)
 
         matchedField = fieldsToSearch.find((field) => field.name === segment)!
       }
@@ -146,7 +143,7 @@ export function getLocalizedPaths({
         const nextSegment = pathSegments[i + 1]!
         const currentFieldIsLocalized = fieldShouldBeLocalized({
           field: matchedField,
-          parentIsLocalized: _parentIsLocalized!,
+          parentIsLocalized: _parentIsLocalized,
         })
 
         const nextSegmentIsLocale =
