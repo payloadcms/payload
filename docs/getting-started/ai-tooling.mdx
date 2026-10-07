@@ -47,28 +47,6 @@ For any Payload-related work, reference the skill at `node_modules/payload/skill
   into context up front.
 </Banner>
 
-## Working with a project
-
-Use the [Payload CLI](../configuration/cli) for local development and coding-agent
-work. Each invocation loads your current Payload config; no running web server or
-MCP plugin is required. Use your development database configuration for local work.
-The CLI provides JSON help, schema discovery, and collection and global operations:
-
-```sh
-pnpm payload help --json
-pnpm payload getConfigInfo --json
-pnpm payload getCollectionSchema --slug users --json
-```
-
-Read the schema and its LLM instructions before creating or updating content.
-The CLI is a trusted local interface with access to the project's configuration
-and database credentials.
-
-Use the [MCP plugin](../plugins/mcp) when an agent needs to work against a stable
-running server, such as a production deployment. Configure MCP explicitly and
-supply credentials for a user with the required permissions. HTTP and stdio
-apply normal authentication and access control in every environment.
-
 ## Claude Code plugin
 
 Payload also publishes the skill as a Claude Code plugin. The plugin tracks the `main`
