@@ -1161,8 +1161,6 @@ await upgradeLexicalData({ payload })
 
 Payload still writes `version` when it saves rich text, and the generated types still include it.
 
-When you regenerate `payload-types.ts`, the generated `LexicalNodes_<hash>` types get new names, because each name is a hash of the node schema. The types themselves are unchanged. If your code refers to one of these names, use `RichTextNodes<Post['richText']>` instead, which doesn't depend on the name.
-
 ### Field `typescriptSchema` renamed to `jsonSchema`
 
 `typescriptSchema` accepted JSON Schema, not TypeScript, so the name lied. Renamed to `jsonSchema`. Same shape, same array of transforms. The underlying schema is now also consumed by the MCP plugin for runtime validation, not just type generation.
