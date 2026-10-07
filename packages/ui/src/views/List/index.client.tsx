@@ -475,6 +475,7 @@ export function DefaultListView(props: ListViewClientProps) {
                         disableBulkEdit={disableBulkEdit}
                         label={collectionLabel}
                         showSelectAllAcrossPages={!isGroupingBy}
+                        where={query?.where}
                       />
                       <div className={`${baseClass}__list-selection-actions`}>{beforeActions}</div>
                     </div>
