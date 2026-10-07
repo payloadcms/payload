@@ -913,6 +913,33 @@ When a missing locale is already valid for the receiving API, optional chaining 
 const locale = useLocale()?.code
 ```
 
+### Deprecated `TableColumnsProvider` props removed
+
+The following deprecated props have been removed from `TableColumnsProvider` and its `TableColumnsProviderProps` type:
+
+- `docs`
+- `enableRowSelections`
+- `listPreferences`
+- `preferenceKey`
+- `renderRowTypes`
+- `setTable`
+- `sortColumnProps`
+- `tableAppearance`
+
+`TableColumnsProvider` has ignored these props since 3.26.0, when column state moved to the URL. Remove them where you render the provider. It now only accepts `children`, `collectionSlug`, `columnState`, and `LinkedCellOverride`.
+
+```diff
+<TableColumnsProvider
+  collectionSlug={collectionSlug}
+  columnState={columnState}
+- enableRowSelections
+- preferenceKey={preferenceKey}
+- tableAppearance="condensed"
+>
+  {children}
+</TableColumnsProvider>
+```
+
 ### RichText adapter `i18n` property removed
 
 The `i18n` property on `RichTextAdapter` (and its return type from adapter provider functions) has been removed. It was deprecated in v3 in favour of merging translations directly into `config.i18n.translations` inside the adapter provider.
