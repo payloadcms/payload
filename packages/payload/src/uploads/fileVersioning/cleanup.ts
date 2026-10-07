@@ -2,7 +2,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
-import type { JsonObject, PayloadRequest, Where } from '../../types/index.js'
+import type { JsonObject, PayloadRequest, SelectType, Where } from '../../types/index.js'
 import type { StagedObject } from './fileOperationManager.js'
 import type { StoredFile, StoredFileList } from './types.js'
 
@@ -113,6 +113,7 @@ export const scheduleUnreferencedFileCleanup = async ({
       }
     },
     req,
+    shouldCleanupAfterFailure: true,
   })
 }
 
@@ -158,46 +159,109 @@ const findUnreferenced = async ({
   collection: SanitizedCollectionConfig
   req: PayloadRequest
 }): Promise<StoredFileList> => {
-  const remaining = new Map(candidates.map((file) => [getStoredFileIdentity(file), file]))
-  let page = 1
-
-  while (remaining.size) {
-    const docs = await req.payload.db.find<JsonObject>({
-      collection: collection.slug,
-      limit: pageSize,
-      page,
-      req,
-    })
-
-    for (const doc of docs.docs) {
-      removeReferenced({ collection, doc, remaining, req })
-    }
-
-    if (docs.docs.length < pageSize) {
-      break
-    }
-    page += 1
+  const variantsField = collection.flattenedFields.find((field) => field.name === 'variants')
+  const variantNames =
+    variantsField?.type === 'group'
+      ? variantsField.flattenedFields
+          .filter(
+            (field) =>
+              field.type === 'group' &&
+              field.flattenedFields.some((nested) => nested.name === 'filename'),
+          )
+          .map((field) => field.name)
+      : []
+  const filenamePaths = [
+    'filename',
+    'original.filename',
+    ...variantNames.map((name) => `variants.${name}.filename`),
+  ]
+  // A removed schema field cannot prove the absence of historical references.
+  // Retain those variant objects until their saved location data is migrated.
+  const remaining = new Map(
+    candidates
+      .filter((file) =>
+        file.roles.every((role) => role.type !== 'size' || variantNames.includes(role.sizeKey)),
+      )
+      .map((file) => [getStoredFileIdentity(file), file]),
+  )
+  const representationSelect: SelectType = {
+    _objectKey: true,
+    filename: true,
+    prefix: true,
+    url: true,
   }
+  const select: SelectType = {
+    ...representationSelect,
+    filesize: true,
+    mimeType: true,
+    original: representationSelect,
+    ...(variantNames.length
+      ? { variants: Object.fromEntries(variantNames.map((name) => [name, representationSelect])) }
+      : {}),
+  }
+  // Legacy filenames may include folders. Match every possible filename suffix,
+  // then verify the adapter's complete key before accepting a reference.
+  const filenames = [
+    ...new Set(
+      [...remaining.values()].flatMap(({ key }) => {
+        const parts = normalizeStorageKey({ key }).split('/')
+        return parts.map((_, index) => parts.slice(index).join('/'))
+      }),
+    ),
+  ]
 
-  if (collection.versions) {
-    page = 1
+  for (let offset = 0; offset < filenames.length && remaining.size; offset += pageSize) {
+    const batch = filenames.slice(offset, offset + pageSize)
+    const where: Where = { or: filenamePaths.map((field) => ({ [field]: { in: batch } })) }
+    let page = 1
 
     while (remaining.size) {
-      const versions = await req.payload.db.findVersions<JsonObject>({
+      const docs = await req.payload.db.find<JsonObject>({
         collection: collection.slug,
         limit: pageSize,
         page,
+        pagination: true,
         req,
+        select,
+        sort: 'id',
+        where,
       })
 
-      for (const row of versions.docs) {
-        removeReferenced({ collection, doc: row.version, remaining, req })
+      for (const doc of docs.docs) {
+        removeReferenced({ collection, doc, remaining, req })
       }
-
-      if (versions.docs.length < pageSize) {
+      if (docs.docs.length < pageSize) {
         break
       }
       page += 1
+    }
+
+    if (collection.versions) {
+      page = 1
+      const versionWhere: Where = {
+        or: filenamePaths.map((field) => ({ [`version.${field}`]: { in: batch } })),
+      }
+
+      while (remaining.size) {
+        const versions = await req.payload.db.findVersions<JsonObject>({
+          collection: collection.slug,
+          limit: pageSize,
+          page,
+          pagination: true,
+          req,
+          select: { version: select },
+          sort: 'id',
+          where: versionWhere,
+        })
+
+        for (const row of versions.docs) {
+          removeReferenced({ collection, doc: row.version, remaining, req })
+        }
+        if (versions.docs.length < pageSize) {
+          break
+        }
+        page += 1
+      }
     }
   }
 

@@ -231,6 +231,14 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       where: { id: { equals: id } },
     })
 
+    if (collectionConfig.upload) {
+      await scheduleUnreferencedFileCleanup({
+        candidates: deletedFiles,
+        collection: collectionConfig,
+        req,
+      })
+    }
+
     // /////////////////////////////////////
     // Add collection property for auth collections
     // /////////////////////////////////////
@@ -315,14 +323,6 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       overrideAccess,
       result,
     })
-
-    if (collectionConfig.upload) {
-      await scheduleUnreferencedFileCleanup({
-        candidates: deletedFiles,
-        collection: collectionConfig,
-        req,
-      })
-    }
 
     // /////////////////////////////////////
     // 8. Return results

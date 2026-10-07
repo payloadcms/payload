@@ -21,28 +21,6 @@ export const copyLocalFile = async ({
   await fs.stat(destination)
 }
 
-/** Moves a managed local object, using copy then delete across filesystems. */
-export const moveLocalFile = async ({
-  from,
-  staticDir,
-  to,
-}: LocalFileOperationArgs): Promise<void> => {
-  const { destination, source } = await resolvePaths({ from, staticDir, to })
-
-  try {
-    await fs.link(source, destination)
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException).code !== 'EXDEV') {
-      throw err
-    }
-
-    await fs.copyFile(source, destination, fs.constants.COPYFILE_EXCL)
-  }
-
-  await fs.stat(destination)
-  await fs.unlink(source)
-}
-
 const resolvePaths = async ({ from, staticDir, to }: LocalFileOperationArgs) => {
   const root = await fs.realpath(staticDir)
   const source = path.resolve(root, normalizeStorageKey({ key: from }))

@@ -28,7 +28,10 @@ import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { saveVersion } from '../../index.js'
 import { removeUnreferencedStagedObjects } from '../../uploads/fileVersioning/cleanup.js'
-import { runCloudFileCreation } from '../../uploads/fileVersioning/cloudStorage.js'
+import {
+  captureCloudHookState,
+  runCloudFileCreation,
+} from '../../uploads/fileVersioning/cloudStorage.js'
 import {
   abortFileOperationScope,
   beginFileOperationScope,
@@ -91,6 +94,7 @@ export const createOperation = async <
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
   let externalUploadSource: ReturnType<typeof getExternalUploadSource>
+  let restoreCloudHookState: (() => void) | undefined
   const hasFileOperationScope = Boolean(args.collection.config.upload)
 
   if (hasFileOperationScope) {
@@ -499,6 +503,7 @@ export const createOperation = async <
       collectionConfig.upload.fileOperations &&
       (filesToUpload.length > 0 || req.context?._payloadVerifiedProviderOriginal)
     ) {
+      restoreCloudHookState = captureCloudHookState({ req })
       doc = await runCloudFileCreation({
         collection: collectionConfig,
         data: dataWithLocales,
@@ -686,9 +691,6 @@ export const createOperation = async <
     }
     throw error
   } finally {
-    if (hasFileOperationScope && args.req.context) {
-      delete args.req.context._payloadManagedCloudStorage
-      delete args.req.context._payloadManagedCloudMetadata
-    }
+    restoreCloudHookState?.()
   }
 }

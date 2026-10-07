@@ -2,7 +2,6 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 
 import type { JsonObject, PayloadRequest } from '../../types/index.js'
-import type { StagedObject } from '../../uploads/fileVersioning/fileOperationManager.js'
 import type { Collection } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
@@ -20,7 +19,7 @@ import {
   completeFileOperationScope,
   runFileOperationPlan,
 } from '../../uploads/fileVersioning/fileOperationManager.js'
-import { copyLocalFile, moveLocalFile } from '../../uploads/fileVersioning/localStorage.js'
+import { copyLocalFile } from '../../uploads/fileVersioning/localStorage.js'
 import { getOriginalFilename, normalizeStorageKey } from '../../uploads/fileVersioning/naming.js'
 import {
   collectStoredFiles,
@@ -28,7 +27,7 @@ import {
   withLegacyCloudUploadFileData,
 } from '../../uploads/fileVersioning/storedFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
-import { hasActiveTransaction, initTransaction } from '../../utilities/initTransaction.js'
+import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
@@ -165,44 +164,11 @@ export const renameFileOperation = async (
     }
 
     const staticDir = collection.config.upload.staticDir
-    const hasTransaction = await hasActiveTransaction({ req })
-    const hasNativeMove =
-      !collection.config.versions &&
-      hasTransaction &&
-      (operations ? Boolean(operations.move) : Boolean(staticDir))
-    const moveFiles = async ({
-      trackStagedObject,
-    }: {
-      trackStagedObject: (object: StagedObject) => void
-    }) => {
-      for (const file of storedFiles) {
-        const to = replacements.get(getStoredFileIdentity(file))!
-        try {
-          if (!operations && staticDir) {
-            await moveLocalFile({ from: file.key, staticDir, to })
-            trackStagedObject({
-              key: to,
-              remove: () => moveLocalFile({ from: to, staticDir, to: file.key }),
-            })
-          } else if (operations?.move) {
-            await operations.move({ from: file.key, req, to, trackStagedObject })
-          }
-        } catch (err) {
-          if (isStorageCollision({ err })) {
-            throw new APIError(`A file named ${path.posix.basename(to)} already exists.`, 409)
-          }
-          throw err
-        }
-      }
-    }
     const result = await runFileOperationPlan({
       cleanupStagedAfterWriteFailure: (objects) =>
         removeUnreferencedStagedObjects({ collection: collection.config, objects, req }),
       req,
       stage: async ({ trackStagedObject }) => {
-        if (hasNativeMove) {
-          return
-        }
         for (const file of storedFiles) {
           const to = replacements.get(getStoredFileIdentity(file))!
           if (!operations && staticDir) {
@@ -219,7 +185,7 @@ export const renameFileOperation = async (
               remove: () => fs.rm(path.join(staticDir, to), { force: true }),
             })
           } else if (operations?.copy) {
-            // The old key may still belong to a version, so even an adapter with move uses copy here.
+            // Keep source files readable until the document update and its transaction succeed.
             try {
               await operations.copy({ from: file.key, req, to, trackStagedObject })
             } catch (err) {
@@ -233,10 +199,7 @@ export const renameFileOperation = async (
           }
         }
       },
-      write: async ({ trackStagedObject }) => {
-        if (hasNativeMove) {
-          await moveFiles({ trackStagedObject })
-        }
+      write: async () => {
         if (collection.config.versions) {
           const previousVersions = await req.payload.db.findVersions({
             collection: collection.config.slug,
@@ -285,13 +248,11 @@ export const renameFileOperation = async (
           showHiddenFields: false,
         })
 
-        if (!hasNativeMove) {
-          await scheduleUnreferencedFileCleanup({
-            candidates: storedFiles,
-            collection: collection.config,
-            req,
-          })
-        }
+        await scheduleUnreferencedFileCleanup({
+          candidates: storedFiles,
+          collection: collection.config,
+          req,
+        })
         return updated as JsonObject
       },
     })

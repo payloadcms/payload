@@ -14,6 +14,7 @@ export type StagedObject = {
 type Attempt = {
   cleanup?: () => Promise<void>
   cleanupStagedAfterWriteFailure?: (objects: StagedObject[]) => Promise<void>
+  shouldCleanupAfterFailure?: boolean
   staged: Map<string, StagedObject>
 }
 
@@ -72,12 +73,15 @@ export const abortFileOperationScope = async ({ req }: { req: PayloadRequest }):
 export const deferFileCleanup = async ({
   cleanup,
   req,
+  shouldCleanupAfterFailure,
 }: {
   cleanup: () => Promise<void>
   req: PayloadRequest
+  /** Enable only for cleanup that rechecks persisted references before deleting. */
+  shouldCleanupAfterFailure?: boolean
 }): Promise<void> => {
   const state = getRequestState({ req })
-  state.pending.push({ cleanup, staged: new Map() })
+  state.pending.push({ cleanup, shouldCleanupAfterFailure, staged: new Map() })
   if (state.depth === 0 && (!(await hasActiveTransaction({ req })) || state.isCommitted)) {
     await flushCleanup({ req, state })
   }
@@ -291,15 +295,7 @@ const flushCleanup = async ({
   requests.delete(req)
 
   for (const attempt of state.pending) {
-    if (!attempt.cleanup) {
-      continue
-    }
-
-    try {
-      await attempt.cleanup()
-    } catch (err) {
-      req.payload.logger.error({ err, msg: 'Failed to clean up an unreferenced upload file' })
-    }
+    await runDeferredCleanup({ attempt, req })
   }
 }
 
@@ -314,6 +310,23 @@ const reconcileFailedAttempts = async ({
 
   for (const attempt of state.pending) {
     await cleanupStagedObjectsAfterWriteFailure({ attempt, req })
+    if (attempt.shouldCleanupAfterFailure) {
+      await runDeferredCleanup({ attempt, req })
+    }
+  }
+}
+
+const runDeferredCleanup = async ({
+  attempt,
+  req,
+}: {
+  attempt: Attempt
+  req: PayloadRequest
+}): Promise<void> => {
+  try {
+    await attempt.cleanup?.()
+  } catch (err) {
+    req.payload.logger.error({ err, msg: 'Failed to clean up an unreferenced upload file' })
   }
 }
 

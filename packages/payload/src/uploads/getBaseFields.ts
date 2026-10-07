@@ -179,7 +179,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
         readOnly: true,
       },
       fields: [
-        { ...filename, index: false, unique: false },
+        { ...filename, unique: false },
         {
           ...url,
           hooks: {

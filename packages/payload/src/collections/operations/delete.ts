@@ -175,7 +175,6 @@ export const deleteOperation = async <
 
     const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
     let didBatchDeleteFail = false
-    let hasAfterDeleteFailure = false
     const deletedFilesByID = new Map<number | string, StoredFileList>()
     req.context ??= {}
     const managedDeletedUploads = (req.context._payloadManagedDeletedUploads ??=
@@ -341,8 +340,6 @@ export const deleteOperation = async <
           },
         })
 
-        const result = await runAfterDeleteWork(doc)
-
         if (collectionConfig.upload) {
           await scheduleUnreferencedFileCleanup({
             candidates: deletedFilesByID.get(doc.id) ?? [],
@@ -350,6 +347,8 @@ export const deleteOperation = async <
             req,
           })
         }
+
+        const result = await runAfterDeleteWork(doc)
 
         if (docShouldCommit) {
           await commitTransaction(req)
@@ -490,12 +489,19 @@ export const deleteOperation = async <
         return results
       }
 
+      if (collectionConfig.upload) {
+        await scheduleUnreferencedFileCleanup({
+          candidates: deletable.flatMap(({ doc }) => deletedFilesByID.get(doc.id) ?? []),
+          collection: collectionConfig,
+          req,
+        })
+      }
+
       await Promise.all(
         deletable.map(async (entry) => {
           try {
             results[entry.index] = await runAfterDeleteWork(entry.doc)
           } catch (error) {
-            hasAfterDeleteFailure = true
             pushError(entry.doc.id, error)
           }
         }),
@@ -546,19 +552,6 @@ export const deleteOperation = async <
       overrideAccess,
       result,
     })
-
-    if (
-      collectionConfig.upload &&
-      !didBatchDeleteFail &&
-      !hasAfterDeleteFailure &&
-      hasFileOperationScope
-    ) {
-      await scheduleUnreferencedFileCleanup({
-        candidates: [...deletedFilesByID.values()].flat(),
-        collection: collectionConfig,
-        req,
-      })
-    }
 
     if (shouldCommit && !didBatchDeleteFail) {
       await commitTransaction(req)

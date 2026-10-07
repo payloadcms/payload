@@ -15,6 +15,28 @@ import {
   withLegacyCloudUploadFileData,
 } from './storedFiles.js'
 
+/** Preserve the caller's cloud flags; nested Local API calls can replace req.context. */
+export const captureCloudHookState = ({ req }: { req: PayloadRequest }): (() => void) => {
+  const previousState = ['_payloadManagedCloudStorage', '_payloadManagedCloudMetadata'].map(
+    (key) => ({
+      hasProperty: Object.hasOwn(req.context ?? {}, key),
+      key,
+      value: req.context?.[key],
+    }),
+  )
+
+  return () => {
+    req.context ??= {}
+    for (const { hasProperty, key, value } of previousState) {
+      if (hasProperty) {
+        req.context[key] = value
+      } else {
+        delete req.context[key]
+      }
+    }
+  }
+}
+
 export const runCloudFileCreation = async <T>({
   collection,
   data,
@@ -55,7 +77,7 @@ export const runCloudFileCreation = async <T>({
       Object.assign(data, metadata)
     },
     // Create's version and afterChange hooks run after the database insert. The
-    // outer create operation clears this guard once those hooks have completed.
+    // outer create operation restores the previous guard after those hooks finish.
     write: () => {
       req.context ??= {}
       req.context._payloadManagedCloudStorage = true
@@ -239,6 +261,7 @@ const withCloudHookGuard = async <T>({
   req: PayloadRequest
   write: () => Promise<T>
 }): Promise<T> => {
+  const restoreCloudHookState = captureCloudHookState({ req })
   req.context ??= {}
   req.context._payloadManagedCloudStorage = true
   req.context._payloadManagedCloudMetadata = metadata
@@ -246,7 +269,6 @@ const withCloudHookGuard = async <T>({
   try {
     return await write()
   } finally {
-    delete req.context._payloadManagedCloudStorage
-    delete req.context._payloadManagedCloudMetadata
+    restoreCloudHookState()
   }
 }
