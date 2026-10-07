@@ -2,16 +2,7 @@ import WebSocket from 'ws'
 
 import type { DevReloadStrategy } from '../admin/adapters/devReload.js'
 
-import { compareVersions, parseVersion } from './dependencies/versionUtils.js'
-import { getNextVersion } from './getNextVersion.js'
-
-/** Next.js serves the dev HMR WebSocket on this path from 16.3 onwards. */
-const modernHMRPath = '/_next/hmr'
-
-/** Next.js served the dev HMR WebSocket on this path before 16.3. */
-const legacyHMRPath = '/_next/webpack-hmr'
-
-const firstModernHMRPathVersion = '16.3.0'
+const hmrPath = '/_next/hmr'
 
 /**
  * Default HMR reload strategy using the Next.js dev HMR WebSocket.
@@ -65,24 +56,5 @@ const getHMRURL = (): string => {
    */
   const prefix = process.env.__NEXT_ASSET_PREFIX || process.env.NEXT_BASE_PATH || ''
 
-  return `${protocol}://localhost:${port}${prefix}${getHMRPath()}`
-}
-
-/**
- * Pre-release identifiers are ignored, so that a `16.3.0-canary` build maps to the 16.3 path.
- * An unreadable version uses the current path, as Payload being unable to resolve Next.js
- * normally means it is not running under Next.js, where this strategy does not apply.
- */
-const getHMRPath = (): string => {
-  const nextVersion = getNextVersion()
-
-  if (!nextVersion) {
-    return modernHMRPath
-  }
-
-  const mainVersion = parseVersion(nextVersion).parts.join('.')
-
-  return compareVersions(mainVersion, firstModernHMRPathVersion) === 'lower'
-    ? legacyHMRPath
-    : modernHMRPath
+  return `${protocol}://localhost:${port}${prefix}${hmrPath}`
 }
