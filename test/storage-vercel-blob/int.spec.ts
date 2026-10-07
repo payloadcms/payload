@@ -1,5 +1,5 @@
-/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test"] }] -- Tests use the shared fixture wrapper. */
-import { head, put } from '@vercel/blob'
+/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options"] }] -- Tests use the shared fixture wrapper. */
+import { head, list, put } from '@vercel/blob'
 import dotenv from 'dotenv'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -91,6 +91,43 @@ test.suite('@payloadcms/storage-vercel-blob', { config: './config.ts' }, () => {
 
     expect(upload.url).toEqual(`/api/${mediaSlug}/file/${String(upload.filename)}`)
   })
+
+  test.options(
+    'should remove the original and derived blobs when a server upload fails after writing',
+    { db: 'mongo' },
+    async ({ payload }) => {
+      const hooks = payload.collections[mediaSlug].config.hooks
+      const afterChange = hooks.afterChange
+      let uploadedKeys: string[] = []
+      hooks.afterChange = [
+        ...afterChange,
+        async () => {
+          uploadedKeys = (await list()).blobs.map(({ pathname }) => pathname)
+          throw new Error('Server document hook failed')
+        },
+      ]
+
+      try {
+        await expect(
+          payload.create({
+            collection: mediaSlug,
+            data: {},
+            filePath: path.resolve(dirname, '../uploads/image.png'),
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow('Server document hook failed')
+
+        expect(uploadedKeys).toHaveLength(4)
+        expect(uploadedKeys.some((key) => key.endsWith('/image-original.png'))).toBe(true)
+        expect((await list()).blobs).toEqual([])
+        expect(
+          (await payload.count({ collection: mediaSlug, overrideAccess: true })).totalDocs,
+        ).toBe(0)
+      } finally {
+        hooks.afterChange = afterChange
+      }
+    },
+  )
 
   test('can upload with prefix', async ({ payload }) => {
     const upload = await payload.create({

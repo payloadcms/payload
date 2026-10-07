@@ -1,5 +1,6 @@
-import type { PayloadRequest } from 'payload'
+import type { Config, PayloadRequest } from 'payload'
 
+import * as blob from '@vercel/blob'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
@@ -33,11 +34,14 @@ vi.mock('@payloadcms/plugin-cloud-storage/utilities', () => ({
   resolveSignedURLKey: mocks.resolveSignedURLKey,
 }))
 
+vi.mock('@vercel/blob', { spy: true })
+
 vi.mock('@vercel/blob/client', () => ({
   generateClientTokenFromReadWriteToken: mocks.generateClientToken,
 }))
 
 import { createVercelBlobAdapter } from './adapter.js'
+import { vercelBlobStorage } from './index.js'
 
 const generateInstructions = async ({
   hasOwner,
@@ -112,5 +116,59 @@ describe('createVercelBlobAdapter', () => {
     expect(mocks.generateClientToken).toHaveBeenCalledWith(
       expect.not.objectContaining({ allowOverwrite: true }),
     )
+  })
+})
+
+describe('vercelBlobStorage configuration', () => {
+  const config = {
+    collections: [{ slug: 'media', fields: [], upload: true }],
+  } as Config
+  const token = 'vercel_blob_rw_teststore_abc123'
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it.each([false, true])(
+    'should reject random suffixes before writes with clientUploads=%s',
+    (clientUploads) => {
+      const adapter = vercelBlobStorage({
+        addRandomSuffix: true,
+        clientUploads,
+        collections: { media: true },
+        token,
+      })
+
+      expect(() => adapter.init(config)).toThrow(/addRandomSuffix/)
+      expect(blob.put).not.toHaveBeenCalled()
+      expect(blob.copy).not.toHaveBeenCalled()
+    },
+  )
+
+  it.each([undefined, false])('should accept addRandomSuffix=%s', (addRandomSuffix) => {
+    const adapter = vercelBlobStorage({ addRandomSuffix, collections: { media: true }, token })
+    const initialized = adapter.init(config) as Config
+
+    expect(initialized.collections?.[0]?.upload).toMatchObject({ disableLocalStorage: true })
+  })
+
+  it.each([
+    { enabled: false, token },
+    { enabled: true, token: undefined },
+  ])('should ignore random suffixes when storage is disabled: %j', (options) => {
+    const adapter = vercelBlobStorage({
+      ...options,
+      addRandomSuffix: true,
+      collections: { media: true },
+    })
+    const initialized = adapter.init(config) as Config
+
+    expect(initialized.collections?.[0]?.upload).not.toMatchObject({ disableLocalStorage: true })
+  })
+
+  it('should allow random suffixes when no collections use the adapter', () => {
+    const adapter = vercelBlobStorage({ addRandomSuffix: true, collections: {}, token })
+
+    expect(() => adapter.init(config)).not.toThrow()
   })
 })

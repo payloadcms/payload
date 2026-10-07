@@ -114,11 +114,17 @@ export default buildConfig({
 | ---------------------- | --------------------------------------------------------------------------------------------------------- | ----------------------------- |
 | `enabled`              | Whether or not to enable the plugin                                                                       | `true`                        |
 | `collections`          | Collections to apply the Vercel Blob adapter to                                                           |                               |
-| `addRandomSuffix`      | Add a random suffix to the uploaded file name in Vercel Blob storage                                      | `false`                       |
+| `addRandomSuffix`      | Must be `false` or omitted; enabled adapters with configured collections reject `true`.                   | `false`                       |
 | `cacheControlMaxAge`   | Cache-Control max-age in seconds                                                                          | `365 * 24 * 60 * 60` (1 Year) |
 | `token`                | Vercel Blob storage read/write token                                                                      | `''`                          |
 | `clientUploads`        | Upload directly to Vercel Blob instead of through Payload.                                                |                               |
 | `useCompositePrefixes` | Always combine collection prefix with document prefix, even when the document prefix already contains it. | `false`                       |
+
+### Migrating Random Suffix Uploads
+
+Remove `addRandomSuffix: true` or set it to `false`. Payload records exact storage paths for the current file, original, and stored variants, and uses those paths for reads, rollback, and deletion. Provider-assigned suffixes change these paths after upload and are incompatible with this lifecycle. New managed uploads already use distinct `_objectKey` folders to avoid overwriting retained objects.
+
+An enabled Vercel Blob adapter with configured collections rejects this option during initialization, before any upload or copy. Explicitly disabled adapters and adapters disabled by a missing token retain their existing behavior. Changing the option does not rename existing blobs; if their actual paths differ from saved file metadata, migrate those paths and metadata together.
 
 ## S3 Storage
 
