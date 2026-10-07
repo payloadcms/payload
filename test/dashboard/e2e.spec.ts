@@ -64,7 +64,7 @@ describe('Dashboard', () => {
     let gate = Promise.resolve()
     let shouldFail = false
 
-    await page.route('**/admin**', async (route) => {
+    await page.route('**/*', async (route) => {
       if (
         route.request().method() === 'POST' &&
         route.request().postData()?.includes('get-dashboard-documents')
