@@ -64,7 +64,7 @@ async function openMoveModalFromAssignedHierarchy({
 }): Promise<void> {
   await button.click()
 
-  const moveAction = page.getByRole('menuitem', { name: /^Move/ })
+  const moveAction = page.getByRole('menuitem', { name: 'Move to...' })
 
   await expect(moveAction).toBeVisible()
   await moveAction.click()
@@ -1155,10 +1155,10 @@ test.describe('Hierarchy Sidebar', () => {
       await folderButton.press('Enter')
 
       await expect(folderButton).toHaveAttribute('aria-expanded', 'true')
-      await expect(page.getByRole('menuitem', { name: /^Move/ })).toBeFocused()
-      await expect(page.getByRole('menuitem', { name: 'Remove Folder' })).toBeVisible()
-      await expect(page.getByRole('menuitem', { name: `Open “${childFolderName}”` })).toBeVisible()
-      await page.getByRole('menuitem', { name: /^Move/ }).click()
+      await expect(page.getByRole('menuitem', { name: 'Move to...' })).toBeFocused()
+      await expect(page.getByRole('menuitem', { name: 'Remove from Folder' })).toBeVisible()
+      await expect(page.getByRole('menuitem', { name: `Go to "${childFolderName}"` })).toBeVisible()
+      await page.getByRole('menuitem', { name: 'Move to...' }).click()
 
       // The modal should open and show columns expanded to the current selection:
       // Column 1 (root): Parent folder visible
@@ -1198,7 +1198,7 @@ test.describe('Hierarchy Sidebar', () => {
       await folderButton.click()
 
       await expect(page.locator('.hierarchy-modal')).toBeVisible()
-      await expect(page.getByRole('menuitem', { name: /^Move/ })).toBeHidden()
+      await expect(page.getByRole('menuitem', { name: 'Move to...' })).toBeHidden()
     })
 
     test('should offer move and remove actions for a selection inside a folder', async () => {
@@ -1209,10 +1209,10 @@ test.describe('Hierarchy Sidebar', () => {
       await childFolderRow.getByRole('checkbox').click()
       await page.getByRole('button', { name: 'Move', exact: true }).click()
 
-      await expect(page.getByRole('menuitem', { name: /^Move/ })).toBeVisible()
-      await expect(page.getByRole('menuitem', { name: 'Remove Folder' })).toBeVisible()
+      await expect(page.getByRole('menuitem', { name: 'Move to...' })).toBeVisible()
+      await expect(page.getByRole('menuitem', { name: 'Remove from Folder' })).toBeVisible()
 
-      await page.getByRole('menuitem', { name: /^Move/ }).click()
+      await page.getByRole('menuitem', { name: 'Move to...' }).click()
       await expect(page.locator('.hierarchy-modal')).toBeVisible()
     })
 

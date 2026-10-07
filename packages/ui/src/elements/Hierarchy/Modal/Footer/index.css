@@ -18,6 +18,7 @@
   }
 
   .hierarchy-modal-footer__secondary,
+  .hierarchy-modal-footer__clear,
   .hierarchy-modal-footer__arrow {
     color: var(--color-text-secondary);
   }

@@ -66,7 +66,13 @@ export const HierarchyModalFooter: React.FC<HierarchyModalFooterProps> = ({
           <React.Fragment>
             <span className={`${baseClass}__secondary`}>{selectionCountLabel}</span>
             {selectionCount > 0 ? (
-              <Button buttonStyle="link" margin={false} onClick={onClear} size="medium">
+              <Button
+                buttonStyle="link"
+                className={`${baseClass}__clear`}
+                margin={false}
+                onClick={onClear}
+                size="medium"
+              >
                 {t('general:clear')}
               </Button>
             ) : null}

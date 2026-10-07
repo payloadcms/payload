@@ -247,7 +247,7 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
                     requestAnimationFrame(openModal)
                   }}
                 >
-                  {t('general:move')}…
+                  Move to...
                 </PopupList.Button>
                 <PopupList.Button
                   onClick={() => {
@@ -255,12 +255,12 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
                     handleRemove()
                   }}
                 >
-                  {t('general:remove')} {hierarchyLabel}
+                  {`Remove from ${hierarchyLabel}`}
                 </PopupList.Button>
                 <PopupList.Divider />
                 <PopupList.Button href={goToHref} onClick={close}>
                   <span className={`${baseClass}__truncate`} title={displayName}>
-                    {t('general:open')} “{displayName}”
+                    {`Go to "${displayName}"`}
                   </span>
                 </PopupList.Button>
               </PopupList.MenuItem>
