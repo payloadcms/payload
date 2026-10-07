@@ -83,14 +83,14 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
           : undefined
       const uploadsBefore = versionedCloudCalls.uploads
       const req = await createPayloadRequest({
-        payload,
         context:
           operation === 'update'
             ? {
-                _payloadManagedCloudStorage: undefined,
                 _payloadManagedCloudMetadata: undefined,
+                _payloadManagedCloudStorage: undefined,
               }
             : {},
+        payload,
       })
       const hooks = payload.collections[versionedCloudMediaSlug].config.hooks
       const afterChange = hooks.afterChange
@@ -1244,6 +1244,39 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     expect(historicalResponse.status).toBe(200)
     expect(Buffer.from(await historicalResponse.arrayBuffer()).equals(firstBytes)).toBe(true)
 
+    const bareResponse = await restClient.GET(historicalURL.pathname.replace(/^\/api/, ''))
+    const wrongPrefix = new URL(historicalURL)
+    wrongPrefix.searchParams.set('prefix', 'another-folder')
+    const wrongPrefixResponse = await restClient.GET(
+      `${wrongPrefix.pathname.replace(/^\/api/, '')}${wrongPrefix.search}`,
+    )
+
+    expect(bareResponse.status).toBe(404)
+    expect(wrongPrefixResponse.status).toBe(404)
+
+    const access = payload.collections[versionedCloudMediaSlug].config.access
+    const read = access.read
+    const readVersions = access.readVersions
+
+    try {
+      access.read = () => false
+      const parentDenied = await restClient.GET(
+        `${historicalURL.pathname.replace(/^\/api/, '')}${historicalURL.search}`,
+      )
+
+      expect(parentDenied.status).toBe(403)
+      access.read = read
+      access.readVersions = () => false
+      const versionDenied = await restClient.GET(
+        `${historicalURL.pathname.replace(/^\/api/, '')}${historicalURL.search}`,
+      )
+
+      expect(versionDenied.status).toBe(403)
+    } finally {
+      access.read = read
+      access.readVersions = readVersions
+    }
+
     await payload.restoreVersion({
       id: selected.id,
       collection: versionedCloudMediaSlug,
@@ -1260,21 +1293,40 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     expect(currentFiles[0]!.key).not.toBe(firstFiles[0]!.key)
     expect(versionedCloudFiles.get(currentFiles[0]!.key)).toEqual(firstBytes)
     expect(after.find(({ id }) => id === selected.id)?.version).toEqual(selected.version)
+
+    const currentRead = await payload.findByID({
+      id: first.id,
+      collection: versionedCloudMediaSlug,
+      overrideAccess: false,
+    })
+    const currentURL = new URL(currentRead.url!, 'http://localhost')
+    const currentResponse = await restClient.GET(
+      `${currentURL.pathname.replace(/^\/api/, '')}${currentURL.search}`,
+    )
+    const historicalAfterRestore = await restClient.GET(
+      `${historicalURL.pathname.replace(/^\/api/, '')}${historicalURL.search}`,
+    )
+
+    expect(currentURL.searchParams.has('version')).toBe(false)
+    expect(currentResponse.status).toBe(200)
+    expect(Buffer.from(await currentResponse.arrayBuffer())).toEqual(firstBytes)
+    expect(historicalAfterRestore.status).toBe(200)
+    expect(Buffer.from(await historicalAfterRestore.arrayBuffer())).toEqual(firstBytes)
   })
 
   test('should retain exact cloud references across documents and non-latest versions', async ({
     payload,
   }) => {
     const collection = payload.collections[versionedCloudMediaSlug].config
-    const source = { filename: 'source.png', prefix: 'originals', _objectKey: 'source' }
-    const history = { filename: 'history.png', prefix: 'history', _objectKey: 'old' }
+    const source = { _objectKey: 'source', filename: 'source.png', prefix: 'originals' }
+    const history = { _objectKey: 'old', filename: 'history.png', prefix: 'history' }
     const doc = await payload.db.create({
       collection: versionedCloudMediaSlug,
-      data: { filename: 'current.png', prefix: 'current', _objectKey: 'active', original: source },
+      data: { _objectKey: 'active', filename: 'current.png', original: source, prefix: 'current' },
     })
     await payload.db.create({
       collection: versionedCloudMediaSlug,
-      data: { filename: 'shared.png', prefix: 'shared', _objectKey: 'active', original: source },
+      data: { _objectKey: 'active', filename: 'shared.png', original: source, prefix: 'shared' },
     })
     const oldVersion = await payload.db.createVersion({
       autosave: false,
@@ -1434,6 +1486,9 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     })
 
     expect(historical.version.original?.url).toMatch(/^https:\/\/files\.example\.test\//)
+    for (const url of [historical.version.url, historical.version.original!.url]) {
+      expect(new URL(url!).searchParams.has('version')).toBe(false)
+    }
 
     await payload.restoreVersion({
       id: selected.id,

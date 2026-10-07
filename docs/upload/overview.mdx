@@ -311,6 +311,8 @@ Existing uploads are upgraded as they are edited; no bulk file migration is requ
 
 SQL projects should generate and apply their schema migration. Original filenames have non-unique indexes on the current upload table and, when versions are enabled, its version table. Stored variant filenames are indexed as well.
 
+To read a stored historical file through Payload's file endpoint, include `?version=<version-id>`. Version reads generate these URLs for the main file, original, stored variants, and thumbnail. The requested filename and storage prefix must belong to that version, and both parent-document read access and version read access are enforced. Without `version`, the endpoint resolves current files only; filenames found only in history return 404. Historical requests serve the saved bytes without rerunning transformations. Public URLs supplied directly by a storage provider remain direct.
+
 ## Disabling Local Upload Storage
 
 If you are using a plugin to send your files off to a third-party file storage host or CDN, like Amazon S3 or similar, you may not want to store your files locally at all. You can prevent Payload from writing files to disk by specifying `disableLocalStorage: true` on your collection's upload config.

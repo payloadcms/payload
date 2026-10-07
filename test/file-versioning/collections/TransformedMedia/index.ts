@@ -10,6 +10,6 @@ export const TransformedMedia: CollectionConfig = {
     update: () => true,
   },
   fields: [{ name: 'alt', type: 'text' }],
-  upload: { staticDir: transformedMediaDir },
+  upload: { adminThumbnail: 'small', staticDir: transformedMediaDir },
   versions: { maxPerDoc: 2 },
 }
